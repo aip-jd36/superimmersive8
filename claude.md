@@ -368,6 +368,27 @@ SuperImmersive8/
 --color-gradient-3: #f472b6;
 ```
 
+### Git Repository
+
+**Remote:** https://github.com/aip-jd36/superimmersive8.git
+**Branch:** main
+**Location:** All SuperImmersive 8 files are in this repo
+
+**Important:** This repo contains the entire SuperImmersive 8 project, including business docs and website files. Only website files (07_Website/) are deployed.
+
+### Deployment
+
+**Hosting:** Bluehost (cPanel)
+**Domain:** www.superimmersive8.com
+**Deploy location:** `public_html/` on Bluehost
+
+**To deploy:**
+1. cPanel → File Manager → `public_html/`
+2. Delete existing WordPress files
+3. Upload: `index.html`, `styles.css`, `script.js` from `07_Website/`
+
+**Future:** Can set up Vercel auto-deploy from GitHub (optional)
+
 ---
 
 ## Notes for Claude
