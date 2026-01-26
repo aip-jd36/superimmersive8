@@ -526,6 +526,88 @@ section {
 }
 
 /* ============================
+   Rights & Safe Lane Section
+   ============================ */
+.rights-section {
+    background: var(--color-bg);
+    padding: var(--space-3xl) 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.rights-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2xl);
+    align-items: center;
+}
+
+.rights-text p {
+    margin-bottom: var(--space-md);
+}
+
+.rights-text p strong {
+    color: var(--color-text);
+}
+
+.rights-list {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+}
+
+.rights-list h4 {
+    margin-bottom: var(--space-md);
+    color: var(--color-text);
+}
+
+.safe-lane-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.safe-lane-list li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
+}
+
+.safe-lane-list li span {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.safe-lane-list li.safe-yes span {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.safe-lane-list li.safe-no span {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+@media (max-width: 768px) {
+    .rights-content {
+        grid-template-columns: 1fr;
+        gap: var(--space-xl);
+    }
+}
+
+/* ============================
    Audience Sections
    ============================ */
 .audience-section {
@@ -659,6 +741,78 @@ section {
 
 .buyer-icon {
     font-size: 1.25rem;
+}
+
+/* ============================
+   Partnerships Section
+   ============================ */
+.partnerships-section {
+    background: var(--color-bg-elevated);
+    padding: var(--space-3xl) 0;
+}
+
+.partnerships-content {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.partnerships-intro {
+    font-size: 1.125rem;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-2xl);
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.partnerships-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+}
+
+.partnership-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    text-align: left;
+    transition: all var(--transition-base);
+}
+
+.partnership-card:hover {
+    border-color: var(--color-border-light);
+    transform: translateY(-2px);
+}
+
+.partnership-card h4 {
+    margin-bottom: var(--space-sm);
+    color: var(--color-text);
+}
+
+.partnership-card p {
+    font-size: 0.9375rem;
+}
+
+.partnerships-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.partnerships-note {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .partnerships-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ============================
@@ -831,6 +985,17 @@ section {
     border-color: var(--color-accent);
 }
 
+.contact-option.featured {
+    background: linear-gradient(135deg, var(--color-gradient-1), var(--color-gradient-2));
+    border-color: transparent;
+    color: white;
+}
+
+.contact-option.featured:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(129, 140, 248, 0.4);
+}
+
 .contact-icon {
     font-size: 1.25rem;
 }
@@ -847,6 +1012,34 @@ section {
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+}
+
+@media (max-width: 480px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-note {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    margin-top: var(--space-sm);
+}
+
+.form-note a {
+    color: var(--color-accent-light);
+    text-decoration: underline;
+}
+
+.form-note a:hover {
+    color: var(--color-accent);
 }
 
 .form-group {
