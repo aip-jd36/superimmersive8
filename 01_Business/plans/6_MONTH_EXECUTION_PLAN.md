@@ -1,5 +1,6 @@
 # SuperImmersive 8 — 6-Month Execution Plan
 
+**Version:** 3.1
 **Period:** February 2026 — July 2026
 **Founder Context:** Part-time (10-15 hours/week), solo execution, based in Taipei
 **Primary Goal:** Reach $5K/month stable revenue to enable full-time transition
@@ -8,12 +9,20 @@
 
 ## Strategic Framework
 
-### The Two-Layer Model
+### The Four-Tier Model
 
-| Layer | What | Target Market | Language | Purpose |
-|-------|------|---------------|----------|---------|
-| **Layer 1: Production** | B2B AI video production for agencies | SEA agencies (primary), Taiwan agencies (secondary) | English (primary), Mandarin (secondary) | Pays the bills, scouts filmmakers |
-| **Layer 2: Distribution** | Filmmaker representation, licensing, events | Global filmmakers, APAC platforms | English (primary) | Builds the scalable platform |
+| Tier | Offering | Who It's For | Price Signal |
+|------|---------|--------------|-------------|
+| **Tier 2 (Primary)** | Custom AI Product Placement — brand elements regenerated into existing catalog productions | Brands, agencies | Premium |
+| **Tier 1 (Standard)** | Catalog licensing as-is | Platforms, airlines, streaming, editorial buyers | Standard |
+| **Tier 3 (Advisory — inbound)** | Rights management + referral for brands building their own AI content pipeline | Brands doing own AI | Project fee |
+| **Tier 4 (Commission — inbound)** | Full bespoke production | Existing relationships only — not advertised | High |
+
+**Primary pitch (Year 1):** Tier 2 and Tier 1. Tier 3 and Tier 4 are inbound only — they come from relationships, not from outreach.
+
+**The single Year 1 message:** "AI video content your legal team won't flag." — one message, tested consistently.
+
+**Secondary pitch (discovery calls + proposals):** "We reduce time from creative brief to legal approval from 3 weeks to 3 days."
 
 ### Geographic Strategy: Parallel Tracks
 
@@ -24,11 +33,11 @@
 - **Events:** All in-person events are Taipei-based
 - **Goal:** Close pilot deal by Month 3 → use as credibility for everything else
 
-**Track 2: SEA Agencies (Production Revenue)**
+**Track 2: SEA Agencies (Primary Revenue)**
 - **Why:** Larger agency budgets, familiar with global AI tools, English as business language
 - **Target cities:** Singapore (priority), Manila, Kuala Lumpur, Bangkok, Jakarta
 - **Outreach:** Remote/digital (LinkedIn, email, video calls)
-- **Goal:** 2 retainer clients by Month 6 → $5K+/month production revenue
+- **Goal:** 2 active licensing or placement clients by Month 6 → $5K+/month
 
 **How the Tracks Reinforce Each Other:**
 ```
@@ -38,7 +47,7 @@ MyVideo Deal (Month 2-3)
         ↓
 SEA agencies take you seriously
         ↓
-Production deals close faster
+Catalog deals close faster
         ↓
 Hire filmmakers for agency work
         ↓
@@ -71,7 +80,7 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 | **Disclosure Requirements** | When must content be labeled as AI-generated? | Brands, platforms |
 | **Music & Audio Rights** | AI-generated music, sound effects, voice cloning | All productions |
 | **Brand Safety** | What makes AI content "safe" for brand association? | Agencies, brands |
-| **International Differences** | US vs EU vs APAC regulations | Cross-border deals |
+| **International Differences** | US vs EU vs regional regulations | Cross-border deals |
 
 **Deliverable by Month 6:** "AI Video Rights Playbook" — internal document (potentially productizable) that covers:
 - Current legal landscape summary
@@ -81,7 +90,7 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 - Standard contract clauses
 
 **This becomes a sales asset:**
-> "We've done the legal homework so you don't have to. Here's our rights clearance process."
+> "We've done the legal homework so you don't have to. Here's our safe lane vetting process."
 
 ### Time Budget
 
@@ -101,14 +110,14 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 
 *What SI8 will NOT do (prevents scope creep and risk):*
 
-- ❌ No celebrity likeness (real people's faces without consent)
-- ❌ No voice cloning of real people
-- ❌ No explicit IP imitation (copyrighted characters, brands)
-- ❌ No political persuasion content
-- ❌ No deepfakes or deceptive content
-- ❌ No adult/explicit content
-- ❌ No projects without signed brief (clients must fill intake form)
-- ❌ No projects without creator bench capacity (don't sell what you can't deliver)
+- No celebrity likeness (real people's faces without consent)
+- No voice cloning of real people
+- No explicit IP imitation (copyrighted characters, brands)
+- No political persuasion content
+- No deepfakes or deceptive content
+- No adult/explicit content
+- No projects without signed brief (clients must fill intake form)
+- No projects without creator bench capacity (don't sell what you can't deliver)
 
 ### Geographic Focus (Refined)
 
@@ -122,12 +131,14 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 
 | Stream | Month 1-2 | Month 3-4 | Month 5-6 | 6-Month Total |
 |--------|-----------|-----------|-----------|---------------|
-| Production (Layer 1) | $0 | $5-10K | $10-15K | $15-25K |
-| Distribution (Layer 2) | $0 | $0 | $1-3K | $1-3K |
+| Tier 2: Product Placement | $0 | $0-15K (1 deal target) | $15-25K | $15-40K |
+| Tier 1: Catalog Licensing | $0 | $2-5K | $3-8K | $5-13K |
 | Event sponsorships | $0 | $2-5K | $2-5K | $4-10K |
-| **Total** | $0 | $7-15K | $13-23K | **$20-38K** |
+| Tier 3: Advisory | $0 | $0 | $2-5K | $2-5K |
+| **Total** | $0 | $4-25K | $22-43K | **$26-68K** |
 
-**Exit criteria for Month 6:** On track for $5K/month run rate
+**Exit criteria for Month 6:** On track for $5K/month stable run rate
+**The upside case:** One Tier 2 placement deal ($20K+) in Month 4-5 changes the entire trajectory.
 
 ---
 
@@ -138,9 +149,9 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 | Dependency | Risk | Mitigation |
 |------------|------|------------|
 | **MyVideo ≠ deal execution** | Warm lead ≠ closed deal. Need: internal champion, legal review, programming needs, budget owner, timeline alignment | 60-90 days realistic, but don't let Track 1 stall Track 2 |
-| **Need creator bench before selling** | Can't sell "delivery engine" without delivery capacity | Build 2-3 creator relationships BEFORE scaling outreach |
+| **Need catalog before pitching Tier 2** | Can't sell product placement without content to place into | Sign 3-5 filmmakers with modification clause BEFORE brand outreach |
 | **Event success = distribution list** | No list = weak attendance | List-building mechanism in Month 1, not just Month 2 |
-| **Offers require credibility artifacts** | Agencies need: 2-3 samples, 1 showreel, 1-2 case writeups | Even mock/personal projects work — but you need them |
+| **Offers require credibility artifacts** | Buyers need: Rights Playbook, catalog samples, advisory board signal | Even mock/personal projects work — but you need them |
 
 ---
 
@@ -148,23 +159,23 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 
 *These break first in 90% of services + brand businesses:*
 
-**🔥 #1: Production scope creep**
-- Client keeps "just one more tweak" → you lose 3 weeks → Layer 2 dies
+**#1: Production scope creep**
+- Client keeps "just one more tweak" → you lose 3 weeks → catalog development dies
 - **Fix:** Enforce package constraints + revision limits strictly
 
-**🔥 #2: Too many workstreams (context switching)**
+**#2: Too many workstreams (context switching)**
 - Start 6 initiatives, finish none
 - **Fix:** Stable weekly operating cadence. Same activities, same days.
 
-**🔥 #3: Event becomes a time sink**
+**#3: Event becomes a time sink**
 - Logistics eats you alive
 - **Fix:** Outsource event operations early. Venue + drinks + ticketing = contractor. You only own: speakers, content, conversion.
 
-**🔥 #4: Overbuilding rights playbook**
+**#4: Overbuilding rights playbook**
 - Disappear into writing instead of selling
 - **Fix:** Only write what helps sell THIS month. v0.1 = 3 pages.
 
-**🔥 #5: MyVideo stalls and blocks everything**
+**#5: MyVideo stalls and blocks everything**
 - Track 1 delay → Track 2 stalls → nothing happens
 - **Fix:** Run parallel. Don't let Track 1 stall Track 2.
 
@@ -172,7 +183,7 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 
 ## Month 1: February 2026 — Foundation
 
-**Theme:** "Ship fast, start outreach, build credibility"
+**Theme:** "Build the catalog, sign the contracts, recruit advisors"
 **Hours:** 40-50 hours
 
 ### First 30 Days — The 7 Things That Matter
@@ -181,19 +192,21 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 
 | # | Item | Deliverable |
 |---|------|-------------|
-| 1 | **Launch website v1 in 7 days** | Positioning, 2 paths, 1 lead form, 1 calendar link, "AI Rights safe lane" blurb. Not perfect. |
-| 2 | **Produce 3 credibility assets** | 60-sec sizzle reel, 10-slide deck OR 1-page PDF, Rights Playbook v0.1 (3 pages) |
-| 3 | **Lock delivery system** | Brief template, revision doc format, file organization, creator contract template |
-| 4 | **Build Singapore target list** | 100 agencies with: name, founder/partner, email, LinkedIn, niche, 1 reason why them |
-| 5 | **Start outreach: 10/day, 5 days/week** | 50 touches/week. Book calls in Week 3-4. |
-| 6 | **Pre-sell event "industry seats"** | Start booking B2B attendees early. Make them feel scarce. |
-| 7 | **Define your "No List"** | Safe lane boundaries documented. |
+| 1 | **Build catalog: sign 3-5 filmmakers** (with modification clause) | Minimum viable catalog before any Tier 2 pitch is made |
+| 2 | **Launch website v1 in 7 days** | Catalog positioning, rights-agency framing, lead form, calendar link |
+| 3 | **Produce Rights Playbook v0.1** | 3 pages max: Safe Lane, legal landscape, platform summary — the primary sales asset |
+| 4 | **Lock filmmaker agreements** (modification clause is non-negotiable) | Signed shopping agreements with modification + exclusivity framework |
+| 5 | **Recruit advisory board candidates** (3-5 people) | 1-page advisory memo drafted; first outreach sent |
+| 6 | **Set up per-asset documentation SKU** | 9-field schema operational before first catalog entry is signed |
+| 7 | **Build Singapore target list** | 100 agencies. Name, contact, niche, 1 reason why them. |
 
 ### Legal Infrastructure (CRITICAL)
 
+**Note:** The modification clause in filmmaker agreements is the legal prerequisite for Tier 2 (product placement). Without it, the primary offering cannot be delivered.
+
 **Contracts (with lawyer):**
 - [ ] Find entertainment lawyer (Taiwan + US/international experience, AI-aware)
-- [ ] Draft Filmmaker Shopping Agreement (non-exclusive representation)
+- [ ] Filmmaker Shopping Agreement with modification clause (authorizes SI8 to commission brand-integrated versions) + exclusivity framework (category-exclusive default for product placements)
 - [ ] Draft Production Services Agreement (for agency clients)
 - [ ] Draft basic Content Licensing Agreement template
 
@@ -208,7 +221,7 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 **Time:** 12-15 hours (contracts + research)
 **Cost:** $2,000-4,000 (lawyer fees)
 **Deliverables:**
-- Usable contracts for both layers
+- Usable contracts with modification clause
 - Rights Playbook v0.1 (3 pages — NOT comprehensive, just what you need to sell)
 
 **Note:** Don't disappear into writing. Only write what helps sell THIS month. Playbook grows iteratively:
@@ -216,8 +229,61 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 - v0.2 (Month 2-3): 8 pages
 - v1.0 (Month 6): Full playbook
 
+### Catalog Building — CRITICAL Month 1 Priority
+
+The Tier 2 product placement pitch requires a catalog. There is nothing to offer without content. Catalog building is therefore a prerequisite for revenue, not a parallel activity.
+
+**Minimum viable catalog:** 3-5 works signed, safe lane vetted, and documented before the licensing path is pitched to any buyer.
+
+**What each catalog entry requires:**
+1. Signed non-exclusive shopping agreement (with modification clause)
+2. Tool disclosure (which tools, which plans, at time of production)
+3. Safe Lane sign-off (SI8 review against the No List)
+4. Rights documentation (ownership confirmation, no third-party IP)
+5. Per-asset documentation SKU (all 9 fields complete)
+
+**Per-asset documentation SKU (9 fields — must be complete for every catalog entry):**
+1. Tool provenance log (which AI tools, which version, which plan tier)
+2. Model disclosure (Runway Gen-3, Kling v1.5, etc.)
+3. Safe Lane sign-off (SI8 reviewer, date, notes)
+4. Commercial use authorization (tool TOS confirmation, plan-level verification)
+5. Modification rights status (is modification clause signed? scope?)
+6. Category conflict log (any active exclusivity restrictions)
+7. Territory log (geographic restrictions if any)
+8. Regeneration rights status (can brand elements be regenerated into this work?)
+9. Version history (dates, changes, re-review triggers)
+
+**Modification clause requirement:** Every filmmaker shopping agreement must authorize SI8 to commission brand-integrated versions of catalog works. Without this clause, Tier 2 (product placement) cannot be offered. This is non-negotiable and must be in every agreement from day one.
+
+**The Taipei filmmaker (post-Lunar New Year call):** First candidate for catalog. His existing award-winning work may qualify after safe lane review. Priority target.
+
+**Time:** 8-10 hours
+**Deliverable:** 3-5 filmmakers signed with compliant agreements + documentation SKU populated for each
+
+### Advisory Board Recruitment — CRITICAL Month 1-2
+
+The advisory board solves the "anchor case study" problem in Year 1. Before real deals exist, listed advisors signal credibility to buyers and filmmakers.
+
+**Target advisor profiles:**
+- An entertainment or IP lawyer (Taiwan or Singapore) — signals legal seriousness
+- A brand marketing executive (agency or brand side) — buyer-side credibility
+- An AI filmmaker or creative technologist — community credibility
+- A streaming/platform executive — distribution credibility
+
+**Terms:** Non-paying. In return: named on website, invited to speak at AI Creators Fest, first access to SI8 opportunities. Light time commitment (1-2 hours/quarter).
+
+**Month 1 actions:**
+- [ ] Identify 5-7 candidates from existing network
+- [ ] Draft 1-page advisory memo (what SI8 is, why we're building an advisory board, what we're asking for)
+- [ ] First outreach to top 3 candidates
+
+**Why it matters:** An advisory board listed on the website gives first-contact buyers a reason to take the meeting before there is a case study to share. It answers "who vouches for you?"
+
+**Time:** 3-4 hours
+**Deliverable:** 3+ candidates identified, 1-page memo drafted, first outreach sent
+
 ### Website Launch (Ship in 7 days — not perfect)
-- [ ] Positioning + 2 paths (Programs/Partnerships)
+- [ ] Catalog positioning + rights-agency framing
 - [ ] Lead intake form (one link for everyone)
 - [ ] Calendar link for booking calls
 - [ ] "AI Rights safe lane" blurb (signals expertise)
@@ -229,33 +295,33 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 **Rule:** Ship in 7 days. Iterate later. Perfectionism kills momentum.
 
 ### Credibility Assets (Before outreach begins)
-- [ ] 60-second sizzle reel (sample AI video work)
-- [ ] 10-slide deck OR 1-page PDF (agency-facing)
-- [ ] 2-3 sample AI video outputs (even mock/personal projects)
+- [ ] Rights Playbook v0.1 (primary sales asset — 3 pages, safe lane framing)
+- [ ] 10-slide deck OR 1-page PDF (buyer-facing)
+- [ ] 2-3 sample AI video outputs from catalog (safe lane vetted)
 - [ ] Case study template ready (Problem → Approach → Output → Lessons)
 
 **Time:** 6-8 hours
-**Why:** Agencies need credibility artifacts. These turn cold outreach into warm conversations.
+**Why:** Buyers need credibility artifacts. The Rights Playbook differentiates SI8 from every AI video vendor who sends a reel.
 
 ### Sales Ops Setup (This makes or breaks Month 2-6)
 - [ ] Lead intake + qualification form (company, role, budget range, use case, timeline)
 - [ ] CRM + pipeline stages (6 max): Prospect → Contacted → Meeting Booked → Proposal Sent → Negotiation → Won/Lost
 - [ ] Proposal template (1-page + SOW) — must take <45 min per proposal
-- [ ] Pricing guardrails: "if X then quote Y" (e.g., "Hero film + cutdowns = $12K baseline")
+- [ ] Pricing guardrails: "if X then quote Y" (e.g., "Tier 2 placement + rights package = $15-25K baseline")
 
 **Time:** 3-4 hours
 
 ### Delivery Ops Setup (Before you sell aggressively)
-- [ ] Production Brief Template (objective, audience, tone, prompt constraints, do-not-do list)
-- [ ] Creative QA Checklist (branding, rights lane, motion stability, audio, specs)
+- [ ] Catalog Brief Template (objective, audience, tone, safe lane constraints, do-not-do list)
+- [ ] Creative QA Checklist (branding, safe lane, motion stability, audio, specs)
 - [ ] Revision policy: "2 rounds max", "only 1 consolidated revision doc"
 - [ ] Asset folder structure: /Client/Project/01_briefs, /02_versions, /03_deliverables_final
 - [ ] Identify 2-3 potential creators for bench (relationships, not contracts yet)
 
 **Time:** 4-5 hours
-**Why:** Production scope creep is the #1 failure mode. Lock this BEFORE scaling outreach.
+**Why:** Scope creep is the #1 failure mode. Lock this BEFORE scaling outreach.
 
-### Singapore Agency Research (Layer 1 — Primary)
+### Singapore Agency Research (Primary)
 - [ ] Build target list: **100 Singapore agencies** (ONE market, go deep)
 - [ ] Focus: Digital agencies, content agencies, performance marketing agencies
 - [ ] For each: name, founder/partner, email, LinkedIn, niche, 1 reason why them
@@ -267,7 +333,7 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 
 **Why Singapore only:** Trying Singapore + Manila + KL + Bangkok + Jakarta = getting none. Pick ONE city, prove the model, then expand in Month 3+.
 
-### Taiwan Agency Research (Layer 1 — Secondary)
+### Taiwan Agency Research (Secondary)
 - [ ] Build target list: 15 Taiwan agencies
 - [ ] Focus: Agencies serving international brands, tech-forward agencies
 - [ ] Leverage existing network where possible
@@ -275,7 +341,7 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 **Time:** 4-6 hours
 **Deliverable:** 15-agency target list
 
-### Filmmaker Research (Layer 2)
+### Filmmaker Research (Catalog Recruitment)
 - [ ] Build target list: 30 AI filmmakers to potentially sign
 - [ ] Criteria: Quality work, 5K+ followers, active, professional, English-speaking
 - [ ] Sources: Twitter/X, Instagram, YouTube, Runway community
@@ -291,16 +357,16 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
   - Ask: Pilot commitment for Q2/Q3 2026
   - Positioning: "First AI film program on a major Taiwan streaming platform"
 - [ ] Research MyVideo's current content strategy and gaps
-- [ ] Prepare supporting materials (filmmaker reel, content samples)
+- [ ] Prepare supporting materials (filmmaker reel, content samples from catalog)
 - [ ] Send proposal by end of Month 1
 
 **Time:** 6-8 hours
 **Deliverable:** MyVideo proposal sent to Jamie Lin
 **Why this matters:** A "yes" from MyVideo changes every conversation that follows.
 
-### Other Distribution Channels (Layer 2)
+### Other Distribution Channels
 - [ ] SEA streaming research: Viu, iQIYI, regional OTT platforms
-- [ ] FAST channels: Samsung TV Plus, LG Channels (APAC)
+- [ ] FAST channels: Samsung TV Plus, LG Channels (streaming platforms)
 - [ ] Educational: SEA universities, Taiwan universities, corporate training
 
 **Time:** 4-6 hours
@@ -309,43 +375,48 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 ### Month 1 Checkpoint
 
 **Must have by end of Month 1:**
-- [ ] Usable legal agreements (both layers)
+- [ ] 3-5 filmmakers signed (shopping agreements with modification clause)
+- [ ] Per-asset documentation SKU populated for each catalog entry
+- [ ] Advisory board outreach sent (3+ candidates)
 - [ ] Website live
-- [ ] **MyVideo proposal sent to Jamie Lin** ← Top priority
-- [ ] 30 SEA agency targets identified
-- [ ] 30 filmmaker targets identified
+- [ ] Rights Playbook v0.1 complete (3 pages)
+- [ ] MyVideo proposal sent to Jamie Lin
+- [ ] 30+ Singapore agency targets identified
 
-**Go/No-Go:** If no legal agreements ready, delay outreach until they are.
+**Go/No-Go:** If fewer than 3 filmmakers are signed by end of Month 1, delay brand outreach — there is nothing to show. Catalog first.
 
 **Parallel Tracks Status:**
 - Track 1 (MyVideo): Proposal sent, awaiting response
-- Track 2 (SEA): Target list ready, outreach begins Month 2
+- Track 2 (Singapore agencies): Target list ready, outreach begins Month 2
+- Catalog: 3-5 works signed (prerequisite for Month 2 pitch)
 
 ---
 
 ## Month 2: March 2026 — First Outreach
 
-**Theme:** "Start conversations on both layers"
+**Theme:** "First outreach with the new pitch — catalog + placement"
 **Hours:** 45-55 hours
 
-### Singapore Agency Outreach (Layer 1 — PRIORITY)
+### Singapore Agency Outreach (PRIORITY)
 - [ ] **Outreach cadence: 10/day, 5 days/week = 50/week = 200/month**
 - [ ] Method: LinkedIn + email, personalized to their work/clients
-- [ ] Pitch: "AI video production partner for agencies — we handle creation, you handle client"
+- [ ] Pitch: "AI content your legal team won't flag — license from our vetted catalog, or place your brand directly into a production. No reshoot."
 - [ ] **Follow-up sequence: 7 touchpoints over 21 days** (prewritten/templated)
 - [ ] Track: Response rates, objections, interest level
 - [ ] Book calls in Week 3-4
+- [ ] **Qualifying question:** "Has your legal team flagged AI-generated content as a risk?" If yes → SI8 is the solution conversation. If no → education opportunity.
+- [ ] **Credibility asset:** Send Rights Playbook v0.1 after first response. This differentiates SI8 from every other AI video vendor who sends a reel.
 
 **Outreach assets (created in Month 1):**
 - [x] LinkedIn connection message template
 - [x] Follow-up email sequence (7 touches)
 - [x] One-pager PDF
-- [x] Sizzle reel
+- [x] Rights Playbook v0.1
 
 **Time:** 12-15 hours
 **Goal:** 5+ discovery calls scheduled; >10% response rate
 
-### Taiwan Agency Outreach (Layer 1 — Secondary)
+### Taiwan Agency Outreach (Secondary)
 - [ ] Reach out to 10-15 Taiwan agencies
 - [ ] Leverage warm intros from network where possible
 - [ ] Bilingual pitch (English + Mandarin as appropriate)
@@ -363,10 +434,10 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 **Time:** 2-3 hours
 **Why:** Event success depends on distribution list. No list = weak attendance. Start in Month 2, not Month 3.
 
-### Filmmaker Outreach (Layer 2)
+### Filmmaker Outreach (Catalog Recruitment)
 - [ ] Reach out to 15-20 Tier 1 filmmakers
-- [ ] Pitch: "Building AI film distribution with APAC focus — interested in representation?"
-- [ ] Lead with: Distribution relationships (MyVideo, festivals, platforms)
+- [ ] Pitch: "Building a safe lane vetted AI film catalog — interested in representation and product placement revenue?"
+- [ ] Lead with: Distribution relationships (MyVideo, platforms) + Tier 2 placement upside
 - [ ] Note: SEA-based filmmakers = priority (can also hire for agency work)
 
 **Time:** 8-10 hours
@@ -383,6 +454,20 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 **Goal:** LOI or clear commitment by end of Month 2
 **Why this matters:** MyVideo "yes" = instant credibility for SEA agency conversations
 
+### Product Placement Workflow — Research and Proof of Concept
+
+Before pitching Tier 2 at premium prices, the workflow must be understood and documented.
+
+**Month 2 research tasks:**
+- [ ] How does regenerating brand elements into an existing AI production actually work technically? (Runway inpainting? ControlNet? Model fine-tuning?)
+- [ ] What catalog characteristics make a production "eligible" for brand placement vs. not?
+- [ ] What does a placement brief look like? What information does SI8 need from the brand?
+- [ ] What does delivery look like? (Multiple cutdowns? Territory variations?)
+- [ ] Build a simple one-page "Product Placement Process" document for use in proposals
+
+**Time:** 4-6 hours
+**Deliverable:** One-page product placement process document; workflow understood before pitching
+
 ### Event Planning — First B2B Event
 - [ ] Set date for first event (target: mid-April)
 - [ ] Format decision: B2B dinner/roundtable (15-25 people) vs. hybrid showcase
@@ -397,7 +482,7 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 ### Legal Research (Ongoing)
 - [ ] Research likeness/voice rights: What are the rules for AI-generated faces/voices?
 - [ ] Interview 1-2 filmmakers: What legal concerns do they have?
-- [ ] Research APAC-specific regulations: Taiwan, Singapore, any emerging rules?
+- [ ] Research region-specific regulations: Taiwan, Singapore, any emerging rules?
 - [ ] Update "AI Video Rights Playbook" with findings
 - [ ] Identify 2-3 legal edge cases to discuss with lawyer
 
@@ -405,7 +490,6 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 
 ### Content & Brand Building
 - [ ] LinkedIn content: 2-3 posts/week about AI video for brands
-- [ ] r/aifilmreviews: Continue 2x/week cadence
 - [ ] Document learnings from outreach (for future content)
 - [ ] **Consider:** 1 LinkedIn post on AI video legal landscape (positions you as expert)
 
@@ -421,7 +505,7 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 | Track 2: SEA Agencies | Outreach sent | 15-20 | |
 | Track 2: SEA Agencies | Response rate | >10% | |
 | Track 2: SEA Agencies | Discovery calls | 5+ | |
-| Layer 2: Filmmakers | Conversations | 5+ | |
+| Catalog: Filmmakers | Conversations | 5+ | |
 
 **Scenario planning:**
 - **MyVideo YES + SEA traction:** Full speed ahead, use MyVideo in all SEA pitches
@@ -438,7 +522,7 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 
 ## Month 3: April 2026 — First Event + First Deals
 
-**Theme:** "Run the event, close first production deal"
+**Theme:** "Run the event, close first catalog deal, build first placement proof-of-concept"
 **Hours:** 50-60 hours (event-intensive month)
 
 ### First B2B Event (KEY MILESTONE)
@@ -458,32 +542,38 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 **Time:** 20-25 hours (including prep)
 **Cost:** $1,000-2,000 (venue, F&B, AV)
 
-### Production Deal Close (Layer 1 — Track 2)
+### First Catalog Deal + Placement Proof-of-Concept (PRIORITY)
+
+**Catalog licensing (Tier 1):**
 - [ ] Convert discovery calls to proposals
-- [ ] Target: Close 1 production deal (Sprint or Retainer)
-- [ ] Pricing: Sprint $8-10K, Retainer $2.5-3K/month
-- [ ] **If MyVideo closed:** Lead with "We program AI content for Taiwan Mobile"
-- [ ] If deal closes: Immediately hire AI creators from filmmaker pipeline
-- [ ] Document process for repeatability
+- [ ] Target: Close 1 catalog licensing deal (even small — $2-5K validates the model)
+- [ ] Pricing: Per-deal licensing based on scope, territory, and use case
+- [ ] This is validation that the catalog model works before pitching Tier 2
+
+**Product placement proof-of-concept (Tier 2):**
+- [ ] Identify 1 willing brand/agency partner for a proof-of-concept placement
+- [ ] Even if at-cost or reduced price — you need 1 example before pitching it at $20K
+- [ ] Document the process: brief → selection → regeneration → delivery
+- [ ] This becomes the case study that makes every future Tier 2 pitch credible
 
 **Time:** 10-12 hours
-**Goal:** 1 signed production deal OR 2+ proposals out
+**Goal:** 1 catalog licensing deal closed OR 2+ proposals out; 1 placement POC initiated
 
 **The MyVideo multiplier:** If MyVideo pilot is confirmed by Month 3, your SEA pitch becomes:
-> "We're the team behind Taiwan Mobile's AI shorts program. We help agencies produce AI video for their clients."
+> "We're the team behind Taiwan Mobile's AI shorts program. We help agencies find and license AI video content — vetted and safe lane compliant."
 
 That's a different conversation than cold outreach.
 
-### Filmmaker Signing (Layer 2)
+### Filmmaker Signing (Catalog Growth)
 - [ ] Convert conversations to signed Shopping Agreements
-- [ ] Target: 3-5 filmmakers signed by end of month
+- [ ] Target: 5-8 filmmakers signed by end of month (up from 3-5 in Month 1)
 - [ ] Priority: Filmmakers who can also do agency work (dual value)
-- [ ] Onboard: Catalog their work, understand their goals
+- [ ] Onboard: Populate documentation SKU for each new catalog entry
 
 **Time:** 6-8 hours
-**Goal:** 3+ filmmakers signed
+**Goal:** 5+ filmmakers signed; catalog fully documented
 
-### Distribution Channel Progress (Layer 2)
+### Distribution Channel Progress
 - [ ] MyVideo: Push for decision or pilot commitment
 - [ ] Educational: Pitch 3-5 SEA/Taiwan universities
 - [ ] Festivals: Submit represented work to 2-3 AI festivals
@@ -494,12 +584,12 @@ That's a different conversation than cold outreach.
 ### Legal & Rights Development
 - [ ] Document legal questions from filmmaker/agency conversations
 - [ ] Research platform requirements: What does MyVideo require for AI content?
-- [ ] Create "Rights Checklist" for production projects (1-pager)
-- [ ] Draft "Brand Safety Guidelines" for agency clients
+- [ ] Create "Rights Checklist" for catalog projects (1-pager)
+- [ ] Draft "Brand Safety Guidelines" for buyer clients
 - [ ] Update "AI Video Rights Playbook"
 
 **Time:** 2-3 hours
-**Deliverable:** Rights Checklist v1 for production projects
+**Deliverable:** Rights Checklist v1 for catalog projects
 
 ### Month 3 Checkpoint
 
@@ -509,50 +599,52 @@ That's a different conversation than cold outreach.
 |--------|--------|--------|
 | Event attendance | 20+ | |
 | Follow-up meetings from event | 3+ | |
-| Production deals closed | 1 | |
-| Production proposals out | 2+ | |
-| Filmmakers signed | 3+ | |
+| Catalog licensing deals closed | 1 | |
+| Proposals out | 2+ | |
+| Filmmakers signed | 5+ | |
 | Distribution channels in discussion | 2+ | |
+| Placement POC initiated | 1 | |
 
-**Decision point:** If zero production interest after 20+ agency conversations, reassess Layer 1 approach.
+**Decision point:** If zero licensing interest after 20+ agency conversations, reassess messaging and catalog composition.
 
 ---
 
 ## Month 4: May 2026 — Revenue Ramp
 
-**Theme:** "Build production revenue, second event"
+**Theme:** "First Tier 2 placement deal, second event"
 **Hours:** 50-60 hours
 
-### Production Revenue (Layer 1 — PRIORITY)
-- [ ] If first deal closed: Deliver excellent work, document case study
-- [ ] Continue agency outreach: 10-15 new contacts
-- [ ] Target: 1-2 more production deals (Sprint or Retainer)
-- [ ] Use first project as proof point: "Here's what we did for [Agency X]"
-- [ ] Hire filmmakers from roster for projects (Layer 1 → Layer 2 connection)
+### Tier 2: First Product Placement Deal (PRIMARY TARGET)
+
+- [ ] Use placement POC from Month 3 as proof point: "Here's what we did for [Brand X]"
+- [ ] Target: 1 signed Tier 2 product placement deal ($15-25K)
+- [ ] Category-exclusive default — position this as premium from the start
+- [ ] Pricing signal: "Placement + rights package" — not just production
+- [ ] Continue catalog licensing (Tier 1) in parallel as volume driver
 
 **Time:** 15-20 hours
-**Goal:** $5-10K production revenue this month; 2+ active projects
+**Goal:** $15-25K from Tier 2; $2-5K from Tier 1 catalog licensing
 
 ### Second B2B Event
 - [ ] Second event (target: 30-40 attendees)
 - [ ] Iterate based on first event feedback
 - [ ] More aggressive sponsor outreach (target: 1 paying sponsor)
-- [ ] Content: Feature case study from first production project
+- [ ] Content: Feature case study from first placement proof-of-concept
 - [ ] Invite more SEA agency execs (offer virtual attendance option?)
 
 **Time:** 15-20 hours
 **Cost:** $1,000-2,500
-**Goal:** 1 paying sponsor; 3+ consulting/production leads
+**Goal:** 1 paying sponsor; 3+ consulting/licensing leads
 
-### Filmmaker Roster Growth (Layer 2)
+### Filmmaker Roster Growth
 - [ ] Continue outreach: Target 8 filmmakers total by end of month
-- [ ] Filmmakers from production projects → sign for distribution
-- [ ] Start matching filmmakers to distribution opportunities
+- [ ] Filmmakers identified through placement projects → sign for catalog
+- [ ] Start matching filmmakers to specific distribution opportunities
 
 **Time:** 6-8 hours
 **Goal:** 8 filmmakers on roster
 
-### Distribution Progress (Layer 2)
+### Distribution Progress
 - [ ] MyVideo: If pilot approved, curate first content package
 - [ ] Educational: Close 1 licensing deal (even small)
 - [ ] Festival results: Track submissions, leverage acceptances
@@ -568,10 +660,10 @@ That's a different conversation than cold outreach.
 **Time:** 4-6 hours
 
 ### Legal & Rights Systematization
-- [ ] Refine "Rights Checklist" based on first production project learnings
+- [ ] Refine "Rights Checklist" based on first placement project learnings
 - [ ] Document any legal issues encountered and how resolved
 - [ ] Research: How are competitors handling rights? (Escape.ai, Promise)
-- [ ] Consider: Package legal framework as value-add for agencies
+- [ ] Consider: Package legal framework as value-add for buyers
 - [ ] Update "AI Video Rights Playbook"
 
 **Time:** 2-3 hours
@@ -583,8 +675,8 @@ That's a different conversation than cold outreach.
 
 | Stream | Month 4 Actual | Run Rate |
 |--------|----------------|----------|
-| Production | $_____ | |
-| Distribution | $_____ | |
+| Tier 2: Product Placement | $_____ | |
+| Tier 1: Catalog Licensing | $_____ | |
 | Sponsorship | $_____ | |
 | **Total** | $_____ | |
 
@@ -597,19 +689,20 @@ That's a different conversation than cold outreach.
 **Theme:** "Double down on what's working"
 **Hours:** 50-60 hours
 
-### Production Scale (Layer 1)
-- [ ] If production is working: Push for 2 retainer clients ($5-6K/month recurring)
-- [ ] Systematize: Create SOPs for project delivery
+### Placement and Catalog Scale
+- [ ] If Tier 2 is working: Push for 2nd placement deal; use first as case study
+- [ ] If Tier 1 is working: Build catalog volume, expand licensing outreach
+- [ ] Systematize: Create SOPs for placement brief → delivery workflow
 - [ ] Build creator bench: 3-5 reliable AI creators for fulfillment
-- [ ] Consider: Can you raise prices? Add premium tier?
+- [ ] Consider: Can you raise placement prices? Add premium territory packages?
 
 **Time:** 15-20 hours
-**Goal:** $8-12K production revenue this month
+**Goal:** $8-15K combined from Tier 1 + Tier 2 this month
 
-### Distribution Validation (Layer 2)
+### Distribution Validation
 - [ ] MyVideo: Content delivered, measure results
 - [ ] Close 1-2 more distribution deals (educational, festival, brand)
-- [ ] Pay filmmakers their share (75%) — creates case study
+- [ ] Pay filmmakers their share (75%) — creates case study for filmmaker recruitment
 
 **Time:** 8-10 hours
 **Goal:** 1+ closed distribution deal; filmmakers paid
@@ -621,20 +714,20 @@ That's a different conversation than cold outreach.
 
 **Time:** 10-15 hours (if running event)
 
-### Consulting Pipeline (Bridge Product)
-- [ ] From event leads: Convert 1-2 to consulting engagements
-- [ ] Offer: "AI Video Strategy Sprint" — 2-week engagement, $3-5K
-- [ ] **Include legal/rights guidance as key value-add**
-- [ ] This bridges Layer 2 to cash before distribution scales
+### Advisory Pipeline (Bridge to Tier 3)
+- [ ] From event leads: Convert 1-2 to advisory or consulting engagements (Tier 3)
+- [ ] Offer: "AI Rights Strategy Session" — 2-week engagement, $3-5K
+- [ ] **Include safe lane vetting guidance as key value-add**
+- [ ] This bridges catalog growth to cash while distribution scales
 
 **Time:** 6-8 hours
-**Goal:** 1 consulting engagement closed
+**Goal:** 1 advisory engagement closed (Tier 3)
 
 ### Legal & Rights Productization
 - [ ] Finalize "AI Video Rights Playbook" v1.0
 - [ ] Create client-facing "Rights & Risk Assessment" one-pager
-- [ ] Test: Use legal knowledge as sales differentiator in agency conversations
-- [ ] Consider: "Rights & Risk Audit" as standalone consulting offering ($2-3K)
+- [ ] Test: Use legal knowledge as sales differentiator in buyer conversations
+- [ ] Consider: "Rights & Risk Audit" as standalone advisory offering ($2-3K)
 - [ ] Gather testimonials: "SI8 helped us navigate the legal complexity"
 
 **Time:** 3-4 hours
@@ -646,8 +739,8 @@ That's a different conversation than cold outreach.
 
 | Scenario | Revenue Mix | Action |
 |----------|-------------|--------|
-| Production working, distribution slow | $4-5K production | Double down on production |
-| Both working | $3K production + $2K distribution | Balanced growth |
+| Tier 2 working, Tier 1 slow | $4-5K from placement | Double down on Tier 2 pitches |
+| Both working | $2-3K Tier 1 + $3-5K Tier 2 | Balanced growth |
 | Neither working | <$2K total | Serious reassessment |
 
 ---
@@ -663,29 +756,27 @@ That's a different conversation than cold outreach.
 
 | Metric | Target | Actual | Notes |
 |--------|--------|--------|-------|
-| **Production deals closed** | 3+ | | |
-| **Production revenue (6-mo total)** | $15-25K | | |
-| **Active retainer clients** | 2 | | |
-| **Filmmakers on roster** | 10 | | |
-| **Distribution deals closed** | 1+ | | |
-| **Distribution revenue** | $1-3K | | |
+| **Catalog entries (signed, documented)** | 5-10 | | |
+| **Tier 1 deals closed** | 2-3 | | |
+| **Tier 1 revenue (6-mo total)** | $5-15K | | |
+| **Tier 2 placement deals closed** | 1-2 | | |
+| **Tier 2 revenue (6-mo total)** | $15-40K | | |
+| **Advisory board recruited** | 3-5 advisors | | |
+| **Filmmakers on roster** | 8-12 | | |
 | **Events held** | 3 | | |
-| **Event attendance (total)** | 80+ | | |
-| **Sponsor revenue** | $4-10K | | |
-| **Consulting revenue** | $3-5K | | |
-| **Total 6-month revenue** | $20-40K | | |
+| **Event sponsorship revenue** | $4-10K | | |
+| **Rights Playbook** | v1.0 complete | | |
+| **Product placement POC documented** | Yes/No | | |
 | **Monthly run rate (Month 6)** | $5K+ | | |
-| **AI Video Rights Playbook** | v1.0 complete | | |
-| **Legal used as sales asset** | Yes/No | | |
 
 ### Decision Framework
 
 **Scenario A: Hit $5K/month run rate**
 - **Action:** Plan aggressive H2
   - Begin transition planning from day job
-  - Hire part-time help for production fulfillment
+  - Hire part-time help for fulfillment
   - Expand to more SEA markets
-  - Pursue larger production deals
+  - Pursue larger Tier 2 placement deals
   - Scale events to quarterly conference format
 
 **Scenario B: $2-4K/month run rate**
@@ -693,19 +784,34 @@ That's a different conversation than cold outreach.
   - Identify what's working, cut what's not
   - Double down on highest-ROI activities
   - Extend timeline for transition by 6 months
-  - Consider: Raise prices? Different client segment?
+  - Consider: Raise prices? Different buyer segment?
 
 **Scenario C: <$2K/month run rate**
 - **Action:** Pivot or pause
   - What specifically isn't working?
   - Is it targeting, pricing, product, or market timing?
-  - Options: Pivot to pure consulting, pause and wait for market, exit
+  - Options: Pivot to pure advisory, pause and wait for market, exit
 
-**Scenario D: Production working, distribution not**
-- **Action:** Focus on production as the business
-  - Accept that distribution is a longer-term play
-  - Build production into sustainable agency model
-  - Use production to continue building filmmaker relationships
+**Scenario D: Catalog working, placement not**
+- **Action:** Focus on Tier 1 as the primary revenue stream
+  - Accept that Tier 2 is a longer-term play
+  - Build catalog licensing into sustainable volume model
+  - Use licensing relationships to develop placement opportunities over time
+
+### Success Definition
+
+**End of Month 6, success looks like:**
+
+1. **Revenue:** $5K/month run rate (combination of catalog licensing + product placement + advisory)
+2. **Catalog:** 5-10 works signed, documented, and in active pitching
+3. **Tier 2:** 1 product placement deal completed and documented as a case study
+4. **Track 1 (MyVideo):** Pilot program live or committed; content delivered
+5. **Track 2 (Singapore):** 2+ active licensing or placement clients
+6. **Advisory board:** 3-5 advisors listed publicly on website
+7. **Events:** 3 events executed, 1+ paying sponsor
+8. **Rights Playbook:** v1.0 complete; legal expertise is explicit sales differentiator
+9. **Process:** Per-asset documentation SKU working reliably for every catalog entry
+10. **Clarity:** Clear path to full-time transition in next 6-12 months
 
 ### H2 2026 Planning
 - [ ] Based on assessment, create H2 plan
@@ -716,7 +822,7 @@ That's a different conversation than cold outreach.
 ### Competitive Check
 - [ ] What has Escape.ai done in past 6 months?
 - [ ] What has Promise/Curious Refuge done?
-- [ ] Any new entrants in APAC?
+- [ ] Any new entrants in the SEA market?
 - [ ] Adjust strategy based on competitive moves
 
 ---
@@ -727,7 +833,7 @@ That's a different conversation than cold outreach.
 
 | Month | Hours | Focus |
 |-------|-------|-------|
-| February | 40-50 | Foundation (legal, website, research) |
+| February | 40-50 | Foundation (legal, catalog, website, research) |
 | March | 45-55 | Outreach (agencies, filmmakers, event planning) |
 | April | 50-60 | Event #1 + first deals |
 | May | 50-60 | Revenue ramp + event #2 |
@@ -749,17 +855,17 @@ That's a different conversation than cold outreach.
 
 ### Expected Revenue
 
-| Month | Production | Distribution | Events/Consulting | Total |
-|-------|------------|--------------|-------------------|-------|
+| Month | Tier 2 Placement | Tier 1 Licensing | Events/Advisory | Total |
+|-------|-----------------|------------------|-----------------|-------|
 | Feb | $0 | $0 | $0 | $0 |
 | Mar | $0 | $0 | $0 | $0 |
-| Apr | $5-10K | $0 | $0 | $5-10K |
-| May | $5-10K | $0-1K | $2-4K | $7-15K |
-| Jun | $5-10K | $1-2K | $2-4K | $8-16K |
-| Jul | $5-10K | $0-1K | $1-2K | $6-13K |
-| **Total** | **$20-40K** | **$1-4K** | **$5-10K** | **$26-54K** |
+| Apr | $0 | $2-5K | $0 | $2-5K |
+| May | $15-25K | $2-5K | $2-4K | $19-34K |
+| Jun | $0-15K | $3-8K | $2-4K | $5-27K |
+| Jul | $0-5K | $0-3K | $2-5K | $2-13K |
+| **Total** | **$15-45K** | **$7-21K** | **$6-13K** | **$28-79K** |
 
-**Net (Revenue - Costs):** $12-47K over 6 months
+**Net (Revenue - Costs):** $14-72K over 6 months
 
 ---
 
@@ -768,8 +874,8 @@ That's a different conversation than cold outreach.
 ### Weeknights (6-10 hours total)
 
 **Monday-Tuesday:** Agency outreach and follow-ups (2-3 hrs)
-**Wednesday:** Filmmaker outreach and distribution (1-2 hrs)
-**Thursday:** Content creation (LinkedIn, r/aifilmreviews) (1-2 hrs)
+**Wednesday:** Filmmaker outreach and catalog development (1-2 hrs)
+**Thursday:** Content creation (LinkedIn) (1-2 hrs)
 **Friday:** Admin, email, planning (1-2 hrs)
 
 ### Weekend (4-5 hours one day)
@@ -777,8 +883,8 @@ That's a different conversation than cold outreach.
 **Saturday OR Sunday:**
 - Event planning (when applicable)
 - Strategic work (proposals, contracts)
-- Production project oversight
-- Layer 2 development (distribution deals)
+- Placement project oversight
+- Catalog and distribution development
 
 ### Monthly Rhythm
 
@@ -791,37 +897,17 @@ That's a different conversation than cold outreach.
 
 ## Key Differences from Previous Plan
 
-| Aspect | Previous | Updated |
-|--------|----------|---------|
-| Time budget | 7-8 hrs/week | 10-15 hrs/week |
-| Market strategy | Taiwan-first, Europe second | **Parallel: MyVideo + SEA agencies** |
-| MyVideo role | Primary focus, potential blocker | **Credibility accelerant (parallel track)** |
-| SEA agencies | Not prioritized | **Primary revenue target (Layer 1)** |
-| Revenue driver | Distribution commissions | Production services (Layer 1) |
-| Filmmaker scope | Global | Global, with SEA priority |
-| Event audience | Filmmakers (B2C) | Agencies + creators (B2B hybrid) |
-
----
-
-## Success Definition
-
-**End of Month 6, success looks like:**
-
-1. **Revenue:** $5K/month run rate (combination of production + distribution + consulting)
-2. **Track 1 (MyVideo):** Pilot program live or committed; content delivered
-3. **Track 2 (SEA Production):** 2 active retainer clients in SEA/Taiwan
-4. **Distribution:** 10 filmmakers on roster, 1+ distribution deal closed
-5. **Events:** 3 events executed, 1+ paying sponsor
-6. **Legal/Rights:** "AI Video Rights Playbook" v1.0 complete; legal expertise used as sales differentiator
-7. **Pipeline:** 5+ warm leads for production, 3+ distribution channels in discussion
-8. **Clarity:** Clear path to full-time transition in next 6-12 months
-
-**The parallel strategy:**
-- **MyVideo** provides credibility and distribution validation
-- **SEA agencies** provide production revenue (Layer 1)
-- **Both tracks reinforce each other** — MyVideo win accelerates SEA closes
-
-**The core bet:** MyVideo closes in 60-90 days, which unlocks SEA agency conversations. SEA production revenue funds the distribution platform.
+| Aspect | v2.1 | v3.1 |
+|--------|------|------|
+| Business model | Two-Layer (Production/Distribution) | **Four-Tier Rights Agency** |
+| Primary revenue driver | Layer 1 production services | **Tier 2 product placement** |
+| Catalog | Secondary, built after outreach | **Prerequisite — must exist before pitching** |
+| Modification clause | Not specified | **Non-negotiable in every filmmaker agreement** |
+| Advisory board | Not included | **Month 1-2 priority — credibility before case studies** |
+| Per-asset documentation | Not specified | **9-field SKU required for every catalog entry** |
+| Primary pitch | "AI video production partner" | **"AI content your legal team won't flag"** |
+| Rights language | "rights-cleared" | **"safe lane vetted"** |
+| Geographic framing | "APAC focus" | **Removed from external positioning** |
 
 ---
 
@@ -833,11 +919,11 @@ That's a different conversation than cold outreach.
 
 | Month | Focus Area | Deliverable |
 |-------|------------|-------------|
-| **1** | Contracts + Copyright basics | Signed contracts; initial legal landscape notes |
-| **2** | Likeness/voice rights; APAC regulations | Updated playbook; 1 legal-focused LinkedIn post |
-| **3** | Platform requirements; production rights checklist | Rights Checklist v1; Brand Safety Guidelines |
+| **1** | Contracts + Copyright basics + modification clause + exclusivity framework for filmmaker agreements | Signed contracts with modification clause; initial legal landscape notes |
+| **2** | Likeness/voice rights; regional regulations (Taiwan, Singapore) | Updated playbook; 1 legal-focused LinkedIn post |
+| **3** | Platform requirements; catalog rights checklist | Rights Checklist v1; Brand Safety Guidelines |
 | **4** | Competitor analysis; systematize process | Refined checklist; documented legal issues |
-| **5** | Productize legal knowledge | Client-facing Rights Assessment; consulting offering |
+| **5** | Productize legal knowledge | Client-facing Rights Assessment; advisory offering |
 | **6** | Finalize and assess | AI Video Rights Playbook v1.0 |
 
 ### Key Legal Questions to Answer
@@ -873,15 +959,15 @@ That's a different conversation than cold outreach.
 > "We've done the legal homework. We know which platforms accept AI content, what disclosures are required, and how to protect your rights."
 
 **For Agencies:**
-> "We handle the rights complexity so you don't have to. Every project comes with a rights clearance checklist and brand safety documentation."
+> "We handle the rights complexity so you don't have to. Every catalog entry comes with a safe lane sign-off and brand safety documentation."
 
 **For Distribution:**
 > "Our content comes with clear provenance, proper licensing, and platform-ready compliance."
 
 **Potential Future Product:**
-- "AI Video Rights Audit" — standalone consulting offering ($2-3K)
+- "AI Video Rights Audit" — standalone advisory offering ($2-3K)
 - "AI Video Rights Playbook" — packaged knowledge product (if market exists)
-- "Rights-Cleared Creator Network" — pre-vetted filmmakers with clean processes
+- "Safe Lane Vetted Catalog" — pre-vetted filmmakers with clean, documented processes
 
 ---
 
