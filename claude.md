@@ -18,6 +18,39 @@
 - Year 2: 40% production / 60% distribution
 - Year 3+: 20% production / 80% distribution (goal)
 
+### v3 Strategy: Rights Agency + AI Product Placement (Current Direction — February 2026)
+
+**SI8 identity:** A Rights Agency and Rights Management firm for AI film and commercial content.
+
+**The four-tier model:**
+- **Tier 2 (Primary):** Custom AI Product Placement in vetted productions — brand elements regenerated into existing catalog films. "Won't get you sued." Premium price.
+- **Tier 1 (Standard):** Catalog licensing as-is — for platforms, airlines, streaming, editorial. Commercial use documented.
+- **Tier 3 (Advisory/inbound):** Referral + rights management for brands building their own AI content.
+- **Tier 4 (Commission/inbound):** Full bespoke production through vetted filmmaker network. Discretionary.
+
+**Key positioning:** "Getty for AI video — with a product placement layer Getty can never offer."
+
+**Competitive differentiation:** "Adobe = safe but boring (Firefly only). SI8 = best creative AI tools (Sora/Kling/Runway) made safe. We fill the gap Adobe structurally can't."
+
+**Single Year 1 message:** "Won't get you sued." (door opener)
+**Secondary pitch line (discovery/proposal stage):** "We reduce time from creative idea to legal approval from 3 weeks to 3 days." (felt experience)
+
+**Internal framing:** "The file is the carrier. The chain of defensibility is the product."
+
+**SI8's value is the judgment layer:** C2PA/Content Credentials will commoditize provenance documentation. SI8's moat is subjective legal review — Safe Lane vetting, IP assessment, training data risk judgment — which software cannot automate.
+
+**Brand identity:** Year 1 = Underwriter (risk reduction, compliance, defensibility). Year 3+ = Underwriter + Curator (taste + safety compound). Do not lead with curation in Year 1.
+
+**Critical operational prerequisite:** Every filmmaker shopping agreement must include a modification clause before Tier 2 can be offered.
+
+**Long-term outcomes (all acceptable):** High-earning services agency / self-serve platform / VC-backed platform. Year 1-2 work is the same regardless. VC path is upside, not a requirement.
+
+**Business plan versions:**
+- `BUSINESS_PLAN_v1.md` — supply-side first (archived, January 2026)
+- `BUSINESS_PLAN_v2.md` — demand-side first (superseded by v3)
+- `BUSINESS_PLAN_v3.md` — Rights Agency + AI Product Placement (current, February 2026)
+- `VERSION_HISTORY.md` — version log
+
 ### Revenue Model (Year 1 Target: $80-120K)
 
 | Stream | Target | How |
@@ -123,6 +156,22 @@
 
 **Priority: HIGH** — Must complete before Month 2 outreach
 
+### 3b. Advisory Board (Credibility asset before first deals)
+- [ ] Identify 3-5 advisory board candidates (see BUSINESS_PLAN_v2.md for profiles)
+- [ ] Draft 1-page advisory memo (what SI8 is, what we're asking, what they get)
+- [ ] Reach out — prioritize anyone already in network
+- [ ] List on website once confirmed (3+ minimum before publishing)
+- [ ] Invite to AI Creators Fest as speakers
+
+**Target profiles:** entertainment/IP lawyer, brand marketing exec (APAC), AI filmmaker/creative technologist, streaming/platform exec
+
+### 3c. Bilingual Website (EN + ZH-TW)
+- [ ] Translate all website copy to Traditional Chinese (繁體中文)
+- [ ] Implement language selector in nav (EN / 中文 toggle)
+- [ ] Add `lang="zh-TW"` attribute for Chinese version
+- [ ] Test on mobile — both languages
+- [ ] Complete before Taipei B2B outreach begins
+
 ### 4. Legal Ops (Rights playbook → actual contracts)
 - [ ] Standard Production MSA + SOW
 - [ ] Creator contractor agreement (work-for-hire + confidentiality + IP assignment)
@@ -210,6 +259,12 @@
 - [ ] Red flags in clients (when to say no)
 - [ ] When to fire a client
 
+### 15. E&O Insurance (Future Investigation)
+- [ ] Research whether E&O insurance for AI-generated content is available from standard media liability insurers
+- [ ] Get quotes at small agency scale
+- [ ] Determine if absence of E&O creates sales friction with large-brand buyers
+- [ ] Not a Year 1 blocker — investigate before significant production volume
+
 ---
 
 ## KEY DEPENDENCIES (Hidden Killers)
@@ -238,11 +293,16 @@
 
 | Document | Location | Purpose |
 |----------|----------|---------|
-| Business Plan | `01_Business/plans/BUSINESS_PLAN.md` | Source of truth for strategy |
-| 6-Month Execution Plan | `01_Business/plans/6_MONTH_EXECUTION_PLAN.md` | Detailed month-by-month plan |
+| **Business Plan v3** (current) | `01_Business/plans/BUSINESS_PLAN_v3.md` | Source of truth for strategy (Rights Agency + AI Product Placement) |
+| Business Plan v2 (superseded) | `01_Business/plans/BUSINESS_PLAN_v2.md` | Demand-side first — reference for operational decisions |
+| Business Plan v1 (archived) | `01_Business/plans/BUSINESS_PLAN_v1.md` | Supply-side first — reference only |
+| Version History | `01_Business/plans/VERSION_HISTORY.md` | Plan version log |
+| 6-Month Execution Plan | `01_Business/plans/6_MONTH_EXECUTION_PLAN.md` | Detailed month-by-month plan (activities unchanged) |
 | Executive Summary | `01_Business/plans/EXECUTIVE_SUMMARY_FOR_MENTOR.md` | Quick overview for advisors |
 | Peer Review Summary | `01_Business/plans/PEER_REVIEW_SUMMARY.md` | AI agent feedback synthesis |
 | Build in Public Log | `02_Marketing/content/BUILD_IN_PUBLIC_LOG.md` | Insights for LinkedIn content |
+| Rights Playbook v0.1 | `06_Operations/legal/rights-playbook/versions/v0.1.md` | Rights vetting — sales asset for buyers |
+| Filmmaker Agreement (WIP) | `06_Operations/legal/filmmaker-agreement/WORKING.md` | Terms for filmmaker representation |
 
 ---
 
@@ -359,6 +419,12 @@ SuperImmersive8/
 **Stack**: Static HTML/CSS/JS
 **Fonts**: Space Grotesk (display), Inter (body)
 **Color Scheme**: Dark theme with purple/pink gradient accents
+
+**Languages:** English + Traditional Chinese (繁體中文) — bilingual required
+- Language selector in nav (EN / 中文 toggle)
+- Full content parity in both languages
+- Mandarin version needed before Taipei B2B outreach begins
+- Traditional Chinese (zh-TW), not Simplified (zh-CN)
 
 **CSS Variables:**
 ```css

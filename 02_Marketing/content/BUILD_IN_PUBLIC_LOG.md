@@ -1642,6 +1642,291 @@ Everything else is preparation. Preparation that never converts to outreach is j
 
 ---
 
+### #40: Demand-Side First — The Reframe That Changes Year 1
+
+**Date:** February 2026
+
+**The insight:**
+I've been pitching SI8 as a filmmaker representation agency — supply-side first. Sign filmmakers, build the roster, then find buyers for their work.
+
+Wrong sequence for Year 1.
+
+The money in Year 1 is on the demand side. Brands and agencies have budget. Filmmakers don't pay SI8 — buyers do. And right now, in early 2026, every brand and agency is scared of the same thing: AI content that gets them sued.
+
+That fear is the door opener.
+
+**The reframe:**
+- Old pitch: *"We represent AI filmmakers and get them distribution."*
+- New pitch: *"Brands and agencies come to SI8 for AI content that won't get them sued — license from our vetted catalog, or commission through our vetted filmmaker network."*
+
+Same business. Same two-layer model. Completely different Year 1 motion.
+
+**What this changes:**
+- Outreach leads with the buyer's pain point, not the filmmaker value prop
+- The Rights Playbook (which I just built) is now a marketing asset sent to agencies — not just internal infrastructure
+- AI Creator Fest leads with brand/agency content ("AI Films for Brands: What's Legal, What's Not, What's Next") — filmmakers are showcased as vetted talent, not the primary audience
+- The "won't get you sued" pitch gets me in the room; the filmmaker representation builds the long-term moat
+
+**What doesn't change:**
+- The two-layer model (Layer 1 production, Layer 2 distribution)
+- The long-term vision — filmmaker representation and catalog licensing IS the Year 2-3 business
+- The Rights Playbook, the Safe Lane, the No List
+- Revenue targets, APAC focus, Singapore first
+
+**The sequencing:**
+```
+Year 1: Demand-side leads → production fees + consulting pay the bills
+Year 2: Both sides active → distribution commissions growing
+Year 3+: Supply-side leads → catalog licensing + filmmaker rep is the scalable platform
+```
+
+**Why it took this long to see:**
+I was so focused on the long-term vision (filmmaker representation agency, Kobalt-style) that I was leading with Year 3 positioning in Year 1 outreach. The demand-side pitch isn't a compromise — it's the correct opening move. It funds the supply-side build.
+
+**The AI Creator Fest connection:**
+The event structure changes completely with this reframe:
+- Agencies come to an industry briefing on AI content rights (they clear their calendar for this)
+- Filmmakers are showcased as vetted talent — which is better for them than a community meetup
+- SI8 is the expert who organized the room
+- Every agency exec is a potential production client or consulting lead
+- Same event, different frame, much higher conversion
+
+**LinkedIn-ready excerpt:**
+> "I've been pitching my AI film company wrong.
+>
+> I was leading with filmmaker representation — supply-side, agency model, Kobalt for AI creators.
+>
+> The right Year 1 pitch is demand-side: 'brands and agencies, here's AI content that won't get you sued.'
+>
+> Same business. Same long-term vision. Completely different opening move.
+>
+> The money in Year 1 is on the demand side. Brands have budget. The fear is real.
+>
+> Lead with the buyer's pain. Build the supply-side moat behind it.
+>
+> Demand-side first. Supply-side forever."
+
+---
+
+### #41: What Peer Review Taught Me About Building in Public with AI
+
+**Date:** February 2026
+
+**The setup:**
+I put Business Plan v2 in front of ChatGPT and Gemini for peer review. I asked them to poke holes. They did.
+
+**The most important challenge they raised:**
+
+"Rights-cleared" is a warranty claim. If a buyer takes your content and gets sued, "rights-cleared" is language their lawyer will read as a guarantee of non-infringement. You can't back that up.
+
+They're right. I was using the phrase because it sounded clean and confident. But it's actually the kind of language that creates the legal exposure I'm promising to prevent.
+
+**What I changed:**
+
+Every instance of "rights-cleared" → "safe lane vetted" or just "safe lane."
+
+The Safe Lane is a *process*. A documented framework. SI8 runs content through the safe lane — that's what buyers are paying for. Not a guarantee of non-infringement. A rigorous, documented, consistent process that significantly reduces risk.
+
+That reframe actually makes the pitch *stronger*, not weaker. It's honest. It's defensible. And it differentiates from any competitor who makes vague "we handle rights" claims.
+
+**Other things peer review surfaced:**
+
+1. **No catalog yet** — you can't pitch "license from our catalog" with zero catalog. Month 1-2 priority: sign 3-5 filmmakers, run their existing work through safe lane review, build the minimum viable catalog.
+
+2. **Advisory board gap** — before the first case study exists, who vouches for SI8? An advisory board listed on the website answers that question. 3-5 people: a lawyer, a brand exec, an AI filmmaker, a platform person. Light commitment, named publicly, invited to the event.
+
+3. **E&O insurance** — flagged but unresolved. AI-generated content may not be coverable under standard media liability policies yet. This is a future investigation, not a Year 1 blocker.
+
+4. **Two test markets, not one** — Taipei is Mandarin-facing (MyVideo, local filmmakers). Singapore is English-facing (SEA agencies). They don't compete. Running both in parallel with a bilingual website gives two real test markets with genuinely different buyer profiles.
+
+5. **One message** — resist the urge to pitch "safer + faster + better." Pick one. "Won't get you sued" is the bet for Year 1. Test it at volume before pivoting.
+
+**What peer review with AI can't replace:**
+
+Real buyer feedback. These are hypothetical objections from a language model trained on business writing. The only objections that actually matter are the ones that come back on outreach.
+
+Peer review sharpened the plan. The market will validate it.
+
+**LinkedIn-ready excerpt:**
+> "I put my business plan in front of ChatGPT and Gemini for peer review.
+>
+> Their best catch: I was using 'rights-cleared' — a phrase that sounds like a legal guarantee I can't actually make.
+>
+> Replaced every instance with 'safe lane vetted' — which is what SI8 actually does. A documented process. Not a warranty.
+>
+> The pitch didn't get weaker. It got more honest.
+>
+> And more honest is more defensible."
+
+---
+
+### #44: What SI8 Actually Sells — The Delivery Mechanism vs. The Product
+
+**Date:** February 2026
+
+**The insight (courtesy of a Gemini correction):**
+
+I pushed back on Gemini's claim that "Getty doesn't work as an analogy because Getty owns their images." It turned out to be factually wrong. Getty doesn't own ~95% of their library. Photographers do. Getty owns the vetting pipeline — the exclusive right to license, and the legal paperwork that makes images commercially usable.
+
+When they corrected themselves, they said something that reframes the whole business:
+
+> *"When an ad agency buys a photo from Getty for $500, they aren't paying $500 for the JPEG. They are paying $50 for the JPEG and $450 for the guarantee that the model signed a release and the location isn't trademarked."*
+
+That's SI8.
+
+**What SI8 actually sells:**
+
+The video file is the delivery mechanism.
+
+The rights documentation — Safe Lane sign-off, tool disclosure, commercial use authorization, modification rights — is the product.
+
+A brand doesn't come to SI8 for an AI video. They can find AI videos anywhere. They come to SI8 because they need something they can stand behind if their legal team asks questions. The documentation is what they're paying for.
+
+This is why the Rights Playbook isn't a marketing asset. It's proof that the product exists.
+
+**What this changes about the pitch:**
+
+Before: "We make vetted AI video."
+After: "We make the legal paperwork that makes AI video commercially usable. The video is how we deliver it."
+
+The fear-based hook stays the same: "Won't get you sued." But now the answer to "how?" is cleaner: "We've documented everything — tools, process, authorization, compliance. You have something to show your legal team."
+
+**The moat, stated correctly:**
+
+SI8 doesn't need to own the content to have a moat. Getty doesn't own most of its content either. The moat is the vetting pipeline — the judgment, the process, the filmmaker relationships, the Safe Lane standards. That takes time to build. Time is the moat.
+
+**LinkedIn-ready excerpt:**
+> "Someone asked me what SI8 actually sells.
+>
+> Not AI video. Anyone can generate AI video.
+>
+> We sell the legal paperwork that makes AI video commercially usable.
+>
+> When a brand licenses a photo from Getty, they're not paying for the JPEG.
+> They're paying for the guarantee that the model signed a release.
+>
+> Same logic. AI video is the delivery mechanism.
+>
+> The Safe Lane documentation — tool disclosure, rights authorization, compliance record — that's the product.
+>
+> The video is just how we deliver it."
+
+---
+
+### #43: Services First, Platform Later — The Right Sequence
+
+**Date:** February 2026
+
+**The insight:**
+The long-term play is a platform. The short-term play is a services business. These are not contradictory — the services phase is how you validate the platform thesis before building it.
+
+The Getty parallel is not just a positioning analogy. It's a map of where AI video is going.
+
+Photography became ubiquitous because the means of production was democratized. When everyone had a camera, the commercial vetting layer became essential. Getty built that layer and became a multi-billion dollar company — not by being the best photographers, but by being the most trusted source of documented, commercially licensed photographs.
+
+AI video is following the same arc. The tools (Runway, Sora, Kling) are democratizing production. In 2-5 years, AI video will be as ubiquitous as photography. Brands who want to use it commercially will need a vetted source. The platform that builds the vetting infrastructure first will occupy the same structural position Getty holds.
+
+That's the long-term thesis for SI8.
+
+But you don't build a platform on an unvalidated hypothesis. You build it on proof.
+
+So Year 1-2 is deliberate services work — staying close to early customers, learning what brands actually need, proving that the product placement offer is repeatable, building the filmmaker relationships. Every manual process you run is the future platform feature being tested in the real world before it's automated.
+
+The pattern is well-documented:
+- Airbnb manually photographed listings before building self-serve
+- Stripe did concierge integrations before the developer API
+- Uber had dispatchers before the algorithm
+
+The services phase is not a compromise. It's the R&D for the platform.
+
+When the validation signals are clear — repeat buyers, multiple licenses of the same film, filmmakers wanting in, inbound starting to outpace outbound — that's when you raise the capital and build the self-serve infrastructure.
+
+**The VC pitch, when the time comes:**
+"We've manually proven that brands pay for vetted AI video. Here are the deals. Here is the process. We want to build the platform that scales this without adding headcount."
+
+That's a much stronger pitch than a deck with a hypothesis.
+
+**LinkedIn-ready excerpt:**
+> "The long-term play for SI8 is a platform.
+>
+> Filmmakers upload. We vet. Brands license. Product placement on demand.
+>
+> The Getty model, for AI video.
+>
+> But we're not building the platform yet. Because the thesis isn't proven yet.
+>
+> Year 1 is services. Manual vetting. Direct relationships. Every deal is a learning.
+>
+> Airbnb photographed listings by hand before they built self-serve.
+> Stripe did concierge integrations before the API.
+>
+> You build the platform on proof. Not on hypothesis.
+>
+> So right now, we're doing the work that proves the thesis.
+>
+> And we're documenting everything as if we'll hand it to an engineering team in Year 3.
+>
+> Because we will."
+
+---
+
+### #42: The Insight That Flipped the Model — AI Product Placement
+
+**Date:** February 2026
+
+**The insight:**
+Stock footage can't do this. Live-action can't do this. Only AI can.
+
+A brand sees a film in our catalog. They like it — the tone, the aesthetic, the world. But they want their brand *inside* it. Their product on the table. Their logo on the billboard. Their name in the background of the scene.
+
+With live-action, that's a reshoot. Days of production. Significant cost. With AI-generated content, it's a regeneration. The scene stays intact. The brand element replaces the generic one. One workflow, a fraction of the cost.
+
+No live-action catalog can offer this. No stock library offers it. Nobody in AI film has named it as a product.
+
+That's why Tier 2 (custom product placement) became the primary offer — not catalog licensing, not production, not advisory. The thing that makes someone choose SI8 over grabbing content off YouTube or Instagram is the thing only AI can do.
+
+**The model it creates:**
+
+```
+Tier 2 (PRIMARY): Custom AI Product Placement in Vetted Productions
+Tier 1 (STANDARD): Catalog Licensing As-Is (platforms, airlines, editorial)
+Tier 3 (INBOUND): Advisory + Rights Management for custom productions
+Tier 4 (INBOUND): Full Bespoke Commission (discretionary)
+```
+
+**The analogy that explains it:**
+
+SI8 is Getty Images for AI video — commercially vetted, documented, and safe for brand use — except SI8 can put your brand *inside* the content, which Getty can never do.
+
+That analogy does more work in one sentence than three paragraphs of positioning copy. Every marketing director understands why you pay for Getty instead of right-clicking Google Images. SI8 is the same logic, applied to AI video, with a product placement layer on top.
+
+**The operational requirement this creates:**
+
+Every filmmaker shopping agreement must include a modification clause before Tier 2 can be offered. This is not optional — you cannot sell product placement without the filmmaker's authorization to modify their work. This clause goes into every agreement from day one.
+
+**Why not just grab something off YouTube?**
+
+YouTube content is not cleared for commercial use. Rights provenance is unknown. Training data is unknown. No documentation exists. If something goes wrong, the brand has nothing to stand behind.
+
+SI8's catalog has documentation on every piece: tool disclosure, Safe Lane sign-off, commercial use authorization. That's what brands are paying for. It's not the content — it's the defensibility.
+
+**LinkedIn-ready excerpt:**
+> "Here's the thing about AI-generated film that nobody in the market has said yet:
+>
+> It's not fixed.
+>
+> With live-action, once you shoot the scene, the background is the background. Changing it means a reshoot.
+>
+> With AI, you can regenerate specific elements. The scene stays. The generic coffee cup becomes your coffee cup. The blank billboard becomes your campaign.
+>
+> No reshoot. One workflow. Your brand inside content that's already been vetted for commercial use.
+>
+> That's what we're building. A rights-vetted AI film catalog where we can put your brand inside the work.
+>
+> Nobody else has named this as a product yet. We're naming it."
+
+---
+
 ## Decisions Log
 
 | Date | Decision | Rationale |
@@ -1695,6 +1980,39 @@ Everything else is preparation. Preparation that never converts to outreach is j
 | Jan 2026 | **"No List" defined** | Explicit safe lane boundaries (no likeness, no voice cloning, etc.) |
 | Jan 2026 | **Singapore ONLY for Month 1-2** | Pick one market, go deep, then expand |
 | Jan 2026 | **5-hour outreach rule** | Minimum 5 hrs/week on outreach is non-negotiable |
+| **Feb 2026** | **Demand-side first (v2 strategy)** | Year 1 pitch leads with buyer pain ("won't get you sued"), not filmmaker representation |
+| Feb 2026 | Rights Playbook = marketing asset (not just internal) | Send to agencies after first contact; proof of claim |
+| Feb 2026 | AI Creator Fest = industry briefing, not community event | Agencies fill the room; filmmakers are the featured talent |
+| Feb 2026 | Business Plan v2 created | v1 archived; v2 is current direction; version history in VERSION_HISTORY.md |
+| Feb 2026 | **"Rights-cleared" replaced with "safe lane"** | "Rights-cleared" implies a legal warranty SI8 can't back up; "safe lane vetted" is accurate and defensible |
+| Feb 2026 | **Two risk tiers from day one** | Certified Tier (Adobe Firefly only) + Standard Tier (Runway/Pika/Sora); different buyer risk tolerances, same safe lane process |
+| Feb 2026 | **Advisory board as Year 1 credibility asset** | Before real deals exist, named advisors answer "who vouches for you?" — 3-5 targets: lawyer, brand exec, AI filmmaker, platform exec |
+| Feb 2026 | **Both Taipei + Singapore in parallel** | Taipei = Mandarin-facing, MyVideo anchor; Singapore = English-facing, SEA agencies; different audiences, learnings transfer |
+| Feb 2026 | **Bilingual website required** | EN + Traditional Chinese (zh-TW); needed before Taipei B2B outreach begins |
+| Feb 2026 | **Single message discipline** | "Won't get you sued" is the one Year 1 message; no layering speed/cost/quality until primary message tested across 200+ touches |
+| Feb 2026 | **Brand the process, not the pieces** | No per-piece rights certificate in Year 1 — branding the Safe Lane *process* is the differentiator; certifying outputs creates warranty exposure |
+| Feb 2026 | **Catalog building = Month 1-2 priority** | Can't pitch "license from catalog" without catalog; minimum 3-5 safe lane vetted works before licensing path is offered |
+| Feb 2026 | **E&O insurance flagged for future investigation** | Unknown if available for AI content at small agency scale; not Year 1 blocker, but resolve before significant production volume |
+| Feb 2026 | **Business Plan v3 created** | Rights Agency + AI Product Placement model; v2.1 superseded; VERSION_HISTORY.md updated |
+| Feb 2026 | **Tier 2 (product placement) = primary offer** | Only AI can do this; no reshoot required; no competitor has named it; justifies premium price |
+| Feb 2026 | **"Getty for AI video" positioning adopted** | Every marketing director understands Getty; explains catalog + rights value instantly; product placement is the layer Getty can never offer |
+| Feb 2026 | **Modification clause required in all filmmaker agreements** | Cannot offer Tier 2 without explicit filmmaker authorization to modify their work for brand integration |
+| Feb 2026 | **Exclusivity framework defined for product placement** | Category-exclusive default; fully exclusive = premium; non-exclusive = lower price, disclosed |
+| Feb 2026 | **"Why not YouTube" argument formalized** | Commercial use requires documentation; YouTube/IG content has no rights provenance, no commercial clearance, no defensibility |
+| Feb 2026 | **Four-tier services ladder documented** | Tier 2 (placement) leads; Tier 1 (as-is) for platforms; Tier 3/4 inbound only, not advertised |
+| Feb 2026 | **"Bad Boy Indemnifier" framing adopted** | Adobe = safe but boring (Firefly only). SI8 = best creative AI tools (Sora/Kling/Runway) made safe. The gap Adobe structurally cannot fill. |
+| Feb 2026 | **SI8's value = judgment layer, not documentation** | C2PA/Content Credentials will commoditize provenance documentation. SI8's moat is subjective legal review — Safe Lane vetting, IP assessment — which software cannot automate. |
+| Feb 2026 | **C2PA flagged for monitoring** | Open standard that auto-documents provenance. Rebuttal: proves who made it, not whether it's safe to use. Monitor adoption. |
+| Feb 2026 | **Passive Reuse added as platform validation signal** | Same asset earns revenue from two different buyers = platform logic proven. Important signal, not the only one. |
+| Feb 2026 | **VC path is upside, not requirement** | Three acceptable long-term outcomes: services agency / self-serve platform / VC-backed. All valid. Year 1 work is the same regardless. |
+| Feb 2026 | **Process standardization = Year 1 priority alongside revenue** | Every manual process run as if it will become a platform feature. Document everything as if handing to engineering team in Year 3. |
+| Feb 2026 | **Content is delivery mechanism; rights documentation is the product** | Getty logic confirmed: brands pay for legal indemnity, not pixels. SI8 sells the Safe Lane documentation; the video is how it's delivered. |
+| Feb 2026 | **SI8's moat = vetting pipeline, not content ownership** | Getty doesn't own ~95% of its library; photographers do. Getty owns the right to license + the trust layer. SI8 owns the same thing for AI video. |
+| Feb 2026 | **"Rights Package" not "Rights Certificate"** | Package = substantive documented process. Certificate = legal guarantee SI8 can't make. Same substance, honest framing. |
+| Feb 2026 | **Secondary pitch line adopted** | "We reduce time from creative idea to legal approval from 3 weeks to 3 days." — the felt experience; complements "won't get you sued" door opener |
+| Feb 2026 | **Internal/external canonical framing locked** | Internal: "The file is the carrier. The chain of defensibility is the product." External: "3 weeks to 3 days." |
+| Feb 2026 | **Per-asset documentation SKU defined** | 9 structured fields per catalog entry (tool provenance, model disclosure, Safe Lane sign-off, etc.). Structured data not narrative. Platform schema in spreadsheet form from day one. |
+| Feb 2026 | **Underwriter→Curator identity progression** | Year 1: risk underwriter (legal teams are the gatekeeper). Year 3+: underwriter + curator (taste develops alongside compliance track record). |
 | Jan 2026 | **Ship website in 7 days** | Not perfect — iterate later |
 | Jan 2026 | **Rights Playbook v0.1 = 3 pages** | Iterate slowly; only write what helps sell THIS month |
 | Jan 2026 | **2 revision rounds max** | Enforce strictly to prevent scope creep |
