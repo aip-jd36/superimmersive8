@@ -2,21 +2,21 @@
    CSS Variables & Reset
    ============================ */
 :root {
-    /* Colors */
-    --color-bg: #0a0a0b;
-    --color-bg-elevated: #111113;
-    --color-bg-card: #161618;
-    --color-text: #ffffff;
-    --color-text-secondary: #a1a1aa;
-    --color-text-muted: #71717a;
-    --color-accent: #818cf8;
-    --color-accent-light: #a5b4fc;
-    --color-accent-dark: #6366f1;
-    --color-gradient-1: #818cf8;
-    --color-gradient-2: #c084fc;
-    --color-gradient-3: #f472b6;
-    --color-border: rgba(255, 255, 255, 0.08);
-    --color-border-light: rgba(255, 255, 255, 0.12);
+    /* Colors — warm light theme */
+    --color-bg: #FFFFFF;
+    --color-bg-elevated: #FAFAF7;
+    --color-bg-card: #F7F6EF;
+    --color-text: #1a1918;
+    --color-text-secondary: #52504A;
+    --color-text-muted: #8C8A82;
+    --color-accent: #C8900A;
+    --color-accent-light: #F0C040;
+    --color-accent-dark: #9E7008;
+    --color-gradient-1: #F5C842;
+    --color-gradient-2: #E8A020;
+    --color-gradient-3: #FFDE80;
+    --color-border: rgba(0, 0, 0, 0.08);
+    --color-border-light: rgba(0, 0, 0, 0.12);
 
     /* Typography */
     --font-display: 'Space Grotesk', sans-serif;
@@ -140,35 +140,38 @@ section {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--color-gradient-1), var(--color-gradient-2));
+    background: #1a1918;
     color: white;
-    box-shadow: 0 4px 20px rgba(129, 140, 248, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 30px rgba(129, 140, 248, 0.4);
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.22);
+    background: #2d2b28;
 }
 
 .btn-secondary {
     background: transparent;
     color: var(--color-text);
-    border: 1px solid var(--color-border-light);
+    border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: var(--color-text-secondary);
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.35);
 }
 
 .btn-light {
-    background: white;
-    color: var(--color-bg);
+    background: #F5C842;
+    color: #1a1918;
+    font-weight: 600;
 }
 
 .btn-light:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 30px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 6px 30px rgba(245, 200, 66, 0.4);
+    background: #f0c030;
 }
 
 .btn-full {
@@ -185,7 +188,7 @@ section {
     right: 0;
     height: var(--nav-height);
     z-index: 1000;
-    background: rgba(10, 10, 11, 0.8);
+    background: rgba(255, 255, 255, 0.96);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--color-border);
 }
@@ -213,7 +216,7 @@ section {
 }
 
 .logo-accent {
-    background: linear-gradient(135deg, var(--color-gradient-1), var(--color-gradient-2));
+    background: linear-gradient(135deg, #C8900A, #F5C842);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -237,13 +240,15 @@ section {
 
 .nav-cta {
     padding: 0.625rem 1.25rem;
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border-light);
+    background: #1a1918;
+    color: white !important;
+    border: 1px solid #1a1918;
     border-radius: var(--radius-full);
 }
 
 .nav-cta:hover {
-    background: var(--color-bg-elevated);
+    background: #2d2b28;
+    color: white !important;
 }
 
 .mobile-menu-btn {
@@ -295,7 +300,7 @@ section {
 .orb-1 {
     width: 600px;
     height: 600px;
-    background: var(--color-gradient-1);
+    background: rgba(245, 200, 66, 0.18);
     top: -200px;
     right: -100px;
     animation-delay: 0s;
@@ -304,7 +309,7 @@ section {
 .orb-2 {
     width: 500px;
     height: 500px;
-    background: var(--color-gradient-2);
+    background: rgba(232, 160, 32, 0.12);
     bottom: -150px;
     left: -100px;
     animation-delay: -7s;
@@ -313,7 +318,7 @@ section {
 .orb-3 {
     width: 400px;
     height: 400px;
-    background: var(--color-gradient-3);
+    background: rgba(255, 222, 128, 0.10);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -335,11 +340,11 @@ section {
 .hero-badge {
     display: inline-block;
     padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--color-border-light);
+    background: #FFF8E8;
+    border: 1px solid rgba(200, 144, 10, 0.3);
     border-radius: var(--radius-full);
     font-size: 0.875rem;
-    color: var(--color-text-secondary);
+    color: #C8900A;
     margin-bottom: var(--space-lg);
 }
 
@@ -348,7 +353,7 @@ section {
 }
 
 .highlight {
-    background: linear-gradient(135deg, var(--color-gradient-1), var(--color-gradient-2), var(--color-gradient-3));
+    background: linear-gradient(135deg, #C8900A, #F0C040);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -423,19 +428,19 @@ section {
 .section-tag {
     display: inline-block;
     padding: 0.375rem 0.875rem;
-    background: rgba(129, 140, 248, 0.1);
-    border: 1px solid rgba(129, 140, 248, 0.2);
+    background: rgba(200, 144, 10, 0.1);
+    border: 1px solid rgba(200, 144, 10, 0.25);
     border-radius: var(--radius-full);
     font-size: 0.8125rem;
-    color: var(--color-accent-light);
+    color: var(--color-accent);
     margin-bottom: var(--space-md);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
 .section-tag.light {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
     color: white;
 }
 
@@ -453,21 +458,23 @@ section {
 }
 
 .service-card {
-    background: var(--color-bg-card);
+    background: #FFFFFF;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     padding: var(--space-xl);
     transition: all var(--transition-base);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 .service-card:hover {
     border-color: var(--color-border-light);
     transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
 }
 
 .service-card.featured {
-    background: linear-gradient(135deg, rgba(129, 140, 248, 0.1), rgba(192, 132, 252, 0.1));
-    border-color: rgba(129, 140, 248, 0.3);
+    background: linear-gradient(135deg, rgba(245, 200, 66, 0.08), rgba(232, 160, 32, 0.08));
+    border-color: rgba(200, 144, 10, 0.25);
 }
 
 .service-icon {
@@ -476,7 +483,7 @@ section {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--color-gradient-1), var(--color-gradient-2));
+    background: linear-gradient(135deg, #C8900A, #F5C842);
     border-radius: var(--radius-md);
     margin-bottom: var(--space-md);
 }
@@ -662,8 +669,8 @@ section {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(129, 140, 248, 0.1);
-    border: 1px solid rgba(129, 140, 248, 0.2);
+    background: rgba(200, 144, 10, 0.1);
+    border: 1px solid rgba(200, 144, 10, 0.2);
     border-radius: var(--radius-sm);
     font-size: 1.25rem;
     flex-shrink: 0;
@@ -680,14 +687,17 @@ section {
 
 /* Visual Cards */
 .visual-card {
-    background: var(--color-bg-card);
+    background: #FFFFFF;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     padding: var(--space-xl);
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
 }
 
 .visual-card.dark {
-    background: var(--color-bg);
+    background: #1a1918;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: white;
 }
 
 .visual-stat {
@@ -704,7 +714,7 @@ section {
     font-family: var(--font-display);
     font-size: 2rem;
     font-weight: 600;
-    background: linear-gradient(135deg, var(--color-gradient-1), var(--color-gradient-2));
+    background: linear-gradient(135deg, #F5C842, #E8A020);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -728,15 +738,16 @@ section {
     align-items: center;
     gap: var(--space-sm);
     padding: var(--space-sm) var(--space-md);
-    background: var(--color-bg-elevated);
-    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: var(--radius-md);
     font-size: 0.9375rem;
+    color: rgba(255, 255, 255, 0.85);
     transition: all var(--transition-fast);
 }
 
 .buyer-type:hover {
-    border-color: var(--color-accent);
+    border-color: #F5C842;
     transform: translateX(4px);
 }
 
@@ -828,13 +839,14 @@ section {
 .fest-bg {
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
+    background: linear-gradient(135deg, #1a1918 0%, #2d2520 50%, #1a1210 100%);
 }
 
 .fest-gradient {
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse at center, transparent 0%, rgba(10, 10, 11, 0.5) 100%);
+    background: radial-gradient(ellipse at 30% 50%, rgba(245, 200, 66, 0.18) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 50%, rgba(232, 160, 32, 0.10) 0%, transparent 60%);
 }
 
 .fest-content {
@@ -944,7 +956,7 @@ section {
     color: var(--color-text);
     position: relative;
     padding-left: var(--space-lg);
-    border-left: 3px solid var(--color-accent);
+    border-left: 3px solid #C8900A;
 }
 
 /* ============================
@@ -987,14 +999,15 @@ section {
 }
 
 .contact-option.featured {
-    background: linear-gradient(135deg, var(--color-gradient-1), var(--color-gradient-2));
+    background: #1a1918;
     border-color: transparent;
     color: white;
 }
 
 .contact-option.featured:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 30px rgba(129, 140, 248, 0.4);
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.25);
+    background: #2d2b28;
 }
 
 .contact-icon {
@@ -1035,12 +1048,12 @@ section {
 }
 
 .form-note a {
-    color: var(--color-accent-light);
+    color: var(--color-accent);
     text-decoration: underline;
 }
 
 .form-note a:hover {
-    color: var(--color-accent);
+    color: var(--color-accent-dark);
 }
 
 .form-group {
@@ -1058,8 +1071,8 @@ section {
 .form-group select,
 .form-group textarea {
     padding: 0.875rem 1rem;
-    background: var(--color-bg);
-    border: 1px solid var(--color-border);
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.14);
     border-radius: var(--radius-sm);
     color: var(--color-text);
     font-family: var(--font-body);
@@ -1071,7 +1084,8 @@ section {
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: var(--color-accent);
+    border-color: #C8900A;
+    box-shadow: 0 0 0 3px rgba(200, 144, 10, 0.12);
 }
 
 .form-group select {
@@ -1194,7 +1208,7 @@ section {
         top: var(--nav-height);
         left: 0;
         right: 0;
-        background: var(--color-bg);
+        background: rgba(255, 255, 255, 0.98);
         flex-direction: column;
         padding: var(--space-lg);
         gap: var(--space-md);
@@ -1259,5 +1273,285 @@ section {
 
     .contact-form-container {
         padding: var(--space-lg);
+    }
+}
+
+/* ============================
+   Catalog Section
+   ============================ */
+.catalog-section {
+    padding: 5rem 0;
+    background: var(--color-bg-elevated);
+}
+
+.catalog-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 2.5rem;
+}
+
+.catalog-top .section-header {
+    text-align: left;
+    margin-bottom: 0;
+}
+
+.catalog-filters {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 0.45rem 1rem;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-muted);
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.filter-btn:hover {
+    border-color: rgba(200, 144, 10, 0.4);
+    color: var(--color-accent);
+    background: rgba(200, 144, 10, 0.06);
+}
+
+.filter-btn.active {
+    border-color: #C8900A;
+    color: #C8900A;
+    background: rgba(200, 144, 10, 0.08);
+    font-weight: 500;
+}
+
+.catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+    .catalog-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 540px) {
+    .catalog-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.catalog-card {
+    border-radius: 12px;
+    overflow: hidden;
+    background: #FFFFFF;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+    position: relative;
+}
+
+.catalog-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+}
+
+.card-thumbnail {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    position: relative;
+}
+
+.card-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform var(--transition-slow);
+}
+
+.catalog-card:hover .card-thumbnail img {
+    transform: scale(1.05);
+}
+
+.card-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.52);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.875rem;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.catalog-card:hover .card-overlay {
+    opacity: 1;
+}
+
+.card-play-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 2px solid white;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.card-play-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.card-play-btn svg {
+    fill: white;
+    width: 18px;
+    height: 18px;
+    margin-left: 2px;
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-sm {
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem;
+    border-radius: var(--radius-full);
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-weight: 500;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.btn-sm.btn-outline {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(4px);
+}
+
+.btn-sm.btn-outline:hover {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.btn-sm.btn-amber {
+    background: #C8900A;
+    color: white;
+}
+
+.btn-sm.btn-amber:hover {
+    background: #9E7008;
+}
+
+.card-badges {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    right: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.badge-safe-lane,
+.badge-placement {
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--radius-full);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    backdrop-filter: blur(4px);
+    line-height: 1.5;
+}
+
+.badge-safe-lane {
+    background: rgba(5, 150, 105, 0.88);
+    color: white;
+}
+
+.badge-placement {
+    background: rgba(200, 144, 10, 0.90);
+    color: white;
+}
+
+.badge-spacer {
+    flex: 1;
+}
+
+.card-info {
+    padding: 0.875rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #FFFFFF;
+    gap: 0.5rem;
+}
+
+.card-info-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-filmmaker {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.card-type {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.catalog-footer {
+    margin-top: 2.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+.catalog-footer a {
+    color: var(--color-accent);
+    text-decoration: underline;
+}
+
+.catalog-footer a:hover {
+    color: var(--color-accent-dark);
+}
+
+@media (max-width: 768px) {
+    .catalog-top {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }

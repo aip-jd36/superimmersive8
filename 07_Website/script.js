@@ -45,9 +45,9 @@ window.addEventListener('scroll', () => {
     const currentScroll = window.pageYOffset;
 
     if (currentScroll > 100) {
-        nav.style.background = 'rgba(10, 10, 11, 0.95)';
+        nav.style.background = 'rgba(255, 255, 255, 0.98)';
     } else {
-        nav.style.background = 'rgba(10, 10, 11, 0.8)';
+        nav.style.background = 'rgba(255, 255, 255, 0.96)';
     }
 
     lastScroll = currentScroll;
@@ -166,6 +166,20 @@ if (window.innerWidth > 768) {
 // ============================
 // Console Easter Egg
 // ============================
-console.log('%cSuperImmersive 8', 'font-size: 24px; font-weight: bold; background: linear-gradient(135deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;');
-console.log('%cBuilding the infrastructure for AI film.', 'color: #a1a1aa; font-size: 14px;');
-console.log('%cInterested in joining? Visit superimmersive8.com/careers', 'color: #818cf8; font-size: 12px;');
+console.log('%cSuperImmersive 8', 'font-size: 24px; font-weight: bold; color: #C8900A;');
+console.log('%cBuilding the infrastructure for AI film.', 'color: #52504A; font-size: 14px;');
+console.log('%cInterested in joining? Visit superimmersive8.com/careers', 'color: #C8900A; font-size: 12px;');
+
+// ============================
+// Catalog Filter
+// ============================
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filter = btn.dataset.filter;
+        document.querySelectorAll('.catalog-card').forEach(card => {
+            card.style.display = (filter === 'all' || card.dataset.category === filter) ? '' : 'none';
+        });
+    });
+});
