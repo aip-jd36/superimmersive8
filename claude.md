@@ -125,13 +125,13 @@
 **Priority: CRITICAL** — Must complete in Month 1
 
 ### 0. Website Launch (Ship in 7 days, iterate later)
-- [ ] Positioning + 2 paths (Programs/Partnerships)
-- [ ] Lead intake form (one link for everyone)
-- [ ] Calendar link for booking calls
-- [ ] "AI Rights safe lane" blurb (signals expertise)
-- [ ] Mobile responsive
-- [ ] Deploy to Netlify/Vercel
-- [ ] Connect domain (www.superimmersive8.com)
+- [x] Positioning + 2 paths (Programs/Partnerships) — ✓ Feb 2026
+- [x] Lead intake form (one link for everyone) — ✓ Formspree form live
+- [x] Calendar link for booking calls — ✓ Calendly linked
+- [x] "AI Rights safe lane" blurb (signals expertise) — ✓ Safe Lane section live
+- [x] Mobile responsive — ✓ Responsive breakpoints implemented
+- [x] Deploy to Netlify/Vercel — ✓ Deployed to Bluehost (cPanel, public_html/)
+- [x] Connect domain (www.superimmersive8.com) — ✓ Live at superimmersive8.com
 
 ### 1. Credibility Assets (Before outreach)
 - [ ] 60-second sizzle reel (sample AI video work)
@@ -166,11 +166,11 @@
 **Target profiles:** entertainment/IP lawyer, brand marketing exec (APAC), AI filmmaker/creative technologist, streaming/platform exec
 
 ### 3c. Bilingual Website (EN + ZH-TW)
-- [ ] Translate all website copy to Traditional Chinese (繁體中文)
-- [ ] Implement language selector in nav (EN / 中文 toggle)
-- [ ] Add `lang="zh-TW"` attribute for Chinese version
+- [x] Translate all website copy to Traditional Chinese (繁體中文) — ✓ index-zh.html live Feb 17, 2026
+- [x] Implement language selector in nav (EN / 中文 toggle) — ✓ links to index-zh.html / index.html
+- [x] Add `lang="zh-TW"` attribute for Chinese version — ✓ html lang set
 - [ ] Test on mobile — both languages
-- [ ] Complete before Taipei B2B outreach begins
+- [x] Complete before Taipei B2B outreach begins — ✓ ready for advisor meetings
 
 ### 4. Legal Ops (Rights playbook → actual contracts)
 - [ ] Standard Production MSA + SOW

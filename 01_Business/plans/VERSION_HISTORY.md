@@ -2,6 +2,28 @@
 
 ---
 
+## Website — February 17, 2026
+**Status:** Live at superimmersive8.com
+
+**What shipped:**
+- Full website launch: dark → warm light theme (white base, golden amber accents)
+- Catalog grid section (immediately below hero): 6 placeholder productions, filter buttons, hover overlays with License + Place Brand CTAs, Safe Lane ✓ + Placement Available badges
+- Traditional Chinese version: superimmersive8.com/index-zh.html — full content parity, lang="zh-TW", all film titles localized
+- Language toggle in nav (EN / 繁體中文) — functional, links between files
+- All three files in GitHub: index.html, index-zh.html, styles.css, script.js
+
+**Design decisions:**
+- Light theme over dark: warmer, more premium for brand buyer audience; differentiates from generic "AI company" aesthetic
+- Warm white (#FFFFFF) base, cream elevated surfaces (#FAFAF7), golden amber (#C8900A) as primary accent
+- Catalog grid follows Getty/Shutterstock visual pattern — makes content feel tangible before real catalog exists
+- Space Grotesk handles zh-TW characters well at this weight — no separate font needed
+- Catalog section has its own anchor (#catalog); "What We Offer" services section renamed #how-it-works
+
+**Deployment:** Bluehost cPanel → public_html/ (index.html, index-zh.html, styles.css, script.js)
+**Git commit:** db71ab7
+
+---
+
 ## v3.1 — February 2026
 **File:** `BUSINESS_PLAN_v3.md` (updated in place)
 **Status:** Current direction

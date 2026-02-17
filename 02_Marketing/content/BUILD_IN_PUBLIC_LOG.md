@@ -2019,6 +2019,13 @@ SI8's catalog has documentation on every piece: tool disclosure, Safe Lane sign-
 | Jan 2026 | **Creator bench before scaling outreach** | Can't sell delivery without delivery capacity |
 | Jan 2026 | **Event list-building starts Month 1** | Event success depends on distribution list built early |
 | Jan 2026 | **Outsource event logistics** | Venue + F&B = contractor; founder owns speakers + content + conversion |
+| **Feb 17, 2026** | **Website launched at superimmersive8.com** | Dark→light theme redesign (warm white + golden amber accents); deployed to Bluehost |
+| Feb 17, 2026 | **Catalog grid added below hero** | 6 placeholder cards, filter buttons (All/Short Film/Experimental/Narrative), hover overlays with License + Place Brand CTAs; follows Getty/Shutterstock visual pattern |
+| Feb 17, 2026 | **Light theme chosen over dark** | Warm white base (#FFFFFF), cream elevated surfaces (#FAFAF7), golden amber accents (#C8900A/#F5C842); moves away from generic tech-dark aesthetic; warmer/more premium for brand buyers |
+| Feb 17, 2026 | **"Safe Lane ✓" + "Placement Available" badges on catalog cards** | Green + amber pill badges; immediately communicates the two-tier value (rights safety + placement opportunity) without any copy |
+| Feb 17, 2026 | **Traditional Chinese (zh-TW) version live** | index-zh.html — full content parity; EN/繁體中文 toggle in nav; deployed to Bluehost; ready for Taipei advisor meetings |
+| Feb 17, 2026 | **Film titles localized for zh-TW** | 霓虹孤獨, 最後的花園, 過境, 訊號消失, 未來田園, 綻放協議 — localized not transliterated; feels native, not translated |
+| Feb 17, 2026 | **Catalog section id anchored separately from services section** | #catalog → visual grid; #how-it-works → services cards; hero "Explore the Catalog" CTA now lands on actual catalog content |
 
 ---
 
@@ -2058,27 +2065,34 @@ SI8's catalog has documentation on every piece: tool disclosure, Safe Lane sign-
 
 ---
 
-## Coming Up — February 2026
+## Status — February 17, 2026
 
-**Immediate priorities:**
+**Completed this week:**
+- [x] Website launched — superimmersive8.com (light theme, catalog grid, bilingual)
+- [x] Traditional Chinese version live — superimmersive8.com/index-zh.html
+- [x] Language toggle functional (EN ↔ 繁體中文)
+- [x] Catalog grid: 6 cards, filter buttons, hover overlays, Safe Lane + Placement badges
+- [x] All code in GitHub: aip-jd36/superimmersive8
+
+**Immediate priorities (still open):**
 - [ ] **Draft MyVideo proposal and send to Jamie Lin** (CRITICAL)
 - [ ] Find entertainment lawyer (Taiwan + US experience)
-- [ ] Draft Filmmaker Representation Agreement v1
-- [ ] Finalize and launch website
-- [ ] Build distribution channel target list (streaming, educational, festivals, alternative)
-- [ ] Build filmmaker target list (30 creators)
-- [ ] Establish r/aifilmreviews posting cadence (2-3x/week)
+- [ ] 60-second sizzle reel — need actual AI video footage
+- [ ] 1-page PDF deck (agency-facing) — blocks outreach
+- [ ] Build Singapore agency target list (100 names)
+- [ ] Begin advisor outreach — site is now ready to show
 
 **Month 2 (March):**
+- [ ] Begin Singapore agency outreach (10/day, 5 days/week)
 - [ ] Follow up on MyVideo proposal; push for LOI/commitment
-- [ ] Begin educational institution outreach (5 universities)
-- [ ] Begin filmmaker outreach WITH distribution pitch
+- [ ] Identify and sign first 1-2 filmmakers to catalog
 - [ ] Set date and venue for first AI Creators Fest meetup
 
-**Key milestones to hit:**
-- [ ] 1 distribution channel LOI/commitment by end of March
+**Key milestones:**
+- [ ] First licensing or placement inquiry from website — validates positioning
+- [ ] 1 advisor confirmed — validates credibility thesis
 - [ ] 3 filmmakers signed by end of May
-- [ ] 1 distribution deal closed by end of June
+- [ ] First deal (any tier) by end of June
 - [ ] First event (30+ attendees) by end of April
 
 ---
