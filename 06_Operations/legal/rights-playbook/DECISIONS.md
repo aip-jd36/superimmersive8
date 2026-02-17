@@ -33,7 +33,7 @@ A record of what changed between versions, why, and what was left unresolved.
 - Festival-specific requirements
 - EU and Japan jurisdiction breakdown
 - Taiwan Copyright Bureau guidelines (no release date)
-- **Per-asset documentation SKU schema** — v0.2 must include the standardized field set for every catalog entry: tool provenance log, model disclosure, Safe Lane sign-off, commercial use authorization, modification rights status, category conflict log, territory log, regeneration rights status, version history. This is the structured data layer that every Rights Package is built from.
+- **Per-asset documentation SKU schema** — ~~v0.2 carry-forward~~ **RESOLVED in February 2026.** The 9-field schema (tool provenance log, model disclosure, Safe Lane sign-off, commercial use authorization, modification rights status, category conflict log, territory log, regeneration rights status, version history) is now fully documented in `06_Operations/safe-lane/RIGHTS-PACKAGE-SCHEMA.md`. That document is the authoritative source. The Safe Lane project (`06_Operations/safe-lane/`) is the operational home for all Rights Package schema work going forward.
 
 ---
 

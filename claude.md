@@ -302,7 +302,15 @@
 | Peer Review Summary | `01_Business/plans/PEER_REVIEW_SUMMARY.md` | AI agent feedback synthesis |
 | Build in Public Log | `02_Marketing/content/BUILD_IN_PUBLIC_LOG.md` | Insights for LinkedIn content |
 | Rights Playbook v0.1 | `06_Operations/legal/rights-playbook/versions/v0.1.md` | Rights vetting — sales asset for buyers |
+| Rights Playbook Decisions | `06_Operations/legal/rights-playbook/DECISIONS.md` | Playbook version log |
 | Filmmaker Agreement (WIP) | `06_Operations/legal/filmmaker-agreement/WORKING.md` | Terms for filmmaker representation |
+| **Safe Lane — README** | `06_Operations/safe-lane/README.md` | Safe Lane project overview; how all documents relate |
+| **Safe Lane — Submission Requirements** | `06_Operations/safe-lane/SUBMISSION-REQUIREMENTS.md` | Filmmaker-facing: what to provide on submission |
+| **Safe Lane — Review Process** | `06_Operations/safe-lane/REVIEW-PROCESS.md` | SI8 internal: 4-stage review workflow |
+| **Safe Lane — Review Criteria** | `06_Operations/safe-lane/REVIEW-CRITERIA.md` | Pass/fail thresholds per review category |
+| **Safe Lane — Rights Package Schema** | `06_Operations/safe-lane/RIGHTS-PACKAGE-SCHEMA.md` | 9-field output template per catalog entry |
+| **Safe Lane — Edge Cases** | `06_Operations/safe-lane/EDGE-CASES.md` | Gray areas, judgment calls, precedents (grows with submissions) |
+| **Safe Lane — Decisions** | `06_Operations/safe-lane/DECISIONS.md` | Safe Lane version log + open questions |
 
 ---
 
