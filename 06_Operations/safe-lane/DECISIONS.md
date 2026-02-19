@@ -94,4 +94,27 @@ Document these as-is. Do not block v0.1 on resolving them.
 
 ---
 
+---
+
+## v0.1 — Post-Peer-Review Updates (February 2026)
+
+**What triggered these updates:**
+External peer review of v0.1 (ChatGPT + Gemini). Both independently flagged file integrity and Tier 2 regeneration copyright as the highest-priority gaps.
+
+**Changes made (not a new version — amendments to v0.1):**
+
+- **Field 10 added to Rights Package schema:** SHA-256 file hash + file specs. Ties the Rights Package to a specific reviewed file. Invalidated by any post-review modification to the file. Hash generated at Stage 4 before issuing the package.
+- **Hash step added to Stage 4 (REVIEW-PROCESS.md):** First step of clean pass workflow. Must be generated from the master delivery file before it leaves reviewer possession.
+- **Section 8 rewritten in SUBMISSION-REQUIREMENTS.md:** Reframed from "Modification Rights Authorization" (rights-grant framing) to "Tier 2 Brand Placement — Enrollment (Optional)" (income-opportunity framing). Legal substance unchanged; psychological framing inverted.
+- **Intake capacity policy added to REVIEW-PROCESS.md:** 10 submissions/month cap at v0.1. Fast reject within 48 hours for Stage 1 failures. 5-business-day SLA clock starts only after Stage 1 confirmed complete.
+- **Tier 2 regeneration copyright flagged for lawyer brief:** The unresolved question of who owns AI-regenerated Tier 2 scenes (original filmmaker vs. SI8) has been added to `06_Operations/legal/filmmaker-agreement/lawyer-briefs/brief-v1.md` as a specific question with three structural options (filmmaker-as-principal, SI8-as-owner, hybrid). Must be resolved before first Tier 2 pitch to any brand.
+
+**Not addressed in this update (deferred):**
+- Re-review triggers (what changes force a new Rights Package)
+- Third-party asset disclosure (fonts, SFX, overlays)
+- Reviewer ID depersonalization for Year 3 scale
+- Reverse face search step in Stage 2 Cat 3
+- Watermark ghost / artifact scan
+- ComfyUI / custom workflow tool handling
+
 *(Add new entry each time a version is cut)*

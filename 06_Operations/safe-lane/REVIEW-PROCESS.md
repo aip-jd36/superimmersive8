@@ -127,11 +127,14 @@ Based on Stage 2 findings, assign one of four outcomes:
 ## Stage 4 — Decision & Output (10–15 min)
 
 **Clean Pass:**
-1. Complete the Rights Package schema (RIGHTS-PACKAGE-SCHEMA.md) for this work.
-2. Assign catalog ID: `SI8-[YEAR]-[4-digit sequence]` (e.g., `SI8-2026-0001`).
-3. Save Rights Package to: `05_Catalog/represented/[filmmaker]/[title]/rights-package.md`
-4. Add catalog entry to catalog index.
-5. Notify filmmaker: pass, tier assigned, catalog ID, what happens next (Tier 1/2 eligibility, next steps).
+1. **Generate file hash.** Run SHA-256 on the master delivery file. Record filename, file specs, and hash in Field 10 of the Rights Package. Do this before anything else — the hash must be generated from the file you reviewed, before it leaves your possession.
+   - Mac/Linux: `shasum -a 256 [filename]` in Terminal
+   - Windows: `certutil -hashfile [filename] SHA256`
+2. Complete the Rights Package schema (RIGHTS-PACKAGE-SCHEMA.md) for this work, including Field 10.
+3. Assign catalog ID: `SI8-[YEAR]-[4-digit sequence]` (e.g., `SI8-2026-0001`).
+4. Save Rights Package to: `05_Catalog/represented/[filmmaker]/[title]/rights-package.md`
+5. Add catalog entry to catalog index.
+6. Notify filmmaker: pass, tier assigned, catalog ID, what happens next (Tier 1/2 eligibility, next steps).
 
 **Conditional Pass:**
 1. Contact filmmaker with specific list of what needs to be provided or corrected.
@@ -158,9 +161,26 @@ File: `05_Catalog/represented/` or a dedicated tracker in `06_Operations/safe-la
 
 ---
 
+## Intake Capacity Policy (v0.1)
+
+**Maximum submissions accepted per month: 10**
+
+SI8 operates at 10–15 hours/week as of v0.1, with part-time or outsourced reviewer support. Accepting more than 10 submissions/month risks missing the 5-business-day turnaround commitment. Credibility depends on hitting that commitment.
+
+**How intake is managed:**
+- Submissions are accepted on a queue basis. If the queue is full for the current month, filmmaker is notified and placed at the front of the next month's queue.
+- Fast reject (within 48 hours): If a submission fails Pre-Screen Stage 1 checks, reject immediately. Do not hold it in the queue.
+- The 5-business-day SLA applies only after completeness is confirmed (i.e., after Stage 1 passes or additional info is received). An incomplete submission does not start the clock.
+- Capacity review: reassess the 10/month cap after the first 3 real submissions. Adjust up or down based on actual review time.
+
+*Note: Publishing the intake cap proactively (e.g., on the website or in filmmaker outreach) sets expectations and signals demand, not limitation.*
+
+---
+
 ## Notes for v0.1 Reviewers
 
 - When in doubt, take the conservative position and document it. Do not try to approve ambiguous cases through creative reasoning. Log them in EDGE-CASES.md.
 - Music rights are the most complex category. If you are uncertain, flag it. Do not approve uncertain music rights in v0.1.
 - The Likeness category is the hardest line. If a face is possibly identifiable, it fails. Period.
 - The goal of v0.1 is not to approve everything — it is to run a clean, documented process for the first time.
+- Generate the file hash (Field 10) before issuing any Rights Package. The hash is the chain of custody. Without it, the package cannot prove it applies to the file the buyer received.

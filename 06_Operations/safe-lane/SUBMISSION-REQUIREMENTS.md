@@ -135,23 +135,27 @@ All audio must be accounted for. Select the applicable category for each audio e
 
 ---
 
-## Section 8: Modification Rights Authorization
+## Section 8: Tier 2 Brand Placement — Enrollment (Optional)
 
-**This section determines Tier 2 eligibility.**
+**What Tier 2 is and what it pays.**
 
-AI product placement (Tier 2) requires SI8 to commission AI-regenerated versions of specific scenes — with brand elements integrated — without a reshoot. This is only possible if you authorize it.
+Tier 2 is SI8's AI product placement program. Brands pay a premium to have their products integrated into catalog films through AI regeneration — no reshoot, no disruption to your work. If your film is selected for a Tier 2 deal:
 
-**Do you authorize SI8 to commission AI-regenerated brand-integrated versions of this work for Tier 2 placement deals?**
+- You receive compensation above the standard Tier 1 catalog license rate. Tier 2 deals are priced at a premium above Tier 1.
+- You are informed of the brand and proposed scene before any deal closes. You can decline any match that doesn't fit your work.
+- You retain authorship credit on the original film.
+- SI8 coordinates all brand communication and production. You do not need to be involved in the regeneration process.
+- You can limit which scenes are eligible — or enroll the full film.
 
-- [ ] **Yes — full work.** SI8 may commission regenerated versions of any scene.
-- [ ] **Yes — specific scenes only.** Describe which scenes are authorized: ___
-- [ ] **No.** This work is submitted for Tier 1 licensing only.
+Enrollment is optional. Your answer here does not affect Tier 1 catalog consideration. You can update your selection at any time.
 
-**If yes:** You will be consulted on all Tier 2 deals and will receive compensation as defined in your Shopping Agreement. Regenerated versions are derivative works; terms are specified in the agreement.
+**Do you want to be considered for Tier 2 brand placement deals?**
 
-**If no:** Your work will be considered for Tier 1 catalog licensing only. You can update this authorization at any time.
+- [ ] **Yes — full film.** Consider any scene in this work for brand placement. SI8 will contact me before any deal closes.
+- [ ] **Yes — specific scenes only.** Consider only the following scenes: ___
+- [ ] **Not now — Tier 1 only.** Consider this work for catalog licensing only. I can enroll in Tier 2 later.
 
-*Note: A modification clause in your Shopping Agreement is a prerequisite for Tier 2. If your agreement does not yet include this clause, select "No" for now — it can be updated when the agreement is amended.*
+*Prerequisite: Tier 2 enrollment is only active if your Shopping Agreement includes a modification clause. If it doesn't yet, select "Not now" — we can activate Tier 2 eligibility when the agreement is updated.*
 
 ---
 

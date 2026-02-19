@@ -251,6 +251,41 @@ Flags: None
 
 ---
 
+### Field 10: File Integrity Record
+
+*What it captures:* The cryptographic fingerprint of the exact file reviewed. Ties the Rights Package to a specific file. Without this, the package cannot definitively prove it applies to the file a buyer received.
+
+*Format:* Structured block.
+
+```
+Reviewed File Name: [filename.mp4 or filename.mov]
+File Format: [e.g., H.264 MP4 / ProRes 422 / etc.]
+Resolution: [e.g., 3840x2160 / 1920x1080]
+Frame Rate: [e.g., 24fps]
+Duration: [HH:MM:SS]
+File Size: [e.g., 2.34 GB]
+Audio: [e.g., AAC stereo / PCM / No audio]
+
+SHA-256 Hash: [64-character hex string]
+Hash Generated: [YYYY-MM-DD HH:MM timezone]
+
+Statement: This Rights Package is valid only for the file matching the SHA-256 hash above.
+Any modification to the file — including color correction, audio changes, frame additions
+or removals — invalidates this package and requires re-review.
+```
+
+*How to generate the hash:*
+- Mac/Linux: `shasum -a 256 [filename]` in Terminal
+- Windows: `certutil -hashfile [filename] SHA256` in Command Prompt
+- Or any reputable SHA-256 file hash utility
+
+*How a buyer verifies:*
+Run the same command on the file they received. The output must exactly match the hash in this field. Any mismatch means the file was modified after review.
+
+*Reviewer note:* Generate the hash at Stage 4 of the review process, immediately before issuing the Rights Package. Do not generate it from a preview or proxy file — always from the master delivery file.
+
+---
+
 ## Year 3 Platform Note
 
 Each field in this schema corresponds to a database column in the Year 3 platform. The schema is designed now to minimize migration cost later.
@@ -266,3 +301,4 @@ Each field in this schema corresponds to a database column in the Year 3 platfor
 | 7. Territory | `territory_restrictions` | Array |
 | 8. Regeneration Rights | `regeneration_status`, `regeneration_scenes` | Enum + JSON |
 | 9. Version History | `version_history` | JSON log |
+| 10. File Integrity | `file_hash_sha256`, `file_name`, `file_specs`, `hash_date` | Multiple columns |
