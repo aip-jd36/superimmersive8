@@ -1,157 +1,174 @@
 # Content Marketing & Growth Strategy
 
-**Version:** v0.1 (February 2026)
+**Version:** v0.2 (February 2026)
 **Owner:** SI8
-**Status:** Active — building toward first newsletter issue (Month 2)
+**Status:** Active — decisions finalized, execution beginning
 
 ---
 
 ## Strategic Purpose
 
-SI8 needs to create the market it's selling into. Most brands don't know they have a problem with AI content risk yet. Most filmmakers don't know about Netflix's production requirements, YouTube's demonetization rules, or what a commercial license from Runway actually does and doesn't cover.
+SI8 needs to create the market it's selling into. Most brands don't know they have a problem with AI content risk. Content marketing is the mechanism — but it serves outreach, it doesn't replace it.
 
-Content marketing is the most efficient way to build that awareness at scale — and it serves both of SI8's target audiences simultaneously:
-- **Brands** need to understand *why they're exposed* and what a documented vetting process actually gives them
-- **Filmmakers** need to understand *what makes their work commercially viable* and how to prepare it correctly
+**Mental model:** Content is outreach ammunition and a compounding asset. Not a flywheel that builds toward some future state. A lead magnet is the "give" in a cold email. A newsletter is what makes the second and third contact feel useful, not pushy. The website explainers build SEO that works in Month 12. All of it serves the 5 hours/week of outreach that closes deals now.
 
-The long-term goal: SI8 becomes the authoritative source on AI content rights in APAC, the way Getty is the authority on image rights globally. Content builds institutional credibility that cold outreach cannot.
+**Long-term goal:** SI8 becomes the authoritative source on AI content rights in APAC — the way Getty is the authority on image rights globally.
 
 ---
 
-## The Core Constraint
+## Core Constraints
 
-**Content marketing cannot exceed 2 hours/week in Year 1.**
+**Content production: 2 hours/week ceiling in Year 1.**
+Outreach (5 hrs/week) is protected and cannot be cannibalized. AI-drafted content + founder redraft is the production model — not from-scratch writing.
 
-The outreach budget — 5 hours/week minimum — cannot be cannibalized by content creation. If forced to choose between writing a newsletter issue and sending 50 outreach messages, send the messages. The newsletter builds the brand over 12 months. Outreach pays the bills in Month 3.
-
-This constraint determines every format and cadence decision below.
-
----
-
-## Content Formats
-
-### 1. Risk Briefing Page (Website)
-**What:** A curated, regularly updated page on the SI8 website summarizing the current AI content legal and platform risk landscape. 6-8 entries, each with a brief SI8 commentary and source link. Framing: "We track this so you don't have to."
-
-**Purpose:** SEO surface, credibility signal, and the primary reason first-time visitors bookmark the site and return.
-
-**Update cadence:** When something significant happens — roughly monthly/quarterly. Not a news feed.
-
-**Critical design note:** A "Last Updated: [Month Year]" timestamp must be visible. Stale "recent news" is worse than no news section at all.
-
-**Lead magnet tie-in:** "Stay current — get Risk Briefing updates by email" is the email signup CTA on this page.
+**Outreach time is primary. Content time is secondary.** If forced to choose, send the outreach.
 
 ---
 
-### 2. Email Newsletter
-**What:** Monthly newsletter covering AI content rights developments. Two audiences, one newsletter — clearly labeled sections ("For Brands" / "For Filmmakers").
+## Audience Focus
 
-**Format:**
-- One major legal development, explained in plain English (not dry legal recap)
-- One platform policy update (YouTube, TikTok, Meta, Netflix, streaming)
-- One SI8 insight, resource, or case study
-- 400-600 words maximum
-- Tone: expert narrator, not academic. SI8 as the underwriter who reads the filings so you don't have to.
+**Year 1: Brands and agencies only.**
+Newsletter, explainers, and lead magnets target brand marketing directors, agency creative leads, and brand legal/compliance teams. This is where the revenue is.
 
-**Cadence:** Monthly in Year 1. Weekly is not sustainable at 10-15 hrs/week.
+**Filmmakers:** Not a content marketing target in Year 1. Filmmaker acquisition is direct outreach (DMs on LinkedIn, Twitter, Discord). The Safe Lane documentation on the website serves as passive filmmaker education. A filmmaker signup path exists but is not actively promoted through content.
 
-**Platform options (decide before Month 2):**
-- **Buttondown** — cleanest, simplest, no fluff. Good for text-forward newsletters.
-- **Beehiiv** — built for growth, has referral mechanics and analytics. Better if list growth is the priority.
-- **ConvertKit** — better automation/segmentation. Better if email sequences (for filmmakers vs. brands) are important.
-- **Mailchimp** — most familiar but bloated for this use case.
-- **Recommendation:** Beehiiv for Year 1 if growth is the priority; Buttondown if simplicity is.
-
-**Bilingual plan:** Launch in English. Add zh-TW edition when Taipei outreach ramps (Month 2-3). Do not delay English launch for bilingual readiness.
+**Year 2+:** Filmmaker-focused content section added to newsletter once brand content infrastructure is stable and catalog supply needs to scale.
 
 ---
 
-### 3. White Papers & Rights Guides
-**What:** Long-form, downloadable content. Gated behind email signup.
+## The Five Content Pillars
 
-**The key insight:** The white papers already exist. Do not create new content. Package what's built:
-- **Rights Playbook v0.1** → packaged as "AI Video Rights: A Brand's Guide" (PDF)
-- **Safe Lane documentation** → packaged as "How to Submit AI Films for Commercial Use" (filmmaker-facing PDF)
-- **Risk landscape research** → packaged as "The AI Content Risk Briefing 2026" (brand-facing PDF)
+### 1. Website Evergreen Explainers (Primary SEO Asset)
 
-**Future white papers** are byproducts of client work — after the first real submission, the learnings become content. After the MyVideo conversation, the Taiwan platform requirements become a guide. Do not create content speculatively.
+**What:** Standalone pages on the SI8 website that answer specific questions brands and agencies search for. Not news entries — evergreen content that ranks for 12+ months.
 
----
+**Format per explainer:**
+- Headline that matches a search query
+- 400-600 words
+- SI8 commentary, not dry legal summary
+- One CTA: email signup to download the lead magnet or book a Risk Triage Call
+- One visual: curated example of quality AI video content
 
-### 4. Lead Magnets
-**What:** Gated downloads that justify email signup.
+**Topics — Month 1 (4 explainers, using existing research):**
+1. "Does Runway's commercial license actually protect your brand?" — the indemnification gap
+2. "YouTube, TikTok, Meta, Netflix: what each platform actually requires for AI content" — platform compliance
+3. "Why 'I paid for the tool' isn't a legal defense" — training data, fair use, and the Copyright Office's 2025 ruling
+4. "AI content disclosure deadlines: what's changing in 2026 and what brands need to do now" — regulatory calendar
 
-**Priority lead magnets (in order of effort required to produce):**
-1. **"AI Video Rights: A Brand's Guide"** — Rights Playbook repackaged for brand audience. Exists, needs light reformatting. Highest-leverage first action.
-2. **"Platform Requirements Cheatsheet"** — One-page summary of YouTube, TikTok, Meta, Netflix AI requirements, in table form. Can be produced in 1-2 hours from existing research.
-3. **"Safe Lane Submission Guide for Filmmakers"** — Submission Requirements doc lightly reformatted. Filmmaker-facing.
+**Cadence:** 4 in Month 1. 2/month from Month 2 onward.
 
----
+**Production model:** AI draft → founder redraft → publish. All source material already exists in `01_Business/research/ai-content-risk-landscape.md`.
 
-### 5. Social / LinkedIn
-**What:** Build-in-public content driving traffic to website and newsletter.
-**Home:** `02_Marketing/content/social/BUILD_IN_PUBLIC_LOG.md`
-**Cadence:** 2-3 posts/week
-**Strategy:** Each newsletter issue → 2-3 LinkedIn posts. Each white paper → 1 launch post + 2-3 excerpts. Each major legal case → immediate post. Content compounds from newsletter into social, not the other way around.
+**Distribution:** Each explainer → 1 LinkedIn post or carousel the same week.
 
 ---
 
-## Audience Strategy
+### 2. LinkedIn Distribution (Immediate Reach)
 
-| Audience | Primary pain | Content hook | CTA |
-|----------|-------------|--------------|-----|
-| Brand marketing directors | "Are we exposed? How would we even know?" | Risk Briefing, indemnification table, platform compliance complexity | Book a call / download brand guide |
-| Brand legal/compliance | "What documentation do we need to use this commercially?" | Rights Package schema, Safe Lane process, regulatory deadlines | Download rights guide |
-| Agency creative leads | "What tools can we use and what do we need to document?" | Platform requirements, tool risk tiers, indemnification gap | Newsletter signup |
-| AI filmmakers (commercial) | "How do I make my work licensable to brands?" | Safe Lane submission guide, platform requirements for creators | Submit your work / newsletter |
-| AI filmmakers (hobbyists) | "What are the rules?" | YouTube/TikTok/Netflix requirements, authorship basics | Newsletter signup |
+**What:** LinkedIn posts and carousels that distribute explainer content and drive traffic to the website and newsletter signup.
+
+**Format:** Mix of carousels (6-8 slides, one legal case or platform rule per carousel) and short-form posts. Every post pairs legal/risk content with a visual example of quality AI video (sourced publicly until catalog exists).
+
+**Cadence:** 2 posts/week. Not 3 — not sustainable at 10-15 hrs/week.
+
+**Content source:** Newsletter issue → 2 LinkedIn posts. Each explainer → 1 LinkedIn post or carousel. Major legal case or platform update → immediate reactive post.
+
+---
+
+### 3. Monthly Newsletter
+
+**What:** Brand-only email newsletter. One issue/month. 250-350 words.
+
+**Audience:** Brands, agencies, brand legal/compliance. NOT filmmakers in Year 1.
+
+**Format (rigid template — do not deviate):**
+- **Subject line:** One specific fact or case name. Never "Monthly Update."
+- **Lede (2-3 sentences):** What happened. Why it matters to the reader's budget or legal team.
+- **The implication (2-3 sentences):** What brands/agencies should do differently.
+- **CTA (1-2 sentences):** One link. One ask. Alternates between: book a Risk Triage Call / download the lead magnet / read the latest explainer.
+
+**Cadence:** Monthly. If a month is missed, skip it — don't catch up. Consistency over volume.
+
+**Platform:** ConvertKit. Tag all subscribers at signup: `brand_buyer` or `filmmaker`. Default send is brand-only. Filmmaker tag exists for future segmentation.
+
+**Signup flow:** Two buttons on the newsletter signup page — "I'm a Brand / Agency" → `brand_buyer` tag. "I'm a Filmmaker" → `filmmaker` tag. Same list, different tags.
+
+**Bilingual:** English only until Taiwan/MyVideo pipeline is demonstrably active. One zh-TW lead magnet PDF for Taipei conversations.
+
+---
+
+### 4. Lead Magnets (Email Capture)
+
+**What:** Gated PDF downloads that justify email signup and serve as cold email "give."
+
+**Priority pipeline:**
+
+| # | Title | Audience | Source | Status |
+|---|-------|---------|--------|--------|
+| 1 | "AI Video Rights: A Brand's Guide" | Brands/agencies | Rights Playbook + risk research | To produce |
+| 2 | "What Your Legal Team Will Ask For: AI Video Compliance Checklist" | Brand legal/compliance | Rights Package schema + research | To produce (Month 2) |
+| 3 | "Platform Requirements Cheatsheet" | Brands + agencies | Platform research | To produce (Month 2) |
+| 4 | "Safe Lane Submission Guide for Filmmakers" | Filmmakers | Submission Requirements doc | To produce (Month 3+) |
+
+**Lead magnet #1 rationale:** "AI Video Rights: A Brand's Guide" is broad evergreen content — the right first asset for a blue ocean market where buyers need education before they need specifics. More targeted assets (legal team checklist, etc.) come once the audience understands the category.
+
+**Cold email use:** Lead magnet #1 is the "give" in outbound outreach emails to Singapore agencies. Link to download in the email, before any ask.
+
+---
+
+### 5. Risk Triage Call (Conversion Mechanism)
+
+**What:** Productized 20-minute call. Replaces the generic "book a call" CTA across all content.
+
+**Offer:** "20-Minute AI Video Risk Triage"
+- Buyer brings: a link to sample AI content they want to use commercially, or a brief description of a campaign
+- SI8 outputs: risk flags, what documentation is missing, recommended next step
+- CTA afterward: Tier 1 license, Tier 2 placement, or Tier 3 advisory conversation
+
+**Why this matters:** Without a specific conversion mechanism, content builds awareness with no floor. The Risk Triage Call turns newsletter readers and explainer visitors into conversations. It's low-friction for a risk-averse buyer because the output is specific and useful, not a sales pitch.
+
+**Implementation:** Update Calendly link name and description. This CTA goes on every piece of content — newsletter footer, explainer pages, LinkedIn bio, website homepage.
 
 ---
 
 ## Build Order
 
-**Month 1 (Immediate — hours of work, uses existing content):**
-- [ ] Risk Briefing page live on website (existing research → web page)
-- [ ] Email capture form on website (Buttondown or Beehiiv signup)
-- [ ] First lead magnet live: "AI Video Rights: A Brand's Guide" PDF
-- [ ] Newsletter platform chosen and account set up
-
-**Month 2:**
-- [ ] First newsletter issue sent
-- [ ] "Platform Requirements Cheatsheet" lead magnet live
-- [ ] LinkedIn cadence established (3 posts/week, sourced from newsletter)
-
-**Month 3+:**
-- [ ] "Safe Lane Submission Guide" lead magnet live
-- [ ] zh-TW newsletter edition (if Taipei outreach is active)
-- [ ] First client-sourced content piece (from real submission learnings)
+| When | Action | Hours |
+|------|--------|-------|
+| **This week** | Set up ConvertKit + tag structure + lead magnet delivery automation | 1 hr |
+| **This week** | Update Calendly to "20-Minute AI Video Risk Triage" with clear description | 30 min |
+| **This week** | Produce lead magnet #1: "AI Video Rights: A Brand's Guide" PDF | 3 hrs |
+| **This week** | Add email capture + lead magnet to website homepage | 1-2 hrs |
+| **Month 1** | Write 4 website explainers (AI draft + founder redraft) | ~6 hrs total |
+| **Month 1** | Start LinkedIn cadence: 2 posts/week from explainer content | 1 hr/week |
+| **Month 1** | Use lead magnet as cold email "give" in Singapore outreach | Ongoing |
+| **Month 2** | First newsletter issue sent to list | 1 hr |
+| **Month 2+** | 2 explainers/month + 1 newsletter/month | ~4 hrs/month |
 
 ---
 
-## What We Can and Cannot Claim in Content
+## What We Can and Cannot Claim
 
 **Can claim:**
-- SI8 tracks and explains the AI content legal and platform landscape
+- SI8 tracks and explains the AI content legal and platform risk landscape
 - SI8's Safe Lane process provides documented chain of defensibility
 - The Rights Package is a structured record of what was reviewed and authorized
-- Specific legal cases, platform policies, and regulatory deadlines (all sourced and citable)
+- Specific legal cases, platform policies, regulatory deadlines (all sourced and citable)
 
 **Cannot claim:**
-- Legal advice or legal certification
+- Legal advice or certification
 - Non-infringement guarantee
-- "Rights-cleared" (use "safe lane vetted" or "through our safe lane process")
+- "Rights-cleared" — use "safe lane vetted" or "through our safe lane process"
 
 ---
 
 ## Key Files
 
-| File | Location | Purpose |
-|------|----------|---------|
-| Risk landscape research | `01_Business/research/ai-content-risk-landscape.md` | Source material for all content |
-| Rights Playbook v0.1 | `06_Operations/legal/rights-playbook/versions/v0.1.md` | Source for brand white paper |
-| Safe Lane Submission Requirements | `06_Operations/safe-lane/SUBMISSION-REQUIREMENTS.md` | Source for filmmaker guide |
-| Build in Public Log | `02_Marketing/content/social/BUILD_IN_PUBLIC_LOG.md` | LinkedIn content log |
-| Newsletter issues | `02_Marketing/content/newsletter/issues/` | Archive of sent issues |
-| White papers | `02_Marketing/content/white-papers/` | Published long-form content |
-| Risk Briefing content | `02_Marketing/content/risk-briefing/` | Website page source + update log |
-| Lead magnets | `02_Marketing/content/lead-magnets/` | Gated download files |
+| File | Location |
+|------|----------|
+| Risk landscape research (all explainer source material) | `01_Business/research/ai-content-risk-landscape.md` |
+| Rights Playbook (lead magnet #1 source) | `06_Operations/legal/rights-playbook/versions/v0.1.md` |
+| Newsletter issues archive | `02_Marketing/content/newsletter/issues/` |
+| Explainer content files | `02_Marketing/content/risk-briefing/` |
+| Lead magnet files | `02_Marketing/content/lead-magnets/` |
+| LinkedIn / social content log | `02_Marketing/content/social/BUILD_IN_PUBLIC_LOG.md` |
