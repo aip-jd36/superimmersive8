@@ -10,12 +10,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <nav class="main-nav">
+    <!-- Navigation -->
+    <nav class="nav">
         <div class="nav-container">
-            <a href="index.html" class="logo">SuperImmersive 8</a>
+            <a href="#" class="logo">
+                <span class="logo-text">SI<span class="logo-accent">8</span></span>
+            </a>
             <div class="nav-links">
+                <a href="#catalog">The Catalog</a>
                 <div class="nav-dropdown">
-                    <a href="#" class="nav-link active">Safe Lane ▾</a>
+                    <a href="#safe-lane">Safe Lane ▾</a>
                     <div class="dropdown-content">
                         <a href="safe-lane-how-it-works.html">How It Works</a>
                         <a href="safe-lane-rights-package.html">Rights Package</a>
@@ -24,11 +28,21 @@
                         <a href="safe-lane-rights-playbook.html">Rights Playbook</a>
                     </div>
                 </div>
-                <a href="index.html#brands" class="nav-link">For Brands</a>
-                <a href="index.html#filmmakers" class="nav-link">For Filmmakers</a>
-                <a href="index.html#catalog" class="nav-link">Catalog</a>
-                <a href="index.html#contact" class="nav-link">Contact</a>
+                <a href="#brands">For Brands</a>
+                <a href="#filmmakers">For Filmmakers</a>
+                <a href="risk-briefing.html">Risk Briefing</a>
+                <a href="#contact" class="nav-cta">Book a Call</a>
             </div>
+            <div class="lang-selector" style="display:flex;align-items:center;gap:6px;font-size:0.8rem;opacity:0.7;margin-left:12px;">
+                <a href="index.html" style="color:var(--color-accent);text-decoration:none;font-weight:500;">EN</a>
+                <span style="color:var(--color-text-muted);">/</span>
+                <a href="index-zh.html" style="color:var(--color-text-muted);text-decoration:none;">繁體中文</a>
+            </div>
+            <button class="mobile-menu-btn" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
     </nav>
 
@@ -272,39 +286,32 @@
     </section>
 
     <!-- Footer -->
-    <footer class="main-footer">
+    <footer class="footer">
         <div class="container">
             <div class="footer-content">
-                <div class="footer-section">
-                    <h4>SuperImmersive 8</h4>
-                    <p>AI film rights agency based in Taipei, Taiwan</p>
+                <div class="footer-brand">
+                    <span class="logo-text">SI<span class="logo-accent">8</span></span>
+                    <p>The trusted vetting layer for AI video content.</p>
                 </div>
-                <div class="footer-section">
-                    <h4>Safe Lane</h4>
-                    <ul>
-                        <li><a href="safe-lane-how-it-works.html">How It Works</a></li>
-                        <li><a href="safe-lane-rights-package.html">Rights Package</a></li>
-                        <li><a href="safe-lane-vetting-criteria.html">Vetting Criteria</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Resources</h4>
-                    <ul>
-                        <li><a href="safe-lane-legal-brief.html">Legal Risk Brief</a></li>
-                        <li><a href="safe-lane-rights-playbook.html">Rights Playbook</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Connect</h4>
-                    <ul>
-                        <li><a href="index.html#contact">Contact</a></li>
-                        <li><a href="https://calendly.com/aipenguins/superimmersive8" target="_blank">Book a Call</a></li>
-                    </ul>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Company</h4>
+                        <a href="#how-it-works">What We Offer</a>
+                        <a href="#safe-lane">The Safe Lane</a>
+                        <a href="#about">About</a>
+                        <a href="#contact">Contact</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>For You</h4>
+                        <a href="#brands">Brands & Agencies</a>
+                        <a href="#filmmakers">Filmmakers</a>
+                        <a href="risk-briefing.html">Risk Briefing</a>
+                    </div>
                 </div>
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2026 SuperImmersive 8. All rights reserved.</p>
-                <p style="margin-top: 12px; font-size: 13px; color: #64748b;">This playbook is for informational purposes only and does not constitute legal advice. Consult qualified legal counsel for specific guidance.</p>
+                <p>Taipei, Taiwan</p>
             </div>
         </div>
     </footer>
