@@ -206,7 +206,7 @@
                 <h2>Download Legal Risk Reduction Brief</h2>
                 <p class="form-intro">Enter your details to receive the full 10-page legal analysis with source citations.</p>
 
-                <form action="https://formspree.io/f/mkgndjqj" method="POST" class="lead-form">
+                <form action="/api/formspree-to-kit" method="POST" class="lead-form">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="name">Name *</label>
@@ -696,5 +696,63 @@
     </style>
 
     <script src="script.js"></script>
+    <script>
+        // Handle form submission
+        document.querySelector('.lead-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const submitButton = form.querySelector('.submit-button');
+            const originalText = submitButton.textContent;
+
+            // Disable button and show loading state
+            submitButton.disabled = true;
+            submitButton.textContent = 'Sending...';
+
+            try {
+                const formData = new FormData(form);
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: formData.get('email'),
+                        name: formData.get('name'),
+                        company: formData.get('company'),
+                        role: formData.get('role')
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Success! Show message
+                    submitButton.textContent = '✓ Success! Check your email';
+                    submitButton.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+                    form.reset();
+
+                    // Reset button after 3 seconds
+                    setTimeout(() => {
+                        submitButton.disabled = false;
+                        submitButton.textContent = originalText;
+                        submitButton.style.background = '';
+                    }, 3000);
+                } else {
+                    throw new Error(result.error || 'Submission failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                submitButton.textContent = '✗ Error - Please try again';
+                submitButton.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+
+                setTimeout(() => {
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalText;
+                    submitButton.style.background = '';
+                }, 3000);
+            }
+        });
+    </script>
 </body>
 </html>
