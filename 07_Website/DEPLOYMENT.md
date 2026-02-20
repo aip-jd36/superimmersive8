@@ -2,12 +2,19 @@
 
 ## Tech Stack
 
-- **Frontend:** Static HTML/CSS/JS (single page)
-- **Hosting:** Bluehost (cPanel)
-- **Domain:** www.superimmersive8.com
+- **Frontend:** Static HTML/CSS/JS
+- **Hosting:** Vercel (auto-deploy from GitHub)
+- **Domain:** www.superimmersive8.com (DNS points to Vercel)
 - **Git:** https://github.com/aip-jd36/superimmersive8.git
-- **Forms:** Formspree (to be configured)
+- **Vercel Project:** superimmersive8
+- **Root Directory:** `07_Website/`
+- **Forms:** Formspree
 - **Calendar:** Calendly (https://calendly.com/aipenguins/superimmersive8)
+
+**IMPORTANT:**
+- Site is deployed on Vercel, NOT Bluehost
+- Bluehost only manages domain registration
+- Do NOT upload files to Bluehost cPanel
 
 ---
 
@@ -23,42 +30,33 @@ script.js
 
 ---
 
-## Deployment to Bluehost
+## Deployment Process (Vercel Auto-Deploy)
 
-### Step 1: Clean Out WordPress
+### How It Works
 
-1. Log in to Bluehost → cPanel
-2. Click **File Manager**
-3. Navigate to `public_html/`
-4. Delete all WordPress files:
-   - `wp-admin/`
-   - `wp-content/`
-   - `wp-includes/`
-   - `wp-config.php`
-   - `index.php`
-   - `.htaccess` (backup first if you have custom rules)
-   - All other WP files
+1. Make changes to files in `07_Website/`
+2. Git commit: `git add . && git commit -m "Description"`
+3. Git push: `git push origin main`
+4. Vercel detects push automatically
+5. Builds from `07_Website/` directory
+6. Deploys to production in ~2 minutes
 
-**Tip:** You can move them to a `_wordpress_backup/` folder instead of deleting.
+### Monitoring Deployments
 
-### Step 2: Upload Static Files
+**Vercel Dashboard:** https://vercel.com/dashboard
+- Click on `superimmersive8` project
+- See deployment status: Building → Deploying → Ready
+- View logs if deployment fails
 
-1. In File Manager, still in `public_html/`
-2. Click **Upload**
-3. Upload these 3 files:
-   - `index.html`
-   - `styles.css`
-   - `script.js`
-
-### Step 3: Test
+### Testing After Deploy
 
 1. Visit www.superimmersive8.com
 2. Check:
-   - Site loads
+   - Site loads with latest changes
    - Mobile responsive
    - Calendly link works
    - Navigation works
-   - Contact form shows (will need Formspree setup later)
+   - Risk Briefing page loads
 
 ---
 
@@ -96,17 +94,20 @@ git push
 
 ---
 
-## Future: Vercel Auto-Deploy (Optional)
+## Vercel Configuration (Already Set Up)
 
-If you want automatic deployment from GitHub:
+**Project:** superimmersive8
+**Framework Preset:** Other
+**Root Directory:** `07_Website`
+**Build Command:** None (static site)
+**Output Directory:** None (uses root)
 
-1. Sign up at vercel.com
-2. Import GitHub repo: `aip-jd36/superimmersive8`
-3. Set **Root Directory** to `07_Website`
-4. Deploy
-5. Point domain DNS to Vercel (or keep Bluehost)
+**Domain Configuration:**
+- `superimmersive8.com` → Production (redirect to www)
+- `www.superimmersive8.com` → Production (primary)
+- `superimmersive8.vercel.app` → Production (Vercel subdomain)
 
-**Benefit:** Every git push auto-deploys. No manual upload.
+**Auto-Deploy:** Enabled for `main` branch
 
 ---
 
