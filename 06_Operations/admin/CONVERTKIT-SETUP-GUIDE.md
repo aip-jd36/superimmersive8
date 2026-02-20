@@ -1,7 +1,8 @@
-# ConvertKit Setup Guide — Complete Copy/Paste Document
+# Kit Setup Guide — Free Plan (3-Email Sequence)
 ## SuperImmersive 8 Lead Gen Funnel
 
-**Time Required:** 60-90 minutes
+**Time Required:** 60 minutes
+**Plan:** Kit Newsletter (Free) — up to 10,000 subscribers
 **Last Updated:** February 20, 2026
 
 ---
@@ -13,20 +14,24 @@ Website Visitor
   ↓
 Submits form on gated page (Formspree)
   ↓
-Zapier triggers → Adds to ConvertKit
+Zapier triggers → Adds to Kit
+  ↓
+Visual Automation runs:
   ↓
 Email #1: Welcome + PDF links (immediate)
   ↓
-Email #2: Why documentation reduces risk (Day 3)
+Wait 3 days
   ↓
-Email #3: Adobe gap (Day 7)
+Email #2: Why vetting matters + Adobe gap (Day 3)
   ↓
-Email #4: C2PA vs SI8 (Day 10)
+Wait 4 days
   ↓
-Email #5: Final check-in (Day 14)
+Email #3: Final check-in + CTA (Day 7)
   ↓
 Calendar booking → Discovery call
 ```
+
+**Why Free Plan works:** The free plan includes "1 basic Visual Automation" — we'll build the entire 3-email flow as a single automation with time delays.
 
 ---
 
@@ -34,19 +39,20 @@ Calendar booking → Discovery call
 
 ### **A. Upload PDFs to Google Drive**
 
-1. Open Google Drive
-2. Create new folder: "SI8 Lead Magnets"
-3. Upload these 2 files:
-   - `legal-risk-reduction-brief-pdf.html` (save as PDF first using browser Print to PDF)
-   - `v0.2-pdf.html` (save as PDF first)
-4. Rename PDFs:
-   - `Legal-Risk-Reduction-Brief.pdf`
-   - `Rights-Playbook-v0.2-Executive-Summary.pdf`
-5. Right-click each PDF → Share → Change to "Anyone with the link can view"
-6. Click "Copy link" for each
-7. **SAVE THESE LINKS** — you'll paste them into emails below
+1. Convert HTML files to PDF first:
+   - Open `legal-risk-reduction-brief-pdf.html` in browser
+   - File → Print → Save as PDF → Name it `Legal-Risk-Reduction-Brief.pdf`
+   - Open `v0.2-pdf.html` in browser
+   - File → Print → Save as PDF → Name it `Rights-Playbook-v0.2-Executive-Summary.pdf`
 
-**Your PDF Links (paste here after upload):**
+2. Upload to Google Drive:
+   - Create new folder: "SI8 Lead Magnets"
+   - Upload both PDFs
+   - Right-click each PDF → Share → Change to "Anyone with the link can view"
+   - Click "Copy link" for each
+
+3. **SAVE THESE LINKS** — you'll paste them into Email #1:
+
 ```
 Legal Brief: ___________________________________________________
 
@@ -55,21 +61,21 @@ Rights Playbook: ___________________________________________________
 
 ---
 
-## PART 2: ConvertKit Account Setup
+## PART 2: Kit Account Setup
 
 ### **Step 1: Create Account**
 
-1. Go to https://convertkit.com
+1. Go to https://kit.com
 2. Click "Get started free"
 3. Enter email, create password
-4. Choose plan: **Creator (Free)** — up to 1,000 subscribers
+4. Choose plan: **Newsletter (Free)** — up to 10,000 subscribers
 5. Complete profile:
    - Name: [Your Name]
    - Website: www.superimmersive8.com
    - Industry: Marketing & Advertising
 6. Skip onboarding tour (click "Skip" or "X")
 
-**✅ Checkpoint:** You should now see the ConvertKit dashboard
+**✅ Checkpoint:** You should see the Kit dashboard
 
 ---
 
@@ -80,60 +86,61 @@ Tags help you segment subscribers by interest and role.
 1. In dashboard, click **"Grow"** (left sidebar)
 2. Click **"Tags"**
 3. Click **"Create a tag"**
-4. Create these 4 tags (one at a time):
+4. Create these 2 tags (one at a time):
 
 **Tag 1:**
 ```
-Name: Lead - Legal Brief Download
-Description: Downloaded Legal Risk Reduction Brief
+Name: Lead-Download
+Description: Downloaded legal brief or rights playbook
 ```
 
 **Tag 2:**
 ```
-Name: Lead - Rights Playbook Download
-Description: Downloaded Rights Playbook v0.2
+Name: Lead-Brand
+Description: Brand or agency role (from form)
 ```
 
-**Tag 3:**
+**Optional Tag 3** (if you want to track filmmakers separately):
 ```
-Name: Lead - Brand
-Description: Brand or Agency role (from form)
-```
-
-**Tag 4:**
-```
-Name: Lead - Filmmaker
+Name: Lead-Filmmaker
 Description: Filmmaker role (from form)
 ```
 
-**✅ Checkpoint:** You should see 4 tags listed
+**✅ Checkpoint:** You should see 2-3 tags listed
 
 ---
 
-## PART 3: Create Email Sequence
+## PART 3: Create Visual Automation (3-Email Flow)
 
-### **Step 3: Create Sequence**
+### **Step 3: Create Automation**
 
-1. Click **"Send"** (left sidebar)
-2. Click **"Sequences"**
-3. Click **"Create sequence"**
-4. Sequence name: `Legal Brief Welcome + Nurture`
-5. Description: `5-email sequence for Legal Brief/Rights Playbook downloads`
-6. Click **"Create"**
+1. Click **"Automate"** (left sidebar)
+2. Click **"Create automation"** or **"Visual automations"** → **"New automation"**
+3. Automation name: `Legal Brief 3-Email Nurture`
+4. Click **"Create"** or **"Start from scratch"**
 
-**✅ Checkpoint:** You should see empty sequence editor
+**✅ Checkpoint:** You should see empty automation canvas
 
 ---
 
-### **Step 4: Add Email #1 (Welcome + PDFs)**
+### **Step 4: Set Up Trigger**
 
-1. Click **"Add email"** button
-2. Email settings:
-   - **Send:** Immediately
-   - **Subject line:** (see below)
-   - **Preview text:** (see below)
+1. Click **"Add trigger"** or click the starting circle
+2. Choose trigger: **"Tag added"**
+3. Select tag: **"Lead-Download"**
+4. Click **"Done"** or **"Save"**
 
-**Click "Edit content"** and paste this:
+**This means:** When Zapier adds someone with the "Lead-Download" tag, this automation starts.
+
+**✅ Checkpoint:** Trigger box should show "Tag added: Lead-Download"
+
+---
+
+### **Step 5: Add Email #1 (Welcome + PDFs)**
+
+1. Click **"+"** below the trigger box
+2. Choose action: **"Send email"**
+3. Click **"Create email"**
 
 ---
 
@@ -158,10 +165,10 @@ Thanks for requesting our Legal Risk Reduction Brief!
 Here are your downloads:
 
 📄 Legal Risk Reduction Brief
-[PDF LINK 1 - PASTE GOOGLE DRIVE LINK HERE]
+[PDF LINK 1 - PASTE YOUR GOOGLE DRIVE LINK HERE]
 
 📄 Rights Playbook v0.2 Executive Summary
-[PDF LINK 2 - PASTE GOOGLE DRIVE LINK HERE]
+[PDF LINK 2 - PASTE YOUR GOOGLE DRIVE LINK HERE]
 
 These resources explain how SI8's Rights Package reduces AI content liability through:
 
@@ -180,7 +187,7 @@ Best,
 SuperImmersive 8
 www.superimmersive8.com
 
-P.S. I'll follow up in a few days with more on why unvetted AI video is a legal time bomb.
+P.S. I'll follow up in a few days with why unvetted AI video is a legal time bomb.
 ```
 
 **Action:**
@@ -189,36 +196,41 @@ P.S. I'll follow up in a few days with more on why unvetted AI video is a legal 
 3. Paste email body
 4. **REPLACE [PDF LINK 1] and [PDF LINK 2]** with your actual Google Drive links
 5. **REPLACE [YOUR NAME]** with your actual name
-6. Click **"Save"**
+6. Click **"Save"** or **"Done"**
 
-**✅ Checkpoint:** Email #1 should show in sequence with "Send: Immediately"
-
----
-
-### **Step 5: Add Email #2 (Why Documentation Reduces Risk)**
-
-1. Click **"Add email"** (below Email #1)
-2. Email settings:
-   - **Send:** 3 days after previous email
-   - **Subject line:** (see below)
-   - **Preview text:** (see below)
-
-**Click "Edit content"** and paste this:
+**✅ Checkpoint:** Email #1 should appear in automation flow
 
 ---
 
-#### **EMAIL #2: Real Risk Cases**
+### **Step 6: Add 3-Day Wait**
 
-**Send Timing:** 3 days after Email #1
+1. Click **"+"** below Email #1
+2. Choose action: **"Wait"** or **"Add delay"**
+3. Set duration: **3 days**
+4. Click **"Done"** or **"Save"**
+
+**✅ Checkpoint:** Wait box should show "Wait 3 days"
+
+---
+
+### **Step 7: Add Email #2 (Why Vetting Matters + Adobe Gap)**
+
+1. Click **"+"** below the Wait box
+2. Choose action: **"Send email"**
+3. Click **"Create email"**
+
+---
+
+#### **EMAIL #2: Risk + Competitive Differentiation**
 
 **Subject Line:**
 ```
-The $150K mistake brands are making with AI video
+Adobe won't protect Sora, Runway, or Kling. We will.
 ```
 
 **Preview Text:**
 ```
-Willful infringement penalties + platform removals
+The $150K mistake + the gap Adobe can't fill
 ```
 
 **Email Body:**
@@ -229,7 +241,7 @@ Quick question: If your legal team flags your AI campaign tomorrow, do you have 
 
 Most brands don't — until it's too late.
 
-Here's what happened to brands without documentation:
+Here's what's happening to brands without documentation:
 
 • Willful infringement penalty: up to $150,000 per work
 • Colorado AI Act violation: $20,000 per incident
@@ -237,60 +249,7 @@ Here's what happened to brands without documentation:
 
 The gap isn't the content. It's the paper trail.
 
-That's why we built the Safe Lane vetting process:
-
-1. Pre-screen (15 min): Tool verification, No List check
-2. Full review (60 min): 7 categories, clear thresholds
-3. Risk tier assignment: Certified / Standard / Caution / Reject
-4. Rights Package output: 9-field documentation
-
-→ See the full process: https://www.superimmersive8.com/safe-lane-how-it-works.html
-
-Want to see how this works for your brand?
-→ Book a call: https://calendly.com/aipenguins/superimmersive8
-
-Best,
-[YOUR NAME]
-SuperImmersive 8
-```
-
-**Action:**
-1. Paste all content
-2. Replace [YOUR NAME]
-3. Set timing to **"3 days after previous email"**
-4. Click **"Save"**
-
----
-
-### **Step 6: Add Email #3 (Adobe Gap)**
-
-1. Click **"Add email"**
-2. Email settings:
-   - **Send:** 4 days after previous email (Day 7 total)
-   - **Subject line:** (see below)
-   - **Preview text:** (see below)
-
----
-
-#### **EMAIL #3: Adobe Competitive Gap**
-
-**Send Timing:** 4 days after Email #2 (Day 7 from start)
-
-**Subject Line:**
-```
-Adobe won't protect Sora, Runway, or Kling. We will.
-```
-
-**Preview Text:**
-```
-Firefly indemnification excludes third-party tools
-```
-
-**Email Body:**
-```
-Hi {{first_name}},
-
-Adobe's Firefly indemnification only covers Firefly.
+And here's the competitive reality: Adobe's Firefly indemnification only covers Firefly.
 
 If your creative team wants:
 • Sora (best cinematic quality)
@@ -306,6 +265,13 @@ This is the gap SI8 fills.
 Adobe = safe but boring (Firefly only)
 SI8 = best creative tools made safe (through Safe Lane vetting)
 
+Our Safe Lane process:
+
+1. Pre-screen (15 min): Tool verification, No List check
+2. Full review (60 min): 7 categories, clear thresholds
+3. Risk tier assignment: Certified / Standard / Caution / Reject
+4. Rights Package output: 9-field documentation
+
 Our Rights Package documents:
 • Tool provenance (which AI tools, versions, paid plans)
 • Model disclosure (which AI models generated content)
@@ -314,6 +280,7 @@ Our Rights Package documents:
 • Version history (human authorship for copyrightability)
 • + 4 more fields
 
+→ See the full process: https://www.superimmersive8.com/safe-lane-how-it-works.html
 → See the Rights Package breakdown: https://www.superimmersive8.com/safe-lane-rights-package.html
 
 Ready to use the best tools safely?
@@ -327,96 +294,32 @@ SuperImmersive 8
 **Action:**
 1. Paste all content
 2. Replace [YOUR NAME]
-3. Set timing to **"4 days after previous email"**
-4. Click **"Save"**
+3. Click **"Save"** or **"Done"**
+
+**✅ Checkpoint:** Email #2 should appear in automation flow
 
 ---
 
-### **Step 7: Add Email #4 (C2PA vs SI8)**
+### **Step 8: Add 4-Day Wait**
 
-1. Click **"Add email"**
-2. Email settings:
-   - **Send:** 3 days after previous email (Day 10 total)
-   - **Subject line:** (see below)
-   - **Preview text:** (see below)
+1. Click **"+"** below Email #2
+2. Choose action: **"Wait"** or **"Add delay"**
+3. Set duration: **4 days**
+4. Click **"Done"** or **"Save"**
 
----
-
-#### **EMAIL #4: C2PA Differentiation**
-
-**Send Timing:** 3 days after Email #3 (Day 10 from start)
-
-**Subject Line:**
-```
-C2PA proves WHERE. SI8 proves you can USE it.
-```
-
-**Preview Text:**
-```
-Provenance vs. legal safety — the critical difference
-```
-
-**Email Body:**
-```
-Hi {{first_name}},
-
-C2PA (Content Credentials) is everywhere — Adobe, Microsoft, OpenAI all use it.
-
-It's great at ONE thing: proving provenance (where content came from).
-
-But here's what C2PA explicitly does NOT do:
-
-"Content Credentials do not provide value judgments about whether a given set of provenance data is 'true'... or good or bad."
-
-Translation: C2PA proves the video came from Runway.
-It doesn't prove the video won't get you sued by Disney.
-
-That's the difference:
-
-C2PA = the receipt
-SI8 Safe Lane = the legal audit
-
-C2PA will soon be commoditized (open standard, auto-generated).
-
-SI8's moat is the judgment layer — subjective legal review that software cannot automate:
-• IP assessment (does this look like copyrighted characters?)
-• Brand safety scan (suitable for mainstream brand attachment?)
-• Human authorship quality (does this meet USCO copyrightability standard?)
-• CMI preservation check (watermarks/attribution intact?)
-
-This is why documentation creates value.
-
-→ Read the full differentiation: https://www.superimmersive8.com/safe-lane-legal-brief.html
-
-Want the legal audit, not just the receipt?
-→ Book a call: https://calendly.com/aipenguins/superimmersive8
-
-Best,
-[YOUR NAME]
-SuperImmersive 8
-```
-
-**Action:**
-1. Paste all content
-2. Replace [YOUR NAME]
-3. Set timing to **"3 days after previous email"**
-4. Click **"Save"**
+**✅ Checkpoint:** Wait box should show "Wait 4 days"
 
 ---
 
-### **Step 8: Add Email #5 (Final Check-In)**
+### **Step 9: Add Email #3 (Final Check-In)**
 
-1. Click **"Add email"**
-2. Email settings:
-   - **Send:** 4 days after previous email (Day 14 total)
-   - **Subject line:** (see below)
-   - **Preview text:** (see below)
+1. Click **"+"** below the Wait box
+2. Choose action: **"Send email"**
+3. Click **"Create email"**
 
 ---
 
-#### **EMAIL #5: Final Follow-Up**
-
-**Send Timing:** 4 days after Email #4 (Day 14 from start)
+#### **EMAIL #3: Final Follow-Up**
 
 **Subject Line:**
 ```
@@ -425,7 +328,7 @@ Still evaluating AI content options?
 
 **Preview Text:**
 ```
-Final check-in + Q2 2026 case study preview
+Final check-in — any questions about Safe Lane vetting?
 ```
 
 **Email Body:**
@@ -434,7 +337,7 @@ Hi {{first_name}},
 
 I wanted to check in one last time.
 
-You downloaded our Legal Risk Brief two weeks ago — any questions come up as you reviewed it?
+You downloaded our Legal Risk Brief last week — any questions come up as you reviewed it?
 
 Common questions I get:
 
@@ -459,37 +362,51 @@ P.S. If you're curious, here's our complete vetting process: https://www.superim
 **Action:**
 1. Paste all content
 2. Replace [YOUR NAME]
-3. Set timing to **"4 days after previous email"**
-4. Click **"Save"**
+3. Click **"Save"** or **"Done"**
 
-**✅ Checkpoint:** You should see 5 emails in sequence timeline
+**✅ Checkpoint:** Email #3 should appear in automation flow
 
 ---
 
-### **Step 9: Activate Sequence**
+### **Step 10: Review & Activate Automation**
 
-1. Review all 5 emails (click each to verify content is correct)
-2. Check timing: Day 0 → Day 3 → Day 7 → Day 10 → Day 14
-3. At top of sequence page, toggle **"Inactive"** to **"Active"**
+1. Review the full automation flow:
+   ```
+   Trigger: Tag "Lead-Download" added
+     ↓
+   Email #1 (Welcome + PDFs)
+     ↓
+   Wait 3 days
+     ↓
+   Email #2 (Risk + Adobe)
+     ↓
+   Wait 4 days
+     ↓
+   Email #3 (Final check-in)
+   ```
+
+2. Check all emails are saved
+3. At top of automation page, toggle **"Inactive"** to **"Active"**
 4. Confirm activation
 
-**✅ Checkpoint:** Sequence status should show "Active" (green)
+**✅ Checkpoint:** Automation status should show "Active" (green)
 
 ---
 
-## PART 4: Zapier Integration (Connect Formspree → ConvertKit)
+## PART 4: Zapier Integration (Connect Formspree → Kit)
 
-### **Step 10: Create Zapier Account**
+### **Step 11: Create Zapier Account**
 
 1. Go to https://zapier.com
 2. Sign up (email + password)
-3. Choose plan: **Starter** ($19.99/mo — 750 tasks/month)
+3. Choose plan: **Free** (100 tasks/month) or **Starter** ($19.99/mo — 750 tasks/month)
+   - Free plan works if you expect <100 form submissions/month
 4. Complete onboarding
 5. Click **"Create Zap"** button
 
 ---
 
-### **Step 11: Configure Zap — Trigger**
+### **Step 12: Configure Zap — Trigger**
 
 **Trigger = Formspree form submission**
 
@@ -512,23 +429,23 @@ P.S. If you're curious, here's our complete vetting process: https://www.superim
 
 ---
 
-### **Step 12: Configure Zap — Action #1 (Add to Sequence)**
+### **Step 13: Configure Zap — Action (Add to Kit)**
 
-**Action = Add subscriber to ConvertKit sequence**
+**Action = Add subscriber to Kit with tag**
 
 1. Click **"+"** to add action
-2. Search for app: **"ConvertKit"**
-3. Select **"ConvertKit"**
-4. Choose action event: **"Add Subscriber to Sequence"**
+2. Search for app: **"Kit"** or **"ConvertKit"** (same company, Kit is the new name)
+3. Select **"Kit"**
+4. Choose action event: **"Add Tag to Subscriber"**
 5. Click **"Continue"**
-6. Click **"Sign in to ConvertKit"**
-7. You'll need your ConvertKit API Key:
-   - Go to ConvertKit dashboard (new tab)
+6. Click **"Sign in to Kit"**
+7. You'll need your Kit API Secret:
+   - Go to Kit dashboard (new tab)
    - Click your profile (top right) → **"Settings"**
    - Click **"Advanced"** (left sidebar)
-   - Copy **"API Key"**
+   - Copy **"API Secret"** (NOT "API Key")
    - Paste into Zapier
-8. Click **"Yes, Continue to ConvertKit"**
+8. Click **"Yes, Continue to Kit"**
 9. Map fields:
 
 **Email Address:**
@@ -541,58 +458,24 @@ Select from dropdown: "Email" (from Formspree trigger)
 Select from dropdown: "Name" (from Formspree trigger)
 ```
 
-**Sequence:**
+**Tag:**
 ```
-Select from dropdown: "Legal Brief Welcome + Nurture"
-```
-
-**Tags:** (Click "Add tag")
-```
-Select: "Lead - Legal Brief Download"
+Select from dropdown: "Lead-Download"
 ```
 
 10. Click **"Continue"**
 11. Click **"Test step"**
-12. Check ConvertKit → "Grow" → "Subscribers" — you should see test subscriber added
+12. Check Kit → "Grow" → "Subscribers" — you should see test subscriber added with "Lead-Download" tag
 13. Click **"Continue"**
 
-**✅ Checkpoint:** Test subscriber should appear in ConvertKit with tag applied
-
----
-
-### **Step 13: Configure Zap — Action #2 (Add Role Tag)**
-
-**Optional but recommended: Tag by role**
-
-1. Click **"+"** to add another action
-2. Search for app: **"ConvertKit"**
-3. Choose action event: **"Add Tag to Subscriber"**
-4. Click **"Continue"**
-5. Map fields:
-
-**Email Address:**
-```
-Select: "Email" (from Formspree trigger)
-```
-
-**Tag:**
-```
-Use Formatter (click "Custom" dropdown):
-  - If "Role" contains "Brand" or "Agency" → "Lead - Brand"
-  - If "Role" contains "Filmmaker" → "Lead - Filmmaker"
-```
-
-*(This is slightly advanced — if it's confusing, skip this step)*
-
-6. Click **"Continue"**
-7. Click **"Test step"**
+**✅ Checkpoint:** Test subscriber should appear in Kit with tag applied, and automation should have started
 
 ---
 
 ### **Step 14: Name & Activate Zap**
 
 1. At top left, click **"Untitled Zap"**
-2. Rename: `Formspree → ConvertKit (Legal Brief)`
+2. Rename: `Formspree → Kit (Legal Brief)`
 3. Click **"Publish"** button (top right)
 4. Confirm: **"Turn on Zap"**
 
@@ -600,15 +483,16 @@ Use Formatter (click "Custom" dropdown):
 
 ---
 
-### **Step 15: Create Second Zap (For Rights Playbook Page)**
+### **Step 15: Create Second Zap (For Rights Playbook Page) [Optional]**
 
 If you have a separate gated page for Rights Playbook:
 
 1. Click **"Create Zap"** (create new)
-2. Repeat Steps 11-14
+2. Repeat Steps 12-14
 3. **Only difference:** Select "safe-lane-rights-playbook" form in trigger
-4. Name: `Formspree → ConvertKit (Rights Playbook)`
-5. Publish
+4. Use same tag: "Lead-Download" (both forms trigger same automation)
+5. Name: `Formspree → Kit (Rights Playbook)`
+6. Publish
 
 **✅ Checkpoint:** You should have 2 active Zaps (one for each gated page)
 
@@ -632,21 +516,21 @@ If you have a separate gated page for Rights Playbook:
 - Click "Zap History" (left sidebar)
 - You should see "Success" for recent trigger
 
-**✅ ConvertKit:**
-- Log in to ConvertKit dashboard
+**✅ Kit:**
+- Log in to Kit dashboard
 - Click "Grow" → "Subscribers"
 - You should see yourself added
-- Click your name → Check tags applied
-- Check "Activity" tab → Sequence should be running
+- Click your name → Check "Lead-Download" tag is applied
+- Check "Activity" tab → Automation should be running
 
 **✅ Email:**
 - Check your inbox
 - You should receive Email #1 (Welcome + PDFs) within 1-2 minutes
 - Click PDF links to verify they download
 
-**✅ Sequence Scheduling:**
-- In ConvertKit, view your subscriber
-- Check timeline — Emails 2-5 should be scheduled for Days 3, 7, 10, 14
+**✅ Automation Scheduling:**
+- In Kit, view your subscriber
+- Check timeline — Email #2 should be scheduled for 3 days from now, Email #3 for 7 days from now
 
 ---
 
@@ -654,12 +538,12 @@ If you have a separate gated page for Rights Playbook:
 
 After testing:
 
-1. In ConvertKit → "Grow" → "Subscribers"
+1. In Kit → "Grow" → "Subscribers"
 2. Find your test subscriber
 3. Click name → "Actions" → "Delete subscriber"
 4. Confirm deletion
 
-*(This prevents you from receiving the full 5-email sequence)*
+*(This prevents you from receiving the full 3-email sequence)*
 
 ---
 
@@ -667,20 +551,20 @@ After testing:
 
 ### **Monitoring (Weekly)**
 
-**Check these metrics in ConvertKit:**
+**Check these metrics in Kit:**
 
 1. **"Grow" → "Subscribers"**
    - Total subscribers
    - Growth rate (new per week)
 
-2. **"Send" → "Sequences" → Click your sequence**
-   - Open rate (aim for >30%)
-   - Click rate (aim for >5%)
-   - Unsubscribe rate (should be <2%)
+2. **"Automate" → Click your automation**
+   - How many subscribers entered
+   - Email open rates (aim for >30%)
+   - Email click rates (aim for >5%)
 
 3. **"Grow" → "Tags"**
-   - How many "Lead - Brand" vs "Lead - Filmmaker"
-   - Segment by role for future campaigns
+   - How many "Lead-Download" subscribers
+   - If you're tracking by role, review Brand vs Filmmaker split
 
 ---
 
@@ -697,9 +581,9 @@ After testing:
 - Add more value before asking for call
 
 **If unsubscribe rate is high (>5%):**
-- Emails may be too frequent
+- Emails may be too frequent (consider 4-5 day waits instead of 3-4)
 - Content not relevant to subscriber
-- Adjust sequence timing or content
+- Adjust automation timing or content
 
 ---
 
@@ -708,10 +592,11 @@ After testing:
 ### **"Subscriber not receiving Email #1"**
 
 **Check:**
-1. ConvertKit → Subscriber → Activity tab — was email sent?
+1. Kit → Subscriber → Activity tab — was email sent?
 2. Check spam folder
-3. Verify sequence is "Active"
+3. Verify automation is "Active"
 4. Check subscriber's email address is correct
+5. Verify subscriber has "Lead-Download" tag (automation won't trigger without it)
 
 ---
 
@@ -735,6 +620,16 @@ After testing:
 
 ---
 
+### **"Automation not starting when tag is added"**
+
+**Check:**
+1. Automation is set to "Active" (not "Inactive" or "Draft")
+2. Trigger is set to correct tag: "Lead-Download"
+3. Tag name matches exactly (case-sensitive)
+4. Check subscriber's Activity tab — does tag show as added?
+
+---
+
 ## Summary Checklist
 
 **Before you start:**
@@ -743,34 +638,35 @@ After testing:
 - [ ] Set sharing to "Anyone with link"
 - [ ] Copy both PDF links
 
-**ConvertKit setup:**
-- [ ] Create ConvertKit account (free tier)
-- [ ] Create 4 tags (Lead - Legal Brief, Lead - Rights Playbook, Lead - Brand, Lead - Filmmaker)
-- [ ] Create sequence "Legal Brief Welcome + Nurture"
-- [ ] Add Email #1 (paste content + PDF links)
-- [ ] Add Email #2 (paste content, set Day 3)
-- [ ] Add Email #3 (paste content, set Day 7)
-- [ ] Add Email #4 (paste content, set Day 10)
-- [ ] Add Email #5 (paste content, set Day 14)
-- [ ] Activate sequence
+**Kit setup:**
+- [ ] Create Kit account (Newsletter free plan)
+- [ ] Create 2 tags (Lead-Download, Lead-Brand)
+- [ ] Create Visual Automation "Legal Brief 3-Email Nurture"
+- [ ] Set trigger: Tag "Lead-Download" added
+- [ ] Add Email #1 (paste content + PDF links + replace [YOUR NAME])
+- [ ] Add Wait: 3 days
+- [ ] Add Email #2 (paste content + replace [YOUR NAME])
+- [ ] Add Wait: 4 days
+- [ ] Add Email #3 (paste content + replace [YOUR NAME])
+- [ ] Activate automation
 
 **Zapier setup:**
-- [ ] Create Zapier account (Starter plan $19.99/mo)
-- [ ] Create Zap #1: Formspree (Legal Brief form) → ConvertKit
+- [ ] Create Zapier account (Free or Starter plan)
+- [ ] Create Zap #1: Formspree (Legal Brief form) → Kit
 - [ ] Configure trigger (Formspree form)
-- [ ] Configure action #1 (Add to sequence + tag)
-- [ ] Configure action #2 (Role tag) [optional]
+- [ ] Configure action (Add tag "Lead-Download")
 - [ ] Test & publish Zap #1
-- [ ] Create Zap #2: Formspree (Rights Playbook form) → ConvertKit [if separate form]
+- [ ] Create Zap #2: Formspree (Rights Playbook form) → Kit [optional if separate form]
 - [ ] Test & publish Zap #2
 
 **Testing:**
 - [ ] Submit test form on website
 - [ ] Verify Formspree captures submission
 - [ ] Verify Zapier triggers successfully
-- [ ] Verify ConvertKit adds subscriber
+- [ ] Verify Kit adds subscriber with tag
+- [ ] Verify automation starts
 - [ ] Verify Email #1 arrives with working PDF links
-- [ ] Verify sequence is scheduled (Days 3, 7, 10, 14)
+- [ ] Verify Emails #2 and #3 are scheduled (Day 3, Day 7)
 - [ ] Delete test subscriber
 
 ---
@@ -779,23 +675,22 @@ After testing:
 
 | Task | Time |
 |------|------|
-| Upload PDFs to Google Drive | 5 min |
-| Create ConvertKit account + tags | 10 min |
-| Create sequence + paste 5 emails | 30 min |
+| Convert HTML to PDF + upload to Google Drive | 10 min |
+| Create Kit account + tags | 10 min |
+| Create Visual Automation + paste 3 emails | 20 min |
 | Replace placeholders ([YOUR NAME], PDF links) | 5 min |
-| Create Zapier account + Zap #1 | 15 min |
-| Create Zap #2 (if needed) | 5 min |
-| Test full funnel | 10 min |
-| **TOTAL** | **80 min** |
+| Create Zapier account + Zap #1 | 10 min |
+| Test full funnel | 5 min |
+| **TOTAL** | **60 min** |
 
 ---
 
 ## Support Resources
 
-**ConvertKit:**
-- Help docs: https://help.convertkit.com
-- Community: https://community.convertkit.com
-- Support: support@convertkit.com
+**Kit (formerly ConvertKit):**
+- Help docs: https://help.kit.com
+- Community: https://community.kit.com
+- Support: help@kit.com
 
 **Zapier:**
 - Help docs: https://help.zapier.com
@@ -805,6 +700,30 @@ After testing:
 **Formspree:**
 - Help docs: https://help.formspree.io
 - Support: support@formspree.io
+
+---
+
+## Why This Works with Free Plan
+
+**Free Plan Limitation:** 1 basic Visual Automation (no Sequences feature)
+
+**Our Workaround:** Build the entire 3-email flow as a single automation:
+- Trigger: Tag added
+- Action 1: Send Email #1
+- Action 2: Wait 3 days
+- Action 3: Send Email #2
+- Action 4: Wait 4 days
+- Action 5: Send Email #3
+
+This achieves the same result as using Sequences (paid feature), but works within the free plan constraints.
+
+You can run this indefinitely on the free plan as long as you stay under 10,000 subscribers.
+
+**When to upgrade to Creator plan ($33/mo):**
+- If you need more than 1 automation (e.g., separate flows for different lead magnets)
+- If you want cleaner Sequences interface (easier to manage)
+- If you want A/B testing for subject lines
+- If you need integrations (though Zapier works with free plan)
 
 ---
 
