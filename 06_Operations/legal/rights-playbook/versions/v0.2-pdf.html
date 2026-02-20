@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Video Rights Playbook v0.2 — Executive Summary | SuperImmersive 8</title>
+    <style>
+        @page {
+            margin: 1in;
+            size: letter;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #1a1918;
+            max-width: 8.5in;
+            margin: 0 auto;
+            padding: 0.5in;
+        }
+
+        h1 {
+            font-size: 24pt;
+            font-weight: 700;
+            margin-bottom: 0.5em;
+            color: #1a1918;
+            border-bottom: 3px solid #C8900A;
+            padding-bottom: 0.25em;
+        }
+
+        h2 {
+            font-size: 16pt;
+            font-weight: 700;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            color: #C8900A;
+        }
+
+        h3 {
+            font-size: 13pt;
+            font-weight: 700;
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+            color: #1a1918;
+        }
+
+        h4 {
+            font-size: 11pt;
+            font-weight: 700;
+            margin-top: 0.75em;
+            margin-bottom: 0.25em;
+        }
+
+        p {
+            margin-bottom: 0.75em;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2em;
+            padding-bottom: 1em;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .header-subtitle {
+            font-size: 10pt;
+            color: #666;
+            margin-top: 0.5em;
+        }
+
+        .version-badge {
+            font-size: 9pt;
+            color: #C8900A;
+            font-weight: 700;
+            background: #FFF9E6;
+            padding: 0.25em 0.5em;
+            border-radius: 3px;
+            display: inline-block;
+            margin-top: 0.5em;
+        }
+
+        .section {
+            margin-bottom: 2em;
+            page-break-inside: avoid;
+        }
+
+        .whats-new-box {
+            background: #FFF9E6;
+            border-left: 4px solid #C8900A;
+            padding: 1em;
+            margin: 1em 0;
+            page-break-inside: avoid;
+        }
+
+        .safe-lane-box {
+            background: #f7f6ef;
+            border: 1px solid #C8900A;
+            padding: 1em;
+            margin: 1em 0;
+            page-break-inside: avoid;
+        }
+
+        .no-list-box {
+            background: #fef5f5;
+            border-left: 4px solid #dc2626;
+            padding: 1em;
+            margin: 1em 0;
+            page-break-inside: avoid;
+        }
+
+        .value-box {
+            background: #fafaf7;
+            border: 1px solid #e0e0e0;
+            padding: 1em;
+            margin: 1em 0;
+            page-break-inside: avoid;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1em 0;
+            page-break-inside: avoid;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 0.5em;
+            text-align: left;
+            font-size: 10pt;
+        }
+
+        th {
+            background: #f7f6ef;
+            font-weight: 700;
+        }
+
+        ul, ol {
+            margin-left: 1.5em;
+            margin-bottom: 0.75em;
+        }
+
+        li {
+            margin-bottom: 0.25em;
+        }
+
+        .footer {
+            margin-top: 3em;
+            padding-top: 1em;
+            border-top: 1px solid #ddd;
+            font-size: 9pt;
+            color: #666;
+            text-align: center;
+        }
+
+        .highlight {
+            background: #FFF9E6;
+            padding: 0.1em 0.3em;
+            border-radius: 3px;
+        }
+
+        strong {
+            color: #1a1918;
+        }
+
+        blockquote {
+            border-left: 3px solid #C8900A;
+            padding-left: 1em;
+            margin: 1em 0;
+            font-style: italic;
+            color: #444;
+        }
+
+        .stat {
+            font-size: 18pt;
+            font-weight: 700;
+            color: #C8900A;
+            display: block;
+            margin: 0.25em 0;
+        }
+
+        .emoji {
+            font-style: normal;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1em;
+            margin: 1em 0;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+            }
+            .page-break {
+                page-break-after: always;
+            }
+            .two-column {
+                display: block;
+            }
+            .two-column > div {
+                margin-bottom: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>AI Video Rights Playbook v0.2</h1>
+    <div class="header-subtitle">Executive Summary</div>
+    <div class="header-subtitle">Safe Lane Guidelines, Tool Tiers, Platform Policies & Legal Standards</div>
+    <div class="version-badge">Version 0.2 | February 2026</div>
+    <div class="header-subtitle" style="margin-top:1em;">SuperImmersive 8 | www.superimmersive8.com</div>
+</div>
+
+<div class="section">
+    <p><strong>About this document:</strong> This is an executive summary of SI8's AI Video Rights Playbook v0.2 — a living reference document that guides our safe lane vetting process. The full playbook is updated quarterly (or sooner if major rulings/platform changes occur). This summary extracts the most valuable sections for brands and buyers.</p>
+    <p style="font-size:9pt;color:#666;"><em>This playbook is for informational purposes only and does not constitute legal advice. For legal guidance, consult qualified counsel.</em></p>
+</div>
+
+<!-- What's New in v0.2 -->
+<div class="section">
+    <h2>What's New in v0.2</h2>
+    <div class="whats-new-box">
+        <ul>
+            <li><strong>Colorado AI Act "rebuttable presumption" safe harbor integrated</strong> — documentation = statutory compliance</li>
+            <li><strong>USCO copyrightability requirements expanded</strong> — human authorship declaration now mandatory</li>
+            <li><strong>DMCA CMI preservation requirements added</strong> — watermark/attribution protection</li>
+            <li><strong>EU AI Act Article 50 transparency obligations added</strong> — multi-jurisdiction readiness</li>
+            <li><strong>NY synthetic performer disclosure law added</strong> — state-level compliance</li>
+            <li><strong>Adobe competitive limitations clarified</strong> — Firefly-only indemnification scope</li>
+            <li><strong>C2PA vs. SI8 differentiation documented</strong> — provenance ≠ legal safety</li>
+            <li><strong>Quantifiable legal metrics added</strong> — 73% damage reduction, penalties avoided</li>
+        </ul>
+    </div>
+</div>
+
+<!-- The SI8 Safe Lane -->
+<div class="section">
+    <h2>The SI8 Safe Lane</h2>
+    <p>These are SI8's standing rules for all represented content and production work. They protect filmmakers, clients, and SI8 from the areas of highest legal risk.</p>
+
+    <div class="safe-lane-box">
+        <h3 style="margin-top:0;">SI8 will work with content that is:</h3>
+        <ul>
+            <li>Created by a human filmmaker who exercised meaningful creative direction — not just prompt entry</li>
+            <li>Documented with a <strong>human authorship declaration</strong> (150+ words detailing editorial choices, iteration decisions, post-generation modifications)</li>
+            <li>Produced using AI tools on <strong>commercially licensed paid plans</strong></li>
+            <li>Fully disclosed as AI-generated or AI-assisted on all submissions and platforms</li>
+            <li>Free of real-person likenesses, voices, or identities without documented consent</li>
+            <li>Preserves copyright management information (CMI) — no watermark/attribution stripping</li>
+        </ul>
+    </div>
+
+    <div class="no-list-box">
+        <h3 style="margin-top:0;color:#dc2626;">SI8 will NOT work with content that:</h3>
+        <ul>
+            <li>Uses celebrity or real-person likeness without explicit, documented consent</li>
+            <li>Clones the voice of a real person without consent</li>
+            <li>Imitates copyrighted characters, brands, or IP without licensed authorization</li>
+            <li>Strips watermarks, signatures, or attribution metadata (DMCA § 1202 violation)</li>
+            <li>Is designed to deceive viewers into thinking it is real footage of real events</li>
+            <li>Contains political persuasion content</li>
+            <li>Was produced primarily using Veo (consumer tier) — commercial use prohibited by Google's terms</li>
+            <li>Was produced primarily using Midjourney or Stability AI for commercial licensing — active studio litigation</li>
+            <li>Was produced without a signed project brief (production work only)</li>
+            <li>Lacks documented human authorship (prompts alone ≠ copyrightability per USCO Jan 2025)</li>
+        </ul>
+    </div>
+
+    <p><strong>Why this matters to buyers:</strong> Every project SI8 represents or produces comes with a documented rights position. We have done the legal homework so you do not have to.</p>
+</div>
+
+<div class="page-break"></div>
+
+<!-- Tool Risk Tiers -->
+<div class="section">
+    <h2>Tool Risk Tiers (February 2026)</h2>
+    <p>Not all AI tools carry equal risk. Courts are actively litigating whether training AI models on copyrighted content constitutes infringement. User liability is real — both the tool company and the user can be held liable for infringing outputs.</p>
+
+    <table>
+        <tr>
+            <th style="width:20%;">Risk Level</th>
+            <th style="width:35%;">Tools</th>
+            <th>Notes</th>
+        </tr>
+        <tr>
+            <td><span class="emoji">✅</span> <strong>Recommended</strong></td>
+            <td>Adobe Firefly, Runway (paid), Pika</td>
+            <td>Licensed training data or strong IP terms</td>
+        </tr>
+        <tr>
+            <td><span class="emoji">⚠️</span> <strong>Monitor</strong></td>
+            <td>Sora (paid)</td>
+            <td>Best IP terms, but legal pushback building</td>
+        </tr>
+        <tr>
+            <td><span class="emoji">⚠️</span> <strong>Caution for exclusivity</strong></td>
+            <td>Kling</td>
+            <td>Retains permanent sublicensable license to use outputs for AI training</td>
+        </tr>
+        <tr>
+            <td><span class="emoji">❌</span> <strong>Commercial use prohibited</strong></td>
+            <td>Veo (consumer/Gemini tier)</td>
+            <td>Pre-GA status — requires written Google permission</td>
+        </tr>
+        <tr>
+            <td><span class="emoji">❌</span> <strong>Active studio litigation</strong></td>
+            <td>Hailuo/Minimax, Midjourney, Stability AI</td>
+            <td>Sued by Disney/WB (Nov 2025)</td>
+        </tr>
+    </table>
+
+    <p><strong>SI8 requirement:</strong> All filmmakers must disclose which tools were used and confirm they were on a paid commercial plan at time of production.</p>
+</div>
+
+<!-- Platform Disclosure Policy -->
+<div class="section">
+    <h2>Platform Disclosure Policy</h2>
+    <p>Major platforms enforce AI disclosure independently. SI8 treats proactive disclosure as standard policy regardless of platform requirements.</p>
+
+    <table>
+        <tr>
+            <th style="width:15%;">Platform</th>
+            <th style="width:25%;">AI Disclosure Required?</th>
+            <th style="width:25%;">Enforcement</th>
+            <th>SI8 Action</th>
+        </tr>
+        <tr>
+            <td><strong>YouTube</strong></td>
+            <td>Yes — realistic AI content (May 2025)</td>
+            <td>Demonetization, removal, ban</td>
+            <td>Always enable disclosure toggle</td>
+        </tr>
+        <tr>
+            <td><strong>TikTok</strong></td>
+            <td>Yes — realistic faces, voices, scenes</td>
+            <td>Escalating bans; 340% removal increase in 2025</td>
+            <td>Label proactively; C2PA auto-detection active</td>
+        </tr>
+        <tr>
+            <td><strong>iQIYI</strong></td>
+            <td>No restrictions found</td>
+            <td>None identified</td>
+            <td>Active distribution opportunity</td>
+        </tr>
+        <tr>
+            <td><strong>Viu</strong></td>
+            <td>No public policy</td>
+            <td>Unknown</td>
+            <td>Confirm directly before submission</td>
+        </tr>
+        <tr>
+            <td><strong>MyVideo</strong></td>
+            <td>Unknown</td>
+            <td>Unknown</td>
+            <td>Confirm with Taiwan Mobile contact</td>
+        </tr>
+        <tr>
+            <td><strong>Festivals</strong></td>
+            <td>Varies</td>
+            <td>Disqualification</td>
+            <td>Confirm per submission</td>
+        </tr>
+    </table>
+
+    <p><strong>Rationale:</strong> Proactive disclosure is brand-positioning for SI8 — it signals transparency and positions ahead of disclosure requirements that are likely to become mandatory across more jurisdictions and platforms.</p>
+</div>
+
+<div class="page-break"></div>
+
+<!-- Key Legal Standards -->
+<div class="section">
+    <h2>Key Legal Standards</h2>
+
+    <h3>1. Copyright Ownership & Copyrightability</h3>
+    <p><strong>Core principle (consistent across US, Taiwan, Singapore):</strong> Human authorship is required for copyright protection.</p>
+
+    <div class="value-box">
+        <h4>US Copyright Office Part 2 Report (January 2025):</h4>
+        <blockquote>"Given current generally available technology, prompts alone do not provide sufficient human control to make users of an AI system the authors of the output... However, [in cases of substantial modification or expressive input] the human's own creative expression will be protected by copyright."</blockquote>
+
+        <p><strong>What this means for brands:</strong></p>
+        <ul>
+            <li><strong>Without documented human authorship, brands cannot own the copyright</strong> to AI-generated commercials</li>
+            <li><strong>SI8 requirement:</strong> Human Authorship Declaration (150+ words minimum) documenting prompts used, iteration decisions, editorial choices, post-generation editing</li>
+            <li>Taiwan's TIPO (June 2023) and Singapore's IPOS (2025) take the same position</li>
+        </ul>
+    </div>
+
+    <h3 style="margin-top:1.5em;">2. Colorado AI Act — "Rebuttable Presumption" Safe Harbor</h3>
+    <p><strong>Source:</strong> Colorado SB24-205 (Effective 2026)</p>
+
+    <blockquote>"Developers and deployers maintain a <strong>rebuttable presumption of using reasonable care</strong> under this provision if they satisfy the obligations of the Act... [including] documentation describing how the system was evaluated... and data governance measures."</blockquote>
+
+    <div class="value-box">
+        <p><strong>What this means for SI8:</strong></p>
+        <ul>
+            <li>SI8's Rights Package = statutory compliance documentation</li>
+            <li>Field #2 (Model Disclosure) + Field #6 (Category Conflict Log) satisfy "reasonable care" standard</li>
+            <li><strong>Avoids state Attorney General civil penalties of up to $20,000 per violation</strong></li>
+        </ul>
+    </div>
+
+    <h3 style="margin-top:1.5em;">3. DMCA Copyright Management Information (CMI) Preservation</h3>
+    <p><strong>Source:</strong> 17 U.S.C. § 1202 (CMI prohibition) & § 1203 (civil remedies)</p>
+
+    <p><strong>Requirements:</strong></p>
+    <ul>
+        <li>Prohibits removal/alteration of CMI (watermarks, signatures, attribution metadata)</li>
+        <li>Separate violation from copyright infringement itself</li>
+        <li>Statutory damages available for CMI violations</li>
+    </ul>
+
+    <p><strong>SI8 policy:</strong> No watermark stripping, no signature removal, attribution metadata preserved where present. Field #9 (Version History) documents CMI handling.</p>
+
+    <h3 style="margin-top:1.5em;">4. EU AI Act Article 50 — Transparency Obligations</h3>
+    <p><strong>Source:</strong> Regulation (EU) 2024/1689, Article 50 (Phased implementation 2026+)</p>
+
+    <p><strong>SI8 compliance:</strong> Field #2 (Model Disclosure) satisfies EU transparency requirements. Field #9 (Version History) provides audit trail. Platform-compliant delivery checklist supports multi-jurisdiction distribution.</p>
+
+    <h3 style="margin-top:1.5em;">5. New York Synthetic Performer Disclosure Law</h3>
+    <p><strong>Effective:</strong> 2026</p>
+    <p><strong>Requirements:</strong> Conspicuous disclosure when "synthetic performers" are used in advertising</p>
+
+    <div class="value-box">
+        <p><strong>SI8 compliance:</strong></p>
+        <ul>
+            <li>Field #3 (Safe Lane Sign-off) flags synthetic performer content</li>
+            <li>Field #6 (Category Conflict Log) notes disclosure requirements</li>
+            <li><strong>Avoids fines of $1,000 - $5,000 per violation</strong></li>
+        </ul>
+    </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- Quantifiable Legal Metrics -->
+<div class="section">
+    <h2>Quantifiable Legal Metrics</h2>
+
+    <h3>1. Damage Reduction (73%+ Statutory Reduction)</h3>
+    <p><strong>Legal Framework:</strong> U.S. copyright law (17 U.S.C. § 504(c)(2)) provides reduced statutory damages for "innocent infringement" when defendants demonstrate good-faith belief they were not infringing.</p>
+
+    <table>
+        <tr>
+            <th>Infringement Type</th>
+            <th>Minimum Damages</th>
+            <th>Maximum Damages</th>
+        </tr>
+        <tr>
+            <td>Standard</td>
+            <td>$750 per work</td>
+            <td>$30,000 per work</td>
+        </tr>
+        <tr style="background:#FFF9E6;">
+            <td><strong>Innocent Infringer</strong></td>
+            <td><strong>$200 per work</strong></td>
+            <td><strong>$750 per work</strong></td>
+        </tr>
+        <tr>
+            <td>Willful</td>
+            <td>$30,000 per work</td>
+            <td>$150,000 per work</td>
+        </tr>
+    </table>
+
+    <p><span class="stat">73% minimum damage reduction</span> ($750 → $200)</p>
+    <p><span class="stat">99% maximum damage reduction</span> (avoiding $150,000 willful penalty)</p>
+
+    <p><strong>Requirements to qualify:</strong></p>
+    <blockquote>"Considerable effort must go into establishing lack of willful disregard, often requiring detailed documentation and compelling argumentation." (Copyright Alliance)</blockquote>
+
+    <div class="value-box">
+        <h4>How SI8's Rights Package supports this defense:</h4>
+        <ul>
+            <li><strong>Field #1 (Tool Provenance Log):</strong> Documented compliance</li>
+            <li><strong>Field #3 (Safe Lane Sign-off):</strong> Compelling argumentation</li>
+            <li><strong>Field #4 (Commercial Use Authorization):</strong> Good-faith reliance</li>
+            <li><strong>Field #9 (Version History):</strong> Audit trail</li>
+        </ul>
+        <p><strong>Critical limitation:</strong> Documentation reduces damages; it does NOT prevent liability if infringement is real.</p>
+    </div>
+
+    <h3 style="margin-top:1.5em;">2. Regulatory Penalties Avoided</h3>
+    <ul>
+        <li><strong>Colorado AI Act:</strong> Up to $20,000 per violation (documentation safe harbor)</li>
+        <li><strong>New York Synthetic Performer Law:</strong> $1,000 - $5,000 per violation (disclosure compliance)</li>
+    </ul>
+
+    <h3 style="margin-top:1.5em;">3. Distribution Enablement</h3>
+    <ul>
+        <li><strong>E&O insurance:</strong> Documentation = chain-of-title equivalent (hypothesis — validate with broker)</li>
+        <li><strong>Platform compliance:</strong> Avoids demonetization, removal, account bans</li>
+    </ul>
+
+    <h3 style="margin-top:1.5em;">4. Copyrightability Protection</h3>
+    <ul>
+        <li><strong>USCO requirement:</strong> Human authorship declaration required for copyright ownership</li>
+        <li><strong>Without documentation:</strong> Brand cannot own copyright to AI-generated commercial</li>
+    </ul>
+</div>
+
+<div class="page-break"></div>
+
+<!-- Competitive Landscape -->
+<div class="section">
+    <h2>Competitive Landscape</h2>
+
+    <h3>Adobe Firefly Indemnification (Limitations)</h3>
+    <p><strong>Source:</strong> Adobe Firefly Legal FAQs / Enterprise Terms (PSLT 2026v1)</p>
+
+    <p><strong>What Adobe indemnifies:</strong></p>
+    <ul>
+        <li>Outputs generated entirely within Firefly features</li>
+        <li>Adobe Stock-trained models only</li>
+    </ul>
+
+    <p><strong>What Adobe explicitly excludes:</strong></p>
+    <blockquote>"Adobe will have no liability for any Claim to the extent that the Claim is based on or arises from: (A) any modification of a Firefly Output... (B) any combination of a Firefly Output with any other material..."</blockquote>
+
+    <div class="value-box">
+        <h4>Critical gap Adobe cannot fill:</h4>
+        <ul>
+            <li>Adobe indemnifies Firefly only</li>
+            <li>Adobe does NOT indemnify Runway, Sora, Midjourney, or Kling outputs</li>
+            <li>Creative teams want best tools (Sora/Runway/Kling), not just safe tools (Firefly)</li>
+        </ul>
+        <p style="margin-top:0.5em;"><strong>SI8's differentiation:</strong> "Adobe = safe but boring (Firefly only). SI8 = best creative AI tools (Sora/Kling/Runway) made safe through Safe Lane vetting."</p>
+    </div>
+
+    <h3 style="margin-top:1.5em;">C2PA vs. SI8 — Provenance vs. Legal Safety</h3>
+    <p><strong>Source:</strong> C2PA Content Credentials Specification Explainer</p>
+
+    <p><strong>What C2PA does:</strong></p>
+    <ul>
+        <li>Cryptographically bound metadata showing how a file was made</li>
+        <li>Proves provenance (WHERE content came from)</li>
+    </ul>
+
+    <p><strong>What C2PA does NOT do:</strong></p>
+    <blockquote>"It is important to highlight that Content Credentials do not provide value judgments about whether a given set of provenance data is 'true'... or good or bad."</blockquote>
+
+    <div class="value-box">
+        <h4>SI8's differentiation:</h4>
+        <ul>
+            <li><strong>C2PA proves the video came from Runway</strong> (provenance metadata)</li>
+            <li><strong>SI8 proves the video won't get you sued by Disney</strong> (legal safety assessment)</li>
+            <li><strong>C2PA is the receipt; SI8 is the legal audit</strong></li>
+        </ul>
+        <p style="margin-top:0.5em;"><strong>SI8's moat:</strong> C2PA commoditizes provenance documentation. SI8's subjective legal review (Safe Lane vetting, IP assessment, training data risk judgment) cannot be automated.</p>
+    </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- Sources & References -->
+<div class="section">
+    <h2>Sources & References</h2>
+
+    <h3>US Copyright</h3>
+    <ul style="font-size:9.5pt;">
+        <li>US Copyright Office — AI resources: <a href="https://www.copyright.gov/ai/">copyright.gov/ai/</a></li>
+        <li>Part 2 AI Report (Jan 29, 2025): <a href="https://newsroom.loc.gov/news/copyright-office-releases-part-2-of-artificial-intelligence-report/s/f3959c36-d616-498d-b8f9-67641fd18bab">LOC Newsroom</a></li>
+        <li>17 U.S.C. § 504 — Statutory Damages: <a href="https://www.law.cornell.edu/uscode/text/17/504">cornell.edu</a></li>
+        <li>17 U.S.C. § 1202 — CMI Prohibition: <a href="https://www.law.cornell.edu/uscode/text/17/1202">cornell.edu</a></li>
+        <li>Innocent Infringer Defense — Copyright Alliance: <a href="https://copyrightalliance.org/faqs/innocent-infringer-defense/">copyrightalliance.org</a></li>
+    </ul>
+
+    <h3>Regulatory Compliance</h3>
+    <ul style="font-size:9.5pt;">
+        <li>Colorado AI Act (SB24-205): <a href="https://leg.colorado.gov/bills/sb24-205">leg.colorado.gov</a></li>
+        <li>EU AI Act (Regulation 2024/1689): <a href="https://eur-lex.europa.eu/eli/reg/2024/1689/oj">eur-lex.europa.eu</a></li>
+        <li>FTC AI Compliance: <a href="https://www.ftc.gov/ai">ftc.gov/ai</a></li>
+        <li>FTC Operation AI Comply: <a href="https://www.ftc.gov/news-events/news/press-releases/2024/09/ftc-announces-crackdown-deceptive-ai-claims-schemes">ftc.gov</a></li>
+    </ul>
+
+    <h3>Taiwan & APAC Law</h3>
+    <ul style="font-size:9.5pt;">
+        <li>TIPO interpretation on generative AI copyright — Lee, Tsai & Partners: <a href="https://www.leetsai.com/copyright/interpretation-released-by-taiwans-ipo-to-clarify-copyright-disputes-regarding-generative-ai">leetsai.com</a></li>
+        <li>IPOS Copyright Resources — Singapore: <a href="https://www.ipos.gov.sg/about-ip/copyright/copyright-resources/">ipos.gov.sg</a></li>
+    </ul>
+
+    <h3>AI Training Data Litigation</h3>
+    <ul style="font-size:9.5pt;">
+        <li>Getty Images v. Stability AI — Latham & Watkins: <a href="https://www.lw.com/en/insights/getty-images-v-stability-ai-english-high-court-rejects-secondary-copyright-claim">lw.com</a></li>
+        <li>Andersen v. Stability AI: <a href="https://copyrightalliance.org/andersen-v-stability-ai-copyright-case/">copyrightalliance.org</a></li>
+        <li>AI Copyright 2025 in Review — EFF: <a href="https://www.eff.org/deeplinks/2025/12/artificial-intelligence-copyright-and-the-fight-user-rights-2025-review">eff.org</a></li>
+    </ul>
+
+    <h3>Platform Policies</h3>
+    <ul style="font-size:9.5pt;">
+        <li>YouTube AI Disclosure Requirements 2025: <a href="https://onewrk.com/youtubes-ai-disclosure-requirements-the-complete-2025-guide/">onewrk.com</a></li>
+        <li>TikTok AI Content Policy: <a href="https://support.tiktok.com/en/using-tiktok/creating-videos/ai-generated-content">support.tiktok.com</a></li>
+        <li>TikTok AI Enforcement 2025: <a href="https://www.affiversemedia.com/tiktoks-ai-crackdown-new-community-guidelines-signal-tougher-times-for-performance-marketers/">affiversemedia.com</a></li>
+    </ul>
+
+    <h3>Tool Terms of Service</h3>
+    <ul style="font-size:9.5pt;">
+        <li>Runway Terms of Use: <a href="https://runwayml.com/terms-of-use">runwayml.com</a></li>
+        <li>Sora Commercial License Guide — Skywork AI: <a href="https://skywork.ai/blog/sora-2-commercial-license-guide/">skywork.ai</a></li>
+        <li>Adobe Firefly Legal FAQs: <a href="https://www.adobe.com/legal/licenses-terms/adobe-gen-ai-user-guidelines.html">adobe.com</a></li>
+    </ul>
+
+    <h3>Competitive Landscape</h3>
+    <ul style="font-size:9.5pt;">
+        <li>C2PA Content Credentials Specification: <a href="https://c2pa.org/specifications/specifications/1.0/specs/C2PA_Specification.html">c2pa.org</a></li>
+        <li>NSA/CISA — Strengthening Multimedia Integrity: <a href="https://media.defense.gov/2025/Jan/29/2003634788/-1/-1/0/CSI-CONTENT-CREDENTIALS.PDF">defense.gov</a></li>
+        <li>Content Authenticity 2026: <a href="https://contentauthenticity.org/blog/the-state-of-content-authenticity-in-2026">contentauthenticity.org</a></li>
+    </ul>
+
+    <p style="margin-top:1.5em;font-size:9.5pt;"><em>Full bibliography with 50+ sources available in the complete Rights Playbook v0.2.</em></p>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    <p><strong>SuperImmersive 8</strong> | AI Film Rights Agency | Taipei, Taiwan</p>
+    <p>www.superimmersive8.com</p>
+    <p style="margin-top:0.5em;font-size:8pt;"><em>This playbook is for informational purposes only and does not constitute legal advice. Brands should consult qualified legal counsel for specific guidance.</em></p>
+    <p style="margin-top:0.5em;font-size:8pt;">Next review: May 2026 (or sooner if major ruling/platform change)</p>
+</div>
+
+</body>
+</html>
