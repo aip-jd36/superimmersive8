@@ -723,6 +723,64 @@ section {
     color: var(--color-text);
 }
 
+/* Risk Stats */
+.risk-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--space-md);
+    margin: var(--space-xl) 0;
+    padding: var(--space-lg);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.risk-stat {
+    text-align: center;
+}
+
+.stat-number {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #C8900A, #F5C842);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+}
+
+/* CTA Group */
+.cta-group {
+    display: flex;
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+}
+
+@media (max-width: 640px) {
+    .risk-stats {
+        grid-template-columns: 1fr;
+        gap: var(--space-sm);
+    }
+
+    .cta-group {
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+
+    .cta-group .btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
 .value-prop p {
     font-size: 0.9375rem;
 }
