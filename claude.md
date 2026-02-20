@@ -141,11 +141,11 @@
 - [ ] 2-3 sample AI video outputs (even mock/personal projects)
 
 ### 2. Sales Ops (This makes or breaks Month 2-6)
-- [ ] Lead intake + qualification form (captures: company, role, budget range, use case, timeline, risk appetite)
+- [x] Lead intake + qualification form — ✓ Gated download forms on safe-lane-legal-brief.html + safe-lane-rights-playbook.html (Feb 2026)
+- [x] Lead gen email automation — ✓ 3-email nurture sequence (Day 0, 3, 7) via Kit + Vercel function; $0/mo stack (Feb 2026)
 - [ ] CRM + pipeline stages (6 max): Prospect → Contacted → Meeting Booked → Proposal Sent → Negotiation → Won/Lost
 - [ ] Proposal template (1-page + SOW) — must take <45 min per proposal
 - [ ] Pricing guardrails: "if X then quote Y" (e.g., "Hero film + cutdowns = $12K baseline")
-- [ ] Follow-up sequence: 7 touchpoints over 21 days, prewritten/templated
 
 ### 3. Delivery Ops (Production is where founders drown)
 - [ ] Production Brief Template (objective, audience, tone, prompt constraints, do-not-do list)

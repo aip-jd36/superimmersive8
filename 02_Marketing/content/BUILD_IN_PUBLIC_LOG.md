@@ -2041,6 +2041,13 @@ SI8's catalog has documentation on every piece: tool disclosure, Safe Lane sign-
 | Feb 20, 2026 | **"Getty for AI video" positioning externalized** | Previously internal framing; now explicit in For Brands section: "Brands pay Getty $450 for legal guarantee, $50 for JPEG. We sell same value layer for AI video." |
 | Feb 20, 2026 | **Adobe competitive gap weaponized** | "Adobe = safe but boring (Firefly only). SI8 = best creative tools (Sora/Runway/Kling) made safe." — now in Rights Playbook v0.2 + Legal Risk Brief + website |
 | Feb 20, 2026 | **C2PA differentiation clarified** | "C2PA proves the video came from Runway. SI8 proves the video won't get you sued by Disney. C2PA is the receipt; SI8 is the legal audit." — documented in playbook + brief |
+| Feb 20, 2026 | **Lead gen stack decision: free vs. paid** | Evaluated Zapier ($20/mo) + Kit Creator ($33/mo) vs. free alternatives; chose Vercel Functions (free) + Kit Newsletter (free) = $0/mo total; services phase doesn't justify $53/mo SaaS costs |
+| Feb 20, 2026 | **Vercel serverless function built** | Direct HTML form → Vercel function → Kit API integration; skipped Formspree + Zapier entirely; `/api/formspree-to-kit.js` receives form POST, calls Kit API with tag, returns success; eliminates two middlemen |
+| Feb 20, 2026 | **Kit 3-email nurture sequence configured** | Day 0 (immediate): Welcome + PDF links; Day 3: Why vetting matters + Adobe gap; Day 7: Final check-in + discovery call CTA; uses Visual Automation trigger on "Lead-Download" tag |
+| Feb 20, 2026 | **Lead gen funnel tested end-to-end successfully** | Form submit → Vercel function → Kit subscriber added with tag → automation triggers → sequence starts → Email #1 delivered within 2 minutes; full flow operational |
+| Feb 20, 2026 | **Complete free email automation stack achieved** | Website forms + Vercel Functions + Kit free plan = $0/month for unlimited form submissions + 10K subscribers + 3-email nurture; no Formspree, no Zapier, no paid email tools; validated for Year 1 scale |
+| Feb 20, 2026 | **Technical insight: direct API > third-party connectors** | Building Vercel function (2 hours) vs. configuring Zapier/Make (30 min setup, $20/mo recurring) — upfront effort pays off month 2+; own the integration, no vendor lock-in, no monthly SaaS creep |
+| Feb 20, 2026 | **Lead gen funnel complete and deployed** | Both gated pages live with working forms; email automation active; PDFs ready for Google Drive upload; discovery call calendar link embedded; ready for traffic |
 
 ---
 
