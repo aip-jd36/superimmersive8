@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Content Risk Briefing | SuperImmersive 8</title>
+    <meta name="description" content="The current legal and platform risk landscape for brands using AI-generated video. Updated monthly by SI8 — the AI film rights agency.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .briefing-hero {
+            padding: 140px 0 80px;
+            text-align: center;
+            position: relative;
+        }
+        .briefing-hero .hero-bg {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            z-index: 0;
+        }
+        .briefing-hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        .updated-stamp {
+            display: inline-block;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-text-muted);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 6px 14px;
+            border-radius: 100px;
+            margin-bottom: 28px;
+        }
+        .briefing-hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 20px;
+            color: var(--color-text);
+        }
+        .briefing-hero p {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--color-text-muted);
+            max-width: 620px;
+            margin: 0 auto 40px;
+        }
+        .briefing-ctas {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Explainer layout */
+        .explainers-section {
+            padding: 0 0 100px;
+        }
+        .explainer-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        .explainer {
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding: 64px 0;
+        }
+        .explainer:last-child {
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .explainer-number {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            margin-bottom: 16px;
+        }
+        .explainer h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(1.4rem, 3vw, 2rem);
+            font-weight: 700;
+            line-height: 1.25;
+            margin-bottom: 28px;
+            color: var(--color-text);
+        }
+        .explainer p {
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            line-height: 1.75;
+            color: var(--color-text-muted);
+            margin-bottom: 20px;
+        }
+        .explainer p:last-of-type {
+            margin-bottom: 0;
+        }
+        .key-fact {
+            background: rgba(129, 140, 248, 0.06);
+            border-left: 3px solid var(--color-accent);
+            border-radius: 0 8px 8px 0;
+            padding: 20px 24px;
+            margin: 32px 0;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--color-text);
+        }
+        .key-fact strong {
+            color: var(--color-accent);
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 32px 0;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+        }
+        .comparison-table th {
+            text-align: left;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.04);
+            color: var(--color-text-muted);
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+        .comparison-table td {
+            padding: 14px 16px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            color: var(--color-text-muted);
+            vertical-align: top;
+        }
+        .comparison-table td:first-child {
+            color: var(--color-text);
+            font-weight: 500;
+        }
+        .status-yes {
+            color: #4ade80;
+            font-weight: 600;
+        }
+        .status-no {
+            color: #f87171;
+            font-weight: 600;
+        }
+        .deadline-grid {
+            display: grid;
+            gap: 16px;
+            margin: 32px 0;
+        }
+        .deadline-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 20px 24px;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 16px;
+            align-items: start;
+        }
+        .deadline-date {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            white-space: nowrap;
+            padding-top: 2px;
+        }
+        .deadline-desc {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--color-text-muted);
+        }
+        .deadline-desc strong {
+            display: block;
+            color: var(--color-text);
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        .explainer-cta {
+            margin-top: 40px;
+            padding-top: 32px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .explainer-cta p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+        }
+
+        /* Bottom CTA section */
+        .briefing-bottom-cta {
+            background: rgba(129, 140, 248, 0.04);
+            border-top: 1px solid rgba(129, 140, 248, 0.12);
+            padding: 80px 24px;
+            text-align: center;
+        }
+        .briefing-bottom-cta h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--color-text);
+        }
+        .briefing-bottom-cta p {
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            color: var(--color-text-muted);
+            max-width: 520px;
+            margin: 0 auto 36px;
+            line-height: 1.7;
+        }
+        .email-capture-form {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .email-capture-form input[type="email"] {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            color: var(--color-text);
+            width: 280px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .email-capture-form input[type="email"]:focus {
+            border-color: var(--color-accent);
+        }
+        .email-capture-form input[type="email"]::placeholder {
+            color: var(--color-text-muted);
+        }
+        .email-capture-note {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.78rem;
+            color: var(--color-text-muted);
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-text">SI<span class="logo-accent">8</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html#catalog">The Catalog</a>
+                <a href="index.html#safe-lane">The Safe Lane</a>
+                <a href="index.html#brands">For Brands</a>
+                <a href="index.html#filmmakers">For Filmmakers</a>
+                <a href="risk-briefing.html" style="color:var(--color-accent);">Risk Briefing</a>
+                <a href="index.html#contact" class="nav-cta">Book a Call</a>
+            </div>
+            <div class="lang-selector" style="display:flex;align-items:center;gap:6px;font-size:0.8rem;opacity:0.7;margin-left:12px;">
+                <a href="risk-briefing.html" style="color:var(--color-accent);text-decoration:none;font-weight:500;">EN</a>
+                <span style="color:var(--color-text-muted);">/</span>
+                <a href="index-zh.html" style="color:var(--color-text-muted);text-decoration:none;">繁體中文</a>
+            </div>
+            <button class="mobile-menu-btn" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="briefing-hero">
+        <div class="hero-bg">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+        </div>
+        <div class="briefing-hero-content">
+            <div class="updated-stamp">Last updated: February 2026</div>
+            <h1>AI Content<br><span class="highlight">Risk Briefing</span></h1>
+            <p>The legal and platform landscape for brands using AI-generated video is changing faster than most legal teams can track. We monitor it so you don't have to. Below is what matters right now.</p>
+            <div class="briefing-ctas">
+                <a href="index.html#contact" class="btn btn-primary">Book a 20-Min Risk Triage Call</a>
+                <a href="#stay-current" class="btn btn-secondary">Get Updates by Email</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Explainers -->
+    <section class="explainers-section">
+        <div class="explainer-container">
+
+            <!-- Explainer 1 -->
+            <article class="explainer" id="runway-license">
+                <div class="explainer-number">01 — Indemnification</div>
+                <h2>Does Runway's commercial license actually protect your brand?</h2>
+
+                <p>When a brand or agency pays for a commercial subscription to an AI video tool, the assumption is that the tool company stands behind the outputs. For one major tool, that assumption is correct. For the tools producing the most creative AI video in the market today, it is not.</p>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Tool</th>
+                            <th>Enterprise indemnification?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Adobe Firefly</td>
+                            <td class="status-yes">Yes — Adobe covers enterprise users if sued over Firefly outputs</td>
+                        </tr>
+                        <tr>
+                            <td>Microsoft Copilot</td>
+                            <td class="status-yes">Yes</td>
+                        </tr>
+                        <tr>
+                            <td>Runway</td>
+                            <td class="status-no">No — indemnity runs from user to Runway, not the reverse</td>
+                        </tr>
+                        <tr>
+                            <td>Midjourney</td>
+                            <td class="status-no">No — explicitly disclaims IP warranties; outputs provided "as is"</td>
+                        </tr>
+                        <tr>
+                            <td>Kling</td>
+                            <td class="status-no">No enterprise indemnification program confirmed</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p>Runway's Terms of Service require users to indemnify Runway against losses related to copyright infringement. The protection flows in the wrong direction. If a rights holder comes after your brand for content produced with Runway, Runway will not defend you, will not cover damages, and may itself become a co-defendant — which increases your exposure, not reduces it.</p>
+
+                <div class="key-fact">
+                    <strong>Active litigation context:</strong> Disney, Universal, and Warner Bros. have each sued Midjourney for copyright infringement. Midjourney's legal defense is that <em>users</em> are responsible for prompting infringing outputs — not Midjourney. If this argument holds, brand liability for AI-generated commercial content migrates directly to the brand or agency that commissioned it.
+                </div>
+
+                <p>In July 2024, leaked internal documents revealed that Runway's Gen-3 model was trained on YouTube videos downloaded without permission from Disney, Netflix, Pixar, and Sony — using proxy software specifically to avoid detection. Runway provides no contractual protection to the brands using these outputs commercially.</p>
+
+                <p>Adobe Firefly's indemnification is real, and it is the only tool in the market offering it at scale. The trade-off: Firefly's outputs are, by professional creative standards, limited. The highest-quality AI video — the work that makes brands take notice — is produced with Runway, Sora, Kling, and similar tools. SI8's Safe Lane process exists precisely in this gap: documented vetting that gives brands the defensibility that the tool companies don't provide.</p>
+
+                <div class="explainer-cta">
+                    <a href="index.html#contact" class="btn btn-primary">Book a Risk Triage Call</a>
+                    <p>Find out whether your current AI video content has a documentation gap.</p>
+                </div>
+            </article>
+
+            <!-- Explainer 2 -->
+            <article class="explainer" id="platform-requirements">
+                <div class="explainer-number">02 — Platform Compliance</div>
+                <h2>YouTube, TikTok, Meta, Netflix: what each platform actually requires for AI video</h2>
+
+                <p>A brand running a single AI video campaign across major platforms must now navigate four structurally different compliance regimes — with different triggers, different enforcement mechanisms, different penalties, and different update cadences. There is no single workflow that covers all of them.</p>
+
+                <div class="key-fact">
+                    <strong>YouTube (July 2025):</strong> Mass-produced or fully AI-generated content without "significant human creativity and editorial judgment" is now demonetized regardless of whether it was disclosed. A channel with 83,000 subscribers was removed entirely after 150+ videos were flagged as insufficiently human-directed. Agencies producing YouTube content must document human creative contribution for every AI-assisted production.
+                </div>
+
+                <div class="key-fact">
+                    <strong>TikTok:</strong> Content generated inside TikTok's own tools is auto-labeled. Content created with external tools — Runway, Kling, Sora — requires manual disclosure by the uploader. TikTok holds the uploader responsible either way. Over 51,000 synthetic media videos were removed in a single six-month enforcement period.
+                </div>
+
+                <div class="key-fact">
+                    <strong>Meta / Instagram:</strong> Meta's C2PA auto-labeling system applies "AI Info" labels based on metadata signals — including residual metadata from Adobe tools used only for minor retouching. Brands have had legitimate product photography auto-labeled "AI Info" with no warning. Meta's recommended fix requires brands to strip metadata before upload. The compliance burden has shifted to the brand's production workflow.
+                </div>
+
+                <div class="key-fact">
+                    <strong>Netflix (August 2025):</strong> The first major streaming platform to publish formal Generative AI Production Guidelines. AI use must be disclosed to Netflix before production begins. Written pre-approval is required if AI outputs appear in final deliverables or involve talent likeness, third-party IP, or union-covered performances. Content with undisclosed AI use is potentially unlicensable.
+                </div>
+
+                <p>The Interactive Advertising Bureau launched a quarterly Video Compliance Brief series in 2025 specifically because the cross-platform complexity had become unmanageable. Their characterization of the current environment: a "risk-based, materiality-driven approach" is now required — meaning no single bright-line rule works across all platforms.</p>
+
+                <p>Layered on top of platform rules: in 2025 alone, US state legislators introduced over 1,100 AI-related bills. Approximately 100 were enacted or proposed into final rules, creating — in the words of legal analysts — "a patchwork of 50 different regulatory regimes."</p>
+
+                <div class="explainer-cta">
+                    <a href="index.html#contact" class="btn btn-primary">Book a Risk Triage Call</a>
+                    <p>Walk through your platform distribution plan against current requirements.</p>
+                </div>
+            </article>
+
+            <!-- Explainer 3 -->
+            <article class="explainer" id="tool-license-defense">
+                <div class="explainer-number">03 — Copyright Exposure</div>
+                <h2>Why "I paid for the tool" isn't a legal defense</h2>
+
+                <p>The most common assumption brands make when using AI-generated content commercially: "we have a paid commercial subscription, so we're covered." The US Copyright Office addressed this assumption directly in May 2025. The answer is not what brands want to hear.</p>
+
+                <p>The Copyright Office's third and final AI and copyright report, published May 9, 2025, states explicitly that use of copyright-protected materials for AI model training is insufficient on its own to justify fair use. More critically: the knowing use of illegally obtained training data weighs against a fair-use defense — meaning if a tool was trained on stolen content, the downstream commercial users of that tool are relying on a legally compromised foundation.</p>
+
+                <div class="key-fact">
+                    <strong>The two legal relationships brands conflate:</strong> A commercial license from the tool company addresses the brand's relationship with that company. It says nothing about the tool company's relationship with the rights holders whose work was used to train the model. These are two entirely separate legal relationships. The commercial license cannot grant rights the tool company never had.
+                </div>
+
+                <p>In 2025, a US court rejected the transformativeness argument for commercial AI outputs — the idea that because AI-generated content doesn't contain the original work verbatim, it's not infringement. The court found that transformation does not occur simply because the copyrighted content does not appear verbatim in the output. This dismantles the most common secondary assumption brands make.</p>
+
+                <p>The pace of litigation makes this a now problem, not a future one. Active copyright infringement cases against AI companies more than doubled in 2025, from approximately 30 to over 70. Three of Hollywood's five major studios have now sued Midjourney. The RIAA sued Suno and Udio; Suno settled and committed to retiring its current model — meaning brands with Suno-generated audio in active campaigns are using content from a model that was legally indefensible enough that its creators agreed to shut it down.</p>
+
+                <p>Under vicarious liability principles, a brand that commissioned AI-generated content and profited from it can be held liable even if an agency produced the infringing work. Major IP law firms are now advising brand owners to amend agency contracts to add explicit AI-specific IP warranties and indemnification clauses — precisely because standard contracts do not contain them.</p>
+
+                <div class="explainer-cta">
+                    <a href="index.html#contact" class="btn btn-primary">Book a Risk Triage Call</a>
+                    <p>Understand what documentation you'd need if a rights holder challenged your AI content.</p>
+                </div>
+            </article>
+
+            <!-- Explainer 4 -->
+            <article class="explainer" id="2026-deadlines">
+                <div class="explainer-number">04 — Regulatory Calendar</div>
+                <h2>AI content disclosure deadlines: what's changing in 2026 and what brands need to do now</h2>
+
+                <p>The legal risk of using AI-generated content commercially is not hypothetical or distant. Several jurisdictions have already passed binding requirements, and multiple hard deadlines are approaching in 2026. Brands building AI content into campaigns now are building against a compliance calendar that is actively tightening.</p>
+
+                <div class="deadline-grid">
+                    <div class="deadline-item">
+                        <div class="deadline-date">Jan 2026<br>Active</div>
+                        <div class="deadline-desc">
+                            <strong>South Korea — Framework Act on AI</strong>
+                            Mandatory AI labeling requirements for certain generative AI applications. Specific obligations for high-impact AI systems. In force as of January 22, 2026.
+                        </div>
+                    </div>
+                    <div class="deadline-item">
+                        <div class="deadline-date">Dec 2025<br>Passed</div>
+                        <div class="deadline-desc">
+                            <strong>Taiwan — AI Basic Act</strong>
+                            Taiwan's Legislative Yuan passed the AI Basic Act on December 23, 2025. The Intellectual Property Office has ruled that using others' copyrightable work to train AI constitutes reproduction requiring license or fair use. AI-generated outputs resembling protected works may themselves infringe.
+                        </div>
+                    </div>
+                    <div class="deadline-item">
+                        <div class="deadline-date">June 2026<br>Approaching</div>
+                        <div class="deadline-desc">
+                            <strong>New York (US) — Synthetic Performer Disclosure Law</strong>
+                            Advertisers must make "clear and conspicuous" disclosure whenever AI-generated synthetic performers appear in any advertisement, in any media. Civil penalties: $1,000 for first violation, $5,000 for subsequent violations. Enforced by the state — does not require a rights holder to file suit.
+                        </div>
+                    </div>
+                    <div class="deadline-item">
+                        <div class="deadline-date">Aug 2026<br>Approaching</div>
+                        <div class="deadline-desc">
+                            <strong>European Union — AI Act Article 50</strong>
+                            Providers and deployers of AI systems that generate or substantially manipulate video, images, or audio must ensure content is clearly identifiable as artificial. Machine-readable watermarks or metadata embedded disclosure are required. Applies to any brand with EU market exposure.
+                        </div>
+                    </div>
+                </div>
+
+                <p>Beyond these hard deadlines, the pace of state-level legislation in the US is accelerating regardless of federal action. Over 1,100 AI-related bills were introduced in US state legislatures in 2025 alone. Tennessee's ELVIS Act (2024) extended right-of-publicity protections specifically to AI-generated voice clones. California's AB 2602 (2024) bans use of digital replicas of deceased performers without estate consent. Massachusetts is advancing mandatory AI disclosure requirements for any generative content within the state.</p>
+
+                <div class="key-fact">
+                    <strong>The compounding problem:</strong> Brands that produce AI video content now without documentation will need to retrofit that documentation retroactively as disclosure requirements take effect. Content produced with a clear chain of provenance today meets tomorrow's requirements without additional work. Content produced without it becomes a liability the moment the next law passes.
+                </div>
+
+                <p>SI8's Safe Lane process is designed to produce the documentation that satisfies these requirements at the point of production — not as a retroactive compliance exercise. Every Rights Package includes the tool provenance log, authorship declaration, commercial license confirmation, and disclosure-ready metadata that platforms and regulators are converging toward as the standard.</p>
+
+                <div class="explainer-cta">
+                    <a href="index.html#contact" class="btn btn-primary">Book a Risk Triage Call</a>
+                    <p>Review your current AI content posture against the 2026 regulatory calendar.</p>
+                </div>
+            </article>
+
+        </div>
+    </section>
+
+    <!-- Email Capture -->
+    <section class="briefing-bottom-cta" id="stay-current">
+        <h2>Stay current. Get the Risk Briefing by email.</h2>
+        <p>Monthly. One major legal development, one platform update, one SI8 insight. 300 words. No filler. Unsubscribe any time.</p>
+        <form class="email-capture-form" action="https://formspree.io/f/your-form-id" method="POST">
+            <input type="hidden" name="tag" value="brand_buyer">
+            <input type="email" name="email" placeholder="your@email.com" required>
+            <button type="submit" class="btn btn-primary">Subscribe</button>
+        </form>
+        <p class="email-capture-note">For brands and agencies. No spam. Unsubscribe any time.</p>
+        <div style="margin-top: 40px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.06);">
+            <p style="font-family:'Inter',sans-serif;font-size:0.9rem;color:var(--color-text-muted);margin-bottom:16px;">Or talk to us directly about your AI content risk.</p>
+            <a href="index.html#contact" class="btn btn-secondary">Book a 20-Min Risk Triage Call</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="text-align:center;padding:40px 24px;font-family:'Inter',sans-serif;font-size:0.8rem;color:var(--color-text-muted);border-top:1px solid rgba(255,255,255,0.06);">
+        <p>© 2026 SuperImmersive 8. Taipei, Taiwan.</p>
+        <p style="margin-top:8px;opacity:0.6;">This page is for informational purposes only and does not constitute legal advice.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
