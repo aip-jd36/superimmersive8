@@ -135,8 +135,9 @@
 
 ### 1. Credibility Assets (Before outreach)
 - [ ] 60-second sizzle reel (sample AI video work)
-- [ ] 10-slide deck OR 1-page PDF (agency-facing)
-- [ ] Rights Playbook v0.1 (3 pages max — safe lane, key clauses, platform summary)
+- [x] 1-page PDF (agency-facing) — ✓ Legal Risk Reduction Brief (Feb 2026)
+- [x] Rights Playbook v0.2 — ✓ Expanded with legal research, quantifiable metrics, competitive landscape (Feb 2026)
+- [x] Safe Lane website section — ✓ 5 pages live (How It Works, Rights Package, Vetting Criteria, Legal Brief, Playbook) (Feb 2026)
 - [ ] 2-3 sample AI video outputs (even mock/personal projects)
 
 ### 2. Sales Ops (This makes or breaks Month 2-6)
