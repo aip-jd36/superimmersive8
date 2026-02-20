@@ -1,0 +1,13 @@
+# Environment variables (contains API secrets)
+.env.local
+.env*.local
+
+# Vercel
+.vercel
+
+# OS files
+.DS_Store
+*.log
+
+# Node modules (if you add npm packages later)
+node_modules/
