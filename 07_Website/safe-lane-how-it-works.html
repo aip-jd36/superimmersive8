@@ -244,8 +244,8 @@
         }
 
         .process-stage {
-            background: rgba(129, 140, 248, 0.05);
-            border: 1px solid rgba(129, 140, 248, 0.2);
+            background: #F7F6EF;
+            border: 1px solid rgba(200, 144, 10, 0.2);
             border-radius: 12px;
             padding: 40px;
         }
@@ -253,7 +253,7 @@
         .stage-number {
             font-size: 48px;
             font-weight: 700;
-            background: linear-gradient(135deg, var(--color-gradient-1), var(--color-gradient-2));
+            background: linear-gradient(135deg, #C8900A, #F0C040);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 20px;
@@ -262,11 +262,11 @@
         .process-stage h3 {
             font-size: 24px;
             margin-bottom: 16px;
-            color: #fff;
+            color: #1a1918;
         }
 
         .process-stage p {
-            color: #94a3b8;
+            color: #52504A;
             margin-bottom: 20px;
         }
 
@@ -280,23 +280,24 @@
             padding: 12px 0;
             padding-left: 32px;
             position: relative;
-            color: #cbd5e1;
-            border-bottom: 1px solid rgba(129, 140, 248, 0.1);
+            color: #1a1918;
+            border-bottom: 1px solid rgba(200, 144, 10, 0.15);
         }
 
         .checklist li:before {
             content: "→";
             position: absolute;
             left: 0;
-            color: var(--color-gradient-2);
+            color: #C8900A;
         }
 
         .stage-outcomes {
             margin-top: 24px;
             padding: 16px;
-            background: rgba(0, 0, 0, 0.3);
+            background: #FAFAF7;
             border-radius: 8px;
             font-size: 14px;
+            color: #1a1918;
         }
 
         .tier-list {
@@ -309,25 +310,22 @@
             padding: 20px;
             border-radius: 8px;
             border-left: 4px solid;
+            background: #FFFFFF;
         }
 
         .tier-certified {
-            background: rgba(34, 197, 94, 0.1);
             border-left-color: #22c55e;
         }
 
         .tier-standard {
-            background: rgba(59, 130, 246, 0.1);
             border-left-color: #3b82f6;
         }
 
         .tier-caution {
-            background: rgba(234, 179, 8, 0.1);
-            border-left-color: #eab308;
+            border-left-color: #C8900A;
         }
 
         .tier-reject {
-            background: rgba(239, 68, 68, 0.1);
             border-left-color: #ef4444;
         }
 
@@ -335,12 +333,13 @@
             display: block;
             margin-bottom: 8px;
             font-size: 16px;
+            color: #1a1918;
         }
 
         .tier p {
             margin: 0;
             font-size: 14px;
-            color: #94a3b8;
+            color: #52504A;
         }
 
         .outcome-box {
@@ -348,25 +347,24 @@
             border-radius: 8px;
             margin: 12px 0;
             border-left: 4px solid;
+            background: #FFFFFF;
+            color: #1a1918;
         }
 
         .outcome-pass {
-            background: rgba(34, 197, 94, 0.1);
             border-left-color: #22c55e;
         }
 
         .outcome-conditional {
-            background: rgba(234, 179, 8, 0.1);
-            border-left-color: #eab308;
+            border-left-color: #C8900A;
         }
 
         .outcome-reject {
-            background: rgba(239, 68, 68, 0.1);
             border-left-color: #ef4444;
         }
 
         .dark-section {
-            background: rgba(0, 0, 0, 0.3);
+            background: #FAFAF7;
             padding: 80px 0;
         }
 
@@ -379,7 +377,7 @@
 
         .no-item {
             padding: 24px;
-            background: rgba(239, 68, 68, 0.1);
+            background: #FFFFFF;
             border: 1px solid rgba(239, 68, 68, 0.3);
             border-radius: 8px;
         }
@@ -393,19 +391,19 @@
 
         .no-item strong {
             display: block;
-            color: #fff;
+            color: #1a1918;
             margin-bottom: 8px;
         }
 
         .no-item p {
             margin: 0;
             font-size: 14px;
-            color: #94a3b8;
+            color: #52504A;
         }
 
         .info-box {
-            background: rgba(129, 140, 248, 0.1);
-            border: 1px solid rgba(129, 140, 248, 0.3);
+            background: #F7F6EF;
+            border: 1px solid rgba(200, 144, 10, 0.3);
             border-radius: 12px;
             padding: 48px;
             text-align: center;
@@ -413,16 +411,20 @@
 
         .info-box h3 {
             margin-bottom: 24px;
-            color: #fff;
+            color: #1a1918;
         }
 
         .big-stat {
             font-size: 48px;
             font-weight: 700;
-            background: linear-gradient(135deg, var(--color-gradient-1), var(--color-gradient-2));
+            background: linear-gradient(135deg, #C8900A, #F0C040);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin: 24px 0;
+        }
+
+        .info-box p {
+            color: #52504A;
         }
 
         .nav-dropdown {
@@ -433,17 +435,18 @@
         .dropdown-content {
             display: none;
             position: absolute;
-            background: #1a1a2e;
+            background: #FFFFFF;
             min-width: 220px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
             border-radius: 8px;
             padding: 12px 0;
             z-index: 1000;
             margin-top: 8px;
+            border: 1px solid rgba(200, 144, 10, 0.2);
         }
 
         .dropdown-content a {
-            color: #cbd5e1;
+            color: #52504A;
             padding: 12px 24px;
             text-decoration: none;
             display: block;
@@ -451,8 +454,8 @@
         }
 
         .dropdown-content a:hover {
-            background: rgba(129, 140, 248, 0.1);
-            color: var(--color-accent);
+            background: #FAFAF7;
+            color: #C8900A;
         }
 
         .nav-dropdown:hover .dropdown-content {
