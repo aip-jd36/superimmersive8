@@ -2026,6 +2026,21 @@ SI8's catalog has documentation on every piece: tool disclosure, Safe Lane sign-
 | Feb 17, 2026 | **Traditional Chinese (zh-TW) version live** | index-zh.html — full content parity; EN/繁體中文 toggle in nav; deployed to Bluehost; ready for Taipei advisor meetings |
 | Feb 17, 2026 | **Film titles localized for zh-TW** | 霓虹孤獨, 最後的花園, 過境, 訊號消失, 未來田園, 綻放協議 — localized not transliterated; feels native, not translated |
 | Feb 17, 2026 | **Catalog section id anchored separately from services section** | #catalog → visual grid; #how-it-works → services cards; hero "Explore the Catalog" CTA now lands on actual catalog content |
+| **Feb 20, 2026** | **Triple-verified legal research completed** | Merged research from Claude + ChatGPT + Gemini; 50+ citations; verification tier labels (✅✅✅ = all three AIs confirmed); 15K word comprehensive foundation for all legal claims |
+| Feb 20, 2026 | **Colorado AI Act "rebuttable presumption" discovered** | Explicit legal safe harbor language: documented systems get presumption of reasonable care; avoids $20K penalties; Rights Package = statutory compliance infrastructure |
+| Feb 20, 2026 | **73% damage reduction quantified** | Innocent infringer defense (17 U.S.C. § 504): $750→$200 minimum statutory damages; prevents $150K willful penalties; documentation = "considerable effort" courts require |
+| Feb 20, 2026 | **USCO copyrightability requirement confirmed** | Jan 2025 Part 2 Report: prompts alone ≠ authorship; human editorial control required; without documentation, brands cannot own copyright to AI commercials |
+| Feb 20, 2026 | **Rights Playbook v0.2 released** | Added Colorado safe harbor, USCO copyrightability, DMCA CMI preservation, EU AI Act Article 50, NY synthetic performer law, quantifiable metrics, competitive landscape (Adobe limitations, C2PA distinction) |
+| Feb 20, 2026 | **Legal Risk Reduction Brief created** | 1-page buyer asset; four value mechanisms (damage mitigation, regulatory compliance, copyrightability, distribution); only triple-verified claims; competitive differentiation vs. Adobe/C2PA |
+| Feb 20, 2026 | **Filmmaker Agreement updated with legal requirements** | Added Human Authorship Declaration (150+ words minimum) + CMI preservation clause; both required by legal research findings; USCO copyrightability + DMCA compliance |
+| Feb 20, 2026 | **Safe Lane website section launched** | 5 pages: How It Works, Rights Package, Vetting Criteria, Legal Risk Brief (gated), Rights Playbook (gated); dark theme + purple/pink gradients; mobile responsive |
+| Feb 20, 2026 | **Navigation restructured: Safe Lane dropdown** | From simple link to dropdown with 5 sub-pages; Safe Lane = primary value prop (not buried); catalog = supporting proof (not primary pitch); both EN + ZH-TW |
+| Feb 20, 2026 | **"For Brands" rewritten: risk-first messaging** | From "Explore the Catalog" (commodity) to "Download Legal Risk Brief" (expertise); added risk stats (73%+, $150K, $20K); Getty positioning front and center |
+| Feb 20, 2026 | **Strategic positioning shift complete** | Homepage now sells risk reduction service, not stock library; Safe Lane = 5 pages of expertise; 2 gated lead-gen assets; catalog = visual proof after expertise pitch |
+| Feb 20, 2026 | **Lead gen funnel architecture built** | Gated downloads (Legal Brief + Rights Playbook) → email capture → auto-deliver PDF → follow-up nurture → discovery call; Formspree integration on both pages |
+| Feb 20, 2026 | **"Getty for AI video" positioning externalized** | Previously internal framing; now explicit in For Brands section: "Brands pay Getty $450 for legal guarantee, $50 for JPEG. We sell same value layer for AI video." |
+| Feb 20, 2026 | **Adobe competitive gap weaponized** | "Adobe = safe but boring (Firefly only). SI8 = best creative tools (Sora/Runway/Kling) made safe." — now in Rights Playbook v0.2 + Legal Risk Brief + website |
+| Feb 20, 2026 | **C2PA differentiation clarified** | "C2PA proves the video came from Runway. SI8 proves the video won't get you sued by Disney. C2PA is the receipt; SI8 is the legal audit." — documented in playbook + brief |
 
 ---
 
