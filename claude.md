@@ -452,16 +452,25 @@ SuperImmersive8/
 
 ### Deployment
 
-**Hosting:** Bluehost (cPanel)
+**IMPORTANT: Site is deployed on VERCEL, not Bluehost!**
+
+**Hosting:** Vercel (auto-deploy from GitHub)
 **Domain:** www.superimmersive8.com
-**Deploy location:** `public_html/` on Bluehost
+**Git:** https://github.com/aip-jd36/superimmersive8.git
+**Vercel Project:** superimmersive8
+**Root Directory:** `07_Website/`
 
 **To deploy:**
-1. cPanel → File Manager → `public_html/`
-2. Delete existing WordPress files
-3. Upload: `index.html`, `styles.css`, `script.js` from `07_Website/`
+1. Make changes to files in `07_Website/`
+2. Git commit locally
+3. `git push origin main`
+4. Vercel auto-deploys in ~2 minutes
+5. Check deployment at https://vercel.com/dashboard
 
-**Future:** Can set up Vercel auto-deploy from GitHub (optional)
+**Domain DNS:** Points to Vercel, NOT Bluehost
+- Bluehost only manages domain registration
+- Website files on Bluehost are NOT used
+- Do NOT upload to Bluehost cPanel
 
 ---
 

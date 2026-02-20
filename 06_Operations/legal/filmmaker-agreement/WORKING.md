@@ -64,7 +64,17 @@ for formal agreement to be drafted.
 - [ ] No unauthorized real-person likeness or voice cloning used
 - [ ] Content does not infringe known copyrighted characters, scenes, or IP to filmmaker's knowledge
 - [ ] Will disclose all AI tools used in production
-- [ ] Exercised meaningful creative control beyond prompt entry (direction, selection, editing) — required for copyright protection in US, Taiwan, and Singapore
+- [ ] **[NEW] Provides Human Authorship Declaration (150+ words minimum)** documenting:
+  - Prompts used and creative intent
+  - Iteration decisions and selection process
+  - Editorial choices and post-generation modifications
+  - Meaningful creative control exercised beyond prompt entry
+  - **Required for copyright protection** per U.S. Copyright Office Part 2 Report (Jan 2025), Taiwan TIPO, and Singapore IPOS
+- [ ] **[NEW] Preserves Copyright Management Information (CMI)**:
+  - No removal or alteration of watermarks, signatures, or attribution metadata
+  - Preserves provenance information where present in AI tool outputs
+  - **Required under DMCA § 1202** — separate violation from copyright infringement
+  - Filmmaker acknowledges that CMI stripping creates statutory damages exposure under 17 U.S.C. § 1203
 - [ ] Acknowledges that Veo consumer outputs are commercially prohibited and cannot be submitted
 - [ ] Acknowledges that Kling-generated content may complicate exclusive licensing agreements (Kling retains sublicensable training data rights)
 
@@ -75,6 +85,22 @@ for formal agreement to be drafted.
 ### Termination
 - Either party: 30 days written notice
 - Deals already in active negotiation survive termination for 90 days
+
+**Why these new requirements matter (February 2026 legal research):**
+
+*Human Authorship Declaration:*
+- U.S. Copyright Office (Jan 2025): "Prompts alone do not provide sufficient human control to make users of an AI system the authors of the output"
+- Without documented human authorship, **brands cannot own copyright** to AI-generated commercials
+- SI8 needs this to prove copyrightability to buyers (premium distribution requirement)
+- 150 words minimum documents "meaningful creative control" courts require
+
+*CMI Preservation:*
+- DMCA § 1202/1203 prohibits removal/alteration of copyright management information (watermarks, signatures, attribution)
+- Separate violation from infringement — statutory damages available
+- Andersen v. Stability AI (2024-2026): CMI preservation claims survived motion to dismiss
+- SI8's Safe Lane process includes CMI compliance — filmmakers must not strip metadata before submission
+
+*Reference:* Full legal research available in `01_Business/research/merged-legal-research-final.md`
 
 ---
 

@@ -4,6 +4,38 @@ A record of what changed between versions, why, and what was left unresolved.
 
 ---
 
+## v0.2 — February 2026
+
+**Trigger:** Comprehensive legal research completed (Claude + ChatGPT + Gemini merged analysis)
+
+**What's new:**
+- **Colorado AI Act safe harbor:** "Rebuttable presumption of reasonable care" for documented systems — explicit legal safe harbor language that rewards SI8's Rights Package approach
+- **USCO copyrightability requirements:** Expanded human authorship section with Jan 2025 Part 2 Report findings — prompts alone ≠ authorship
+- **DMCA CMI preservation:** Added § 1202/1203 requirements (no watermark/attribution stripping) — separate violation from infringement
+- **EU AI Act Article 50:** Transparency obligations for synthetic content (phased 2026+)
+- **NY synthetic performer disclosure law:** $1K-$5K fines for undisclosed synthetic performers in ads (effective 2026)
+- **Quantifiable legal metrics section:** 73% damage reduction, regulatory penalties avoided, copyrightability protection
+- **Competitive landscape section:** Adobe Firefly limitations clarified (indemnifies Firefly only, NOT third-party tools like Runway/Sora), C2PA vs. SI8 differentiation (provenance vs. legal safety)
+- **Innocent infringer defense:** Expanded with statutory damages table, Copyright Alliance quote, Rights Package field mapping
+
+**Key decisions made:**
+- Human Authorship Declaration now mandatory (150+ words minimum) — required for copyrightability per USCO
+- CMI preservation is Safe Lane requirement (no watermark stripping) — DMCA compliance
+- "73% damage reduction" is defensible marketing claim (statutory framework, triple-verified)
+- "Rebuttable presumption of reasonable care" (Colorado) validates Rights Package as compliance infrastructure
+- C2PA commoditizes provenance; SI8's moat is subjective legal review (judgment layer)
+- Adobe's indemnification gap is SI8's competitive opening: "Adobe = safe but boring. SI8 = best tools made safe."
+
+**Still unresolved (carry to v0.3):**
+- E&O insurance broker-validated underwriting requirements (hypothesis needs validation)
+- Music and audio rights (complex; flag edge cases for legal review)
+- Festival-specific requirements
+- Taiwan Copyright Bureau guidelines (no release date)
+- MyVideo platform policy (ask Jamie Lin)
+- Viu platform policy (direct contact)
+
+---
+
 ## v0.1 — February 2026
 
 **Use case served:**
