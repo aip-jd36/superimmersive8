@@ -130,7 +130,7 @@
 - [x] Calendar link for booking calls — ✓ Calendly linked
 - [x] "AI Rights safe lane" blurb (signals expertise) — ✓ Safe Lane section live
 - [x] Mobile responsive — ✓ Responsive breakpoints implemented
-- [x] Deploy to Netlify/Vercel — ✓ Deployed to Bluehost (cPanel, public_html/)
+- [x] Deploy to Netlify/Vercel — ✓ Deployed to Vercel (auto-deploy from GitHub)
 - [x] Connect domain (www.superimmersive8.com) — ✓ Live at superimmersive8.com
 
 ### 1. Credibility Assets (Before outreach)
