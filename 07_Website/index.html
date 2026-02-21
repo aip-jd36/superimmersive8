@@ -10,14 +10,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <style>
-        /* Three-button CTA responsive layout */
+        /* CTA responsive layouts */
         @media (max-width: 768px) {
+            /* For Brands section - three-button layout */
             .cta-group > div {
                 grid-template-columns: 1fr !important;
             }
             .cta-group .btn {
                 font-size: 15px !important;
                 padding: 14px 24px !important;
+            }
+            /* For Filmmakers section - two-button layout */
+            .filmmaker-ctas {
+                grid-template-columns: 1fr !important;
+                max-width: 100% !important;
             }
         }
     </style>
@@ -384,7 +390,14 @@
                         </div>
                     </div>
 
-                    <a href="#contact" class="btn btn-primary">Apply to the Roster</a>
+                    <div class="cta-group filmmaker-ctas" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 500px;">
+                        <a href="#contact" class="btn btn-primary" style="text-align: center;">
+                            Apply to the Roster
+                        </a>
+                        <a href="safe-lane-rights-package.html#sample" class="btn btn-secondary" style="text-align: center;">
+                            Sample Rights Package
+                        </a>
+                    </div>
                 </div>
                 <div class="audience-visual">
                     <div class="visual-card">
