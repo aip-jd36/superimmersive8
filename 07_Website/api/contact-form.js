@@ -66,33 +66,34 @@ export default async function handler(req, res) {
     }
 
     // ============================================
-    // 2. ADD TO KIT FOR CRM TRACKING
+    // 2. ADD TO KIT FOR CRM TRACKING (OPTIONAL)
     // ============================================
 
-    const kitResponse = await fetch(
-      `https://api.kit.com/v3/tags/${KIT_TAG_ID}/subscribe`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          api_secret: KIT_API_SECRET,
-          email: email,
-          first_name: name || '',
-          fields: {
-            company: company || '',
-            inquiry_type: type || '',
-            message: message || '',
-            form_source: 'contact-form'
-          }
-        }),
+    let kitAdded = false;
+    try {
+      const kitResponse = await fetch(
+        `https://api.kit.com/v3/tags/${KIT_TAG_ID}/subscribe`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            api_secret: KIT_API_SECRET,
+            email: email,
+            first_name: name || ''
+            // Note: Custom fields removed - add to Kit dashboard first
+          }),
+        }
+      );
+
+      const kitData = await kitResponse.json();
+      kitAdded = kitResponse.ok;
+
+      if (!kitResponse.ok) {
+        console.error('Kit API error (non-fatal):', kitData);
       }
-    );
-
-    const kitData = await kitResponse.json();
-
-    if (!kitResponse.ok) {
-      console.error('Kit error:', kitData);
-      // Email was sent, so still return success even if Kit fails
+    } catch (kitError) {
+      console.error('Kit error (non-fatal):', kitError);
+      // Don't fail the request if Kit fails - email is the priority
     }
 
     // ============================================
@@ -103,7 +104,7 @@ export default async function handler(req, res) {
       success: true,
       message: 'Message sent successfully! We\'ll respond within 24 hours.',
       email_sent: emailResponse.ok,
-      kit_added: kitResponse.ok
+      kit_added: kitAdded
     });
 
   } catch (error) {
