@@ -4,7 +4,89 @@
 
 | Version | Date | Status | Trigger | Key Changes |
 |---------|------|--------|---------|-------------|
-| **v0.1** | Feb 21, 2026 | Draft (peer review pending) | Research completed on Getty SOP | Initial framework based on Getty Images delivery model |
+| **v0.2** | Feb 21, 2026 | Finalized (ready for first deal) | Peer review complete + familiarity improvements | Terminology updated, 7 decisions implemented, License Summary + Master Agreement added |
+| **v0.1** | Feb 21, 2026 | Draft (superseded by v0.2) | Research completed on Getty SOP | Initial framework based on Getty Images delivery model |
+
+---
+
+## v0.2 — February 21, 2026
+
+### What Triggered This Version
+
+**Peer review complete:** ChatGPT + Gemini provided detailed feedback on v0.1
+**Key insight:** SOP is structurally sound, but needs to use **familiar stock-agency language** to reduce buyer friction
+
+Both models emphasized: "Make it feel like Getty/Shutterstock, but deliver more documentation."
+
+### Major Changes in v0.2
+
+#### 1. Terminology Updated (Industry-Familiar Language)
+
+| Old Term (v0.1) | New Term (v0.2) | Why |
+|-----------------|-----------------|-----|
+| Rights Package | **Chain of Title & Compliance Log** | Film/TV buyers already know this terminology |
+| Safe Lane Sign-Off | **Chain of Title Verification** | Familiar legal audit language |
+| Transaction ID | **Order ID** (ORD-2026-####) | Familiar e-commerce language |
+| Catalog ID | **Asset ID** (buyer-facing) | Stock agencies use "Asset ID" |
+
+**Impact:** Buyers immediately understand what they're getting (no learning curve)
+
+#### 2. New Deliverables Added
+
+| Document | Purpose | Why Added |
+|----------|---------|-----------|
+| **License Summary** (1-page PDF) | Quick reference for procurement/legal | ChatGPT: "Ultra-familiar, most forwarded doc" |
+| **Master License Agreement** | One EULA for all purchases | Gemini: "Matches Getty model, no per-deal contracts" |
+
+#### 3. Folder Structure Redesigned
+
+**Old (v0.1):** Messy folder with files
+**New (v0.2):** Premium ZIP download structure
+
+```
+/SI8 Library/ACME Corporation/ORD-2026-0001_Neon-Dreams/
+  ├── LICENSE_SUMMARY.pdf (1 page) ← NEW
+  ├── SI8-2026-0001_Neon-Dreams.mp4
+  ├── CHAIN_OF_TITLE.pdf (12 pages) ← renamed
+  ├── INVOICE_ORD-2026-0001.pdf
+  └── SI8_MASTER_LICENSE_AGREEMENT.pdf ← NEW
+```
+
+**ALL CAPS file names** + consistent structure = professional, scannable
+
+#### 4. Email Templates Revised (Stock-Agency Voice)
+
+**Old subject:** `License Confirmed: Neon Dreams (SI8-2026-0001)`
+**New subject:** `Your Download is Ready — Order #ORD-2026-0001`
+
+**Removed:**
+- ❌ "This is what Getty doesn't provide" (sounds defensive post-purchase)
+- ❌ Emojis (✓, →) in enterprise templates
+- ❌ Marketing language
+
+**Added:**
+- ✅ "Your SI8 Library" framing (feels like account portal)
+- ✅ Master License Agreement reference
+- ✅ License Summary PDF link
+
+#### 5. "My SI8 Licenses" Index (Year 1 Dashboard Simulation)
+
+**What:** Shared Google Sheet (read-only) listing buyer's purchases
+**Why:** ChatGPT: "Mimics account dashboard psychologically without building platform"
+
+**Columns:** Order ID | Asset | License Type | Date | Download Folder | Invoice | License Summary
+
+#### 6. Seven Peer Review Decisions Implemented
+
+| Question | JD's Decision | Implementation |
+|----------|---------------|----------------|
+| **Q1: Storage security** | Option B (email-specific sharing) | No public "anyone with link" — share to buyer@company.com only |
+| **Q2: Refund policy** | Option A (no refunds after delivery) | Matches Getty, simple to enforce |
+| **Q3: Documentation scope** | Option A (everything included) | No $500 compliance add-on, all docs in base package |
+| **Q4: Year 1.5 automation** | Option B (wait for pain) | Automate only when manual work exceeds 2 hrs/week |
+| **Q5: Category taxonomy** | Option B (start with 5) | Build taxonomy as conflicts arise (QSR, telco, auto, banking, CPG) |
+| **Q6: E&O insurance** | Option B (investigate when Tier 2 is live) | Research quotes when first $50K deal materializes |
+| **Q7: Google Workspace** | Option C (stay on Drive through Year 2) | Cheapest path, upgrade only if enterprise buyer requires it |
 
 ---
 

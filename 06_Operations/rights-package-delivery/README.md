@@ -4,17 +4,37 @@
 
 This project documents **how SI8 delivers rights documentation to buyers** when they license AI video content from our catalog. It defines the operational process for fulfilling orders, delivering legal documentation, and maintaining records for compliance and legal defense.
 
-This is not about creating the Rights Package itself (that's documented in `06_Operations/safe-lane/`). This is about **how we get it to the customer** and **how we store it for the long term**.
+This is not about creating the Chain of Title documentation itself (that's documented in `06_Operations/safe-lane/`). This is about **how we get it to the customer** and **how we store it for the long term**.
 
 ---
 
 ## Why This Matters
 
-**The Rights Package is the product. The video file is just the carrier.**
+**The Chain of Title is the product. The video file is just the carrier.**
 
-Based on the Getty Images model: buyers pay $450 for the legal guarantee, $50 for the JPEG. SI8's differentiation is providing documented defensibility that Getty doesn't offer for photography. Our delivery system must treat the Rights Package PDF as the primary deliverable, not an afterthought.
+Based on the Getty Images model: buyers pay $450 for the legal guarantee, $50 for the JPEG. SI8's differentiation is providing documented defensibility that Getty doesn't offer for photography. Our delivery system must treat the Chain of Title & Compliance Log as the primary deliverable, not an afterthought.
 
-**Legal compliance:** Stock photo agencies maintain license records indefinitely. SI8 must do the same. If a buyer faces legal review 3 years after purchase, they need to retrieve their Rights Package. Our SOP must guarantee this.
+**Legal compliance:** Stock photo agencies maintain license records indefinitely. SI8 must do the same. If a buyer faces legal review 3 years after purchase, they need to retrieve their documentation. Our SOP must guarantee this.
+
+---
+
+## Terminology: Industry-Familiar Language
+
+**Key decision (v0.2):** We use stock-agency familiar terminology to reduce buyer friction.
+
+| Internal Name | Buyer-Facing Name | Why |
+|---------------|-------------------|-----|
+| Rights Package | **Chain of Title & Compliance Log** | Film/TV buyers already know "Chain of Title" = legal provenance |
+| Safe Lane Sign-Off | **Chain of Title Verification** | Familiar legal audit terminology |
+| Catalog ID | **Asset ID** (buyer-facing) | Stock agencies use "Asset ID" |
+| Transaction | **Order** (with Order ID) | Familiar e-commerce language |
+
+**What we deliver:**
+- Video file (MP4)
+- **Chain of Title & Compliance Log** (PDF, 9-field documentation)
+- **License Summary** (1-page quick reference)
+- Invoice
+- Master License Agreement (standard terms)
 
 ---
 
@@ -22,10 +42,10 @@ Based on the Getty Images model: buyers pay $450 for the legal guarantee, $50 fo
 
 | Project | What | Relationship to This Project |
 |---------|------|------------------------------|
-| **Safe Lane Verification** (`06_Operations/safe-lane/`) | HOW SI8 vets content before it enters catalog | Creates the Rights Package PDF that this project delivers |
-| **Rights Playbook** (`06_Operations/legal/rights-playbook/`) | WHY SI8's process is legally sound | Legal foundation that Rights Package documents |
-| **Filmmaker Agreement** (`06_Operations/legal/filmmaker-agreement/`) | How SI8 acquires rights from creators | Upstream relationship; affects modification rights in Rights Package |
-| **This Project** | HOW SI8 delivers Rights Packages to buyers + stores records | Downstream fulfillment after Safe Lane vetting |
+| **Safe Lane Verification** (`06_Operations/safe-lane/`) | HOW SI8 vets content before it enters catalog | Creates the Chain of Title documentation that this project delivers |
+| **Rights Playbook** (`06_Operations/legal/rights-playbook/`) | WHY SI8's process is legally sound | Legal foundation that Chain of Title documents |
+| **Filmmaker Agreement** (`06_Operations/legal/filmmaker-agreement/`) | How SI8 acquires rights from creators | Upstream relationship; affects modification rights in Chain of Title |
+| **This Project** | HOW SI8 delivers documentation to buyers + stores records | Downstream fulfillment after Safe Lane vetting |
 
 ---
 
@@ -55,6 +75,16 @@ Buyer licenses content
 └────────────────────────────────────────┘
          ↓
 ┌────────────────────────────────────────┐
+│ MASTER-LICENSE-AGREEMENT.md            │ ← Standard terms (one EULA for all)
+│ (Lawyer review required before use)    │
+└────────────────────────────────────────┘
+         ↓
+┌────────────────────────────────────────┐
+│ LICENSE-SUMMARY-TEMPLATE.md            │ ← 1-page quick reference template
+│ (Generated for every order)            │
+└────────────────────────────────────────┘
+         ↓
+┌────────────────────────────────────────┐
 │ DECISIONS.md                           │ ← Version log, what changed, why
 │ (Decision history, open questions)     │
 └────────────────────────────────────────┘
@@ -64,30 +94,38 @@ Buyer licenses content
 
 ## Current Version Status
 
-**Version:** v0.1 (Draft — awaiting peer review)
+**Version:** v0.2 (Finalized after peer review)
 **Date:** February 21, 2026
-**Status:** Pre-launch design based on Getty Images SOP research
+**Status:** Ready for first deal, pending lawyer review of Master Agreement
+
+**Major changes in v0.2:**
+- Terminology updated to match Getty/Shutterstock buyer expectations
+- Added License Summary 1-pager (ultra-familiar to procurement teams)
+- Added Master License Agreement (one EULA for all purchases)
+- Folder structure redesigned to feel like "premium ZIP download"
+- Email templates revised to use stock-agency voice
+- All 7 peer review decisions implemented
 
 ### Phase Roadmap
 
 | Phase | Trigger | Implementation Focus |
 |-------|---------|---------------------|
-| **v0.1 (now)** | First catalog entries ready | Manual process: email templates, Google Drive storage, spreadsheet tracking |
-| **v0.2** | After first 3 deals close | Semi-automated: Resend/Kit automation, Notion/Airtable license DB |
-| **v0.3** | After 10+ deals, steady revenue | Refine based on buyer feedback, lawyer review of email language |
-| **v1.0** | Month 6-12 | Stable manual→semi-automated SOP, ready for platform build |
-| **Platform (Year 2-3)** | Revenue validates model | Self-serve user accounts, automated Rights Package delivery, API access |
+| **v0.2 (now)** | First deal ready to close | Manual process optimized for buyer familiarity (Getty-like UX) |
+| **v0.3** | After first 3 deals close | Refine based on real buyer feedback, document edge cases |
+| **v1.0** | Month 6-12, lawyer review complete | Stable manual SOP, lawyer-approved Master Agreement |
+| **Platform (Year 2-3)** | Revenue validates model | Self-serve user accounts, automated delivery, API access |
 
 ---
 
 ## Key Design Principles
 
 1. **Model after Getty Images** — proven 25+ year stock licensing SOP
-2. **Rights Package = primary deliverable** — video file is secondary
-3. **Indefinite record retention** — legal compliance requires permanent license history
-4. **Year 1 = manual, Year 3 = automated** — build process before platform
-5. **Email confirmation = immediate** — Rights Package download link sent within seconds of payment
-6. **Invoice + Rights Package = legal defense bundle** — both must be preserved and retrievable
+2. **Feel familiar, deliver more** — Use Getty's UX language, but include Chain of Title documentation they don't provide
+3. **Chain of Title = primary deliverable** — video file is secondary
+4. **Indefinite record retention** — legal compliance requires permanent license history
+5. **Year 1 = manual, Year 3 = automated** — build process before platform
+6. **Master License Agreement + Order ID** — familiar transaction model (one EULA, many purchases)
+7. **"SI8 Library" framing** — Even in Year 1, delivery feels like account vault (not agency handoff)
 
 ---
 
@@ -95,39 +133,55 @@ Buyer licenses content
 
 ```
 06_Operations/rights-package-delivery/
-├── README.md                      # This file — project overview
-├── DELIVERY-PROCESS.md            # Step-by-step buyer purchase → delivery flow
-├── EMAIL-TEMPLATES.md             # All automated email templates
-├── STORAGE-RETENTION.md           # File storage, backup, retention policies
-├── ACCOUNT-DASHBOARD.md           # Year 2-3 self-serve platform design
-├── DECISIONS.md                   # Version log, what changed, why
+├── README.md                         # This file — project overview
+├── DELIVERY-PROCESS.md               # Step-by-step buyer purchase → delivery flow
+├── EMAIL-TEMPLATES.md                # All automated email templates
+├── STORAGE-RETENTION.md              # File storage, backup, retention policies
+├── ACCOUNT-DASHBOARD.md              # Year 2-3 self-serve platform design
+├── MASTER-LICENSE-AGREEMENT.md       # Draft standard terms (EULA)
+├── LICENSE-SUMMARY-TEMPLATE.md       # 1-page quick reference template
+├── DECISIONS.md                      # Version log, what changed, why
+├── PEER-REVIEW-SYNTHESIS.md          # ChatGPT + Gemini feedback analysis
+├── DISCUSSION-QUESTIONS.md           # Structured decision questions (answered)
+├── PEER-REVIEW-PROMPT.md             # Prompt used for peer review
 ├── research/
-│   └── getty-sop-research.md      # Feb 21 2026 web research on Getty's delivery process
+│   └── getty-sop-research.md         # Feb 21 2026 web research on Getty's delivery process
 └── versions/
-    └── v0.1.md                    # First frozen snapshot (cut after peer review)
+    ├── v0.1.md                       # First draft snapshot (pre-peer review)
+    └── v0.2.md                       # Post-peer review (ready for first deal)
 ```
 
 ---
 
 ## Open Questions (To Be Resolved)
 
-- **Payment processing:** Stripe vs. PayPal vs. wire transfer for international buyers?
-- **File delivery method:** Email attachment (size limits) vs. download link (expiration policy)?
-- **Rights Package versioning:** If a buyer licensed v1.0 but we later update to v1.1 (template change), do they get the new version? Or is it frozen at purchase date?
-- **Re-download policy:** Unlimited re-downloads? Or "contact support after 90 days"?
-- **Account creation:** Required at purchase? Or optional (just email-based delivery)?
-- **Territory-specific invoicing:** Do we need different invoice formats for Taiwan vs. Singapore vs. US buyers?
-- **Refund policy:** If buyer requests refund, do we revoke Rights Package access? (Getty: yes, within 30 days if unused)
+### Resolved in v0.2 (Peer Review)
+
+- ✅ **Storage security:** Email-specific sharing (not public links)
+- ✅ **Refund policy:** No refunds after delivery (matches Getty)
+- ✅ **Documentation scope:** Everything included in base package (no upsell)
+- ✅ **Year 1.5 automation:** Wait for manual pain (support >2hrs/week) before automating
+- ✅ **Category taxonomy:** Start with 5 categories, expand as conflicts arise
+- ✅ **E&O insurance:** Investigate when first Tier 2 deal is live
+- ✅ **Google Workspace:** Stay on Google Drive through Year 2
+
+### Still Open (Resolve by Month 3)
+
+- **Payment processing:** Stripe preferred, but add PayPal/wire for international buyers?
+- **Territory-specific invoicing:** Different invoice formats for Taiwan/Singapore/US?
+- **Master Agreement governing law:** Taiwan? Singapore? Buyer's jurisdiction?
+- **Filmmaker royalty tracking:** Automate or manual spreadsheet in Year 1?
 
 ---
 
 ## Next Steps
 
-1. **Peer review:** Get feedback from ChatGPT, Gemini, and advisor network
-2. **Draft all core documents:** Complete DELIVERY-PROCESS.md, EMAIL-TEMPLATES.md, STORAGE-RETENTION.md
-3. **Legal review (Month 3):** Have lawyer review email language, invoice format, license confirmation wording
-4. **Test with first deal:** Run manual process end-to-end, document what breaks
-5. **Iterate to v0.2:** Refine based on real buyer experience
+1. ✅ **Peer review complete** (ChatGPT + Gemini feedback synthesized)
+2. ✅ **Terminology updated** (Chain of Title, Order ID, License Summary added)
+3. ⚠️ **Lawyer review** (Master Agreement, disclaimer language, refund policy)
+4. 📋 **Test with first deal** (MyVideo pilot — run manual process end-to-end)
+5. 📋 **Update website** (terminology consistency across homepage + Safe Lane pages)
+6. 📋 **Iterate to v0.3** (after first 3 deals, refine based on buyer feedback)
 
 ---
 
@@ -136,9 +190,10 @@ Buyer licenses content
 | Date | Version | Change | Reason |
 |------|---------|--------|--------|
 | Feb 21, 2026 | v0.1 | Initial draft based on Getty research | Establish SOP framework before first catalog deal |
+| Feb 21, 2026 | v0.2 | Terminology update + peer review decisions implemented | Make delivery feel familiar to Getty/Shutterstock buyers |
 
 ---
 
 **Project Owner:** JD
 **Last Updated:** February 21, 2026
-**Review Cycle:** After every 3 deals (v0.1 → v0.2 → v0.3) until stable at v1.0
+**Review Cycle:** After every 3 deals (v0.2 → v0.3 → v1.0)
