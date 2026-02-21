@@ -37,7 +37,7 @@
 
 **Internal framing:** "The file is the carrier. The chain of defensibility is the product."
 
-**SI8's value is the judgment layer:** C2PA/Content Credentials will commoditize provenance documentation. SI8's moat is subjective legal review — Rights Verification, IP assessment, training data risk judgment — which software cannot automate.
+**SI8's value is the judgment layer:** C2PA/Content Credentials will commoditize provenance documentation. SI8's moat is subjective legal review — Rights Verified, IP assessment, training data risk judgment — which software cannot automate.
 
 **Brand identity:** Year 1 = Underwriter (risk reduction, compliance, defensibility). Year 3+ = Underwriter + Curator (taste + safety compound). Do not lead with curation in Year 1.
 
@@ -83,13 +83,13 @@
 
 | # | Item | Why It Matters |
 |---|------|----------------|
-| 1 | **Launch website v1 in 7 days** (not perfect) | Positioning, 2 paths, 1 lead form, 1 calendar link, "Rights Verification" blurb. No more. |
+| 1 | **Launch website v1 in 7 days** (not perfect) | Positioning, 2 paths, 1 lead form, 1 calendar link, "Rights Verified" blurb. No more. |
 | 2 | **Produce 3 credibility assets** | 60-sec sizzle reel, 10-slide deck OR 1-page PDF, Rights Playbook v0.1 (3 pages). Turns cold outreach into warm conversations. |
 | 3 | **Lock delivery system** | Brief template, revision doc format, file organization, creator contract template. Before you sell aggressively. |
 | 4 | **Build Singapore target list** | 100 agencies. Name, founder/partner, email, LinkedIn, niche, 1 reason why them. This is the substrate of revenue. |
 | 5 | **Start outreach: 10/day, 5 days/week** | 50 touches/week. Book calls in Week 3-4. |
 | 6 | **Pre-sell event "industry seats"** | If event is Month 3, start booking B2B attendees in Month 1-2. Make them feel scarce. |
-| 7 | **Define your "No List"** | Rights Verification boundaries. Prevents catastrophic time waste and risk. |
+| 7 | **Define your "No List"** | Rights Verified boundaries. Prevents catastrophic time waste and risk. |
 
 ---
 
@@ -128,7 +128,7 @@
 - [x] Positioning + 2 paths (Programs/Partnerships) — ✓ Feb 2026
 - [x] Lead intake form (one link for everyone) — ✓ Formspree form live
 - [x] Calendar link for booking calls — ✓ Calendly linked
-- [x] "Rights Verification" blurb (signals expertise) — ✓ Rights Verification section live
+- [x] "Rights Verified" blurb (signals expertise) — ✓ Rights Verified section live
 - [x] Mobile responsive — ✓ Responsive breakpoints implemented
 - [x] Deploy to Netlify/Vercel — ✓ Deployed to Vercel (auto-deploy from GitHub)
 - [x] Connect domain (www.superimmersive8.com) — ✓ Live at superimmersive8.com
@@ -137,7 +137,7 @@
 - [ ] 60-second sizzle reel (sample AI video work)
 - [x] 1-page PDF (agency-facing) — ✓ Legal Risk Reduction Brief (Feb 2026)
 - [x] Rights Playbook v0.2 — ✓ Expanded with legal research, quantifiable metrics, competitive landscape (Feb 2026)
-- [x] Rights Verification website section — ✓ 5 pages live (How It Works, Chain of Title, Vetting Criteria, Legal Brief, Playbook) (Feb 2026)
+- [x] Rights Verified website section — ✓ 5 pages live (How It Works, Chain of Title, Vetting Criteria, Legal Brief, Playbook) (Feb 2026)
 - [x] Sample Rights Package example — ✓ "Neon Dreams" 12-page PDF with 9-field documentation; HTML template + PDF generation system; gated download on website with 4 entry points (Feb 2026)
 - [ ] 2-3 sample AI video outputs (even mock/personal projects)
 
@@ -178,7 +178,7 @@
 ### 4. Legal Ops (Rights playbook → actual contracts)
 - [ ] Standard Production MSA + SOW
 - [ ] Creator contractor agreement (work-for-hire + confidentiality + IP assignment)
-- [ ] Rights rider (explicit "Rights Verification" restrictions)
+- [ ] Rights rider (explicit "Rights Verified" restrictions)
 - [ ] Client approval language ("Client agrees final outputs are not infringing to their knowledge")
 - [ ] Filmmaker Shopping Agreement (duration, exclusivity, territories)
 
@@ -307,17 +307,17 @@
 | Rights Playbook v0.1 | `06_Operations/legal/rights-playbook/versions/v0.1.md` | Rights vetting — sales asset for buyers |
 | Rights Playbook Decisions | `06_Operations/legal/rights-playbook/DECISIONS.md` | Playbook version log |
 | Filmmaker Agreement (WIP) | `06_Operations/legal/filmmaker-agreement/WORKING.md` | Terms for filmmaker representation |
-| **Rights Verification — README** | `06_Operations/safe-lane/README.md` | Rights Verification project overview; how all documents relate |
-| **Rights Verification — Submission Requirements** | `06_Operations/safe-lane/SUBMISSION-REQUIREMENTS.md` | Filmmaker-facing: what to provide on submission |
-| **Rights Verification — Review Process** | `06_Operations/safe-lane/REVIEW-PROCESS.md` | SI8 internal: 4-stage review workflow |
-| **Rights Verification — Review Criteria** | `06_Operations/safe-lane/REVIEW-CRITERIA.md` | Pass/fail thresholds per review category |
-| **Rights Verification — Chain of Title Schema** | `06_Operations/safe-lane/RIGHTS-PACKAGE-SCHEMA.md` | 9-field output template per catalog entry |
-| **Rights Verification — Edge Cases** | `06_Operations/safe-lane/EDGE-CASES.md` | Gray areas, judgment calls, precedents (grows with submissions) |
+| **Rights Verified — README** | `06_Operations/safe-lane/README.md` | Rights Verified project overview; how all documents relate |
+| **Rights Verified — Submission Requirements** | `06_Operations/safe-lane/SUBMISSION-REQUIREMENTS.md` | Filmmaker-facing: what to provide on submission |
+| **Rights Verified — Review Process** | `06_Operations/safe-lane/REVIEW-PROCESS.md` | SI8 internal: 4-stage review workflow |
+| **Rights Verified — Review Criteria** | `06_Operations/safe-lane/REVIEW-CRITERIA.md` | Pass/fail thresholds per review category |
+| **Rights Verified — Chain of Title Schema** | `06_Operations/safe-lane/RIGHTS-PACKAGE-SCHEMA.md` | 9-field output template per catalog entry |
+| **Rights Verified — Edge Cases** | `06_Operations/safe-lane/EDGE-CASES.md` | Gray areas, judgment calls, precedents (grows with submissions) |
 | **Chain of Title Examples — README** | `05_Catalog/_examples/README.md` | Chain of Title examples overview; sales and onboarding tool |
 | **Chain of Title Template** | `05_Catalog/_examples/TEMPLATE.md` | Blank Chain of Title template for new catalog entries |
 | **Example 001: Neon Dreams** | `05_Catalog/_examples/example-001-neon-dreams/` | First complete Chain of Title example (cyberpunk commercial, Tier 1+2) |
 | **Chain of Title Changelog** | `05_Catalog/_examples/versions/CHANGELOG.md` | Template version history and evolution tracking |
-| **Rights Verification — Decisions** | `06_Operations/safe-lane/DECISIONS.md` | Rights Verification version log + open questions |
+| **Rights Verified — Decisions** | `06_Operations/safe-lane/DECISIONS.md` | Rights Verified version log + open questions |
 
 ---
 
