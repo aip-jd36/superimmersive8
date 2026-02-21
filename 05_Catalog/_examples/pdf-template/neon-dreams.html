@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rights Package — Neon Dreams</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ===========================
+           SI8 Design System - PDF Version
+           Matches superimmersive8.com aesthetic
+           =========================== */
+
+        :root {
+            /* Colors - Warm Light Theme */
+            --color-bg: #FFFBF5;
+            --color-surface: #FFFFFF;
+            --color-text-primary: #1a1a1a;
+            --color-text-secondary: #4a4a4a;
+            --color-text-tertiary: #6b6b6b;
+            --color-accent: #C8900A;
+            --color-accent-light: #F5E6C8;
+            --color-border: rgba(200, 144, 10, 0.2);
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+
+            /* Typography */
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            --spacing-2xl: 48px;
+        }
+
+        /* ===========================
+           Print Optimization
+           =========================== */
+
+        @page {
+            size: A4;
+            margin: 20mm 15mm;
+        }
+
+        @media print {
+            body {
+                background: white;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+
+            .no-break {
+                page-break-inside: avoid;
+            }
+
+            h1, h2, h3 {
+                page-break-after: avoid;
+            }
+
+            table {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* ===========================
+           Base Styles
+           =========================== */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            font-size: 10pt;
+            line-height: 1.6;
+            color: var(--color-text-primary);
+            background: var(--color-bg);
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            padding: var(--spacing-xl);
+        }
+
+        /* ===========================
+           Cover Page
+           =========================== */
+
+        .cover-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 100vh;
+            padding: var(--spacing-2xl);
+            background: linear-gradient(135deg, var(--color-bg) 0%, #FFF8E7 100%);
+            border-bottom: 3px solid var(--color-accent);
+        }
+
+        .cover-header {
+            text-align: left;
+        }
+
+        .cover-logo {
+            font-family: var(--font-display);
+            font-size: 18pt;
+            font-weight: 700;
+            color: var(--color-accent);
+            letter-spacing: -0.5px;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .cover-tagline {
+            font-family: var(--font-body);
+            font-size: 9pt;
+            color: var(--color-text-secondary);
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .cover-title-section {
+            margin-top: var(--spacing-2xl);
+        }
+
+        .cover-document-type {
+            font-family: var(--font-body);
+            font-size: 10pt;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--color-accent);
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .cover-title {
+            font-family: var(--font-display);
+            font-size: 36pt;
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--color-text-primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .cover-subtitle {
+            font-family: var(--font-body);
+            font-size: 12pt;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+            max-width: 600px;
+        }
+
+        .cover-meta {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-xl);
+            padding: var(--spacing-lg);
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+
+        .meta-label {
+            font-size: 8pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-tertiary);
+            font-weight: 600;
+        }
+
+        .meta-value {
+            font-size: 11pt;
+            color: var(--color-text-primary);
+            font-weight: 500;
+        }
+
+        .cover-footer {
+            padding-top: var(--spacing-xl);
+            border-top: 1px solid var(--color-border);
+        }
+
+        .cover-disclaimer {
+            font-size: 8pt;
+            color: var(--color-text-tertiary);
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        /* ===========================
+           Content Pages
+           =========================== */
+
+        .content-page {
+            padding: var(--spacing-xl) 0;
+        }
+
+        /* Headers */
+        h1 {
+            font-family: var(--font-display);
+            font-size: 24pt;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-top: var(--spacing-2xl);
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        h1:first-child {
+            margin-top: 0;
+        }
+
+        h2 {
+            font-family: var(--font-display);
+            font-size: 14pt;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin-top: var(--spacing-xl);
+            margin-bottom: var(--spacing-md);
+            padding-left: var(--spacing-sm);
+            border-left: 3px solid var(--color-accent);
+        }
+
+        h3 {
+            font-family: var(--font-body);
+            font-size: 11pt;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin-top: var(--spacing-lg);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        /* Text */
+        p {
+            margin-bottom: var(--spacing-md);
+            text-align: justify;
+        }
+
+        strong {
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        em {
+            font-style: italic;
+            color: var(--color-text-secondary);
+        }
+
+        /* Lists */
+        ul, ol {
+            margin-left: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+        }
+
+        li {
+            margin-bottom: var(--spacing-sm);
+            padding-left: var(--spacing-xs);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--spacing-lg) 0;
+            font-size: 9pt;
+            background: white;
+        }
+
+        thead {
+            background: linear-gradient(135deg, var(--color-accent-light), #FFF8E7);
+        }
+
+        th {
+            font-family: var(--font-body);
+            font-weight: 600;
+            text-align: left;
+            padding: var(--spacing-sm) var(--spacing-md);
+            color: var(--color-text-primary);
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        td {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-bottom: 1px solid var(--color-border);
+            vertical-align: top;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:nth-child(even) {
+            background: rgba(245, 230, 200, 0.3);
+        }
+
+        /* Status Badges */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 8pt;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+        }
+
+        .badge-info {
+            background: var(--color-accent-light);
+            color: var(--color-accent);
+        }
+
+        /* Callout Boxes */
+        .callout {
+            padding: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+            border-radius: 6px;
+            border-left: 4px solid var(--color-accent);
+            background: var(--color-accent-light);
+        }
+
+        .callout-title {
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin-bottom: var(--spacing-sm);
+            font-size: 10pt;
+        }
+
+        .callout-content {
+            font-size: 9pt;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+        }
+
+        .callout-content p {
+            margin-bottom: var(--spacing-sm);
+            text-align: left;
+        }
+
+        .callout-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Checklist */
+        .checklist {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .checklist li {
+            position: relative;
+            padding-left: var(--spacing-lg);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .checklist li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--color-success);
+            font-weight: 700;
+            font-size: 11pt;
+        }
+
+        .checklist-restricted li:before {
+            content: '❌';
+            font-size: 9pt;
+        }
+
+        /* Footer */
+        .page-footer {
+            margin-top: var(--spacing-2xl);
+            padding-top: var(--spacing-lg);
+            border-top: 1px solid var(--color-border);
+            text-align: center;
+        }
+
+        .footer-text {
+            font-size: 8pt;
+            color: var(--color-text-tertiary);
+            line-height: 1.5;
+        }
+
+        .footer-contact {
+            margin-top: var(--spacing-sm);
+            font-size: 8pt;
+            color: var(--color-accent);
+        }
+
+        /* Section Divider */
+        .section-divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--color-border), transparent);
+            margin: var(--spacing-xl) 0;
+        }
+
+        /* Special Sections */
+        .meta-info {
+            background: var(--color-accent-light);
+            padding: var(--spacing-md);
+            border-radius: 6px;
+            margin: var(--spacing-md) 0;
+        }
+
+        .meta-info p {
+            margin-bottom: var(--spacing-sm);
+            text-align: left;
+        }
+
+        .meta-info p:last-child {
+            margin-bottom: 0;
+        }
+
+        .disclaimer {
+            background: rgba(245, 230, 200, 0.3);
+            padding: var(--spacing-lg);
+            border-radius: 6px;
+            margin: var(--spacing-xl) 0;
+            border: 1px solid var(--color-border);
+        }
+
+        .disclaimer p {
+            font-size: 8pt;
+            color: var(--color-text-tertiary);
+            line-height: 1.6;
+            font-style: italic;
+            margin-bottom: 0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <!-- COVER PAGE -->
+    <div class="cover-page">
+        <div class="cover-header">
+            <div class="cover-logo">SuperImmersive 8</div>
+            <div class="cover-tagline">AI Film Rights & Distribution</div>
+        </div>
+
+        <div class="cover-title-section">
+            <div class="cover-document-type">Rights Package</div>
+            <h1 class="cover-title">Neon Dreams</h1>
+            <div class="cover-subtitle">
+                Comprehensive legal documentation and provenance record for AI-generated content licensing.
+            </div>
+
+            <div class="cover-meta">
+                <div class="meta-item">
+                    <div class="meta-label">Catalog ID</div>
+                    <div class="meta-value">SI8-2026-0001</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Filmmaker</div>
+                    <div class="meta-value">Alex Chen</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Runtime</div>
+                    <div class="meta-value">90 seconds</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Production Date</div>
+                    <div class="meta-value">January 2026</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Package Version</div>
+                    <div class="meta-value">v1.0</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Package Date</div>
+                    <div class="meta-value">February 18, 2026</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cover-footer">
+            <div class="cover-disclaimer">
+                This Rights Package is a factual documentation of production provenance, tool usage, and authorization status.
+                It is provided for informational purposes and does not constitute legal advice or a legal warranty.
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENT PAGES -->
+    <div class="page-break"></div>
+    <div class="content-page container">
+
+        <!-- Field 1: Tool Provenance Log -->
+        <h2>1. Tool Provenance Log</h2>
+
+        <table class="no-break">
+            <thead>
+                <tr>
+                    <th>Tool / Service</th>
+                    <th>Version / Model</th>
+                    <th>Plan Type</th>
+                    <th>Production Period</th>
+                    <th>Receipt Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Runway ML</td>
+                    <td>Gen-3 Alpha Turbo</td>
+                    <td>Standard Plan ($12/mo)</td>
+                    <td>Jan 20-28, 2026</td>
+                    <td><span class="badge badge-success">✓ On file</span></td>
+                </tr>
+                <tr>
+                    <td>ElevenLabs</td>
+                    <td>Voice Design + Sound Effects</td>
+                    <td>Creator Plan ($22/mo)</td>
+                    <td>Jan 25, 2026</td>
+                    <td><span class="badge badge-success">✓ On file</span></td>
+                </tr>
+                <tr>
+                    <td>Adobe Premiere Pro</td>
+                    <td>CC 2024</td>
+                    <td>Creative Cloud Subscription</td>
+                    <td>Jan 28-29, 2026</td>
+                    <td><span class="badge badge-success">✓ On file</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="meta-info">
+            <p><strong>Primary Generation Tool:</strong> Runway Gen-3 Alpha Turbo</p>
+            <p><strong>Supporting Tools:</strong> ElevenLabs (audio), Adobe Premiere Pro (post-production editing)</p>
+        </div>
+
+        <h3>Tool Usage Summary:</h3>
+        <ul>
+            <li>47 prompts written by filmmaker across 8 scenes</li>
+            <li>180 video clips generated; 23 selected for final edit</li>
+            <li>Human editorial control at prompt, selection, and post-production stages</li>
+        </ul>
+
+        <div class="section-divider"></div>
+
+        <!-- Field 2: Model Disclosure -->
+        <h2>2. Model Disclosure</h2>
+
+        <h3>AI Models Used:</h3>
+        <ul>
+            <li><strong>Runway:</strong> Gen-3 Alpha Turbo (video generation model active January 2026)</li>
+            <li><strong>ElevenLabs:</strong> Voice Design text-to-speech model + sound effects generation</li>
+        </ul>
+
+        <h3>Training Data Transparency:</h3>
+        <ul>
+            <li><strong>Runway Gen-3:</strong> Trained on licensed stock footage, public domain content, and proprietary datasets per Runway's public model card (as of Jan 2026)</li>
+            <li><strong>ElevenLabs:</strong> Trained on licensed voice datasets with consent; no unauthorized voice cloning used</li>
+        </ul>
+
+        <h3>Tool Provider Terms Acknowledgment:</h3>
+        <ul>
+            <li>All tools used under paid commercial plans with documented commercial use authorization</li>
+            <li>Terms of Service reviewed February 15, 2026</li>
+            <li>No tools flagged as high-risk or prohibited under SI8 Safe Lane criteria</li>
+        </ul>
+
+        <div class="section-divider"></div>
+
+        <!-- Field 3: Safe Lane Sign-off -->
+        <h2>3. Safe Lane Sign-off</h2>
+
+        <div class="callout">
+            <div class="callout-title">Safe Lane Status: <span class="badge badge-success">✓ APPROVED FOR CATALOG</span></div>
+            <div class="callout-content">
+                <p><strong>Risk Tier Assigned:</strong> STANDARD</p>
+                <p><strong>Reviewer:</strong> SI8 Review Team | <strong>Review Date:</strong> February 17, 2026 | <strong>Duration:</strong> 73 minutes</p>
+            </div>
+        </div>
+
+        <h3>Review Summary:</h3>
+        <p>"Neon Dreams" passed Safe Lane review with no flags or conditions. The work demonstrates clear human creative direction (47 prompts, extensive iteration documented, editorial choices in post-production). All AI tools used under paid commercial plans. No copyrighted IP, real person likeness, or brand imitation detected. Audio is entirely AI-generated under authorized commercial use terms. Content is brand-safe for mainstream commercial attachment.</p>
+
+        <h3>Notable Strengths:</h3>
+        <ul>
+            <li>Exceptional documentation of human authorship (287-word declaration with specific creative decisions)</li>
+            <li>Production process screenshots provide clear chain of custody</li>
+            <li>Modification authorization covers holographic ad placements (strong Tier 2 potential)</li>
+            <li>Visual style is distinctive and ownable (no derivative character imitation)</li>
+        </ul>
+
+        <h3>No List Compliance:</h3>
+        <ul class="checklist">
+            <li>No celebrity likeness or real person faces without consent</li>
+            <li>No voice cloning of real people</li>
+            <li>No copyrighted character imitation (e.g., recognizable IP)</li>
+            <li>No brand IP imitation (all signage fictional/AI-generated)</li>
+            <li>No political persuasion content</li>
+            <li>No deceptive or deepfake content</li>
+            <li>No adult/explicit content</li>
+        </ul>
+
+        <h3>Risk Tier Rationale:</h3>
+        <p>Assigned <strong>Standard</strong> tier (not Certified) because primary generation tool is Runway Gen-3 (paid commercial plan), not Adobe Firefly. Standard tier reflects current best-practice AI tools (Runway, Pika, Sora) used under documented commercial authorization. Work is suitable for mainstream brand licensing with appropriate legal review by buyer's counsel.</p>
+
+        <div class="section-divider"></div>
+
+        <!-- Field 4: Commercial Use Authorization -->
+        <h2>4. Commercial Use Authorization</h2>
+
+        <h3>Tool TOS Verification:</h3>
+
+        <table class="no-break">
+            <thead>
+                <tr>
+                    <th>Tool</th>
+                    <th>Plan Type</th>
+                    <th>Commercial Use Permitted</th>
+                    <th>Verification Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Runway Gen-3</td>
+                    <td>Standard Plan ($12/mo)</td>
+                    <td><span class="badge badge-success">✓ Yes</span> — Standard Plan includes commercial use rights</td>
+                    <td>Feb 15, 2026</td>
+                </tr>
+                <tr>
+                    <td>ElevenLabs</td>
+                    <td>Creator Plan ($22/mo)</td>
+                    <td><span class="badge badge-success">✓ Yes</span> — Creator Plan authorizes commercial audio use</td>
+                    <td>Feb 15, 2026</td>
+                </tr>
+                <tr>
+                    <td>Adobe Premiere</td>
+                    <td>Creative Cloud</td>
+                    <td><span class="badge badge-success">✓ Yes</span> — All CC content created by user is commercially usable</td>
+                    <td>Feb 15, 2026</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="meta-info">
+            <p><strong>Plan Receipts:</strong> On file with SI8 (January 2026 billing statements for all paid services)</p>
+            <p><strong>License Compliance:</strong> All tools used within authorized commercial use terms as of production date (January 2026)</p>
+            <p><strong>Attribution Requirements:</strong> None (no attribution required by tool ToS for commercial projects)</p>
+            <p><strong>Future TOS Monitoring:</strong> SI8 monitors tool ToS changes quarterly. Buyers will be notified if terms materially change affecting commercial use authorization.</p>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Field 5: Modification Rights Status -->
+        <h2>5. Modification Rights Status</h2>
+
+        <div class="callout">
+            <div class="callout-title">Status: <span class="badge badge-success">✓ AUTHORIZED — FULL WORK</span></div>
+            <div class="callout-content">
+                <p>Filmmaker Alex Chen has authorized SI8 to commission AI-regenerated brand-integrated versions of "Neon Dreams" for commercial product placement purposes. Authorization signed February 10, 2026 under SI8 Filmmaker Shopping Agreement.</p>
+            </div>
+        </div>
+
+        <h3>Modification Authorization Details:</h3>
+        <ul>
+            <li><strong>Authorized scenes:</strong> All scenes (full work)</li>
+            <li><strong>Brand integration points:</strong> Neon signage, holographic advertisements, background digital billboards</li>
+            <li><strong>Technical approach:</strong> AI regeneration of specific visual elements (signage, holograms) while preserving character, narrative, and core aesthetic</li>
+            <li><strong>Character integrity:</strong> Character appearance and movement remain unchanged</li>
+            <li><strong>Filmmaker approval:</strong> Filmmaker requests review of brand-integrated versions before buyer delivery (approval not to be unreasonably withheld)</li>
+        </ul>
+
+        <h3>Tier 2 Eligibility:</h3>
+        <p><span class="badge badge-success">✓ YES — FULL WORK</span></p>
+        <p>This work is eligible for Tier 2 product placement offerings. Brands can license custom AI-regenerated versions with brand elements integrated into neon signage and holographic ad placements.</p>
+
+        <h3>Filmmaker Approval Process:</h3>
+        <ol>
+            <li>SI8 commissions AI regeneration with brand elements</li>
+            <li>Filmmaker reviews integrated version (48-hour review window)</li>
+            <li>Filmmaker provides approval or requests reasonable adjustments</li>
+            <li>Final version delivered to buyer</li>
+        </ol>
+
+        <div class="section-divider"></div>
+
+        <!-- Field 6: Category Conflict Log -->
+        <h2>6. Category Conflict Log</h2>
+
+        <h3>Brand Categories - ELIGIBLE (All mainstream categories approved):</h3>
+        <ul>
+            <li>Technology & consumer electronics</li>
+            <li>Automotive</li>
+            <li>Fashion & apparel</li>
+            <li>Entertainment & streaming platforms</li>
+            <li>Financial services</li>
+            <li>Travel & hospitality</li>
+            <li>Food & beverage (non-alcoholic)</li>
+            <li>Health & wellness (non-pharmaceutical)</li>
+        </ul>
+
+        <h3>Brand Categories - RESTRICTED:</h3>
+        <ul class="checklist checklist-restricted">
+            <li>Alcohol brands (filmmaker preference: maintain brand-safe positioning)</li>
+            <li>Tobacco & vaping (legal restrictions + brand safety)</li>
+            <li>Political campaigns or advocacy groups (SI8 No List policy)</li>
+            <li>Gambling & sports betting (legal complexity + brand safety)</li>
+            <li>Pharmaceutical products (regulatory disclosure requirements)</li>
+        </ul>
+
+        <h3>Exclusivity Status:</h3>
+        <ul>
+            <li><strong>Current:</strong> None (available for licensing)</li>
+            <li><strong>Preference:</strong> Category-exclusive for product placement deals (if tech brand licenses Tier 2 placement, no competing tech brand in same version)</li>
+            <li><strong>Territory:</strong> Global (no geographic restrictions)</li>
+        </ul>
+
+        <p><strong>Active Restrictions:</strong> None (no existing licenses or conflicts as of Feb 18, 2026)</p>
+
+        <div class="section-divider"></div>
+
+        <!-- Field 7: Territory Log -->
+        <h2>7. Territory Log</h2>
+
+        <div class="callout">
+            <div class="callout-title">Geographic Licensing: <span class="badge badge-success">✓ GLOBAL (No Restrictions)</span></div>
+        </div>
+
+        <h3>Territories - Authorized:</h3>
+        <ul>
+            <li>Worldwide / All territories</li>
+            <li>No geographic restrictions on licensing</li>
+        </ul>
+
+        <h3>Territories - Restricted:</h3>
+        <p>None</p>
+
+        <h3>Cultural Considerations:</h3>
+        <ul>
+            <li>Content is culturally neutral (abstract sci-fi aesthetic)</li>
+            <li>No culturally specific references that would limit geographic appeal</li>
+            <li>Fictional signage uses abstract symbols (no real language)</li>
+        </ul>
+
+        <h3>Language Versions:</h3>
+        <ul>
+            <li>Original version is dialogue-free (ambient audio only)</li>
+            <li>Voiceover can be added in any language without re-production</li>
+            <li>Subtitle-friendly (no on-screen text requiring translation)</li>
+        </ul>
+
+        <h3>Platform Compatibility:</h3>
+        <ul>
+            <li>Suitable for global streaming platforms</li>
+            <li>Suitable for airline/in-flight entertainment</li>
+            <li>Suitable for retail/ambient display use</li>
+        </ul>
+
+        <div class="section-divider"></div>
+
+        <!-- Field 8: Regeneration Rights Status -->
+        <h2>8. Regeneration Rights Status</h2>
+
+        <div class="callout">
+            <div class="callout-title">AI Regeneration Authorized: <span class="badge badge-success">✓ YES — SCENE-LEVEL</span></div>
+            <div class="callout-content">
+                <p>Filmmaker has authorized AI regeneration of specific visual elements for brand integration while preserving core creative vision.</p>
+            </div>
+        </div>
+
+        <h3>Authorized Regeneration Elements:</h3>
+        <ol>
+            <li><strong>Neon signage</strong> (building facades, storefronts) — can be replaced with brand logos, taglines, product imagery</li>
+            <li><strong>Holographic advertisements</strong> (floating mid-air ads in cityscape) — can be replaced with brand 3D holograms, product demos</li>
+            <li><strong>Digital billboards</strong> (background screens, ambient displays) — can be replaced with brand video content, messaging</li>
+        </ol>
+
+        <h3>Protected Elements (NOT authorized for regeneration):</h3>
+        <ul>
+            <li>Character appearance, wardrobe, movement</li>
+            <li>Core camera movements and framing</li>
+            <li>Rain effects and atmospheric lighting</li>
+            <li>Color grading and overall aesthetic tone</li>
+            <li>Scene structure and pacing</li>
+        </ul>
+
+        <h3>Brand Integration Authorization:</h3>
+        <p>Brands can license Tier 2 product placement with brand elements AI-regenerated into authorized signage and holographic ad placements. Integration preserves filmmaker's creative vision while allowing brand visibility.</p>
+
+        <h3>Technical Parameters:</h3>
+        <ul>
+            <li>Regenerated elements must maintain visual coherence with cyberpunk aesthetic (neon color palette, atmospheric lighting)</li>
+            <li>Brand integration must not overwhelm core narrative or character moments</li>
+            <li>Maximum 30% of screen time can show brand elements in any given scene</li>
+        </ul>
+
+        <p><strong>Filmmaker Review Required:</strong> <span class="badge badge-success">✓ Yes</span> (48-hour approval window for brand-integrated versions)</p>
+
+        <div class="section-divider"></div>
+
+        <!-- Field 9: Version History -->
+        <h2>9. Version History</h2>
+
+        <table class="no-break">
+            <thead>
+                <tr>
+                    <th>Version</th>
+                    <th>Date</th>
+                    <th>Event</th>
+                    <th>Reviewer / Party</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>v1.0</td>
+                    <td>Jan 28, 2026</td>
+                    <td>Initial production complete</td>
+                    <td>Alex Chen (filmmaker)</td>
+                    <td>Original 90-second edit finalized</td>
+                </tr>
+                <tr>
+                    <td>v1.0</td>
+                    <td>Feb 10, 2026</td>
+                    <td>Filmmaker Shopping Agreement signed</td>
+                    <td>Alex Chen + SI8</td>
+                    <td>Modification rights authorized; representation begins</td>
+                </tr>
+                <tr>
+                    <td>v1.0</td>
+                    <td>Feb 15, 2026</td>
+                    <td>Submission to SI8 for Safe Lane review</td>
+                    <td>Alex Chen</td>
+                    <td>Complete documentation package submitted</td>
+                </tr>
+                <tr>
+                    <td>v1.0</td>
+                    <td>Feb 17, 2026</td>
+                    <td>Safe Lane review complete</td>
+                    <td>SI8 Review Team</td>
+                    <td>APPROVED — Standard tier; catalog ID assigned: SI8-2026-0001</td>
+                </tr>
+                <tr>
+                    <td>v1.0</td>
+                    <td>Feb 18, 2026</td>
+                    <td>Rights Package v1.0 issued</td>
+                    <td>SI8 Operations</td>
+                    <td>This document; catalog entry active</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Re-review Triggers:</h3>
+        <p>The following events would trigger a Safe Lane re-review and potential Rights Package update:</p>
+        <ul>
+            <li>Runway or ElevenLabs ToS changes affecting commercial use authorization</li>
+            <li>Major platform policy updates (e.g., YouTube, Netflix AI content requirements)</li>
+            <li>Licensing dispute or third-party claim related to this work</li>
+            <li>Material modification to content (e.g., significant re-edit, new scenes added)</li>
+            <li>Tool provider training data lawsuit affecting Gen-3 model</li>
+        </ul>
+
+        <h3>Version Update Policy:</h3>
+        <ul>
+            <li>Minor updates (TOS monitoring, clarifications): Rights Package version increments to v1.1, v1.2, etc.</li>
+            <li>Major updates (content changes, re-review required): New Rights Package issued as v2.0</li>
+        </ul>
+
+        <div class="section-divider"></div>
+
+        <!-- Supporting Documentation -->
+        <h2>Supporting Documentation (On File with SI8)</h2>
+
+        <ul class="checklist">
+            <li>Filmmaker Shopping Agreement (signed Feb 10, 2026)</li>
+            <li>Runway Standard Plan receipt (January 2026)</li>
+            <li>ElevenLabs Creator Plan receipt (January 2026)</li>
+            <li>Adobe Creative Cloud receipt (January 2026)</li>
+            <li>Human Authorship Declaration (287 words, signed)</li>
+            <li>Production process screenshots (12 images: prompt examples, iterations, Premiere timeline)</li>
+            <li>Safe Lane review checklist (completed Feb 17, 2026)</li>
+            <li>No List compliance verification (completed)</li>
+        </ul>
+
+        <h3>Available Upon Request (for qualified buyers under NDA):</h3>
+        <ul>
+            <li>Full prompt log (47 prompts with iteration notes and rationale)</li>
+            <li>Runway generation history (180 clips with selection criteria documented)</li>
+            <li>Adobe Premiere Pro project file</li>
+            <li>Filmmaker portfolio and prior work samples</li>
+        </ul>
+
+        <div class="section-divider"></div>
+
+        <!-- Usage Notes -->
+        <h2>Usage Notes</h2>
+
+        <h3>Recommended Use Cases:</h3>
+        <ul>
+            <li><strong>Tech brand commercials</strong> — Perfect for consumer electronics, software, mobile devices</li>
+            <li><strong>Automotive advertising</strong> — Futuristic/electric vehicle positioning</li>
+            <li><strong>Streaming platform content</strong> — Ambient/background content, sci-fi category</li>
+            <li><strong>Retail/experiential</strong> — In-store displays, trade show content, ambient loops</li>
+            <li><strong>Fashion & apparel</strong> — Urban/streetwear brands, futuristic product launches</li>
+            <li><strong>Editorial</strong> — Stock footage for sci-fi/tech articles, video essays</li>
+        </ul>
+
+        <h3>Tier 1 Licensing (As-Is):</h3>
+        <p>License the work as-is for use in commercials, content libraries, editorial, or ambient display. No brand integration, no modifications.</p>
+
+        <h3>Tier 2 Product Placement (Custom Brand Integration):</h3>
+        <p>Commission AI-regenerated version with your brand's logos, products, or messaging integrated into neon signage and holographic ad placements. Filmmaker approval process included. Category-exclusive available.</p>
+
+        <h3>Buyer Guidance:</h3>
+        <ul>
+            <li>Content is brand-safe for mainstream commercial use</li>
+            <li>No legal red flags identified in Safe Lane review</li>
+            <li>Buyers should conduct standard legal review appropriate to their risk tolerance and use case</li>
+            <li>For high-profile campaigns, recommend legal counsel review of tool ToS and training data policies</li>
+            <li>For broadcast/streaming, verify platform AI content policies (requirements evolving 2026)</li>
+        </ul>
+
+        <h3>Attribution:</h3>
+        <ul>
+            <li>No filmmaker attribution required for licensing use</li>
+            <li>SI8 recommends crediting filmmaker for goodwill and future collaboration opportunities</li>
+            <li>Suggested credit: "Directed by Alex Chen"</li>
+        </ul>
+
+        <div class="section-divider"></div>
+
+        <!-- Risk Mitigation Summary -->
+        <h2>Risk Mitigation Summary (For Buyer Legal Counsel)</h2>
+
+        <h3>What This Rights Package Provides:</h3>
+        <ol>
+            <li><strong>Documented provenance:</strong> Complete chain of custody from AI generation to final delivery</li>
+            <li><strong>Commercial use authorization:</strong> All tools used under paid plans permitting commercial licensing</li>
+            <li><strong>Human authorship evidence:</strong> Detailed declaration of creative direction and editorial control</li>
+            <li><strong>IP clearance:</strong> No copyrighted characters, brand imitation, or unauthorized likeness use</li>
+            <li><strong>Safe Lane vetting:</strong> SI8 review against brand safety and legal risk criteria</li>
+            <li><strong>Modification rights:</strong> Authorized AI regeneration scope for product placement (Tier 2)</li>
+            <li><strong>Version tracking:</strong> Audit trail for future TOS monitoring and re-review triggers</li>
+        </ol>
+
+        <h3>What This Rights Package Does NOT Provide:</h3>
+        <ul>
+            <li>Legal warranty or indemnification (SI8 is not a law firm)</li>
+            <li>Guarantee against future tool provider ToS changes</li>
+            <li>Protection against evolving AI content regulations</li>
+            <li>E&O insurance coverage (buyers should maintain own E&O policies)</li>
+        </ul>
+
+        <h3>Buyer Risk Assessment Framework:</h3>
+        <ul>
+            <li><strong>Low-risk use cases:</strong> Editorial, internal presentations, low-visibility content</li>
+            <li><strong>Medium-risk use cases:</strong> Organic social media, streaming platform content, regional campaigns</li>
+            <li><strong>Higher-risk use cases:</strong> National broadcast, high-profile brand campaigns (recommend legal counsel review)</li>
+        </ul>
+
+        <h3>Recommended Buyer Actions:</h3>
+        <ol>
+            <li>Review this Rights Package with in-house or external legal counsel</li>
+            <li>Assess risk tolerance based on use case, budget, and visibility</li>
+            <li>For broadcast/streaming, verify platform AI content policies as of license date</li>
+            <li>For high-profile campaigns, consider legal opinion on tool ToS and training data exposure</li>
+            <li>Maintain E&O insurance appropriate to campaign scale</li>
+        </ol>
+
+        <div class="section-divider"></div>
+
+        <!-- Final Certification -->
+        <div class="callout">
+            <div class="callout-title">Package Certification</div>
+            <div class="callout-content">
+                <p><strong>Package Certified By:</strong> SI8 Review Team</p>
+                <p><strong>Certification Date:</strong> February 18, 2026</p>
+                <p><strong>Catalog Status:</strong> <span class="badge badge-success">✓ Active</span> — Available for licensing</p>
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            <p>This Rights Package is a factual documentation of production provenance, tool usage, and authorization status. It is provided for informational purposes and does not constitute legal advice or a legal warranty. SuperImmersive 8 is not a law firm and does not provide legal counsel. Buyers should conduct their own legal review appropriate to their use case, risk tolerance, and jurisdiction. All statements herein are accurate as of the package date; tool provider terms and legal landscape may evolve.</p>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Contact Information -->
+        <h2>Contact</h2>
+
+        <div class="meta-info">
+            <p><strong>For Licensing Inquiries:</strong></p>
+            <p>SuperImmersive 8<br>
+            licensing@superimmersive8.com<br>
+            https://www.superimmersive8.com</p>
+            <p><strong>Catalog ID:</strong> SI8-2026-0001<br>
+            <strong>Direct Link:</strong> [To be added when catalog page is live]</p>
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="page-footer">
+        <div class="footer-text">
+            Package Certified By: SI8 Review Team | Certification Date: February 18, 2026
+        </div>
+        <div class="footer-contact">
+            SuperImmersive 8 | licensing@superimmersive8.com | www.superimmersive8.com
+        </div>
+    </div>
+
+</body>
+</html>
