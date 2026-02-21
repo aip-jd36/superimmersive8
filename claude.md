@@ -143,6 +143,7 @@
 
 ### 2. Sales Ops (This makes or breaks Month 2-6)
 - [x] Lead intake + qualification form — ✓ Gated download forms on safe-lane-legal-brief.html + safe-lane-rights-playbook.html (Feb 2026)
+- [x] Contact form with instant notifications — ✓ Main website contact form + Resend integration; instant email to jd@superimmersive8.com; all 6 site forms functional; $0/mo stack (Feb 2026)
 - [x] Lead gen email automation — ✓ 3-email nurture sequence (Day 0, 3, 7) via Kit + Vercel function; $0/mo stack (Feb 2026)
 - [ ] CRM + pipeline stages (6 max): Prospect → Contacted → Meeting Booked → Proposal Sent → Negotiation → Won/Lost
 - [ ] Proposal template (1-page + SOW) — must take <45 min per proposal
