@@ -138,6 +138,7 @@
 - [x] 1-page PDF (agency-facing) — ✓ Legal Risk Reduction Brief (Feb 2026)
 - [x] Rights Playbook v0.2 — ✓ Expanded with legal research, quantifiable metrics, competitive landscape (Feb 2026)
 - [x] Safe Lane website section — ✓ 5 pages live (How It Works, Rights Package, Vetting Criteria, Legal Brief, Playbook) (Feb 2026)
+- [x] Sample Rights Package example — ✓ "Neon Dreams" 12-page PDF with 9-field documentation; HTML template + PDF generation system; gated download on website with 4 entry points (Feb 2026)
 - [ ] 2-3 sample AI video outputs (even mock/personal projects)
 
 ### 2. Sales Ops (This makes or breaks Month 2-6)
