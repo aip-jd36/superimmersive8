@@ -533,7 +533,7 @@
                     </div>
                 </div>
                 <div class="contact-form-container">
-                    <form class="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+                    <form class="contact-form" action="/api/contact-form" method="POST">
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="name">姓名 *</label>
@@ -618,5 +618,66 @@
     </footer>
 
     <script src="script.js"></script>
+    <script>
+        // Handle contact form submission
+        document.querySelector('.contact-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalText = submitButton.textContent;
+
+            submitButton.disabled = true;
+            submitButton.textContent = '發送中...';
+
+            try {
+                const formData = new FormData(form);
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: formData.get('email'),
+                        name: formData.get('name'),
+                        company: formData.get('company'),
+                        type: formData.get('type'),
+                        message: formData.get('message')
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    submitButton.textContent = '✓ 訊息已發送！';
+                    submitButton.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+
+                    setTimeout(() => {
+                        form.innerHTML = `
+                            <div style="text-align: center; padding: 40px 20px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.1)); border-radius: 8px; border: 2px solid #22c55e;">
+                                <div style="font-size: 48px; margin-bottom: 16px;">✓</div>
+                                <h3 style="color: #16a34a; margin-bottom: 12px;">訊息發送成功！</h3>
+                                <p style="color: #52504A; margin-bottom: 24px;">我們將在 24 小時內回覆。</p>
+                                <p style="margin-bottom: 16px; color: #1a1918; font-weight: 500;">想立即預約通話嗎？</p>
+                                <a href="https://calendly.com/aipenguins/superimmersive8" target="_blank" class="btn btn-primary" style="display: inline-block; text-decoration: none;">
+                                    📅 在 Calendly 預約通話
+                                </a>
+                            </div>
+                        `;
+                    }, 1000);
+                } else {
+                    throw new Error(result.error || 'Submission failed');
+                }
+            } catch (error) {
+                console.error('Form submission error:', error);
+                submitButton.textContent = '✗ 錯誤 - 請重試';
+                submitButton.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+                submitButton.disabled = false;
+
+                setTimeout(() => {
+                    submitButton.textContent = originalText;
+                    submitButton.style.background = '';
+                }, 3000);
+            }
+        });
+    </script>
 </body>
 </html>

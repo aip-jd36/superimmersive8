@@ -482,7 +482,7 @@
     <section class="briefing-bottom-cta" id="stay-current">
         <h2>Stay current. Get the Risk Briefing by email.</h2>
         <p>Monthly. One major legal development, one platform update, one SI8 insight. 300 words. No filler. Unsubscribe any time.</p>
-        <form class="email-capture-form" action="https://formspree.io/f/your-form-id" method="POST">
+        <form class="email-capture-form" action="/api/formspree-to-kit" method="POST">
             <input type="hidden" name="tag" value="brand_buyer">
             <input type="email" name="email" placeholder="your@email.com" required>
             <button type="submit" class="btn btn-primary">Subscribe</button>
