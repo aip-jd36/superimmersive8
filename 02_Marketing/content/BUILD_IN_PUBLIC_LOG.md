@@ -2,7 +2,7 @@
 
 A running log of decisions, insights, and lessons learned while building an AI film distribution company.
 
-*Last updated: January 2026*
+*Last updated: February 21, 2026*
 
 ---
 
@@ -2066,6 +2066,11 @@ SI8's catalog has documentation on every piece: tool disclosure, Safe Lane sign-
 | Feb 21, 2026 | **All website forms now functional (6 forms total)** | Fixed all Formspree placeholder references: (1-2) Contact forms on EN + ZH homepages → instant email, (3-5) Gated downloads → Kit automation, (6) Risk Briefing newsletter → Kit; all forms POST to Vercel functions; no third-party dependencies; $0/month total cost |
 | Feb 21, 2026 | **Debugged and fixed contact form 500 error** | Root cause: Vercel doesn't auto-parse req.body in all cases; fix: manually parse JSON body before destructuring; added comprehensive debug logging for future troubleshooting; tested end-to-end successfully; email delivery confirmed working |
 | Feb 21, 2026 | **Complete lead capture infrastructure operational** | Three capture points: (1) Gated downloads → Kit nurture sequence, (2) Contact form → instant email to JD + Kit, (3) Newsletter signup → Kit; all integrated with existing $0/month stack (Vercel Functions + Kit free + Resend free); unified CRM in Kit; ready for Month 1 outreach |
+| Feb 21, 2026 | **Terminology evolution: "Safe Lane" → "Rights Verified"** | After peer review (ChatGPT + Gemini) on Rights Package Delivery SOP, realized "Safe Lane" reads as startup jargon; Getty/Shutterstock don't brand their vetting process — they just say "licensed" or "rights-managed"; switched to "Rights Verified" (adjective form) to feel like established industry standard, not novel experiment; matches Getty pattern: "Royalty-Free", "Rights-Managed" |
+| Feb 21, 2026 | **"Rights Package" → "Chain of Title" (buyer-familiar terminology)** | "Rights Package" = unfamiliar startup term; "Chain of Title" = film/TV industry standard for legal provenance documentation; buyers already know this term from traditional production; updated all website pages (8 HTML files), CLAUDE.md, and memory; positioning: feel like Getty (proven), not startup (risky) |
+| Feb 21, 2026 | **Commission rate adjusted: 25% → 20%** | Standard industry commission for representation/licensing is 15-20%; 25% was high for Year 1 when SI8 has no track record; lowered to 20% to be competitive with established agencies while still premium vs. platform models (Escape.ai 15%); updated website (EN + ZH) and filmmaker agreement |
+| Feb 21, 2026 | **Website content refinements for clarity** | Updated catalog header to "Rights Verified AI videos" (not "Vetted AI Productions"); services section to "Two ways to use Rights Verified AI videos"; process subheading to "Our Rights Verified process"; removed redundant "The" from section tags and navigation for cleaner, more professional feel |
+| Feb 21, 2026 | **Language consistency: Getty-familiar over startup-unique** | Pattern across all updates: chose established industry language over branded/novel terms; "Rights Verified" over "Safe Lane", "Chain of Title" over "Rights Package", "20%" over "25%" commission; strategic positioning = trusted infrastructure (like Getty), not experimental platform (like Escape.ai) |
 
 ---
 
@@ -2105,13 +2110,13 @@ SI8's catalog has documentation on every piece: tool disclosure, Safe Lane sign-
 
 ---
 
-## Status — February 17, 2026
+## Status — February 21, 2026
 
 **Completed this week:**
 - [x] Website launched — superimmersive8.com (light theme, catalog grid, bilingual)
 - [x] Traditional Chinese version live — superimmersive8.com/index-zh.html
 - [x] Language toggle functional (EN ↔ 繁體中文)
-- [x] Catalog grid: 6 cards, filter buttons, hover overlays, Safe Lane + Placement badges
+- [x] Catalog grid: 6 cards, filter buttons, hover overlays, Rights Verified + Placement badges
 - [x] All code in GitHub: aip-jd36/superimmersive8
 
 **Immediate priorities (still open):**

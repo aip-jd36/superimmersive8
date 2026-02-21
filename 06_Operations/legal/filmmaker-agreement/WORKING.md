@@ -43,8 +43,8 @@ for formal agreement to be drafted.
 - Proposed: 12 months, auto-renews unless either party gives 30 days notice
 
 ### Commission
-- SI8: 25% of deals brokered
-- Filmmaker: 75%
+- SI8: 20% of deals brokered
+- Filmmaker: 80%
 - Payment: SI8 pays filmmaker within 30 days of receiving payment from buyer
 
 ### What SI8 Can Do
@@ -110,7 +110,7 @@ for formal agreement to be drafted.
 - Does he have existing distribution or licensing in place we'd need to work around?
 - Is he comfortable with the MyVideo pilot concept?
 - What does he want from representation? (Exposure, income, legal protection, community?)
-- Any concerns about the 25% commission?
+- Any concerns about the 20% commission?
 - What works does he want to include — all films, or specific titles?
 
 ---

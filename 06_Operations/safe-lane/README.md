@@ -1,8 +1,8 @@
-# Safe Lane Verification — Project Overview
+# Rights Verified Verification — Project Overview
 
 ## What This Is
 
-The Safe Lane is SI8's operational vetting process for AI-generated content. It is the core of SI8's value proposition: the judgment layer that separates SI8 from anyone who simply puts AI videos online.
+The Rights Verified is SI8's operational vetting process for AI-generated content. It is the core of SI8's value proposition: the judgment layer that separates SI8 from anyone who simply puts AI videos online.
 
 This folder contains the process documentation — the HOW. It is not legal advice and does not constitute a legal guarantee. It is a documented workflow.
 
@@ -10,7 +10,7 @@ This folder contains the process documentation — the HOW. It is not legal advi
 - The Rights Playbook covers the WHY: legal landscape, jurisdiction risk, tool risk tiers, platform policies, the No List.
 - This project covers the HOW: what happens when a filmmaker submits work, what gets checked, what the output looks like.
 
-Both must be understood together. The Rights Playbook provides the legal theory. The Safe Lane process applies that theory to real submissions.
+Both must be understood together. The Rights Playbook provides the legal theory. The Rights Verified process applies that theory to real submissions.
 
 ---
 
@@ -71,6 +71,6 @@ The services phase is not a detour. It is the research phase for the platform. E
 
 ## Internal Note
 
-SI8's moat is not documentation. C2PA/Content Credentials will commoditize provenance documentation. SI8's moat is the judgment layer: subjective legal review, IP assessment, training data risk analysis — which software cannot automate. The Safe Lane process is what operationalizes that judgment.
+SI8's moat is not documentation. C2PA/Content Credentials will commoditize provenance documentation. SI8's moat is the judgment layer: subjective legal review, IP assessment, training data risk analysis — which software cannot automate. The Rights Verified process is what operationalizes that judgment.
 
-The Rights Package is the product. The content is the carrier.
+The Chain of Title is the product. The content is the carrier.

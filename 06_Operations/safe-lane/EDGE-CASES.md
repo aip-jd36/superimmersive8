@@ -1,4 +1,4 @@
-# Safe Lane Edge Cases
+# Rights Verified Edge Cases
 
 **Version:** v0.1 (February 2026)
 **Audience:** SI8 internal reviewer

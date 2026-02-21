@@ -1,4 +1,4 @@
-# Safe Lane Review Criteria
+# Rights Verified Review Criteria
 
 **Version:** v0.1 (February 2026)
 **Audience:** SI8 internal reviewer
@@ -25,8 +25,8 @@ For each of the seven categories, apply the criteria listed. If the submission c
 - Any Prohibited or High-Risk tool used as a primary generation source (e.g., Hailuo, non-commercial plans of any tool)
 - Missing receipts for any tool — cannot confirm commercial authorization
 
-**Flag (note in Rights Package, work may still pass):**
-- Caution-tier tool (e.g., Kling) used as primary or significant tool → note in Rights Package; affects exclusivity pricing for buyers who require strong IP indemnification
+**Flag (note in Chain of Title, work may still pass):**
+- Caution-tier tool (e.g., Kling) used as primary or significant tool → note in Chain of Title; affects exclusivity pricing for buyers who require strong IP indemnification
 - Tool version cannot be confirmed (older version, unclear what model was used) → note; affects traceability
 
 **Reviewer note:** Tool tier list is maintained in the Rights Playbook and will be updated as tool ToS change, litigation landscapes shift, and new tools emerge. Always check the current list, not memory.
@@ -110,7 +110,7 @@ This is the category with the highest legal exposure and the most direct reputat
 
 **Pass:**
 - Content is suitable for mainstream commercial brand attachment with no restrictions
-- OR content has specific restrictions that can be clearly documented in the Rights Package category conflict log
+- OR content has specific restrictions that can be clearly documented in the Chain of Title category conflict log
 
 **Conditional (suitable for some categories, not others):**
 - Content has mature themes but no explicit content → suitable for most brands; not suitable for children's, family, or certain regulated categories (pharma, healthcare, financial services targeting retail consumers)
@@ -160,16 +160,16 @@ This is the category with the highest legal exposure and the most direct reputat
 
 **Authorized — Full Work:**
 - Tier 2 eligible (all scenes)
-- Note: Shopping Agreement must include modification clause. If it doesn't, Tier 2 cannot be offered until agreement is amended. Note this in Rights Package.
+- Note: Shopping Agreement must include modification clause. If it doesn't, Tier 2 cannot be offered until agreement is amended. Note this in Chain of Title.
 
 **Authorized — Specific Scenes:**
 - Tier 2 eligible for specified scenes only
-- Document scene list precisely in Rights Package
+- Document scene list precisely in Chain of Title
 - Note modification clause requirement as above
 
 **Not Authorized:**
-- Tier 1 only. Note clearly in Rights Package.
-- Filmmaker can update authorization at any time (requires Rights Package update and re-review of this category only)
+- Tier 1 only. Note clearly in Chain of Title.
+- Filmmaker can update authorization at any time (requires Chain of Title update and re-review of this category only)
 
 **Scope note:** The scope of modification authorization affects what Tier 2 placement products can be offered. Full authorization = maximum flexibility. Scene-specific = limited to those scenes. This information is passed to the sales team when Tier 2 deals are being structured.
 

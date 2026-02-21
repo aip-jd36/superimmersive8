@@ -1,4 +1,4 @@
-# Safe Lane — Decisions Log
+# Rights Verified — Decisions Log
 
 A record of what changed between versions, why, and what remains unresolved.
 
@@ -9,14 +9,14 @@ A record of what changed between versions, why, and what remains unresolved.
 **What triggered this version:**
 - First filmmaker conversations expected (post-Lunar New Year)
 - Need a documented process before the first real submission — not after
-- Safe Lane must be operational before pitching Tier 2 to any brand buyer
+- Rights Verified must be operational before pitching Tier 2 to any brand buyer
 
 **What's in v0.1:**
 - Full project structure (7 documents)
 - Submission requirements (10 sections, filmmaker-facing)
 - Review process (4-stage workflow, target <90 min per submission)
 - Review criteria (7 categories, pass/fail thresholds)
-- Rights Package schema (9 fields, one per catalog entry)
+- Chain of Title schema (9 fields, one per catalog entry)
 - Edge cases log (initialized; empty until first real submission)
 - 5-business-day turnaround commitment (v0.1 standard)
 
@@ -24,10 +24,10 @@ A record of what changed between versions, why, and what remains unresolved.
 - Process designed from day one as if it will become a Year 3 self-serve platform intake flow
   - Submission requirements = future web form fields
   - Review criteria Stage 1 = future automated pre-screen rules
-  - Rights Package schema fields = future database columns
-- 9-field Rights Package schema resolved here (was flagged as v0.2 carry-forward item in Rights Playbook DECISIONS.md — now resolved and documented in RIGHTS-PACKAGE-SCHEMA.md)
+  - Chain of Title schema fields = future database columns
+- 9-field Chain of Title schema resolved here (was flagged as v0.2 carry-forward item in Rights Playbook DECISIONS.md — now resolved and documented in RIGHTS-PACKAGE-SCHEMA.md)
 - Music rights v0.1 position: conservative default. Silence or original AI audio = Pass. Licensed with documentation = Conditional (flag for legal review at v0.3). Unlicensed = Fail.
-- Kling training data clause: work produced with Kling = Caution-Flagged tier, not rejected. Documented in Rights Package. Affects exclusivity pricing for buyers requiring strong IP indemnification.
+- Kling training data clause: work produced with Kling = Caution-Flagged tier, not rejected. Documented in Chain of Title. Affects exclusivity pricing for buyers requiring strong IP indemnification.
 - Turnaround commitment: 5 business days from receipt of complete submission (v0.1)
 - Human authorship declaration minimum: 150 words, substantive not padded
 
@@ -55,27 +55,27 @@ Document these as-is. Do not block v0.1 on resolving them.
 **Kling exclusivity pricing:**
 - Caution-Flagged works (Kling as primary tool) can be licensed, but buyers needing strong IP indemnification may require discounts or category-exclusives at different pricing
 - Pricing differential: TBD in pricing framework (out of scope for this project)
-- Note in Rights Package for now; sales team handles buyer conversation
+- Note in Chain of Title for now; sales team handles buyer conversation
 
 **MyVideo platform requirements:**
 - Jamie Lin connection has not been asked yet: what does MyVideo require for AI content documentation?
-- May affect Rights Package format for Taiwan-facing deals
+- May affect Chain of Title format for Taiwan-facing deals
 - Flag: ask in first conversation. Note result here.
 
 **Tier pricing differential:**
 - Certified (Firefly only) vs. Standard (Runway/Pika/Sora) — does tier affect licensing price?
 - Not resolved. Flagged for pricing framework development (separate workstream)
-- Safe Lane process does not set prices — it assigns tiers. Pricing attaches to tiers separately.
+- Rights Verified process does not set prices — it assigns tiers. Pricing attaches to tiers separately.
 
 **Shopping Agreement modification clause:**
 - Required before any Tier 2 deal can close
 - As of v0.1, Filmmaker Agreement is a work in progress (see `06_Operations/legal/filmmaker-agreement/`)
-- Safe Lane process notes modification clause status in Rights Package (Field 5)
+- Rights Verified process notes modification clause status in Chain of Title (Field 5)
 - This dependency must be resolved before first Tier 2 pitch to a brand
 
 **Lawyer review (v0.3 target):**
 - Human authorship declaration language — is the current standard legally adequate?
-- Rights Package schema — does it constitute adequate documentation for commercial use?
+- Chain of Title schema — does it constitute adequate documentation for commercial use?
 - Overall process — does it create or limit SI8's liability exposure?
 - Music rights guidance — specific to APAC distribution
 - Not a blocker for v0.1. First 3 real submissions will reveal what needs legal attention most urgently.
@@ -103,14 +103,14 @@ External peer review of v0.1 (ChatGPT + Gemini). Both independently flagged file
 
 **Changes made (not a new version — amendments to v0.1):**
 
-- **Field 10 added to Rights Package schema:** SHA-256 file hash + file specs. Ties the Rights Package to a specific reviewed file. Invalidated by any post-review modification to the file. Hash generated at Stage 4 before issuing the package.
+- **Field 10 added to Chain of Title schema:** SHA-256 file hash + file specs. Ties the Chain of Title to a specific reviewed file. Invalidated by any post-review modification to the file. Hash generated at Stage 4 before issuing the package.
 - **Hash step added to Stage 4 (REVIEW-PROCESS.md):** First step of clean pass workflow. Must be generated from the master delivery file before it leaves reviewer possession.
 - **Section 8 rewritten in SUBMISSION-REQUIREMENTS.md:** Reframed from "Modification Rights Authorization" (rights-grant framing) to "Tier 2 Brand Placement — Enrollment (Optional)" (income-opportunity framing). Legal substance unchanged; psychological framing inverted.
 - **Intake capacity policy added to REVIEW-PROCESS.md:** 10 submissions/month cap at v0.1. Fast reject within 48 hours for Stage 1 failures. 5-business-day SLA clock starts only after Stage 1 confirmed complete.
 - **Tier 2 regeneration copyright flagged for lawyer brief:** The unresolved question of who owns AI-regenerated Tier 2 scenes (original filmmaker vs. SI8) has been added to `06_Operations/legal/filmmaker-agreement/lawyer-briefs/brief-v1.md` as a specific question with three structural options (filmmaker-as-principal, SI8-as-owner, hybrid). Must be resolved before first Tier 2 pitch to any brand.
 
 **Not addressed in this update (deferred):**
-- Re-review triggers (what changes force a new Rights Package)
+- Re-review triggers (what changes force a new Chain of Title)
 - Third-party asset disclosure (fonts, SFX, overlays)
 - Reviewer ID depersonalization for Year 3 scale
 - Reverse face search step in Stage 2 Cat 3

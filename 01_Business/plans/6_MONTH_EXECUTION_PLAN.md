@@ -106,7 +106,7 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 
 **Critical rule:** If you go below 5 hrs/week on outreach, you likely miss $5K/month by Month 6.
 
-### The "No List" — Safe Lane Boundaries
+### The "No List" — Rights Verified Boundaries
 
 *What SI8 will NOT do (prevents scope creep and risk):*
 
@@ -194,7 +194,7 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 |---|------|-------------|
 | 1 | **Build catalog: sign 3-5 filmmakers** (with modification clause) | Minimum viable catalog before any Tier 2 pitch is made |
 | 2 | **Launch website v1 in 7 days** | Catalog positioning, rights-agency framing, lead form, calendar link |
-| 3 | **Produce Rights Playbook v0.1** | 3 pages max: Safe Lane, legal landscape, platform summary — the primary sales asset |
+| 3 | **Produce Rights Playbook v0.1** | 3 pages max: Rights Verified, legal landscape, platform summary — the primary sales asset |
 | 4 | **Lock filmmaker agreements** (modification clause is non-negotiable) | Signed shopping agreements with modification + exclusivity framework |
 | 5 | **Recruit advisory board candidates** (3-5 people) | 1-page advisory memo drafted; first outreach sent |
 | 6 | **Set up per-asset documentation SKU** | 9-field schema operational before first catalog entry is signed |
@@ -238,14 +238,14 @@ The Tier 2 product placement pitch requires a catalog. There is nothing to offer
 **What each catalog entry requires:**
 1. Signed non-exclusive shopping agreement (with modification clause)
 2. Tool disclosure (which tools, which plans, at time of production)
-3. Safe Lane sign-off (SI8 review against the No List)
+3. Rights Verified sign-off (SI8 review against the No List)
 4. Rights documentation (ownership confirmation, no third-party IP)
 5. Per-asset documentation SKU (all 9 fields complete)
 
 **Per-asset documentation SKU (9 fields — must be complete for every catalog entry):**
 1. Tool provenance log (which AI tools, which version, which plan tier)
 2. Model disclosure (Runway Gen-3, Kling v1.5, etc.)
-3. Safe Lane sign-off (SI8 reviewer, date, notes)
+3. Rights Verified sign-off (SI8 reviewer, date, notes)
 4. Commercial use authorization (tool TOS confirmation, plan-level verification)
 5. Modification rights status (is modification clause signed? scope?)
 6. Category conflict log (any active exclusivity restrictions)
@@ -967,7 +967,7 @@ That's a different conversation than cold outreach.
 **Potential Future Product:**
 - "AI Video Rights Audit" — standalone advisory offering ($2-3K)
 - "AI Video Rights Playbook" — packaged knowledge product (if market exists)
-- "Safe Lane Vetted Catalog" — pre-vetted filmmakers with clean, documented processes
+- "Rights Verified Vetted Catalog" — pre-vetted filmmakers with clean, documented processes
 
 ---
 

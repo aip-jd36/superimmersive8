@@ -1,18 +1,18 @@
-# Safe Lane Submission Requirements
+# Rights Verified Submission Requirements
 
 **Version:** v0.1 (February 2026)
 **Audience:** Filmmakers submitting work for SI8 representation and catalog inclusion
-**Purpose:** Everything SI8 needs to complete a Safe Lane review and issue a Rights Package
+**Purpose:** Everything SI8 needs to complete a Rights Verified review and issue a Chain of Title
 
 ---
 
 ## Before You Submit
 
-SI8 represents AI-generated and AI-assisted films through a documented vetting process called the Safe Lane. Completing this submission is what enables your work to be:
+SI8 represents AI-generated and AI-assisted films through a documented vetting process called the Rights Verified. Completing this submission is what enables your work to be:
 - Included in SI8's catalog for commercial licensing (Tier 1)
 - Considered for AI product placement deals with brands (Tier 2)
 
-This is not a legal certification. It is a documented process. The more complete and accurate your submission, the stronger your Rights Package — and the more valuable your work is to buyers.
+This is not a legal certification. It is a documented process. The more complete and accurate your submission, the stronger your Chain of Title — and the more valuable your work is to buyers.
 
 If you have questions before submitting, contact SI8 directly.
 
@@ -58,7 +58,7 @@ If you have questions before submitting, contact SI8 directly.
 | | | | Y/N | Y/N |
 | | | | Y/N | Y/N |
 
-**Paid commercial plan receipts or subscription confirmation screenshots are required for each tool listed.** This is the foundation of the commercial use authorization in your Rights Package. Without receipts, the submission cannot proceed.
+**Paid commercial plan receipts or subscription confirmation screenshots are required for each tool listed.** This is the foundation of the commercial use authorization in your Chain of Title. Without receipts, the submission cannot proceed.
 
 *Note: SI8 maintains a tool risk tier list (Approved / Caution / Prohibited) based on commercial terms, active litigation exposure, and training data risk. Tools not on the Approved list require additional review. See the Rights Playbook for current tier assignments.*
 

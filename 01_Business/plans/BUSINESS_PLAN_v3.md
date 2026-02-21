@@ -6,7 +6,7 @@
 **Supersedes:** BUSINESS_PLAN_v2.md (v2.1, February 2026)
 **Change summary:** Primary offering reframed around custom AI product placement in vetted productions. Rights Agency + Rights Management model named explicitly. "Getty for AI video" positioning established. "The Bad Boy Indemnifier" competitive differentiation added. Platform Horizon refined — VC path is upside not requirement. Passive Reuse added as platform validation signal. C2PA flagged for monitoring.
 
-> For operational sections unchanged from v2.1 (risk tiers, advisory board, geographic strategy, bilingual website, E&O insurance, Safe Lane, No List, financial projections, filmmaker acquisition), refer to BUSINESS_PLAN_v2.md.
+> For operational sections unchanged from v2.1 (risk tiers, advisory board, geographic strategy, bilingual website, E&O insurance, Rights Verified, No List, financial projections, filmmaker acquisition), refer to BUSINESS_PLAN_v2.md.
 
 ---
 
@@ -58,7 +58,7 @@ TIER 3 — ADVISORY (inbound, don't lead with it)
 Referral + Rights Management
 Brand wants something custom that doesn't exist in the catalog.
 SI8 refers to a vetted filmmaker AND manages rights for both
-parties through the Safe Lane process.
+parties through the Rights Verified process.
 Price: Advisory/management fee
 SI8 role: Rights manager + filmmaker connector
 
@@ -92,7 +92,7 @@ AI-generated content is not fixed. Specific elements can be regenerated with mod
 
 ### The Pitch
 
-> *"You like this film? We can put your brand in it. One modification workflow — no reshoot, no new production. And because everything in our catalog has been through our Safe Lane process, you won't have legal exposure on the other end. That's the part nobody else is offering."*
+> *"You like this film? We can put your brand in it. One modification workflow — no reshoot, no new production. And because everything in our catalog has been through our Rights Verified process, you won't have legal exposure on the other end. That's the part nobody else is offering."*
 
 ### Exclusivity Framework (Required Before First Sale)
 
@@ -119,7 +119,7 @@ Default: category-exclusive unless otherwise negotiated. Must be defined in the 
 
 ### What It Is
 
-The catalog as a commercial content library. Every work is vetted through the Safe Lane process, documented for commercial use, and available for licensing to content platforms, streaming services, airline entertainment, editorial, and education.
+The catalog as a commercial content library. Every work is vetted through the Rights Verified process, documented for commercial use, and available for licensing to content platforms, streaming services, airline entertainment, editorial, and education.
 
 ### Why This Exists as a Separate Tier
 
@@ -164,7 +164,7 @@ SI8 operates on identical logic:
 
 | What the buyer thinks they're buying | What they're actually buying |
 |--------------------------------------|------------------------------|
-| An AI video file | Commercial use documentation + Safe Lane sign-off |
+| An AI video file | Commercial use documentation + Rights Verified sign-off |
 | A branded AI video | Same + modification authorization + placement rights |
 | A filmmaker referral | SI8's rights management process + legal judgment |
 
@@ -179,7 +179,7 @@ This means the Rights Playbook is not a sales asset or a credibility signal — 
 
 Brands don't want to hear "we sell documentation." They want confidence, speed, and reduced friction. What they *feel* is: AI content that used to require weeks of legal back-and-forth now takes days because the paperwork is already done. That is the emotional product. The documentation is how it's delivered.
 
-### The Rights Package — Product SKU (Per Asset)
+### The Chain of Title — Product SKU (Per Asset)
 
 Every asset in the SI8 catalog has a structured rights record — not a narrative PDF, but structured data fields that are consistent across every work. This is the documentation that ships with every deal, and the schema that eventually becomes the platform's database.
 
@@ -189,7 +189,7 @@ Every asset in the SI8 catalog has a structured rights record — not a narrativ
 |-------|----------------|
 | **Tool provenance log** | Which AI tools were used, which plan/tier, at what date |
 | **Model disclosure** | Specific model version (e.g., Runway Gen-3, Sora v2) at time of generation |
-| **Safe Lane sign-off** | Reviewer confirmation against No List — no likeness, no voice cloning, no IP imitation |
+| **Rights Verified sign-off** | Reviewer confirmation against No List — no likeness, no voice cloning, no IP imitation |
 | **Commercial use authorization** | Filmmaker confirmation of commercial rights; plan documentation attached |
 | **Modification rights status** | Whether filmmaker has authorized brand-integrated versions (gates Tier 2) |
 | **Category conflict log** | Existing exclusive placements by product category and territory |
@@ -197,11 +197,11 @@ Every asset in the SI8 catalog has a structured rights record — not a narrativ
 | **Regeneration rights status** | Whether original project files and generation parameters are archived and accessible |
 | **Version history** | Every licensed or modified version of the work, with buyer and date |
 
-This is **not** called a "Rights Certificate" — because "certificate" implies SI8 is certifying non-infringement, which is a legal guarantee SI8 cannot make. The Rights Package documents the process rigorously. It gives buyers something to stand behind. It does not eliminate risk — it documents the steps taken to reduce it, which is what a legal team actually needs.
+This is **not** called a "Rights Certificate" — because "certificate" implies SI8 is certifying non-infringement, which is a legal guarantee SI8 cannot make. The Chain of Title documents the process rigorously. It gives buyers something to stand behind. It does not eliminate risk — it documents the steps taken to reduce it, which is what a legal team actually needs.
 
 **Why structured data matters:** Narrative documentation cannot be searched, scaled, or automated. Structured fields can. Running the agency on this schema from day one means the platform already exists in spreadsheet form before a single line of software is written.
 
-**SI8's moat is owning the vetting pipeline** — the judgment, the process, the filmmaker relationships, the Safe Lane standards — not owning the content. The same moat Getty built, applied to the AI video era.
+**SI8's moat is owning the vetting pipeline** — the judgment, the process, the filmmaker relationships, the Rights Verified standards — not owning the content. The same moat Getty built, applied to the AI video era.
 
 ### Brand Identity Progression — Underwriter First, Curator Later
 
@@ -225,7 +225,7 @@ Adobe is also structurally limited. Their indemnification only applies to Firefl
 |--|----------------|------------------|-------------------|
 | **Creative tools** | Firefly only | Sora, Kling, Runway | Adobe Firefly |
 | **Creative ceiling** | Limited — licensed library only | Full AI creative capability | Same as Adobe |
-| **Commercial vetting** | Built-in indemnification | Safe Lane process + documentation | Safe Lane process + documentation |
+| **Commercial vetting** | Built-in indemnification | Rights Verified process + documentation | Rights Verified process + documentation |
 | **Product placement** | No | Yes | Yes |
 | **Who it's for** | Risk-averse brands, conservative legal teams | Agencies wanting creative power with compliance | Fortune 500, financial services, maximum defensibility |
 
@@ -267,7 +267,7 @@ This is the *felt* version of what SI8 delivers. Brands don't want paperwork —
 
 ### Secondary Motion: Tier 1 Catalog Licensing to Platforms
 
-MyVideo, streaming services, airline content libraries, editorial. Pitch is documentation-first: "Every work in our catalog is commercially licensed, Safe Lane vetted, and disclosure-compliant for your platform."
+MyVideo, streaming services, airline content libraries, editorial. Pitch is documentation-first: "Every work in our catalog is commercially licensed, Rights Verified vetted, and disclosure-compliant for your platform."
 
 ### Tertiary Motion: Filmmaker Acquisition (Catalog Building)
 
@@ -296,7 +296,7 @@ Every manual step should be run as if it will be handed to a software team in Ye
 | Manual Process (Year 1) | Future Platform Feature |
 |------------------------|------------------------|
 | Filmmaker intake by email + call | Self-serve upload and onboarding form |
-| Safe Lane vetting by manual review | Checklist-driven QA with human oversight |
+| Rights Verified vetting by manual review | Checklist-driven QA with human oversight |
 | Rights documentation from templates | Auto-generated from structured intake data |
 | Catalog browsing via curated PDF | Searchable, filterable catalog interface |
 | Product placement via email coordination | Structured brief + workflow tool |
@@ -316,7 +316,7 @@ This is the one message. Tier 2 (product placement) makes it more compelling —
 
 ## What's Unchanged from v2.1
 
-- Safe Lane process and No List
+- Rights Verified process and No List
 - Two risk tiers (Certified: Adobe Firefly / Standard: Runway, Pika, Sora)
 - Language: "safe lane vetted" not "rights-cleared"
 - Advisory board as Year 1 credibility asset
@@ -340,7 +340,7 @@ Photographs became ubiquitous because the means of production was democratized �
 
 AI video is following the same arc. Generation tools (Runway, Sora, Kling, Pika) are rapidly democratizing production. Within 2-5 years, AI video will be as ubiquitous as photography is today. Brands who want to use it commercially will need a source that is vetted, documented, and defensible. The platform that builds that vetting infrastructure first — before the wave fully arrives — will occupy the same structural position Getty holds in photography.
 
-SI8 is building that infrastructure. The catalog, the Safe Lane process, the filmmaker agreements, the rights documentation — these are not just operational tools for a boutique agency. They are the foundation of a platform.
+SI8 is building that infrastructure. The catalog, the Rights Verified process, the filmmaker agreements, the rights documentation — these are not just operational tools for a boutique agency. They are the foundation of a platform.
 
 ### Why Start as a Services Business
 
@@ -377,7 +377,7 @@ When manual processes are validated and repeatable, they become platform feature
 | Manual (Year 1-2) | Platform (Year 3+) |
 |-------------------|-------------------|
 | Filmmaker intake by email + call | Self-serve upload and onboarding |
-| Safe Lane vetting by manual review | Checklist-driven QA with human oversight |
+| Rights Verified vetting by manual review | Checklist-driven QA with human oversight |
 | Rights documentation from templates | Auto-generated from structured intake data |
 | Catalog browsing via curated PDF or link | Searchable, filterable catalog interface |
 | Product placement by email coordination | Structured brief + workflow tool |
@@ -403,7 +403,7 @@ The Year 1-2 work is the same regardless of which option materializes. Build the
 
 ## One-Sentence Summary
 
-**v3:** *"SI8 is a rights agency for AI film — we give brands access to the best creative AI tools their legal teams are afraid of, we vet everything through our Safe Lane process, and we can put their brand inside the content itself — so they get creative power and commercial safety in one package."*
+**v3:** *"SI8 is a rights agency for AI film — we give brands access to the best creative AI tools their legal teams are afraid of, we vet everything through our Rights Verified process, and we can put their brand inside the content itself — so they get creative power and commercial safety in one package."*
 
 ---
 

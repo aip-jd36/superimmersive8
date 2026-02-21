@@ -1,4 +1,4 @@
-# Rights Package Schema
+# Chain of Title Schema
 
 **Version:** v0.1 (February 2026)
 **Audience:** SI8 internal reviewer (completing after clean pass); referenced in buyer agreements
@@ -6,17 +6,17 @@
 
 ---
 
-## What the Rights Package Is
+## What the Chain of Title Is
 
-The Rights Package is the documented chain of defensibility for a single work in SI8's catalog. It is not a legal certification. It is a structured record of what was reviewed, what was found, and what was authorized — completed by SI8's Safe Lane reviewer after a successful review.
+The Chain of Title is the documented chain of defensibility for a single work in SI8's catalog. It is not a legal certification. It is a structured record of what was reviewed, what was found, and what was authorized — completed by SI8's Safe Lane reviewer after a successful review.
 
-**The file is the carrier. The Rights Package is the product.**
+**The file is the carrier. The Chain of Title is the product.**
 
 When a buyer licenses content from SI8, they receive:
 1. The content file(s)
-2. The Rights Package for that work (or relevant portions)
+2. The Chain of Title for that work (or relevant portions)
 
-The Rights Package is what allows buyers to use AI-generated content commercially with confidence — knowing the provenance is documented, the tools are licensed, the authorship claim is supported, and the risk has been assessed by a human reviewer.
+The Chain of Title is what allows buyers to use AI-generated content commercially with confidence — knowing the provenance is documented, the tools are licensed, the authorship claim is supported, and the risk has been assessed by a human reviewer.
 
 ---
 
@@ -26,7 +26,7 @@ The Rights Package is what allows buyers to use AI-generated content commerciall
 
 Examples: `SI8-2026-0001`, `SI8-2026-0002`
 
-Sequence is assigned at the time of Rights Package completion — not at submission. Numbers are assigned in order of completion, not submission date.
+Sequence is assigned at the time of Chain of Title completion — not at submission. Numbers are assigned in order of completion, not submission date.
 
 ---
 
@@ -38,21 +38,21 @@ Example: `05_Catalog/represented/chen-wei/luminance-short/rights-package.md`
 
 ---
 
-## Rights Package Template
+## Chain of Title Template
 
 Copy this template for each new catalog entry. Fill all fields. Mark "N/A" only where genuinely not applicable. Never leave a field blank.
 
 ---
 
 ```
-# Rights Package
+# Chain of Title
 ## [Title]
 
 **Catalog ID:** SI8-[YEAR]-[####]
 **Filmmaker:** [Name]
 **Review Date:** [Date]
 **Reviewer:** [Name / initials]
-**Rights Package Version:** 1.0
+**Chain of Title Version:** 1.0
 ```
 
 ---
@@ -67,7 +67,7 @@ Copy this template for each new catalog entry. Fill all fields. Mark "N/A" only 
 |------|----------------|-----------|-------------------|-------------------|----------------|
 | [Tool name] | [Version or model name] | [Free / Paid / Enterprise] | [Confirmed / Unconfirmed] | [Month/Year – Month/Year] | [Yes / No] |
 
-*Reviewer note:* Every tool must show "Confirmed" commercial license and "Yes" receipt on file to pass. If any tool shows otherwise, the submission did not pass and this Rights Package should not exist.
+*Reviewer note:* Every tool must show "Confirmed" commercial license and "Yes" receipt on file to pass. If any tool shows otherwise, the submission did not pass and this Chain of Title should not exist.
 
 ---
 
@@ -205,25 +205,25 @@ Not authorized for regeneration:
 *Format:* Log — add entries chronologically.
 
 ```
-[YYYY-MM-DD] — Production version reviewed. Rights Package v1.0 issued. Catalog ID: [SI8-YEAR-####]
-[YYYY-MM-DD] — [Description of any modification, if applicable] — Re-reviewed. Rights Package updated to v[X.X].
+[YYYY-MM-DD] — Production version reviewed. Chain of Title v1.0 issued. Catalog ID: [SI8-YEAR-####]
+[YYYY-MM-DD] — [Description of any modification, if applicable] — Re-reviewed. Chain of Title updated to v[X.X].
 ```
 
-*Note: If a Tier 2 placement regeneration is commissioned, the regenerated version gets its own Rights Package entry (new Catalog ID, different "filmmaker" = SI8 + original filmmaker, new review date). The original work's version history notes the regeneration event.*
+*Note: If a Tier 2 placement regeneration is commissioned, the regenerated version gets its own Chain of Title entry (new Catalog ID, different "filmmaker" = SI8 + original filmmaker, new review date). The original work's version history notes the regeneration event.*
 
 ---
 
-## Completed Rights Package Example Structure
+## Completed Chain of Title Example Structure
 
 ```
-# Rights Package
+# Chain of Title
 ## Luminance
 
 **Catalog ID:** SI8-2026-0001
 **Filmmaker:** Chen Wei
 **Review Date:** 2026-03-15
 **Reviewer:** JD
-**Rights Package Version:** 1.0
+**Chain of Title Version:** 1.0
 
 ### Field 1: Tool Provenance Log
 | Tool | Version / Model | Plan Type | Commercial License | Production Period | Receipt on File |
@@ -246,14 +246,14 @@ Flags: None
 [...remaining fields...]
 
 ### Field 9: Version History
-2026-03-15 — Production version reviewed. Rights Package v1.0 issued. Catalog ID: SI8-2026-0001
+2026-03-15 — Production version reviewed. Chain of Title v1.0 issued. Catalog ID: SI8-2026-0001
 ```
 
 ---
 
 ### Field 10: File Integrity Record
 
-*What it captures:* The cryptographic fingerprint of the exact file reviewed. Ties the Rights Package to a specific file. Without this, the package cannot definitively prove it applies to the file a buyer received.
+*What it captures:* The cryptographic fingerprint of the exact file reviewed. Ties the Chain of Title to a specific file. Without this, the package cannot definitively prove it applies to the file a buyer received.
 
 *Format:* Structured block.
 
@@ -269,7 +269,7 @@ Audio: [e.g., AAC stereo / PCM / No audio]
 SHA-256 Hash: [64-character hex string]
 Hash Generated: [YYYY-MM-DD HH:MM timezone]
 
-Statement: This Rights Package is valid only for the file matching the SHA-256 hash above.
+Statement: This Chain of Title is valid only for the file matching the SHA-256 hash above.
 Any modification to the file — including color correction, audio changes, frame additions
 or removals — invalidates this package and requires re-review.
 ```
@@ -282,7 +282,7 @@ or removals — invalidates this package and requires re-review.
 *How a buyer verifies:*
 Run the same command on the file they received. The output must exactly match the hash in this field. Any mismatch means the file was modified after review.
 
-*Reviewer note:* Generate the hash at Stage 4 of the review process, immediately before issuing the Rights Package. Do not generate it from a preview or proxy file — always from the master delivery file.
+*Reviewer note:* Generate the hash at Stage 4 of the review process, immediately before issuing the Chain of Title. Do not generate it from a preview or proxy file — always from the master delivery file.
 
 ---
 

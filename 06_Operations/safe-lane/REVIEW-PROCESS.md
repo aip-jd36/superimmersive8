@@ -1,4 +1,4 @@
-# Safe Lane Review Process
+# Rights Verified Review Process
 
 **Version:** v0.1 (February 2026)
 **Audience:** SI8 internal reviewer
@@ -16,7 +16,7 @@ Four stages. Each stage has a defined outcome. Do not skip stages or combine the
 | 1 | Pre-Screen | 15 min | Quick gate: is this worth a full review? |
 | 2 | Full Review | 45–60 min | Seven-category deep review |
 | 3 | Risk Tier Assignment | 5 min | Classify the work based on review findings |
-| 4 | Decision & Output | 10–15 min | Document decision; generate Rights Package or reject |
+| 4 | Decision & Output | 10–15 min | Document decision; generate Chain of Title or reject |
 
 ---
 
@@ -63,12 +63,12 @@ Run through the following five checks. Any single failure = stop and handle befo
 
 **Purpose:** Seven-category deep review. Apply REVIEW-CRITERIA.md thresholds for each category.
 
-Work through the seven categories in order. Note findings as you go — these become the basis of the Rights Package.
+Work through the seven categories in order. Note findings as you go — these become the basis of the Chain of Title.
 
 ### Category 1: Tool & Plan Verification
 - Confirm each tool against current tier list.
 - Confirm commercial license status for each tool.
-- Note any Caution-tier tools (e.g., Kling) — these affect Rights Package flags and exclusivity pricing.
+- Note any Caution-tier tools (e.g., Kling) — these affect Chain of Title flags and exclusivity pricing.
 - File copies of receipts in submission record.
 
 ### Category 2: Human Authorship Evidence Quality
@@ -93,7 +93,7 @@ Work through the seven categories in order. Note findings as you go — these be
 ### Category 5: Brand Safety Assessment
 - Could this content be attached to mainstream commercial brand advertising?
 - Note specific brand category restrictions (e.g., "suitable for most categories; not suitable for children's brands due to [scene X]").
-- These restrictions populate the Category Conflict Log in the Rights Package.
+- These restrictions populate the Category Conflict Log in the Chain of Title.
 
 ### Category 6: Audio & Music Rights Verification
 - Review Section 7 disclosures against the actual audio.
@@ -104,7 +104,7 @@ Work through the seven categories in order. Note findings as you go — these be
 ### Category 7: Modification Rights Scope Confirmation
 - Review Section 8 selection.
 - If authorized (full or scene-specific) — confirm the Shopping Agreement includes a modification clause. If not, note this must be resolved before Tier 2 deals are offered.
-- If not authorized — note Tier 1 only in Rights Package.
+- If not authorized — note Tier 1 only in Chain of Title.
 - Document scope precisely — "specific scenes" authorization requires a scene list.
 
 ---
@@ -116,8 +116,8 @@ Based on Stage 2 findings, assign one of four outcomes:
 | Tier | Criteria |
 |------|---------|
 | **Certified** | Adobe Firefly as primary generation tool. No Caution-tier tools used. All categories pass cleanly. |
-| **Standard** | Runway / Pika / Sora (paid plans) as primary tools. No Prohibited tools. All categories pass. Caution-tier tools may be present — note in Rights Package. |
-| **Caution-Flagged** | Approved tools used, but Caution-tier tool (e.g., Kling) is primary or significant. Note in Rights Package. Affects exclusivity pricing for buyers. Work is licensable but buyers are informed. |
+| **Standard** | Runway / Pika / Sora (paid plans) as primary tools. No Prohibited tools. All categories pass. Caution-tier tools may be present — note in Chain of Title. |
+| **Caution-Flagged** | Approved tools used, but Caution-tier tool (e.g., Kling) is primary or significant. Note in Chain of Title. Affects exclusivity pricing for buyers. Work is licensable but buyers are informed. |
 | **Reject** | Any Prohibited or High-Risk tool used as primary generation source. Or any Category 3 (Likeness) or Category 1 hard-line failure. |
 
 *Note: Certified vs. Standard distinction matters for pricing (TBD in pricing framework). Both are licensable. Caution-Flagged is licensable with buyer disclosure. Reject is not.*
@@ -127,12 +127,12 @@ Based on Stage 2 findings, assign one of four outcomes:
 ## Stage 4 — Decision & Output (10–15 min)
 
 **Clean Pass:**
-1. **Generate file hash.** Run SHA-256 on the master delivery file. Record filename, file specs, and hash in Field 10 of the Rights Package. Do this before anything else — the hash must be generated from the file you reviewed, before it leaves your possession.
+1. **Generate file hash.** Run SHA-256 on the master delivery file. Record filename, file specs, and hash in Field 10 of the Chain of Title. Do this before anything else — the hash must be generated from the file you reviewed, before it leaves your possession.
    - Mac/Linux: `shasum -a 256 [filename]` in Terminal
    - Windows: `certutil -hashfile [filename] SHA256`
-2. Complete the Rights Package schema (RIGHTS-PACKAGE-SCHEMA.md) for this work, including Field 10.
+2. Complete the Chain of Title schema (RIGHTS-PACKAGE-SCHEMA.md) for this work, including Field 10.
 3. Assign catalog ID: `SI8-[YEAR]-[4-digit sequence]` (e.g., `SI8-2026-0001`).
-4. Save Rights Package to: `05_Catalog/represented/[filmmaker]/[title]/rights-package.md`
+4. Save Chain of Title to: `05_Catalog/represented/[filmmaker]/[title]/rights-package.md`
 5. Add catalog entry to catalog index.
 6. Notify filmmaker: pass, tier assigned, catalog ID, what happens next (Tier 1/2 eligibility, next steps).
 
@@ -183,4 +183,4 @@ SI8 operates at 10–15 hours/week as of v0.1, with part-time or outsourced revi
 - Music rights are the most complex category. If you are uncertain, flag it. Do not approve uncertain music rights in v0.1.
 - The Likeness category is the hardest line. If a face is possibly identifiable, it fails. Period.
 - The goal of v0.1 is not to approve everything — it is to run a clean, documented process for the first time.
-- Generate the file hash (Field 10) before issuing any Rights Package. The hash is the chain of custody. Without it, the package cannot prove it applies to the file the buyer received.
+- Generate the file hash (Field 10) before issuing any Chain of Title. The hash is the chain of custody. Without it, the package cannot prove it applies to the file the buyer received.
