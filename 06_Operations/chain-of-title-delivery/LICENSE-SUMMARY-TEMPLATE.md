@@ -62,7 +62,7 @@ RESTRICTIONS
 ✗ [If applicable: Territory-restricted — [List restricted regions]]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SAFE LANE VERIFICATION
+RIGHTS VERIFIED
 ──────────────────────────────────────────────────────────────
 
 ✓ AI tool provenance documented
