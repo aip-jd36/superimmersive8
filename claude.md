@@ -311,6 +311,10 @@
 | **Safe Lane — Review Criteria** | `06_Operations/safe-lane/REVIEW-CRITERIA.md` | Pass/fail thresholds per review category |
 | **Safe Lane — Rights Package Schema** | `06_Operations/safe-lane/RIGHTS-PACKAGE-SCHEMA.md` | 9-field output template per catalog entry |
 | **Safe Lane — Edge Cases** | `06_Operations/safe-lane/EDGE-CASES.md` | Gray areas, judgment calls, precedents (grows with submissions) |
+| **Rights Package Examples — README** | `05_Catalog/_examples/README.md` | Rights Package examples overview; sales and onboarding tool |
+| **Rights Package Template** | `05_Catalog/_examples/TEMPLATE.md` | Blank Rights Package template for new catalog entries |
+| **Example 001: Neon Dreams** | `05_Catalog/_examples/example-001-neon-dreams/` | First complete Rights Package example (cyberpunk commercial, Tier 1+2) |
+| **Rights Package Changelog** | `05_Catalog/_examples/versions/CHANGELOG.md` | Template version history and evolution tracking |
 | **Safe Lane — Decisions** | `06_Operations/safe-lane/DECISIONS.md` | Safe Lane version log + open questions |
 
 ---
