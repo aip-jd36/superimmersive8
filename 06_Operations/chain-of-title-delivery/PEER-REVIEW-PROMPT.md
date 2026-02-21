@@ -203,7 +203,7 @@ DOWNLOAD YOUR FILES
 These links do not expire. You can re-download anytime.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-WHAT'S IN YOUR RIGHTS PACKAGE
+WHAT'S IN YOUR CHAIN OF TITLE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Your Chain of Title is a 9-field legal documentation bundle designed to demonstrate defensibility in the event of legal review. It includes:

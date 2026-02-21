@@ -53,7 +53,7 @@ All files are ready for download:
 These links do not expire. You can re-download anytime.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-WHAT'S IN YOUR RIGHTS PACKAGE
+WHAT'S IN YOUR CHAIN OF TITLE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Your Chain of Title is a 9-field legal documentation bundle designed to demonstrate defensibility in the event of legal review. It includes:
@@ -162,7 +162,7 @@ DOWNLOAD YOUR FILES
 These links do not expire. You can re-download anytime.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-WHAT'S DIFFERENT IN TIER 2 RIGHTS PACKAGE
+WHAT'S DIFFERENT IN TIER 2 CHAIN OF TITLE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Your Chain of Title v2.0 includes everything from Tier 1, PLUS:
@@ -346,7 +346,7 @@ What you get:
 Delivery: 7-14 days (includes regeneration iteration)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-WHY THE RIGHTS PACKAGE MATTERS
+WHY THE CHAIN OF TITLE MATTERS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 If your legal team asks "Can we prove this AI content won't get us sued?", the Chain of Title is your answer.

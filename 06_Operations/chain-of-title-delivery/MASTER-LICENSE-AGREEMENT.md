@@ -156,7 +156,7 @@ you agree to be bound by this Agreement.
     the Content as described in the Order within 7 business days.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-5. CHAIN OF TITLE AND SAFE LANE VERIFICATION
+5. CHAIN OF TITLE AND RIGHTS VERIFIED VERIFICATION
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 5.1 Chain of Title Documentation

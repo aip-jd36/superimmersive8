@@ -180,7 +180,7 @@ When buyer clicks "View License Details":
 │  ↓ Chain of Title (PDF, 12 pages)                          │
 │  ↓ Invoice (PDF)                                            │
 │                                                              │
-│  WHAT'S IN YOUR RIGHTS PACKAGE                              │
+│  WHAT'S IN YOUR CHAIN OF TITLE                              │
 │  ────────────────────────────────────────────────────────  │
 │  ✓ Tool Provenance Log (Runway ML Gen-3 Alpha Turbo)       │
 │  ✓ Model Disclosure (gen3a_turbo, Nov 2025)                │

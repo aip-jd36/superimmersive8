@@ -253,7 +253,7 @@
 
 ---
 
-## 10. THE 9-FIELD RIGHTS PACKAGE MAPPED TO LEGAL DEFENSES
+## 10. THE 9-FIELD CHAIN OF TITLE MAPPED TO LEGAL DEFENSES
 
 | Chain of Title Field | Legal Defense Supported |
 |---------------------|------------------------|
