@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>定價 | SuperImmersive 8</title>
+    <meta name="description" content="簡單透明的定價方案。三種授權方案：標準目錄授權、延伸廣播版權、或客製化品牌置入。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Pricing page specific styles */
+        .pricing-hero {
+            padding: calc(var(--nav-height) + 4rem) 0 4rem 0;
+            background: var(--color-bg-elevated);
+            text-align: center;
+        }
+
+        .pricing-hero h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+        }
+
+        .pricing-hero p {
+            font-size: 1.125rem;
+            color: var(--color-text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Pricing grid */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+            max-width: 1200px;
+            padding: 0 2rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        @media (min-width: 768px) {
+            .pricing-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Pricing card */
+        .pricing-card {
+            background: var(--color-bg-card);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            transition: all var(--transition-base);
+        }
+
+        .pricing-card:hover {
+            border-color: var(--color-accent);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(200, 144, 10, 0.15);
+        }
+
+        .pricing-card.featured {
+            border-color: var(--color-accent);
+            position: relative;
+        }
+
+        .pricing-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--color-gradient-1), var(--color-gradient-2));
+            color: var(--color-text);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-full);
+            margin-bottom: 1rem;
+        }
+
+        .pricing-tier {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .pricing-price {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .pricing-price-note {
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .pricing-description {
+            font-size: 0.9375rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .pricing-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 2rem 0;
+            flex-grow: 1;
+        }
+
+        .pricing-features li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 0.9375rem;
+            color: var(--color-text-secondary);
+            line-height: 1.5;
+        }
+
+        .pricing-features li::before {
+            content: "✓";
+            color: var(--color-accent);
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .pricing-cta {
+            margin-top: auto;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            background: var(--color-bg);
+            padding: 5rem 2rem;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-title {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--color-text);
+        }
+
+        .faq-item {
+            margin-bottom: 2rem;
+        }
+
+        .faq-question {
+            font-family: var(--font-display);
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 0.75rem;
+        }
+
+        .faq-answer {
+            font-size: 1rem;
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+        }
+
+        .faq-answer a {
+            color: var(--color-accent);
+            text-decoration: none;
+            border-bottom: 1px solid var(--color-accent);
+            transition: opacity var(--transition-fast);
+        }
+
+        .faq-answer a:hover {
+            opacity: 0.7;
+        }
+
+        /* CTA Banner */
+        .pricing-cta-banner {
+            background: var(--color-bg-elevated);
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .pricing-cta-banner h2 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+        }
+
+        .pricing-cta-banner p {
+            font-size: 1.125rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .pricing-cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index-zh.html" class="logo">
+                <span class="logo-text">SI<span class="logo-accent">8</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="index-zh.html#catalog">影片目錄</a>
+                <div class="nav-dropdown">
+                    <a href="index-zh.html#rights-verified">安全通道 ▾</a>
+                    <div class="dropdown-content">
+                        <a href="rights-verified-how-it-works.html">運作方式</a>
+                        <a href="rights-verified-chain-of-title.html">版權文件包</a>
+                        <a href="rights-verified-vetting-criteria.html">審核標準</a>
+                        <a href="rights-verified-legal-brief.html">法律風險簡報</a>
+                        <a href="rights-verified-rights-playbook.html">版權手冊</a>
+                    </div>
+                </div>
+                <a href="index-zh.html#brands">品牌合作</a>
+                <a href="index-zh.html#filmmakers">創作者專區</a>
+                <a href="pricing-zh.html" style="color: var(--color-accent); font-weight: 500;">定價</a>
+                <a href="risk-briefing.html">風險簡報</a>
+                <a href="index-zh.html#contact" class="nav-cta">預約通話</a>
+            </div>
+            <div class="lang-selector" style="display:flex;align-items:center;gap:6px;font-size:0.8rem;opacity:0.7;margin-left:12px;">
+                <a href="pricing.html" style="color:var(--color-text-muted);text-decoration:none;">EN</a>
+                <span style="color:var(--color-text-muted);">/</span>
+                <a href="pricing-zh.html" style="color:var(--color-accent);text-decoration:none;font-weight:500;">繁體中文</a>
+            </div>
+            <button class="mobile-menu-btn" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Pricing Hero -->
+    <section class="pricing-hero">
+        <div class="container">
+            <h1>簡單透明的定價方案</h1>
+            <p>三種方案。無隱藏費用。選擇符合您行銷活動的版權授權方案。</p>
+        </div>
+    </section>
+
+    <!-- Pricing Grid -->
+    <div class="pricing-grid">
+        <!-- Standard License -->
+        <div class="pricing-card">
+            <div class="pricing-tier">標準授權</div>
+            <div class="pricing-price">$1,500</div>
+            <div class="pricing-price-note">每件作品</div>
+            <div class="pricing-description">
+                適合需要立即使用、經法律審核的創意內容，用於數位和社群媒體。
+            </div>
+            <ul class="pricing-features">
+                <li>主檔影片檔案（4K/ProRes）</li>
+                <li>完整版權來源鏈與合規記錄</li>
+                <li>安全通道流程審核簽核</li>
+                <li>商業使用授權</li>
+                <li>數位、社群、網路與企業內部使用</li>
+                <li>1年授權期限</li>
+                <li>非獨家授權</li>
+            </ul>
+            <div class="pricing-cta">
+                <a href="index-zh.html#catalog" class="btn btn-primary" style="width: 100%; text-align: center;">探索影片目錄</a>
+            </div>
+        </div>
+
+        <!-- Extended License (Featured) -->
+        <div class="pricing-card featured">
+            <div class="pricing-badge">最受歡迎</div>
+            <div class="pricing-tier">延伸授權</div>
+            <div class="pricing-price">$2,500 - $5,000</div>
+            <div class="pricing-price-note">客製化報價</div>
+            <div class="pricing-description">
+                適合廣播活動與多通路商業使用，提供更廣泛的版權與獨家授權選項。
+            </div>
+            <ul class="pricing-features">
+                <li><strong>包含標準授權所有內容，另加：</strong></li>
+                <li>廣播、電視與串流平台版權</li>
+                <li>平面與戶外廣告</li>
+                <li>全球無限地區</li>
+                <li>延長授權期限（最長3年）</li>
+                <li>可選擇類別獨家授權</li>
+            </ul>
+            <div class="pricing-cta">
+                <a href="https://calendly.com/superimmersive8/discovery" class="btn btn-primary" style="width: 100%; text-align: center;">索取報價</a>
+            </div>
+        </div>
+
+        <!-- Custom AI Placement -->
+        <div class="pricing-card">
+            <div class="pricing-tier">客製化AI品牌置入</div>
+            <div class="pricing-price">$12,000+</div>
+            <div class="pricing-price-note">起始價格</div>
+            <div class="pricing-description">
+                全方位品牌整合服務。我們運用AI技術在現有目錄作品中重新生成您的品牌元素——無需重新拍攝。
+            </div>
+            <ul class="pricing-features">
+                <li><strong>包含延伸授權所有內容，另加：</strong></li>
+                <li>AI重新生成並植入品牌元素</li>
+                <li>客製化產品/品牌置入</li>
+                <li>包含類別獨家版權</li>
+                <li>包含修改版權</li>
+                <li>多輪修訂服務</li>
+                <li>創作者協作</li>
+            </ul>
+            <div class="pricing-cta">
+                <a href="https://calendly.com/superimmersive8/discovery" class="btn btn-secondary" style="width: 100%; text-align: center;">預約探索諮詢</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="faq-container">
+            <h2 class="faq-title">常見問題</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">標準授權和延伸授權有何不同？</div>
+                <div class="faq-answer">
+                    標準授權適用於數位和社群媒體使用（1年期，非獨家）。延伸授權增加了廣播/電視版權、更長授權期限、全球地區授權，以及類別獨家授權選項。
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">之後可以升級授權嗎？</div>
+                <div class="faq-answer">
+                    可以。請聯絡我們將標準授權升級為延伸授權，或探索現有目錄作品的客製化置入選項。
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">版權來源鏈包含哪些內容？</div>
+                <div class="faq-answer">
+                    每件作品都附有結構化文件包，涵蓋工具來源、模型披露、安全通道審核簽核、商業使用授權、修改權限狀態、類別衝突記錄、地區資訊與版本歷史。<a href="rights-verified-chain-of-title.html">了解更多</a>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">如果我需要獨家版權怎麼辦？</div>
+                <div class="faq-answer">
+                    延伸授權和客製化AI置入方案中提供類別獨家版權。這意味著您的品牌將成為該產品類別中唯一授權該特定作品的品牌。請聯絡我們取得客製化報價。
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">有提供大量授權折扣嗎？</div>
+                <div class="faq-answer">
+                    有的。若您需要授權多件作品（5件以上），請聯絡我們，我們將為您量身打造包含優惠價格的套裝方案。
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">客製化AI品牌置入如何運作？</div>
+                <div class="faq-answer">
+                    我們從現有目錄作品中挑選，使用AI技術重新生成特定場景並整合您的品牌元素。這讓您以傳統製作成本的一小部分，獲得客製化品牌內容，並附有完整版權來源鏈文件。無需重新拍攝。
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">提供什麼付款條件？</div>
+                <div class="faq-answer">
+                    標準付款結構為50%訂金，50%交付時支付。對於延伸專案或多件作品授權，我們可以討論基於里程碑的付款時程。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Banner -->
+    <section class="pricing-cta-banner">
+        <div class="container">
+            <h2>準備好授權安全通道AI內容了嗎？</h2>
+            <p>瀏覽我們的影片目錄，或預約通話討論您的專案需求。</p>
+            <div class="pricing-cta-buttons">
+                <a href="index-zh.html#catalog" class="btn btn-primary">探索影片目錄</a>
+                <a href="https://calendly.com/superimmersive8/discovery" class="btn btn-secondary">預約通話</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="logo">
+                    <span class="logo-text">SI<span class="logo-accent">8</span></span>
+                </div>
+                <p>AI影片版權代理機構<br>台灣台北</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>平台</h4>
+                    <a href="index-zh.html#catalog">影片目錄</a>
+                    <a href="index-zh.html#rights-verified">安全通道</a>
+                    <a href="pricing-zh.html">定價</a>
+                </div>
+                <div class="footer-column">
+                    <h4>品牌合作</h4>
+                    <a href="index-zh.html#brands">授權內容</a>
+                    <a href="index-zh.html#brands">品牌置入</a>
+                    <a href="https://calendly.com/superimmersive8/discovery">預約通話</a>
+                </div>
+                <div class="footer-column">
+                    <h4>創作者專區</h4>
+                    <a href="index-zh.html#filmmakers">加入我們的名單</a>
+                    <a href="index-zh.html#filmmakers">提交作品</a>
+                </div>
+                <div class="footer-column">
+                    <h4>資源</h4>
+                    <a href="rights-verified-how-it-works.html">運作方式</a>
+                    <a href="rights-verified-legal-brief.html">法律風險簡報</a>
+                    <a href="risk-briefing.html">風險簡報</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 SuperImmersive 8. 版權所有。</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

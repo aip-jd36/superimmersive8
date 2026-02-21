@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing | SuperImmersive 8</title>
+    <meta name="description" content="Simple, transparent pricing for rights-verified AI video content. Three tiers: Standard catalog licensing, Extended broadcast rights, or Custom brand placement.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Pricing page specific styles */
+        .pricing-hero {
+            padding: calc(var(--nav-height) + 4rem) 0 4rem 0;
+            background: var(--color-bg-elevated);
+            text-align: center;
+        }
+
+        .pricing-hero h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+        }
+
+        .pricing-hero p {
+            font-size: 1.125rem;
+            color: var(--color-text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Pricing grid */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+            max-width: 1200px;
+            padding: 0 2rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        @media (min-width: 768px) {
+            .pricing-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Pricing card */
+        .pricing-card {
+            background: var(--color-bg-card);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            transition: all var(--transition-base);
+        }
+
+        .pricing-card:hover {
+            border-color: var(--color-accent);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(200, 144, 10, 0.15);
+        }
+
+        .pricing-card.featured {
+            border-color: var(--color-accent);
+            position: relative;
+        }
+
+        .pricing-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--color-gradient-1), var(--color-gradient-2));
+            color: var(--color-text);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-full);
+            margin-bottom: 1rem;
+        }
+
+        .pricing-tier {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .pricing-price {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .pricing-price-note {
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .pricing-description {
+            font-size: 0.9375rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .pricing-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 2rem 0;
+            flex-grow: 1;
+        }
+
+        .pricing-features li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 0.9375rem;
+            color: var(--color-text-secondary);
+            line-height: 1.5;
+        }
+
+        .pricing-features li::before {
+            content: "✓";
+            color: var(--color-accent);
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .pricing-cta {
+            margin-top: auto;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            background: var(--color-bg);
+            padding: 5rem 2rem;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-title {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--color-text);
+        }
+
+        .faq-item {
+            margin-bottom: 2rem;
+        }
+
+        .faq-question {
+            font-family: var(--font-display);
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 0.75rem;
+        }
+
+        .faq-answer {
+            font-size: 1rem;
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+        }
+
+        .faq-answer a {
+            color: var(--color-accent);
+            text-decoration: none;
+            border-bottom: 1px solid var(--color-accent);
+            transition: opacity var(--transition-fast);
+        }
+
+        .faq-answer a:hover {
+            opacity: 0.7;
+        }
+
+        /* CTA Banner */
+        .pricing-cta-banner {
+            background: var(--color-bg-elevated);
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .pricing-cta-banner h2 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+        }
+
+        .pricing-cta-banner p {
+            font-size: 1.125rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .pricing-cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-text">SI<span class="logo-accent">8</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html#catalog">The Catalog</a>
+                <div class="nav-dropdown">
+                    <a href="index.html#rights-verified">Rights Verified ▾</a>
+                    <div class="dropdown-content">
+                        <a href="rights-verified-how-it-works.html">How It Works</a>
+                        <a href="rights-verified-chain-of-title.html">Rights Package</a>
+                        <a href="rights-verified-vetting-criteria.html">Vetting Criteria</a>
+                        <a href="rights-verified-legal-brief.html">Legal Risk Brief</a>
+                        <a href="rights-verified-rights-playbook.html">Rights Playbook</a>
+                    </div>
+                </div>
+                <a href="index.html#brands">For Brands</a>
+                <a href="index.html#filmmakers">For Filmmakers</a>
+                <a href="pricing.html" style="color: var(--color-accent); font-weight: 500;">Pricing</a>
+                <a href="index.html#contact" class="nav-cta">Book a Call</a>
+            </div>
+            <div class="lang-selector" style="display:flex;align-items:center;gap:6px;font-size:0.8rem;opacity:0.7;margin-left:12px;">
+                <a href="pricing.html" style="color:var(--color-accent);text-decoration:none;font-weight:500;">EN</a>
+                <span style="color:var(--color-text-muted);">/</span>
+                <a href="pricing-zh.html" style="color:var(--color-text-muted);text-decoration:none;">繁體中文</a>
+            </div>
+            <button class="mobile-menu-btn" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Pricing Hero -->
+    <section class="pricing-hero">
+        <div class="container">
+            <h1>Simple, transparent pricing</h1>
+            <p>Three tiers. No hidden fees. Choose the rights package that fits your campaign.</p>
+        </div>
+    </section>
+
+    <!-- Pricing Grid -->
+    <div class="pricing-grid">
+        <!-- Standard License -->
+        <div class="pricing-card">
+            <div class="pricing-tier">Standard License</div>
+            <div class="pricing-price">$1,500</div>
+            <div class="pricing-price-note">per asset</div>
+            <div class="pricing-description">
+                For campaigns that need immediate, legally-vetted creative for digital and social use.
+            </div>
+            <ul class="pricing-features">
+                <li>Master video file (4K/ProRes)</li>
+                <li>Complete Chain of Title & Compliance Log</li>
+                <li>Rights Verified process sign-off</li>
+                <li>Commercial use authorization</li>
+                <li>Digital, social, web, and corporate use</li>
+                <li>1-year license term</li>
+                <li>Non-exclusive</li>
+            </ul>
+            <div class="pricing-cta">
+                <a href="index.html#catalog" class="btn btn-primary" style="width: 100%; text-align: center;">Explore Catalog</a>
+            </div>
+        </div>
+
+        <!-- Extended License (Featured) -->
+        <div class="pricing-card featured">
+            <div class="pricing-badge">Most Popular</div>
+            <div class="pricing-tier">Extended License</div>
+            <div class="pricing-price">$2,500 - $5,000</div>
+            <div class="pricing-price-note">custom quote</div>
+            <div class="pricing-description">
+                For broadcast campaigns and multi-channel commercial use with broader rights and exclusivity options.
+            </div>
+            <ul class="pricing-features">
+                <li><strong>Everything in Standard, plus:</strong></li>
+                <li>Broadcast, TV, and streaming rights</li>
+                <li>Print and out-of-home advertising</li>
+                <li>Unlimited territory (global)</li>
+                <li>Extended duration (up to 3 years)</li>
+                <li>Category-exclusive options available</li>
+            </ul>
+            <div class="pricing-cta">
+                <a href="https://calendly.com/superimmersive8/discovery" class="btn btn-primary" style="width: 100%; text-align: center;">Request Quote</a>
+            </div>
+        </div>
+
+        <!-- Custom AI Placement -->
+        <div class="pricing-card">
+            <div class="pricing-tier">Custom AI Placement</div>
+            <div class="pricing-price">$12,000+</div>
+            <div class="pricing-price-note">starting price</div>
+            <div class="pricing-description">
+                Full-service brand integration. We regenerate catalog productions with your brand elements — no reshoot required.
+            </div>
+            <ul class="pricing-features">
+                <li><strong>Everything in Extended, plus:</strong></li>
+                <li>AI regeneration with brand elements</li>
+                <li>Custom product/brand placement</li>
+                <li>Category-exclusive rights included</li>
+                <li>Modification rights included</li>
+                <li>Multiple revision rounds</li>
+                <li>Filmmaker collaboration</li>
+            </ul>
+            <div class="pricing-cta">
+                <a href="https://calendly.com/superimmersive8/discovery" class="btn btn-secondary" style="width: 100%; text-align: center;">Book Discovery Call</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="faq-container">
+            <h2 class="faq-title">Frequently Asked Questions</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">What's the difference between Standard and Extended?</div>
+                <div class="faq-answer">
+                    Standard License is for digital and social use (1 year, non-exclusive). Extended License adds broadcast/TV rights, longer terms, global territory, and category-exclusive options.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Can I upgrade my license later?</div>
+                <div class="faq-answer">
+                    Yes. Contact us to upgrade from Standard to Extended, or to explore Custom Placement options for existing catalog assets.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">What's included in the Chain of Title?</div>
+                <div class="faq-answer">
+                    Every asset comes with a structured documentation package covering tool provenance, model disclosure, Rights Verified sign-off, commercial use authorization, modification rights status, category conflict log, territory information, and version history. <a href="rights-verified-chain-of-title.html">Learn more</a>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">What if I need exclusive rights?</div>
+                <div class="faq-answer">
+                    Category-exclusive rights are available in Extended and Custom Placement tiers. This means your brand will be the only one in your product category to license that specific asset. Contact us for a custom quote.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Do you offer volume discounts?</div>
+                <div class="faq-answer">
+                    Yes. Contact us for multi-asset licensing (5+ clips) and we'll create a custom package with volume pricing.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">How does Custom AI Placement work?</div>
+                <div class="faq-answer">
+                    We take an existing catalog production and use AI to regenerate specific scenes with your brand elements integrated. This gives you custom branded content at a fraction of traditional production cost, with full Chain of Title documentation. No reshoot required.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">What payment terms do you offer?</div>
+                <div class="faq-answer">
+                    Standard payment structure is 50% upfront, 50% on delivery. For extended projects or multi-asset deals, we can discuss milestone-based payment schedules.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Banner -->
+    <section class="pricing-cta-banner">
+        <div class="container">
+            <h2>Ready to license safe lane AI content?</h2>
+            <p>Browse our catalog or book a call to discuss your project needs.</p>
+            <div class="pricing-cta-buttons">
+                <a href="index.html#catalog" class="btn btn-primary">Explore Catalog</a>
+                <a href="https://calendly.com/superimmersive8/discovery" class="btn btn-secondary">Book a Call</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="logo">
+                    <span class="logo-text">SI<span class="logo-accent">8</span></span>
+                </div>
+                <p>AI Film Rights Agency<br>Taipei, Taiwan</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Platform</h4>
+                    <a href="index.html#catalog">The Catalog</a>
+                    <a href="index.html#rights-verified">Rights Verified</a>
+                    <a href="pricing.html">Pricing</a>
+                </div>
+                <div class="footer-column">
+                    <h4>For Brands</h4>
+                    <a href="index.html#brands">License Content</a>
+                    <a href="index.html#brands">Brand Placement</a>
+                    <a href="https://calendly.com/superimmersive8/discovery">Book a Call</a>
+                </div>
+                <div class="footer-column">
+                    <h4>For Filmmakers</h4>
+                    <a href="index.html#filmmakers">Join Our Roster</a>
+                    <a href="index.html#filmmakers">Submit Work</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Resources</h4>
+                    <a href="rights-verified-how-it-works.html">How It Works</a>
+                    <a href="rights-verified-legal-brief.html">Legal Risk Brief</a>
+                    <a href="risk-briefing.html">Risk Briefing</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 SuperImmersive 8. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
