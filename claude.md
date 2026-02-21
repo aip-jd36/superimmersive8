@@ -304,6 +304,9 @@
 | Executive Summary | `01_Business/plans/EXECUTIVE_SUMMARY_FOR_MENTOR.md` | Quick overview for advisors |
 | Peer Review Summary | `01_Business/plans/PEER_REVIEW_SUMMARY.md` | AI agent feedback synthesis |
 | Build in Public Log | `02_Marketing/content/BUILD_IN_PUBLIC_LOG.md` | Insights for LinkedIn content |
+| **Pricing Strategy v1.0** | `01_Business/pricing/PRICING-STRATEGY-v1.0.md` | Three-tier pricing model, commission math, competitive analysis |
+| Pricing Decisions | `01_Business/pricing/DECISIONS.md` | Pricing version log and rationale |
+| Pricing Research | `01_Business/pricing/research/` | Competitor research (10 platforms), peer review feedback |
 | Rights Playbook v0.1 | `06_Operations/legal/rights-playbook/versions/v0.1.md` | Rights vetting — sales asset for buyers |
 | Rights Playbook Decisions | `06_Operations/legal/rights-playbook/DECISIONS.md` | Playbook version log |
 | Filmmaker Agreement (WIP) | `06_Operations/legal/filmmaker-agreement/WORKING.md` | Terms for filmmaker representation |
