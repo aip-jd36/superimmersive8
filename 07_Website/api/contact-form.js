@@ -5,10 +5,20 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { email, name, company, type, message } = req.body;
+    console.log('=== Contact Form Submission Started ===');
+
+    // Parse request body (Vercel doesn't auto-parse in all cases)
+    let body = req.body;
+    if (!body || typeof body === 'string') {
+      body = JSON.parse(req.body || '{}');
+    }
+
+    const { email, name, company, type, message } = body;
+    console.log('Form data:', { email, name, company, type, message: message?.substring(0, 50) });
 
     // Validate required fields
     if (!email || !name || !type || !message) {
+      console.log('Validation failed - missing fields');
       return res.status(400).json({
         error: 'Missing required fields',
         required: ['email', 'name', 'type', 'message']
@@ -17,12 +27,19 @@ export default async function handler(req, res) {
 
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
     const KIT_API_SECRET = process.env.KIT_API_SECRET;
-    const KIT_TAG_ID = process.env.KIT_TAG_ID; // Reuse existing tag or create new one
+    const KIT_TAG_ID = process.env.KIT_TAG_ID;
+
+    console.log('Environment check:', {
+      hasResendKey: !!RESEND_API_KEY,
+      hasKitSecret: !!KIT_API_SECRET,
+      hasKitTagId: !!KIT_TAG_ID
+    });
 
     // ============================================
     // 1. SEND EMAIL NOTIFICATION TO JD VIA RESEND
     // ============================================
 
+    console.log('Attempting to send email via Resend...');
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -59,16 +76,21 @@ export default async function handler(req, res) {
     });
 
     const emailData = await emailResponse.json();
+    console.log('Email response status:', emailResponse.status);
+    console.log('Email response data:', emailData);
 
     if (!emailResponse.ok) {
-      console.error('Resend error:', emailData);
+      console.error('❌ Resend API failed:', emailData);
       // Don't fail the whole request if email fails - still add to Kit
+    } else {
+      console.log('✓ Email sent successfully');
     }
 
     // ============================================
     // 2. ADD TO KIT FOR CRM TRACKING (OPTIONAL)
     // ============================================
 
+    console.log('Attempting to add to Kit...');
     let kitAdded = false;
     try {
       const kitResponse = await fetch(
@@ -87,18 +109,25 @@ export default async function handler(req, res) {
 
       const kitData = await kitResponse.json();
       kitAdded = kitResponse.ok;
+      console.log('Kit response status:', kitResponse.status);
+      console.log('Kit response data:', kitData);
 
       if (!kitResponse.ok) {
-        console.error('Kit API error (non-fatal):', kitData);
+        console.error('❌ Kit API failed (non-fatal):', kitData);
+      } else {
+        console.log('✓ Added to Kit successfully');
       }
     } catch (kitError) {
-      console.error('Kit error (non-fatal):', kitError);
+      console.error('❌ Kit exception (non-fatal):', kitError.message);
       // Don't fail the request if Kit fails - email is the priority
     }
 
     // ============================================
     // 3. RETURN SUCCESS
     // ============================================
+
+    console.log('=== Returning success response ===');
+    console.log('Email sent:', emailResponse.ok, '| Kit added:', kitAdded);
 
     return res.status(200).json({
       success: true,
@@ -108,10 +137,12 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Contact form error:', error);
+    console.error('❌ FATAL ERROR in contact form handler:', error);
+    console.error('Error stack:', error.stack);
     return res.status(500).json({
       error: 'Internal server error',
-      message: error.message
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 }
