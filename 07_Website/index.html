@@ -9,6 +9,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Three-button CTA responsive layout */
+        @media (max-width: 768px) {
+            .cta-group > div {
+                grid-template-columns: 1fr !important;
+            }
+            .cta-group .btn {
+                font-size: 15px !important;
+                padding: 14px 24px !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
@@ -468,9 +480,21 @@
                         </div>
                     </div>
 
-                    <div class="cta-group">
-                        <a href="safe-lane-legal-brief.html" class="btn btn-primary">Download Legal Risk Brief</a>
-                        <a href="#catalog" class="btn btn-secondary">Browse Vetted Catalog</a>
+                    <div class="cta-group" style="display: flex; flex-direction: column; gap: 16px; align-items: center;">
+                        <!-- Primary CTA -->
+                        <a href="safe-lane-legal-brief.html" class="btn btn-primary" style="width: 100%; max-width: 450px; text-align: center;">
+                            Download Legal Risk Brief
+                        </a>
+
+                        <!-- Secondary CTAs -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 450px;">
+                            <a href="safe-lane-rights-package.html#sample" class="btn btn-secondary" style="text-align: center; padding: 12px 20px; font-size: 14px;">
+                                Sample Rights Package
+                            </a>
+                            <a href="#catalog" class="btn btn-secondary" style="text-align: center; padding: 12px 20px; font-size: 14px;">
+                                Browse Catalog
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
