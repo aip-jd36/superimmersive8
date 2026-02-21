@@ -30,7 +30,7 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'SI8 Website <contact@superimmersive8.com>',
+        from: 'SI8 Website <onboarding@resend.dev>',
         to: ['jd@superimmersive8.com'],
         subject: `🔔 New Contact Form Inquiry from ${name}`,
         html: `
