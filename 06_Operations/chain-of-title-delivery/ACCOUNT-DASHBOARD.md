@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the **self-serve buyer portal** that SI8 will build in Year 2-3, enabling buyers to manage their licenses, re-download files, and access Rights Packages without emailing JD for support.
+This document outlines the **self-serve buyer portal** that SI8 will build in Year 2-3, enabling buyers to manage their licenses, re-download files, and access Chain of Titles without emailing JD for support.
 
 **Goal:** Match Getty Images' user experience — every buyer has an account, can see their full license history, and can retrieve files anytime.
 
@@ -22,7 +22,7 @@ This document outlines the **self-serve buyer portal** that SI8 will build in Ye
 
 ### Solution (Year 2-3)
 
-**Buyer:** Logs into superimmersive8.com/account → sees all licenses → clicks "Download Rights Package" → gets new download link instantly
+**Buyer:** Logs into superimmersive8.com/account → sees all licenses → clicks "Download Chain of Title" → gets new download link instantly
 **JD:** [No action required]
 **Time cost:** 0 minutes
 
@@ -80,10 +80,10 @@ This document outlines the **self-serve buyer portal** that SI8 will build in Ye
 ### Flow 3: Re-Download After 1 Year
 
 ```
-1. Buyer's legal team requests Rights Package for compliance review
+1. Buyer's legal team requests Chain of Title for compliance review
    → Buyer logs in to superimmersive8.com/account
    → Finds SI8-2026-0001 in "My Licenses"
-   → Clicks "Download Rights Package (PDF)"
+   → Clicks "Download Chain of Title (PDF)"
    → New download link generated (S3 pre-signed URL, 7-day expiration)
    → Buyer downloads
 
@@ -125,7 +125,7 @@ Total time: < 3 minutes, zero support tickets
 │  │ Territory: Global | Status: Active                    │  │
 │  │                                                        │  │
 │  │ ↓ Download Video (MP4)                                │  │
-│  │ ↓ Download Rights Package (PDF)                       │  │
+│  │ ↓ Download Chain of Title (PDF)                       │  │
 │  │ ↓ Download Invoice (PDF)                              │  │
 │  │ → View License Details                                │  │
 │  └──────────────────────────────────────────────────────┘  │
@@ -138,7 +138,7 @@ Total time: < 3 minutes, zero support tickets
 │  │                                                        │  │
 │  │ ↓ Download Custom Video (MP4)                         │  │
 │  │ ↓ Download Original Video (MP4)                       │  │
-│  │ ↓ Download Rights Package v2.0 (PDF)                  │  │
+│  │ ↓ Download Chain of Title v2.0 (PDF)                  │  │
 │  │ ↓ Download Invoice (PDF)                              │  │
 │  │ → View License Details                                │  │
 │  └──────────────────────────────────────────────────────┘  │
@@ -177,20 +177,20 @@ When buyer clicks "View License Details":
 │  DOWNLOADS                                                   │
 │  ────────────────────────────────────────────────────────  │
 │  ↓ Video File (MP4, 1920x1080, 60fps, 2:15)                │
-│  ↓ Rights Package (PDF, 12 pages)                          │
+│  ↓ Chain of Title (PDF, 12 pages)                          │
 │  ↓ Invoice (PDF)                                            │
 │                                                              │
 │  WHAT'S IN YOUR RIGHTS PACKAGE                              │
 │  ────────────────────────────────────────────────────────  │
 │  ✓ Tool Provenance Log (Runway ML Gen-3 Alpha Turbo)       │
 │  ✓ Model Disclosure (gen3a_turbo, Nov 2025)                │
-│  ✓ Safe Lane Sign-Off (Reviewed Feb 20, 2026, Tier: Std)   │
+│  ✓ Rights Verified Sign-Off (Reviewed Feb 20, 2026, Tier: Std)   │
 │  ✓ Commercial Use Authorization (Paid plan receipts filed) │
 │  ✓ Modification Rights: Not authorized (Tier 1 only)       │
 │  ✓ Category Conflicts: None                                │
 │  ✓ Territory: Global                                        │
 │  ✓ Regeneration Rights: N/A (Tier 1)                       │
-│  ✓ Version History: Production v1.0, Rights Package v1.0   │
+│  ✓ Version History: Production v1.0, Chain of Title v1.0   │
 │                                                              │
 │  LICENSE TERMS                                              │
 │  ────────────────────────────────────────────────────────  │
@@ -206,8 +206,8 @@ When buyer clicks "View License Details":
 │  DOWNLOAD HISTORY                                           │
 │  ────────────────────────────────────────────────────────  │
 │  Feb 25, 2026, 3:45 PM — Video file downloaded              │
-│  Feb 25, 2026, 3:46 PM — Rights Package downloaded          │
-│  Aug 10, 2026, 10:22 AM — Rights Package re-downloaded      │
+│  Feb 25, 2026, 3:46 PM — Chain of Title downloaded          │
+│  Aug 10, 2026, 10:22 AM — Chain of Title re-downloaded      │
 │                                                              │
 │  SUPPORT                                                     │
 │  ────────────────────────────────────────────────────────  │
@@ -354,7 +354,7 @@ CREATE TABLE download_logs (
 4. Colleague receives email with:
    - License summary (asset title, ID, date)
    - Read-only view link (no login required)
-   - Download links for Rights Package + Invoice only (not video file)
+   - Download links for Chain of Title + Invoice only (not video file)
 
 Note: Video file download requires buyer account login (prevents unauthorized redistribution)
 ```
@@ -365,7 +365,7 @@ Note: Video file download requires buyer account login (prevents unauthorized re
 1. Buyer receives audit request from legal team
 2. Logs in to superimmersive8.com/account
 3. Finds SI8-2026-0001 (purchased in 2026, now 2029)
-4. Clicks "Download Rights Package" → generates new S3 link
+4. Clicks "Download Chain of Title" → generates new S3 link
 5. Clicks "Download Invoice" → generates new S3 link
 6. Clicks "Export License Details (PDF)" → generates audit-ready PDF with:
    - License summary

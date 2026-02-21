@@ -1,6 +1,6 @@
-# Rights Package PDF Generation
+# Chain of Title PDF Generation
 
-This folder contains tools for generating branded PDF versions of Rights Packages that match the SI8 website aesthetic.
+This folder contains tools for generating branded PDF versions of Chain of Titles that match the SI8 website aesthetic.
 
 ---
 
@@ -8,7 +8,7 @@ This folder contains tools for generating branded PDF versions of Rights Package
 
 | File | Purpose |
 |------|---------|
-| `rights-package-template.html` | HTML template with SI8 design system |
+| `chain-of-title-template.html` | HTML template with SI8 design system |
 | `generate-pdf.sh` | Shell script to convert HTML to PDF |
 | `neon-dreams.html` | Styled HTML version of Example 001 (ready for PDF) |
 | `README.md` | This file |
@@ -56,7 +56,7 @@ The PDF template uses the same design aesthetic as superimmersive8.com:
      - Background graphics: ✓ Enabled
      - Headers/footers: ✗ Disabled
 
-3. **Save:** `neon-dreams-rights-package.pdf`
+3. **Save:** `neon-dreams-chain-of-title.pdf`
 
 **Pros:** Easy, no installation, WYSIWYG
 **Cons:** Manual process for each file
@@ -79,7 +79,7 @@ sudo apt-get install wkhtmltopdf
 
 **Generate PDF:**
 ```bash
-./generate-pdf.sh neon-dreams.html neon-dreams-rights-package.pdf
+./generate-pdf.sh neon-dreams.html neon-dreams-chain-of-title.pdf
 ```
 
 **Or manually:**
@@ -93,7 +93,7 @@ wkhtmltopdf \
   --enable-local-file-access \
   --print-media-type \
   neon-dreams.html \
-  neon-dreams-rights-package.pdf
+  neon-dreams-chain-of-title.pdf
 ```
 
 **Pros:** Scriptable, consistent output, batch processing
@@ -122,7 +122,7 @@ const path = require('path');
   });
 
   await page.pdf({
-    path: 'neon-dreams-rights-package.pdf',
+    path: 'neon-dreams-chain-of-title.pdf',
     format: 'A4',
     margin: {
       top: '20mm',
@@ -134,7 +134,7 @@ const path = require('path');
   });
 
   await browser.close();
-  console.log('PDF generated: neon-dreams-rights-package.pdf');
+  console.log('PDF generated: neon-dreams-chain-of-title.pdf');
 })();
 ```
 
@@ -148,11 +148,11 @@ node generate-pdf.js
 
 ---
 
-## Creating a New Rights Package PDF
+## Creating a New Chain of Title PDF
 
 ### Step 1: Copy the Template
 ```bash
-cp rights-package-template.html new-work-title.html
+cp chain-of-title-template.html new-work-title.html
 ```
 
 ### Step 2: Replace Placeholders
@@ -171,8 +171,8 @@ Open `new-work-title.html` and find/replace:
 
 ### Step 3: Fill in Content
 
-Replace section placeholders with actual Rights Package content:
-- Copy field content from the markdown Rights Package
+Replace section placeholders with actual Chain of Title content:
+- Copy field content from the markdown Chain of Title
 - Paste into corresponding HTML sections
 - Preserve HTML table structure for tables
 - Use `<ul class="checklist">` for checkmark lists
@@ -213,11 +213,11 @@ Use any of the three methods above to create PDF.
 
 ## Styling Components
 
-### Callout Box (for Safe Lane approval)
+### Callout Box (for Rights Verified approval)
 ```html
 <div class="callout">
   <div class="callout-title">
-    Safe Lane Status: <span class="badge badge-success">✓ APPROVED</span>
+    Rights Verified Status: <span class="badge badge-success">✓ APPROVED</span>
   </div>
   <div class="callout-content">
     <p>Content here</p>
@@ -283,8 +283,8 @@ Use any of the three methods above to create PDF.
 ## File Size Optimization
 
 **Expected PDF sizes:**
-- 10-page Rights Package: ~200-300 KB
-- 15-page Rights Package: ~400-500 KB
+- 10-page Chain of Title: ~200-300 KB
+- 15-page Chain of Title: ~400-500 KB
 
 **If file size is too large:**
 1. Check for embedded images (none in template)
@@ -319,7 +319,7 @@ Use any of the three methods above to create PDF.
 2. **Test with buyers** — get feedback on formatting, clarity
 3. **Iterate template** based on feedback
 4. **Add to website** as downloadable sample
-5. **Create workflow** for future Rights Packages
+5. **Create workflow** for future Chain of Titles
 
 ---
 

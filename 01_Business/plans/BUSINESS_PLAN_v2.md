@@ -224,7 +224,7 @@ Same room. Same people. Completely different framing — and completely differen
 
 **Event headline options:**
 - "AI Films for Brands: What's Legal, What's Not, and What's Next"
-- "The Safe Lane: How Agencies Are Using AI Video in 2026"
+- "The Rights Verified: How Agencies Are Using AI Video in 2026"
 - "AI Content Without the Legal Exposure" (most direct)
 
 **Why this structure works:**
@@ -290,7 +290,7 @@ No other AI video producer in APAC has this. That's the differentiator.
 
 **Single message discipline (v2 decision):** The Year 1 outreach message is "won't get you sued" — one message, tested consistently before pivoting. Do not layer additional messages (speed, cost, quality) until the primary message has been tested in market. If "won't get you sued" does not generate response after 200+ touches, iterate then.
 
-**Brand the process — do not certify pieces:** SI8 does not label individual pieces of content with a rights certificate or badge in Year 1. The differentiator is that SI8 *has a process* — documented, consistent, auditable. Branding the process (the "Safe Lane") is the right move. Certifying individual outputs creates warranty exposure SI8 cannot back up. The process is the product; the documentation is the proof.
+**Brand the process — do not certify pieces:** SI8 does not label individual pieces of content with a rights certificate or badge in Year 1. The differentiator is that SI8 *has a process* — documented, consistent, auditable. Branding the process (the "Rights Verified") is the right move. Certifying individual outputs creates warranty exposure SI8 cannot back up. The process is the product; the documentation is the proof.
 
 ---
 
@@ -306,7 +306,7 @@ The following sections of BUSINESS_PLAN_v1.md are fully applicable to v2:
 - Financial Projections (Year 1-3)
 - Risk Analysis (all risks still apply)
 - AI Creators Fest sponsorship tiers and structure
-- The No List / Safe Lane boundaries
+- The No List / Rights Verified boundaries
 - Geographic Focus (Singapore first, APAC + Europe)
 - Filmmaker acquisition (Tier 1/2/3 criteria)
 - The Friday Rule (protecting Layer 2 time)

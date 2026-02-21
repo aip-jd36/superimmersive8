@@ -30,7 +30,7 @@ Outreach (5 hrs/week) is protected and cannot be cannibalized. AI-drafted conten
 **Year 1: Brands and agencies only.**
 Newsletter, explainers, and lead magnets target brand marketing directors, agency creative leads, and brand legal/compliance teams. This is where the revenue is.
 
-**Filmmakers:** Not a content marketing target in Year 1. Filmmaker acquisition is direct outreach (DMs on LinkedIn, Twitter, Discord). The Safe Lane documentation on the website serves as passive filmmaker education. A filmmaker signup path exists but is not actively promoted through content.
+**Filmmakers:** Not a content marketing target in Year 1. Filmmaker acquisition is direct outreach (DMs on LinkedIn, Twitter, Discord). The Rights Verified documentation on the website serves as passive filmmaker education. A filmmaker signup path exists but is not actively promoted through content.
 
 **Year 2+:** Filmmaker-focused content section added to newsletter once brand content infrastructure is stable and catalog supply needs to scale.
 
@@ -106,9 +106,9 @@ Newsletter, explainers, and lead magnets target brand marketing directors, agenc
 | # | Title | Audience | Source | Status |
 |---|-------|---------|--------|--------|
 | 1 | "AI Video Rights: A Brand's Guide" | Brands/agencies | Rights Playbook + risk research | To produce |
-| 2 | "What Your Legal Team Will Ask For: AI Video Compliance Checklist" | Brand legal/compliance | Rights Package schema + research | To produce (Month 2) |
+| 2 | "What Your Legal Team Will Ask For: AI Video Compliance Checklist" | Brand legal/compliance | Chain of Title schema + research | To produce (Month 2) |
 | 3 | "Platform Requirements Cheatsheet" | Brands + agencies | Platform research | To produce (Month 2) |
-| 4 | "Safe Lane Submission Guide for Filmmakers" | Filmmakers | Submission Requirements doc | To produce (Month 3+) |
+| 4 | "Rights Verified Submission Guide for Filmmakers" | Filmmakers | Submission Requirements doc | To produce (Month 3+) |
 
 **Lead magnet #1 rationale:** "AI Video Rights: A Brand's Guide" is broad evergreen content — the right first asset for a blue ocean market where buyers need education before they need specifics. More targeted assets (legal team checklist, etc.) come once the audience understands the category.
 
@@ -151,8 +151,8 @@ Newsletter, explainers, and lead magnets target brand marketing directors, agenc
 
 **Can claim:**
 - SI8 tracks and explains the AI content legal and platform risk landscape
-- SI8's Safe Lane process provides documented chain of defensibility
-- The Rights Package is a structured record of what was reviewed and authorized
+- SI8's Rights Verified process provides documented chain of defensibility
+- The Chain of Title is a structured record of what was reviewed and authorized
 - Specific legal cases, platform policies, regulatory deadlines (all sourced and citable)
 
 **Cannot claim:**

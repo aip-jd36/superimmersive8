@@ -1,5 +1,5 @@
 # Legal Risk Reduction Brief
-## How SuperImmersive 8's Rights Package Reduces AI Content Liability
+## How SuperImmersive 8's Chain of Title Reduces AI Content Liability
 
 **For:** Brand marketing teams, agency partners, legal/compliance stakeholders
 **Date:** February 2026
@@ -18,9 +18,9 @@ Traditional stock libraries and AI tool providers address provenance (WHERE cont
 
 ---
 
-## The SI8 Solution: Rights Package
+## The SI8 Solution: Chain of Title
 
-Every piece of SI8-represented content includes a **9-field Rights Package** — structured documentation that reduces legal exposure through four mechanisms:
+Every piece of SI8-represented content includes a **9-field Chain of Title** — structured documentation that reduces legal exposure through four mechanisms:
 
 ---
 
@@ -35,9 +35,9 @@ Every piece of SI8-represented content includes a **9-field Rights Package** —
 
 **Requirement:** *"Considerable effort must go into establishing lack of willful disregard, often requiring detailed documentation and compelling argumentation."* (Copyright Alliance)
 
-**How SI8's Rights Package supports this:**
+**How SI8's Chain of Title supports this:**
 - **Field #1 (Tool Provenance Log):** Documents which AI tools were used, versions, paid commercial plan receipts
-- **Field #3 (Safe Lane Sign-off):** SI8's legal review creates "compelling argumentation" courts require
+- **Field #3 (Rights Verified Sign-off):** SI8's legal review creates "compelling argumentation" courts require
 - **Field #4 (Commercial Use Authorization):** Demonstrates good-faith reliance on tool provider terms
 - **Field #9 (Version History):** Creates audit trail showing reasonable care
 
@@ -51,7 +51,7 @@ Every piece of SI8-represented content includes a **9-field Rights Package** —
 
 > "Developers and deployers maintain a **rebuttable presumption of using reasonable care** under this provision if they satisfy the obligations of the Act... [including] documentation describing how the system was evaluated... and data governance measures."
 
-**What this means:** Colorado's AI law explicitly rewards documented systems. SI8's Rights Package = statutory compliance documentation.
+**What this means:** Colorado's AI law explicitly rewards documented systems. SI8's Chain of Title = statutory compliance documentation.
 
 - **Field #2 (Model Disclosure):** Satisfies transparency obligations
 - **Field #6 (Category Conflict Log):** Documents risk mitigation decisions
@@ -65,7 +65,7 @@ Every piece of SI8-represented content includes a **9-field Rights Package** —
 
 The FTC is actively prosecuting "deceptive" advertising practices involving undisclosed AI-generated content.
 
-**SI8 compliance:** Safe Lane vetting ensures no deepfake testimonials, no misleading synthetic performers.
+**SI8 compliance:** Rights Verified vetting ensures no deepfake testimonials, no misleading synthetic performers.
 
 **Source:** FTC Announcement (Sept 2024 / 2025 Guidelines)
 
@@ -117,7 +117,7 @@ Entertainment distribution often requires E&O insurance. Insurers scrutinize AI 
 - Rights clearance reports
 - Provenance records
 
-**SI8's Rights Package = chain-of-title equivalent for AI content.**
+**SI8's Chain of Title = chain-of-title equivalent for AI content.**
 
 > "Does the E&O insurance policy for the project expressly permit or exclude content created using AI? ... Consider requesting confirmation from the insurer regarding the use of AI." (ACTRA Generative AI Guidelines, Nov 2024)
 
@@ -125,7 +125,7 @@ Entertainment distribution often requires E&O insurance. Insurers scrutinize AI 
 - **YouTube:** AI disclosure required for realistic content (May 2025) — demonetization/removal for violations
 - **TikTok:** AI labeling required; 340% removal increase in 2025 enforcement
 
-**SI8's Rights Package includes platform-compliant delivery checklist** — avoiding demonetization, removal, account bans.
+**SI8's Chain of Title includes platform-compliant delivery checklist** — avoiding demonetization, removal, account bans.
 
 ---
 
@@ -156,7 +156,7 @@ Entertainment distribution often requires E&O insurance. Insurers scrutinize AI 
 
 **The gap Adobe cannot fill:** Creative teams want best-in-class tools (Sora, Runway, Kling), not just safe tools (Firefly).
 
-**SI8's positioning:** "Adobe = safe but boring. SI8 = best creative tools made safe through Safe Lane vetting."
+**SI8's positioning:** "Adobe = safe but boring. SI8 = best creative tools made safe through Rights Verified vetting."
 
 ---
 
@@ -174,13 +174,13 @@ Entertainment distribution often requires E&O insurance. Insurers scrutinize AI 
 
 ---
 
-## The Rights Package: What's Inside
+## The Chain of Title: What's Inside
 
 | Field | Legal Defense Supported |
 |-------|------------------------|
 | 1. Tool Provenance Log | Innocent infringer defense; FTC disclosure; audit trail |
 | 2. Model Disclosure | Copyright Office registration; regulatory transparency (EU, CO, NY) |
-| 3. Safe Lane Sign-off | Reasonable care standard; good-faith defense; FTC compliance |
+| 3. Rights Verified Sign-off | Reasonable care standard; good-faith defense; FTC compliance |
 | 4. Commercial Use Authorization | Licensing defense; demonstrates good faith |
 | 5. Modification Rights Status | Tier 2 product placement authorization (brand integration) |
 | 6. Category Conflict Log | Brand risk mitigation; disclosure requirements |
@@ -192,7 +192,7 @@ Entertainment distribution often requires E&O insurance. Insurers scrutinize AI 
 
 ## Summary: Legal Value Proposition
 
-**The file is the carrier. The Rights Package is the product.**
+**The file is the carrier. The Chain of Title is the product.**
 
 Brands don't pay SI8 for pixels. They pay for:
 - A documented audit trail that reduces statutory damages 73%+

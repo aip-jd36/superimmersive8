@@ -1,4 +1,4 @@
-# Email Templates — Rights Package Delivery
+# Email Templates — Chain of Title Delivery
 
 ## Overview
 
@@ -7,7 +7,7 @@ All email templates for the buyer delivery process, from initial inquiry respons
 **Design principles:**
 - Professional but warm tone
 - Clear CTAs (download links prominent)
-- Explain what the Rights Package is and why it matters
+- Explain what the Chain of Title is and why it matters
 - Taipei time + buyer's local time for international deals
 - Mobile-responsive plain text (Year 1) → HTML (Year 2+)
 
@@ -44,7 +44,7 @@ All files are ready for download:
 → Video File (MP4, 1920x1080, [Duration])
    [Google Drive Link]
 
-→ Rights Package (PDF, [Page Count] pages)
+→ Chain of Title (PDF, [Page Count] pages)
    [Google Drive Link]
 
 → Invoice (PDF)
@@ -56,11 +56,11 @@ These links do not expire. You can re-download anytime.
 WHAT'S IN YOUR RIGHTS PACKAGE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Your Rights Package is a 9-field legal documentation bundle designed to demonstrate defensibility in the event of legal review. It includes:
+Your Chain of Title is a 9-field legal documentation bundle designed to demonstrate defensibility in the event of legal review. It includes:
 
 ✓ Tool Provenance Log — Every AI tool used to create this content
 ✓ Model Disclosure — Specific AI models and versions
-✓ Safe Lane Sign-Off — SI8's vetting review certification
+✓ Rights Verified Sign-Off — SI8's vetting review certification
 ✓ Commercial Use Authorization — Confirmation all tools permit commercial licensing
 ✓ Modification Rights Status — Whether this asset can be customized for brand placement
 ✓ Category Conflict Log — Brand categories ineligible for placement (if any)
@@ -100,7 +100,7 @@ We typically respond within 24 hours (Taipei time, UTC+8).
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 SuperImmersive 8 | Won't Get You Sued™
-Safe Lane AI Content for Commercial Deployment
+Rights Verified AI Content for Commercial Deployment
 
 [Social Links: LinkedIn | Website]
 ```
@@ -113,7 +113,7 @@ Safe Lane AI Content for Commercial Deployment
 - `[Full Date, YYYY-MM-DD]`
 - `[Territory]` (Global / APAC / etc.)
 - `[Duration]` (video length)
-- `[Page Count]` (Rights Package PDF pages)
+- `[Page Count]` (Chain of Title PDF pages)
 - `[Google Drive Link]` (3 links)
 
 ---
@@ -149,7 +149,7 @@ DOWNLOAD YOUR FILES
 → Custom Video File (MP4, 1920x1080, [Duration])
    [Google Drive Link]
 
-→ Rights Package v2.0 (PDF, [Page Count] pages)
+→ Chain of Title v2.0 (PDF, [Page Count] pages)
    [Google Drive Link]
    ↳ Includes: Custom regeneration log, brand placement documentation, exclusivity terms
 
@@ -165,7 +165,7 @@ These links do not expire. You can re-download anytime.
 WHAT'S DIFFERENT IN TIER 2 RIGHTS PACKAGE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Your Rights Package v2.0 includes everything from Tier 1, PLUS:
+Your Chain of Title v2.0 includes everything from Tier 1, PLUS:
 
 ✓ Regeneration Log — Which scenes were AI-regenerated for brand placement
 ✓ Brand Placement Documentation — Specific brand elements integrated and frames modified
@@ -200,7 +200,7 @@ superimmersive8.com
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 SuperImmersive 8 | Won't Get You Sued™
-Safe Lane AI Content for Commercial Deployment
+Rights Verified AI Content for Commercial Deployment
 ```
 
 ---
@@ -223,7 +223,7 @@ DOWNLOAD YOUR FILES
 → Video File (MP4)
    [Google Drive Link]
 
-→ Rights Package (PDF)
+→ Chain of Title (PDF)
    [Google Drive Link]
 
 → Invoice (PDF)
@@ -271,7 +271,7 @@ LICENSE REVOCATION
 Your license for this asset has been revoked. Please:
 
 1. Delete all copies of the video file
-2. Delete the Rights Package PDF
+2. Delete the Chain of Title PDF
 3. Delete the invoice
 4. Do not deploy this asset in any projects
 
@@ -327,7 +327,7 @@ Price: $[Amount] USD
 Use case: Streaming, airline, editorial, platforms
 What you get:
   • Video file (catalog version, no modifications)
-  • Rights Package PDF (9-field documentation)
+  • Chain of Title PDF (9-field documentation)
   • Perpetual commercial use rights
   • Global territory (unless restricted)
 Delivery: Immediate upon payment
@@ -340,7 +340,7 @@ Use case: Brand integration, advertising, sponsored content
 What you get:
   • Custom video file with your brand elements AI-regenerated into scenes
   • Original video file (before brand integration)
-  • Rights Package v2.0 (includes regeneration log + exclusivity terms)
+  • Chain of Title v2.0 (includes regeneration log + exclusivity terms)
   • Category-exclusive rights for [Duration]
   • Perpetual commercial use rights
 Delivery: 7-14 days (includes regeneration iteration)
@@ -349,12 +349,12 @@ Delivery: 7-14 days (includes regeneration iteration)
 WHY THE RIGHTS PACKAGE MATTERS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-If your legal team asks "Can we prove this AI content won't get us sued?", the Rights Package is your answer.
+If your legal team asks "Can we prove this AI content won't get us sued?", the Chain of Title is your answer.
 
 It documents:
 ✓ Every AI tool used (provenance)
 ✓ Commercial licensing authorization
-✓ Safe Lane vetting review
+✓ Rights Verified vetting review
 ✓ No unauthorized likeness/IP
 ✓ Modification permissions (for Tier 2)
 
@@ -431,12 +431,12 @@ Just checking in to make sure everything went smoothly with your license for "[A
 A few quick questions:
 
 1. Were you able to download all files without issues?
-2. Did the Rights Package provide the documentation your team needed?
+2. Did the Chain of Title provide the documentation your team needed?
 3. Is there anything unclear about the license terms or usage rights?
 
 No need to respond if everything's good — but if you have feedback or ran into any issues, I'd love to hear about it so I can improve the process for future buyers.
 
-Also, if your legal or compliance team has questions about the Rights Package, feel free to connect them directly with me.
+Also, if your legal or compliance team has questions about the Chain of Title, feel free to connect them directly with me.
 
 Best,
 JD
@@ -496,7 +496,7 @@ jd@superimmersive8.com
 
 **DO:**
 - Use buyer's first name (warm, personal)
-- Explain *why* the Rights Package matters (not just *what* it is)
+- Explain *why* the Chain of Title matters (not just *what* it is)
 - Provide clear CTAs (download links, payment links, calendar links)
 - Include support contact in every email (reply or jd@superimmersive8.com)
 - Use plain language (avoid legalese unless necessary)

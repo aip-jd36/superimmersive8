@@ -2,7 +2,7 @@
 
 **Date:** February 21, 2026
 **Reviewers:** ChatGPT (GPT-4), Gemini (1.5 Pro)
-**Document Reviewed:** Rights Package Delivery SOP v0.1
+**Document Reviewed:** Chain of Title Delivery SOP v0.1
 
 ---
 
@@ -26,24 +26,24 @@ Not storage costs. Not automation complexity. It's **exception creep** — bespo
 ### 1. Language: Stop Using "Certification" (ChatGPT Flagged)
 
 **The problem:**
-- Calling it "Safe Lane Sign-Off (SI8's vetting certification)" creates legal liability
+- Calling it "Rights Verified Sign-Off (SI8's vetting certification)" creates legal liability
 - "Certification" implies warranty/guarantee SI8 can't back up
 - Even in internal docs, this language is dangerous
 
 **The fix:**
 ```diff
-- Safe Lane Certification
-+ Safe Lane Review Sign-Off
+- Rights Verified Certification
++ Rights Verified Review Sign-Off
 
-- Safe Lane vetting certification
-+ Safe Lane review record
+- Rights Verified vetting certification
++ Rights Verified review record
 
 - This certifies that...
-+ This documents that SI8 completed its Safe Lane review process...
++ This documents that SI8 completed its Rights Verified review process...
 ```
 
-**Add disclaimer to every Rights Package:**
-> "The Rights Package documents SI8's review process and filmmaker-provided disclosures. It is not legal advice and does not constitute a warranty or indemnification."
+**Add disclaimer to every Chain of Title:**
+> "The Chain of Title documents SI8's review process and filmmaker-provided disclosures. It is not legal advice and does not constitute a warranty or indemnification."
 
 **Impact:** High legal risk if not fixed. Could void E&O insurance or create implied warranty.
 
@@ -68,7 +68,7 @@ This is SI8's differentiation.
 
 **Revised (authority positioning):**
 ```
-Please retain this Rights Package in your compliance records. This document
+Please retain this Chain of Title in your compliance records. This document
 serves as your official Chain of Title record in the event of platform or
 legal review.
 ```
@@ -157,7 +157,7 @@ Download links will be revoked.
 
 **The fix:**
 
-Add field to checkout form + Rights Package:
+Add field to checkout form + Chain of Title:
 ```
 Licensed to: [Agency Name]
 On behalf of: [End Client / Brand Name]
@@ -230,10 +230,10 @@ requires separate license.
 
 **Create two-tier documentation system:**
 
-**Tier A — Included in Rights Package (every deal):**
+**Tier A — Included in Chain of Title (every deal):**
 1. Tool Provenance Log (summary: tool names, versions, dates)
 2. Model Disclosure (model names, training cutoff dates)
-3. Safe Lane Sign-Off (review date, tier, reviewer name)
+3. Rights Verified Sign-Off (review date, tier, reviewer name)
 4. Commercial Use Authorization (confirmation receipts filed)
 5. Modification Rights Status
 6. Category Conflict Log
@@ -246,7 +246,7 @@ requires separate license.
 2. Tool ToS snapshots (PDFs from production date)
 3. Model training data disclosures (links to provider docs)
 4. Filmmaker declaration (full submission form)
-5. Safe Lane review notes (internal QA checklist)
+5. Rights Verified review notes (internal QA checklist)
 
 **Pricing:**
 - Tier 1 Standard: Tier A included
@@ -285,7 +285,7 @@ Tier 2 Custom Placement — Approval Workflow
    - 5-7 business days turnaround
 
 3. Draft Review (first regenerated version)
-   - SI8 runs Safe Lane QA on regenerated content
+   - SI8 runs Rights Verified QA on regenerated content
    - Sends draft to buyer for review
    - Buyer has 5 business days to approve or request changes
 
@@ -296,7 +296,7 @@ Tier 2 Custom Placement — Approval Workflow
 
 5. Final Approval & Delivery
    - Buyer signs off on final version
-   - SI8 generates Rights Package v2.0
+   - SI8 generates Chain of Title v2.0
    - Delivery within 24 hours of final approval
    - 50% deposit (concept approval), 50% final payment (delivery)
 ```
@@ -354,7 +354,7 @@ Tier 2 Custom Placement — Approval Workflow
 **Create "Emergency Dispute Kit" (template buyer can use):**
 
 ```
-Subject: Content ID Dispute — Licensed AI Video with Rights Package
+Subject: Content ID Dispute — Licensed AI Video with Chain of Title
 
 To: [Platform] Content Review Team
 
@@ -363,7 +363,7 @@ AI-generated content properly licensed through SuperImmersive 8, a
 rights-vetting agency.
 
 Attached:
-1. Rights Package (PDF) — documents tool provenance, Safe Lane review
+1. Chain of Title (PDF) — documents tool provenance, Rights Verified review
 2. Invoice (PDF) — proof of commercial license
 3. License Agreement (PDF) — confirms authorized use
 
@@ -389,7 +389,7 @@ Contact: jd@superimmersive8.com for verification.
 ### 11. E&O Insurance Investigation (Gemini Flagged)
 
 **The problem:**
-- Gemini: "Because you are selling a 'Vetting Certification' (The Rights Package), you are technically providing a professional advisory service."
+- Gemini: "Because you are selling a 'Vetting Certification' (The Chain of Title), you are technically providing a professional advisory service."
 - You should investigate E&O (Errors & Omissions) insurance before first $50K Tier 2 deal
 
 **The fix:**
@@ -430,7 +430,7 @@ When buyer requests expansion of existing license:
    - Term extension (12mo → perpetual): 100% of original price
 3. Create Amendment Agreement (references original license)
 4. Buyer pays amendment fee
-5. SI8 issues Rights Package v1.1 (updated Territory/Media fields)
+5. SI8 issues Chain of Title v1.1 (updated Territory/Media fields)
 6. Both versions retained in account (v1.0 + v1.1)
 ```
 
@@ -458,7 +458,7 @@ Hour 0-2:
   - Do NOT revoke license immediately (contractual obligation)
 
 Hour 2-24:
-  - Review original Safe Lane submission
+  - Review original Rights Verified submission
   - Contact filmmaker: request response to claim
   - Review tool ToS, model training data disclosures
   - Consult lawyer if claim appears credible
@@ -515,7 +515,7 @@ Never: Unilaterally revoke license without buyer consent (breach of contract)
 ### Strong Consensus (Validate After First Deal)
 
 8. ✅ **Track support requests, not just deal count** — Real bottleneck is buyer questions, not delivery volume
-9. ✅ **Add disclaimer to every Rights Package** — "Not legal advice, not a warranty"
+9. ✅ **Add disclaimer to every Chain of Title** — "Not legal advice, not a warranty"
 10. ✅ **Tier 2 needs revision cap + approval workflow** — Prevent infinite iteration
 
 ---
@@ -537,7 +537,7 @@ Never: Unilaterally revoke license without buyer consent (breach of contract)
 
 1. ✅ Change all "certification" language to "review sign-off"
 2. ✅ Revise email template (remove Getty comparison, add disclaimer)
-3. ✅ Add Agency/End-Client field to checkout + Rights Package template
+3. ✅ Add Agency/End-Client field to checkout + Chain of Title template
 4. ✅ Decide refund policy (Certificate of Destruction or no refunds?)
 5. ✅ Decide storage sharing method (public links or email-specific?)
 6. ✅ Create Platform Takedown Response Kit template

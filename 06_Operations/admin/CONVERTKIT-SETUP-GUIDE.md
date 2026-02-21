@@ -170,14 +170,14 @@ Here are your downloads:
 📄 Rights Playbook v0.2 Executive Summary
 [PDF LINK 2 - PASTE YOUR GOOGLE DRIVE LINK HERE]
 
-These resources explain how SI8's Rights Package reduces AI content liability through:
+These resources explain how SI8's Chain of Title reduces AI content liability through:
 
 ✓ 73%+ statutory damage reduction (innocent infringer defense)
 ✓ Colorado AI Act safe harbor compliance
 ✓ Copyrightability assurance (USCO human authorship requirement)
 ✓ Distribution enablement (E&O insurance + platform compliance)
 
-The file is the carrier. The Rights Package is the product.
+The file is the carrier. The Chain of Title is the product.
 
 Want to discuss how this applies to your brand's AI content needs?
 → Book a 15-min call: https://calendly.com/aipenguins/superimmersive8
@@ -263,25 +263,25 @@ Read their terms: "Adobe will have no liability for any Claim to the extent that
 This is the gap SI8 fills.
 
 Adobe = safe but boring (Firefly only)
-SI8 = best creative tools made safe (through Safe Lane vetting)
+SI8 = best creative tools made safe (through Rights Verified vetting)
 
-Our Safe Lane process:
+Our Rights Verified process:
 
 1. Pre-screen (15 min): Tool verification, No List check
 2. Full review (60 min): 7 categories, clear thresholds
 3. Risk tier assignment: Certified / Standard / Caution / Reject
-4. Rights Package output: 9-field documentation
+4. Chain of Title output: 9-field documentation
 
-Our Rights Package documents:
+Our Chain of Title documents:
 • Tool provenance (which AI tools, versions, paid plans)
 • Model disclosure (which AI models generated content)
-• Safe Lane sign-off (legal review + risk tier)
+• Rights Verified sign-off (legal review + risk tier)
 • Commercial use authorization (ToS compliance verified)
 • Version history (human authorship for copyrightability)
 • + 4 more fields
 
-→ See the full process: https://www.superimmersive8.com/safe-lane-how-it-works.html
-→ See the Rights Package breakdown: https://www.superimmersive8.com/safe-lane-rights-package.html
+→ See the full process: https://www.superimmersive8.com/rights-verified-how-it-works.html
+→ See the Chain of Title breakdown: https://www.superimmersive8.com/rights-verified-chain-of-title.html
 
 Ready to use the best tools safely?
 → Book a call: https://calendly.com/aipenguins/superimmersive8
@@ -328,7 +328,7 @@ Still evaluating AI content options?
 
 **Preview Text:**
 ```
-Final check-in — any questions about Safe Lane vetting?
+Final check-in — any questions about Rights Verified vetting?
 ```
 
 **Email Body:**
@@ -356,7 +356,7 @@ Best,
 [YOUR NAME]
 SuperImmersive 8
 
-P.S. If you're curious, here's our complete vetting process: https://www.superimmersive8.com/safe-lane-how-it-works.html
+P.S. If you're curious, here's our complete vetting process: https://www.superimmersive8.com/rights-verified-how-it-works.html
 ```
 
 **Action:**
@@ -419,7 +419,7 @@ P.S. If you're curious, here's our complete vetting process: https://www.superim
 7. Authorize Zapier to access Formspree
 8. Choose account: Select your Formspree account
 9. Click **"Continue"**
-10. Choose form: Select **"safe-lane-legal-brief"** form (or whichever gated form you're using)
+10. Choose form: Select **"rights-verified-legal-brief"** form (or whichever gated form you're using)
 11. Click **"Continue"**
 12. Click **"Test trigger"**
 13. Zapier will find a recent form submission (if you haven't submitted test yet, do that now)
@@ -489,7 +489,7 @@ If you have a separate gated page for Rights Playbook:
 
 1. Click **"Create Zap"** (create new)
 2. Repeat Steps 12-14
-3. **Only difference:** Select "safe-lane-rights-playbook" form in trigger
+3. **Only difference:** Select "rights-verified-rights-playbook" form in trigger
 4. Use same tag: "Lead-Download" (both forms trigger same automation)
 5. Name: `Formspree → Kit (Rights Playbook)`
 6. Publish
@@ -502,7 +502,7 @@ If you have a separate gated page for Rights Playbook:
 
 ### **Step 16: End-to-End Test**
 
-1. Go to your website: `https://www.superimmersive8.com/safe-lane-legal-brief.html`
+1. Go to your website: `https://www.superimmersive8.com/rights-verified-legal-brief.html`
 2. Fill out form with YOUR email (so you can test the full experience)
 3. Submit form
 4. **Check these within 5 minutes:**

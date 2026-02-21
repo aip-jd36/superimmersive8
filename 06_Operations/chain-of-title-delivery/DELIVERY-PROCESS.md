@@ -1,12 +1,12 @@
-# Rights Package Delivery Process
+# Chain of Title Delivery Process
 
 ## Overview
 
 This document defines the **step-by-step operational flow** from the moment a buyer clicks "Purchase" to the moment they have all files and documentation in hand.
 
-**Goal:** Deliver Rights Package + video file + invoice to buyer within 5 minutes of payment confirmation.
+**Goal:** Deliver Chain of Title + video file + invoice to buyer within 5 minutes of payment confirmation.
 
-**Non-goal:** This is NOT about how to create the Rights Package (see `06_Operations/safe-lane/`). This is about delivery logistics.
+**Non-goal:** This is NOT about how to create the Chain of Title (see `06_Operations/rights-verified/`). This is about delivery logistics.
 
 ---
 
@@ -48,7 +48,7 @@ This document defines the **step-by-step operational flow** from the moment a bu
 │ ────────────────────────────────────────────────────────────────│
 │ JD assembles:                                                    │
 │  1. Video file (MP4) — upload to Google Drive, set permissions  │
-│  2. Rights Package PDF — generate from template (if not already)│
+│  2. Chain of Title PDF — generate from template (if not already)│
 │  3. Invoice PDF — export from Stripe or accounting system       │
 │                                                                  │
 │ Create Google Drive folder:                                     │
@@ -130,7 +130,7 @@ This document defines the **step-by-step operational flow** from the moment a bu
 │                                                                  │
 │ Email includes:                                                  │
 │  - Video file download link                                     │
-│  - Rights Package PDF download link                             │
+│  - Chain of Title PDF download link                             │
 │  - Invoice PDF download link                                    │
 │  - Account login link (to access license history)               │
 └─────────────────────────────────────────────────────────────────┘
@@ -164,7 +164,7 @@ This document defines the **step-by-step operational flow** from the moment a bu
 │ BUYER BROWSES CATALOG (Self-Serve)                              │
 │ ────────────────────────────────────────────────────────────────│
 │ Catalog page: thumbnail grid + filters (genre, duration, tier)  │
-│ → Click asset → preview page with Rights Package summary        │
+│ → Click asset → preview page with Chain of Title summary        │
 │ → Select license tier (Tier 1 Standard / Tier 2 Custom)         │
 │ → Add to cart                                                   │
 └─────────────────────────────────────────────────────────────────┘
@@ -187,7 +187,7 @@ This document defines the **step-by-step operational flow** from the moment a bu
 │ 1. Email confirmation sent (< 10 seconds)                       │
 │ 2. Files available in "My Licenses" dashboard immediately       │
 │ 3. Invoice auto-generated and downloadable                      │
-│ 4. Rights Package auto-generated from database template         │
+│ 4. Chain of Title auto-generated from database template         │
 │                                                                  │
 │ Buyer can:                                                       │
 │  - Download all files from account dashboard                    │
@@ -213,13 +213,13 @@ Tier 2 deals involve **custom AI regeneration** of brand elements into the video
 3. SI8 commissions filmmaker to regenerate scenes (2-5 days)
 4. Review iteration (1-2 rounds)
 5. Final approval + 50% final payment
-6. Delivery: same as Tier 1 PLUS updated Rights Package v2.0
+6. Delivery: same as Tier 1 PLUS updated Chain of Title v2.0
    - v2.0 includes: regeneration log, brand placement details, category exclusivity
 ```
 
 **Timeline:** 7-14 days from deposit to delivery (vs. instant for Tier 1)
 
-**Rights Package versioning:**
+**Chain of Title versioning:**
 - Tier 1 (as-is licensing): `Rights-Package_SI8-2026-0001_v1.0.pdf`
 - Tier 2 (custom placement): `Rights-Package_SI8-2026-0001_v2.0.pdf`
 
@@ -236,10 +236,10 @@ Both versions stored. Buyer receives the version corresponding to their license 
 ### Buyer Requests Refund (Within 30 Days)
 - **Policy:** Full refund if asset unused and not deployed
 - **Process:** Buyer confirms non-use in writing → JD processes refund → revoke download link → mark license as "Refunded" in database
-- **Rights Package:** Buyer must delete all copies (honor system, not enforceable)
+- **Chain of Title:** Buyer must delete all copies (honor system, not enforceable)
 
-### Buyer Needs Updated Rights Package (Template Change)
-- **Scenario:** SI8 updates Rights Package template format in Month 6 (e.g., adds new field). Buyer licensed in Month 2 with old template.
+### Buyer Needs Updated Chain of Title (Template Change)
+- **Scenario:** SI8 updates Chain of Title template format in Month 6 (e.g., adds new field). Buyer licensed in Month 2 with old template.
 - **Policy (v0.1 proposal):** License is frozen at purchase date. Buyer keeps v1.0 template. No automatic upgrade.
 - **Exception:** If template change is legally material (e.g., adds critical compliance field), SI8 may offer voluntary re-issue.
 
@@ -265,7 +265,7 @@ Before sending confirmation email, verify:
 
 - [ ] Payment confirmed (Stripe dashboard / bank account)
 - [ ] Correct asset files uploaded (filename matches catalog ID)
-- [ ] Rights Package PDF is final version (not draft/internal)
+- [ ] Chain of Title PDF is final version (not draft/internal)
 - [ ] Invoice matches payment amount received
 - [ ] Licensee name spelled correctly in all documents
 - [ ] Download links tested (can access from incognito browser)

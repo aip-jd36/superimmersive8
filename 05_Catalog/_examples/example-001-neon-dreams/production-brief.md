@@ -1,6 +1,6 @@
 # Production Brief — Neon Dreams
 
-**Submitted to SI8 for Safe Lane Review**
+**Submitted to SI8 for Rights Verified Review**
 **Submission Date:** February 15, 2026
 
 ---

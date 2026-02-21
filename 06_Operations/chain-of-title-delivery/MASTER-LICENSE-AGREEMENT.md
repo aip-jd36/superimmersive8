@@ -59,9 +59,9 @@ you agree to be bound by this Agreement.
 
 1.2 "Chain of Title" means the documentation package provided with
     each Content purchase, detailing AI tool provenance, model
-    disclosure, and Safe Lane verification.
+    disclosure, and Rights Verified verification.
 
-1.3 "Safe Lane" means SI8's content review process designed to
+1.3 "Rights Verified" means SI8's content review process designed to
     reduce legal risk by verifying tool authorization, commercial
     use permissions, and absence of unauthorized likeness or
     intellectual property.
@@ -166,7 +166,7 @@ you agree to be bound by this Agreement.
 
     (a) AI tool provenance (tools used, versions, production dates)
     (b) Model disclosure (AI models, training data information)
-    (c) Safe Lane verification (SI8's review sign-off)
+    (c) Rights Verified verification (SI8's review sign-off)
     (d) Commercial use authorization (tool ToS compliance)
     (e) Modification rights status
     (f) Category conflicts and exclusivity terms
@@ -174,13 +174,13 @@ you agree to be bound by this Agreement.
     (h) Regeneration rights (Tier 2 only)
     (i) Version history
 
-5.2 Nature of Safe Lane Verification
+5.2 Nature of Rights Verified Verification
 
     IMPORTANT: The Chain of Title documents SI8's review process and
     filmmaker-provided disclosures. It is NOT legal advice, a warranty,
     an indemnification, or a certification of legal compliance.
 
-    SI8's Safe Lane process is designed to reduce legal risk by verifying:
+    SI8's Rights Verified process is designed to reduce legal risk by verifying:
     - AI tools used are authorized for commercial use
     - Content does not contain unauthorized likenesses or copyrighted material
     - Filmmaker has provided required disclosures
@@ -200,7 +200,7 @@ you agree to be bound by this Agreement.
     (a) SI8 has the right to license the Content to you
     (b) The Content was created using the AI tools disclosed in the
         Chain of Title
-    (c) SI8 conducted its Safe Lane review process in good faith
+    (c) SI8 conducted its Rights Verified review process in good faith
     (d) To SI8's knowledge, the Content does not contain unauthorized
         likenesses or copyrighted material
 
@@ -386,7 +386,7 @@ THAT YOU HAVE READ, UNDERSTOOD, AND AGREE TO BE BOUND BY THIS AGREEMENT.
 - Does Taiwan law permit liability caps in B2B contracts?
 - Should there be separate caps for different claim types?
 
-### 4. Safe Lane Disclaimer Language (Section 5.2)
+### 4. Rights Verified Disclaimer Language (Section 5.2)
 
 **Current draft:** "NOT legal advice, a warranty, an indemnification, or a certification"
 
@@ -394,7 +394,7 @@ THAT YOU HAVE READ, UNDERSTOOD, AND AGREE TO BE BOUND BY THIS AGREEMENT.
 
 **Lawyer should advise:**
 - Does Section 6.1 create implied warranties that conflict with Section 5.2?
-- Should Safe Lane language be even more cautious?
+- Should Rights Verified language be even more cautious?
 - Is "good faith" standard in 6.1(c) too vague?
 
 ### 5. Refund Policy (Section 4.2)
@@ -412,7 +412,7 @@ THAT YOU HAVE READ, UNDERSTOOD, AND AGREE TO BE BOUND BY THIS AGREEMENT.
 **Current draft:** Does NOT explicitly address:
 - AI training data lawsuits (e.g., if Runway/Sora get sued)
 - Platform policy changes (e.g., YouTube bans AI content)
-- Deepfake/likeness claims (even after Safe Lane review)
+- Deepfake/likeness claims (even after Rights Verified review)
 
 **Lawyer should advise:** Should these risks be explicitly disclaimed? Or does general disclaimer in 6.2 cover them?
 

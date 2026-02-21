@@ -8,7 +8,7 @@
 
 ## What the Chain of Title Is
 
-The Chain of Title is the documented chain of defensibility for a single work in SI8's catalog. It is not a legal certification. It is a structured record of what was reviewed, what was found, and what was authorized — completed by SI8's Safe Lane reviewer after a successful review.
+The Chain of Title is the documented chain of defensibility for a single work in SI8's catalog. It is not a legal certification. It is a structured record of what was reviewed, what was found, and what was authorized — completed by SI8's Rights Verified reviewer after a successful review.
 
 **The file is the carrier. The Chain of Title is the product.**
 
@@ -32,9 +32,9 @@ Sequence is assigned at the time of Chain of Title completion — not at submiss
 
 ## Storage Path
 
-`05_Catalog/represented/[filmmaker-name]/[title]/rights-package.md`
+`05_Catalog/represented/[filmmaker-name]/[title]/chain-of-title.md`
 
-Example: `05_Catalog/represented/chen-wei/luminance-short/rights-package.md`
+Example: `05_Catalog/represented/chen-wei/luminance-short/chain-of-title.md`
 
 ---
 
@@ -93,7 +93,7 @@ ElevenLabs: Multilingual v2 (used November 2025)
 
 ---
 
-### Field 3: Safe Lane Sign-off
+### Field 3: Rights Verified Sign-off
 
 *What it captures:* Reviewer name, review date, risk tier assigned, any conditions or flags noted during review.
 
@@ -235,7 +235,7 @@ Not authorized for regeneration:
 Runway: Gen-3 Alpha (used October–November 2025)
 ElevenLabs: Multilingual v2 (used November 2025)
 
-### Field 3: Safe Lane Sign-off
+### Field 3: Rights Verified Sign-off
 Reviewer: JD
 Review Date: 2026-03-15
 Risk Tier: Standard
@@ -294,7 +294,7 @@ Each field in this schema corresponds to a database column in the Year 3 platfor
 |-------|----------------|------|
 | 1. Tool Provenance Log | `tool_provenance` | JSON array |
 | 2. Model Disclosure | `model_disclosure` | JSON object |
-| 3. Safe Lane Sign-off | `review_tier`, `review_date`, `reviewer_id`, `review_flags` | Multiple columns |
+| 3. Rights Verified Sign-off | `review_tier`, `review_date`, `reviewer_id`, `review_flags` | Multiple columns |
 | 4. Commercial Use Authorization | `commercial_auth_status` | JSON array |
 | 5. Modification Rights | `modification_rights_status`, `modification_scope` | Enum + text |
 | 6. Category Conflict | `category_conflicts` | Array |

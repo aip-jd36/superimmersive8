@@ -1,6 +1,6 @@
 # Peer Review Prompt — For ChatGPT & Gemini
 
-**Copy-paste this entire prompt into ChatGPT and Gemini for feedback on SI8's Rights Package Delivery SOP.**
+**Copy-paste this entire prompt into ChatGPT and Gemini for feedback on SI8's Chain of Title Delivery SOP.**
 
 ---
 
@@ -10,18 +10,18 @@ SuperImmersive 8 is an AI film distribution agency based in Taipei, Taiwan, laun
 
 **The business model:**
 - We represent AI filmmakers and license their work to brands, agencies, platforms, and streaming services
-- Our differentiation: We vet AI video content through a "Safe Lane" process to ensure it's defensible against legal risk (no unauthorized likeness, IP infringement, training data issues, tool ToS violations)
-- We deliver a **Rights Package** — a 9-field legal documentation bundle — with every licensed asset
+- Our differentiation: We vet AI video content through a "Rights Verified" process to ensure it's defensible against legal risk (no unauthorized likeness, IP infringement, training data issues, tool ToS violations)
+- We deliver a **Chain of Title** — a 9-field legal documentation bundle — with every licensed asset
 
 **The two-tier model:**
-- **Tier 1 (Standard):** Catalog licensing as-is — buyer gets video file + Rights Package PDF
+- **Tier 1 (Standard):** Catalog licensing as-is — buyer gets video file + Chain of Title PDF
 - **Tier 2 (Custom Placement):** AI product placement — we commission the filmmaker to regenerate brand elements into existing content (premium pricing, category-exclusive rights)
 
-**The Rights Package (what we deliver):**
+**The Chain of Title (what we deliver):**
 A PDF document with 9 structured fields:
 1. Tool Provenance Log (every AI tool used)
 2. Model Disclosure (which AI models, versions)
-3. Safe Lane Sign-Off (SI8's vetting certification)
+3. Rights Verified Sign-Off (SI8's vetting certification)
 4. Commercial Use Authorization (receipts proving paid plans)
 5. Modification Rights Status (can it be customized for Tier 2?)
 6. Category Conflict Log (brand categories excluded from placement)
@@ -30,15 +30,15 @@ A PDF document with 9 structured fields:
 9. Version History (production timeline, review dates)
 
 **Why this matters:**
-Getty Images provides **invoice + license history** but **no detailed provenance documentation**. SI8's Rights Package fills this gap for AI video, where legal risk is higher (training data lawsuits, deepfake concerns, IP infringement potential).
+Getty Images provides **invoice + license history** but **no detailed provenance documentation**. SI8's Chain of Title fills this gap for AI video, where legal risk is higher (training data lawsuits, deepfake concerns, IP infringement potential).
 
 ---
 
 ## The Question I Need Your Help With
 
-**I've designed SI8's Rights Package Delivery SOP** — the operational process for how we deliver the Rights Package (and video file) to buyers when they license content.
+**I've designed SI8's Chain of Title Delivery SOP** — the operational process for how we deliver the Chain of Title (and video file) to buyers when they license content.
 
-I researched Getty Images' actual delivery process and modeled SI8's SOP after their proven approach, but with the Rights Package as an added layer.
+I researched Getty Images' actual delivery process and modeled SI8's SOP after their proven approach, but with the Chain of Title as an added layer.
 
 **I need peer review on:**
 1. Is this SOP sound? Any gaps, risks, or overlooked details?
@@ -63,7 +63,7 @@ I researched Getty Images' actual delivery process and modeled SI8's SOP after t
 1. Buyer inquires → JD sends proposal + invoice
 2. Payment received → JD uploads files to Google Drive
 3. JD sends confirmation email with download links (no expiration)
-4. Buyer downloads video + Rights Package PDF + invoice
+4. Buyer downloads video + Chain of Title PDF + invoice
 5. JD logs transaction in spreadsheet
 
 ### Year 2 (Semi-Automated, 20-100 deals)
@@ -100,7 +100,7 @@ I researched Getty Images' actual delivery process and modeled SI8's SOP after t
 | Decision | Rationale |
 |----------|-----------|
 | **Indefinite record retention** | Getty maintains license history forever; buyers may need docs years later for legal review |
-| **Rights Package = primary deliverable** | Getty logic: buyers pay $450 for legal guarantee, $50 for the JPEG. SI8: video is carrier, Rights Package is the product. |
+| **Chain of Title = primary deliverable** | Getty logic: buyers pay $450 for legal guarantee, $50 for the JPEG. SI8: video is carrier, Chain of Title is the product. |
 | **No expiration on download links (Year 1)** | Matches Getty UX, reduces support burden |
 | **Plain text emails (Year 1)** | Easy to maintain, universal compatibility |
 | **Year 1 = manual, Year 3 = platform** | Validate business model before building expensive infrastructure |
@@ -115,7 +115,7 @@ I created 7 documents totaling ~15,000 words. Here's the structure:
 
 ### 1. README.md
 - Project overview, how documents relate, version roadmap
-- Key principle: "The Rights Package is the product. The video file is just the carrier."
+- Key principle: "The Chain of Title is the product. The video file is just the carrier."
 
 ### 2. DELIVERY-PROCESS.md
 - Step-by-step flow from purchase → delivery (Year 1, 2, 3)
@@ -125,7 +125,7 @@ I created 7 documents totaling ~15,000 words. Here's the structure:
 
 ### 3. EMAIL-TEMPLATES.md
 - 8 templates: License confirmation (Tier 1 & 2), re-download, refund, proposal, payment reminder, follow-up, iteration request
-- Tone guidelines: professional but warm, explain why Rights Package matters
+- Tone guidelines: professional but warm, explain why Chain of Title matters
 - Plain text (Year 1) → HTML (Year 2+)
 
 ### 4. STORAGE-RETENTION.md
@@ -162,7 +162,7 @@ I created 7 documents totaling ~15,000 words. Here's the structure:
 ### Question 1: Is the Year 1 → Year 2 → Year 3 phasing realistic?
 
 **My thinking:**
-- Year 1: Keep it simple, manual process, focus on closing deals and refining the Rights Package itself
+- Year 1: Keep it simple, manual process, focus on closing deals and refining the Chain of Title itself
 - Year 2: Automate when manual work becomes painful (20+ deals = 10+ hours/month manual delivery)
 - Year 3: Build platform when model is validated (100+ deals = sustainable revenue)
 
@@ -197,7 +197,7 @@ DOWNLOAD YOUR FILES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 → Video File (MP4) [Link]
-→ Rights Package (PDF) [Link]
+→ Chain of Title (PDF) [Link]
 → Invoice (PDF) [Link]
 
 These links do not expire. You can re-download anytime.
@@ -206,11 +206,11 @@ These links do not expire. You can re-download anytime.
 WHAT'S IN YOUR RIGHTS PACKAGE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Your Rights Package is a 9-field legal documentation bundle designed to demonstrate defensibility in the event of legal review. It includes:
+Your Chain of Title is a 9-field legal documentation bundle designed to demonstrate defensibility in the event of legal review. It includes:
 
 ✓ Tool Provenance Log
 ✓ Model Disclosure
-✓ Safe Lane Sign-Off
+✓ Rights Verified Sign-Off
 [... etc ...]
 
 This is what Getty Images doesn't provide for stock photography. This is SI8's differentiation.
@@ -248,7 +248,7 @@ This is what Getty Images doesn't provide for stock photography. This is SI8's d
 2. Buyer requests refund (within 30 days, asset unused)
 3. Buyer's company is acquired → license transfers with company ownership
 4. International wire transfer (3-5 day delay)
-5. Rights Package template updated → buyer gets version at purchase date (frozen, not auto-upgraded)
+5. Chain of Title template updated → buyer gets version at purchase date (frozen, not auto-upgraded)
 
 **Your feedback:**
 - What else could go wrong?
@@ -324,7 +324,7 @@ This is what Getty Images doesn't provide for stock photography. This is SI8's d
 
 ## Thank You!
 
-I'm building this in public and documenting every decision. Your feedback will be logged in `DECISIONS.md` and will directly shape how SI8 delivers Rights Packages to buyers.
+I'm building this in public and documenting every decision. Your feedback will be logged in `DECISIONS.md` and will directly shape how SI8 delivers Chain of Titles to buyers.
 
 If you have time for a quick review, I'd hugely appreciate it. Even just answering 1-2 of the questions above would be helpful.
 

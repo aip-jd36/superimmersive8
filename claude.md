@@ -138,11 +138,11 @@
 - [x] 1-page PDF (agency-facing) — ✓ Legal Risk Reduction Brief (Feb 2026)
 - [x] Rights Playbook v0.2 — ✓ Expanded with legal research, quantifiable metrics, competitive landscape (Feb 2026)
 - [x] Rights Verified website section — ✓ 5 pages live (How It Works, Chain of Title, Vetting Criteria, Legal Brief, Playbook) (Feb 2026)
-- [x] Sample Rights Package example — ✓ "Neon Dreams" 12-page PDF with 9-field documentation; HTML template + PDF generation system; gated download on website with 4 entry points (Feb 2026)
+- [x] Sample Chain of Title example — ✓ "Neon Dreams" 12-page PDF with 9-field documentation; HTML template + PDF generation system; gated download on website with 4 entry points (Feb 2026)
 - [ ] 2-3 sample AI video outputs (even mock/personal projects)
 
 ### 2. Sales Ops (This makes or breaks Month 2-6)
-- [x] Lead intake + qualification form — ✓ Gated download forms on safe-lane-legal-brief.html + safe-lane-rights-playbook.html (Feb 2026)
+- [x] Lead intake + qualification form — ✓ Gated download forms on rights-verified-legal-brief.html + rights-verified-rights-playbook.html (Feb 2026)
 - [x] Contact form with instant notifications — ✓ Main website contact form + Resend integration; instant email to jd@superimmersive8.com; all 6 site forms functional; $0/mo stack (Feb 2026)
 - [x] Lead gen email automation — ✓ 3-email nurture sequence (Day 0, 3, 7) via Kit + Vercel function; $0/mo stack (Feb 2026)
 - [ ] CRM + pipeline stages (6 max): Prospect → Contacted → Meeting Booked → Proposal Sent → Negotiation → Won/Lost

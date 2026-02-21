@@ -7,7 +7,7 @@
 
 ## Bottom Line for SI8
 
-**User liability is real.** Both the tool company AND the user/filmmaker can be held liable for infringing outputs. This must be reflected in the Filmmaker Agreement warranties and the Safe Lane policy.
+**User liability is real.** Both the tool company AND the user/filmmaker can be held liable for infringing outputs. This must be reflected in the Filmmaker Agreement warranties and the Rights Verified policy.
 
 **Tool choice matters.** Adobe Firefly is the only tool with documented licensed training data and no active litigation. Midjourney and Stability AI carry known exposure. Sora 2, Kling, Veo, and Pika are untested but likely future targets.
 
@@ -84,7 +84,7 @@ Current law allows both the user AND the tool company to be held liable:
 
 ## SI8 Policy Implications
 
-**Add to Safe Lane / No List:**
+**Add to Rights Verified / No List:**
 - ❌ No work produced primarily with tools in Tier 3 (Midjourney, Stability AI) for commercial licensing without additional review
 - ⚠️ Sora 2 and Hailuo — monitor closely; advise filmmakers of current exposure
 - ✅ Adobe Firefly — safest for commercial work; encourage use where possible

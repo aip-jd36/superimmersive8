@@ -132,7 +132,7 @@ Based on Stage 2 findings, assign one of four outcomes:
    - Windows: `certutil -hashfile [filename] SHA256`
 2. Complete the Chain of Title schema (RIGHTS-PACKAGE-SCHEMA.md) for this work, including Field 10.
 3. Assign catalog ID: `SI8-[YEAR]-[4-digit sequence]` (e.g., `SI8-2026-0001`).
-4. Save Chain of Title to: `05_Catalog/represented/[filmmaker]/[title]/rights-package.md`
+4. Save Chain of Title to: `05_Catalog/represented/[filmmaker]/[title]/chain-of-title.md`
 5. Add catalog entry to catalog index.
 6. Notify filmmaker: pass, tier assigned, catalog ID, what happens next (Tier 1/2 eligibility, next steps).
 
@@ -157,7 +157,7 @@ Maintain a simple log of all submissions. Minimum fields:
 |---|---|---|---|---|---|---|---|---|
 | | | | | | | | | |
 
-File: `05_Catalog/represented/` or a dedicated tracker in `06_Operations/safe-lane/` (decide at v0.2).
+File: `05_Catalog/represented/` or a dedicated tracker in `06_Operations/rights-verified/` (decide at v0.2).
 
 ---
 

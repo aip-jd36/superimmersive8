@@ -122,7 +122,7 @@ User asked: "How does Getty give a user their rights package? Does Getty give a 
 - But Adobe doesn't provide them
 - Workaround: screenshot + link to standard terms
 
-**Key insight:** **There's a gap in the market.** Buyers want per-asset documentation, but stock agencies don't provide it. SI8's Rights Package fills this gap.
+**Key insight:** **There's a gap in the market.** Buyers want per-asset documentation, but stock agencies don't provide it. SI8's Chain of Title fills this gap.
 
 ---
 
@@ -144,13 +144,13 @@ User asked: "How does Getty give a user their rights package? Does Getty give a 
 
 | Aspect | Getty Images | SI8 (Recommendation) |
 |--------|-------------|---------------------|
-| **At purchase** | Download link + invoice + account record | Download link + invoice + account record + **Rights Package PDF** |
-| **Documentation depth** | Minimal (invoice + master agreement) | Detailed (9-field Rights Package per asset) |
-| **Provenance disclosure** | None (buyer doesn't know photographer, creation date, etc.) | **Full disclosure** (tool log, model versions, Safe Lane review) |
+| **At purchase** | Download link + invoice + account record | Download link + invoice + account record + **Chain of Title PDF** |
+| **Documentation depth** | Minimal (invoice + master agreement) | Detailed (9-field Chain of Title per asset) |
+| **Provenance disclosure** | None (buyer doesn't know photographer, creation date, etc.) | **Full disclosure** (tool log, model versions, Rights Verified review) |
 | **Legal positioning** | "We warrant we can license this" (confidence-based) | "Here's proof this is defensible" (transparency-based) |
 | **Record retention** | Indefinite (license history in account forever) | **Same** (indefinite retention) |
 | **Re-download policy** | Unlimited, no expiration | **Same** (Year 1: Google Drive no expiration, Year 2+: account access indefinite) |
-| **Certificate PDF** | ❌ None | ✅ **Rights Package PDF** (SI8's differentiator) |
+| **Certificate PDF** | ❌ None | ✅ **Chain of Title PDF** (SI8's differentiator) |
 | **Delivery speed** | Instant (automated) | Year 1: 15-30 min (manual), Year 2+: instant (automated) |
 
 ---
@@ -169,8 +169,8 @@ User asked: "How does Getty give a user their rights package? Does Getty give a 
 ## SI8's Competitive Advantage (What Getty Can't Replicate)
 
 1. **AI-specific legal vetting** — Getty doesn't vet for AI training data risk, tool ToS compliance, model disclosure
-2. **Documented provenance** — SI8 provides 9-field Rights Package; Getty provides nothing
-3. **Judgment layer** — SI8's Safe Lane review is human legal judgment, not just metadata
+2. **Documented provenance** — SI8 provides 9-field Chain of Title; Getty provides nothing
+3. **Judgment layer** — SI8's Rights Verified review is human legal judgment, not just metadata
 4. **Product placement capability** — SI8's Tier 2 custom regeneration; Getty can't offer this structurally (photography can't be AI-regenerated post-licensing)
 
 **What Getty can't compete on:** AI-specific compliance documentation, custom AI regeneration
@@ -187,8 +187,8 @@ User asked: "How does Getty give a user their rights package? Does Getty give a 
 5. **No expiration on re-download rights** — buyer can retrieve files anytime
 
 ### ✅ Differentiate from Getty:
-1. **Provide Rights Package PDF** — this is what Getty doesn't offer
-2. **Explain WHY the Rights Package matters** — buyers may not know they need this (education required)
+1. **Provide Chain of Title PDF** — this is what Getty doesn't offer
+2. **Explain WHY the Chain of Title matters** — buyers may not know they need this (education required)
 3. **Position as "Getty for AI video"** — but with the compliance layer Getty can't provide
 4. **Tier 2 custom placement** — Getty's model is static content, SI8's is dynamic (AI regeneration)
 
@@ -224,4 +224,4 @@ User asked: "How does Getty give a user their rights package? Does Getty give a 
 **Researcher:** Claude (via web search)
 **Date:** February 21, 2026
 **Status:** Complete (sufficient for v0.1 SOP design)
-**Next research:** After first 5 deals, survey buyers on Rights Package usefulness (validate that this differentiation actually matters to buyers)
+**Next research:** After first 5 deals, survey buyers on Chain of Title usefulness (validate that this differentiation actually matters to buyers)

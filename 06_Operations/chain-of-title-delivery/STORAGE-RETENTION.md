@@ -2,9 +2,9 @@
 
 ## Overview
 
-This document defines **where SI8 stores files** (video assets, Rights Packages, invoices) and **how long** records are retained for legal compliance and customer support.
+This document defines **where SI8 stores files** (video assets, Chain of Titles, invoices) and **how long** records are retained for legal compliance and customer support.
 
-**Key principle:** Getty Images maintains license records indefinitely. SI8 must do the same. Buyers may need to retrieve their Rights Package years after purchase if their deployment faces legal review.
+**Key principle:** Getty Images maintains license records indefinitely. SI8 must do the same. Buyers may need to retrieve their Chain of Title years after purchase if their deployment faces legal review.
 
 ---
 
@@ -45,7 +45,7 @@ Google Drive:
 **Limitations:**
 - Not enterprise-grade (no SLA guarantees)
 - Sharing links can be accidentally revoked if folder permissions change
-- No version control (must manually version Rights Package PDFs)
+- No version control (must manually version Chain of Title PDFs)
 
 ---
 
@@ -93,7 +93,7 @@ S3 Bucket: si8-licenses/
   │           ├── video_original.mp4 (Tier 2: pre-placement version)
   │           └── thumbnail.jpg
   │
-  ├── rights-packages/
+  ├── chain-of-titles/
   │     ├── SI8-2026-0001_v1.0.pdf
   │     ├── SI8-2026-0002_v2.0.pdf
   │     └── [...]
@@ -116,7 +116,7 @@ S3 Bucket: si8-licenses/
 
 **Advantages:**
 - Programmatic access (API-driven)
-- Versioning built-in (automatic Rights Package version tracking)
+- Versioning built-in (automatic Chain of Title version tracking)
 - Scalable (no manual folder management)
 - 99.99% uptime SLA
 
@@ -150,13 +150,13 @@ My Licenses
 ────────────────────────────────────────────────────
 SI8-2026-0001 | Neon Dreams       | Feb 25, 2026 | Tier 1 Standard
   → Download Video (MP4)
-  → Download Rights Package (PDF)
+  → Download Chain of Title (PDF)
   → Download Invoice (PDF)
   → View License Details
 
 SI8-2026-0015 | Ocean Depths      | Mar 10, 2026 | Tier 1 Standard
   → Download Video (MP4)
-  → Download Rights Package (PDF)
+  → Download Chain of Title (PDF)
   → Download Invoice (PDF)
   → View License Details
 
@@ -177,18 +177,18 @@ Based on industry best practices and legal compliance requirements:
 | Record Type | Retention Period | Storage Location (Year 1) | Storage Location (Year 2+) |
 |-------------|------------------|---------------------------|---------------------------|
 | **Video Assets** | Indefinite (user lifetime) | Google Drive | S3 Standard → S3 Glacier (after 1 year) |
-| **Rights Package PDFs** | Indefinite (user lifetime) | Google Drive | S3 Standard (always hot — frequent access) |
+| **Chain of Title PDFs** | Indefinite (user lifetime) | Google Drive | S3 Standard (always hot — frequent access) |
 | **Invoices** | 7 years minimum (tax law) | Google Drive + accounting software | S3 Standard + accounting system |
 | **License History Records** | Indefinite | Google Sheets | Database (hot), exported to CSV quarterly |
 | **Email Confirmations** | 7 years | Gmail archive | Email archive + backup to S3 |
 | **Filmmaker Agreements** | Agreement duration + 7 years | Google Drive | S3 + legal folder |
-| **Safe Lane Review Notes** | Indefinite (internal only) | Google Drive | S3 (internal bucket, not shared with buyers) |
+| **Rights Verified Review Notes** | Indefinite (internal only) | Google Drive | S3 (internal bucket, not shared with buyers) |
 
 ### Storage Tier Transitions (Year 2+)
 
 **Hot Storage (S3 Standard):**
 - 0-90 days post-purchase: All files
-- 90+ days: Rights Packages, invoices (frequent access for re-downloads)
+- 90+ days: Chain of Titles, invoices (frequent access for re-downloads)
 
 **Warm Storage (S3 Glacier Instant Retrieval):**
 - 1+ years post-purchase: Video assets (less frequent access, lower cost)
@@ -217,11 +217,11 @@ Day 0-90:
   → Download links valid indefinitely
 
 Day 90 - 1 year:
-  → Rights Package, invoice: S3 Standard (hot)
+  → Chain of Title, invoice: S3 Standard (hot)
   → Video asset: S3 Standard (still hot, cheaper to keep than migrate)
 
 Year 1+:
-  → Rights Package, invoice: S3 Standard (hot, frequently accessed)
+  → Chain of Title, invoice: S3 Standard (hot, frequently accessed)
   → Video asset: S3 Glacier Instant Retrieval (warm, 50% cost savings)
   → Buyer can still re-download anytime (instant retrieval)
 
@@ -263,7 +263,7 @@ Year 7+:
 | Data | Primary Storage | Backup 1 | Backup 2 | Backup Frequency |
 |------|-----------------|----------|----------|------------------|
 | Video assets | Google Drive | External SSD | N/A | Weekly (Sunday) |
-| Rights Packages | Google Drive | External SSD | N/A | Weekly (Sunday) |
+| Chain of Titles | Google Drive | External SSD | N/A | Weekly (Sunday) |
 | Invoices | Google Drive + Accounting software | External SSD | N/A | Weekly (Sunday) |
 | License history | Google Sheets | CSV export to Drive | External SSD | Daily (auto-sync) |
 
@@ -275,7 +275,7 @@ Year 7+:
 | Data | Primary Storage | Backup 1 | Backup 2 | Backup Frequency |
 |------|-----------------|----------|----------|------------------|
 | Video assets | S3 (primary region) | S3 (cross-region replication) | N/A | Real-time |
-| Rights Packages | S3 (primary region) | S3 (cross-region replication) | N/A | Real-time |
+| Chain of Titles | S3 (primary region) | S3 (cross-region replication) | N/A | Real-time |
 | Invoices | S3 + Accounting software | S3 (cross-region) | N/A | Real-time |
 | Database | PostgreSQL (primary) | Daily automated backup to S3 | N/A | Daily (midnight) |
 
@@ -305,7 +305,7 @@ Year 7+:
 | License purchase | Buyer details, amount, payment method, timestamp | Indefinite | Financial records + license history |
 | Download link generated | Buyer email, catalog ID, link expiration, timestamp | 7 years | Track re-download requests |
 | Refund processed | Buyer email, refund amount, reason, timestamp | 7 years | Financial + legal compliance |
-| Rights Package updated | Catalog ID, version (v1.0 → v1.1), reason, timestamp | Indefinite | Version control for legal review |
+| Chain of Title updated | Catalog ID, version (v1.0 → v1.1), reason, timestamp | Indefinite | Version control for legal review |
 
 ### How to Log (Year 1)
 
@@ -357,7 +357,7 @@ Year 7+:
 Assumptions:
 - 50 deals in Year 2
 - Average video size: 500MB
-- Average Rights Package size: 2MB
+- Average Chain of Title size: 2MB
 - Total storage: ~26GB (video) + 100MB (docs)
 
 | Item | Cost |
@@ -388,7 +388,7 @@ Assumptions:
 
 - **Download link expiration:** Year 1 = no expiration (Google Drive). Year 2 = 7-day expiration (S3 pre-signed URLs). Does 7 days feel too short? Should it be 30 days?
 - **Re-download limit:** Unlimited re-downloads forever? Or "after 1 year, contact support"?
-- **File versioning:** If Rights Package template changes (e.g., v1.0 → v1.1 format), does buyer get updated PDF? Or frozen at purchase date?
+- **File versioning:** If Chain of Title template changes (e.g., v1.0 → v1.1 format), does buyer get updated PDF? Or frozen at purchase date?
 - **What if buyer's company is acquired?** Can new company access old licenses? (Getty: yes, licenses transfer with company ownership)
 - **International data residency:** Do EU buyers require data stored in EU region? (Adds cost + complexity)
 

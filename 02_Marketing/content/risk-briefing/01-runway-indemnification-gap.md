@@ -48,8 +48,8 @@ When you pay for Runway's Pro plan ($35/month), you get:
 We can't make you lawsuit-proof (no one can). But we can significantly reduce the risk:
 
 1. **Tool tier assessment** — Adobe Firefly = Certified (indemnified). Runway/Pika/Sora = Standard (not indemnified, but high-quality if used carefully).
-2. **Safe Lane vetting** — Every production reviewed for IP imitation risk, likeness rights, brand safety.
-3. **Rights Package documentation** — Tool provenance, model versions, commercial use authorization, and SHA-256 file hash included with every catalog entry.
+2. **Rights Verified vetting** — Every production reviewed for IP imitation risk, likeness rights, brand safety.
+3. **Chain of Title documentation** — Tool provenance, model versions, commercial use authorization, and SHA-256 file hash included with every catalog entry.
 4. **Modification clause** — For Tier 2 placements, brand elements are AI-regenerated into existing productions — so your brand isn't attached to unknown-provenance content.
 
 ---

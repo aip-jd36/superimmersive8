@@ -21,7 +21,7 @@ This research relies on recent case law (2024–2026), federal statutes, state A
 
 **Direct Quote:** "In a case where the infringer sustains the burden of proving, and the court finds, that such infringer was not aware and had no reason to believe that his or her acts constituted an infringement of copyright, the court in its discretion may reduce the award of statutory damages to a sum of not less than $200."
 
-**Relevance to SI8:** Proving "no reason to believe" requires documented good-faith reliance on clearances. SI8's Field #4 (Commercial Use Authorization) and Field #3 (Safe Lane Sign-off) provide the exact evidentiary paper trail a brand needs to trigger the statutory reduction.
+**Relevance to SI8:** Proving "no reason to believe" requires documented good-faith reliance on clearances. SI8's Field #4 (Commercial Use Authorization) and Field #3 (Rights Verified Sign-off) provide the exact evidentiary paper trail a brand needs to trigger the statutory reduction.
 
 **Quantifiable Impact:** Reduces minimum damages by 73% (from $750 to $200) and maximum exposure by up to 99% per work (preventing the $150,000 willful multiplier).
 
@@ -53,7 +53,7 @@ This research relies on recent case law (2024–2026), federal statutes, state A
 
 **Direct Quote:** "Developers and deployers maintain a rebuttable presumption of using reasonable care under this provision if they satisfy the obligations of the Act... [including] documentation describing how the system was evaluated... and data governance measures."
 
-**Relevance to SI8:** SI8's Rights Package acts exactly like the required "evaluation & mitigation" compliance packet. Field #2 (Model Disclosure) and Field #6 (Category Conflict Log) satisfy the "reasonable care" documentation standard.
+**Relevance to SI8:** SI8's Chain of Title acts exactly like the required "evaluation & mitigation" compliance packet. Field #2 (Model Disclosure) and Field #6 (Category Conflict Log) satisfy the "reasonable care" documentation standard.
 
 **Quantifiable Impact:** Avoids state Attorney General civil penalties of up to $20,000 per violation.
 
@@ -67,7 +67,7 @@ This research relies on recent case law (2024–2026), federal statutes, state A
 
 **Key Facts:** The FTC is actively prosecuting companies using AI for "deceptive" advertising practices, including undisclosed synthetic generation that misleads consumers.
 
-**Relevance to SI8:** SI8's Safe Lane Sign-off ensures that AI content conforms to FTC endorsement and native advertising guidelines (e.g., barring the use of deepfake testimonials).
+**Relevance to SI8:** SI8's Rights Verified Sign-off ensures that AI content conforms to FTC endorsement and native advertising guidelines (e.g., barring the use of deepfake testimonials).
 
 ---
 
@@ -83,7 +83,7 @@ This research relies on recent case law (2024–2026), federal statutes, state A
 
 **Direct Quote:** "Does the E&O insurance policy for the project expressly permit or exclude content created using AI? ... The use of AI can impact the rights of those third parties... Consider requesting confirmation from the insurer regarding the use of AI."
 
-**Relevance to SI8:** SI8 is standardizing the Chain of Title for AI. A brand cannot distribute a commercial on premium TV/Streaming without E&O clearance. The SI8 Rights Package is the clearance report.
+**Relevance to SI8:** SI8 is standardizing the Chain of Title for AI. A brand cannot distribute a commercial on premium TV/Streaming without E&O clearance. The SI8 Chain of Title is the clearance report.
 
 ---
 
@@ -153,7 +153,7 @@ Here are three heavily-vetted quotes to use in your sales decks:
 
 **On Copyrightability:** "The U.S. Copyright Office has ruled that AI prompts alone do not grant copyright ownership. SI8's mandatory Human Authorship Declarations secure the editorial paper trail required for your brand to actually own its campaigns." (Based on USCO Part 2 Report, Jan 2025).
 
-**On Vicarious Risk:** "Brands using unvetted AI creators face severe secondary liability. SI8's Safe Lane vetting severs the chain of vicarious liability by documenting commercial compliance before a single frame is licensed."
+**On Vicarious Risk:** "Brands using unvetted AI creators face severe secondary liability. SI8's Rights Verified vetting severs the chain of vicarious liability by documenting commercial compliance before a single frame is licensed."
 
 **On Distribution:** "Premium distribution requires E&O insurance, and E&O requires a clean Chain of Title. SI8 provides the industry's first structured AI clearance report, turning synthetic media into a legally distributable asset."
 

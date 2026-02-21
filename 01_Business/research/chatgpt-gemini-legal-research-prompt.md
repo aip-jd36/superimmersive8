@@ -6,12 +6,12 @@
 
 ## CONTEXT: What SuperImmersive 8 (SI8) Does
 
-SI8 is an AI film rights agency that provides "Safe Lane vetted" AI video content to brands. Our core product is a **Rights Package** - structured documentation for each piece of AI-generated content in our catalog.
+SI8 is an AI film rights agency that provides "Rights Verified vetted" AI video content to brands. Our core product is a **Chain of Title** - structured documentation for each piece of AI-generated content in our catalog.
 
-**The Rights Package includes 9 fields:**
+**The Chain of Title includes 9 fields:**
 1. Tool Provenance Log (which AI tools used, versions, paid plans)
 2. Model Disclosure (which AI models generated content)
-3. Safe Lane Sign-off (our vetting review, date, tier assigned)
+3. Rights Verified Sign-off (our vetting review, date, tier assigned)
 4. Commercial Use Authorization (proof tool ToS permits commercial licensing)
 5. Modification Rights Status (can we AI-regenerate brand elements into the content?)
 6. Category Conflict Log (which brand categories are ineligible)
@@ -19,7 +19,7 @@ SI8 is an AI film rights agency that provides "Safe Lane vetted" AI video conten
 8. Regeneration Rights Status (which scenes can be AI-modified)
 9. Version History (production timeline, modifications, re-reviews)
 
-**Our value proposition:** Brands using AI-generated content face legal risks (copyright infringement, training data liability, platform violations). We claim that our **documented vetting process and structured Rights Package reduce legal risk**.
+**Our value proposition:** Brands using AI-generated content face legal risks (copyright infringement, training data liability, platform violations). We claim that our **documented vetting process and structured Chain of Title reduce legal risk**.
 
 **We need to prove this claim with evidence.**
 
@@ -125,8 +125,8 @@ For each finding, provide:
 - **Direct quotes where available** (with quotation marks)
 
 ### 3. Relevance to SI8
-- How does this support (or challenge) our Rights Package approach?
-- What specific field in our 9-field Rights Package does this validate?
+- How does this support (or challenge) our Chain of Title approach?
+- What specific field in our 9-field Chain of Title does this validate?
 - Can we cite this in marketing materials?
 
 ### 4. Quantifiable Impact (if applicable)
@@ -148,7 +148,7 @@ For each finding, provide:
 - Cases where defendants successfully used this defense
 - What "considerable effort" courts require to prove good faith
 
-**SI8 Relevance:** Our Rights Package = evidence of considerable effort
+**SI8 Relevance:** Our Chain of Title = evidence of considerable effort
 
 ---
 
@@ -162,7 +162,7 @@ For each finding, provide:
 - How documented authorization chains affect liability
 - Difference between direct vs. vicarious vs. contributory infringement
 
-**SI8 Relevance:** Our Rights Package breaks vicarious liability chain
+**SI8 Relevance:** Our Chain of Title breaks vicarious liability chain
 
 ---
 
@@ -176,7 +176,7 @@ For each finding, provide:
 - Clearance report documentation standards
 - Can content be distributed without E&O insurance?
 
-**SI8 Relevance:** Our Rights Package = chain of title equivalent for AI content
+**SI8 Relevance:** Our Chain of Title = chain of title equivalent for AI content
 
 ---
 
@@ -190,7 +190,7 @@ For each finding, provide:
 - What disclosures must brands make about AI-generated content?
 - Penalties for non-disclosure
 
-**SI8 Relevance:** Our Rights Package = compliance documentation infrastructure
+**SI8 Relevance:** Our Chain of Title = compliance documentation infrastructure
 
 ---
 
@@ -219,7 +219,7 @@ For each finding, provide:
 - Netflix AI production disclosure requirements
 - Consequences of violating platform policies
 
-**SI8 Relevance:** Our Rights Package includes platform compliance checklist
+**SI8 Relevance:** Our Chain of Title includes platform compliance checklist
 
 ---
 
@@ -233,7 +233,7 @@ For each finding, provide:
 - Stanford/Columbia fair use checklists (legal value)
 - Thomson Reuters v. Ross Intelligence (AI fair use rejection)
 
-**SI8 Relevance:** Our Rights Package = documented fair use analysis
+**SI8 Relevance:** Our Chain of Title = documented fair use analysis
 
 ---
 
@@ -247,7 +247,7 @@ For each finding, provide:
 - Penalties for stripping watermarks, signatures, attribution
 - What metadata must be preserved?
 
-**SI8 Relevance:** Our Rights Package preserves CMI, avoiding separate violation
+**SI8 Relevance:** Our Chain of Title preserves CMI, avoiding separate violation
 
 ---
 
@@ -334,7 +334,7 @@ For each finding, provide:
 ## WHAT WE'RE TRYING TO PROVE
 
 ### Thesis Statement:
-"SI8's Rights Package reduces legal risk through four mechanisms: (1) damage mitigation via innocent infringer defense, (2) vicarious liability protection through documented authorization, (3) regulatory compliance with FTC/state AI laws, and (4) distribution enablement through E&O-equivalent documentation."
+"SI8's Chain of Title reduces legal risk through four mechanisms: (1) damage mitigation via innocent infringer defense, (2) vicarious liability protection through documented authorization, (3) regulatory compliance with FTC/state AI laws, and (4) distribution enablement through E&O-equivalent documentation."
 
 ### What We Need From Research:
 
@@ -487,10 +487,10 @@ Here's how to format each finding:
 "Considerable effort must go into establishing lack of willful disregard, often requiring detailed documentation and compelling argumentation."
 
 **Relevance to SI8:**
-- Our 9-field Rights Package = "detailed documentation"
-- Safe Lane vetting = "compelling argumentation"
+- Our 9-field Chain of Title = "detailed documentation"
+- Rights Verified vetting = "compelling argumentation"
 - Reduces minimum damages from $750 to $200 (73% reduction)
-- Validates Rights Package Field #3 (Safe Lane Sign-Off)
+- Validates Chain of Title Field #3 (Rights Verified Sign-Off)
 
 **Can We Cite This?** Yes - statutory provision, publicly available guidance
 
@@ -508,6 +508,6 @@ Please conduct this research and return findings in the format above. Focus on:
 4. **Industry precedents** (film, music, stock photo)
 5. **Expert opinions** (bar associations, legal scholars)
 
-**Our goal:** Prove SI8's Rights Package reduces legal risk through documented evidence, not marketing claims.
+**Our goal:** Prove SI8's Chain of Title reduces legal risk through documented evidence, not marketing claims.
 
 Thank you!

@@ -98,7 +98,7 @@ for formal agreement to be drafted.
 - DMCA § 1202/1203 prohibits removal/alteration of copyright management information (watermarks, signatures, attribution)
 - Separate violation from infringement — statutory damages available
 - Andersen v. Stability AI (2024-2026): CMI preservation claims survived motion to dismiss
-- SI8's Safe Lane process includes CMI compliance — filmmakers must not strip metadata before submission
+- SI8's Rights Verified process includes CMI compliance — filmmakers must not strip metadata before submission
 
 *Reference:* Full legal research available in `01_Business/research/merged-legal-research-final.md`
 

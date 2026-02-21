@@ -272,8 +272,8 @@ Lead with the regulatory deadline table. June 2026 (New York) and August 2026 (E
 ## WHAT SI8 CAN AND CANNOT CLAIM
 
 **Can claim:**
-- SI8's Safe Lane process documents tool provenance, commercial license status, and human authorship in a structured Rights Package
-- The Rights Package provides a documented chain of defensibility that brands can present to buyers, platforms, and legal teams
+- SI8's Rights Verified process documents tool provenance, commercial license status, and human authorship in a structured Chain of Title
+- The Chain of Title provides a documented chain of defensibility that brands can present to buyers, platforms, and legal teams
 - SI8 reviews against a defined criteria set including likeness, IP imitation, brand safety, and modification rights
 - SI8-vetted content from Runway/Kling/Sora comes with documentation that Adobe Firefly content automatically carries, but that unvetted non-Adobe AI content lacks
 

@@ -1,11 +1,11 @@
-# Rights Package Template
+# Chain of Title Template
 
 **Catalog ID:** [SI8-YYYY-####]
 **Title:** [Work Title]
 **Filmmaker:** [Filmmaker Name]
 **Runtime:** [Duration]
 **Production Date:** [Month YYYY]
-**Rights Package Version:** v[X.X]
+**Chain of Title Version:** v[X.X]
 **Package Date:** [Date]
 
 ---
@@ -37,14 +37,14 @@
 
 ---
 
-## 3. Safe Lane Sign-off
+## 3. Rights Verified Sign-off
 
 **Reviewer:** [SI8 reviewer name]
 **Review Date:** [Date]
 **Risk Tier Assigned:** [Certified / Standard / Caution-flagged]
 **Review Duration:** [X minutes]
 
-**Safe Lane Status:** ✓ **APPROVED**
+**Rights Verified Status:** ✓ **APPROVED**
 
 **Review Notes:**
 - [Brief summary of review process]
@@ -146,7 +146,7 @@
 | Version | Date | Event | Reviewer | Notes |
 |---|---|---|---|---|
 | v1.0 | [Date] | Initial production | [Filmmaker] | Original creation |
-| v1.0 | [Date] | Safe Lane review | [SI8 Reviewer] | Approved for catalog |
+| v1.0 | [Date] | Rights Verified review | [SI8 Reviewer] | Approved for catalog |
 | | | | | |
 
 **Re-review Triggers:**
@@ -163,7 +163,7 @@
 - [ ] Tool plan receipts (all paid services)
 - [ ] Human Authorship Declaration (150+ words)
 - [ ] Production process screenshots
-- [ ] Safe Lane review checklist (completed)
+- [ ] Rights Verified review checklist (completed)
 - [ ] [Additional materials as needed]
 
 ---
@@ -186,4 +186,4 @@
 
 ---
 
-*This Rights Package is a factual documentation of production provenance, tool usage, and authorization status. It does not constitute legal advice or a warranty. Buyers should conduct their own legal review appropriate to their use case and risk tolerance.*
+*This Chain of Title is a factual documentation of production provenance, tool usage, and authorization status. It does not constitute legal advice or a warranty. Buyers should conduct their own legal review appropriate to their use case and risk tolerance.*

@@ -23,8 +23,8 @@ Below is what I could substantiate with primary sources (statutes / official gui
 
 **Relevance to SI8:**
 
-- Rights Package = evidence of "good-faith / due diligence." It doesn't guarantee innocent infringer treatment, but it's the kind of record you'd want if you're arguing "we tried to do this responsibly."
-- Validates Rights Package fields: #1 (Tool provenance), #3 (Safe Lane sign-off), #4 (Commercial use authorization), #9 (Version history).
+- Chain of Title = evidence of "good-faith / due diligence." It doesn't guarantee innocent infringer treatment, but it's the kind of record you'd want if you're arguing "we tried to do this responsibly."
+- Validates Chain of Title fields: #1 (Tool provenance), #3 (Rights Verified sign-off), #4 (Commercial use authorization), #9 (Version history).
 
 **Can you cite in marketing?** Yes (statute).
 
@@ -44,7 +44,7 @@ Below is what I could substantiate with primary sources (statutes / official gui
 
 **Relevance to SI8:** This is the cleanest "documentation reduces risk" claim that stays inside what the statute supports.
 
-**Rights Package fields:** #1, #3, #4, #9.
+**Chain of Title fields:** #1, #3, #4, #9.
 
 ---
 
@@ -83,7 +83,7 @@ Below is what I could substantiate with primary sources (statutes / official gui
 **Relevance to SI8:**
 
 - Supports the claim that documented workflow + disclosure readiness is becoming a compliance requirement in major jurisdictions.
-- Validates Rights Package fields: #2 (Model disclosure), #3 (Safe Lane sign-off), #9 (Version history) plus your planned "platform-compliant delivery" checklist.
+- Validates Chain of Title fields: #2 (Model disclosure), #3 (Rights Verified sign-off), #9 (Version history) plus your planned "platform-compliant delivery" checklist.
 
 **Practical SI8 claim line that's defensible:**
 "We maintain the disclosure and provenance records you'll need as transparency requirements expand (e.g., EU AI Act Article 50)."
@@ -101,7 +101,7 @@ Below is what I could substantiate with primary sources (statutes / official gui
 **Relevance to SI8:**
 
 - Reinforces that ad/brand workflows will need documentation + disclosure logic (not just "cool video").
-- Validates Rights Package fields: #3, #6, #9 (and a future "disclosure-ready" field if you add it).
+- Validates Chain of Title fields: #3, #6, #9 (and a future "disclosure-ready" field if you add it).
 
 ---
 
@@ -116,7 +116,7 @@ Below is what I could substantiate with primary sources (statutes / official gui
 **Relevance to SI8:**
 
 - Strong support for your Human Authorship Declaration + Version History logic as a "copyrightability posture" layer (even if you're not filing registrations).
-- Validates Rights Package fields: #9 (Version history) and your submission requirement "human authorship declaration" (even though it's not one of the 9 fields today).
+- Validates Chain of Title fields: #9 (Version history) and your submission requirement "human authorship declaration" (even though it's not one of the 9 fields today).
 
 ---
 
@@ -132,7 +132,7 @@ Below is what I could substantiate with primary sources (statutes / official gui
 
 **Relevance to SI8:**
 
-- Your Rights Package supports platform compliance (the "paperwork" to ship content safely).
+- Your Chain of Title supports platform compliance (the "paperwork" to ship content safely).
 - Validates fields: #2, #3, #9 (and a "platform labeling compliance" checklist you may want to formalize).
 
 ---
@@ -165,7 +165,7 @@ Below is what I could substantiate with primary sources (statutes / official gui
 
 **Relevance to SI8:**
 
-- Your "Rights Package" idea can credibly expand into: "we preserve provenance/CMI-like records and don't strip attribution/metadata."
+- Your "Chain of Title" idea can credibly expand into: "we preserve provenance/CMI-like records and don't strip attribution/metadata."
 - Validates fields: #1, #2, #9 (and suggests you may want a dedicated "metadata/CMI handling" line item in your process).
 
 ---
@@ -183,7 +183,7 @@ Below is what I could substantiate with primary sources (statutes / official gui
 **Relevance to SI8:**
 
 - Supports your structural claim: buyers pay for defensibility + paperwork + risk posture, not the pixels.
-- Validates your "Rights Package is the product" positioning.
+- Validates your "Chain of Title is the product" positioning.
 
 ---
 
@@ -235,7 +235,7 @@ If you want, paste one draft "Risk Briefing" entry and I'll rewrite it using onl
 ## Section 10: Open questions & gaps (what research did NOT prove)
 
 - **Direct AI-video precedent:** I did not find a clean, court-citable statement (2024–2026) that says "provenance logs reduce liability for brands using AI video outputs." The support is analogical (copyright damages posture, disclosure laws, platform compliance), not a definitive AI-output safe harbor.
-- **E&O insurance eligibility:** I didn't pull a primary insurer underwriting checklist in this research pass (and E&O varies by carrier). Your "Rights Package = chain-of-title-like artifact" is directionally right, but I would treat "enables E&O insurance" as a hypothesis to validate with a broker, not a marketing claim yet.
+- **E&O insurance eligibility:** I didn't pull a primary insurer underwriting checklist in this research pass (and E&O varies by carrier). Your "Chain of Title = chain-of-title-like artifact" is directionally right, but I would treat "enables E&O insurance" as a hypothesis to validate with a broker, not a marketing claim yet.
 - **Adobe indemnification scope:** I didn't capture Adobe's actual indemnity contract language in a primary source here. Don't compare indemnity scopes in marketing without quoting the exact plan terms.
 
 ---
@@ -244,11 +244,11 @@ If you want, paste one draft "Risk Briefing" entry and I'll rewrite it using onl
 
 ### ✅ Defensible claims (with citations above)
 
-- "Our Rights Package creates a documented audit trail of tool provenance, authorization, and review decisions."
+- "Our Chain of Title creates a documented audit trail of tool provenance, authorization, and review decisions."
 - "Documentation can materially improve your damages posture (e.g., helps argue against willfulness; in some cases supports 'innocent infringement' arguments)."
 - "Disclosure and transparency obligations are expanding (e.g., EU AI Act Article 50, NY synthetic-performer disclosure law). We maintain the records needed for compliance."
 - "Platform policies increasingly expect labeling/disclosure for synthetic media; we support platform-compliant delivery."
-- "We don't sell 'rights-cleared.' We sell a documented process ('Safe Lane vetted') and the paperwork your legal team can review."
+- "We don't sell 'rights-cleared.' We sell a documented process ('Rights Verified vetted') and the paperwork your legal team can review."
 
 ### ❌ Claims to avoid (unless you later obtain very specific support + tighten contracts)
 
@@ -261,5 +261,5 @@ If you want, paste one draft "Risk Briefing" entry and I'll rewrite it using onl
 Tell me which one you want first and I'll write it in your tone ("won't get you sued," but disciplined):
 
 1. A Risk Briefing web page template (6–8 entries) with compliant citation formatting.
-2. A 1-page buyer explainer: "Why the file is the carrier, the Rights Package is the product" (with only defensible claims).
+2. A 1-page buyer explainer: "Why the file is the carrier, the Chain of Title is the product" (with only defensible claims).
 3. A battlecard vs. Adobe/stock libraries/AI studios that cleanly distinguishes "provenance metadata" vs "legal defensibility workflow."

@@ -7,7 +7,7 @@
 
 **What shipped:**
 - Full website launch: dark → warm light theme (white base, golden amber accents)
-- Catalog grid section (immediately below hero): 6 placeholder productions, filter buttons, hover overlays with License + Place Brand CTAs, Safe Lane ✓ + Placement Available badges
+- Catalog grid section (immediately below hero): 6 placeholder productions, filter buttons, hover overlays with License + Place Brand CTAs, Rights Verified ✓ + Placement Available badges
 - Traditional Chinese version: superimmersive8.com/index-zh.html — full content parity, lang="zh-TW", all film titles localized
 - Language toggle in nav (EN / 繁體中文) — functional, links between files
 - All three files in GitHub: index.html, index-zh.html, styles.css, script.js
@@ -71,7 +71,7 @@
 - Geographic strategy updated: Taipei + Singapore in parallel (Mandarin + English test markets); bilingual website required
 - Catalog building elevated to Month 1-2 priority with minimum 3-5 safe lane vetted works required before licensing path is offered
 - Single message discipline confirmed: "won't get you sued" is the Year 1 message; no layering until tested
-- Process branding vs. piece certification: brand the Safe Lane process, not individual outputs
+- Process branding vs. piece certification: brand the Rights Verified process, not individual outputs
 - E&O insurance flagged as future investigation (not Year 1 blocker)
 
 **Why:** External peer review (ChatGPT + Gemini) surfaced legal liability in "rights-cleared" language, geographic strategy gaps, and missing credibility assets. See BUILD_IN_PUBLIC_LOG.md insight #41.
@@ -96,7 +96,7 @@
 - MyVideo parallel track
 - Legal infrastructure as core competency
 - Rights Playbook
-- The No List / Safe Lane
+- The No List / Rights Verified
 - All financial projections
 
 **Why the change:**

@@ -1,4 +1,4 @@
-# Discussion Questions — Rights Package Delivery SOP
+# Discussion Questions — Chain of Title Delivery SOP
 
 **Based on peer review feedback from ChatGPT & Gemini**
 **Date:** February 21, 2026
@@ -93,7 +93,7 @@ Refunds are processed within 5-10 business days to original payment method.
 
 **Options:**
 
-| Option | What's Included in Base Rights Package | What Costs Extra |
+| Option | What's Included in Base Chain of Title | What Costs Extra |
 |--------|----------------------------------------|------------------|
 | **A: Everything included** | 9 fields PLUS tool receipts, ToS PDFs, model docs, filmmaker submission | Nothing |
 | **B: Two-tier system** (ChatGPT's suggestion) | 9 fields (summary documentation) | Compliance Add-On (+$500): receipts, ToS PDFs, full submission |
@@ -102,13 +102,13 @@ Refunds are processed within 5-10 business days to original payment method.
 **My recommendation:** **Option B (Two-tier system)**
 
 **Rationale:**
-- Most buyers won't ask for receipts/ToS (they trust the Rights Package summary)
+- Most buyers won't ask for receipts/ToS (they trust the Chain of Title summary)
 - Enterprise buyers with strict compliance will pay $500 for full audit trail
 - Creates upsell opportunity (Tier 1 Standard = $8K, Tier 1 + Compliance = $8.5K)
 - Prevents scope creep ("just one more doc" requests)
 
 **Pricing:**
-- **Tier 1 Standard:** Rights Package (9 fields) included
+- **Tier 1 Standard:** Chain of Title (9 fields) included
 - **Tier 1 + Compliance Add-On:** +$500 for full documentation package
 - **Tier 2 Custom:** Compliance package included (built into premium pricing)
 
@@ -117,7 +117,7 @@ Refunds are processed within 5-10 business days to original payment method.
 2. Tool ToS snapshots (archived from production date)
 3. Model training data disclosure links (from tool providers)
 4. Filmmaker production brief (full 10-section submission)
-5. Safe Lane review checklist (internal QA notes)
+5. Rights Verified review checklist (internal QA notes)
 
 **Decision needed:**
 
@@ -222,7 +222,7 @@ Refunds are processed within 5-10 business days to original payment method.
 **My recommendation:** **Option B (Investigate before first Tier 2 deal)**
 
 **Rationale:**
-- Tier 1 catalog licensing = low risk (buyer licenses as-is, Rights Package is documentation not warranty)
+- Tier 1 catalog licensing = low risk (buyer licenses as-is, Chain of Title is documentation not warranty)
 - Tier 2 custom placement = higher risk (SI8 is commissioning regeneration, more involvement)
 - E&O insurance = $2K-$5K/year estimated (not trivial for pre-revenue startup)
 - Don't buy insurance you don't need yet, but understand options before first $50K deal
@@ -297,10 +297,10 @@ These changes should be implemented immediately. No trade-offs, both models agre
 ### 1. Language Changes
 - ✅ Change "certification" → "review sign-off" everywhere
 - ✅ Remove "This is what Getty doesn't provide" from delivery email
-- ✅ Add disclaimer to Rights Package: "Not legal advice, not a warranty"
+- ✅ Add disclaimer to Chain of Title: "Not legal advice, not a warranty"
 
 ### 2. Process Additions
-- ✅ Add Agency/End-Client licensing fields to checkout + Rights Package
+- ✅ Add Agency/End-Client licensing fields to checkout + Chain of Title
 - ✅ Add Platform Takedown Response Kit template to every delivery
 - ✅ Define Tier 2 approval workflow (concept → draft → revisions → final, 2 rounds included)
 - ✅ Add License Amendment workflow to SOP (territory/media/term expansions)
@@ -318,7 +318,7 @@ These changes should be implemented immediately. No trade-offs, both models agre
 **Copy this section, fill in your decisions, and I'll update all SOP docs accordingly.**
 
 ```
-DECISION SUMMARY — Rights Package Delivery SOP v0.2
+DECISION SUMMARY — Chain of Title Delivery SOP v0.2
 
 Date: ___________
 Decided by: JD

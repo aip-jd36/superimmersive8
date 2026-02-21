@@ -11,7 +11,7 @@
 
 **Singapore is the most permissive APAC jurisdiction** for AI content — good news for SEA agency outreach. Taiwan is more restrictive but pending new guidelines.
 
-**The APAC region is fragmented** — no unified standard yet. SI8's Safe Lane approach (documented human creative direction, no celebrity likeness, proper consent) aligns well with emerging norms across the region.
+**The APAC region is fragmented** — no unified standard yet. SI8's Rights Verified approach (documented human creative direction, no celebrity likeness, proper consent) aligns well with emerging norms across the region.
 
 ---
 

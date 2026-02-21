@@ -1,6 +1,6 @@
-# Rights Package Template — Version History
+# Chain of Title Template — Version History
 
-This log tracks changes to the Rights Package template structure and content standards over time.
+This log tracks changes to the Chain of Title template structure and content standards over time.
 
 ---
 
@@ -10,17 +10,17 @@ This log tracks changes to the Rights Package template structure and content sta
 
 **Created by:** SI8 Founding Team
 
-**Trigger:** Initial Rights Package example created for sales and filmmaker onboarding
+**Trigger:** Initial Chain of Title example created for sales and filmmaker onboarding
 
 **Template Structure:**
-- 9-field schema (documented in `/06_Operations/safe-lane/RIGHTS-PACKAGE-SCHEMA.md`)
+- 9-field schema (documented in `/06_Operations/rights-verified/RIGHTS-PACKAGE-SCHEMA.md`)
 - Markdown format for flexibility and version control
 - Comprehensive documentation style (12 pages for Example 001)
 
 **9 Fields (v1.0):**
 1. Tool Provenance Log
 2. Model Disclosure
-3. Safe Lane Sign-off
+3. Rights Verified Sign-off
 4. Commercial Use Authorization
 5. Modification Rights Status
 6. Category Conflict Log
@@ -43,12 +43,12 @@ This log tracks changes to the Rights Package template structure and content sta
 - Version History table (Field 9) will grow unwieldy after 10+ entries — may need appendix
 - Category Conflict Log formatting unclear for complex active restrictions
 - PDF export format not yet defined (Markdown only)
-- No "Rights Package Lite" variant for low-risk use cases
+- No "Chain of Title Lite" variant for low-risk use cases
 
 **Feedback Needed:**
 - Test with real buyers: Is 12 pages too long, or is comprehensiveness valued?
 - Test with filmmakers: Is production brief format clear and achievable?
-- Legal counsel review: Does Rights Package provide sufficient documentation for buyer risk assessment?
+- Legal counsel review: Does Chain of Title provide sufficient documentation for buyer risk assessment?
 
 ---
 
@@ -58,7 +58,7 @@ This log tracks changes to the Rights Package template structure and content sta
 **Trigger:** After first 3 real catalog entries + buyer/filmmaker feedback
 
 **Potential changes:**
-- Add 1-page executive summary to Rights Package (quick reference for buyers)
+- Add 1-page executive summary to Chain of Title (quick reference for buyers)
 - Refine Category Conflict Log formatting based on real catalog complexity
 - Clarify Risk Mitigation Summary based on buyer legal counsel questions
 - Standardize PDF export format and styling
@@ -77,7 +77,7 @@ This log tracks changes to the Rights Package template structure and content sta
 **Trigger:** 20+ catalog entries + pattern recognition from real deals
 
 **Potential changes:**
-- Split into "Rights Package Lite" (5 pages, low-risk) vs. "Rights Package Comprehensive" (12+ pages, high-risk)
+- Split into "Chain of Title Lite" (5 pages, low-risk) vs. "Chain of Title Comprehensive" (12+ pages, high-risk)
 - Automation of certain fields (tool TOS verification, model disclosure updates)
 - Database integration preparation (Year 3 platform vision)
 - API export format for buyer systems integration
@@ -94,7 +94,7 @@ This log tracks changes to the Rights Package template structure and content sta
 - v1.0 (Feb 2026): Narrative format describing models and training data policies
 - Future consideration: Link to tool provider model cards (if publicly available)
 
-### Field 3: Safe Lane Sign-off
+### Field 3: Rights Verified Sign-off
 - v1.0 (Feb 2026): Reviewer name, date, risk tier, review duration, summary, No List compliance checklist
 - Future consideration: Add numeric risk score (1-10 scale) for easier buyer assessment
 
@@ -126,7 +126,7 @@ This log tracks changes to the Rights Package template structure and content sta
 
 ## Supporting Documentation Standards
 
-### What's Included in Rights Package (v1.0):
+### What's Included in Chain of Title (v1.0):
 - All 9 fields fully documented
 - Risk Mitigation Summary for buyer legal counsel
 - Usage notes and recommended use cases
@@ -137,10 +137,10 @@ This log tracks changes to the Rights Package template structure and content sta
 - Tool plan receipts (on file with SI8)
 - Human Authorship Declaration (on file with SI8)
 - Production process screenshots (on file with SI8)
-- Safe Lane review checklist (SI8 internal)
+- Rights Verified review checklist (SI8 internal)
 - Full prompt logs (available on request under NDA)
 
-**Rationale:** Keep Rights Package focused on essential buyer information. Full documentation available for qualified buyers or legal disputes.
+**Rationale:** Keep Chain of Title focused on essential buyer information. Full documentation available for qualified buyers or legal disputes.
 
 ---
 
@@ -159,21 +159,21 @@ This log tracks changes to the Rights Package template structure and content sta
 - Regulatory changes (e.g., new AI content laws)
 
 **Backwards compatibility:**
-- Existing Rights Packages (v1.0) remain valid even after template updates
+- Existing Chain of Titles (v1.0) remain valid even after template updates
 - Major version changes trigger re-review consideration for active catalog entries
-- Catalog ID remains permanent; Rights Package version increments independently
+- Catalog ID remains permanent; Chain of Title version increments independently
 
 ---
 
 ## Open Questions (To Resolve in Future Versions)
 
-1. **Format:** Should final buyer-facing Rights Package be PDF, Markdown, or both?
+1. **Format:** Should final buyer-facing Chain of Title be PDF, Markdown, or both?
 2. **Length:** Is 12 pages appropriate, or should we create shorter variants?
 3. **Automation:** Which fields can be auto-populated from structured data? (Year 3 platform consideration)
-4. **Pricing:** Should Rights Package version/tier affect licensing price? (e.g., Certified vs. Standard)
-5. **Updates:** How to handle bulk Rights Package updates when tool ToS change affects 100+ catalog entries?
-6. **Internationalization:** Do non-English Rights Packages need translation, or is English standard for legal docs?
-7. **Interoperability:** Should Rights Package schema align with C2PA Content Credentials format?
+4. **Pricing:** Should Chain of Title version/tier affect licensing price? (e.g., Certified vs. Standard)
+5. **Updates:** How to handle bulk Chain of Title updates when tool ToS change affects 100+ catalog entries?
+6. **Internationalization:** Do non-English Chain of Titles need translation, or is English standard for legal docs?
+7. **Interoperability:** Should Chain of Title schema align with C2PA Content Credentials format?
 
 ---
 

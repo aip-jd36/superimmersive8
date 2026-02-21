@@ -1,7 +1,7 @@
 # Example 001 — Neon Dreams: Design Notes
 
 **Created:** February 21, 2026
-**Purpose:** First Rights Package example for sales, filmmaker onboarding, and internal reference
+**Purpose:** First Chain of Title example for sales, filmmaker onboarding, and internal reference
 
 ---
 
@@ -9,7 +9,7 @@
 
 **Strategic objectives:**
 1. **Demonstrate both Tier 1 and Tier 2 eligibility** — Shows as-is licensing AND product placement authorization
-2. **Show "clean pass" through Safe Lane** — No edge cases, no red flags, ideal submission
+2. **Show "clean pass" through Rights Verified** — No edge cases, no red flags, ideal submission
 3. **Realistic but achievable** — Based on actual Runway Gen-3 capabilities and real filmmaker workflows
 4. **Brand-safe and commercially viable** — Appeals to mainstream buyers (tech, automotive, streaming)
 5. **Clear documentation standard** — Sets the bar for filmmaker submissions
@@ -82,7 +82,7 @@
 - Receipts for all paid tools — demonstrates compliance verification
 - Full prompt log available on request — shows transparency without overwhelming submission
 
-### Rights Package (SI8 Deliverable)
+### Chain of Title (SI8 Deliverable)
 
 **Risk Tier Assignment: Standard (not Certified):**
 - Intentionally chose Runway (not Adobe Firefly) to demonstrate Standard tier
@@ -108,13 +108,13 @@
 
 ### For Filmmakers (Sales Tool)
 - ✓ "Here's what you need to provide" → production-brief.md shows attainable documentation standard
-- ✓ "Here's what you'll get in return" → rights-package shows professional, valuable documentation
+- ✓ "Here's what you'll get in return" → chain-of-title shows professional, valuable documentation
 - ✓ "Your work is valued and protected" → modification rights require authorization, approval checkpoint included
 - ✓ "Clear path to commercial opportunity" → Tier 1 + Tier 2 eligibility explained
 
 ### For Buyers (Sales Tool)
-- ✓ "This is what legal documentation looks like" → 9-field Rights Package is comprehensive and defensible
-- ✓ "We've done the homework" → Safe Lane review, TOS verification, No List compliance
+- ✓ "This is what legal documentation looks like" → 9-field Chain of Title is comprehensive and defensible
+- ✓ "We've done the homework" → Rights Verified review, TOS verification, No List compliance
 - ✓ "Clear licensing options" → Tier 1 as-is vs. Tier 2 product placement differentiated
 - ✓ "Risk mitigation framework" → helps legal counsel assess and approve
 - ✓ "Professional operation" → demonstrates SI8's expertise and thoroughness
@@ -162,7 +162,7 @@ Based on gaps in Example 001, future examples should demonstrate:
 **Example 004: Conditional Approval**
 - Submission that required additional documentation before approval
 - Shows revision request and filmmaker response
-- Demonstrates Safe Lane edge case handling
+- Demonstrates Rights Verified edge case handling
 - Re-review after modifications
 
 ---
@@ -172,44 +172,44 @@ Based on gaps in Example 001, future examples should demonstrate:
 **What worked well:**
 - 9-field schema is comprehensive but not overwhelming
 - Production brief format is clear and filmmaker-friendly
-- Rights Package reads as professional and legally rigorous
+- Chain of Title reads as professional and legally rigorous
 - Both documents can realistically be produced in under 90 minutes (reviewer time target)
 
 **What needs iteration:**
-- Consider adding "Quick Reference" summary page to Rights Package (1-page executive summary)
+- Consider adding "Quick Reference" summary page to Chain of Title (1-page executive summary)
 - Risk Mitigation Summary might be too detailed — test with real buyers
 - Field 6 (Category Conflict Log) needs clearer formatting for active restrictions (currently "None" — will be complex with real catalog)
 - Version History table (Field 9) will grow quickly — consider separating into appendix after 10+ entries
 
 **Open questions:**
-- Should Rights Package be PDF or Markdown for buyer delivery? (Markdown for now, PDF conversion later)
+- Should Chain of Title be PDF or Markdown for buyer delivery? (Markdown for now, PDF conversion later)
 - Do buyers want shorter version (5 pages) or comprehensive version (current 12 pages)? Test in sales conversations.
-- Should SI8 offer "Rights Package Lite" for low-risk use cases (e.g., editorial, internal use)? TBD.
-- How to handle Rights Package updates when tool ToS changes affect 100+ catalog entries? Need system for bulk updates.
+- Should SI8 offer "Chain of Title Lite" for low-risk use cases (e.g., editorial, internal use)? TBD.
+- How to handle Chain of Title updates when tool ToS changes affect 100+ catalog entries? Need system for bulk updates.
 
 ---
 
 ## How to Use This Example
 
 **In sales conversations:**
-- **Email/LinkedIn:** "Here's an example of the Rights Package documentation we provide with every license."
-- **Discovery calls:** Screen-share the Rights Package, walk through 9 fields
-- **Proposals:** Attach as Appendix A: "Sample Rights Package"
+- **Email/LinkedIn:** "Here's an example of the Chain of Title documentation we provide with every license."
+- **Discovery calls:** Screen-share the Chain of Title, walk through 9 fields
+- **Proposals:** Attach as Appendix A: "Sample Chain of Title"
 
 **For filmmaker onboarding:**
 - **Initial outreach:** "Here's what documentation you'll receive when we represent your work"
-- **Agreement negotiation:** "Production brief shows what we need from you; Rights Package shows what you get in return"
+- **Agreement negotiation:** "Production brief shows what we need from you; Chain of Title shows what you get in return"
 - **Submission:** "Use the production brief format as your submission template"
 
 **On website:**
-- Add to Safe Lane section: "Download Sample Rights Package" (gated, lead gen)
-- Add thumbnail/preview to catalog page: "Each catalog entry includes comprehensive Rights Package"
+- Add to Rights Verified section: "Download Sample Chain of Title" (gated, lead gen)
+- Add thumbnail/preview to catalog page: "Each catalog entry includes comprehensive Chain of Title"
 - Use in "How It Works" explainer
 
 **Internal training:**
 - Use as onboarding material for future SI8 team members
 - Reference when reviewing actual filmmaker submissions ("Does this meet the Neon Dreams standard?")
-- Template for populating actual catalog entry Rights Packages
+- Template for populating actual catalog entry Chain of Titles
 
 ---
 

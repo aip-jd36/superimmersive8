@@ -1,11 +1,11 @@
-# Rights Package — Neon Dreams
+# Chain of Title — Neon Dreams
 
 **Catalog ID:** SI8-2026-0001
 **Title:** Neon Dreams
 **Filmmaker:** Alex Chen
 **Runtime:** 90 seconds
 **Production Date:** January 2026
-**Rights Package Version:** v1.0
+**Chain of Title Version:** v1.0
 **Package Date:** February 18, 2026
 
 ---
@@ -41,21 +41,21 @@
 **Tool Provider Terms Acknowledgment:**
 - All tools used under paid commercial plans with documented commercial use authorization
 - Terms of Service reviewed February 15, 2026
-- No tools flagged as high-risk or prohibited under SI8 Safe Lane criteria
+- No tools flagged as high-risk or prohibited under SI8 Rights Verified criteria
 
 ---
 
-## 3. Safe Lane Sign-off
+## 3. Rights Verified Sign-off
 
 **Reviewer:** SI8 Review Team
 **Review Date:** February 17, 2026
 **Risk Tier Assigned:** **STANDARD**
 **Review Duration:** 73 minutes
 
-**Safe Lane Status:** ✓ **APPROVED FOR CATALOG**
+**Rights Verified Status:** ✓ **APPROVED FOR CATALOG**
 
 **Review Summary:**
-"Neon Dreams" passed Safe Lane review with no flags or conditions. The work demonstrates clear human creative direction (47 prompts, extensive iteration documented, editorial choices in post-production). All AI tools used under paid commercial plans. No copyrighted IP, real person likeness, or brand imitation detected. Audio is entirely AI-generated under authorized commercial use terms. Content is brand-safe for mainstream commercial attachment.
+"Neon Dreams" passed Rights Verified review with no flags or conditions. The work demonstrates clear human creative direction (47 prompts, extensive iteration documented, editorial choices in post-production). All AI tools used under paid commercial plans. No copyrighted IP, real person likeness, or brand imitation detected. Audio is entirely AI-generated under authorized commercial use terms. Content is brand-safe for mainstream commercial attachment.
 
 **Notable Strengths:**
 - Exceptional documentation of human authorship (287-word declaration with specific creative decisions)
@@ -215,12 +215,12 @@ Brands can license Tier 2 product placement with brand elements AI-regenerated i
 |---|---|---|---|---|
 | v1.0 | Jan 28, 2026 | Initial production complete | Alex Chen (filmmaker) | Original 90-second edit finalized |
 | v1.0 | Feb 10, 2026 | Filmmaker Shopping Agreement signed | Alex Chen + SI8 | Modification rights authorized; representation begins |
-| v1.0 | Feb 15, 2026 | Submission to SI8 for Safe Lane review | Alex Chen | Complete documentation package submitted |
-| v1.0 | Feb 17, 2026 | Safe Lane review complete | SI8 Review Team | APPROVED — Standard tier; catalog ID assigned: SI8-2026-0001 |
-| v1.0 | Feb 18, 2026 | Rights Package v1.0 issued | SI8 Operations | This document; catalog entry active |
+| v1.0 | Feb 15, 2026 | Submission to SI8 for Rights Verified review | Alex Chen | Complete documentation package submitted |
+| v1.0 | Feb 17, 2026 | Rights Verified review complete | SI8 Review Team | APPROVED — Standard tier; catalog ID assigned: SI8-2026-0001 |
+| v1.0 | Feb 18, 2026 | Chain of Title v1.0 issued | SI8 Operations | This document; catalog entry active |
 
 **Re-review Triggers:**
-The following events would trigger a Safe Lane re-review and potential Rights Package update:
+The following events would trigger a Rights Verified re-review and potential Chain of Title update:
 - Runway or ElevenLabs ToS changes affecting commercial use authorization
 - Major platform policy updates (e.g., YouTube, Netflix AI content requirements)
 - Licensing dispute or third-party claim related to this work
@@ -228,8 +228,8 @@ The following events would trigger a Safe Lane re-review and potential Rights Pa
 - Tool provider training data lawsuit affecting Gen-3 model
 
 **Version Update Policy:**
-- Minor updates (TOS monitoring, clarifications): Rights Package version increments to v1.1, v1.2, etc.
-- Major updates (content changes, re-review required): New Rights Package issued as v2.0
+- Minor updates (TOS monitoring, clarifications): Chain of Title version increments to v1.1, v1.2, etc.
+- Major updates (content changes, re-review required): New Chain of Title issued as v2.0
 
 ---
 
@@ -241,7 +241,7 @@ The following events would trigger a Safe Lane re-review and potential Rights Pa
 - ✓ Adobe Creative Cloud receipt (January 2026)
 - ✓ Human Authorship Declaration (287 words, signed)
 - ✓ Production process screenshots (12 images: prompt examples, iterations, Premiere timeline)
-- ✓ Safe Lane review checklist (completed Feb 17, 2026)
+- ✓ Rights Verified review checklist (completed Feb 17, 2026)
 - ✓ No List compliance verification (completed)
 
 **Available Upon Request (for qualified buyers under NDA):**
@@ -270,7 +270,7 @@ Commission AI-regenerated version with your brand's logos, products, or messagin
 
 **Buyer Guidance:**
 - Content is brand-safe for mainstream commercial use
-- No legal red flags identified in Safe Lane review
+- No legal red flags identified in Rights Verified review
 - Buyers should conduct standard legal review appropriate to their risk tolerance and use case
 - For high-profile campaigns, recommend legal counsel review of tool ToS and training data policies
 - For broadcast/streaming, verify platform AI content policies (requirements evolving 2026)
@@ -284,16 +284,16 @@ Commission AI-regenerated version with your brand's logos, products, or messagin
 
 ## Risk Mitigation Summary (For Buyer Legal Counsel)
 
-**What This Rights Package Provides:**
+**What This Chain of Title Provides:**
 1. **Documented provenance:** Complete chain of custody from AI generation to final delivery
 2. **Commercial use authorization:** All tools used under paid plans permitting commercial licensing
 3. **Human authorship evidence:** Detailed declaration of creative direction and editorial control
 4. **IP clearance:** No copyrighted characters, brand imitation, or unauthorized likeness use
-5. **Safe Lane vetting:** SI8 review against brand safety and legal risk criteria
+5. **Rights Verified vetting:** SI8 review against brand safety and legal risk criteria
 6. **Modification rights:** Authorized AI regeneration scope for product placement (Tier 2)
 7. **Version tracking:** Audit trail for future TOS monitoring and re-review triggers
 
-**What This Rights Package Does NOT Provide:**
+**What This Chain of Title Does NOT Provide:**
 - Legal warranty or indemnification (SI8 is not a law firm)
 - Guarantee against future tool provider ToS changes
 - Protection against evolving AI content regulations
@@ -305,7 +305,7 @@ Commission AI-regenerated version with your brand's logos, products, or messagin
 - **Higher-risk use cases:** National broadcast, high-profile brand campaigns (recommend legal counsel review)
 
 **Recommended Buyer Actions:**
-1. Review this Rights Package with in-house or external legal counsel
+1. Review this Chain of Title with in-house or external legal counsel
 2. Assess risk tolerance based on use case, budget, and visibility
 3. For broadcast/streaming, verify platform AI content policies as of license date
 4. For high-profile campaigns, consider legal opinion on tool ToS and training data exposure
@@ -319,7 +319,7 @@ Commission AI-regenerated version with your brand's logos, products, or messagin
 
 ---
 
-*This Rights Package is a factual documentation of production provenance, tool usage, and authorization status. It is provided for informational purposes and does not constitute legal advice or a legal warranty. SuperImmersive 8 is not a law firm and does not provide legal counsel. Buyers should conduct their own legal review appropriate to their use case, risk tolerance, and jurisdiction. All statements herein are accurate as of the package date; tool provider terms and legal landscape may evolve.*
+*This Chain of Title is a factual documentation of production provenance, tool usage, and authorization status. It is provided for informational purposes and does not constitute legal advice or a legal warranty. SuperImmersive 8 is not a law firm and does not provide legal counsel. Buyers should conduct their own legal review appropriate to their use case, risk tolerance, and jurisdiction. All statements herein are accurate as of the package date; tool provider terms and legal landscape may evolve.*
 
 ---
 

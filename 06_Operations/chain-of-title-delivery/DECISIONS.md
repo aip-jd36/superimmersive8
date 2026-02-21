@@ -1,4 +1,4 @@
-# Rights Package Delivery — Decision Log
+# Chain of Title Delivery — Decision Log
 
 ## Version History
 
@@ -24,8 +24,8 @@ Both models emphasized: "Make it feel like Getty/Shutterstock, but deliver more 
 
 | Old Term (v0.1) | New Term (v0.2) | Why |
 |-----------------|-----------------|-----|
-| Rights Package | **Chain of Title & Compliance Log** | Film/TV buyers already know this terminology |
-| Safe Lane Sign-Off | **Chain of Title Verification** | Familiar legal audit language |
+| Chain of Title | **Chain of Title & Compliance Log** | Film/TV buyers already know this terminology |
+| Rights Verified Sign-Off | **Chain of Title Verification** | Familiar legal audit language |
 | Transaction ID | **Order ID** (ORD-2026-####) | Familiar e-commerce language |
 | Catalog ID | **Asset ID** (buyer-facing) | Stock agencies use "Asset ID" |
 
@@ -113,7 +113,7 @@ Research completed on Getty Images, Adobe Stock, and stock photography industry 
 | # | Decision | Rationale | Status |
 |---|----------|-----------|--------|
 | 1 | Model delivery SOP after Getty Images | Proven 25+ year stock licensing model, industry standard | ✓ Final |
-| 2 | Rights Package is primary deliverable, video file is secondary | Getty logic: buyers pay for legal guarantee, not just the file | ✓ Final |
+| 2 | Chain of Title is primary deliverable, video file is secondary | Getty logic: buyers pay for legal guarantee, not just the file | ✓ Final |
 | 3 | Year 1 = manual delivery via Google Drive + email | Low tech overhead, focus on validating model before building platform | ✓ Final |
 | 4 | Year 2 = semi-automated (Stripe webhooks + Resend) | Automate when deal volume justifies the dev time | ✓ Final |
 | 5 | Year 3 = full self-serve platform (Next.js + PostgreSQL) | Scale to 100+ deals/year without manual work | ✓ Final |
@@ -138,7 +138,7 @@ Research completed on Getty Images, Adobe Stock, and stock photography industry 
    - **Why it matters:** Shorter = more secure, longer = better UX
    - **Decision needed by:** Before Year 2 platform build
 
-3. **Rights Package versioning:** If template format changes (v1.0 → v1.1), do existing buyers get updated PDF?
+3. **Chain of Title versioning:** If template format changes (v1.0 → v1.1), do existing buyers get updated PDF?
    - **Why it matters:** Affects buyer support burden, database versioning complexity
    - **Decision needed by:** Before first template update
 
@@ -195,7 +195,7 @@ Research completed on Getty Images, Adobe Stock, and stock photography industry 
 - Users have requested PDF certificate downloads, but Adobe hasn't implemented
 - License history + screenshot + standard terms = proof of license
 
-**Key insight:** Stock photo industry standard = minimal documentation. SI8's Rights Package is above industry standard.
+**Key insight:** Stock photo industry standard = minimal documentation. SI8's Chain of Title is above industry standard.
 
 ### Stock Photo Agency Best Practices
 
@@ -212,10 +212,10 @@ Research completed on Getty Images, Adobe Stock, and stock photography industry 
 
 | Initial Assumption | Reality (After Research) | Impact on SI8 SOP |
 |-------------------|-------------------------|------------------|
-| Getty provides detailed certificate PDFs | ❌ No, just invoice + license history | SI8's Rights Package is a true differentiator |
-| Stock agencies provide provenance documentation | ❌ No, minimal documentation is industry standard | SI8's 9-field Rights Package is above industry norm |
+| Getty provides detailed certificate PDFs | ❌ No, just invoice + license history | SI8's Chain of Title is a true differentiator |
+| Stock agencies provide provenance documentation | ❌ No, minimal documentation is industry standard | SI8's 9-field Chain of Title is above industry norm |
 | Download links expire after 30 days | ✅ Getty: no expiration (account access indefinite) | Year 1: match Getty (no expiration) |
-| Buyers expect detailed per-asset legal docs | ❓ Mixed (some request it, most don't) | SI8 should position Rights Package as premium compliance layer |
+| Buyers expect detailed per-asset legal docs | ❓ Mixed (some request it, most don't) | SI8 should position Chain of Title as premium compliance layer |
 | Refunds are common in stock licensing | ❓ Unknown refund rate (not public) | Monitor SI8 refund rate, adjust policy if >5% |
 
 ---
@@ -325,7 +325,7 @@ Research completed on Getty Images, Adobe Stock, and stock photography industry 
 *Questions that come up during implementation but don't block immediate work. Document here for future resolution.*
 
 ### Q1: Should SI8 offer a "verification badge" for buyers to display on their website?
-**Context:** "This content verified by SuperImmersive 8 Safe Lane"
+**Context:** "This content verified by SuperImmersive 8 Rights Verified"
 **Why it might matter:** Marketing benefit for buyer, credibility signal
 **Concerns:** Implies SI8 is certifying (legal risk), branding complexity
 **Decision needed by:** After first 5 deals (gauge buyer interest)
@@ -336,10 +336,10 @@ Research completed on Getty Images, Adobe Stock, and stock photography industry 
 **Concerns:** Can't control how buyers use content, but association risk exists
 **Decision needed by:** Before first major brand deal
 
-### Q3: Should Rights Package include filmmaker name, or keep filmmaker anonymous to buyers?
+### Q3: Should Chain of Title include filmmaker name, or keep filmmaker anonymous to buyers?
 **Context:** Getty doesn't disclose photographer names in license docs (just asset ID)
 **Why it might matter:** Filmmaker attribution vs. privacy
-**Current stance:** Filmmaker name included in Rights Package (transparency), but not required in buyer's deployment (optional attribution)
+**Current stance:** Filmmaker name included in Chain of Title (transparency), but not required in buyer's deployment (optional attribution)
 **Decision needed by:** Before first filmmaker agreement finalized
 
 ---

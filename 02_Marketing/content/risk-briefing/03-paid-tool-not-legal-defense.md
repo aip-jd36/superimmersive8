@@ -88,8 +88,8 @@ Paying for the tool is step one. But legal defensibility requires:
 
 1. **Human authorship documentation** — proof you directed, iterated, selected, and edited the AI output (not just one-click generation)
 2. **Tool tier assessment** — Adobe Firefly = indemnified. Runway/Pika/Sora = not indemnified but high-quality if vetted.
-3. **Safe Lane vetting** — IP imitation review, likeness rights check, brand safety clearance
-4. **Rights Package documentation** — tool provenance log, commercial use authorization, SHA-256 file hash, platform compliance checklist
+3. **Rights Verified vetting** — IP imitation review, likeness rights check, brand safety clearance
+4. **Chain of Title documentation** — tool provenance log, commercial use authorization, SHA-256 file hash, platform compliance checklist
 
 **SI8's model:** Every catalog production includes all four. For Tier 2 placements, brand elements are AI-regenerated into existing vetted productions — so you get the creative quality of Runway/Sora with documented defensibility.
 

@@ -1670,7 +1670,7 @@ Same business. Same two-layer model. Completely different Year 1 motion.
 **What doesn't change:**
 - The two-layer model (Layer 1 production, Layer 2 distribution)
 - The long-term vision — filmmaker representation and catalog licensing IS the Year 2-3 business
-- The Rights Playbook, the Safe Lane, the No List
+- The Rights Playbook, the Rights Verified, the No List
 - Revenue targets, APAC focus, Singapore first
 
 **The sequencing:**
@@ -1725,7 +1725,7 @@ They're right. I was using the phrase because it sounded clean and confident. Bu
 
 Every instance of "rights-cleared" → "safe lane vetted" or just "safe lane."
 
-The Safe Lane is a *process*. A documented framework. SI8 runs content through the safe lane — that's what buyers are paying for. Not a guarantee of non-infringement. A rigorous, documented, consistent process that significantly reduces risk.
+The Rights Verified is a *process*. A documented framework. SI8 runs content through the safe lane — that's what buyers are paying for. Not a guarantee of non-infringement. A rigorous, documented, consistent process that significantly reduces risk.
 
 That reframe actually makes the pitch *stronger*, not weaker. It's honest. It's defensible. And it differentiates from any competitor who makes vague "we handle rights" claims.
 
@@ -1778,7 +1778,7 @@ That's SI8.
 
 The video file is the delivery mechanism.
 
-The rights documentation — Safe Lane sign-off, tool disclosure, commercial use authorization, modification rights — is the product.
+The rights documentation — Rights Verified sign-off, tool disclosure, commercial use authorization, modification rights — is the product.
 
 A brand doesn't come to SI8 for an AI video. They can find AI videos anywhere. They come to SI8 because they need something they can stand behind if their legal team asks questions. The documentation is what they're paying for.
 
@@ -1793,7 +1793,7 @@ The fear-based hook stays the same: "Won't get you sued." But now the answer to 
 
 **The moat, stated correctly:**
 
-SI8 doesn't need to own the content to have a moat. Getty doesn't own most of its content either. The moat is the vetting pipeline — the judgment, the process, the filmmaker relationships, the Safe Lane standards. That takes time to build. Time is the moat.
+SI8 doesn't need to own the content to have a moat. Getty doesn't own most of its content either. The moat is the vetting pipeline — the judgment, the process, the filmmaker relationships, the Rights Verified standards. That takes time to build. Time is the moat.
 
 **LinkedIn-ready excerpt:**
 > "Someone asked me what SI8 actually sells.
@@ -1807,7 +1807,7 @@ SI8 doesn't need to own the content to have a moat. Getty doesn't own most of it
 >
 > Same logic. AI video is the delivery mechanism.
 >
-> The Safe Lane documentation — tool disclosure, rights authorization, compliance record — that's the product.
+> The Rights Verified documentation — tool disclosure, rights authorization, compliance record — that's the product.
 >
 > The video is just how we deliver it."
 
@@ -1908,7 +1908,7 @@ Every filmmaker shopping agreement must include a modification clause before Tie
 
 YouTube content is not cleared for commercial use. Rights provenance is unknown. Training data is unknown. No documentation exists. If something goes wrong, the brand has nothing to stand behind.
 
-SI8's catalog has documentation on every piece: tool disclosure, Safe Lane sign-off, commercial use authorization. That's what brands are paying for. It's not the content — it's the defensibility.
+SI8's catalog has documentation on every piece: tool disclosure, Rights Verified sign-off, commercial use authorization. That's what brands are paying for. It's not the content — it's the defensibility.
 
 **LinkedIn-ready excerpt:**
 > "Here's the thing about AI-generated film that nobody in the market has said yet:
@@ -1990,7 +1990,7 @@ SI8's catalog has documentation on every piece: tool disclosure, Safe Lane sign-
 | Feb 2026 | **Both Taipei + Singapore in parallel** | Taipei = Mandarin-facing, MyVideo anchor; Singapore = English-facing, SEA agencies; different audiences, learnings transfer |
 | Feb 2026 | **Bilingual website required** | EN + Traditional Chinese (zh-TW); needed before Taipei B2B outreach begins |
 | Feb 2026 | **Single message discipline** | "Won't get you sued" is the one Year 1 message; no layering speed/cost/quality until primary message tested across 200+ touches |
-| Feb 2026 | **Brand the process, not the pieces** | No per-piece rights certificate in Year 1 — branding the Safe Lane *process* is the differentiator; certifying outputs creates warranty exposure |
+| Feb 2026 | **Brand the process, not the pieces** | No per-piece rights certificate in Year 1 — branding the Rights Verified *process* is the differentiator; certifying outputs creates warranty exposure |
 | Feb 2026 | **Catalog building = Month 1-2 priority** | Can't pitch "license from catalog" without catalog; minimum 3-5 safe lane vetted works before licensing path is offered |
 | Feb 2026 | **E&O insurance flagged for future investigation** | Unknown if available for AI content at small agency scale; not Year 1 blocker, but resolve before significant production volume |
 | Feb 2026 | **Business Plan v3 created** | Rights Agency + AI Product Placement model; v2.1 superseded; VERSION_HISTORY.md updated |
@@ -2001,17 +2001,17 @@ SI8's catalog has documentation on every piece: tool disclosure, Safe Lane sign-
 | Feb 2026 | **"Why not YouTube" argument formalized** | Commercial use requires documentation; YouTube/IG content has no rights provenance, no commercial clearance, no defensibility |
 | Feb 2026 | **Four-tier services ladder documented** | Tier 2 (placement) leads; Tier 1 (as-is) for platforms; Tier 3/4 inbound only, not advertised |
 | Feb 2026 | **"Bad Boy Indemnifier" framing adopted** | Adobe = safe but boring (Firefly only). SI8 = best creative AI tools (Sora/Kling/Runway) made safe. The gap Adobe structurally cannot fill. |
-| Feb 2026 | **SI8's value = judgment layer, not documentation** | C2PA/Content Credentials will commoditize provenance documentation. SI8's moat is subjective legal review — Safe Lane vetting, IP assessment — which software cannot automate. |
+| Feb 2026 | **SI8's value = judgment layer, not documentation** | C2PA/Content Credentials will commoditize provenance documentation. SI8's moat is subjective legal review — Rights Verified vetting, IP assessment — which software cannot automate. |
 | Feb 2026 | **C2PA flagged for monitoring** | Open standard that auto-documents provenance. Rebuttal: proves who made it, not whether it's safe to use. Monitor adoption. |
 | Feb 2026 | **Passive Reuse added as platform validation signal** | Same asset earns revenue from two different buyers = platform logic proven. Important signal, not the only one. |
 | Feb 2026 | **VC path is upside, not requirement** | Three acceptable long-term outcomes: services agency / self-serve platform / VC-backed. All valid. Year 1 work is the same regardless. |
 | Feb 2026 | **Process standardization = Year 1 priority alongside revenue** | Every manual process run as if it will become a platform feature. Document everything as if handing to engineering team in Year 3. |
-| Feb 2026 | **Content is delivery mechanism; rights documentation is the product** | Getty logic confirmed: brands pay for legal indemnity, not pixels. SI8 sells the Safe Lane documentation; the video is how it's delivered. |
+| Feb 2026 | **Content is delivery mechanism; rights documentation is the product** | Getty logic confirmed: brands pay for legal indemnity, not pixels. SI8 sells the Rights Verified documentation; the video is how it's delivered. |
 | Feb 2026 | **SI8's moat = vetting pipeline, not content ownership** | Getty doesn't own ~95% of its library; photographers do. Getty owns the right to license + the trust layer. SI8 owns the same thing for AI video. |
-| Feb 2026 | **"Rights Package" not "Rights Certificate"** | Package = substantive documented process. Certificate = legal guarantee SI8 can't make. Same substance, honest framing. |
+| Feb 2026 | **"Chain of Title" not "Rights Certificate"** | Package = substantive documented process. Certificate = legal guarantee SI8 can't make. Same substance, honest framing. |
 | Feb 2026 | **Secondary pitch line adopted** | "We reduce time from creative idea to legal approval from 3 weeks to 3 days." — the felt experience; complements "won't get you sued" door opener |
 | Feb 2026 | **Internal/external canonical framing locked** | Internal: "The file is the carrier. The chain of defensibility is the product." External: "3 weeks to 3 days." |
-| Feb 2026 | **Per-asset documentation SKU defined** | 9 structured fields per catalog entry (tool provenance, model disclosure, Safe Lane sign-off, etc.). Structured data not narrative. Platform schema in spreadsheet form from day one. |
+| Feb 2026 | **Per-asset documentation SKU defined** | 9 structured fields per catalog entry (tool provenance, model disclosure, Rights Verified sign-off, etc.). Structured data not narrative. Platform schema in spreadsheet form from day one. |
 | Feb 2026 | **Underwriter→Curator identity progression** | Year 1: risk underwriter (legal teams are the gatekeeper). Year 3+: underwriter + curator (taste develops alongside compliance track record). |
 | Jan 2026 | **Ship website in 7 days** | Not perfect — iterate later |
 | Jan 2026 | **Rights Playbook v0.1 = 3 pages** | Iterate slowly; only write what helps sell THIS month |
@@ -2022,21 +2022,21 @@ SI8's catalog has documentation on every piece: tool disclosure, Safe Lane sign-
 | **Feb 17, 2026** | **Website launched at superimmersive8.com** | Dark→light theme redesign (warm white + golden amber accents); deployed to Bluehost |
 | Feb 17, 2026 | **Catalog grid added below hero** | 6 placeholder cards, filter buttons (All/Short Film/Experimental/Narrative), hover overlays with License + Place Brand CTAs; follows Getty/Shutterstock visual pattern |
 | Feb 17, 2026 | **Light theme chosen over dark** | Warm white base (#FFFFFF), cream elevated surfaces (#FAFAF7), golden amber accents (#C8900A/#F5C842); moves away from generic tech-dark aesthetic; warmer/more premium for brand buyers |
-| Feb 17, 2026 | **"Safe Lane ✓" + "Placement Available" badges on catalog cards** | Green + amber pill badges; immediately communicates the two-tier value (rights safety + placement opportunity) without any copy |
+| Feb 17, 2026 | **"Rights Verified ✓" + "Placement Available" badges on catalog cards** | Green + amber pill badges; immediately communicates the two-tier value (rights safety + placement opportunity) without any copy |
 | Feb 17, 2026 | **Traditional Chinese (zh-TW) version live** | index-zh.html — full content parity; EN/繁體中文 toggle in nav; deployed to Bluehost; ready for Taipei advisor meetings |
 | Feb 17, 2026 | **Film titles localized for zh-TW** | 霓虹孤獨, 最後的花園, 過境, 訊號消失, 未來田園, 綻放協議 — localized not transliterated; feels native, not translated |
 | Feb 17, 2026 | **Catalog section id anchored separately from services section** | #catalog → visual grid; #how-it-works → services cards; hero "Explore the Catalog" CTA now lands on actual catalog content |
 | **Feb 20, 2026** | **Triple-verified legal research completed** | Merged research from Claude + ChatGPT + Gemini; 50+ citations; verification tier labels (✅✅✅ = all three AIs confirmed); 15K word comprehensive foundation for all legal claims |
-| Feb 20, 2026 | **Colorado AI Act "rebuttable presumption" discovered** | Explicit legal safe harbor language: documented systems get presumption of reasonable care; avoids $20K penalties; Rights Package = statutory compliance infrastructure |
+| Feb 20, 2026 | **Colorado AI Act "rebuttable presumption" discovered** | Explicit legal safe harbor language: documented systems get presumption of reasonable care; avoids $20K penalties; Chain of Title = statutory compliance infrastructure |
 | Feb 20, 2026 | **73% damage reduction quantified** | Innocent infringer defense (17 U.S.C. § 504): $750→$200 minimum statutory damages; prevents $150K willful penalties; documentation = "considerable effort" courts require |
 | Feb 20, 2026 | **USCO copyrightability requirement confirmed** | Jan 2025 Part 2 Report: prompts alone ≠ authorship; human editorial control required; without documentation, brands cannot own copyright to AI commercials |
 | Feb 20, 2026 | **Rights Playbook v0.2 released** | Added Colorado safe harbor, USCO copyrightability, DMCA CMI preservation, EU AI Act Article 50, NY synthetic performer law, quantifiable metrics, competitive landscape (Adobe limitations, C2PA distinction) |
 | Feb 20, 2026 | **Legal Risk Reduction Brief created** | 1-page buyer asset; four value mechanisms (damage mitigation, regulatory compliance, copyrightability, distribution); only triple-verified claims; competitive differentiation vs. Adobe/C2PA |
 | Feb 20, 2026 | **Filmmaker Agreement updated with legal requirements** | Added Human Authorship Declaration (150+ words minimum) + CMI preservation clause; both required by legal research findings; USCO copyrightability + DMCA compliance |
-| Feb 20, 2026 | **Safe Lane website section launched** | 5 pages: How It Works, Rights Package, Vetting Criteria, Legal Risk Brief (gated), Rights Playbook (gated); dark theme + purple/pink gradients; mobile responsive |
-| Feb 20, 2026 | **Navigation restructured: Safe Lane dropdown** | From simple link to dropdown with 5 sub-pages; Safe Lane = primary value prop (not buried); catalog = supporting proof (not primary pitch); both EN + ZH-TW |
+| Feb 20, 2026 | **Rights Verified website section launched** | 5 pages: How It Works, Chain of Title, Vetting Criteria, Legal Risk Brief (gated), Rights Playbook (gated); dark theme + purple/pink gradients; mobile responsive |
+| Feb 20, 2026 | **Navigation restructured: Rights Verified dropdown** | From simple link to dropdown with 5 sub-pages; Rights Verified = primary value prop (not buried); catalog = supporting proof (not primary pitch); both EN + ZH-TW |
 | Feb 20, 2026 | **"For Brands" rewritten: risk-first messaging** | From "Explore the Catalog" (commodity) to "Download Legal Risk Brief" (expertise); added risk stats (73%+, $150K, $20K); Getty positioning front and center |
-| Feb 20, 2026 | **Strategic positioning shift complete** | Homepage now sells risk reduction service, not stock library; Safe Lane = 5 pages of expertise; 2 gated lead-gen assets; catalog = visual proof after expertise pitch |
+| Feb 20, 2026 | **Strategic positioning shift complete** | Homepage now sells risk reduction service, not stock library; Rights Verified = 5 pages of expertise; 2 gated lead-gen assets; catalog = visual proof after expertise pitch |
 | Feb 20, 2026 | **Lead gen funnel architecture built** | Gated downloads (Legal Brief + Rights Playbook) → email capture → auto-deliver PDF → follow-up nurture → discovery call; Formspree integration on both pages |
 | Feb 20, 2026 | **"Getty for AI video" positioning externalized** | Previously internal framing; now explicit in For Brands section: "Brands pay Getty $450 for legal guarantee, $50 for JPEG. We sell same value layer for AI video." |
 | Feb 20, 2026 | **Adobe competitive gap weaponized** | "Adobe = safe but boring (Firefly only). SI8 = best creative tools (Sora/Runway/Kling) made safe." — now in Rights Playbook v0.2 + Legal Risk Brief + website |
@@ -2048,29 +2048,29 @@ SI8's catalog has documentation on every piece: tool disclosure, Safe Lane sign-
 | Feb 20, 2026 | **Complete free email automation stack achieved** | Website forms + Vercel Functions + Kit free plan = $0/month for unlimited form submissions + 10K subscribers + 3-email nurture; no Formspree, no Zapier, no paid email tools; validated for Year 1 scale |
 | Feb 20, 2026 | **Technical insight: direct API > third-party connectors** | Building Vercel function (2 hours) vs. configuring Zapier/Make (30 min setup, $20/mo recurring) — upfront effort pays off month 2+; own the integration, no vendor lock-in, no monthly SaaS creep |
 | Feb 20, 2026 | **Lead gen funnel complete and deployed** | Both gated pages live with working forms; email automation active; PDFs ready for Google Drive upload; discovery call calendar link embedded; ready for traffic |
-| Feb 21, 2026 | **Safe Lane pages redesigned: dark → warm light theme** | All 5 Safe Lane pages (Legal Brief, Rights Playbook, How It Works, Rights Package, Vetting Criteria) updated from dark purple/pink theme to match homepage warm light aesthetic; white/cream backgrounds, dark text, golden amber accents; cohesive visual identity |
+| Feb 21, 2026 | **Rights Verified pages redesigned: dark → warm light theme** | All 5 Rights Verified pages (Legal Brief, Rights Playbook, How It Works, Chain of Title, Vetting Criteria) updated from dark purple/pink theme to match homepage warm light aesthetic; white/cream backgrounds, dark text, golden amber accents; cohesive visual identity |
 | Feb 21, 2026 | **Dropdown navigation hover behavior fixed** | Dropdown menu was collapsing before users could click subpage links; fixed with CSS timing adjustments (`top: 100%`, 4px margin-top, 12px padding-top bridge); applied to both styles.css and inline styles on all subpages |
-| Feb 21, 2026 | **Header/footer consistency implemented across site** | Safe Lane pages had custom navigation/footer components that didn't match homepage; replaced all with exact homepage versions; every page now uses identical header/footer HTML |
-| Feb 21, 2026 | **Navigation links corrected for subpage routing** | Hash anchor links (#catalog, #brands, etc.) only worked on homepage; updated all Safe Lane page nav links to point back to homepage sections (index.html#catalog); proper cross-page navigation restored |
-| Feb 21, 2026 | **Website design consistency complete** | All 7 website pages (homepage, index-zh, 5 Safe Lane pages) now share unified visual language, navigation behavior, and user experience; warm light theme throughout; professional, cohesive brand presentation; ready for public traffic |
-| Feb 21, 2026 | **Rights Package examples project created** | Full working project with versioning: README, blank template, Example 001 "Neon Dreams" (complete 9-field Rights Package + filmmaker production brief + design notes), CHANGELOG for template evolution; demonstrates what SI8 delivers to buyers and filmmakers |
-| Feb 21, 2026 | **First Rights Package example complete: "Neon Dreams"** | Fictional but realistic cyberpunk commercial (90s, Runway Gen-3, Tier 1+2 eligible); shows clean Safe Lane approval, modification authorization, comprehensive documentation; 12-page Rights Package demonstrates all 9 fields in action; sales tool ready for buyer/filmmaker conversations |
+| Feb 21, 2026 | **Header/footer consistency implemented across site** | Rights Verified pages had custom navigation/footer components that didn't match homepage; replaced all with exact homepage versions; every page now uses identical header/footer HTML |
+| Feb 21, 2026 | **Navigation links corrected for subpage routing** | Hash anchor links (#catalog, #brands, etc.) only worked on homepage; updated all Rights Verified page nav links to point back to homepage sections (index.html#catalog); proper cross-page navigation restored |
+| Feb 21, 2026 | **Website design consistency complete** | All 7 website pages (homepage, index-zh, 5 Rights Verified pages) now share unified visual language, navigation behavior, and user experience; warm light theme throughout; professional, cohesive brand presentation; ready for public traffic |
+| Feb 21, 2026 | **Chain of Title examples project created** | Full working project with versioning: README, blank template, Example 001 "Neon Dreams" (complete 9-field Chain of Title + filmmaker production brief + design notes), CHANGELOG for template evolution; demonstrates what SI8 delivers to buyers and filmmakers |
+| Feb 21, 2026 | **First Chain of Title example complete: "Neon Dreams"** | Fictional but realistic cyberpunk commercial (90s, Runway Gen-3, Tier 1+2 eligible); shows clean Rights Verified approval, modification authorization, comprehensive documentation; 12-page Chain of Title demonstrates all 9 fields in action; sales tool ready for buyer/filmmaker conversations |
 | Feb 21, 2026 | **PDF generation system built with SI8 branding** | HTML-to-PDF workflow matching website aesthetic: warm light theme, Space Grotesk + Inter fonts, A4 print-optimized; includes reusable template, Neon Dreams styled HTML (40KB), shell script for wkhtmltopdf, 3 generation methods (browser print, CLI, Puppeteer); professional branded PDFs for buyer delivery |
-| Feb 21, 2026 | **Sample Rights Package PDF generated (1.1 MB)** | 12-page branded PDF from Neon Dreams HTML; cover page with SI8 logo + metadata grid, all 9 Rights Package fields, risk mitigation summary, status badges, styled tables; uploaded to Google Drive; ready for gated download distribution |
-| Feb 21, 2026 | **Gated Sample Rights Package download added to website** | New lead capture section on safe-lane-rights-package.html; form posts to Vercel function → Kit email list → auto-opens PDF; completes value prop trilogy: Legal Brief (WHY) + Rights Playbook (HOW) + Sample Package (WHAT); third gated asset = third lead gen touchpoint |
-| Feb 21, 2026 | **Sample Rights Package integrated across homepage (4 locations)** | Added to Safe Lane section (2-button CTA), For Brands section (3-button CTA), For Filmmakers section (2-button CTA), plus nav dropdown; multiple conversion paths based on which section resonates; consistent left-aligned layout across all sections |
-| Feb 21, 2026 | **Complete lead gen funnel: one asset, four entry points** | Single Rights Package PDF accessible from: (1) Safe Lane section CTA, (2) For Brands section CTA, (3) For Filmmakers section CTA, (4) dedicated download page with form; all routes → same lead capture → Kit automation → PDF delivery; unified tracking via "Lead-Download" tag |
-| Feb 21, 2026 | **Homepage CTA strategy complete** | Every key section now has clear next actions: Safe Lane (Legal Brief + Sample Package), For Brands (Legal Brief + Sample + Catalog), For Filmmakers (Apply + Sample); responsive design (all stack on mobile); consistent visual hierarchy (primary gold buttons, secondary outline); no dead ends |
+| Feb 21, 2026 | **Sample Chain of Title PDF generated (1.1 MB)** | 12-page branded PDF from Neon Dreams HTML; cover page with SI8 logo + metadata grid, all 9 Chain of Title fields, risk mitigation summary, status badges, styled tables; uploaded to Google Drive; ready for gated download distribution |
+| Feb 21, 2026 | **Gated Sample Chain of Title download added to website** | New lead capture section on rights-verified-chain-of-title.html; form posts to Vercel function → Kit email list → auto-opens PDF; completes value prop trilogy: Legal Brief (WHY) + Rights Playbook (HOW) + Sample Package (WHAT); third gated asset = third lead gen touchpoint |
+| Feb 21, 2026 | **Sample Chain of Title integrated across homepage (4 locations)** | Added to Rights Verified section (2-button CTA), For Brands section (3-button CTA), For Filmmakers section (2-button CTA), plus nav dropdown; multiple conversion paths based on which section resonates; consistent left-aligned layout across all sections |
+| Feb 21, 2026 | **Complete lead gen funnel: one asset, four entry points** | Single Chain of Title PDF accessible from: (1) Rights Verified section CTA, (2) For Brands section CTA, (3) For Filmmakers section CTA, (4) dedicated download page with form; all routes → same lead capture → Kit automation → PDF delivery; unified tracking via "Lead-Download" tag |
+| Feb 21, 2026 | **Homepage CTA strategy complete** | Every key section now has clear next actions: Rights Verified (Legal Brief + Sample Package), For Brands (Legal Brief + Sample + Catalog), For Filmmakers (Apply + Sample); responsive design (all stack on mobile); consistent visual hierarchy (primary gold buttons, secondary outline); no dead ends |
 | Feb 21, 2026 | **Contact form with instant email notifications ($0/month)** | Built Vercel function /api/contact-form.js using Resend free tier (3K emails/month); instant email to jd@superimmersive8.com with form data (name, email, company, type, message); styled HTML email with SI8 branding; Taipei timezone; reply-to link; optional Kit CRM tracking |
 | Feb 21, 2026 | **Resend.com integration for free email notifications** | Signed up for Resend free tier; added API key to Vercel environment variables; using onboarding@resend.dev domain (works immediately, no DNS setup required); delivers emails in 5-10 seconds; completely free alternative to paid email services |
 | Feb 21, 2026 | **All website forms now functional (6 forms total)** | Fixed all Formspree placeholder references: (1-2) Contact forms on EN + ZH homepages → instant email, (3-5) Gated downloads → Kit automation, (6) Risk Briefing newsletter → Kit; all forms POST to Vercel functions; no third-party dependencies; $0/month total cost |
 | Feb 21, 2026 | **Debugged and fixed contact form 500 error** | Root cause: Vercel doesn't auto-parse req.body in all cases; fix: manually parse JSON body before destructuring; added comprehensive debug logging for future troubleshooting; tested end-to-end successfully; email delivery confirmed working |
 | Feb 21, 2026 | **Complete lead capture infrastructure operational** | Three capture points: (1) Gated downloads → Kit nurture sequence, (2) Contact form → instant email to JD + Kit, (3) Newsletter signup → Kit; all integrated with existing $0/month stack (Vercel Functions + Kit free + Resend free); unified CRM in Kit; ready for Month 1 outreach |
-| Feb 21, 2026 | **Terminology evolution: "Safe Lane" → "Rights Verified"** | After peer review (ChatGPT + Gemini) on Rights Package Delivery SOP, realized "Safe Lane" reads as startup jargon; Getty/Shutterstock don't brand their vetting process — they just say "licensed" or "rights-managed"; switched to "Rights Verified" (adjective form) to feel like established industry standard, not novel experiment; matches Getty pattern: "Royalty-Free", "Rights-Managed" |
-| Feb 21, 2026 | **"Rights Package" → "Chain of Title" (buyer-familiar terminology)** | "Rights Package" = unfamiliar startup term; "Chain of Title" = film/TV industry standard for legal provenance documentation; buyers already know this term from traditional production; updated all website pages (8 HTML files), CLAUDE.md, and memory; positioning: feel like Getty (proven), not startup (risky) |
+| Feb 21, 2026 | **Terminology evolution: "Rights Verified" → "Rights Verified"** | After peer review (ChatGPT + Gemini) on Chain of Title Delivery SOP, realized "Rights Verified" reads as startup jargon; Getty/Shutterstock don't brand their vetting process — they just say "licensed" or "rights-managed"; switched to "Rights Verified" (adjective form) to feel like established industry standard, not novel experiment; matches Getty pattern: "Royalty-Free", "Rights-Managed" |
+| Feb 21, 2026 | **"Chain of Title" → "Chain of Title" (buyer-familiar terminology)** | "Chain of Title" = unfamiliar startup term; "Chain of Title" = film/TV industry standard for legal provenance documentation; buyers already know this term from traditional production; updated all website pages (8 HTML files), CLAUDE.md, and memory; positioning: feel like Getty (proven), not startup (risky) |
 | Feb 21, 2026 | **Commission rate adjusted: 25% → 20%** | Standard industry commission for representation/licensing is 15-20%; 25% was high for Year 1 when SI8 has no track record; lowered to 20% to be competitive with established agencies while still premium vs. platform models (Escape.ai 15%); updated website (EN + ZH) and filmmaker agreement |
 | Feb 21, 2026 | **Website content refinements for clarity** | Updated catalog header to "Rights Verified AI videos" (not "Vetted AI Productions"); services section to "Two ways to use Rights Verified AI videos"; process subheading to "Our Rights Verified process"; removed redundant "The" from section tags and navigation for cleaner, more professional feel |
-| Feb 21, 2026 | **Language consistency: Getty-familiar over startup-unique** | Pattern across all updates: chose established industry language over branded/novel terms; "Rights Verified" over "Safe Lane", "Chain of Title" over "Rights Package", "20%" over "25%" commission; strategic positioning = trusted infrastructure (like Getty), not experimental platform (like Escape.ai) |
+| Feb 21, 2026 | **Language consistency: Getty-familiar over startup-unique** | Pattern across all updates: chose established industry language over branded/novel terms; "Rights Verified" over "Rights Verified", "Chain of Title" over "Chain of Title", "20%" over "25%" commission; strategic positioning = trusted infrastructure (like Getty), not experimental platform (like Escape.ai) |
 
 ---
 

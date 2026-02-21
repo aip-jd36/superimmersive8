@@ -14,6 +14,6 @@ Options:
 - Agency leads
 
 ## Sequences (to build)
-- Welcome sequence (3 emails): what SI8 is, what the Safe Lane is, first resource
-- Filmmaker onboarding: Safe Lane process, submission requirements
-- Brand onboarding: risk landscape, indemnification gap, Rights Package explainer
+- Welcome sequence (3 emails): what SI8 is, what the Rights Verified is, first resource
+- Filmmaker onboarding: Rights Verified process, submission requirements
+- Brand onboarding: risk landscape, indemnification gap, Chain of Title explainer

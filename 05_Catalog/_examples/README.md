@@ -1,8 +1,8 @@
-# Rights Package Examples
+# Chain of Title Examples
 
 ## Purpose
 
-This folder contains **example Rights Packages** — demonstration versions of the documentation SI8 delivers to buyers and filmmakers. These are sales and education assets, not real catalog entries.
+This folder contains **example Chain of Titles** — demonstration versions of the documentation SI8 delivers to buyers and filmmakers. These are sales and education assets, not real catalog entries.
 
 **Target audiences:**
 - **Filmmakers:** "Here's what documentation you'll get when SI8 represents your work"
@@ -11,9 +11,9 @@ This folder contains **example Rights Packages** — demonstration versions of t
 
 ---
 
-## What Is a Rights Package?
+## What Is a Chain of Title?
 
-A **Rights Package** is SI8's core deliverable — the structured legal documentation that accompanies every piece of AI-generated content in the SI8 catalog.
+A **Chain of Title** is SI8's core deliverable — the structured legal documentation that accompanies every piece of AI-generated content in the SI8 catalog.
 
 **Getty analogy:** When a brand licenses a photo from Getty Images, they're not just paying for the JPEG file. They're paying for:
 - License agreement
@@ -24,19 +24,19 @@ A **Rights Package** is SI8's core deliverable — the structured legal document
 
 **The JPEG costs $50. The legal guarantee costs $400.**
 
-SI8 provides the same value layer for AI video. The video file is the carrier. The Rights Package is the product.
+SI8 provides the same value layer for AI video. The video file is the carrier. The Chain of Title is the product.
 
 ---
 
-## Rights Package Components
+## Chain of Title Components
 
-Each Rights Package includes **9 structured fields** (see: `/06_Operations/safe-lane/RIGHTS-PACKAGE-SCHEMA.md`):
+Each Chain of Title includes **9 structured fields** (see: `/06_Operations/rights-verified/RIGHTS-PACKAGE-SCHEMA.md`):
 
 | # | Field | What It Documents |
 |---|---|---|
 | 1 | Tool Provenance Log | Which AI tools generated the content; versions, plan tiers, production dates |
 | 2 | Model Disclosure | Specific AI models used (e.g., Runway Gen-3 Alpha Turbo, Kling v1.6) |
-| 3 | Safe Lane Sign-off | SI8 reviewer, review date, risk tier assigned, any flags or conditions |
+| 3 | Rights Verified Sign-off | SI8 reviewer, review date, risk tier assigned, any flags or conditions |
 | 4 | Commercial Use Authorization | Confirmation that tool Terms of Service permit commercial licensing; plan receipts verified |
 | 5 | Modification Rights Status | Whether filmmaker has authorized SI8 to commission brand-integrated versions (Tier 2 gate) |
 | 6 | Category Conflict Log | Brand categories restricted for product placement (e.g., alcohol, tobacco, political) |
@@ -51,9 +51,9 @@ Each Rights Package includes **9 structured fields** (see: `/06_Operations/safe-
 ```
 05_Catalog/_examples/
 ├── README.md                           # This file
-├── TEMPLATE.md                         # Blank Rights Package template (copy for new entries)
+├── TEMPLATE.md                         # Blank Chain of Title template (copy for new entries)
 ├── example-001-neon-dreams/            # Example 1: Cyberpunk commercial/short
-│   ├── rights-package-v1.0.md         # The Rights Package deliverable
+│   ├── chain-of-title-v1.0.md         # The Chain of Title deliverable
 │   ├── production-brief.md            # Fictional filmmaker submission (shows what SI8 receives)
 │   └── notes.md                       # Design decisions, why we chose this example
 ├── example-002-[title]/                # Future examples as needed
@@ -66,13 +66,13 @@ Each Rights Package includes **9 structured fields** (see: `/06_Operations/safe-
 ## How to Use This Folder
 
 ### For Sales Conversations
-- Share `example-001-neon-dreams/rights-package-v1.0.md` with prospects
+- Share `example-001-neon-dreams/chain-of-title-v1.0.md` with prospects
 - Demonstrates professionalism, legal rigor, defensibility
 - Shows what buyers receive vs. unlicensed AI video stock sites
 
 ### For Filmmaker Onboarding
 - Share `example-001-neon-dreams/production-brief.md` to show what submission requires
-- Share `rights-package-v1.0.md` to show what documentation they'll receive in return
+- Share `chain-of-title-v1.0.md` to show what documentation they'll receive in return
 
 ### For Internal Reference
 - Copy `TEMPLATE.md` when creating actual catalog entries
@@ -90,7 +90,7 @@ Each Rights Package includes **9 structured fields** (see: `/06_Operations/safe-
 
 **Template versioning:** Track in `versions/CHANGELOG.md`
 
-**Example versioning:** Each example has its own version number (e.g., `rights-package-v1.0.md`)
+**Example versioning:** Each example has its own version number (e.g., `chain-of-title-v1.0.md`)
 
 **When to create a new example:**
 - Different content type (commercial vs. narrative short vs. music video)
@@ -119,15 +119,15 @@ Each Rights Package includes **9 structured fields** (see: `/06_Operations/safe-
 ## Key Principles
 
 1. **Examples are fictional but realistic** — based on real tool capabilities, real submission requirements, real legal considerations
-2. **Examples evolve with the business** — as Safe Lane process matures, examples get updated
+2. **Examples evolve with the business** — as Rights Verified process matures, examples get updated
 3. **Examples are sales tools** — optimized for clarity and buyer confidence, not just internal reference
-4. **All examples show "clean" outcomes** — these demonstrate successful Safe Lane approval, not rejection scenarios
+4. **All examples show "clean" outcomes** — these demonstrate successful Rights Verified approval, not rejection scenarios
 
 ---
 
 ## Related Documentation
 
-- `/06_Operations/safe-lane/RIGHTS-PACKAGE-SCHEMA.md` — Full 9-field schema definition
-- `/06_Operations/safe-lane/SUBMISSION-REQUIREMENTS.md` — What filmmakers must provide
-- `/06_Operations/safe-lane/REVIEW-CRITERIA.md` — How SI8 evaluates submissions
+- `/06_Operations/rights-verified/RIGHTS-PACKAGE-SCHEMA.md` — Full 9-field schema definition
+- `/06_Operations/rights-verified/SUBMISSION-REQUIREMENTS.md` — What filmmakers must provide
+- `/06_Operations/rights-verified/REVIEW-CRITERIA.md` — How SI8 evaluates submissions
 - `/06_Operations/legal/rights-playbook/versions/v0.2.md` — Legal theory and landscape

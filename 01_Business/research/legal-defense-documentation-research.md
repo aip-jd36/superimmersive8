@@ -34,9 +34,9 @@
 - No reason to believe acts constituted infringement
 - **"Considerable effort must go into establishing lack of willful disregard, often requiring detailed documentation"**
 
-**SI8's Rights Package = Evidence of "Considerable Effort"**
+**SI8's Chain of Title = Evidence of "Considerable Effort"**
 - 9-field structured documentation
-- Safe Lane vetting records
+- Rights Verified vetting records
 - Commercial use authorization
 - Modification rights scope
 
@@ -61,7 +61,7 @@
 - "Usage policies and user agreements"
 - "Transparency and safe-use features"
 
-**SI8's Value:** Rights Package documents authorization chain, breaking brand vicarious liability
+**SI8's Value:** Chain of Title documents authorization chain, breaking brand vicarious liability
 
 **Case Reference:** Andersen v. Stability AI (N.D. Cal. 2024) - CMI preservation requirement
 
@@ -86,9 +86,9 @@
 - "Applications to register works containing AI-generated material should disclose that material"
 - "Meaningful human authorship is central"
 
-**SI8's Rights Package = Compliance Infrastructure**
+**SI8's Chain of Title = Compliance Infrastructure**
 - Built-in disclosure documentation
-- Safe Lane vetting = substantiation
+- Rights Verified vetting = substantiation
 - Version history = human authorship documentation
 
 **Sources:**
@@ -111,9 +111,9 @@
 - Release forms
 - Title and clearance reports
 
-**SI8's Rights Package = Chain of Title Equivalent**
+**SI8's Chain of Title = Chain of Title Equivalent**
 - Filmmaker Shopping Agreement = literary rights acquisition
-- Safe Lane sign-off = clearance report
+- Rights Verified sign-off = clearance report
 - Tool provenance = music cue sheet equivalent
 
 **Distribution Impact:** "We reduce time from creative idea to legal approval from 3 weeks to 3 days"
@@ -137,7 +137,7 @@
 
 "Maintaining a record of your fair use analysis can be critical for establishing good faith. Consider adding to a checklist the current date and notes about your project. A Fair Use Checklist can provide an important mechanism to document your decision-making process."
 
-**SI8's Rights Package = Fair Use Analysis Record**
+**SI8's Chain of Title = Fair Use Analysis Record**
 - Tool provenance = Factor 1 documentation
 - Commercial use authorization = Factor 4 documentation (no market harm if authorized)
 - Modification rights = Factor 3 documentation
@@ -194,21 +194,21 @@
 **SI8 = Getty for AI Video**
 - Documentation creates value
 - Don't need to own content to have moat
-- Safe Lane vetting = Getty's rights clearance
+- Rights Verified vetting = Getty's rights clearance
 
 ### Music Mechanical Licensing
 - Mechanical Licensing Collective receives notices, reports, distributes royalties
 - Multi-party chain documented at each step
 - Established precedent: documentation infrastructure is industry standard
 
-**SI8's Rights Package = Mechanical License Equivalent**
+**SI8's Chain of Title = Mechanical License Equivalent**
 
 ### Film Chain of Title
 - "Cannot obtain E&O insurance without clean chain of title"
 - "Definitely can't sell it without properly documented chain-of-title"
 - Legal consequences: lawsuits, injunctive relief, project cessation
 
-**SI8's Rights Package = Chain of Title for AI Content**
+**SI8's Chain of Title = Chain of Title for AI Content**
 
 ---
 
@@ -226,7 +226,7 @@
 
 **Regulatory Trend:** "By 2026, regulators assume you can technically label AI outputs—the question is whether you actually do it in a robust, auditable way"
 
-**SI8's Moat:** C2PA commoditizes provenance; Safe Lane vetting (subjective legal review) cannot be automated
+**SI8's Moat:** C2PA commoditizes provenance; Rights Verified vetting (subjective legal review) cannot be automated
 
 **Sources:**
 - [NSA/CISA - Strengthening Multimedia Integrity](https://media.defense.gov/2025/Jan/29/2003634788/-1/-1/0/CSI-CONTENT-CREDENTIALS.PDF)
@@ -241,25 +241,25 @@
 - Safe but boring - limits creative tools
 
 **SI8's Model:**
-- Safe Lane vetting enables indemnification for Sora/Kling/Runway
+- Rights Verified vetting enables indemnification for Sora/Kling/Runway
 - Best creative tools made safe
 
 **Legal Basis:**
 - Adobe can indemnify Firefly because they control training data
 - Adobe CANNOT indemnify Runway/Sora (don't control models)
-- **SI8's Safe Lane vetting creates documented legal review layer Adobe's model can't provide for third-party tools**
+- **SI8's Rights Verified vetting creates documented legal review layer Adobe's model can't provide for third-party tools**
 
-**Rebuttal:** "Adobe's indemnification only covers Firefly. If your creative team wants Runway, Sora, or Kling, Adobe won't protect you. We will—because our Safe Lane vetting documents the legal review those tools need."
+**Rebuttal:** "Adobe's indemnification only covers Firefly. If your creative team wants Runway, Sora, or Kling, Adobe won't protect you. We will—because our Rights Verified vetting documents the legal review those tools need."
 
 ---
 
 ## 10. THE 9-FIELD RIGHTS PACKAGE MAPPED TO LEGAL DEFENSES
 
-| Rights Package Field | Legal Defense Supported |
+| Chain of Title Field | Legal Defense Supported |
 |---------------------|------------------------|
 | **1. Tool Provenance** | Fair use Factor 1; FTC disclosure; C2PA compliance |
 | **2. Model Disclosure** | Copyright Office registration; regulatory transparency |
-| **3. Safe Lane Sign-Off** | Reasonable care standard; good faith; due diligence |
+| **3. Rights Verified Sign-Off** | Reasonable care standard; good faith; due diligence |
 | **4. Commercial Use Authorization** | Fair use Factor 4; licensing defense; vicarious liability break |
 | **5. Modification Rights** | Fair use Factor 3; work-for-hire documentation |
 | **6. Category Conflict** | Trademark clearance; brand risk mitigation |
@@ -278,8 +278,8 @@
 - "Enables indemnification protection"
 - "Satisfies regulatory compliance requirements"
 - "If something goes wrong, documented process reduces exposure by 75%+"
-- "Safe Lane vetted" (process description)
-- "Through our Safe Lane process" (procedural framing)
+- "Rights Verified vetted" (process description)
+- "Through our Rights Verified process" (procedural framing)
 
 ### ❌ DO NOT SAY:
 - "Documentation prevents lawsuits" (not proven)

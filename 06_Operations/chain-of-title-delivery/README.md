@@ -1,10 +1,10 @@
-# Rights Package Delivery — SOP Documentation
+# Chain of Title Delivery — SOP Documentation
 
 ## What This Project Is
 
 This project documents **how SI8 delivers rights documentation to buyers** when they license AI video content from our catalog. It defines the operational process for fulfilling orders, delivering legal documentation, and maintaining records for compliance and legal defense.
 
-This is not about creating the Chain of Title documentation itself (that's documented in `06_Operations/safe-lane/`). This is about **how we get it to the customer** and **how we store it for the long term**.
+This is not about creating the Chain of Title documentation itself (that's documented in `06_Operations/rights-verified/`). This is about **how we get it to the customer** and **how we store it for the long term**.
 
 ---
 
@@ -24,8 +24,8 @@ Based on the Getty Images model: buyers pay $450 for the legal guarantee, $50 fo
 
 | Internal Name | Buyer-Facing Name | Why |
 |---------------|-------------------|-----|
-| Rights Package | **Chain of Title & Compliance Log** | Film/TV buyers already know "Chain of Title" = legal provenance |
-| Safe Lane Sign-Off | **Chain of Title Verification** | Familiar legal audit terminology |
+| Chain of Title | **Chain of Title & Compliance Log** | Film/TV buyers already know "Chain of Title" = legal provenance |
+| Rights Verified Sign-Off | **Chain of Title Verification** | Familiar legal audit terminology |
 | Catalog ID | **Asset ID** (buyer-facing) | Stock agencies use "Asset ID" |
 | Transaction | **Order** (with Order ID) | Familiar e-commerce language |
 
@@ -42,10 +42,10 @@ Based on the Getty Images model: buyers pay $450 for the legal guarantee, $50 fo
 
 | Project | What | Relationship to This Project |
 |---------|------|------------------------------|
-| **Safe Lane Verification** (`06_Operations/safe-lane/`) | HOW SI8 vets content before it enters catalog | Creates the Chain of Title documentation that this project delivers |
+| **Rights Verified Verification** (`06_Operations/rights-verified/`) | HOW SI8 vets content before it enters catalog | Creates the Chain of Title documentation that this project delivers |
 | **Rights Playbook** (`06_Operations/legal/rights-playbook/`) | WHY SI8's process is legally sound | Legal foundation that Chain of Title documents |
 | **Filmmaker Agreement** (`06_Operations/legal/filmmaker-agreement/`) | How SI8 acquires rights from creators | Upstream relationship; affects modification rights in Chain of Title |
-| **This Project** | HOW SI8 delivers documentation to buyers + stores records | Downstream fulfillment after Safe Lane vetting |
+| **This Project** | HOW SI8 delivers documentation to buyers + stores records | Downstream fulfillment after Rights Verified vetting |
 
 ---
 
@@ -132,7 +132,7 @@ Buyer licenses content
 ## Folder Structure
 
 ```
-06_Operations/rights-package-delivery/
+06_Operations/chain-of-title-delivery/
 ├── README.md                         # This file — project overview
 ├── DELIVERY-PROCESS.md               # Step-by-step buyer purchase → delivery flow
 ├── EMAIL-TEMPLATES.md                # All automated email templates
@@ -180,7 +180,7 @@ Buyer licenses content
 2. ✅ **Terminology updated** (Chain of Title, Order ID, License Summary added)
 3. ⚠️ **Lawyer review** (Master Agreement, disclaimer language, refund policy)
 4. 📋 **Test with first deal** (MyVideo pilot — run manual process end-to-end)
-5. 📋 **Update website** (terminology consistency across homepage + Safe Lane pages)
+5. 📋 **Update website** (terminology consistency across homepage + Rights Verified pages)
 6. 📋 **Iterate to v0.3** (after first 3 deals, refine based on buyer feedback)
 
 ---

@@ -43,7 +43,7 @@ All three AI research sources confirm that **documentation does NOT prevent liab
 
 **✅✅✅ Triple-Verified:** "Considerable effort must go into establishing lack of willful disregard, often requiring **detailed documentation and compelling argumentation**" (Copyright Alliance)
 
-**SI8's Rights Package = The "detailed documentation" courts explicitly require.**
+**SI8's Chain of Title = The "detailed documentation" courts explicitly require.**
 
 ---
 
@@ -92,21 +92,21 @@ Per Copyright Alliance (cited by Claude):
 **ChatGPT's caveat:**
 > "Important limitation: 'Innocent infringer' is not available if the work had a proper copyright notice in many situations (and courts vary in practice). 17 U.S.C. § 504(c)(2) includes constraints."
 
-#### Relevance to SI8's Rights Package
+#### Relevance to SI8's Chain of Title
 
 **✅✅✅ Triple-Verified Value Proposition:**
 
 All three AIs independently confirmed SI8's 9-field structure maps to "detailed documentation" requirement:
 
-- **Claude:** "Rights Package 9-field structure = 'detailed documentation'; Safe Lane vetting = 'compelling argumentation'; Demonstrates 'considerable effort' courts require"
-- **ChatGPT:** "Rights Package = evidence of 'good-faith / due diligence.' Validates Rights Package fields: #1 (Tool provenance), #3 (Safe Lane sign-off), #4 (Commercial use authorization), #9 (Version history)"
-- **Gemini:** "SI8's Field #4 (Commercial Use Authorization) and Field #3 (Safe Lane Sign-off) provide the exact evidentiary paper trail a brand needs to trigger the statutory reduction"
+- **Claude:** "Chain of Title 9-field structure = 'detailed documentation'; Rights Verified vetting = 'compelling argumentation'; Demonstrates 'considerable effort' courts require"
+- **ChatGPT:** "Chain of Title = evidence of 'good-faith / due diligence.' Validates Chain of Title fields: #1 (Tool provenance), #3 (Rights Verified sign-off), #4 (Commercial use authorization), #9 (Version history)"
+- **Gemini:** "SI8's Field #4 (Commercial Use Authorization) and Field #3 (Rights Verified Sign-off) provide the exact evidentiary paper trail a brand needs to trigger the statutory reduction"
 
 #### Approved vs. Prohibited Messaging
 
 **✅ DO SAY (Supported by Statute):**
 - "If infringement claim arises, documented process reduces statutory damages by 73% minimum"
-- "SI8's Rights Package demonstrates the 'considerable effort' courts require for innocent infringer defense"
+- "SI8's Chain of Title demonstrates the 'considerable effort' courts require for innocent infringer defense"
 - "Documentation can materially improve your damages posture (helps argue against willfulness)" (ChatGPT framing)
 
 **❌ DO NOT SAY (Overpromise):**
@@ -143,11 +143,11 @@ All three AIs independently confirmed SI8's 9-field structure maps to "detailed 
 **Gemini's Impact Calculation:**
 > "Reduces minimum damages by 73% (from $750 to $200) and maximum exposure by up to 99% per work (preventing the $150,000 willful multiplier)."
 
-#### Rights Package Fields Supporting Willfulness Defense
+#### Chain of Title Fields Supporting Willfulness Defense
 
 **✅✅✅ All three AIs identified:**
 - Field #1: Tool Provenance
-- Field #3: Safe Lane Sign-Off
+- Field #3: Rights Verified Sign-Off
 - Field #4: Commercial Use Authorization
 - Field #9: Version History
 
@@ -200,19 +200,19 @@ All three AIs identified documentation breaks liability chain:
 **✅ DO SAY (Defensible):**
 - "Creates an audit trail that supports good-faith compliance and lowers the chance of aggravated damages / willfulness" (ChatGPT)
 - "Improves defensibility in clearance and vendor-management decisions" (ChatGPT)
-- "Rights Package documents authorization chain, breaking brand vicarious liability" (Claude)
-- "SI8's Safe Lane vetting severs the chain of vicarious liability by documenting commercial compliance before a single frame is licensed" (Gemini)
+- "Chain of Title documents authorization chain, breaking brand vicarious liability" (Claude)
+- "SI8's Rights Verified vetting severs the chain of vicarious liability by documenting commercial compliance before a single frame is licensed" (Gemini)
 
 **❌ DO NOT SAY:**
 - "Breaks vicarious liability" (as absolute statement)
 - "Prevents brand liability"
 - "Guarantees protection from secondary infringement"
 
-### 2.6 Rights Package Fields Supporting Vicarious Liability Defense
+### 2.6 Chain of Title Fields Supporting Vicarious Liability Defense
 
 **✅✅✅ Triple-Verified:**
 - Field #1: Tool Provenance (proves what was authorized)
-- Field #3: Safe Lane Sign-Off (proves compliance review occurred)
+- Field #3: Rights Verified Sign-Off (proves compliance review occurred)
 - Field #4: Commercial Use Authorization (proves permission chain)
 - Field #6: Category Conflict (proves "No List" enforcement)
 
@@ -240,7 +240,7 @@ All three AIs identified documentation breaks liability chain:
 **Gemini's Additional Finding:**
 > "FTC 'Operation AI Comply' Enforcement (September 2024 / 2025 Guidelines): The FTC is actively prosecuting companies using AI for 'deceptive' advertising practices, including undisclosed synthetic generation that misleads consumers."
 
-**SI8 Value:** Rights Package Field #2 (Model Disclosure) + Field #3 (Safe Lane Sign-Off) = built-in FTC compliance infrastructure
+**SI8 Value:** Chain of Title Field #2 (Model Disclosure) + Field #3 (Rights Verified Sign-Off) = built-in FTC compliance infrastructure
 
 ---
 
@@ -263,9 +263,9 @@ All three AIs identified documentation breaks liability chain:
 **Quantifiable Impact:**
 - **✅✅ Dual-Verified:** Avoids state Attorney General civil penalties of up to **$20,000 per violation**
 
-**SI8 Rights Package Fields Supporting Colorado Compliance:**
+**SI8 Chain of Title Fields Supporting Colorado Compliance:**
 - Field #2: Model Disclosure
-- Field #3: Safe Lane Sign-Off (evaluation documentation)
+- Field #3: Rights Verified Sign-Off (evaluation documentation)
 - Field #6: Category Conflict Log (risk mitigation)
 
 **Sources:**
@@ -285,9 +285,9 @@ All three AIs identified documentation breaks liability chain:
 **SI8 Value:**
 > "We maintain the disclosure and provenance records you'll need as transparency requirements expand (e.g., EU AI Act Article 50)." (ChatGPT suggested messaging)
 
-**Rights Package Fields:**
+**Chain of Title Fields:**
 - Field #2: Model Disclosure
-- Field #3: Safe Lane Sign-Off
+- Field #3: Rights Verified Sign-Off
 - Field #9: Version History
 
 ---
@@ -309,8 +309,8 @@ All three AIs identified documentation breaks liability chain:
 - ❌ No voice cloning of real people
 - ❌ No deepfakes or deceptive content
 
-**Rights Package Fields:**
-- Field #3: Safe Lane Sign-Off (includes No List enforcement)
+**Chain of Title Fields:**
+- Field #3: Rights Verified Sign-Off (includes No List enforcement)
 - Field #6: Category Conflict (flags real-person likeness)
 
 ---
@@ -368,12 +368,12 @@ All three AIs identified documentation breaks liability chain:
 #### SI8 Value Proposition
 
 **✅✅ Dual-Verified:**
-- "Your Rights Package supports platform compliance (the 'paperwork' to ship content safely)" (ChatGPT)
+- "Your Chain of Title supports platform compliance (the 'paperwork' to ship content safely)" (ChatGPT)
 - "Platform policies increasingly expect labeling/disclosure for synthetic media; we support platform-compliant delivery" (ChatGPT approved messaging)
 
-**Rights Package Fields:**
+**Chain of Title Fields:**
 - Field #2: Model Disclosure
-- Field #3: Safe Lane Sign-Off
+- Field #3: Rights Verified Sign-Off
 - Field #9: Version History
 - (Plus: "Platform labeling compliance" checklist — ChatGPT suggests formalizing)
 
@@ -409,7 +409,7 @@ All three AIs identified documentation breaks liability chain:
 **Gemini's Critical Addition:**
 > "Errors & Omissions (E&O) insurance policies—which are legally mandatory for streaming and commercial distribution—now actively scrutinize AI. **Insurers can deny coverage if a production hides AI use.** Distributors require a pristine Chain of Title."
 
-### 4.3 SI8's Rights Package = Chain of Title Equivalent
+### 4.3 SI8's Chain of Title = Chain of Title Equivalent
 
 **✅✅✅ Triple-Verified Value Proposition:**
 
@@ -417,14 +417,14 @@ All three AIs independently validated this analogy:
 
 **Claude's Mapping:**
 - Filmmaker Shopping Agreement = literary rights acquisition
-- Safe Lane sign-off = clearance report
+- Rights Verified sign-off = clearance report
 - Tool provenance = music cue sheet equivalent
 
 **ChatGPT's Caution:**
-> "Your 'Rights Package = chain-of-title-like artifact' is directionally right, but I would treat 'enables E&O insurance' as a **hypothesis to validate with a broker**, not a marketing claim yet."
+> "Your 'Chain of Title = chain-of-title-like artifact' is directionally right, but I would treat 'enables E&O insurance' as a **hypothesis to validate with a broker**, not a marketing claim yet."
 
 **Gemini's Strong Validation:**
-> "SI8 is standardizing the Chain of Title for AI. A brand cannot distribute a commercial on premium TV/Streaming without E&O clearance. **The SI8 Rights Package is the clearance report.**"
+> "SI8 is standardizing the Chain of Title for AI. A brand cannot distribute a commercial on premium TV/Streaming without E&O clearance. **The SI8 Chain of Title is the clearance report.**"
 
 ### 4.4 Distribution Impact (Felt Value)
 
@@ -485,9 +485,9 @@ This is the **felt experience** value proposition (distinct from statutory damag
 **Claude's Direct Quote (Stanford):**
 > "Maintaining a record of your fair use analysis can be critical for establishing good faith. Consider adding to a checklist the current date and notes about your project. A Fair Use Checklist can provide an important mechanism to **document your decision-making process.**"
 
-**This validates SI8's entire approach:** Fair use practitioners are told to document decision-making. SI8's Rights Package IS that documented decision-making process.
+**This validates SI8's entire approach:** Fair use practitioners are told to document decision-making. SI8's Chain of Title IS that documented decision-making process.
 
-### 5.3 Rights Package Mapping to Fair Use Factors
+### 5.3 Chain of Title Mapping to Fair Use Factors
 
 **✅✅ Dual-Verified Structure:**
 
@@ -497,7 +497,7 @@ This is the **felt experience** value proposition (distinct from statutory damag
 - Modification rights = Factor 3 documentation (amount/substantiality)
 
 **SI8's Value:**
-> "Rights Package = Fair Use Analysis Record" (Claude)
+> "Chain of Title = Fair Use Analysis Record" (Claude)
 
 ### Sources
 
@@ -537,9 +537,9 @@ This is the **felt experience** value proposition (distinct from statutory damag
 ### 6.3 SI8's CMI Preservation Approach
 
 **ChatGPT's Value Proposition:**
-> "Your 'Rights Package' idea can credibly expand into: 'we preserve provenance/CMI-like records and don't strip attribution/metadata.'"
+> "Your 'Chain of Title' idea can credibly expand into: 'we preserve provenance/CMI-like records and don't strip attribution/metadata.'"
 
-**Rights Package Fields:**
+**Chain of Title Fields:**
 - Field #1: Tool Provenance (CMI-like metadata)
 - Field #2: Model Disclosure
 - Field #9: Version History (audit trail)
@@ -640,7 +640,7 @@ This is the **felt experience** value proposition (distinct from statutory damag
 
 **Cases Do NOT Prove (Research Gap):**
 - Whether documentation reduces brand liability for AI **outputs** (no direct precedent yet)
-- Whether Rights Package approach succeeds in deployment cases
+- Whether Chain of Title approach succeeds in deployment cases
 
 **ChatGPT's Critical Assessment:**
 > "I did not find a clean, court-citable statement (2024–2026) that says 'provenance logs reduce liability for brands using AI video outputs.' The support is **analogical** (copyright damages posture, disclosure laws, platform compliance), not a definitive AI-output safe harbor."
@@ -666,7 +666,7 @@ This is the **felt experience** value proposition (distinct from statutory damag
 **SI8 = Getty for AI Video:**
 - Documentation creates value
 - Don't need to own content to have moat
-- Safe Lane vetting = Getty's rights clearance
+- Rights Verified vetting = Getty's rights clearance
 
 **ChatGPT's Validation:**
 > "Getty positions its genAI offering as trained on licensed content and marketed for commercial use; indemnification is a key enterprise value prop in this category. Supports your structural claim: buyers pay for defensibility + paperwork + risk posture, not the pixels."
@@ -682,7 +682,7 @@ This is the **felt experience** value proposition (distinct from statutory damag
 - Multi-party chain documented at each step
 - Established precedent: documentation infrastructure is industry standard
 
-**SI8's Rights Package = Mechanical License Equivalent**
+**SI8's Chain of Title = Mechanical License Equivalent**
 
 **Source:** [Mechanical Licensing 101 - TuneCore](https://www.tunecore.com/guides/mechanical-licensing-101)
 
@@ -695,7 +695,7 @@ This is the **felt experience** value proposition (distinct from statutory damag
 **Claude's Direct Quote:**
 > "Cannot obtain E&O insurance without clean chain of title. Definitely can't sell it without properly documented chain-of-title. Legal consequences: lawsuits, injunctive relief, project cessation."
 
-**SI8's Rights Package = Chain of Title for AI Content**
+**SI8's Chain of Title = Chain of Title for AI Content**
 
 **Source:** [Chain of Title in Film - Pitt Entertainment Law](https://www.pittentertainmentlaw.com/chain-of-title-in-film-and-television)
 
@@ -724,10 +724,10 @@ This is the **felt experience** value proposition (distinct from statutory damag
 **Legal Basis:**
 - Adobe can indemnify Firefly because they control training data
 - Adobe CANNOT indemnify Runway/Sora (don't control models)
-- **SI8's Safe Lane vetting creates documented legal review layer Adobe's model can't provide for third-party tools**
+- **SI8's Rights Verified vetting creates documented legal review layer Adobe's model can't provide for third-party tools**
 
 **Approved Messaging (Claude):**
-> "Adobe's indemnification only covers Firefly. If your creative team wants Runway, Sora, or Kling, Adobe won't protect you. We will—because our Safe Lane vetting documents the legal review those tools need."
+> "Adobe's indemnification only covers Firefly. If your creative team wants Runway, Sora, or Kling, Adobe won't protect you. We will—because our Rights Verified vetting documents the legal review those tools need."
 
 **Gemini's Framing:**
 > "Adobe = limited models, strict boundaries. SI8 = 'We make the dangerous tools (Sora/Runway) safe to use.'"
@@ -770,7 +770,7 @@ This is the **felt experience** value proposition (distinct from statutory damag
 > "By 2026, regulators assume you can technically label AI outputs—the question is whether you actually do it in a robust, auditable way"
 
 **SI8's Moat:**
-> "C2PA commoditizes provenance; Safe Lane vetting (subjective legal review) cannot be automated"
+> "C2PA commoditizes provenance; Rights Verified vetting (subjective legal review) cannot be automated"
 
 **ChatGPT's Rebuttal Framing:**
 > "C2PA/Content Credentials: monitor — rebuttal is 'proves provenance, not safety'"
@@ -793,15 +793,15 @@ This is the **felt experience** value proposition (distinct from statutory damag
 
 ---
 
-## Section 10: The 9-Field Rights Package Mapped to Legal Defenses
+## Section 10: The 9-Field Chain of Title Mapped to Legal Defenses
 
 **Verification Tier:** ✅✅✅ Triple-Verified Structure (all three AIs validated mapping)
 
-| Rights Package Field | Legal Defense Supported | Verification | Sources |
+| Chain of Title Field | Legal Defense Supported | Verification | Sources |
 |---------------------|------------------------|--------------|---------|
 | **1. Tool Provenance** | Fair use Factor 1; FTC disclosure; C2PA compliance; CMI preservation | ✅✅✅ | Claude, ChatGPT, Gemini |
 | **2. Model Disclosure** | Copyright Office registration; regulatory transparency (EU AI Act Article 50); FTC substantiation | ✅✅✅ | Claude, ChatGPT, Gemini |
-| **3. Safe Lane Sign-Off** | Reasonable care standard (Colorado AI Act rebuttable presumption); good faith; due diligence; innocent infringer "considerable effort" | ✅✅✅ | Claude, ChatGPT, Gemini |
+| **3. Rights Verified Sign-Off** | Reasonable care standard (Colorado AI Act rebuttable presumption); good faith; due diligence; innocent infringer "considerable effort" | ✅✅✅ | Claude, ChatGPT, Gemini |
 | **4. Commercial Use Authorization** | Fair use Factor 4; licensing defense; vicarious liability break | ✅✅✅ | Claude, ChatGPT, Gemini |
 | **5. Modification Rights** | Fair use Factor 3; work-for-hire documentation | ✅✅ | Claude, ChatGPT |
 | **6. Category Conflict** | Trademark clearance; brand risk mitigation; "No List" enforcement (vicarious liability) | ✅✅ | Claude, Gemini |
@@ -813,7 +813,7 @@ This is the **felt experience** value proposition (distinct from statutory damag
 
 **✅✅✅ Triple-Verified:**
 - Fields #1, #2, #3, #4, #9 = most legally critical (all three AIs emphasized)
-- Field #3 (Safe Lane Sign-Off) = linchpin field (supports multiple defenses)
+- Field #3 (Rights Verified Sign-Off) = linchpin field (supports multiple defenses)
 - Field #9 (Version History) = copyrightability requirement (USCO mandate)
 
 **ChatGPT's Additional Suggestion:**
@@ -836,10 +836,10 @@ This is the **felt experience** value proposition (distinct from statutory damag
 
 **Process & Good Faith:**
 - "Demonstrates reasonable care"
-- "SI8's Rights Package demonstrates the 'considerable effort' courts require for innocent infringer defense"
+- "SI8's Chain of Title demonstrates the 'considerable effort' courts require for innocent infringer defense"
 - "Creates an audit trail that supports good-faith compliance and lowers the chance of aggravated damages / willfulness" (ChatGPT)
-- "Safe Lane vetted" (process description)
-- "Through our Safe Lane process" (procedural framing)
+- "Rights Verified vetted" (process description)
+- "Through our Rights Verified process" (procedural framing)
 
 **Regulatory Compliance:**
 - "Satisfies regulatory compliance requirements"
@@ -853,20 +853,20 @@ This is the **felt experience** value proposition (distinct from statutory damag
 - "Premium distribution requires E&O insurance, and E&O requires a clean Chain of Title. SI8 provides the industry's first structured AI clearance report" (Gemini)
 
 **Documentation Value:**
-- "Our Rights Package creates a documented audit trail of tool provenance, authorization, and review decisions" (ChatGPT)
-- "We don't sell 'rights-cleared.' We sell a documented process ('Safe Lane vetted') and the paperwork your legal team can review" (ChatGPT)
+- "Our Chain of Title creates a documented audit trail of tool provenance, authorization, and review decisions" (ChatGPT)
+- "We don't sell 'rights-cleared.' We sell a documented process ('Rights Verified vetted') and the paperwork your legal team can review" (ChatGPT)
 - "Improves defensibility in clearance and vendor-management decisions" (ChatGPT)
 
 **Copyrightability:**
 - "The U.S. Copyright Office has ruled that AI prompts alone do not grant copyright ownership. SI8's mandatory Human Authorship Declarations secure the editorial paper trail required for your brand to actually own its campaigns" (Gemini)
 
 **Vicarious Liability:**
-- "Rights Package documents authorization chain, breaking brand vicarious liability" (Claude)
-- "SI8's Safe Lane vetting severs the chain of vicarious liability by documenting commercial compliance before a single frame is licensed" (Gemini)
+- "Chain of Title documents authorization chain, breaking brand vicarious liability" (Claude)
+- "SI8's Rights Verified vetting severs the chain of vicarious liability by documenting commercial compliance before a single frame is licensed" (Gemini)
 - "Creates an audit trail that supports good-faith compliance" (ChatGPT)
 
 **Competitive Differentiation:**
-- "Adobe's indemnification only covers Firefly. If your creative team wants Runway, Sora, or Kling, Adobe won't protect you. We will—because our Safe Lane vetting documents the legal review those tools need" (Claude)
+- "Adobe's indemnification only covers Firefly. If your creative team wants Runway, Sora, or Kling, Adobe won't protect you. We will—because our Rights Verified vetting documents the legal review those tools need" (Claude)
 - "C2PA proves the video came from Runway. SI8 proves the video won't get you sued by Disney. C2PA is the receipt; SI8 is the legal audit" (Gemini)
 
 ---
@@ -1169,7 +1169,7 @@ This is the **felt experience** value proposition (distinct from statutory damag
 **2. E&O Insurance Underwriting Standards**
 
 **ChatGPT's Gap:**
-> "E&O insurance eligibility: I didn't pull a primary insurer underwriting checklist in this research pass (and E&O varies by carrier). Your 'Rights Package = chain-of-title-like artifact' is directionally right, but I would treat 'enables E&O insurance' as a hypothesis to validate with a broker, not a marketing claim yet."
+> "E&O insurance eligibility: I didn't pull a primary insurer underwriting checklist in this research pass (and E&O varies by carrier). Your 'Chain of Title = chain-of-title-like artifact' is directionally right, but I would treat 'enables E&O insurance' as a hypothesis to validate with a broker, not a marketing claim yet."
 
 **Action Required:** Validate with E&O broker before absolute claims. Safe framing: "Creates the documentation E&O insurers typically require."
 
@@ -1228,7 +1228,7 @@ This is the **felt experience** value proposition (distinct from statutory damag
 **Priority 1: Contract Language**
 1. Filmmaker Shopping Agreement modification clause (Tier 2 prerequisite)
 2. Brand indemnification language (what SI8 can/cannot promise)
-3. Safe Lane vetting liability disclaimers
+3. Rights Verified vetting liability disclaimers
 
 **Priority 2: Marketing Claims**
 1. E&O insurance "enablement" vs. "guarantee" language
@@ -1236,7 +1236,7 @@ This is the **felt experience** value proposition (distinct from statutory damag
 3. Statutory damage reduction percentage claims (73%) — validate citation format
 
 **Priority 3: Operational Process**
-1. CMI preservation requirements in Safe Lane checklist
+1. CMI preservation requirements in Rights Verified checklist
 2. Human Authorship Declaration sufficiency for USCO standard
 3. FTC disclosure implementation in delivery workflow
 
@@ -1278,10 +1278,10 @@ This is the **felt experience** value proposition (distinct from statutory damag
 **Evidence:**
 - All three AIs confirmed statutory damages framework
 - All three AIs confirmed "detailed documentation" requirement (Copyright Alliance)
-- All three AIs independently validated Rights Package fields support innocent infringer defense
+- All three AIs independently validated Chain of Title fields support innocent infringer defense
 
 **Marketing Language (Approved):**
-> "SI8's Rights Package demonstrates the 'considerable effort' courts require for innocent infringer defense, reducing minimum statutory damages by 73%."
+> "SI8's Chain of Title demonstrates the 'considerable effort' courts require for innocent infringer defense, reducing minimum statutory damages by 73%."
 
 ---
 
@@ -1295,7 +1295,7 @@ This is the **felt experience** value proposition (distinct from statutory damag
 - U.S. Copyright Office AI Guidance
 
 **Claim:**
-> "SI8's Rights Package satisfies expanding regulatory disclosure requirements (FTC, state AI laws, platform policies) and creates legal safe harbor under Colorado's 'rebuttable presumption' standard."
+> "SI8's Chain of Title satisfies expanding regulatory disclosure requirements (FTC, state AI laws, platform policies) and creates legal safe harbor under Colorado's 'rebuttable presumption' standard."
 
 **Evidence:**
 - All three AIs confirmed FTC disclosure requirements
@@ -1339,7 +1339,7 @@ This is the **felt experience** value proposition (distinct from statutory damag
 - Film Chain of Title requirements
 
 **Claim:**
-> "SI8's Rights Package creates chain of title equivalent, enabling E&O insurance and premium distribution."
+> "SI8's Chain of Title creates chain of title equivalent, enabling E&O insurance and premium distribution."
 
 **Evidence:**
 - Claude + Gemini confirmed E&O requires clean chain of title
@@ -1398,7 +1398,7 @@ This is the **felt experience** value proposition (distinct from statutory damag
 - Statutory foundation (17 U.S.C. § 504)
 - Quantifiable ($750 → $200)
 - Explicitly requires "detailed documentation" (Copyright Alliance)
-- SI8's Rights Package = documented evidence courts require
+- SI8's Chain of Title = documented evidence courts require
 
 ---
 
@@ -1417,7 +1417,7 @@ This is the **felt experience** value proposition (distinct from statutory damag
 **Why This Is Secondary:**
 - Not optional (legally required)
 - Penalties quantified
-- SI8's Rights Package = compliance infrastructure
+- SI8's Chain of Title = compliance infrastructure
 - Safe harbor language exists (Colorado rebuttable presumption)
 
 ---
@@ -1454,10 +1454,10 @@ This is the **felt experience** value proposition (distinct from statutory damag
 - Cannot indemnify Runway, Sora, Kling, Midjourney (don't control models)
 
 **SI8's Legal Basis:**
-> "SI8's Safe Lane vetting creates documented legal review layer Adobe's model can't provide for third-party tools"
+> "SI8's Rights Verified vetting creates documented legal review layer Adobe's model can't provide for third-party tools"
 
 **Approved Messaging (Claude):**
-> "Adobe's indemnification only covers Firefly. If your creative team wants Runway, Sora, or Kling, Adobe won't protect you. We will—because our Safe Lane vetting documents the legal review those tools need."
+> "Adobe's indemnification only covers Firefly. If your creative team wants Runway, Sora, or Kling, Adobe won't protect you. We will—because our Rights Verified vetting documents the legal review those tools need."
 
 **"Bad Boy Indemnifier" Positioning:**
 > "Adobe = safe but boring (Firefly only). SI8 = best creative AI tools (Sora/Kling/Runway) made safe. We fill the gap Adobe structurally can't."
@@ -1469,7 +1469,7 @@ This is the **felt experience** value proposition (distinct from statutory damag
 **Evidence:**
 - All three AIs discussed C2PA/Content Credentials
 - Gemini found C2PA disclaimer: "do not provide value judgments about whether a given set of provenance data is 'true'... or good or bad"
-- Claude: "C2PA commoditizes provenance; Safe Lane vetting (subjective legal review) cannot be automated"
+- Claude: "C2PA commoditizes provenance; Rights Verified vetting (subjective legal review) cannot be automated"
 
 **C2PA's Limitation:**
 - Proves **provenance** (WHERE content came from)
@@ -1488,7 +1488,7 @@ This is the **felt experience** value proposition (distinct from statutory damag
 
 **Why This Gap Exists:**
 - C2PA is technical/cryptographic (can be automated)
-- Safe Lane vetting is subjective legal review (cannot be automated)
+- Rights Verified vetting is subjective legal review (cannot be automated)
 - **This is SI8's moat:** Judgment layer that software cannot replicate
 
 ---
@@ -1505,23 +1505,23 @@ This is the **felt experience** value proposition (distinct from statutory damag
 **SI8 = Getty for AI Video:**
 - Don't need to own content to have moat
 - Documentation creates value
-- Safe Lane vetting = Getty's rights clearance
+- Rights Verified vetting = Getty's rights clearance
 
 **Film Chain of Title (Claude + Gemini):**
 - "Cannot obtain E&O insurance without clean chain of title"
 - "Definitely can't sell it without properly documented chain-of-title"
-- SI8's Rights Package = Chain of Title for AI content
+- SI8's Chain of Title = Chain of Title for AI content
 
 **Music Mechanical Licensing (Claude):**
 - Multi-party chain documented at each step
 - Established precedent: documentation infrastructure is industry standard
-- SI8's Rights Package = Mechanical License Equivalent
+- SI8's Chain of Title = Mechanical License Equivalent
 
 **Why These Analogies Work:**
 - All are established, accepted industry models
 - All prove documentation creates business value
 - All show buyers pay for legal defensibility, not just creative output
-- All validate SI8's "file is carrier, Rights Package is product" positioning
+- All validate SI8's "file is carrier, Chain of Title is product" positioning
 
 ---
 
@@ -1560,12 +1560,12 @@ Documentation **does NOT prevent liability**, but provides **meaningful, quantif
 > "We reduce time from creative idea to legal approval from 3 weeks to 3 days"
 
 **Legal Moat (Triple-Verified):**
-> "C2PA commoditizes provenance documentation. SI8's moat is subjective legal review (Safe Lane vetting) — the judgment layer software cannot automate."
+> "C2PA commoditizes provenance documentation. SI8's moat is subjective legal review (Rights Verified vetting) — the judgment layer software cannot automate."
 
 ### Next Steps
 
 1. **Lawyer Review:** Send Section 16 to counsel for validation
-2. **E&O Broker Validation:** Test "Rights Package enables E&O insurance" hypothesis
+2. **E&O Broker Validation:** Test "Chain of Title enables E&O insurance" hypothesis
 3. **Rights Playbook v0.2:** Integrate findings into legal framework
 4. **Marketing Collateral:** Create "Legal Risk Reduction Brief" 1-pager using approved messaging
 5. **Filmmaker Agreement:** Ensure modification clause + CMI preservation clause iron-clad

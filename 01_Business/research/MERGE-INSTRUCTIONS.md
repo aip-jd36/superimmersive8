@@ -125,11 +125,11 @@
 - Legal Scholar Opinions
 - Bar Association Guidance
 
-### Section 10: The 9-Field Rights Package
+### Section 10: The 9-Field Chain of Title
 **Map each field to legal defenses:**
 - Tool Provenance → Fair use Factor 1, FTC disclosure
 - Model Disclosure → Copyright Office registration
-- Safe Lane Sign-Off → Reasonable care, good faith
+- Rights Verified Sign-Off → Reasonable care, good faith
 - Commercial Use Authorization → Fair use Factor 4, vicarious liability
 - Modification Rights → Fair use Factor 3, work-for-hire
 - Category Conflict → Trademark clearance
@@ -279,7 +279,7 @@
 ### Phase 7: Synthesis
 1. Write executive summary
 2. Create approved messaging list
-3. Map Rights Package to legal defenses
+3. Map Chain of Title to legal defenses
 4. Draft legal value proposition
 
 ### Phase 8: Quality Control
@@ -320,10 +320,10 @@ Here's how a finding should look after merging all three sources:
 **Critical Limitation:** "Innocent infringement defense CANNOT be used if copyrighted work contains proper copyright notice" (Copyright Alliance)
 
 **Relevance to SI8:**
-- Rights Package 9-field structure = "detailed documentation"
-- Safe Lane vetting = "compelling argumentation"
+- Chain of Title 9-field structure = "detailed documentation"
+- Rights Verified vetting = "compelling argumentation"
 - Demonstrates "considerable effort" courts require
-- Validates Field #3 (Safe Lane Sign-Off) as legal defense mechanism
+- Validates Field #3 (Rights Verified Sign-Off) as legal defense mechanism
 
 **Direct Quotes:**
 
@@ -346,7 +346,7 @@ Here's how a finding should look after merging all three sources:
 
 **Approved Messaging:**
 - "If infringement claim arises, documented process reduces statutory damages by 73% minimum"
-- "SI8's Rights Package demonstrates the 'considerable effort' courts require for innocent infringer defense"
+- "SI8's Chain of Title demonstrates the 'considerable effort' courts require for innocent infringer defense"
 
 **Do NOT Say:**
 - "Prevents infringement lawsuits" (statute reduces damages, doesn't prevent claims)

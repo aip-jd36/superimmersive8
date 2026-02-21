@@ -111,7 +111,7 @@ by the SI8 Master License Agreement available at:
 The Chain of Title & Compliance Log serves as Exhibit A to the Master
 License Agreement, documenting the specific asset licensed under this order.
 
-The Chain of Title documents SI8's Safe Lane review process and filmmaker-
+The Chain of Title documents SI8's Rights Verified review process and filmmaker-
 provided disclosures. It is not legal advice and does not constitute a
 warranty or indemnification.
 
@@ -131,7 +131,7 @@ Platform takedown dispute?
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 SUPERIMMERSIVE 8
-Safe Lane AI Content for Commercial Deployment
+Rights Verified AI Content for Commercial Deployment
 
 superimmersive8.com
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -150,7 +150,7 @@ Replace all `[bracketed fields]` with actual values:
 | Variable | Source | Example |
 |----------|--------|---------|
 | `[####]` in Order ID | Sequential order counter | 0001, 0002, etc. |
-| `[####]` in Asset ID | From Safe Lane catalog | SI8-2026-0001 |
+| `[####]` in Asset ID | From Rights Verified catalog | SI8-2026-0001 |
 | `[Title]` | Asset title | "Neon Dreams" |
 | `[Company Name]` | Buyer entity | "Acme Corporation" |
 | `[End Client Name]` | If agency buying for client | "Coca-Cola APAC" |
