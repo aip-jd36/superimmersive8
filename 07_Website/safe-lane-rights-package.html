@@ -272,6 +272,63 @@
         </div>
     </section>
 
+    <!-- Sample Rights Package Download -->
+    <section class="form-section" style="background: linear-gradient(135deg, #FFFBF5 0%, #FFF8E7 100%); padding: 80px 0;">
+        <div class="container">
+            <div class="form-container" style="max-width: 700px; margin: 0 auto; background: #FFFFFF; border: 1px solid rgba(200, 144, 10, 0.2); border-radius: 12px; padding: 48px;">
+                <h2 style="text-align: center; margin-bottom: 16px; color: #1a1918;">See a Sample Rights Package</h2>
+                <p class="form-intro" style="text-align: center; color: #52504A; margin-bottom: 32px;">Download a complete example showing all 9 fields, documentation standards, and buyer guidance.</p>
+
+                <div style="background: linear-gradient(135deg, rgba(200, 144, 10, 0.1), rgba(245, 230, 200, 0.3)); border-left: 3px solid var(--color-accent); padding: 20px; border-radius: 8px; margin-bottom: 32px;">
+                    <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #1a1918;"><strong>Example: "Neon Dreams"</strong> — A fictional cyberpunk commercial demonstrating complete Rights Package documentation for AI-generated content (Runway Gen-3 + ElevenLabs).</p>
+                    <ul style="margin: 12px 0 0 20px; font-size: 14px; color: #52504A;">
+                        <li>All 9 Rights Package fields fully documented</li>
+                        <li>Tool provenance, Safe Lane review, risk mitigation summary</li>
+                        <li>Tier 1 (as-is licensing) + Tier 2 (product placement) eligibility</li>
+                        <li>12 pages showing exactly what buyers receive</li>
+                    </ul>
+                </div>
+
+                <form action="/api/formspree-to-kit" method="POST" class="lead-form sample-package-form" style="display: grid; gap: 24px;">
+                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div class="form-group" style="display: flex; flex-direction: column;">
+                            <label for="sample-name" style="color: #1a1918; margin-bottom: 8px; font-size: 14px; font-weight: 500;">Name *</label>
+                            <input type="text" id="sample-name" name="name" required style="padding: 12px 16px; border: 1px solid rgba(200, 144, 10, 0.3); border-radius: 6px; font-size: 14px; font-family: var(--font-body);">
+                        </div>
+                        <div class="form-group" style="display: flex; flex-direction: column;">
+                            <label for="sample-email" style="color: #1a1918; margin-bottom: 8px; font-size: 14px; font-weight: 500;">Email *</label>
+                            <input type="email" id="sample-email" name="email" required style="padding: 12px 16px; border: 1px solid rgba(200, 144, 10, 0.3); border-radius: 6px; font-size: 14px; font-family: var(--font-body);">
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div class="form-group" style="display: flex; flex-direction: column;">
+                            <label for="sample-company" style="color: #1a1918; margin-bottom: 8px; font-size: 14px; font-weight: 500;">Company (optional)</label>
+                            <input type="text" id="sample-company" name="company" style="padding: 12px 16px; border: 1px solid rgba(200, 144, 10, 0.3); border-radius: 6px; font-size: 14px; font-family: var(--font-body);">
+                        </div>
+                        <div class="form-group" style="display: flex; flex-direction: column;">
+                            <label for="sample-role" style="color: #1a1918; margin-bottom: 8px; font-size: 14px; font-weight: 500;">Role *</label>
+                            <select id="sample-role" name="role" required style="padding: 12px 16px; border: 1px solid rgba(200, 144, 10, 0.3); border-radius: 6px; font-size: 14px; font-family: var(--font-body); background: white;">
+                                <option value="">Select your role</option>
+                                <option value="brand-marketer">Brand Marketer / CMO</option>
+                                <option value="agency">Agency / Production Company</option>
+                                <option value="legal">Legal / Risk / Compliance</option>
+                                <option value="platform">Platform / Streaming Service</option>
+                                <option value="filmmaker">Filmmaker / Creator</option>
+                                <option value="investor">Investor / Advisor</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-button" style="background: linear-gradient(135deg, var(--color-accent), #A67C08); color: white; padding: 16px 32px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; font-family: var(--font-body); transition: all 0.3s ease;">
+                        Download Sample Rights Package
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA Section -->
     <section class="cta-section">
         <div class="container">
@@ -553,5 +610,67 @@
     </style>
 
     <script src="script.js"></script>
+    <script>
+        // Handle Sample Rights Package form submission
+        document.querySelector('.sample-package-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const submitButton = form.querySelector('.submit-button');
+            const originalText = submitButton.textContent;
+
+            // Disable button and show loading state
+            submitButton.disabled = true;
+            submitButton.textContent = 'Sending...';
+
+            try {
+                const formData = new FormData(form);
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: formData.get('email'),
+                        name: formData.get('name'),
+                        company: formData.get('company'),
+                        role: formData.get('role')
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Success - show confirmation and redirect to PDF
+                    submitButton.textContent = '✓ Opening PDF...';
+                    submitButton.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+
+                    // Wait a moment then redirect to Google Drive PDF
+                    setTimeout(() => {
+                        window.open('https://drive.google.com/file/d/1qMeyiER9HV3A1mC-KjNDF_pbdXkNr1DN/view?usp=sharing', '_blank');
+
+                        // Reset form after redirect
+                        form.reset();
+                        submitButton.disabled = false;
+                        submitButton.textContent = originalText;
+                        submitButton.style.background = '';
+                    }, 1000);
+                } else {
+                    throw new Error(result.error || 'Submission failed');
+                }
+            } catch (error) {
+                console.error('Form submission error:', error);
+                submitButton.textContent = '✗ Error - Please try again';
+                submitButton.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+                submitButton.disabled = false;
+
+                // Reset button after 3 seconds
+                setTimeout(() => {
+                    submitButton.textContent = originalText;
+                    submitButton.style.background = '';
+                }, 3000);
+            }
+        });
+    </script>
 </body>
 </html>
