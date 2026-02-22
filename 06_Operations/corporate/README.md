@@ -13,7 +13,8 @@
 | **STRUCTURE-OVERVIEW.md** | Comprehensive strategic framework for SI8's legal structure | Reference for understanding DBA decision, Taiwan LLC strategy, buyer perception, Year 2 transition options |
 | **DBA-FILING-GUIDE.md** | Step-by-step instructions for filing Texas DBA | When ready to file "SuperImmersive 8" as Assumed Name |
 | **DECISIONS.md** | Decision log tracking all corporate structure choices | When making new entity/branding decisions; review history |
-| **DISCUSSION-QUESTIONS.md** | Alignment questions for operational decisions | Review and answer before filing DBA and executing Year 1 strategy |
+| **DISCUSSION-QUESTIONS.md** | Alignment questions for operational decisions | ✅ Completed — decisions finalized Feb 23, 2026 |
+| **ACTION-PLAN.md** | Week-by-week execution plan for entity setup | ⭐ Current — follow this for DBA filing + template updates |
 
 ### Supporting Folders
 

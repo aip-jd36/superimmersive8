@@ -165,6 +165,38 @@ Taiwan Buyer
 
 ---
 
+### Decision 005 — Operational Execution: DBA Filing + US Entity Default
+**Date:** February 23, 2026
+**Decisions Made:**
+
+**Q1: MyVideo Entity Preference**
+- **Decision:** Option B — Assume US entity is acceptable, proceed with DBA filing
+- **Rationale:** Don't delay entity setup on uncertainty. If MyVideo later requires Taiwan entity, intercompany reseller agreement can be added without invalidating US entity structure.
+- **Fallback:** Taiwan LLC framework documented and ready to activate if needed
+
+**Q2: DBA Filing Timeline**
+- **Decision:** Option A — File Texas DBA this week
+- **Action:** File Form 503 for "SuperImmersive 8" as Assumed Name under PMF Strategy Inc.
+- **Timeline:** File by end of Week 1 (Feb 24-28, 2026)
+- **Processing:** 1-3 business days from Texas SOS
+
+**Q3: Tax/Accounting Validation**
+- **Decision:** Current CPA validates both US and Taiwan entities
+- **Status:** CPA already works on both PMF Strategy Inc. and Taiwan LLC annual tax filings
+- **Action:** No additional CPA consultation needed before proceeding
+- **Note:** CPA familiar with cross-border US + Taiwan tax structure
+
+**Implications:**
+- ✅ Clear to proceed with US entity (PMF Strategy d/b/a SI8) as default for ALL contracts
+- ✅ Taiwan LLC remains separate (B2B consulting) unless specific buyer requires it
+- ✅ Week 1: File DBA
+- ✅ Week 2-3: Update contract templates, website footer, invoices
+- ✅ Ready to execute filmmaker agreements and licensing deals
+
+**Status:** Approved, execution phase
+
+---
+
 ## Future Decision Points
 
 ### FDP-001 — Entity Separation Trigger (August 2026)
