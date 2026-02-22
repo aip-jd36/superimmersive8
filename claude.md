@@ -321,6 +321,9 @@
 | **Example 001: Neon Dreams** | `05_Catalog/_examples/example-001-neon-dreams/` | First complete Chain of Title example (cyberpunk commercial, Tier 1+2) |
 | **Chain of Title Changelog** | `05_Catalog/_examples/versions/CHANGELOG.md` | Template version history and evolution tracking |
 | **Rights Verified — Decisions** | `06_Operations/rights-verified/DECISIONS.md` | Rights Verified version log + open questions |
+| **Corporate Structure Overview** | `06_Operations/corporate/STRUCTURE-OVERVIEW.md` | Legal entity framework (DBA decision, Year 2 transition, buyer perception) |
+| **DBA Filing Guide** | `06_Operations/corporate/DBA-FILING-GUIDE.md` | Step-by-step Texas DBA filing instructions |
+| **Corporate Decisions** | `06_Operations/corporate/DECISIONS.md` | Corporate structure decision log |
 
 ---
 
@@ -375,6 +378,7 @@ SuperImmersive8/
 │   └── licensing/               # Active deals
 │
 ├── 06_Operations/               # Admin & Legal
+│   ├── corporate/               # Corporate structure, DBA filing, entity decisions
 │   ├── legal/                   # Contracts, AI Video Rights Playbook
 │   ├── admin/                   # Registrations, accounts
 │   └── team/                    # Contractors
