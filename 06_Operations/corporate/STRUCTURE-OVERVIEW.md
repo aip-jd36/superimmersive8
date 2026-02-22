@@ -8,12 +8,15 @@
 
 ## Current Legal Structure
 
+### Primary Entity (US)
+
 **Legal Entity:** PMF Strategy Inc.
 - Type: S-Corporation
 - State: Texas
 - Formation Date: 2022
 - EIN: [To be added]
 - Status: Active, in good standing
+- Current Revenue: <$10K/year (minimal, pass-through for Taiwan income)
 
 **Brand Name:** SuperImmersive 8 (SI8)
 - Type: Doing Business As (DBA) / Assumed Name
@@ -23,6 +26,17 @@
 
 **Operating Structure:**
 PMF Strategy Inc., a Texas corporation, doing business as SuperImmersive 8
+
+### Secondary Entity (Taiwan) — Optional Local Agent
+
+**Legal Entity:** 沉浸科技顧問有限公司 (Immersive Technology Consulting Co., Ltd.)
+- Type: Limited Liability Company (Taiwan)
+- 統一編號 (Unified Business Number): 83067478
+- Status: Active
+- Current Use: B2B sales consulting
+- SI8 Use: Optional local reseller/agent for Taiwan-specific deals (if buyer requires Taiwan entity)
+
+**Strategic Note:** "沉浸科技" literally translates to "Immersive Tech" — semantic match to SuperImmersive 8 brand (fortunate coincidence).
 
 ---
 
@@ -63,6 +77,141 @@ If by Month 6:
 - Liability exposure increases significantly
 
 → **Then** consider forming SI8 LLC/Inc. and transferring operations.
+
+---
+
+## Taiwan LLC Strategy: Master/Node Model
+
+### Strategic Framework (Consensus from All Three Analyses)
+
+**Core Principle:** SI8 is a **global business** with US entity as master/HQ. Taiwan LLC is optional local node for Taiwan-specific deals if needed.
+
+**User's Strategic Intent (Confirmed):**
+> "My intention is to be a global business. There may be some deals out of Taiwan, i.e. MyVideo, but if that happens, I'm fine with PMF Strategy outsourcing or having a contract with the Taiwan entity specifically to handle legalities."
+
+**This confirms:** Master/Node structure, NOT dual-entity structure.
+
+### Why Keep SI8 Under US Entity (PMF Strategy)
+
+**All three analyses independently agreed:**
+
+1. **IP Consolidation** — Catalog, filmmaker agreements, and Rights Verified process should live under ONE roof (US entity) for clean cap table, global coherence, and future M&A/valuation.
+
+2. **Global Licensing Standard** — US copyright law and Texas/Delaware jurisdictions are universally understood by global platforms. Taiwan LLC is designed for local B2B services, not global IP licensing.
+
+3. **Liability Isolation** — Keep US licensing risk pool separate from Taiwan consulting risk pool.
+
+4. **Tax Simplicity** — US S-Corp pass-through is simpler than managing Taiwan corporate tax + cross-border dividend repatriation + foreign tax credits.
+
+5. **Filmmaker Payouts** — US entity can pay global filmmakers easily (no Taiwan FX controls or 20% withholding tax on outbound payments).
+
+6. **Future Scalability** — If SI8 scales and needs VC funding or acquisition, US entity structure is cleaner.
+
+### When to Use Taiwan LLC (Optional)
+
+**ONLY use Taiwan LLC if:**
+
+1. **Taiwan buyer specifically requires local entity** (e.g., Taiwan Mobile procurement policy)
+2. **Local invoicing creates significant friction reduction** (e.g., FaPiao for Taiwan corporate buyers)
+3. **Tax withholding avoidance** (Taiwan companies paying foreign entities face 20% withholding unless exemption paperwork filed)
+
+**Default assumption:** Most deals (Taiwan included) can be done through US entity. Only activate Taiwan LLC if buyer specifically needs it.
+
+### How It Works: Intercompany Reseller Model
+
+**If MyVideo (or another Taiwan buyer) requires Taiwan entity:**
+
+**Structure:**
+```
+PMF Strategy Inc. (US) — Master Entity
+  ↓ (Intercompany Reseller Agreement)
+沉浸科技顧問有限公司 (Taiwan LLC) — Local Agent/Reseller
+  ↓ (Sales Contract)
+Taiwan Buyer (e.g., MyVideo)
+```
+
+**Flow:**
+
+1. **Taiwan LLC signs deal** with Taiwan buyer (e.g., MyVideo)
+2. **Taiwan LLC issues FaPiao** (local VAT invoice in NTD)
+3. **Taiwan buyer pays Taiwan LLC** (local bank transfer, no 20% withholding)
+4. **Taiwan LLC "purchases" Rights Package** from PMF Strategy via intercompany agreement
+5. **Taiwan LLC transfers revenue** (minus small commission/service fee) to PMF Strategy (US)
+6. **PMF Strategy pays filmmaker** their 20% royalty from US bank account
+
+**Why this works:**
+- ✅ Buyer gets local entity, local invoice, no tax friction
+- ✅ IP ownership stays with US entity (PMF Strategy)
+- ✅ Clean transfer pricing (intercompany agreement justifies money movement)
+- ✅ Filmmaker gets paid from US (no Taiwan FX controls)
+
+**Legal requirement:** Must have written "Intercompany Reseller & Services Agreement" between PMF Strategy and Taiwan LLC to justify money movement for IRS and Taiwan National Tax Bureau.
+
+### Operational Posture for Year 1
+
+**Public-Facing Brand:**
+- "SuperImmersive 8 is a US-based AI film rights agency"
+- Website, marketing, filmmaker-facing materials = US company positioning
+
+**Contract Execution (Territory-Based):**
+
+| Buyer Location | Entity Used | Why |
+|----------------|-------------|-----|
+| **Taiwan** (if buyer requires local) | Taiwan LLC | Local FaPiao, no withholding tax, easier procurement |
+| **Taiwan** (if buyer OK with US) | PMF Strategy Inc. | Simpler, default approach |
+| **Singapore, SEA, US, Global** | PMF Strategy Inc. | Standard international B2B, USD invoicing, Stripe |
+
+**Filmmaker Agreements:**
+- **ALL filmmakers sign with PMF Strategy Inc.** (centralizes IP ownership)
+- Regardless of filmmaker location (Taiwan, US, global)
+
+**Rights Verified Catalog:**
+- **Owned by PMF Strategy Inc.**
+- Taiwan LLC never owns catalog (only acts as sales agent if needed)
+
+### Critical Questions to Answer (Discussion Needed)
+
+See "DISCUSSION QUESTIONS" document for alignment conversation.
+
+### What This Means for DBA Filing Decision
+
+**Two paths:**
+
+**Path A: File US DBA Now (Recommended if MyVideo entity preference unknown)**
+- File "SuperImmersive 8" DBA under PMF Strategy this week
+- Move forward with all contracts as PMF Strategy d/b/a SI8
+- If MyVideo later requires Taiwan entity → add intercompany agreement
+- **Advantage:** Don't delay on entity uncertainty
+
+**Path B: Confirm MyVideo Preference First**
+- Contact Jamie Lin / Taiwan Mobile procurement
+- Ask: "Do you prefer contracting with Taiwan entity or US entity?"
+- Then file DBA or activate Taiwan LLC accordingly
+- **Advantage:** Perfect fit for MyVideo deal (Track 1 priority)
+- **Disadvantage:** Delays entity setup
+
+**User decision needed:** Which path?
+
+### Gemini's Unique Insight: Taiwan Procurement Friction
+
+**FaPiao (發票) Advantage:**
+
+Gemini analysis highlighted that Taiwan corporate buyers strongly prefer local vendors because:
+- Local entity can issue Taiwan VAT uniform invoice (FaPiao)
+- No 20% withholding tax on payments to foreign entities
+- No international wire transfer
+- No complex tax exemption paperwork
+
+**Semantic Brand Match:**
+
+"沉浸科技顧問有限公司" literally translates to "Immersive Technology Consulting Co., Ltd."
+- "沉浸科技" = "Immersive Tech"
+- Fortunate semantic alignment with "SuperImmersive 8"
+- Makes brand continuity clean if using Taiwan entity
+
+**Gemini's recommendation:** Use Taiwan LLC for all Taiwan deals (more bullish than ChatGPT/Claude).
+
+**User's decision overrides:** Use Taiwan LLC ONLY if buyer requires it (more conservative, globally-focused approach).
 
 ---
 

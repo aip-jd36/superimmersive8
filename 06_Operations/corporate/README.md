@@ -10,9 +10,10 @@
 
 | Document | Purpose | When to Use |
 |----------|---------|-------------|
-| **STRUCTURE-OVERVIEW.md** | Comprehensive strategic framework for SI8's legal structure | Reference for understanding DBA decision, buyer perception, Year 2 transition options |
+| **STRUCTURE-OVERVIEW.md** | Comprehensive strategic framework for SI8's legal structure | Reference for understanding DBA decision, Taiwan LLC strategy, buyer perception, Year 2 transition options |
 | **DBA-FILING-GUIDE.md** | Step-by-step instructions for filing Texas DBA | When ready to file "SuperImmersive 8" as Assumed Name |
 | **DECISIONS.md** | Decision log tracking all corporate structure choices | When making new entity/branding decisions; review history |
+| **DISCUSSION-QUESTIONS.md** | Alignment questions for operational decisions | Review and answer before filing DBA and executing Year 1 strategy |
 
 ### Supporting Folders
 
@@ -26,13 +27,21 @@
 
 ### Current Structure (Year 1, 2026)
 
-**Legal Entity:** PMF Strategy Inc. (Texas S-Corp, 2022)
-**Brand Name:** SuperImmersive 8 (DBA/Assumed Name)
-**Status:** DBA to be filed Week of Feb 24, 2026
+**Primary Entity (US):**
+- Legal Entity: PMF Strategy Inc. (Texas S-Corp, 2022)
+- Brand Name: SuperImmersive 8 (DBA/Assumed Name)
+- Status: DBA to be filed Week of Feb 24, 2026
+- Role: Master/HQ (owns IP, catalog, filmmaker agreements)
+
+**Secondary Entity (Taiwan) — Optional:**
+- Legal Entity: 沉浸科技顧問有限公司 (Taiwan LLC, 統編: 83067478)
+- Role: Local reseller/agent for Taiwan deals (ONLY if buyer requires it)
+- Default: Not used unless Taiwan buyer specifically needs Taiwan entity
 
 **Presentation:**
 - Public-facing: "SuperImmersive 8" or "SI8"
 - Contracts/Legal: "PMF Strategy Inc., a Texas corporation, doing business as SuperImmersive 8 ("SI8")"
+- Taiwan deals (if needed): Taiwan LLC acts as reseller via intercompany agreement
 
 ### Key Principles
 

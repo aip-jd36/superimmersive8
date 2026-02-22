@@ -102,6 +102,69 @@ August 2026 (6-month review) — evaluate revenue, fundraising opportunities, bu
 
 ---
 
+### Decision 004 — Taiwan LLC Strategy: Master/Node Model
+**Date:** February 23, 2026
+**Decision:** Keep SI8 under US entity (PMF Strategy) as master/HQ. Taiwan LLC = optional local reseller/agent for Taiwan-specific deals ONLY if buyer requires it.
+
+**Context:**
+- User has existing Taiwan LLC: 沉浸科技顧問有限公司 (統編: 83067478)
+- Taiwan LLC currently used for B2B sales consulting
+- PMF Strategy Inc. currently <$10K revenue (minimal, pass-through)
+- User's strategic intent: "My intention is to be a global business"
+
+**Options Considered:**
+1. All SI8 through US entity, ignore Taiwan LLC (SELECTED for default)
+2. All SI8 through Taiwan entity
+3. Dual structure (territory-based entity selection)
+4. Taiwan LLC as subsidiary of US entity
+
+**Rationale for Master/Node Model:**
+- **IP consolidation** — All catalog, filmmaker agreements, Rights Verified process centralized in US entity for clean cap table, M&A readiness, global coherence
+- **Global licensing standard** — US copyright law universally understood; Taiwan LLC designed for local services, not global IP licensing
+- **Tax simplicity** — US S-Corp pass-through simpler than Taiwan corporate tax + cross-border repatriation
+- **Filmmaker payouts** — US entity can pay global filmmakers without Taiwan FX controls or 20% withholding tax
+- **Liability isolation** — Keep US licensing risk separate from Taiwan consulting risk
+- **Future scalability** — VC/acquisition easier with US entity structure
+
+**When to Activate Taiwan LLC:**
+- ONLY if Taiwan buyer specifically requires local entity (e.g., MyVideo procurement policy)
+- ONLY if local FaPiao invoicing creates significant buyer friction reduction
+- Default: Try US entity first, even for Taiwan deals
+
+**Intercompany Structure (If Needed):**
+```
+PMF Strategy Inc. (Master — owns IP, catalog, filmmaker agreements)
+  ↓ Intercompany Reseller Agreement
+Taiwan LLC (Agent — local sales, FaPiao invoicing)
+  ↓ Sales Contract
+Taiwan Buyer
+```
+
+**Analysis Sources:**
+- Claude: Ask Jamie Lin entity preference first, tax/accounting considerations
+- ChatGPT: IP licensing cleaner in US, liability isolation, only use Taiwan LLC if required
+- Gemini: FaPiao advantage for Taiwan procurement, but user's global intent overrides
+
+**All three analyses agreed:** Master/Node model (not dual structure) is correct for global business intent.
+
+**Consensus insight from Gemini:**
+- "沉浸科技" = "Immersive Tech" (semantic brand match to SI8)
+- Taiwan corporate buyers prefer local FaPiao (no 20% withholding tax on foreign payments)
+- However, user's global intent means Taiwan LLC is optional tool, not default structure
+
+**Related Documents:**
+- `STRUCTURE-OVERVIEW.md` (Section: "Taiwan LLC Strategy: Master/Node Model")
+- `INTERCOMPANY-AGREEMENT-FRAMEWORK.md` (if created)
+
+**Open Questions (Requires User Decision):**
+1. File US DBA now, or wait for MyVideo entity preference confirmation?
+2. Contact Jamie Lin to ask entity preference?
+3. Need CPA consultation on US + Taiwan tax residency implications?
+
+**Status:** Decision finalized (Master/Node model), operational questions pending user input
+
+---
+
 ## Future Decision Points
 
 ### FDP-001 — Entity Separation Trigger (August 2026)
