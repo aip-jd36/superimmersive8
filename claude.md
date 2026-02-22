@@ -175,6 +175,23 @@
 - [ ] Test on mobile — both languages
 - [x] Complete before Taipei B2B outreach begins — ✓ ready for advisor meetings
 
+### 3d. Corporate Structure & Legal Entity (Finalized Feb 2026)
+- [x] Analyze entity structure options (US DBA vs Taiwan LLC vs standalone) — ✓ Three independent analyses (Claude, ChatGPT, Gemini) synthesized (Feb 2026)
+- [x] Document Master/Node framework — ✓ STRUCTURE-OVERVIEW.md (Feb 2026)
+- [x] Finalize operational decisions (Q1-Q3) — ✓ File DBA, assume US entity OK for MyVideo, CPA validates current structure (Feb 2026)
+- [ ] File Texas DBA for "SuperImmersive 8" under PMF Strategy Inc. — Week 1 (Feb 24-28, 2026)
+- [ ] Update Master License Agreement signature block — Week 2
+- [ ] Update Filmmaker Shopping Agreement signature block — Week 2
+- [ ] Update Invoice Template with legal entity formatting — Week 2
+- [ ] Update Rights Verified Package footer/signature — Week 2
+- [ ] Update website footer (all HTML files) — Week 3
+- [ ] Verify bank account for wire transfers — Week 3
+
+**Entity Structure:** PMF Strategy Inc. (Texas S-Corp, 2022) d/b/a SuperImmersive 8
+- Role: Master entity (owns IP, catalog, filmmaker agreements)
+- Taiwan LLC (沉浸科技顧問有限公司): Optional local reseller (ONLY if Taiwan buyer requires it)
+- Documentation: `06_Operations/corporate/` (STRUCTURE-OVERVIEW, ACTION-PLAN, DECISIONS, DBA-FILING-GUIDE)
+
 ### 4. Legal Ops (Rights playbook → actual contracts)
 - [ ] Standard Production MSA + SOW
 - [ ] Creator contractor agreement (work-for-hire + confidentiality + IP assignment)

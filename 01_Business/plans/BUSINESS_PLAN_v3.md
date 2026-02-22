@@ -306,6 +306,48 @@ This doesn't mean building software in Year 1. It means running the agency in a 
 
 ---
 
+## Operational Structure & Legal Entity
+
+### Corporate Structure (Finalized February 2026)
+
+**Primary Entity:** PMF Strategy Inc. (Texas S-Corporation, est. 2022)
+- Operates as: "SuperImmersive 8" (DBA filed with Texas Secretary of State)
+- Role: Master entity — owns IP, catalog, all filmmaker agreements
+- Tax Structure: S-Corp pass-through
+- All contracts, invoices, and Rights Verified Packages issued by PMF Strategy Inc. d/b/a SuperImmersive 8
+
+**Secondary Entity (Optional):** 沉浸科技顧問有限公司 (Taiwan LLC, 統編: 83067478)
+- Current use: B2B sales consulting
+- SI8 use: Local reseller/agent for Taiwan deals (ONLY if buyer requires Taiwan entity)
+- Default: Not used unless Taiwan buyer specifically needs local FaPiao invoicing or entity
+
+### Strategic Rationale: Master/Node Model
+
+SI8 operates as a **global business** with US entity as headquarters. All IP (catalog, filmmaker agreements, Rights Verified process) is centralized under PMF Strategy Inc. for:
+- Clean cap table and M&A readiness
+- Global licensing standard (US copyright law)
+- Tax simplicity (S-Corp pass-through vs multi-jurisdiction complexity)
+- Future scalability (VC/acquisition easier with US structure)
+
+**When Taiwan LLC is activated:**
+If a Taiwan buyer (e.g., MyVideo/Taiwan Mobile) requires local entity for procurement, Taiwan LLC acts as local reseller via intercompany agreement:
+- Taiwan LLC signs deal with buyer, issues FaPiao
+- Taiwan LLC "purchases" rights from PMF Strategy
+- PMF Strategy retains IP ownership and pays filmmaker royalties
+- This structure ready to deploy in 3-5 days if needed
+
+**Documentation:** Full corporate structure framework, DBA filing guide, and operational decisions documented in `06_Operations/corporate/`
+
+### Year 1 Timeline
+
+**Week 1 (Feb 2026):** File Texas DBA for "SuperImmersive 8" under PMF Strategy Inc.
+**Week 2-3:** Update all contract templates, invoices, and Rights Verified Package templates with proper legal entity formatting
+**Month 6 (Aug 2026):** Review entity structure based on revenue mix and buyer feedback
+
+**Entity setup complete before first deal closes.** All contracts reference: "PMF Strategy Inc., a Texas corporation, doing business as SuperImmersive 8 ("SI8")"
+
+---
+
 ## The Single Year 1 Message
 
 **"Won't get you sued."**

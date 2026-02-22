@@ -204,6 +204,13 @@ SI8's positioning is "the trusted operator" who helps creators and brands naviga
 
 **Note:** The modification clause in filmmaker agreements is the legal prerequisite for Tier 2 (product placement). Without it, the primary offering cannot be delivered.
 
+**Corporate Structure (Week 1):**
+- [x] Finalize entity framework — ✓ PMF Strategy Inc. d/b/a SuperImmersive 8 (Master/Node model documented Feb 2026)
+- [ ] File Texas DBA for "SuperImmersive 8" under PMF Strategy Inc. ($25, 1-3 days processing)
+- [ ] Update all contract templates with proper entity signature blocks (Week 2-3)
+
+**Entity:** PMF Strategy Inc. (Texas S-Corp, 2022) doing business as SuperImmersive 8. Taiwan LLC (沉浸科技顧問有限公司) available as optional local reseller if Taiwan buyer requires it. Full framework documented in `06_Operations/corporate/`
+
 **Contracts (with lawyer):**
 - [ ] Find entertainment lawyer (Taiwan + US/international experience, AI-aware)
 - [ ] Filmmaker Shopping Agreement with modification clause (authorizes SI8 to commission brand-integrated versions) + exclusivity framework (category-exclusive default for product placements)
