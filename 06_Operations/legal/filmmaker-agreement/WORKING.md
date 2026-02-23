@@ -119,3 +119,34 @@ for formal agreement to be drafted.
 
 *(Add notes from calls, lawyer feedback, etc.)*
 
+---
+
+## Signature Block Template
+
+*(For final agreement — to be formatted by lawyer)*
+
+**AGREED AND ACCEPTED:**
+
+**PMF Strategy Inc., a Texas corporation, doing business as SuperImmersive 8 ("SI8")**
+
+By: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+Name: Jerry Damon Chang
+Title: Managing Director
+Date: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+**FILMMAKER:**
+
+By: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+Name: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+Date: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+---
+
+**Company Information:**
+
+PMF Strategy Inc. d/b/a SuperImmersive 8
+1320 Arrow Point Dr, Suite 501 #185
+Cedar Park, TX 78613 USA
+Email: jd@superimmersive8.com
+Website: www.superimmersive8.com
+

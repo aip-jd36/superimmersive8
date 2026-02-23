@@ -180,11 +180,11 @@
 - [x] Document Master/Node framework — ✓ STRUCTURE-OVERVIEW.md (Feb 2026)
 - [x] Finalize operational decisions (Q1-Q3) — ✓ File DBA, assume US entity OK for MyVideo, CPA validates current structure (Feb 2026)
 - [x] File Texas DBA for "SuperImmersive 8" under PMF Strategy Inc. — ✓ Filed and APPROVED Feb 23, 2026 (Document #1560777170004)
-- [ ] Update Master License Agreement signature block — Week 2
-- [ ] Update Filmmaker Shopping Agreement signature block — Week 2
-- [ ] Update Invoice Template with legal entity formatting — Week 2
-- [ ] Update Rights Verified Package footer/signature — Week 2
-- [ ] Update website footer (all HTML files) — Week 3
+- [x] Update Filmmaker Shopping Agreement signature block — ✓ Added professional signature block template (Feb 23, 2026)
+- [x] Update Invoice Template with legal entity formatting — ✓ Created comprehensive invoice template (Feb 23, 2026)
+- [x] Update website footer (all HTML files) — ✓ All 10 HTML files updated with "PMF Strategy Inc. d/b/a SuperImmersive 8" (Feb 23, 2026)
+- [ ] Update Master License Agreement signature block — Pending (create template when needed)
+- [ ] Update Rights Verified Package footer/signature — Pending (create when first package issued)
 - [ ] Verify bank account for wire transfers — Week 3
 
 **Entity Structure:** PMF Strategy Inc. (Texas S-Corp, 2022) d/b/a SuperImmersive 8
