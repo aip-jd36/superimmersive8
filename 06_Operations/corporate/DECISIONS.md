@@ -197,6 +197,33 @@ Taiwan Buyer
 
 ---
 
+### Decision 006 — Texas DBA Filed: "SuperImmersive 8"
+**Date Filed:** February 23, 2026
+**Document #:** 1560777170004
+**Session ID:** 022326PW5046
+
+**Filing Details:**
+- **Assumed Name:** SuperImmersive 8 (with space)
+- **Legal Entity:** PMF Strategy Inc. (File #804768066)
+- **Duration:** 10 years (expires February 2036)
+- **Counties:** All Counties in Texas
+- **Principal Office:** 1320 Arrow Point Dr, Suite 501 #185, Cedar Park, TX 78613
+- **Registrant:** Jerry Damon Chang
+
+**Status:** Submitted — pending approval (1-3 business days)
+
+**Next Actions (after approval):**
+1. Download official certificate from SOSDirect
+2. Save to: `06_Operations/corporate/dba-certificate-superimmersive-8.pdf`
+3. Update all contract signature blocks to: "PMF Strategy Inc. d/b/a SuperImmersive 8"
+4. Update CLAUDE.md execution gaps (mark DBA filing complete)
+
+**Files:**
+- Filing receipt: `06_Operations/corporate/dba-filing-receipt-2026-02-23.pdf`
+- Certificate (pending): `06_Operations/corporate/dba-certificate-superimmersive-8.pdf`
+
+---
+
 ## Future Decision Points
 
 ### FDP-001 — Entity Separation Trigger (August 2026)
@@ -283,6 +310,9 @@ Taiwan Buyer
 | Date | Change | Modified By |
 |------|--------|-------------|
 | Feb 22, 2026 | Initial decision log created — Decisions 001-003 documented | JD + Claude |
+| Feb 23, 2026 | Decision 004: Taiwan LLC Master/Node model documented | JD + Claude |
+| Feb 23, 2026 | Decision 005: Operational execution — DBA filing approved | JD + Claude |
+| Feb 23, 2026 | Decision 006: Texas DBA filed — Document #1560777170004 | JD + Claude |
 
 ---
 
