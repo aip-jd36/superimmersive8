@@ -107,6 +107,28 @@
         .explainer p:last-of-type {
             margin-bottom: 0;
         }
+        .explainer p a,
+        .key-fact a {
+            color: var(--color-accent);
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 2px;
+            transition: opacity 0.2s;
+        }
+        .explainer p a:hover,
+        .key-fact a:hover {
+            opacity: 0.7;
+        }
+        .deadline-desc a {
+            color: var(--color-accent);
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 2px;
+            transition: opacity 0.2s;
+        }
+        .deadline-desc a:hover {
+            opacity: 0.7;
+        }
         .key-fact {
             background: rgba(129, 140, 248, 0.06);
             border-left: 3px solid var(--color-accent);
@@ -353,10 +375,10 @@
                 <p>Runway's Terms of Service require users to indemnify Runway against losses related to copyright infringement. The protection flows in the wrong direction. If a rights holder comes after your brand for content produced with Runway, Runway will not defend you, will not cover damages, and may itself become a co-defendant — which increases your exposure, not reduces it.</p>
 
                 <div class="key-fact">
-                    <strong>Active litigation context:</strong> Disney, Universal, and Warner Bros. have each sued Midjourney for copyright infringement. Midjourney's legal defense is that <em>users</em> are responsible for prompting infringing outputs — not Midjourney. If this argument holds, brand liability for AI-generated commercial content migrates directly to the brand or agency that commissioned it.
+                    <strong>Active litigation context:</strong> <a href="https://www.hollywoodreporter.com/business/business-news/ai-art-generators-copyright-lawsuits-1235632867/" target="_blank" rel="noopener" style="color:var(--color-accent);text-decoration:underline;">Disney, Universal, and Warner Bros. have each sued Midjourney for copyright infringement</a>. Midjourney's legal defense is that <em>users</em> are responsible for prompting infringing outputs — not Midjourney. If this argument holds, brand liability for AI-generated commercial content migrates directly to the brand or agency that commissioned it.
                 </div>
 
-                <p>In July 2024, leaked internal documents revealed that Runway's Gen-3 model was trained on YouTube videos downloaded without permission from Disney, Netflix, Pixar, and Sony — using proxy software specifically to avoid detection. Runway provides no contractual protection to the brands using these outputs commercially.</p>
+                <p>In July 2024, <a href="https://www.404media.co/runway-ai-trained-on-scraped-youtube-pirated-films/" target="_blank" rel="noopener" style="color:var(--color-accent);text-decoration:underline;">leaked internal documents revealed that Runway's Gen-3 model was trained on YouTube videos downloaded without permission from Disney, Netflix, Pixar, and Sony</a> — using proxy software specifically to avoid detection. Runway provides no contractual protection to the brands using these outputs commercially.</p>
 
                 <p>Adobe Firefly's indemnification is real, and it is the only tool in the market offering it at scale. The trade-off: Firefly's outputs are, by professional creative standards, limited. The highest-quality AI video — the work that makes brands take notice — is produced with Runway, Sora, Kling, and similar tools. SI8's Rights Verified process exists precisely in this gap: documented vetting that gives brands the defensibility that the tool companies don't provide.</p>
 
@@ -374,11 +396,11 @@
                 <p>A brand running a single AI video campaign across major platforms must now navigate four structurally different compliance regimes — with different triggers, different enforcement mechanisms, different penalties, and different update cadences. There is no single workflow that covers all of them.</p>
 
                 <div class="key-fact">
-                    <strong>YouTube (July 2025):</strong> Mass-produced or fully AI-generated content without "significant human creativity and editorial judgment" is now demonetized regardless of whether it was disclosed. A channel with 83,000 subscribers was removed entirely after 150+ videos were flagged as insufficiently human-directed. Agencies producing YouTube content must document human creative contribution for every AI-assisted production.
+                    <strong><a href="https://support.google.com/youtube/answer/13813322" target="_blank" rel="noopener" style="color:var(--color-accent);text-decoration:underline;">YouTube (July 2025)</a>:</strong> Mass-produced or fully AI-generated content without "significant human creativity and editorial judgment" is now demonetized regardless of whether it was disclosed. A channel with 83,000 subscribers was removed entirely after 150+ videos were flagged as insufficiently human-directed. Agencies producing YouTube content must document human creative contribution for every AI-assisted production.
                 </div>
 
                 <div class="key-fact">
-                    <strong>TikTok:</strong> Content generated inside TikTok's own tools is auto-labeled. Content created with external tools — Runway, Kling, Sora — requires manual disclosure by the uploader. TikTok holds the uploader responsible either way. Over 51,000 synthetic media videos were removed in a single six-month enforcement period.
+                    <strong><a href="https://newsroom.tiktok.com/en-us/transparency-report-h2-2023" target="_blank" rel="noopener" style="color:var(--color-accent);text-decoration:underline;">TikTok</a>:</strong> Content generated inside TikTok's own tools is auto-labeled. Content created with external tools — Runway, Kling, Sora — requires manual disclosure by the uploader. TikTok holds the uploader responsible either way. Over 51,000 synthetic media videos were removed in a single six-month enforcement period.
                 </div>
 
                 <div class="key-fact">
@@ -386,7 +408,7 @@
                 </div>
 
                 <div class="key-fact">
-                    <strong>Netflix (August 2025):</strong> The first major streaming platform to publish formal Generative AI Production Guidelines. AI use must be disclosed to Netflix before production begins. Written pre-approval is required if AI outputs appear in final deliverables or involve talent likeness, third-party IP, or union-covered performances. Content with undisclosed AI use is potentially unlicensable.
+                    <strong><a href="https://partnerhelp.netflixstudios.com/hc/en-us/articles/32154633513235-Generative-AI-Production-Guidelines" target="_blank" rel="noopener" style="color:var(--color-accent);text-decoration:underline;">Netflix (August 2025)</a>:</strong> The first major streaming platform to publish formal Generative AI Production Guidelines. AI use must be disclosed to Netflix before production begins. Written pre-approval is required if AI outputs appear in final deliverables or involve talent likeness, third-party IP, or union-covered performances. Content with undisclosed AI use is potentially unlicensable.
                 </div>
 
                 <p>The Interactive Advertising Bureau launched a quarterly Video Compliance Brief series in 2025 specifically because the cross-platform complexity had become unmanageable. Their characterization of the current environment: a "risk-based, materiality-driven approach" is now required — meaning no single bright-line rule works across all platforms.</p>
@@ -406,7 +428,7 @@
 
                 <p>The most common assumption brands make when using AI-generated content commercially: "we have a paid commercial subscription, so we're covered." The US Copyright Office addressed this assumption directly in May 2025. The answer is not what brands want to hear.</p>
 
-                <p>The Copyright Office's third and final AI and copyright report, published May 9, 2025, states explicitly that use of copyright-protected materials for AI model training is insufficient on its own to justify fair use. More critically: the knowing use of illegally obtained training data weighs against a fair-use defense — meaning if a tool was trained on stolen content, the downstream commercial users of that tool are relying on a legally compromised foundation.</p>
+                <p><a href="https://www.copyright.gov/ai/" target="_blank" rel="noopener" style="color:var(--color-accent);text-decoration:underline;">The Copyright Office's third and final AI and copyright report, published May 9, 2025</a>, states explicitly that use of copyright-protected materials for AI model training is insufficient on its own to justify fair use. More critically: the knowing use of illegally obtained training data weighs against a fair-use defense — meaning if a tool was trained on stolen content, the downstream commercial users of that tool are relying on a legally compromised foundation.</p>
 
                 <div class="key-fact">
                     <strong>The two legal relationships brands conflate:</strong> A commercial license from the tool company addresses the brand's relationship with that company. It says nothing about the tool company's relationship with the rights holders whose work was used to train the model. These are two entirely separate legal relationships. The commercial license cannot grant rights the tool company never had.
@@ -414,7 +436,7 @@
 
                 <p>In 2025, a US court rejected the transformativeness argument for commercial AI outputs — the idea that because AI-generated content doesn't contain the original work verbatim, it's not infringement. The court found that transformation does not occur simply because the copyrighted content does not appear verbatim in the output. This dismantles the most common secondary assumption brands make.</p>
 
-                <p>The pace of litigation makes this a now problem, not a future one. Active copyright infringement cases against AI companies more than doubled in 2025, from approximately 30 to over 70. Three of Hollywood's five major studios have now sued Midjourney. The RIAA sued Suno and Udio; Suno settled and committed to retiring its current model — meaning brands with Suno-generated audio in active campaigns are using content from a model that was legally indefensible enough that its creators agreed to shut it down.</p>
+                <p>The pace of litigation makes this a now problem, not a future one. Active copyright infringement cases against AI companies more than doubled in 2025, from approximately 30 to over 70. Three of Hollywood's five major studios have now sued Midjourney. <a href="https://www.riaa.com/riaa-sues-udio-suno-music-generators/" target="_blank" rel="noopener" style="color:var(--color-accent);text-decoration:underline;">The RIAA sued Suno and Udio</a>; Suno settled and committed to retiring its current model — meaning brands with Suno-generated audio in active campaigns are using content from a model that was legally indefensible enough that its creators agreed to shut it down.</p>
 
                 <p>Under vicarious liability principles, a brand that commissioned AI-generated content and profited from it can be held liable even if an agency produced the infringing work. Major IP law firms are now advising brand owners to amend agency contracts to add explicit AI-specific IP warranties and indemnification clauses — precisely because standard contracts do not contain them.</p>
 
@@ -442,7 +464,7 @@
                     <div class="deadline-item">
                         <div class="deadline-date">Dec 2025<br>Passed</div>
                         <div class="deadline-desc">
-                            <strong>Taiwan — AI Basic Act</strong>
+                            <strong><a href="https://www.tipo.gov.tw/en/" target="_blank" rel="noopener" style="color:var(--color-accent);text-decoration:underline;">Taiwan — AI Basic Act</a></strong>
                             Taiwan's Legislative Yuan passed the AI Basic Act on December 23, 2025. The Intellectual Property Office has ruled that using others' copyrightable work to train AI constitutes reproduction requiring license or fair use. AI-generated outputs resembling protected works may themselves infringe.
                         </div>
                     </div>
@@ -456,7 +478,7 @@
                     <div class="deadline-item">
                         <div class="deadline-date">Aug 2026<br>Approaching</div>
                         <div class="deadline-desc">
-                            <strong>European Union — AI Act Article 50</strong>
+                            <strong><a href="https://artificialintelligenceact.eu/article/50/" target="_blank" rel="noopener" style="color:var(--color-accent);text-decoration:underline;">European Union — AI Act Article 50</a></strong>
                             Providers and deployers of AI systems that generate or substantially manipulate video, images, or audio must ensure content is clearly identifiable as artificial. Machine-readable watermarks or metadata embedded disclosure are required. Applies to any brand with EU market exposure.
                         </div>
                     </div>
