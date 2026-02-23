@@ -47,12 +47,15 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero-section" style="padding: 120px 0 80px;">
-        <div class="container">
-            <h1 class="hero-title">Chain of Title & Compliance Log</h1>
-            <p class="hero-subtitle" style="max-width: 900px; margin: 0 auto;">
-                Every piece of Rights Verified vetted content comes with a structured Chain of Title (Rights Package) — 9 fields of documentation that reduce legal exposure, satisfy regulatory compliance, and enable distribution.
-            </p>
+    <section class="briefing-hero">
+        <div class="hero-bg">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+        </div>
+        <div class="briefing-hero-content">
+            <div class="page-tag">Rights Verified</div>
+            <h1>Chain of Title & Compliance Log</h1>
+            <p>Every piece of Rights Verified vetted content comes with a structured Chain of Title — 9 fields of documentation that reduce legal exposure, satisfy regulatory compliance, and enable distribution.</p>
             <div class="hero-callout">
                 <p><strong>The file is the carrier. The Chain of Title is the product.</strong></p>
             </div>
@@ -384,11 +387,60 @@
     </footer>
 
     <style>
+        /* Hero Section - Dark Theme */
+        .briefing-hero {
+            padding: 140px 0 80px;
+            text-align: center;
+            position: relative;
+        }
+        .briefing-hero .hero-bg {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            z-index: 0;
+        }
+        .briefing-hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        .page-tag {
+            display: inline-block;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-text-muted);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 6px 14px;
+            border-radius: 100px;
+            margin-bottom: 28px;
+        }
+        .briefing-hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 20px;
+            color: var(--color-text);
+        }
+        .briefing-hero p {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--color-text-muted);
+            max-width: 620px;
+            margin: 0 auto 40px;
+        }
+
         .hero-callout {
             margin-top: 40px;
             padding: 32px;
-            background: #F7F6EF;
-            border: 2px solid rgba(200, 144, 10, 0.3);
+            background: rgba(129, 140, 248, 0.06);
+            border: 1px solid rgba(129, 140, 248, 0.2);
             border-radius: 12px;
             max-width: 600px;
             margin-left: auto;
@@ -398,26 +450,29 @@
         .hero-callout p {
             margin: 0;
             font-size: 18px;
-            color: #1a1918;
+            font-family: 'Inter', sans-serif;
+            color: var(--color-text);
         }
 
         .intro-box {
-            background: #F7F6EF;
-            border: 1px solid rgba(200, 144, 10, 0.2);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
             padding: 48px;
             margin: 40px 0;
         }
 
         .intro-box h2 {
+            font-family: 'Space Grotesk', sans-serif;
             margin-bottom: 24px;
-            color: #1a1918;
+            color: var(--color-text);
         }
 
         .intro-box p {
+            font-family: 'Inter', sans-serif;
             font-size: 18px;
             line-height: 1.8;
-            color: #52504A;
+            color: var(--color-text-muted);
             margin-bottom: 16px;
         }
 
@@ -426,7 +481,7 @@
         }
 
         .dark-section {
-            background: #FAFAF7;
+            background: rgba(255,255,255,0.02);
             padding: 80px 0;
         }
 
@@ -437,8 +492,8 @@
         }
 
         .field-card {
-            background: #FFFFFF;
-            border: 1px solid rgba(200, 144, 10, 0.2);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
             padding: 32px;
         }
@@ -447,36 +502,40 @@
             display: inline-block;
             font-size: 14px;
             font-weight: 700;
-            color: #C8900A;
-            background: rgba(200, 144, 10, 0.1);
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--color-accent);
+            background: rgba(129, 140, 248, 0.15);
             padding: 8px 16px;
             border-radius: 20px;
             margin-bottom: 16px;
         }
 
         .field-card h3 {
+            font-family: 'Space Grotesk', sans-serif;
             font-size: 24px;
             margin-bottom: 16px;
-            color: #1a1918;
+            color: var(--color-text);
         }
 
         .field-description {
-            color: #52504A;
+            color: var(--color-text-muted);
             margin-bottom: 24px;
+            font-family: 'Inter', sans-serif;
             font-size: 16px;
             line-height: 1.6;
         }
 
         .legal-support {
             padding: 20px;
-            background: #FAFAF7;
-            border-left: 3px solid #C8900A;
+            background: rgba(129, 140, 248, 0.06);
+            border-left: 3px solid var(--color-accent);
             border-radius: 8px;
         }
 
         .legal-support strong {
             display: block;
-            color: #C8900A;
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--color-accent);
             margin-bottom: 12px;
             font-size: 14px;
         }
@@ -490,7 +549,8 @@
         .legal-support li {
             padding: 8px 0 8px 24px;
             position: relative;
-            color: #1a1918;
+            font-family: 'Inter', sans-serif;
+            color: var(--color-text-muted);
             font-size: 14px;
         }
 
@@ -498,7 +558,7 @@
             content: "✓";
             position: absolute;
             left: 0;
-            color: #C8900A;
+            color: var(--color-accent);
         }
 
         .value-mechanisms {
@@ -509,8 +569,8 @@
         }
 
         .mechanism-card {
-            background: #F7F6EF;
-            border: 1px solid rgba(200, 144, 10, 0.2);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
             padding: 32px;
             text-align: center;
@@ -522,64 +582,68 @@
         }
 
         .mechanism-card h3 {
+            font-family: 'Space Grotesk', sans-serif;
             margin-bottom: 16px;
-            color: #1a1918;
+            color: var(--color-text);
         }
 
         .mechanism-stat {
             font-size: 18px;
             font-weight: 600;
-            color: #C8900A;
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--color-accent);
             margin-bottom: 16px;
         }
 
         .mechanism-card p {
-            color: #52504A;
+            font-family: 'Inter', sans-serif;
+            color: var(--color-text-muted);
             line-height: 1.6;
             margin-bottom: 16px;
         }
 
         .mechanism-field {
             font-size: 13px;
-            color: #C8900A;
+            font-family: 'Inter', sans-serif;
+            color: var(--color-accent);
             font-style: italic;
         }
 
         .info-box {
-            background: #F7F6EF;
-            border: 1px solid rgba(200, 144, 10, 0.3);
+            background: rgba(129, 140, 248, 0.06);
+            border: 1px solid rgba(129, 140, 248, 0.2);
             border-radius: 12px;
             padding: 48px;
             text-align: center;
         }
 
         .info-box h3 {
+            font-family: 'Space Grotesk', sans-serif;
             margin-bottom: 24px;
-            color: #1a1918;
+            color: var(--color-text);
         }
 
         .info-box p {
-            color: #52504A;
+            font-family: 'Inter', sans-serif;
+            color: var(--color-text-muted);
         }
 
         .code-sample {
             font-family: 'Courier New', monospace;
             font-size: 32px;
             font-weight: 700;
-            background: linear-gradient(135deg, #C8900A, #F0C040);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--color-accent);
             margin: 24px 0;
             display: block;
         }
 
         code {
-            background: #FAFAF7;
+            background: rgba(255,255,255,0.05);
             padding: 4px 8px;
             border-radius: 4px;
             font-family: 'Courier New', monospace;
             font-size: 14px;
-            color: #C8900A;
+            color: var(--color-accent);
         }
 
         .nav-dropdown {
@@ -591,32 +655,61 @@
             display: none;
             position: absolute;
             top: 100%;
-            background: #FFFFFF;
+            background: var(--color-bg-elevated);
             min-width: 220px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             border-radius: 8px;
             padding: 12px 0;
-            padding-top: 12px;
-            margin-top: 4px;
+            margin-top: 8px;
             z-index: 1000;
-            border: 1px solid rgba(200, 144, 10, 0.2);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .dropdown-content a {
-            color: #52504A;
+            color: var(--color-text-muted);
             padding: 12px 24px;
             text-decoration: none;
             display: block;
-            font-size: 14px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
         }
 
         .dropdown-content a:hover {
-            background: #FAFAF7;
-            color: #C8900A;
+            background: rgba(255,255,255,0.05);
+            color: var(--color-accent);
         }
 
         .nav-dropdown:hover .dropdown-content {
             display: block;
+        }
+
+        .content-section {
+            padding: 60px 0;
+        }
+
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--color-text);
+        }
+
+        .section-intro {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.1rem;
+            text-align: center;
+            color: var(--color-text-muted);
+            max-width: 700px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 768px) {
+            .briefing-hero {
+                padding: 120px 0 60px;
+            }
         }
     </style>
 

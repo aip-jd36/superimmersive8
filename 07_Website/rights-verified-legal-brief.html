@@ -47,12 +47,15 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero-section" style="padding: 120px 0 80px;">
-        <div class="container">
-            <h1 class="hero-title">Legal Risk Reduction Brief</h1>
-            <p class="hero-subtitle" style="max-width: 800px; margin: 0 auto;">
-                How SI8's Chain of Title reduces AI content liability through four quantifiable legal mechanisms
-            </p>
+    <section class="briefing-hero">
+        <div class="hero-bg">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+        </div>
+        <div class="briefing-hero-content">
+            <div class="page-tag">Rights Verified</div>
+            <h1>Legal Risk Reduction Brief</h1>
+            <p>How SI8's Chain of Title reduces AI content liability through four quantifiable legal mechanisms</p>
         </div>
     </section>
 
@@ -333,6 +336,55 @@
     </footer>
 
     <style>
+        /* Hero Section - Dark Theme */
+        .briefing-hero {
+            padding: 140px 0 80px;
+            text-align: center;
+            position: relative;
+        }
+        .briefing-hero .hero-bg {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            z-index: 0;
+        }
+        .briefing-hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        .page-tag {
+            display: inline-block;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-text-muted);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 6px 14px;
+            border-radius: 100px;
+            margin-bottom: 28px;
+        }
+        .briefing-hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 20px;
+            color: var(--color-text);
+        }
+        .briefing-hero p {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--color-text-muted);
+            max-width: 620px;
+            margin: 0 auto;
+        }
+
         .challenge-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -350,26 +402,27 @@
         .challenge-number {
             font-size: 36px;
             font-weight: 700;
-            background: linear-gradient(135deg, #ef4444, #f59e0b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-family: 'Space Grotesk', sans-serif;
+            color: #ef4444;
             margin-bottom: 16px;
         }
 
         .challenge-item h3 {
-            color: #1a1918;
+            color: var(--color-text);
             margin-bottom: 12px;
+            font-family: 'Space Grotesk', sans-serif;
             font-size: 20px;
         }
 
         .challenge-item p {
-            color: #52504A;
+            color: var(--color-text-muted);
+            font-family: 'Inter', sans-serif;
             margin: 0;
         }
 
         .insight-box {
-            background: #F7F6EF;
-            border: 1px solid rgba(200, 144, 10, 0.3);
+            background: rgba(129, 140, 248, 0.06);
+            border: 1px solid rgba(129, 140, 248, 0.2);
             border-radius: 12px;
             padding: 32px;
             margin-top: 40px;
@@ -379,11 +432,12 @@
         .insight-box p {
             margin: 0;
             font-size: 18px;
-            color: #1a1918;
+            font-family: 'Inter', sans-serif;
+            color: var(--color-text-muted);
         }
 
         .dark-section {
-            background: #FAFAF7;
+            background: rgba(255,255,255,0.02);
             padding: 80px 0;
         }
 
@@ -395,8 +449,8 @@
         }
 
         .mechanism-card {
-            background: #FFFFFF;
-            border: 1px solid rgba(200, 144, 10, 0.2);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
             padding: 32px;
         }
@@ -407,38 +461,40 @@
         }
 
         .mechanism-card h3 {
-            color: #1a1918;
+            color: var(--color-text);
             margin-bottom: 12px;
+            font-family: 'Space Grotesk', sans-serif;
             font-size: 22px;
         }
 
         .mechanism-card .stat {
             font-size: 24px;
             font-weight: 700;
-            background: linear-gradient(135deg, #C8900A, #F0C040);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--color-accent);
             margin-bottom: 16px;
         }
 
         .mechanism-card > p {
-            color: #52504A;
+            color: var(--color-text-muted);
             margin-bottom: 20px;
+            font-family: 'Inter', sans-serif;
             line-height: 1.6;
         }
 
         .locked-content {
-            background: #FAFAF7;
+            background: rgba(129, 140, 248, 0.06);
             padding: 16px;
             border-radius: 8px;
-            border-left: 3px solid #C8900A;
+            border-left: 3px solid var(--color-accent);
             margin-top: 16px;
         }
 
         .locked-content p {
             margin: 0;
             font-size: 14px;
-            color: #52504A;
+            font-family: 'Inter', sans-serif;
+            color: var(--color-text-muted);
         }
 
         .comparison-grid {
@@ -448,21 +504,23 @@
         }
 
         .comparison-card {
-            background: #F7F6EF;
-            border: 1px solid rgba(200, 144, 10, 0.2);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
             padding: 40px;
         }
 
         .comparison-card h3 {
-            color: #1a1918;
+            color: var(--color-text);
             margin-bottom: 20px;
+            font-family: 'Space Grotesk', sans-serif;
             font-size: 24px;
         }
 
         .comparison-card > p {
-            color: #52504A;
+            color: var(--color-text-muted);
             margin: 12px 0;
+            font-family: 'Inter', sans-serif;
             line-height: 1.6;
         }
 
@@ -476,7 +534,8 @@
 
         .differentiation-box p {
             margin: 12px 0;
-            color: #1a1918;
+            font-family: 'Inter', sans-serif;
+            color: var(--color-text-muted);
         }
 
         .rights-fields-preview {
@@ -486,8 +545,8 @@
         }
 
         .field-preview {
-            background: #FFFFFF;
-            border: 1px solid rgba(200, 144, 10, 0.2);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 8px;
             padding: 20px;
             display: flex;
@@ -498,19 +557,21 @@
         }
 
         .field-preview strong {
-            color: #1a1918;
+            color: var(--color-text);
+            font-family: 'Space Grotesk', sans-serif;
             font-size: 16px;
         }
 
         .defense-tag {
             font-size: 13px;
-            color: #52504A;
+            font-family: 'Inter', sans-serif;
+            color: var(--color-text-muted);
             font-style: italic;
         }
 
         .locked-content-box {
-            background: rgba(200, 144, 10, 0.05);
-            border: 2px solid rgba(200, 144, 10, 0.2);
+            background: rgba(129, 140, 248, 0.06);
+            border: 2px solid rgba(129, 140, 248, 0.2);
             border-radius: 12px;
             padding: 40px;
             margin-top: 40px;
@@ -518,34 +579,37 @@
         }
 
         .locked-content-box h3 {
-            color: #1a1918;
+            color: var(--color-text);
             margin-bottom: 20px;
+            font-family: 'Space Grotesk', sans-serif;
             font-size: 28px;
         }
 
         .locked-content-box p {
-            color: #52504A;
+            color: var(--color-text-muted);
             margin-bottom: 20px;
+            font-family: 'Inter', sans-serif;
         }
 
         .locked-content-box ul {
             text-align: left;
             max-width: 600px;
             margin: 0 auto;
-            color: #1a1918;
+            color: var(--color-text-muted);
+            font-family: 'Inter', sans-serif;
             line-height: 1.8;
         }
 
         .form-section {
             padding: 80px 0;
-            background: #FAFAF7;
+            background: rgba(255,255,255,0.02);
         }
 
         .form-container {
             max-width: 700px;
             margin: 0 auto;
-            background: #FFFFFF;
-            border: 1px solid rgba(200, 144, 10, 0.2);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
             padding: 48px;
         }
@@ -553,12 +617,14 @@
         .form-container h2 {
             text-align: center;
             margin-bottom: 16px;
-            color: #1a1918;
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--color-text);
         }
 
         .form-intro {
             text-align: center;
-            color: #52504A;
+            color: var(--color-text-muted);
+            font-family: 'Inter', sans-serif;
             margin-bottom: 40px;
         }
 
@@ -579,37 +645,39 @@
         }
 
         .form-group label {
-            color: #1a1918;
+            color: var(--color-text);
             margin-bottom: 8px;
             font-size: 14px;
+            font-family: 'Space Grotesk', sans-serif;
             font-weight: 500;
         }
 
         .form-group input,
         .form-group select {
-            background: #FAFAF7;
-            border: 1px solid rgba(200, 144, 10, 0.3);
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 8px;
             padding: 12px 16px;
-            color: #1a1918;
+            color: var(--color-text);
             font-size: 16px;
-            font-family: inherit;
+            font-family: 'Inter', sans-serif;
         }
 
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #C8900A;
+            border-color: var(--color-accent);
         }
 
         .submit-button {
-            background: linear-gradient(135deg, #C8900A, #F0C040);
+            background: linear-gradient(135deg, var(--color-accent), #6366f1);
             color: #FFFFFF;
             border: none;
             border-radius: 8px;
             padding: 16px 32px;
             font-size: 18px;
             font-weight: 600;
+            font-family: 'Space Grotesk', sans-serif;
             cursor: pointer;
             transition: transform 0.2s;
             margin-top: 16px;
@@ -621,8 +689,9 @@
 
         .form-note {
             text-align: center;
-            color: #64748b;
+            color: var(--color-text-muted);
             font-size: 13px;
+            font-family: 'Inter', sans-serif;
             margin-top: 16px;
         }
 
@@ -634,8 +703,8 @@
         }
 
         .stat-card {
-            background: #F7F6EF;
-            border: 1px solid rgba(200, 144, 10, 0.2);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
             padding: 32px;
             text-align: center;
@@ -644,22 +713,23 @@
         .stat-number {
             font-size: 48px;
             font-weight: 700;
-            background: linear-gradient(135deg, #C8900A, #F0C040);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--color-accent);
             margin-bottom: 12px;
         }
 
         .stat-label {
-            color: #1a1918;
+            color: var(--color-text);
             font-size: 18px;
+            font-family: 'Space Grotesk', sans-serif;
             font-weight: 600;
             margin-bottom: 12px;
         }
 
         .stat-card p {
-            color: #52504A;
+            color: var(--color-text-muted);
             font-size: 14px;
+            font-family: 'Inter', sans-serif;
             margin: 0;
         }
 
@@ -672,43 +742,67 @@
             display: none;
             position: absolute;
             top: 100%;
-            background: #FFFFFF;
+            background: var(--color-bg-elevated);
             min-width: 220px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             border-radius: 8px;
             padding: 12px 0;
-            padding-top: 12px;
-            margin-top: 4px;
+            margin-top: 8px;
             z-index: 1000;
-            border: 1px solid rgba(200, 144, 10, 0.2);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .dropdown-content a {
-            color: #52504A;
+            color: var(--color-text-muted);
             padding: 12px 24px;
             text-decoration: none;
             display: block;
-            font-size: 14px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
         }
 
         .dropdown-content a:hover {
-            background: #FAFAF7;
-            color: #C8900A;
+            background: rgba(255,255,255,0.05);
+            color: var(--color-accent);
         }
 
         .nav-dropdown:hover .dropdown-content {
             display: block;
         }
 
+        .content-section {
+            padding: 60px 0;
+        }
+
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--color-text);
+        }
+
+        .section-intro {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.1rem;
+            text-align: center;
+            color: var(--color-text-muted);
+            max-width: 700px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
+        }
+
         @media (max-width: 768px) {
+            .briefing-hero {
+                padding: 120px 0 60px;
+            }
             .form-row {
                 grid-template-columns: 1fr;
             }
-
             .form-container {
                 padding: 32px 24px;
             }
-
             .challenge-grid,
             .mechanisms-grid {
                 grid-template-columns: 1fr;
