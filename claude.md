@@ -324,6 +324,7 @@
 | **Pricing Strategy v1.0** | `01_Business/pricing/PRICING-STRATEGY-v1.0.md` | Three-tier pricing model, commission math, competitive analysis |
 | Pricing Decisions | `01_Business/pricing/DECISIONS.md` | Pricing version log and rationale |
 | Pricing Research | `01_Business/pricing/research/` | Competitor research (10 platforms), peer review feedback |
+| **Revenue Projections v3.1** | `01_Business/financials/REVENUE_PROJECTIONS_v3.1.md` | 6-month revenue projections with 80/20 Tier 1 and 50/50 Tier 2 payout structure |
 | Rights Playbook v0.1 | `06_Operations/legal/rights-playbook/versions/v0.1.md` | Rights vetting — sales asset for buyers |
 | Rights Playbook Decisions | `06_Operations/legal/rights-playbook/DECISIONS.md` | Playbook version log |
 | Filmmaker Agreement (WIP) | `06_Operations/legal/filmmaker-agreement/WORKING.md` | Terms for filmmaker representation |
