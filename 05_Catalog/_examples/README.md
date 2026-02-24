@@ -52,15 +52,20 @@ Each Chain of Title includes **9 structured fields** (see: `/06_Operations/right
 05_Catalog/_examples/
 ├── README.md                           # This file
 ├── TEMPLATE.md                         # Blank Chain of Title template (copy for new entries)
+├── FEEDBACK-SYNTHESIS.md               # External AI feedback on Rights Package (ChatGPT + Gemini)
+├── PDF-VERSIONS-GUIDE.md               # Instructions for generating Sample vs Full PDFs
 ├── example-001-neon-dreams/            # Example 1: Cyberpunk commercial/short
 │   ├── chain-of-title-v1.0.md         # The Chain of Title deliverable (markdown)
-│   ├── [Example] Rights Package — Neon Dreams.pdf  # PDF version (for sales/download)
+│   ├── Rights Package — Neon Dreams.pdf            # ✓ Full version (P1+P2 updates, Feb 24 2026)
+│   ├── Sample - Rights Package — Neon Dreams.pdf   # ✓ Sample version (watermarked, Feb 24 2026)
 │   ├── production-brief.md            # Fictional filmmaker submission (shows what SI8 receives)
-│   └── notes.md                       # Design decisions, why we chose this example
+│   ├── notes.md                       # Design decisions, why we chose this example
+│   └── versions/                      # Archived versions
+│       └── v0.9-pre-p1-fixes.pdf      # Original version before P1+P2 updates
 ├── example-002-[title]/                # Future examples as needed
 ├── pdf-template/                       # HTML templates for generating branded PDFs
 │   ├── README.md                      # PDF generation guide
-│   ├── neon-dreams.html               # Styled HTML (Example 001)
+│   ├── neon-dreams.html               # Styled HTML (Example 001, P1+P2 updates applied)
 │   ├── rights-package-template.html   # Blank template
 │   └── generate-pdf.sh                # PDF generation script
 └── versions/
@@ -72,7 +77,11 @@ Each Chain of Title includes **9 structured fields** (see: `/06_Operations/right
 ## How to Use This Folder
 
 ### For Sales Conversations
-- Share `example-001-neon-dreams/[Example] Rights Package — Neon Dreams.pdf` with prospects
+- **Public/Cold Outreach:** Share `Sample - Rights Package — Neon Dreams.pdf` (watermarked)
+  - Use for: cold email, LinkedIn, website download, advisor presentations
+  - Includes all P1+P2 updates (legal language fixes + executive summary)
+- **Serious Buyers (Post-Call):** Share `Rights Package — Neon Dreams.pdf` (full, no watermark)
+  - Use for: qualified prospects after discovery call, before proposal stage
 - Markdown version also available: `chain-of-title-v1.0.md`
 - Demonstrates professionalism, legal rigor, defensibility
 - Shows what buyers receive vs. unlicensed AI video stock sites
@@ -117,7 +126,7 @@ Each Chain of Title includes **9 structured fields** (see: `/06_Operations/right
 
 | Example | Content Type | Tool Stack | Use Case | Status |
 |---------|-------------|------------|----------|--------|
-| 001 - Neon Dreams | Cyberpunk commercial/short (90s) | Runway Gen-3 + ElevenLabs | Tier 1 + Tier 2 (modification authorized) | ✓ v1.0 |
+| 001 - Neon Dreams | Cyberpunk commercial/short (90s) | Runway Gen-3 + ElevenLabs | Tier 1 + Tier 2 (modification authorized) | ✅ **v1.0 Complete** (Full + Sample PDFs, P1+P2 updates, Feb 24 2026) |
 | 002 - [TBD] | Narrative short film | Sora | Tier 1 only (no modification) | Planned |
 | 003 - [TBD] | Product demo / explainer | Kling + custom audio | Tier 2 (product placement) | Planned |
 
