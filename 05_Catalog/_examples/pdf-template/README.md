@@ -315,7 +315,8 @@ Use any of the three methods above to create PDF.
 
 ## Next Steps
 
-1. **Generate Example 001 PDF** using `neon-dreams.html`
+1. ✅ **Generate Example 001 PDF** using `neon-dreams.html` — COMPLETE (Feb 2026)
+   - Output: `/05_Catalog/_examples/example-001-neon-dreams/[Example] Rights Package — Neon Dreams.pdf`
 2. **Test with buyers** — get feedback on formatting, clarity
 3. **Iterate template** based on feedback
 4. **Add to website** as downloadable sample

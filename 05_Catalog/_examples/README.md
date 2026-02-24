@@ -53,10 +53,16 @@ Each Chain of Title includes **9 structured fields** (see: `/06_Operations/right
 ├── README.md                           # This file
 ├── TEMPLATE.md                         # Blank Chain of Title template (copy for new entries)
 ├── example-001-neon-dreams/            # Example 1: Cyberpunk commercial/short
-│   ├── chain-of-title-v1.0.md         # The Chain of Title deliverable
+│   ├── chain-of-title-v1.0.md         # The Chain of Title deliverable (markdown)
+│   ├── [Example] Rights Package — Neon Dreams.pdf  # PDF version (for sales/download)
 │   ├── production-brief.md            # Fictional filmmaker submission (shows what SI8 receives)
 │   └── notes.md                       # Design decisions, why we chose this example
 ├── example-002-[title]/                # Future examples as needed
+├── pdf-template/                       # HTML templates for generating branded PDFs
+│   ├── README.md                      # PDF generation guide
+│   ├── neon-dreams.html               # Styled HTML (Example 001)
+│   ├── rights-package-template.html   # Blank template
+│   └── generate-pdf.sh                # PDF generation script
 └── versions/
     └── CHANGELOG.md                    # Track template evolution over time
 ```
@@ -66,7 +72,8 @@ Each Chain of Title includes **9 structured fields** (see: `/06_Operations/right
 ## How to Use This Folder
 
 ### For Sales Conversations
-- Share `example-001-neon-dreams/chain-of-title-v1.0.md` with prospects
+- Share `example-001-neon-dreams/[Example] Rights Package — Neon Dreams.pdf` with prospects
+- Markdown version also available: `chain-of-title-v1.0.md`
 - Demonstrates professionalism, legal rigor, defensibility
 - Shows what buyers receive vs. unlicensed AI video stock sites
 
