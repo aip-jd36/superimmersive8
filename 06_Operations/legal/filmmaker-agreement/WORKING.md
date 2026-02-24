@@ -52,6 +52,7 @@ for formal agreement to be drafted.
 - Negotiate licenses with platforms, brands, educational institutions
 - Use work in SI8 marketing (with filmmaker approval)
 - Include in MyVideo / platform proposals
+- **Share technical production documentation (including prompt logs, tool settings, and authorship declarations) with qualified buyers under NDA** for licensing due diligence purposes
 
 ### What Filmmaker Retains
 - Final approval on any exclusive licensing deals
