@@ -1,317 +1,291 @@
-# Revised Action Plan — Post-Feedback Alignment
+# Revised Action Plan — Post-Round 2 Alignment
 
-**Date:** February 26, 2026
-**Based on:** ChatGPT + Gemini feedback synthesis
-**Status:** Aligned with founder decisions
+**Date:** February 27, 2026
+**Based on:** Round 2 ChatGPT + Gemini feedback synthesis
+**Status:** Updated after both AIs challenged original decisions
+**Previous version:** Feb 26, 2026 (before Round 2 feedback)
 
 ---
 
-## Decisions Made
+## What Changed from Round 1 to Round 2
+
+**Round 1 Decisions (Feb 26):**
+- ✅ Cut advisory board
+- ✅ Postpone AI Creators Fest
+- ✅ Parallel execution (both tracks Week 1)
+- ✅ 5-film MyVideo pilot
+- ❌ Deprioritize Tier 3 advisory
+
+**Round 2 Reality Check (Feb 27):**
+
+Both AIs caught the same pattern: **"You're still trying to 'win via preparation' instead of 'win via conversations.'"**
+
+### Key Corrections:
+1. **Parallel execution is a trap** — Automation ≠ selling; you'll have no catalog to show agencies when they respond
+2. **Week 1 too ambitious** — Rights Verified takes 2 hrs/video (not 1 hr) on first run
+3. **MyVideo should be 3 films** — Don't gate pitch behind hypothetical second filmmaker
+4. **Tier 3 CAN be sold now** — Reframe as "Risk Briefing" product ($2K-$5K), easiest first revenue
+5. **Contact quotas required** — Must include measurable human interaction, not just setup
+
+---
+
+## Final Decisions (Post-Round 2)
 
 ### 1. Advisory Board: ✅ CUT until $5K revenue
 **Decision:** Cut advisory board initiative until after first $5K revenue.
-**Why:** Time sink, optics risk, focus on revenue first.
 **Gate:** Revisit after $5K closes.
+**Status:** Unchanged from Round 1.
 
 ---
 
-### 2. AI Creators Fest: 🔄 KEEP but POSTPONE + REFRAME
-**Decision:** Keep as B2B brand pitch / lead magnet, but NOT Month 3.
-**Reframe:** Position as private B2B showcase for brands, not public festival.
-**Timing:** Month 5-6 (after catalog + first deals)
-**Format:** Intimate brand showcase (10-15 brand attendees) with curated AI film screenings + product placement demos.
-**Goal:** Tier 2 lead generation (not Tier 3 advisory).
+### 2. AI Creators Fest: 🔄 Month 5-6, Trigger-Based
+**Decision:** Private B2B showcase, NOT Month 3.
+**Trigger:** 2 paying customers OR 1 Tier 2 pilot underway (not calendar-based).
+**Format:** 10-15 brand attendees, curated screenings + live Tier 2 placement demos.
+**Goal:** Tier 2 lead generation (deal-closing mechanism, not lead magnet).
+**Status:** Unchanged from Round 1.
 
 ---
 
-### 3. Demand vs Supply: ✅ PARALLEL APPROACH
-**Decision:** Both in parallel, not sequential.
-**Brand Outreach:** Use existing LinkedIn outreach system (automated/scaled).
-**Filmmaker Outreach:** Manual, personal (warm conversations).
-**Why:** LinkedIn system can run in background while doing filmmaker calls.
-**Key:** Don't let one block the other.
+### 3. Demand vs Supply: 🔄 SEQUENTIAL, NOT PARALLEL
+**Decision:** Build catalog FIRST (Week 1), THEN launch outreach (Week 2).
+**Why Round 2 changed this:**
+- "You cannot sell from an empty cart" — if agencies respond Week 1, you have nothing to show
+- Automation requires managing replies, writing sequences, configuring CRM (not passive)
+- Week 1 = prove Rights Verified works in production, not on paper
+
+**New approach:**
+- **Week 1:** Filmmaker → 3 videos → Rights Verified → MyVideo pitch → 30 agency list + 10 manual messages
+- **Week 2:** LinkedIn automation + CRM + scale outreach to 50+ messages
 
 ---
 
-### 4. Catalog Targets: ✅ REDUCE + "MINI-SET" APPROACH
-**Decision:** Reduce targets + build "mini-set" from one creator first.
+### 4. Catalog Targets: ✅ "MINI-SET" APPROACH
+**Decision:** 3 films from 1 creator Month 2, expand based on demand.
 
 **New Targets:**
-- **Month 2:** 3 pieces from 1 creator (Gemini's "mini-set")
+- **Month 2:** 3 pieces from 1 creator
 - **Month 3:** 6-8 pieces from 2 creators
 - **Month 4+:** Add creators based on demand signals
 
-**Why:** Quality > quantity. Easier to deliver on MyVideo 5-film pilot with focused catalog.
+**Status:** Unchanged from Round 1.
 
 ---
 
-### 5. Tier 3 Advisory: ❌ DON'T LEAD WITH THIS
-**Decision:** Focus on Tier 1 (catalog) and Tier 2 (placement), NOT Tier 3.
-**Why:** Without roster of advisors or track record, Tier 3 is harder sell right now.
-**Priority:** Get catalog live, close Tier 1/2 deals, THEN add Tier 3 credibility.
-**Note:** Disagrees with both AIs, but founder reasoning is sound.
+### 5. Tier 3 Advisory: 🔄 ADD AS "RISK BRIEFING" PRODUCT
+**Decision:** Add Tier 3 as structured product offering (not consulting).
+**Why Round 2 changed this:** ChatGPT: "You're WRONG to deprioritize it. Easiest thing to sell before catalog exists."
+
+**Reframe:** Not "we're advisors" but "we built the Rights Verified system, here's how to apply it to your workflow."
+
+**Two offerings:**
+- **Option A (Entry):** $2K-$3.5K — 60-90 min call + 1-page Risk Memo + disclosure checklist
+- **Option B (Premium):** $5K — 2-week engagement + Platform Policy Map + Compliance Pack
+
+**Target:** Singapore agencies building AI content in-house (need process, not content).
+
+**Strategy:** Wedge offer for first revenue + case study (still focus on Tier 1/2 long-term).
+
+**Status:** CHANGED from Round 1 (was deprioritized, now active offering).
 
 ---
 
-### 6. MyVideo Proposal: ✅ 5-FILM PILOT
-**Decision:** 5-film pilot (compromise between 3 and 10).
-**Pricing:** $8K-$12K (middle ground).
-**Pitch:** "5-film pilot to validate the model, expand to full catalog in Phase 2."
-**Deliverable:** 5 Rights Verified films, Taiwan territory, 12 months.
+### 6. MyVideo Proposal: 🔄 3-FILM PILOT (NOT 5)
+**Decision:** 3-film micro-pilot from single filmmaker.
+**Pricing:** $7.5K-$8K (or $10K with value-adds).
+**Why Round 2 changed this:** Gemini: "Do not gate your most important sales pitch behind a hypothetical second filmmaker."
+
+**Pitch:** "3-Film Micro-Pilot to validate the model, expand to full catalog in Phase 2."
+
+**Deliverable:**
+- 3 Rights Verified films
+- Taiwan territory, 12 months, non-exclusive streaming
+- Full Chain of Title documentation per film
+- 1-page Risk Briefing tailored to MyVideo
+- 1 replacement if any asset flagged internally
+
+**Status:** CHANGED from Round 1 (was 5 films, now 3).
 
 ---
 
-### 7. This Week's Focus: ✅ PARALLEL EXECUTION
-**Decision:** Run both Gemini's sequence (filmmaker) AND ChatGPT's approach (brand outreach) in parallel.
+### 7. Week 1 Focus: 🔄 CATALOG FIRST, CONTACT ON SUNDAY
+**Decision:** Prove Rights Verified works, THEN add contact quota Sunday.
 
-**This Week (12-15 hours):**
-- **Track A (Supply):** 1-Page Deck → Filmmaker call → 3 videos → MyVideo pitch (7 hrs)
-- **Track B (Demand):** Singapore list → LinkedIn outreach setup (5 hrs)
+**Week 1 Simplified (14 hours):**
 
-**Why:** User has LinkedIn automation system — can run in background while doing filmmaker work.
+| Day | Task | Hours | Track |
+|-----|------|-------|-------|
+| **Mon** | 1-Page Deck | 2 hrs | Asset |
+| **Tue** | Filmmaker outreach (schedule call) | 30 min | Contact |
+| **Wed** | Filmmaker call → receive 3 videos | 2 hrs | Contact |
+| **Thu-Fri** | Rights Verified review (3 videos) | 6 hrs | Core work |
+| **Sat** | MyVideo pitch drafted + sent (3-film pilot) | 1.5 hrs | Contact |
+| **Sun** | Build 30 agency list + send 10 manual messages | 2 hrs | Contact |
+
+**Total:** 14 hours
+
+**Contact Quota (Non-Negotiable):**
+- ✅ 10 manual messages sent
+- ✅ 1 filmmaker call completed
+- ✅ 1 MyVideo pitch sent
+- ✅ Goal: Book 1 call by end of week (filmmaker or buyer)
+
+**Cut from Week 1:**
+- ❌ LinkedIn automation setup (Week 2)
+- ❌ Pipedrive config (use spreadsheet for now)
+- ❌ Building 100 agencies (just 30)
+
+**Why this order:** Catalog first = can confidently reply "Yes, here's our catalog" when agencies respond Week 2+.
+
+**Status:** CHANGED from Round 1 (was parallel execution, now sequential with contact quota).
 
 ---
 
-### 8. Weekly Scoreboard: ✅ IMPLEMENT + PIPEDRIVE
-**Decision:** Weekly scoreboard + leverage existing Pipedrive CRM.
-**Format:** Simple markdown tracker + Pipedrive for pipeline stages.
-**Track:** Agencies added, outreach sent, calls booked, revenue, filmmakers, catalog.
-**Frequency:** Update every Monday morning.
+### 8. Filmmaker Economics: 🔄 50/50 FOR "FOUNDING ROSTER"
+**Decision:** Lead with 50/50 split on Tier 1 for first filmmaker.
+**Why:** Gemini: "You need this filmmaker desperately. If you pitch 80/20 on passive licensing to your first creator, you risk them walking away."
+
+**Pitch script:**
+> "For our founding roster, we're doing a 50/50 split on both catalog licensing (Tier 1) and custom brand placements (Tier 2). Once we establish the baseline, our standard platform rate will shift to 80/20 for passive licensing, but you'll be grandfathered in at 50/50 for your first 3 films."
+
+**Future filmmakers:** Revert to 80/20 Tier 1, 50/50 Tier 2.
+
+**Status:** NEW decision (not in Round 1 plan).
+
+---
+
+### 9. Weekly Scoreboard: ✅ IMPLEMENT + NEW METRICS
+**Decision:** Weekly scoreboard with ChatGPT's recommended metrics.
+
+**Track:**
+- Filmmakers signed
+- Catalog entries
+- Agencies added to list
+- **Manual touches sent (not automated)** — NEW
+- **Follow-ups sent** — NEW
+- **Reply rate (positive + negative) on first 30 messages** — NEW
+- Calls booked
+- Proposals sent
+- Revenue closed
+
+**Frequency:** Update every Monday morning, 15 minutes.
+
+**Status:** Enhanced from Round 1 (added ChatGPT's contact-focused metrics).
 
 ---
 
 ## Revised Weekly Action Plan
 
-### THIS WEEK (Feb 26 - Mar 4) — 12-15 Hours
+### THIS WEEK (Feb 26 - Mar 4) — 14 Hours
 
-#### Track A: Supply (Filmmaker → Catalog → MyVideo)
+**Primary Track: Prove Rights Verified Works (11.5 hrs)**
 
 | Day | Task | Hours | Output |
 |-----|------|-------|--------|
 | **Mon** | Create 1-Page Agency Deck (Canva/Figma) | 2 hrs | PDF ready for filmmaker pitch + MyVideo |
-| **Tue** | Reach out to filmmaker (warm contact) | 30 min | Call scheduled for Thu/Fri |
-| **Wed** | Build Singapore target list (100 agencies) | 3 hrs | Airtable/Notion with 100 rows |
-| **Thu** | Filmmaker call: Pitch 50/50, get 3 videos | 2 hrs | 3 videos + receipts received |
-| **Fri AM** | Rights Verified review (3 videos) | 2 hrs | 3 Rights Packages generated |
-| **Fri PM** | Draft + send MyVideo pitch (5-film pilot) | 1.5 hrs | Email sent to Jamie Lin |
+| **Tue** | Reach out to filmmaker (warm contact) | 30 min | Call scheduled for Wed |
+| **Wed** | Filmmaker call: Pitch 50/50, get 3 videos | 2 hrs | 3 videos + receipts received |
+| **Thu-Fri** | Rights Verified review (3 videos) | 6 hrs | 3 Rights Packages generated (2 hrs/video) |
+| **Sat** | Draft + send MyVideo pitch (3-film pilot) | 1.5 hrs | Email sent to Jamie Lin |
 
-**Track A Total:** 11 hours
-
----
-
-#### Track B: Demand (Brand Outreach Setup)
+**Secondary Track: Proof of Contact (2.5 hrs)**
 
 | Day | Task | Hours | Output |
 |-----|------|-------|--------|
-| **Wed** | (Already built Singapore list above) | — | 100 agencies in Airtable |
-| **Sat** | LinkedIn outreach sequence setup | 2 hrs | 5-message sequence ready |
-| **Sun** | Pipedrive setup (pipeline stages) | 1 hr | CRM ready for tracking |
+| **Sun AM** | Build 30 agency list (Singapore) | 1 hr | 30 agencies in spreadsheet |
+| **Sun PM** | Send 10 manual messages | 1.5 hrs | 10 personalized LinkedIn/emails sent |
 
-**Track B Total:** 3 hours (+ using existing LinkedIn system)
+**Contact Quota Checklist:**
+- [ ] 10 manual messages sent (not automated)
+- [ ] 1 filmmaker call completed
+- [ ] 1 MyVideo pitch sent
+- [ ] Goal: 1 call booked by end of week
 
 ---
 
-### NEXT WEEK (Mar 5-11) — Outreach Launch
+### NEXT WEEK (Mar 5-11) — Launch Outreach at Scale
 
-**Track A (Supply):**
-- Sign first filmmaker (shopping agreement)
-- Second filmmaker outreach (if needed for 5-film pilot)
-- MyVideo follow-up (if no response by Wed)
+**Only after you have:**
+- ✅ 3 videos vetted
+- ✅ 3 Rights Packages generated
+- ✅ MyVideo pitch sent
+- ✅ Proof Rights Verified SOP works in production
 
-**Track B (Demand):**
-- Launch LinkedIn outreach: 20-30 messages Week 1
-- Goal: Book 2-3 calls
-- Test messaging, iterate based on responses
+**THEN:**
+- Build full 100 agency list
+- Set up LinkedIn automation
+- Configure Pipedrive CRM
+- Launch outreach at scale (50+ messages)
+- Test Tier 3 "Risk Briefing" pitch alongside Tier 1/2
+
+**Why this order:** You can confidently reply "Yes, here's our catalog" when agencies respond.
 
 ---
 
 ## Revised Month 2 Goals (March 2026)
 
 ### Primary Goal: First Revenue
-**Target:** Close 1 deal (Tier 1 OR Tier 2) for $5K+ minimum
+**Target:** Close 1 deal (any tier) for **$5K+ minimum**
+
+**Acceptable outcomes:**
+- 1 Tier 3 "Risk Briefing" ($2K-$5K) → fastest path, no catalog required
+- 1 Tier 1 catalog license (MyVideo or Singapore agency) → $7.5K-$12K
+- 1 Tier 2 custom placement → $15K-$25K
 
 ### Supply Targets (Reduced):
-- Filmmakers signed: **1-2** (not 2-3)
-- Catalog entries: **3-6** (not 6-10)
-  - Month 2: 3 pieces from 1 creator (mini-set)
-  - Add more only if demand requires
+- Filmmakers signed: **1** (founding roster, 50/50 split)
+- Catalog entries: **3** (mini-set from 1 creator)
+- Add more only if demand requires
 
 ### Demand Targets:
-- Singapore list: **100 agencies** (complete Week 1)
-- LinkedIn outreach: **100 touches** (not 200 — test first)
+- Singapore list: **100 agencies** (30 Week 1, 70 Week 2)
+- LinkedIn outreach: **100 touches** (not 200 — test messaging first)
 - Calls booked: **5-8**
 - Proposals sent: **2-3**
 
 ### Revenue Target:
-- **Close 1 deal:** $5K-$15K
-- Tier 1 (MyVideo 5-film pilot): $8K-$12K
+- **Close 1 deal:** $5K minimum
+- Tier 3 (Risk Briefing): $2K-$5K — fastest path
+- Tier 1 (MyVideo 3-film pilot): $7.5K-$8K
 - OR Tier 2 (brand placement): $15K-$25K
 
 ---
 
-## Parallel Execution Strategy
+## Risk Mitigation (Updated)
 
-### Why Parallel Works for You:
+### Risk: MyVideo stalls
+**Mitigation:** Singapore outreach runs in parallel Week 2+ — not dependent on MyVideo response.
 
-**You have:**
-- LinkedIn outreach system (can automate/scale brand touches)
-- Warm filmmaker contact (easier first conversation)
-- Pipedrive CRM (track both pipelines separately)
+### Risk: LinkedIn outreach <10% response
+**Mitigation:** Test with 30 agencies + 20 messages first (Week 1-2), iterate messaging before scaling to 100.
 
-**Approach:**
-1. **Week 1:** Build both tracks (filmmaker + Singapore list)
-2. **Week 2+:** Filmmaker track = manual/high-touch, Brand track = automated/scaled
-3. **Don't let one block the other** — LinkedIn runs while you do filmmaker calls
+### Risk: Filmmaker rejects 50/50 pitch
+**Mitigation:** Lead with "founding roster" framing + Tier 2 opportunity (50/50 on both tiers for first 3 films). Show Rights Package as proof of value SI8 adds.
 
-**Key insight:** You're not choosing demand vs. supply. You're building both engines in parallel because you have systems to support it.
+### Risk: Can't deliver 3 films to MyVideo
+**Mitigation:** Already mitigated (reduced from 5 to 3). Single filmmaker can deliver 3 works.
 
----
+### Risk: Production trap (Tier 4 overwhelms)
+**Mitigation:** Friday Rule still applies. Only take Tier 4 if doesn't block Tier 1/2 catalog building.
 
-## Weekly Scoreboard Format
-
-**Track in:** `01_Business/plans/WEEKLY-SCOREBOARD.md`
-
-```markdown
-# Weekly Scoreboard
-
-## Week 1 (Feb 26 - Mar 4, 2026)
-
-### Supply Track
-- [ ] 1-Page Deck created
-- [ ] Filmmaker call completed
-- [ ] 3 videos received
-- [ ] Rights Verified review complete (3 packages)
-- [ ] MyVideo pitch sent (5-film pilot)
-- Filmmakers signed: 0
-- Catalog entries: 0
-
-### Demand Track
-- [ ] Singapore list: 100 agencies
-- [ ] LinkedIn sequence setup
-- [ ] Pipedrive configured
-- Outreach sent: 0
-- Calls booked: 0
-- Proposals sent: 0
-
-### Revenue
-- Deals closed: 0
-- Revenue: $0
+### Risk: No revenue Month 2
+**Mitigation:** Tier 3 "Risk Briefing" is fastest path to first $5K — no catalog required, just Rights Package as proof. If Tier 1/2 stalls, pivot to Tier 3.
 
 ---
 
-## Week 2 (Mar 5-11, 2026)
+## Open Questions
 
-### Supply Track
-- [ ] Filmmaker agreement signed
-- [ ] Second filmmaker outreach (if needed)
-- [ ] MyVideo follow-up
-- Filmmakers signed: __
-- Catalog entries: __
+1. **Filmmaker warm contact:** Who are you reaching out to? Do they already know about SI8?
+   - **Action:** Confirm name + relationship before Week 1 starts
 
-### Demand Track
-- [ ] LinkedIn outreach: 20-30 messages
-- [ ] Calls scheduled: __
-- Outreach sent: __
-- Calls booked: __
-- Proposals sent: __
+2. **LinkedIn automation tool:** Which tool are you using? Setup time required?
+   - **Action:** Confirm tool + setup process for Week 2
 
-### Revenue
-- Deals closed: __
-- Revenue: $__
-```
+3. **MyVideo pricing:** $7.5K, $8K, or $10K for 3-film pilot?
+   - **Recommendation:** Pitch $10K with value-adds (Risk Briefing + replacement), negotiate down to $7.5K if needed
 
-**Update:** Every Monday morning, 15 minutes
-
----
-
-## MyVideo Pitch: 5-Film Pilot
-
-**To:** Jamie Lin, Chairman, Taiwan Mobile
-**Subject:** SI8 × MyVideo: 5-Film AI Content Pilot (Rights Verified)
-
-**Pitch Structure:**
-
-**Opening:**
-> We've built a Rights Verified catalog of AI-generated films specifically designed for commercial licensing — clean legal documentation, tool provenance, human authorship proof.
-
-**Offer:**
-> 5-film pilot for MyVideo Taiwan:
-> - 5 Rights Verified AI films (90-120 seconds each)
-> - Taiwan territory, 12 months, non-exclusive streaming
-> - Full Chain of Title documentation (9-field package per film)
-> - Genres: Cyberpunk, sci-fi, narrative shorts
-> - Tools: Runway Gen-3, Sora, ElevenLabs (paid commercial plans)
-
-**Pricing:** $10,000 ($2,000/film)
-
-**Phase 2 Option:** Expand to full 15-20 film catalog if pilot successful
-
-**Attachments:**
-- 1-Page Deck (visual overview)
-- Sample Rights Package (Neon Dreams example)
-- 3 catalog previews (once ready)
-
-**CTA:** "Available for call this week to discuss. Let me know if you'd like to see the full catalog preview."
-
----
-
-## Singapore LinkedIn Outreach Sequence
-
-**Target:** Creative Directors, Marketing Heads at Singapore agencies
-
-**Message 1 (Connection Request):**
-> Hi [Name], I'm building a Rights Verified catalog of AI films for commercial licensing — basically Getty Images for AI video. Saw your work at [Agency] and thought you might find this interesting. Open to connect?
-
-**Message 2 (After Accept, Day 3):**
-> Thanks for connecting! Quick context: We solve the "AI content legal risk" problem for brands. Our Rights Verified process documents tool provenance, human authorship, and commercial use authorization — so your legal team doesn't panic. Relevant for [Agency]'s AI video projects?
-
-**Message 3 (If Interested, Day 7):**
-> Here's a sample Rights Package showing what we deliver: [Google Drive link]. This is the 12-page legal documentation that accompanies every licensed AI film. Happy to discuss how this could fit into [Agency]'s workflow.
-
-**Message 4 (If Still Engaged, Day 10):**
-> Two ways we can work together:
-> 1. **Tier 1:** License AI films from our catalog (as-is) for client campaigns
-> 2. **Tier 2:** Custom AI product placement (we regenerate brand elements into existing catalog films)
->
-> Want to explore either path?
-
-**Message 5 (CTA, Day 14):**
-> Open for a 20-minute call this week? I can walk through 3-4 catalog examples and pricing. [Calendly link]
-
-**Sequence managed in:** LinkedIn automation tool + Pipedrive tracking
-
----
-
-## AI Creators Fest Reframe (Month 5-6)
-
-**Original concept:** Public festival, Tier 3 advisory lead gen
-**Revised concept:** Private B2B brand showcase, Tier 2 lead gen
-
-**Format:**
-- **Attendees:** 10-15 brand marketing execs (invite-only)
-- **Content:** Curated AI film screenings (30 min) + Tier 2 product placement demos (30 min)
-- **Pitch:** Live demo of "before/after" — show original catalog film, then AI-regenerated version with brand elements
-- **Outcome:** Book Tier 2 placement deals, not advisory consulting
-
-**Timing:** Month 5-6 (after catalog live + first Tier 1/2 deals closed)
-
-**Budget:** $2K-$5K (venue, drinks, AV) — fund from first revenue
-
-**Why later:** Need working catalog + real Tier 2 case study before showcasing
-
----
-
-## Key Changes from Original Plan
-
-| Original | Revised | Why |
-|----------|---------|-----|
-| Advisory board Month 1 | Cut until $5K | Time sink, focus revenue first |
-| AI Creators Fest Month 3 | Month 5-6, reframed as B2B showcase | Need catalog + deals first |
-| 15-20 catalog entries Month 3 | 6-8 entries Month 3 | Quality > quantity, easier delivery |
-| Supply-first (filmmaker then outreach) | Parallel (both at once) | User has LinkedIn system, can run both |
-| Tier 3 advisory lead | Tier 1/2 catalog/placement lead | No credibility for advisory yet |
-| MyVideo 10 films | MyVideo 5-film pilot | Easier delivery, faster close |
-| Monthly review only | Weekly scoreboard | Accountability, catch drift early |
+4. **Tier 3 positioning:** Lead with Tier 1/2 and offer Tier 3 as down-sell, or pitch all 3 tiers equally?
+   - **Recommendation:** Test both approaches Week 2 — some agencies need content (Tier 1/2), some need process (Tier 3)
 
 ---
 
@@ -320,77 +294,77 @@
 ### Week 1 Success:
 - ✅ 1-Page Deck created
 - ✅ Filmmaker call completed, 3 videos received
-- ✅ MyVideo pitch sent
-- ✅ Singapore list: 100 agencies
-- ✅ LinkedIn outreach ready to launch
+- ✅ 3 Rights Packages generated (Rights Verified SOP proven in production)
+- ✅ MyVideo pitch sent (3-film pilot)
+- ✅ 30 agency list built
+- ✅ 10 manual messages sent
+- ✅ 1 call booked (filmmaker or buyer)
 
 ### Month 2 Success:
-- ✅ 1 filmmaker signed
-- ✅ 3-6 catalog entries live
+- ✅ 1 filmmaker signed (founding roster, 50/50)
+- ✅ 3 catalog entries live
 - ✅ 100 LinkedIn touches sent
 - ✅ 5-8 calls booked
-- ✅ **1 deal closed: $5K minimum**
+- ✅ **1 deal closed: $5K minimum** (any tier)
 
 ### Month 3 Success:
 - ✅ 2 filmmakers signed
 - ✅ 6-8 catalog entries
 - ✅ **2 deals closed: $10K-$20K total**
-- ✅ MyVideo pilot live OR brand placement deal closed
+- ✅ MyVideo pilot live OR brand placement deal closed OR 2 Tier 3 Risk Briefings delivered
 
 ---
 
-## Risk Mitigation (Updated)
+## ChatGPT's Contact Test
 
-### Risk: MyVideo stalls
-**Mitigation:** Singapore outreach runs in parallel — not dependent on MyVideo response
+**The Test:** "By Mar 4, did you personally send at least 10 hand-written messages and book at least 1 call?"
 
-### Risk: LinkedIn outreach <10% response
-**Mitigation:** Test with 20-30 messages first, iterate messaging before scaling to 100
+**If YES:** You're out of infrastructure mode.
+**If NO:** You're still hiding with nicer tools.
 
-### Risk: Filmmaker rejects 80/20 Tier 1
-**Mitigation:** Lead with 50/50 Tier 2 opportunity, frame Tier 1 as bonus passive income
-
-### Risk: Can't deliver 5 films to MyVideo
-**Mitigation:** "Mini-set" approach — 3 from first filmmaker, 2 from second. Quality over quantity.
-
-### Risk: Production trap (Tier 4 overwhelms)
-**Mitigation:** Friday Rule still applies. Only take Tier 4 if doesn't block Tier 1/2 catalog building.
+**This Week's Accountability:**
+- Messages sent: ___ / 10
+- Calls booked: ___ / 1
+- Proposals sent: ___ / 1
 
 ---
 
-## Open Questions
+## Gemini's Challenge
 
-1. **Filmmaker agreement:** Lawyer review before first signing, or use draft as-is?
-   - **Recommendation:** Use draft, add "subject to legal review" clause
+> "I challenge you to delay the CRM and automated LinkedIn outbound by exactly 7 days. Spend this week proving that your core mechanism—taking a raw AI file, running it through the Rights Verified process, and generating the PDF—actually works in reality, not just on paper."
 
-2. **MyVideo pricing:** $8K, $10K, or $12K for 5-film pilot?
-   - **Recommendation:** Pitch $10K, negotiate down to $8K if needed
+**Translation:** Week 1 = proof of concept for your core value prop.
+**Week 2 THEN = outreach at scale.**
 
-3. **LinkedIn automation tool:** Which tool are you using?
-   - Need to know for sequence setup integration
+---
 
-4. **Pipedrive pipeline stages:** What stages do you want?
-   - **Recommendation:** Prospect → Contacted → Meeting Booked → Proposal Sent → Negotiation → Won/Lost
+## Both AIs' Closing Message
+
+> **Stop preparing to sell. Start selling.**
+
+**Gemini:** "Delay automation by 7 days. Prove the mechanism works."
+**ChatGPT:** "Week 1 must include contact: messages sent, calls booked, proposals sent."
 
 ---
 
 ## Next Steps (Immediate)
 
 **Tonight/Tomorrow:**
-1. Review this revised plan — any adjustments needed?
-2. Confirm filmmaker warm contact — who are you reaching out to?
-3. Confirm LinkedIn tool — what's the setup process?
+1. ✅ Review this revised plan — Round 2 adjustments clear?
+2. ✅ Confirm filmmaker warm contact — who + when to reach out?
+3. ✅ Confirm LinkedIn tool — setup time needed for Week 2?
 
-**This Week:**
-1. Execute Track A (filmmaker path) Mon-Fri
-2. Execute Track B (Singapore list + LinkedIn setup) Wed-Sun
-3. Update weekly scoreboard Monday AM
+**This Week (Execute):**
+1. Mon-Sat: Execute Primary Track (filmmaker path)
+2. Sun: Execute Secondary Track (30 agencies + 10 messages)
+3. Monday Mar 4: Update weekly scoreboard
 
 **Next Week:**
-1. Launch LinkedIn outreach
-2. Sign first filmmaker
+1. Launch LinkedIn automation (after catalog exists)
+2. Sign first filmmaker (founding roster, 50/50)
 3. Follow up MyVideo
+4. Scale outreach to 50+ messages
 
 ---
 
-**This plan is locked in and ready to execute. Weekly scoreboard starts Monday.**
+**This plan is locked in and ready to execute. Weekly scoreboard starts Monday Mar 4.**
