@@ -25,7 +25,7 @@
 **The four-tier model:**
 - **Tier 2 (Primary):** Custom AI Product Placement in vetted productions — brand elements regenerated into existing catalog films. "Won't get you sued." Premium price.
 - **Tier 1 (Standard):** Catalog licensing as-is — for platforms, airlines, streaming, editorial. Commercial use documented.
-- **Tier 3 (Advisory/inbound):** Referral + rights management for brands building their own AI content.
+- **Tier 3 (Active offering):** "Risk Briefing" product for agencies building AI content in-house. Two options: Entry ($2K-$3.5K) = Risk Memo + checklist; Premium ($5K) = 2-week engagement + Compliance Pack. Wedge offer for first revenue (no catalog required).
 - **Tier 4 (Commission/inbound):** Full bespoke production through vetted filmmaker network. Discretionary.
 
 **Key positioning:** "Getty for AI video — with a product placement layer Getty can never offer."
@@ -50,6 +50,17 @@
 - `BUSINESS_PLAN_v2.md` — demand-side first (superseded by v3)
 - `BUSINESS_PLAN_v3.md` — Rights Agency + AI Product Placement (current, February 2026)
 - `VERSION_HISTORY.md` — version log
+
+**Round 2 Decisions (February 27, 2026):**
+
+After external validation from ChatGPT + Gemini, key execution decisions changed:
+
+- **Sequential execution, not parallel** — Week 1 = prove Rights Verified works (catalog first), Week 2 = launch outreach at scale. Both AIs caught "win via preparation" avoidance pattern.
+- **MyVideo: 3 films not 5** — Don't gate pitch behind hypothetical second filmmaker. Easier delivery, faster close.
+- **Tier 3 added as active offering** — Reframed as "Risk Briefing" product ($2K-$5K). ChatGPT: "Easiest thing to sell before catalog exists." Not consulting, but structured deliverable.
+- **Filmmaker economics: 50/50 for "founding roster"** — First filmmaker gets 50/50 on both Tier 1 + Tier 2 for first 3 films (grandfathered). Future filmmakers: 80/20 Tier 1, 50/50 Tier 2.
+- **Contact quotas Week 1** — 10 manual messages, 1 call booked, 1 proposal sent (non-negotiable). ChatGPT's test: "By Mar 4, did you personally send at least 10 hand-written messages and book at least 1 call? If NO: still hiding with nicer tools."
+- **Rights Verified time reality** — Budget 2 hrs per video on first run (not 1 hr). Week 1 = 6 hrs for 3 videos.
 
 ### Revenue Model (Year 1 Target: $80-120K)
 
@@ -342,6 +353,10 @@
 | **Corporate Structure Overview** | `06_Operations/corporate/STRUCTURE-OVERVIEW.md` | Legal entity framework (DBA decision, Year 2 transition, buyer perception) |
 | **DBA Filing Guide** | `06_Operations/corporate/DBA-FILING-GUIDE.md` | Step-by-step Texas DBA filing instructions |
 | **Corporate Decisions** | `06_Operations/corporate/DECISIONS.md` | Corporate structure decision log |
+| **Revised Action Plan** (current) | `01_Business/plans/REVISED-ACTION-PLAN.md` | Post-Round 2 execution plan; sequential Week 1, 3-film MyVideo pilot, Tier 3 active offering, contact quotas |
+| **Round 2 Feedback Synthesis** | `01_Business/plans/ROUND-2-SYNTHESIS.md` | ChatGPT + Gemini Round 2 feedback; both AIs caught "win via preparation" pattern |
+| **Weekly Scoreboard** | `01_Business/plans/WEEKLY-SCOREBOARD.md` | Weekly tracking template with contact-focused metrics (manual touches, follow-ups, reply rate) |
+| **Tier 3: Risk Briefing Product** | `03_Sales/tier-3-risk-briefing.md` | Complete Tier 3 product definition (Option A: $2K-$3.5K, Option B: $5K); positioning, deliverables, sales process |
 
 ---
 
