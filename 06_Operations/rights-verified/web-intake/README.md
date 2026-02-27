@@ -37,8 +37,8 @@ A web-based intake form that allows filmmakers to submit their AI-generated work
 
 | Document | Status | Purpose |
 |----------|--------|---------|
-| **PRD.md** | 🟡 In progress | Product requirements, user stories, success metrics |
-| **TECHNICAL-SPEC.md** | ⏳ Not started | Stack decisions, data schema, API design |
+| **PRD.md** | ✅ Complete | Product requirements, user stories, success metrics |
+| **TECHNICAL-SPEC.md** | ✅ Complete | Stack decisions, data schema, API design |
 | **IMPLEMENTATION-PLAN.md** | ⏳ Not started | Build phases, task breakdown, timeline |
 | **DEPLOYMENT.md** | ⏳ Not started | Hosting, CI/CD, environment setup |
 | **TESTING.md** | ⏳ Not started | Test scenarios, QA checklist |
