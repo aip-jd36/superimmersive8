@@ -2,7 +2,7 @@
 
 A running log of decisions, insights, and lessons learned while building an AI film distribution company.
 
-*Last updated: February 21, 2026*
+*Last updated: February 27, 2026*
 
 ---
 
@@ -1813,6 +1813,91 @@ SI8 doesn't need to own the content to have a moat. Getty doesn't own most of it
 
 ---
 
+### #45: Building the Intake Layer — Web Form as Platform Foundation
+
+**Date:** February 27, 2026
+
+**The decision:**
+
+After two rounds of AI feedback (ChatGPT + Gemini both said "stop preparing to sell, start selling"), I'm now building the operational infrastructure to actually run Rights Verified at scale.
+
+The first piece: a web intake form for filmmaker submissions.
+
+**Why a web form matters:**
+
+Right now, if a filmmaker wants to submit work for Rights Verified review, they'd email me a PDF. That means:
+- I manually parse unstructured data (30+ minutes per submission)
+- Data lives in PDFs and emails (not queryable)
+- No tracking, no metrics, no automation
+- Doesn't scale past 5 submissions/month
+
+A web form changes this:
+- Structured data from day one (every submission = database row)
+- Automated email notifications (filmmaker gets confirmation, SI8 gets alert)
+- Mobile-responsive (60% of filmmakers will submit from phones)
+- Prepares for Year 3 platform (same form becomes self-serve intake)
+
+**But here's the real reason:**
+
+Year 1-2 = services business (I'm the vetting layer).
+Year 3+ = platform business (automated intake, human judgment for edge cases).
+
+If I build the web form correctly now — treating it like a platform even though it's just me — the transition to Year 3 is just turning on user accounts and payment processing. The data schema is already platform-ready.
+
+The services phase isn't a detour. It's the R&D for the platform.
+
+**What I'm building:**
+
+A 10-section submission form that captures:
+1. Filmmaker profile
+2. Production overview
+3. Tool disclosure (which AI tools used, with receipts)
+4. Human authorship declaration (copyright protection layer)
+5. Likeness & identity confirmation (no celebrity faces)
+6. IP & brand confirmation (no copyrighted characters)
+7. Audio & music disclosure
+8. Tier 2 brand placement enrollment (opt-in)
+9. Territory & exclusivity preferences
+10. Supporting materials (file uploads)
+
+All 10 sections map directly to what's in `SUBMISSION-REQUIREMENTS.md` — this isn't new. I'm just making it digital and structured.
+
+**The project management approach:**
+
+I'm treating this like proper software development:
+- PRD (Product Requirements Document)
+- Technical specification (stack, data schema, API design)
+- Implementation plan (phased build)
+- Deployment guide
+- Security documentation
+- Testing plan
+
+This is a checkpoint moment: the shift from "thinking about the business" to "building the operational machinery."
+
+**Timeline:**
+- Planning complete: Feb 28
+- v0.1 build: Mar 1-7
+- Beta testing: Mar 10-14
+- Launch: Mar 15 (live on superimmersive8.com/submit)
+
+First filmmaker submits via web form Week 2. That's when Rights Verified moves from theory to production.
+
+**LinkedIn-ready excerpt:**
+> "Week 1 was about stopping preparation mode.
+>
+> Week 2 is about building the operational layer.
+>
+> I'm building a web intake form for Rights Verified submissions. Not just a form — the foundation for the Year 3 platform.
+>
+> Year 1-2 = I'm the vetting layer (services).
+> Year 3+ = The form becomes self-serve (platform).
+>
+> If you build the services phase correctly, the platform transition is just turning on accounts and payments. The data schema is already there.
+>
+> Services first, platform later. But platform-ready from day one."
+
+---
+
 ### #43: Services First, Platform Later — The Right Sequence
 
 **Date:** February 2026
@@ -2111,14 +2196,15 @@ SI8's catalog has documentation on every piece: tool disclosure, Rights Verified
 
 ---
 
-## Status — February 21, 2026
+## Status — February 27, 2026
 
 **Completed this week:**
-- [x] Website launched — superimmersive8.com (light theme, catalog grid, bilingual)
-- [x] Traditional Chinese version live — superimmersive8.com/index-zh.html
-- [x] Language toggle functional (EN ↔ 繁體中文)
-- [x] Catalog grid: 6 cards, filter buttons, hover overlays, Rights Verified + Placement badges
-- [x] All code in GitHub: aip-jd36/superimmersive8
+- [x] Round 2 external validation (ChatGPT + Gemini) — both caught "win via preparation" pattern
+- [x] Revised action plan — sequential execution, 3-film MyVideo pilot, Tier 3 active offering, contact quotas
+- [x] Tier 3 "Risk Briefing" product defined — $2K-$5K structured offering (not consulting)
+- [x] Weekly scoreboard with contact-focused metrics — manual touches, follow-ups, reply rate
+- [x] Rights Verified web intake form project launched — PRD complete, planning phase underway
+- [x] Full project structure created: PRD, technical spec, implementation plan, deployment docs
 
 **Immediate priorities (still open):**
 - [ ] **Draft MyVideo proposal and send to Jamie Lin** (CRITICAL)
