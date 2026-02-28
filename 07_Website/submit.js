@@ -2,7 +2,10 @@
 // Submit Form JavaScript
 // ============================
 
+console.log('✅ submit.js loaded');
+
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ DOM ready, initializing form...');
 
     // Initialize
     initializeForm();
@@ -12,6 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeProgressTracking();
     initializeConditionalFields();
     initializeFormValidation();
+
+    console.log('✅ All initializations complete');
 
     // ============================
     // Form Initialization
