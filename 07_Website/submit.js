@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeProgressTracking();
     initializeConditionalFields();
     initializeFormValidation();
+    addTestDataButton();
 
     console.log('✅ All initializations complete');
 
@@ -350,7 +351,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function validateField(field) {
         const formGroup = field.closest('.form-group');
-        if (!formGroup) return;
+        if (!formGroup) return true; // No form group, skip validation
 
         // Remove existing error/success classes
         formGroup.classList.remove('error', 'success');
@@ -361,14 +362,42 @@ document.addEventListener('DOMContentLoaded', function() {
             existingError.remove();
         }
 
-        // Validate
+        // Handle checkboxes and radio buttons differently
+        if (field.type === 'checkbox' || field.type === 'radio') {
+            if (field.hasAttribute('required')) {
+                // For checkboxes: check if THIS checkbox is checked
+                if (field.type === 'checkbox') {
+                    if (!field.checked) {
+                        console.log(`🔴 Checkbox not checked: ${field.name}`);
+                        showFieldError(formGroup, 'This field is required');
+                        return false;
+                    }
+                }
+                // For radio: check if ANY radio in the group is checked
+                if (field.type === 'radio') {
+                    const name = field.name;
+                    const anyChecked = document.querySelector(`input[name="${name}"]:checked`);
+                    if (!anyChecked) {
+                        console.log(`🔴 No radio selected in group: ${name}`);
+                        showFieldError(formGroup, 'Please select an option');
+                        return false;
+                    }
+                }
+            }
+            formGroup.classList.add('success');
+            return true;
+        }
+
+        // Validate text inputs, textareas, selects
         if (field.hasAttribute('required') && !field.value.trim()) {
+            console.log(`🔴 Required field empty: ${field.name || field.id}`);
             showFieldError(formGroup, 'This field is required');
             return false;
         }
 
         if (field.type === 'email' && field.value) {
             if (!validateEmail(field.value)) {
+                console.log(`🔴 Invalid email: ${field.value}`);
                 showFieldError(formGroup, 'Please enter a valid email address');
                 return false;
             }
@@ -376,6 +405,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (field.type === 'url' && field.value) {
             if (!validateURL(field.value)) {
+                console.log(`🔴 Invalid URL: ${field.value}`);
                 showFieldError(formGroup, 'Please enter a valid URL');
                 return false;
             }
@@ -385,6 +415,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (field.id === 'authorship_declaration') {
             const words = field.value.trim().split(/\s+/).length;
             if (words < 150) {
+                console.log(`🔴 Word count too low: ${words}/150`);
                 showFieldError(formGroup, `Minimum 150 words required (current: ${words})`);
                 return false;
             }
@@ -620,6 +651,135 @@ document.addEventListener('DOMContentLoaded', function() {
             reader.onload = () => resolve(reader.result);
             reader.onerror = reject;
             reader.readAsDataURL(file);
+        });
+    }
+
+    // ============================
+    // Test Data Auto-Fill
+    // ============================
+
+    function addTestDataButton() {
+        // Create a floating test button
+        const testBtn = document.createElement('button');
+        testBtn.textContent = '🧪 Load Test Data';
+        testBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: #10b981; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);';
+        document.body.appendChild(testBtn);
+
+        testBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('🧪 Loading test data...');
+
+            // Section 1: Filmmaker Profile
+            document.querySelector('input[name="filmmaker_name"]').value = 'Jane Chen';
+            document.querySelector('input[name="filmmaker_email"]').value = 'jdchangmedia@gmail.com';
+            document.querySelector('input[name="filmmaker_location"]').value = 'Singapore, Singapore';
+            document.querySelector('input[name="filmmaker_portfolio"]').value = 'https://janechen.art';
+            document.querySelector('textarea[name="prior_works"]').value = 'https://vimeo.com/123456789\nhttps://youtube.com/watch?v=test123\nhttps://vimeo.com/987654321';
+
+            // Section 2: Production Overview
+            document.querySelector('input[name="title"]').value = 'Neon Dreams';
+            document.querySelector('input[name="runtime"]').value = '02:30';
+            document.querySelector('input[name="genre"]').value = 'Sci-fi narrative short';
+            document.querySelector('textarea[name="logline"]').value = 'A solitary robot discovers an abandoned garden in a neon-lit megacity and learns the meaning of growth through caring for a single flower.';
+            document.querySelector('input[name="intended_use"][value="Both"]').checked = true;
+            document.querySelector('input[name="production_start"]').value = 'Jan 2026';
+            document.querySelector('input[name="production_end"]').value = 'Feb 2026';
+            document.querySelector('textarea[name="existing_agreements"]').value = 'None';
+
+            // Section 3: Tools (3 tools)
+            // Tools are already added dynamically, so we need to fill them
+            const toolNames = document.querySelectorAll('input[name^="tool_name_"]');
+            const toolVersions = document.querySelectorAll('input[name^="tool_version_"]');
+            const toolPlans = document.querySelectorAll('input[name^="tool_plan_"]');
+
+            if (toolNames.length < 3) {
+                // Add more tools if needed
+                while (toolCount < 3) {
+                    addToolRow();
+                }
+            }
+
+            // Fill tool data
+            const toolData = [
+                { name: 'Runway', version: 'Gen-3 Alpha Turbo', plan: 'Paid - Unlimited Plan' },
+                { name: 'ElevenLabs', version: 'Voice Design', plan: 'Paid - Creator Plan' },
+                { name: 'Udio', version: 'v1.5', plan: 'Paid - Standard Plan' }
+            ];
+
+            toolData.forEach((tool, idx) => {
+                const nameInput = document.querySelector(`input[name="tool_name_${idx + 1}"]`);
+                const versionInput = document.querySelector(`input[name="tool_version_${idx + 1}"]`);
+                const planInput = document.querySelector(`input[name="tool_plan_${idx + 1}"]`);
+
+                if (nameInput) nameInput.value = tool.name;
+                if (versionInput) versionInput.value = tool.version;
+                if (planInput) planInput.value = tool.plan;
+            });
+
+            // Section 4: Authorship
+            document.querySelector('textarea[name="authorship_declaration"]').value = `I directed every creative decision in this film through iterative prompting and editorial selection. The production process involved over 200 individual generation attempts across 15 distinct scenes.
+
+For the opening sequence, I experimented with 30+ prompt variations to achieve the specific neon color palette and cyberpunk atmosphere. Each shot required careful consideration of camera movement, lighting direction, and compositional balance. I rejected approximately 70% of generated outputs that didn't match my creative vision.
+
+The robot character design went through 12 iterations before I landed on the final aesthetic that balanced mechanical precision with emotional expressiveness. I manually selected and sequenced every shot, paying close attention to pacing, rhythm, and emotional arc.
+
+Post-generation, I performed extensive editorial work: color grading all footage for tonal consistency, compositing multiple generated elements into unified shots, timing cuts to the musical score I commissioned, and adding subtle VFX enhancements.
+
+The final film represents my authorial vision executed through AI tools, not the AI's autonomous output. Every frame exists because I chose it from many alternatives.`;
+
+            // Section 5: Likeness checkboxes
+            document.querySelector('input[name="likeness_no_faces"]').checked = true;
+            document.querySelector('input[name="likeness_no_voices"]').checked = true;
+            document.querySelector('input[name="likeness_no_lookalikes"]').checked = true;
+            document.querySelector('input[name="likeness_no_synthetic"]').checked = true;
+
+            // Section 6: IP checkboxes
+            document.querySelector('input[name="ip_no_characters"]').checked = true;
+            document.querySelector('input[name="ip_no_brands"]').checked = true;
+            document.querySelector('input[name="ip_no_trademarks"]').checked = true;
+
+            // Section 7: Audio
+            document.querySelector('input[name="audio_music_source"][value="Original AI"]').checked = true;
+            // Trigger change event to show conditional field
+            document.querySelector('input[name="audio_music_source"][value="Original AI"]').dispatchEvent(new Event('change'));
+            setTimeout(() => {
+                const musicToolInput = document.querySelector('input[name="audio_music_tool"]');
+                if (musicToolInput) musicToolInput.value = 'Udio v1.5 (Paid - Standard Plan)';
+            }, 100);
+
+            document.querySelector('input[name="audio_sound_design"][value="Original AI"]').checked = true;
+            document.querySelector('input[name="audio_voiceover"][value="AI voice"]').checked = true;
+
+            // Section 8: Tier 2
+            document.querySelector('input[name="tier2_enrollment"][value="Yes scenes"]').checked = true;
+            // Trigger change event to show conditional field
+            document.querySelector('input[name="tier2_enrollment"][value="Yes scenes"]').dispatchEvent(new Event('change'));
+            setTimeout(() => {
+                const scenesInput = document.querySelector('textarea[name="tier2_scenes"]');
+                if (scenesInput) scenesInput.value = 'Scene 3 (robot in garden), Scene 7 (cityscape establishing shot), Scene 12 (final shot with flower)';
+            }, 100);
+
+            // Section 9: Territory
+            const territorySelect = document.querySelector('select[name="territory_preference"]');
+            if (territorySelect) territorySelect.value = 'Global';
+            document.querySelector('input[name="exclusivity_preference"][value="Exclusive"]').checked = true;
+
+            // Section 10: Video
+            document.querySelector('input[name="video_url"]').value = 'https://vimeo.com/testsubmission123';
+            document.querySelector('input[name="video_password"]').value = 'testpass123';
+
+            console.log('✅ Test data loaded! Now trigger progress tracking...');
+
+            // Trigger change events to update progress
+            document.querySelectorAll('input, textarea, select').forEach(el => {
+                el.dispatchEvent(new Event('change'));
+                el.dispatchEvent(new Event('blur'));
+            });
+
+            setTimeout(() => {
+                console.log('✅ Form should now be ready to submit (except file uploads - do those manually)');
+                alert('✅ Test data loaded!\n\nYou still need to upload a test file for "Tool Receipts" to enable submit button.');
+            }, 500);
         });
     }
 
