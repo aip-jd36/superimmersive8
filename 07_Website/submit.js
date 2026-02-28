@@ -418,28 +418,52 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function validateForm() {
+        console.log('🔵 Starting form validation...');
         let isValid = true;
         const form = document.getElementById('submitForm');
         const inputs = form.querySelectorAll('input[required], textarea[required], select[required]');
 
+        console.log(`🔵 Validating ${inputs.length} required fields...`);
+        let failedFields = [];
+
         inputs.forEach(input => {
             if (!validateField(input)) {
                 isValid = false;
+                failedFields.push({
+                    name: input.name || input.id,
+                    type: input.type,
+                    value: input.value
+                });
             }
         });
 
+        if (failedFields.length > 0) {
+            console.log('🔴 Failed fields:', failedFields);
+        } else {
+            console.log('✅ All required fields valid');
+        }
+
         // Check if at least one tool is added
+        console.log(`🔵 Tool count: ${toolCount}`);
         if (toolCount === 0) {
+            console.log('🔴 No tools added');
             alert('Please add at least one AI tool used in production');
             isValid = false;
+        } else {
+            console.log('✅ Tools added');
         }
 
         // Check if receipts are uploaded
+        console.log(`🔵 Receipts uploaded: ${uploadedFiles['receipts-list'].length}`);
         if (uploadedFiles['receipts-list'].length === 0) {
+            console.log('🔴 No receipts uploaded');
             alert('Please upload at least one tool receipt');
             isValid = false;
+        } else {
+            console.log('✅ Receipts uploaded');
         }
 
+        console.log(`🔵 Final validation result: ${isValid}`);
         return isValid;
     }
 
