@@ -7,7 +7,20 @@ console.log('✅ submit.js loaded');
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM ready, initializing form...');
 
+    // ============================
+    // Variables
+    // ============================
+
+    let toolCount = 0;
+    const uploadedFiles = {
+        'receipts-list': [],
+        'supporting-docs-list': []
+    };
+
+    // ============================
     // Initialize
+    // ============================
+
     initializeForm();
     initializeToolRows();
     initializeFileUploads();
@@ -37,8 +50,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================
     // Dynamic Tool Rows
     // ============================
-
-    let toolCount = 0;
 
     function initializeToolRows() {
         const addToolBtn = document.getElementById('add-tool-btn');
@@ -127,11 +138,6 @@ document.addEventListener('DOMContentLoaded', function() {
             handleFiles(e.dataTransfer.files, listId);
         });
     }
-
-    const uploadedFiles = {
-        'receipts-list': [],
-        'supporting-docs-list': []
-    };
 
     function handleFiles(files, listId) {
         const fileArray = Array.from(files);
