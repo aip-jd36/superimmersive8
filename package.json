@@ -2,5 +2,8 @@
   "dependencies": {
     "airtable": "^0.12.2",
     "resend": "^6.9.3"
+  },
+  "devDependencies": {
+    "dotenv": "^17.3.1"
   }
 }
