@@ -236,6 +236,7 @@ async function createAirtableRecord(submissionId, data, receiptsInfo, supporting
             fields: {
                 submission_id: submissionId,
                 status: 'received',
+                timestamp: new Date().toISOString(), // Add timestamp for rate limiting and sorting
                 filmmaker_name: data.filmmaker.name,
                 filmmaker_email: data.filmmaker.email,
                 filmmaker_location: data.filmmaker.location,
