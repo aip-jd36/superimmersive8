@@ -60,12 +60,12 @@ module.exports = async function handler(req, res) {
         // Generate submission ID
         const submissionId = await generateSubmissionId();
 
-        // Process file attachments (convert to base64 URLs for Airtable)
-        const receiptsAttachments = processFileAttachments(data.files.receipts);
-        const supportingDocsAttachments = processFileAttachments(data.files.supportingDocs);
+        // Process file info (store file names/sizes as text for now)
+        const receiptsInfo = processFileInfo(data.files.receipts);
+        const supportingDocsInfo = processFileInfo(data.files.supportingDocs);
 
         // Create Airtable record
-        const record = await createAirtableRecord(submissionId, data, receiptsAttachments, supportingDocsAttachments);
+        const record = await createAirtableRecord(submissionId, data, receiptsInfo, supportingDocsInfo);
 
         console.log('Created Airtable record:', record.id);
 
@@ -217,19 +217,19 @@ async function generateSubmissionId() {
 // File Processing
 // ============================
 
-function processFileAttachments(files) {
-    if (!files || files.length === 0) return [];
+function processFileInfo(files) {
+    // For now, just store file names and sizes as text
+    // TODO: Implement proper file upload to storage (Vercel Blob, Cloudinary, etc.)
+    if (!files || files.length === 0) return '';
 
-    return files.map(file => ({
-        url: file.dataUrl // Assuming frontend sends base64 data URLs
-    }));
+    return files.map(file => `${file.name} (${(file.dataUrl.length / 1024 / 1024).toFixed(2)} MB)`).join(', ');
 }
 
 // ============================
 // Airtable Record Creation
 // ============================
 
-async function createAirtableRecord(submissionId, data, receiptsAttachments, supportingDocsAttachments) {
+async function createAirtableRecord(submissionId, data, receiptsInfo, supportingDocsInfo) {
     const record = await base('Submissions').create([
         {
             fields: {
@@ -265,9 +265,10 @@ async function createAirtableRecord(submissionId, data, receiptsAttachments, sup
                 territory_restrictions: data.territory.restrictions || '',
                 exclusivity_preference: data.territory.exclusivity,
                 video_url: data.files.videoUrl,
+                video_password: data.files.videoPassword || '',
                 reviewer: 'JD',
-                receipts: receiptsAttachments,
-                supporting_docs: supportingDocsAttachments
+                receipts: receiptsInfo, // Store as text: "file1.pdf (2.5 MB), file2.jpg (1.2 MB)"
+                supporting_docs: supportingDocsInfo // Store as text for now
             }
         }
     ]);
