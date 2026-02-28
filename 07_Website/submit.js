@@ -40,9 +40,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
+            console.log('🔵 Form submit event triggered');
 
-            if (validateForm()) {
+            const isValid = validateForm();
+            console.log('🔵 Form validation result:', isValid);
+
+            if (isValid) {
+                console.log('🔵 Starting form submission...');
                 await submitForm();
+            } else {
+                console.log('🔴 Form validation failed');
             }
         });
     }
@@ -283,10 +290,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const allSections = document.querySelectorAll('.progress-list li');
         const completedSections = document.querySelectorAll('.progress-list li.complete');
 
+        console.log(`🔵 Progress: ${completedSections.length}/${allSections.length} sections complete`);
+
         if (completedSections.length === allSections.length) {
             submitBtn.disabled = false;
+            console.log('✅ Submit button ENABLED');
         } else {
             submitBtn.disabled = true;
+            console.log('🔴 Submit button DISABLED');
         }
     }
 
@@ -437,9 +448,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================
 
     async function submitForm() {
+        console.log('🔵 submitForm() called');
         const submitBtn = document.getElementById('submit-btn');
         const btnText = submitBtn.querySelector('.btn-text');
         const btnSpinner = submitBtn.querySelector('.btn-spinner');
+
+        console.log('🔵 Submit button found:', !!submitBtn);
+        console.log('🔵 Button text found:', !!btnText);
+        console.log('🔵 Button spinner found:', !!btnSpinner);
 
         // Show loading state
         submitBtn.disabled = true;
@@ -448,9 +464,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             // Collect form data
+            console.log('🔵 Collecting form data...');
             const formData = await collectFormData();
+            console.log('🔵 Form data collected:', formData);
 
             // Send to API endpoint
+            console.log('🔵 Sending to /api/submit...');
             const response = await fetch('/api/submit', {
                 method: 'POST',
                 headers: {
