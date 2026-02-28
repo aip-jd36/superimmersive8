@@ -2,7 +2,7 @@
 
 A running log of decisions, insights, and lessons learned while building an AI film distribution company.
 
-*Last updated: February 27, 2026*
+*Last updated: March 1, 2026*
 
 ---
 
@@ -2009,6 +2009,59 @@ SI8's catalog has documentation on every piece: tool disclosure, Rights Verified
 > That's what we're building. A rights-vetted AI film catalog where we can put your brand inside the work.
 >
 > Nobody else has named this as a product yet. We're naming it."
+
+---
+
+### #43: Shipping the Rights Verified Intake System — $0/mo Operational Stack
+
+**Date:** March 2026
+
+**The insight:**
+The Rights Verified process isn't just a service — it's a structured product with a web intake layer, documentation output, and operational workflow. Building it as infrastructure (not manual process) makes it scalable from day one.
+
+**What shipped:**
+A complete end-to-end filmmaker submission system:
+- 10-section web form (70+ fields) covering filmmaker profile, production details, tool disclosure, authorship declaration, likeness/IP confirmation, audio rights, Tier 2 enrollment, and territory preferences
+- Airtable database integration for structured submissions storage
+- Automated email confirmations (filmmaker + internal SI8 notification)
+- Rate limiting (5 submissions/day to prevent spam)
+- Clean submission ID generation (SUB-YYYY-timestamp)
+- Confirmation page with proper UX
+
+**Tech stack:** Vercel serverless functions + Airtable + Resend email — **$0/mo operational cost**
+
+**Why it matters:**
+This is the operational layer that makes Rights Verified a repeatable process, not a one-off service. Every field in the intake form maps to a field in the Chain of Title output. The system is designed to become self-serve in Year 3 (filmmakers submit → SI8 reviews → approved works get Chain of Title → catalog entry created).
+
+The architecture decision: Build as if it's already a platform, even when Year 1 volume is manual review. When the first 50 submissions come in, the infrastructure is already built. The review workflow can stay human, but the intake/output structure is platform-ready.
+
+**The $0/mo stack principle:**
+Operational costs should be near-zero until revenue validates the model. Vercel (serverless functions), Airtable (free tier: 1,200 records/base), and Resend (free tier: 100 emails/day) = full production system with no monthly burn. This is **infrastructure leverage** — build like a funded startup, operate like a bootstrapped side project.
+
+**What this unlocks:**
+- Filmmakers can submit 24/7 (no manual intake bottleneck)
+- Submissions are structured and searchable (Airtable as CRM)
+- SI8 gets instant notifications when new work arrives
+- Clean data for future analytics (submission volume, tool usage trends, geographic distribution)
+- Platform-ready architecture when volume scales in Year 2-3
+
+**The decision:**
+Rights Verified is not a checkbox on a contract — it's a documented process with intake, review, and output layers. Building the intake infrastructure in Month 1 (before the first real submission) means the system is ready when filmmaker outreach begins.
+
+**LinkedIn-ready excerpt:**
+> "Just shipped the Rights Verified intake system for SI8.
+>
+> 70+ field web form. Airtable database. Automated email confirmations. Rate limiting. Submission IDs. Confirmation UX.
+>
+> Operational cost: $0/month.
+>
+> Here's the thing: most people build the service first, then add the infrastructure when it breaks. We're doing the opposite. Build the platform layer on day one — even when volume is manual.
+>
+> Why? Because in Year 3, this becomes self-serve. Filmmakers submit → we review → approved works get Chain of Title → catalog. The intake workflow is already built. The review layer stays human until it doesn't need to be.
+>
+> Infrastructure leverage. Build like a funded startup. Operate like a bootstrapped side project.
+>
+> Tech stack: Vercel serverless + Airtable + Resend. Free tiers all the way down."
 
 ---
 

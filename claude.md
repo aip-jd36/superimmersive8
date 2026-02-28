@@ -203,6 +203,20 @@ After external validation from ChatGPT + Gemini, key execution decisions changed
 - Taiwan LLC (沉浸科技顧問有限公司): Optional local reseller (ONLY if Taiwan buyer requires it)
 - Documentation: `06_Operations/corporate/` (STRUCTURE-OVERVIEW, ACTION-PLAN, DECISIONS, DBA-FILING-GUIDE)
 
+### 3e. Rights Verified Submission System (Completed Mar 1, 2026)
+- [x] Multi-page web intake form (10 sections, 70+ fields) — ✓ Built with progressive disclosure UI
+- [x] Client-side validation + test data auto-fill — ✓ Production-ready validation
+- [x] Airtable integration — ✓ Submissions table with all fields + timestamp
+- [x] Vercel serverless API — ✓ `/api/submit` endpoint with error handling
+- [x] Email notifications (filmmaker + internal) — ✓ Resend integration with domain verification
+- [x] Confirmation page — ✓ Clean URLs, submission ID display, proper footer
+- [x] Rate limiting (5 submissions/day per email) — ✓ Prevents spam
+- [x] Submission ID generation (SUB-YYYY-timestamp) — ✓ Unique tracking IDs
+
+**Status:** Fully operational end-to-end filmmaker intake system. Filmmakers can submit work, receive confirmation emails, SI8 gets internal notifications. Form deployed at superimmersive8.com/submit
+
+**Tech Stack:** Vercel (serverless functions) + Airtable (database) + Resend (email) — $0/mo operational cost
+
 ### 4. Legal Ops (Rights playbook → actual contracts)
 - [ ] Standard Production MSA + SOW
 - [ ] Creator contractor agreement (work-for-hire + confidentiality + IP assignment)
