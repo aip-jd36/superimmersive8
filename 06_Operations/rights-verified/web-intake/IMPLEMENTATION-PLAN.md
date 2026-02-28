@@ -11,8 +11,9 @@
 
 **Total build time (v0.1 MVP):** ~24 hours over 2 weeks
 **Phases:** 3 phases (v0.1 = MVP, v0.2 = Enhanced, v0.3 = Automated)
-**Critical path:** Google Cloud setup → API integration → Testing
+**Critical path:** Airtable setup → API integration → Testing
 **Launch date:** March 15, 2026 (first filmmaker can submit)
+**Stack:** Airtable + video links (updated Feb 28, 2026)
 
 ---
 
@@ -33,8 +34,8 @@
 **Launch criteria:**
 - ✅ Form live at superimmersive8.com/submit
 - ✅ All 10 sections render correctly on mobile + desktop
-- ✅ Submission writes to Google Sheets
-- ✅ Files upload to Google Drive
+- ✅ Submission writes to Airtable
+- ✅ Files upload as Airtable attachments
 - ✅ Both emails send (filmmaker + SI8)
 - ✅ Tested with 3 real submissions (no errors)
 
@@ -42,43 +43,42 @@
 
 ### Week 1 (Mar 1-7): Planning + Setup + Frontend
 
-#### **Day 1 (Mar 1, Saturday): Environment Setup** — 3 hours
+#### **Day 1 (Mar 1, Saturday): Environment Setup** — 2 hours (reduced from 3)
 
 **Tasks:**
-1. **Google Cloud Project setup** (1 hr)
-   - Create new Google Cloud project: "SI8 Rights Verified"
-   - Enable Google Sheets API
-   - Enable Google Drive API
-   - Create service account
-   - Download service account JSON key
-   - Grant service account access to target Google Sheet
-   - Grant service account access to Google Drive folder
+1. **Airtable Base setup** (15 min)
+   - Go to https://airtable.com/ (existing "SuperImmersive 8" workspace)
+   - Create new base: "SI8 Rights Verified Submissions"
+   - Create table: "Submissions"
+   - Add 39 fields (see AIRTABLE-SETUP.md for full schema)
+   - Configure field types (Single select, Checkbox, Attachment, URL, etc.)
 
-2. **Google Sheets setup** (30 min)
-   - Create new spreadsheet: "SI8 Rights Verified Submissions"
-   - Create sheet: "Submissions"
-   - Add 40 column headers (A-AN as per TECHNICAL-SPEC.md)
-   - Share with service account email (Editor access)
-   - Note Spreadsheet ID
+2. **Airtable API credentials** (10 min)
+   - Go to https://airtable.com/create/tokens
+   - Create Personal Access Token: "SI8 Rights Verified API"
+   - Add scopes: `data.records:read`, `data.records:write`, `schema.bases:read`
+   - Grant access to "SI8 Rights Verified Submissions" base
+   - Copy token (starts with `pat...`)
+   - Copy Base ID from URL (starts with `app...`)
 
-3. **Google Drive folder setup** (30 min)
-   - Create folder: "SI8 Rights Verified Submissions"
-   - Share with service account email (Editor access)
-   - Note Folder ID
-
-4. **Local development environment** (1 hr)
+3. **Local development environment** (1 hr)
    - Clone repo: `git clone https://github.com/aip-jd36/superimmersive8.git`
-   - Install dependencies: `npm install googleapis google-auth-library resend`
-   - Create `.env.local` file with all keys
+   - Install dependencies: `npm install airtable resend`
+   - Create `.env.local` file with: `AIRTABLE_API_KEY`, `AIRTABLE_BASE_ID`, `RESEND_API_KEY`
    - Test Vercel CLI: `vercel dev`
-   - Verify can connect to Google Sheets (write test row)
+   - Run test script: `node test-airtable.js` (verify can read/write records)
+
+4. **Test connection** (35 min)
+   - Run test-airtable.js (creates test record, reads it, deletes it)
+   - Verify all 4 tests pass
+   - Check Airtable base in browser (test record should appear then disappear)
 
 **Deliverables:**
-- [x] Google Cloud project ready
-- [x] Google Sheet created with schema
-- [x] Google Drive folder created
+- [x] Airtable base created with 39 fields
+- [x] Personal Access Token created
 - [x] Local dev environment working
 - [x] `.env.local` file with all secrets
+- [x] Test script passed (connection verified)
 
 **Dependencies:** None (can start immediately)
 
@@ -213,44 +213,43 @@
 - Re-validate all required fields
 - Check authorship word count ≥ 150
 - Validate email format (regex)
-- Validate URL formats
-- Check file sizes (reject if >50MB)
-- Rate limiting: Check if email has submitted >5 times today (query Google Sheets)
+- Validate URL formats (video links: Vimeo, YouTube, Airtable attachments, Dropbox)
+- Check file sizes (reject if >50MB per file)
+- Rate limiting: Check if email has submitted >5 times today (query Airtable)
 
-**6.3 Google Drive integration** (2 hrs)
-- Authenticate with service account
-- Function: `uploadFilesToDrive(submissionId, files)`
-  - Create folder: `SUB-2026-0001`
-  - Create subfolder: `receipts/`
-  - Upload receipt files to `receipts/` folder
-  - Create subfolder: `supporting-docs/` (if any)
-  - Upload supporting docs (if any)
-  - Set folder permissions (private, SI8-only)
-  - Return folder URL
-- Handle errors (network failures, quota exceeded)
+**6.3 File upload processing** (1.5 hrs, reduced from 2)
+- Convert uploaded files to base64 (for Airtable attachment format)
+- Function: `processFileAttachments(files)`
+  - Receipt files → base64 array
+  - Supporting docs → base64 array (if any)
+  - Format as Airtable attachment objects: `{ url: "data:type;base64,..." }`
+- Validate file types (receipts: PDF/JPG/PNG only)
+- Handle errors (oversized files, invalid types)
 
-**6.4 Google Sheets integration** (1 hr)
-- Authenticate with service account
-- Function: `generateSubmissionId()` — query last row, increment
-- Function: `writeSubmissionRow(data)` — append new row (40 columns)
-- Map form data to schema (as per TECHNICAL-SPEC.md)
-- Handle errors (connection failures, write failures)
+**6.4 Airtable integration** (1.5 hrs, reduced from 1)
+- Authenticate with Personal Access Token
+- Function: `generateSubmissionId()` — query last record, increment (SUB-2026-0001)
+- Function: `createSubmissionRecord(data)` — create new record with all 39 fields
+- Include file attachments in record creation (receipts, supporting_docs)
+- Map form data to Airtable schema (as per TECHNICAL-SPEC.md)
+- Handle errors (connection failures, write failures, API rate limits)
 
 **Deliverables:**
 - [x] `/api/submit.js` — Working API endpoint
-- [x] Google Drive uploads working
-- [x] Google Sheets writes working
+- [x] File upload processing (base64 conversion)
+- [x] Airtable record creation working
 - [x] Error handling implemented
 - [x] Rate limiting implemented
 
 **Testing checklist:**
 - [ ] Can submit test data via Postman
-- [ ] Row appears in Google Sheets with correct data
-- [ ] Files appear in Google Drive in correct folder structure
+- [ ] Record appears in Airtable with correct data (all 39 fields)
+- [ ] Files appear as attachments (receipts, supporting docs)
+- [ ] Video URL stored correctly (link, not upload)
 - [ ] Rate limit works (6th submission same day fails)
 - [ ] Server-side validation catches invalid data
 
-**Dependencies:** Day 1 (Google Cloud setup), Day 2-5 (Frontend for testing)
+**Dependencies:** Day 1 (Airtable setup), Day 2-5 (Frontend for testing)
 
 ---
 
@@ -361,10 +360,11 @@
   - Chrome Android mobile
 
 **10.2 Data verification** (1 hr)
-- Submit test form → check Google Sheets row (all 40 columns populated correctly)
-- Check Google Drive folder (files in correct structure)
+- Submit test form → check Airtable record (all 39 fields populated correctly)
+- Check Airtable attachments (receipts, supporting docs uploaded)
+- Check video URL (link stored correctly, not uploaded)
 - Check emails (both received, content correct)
-- Verify submission ID increments correctly
+- Verify submission ID increments correctly (SUB-2026-0001, 0002, etc.)
 
 **10.3 Bug fixes** (1 hr)
 - Fix any issues found during testing
@@ -375,7 +375,7 @@
 **Deliverables:**
 - [x] All manual tests passed
 - [x] No critical bugs
-- [x] Data verified in Sheets + Drive + Emails
+- [x] Data verified in Airtable + Emails
 - [x] Ready for production launch
 
 **Testing checklist:**
@@ -394,12 +394,11 @@
 
 **Tasks:**
 
-**12.1 Environment variables** (15 min)
+**12.1 Environment variables** (10 min, reduced from 15)
 - Add all secrets to Vercel dashboard:
-  - `RESEND_API_KEY`
-  - `GOOGLE_SERVICE_ACCOUNT_KEY`
-  - `SHEET_ID`
-  - `GOOGLE_DRIVE_FOLDER_ID`
+  - `RESEND_API_KEY` (already exists from existing setup)
+  - `AIRTABLE_API_KEY` (Personal Access Token)
+  - `AIRTABLE_BASE_ID` (Base ID from Airtable URL)
 - Verify environment variables accessible in production
 
 **12.2 Deploy** (15 min)
@@ -412,10 +411,11 @@
 - Fill out real test submission (use test email)
 - Submit → verify:
   - Redirects to confirmation page
-  - Row written to Google Sheets
-  - Files in Google Drive
-  - Both emails received
-- Delete test row from Google Sheets (clean up)
+  - Record written to Airtable (all 39 fields)
+  - Files uploaded as attachments (receipts, supporting docs)
+  - Video URL stored correctly
+  - Both emails received (filmmaker + SI8)
+- Delete test record from Airtable (clean up)
 
 **Deliverables:**
 - [x] Deployed to production
@@ -439,8 +439,8 @@ Before declaring v0.1 "launched," must have:
 ✅ **Functional:**
 - [ ] Form live at superimmersive8.com/submit
 - [ ] All 10 sections render correctly
-- [ ] Submission writes to Google Sheets (40 columns)
-- [ ] Files upload to Google Drive (organized folders)
+- [ ] Submission writes to Airtable (39 fields)
+- [ ] Files upload to Airtable attachments (organized folders)
 - [ ] Filmmaker confirmation email sends (<5 min)
 - [ ] SI8 notification email sends (<5 min)
 - [ ] Confirmation page shows with Submission ID
@@ -465,7 +465,7 @@ Before declaring v0.1 "launched," must have:
 
 ## Phase 2: v0.2 Enhanced (Month 2)
 
-**Goal:** Add admin tools for SI8 reviewer to manage submissions without manually editing Google Sheets.
+**Goal:** Add admin tools for SI8 reviewer to manage submissions without manually editing Airtable.
 
 **Timeline:** April 2026 (16 hours over 2-3 weeks)
 
@@ -484,7 +484,7 @@ Before declaring v0.1 "launched," must have:
   - Show file links (receipts folder, video link)
   - Status dropdown (change status)
   - Review notes textarea (internal notes)
-  - Save button (update Google Sheets row)
+  - Save button (update Airtable row)
 
 #### **2.2 Status Tracking (Filmmaker-facing)** — 4 hours
 - New page: `superimmersive8.com/submission/:id`
@@ -511,7 +511,7 @@ Before declaring v0.1 "launched," must have:
 - [ ] Can filter/search/sort submissions
 - [ ] Can view submission details
 - [ ] Can change status + add notes
-- [ ] Status changes write to Google Sheets
+- [ ] Status changes write to Airtable
 - [ ] Filmmaker can check status at /submission/:id
 - [ ] Status change emails send automatically
 
@@ -535,11 +535,11 @@ Before declaring v0.1 "launched," must have:
 #### **3.2 Chain of Title Auto-Generation** — 8 hours
 - When SI8 marks status = Approved in admin dashboard:
   - Trigger function: `generateChainOfTitle(submissionId)`
-  - Pull data from Google Sheets row
+  - Pull data from Airtable row
   - Populate Chain of Title template (9-field schema from CHAIN-OF-TITLE-SCHEMA.md)
   - Generate PDF
-  - Upload PDF to Google Drive
-  - Store PDF URL in Google Sheets (Column AM)
+  - Upload PDF to Airtable attachments
+  - Store PDF URL in Airtable (Column AM)
   - Include PDF URL in approval email
 
 #### **3.3 Bulk Actions (Admin)** — 4 hours
@@ -558,7 +558,7 @@ Before declaring v0.1 "launched," must have:
 ## Task Dependencies (Critical Path)
 
 ```
-Day 1 (Google Cloud setup)
+Day 1 (Airtable setup)
   ↓
 Day 6-7 (API endpoint)
   ↓
@@ -573,7 +573,7 @@ Day 12 (Deploy)
 
 **Parallel work (no dependencies):**
 - Day 2-5 (Frontend) can start immediately (doesn't block anything)
-- Day 1 (Google Cloud setup) must complete before Day 6-7 (API)
+- Day 1 (Airtable setup) must complete before Day 6-7 (API)
 
 **Critical path:** Day 1 → Day 6-7 → Day 8 → Day 9 → Day 10-11 → Day 12
 
@@ -604,20 +604,21 @@ Day 12 (Deploy)
 
 | Risk | Impact | Likelihood | Mitigation |
 |------|--------|------------|------------|
-| **Google API quota exceeded** | Critical | Low | Free tier = 1,000 requests/100 sec. Monitor usage. Upgrade if needed ($0.40/1000 requests). |
-| **File upload fails (large files)** | High | Medium | Set 50MB limit. Require video links (Vimeo/YouTube) instead of uploads. |
+| **Airtable API quota exceeded** | Medium | Very Low | Free tier = 1,000 API calls/month. ~2-4 calls per submission = 250-500 submissions/month. Monitor usage. Upgrade to Team ($20/user/mo) if needed. |
+| **File upload fails (large files)** | High | Medium | Set 50MB limit per file. Videos = links only (no uploads). Test with 10+ MB files before launch. |
 | **Email delivery fails** | High | Low | Resend = 99.9% deliverability. Add retry logic + error logging. |
 | **Form abandonment (too complex)** | Medium | High | v0.1 = single page (no save/resume). Add save/resume in v0.2 if abandonment >10%. |
 | **Rate limiting too strict** | Low | Medium | 5 submissions/email/day. Adjust if legit filmmakers hit limit. |
 | **Cross-browser bugs** | Medium | Medium | Test on Chrome/Safari/Firefox before launch. Use standard HTML5 (no exotic features). |
 | **Mobile layout issues** | High | Medium | Mobile-first CSS. Test on iPhone + Android before launch. |
-| **Google Sheets performance** | Low | Low | Sheets = fast until >10,000 rows. Migrate to PostgreSQL when needed (Year 3). |
-| **Security breach (PII exposed)** | Critical | Very Low | Service account = only SI8 access. No public read. HTTPS enforced. Input sanitization. |
+| **Airtable record limit (1,000)** | Low | Low | Free tier = 1,000 records/base. Upgrade to Team ($20/user/mo) or export to PostgreSQL if needed (Year 3). |
+| **Security breach (PII exposed)** | Critical | Very Low | Airtable API key = only SI8 access. No public read. HTTPS enforced. Input sanitization. |
 
 **Contingency plans:**
-- If Google Drive quota exceeded → upgrade to Google Workspace ($6/user/month for 30GB)
-- If Resend quota exceeded → upgrade to paid plan ($10/mo for 10,000 emails)
-- If Vercel quota exceeded → upgrade to Pro ($20/mo)
+- If Airtable record limit hit (1,000 submissions) → upgrade to Team plan ($20/user/mo for unlimited records)
+- If Airtable attachments quota exceeded (1 GB) → delete old receipts or upgrade to Team
+- If Resend quota exceeded (3,000 emails/mo) → upgrade to paid plan ($20/mo for 50,000 emails)
+- If Vercel quota exceeded → upgrade to Pro ($20/mo) (very unlikely in Year 1)
 - If form abandonment high → add save/resume in v0.2 (already planned)
 - If mobile issues discovered → delay launch 2-3 days for fixes
 
@@ -665,7 +666,7 @@ Day 12 (Deploy)
 
 ### **Week 1 post-launch (Mar 15-21):**
 - Monitor Vercel logs daily (check for errors)
-- Check Google Sheets daily (verify submissions writing correctly)
+- Check Airtable daily (verify submissions writing correctly)
 - Respond to filmmaker support requests within 24 hours
 - Fix any bugs reported (deploy fixes within 48 hours)
 
@@ -688,14 +689,14 @@ Day 12 (Deploy)
 **If critical bug discovered post-launch:**
 
 1. **Immediate:** Disable form (add "Temporarily unavailable" message)
-2. **Investigate:** Check Vercel logs, Google Sheets, Drive for issues
+2. **Investigate:** Check Vercel logs, Airtable, Drive for issues
 3. **Fix:** Deploy fix to staging environment, test
 4. **Re-enable:** Deploy fix to production, remove "unavailable" message
 5. **Communicate:** Email any affected filmmakers (if submissions lost/corrupted)
 
 **If data corruption:**
-- Google Sheets = version history (can restore previous version)
-- Google Drive = trash bin (can restore deleted files for 30 days)
+- Airtable = version history (can restore previous version)
+- Airtable attachments = trash bin (can restore deleted files for 30 days)
 - No permanent data loss risk
 
 ---
@@ -745,7 +746,7 @@ Document deployment process:
 **NOT done until:**
 - Tested on mobile (iOS + Android)
 - Tested on 3 browsers (Chrome, Safari, Firefox)
-- End-to-end test passed (form → Sheets → Drive → Emails)
+- End-to-end test passed (form → Airtable → Emails)
 - No critical bugs
 - Performance targets met (page load <3 sec, submit <5 sec)
 
@@ -778,10 +779,10 @@ Document deployment process:
 - [x] IMPLEMENTATION-PLAN.md (when we're building it)
 
 ⏳ **Ready to start build:**
-- **Day 1 (Mar 1):** Google Cloud setup (3 hours)
+- **Day 1 (Mar 1):** Airtable setup (2 hours, reduced from 3)
 - **Day 2-5 (Mar 2-5):** Frontend HTML/CSS/JS (14 hours)
 
-**Total v0.1 effort:** 24 hours over 2 weeks
+**Total v0.1 effort:** 23 hours over 2 weeks (reduced from 24)
 **Launch date:** March 15, 2026
 
 ---
