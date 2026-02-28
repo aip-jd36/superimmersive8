@@ -70,16 +70,17 @@ module.exports = async function handler(req, res) {
         console.log('Created Airtable record:', record.id);
 
         // Send email notifications
-        await sendEmailNotifications(submissionId, data, record.id);
+        const emailResults = await sendEmailNotifications(submissionId, data, record.id);
 
-        console.log('Sent email notifications');
+        console.log('Email notifications completed');
 
         // Return success response
         return res.status(200).json({
             success: true,
             submissionId: submissionId,
             message: 'Submission received successfully',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            emailStatus: emailResults
         });
 
     } catch (error) {
@@ -289,92 +290,128 @@ async function sendEmailNotifications(submissionId, data, recordId) {
         day: 'numeric'
     });
 
+    const emailResults = {
+        filmmaker: null,
+        internal: null
+    };
+
     // Email 1: Filmmaker confirmation
-    await resend.emails.send({
-        from: 'SI8 <noreply@superimmersive8.com>',
-        replyTo: 'jd@superimmersive8.com',
-        to: data.filmmaker.email,
-        subject: `SI8 Rights Verified Submission Received — ${data.production.title}`,
-        html: `
-            <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1a1918;">
-                <h2 style="font-family: 'Space Grotesk', Arial, sans-serif; color: #1a1918; font-size: 24px; margin-bottom: 16px;">Submission Received</h2>
+    try {
+        console.log(`📧 Sending filmmaker confirmation to: ${data.filmmaker.email}`);
 
-                <p>Hi ${data.filmmaker.name},</p>
+        const filmmakerEmail = await resend.emails.send({
+            from: 'SI8 <noreply@superimmersive8.com>',
+            replyTo: 'jd@superimmersive8.com',
+            to: data.filmmaker.email,
+            subject: `SI8 Rights Verified Submission Received — ${data.production.title}`,
+            html: `
+                <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1a1918;">
+                    <h2 style="font-family: 'Space Grotesk', Arial, sans-serif; color: #1a1918; font-size: 24px; margin-bottom: 16px;">Submission Received</h2>
 
-                <p>We've received your Rights Verified submission for "<strong>${data.production.title}</strong>."</p>
+                    <p>Hi ${data.filmmaker.name},</p>
 
-                <div style="background: #F7F6EF; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; padding: 20px; margin: 24px 0;">
-                    <p style="margin: 0 0 8px 0;"><strong>Submission Details:</strong></p>
-                    <ul style="margin: 0; padding-left: 20px;">
-                        <li>Submission ID: <strong>${submissionId}</strong></li>
-                        <li>Submitted: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</li>
-                        <li>Target completion: <strong>${targetDateStr}</strong></li>
-                    </ul>
-                </div>
+                    <p>We've received your Rights Verified submission for "<strong>${data.production.title}</strong>."</p>
 
-                <p><strong>What happens next:</strong></p>
-                <ol style="line-height: 1.8;">
-                    <li>We'll begin our Rights Verified review within 2 business days</li>
-                    <li>You'll receive an update by <strong>${targetDateStr}</strong> with one of three outcomes:
-                        <ul style="margin-top: 8px;">
-                            <li>✅ Approved — Chain of Title issued</li>
-                            <li>⏳ Approved pending additional info</li>
-                            <li>❌ Not approved with explanation</li>
+                    <div style="background: #F7F6EF; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; padding: 20px; margin: 24px 0;">
+                        <p style="margin: 0 0 8px 0;"><strong>Submission Details:</strong></p>
+                        <ul style="margin: 0; padding-left: 20px;">
+                            <li>Submission ID: <strong>${submissionId}</strong></li>
+                            <li>Submitted: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</li>
+                            <li>Target completion: <strong>${targetDateStr}</strong></li>
                         </ul>
-                    </li>
-                    <li>If approved, your work will be added to SI8's catalog</li>
-                </ol>
+                    </div>
 
-                <p>Questions? Reply to this email and we'll get back to you within 24 hours.</p>
+                    <p><strong>What happens next:</strong></p>
+                    <ol style="line-height: 1.8;">
+                        <li>We'll begin our Rights Verified review within 2 business days</li>
+                        <li>You'll receive an update by <strong>${targetDateStr}</strong> with one of three outcomes:
+                            <ul style="margin-top: 8px;">
+                                <li>✅ Approved — Chain of Title issued</li>
+                                <li>⏳ Approved pending additional info</li>
+                                <li>❌ Not approved with explanation</li>
+                            </ul>
+                        </li>
+                        <li>If approved, your work will be added to SI8's catalog</li>
+                    </ol>
 
-                <p style="margin-top: 32px;">Best,<br><strong>SI8 Review Team</strong></p>
+                    <p>Questions? Reply to this email and we'll get back to you within 24 hours.</p>
 
-                <hr style="border: none; border-top: 1px solid rgba(0,0,0,0.08); margin: 32px 0;">
+                    <p style="margin-top: 32px;">Best,<br><strong>SI8 Review Team</strong></p>
 
-                <p style="font-size: 12px; color: #8C8A82;">
-                    This is an automated confirmation. Your submission has been logged and our team will review it shortly.
-                </p>
-            </div>
-        `
-    });
+                    <hr style="border: none; border-top: 1px solid rgba(0,0,0,0.08); margin: 32px 0;">
+
+                    <p style="font-size: 12px; color: #8C8A82;">
+                        This is an automated confirmation. Your submission has been logged and our team will review it shortly.
+                    </p>
+                </div>
+            `
+        });
+
+        emailResults.filmmaker = { success: true, id: filmmakerEmail.id };
+        console.log(`✅ Filmmaker email sent successfully. Email ID: ${filmmakerEmail.id}`);
+    } catch (error) {
+        emailResults.filmmaker = { success: false, error: error.message };
+        console.error('❌ Failed to send filmmaker email:', error);
+        // Don't throw - try to send internal email anyway
+    }
 
     // Email 2: SI8 internal notification
-    const airtableRecordUrl = `https://airtable.com/${process.env.AIRTABLE_BASE_ID}/${recordId}`;
+    try {
+        console.log('📧 Sending internal notification to: jd@superimmersive8.com');
 
-    await resend.emails.send({
-        from: 'SI8 <noreply@superimmersive8.com>',
-        to: 'jd@superimmersive8.com',
-        subject: `🎬 New Rights Verified Submission: ${data.production.title} by ${data.filmmaker.name}`,
-        html: `
-            <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1a1918;">
-                <h2 style="font-family: 'Space Grotesk', Arial, sans-serif; color: #1a1918; font-size: 24px; margin-bottom: 16px;">New Rights Verified Submission</h2>
+        const airtableRecordUrl = `https://airtable.com/${process.env.AIRTABLE_BASE_ID}/${recordId}`;
 
-                <div style="background: #F7F6EF; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; padding: 20px; margin: 24px 0;">
-                    <p style="margin: 0 0 4px 0;"><strong>Submission ID:</strong> ${submissionId}</p>
-                    <p style="margin: 0 0 4px 0;"><strong>Filmmaker:</strong> ${data.filmmaker.name} (${data.filmmaker.email})</p>
-                    <p style="margin: 0 0 4px 0;"><strong>Title:</strong> ${data.production.title}</p>
-                    <p style="margin: 0 0 4px 0;"><strong>Runtime:</strong> ${data.production.runtime}</p>
-                    <p style="margin: 0 0 4px 0;"><strong>Intended use:</strong> ${data.production.intendedUse}</p>
-                </div>
+        const internalEmail = await resend.emails.send({
+            from: 'SI8 <noreply@superimmersive8.com>',
+            to: 'jd@superimmersive8.com',
+            subject: `🎬 New Rights Verified Submission: ${data.production.title} by ${data.filmmaker.name}`,
+            html: `
+                <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1a1918;">
+                    <h2 style="font-family: 'Space Grotesk', Arial, sans-serif; color: #1a1918; font-size: 24px; margin-bottom: 16px;">New Rights Verified Submission</h2>
 
-                <p><strong>Quick links:</strong></p>
-                <ul>
-                    <li><a href="${airtableRecordUrl}" style="color: #C8900A;">View submission in Airtable</a></li>
-                    <li><a href="${data.files.videoUrl}" style="color: #C8900A;">Watch video</a></li>
-                </ul>
+                    <div style="background: #F7F6EF; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; padding: 20px; margin: 24px 0;">
+                        <p style="margin: 0 0 4px 0;"><strong>Submission ID:</strong> ${submissionId}</p>
+                        <p style="margin: 0 0 4px 0;"><strong>Filmmaker:</strong> ${data.filmmaker.name} (${data.filmmaker.email})</p>
+                        <p style="margin: 0 0 4px 0;"><strong>Title:</strong> ${data.production.title}</p>
+                        <p style="margin: 0 0 4px 0;"><strong>Runtime:</strong> ${data.production.runtime}</p>
+                        <p style="margin: 0 0 4px 0;"><strong>Intended use:</strong> ${data.production.intendedUse}</p>
+                    </div>
 
-                <div style="background: white; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; padding: 16px; margin: 24px 0;">
-                    <p style="margin: 0 0 8px 0;"><strong>Tools used:</strong></p>
-                    <ul style="margin: 0; padding-left: 20px;">
-                        ${data.tools.map(tool => `<li>${tool.name} ${tool.version} (${tool.plan}) ✅</li>`).join('')}
+                    <p><strong>Quick links:</strong></p>
+                    <ul>
+                        <li><a href="${airtableRecordUrl}" style="color: #C8900A;">View submission in Airtable</a></li>
+                        <li><a href="${data.files.videoUrl}" style="color: #C8900A;">Watch video</a></li>
                     </ul>
+
+                    <div style="background: white; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; padding: 16px; margin: 24px 0;">
+                        <p style="margin: 0 0 8px 0;"><strong>Tools used:</strong></p>
+                        <ul style="margin: 0; padding-left: 20px;">
+                            ${data.tools.map(tool => `<li>${tool.name} ${tool.version} (${tool.plan}) ✅</li>`).join('')}
+                        </ul>
+                    </div>
+
+                    <p><strong>Tier 2 enrollment:</strong> ${data.tier2.enrollment}</p>
+                    <p><strong>First submission:</strong> ${data.filmmaker.firstSubmission ? 'Yes' : 'No'}</p>
+
+                    <p style="margin-top: 32px;"><strong>Next step:</strong> Begin pre-screen review (target: within 2 business days)</p>
                 </div>
+            `
+        });
 
-                <p><strong>Tier 2 enrollment:</strong> ${data.tier2.enrollment}</p>
-                <p><strong>First submission:</strong> ${data.filmmaker.firstSubmission ? 'Yes' : 'No'}</p>
+        emailResults.internal = { success: true, id: internalEmail.id };
+        console.log(`✅ Internal email sent successfully. Email ID: ${internalEmail.id}`);
+    } catch (error) {
+        emailResults.internal = { success: false, error: error.message };
+        console.error('❌ Failed to send internal email:', error);
+    }
 
-                <p style="margin-top: 32px;"><strong>Next step:</strong> Begin pre-screen review (target: within 2 business days)</p>
-            </div>
-        `
-    });
+    // Log summary
+    console.log('📊 Email sending summary:', JSON.stringify(emailResults, null, 2));
+
+    // Only throw if BOTH emails failed
+    if (!emailResults.filmmaker.success && !emailResults.internal.success) {
+        throw new Error('Failed to send both confirmation emails');
+    }
+
+    return emailResults;
 }
