@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submission Received | SI8</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .confirmation-container {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-2xl) var(--space-lg);
+            background: linear-gradient(135deg, var(--color-bg-elevated) 0%, var(--color-bg-card) 100%);
+        }
+
+        .confirmation-card {
+            max-width: 600px;
+            background: white;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-2xl);
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: var(--space-lg);
+        }
+
+        .confirmation-card h1 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: var(--space-md);
+        }
+
+        .submission-id {
+            display: inline-block;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            padding: var(--space-sm) var(--space-lg);
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-accent);
+            margin: var(--space-lg) 0;
+        }
+
+        .confirmation-info {
+            background: var(--color-bg-elevated);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-xl) 0;
+            text-align: left;
+        }
+
+        .confirmation-info h3 {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: var(--space-md);
+        }
+
+        .confirmation-info ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .confirmation-info li {
+            padding: var(--space-sm) 0;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .confirmation-info li:last-child {
+            border-bottom: none;
+        }
+
+        .confirmation-info li::before {
+            content: '✓';
+            color: var(--color-accent);
+            font-weight: bold;
+        }
+
+        .confirmation-actions {
+            display: flex;
+            gap: var(--space-md);
+            margin-top: var(--space-xl);
+        }
+
+        .confirmation-actions .btn {
+            flex: 1;
+            padding: 1rem 2rem;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-base);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-gradient-1) 0%, var(--color-gradient-2) 100%);
+            color: var(--color-text);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(200, 144, 10, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-bg-elevated);
+            border-color: var(--color-accent);
+        }
+
+        @media (max-width: 768px) {
+            .confirmation-card {
+                padding: var(--space-lg);
+            }
+
+            .confirmation-card h1 {
+                font-size: 1.5rem;
+            }
+
+            .confirmation-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-text">SI<span class="logo-accent">8</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html#catalog">The Catalog</a>
+                <div class="nav-dropdown">
+                    <a href="#rights-verified">Rights Verified ▾</a>
+                    <div class="dropdown-content">
+                        <a href="rights-verified-how-it-works.html">How It Works</a>
+                        <a href="rights-verified-chain-of-title.html">Rights Package</a>
+                        <a href="rights-verified-vetting-criteria.html">Vetting Criteria</a>
+                        <a href="rights-verified-legal-brief.html">Legal Risk Brief</a>
+                        <a href="rights-verified-rights-playbook.html">Rights Playbook</a>
+                    </div>
+                </div>
+                <a href="index.html#brands">For Brands</a>
+                <a href="index.html#creators">For Creators</a>
+                <a href="risk-briefing.html">Risk Briefing</a>
+                <a href="pricing.html">Pricing</a>
+                <a href="index.html#contact" class="nav-cta">Book a Call</a>
+            </div>
+            <button class="mobile-menu-btn" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Confirmation Content -->
+    <div class="confirmation-container">
+        <div class="confirmation-card">
+            <div class="success-icon">✅</div>
+            <h1>Submission Received!</h1>
+            <p>We've successfully received your Rights Verified submission.</p>
+
+            <div class="submission-id" id="submission-id">Loading...</div>
+
+            <div class="confirmation-info">
+                <h3>What happens next:</h3>
+                <ul>
+                    <li>We'll review your submission within 2 business days</li>
+                    <li>You'll receive a decision within 5 business days</li>
+                    <li>Check your email for confirmation and updates</li>
+                    <li>If approved, we'll issue your Chain of Title documentation</li>
+                </ul>
+            </div>
+
+            <p style="color: var(--color-text-secondary); margin-top: var(--space-lg);">
+                A confirmation email has been sent to <strong id="filmmaker-email">your email</strong>.
+            </p>
+
+            <div class="confirmation-actions">
+                <a href="index.html" class="btn btn-secondary">Return Home</a>
+                <a href="index.html#contact" class="btn btn-primary">Book a Discovery Call</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <span class="logo-text">SI<span class="logo-accent">8</span></span>
+                <p>AI video content your legal team won't flag.</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Services</h4>
+                    <a href="index.html#catalog">The Catalog</a>
+                    <a href="rights-verified-how-it-works.html">Rights Verified</a>
+                    <a href="pricing.html">Pricing</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Resources</h4>
+                    <a href="rights-verified-legal-brief.html">Legal Risk Brief</a>
+                    <a href="rights-verified-rights-playbook.html">Rights Playbook</a>
+                    <a href="risk-briefing.html">Risk Briefing</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Company</h4>
+                    <a href="index.html#contact">Contact</a>
+                    <a href="submit.html">Submit Your Work</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 SuperImmersive 8. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Get submission ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const submissionId = urlParams.get('id');
+
+        if (submissionId) {
+            document.getElementById('submission-id').textContent = submissionId;
+        } else {
+            document.getElementById('submission-id').textContent = 'SUB-XXXX-XXXX';
+        }
+
+        // Get email from localStorage if available
+        const email = localStorage.getItem('submitterEmail');
+        if (email) {
+            document.getElementById('filmmaker-email').textContent = email;
+            // Clear from localStorage after displaying
+            localStorage.removeItem('submitterEmail');
+        }
+    </script>
+</body>
+</html>
