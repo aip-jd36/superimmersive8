@@ -533,7 +533,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify(formData)
             });
 
-            const result = await response.json();
+            console.log('🔵 Response status:', response.status);
+            console.log('🔵 Response statusText:', response.statusText);
+            console.log('🔵 Response headers:', Object.fromEntries(response.headers.entries()));
+
+            // Get the raw response text first
+            const responseText = await response.text();
+            console.log('🔵 Raw response body:', responseText);
+
+            // Try to parse as JSON
+            let result;
+            try {
+                result = JSON.parse(responseText);
+                console.log('🔵 Parsed JSON result:', result);
+            } catch (parseError) {
+                console.error('🔴 Failed to parse response as JSON:', parseError);
+                console.error('🔴 Response was:', responseText.substring(0, 500));
+                throw new Error(`API returned non-JSON response (status ${response.status}): ${responseText.substring(0, 200)}`);
+            }
 
             if (!response.ok) {
                 throw new Error(result.error || 'Submission failed');
