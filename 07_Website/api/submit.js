@@ -265,7 +265,7 @@ async function createAirtableRecord(submissionId, data, receiptsInfo, supporting
                 territory_restrictions: data.territory.restrictions || '',
                 exclusivity_preference: data.territory.exclusivity,
                 video_url: data.files.videoUrl,
-                video_password: data.files.videoPassword || '',
+                // video_password: data.files.videoPassword || '', // TODO: Add this field to Airtable
                 reviewer: 'JD',
                 receipts: receiptsInfo, // Store as text: "file1.pdf (2.5 MB), file2.jpg (1.2 MB)"
                 supporting_docs: supportingDocsInfo // Store as text for now
