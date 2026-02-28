@@ -665,26 +665,38 @@ document.addEventListener('DOMContentLoaded', function() {
         testBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: #10b981; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);';
         document.body.appendChild(testBtn);
 
+        // Helper function to safely set values
+        const safeSet = (selector, value, prop = 'value') => {
+            const el = document.querySelector(selector);
+            if (el) {
+                el[prop] = value;
+                return el;
+            } else {
+                console.warn(`⚠️ Element not found: ${selector}`);
+                return null;
+            }
+        };
+
         testBtn.addEventListener('click', function(e) {
             e.preventDefault();
             console.log('🧪 Loading test data...');
 
             // Section 1: Filmmaker Profile
-            document.querySelector('input[name="filmmaker_name"]').value = 'Jane Chen';
-            document.querySelector('input[name="filmmaker_email"]').value = 'jdchangmedia@gmail.com';
-            document.querySelector('input[name="filmmaker_location"]').value = 'Singapore, Singapore';
-            document.querySelector('input[name="filmmaker_portfolio"]').value = 'https://janechen.art';
-            document.querySelector('textarea[name="prior_works"]').value = 'https://vimeo.com/123456789\nhttps://youtube.com/watch?v=test123\nhttps://vimeo.com/987654321';
+            safeSet('input[name="filmmaker_name"]', 'Jane Chen');
+            safeSet('input[name="filmmaker_email"]', 'jdchangmedia@gmail.com');
+            safeSet('input[name="filmmaker_location"]', 'Singapore, Singapore');
+            safeSet('input[name="filmmaker_portfolio"]', 'https://janechen.art');
+            safeSet('textarea[name="prior_works"]', 'https://vimeo.com/123456789\nhttps://youtube.com/watch?v=test123\nhttps://vimeo.com/987654321');
 
             // Section 2: Production Overview
-            document.querySelector('input[name="title"]').value = 'Neon Dreams';
-            document.querySelector('input[name="runtime"]').value = '02:30';
-            document.querySelector('input[name="genre"]').value = 'Sci-fi narrative short';
-            document.querySelector('textarea[name="logline"]').value = 'A solitary robot discovers an abandoned garden in a neon-lit megacity and learns the meaning of growth through caring for a single flower.';
-            document.querySelector('input[name="intended_use"][value="Both"]').checked = true;
-            document.querySelector('input[name="production_start"]').value = 'Jan 2026';
-            document.querySelector('input[name="production_end"]').value = 'Feb 2026';
-            document.querySelector('textarea[name="existing_agreements"]').value = 'None';
+            safeSet('input[name="title"]', 'Neon Dreams');
+            safeSet('input[name="runtime"]', '02:30');
+            safeSet('input[name="genre"]', 'Sci-fi narrative short');
+            safeSet('textarea[name="logline"]', 'A solitary robot discovers an abandoned garden in a neon-lit megacity and learns the meaning of growth through caring for a single flower.');
+            safeSet('input[name="intended_use"][value="Both"]', true, 'checked');
+            safeSet('input[name="production_start"]', 'Jan 2026');
+            safeSet('input[name="production_end"]', 'Feb 2026');
+            safeSet('textarea[name="existing_agreements"]', 'None');
 
             // Section 3: Tools (3 tools)
             // Tools are already added dynamically, so we need to fill them
@@ -717,7 +729,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             // Section 4: Authorship
-            document.querySelector('textarea[name="authorship_declaration"]').value = `I directed every creative decision in this film through iterative prompting and editorial selection. The production process involved over 200 individual generation attempts across 15 distinct scenes.
+            safeSet('textarea[name="authorship_declaration"]', `I directed every creative decision in this film through iterative prompting and editorial selection. The production process involved over 200 individual generation attempts across 15 distinct scenes.
 
 For the opening sequence, I experimented with 30+ prompt variations to achieve the specific neon color palette and cyberpunk atmosphere. Each shot required careful consideration of camera movement, lighting direction, and compositional balance. I rejected approximately 70% of generated outputs that didn't match my creative vision.
 
@@ -725,48 +737,45 @@ The robot character design went through 12 iterations before I landed on the fin
 
 Post-generation, I performed extensive editorial work: color grading all footage for tonal consistency, compositing multiple generated elements into unified shots, timing cuts to the musical score I commissioned, and adding subtle VFX enhancements.
 
-The final film represents my authorial vision executed through AI tools, not the AI's autonomous output. Every frame exists because I chose it from many alternatives.`;
+The final film represents my authorial vision executed through AI tools, not the AI's autonomous output. Every frame exists because I chose it from many alternatives.`);
 
             // Section 5: Likeness checkboxes
-            document.querySelector('input[name="likeness_no_faces"]').checked = true;
-            document.querySelector('input[name="likeness_no_voices"]').checked = true;
-            document.querySelector('input[name="likeness_no_lookalikes"]').checked = true;
-            document.querySelector('input[name="likeness_no_synthetic"]').checked = true;
+            safeSet('input[name="likeness_no_faces"]', true, 'checked');
+            safeSet('input[name="likeness_no_voices"]', true, 'checked');
+            safeSet('input[name="likeness_no_lookalikes"]', true, 'checked');
+            safeSet('input[name="likeness_no_synthetic"]', true, 'checked');
 
             // Section 6: IP checkboxes
-            document.querySelector('input[name="ip_no_characters"]').checked = true;
-            document.querySelector('input[name="ip_no_brands"]').checked = true;
-            document.querySelector('input[name="ip_no_trademarks"]').checked = true;
+            safeSet('input[name="ip_no_characters"]', true, 'checked');
+            safeSet('input[name="ip_no_brands"]', true, 'checked');
+            safeSet('input[name="ip_no_trademarks"]', true, 'checked');
 
             // Section 7: Audio
-            document.querySelector('input[name="audio_music_source"][value="Original AI"]').checked = true;
-            // Trigger change event to show conditional field
-            document.querySelector('input[name="audio_music_source"][value="Original AI"]').dispatchEvent(new Event('change'));
+            const musicRadio = safeSet('input[name="audio_music_source"][value="Original AI"]', true, 'checked');
+            if (musicRadio) musicRadio.dispatchEvent(new Event('change'));
+
             setTimeout(() => {
-                const musicToolInput = document.querySelector('input[name="audio_music_tool"]');
-                if (musicToolInput) musicToolInput.value = 'Udio v1.5 (Paid - Standard Plan)';
+                safeSet('input[name="audio_music_tool"]', 'Udio v1.5 (Paid - Standard Plan)');
             }, 100);
 
-            document.querySelector('input[name="audio_sound_design"][value="Original AI"]').checked = true;
-            document.querySelector('input[name="audio_voiceover"][value="AI voice"]').checked = true;
+            safeSet('input[name="audio_sound_design"][value="Original AI"]', true, 'checked');
+            safeSet('input[name="audio_voiceover"][value="AI voice"]', true, 'checked');
 
             // Section 8: Tier 2
-            document.querySelector('input[name="tier2_enrollment"][value="Yes scenes"]').checked = true;
-            // Trigger change event to show conditional field
-            document.querySelector('input[name="tier2_enrollment"][value="Yes scenes"]').dispatchEvent(new Event('change'));
+            const tier2Radio = safeSet('input[name="tier2_enrollment"][value="Yes scenes"]', true, 'checked');
+            if (tier2Radio) tier2Radio.dispatchEvent(new Event('change'));
+
             setTimeout(() => {
-                const scenesInput = document.querySelector('textarea[name="tier2_scenes"]');
-                if (scenesInput) scenesInput.value = 'Scene 3 (robot in garden), Scene 7 (cityscape establishing shot), Scene 12 (final shot with flower)';
+                safeSet('textarea[name="tier2_scenes"]', 'Scene 3 (robot in garden), Scene 7 (cityscape establishing shot), Scene 12 (final shot with flower)');
             }, 100);
 
             // Section 9: Territory
-            const territorySelect = document.querySelector('select[name="territory_preference"]');
-            if (territorySelect) territorySelect.value = 'Global';
-            document.querySelector('input[name="exclusivity_preference"][value="Exclusive"]').checked = true;
+            safeSet('select[name="territory_preference"]', 'Global');
+            safeSet('input[name="exclusivity_preference"][value="Exclusive"]', true, 'checked');
 
             // Section 10: Video
-            document.querySelector('input[name="video_url"]').value = 'https://vimeo.com/testsubmission123';
-            document.querySelector('input[name="video_password"]').value = 'testpass123';
+            safeSet('input[name="video_url"]', 'https://vimeo.com/testsubmission123');
+            safeSet('input[name="video_password"]', 'testpass123');
 
             console.log('✅ Test data loaded! Now trigger progress tracking...');
 
