@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Your Work | Rights Verified Review | SI8</title>
+    <meta name="description" content="Submit your AI-generated film for Rights Verified review. Get your work vetted, documented, and added to SI8's catalog for commercial licensing.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="submit.css">
+</head>
+<body>
+    <!-- Navigation (same as homepage) -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-text">SI<span class="logo-accent">8</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html#catalog">The Catalog</a>
+                <div class="nav-dropdown">
+                    <a href="#rights-verified">Rights Verified ▾</a>
+                    <div class="dropdown-content">
+                        <a href="rights-verified-how-it-works.html">How It Works</a>
+                        <a href="rights-verified-chain-of-title.html">Rights Package</a>
+                        <a href="rights-verified-vetting-criteria.html">Vetting Criteria</a>
+                        <a href="rights-verified-legal-brief.html">Legal Risk Brief</a>
+                        <a href="rights-verified-rights-playbook.html">Rights Playbook</a>
+                    </div>
+                </div>
+                <a href="index.html#brands">For Brands</a>
+                <a href="index.html#creators">For Creators</a>
+                <a href="risk-briefing.html">Risk Briefing</a>
+                <a href="pricing.html">Pricing</a>
+                <a href="index.html#contact" class="nav-cta">Book a Call</a>
+            </div>
+            <div class="lang-selector">
+                <a href="submit.html" class="active">EN</a>
+                <span>/</span>
+                <a href="submit-zh.html">繁體中文</a>
+            </div>
+            <button class="mobile-menu-btn" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="submit-header">
+        <div class="container">
+            <span class="section-tag">Rights Verified Submission</span>
+            <h1>Submit Your Work for Review</h1>
+            <p class="submit-intro">Complete the form below to submit your AI-generated film for Rights Verified review. We'll evaluate your work against our vetting criteria and provide a decision within 5 business days.</p>
+            <div class="submit-stats">
+                <div class="stat">
+                    <strong>5 days</strong>
+                    <span>Target turnaround</span>
+                </div>
+                <div class="stat">
+                    <strong>10 sections</strong>
+                    <span>Required information</span>
+                </div>
+                <div class="stat">
+                    <strong>~20 min</strong>
+                    <span>Estimated completion</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Form -->
+    <div class="form-container">
+        <div class="form-wrapper">
+            <!-- Progress Sidebar -->
+            <aside class="progress-sidebar">
+                <h3>Submission Progress</h3>
+                <ul class="progress-list">
+                    <li data-section="1">
+                        <span class="progress-icon">○</span>
+                        <span class="progress-label">Filmmaker Profile</span>
+                    </li>
+                    <li data-section="2">
+                        <span class="progress-icon">○</span>
+                        <span class="progress-label">Production Overview</span>
+                    </li>
+                    <li data-section="3">
+                        <span class="progress-icon">○</span>
+                        <span class="progress-label">Tool Disclosure</span>
+                    </li>
+                    <li data-section="4">
+                        <span class="progress-icon">○</span>
+                        <span class="progress-label">Human Authorship</span>
+                    </li>
+                    <li data-section="5">
+                        <span class="progress-icon">○</span>
+                        <span class="progress-label">Likeness & Identity</span>
+                    </li>
+                    <li data-section="6">
+                        <span class="progress-icon">○</span>
+                        <span class="progress-label">IP & Brand</span>
+                    </li>
+                    <li data-section="7">
+                        <span class="progress-icon">○</span>
+                        <span class="progress-label">Audio & Music</span>
+                    </li>
+                    <li data-section="8">
+                        <span class="progress-icon">○</span>
+                        <span class="progress-label">Tier 2 Enrollment</span>
+                    </li>
+                    <li data-section="9">
+                        <span class="progress-icon">○</span>
+                        <span class="progress-label">Territory & Exclusivity</span>
+                    </li>
+                    <li data-section="10">
+                        <span class="progress-icon">○</span>
+                        <span class="progress-label">Supporting Materials</span>
+                    </li>
+                </ul>
+            </aside>
+
+            <!-- Form Content -->
+            <form id="submitForm" class="submit-form">
+
+                <!-- Section 1: Filmmaker Profile -->
+                <section class="form-section" data-section="1">
+                    <h2>1. Filmmaker Profile</h2>
+                    <p class="section-description">Tell us about yourself and your previous work.</p>
+
+                    <div class="form-group">
+                        <label for="filmmaker_name">Full Name <span class="required">*</span></label>
+                        <input type="text" id="filmmaker_name" name="filmmaker_name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="filmmaker_email">Email Address <span class="required">*</span></label>
+                        <input type="email" id="filmmaker_email" name="filmmaker_email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="filmmaker_location">Location (City, Country) <span class="required">*</span></label>
+                        <input type="text" id="filmmaker_location" name="filmmaker_location" placeholder="e.g., Singapore" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="filmmaker_portfolio">Portfolio / Website URL <span class="required">*</span></label>
+                        <input type="url" id="filmmaker_portfolio" name="filmmaker_portfolio" placeholder="https://" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prior_works">Links to 2-3 Prior Works</label>
+                        <textarea id="prior_works" name="prior_works" rows="3" placeholder="One link per line (Vimeo, YouTube, etc.)"></textarea>
+                        <small class="field-help">Share links to your previous AI-generated work (optional but recommended)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="first_submission" name="first_submission">
+                            <span>This is my first submission to SI8</span>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Section 2: Production Overview -->
+                <section class="form-section" data-section="2">
+                    <h2>2. Production Overview</h2>
+                    <p class="section-description">Provide details about your film.</p>
+
+                    <div class="form-group">
+                        <label for="title">Film Title <span class="required">*</span></label>
+                        <input type="text" id="title" name="title" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="runtime">Runtime (mm:ss) <span class="required">*</span></label>
+                        <input type="text" id="runtime" name="runtime" placeholder="01:45" pattern="[0-9]{2}:[0-9]{2}" required>
+                        <small class="field-help">Format: minutes:seconds (e.g., 01:45)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="genre">Genre / Category <span class="required">*</span></label>
+                        <input type="text" id="genre" name="genre" placeholder="e.g., Narrative short, Experimental, Commercial" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="logline">Logline (1-2 sentences) <span class="required">*</span></label>
+                        <textarea id="logline" name="logline" rows="3" required></textarea>
+                        <small class="field-help">Brief description of your film's story or concept</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Intended Use <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="intended_use" value="Catalog" required>
+                                <span>Catalog licensing only</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="intended_use" value="Placement">
+                                <span>Brand placement only</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="intended_use" value="Both">
+                                <span>Both catalog licensing and brand placement</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="production_start">Production Start Date <span class="required">*</span></label>
+                            <input type="text" id="production_start" name="production_start" placeholder="Month Year (e.g., Jan 2026)" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="production_end">Production End Date <span class="required">*</span></label>
+                            <input type="text" id="production_end" name="production_end" placeholder="Month Year (e.g., Feb 2026)" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="existing_agreements">Existing Licensing Agreements</label>
+                        <textarea id="existing_agreements" name="existing_agreements" rows="2" placeholder="List any existing licenses, festival screenings, or distribution agreements"></textarea>
+                        <small class="field-help">If none, leave blank</small>
+                    </div>
+                </section>
+
+                <!-- Section 3: Tool Disclosure -->
+                <section class="form-section" data-section="3">
+                    <h2>3. Tool Disclosure</h2>
+                    <p class="section-description">List all AI tools used in production. For each tool, you must provide a receipt showing your paid commercial plan.</p>
+
+                    <div id="tools-container">
+                        <!-- Tool rows will be added here dynamically -->
+                    </div>
+
+                    <button type="button" class="btn-secondary" id="add-tool-btn">+ Add Tool</button>
+
+                    <div class="form-group" style="margin-top: 2rem;">
+                        <label for="receipts">Tool Receipts / Invoices <span class="required">*</span></label>
+                        <div class="file-upload-zone" id="receipts-upload">
+                            <div class="upload-icon">📎</div>
+                            <p>Drag and drop files here or click to browse</p>
+                            <small>PDF, JPG, PNG only. Max 50MB per file. One receipt per tool.</small>
+                            <input type="file" id="receipts" name="receipts" multiple accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+                        </div>
+                        <div id="receipts-list" class="file-list"></div>
+                    </div>
+                </section>
+
+                <!-- Section 4: Human Authorship Declaration -->
+                <section class="form-section" data-section="4">
+                    <h2>4. Human Authorship Declaration</h2>
+                    <p class="section-description">Describe your creative process in detail. This is critical for copyright protection.</p>
+
+                    <div class="form-group">
+                        <label for="authorship_declaration">Your Creative Process <span class="required">*</span></label>
+                        <textarea id="authorship_declaration" name="authorship_declaration" rows="10" placeholder="Describe your prompts, iteration decisions, editorial choices, and post-generation editing in detail..." required></textarea>
+                        <div class="word-counter">
+                            <span id="word-count">0</span> / 150 words minimum
+                        </div>
+                        <small class="field-help">Explain: What prompts did you write? How did you iterate? What creative decisions did you make? What post-production editing did you do?</small>
+                    </div>
+                </section>
+
+                <!-- Section 5: Likeness & Identity Confirmation -->
+                <section class="form-section" data-section="5">
+                    <h2>5. Likeness & Identity Confirmation</h2>
+                    <p class="section-description">Confirm that your film does not use real people's likenesses without consent.</p>
+
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="likeness_no_faces" required>
+                                <span>No real person faces appear in this film</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="likeness_no_voices" required>
+                                <span>No real person voices are used in this film</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="likeness_no_lookalikes" required>
+                                <span>No recognizable lookalikes of real people</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="likeness_no_synthetic" required>
+                                <span>No synthetic versions of real people (deepfakes)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="likeness_notes">Additional Notes (if any concerns)</label>
+                        <textarea id="likeness_notes" name="likeness_notes" rows="3"></textarea>
+                    </div>
+                </section>
+
+                <!-- Section 6: IP & Brand Confirmation -->
+                <section class="form-section" data-section="6">
+                    <h2>6. IP & Brand Confirmation</h2>
+                    <p class="section-description">Confirm that your film does not imitate copyrighted characters or brands.</p>
+
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="ip_no_characters" required>
+                                <span>No copyrighted characters appear in this film</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="ip_no_brands" required>
+                                <span>No recognizable brand imitation (logos, trade dress, trademarks)</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="ip_no_ip" required>
+                                <span>No protected intellectual property used without license</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ip_notes">Additional Notes (if any concerns)</label>
+                        <textarea id="ip_notes" name="ip_notes" rows="3"></textarea>
+                    </div>
+                </section>
+
+                <!-- Section 7: Audio & Music Disclosure -->
+                <section class="form-section" data-section="7">
+                    <h2>7. Audio & Music Disclosure</h2>
+                    <p class="section-description">Disclose the source of all audio in your film.</p>
+
+                    <div class="form-group">
+                        <label>Music Source <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="audio_music_source" value="Original AI" required>
+                                <span>Original AI-generated music</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="audio_music_source" value="Licensed">
+                                <span>Licensed music (provide documentation)</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="audio_music_source" value="Silent">
+                                <span>Silent / No music</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="audio_music_tool_group" style="display: none;">
+                        <label for="audio_music_tool">AI Music Tool Used</label>
+                        <input type="text" id="audio_music_tool" name="audio_music_tool" placeholder="e.g., ElevenLabs, Suno, Udio">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sound Design <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="audio_sound_design" value="Original AI" required>
+                                <span>Original AI-generated</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="audio_sound_design" value="Licensed">
+                                <span>Licensed sound effects</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="audio_sound_design" value="None">
+                                <span>None</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Voiceover <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="audio_voiceover" value="Own voice" required>
+                                <span>My own voice</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="audio_voiceover" value="AI">
+                                <span>AI-generated voice</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="audio_voiceover" value="None">
+                                <span>No voiceover</span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 8: Tier 2 Enrollment -->
+                <section class="form-section" data-section="8">
+                    <h2>8. Tier 2 Enrollment (AI Product Placement)</h2>
+                    <p class="section-description">Do you authorize SI8 to regenerate brand elements into your film for custom placement deals?</p>
+
+                    <div class="form-group">
+                        <label>Modification Authorization <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="tier2_enrollment" value="Yes full" required>
+                                <span>Yes — authorize full film modification for brand placement</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="tier2_enrollment" value="Yes scenes">
+                                <span>Yes — authorize specific scenes only (specify below)</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="tier2_enrollment" value="Not now">
+                                <span>Not now — catalog licensing only</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="tier2_scenes_group" style="display: none;">
+                        <label for="tier2_scenes">Specific Scenes for Placement</label>
+                        <textarea id="tier2_scenes" name="tier2_scenes" rows="3" placeholder="List which scenes can be modified for brand placement"></textarea>
+                    </div>
+                </section>
+
+                <!-- Section 9: Territory & Exclusivity -->
+                <section class="form-section" data-section="9">
+                    <h2>9. Territory & Exclusivity Preferences</h2>
+                    <p class="section-description">Specify your licensing territory and exclusivity preferences.</p>
+
+                    <div class="form-group">
+                        <label for="territory_preference">Territory Preference <span class="required">*</span></label>
+                        <select id="territory_preference" name="territory_preference" required>
+                            <option value="">Select territory</option>
+                            <option value="Global">Global (worldwide)</option>
+                            <option value="APAC">Asia-Pacific only</option>
+                            <option value="North America">North America only</option>
+                            <option value="Europe">Europe only</option>
+                            <option value="Other">Other (specify below)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="territory_restrictions">Territory Restrictions (if any)</label>
+                        <textarea id="territory_restrictions" name="territory_restrictions" rows="2" placeholder="List any territories where this work cannot be licensed"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Exclusivity Preference <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="exclusivity_preference" value="Non-exclusive" required>
+                                <span>Non-exclusive — can be licensed to multiple buyers</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="exclusivity_preference" value="Exclusive OK">
+                                <span>Exclusive OK — open to exclusive deals (category-based)</span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 10: Supporting Materials -->
+                <section class="form-section" data-section="10">
+                    <h2>10. Supporting Materials</h2>
+                    <p class="section-description">Upload your film and any supporting documentation.</p>
+
+                    <div class="form-group">
+                        <label for="video_url">Video Link <span class="required">*</span></label>
+                        <input type="url" id="video_url" name="video_url" placeholder="Vimeo, YouTube, Google Drive, or Dropbox link" required>
+                        <small class="field-help">We require a link (not upload) for video files. Ensure the link is publicly accessible or password-protected (provide password below).</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="video_password">Video Password (if applicable)</label>
+                        <input type="text" id="video_password" name="video_password" placeholder="Leave blank if no password">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="supporting_docs">Supporting Documentation (optional)</label>
+                        <div class="file-upload-zone" id="supporting-docs-upload">
+                            <div class="upload-icon">📄</div>
+                            <p>Drag and drop files here or click to browse</p>
+                            <small>Process screenshots, production notes, etc. PDF, JPG, PNG only. Max 50MB per file.</small>
+                            <input type="file" id="supporting_docs" name="supporting_docs" multiple accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+                        </div>
+                        <div id="supporting-docs-list" class="file-list"></div>
+                    </div>
+                </section>
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary" id="submit-btn" disabled>
+                        <span class="btn-text">Submit for Rights Verified Review</span>
+                        <span class="btn-spinner" style="display: none;">⏳ Submitting...</span>
+                    </button>
+                    <p class="form-footer-note">By submitting, you confirm that all information provided is accurate and that you have the rights to all materials submitted.</p>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer (same as homepage) -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <span class="logo-text">SI<span class="logo-accent">8</span></span>
+                <p>AI video content your legal team won't flag.</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Services</h4>
+                    <a href="index.html#catalog">The Catalog</a>
+                    <a href="rights-verified-how-it-works.html">Rights Verified</a>
+                    <a href="pricing.html">Pricing</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Resources</h4>
+                    <a href="rights-verified-legal-brief.html">Legal Risk Brief</a>
+                    <a href="rights-verified-rights-playbook.html">Rights Playbook</a>
+                    <a href="risk-briefing.html">Risk Briefing</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Company</h4>
+                    <a href="index.html#contact">Contact</a>
+                    <a href="submit.html">Submit Your Work</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 SuperImmersive 8. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="submit.js"></script>
+</body>
+</html>
