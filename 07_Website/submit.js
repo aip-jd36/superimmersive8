@@ -560,7 +560,7 @@ document.addEventListener('DOMContentLoaded', function() {
             localStorage.setItem('submitterEmail', formData.filmmaker.email);
 
             // Success! Redirect to confirmation page
-            window.location.href = `confirmation.html?id=${result.submissionId}`;
+            window.location.href = `confirmation?id=${result.submissionId}`;
 
         } catch (error) {
             console.error('Submission error:', error);
