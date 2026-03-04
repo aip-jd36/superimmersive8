@@ -2,7 +2,7 @@
 
 A running log of decisions, insights, and lessons learned while building an AI film distribution company.
 
-*Last updated: March 1, 2026*
+*Last updated: March 4, 2026*
 
 ---
 
@@ -2212,6 +2212,8 @@ Rights Verified is not a checkbox on a contract — it's a documented process wi
 | Feb 21, 2026 | **Pricing page launched (EN + ZH-TW)** | Created pricing.html + pricing-zh.html with 3-tier structure: Standard License ($1,500), Extended License ($2,500-$5,000), Custom AI Placement ($12,000+); FAQ section addresses 7 common questions; both languages deployed; added pricing links to main nav + footer on all pages; pricing strategy v1.0 complete with competitor research (10 platforms), peer review validation, commission math |
 | Feb 28, 2026 | **Rights Verified web intake: Google → Airtable pivot** | Hit Google Cloud organization policy blocker (service account keys disabled even on new projects without org); switched from Google Sheets + Drive API to Airtable + video links; result: simpler auth (API key vs service account), built-in attachments (no separate file storage), better UI for reviewers, $0/month maintained, zero Google Cloud complexity; unblocked Day 1 setup |
 | Feb 28, 2026 | **Technical stack decision: simplicity > feature parity** | Google Sheets offered unlimited rows, familiar interface; but required: service account creation, JSON key management, 2 separate APIs (Sheets + Drive), org policy navigation; Airtable: 1 API key, built-in attachments, forms/kanban views, 1,000 records free (sufficient Year 1); lesson: choose based on auth friction, not just feature comparison; "works in 30 min" > "works better in 6 hours" |
+| Mar 4, 2026 | **Contact form spam protection implemented (honeypot + time limiting)** | Was receiving bot spam on main contact form (random names: mtmsozmwnd, fpygymxlho, etc.); implemented two-layer protection: (1) honeypot field (hidden "website" field bots auto-fill), (2) time-based validation (min 3 seconds from page load to submit); spam detected returns 400 error before reaching email/Kit; legitimate submissions unaffected; 80-95% spam reduction expected; $0/month solution |
+| Mar 4, 2026 | **Form handler conflict debugged and resolved** | Initial deployment failed with 400 errors; root cause: script.js had OLD handler sending FormData as multipart/form-data, index.html had NEW inline handler sending JSON with spam fields; both tried to run simultaneously causing conflict; solution: consolidated all form handling into script.js, removed duplicate inline handlers from both EN/ZH pages; single source of truth, spam protection now functional |
 
 ---
 
