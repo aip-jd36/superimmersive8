@@ -586,6 +586,12 @@
                 </div>
                 <div class="contact-form-container">
                     <form class="contact-form" action="/api/contact-form" method="POST">
+                        <!-- Honeypot field (hidden from humans, bots will fill it) -->
+                        <input type="text" name="website" style="display: none;" tabindex="-1" autocomplete="off">
+
+                        <!-- Timestamp field (populated on page load) -->
+                        <input type="hidden" name="formLoadTime" id="formLoadTime">
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="name">Name *</label>
@@ -682,6 +688,11 @@
 
     <script src="script.js"></script>
     <script>
+        // Set form load timestamp for spam detection
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('formLoadTime').value = Date.now();
+        });
+
         // Handle contact form submission
         document.querySelector('.contact-form').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -706,7 +717,10 @@
                         name: formData.get('name'),
                         company: formData.get('company'),
                         type: formData.get('type'),
-                        message: formData.get('message')
+                        message: formData.get('message'),
+                        // Spam protection fields
+                        website: formData.get('website'),
+                        formLoadTime: formData.get('formLoadTime')
                     })
                 });
 

@@ -13,8 +13,38 @@ export default async function handler(req, res) {
       body = JSON.parse(req.body || '{}');
     }
 
-    const { email, name, company, type, message } = body;
+    const { email, name, company, type, message, website, formLoadTime } = body;
     console.log('Form data:', { email, name, company, type, message: message?.substring(0, 50) });
+
+    // ============================================
+    // SPAM DETECTION
+    // ============================================
+
+    // 1. Honeypot check - if "website" field is filled, it's a bot
+    if (website && website.trim() !== '') {
+      console.log('🚫 SPAM DETECTED: Honeypot field filled:', website);
+      return res.status(400).json({
+        error: 'Invalid submission',
+        message: 'Please try again'
+      });
+    }
+
+    // 2. Time-based check - reject if submitted too quickly (< 3 seconds)
+    if (formLoadTime) {
+      const timeElapsed = Date.now() - parseInt(formLoadTime);
+      const minTime = 3000; // 3 seconds minimum
+
+      if (timeElapsed < minTime) {
+        console.log(`🚫 SPAM DETECTED: Submitted too quickly (${timeElapsed}ms < ${minTime}ms)`);
+        return res.status(400).json({
+          error: 'Invalid submission',
+          message: 'Please try again'
+        });
+      }
+      console.log(`✓ Time check passed: ${timeElapsed}ms elapsed`);
+    } else {
+      console.log('⚠️ Warning: No formLoadTime provided (old form?)');
+    }
 
     // Validate required fields
     if (!email || !name || !type || !message) {
