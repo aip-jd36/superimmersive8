@@ -90,9 +90,17 @@ style.textContent = `
 document.head.appendChild(style);
 
 // ============================
-// Form Handling
+// Form Handling with Spam Protection
 // ============================
 const contactForm = document.querySelector('.contact-form');
+
+// Set form load timestamp for spam detection
+document.addEventListener('DOMContentLoaded', function() {
+    const timestampField = document.getElementById('formLoadTime');
+    if (timestampField) {
+        timestampField.value = Date.now();
+    }
+});
 
 if (contactForm) {
     contactForm.addEventListener('submit', async (e) => {
@@ -109,35 +117,55 @@ if (contactForm) {
             const formData = new FormData(contactForm);
             const response = await fetch(contactForm.action, {
                 method: 'POST',
-                body: formData,
                 headers: {
-                    'Accept': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: formData.get('email'),
+                    name: formData.get('name'),
+                    company: formData.get('company'),
+                    type: formData.get('type'),
+                    message: formData.get('message'),
+                    // Spam protection fields
+                    website: formData.get('website'),
+                    formLoadTime: formData.get('formLoadTime')
+                })
             });
 
-            if (response.ok) {
-                // Success
-                submitBtn.textContent = 'Message Sent!';
-                submitBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-                contactForm.reset();
+            const result = await response.json();
 
+            if (response.ok) {
+                // Success - show confirmation message
+                submitBtn.textContent = '✓ Message Sent!';
+                submitBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+
+                // Replace form with success message
                 setTimeout(() => {
-                    submitBtn.textContent = originalText;
-                    submitBtn.style.background = '';
-                    submitBtn.disabled = false;
-                }, 3000);
+                    contactForm.innerHTML = `
+                        <div style="text-align: center; padding: 40px 20px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.1)); border-radius: 8px; border: 2px solid #22c55e;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">✓</div>
+                            <h3 style="color: #16a34a; margin-bottom: 12px;">Message Sent Successfully!</h3>
+                            <p style="color: #52504A; margin-bottom: 24px;">We'll respond within 24 hours.</p>
+                            <p style="margin-bottom: 16px; color: #1a1918; font-weight: 500;">Want to book a call right now?</p>
+                            <a href="https://calendly.com/aipenguins/superimmersive8" target="_blank" class="btn btn-primary" style="display: inline-block; text-decoration: none;">
+                                📅 Book a Call on Calendly
+                            </a>
+                        </div>
+                    `;
+                }, 1000);
             } else {
-                throw new Error('Form submission failed');
+                throw new Error(result.error || 'Form submission failed');
             }
         } catch (error) {
-            // Error
-            submitBtn.textContent = 'Error - Try Again';
+            console.error('Form submission error:', error);
+            submitBtn.textContent = '✗ Error - Please try again';
             submitBtn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+            submitBtn.disabled = false;
 
+            // Reset button after 3 seconds
             setTimeout(() => {
                 submitBtn.textContent = originalText;
                 submitBtn.style.background = '';
-                submitBtn.disabled = false;
             }, 3000);
         }
     });
