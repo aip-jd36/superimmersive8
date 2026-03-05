@@ -151,7 +151,7 @@ After external validation from ChatGPT + Gemini, key execution decisions changed
 - [x] Rights Playbook v0.2 — ✓ Expanded with legal research, quantifiable metrics, competitive landscape (Feb 2026)
 - [x] Rights Verified website section — ✓ 5 pages live (How It Works, Chain of Title, Vetting Criteria, Legal Brief, Playbook) (Feb 2026)
 - [x] Sample Chain of Title example — ✓ "Neon Dreams" 12-page PDF with 9-field documentation; HTML template + PDF generation system; gated download on website with 4 entry points (Feb 2026)
-- [ ] 2-3 sample AI video outputs (even mock/personal projects)
+- [x] 5 catalog entries with real filmmaker work — ✓ Time Passing (Damon Chang), One Fleeting Moment (Michy1591, vertical 9:16), Adventures of Sam and Cole (Jsizzle), Overtime (JerBear), Karoake Time! (Machete in the Woods); properly filed in 05_Catalog/represented/ with source images + thumbnails + metadata (Mar 2026)
 
 ### 2. Sales Ops (This makes or breaks Month 2-6)
 - [x] Lead intake + qualification form — ✓ Gated download forms on rights-verified-legal-brief.html + rights-verified-rights-playbook.html (Feb 2026)
