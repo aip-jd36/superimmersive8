@@ -228,9 +228,10 @@ After external validation from ChatGPT + Gemini, key execution decisions changed
 ### 5. Outreach & Messaging
 - [ ] LinkedIn message template for Singapore agencies
 - [ ] Email follow-up sequence (7 touches over 21 days)
-- [ ] Common objections and responses
-- [ ] Filmmaker pitch message
-- [ ] Filmmaker value prop (why SI8 vs self-distribute?)
+- [x] Instagram filmmaker outreach templates — ✓ 2 message variants (professional/direct), 3 follow-ups, response scripts, A/B testing strategy; streaming platform opportunity angle; located in 03_Sales/filmmakers/INSTAGRAM_OUTREACH_TEMPLATES.md (Mar 2026)
+- [x] Common objections and responses — ✓ Included in Instagram outreach template (platform details, pay structure, process, value prop)
+- [x] Filmmaker pitch message — ✓ See Instagram outreach templates (Mar 2026)
+- [x] Filmmaker value prop (why SI8 vs self-distribute?) — ✓ Platform access + rights verification (documented in outreach templates)
 
 ### 6. Comms & Brand Assets
 - [ ] Intro email / "what we do" blurb (100 words)
