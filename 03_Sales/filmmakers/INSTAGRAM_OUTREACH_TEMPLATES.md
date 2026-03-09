@@ -1,8 +1,18 @@
 # Instagram Filmmaker Outreach Templates
 
-**Last Updated:** March 5, 2026
+**Last Updated:** March 6, 2026
 **Status:** Active (Streaming platform deal angle)
 **Expected Response Rate:** 20-30%
+
+## Real Results
+
+**March 5, 2026:**
+- Messages sent: 15
+- Positive replies: 4
+- Response rate: **26.7%** ✅
+- Message used: Message 2 (Direct/Urgent) with "Tell you more?" CTA
+
+**Key insight:** "Tell you more?" performed better than "Worth a conversation?" — more casual, lower friction.
 
 ---
 
@@ -239,3 +249,151 @@ Before sending ANY message:
 ---
 
 **Status:** Ready to use (March 5, 2026)
+
+---
+
+## Response Scripts (After They Say "Yes/Tell me more")
+
+### Option A: Request Work First (Recommended)
+
+**Use when:** You want to filter for quality before spending time on calls
+
+```
+Great! Here's the quick version:
+
+We're SI8 — AI film rights agency. We're closing a deal with a streaming platform
+in Taiwan (curated tier, think Netflix-style programming for AI content).
+
+They need vetted short-form AI films (3-10 min). We handle rights verification
+(tool provenance, chain of title, brand safety). You keep rights (non-exclusive),
+earn 20% royalty.
+
+Next step: Can you send me 1-2 of your best pieces? I'll review and let you know
+if they'd be a fit for the platform. Then we can schedule a quick call to discuss
+details.
+
+What's your best work?
+```
+
+---
+
+### Option B: Book Call Immediately
+
+**Use when:** You've already seen their work and know it's strong
+
+```
+Awesome! Quick background:
+
+SI8 = AI film rights agency. We're closing a licensing deal with a streaming
+platform in Taiwan. They need rights-verified AI content (3-10 min shorts).
+
+We handle the vetting (tool provenance, chain of title, brand safety). You get
+20% royalty, keep rights (non-exclusive).
+
+Worth a 15-min call to see if your work is a fit?
+[Insert Calendly link or ask: "What's your timezone?"]
+```
+
+---
+
+## After They Send You Their Work
+
+### If work looks good:
+
+```
+This is strong work — [specific compliment]. Definitely fits what the platform
+is looking for.
+
+Next step: Let's do a quick 15-min call to walk through our Rights Verified
+process and answer any questions. [Calendly link]
+
+Quick question before we chat: Are you using paid commercial plans for your
+tools (Runway/Sora/Kling)? Platform requires commercial licensing.
+```
+
+---
+
+### If work is borderline:
+
+```
+Really nice work! A few questions before I can confirm it's a fit:
+
+1. Which AI tool(s) did you use? (Runway/Sora/Kling/Pika?)
+2. Are you on a paid commercial plan?
+3. Runtime? (Platform is looking for 3-10 min range)
+
+If those check out, let's schedule a call to discuss next steps.
+```
+
+---
+
+### If work is NOT a fit (soft decline):
+
+```
+Thanks for sharing! Strong work. For this particular platform deal, they're
+looking for [specific criteria - e.g., "narrative structure" or "3-10 min runtime"].
+
+We're building our broader catalog though — would you be open to staying in
+touch for future opportunities? We'll have more platform deals coming.
+```
+
+---
+
+## Call Preparation Checklist
+
+Before the 15-min call with interested filmmakers:
+
+- [ ] Review their submitted work (note 2-3 specific things you like)
+- [ ] Check which tools they use (visible in their posts/bio)
+- [ ] Prepare questions:
+  - [ ] What tool(s) do you use? Paid commercial plan?
+  - [ ] How long have you been creating AI films?
+  - [ ] What's your goal with your work? (Monetization? Art? Both?)
+  - [ ] Have you licensed your work before?
+- [ ] Have Calendly ready for follow-up if needed
+- [ ] Have Rights Verified submission form ready to send post-call
+
+---
+
+## Post-Call Actions
+
+### If they're a fit and interested:
+
+**Send within 24 hours:**
+```
+Great talking with you! As discussed, next steps:
+
+1. Submit your work through our Rights Verified intake form: [link]
+2. We'll review within 5-7 business days
+3. If approved, we'll add you to our represented roster and pitch to the platform
+
+Let me know if you have any questions as you fill out the form!
+```
+
+---
+
+### If they need time to think:
+
+```
+No problem at all — take your time! Just to recap what we discussed:
+
+- Platform: Streaming service in Taiwan (Netflix-style curation)
+- Your role: Submit work for rights verification
+- Our role: Handle vetting + licensing
+- Deal terms: 20% royalty, non-exclusive
+- Timeline: Programming deadline April/May
+
+Let me know if any questions come up. Happy to chat again anytime.
+```
+
+---
+
+### If they're not ready (but warm lead):
+
+```
+Totally understand! We're still building the catalog, so if anything changes or
+you create new work you think would be a fit, feel free to reach out.
+
+I'll keep you posted on future platform opportunities. Stay in touch!
+```
+
