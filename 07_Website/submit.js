@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeProgressTracking();
     initializeConditionalFields();
     initializeFormValidation();
-    addTestDataButton();
+    // addTestDataButton(); // Disabled for production
 
     console.log('✅ All initializations complete');
 
