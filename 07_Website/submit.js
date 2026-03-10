@@ -962,9 +962,19 @@ The final film represents my authorial vision executed through AI tools, not the
             const likenessRadio = safeSet('input[name="likeness_status"][value="none"]', true, 'checked');
             if (likenessRadio) likenessRadio.dispatchEvent(new Event('change'));
 
+            // Section 5: Likeness confirmation checkboxes
+            safeSet('input[name="no_unlicensed_voices"]', true, 'checked');
+            safeSet('input[name="no_unlicensed_lookalikes"]', true, 'checked');
+            safeSet('input[name="synthetic_faces_check"]', true, 'checked');
+
             // Section 6: IP Status (NEW radio button approach)
             const ipRadio = safeSet('input[name="ip_status"][value="none"]', true, 'checked');
             if (ipRadio) ipRadio.dispatchEvent(new Event('change'));
+
+            // Section 6: IP confirmation checkboxes
+            safeSet('input[name="no_unlicensed_characters"]', true, 'checked');
+            safeSet('input[name="no_unlicensed_brands"]', true, 'checked');
+            safeSet('input[name="no_unlicensed_trademarks"]', true, 'checked');
 
             // Section 7: Audio
             const musicRadio = safeSet('input[name="audio_music_source"][value="Original AI"]', true, 'checked');
