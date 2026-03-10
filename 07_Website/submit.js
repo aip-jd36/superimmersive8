@@ -404,6 +404,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // NEW: Show/hide underlying rights details
         const underlyingRights = document.getElementById('underlying_rights');
         if (underlyingRights) {
+            // Initialize on page load
+            const initialValue = underlyingRights.value;
+            if (initialValue === 'original') {
+                document.getElementById('underlying_rights_source').required = false;
+                document.getElementById('underlying_rights_holder').required = false;
+                document.getElementById('underlying_rights_permission').required = false;
+            }
+
             underlyingRights.addEventListener('change', function() {
                 const container = document.getElementById('underlying_rights_details_container');
                 const isAdapted = this.value === 'adapted';
@@ -418,6 +426,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // NEW: Show/hide third-party asset details
         const thirdPartyCheckboxes = document.querySelectorAll('[name^="third_party_"]');
+
+        // Initialize on page load - if no boxes checked, field not required
+        const initiallyChecked = Array.from(thirdPartyCheckboxes).some(cb => cb.checked);
+        if (!initiallyChecked) {
+            document.getElementById('third_party_details').required = false;
+        }
+
         thirdPartyCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 const anyChecked = Array.from(thirdPartyCheckboxes).some(cb => cb.checked);
@@ -429,6 +444,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // NEW: Show/hide licensed likenesses container
         const likenessRadios = document.querySelectorAll('[name="likeness_status"]');
+
+        // Initialize on page load - set required to false if "none" is selected
+        const selectedLikenessRadio = document.querySelector('[name="likeness_status"]:checked');
+        if (selectedLikenessRadio && selectedLikenessRadio.value === 'none') {
+            document.getElementById('licensed_likenesses_details').required = false;
+            document.getElementById('licensed_likenesses_docs').required = false;
+        }
+
         likenessRadios.forEach(radio => {
             radio.addEventListener('change', function() {
                 const container = document.getElementById('licensed_likenesses_container');
@@ -443,6 +466,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // NEW: Show/hide licensed IP containers
         const ipRadios = document.querySelectorAll('[name="ip_status"]');
+
+        // Initialize on page load - set required to false if "none" is selected
+        const selectedIpRadio = document.querySelector('[name="ip_status"]:checked');
+        if (selectedIpRadio && selectedIpRadio.value === 'none') {
+            document.getElementById('licensed_ip_details').required = false;
+            document.getElementById('licensed_ip_docs').required = false;
+            document.getElementById('fair_use_reasoning').required = false;
+        }
+
         ipRadios.forEach(radio => {
             radio.addEventListener('change', function() {
                 const licensedContainer = document.getElementById('licensed_ip_container');
@@ -468,6 +500,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // NEW: Show/hide existing brand placement details
         const brandPlacementRadios = document.querySelectorAll('[name="existing_brand_placements"]');
+
+        // Initialize on page load - set required to false if "none" is selected
+        const selectedBrandRadio = document.querySelector('[name="existing_brand_placements"]:checked');
+        if (selectedBrandRadio && selectedBrandRadio.value === 'none') {
+            document.getElementById('existing_brand_details').required = false;
+        }
+
         brandPlacementRadios.forEach(radio => {
             radio.addEventListener('change', function() {
                 const container = document.getElementById('existing_brand_details_container');
