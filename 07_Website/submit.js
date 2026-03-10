@@ -869,11 +869,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================
 
     function setupTestDataButton() {
-        const testBtn = document.getElementById('load-test-data-btn');
-        if (!testBtn) {
-            console.log('⚠️ Test data button not found');
-            return;
-        }
+        // Create a floating test button (same as old implementation)
+        const testBtn = document.createElement('button');
+        testBtn.textContent = '🧪 Load Test Data';
+        testBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: #f59e0b; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);';
+        document.body.appendChild(testBtn);
 
         // Helper function to safely set values
         const safeSet = (selector, value, prop = 'value') => {
