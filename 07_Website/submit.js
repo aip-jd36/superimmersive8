@@ -14,7 +14,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let toolCount = 0;
     const uploadedFiles = {
         'receipts-list': [],
-        'supporting-docs-list': []
+        'supporting-docs-list': [],
+        'likeness-docs-list': [],
+        'ip-docs-list': []
     };
 
     // ============================
@@ -476,8 +478,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // NEW: File upload handlers for new documentation fields
-        setupFileUploadZone('licensed_likenesses_docs', 'likeness-docs-list');
-        setupFileUploadZone('licensed_ip_docs', 'ip-docs-list');
+        setupFileUpload('likeness-docs-upload-zone', 'licensed_likenesses_docs', 'likeness-docs-list');
+        setupFileUpload('ip-docs-upload-zone', 'licensed_ip_docs', 'ip-docs-list');
     }
 
     // ============================
