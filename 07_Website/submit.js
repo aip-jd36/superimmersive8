@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeProgressTracking();
     initializeConditionalFields();
     initializeFormValidation();
-    // addTestDataButton(); // Disabled for production
+    setupTestDataButton(); // Load test data button for development
 
     console.log('✅ All initializations complete');
 
@@ -868,12 +868,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Test Data Auto-Fill
     // ============================
 
-    function addTestDataButton() {
-        // Create a floating test button
-        const testBtn = document.createElement('button');
-        testBtn.textContent = '🧪 Load Test Data';
-        testBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: #10b981; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);';
-        document.body.appendChild(testBtn);
+    function setupTestDataButton() {
+        const testBtn = document.getElementById('load-test-data-btn');
+        if (!testBtn) {
+            console.log('⚠️ Test data button not found');
+            return;
+        }
 
         // Helper function to safely set values
         const safeSet = (selector, value, prop = 'value') => {
@@ -908,6 +908,10 @@ document.addEventListener('DOMContentLoaded', function() {
             safeSet('input[name="production_end"]', 'Feb 2026');
             safeSet('textarea[name="existing_agreements"]', 'None');
 
+            // NEW: Underlying Rights
+            const underlyingRights = safeSet('select[name="underlying_rights"]', 'original');
+            if (underlyingRights) underlyingRights.dispatchEvent(new Event('change'));
+
             // Section 3: Tools (3 tools)
             // Tools are already added dynamically, so we need to fill them
             const toolNames = document.querySelectorAll('input[name^="tool_name_"]');
@@ -938,6 +942,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (planInput) planInput.value = tool.plan;
             });
 
+            // NEW: Third-Party Assets (leave unchecked for clean test)
+            // Don't check any third-party asset boxes for a clean submission test
+
             // Section 4: Authorship
             safeSet('textarea[name="authorship_declaration"]', `I directed every creative decision in this film through iterative prompting and editorial selection. The production process involved over 200 individual generation attempts across 15 distinct scenes.
 
@@ -949,16 +956,13 @@ Post-generation, I performed extensive editorial work: color grading all footage
 
 The final film represents my authorial vision executed through AI tools, not the AI's autonomous output. Every frame exists because I chose it from many alternatives.`);
 
-            // Section 5: Likeness checkboxes
-            safeSet('input[name="likeness_no_faces"]', true, 'checked');
-            safeSet('input[name="likeness_no_voices"]', true, 'checked');
-            safeSet('input[name="likeness_no_lookalikes"]', true, 'checked');
-            safeSet('input[name="likeness_no_synthetic"]', true, 'checked');
+            // Section 5: Likeness Status (NEW radio button approach)
+            const likenessRadio = safeSet('input[name="likeness_status"][value="none"]', true, 'checked');
+            if (likenessRadio) likenessRadio.dispatchEvent(new Event('change'));
 
-            // Section 6: IP checkboxes
-            safeSet('input[name="ip_no_characters"]', true, 'checked');
-            safeSet('input[name="ip_no_brands"]', true, 'checked');
-            safeSet('input[name="ip_no_trademarks"]', true, 'checked');
+            // Section 6: IP Status (NEW radio button approach)
+            const ipRadio = safeSet('input[name="ip_status"][value="none"]', true, 'checked');
+            if (ipRadio) ipRadio.dispatchEvent(new Event('change'));
 
             // Section 7: Audio
             const musicRadio = safeSet('input[name="audio_music_source"][value="Original AI"]', true, 'checked');
@@ -979,13 +983,24 @@ The final film represents my authorial vision executed through AI tools, not the
                 safeSet('textarea[name="tier2_scenes"]', 'Scene 3 (robot in garden), Scene 7 (cityscape establishing shot), Scene 12 (final shot with flower)');
             }, 100);
 
+            // NEW: Existing Brand Placements
+            const brandPlacementRadio = safeSet('input[name="existing_brand_placements"][value="none"]', true, 'checked');
+            if (brandPlacementRadio) brandPlacementRadio.dispatchEvent(new Event('change'));
+
             // Section 9: Territory
             safeSet('select[name="territory_preference"]', 'Global');
             safeSet('input[name="exclusivity_preference"][value="Exclusive"]', true, 'checked');
 
-            // Section 10: Video
+            // Section 10: Catalog Submission
+            safeSet('input[name="catalog_title"]', 'Neon Dreams');
+            safeSet('textarea[name="catalog_description"]', 'A contemplative sci-fi short about connection and growth in a neon-lit cyberpunk world.');
+
+            // Section 11: Supporting Materials
             safeSet('input[name="video_url"]', 'https://vimeo.com/testsubmission123');
             safeSet('input[name="video_password"]', 'testpass123');
+
+            // Section 12: Terms
+            safeSet('input[name="terms_consent"]', true, 'checked');
 
             console.log('✅ Test data loaded! Now trigger progress tracking...');
 
