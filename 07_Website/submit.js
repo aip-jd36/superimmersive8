@@ -1063,7 +1063,7 @@ The final film represents my authorial vision executed through AI tools, not the
 
             setTimeout(() => {
                 console.log('✅ Form should now be ready to submit (except file uploads - do those manually)');
-                alert('✅ Test data loaded!\n\nYou still need to upload a test file for "Tool Receipts" to enable submit button.');
+                alert('✅ Test data loaded!\n\nManually upload these files to complete the form:\n\n1. Tool Receipts (Section 3) - at least 1 file\n2. Catalog Thumbnail (Section 10) - required\n\nThen submit the form.');
             }, 500);
         });
     }
