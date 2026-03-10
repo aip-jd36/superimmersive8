@@ -11,6 +11,11 @@ const airtable = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY });
 const base = airtable.base(process.env.AIRTABLE_BASE_ID);
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// Cloudinary config
+const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
+const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY;
+const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;
+
 // CORS headers
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -64,8 +69,16 @@ module.exports = async function handler(req, res) {
         const receiptsInfo = processFileInfo(data.files.receipts);
         const supportingDocsInfo = processFileInfo(data.files.supportingDocs);
 
+        // Upload catalog thumbnail to Cloudinary
+        let thumbnailUrl = null;
+        if (data.catalog.thumbnailDataUrl) {
+            console.log('Uploading catalog thumbnail to Cloudinary...');
+            thumbnailUrl = await uploadThumbnailToCloudinary(data.catalog.thumbnailDataUrl, submissionId);
+            console.log('Thumbnail uploaded:', thumbnailUrl);
+        }
+
         // Create Airtable record
-        const record = await createAirtableRecord(submissionId, data, receiptsInfo, supportingDocsInfo);
+        const record = await createAirtableRecord(submissionId, data, receiptsInfo, supportingDocsInfo, thumbnailUrl);
 
         console.log('Created Airtable record:', record.id);
 
@@ -142,6 +155,28 @@ function validateSubmission(data) {
     // File uploads
     if (!data.files.receipts || data.files.receipts.length === 0) {
         errors.push('At least one tool receipt is required');
+    }
+
+    // Catalog submission
+    if (!data.catalog.title || data.catalog.title.length < 3) {
+        errors.push('Catalog title is required (min 3 characters)');
+    }
+
+    if (data.catalog.title && data.catalog.title.length > 60) {
+        errors.push('Catalog title must be 60 characters or less');
+    }
+
+    if (data.catalog.description && data.catalog.description.length > 200) {
+        errors.push('Catalog description must be 200 characters or less');
+    }
+
+    if (!data.catalog.thumbnailUrl) {
+        errors.push('Catalog thumbnail is required');
+    }
+
+    // Terms consent
+    if (!data.terms.consent) {
+        errors.push('You must agree to the terms to submit');
     }
 
     return errors;
@@ -226,11 +261,44 @@ function processFileInfo(files) {
     return files.map(file => `${file.name} (${(file.dataUrl.length / 1024 / 1024).toFixed(2)} MB)`).join(', ');
 }
 
+// Upload thumbnail to Cloudinary
+async function uploadThumbnailToCloudinary(dataUrl, submissionId) {
+    try {
+        // Cloudinary upload API
+        const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+
+        // Create form data
+        const formData = new URLSearchParams();
+        formData.append('file', dataUrl);
+        formData.append('upload_preset', 'si8_catalog'); // You'll need to create this preset in Cloudinary
+        formData.append('public_id', `catalog/${submissionId}`); // Organize by submission ID
+        formData.append('folder', 'si8-catalog-submissions');
+
+        // Upload to Cloudinary
+        const response = await fetch(uploadUrl, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error(`Cloudinary upload failed: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        return result.secure_url; // Return the HTTPS URL
+
+    } catch (error) {
+        console.error('Thumbnail upload error:', error);
+        // Don't fail the whole submission if thumbnail upload fails
+        return null;
+    }
+}
+
 // ============================
 // Airtable Record Creation
 // ============================
 
-async function createAirtableRecord(submissionId, data, receiptsInfo, supportingDocsInfo) {
+async function createAirtableRecord(submissionId, data, receiptsInfo, supportingDocsInfo, thumbnailUrl) {
     const record = await base('Submissions').create([
         {
             fields: {
@@ -267,7 +335,11 @@ async function createAirtableRecord(submissionId, data, receiptsInfo, supporting
                 territory_restrictions: data.territory.restrictions || '',
                 exclusivity_preference: data.territory.exclusivity,
                 video_url: data.files.videoUrl,
-                // video_password: data.files.videoPassword || '', // TODO: Add this field to Airtable
+                video_password: data.files.videoPassword || '',
+                catalog_title: data.catalog.title,
+                catalog_description: data.catalog.description || '',
+                catalog_thumbnail: thumbnailUrl ? [{ url: thumbnailUrl }] : [], // Airtable attachment from Cloudinary
+                terms_consent: data.terms.consent,
                 reviewer: 'JD',
                 receipts: receiptsInfo, // Store as text: "file1.pdf (2.5 MB), file2.jpg (1.2 MB)"
                 supporting_docs: supportingDocsInfo // Store as text for now

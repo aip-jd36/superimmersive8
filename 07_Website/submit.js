@@ -705,6 +705,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 restrictions: formData.get('territory_restrictions'),
                 exclusivity: formData.get('exclusivity_preference')
             },
+            catalog: {
+                title: formData.get('catalog_title'),
+                description: formData.get('catalog_description'),
+                thumbnailDataUrl: await getCatalogThumbnailDataUrl()
+            },
+            terms: {
+                consent: formData.get('terms_consent') === 'on'
+            },
             files: {
                 videoUrl: formData.get('video_url'),
                 videoPassword: formData.get('video_password'),
@@ -714,6 +722,21 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         return data;
+    }
+
+    // Get catalog thumbnail as data URL
+    async function getCatalogThumbnailDataUrl() {
+        const input = document.getElementById('catalog_thumbnail');
+        if (!input || !input.files || !input.files[0]) {
+            return null;
+        }
+
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(input.files[0]);
+        });
     }
 
     // Convert files to base64 data URLs for Airtable
