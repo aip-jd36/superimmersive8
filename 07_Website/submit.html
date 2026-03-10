@@ -69,7 +69,7 @@
                     <span>Target turnaround</span>
                 </div>
                 <div class="stat">
-                    <strong>10 sections</strong>
+                    <strong>12 sections</strong>
                     <span>Required information</span>
                 </div>
                 <div class="stat">
@@ -125,7 +125,15 @@
                     </li>
                     <li data-section="10">
                         <span class="progress-icon">○</span>
+                        <span class="progress-label">Catalog Submission</span>
+                    </li>
+                    <li data-section="11">
+                        <span class="progress-icon">○</span>
                         <span class="progress-label">Supporting Materials</span>
+                    </li>
+                    <li data-section="12">
+                        <span class="progress-icon">○</span>
+                        <span class="progress-label">Terms & Consent</span>
                     </li>
                 </ul>
             </aside>
@@ -464,9 +472,41 @@
                     </div>
                 </section>
 
-                <!-- Section 10: Supporting Materials -->
+                <!-- Section 10: Catalog Submission -->
                 <section class="form-section" data-section="10">
-                    <h2>10. Supporting Materials</h2>
+                    <h2>10. Catalog Submission</h2>
+                    <p class="section-description">If approved, your work will be displayed in the SI8 catalog at superimmersive8.com. Please provide a preview thumbnail and catalog details.</p>
+
+                    <div class="form-group">
+                        <label for="catalog_thumbnail">Catalog Thumbnail <span class="required">*</span></label>
+                        <div class="file-upload-zone" id="catalog-thumbnail-upload">
+                            <div class="upload-icon">🖼️</div>
+                            <p>Click to upload catalog thumbnail</p>
+                            <small>Representative still frame from your film for catalog display<br><br>
+                            <strong>Recommended:</strong> 1920x1080px (16:9 aspect ratio)<br>
+                            <strong>Formats:</strong> JPG or PNG | <strong>Max size:</strong> 5MB<br>
+                            Other aspect ratios (9:16, 1:1, etc.) will be letterboxed to fit our 16:9 catalog grid.</small>
+                            <input type="file" id="catalog_thumbnail" name="catalog_thumbnail" accept="image/jpeg,image/png,image/jpg" required style="display: none;">
+                        </div>
+                        <div id="catalog-thumbnail-preview" class="file-preview"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="catalog_title">Catalog Display Title <span class="required">*</span></label>
+                        <input type="text" id="catalog_title" name="catalog_title" maxlength="60" placeholder="How your work will appear in the catalog" required>
+                        <small class="field-help">Max 60 characters</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="catalog_description">Catalog Description (Optional)</label>
+                        <textarea id="catalog_description" name="catalog_description" rows="3" maxlength="200" placeholder="Brief description for brands/programmers browsing the catalog..."></textarea>
+                        <small class="field-help">Max 200 characters</small>
+                    </div>
+                </section>
+
+                <!-- Section 11: Supporting Materials -->
+                <section class="form-section" data-section="11">
+                    <h2>11. Supporting Materials</h2>
                     <p class="section-description">Upload your film and any supporting documentation.</p>
 
                     <div class="form-group">
@@ -492,13 +532,45 @@
                     </div>
                 </section>
 
+                <!-- Section 12: Terms & Consent -->
+                <section class="form-section" data-section="12">
+                    <h2>12. Terms & Consent</h2>
+                    <p class="section-description">Please review and agree to the following terms before submitting.</p>
+
+                    <div class="terms-box">
+                        <h3>By submitting this form, you agree to:</h3>
+                        <ul class="terms-list">
+                            <li><strong>Catalog Display Rights:</strong> SI8 may display your work (including thumbnails, stills, and video previews) on the SI8 catalog at superimmersive8.com and in marketing materials to attract potential licensees.</li>
+
+                            <li><strong>Representation Authorization:</strong> SI8 is authorized to pitch your work to brands, platforms, and other commercial buyers on your behalf.</li>
+
+                            <li><strong>Non-Exclusive Agreement:</strong> You retain full ownership and copyright. You may license your work elsewhere. SI8's representation is non-exclusive.</li>
+
+                            <li><strong>Commission Structure:</strong> SI8 earns 20% commission on licensing deals we facilitate. You earn 80%. SI8 only earns when you earn.</li>
+
+                            <li><strong>Rights Verified Status:</strong> Your work will only be added to the catalog if it passes our Rights Verified review process (5-7 business day turnaround).</li>
+
+                            <li><strong>Termination:</strong> Either party may terminate this agreement with 30 days written notice. Works already licensed remain subject to existing agreements.</li>
+                        </ul>
+
+                        <p class="terms-note">Full terms available at: <a href="/filmmaker-terms" target="_blank" style="color: #C8900A; text-decoration: underline;">superimmersive8.com/filmmaker-terms</a></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="terms_consent" id="terms_consent" required>
+                            <span>I have read and agree to the terms above, including granting SI8 non-exclusive rights to display my work in the SI8 catalog and authorizing SI8 to represent my work to potential licensees. <span class="required">*</span></span>
+                        </label>
+                    </div>
+                </section>
+
                 <!-- Submit Button -->
                 <div class="form-actions">
                     <button type="submit" class="btn-primary" id="submit-btn" disabled>
                         <span class="btn-text">Submit for Rights Verified Review</span>
                         <span class="btn-spinner" style="display: none;">⏳ Submitting...</span>
                     </button>
-                    <p class="form-footer-note">By submitting, you confirm that all information provided is accurate and that you have the rights to all materials submitted.</p>
+                    <p class="form-footer-note">By submitting, you confirm that all information provided is accurate, that you have the rights to all materials submitted, and that you agree to the SI8 Filmmaker Representation Terms.</p>
                 </div>
 
             </form>

@@ -115,6 +115,72 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Supporting docs upload
         setupFileUpload('supporting-docs-upload', 'supporting_docs', 'supporting-docs-list');
+
+        // Catalog thumbnail upload (with preview)
+        setupThumbnailUpload();
+    }
+
+    function setupThumbnailUpload() {
+        const zone = document.getElementById('catalog-thumbnail-upload');
+        const input = document.getElementById('catalog_thumbnail');
+        const preview = document.getElementById('catalog-thumbnail-preview');
+
+        if (!zone || !input || !preview) return;
+
+        // Click to browse
+        zone.addEventListener('click', () => input.click());
+
+        // File input change
+        input.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                displayThumbnailPreview(this.files[0], preview);
+            }
+        });
+
+        // Drag and drop
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            zone.classList.add('drag-over');
+        });
+
+        zone.addEventListener('dragleave', () => {
+            zone.classList.remove('drag-over');
+        });
+
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zone.classList.remove('drag-over');
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                input.files = e.dataTransfer.files;
+                displayThumbnailPreview(e.dataTransfer.files[0], preview);
+            }
+        });
+    }
+
+    function displayThumbnailPreview(file, preview) {
+        // Validate file type
+        if (!file.type.match('image/(jpeg|jpg|png)')) {
+            alert('Please upload a JPG or PNG image.');
+            return;
+        }
+
+        // Validate file size (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Image must be under 5MB.');
+            return;
+        }
+
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `
+                <img src="${e.target.result}" alt="Catalog thumbnail preview">
+                <p style="margin-top: 8px; font-size: 0.875rem; color: #666;">
+                    ${file.name} (${(file.size / 1024).toFixed(0)} KB)
+                </p>
+            `;
+        };
+        reader.readAsDataURL(file);
     }
 
     function setupFileUpload(zoneId, inputId, listId) {
