@@ -1,66 +1,63 @@
 # Rights Verified Submission Requirements
 
 **Version:** v0.1 (February 2026)
-**Audience:** Filmmakers submitting work for SI8 representation and catalog inclusion
-**Purpose:** Everything SI8 needs to complete a Rights Verified review and issue a Chain of Title
+**Audience:** Filmmakers submitting work for SI8 representation
+**Purpose:** Define what filmmakers must provide for Rights Verified review
 
 ---
 
-## Before You Submit
+## Overview
 
-SI8 represents AI-generated and AI-assisted films through a documented vetting process called the Rights Verified. Completing this submission is what enables your work to be:
-- Included in SI8's catalog for commercial licensing (Tier 1)
-- Considered for AI product placement deals with brands (Tier 2)
+SI8 represents AI-generated films through a documented vetting process called **Rights Verified**. This submission template collects everything SI8 needs to:
 
-This is not a legal certification. It is a documented process. The more complete and accurate your submission, the stronger your Chain of Title — and the more valuable your work is to buyers.
+- Complete a thorough rights review
+- Generate a Chain of Title documentation package
+- Add approved works to the SI8 catalog
 
-If you have questions before submitting, contact SI8 directly.
+**This is not a legal certification.** It is a documented process. The more complete and accurate your submission, the stronger your Chain of Title.
+
+**Current format:** Document template (filmmakers fill out and email)
+**Year 3 platform format:** Web intake form with the same 10 sections as database fields
 
 ---
 
 ## Section 1: Filmmaker Profile
 
 | Field | Required |
-|-------|---------|
+|-------|----------|
 | Full name | Yes |
 | Location (city, country) | Yes |
 | Contact email | Yes |
-| Website or portfolio link | Yes |
+| Website or portfolio link | Recommended |
 | Links to 2-3 prior works | Recommended |
-| Have you previously submitted to SI8? | Yes (Y/N) |
 
 ---
 
 ## Section 2: Production Overview
 
-| Field | Required |
-|-------|---------|
-| Title | Yes |
-| Runtime (mm:ss) | Yes |
-| Genre / Category (e.g., narrative short, music video, documentary, experimental, commercial) | Yes |
-| Logline (1-2 sentences) | Yes |
-| Intended use — select all that apply: | Yes |
-| &nbsp;&nbsp;• Catalog licensing (Tier 1) | |
-| &nbsp;&nbsp;• AI product placement consideration (Tier 2) | |
-| &nbsp;&nbsp;• Both | |
-| Production period (month/year start — month/year complete) | Yes |
-| Is this work currently licensed, submitted to festivals, or under any existing distribution agreement? | Yes — if yes, describe |
+| Field | Required | Notes |
+|-------|----------|-------|
+| Title | Yes | |
+| Runtime (mm:ss) | Yes | |
+| Genre / Category | Yes | Narrative, music video, experimental, commercial, etc. |
+| Logline (1-2 sentences) | Yes | |
+| Intended use | Yes | Tier 1 (catalog licensing) / Tier 2 (brand placement) / Both |
+| Production period | Yes | Month/year start → month/year complete |
+| Existing agreements | Yes | Any current licensing, festival, or distribution agreements? |
 
 ---
 
 ## Section 3: Tool Disclosure
 
-**One row per tool used.** Include every AI tool used in production, including tools used for audio, upscaling, or post-processing.
+**One row per tool used.** Include every AI tool in production (generation, audio, upscaling, post).
 
-| Tool Name | Version / Model | Plan Type (Free / Paid / Enterprise) | Commercial License Confirmed? | Receipt or Confirmation on File? |
-|-----------|----------------|--------------------------------------|------------------------------|----------------------------------|
-| | | | Y/N | Y/N |
-| | | | Y/N | Y/N |
-| | | | Y/N | Y/N |
+| Tool Name | Version/Model | Plan Type | Commercial License? | Receipt on File? |
+|-----------|---------------|-----------|---------------------|------------------|
+| | | Free/Paid/Enterprise | Y/N | Y/N |
 
-**Paid commercial plan receipts or subscription confirmation screenshots are required for each tool listed.** This is the foundation of the commercial use authorization in your Chain of Title. Without receipts, the submission cannot proceed.
+**Paid commercial plan receipts required for each tool.** This is the foundation of commercial use authorization in your Chain of Title.
 
-*Note: SI8 maintains a tool risk tier list (Approved / Caution / Prohibited) based on commercial terms, active litigation exposure, and training data risk. Tools not on the Approved list require additional review. See the Rights Playbook for current tier assignments.*
+*Note: SI8 maintains a tool risk tier list (Approved / Caution / Prohibited). Tools not on the Approved list require additional review. See Rights Playbook for current tiers.*
 
 ---
 
@@ -68,136 +65,147 @@ If you have questions before submitting, contact SI8 directly.
 
 **Written statement required. Minimum 150 words.**
 
-This is the copyright protection layer. Under current US, Taiwan, and Singapore law, AI-generated content without meaningful human authorship may not qualify for copyright protection. Your declaration documents the human creative decisions that make this work yours.
+This is the copyright protection layer. Under US, Taiwan, and Singapore law, AI content without meaningful human authorship may not qualify for copyright protection. Your declaration documents the human creative decisions that make this work yours.
 
-Your statement must describe:
-- What prompts you wrote and how you developed them
-- Decisions you made during iteration (what you kept, what you rejected, and why)
-- Editorial choices: pacing, structure, scene selection, composition decisions
-- Any post-generation editing: color, cuts, sound design, titles
+**Your statement must describe:**
+- Prompts you wrote and how you developed them
+- Iteration decisions (what you kept, rejected, and why)
+- Editorial choices: pacing, structure, scene selection, composition
+- Post-generation editing: color, cuts, sound design, titles
 - How you directed the overall creative process
 
-**Generic statements ("I wrote the prompts") are insufficient and will result in a Conditional Pass pending expansion.**
+**Generic statements ("I wrote the prompts") are insufficient.** This results in Conditional Pass pending expansion.
 
-The standard is: could another human, reading your declaration, understand the creative decisions you made? If yes, it passes. If not, it needs more detail.
+**Standard:** Could another human, reading your declaration, understand the creative decisions you made? If yes → pass. If not → needs detail.
 
 ---
 
 ## Section 5: Likeness & Identity Confirmation
 
-Review each item and confirm with a checkmark or written "Confirmed."
+**Review and confirm each item:**
 
 - [ ] No identifiable real person's face appears in this work
-- [ ] No voice that is a clone or imitation of a real person appears in this work
-- [ ] No character that is a lookalike for a specific real person appears in this work
-- [ ] No synthetic version of a real person (living or deceased) appears in this work
-- [ ] If any face appears that could be mistaken for a real person, describe here: ___
+- [ ] No voice clone or imitation of a real person appears
+- [ ] No character that is a lookalike for a specific real person appears
+- [ ] No synthetic version of a real person (living or deceased) appears
+- [ ] If any face could be mistaken for a real person, describe: ___
 
-**This is a hard line. No exceptions. Any "yes" on the above requires immediate disclosure before review proceeds.**
+**Hard line. No exceptions.** Any "yes" requires immediate disclosure before review proceeds.
 
 ---
 
 ## Section 6: IP & Brand Confirmation
 
-Review each item and confirm with a checkmark or written "Confirmed."
+**Review and confirm each item:**
 
-- [ ] No copyrighted characters, creatures, or fictional IP appear in this work (e.g., no recognizable film/TV/game characters)
-- [ ] No recognizable brand imitation appears (e.g., no content that replicates or parodies a real brand's trade dress without authorization)
+- [ ] No copyrighted characters, creatures, or fictional IP appear (no film/TV/game characters)
+- [ ] No recognizable brand imitation appears (no trade dress replication without authorization)
 - [ ] No trademarked logos, slogans, or brand identifiers appear
-- [ ] If any element could be interpreted as referencing real IP, describe here: ___
+- [ ] If any element could reference real IP, describe: ___
 
-*Note: Ambiguous cases are documented in SI8's EDGE-CASES log and may require additional review.*
+*Note: Ambiguous cases are logged in SI8's EDGE-CASES.md and may require additional review.*
 
 ---
 
 ## Section 7: Audio & Music Disclosure
 
-All audio must be accounted for. Select the applicable category for each audio element:
+**All audio must be accounted for. Select applicable category:**
 
 **Score / Background Music:**
-- [ ] Original — generated by AI tool (specify tool: ___)
-- [ ] Licensed — provide license documentation (license type, licensor, license file attached)
+- [ ] Original — AI-generated (specify tool: ___)
+- [ ] Licensed — provide documentation (license type, licensor, file attached)
 - [ ] Silent — no music
 
-**Sound Design / Ambient Audio:**
-- [ ] Original — generated by AI tool (specify tool: ___)
-- [ ] Licensed — provide license documentation
+**Sound Design / Ambient:**
+- [ ] Original — AI-generated (specify tool: ___)
+- [ ] Licensed — provide documentation
 - [ ] No sound design
 
 **Voiceover / Narration:**
 - [ ] Original — filmmaker's own voice
-- [ ] AI-generated — specify tool and confirm commercial license: ___
+- [ ] AI-generated — specify tool and confirm commercial license
 - [ ] No voiceover
 
-**Unlicensed commercial music tracks are grounds for rejection.** If you are uncertain about a track's licensing status, do not include it and contact SI8 before submitting.
+**Unlicensed commercial music tracks are grounds for rejection.**
 
-*v0.1 default: SI8 takes a conservative position on music rights. Edge cases will be flagged for legal review. When in doubt, use original AI audio or silence.*
+*v0.1 stance: SI8 takes a conservative position on music rights. Edge cases flagged for legal review. When in doubt, use original AI audio or silence.*
 
 ---
 
-## Section 8: Tier 2 Brand Placement — Enrollment (Optional)
+## Section 8: Modification Rights Authorization (Tier 2 Gate)
 
-**What Tier 2 is and what it pays.**
+**Do you authorize SI8 to commission AI-regenerated versions of this work with brand elements integrated for Tier 2 product placement deals?**
 
-Tier 2 is SI8's AI product placement program. Brands pay a premium to have their products integrated into catalog films through AI regeneration — no reshoot, no disruption to your work. If your film is selected for a Tier 2 deal:
+- [ ] **Yes — full work.** Any scene can be considered for brand placement. I retain approval rights before deals close.
+- [ ] **Yes — specific scenes only.** Only these scenes: ___
+- [ ] **Not now — Tier 1 only.** Catalog licensing only. I can update this later.
 
-- You receive compensation above the standard Tier 1 catalog license rate. Tier 2 deals are priced at a premium above Tier 1.
-- You are informed of the brand and proposed scene before any deal closes. You can decline any match that doesn't fit your work.
-- You retain authorship credit on the original film.
-- SI8 coordinates all brand communication and production. You do not need to be involved in the regeneration process.
-- You can limit which scenes are eligible — or enroll the full film.
+**What this means:**
+- Brands pay premium rates for AI product placement (no reshoot, no disruption to your work)
+- You are notified before any deal closes and retain veto rights
+- You earn higher licensing fees for Tier 2 vs. Tier 1
+- SI8 coordinates all brand communication
 
-Enrollment is optional. Your answer here does not affect Tier 1 catalog consideration. You can update your selection at any time.
-
-**Do you want to be considered for Tier 2 brand placement deals?**
-
-- [ ] **Yes — full film.** Consider any scene in this work for brand placement. SI8 will contact me before any deal closes.
-- [ ] **Yes — specific scenes only.** Consider only the following scenes: ___
-- [ ] **Not now — Tier 1 only.** Consider this work for catalog licensing only. I can enroll in Tier 2 later.
-
-*Prerequisite: Tier 2 enrollment is only active if your Shopping Agreement includes a modification clause. If it doesn't yet, select "Not now" — we can activate Tier 2 eligibility when the agreement is updated.*
+**Prerequisite:** Your Shopping Agreement must include a modification clause. If it doesn't, select "Not now" — we can activate Tier 2 eligibility when the agreement is updated.
 
 ---
 
 ## Section 9: Territory & Exclusivity Preferences
 
 | Field | Response |
-|-------|---------|
+|-------|----------|
 | Preferred licensing territory | Global / APAC only / Specific regions: ___ |
-| Any territories where this work cannot be licensed (existing agreements, restrictions) | Y/N — if yes, describe |
-| Exclusivity preference for catalog licensing | Open (non-exclusive preferred) / Exclusive deals acceptable (case-by-case) |
-| Any existing streaming, festival, or distribution agreements that restrict territory or exclusivity | Y/N — if yes, attach or describe |
+| Any territories where this cannot be licensed (existing restrictions) | Y/N — if yes, describe |
+| Exclusivity preference for catalog licensing | Non-exclusive preferred / Exclusive acceptable (case-by-case) |
+| Existing agreements that restrict territory or exclusivity | Y/N — if yes, attach or describe |
 
-*Note: SI8's default for catalog licensing is non-exclusive. Exclusive deals require additional negotiation and are priced accordingly.*
+*Note: SI8's default is non-exclusive for catalog licensing. Exclusive deals require additional negotiation.*
 
 ---
 
 ## Section 10: Supporting Materials
 
 | Item | Required / Recommended |
-|------|----------------------|
-| Commercial plan receipts for each AI tool listed in Section 3 | **Required** |
-| Production process screenshots (showing prompts, iterations, editorial decisions) | Strongly Recommended |
-| Any existing rights documentation (prior legal review, festival releases, etc.) | Include if available |
-| Final deliverable file (or secure link) | Required for review |
-| Preferred file format and delivery method | Required |
+|------|------------------------|
+| Commercial plan receipts for each tool (Section 3) | **Required** |
+| Production process screenshots (prompts, iterations, decisions) | Strongly Recommended |
+| Any existing rights documentation | Include if available |
+| Final deliverable file or secure link | **Required** for review |
+| Password (if video link is protected) | Required if applicable |
+| Catalog thumbnail (1920x1080px recommended, 16:9) | **Required** |
 
 ---
 
 ## Submission Checklist
 
-Before submitting, confirm:
+**Before submitting, confirm:**
 
 - [ ] All 10 sections completed
 - [ ] Commercial plan receipts attached for every AI tool
 - [ ] Human authorship declaration is at least 150 words and describes specific decisions
 - [ ] Final deliverable file or secure link included
+- [ ] Catalog thumbnail uploaded
 - [ ] You have read SI8's No List and confirmed this work does not violate it
+- [ ] You agree to SI8's Filmmaker Representation Terms
 
-**Submit to:** [SI8 contact / intake form link]
-**Target review turnaround:** 5 business days from receipt of complete submission
+**Submit via:** https://www.superimmersive8.com/submit
+**Target review turnaround:** 5-7 business days from receipt of complete submission
 
 ---
 
-*This document is a submission template, not a contract. Rights and representation terms are governed by your Shopping Agreement with SI8.*
-*Version: v0.1 — February 2026. Year 3 platform version: this template becomes a web intake form with the same fields.*
+## After Submission
+
+**You will receive one of three outcomes:**
+
+1. **Approved** — Work added to catalog with Chain of Title documentation. You'll receive your Chain of Title package and catalog link.
+2. **Conditional Approval** — Additional information needed. You have 14 days to provide requested materials.
+3. **Rejected** — Work does not meet Rights Verified criteria. We'll explain why and whether resubmission is possible.
+
+**Commission structure:** SI8 earns 20% commission on deals we facilitate. You earn 80%. No upfront fees.
+
+---
+
+*This document is a submission template, not a contract. Rights and representation terms are governed by SI8's Filmmaker Representation Terms.*
+
+*Version: v0.1 — February 2026*
+*Year 3 platform: This template becomes a web form with the same fields as database columns*

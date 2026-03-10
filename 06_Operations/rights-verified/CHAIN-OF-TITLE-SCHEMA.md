@@ -1,22 +1,24 @@
 # Chain of Title Schema
 
 **Version:** v0.1 (February 2026)
-**Audience:** SI8 internal reviewer (completing after clean pass); referenced in buyer agreements
-**Purpose:** The structured output template for every catalog entry. One schema per work. This is the product SI8 sells to buyers.
+**Audience:** SI8 internal reviewer; referenced in buyer agreements
+**Purpose:** Structured output template for every catalog entry. This is the product SI8 sells to buyers.
 
 ---
 
 ## What the Chain of Title Is
 
-The Chain of Title is the documented chain of defensibility for a single work in SI8's catalog. It is not a legal certification. It is a structured record of what was reviewed, what was found, and what was authorized — completed by SI8's Rights Verified reviewer after a successful review.
+The Chain of Title is the documented chain of defensibility for a single work in SI8's catalog.
+
+**It is not a legal certification.** It is a structured record of what was reviewed, what was found, and what was authorized.
 
 **The file is the carrier. The Chain of Title is the product.**
 
 When a buyer licenses content from SI8, they receive:
 1. The content file(s)
-2. The Chain of Title for that work (or relevant portions)
+2. The Chain of Title documentation
 
-The Chain of Title is what allows buyers to use AI-generated content commercially with confidence — knowing the provenance is documented, the tools are licensed, the authorship claim is supported, and the risk has been assessed by a human reviewer.
+The Chain of Title allows buyers to use AI content commercially with confidence — knowing provenance is documented, tools are licensed, authorship claim is supported, and risk assessed by human reviewer.
 
 ---
 
@@ -26,7 +28,7 @@ The Chain of Title is what allows buyers to use AI-generated content commerciall
 
 Examples: `SI8-2026-0001`, `SI8-2026-0002`
 
-Sequence is assigned at the time of Chain of Title completion — not at submission. Numbers are assigned in order of completion, not submission date.
+Sequence assigned at Chain of Title completion (not at submission). Assigned in completion order, not submission date order.
 
 ---
 
@@ -38,20 +40,20 @@ Example: `05_Catalog/represented/chen-wei/luminance-short/chain-of-title.md`
 
 ---
 
-## Chain of Title Template
+## Chain of Title Template (9 Fields)
 
-Copy this template for each new catalog entry. Fill all fields. Mark "N/A" only where genuinely not applicable. Never leave a field blank.
+Copy this template for each new catalog entry. Fill all fields. Mark "N/A" only where genuinely not applicable. Never leave blank.
 
 ---
 
-```
+```markdown
 # Chain of Title
 ## [Title]
 
 **Catalog ID:** SI8-[YEAR]-[####]
 **Filmmaker:** [Name]
-**Review Date:** [Date]
-**Reviewer:** [Name / initials]
+**Review Date:** [YYYY-MM-DD]
+**Reviewer:** [Name]
 **Chain of Title Version:** 1.0
 ```
 
@@ -59,119 +61,120 @@ Copy this template for each new catalog entry. Fill all fields. Mark "N/A" only 
 
 ### Field 1: Tool Provenance Log
 
-*What it captures:* Every AI tool used in production, its version, the plan type, the production period, and whether a commercial license receipt is on file.
+**What it captures:** Every AI tool used, version, plan type, production period, receipt status.
 
-*Format:* Structured rows, one per tool.
+**Format:** Structured table
 
-| Tool | Version / Model | Plan Type | Commercial License | Production Period | Receipt on File |
-|------|----------------|-----------|-------------------|-------------------|----------------|
-| [Tool name] | [Version or model name] | [Free / Paid / Enterprise] | [Confirmed / Unconfirmed] | [Month/Year – Month/Year] | [Yes / No] |
+| Tool | Version/Model | Plan Type | Commercial License | Production Period | Receipt on File |
+|------|--------------|-----------|-------------------|-------------------|-----------------|
+| [Tool name] | [Version] | Free/Paid/Enterprise | Confirmed/Unconfirmed | [Month/Year – Month/Year] | Yes/No |
 
-*Reviewer note:* Every tool must show "Confirmed" commercial license and "Yes" receipt on file to pass. If any tool shows otherwise, the submission did not pass and this Chain of Title should not exist.
+**Reviewer note:** Every tool must show "Confirmed" commercial license and "Yes" receipt to pass. If any shows otherwise, submission did not pass.
 
 ---
 
 ### Field 2: Model Disclosure
 
-*What it captures:* Which AI model(s) generated the content; version at time of production. Distinct from tool — a tool (e.g., Runway) may use multiple underlying models (e.g., Gen-3 Alpha).
+**What it captures:** Which AI model(s) generated content; version at production time. Distinct from tool — tool (Runway) may use multiple models (Gen-3 Alpha).
 
-*Format:* Plain text.
+**Format:** Plain text list
 
 ```
-[Tool name]: [Model name and version, as specified at time of production]
+[Tool name]: [Model name and version, as specified at production time]
 [Tool name]: [Model name and version]
 ```
 
-*Example:*
+**Example:**
 ```
 Runway: Gen-3 Alpha (used November 2025)
 Adobe Firefly: Firefly Video Model (used November 2025)
 ElevenLabs: Multilingual v2 (used November 2025)
 ```
 
-*Note:* Model version matters because terms, training data, and litigation exposure can differ between model versions. Document what was used at production time, not what the tool currently offers.
+**Note:** Model version matters because terms, training data, litigation exposure differ between versions. Document what was used at production time, not current offering.
 
 ---
 
 ### Field 3: Rights Verified Sign-off
 
-*What it captures:* Reviewer name, review date, risk tier assigned, any conditions or flags noted during review.
+**What it captures:** Reviewer, date, risk tier, conditions/flags.
 
-*Format:* Text block.
+**Format:** Text block
 
 ```
 Reviewer: [Name]
 Review Date: [YYYY-MM-DD]
 Risk Tier: [Certified / Standard / Caution-Flagged]
 Review Status: [Clean Pass / Conditional Pass]
-Conditions: [List any conditions; "None" if clean pass]
-Flags: [List any flags noted; "None" if none]
+Conditions: [List any conditions; "None" if clean]
+Flags: [List any flags; "None" if none]
 ```
 
-*Risk tier definitions (from REVIEW-PROCESS.md):*
-- **Certified:** Adobe Firefly as primary generation tool; no Caution-tier tools; all categories clean.
-- **Standard:** Runway / Pika / Sora (paid plans) as primary; no Prohibited tools; all categories pass.
-- **Caution-Flagged:** Approved tools used but Caution-tier tool (e.g., Kling) is primary or significant. Licensable with buyer disclosure.
+**Risk tier definitions:**
+- **Certified:** Adobe Firefly primary; no Caution-tier tools; all categories clean
+- **Standard:** Runway/Pika/Sora (paid) primary; no Prohibited tools; all categories pass
+- **Caution-Flagged:** Approved tools but Caution-tier (Kling) primary/significant. Licensable with buyer disclosure.
 
 ---
 
 ### Field 4: Commercial Use Authorization
 
-*What it captures:* Confirmation that each tool's Terms of Service permit commercial licensing of outputs; receipts filed.
+**What it captures:** Confirmation each tool's ToS permits commercial licensing; receipts filed.
 
-*Format:* Checklist + document reference.
+**Format:** Checklist + reference
 
 | Tool | ToS Commercial Use | Reference | Receipt Filed |
 |------|-------------------|-----------|---------------|
-| [Tool] | [Permitted / Permitted with restrictions / Review required] | [Rights Playbook section or direct ToS citation] | [Yes — filename] |
+| [Tool] | Permitted / Permitted with restrictions / Review required | [Rights Playbook section or ToS citation] | Yes — [filename] |
 
-*If any tool shows "Permitted with restrictions" — describe the restriction in the Flags field of Field 3.*
+**If any tool shows "Permitted with restrictions" — describe restriction in Flags (Field 3).**
 
 ---
 
 ### Field 5: Modification Rights Status
 
-*What it captures:* Whether the filmmaker has authorized AI-regenerated brand-integrated versions for Tier 2 placement, and the scope of that authorization.
+**What it captures:** Whether filmmaker authorized AI-regenerated brand-integrated versions (Tier 2), and scope.
 
-*Format:* Status + scope description.
+**Format:** Status + scope
 
 ```
 Status: [Authorized — Full Work / Authorized — Scene-Specific / Not Authorized]
-Scope: [Description of what is authorized, or "N/A — Tier 1 only"]
-Scene List (if scene-specific): [List of authorized scenes with timestamps]
-Shopping Agreement Modification Clause: [Confirmed / Pending — must be confirmed before Tier 2 deals can close]
+Scope: [Description or "N/A — Tier 1 only"]
+Scene List (if scene-specific): [Authorized scenes with timestamps]
+Shopping Agreement Modification Clause: [Confirmed / Pending — must confirm before Tier 2 deals]
 ```
 
 ---
 
 ### Field 6: Category Conflict Log
 
-*What it captures:* Brand categories that are ineligible for placement deals with this work, and why.
+**What it captures:** Brand categories ineligible for placement deals, and why.
 
-*Format:* List. "None — suitable for all mainstream commercial categories" if no restrictions.
+**Format:** List or "None"
 
 ```
 Ineligible categories:
-- [Category]: [Reason — reference specific element or scene]
+- [Category]: [Reason — reference specific element/scene]
 - [Category]: [Reason]
 
-Suitable for (confirmed categories): [List, or "All mainstream commercial categories"]
+Suitable for: [List, or "All mainstream commercial categories"]
 ```
 
-*Common restriction triggers:* mature themes, alcohol consumption depicted, political references, content unsuitable for children's brands, direct competitor category conflicts (where known).
+**Common triggers:** Mature themes, alcohol depicted, political references, content unsuitable for children's brands, competitor category conflicts.
 
 ---
 
 ### Field 7: Territory Log
 
-*What it captures:* Geographic licensing restrictions. Restrictions may come from existing distribution agreements, tool training data clauses (e.g., Kling's Taiwan data clause), or filmmaker preference.
+**What it captures:** Geographic licensing restrictions from existing agreements, tool clauses (Kling's Taiwan data), or filmmaker preference.
 
-*Format:* List, or "Global — no restrictions" if none.
+**Format:** List or "Global"
 
 ```
 Territory: [Global — no restrictions / Restricted — see below]
+
 Restrictions:
-- [Territory]: [Reason for restriction]
+- [Territory]: [Reason]
 
 Existing agreements affecting territory: [List or "None"]
 ```
@@ -180,42 +183,43 @@ Existing agreements affecting territory: [List or "None"]
 
 ### Field 8: Regeneration Rights Status
 
-*What it captures:* Whether specific scenes can be AI-regenerated for brand integration (Tier 2), and which scenes. This is the operational detail layer below Field 5.
+**What it captures:** Which specific scenes can be AI-regenerated for brand integration (Tier 2). Operational detail layer below Field 5.
 
-*Format:* Status + scene list.
+**Format:** Status + scene list
 
 ```
 Status: [Fully authorized / Scene-specific / Not authorized]
+
 Authorized for regeneration:
-- [Scene description and timestamp range]: [Notes on what elements can be modified]
-- [Scene description and timestamp range]: [Notes]
+- [Scene description and timestamp]: [Notes on modifiable elements]
+- [Scene description and timestamp]: [Notes]
 
 Not authorized for regeneration:
-- [Scene description and timestamp range]: [Reason if known]
+- [Scene description and timestamp]: [Reason if known]
 ```
 
-*Note: This field is completed in conjunction with Field 5. If Field 5 = "Not Authorized," this field = "N/A."*
+**Note:** If Field 5 = "Not Authorized," this field = "N/A."
 
 ---
 
 ### Field 9: Version History
 
-*What it captures:* Production version of the work, review date, and any subsequent modifications and re-review dates.
+**What it captures:** Production version, review date, subsequent modifications and re-reviews.
 
-*Format:* Log — add entries chronologically.
+**Format:** Chronological log
 
 ```
 [YYYY-MM-DD] — Production version reviewed. Chain of Title v1.0 issued. Catalog ID: [SI8-YEAR-####]
-[YYYY-MM-DD] — [Description of any modification, if applicable] — Re-reviewed. Chain of Title updated to v[X.X].
+[YYYY-MM-DD] — [Modification description, if applicable] — Re-reviewed. Chain of Title updated to v[X.X].
 ```
 
-*Note: If a Tier 2 placement regeneration is commissioned, the regenerated version gets its own Chain of Title entry (new Catalog ID, different "filmmaker" = SI8 + original filmmaker, new review date). The original work's version history notes the regeneration event.*
+**Note:** If Tier 2 placement regeneration commissioned, regenerated version gets own Chain of Title (new Catalog ID, different "filmmaker" = SI8 + original filmmaker). Original work's version history notes regeneration event.
 
 ---
 
-## Completed Chain of Title Example Structure
+## Completed Example
 
-```
+```markdown
 # Chain of Title
 ## Luminance
 
@@ -226,8 +230,8 @@ Not authorized for regeneration:
 **Chain of Title Version:** 1.0
 
 ### Field 1: Tool Provenance Log
-| Tool | Version / Model | Plan Type | Commercial License | Production Period | Receipt on File |
-|---|---|---|---|---|---|
+| Tool | Version | Plan Type | Commercial License | Production Period | Receipt on File |
+|------|---------|-----------|-------------------|-------------------|-----------------|
 | Runway | Gen-3 Alpha | Paid — Standard | Confirmed | Oct–Nov 2025 | Yes — runway-receipt-2025-10.pdf |
 | ElevenLabs | Multilingual v2 | Paid — Creator | Confirmed | Nov 2025 | Yes — elevenlabs-receipt-2025-11.pdf |
 
@@ -243,7 +247,31 @@ Review Status: Clean Pass
 Conditions: None
 Flags: None
 
-[...remaining fields...]
+### Field 4: Commercial Use Authorization
+| Tool | ToS Commercial Use | Reference | Receipt Filed |
+|------|-------------------|-----------|---------------|
+| Runway | Permitted | Rights Playbook v0.1 Section 4.2 | Yes — runway-receipt-2025-10.pdf |
+| ElevenLabs | Permitted | Rights Playbook v0.1 Section 4.5 | Yes — elevenlabs-receipt-2025-11.pdf |
+
+### Field 5: Modification Rights Status
+Status: Authorized — Full Work
+Scope: All scenes authorized for brand integration regeneration
+Scene List: N/A (full work)
+Shopping Agreement Modification Clause: Confirmed — signed 2026-02-10
+
+### Field 6: Category Conflict Log
+Ineligible categories: None
+Suitable for: All mainstream commercial categories
+
+### Field 7: Territory Log
+Territory: Global — no restrictions
+Restrictions: None
+Existing agreements affecting territory: None
+
+### Field 8: Regeneration Rights Status
+Status: Fully authorized
+Authorized for regeneration: All scenes (full work)
+Not authorized for regeneration: N/A
 
 ### Field 9: Version History
 2026-03-15 — Production version reviewed. Chain of Title v1.0 issued. Catalog ID: SI8-2026-0001
@@ -251,48 +279,13 @@ Flags: None
 
 ---
 
-### Field 10: File Integrity Record
-
-*What it captures:* The cryptographic fingerprint of the exact file reviewed. Ties the Chain of Title to a specific file. Without this, the package cannot definitively prove it applies to the file a buyer received.
-
-*Format:* Structured block.
-
-```
-Reviewed File Name: [filename.mp4 or filename.mov]
-File Format: [e.g., H.264 MP4 / ProRes 422 / etc.]
-Resolution: [e.g., 3840x2160 / 1920x1080]
-Frame Rate: [e.g., 24fps]
-Duration: [HH:MM:SS]
-File Size: [e.g., 2.34 GB]
-Audio: [e.g., AAC stereo / PCM / No audio]
-
-SHA-256 Hash: [64-character hex string]
-Hash Generated: [YYYY-MM-DD HH:MM timezone]
-
-Statement: This Chain of Title is valid only for the file matching the SHA-256 hash above.
-Any modification to the file — including color correction, audio changes, frame additions
-or removals — invalidates this package and requires re-review.
-```
-
-*How to generate the hash:*
-- Mac/Linux: `shasum -a 256 [filename]` in Terminal
-- Windows: `certutil -hashfile [filename] SHA256` in Command Prompt
-- Or any reputable SHA-256 file hash utility
-
-*How a buyer verifies:*
-Run the same command on the file they received. The output must exactly match the hash in this field. Any mismatch means the file was modified after review.
-
-*Reviewer note:* Generate the hash at Stage 4 of the review process, immediately before issuing the Chain of Title. Do not generate it from a preview or proxy file — always from the master delivery file.
-
----
-
 ## Year 3 Platform Note
 
-Each field in this schema corresponds to a database column in the Year 3 platform. The schema is designed now to minimize migration cost later.
+Each field = database column in Year 3 platform. Schema designed now to minimize migration cost later.
 
 | Field | Database Column | Type |
-|-------|----------------|------|
-| 1. Tool Provenance Log | `tool_provenance` | JSON array |
+|-------|-----------------|------|
+| 1. Tool Provenance | `tool_provenance` | JSON array |
 | 2. Model Disclosure | `model_disclosure` | JSON object |
 | 3. Rights Verified Sign-off | `review_tier`, `review_date`, `reviewer_id`, `review_flags` | Multiple columns |
 | 4. Commercial Use Authorization | `commercial_auth_status` | JSON array |
@@ -301,4 +294,8 @@ Each field in this schema corresponds to a database column in the Year 3 platfor
 | 7. Territory | `territory_restrictions` | Array |
 | 8. Regeneration Rights | `regeneration_status`, `regeneration_scenes` | Enum + JSON |
 | 9. Version History | `version_history` | JSON log |
-| 10. File Integrity | `file_hash_sha256`, `file_name`, `file_specs`, `hash_date` | Multiple columns |
+
+---
+
+*Version: v0.1 — February 2026*
+*This schema will evolve. Version to v0.2 after first 3 real catalog entries.*
