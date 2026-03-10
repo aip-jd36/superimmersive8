@@ -108,7 +108,32 @@ Risk Tier: [Certified / Standard / Caution-Flagged]
 Review Status: [Clean Pass / Conditional Pass]
 Conditions: [List any conditions; "None" if clean]
 Flags: [List any flags; "None" if none]
+
+Licensed Likenesses: [None / See below]
+Licensed IP: [None / See below]
+Underlying Rights: [Original work / Adapted with permission — see below]
+Third-Party Assets: [None / See below]
 ```
+
+**If Licensed Likenesses present:**
+| Person Name | Likeness Type | Consent Documentation | Scope | Date |
+|-------------|---------------|----------------------|-------|------|
+| [Name] | Face/Voice/Both | [Signed release/License/Estate permission] | [Commercial, AI derivatives, third-party licensing] | [YYYY-MM-DD] |
+
+**If Licensed IP present:**
+| IP Name | IP Type | Rights Holder | Permission Documentation | Scope |
+|---------|---------|---------------|-------------------------|-------|
+| [Name] | [Character/Brand/Trademark] | [Rights holder] | [License agreement/Permission letter] | [Commercial, AI derivatives, territory] |
+
+**If Adapted from existing work:**
+- Original source: [Book/Screenplay/Article/etc.]
+- Rights holder: [Name]
+- Permission documentation: [filename.pdf]
+
+**If Third-Party Assets used:**
+| Asset Type | Source | License | Coverage |
+|------------|--------|---------|----------|
+| [Font/SFX/Stock footage/Overlay] | [Source/platform] | [License type] | [Commercial use confirmed] |
 
 **Risk tier definitions:**
 - **Certified:** Adobe Firefly primary; no Caution-tier tools; all categories clean
@@ -148,11 +173,14 @@ Shopping Agreement Modification Clause: [Confirmed / Pending — must confirm be
 
 ### Field 6: Category Conflict Log
 
-**What it captures:** Brand categories ineligible for placement deals, and why.
+**What it captures:** Brand categories ineligible for placement deals, and why. Includes existing brand placements.
 
 **Format:** List or "None"
 
 ```
+Existing Brand Placements (if any):
+- [Brand/Product]: [Scene/timestamp] — affects Tier 2 eligibility for competing brands
+
 Ineligible categories:
 - [Category]: [Reason — reference specific element/scene]
 - [Category]: [Reason]
@@ -160,7 +188,7 @@ Ineligible categories:
 Suitable for: [List, or "All mainstream commercial categories"]
 ```
 
-**Common triggers:** Mature themes, alcohol depicted, political references, content unsuitable for children's brands, competitor category conflicts.
+**Common triggers:** Mature themes, alcohol depicted, political references, content unsuitable for children's brands, competitor category conflicts, existing brand placements.
 
 ---
 

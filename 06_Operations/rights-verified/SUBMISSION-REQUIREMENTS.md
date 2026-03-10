@@ -44,6 +44,7 @@ SI8 represents AI-generated films through a documented vetting process called **
 | Intended use | Yes | Tier 1 (catalog licensing) / Tier 2 (brand placement) / Both |
 | Production period | Yes | Month/year start → month/year complete |
 | Existing agreements | Yes | Any current licensing, festival, or distribution agreements? |
+| **Underlying rights** | **Yes** | **Is this work based on or adapted from any existing material (book, screenplay, article, someone else's story)? If yes, do you own all underlying rights or have written permission from rights holders?** |
 
 ---
 
@@ -56,6 +57,18 @@ SI8 represents AI-generated films through a documented vetting process called **
 | | | Free/Paid/Enterprise | Y/N | Y/N |
 
 **Paid commercial plan receipts required for each tool.** This is the foundation of commercial use authorization in your Chain of Title.
+
+**Third-party assets (non-AI):**
+
+Did you use any non-AI assets in this production?
+
+- [ ] Stock footage (Pexels, Unsplash, Shutterstock, etc.)
+- [ ] Commercial fonts (require licenses for commercial use)
+- [ ] Sound effects packs or libraries
+- [ ] Overlays, LUTs, presets, or visual effects
+- [ ] Any other third-party creative assets
+
+**If yes to any:** List each asset, source, and license type. Provide documentation in Section 10.
 
 *Note: SI8 maintains a tool risk tier list (Approved / Caution / Prohibited). Tools not on the Approved list require additional review. See Rights Playbook for current tiers.*
 
@@ -82,28 +95,59 @@ This is the copyright protection layer. Under US, Taiwan, and Singapore law, AI 
 
 ## Section 5: Likeness & Identity Confirmation
 
-**Review and confirm each item:**
+**Select one:**
 
-- [ ] No identifiable real person's face appears in this work
-- [ ] No voice clone or imitation of a real person appears
-- [ ] No character that is a lookalike for a specific real person appears
-- [ ] No synthetic version of a real person (living or deceased) appears
-- [ ] If any face could be mistaken for a real person, describe: ___
+- [ ] **No identifiable likenesses** — No real person's face, voice, or identity appears in this work
+- [ ] **Licensed likenesses** — Identifiable person(s) appear WITH written consent/license (documentation required below)
 
-**Hard line. No exceptions.** Any "yes" requires immediate disclosure before review proceeds.
+**If you selected "Licensed likenesses" — provide for EACH person:**
+
+| Person Name | Likeness Type | Documentation Type | Scope of Use | Date |
+|-------------|---------------|-------------------|--------------|------|
+| | Face / Voice / Both | Signed release / License agreement / Estate permission | Commercial / AI derivatives / Third-party licensing | YYYY-MM-DD |
+
+**Required documentation:**
+- Signed release or license agreement (attach in Section 10)
+- Scope must explicitly cover: (a) commercial use, (b) AI-generated derivatives, (c) third-party licensing via SI8
+- Territory and duration must match intended licensing territory
+- If minor (under 18): parental/guardian consent required
+
+**Checklist (applies to all submissions):**
+- [ ] No voice clone/imitation of real person **without documented consent**
+- [ ] No lookalike character **without written authorization**
+- [ ] All synthetic faces are either non-identifiable OR properly licensed
+
+**Note:** Likeness licensing is complex. If consent documentation is unclear, ambiguous, or doesn't explicitly cover AI derivatives and third-party licensing, submission will be marked Conditional pending clarification or legal review.
 
 ---
 
 ## Section 6: IP & Brand Confirmation
 
-**Review and confirm each item:**
+**Select one:**
 
-- [ ] No copyrighted characters, creatures, or fictional IP appear (no film/TV/game characters)
-- [ ] No recognizable brand imitation appears (no trade dress replication without authorization)
-- [ ] No trademarked logos, slogans, or brand identifiers appear
-- [ ] If any element could reference real IP, describe: ___
+- [ ] **No IP imitation** — No copyrighted characters, trademarked brands, or protected IP appear in this work
+- [ ] **Licensed IP** — Copyrighted/trademarked IP appears WITH written permission (documentation required below)
 
-*Note: Ambiguous cases are logged in SI8's EDGE-CASES.md and may require additional review.*
+**If you selected "Licensed IP" — provide for EACH IP element:**
+
+| IP Name | IP Type | Rights Holder | Documentation Type | Scope of Use |
+|---------|---------|---------------|-------------------|--------------|
+| | Character / Brand / Trademark / Other | | License agreement / Permission letter | Commercial / AI derivatives / Territory |
+
+**Required documentation:**
+- Written license or permission from IP rights holder (attach in Section 10)
+- Scope must cover: (a) commercial use, (b) AI-generated derivatives, (c) third-party licensing via SI8
+- Territory and duration must match intended licensing
+
+**Checklist (applies to all submissions):**
+- [ ] No copyrighted characters **without written permission**
+- [ ] No brand trade dress imitation **without authorization**
+- [ ] No trademarked logos/slogans **without license**
+
+**Parody / Fair Use:**
+If your work contains IP that you believe is protected by fair use or parody doctrine, you must disclose it here and provide legal reasoning. **v0.1 stance:** Fair use claims require legal review and may result in Conditional Pass or rejection pending lawyer consultation.
+
+*Note: Ambiguous IP similarity cases are logged in SI8's EDGE-CASES.md and may require additional review.*
 
 ---
 
@@ -148,6 +192,15 @@ This is the copyright protection layer. Under US, Taiwan, and Singapore law, AI 
 
 **Prerequisite:** Your Shopping Agreement must include a modification clause. If it doesn't, select "Not now" — we can activate Tier 2 eligibility when the agreement is updated.
 
+**Existing brand placements:**
+
+Does this work already contain any product placements, brand integrations, or recognizable branded products/logos?
+
+- [ ] No — work contains no existing brand placements
+- [ ] Yes — describe: ___
+
+**If yes:** List each brand/product visible in the work. This affects Tier 2 eligibility (e.g., cannot place competing brands in same work).
+
 ---
 
 ## Section 9: Territory & Exclusivity Preferences
@@ -167,7 +220,10 @@ This is the copyright protection layer. Under US, Taiwan, and Singapore law, AI 
 
 | Item | Required / Recommended |
 |------|------------------------|
-| Commercial plan receipts for each tool (Section 3) | **Required** |
+| Commercial plan receipts for each AI tool (Section 3) | **Required** |
+| Third-party asset licenses (fonts, SFX, stock footage, overlays - Section 3) | **Required if applicable** |
+| Likeness consent/release documentation (Section 5) | **Required if applicable** |
+| IP license/permission documentation (Section 6) | **Required if applicable** |
 | Production process screenshots (prompts, iterations, decisions) | Strongly Recommended |
 | Any existing rights documentation | Include if available |
 | Final deliverable file or secure link | **Required** for review |

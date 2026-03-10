@@ -114,4 +114,103 @@ A record of what changed between versions, why, and what remains unresolved.
 
 ---
 
+## v0.1 Post-Launch Updates — February 18, 2026
+
+**What triggered these updates:**
+Pre-launch comprehensive review of submission requirements identified 6 critical gaps (licensing traps) that needed immediate addition before first real submission.
+
+**Changes made (v0.1 amendments, not new version):**
+
+1. **Licensed likenesses allowed (Section 5)** — Updated from binary "no identifiable person" to allow documented consent/licenses
+   - Added table for person name, likeness type, documentation type, scope, date
+   - Required: signed release/agreement covering commercial use, AI derivatives, third-party licensing
+   - Conservative standard: ambiguous consent scope → Conditional, not Pass
+
+2. **Licensed IP allowed (Section 6)** — Updated from binary "no IP imitation" to allow documented permissions
+   - Added table for IP name, type, rights holder, documentation, scope
+   - Parody/fair use claims explicitly flagged: require legal review, not approved unilaterally in v0.1
+
+3. **Underlying rights disclosure (Section 2)** — Added question: "Is this adapted from existing material?"
+   - If yes, must provide documentation of rights ownership or written permission
+   - Catches: filmmaker adapts novel/screenplay without permission
+
+4. **Third-party assets disclosure (Section 3)** — Added checklist: stock footage, fonts, SFX, overlays, LUTs
+   - Many have licensing restrictions (commercial fonts, SFX packs, etc.)
+   - Required: list each asset + provide license documentation in Section 10
+
+5. **Existing brand placements (Section 8)** — Added question under Tier 2 enrollment
+   - Critical for Tier 2: can't place Coke in film that already has Pepsi
+   - Populates Category Conflict Log in Chain of Title
+
+6. **Chain of Title schema expanded (Field 3)** — Added disclosure sections for:
+   - Licensed Likenesses (if any)
+   - Licensed IP (if any)
+   - Underlying Rights (original vs. adapted)
+   - Third-Party Assets (if any)
+   - Existing Brand Placements (added to Field 6 Category Conflict Log)
+
+**Updated files:**
+- SUBMISSION-REQUIREMENTS.md — Sections 2, 3, 5, 6, 8, 10
+- REVIEW-CRITERIA.md — Categories 3, 4 (updated Pass/Conditional/Fail thresholds)
+- REVIEW-PROCESS.md — Stage 2 Categories 1, 3, 4, 7 (added verification steps)
+- CHAIN-OF-TITLE-SCHEMA.md — Field 3 (expanded), Field 6 (existing brand placements)
+
+---
+
+## Deferred to v0.2
+
+**Items identified during v0.1 review but deferred until after first 3 real submissions:**
+
+These will be reviewed for inclusion when versioning to v0.2 (after 3 real submissions provide evidence of need).
+
+**7. Collaboration / co-creators disclosure (Section 2):**
+- Question: "Did anyone else contribute creative input (co-director, editor, collaborator)?"
+- Affects: who signs Shopping Agreement, revenue splits, credits
+- Deferred because: v0.1 assumes single filmmaker submission; complexity can be handled case-by-case initially
+
+**8. Technical specs (Section 10):**
+- Aspect ratio (16:9, 9:16, 1:1, other)
+- Resolution (4K, 1080p, 720p)
+- Frame rate (24fps, 30fps, 60fps)
+- Deferred because: can be obtained from deliverable file; not critical for rights review
+
+**9. Public exhibition history:**
+- Question: "Has this work been publicly exhibited (festivals, YouTube, social media, broadcast)?"
+- Affects: Is it already "out there"? Any takedown history?
+- Deferred because: doesn't affect rights verification; more relevant for exclusivity negotiations
+
+**10. Parody/fair use policy clarification (Section 6):**
+- v0.1 stance documented: claimed fair use flagged for legal review, not approved unilaterally
+- v0.2 may add clearer guidance after lawyer review at v0.3
+
+**11. Company vs. individual submission (Section 1):**
+- Affects contracts, invoicing, liability
+- Deferred because: can be handled in Shopping Agreement; not critical for intake form
+
+**12. Marketing tracking (Section 1):**
+- Question: "How did you hear about SI8?"
+- Deferred because: not critical for rights review; can track separately
+
+**13. Property/location rights:**
+- Question: "Any identifiable buildings/landmarks with property rights?"
+- Example: Eiffel Tower at night requires permission, certain stadiums
+- Deferred because: complex and rare; can be handled as edge case initially
+
+**14. Minor content disclosure:**
+- Question: "Does this work depict minors (under 18)?"
+- Affects: brand safety, requires extra caution
+- Deferred because: covered under brand safety assessment (Category 5); doesn't need separate field yet
+
+**15. Legal history:**
+- Question: "Has this work ever been subject to legal claims, takedown requests, or disputes?"
+- Red flag question
+- Deferred because: extreme edge case; if it comes up, will be obvious in filmmaker conversation
+
+**Review trigger:** After 3 real submissions, assess which deferred items should be added based on:
+- Did any submissions raise these issues?
+- Would having these fields upfront have improved review efficiency?
+- Do any represent unaddressed risk?
+
+---
+
 *(Add new entry each time version is cut)*

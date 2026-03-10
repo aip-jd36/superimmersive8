@@ -68,18 +68,32 @@ Novel gray areas that don't fit existing criteria → log in EDGE-CASES.md.
 - All faces clearly synthetic and non-identifiable
 - All voices original or AI-generated with no specific real-person identity
 - No character evokes specific real person through costume, setting, or context
+- **OR** Identifiable person appears WITH documented consent/license:
+  - Signed release/agreement on file (Section 10)
+  - Scope explicitly covers: commercial use, AI-generated derivatives, third-party licensing via SI8
+  - Territory matches intended licensing territory
+  - No expiration or restriction issues
+  - If minor: parental/guardian consent on file
+
+**Conditional (request additional documentation):**
+- Likeness appears with claimed consent but documentation insufficient:
+  - Missing signature, unclear scope, expired agreement
+  - Consent doesn't explicitly cover AI-generated derivatives
+  - Consent doesn't explicitly cover third-party licensing
+  - Territory restrictions unclear or don't match intended use
+  - Minor depicted but parental consent unclear
 
 **Fail:**
-- Any identifiable real-person face without consent
-- Any voice that is clone/imitation of specific real person without consent
-- Any character clearly meant to represent real person (even if altered)
-- **Any doubt on any of above**
+- Any identifiable real-person face/voice **without** documented consent
+- Consent documentation provided but clearly doesn't cover this use
+- Any doubt about consent validity or scope
+- **Lookalike test fails:** Reasonable viewer would identify work with specific real person
 
-**Hard line: No exceptions. No gray area. If face possibly identifiable, it fails.**
+**Hard line: If face possibly identifiable → must have documented consent OR fail. No "probably fine" passes.**
 
-Highest legal exposure and most direct reputational risk. "Probably fine" is not a pass.
+Highest legal exposure and most direct reputational risk.
 
-**Lookalike test:** If work were published and journalist wrote about it, would reasonable viewer say "that looks like [specific real person]"? If yes → fail.
+**Reviewer note:** Conservative standard on consent quality. If consent scope is ambiguous about AI derivatives or third-party licensing → Conditional, not Pass. Require explicit language.
 
 ---
 
@@ -91,18 +105,36 @@ Highest legal exposure and most direct reputational risk. "Probably fine" is not
 - No character/creature/logo/brand element recognized as belonging to real IP holder
 - No content replicating/parodying real brand trade dress (distinctive colors, packaging, visual identity)
 - No trademarked slogans, logos, or identifiers
+- **OR** Copyrighted/trademarked IP appears WITH documented permission:
+  - Written license/permission from IP rights holder on file (Section 10)
+  - Scope explicitly covers: commercial use, AI-generated derivatives, third-party licensing via SI8
+  - Territory and duration match intended licensing
+  - No restriction issues
+
+**Conditional (request additional documentation or flag for legal review):**
+- IP appears with claimed permission but documentation insufficient:
+  - License doesn't explicitly cover AI derivatives
+  - License doesn't cover third-party licensing
+  - Territory/duration restrictions unclear
+- **Parody/fair use claimed:** Filmmaker believes work is protected by fair use or parody doctrine
+  - v0.1 stance: Fair use is complex and jurisdiction-specific → Flag for legal review
+  - Do not approve fair use claims unilaterally in v0.1
+  - Require legal consultation at v0.3
 
 **Fail:**
-- Clear imitation of copyrighted character (film/game/TV character, even if not pixel-identical)
-- Protected trade dress replicated causing consumer confusion
-- Trademarked logos/identifiers visible and identifiable
+- Clear imitation of copyrighted character **without** written permission
+- Protected trade dress replicated causing consumer confusion **without authorization**
+- Trademarked logos/identifiers visible **without license**
+- Permission documentation provided but clearly doesn't cover this use
 
 **Gray (log in EDGE-CASES.md; do not approve unilaterally):**
 - Ambiguous similarity — shares some features with real IP but not clearly same
 - Stylistic reference to brands but not direct imitation
-- Parody that may/may not qualify for fair use (requires legal review, not reviewer judgment)
+- Unclear whether similarity rises to level requiring permission
 
-**Standard:** Would reasonable IP holder's lawyer send cease-and-desist? If yes → fail. If unsure → log as gray area, flag for legal review at v0.3.
+**Standard:** Would reasonable IP holder's lawyer send cease-and-desist? If yes → fail (unless documented permission). If unsure → log as gray area, flag for legal review at v0.3.
+
+**Reviewer note:** Conservative standard on IP permission quality. If license scope is ambiguous about AI derivatives or third-party licensing → Conditional, not Pass.
 
 ---
 

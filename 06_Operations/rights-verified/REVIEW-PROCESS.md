@@ -69,6 +69,8 @@ Run through five checks. Any failure = stop and handle before proceeding.
 - Confirm commercial license status for each
 - Note any Caution-tier tools (e.g., Kling) — affects Chain of Title flags and exclusivity pricing
 - File receipt copies in submission record
+- **Check Section 2:** Underlying rights — if work is adapted from existing material, verify filmmaker owns rights or has written permission
+- **Check Section 3:** Third-party assets — if non-AI assets used (fonts, SFX, stock footage, overlays), verify licenses cover commercial use
 
 ### Category 2: Human Authorship Evidence Quality
 - Read declaration (Section 4) carefully
@@ -82,12 +84,25 @@ Run through five checks. Any failure = stop and handle before proceeding.
 - Scan every face: identifiable as real specific person?
 - Scan voices: sounds like specific real person?
 - Lookalike test: does character clearly evoke real specific person?
+- **If yes to any:** Check Section 5 — is consent/license documented?
+  - Review consent documentation quality (Section 10)
+  - Verify scope covers: (a) commercial use, (b) AI-generated derivatives, (c) third-party licensing
+  - Check territory, duration, any restrictions
+  - If minor depicted: verify parental/guardian consent
+  - **Conservative standard:** If consent scope unclear or ambiguous → Conditional or Fail
+- **If no identifiable likenesses:** Pass
 - Apply REVIEW-CRITERIA.md Category 3 thresholds
-- **Hard line. If any doubt → Fail. No exceptions.**
+- **Hard line. If any doubt about identity OR consent validity → Fail or Conditional. No "probably fine" passes.**
 
 ### Category 4: IP & Brand Imitation Scan
 - Scan for: recognizable characters, protected trade dress, trademarked logos, brand color/identity combinations
-- Does any element clearly imitate or parody real IP without authorization?
+- Does any element clearly imitate or parody real IP?
+- **If yes:** Check Section 6 — is permission/license documented?
+  - Review IP license documentation quality (Section 10)
+  - Verify scope covers: (a) commercial use, (b) AI-generated derivatives, (c) third-party licensing
+  - Check territory, duration, any restrictions
+  - **Conservative standard:** If license scope unclear or ambiguous → Conditional or Fail
+- **Parody/fair use claimed:** Do not approve unilaterally in v0.1. Flag for legal review at v0.3.
 - **Ambiguous cases → document in EDGE-CASES.md. Do not unilaterally approve.**
 
 ### Category 5: Brand Safety Assessment
@@ -105,6 +120,7 @@ Run through five checks. Any failure = stop and handle before proceeding.
 - Review Section 8 selection
 - If authorized (full or scene-specific) — confirm Shopping Agreement includes modification clause
 - If not authorized → note Tier 1 only in Chain of Title
+- **Check existing brand placements:** If work contains existing product placements or branded products, note in Chain of Title Category Conflict Log (affects Tier 2 eligibility for competing brands)
 - **Document scope precisely: "specific scenes" requires scene list**
 
 ---
