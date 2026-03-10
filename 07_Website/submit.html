@@ -241,6 +241,37 @@
                         <textarea id="existing_agreements" name="existing_agreements" rows="2" placeholder="List any existing licenses, festival screenings, or distribution agreements"></textarea>
                         <small class="field-help">If none, leave blank</small>
                     </div>
+
+                    <!-- NEW: Underlying Rights -->
+                    <div class="form-group">
+                        <label for="underlying_rights">Underlying Rights <span class="required">*</span></label>
+                        <select id="underlying_rights" name="underlying_rights" required>
+                            <option value="">Select...</option>
+                            <option value="original">Original work (not based on existing material)</option>
+                            <option value="adapted">Adapted from existing material WITH permission</option>
+                        </select>
+                        <small class="field-help">Is this work based on a book, screenplay, article, or someone else's story?</small>
+                    </div>
+
+                    <!-- Show if "adapted" selected -->
+                    <div id="underlying_rights_details_container" style="display: none;">
+                        <div class="form-group">
+                            <label for="underlying_rights_source">Source Material <span class="required">*</span></label>
+                            <input type="text" id="underlying_rights_source" name="underlying_rights_source"
+                                   placeholder="e.g., Novel 'Title' by Author Name">
+                            <small class="field-help">What existing work is this based on?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="underlying_rights_holder">Rights Holder <span class="required">*</span></label>
+                            <input type="text" id="underlying_rights_holder" name="underlying_rights_holder"
+                                   placeholder="Person or entity who owns the original work">
+                        </div>
+                        <div class="form-group">
+                            <label for="underlying_rights_permission">Permission Documentation <span class="required">*</span></label>
+                            <textarea id="underlying_rights_permission" name="underlying_rights_permission" rows="3"
+                                      placeholder="Describe your permission (e.g., 'Written license agreement dated YYYY-MM-DD' or 'I am the original author')"></textarea>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- Section 3: Tool Disclosure -->
@@ -264,6 +295,42 @@
                         </div>
                         <div id="receipts-list" class="file-list"></div>
                     </div>
+
+                    <!-- NEW: Third-Party Assets -->
+                    <div class="form-group" style="margin-top: 48px; padding-top: 32px; border-top: 1px solid rgba(0,0,0,0.08);">
+                        <label>Third-Party Assets (Non-AI)</label>
+                        <p class="section-description" style="margin-bottom: 16px;">Did you use any non-AI assets in this production?</p>
+
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="third_party_stock_footage" value="yes">
+                            <span>Stock footage (Pexels, Unsplash, Shutterstock, etc.)</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="third_party_fonts" value="yes">
+                            <span>Commercial fonts (require licenses for commercial use)</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="third_party_sfx" value="yes">
+                            <span>Sound effects packs or libraries</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="third_party_overlays" value="yes">
+                            <span>Overlays, LUTs, presets, or visual effects</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="third_party_other" value="yes">
+                            <span>Other third-party creative assets</span>
+                        </label>
+                    </div>
+
+                    <div id="third_party_details_container" style="display: none; margin-top: 16px;">
+                        <div class="form-group">
+                            <label for="third_party_details">Asset Details <span class="required">*</span></label>
+                            <textarea id="third_party_details" name="third_party_details" rows="5"
+                                      placeholder="List each asset, source, and license type. Example:&#10;- Font: 'Helvetica Neue' from Adobe Fonts (Commercial license)&#10;- SFX: Explosion pack from Epidemic Sound (Standard license)&#10;- Stock footage: City timelapse from Pexels (Free for commercial use)"></textarea>
+                            <small class="field-help">Provide license documentation in Section 10 (Supporting Materials)</small>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- Section 4: Human Authorship Declaration -->
@@ -284,60 +351,145 @@
                 <!-- Section 5: Likeness & Identity Confirmation -->
                 <section class="form-section" data-section="5">
                     <h2>5. Likeness & Identity Confirmation</h2>
-                    <p class="section-description">Confirm that your film does not use real people's likenesses without consent.</p>
+                    <p class="section-description">Does this work contain any identifiable real person's face, voice, or identity?</p>
 
                     <div class="form-group">
-                        <div class="checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="likeness_no_faces" required>
-                                <span>No real person faces appear in this film</span>
+                        <label>Likeness Status <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="likeness_status" value="none" required checked>
+                                <span><strong>No identifiable likenesses</strong> — No real person's face, voice, or identity appears</span>
                             </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="likeness_no_voices" required>
-                                <span>No real person voices are used in this film</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="likeness_no_lookalikes" required>
-                                <span>No recognizable lookalikes of real people</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="likeness_no_synthetic" required>
-                                <span>No synthetic versions of real people (deepfakes)</span>
+                            <label class="radio-label">
+                                <input type="radio" name="likeness_status" value="licensed" required>
+                                <span><strong>Licensed likenesses</strong> — Identifiable person(s) appear WITH written consent/license</span>
                             </label>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="likeness_notes">Additional Notes (if any concerns)</label>
-                        <textarea id="likeness_notes" name="likeness_notes" rows="3"></textarea>
+                    <!-- Show if "licensed" selected -->
+                    <div id="licensed_likenesses_container" style="display: none; margin-top: 24px;">
+                        <div class="info-box" style="background: rgba(200,144,10,0.08); border: 1px solid rgba(200,144,10,0.3); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                            <strong>Required for each person:</strong> Signed release/consent covering commercial use, AI derivatives, and third-party licensing via SI8.
+                        </div>
+
+                        <div class="form-group">
+                            <label for="licensed_likenesses_details">Likeness Details <span class="required">*</span></label>
+                            <textarea id="licensed_likenesses_details" name="licensed_likenesses_details" rows="6"
+                                      placeholder="For each person, provide:&#10;- Name:&#10;- Likeness type (Face / Voice / Both):&#10;- Documentation type (Signed release / License / Estate permission):&#10;- Scope (must cover: commercial use, AI derivatives, third-party licensing):&#10;- Date (YYYY-MM-DD):"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="licensed_likenesses_docs">Upload Consent Documentation <span class="required">*</span></label>
+                            <div class="file-upload-zone">
+                                <div class="upload-icon">📎</div>
+                                <p>Drag and drop files here or click to browse</p>
+                                <small>Upload signed releases/consent forms (PDF or image). Max 50MB per file.</small>
+                                <input type="file" id="licensed_likenesses_docs" name="licensed_likenesses_docs"
+                                       accept=".pdf,.jpg,.jpeg,.png" multiple style="display: none;">
+                            </div>
+                            <div id="likeness-docs-list" class="file-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- Standard checklist (applies to all submissions) -->
+                    <div class="form-group" style="margin-top: 24px;">
+                        <label>Confirmation (required for all submissions)</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="no_unlicensed_voices" required>
+                                <span>No voice clone/imitation of real person without documented consent</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="no_unlicensed_lookalikes" required>
+                                <span>No lookalike character without written authorization</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="synthetic_faces_check" required>
+                                <span>All synthetic faces are either non-identifiable OR properly licensed</span>
+                            </label>
+                        </div>
                     </div>
                 </section>
 
                 <!-- Section 6: IP & Brand Confirmation -->
                 <section class="form-section" data-section="6">
                     <h2>6. IP & Brand Confirmation</h2>
-                    <p class="section-description">Confirm that your film does not imitate copyrighted characters or brands.</p>
+                    <p class="section-description">Does this work contain any copyrighted characters, trademarked brands, or protected IP?</p>
 
                     <div class="form-group">
-                        <div class="checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="ip_no_characters" required>
-                                <span>No copyrighted characters appear in this film</span>
+                        <label>IP Status <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="ip_status" value="none" required checked>
+                                <span><strong>No IP imitation</strong> — No copyrighted characters, trademarked brands, or protected IP appear</span>
                             </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="ip_no_brands" required>
-                                <span>No recognizable brand imitation (logos, trade dress, trademarks)</span>
+                            <label class="radio-label">
+                                <input type="radio" name="ip_status" value="licensed" required>
+                                <span><strong>Licensed IP</strong> — Copyrighted/trademarked IP appears WITH written permission</span>
                             </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="ip_no_ip" required>
-                                <span>No protected intellectual property used without license</span>
+                            <label class="radio-label">
+                                <input type="radio" name="ip_status" value="fair_use" required>
+                                <span><strong>Parody / Fair Use claim</strong> — I believe this is protected by fair use/parody</span>
                             </label>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="ip_notes">Additional Notes (if any concerns)</label>
-                        <textarea id="ip_notes" name="ip_notes" rows="3"></textarea>
+                    <!-- Show if "licensed" selected -->
+                    <div id="licensed_ip_container" style="display: none; margin-top: 24px;">
+                        <div class="info-box" style="background: rgba(200,144,10,0.08); border: 1px solid rgba(200,144,10,0.3); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                            <strong>Required:</strong> Written license/permission from IP rights holder covering commercial use, AI derivatives, and third-party licensing.
+                        </div>
+
+                        <div class="form-group">
+                            <label for="licensed_ip_details">IP License Details <span class="required">*</span></label>
+                            <textarea id="licensed_ip_details" name="licensed_ip_details" rows="6"
+                                      placeholder="For each IP element, provide:&#10;- IP Name:&#10;- IP Type (Character / Brand / Trademark / Other):&#10;- Rights Holder:&#10;- Documentation type (License agreement / Permission letter):&#10;- Scope (must cover: commercial use, AI derivatives, territory):"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="licensed_ip_docs">Upload IP Documentation <span class="required">*</span></label>
+                            <div class="file-upload-zone">
+                                <div class="upload-icon">📎</div>
+                                <p>Drag and drop files here or click to browse</p>
+                                <small>Upload license agreements/permission letters (PDF or image). Max 50MB per file.</small>
+                                <input type="file" id="licensed_ip_docs" name="licensed_ip_docs"
+                                       accept=".pdf,.jpg,.jpeg,.png" multiple style="display: none;">
+                            </div>
+                            <div id="ip-docs-list" class="file-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- Show if "fair_use" selected -->
+                    <div id="fair_use_container" style="display: none; margin-top: 24px;">
+                        <div class="warning-box" style="background: rgba(255,171,0,0.08); border: 1px solid rgba(255,171,0,0.3); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                            <strong>Note:</strong> Fair use/parody claims require legal review. Submissions with fair use claims may be marked Conditional pending lawyer consultation.
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fair_use_reasoning">Fair Use Reasoning <span class="required">*</span></label>
+                            <textarea id="fair_use_reasoning" name="fair_use_reasoning" rows="5"
+                                      placeholder="Explain why you believe this qualifies as fair use or parody. What IP is referenced and how is it transformed?"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Standard checklist (applies to all submissions) -->
+                    <div class="form-group" style="margin-top: 24px;">
+                        <label>Confirmation (required for all submissions)</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="no_unlicensed_characters" required>
+                                <span>No copyrighted characters without written permission</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="no_unlicensed_brands" required>
+                                <span>No brand trade dress imitation without authorization</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="no_unlicensed_trademarks" required>
+                                <span>No trademarked logos/slogans without license</span>
+                            </label>
+                        </div>
                     </div>
                 </section>
 
@@ -433,6 +585,33 @@
                         <label for="tier2_scenes">Specific Scenes for Placement</label>
                         <textarea id="tier2_scenes" name="tier2_scenes" rows="3" placeholder="List which scenes can be modified for brand placement"></textarea>
                     </div>
+
+                    <!-- NEW: Existing Brand Placements -->
+                    <div class="form-group" style="margin-top: 32px; padding-top: 32px; border-top: 1px solid rgba(0,0,0,0.08);">
+                        <label>Existing Brand Placements <span class="required">*</span></label>
+                        <p class="section-description" style="margin-bottom: 16px;">Does this work already contain any product placements, brand integrations, or recognizable branded products/logos?</p>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="existing_brand_placements" value="none" required checked>
+                                <span>No — work contains no existing brand placements</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="existing_brand_placements" value="yes" required>
+                                <span>Yes — describe below</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="existing_brand_details_container" style="display: none; margin-top: 16px;">
+                        <div class="form-group">
+                            <label for="existing_brand_details">Brand Placement Details <span class="required">*</span></label>
+                            <textarea id="existing_brand_details" name="existing_brand_details" rows="3"
+                                      placeholder="List each brand/product visible in the work and the scene/timestamp where it appears."></textarea>
+                        </div>
+                        <div class="info-box" style="background: rgba(200,144,10,0.08); border: 1px solid rgba(200,144,10,0.3); padding: 16px; border-radius: 8px; margin-top: 12px;">
+                            <strong>Note:</strong> Existing brand placements affect Tier 2 eligibility (e.g., cannot place competing brands in same work).
+                        </div>
+                    </div>
                 </section>
 
                 <!-- Section 9: Territory & Exclusivity -->
@@ -508,6 +687,19 @@
                 <section class="form-section" data-section="11">
                     <h2>11. Supporting Materials</h2>
                     <p class="section-description">Upload your film and any supporting documentation.</p>
+
+                    <div class="info-box" style="background: #F7F6EF; border: 1px solid rgba(0,0,0,0.08); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                        <strong>Documentation checklist:</strong>
+                        <ul style="margin: 8px 0 0 20px; line-height: 1.8;">
+                            <li>Commercial plan receipts for all AI tools (Section 3) — <strong>Required</strong></li>
+                            <li>Third-party asset licenses (fonts, SFX, etc.) — <strong>Required if applicable</strong></li>
+                            <li>Likeness consent documentation (Section 5) — <strong>Required if applicable</strong></li>
+                            <li>IP license documentation (Section 6) — <strong>Required if applicable</strong></li>
+                            <li>Underlying rights permission (Section 2) — <strong>Required if adapted work</strong></li>
+                            <li>Production process screenshots — <em>Strongly recommended</em></li>
+                        </ul>
+                        <p style="margin: 12px 0 0 0; font-size: 14px;">Note: Some documentation (licensed likenesses, IP) is uploaded in their respective sections above.</p>
+                    </div>
 
                     <div class="form-group">
                         <label for="video_url">Video Link <span class="required">*</span></label>

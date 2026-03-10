@@ -398,6 +398,86 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         });
+
+        // NEW: Show/hide underlying rights details
+        const underlyingRights = document.getElementById('underlying_rights');
+        if (underlyingRights) {
+            underlyingRights.addEventListener('change', function() {
+                const container = document.getElementById('underlying_rights_details_container');
+                const isAdapted = this.value === 'adapted';
+                container.style.display = isAdapted ? 'block' : 'none';
+
+                // Update required status
+                document.getElementById('underlying_rights_source').required = isAdapted;
+                document.getElementById('underlying_rights_holder').required = isAdapted;
+                document.getElementById('underlying_rights_permission').required = isAdapted;
+            });
+        }
+
+        // NEW: Show/hide third-party asset details
+        const thirdPartyCheckboxes = document.querySelectorAll('[name^="third_party_"]');
+        thirdPartyCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const anyChecked = Array.from(thirdPartyCheckboxes).some(cb => cb.checked);
+                const container = document.getElementById('third_party_details_container');
+                container.style.display = anyChecked ? 'block' : 'none';
+                document.getElementById('third_party_details').required = anyChecked;
+            });
+        });
+
+        // NEW: Show/hide licensed likenesses container
+        const likenessRadios = document.querySelectorAll('[name="likeness_status"]');
+        likenessRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const container = document.getElementById('licensed_likenesses_container');
+                const isLicensed = this.value === 'licensed';
+                container.style.display = isLicensed ? 'block' : 'none';
+
+                // Update required status
+                document.getElementById('licensed_likenesses_details').required = isLicensed;
+                document.getElementById('licensed_likenesses_docs').required = isLicensed;
+            });
+        });
+
+        // NEW: Show/hide licensed IP containers
+        const ipRadios = document.querySelectorAll('[name="ip_status"]');
+        ipRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const licensedContainer = document.getElementById('licensed_ip_container');
+                const fairUseContainer = document.getElementById('fair_use_container');
+                const isLicensed = this.value === 'licensed';
+                const isFairUse = this.value === 'fair_use';
+
+                licensedContainer.style.display = isLicensed ? 'block' : 'none';
+                fairUseContainer.style.display = isFairUse ? 'block' : 'none';
+
+                // Update required status
+                if (document.getElementById('licensed_ip_details')) {
+                    document.getElementById('licensed_ip_details').required = isLicensed;
+                }
+                if (document.getElementById('licensed_ip_docs')) {
+                    document.getElementById('licensed_ip_docs').required = isLicensed;
+                }
+                if (document.getElementById('fair_use_reasoning')) {
+                    document.getElementById('fair_use_reasoning').required = isFairUse;
+                }
+            });
+        });
+
+        // NEW: Show/hide existing brand placement details
+        const brandPlacementRadios = document.querySelectorAll('[name="existing_brand_placements"]');
+        brandPlacementRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const container = document.getElementById('existing_brand_details_container');
+                const hasPlacement = this.value === 'yes';
+                container.style.display = hasPlacement ? 'block' : 'none';
+                document.getElementById('existing_brand_details').required = hasPlacement;
+            });
+        });
+
+        // NEW: File upload handlers for new documentation fields
+        setupFileUploadZone('licensed_likenesses_docs', 'likeness-docs-list');
+        setupFileUploadZone('licensed_ip_docs', 'ip-docs-list');
     }
 
     // ============================
@@ -659,6 +739,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Convert files to base64 data URLs
         const receiptsDataUrls = await convertFilesToDataUrls(uploadedFiles['receipts-list']);
         const supportingDocsDataUrls = await convertFilesToDataUrls(uploadedFiles['supporting-docs-list']);
+        const likenessDocsDataUrls = await convertFilesToDataUrls(uploadedFiles['likeness-docs-list'] || []);
+        const ipDocsDataUrls = await convertFilesToDataUrls(uploadedFiles['ip-docs-list'] || []);
 
         // Collect all form fields
         const data = {
@@ -678,17 +760,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 intendedUse: formData.get('intended_use'),
                 productionStart: formData.get('production_start'),
                 productionEnd: formData.get('production_end'),
-                existingAgreements: formData.get('existing_agreements')
+                existingAgreements: formData.get('existing_agreements'),
+                underlyingRights: {
+                    status: formData.get('underlying_rights'),
+                    source: formData.get('underlying_rights_source') || '',
+                    rightsHolder: formData.get('underlying_rights_holder') || '',
+                    permission: formData.get('underlying_rights_permission') || ''
+                }
             },
             tools: tools,
+            thirdPartyAssets: {
+                stockFootage: formData.get('third_party_stock_footage') === 'yes',
+                fonts: formData.get('third_party_fonts') === 'yes',
+                sfx: formData.get('third_party_sfx') === 'yes',
+                overlays: formData.get('third_party_overlays') === 'yes',
+                other: formData.get('third_party_other') === 'yes',
+                details: formData.get('third_party_details') || ''
+            },
             authorship: {
                 declaration: formData.get('authorship_declaration')
             },
             likeness: {
-                notes: formData.get('likeness_notes')
+                status: formData.get('likeness_status'),
+                details: formData.get('licensed_likenesses_details') || '',
+                docsDataUrls: likenessDocsDataUrls
             },
             ip: {
-                notes: formData.get('ip_notes')
+                status: formData.get('ip_status'),
+                details: formData.get('licensed_ip_details') || formData.get('fair_use_reasoning') || '',
+                docsDataUrls: ipDocsDataUrls
             },
             audio: {
                 musicSource: formData.get('audio_music_source'),
@@ -698,7 +798,11 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             tier2: {
                 enrollment: formData.get('tier2_enrollment'),
-                scenes: formData.get('tier2_scenes')
+                scenes: formData.get('tier2_scenes'),
+                existingBrandPlacements: {
+                    status: formData.get('existing_brand_placements'),
+                    details: formData.get('existing_brand_details') || ''
+                }
             },
             territory: {
                 preference: formData.get('territory_preference'),

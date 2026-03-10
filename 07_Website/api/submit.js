@@ -77,8 +77,19 @@ module.exports = async function handler(req, res) {
             console.log('Thumbnail uploaded:', thumbnailUrl);
         }
 
+        // Upload documentation files to Cloudinary
+        let likenessDocsUrls = [];
+        if (data.likeness && data.likeness.docsDataUrls && data.likeness.docsDataUrls.length > 0) {
+            likenessDocsUrls = await uploadDocumentationToCloudinary(data.likeness.docsDataUrls, submissionId, 'likeness-consent');
+        }
+
+        let ipDocsUrls = [];
+        if (data.ip && data.ip.docsDataUrls && data.ip.docsDataUrls.length > 0) {
+            ipDocsUrls = await uploadDocumentationToCloudinary(data.ip.docsDataUrls, submissionId, 'ip-licenses');
+        }
+
         // Create Airtable record
-        const record = await createAirtableRecord(submissionId, data, receiptsInfo, supportingDocsInfo, thumbnailUrl);
+        const record = await createAirtableRecord(submissionId, data, receiptsInfo, supportingDocsInfo, thumbnailUrl, likenessDocsUrls, ipDocsUrls);
 
         console.log('Created Airtable record:', record.id);
 
@@ -177,6 +188,48 @@ function validateSubmission(data) {
     // Terms consent
     if (!data.terms.consent) {
         errors.push('You must agree to the terms to submit');
+    }
+
+    // NEW: Underlying rights validation
+    if (!data.production.underlyingRights.status) {
+        errors.push('Underlying rights status is required');
+    }
+    if (data.production.underlyingRights.status === 'adapted' && !data.production.underlyingRights.permission) {
+        errors.push('Permission documentation required for adapted works');
+    }
+
+    // NEW: Third-party assets validation
+    const hasThirdPartyAssets = Object.values(data.thirdPartyAssets).some(v => v === true);
+    if (hasThirdPartyAssets && !data.thirdPartyAssets.details) {
+        errors.push('Third-party asset details required when assets are used');
+    }
+
+    // NEW: Licensed likenesses validation
+    if (data.likeness.status === 'licensed') {
+        if (!data.likeness.details) {
+            errors.push('Likeness details required for licensed likenesses');
+        }
+        if (!data.likeness.docsDataUrls || data.likeness.docsDataUrls.length === 0) {
+            errors.push('Consent documentation required for licensed likenesses');
+        }
+    }
+
+    // NEW: Licensed IP validation
+    if (data.ip.status === 'licensed') {
+        if (!data.ip.details) {
+            errors.push('IP license details required');
+        }
+        if (!data.ip.docsDataUrls || data.ip.docsDataUrls.length === 0) {
+            errors.push('IP documentation required for licensed IP');
+        }
+    }
+    if (data.ip.status === 'fair_use' && !data.ip.details) {
+        errors.push('Fair use reasoning required');
+    }
+
+    // NEW: Existing brand placements validation
+    if (data.tier2.existingBrandPlacements.status === 'yes' && !data.tier2.existingBrandPlacements.details) {
+        errors.push('Brand placement details required');
     }
 
     return errors;
@@ -294,11 +347,67 @@ async function uploadThumbnailToCloudinary(dataUrl, submissionId) {
     }
 }
 
+// Upload documentation files (likeness consent, IP licenses) to Cloudinary
+async function uploadDocumentationToCloudinary(dataUrls, submissionId, docType) {
+    const uploadedUrls = [];
+
+    if (!dataUrls || dataUrls.length === 0) {
+        return uploadedUrls;
+    }
+
+    try {
+        console.log(`Uploading ${dataUrls.length} ${docType} file(s) to Cloudinary...`);
+
+        for (let i = 0; i < dataUrls.length; i++) {
+            const { name, dataUrl } = dataUrls[i];
+
+            // Use /raw/upload for non-image files (PDFs, docs, etc.)
+            const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload`;
+
+            const formData = new URLSearchParams();
+            formData.append('file', dataUrl);
+            formData.append('upload_preset', 'si8_catalog');
+            formData.append('public_id', `${submissionId}/${docType}/${name.replace(/\s/g, '_')}`);
+            formData.append('folder', 'si8-documentation');
+
+            const response = await fetch(uploadUrl, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                console.error(`Failed to upload ${name}: ${response.statusText}`);
+                continue; // Skip failed uploads, don't block entire submission
+            }
+
+            const result = await response.json();
+            uploadedUrls.push({
+                filename: name,
+                url: result.secure_url
+            });
+            console.log(`✅ Uploaded ${name}: ${result.secure_url}`);
+        }
+
+        return uploadedUrls;
+
+    } catch (error) {
+        console.error(`Documentation upload error (${docType}):`, error);
+        // Don't fail entire submission if documentation upload fails
+        return uploadedUrls; // Return whatever succeeded
+    }
+}
+
 // ============================
 // Airtable Record Creation
 // ============================
 
-async function createAirtableRecord(submissionId, data, receiptsInfo, supportingDocsInfo, thumbnailUrl) {
+async function createAirtableRecord(submissionId, data, receiptsInfo, supportingDocsInfo, thumbnailUrl, likenessDocsUrls, ipDocsUrls) {
+    // Format documentation URLs for Airtable (as attachment objects or text)
+    const formatDocsForAirtable = (docsUrls) => {
+        if (!docsUrls || docsUrls.length === 0) return '';
+        return docsUrls.map(doc => `${doc.filename}: ${doc.url}`).join('\n');
+    };
+
     const record = await base('Submissions').create([
         {
             fields: {
@@ -319,18 +428,60 @@ async function createAirtableRecord(submissionId, data, receiptsInfo, supporting
                 production_start: data.production.productionStart,
                 production_end: data.production.productionEnd,
                 existing_agreements: data.production.existingAgreements || '',
+
+                // NEW: Underlying rights (Field 1)
+                underlying_rights: data.production.underlyingRights?.status || 'original',
+                underlying_rights_details: data.production.underlyingRights?.status === 'adapted'
+                    ? JSON.stringify({
+                        source: data.production.underlyingRights.source,
+                        rightsHolder: data.production.underlyingRights.rightsHolder,
+                        permission: data.production.underlyingRights.permission
+                    })
+                    : '',
+
                 tools_json: JSON.stringify(data.tools),
+
+                // NEW: Third-party assets (Field 2)
+                third_party_assets: data.thirdPartyAssets
+                    ? JSON.stringify({
+                        stockFootage: data.thirdPartyAssets.stockFootage || false,
+                        fonts: data.thirdPartyAssets.fonts || false,
+                        sfx: data.thirdPartyAssets.sfx || false,
+                        overlays: data.thirdPartyAssets.overlays || false,
+                        other: data.thirdPartyAssets.other || false
+                    })
+                    : '',
+                third_party_assets_licenses: data.thirdPartyAssets?.details || '',
+
                 authorship_declaration: data.authorship.declaration,
-                likeness_confirmed: true, // Assuming checkboxes were checked to submit
-                likeness_notes: data.likeness.notes || '',
-                ip_confirmed: true,
-                ip_notes: data.ip.notes || '',
+
+                // UPDATED: Likeness fields (Field 3)
+                likeness_status: data.likeness?.status || 'none',
+                likeness_confirmed: data.likeness?.status === 'none', // Only true if explicitly none
+                licensed_likenesses: data.likeness?.status === 'licensed' ? data.likeness.details : '',
+                licensed_likenesses_docs: formatDocsForAirtable(likenessDocsUrls),
+                likeness_notes: data.likeness?.notes || '',
+
+                // UPDATED: IP fields (Field 4)
+                ip_status: data.ip?.status || 'none',
+                ip_confirmed: data.ip?.status === 'none',
+                licensed_ip: (data.ip?.status === 'licensed' || data.ip?.status === 'fair_use') ? data.ip.details : '',
+                licensed_ip_docs: formatDocsForAirtable(ipDocsUrls),
+                ip_notes: data.ip?.notes || '',
+
                 audio_music_source: data.audio.musicSource,
                 audio_music_tool: data.audio.musicTool || '',
                 audio_sound_design: data.audio.soundDesign,
                 audio_voiceover: data.audio.voiceover,
+
                 tier2_enrollment: data.tier2.enrollment,
                 tier2_scenes: data.tier2.scenes || '',
+
+                // NEW: Existing brand placements (Field 5)
+                existing_brand_placements: data.tier2.existingBrandPlacements?.status === 'yes'
+                    ? data.tier2.existingBrandPlacements.details
+                    : '',
+
                 territory_preference: data.territory.preference,
                 territory_restrictions: data.territory.restrictions || '',
                 exclusivity_preference: data.territory.exclusivity,
