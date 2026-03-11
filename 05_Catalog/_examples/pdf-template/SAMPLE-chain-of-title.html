@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chain of Title — SAMPLE — Neon Dreams</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ===========================
+           SI8 Design System - PDF Version
+           Matches superimmersive8.com aesthetic
+           =========================== */
+
+        :root {
+            /* Colors - Warm Light Theme */
+            --color-bg: #FFFBF5;
+            --color-surface: #FFFFFF;
+            --color-text-primary: #1a1a1a;
+            --color-text-secondary: #4a4a4a;
+            --color-text-tertiary: #6b6b6b;
+            --color-accent: #C8900A;
+            --color-accent-light: #F5E6C8;
+            --color-border: rgba(200, 144, 10, 0.2);
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-sample: #e74c3c;
+
+            /* Typography */
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            --spacing-2xl: 48px;
+        }
+
+        /* ===========================
+           Print Optimization
+           =========================== */
+
+        @page {
+            size: A4;
+            margin: 20mm 15mm;
+        }
+
+        @media print {
+            body {
+                background: white;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+
+            .no-break {
+                page-break-inside: avoid;
+            }
+
+            h1, h2, h3 {
+                page-break-after: avoid;
+            }
+
+            table {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* ===========================
+           Base Styles
+           =========================== */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            font-size: 10pt;
+            line-height: 1.6;
+            color: var(--color-text-primary);
+            background: var(--color-bg);
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            padding: var(--spacing-xl);
+        }
+
+        /* ===========================
+           Cover Page
+           =========================== */
+
+        .cover-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 100vh;
+            padding: var(--spacing-2xl);
+            background: linear-gradient(135deg, var(--color-bg) 0%, #FFF8E7 100%);
+            border-bottom: 3px solid var(--color-accent);
+            position: relative;
+        }
+
+        .sample-watermark {
+            background: var(--color-sample);
+            color: white;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: 6px;
+            font-family: var(--font-body);
+            font-size: 10pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .cover-header {
+            text-align: left;
+        }
+
+        .cover-logo {
+            font-family: var(--font-display);
+            font-size: 18pt;
+            font-weight: 700;
+            color: var(--color-accent);
+            letter-spacing: -0.5px;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .cover-tagline {
+            font-family: var(--font-body);
+            font-size: 9pt;
+            color: var(--color-text-secondary);
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .cover-title-section {
+            margin-top: var(--spacing-2xl);
+        }
+
+        .cover-document-type {
+            font-family: var(--font-body);
+            font-size: 10pt;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--color-accent);
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .cover-title {
+            font-family: var(--font-display);
+            font-size: 36pt;
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--color-text-primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .cover-subtitle {
+            font-family: var(--font-body);
+            font-size: 12pt;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+            max-width: 600px;
+        }
+
+        .cover-meta {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-xl);
+            padding: var(--spacing-lg);
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+
+        .meta-label {
+            font-size: 8pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-tertiary);
+            font-weight: 600;
+        }
+
+        .meta-value {
+            font-size: 11pt;
+            color: var(--color-text-primary);
+            font-weight: 500;
+        }
+
+        .cover-footer {
+            padding-top: var(--spacing-xl);
+            border-top: 1px solid var(--color-border);
+        }
+
+        .cover-disclaimer {
+            font-size: 8pt;
+            color: var(--color-text-tertiary);
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        /* ===========================
+           Content Pages
+           =========================== */
+
+        .content-page {
+            padding: var(--spacing-xl) 0;
+        }
+
+        /* Headers */
+        h1 {
+            font-family: var(--font-display);
+            font-size: 24pt;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-top: var(--spacing-2xl);
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        h1:first-child {
+            margin-top: 0;
+        }
+
+        h2 {
+            font-family: var(--font-display);
+            font-size: 14pt;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin-top: var(--spacing-xl);
+            margin-bottom: var(--spacing-md);
+            padding-left: var(--spacing-sm);
+            border-left: 3px solid var(--color-accent);
+        }
+
+        h3 {
+            font-family: var(--font-body);
+            font-size: 11pt;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin-top: var(--spacing-lg);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        /* Text */
+        p {
+            margin-bottom: var(--spacing-md);
+            text-align: justify;
+        }
+
+        strong {
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        em {
+            font-style: italic;
+            color: var(--color-text-secondary);
+        }
+
+        /* Lists */
+        ul, ol {
+            margin-left: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+        }
+
+        li {
+            margin-bottom: var(--spacing-sm);
+            padding-left: var(--spacing-xs);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--spacing-lg) 0;
+            font-size: 9pt;
+            background: white;
+        }
+
+        thead {
+            background: linear-gradient(135deg, var(--color-accent-light), #FFF8E7);
+        }
+
+        th {
+            font-family: var(--font-body);
+            font-weight: 600;
+            text-align: left;
+            padding: var(--spacing-sm) var(--spacing-md);
+            color: var(--color-text-primary);
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        td {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-bottom: 1px solid var(--color-border);
+            vertical-align: top;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:nth-child(even) {
+            background: rgba(245, 230, 200, 0.3);
+        }
+
+        /* Status Badges */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 8pt;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+        }
+
+        .badge-info {
+            background: var(--color-accent-light);
+            color: var(--color-accent);
+        }
+
+        .badge-sample {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--color-sample);
+        }
+
+        /* Callout Boxes */
+        .callout {
+            padding: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+            border-radius: 6px;
+            border-left: 4px solid var(--color-accent);
+            background: var(--color-accent-light);
+        }
+
+        .callout-title {
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin-bottom: var(--spacing-sm);
+            font-size: 10pt;
+        }
+
+        .callout-content {
+            font-size: 9pt;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+        }
+
+        .callout-content p {
+            margin-bottom: var(--spacing-sm);
+            text-align: left;
+        }
+
+        .callout-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Checklist */
+        .checklist {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .checklist li {
+            position: relative;
+            padding-left: var(--spacing-lg);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .checklist li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--color-success);
+            font-weight: 700;
+            font-size: 11pt;
+        }
+
+        /* Footer */
+        .page-footer {
+            margin-top: var(--spacing-2xl);
+            padding-top: var(--spacing-lg);
+            border-top: 1px solid var(--color-border);
+            text-align: center;
+        }
+
+        .footer-text {
+            font-size: 8pt;
+            color: var(--color-text-tertiary);
+            line-height: 1.5;
+        }
+
+        .footer-contact {
+            margin-top: var(--spacing-sm);
+            font-size: 8pt;
+            color: var(--color-accent);
+        }
+
+        /* Section Divider */
+        .section-divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--color-border), transparent);
+            margin: var(--spacing-xl) 0;
+        }
+
+        /* Special Sections */
+        .meta-info {
+            background: var(--color-accent-light);
+            padding: var(--spacing-md);
+            border-radius: 6px;
+            margin: var(--spacing-md) 0;
+        }
+
+        .meta-info p {
+            margin-bottom: var(--spacing-sm);
+            text-align: left;
+        }
+
+        .meta-info p:last-child {
+            margin-bottom: 0;
+        }
+
+        .disclaimer {
+            background: rgba(245, 230, 200, 0.3);
+            padding: var(--spacing-lg);
+            border-radius: 6px;
+            margin: var(--spacing-xl) 0;
+            border: 1px solid var(--color-border);
+        }
+
+        .disclaimer p {
+            font-size: 8pt;
+            color: var(--color-text-tertiary);
+            line-height: 1.6;
+            font-style: italic;
+            margin-bottom: 0;
+            text-align: left;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.05);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 9pt;
+        }
+    </style>
+</head>
+<body>
+    <!-- COVER PAGE -->
+    <div class="cover-page">
+        <div class="sample-watermark">⚠️ SAMPLE DOCUMENT — FOR DEMONSTRATION PURPOSES ONLY</div>
+
+        <div class="cover-header">
+            <div class="cover-logo">SuperImmersive 8</div>
+            <div class="cover-tagline">AI Film Rights & Distribution</div>
+        </div>
+
+        <div class="cover-title-section">
+            <div class="cover-document-type">Chain of Title — SAMPLE</div>
+            <h1 class="cover-title">Neon Dreams</h1>
+            <div class="cover-subtitle">
+                Comprehensive legal documentation and provenance record for AI-generated content licensing.
+            </div>
+
+            <div class="cover-meta">
+                <div class="meta-item">
+                    <div class="meta-label">Catalog ID</div>
+                    <div class="meta-value">SI8-2026-SAMPLE</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Filmmaker</div>
+                    <div class="meta-value">Jane Chen (SAMPLE)</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Runtime</div>
+                    <div class="meta-value">4:45</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Production Date</div>
+                    <div class="meta-value">January–February 2026</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Chain of Title Version</div>
+                    <div class="meta-value">v1.0</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Review Date</div>
+                    <div class="meta-value">March 11, 2026</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cover-footer">
+            <div class="cover-disclaimer">
+                <strong style="color: var(--color-sample);">⚠️ SAMPLE DOCUMENT:</strong> This is a sample Chain of Title showing the structure and content buyers receive with every SI8 catalog license. Actual Chain of Title documents contain real filmmaker names, production dates, and verified documentation.
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENT PAGES -->
+    <div class="page-break"></div>
+    <div class="content-page container">
+
+        <div class="sample-watermark" style="margin-bottom: var(--spacing-xl);">⚠️ SAMPLE DATA BELOW</div>
+
+        <!-- Field 1: Tool Provenance Log -->
+        <h2>Field 1: Tool Provenance Log</h2>
+
+        <table class="no-break">
+            <thead>
+                <tr>
+                    <th>Tool</th>
+                    <th>Version/Model</th>
+                    <th>Plan Type</th>
+                    <th>Commercial License</th>
+                    <th>Production Period</th>
+                    <th>Receipt on File</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Runway</td>
+                    <td>Gen-3 Alpha Turbo</td>
+                    <td>Paid — Unlimited Plan</td>
+                    <td>Confirmed</td>
+                    <td>Jan–Feb 2026</td>
+                    <td>Yes — runway-receipt-2026-01.pdf</td>
+                </tr>
+                <tr>
+                    <td>ElevenLabs</td>
+                    <td>Voice Design</td>
+                    <td>Paid — Creator Plan</td>
+                    <td>Confirmed</td>
+                    <td>Feb 2026</td>
+                    <td>Yes — elevenlabs-receipt-2026-02.pdf</td>
+                </tr>
+                <tr>
+                    <td>Udio</td>
+                    <td>v1.5</td>
+                    <td>Paid — Standard Plan</td>
+                    <td>Confirmed</td>
+                    <td>Jan 2026</td>
+                    <td>Yes — udio-receipt-2026-01.pdf</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p><strong>Reviewer Note:</strong> All tools show confirmed commercial licenses with receipts on file. Production paid plans verified.</p>
+
+        <div class="section-divider"></div>
+
+        <!-- Field 2: Model Disclosure -->
+        <h2>Field 2: Model Disclosure</h2>
+
+        <p><strong>Models Used:</strong></p>
+        <ul>
+            <li>Runway: Gen-3 Alpha Turbo (used January–February 2026)</li>
+            <li>ElevenLabs: Voice Design multilingual model (used February 2026)</li>
+            <li>Udio: v1.5 music generation model (used January 2026)</li>
+        </ul>
+
+        <p><strong>Note:</strong> Model versions documented as specified at production time. Each tool's ToS reviewed for commercial use permissions.</p>
+
+        <div class="section-divider"></div>
+
+        <!-- Field 3: Rights Verified Sign-off -->
+        <h2>Field 3: Rights Verified Sign-off</h2>
+
+        <div class="callout">
+            <div class="callout-title">Rights Verified Status: <span class="badge badge-success">✓ Clean Pass</span></div>
+            <div class="callout-content">
+                <p><strong>Reviewer:</strong> JD</p>
+                <p><strong>Review Date:</strong> 2026-03-11</p>
+                <p><strong>Risk Tier:</strong> Standard</p>
+                <p><strong>Conditions:</strong> None</p>
+                <p><strong>Flags:</strong> None</p>
+            </div>
+        </div>
+
+        <h3>Licensed Likenesses:</h3>
+        <p>None</p>
+
+        <h3>Licensed IP:</h3>
+        <p>None</p>
+
+        <h3>Underlying Rights:</h3>
+        <p>Original work</p>
+
+        <h3>Third-Party Assets:</h3>
+        <p>None</p>
+
+        <h3>Risk Tier Rationale:</h3>
+        <p>All tools are Standard tier (Runway Gen-3, ElevenLabs, Udio) with paid commercial plans. No Prohibited or Caution-tier tools used. All likeness, IP, and brand safety checks passed. Original authorship confirmed through 150+ word declaration with detailed production process description.</p>
+
+        <div class="section-divider"></div>
+
+        <!-- Field 4: Commercial Use Authorization -->
+        <h2>Field 4: Commercial Use Authorization</h2>
+
+        <table class="no-break">
+            <thead>
+                <tr>
+                    <th>Tool</th>
+                    <th>ToS Commercial Use</th>
+                    <th>Reference</th>
+                    <th>Receipt Filed</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Runway</td>
+                    <td>Permitted</td>
+                    <td>Rights Playbook v0.1 — Runway Gen-3 paid plan permits commercial licensing</td>
+                    <td>Yes — runway-receipt-2026-01.pdf</td>
+                </tr>
+                <tr>
+                    <td>ElevenLabs</td>
+                    <td>Permitted</td>
+                    <td>Rights Playbook v0.1 — Creator plan permits commercial licensing</td>
+                    <td>Yes — elevenlabs-receipt-2026-02.pdf</td>
+                </tr>
+                <tr>
+                    <td>Udio</td>
+                    <td>Permitted</td>
+                    <td>Rights Playbook v0.1 — Standard plan permits commercial licensing</td>
+                    <td>Yes — udio-receipt-2026-01.pdf</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p><strong>Reviewer Note:</strong> All tools' ToS explicitly permit commercial licensing under paid plans. No restrictions flagged.</p>
+
+        <div class="section-divider"></div>
+
+        <!-- Field 5: Modification Rights Status -->
+        <h2>Field 5: Modification Rights Status</h2>
+
+        <div class="callout">
+            <div class="callout-title">Status: <span class="badge badge-success">✓ Authorized — Scene-Specific</span></div>
+            <div class="callout-content">
+                <p><strong>Scope:</strong> Three specific scenes authorized for brand integration regeneration</p>
+                <p><strong>Shopping Agreement Modification Clause:</strong> Confirmed — signed 2026-02-28</p>
+            </div>
+        </div>
+
+        <h3>Authorized Scenes:</h3>
+        <ul>
+            <li><strong>Scene 3</strong> (robot in garden) — 0:45–1:12 — product placement viable</li>
+            <li><strong>Scene 7</strong> (cityscape establishing shot) — 2:03–2:25 — brand signage viable</li>
+            <li><strong>Scene 12</strong> (final shot with flower) — 4:18–4:32 — product placement viable</li>
+        </ul>
+
+        <p><strong>Note:</strong> Filmmaker authorized AI-regenerated brand-integrated versions for specific scenes only. Full work not authorized. Tier 2 placement products available for listed scenes only.</p>
+
+        <div class="section-divider"></div>
+
+        <!-- Field 6: Category Conflict Log -->
+        <h2>Field 6: Category Conflict Log</h2>
+
+        <h3>Existing Brand Placements:</h3>
+        <p>None</p>
+
+        <h3>Ineligible Categories:</h3>
+        <ul>
+            <li><strong>Alcohol:</strong> Work depicts synthetic alcohol-like beverage in Scene 8 — not suitable for alcohol brand placement</li>
+            <li><strong>Children's products:</strong> Mature themes (existential loneliness, decay) — not suitable for children's brands</li>
+        </ul>
+
+        <h3>Suitable For:</h3>
+        <p>Technology, automotive, fashion, luxury goods, consumer electronics, lifestyle brands, travel, hospitality, entertainment</p>
+
+        <h3>Brand Safety Assessment:</h3>
+        <p>Mainstream commercial content with contemplative sci-fi themes. No graphic content, political messaging, or controversial elements. Suitable for most mainstream brand categories except alcohol and children's products (see restrictions above).</p>
+
+        <div class="section-divider"></div>
+
+        <!-- Field 7: Territory Log -->
+        <h2>Field 7: Territory Log</h2>
+
+        <div class="callout">
+            <div class="callout-title">Territory: <span class="badge badge-success">Global — No Restrictions</span></div>
+        </div>
+
+        <p><strong>Restrictions:</strong> None</p>
+
+        <p><strong>Existing Agreements Affecting Territory:</strong> None</p>
+
+        <p><strong>Note:</strong> No geographic licensing restrictions. Filmmaker has not licensed work to any platform or distributor that would restrict SI8's territory. All tools used permit global commercial distribution.</p>
+
+        <div class="section-divider"></div>
+
+        <!-- Field 8: Regeneration Rights Status -->
+        <h2>Field 8: Regeneration Rights Status</h2>
+
+        <div class="callout">
+            <div class="callout-title">Status: <span class="badge badge-info">Scene-specific</span></div>
+        </div>
+
+        <h3>Authorized for Regeneration:</h3>
+        <ul>
+            <li><strong>Scene 3</strong> (robot in garden, 0:45–1:12): Product placement viable — robot can interact with branded object (e.g., device, beverage container, tech product)</li>
+            <li><strong>Scene 7</strong> (cityscape establishing shot, 2:03–2:25): Brand signage viable — neon signs can be regenerated to display brand messaging/logos</li>
+            <li><strong>Scene 12</strong> (final shot with flower, 4:18–4:32): Product placement viable — branded object can be placed near flower (e.g., luxury product, technology device)</li>
+        </ul>
+
+        <h3>Not Authorized for Regeneration:</h3>
+        <p>All other scenes (filmmaker preference — critical to narrative integrity)</p>
+
+        <h3>Tier 2 Eligibility:</h3>
+        <p>Custom AI Product Placement available for 3 authorized scenes. Estimated regeneration fee: $6K–$12K depending on scene complexity and brand integration requirements.</p>
+
+        <div class="section-divider"></div>
+
+        <!-- Field 9: Version History -->
+        <h2>Field 9: Version History</h2>
+
+        <table class="no-break">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Event</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>2026-03-11</td>
+                    <td>Production version reviewed</td>
+                    <td>Chain of Title v1.0 issued. Catalog ID: SI8-2026-SAMPLE</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p><strong>Note:</strong> If Tier 2 regeneration commissioned, regenerated version receives new Catalog ID with updated Chain of Title documenting brand placement elements.</p>
+
+        <div class="section-divider"></div>
+
+        <!-- Summary -->
+        <h2>Summary — SAMPLE</h2>
+
+        <p><strong>This Chain of Title documents:</strong></p>
+        <ul class="checklist">
+            <li>Tool provenance: 3 tools, all paid commercial plans, receipts on file</li>
+            <li>Model disclosure: Runway Gen-3 Alpha Turbo, ElevenLabs Voice Design, Udio v1.5</li>
+            <li>Rights Verified: Standard tier, Clean Pass, no flags or conditions</li>
+            <li>Commercial authorization: All tools permit commercial licensing</li>
+            <li>Modification rights: Scene-specific Tier 2 authorization (3 scenes)</li>
+            <li>Brand safety: Mainstream commercial content, suitable for most categories</li>
+            <li>Territory: Global, no restrictions</li>
+            <li>Regeneration rights: 3 scenes authorized for AI brand integration</li>
+        </ul>
+
+        <h3>Licensing Options:</h3>
+        <ul>
+            <li><strong>Tier 1 (Catalog Licensing):</strong> License as-is for commercial use</li>
+            <li><strong>Tier 2 (Brand Placement):</strong> Custom AI regeneration of authorized scenes with brand integration</li>
+        </ul>
+
+        <div class="section-divider"></div>
+
+        <div class="sample-watermark" style="margin-top: var(--spacing-2xl);">⚠️ SAMPLE DOCUMENT — FOR DEMONSTRATION PURPOSES ONLY</div>
+
+        <div class="disclaimer">
+            <p><strong>This is a sample Chain of Title showing the structure and content buyers receive with every SI8 catalog license.</strong> Actual Chain of Title documents contain real filmmaker names, production dates, and verified documentation.</p>
+        </div>
+
+        <div class="meta-info">
+            <p><strong>Questions about this Chain of Title format?</strong></p>
+            <p>Contact: SI8 Rights Verified Team<br>
+            Email: hello@superimmersive8.com<br>
+            Website: www.superimmersive8.com/rights-verified</p>
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="page-footer">
+        <div class="footer-text">
+            Chain of Title Schema Version: v0.1 (February 2026) | Document Generated: March 2026
+        </div>
+        <div class="footer-contact">
+            PMF Strategy Inc. d/b/a SuperImmersive 8 | hello@superimmersive8.com | www.superimmersive8.com
+        </div>
+    </div>
+
+</body>
+</html>
