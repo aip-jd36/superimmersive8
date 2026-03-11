@@ -19,6 +19,54 @@ document.addEventListener('DOMContentLoaded', function() {
         'ip-docs-list': []
     };
 
+    // Cloudinary uploaded URLs (store URLs instead of files)
+    const cloudinaryUrls = {
+        'receipts-list': [],
+        'supporting-docs-list': [],
+        'likeness-docs-list': [],
+        'ip-docs-list': [],
+        'catalog-thumbnail': null
+    };
+
+    // Cloudinary configuration
+    const CLOUDINARY_CLOUD_NAME = 'dxqc2bkit'; // SI8 cloud name
+    const CLOUDINARY_UPLOAD_PRESET = 'si8_catalog'; // Unsigned preset
+
+    // ============================
+    // Cloudinary Upload
+    // ============================
+
+    async function uploadToCloudinary(file, folder = 'si8-submissions') {
+        console.log(`🔵 Uploading to Cloudinary: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        formData.append('folder', folder);
+
+        try {
+            const response = await fetch(
+                `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`,
+                {
+                    method: 'POST',
+                    body: formData
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(`Cloudinary upload failed: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            console.log(`✅ Uploaded to Cloudinary: ${data.secure_url}`);
+            return data.secure_url;
+
+        } catch (error) {
+            console.error('🔴 Cloudinary upload error:', error);
+            throw error;
+        }
+    }
+
     // ============================
     // Initialize
     // ============================
@@ -134,11 +182,31 @@ document.addEventListener('DOMContentLoaded', function() {
         zone.addEventListener('click', () => input.click());
 
         // File input change
-        input.addEventListener('change', function(e) {
+        input.addEventListener('change', async function(e) {
             if (this.files && this.files[0]) {
-                displayThumbnailPreview(this.files[0], preview);
-                // Trigger validation update
-                this.dispatchEvent(new Event('blur'));
+                const file = this.files[0];
+
+                // Display preview with "uploading" status
+                displayThumbnailPreview(file, preview, 'uploading');
+
+                try {
+                    // Upload to Cloudinary
+                    const cloudinaryUrl = await uploadToCloudinary(file, 'si8-catalog-thumbnails');
+
+                    // Store URL
+                    cloudinaryUrls['catalog-thumbnail'] = cloudinaryUrl;
+
+                    // Update preview to "uploaded" status
+                    displayThumbnailPreview(file, preview, 'uploaded');
+
+                    // Trigger validation update
+                    this.dispatchEvent(new Event('blur'));
+
+                } catch (error) {
+                    console.error('Failed to upload thumbnail:', error);
+                    displayThumbnailPreview(file, preview, 'error');
+                    alert('Failed to upload thumbnail. Please try again.');
+                }
             }
         });
 
@@ -152,24 +220,41 @@ document.addEventListener('DOMContentLoaded', function() {
             zone.classList.remove('drag-over');
         });
 
-        zone.addEventListener('drop', (e) => {
+        zone.addEventListener('drop', async (e) => {
             e.preventDefault();
             zone.classList.remove('drag-over');
             if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                const file = e.dataTransfer.files[0];
+
                 // Set files using DataTransfer (proper way)
                 const dt = new DataTransfer();
-                dt.items.add(e.dataTransfer.files[0]);
+                dt.items.add(file);
                 input.files = dt.files;
 
-                displayThumbnailPreview(e.dataTransfer.files[0], preview);
-                // Trigger validation update
-                input.dispatchEvent(new Event('change'));
-                input.dispatchEvent(new Event('blur'));
+                // Show uploading preview
+                displayThumbnailPreview(file, preview, 'uploading');
+
+                try {
+                    // Upload to Cloudinary
+                    const cloudinaryUrl = await uploadToCloudinary(file, 'si8-catalog-thumbnails');
+                    cloudinaryUrls['catalog-thumbnail'] = cloudinaryUrl;
+                    console.log('✅ Catalog thumbnail uploaded to Cloudinary:', cloudinaryUrl);
+
+                    // Update preview to show success
+                    displayThumbnailPreview(file, preview, 'uploaded');
+
+                    // Trigger validation update
+                    input.dispatchEvent(new Event('blur'));
+                } catch (error) {
+                    console.error('❌ Catalog thumbnail upload failed:', error);
+                    displayThumbnailPreview(file, preview, 'error');
+                    alert(`Failed to upload thumbnail: ${error.message}`);
+                }
             }
         });
     }
 
-    function displayThumbnailPreview(file, preview) {
+    function displayThumbnailPreview(file, preview, status = 'uploading') {
         // Validate file type
         if (!file.type.match('image/(jpeg|jpg|png)')) {
             alert('Please upload a JPG or PNG image.');
@@ -182,13 +267,21 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Status indicators
+        const statusIcon = status === 'uploading' ? '⏳' : status === 'uploaded' ? '✅' : '❌';
+        const statusText = status === 'uploading' ? 'Uploading...' : status === 'uploaded' ? 'Uploaded' : 'Upload failed';
+        const statusColor = status === 'uploading' ? '#818cf8' : status === 'uploaded' ? '#10b981' : '#ef4444';
+
         // Create preview
         const reader = new FileReader();
         reader.onload = function(e) {
             preview.innerHTML = `
-                <img src="${e.target.result}" alt="Catalog thumbnail preview">
+                <img src="${e.target.result}" alt="Catalog thumbnail preview" style="opacity: ${status === 'uploading' ? '0.6' : '1'};">
                 <p style="margin-top: 8px; font-size: 0.875rem; color: #666;">
                     ${file.name} (${(file.size / 1024).toFixed(0)} KB)
+                </p>
+                <p style="margin-top: 4px; font-size: 0.875rem; color: ${statusColor}; font-weight: 500;">
+                    ${statusIcon} ${statusText}
                 </p>
             `;
         };
@@ -225,21 +318,40 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function handleFiles(files, listId) {
+    async function handleFiles(files, listId) {
         const fileArray = Array.from(files);
 
-        fileArray.forEach(file => {
+        for (const file of fileArray) {
             // Validate file
             if (!validateFile(file)) {
-                return;
+                continue;
             }
 
-            // Add to uploaded files
+            // Add to uploaded files (for display)
             uploadedFiles[listId].push(file);
 
-            // Display in list
-            displayFile(file, listId);
-        });
+            // Display in list with "uploading" status
+            const fileId = displayFile(file, listId, 'uploading');
+
+            try {
+                // Upload to Cloudinary
+                const cloudinaryUrl = await uploadToCloudinary(file, 'si8-submissions');
+
+                // Store Cloudinary URL
+                cloudinaryUrls[listId].push({
+                    filename: file.name,
+                    url: cloudinaryUrl
+                });
+
+                // Update display to "uploaded" status
+                updateFileStatus(fileId, 'uploaded');
+
+            } catch (error) {
+                console.error(`Failed to upload ${file.name}:`, error);
+                updateFileStatus(fileId, 'error');
+                alert(`Failed to upload ${file.name}. Please try again.`);
+            }
+        }
     }
 
     function validateFile(file) {
@@ -259,32 +371,67 @@ document.addEventListener('DOMContentLoaded', function() {
         return true;
     }
 
-    function displayFile(file, listId) {
+    function displayFile(file, listId, status = 'uploading') {
         const list = document.getElementById(listId);
         const fileItem = document.createElement('div');
+        const fileId = `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
         fileItem.className = 'file-item';
+        fileItem.id = fileId;
         fileItem.dataset.fileName = file.name;
+        fileItem.dataset.status = status;
 
         const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
 
+        const statusIcon = status === 'uploading' ? '⏳' : status === 'uploaded' ? '✅' : '❌';
+        const statusText = status === 'uploading' ? 'Uploading...' : status === 'uploaded' ? 'Uploaded' : 'Failed';
+
         fileItem.innerHTML = `
             <div class="file-item-name">
-                <span>📎</span>
+                <span class="file-status-icon">${statusIcon}</span>
                 <span>${file.name}</span>
                 <span class="file-item-size">(${sizeInMB} MB)</span>
+                <span class="file-status-text" style="font-size: 0.875rem; color: ${status === 'error' ? '#ef4444' : '#666'};">${statusText}</span>
             </div>
-            <button type="button" class="file-item-remove" onclick="removeFile('${file.name}', '${listId}')">×</button>
+            <button type="button" class="file-item-remove" onclick="removeFile('${fileId}', '${file.name}', '${listId}')" ${status === 'uploading' ? 'disabled' : ''}>×</button>
         `;
 
         list.appendChild(fileItem);
+        return fileId;
     }
 
-    window.removeFile = function(fileName, listId) {
+    function updateFileStatus(fileId, status) {
+        const fileItem = document.getElementById(fileId);
+        if (!fileItem) return;
+
+        const statusIcon = status === 'uploading' ? '⏳' : status === 'uploaded' ? '✅' : '❌';
+        const statusText = status === 'uploading' ? 'Uploading...' : status === 'uploaded' ? 'Uploaded' : 'Failed';
+
+        const statusIconEl = fileItem.querySelector('.file-status-icon');
+        const statusTextEl = fileItem.querySelector('.file-status-text');
+        const removeBtn = fileItem.querySelector('.file-item-remove');
+
+        if (statusIconEl) statusIconEl.textContent = statusIcon;
+        if (statusTextEl) {
+            statusTextEl.textContent = statusText;
+            statusTextEl.style.color = status === 'error' ? '#ef4444' : '#666';
+        }
+        if (removeBtn && status !== 'uploading') {
+            removeBtn.disabled = false;
+        }
+
+        fileItem.dataset.status = status;
+    }
+
+    window.removeFile = function(fileId, fileName, listId) {
         // Remove from uploaded files array
         uploadedFiles[listId] = uploadedFiles[listId].filter(f => f.name !== fileName);
 
+        // Remove from Cloudinary URLs array
+        cloudinaryUrls[listId] = cloudinaryUrls[listId].filter(f => f.filename !== fileName);
+
         // Remove from display
-        const fileItem = document.querySelector(`[data-file-name="${fileName}"]`);
+        const fileItem = document.getElementById(fileId);
         if (fileItem) {
             fileItem.remove();
         }
@@ -787,11 +934,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Convert files to base64 data URLs
-        const receiptsDataUrls = await convertFilesToDataUrls(uploadedFiles['receipts-list']);
-        const supportingDocsDataUrls = await convertFilesToDataUrls(uploadedFiles['supporting-docs-list']);
-        const likenessDocsDataUrls = await convertFilesToDataUrls(uploadedFiles['likeness-docs-list'] || []);
-        const ipDocsDataUrls = await convertFilesToDataUrls(uploadedFiles['ip-docs-list'] || []);
+        // Use Cloudinary URLs instead of base64 data URLs
+        // Files have already been uploaded during selection - just use the stored URLs
+        console.log('📦 Cloudinary URLs:', cloudinaryUrls);
 
         // Collect all form fields
         const data = {
@@ -834,12 +979,12 @@ document.addEventListener('DOMContentLoaded', function() {
             likeness: {
                 status: formData.get('likeness_status'),
                 details: formData.get('licensed_likenesses_details') || '',
-                docsDataUrls: likenessDocsDataUrls
+                docsUrls: cloudinaryUrls['likeness-docs-list'] || []
             },
             ip: {
                 status: formData.get('ip_status'),
                 details: formData.get('licensed_ip_details') || formData.get('fair_use_reasoning') || '',
-                docsDataUrls: ipDocsDataUrls
+                docsUrls: cloudinaryUrls['ip-docs-list'] || []
             },
             audio: {
                 musicSource: formData.get('audio_music_source'),
@@ -863,7 +1008,7 @@ document.addEventListener('DOMContentLoaded', function() {
             catalog: {
                 title: formData.get('catalog_title'),
                 description: formData.get('catalog_description'),
-                thumbnailDataUrl: await getCatalogThumbnailDataUrl()
+                thumbnailUrl: cloudinaryUrls['catalog-thumbnail']
             },
             terms: {
                 consent: formData.get('terms_consent') === 'on'
@@ -871,67 +1016,22 @@ document.addEventListener('DOMContentLoaded', function() {
             files: {
                 videoUrl: formData.get('video_url'),
                 videoPassword: formData.get('video_password'),
-                receipts: receiptsDataUrls,
-                supportingDocs: supportingDocsDataUrls
+                receiptsUrls: cloudinaryUrls['receipts-list'] || [],
+                supportingDocsUrls: cloudinaryUrls['supporting-docs-list'] || []
             }
         };
 
         console.log('🔍 Catalog data:', {
             title: data.catalog.title,
             description: data.catalog.description,
-            thumbnailDataUrl: data.catalog.thumbnailDataUrl ? `${data.catalog.thumbnailDataUrl.substring(0, 50)}... (${data.catalog.thumbnailDataUrl.length} chars)` : 'NULL'
+            thumbnailUrl: data.catalog.thumbnailUrl || 'NULL'
         });
 
         return data;
     }
 
-    // Get catalog thumbnail as data URL
-    async function getCatalogThumbnailDataUrl() {
-        const input = document.getElementById('catalog_thumbnail');
-        console.log('🔍 getCatalogThumbnailDataUrl: input found:', !!input);
-        console.log('🔍 getCatalogThumbnailDataUrl: input.files:', input?.files);
-        console.log('🔍 getCatalogThumbnailDataUrl: input.files[0]:', input?.files?.[0]);
-
-        if (!input || !input.files || !input.files[0]) {
-            console.log('🔴 getCatalogThumbnailDataUrl: No file found, returning null');
-            return null;
-        }
-
-        console.log('🔵 getCatalogThumbnailDataUrl: File found, converting to base64...');
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                console.log('✅ getCatalogThumbnailDataUrl: Conversion complete, size:', e.target.result?.length);
-                resolve(e.target.result);
-            };
-            reader.onerror = (err) => {
-                console.log('🔴 getCatalogThumbnailDataUrl: Conversion error:', err);
-                reject(err);
-            };
-            reader.readAsDataURL(input.files[0]);
-        });
-    }
-
-    // Convert files to base64 data URLs for Airtable
-    async function convertFilesToDataUrls(files) {
-        const dataUrls = [];
-
-        for (const file of files) {
-            const dataUrl = await fileToDataUrl(file);
-            dataUrls.push({ dataUrl: dataUrl, name: file.name });
-        }
-
-        return dataUrls;
-    }
-
-    function fileToDataUrl(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    }
+    // Note: File upload functions removed - files now uploaded directly to Cloudinary
+    // when selected, and only URLs are sent to backend (not base64 data)
 
     // ============================
     // Test Data Auto-Fill

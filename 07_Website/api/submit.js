@@ -65,31 +65,23 @@ module.exports = async function handler(req, res) {
         // Generate submission ID
         const submissionId = await generateSubmissionId();
 
-        // Process file info (store file names/sizes as text for now)
-        const receiptsInfo = processFileInfo(data.files.receipts);
-        const supportingDocsInfo = processFileInfo(data.files.supportingDocs);
+        // Files already uploaded to Cloudinary from frontend - just use the URLs
+        console.log('Catalog thumbnail URL:', data.catalog.thumbnailUrl);
+        console.log('Likeness docs URLs:', data.likeness?.docsUrls?.length || 0, 'files');
+        console.log('IP docs URLs:', data.ip?.docsUrls?.length || 0, 'files');
+        console.log('Receipts URLs:', data.files?.receiptsUrls?.length || 0, 'files');
+        console.log('Supporting docs URLs:', data.files?.supportingDocsUrls?.length || 0, 'files');
 
-        // Upload catalog thumbnail to Cloudinary
-        let thumbnailUrl = null;
-        if (data.catalog.thumbnailDataUrl) {
-            console.log('Uploading catalog thumbnail to Cloudinary...');
-            thumbnailUrl = await uploadThumbnailToCloudinary(data.catalog.thumbnailDataUrl, submissionId);
-            console.log('Thumbnail uploaded:', thumbnailUrl);
-        }
-
-        // Upload documentation files to Cloudinary
-        let likenessDocsUrls = [];
-        if (data.likeness && data.likeness.docsDataUrls && data.likeness.docsDataUrls.length > 0) {
-            likenessDocsUrls = await uploadDocumentationToCloudinary(data.likeness.docsDataUrls, submissionId, 'likeness-consent');
-        }
-
-        let ipDocsUrls = [];
-        if (data.ip && data.ip.docsDataUrls && data.ip.docsDataUrls.length > 0) {
-            ipDocsUrls = await uploadDocumentationToCloudinary(data.ip.docsDataUrls, submissionId, 'ip-licenses');
-        }
-
-        // Create Airtable record
-        const record = await createAirtableRecord(submissionId, data, receiptsInfo, supportingDocsInfo, thumbnailUrl, likenessDocsUrls, ipDocsUrls);
+        // Create Airtable record with URLs from frontend
+        const record = await createAirtableRecord(
+            submissionId,
+            data,
+            data.catalog.thumbnailUrl,
+            data.likeness?.docsUrls || [],
+            data.ip?.docsUrls || [],
+            data.files?.receiptsUrls || [],
+            data.files?.supportingDocsUrls || []
+        );
 
         console.log('Created Airtable record:', record.id);
 
@@ -163,8 +155,8 @@ function validateSubmission(data) {
         errors.push('Valid video URL is required');
     }
 
-    // File uploads
-    if (!data.files.receipts || data.files.receipts.length === 0) {
+    // File uploads (Cloudinary URLs)
+    if (!data.files.receiptsUrls || data.files.receiptsUrls.length === 0) {
         errors.push('At least one tool receipt is required');
     }
 
@@ -209,7 +201,7 @@ function validateSubmission(data) {
         if (!data.likeness.details) {
             errors.push('Likeness details required for licensed likenesses');
         }
-        if (!data.likeness.docsDataUrls || data.likeness.docsDataUrls.length === 0) {
+        if (!data.likeness.docsUrls || data.likeness.docsUrls.length === 0) {
             errors.push('Consent documentation required for licensed likenesses');
         }
     }
@@ -219,7 +211,7 @@ function validateSubmission(data) {
         if (!data.ip.details) {
             errors.push('IP license details required');
         }
-        if (!data.ip.docsDataUrls || data.ip.docsDataUrls.length === 0) {
+        if (!data.ip.docsUrls || data.ip.docsUrls.length === 0) {
             errors.push('IP documentation required for licensed IP');
         }
     }
@@ -306,103 +298,15 @@ async function generateSubmissionId() {
 // File Processing
 // ============================
 
-function processFileInfo(files) {
-    // For now, just store file names and sizes as text
-    // TODO: Implement proper file upload to storage (Vercel Blob, Cloudinary, etc.)
-    if (!files || files.length === 0) return '';
-
-    return files.map(file => `${file.name} (${(file.dataUrl.length / 1024 / 1024).toFixed(2)} MB)`).join(', ');
-}
-
-// Upload thumbnail to Cloudinary
-async function uploadThumbnailToCloudinary(dataUrl, submissionId) {
-    try {
-        // Cloudinary upload API
-        const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
-
-        // Create form data
-        const formData = new URLSearchParams();
-        formData.append('file', dataUrl);
-        formData.append('upload_preset', 'si8_catalog'); // You'll need to create this preset in Cloudinary
-        formData.append('public_id', `catalog/${submissionId}`); // Organize by submission ID
-        formData.append('folder', 'si8-catalog-submissions');
-
-        // Upload to Cloudinary
-        const response = await fetch(uploadUrl, {
-            method: 'POST',
-            body: formData
-        });
-
-        if (!response.ok) {
-            throw new Error(`Cloudinary upload failed: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        return result.secure_url; // Return the HTTPS URL
-
-    } catch (error) {
-        console.error('Thumbnail upload error:', error);
-        // Don't fail the whole submission if thumbnail upload fails
-        return null;
-    }
-}
-
-// Upload documentation files (likeness consent, IP licenses) to Cloudinary
-async function uploadDocumentationToCloudinary(dataUrls, submissionId, docType) {
-    const uploadedUrls = [];
-
-    if (!dataUrls || dataUrls.length === 0) {
-        return uploadedUrls;
-    }
-
-    try {
-        console.log(`Uploading ${dataUrls.length} ${docType} file(s) to Cloudinary...`);
-
-        for (let i = 0; i < dataUrls.length; i++) {
-            const { name, dataUrl } = dataUrls[i];
-
-            // Use /raw/upload for non-image files (PDFs, docs, etc.)
-            const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload`;
-
-            const formData = new URLSearchParams();
-            formData.append('file', dataUrl);
-            formData.append('upload_preset', 'si8_catalog');
-            formData.append('public_id', `${submissionId}/${docType}/${name.replace(/\s/g, '_')}`);
-            formData.append('folder', 'si8-documentation');
-
-            const response = await fetch(uploadUrl, {
-                method: 'POST',
-                body: formData
-            });
-
-            if (!response.ok) {
-                console.error(`Failed to upload ${name}: ${response.statusText}`);
-                continue; // Skip failed uploads, don't block entire submission
-            }
-
-            const result = await response.json();
-            uploadedUrls.push({
-                filename: name,
-                url: result.secure_url
-            });
-            console.log(`✅ Uploaded ${name}: ${result.secure_url}`);
-        }
-
-        return uploadedUrls;
-
-    } catch (error) {
-        console.error(`Documentation upload error (${docType}):`, error);
-        // Don't fail entire submission if documentation upload fails
-        return uploadedUrls; // Return whatever succeeded
-    }
-}
+// Note: File upload functions removed - files now uploaded directly to Cloudinary from frontend
+// Backend only receives and stores Cloudinary URLs, not file data
 
 // ============================
 // Airtable Record Creation
 // ============================
 
-async function createAirtableRecord(submissionId, data, receiptsInfo, supportingDocsInfo, thumbnailUrl, likenessDocsUrls, ipDocsUrls) {
-    // Format documentation URLs for Airtable (as attachment objects or text)
+async function createAirtableRecord(submissionId, data, thumbnailUrl, likenessDocsUrls, ipDocsUrls, receiptsUrls, supportingDocsUrls) {
+    // Format documentation URLs for Airtable (as text with filename: url format)
     const formatDocsForAirtable = (docsUrls) => {
         if (!docsUrls || docsUrls.length === 0) return '';
         return docsUrls.map(doc => `${doc.filename}: ${doc.url}`).join('\n');
@@ -492,8 +396,8 @@ async function createAirtableRecord(submissionId, data, receiptsInfo, supporting
                 catalog_thumbnail: thumbnailUrl ? [{ url: thumbnailUrl }] : [], // Airtable attachment from Cloudinary
                 terms_consent: data.terms.consent,
                 reviewer: 'JD',
-                receipts: receiptsInfo, // Store as text: "file1.pdf (2.5 MB), file2.jpg (1.2 MB)"
-                supporting_docs: supportingDocsInfo // Store as text for now
+                receipts: formatDocsForAirtable(receiptsUrls), // Cloudinary URLs
+                supporting_docs: formatDocsForAirtable(supportingDocsUrls) // Cloudinary URLs
             }
         }
     ]);
