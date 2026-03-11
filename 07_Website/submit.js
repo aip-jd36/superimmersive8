@@ -876,20 +876,38 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         };
 
+        console.log('🔍 Catalog data:', {
+            title: data.catalog.title,
+            description: data.catalog.description,
+            thumbnailDataUrl: data.catalog.thumbnailDataUrl ? `${data.catalog.thumbnailDataUrl.substring(0, 50)}... (${data.catalog.thumbnailDataUrl.length} chars)` : 'NULL'
+        });
+
         return data;
     }
 
     // Get catalog thumbnail as data URL
     async function getCatalogThumbnailDataUrl() {
         const input = document.getElementById('catalog_thumbnail');
+        console.log('🔍 getCatalogThumbnailDataUrl: input found:', !!input);
+        console.log('🔍 getCatalogThumbnailDataUrl: input.files:', input?.files);
+        console.log('🔍 getCatalogThumbnailDataUrl: input.files[0]:', input?.files?.[0]);
+
         if (!input || !input.files || !input.files[0]) {
+            console.log('🔴 getCatalogThumbnailDataUrl: No file found, returning null');
             return null;
         }
 
+        console.log('🔵 getCatalogThumbnailDataUrl: File found, converting to base64...');
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
-            reader.onerror = reject;
+            reader.onload = (e) => {
+                console.log('✅ getCatalogThumbnailDataUrl: Conversion complete, size:', e.target.result?.length);
+                resolve(e.target.result);
+            };
+            reader.onerror = (err) => {
+                console.log('🔴 getCatalogThumbnailDataUrl: Conversion error:', err);
+                reject(err);
+            };
             reader.readAsDataURL(input.files[0]);
         });
     }
