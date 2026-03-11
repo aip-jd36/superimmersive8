@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeForm();
     initializeToolRows();
     initializeFileUploads();
+    setupThumbnailUpload(); // Initialize catalog thumbnail upload
     initializeWordCounter();
     initializeProgressTracking();
     initializeConditionalFields();
