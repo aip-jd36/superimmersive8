@@ -1,0 +1,15 @@
+# Environment variables
+.env
+
+# Node modules
+node_modules/
+
+# Generated PDFs (optional - may want to commit these)
+# *.pdf
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store

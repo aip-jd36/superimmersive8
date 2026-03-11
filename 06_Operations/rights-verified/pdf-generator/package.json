@@ -1,0 +1,22 @@
+{
+  "name": "si8-chain-of-title-generator",
+  "version": "1.0.0",
+  "description": "Generate Chain of Title PDFs from Airtable submissions",
+  "main": "generate-pdf.js",
+  "scripts": {
+    "generate": "node generate-pdf.js"
+  },
+  "keywords": [
+    "pdf",
+    "chain-of-title",
+    "rights-verified",
+    "airtable"
+  ],
+  "author": "SuperImmersive 8",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "airtable": "^0.12.2",
+    "dotenv": "^16.4.5",
+    "puppeteer": "^22.0.0"
+  }
+}
