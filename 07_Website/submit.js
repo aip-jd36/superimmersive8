@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Cloudinary configuration
-    const CLOUDINARY_CLOUD_NAME = 'dxqc2bkit'; // SI8 cloud name
+    const CLOUDINARY_CLOUD_NAME = 'de9xcgbbw'; // SI8 cloud name
     const CLOUDINARY_UPLOAD_PRESET = 'si8_catalog'; // Unsigned preset
 
     // ============================
