@@ -137,6 +137,8 @@ document.addEventListener('DOMContentLoaded', function() {
         input.addEventListener('change', function(e) {
             if (this.files && this.files[0]) {
                 displayThumbnailPreview(this.files[0], preview);
+                // Trigger validation update
+                this.dispatchEvent(new Event('blur'));
             }
         });
 
@@ -154,8 +156,15 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             zone.classList.remove('drag-over');
             if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                input.files = e.dataTransfer.files;
+                // Set files using DataTransfer (proper way)
+                const dt = new DataTransfer();
+                dt.items.add(e.dataTransfer.files[0]);
+                input.files = dt.files;
+
                 displayThumbnailPreview(e.dataTransfer.files[0], preview);
+                // Trigger validation update
+                input.dispatchEvent(new Event('change'));
+                input.dispatchEvent(new Event('blur'));
             }
         });
     }
