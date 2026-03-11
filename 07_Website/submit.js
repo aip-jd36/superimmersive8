@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeProgressTracking();
     initializeConditionalFields();
     initializeFormValidation();
-    setupTestDataButton(); // Load test data button for development
+    // setupTestDataButton(); // DISABLED for production - see line ~1040 for re-enable instructions
 
     console.log('✅ All initializations complete');
 
@@ -1035,6 +1035,48 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ============================
     // Test Data Auto-Fill
+    // ============================
+    // Test Data Auto-Fill Button
+    // ============================
+    //
+    // STATUS: DISABLED for production (March 11, 2026)
+    //
+    // This floating button auto-fills all form fields with realistic test data
+    // to speed up development and testing. It was used extensively during
+    // Rights Verified v0.1 development and successful end-to-end testing.
+    //
+    // HOW TO RE-ENABLE FOR TESTING:
+    // 1. Uncomment the function call on line ~82: setupTestDataButton();
+    // 2. Save and deploy
+    // 3. Button will appear as orange floating button in bottom-right corner
+    // 4. Click button to auto-fill all fields (except file uploads)
+    // 5. Manually upload test files (receipts + thumbnail)
+    // 6. Submit form
+    //
+    // WHAT IT FILLS:
+    // - Section 1: Filmmaker Profile (Jane Chen, Singapore)
+    // - Section 2: Production Overview (Neon Dreams - sci-fi short)
+    // - Section 3: Tools (3 tools: Runway, ElevenLabs, Udio)
+    // - Section 4: Authorship Declaration (150+ word sample)
+    // - Section 5: Likeness Status (none - all checkboxes)
+    // - Section 6: IP Status (none - all checkboxes)
+    // - Section 7: Audio (Original AI music, Udio tool)
+    // - Section 8: Tier 2 (Yes scenes, sample scenes listed)
+    // - Section 9: Territory (Global, Exclusive)
+    // - Section 10: Catalog (Title + Description)
+    // - Section 11: Supporting Materials (Vimeo URL + password)
+    // - Section 12: Terms (Consent checkbox)
+    //
+    // DOES NOT FILL (must upload manually):
+    // - Tool Receipts (Section 3 - file upload)
+    // - Catalog Thumbnail (Section 10 - file upload)
+    // - Likeness Docs (if "licensed" is selected)
+    // - IP Docs (if "licensed" is selected)
+    // - Supporting Docs (optional)
+    //
+    // LAST USED: March 11, 2026 during final production testing
+    // COMMIT: d9ec895 (Rights Verified v0.1 fully operational)
+    //
     // ============================
 
     function setupTestDataButton() {
