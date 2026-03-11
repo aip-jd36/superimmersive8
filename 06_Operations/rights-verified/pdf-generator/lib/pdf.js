@@ -6,8 +6,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// For serverless Chrome (Vercel)
-import chromium from 'chrome-aws-lambda';
+// For serverless Chrome (Vercel) - using actively maintained fork
+import chromium from '@sparticuz/chromium';
 import puppeteerCore from 'puppeteer-core';
 
 // Get __dirname equivalent in ES modules
@@ -52,12 +52,20 @@ export async function generatePDF(html) {
   let browser = null;
 
   try {
-    // Launch browser with serverless Chrome
+    // Launch browser with serverless Chrome (optimized for Vercel)
     browser = await puppeteerCore.launch({
-      args: chromium.args,
+      args: [
+        ...chromium.args,
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--single-process',
+        '--no-zygote'
+      ],
       defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath,
-      headless: chromium.headless,
+      executablePath: await chromium.executablePath(),
+      headless: 'new',
       ignoreHTTPSErrors: true
     });
 

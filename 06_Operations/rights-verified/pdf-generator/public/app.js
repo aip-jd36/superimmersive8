@@ -54,53 +54,36 @@ async function loadApprovedRecords() {
 }
 
 async function generatePDF(recordId) {
-    const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ recordId })
-    });
+    // Open HTML preview in new window
+    const url = `/api/generate`;
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = url;
+    form.target = '_blank';
 
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate PDF');
-    }
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'recordId';
+    input.value = recordId;
 
-    // Get metadata from headers
-    const catalogId = response.headers.get('X-Catalog-ID');
-    const title = decodeURIComponent(response.headers.get('X-Title') || 'Unknown');
-    const filmmaker = decodeURIComponent(response.headers.get('X-Filmmaker') || 'Unknown');
-    const storagePath = response.headers.get('X-Storage-Path');
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
 
-    // Get filename from Content-Disposition header
-    const contentDisposition = response.headers.get('Content-Disposition');
-    const filenameMatch = contentDisposition && contentDisposition.match(/filename="(.+)"/);
-    const filename = filenameMatch ? filenameMatch[1] : 'chain-of-title.pdf';
-
-    // Get PDF blob
-    const blob = await response.blob();
-
-    // Trigger download
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+    // Get record data for success message
+    const selectedOption = recordSelect.selectedOptions[0];
+    const record = JSON.parse(selectedOption.dataset.record);
 
     // Return metadata for success message
     return {
         success: true,
         data: {
-            title,
-            filmmaker,
-            catalogId,
-            filename,
-            path: `05_Catalog/represented/${storagePath}`
+            title: record.title,
+            filmmaker: record.filmmaker,
+            catalogId: record.catalogId,
+            filename: `${record.catalogId}-chain-of-title-v1.0.pdf`,
+            path: 'Opens in new window - use Print to PDF'
         }
     };
 }

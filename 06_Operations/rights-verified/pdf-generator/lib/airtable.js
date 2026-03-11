@@ -1,55 +1,57 @@
 /**
- * Airtable Helper Functions
+ * Airtable Helper Functions - Using Direct REST API
  */
 
-import Airtable from 'airtable';
+const AIRTABLE_API_BASE = 'https://api.airtable.com/v0';
 
-// Initialize Airtable base
-let base;
+function getConfig() {
+  const apiKey = process.env.AIRTABLE_API_KEY;
+  const baseId = process.env.AIRTABLE_BASE_ID;
+  const tableName = process.env.AIRTABLE_TABLE_NAME;
 
-function getBase() {
-  if (!base) {
-    const apiKey = process.env.AIRTABLE_API_KEY;
-    const baseId = process.env.AIRTABLE_BASE_ID;
-
-    if (!apiKey || !baseId) {
-      throw new Error('Airtable credentials not configured');
-    }
-
-    base = new Airtable({ apiKey }).base(baseId);
+  if (!apiKey || !baseId || !tableName) {
+    throw new Error('Airtable credentials not configured');
   }
-  return base;
+
+  return { apiKey, baseId, tableName };
 }
 
 /**
- * Fetch approved records from Airtable
+ * Fetch approved records from Airtable using REST API
  * @returns {Promise<Array>} Array of approved records
  */
 export async function fetchApprovedRecords() {
-  const tableName = process.env.AIRTABLE_TABLE_NAME || 'Rights Verified Submissions';
-  const records = [];
+  const { apiKey, baseId, tableName } = getConfig();
 
   try {
-    await getBase()(tableName)
-      .select({
-        filterByFormula: "{Status} = 'Approved'",
-        sort: [{ field: 'Review Date', direction: 'desc' }],
-        maxRecords: 100
-      })
-      .eachPage((pageRecords, fetchNextPage) => {
-        pageRecords.forEach(record => {
-          records.push({
-            id: record.id,
-            title: record.fields['Work Title'] || 'Untitled',
-            filmmaker: record.fields['Filmmaker Name'] || 'Unknown',
-            catalogId: record.fields['Catalog ID'] || 'Pending',
-            reviewDate: record.fields['Review Date'] || '',
-            status: record.fields['Status'] || 'Unknown'
-          });
-        });
-        fetchNextPage();
-      });
+    const url = `${AIRTABLE_API_BASE}/${baseId}/${encodeURIComponent(tableName)}?filterByFormula={status}='received'&sort[0][field]=submission_id&sort[0][direction]=desc&maxRecords=100`;
 
+    console.log('Fetching from:', url);
+
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Airtable API error (${response.status}): ${errorText}`);
+    }
+
+    const data = await response.json();
+
+    const records = data.records.map(record => ({
+      id: record.id,
+      title: record.fields['submission_id'] || record.fields['title'] || 'Untitled',
+      filmmaker: record.fields['filmmaker_name'] || 'Unknown',
+      catalogId: record.fields['submission_id'] || 'Pending',
+      reviewDate: new Date().toISOString().split('T')[0],
+      status: record.fields['status'] || 'Unknown'
+    }));
+
+    console.log('Successfully fetched', records.length, 'records');
     return records;
   } catch (error) {
     console.error('Error fetching approved records:', error);
@@ -58,15 +60,29 @@ export async function fetchApprovedRecords() {
 }
 
 /**
- * Fetch a single record by ID
+ * Fetch a single record by ID using REST API
  * @param {string} recordId - Airtable record ID
  * @returns {Promise<Object>} Record object
  */
 export async function fetchRecord(recordId) {
-  const tableName = process.env.AIRTABLE_TABLE_NAME || 'Rights Verified Submissions';
+  const { apiKey, baseId, tableName } = getConfig();
 
   try {
-    const record = await getBase()(tableName).find(recordId);
+    const url = `${AIRTABLE_API_BASE}/${baseId}/${encodeURIComponent(tableName)}/${recordId}`;
+
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Airtable API error (${response.status}): ${errorText}`);
+    }
+
+    const record = await response.json();
     return record;
   } catch (error) {
     console.error('Error fetching record:', error);
@@ -82,47 +98,51 @@ export async function fetchRecord(recordId) {
 export function mapRecordToTemplateData(record) {
   const fields = record.fields;
 
+  // Map actual Airtable field names to template variables
   const data = {
-    // Cover/Metadata
-    catalog_id: fields['Catalog ID'] || 'SI8-2026-XXXX',
-    title: fields['Work Title'] || 'Untitled',
-    filmmaker_name: fields['Filmmaker Name'] || 'Unknown',
-    runtime: fields['Runtime'] || 'Unknown',
-    production_date: fields['Production Date'] || 'Unknown',
+    // Cover/Metadata - using actual field names from submission form
+    catalog_id: fields['submission_id'] || 'SI8-2026-XXXX',
+    title: fields['title'] || 'Untitled',
+    filmmaker_name: fields['filmmaker_name'] || 'Unknown',
+    runtime: fields['runtime'] || 'Unknown',
+    production_date: fields['production_start'] && fields['production_end']
+      ? `${fields['production_start']} to ${fields['production_end']}`
+      : 'Unknown',
     chain_of_title_version: 'v1.0',
-    review_date: fields['Review Date'] || new Date().toISOString().split('T')[0],
+    review_date: fields['last_updated'] ? fields['last_updated'].split('T')[0] : new Date().toISOString().split('T')[0],
 
     // Field 3: Rights Verified Sign-off
-    reviewer_name: fields['Reviewer'] || 'SI8 Review Team',
-    risk_tier: fields['Risk Tier'] || 'Standard',
-    review_status: fields['Review Status'] || 'Clean Pass',
-    conditions: fields['Conditions'] || 'None',
-    flags: fields['Flags'] || 'None',
-    licensed_likenesses: fields['Licensed Likenesses'] || 'None',
-    licensed_ip: fields['Licensed IP'] || 'None',
-    underlying_rights: fields['Underlying Rights'] || 'Original work',
-    third_party_assets: fields['Third-Party Assets'] || 'None',
-    risk_tier_rationale: fields['Risk Tier Rationale'] || '',
+    reviewer_name: fields['reviewer'] || 'SI8 Review Team',
+    risk_tier: 'Standard', // Default for now
+    review_status: fields['status'] === 'received' ? 'Pending Review' : 'Clean Pass',
+    conditions: 'None',
+    flags: 'None',
+    licensed_likenesses: fields['likeness_confirmed'] ? 'None (confirmed)' : 'Pending verification',
+    licensed_ip: fields['ip_confirmed'] ? 'None (confirmed)' : 'Pending verification',
+    underlying_rights: 'Original work - AI generated',
+    third_party_assets: fields['audio_music_source'] || 'None',
+    risk_tier_rationale: '',
 
     // Field 5: Modification Rights
-    modification_status: fields['Modification Rights Status'] || 'Not Authorized',
-    modification_scope: fields['Modification Scope'] || '',
-    shopping_agreement_date: fields['Shopping Agreement Date'] || '',
+    modification_status: fields['tier2_enrollment'] === 'Yes scenes' ? 'Authorized (specific scenes)' :
+                         fields['tier2_enrollment'] === 'Yes' ? 'Authorized (full work)' : 'Not Authorized',
+    modification_scope: fields['tier2_scenes'] || '',
+    shopping_agreement_date: '',
 
     // Field 6: Category Conflict
-    existing_brand_placements: fields['Existing Brand Placements'] || 'None',
-    ineligible_categories: fields['Ineligible Categories'] || 'None',
-    suitable_categories: fields['Suitable Categories'] || '',
-    brand_safety_assessment: fields['Brand Safety Assessment'] || '',
+    existing_brand_placements: 'None',
+    ineligible_categories: 'None',
+    suitable_categories: fields['genre'] || '',
+    brand_safety_assessment: fields['logline'] || '',
 
     // Field 7: Territory
-    territory_status: fields['Territory'] || 'Global — no restrictions',
-    territory_restrictions: fields['Territory Restrictions'] || 'None',
-    existing_agreements_territory: fields['Existing Agreements (Territory)'] || 'None',
+    territory_status: fields['territory_preference'] || 'Global — no restrictions',
+    territory_restrictions: 'None',
+    existing_agreements_territory: fields['existing_agreements'] || 'None',
 
     // Field 8: Regeneration Rights
-    regeneration_status: fields['Regeneration Rights Status'] || 'Not Authorized',
-    tier2_eligibility: fields['Tier 2 Eligibility'] || ''
+    regeneration_status: fields['tier2_enrollment'] ? 'Authorized for Tier 2 placement' : 'Not Authorized',
+    tier2_eligibility: fields['tier2_enrollment'] || 'Not enrolled'
   };
 
   // Generate complex HTML sections (placeholder for now)
