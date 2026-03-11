@@ -62,13 +62,47 @@ async function generatePDF(recordId) {
         body: JSON.stringify({ recordId })
     });
 
-    const data = await response.json();
-
-    if (!data.success) {
-        throw new Error(data.error || 'Failed to generate PDF');
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate PDF');
     }
 
-    return data;
+    // Get metadata from headers
+    const catalogId = response.headers.get('X-Catalog-ID');
+    const title = decodeURIComponent(response.headers.get('X-Title') || 'Unknown');
+    const filmmaker = decodeURIComponent(response.headers.get('X-Filmmaker') || 'Unknown');
+    const storagePath = response.headers.get('X-Storage-Path');
+
+    // Get filename from Content-Disposition header
+    const contentDisposition = response.headers.get('Content-Disposition');
+    const filenameMatch = contentDisposition && contentDisposition.match(/filename="(.+)"/);
+    const filename = filenameMatch ? filenameMatch[1] : 'chain-of-title.pdf';
+
+    // Get PDF blob
+    const blob = await response.blob();
+
+    // Trigger download
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+
+    // Return metadata for success message
+    return {
+        success: true,
+        data: {
+            title,
+            filmmaker,
+            catalogId,
+            filename,
+            path: `05_Catalog/represented/${storagePath}`
+        }
+    };
 }
 
 // ============================
