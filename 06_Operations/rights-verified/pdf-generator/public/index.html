@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chain of Title Generator | SI8</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="logo">SuperImmersive 8</h1>
+            <p class="tagline">Chain of Title Generator</p>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Status Banner -->
+            <div id="statusBanner" class="alert alert-info d-none" role="alert">
+                <div class="d-flex align-items-center">
+                    <div class="spinner-border spinner-border-sm me-2" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span id="statusMessage">Loading...</span>
+                </div>
+            </div>
+
+            <!-- Success Banner -->
+            <div id="successBanner" class="alert alert-success d-none" role="alert">
+                <h4 class="alert-heading">✅ PDF Generated Successfully!</h4>
+                <p id="successMessage"></p>
+                <hr>
+                <p class="mb-0"><strong>Next steps:</strong> Locate the PDF in your catalog directory, spot-check for errors, and upload to Google Drive.</p>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="errorBanner" class="alert alert-danger d-none" role="alert">
+                <h4 class="alert-heading">❌ Error</h4>
+                <p id="errorMessage"></p>
+            </div>
+
+            <!-- Generator Card -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">Generate Chain of Title PDF</h2>
+
+                    <!-- Record Selection -->
+                    <div class="mb-4">
+                        <label for="recordSelect" class="form-label">
+                            <strong>Select Approved Record</strong>
+                        </label>
+                        <select id="recordSelect" class="form-select form-select-lg" disabled>
+                            <option value="">Loading approved records...</option>
+                        </select>
+                        <div class="form-text mt-2">
+                            Only records with Status = "Approved" are shown.
+                        </div>
+                    </div>
+
+                    <!-- Record Details (shows when record selected) -->
+                    <div id="recordDetails" class="record-details d-none mb-4">
+                        <h5>Record Details</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="detail-item">
+                                    <span class="detail-label">Title:</span>
+                                    <span id="detailTitle" class="detail-value">—</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-item">
+                                    <span class="detail-label">Filmmaker:</span>
+                                    <span id="detailFilmmaker" class="detail-value">—</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-item">
+                                    <span class="detail-label">Catalog ID:</span>
+                                    <span id="detailCatalogId" class="detail-value">—</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-item">
+                                    <span class="detail-label">Review Date:</span>
+                                    <span id="detailReviewDate" class="detail-value">—</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <div class="d-grid">
+                        <button id="generateBtn" class="btn btn-primary btn-lg" disabled>
+                            <span id="btnText">Generate PDF</span>
+                            <span id="btnSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status">
+                                <span class="visually-hidden">Generating...</span>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="card mt-4 border-0 bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">How It Works</h5>
+                    <ol class="mb-0">
+                        <li>Select an approved record from the dropdown</li>
+                        <li>Review the record details to confirm it's the right one</li>
+                        <li>Click "Generate PDF" and wait ~5 seconds</li>
+                        <li>PDF will be saved to: <code>05_Catalog/represented/[filmmaker]/[title]/</code></li>
+                        <li>Spot-check the PDF for any errors or missing data</li>
+                        <li>Upload to Google Drive and update Airtable with the PDF link</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Recent Generations Log -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">Recent Generations</h5>
+                    <div id="recentLog" class="recent-log">
+                        <p class="text-muted">No PDFs generated yet in this session.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer mt-5">
+            <div class="text-center text-muted">
+                <small>
+                    SuperImmersive 8 | Chain of Title Generator v1.0 |
+                    <a href="https://github.com/aip-jd36/superimmersive8" target="_blank" class="text-muted">Documentation</a>
+                </small>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

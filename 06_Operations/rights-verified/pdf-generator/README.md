@@ -4,17 +4,65 @@ Automated PDF generation for Rights Verified Chain of Title documents.
 
 ## Overview
 
-This tool generates Chain of Title PDFs from approved Airtable submissions. It:
-1. Fetches approved record data from Airtable
-2. Populates an HTML template with the data
-3. Renders the HTML to PDF using headless Chrome (Puppeteer)
-4. Saves the PDF to the catalog directory structure
+**Web-based tool** for generating Chain of Title PDFs from approved Airtable submissions.
+
+**Access:** Open browser to `http://localhost:3000` → Select record → Click "Generate PDF" → Done
+
+**Features:**
+- ✅ Simple web UI (no command-line required)
+- ✅ Dropdown list of approved records
+- ✅ One-click PDF generation
+- ✅ Real-time progress indicators
+- ✅ Recent generations log
+- ✅ Automatic file organization
 
 **Time saved:** ~10-15 minutes per entry (manual copy-paste → automated)
 
 ---
 
-## Setup (One-Time)
+## Quick Start (Web UI)
+
+### 1. Install & Configure (One-Time Setup)
+
+```bash
+cd 06_Operations/rights-verified/pdf-generator
+npm install
+cp .env.example .env
+# Edit .env and add your Airtable credentials
+```
+
+### 2. Start the Web Server
+
+```bash
+npm start
+```
+
+You'll see:
+```
+🚀 Chain of Title PDF Generator - Web UI
+✅ Server running at: http://localhost:3000
+```
+
+### 3. Open Your Browser
+
+Navigate to: **http://localhost:3000**
+
+### 4. Generate a PDF
+
+1. **Select a record** from the dropdown (only approved records shown)
+2. **Review details** - confirm it's the right record
+3. **Click "Generate PDF"** - wait ~5 seconds
+4. **Success!** - PDF location shown, check the file
+5. **Spot-check** the PDF for errors
+6. **Upload** to Google Drive and update Airtable
+
+### 5. Stop the Server
+
+Press `Ctrl+C` in the terminal
+
+---
+
+## Setup Details (One-Time)
 
 ### 1. Install Dependencies
 
@@ -74,7 +122,29 @@ The script expects these field names in Airtable (customize in `generate-pdf.js`
 
 ---
 
-## Usage
+## Two Ways to Use
+
+### **Option 1: Web UI (Recommended)**
+
+Simple browser-based interface. Best for:
+- Non-technical reviewers
+- Visual record selection
+- Real-time feedback
+
+**Usage:** `npm start` → Open browser → Click buttons
+
+### **Option 2: Command Line (Advanced)**
+
+Direct script execution. Best for:
+- Automation/scripting
+- Batch processing
+- Integration with other tools
+
+**Usage:** `node generate-pdf.js <record-id>`
+
+---
+
+## Usage (Command Line)
 
 ### Basic Usage
 
