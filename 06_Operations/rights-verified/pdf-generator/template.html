@@ -25,7 +25,7 @@
 
         @page {
             size: A4;
-            margin: 0;
+            margin: 15mm 15mm 15mm 15mm;
         }
 
         @media print {
@@ -34,11 +34,79 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
+
+            .container {
+                padding: 0;
+            }
+
+            /* Force page breaks */
             .page-break {
                 page-break-before: always;
             }
-            .no-break {
+
+            /* Prevent breaks inside these */
+            .no-break,
+            .metadata,
+            .meta-item,
+            .callout {
                 page-break-inside: avoid;
+            }
+
+            /* Keep headings with following content */
+            h1, h2, h3, h4, h5, h6 {
+                page-break-after: avoid;
+                page-break-inside: avoid;
+            }
+
+            /* Keep tables together */
+            table {
+                page-break-inside: avoid;
+            }
+
+            /* Keep table rows together */
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+
+            /* Don't break between thead and tbody */
+            thead {
+                page-break-after: avoid;
+            }
+
+            /* Keep list items together */
+            li {
+                page-break-inside: avoid;
+            }
+
+            /* Keep lists together when short */
+            ul, ol {
+                page-break-inside: auto;
+            }
+
+            ul:has(li:only-child),
+            ol:has(li:only-child) {
+                page-break-inside: avoid;
+            }
+
+            /* Orphans and widows */
+            p, li {
+                orphans: 3;
+                widows: 3;
+            }
+
+            /* Prevent break right after heading */
+            h2 + p,
+            h2 + ul,
+            h2 + table,
+            h3 + p,
+            h3 + ul {
+                page-break-before: avoid;
+            }
+
+            /* Keep dividers with following content */
+            .divider {
+                page-break-after: avoid;
             }
         }
 
@@ -60,7 +128,7 @@
 
         .container {
             max-width: 100%;
-            padding: 0 80px 60px 80px;
+            padding: 40px 60px 40px 60px;
         }
 
         /* Sample Banner */
