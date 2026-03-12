@@ -102,14 +102,16 @@ export function mapRecordToTemplateData(record) {
   const data = {
     // Cover/Metadata - using actual field names from submission form
     catalog_id: fields['submission_id'] || 'SI8-2026-XXXX',
-    title: fields['title'] || 'Untitled',
+    title: fields['title'] && fields['title'] !== fields['filmmaker_name']
+      ? fields['title']
+      : fields['submission_id'] || 'Untitled',
     filmmaker_name: fields['filmmaker_name'] || 'Unknown',
     runtime: fields['runtime'] || 'Unknown',
     production_date: fields['production_start'] && fields['production_end']
       ? `${fields['production_start']} to ${fields['production_end']}`
       : 'Unknown',
     chain_of_title_version: 'v1.0',
-    review_date: fields['last_updated'] ? fields['last_updated'].split('T')[0] : new Date().toISOString().split('T')[0],
+    review_date: fields['last_updated'] ? fields['last_updated'].split('T')[0].replace(/-/g, '/') : new Date().toISOString().split('T')[0],
 
     // Field 3: Rights Verified Sign-off
     reviewer_name: fields['reviewer'] || 'SI8 Review Team',
@@ -125,8 +127,8 @@ export function mapRecordToTemplateData(record) {
 
     // Field 5: Modification Rights
     modification_status: fields['tier2_enrollment'] === 'Yes scenes' ? 'Authorized (specific scenes)' :
-                         fields['tier2_enrollment'] === 'Yes' ? 'Authorized (full work)' : 'Not Authorized',
-    modification_scope: fields['tier2_scenes'] || '',
+                         (fields['tier2_enrollment'] === 'Yes full' || fields['tier2_enrollment'] === 'Yes') ? 'Authorized (full work)' : 'Not Authorized',
+    modification_scope: fields['tier2_scenes'] || (fields['tier2_enrollment'] === 'Yes full' ? 'Full work authorized' : ''),
     shopping_agreement_date: '',
 
     // Field 6: Category Conflict
@@ -160,25 +162,62 @@ export function mapRecordToTemplateData(record) {
 
 // Helper functions for generating complex HTML sections
 function generateToolsTableRows(fields) {
-  return `
-    <tr>
-      <td>Tool data pending</td>
-      <td>—</td>
-      <td>—</td>
-      <td>—</td>
-      <td>—</td>
-      <td>—</td>
-    </tr>
-  `;
+  const toolsJson = fields['tools_json'];
+
+  if (!toolsJson) {
+    return `
+      <tr>
+        <td>Tool data pending</td>
+        <td>—</td>
+        <td>—</td>
+        <td>—</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+    `;
+  }
+
+  try {
+    const tools = typeof toolsJson === 'string' ? JSON.parse(toolsJson) : toolsJson;
+
+    if (!Array.isArray(tools) || tools.length === 0) {
+      return '<tr><td colspan="6">No tools recorded</td></tr>';
+    }
+
+    return tools.map((tool, index) => `
+      <tr>
+        <td>${tool.name || '—'}</td>
+        <td>${tool.version || '—'}</td>
+        <td>${tool.plan || '—'}</td>
+        <td>✓ Commercial License</td>
+        <td>${fields['production_start'] || '—'} to ${fields['production_end'] || '—'}</td>
+        <td>Receipt on file</td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    console.error('Error parsing tools_json:', e);
+    return '<tr><td colspan="6">Error parsing tool data</td></tr>';
+  }
 }
 
 function generateModelsList(fields) {
-  const models = fields['Models Used'] || '';
-  if (!models) return '<li>Model disclosure pending</li>';
+  const toolsJson = fields['tools_json'];
 
-  return models.split(/\n|,/).map(m => m.trim()).filter(Boolean)
-    .map(model => `<li>${model}</li>`)
-    .join('\n');
+  if (!toolsJson) {
+    return '<li>Model disclosure pending</li>';
+  }
+
+  try {
+    const tools = typeof toolsJson === 'string' ? JSON.parse(toolsJson) : toolsJson;
+
+    if (!Array.isArray(tools) || tools.length === 0) {
+      return '<li>No models recorded</li>';
+    }
+
+    return tools.map(tool => `<li>${tool.name} ${tool.version || ''}</li>`).join('\n');
+  } catch (e) {
+    return '<li>Error parsing model data</li>';
+  }
 }
 
 function generateCommercialAuthTableRows(fields) {

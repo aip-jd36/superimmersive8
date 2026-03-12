@@ -470,12 +470,8 @@
         <!-- Field 2: Model Disclosure -->
         <h2>Field 2: Model Disclosure</h2>
 
-        <p><strong>SAMPLE DATA</strong></p>
-
         <ul>
-            <li>Runway: Gen-3 Alpha Turbo (used January–February 2026)</li>
-            <li>ElevenLabs: Voice Design multilingual model (used February 2026)</li>
-            <li>Udio: v1.5 music generation model (used January 2026)</li>
+            {{models_list}}
         </ul>
 
         <p><strong>Note:</strong> Model versions documented as specified at production time. Each tool's ToS reviewed for commercial use permissions.</p>
@@ -485,28 +481,26 @@
         <!-- Field 3: Rights Verified Sign-off -->
         <h2>Field 3: Rights Verified Sign-off</h2>
 
-        <p><strong>SAMPLE DATA</strong></p>
-
         <div class="callout">
-            <p><strong>Reviewer:</strong> JD</p>
-            <p><strong>Review Date:</strong> 2026-03-11</p>
-            <p><strong>Risk Tier:</strong> Standard</p>
-            <p><strong>Review Status:</strong> Clean Pass</p>
-            <p><strong>Conditions:</strong> None</p>
-            <p><strong>Flags:</strong> None</p>
+            <p><strong>Reviewer:</strong> {{reviewer_name}}</p>
+            <p><strong>Review Date:</strong> {{review_date}}</p>
+            <p><strong>Risk Tier:</strong> {{risk_tier}}</p>
+            <p><strong>Review Status:</strong> {{review_status}}</p>
+            <p><strong>Conditions:</strong> {{conditions}}</p>
+            <p><strong>Flags:</strong> {{flags}}</p>
         </div>
 
         <h3>Licensed Likenesses:</h3>
-        <p>None</p>
+        <p>{{licensed_likenesses}}</p>
 
         <h3>Licensed IP:</h3>
-        <p>None</p>
+        <p>{{licensed_ip}}</p>
 
         <h3>Underlying Rights:</h3>
-        <p>Original work</p>
+        <p>{{underlying_rights}}</p>
 
         <h3>Third-Party Assets:</h3>
-        <p>None</p>
+        <p>{{third_party_assets}}</p>
 
         <h3>Risk Tier Rationale:</h3>
         <p>All tools are Standard tier (Runway Gen-3, ElevenLabs, Udio) with paid commercial plans. No Prohibited or Caution-tier tools used. All likeness, IP, and brand safety checks passed. Original authorship confirmed through 150+ word declaration with detailed production process description.</p>
@@ -556,62 +550,47 @@
         <!-- Field 5: Modification Rights Status -->
         <h2>Field 5: Modification Rights Status</h2>
 
-        <p><strong>SAMPLE DATA</strong></p>
-
         <div class="callout">
-            <p><strong>Status:</strong> Authorized — Scene-Specific</p>
-            <p><strong>Scope:</strong> Three specific scenes authorized for brand integration regeneration (see list below)</p>
+            <p><strong>Status:</strong> {{modification_status}}</p>
+            <p><strong>Scope:</strong> {{modification_scope}}</p>
         </div>
 
         <h3>Scene List:</h3>
         <ul>
-            <li>Scene 3 (robot in garden) — 0:45–1:12 — product placement viable</li>
-            <li>Scene 7 (cityscape establishing shot) — 2:03–2:25 — brand signage viable</li>
-            <li>Scene 12 (final shot with flower) — 4:18–4:32 — product placement viable</li>
+            {{scene_list}}
         </ul>
 
-        <p><strong>Shopping Agreement Modification Clause:</strong> Confirmed — signed 2026-02-28</p>
-
-        <p><strong>Note:</strong> Filmmaker authorized AI-regenerated brand-integrated versions for specific scenes only. Full work not authorized. Tier 2 placement products available for listed scenes only.</p>
+        <p><strong>Shopping Agreement Modification Clause:</strong> {{shopping_agreement_date}}</p>
 
         <div class="divider"></div>
 
         <!-- Field 6: Category Conflict Log -->
         <h2>Field 6: Category Conflict Log</h2>
 
-        <p><strong>SAMPLE DATA</strong></p>
-
         <h3>Existing Brand Placements:</h3>
-        <p>None</p>
+        <p>{{existing_brand_placements}}</p>
 
         <h3>Ineligible Categories:</h3>
-        <ul>
-            <li><strong>Alcohol:</strong> Work depicts synthetic alcohol-like beverage in Scene 8 — not suitable for alcohol brand placement</li>
-            <li><strong>Children's products:</strong> Mature themes (existential loneliness, decay) — not suitable for children's brands</li>
-        </ul>
+        <p>{{ineligible_categories}}</p>
 
         <h3>Suitable for:</h3>
-        <p>Technology, automotive, fashion, luxury goods, consumer electronics, lifestyle brands, travel, hospitality, entertainment</p>
+        <p>{{suitable_categories}}</p>
 
         <h3>Brand Safety Assessment:</h3>
-        <p>Mainstream commercial content with contemplative sci-fi themes. No graphic content, political messaging, or controversial elements. Suitable for most mainstream brand categories except alcohol and children's products (see restrictions above).</p>
+        <p>{{brand_safety_assessment}}</p>
 
         <div class="divider"></div>
 
         <!-- Field 7: Territory Log -->
         <h2>Field 7: Territory Log</h2>
 
-        <p><strong>SAMPLE DATA</strong></p>
-
         <div class="callout">
-            <p><strong>Territory:</strong> Global — no restrictions</p>
+            <p><strong>Territory:</strong> {{territory_status}}</p>
         </div>
 
-        <p><strong>Restrictions:</strong> None</p>
+        <p><strong>Restrictions:</strong> {{territory_restrictions}}</p>
 
-        <p><strong>Existing agreements affecting territory:</strong> None</p>
-
-        <p><strong>Note:</strong> No geographic licensing restrictions. Filmmaker has not licensed work to any platform or distributor that would restrict SI8's territory. All tools used permit global commercial distribution.</p>
+        <p><strong>Existing agreements affecting territory:</strong> {{existing_agreements_territory}}</p>
 
         <div class="divider"></div>
 
