@@ -24,6 +24,30 @@
 
 ---
 
+## v3.2 — March 12, 2026
+**File:** `BUSINESS_PLAN_v3.md` (updated in place)
+**Status:** Current direction
+
+**What changed from v3.1:**
+- **London agencies added as alternate Track 2** based on real-world outreach results
+- Singapore outreach documented: ~200 contacts, <5% response rate → deprioritized
+- London outreach documented: Strong response rate, multiple calls booked (3/17-18/2026)
+- New section: "Market Discovery: London Alternate Track" with decision framework
+- Geographic flexibility established as strategic advantage: "Real-world traction determines strategy, not theoretical market sizing"
+- Decision checkpoint set: March 18, 2026 (after first London calls)
+
+**Why:** After 200 Singapore agency contacts yielded minimal response, London agencies showed strong interest and booked multiple discovery calls. Market validation trumps theoretical planning. The business plan now reflects this real-world feedback and sets clear validation criteria for the London track.
+
+**Market hypothesis:** London agencies may be more receptive to AI rights positioning due to:
+- Stronger AI adoption in UK creative industry
+- European regulatory awareness (AI Act)
+- Major global ad hub with international clients
+- English as primary language (no translation friction)
+
+**Next milestone:** First London calls (3/17-18) will validate or invalidate London as primary Track 2. See decision framework in updated business plan.
+
+---
+
 ## v3.1 — February 2026
 **File:** `BUSINESS_PLAN_v3.md` (updated in place)
 **Status:** Current direction

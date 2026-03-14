@@ -1,10 +1,12 @@
 # SuperImmersive 8
 ## Business Plan v3.0 — Rights Agency + AI Product Placement
 
-**Version:** 3.1
-**Date:** February 2026
+**Version:** 3.2
+**Date:** March 2026
 **Supersedes:** BUSINESS_PLAN_v2.md (v2.1, February 2026)
-**Change summary:** Primary offering reframed around custom AI product placement in vetted productions. Rights Agency + Rights Management model named explicitly. "Getty for AI video" positioning established. "The Bad Boy Indemnifier" competitive differentiation added. Platform Horizon refined — VC path is upside not requirement. Passive Reuse added as platform validation signal. C2PA flagged for monitoring.
+**Change summary (v3.2):** London agencies added as alternate Track 2 based on real-world outreach feedback. Singapore deprioritized due to low response rate (~200 contacts, <5% response). First London calls scheduled 3/17-18/2026. Decision framework added for market validation. Geographic flexibility established as strategic advantage.
+
+**Previous changes (v3.1, February 2026):** Primary offering reframed around custom AI product placement in vetted productions. Rights Agency + Rights Management model named explicitly. "Getty for AI video" positioning established. "The Bad Boy Indemnifier" competitive differentiation added. Platform Horizon refined — VC path is upside not requirement. Passive Reuse added as platform validation signal. C2PA flagged for monitoring.
 
 > For operational sections unchanged from v2.1 (risk tiers, advisory board, geographic strategy, bilingual website, E&O insurance, Rights Verified, No List, financial projections, filmmaker acquisition), refer to BUSINESS_PLAN_v2.md.
 
@@ -303,6 +305,72 @@ Every manual step should be run as if it will be handed to a software team in Ye
 | Exclusivity tracking on spreadsheet | Database with conflict detection |
 
 This doesn't mean building software in Year 1. It means running the agency in a structured, consistent, documented way — so that when the time comes, the platform already exists on paper.
+
+---
+
+## Market Discovery: London Alternate Track (March 2026)
+
+### Original Geographic Strategy (v2-v3)
+
+**Track 1:** MyVideo / Taipei (Mandarin market, credibility anchor)
+**Track 2:** Singapore agencies (English market, primary revenue)
+
+**Rationale:** Parallel tracks test both markets simultaneously. MyVideo warm lead provides credibility; Singapore agencies provide revenue scale.
+
+### Real-World Feedback (March 2026)
+
+**Singapore outreach results:**
+- ~200 agency contacts attempted (LinkedIn + email)
+- Response rate: <5%
+- Calls booked: Minimal
+- Assessment: Low market receptivity or poor message-market fit
+
+**London outreach results:**
+- Response rate: Strong (significantly higher than Singapore)
+- Calls booked: Multiple (first calls scheduled 3/17-3/18/2026)
+- Assessment: High market interest, messaging resonates
+
+### Updated Geographic Strategy (Pending Validation)
+
+**Track 1:** MyVideo / Taipei — **unchanged** (credibility anchor)
+
+**Track 2A:** London agencies — **NEW PRIMARY** (subject to validation from 3/17-18 calls)
+- Major global ad/creative hub (WPP, Publicis, Omnicom, independent agencies)
+- English as primary business language (no translation friction)
+- European timezone overlap
+- Strong AI adoption in creative industry
+- Market responding to positioning
+
+**Track 2B:** Singapore agencies — **DEPRIORITIZED** (low response rate)
+- Maintain as secondary opportunity
+- Revisit after London validation
+- Possible message-market fit issue to diagnose
+
+### Decision Framework
+
+**After first London calls (3/17-18):**
+
+**If London validates (2+ agencies show deal interest):**
+- London becomes primary Track 2 for Month 2-3
+- Build London-specific target list (100+ agencies)
+- Adapt messaging based on call learnings
+- Singapore remains open but not prioritized
+
+**If London doesn't validate (no deal interest):**
+- Return to Singapore hypothesis testing
+- Diagnose: Is it the market or the message?
+- Consider alternate markets (NYC, LA, Toronto)
+
+**If both markets struggle:**
+- Pivot to direct-to-brand outreach (bypass agencies)
+- Focus on Tier 1 platform deals (MyVideo, streaming)
+- Reassess positioning fundamentals
+
+### Strategic Implication
+
+**Geography flexibility is a feature, not a bug.** SI8 operates remotely and serves global markets. The "first market" is wherever response rate and deal interest align. Real-world traction determines strategy, not theoretical market sizing.
+
+**Next checkpoint:** March 18, 2026 (after London calls complete)
 
 ---
 
