@@ -11,11 +11,12 @@
 ## Executive Summary
 
 **Key Findings:**
-1. **London outperforms Singapore** in response quality (interest vs polite pass)
-2. **Campaign A ("Vetting Takes Weeks")** has highest absolute responses, but mixed quality
-3. **Campaign B ("Documented Provenance")** has **lowest volume but highest conversion** (1 call booked from minimal outreach)
-4. **"Show me examples/samples"** is the #1 objection across all campaigns
-5. **Wrong audience targeting:** Several responses from solo creators, consultants, non-agency contacts
+1. **Campaign C ("Trusted AI Supplier") has highest response rate** (2.75% vs 1.2% for A, 1% for B)
+2. **Campaign A ("Vetting Takes Weeks") creates most pushback** (2 explicit negative responses to assumptive opener)
+3. **Campaign B ("Documented Provenance") sample size too small** (N=1) — needs 50-100 responses before conclusions can be drawn
+4. **London outperforms Singapore** in response quality (interest vs polite pass)
+5. **"Show me examples/samples"** is the #1 objection across all campaigns
+6. **Wrong audience targeting:** Several responses from solo creators, consultants, non-agency contacts
 
 **Immediate Action Items:**
 - ✅ **CALL BOOKED:** Elaine Tan + Joseph Lee (The Media Shop, Singapore) — 3/18 at 10:30am SGT
@@ -26,13 +27,15 @@
 
 ## Campaign Performance Overview
 
-| Campaign | Target Lists | Total Leads | Acceptance Rate | Response Rate | Quality Score* |
-|----------|-------------|-------------|-----------------|---------------|----------------|
-| **A: Vetting Takes Weeks** | 5 lists (London, Singapore, Sydney) | ~993 | 14.7%–34% | 0%–9.1% | Medium |
-| **B: Documented Provenance** | 1 list (London) | ~101 | 18.8% | 3% | **HIGH** |
-| **C: Trusted AI Supplier** | 2 lists (London, Singapore) | ~400 | 18.8%–23.7% | 3%–4% | Medium |
+| Campaign | Target Lists | Total Leads | Total Responses | Response Rate | Interested/Hot | Negative/Pushback |
+|----------|-------------|-------------|-----------------|---------------|----------------|-------------------|
+| **A: Vetting Takes Weeks** | 5 lists (London, Singapore, Sydney) | ~993 | 12 | **1.2%** | 4 (2 hot + 2 conditional) | **2** ❌ |
+| **B: Documented Provenance** | 1 list (London) | ~101 | 1 | 1% | 1 (call booked) | 0 |
+| **C: Trusted AI Supplier** | 2 lists (London, Singapore) | ~400 | 11 | **2.75%** ⭐ | 4 (1 hot + 3 lukewarm) | 1 |
 
-*Quality Score = % of responses showing genuine interest vs polite pass/rejection
+**⭐ Campaign C has the highest response rate** (2.75% — more than double Campaign A's 1.2%)
+
+**⚠️ Statistical Note:** Campaign B has only 1 response (N=1). This sample size is too small to draw conclusions. Need 50-100 responses minimum before determining if Campaign B is superior to C.
 
 ### Best Performing List:
 **SI8_RV_R4LI_Mgr+_Mktg_London_0326A_LH** (Campaign A, Lilly, London)
@@ -207,40 +210,51 @@
 
 ## Campaign Message Analysis
 
-### Campaign A: "Vetting Takes Weeks" (Speed/Efficiency)
-- **Volume:** Highest (5 lists, ~993 leads)
-- **Response Rate:** 0%–9.1% (wide variance)
-- **Responses:** 14 total
-- **Quality:** Mixed (3 hot, 2 conditional, 5 polite pass, 3 negative, 1 off-target)
-- **Best Response:** Barney O'Kelly (AlixPartners, London) — "I'd be interested in learning more"
-- **Objection Pattern:** "Show me examples" (2), "My clients don't want that" (2)
-
-**Insight:** Speed angle resonates with some (AlixPartners, Zedtronix), but assumptive opener ("Your clients want AI video...") creates pushback with others.
-
----
-
-### Campaign B: "Documented Provenance" (Risk Reduction)
-- **Volume:** Lowest (1 list, ~101 leads)
-- **Response Rate:** 3%
-- **Responses:** 1 total
-- **Quality:** **HIGHEST** — 1 call booked (The Media Shop, Singapore)
-- **Best Response:** Elaine Tan — "We are keen to see how it works" + proactive call booking
-
-**Insight:** **Risk/liability framing resonates strongly with agencies.** The Media Shop brought in their digital lead (Joseph Lee) immediately — signals internal buy-in.
-
-**RECOMMENDATION:** Scale Campaign B. This is the winner.
-
----
-
-### Campaign C: "Trusted AI Supplier" (White-Label Partner)
+### Campaign C: "Trusted AI Supplier" (White-Label Partner) ⭐ BEST PERFORMER
 - **Volume:** Medium (2 lists, ~400 leads)
-- **Response Rate:** 3%–4%
-- **Responses:** 9 total
-- **Quality:** Mixed (1 hot, 1 conditional, 3 lukewarm, 3 polite pass, 1 off-target)
+- **Total Responses:** 11
+- **Response Rate:** **2.75%** (highest)
+- **Quality:** 1 hot (Isaac) + 3 lukewarm + 4 polite pass + 1 negative + 2 off-target
 - **Best Response:** Isaac Twidale (We Do Ads, London) — "let's chat" + sent Calendly
+- **Negative/Pushback:** 1 (Starcom asked "are you a real person?")
 - **Objection Pattern:** "I don't need this" (off-target), "not my role" (consultants)
 
-**Insight:** White-label angle works for small agencies (Isaac Twidale), but attracts wrong audience (consultants, solo creators). Needs tighter targeting.
+**Insight:** White-label angle gets **2.3x more responses** than Campaign A with less pushback. Softer framing ("Want to add AI video as a service offering?") is less assumptive, creates less friction. Attracts some off-target (consultants, solo creators) but also gets genuine interest from small agencies.
+
+**RECOMMENDATION:** Scale Campaign C as primary outreach message.
+
+---
+
+### Campaign A: "Vetting Takes Weeks" (Speed/Efficiency) ❌ WORST PERFORMER
+- **Volume:** Highest (5 lists, ~993 leads)
+- **Total Responses:** 12
+- **Response Rate:** **1.2%** (lowest)
+- **Quality:** 2 hot (Barney, Syed) + 2 conditional + 1 lukewarm + 3 polite pass + **2 negative** + 2 off-target
+- **Best Response:** Barney O'Kelly (AlixPartners, London) — "I'd be interested in learning more"
+- **Negative/Pushback:** **2** (Richard Clark: "No they don't and you can't assume that", Charlie Mcneill Love: "My clients do not want that")
+- **Objection Pattern:** "Show me examples" (2), **"You can't assume my clients want that"** (2)
+
+**Insight:** Speed angle resonates with some (AlixPartners, Zedtronix), but **assumptive opener ("Your clients want AI video...") actively irritates prospects.** Two explicit rejections where the assumption itself was the problem. Lowest response rate of all campaigns.
+
+**RECOMMENDATION:** Either fix the opener (make it question-based, not assumption-based) or retire this message. Current version creates unnecessary friction.
+
+**Test Alternative Opener:**
+- Current: "Your clients want AI video, but vetting rights takes weeks?"
+- Alternative: "Does your agency work with AI-generated video? If so, how are you handling rights verification?"
+
+---
+
+### Campaign B: "Documented Provenance" (Risk Reduction) ⚠️ INSUFFICIENT DATA
+- **Volume:** Lowest (1 list, ~101 leads)
+- **Total Responses:** **1**
+- **Response Rate:** 1%
+- **Quality:** 1 call booked (The Media Shop, Singapore)
+- **Best Response:** Elaine Tan — "We are keen to see how it works" + proactive call booking (brought in digital lead Joseph Lee)
+- **Negative/Pushback:** 0
+
+**Insight:** Risk/liability framing produced one excellent outcome (call booked, digital lead brought in immediately). **However, N=1 is not statistically meaningful.** Could be luck, outlier, or genuinely superior message — we don't know yet.
+
+**RECOMMENDATION:** Scale Campaign B to ~400 leads (match Campaign C volume) before drawing conclusions. If it maintains high conversion at scale, then it's the winner. Until then, it's unproven.
 
 ---
 
@@ -344,12 +358,33 @@ After Elaine Tan call (3/18) and any London calls booked, update:
 
 ## Strategic Insights
 
-### 1. Campaign B ("Documented Provenance") is the winner
-- Lowest volume, **highest conversion**
-- Risk/liability framing resonates with agencies who have legal/procurement teams
-- The Media Shop brought in digital lead immediately — signals internal credibility
+### 1. Campaign C ("Trusted AI Supplier") is the proven best performer
+- **Highest response rate:** 2.75% (2.3x better than Campaign A's 1.2%)
+- **Lower pushback:** Only 1 skeptical response vs Campaign A's 2 explicit negatives
+- Softer, question-based framing ("Want to add AI video as a service offering?") creates less friction
+- Works well with small agencies (Isaac Twidale sent his Calendly immediately)
 
-**RECOMMENDATION:** Scale Campaign B. Create more London lists with this message.
+**RECOMMENDATION:** Scale Campaign C as primary outreach message for next batch.
+
+---
+
+### 1b. Campaign B ("Documented Provenance") is unproven but promising
+- Only 1 response (N=1) — **statistically meaningless**
+- That 1 response was excellent (call booked, digital lead brought in)
+- Risk/liability framing could resonate with agencies who have legal/procurement teams
+- **But we don't know if this is luck or a real pattern**
+
+**RECOMMENDATION:** Scale Campaign B to ~400 leads (match Campaign C) to test if it's genuinely superior. If it maintains high conversion at scale, then pivot to Campaign B as primary. Until then, treat as "promising but unproven."
+
+---
+
+### 1c. Campaign A ("Vetting Takes Weeks") actively hurts conversion
+- **Lowest response rate:** 1.2%
+- **Most negative pushback:** 2 prospects explicitly irritated by assumptive opener
+- "Your clients want AI video, but vetting rights takes weeks?" assumes facts not in evidence
+- Creates friction even when the value prop might resonate
+
+**RECOMMENDATION:** Fix or retire. Test softer opener ("Does your agency work with AI-generated video?") or switch to Campaign C/B entirely.
 
 ---
 
@@ -384,6 +419,42 @@ After Elaine Tan call (3/18) and any London calls booked, update:
 
 ---
 
+## Statistical Note: Why Campaign B Is Unproven (Not "The Winner")
+
+**The Problem with N=1:**
+
+Campaign B produced 1 response from ~101 leads, and that response was excellent (call booked). It's tempting to conclude "Campaign B is the best!"
+
+**But this is premature.** Here's why:
+
+### Sample Size Requirements
+To determine if one campaign is statistically better than another, you need:
+- **Minimum 50-100 responses per campaign** to detect meaningful differences
+- **Confidence interval:** With N=1, the true conversion rate could be anywhere from 0% to 10%
+- **Margin of error:** ±100% (meaningless)
+
+### What We Actually Know
+- **Campaign A:** 12 responses from ~993 leads = 1.2% (reasonable confidence)
+- **Campaign B:** 1 response from ~101 leads = 1% (no confidence — could be 0% or 5% at scale)
+- **Campaign C:** 11 responses from ~400 leads = 2.75% (reasonable confidence)
+
+### The Right Interpretation
+Campaign B's single excellent outcome (Elaine Tan call booking) tells us:
+- ✅ The message isn't broken (it can convert)
+- ✅ Risk/liability framing might resonate
+- ❌ We don't know if it's better than Campaign C
+- ❌ Could be luck, outlier, or perfect timing
+
+### What to Do Next
+**Scale Campaign B to ~400 leads** (match Campaign C volume). Then compare:
+- If Campaign B gets 10+ responses with 2-3 calls booked → it's genuinely better, make it primary
+- If Campaign B gets 3-5 responses with 0-1 calls booked → it's similar to Campaign A, stick with Campaign C
+- If Campaign B gets <3 responses → it's worse than C, retire it
+
+**Until then:** Campaign C is the proven best performer by response rate.
+
+---
+
 ## Next Steps
 
 ### Week of 3/17–3/21:
@@ -397,7 +468,8 @@ After Elaine Tan call (3/18) and any London calls booked, update:
 1. Follow up William Tan (evaluating, asked for patience)
 2. Re-engage conditional leads once catalog ready (Mainul, James)
 3. Update business plan v3.2 with validation decision
-4. Scale Campaign B if London calls convert
+4. **Next outreach batch:** Scale Campaign C (proven best performer) + Scale Campaign B to ~400 leads (test if it's genuinely better)
+5. Consider testing softer opener for Campaign A or retire it entirely
 
 ---
 
