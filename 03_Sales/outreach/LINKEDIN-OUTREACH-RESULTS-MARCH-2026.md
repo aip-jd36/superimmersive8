@@ -67,20 +67,19 @@
 
 ---
 
-### 🟡 TIER 2: HOT LEADS — INTERESTED, NEED CALL BOOKING (3)
+### 🟡 TIER 2: HOT LEADS — INTERESTED (2 pending, 1 call completed)
 
-| # | Lead | Company | Location | Campaign | Persona | Response | Action Needed |
-|---|------|---------|----------|----------|---------|----------|---------------|
-| 1 | **Barney O'Kelly** | AlixPartners (global consulting) | London | A | Vanessa | "Hi Vanessa, I'd be interested in learning more." | Send Calendly link + London Deck PDF |
-| 2 | **Syed Tabish Hasan** | Zedtronix | London | A | Lilly + Vanessa (duplicate!) | "Sure" | Send Calendly link + consolidate personas |
-| 3 | **Isaac Twidale** | We Do Ads | London | C | Ivy | "Hey, let's chat. can you book a meeting time in here that works for you calendly.com/isaac-twidale" | **Book via HIS Calendly** |
+| # | Lead | Company | Location | Campaign | Persona | Response | Status |
+|---|------|---------|----------|----------|---------|----------|--------|
+| 1 | **Barney O'Kelly** | AlixPartners (global consulting) | London | A | Vanessa | "Hi Vanessa, I'd be interested in learning more." | ⏳ Pending: Send Calendly link + London Deck PDF |
+| 2 | **Syed Tabish Hasan** | Zedtronix | London | A | Lilly + Vanessa (duplicate!) | "Sure" | ⏳ Pending: Send Calendly link + consolidate personas |
+| 3 | **Isaac Twidale** | We Do Ads | London | C | Ivy | "Hey, let's chat. can you book a meeting time in here that works for you calendly.com/isaac-twidale" | ✅ **CALL COMPLETED** (March 2026) — See discovery call notes |
 
 **DUPLICATE ALERT:** Syed Tabish Hasan received outreach from both Lilly and Vanessa (same campaign). Consolidate to avoid confusion.
 
-**ACTION:** All three are London-based. Send follow-up with:
-1. Calendly link (or book via Isaac's Calendly)
-2. London Deck PDF attachment
-3. Brief: "Here's a 1-pager on how we work. Let me know a time that suits you."
+**ACTION:**
+- Barney + Syed: Send Calendly link + London Deck PDF
+- Isaac: ✅ Call completed — **Next action:** Send 3-5 photorealistic creator portfolio links (within 48 hours)
 
 ---
 
@@ -452,6 +451,122 @@ Campaign B's single excellent outcome (Elaine Tan call booking) tells us:
 - If Campaign B gets <3 responses → it's worse than C, retire it
 
 **Until then:** Campaign C is the proven best performer by response rate.
+
+---
+
+## Discovery Call Insights (Pending Validation)
+
+### Isaac Twidale — We Do Ads (London) ✅ Call Completed
+
+**Date:** March 2026
+**Company:** Small paid social agency (£2.5K/month client retainers)
+**Campaign:** C (Trusted AI Supplier)
+**Outcome:** 🟡 Warm — needs quality proof
+
+**Full notes:** `/03_Sales/buyers/call-notes/2026-03-ISAAC-TWIDALE-WE-DO-ADS.md`
+
+---
+
+#### Key Insights (N=1 — needs validation with more calls)
+
+**1. Small Agencies Prioritize Quality > Rights**
+
+**Quote:** *"My assumption is that these legal issues affect larger firms rather than small firms like me. So for me, the legality thing, it's interesting. And if it was a feature, then it would make me feel more secure. But it's not a thing that's going to make me want to buy."*
+
+**What Isaac wants:**
+- High-quality photorealistic AI video (primary need)
+- Portfolio of 10-20 clips for £1,500 (lasts 3 months)
+- Creator network access (secondary need)
+- Rights clearance = nice-to-have, not buying driver
+
+**⚠️ Interpretation:** Rights Verified may not be primary value prop for small agencies (budget <£10K/month). May be more important for enterprise brands with legal/procurement teams.
+
+**⏳ NEEDS VALIDATION:** Elaine Tan call (Singapore, 3/18) + other discovery calls before concluding this is a pattern.
+
+---
+
+**2. "High-Quality AI Video Doesn't Exist Yet" = Market Perception**
+
+**Quote:** *"As it stands from where I'm sitting, high-quality AI video is not available to us and there's only really specific use cases where it is."*
+
+**Isaac's current experience:**
+- In-house AI video attempts fail quality threshold
+- Only simple product animations work
+- Text hallucination, motion hallucination, complex movements don't work
+
+**Opportunity:** If SI8 can prove photorealistic AI video exists → immediate buyer interest
+
+**Next action:** Send Isaac 3-5 photorealistic creator portfolio links (within 48 hours) — conversion depends on quality proof
+
+---
+
+**3. Portfolio Licensing (Tier 1) > Custom Production for Small Agencies**
+
+**Budget:** £1,500 per client (out of £7,500 total retainer = 20%)
+
+**Preferred model:**
+- Portfolio of clips (not 1-2 custom videos)
+- Variety: product shots, lifestyle, hands/product interaction
+- 10-90 second paid social formats
+- Lasts 3 months of campaign work
+
+**⏳ NEEDS VALIDATION:** Does this hold for Singapore agencies? Other London agencies?
+
+---
+
+**4. Broker Model Accepted**
+
+Isaac understood and accepted:
+- SI8 takes 10% from creator (not from agency budget)
+- SI8 handles creator discovery/vetting
+- Agency pays creator directly (or SI8 invoices with markup)
+
+**This validates Campaign C messaging** ("Trusted AI Supplier" = white-label partner)
+
+---
+
+**5. Premium Brands = Higher Quality Bar**
+
+**Quote:** *"If you're selling a premium product, like we're working with a premium wellness brand, you're trying to use stuff that looks like AI imagery, that would land quite poorly with the audience."*
+
+**Segmentation hypothesis:**
+- Premium wellness, luxury brands → must be photorealistic
+- Mass market, performance brands → AI look acceptable
+
+**⏳ NEEDS VALIDATION:** Test with more agencies serving premium vs mass-market clients
+
+---
+
+### What We're NOT Changing Yet (Pending More Calls)
+
+**Staying the same until we have 3-5 discovery calls:**
+1. Rights Verified as primary positioning (website, decks, outreach)
+2. Campaign messaging (A, B, C all stay as-is)
+3. Tier structure (Tier 1 catalog, Tier 2 placement)
+
+**Why wait:**
+- Isaac is N=1 (one small London agency)
+- Elaine Tan call (Singapore, 3/18) may show different priorities
+- Barney O'Kelly (AlixPartners, large consulting) may care more about rights
+- Need pattern recognition across 3-5 calls before pivoting strategy
+
+**What we're tracking:**
+- Do **small agencies** (<£10K/month retainers) deprioritize rights clearance?
+- Do **large brands/agencies** (>£50K/month retainers) prioritize rights clearance?
+- Does **geography** matter? (London vs Singapore vs other)
+- Does **client segment** matter? (premium brands vs mass market)
+
+---
+
+### Next Discovery Calls
+
+| Date | Company | Location | Type | What to Test |
+|------|---------|----------|------|--------------|
+| **3/18** | The Media Shop | Singapore | Medium agency | Does Singapore prioritize rights differently than London? |
+| TBD | AlixPartners (Barney O'Kelly) | London | Large consulting | Do large firms care more about rights clearance? |
+| TBD | Zedtronix (Syed Tabish Hasan) | London | Tech/digital | Another London small agency data point |
+
+**After 3-5 calls:** Review patterns, decide if messaging/positioning needs adjustment.
 
 ---
 
