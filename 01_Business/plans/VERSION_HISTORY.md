@@ -24,6 +24,83 @@
 
 ---
 
+## v4.0 — March 2026
+**File:** `BUSINESS_PLAN_v4.md`
+**Status:** Current direction (major pivot from v3)
+
+**What changed from v3.2:**
+- **Primary offering shifted: From Rights Agency (product placement) to Compliance as a Service (B2B verification service)**
+- **Three-gear model introduced:** CaaS foundation (Gear A) + Showcase marketplace (Gear B) + Producer track (Gear C)
+- **CarFax two-sided model:** Verification service (Side A pays for business) + discovery marketplace (Side B is long-term value multiplier)
+- **Opt-in flywheel mechanism:** Verification customers become marketplace inventory via checkbox after approval — solves chicken-egg problem
+- **Platform architecture from day one:** Supabase (auth + database + file storage), creator login/dashboard, admin review panel, public catalog
+- **Revenue model updated:** $499/video verification (primary) + 20% licensing commission (secondary) + producer curation (tertiary)
+- **Pricing shift:** From 80/20 filmmaker split (v3) to 20% SI8 commission (v4) — more defensible for unproven platform
+
+**Why the pivot:**
+- **v3 deadlock:** Filmmakers won't submit without proof of buyers (Essa, Leon call notes); buyers won't commit without catalog (Isaac, The Media Shop). Chicken-egg problem blocked execution.
+- **Peer review validation:** Both ChatGPT (Claude Opus) and Gemini validated two-sided CarFax model as solving chicken-egg problem. Verification customers paying upfront removes need to recruit creators separately.
+- **Immediate revenue:** CaaS generates transaction fees ($499) immediately vs. waiting for licensing deals to close
+- **Platform scalability:** Verification service can scale via self-serve platform (Year 3 vision); product placement is time-intensive and doesn't scale
+- **Market gap:** No B2B verification service exists for Sora/Runway/Kling outputs (Adobe only covers Firefly)
+
+**The three gears explained:**
+
+**Gear A (CaaS Foundation) — PRIMARY:**
+- B2B verification service: $499 per video Chain of Title verification
+- Customers: Production agencies, brands, filmmakers
+- Process: 70-field submission → manual review (90 min) → 9-field Rights Package PDF
+- Revenue: Transaction fee (immediate cash)
+- Year 1 target: 60-70 verifications ($30-35K)
+
+**Gear B (Showcase Marketplace) — SECONDARY:**
+- After Gear A verification, creator sees checkbox: "List in catalog for licensing?"
+- If yes → film appears on superimmersive8.com with Rights Verified badge
+- Buyers browse → license → SI8 takes 20% commission
+- Revenue: Commission (recurring, passive)
+- Year 1 target: 20-30 films in catalog, 10 licensing deals ($6-10K SI8 commission)
+
+**Gear C (Producer Track) — TERTIARY:**
+- JD curates custom slates for whale buyers (MyVideo)
+- Uses Gear A (verification) + Gear B (catalog discovery) as infrastructure
+- Revenue: Project fee ($10K-$20K per slate)
+- Year 1 target: MyVideo $10K + 1-2 additional deals ($17.5-25K total)
+
+**Conflict of interest handling:**
+- PMF Strategy Inc. (legal entity) / SI8 (DBA) — one entity, two operational "hats"
+- JD acts as Producer for Gear C deals (using SI8 tools)
+- SI8 acts as independent verifier for Gear A clients
+- Transparency: Role disclosed in each transaction
+
+**Supporting documents (new):**
+- `PEER_REVIEW_SUMMARY_CAAS.md` — ChatGPT (Opus) + Gemini feedback synthesis
+- `REVENUE_MODEL_v4.md` — Three-gear unit economics, projections, sensitivity analysis
+- `COMPETITIVE_ANALYSIS_CAAS_2026.md` — Updated competitive landscape for CaaS model
+
+**Evidence base:**
+- Filmmaker feedback: Essa (Hong Kong) and Leon (LKDN_OFFICIAL) both failed to convert under v3 model (20% royalty + unproven platform not compelling)
+- Buyer feedback: Isaac (Minted Creative) and The Media Shop both asked for "examples" before committing — catalog doesn't exist under v3 model without recruiting filmmakers first
+- Peer review: Both AI advisors validated CaaS model independently, converged on two-sided CarFax architecture
+
+**What stayed the same:**
+- Rights Verified process (legal vetting, Chain of Title documentation)
+- No List (likeness, voice cloning, IP imitation remain prohibited)
+- Geographic strategy (Singapore/SEA for CaaS, Taiwan for Producer track)
+- Bilingual website (EN + ZH-TW)
+- Year 1 revenue target ($80-120K)
+- Platform vision (Year 3 self-serve, judgment layer as moat)
+
+**Execution plan (next 30 days):**
+- Week 1-4: Build Supabase platform (creator auth, submission portal, admin review panel, opt-in system, public catalog)
+- Week 1: Email Jamie Lin (MyVideo) with slate pitch, book discovery call
+- Month 2: Launch CaaS outreach (Singapore agencies), close MyVideo deal
+- Month 3: First verifications, first opt-ins, catalog goes live
+- Month 6: Validation checkpoint (10 verifications/month, 20 films in catalog, 5 licensing deals)
+
+**See:** `PEER_REVIEW_PROMPT_CHATGPT.md` and Gemini feedback (conversation history) for full peer review analysis
+
+---
+
 ## v3.2 — March 12, 2026
 **File:** `BUSINESS_PLAN_v3.md` (updated in place)
 **Status:** Current direction

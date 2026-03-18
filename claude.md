@@ -18,58 +18,71 @@
 - Year 2: 40% production / 60% distribution
 - Year 3+: 20% production / 80% distribution (goal)
 
-### v3 Strategy: Rights Agency + AI Product Placement (Current Direction — February 2026)
+### v4 Strategy: Compliance as a Service + Creator Platform (Current Direction — March 2026)
 
-**SI8 identity:** A Rights Agency and Rights Management firm for AI film and commercial content.
+**Major pivot from v3:** From Rights Agency (product placement) to **Compliance Infrastructure Provider** with opt-in marketplace.
 
-**The four-tier model:**
-- **Tier 2 (Primary):** Custom AI Product Placement in vetted productions — brand elements regenerated into existing catalog films. "Won't get you sued." Premium price.
-- **Tier 1 (Standard):** Catalog licensing as-is — for platforms, airlines, streaming, editorial. Commercial use documented.
-- **Tier 3 (Active offering):** "Risk Briefing" product for agencies building AI content in-house. Two options: Entry ($2K-$3.5K) = Risk Memo + checklist; Premium ($5K) = 2-week engagement + Compliance Pack. Wedge offer for first revenue (no catalog required).
-- **Tier 4 (Commission/inbound):** Full bespoke production through vetted filmmaker network. Discretionary.
+**SI8 identity:** B2B compliance infrastructure for AI video content, with a creator marketplace built on top of the verification service.
 
-**Key positioning:** "Getty for AI video — with a product placement layer Getty can never offer."
+**The three-gear model:**
+- **Gear A (CaaS Foundation — PRIMARY):** B2B verification service at $499/video. Production houses, agencies, brands submit AI video → SI8 reviews (90 min) → Chain of Title documentation delivered. Immediate cash revenue.
+- **Gear B (Showcase Marketplace — SECONDARY):** After Gear A verification, creator sees checkbox: "List in catalog for licensing opportunities?" If yes → film appears on superimmersive8.com with Rights Verified badge. Buyers discover → license → SI8 takes 20% commission. Passive recurring revenue.
+- **Gear C (Producer Track — TERTIARY):** JD curates custom slates for whale buyers (MyVideo). High-touch, premium pricing ($10K-$20K per slate). Uses Gears A+B as infrastructure.
 
-**Competitive differentiation:** "Adobe = safe but boring (Firefly only). SI8 = best creative AI tools (Sora/Kling/Runway) made safe. We fill the gap Adobe structurally can't."
+**Why this pivot:** v3 deadlock (chicken-egg: need creators for buyers, buyers for creators) blocked execution. Filmmaker feedback (Essa, Leon) showed 20% royalty + unproven platform = not compelling. Buyer feedback (Isaac, The Media Shop) showed "need examples first" → no catalog without creators. **CaaS solves this:** Verification customers pay upfront ($499), then OPT-IN to become marketplace inventory. No separate creator recruitment needed.
 
-**Single Year 1 message:** "Won't get you sued." (door opener)
-**Secondary pitch line (discovery/proposal stage):** "We reduce time from creative idea to legal approval from 3 weeks to 3 days." (felt experience)
+**Key positioning:** "CarFax for AI video — verification service with discovery marketplace byproduct."
 
-**Internal framing:** "The file is the carrier. The chain of defensibility is the product."
+**Competitive differentiation:** "Adobe verifies Firefly only. We verify Sora/Runway/Kling — the tools legal teams are blocking."
 
-**SI8's value is the judgment layer:** C2PA/Content Credentials will commoditize provenance documentation. SI8's moat is subjective legal review — Rights Verified, IP assessment, training data risk judgment — which software cannot automate.
+**Year 1 message:** "Get Chain of Title documentation for AI video. $499 per video, 5-day turnaround."
 
-**Brand identity:** Year 1 = Underwriter (risk reduction, compliance, defensibility). Year 3+ = Underwriter + Curator (taste + safety compound). Do not lead with curation in Year 1.
+**Internal framing:** "The file is the carrier. The Chain of Title is the product."
 
-**Critical operational prerequisite:** Every filmmaker shopping agreement must include a modification clause before Tier 2 can be offered.
+**SI8's moat = judgment layer:** C2PA/Content Credentials will commoditize provenance metadata. SI8's value is subjective legal review (IP risk, likeness assessment, training data liability) — cannot be automated.
+
+**Opt-in flywheel:** More verifications → more opt-ins → larger catalog → more buyer traffic → more verifications.
+
+**Platform architecture:** Supabase (auth + database + file storage), Next.js frontend, creator login/dashboard, admin review panel, public catalog. Built from day one for Year 3 self-serve scale.
+
+**Conflict of interest:** PMF Strategy Inc. (legal entity) / SI8 (DBA). JD acts as Producer for Gear C deals, SI8 acts as independent verifier for Gear A clients. Role disclosed in each transaction.
 
 **Long-term outcomes (all acceptable):** High-earning services agency / self-serve platform / VC-backed platform. Year 1-2 work is the same regardless. VC path is upside, not a requirement.
 
 **Business plan versions:**
 - `BUSINESS_PLAN_v1.md` — supply-side first (archived, January 2026)
-- `BUSINESS_PLAN_v2.md` — demand-side first (superseded by v3)
-- `BUSINESS_PLAN_v3.md` — Rights Agency + AI Product Placement (current, February 2026)
+- `BUSINESS_PLAN_v2.md` — demand-side first (superseded by v3, February 2026)
+- `BUSINESS_PLAN_v3.md` — Rights Agency + AI Product Placement (superseded by v4, February-March 2026)
+- `BUSINESS_PLAN_v4.md` — Compliance as a Service + Creator Platform (current, March 2026)
 - `VERSION_HISTORY.md` — version log
 
-**Round 2 Decisions (February 27, 2026):**
+**Peer Review Validation (March 2026):**
 
-After external validation from ChatGPT + Gemini, key execution decisions changed:
+Both ChatGPT (Claude Opus) and Gemini validated the v4 CaaS model:
 
-- **Sequential execution, not parallel** — Week 1 = prove Rights Verified works (catalog first), Week 2 = launch outreach at scale. Both AIs caught "win via preparation" avoidance pattern.
-- **MyVideo: 3 films not 5** — Don't gate pitch behind hypothetical second filmmaker. Easier delivery, faster close.
-- **Tier 3 added as active offering** — Reframed as "Risk Briefing" product ($2K-$5K). ChatGPT: "Easiest thing to sell before catalog exists." Not consulting, but structured deliverable.
-- **Filmmaker economics: 50/50 for "founding roster"** — First filmmaker gets 50/50 on both Tier 1 + Tier 2 for first 3 films (grandfathered). Future filmmakers: 80/20 Tier 1, 50/50 Tier 2.
-- **Contact quotas Week 1** — 10 manual messages, 1 call booked, 1 proposal sent (non-negotiable). ChatGPT's test: "By Mar 4, did you personally send at least 10 hand-written messages and book at least 1 call? If NO: still hiding with nicer tools."
-- **Rights Verified time reality** — Budget 2 hrs per video on first run (not 1 hr). Week 1 = 6 hrs for 3 videos.
+- **Two-sided CarFax model consensus:** Verification service (Side A) pays for business, marketplace (Side B) is long-term value multiplier
+- **Opt-in flywheel solves chicken-egg:** Verification customers become marketplace inventory automatically — no separate creator recruitment
+- **Platform required from day one:** Creator auth, submission tracking, opt-in toggles, admin panel required for model to function efficiently
+- **Judgment layer is the moat:** As C2PA commoditizes provenance metadata, human legal review becomes MORE valuable
+- **Parallel execution (Gemini's emphasis):** Close MyVideo immediately (Month 1), build platform in parallel, launch CaaS Month 2 — don't delay whale deal to build infrastructure first
+
+See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 
 ### Revenue Model (Year 1 Target: $80-120K)
 
+**Three-gear revenue streams:**
+
 | Stream | Target | How |
 |--------|--------|-----|
-| Production (Layer 1) | $50-70K | Agency retainers + sprints |
-| Distribution commissions | $5-10K | 25% of deals brokered |
-| Event sponsorships | $10-20K | Tool companies, agencies |
-| Consulting | $15-30K | From event leads |
+| **CaaS (Gear A)** | $30-40K | $499/video × 60-70 verifications |
+| **Showcase (Gear B)** | $6-10K | 20% commission on 10 licensing deals ($30-50K GMV) |
+| **Producer (Gear C)** | $20-40K | MyVideo $10K + 2-3 additional whale deals |
+| **Layer 1 Production (optional)** | $20-30K | If needed to supplement revenue |
+
+**Unit economics:**
+- CaaS verification: $499 revenue, ~$17 cost (Stripe + platform overhead) = 97% gross margin
+- Showcase licensing: 20% commission (creator keeps 80%), ~85% margin after platform fees
+- Producer curation: 50% to filmmaker, 50% to SI8 (after absorbing verification cost internally)
 
 ### Geographic Strategy: Parallel Tracks
 
@@ -340,18 +353,16 @@ After external validation from ChatGPT + Gemini, key execution decisions changed
 
 | Document | Location | Purpose |
 |----------|----------|---------|
-| **Business Plan v3** (current) | `01_Business/plans/BUSINESS_PLAN_v3.md` | Source of truth for strategy (Rights Agency + AI Product Placement) |
+| **Business Plan v4** (current) | `01_Business/plans/BUSINESS_PLAN_v4.md` | Source of truth for strategy (CaaS + Creator Platform) |
+| **Peer Review Summary (CaaS)** | `01_Business/plans/PEER_REVIEW_SUMMARY_CAAS.md` | ChatGPT (Opus) + Gemini feedback synthesis on v4 pivot |
+| **Revenue Model v4** | `01_Business/financials/REVENUE_MODEL_v4.md` | Three-gear economics, unit economics, projections |
+| **Competitive Analysis (CaaS)** | `01_Business/research/COMPETITIVE_ANALYSIS_CAAS_2026.md` | Updated competitive landscape for CaaS model |
+| Business Plan v3 (superseded) | `01_Business/plans/BUSINESS_PLAN_v3.md` | Rights Agency + AI Product Placement (Feb-Mar 2026) |
 | Business Plan v2 (superseded) | `01_Business/plans/BUSINESS_PLAN_v2.md` | Demand-side first — reference for operational decisions |
 | Business Plan v1 (archived) | `01_Business/plans/BUSINESS_PLAN_v1.md` | Supply-side first — reference only |
 | Version History | `01_Business/plans/VERSION_HISTORY.md` | Plan version log |
-| 6-Month Execution Plan | `01_Business/plans/6_MONTH_EXECUTION_PLAN.md` | Detailed month-by-month plan (activities unchanged) |
-| Executive Summary | `01_Business/plans/EXECUTIVE_SUMMARY_FOR_MENTOR.md` | Quick overview for advisors |
-| Peer Review Summary | `01_Business/plans/PEER_REVIEW_SUMMARY.md` | AI agent feedback synthesis |
 | Build in Public Log | `02_Marketing/content/BUILD_IN_PUBLIC_LOG.md` | Insights for LinkedIn content |
-| **Pricing Strategy v1.0** | `01_Business/pricing/PRICING-STRATEGY-v1.0.md` | Three-tier pricing model, commission math, competitive analysis |
-| Pricing Decisions | `01_Business/pricing/DECISIONS.md` | Pricing version log and rationale |
-| Pricing Research | `01_Business/pricing/research/` | Competitor research (10 platforms), peer review feedback |
-| **Revenue Projections v3.1** | `01_Business/financials/REVENUE_PROJECTIONS_v3.1.md` | 6-month revenue projections with 80/20 Tier 1 and 50/50 Tier 2 payout structure |
+| **Pricing Strategy v1.0** | `01_Business/pricing/PRICING-STRATEGY-v1.0.md` | v3 pricing (superseded by v4 CaaS pricing) |
 | Rights Playbook v0.1 | `06_Operations/legal/rights-playbook/versions/v0.1.md` | Rights vetting — sales asset for buyers |
 | Rights Playbook Decisions | `06_Operations/legal/rights-playbook/DECISIONS.md` | Playbook version log |
 | Filmmaker Agreement (WIP) | `06_Operations/legal/filmmaker-agreement/WORKING.md` | Terms for filmmaker representation |
