@@ -5,7 +5,17 @@ import Link from 'next/link'
 import { formatDate, formatCurrency } from '@/lib/utils'
 import { cookies } from 'next/headers'
 
-async function getSubmissions() {
+type Submission = {
+  id: string
+  user_id: string
+  title: string
+  status: string
+  payment_status: string
+  created_at: string
+  [key: string]: any
+}
+
+async function getSubmissions(): Promise<Submission[]> {
   const cookieStore = cookies()
   const supabase = createClient()
   const {
