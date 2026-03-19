@@ -45,7 +45,11 @@ const submissionSchema = z.object({
   territory: z.string().default('Global'),
   existing_restrictions: z.string().optional(),
 
-  // Section 10: Supporting Materials (handled separately with file uploads)
+  // Section 10: Supporting Materials + Catalog Opt-In
+  video_url: z.string().url('Must be a valid URL (YouTube or Vimeo)').min(1, 'Video URL is required'),
+  thumbnail_url: z.string().url().optional(),
+  public_description: z.string().max(500).optional(),
+  catalog_opt_in: z.boolean().default(false),
 })
 
 type SubmissionFormData = z.infer<typeof submissionSchema>
@@ -70,6 +74,7 @@ export default function SubmitPage() {
       modification_authorized: false,
       likeness_confirmed: false,
       ip_confirmed: false,
+      catalog_opt_in: false,
     },
   })
 
@@ -160,10 +165,19 @@ export default function SubmitPage() {
         payment_status: 'unpaid',
       }
 
+      // Prepare catalog opt-in data (if opted in)
+      const catalogData = data.catalog_opt_in ? {
+        catalog_opt_in: true,
+        video_url: data.video_url,
+        thumbnail_url: data.thumbnail_url || null,
+        public_description: data.public_description || data.logline || null,
+      } : null
+
       // Create submission via API route (uses service role to bypass RLS)
       console.log('📤 Calling /api/submissions/create')
       console.log('📤 User ID:', user_id)
       console.log('📤 Submission data:', submissionData)
+      console.log('📤 Catalog data:', catalogData)
 
       const submissionResponse = await fetch('/api/submissions/create', {
         method: 'POST',
@@ -171,6 +185,7 @@ export default function SubmitPage() {
         body: JSON.stringify({
           submissionData,
           userId: user_id,
+          catalogData,
         }),
       })
 
@@ -220,13 +235,13 @@ export default function SubmitPage() {
             </CardDescription>
             <div className="mt-4">
               <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-                <span>Progress: Section {currentSection} of 10</span>
-                <span>{Math.round((currentSection / 10) * 100)}% Complete</span>
+                <span>Progress: Section {currentSection} of 11</span>
+                <span>{Math.round((currentSection / 11) * 100)}% Complete</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div
                   className="bg-primary h-2 rounded-full transition-all"
-                  style={{ width: `${(currentSection / 10) * 100}%` }}
+                  style={{ width: `${(currentSection / 11) * 100}%` }}
                 />
               </div>
             </div>
@@ -523,10 +538,89 @@ export default function SubmitPage() {
                 </div>
               )}
 
-              {/* Section 10: Review & Payment */}
+              {/* Section 10: Video & Catalog */}
               {currentSection === 10 && (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">10. Review & Submit</h3>
+                  <h3 className="text-lg font-semibold">10. Video & Catalog Listing</h3>
+                  <p className="text-sm text-gray-600">
+                    Provide a link to your video (YouTube or Vimeo) and optionally list it in our public catalog after approval.
+                  </p>
+
+                  <div>
+                    <Label htmlFor="video_url">Video Screening Link *</Label>
+                    <Input
+                      id="video_url"
+                      placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..."
+                      {...register('video_url')}
+                    />
+                    {errors.video_url && (
+                      <p className="text-sm text-red-500 mt-1">{errors.video_url.message}</p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      YouTube or Vimeo only. Make sure the video is unlisted or public.
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="thumbnail_url">Thumbnail URL (optional)</Label>
+                    <Input
+                      id="thumbnail_url"
+                      placeholder="https://..."
+                      {...register('thumbnail_url')}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      If not provided, we'll use the video platform's default thumbnail.
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="public_description">Public Catalog Description (optional)</Label>
+                    <textarea
+                      id="public_description"
+                      className="w-full min-h-[80px] px-3 py-2 text-sm border rounded-md"
+                      placeholder="Brief description for public catalog (max 500 characters)"
+                      {...register('public_description')}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      If not provided, we'll use your logline from Section 2.
+                    </p>
+                  </div>
+
+                  <div className="bg-blue-50 p-4 rounded-md">
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="checkbox"
+                        id="catalog_opt_in"
+                        className="mt-1"
+                        {...register('catalog_opt_in')}
+                      />
+                      <div>
+                        <Label htmlFor="catalog_opt_in" className="cursor-pointer font-medium">
+                          List in Public Catalog (after approval)
+                        </Label>
+                        <p className="text-xs text-gray-600 mt-1">
+                          After your work is approved, it will appear in our public catalog for licensing opportunities.
+                          You can opt out at any time from your dashboard.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <Button type="button" variant="outline" onClick={() => setCurrentSection(9)}>
+                      ← Back
+                    </Button>
+                    <Button type="button" onClick={() => setCurrentSection(11)}>
+                      Continue →
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Section 11: Review & Payment */}
+              {currentSection === 11 && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">11. Review & Submit</h3>
                   <p className="text-sm text-gray-600">
                     Please review your submission. Clicking "Submit & Pay $499" will redirect you to Stripe for payment.
                   </p>
@@ -547,7 +641,7 @@ export default function SubmitPage() {
                   )}
 
                   <div className="flex gap-4">
-                    <Button type="button" variant="outline" onClick={() => setCurrentSection(9)}>
+                    <Button type="button" variant="outline" onClick={() => setCurrentSection(10)}>
                       ← Back
                     </Button>
                     <Button type="submit" disabled={isSubmitting} className="flex-1">
