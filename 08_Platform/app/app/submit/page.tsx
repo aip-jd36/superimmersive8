@@ -93,6 +93,7 @@ export default function SubmitPage() {
   }, [setValue])
 
   const onSubmit = async (data: SubmissionFormData) => {
+    console.log('🚀 Form submitted! Data:', data)
     try {
       setIsSubmitting(true)
       setError(null)
@@ -194,7 +195,10 @@ export default function SubmitPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={handleSubmit(onSubmit, (errors) => {
+              console.log('❌ Form validation errors:', errors)
+              alert('Please fill out all required fields. Check the console for details.')
+            })} className="space-y-8">
               {/* Section 1: Filmmaker Profile (auto-filled) */}
               {currentSection === 1 && (
                 <div className="space-y-4">
