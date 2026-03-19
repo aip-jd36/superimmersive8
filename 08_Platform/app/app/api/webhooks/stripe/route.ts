@@ -39,34 +39,49 @@ export async function POST(request: NextRequest) {
     }
 
     try {
+      console.log('🔷 Webhook: Processing payment for submission:', submissionId)
+
       // Update submission payment status
       const { data: submission, error: updateError } = await supabaseAdmin
         .from('submissions')
         .update({
           payment_status: 'paid',
           stripe_payment_intent_id: session.payment_intent,
+          stripe_checkout_session_id: session.id,
           amount_paid: session.amount_total,
           status: 'pending', // Now ready for review
         })
         .eq('id', submissionId)
-        .select('*, users(full_name, email)')
+        .select()
         .single()
 
-      if (updateError) throw updateError
+      if (updateError) {
+        console.error('❌ Webhook: Update error:', updateError)
+        throw updateError
+      }
+
+      console.log('✅ Webhook: Submission payment updated successfully')
+
+      // Get user info for email (separate query to avoid relationship ambiguity)
+      const { data: user } = await supabaseAdmin
+        .from('users')
+        .select('name, email')
+        .eq('id', submission.user_id)
+        .single()
 
       // Send confirmation email
-      if (submission && submission.users) {
-        const user = Array.isArray(submission.users) ? submission.users[0] : submission.users
+      if (user && submission) {
         await sendSubmissionReceivedEmail(
-          user.full_name || 'Creator',
+          user.name || 'Creator',
           submission.title,
           user.email
         )
+        console.log('✅ Webhook: Confirmation email sent')
       }
 
-      console.log('Submission payment processed:', submissionId)
+      console.log('✅ Webhook: Processing complete for submission:', submissionId)
     } catch (error: any) {
-      console.error('Error processing webhook:', error)
+      console.error('❌ Webhook: Error processing:', error)
       return NextResponse.json(
         { error: error.message },
         { status: 500 }
