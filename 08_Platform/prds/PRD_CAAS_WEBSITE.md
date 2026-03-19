@@ -20,7 +20,8 @@
 1. **Homepage:** CaaS positioning, two paths (Get Verified / Browse Catalog), social proof
 2. **How It Works:** Explain verification process, Rights Verified criteria, 5-day turnaround
 3. **Pricing:** $499 per video, what's included, FAQs
-4. **Nav updates:** Add Creator Login, Admin Login
+4. **Rights Verified:** 3-page structure (Overview landing page, Full Playbook, Chain of Title deep-dive)
+5. **Nav updates:** Add Creator Login, Admin Login, Rights Verified dropdown
 
 **Success metrics:**
 - 20%+ of homepage visitors click "Get Verified" CTA (primary conversion)
@@ -393,7 +394,188 @@
 
 ---
 
-### 4. Navigation Updates
+### 4. Rights Verified Section (3-Page Structure)
+
+**Primary goal:** Educate visitors on verification methodology, build credibility, convert serious buyers.
+
+**Overview:** Rights Verified section consolidates the existing 5 separate pages into a streamlined 3-page structure:
+1. **Landing Page** (high-level overview for all visitors)
+2. **Full Playbook** (deep-dive for legal teams, advisors, serious buyers)
+3. **Chain of Title Deep-Dive** (9-field schema explained with examples)
+
+**File structure:**
+```
+/rights-verified/               → Overview landing page
+/rights-verified/playbook       → Full legal reference
+/rights-verified/chain-of-title → 9-field schema deep-dive
+```
+
+---
+
+#### Page 4.1: Rights Verified Overview (`/rights-verified`)
+
+**Purpose:** Entry point for all visitors — explains the system without overwhelming.
+
+**Layout Structure:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  HERO                                                        │
+│  What is Rights Verified?                                    │
+│  Expert review that reduces AI video legal risk             │
+│  $499 per video | 90-minute review | Chain of Title docs    │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│  SECTION 1: HOW IT WORKS (4-stage process)                   │
+│                                                              │
+│  Stage 1: Pre-Screen (15 min)                                │
+│  Stage 2: Full Review (45-60 min)                            │
+│  Stage 3: Risk Tier Assignment                               │
+│  Stage 4: Decision & Chain of Title Generation               │
+│                                                              │
+│  [Submit for Verification →]                                 │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│  SECTION 2: WHAT WE CHECK (7 Vetting Categories)             │
+│                                                              │
+│  1. Tool & Plan Verification (Approved/Caution/Prohibited)   │
+│  2. Human Authorship Evidence (150+ word declaration)        │
+│  3. Likeness & Identity (No real person faces/voices)        │
+│  4. IP & Brand Imitation (No copyrighted characters)         │
+│  5. Brand Safety (Suitable for commercial attachment)        │
+│  6. Audio & Music Rights (Licensed or original only)         │
+│  7. Modification Rights (Can brands integrate elements?)     │
+│                                                              │
+│  [See Full Vetting Criteria → /playbook]                     │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│  SECTION 3: WHAT YOU RECEIVE — CHAIN OF TITLE                │
+│                                                              │
+│  "The file is the carrier. The documentation is the product."│
+│                                                              │
+│  9-Field Schema Overview:                                    │
+│  1. Tool Provenance Log                                      │
+│  2. Model Disclosure                                         │
+│  3. Rights Verified Sign-off                                 │
+│  4. Commercial Use Authorization                             │
+│  5. Modification Rights Status                               │
+│  6. Category Conflict Log                                    │
+│  7. Territory Log                                            │
+│  8. Regeneration Rights Status                               │
+│  9. Version History                                          │
+│                                                              │
+│  [Download Sample Chain of Title (PDF)]                      │
+│  [See Full Schema → /chain-of-title]                         │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│  SECTION 4: WHY THIS REDUCES RISK                            │
+│                                                              │
+│  Three Risk Categories:                                      │
+│  • Copyright Infringement (training data, output similarity) │
+│  • Regulatory Compliance (FTC, state AI laws, platform TOS)  │
+│  • Copyrightability Uncertainty (can brands own the output?) │
+│                                                              │
+│  Four Legal Mechanisms:                                      │
+│  • Damage Mitigation (73% statutory reduction via innocent   │
+│    infringer defense)                                        │
+│  • Regulatory Compliance (Colorado AI Act safe harbor, etc.) │
+│  • Copyrightability Protection (human authorship evidence)   │
+│  • Distribution Enablement (platform policy compliance)      │
+│                                                              │
+│  "Adobe verifies Firefly only. We verify Sora, Runway, Kling."│
+│                                                              │
+│  [Read Legal Risk Brief → /playbook]                         │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│  SECTION 5: TOOL TIERS PREVIEW                               │
+│                                                              │
+│  ✓ Approved Tier: Sora, Runway, Pika, Adobe Firefly         │
+│  ⚠ Caution Tier: Kling (approved but flagged)               │
+│  ✗ Prohibited Tier: Hailuo, Veo, unlicensed tools           │
+│                                                              │
+│  [See Full Tool Tier List → /playbook]                       │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│  FINAL CTA SECTION                                           │
+│  Ready to Get Verified?                                      │
+│  [Submit for Verification →]  [Read Full Playbook →]         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Acceptance criteria:**
+- [ ] Clear entry point (explains system without legal jargon)
+- [ ] 4-stage process visualized
+- [ ] 7 categories listed with brief descriptions
+- [ ] 9-field Chain of Title overview (fields listed)
+- [ ] 4 legal mechanisms explained at high level
+- [ ] Tool tier preview (Approved/Caution/Prohibited examples)
+- [ ] Multiple CTAs throughout (Submit / Read Playbook / Download Sample)
+- [ ] Links to deep-dive pages (Playbook, Chain of Title)
+- [ ] Mobile responsive
+- [ ] ~3,000 words (5-7 min read)
+
+---
+
+#### Page 4.2: Full Playbook (`/rights-verified/playbook`)
+
+**Purpose:** Comprehensive legal reference for legal teams, advisors, serious buyers.
+
+**Content includes:**
+- Version badge: "Version 0.2 — February 2026"
+- Table of Contents with anchor links
+- **Part 1:** The SI8 Rights Verified Framework (What we will/won't work with + No List)
+- **Part 2:** Legal Landscape (Copyright ownership, damage mitigation, regulatory compliance, training data liability, DMCA CMI)
+- **Part 3:** Tool Tier Classifications (detailed table with all tools + rationale)
+- **Part 4:** Platform Policies (YouTube, TikTok, Meta, iQIYI, LinkedIn disclosure requirements)
+- **Part 5:** Vetting Criteria (7 categories with full pass/fail/flag thresholds)
+- **Part 6:** Legal Risk Reduction Mechanisms (4 mechanisms with Chain of Title field mapping)
+
+**Acceptance criteria:**
+- [ ] Table of contents with working anchor links
+- [ ] All 6 parts complete with detailed content
+- [ ] Legal language accurate (preserve from existing pages)
+- [ ] Tool tier table updated (Approved/Caution/Prohibited with examples)
+- [ ] Platform policy summary (4-5 major platforms)
+- [ ] CTA at bottom (Get Your Content Verified)
+- [ ] Mobile responsive
+- [ ] PDF download option (optional Year 1)
+
+---
+
+#### Page 4.3: Chain of Title Deep-Dive (`/rights-verified/chain-of-title`)
+
+**Purpose:** Explain the 9-field schema in detail with examples.
+
+**Content includes:**
+- Hero: "The file is the carrier. The Chain of Title is the product."
+- **Section 1:** Why Documentation Creates Value (Getty analogy)
+- **Section 2:** The 9-Field Schema
+  - Each field gets detailed card:
+    - What it captures
+    - Legal defense supported
+    - Example (code-formatted sample)
+- **Section 3:** Four Mechanisms of Risk Reduction (with field mapping)
+- **Section 4:** Catalog ID Format (SI8-2026-0001 example)
+- **Section 5:** How to Read the Documentation (What buyers receive, what legal teams look for)
+
+**Acceptance criteria:**
+- [ ] All 9 fields explained in detail
+- [ ] Each field includes: description, legal defense, example
+- [ ] Getty analogy included ("$450 for guarantee, $50 for JPEG")
+- [ ] Catalog ID format explained with example
+- [ ] Sample Chain of Title embedded or linked (PDF)
+- [ ] CTA at bottom (Get Verified / Read Legal Risk Brief)
+- [ ] Mobile responsive
+
+---
+
+### 5. Navigation Updates
 
 **Current nav (v3):**
 ```
@@ -402,9 +584,10 @@ SI8 Logo | How It Works | Pricing | Catalog | Contact
 
 **New nav (v4):**
 ```
-SI8 Logo | How It Works | Pricing | Catalog | Login ▼
-                                              • Creator Login
-                                              • Admin Login
+SI8 Logo | How It Works | Pricing | Catalog | Rights Verified ▼ | Login ▼ | Get Verified
+                                              • Overview            • Creator Login
+                                              • Full Playbook       • Admin Login
+                                              • Chain of Title
 ```
 
 **Logged-in nav (creators):**
@@ -476,6 +659,9 @@ SI8 Logo | Review Queue | Catalog | Deals | Users | [JD] ▼ Logout
 - `/` → `/zh` (Homepage)
 - `/how-it-works` → `/zh/how-it-works`
 - `/pricing` → `/zh/pricing`
+- `/rights-verified` → `/zh/rights-verified` (Overview landing page)
+- `/rights-verified/playbook` → `/zh/rights-verified/playbook` (Full legal reference)
+- `/rights-verified/chain-of-title` → `/zh/rights-verified/chain-of-title` (9-field schema)
 - `/catalog` → `/zh/catalog` (optional Year 1, English-first for buyers)
 
 **Language selector in nav:**

@@ -871,59 +871,78 @@ This plan delivers the minimum viable CaaS platform:
 
 **Goal:** Launch production site with updated v4 messaging
 
-### Day 20 (Mon): Website Homepage Redesign
-- [ ] Update existing `07_Website/index.html` with v4 messaging:
-  - Hero: "Chain of Title Verification for AI Video Content"
-  - Subhead: "Get commercial use documentation for Sora, Runway, and Kling outputs. $499 per video, 5-day turnaround."
-  - Two CTA buttons: "Get Verified" (to `/auth/signup`), "Browse Catalog" (to `/catalog`)
-  - Section: "Two Ways to Work with SI8"
-    - Path 1: CaaS Verification ($499, fast turnaround)
-    - Path 2: Showcase Marketplace (opt-in after verification, earn 80%)
-  - Social proof section: "Trusted by creators and brands" (placeholder until real logos)
-  - FAQ section: 5-7 common questions
-- [ ] Update nav:
-  - Add "Login" dropdown: Creator Login, Admin Login
-  - Update links: How It Works, Pricing, Catalog, Contact
-- [ ] Test: View homepage → verify messaging clear → click CTAs
+### Day 20 (Mon): Set Up /newsite/ Staging Directory + Homepage
 
-### Day 21 (Tue): Website - How It Works Page
-- [ ] Create `/07_Website/how-it-works.html`:
+**Note:** Build new v4 site in `/newsite/` subdirectory to avoid disrupting production site. Use folder/index.html pattern for clean URLs (Vercel compatibility).
+
+- [ ] Create `/07_Website/newsite/` directory structure:
+  ```
+  /newsite/
+  ├── index.html           (homepage)
+  ├── styles.css           (shared styles)
+  ├── script.js            (shared scripts)
+  ├── how-it-works/
+  │   └── index.html
+  ├── pricing/
+  │   └── index.html
+  ├── catalog/
+  │   └── index.html       (placeholder for now)
+  └── rights-verified/
+      ├── index.html       (overview landing page) ✅ Already created
+      ├── playbook/
+      │   └── index.html   (deep-dive) ✅ Already created
+      └── chain-of-title/
+          └── index.html   (9-field schema) ✅ Already created
+  ```
+- [ ] Copy `/07_Website/homepage-v4-mock.html` to `/newsite/index.html`
+- [ ] Update nav in homepage:
+  - Add "Rights Verified" dropdown: Overview, Full Playbook, Chain of Title
+  - Add "Login" dropdown: Creator Login, Admin Login
+  - Add "Get Verified" CTA button
+- [ ] Update all links to use clean URLs (no .html extensions):
+  - `/newsite/how-it-works` (not `/newsite/how-it-works.html`)
+  - `/newsite/pricing`
+  - `/newsite/rights-verified`
+- [ ] Test: Open `/newsite/index.html` in browser → verify styling → click nav links
+
+### Day 21 (Tue): Website - How It Works + Pricing Pages
+- [ ] Create `/07_Website/newsite/how-it-works/index.html`:
   - Section 1: "What is Chain of Title Verification?"
     - Explain the Rights Verified process
     - Why brands need it ("won't get you sued" positioning)
-    - What you get: 9-field Rights Package PDF
-  - Section 2: "How It Works (3 Steps)"
-    - Step 1: Submit your video + documentation (70 fields)
-    - Step 2: We review (90 minutes, 7 categories checked)
-    - Step 3: Download your Rights Verified Package + opt-in to Showcase
-  - Section 3: "What We Check"
-    - Tool & plan verification
-    - Human authorship evidence
-    - Likeness & identity
-    - IP & brand imitation
-    - Brand safety
-    - Audio & music rights
-    - Modification rights
+    - What you get: 9-field Chain of Title documentation
+  - Section 2: "How It Works (4 Stages)"
+    - Stage 1: Pre-Screen (15 min)
+    - Stage 2: Full Review (45-60 min)
+    - Stage 3: Risk Tier Assignment
+    - Stage 4: Decision & Chain of Title Generation
+  - Section 3: "What We Check" (7 categories overview)
   - Section 4: "Optional: Opt into Showcase"
     - Explain marketplace, 80/20 split, passive income potential
   - CTA: "Get Started" (to `/auth/signup`)
+  - Link to Rights Verified deep-dive: "Read Full Playbook"
 - [ ] Test: Read through → verify explains process clearly
 
-### Day 22 (Wed): Website - Pricing Page
-- [ ] Create `/07_Website/pricing.html`:
+### Day 22 (Wed): Website - Pricing Page + Rights Verified Review
+- [ ] Create `/07_Website/newsite/pricing/index.html`:
   - Single tier: $499 per video
   - "What's Included" section:
     - 90-minute expert review (7 categories)
     - Rights Verified Documentation Package (9-field Chain of Title PDF)
     - Commercial use authorization verification
     - 5-business-day turnaround (or faster)
-    - Optional Showcase opt-in (earn 80% of licensing fees)
+    - Optional catalog opt-in (earn 80% of licensing fees)
   - "Compare to Alternatives" table:
     - Adobe Stock: Only Firefly accepted, no Sora/Runway/Kling
     - DIY: No expert review, brands assume all risk
     - SI8: Best tools verified, expert review, fast turnaround
   - FAQ: Pricing-specific questions (refunds, volume discounts, what if rejected)
   - CTA: "Get Verified" (to `/auth/signup`)
+- [ ] Review Rights Verified 3-page structure (already created):
+  - `/newsite/rights-verified/index.html` ✅ Landing page complete
+  - `/newsite/rights-verified/playbook/index.html` ✅ Full legal reference complete
+  - `/newsite/rights-verified/chain-of-title/index.html` ✅ 9-field schema complete
+  - Test all 3 pages → verify content accuracy → check nav links work
 - [ ] Test: View pricing → verify $499 clear → understand what's included
 
 ### Day 23 (Thu): Integration Testing

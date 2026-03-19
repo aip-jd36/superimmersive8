@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rights Verified - Expert Review for AI Video | SuperImmersive 8</title>
+    <meta name="description" content="$499 per video. 90-minute expert review. Comprehensive Chain of Title documentation that reduces AI video legal risk for commercial use.">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Rights Verified - Expert Review for AI Video">
+    <meta property="og:description" content="$499 per video. Expert review that reduces legal risk for commercial AI video deployment.">
+    <meta property="og:type" content="website">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-bg: #0f0f0f;
+            --color-surface: #1a1a1a;
+            --color-surface-hover: #252525;
+            --color-text: #ffffff;
+            --color-text-secondary: #a0a0a0;
+            --color-accent: #f59e0b;
+            --color-accent-hover: #d97706;
+            --color-border: #333;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 15, 15, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--color-border);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+
+        .logo span {
+            color: var(--color-accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--color-text);
+        }
+
+        .nav-dropdown {
+            position: relative;
+        }
+
+        .nav-dropdown-trigger {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-dropdown-content {
+            position: absolute;
+            top: calc(100% + 1rem);
+            right: 0;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+            min-width: 200px;
+            display: none;
+        }
+
+        .nav-dropdown:hover .nav-dropdown-content {
+            display: block;
+        }
+
+        .nav-dropdown-content a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .nav-dropdown-content a:hover {
+            color: var(--color-text);
+            background: var(--color-surface-hover);
+        }
+
+        .nav-cta {
+            padding: 0.75rem 1.5rem;
+            background: var(--color-accent);
+            color: var(--color-bg);
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .nav-cta:hover {
+            background: var(--color-accent-hover);
+            color: var(--color-bg);
+        }
+
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            margin-left: 1rem;
+        }
+
+        .lang-selector a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .lang-selector a:hover,
+        .lang-selector a.active {
+            color: var(--color-accent);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 12rem 2rem 8rem;
+            text-align: center;
+            background:
+                radial-gradient(ellipse at top, rgba(245, 158, 11, 0.15), transparent 50%),
+                var(--color-bg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 1200px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(245, 158, 11, 0.1), transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 50px;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-family: var(--font-display);
+            font-size: 4rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .hero h1 {
+            background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.35rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+
+        .hero-cta-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--color-accent);
+            color: var(--color-bg);
+        }
+
+        .btn-primary:hover {
+            background: var(--color-accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-surface);
+            border-color: var(--color-accent);
+        }
+
+        /* Content Section */
+        .content-section {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-pretitle {
+            font-size: 0.875rem;
+            color: var(--color-accent);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: var(--color-text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Process Steps */
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .process-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 2.5rem;
+            transition: all 0.3s;
+        }
+
+        .process-card:hover {
+            border-color: var(--color-accent);
+            transform: translateY(-4px);
+        }
+
+        .process-number {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            margin-bottom: 1rem;
+        }
+
+        .process-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .process-card p {
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+        }
+
+        .process-list {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0 0 0;
+        }
+
+        .process-list li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .process-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--color-accent);
+            font-weight: 700;
+        }
+
+        /* Vetting Categories */
+        .vetting-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+
+        .vetting-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 2rem;
+        }
+
+        .vetting-card h4 {
+            font-family: var(--font-display);
+            color: var(--color-accent);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+        }
+
+        .vetting-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .vetting-card p {
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* CTA Sections */
+        .cta-section {
+            background: var(--color-surface);
+            border-top: 1px solid var(--color-border);
+            border-bottom: 1px solid var(--color-border);
+            padding: 6rem 2rem;
+            text-align: center;
+        }
+
+        .cta-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .cta-title {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .cta-subtitle {
+            font-size: 1.125rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        /* Info Boxes */
+        .info-box {
+            background: rgba(245, 158, 11, 0.05);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 12px;
+            padding: 3rem;
+            margin: 3rem auto;
+            max-width: 900px;
+        }
+
+        .info-box h3 {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-box p {
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+
+        .info-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--color-bg);
+            border-top: 1px solid var(--color-border);
+            padding: 4rem 2rem 2rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 4rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-brand h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-brand p {
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+        }
+
+        .footer-links h4 {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links ul li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-links a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--color-accent);
+        }
+
+        .footer-bottom {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-top: 2rem;
+            border-top: 1px solid var(--color-border);
+            text-align: center;
+            color: var(--color-text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero {
+                padding: 8rem 1.5rem 4rem;
+            }
+
+            .process-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .vetting-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="logo">SuperImmersive <span>8</span></a>
+            <ul class="nav-links">
+                <li><a href="/how-it-works">How It Works</a></li>
+                <li><a href="/pricing">Pricing</a></li>
+                <li><a href="/catalog">Catalog</a></li>
+                <li class="nav-dropdown">
+                    <span class="nav-dropdown-trigger">
+                        <span>Rights Verified</span>
+                        <span>▼</span>
+                    </span>
+                    <div class="nav-dropdown-content">
+                        <a href="/rights-verified">Overview</a>
+                        <a href="/rights-verified/playbook">Full Playbook</a>
+                        <a href="/rights-verified/chain-of-title">Chain of Title</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <span class="nav-dropdown-trigger">
+                        <span>Login</span>
+                        <span>▼</span>
+                    </span>
+                    <div class="nav-dropdown-content">
+                        <a href="/auth/login">Creator Login</a>
+                        <a href="/auth/admin/login">Admin Login</a>
+                    </div>
+                </li>
+                <li><a href="/auth/signup" class="nav-cta">Get Verified</a></li>
+            </ul>
+            <div class="lang-selector">
+                <a href="/rights-verified" class="active">EN</a>
+                <span>/</span>
+                <a href="/zh/rights-verified">繁體中文</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span>Rights Verified Process</span>
+            </div>
+
+            <h1>What is Rights Verified?</h1>
+
+            <p class="hero-subtitle">
+                Expert review that reduces AI video legal risk. <strong>$499 per video, 90-minute review, comprehensive Chain of Title documentation.</strong>
+            </p>
+
+            <div class="hero-cta-group">
+                <a href="/auth/signup" class="btn btn-primary">
+                    Submit for Verification
+                    <span>→</span>
+                </a>
+                <a href="/rights-verified/playbook" class="btn btn-secondary">
+                    Read Full Playbook
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="content-section">
+        <div class="section-header">
+            <p class="section-pretitle">The Process</p>
+            <h2 class="section-title">How Rights Verified Works</h2>
+            <p class="section-subtitle">
+                Every submission passes through a rigorous 4-stage vetting process. We do the legal homework so brands and platforms don't have to.
+            </p>
+        </div>
+
+        <div class="process-grid">
+            <div class="process-card">
+                <div class="process-number">01</div>
+                <h3>Pre-Screen</h3>
+                <p>Quick gate before investing full review time (15 minutes):</p>
+                <ul class="process-list">
+                    <li>All tools on Approved or Caution list?</li>
+                    <li>Commercial plan receipts provided?</li>
+                    <li>Any obvious No List violations?</li>
+                    <li>Modification rights authorization complete?</li>
+                    <li>Audio disclosure complete?</li>
+                </ul>
+            </div>
+
+            <div class="process-card">
+                <div class="process-number">02</div>
+                <h3>Full Review</h3>
+                <p>Seven review categories with clear thresholds (45-60 minutes):</p>
+                <ul class="process-list">
+                    <li>Tool & Plan Verification</li>
+                    <li>Human Authorship Evidence</li>
+                    <li>Likeness & Identity Scan</li>
+                    <li>IP & Brand Imitation</li>
+                    <li>Brand Safety Assessment</li>
+                    <li>Audio & Music Rights</li>
+                    <li>Modification Rights</li>
+                </ul>
+            </div>
+
+            <div class="process-card">
+                <div class="process-number">03</div>
+                <h3>Risk Tier Assignment</h3>
+                <p>Content classified into clear risk categories:</p>
+                <ul class="process-list">
+                    <li><strong>Certified:</strong> Adobe Firefly primary tool</li>
+                    <li><strong>Standard:</strong> Runway/Pika/Sora (paid)</li>
+                    <li><strong>Caution-Flagged:</strong> Kling used (approved but noted)</li>
+                    <li><strong>Reject:</strong> Prohibited/high-risk tool</li>
+                </ul>
+            </div>
+
+            <div class="process-card">
+                <div class="process-number">04</div>
+                <h3>Decision & Chain of Title</h3>
+                <p>Final determination and documentation:</p>
+                <ul class="process-list">
+                    <li><strong>Clean Pass:</strong> Chain of Title generated</li>
+                    <li><strong>Conditional Pass:</strong> Filmmaker provides missing docs (14 days)</li>
+                    <li><strong>Reject:</strong> Written explanation + resubmission guidance</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- What We Check -->
+    <section class="content-section" style="background: var(--color-surface);">
+        <div class="section-header">
+            <p class="section-pretitle">Vetting Categories</p>
+            <h2 class="section-title">What We Check</h2>
+            <p class="section-subtitle">
+                Seven review categories with pass/fail thresholds. Clear standards remove ambiguity where judgment isn't needed.
+            </p>
+        </div>
+
+        <div class="vetting-grid">
+            <div class="vetting-card">
+                <h4>Category 01</h4>
+                <h3>Tool & Plan Verification</h3>
+                <p>Every AI tool used has a paid commercial license and is on the Approved or Caution tier list.</p>
+            </div>
+
+            <div class="vetting-card">
+                <h4>Category 02</h4>
+                <h3>Human Authorship Evidence</h3>
+                <p>Declaration demonstrates meaningful human creative direction — sufficient to establish human authorship, not just prompt entry.</p>
+            </div>
+
+            <div class="vetting-card">
+                <h4>Category 03</h4>
+                <h3>Likeness & Identity</h3>
+                <p>No identifiable real person's face, voice, or identity without documented consent. Hard line — no exceptions.</p>
+            </div>
+
+            <div class="vetting-card">
+                <h4>Category 04</h4>
+                <h3>IP & Brand Imitation</h3>
+                <p>No copyrighted characters, protected trade dress, or trademarked identifiers without authorization.</p>
+            </div>
+
+            <div class="vetting-card">
+                <h4>Category 05</h4>
+                <h3>Brand Safety</h3>
+                <p>Content suitability for commercial brand attachment, and which brand categories are appropriate.</p>
+            </div>
+
+            <div class="vetting-card">
+                <h4>Category 06</h4>
+                <h3>Audio & Music Rights</h3>
+                <p>Every audio element is original AI-generated with commercial license, licensed with documentation, or absent.</p>
+            </div>
+
+            <div class="vetting-card">
+                <h4>Category 07</h4>
+                <h3>Modification Rights</h3>
+                <p>Filmmaker authorized SI8 to commission AI-regenerated brand-integrated versions for product placement deals.</p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 3rem;">
+            <a href="/rights-verified/playbook" class="btn btn-secondary">
+                See Full Vetting Criteria
+            </a>
+        </div>
+    </section>
+
+    <!-- What You Receive -->
+    <section class="content-section">
+        <div class="section-header">
+            <p class="section-pretitle">Documentation</p>
+            <h2 class="section-title">What You Receive — Chain of Title</h2>
+            <p class="section-subtitle">
+                The file is the carrier. The documentation is the product.
+            </p>
+        </div>
+
+        <div class="info-box">
+            <h3>9-Field Chain of Title Documentation</h3>
+            <p>Every verified video comes with a structured Chain of Title — 9 fields of documentation that reduce legal exposure, satisfy regulatory compliance, and enable distribution.</p>
+            <p><strong>Think Getty Images:</strong> Brands pay $450 for the legal guarantee, $50 for the JPEG. The documentation layer is the product, not the pixels.</p>
+        </div>
+
+        <div class="vetting-grid">
+            <div class="vetting-card">
+                <h4>Field 01</h4>
+                <h3>Tool Provenance Log</h3>
+                <p>Which AI tools were used, versions, plan type, production dates, paid commercial plan receipts on file</p>
+            </div>
+
+            <div class="vetting-card">
+                <h4>Field 02</h4>
+                <h3>Model Disclosure</h3>
+                <p>Which AI models generated content, version at time of production</p>
+            </div>
+
+            <div class="vetting-card">
+                <h4>Field 03</h4>
+                <h3>Rights Verified Sign-off</h3>
+                <p>SI8 reviewer, review date, tier assigned (Certified/Standard/Caution), any conditions or flags</p>
+            </div>
+
+            <div class="vetting-card">
+                <h4>Field 04</h4>
+                <h3>Commercial Use Authorization</h3>
+                <p>Confirmation each tool's ToS permits commercial licensing, paid plan receipts filed</p>
+            </div>
+
+            <div class="vetting-card">
+                <h4>Field 05</h4>
+                <h3>Modification Rights Status</h3>
+                <p>Authorized (full work / scene-level) or Not Authorized; authorization scope documented</p>
+            </div>
+
+            <div class="vetting-card">
+                <h4>Field 06</h4>
+                <h3>Category Conflict Log</h3>
+                <p>Brand categories ineligible for placement (e.g., alcohol, political, direct competitors)</p>
+            </div>
+
+            <div class="vetting-card">
+                <h4>Field 07</h4>
+                <h3>Territory Log</h3>
+                <p>Geographic licensing restrictions; default = Global if none noted</p>
+            </div>
+
+            <div class="vetting-card">
+                <h4>Field 08</h4>
+                <h3>Regeneration Rights Status</h3>
+                <p>Which scenes can be AI-regenerated for brand integration; scope and limitations</p>
+            </div>
+
+            <div class="vetting-card">
+                <h4>Field 09</h4>
+                <h3>Version History</h3>
+                <p>Production version, review date, any subsequent modifications and re-review dates</p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 3rem;">
+            <a href="/rights-verified/chain-of-title" class="btn btn-secondary">
+                See Full Chain of Title Schema
+            </a>
+        </div>
+    </section>
+
+    <!-- Why This Reduces Risk -->
+    <section class="content-section" style="background: var(--color-surface);">
+        <div class="section-header">
+            <p class="section-pretitle">Legal Value</p>
+            <h2 class="section-title">Why This Reduces Risk</h2>
+            <p class="section-subtitle">
+                Four quantifiable legal defense mechanisms backed by statute and case law.
+            </p>
+        </div>
+
+        <div class="process-grid">
+            <div class="process-card">
+                <h3>📉 Damage Mitigation</h3>
+                <p><strong>73%+ Statutory Damage Reduction</strong></p>
+                <p>Chain of Title documentation supports innocent infringer defense under 17 U.S.C. § 504, reducing minimum statutory damages from $750 to $200 per work.</p>
+            </div>
+
+            <div class="process-card">
+                <h3>✓ Regulatory Compliance</h3>
+                <p><strong>Colorado "Rebuttable Presumption" Safe Harbor</strong></p>
+                <p>Colorado AI Act explicitly rewards documented systems with legal presumption of reasonable care. Avoids $20K penalties.</p>
+            </div>
+
+            <div class="process-card">
+                <h3>© Copyrightability Protection</h3>
+                <p><strong>USCO Human Authorship Requirement</strong></p>
+                <p>U.S. Copyright Office (Jan 2025): Prompts alone don't grant ownership. Chain of Title documents the editorial paper trail required for your brand to actually own the copyright.</p>
+            </div>
+
+            <div class="process-card">
+                <h3>📺 Distribution Enablement</h3>
+                <p><strong>E&O Insurance + Platform Compliance</strong></p>
+                <p>Chain of Title = chain-of-title equivalent for AI content. Satisfies E&O underwriting requirements and platform disclosure policies (YouTube, TikTok, streaming).</p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 3rem;">
+            <a href="/rights-verified/playbook" class="btn btn-secondary">
+                Read Legal Risk Brief
+            </a>
+        </div>
+    </section>
+
+    <!-- Tool Tiers -->
+    <section class="content-section">
+        <div class="section-header">
+            <p class="section-pretitle">Tool Classification</p>
+            <h2 class="section-title">Tool Tiers</h2>
+            <p class="section-subtitle">
+                Not all AI tools carry equal risk. We verify the best creative tools on the market.
+            </p>
+        </div>
+
+        <div class="vetting-grid">
+            <div class="vetting-card" style="border-left: 4px solid #22c55e;">
+                <h4 style="color: #22c55e;">✓ Approved</h4>
+                <h3>Adobe Firefly, Runway, Pika, Sora</h3>
+                <p>Best commercial terms with documented service improvement clauses. Adobe Stock-trained (Firefly) or paid commercial plans with clear ToS.</p>
+            </div>
+
+            <div class="vetting-card" style="border-left: 4px solid var(--color-accent);">
+                <h4>⚠ Caution</h4>
+                <h3>Kling</h3>
+                <p>Approved but flagged: Retains permanent sublicensable license to use outputs for AI training. Note in Chain of Title; affects exclusivity pricing.</p>
+            </div>
+
+            <div class="vetting-card" style="border-left: 4px solid #ef4444;">
+                <h4 style="color: #ef4444;">✗ Prohibited</h4>
+                <h3>Veo (consumer), Hailuo, Midjourney</h3>
+                <p>Veo consumer = no commercial use. Hailuo/Minimax = active Disney/WB lawsuit. Midjourney/Stability = studio litigation.</p>
+            </div>
+
+            <div class="vetting-card">
+                <h4>The Adobe Gap</h4>
+                <h3>Why This Matters</h3>
+                <p><strong>Adobe verifies Firefly only.</strong> If you want to use Sora, Runway, or Kling, you're on your own. SI8 fills the gap Adobe structurally can't.</p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 3rem;">
+            <a href="/rights-verified/playbook" class="btn btn-secondary">
+                See Full Tool Tier List
+            </a>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2 class="cta-title">Ready to Get Verified?</h2>
+            <p class="cta-subtitle">
+                Join creators who are making their AI video work commercially safe. 5-day turnaround, $499 per video.
+            </p>
+            <div class="hero-cta-group">
+                <a href="/auth/signup" class="btn btn-primary">
+                    Submit for Verification
+                    <span>→</span>
+                </a>
+                <a href="/rights-verified/playbook" class="btn btn-secondary">
+                    Read Full Playbook
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3>SuperImmersive <span style="color: var(--color-accent);">8</span></h3>
+                <p>
+                    Chain of Title verification for AI video content.
+                    Based in Taipei, serving creators globally.
+                </p>
+            </div>
+
+            <div class="footer-links">
+                <h4>Product</h4>
+                <ul>
+                    <li><a href="/how-it-works">How It Works</a></li>
+                    <li><a href="/pricing">Pricing</a></li>
+                    <li><a href="/catalog">Browse Catalog</a></li>
+                    <li><a href="/auth/signup">Get Verified</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links">
+                <h4>Rights Verified</h4>
+                <ul>
+                    <li><a href="/rights-verified">Overview</a></li>
+                    <li><a href="/rights-verified/playbook">Full Playbook</a></li>
+                    <li><a href="/rights-verified/chain-of-title">Chain of Title</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                    <li><a href="/terms">Terms of Service</a></li>
+                    <li><a href="/privacy">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 SuperImmersive 8. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

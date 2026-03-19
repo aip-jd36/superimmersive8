@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperImmersive 8 - Chain of Title Verification for AI Video</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-bg: #0f0f0f;
+            --color-surface: #1a1a1a;
+            --color-surface-hover: #252525;
+            --color-text: #ffffff;
+            --color-text-secondary: #a0a0a0;
+            --color-accent: #f59e0b;
+            --color-accent-hover: #d97706;
+            --color-border: #333;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 15, 15, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--color-border);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+
+        .logo span {
+            color: var(--color-accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--color-text);
+        }
+
+        .nav-dropdown {
+            position: relative;
+        }
+
+        .nav-dropdown-trigger {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-dropdown-content {
+            position: absolute;
+            top: calc(100% + 1rem);
+            right: 0;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+            min-width: 160px;
+            display: none;
+        }
+
+        .nav-dropdown:hover .nav-dropdown-content {
+            display: block;
+        }
+
+        .nav-dropdown-content a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .nav-dropdown-content a:hover {
+            color: var(--color-text);
+            background: var(--color-surface-hover);
+        }
+
+        .nav-cta {
+            padding: 0.75rem 1.5rem;
+            background: var(--color-accent);
+            color: var(--color-bg);
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .nav-cta:hover {
+            background: var(--color-accent-hover);
+            color: var(--color-bg);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 12rem 2rem 8rem;
+            text-align: center;
+            background:
+                radial-gradient(ellipse at top, rgba(245, 158, 11, 0.15), transparent 50%),
+                var(--color-bg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 1200px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(245, 158, 11, 0.1), transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 50px;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .hero-badge-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        h1 {
+            font-family: var(--font-display);
+            font-size: 4rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .hero h1 {
+            background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.35rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+
+        .hero-cta-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--color-accent);
+            color: var(--color-bg);
+        }
+
+        .btn-primary:hover {
+            background: var(--color-accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-surface);
+            border-color: var(--color-accent);
+        }
+
+        /* Trusted By */
+        .trusted-by {
+            padding: 4rem 2rem 0;
+            text-align: center;
+        }
+
+        .trusted-by-label {
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .trusted-logos {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            align-items: center;
+            flex-wrap: wrap;
+            opacity: 0.5;
+        }
+
+        .trusted-logo {
+            font-size: 1.5rem;
+            color: var(--color-text-secondary);
+            font-weight: 500;
+        }
+
+        /* Two Paths Section */
+        .two-paths {
+            padding: 8rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .section-pretitle {
+            font-size: 0.875rem;
+            color: var(--color-accent);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .section-subtitle {
+            font-size: 1.25rem;
+            color: var(--color-text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .paths-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+        }
+
+        .path-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 16px;
+            padding: 3rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .path-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--color-accent);
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .path-card:hover {
+            border-color: var(--color-accent);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .path-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .path-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(245, 158, 11, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .path-title {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .path-price {
+            font-size: 1rem;
+            color: var(--color-accent);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .path-description {
+            color: var(--color-text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+
+        .path-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .path-features li {
+            padding: 0.75rem 0;
+            display: flex;
+            align-items: start;
+            gap: 0.75rem;
+            color: var(--color-text-secondary);
+        }
+
+        .path-features li::before {
+            content: '✓';
+            color: var(--color-accent);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* Problem Section */
+        .problem-section {
+            padding: 8rem 2rem;
+            background: var(--color-surface);
+            border-top: 1px solid var(--color-border);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .problem-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .problem-title {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            letter-spacing: -0.02em;
+        }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .problem-card {
+            padding: 2rem;
+            text-align: left;
+        }
+
+        .problem-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+        }
+
+        .problem-card p {
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+        }
+
+        .problem-card.highlight {
+            background: rgba(245, 158, 11, 0.05);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 12px;
+        }
+
+        .problem-card.highlight h3 {
+            color: var(--color-accent);
+        }
+
+        /* Social Proof */
+        .social-proof {
+            padding: 8rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .testimonial-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 2rem;
+        }
+
+        .testimonial-text {
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .testimonial-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-accent), #d97706);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--color-bg);
+        }
+
+        .testimonial-info h4 {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .testimonial-info p {
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            padding: 8rem 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .faq-list {
+            margin-top: 4rem;
+        }
+
+        .faq-item {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            font-family: var(--font-display);
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: color 0.2s;
+        }
+
+        .faq-question:hover {
+            color: var(--color-accent);
+        }
+
+        .faq-answer {
+            padding: 0 1.5rem 1.5rem;
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 8rem 2rem;
+            background:
+                radial-gradient(ellipse at center, rgba(245, 158, 11, 0.1), transparent 70%),
+                var(--color-surface);
+            border-top: 1px solid var(--color-border);
+            text-align: center;
+        }
+
+        .cta-content {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .cta-title {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .cta-subtitle {
+            font-size: 1.25rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 3rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--color-bg);
+            border-top: 1px solid var(--color-border);
+            padding: 4rem 2rem 2rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 4rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-brand h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-brand p {
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links h4 {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links ul li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-links a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--color-accent);
+        }
+
+        .footer-bottom {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-top: 2rem;
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--color-text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.125rem;
+            }
+
+            .hero {
+                padding: 8rem 1.5rem 4rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .paths-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="logo">SuperImmersive <span>8</span></a>
+            <ul class="nav-links">
+                <li><a href="/how-it-works">How It Works</a></li>
+                <li><a href="/pricing">Pricing</a></li>
+                <li><a href="/catalog">Browse Catalog</a></li>
+                <li class="nav-dropdown">
+                    <span class="nav-dropdown-trigger">
+                        <span>Login</span>
+                        <span>▼</span>
+                    </span>
+                    <div class="nav-dropdown-content">
+                        <a href="/auth/login">Creator Login</a>
+                        <a href="/auth/admin/login">Admin Login</a>
+                    </div>
+                </li>
+                <li><a href="/auth/signup" class="nav-cta">Get Verified</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="hero-badge-dot"></span>
+                <span>Now verifying Sora, Runway, Kling, Pika, and more</span>
+            </div>
+
+            <h1>Chain of Title Verification for AI Video Content</h1>
+
+            <p class="hero-subtitle">
+                Get commercial use documentation for Sora, Runway, and Kling outputs.
+                <strong style="color: var(--color-text);">$499 per video, 5-day turnaround.</strong>
+            </p>
+
+            <div class="hero-cta-group">
+                <a href="/auth/signup" class="btn btn-primary">
+                    Get Verified
+                    <span>→</span>
+                </a>
+                <a href="/catalog" class="btn btn-secondary">
+                    Browse Catalog
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trusted By -->
+    <section class="trusted-by">
+        <p class="trusted-by-label">Trusted by creators and brands</p>
+        <div class="trusted-logos">
+            <div class="trusted-logo">MyVideo</div>
+            <div class="trusted-logo">Creator Studios</div>
+            <div class="trusted-logo">Brand Partners</div>
+        </div>
+    </section>
+
+    <!-- The Problem -->
+    <section class="problem-section">
+        <div class="problem-content">
+            <p class="section-pretitle">The Problem</p>
+            <h2 class="problem-title">Brands want AI video. Legal teams say "not yet."</h2>
+
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <h3>Adobe Stock</h3>
+                    <p>Only verifies Firefly. If you want to use Sora, Runway, or Kling, you're on your own.</p>
+                </div>
+
+                <div class="problem-card highlight">
+                    <h3>SuperImmersive 8</h3>
+                    <p>We verify the best AI tools on the market. Get documentation that helps brands move faster—without legal headaches.</p>
+                </div>
+
+                <div class="problem-card">
+                    <h3>DIY Approach</h3>
+                    <p>No expert review. Brands assume 100% of the risk. Legal approval takes weeks, if it happens at all.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Two Paths Section -->
+    <section class="two-paths">
+        <div class="section-header">
+            <p class="section-pretitle">Two Ways to Work With Us</p>
+            <h2 class="section-title">Choose Your Path</h2>
+            <p class="section-subtitle">
+                Get your content verified first. Then optionally list it in our marketplace to earn passive income.
+            </p>
+        </div>
+
+        <div class="paths-grid">
+            <!-- Path 1: CaaS -->
+            <div class="path-card">
+                <div class="path-icon">📄</div>
+                <h3 class="path-title">Chain of Title Verification</h3>
+                <p class="path-price">$499 per video</p>
+                <p class="path-description">
+                    Get expert-reviewed documentation that brands need for commercial use.
+                    5-day turnaround, comprehensive review.
+                </p>
+
+                <ul class="path-features">
+                    <li>90-minute expert review (7 categories checked)</li>
+                    <li>Rights Verified Documentation Package (9-field Chain of Title PDF)</li>
+                    <li>Commercial use authorization verification</li>
+                    <li>Tool provenance log (Sora, Runway, Kling approved)</li>
+                    <li>Human authorship evidence review</li>
+                    <li>5-business-day turnaround</li>
+                </ul>
+
+                <a href="/auth/signup" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    Get Verified
+                </a>
+            </div>
+
+            <!-- Path 2: Showcase -->
+            <div class="path-card">
+                <div class="path-icon">🎬</div>
+                <h3 class="path-title">Showcase Marketplace</h3>
+                <p class="path-price">Earn 80% of licensing fees</p>
+                <p class="path-description">
+                    After verification, opt-in to our public catalog. When brands license your work,
+                    you earn 80% (we keep 20%).
+                </p>
+
+                <ul class="path-features">
+                    <li>Optional: Opt-in after verification</li>
+                    <li>Public catalog listing with Rights Verified badge</li>
+                    <li>Brands discover and request licensing</li>
+                    <li>We handle negotiations and paperwork</li>
+                    <li>You keep 80% of every deal</li>
+                    <li>Passive income from your verified content</li>
+                </ul>
+
+                <a href="/catalog" class="btn btn-secondary" style="width: 100%; justify-content: center;">
+                    Browse Catalog
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof -->
+    <section class="social-proof">
+        <div class="section-header">
+            <p class="section-pretitle">Testimonials</p>
+            <h2 class="section-title">Trusted by Creators</h2>
+            <p class="section-subtitle">
+                Filmmakers and brands rely on our verification process for peace of mind.
+            </p>
+        </div>
+
+        <div class="testimonial-grid">
+            <div class="testimonial-card">
+                <p class="testimonial-text">
+                    "I was nervous about licensing my Runway work commercially. SI8's verification gave me and my client confidence. Process was fast and thorough."
+                </p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">EH</div>
+                    <div class="testimonial-info">
+                        <h4>Essa H.</h4>
+                        <p>AI Filmmaker, Netherlands</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <p class="testimonial-text">
+                    "The documentation package was exactly what our legal team needed. Saved us 3 weeks of back-and-forth. Worth every dollar."
+                </p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">LC</div>
+                    <div class="testimonial-info">
+                        <h4>Lisa Chen</h4>
+                        <p>Brand Manager, Singapore</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <p class="testimonial-text">
+                    "Adobe Stock won't touch Sora outputs. SI8 does. That's the difference between shipping this campaign or not."
+                </p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">MK</div>
+                    <div class="testimonial-info">
+                        <h4>Michael K.</h4>
+                        <p>Creative Director, Bangkok</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="section-header">
+            <p class="section-pretitle">FAQ</p>
+            <h2 class="section-title">Frequently Asked Questions</h2>
+        </div>
+
+        <div class="faq-list">
+            <div class="faq-item">
+                <div class="faq-question">
+                    What AI tools do you verify?
+                </div>
+                <div class="faq-answer">
+                    We verify commercial-grade AI video tools including Sora, Runway, Kling, Pika, and others.
+                    Each tool is reviewed for commercial use authorization and training data safety.
+                    Adobe Firefly is also supported. We do NOT verify tools with unclear IP policies or those trained on unlicensed content.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    What if my video is rejected?
+                </div>
+                <div class="faq-answer">
+                    If your submission doesn't meet our criteria, we'll provide a detailed explanation.
+                    In some cases, you can resubmit with corrections. Rejections typically occur when tools weren't used with paid commercial plans,
+                    or when there's clear IP imitation. We're here to help you understand what needs to change.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    How long does verification take?
+                </div>
+                <div class="faq-answer">
+                    Our target turnaround is 5 business days. Most reviews are completed within 90 minutes of review time,
+                    but we allow buffer for queue management. Rush processing may be available—contact us for details.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    Do I have to opt into the marketplace?
+                </div>
+                <div class="faq-answer">
+                    No. The marketplace is completely optional. Many creators just want the verification documentation
+                    for their own client work. If you do opt-in, you can remove your work from the catalog at any time.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    How does the 80/20 commission split work?
+                </div>
+                <div class="faq-answer">
+                    If you opt into our Showcase marketplace and a brand licenses your work, you receive 80% of the licensing fee.
+                    SI8 keeps 20% for handling negotiations, contracts, and payments. You'll be notified of every deal
+                    and receive payment within 30 days of the deal closing.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2 class="cta-title">Ready to Get Verified?</h2>
+            <p class="cta-subtitle">
+                Join creators who are making their AI video work commercially safe.
+                5-day turnaround, $499 per video.
+            </p>
+            <div class="hero-cta-group">
+                <a href="/auth/signup" class="btn btn-primary">
+                    Get Verified
+                    <span>→</span>
+                </a>
+                <a href="/how-it-works" class="btn btn-secondary">
+                    Learn How It Works
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3>SuperImmersive <span style="color: var(--color-accent);">8</span></h3>
+                <p>
+                    Chain of Title verification for AI video content.
+                    Based in Taipei, serving creators globally.
+                </p>
+            </div>
+
+            <div class="footer-links">
+                <h4>Product</h4>
+                <ul>
+                    <li><a href="/how-it-works">How It Works</a></li>
+                    <li><a href="/pricing">Pricing</a></li>
+                    <li><a href="/catalog">Browse Catalog</a></li>
+                    <li><a href="/auth/signup">Get Verified</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                    <li><a href="/blog">Blog</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="/terms">Terms of Service</a></li>
+                    <li><a href="/privacy">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 SuperImmersive 8. All rights reserved.</p>
+            <p>Built with ❤️ in Taipei</p>
+        </div>
+    </footer>
+</body>
+</html>

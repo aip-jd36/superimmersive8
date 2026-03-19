@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chain of Title & Compliance Documentation | SuperImmersive 8</title>
+    <meta name="description" content="The 9-field Chain of Title schema explained. Why documentation creates value, how it reduces legal exposure, and what buyers receive.">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Chain of Title & Compliance Documentation">
+    <meta property="og:description" content="The file is the carrier. The Chain of Title is the product.">
+    <meta property="og:type" content="website">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-bg: #0f0f0f;
+            --color-surface: #1a1a1a;
+            --color-surface-hover: #252525;
+            --color-text: #ffffff;
+            --color-text-secondary: #a0a0a0;
+            --color-accent: #f59e0b;
+            --color-accent-hover: #d97706;
+            --color-border: #333;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 15, 15, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--color-border);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--color-accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--color-text);
+        }
+
+        .nav-dropdown {
+            position: relative;
+        }
+
+        .nav-dropdown-trigger {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-dropdown-content {
+            position: absolute;
+            top: calc(100% + 1rem);
+            right: 0;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+            min-width: 200px;
+            display: none;
+        }
+
+        .nav-dropdown:hover .nav-dropdown-content {
+            display: block;
+        }
+
+        .nav-dropdown-content a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .nav-dropdown-content a:hover {
+            color: var(--color-text);
+            background: var(--color-surface-hover);
+        }
+
+        .nav-cta {
+            padding: 0.75rem 1.5rem;
+            background: var(--color-accent);
+            color: var(--color-bg);
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .nav-cta:hover {
+            background: var(--color-accent-hover);
+            color: var(--color-bg);
+        }
+
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            margin-left: 1rem;
+        }
+
+        .lang-selector a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+        }
+
+        .lang-selector a.active {
+            color: var(--color-accent);
+        }
+
+        /* Hero */
+        .hero {
+            padding: 12rem 2rem 6rem;
+            text-align: center;
+            background:
+                radial-gradient(ellipse at top, rgba(245, 158, 11, 0.15), transparent 50%),
+                var(--color-bg);
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--color-text-secondary);
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+
+        .hero-callout {
+            max-width: 700px;
+            margin: 3rem auto 0;
+            padding: 2rem;
+            background: rgba(245, 158, 11, 0.05);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 12px;
+        }
+
+        .hero-callout p {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        /* Content */
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .section {
+            margin: 5rem 0;
+        }
+
+        .section h2 {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 1rem;
+        }
+
+        .section h3 {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            margin: 2.5rem 0 1rem 0;
+            color: var(--color-accent);
+        }
+
+        .section p {
+            color: var(--color-text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .intro-box {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 3rem;
+            margin: 3rem 0;
+        }
+
+        .intro-box h3 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--color-text);
+        }
+
+        .intro-box p {
+            color: var(--color-text-secondary);
+            line-height: 1.8;
+            font-size: 1.125rem;
+        }
+
+        /* Field Cards */
+        .fields-grid {
+            display: grid;
+            gap: 3rem;
+            margin: 3rem 0;
+        }
+
+        .field-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 3rem;
+        }
+
+        .field-number {
+            display: inline-block;
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            background: rgba(245, 158, 11, 0.15);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            margin-bottom: 1.5rem;
+        }
+
+        .field-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            margin: 0 0 1rem 0;
+            color: var(--color-text);
+        }
+
+        .field-description {
+            color: var(--color-text-secondary);
+            font-size: 1.125rem;
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+
+        .field-section {
+            margin: 1.5rem 0;
+        }
+
+        .field-section h4 {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--color-accent);
+            margin-bottom: 0.75rem;
+        }
+
+        .field-section ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .field-section li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--color-text-secondary);
+        }
+
+        .field-section li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--color-accent);
+            font-weight: 700;
+        }
+
+        .example-box {
+            background: rgba(245, 158, 11, 0.05);
+            border-left: 4px solid var(--color-accent);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .example-box strong {
+            color: var(--color-accent);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .example-box code {
+            display: block;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            color: var(--color-text);
+            margin-top: 0.75rem;
+            overflow-x: auto;
+        }
+
+        /* Mechanism Cards */
+        .mechanisms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .mechanism-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 2.5rem;
+            text-align: center;
+        }
+
+        .mechanism-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .mechanism-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin: 0 0 1rem 0;
+            color: var(--color-text);
+        }
+
+        .mechanism-stat {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--color-accent);
+            margin-bottom: 1rem;
+        }
+
+        .mechanism-card p {
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+
+        .mechanism-fields {
+            font-size: 0.875rem;
+            font-style: italic;
+            color: var(--color-accent);
+        }
+
+        /* Info Box */
+        .info-box {
+            background: rgba(245, 158, 11, 0.05);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 12px;
+            padding: 3rem;
+            margin: 3rem 0;
+            text-align: center;
+        }
+
+        .info-box h3 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-box .catalog-id {
+            font-family: 'Courier New', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            display: block;
+            margin: 1.5rem 0;
+        }
+
+        .info-box p {
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+        }
+
+        .info-box code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: var(--color-accent);
+        }
+
+        /* CTA */
+        .cta-section {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 4rem;
+            text-align: center;
+            margin: 5rem 0;
+        }
+
+        .cta-section h3 {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            color: var(--color-text-secondary);
+            font-size: 1.125rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--color-accent);
+            color: var(--color-bg);
+        }
+
+        .btn-primary:hover {
+            background: var(--color-accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-surface-hover);
+            border-color: var(--color-accent);
+        }
+
+        footer {
+            background: var(--color-bg);
+            border-top: 1px solid var(--color-border);
+            padding: 4rem 2rem 2rem;
+            text-align: center;
+            color: var(--color-text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .section h2 {
+                font-size: 2rem;
+            }
+
+            .mechanisms-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="logo">SuperImmersive <span>8</span></a>
+            <ul class="nav-links">
+                <li><a href="/how-it-works">How It Works</a></li>
+                <li><a href="/pricing">Pricing</a></li>
+                <li><a href="/catalog">Catalog</a></li>
+                <li class="nav-dropdown">
+                    <span class="nav-dropdown-trigger">
+                        <span>Rights Verified</span>
+                        <span>▼</span>
+                    </span>
+                    <div class="nav-dropdown-content">
+                        <a href="/rights-verified">Overview</a>
+                        <a href="/rights-verified/playbook">Full Playbook</a>
+                        <a href="/rights-verified/chain-of-title">Chain of Title</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <span class="nav-dropdown-trigger">
+                        <span>Login</span>
+                        <span>▼</span>
+                    </span>
+                    <div class="nav-dropdown-content">
+                        <a href="/auth/login">Creator Login</a>
+                        <a href="/auth/admin/login">Admin Login</a>
+                    </div>
+                </li>
+                <li><a href="/auth/signup" class="nav-cta">Get Verified</a></li>
+            </ul>
+            <div class="lang-selector">
+                <a href="/rights-verified/chain-of-title" class="active">EN</a>
+                <span>/</span>
+                <a href="/zh/rights-verified/chain-of-title">繁體中文</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <h1>Chain of Title & Compliance Documentation</h1>
+        <p class="hero-subtitle">
+            Every piece of Rights Verified vetted content comes with a structured Chain of Title — 9 fields of documentation that reduce legal exposure, satisfy regulatory compliance, and enable distribution.
+        </p>
+        <div class="hero-callout">
+            <p>The file is the carrier. The Chain of Title is the product.</p>
+        </div>
+    </section>
+
+    <!-- Content -->
+    <article class="content">
+        <!-- Why Documentation Creates Value -->
+        <section class="section">
+            <h2>Why Documentation Creates Value</h2>
+
+            <div class="intro-box">
+                <h3>Think Getty Images</h3>
+                <p>Brands pay $450 for the legal guarantee, $50 for the JPEG. The documentation layer is the product, not the pixels.</p>
+                <p>SI8's Chain of Title provides the audit trail, compliance documentation, and legal defensibility that brands need to deploy AI video content with confidence.</p>
+            </div>
+
+            <p>Traditional stock libraries succeed because they reduce legal risk through documentation, not just by providing content. Getty Images charges premium prices not for the photograph itself, but for the chain of permissions, model releases, and indemnification that come with it.</p>
+
+            <p>AI video content requires the same legal infrastructure. SI8's Chain of Title is the equivalent for AI-generated content — structured documentation that satisfies legal teams, platform policies, and regulatory requirements.</p>
+        </section>
+
+        <!-- The 9-Field Schema -->
+        <section class="section">
+            <h2>The 9-Field Schema</h2>
+            <p>Each catalog entry includes structured documentation mapped to legal defenses:</p>
+
+            <div class="fields-grid">
+                <!-- Field 1 -->
+                <div class="field-card">
+                    <div class="field-number">Field 01</div>
+                    <h3>Tool Provenance Log</h3>
+                    <p class="field-description">Which AI tools were used, versions, plan type, production dates, paid commercial plan receipts on file</p>
+
+                    <div class="field-section">
+                        <h4>What It Captures</h4>
+                        <ul>
+                            <li>Tool name(s) used (e.g., Runway Gen-3, ElevenLabs)</li>
+                            <li>Version/model at time of production</li>
+                            <li>Plan type (paid commercial plan confirmation)</li>
+                            <li>Production dates</li>
+                            <li>Receipt/invoice numbers on file</li>
+                        </ul>
+                    </div>
+
+                    <div class="field-section">
+                        <h4>Legal Defense Supported</h4>
+                        <ul>
+                            <li>Innocent infringer defense (good-faith documentation)</li>
+                            <li>FTC disclosure compliance</li>
+                            <li>Audit trail for willfulness defense</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <strong>Example:</strong>
+                        <code>Tool: Runway Gen-3 (paid Pro plan)
+Version: Gen-3 Alpha (Nov 2025)
+Dates: November 12-18, 2025
+Receipt: RW-2025-11-0042 (on file)</code>
+                    </div>
+                </div>
+
+                <!-- Field 2 -->
+                <div class="field-card">
+                    <div class="field-number">Field 02</div>
+                    <h3>Model Disclosure</h3>
+                    <p class="field-description">Which AI models generated content, version at time of production</p>
+
+                    <div class="field-section">
+                        <h4>What It Captures</h4>
+                        <ul>
+                            <li>Model name (e.g., Runway Gen-3 Alpha)</li>
+                            <li>Model version/checkpoint used</li>
+                            <li>Training data policy (if publicly documented)</li>
+                        </ul>
+                    </div>
+
+                    <div class="field-section">
+                        <h4>Legal Defense Supported</h4>
+                        <ul>
+                            <li>Copyright Office registration (disclosure requirement)</li>
+                            <li>Regulatory transparency (EU AI Act Article 50, Colorado AI Act)</li>
+                            <li>Platform compliance (YouTube, TikTok disclosure rules)</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <strong>Example:</strong>
+                        <code>Model: Runway Gen-3 Alpha
+Training: Proprietary dataset (service improvement clause accepted)
+Platform Disclosure: Compliant with YouTube/TikTok requirements</code>
+                    </div>
+                </div>
+
+                <!-- Field 3 -->
+                <div class="field-card">
+                    <div class="field-number">Field 03</div>
+                    <h3>Rights Verified Sign-off</h3>
+                    <p class="field-description">SI8 reviewer, review date, tier assigned (Certified/Standard/Caution), any conditions or flags</p>
+
+                    <div class="field-section">
+                        <h4>What It Captures</h4>
+                        <ul>
+                            <li>SI8 reviewer name/ID</li>
+                            <li>Review date</li>
+                            <li>Risk tier assigned (Certified/Standard/Caution-Flagged)</li>
+                            <li>Any conditional flags or restrictions</li>
+                        </ul>
+                    </div>
+
+                    <div class="field-section">
+                        <h4>Legal Defense Supported</h4>
+                        <ul>
+                            <li>Reasonable care standard (Colorado "rebuttable presumption")</li>
+                            <li>Good-faith defense (documented due diligence)</li>
+                            <li>FTC compliance (substantiated claims)</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <strong>Example:</strong>
+                        <code>Reviewer: SI8-JD-001
+Review Date: February 15, 2026
+Tier: Standard (Runway Gen-3, paid plan)
+Flags: None</code>
+                    </div>
+                </div>
+
+                <!-- Field 4 -->
+                <div class="field-card">
+                    <div class="field-number">Field 04</div>
+                    <h3>Commercial Use Authorization</h3>
+                    <p class="field-description">Confirmation each tool's ToS permits commercial licensing, paid plan receipts filed</p>
+
+                    <div class="field-section">
+                        <h4>What It Captures</h4>
+                        <ul>
+                            <li>ToS commercial use clause confirmation</li>
+                            <li>Paid plan verification (receipts on file)</li>
+                            <li>Territory restrictions (if any)</li>
+                            <li>Sublicensing rights documentation</li>
+                        </ul>
+                    </div>
+
+                    <div class="field-section">
+                        <h4>Legal Defense Supported</h4>
+                        <ul>
+                            <li>Licensing defense (authorized commercial use)</li>
+                            <li>Vicarious liability break (documented permissions chain)</li>
+                            <li>Good-faith reliance on tool provider terms</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <strong>Example:</strong>
+                        <code>Commercial Use: Authorized (Runway Pro plan ToS § 4.2)
+Territory: Global
+Sublicensing: Permitted for client work
+Receipt on file: RW-2025-11-0042</code>
+                    </div>
+                </div>
+
+                <!-- Field 5 -->
+                <div class="field-card">
+                    <div class="field-number">Field 05</div>
+                    <h3>Modification Rights Status</h3>
+                    <p class="field-description">Authorized (full work / scene-level) or Not Authorized; authorization scope documented</p>
+
+                    <div class="field-section">
+                        <h4>What It Captures</h4>
+                        <ul>
+                            <li>Full work modification: Authorized or Not Authorized</li>
+                            <li>Scene-level authorization (if partial)</li>
+                            <li>Authorization scope and limitations</li>
+                            <li>Filmmaker Shopping Agreement reference</li>
+                        </ul>
+                    </div>
+
+                    <div class="field-section">
+                        <h4>Legal Defense Supported</h4>
+                        <ul>
+                            <li>Product Placement authorization (brand integration capability)</li>
+                            <li>Work-for-hire documentation</li>
+                            <li>Scope of licensing rights clarity</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <strong>Example:</strong>
+                        <code>Status: Authorized (Full Work)
+Scope: All scenes eligible for AI regeneration for brand placement
+Shopping Agreement: SA-2026-0042 (on file)
+Filmmaker proxy authorization: Yes</code>
+                    </div>
+                </div>
+
+                <!-- Field 6 -->
+                <div class="field-card">
+                    <div class="field-number">Field 06</div>
+                    <h3>Category Conflict Log</h3>
+                    <p class="field-description">Brand categories ineligible for placement (e.g., alcohol, political, direct competitors)</p>
+
+                    <div class="field-section">
+                        <h4>What It Captures</h4>
+                        <ul>
+                            <li>Ineligible brand categories</li>
+                            <li>Content-specific restrictions (e.g., mature themes)</li>
+                            <li>Competitive exclusions</li>
+                            <li>Regulatory restrictions by territory</li>
+                        </ul>
+                    </div>
+
+                    <div class="field-section">
+                        <h4>Legal Defense Supported</h4>
+                        <ul>
+                            <li>Brand risk mitigation (category exclusions)</li>
+                            <li>Disclosure requirements tracking</li>
+                            <li>Trademark clearance documentation</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <strong>Example:</strong>
+                        <code>Ineligible Categories:
+- Alcohol (content features minors)
+- Political campaigns
+- Direct competitors: [existing brand integrations]
+Suitable for: Consumer tech, fashion, travel, food & beverage (non-alcoholic)</code>
+                    </div>
+                </div>
+
+                <!-- Field 7 -->
+                <div class="field-card">
+                    <div class="field-number">Field 07</div>
+                    <h3>Territory Log</h3>
+                    <p class="field-description">Geographic licensing restrictions; default = Global if none noted</p>
+
+                    <div class="field-section">
+                        <h4>What It Captures</h4>
+                        <ul>
+                            <li>Authorized territories</li>
+                            <li>Territory-specific restrictions</li>
+                            <li>Platform availability by region</li>
+                            <li>Regulatory compliance by jurisdiction</li>
+                        </ul>
+                    </div>
+
+                    <div class="field-section">
+                        <h4>Legal Defense Supported</h4>
+                        <ul>
+                            <li>Licensing scope documentation</li>
+                            <li>Jurisdiction clarity (which laws apply)</li>
+                            <li>Multi-territory compliance tracking</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <strong>Example:</strong>
+                        <code>Authorized: Global (all territories)
+Platform Compliance:
+- US: YouTube, TikTok, Meta (compliant)
+- EU: Article 50 disclosure requirements met
+- Taiwan/APAC: iQIYI/Viu distribution ready</code>
+                    </div>
+                </div>
+
+                <!-- Field 8 -->
+                <div class="field-card">
+                    <div class="field-number">Field 08</div>
+                    <h3>Regeneration Rights Status</h3>
+                    <p class="field-description">Which scenes can be AI-regenerated for brand integration; scope and limitations</p>
+
+                    <div class="field-section">
+                        <h4>What It Captures</h4>
+                        <ul>
+                            <li>Scene-by-scene regeneration eligibility</li>
+                            <li>Technical limitations (e.g., character consistency)</li>
+                            <li>Filmmaker approval process for regeneration</li>
+                            <li>Quality control standards</li>
+                        </ul>
+                    </div>
+
+                    <div class="field-section">
+                        <h4>Legal Defense Supported</h4>
+                        <ul>
+                            <li>Product Placement authorization (AI regeneration capability)</li>
+                            <li>Modification clause enforcement</li>
+                            <li>Filmmaker proxy authorization documentation</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <strong>Example:</strong>
+                        <code>Eligible Scenes: All (full work authorization)
+Technical Capability: Product placement, environment modification
+Filmmaker Review: Required for final approval
+QC Standard: Style consistency, motion coherence maintained</code>
+                    </div>
+                </div>
+
+                <!-- Field 9 -->
+                <div class="field-card">
+                    <div class="field-number">Field 09</div>
+                    <h3>Version History</h3>
+                    <p class="field-description">Production version, review date, any subsequent modifications and re-review dates</p>
+
+                    <div class="field-section">
+                        <h4>What It Captures</h4>
+                        <ul>
+                            <li>Original production version</li>
+                            <li>Human authorship declaration</li>
+                            <li>Subsequent modification dates</li>
+                            <li>Re-review dates (if modified)</li>
+                            <li>CMI preservation (watermark/attribution)</li>
+                        </ul>
+                    </div>
+
+                    <div class="field-section">
+                        <h4>Legal Defense Supported</h4>
+                        <ul>
+                            <li>Human authorship (Copyright Office requirement for copyrightability)</li>
+                            <li>CMI preservation (DMCA compliance)</li>
+                            <li>Audit trail (complete provenance chain)</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <strong>Example:</strong>
+                        <code>Version 1.0: November 18, 2025 (original production)
+Human Authorship Declaration: [150+ word declaration on file]
+Modifications: None
+Re-review: N/A
+CMI Status: Preserved (no watermark removal)</code>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Four Mechanisms of Risk Reduction -->
+        <section class="section">
+            <h2>Four Mechanisms of Risk Reduction</h2>
+
+            <p>How the Chain of Title maps to legal defenses, regulatory compliance, and case law:</p>
+
+            <div class="mechanisms-grid">
+                <div class="mechanism-card">
+                    <div class="mechanism-icon">📉</div>
+                    <h3>1. Damage Mitigation</h3>
+                    <p class="mechanism-stat">73%+ Statutory Damage Reduction</p>
+                    <p>Chain of Title documentation supports innocent infringer defense under 17 U.S.C. § 504, reducing minimum statutory damages from $750 to $200 per work and preventing willful penalties up to $150,000.</p>
+                    <p class="mechanism-fields">Supported by: Fields #1, #3, #4, #9</p>
+                </div>
+
+                <div class="mechanism-card">
+                    <div class="mechanism-icon">✓</div>
+                    <h3>2. Regulatory Compliance</h3>
+                    <p class="mechanism-stat">Colorado "Rebuttable Presumption" Safe Harbor</p>
+                    <p>Colorado AI Act explicitly rewards documented systems with legal presumption of reasonable care. Chain of Title = statutory compliance infrastructure, avoiding $20K penalties.</p>
+                    <p class="mechanism-fields">Supported by: Fields #2, #3, #6, #9</p>
+                </div>
+
+                <div class="mechanism-card">
+                    <div class="mechanism-icon">©</div>
+                    <h3>3. Copyrightability Protection</h3>
+                    <p class="mechanism-stat">USCO Human Authorship Requirement</p>
+                    <p>U.S. Copyright Office (Jan 2025): Prompts alone don't grant ownership. Chain of Title Field #9 documents the editorial paper trail required for your brand to actually own the copyright.</p>
+                    <p class="mechanism-fields">Supported by: Field #9 (Version History)</p>
+                </div>
+
+                <div class="mechanism-card">
+                    <div class="mechanism-icon">📺</div>
+                    <h3>4. Distribution Enablement</h3>
+                    <p class="mechanism-stat">E&O Insurance + Platform Compliance</p>
+                    <p>Chain of Title = chain-of-title equivalent for AI content. Satisfies E&O underwriting requirements and platform disclosure policies (YouTube, TikTok, streaming).</p>
+                    <p class="mechanism-fields">Supported by: All 9 fields (comprehensive documentation)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Catalog ID Format -->
+        <section class="section">
+            <div class="info-box">
+                <h3>Catalog ID Format</h3>
+                <span class="catalog-id">SI8-2026-0001</span>
+                <p>Each Chain of Title is assigned a unique catalog ID: <strong>SI8-[YEAR]-[4-digit sequence]</strong></p>
+                <p style="margin-top: 2rem;"><strong>Storage Path:</strong><br><code>/05_Catalog/represented/[filmmaker]/[title]/rights-package.md</code></p>
+            </div>
+        </section>
+
+        <!-- How to Read the Documentation -->
+        <section class="section">
+            <h2>How to Read the Documentation</h2>
+
+            <p>The Chain of Title is delivered as a structured PDF document. Each section corresponds to one of the 9 fields, with supporting documentation referenced.</p>
+
+            <h3>What Buyers Receive</h3>
+            <ul style="color: var(--color-text-secondary); line-height: 1.8; margin-left: 2rem;">
+                <li><strong>Chain of Title PDF:</strong> 9-field documentation package (typically 8-12 pages)</li>
+                <li><strong>Tool Receipts:</strong> Proof of commercial plan authorization</li>
+                <li><strong>Human Authorship Declaration:</strong> Filmmaker's documented creative process</li>
+                <li><strong>Rights Verified Certificate:</strong> Summary page with catalog ID and tier assignment</li>
+            </ul>
+
+            <h3>What Legal Teams Look For</h3>
+            <ul style="color: var(--color-text-secondary); line-height: 1.8; margin-left: 2rem;">
+                <li><strong>Field #4 (Commercial Use Authorization):</strong> Confirms tools permit commercial licensing</li>
+                <li><strong>Field #9 (Version History):</strong> Human authorship evidence for copyright ownership</li>
+                <li><strong>Field #1 (Tool Provenance):</strong> Audit trail for innocent infringer defense</li>
+                <li><strong>Field #2 (Model Disclosure):</strong> Platform disclosure compliance</li>
+            </ul>
+        </section>
+
+        <!-- CTA -->
+        <div class="cta-section">
+            <h3>See the Legal Foundation</h3>
+            <p>Download our comprehensive Legal Risk Reduction Brief to see how the Chain of Title maps to statutory defenses, regulatory compliance, and case law.</p>
+            <div class="btn-group">
+                <a href="/rights-verified/playbook" class="btn btn-primary">Read Legal Risk Brief</a>
+                <a href="/auth/signup" class="btn btn-secondary">Get Verified</a>
+            </div>
+        </div>
+    </article>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 SuperImmersive 8. All rights reserved.</p>
+    </footer>
+</body>
+</html>

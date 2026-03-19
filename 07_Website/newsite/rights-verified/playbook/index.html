@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Video Rights Playbook v0.2 | SuperImmersive 8</title>
+    <meta name="description" content="Comprehensive legal reference for AI video rights verification. Tool tier classifications, platform policies, vetting criteria, and legal risk framework.">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="AI Video Rights Playbook v0.2">
+    <meta property="og:description" content="Legal reference guide for AI video rights, updated quarterly as law and policy evolve.">
+    <meta property="og:type" content="website">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-bg: #0f0f0f;
+            --color-surface: #1a1a1a;
+            --color-surface-hover: #252525;
+            --color-text: #ffffff;
+            --color-text-secondary: #a0a0a0;
+            --color-accent: #f59e0b;
+            --color-accent-hover: #d97706;
+            --color-border: #333;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation (same as index) */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 15, 15, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--color-border);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--color-accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--color-text);
+        }
+
+        .nav-dropdown {
+            position: relative;
+        }
+
+        .nav-dropdown-trigger {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-dropdown-content {
+            position: absolute;
+            top: calc(100% + 1rem);
+            right: 0;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+            min-width: 200px;
+            display: none;
+        }
+
+        .nav-dropdown:hover .nav-dropdown-content {
+            display: block;
+        }
+
+        .nav-dropdown-content a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .nav-dropdown-content a:hover {
+            color: var(--color-text);
+            background: var(--color-surface-hover);
+        }
+
+        .nav-cta {
+            padding: 0.75rem 1.5rem;
+            background: var(--color-accent);
+            color: var(--color-bg);
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .nav-cta:hover {
+            background: var(--color-accent-hover);
+            color: var(--color-bg);
+        }
+
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            margin-left: 1rem;
+        }
+
+        .lang-selector a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+        }
+
+        .lang-selector a.active {
+            color: var(--color-accent);
+        }
+
+        /* Hero */
+        .hero {
+            padding: 12rem 2rem 6rem;
+            text-align: center;
+            background:
+                radial-gradient(ellipse at top, rgba(245, 158, 11, 0.15), transparent 50%),
+                var(--color-bg);
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--color-text-secondary);
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 50px;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.875rem;
+            color: var(--color-accent);
+            font-weight: 600;
+        }
+
+        /* Content */
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .toc {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .toc h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .toc-list {
+            list-style: none;
+        }
+
+        .toc-list li {
+            margin-bottom: 0.75rem;
+        }
+
+        .toc-list a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .toc-list a:hover {
+            color: var(--color-accent);
+        }
+
+        .section {
+            margin: 5rem 0;
+        }
+
+        .section h2 {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 1rem;
+        }
+
+        .section h3 {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            margin: 2.5rem 0 1rem 0;
+            color: var(--color-accent);
+        }
+
+        .section p {
+            color: var(--color-text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .section ul, .section ol {
+            color: var(--color-text-secondary);
+            margin-left: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section li {
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .callout {
+            background: rgba(245, 158, 11, 0.05);
+            border-left: 4px solid var(--color-accent);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .callout strong {
+            color: var(--color-accent);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .warning {
+            background: rgba(239, 68, 68, 0.05);
+            border-left: 4px solid #ef4444;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .warning strong {
+            color: #ef4444;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 2rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        th {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--color-text);
+            font-weight: 600;
+        }
+
+        td {
+            color: var(--color-text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .tier-approved {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .tier-caution {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--color-accent);
+        }
+
+        .tier-prohibited {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .cta-section {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            margin: 4rem 0;
+        }
+
+        .cta-section h3 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: var(--color-accent);
+            color: var(--color-bg);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-top: 1rem;
+        }
+
+        .btn:hover {
+            background: var(--color-accent-hover);
+            transform: translateY(-2px);
+        }
+
+        footer {
+            background: var(--color-bg);
+            border-top: 1px solid var(--color-border);
+            padding: 4rem 2rem 2rem;
+            text-align: center;
+            color: var(--color-text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .section h2 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="logo">SuperImmersive <span>8</span></a>
+            <ul class="nav-links">
+                <li><a href="/how-it-works">How It Works</a></li>
+                <li><a href="/pricing">Pricing</a></li>
+                <li><a href="/catalog">Catalog</a></li>
+                <li class="nav-dropdown">
+                    <span class="nav-dropdown-trigger">
+                        <span>Rights Verified</span>
+                        <span>▼</span>
+                    </span>
+                    <div class="nav-dropdown-content">
+                        <a href="/rights-verified">Overview</a>
+                        <a href="/rights-verified/playbook">Full Playbook</a>
+                        <a href="/rights-verified/chain-of-title">Chain of Title</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <span class="nav-dropdown-trigger">
+                        <span>Login</span>
+                        <span>▼</span>
+                    </span>
+                    <div class="nav-dropdown-content">
+                        <a href="/auth/login">Creator Login</a>
+                        <a href="/auth/admin/login">Admin Login</a>
+                    </div>
+                </li>
+                <li><a href="/auth/signup" class="nav-cta">Get Verified</a></li>
+            </ul>
+            <div class="lang-selector">
+                <a href="/rights-verified/playbook" class="active">EN</a>
+                <span>/</span>
+                <a href="/zh/rights-verified/playbook">繁體中文</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <h1>AI Video Rights Playbook</h1>
+        <p class="hero-subtitle">
+            SI8's internal reference guide for legal standards, platform policies, and tool tier classifications. Updated quarterly as law and policy evolve.
+        </p>
+        <div class="version-badge">Version 0.2 — February 2026</div>
+    </section>
+
+    <!-- Content -->
+    <article class="content">
+        <!-- Table of Contents -->
+        <nav class="toc">
+            <h3>Table of Contents</h3>
+            <ul class="toc-list">
+                <li><a href="#framework">Part 1: The SI8 Rights Verified Framework</a></li>
+                <li><a href="#legal">Part 2: Legal Landscape (Current State)</a></li>
+                <li><a href="#tools">Part 3: Tool Tier Classifications</a></li>
+                <li><a href="#platforms">Part 4: Platform Policies</a></li>
+                <li><a href="#vetting">Part 5: Vetting Criteria (7 Categories)</a></li>
+                <li><a href="#risk">Part 6: Legal Risk Reduction Mechanisms</a></li>
+            </ul>
+        </nav>
+
+        <!-- Part 1: Framework -->
+        <section id="framework" class="section">
+            <h2>Part 1: The SI8 Rights Verified Framework</h2>
+
+            <p>Standing rules for all represented content and production work.</p>
+
+            <h3>What SI8 Will Work With</h3>
+            <ul>
+                <li><strong>Human-directed content:</strong> Meaningful human creative authorship documented (not just prompt entry)</li>
+                <li><strong>Commercial licenses:</strong> All AI tools used with paid commercial plans, receipts on file</li>
+                <li><strong>Approved tools only:</strong> Tools on Approved or Caution tier list (no Prohibited tools as primary generation source)</li>
+                <li><strong>Documented provenance:</strong> Complete Chain of Title for every piece of content</li>
+            </ul>
+
+            <h3>The No List — What SI8 Won't Work With</h3>
+            <p>Hard boundaries that protect filmmakers, clients, and SI8 from highest-risk areas:</p>
+
+            <ul>
+                <li>❌ <strong>Celebrity Likeness:</strong> Real people's faces without consent</li>
+                <li>❌ <strong>Voice Cloning:</strong> Real person voices without authorization</li>
+                <li>❌ <strong>IP Imitation:</strong> Copyrighted characters, brands, trademarks</li>
+                <li>❌ <strong>Deepfakes:</strong> Deceptive content pretending to be real</li>
+                <li>❌ <strong>Political Content:</strong> Persuasion or advocacy content</li>
+                <li>❌ <strong>CMI Stripping:</strong> Watermark/attribution removal (DMCA violation)</li>
+                <li>❌ <strong>Prohibited Tools:</strong> Veo consumer tier, tools in active litigation</li>
+                <li>❌ <strong>No Human Authorship:</strong> Prompts alone (not copyrightable per USCO)</li>
+            </ul>
+
+            <div class="callout">
+                <strong>Why it matters to buyers:</strong>
+                <p>Every SI8 project comes with a documented rights position. Brands get legal defensibility, not just creative output.</p>
+            </div>
+        </section>
+
+        <!-- Part 2: Legal Landscape -->
+        <section id="legal" class="section">
+            <h2>Part 2: Legal Landscape (Current State)</h2>
+
+            <p>Copyright, liability, regulatory compliance — US, Taiwan, Singapore, EU</p>
+
+            <h3>Copyright Ownership</h3>
+            <p><strong>USCO January 2025 Human Authorship Requirement:</strong> The U.S. Copyright Office requires documented human authorship for AI-generated works. Prompts alone do not establish copyright ownership. SI8's Chain of Title Field #9 (Version History) captures the editorial paper trail required.</p>
+
+            <div class="callout">
+                <strong>Key Citation:</strong>
+                <p>U.S. Copyright Office, "Copyright and Artificial Intelligence, Part 2: Notice of Inquiry and Request for Comments" (Jan 2025). Human creative expression must be meaningfully present.</p>
+            </div>
+
+            <h3>Damage Mitigation</h3>
+            <p><strong>73% Statutory Reduction via Innocent Infringer Defense:</strong> Chain of Title documentation supports innocent infringer defense under 17 U.S.C. § 504(c)(2), reducing minimum statutory damages from $750 to $200 per work and preventing willful penalties up to $150,000.</p>
+
+            <h3>Regulatory Compliance</h3>
+            <p><strong>Colorado AI Act "Rebuttable Presumption" Safe Harbor:</strong> Colorado SB24-205 explicitly rewards documented systems with legal presumption of reasonable care. Chain of Title = statutory compliance infrastructure, avoiding $20K penalties per violation.</p>
+
+            <p><strong>EU AI Act Article 50:</strong> Phased transparency obligations for synthetic/deepfake content (2026+). SI8's Model Disclosure (Field #2) satisfies EU transparency requirements.</p>
+
+            <p><strong>FTC Operation AI Comply:</strong> Substantiation requirements for AI-related marketing claims. Chain of Title provides audit trail for FTC compliance.</p>
+
+            <h3>Training Data Liability</h3>
+            <p><strong>User liability is real:</strong> Tool providers' ToS generally disclaim liability for copyright infringement. Buyers assume risk. Tool tier classifications matter — using tools in active litigation (Midjourney, Stability AI) increases exposure.</p>
+
+            <div class="warning">
+                <strong>Hard Line:</strong>
+                <p>SI8 does not work with tools under active studio litigation as primary generation source. Prohibited tier exists to protect filmmakers and buyers.</p>
+            </div>
+
+            <h3>DMCA CMI Preservation</h3>
+            <p><strong>No watermark stripping:</strong> DMCA § 1202 prohibits removal of copyright management information (CMI). Watermark removal is a separate violation from copyright infringement. SI8 requires CMI preservation.</p>
+        </section>
+
+        <!-- Part 3: Tool Tiers -->
+        <section id="tools" class="section">
+            <h2>Part 3: Tool Tier Classifications</h2>
+
+            <p>Not all AI tools carry equal risk. SI8 classifies tools into risk tiers based on training data transparency, litigation status, and commercial terms.</p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tool</th>
+                            <th>Tier</th>
+                            <th>Rationale</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Adobe Firefly</strong></td>
+                            <td><span class="tier-badge tier-approved">✅ Approved</span></td>
+                            <td>Adobe Stock-trained models only. Indemnification for Firefly outputs (exclusions apply).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Runway (paid)</strong></td>
+                            <td><span class="tier-badge tier-approved">✅ Approved</span></td>
+                            <td>Best commercial terms. Service improvement clause documented. Paid plan required.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Pika (paid)</strong></td>
+                            <td><span class="tier-badge tier-approved">✅ Approved</span></td>
+                            <td>Clear commercial use authorization. Paid plan required.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sora (paid)</strong></td>
+                            <td><span class="tier-badge tier-approved">✅ Approved</span></td>
+                            <td>Best IP terms (Disney/Marvel/Pixar licensed; others opt-in only). Legal pushback building — SI8 monitors.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Kling</strong></td>
+                            <td><span class="tier-badge tier-caution">⚠️ Caution</span></td>
+                            <td>Retains permanent sublicensable license to use outputs for AI training. Approved for catalog but flagged for exclusivity deals.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Veo (consumer)</strong></td>
+                            <td><span class="tier-badge tier-prohibited">❌ Prohibited</span></td>
+                            <td>Consumer tier = no commercial use. Enterprise tier may be evaluated in future.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hailuo / Minimax</strong></td>
+                            <td><span class="tier-badge tier-prohibited">❌ Prohibited</span></td>
+                            <td>Active Disney/WB lawsuit (Nov 2025). Too high risk for commercial use.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Midjourney, Stability AI</strong></td>
+                            <td><span class="tier-badge tier-prohibited">❌ Prohibited</span></td>
+                            <td>Active studio litigation. SI8 will not use as primary generation source until litigation resolves.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout">
+                <strong>The Adobe Gap:</strong>
+                <p>Adobe indemnifies Firefly only. Excludes Runway, Sora, Midjourney, Kling, any modifications or combinations. Creative teams want best-in-class tools (Sora, Runway), not just safe tools (Firefly). <strong>SI8's positioning:</strong> "Adobe = safe but boring. SI8 = best creative tools made safe through Rights Verified vetting."</p>
+            </div>
+        </section>
+
+        <!-- Part 4: Platform Policies -->
+        <section id="platforms" class="section">
+            <h2>Part 4: Platform Policies</h2>
+
+            <h3>YouTube</h3>
+            <ul>
+                <li><strong>Disclosure requirement:</strong> "Altered or synthetic content" must be disclosed if realistic people, places, or events depicted</li>
+                <li><strong>Label placement:</strong> Video description or on-screen notice</li>
+                <li><strong>Enforcement:</strong> Demonetization, recommendation suppression, or removal for non-disclosure</li>
+            </ul>
+
+            <h3>TikTok</h3>
+            <ul>
+                <li><strong>Disclosure requirement:</strong> AI-generated content toggle required at upload</li>
+                <li><strong>Label:</strong> "AI-generated" label appears on video</li>
+                <li><strong>Enforcement:</strong> Content removal for non-disclosure</li>
+            </ul>
+
+            <h3>Meta (Facebook, Instagram)</h3>
+            <ul>
+                <li><strong>Disclosure requirement:</strong> "Made with AI" label for photorealistic content</li>
+                <li><strong>Detection:</strong> Meta auto-detects some AI content; manual disclosure also accepted</li>
+                <li><strong>Enforcement:</strong> Reduced distribution for non-compliance</li>
+            </ul>
+
+            <h3>iQIYI (China/Taiwan Streaming)</h3>
+            <ul>
+                <li><strong>Content requirements:</strong> Full rights documentation required for licensing</li>
+                <li><strong>AI disclosure:</strong> Currently evaluating policies (as of Feb 2026)</li>
+                <li><strong>SI8 advantage:</strong> Chain of Title satisfies documentation requirements</li>
+            </ul>
+
+            <h3>LinkedIn</h3>
+            <ul>
+                <li><strong>No formal AI disclosure requirement yet</strong> (as of Feb 2026)</li>
+                <li><strong>Best practice:</strong> Proactive disclosure in post text</li>
+            </ul>
+
+            <div class="callout">
+                <strong>Distribution Enablement:</strong>
+                <p>SI8's Chain of Title = platform-compliant delivery. Model Disclosure (Field #2) + Tool Provenance (Field #1) satisfy disclosure policies across all major platforms.</p>
+            </div>
+        </section>
+
+        <!-- Part 5: Vetting Criteria -->
+        <section id="vetting" class="section">
+            <h2>Part 5: Vetting Criteria (7 Categories)</h2>
+
+            <p>Pass/fail thresholds for each review category. For full vetting criteria with examples, see <a href="/rights-verified">Rights Verified Overview</a>.</p>
+
+            <h3>1. Tool & Plan Verification</h3>
+            <p><strong>Pass:</strong> All tools on Approved or Caution tier list. Paid plan receipts on file for every tool. Commercial license status confirmed.</p>
+            <p><strong>Fail:</strong> Prohibited/High-Risk tool as primary source; missing receipts for any tool.</p>
+
+            <h3>2. Human Authorship Evidence Quality</h3>
+            <p><strong>Pass:</strong> Declaration describes specific iteration decisions, editorial choices, post-generation editing. Minimum 150 words, substantive.</p>
+            <p><strong>Fail:</strong> Generic ("I wrote prompts and selected outputs") with no specifics. AI made all meaningful creative decisions.</p>
+
+            <h3>3. Likeness & Identity</h3>
+            <p><strong>Pass:</strong> All faces clearly synthetic and non-identifiable. All voices original or AI-generated with no specific real-person identity.</p>
+            <p><strong>Fail:</strong> Any identifiable real-person face or voice without consent. <strong>Any doubt = fail.</strong></p>
+
+            <div class="warning">
+                <strong>Hard Line:</strong>
+                <p>No exceptions. No gray area. If a face is possibly identifiable, it fails. This is the highest legal exposure category.</p>
+            </div>
+
+            <h3>4. IP & Brand Imitation</h3>
+            <p><strong>Pass:</strong> No character/creature/logo/brand element recognized as belonging to real IP holder. No replication/parody of real brand trade dress.</p>
+            <p><strong>Fail:</strong> Clear imitation of copyrighted character. Protected trade dress replicated. Trademarked logos/identifiers visible.</p>
+
+            <h3>5. Brand Safety</h3>
+            <p><strong>Pass:</strong> Suitable for mainstream commercial brand attachment, no restrictions. OR has specific documented restrictions in Chain of Title.</p>
+            <p><strong>Fail:</strong> Graphic violence, sexual content, political persuasion, drug use (celebratory/instructional), any No List content.</p>
+
+            <h3>6. Audio & Music Rights</h3>
+            <p><strong>Pass:</strong> All audio is original AI-generated using paid commercial plans (receipts on file). All licensed audio has documentation. Work is silent (no audio).</p>
+            <p><strong>Fail:</strong> Unlicensed commercial music without documentation. Audio license doesn't cover commercial use or specific territory/medium.</p>
+
+            <h3>7. Modification Rights (Tier 2 Gate)</h3>
+            <p><strong>Authorized — Full Work:</strong> All scenes eligible for product placement regeneration.</p>
+            <p><strong>Authorized — Specific Scenes:</strong> Only listed scenes eligible for product placement.</p>
+            <p><strong>Not Authorized:</strong> Tier 1 (as-is licensing) only. Filmmaker can update authorization anytime.</p>
+        </section>
+
+        <!-- Part 6: Legal Risk Reduction -->
+        <section id="risk" class="section">
+            <h2>Part 6: Legal Risk Reduction Mechanisms</h2>
+
+            <p>How SI8's Chain of Title reduces AI content liability through four quantifiable legal mechanisms.</p>
+
+            <h3>Mechanism 1: Damage Mitigation</h3>
+            <p><strong>73%+ Statutory Damage Reduction</strong></p>
+            <p>Chain of Title documentation supports innocent infringer defense under 17 U.S.C. § 504(c)(2), reducing minimum statutory damages from $750 to $200 per work and preventing willful penalties up to $150,000.</p>
+            <p><strong>Supported by:</strong> Fields #1 (Tool Provenance), #3 (Rights Verified Sign-off), #4 (Commercial Use Authorization), #9 (Version History)</p>
+
+            <h3>Mechanism 2: Regulatory Compliance</h3>
+            <p><strong>Colorado "Rebuttable Presumption" Safe Harbor</strong></p>
+            <p>Colorado AI Act explicitly rewards documented systems with legal presumption of reasonable care. Chain of Title = statutory compliance infrastructure, avoiding $20K penalties per violation.</p>
+            <p><strong>Supported by:</strong> Fields #2 (Model Disclosure), #3 (Rights Verified Sign-off), #6 (Category Conflict Log), #9 (Version History)</p>
+
+            <h3>Mechanism 3: Copyrightability Protection</h3>
+            <p><strong>USCO Human Authorship Requirement</strong></p>
+            <p>U.S. Copyright Office (Jan 2025): Prompts alone don't grant ownership. Chain of Title Field #9 documents the editorial paper trail required for your brand to actually own the copyright.</p>
+            <p><strong>Supported by:</strong> Field #9 (Version History — captures human authorship evidence)</p>
+
+            <h3>Mechanism 4: Distribution Enablement</h3>
+            <p><strong>E&O Insurance + Platform Compliance</strong></p>
+            <p>Chain of Title = chain-of-title equivalent for AI content. Satisfies E&O underwriting requirements and platform disclosure policies (YouTube, TikTok, streaming).</p>
+            <p><strong>Supported by:</strong> All 9 fields (comprehensive documentation)</p>
+
+            <div class="callout">
+                <strong>Quantifiable Legal Value:</strong>
+                <ul>
+                    <li><strong>Damage Reduction:</strong> 73% minimum ($750 → $200 statutory damages)</li>
+                    <li><strong>Regulatory Penalties Avoided:</strong> Colorado $20K, NY $1K-$5K per violation</li>
+                    <li><strong>Distribution Enablement:</strong> E&O insurance documentation, platform compliance</li>
+                    <li><strong>Copyrightability Protection:</strong> USCO human authorship requirement met</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <div class="cta-section">
+            <h3>Ready to Get Your Content Verified?</h3>
+            <p>$499 per video. 90-minute expert review. 5-business-day turnaround.</p>
+            <a href="/auth/signup" class="btn">Submit for Verification →</a>
+        </div>
+    </article>
+
+    <!-- Footer -->
+    <footer>
+        <p><strong>Living Document — Updated Quarterly</strong></p>
+        <p>The AI legal landscape evolves rapidly. SI8's Rights Playbook is reviewed every quarter (May, August, November, February) and updated as major rulings, platform policy changes, or legislative developments occur.</p>
+        <p style="margin-top: 2rem;">Version history: v0.1 (Nov 2025) → v0.2 (Feb 2026)</p>
+        <p style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--color-border);">&copy; 2026 SuperImmersive 8. All rights reserved.</p>
+    </footer>
+</body>
+</html>
