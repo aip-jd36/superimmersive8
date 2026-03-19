@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { formatDate, formatCurrency } from '@/lib/utils'
-import { cookies } from 'next/headers'
 
 type Submission = {
   id: string
@@ -15,34 +15,26 @@ type Submission = {
   [key: string]: any
 }
 
-async function getSubmissions(): Promise<Submission[]> {
-  const cookieStore = cookies()
-  const supabase = createClient()
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-
-  if (!session) return []
-
+async function getSubmissions(userId: string): Promise<Submission[]> {
   try {
-    // Call API route instead of direct Supabase query
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-    const response = await fetch(`${baseUrl}/api/submissions`, {
-      headers: {
-        Cookie: cookieStore.toString(),
-      },
-      cache: 'no-store',
-    })
+    console.log('🔷 Dashboard: Fetching submissions for user:', userId)
 
-    if (!response.ok) {
-      console.error('Failed to fetch submissions:', response.status)
+    // Use supabaseAdmin directly (server-side, bypasses RLS)
+    const { data: submissions, error } = await supabaseAdmin
+      .from('submissions')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('❌ Dashboard: Error fetching submissions:', error)
       return []
     }
 
-    const data = await response.json()
-    return data.submissions || []
+    console.log('✅ Dashboard: Fetched submissions:', submissions?.length || 0)
+    return submissions || []
   } catch (error) {
-    console.error('Error fetching submissions:', error)
+    console.error('❌ Dashboard: Exception:', error)
     return []
   }
 }
@@ -55,8 +47,8 @@ export default async function DashboardPage() {
 
   if (!session) return null
 
-  // Get user's submissions via API route
-  const submissions = await getSubmissions()
+  // Get user's submissions using service_role (bypasses RLS)
+  const submissions = await getSubmissions(session.user.id)
 
   // Get user's opt-ins
   const { data: optIns } = await supabase
