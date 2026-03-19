@@ -30,5 +30,5 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   typescript: true,
 })
 
-// Stripe Price ID for AI Video Chain of Title Verification ($499)
-export const VERIFICATION_PRICE_ID = 'price_1TCdOXDHFv9ajBxSYWGjvdHA'
+// Stripe Price ID for AI Video Chain of Title Verification ($499) - Test Mode
+export const VERIFICATION_PRICE_ID = 'price_1TCgphDHFv9ajBxS0Fj9f1h2'
