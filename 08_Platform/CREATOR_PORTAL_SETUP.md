@@ -257,6 +257,159 @@ FROM submissions;
 
 ---
 
+## Public Catalog (Added March 20, 2026)
+
+### Overview
+
+Public-facing catalog at `/catalog` where approved, opted-in works are displayed for licensing. Filmmakers opt in during submission (Section 10), admin approves entries, videos appear in grid with click-to-play modal.
+
+### Submit Form - Section 10: Video & Catalog
+
+**New fields added:**
+- **video_url** (required) - YouTube or Vimeo URL
+- **thumbnail_url** (optional) - Custom thumbnail, auto-generated if not provided
+- **public_description** (optional) - Falls back to logline from Section 2
+- **catalog_opt_in** (boolean) - Checkbox: "List in Public Catalog (after approval)"
+
+**Schema validation:**
+```typescript
+video_url: z.string().url('Must be a valid URL').min(1),
+thumbnail_url: z.string().url().optional(),
+public_description: z.string().max(500).optional(),
+catalog_opt_in: z.boolean().default(false),
+```
+
+### Catalog Opt-In System
+
+**When `catalog_opt_in = true`:**
+1. API creates record in `opt_ins` table
+2. Links to submission via `submission_id`
+3. Stores: `video_url`, `thumbnail_url`, `public_description`
+4. Sets `visible = false` (admin must approve)
+5. `catalog_id` is `null` (assigned by admin)
+
+**opt_ins table schema:**
+```sql
+CREATE TABLE public.opt_ins (
+  id UUID PRIMARY KEY,
+  submission_id UUID REFERENCES submissions(id) UNIQUE NOT NULL,
+  catalog_id TEXT UNIQUE, -- SI8-2026-0001 format
+  opted_in BOOLEAN DEFAULT FALSE,
+  video_url TEXT,
+  thumbnail_url TEXT,
+  public_description TEXT,
+  visible BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+### Public Catalog Page
+
+**URL:** `https://si8-creator-portal.vercel.app/catalog`
+
+**Features:**
+- Responsive grid layout (3 cols desktop, 2 tablet, 1 mobile)
+- Auto-generated thumbnails from YouTube/Vimeo
+- Catalog ID badge in top-right corner
+- Genre tags
+- Filmmaker attribution
+- Click video → modal opens with iframe player
+
+**API Route:** `/api/catalog`
+```typescript
+// Fetches approved + visible entries
+const { data: entries, error } = await supabaseAdmin
+  .from('opt_ins')
+  .select(`
+    id, catalog_id, video_url, thumbnail_url, public_description,
+    submission:submissions!inner (
+      title, genre, filmmaker_name, status
+    )
+  `)
+  .eq('opted_in', true)
+  .eq('visible', true)
+  .eq('submission.status', 'approved')
+  .order('created_at', { ascending: false })
+```
+
+**Note:** Uses `!inner` join to ensure only entries with approved submissions are returned.
+
+### Video Modal Player
+
+**Features:**
+- Click video → modal opens
+- YouTube/Vimeo iframe embed with autoplay
+- Click X or outside modal to close
+- Displays: title, filmmaker, description, catalog ID
+- "Request License" button (placeholder)
+
+**Helper Functions:**
+```typescript
+// Convert watch URLs to embed format
+getEmbedUrl(url: string): string
+  // YouTube: youtube.com/watch?v=ABC → youtube.com/embed/ABC?autoplay=1
+  // Vimeo: vimeo.com/123 → player.vimeo.com/video/123?autoplay=1
+
+// Auto-generate thumbnails
+getThumbnailUrl(videoUrl: string, provided: string | null): string
+  // YouTube: img.youtube.com/vi/{videoId}/maxresdefault.jpg
+  // Vimeo: placeholder (API integration needed)
+```
+
+### Admin Approval Workflow (Manual)
+
+**To approve a catalog entry:**
+```sql
+-- 1. Approve the submission
+UPDATE submissions
+SET status = 'approved'
+WHERE id = 'SUBMISSION_ID';
+
+-- 2. Make visible and assign catalog ID
+UPDATE opt_ins
+SET visible = true,
+    catalog_id = 'SI8-2026-0001'
+WHERE submission_id = 'SUBMISSION_ID';
+```
+
+**Catalog ID format:** `SI8-YYYY-####` (e.g., SI8-2026-0001)
+
+### Testing Catalog Display
+
+**Verify opt-in was created:**
+```sql
+SELECT
+  s.id, s.title, s.status,
+  o.opted_in, o.video_url, o.visible, o.catalog_id
+FROM submissions s
+LEFT JOIN opt_ins o ON o.submission_id = s.id
+WHERE s.title = 'YOUR_TITLE';
+```
+
+**Check what catalog API returns:**
+```sql
+SELECT
+  o.id, o.catalog_id, o.video_url, o.visible,
+  s.title, s.genre, s.filmmaker_name, s.status
+FROM opt_ins o
+JOIN submissions s ON o.submission_id = s.id
+WHERE o.opted_in = true
+  AND o.visible = true
+  AND s.status = 'approved';
+```
+
+### Production Test Results
+
+**Test entry:** jdchangmedia@gmail.com → "TESTLINK"
+- ✅ Video URL: `https://youtu.be/Z0tJ3p5U9Cs`
+- ✅ Catalog ID: `SI8-2026-0001`
+- ✅ Displays in catalog grid
+- ✅ Modal opens with YouTube player
+- ✅ Video plays with autoplay
+- ✅ All metadata displayed correctly
+
+---
+
 ## Known Issues & Fixes
 
 ### Issue 1: "Unexpected token '<', '<!DOCTYPE'... is not valid JSON"
@@ -275,6 +428,11 @@ FROM submissions;
 **Cause:** service_role lacked table-level GRANT permissions
 **Fix:** Applied migration 005 (`GRANT ALL ON ... TO service_role`)
 
+### Issue 5: Catalog showing empty despite approved entries
+**Cause:** Incorrect Supabase query syntax - `.eq('submissions.status', 'approved')` doesn't work on joined tables
+**Fix:** Changed to `.eq('submission.status', 'approved')` (use alias) + added `!inner` join modifier
+**Details:** PostgREST requires using relationship alias, not table name, when filtering on joined columns
+
 ---
 
 ## Architecture Principles
@@ -290,9 +448,18 @@ FROM submissions;
 
 ## Next Steps (Post-MVP)
 
+### Public Catalog Enhancements
+- [ ] Add "Catalog" link to main navigation
+- [ ] Catalog filters (genre, search, sort)
+- [ ] "Request License" functionality (form or email)
+- [ ] Vimeo thumbnail API integration
+- [ ] Video view analytics
+
 ### Admin Review Panel
 - [ ] Review queue page (`/admin/submissions`)
-- [ ] Approve/reject actions
+- [ ] Approve/reject actions with UI (currently manual SQL)
+- [ ] Generate catalog_id automatically
+- [ ] Set visible=true from admin panel
 - [ ] Status change emails to filmmakers
 - [ ] Notes/feedback field
 
@@ -313,6 +480,7 @@ FROM submissions;
 - [ ] Tool usage breakdown (which AI tools are popular)
 - [ ] Geographic distribution
 - [ ] Approval rate metrics
+- [ ] Catalog video views, modal opens, license requests
 
 ---
 
@@ -333,4 +501,4 @@ FROM submissions;
 
 ---
 
-**Last Updated:** March 19, 2026
+**Last Updated:** March 20, 2026

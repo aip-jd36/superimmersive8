@@ -2,7 +2,7 @@
 
 A running log of decisions, insights, and lessons learned while building an AI film distribution company.
 
-*Last updated: March 19, 2026*
+*Last updated: March 20, 2026*
 
 ---
 
@@ -2133,6 +2133,85 @@ Build the payment layer early, before significant traffic. Why? Because payment 
 > The Creator Portal is now the revenue engine. $499 per submission. Filmmakers pay to enter the Rights Verified review queue. After approval, they get Chain of Title PDF + catalog listing.
 >
 > Infrastructure is operational before filmmaker outreach begins. Ready to accept real users today."
+
+---
+
+### #47: Shipping the Public Catalog — YouTube Embeds + Modal Player
+
+**Date:** March 19, 2026
+
+**The feature:**
+Added public catalog with video playback. Filmmakers opt in during submission (Section 10), admin approves entries, videos appear in public grid with click-to-play modal that embeds YouTube/Vimeo iframes.
+
+**What shipped:**
+- **Submit form Section 10:** Video URL (required), thumbnail URL (optional), public description, catalog opt-in checkbox
+- **Catalog opt-in system:** Creates `opt_ins` record with video metadata when checkbox enabled
+- **Public catalog page:** `/catalog` route with responsive grid layout
+- **Video modal player:** Click video → modal opens → YouTube/Vimeo iframe with autoplay
+- **API route:** `/api/catalog` fetches approved + visible entries using Supabase inner join
+- **Helper functions:** `getEmbedUrl()` converts YouTube/Vimeo URLs to embed format, `getThumbnailUrl()` auto-generates from platform APIs
+
+**The architecture decision:**
+Store video URLs, not video files. Let YouTube/Vimeo handle hosting, bandwidth, and encoding. SI8 curates + documents rights, platforms handle distribution. This keeps operational costs at zero while providing high-quality video playback.
+
+**Why it matters:**
+The catalog is the public-facing product. Buyers browse approved works, click to watch, request licenses. This is where Rights Verified documentation creates value — buyers see quality content they can legally license, creators get distribution without platform risk.
+
+**The Supabase query bug:**
+First deployment: catalog showed empty even though data existed. Issue: `.eq('submissions.status', 'approved')` tried to filter on joined table using wrong syntax. PostgREST requires using the relationship alias. Fixed: changed to `.eq('submission.status', 'approved')` + added `!inner` join modifier. Lesson: Supabase query builder syntax for joins is not intuitive — test queries in SQL editor first.
+
+**The iframe embed challenge:**
+YouTube and Vimeo have different URL structures:
+- YouTube watch URL: `youtube.com/watch?v=ABC`
+- YouTube embed URL: `youtube.com/embed/ABC`
+- Vimeo watch URL: `vimeo.com/123456`
+- Vimeo embed URL: `player.vimeo.com/video/123456`
+
+Created `getEmbedUrl()` helper to convert watch URLs to embed format. Added `?autoplay=1` parameter so videos play immediately when modal opens. This creates a Netflix-like browsing experience — click, watch, close.
+
+**Thumbnail generation:**
+YouTube provides free thumbnail API: `https://img.youtube.com/vi/{videoId}/maxresdefault.jpg`. Vimeo requires API call for thumbnails (needs auth). For now, using placeholder for Vimeo. Future: add Vimeo API integration or require filmmakers to upload custom thumbnails.
+
+**What this unlocks:**
+- Public-facing catalog for buyer discovery
+- Filmmakers can share direct links to their catalog entries
+- Catalog ID (SI8-2026-0001) becomes the SKU for licensing deals
+- "Request License" button (placeholder) will trigger licensing inquiry flow
+- Catalog becomes the storefront for Rights Verified content
+
+**The UX insight:**
+Modal player with click-outside-to-close is familiar UX (YouTube, Vimeo, Netflix all use it). No need to reinvent. Users expect this pattern. Implemented with Tailwind overlay + React state management. Works perfectly on desktop and mobile.
+
+**What's still manual:**
+Admin approval. To make an entry visible:
+```sql
+UPDATE submissions SET status = 'approved' WHERE id = '...';
+UPDATE opt_ins SET visible = true, catalog_id = 'SI8-2026-0001' WHERE submission_id = '...';
+```
+
+This is Year 1 workflow. Keeps admin in control of catalog quality. Year 2-3: build admin panel UI. For now, SQL is fine — low volume, high touch.
+
+**Next steps:**
+- Add "Catalog" link to main site navigation
+- Admin panel: approve entries, generate catalog IDs, set visible flag
+- "Request License" flow (form or email)
+- Catalog filters: genre, search, sort by date
+- Analytics: track video views, modal opens, license requests
+
+**LinkedIn-ready excerpt:**
+> "Just shipped the public catalog for SI8.
+>
+> Filmmakers submit videos (YouTube/Vimeo links). Admin approves. Entries appear in public catalog with click-to-play modal.
+>
+> Tech: Next.js client component + Supabase inner joins + YouTube/Vimeo iframe embeds. Zero video hosting costs.
+>
+> Here's the Supabase bug I hit: `.eq('submissions.status', 'approved')` doesn't work on joined tables. PostgREST requires using the relationship alias + `!inner` modifier. Changed to `.eq('submission.status', 'approved')` and it worked.
+>
+> The catalog is now the storefront. Buyers browse approved works. Catalog ID (SI8-2026-0001) becomes the SKU for licensing deals.
+>
+> Modal player with autoplay creates a Netflix-like UX. Click → watch → close. Familiar pattern, no friction.
+>
+> Next: admin panel to approve entries + 'Request License' flow. For now, manual approval via SQL is fine — low volume, high touch, Year 1 workflow."
 
 ---
 
