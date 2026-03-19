@@ -98,20 +98,14 @@ export default function SubmitPage() {
       setIsSubmitting(true)
       setError(null)
 
-      // Get current user
+      // Get current user session
       const {
         data: { session },
       } = await supabase.auth.getSession()
       if (!session) throw new Error('Not authenticated')
 
-      // Get user from users table (id matches auth.users id)
-      const { data: userData } = await supabase
-        .from('users')
-        .select('id')
-        .eq('id', session.user.id)
-        .single()
-
-      if (!userData) throw new Error('User not found')
+      // Use session.user.id directly (matches public.users.id)
+      const user_id = session.user.id
 
       // Calculate total runtime in seconds
       const runtime_seconds =
@@ -119,7 +113,7 @@ export default function SubmitPage() {
 
       // Create submission in database (without payment initially)
       const submissionData = {
-        user_id: userData.id,
+        user_id: user_id,
         title: data.title,
         runtime_seconds,
         genre: data.genre,
