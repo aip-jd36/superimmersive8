@@ -112,23 +112,50 @@ export default function SubmitPage() {
         (data.runtime_minutes || 0) * 60 + (data.runtime_seconds || 0)
 
       // Create submission in database (without payment initially)
+      // Map form data to match actual database schema
       const submissionData = {
         user_id: user_id,
+
+        // Filmmaker Profile (auto-filled from session)
+        filmmaker_name: session.user.user_metadata?.full_name || session.user.email || 'Unknown',
+        filmmaker_location: data.filmmaker_location || null,
+        filmmaker_contact: session.user.email || null,
+        filmmaker_portfolio_links: data.filmmaker_portfolio_links || null,
+
+        // Production Overview
         title: data.title,
-        runtime_seconds,
-        genre: data.genre,
-        logline: data.logline,
-        intended_use: data.intended_use,
-        tools_used: data.tools_used, // In production, this would be JSONB array
+        runtime: runtime_seconds, // Schema uses 'runtime', not 'runtime_seconds'
+        genre: data.genre || null,
+        logline: data.logline || null,
+        intended_use: data.intended_use || null,
+
+        // Tool Disclosure (JSONB)
+        tools_used: JSON.stringify([{ tool: data.tools_used || 'Not specified' }]),
+
+        // Human Authorship
         authorship_statement: data.authorship_statement,
-        likeness_confirmed: data.likeness_confirmed,
-        ip_confirmed: data.ip_confirmed,
-        audio_source: data.audio_source,
-        audio_documentation: data.audio_documentation,
-        modification_authorized: data.modification_authorized,
-        modification_scope: data.modification_scope,
-        territory: data.territory,
-        existing_restrictions: data.existing_restrictions,
+
+        // Likeness & IP (JSONB, not boolean)
+        likeness_confirmation: JSON.stringify({ confirmed: data.likeness_confirmed || false }),
+        ip_confirmation: JSON.stringify({ confirmed: data.ip_confirmed || false }),
+
+        // Audio (JSONB with source_type and documentation)
+        audio_disclosure: JSON.stringify({
+          source_type: data.audio_source || 'not_specified',
+          documentation: data.audio_documentation || null
+        }),
+
+        // Modification Rights
+        modification_authorized: data.modification_authorized || false,
+        modification_scope: data.modification_scope || null,
+
+        // Territory
+        territory_preferences: data.territory || 'Global',
+
+        // Supporting Materials (JSONB array)
+        supporting_materials: JSON.stringify([]),
+
+        // Status
         status: 'pending',
         payment_status: 'unpaid',
       }
