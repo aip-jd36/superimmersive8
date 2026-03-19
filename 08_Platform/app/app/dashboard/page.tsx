@@ -3,6 +3,39 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { formatDate, formatCurrency } from '@/lib/utils'
+import { cookies } from 'next/headers'
+
+async function getSubmissions() {
+  const cookieStore = cookies()
+  const supabase = createClient()
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  if (!session) return []
+
+  try {
+    // Call API route instead of direct Supabase query
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    const response = await fetch(`${baseUrl}/api/submissions`, {
+      headers: {
+        Cookie: cookieStore.toString(),
+      },
+      cache: 'no-store',
+    })
+
+    if (!response.ok) {
+      console.error('Failed to fetch submissions:', response.status)
+      return []
+    }
+
+    const data = await response.json()
+    return data.submissions || []
+  } catch (error) {
+    console.error('Error fetching submissions:', error)
+    return []
+  }
+}
 
 export default async function DashboardPage() {
   const supabase = createClient()
@@ -12,12 +45,8 @@ export default async function DashboardPage() {
 
   if (!session) return null
 
-  // Get user's submissions
-  const { data: submissions } = await supabase
-    .from('submissions')
-    .select('*')
-    .eq('user_id', session.user.id)
-    .order('created_at', { ascending: false })
+  // Get user's submissions via API route
+  const submissions = await getSubmissions()
 
   // Get user's opt-ins
   const { data: optIns } = await supabase
@@ -31,7 +60,7 @@ export default async function DashboardPage() {
     .select('*')
     .eq('creator_id', session.user.id)
 
-  const approvedCount = submissions?.filter((s) => s.status === 'approved').length || 0
+  const approvedCount = submissions.filter((s) => s.status === 'approved').length
   const catalogCount = optIns?.length || 0
   const totalEarnings = deals?.reduce((sum, deal) => sum + (deal.creator_payout || 0), 0) || 0
 
@@ -62,7 +91,7 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Total Submissions</CardDescription>
-            <CardTitle className="text-3xl">{submissions?.length || 0}</CardTitle>
+            <CardTitle className="text-3xl">{submissions.length}</CardTitle>
           </CardHeader>
         </Card>
 
@@ -104,7 +133,7 @@ export default async function DashboardPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {!submissions || submissions.length === 0 ? (
+          {submissions.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 mb-4">You haven't submitted any videos yet.</p>
               <Button asChild>
