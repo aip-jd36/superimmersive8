@@ -103,11 +103,11 @@ export default function SubmitPage() {
       } = await supabase.auth.getSession()
       if (!session) throw new Error('Not authenticated')
 
-      // Get user ID from users table
+      // Get user from users table (id matches auth.users id)
       const { data: userData } = await supabase
         .from('users')
         .select('id')
-        .eq('auth_id', session.user.id)
+        .eq('id', session.user.id)
         .single()
 
       if (!userData) throw new Error('User not found')
