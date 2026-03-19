@@ -214,14 +214,54 @@
             background: var(--color-surface);
             border: 1px solid var(--color-border);
             border-radius: 12px;
-            padding: 2rem;
+            padding: 1.5rem;
             margin-bottom: 4rem;
+            position: sticky;
+            top: 100px; /* Below fixed nav */
+            z-index: 100; /* Below nav (1000) but above content */
+            max-width: 100%;
         }
 
-        .toc h3 {
+        .toc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .toc-header h3 {
             font-family: var(--font-display);
+            font-size: 1.25rem;
+            margin: 0;
+        }
+
+        .toc-toggle {
+            background: none;
+            border: none;
+            color: var(--color-text-secondary);
             font-size: 1.5rem;
-            margin-bottom: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: color 0.2s;
+            line-height: 1;
+        }
+
+        .toc-toggle:hover {
+            color: var(--color-accent);
+        }
+
+        .toc-content {
+            margin-top: 1.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+
+        .toc-content.collapsed {
+            max-height: 0;
+            margin-top: 0;
+            overflow: hidden;
         }
 
         .toc-list {
@@ -236,10 +276,20 @@
             color: var(--color-text-secondary);
             text-decoration: none;
             transition: color 0.2s;
+            display: block;
+            padding: 0.25rem 0;
         }
 
         .toc-list a:hover {
             color: var(--color-accent);
+        }
+
+        /* Mobile: Make TOC not sticky */
+        @media (max-width: 768px) {
+            .toc {
+                position: relative;
+                top: 0;
+            }
         }
 
         .section {
@@ -471,16 +521,33 @@
     <article class="content">
         <!-- Table of Contents -->
         <nav class="toc">
-            <h3>Table of Contents</h3>
-            <ul class="toc-list">
-                <li><a href="#framework">Part 1: The SI8 Rights Verified Framework</a></li>
-                <li><a href="#legal">Part 2: Legal Landscape (Current State)</a></li>
-                <li><a href="#tools">Part 3: Tool Tier Classifications</a></li>
-                <li><a href="#platforms">Part 4: Platform Policies</a></li>
-                <li><a href="#vetting">Part 5: Vetting Criteria (7 Categories)</a></li>
-                <li><a href="#risk">Part 6: Legal Risk Reduction Mechanisms</a></li>
-            </ul>
+            <div class="toc-header" onclick="toggleTOC()">
+                <h3>Table of Contents</h3>
+                <button class="toc-toggle" aria-label="Toggle table of contents">
+                    <span class="toc-toggle-icon">−</span>
+                </button>
+            </div>
+            <div class="toc-content" id="tocContent">
+                <ul class="toc-list">
+                    <li><a href="#framework">Part 1: The SI8 Rights Verified Framework</a></li>
+                    <li><a href="#legal">Part 2: Legal Landscape (Current State)</a></li>
+                    <li><a href="#tools">Part 3: Tool Tier Classifications</a></li>
+                    <li><a href="#platforms">Part 4: Platform Policies</a></li>
+                    <li><a href="#vetting">Part 5: Vetting Criteria (7 Categories)</a></li>
+                    <li><a href="#risk">Part 6: Legal Risk Reduction Mechanisms</a></li>
+                </ul>
+            </div>
         </nav>
+
+        <script>
+            function toggleTOC() {
+                const tocContent = document.getElementById('tocContent');
+                const toggleIcon = document.querySelector('.toc-toggle-icon');
+
+                tocContent.classList.toggle('collapsed');
+                toggleIcon.textContent = tocContent.classList.contains('collapsed') ? '+' : '−';
+            }
+        </script>
 
         <!-- Part 1: Framework -->
         <section id="framework" class="section">
