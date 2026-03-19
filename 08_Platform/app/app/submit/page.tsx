@@ -161,6 +161,10 @@ export default function SubmitPage() {
       }
 
       // Create submission via API route (uses service role to bypass RLS)
+      console.log('📤 Calling /api/submissions/create')
+      console.log('📤 User ID:', user_id)
+      console.log('📤 Submission data:', submissionData)
+
       const submissionResponse = await fetch('/api/submissions/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -170,8 +174,11 @@ export default function SubmitPage() {
         }),
       })
 
+      console.log('📥 API response status:', submissionResponse.status)
+
       if (!submissionResponse.ok) {
         const error = await submissionResponse.json()
+        console.error('❌ API error response:', error)
         throw new Error(error.error || 'Failed to create submission')
       }
 
