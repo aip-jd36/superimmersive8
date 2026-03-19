@@ -372,6 +372,12 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 | **Rights Verified — Review Criteria** | `06_Operations/rights-verified/REVIEW-CRITERIA.md` | Pass/fail thresholds per review category |
 | **Rights Verified — Chain of Title Schema** | `06_Operations/rights-verified/CHAIN-OF-TITLE-SCHEMA.md` | 9-field output template per catalog entry |
 | **Rights Verified — Edge Cases** | `06_Operations/rights-verified/EDGE-CASES.md` | Gray areas, judgment calls, precedents (grows with submissions) |
+| **Technical Architecture** | `08_Platform/architecture/TECHNICAL_ARCHITECTURE.md` | Database schema, API structure, tech stack (Supabase + Next.js) |
+| **PRD: Creator Portal** | `08_Platform/prds/PRD_CREATOR_PORTAL.md` | Submission flow, Stripe payment, opt-in to Showcase |
+| **PRD: Admin Panel** | `08_Platform/prds/PRD_ADMIN_PANEL.md` | Review queue, PDF generation, catalog management |
+| **PRD: Public Catalog** | `08_Platform/prds/PRD_PUBLIC_CATALOG.md` | Marketplace, licensing requests, Rights Verified badges |
+| **PRD: CaaS Website** | `08_Platform/prds/PRD_CAAS_WEBSITE.md` | Homepage redesign for v4 model (How It Works, Pricing) |
+| **4-Week Sprint Plan** | `08_Platform/implementation/4_WEEK_SPRINT_PLAN.md` | Day-by-day implementation plan (Feb 19 - Mar 18, 2026) |
 | **Chain of Title Examples — README** | `05_Catalog/_examples/README.md` | Chain of Title examples overview; sales and onboarding tool |
 | **Chain of Title Template** | `05_Catalog/_examples/TEMPLATE.md` | Blank Chain of Title template for new catalog entries |
 | **Example 001: Neon Dreams** | `05_Catalog/_examples/example-001-neon-dreams/` | First complete Chain of Title example (cyberpunk commercial, Tier 1+2) |
