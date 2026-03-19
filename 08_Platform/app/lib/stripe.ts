@@ -30,5 +30,5 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   typescript: true,
 })
 
-// TODO: Replace with your actual Price ID after creating product in Stripe Dashboard
-export const VERIFICATION_PRICE_ID = 'price_REPLACE_WITH_YOUR_PRICE_ID'
+// Stripe Price ID for AI Video Chain of Title Verification ($499)
+export const VERIFICATION_PRICE_ID = 'price_1TCdOXDHFv9ajBxSYWGjvdHA'
