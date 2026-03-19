@@ -53,17 +53,7 @@ export default function SignupPage() {
 
       if (authError) throw authError
 
-      if (authData.user) {
-        // Create user record in public.users table
-        const { error: userError } = await supabase.from('users').insert({
-          id: authData.user.id,
-          email: authData.user.email!,
-          name: data.fullName,
-        })
-
-        if (userError) throw userError
-      }
-
+      // User record in public.users is created automatically by database trigger
       setSuccess(true)
     } catch (err: any) {
       setError(err.message || 'An error occurred during signup')
