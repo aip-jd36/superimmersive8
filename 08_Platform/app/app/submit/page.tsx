@@ -160,13 +160,22 @@ export default function SubmitPage() {
         payment_status: 'unpaid',
       }
 
-      const { data: submission, error: submissionError } = await supabase
-        .from('submissions')
-        .insert(submissionData)
-        .select()
-        .single()
+      // Create submission via API route (uses service role to bypass RLS)
+      const submissionResponse = await fetch('/api/submissions/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          submissionData,
+          userId: user_id,
+        }),
+      })
 
-      if (submissionError) throw submissionError
+      if (!submissionResponse.ok) {
+        const error = await submissionResponse.json()
+        throw new Error(error.error || 'Failed to create submission')
+      }
+
+      const { submission } = await submissionResponse.json()
 
       // Create Stripe Checkout session
       const response = await fetch('/api/checkout/create-session', {
