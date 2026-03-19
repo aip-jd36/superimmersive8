@@ -2,7 +2,7 @@
 
 A running log of decisions, insights, and lessons learned while building an AI film distribution company.
 
-*Last updated: March 5, 2026*
+*Last updated: March 19, 2026*
 
 ---
 
@@ -2062,6 +2062,77 @@ Rights Verified is not a checkbox on a contract — it's a documented process wi
 > Infrastructure leverage. Build like a funded startup. Operate like a bootstrapped side project.
 >
 > Tech stack: Vercel serverless + Airtable + Resend. Free tiers all the way down."
+
+---
+
+### #46: Shipping the Creator Portal MVP — Payment Flow to Dashboard
+
+**Date:** March 19, 2026
+
+**The milestone:**
+Completed and tested the full Creator Portal end-to-end: signup → submit → pay $499 via Stripe → webhook processing → dashboard display. Three test accounts successfully completed the flow in production.
+
+**What shipped:**
+- **Authentication system:** Supabase Auth with signup, login, email verification (Resend SMTP)
+- **Database schema:** PostgreSQL with 7 tables, RLS policies, automated user creation triggers
+- **10-section submission form:** React Hook Form with Zod validation, progressive disclosure UI
+- **Stripe integration:** Test Mode checkout ($499 Rights Verified fee), webhook processing, payment status tracking
+- **Payment webhook:** Processes `checkout.session.completed` event, updates submission status to "paid", sends confirmation email
+- **Creator dashboard:** Displays submissions with status badges (PENDING/APPROVED/REJECTED), payment status, submission dates
+- **API architecture:** Service role bypass for RLS restrictions (`/api/submissions/create`, `/api/submissions`)
+- **5 database migrations:** Triggers, RLS policies, foreign key fixes, service role permissions
+
+**Tech stack:** Next.js 14 (App Router) + Supabase (PostgreSQL + Auth) + Stripe + Resend + Vercel
+
+**Test results:**
+- jd@aipenguins.com → "Test1" → $499 paid → Dashboard ✅
+- jd@standingencore.com → "STEC_TEST" → $499 paid → Dashboard ✅
+- jdchangmedia@gmail.com → "JDCTEST" → $499 paid → Dashboard ✅
+
+**Why it matters:**
+This isn't just a payment form — it's the operational infrastructure for the entire Rights Verified business model. The Creator Portal is where filmmakers pay $499 to enter the review queue. After approval, they get the Chain of Title PDF and catalog listing. This is the revenue-generating layer that funds the entire agency.
+
+**The architecture insight:**
+Started with client-side Supabase queries, hit RLS permission walls immediately. Solution: API routes with `service_role` key (bypasses RLS) for all database operations. Dashboard queries submissions via direct `supabaseAdmin` call (server component, no unnecessary API roundtrip). Simple, reliable, production-ready.
+
+**The environment variable trap:**
+Deployed to production with missing/wrong env vars:
+- `NEXT_PUBLIC_SUPABASE_URL` was set to Vercel URL instead of Supabase URL → JSON parsing errors
+- `NEXT_PUBLIC_SITE_URL` was set to git branch preview URL → post-payment redirect went to Vercel login
+
+Lesson: Environment variables are invisible until they break in production. Test with real deployments, not just localhost.
+
+**What this unlocks:**
+- Can switch to Stripe Live Mode today and accept real filmmaker submissions
+- Revenue infrastructure is operational before filmmaker outreach begins
+- Every submission generates data: who's submitting, what tools they use, where they're from
+- Dashboard gives filmmakers real-time status visibility (reduces support burden)
+
+**The decision:**
+Build the payment layer early, before significant traffic. Why? Because payment bugs discovered at scale are catastrophic. Better to catch webhook failures, RLS permission issues, and redirect problems with test accounts than with real paying filmmakers.
+
+**Next steps:**
+- Admin review panel (approve/reject submissions)
+- Chain of Title PDF generation (9-field template)
+- Submission detail view (`/dashboard/submissions/[id]`)
+- Email notifications when status changes
+
+**LinkedIn-ready excerpt:**
+> "Just shipped the Creator Portal MVP for SI8.
+>
+> Full payment flow: signup → submit → $499 Stripe checkout → webhook → dashboard.
+>
+> Tested end-to-end with 3 accounts in production. All payments processed correctly. All dashboards displaying submissions.
+>
+> Tech: Next.js 14 + Supabase + Stripe + Vercel. 5 database migrations. Service role API routes to bypass RLS. Direct server-side queries in dashboard.
+>
+> Here's what I learned: Environment variables are invisible until they break in production. First deployment had wrong Supabase URL (was set to Vercel URL) → JSON parsing errors on login. Second issue: success redirect URL was git branch preview URL → users hit Vercel auth screen after paying.
+>
+> Lesson: Don't assume. Test real deployments with real accounts before announcing launch.
+>
+> The Creator Portal is now the revenue engine. $499 per submission. Filmmakers pay to enter the Rights Verified review queue. After approval, they get Chain of Title PDF + catalog listing.
+>
+> Infrastructure is operational before filmmaker outreach begins. Ready to accept real users today."
 
 ---
 
