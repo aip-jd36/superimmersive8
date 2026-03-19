@@ -118,9 +118,9 @@ export default function SubmitPage() {
 
         // Filmmaker Profile (auto-filled from session)
         filmmaker_name: session.user.user_metadata?.full_name || session.user.email || 'Unknown',
-        filmmaker_location: data.filmmaker_location || null,
+        filmmaker_location: null, // Will be added to form in future version
         filmmaker_contact: session.user.email || null,
-        filmmaker_portfolio_links: data.filmmaker_portfolio_links || null,
+        filmmaker_portfolio_links: null, // Will be added to form in future version
 
         // Production Overview
         title: data.title,
