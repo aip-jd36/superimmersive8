@@ -56,10 +56,9 @@ export default function SignupPage() {
       if (authData.user) {
         // Create user record in public.users table
         const { error: userError } = await supabase.from('users').insert({
-          auth_id: authData.user.id,
+          id: authData.user.id,
           email: authData.user.email!,
-          full_name: data.fullName,
-          role: 'creator',
+          name: data.fullName,
         })
 
         if (userError) throw userError
