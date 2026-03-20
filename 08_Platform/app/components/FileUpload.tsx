@@ -93,6 +93,13 @@ export default function FileUpload({
   // Upload file to Supabase Storage
   const uploadFile = async (file: File): Promise<UploadedFile | null> => {
     try {
+      // Get user ID from session at upload time (avoids timing issues with prop)
+      const { data: { user } } = await supabase.auth.getUser()
+      const uploadUserId = user?.id || userId
+      if (!uploadUserId) {
+        throw new Error('Not authenticated')
+      }
+
       // Generate secure file name
       const timestamp = new Date().toISOString().split('T')[0]
       const randomSuffix = generateRandomSuffix()
@@ -103,7 +110,7 @@ export default function FileUpload({
         .toLowerCase()
 
       const fileName = `${folder}-${timestamp}-${randomSuffix}.${fileExt}`
-      const filePath = `${userId}/${folder}/${fileName}`
+      const filePath = `${uploadUserId}/${folder}/${fileName}`
 
       console.log('📤 Uploading file:', filePath)
 
