@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useCallback, useRef } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { X, Upload, FileText, Image as ImageIcon, Loader2 } from 'lucide-react'
 
@@ -44,7 +43,6 @@ export default function FileUpload({
   const [dragActive, setDragActive] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const supabase = createClient()
 
   // Format file size for display
   const formatFileSize = (bytes: number): string => {
@@ -90,54 +88,29 @@ export default function FileUpload({
     return null
   }
 
-  // Upload file to Supabase Storage
+  // Upload file via server API route (uses service role key, bypasses RLS)
   const uploadFile = async (file: File): Promise<UploadedFile | null> => {
     try {
-      // Get user ID from session at upload time (avoids timing issues with prop)
-      const { data: { user } } = await supabase.auth.getUser()
-      const uploadUserId = user?.id || userId
-      if (!uploadUserId) {
-        throw new Error('Not authenticated')
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('folder', folder)
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Upload failed')
       }
 
-      // Generate secure file name
-      const timestamp = new Date().toISOString().split('T')[0]
-      const randomSuffix = generateRandomSuffix()
-      const fileExt = file.name.split('.').pop()
-      const sanitizedName = file.name
-        .replace(/[^a-zA-Z0-9.-]/g, '_')
-        .replace(/_{2,}/g, '_')
-        .toLowerCase()
-
-      const fileName = `${folder}-${timestamp}-${randomSuffix}.${fileExt}`
-      const filePath = `${uploadUserId}/${folder}/${fileName}`
-
-      console.log('📤 Uploading file:', filePath)
-
-      // Upload to Supabase Storage
-      const { data, error } = await supabase.storage
-        .from('submission-files')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false,
-        })
-
-      if (error) {
-        console.error('Upload error:', error)
-        throw error
-      }
-
-      console.log('✅ Upload successful:', data)
-
-      // Get public URL (will require signed URL for actual access since bucket is private)
-      const { data: urlData } = supabase.storage
-        .from('submission-files')
-        .getPublicUrl(filePath)
+      const data = await response.json()
 
       const uploadedFile: UploadedFile = {
         name: file.name,
-        path: filePath,
-        url: urlData.publicUrl,
+        path: data.path,
+        url: data.url,
         size: file.size,
         type: file.type,
         uploaded_at: new Date().toISOString(),
@@ -202,16 +175,6 @@ export default function FileUpload({
   // Handle file remove
   const handleRemove = async (fileToRemove: UploadedFile) => {
     try {
-      // Delete from Supabase Storage
-      const { error } = await supabase.storage
-        .from('submission-files')
-        .remove([fileToRemove.path])
-
-      if (error) {
-        console.error('Delete error:', error)
-        throw error
-      }
-
       // Update state
       const newFiles = files.filter(f => f.path !== fileToRemove.path)
       setFiles(newFiles)
