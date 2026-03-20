@@ -187,6 +187,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     }))
 
     // Generate Chain of Title PDF (react-pdf version)
+    console.log('📄 Calling generateChainOfTitlePDF for', catalogId)
     const pdfUrl = await generateChainOfTitlePDF({
       catalogId,
       submissionId: params.id,
@@ -201,8 +202,16 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       reviewedBy: userData.name || userData.email,
     })
 
-    // generateChainOfTitlePDF handles upsert to rights_packages internally,
-    // so update the record we just inserted with the returned URL
+    console.log('📄 generateChainOfTitlePDF result:', pdfUrl ? '✅ URL returned' : '❌ null returned')
+
+    if (!pdfUrl) {
+      // PDF generation failed — return error so admin knows immediately
+      return NextResponse.json({
+        error: 'PDF generation failed. Check Vercel logs for details.',
+        rightsPackageId: rightsPackage.id,
+      }, { status: 500 })
+    }
+
     if (pdfUrl) {
       await supabaseAdmin
         .from('rights_packages')
