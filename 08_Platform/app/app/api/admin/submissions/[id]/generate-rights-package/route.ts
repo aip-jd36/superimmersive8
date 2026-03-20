@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
-import { generateChainOfTitle } from '@/lib/generate-chain-of-title'
+import { generateChainOfTitlePDF } from '@/lib/pdf/generateChainOfTitle'
 
 type RouteContext = {
   params: {
@@ -176,59 +176,47 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
     console.log(`Rights Package created for submission ${params.id}, catalog ID: ${catalogId}, tier: ${tier}`)
 
-    // Generate Chain of Title document
-    const chainOfTitleText = generateChainOfTitle(rightsPackage, {
+    // Parse tools for PDF generator
+    const tools = toolsUsed.map((t: any) => ({
+      tool_name: t.tool || 'Unknown',
+      version: t.version || 'Not specified',
+      plan_type: t.plan_type || 'Pro',
+      start_date: t.start_date || '',
+      end_date: t.end_date || '',
+      receipt_url: t.receipt_url,
+    }))
+
+    // Generate Chain of Title PDF (react-pdf version)
+    const pdfUrl = await generateChainOfTitlePDF({
+      catalogId,
+      submissionId: params.id,
+      filmmakerName: submission.filmmaker_name,
       title: submission.title,
-      filmmaker_name: submission.filmmaker_name,
-      runtime: submission.runtime,
-      genre: submission.genre,
-      created_at: submission.created_at,
+      tools,
+      modificationRights: {
+        authorized: submission.modification_authorized || false,
+        scope: submission.modification_scope || undefined,
+      },
+      territory: submission.territory_preferences || 'Global',
+      reviewedBy: userData.name || userData.email,
     })
 
-    // Upload to Supabase Storage
-    const fileName = `${catalogId}_chain-of-title.txt`
-    const filePath = `rights-packages/${fileName}`
-
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
-      .from('documents')
-      .upload(filePath, chainOfTitleText, {
-        contentType: 'text/plain',
-        upsert: true,
-      })
-
-    if (uploadError) {
-      console.error('Error uploading Chain of Title:', uploadError)
-      // Don't fail the whole operation if upload fails
-    }
-
-    // Get public URL for the uploaded file
-    let publicUrl = null
-    if (uploadData) {
-      const { data: urlData } = supabaseAdmin.storage
-        .from('documents')
-        .getPublicUrl(filePath)
-      publicUrl = urlData.publicUrl
-    }
-
-    // Update rights_package with document URL
-    if (publicUrl) {
+    // generateChainOfTitlePDF handles upsert to rights_packages internally,
+    // so update the record we just inserted with the returned URL
+    if (pdfUrl) {
       await supabaseAdmin
         .from('rights_packages')
-        .update({
-          document_url: publicUrl,
-          document_path: filePath,
-          generated_at: new Date().toISOString(),
-        })
+        .update({ document_url: pdfUrl, generated_at: new Date().toISOString() })
         .eq('id', rightsPackage.id)
     }
 
     return NextResponse.json({
       success: true,
       rightsPackageId: rightsPackage.id,
-      catalogId: catalogId,
-      tier: tier,
-      documentUrl: publicUrl,
-      message: 'Chain of Title generated successfully (all fields auto-populated)',
+      catalogId,
+      tier,
+      documentUrl: pdfUrl,
+      message: 'Chain of Title PDF generated successfully',
     })
   } catch (error) {
     console.error('Error in generate-rights-package route:', error)

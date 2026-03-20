@@ -292,33 +292,6 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
               existingRightsPackage={rightsPackage}
             />
 
-            {/* Download Chain of Title PDF */}
-            {rightsPackage?.document_url && (
-              <Card className="bg-green-50 border-green-200">
-                <CardHeader>
-                  <CardTitle className="text-green-900 flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5" />
-                    Chain of Title Generated
-                  </CardTitle>
-                  <CardDescription>
-                    Generated {rightsPackage.generated_at ? formatDate(rightsPackage.generated_at) : 'recently'}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button asChild className="w-full">
-                    <a
-                      href={rightsPackage.document_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      Download PDF
-                    </a>
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-
             {/* Review Notes */}
             <Card>
               <CardHeader>
