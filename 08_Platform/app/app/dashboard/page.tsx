@@ -47,14 +47,26 @@ export default async function DashboardPage() {
 
   if (!session) return null
 
+  // DEBUG: Log session info
+  console.log('🔍 Dashboard - Session user ID:', session.user.id)
+  console.log('🔍 Dashboard - Session user email:', session.user.email)
+
   // Check if user is admin
-  const { data: userData } = await supabase
+  const { data: userData, error: userError } = await supabase
     .from('users')
     .select('is_admin')
     .eq('id', session.user.id)
     .single()
 
+  // DEBUG: Log admin check result
+  console.log('🔍 Dashboard - userData:', userData)
+  console.log('🔍 Dashboard - userError:', userError)
+  console.log('🔍 Dashboard - is_admin value:', userData?.is_admin)
+
   const isAdmin = userData?.is_admin || false
+
+  // DEBUG: Log final isAdmin value
+  console.log('🔍 Dashboard - Final isAdmin:', isAdmin)
 
   // Get user's submissions using service_role (bypasses RLS)
   const submissions = await getSubmissions(session.user.id)
