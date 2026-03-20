@@ -41,47 +41,44 @@ async function getSubmissions(userId: string): Promise<Submission[]> {
 
 export default async function DashboardPage() {
   const supabase = createClient()
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
 
-  if (!session) return null
+  // Use getUser() instead of getSession() as recommended by Supabase
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-  // DEBUG: Log session info
-  console.log('🔍 Dashboard - Session user ID:', session.user.id)
-  console.log('🔍 Dashboard - Session user email:', session.user.email)
+  if (authError || !user) return null
 
-  // Check if user is admin
-  const { data: userData, error: userError } = await supabase
+  console.log('🔍 Dashboard - Auth user ID:', user.id)
+  console.log('🔍 Dashboard - Auth user email:', user.email)
+
+  // Check if user is admin using service role (bypasses RLS)
+  const { data: userData, error: userError } = await supabaseAdmin
     .from('users')
     .select('is_admin')
-    .eq('id', session.user.id)
+    .eq('id', user.id)
     .single()
 
-  // DEBUG: Log admin check result
-  console.log('🔍 Dashboard - userData:', userData)
-  console.log('🔍 Dashboard - userError:', userError)
+  console.log('🔍 Dashboard - userData from DB:', userData)
+  console.log('🔍 Dashboard - DB error:', userError)
   console.log('🔍 Dashboard - is_admin value:', userData?.is_admin)
 
   const isAdmin = userData?.is_admin || false
 
-  // DEBUG: Log final isAdmin value
   console.log('🔍 Dashboard - Final isAdmin:', isAdmin)
 
   // Get user's submissions using service_role (bypasses RLS)
-  const submissions = await getSubmissions(session.user.id)
+  const submissions = await getSubmissions(user.id)
 
   // Get user's opt-ins
   const { data: optIns } = await supabase
     .from('opt_ins')
     .select('*')
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id)
 
   // Get user's licensing deals
   const { data: deals } = await supabase
     .from('licensing_deals')
     .select('*')
-    .eq('creator_id', session.user.id)
+    .eq('creator_id', user.id)
 
   const approvedCount = submissions.filter((s) => s.status === 'approved').length
   const catalogCount = optIns?.length || 0
