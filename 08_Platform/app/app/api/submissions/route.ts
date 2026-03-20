@@ -4,23 +4,21 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
-    // Get the authenticated user using the regular client
+    // Get the authenticated user using getUser()
     const supabase = createClient()
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    if (!session) {
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    console.log('🔷 API /api/submissions GET - User ID:', session.user.id)
+    console.log('🔷 API /api/submissions GET - User ID:', user.id)
 
     // Fetch submissions using service role (bypasses RLS)
     const { data: submissions, error } = await supabaseAdmin
       .from('submissions')
       .select('*')
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
     if (error) {

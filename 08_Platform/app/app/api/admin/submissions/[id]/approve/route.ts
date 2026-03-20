@@ -11,21 +11,22 @@ type RouteContext = {
 
 export async function POST(request: NextRequest, { params }: RouteContext) {
   try {
-    // Verify admin auth
+    // Verify admin auth using getUser() + service role
     const supabase = createClient()
-    const { data: { session } } = await supabase.auth.getSession()
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
 
-    if (!session) {
+    if (authError || !authUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { data: user } = await supabase
+    // Check admin status using service role (bypasses RLS)
+    const { data: userData } = await supabaseAdmin
       .from('users')
       .select('is_admin')
-      .eq('id', session.user.id)
+      .eq('id', authUser.id)
       .single()
 
-    if (!user?.is_admin) {
+    if (!userData?.is_admin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

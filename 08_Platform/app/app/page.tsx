@@ -3,12 +3,12 @@ import { createClient } from '@/lib/supabase/server'
 
 export default async function Home() {
   const supabase = createClient()
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+
+  // Use getUser() instead of getSession() as recommended by Supabase
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
 
   // If logged in, redirect to dashboard
-  if (session) {
+  if (!authError && user) {
     redirect('/dashboard')
   }
 
