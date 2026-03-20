@@ -61,9 +61,9 @@ export async function generateChainOfTitlePDF(
     const pdfStream = await renderToStream(<ChainOfTitlePDF data={pdfData} />)
 
     // Convert stream to buffer
-    const chunks: Uint8Array[] = []
+    const chunks: Buffer[] = []
     for await (const chunk of pdfStream) {
-      chunks.push(chunk)
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
     }
     const pdfBuffer = Buffer.concat(chunks)
 
