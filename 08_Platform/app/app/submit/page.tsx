@@ -954,7 +954,7 @@ export default function SubmitPage() {
                     <h4 className="font-medium mb-2">Summary:</h4>
                     <ul className="text-sm space-y-1">
                       <li>Film Title: {watch('title')}</li>
-                      <li>Tools Used: {watch('tools_used')}</li>
+                      <li>Tools Used: {tools.length} tool{tools.length !== 1 ? 's' : ''} added</li>
                       <li>Territory: {watch('territory')}</li>
                     </ul>
                   </div>
