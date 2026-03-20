@@ -32,12 +32,15 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
     const { hasOptIn } = await request.json()
 
+    console.log('🔍 Approving submission:', params.id, 'hasOptIn:', hasOptIn)
+
     // Fetch submission with user data for email
-    const { data: submission } = await supabaseAdmin
+    // Use explicit foreign key (!user_id) to avoid ambiguous relationship error
+    const { data: submission, error: fetchError } = await supabaseAdmin
       .from('submissions')
       .select(`
         *,
-        user:users (
+        user:users!user_id (
           email,
           name
         )
@@ -45,7 +48,10 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       .eq('id', params.id)
       .single()
 
+    console.log('📊 Fetch result:', { found: !!submission, error: fetchError?.message })
+
     if (!submission) {
+      console.log('❌ Submission not found')
       return NextResponse.json({ error: 'Submission not found' }, { status: 404 })
     }
 

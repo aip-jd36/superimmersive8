@@ -37,11 +37,12 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     }
 
     // Fetch submission with user data for email
+    // Use explicit foreign key (!user_id) to avoid ambiguous relationship error
     const { data: submission } = await supabaseAdmin
       .from('submissions')
       .select(`
         *,
-        user:users (
+        user:users!user_id (
           email,
           name
         )
