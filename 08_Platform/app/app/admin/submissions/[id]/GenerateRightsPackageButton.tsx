@@ -12,8 +12,8 @@ type Props = {
   currentStatus: string
   existingRightsPackage?: {
     id: string
-    pdf_url: string | null
-    created_at: string
+    document_url: string | null
+    generated_at: string | null
   } | null
 }
 
@@ -67,13 +67,13 @@ export function GenerateRightsPackageButton({
             Chain of Title Generated
           </CardTitle>
           <CardDescription className="text-green-700">
-            Created on {new Date(existingRightsPackage.created_at).toLocaleDateString()}
+            Created on {existingRightsPackage.generated_at ? new Date(existingRightsPackage.generated_at).toLocaleDateString() : 'recently'}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {existingRightsPackage.pdf_url ? (
+          {existingRightsPackage.document_url ? (
             <Button asChild className="w-full">
-              <a href={existingRightsPackage.pdf_url} target="_blank" rel="noopener noreferrer">
+              <a href={existingRightsPackage.document_url} target="_blank" rel="noopener noreferrer">
                 <Download className="w-4 h-4 mr-2" />
                 Download Chain of Title
               </a>
