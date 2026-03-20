@@ -34,7 +34,7 @@ export default async function CatalogManagementPage() {
       video_url,
       visible,
       created_at,
-      submission:submissions (
+      submission:submissions!inner (
         title,
         filmmaker_name,
         status
