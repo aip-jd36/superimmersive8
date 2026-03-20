@@ -18,6 +18,8 @@ type PageProps = {
 export default async function SubmissionDetailPage({ params }: PageProps) {
   await requireAdmin()
 
+  console.log('🔍 Fetching submission:', params.id)
+
   // Fetch submission with user data
   const { data: submission, error } = await supabaseAdmin
     .from('submissions')
@@ -31,9 +33,18 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
     .eq('id', params.id)
     .single()
 
+  console.log('📊 Query result:', {
+    found: !!submission,
+    error: error?.message,
+    submissionId: submission?.id
+  })
+
   if (error || !submission) {
+    console.log('❌ Submission not found, calling notFound()')
     notFound()
   }
+
+  console.log('✅ Submission found:', submission.title)
 
   // Check if opt-in exists
   const { data: optIn } = await supabaseAdmin
