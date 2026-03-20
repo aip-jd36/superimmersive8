@@ -21,11 +21,12 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
   console.log('🔍 Fetching submission:', params.id)
 
   // Fetch submission with user data
+  // Use explicit foreign key (!user_id) to avoid ambiguous relationship error
   const { data: submission, error } = await supabaseAdmin
     .from('submissions')
     .select(`
       *,
-      user:users (
+      user:users!user_id (
         email,
         name
       )
