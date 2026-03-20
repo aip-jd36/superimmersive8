@@ -123,7 +123,7 @@ export default function CatalogPage() {
     setFilteredEntries(filtered)
   }
 
-  const genres = ['all', ...Array.from(new Set(entries.map(e => e.submission.genre).filter(Boolean)))]
+  const genres: string[] = ['all', ...Array.from(new Set(entries.map(e => e.submission.genre).filter((g): g is string => g !== null)))]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
