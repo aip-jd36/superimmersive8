@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { sendSubmissionApprovedEmail, sendOptInConfirmationEmail } from '@/lib/emails'
+import { generateChainOfTitlePDF } from '@/lib/pdf/generateChainOfTitle'
 
 type RouteContext = {
   params: {
@@ -104,6 +105,41 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
         console.error('Error updating opt-in:', optInError)
         // Don't fail the whole approval if catalog update fails
       } else {
+        // Generate Chain of Title PDF
+        console.log('📄 Generating Chain of Title PDF for', catalogId)
+
+        // Parse tools from JSONB
+        let tools = []
+        try {
+          tools = JSON.parse(submission.tools_used as string || '[]')
+        } catch (e) {
+          console.error('Error parsing tools_used:', e)
+          tools = []
+        }
+
+        // Parse modification rights
+        const modificationRights = {
+          authorized: submission.modification_authorized || false,
+          scope: submission.modification_scope || undefined,
+        }
+
+        // Generate PDF
+        const pdfUrl = await generateChainOfTitlePDF({
+          catalogId,
+          submissionId: params.id,
+          filmmakerName: submission.filmmaker_name,
+          title: submission.title,
+          tools,
+          modificationRights,
+          territory: submission.territory_preferences || 'Global',
+        })
+
+        if (pdfUrl) {
+          console.log('✅ Chain of Title PDF generated:', pdfUrl)
+        } else {
+          console.error('❌ Failed to generate Chain of Title PDF')
+        }
+
         // Send catalog opt-in confirmation email
         const catalogUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/catalog`
         await sendOptInConfirmationEmail(

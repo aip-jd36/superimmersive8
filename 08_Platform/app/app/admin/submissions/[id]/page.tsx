@@ -54,10 +54,10 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
     .eq('submission_id', params.id)
     .single()
 
-  // Check if Rights Package exists
+  // Check if Rights Package (Chain of Title PDF) exists
   const { data: rightsPackage } = await supabaseAdmin
     .from('rights_packages')
-    .select('id, pdf_url, created_at')
+    .select('id, document_url, document_path, generated_at, format')
     .eq('submission_id', params.id)
     .single()
 
@@ -291,6 +291,33 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
               currentStatus={submission.status}
               existingRightsPackage={rightsPackage}
             />
+
+            {/* Download Chain of Title PDF */}
+            {rightsPackage?.document_url && (
+              <Card className="bg-green-50 border-green-200">
+                <CardHeader>
+                  <CardTitle className="text-green-900 flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5" />
+                    Chain of Title Generated
+                  </CardTitle>
+                  <CardDescription>
+                    Generated {rightsPackage.generated_at ? formatDate(rightsPackage.generated_at) : 'recently'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button asChild className="w-full">
+                    <a
+                      href={rightsPackage.document_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Download PDF
+                    </a>
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Review Notes */}
             <Card>
