@@ -4,6 +4,21 @@
       "source": "/catalog",
       "destination": "https://si8-creator-portal.vercel.app/catalog",
       "permanent": false
+    },
+    {
+      "source": "/auth/signup",
+      "destination": "https://si8-creator-portal.vercel.app/auth/signup",
+      "permanent": false
+    },
+    {
+      "source": "/auth/login",
+      "destination": "https://si8-creator-portal.vercel.app/auth/login",
+      "permanent": false
+    },
+    {
+      "source": "/auth/admin/login",
+      "destination": "https://si8-creator-portal.vercel.app/auth/login",
+      "permanent": false
     }
   ]
 }
