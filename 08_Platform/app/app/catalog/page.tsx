@@ -1,10 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { X, Play, Search, Filter, Clock, User, Tag } from 'lucide-react'
+import { X, Play, Search, Clock, User, Tag, Filter } from 'lucide-react'
+import Link from 'next/link'
 
 type CatalogEntry = {
   id: string
@@ -20,9 +18,7 @@ type CatalogEntry = {
   }
 }
 
-// Helper to convert YouTube/Vimeo URLs to embed format
 function getEmbedUrl(url: string): string {
-  // YouTube
   if (url.includes('youtube.com') || url.includes('youtu.be')) {
     let videoId = ''
     if (url.includes('youtube.com/watch')) {
@@ -32,21 +28,15 @@ function getEmbedUrl(url: string): string {
     }
     return `https://www.youtube.com/embed/${videoId}?autoplay=1`
   }
-
-  // Vimeo
   if (url.includes('vimeo.com')) {
     const videoId = url.split('vimeo.com/')[1]?.split('?')[0] || ''
     return `https://player.vimeo.com/video/${videoId}?autoplay=1`
   }
-
   return url
 }
 
-// Helper to get thumbnail from video URL if not provided
 function getThumbnailUrl(videoUrl: string, providedThumbnail: string | null): string {
   if (providedThumbnail) return providedThumbnail
-
-  // YouTube thumbnail
   if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
     let videoId = ''
     if (videoUrl.includes('youtube.com/watch')) {
@@ -56,18 +46,11 @@ function getThumbnailUrl(videoUrl: string, providedThumbnail: string | null): st
     }
     return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
   }
-
-  // Vimeo thumbnail - would need API call, using placeholder for now
-  if (videoUrl.includes('vimeo.com')) {
-    return 'https://placehold.co/1280x720/1e293b/ffffff?text=Vimeo+Video'
-  }
-
-  return 'https://placehold.co/1280x720/1e293b/ffffff?text=Video'
+  return 'https://placehold.co/1280x720/1a1a1a/ffffff?text=Video'
 }
 
-// Helper to format runtime
 function formatRuntime(seconds: number | null): string {
-  if (!seconds) return 'Unknown'
+  if (!seconds) return ''
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
   return `${mins}:${secs.toString().padStart(2, '0')}`
@@ -81,13 +64,8 @@ export default function CatalogPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedGenre, setSelectedGenre] = useState<string>('all')
 
-  useEffect(() => {
-    fetchCatalog()
-  }, [])
-
-  useEffect(() => {
-    filterEntries()
-  }, [entries, searchQuery, selectedGenre])
+  useEffect(() => { fetchCatalog() }, [])
+  useEffect(() => { filterEntries() }, [entries, searchQuery, selectedGenre])
 
   const fetchCatalog = async () => {
     try {
@@ -105,8 +83,6 @@ export default function CatalogPage() {
 
   const filterEntries = () => {
     let filtered = entries
-
-    // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter(entry =>
         entry.submission.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -114,88 +90,105 @@ export default function CatalogPage() {
         entry.public_description?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     }
-
-    // Filter by genre
     if (selectedGenre !== 'all') {
       filtered = filtered.filter(entry => entry.submission.genre === selectedGenre)
     }
-
     setFilteredEntries(filtered)
   }
 
   const genres: string[] = ['all', ...Array.from(new Set(entries.map(e => e.submission.genre).filter((g): g is string => g !== null)))]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div style={{ minHeight: '100vh', backgroundColor: '#0f0f0f', color: '#ffffff', fontFamily: 'Inter, sans-serif' }}>
+
+      {/* Nav — matches marketing site */}
+      <nav style={{ position: 'sticky', top: 0, backgroundColor: 'rgba(15,15,15,0.95)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #333', zIndex: 100 }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '72px' }}>
+          <Link href="https://superimmersive8.com/newsite" style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em', color: '#ffffff', textDecoration: 'none' }}>
+            SuperImmersive <span style={{ color: '#f59e0b' }}>8</span>
+          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+            <Link href="https://superimmersive8.com/newsite/how-it-works" style={{ color: '#a0a0a0', textDecoration: 'none', fontSize: '0.95rem' }}>How It Works</Link>
+            <Link href="https://superimmersive8.com/newsite/pricing" style={{ color: '#a0a0a0', textDecoration: 'none', fontSize: '0.95rem' }}>Pricing</Link>
+            <span style={{ color: '#ffffff', fontSize: '0.95rem', fontWeight: 500 }}>Catalog</span>
+            <Link href="/auth/login" style={{ color: '#a0a0a0', textDecoration: 'none', fontSize: '0.95rem' }}>Login</Link>
+            <Link href="/auth/signup" style={{ backgroundColor: '#f59e0b', color: '#000000', padding: '0.5rem 1.25rem', borderRadius: '6px', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none' }}>
+              Get Verified
+            </Link>
+          </div>
+        </div>
+      </nav>
+
       {/* Header */}
-      <div className="bg-white border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between mb-6">
+      <div style={{ borderBottom: '1px solid #222', padding: '4rem 2rem 3rem' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.5rem', marginBottom: '2.5rem' }}>
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">
+              <h1 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '2.75rem', fontWeight: 700, letterSpacing: '-0.02em', marginBottom: '0.75rem' }}>
                 Rights Verified Catalog
               </h1>
-              <p className="text-gray-600">
+              <p style={{ color: '#a0a0a0', fontSize: '1.05rem', lineHeight: 1.6, maxWidth: '540px' }}>
                 AI-generated films with verified rights documentation. Ready for commercial licensing.
               </p>
             </div>
-            <div className="hidden md:flex items-center gap-3 text-sm text-gray-500">
-              <div className="flex items-center gap-2 bg-green-50 text-green-700 px-3 py-2 rounded-lg">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="font-medium">{entries.length} Available</span>
+            {!loading && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '999px', padding: '0.5rem 1.125rem' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite' }} />
+                <span style={{ fontSize: '0.875rem', fontWeight: 500, color: '#a0a0a0' }}>{entries.length} Available</span>
               </div>
-            </div>
+            )}
           </div>
 
-          {/* Search and Filters */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <Input
+          {/* Search + filters */}
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: '280px', position: 'relative' }}>
+              <Search style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', color: '#666' }} />
+              <input
                 type="text"
                 placeholder="Search by title, filmmaker, or description..."
-                className="pl-10 h-12 text-base"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%', padding: '0.75rem 1rem 0.75rem 2.75rem',
+                  backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px',
+                  color: '#ffffff', fontSize: '0.95rem', outline: 'none',
+                }}
               />
             </div>
-            <div className="flex gap-2">
-              <select
-                className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-                value={selectedGenre}
-                onChange={(e) => setSelectedGenre(e.target.value)}
-              >
-                {genres.map(genre => (
-                  <option key={genre} value={genre}>
-                    {genre === 'all' ? 'All Genres' : genre}
-                  </option>
-                ))}
-              </select>
-              <Button variant="outline" className="hidden sm:flex items-center gap-2">
-                <Filter className="w-4 h-4" />
-                Filters
-              </Button>
-            </div>
+            <select
+              value={selectedGenre}
+              onChange={(e) => setSelectedGenre(e.target.value)}
+              style={{
+                padding: '0.75rem 1rem', backgroundColor: '#1a1a1a', border: '1px solid #333',
+                borderRadius: '8px', color: '#ffffff', fontSize: '0.95rem', cursor: 'pointer',
+              }}
+            >
+              {genres.map(genre => (
+                <option key={genre} value={genre}>
+                  {genre === 'all' ? 'All Genres' : genre}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </div>
 
-      {/* Catalog Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Grid */}
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '3rem 2rem' }}>
         {loading ? (
-          <div className="text-center py-20">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mb-4"></div>
-            <p className="text-gray-500">Loading catalog...</p>
+          <div style={{ textAlign: 'center', padding: '5rem 0' }}>
+            <div style={{ width: '40px', height: '40px', border: '2px solid #333', borderTopColor: '#f59e0b', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 1rem' }} />
+            <p style={{ color: '#666' }}>Loading catalog...</p>
           </div>
         ) : filteredEntries.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-              <Search className="w-8 h-8 text-gray-400" />
+          <div style={{ textAlign: 'center', padding: '5rem 0' }}>
+            <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#1a1a1a', border: '1px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+              <Search style={{ width: '28px', height: '28px', color: '#666' }} />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {searchQuery || selectedGenre !== 'all' ? 'No results found' : 'No entries in the catalog yet'}
+            <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+              {searchQuery || selectedGenre !== 'all' ? 'No results found' : 'No entries yet'}
             </h3>
-            <p className="text-sm text-gray-500 max-w-md mx-auto">
+            <p style={{ color: '#666', fontSize: '0.9rem' }}>
               {searchQuery || selectedGenre !== 'all'
                 ? 'Try adjusting your search or filters'
                 : 'Approved works will appear here once filmmakers opt in.'}
@@ -203,90 +196,82 @@ export default function CatalogPage() {
           </div>
         ) : (
           <>
-            <div className="mb-6 flex items-center justify-between">
-              <p className="text-sm text-gray-600">
-                Showing <span className="font-semibold text-gray-900">{filteredEntries.length}</span> {filteredEntries.length === 1 ? 'entry' : 'entries'}
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <p style={{ color: '#666', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+              Showing <strong style={{ color: '#ffffff' }}>{filteredEntries.length}</strong> {filteredEntries.length === 1 ? 'entry' : 'entries'}
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.5rem' }}>
               {filteredEntries.map((entry) => (
-                <Card
+                <div
                   key={entry.id}
-                  className="group overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer border-0 shadow-lg bg-white"
                   onClick={() => setSelectedVideo(entry)}
+                  style={{ backgroundColor: '#1a1a1a', border: '1px solid #282828', borderRadius: '12px', overflow: 'hidden', cursor: 'pointer', transition: 'border-color 0.2s, transform 0.2s' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#f59e0b'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#282828'; (e.currentTarget as HTMLElement).style.transform = 'translateY(0)' }}
                 >
-                  <div className="relative aspect-video bg-gray-900 overflow-hidden">
+                  {/* Thumbnail */}
+                  <div style={{ position: 'relative', aspectRatio: '16/9', backgroundColor: '#111', overflow: 'hidden' }}>
                     <img
                       src={getThumbnailUrl(entry.video_url, entry.thumbnail_url)}
                       alt={entry.submission.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
-                    {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-
-                    {/* Play button overlay */}
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="w-20 h-20 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                        <Play className="w-10 h-10 text-gray-900 ml-1" fill="currentColor" />
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)' }} />
+                    {/* Play overlay */}
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0)', transition: 'background-color 0.2s' }}
+                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(0,0,0,0.4)'}
+                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(0,0,0,0)'}
+                    >
+                      <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Play style={{ width: '24px', height: '24px', color: '#111', marginLeft: '3px' }} fill="currentColor" />
                       </div>
                     </div>
-
-                    {/* Catalog ID badge */}
+                    {/* Catalog ID */}
                     {entry.catalog_id && (
-                      <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-sm text-white text-xs font-mono px-3 py-1.5 rounded-full border border-white/20">
+                      <div style={{ position: 'absolute', top: '12px', right: '12px', backgroundColor: 'rgba(0,0,0,0.8)', color: '#a0a0a0', fontSize: '0.7rem', fontFamily: 'monospace', padding: '4px 10px', borderRadius: '999px', border: '1px solid #333' }}>
                         {entry.catalog_id}
                       </div>
                     )}
-
-                    {/* Runtime badge */}
+                    {/* Runtime */}
                     {entry.submission.runtime && (
-                      <div className="absolute bottom-3 right-3 bg-black/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
+                      <div style={{ position: 'absolute', bottom: '10px', right: '10px', backgroundColor: 'rgba(0,0,0,0.8)', color: '#a0a0a0', fontSize: '0.75rem', padding: '3px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Clock style={{ width: '11px', height: '11px' }} />
                         {formatRuntime(entry.submission.runtime)}
                       </div>
                     )}
                   </div>
 
-                  <CardContent className="p-5">
-                    <h3 className="font-bold text-xl mb-2 text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                  {/* Card content */}
+                  <div style={{ padding: '1.25rem' }}>
+                    <h3 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem', lineHeight: 1.3 }}>
                       {entry.submission.title}
                     </h3>
-
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                      <User className="w-4 h-4" />
-                      <span className="line-clamp-1">{entry.submission.filmmaker_name}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#a0a0a0', fontSize: '0.85rem', marginBottom: '0.75rem' }}>
+                      <User style={{ width: '14px', height: '14px' }} />
+                      <span>{entry.submission.filmmaker_name}</span>
                     </div>
-
                     {entry.submission.genre && (
-                      <div className="flex items-center gap-2 mb-3">
-                        <Tag className="w-4 h-4 text-gray-400" />
-                        <span className="inline-block bg-blue-50 text-blue-700 text-xs font-medium px-3 py-1 rounded-full">
-                          {entry.submission.genre}
-                        </span>
-                      </div>
+                      <span style={{ display: 'inline-block', backgroundColor: 'rgba(245,158,11,0.12)', color: '#f59e0b', fontSize: '0.75rem', fontWeight: 500, padding: '3px 10px', borderRadius: '999px', marginBottom: '0.75rem' }}>
+                        {entry.submission.genre}
+                      </span>
                     )}
-
                     {entry.public_description && (
-                      <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
+                      <p style={{ color: '#666', fontSize: '0.875rem', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                         {entry.public_description}
                       </p>
                     )}
-
-                    <div className="mt-4 pt-4 border-t border-gray-100">
-                      <Button
-                        variant="ghost"
-                        className="w-full text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setSelectedVideo(entry)
-                        }}
+                    <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #282828' }}>
+                      <button
+                        style={{ width: '100%', padding: '0.5rem', backgroundColor: 'transparent', border: '1px solid #333', borderRadius: '6px', color: '#a0a0a0', fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', transition: 'all 0.2s' }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#f59e0b'; (e.currentTarget as HTMLElement).style.color = '#f59e0b' }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#333'; (e.currentTarget as HTMLElement).style.color = '#a0a0a0' }}
+                        onClick={(e) => { e.stopPropagation(); setSelectedVideo(entry) }}
                       >
-                        <Play className="w-4 h-4 mr-2" />
+                        <Play style={{ width: '14px', height: '14px' }} />
                         Watch & License
-                      </Button>
+                      </button>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ))}
             </div>
           </>
@@ -296,83 +281,84 @@ export default function CatalogPage() {
       {/* Video Modal */}
       {selectedVideo && (
         <div
-          className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200"
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}
           onClick={() => setSelectedVideo(null)}
         >
           <div
-            className="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300"
+            style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '16px', maxWidth: '900px', width: '100%', maxHeight: '90vh', overflow: 'hidden' }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b bg-gray-50">
-              <div className="flex-1 mr-4">
-                <h2 className="text-2xl font-bold text-gray-900 mb-1">
+            {/* Modal header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem 1.5rem', borderBottom: '1px solid #282828' }}>
+              <div>
+                <h2 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.25rem' }}>
                   {selectedVideo.submission.title}
                 </h2>
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                  <div className="flex items-center gap-1.5">
-                    <User className="w-4 h-4" />
-                    <span>{selectedVideo.submission.filmmaker_name}</span>
-                  </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.85rem', color: '#a0a0a0' }}>
+                  <span>{selectedVideo.submission.filmmaker_name}</span>
                   {selectedVideo.catalog_id && (
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-mono text-blue-600">{selectedVideo.catalog_id}</span>
-                    </div>
+                    <span style={{ fontFamily: 'monospace', color: '#f59e0b' }}>{selectedVideo.catalog_id}</span>
                   )}
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
                 onClick={() => setSelectedVideo(null)}
-                className="rounded-full w-10 h-10 p-0 hover:bg-gray-200"
+                style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#252525', border: '1px solid #333', color: '#a0a0a0', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                <X className="w-5 h-5" />
-              </Button>
+                <X style={{ width: '18px', height: '18px' }} />
+              </button>
             </div>
 
-            {/* Video Player */}
-            <div className="aspect-video bg-black">
+            {/* Video */}
+            <div style={{ aspectRatio: '16/9', backgroundColor: '#000' }}>
               <iframe
                 src={getEmbedUrl(selectedVideo.video_url)}
-                className="w-full h-full"
-                frameBorder="0"
+                style={{ width: '100%', height: '100%', border: 'none' }}
                 allow="autoplay; fullscreen; picture-in-picture"
                 allowFullScreen
               />
             </div>
 
-            {/* Modal Footer */}
-            <div className="p-6 bg-gray-50 border-t">
-              {selectedVideo.public_description && (
-                <p className="text-gray-700 mb-4 leading-relaxed">
-                  {selectedVideo.public_description}
-                </p>
-              )}
-
-              <div className="flex items-center justify-between">
-                <div className="flex gap-2 flex-wrap">
-                  {selectedVideo.submission.genre && (
-                    <span className="bg-blue-100 text-blue-700 text-sm px-3 py-1.5 rounded-full font-medium">
-                      {selectedVideo.submission.genre}
-                    </span>
-                  )}
-                  {selectedVideo.submission.runtime && (
-                    <span className="bg-gray-100 text-gray-700 text-sm px-3 py-1.5 rounded-full font-medium flex items-center gap-1.5">
-                      <Clock className="w-4 h-4" />
-                      {formatRuntime(selectedVideo.submission.runtime)}
-                    </span>
-                  )}
-                </div>
-
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6">
-                  Request License
-                </Button>
+            {/* Modal footer */}
+            <div style={{ padding: '1.25rem 1.5rem', borderTop: '1px solid #282828', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {selectedVideo.submission.genre && (
+                  <span style={{ backgroundColor: 'rgba(245,158,11,0.12)', color: '#f59e0b', fontSize: '0.8rem', fontWeight: 500, padding: '4px 12px', borderRadius: '999px' }}>
+                    {selectedVideo.submission.genre}
+                  </span>
+                )}
+                {selectedVideo.submission.runtime && (
+                  <span style={{ backgroundColor: '#252525', color: '#a0a0a0', fontSize: '0.8rem', padding: '4px 12px', borderRadius: '999px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Clock style={{ width: '13px', height: '13px' }} />
+                    {formatRuntime(selectedVideo.submission.runtime)}
+                  </span>
+                )}
+                {selectedVideo.public_description && (
+                  <p style={{ width: '100%', color: '#a0a0a0', fontSize: '0.875rem', lineHeight: 1.6, margin: '0.25rem 0 0' }}>
+                    {selectedVideo.public_description}
+                  </p>
+                )}
               </div>
+              <a
+                href="mailto:jd@superimmersive8.com?subject=License Inquiry"
+                style={{ backgroundColor: '#f59e0b', color: '#000000', padding: '0.625rem 1.5rem', borderRadius: '8px', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', whiteSpace: 'nowrap' }}
+              >
+                Request License
+              </a>
             </div>
           </div>
         </div>
       )}
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+        @keyframes spin { to { transform: rotate(360deg) } }
+        @keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.5 } }
+        * { box-sizing: border-box; }
+        input::placeholder { color: #555; }
+        input:focus { border-color: #f59e0b !important; }
+        select option { background: #1a1a1a; }
+      `}</style>
     </div>
   )
 }
