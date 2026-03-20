@@ -241,13 +241,13 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
             {submission.logline && (
               <div className="col-span-2">
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Logline</p>
-                <p className="text-sm text-gray-900">{submission.logline}</p>
+                <p className="text-sm text-gray-900 break-words">{submission.logline}</p>
               </div>
             )}
             {submission.intended_use && (
               <div className="col-span-2">
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Intended Use</p>
-                <p className="text-sm text-gray-900">{submission.intended_use}</p>
+                <p className="text-sm text-gray-900 break-words">{submission.intended_use}</p>
               </div>
             )}
           </CardContent>
@@ -298,7 +298,7 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
               <CardTitle>Human Authorship Declaration</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-700 leading-relaxed">{submission.authorship_statement}</p>
+              <p className="text-sm text-gray-700 leading-relaxed break-words">{submission.authorship_statement}</p>
             </CardContent>
           </Card>
         )}
