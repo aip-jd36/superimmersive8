@@ -239,6 +239,14 @@ Point `superimmersive8.com` to Vercel:
 - Verify `RESEND_API_KEY` is valid in `.env.local`
 - Check Resend dashboard for delivery status
 
+## Documentation
+
+- **[DEVELOPMENT_GUIDE.md](./DEVELOPMENT_GUIDE.md)** - Debugging practices, Supabase best practices, testing protocols
+- **[TEST_PLAN.md](./TEST_PLAN.md)** - Testing checklist and scenarios
+- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Deployment procedures
+- **[STORAGE_SETUP.md](./STORAGE_SETUP.md)** - Supabase Storage configuration
+- **[EMAIL_TESTING_GUIDE.md](./EMAIL_TESTING_GUIDE.md)** - Email testing procedures
+
 ## Support
 
 For issues or questions:
@@ -249,4 +257,4 @@ For issues or questions:
 ---
 
 **Version**: 1.0 (MVP)
-**Last updated**: March 19, 2026
+**Last updated**: March 20, 2026
