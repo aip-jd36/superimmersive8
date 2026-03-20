@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { generateChainOfTitle } from '@/lib/generate-chain-of-title'
 
 type RouteContext = {
   params: {
@@ -151,15 +152,58 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
     console.log(`Rights Package created for submission ${params.id}, catalog ID: ${catalogId}`)
 
-    // TODO: Generate PDF in background or next step
-    // For MVP, we'll generate a simple markdown/text version
-    // Later: Use react-pdf or puppeteer for styled PDF
+    // Generate Chain of Title document
+    const chainOfTitleText = generateChainOfTitle(rightsPackage, {
+      title: submission.title,
+      filmmaker_name: submission.filmmaker_name,
+      runtime: submission.runtime,
+      genre: submission.genre,
+      created_at: submission.created_at,
+    })
+
+    // Upload to Supabase Storage
+    const fileName = `${catalogId}_chain-of-title.txt`
+    const filePath = `rights-packages/${fileName}`
+
+    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+      .from('documents')
+      .upload(filePath, chainOfTitleText, {
+        contentType: 'text/plain',
+        upsert: true,
+      })
+
+    if (uploadError) {
+      console.error('Error uploading Chain of Title:', uploadError)
+      // Don't fail the whole operation if upload fails
+      // Rights Package record exists, file upload can be retried
+    }
+
+    // Get public URL for the uploaded file
+    let publicUrl = null
+    if (uploadData) {
+      const { data: urlData } = supabaseAdmin.storage
+        .from('documents')
+        .getPublicUrl(filePath)
+      publicUrl = urlData.publicUrl
+    }
+
+    // Update rights_package with PDF URL
+    if (publicUrl) {
+      await supabaseAdmin
+        .from('rights_packages')
+        .update({
+          pdf_url: publicUrl,
+          pdf_generated_at: new Date().toISOString(),
+        })
+        .eq('id', rightsPackage.id)
+    }
 
     return NextResponse.json({
       success: true,
       rightsPackageId: rightsPackage.id,
       catalogId: catalogId,
-      message: 'Rights Package generated successfully. PDF generation coming soon.',
+      documentUrl: publicUrl,
+      message: 'Rights Package and Chain of Title generated successfully',
     })
   } catch (error) {
     console.error('Error in generate-rights-package route:', error)
