@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import AddToolModal, { Tool } from '@/components/AddToolModal'
+import ToolCard from '@/components/ToolCard'
 
 // Simplified schema for MVP - covers all 10 sections
 const submissionSchema = z.object({
@@ -21,8 +23,7 @@ const submissionSchema = z.object({
   logline: z.string().max(500).optional(),
   intended_use: z.string().optional(),
 
-  // Section 3: Tool Disclosure
-  tools_used: z.string().min(1, 'At least one tool must be listed'),
+  // Section 3: Tool Disclosure - handled separately with state
 
   // Section 4: Human Authorship Declaration
   authorship_statement: z.string().min(150, 'Must be at least 150 words'),
@@ -69,6 +70,11 @@ export default function SubmitPage() {
   const [currentSection, setCurrentSection] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [tools, setTools] = useState<Tool[]>([])
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingTool, setEditingTool] = useState<Tool | null>(null)
+  const [toolsError, setToolsError] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string>('')
   const supabase = createClient()
 
   const {
@@ -93,6 +99,17 @@ export default function SubmitPage() {
     },
   })
 
+  // Get user ID on mount
+  useEffect(() => {
+    const getUserId = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user?.id) {
+        setUserId(session.user.id)
+      }
+    }
+    getUserId()
+  }, [supabase])
+
   // Auto-save draft to localStorage
   useEffect(() => {
     const subscription = watch((value) => {
@@ -112,8 +129,42 @@ export default function SubmitPage() {
     }
   }, [setValue])
 
+  // Tool management handlers
+  const handleAddTool = () => {
+    setEditingTool(null)
+    setIsModalOpen(true)
+  }
+
+  const handleEditTool = (tool: Tool) => {
+    setEditingTool(tool)
+    setIsModalOpen(true)
+  }
+
+  const handleSaveTool = (tool: Tool) => {
+    if (editingTool) {
+      // Update existing tool
+      setTools(tools.map(t => t.id === tool.id ? tool : t))
+    } else {
+      // Add new tool
+      setTools([...tools, tool])
+    }
+    setToolsError(null)
+  }
+
+  const handleRemoveTool = (toolId: string) => {
+    setTools(tools.filter(t => t.id !== toolId))
+  }
+
   const onSubmit = async (data: SubmissionFormData) => {
     console.log('🚀 Form submitted! Data:', data)
+
+    // Validate tools before submission
+    if (tools.length === 0) {
+      setToolsError('At least one tool must be added')
+      setCurrentSection(3) // Go back to Tool Disclosure section
+      return
+    }
+
     try {
       setIsSubmitting(true)
       setError(null)
@@ -149,8 +200,16 @@ export default function SubmitPage() {
         logline: data.logline || null,
         intended_use: data.intended_use || null,
 
-        // Tool Disclosure (JSONB)
-        tools_used: JSON.stringify([{ tool: data.tools_used || 'Not specified' }]),
+        // Tool Disclosure (JSONB array of tool objects)
+        tools_used: JSON.stringify(tools.map(tool => ({
+          tool_name: tool.toolName === 'Other' ? tool.toolNameOther : tool.toolName,
+          version: tool.version,
+          plan_type: tool.planType,
+          start_date: tool.startDate,
+          end_date: tool.endDate,
+          receipt_url: tool.receipt?.url || null,
+          receipt_path: tool.receipt?.path || null,
+        }))),
 
         // Human Authorship
         authorship_statement: data.authorship_statement,
@@ -366,24 +425,69 @@ export default function SubmitPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">3. Tool Disclosure</h3>
                   <p className="text-sm text-gray-600">
-                    List all AI tools used (simplified for MVP - enter as comma-separated list)
+                    Add all AI tools used in production. For each tool, provide the model version, plan type, production dates, and proof of paid commercial plan.
                   </p>
 
+                  {/* Add Tool Button */}
                   <div>
-                    <Label htmlFor="tools_used">
-                      AI Tools Used * (e.g., "Runway Gen-3, Midjourney, ElevenLabs")
-                    </Label>
-                    <Input id="tools_used" {...register('tools_used')} />
-                    {errors.tools_used && (
-                      <p className="text-sm text-red-500">{errors.tools_used.message}</p>
-                    )}
+                    <Button
+                      type="button"
+                      onClick={handleAddTool}
+                      variant="outline"
+                      className="w-full border-2 border-dashed border-gray-300 hover:border-primary hover:bg-primary/5"
+                    >
+                      + Add Tool
+                    </Button>
                   </div>
+
+                  {/* Tools List */}
+                  {tools.length > 0 && (
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium text-gray-700">
+                        Added Tools ({tools.length}):
+                      </p>
+                      <div className="space-y-3">
+                        {tools.map((tool) => (
+                          <ToolCard
+                            key={tool.id}
+                            tool={tool}
+                            onEdit={handleEditTool}
+                            onRemove={handleRemoveTool}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Error Message */}
+                  {toolsError && (
+                    <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded">
+                      {toolsError}
+                    </div>
+                  )}
+
+                  {/* Requirement Message */}
+                  {tools.length === 0 && (
+                    <div className="p-3 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded">
+                      ⚠️ At least one tool must be added to proceed
+                    </div>
+                  )}
 
                   <div className="flex gap-4">
                     <Button type="button" variant="outline" onClick={() => setCurrentSection(2)}>
                       ← Back
                     </Button>
-                    <Button type="button" onClick={() => setCurrentSection(4)}>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        if (tools.length === 0) {
+                          setToolsError('Please add at least one tool before continuing')
+                        } else {
+                          setToolsError(null)
+                          setCurrentSection(4)
+                        }
+                      }}
+                    >
                       Continue →
                     </Button>
                   </div>
@@ -874,6 +978,18 @@ export default function SubmitPage() {
             </form>
           </CardContent>
         </Card>
+
+        {/* Add Tool Modal */}
+        <AddToolModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false)
+            setEditingTool(null)
+          }}
+          onSave={handleSaveTool}
+          editTool={editingTool}
+          userId={userId}
+        />
       </div>
     </div>
   )
