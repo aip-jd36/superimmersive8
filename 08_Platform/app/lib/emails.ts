@@ -11,6 +11,7 @@ export async function sendSubmissionReceivedEmail(
   creatorEmail: string
 ) {
   try {
+    // Email to creator
     await resend.emails.send({
       from: FROM_EMAIL,
       to: creatorEmail,
@@ -22,6 +23,19 @@ export async function sendSubmissionReceivedEmail(
         <p>You can track the status of your submission in your <a href="${process.env.NEXT_PUBLIC_SITE_URL}/dashboard">dashboard</a>.</p>
         <br>
         <p>Best,<br>The SI8 Team</p>
+      `,
+    })
+
+    // Admin notification
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject: `New submission: ${filmTitle}`,
+      html: `
+        <h2>New submission received</h2>
+        <p><strong>Film:</strong> ${filmTitle}</p>
+        <p><strong>Creator:</strong> ${creatorName} (${creatorEmail})</p>
+        <p><a href="${process.env.NEXT_PUBLIC_SITE_URL}/admin">Review in Admin Panel →</a></p>
       `,
     })
   } catch (error) {
