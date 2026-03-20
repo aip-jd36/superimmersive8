@@ -27,22 +27,32 @@ const submissionSchema = z.object({
   // Section 4: Human Authorship Declaration
   authorship_statement: z.string().min(150, 'Must be at least 150 words'),
 
-  // Section 5: Likeness & Identity
-  likeness_confirmed: z.boolean().refine((val) => val === true, 'You must confirm'),
+  // Section 5: Likeness & Identity (4 individual checkboxes - all required)
+  likeness_no_real_faces: z.boolean().refine((val) => val === true, 'Required'),
+  likeness_no_real_voices: z.boolean().refine((val) => val === true, 'Required'),
+  likeness_no_lookalikes: z.boolean().refine((val) => val === true, 'Required'),
+  likeness_no_synthetic_people: z.boolean().refine((val) => val === true, 'Required'),
 
-  // Section 6: IP & Brand
-  ip_confirmed: z.boolean().refine((val) => val === true, 'You must confirm'),
+  // Section 6: IP & Brand (3 individual checkboxes - all required)
+  ip_no_copyrighted_characters: z.boolean().refine((val) => val === true, 'Required'),
+  ip_no_brand_imitation: z.boolean().refine((val) => val === true, 'Required'),
+  ip_no_trademarked_ip: z.boolean().refine((val) => val === true, 'Required'),
 
   // Section 7: Audio & Music
   audio_source: z.enum(['ai_generated', 'licensed', 'silent']),
   audio_documentation: z.string().optional(),
 
   // Section 8: Modification Rights
-  modification_authorized: z.boolean(),
+  modification_rights: z.enum(['full', 'scenes', 'no'], {
+    required_error: 'Please select an option',
+  }),
   modification_scope: z.string().optional(),
 
   // Section 9: Territory
-  territory: z.string().default('Global'),
+  territory: z.enum(['Global', 'North America', 'Europe', 'Asia', 'Other'], {
+    required_error: 'Please select a territory',
+  }),
+  territory_other: z.string().optional(),
   existing_restrictions: z.string().optional(),
 
   // Section 10: Supporting Materials + Catalog Opt-In
@@ -71,9 +81,14 @@ export default function SubmitPage() {
     resolver: zodResolver(submissionSchema),
     defaultValues: {
       territory: 'Global',
-      modification_authorized: false,
-      likeness_confirmed: false,
-      ip_confirmed: false,
+      modification_rights: 'no',
+      likeness_no_real_faces: false,
+      likeness_no_real_voices: false,
+      likeness_no_lookalikes: false,
+      likeness_no_synthetic_people: false,
+      ip_no_copyrighted_characters: false,
+      ip_no_brand_imitation: false,
+      ip_no_trademarked_ip: false,
       catalog_opt_in: false,
     },
   })
@@ -140,9 +155,20 @@ export default function SubmitPage() {
         // Human Authorship
         authorship_statement: data.authorship_statement,
 
-        // Likeness & IP (JSONB, not boolean)
-        likeness_confirmation: JSON.stringify({ confirmed: data.likeness_confirmed || false }),
-        ip_confirmation: JSON.stringify({ confirmed: data.ip_confirmed || false }),
+        // Likeness & IP (JSONB with individual confirmations)
+        likeness_confirmation: JSON.stringify({
+          no_real_faces: data.likeness_no_real_faces || false,
+          no_real_voices: data.likeness_no_real_voices || false,
+          no_lookalikes: data.likeness_no_lookalikes || false,
+          no_synthetic_people: data.likeness_no_synthetic_people || false,
+          all_confirmed: data.likeness_no_real_faces && data.likeness_no_real_voices && data.likeness_no_lookalikes && data.likeness_no_synthetic_people
+        }),
+        ip_confirmation: JSON.stringify({
+          no_copyrighted_characters: data.ip_no_copyrighted_characters || false,
+          no_brand_imitation: data.ip_no_brand_imitation || false,
+          no_trademarked_ip: data.ip_no_trademarked_ip || false,
+          all_confirmed: data.ip_no_copyrighted_characters && data.ip_no_brand_imitation && data.ip_no_trademarked_ip
+        }),
 
         // Audio (JSONB with source_type and documentation)
         audio_disclosure: JSON.stringify({
@@ -151,11 +177,11 @@ export default function SubmitPage() {
         }),
 
         // Modification Rights
-        modification_authorized: data.modification_authorized || false,
-        modification_scope: data.modification_scope || null,
+        modification_authorized: data.modification_rights === 'full' || data.modification_rights === 'scenes',
+        modification_scope: data.modification_rights === 'scenes' ? data.modification_scope : null,
 
         // Territory
-        territory_preferences: data.territory || 'Global',
+        territory_preferences: data.territory === 'Other' ? data.territory_other : data.territory,
 
         // Supporting Materials (JSONB array)
         supporting_materials: JSON.stringify([]),
@@ -369,7 +395,7 @@ export default function SubmitPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">4. Human Authorship Declaration</h3>
                   <p className="text-sm text-gray-600">
-                    Describe your creative process (minimum 150 words)
+                    Describe your creative process in detail. This statement is critical for establishing human authorship and copyright protection.
                   </p>
 
                   <div>
@@ -378,11 +404,19 @@ export default function SubmitPage() {
                       id="authorship_statement"
                       {...register('authorship_statement')}
                       className="flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      placeholder="Describe your creative process: What prompts did you use? How did you iterate on outputs? What editorial decisions did you make?"
+                      placeholder="Describe your creative process: What prompts did you use? How did you iterate on outputs? What editorial decisions did you make? How did you use post-generation editing?"
+                      maxLength={2000}
                     />
-                    {errors.authorship_statement && (
-                      <p className="text-sm text-red-500">{errors.authorship_statement.message}</p>
-                    )}
+                    <div className="flex items-center justify-between mt-1">
+                      <div>
+                        {errors.authorship_statement && (
+                          <p className="text-sm text-red-500">{errors.authorship_statement.message}</p>
+                        )}
+                      </div>
+                      <p className={`text-xs ${(watch('authorship_statement')?.length || 0) < 150 ? 'text-red-500 font-medium' : 'text-gray-500'}`}>
+                        {watch('authorship_statement')?.length || 0} / 150 characters minimum (2000 max)
+                      </p>
+                    </div>
                   </div>
 
                   <div className="flex gap-4">
@@ -400,21 +434,71 @@ export default function SubmitPage() {
               {currentSection === 5 && (
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">5. Likeness & Identity Confirmation</h3>
+                  <p className="text-sm text-gray-600">
+                    All checkboxes must be checked to proceed. We cannot accept content with real person likenesses without proper authorization.
+                  </p>
 
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="likeness_confirmed"
-                      {...register('likeness_confirmed')}
-                      className="h-4 w-4"
-                    />
-                    <Label htmlFor="likeness_confirmed">
-                      I confirm this work contains no real person faces, voices, or likenesses without proper consent *
-                    </Label>
+                  <div className="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        id="likeness_no_real_faces"
+                        {...register('likeness_no_real_faces')}
+                        className="h-4 w-4 mt-1 flex-shrink-0"
+                      />
+                      <Label htmlFor="likeness_no_real_faces" className="cursor-pointer">
+                        No real person faces without consent *
+                      </Label>
+                    </div>
+                    {errors.likeness_no_real_faces && (
+                      <p className="text-sm text-red-500 ml-7">{errors.likeness_no_real_faces.message}</p>
+                    )}
+
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        id="likeness_no_real_voices"
+                        {...register('likeness_no_real_voices')}
+                        className="h-4 w-4 mt-1 flex-shrink-0"
+                      />
+                      <Label htmlFor="likeness_no_real_voices" className="cursor-pointer">
+                        No real person voices without consent *
+                      </Label>
+                    </div>
+                    {errors.likeness_no_real_voices && (
+                      <p className="text-sm text-red-500 ml-7">{errors.likeness_no_real_voices.message}</p>
+                    )}
+
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        id="likeness_no_lookalikes"
+                        {...register('likeness_no_lookalikes')}
+                        className="h-4 w-4 mt-1 flex-shrink-0"
+                      />
+                      <Label htmlFor="likeness_no_lookalikes" className="cursor-pointer">
+                        No lookalikes or impersonation of real people *
+                      </Label>
+                    </div>
+                    {errors.likeness_no_lookalikes && (
+                      <p className="text-sm text-red-500 ml-7">{errors.likeness_no_lookalikes.message}</p>
+                    )}
+
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        id="likeness_no_synthetic_people"
+                        {...register('likeness_no_synthetic_people')}
+                        className="h-4 w-4 mt-1 flex-shrink-0"
+                      />
+                      <Label htmlFor="likeness_no_synthetic_people" className="cursor-pointer">
+                        No synthetic versions of real people (deepfakes) *
+                      </Label>
+                    </div>
+                    {errors.likeness_no_synthetic_people && (
+                      <p className="text-sm text-red-500 ml-7">{errors.likeness_no_synthetic_people.message}</p>
+                    )}
                   </div>
-                  {errors.likeness_confirmed && (
-                    <p className="text-sm text-red-500">{errors.likeness_confirmed.message}</p>
-                  )}
 
                   <div className="flex gap-4">
                     <Button type="button" variant="outline" onClick={() => setCurrentSection(4)}>
@@ -431,21 +515,56 @@ export default function SubmitPage() {
               {currentSection === 6 && (
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">6. IP & Brand Confirmation</h3>
+                  <p className="text-sm text-gray-600">
+                    All checkboxes must be checked to proceed. We cannot accept content that infringes on existing intellectual property.
+                  </p>
 
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="ip_confirmed"
-                      {...register('ip_confirmed')}
-                      className="h-4 w-4"
-                    />
-                    <Label htmlFor="ip_confirmed">
-                      I confirm this work contains no copyrighted characters, brand imitation, or trademarked IP *
-                    </Label>
+                  <div className="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        id="ip_no_copyrighted_characters"
+                        {...register('ip_no_copyrighted_characters')}
+                        className="h-4 w-4 mt-1 flex-shrink-0"
+                      />
+                      <Label htmlFor="ip_no_copyrighted_characters" className="cursor-pointer">
+                        No copyrighted characters (e.g., Marvel, Disney, anime characters) *
+                      </Label>
+                    </div>
+                    {errors.ip_no_copyrighted_characters && (
+                      <p className="text-sm text-red-500 ml-7">{errors.ip_no_copyrighted_characters.message}</p>
+                    )}
+
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        id="ip_no_brand_imitation"
+                        {...register('ip_no_brand_imitation')}
+                        className="h-4 w-4 mt-1 flex-shrink-0"
+                      />
+                      <Label htmlFor="ip_no_brand_imitation" className="cursor-pointer">
+                        No recognizable brand imitation (logos, trade dress, packaging) *
+                      </Label>
+                    </div>
+                    {errors.ip_no_brand_imitation && (
+                      <p className="text-sm text-red-500 ml-7">{errors.ip_no_brand_imitation.message}</p>
+                    )}
+
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        id="ip_no_trademarked_ip"
+                        {...register('ip_no_trademarked_ip')}
+                        className="h-4 w-4 mt-1 flex-shrink-0"
+                      />
+                      <Label htmlFor="ip_no_trademarked_ip" className="cursor-pointer">
+                        No trademarked intellectual property without authorization *
+                      </Label>
+                    </div>
+                    {errors.ip_no_trademarked_ip && (
+                      <p className="text-sm text-red-500 ml-7">{errors.ip_no_trademarked_ip.message}</p>
+                    )}
                   </div>
-                  {errors.ip_confirmed && (
-                    <p className="text-sm text-red-500">{errors.ip_confirmed.message}</p>
-                  )}
 
                   <div className="flex gap-4">
                     <Button type="button" variant="outline" onClick={() => setCurrentSection(5)}>
@@ -494,17 +613,79 @@ export default function SubmitPage() {
                     Do you authorize SI8 to commission AI-regenerated brand-integrated versions for Custom AI Placement deals?
                   </p>
 
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="modification_authorized"
-                      {...register('modification_authorized')}
-                      className="h-4 w-4"
-                    />
-                    <Label htmlFor="modification_authorized">
-                      Yes, I authorize modification rights
-                    </Label>
+                  <div className="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="radio"
+                        id="modification_full"
+                        value="full"
+                        {...register('modification_rights')}
+                        className="h-4 w-4 mt-1"
+                      />
+                      <Label htmlFor="modification_full" className="cursor-pointer">
+                        <div>
+                          <div className="font-medium">Yes, full work</div>
+                          <div className="text-sm text-gray-600">
+                            SI8 can regenerate any part of this work for brand placement
+                          </div>
+                        </div>
+                      </Label>
+                    </div>
+
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="radio"
+                        id="modification_scenes"
+                        value="scenes"
+                        {...register('modification_rights')}
+                        className="h-4 w-4 mt-1"
+                      />
+                      <Label htmlFor="modification_scenes" className="cursor-pointer">
+                        <div>
+                          <div className="font-medium">Yes, specific scenes only</div>
+                          <div className="text-sm text-gray-600">
+                            I'll specify which scenes can be regenerated (describe below)
+                          </div>
+                        </div>
+                      </Label>
+                    </div>
+
+                    {watch('modification_rights') === 'scenes' && (
+                      <div className="ml-7 mt-2">
+                        <Label htmlFor="modification_scope">
+                          Describe which scenes can be modified *
+                        </Label>
+                        <textarea
+                          id="modification_scope"
+                          {...register('modification_scope')}
+                          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1"
+                          placeholder="e.g., 'Scene 2 (0:15-0:45) where the protagonist walks through the city'"
+                        />
+                      </div>
+                    )}
+
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="radio"
+                        id="modification_no"
+                        value="no"
+                        {...register('modification_rights')}
+                        className="h-4 w-4 mt-1"
+                      />
+                      <Label htmlFor="modification_no" className="cursor-pointer">
+                        <div>
+                          <div className="font-medium">No</div>
+                          <div className="text-sm text-gray-600">
+                            I do not authorize modifications (catalog licensing only)
+                          </div>
+                        </div>
+                      </Label>
+                    </div>
                   </div>
+
+                  {errors.modification_rights && (
+                    <p className="text-sm text-red-500">{errors.modification_rights.message}</p>
+                  )}
 
                   <div className="flex gap-4">
                     <Button type="button" variant="outline" onClick={() => setCurrentSection(7)}>
@@ -520,11 +701,51 @@ export default function SubmitPage() {
               {/* Section 9: Territory */}
               {currentSection === 9 && (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">9. Territory & Exclusivity</h3>
+                  <h3 className="text-lg font-semibold">9. Territory & Exclusivity Preferences</h3>
+                  <p className="text-sm text-gray-600">
+                    Specify the geographic territory for licensing rights.
+                  </p>
 
                   <div>
-                    <Label htmlFor="territory">Territory</Label>
-                    <Input id="territory" {...register('territory')} defaultValue="Global" />
+                    <Label htmlFor="territory">Territory *</Label>
+                    <select
+                      id="territory"
+                      {...register('territory')}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    >
+                      <option value="Global">Global (Worldwide)</option>
+                      <option value="North America">North America</option>
+                      <option value="Europe">Europe</option>
+                      <option value="Asia">Asia</option>
+                      <option value="Other">Other (specify below)</option>
+                    </select>
+                    {errors.territory && (
+                      <p className="text-sm text-red-500 mt-1">{errors.territory.message}</p>
+                    )}
+                  </div>
+
+                  {watch('territory') === 'Other' && (
+                    <div>
+                      <Label htmlFor="territory_other">Specify Territory *</Label>
+                      <Input
+                        id="territory_other"
+                        {...register('territory_other')}
+                        placeholder="e.g., South America, Middle East, specific countries..."
+                      />
+                    </div>
+                  )}
+
+                  <div>
+                    <Label htmlFor="existing_restrictions">Existing Licensing Restrictions (optional)</Label>
+                    <textarea
+                      id="existing_restrictions"
+                      {...register('existing_restrictions')}
+                      className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      placeholder="Do you have any existing licensing agreements that restrict territory or exclusivity?"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Let us know if you've already licensed this work elsewhere or have territorial restrictions.
+                    </p>
                   </div>
 
                   <div className="flex gap-4">

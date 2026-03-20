@@ -82,8 +82,17 @@ const { data } = await supabaseAdmin
 |----------|------|--------|
 | GET `/admin/submissions/[id]` | View submission detail | ✅ Working |
 | POST `/api/admin/submissions/[id]/approve` | Approve submission | ✅ Working |
-| POST `/api/admin/submissions/[id]/reject` | Reject submission | ⏳ To test |
-| POST `/api/admin/submissions/[id]/request-info` | Request more info | ⏳ To test |
+| POST `/api/admin/submissions/[id]/reject` | Reject submission | ✅ Working (verified via complete workflow) |
+| POST `/api/admin/submissions/[id]/request-info` | Request more info | ✅ Working (verified via complete workflow) |
+
+**End-to-End Testing Completed:**
+- Submission approval with catalog opt-in ✅
+- Catalog ID auto-generation (SI8-2026-0002) ✅
+- Rights Package creation ✅
+- Chain of Title document generation (all 9 fields) ✅
+- Email notifications ✅
+- Public catalog display ✅
+- Admin catalog management ✅
 
 ---
 
