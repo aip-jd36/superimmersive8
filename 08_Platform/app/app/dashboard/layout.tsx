@@ -55,7 +55,7 @@ export default async function DashboardLayout({
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">
-                {userData?.full_name || session.user.email}
+                {userData?.full_name || user.email}
               </span>
               <form action={handleSignOut}>
                 <Button variant="outline" size="sm" type="submit">
