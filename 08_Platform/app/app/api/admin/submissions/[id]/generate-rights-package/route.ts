@@ -157,9 +157,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
         ],
       },
 
-      // PDF will be generated next
-      pdf_url: null,
-      pdf_generated_at: null,
+      // Document will be generated next
+      document_url: null,
+      document_path: null,
     }
 
     // Insert Rights Package record
@@ -215,8 +215,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       await supabaseAdmin
         .from('rights_packages')
         .update({
-          pdf_url: publicUrl,
-          pdf_generated_at: new Date().toISOString(),
+          document_url: publicUrl,
+          document_path: filePath,
+          generated_at: new Date().toISOString(),
         })
         .eq('id', rightsPackage.id)
     }
