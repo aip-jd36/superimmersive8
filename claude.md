@@ -231,6 +231,52 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 
 **Tech Stack:** Vercel (serverless functions) + Airtable (database) + Resend (email) — $0/mo operational cost
 
+### 3f. Creator Portal MVP (Completed Mar 19, 2026)
+- [x] Database schema design (Supabase PostgreSQL) — ✓ 7 tables with RLS policies
+- [x] Authentication system (signup, login, email verification) — ✓ Supabase Auth + Resend SMTP
+- [x] Multi-section submission form (10 sections, validated) — ✓ React Hook Form + Zod validation
+- [x] Stripe Test Mode integration ($499 Rights Verified fee) — ✓ Test product, webhooks, test cards
+- [x] Payment webhook processing — ✓ Updates submission status + sends confirmation email
+- [x] Creator dashboard — ✓ Shows submissions, payment status, review status
+- [x] API routes with service_role (bypass RLS) — ✓ `/api/submissions/create`, `/api/submissions`
+- [x] Database migrations (5 migrations) — ✓ Triggers, RLS policies, service_role permissions
+- [x] Environment variables configuration — ✓ Supabase, Stripe, Resend, site URLs
+- [x] End-to-end testing (3 test accounts) — ✓ Full flow verified in production
+
+**Status:** Fully operational Creator Portal deployed at si8-creator-portal.vercel.app. Filmmakers can signup, submit work, pay $499 via Stripe, and track submissions in dashboard. Ready for real users.
+
+**Tech Stack:** Next.js 14 (App Router) + Supabase (PostgreSQL + Auth) + Stripe (payments) + Resend (emails) + Vercel (hosting)
+
+**Test Results:** 3 successful end-to-end flows completed:
+- jd@aipenguins.com → "Test1" → $499 paid → Dashboard shows PENDING
+- jd@standingencore.com → "STEC_TEST" → $499 paid → Dashboard shows PENDING
+- jdchangmedia@gmail.com → "JDCTEST" → $499 paid → Dashboard shows PENDING
+
+**Production Ready:** ✅ Can switch to Stripe Live Mode and accept real filmmaker submissions immediately.
+
+### 3g. Public Catalog with Video Player (Completed Mar 19, 2026)
+- [x] Submit form Section 10: Video & Catalog — ✓ video_url, thumbnail_url, public_description, catalog opt-in checkbox
+- [x] Catalog opt-in system — ✓ Creates opt_ins record when checkbox enabled
+- [x] Public catalog page (/catalog) — ✓ Grid layout, responsive design
+- [x] Video modal player — ✓ YouTube/Vimeo iframe with autoplay
+- [x] API route (/api/catalog) — ✓ Fetches approved + visible entries
+- [x] Helper functions — ✓ getEmbedUrl(), getThumbnailUrl() for YouTube/Vimeo
+- [x] Catalog metadata display — ✓ Title, filmmaker, genre, catalog_id, description
+- [x] End-to-end testing — ✓ Full catalog flow verified in production
+
+**Status:** Public catalog operational at si8-creator-portal.vercel.app/catalog. Filmmakers opt in during submission (Section 10), admin approves entries (manual SQL for now), videos appear in public grid with click-to-play modal.
+
+**Tech Stack:** Next.js client component + Supabase inner joins + YouTube/Vimeo iframe embeds + Tailwind modal overlay
+
+**Test Results:** 1 catalog entry verified:
+- jdchangmedia@gmail.com → "TESTLINK" → Catalog ID: SI8-2026-0001 → Video plays in modal ✅
+
+**Next Steps:**
+- [ ] Add "Catalog" link to navigation
+- [ ] Admin panel: approve entries, set visible=true, generate catalog_id
+- [ ] "Request License" functionality
+- [ ] Catalog filters (genre, search)
+
 ### 4. Legal Ops (Rights playbook → actual contracts)
 - [ ] Standard Production MSA + SOW
 - [ ] Creator contractor agreement (work-for-hire + confidentiality + IP assignment)

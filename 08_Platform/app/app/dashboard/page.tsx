@@ -47,6 +47,15 @@ export default async function DashboardPage() {
 
   if (!session) return null
 
+  // Check if user is admin
+  const { data: userData } = await supabase
+    .from('users')
+    .select('is_admin')
+    .eq('id', session.user.id)
+    .single()
+
+  const isAdmin = userData?.is_admin || false
+
   // Get user's submissions using service_role (bypasses RLS)
   const submissions = await getSubmissions(session.user.id)
 
@@ -83,9 +92,16 @@ export default async function DashboardPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="mt-2 text-gray-600">Welcome back! Here's an overview of your submissions.</p>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="mt-2 text-gray-600">Welcome back! Here's an overview of your submissions.</p>
+        </div>
+        {isAdmin && (
+          <Button variant="outline" asChild>
+            <Link href="/admin">Admin Panel</Link>
+          </Button>
+        )}
       </div>
 
       {/* Summary Cards */}

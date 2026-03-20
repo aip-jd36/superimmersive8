@@ -108,3 +108,32 @@ export async function sendOptInConfirmationEmail(
     console.error('Error sending opt-in confirmation email:', error)
   }
 }
+
+export async function sendInfoRequestEmail(
+  creatorName: string,
+  filmTitle: string,
+  requestedInfo: string,
+  dashboardUrl: string,
+  creatorEmail: string
+) {
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: creatorEmail,
+      subject: `Action Required: Additional Information Needed for ${filmTitle}`,
+      html: `
+        <h2>Hi ${creatorName},</h2>
+        <p>We've reviewed your submission <strong>${filmTitle}</strong> and need some additional information before we can complete our review.</p>
+        <h3>What We Need:</h3>
+        <p>${requestedInfo}</p>
+        <p><strong>Important:</strong> Please respond within <strong>14 days</strong> to keep your submission active.</p>
+        <p>Reply to this email with the requested information, or update your submission in the dashboard.</p>
+        <p><a href="${dashboardUrl}" style="background: #818cf8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Go to Dashboard</a></p>
+        <br>
+        <p>Best,<br>The SI8 Team</p>
+      `,
+    })
+  } catch (error) {
+    console.error('Error sending info request email:', error)
+  }
+}
