@@ -42,7 +42,11 @@ export default async function CatalogManagementPage() {
     `)
     .order('created_at', { ascending: false })
 
-  const catalogEntries = (entries || []) as CatalogEntry[]
+  // Normalize entries (Supabase may return submission as array)
+  const catalogEntries: CatalogEntry[] = (entries || []).map((entry: any) => ({
+    ...entry,
+    submission: Array.isArray(entry.submission) ? entry.submission[0] : entry.submission
+  }))
 
   const totalEntries = catalogEntries.length
   const visibleEntries = catalogEntries.filter(e => e.visible).length
