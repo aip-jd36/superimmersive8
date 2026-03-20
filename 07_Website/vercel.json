@@ -19,6 +19,21 @@
       "source": "/auth/admin/login",
       "destination": "https://si8-creator-portal.vercel.app/auth/login",
       "permanent": false
+    },
+    {
+      "source": "/rights-verified",
+      "destination": "/newsite/rights-verified",
+      "permanent": false
+    },
+    {
+      "source": "/rights-verified/chain-of-title",
+      "destination": "/newsite/rights-verified/chain-of-title",
+      "permanent": false
+    },
+    {
+      "source": "/rights-verified/playbook",
+      "destination": "/newsite/rights-verified/playbook",
+      "permanent": false
     }
   ]
 }
