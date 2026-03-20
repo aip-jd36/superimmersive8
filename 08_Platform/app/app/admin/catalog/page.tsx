@@ -53,9 +53,9 @@ export default async function CatalogManagementPage() {
   const hiddenEntries = totalEntries - visibleEntries
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b shadow-sm">
+    <div>
+      {/* Page header */}
+      <div className="bg-white border-b" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center gap-4 mb-4">
             <Button variant="ghost" size="sm" asChild>
