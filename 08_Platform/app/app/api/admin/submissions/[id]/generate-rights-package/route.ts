@@ -9,6 +9,26 @@ type RouteContext = {
   }
 }
 
+// Auto-determine tier based on tools used
+function determineTier(toolsUsed: any[]): string {
+  // If all tools are Adobe Firefly, tier is Certified
+  // Otherwise, tier is Standard
+  const allFirefly = toolsUsed.every((tool: any) => {
+    const toolName = (tool.tool || '').toLowerCase()
+    return toolName.includes('firefly') || toolName.includes('adobe')
+  })
+
+  return allFirefly ? 'Certified' : 'Standard'
+}
+
+// Auto-determine category conflicts based on content analysis
+// For MVP, this returns empty array (can be enhanced later with AI analysis)
+function determineCategoryConflicts(submission: any): string[] {
+  // Future: Analyze logline, genre, etc. for category conflicts
+  // For now: Return empty array, admin can manually flag later if needed
+  return []
+}
+
 export async function POST(request: NextRequest, { params }: RouteContext) {
   try {
     // Verify admin auth
@@ -30,8 +50,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const body = await request.json()
-    const { catalogId, modelDisclosure, tier, categoryConflicts, territory } = body
+    const { catalogId } = await request.json()
 
     if (!catalogId) {
       return NextResponse.json({ error: 'Catalog ID required' }, { status: 400 })
@@ -62,12 +81,17 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     // Parse submission JSONB fields
     const toolsUsed = submission.tools_used ? JSON.parse(submission.tools_used) : []
 
-    // Build 9-field Rights Package data
+    // AUTO-DETERMINE all fields from submission data
+    const tier = determineTier(toolsUsed)
+    const categoryConflicts = determineCategoryConflicts(submission)
+    const modelDisclosure = toolsUsed.map((t: any) => t.tool || 'Unknown').join(', ')
+
+    // Build 9-field Rights Package data (all auto-populated)
     const rightsPackageData = {
       submission_id: params.id,
       catalog_id: catalogId,
 
-      // Field 1: Tool Provenance Log (JSONB)
+      // Field 1: Tool Provenance Log (JSONB) - Auto-populated from submission
       tool_provenance_log: {
         tools: toolsUsed.map((tool: any) => ({
           name: tool.tool || 'Unknown',
@@ -79,19 +103,19 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
         verification_date: new Date().toISOString(),
       },
 
-      // Field 2: Model Disclosure (TEXT)
+      // Field 2: Model Disclosure (TEXT) - Auto-extracted from tools
       model_disclosure: modelDisclosure || 'See tool provenance log',
 
-      // Field 3: Rights Verified Sign-off (JSONB)
+      // Field 3: Rights Verified Sign-off (JSONB) - Auto-populated with reviewer + tier
       rights_verified_signoff: {
         reviewer: userData.name || userData.email,
         reviewer_email: userData.email,
         date: new Date().toISOString(),
-        tier: tier || 'Standard',
+        tier: tier, // Auto-determined: Firefly only = Certified, else = Standard
         status: 'verified',
       },
 
-      // Field 4: Commercial Use Authorization (JSONB)
+      // Field 4: Commercial Use Authorization (JSONB) - Auto-populated
       commercial_use_authorization: {
         authorized: true,
         basis: 'Paid commercial plan receipts verified',
@@ -99,27 +123,27 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
         verification_date: new Date().toISOString(),
       },
 
-      // Field 5: Modification Rights Status (JSONB)
+      // Field 5: Modification Rights Status (JSONB) - Auto-populated from submission
       modification_rights_status: {
         authorized: submission.modification_authorized || false,
         scope: submission.modification_scope || 'Not authorized',
         tier_2_eligible: submission.modification_authorized,
       },
 
-      // Field 6: Category Conflict Log (TEXT[])
-      category_conflict_log: categoryConflicts || [],
+      // Field 6: Category Conflict Log (TEXT[]) - Auto-determined (empty for now)
+      category_conflict_log: categoryConflicts,
 
-      // Field 7: Territory Log (TEXT)
-      territory_log: territory || submission.territory_preferences || 'Global',
+      // Field 7: Territory Log (TEXT) - Auto-populated from submission
+      territory_log: submission.territory_preferences || 'Global',
 
-      // Field 8: Regeneration Rights Status (JSONB)
+      // Field 8: Regeneration Rights Status (JSONB) - Auto-populated from modification rights
       regeneration_rights_status: {
         authorized: submission.modification_authorized || false,
         scenes: submission.modification_scope || 'N/A',
         ai_regeneration_permitted: submission.modification_authorized,
       },
 
-      // Field 9: Version History (JSONB)
+      // Field 9: Version History (JSONB) - Auto-generated
       version_history: {
         current_version: 'v1.0',
         created_date: new Date().toISOString(),
@@ -127,13 +151,13 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
           {
             version: 'v1.0',
             date: new Date().toISOString(),
-            description: 'Initial Rights Package generation',
+            description: 'Initial Chain of Title generation',
             reviewer: userData.name || userData.email,
           },
         ],
       },
 
-      // PDF will be generated separately
+      // PDF will be generated next
       pdf_url: null,
       pdf_generated_at: null,
     }
@@ -150,7 +174,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: 'Failed to create Rights Package' }, { status: 500 })
     }
 
-    console.log(`Rights Package created for submission ${params.id}, catalog ID: ${catalogId}`)
+    console.log(`Rights Package created for submission ${params.id}, catalog ID: ${catalogId}, tier: ${tier}`)
 
     // Generate Chain of Title document
     const chainOfTitleText = generateChainOfTitle(rightsPackage, {
@@ -175,7 +199,6 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     if (uploadError) {
       console.error('Error uploading Chain of Title:', uploadError)
       // Don't fail the whole operation if upload fails
-      // Rights Package record exists, file upload can be retried
     }
 
     // Get public URL for the uploaded file
@@ -187,7 +210,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       publicUrl = urlData.publicUrl
     }
 
-    // Update rights_package with PDF URL
+    // Update rights_package with document URL
     if (publicUrl) {
       await supabaseAdmin
         .from('rights_packages')
@@ -202,8 +225,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       success: true,
       rightsPackageId: rightsPackage.id,
       catalogId: catalogId,
+      tier: tier,
       documentUrl: publicUrl,
-      message: 'Rights Package and Chain of Title generated successfully',
+      message: 'Chain of Title generated successfully (all fields auto-populated)',
     })
   } catch (error) {
     console.error('Error in generate-rights-package route:', error)
