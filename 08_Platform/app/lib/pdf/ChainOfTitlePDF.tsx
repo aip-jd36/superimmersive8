@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
   },
   badge: {
-    display: 'inline-block',
+    display: 'flex',
     backgroundColor: '#dbeafe',
     color: '#1e40af',
     padding: '4 8',
