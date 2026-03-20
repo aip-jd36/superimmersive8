@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { formatDate, formatCurrency } from '@/lib/utils'
 import { ArrowLeft, CheckCircle, XCircle, AlertCircle, ExternalLink } from 'lucide-react'
 import { ApproveRejectButtons } from './ApproveRejectButtons'
+import { GenerateRightsPackageButton } from './GenerateRightsPackageButton'
 import { notFound } from 'next/navigation'
 
 type PageProps = {
@@ -38,6 +39,13 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
   const { data: optIn } = await supabaseAdmin
     .from('opt_ins')
     .select('*')
+    .eq('submission_id', params.id)
+    .single()
+
+  // Check if Rights Package exists
+  const { data: rightsPackage } = await supabaseAdmin
+    .from('rights_packages')
+    .select('id, pdf_url, created_at')
     .eq('submission_id', params.id)
     .single()
 
@@ -263,6 +271,13 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
               submissionId={params.id}
               currentStatus={submission.status}
               hasOptIn={!!optIn}
+            />
+
+            <GenerateRightsPackageButton
+              submissionId={params.id}
+              catalogId={optIn?.catalog_id || null}
+              currentStatus={submission.status}
+              existingRightsPackage={rightsPackage}
             />
 
             {/* Review Notes */}
