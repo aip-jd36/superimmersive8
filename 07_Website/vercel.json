@@ -34,6 +34,21 @@
       "source": "/rights-verified/playbook",
       "destination": "/newsite/rights-verified/playbook",
       "permanent": false
+    },
+    {
+      "source": "/zh/rights-verified",
+      "destination": "/newsite/zh/rights-verified",
+      "permanent": false
+    },
+    {
+      "source": "/zh/rights-verified/chain-of-title",
+      "destination": "/newsite/zh/rights-verified/chain-of-title",
+      "permanent": false
+    },
+    {
+      "source": "/zh/rights-verified/playbook",
+      "destination": "/newsite/zh/rights-verified/playbook",
+      "permanent": false
     }
   ]
 }

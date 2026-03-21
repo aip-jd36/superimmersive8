@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chain of Title 版權來源文件 | SuperImmersive 8</title>
+    <meta name="description" content="9 欄位 Chain of Title 架構說明。了解文件如何創造價值、如何降低法律風險，以及品牌方會收到什麼。">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --color-bg: #0f0f0f; --color-surface: #1a1a1a; --color-surface-hover: #252525;
+            --color-text: #ffffff; --color-text-secondary: #a0a0a0;
+            --color-accent: #f59e0b; --color-accent-hover: #d97706;
+            --color-border: #333;
+            --font-display: 'Space Grotesk', sans-serif; --font-body: 'Inter', sans-serif;
+        }
+        body { font-family: var(--font-body); background: var(--color-bg); color: var(--color-text); line-height: 1.6; overflow-x: hidden; }
+
+        nav { position: fixed; top: 0; left: 0; right: 0; background: rgba(15,15,15,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--color-border); z-index: 1000; }
+        .nav-container { max-width: 1400px; margin: 0 auto; padding: 1.25rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; color: var(--color-text); text-decoration: none; }
+        .logo span { color: var(--color-accent); }
+        .nav-links { display: flex; gap: 2rem; align-items: center; list-style: none; }
+        .nav-links a { color: var(--color-text-secondary); text-decoration: none; font-size: 0.95rem; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--color-text); }
+        .nav-dropdown { position: relative; }
+        .nav-dropdown-trigger { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: var(--color-text-secondary); font-size: 0.95rem; }
+        .nav-dropdown-content { position: absolute; top: 100%; right: 0; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; padding: 1rem 0 0.5rem; min-width: 200px; display: none; }
+        .nav-dropdown:hover .nav-dropdown-content { display: block; }
+        .nav-dropdown-content a { display: block; padding: 0.75rem 1rem; color: var(--color-text-secondary); text-decoration: none; transition: all 0.2s; }
+        .nav-dropdown-content a:hover { color: var(--color-text); background: var(--color-surface-hover); }
+        .nav-cta { padding: 0.75rem 1.5rem; background: var(--color-accent); color: var(--color-bg) !important; border-radius: 6px; font-weight: 600; }
+        .nav-cta:hover { background: var(--color-accent-hover) !important; }
+        .lang-selector { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; margin-left: 1rem; }
+        .lang-selector a { color: var(--color-text-secondary); text-decoration: none; }
+        .lang-selector a.active { color: var(--color-accent); }
+
+        .hero { padding: 12rem 2rem 6rem; text-align: center; background: radial-gradient(ellipse at top, rgba(245,158,11,0.15), transparent 50%), var(--color-bg); }
+        .hero h1 { font-family: var(--font-display); font-size: 3.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero-subtitle { font-size: 1.25rem; color: var(--color-text-secondary); max-width: 800px; margin: 0 auto 2rem; }
+        .hero-callout { max-width: 700px; margin: 3rem auto 0; padding: 2rem; background: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.2); border-radius: 12px; }
+        .hero-callout p { font-size: 1.25rem; font-weight: 600; margin: 0; }
+
+        .content { max-width: 860px; margin: 0 auto; padding: 4rem 2rem; }
+        .section { margin: 5rem 0; }
+        .section h2 { font-family: var(--font-display); font-size: 2.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); padding-bottom: 1rem; }
+        .section h3 { font-family: var(--font-display); font-size: 1.75rem; margin: 2.5rem 0 1rem 0; color: var(--color-accent); }
+        .section p { color: var(--color-text-secondary); line-height: 1.8; margin-bottom: 1.5rem; }
+        .intro-box { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 3rem; margin: 3rem 0; }
+        .intro-box h3 { font-family: var(--font-display); font-size: 2rem; margin-bottom: 1.5rem; color: var(--color-text); }
+        .intro-box p { color: var(--color-text-secondary); line-height: 1.8; font-size: 1.125rem; }
+
+        .fields-grid { display: grid; gap: 3rem; margin: 3rem 0; }
+        .field-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 3rem; }
+        .field-number { display: inline-block; font-size: 0.875rem; font-weight: 700; color: var(--color-accent); background: rgba(245,158,11,0.15); padding: 0.5rem 1rem; border-radius: 50px; margin-bottom: 1.5rem; }
+        .field-card h3 { font-family: var(--font-display); font-size: 1.75rem; margin: 0 0 1rem 0; color: var(--color-text); }
+        .field-description { color: var(--color-text-secondary); font-size: 1.125rem; margin-bottom: 2rem; line-height: 1.7; }
+        .field-section { margin: 1.5rem 0; }
+        .field-section h4 { font-family: var(--font-display); font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-accent); margin-bottom: 0.75rem; }
+        .field-section ul { list-style: none; margin-left: 0; }
+        .field-section li { padding: 0.5rem 0 0.5rem 1.5rem; position: relative; color: var(--color-text-secondary); }
+        .field-section li::before { content: "✓"; position: absolute; left: 0; color: var(--color-accent); font-weight: 700; }
+        .example-box { background: rgba(245,158,11,0.05); border-left: 4px solid var(--color-accent); padding: 1.5rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
+        .example-box strong { color: var(--color-accent); display: block; margin-bottom: 0.5rem; }
+        .example-box code { display: block; background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 6px; font-family: 'Courier New', monospace; color: var(--color-text); margin-top: 0.75rem; overflow-x: auto; }
+
+        .mechanisms-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin: 3rem 0; }
+        .mechanism-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 2.5rem; text-align: center; }
+        .mechanism-icon { font-size: 3rem; margin-bottom: 1rem; }
+        .mechanism-card h3 { font-family: var(--font-display); font-size: 1.5rem; margin: 0 0 1rem 0; color: var(--color-text); }
+        .mechanism-stat { font-size: 1.125rem; font-weight: 600; color: var(--color-accent); margin-bottom: 1rem; }
+        .mechanism-card p { color: var(--color-text-secondary); line-height: 1.7; margin-bottom: 1rem; }
+        .mechanism-fields { font-size: 0.875rem; font-style: italic; color: var(--color-accent); }
+
+        .info-box { background: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.2); border-radius: 12px; padding: 3rem; margin: 3rem 0; text-align: center; }
+        .info-box h3 { font-family: var(--font-display); font-size: 2rem; margin-bottom: 1.5rem; }
+        .info-box .catalog-id { font-family: 'Courier New', monospace; font-size: 2rem; font-weight: 700; color: var(--color-accent); display: block; margin: 1.5rem 0; }
+        .info-box p { color: var(--color-text-secondary); line-height: 1.7; }
+        .info-box code { background: rgba(0,0,0,0.3); padding: 0.25rem 0.75rem; border-radius: 4px; font-family: 'Courier New', monospace; color: var(--color-accent); }
+
+        .cta-section { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 4rem; text-align: center; margin: 5rem 0; }
+        .cta-section h3 { font-family: var(--font-display); font-size: 2.5rem; margin-bottom: 1rem; }
+        .cta-section p { color: var(--color-text-secondary); font-size: 1.125rem; margin-bottom: 2rem; }
+        .btn-group { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .btn { padding: 1rem 2rem; border-radius: 8px; font-weight: 600; text-decoration: none; transition: all 0.2s; display: inline-block; }
+        .btn-primary { background: var(--color-accent); color: var(--color-bg); }
+        .btn-primary:hover { background: var(--color-accent-hover); transform: translateY(-2px); }
+        .btn-secondary { background: transparent; color: var(--color-text); border: 1px solid var(--color-border); }
+        .btn-secondary:hover { background: var(--color-surface-hover); border-color: var(--color-accent); }
+
+        footer { background: var(--color-bg); border-top: 1px solid var(--color-border); padding: 4rem 2rem 2rem; text-align: center; color: var(--color-text-secondary); }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero h1 { font-size: 2.5rem; }
+            .section h2 { font-size: 2rem; }
+            .mechanisms-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="/newsite" class="logo">SuperImmersive <span>8</span></a>
+            <ul class="nav-links">
+                <li><a href="/newsite/zh/how-it-works">服務流程</a></li>
+                <li><a href="/newsite/zh/pricing">定價</a></li>
+                <li><a href="/catalog">瀏覽目錄</a></li>
+                <li class="nav-dropdown">
+                    <span class="nav-dropdown-trigger">
+                        <span>Rights Verified</span>
+                        <span>▼</span>
+                    </span>
+                    <div class="nav-dropdown-content">
+                        <a href="/newsite/zh/rights-verified">總覽</a>
+                        <a href="/newsite/zh/rights-verified/playbook">完整審核手冊</a>
+                        <a href="/newsite/zh/rights-verified/chain-of-title">版權來源文件</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <span class="nav-dropdown-trigger">
+                        <span>登入</span>
+                        <span>▼</span>
+                    </span>
+                    <div class="nav-dropdown-content">
+                        <a href="/auth/login">創作者登入</a>
+                        <a href="/auth/admin/login">管理員登入</a>
+                    </div>
+                </li>
+                <li><a href="/auth/signup" class="nav-cta">立即申請認證</a></li>
+            </ul>
+            <div class="lang-selector">
+                <a href="/newsite/rights-verified/chain-of-title">EN</a>
+                <span>/</span>
+                <a href="/newsite/zh/rights-verified/chain-of-title" class="active">繁體中文</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <h1>Chain of Title 版權來源文件</h1>
+        <p class="hero-subtitle">
+            每支通過 Rights Verified 審核的影片，都附有結構化的 Chain of Title——9 個欄位的文件，有效降低法律風險、滿足法規合規要求，並協助取得發行授權。
+        </p>
+        <div class="hero-callout">
+            <p>檔案是載體，Chain of Title 才是核心產品。</p>
+        </div>
+    </section>
+
+    <!-- Content -->
+    <article class="content">
+        <!-- Why Documentation Creates Value -->
+        <section class="section">
+            <h2>文件為何能創造價值</h2>
+
+            <div class="intro-box">
+                <h3>想想 Getty Images</h3>
+                <p>品牌願意付 $450 買的是法律保障，而非那張 $50 的 JPEG。文件層才是真正的產品，而非像素本身。</p>
+                <p>SI8 的 Chain of Title 提供了品牌在部署 AI 影片時所需的稽核軌跡、合規文件，以及法律防禦能力。</p>
+            </div>
+
+            <p>傳統圖庫公司之所以能成功，是因為它們透過文件降低法律風險，而不僅僅是提供內容。Getty Images 之所以收取高價，不是為了照片本身，而是為了隨附的授權鏈、模特兒授權書，以及賠償保障。</p>
+
+            <p>AI 影片內容同樣需要這樣的法律基礎架構。SI8 的 Chain of Title 是針對 AI 生成內容的等效方案——結構化的文件，能讓法務團隊、平台政策和法規要求都滿意。</p>
+        </section>
+
+        <!-- The 9-Field Schema -->
+        <section class="section">
+            <h2>9 欄位架構</h2>
+            <p>每個目錄條目都包含對應法律防禦的結構化文件：</p>
+
+            <div class="fields-grid">
+                <div class="field-card">
+                    <div class="field-number">欄位 01</div>
+                    <h3>工具來源記錄</h3>
+                    <p class="field-description">使用的 AI 工具、版本、方案類型、製作日期，以及付費商業方案收據</p>
+                    <div class="field-section">
+                        <h4>記錄內容</h4>
+                        <ul>
+                            <li>使用的工具名稱（例如：Runway Gen-3、ElevenLabs）</li>
+                            <li>製作時的版本/模型</li>
+                            <li>方案類型（付費商業方案確認）</li>
+                            <li>製作日期</li>
+                            <li>收據/發票號碼存檔</li>
+                        </ul>
+                    </div>
+                    <div class="field-section">
+                        <h4>支持的法律防禦</h4>
+                        <ul>
+                            <li>善意侵害抗辯（善意文件記錄）</li>
+                            <li>FTC 揭露合規</li>
+                            <li>惡意性抗辯的稽核軌跡</li>
+                        </ul>
+                    </div>
+                    <div class="example-box">
+                        <strong>範例：</strong>
+                        <code>工具：Runway Gen-3（付費 Pro 方案）
+版本：Gen-3 Alpha（2025 年 11 月）
+日期：2025 年 11 月 12–18 日
+收據：RW-2025-11-0042（存檔中）</code>
+                    </div>
+                </div>
+
+                <div class="field-card">
+                    <div class="field-number">欄位 02</div>
+                    <h3>模型揭露聲明</h3>
+                    <p class="field-description">生成內容所使用的 AI 模型及製作時的版本</p>
+                    <div class="field-section">
+                        <h4>記錄內容</h4>
+                        <ul>
+                            <li>模型名稱（例如：Runway Gen-3 Alpha）</li>
+                            <li>使用的模型版本/檢查點</li>
+                            <li>訓練資料政策（若有公開文件）</li>
+                        </ul>
+                    </div>
+                    <div class="field-section">
+                        <h4>支持的法律防禦</h4>
+                        <ul>
+                            <li>著作權局注冊（揭露要求）</li>
+                            <li>法規透明度（EU AI Act 第 50 條、Colorado AI Act）</li>
+                            <li>平台合規（YouTube、TikTok 揭露規定）</li>
+                        </ul>
+                    </div>
+                    <div class="example-box">
+                        <strong>範例：</strong>
+                        <code>模型：Runway Gen-3 Alpha
+訓練：專有資料集（已接受服務改善條款）
+平台揭露：符合 YouTube/TikTok 要求</code>
+                    </div>
+                </div>
+
+                <div class="field-card">
+                    <div class="field-number">欄位 03</div>
+                    <h3>Rights Verified 審核簽發</h3>
+                    <p class="field-description">SI8 審核人員、審核日期、指派的風險等級（認證級/標準級/注意標記），以及任何條件或標記</p>
+                    <div class="field-section">
+                        <h4>記錄內容</h4>
+                        <ul>
+                            <li>SI8 審核人員姓名/編號</li>
+                            <li>審核日期</li>
+                            <li>指派的風險等級（認證級/標準級/注意標記）</li>
+                            <li>任何條件標記或限制</li>
+                        </ul>
+                    </div>
+                    <div class="field-section">
+                        <h4>支持的法律防禦</h4>
+                        <ul>
+                            <li>合理注意義務標準（Colorado「可反駁推定」）</li>
+                            <li>善意抗辯（有文件的盡職審查）</li>
+                            <li>FTC 合規（有依據的聲明）</li>
+                        </ul>
+                    </div>
+                    <div class="example-box">
+                        <strong>範例：</strong>
+                        <code>審核人員：SI8-JD-001
+審核日期：2026 年 2 月 15 日
+等級：標準級（Runway Gen-3，付費方案）
+標記：無</code>
+                    </div>
+                </div>
+
+                <div class="field-card">
+                    <div class="field-number">欄位 04</div>
+                    <h3>商業使用授權確認</h3>
+                    <p class="field-description">確認每款工具的服務條款允許商業授權，付費方案收據已存檔</p>
+                    <div class="field-section">
+                        <h4>記錄內容</h4>
+                        <ul>
+                            <li>服務條款商業使用條款確認</li>
+                            <li>付費方案驗證（收據存檔）</li>
+                            <li>地區限制（若有）</li>
+                            <li>轉授權權利文件</li>
+                        </ul>
+                    </div>
+                    <div class="field-section">
+                        <h4>支持的法律防禦</h4>
+                        <ul>
+                            <li>授權抗辯（已授權商業使用）</li>
+                            <li>連帶責任切斷（有文件的授權鏈）</li>
+                            <li>善意依賴工具提供商條款</li>
+                        </ul>
+                    </div>
+                    <div class="example-box">
+                        <strong>範例：</strong>
+                        <code>商業使用：已授權（Runway Pro 方案服務條款 §4.2）
+授權地區：全球
+轉授權：允許用於客戶工作
+收據存檔：RW-2025-11-0042</code>
+                    </div>
+                </div>
+
+                <div class="field-card">
+                    <div class="field-number">欄位 05</div>
+                    <h3>修改權限狀態</h3>
+                    <p class="field-description">已授權（全片/場景層級）或未授權；授權範疇已記錄</p>
+                    <div class="field-section">
+                        <h4>記錄內容</h4>
+                        <ul>
+                            <li>全片修改：已授權或未授權</li>
+                            <li>場景層級授權（若為部分授權）</li>
+                            <li>授權範疇與限制</li>
+                            <li>創作者合作協議參考</li>
+                        </ul>
+                    </div>
+                    <div class="field-section">
+                        <h4>支持的法律防禦</h4>
+                        <ul>
+                            <li>廣告置入授權（品牌整合能力）</li>
+                            <li>委託創作文件</li>
+                            <li>授權範疇清晰度</li>
+                        </ul>
+                    </div>
+                    <div class="example-box">
+                        <strong>範例：</strong>
+                        <code>狀態：已授權（全片）
+範疇：所有場景均可進行品牌置入 AI 再生成
+合作協議：SA-2026-0042（存檔中）
+創作者代理授權：是</code>
+                    </div>
+                </div>
+
+                <div class="field-card">
+                    <div class="field-number">欄位 06</div>
+                    <h3>類別衝突記錄</h3>
+                    <p class="field-description">不適合置入廣告的品牌類別（如：酒類、政治、直接競爭者）</p>
+                    <div class="field-section">
+                        <h4>記錄內容</h4>
+                        <ul>
+                            <li>不適合的品牌類別</li>
+                            <li>內容特定限制（如：含成人主題）</li>
+                            <li>競爭性排除</li>
+                            <li>各地區法規限制</li>
+                        </ul>
+                    </div>
+                    <div class="field-section">
+                        <h4>支持的法律防禦</h4>
+                        <ul>
+                            <li>品牌風險控管（類別排除）</li>
+                            <li>揭露要求追蹤</li>
+                            <li>商標淨空文件</li>
+                        </ul>
+                    </div>
+                    <div class="example-box">
+                        <strong>範例：</strong>
+                        <code>不適合類別：
+- 酒類（內容有未成年人）
+- 政治競選
+- 直接競爭者：[現有品牌整合]
+適合：消費科技、時尚、旅遊、餐飲（非酒精）</code>
+                    </div>
+                </div>
+
+                <div class="field-card">
+                    <div class="field-number">欄位 07</div>
+                    <h3>授權地區記錄</h3>
+                    <p class="field-description">地理授權限制；若無特別說明，預設為全球</p>
+                    <div class="field-section">
+                        <h4>記錄內容</h4>
+                        <ul>
+                            <li>已授權地區</li>
+                            <li>地區特定限制</li>
+                            <li>各地區平台可用性</li>
+                            <li>各司法管轄區法規合規</li>
+                        </ul>
+                    </div>
+                    <div class="field-section">
+                        <h4>支持的法律防禦</h4>
+                        <ul>
+                            <li>授權範疇文件</li>
+                            <li>司法管轄區清晰度（適用哪些法律）</li>
+                            <li>多地區合規追蹤</li>
+                        </ul>
+                    </div>
+                    <div class="example-box">
+                        <strong>範例：</strong>
+                        <code>已授權：全球（所有地區）
+平台合規：
+- 美國：YouTube、TikTok、Meta（合規）
+- 歐盟：符合第 50 條揭露要求
+- 台灣/亞太：iQIYI/Viu 發行就緒</code>
+                    </div>
+                </div>
+
+                <div class="field-card">
+                    <div class="field-number">欄位 08</div>
+                    <h3>再生成權限狀態</h3>
+                    <p class="field-description">哪些場景可被 AI 再生成以進行品牌整合；範疇與限制</p>
+                    <div class="field-section">
+                        <h4>記錄內容</h4>
+                        <ul>
+                            <li>逐場景再生成資格</li>
+                            <li>技術限制（如：角色一致性）</li>
+                            <li>再生成的創作者審核流程</li>
+                            <li>品質控制標準</li>
+                        </ul>
+                    </div>
+                    <div class="field-section">
+                        <h4>支持的法律防禦</h4>
+                        <ul>
+                            <li>廣告置入授權（AI 再生成能力）</li>
+                            <li>修改條款執行</li>
+                            <li>創作者代理授權文件</li>
+                        </ul>
+                    </div>
+                    <div class="example-box">
+                        <strong>範例：</strong>
+                        <code>適合場景：全部（全片授權）
+技術能力：產品置入、環境修改
+創作者審核：最終核准需創作者確認
+品管標準：維持風格一致性與動態連貫性</code>
+                    </div>
+                </div>
+
+                <div class="field-card">
+                    <div class="field-number">欄位 09</div>
+                    <h3>版本歷史記錄</h3>
+                    <p class="field-description">製作版本、審核日期，以及後續任何修改與重審日期</p>
+                    <div class="field-section">
+                        <h4>記錄內容</h4>
+                        <ul>
+                            <li>原始製作版本</li>
+                            <li>人類創作聲明</li>
+                            <li>後續修改日期</li>
+                            <li>重審日期（若有修改）</li>
+                            <li>版權管理資訊（CMI）保存（浮水印/歸屬標記）</li>
+                        </ul>
+                    </div>
+                    <div class="field-section">
+                        <h4>支持的法律防禦</h4>
+                        <ul>
+                            <li>人類創作（著作權局著作權可保護性要求）</li>
+                            <li>CMI 保存（DMCA 合規）</li>
+                            <li>稽核軌跡（完整來源鏈）</li>
+                        </ul>
+                    </div>
+                    <div class="example-box">
+                        <strong>範例：</strong>
+                        <code>版本 1.0：2025 年 11 月 18 日（原始製作）
+人類創作聲明：[150 字以上聲明書，存檔中]
+修改：無
+重審：不適用
+CMI 狀態：保存（未移除浮水印）</code>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Four Mechanisms -->
+        <section class="section">
+            <h2>四大風險降低機制</h2>
+            <p>Chain of Title 如何對應法律防禦、法規合規及判例法：</p>
+
+            <div class="mechanisms-grid">
+                <div class="mechanism-card">
+                    <div class="mechanism-icon">📉</div>
+                    <h3>1. 損害賠償控制</h3>
+                    <p class="mechanism-stat">法定損害賠償降低 73% 以上</p>
+                    <p>Chain of Title 文件支持依據 17 U.S.C. § 504(c)(2) 的善意侵害抗辯，可將最低法定賠償額從每件 $750 降至 $200，並防止最高 $150,000 的故意侵害懲罰性賠償。</p>
+                    <p class="mechanism-fields">支持欄位：#1、#3、#4、#9</p>
+                </div>
+                <div class="mechanism-card">
+                    <div class="mechanism-icon">✓</div>
+                    <h3>2. 法規合規</h3>
+                    <p class="mechanism-stat">Colorado AI 法規「可反駁推定」安全港</p>
+                    <p>Colorado AI 法明確獎勵有完整記錄的系統，賦予合理注意義務的法律推定。Chain of Title = 法定合規基礎架構，可避免每次違規高達 $20,000 的罰款。</p>
+                    <p class="mechanism-fields">支持欄位：#2、#3、#6、#9</p>
+                </div>
+                <div class="mechanism-card">
+                    <div class="mechanism-icon">©</div>
+                    <h3>3. 著作權保護</h3>
+                    <p class="mechanism-stat">美國著作權局人類創作要求</p>
+                    <p>美國著作權局（2025 年 1 月）：僅有提示詞不構成著作權。Chain of Title 第 9 欄位記錄了品牌主張著作權所需的編輯決策軌跡。</p>
+                    <p class="mechanism-fields">支持欄位：#9（版本歷史記錄）</p>
+                </div>
+                <div class="mechanism-card">
+                    <div class="mechanism-icon">📺</div>
+                    <h3>4. 發行授權</h3>
+                    <p class="mechanism-stat">E&O 保險 + 平台合規</p>
+                    <p>Chain of Title 等同於 AI 內容的版權鏈文件，可滿足 E&O 保險承保要求及各平台揭露政策（YouTube、TikTok、串流平台）。</p>
+                    <p class="mechanism-fields">支持欄位：全部 9 個欄位（完整文件）</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Catalog ID Format -->
+        <section class="section">
+            <div class="info-box">
+                <h3>目錄 ID 格式</h3>
+                <span class="catalog-id">SI8-2026-0001</span>
+                <p>每份 Chain of Title 都有一個唯一的目錄 ID：<strong>SI8-[年份]-[4 位序號]</strong></p>
+                <p style="margin-top: 2rem;"><strong>儲存路徑：</strong><br><code>/05_Catalog/represented/[filmmaker]/[title]/rights-package.md</code></p>
+            </div>
+        </section>
+
+        <!-- How to Read -->
+        <section class="section">
+            <h2>如何閱讀文件</h2>
+            <p>Chain of Title 以結構化的 PDF 形式交件。每個章節對應 9 個欄位之一，並附有參考文件連結。</p>
+
+            <h3>買家會收到什麼</h3>
+            <ul style="color: var(--color-text-secondary); line-height: 1.8; margin-left: 2rem;">
+                <li><strong>Chain of Title PDF：</strong>9 欄位文件包（通常 8–12 頁）</li>
+                <li><strong>工具收據：</strong>商業方案授權證明</li>
+                <li><strong>人類創作聲明：</strong>創作者的創作過程文件</li>
+                <li><strong>Rights Verified 摘要頁：</strong>包含目錄 ID 與等級分類的摘要頁</li>
+            </ul>
+
+            <h3>法務團隊重點關注什麼</h3>
+            <ul style="color: var(--color-text-secondary); line-height: 1.8; margin-left: 2rem;">
+                <li><strong>欄位 #4（商業使用授權確認）：</strong>確認工具允許商業授權</li>
+                <li><strong>欄位 #9（版本歷史記錄）：</strong>著作權歸屬所需的人類創作證據</li>
+                <li><strong>欄位 #1（工具來源記錄）：</strong>善意侵害抗辯的稽核軌跡</li>
+                <li><strong>欄位 #2（模型揭露聲明）：</strong>平台揭露合規</li>
+            </ul>
+        </section>
+
+        <!-- CTA -->
+        <div class="cta-section">
+            <h3>了解法律基礎</h3>
+            <p>下載我們完整的法律風險降低簡報，了解 Chain of Title 如何對應法定防禦、法規合規及判例法。</p>
+            <div class="btn-group">
+                <a href="/newsite/zh/rights-verified/playbook" class="btn btn-primary">閱讀法律風險簡報</a>
+                <a href="/auth/signup" class="btn btn-secondary">立即申請認證</a>
+            </div>
+        </div>
+    </article>
+
+    <footer>
+        <p>&copy; 2026 SuperImmersive 8. 版權所有。</p>
+    </footer>
+</body>
+</html>

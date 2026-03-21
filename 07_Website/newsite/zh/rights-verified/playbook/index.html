@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 影片版權審核手冊 v0.2 | SuperImmersive 8</title>
+    <meta name="description" content="AI 影片版權認證完整法律參考手冊。工具分級、平台政策、審核標準，以及法律風險框架。">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --color-bg: #0f0f0f; --color-surface: #1a1a1a; --color-surface-hover: #252525;
+            --color-text: #ffffff; --color-text-secondary: #a0a0a0;
+            --color-accent: #f59e0b; --color-accent-hover: #d97706; --color-border: #333;
+            --font-display: 'Space Grotesk', sans-serif; --font-body: 'Inter', sans-serif;
+        }
+        body { font-family: var(--font-body); background: var(--color-bg); color: var(--color-text); line-height: 1.6; overflow-x: hidden; }
+
+        nav { position: fixed; top: 0; left: 0; right: 0; background: rgba(15,15,15,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--color-border); z-index: 1000; }
+        .nav-container { max-width: 1400px; margin: 0 auto; padding: 1.25rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; color: var(--color-text); text-decoration: none; }
+        .logo span { color: var(--color-accent); }
+        .nav-links { display: flex; gap: 2rem; align-items: center; list-style: none; }
+        .nav-links a { color: var(--color-text-secondary); text-decoration: none; font-size: 0.95rem; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--color-text); }
+        .nav-dropdown { position: relative; }
+        .nav-dropdown-trigger { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: var(--color-text-secondary); font-size: 0.95rem; }
+        .nav-dropdown-content { position: absolute; top: 100%; right: 0; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; padding: 1rem 0 0.5rem; min-width: 200px; display: none; }
+        .nav-dropdown:hover .nav-dropdown-content { display: block; }
+        .nav-dropdown-content a { display: block; padding: 0.75rem 1rem; color: var(--color-text-secondary); text-decoration: none; transition: all 0.2s; }
+        .nav-dropdown-content a:hover { color: var(--color-text); background: var(--color-surface-hover); }
+        .nav-cta { padding: 0.75rem 1.5rem; background: var(--color-accent); color: var(--color-bg) !important; border-radius: 6px; font-weight: 600; }
+        .nav-cta:hover { background: var(--color-accent-hover) !important; }
+        .lang-selector { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; margin-left: 1rem; }
+        .lang-selector a { color: var(--color-text-secondary); text-decoration: none; }
+        .lang-selector a.active { color: var(--color-accent); }
+
+        .hero { padding: 12rem 2rem 6rem; text-align: center; background: radial-gradient(ellipse at top, rgba(245,158,11,0.15), transparent 50%), var(--color-bg); }
+        .hero h1 { font-family: var(--font-display); font-size: 3.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero-subtitle { font-size: 1.25rem; color: var(--color-text-secondary); max-width: 800px; margin: 0 auto 2rem; }
+        .version-badge { display: inline-block; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); border-radius: 50px; padding: 0.5rem 1.5rem; font-size: 0.875rem; color: var(--color-accent); font-weight: 600; }
+
+        .content { max-width: 860px; margin: 0 auto; padding: 4rem 2rem; }
+        .toc { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 1.5rem; margin-bottom: 4rem; position: sticky; top: 100px; z-index: 100; max-width: 100%; }
+        .toc-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+        .toc-header h3 { font-family: var(--font-display); font-size: 1.25rem; margin: 0; }
+        .toc-toggle { background: none; border: none; color: var(--color-text-secondary); font-size: 1.5rem; cursor: pointer; padding: 0.5rem; transition: color 0.2s; line-height: 1; }
+        .toc-toggle:hover { color: var(--color-accent); }
+        .toc-content { margin-top: 1.5rem; max-height: 400px; overflow-y: auto; transition: all 0.3s ease; }
+        .toc-content.collapsed { max-height: 0; margin-top: 0; overflow: hidden; }
+        .toc-list { list-style: none; }
+        .toc-list li { margin-bottom: 0.75rem; }
+        .toc-list a { color: var(--color-text-secondary); text-decoration: none; transition: color 0.2s; display: block; padding: 0.25rem 0; }
+        .toc-list a:hover { color: var(--color-accent); }
+        @media (max-width: 768px) { .toc { position: relative; top: 0; } }
+
+        .section { margin: 5rem 0; }
+        .section h2 { font-family: var(--font-display); font-size: 2.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); padding-bottom: 1rem; }
+        .section h3 { font-family: var(--font-display); font-size: 1.75rem; margin: 2.5rem 0 1rem 0; color: var(--color-accent); }
+        .section p { color: var(--color-text-secondary); line-height: 1.8; margin-bottom: 1.5rem; }
+        .section ul, .section ol { color: var(--color-text-secondary); margin-left: 2rem; margin-bottom: 1.5rem; }
+        .section li { margin-bottom: 0.75rem; line-height: 1.7; }
+
+        .callout { background: rgba(245,158,11,0.05); border-left: 4px solid var(--color-accent); padding: 1.5rem; margin: 2rem 0; border-radius: 0 8px 8px 0; }
+        .callout strong { color: var(--color-accent); display: block; margin-bottom: 0.5rem; }
+        .callout p, .callout ul { color: var(--color-text-secondary); margin-bottom: 0; }
+        .warning { background: rgba(239,68,68,0.05); border-left: 4px solid #ef4444; padding: 1.5rem; margin: 2rem 0; border-radius: 0 8px 8px 0; }
+        .warning strong { color: #ef4444; display: block; margin-bottom: 0.5rem; }
+        .warning p { color: var(--color-text-secondary); margin-bottom: 0; }
+
+        .table-wrapper { overflow-x: auto; margin: 2rem 0; }
+        table { width: 100%; border-collapse: collapse; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--color-border); }
+        th { background: rgba(245,158,11,0.1); color: var(--color-text); font-weight: 600; }
+        td { color: var(--color-text-secondary); }
+        tr:last-child td { border-bottom: none; }
+        .tier-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.875rem; font-weight: 600; }
+        .tier-approved { background: rgba(34,197,94,0.1); color: #22c55e; }
+        .tier-caution { background: rgba(245,158,11,0.1); color: var(--color-accent); }
+        .tier-prohibited { background: rgba(239,68,68,0.1); color: #ef4444; }
+
+        .cta-section { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 3rem; text-align: center; margin: 4rem 0; }
+        .cta-section h3 { font-family: var(--font-display); font-size: 2rem; margin-bottom: 1rem; }
+        .cta-section p { color: var(--color-text-secondary); font-size: 1.125rem; margin-bottom: 1rem; }
+        .btn { display: inline-block; padding: 1rem 2rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.2s; margin-top: 1rem; }
+        .btn:hover { background: var(--color-accent-hover); transform: translateY(-2px); }
+
+        footer { background: var(--color-bg); border-top: 1px solid var(--color-border); padding: 4rem 2rem 2rem; text-align: center; color: var(--color-text-secondary); }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero h1 { font-size: 2.5rem; }
+            .section h2 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="/newsite" class="logo">SuperImmersive <span>8</span></a>
+            <ul class="nav-links">
+                <li><a href="/newsite/zh/how-it-works">服務流程</a></li>
+                <li><a href="/newsite/zh/pricing">定價</a></li>
+                <li><a href="/catalog">瀏覽目錄</a></li>
+                <li class="nav-dropdown">
+                    <span class="nav-dropdown-trigger">
+                        <span>Rights Verified</span>
+                        <span>▼</span>
+                    </span>
+                    <div class="nav-dropdown-content">
+                        <a href="/newsite/zh/rights-verified">總覽</a>
+                        <a href="/newsite/zh/rights-verified/playbook">完整審核手冊</a>
+                        <a href="/newsite/zh/rights-verified/chain-of-title">版權來源文件</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <span class="nav-dropdown-trigger">
+                        <span>登入</span>
+                        <span>▼</span>
+                    </span>
+                    <div class="nav-dropdown-content">
+                        <a href="/auth/login">創作者登入</a>
+                        <a href="/auth/admin/login">管理員登入</a>
+                    </div>
+                </li>
+                <li><a href="/auth/signup" class="nav-cta">立即申請認證</a></li>
+            </ul>
+            <div class="lang-selector">
+                <a href="/newsite/rights-verified/playbook">EN</a>
+                <span>/</span>
+                <a href="/newsite/zh/rights-verified/playbook" class="active">繁體中文</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <h1>AI 影片版權審核手冊</h1>
+        <p class="hero-subtitle">
+            SI8 關於法律標準、平台政策與工具風險分級的內部參考手冊。隨法律與政策演進，每季更新一次。
+        </p>
+        <div class="version-badge">版本 0.2 — 2026 年 2 月</div>
+    </section>
+
+    <!-- Content -->
+    <article class="content">
+        <!-- Table of Contents -->
+        <nav class="toc">
+            <div class="toc-header" onclick="toggleTOC()">
+                <h3>目錄</h3>
+                <button class="toc-toggle" aria-label="展開/收合目錄">
+                    <span class="toc-toggle-icon">−</span>
+                </button>
+            </div>
+            <div class="toc-content" id="tocContent">
+                <ul class="toc-list">
+                    <li><a href="#framework">第一部分：SI8 Rights Verified 框架</a></li>
+                    <li><a href="#legal">第二部分：現行法律環境</a></li>
+                    <li><a href="#tools">第三部分：工具風險等級分類</a></li>
+                    <li><a href="#platforms">第四部分：平台政策</a></li>
+                    <li><a href="#vetting">第五部分：審核標準（7 大類別）</a></li>
+                    <li><a href="#risk">第六部分：法律風險降低機制</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <script>
+            function toggleTOC() {
+                const tocContent = document.getElementById('tocContent');
+                const toggleIcon = document.querySelector('.toc-toggle-icon');
+                tocContent.classList.toggle('collapsed');
+                toggleIcon.textContent = tocContent.classList.contains('collapsed') ? '+' : '−';
+            }
+        </script>
+
+        <!-- Part 1: Framework -->
+        <section id="framework" class="section">
+            <h2>第一部分：SI8 Rights Verified 框架</h2>
+            <p>所有代理內容與製作工作的基本原則。</p>
+
+            <h3>SI8 接受的內容條件</h3>
+            <ul>
+                <li><strong>人類主導的內容：</strong>有意義的人類創作參與已有文件記錄（而非僅是輸入提示詞）</li>
+                <li><strong>商業授權：</strong>所有 AI 工具均使用付費商業方案，收據存檔</li>
+                <li><strong>僅限核准工具：</strong>工具在核准或注意等級清單上（禁用工具不得作為主要生成來源）</li>
+                <li><strong>有文件的來源：</strong>每件內容均有完整的 Chain of Title</li>
+            </ul>
+
+            <h3>拒絕清單——SI8 不接受的內容</h3>
+            <p>保護創作者、客戶與 SI8 遠離最高風險領域的硬性規定：</p>
+            <ul>
+                <li>❌ <strong>名人肖像：</strong>未經同意使用真實人物的臉孔</li>
+                <li>❌ <strong>聲音複製：</strong>未經授權使用真實人物的聲音</li>
+                <li>❌ <strong>IP 仿冒：</strong>受版權保護的角色、品牌、商標</li>
+                <li>❌ <strong>深偽內容（Deepfake）：</strong>偽裝為真實的欺騙性內容</li>
+                <li>❌ <strong>政治內容：</strong>政治說服或倡議性內容</li>
+                <li>❌ <strong>移除版權管理資訊（CMI）：</strong>移除浮水印/歸屬標記（違反 DMCA）</li>
+                <li>❌ <strong>禁用工具：</strong>Veo 消費版、正面臨訴訟的工具</li>
+                <li>❌ <strong>無人類創作：</strong>僅靠提示詞生成（依美國著作權局規定不具著作權）</li>
+            </ul>
+
+            <div class="callout">
+                <strong>對買家的重要性：</strong>
+                <p>每個 SI8 項目都附有有文件記錄的版權立場。品牌得到的是法律防禦能力，而非只是創意產出。</p>
+            </div>
+        </section>
+
+        <!-- Part 2: Legal Landscape -->
+        <section id="legal" class="section">
+            <h2>第二部分：現行法律環境</h2>
+            <p>著作權、責任、法規合規——美國、台灣、新加坡、歐盟</p>
+
+            <h3>著作權歸屬</h3>
+            <p><strong>美國著作權局 2025 年 1 月人類創作要求：</strong>美國著作權局要求 AI 生成作品具備有文件記錄的人類創作參與。僅有提示詞不構成著作權。SI8 的 Chain of Title 第 9 欄位（版本歷史記錄）捕捉了所需的編輯決策軌跡。</p>
+
+            <div class="callout">
+                <strong>重要引用：</strong>
+                <p>美國著作權局，「著作權與人工智慧，第二部分：調查通知與評論徵集」（2025 年 1 月）。必須有有意義的人類創意表達存在。</p>
+            </div>
+
+            <h3>損害賠償控制</h3>
+            <p><strong>透過善意侵害抗辯降低 73% 法定賠償：</strong>Chain of Title 文件支持依據 17 U.S.C. § 504(c)(2) 的善意侵害抗辯，可將最低法定賠償額從每件 $750 降至 $200，並防止最高 $150,000 的故意侵害懲罰性賠償。</p>
+
+            <h3>法規合規</h3>
+            <p><strong>Colorado AI 法「可反駁推定」安全港：</strong>Colorado SB24-205 明確獎勵有完整記錄的系統，賦予合理注意義務的法律推定。Chain of Title = 法定合規基礎架構，可避免每次違規高達 $20,000 的罰款。</p>
+
+            <p><strong>歐盟 AI 法第 50 條：</strong>針對合成/深偽內容的分階段透明度義務（2026 年起生效）。SI8 的模型揭露聲明（欄位 #2）符合歐盟透明度要求。</p>
+
+            <p><strong>FTC「AI 合規行動」：</strong>AI 相關行銷聲明的實質性要求。Chain of Title 提供了 FTC 合規所需的稽核軌跡。</p>
+
+            <h3>訓練資料責任</h3>
+            <p><strong>使用者責任是真實存在的：</strong>工具提供商的服務條款通常不承擔著作權侵害的責任。買家自行承擔風險。工具等級分類至關重要——使用正面臨訴訟的工具（如 Midjourney、Stability AI）會增加法律曝險。</p>
+
+            <div class="warning">
+                <strong>硬性規定：</strong>
+                <p>SI8 不以正面臨工作室訴訟的工具作為主要生成來源。禁用等級的存在是為了保護創作者和買家。</p>
+            </div>
+
+            <h3>DMCA 版權管理資訊（CMI）保存</h3>
+            <p><strong>不得移除浮水印：</strong>DMCA §1202 禁止移除版權管理資訊（CMI）。移除浮水印是獨立於著作權侵害之外的另一項違規行為。SI8 要求保存 CMI。</p>
+        </section>
+
+        <!-- Part 3: Tool Tiers -->
+        <section id="tools" class="section">
+            <h2>第三部分：工具風險等級分類</h2>
+            <p>不同 AI 工具的法律風險不盡相同。SI8 依據訓練資料透明度、訴訟狀態及商業條款，將工具分為不同風險等級。</p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>工具</th>
+                            <th>等級</th>
+                            <th>判定依據</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Adobe Firefly</strong></td>
+                            <td><span class="tier-badge tier-approved">✅ 核准</span></td>
+                            <td>僅使用 Adobe Stock 訓練資料。對 Firefly 輸出提供賠償保障（適用除外條款）。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Runway（付費版）</strong></td>
+                            <td><span class="tier-badge tier-approved">✅ 核准</span></td>
+                            <td>最佳商業授權條款。服務改善條款已有文件記錄。需使用付費方案。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Pika（付費版）</strong></td>
+                            <td><span class="tier-badge tier-approved">✅ 核准</span></td>
+                            <td>商業使用授權清晰。需使用付費方案。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sora（付費版）</strong></td>
+                            <td><span class="tier-badge tier-approved">✅ 核准</span></td>
+                            <td>最佳 IP 條款（Disney/Marvel/Pixar 已授權；其他採選擇加入制）。法律挑戰逐漸增加——SI8 持續監控。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Kling</strong></td>
+                            <td><span class="tier-badge tier-caution">⚠️ 注意</span></td>
+                            <td>保留永久可轉授權以用於 AI 訓練目的。允許加入目錄，但獨家授權案件需特別標記。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Veo（消費版）</strong></td>
+                            <td><span class="tier-badge tier-prohibited">❌ 禁用</span></td>
+                            <td>消費版禁止商業使用。企業版未來或可評估。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hailuo / Minimax</strong></td>
+                            <td><span class="tier-badge tier-prohibited">❌ 禁用</span></td>
+                            <td>面臨 Disney/WB 積極訴訟（2025 年 11 月）。商業使用風險過高。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Midjourney、Stability AI</strong></td>
+                            <td><span class="tier-badge tier-prohibited">❌ 禁用</span></td>
+                            <td>面臨工作室積極訴訟。訴訟解決前，SI8 不使用此類工具作為主要生成來源。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout">
+                <strong>Adobe 缺口：</strong>
+                <p>Adobe 只對 Firefly 提供賠償保障，不涵蓋 Runway、Sora、Midjourney、Kling，也不涵蓋任何修改或組合。創意團隊想用最好的工具（Sora、Runway），而非只是最安全的工具（Firefly）。<strong>SI8 的定位：</strong>「Adobe = 安全但無聊。SI8 = 透過 Rights Verified 審核，讓最好的創意工具也能安全使用。」</p>
+            </div>
+        </section>
+
+        <!-- Part 4: Platform Policies -->
+        <section id="platforms" class="section">
+            <h2>第四部分：平台政策</h2>
+
+            <h3>YouTube</h3>
+            <ul>
+                <li><strong>揭露要求：</strong>若描繪了真實人物、地點或事件，「修改或合成內容」必須揭露</li>
+                <li><strong>標示位置：</strong>影片說明或畫面上顯示</li>
+                <li><strong>執法：</strong>未揭露者可能遭去除廣告分潤、降低推薦曝光或下架</li>
+            </ul>
+
+            <h3>TikTok</h3>
+            <ul>
+                <li><strong>揭露要求：</strong>上傳時須開啟 AI 生成內容標記</li>
+                <li><strong>標示：</strong>影片上顯示「AI 生成」標籤</li>
+                <li><strong>執法：</strong>未揭露者可能遭下架</li>
+            </ul>
+
+            <h3>Meta（Facebook、Instagram）</h3>
+            <ul>
+                <li><strong>揭露要求：</strong>擬真內容須標示「由 AI 製作」</li>
+                <li><strong>偵測：</strong>Meta 自動偵測部分 AI 內容；亦接受手動揭露</li>
+                <li><strong>執法：</strong>未合規者降低內容觸及率</li>
+            </ul>
+
+            <h3>愛奇藝（中國/台灣串流）</h3>
+            <ul>
+                <li><strong>內容要求：</strong>授權需提供完整版權文件</li>
+                <li><strong>AI 揭露：</strong>政策仍在評估中（截至 2026 年 2 月）</li>
+                <li><strong>SI8 優勢：</strong>Chain of Title 符合文件要求</li>
+            </ul>
+
+            <h3>LinkedIn</h3>
+            <ul>
+                <li><strong>目前尚無正式 AI 揭露要求</strong>（截至 2026 年 2 月）</li>
+                <li><strong>最佳實踐：</strong>在貼文中主動揭露</li>
+            </ul>
+
+            <div class="callout">
+                <strong>發行授權優勢：</strong>
+                <p>SI8 的 Chain of Title = 符合平台規範的交付文件。模型揭露聲明（欄位 #2）＋工具來源記錄（欄位 #1）可滿足所有主要平台的揭露政策。</p>
+            </div>
+        </section>
+
+        <!-- Part 5: Vetting Criteria -->
+        <section id="vetting" class="section">
+            <h2>第五部分：審核標準（7 大類別）</h2>
+            <p>每個審查類別的通過/未通過門檻。完整審核標準及範例請見 <a href="/newsite/zh/rights-verified" style="color: var(--color-accent);">Rights Verified 總覽</a>。</p>
+
+            <h3>1. 工具與方案驗證</h3>
+            <p><strong>通過：</strong>所有工具在核准或注意等級清單上。每款工具均有付費方案收據存檔。商業授權狀態已確認。</p>
+            <p><strong>未通過：</strong>以禁用/高風險工具作為主要生成來源；任何工具缺少收據。</p>
+
+            <h3>2. 人類創作證據品質</h3>
+            <p><strong>通過：</strong>聲明書描述了具體的迭代決策、編輯選擇、生成後剪輯。至少 150 字，內容實質。</p>
+            <p><strong>未通過：</strong>過於籠統（「我寫了提示詞並選取輸出」）而無具體說明。AI 做出了所有有意義的創意決策。</p>
+
+            <h3>3. 肖像與身份確認</h3>
+            <p><strong>通過：</strong>所有人臉明顯為合成且無法識別身份。所有聲音均為原創或 AI 生成，不具特定真實人物身份。</p>
+            <p><strong>未通過：</strong>任何未經同意的可識別真實人物臉孔或聲音。<strong>有疑慮即視為未通過。</strong></p>
+
+            <div class="warning">
+                <strong>硬性規定：</strong>
+                <p>無例外，無灰色地帶。若臉孔可能被識別，即視為未通過。這是法律曝險最高的類別。</p>
+            </div>
+
+            <h3>4. IP 與品牌仿冒</h3>
+            <p><strong>通過：</strong>未出現任何屬於真實 IP 持有者的角色/生物/標誌/品牌元素。未複製/模仿任何真實品牌商業外觀。</p>
+            <p><strong>未通過：</strong>明顯仿冒受版權保護的角色。複製受保護的商業外觀。可見已注冊商標的標誌/識別符。</p>
+
+            <h3>5. 品牌安全性</h3>
+            <p><strong>通過：</strong>適合主流商業品牌附掛，無特別限制。或在 Chain of Title 中有具體記錄的限制。</p>
+            <p><strong>未通過：</strong>含有強烈暴力、性內容、政治說服、毒品使用（宣揚性/教學性），或任何拒絕清單上的內容。</p>
+
+            <h3>6. 音訊與音樂版權</h3>
+            <p><strong>通過：</strong>所有音訊均為使用付費商業方案生成的原創 AI 音效（收據存檔）。所有授權音訊均有文件。作品無音訊。</p>
+            <p><strong>未通過：</strong>未授權的商業音樂且無文件。音訊授權未涵蓋商業使用或特定地區/媒介。</p>
+
+            <h3>7. 修改權限（Tier 2 通道）</h3>
+            <p><strong>已授權——全片：</strong>所有場景均可進行廣告置入再生成。</p>
+            <p><strong>已授權——特定場景：</strong>僅列出的場景可進行廣告置入。</p>
+            <p><strong>未授權：</strong>僅限 Tier 1（原版授權）。創作者可隨時更新授權。</p>
+        </section>
+
+        <!-- Part 6: Legal Risk Reduction -->
+        <section id="risk" class="section">
+            <h2>第六部分：法律風險降低機制</h2>
+            <p>SI8 的 Chain of Title 如何透過四項可量化的法律機制降低 AI 內容責任。</p>
+
+            <h3>機制一：損害賠償控制</h3>
+            <p><strong>法定損害賠償降低 73% 以上</strong></p>
+            <p>Chain of Title 文件支持依據 17 U.S.C. § 504(c)(2) 的善意侵害抗辯，可將最低法定賠償額從每件 $750 降至 $200，並防止最高 $150,000 的故意侵害懲罰性賠償。</p>
+            <p><strong>支持欄位：</strong>#1（工具來源記錄）、#3（Rights Verified 審核簽發）、#4（商業使用授權確認）、#9（版本歷史記錄）</p>
+
+            <h3>機制二：法規合規</h3>
+            <p><strong>Colorado AI 法「可反駁推定」安全港</strong></p>
+            <p>Colorado AI 法明確獎勵有完整記錄的系統，賦予合理注意義務的法律推定。Chain of Title = 法定合規基礎架構，可避免每次違規高達 $20,000 的罰款。</p>
+            <p><strong>支持欄位：</strong>#2（模型揭露聲明）、#3（Rights Verified 審核簽發）、#6（類別衝突記錄）、#9（版本歷史記錄）</p>
+
+            <h3>機制三：著作權保護</h3>
+            <p><strong>美國著作權局人類創作要求</strong></p>
+            <p>美國著作權局（2025 年 1 月）：僅有提示詞不構成著作權。Chain of Title 第 9 欄位記錄了品牌主張著作權所需的編輯決策軌跡。</p>
+            <p><strong>支持欄位：</strong>#9（版本歷史記錄——捕捉人類創作證據）</p>
+
+            <h3>機制四：發行授權</h3>
+            <p><strong>E&O 保險 + 平台合規</strong></p>
+            <p>Chain of Title 等同於 AI 內容的版權鏈文件，可滿足 E&O 保險承保要求及各平台揭露政策（YouTube、TikTok、串流平台）。</p>
+            <p><strong>支持欄位：</strong>全部 9 個欄位（完整文件）</p>
+
+            <div class="callout">
+                <strong>可量化的法律價值：</strong>
+                <ul>
+                    <li><strong>損害賠償降低：</strong>73%（從 $750 降至 $200 的最低法定賠償）</li>
+                    <li><strong>避免的法規罰款：</strong>Colorado $20,000、紐約每次 $1,000–$5,000</li>
+                    <li><strong>發行授權：</strong>E&O 保險文件、平台合規</li>
+                    <li><strong>著作權保護：</strong>符合美國著作權局人類創作要求</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <div class="cta-section">
+            <h3>準備好讓你的內容通過認證了嗎？</h3>
+            <p>每支影片 $499 美元。90 分鐘專業審核。5 個工作天交件。</p>
+            <a href="/auth/signup" class="btn">提交申請認證 →</a>
+        </div>
+    </article>
+
+    <!-- Footer -->
+    <footer>
+        <p><strong>持續更新文件——每季檢視</strong></p>
+        <p>AI 法律環境變化迅速。SI8 的 Rights Playbook 每季更新一次（5月、8月、11月、2月），並隨重大判決、平台政策變更或立法進展而調整。</p>
+        <p style="margin-top: 2rem;">版本歷史：v0.1（2025 年 11 月）→ v0.2（2026 年 2 月）</p>
+        <p style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--color-border);">&copy; 2026 SuperImmersive 8. 版權所有。</p>
+    </footer>
+</body>
+</html>
