@@ -70,17 +70,22 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 
 ### Revenue Model (Year 1 Target: $80-120K)
 
+**Two-tier pricing (updated March 2026):**
+- **Creator Record** — $29 early access (~~$49~~) · Self-attested, automated, PDF stamp "SELF-ATTESTED — NOT FOR COMMERCIAL USE" · Funnel mechanism, not primary revenue
+- **SI8 Certified** — $499 · 90-minute human review, PDF stamp "CLEARED FOR COMMERCIAL USE" · Primary revenue driver
+
 **Three-gear revenue streams:**
 
 | Stream | Target | How |
 |--------|--------|-----|
-| **CaaS (Gear A)** | $30-40K | $499/video × 60-70 verifications |
+| **CaaS (Gear A)** | $30-40K | $499/video × 60-70 SI8 Certified verifications |
 | **Showcase (Gear B)** | $6-10K | 20% commission on 10 licensing deals ($30-50K GMV) |
 | **Producer (Gear C)** | $20-40K | MyVideo $10K + 2-3 additional whale deals |
 | **Layer 1 Production (optional)** | $20-30K | If needed to supplement revenue |
 
 **Unit economics:**
-- CaaS verification: $499 revenue, ~$17 cost (Stripe + platform overhead) = 97% gross margin
+- Creator Record: $29 revenue, ~$1.50 cost (Stripe) = 95% gross margin (funnel, not revenue focus)
+- SI8 Certified: $499 revenue, ~$17 cost (Stripe + platform overhead) = 97% gross margin
 - Showcase licensing: 20% commission (creator keeps 80%), ~85% margin after platform fees
 - Producer curation: 50% to filmmaker, 50% to SI8 (after absorbing verification cost internally)
 
@@ -231,51 +236,62 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 
 **Tech Stack:** Vercel (serverless functions) + Airtable (database) + Resend (email) — $0/mo operational cost
 
-### 3f. Creator Portal MVP (Completed Mar 19, 2026)
+### 3f. Creator Portal MVP (Completed Mar 19, 2026 — Updated Mar 21, 2026)
 - [x] Database schema design (Supabase PostgreSQL) — ✓ 7 tables with RLS policies
 - [x] Authentication system (signup, login, email verification) — ✓ Supabase Auth + Resend SMTP
 - [x] Multi-section submission form (10 sections, validated) — ✓ React Hook Form + Zod validation
 - [x] Stripe Test Mode integration ($499 Rights Verified fee) — ✓ Test product, webhooks, test cards
 - [x] Payment webhook processing — ✓ Updates submission status + sends confirmation email
 - [x] Creator dashboard — ✓ Shows submissions, payment status, review status
+- [x] Creator submission detail page — ✓ `/dashboard/submissions/[id]` — status banner, Chain of Title PDF download (approved only), catalog listing status, tool disclosure, rights confirmations
 - [x] API routes with service_role (bypass RLS) — ✓ `/api/submissions/create`, `/api/submissions`
 - [x] Database migrations (5 migrations) — ✓ Triggers, RLS policies, service_role permissions
 - [x] Environment variables configuration — ✓ Supabase, Stripe, Resend, site URLs
 - [x] End-to-end testing (3 test accounts) — ✓ Full flow verified in production
+- [x] SI8 design system — ✓ Warm off-white palette (#FAFAF7 bg, #1a1918 text, #C8900A amber), Space Grotesk + Inter fonts, applied to all logged-in pages via `globals.css`
+- [x] Admin shared layout — ✓ `app/admin/layout.tsx` with nav, Admin badge, Review Queue + Catalog links
 
-**Status:** Fully operational Creator Portal deployed at si8-creator-portal.vercel.app. Filmmakers can signup, submit work, pay $499 via Stripe, and track submissions in dashboard. Ready for real users.
+**Status:** Fully operational Creator Portal. Creators can signup, submit, pay, track submissions, and download Chain of Title PDFs. Admins can review, approve/reject, and generate documentation.
 
 **Tech Stack:** Next.js 14 (App Router) + Supabase (PostgreSQL + Auth) + Stripe (payments) + Resend (emails) + Vercel (hosting)
 
-**Test Results:** 3 successful end-to-end flows completed:
-- jd@aipenguins.com → "Test1" → $499 paid → Dashboard shows PENDING
-- jd@standingencore.com → "STEC_TEST" → $499 paid → Dashboard shows PENDING
-- jdchangmedia@gmail.com → "JDCTEST" → $499 paid → Dashboard shows PENDING
+**Remaining:**
+- [ ] Switch Stripe to live mode ($29 Creator Record + $499 SI8 Certified real keys)
+- [ ] Clean test data from production DB (STEC_TEST, STEC_TEST3, TESTLINK)
+- [ ] Fix "Unknown tool" display when tool name isn't recognized
+- [ ] Run DB migration: `20260323000000_add_tier_and_submission_mode.sql` (adds `tier` and `submission_mode` columns)
+- [ ] Build Creator Record auto-generated PDF (self-attested stamp) — triggered on payment webhook for tier='creator_record'
 
-**Production Ready:** ✅ Can switch to Stripe Live Mode and accept real filmmaker submissions immediately.
+**Two-Tier Platform (Added Mar 23, 2026):**
+- [x] Tier selection in submit form (Section 1): Creator Record $29 vs SI8 Certified $499
+- [x] Submission mode: Individual Creator vs Agency/Production House (agency hides Sections 8/9/catalog opt-in)
+- [x] Evidence Custodian Declaration checkbox (Section 4) — required for all tiers
+- [x] Indemnification warranty checkbox (Section 11) — required for all tiers
+- [x] Receipts optional for Creator Record, required for SI8 Certified (AddToolModal.tsx updated)
+- [x] Checkout API accepts `tier` param — routes to $29 or $499 Stripe product
+- [x] Webhook auto-approves Creator Record on payment (status='approved')
+- [x] DB migration file created for tier + submission_mode columns
 
-### 3g. Public Catalog with Video Player (Completed Mar 19, 2026)
+### 3g. Public Catalog with Video Player (Completed Mar 19, 2026 — Updated Mar 21, 2026)
 - [x] Submit form Section 10: Video & Catalog — ✓ video_url, thumbnail_url, public_description, catalog opt-in checkbox
 - [x] Catalog opt-in system — ✓ Creates opt_ins record when checkbox enabled
-- [x] Public catalog page (/catalog) — ✓ Grid layout, responsive design
+- [x] Public catalog page (/catalog) — ✓ Dark design matching marketing site, grid layout, responsive
 - [x] Video modal player — ✓ YouTube/Vimeo iframe with autoplay
-- [x] API route (/api/catalog) — ✓ Fetches approved + visible entries
+- [x] API route (/api/catalog) — ✓ Fetches approved + visible entries, force-dynamic
 - [x] Helper functions — ✓ getEmbedUrl(), getThumbnailUrl() for YouTube/Vimeo
 - [x] Catalog metadata display — ✓ Title, filmmaker, genre, catalog_id, description
+- [x] Catalog filters — ✓ Search by title/filmmaker/description, genre filter
 - [x] End-to-end testing — ✓ Full catalog flow verified in production
+- [x] Catalog link in dashboard nav — ✓ Added to dashboard layout
 
-**Status:** Public catalog operational at si8-creator-portal.vercel.app/catalog. Filmmakers opt in during submission (Section 10), admin approves entries (manual SQL for now), videos appear in public grid with click-to-play modal.
+**Status:** Public catalog at si8-creator-portal.vercel.app/catalog — dark design matching marketing site. Marketing site /catalog redirects here via vercel.json.
 
-**Tech Stack:** Next.js client component + Supabase inner joins + YouTube/Vimeo iframe embeds + Tailwind modal overlay
-
-**Test Results:** 1 catalog entry verified:
-- jdchangmedia@gmail.com → "TESTLINK" → Catalog ID: SI8-2026-0001 → Video plays in modal ✅
-
-**Next Steps:**
-- [ ] Add "Catalog" link to navigation
-- [ ] Admin panel: approve entries, set visible=true, generate catalog_id
-- [ ] "Request License" functionality
-- [ ] Catalog filters (genre, search)
+### 3h. Marketing Site Polish (Mar 21, 2026)
+- [x] vercel.json redirects — ✓ `/catalog`, `/auth/signup`, `/auth/login`, `/auth/admin/login`, `/rights-verified`, `/rights-verified/chain-of-title`, `/rights-verified/playbook` all redirect correctly
+- [x] Nav dropdown fix — ✓ Eliminated 1rem gap that caused hover menu to close before clicking
+- [x] Rights Verified content width — ✓ Narrowed from 1200px → 860px (chain-of-title, playbook), 1400px → 1000px (overview)
+- [x] Sample document CTA — ✓ Added to newsite homepage — Neon Dreams Chain of Title download
+- [x] Contact/Book a Call section — ✓ Added to newsite homepage — Calendly + email CTAs
 
 ### 4. Legal Ops (Rights playbook → actual contracts)
 - [ ] Standard Production MSA + SOW
@@ -408,7 +424,8 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 | Business Plan v1 (archived) | `01_Business/plans/BUSINESS_PLAN_v1.md` | Supply-side first — reference only |
 | Version History | `01_Business/plans/VERSION_HISTORY.md` | Plan version log |
 | Build in Public Log | `02_Marketing/content/BUILD_IN_PUBLIC_LOG.md` | Insights for LinkedIn content |
-| **Pricing Strategy v1.0** | `01_Business/pricing/PRICING-STRATEGY-v1.0.md` | v3 pricing (superseded by v4 CaaS pricing) |
+| **Pricing Strategy v2.0** (current) | `01_Business/pricing/PRICING-STRATEGY-v2.0.md` | Two-tier CaaS pricing: Creator Record $29 + SI8 Certified $499 (March 2026) |
+| Pricing Strategy v1.0 (archived) | `01_Business/pricing/PRICING-STRATEGY-v1.0.md` | v3 licensing tiers (Rights Agency model — archived) |
 | Rights Playbook v0.1 | `06_Operations/legal/rights-playbook/versions/v0.1.md` | Rights vetting — sales asset for buyers |
 | Rights Playbook Decisions | `06_Operations/legal/rights-playbook/DECISIONS.md` | Playbook version log |
 | Filmmaker Agreement (WIP) | `06_Operations/legal/filmmaker-agreement/WORKING.md` | Terms for filmmaker representation |

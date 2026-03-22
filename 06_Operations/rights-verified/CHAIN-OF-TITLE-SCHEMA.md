@@ -1,8 +1,9 @@
 # Chain of Title Schema
 
-**Version:** v0.1 (February 2026)
+**Version:** v0.2 (March 2026)
 **Audience:** SI8 internal reviewer; referenced in buyer agreements
 **Purpose:** Structured output template for every catalog entry. This is the product SI8 sells to buyers.
+**Changes in v0.2:** Added Training Data Disclosure column to Field 1; added Prompt & Iteration Records note to Field 2; added Regulatory Notes to Field 7 (UK/EU). All changes reflect distributor/E&O insurer requirements per March 2026 practitioner guidance.
 
 ---
 
@@ -65,11 +66,16 @@ Copy this template for each new catalog entry. Fill all fields. Mark "N/A" only 
 
 **Format:** Structured table
 
-| Tool | Version/Model | Plan Type | Commercial License | Production Period | Receipt on File |
-|------|--------------|-----------|-------------------|-------------------|-----------------|
-| [Tool name] | [Version] | Free/Paid/Enterprise | Confirmed/Unconfirmed | [Month/Year – Month/Year] | Yes/No |
+| Tool | Version/Model | Plan Type | Commercial License | Production Period | Receipt on File | Training Data Disclosure |
+|------|--------------|-----------|-------------------|-------------------|-----------------|--------------------------|
+| [Tool name] | [Version] | Free/Paid/Enterprise | Confirmed/Unconfirmed | [Month/Year – Month/Year] | Yes/No | Confirmed / Unconfirmed / N/A |
 
-**Reviewer note:** Every tool must show "Confirmed" commercial license and "Yes" receipt to pass. If any shows otherwise, submission did not pass.
+**Training Data Disclosure values:**
+- **Confirmed** — Vendor has provided written disclosure of training data sources (e.g., Adobe: trained on Adobe Stock + licensed content only)
+- **Unconfirmed** — Vendor has not provided written training data disclosure; training data provenance unknown
+- **N/A** — Tool does not generate content from training data (e.g., post-processing tools)
+
+**Reviewer note:** Every tool must show "Confirmed" commercial license and "Yes" receipt to pass. If any shows otherwise, submission did not pass. Training Data Disclosure does not affect pass/fail but is noted in the Chain of Title because distributors and E&O underwriters now specifically request this information (per entertainment attorney practice guidance, March 2026). "Unconfirmed" tools carry higher distributor scrutiny.
 
 ---
 
@@ -92,6 +98,13 @@ ElevenLabs: Multilingual v2 (used November 2025)
 ```
 
 **Note:** Model version matters because terms, training data, litigation exposure differ between versions. Document what was used at production time, not current offering.
+
+**Prompt retention note:** SI8 does not collect raw prompts (trade secrets). However, the Chain of Title should note whether the filmmaker has confirmed they retain prompt logs and iteration records internally. This satisfies the "paper trail" requirement that distributors and E&O underwriters now request (per entertainment attorney practice guidance, March 2026) without requiring disclosure of proprietary creative process.
+
+Add to Field 2 when applicable:
+```
+Prompt & Iteration Records: Retained by filmmaker (confirmed) / Not confirmed
+```
 
 ---
 
@@ -205,7 +218,13 @@ Restrictions:
 - [Territory]: [Reason]
 
 Existing agreements affecting territory: [List or "None"]
+
+Regulatory notes (if UK/EU buyer):
+- UK: Parliament (March 2026) recommending mandatory AI content labeling and provenance standards — this Chain of Title document satisfies the intent of proposed transparency requirements
+- EU: EU AI Act Article 50 (effective August 2026) requires AI-generated video/audio to be clearly identifiable as artificial; machine-readable watermarks or metadata recommended
 ```
+
+**Regulatory note (March 2026):** For UK and EU-bound licensing, this Chain of Title document is the early-market version of the provenance and transparency standards that regulators are moving to mandate. Include the regulatory note field for any submission with UK/EU territory licensing.
 
 ---
 
@@ -325,5 +344,5 @@ Each field = database column in Year 3 platform. Schema designed now to minimize
 
 ---
 
-*Version: v0.1 — February 2026*
-*This schema will evolve. Version to v0.2 after first 3 real catalog entries.*
+*Version: v0.2 — March 2026*
+*This schema will evolve. Version to v0.3 after first 3 real catalog entries.*

@@ -30,8 +30,9 @@ Novel gray areas that don't fit existing criteria → log in EDGE-CASES.md.
 **Flag (note in Chain of Title):**
 - Caution-tier tool (e.g., Kling) as primary/significant → note in Chain of Title; affects exclusivity pricing
 - Tool version cannot be confirmed → affects traceability
+- Vendor has NOT provided written training data disclosure → note as "Unconfirmed training data source" in Chain of Title Field 1. Does not fail submission but reduces defensibility for distributor/E&O review.
 
-**Reviewer note:** Tool tier list in Rights Playbook updated as tool ToS change, litigation shifts, new tools emerge. Always check current list.
+**Reviewer note:** Tool tier list in Rights Playbook updated as tool ToS change, litigation shifts, new tools emerge. Always check current list. Distributors and E&O underwriters are now specifically asking whether training data sources are documented (per entertainment attorney practice guidance, March 2026). Vendor written disclosure = stronger Chain of Title.
 
 ---
 
@@ -94,6 +95,8 @@ Novel gray areas that don't fit existing criteria → log in EDGE-CASES.md.
 Highest legal exposure and most direct reputational risk.
 
 **Reviewer note:** Conservative standard on consent quality. If consent scope is ambiguous about AI derivatives or third-party licensing → Conditional, not Pass. Require explicit language.
+
+**Legal context (March 2026):** In most jurisdictions (US, UK, Australia), there is currently no copyright or personality right in a person's face. The only available legal hooks are defamation or misleading conduct under consumer law — both of which are narrow and difficult to enforce. The UK Parliament (March 2026) has recommended introducing explicit personality rights and digital replica protections, but this is not yet law. This is WHY SI8's hard fail on uncontented likeness is protective, not arbitrary — there is no legal framework that would defend this content if challenged. When rejecting on likeness grounds, the rejection rationale should reflect this: "No current legal framework provides defensible protection for this content in commercial use."
 
 ---
 
@@ -225,5 +228,5 @@ When in doubt, document restrictions rather than failing. Restrictions are usefu
 
 ---
 
-*Version: v0.1 — February 2026*
-*These criteria will evolve as edge cases accumulate. Version to v0.2 after first 3 real submissions.*
+*Version: v0.2 — March 2026*
+*Changes in v0.2: Added vendor training data disclosure flag to Category 1; added legal context note to Category 3 (likeness) reflecting UK Parliament report and practitioner guidance. These criteria will evolve as edge cases accumulate. Version to v0.3 after first 3 real submissions.*

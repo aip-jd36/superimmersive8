@@ -8,6 +8,172 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/newsite/styles.css">
+    <style>
+        .pricing-tiers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+        @media (max-width: 768px) {
+            .pricing-tiers-grid { grid-template-columns: 1fr; }
+        }
+        .tier-box {
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            padding: 2.5rem 2rem;
+            background: rgba(255,255,255,0.03);
+            display: flex;
+            flex-direction: column;
+        }
+        .tier-box.tier-featured {
+            border-color: var(--color-accent);
+            background: rgba(129,140,248,0.06);
+            position: relative;
+        }
+        .tier-badge {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--color-accent);
+            color: #0d0d0d;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            padding: 4px 16px;
+            border-radius: 20px;
+            white-space: nowrap;
+            text-transform: uppercase;
+        }
+        .tier-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            margin-bottom: 0.75rem;
+        }
+        .tier-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .tier-desc {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+        .tier-price-block {
+            margin-bottom: 1.5rem;
+        }
+        .tier-price-original {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.35);
+            text-decoration: line-through;
+            margin-bottom: 2px;
+        }
+        .tier-price-main {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+        .tier-price-currency {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.85);
+        }
+        .tier-price-amount {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .tier-price-period {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.5);
+        }
+        .tier-early-access {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #fbbf24;
+            background: rgba(251,191,36,0.12);
+            border: 1px solid rgba(251,191,36,0.3);
+            border-radius: 4px;
+            padding: 2px 8px;
+            margin-top: 6px;
+        }
+        .tier-stamp {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+        .tier-stamp.stamp-unverified {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.5);
+        }
+        .tier-stamp.stamp-certified {
+            background: rgba(129,140,248,0.12);
+            border: 1px solid rgba(129,140,248,0.4);
+            color: var(--color-accent);
+        }
+        .tier-checklist {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 2rem 0;
+            flex-grow: 1;
+        }
+        .tier-checklist li {
+            font-size: 0.9rem;
+            padding: 0.4rem 0;
+            color: rgba(255,255,255,0.8);
+            display: flex;
+            gap: 0.6rem;
+            align-items: flex-start;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .tier-checklist li:last-child { border-bottom: none; }
+        .tier-checklist li .check { color: var(--color-accent); flex-shrink: 0; }
+        .tier-checklist li .dim { color: rgba(255,255,255,0.4); }
+        .tier-for {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 1.25rem;
+            font-style: italic;
+        }
+        .tier-cta {
+            margin-top: auto;
+        }
+        .tier-divider {
+            text-align: center;
+            padding: 3rem 0 1rem;
+            color: rgba(255,255,255,0.3);
+            font-size: 0.85rem;
+            font-style: italic;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+        .upgrade-note {
+            text-align: center;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1.25rem 2rem;
+            max-width: 680px;
+            margin: 2rem auto 0;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.65);
+            line-height: 1.6;
+        }
+        .upgrade-note strong { color: rgba(255,255,255,0.9); }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
@@ -57,61 +223,240 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <h1>Pricing</h1>
-            <p class="hero-subtitle">Simple, transparent. No hidden fees.</p>
+            <h1>Two Levels of Trust</h1>
+            <p class="hero-subtitle">Document your work, or get it certified for commercial use. Simple, transparent pricing.</p>
         </div>
     </section>
 
-    <!-- Pricing Card -->
+    <!-- Pricing Tiers -->
     <section class="pricing-section">
-        <div class="pricing-card-large">
-            <h2>Chain of Title Verification</h2>
-            <div class="price">
-                <span class="currency">$</span>
-                <span class="amount">499</span>
-                <span class="period">per video</span>
+        <div class="pricing-tiers-grid">
+
+            <!-- Tier 1: Self-Declared -->
+            <div class="tier-box">
+                <div class="tier-label">Self-Declared</div>
+                <div class="tier-name">Creator Record</div>
+                <div class="tier-desc">Document your AI video with a structured record. Automated. No manual review.</div>
+
+                <div class="tier-price-block">
+                    <div class="tier-price-original">$49</div>
+                    <div class="tier-price-main">
+                        <span class="tier-price-currency">$</span>
+                        <span class="tier-price-amount">29</span>
+                        <span class="tier-price-period">/ video</span>
+                    </div>
+                    <span class="tier-early-access">Early Access Price</span>
+                </div>
+
+                <div class="tier-stamp stamp-unverified">SELF-ATTESTED — NOT FOR COMMERCIAL USE</div>
+
+                <p class="tier-for">For: indie creators, social media, YouTube, portfolio work, festival submissions</p>
+
+                <ul class="tier-checklist">
+                    <li><span class="check">✓</span> Structured Chain of Title record (PDF)</li>
+                    <li><span class="check">✓</span> Tool disclosure log (self-declared)</li>
+                    <li><span class="check">✓</span> IP & likeness self-attestation</li>
+                    <li><span class="check">✓</span> Human authorship declaration</li>
+                    <li><span class="check">✓</span> Instant automated delivery</li>
+                    <li><span class="check">✓</span> Stored in SI8 system for future upgrade</li>
+                    <li><span class="dim">✗</span> <span class="dim">No human review</span></li>
+                    <li><span class="dim">✗</span> <span class="dim">Not cleared for commercial/brand use</span></li>
+                </ul>
+
+                <div class="tier-cta">
+                    <a href="/auth/signup" class="btn btn-secondary" style="width: 100%; justify-content: center; text-align: center;">Get Your Record →</a>
+                </div>
             </div>
 
-            <h3>What's Included:</h3>
-            <ul class="checklist">
-                <li>90-minute expert review (7 categories checked)</li>
-                <li>9-field Chain of Title documentation (PDF)</li>
-                <li>Rights Verified badge and catalog ID (SI8-YYYY-####)</li>
-                <li>Commercial use authorization verification</li>
-                <li>5-business-day turnaround (most complete in 2-3 days)</li>
-                <li>Email support throughout review process</li>
-                <li>Free resubmission if corrections needed</li>
-                <li>Optional Showcase catalog opt-in (earn 80% of licensing fees)</li>
-            </ul>
+            <!-- Tier 2: SI8 Certified -->
+            <div class="tier-box tier-featured">
+                <div class="tier-badge">Most Popular</div>
+                <div class="tier-label">SI8 Certified</div>
+                <div class="tier-name">Commercial Clearance</div>
+                <div class="tier-desc">Full human review to clear brand legal approval, unlock invoices, and satisfy E&O insurer requirements.</div>
 
-            <a href="/auth/signup" class="btn btn-primary btn-large" style="width: 100%; justify-content: center; margin-top: 1rem;">Get Verified Now →</a>
+                <div class="tier-price-block">
+                    <div class="tier-price-main">
+                        <span class="tier-price-currency">$</span>
+                        <span class="tier-price-amount">499</span>
+                        <span class="tier-price-period">/ video</span>
+                    </div>
+                </div>
+
+                <div class="tier-stamp stamp-certified">CLEARED FOR COMMERCIAL USE</div>
+
+                <p class="tier-for">For: ad agencies, production houses, brands, short films for distribution, streaming submissions</p>
+
+                <ul class="tier-checklist">
+                    <li><span class="check">✓</span> 90-minute expert human review</li>
+                    <li><span class="check">✓</span> All 7 vetting categories checked</li>
+                    <li><span class="check">✓</span> Receipts & commercial licenses verified</li>
+                    <li><span class="check">✓</span> Full 9-field Chain of Title documentation (PDF)</li>
+                    <li><span class="check">✓</span> Rights Verified badge + Catalog ID (SI8-YYYY-####)</li>
+                    <li><span class="check">✓</span> E&O insurer-ready documentation</li>
+                    <li><span class="check">✓</span> Risk flags + remediation guidance if needed</li>
+                    <li><span class="check">✓</span> 3–5 business day turnaround</li>
+                    <li><span class="check">✓</span> Free resubmission if corrections needed</li>
+                    <li><span class="check">✓</span> Optional Showcase catalog listing (earn 80% of licensing fees)</li>
+                </ul>
+
+                <div class="tier-cta">
+                    <a href="/auth/signup" class="btn btn-primary" style="width: 100%; justify-content: center; text-align: center;">Get Certified →</a>
+                </div>
+            </div>
+
         </div>
+
+        <div class="upgrade-note">
+            <strong>Start with Creator Record, upgrade anytime.</strong> If you later land a commercial opportunity, log in and upgrade your existing submission to SI8 Certified — no need to resubmit from scratch.
+        </div>
+    </section>
+
+    <!-- Who Each Tier Is For -->
+    <section class="comparison-section">
+        <h2>Which Tier Do I Need?</h2>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Use Case</th>
+                    <th>Creator Record ($29)</th>
+                    <th class="highlight">SI8 Certified ($499)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>YouTube / TikTok / Instagram content</td>
+                    <td>✓</td>
+                    <td class="highlight">Optional upgrade</td>
+                </tr>
+                <tr>
+                    <td>Film festival submission</td>
+                    <td>✓</td>
+                    <td class="highlight">Optional upgrade</td>
+                </tr>
+                <tr>
+                    <td>Portfolio or personal archive</td>
+                    <td>✓</td>
+                    <td class="highlight">Optional upgrade</td>
+                </tr>
+                <tr>
+                    <td>Client delivery (small budget)</td>
+                    <td>✓ (light signal)</td>
+                    <td class="highlight">Recommended</td>
+                </tr>
+                <tr>
+                    <td>Brand commercial / paid advertising</td>
+                    <td>✗ Not accepted</td>
+                    <td class="highlight">✓ Required</td>
+                </tr>
+                <tr>
+                    <td>Agency deliverable (passing brand legal)</td>
+                    <td>✗ Not accepted</td>
+                    <td class="highlight">✓ Required</td>
+                </tr>
+                <tr>
+                    <td>Short film for streaming / distribution (e.g., MyVideo)</td>
+                    <td>✗ Not accepted</td>
+                    <td class="highlight">✓ Required</td>
+                </tr>
+                <tr>
+                    <td>E&O insurance documentation</td>
+                    <td>✗ Not accepted</td>
+                    <td class="highlight">✓ Required</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p class="comparison-note">"Streamers, distributors, and E&O underwriters expect to see which tools were used, where training data came from, and a clearance memo on risk. SI8 Certified provides exactly that documentation." — Entertainment attorney guidance, March 2026</p>
+    </section>
+
+    <!-- Compare to Alternatives -->
+    <section class="comparison-section">
+        <h2>SI8 Certified vs. Alternatives</h2>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Adobe Stock</th>
+                    <th>DIY Approach</th>
+                    <th class="highlight">SI8 Certified ($499)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Tools Verified</strong></td>
+                    <td>Firefly only</td>
+                    <td>None (self-documented)</td>
+                    <td class="highlight">Sora, Runway, Kling, Pika, Firefly</td>
+                </tr>
+                <tr>
+                    <td><strong>Human Review</strong></td>
+                    <td>Automated only</td>
+                    <td>None</td>
+                    <td class="highlight">90-minute review across 7 categories</td>
+                </tr>
+                <tr>
+                    <td><strong>Chain of Title Documentation</strong></td>
+                    <td>Limited</td>
+                    <td>None</td>
+                    <td class="highlight">9-field certified package</td>
+                </tr>
+                <tr>
+                    <td><strong>E&O Insurance Readiness</strong></td>
+                    <td>Adobe-scoped only</td>
+                    <td>None</td>
+                    <td class="highlight">Documentation satisfies insurer requirements</td>
+                </tr>
+                <tr>
+                    <td><strong>Training Data Disclosure</strong></td>
+                    <td>Adobe-only</td>
+                    <td>None</td>
+                    <td class="highlight">Vendor disclosure documented per tool</td>
+                </tr>
+                <tr>
+                    <td><strong>Turnaround</strong></td>
+                    <td>Instant (automated)</td>
+                    <td>Weeks (if legal reviews)</td>
+                    <td class="highlight">3–5 business days</td>
+                </tr>
+                <tr>
+                    <td><strong>Cost</strong></td>
+                    <td>Free (Firefly only)</td>
+                    <td>Free (high legal risk)</td>
+                    <td class="highlight">$499 per video</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p class="comparison-note">"Adobe verifies Firefly only. We verify the tools your legal team is blocking."</p>
     </section>
 
     <!-- Optional: Catalog Licensing -->
     <section class="catalog-licensing-section">
         <h2>Optional: Earn Passive Income from Licensing</h2>
-        <p>After verification, opt-in to our Showcase marketplace. When brands license your work, you keep 80% of the fee.</p>
+        <p>After SI8 Certified verification, opt-in to our Showcase marketplace. When brands license your work, you keep 80% of the fee.</p>
 
         <div class="licensing-tiers">
             <div class="tier-card">
                 <h3>Editorial</h3>
-                <p class="tier-price">$500 - $1,500</p>
-                <p class="tier-earnings">You earn: $400 - $1,200</p>
+                <p class="tier-price">$500 – $1,500</p>
+                <p class="tier-earnings">You earn: $400 – $1,200</p>
                 <p class="tier-description">News, documentaries, educational content</p>
             </div>
 
             <div class="tier-card">
                 <h3>Non-Exclusive</h3>
-                <p class="tier-price">$2,000 - $5,000</p>
-                <p class="tier-earnings">You earn: $1,600 - $4,000</p>
+                <p class="tier-price">$2,000 – $5,000</p>
+                <p class="tier-earnings">You earn: $1,600 – $4,000</p>
                 <p class="tier-description">Commercial use, can be licensed to multiple buyers</p>
             </div>
 
             <div class="tier-card">
                 <h3>Category-Exclusive</h3>
-                <p class="tier-price">$5,000 - $10,000</p>
-                <p class="tier-earnings">You earn: $4,000 - $8,000</p>
+                <p class="tier-price">$5,000 – $10,000</p>
+                <p class="tier-earnings">You earn: $4,000 – $8,000</p>
                 <p class="tier-description">Exclusive within one industry category (e.g., automotive)</p>
             </div>
 
@@ -123,73 +468,17 @@
             </div>
         </div>
 
-        <p class="note"><strong>No upfront fees.</strong> You only pay the 20% commission when deals close. Verification fee ($499) is separate and paid upfront.</p>
+        <p class="note"><strong>No upfront fees.</strong> You only pay the 20% commission when deals close. Verification fee ($499) is separate and paid upfront. Creator Record ($29) does not include catalog listing.</p>
 
         <div style="text-align: center; margin-top: 3rem;">
             <a href="/catalog" class="btn btn-secondary">Browse Catalog →</a>
         </div>
     </section>
 
-    <!-- Compare to Alternatives -->
-    <section class="comparison-section">
-        <h2>Compare to Alternatives</h2>
-
-        <table class="comparison-table">
-            <thead>
-                <tr>
-                    <th>Feature</th>
-                    <th>Adobe Stock</th>
-                    <th>DIY Approach</th>
-                    <th class="highlight">SI8 Rights Verified</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>Tools Verified</strong></td>
-                    <td>Firefly only</td>
-                    <td>None (self-documented)</td>
-                    <td class="highlight">Sora, Runway, Kling, Pika, Firefly</td>
-                </tr>
-                <tr>
-                    <td><strong>Expert Review</strong></td>
-                    <td>Automated only</td>
-                    <td>None</td>
-                    <td class="highlight">90-minute human review (7 categories)</td>
-                </tr>
-                <tr>
-                    <td><strong>Chain of Title Documentation</strong></td>
-                    <td>Limited</td>
-                    <td>None</td>
-                    <td class="highlight">9-field comprehensive package</td>
-                </tr>
-                <tr>
-                    <td><strong>Legal Risk Reduction</strong></td>
-                    <td>Adobe-only liability</td>
-                    <td>None (brand assumes 100% risk)</td>
-                    <td class="highlight">4 legal mechanisms (73% damage mitigation)</td>
-                </tr>
-                <tr>
-                    <td><strong>Turnaround Time</strong></td>
-                    <td>Instant (automated)</td>
-                    <td>Weeks (if legal team reviews)</td>
-                    <td class="highlight">2-5 business days</td>
-                </tr>
-                <tr>
-                    <td><strong>Cost</strong></td>
-                    <td>Free (limited to Firefly)</td>
-                    <td>Free (but high legal risk)</td>
-                    <td class="highlight">$499 per video</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <p class="comparison-note">"Adobe verifies Firefly only. We verify the tools your legal team is blocking."</p>
-    </section>
-
-    <!-- Volume Discounts (Year 2) -->
+    <!-- Volume Discounts -->
     <section class="volume-section">
-        <h2>Volume Discounts</h2>
-        <p>Planning to verify multiple videos? Contact us for volume pricing:</p>
+        <h2>Volume Pricing</h2>
+        <p>Planning to verify multiple videos? Contact us for volume pricing on SI8 Certified:</p>
         <ul>
             <li>5+ videos: $399 each (save 20%)</li>
             <li>10+ videos: $349 each (save 30%)</li>
@@ -198,7 +487,7 @@
         <a href="mailto:contact@superimmersive8.com" class="btn btn-secondary">Contact Us for Volume Pricing</a>
     </section>
 
-    <!-- FAQ (Pricing-specific) -->
+    <!-- FAQ -->
     <section class="faq-section">
         <div class="section-header">
             <p class="section-pretitle">FAQ</p>
@@ -206,6 +495,43 @@
         </div>
 
         <div class="faq-list">
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    What's the difference between Creator Record and SI8 Certified?
+                </div>
+                <div class="faq-answer">
+                    Creator Record ($29) is fully automated — you fill out the form, the system generates a PDF stamped "SELF-ATTESTED — NOT FOR COMMERCIAL USE." It's a structured record for your own files, portfolio, or small-client work. SI8 Certified ($499) involves a 90-minute human review of your submission, verifying receipts, screening for IP and likeness issues, and producing a certified "CLEARED FOR COMMERCIAL USE" document that satisfies brand legal teams and E&O insurance requirements.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    Can a brand or agency use the Creator Record ($29) document?
+                </div>
+                <div class="faq-answer">
+                    No. The Creator Record is explicitly stamped "NOT FOR COMMERCIAL USE" and is not accepted by brand legal teams or E&O underwriters as a verified compliance document. For any commercial application — ads, sponsored content, streaming distribution, licensing — SI8 Certified is required.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    Where do short films for streaming or distribution go?
+                </div>
+                <div class="faq-answer">
+                    SI8 Certified. A streaming platform licensing your short film has the same legal exposure as a brand using it in a commercial. Distribution liability is determined by who is buying, not the format of the content.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    Can I upgrade from Creator Record to SI8 Certified later?
+                </div>
+                <div class="faq-answer">
+                    Yes. Log in, find your submission, and request an upgrade. You'll pay the $499 fee and your submission enters the human review queue. No need to fill out the form again.
+                </div>
+            </div>
+
             <div class="faq-item">
                 <div class="faq-question">
                     What payment methods do you accept?
@@ -217,46 +543,28 @@
 
             <div class="faq-item">
                 <div class="faq-question">
+                    How long does SI8 Certified verification take?
+                </div>
+                <div class="faq-answer">
+                    3–5 business days. Most reviews complete in 2–3 days. The actual review takes ~90 minutes; we buffer for queue management.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
                     Do you offer refunds?
                 </div>
                 <div class="faq-answer">
-                    No refunds, but if your video is rejected, we provide a clear explanation and offer free resubmission after you make corrections. Most rejections occur due to missing documentation (e.g., missing commercial plan receipts) or prohibited tool usage.
+                    No refunds. If your SI8 Certified submission is rejected, we provide a detailed explanation and offer free resubmission after corrections. Most rejections are for missing receipts or prohibited tool usage — both correctable.
                 </div>
             </div>
 
             <div class="faq-item">
                 <div class="faq-question">
-                    How long does verification take?
+                    What tools are not eligible for verification?
                 </div>
                 <div class="faq-answer">
-                    Up to 5 business days. Most reviews are completed within 2-3 days. The actual review takes ~90 minutes, but we allow buffer time for queue management.
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">
-                    Can I verify multiple videos at once?
-                </div>
-                <div class="faq-answer">
-                    Yes. Each video is $499. Submit each video separately through our platform. Volume discounts (5+ videos) will be available in Year 2.
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">
-                    What if my video is rejected?
-                </div>
-                <div class="faq-answer">
-                    We provide a detailed explanation of why your submission didn't meet our criteria. In many cases, you can correct the issue (e.g., provide missing receipts, update authorship declaration) and resubmit at no additional cost.
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">
-                    What tools do you NOT verify?
-                </div>
-                <div class="faq-answer">
-                    We do not verify content created with prohibited/high-risk tools including: Hailuo (training data concerns), Veo (access restrictions), Midjourney (image-only), or tools used on free/non-commercial plans. See our full tool tier list in the <a href="/newsite/rights-verified/playbook">Rights Playbook</a>.
+                    We do not verify content created with prohibited tools including: Hailuo (training data concerns), Veo (access restrictions), Midjourney (image-only, no video), or any tool used on a free or non-commercial plan. See our <a href="/newsite/rights-verified/playbook">Rights Playbook</a> for the full tool tier list.
                 </div>
             </div>
 
@@ -265,18 +573,19 @@
                     Do I have to opt into the Showcase catalog?
                 </div>
                 <div class="faq-answer">
-                    No. Catalog opt-in is completely optional. Many creators just want the verification documentation for their own client work. If you do opt-in, you can remove your work from the catalog at any time.
+                    No. Many creators use SI8 Certified purely for their own client documentation. Catalog opt-in is entirely optional and available only on SI8 Certified. You can opt out at any time from your dashboard.
                 </div>
             </div>
+
         </div>
     </section>
 
     <!-- Final CTA -->
     <section class="cta-section">
         <div class="cta-content">
-            <h2 class="cta-title">Ready to get verified?</h2>
+            <h2 class="cta-title">Ready to get your AI video cleared?</h2>
             <p class="cta-subtitle">
-                $499 per video | 5-day turnaround | Chain of Title documentation
+                Creator Record $29 · SI8 Certified $499 · Chain of Title documentation
             </p>
             <div class="cta-buttons">
                 <a href="/auth/signup" class="btn btn-primary">Get Started →</a>

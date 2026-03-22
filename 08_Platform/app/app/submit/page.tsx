@@ -75,6 +75,16 @@ export default function SubmitPage() {
   const [editingTool, setEditingTool] = useState<Tool | null>(null)
   const [toolsError, setToolsError] = useState<string | null>(null)
   const [userId, setUserId] = useState<string>('')
+  // Tier & mode selection
+  const [selectedTier, setSelectedTier] = useState<'creator_record' | 'certified' | null>(null)
+  const [submissionMode, setSubmissionMode] = useState<'creator' | 'agency'>('creator')
+  const [tierError, setTierError] = useState<string | null>(null)
+  // Section 4: Evidence Custodian
+  const [evidenceCustodian, setEvidenceCustodian] = useState(false)
+  const [evidenceCustodianError, setEvidenceCustodianError] = useState<string | null>(null)
+  // Section 11: Indemnification
+  const [indemnificationAccepted, setIndemnificationAccepted] = useState(false)
+  const [indemnificationError, setIndemnificationError] = useState<string | null>(null)
   const supabase = createClient()
 
   const {
@@ -165,6 +175,12 @@ export default function SubmitPage() {
       return
     }
 
+    // Validate indemnification
+    if (!indemnificationAccepted) {
+      setIndemnificationError('You must accept the accuracy warranty to proceed')
+      return
+    }
+
     try {
       setIsSubmitting(true)
       setError(null)
@@ -245,6 +261,10 @@ export default function SubmitPage() {
         // Supporting Materials (JSONB array)
         supporting_materials: JSON.stringify([]),
 
+        // Tier & submission mode
+        tier: selectedTier || 'certified',
+        submission_mode: submissionMode,
+
         // Status
         status: 'pending',
         payment_status: 'unpaid',
@@ -291,6 +311,7 @@ export default function SubmitPage() {
         body: JSON.stringify({
           submissionId: submission.id,
           creatorEmail: session.user.email,
+          tier: selectedTier || 'certified',
         }),
       })
 
@@ -316,7 +337,11 @@ export default function SubmitPage() {
           <CardHeader>
             <CardTitle>Submit for Rights Verified</CardTitle>
             <CardDescription>
-              Complete all sections to submit your AI video for verification ($499)
+              {selectedTier === 'creator_record'
+                ? 'Creator Record — $29 · Self-attested documentation, instant automated delivery'
+                : selectedTier === 'certified'
+                ? 'SI8 Certified — $499 · 90-minute human review, cleared for commercial use'
+                : 'Complete all sections to submit your AI video for verification'}
             </CardDescription>
             <div className="mt-4">
               <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
@@ -336,14 +361,85 @@ export default function SubmitPage() {
               console.log('❌ Form validation errors:', errors)
               alert('Please fill out all required fields. Check the console for details.')
             })} className="space-y-8">
-              {/* Section 1: Filmmaker Profile (auto-filled) */}
+              {/* Section 1: Tier Selection + Filmmaker Profile */}
               {currentSection === 1 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">1. Filmmaker Profile</h3>
+                <div className="space-y-6">
+                  <h3 className="text-lg font-semibold">1. Choose Your Verification Tier</h3>
+
+                  {/* Tier selection */}
+                  <div className="space-y-3">
+                    <Label>Which verification do you need? *</Label>
+                    <div
+                      onClick={() => { setSelectedTier('creator_record'); setSubmissionMode('creator') }}
+                      className={`cursor-pointer rounded-lg border-2 p-4 transition-all ${selectedTier === 'creator_record' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-semibold">Creator Record — $29</div>
+                          <div className="text-sm text-gray-600 mt-1">Self-attested documentation. Automated, instant delivery. <strong>Not for commercial use.</strong></div>
+                          <div className="text-xs text-gray-500 mt-1">For: indie creators, social media, YouTube, portfolio, festivals</div>
+                        </div>
+                        <div className={`h-5 w-5 rounded-full border-2 flex-shrink-0 ${selectedTier === 'creator_record' ? 'border-primary bg-primary' : 'border-gray-300'}`} />
+                      </div>
+                    </div>
+
+                    <div
+                      onClick={() => setSelectedTier('certified')}
+                      className={`cursor-pointer rounded-lg border-2 p-4 transition-all ${selectedTier === 'certified' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-semibold">SI8 Certified — $499 <span className="text-xs font-normal text-primary ml-1">Most Popular</span></div>
+                          <div className="text-sm text-gray-600 mt-1">90-minute human review. Cleared for commercial use. Satisfies brand legal teams and E&O insurers.</div>
+                          <div className="text-xs text-gray-500 mt-1">For: agencies, brands, production houses, streaming submissions</div>
+                        </div>
+                        <div className={`h-5 w-5 rounded-full border-2 flex-shrink-0 ${selectedTier === 'certified' ? 'border-primary bg-primary' : 'border-gray-300'}`} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Submission mode (only show if SI8 Certified selected) */}
+                  {selectedTier === 'certified' && (
+                    <div className="space-y-3">
+                      <Label>How are you submitting? *</Label>
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setSubmissionMode('creator')}
+                          className={`flex-1 rounded-lg border-2 p-3 text-left text-sm transition-all ${submissionMode === 'creator' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'}`}
+                        >
+                          <div className="font-medium">Individual Creator</div>
+                          <div className="text-xs text-gray-500 mt-0.5">I'm submitting my own work</div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSubmissionMode('agency')}
+                          className={`flex-1 rounded-lg border-2 p-3 text-left text-sm transition-all ${submissionMode === 'agency' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'}`}
+                        >
+                          <div className="font-medium">Agency / Production House</div>
+                          <div className="text-xs text-gray-500 mt-0.5">Submitting on behalf of a client</div>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {tierError && <p className="text-sm text-red-500">{tierError}</p>}
+
                   <p className="text-sm text-gray-600">
                     Your profile information is automatically filled from your account settings.
                   </p>
-                  <Button type="button" onClick={() => setCurrentSection(2)}>
+
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      if (!selectedTier) {
+                        setTierError('Please select a verification tier to continue')
+                      } else {
+                        setTierError(null)
+                        setCurrentSection(2)
+                      }
+                    }}
+                  >
                     Continue →
                   </Button>
                 </div>
@@ -425,7 +521,9 @@ export default function SubmitPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">3. Tool Disclosure</h3>
                   <p className="text-sm text-gray-600">
-                    Add all AI tools used in production. For each tool, provide the model version, plan type, production dates, and proof of paid commercial plan.
+                    Add all AI tools used in production. For each tool, provide the model version, plan type, and production dates.
+                    {selectedTier === 'certified' && ' Receipt upload (proof of paid commercial plan) is required for SI8 Certified.'}
+                    {selectedTier === 'creator_record' && ' Receipts are optional for Creator Record but required if you later upgrade to SI8 Certified.'}
                   </p>
 
                   {/* Add Tool Button */}
@@ -523,11 +621,48 @@ export default function SubmitPage() {
                     </div>
                   </div>
 
+                  {/* Evidence Custodian */}
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="checkbox"
+                        id="evidence_custodian"
+                        checked={evidenceCustodian}
+                        onChange={(e) => {
+                          setEvidenceCustodian(e.target.checked)
+                          if (e.target.checked) setEvidenceCustodianError(null)
+                        }}
+                        className="h-4 w-4 mt-0.5 flex-shrink-0"
+                      />
+                      <div>
+                        <Label htmlFor="evidence_custodian" className="cursor-pointer font-medium text-amber-900">
+                          Evidence Custodian Declaration *
+                        </Label>
+                        <p className="text-xs text-amber-800 mt-1">
+                          I confirm that I retain my prompt logs, iteration records, and production notes internally. I will produce these records if legally challenged or requested by a distributor or E&O insurer. SI8 does not collect raw prompts.
+                        </p>
+                      </div>
+                    </div>
+                    {evidenceCustodianError && (
+                      <p className="text-sm text-red-500 mt-2 ml-7">{evidenceCustodianError}</p>
+                    )}
+                  </div>
+
                   <div className="flex gap-4">
                     <Button type="button" variant="outline" onClick={() => setCurrentSection(3)}>
                       ← Back
                     </Button>
-                    <Button type="button" onClick={() => setCurrentSection(5)}>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        if (!evidenceCustodian) {
+                          setEvidenceCustodianError('You must confirm you retain your production records')
+                        } else {
+                          setEvidenceCustodianError(null)
+                          setCurrentSection(5)
+                        }
+                      }}
+                    >
                       Continue →
                     </Button>
                   </div>
@@ -702,15 +837,15 @@ export default function SubmitPage() {
                     <Button type="button" variant="outline" onClick={() => setCurrentSection(6)}>
                       ← Back
                     </Button>
-                    <Button type="button" onClick={() => setCurrentSection(8)}>
+                    <Button type="button" onClick={() => setCurrentSection(submissionMode === 'agency' ? 10 : 8)}>
                       Continue →
                     </Button>
                   </div>
                 </div>
               )}
 
-              {/* Section 8: Modification Rights */}
-              {currentSection === 8 && (
+              {/* Section 8: Modification Rights (creator mode only) */}
+              {currentSection === 8 && submissionMode === 'creator' && (
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">8. Modification Rights Authorization</h3>
                   <p className="text-sm text-gray-600">
@@ -802,8 +937,8 @@ export default function SubmitPage() {
                 </div>
               )}
 
-              {/* Section 9: Territory */}
-              {currentSection === 9 && (
+              {/* Section 9: Territory (creator mode only) */}
+              {currentSection === 9 && submissionMode === 'creator' && (
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">9. Territory & Exclusivity Preferences</h3>
                   <p className="text-sm text-gray-600">
@@ -911,28 +1046,37 @@ export default function SubmitPage() {
                     </p>
                   </div>
 
-                  <div className="bg-blue-50 p-4 rounded-md">
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="checkbox"
-                        id="catalog_opt_in"
-                        className="mt-1"
-                        {...register('catalog_opt_in')}
-                      />
-                      <div>
-                        <Label htmlFor="catalog_opt_in" className="cursor-pointer font-medium">
-                          List in Public Catalog (after approval)
-                        </Label>
-                        <p className="text-xs text-gray-600 mt-1">
-                          After your work is approved, it will appear in our public catalog for licensing opportunities.
-                          You can opt out at any time from your dashboard.
-                        </p>
+                  {submissionMode === 'creator' && selectedTier === 'certified' && (
+                    <div className="bg-blue-50 p-4 rounded-md">
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          id="catalog_opt_in"
+                          className="mt-1"
+                          {...register('catalog_opt_in')}
+                        />
+                        <div>
+                          <Label htmlFor="catalog_opt_in" className="cursor-pointer font-medium">
+                            List in Public Catalog (after approval)
+                          </Label>
+                          <p className="text-xs text-gray-600 mt-1">
+                            After your work is approved, it will appear in our public catalog for licensing opportunities.
+                            You keep 80% of any licensing fees. You can opt out at any time from your dashboard.
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
+                  {(submissionMode === 'agency' || selectedTier === 'creator_record') && (
+                    <div className="bg-gray-50 p-4 rounded-md text-sm text-gray-500">
+                      {submissionMode === 'agency'
+                        ? 'Catalog listing not available for agency submissions. The Chain of Title document is delivered directly to you.'
+                        : 'Catalog listing requires SI8 Certified. Upgrade from your dashboard after verification.'}
+                    </div>
+                  )}
 
                   <div className="flex gap-4">
-                    <Button type="button" variant="outline" onClick={() => setCurrentSection(9)}>
+                    <Button type="button" variant="outline" onClick={() => setCurrentSection(submissionMode === 'agency' ? 7 : 9)}>
                       ← Back
                     </Button>
                     <Button type="button" onClick={() => setCurrentSection(11)}>
@@ -946,17 +1090,43 @@ export default function SubmitPage() {
               {currentSection === 11 && (
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">11. Review & Submit</h3>
-                  <p className="text-sm text-gray-600">
-                    Please review your submission. Clicking "Submit & Pay $499" will redirect you to Stripe for payment.
-                  </p>
 
                   <div className="bg-blue-50 p-4 rounded-md">
                     <h4 className="font-medium mb-2">Summary:</h4>
                     <ul className="text-sm space-y-1">
-                      <li>Film Title: {watch('title')}</li>
-                      <li>Tools Used: {tools.length} tool{tools.length !== 1 ? 's' : ''} added</li>
-                      <li>Territory: {watch('territory')}</li>
+                      <li><strong>Tier:</strong> {selectedTier === 'creator_record' ? 'Creator Record — $29 (self-attested)' : 'SI8 Certified — $499 (human review)'}</li>
+                      <li><strong>Film Title:</strong> {watch('title')}</li>
+                      <li><strong>Tools Used:</strong> {tools.length} tool{tools.length !== 1 ? 's' : ''} added</li>
+                      {submissionMode === 'creator' && <li><strong>Territory:</strong> {watch('territory')}</li>}
+                      <li><strong>Submission Mode:</strong> {submissionMode === 'agency' ? 'Agency / Production House' : 'Individual Creator'}</li>
                     </ul>
+                  </div>
+
+                  {/* Indemnification checkbox — required for all tiers */}
+                  <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="checkbox"
+                        id="indemnification"
+                        checked={indemnificationAccepted}
+                        onChange={(e) => {
+                          setIndemnificationAccepted(e.target.checked)
+                          if (e.target.checked) setIndemnificationError(null)
+                        }}
+                        className="h-4 w-4 mt-0.5 flex-shrink-0"
+                      />
+                      <div>
+                        <Label htmlFor="indemnification" className="cursor-pointer font-medium">
+                          Accuracy Warranty & Indemnification *
+                        </Label>
+                        <p className="text-xs text-gray-600 mt-1">
+                          I warrant that all information submitted is accurate and complete to the best of my knowledge. I agree to indemnify and hold harmless SI8 / PMF Strategy Inc. against any claims arising from inaccurate or incomplete information I have provided. I understand that SI8's verification is not a legal certification and does not replace independent legal advice.
+                        </p>
+                      </div>
+                    </div>
+                    {indemnificationError && (
+                      <p className="text-sm text-red-500 mt-2 ml-7">{indemnificationError}</p>
+                    )}
                   </div>
 
                   {error && (
@@ -969,8 +1139,19 @@ export default function SubmitPage() {
                     <Button type="button" variant="outline" onClick={() => setCurrentSection(10)}>
                       ← Back
                     </Button>
-                    <Button type="submit" disabled={isSubmitting} className="flex-1">
-                      {isSubmitting ? 'Creating submission...' : 'Submit & Pay $499'}
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="flex-1"
+                      onClick={() => {
+                        if (!indemnificationAccepted) {
+                          setIndemnificationError('You must accept the accuracy warranty to proceed')
+                        }
+                      }}
+                    >
+                      {isSubmitting
+                        ? 'Creating submission...'
+                        : `Submit & Pay ${selectedTier === 'creator_record' ? '$29' : '$499'}`}
                     </Button>
                   </div>
                 </div>
@@ -989,6 +1170,7 @@ export default function SubmitPage() {
           onSave={handleSaveTool}
           editTool={editingTool}
           userId={userId}
+          requireReceipt={selectedTier === 'certified'}
         />
       </div>
     </div>

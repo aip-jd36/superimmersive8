@@ -41,7 +41,11 @@ export async function POST(request: NextRequest) {
     try {
       console.log('🔷 Webhook: Processing payment for submission:', submissionId)
 
+      const isCreatorRecord = session.metadata?.tier === 'creator_record'
+
       // Update submission payment status
+      // Creator Record auto-approves (self-attested, no human review needed)
+      // SI8 Certified goes to pending for human review queue
       const { data: submission, error: updateError } = await supabaseAdmin
         .from('submissions')
         .update({
@@ -49,7 +53,7 @@ export async function POST(request: NextRequest) {
           stripe_payment_intent_id: session.payment_intent,
           stripe_checkout_session_id: session.id,
           amount_paid: session.amount_total,
-          status: 'pending', // Now ready for review
+          status: isCreatorRecord ? 'approved' : 'pending',
         })
         .eq('id', submissionId)
         .select()

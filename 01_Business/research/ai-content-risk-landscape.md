@@ -1,6 +1,6 @@
 # AI Content Risk Landscape — Research Brief
 
-**Compiled:** February 2026
+**Compiled:** February 2026 | **Updated:** March 2026
 **Purpose:** Source material for SI8 marketing copy, blog posts, email campaigns, and sales conversations
 **Primary audience this content serves:** Brand marketing directors, agency creative leads, brand legal/compliance teams
 
@@ -243,6 +243,123 @@ Sources:
 
 ---
 
+## SECTION 6: PRACTITIONER AND REGULATORY SOURCES (March 2026)
+
+*Three additional sources compiled March 2026: entertainment attorney practice guidance, UK Parliamentary committee report, and legal expert commentary from ABC News.*
+
+---
+
+### Nina Mary / Ameri Law PC — Entertainment Attorney Practice Guidance
+
+Nina Mary is a ~20-year entertainment attorney and founder of Ameri Law PC, specializing in IP licensing, production agreements, clearances, and AI-era contracts. Her guidance represents what clients are currently being advised to do, and what distributors and insurers are currently requiring.
+
+**The single most important statement for SI8 sales materials:**
+
+> *"Streamers, distributors, and E&O underwriters want to know which tools you used, where the data training came from, and whether you have a lawyer's memo on risk. Expect warranties and representations that make the producer — not the tool vendor — responsible."*
+
+**What she says distributors and E&O insurers now specifically ask for:**
+- Which AI tools were used
+- Where the model training data came from
+- Whether the producer has a **fair use opinion letter** or **clearance memo** from an attorney
+- A documented paper trail: receipts, prompts, model versions, edits, notes on human authorship
+
+**Her four-step producer protection checklist:**
+
+1. **Tool due diligence — get it in writing from the vendor:** What categories of data trained the model; confirmation no pirated/unlicensed sources were used; whether the vendor offers a warranty they had the right to training data.
+
+2. **Contractual guardrails:** Data source reps, no piracy warranty from vendor, indemnity if their tool triggers a claim, promise to cooperate with documentation requests.
+
+3. **Fair use opinion letter + clearance memo:** *"Increasingly, that's part of what carriers and distributors expect before they approve deliverables."*
+
+4. **Paper trail:** *"Hold on to receipts, prompts, model versions, edits, notes on human authorship. If originality or copying is challenged, your paper trail is your first line of defense."*
+
+**On "tainted inputs":**
+
+> *"If a tool trained on pirated or otherwise unlicensed material helped create your asset, a claimant can argue your downstream use is contaminated. Discovery in current cases is drilling into how data sets were built."*
+
+**On protecting creators from unauthorized AI training use of their work:**
+- Copyright registration = statutory remedies + federal court access
+- Trademark protection for names, logos, distinctive phrases
+- Contract clauses requiring explicit consent for voice/likeness modeling and limiting future training use
+
+**On production deliverables:**
+
+> *"Deliverables aren't suggestions, they're obligations."* A finished show was blocked from distribution because producers kept footage they contractually agreed to remove. A distributor injunction can stop a completed project at the finish line. Chain of title, appearance releases, and clearance workflows are what prevents this.
+
+**SI8 positioning implication:** Nina Mary is telling clients to go get "a lawyer's memo on risk" and a "clearance memo." That memo currently costs $350+/hr. SI8's Chain of Title document is the scalable version of that memo at $499 per submission. The pitch: *"Distributors and E&O insurers now expect a documented record of which AI tools were used, whether training data was clean, and a clearance memo on risk. SI8 produces that documentation."*
+
+---
+
+### UK Parliament — Communications and Digital Committee Report (March 6, 2026)
+
+**Report:** *"AI, copyright and the creative industries"*
+**Committee:** House of Lords Communications and Digital Committee
+**Chair:** Baroness Keeley
+
+**Main finding:**
+
+> *"The protections for creators afforded by copyright are now under threat. Not because the UK's copyright framework is outdated, but because widespread unlicensed use of protected works, coupled with limited transparency from AI developers about how their models have been trained, leaves rightsholders unsure about whether their content has been used, and unable to enforce their rights when it has."*
+
+**Key recommendations:**
+
+| Recommendation | Detail |
+|---|---|
+| **Reject opt-out TDM exception** | Government should NOT introduce a text and data mining exception with opt-out mechanism. Licensing-first approach instead. |
+| **Mandatory training data transparency** | Statutory obligation for UK AI developers to disclose training data. Public procurement and regulatory tools to enforce compliance from international developers. |
+| **Close the personality rights gap** | Introduce protections against unauthorized digital replicas and "in the style of" outputs. Creators need clear control over commercial exploitation of their identity. |
+| **Support a licensing market** | Back "open, globally aligned standards for rights reservation, data provenance, and the labelling of AI-generated content." |
+| **Sovereign AI models** | Prioritize domestically governed AI with enhanced transparency and copyright respect. |
+
+**The economic stakes:**
+
+> *"In 2023 the creative industries delivered £124 billion of economic value to the UK and this is set to grow to £141 billion by 2030. Watering down the protections in our existing copyright regime to lure the biggest US tech companies is a race to the bottom."*
+
+**Regulatory direction this sets:** The UK is moving toward mandatory transparency + licensing-first + provenance labeling. This is exactly what SI8's Chain of Title document provides at the individual submission level — ahead of where regulation is going.
+
+**SI8 UK/EU positioning:** SI8-verified content arrives with the provenance documentation, training data disclosure, and rights transparency that UK regulators are moving to mandate. For UK and EU clients, SI8 is compliance infrastructure, not just a quality signal.
+
+---
+
+### ABC News / Jeannie Patterson — Center for AI and Digital Facts (February 2026)
+
+*Commentary on Sora 2's US launch and the current legal status of AI-generated video.*
+
+**On the legal status of AI training:**
+
+> *"Training a generative AI in the US on copyright material is thought to be radically transformative at least in certain lower courts in California — which means that of itself isn't a copyright breach — but this is a whole new dimension. This is people taking copyright material and reproducing it in silly and in some instances dangerous videos."*
+
+Key: "thought to be" and "lower courts" — this is not settled law. Betting on training = fair use is not a strategy.
+
+**Anthropic settlement precedent:**
+
+> *"There's recently been a settlement in the US with Anthropic — Anthropic used pirated works, pirated books to train its generative AI tool. That was found to breach copyright."*
+
+**On likeness and persona — the most legally underdeveloped area:**
+
+> *"We have no copyright. We have no protection in our own faces except [in some EU countries]. So yes, people can create either amusing or horrific videos using our faces and we have no real protection other than through defamation laws."*
+
+This confirms the UK Parliamentary committee finding: personality rights / digital likeness protection is a major legal gap that governments are scrambling to close. Until new legislation passes, creators and brands have minimal legal recourse for unauthorized likeness use.
+
+**On branded IP (characters, logos):**
+
+> *"They'll have trademarks in those images. Trademark is even a broader protection — I have rights over that particular image because it has unique features. One would think that's an infringement of trademark law. But that hasn't actually stopped the AI industry at this point in time."*
+
+---
+
+### Cross-Source Synthesis: What This Means for SI8
+
+| Legal exposure | All three sources agree? | SI8 current coverage | Gap / Action |
+|---|---|---|---|
+| Tainted training data contaminates outputs | ✅ Yes (all three) | Tool tier system partially addresses | Add vendor training data disclosure to review criteria |
+| Producer bears warranty liability, not tool vendor | ✅ Yes (Nina Mary + US cases) | Creator attestation handles this | Strengthen attestation language |
+| Fair use is not a reliable safe harbor | ✅ Yes (all three) | Not relied upon | Reinforce in Chain of Title language |
+| Likeness / persona = highest risk, lowest protection | ✅ Yes (UK Parliament + ABC) | Section 5 checkboxes | Note legal reality in rejection rationale |
+| Distributors + insurers require documented clearance memo | ✅ Yes (Nina Mary) | Chain of Title IS this memo | Use Nina Mary's quote in positioning |
+| Licensing-first + provenance standards = regulatory direction | ✅ Yes (UK Parliament) | Chain of Title = early-market version | Cite in UK/EU client materials |
+| Prompt/iteration records: creator must retain, not upload | ✅ Yes (Nina Mary — "paper trail") | Authorship statement covers substance | Add retention declaration checkbox |
+
+---
+
 ## MARKETING ANGLES: HOW TO DEPLOY THIS RESEARCH
 
 ### For cold email / short-form outreach (open with one specific fact)
@@ -285,4 +402,4 @@ Lead with the regulatory deadline table. June 2026 (New York) and August 2026 (E
 
 ---
 
-*Research compiled February 2026. Sources are current as of date of compilation. AI legal landscape is actively evolving — verify specific case statuses before using in formal legal or compliance contexts.*
+*Research compiled February 2026; updated March 2026 (added Section 6: practitioner and regulatory sources). AI legal landscape is actively evolving — verify specific case statuses before using in formal legal or compliance contexts.*

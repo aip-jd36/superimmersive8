@@ -33,6 +33,7 @@ interface AddToolModalProps {
   onSave: (tool: Tool) => void
   editTool?: Tool | null // If editing, this will be populated
   userId: string
+  requireReceipt?: boolean // Defaults to true; false for Creator Record tier
 }
 
 export default function AddToolModal({
@@ -41,6 +42,7 @@ export default function AddToolModal({
   onSave,
   editTool,
   userId,
+  requireReceipt = true,
 }: AddToolModalProps) {
   const [toolName, setToolName] = useState('')
   const [toolNameOther, setToolNameOther] = useState('')
@@ -105,7 +107,7 @@ export default function AddToolModal({
       newErrors.endDate = 'End date must be after start date'
     }
 
-    if (!receipt) {
+    if (requireReceipt && !receipt) {
       newErrors.receipt = 'Receipt upload is required'
     }
 
@@ -281,12 +283,12 @@ export default function AddToolModal({
             {/* Receipt Upload */}
             <div>
               <FileUpload
-                label="Plan Receipt"
-                description="Upload proof of paid commercial plan (PDF, JPG, or PNG)"
+                label={requireReceipt ? "Plan Receipt" : "Plan Receipt (optional for Creator Record)"}
+                description={requireReceipt ? "Upload proof of paid commercial plan (PDF, JPG, or PNG)" : "Optional for Creator Record. Required if upgrading to SI8 Certified."}
                 accept="image/jpeg,image/png,application/pdf"
                 maxSize={10 * 1024 * 1024}
                 maxFiles={1}
-                required={true}
+                required={requireReceipt}
                 folder="receipts"
                 userId={userId}
                 onFilesChange={handleFileChange}

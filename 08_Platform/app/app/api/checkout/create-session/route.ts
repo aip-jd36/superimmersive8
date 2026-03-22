@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const { submissionId, creatorEmail } = await request.json()
+    const { submissionId, creatorEmail, tier } = await request.json()
 
     if (!submissionId || !creatorEmail) {
       return NextResponse.json(
@@ -21,6 +21,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const isCreatorRecord = tier === 'creator_record'
+    const productName = isCreatorRecord
+      ? 'Creator Record — Self-Attested Documentation'
+      : 'SI8 Certified — Commercial Clearance Verification'
+    const productDescription = isCreatorRecord
+      ? 'Structured Chain of Title record (self-attested, not for commercial use) — instant automated delivery'
+      : 'Rights Verified verification service — 90-minute human review, CLEARED FOR COMMERCIAL USE PDF'
+    const unitAmount = isCreatorRecord ? 2900 : 49900 // $29 or $499 in cents
+
     // Create Stripe Checkout session
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -29,10 +38,10 @@ export async function POST(request: NextRequest) {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: 'AI Video Chain of Title Verification',
-              description: 'Rights Verified verification service - includes Rights Package PDF after approval',
+              name: productName,
+              description: productDescription,
             },
-            unit_amount: 49900, // $499.00 in cents
+            unit_amount: unitAmount,
           },
           quantity: 1,
         },
@@ -44,6 +53,7 @@ export async function POST(request: NextRequest) {
       customer_email: creatorEmail,
       metadata: {
         submissionId,
+        tier: tier || 'certified',
       },
     })
 

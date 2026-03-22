@@ -8,6 +8,172 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/newsite/styles.css">
+    <style>
+        .pricing-tiers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+        @media (max-width: 768px) {
+            .pricing-tiers-grid { grid-template-columns: 1fr; }
+        }
+        .tier-box {
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            padding: 2.5rem 2rem;
+            background: rgba(255,255,255,0.03);
+            display: flex;
+            flex-direction: column;
+        }
+        .tier-box.tier-featured {
+            border-color: var(--color-accent);
+            background: rgba(129,140,248,0.06);
+            position: relative;
+        }
+        .tier-badge {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--color-accent);
+            color: #0d0d0d;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            padding: 4px 16px;
+            border-radius: 20px;
+            white-space: nowrap;
+            text-transform: uppercase;
+        }
+        .tier-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            margin-bottom: 0.75rem;
+        }
+        .tier-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .tier-desc {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+        .tier-price-block {
+            margin-bottom: 1.5rem;
+        }
+        .tier-price-original {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.35);
+            text-decoration: line-through;
+            margin-bottom: 2px;
+        }
+        .tier-price-main {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+        .tier-price-currency {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.85);
+        }
+        .tier-price-amount {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .tier-price-period {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.5);
+        }
+        .tier-early-access {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #fbbf24;
+            background: rgba(251,191,36,0.12);
+            border: 1px solid rgba(251,191,36,0.3);
+            border-radius: 4px;
+            padding: 2px 8px;
+            margin-top: 6px;
+        }
+        .tier-stamp {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+        .tier-stamp.stamp-unverified {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.5);
+        }
+        .tier-stamp.stamp-certified {
+            background: rgba(129,140,248,0.12);
+            border: 1px solid rgba(129,140,248,0.4);
+            color: var(--color-accent);
+        }
+        .tier-checklist {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 2rem 0;
+            flex-grow: 1;
+        }
+        .tier-checklist li {
+            font-size: 0.9rem;
+            padding: 0.4rem 0;
+            color: rgba(255,255,255,0.8);
+            display: flex;
+            gap: 0.6rem;
+            align-items: flex-start;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .tier-checklist li:last-child { border-bottom: none; }
+        .tier-checklist li .check { color: var(--color-accent); flex-shrink: 0; }
+        .tier-checklist li .dim { color: rgba(255,255,255,0.4); }
+        .tier-for {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 1.25rem;
+            font-style: italic;
+        }
+        .tier-cta {
+            margin-top: auto;
+        }
+        .tier-divider {
+            text-align: center;
+            padding: 3rem 0 1rem;
+            color: rgba(255,255,255,0.3);
+            font-size: 0.85rem;
+            font-style: italic;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+        .upgrade-note {
+            text-align: center;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1.25rem 2rem;
+            max-width: 680px;
+            margin: 2rem auto 0;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.65);
+            line-height: 1.6;
+        }
+        .upgrade-note strong { color: rgba(255,255,255,0.9); }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
@@ -57,41 +223,220 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <h1>定價</h1>
-            <p class="hero-subtitle">簡單透明，沒有隱藏費用。</p>
+            <h1>兩個信任等級</h1>
+            <p class="hero-subtitle">記錄你的作品，或取得商業使用認證。定價簡單透明。</p>
         </div>
     </section>
 
-    <!-- Pricing Card -->
+    <!-- Pricing Tiers -->
     <section class="pricing-section">
-        <div class="pricing-card-large">
-            <h2>Chain of Title 版權來源認證</h2>
-            <div class="price">
-                <span class="currency">$</span>
-                <span class="amount">499</span>
-                <span class="period">每支影片</span>
+        <div class="pricing-tiers-grid">
+
+            <!-- Tier 1: Self-Declared -->
+            <div class="tier-box">
+                <div class="tier-label">自主申報</div>
+                <div class="tier-name">創作者記錄</div>
+                <div class="tier-desc">以結構化格式記錄你的 AI 影片。全自動處理，無需人工審核。</div>
+
+                <div class="tier-price-block">
+                    <div class="tier-price-original">$49</div>
+                    <div class="tier-price-main">
+                        <span class="tier-price-currency">$</span>
+                        <span class="tier-price-amount">29</span>
+                        <span class="tier-price-period">每支影片</span>
+                    </div>
+                    <span class="tier-early-access">早鳥優惠價</span>
+                </div>
+
+                <div class="tier-stamp stamp-unverified">自主申報 — 不適用於商業用途</div>
+
+                <p class="tier-for">適用對象：獨立創作者、社群媒體、YouTube、作品集、影展投件</p>
+
+                <ul class="tier-checklist">
+                    <li><span class="check">✓</span> 結構化版權來源記錄（PDF）</li>
+                    <li><span class="check">✓</span> 工具使用申報（自主聲明）</li>
+                    <li><span class="check">✓</span> IP 與肖像自主聲明</li>
+                    <li><span class="check">✓</span> 人類創作聲明</li>
+                    <li><span class="check">✓</span> 即時自動交付</li>
+                    <li><span class="check">✓</span> 存入 SI8 系統，日後可升級</li>
+                    <li><span class="dim">✗</span> <span class="dim">無人工審核</span></li>
+                    <li><span class="dim">✗</span> <span class="dim">不適用於商業或品牌用途</span></li>
+                </ul>
+
+                <div class="tier-cta">
+                    <a href="/auth/signup" class="btn btn-secondary" style="width: 100%; justify-content: center; text-align: center;">取得創作者記錄 →</a>
+                </div>
             </div>
 
-            <h3>服務內容：</h3>
-            <ul class="checklist">
-                <li>90 分鐘專業審核（涵蓋 7 大審查類別）</li>
-                <li>9 欄位 Chain of Title 文件（PDF）</li>
-                <li>Rights Verified 徽章與目錄 ID（SI8-YYYY-####）</li>
-                <li>商業使用授權驗證</li>
-                <li>5 個工作天交件（多數在 2–3 天內完成）</li>
-                <li>審核過程中提供電子郵件支援</li>
-                <li>需補正時可免費重新提交</li>
-                <li>可選擇加入 Showcase 目錄（獲得授權費的 80%）</li>
-            </ul>
+            <!-- Tier 2: SI8 Certified -->
+            <div class="tier-box tier-featured">
+                <div class="tier-badge">最受歡迎</div>
+                <div class="tier-label">SI8 認證</div>
+                <div class="tier-name">商業使用認證</div>
+                <div class="tier-desc">完整人工審核，通過品牌法務審查、開立發票，並符合 E&O 保險承保要求。</div>
 
-            <a href="/auth/signup" class="btn btn-primary btn-large" style="width: 100%; justify-content: center; margin-top: 1rem;">立即申請認證 →</a>
+                <div class="tier-price-block">
+                    <div class="tier-price-main">
+                        <span class="tier-price-currency">$</span>
+                        <span class="tier-price-amount">499</span>
+                        <span class="tier-price-period">每支影片</span>
+                    </div>
+                </div>
+
+                <div class="tier-stamp stamp-certified">已通過商業使用認證</div>
+
+                <p class="tier-for">適用對象：廣告代理商、製作公司、品牌、發行用短片、串流平台投件</p>
+
+                <ul class="tier-checklist">
+                    <li><span class="check">✓</span> 90 分鐘專業人工審核</li>
+                    <li><span class="check">✓</span> 7 大審查類別全面核查</li>
+                    <li><span class="check">✓</span> 收據與商業授權驗證</li>
+                    <li><span class="check">✓</span> 9 欄位完整 Chain of Title 文件（PDF）</li>
+                    <li><span class="check">✓</span> Rights Verified 徽章 + 目錄 ID（SI8-YYYY-####）</li>
+                    <li><span class="check">✓</span> 符合 E&O 保險承保要求的文件</li>
+                    <li><span class="check">✓</span> 風險提示 + 修正建議（如需要）</li>
+                    <li><span class="check">✓</span> 3–5 個工作天交件</li>
+                    <li><span class="check">✓</span> 需補正時可免費重新提交</li>
+                    <li><span class="check">✓</span> 可選加入 Showcase 目錄（獲得授權費的 80%）</li>
+                </ul>
+
+                <div class="tier-cta">
+                    <a href="/auth/signup" class="btn btn-primary" style="width: 100%; justify-content: center; text-align: center;">申請 SI8 認證 →</a>
+                </div>
+            </div>
+
         </div>
+
+        <div class="upgrade-note">
+            <strong>先取得創作者記錄，隨時可升級。</strong>若日後有商業機會，只需登入並將現有提交升級為 SI8 認證即可，無需重新填寫表單。
+        </div>
+    </section>
+
+    <!-- Who Each Tier Is For -->
+    <section class="comparison-section">
+        <h2>我需要哪個等級？</h2>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>使用情境</th>
+                    <th>創作者記錄（$29）</th>
+                    <th class="highlight">SI8 認證（$499）</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>YouTube / TikTok / Instagram 內容</td>
+                    <td>✓</td>
+                    <td class="highlight">可選升級</td>
+                </tr>
+                <tr>
+                    <td>影展投件</td>
+                    <td>✓</td>
+                    <td class="highlight">可選升級</td>
+                </tr>
+                <tr>
+                    <td>作品集或個人存檔</td>
+                    <td>✓</td>
+                    <td class="highlight">可選升級</td>
+                </tr>
+                <tr>
+                    <td>客戶交件（小型預算）</td>
+                    <td>✓（基本文件）</td>
+                    <td class="highlight">建議使用</td>
+                </tr>
+                <tr>
+                    <td>品牌廣告 / 付費廣告</td>
+                    <td>✗ 不受理</td>
+                    <td class="highlight">✓ 必須使用</td>
+                </tr>
+                <tr>
+                    <td>代理商交件（需通過品牌法務）</td>
+                    <td>✗ 不受理</td>
+                    <td class="highlight">✓ 必須使用</td>
+                </tr>
+                <tr>
+                    <td>串流 / 發行用短片（如 MyVideo）</td>
+                    <td>✗ 不受理</td>
+                    <td class="highlight">✓ 必須使用</td>
+                </tr>
+                <tr>
+                    <td>E&O 保險文件</td>
+                    <td>✗ 不受理</td>
+                    <td class="highlight">✓ 必須使用</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p class="comparison-note">「串流平台、發行商與 E&O 保險業者會要求提供使用工具清單、訓練資料來源說明，以及風險清除備忘錄。SI8 認證提供的正是這些文件。」— 娛樂法律顧問實務指引，2026 年 3 月</p>
+    </section>
+
+    <!-- Compare to Alternatives -->
+    <section class="comparison-section">
+        <h2>SI8 認證 vs. 其他方案</h2>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>比較項目</th>
+                    <th>Adobe Stock</th>
+                    <th>自行處理</th>
+                    <th class="highlight">SI8 認證（$499）</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>支援的 AI 工具</strong></td>
+                    <td>僅 Firefly</td>
+                    <td>無（自行記錄）</td>
+                    <td class="highlight">Sora、Runway、Kling、Pika、Firefly</td>
+                </tr>
+                <tr>
+                    <td><strong>專業人工審核</strong></td>
+                    <td>僅自動化審核</td>
+                    <td>無</td>
+                    <td class="highlight">90 分鐘人工審核（7 大類別）</td>
+                </tr>
+                <tr>
+                    <td><strong>Chain of Title 文件</strong></td>
+                    <td>有限</td>
+                    <td>無</td>
+                    <td class="highlight">9 欄位完整認證文件包</td>
+                </tr>
+                <tr>
+                    <td><strong>E&O 保險文件適用性</strong></td>
+                    <td>僅限 Adobe 範圍</td>
+                    <td>無</td>
+                    <td class="highlight">符合保險業者要求的文件</td>
+                </tr>
+                <tr>
+                    <td><strong>訓練資料揭露</strong></td>
+                    <td>僅 Adobe 自身</td>
+                    <td>無</td>
+                    <td class="highlight">逐工具記錄供應商揭露資訊</td>
+                </tr>
+                <tr>
+                    <td><strong>交件時間</strong></td>
+                    <td>即時（自動化）</td>
+                    <td>數週（若需法務審查）</td>
+                    <td class="highlight">3–5 個工作天</td>
+                </tr>
+                <tr>
+                    <td><strong>費用</strong></td>
+                    <td>免費（僅限 Firefly）</td>
+                    <td>免費（但法律風險高）</td>
+                    <td class="highlight">每支影片 $499 美元</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p class="comparison-note">「Adobe 只認證 Firefly。我們認證你法務部門一直在阻擋的那些工具。」</p>
     </section>
 
     <!-- Optional: Catalog Licensing -->
     <section class="catalog-licensing-section">
         <h2>選填：透過授權獲得被動收入</h2>
-        <p>完成認證後，可選擇加入我們的 Showcase 市集。品牌授權你的作品時，你保留授權費的 80%。</p>
+        <p>完成 SI8 認證後，可選擇加入我們的 Showcase 市集。品牌授權你的作品時，你保留授權費的 80%。</p>
 
         <div class="licensing-tiers">
             <div class="tier-card">
@@ -123,73 +468,17 @@
             </div>
         </div>
 
-        <p class="note"><strong>無前期費用。</strong>只有成交時才收取 20% 服務費。認證費（$499）為獨立收費，於申請時預先支付。</p>
+        <p class="note"><strong>無前期費用。</strong>只有成交時才收取 20% 服務費。認證費（$499）為獨立收費，於申請時預先支付。創作者記錄（$29）不含目錄上架功能。</p>
 
         <div style="text-align: center; margin-top: 3rem;">
             <a href="/catalog" class="btn btn-secondary">瀏覽目錄 →</a>
         </div>
     </section>
 
-    <!-- Compare to Alternatives -->
-    <section class="comparison-section">
-        <h2>與其他方案比較</h2>
-
-        <table class="comparison-table">
-            <thead>
-                <tr>
-                    <th>比較項目</th>
-                    <th>Adobe Stock</th>
-                    <th>自行處理</th>
-                    <th class="highlight">SI8 Rights Verified</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>支援的 AI 工具</strong></td>
-                    <td>僅 Firefly</td>
-                    <td>無（自行記錄）</td>
-                    <td class="highlight">Sora、Runway、Kling、Pika、Firefly</td>
-                </tr>
-                <tr>
-                    <td><strong>專業人工審核</strong></td>
-                    <td>僅自動化審核</td>
-                    <td>無</td>
-                    <td class="highlight">90 分鐘人工審核（7 大類別）</td>
-                </tr>
-                <tr>
-                    <td><strong>Chain of Title 文件</strong></td>
-                    <td>有限</td>
-                    <td>無</td>
-                    <td class="highlight">9 欄位完整文件包</td>
-                </tr>
-                <tr>
-                    <td><strong>降低法律風險</strong></td>
-                    <td>僅限 Adobe 責任</td>
-                    <td>無（品牌承擔 100% 風險）</td>
-                    <td class="highlight">4 項法律保護機制（可降低 73% 損害賠償）</td>
-                </tr>
-                <tr>
-                    <td><strong>交件時間</strong></td>
-                    <td>即時（自動化）</td>
-                    <td>數週（若法務審查）</td>
-                    <td class="highlight">2–5 個工作天</td>
-                </tr>
-                <tr>
-                    <td><strong>費用</strong></td>
-                    <td>免費（僅限 Firefly）</td>
-                    <td>免費（但法律風險高）</td>
-                    <td class="highlight">每支影片 $499 美元</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <p class="comparison-note">「Adobe 只認證 Firefly。我們認證你法務部門一直在阻擋的那些工具。」</p>
-    </section>
-
-    <!-- Volume Discounts (Year 2) -->
+    <!-- Volume Discounts -->
     <section class="volume-section">
         <h2>批量優惠</h2>
-        <p>計畫認證多支影片？歡迎聯繫我們洽詢批量定價：</p>
+        <p>計畫認證多支影片？歡迎洽詢 SI8 認證的批量定價：</p>
         <ul>
             <li>5 支以上：每支 $399（省 20%）</li>
             <li>10 支以上：每支 $349（省 30%）</li>
@@ -198,7 +487,7 @@
         <a href="mailto:contact@superimmersive8.com" class="btn btn-secondary">聯繫我們洽詢批量定價</a>
     </section>
 
-    <!-- FAQ (Pricing-specific) -->
+    <!-- FAQ -->
     <section class="faq-section">
         <div class="section-header">
             <p class="section-pretitle">常見問題</p>
@@ -206,6 +495,43 @@
         </div>
 
         <div class="faq-list">
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    創作者記錄與 SI8 認證有什麼差別？
+                </div>
+                <div class="faq-answer">
+                    創作者記錄（$29）為全自動處理——填完表單後，系統即生成一份蓋有「自主申報 — 不適用於商業用途」印記的 PDF。這份文件適合用於個人存檔、作品集或小型客戶交件。SI8 認證（$499）則由專業人員進行 90 分鐘的人工審核，核查收據、篩查 IP 與肖像風險，並出具蓋有「已通過商業使用認證」的正式文件，符合品牌法務團隊及 E&O 保險業者的要求。
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    品牌或代理商可以使用創作者記錄（$29）文件嗎？
+                </div>
+                <div class="faq-answer">
+                    不行。創作者記錄明確標示「不適用於商業用途」，品牌法務團隊及 E&O 保險業者不接受此文件作為合規證明。凡涉及商業應用——包括廣告、贊助內容、串流發行或授權——均須使用 SI8 認證。
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    要發行或串流的短片應選哪個等級？
+                </div>
+                <div class="faq-answer">
+                    必須使用 SI8 認證。串流平台授權你的短片與品牌用於廣告所承擔的法律責任相同。法律責任等級由買方決定，而非內容格式。
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    可以之後從創作者記錄升級為 SI8 認證嗎？
+                </div>
+                <div class="faq-answer">
+                    可以。登入帳號，找到你的提交記錄，申請升級即可。支付 $499 費用後，提交記錄將進入人工審核佇列，無需重新填寫表單。
+                </div>
+            </div>
+
             <div class="faq-item">
                 <div class="faq-question">
                     支援哪些付款方式？
@@ -217,37 +543,19 @@
 
             <div class="faq-item">
                 <div class="faq-question">
+                    SI8 認證需要多久時間？
+                </div>
+                <div class="faq-answer">
+                    最長 3–5 個工作天。大多數案件在 2–3 天內完成。實際審核約需 90 分鐘，我們保留緩衝時間以管理排隊狀況。
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
                     是否提供退款？
                 </div>
                 <div class="faq-answer">
-                    不提供退款。但若影片未通過審核，我們會提供明確說明，並讓你修正後免費重新提交。常見的未通過原因包括缺少商業方案付款收據，或使用了禁用工具。
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">
-                    認證需要多久時間？
-                </div>
-                <div class="faq-answer">
-                    最長 5 個工作天。大多數案件在 2–3 天內完成。實際審核約需 90 分鐘，但我們保留緩衝時間以管理排隊狀況。
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">
-                    可以同時提交多支影片嗎？
-                </div>
-                <div class="faq-answer">
-                    可以。每支影片 $499 美元，請透過平台分別提交。批量優惠（5 支以上）將於第二年推出。
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">
-                    影片未通過審核怎麼辦？
-                </div>
-                <div class="faq-answer">
-                    我們會詳細說明未通過的原因。許多情況下，你可以修正問題（例如補提收據、更新創作聲明），然後免費重新提交。
+                    不提供退款。若 SI8 認證提交未通過，我們將提供詳細說明，並允許修正後免費重新提交。常見未通過原因為缺少收據或使用禁用工具——兩者均可修正。
                 </div>
             </div>
 
@@ -265,18 +573,19 @@
                     是否一定要加入 Showcase 目錄？
                 </div>
                 <div class="faq-answer">
-                    不需要。加入目錄完全出於自願。許多創作者只需認證文件供自己的客戶使用即可。若決定加入，也可以隨時申請下架。
+                    不需要。許多創作者使用 SI8 認證純粹是為了提供給自己的客戶作為合規文件。目錄加入完全出於自願，且僅限 SI8 認證用戶。你可以隨時從帳號控制台申請下架。
                 </div>
             </div>
+
         </div>
     </section>
 
     <!-- Final CTA -->
     <section class="cta-section">
         <div class="cta-content">
-            <h2 class="cta-title">準備好申請認證了嗎？</h2>
+            <h2 class="cta-title">準備好為你的 AI 影片取得認證了嗎？</h2>
             <p class="cta-subtitle">
-                每支影片 $499 美元 ｜ 5 個工作天交件 ｜ Chain of Title 文件
+                創作者記錄 $29 · SI8 認證 $499 · Chain of Title 文件
             </p>
             <div class="cta-buttons">
                 <a href="/auth/signup" class="btn btn-primary">立即開始 →</a>

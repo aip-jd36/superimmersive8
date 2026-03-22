@@ -1,8 +1,8 @@
 # SI8 Pricing Strategy v1.0
 
 **Date:** February 2026
-**Status:** Initial model (pre-launch)
-**Next review:** After first 5 deals close
+**Status:** ~~SUPERSEDED~~ — See PRICING-STRATEGY-v2.0.md (Two-tier CaaS pricing, March 2026)
+**Archived:** This document reflects the v3 Rights Agency model (licensing tiers for catalog/placement). The business pivoted to v4 CaaS in March 2026. Keep as reference for licensing tier structure (still used in Gear B marketplace), but verification pricing is now in v2.0.
 
 ---
 
