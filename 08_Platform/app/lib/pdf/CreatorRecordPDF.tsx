@@ -315,7 +315,7 @@ export const CreatorRecordPDF: React.FC<{ data: CreatorRecordData }> = ({ data }
           <Text style={styles.sectionTitle}>3. Likeness & Identity — Self-Attestation</Text>
           {likenessItems.map(([label, val], idx) => (
             <View key={idx} style={styles.checkRow}>
-              <Text style={styles.checkMark}>{val ? '✓' : '○'}</Text>
+              <Text style={styles.checkMark}>{val ? '[Y]' : '[ ]'}</Text>
               <Text style={styles.checkLabel}>{label}</Text>
             </View>
           ))}
@@ -326,7 +326,7 @@ export const CreatorRecordPDF: React.FC<{ data: CreatorRecordData }> = ({ data }
           <Text style={styles.sectionTitle}>4. IP & Brand — Self-Attestation</Text>
           {ipItems.map(([label, val], idx) => (
             <View key={idx} style={styles.checkRow}>
-              <Text style={styles.checkMark}>{val ? '✓' : '○'}</Text>
+              <Text style={styles.checkMark}>{val ? '[Y]' : '[ ]'}</Text>
               <Text style={styles.checkLabel}>{label}</Text>
             </View>
           ))}

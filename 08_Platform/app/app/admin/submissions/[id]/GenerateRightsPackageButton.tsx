@@ -90,7 +90,7 @@ export function GenerateRightsPackageButton({
     )
   }
 
-  // Creator Record: show a distinct "coming soon" state
+  // Creator Record: auto-generation should have run on payment. Show retry if PDF is missing.
   if (isCreatorRecord && !existingRightsPackage) {
     return (
       <Card className="border-amber-200 bg-amber-50">
@@ -100,13 +100,36 @@ export function GenerateRightsPackageButton({
             Creator Record PDF
           </CardTitle>
           <CardDescription className="text-amber-700">
-            Auto-approved. Self-attested PDF auto-generation coming soon.
+            Auto-generation did not complete. Click below to retry.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button disabled className="w-full">
-            <FileText className="w-4 h-4 mr-2" />
-            PDF Auto-Generation Pending
+          <Button
+            onClick={async () => {
+              setLoading(true)
+              try {
+                const res = await fetch(`/api/admin/submissions/${submissionId}/generate-creator-record`, { method: 'POST' })
+                const data = await res.json()
+                if (res.ok) {
+                  alert('Creator Record PDF generated successfully!')
+                  router.refresh()
+                } else {
+                  alert(`Error: ${data.error}`)
+                }
+              } catch (e) {
+                alert('Request failed — check Vercel logs')
+              } finally {
+                setLoading(false)
+              }
+            }}
+            disabled={loading}
+            className="w-full bg-amber-600 hover:bg-amber-700"
+          >
+            {loading ? (
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating...</>
+            ) : (
+              <><FileText className="w-4 h-4 mr-2" />Generate Creator Record PDF</>
+            )}
           </Button>
         </CardContent>
       </Card>

@@ -175,7 +175,7 @@ export const ChainOfTitlePDF: React.FC<{ data: ChainOfTitleData }> = ({ data }) 
           <Text style={styles.headerSubtitle}>
             Rights Verified Content • Catalog ID: {data.catalogId}
           </Text>
-          <Text style={styles.watermark}>✓ Rights Verified</Text>
+          <Text style={styles.watermark}>Rights Verified</Text>
         </View>
 
         {/* Film Information */}
