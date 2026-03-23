@@ -43,6 +43,7 @@ export async function sendSubmissionReceivedEmail(
   }
 }
 
+// SI8 Certified approval email (sent by admin after human review)
 export async function sendSubmissionApprovedEmail(
   creatorName: string,
   filmTitle: string,
@@ -53,14 +54,14 @@ export async function sendSubmissionApprovedEmail(
     await resend.emails.send({
       from: FROM_EMAIL,
       to: creatorEmail,
-      subject: `Approved: ${filmTitle} is Rights Verified!`,
+      subject: `Approved: ${filmTitle} — Chain of Title ready`,
       html: `
         <h2>Congratulations, ${creatorName}!</h2>
-        <p>Your submission <strong>${filmTitle}</strong> has been approved and is now <strong>Rights Verified</strong>.</p>
+        <p>Your submission <strong>${filmTitle}</strong> has passed SI8's Rights Verified review and is now cleared for commercial use.</p>
         <h3>What's Next?</h3>
         <ol>
-          <li><strong>Download your Rights Package PDF</strong> - Your Chain of Title documentation is ready</li>
-          <li><strong>Optional: List in SI8 Catalog</strong> - Opt-in to earn licensing revenue (you keep 80%)</li>
+          <li><strong>Download your Chain of Title PDF</strong> — Your commercial clearance documentation is ready in your dashboard</li>
+          <li><strong>Optional: List in SI8 Catalog</strong> — Opt in to earn licensing revenue (you keep 80%)</li>
         </ol>
         <p><a href="${dashboardUrl}" style="background: #818cf8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">View Your Dashboard</a></p>
         <br>
@@ -69,6 +70,50 @@ export async function sendSubmissionApprovedEmail(
     })
   } catch (error) {
     console.error('Error sending submission approved email:', error)
+  }
+}
+
+// Creator Record approval email (auto-sent on payment — no human review)
+export async function sendCreatorRecordApprovedEmail(
+  creatorName: string,
+  filmTitle: string,
+  dashboardUrl: string,
+  creatorEmail: string
+) {
+  try {
+    // Email to creator
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: creatorEmail,
+      subject: `Your Creator Record is ready: ${filmTitle}`,
+      html: `
+        <h2>Hi ${creatorName},</h2>
+        <p>Your Creator Record for <strong>${filmTitle}</strong> has been issued and your self-attested documentation PDF is ready to download.</p>
+        <p><strong>Important:</strong> Your Creator Record is stamped <em>"SELF-ATTESTED — NOT FOR COMMERCIAL USE."</em> It is suitable for personal records and portfolio documentation only.</p>
+        <h3>Want to use this film commercially?</h3>
+        <p>Upgrade to <strong>SI8 Certified ($499)</strong> for a human-reviewed Chain of Title stamped "CLEARED FOR COMMERCIAL USE." Required for brand placements, agency deliverables, streaming submissions, and E&O insurance.</p>
+        <p><a href="${dashboardUrl}" style="background: #d97706; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Download Your Creator Record PDF</a></p>
+        <br>
+        <p>Best,<br>The SI8 Team</p>
+      `,
+    })
+
+    // Admin notification (awareness only — no action required)
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject: `Creator Record submitted: ${filmTitle} — auto-approved`,
+      html: `
+        <h2>Creator Record auto-approved</h2>
+        <p><strong>Film:</strong> ${filmTitle}</p>
+        <p><strong>Creator:</strong> ${creatorName} (${creatorEmail})</p>
+        <p><strong>Tier:</strong> Creator Record ($29) — self-attested, no review required</p>
+        <p>PDF has been auto-generated and is available in the creator's dashboard.</p>
+        <p><a href="${process.env.NEXT_PUBLIC_SITE_URL}/admin">View in Admin Panel →</a></p>
+      `,
+    })
+  } catch (error) {
+    console.error('Error sending Creator Record approved email:', error)
   }
 }
 

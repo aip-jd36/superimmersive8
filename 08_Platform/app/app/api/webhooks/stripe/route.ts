@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { sendSubmissionReceivedEmail, sendSubmissionApprovedEmail } from '@/lib/emails'
+import { sendSubmissionReceivedEmail, sendCreatorRecordApprovedEmail, sendSubmissionApprovedEmail } from '@/lib/emails'
 import { generateCreatorRecordPDF } from '@/lib/pdf/generateChainOfTitle'
 
 export async function POST(request: NextRequest) {
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
       // submission received email for SI8 Certified (goes to human review queue)
       if (user && submission) {
         if (isCreatorRecord) {
-          await sendSubmissionApprovedEmail(
+          await sendCreatorRecordApprovedEmail(
             user.name || 'Creator',
             submission.title,
             `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/submissions/${submission.id}`,
