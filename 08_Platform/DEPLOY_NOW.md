@@ -15,60 +15,20 @@ You need:
 
 ---
 
-## Step 1: Supabase Storage (5 min)
+## Step 1: Supabase Storage ✅ ALREADY CONFIGURED
 
-**CRITICAL - File uploads won't work without this!**
+**All 6 buckets are live in production.** No action needed — confirmed Mar 23, 2026.
 
-### Create Bucket
-1. Go to: https://supabase.com/dashboard → Storage → Buckets
-2. Click "New bucket"
-3. Name: `submission-files`
-4. **Public: NO** ❌
-5. File size: 10 MB
-6. MIME types: `image/jpeg, image/png, application/pdf`
+| Bucket | Public | Purpose |
+|--------|--------|---------|
+| `submission-files` | No | Creator-uploaded receipts/files |
+| `documents` | **Yes** | Chain of Title + Creator Record PDFs (generated server-side) |
+| `catalog-videos` | Yes | Catalog video files |
+| `catalog-thumbnails` | Yes | Catalog thumbnail images |
+| `rights-packages` | No | (reserved) |
+| `receipts` | No | (reserved) |
 
-### Add Policies
-1. Go to: SQL Editor
-2. Paste and run this:
-
-```sql
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Creators can upload submission files"
-ON storage.objects FOR INSERT TO authenticated
-WITH CHECK (
-  bucket_id = 'submission-files' AND
-  (storage.foldername(name))[1] = auth.uid()::text
-);
-
-CREATE POLICY "Creators can read their own submission files"
-ON storage.objects FOR SELECT TO authenticated
-USING (
-  bucket_id = 'submission-files' AND
-  (storage.foldername(name))[1] = auth.uid()::text
-);
-
-CREATE POLICY "Admins can read all submission files"
-ON storage.objects FOR SELECT TO authenticated
-USING (
-  bucket_id = 'submission-files' AND
-  (SELECT is_admin FROM public.users WHERE id = auth.uid()) = true
-);
-
-CREATE POLICY "Admins can delete submission files"
-ON storage.objects FOR DELETE TO authenticated
-USING (
-  bucket_id = 'submission-files' AND
-  (SELECT is_admin FROM public.users WHERE id = auth.uid()) = true
-);
-
-CREATE POLICY "Creators can update their own submission files"
-ON storage.objects FOR UPDATE TO authenticated
-USING (
-  bucket_id = 'submission-files' AND
-  (storage.foldername(name))[1] = auth.uid()::text
-);
-```
+**PDF generation** (`generateChainOfTitle.tsx`, `generateCreatorRecordPDF()`) uploads to the `documents` bucket at path `rights-packages/{ID}_chain-of-title.pdf` or `rights-packages/{CR-ID}_creator-record.pdf`.
 
 ✅ **Done!** Storage is ready.
 
