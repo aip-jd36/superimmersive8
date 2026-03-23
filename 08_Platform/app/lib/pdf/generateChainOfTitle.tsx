@@ -1,5 +1,6 @@
 import { renderToStream } from '@react-pdf/renderer'
 import { ChainOfTitlePDF } from './ChainOfTitlePDF'
+import { CreatorRecordPDF } from './CreatorRecordPDF'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
 interface Tool {
@@ -159,4 +160,105 @@ function generateCommercialUseAuth(tools: Tool[]): string {
   }
 
   return `Tool plans have been reviewed. Some tools used free or non-commercial plans. Additional verification required before commercial licensing.`
+}
+
+// ─── Creator Record PDF ───────────────────────────────────────────────────────
+
+interface GenerateCreatorRecordParams {
+  submissionId: string
+  filmmakerName: string
+  title: string
+  tools: Tool[]
+  authorshipStatement?: string
+  likenessConfirmation?: Record<string, boolean>
+  ipConfirmation?: Record<string, boolean>
+  territory?: string
+}
+
+/**
+ * Auto-generate a Creator Record PDF (self-attested) and upload to Supabase Storage.
+ * Triggers automatically from the Stripe webhook on Creator Record payment.
+ * Does NOT require admin auth or a catalog ID.
+ */
+export async function generateCreatorRecordPDF(
+  params: GenerateCreatorRecordParams
+): Promise<string | null> {
+  try {
+    // Auto-assign a Creator Record ID: CR-YYYY-{first8ofUUID}
+    const year = new Date().getFullYear()
+    const shortId = params.submissionId.replace(/-/g, '').slice(0, 8).toUpperCase()
+    const creatorRecordId = `CR-${year}-${shortId}`
+
+    console.log('📄 Generating Creator Record PDF:', creatorRecordId)
+
+    const pdfData = {
+      creatorRecordId,
+      filmmakerName: params.filmmakerName,
+      title: params.title,
+      issuedAt: new Date().toISOString(),
+      tools: params.tools,
+      authorshipStatement: params.authorshipStatement,
+      likenessConfirmation: params.likenessConfirmation,
+      ipConfirmation: params.ipConfirmation,
+      territory: params.territory || 'Global',
+    }
+
+    // Generate PDF stream
+    const pdfStream = await renderToStream(<CreatorRecordPDF data={pdfData} />)
+
+    // Convert stream to buffer
+    const chunks: Buffer[] = []
+    for await (const chunk of pdfStream) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+    }
+    const pdfBuffer = Buffer.concat(chunks)
+
+    // Upload to Supabase Storage
+    const fileName = `${creatorRecordId}_creator-record.pdf`
+    const filePath = `rights-packages/${fileName}`
+
+    console.log('📤 Uploading Creator Record PDF:', filePath)
+
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from('documents')
+      .upload(filePath, pdfBuffer, {
+        contentType: 'application/pdf',
+        upsert: true,
+      })
+
+    if (uploadError) {
+      console.error('❌ Creator Record upload error:', uploadError)
+      throw uploadError
+    }
+
+    // Get public URL
+    const { data: urlData } = supabaseAdmin.storage
+      .from('documents')
+      .getPublicUrl(filePath)
+
+    const pdfUrl = urlData.publicUrl
+
+    // Insert into rights_packages table
+    const { error: dbError } = await supabaseAdmin
+      .from('rights_packages')
+      .upsert({
+        submission_id: params.submissionId,
+        catalog_id: creatorRecordId,
+        document_url: pdfUrl,
+        document_path: filePath,
+        generated_at: new Date().toISOString(),
+        format: 'pdf',
+      })
+
+    if (dbError) {
+      console.error('❌ Creator Record DB error:', dbError)
+      // Don't throw — PDF is uploaded, DB update is secondary
+    }
+
+    console.log('✅ Creator Record PDF generated:', pdfUrl)
+    return pdfUrl
+  } catch (error) {
+    console.error('❌ Error generating Creator Record PDF:', error)
+    return null
+  }
 }

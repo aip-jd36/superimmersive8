@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { sendSubmissionReceivedEmail, sendSubmissionApprovedEmail } from '@/lib/emails'
+import { generateCreatorRecordPDF } from '@/lib/pdf/generateChainOfTitle'
 
 export async function POST(request: NextRequest) {
   const body = await request.text()
@@ -72,6 +73,36 @@ export async function POST(request: NextRequest) {
         .select('name, email')
         .eq('id', submission.user_id)
         .single()
+
+      // Auto-generate Creator Record PDF (self-attested)
+      if (isCreatorRecord) {
+        console.log('📄 Webhook: Auto-generating Creator Record PDF...')
+        try {
+          let tools: any[] = []
+          try { tools = JSON.parse(submission.tools_used as string || '[]') } catch {}
+
+          let likenessConfirmation: Record<string, boolean> = {}
+          try { likenessConfirmation = JSON.parse(submission.likeness_confirmation as string || '{}') } catch {}
+
+          let ipConfirmation: Record<string, boolean> = {}
+          try { ipConfirmation = JSON.parse(submission.ip_confirmation as string || '{}') } catch {}
+
+          await generateCreatorRecordPDF({
+            submissionId: submission.id,
+            filmmakerName: submission.filmmaker_name || 'Unknown',
+            title: submission.title,
+            tools,
+            authorshipStatement: submission.authorship_statement || undefined,
+            likenessConfirmation,
+            ipConfirmation,
+            territory: submission.territory_preferences || submission.territory || 'Global',
+          })
+          console.log('✅ Webhook: Creator Record PDF generated')
+        } catch (pdfError) {
+          // PDF generation failure must not block webhook — creator can get PDF later
+          console.error('⚠️ Webhook: Creator Record PDF generation failed (non-fatal):', pdfError)
+        }
+      }
 
       // Send confirmation email — approval email for Creator Record (auto-approved),
       // submission received email for SI8 Certified (goes to human review queue)
