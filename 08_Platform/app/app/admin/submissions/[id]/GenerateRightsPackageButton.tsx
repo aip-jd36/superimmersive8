@@ -10,6 +10,7 @@ type Props = {
   submissionId: string
   catalogId: string | null
   currentStatus: string
+  tier?: string | null
   existingRightsPackage?: {
     id: string
     document_url: string | null
@@ -21,13 +22,16 @@ export function GenerateRightsPackageButton({
   submissionId,
   catalogId,
   currentStatus,
+  tier,
   existingRightsPackage
 }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
 
-  // Can only generate if approved and has catalog ID
-  const canGenerate = currentStatus === 'approved' && catalogId && !existingRightsPackage
+  const isCreatorRecord = tier === 'creator_record'
+  // SI8 Certified: can generate if approved + has catalog ID
+  // Creator Record: auto-approved but PDF auto-generation not yet built
+  const canGenerate = !isCreatorRecord && currentStatus === 'approved' && catalogId && !existingRightsPackage
 
   const handleGenerate = async () => {
     if (!confirm('Generate Chain of Title document? All fields will be auto-populated from submission data.')) {
@@ -86,6 +90,29 @@ export function GenerateRightsPackageButton({
     )
   }
 
+  // Creator Record: show a distinct "coming soon" state
+  if (isCreatorRecord && !existingRightsPackage) {
+    return (
+      <Card className="border-amber-200 bg-amber-50">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-amber-800 flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            Creator Record PDF
+          </CardTitle>
+          <CardDescription className="text-amber-700">
+            Auto-approved. Self-attested PDF auto-generation coming soon.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button disabled className="w-full">
+            <FileText className="w-4 h-4 mr-2" />
+            PDF Auto-Generation Pending
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card className={canGenerate ? 'border-blue-200 bg-blue-50' : ''}>
       <CardHeader className="pb-3">
@@ -94,7 +121,8 @@ export function GenerateRightsPackageButton({
           Chain of Title
         </CardTitle>
         <CardDescription>
-          {!canGenerate && !catalogId && 'Approval required first'}
+          {!canGenerate && !catalogId && currentStatus !== 'approved' && 'Approval required first'}
+          {!canGenerate && !catalogId && currentStatus === 'approved' && 'Assign a Catalog ID to enable PDF generation'}
           {!canGenerate && catalogId && 'Not yet generated'}
           {canGenerate && 'Ready to generate (auto-populated from submission)'}
         </CardDescription>
@@ -121,7 +149,7 @@ export function GenerateRightsPackageButton({
         ) : (
           <Button disabled className="w-full">
             <FileText className="w-4 h-4 mr-2" />
-            {!catalogId ? 'Approve First' : 'Already Generated'}
+            {currentStatus !== 'approved' ? 'Approve First' : !catalogId ? 'Needs Catalog ID' : 'Already Generated'}
           </Button>
         )}
       </CardContent>

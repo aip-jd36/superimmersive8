@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { sendSubmissionReceivedEmail } from '@/lib/emails'
+import { sendSubmissionReceivedEmail, sendSubmissionApprovedEmail } from '@/lib/emails'
 
 export async function POST(request: NextRequest) {
   const body = await request.text()
@@ -73,13 +73,23 @@ export async function POST(request: NextRequest) {
         .eq('id', submission.user_id)
         .single()
 
-      // Send confirmation email
+      // Send confirmation email — approval email for Creator Record (auto-approved),
+      // submission received email for SI8 Certified (goes to human review queue)
       if (user && submission) {
-        await sendSubmissionReceivedEmail(
-          user.name || 'Creator',
-          submission.title,
-          user.email
-        )
+        if (isCreatorRecord) {
+          await sendSubmissionApprovedEmail(
+            user.name || 'Creator',
+            submission.title,
+            `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/submissions/${submission.id}`,
+            user.email
+          )
+        } else {
+          await sendSubmissionReceivedEmail(
+            user.name || 'Creator',
+            submission.title,
+            user.email
+          )
+        }
         console.log('✅ Webhook: Confirmation email sent')
       }
 

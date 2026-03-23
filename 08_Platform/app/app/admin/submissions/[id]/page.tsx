@@ -289,6 +289,7 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
               submissionId={params.id}
               catalogId={optIn?.catalog_id || null}
               currentStatus={submission.status}
+              tier={submission.tier || null}
               existingRightsPackage={rightsPackage}
             />
 
