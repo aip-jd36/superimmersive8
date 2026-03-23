@@ -239,6 +239,7 @@ export async function generateCreatorRecordPDF(
     const pdfUrl = urlData.publicUrl
 
     // Insert into rights_packages table
+    // Provide placeholder values for NOT NULL columns — Creator Records are self-attested
     const { error: dbError } = await supabaseAdmin
       .from('rights_packages')
       .upsert({
@@ -248,6 +249,46 @@ export async function generateCreatorRecordPDF(
         document_path: filePath,
         generated_at: new Date().toISOString(),
         format: 'pdf',
+        // Required NOT NULL columns — self-attested values for Creator Record tier
+        tool_provenance_log: {
+          tools: params.tools.map(t => ({
+            name: t.tool_name || 'Unknown',
+            version: t.version || 'Not specified',
+            plan_type: t.plan_type || 'Not specified',
+            self_attested: true,
+          })),
+          verification_date: new Date().toISOString(),
+          tier: 'creator_record',
+        },
+        model_disclosure: params.tools.length > 0
+          ? `Self-declared tools: ${params.tools.map(t => t.tool_name).join(', ')}`
+          : 'No AI tools declared',
+        rights_verified_signoff: {
+          reviewer: 'Self-attested',
+          date: new Date().toISOString(),
+          tier: 'creator_record',
+          status: 'self_attested',
+        },
+        commercial_use_authorization: {
+          authorized: false,
+          basis: 'Self-attested Creator Record — NOT FOR COMMERCIAL USE',
+          upgrade_required: true,
+        },
+        modification_rights_status: {
+          authorized: false,
+          scope: 'Creator Record — not applicable',
+        },
+        category_conflict_log: [],
+        territory_log: params.territory || 'Global',
+        regeneration_rights_status: {
+          authorized: false,
+          scope: 'Creator Record — not applicable',
+        },
+        version_history: {
+          current_version: 'v1.0',
+          created_date: new Date().toISOString(),
+          changes: [{ version: 'v1.0', date: new Date().toISOString(), description: 'Creator Record auto-generated on payment' }],
+        },
       })
 
     if (dbError) {
