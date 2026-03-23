@@ -63,7 +63,7 @@ export default async function AdminDashboard() {
     if (status === 'paid') {
       return (
         <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700">
-          ✓ Paid {amount ? formatCurrency(amount / 100) : ''}
+          ✓ Paid {amount ? formatCurrency(amount) : ''}
         </span>
       )
     }
