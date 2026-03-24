@@ -38,7 +38,7 @@ const SECTION_NAMES: Record<number, string> = {
   6: 'IP & Brand',
   7: 'Audio & Music',
   8: 'Territory',
-  9: 'Video & Catalog',
+  9: 'Video & Showcase',
   10: 'Review & Payment',
 }
 
@@ -253,7 +253,7 @@ const submissionSchema = z.object({
   territory_other: z.string().optional(),
   existing_restrictions: z.string().optional(),
 
-  // Section 9 — Video & Catalog
+  // Section 9 — Video & Showcase
   video_url: z.string().url('Must be a valid URL (YouTube or Vimeo)').min(1, 'Video URL is required'),
   thumbnail_url: z.string().url().optional(),
   public_description: z.string().max(500).optional(),
@@ -695,7 +695,7 @@ export default function SubmitPage() {
                           <option value="brand_commercial">Brand Commercial / Advertisement</option>
                           <option value="agency_deliverable">Agency Deliverable / Client Work</option>
                           <option value="streaming_submission">Streaming Platform Submission</option>
-                          <option value="licensing_marketplace">Licensing Marketplace (catalog listing)</option>
+                          <option value="licensing_marketplace">Licensing Marketplace (Showcase)</option>
                           <option value="festival">Film Festival</option>
                           <option value="social_media">Social Media / YouTube</option>
                           <option value="portfolio">Portfolio / Personal Project</option>
@@ -1133,7 +1133,7 @@ export default function SubmitPage() {
                       <ChainOfTitleCallout
                         fieldNumber={7}
                         fieldName="Territory Log"
-                        description="Your territory selection is documented in the Chain of Title and governs the geographic scope of any licensing deals negotiated through the catalog."
+                        description="Your territory selection is documented in the Chain of Title and governs the geographic scope of any licensing deals negotiated through the Showcase."
                       />
 
                       <div>
@@ -1173,10 +1173,10 @@ export default function SubmitPage() {
                     </div>
                   )}
 
-                  {/* ── Section 9: Video & Catalog ── */}
+                  {/* ── Section 9: Video & Showcase ── */}
                   {currentSection === 9 && (
                     <div className="space-y-4">
-                      <h3 className="text-lg font-semibold">9. Video & Catalog Listing</h3>
+                      <h3 className="text-lg font-semibold">9. Video & Showcase Listing</h3>
 
                       <ChainOfTitleCallout
                         fieldNumber={9}
@@ -1198,11 +1198,11 @@ export default function SubmitPage() {
                       </div>
 
                       <div>
-                        <Label htmlFor="public_description">Public Catalog Description (optional)</Label>
+                        <Label htmlFor="public_description">Showcase Description (optional)</Label>
                         <textarea
                           id="public_description"
                           className="w-full min-h-[80px] px-3 py-2 text-sm border rounded-md"
-                          placeholder="Brief description for public catalog (max 500 characters)"
+                          placeholder="Brief description for Showcase (max 500 characters)"
                           {...register('public_description')}
                         />
                         <p className="text-xs text-gray-500 mt-1">If not provided, we'll use your logline.</p>
@@ -1213,9 +1213,9 @@ export default function SubmitPage() {
                           <div className="flex items-start gap-3">
                             <input type="checkbox" id="catalog_opt_in" className="mt-1" {...register('catalog_opt_in')} />
                             <div>
-                              <Label htmlFor="catalog_opt_in" className="cursor-pointer font-medium">List in Public Catalog (after approval)</Label>
+                              <Label htmlFor="catalog_opt_in" className="cursor-pointer font-medium">List in Showcase (after approval)</Label>
                               <p className="text-xs text-gray-600 mt-1">
-                                Your film appears in our marketplace with a Rights Verified badge. When brands license your work, you keep 80% of the fee. You can opt out at any time from your dashboard.
+                                Your film appears in our Showcase with a Rights Verified badge. When brands license your work, you keep 80% of the fee. You can opt out at any time from your dashboard.
                               </p>
                             </div>
                           </div>
@@ -1224,7 +1224,7 @@ export default function SubmitPage() {
 
                       {submissionMode === 'agency' && (
                         <div className="bg-gray-50 p-4 rounded-md text-sm text-gray-500 border border-gray-200">
-                          Catalog listing is not available for agency submissions. The Chain of Title is delivered directly to you.
+                          Showcase listing is not available for agency submissions. The Chain of Title is delivered directly to you.
                         </div>
                       )}
 
