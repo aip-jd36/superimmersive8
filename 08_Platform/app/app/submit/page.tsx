@@ -28,35 +28,33 @@ const submissionSchema = z.object({
   // Section 4: Human Authorship Declaration
   authorship_statement: z.string().min(150, 'Must be at least 150 words'),
 
-  // Section 5: Likeness & Identity (4 individual checkboxes - all required)
-  likeness_no_real_faces: z.boolean().refine((val) => val === true, 'Required'),
-  likeness_no_real_voices: z.boolean().refine((val) => val === true, 'Required'),
-  likeness_no_lookalikes: z.boolean().refine((val) => val === true, 'Required'),
-  likeness_no_synthetic_people: z.boolean().refine((val) => val === true, 'Required'),
+  // Section 5: Likeness & Identity (4 individual checkboxes)
+  likeness_no_real_faces: z.boolean().optional(),
+  likeness_no_real_voices: z.boolean().optional(),
+  likeness_no_lookalikes: z.boolean().optional(),
+  likeness_no_synthetic_people: z.boolean().optional(),
+  likeness_has_licensed_content: z.boolean().optional(),
+  likeness_license_notes: z.string().optional(),
 
-  // Section 6: IP & Brand (3 individual checkboxes - all required)
-  ip_no_copyrighted_characters: z.boolean().refine((val) => val === true, 'Required'),
-  ip_no_brand_imitation: z.boolean().refine((val) => val === true, 'Required'),
-  ip_no_trademarked_ip: z.boolean().refine((val) => val === true, 'Required'),
+  // Section 6: IP & Brand (3 individual checkboxes)
+  ip_no_copyrighted_characters: z.boolean().optional(),
+  ip_no_brand_imitation: z.boolean().optional(),
+  ip_no_trademarked_ip: z.boolean().optional(),
+  ip_has_licensed_content: z.boolean().optional(),
+  ip_license_notes: z.string().optional(),
 
   // Section 7: Audio & Music
   audio_source: z.enum(['ai_generated', 'licensed', 'silent']),
   audio_documentation: z.string().optional(),
 
-  // Section 8: Modification Rights
-  modification_rights: z.enum(['full', 'scenes', 'no'], {
-    required_error: 'Please select an option',
-  }),
-  modification_scope: z.string().optional(),
-
-  // Section 9: Territory
+  // Section 8: Territory
   territory: z.enum(['Global', 'North America', 'Europe', 'Asia', 'Other'], {
     required_error: 'Please select a territory',
   }),
   territory_other: z.string().optional(),
   existing_restrictions: z.string().optional(),
 
-  // Section 10: Supporting Materials + Catalog Opt-In
+  // Section 9: Supporting Materials + Catalog Opt-In
   video_url: z.string().url('Must be a valid URL (YouTube or Vimeo)').min(1, 'Video URL is required'),
   thumbnail_url: z.string().url().optional(),
   public_description: z.string().max(500).optional(),
@@ -82,7 +80,14 @@ export default function SubmitPage() {
   // Section 4: Evidence Custodian
   const [evidenceCustodian, setEvidenceCustodian] = useState(false)
   const [evidenceCustodianError, setEvidenceCustodianError] = useState<string | null>(null)
-  // Section 11: Indemnification
+  // Section 5: Likeness error
+  const [likenessError, setLikenessError] = useState<string | null>(null)
+  // Section 6: IP error
+  const [ipError, setIpError] = useState<string | null>(null)
+  // Section 7: Audio license upload
+  const [audioLicensePath, setAudioLicensePath] = useState<string | null>(null)
+  const [audioLicenseUploading, setAudioLicenseUploading] = useState(false)
+  // Section 10 (was 11): Indemnification
   const [indemnificationAccepted, setIndemnificationAccepted] = useState(false)
   const [indemnificationError, setIndemnificationError] = useState<string | null>(null)
   const supabase = createClient()
@@ -97,7 +102,6 @@ export default function SubmitPage() {
     resolver: zodResolver(submissionSchema),
     defaultValues: {
       territory: 'Global',
-      modification_rights: 'no',
       likeness_no_real_faces: false,
       likeness_no_real_voices: false,
       likeness_no_lookalikes: false,
@@ -236,24 +240,29 @@ export default function SubmitPage() {
           no_real_voices: data.likeness_no_real_voices || false,
           no_lookalikes: data.likeness_no_lookalikes || false,
           no_synthetic_people: data.likeness_no_synthetic_people || false,
-          all_confirmed: data.likeness_no_real_faces && data.likeness_no_real_voices && data.likeness_no_lookalikes && data.likeness_no_synthetic_people
+          all_confirmed: data.likeness_no_real_faces && data.likeness_no_real_voices && data.likeness_no_lookalikes && data.likeness_no_synthetic_people,
+          has_licensed_content: watch('likeness_has_licensed_content') || false,
+          license_notes: watch('likeness_license_notes') || null,
         }),
         ip_confirmation: JSON.stringify({
           no_copyrighted_characters: data.ip_no_copyrighted_characters || false,
           no_brand_imitation: data.ip_no_brand_imitation || false,
           no_trademarked_ip: data.ip_no_trademarked_ip || false,
-          all_confirmed: data.ip_no_copyrighted_characters && data.ip_no_brand_imitation && data.ip_no_trademarked_ip
+          all_confirmed: data.ip_no_copyrighted_characters && data.ip_no_brand_imitation && data.ip_no_trademarked_ip,
+          has_licensed_content: watch('ip_has_licensed_content') || false,
+          license_notes: watch('ip_license_notes') || null,
         }),
 
         // Audio (JSONB with source_type and documentation)
         audio_disclosure: JSON.stringify({
           source_type: data.audio_source || 'not_specified',
-          documentation: data.audio_documentation || null
+          documentation: data.audio_documentation || null,
+          license_path: audioLicensePath || null,
         }),
 
-        // Modification Rights
-        modification_authorized: data.modification_rights === 'full' || data.modification_rights === 'scenes',
-        modification_scope: data.modification_rights === 'scenes' ? data.modification_scope : null,
+        // Modification Rights (removed — defaulting to false)
+        modification_authorized: false,
+        modification_scope: null,
 
         // Territory
         territory_preferences: data.territory === 'Other' ? data.territory_other : data.territory,
@@ -345,13 +354,13 @@ export default function SubmitPage() {
             </CardDescription>
             <div className="mt-4">
               <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-                <span>Progress: Section {currentSection} of 11</span>
-                <span>{Math.round((currentSection / 11) * 100)}% Complete</span>
+                <span>Progress: Section {currentSection} of 10</span>
+                <span>{Math.round((currentSection / 10) * 100)}% Complete</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div
                   className="bg-primary h-2 rounded-full transition-all"
-                  style={{ width: `${(currentSection / 11) * 100}%` }}
+                  style={{ width: `${(currentSection / 10) * 100}%` }}
                 />
               </div>
             </div>
@@ -674,7 +683,7 @@ export default function SubmitPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">5. Likeness & Identity Confirmation</h3>
                   <p className="text-sm text-gray-600">
-                    All checkboxes must be checked to proceed. We cannot accept content with real person likenesses without proper authorization.
+                    Confirm that your work does not contain unlicensed real person likenesses, or declare your licensed content below.
                   </p>
 
                   <div className="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -686,12 +695,9 @@ export default function SubmitPage() {
                         className="h-4 w-4 mt-1 flex-shrink-0"
                       />
                       <Label htmlFor="likeness_no_real_faces" className="cursor-pointer">
-                        No real person faces without consent *
+                        No real person faces without consent
                       </Label>
                     </div>
-                    {errors.likeness_no_real_faces && (
-                      <p className="text-sm text-red-500 ml-7">{errors.likeness_no_real_faces.message}</p>
-                    )}
 
                     <div className="flex items-start space-x-3">
                       <input
@@ -701,12 +707,9 @@ export default function SubmitPage() {
                         className="h-4 w-4 mt-1 flex-shrink-0"
                       />
                       <Label htmlFor="likeness_no_real_voices" className="cursor-pointer">
-                        No real person voices without consent *
+                        No real person voices without consent
                       </Label>
                     </div>
-                    {errors.likeness_no_real_voices && (
-                      <p className="text-sm text-red-500 ml-7">{errors.likeness_no_real_voices.message}</p>
-                    )}
 
                     <div className="flex items-start space-x-3">
                       <input
@@ -716,12 +719,9 @@ export default function SubmitPage() {
                         className="h-4 w-4 mt-1 flex-shrink-0"
                       />
                       <Label htmlFor="likeness_no_lookalikes" className="cursor-pointer">
-                        No lookalikes or impersonation of real people *
+                        No lookalikes or impersonation of real people
                       </Label>
                     </div>
-                    {errors.likeness_no_lookalikes && (
-                      <p className="text-sm text-red-500 ml-7">{errors.likeness_no_lookalikes.message}</p>
-                    )}
 
                     <div className="flex items-start space-x-3">
                       <input
@@ -731,19 +731,56 @@ export default function SubmitPage() {
                         className="h-4 w-4 mt-1 flex-shrink-0"
                       />
                       <Label htmlFor="likeness_no_synthetic_people" className="cursor-pointer">
-                        No synthetic versions of real people (deepfakes) *
+                        No synthetic versions of real people (deepfakes)
                       </Label>
                     </div>
-                    {errors.likeness_no_synthetic_people && (
-                      <p className="text-sm text-red-500 ml-7">{errors.likeness_no_synthetic_people.message}</p>
+
+                    <div className="border-t border-gray-300 my-3 flex items-center"><span className="px-3 text-xs text-gray-400 bg-gray-50">OR</span></div>
+
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        id="likeness_has_licensed_content"
+                        {...register('likeness_has_licensed_content')}
+                        className="h-4 w-4 mt-1 flex-shrink-0"
+                      />
+                      <Label htmlFor="likeness_has_licensed_content" className="cursor-pointer">
+                        This work contains real person faces, voices, or likenesses — I have written consent or a signed license on file
+                      </Label>
+                    </div>
+
+                    {watch('likeness_has_licensed_content') && (
+                      <div className="ml-7 mt-2">
+                        <Label htmlFor="likeness_license_notes">Describe the consent/license arrangement *</Label>
+                        <textarea
+                          id="likeness_license_notes"
+                          {...register('likeness_license_notes')}
+                          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1"
+                          placeholder="e.g., Written consent signed by [Name] on [date], covering [scope]. License documentation retained internally."
+                        />
+                      </div>
                     )}
+
+                    {likenessError && <p className="text-sm text-red-500">{likenessError}</p>}
                   </div>
 
                   <div className="flex gap-4">
                     <Button type="button" variant="outline" onClick={() => setCurrentSection(4)}>
                       ← Back
                     </Button>
-                    <Button type="button" onClick={() => setCurrentSection(6)}>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        const noneChecked = !watch('likeness_no_real_faces') && !watch('likeness_no_real_voices') && !watch('likeness_no_lookalikes') && !watch('likeness_no_synthetic_people')
+                        const hasLicensed = watch('likeness_has_licensed_content')
+                        if (noneChecked && !hasLicensed) {
+                          setLikenessError('Please confirm your likeness commitments or declare your licensed content')
+                        } else {
+                          setLikenessError(null)
+                          setCurrentSection(6)
+                        }
+                      }}
+                    >
                       Continue →
                     </Button>
                   </div>
@@ -755,7 +792,7 @@ export default function SubmitPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">6. IP & Brand Confirmation</h3>
                   <p className="text-sm text-gray-600">
-                    All checkboxes must be checked to proceed. We cannot accept content that infringes on existing intellectual property.
+                    Confirm that your work does not contain unlicensed intellectual property, or declare your licensed content below.
                   </p>
 
                   <div className="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -767,12 +804,9 @@ export default function SubmitPage() {
                         className="h-4 w-4 mt-1 flex-shrink-0"
                       />
                       <Label htmlFor="ip_no_copyrighted_characters" className="cursor-pointer">
-                        No copyrighted characters (e.g., Marvel, Disney, anime characters) *
+                        No copyrighted characters (e.g., Marvel, Disney, anime characters)
                       </Label>
                     </div>
-                    {errors.ip_no_copyrighted_characters && (
-                      <p className="text-sm text-red-500 ml-7">{errors.ip_no_copyrighted_characters.message}</p>
-                    )}
 
                     <div className="flex items-start space-x-3">
                       <input
@@ -782,12 +816,9 @@ export default function SubmitPage() {
                         className="h-4 w-4 mt-1 flex-shrink-0"
                       />
                       <Label htmlFor="ip_no_brand_imitation" className="cursor-pointer">
-                        No recognizable brand imitation (logos, trade dress, packaging) *
+                        No recognizable brand imitation (logos, trade dress, packaging)
                       </Label>
                     </div>
-                    {errors.ip_no_brand_imitation && (
-                      <p className="text-sm text-red-500 ml-7">{errors.ip_no_brand_imitation.message}</p>
-                    )}
 
                     <div className="flex items-start space-x-3">
                       <input
@@ -797,19 +828,56 @@ export default function SubmitPage() {
                         className="h-4 w-4 mt-1 flex-shrink-0"
                       />
                       <Label htmlFor="ip_no_trademarked_ip" className="cursor-pointer">
-                        No trademarked intellectual property without authorization *
+                        No trademarked intellectual property without authorization
                       </Label>
                     </div>
-                    {errors.ip_no_trademarked_ip && (
-                      <p className="text-sm text-red-500 ml-7">{errors.ip_no_trademarked_ip.message}</p>
+
+                    <div className="border-t border-gray-300 my-3 flex items-center"><span className="px-3 text-xs text-gray-400 bg-gray-50">OR</span></div>
+
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        id="ip_has_licensed_content"
+                        {...register('ip_has_licensed_content')}
+                        className="h-4 w-4 mt-1 flex-shrink-0"
+                      />
+                      <Label htmlFor="ip_has_licensed_content" className="cursor-pointer">
+                        This work contains licensed brand or IP elements — I have written authorization on file
+                      </Label>
+                    </div>
+
+                    {watch('ip_has_licensed_content') && (
+                      <div className="ml-7 mt-2">
+                        <Label htmlFor="ip_license_notes">Describe the consent/license arrangement *</Label>
+                        <textarea
+                          id="ip_license_notes"
+                          {...register('ip_license_notes')}
+                          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1"
+                          placeholder="e.g., Written consent signed by [Name] on [date], covering [scope]. License documentation retained internally."
+                        />
+                      </div>
                     )}
+
+                    {ipError && <p className="text-sm text-red-500">{ipError}</p>}
                   </div>
 
                   <div className="flex gap-4">
                     <Button type="button" variant="outline" onClick={() => setCurrentSection(5)}>
                       ← Back
                     </Button>
-                    <Button type="button" onClick={() => setCurrentSection(7)}>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        const noneChecked = !watch('ip_no_copyrighted_characters') && !watch('ip_no_brand_imitation') && !watch('ip_no_trademarked_ip')
+                        const hasLicensed = watch('ip_has_licensed_content')
+                        if (noneChecked && !hasLicensed) {
+                          setIpError('Please confirm your IP commitments or declare your licensed content')
+                        } else {
+                          setIpError(null)
+                          setCurrentSection(7)
+                        }
+                      }}
+                    >
                       Continue →
                     </Button>
                   </div>
@@ -833,114 +901,61 @@ export default function SubmitPage() {
                     </select>
                   </div>
 
+                  {watch('audio_source') === 'licensed' && (
+                    <div className="space-y-2">
+                      <Label>License Documentation *</Label>
+                      <p className="text-xs text-gray-500">Upload your music/audio license, sync license, or permission letter (PDF, JPG, PNG — max 10MB)</p>
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0]
+                          if (!file) return
+                          if (file.size > 10 * 1024 * 1024) {
+                            alert('File must be under 10MB')
+                            return
+                          }
+                          setAudioLicenseUploading(true)
+                          const path = `${userId}/audio-license-${Date.now()}.${file.name.split('.').pop()}`
+                          const { error } = await supabase.storage.from('submission-files').upload(path, file)
+                          if (!error) {
+                            setAudioLicensePath(path)
+                          } else {
+                            alert('Upload failed. Please try again.')
+                          }
+                          setAudioLicenseUploading(false)
+                        }}
+                      />
+                      {audioLicenseUploading && <p className="text-xs text-blue-600">Uploading...</p>}
+                      {audioLicensePath && <p className="text-xs text-green-600">License uploaded successfully.</p>}
+                    </div>
+                  )}
+
                   <div className="flex gap-4">
                     <Button type="button" variant="outline" onClick={() => setCurrentSection(6)}>
                       ← Back
                     </Button>
-                    <Button type="button" onClick={() => setCurrentSection(submissionMode === 'agency' ? 10 : 8)}>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        if (watch('audio_source') === 'licensed' && !audioLicensePath) {
+                          alert('Please upload your audio license documentation before continuing.')
+                          return
+                        }
+                        setCurrentSection(submissionMode === 'agency' ? 9 : 8)
+                      }}
+                    >
                       Continue →
                     </Button>
                   </div>
                 </div>
               )}
 
-              {/* Section 8: Modification Rights (creator mode only) */}
+              {/* Section 8: Territory (creator mode only) */}
               {currentSection === 8 && submissionMode === 'creator' && (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">8. Modification Rights Authorization</h3>
-                  <p className="text-sm text-gray-600">
-                    Do you authorize SI8 to commission AI-regenerated brand-integrated versions for Custom AI Placement deals?
-                  </p>
-
-                  <div className="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <div className="flex items-start space-x-3">
-                      <input
-                        type="radio"
-                        id="modification_full"
-                        value="full"
-                        {...register('modification_rights')}
-                        className="h-4 w-4 mt-1"
-                      />
-                      <Label htmlFor="modification_full" className="cursor-pointer">
-                        <div>
-                          <div className="font-medium">Yes, full work</div>
-                          <div className="text-sm text-gray-600">
-                            SI8 can regenerate any part of this work for brand placement
-                          </div>
-                        </div>
-                      </Label>
-                    </div>
-
-                    <div className="flex items-start space-x-3">
-                      <input
-                        type="radio"
-                        id="modification_scenes"
-                        value="scenes"
-                        {...register('modification_rights')}
-                        className="h-4 w-4 mt-1"
-                      />
-                      <Label htmlFor="modification_scenes" className="cursor-pointer">
-                        <div>
-                          <div className="font-medium">Yes, specific scenes only</div>
-                          <div className="text-sm text-gray-600">
-                            I'll specify which scenes can be regenerated (describe below)
-                          </div>
-                        </div>
-                      </Label>
-                    </div>
-
-                    {watch('modification_rights') === 'scenes' && (
-                      <div className="ml-7 mt-2">
-                        <Label htmlFor="modification_scope">
-                          Describe which scenes can be modified *
-                        </Label>
-                        <textarea
-                          id="modification_scope"
-                          {...register('modification_scope')}
-                          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1"
-                          placeholder="e.g., 'Scene 2 (0:15-0:45) where the protagonist walks through the city'"
-                        />
-                      </div>
-                    )}
-
-                    <div className="flex items-start space-x-3">
-                      <input
-                        type="radio"
-                        id="modification_no"
-                        value="no"
-                        {...register('modification_rights')}
-                        className="h-4 w-4 mt-1"
-                      />
-                      <Label htmlFor="modification_no" className="cursor-pointer">
-                        <div>
-                          <div className="font-medium">No</div>
-                          <div className="text-sm text-gray-600">
-                            I do not authorize modifications (catalog licensing only)
-                          </div>
-                        </div>
-                      </Label>
-                    </div>
-                  </div>
-
-                  {errors.modification_rights && (
-                    <p className="text-sm text-red-500">{errors.modification_rights.message}</p>
-                  )}
-
-                  <div className="flex gap-4">
-                    <Button type="button" variant="outline" onClick={() => setCurrentSection(7)}>
-                      ← Back
-                    </Button>
-                    <Button type="button" onClick={() => setCurrentSection(9)}>
-                      Continue →
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {/* Section 9: Territory (creator mode only) */}
-              {currentSection === 9 && submissionMode === 'creator' && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">9. Territory & Exclusivity Preferences</h3>
+                  <h3 className="text-lg font-semibold">8. Territory & Exclusivity Preferences</h3>
                   <p className="text-sm text-gray-600">
                     Specify the geographic territory for licensing rights.
                   </p>
@@ -988,20 +1003,20 @@ export default function SubmitPage() {
                   </div>
 
                   <div className="flex gap-4">
-                    <Button type="button" variant="outline" onClick={() => setCurrentSection(8)}>
+                    <Button type="button" variant="outline" onClick={() => setCurrentSection(7)}>
                       ← Back
                     </Button>
-                    <Button type="button" onClick={() => setCurrentSection(10)}>
+                    <Button type="button" onClick={() => setCurrentSection(9)}>
                       Continue →
                     </Button>
                   </div>
                 </div>
               )}
 
-              {/* Section 10: Video & Catalog */}
-              {currentSection === 10 && (
+              {/* Section 9: Video & Catalog */}
+              {currentSection === 9 && (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">10. Video & Catalog Listing</h3>
+                  <h3 className="text-lg font-semibold">9. Video & Catalog Listing</h3>
                   <p className="text-sm text-gray-600">
                     Provide a link to your video (YouTube or Vimeo) and optionally list it in our public catalog after approval.
                   </p>
@@ -1046,7 +1061,7 @@ export default function SubmitPage() {
                     </p>
                   </div>
 
-                  {submissionMode === 'creator' && selectedTier === 'certified' && (
+                  {submissionMode === 'creator' && (
                     <div className="bg-blue-50 p-4 rounded-md">
                       <div className="flex items-start gap-3">
                         <input
@@ -1060,36 +1075,33 @@ export default function SubmitPage() {
                             List in Public Catalog (after approval)
                           </Label>
                           <p className="text-xs text-gray-600 mt-1">
-                            After your work is approved, it will appear in our public catalog for licensing opportunities.
-                            You keep 80% of any licensing fees. You can opt out at any time from your dashboard.
+                            After your submission is processed, it will appear in our public catalog for licensing opportunities. You keep 80% of any licensing fees. Creator Record submissions are listed with a self-attested badge. You can opt out at any time from your dashboard.
                           </p>
                         </div>
                       </div>
                     </div>
                   )}
-                  {(submissionMode === 'agency' || selectedTier === 'creator_record') && (
+                  {submissionMode === 'agency' && (
                     <div className="bg-gray-50 p-4 rounded-md text-sm text-gray-500">
-                      {submissionMode === 'agency'
-                        ? 'Catalog listing not available for agency submissions. The Chain of Title document is delivered directly to you.'
-                        : 'Catalog listing requires SI8 Certified. Upgrade from your dashboard after verification.'}
+                      Catalog listing not available for agency submissions. The Chain of Title document is delivered directly to you.
                     </div>
                   )}
 
                   <div className="flex gap-4">
-                    <Button type="button" variant="outline" onClick={() => setCurrentSection(submissionMode === 'agency' ? 7 : 9)}>
+                    <Button type="button" variant="outline" onClick={() => setCurrentSection(submissionMode === 'agency' ? 7 : 8)}>
                       ← Back
                     </Button>
-                    <Button type="button" onClick={() => setCurrentSection(11)}>
+                    <Button type="button" onClick={() => setCurrentSection(10)}>
                       Continue →
                     </Button>
                   </div>
                 </div>
               )}
 
-              {/* Section 11: Review & Payment */}
-              {currentSection === 11 && (
+              {/* Section 10: Review & Payment */}
+              {currentSection === 10 && (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">11. Review & Submit</h3>
+                  <h3 className="text-lg font-semibold">10. Review & Submit</h3>
 
                   <div className="bg-blue-50 p-4 rounded-md">
                     <h4 className="font-medium mb-2">Summary:</h4>
@@ -1136,7 +1148,7 @@ export default function SubmitPage() {
                   )}
 
                   <div className="flex gap-4">
-                    <Button type="button" variant="outline" onClick={() => setCurrentSection(10)}>
+                    <Button type="button" variant="outline" onClick={() => setCurrentSection(9)}>
                       ← Back
                     </Button>
                     <Button
