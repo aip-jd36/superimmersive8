@@ -300,12 +300,28 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 
 **Status:** Public catalog at si8-creator-portal.vercel.app/catalog — dark design matching marketing site. Marketing site /catalog redirects here via vercel.json.
 
-### 3h. Marketing Site Polish (Mar 21, 2026)
+### 3h. Marketing Site Polish (Mar 21, 2026 — Updated Mar 24, 2026)
 - [x] vercel.json redirects — ✓ `/catalog`, `/auth/signup`, `/auth/login`, `/auth/admin/login`, `/rights-verified`, `/rights-verified/chain-of-title`, `/rights-verified/playbook` all redirect correctly
 - [x] Nav dropdown fix — ✓ Eliminated 1rem gap that caused hover menu to close before clicking
 - [x] Rights Verified content width — ✓ Narrowed from 1200px → 860px (chain-of-title, playbook), 1400px → 1000px (overview)
 - [x] Sample document CTA — ✓ Added to newsite homepage — Neon Dreams Chain of Title download
-- [x] Contact/Book a Call section — ✓ Added to newsite homepage — Calendly + email CTAs
+- [x] Contact/Book a Call section — ✓ Replaced with Request Demo form (Kit-connected via /api/formspree-to-kit) + Book a Call Calendly card
+
+### 3i. Marketing Site v4 Redesign (Mar 24, 2026)
+- [x] Homepage H1 — ✓ "Get Your AI Video Cleared for Commercial Use"
+- [x] Homepage hero subtitle — ✓ Adobe gap quote + urgency line ("Without documentation, brands won't approve your campaign")
+- [x] Homepage secondary CTA — ✓ "View Sample Rights Package" (was "Showcase") — sends visitors to the actual product PDF
+- [x] Nav rename — ✓ "Browse Showcase" → "Showcase" across all EN HTML files
+- [x] Remove "Trusted By" section — ✓ Placeholder logos removed until real partners confirmed
+- [x] "Without/With" risk visualization section — ✓ Added after Problem section; left=brand legal objections, right=SI8 Certified deliverables; amber ✓/grey ✗ visual treatment
+- [x] "Choose Your Documentation" section — ✓ Replaced "Two Ways to Work With Us" (CaaS + Showcase) with $29/$499 tier cards including "Who uses this" lists; Creator Record dimmed (opacity 0.72); stamp labels updated
+- [x] Green ✓ checkmarks — ✓ Added to SI8 box in Problem section and "With SI8 Certified" label
+- [x] Creator Record stamp — ✓ "SELF-ATTESTED" → "Pre-Commercial Record" on homepage and pricing page
+- [x] Money framing — ✓ "Used to unlock $5K–$50K campaigns" in SI8 Certified card; "Without documentation, brands won't approve your campaign" in hero
+- [x] Showcase page (catalog/page.tsx) — ✓ Walled garden: top 70% = B2B agency proof-of-work (RIGHTS VERIFIED badges, catalog IDs, Watch & Request License); bottom 30% = creator CTA (80/20 pitch, licensing tier earnings cards)
+- [x] Pricing page — ✓ Removed licensing tiers table (4 cards); replaced with compact Showcase callout; fixed "Showcase Showcase" typo; upgrade note reframed
+- [x] How It Works page — ✓ Removed "Optional: Opt into Showcase Marketplace" section (earnings tables); Step 1 "70-field submission form" → 4-category intake description
+- [x] Request Demo form — ✓ Kit-connected lead capture (name, email, role); POSTs to /api/formspree-to-kit; async submit with success/error states; feeds Kit nurture sequence
 
 ### 4. Legal Ops (Rights playbook → actual contracts)
 - [ ] Standard Production MSA + SOW
