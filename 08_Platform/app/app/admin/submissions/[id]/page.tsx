@@ -162,8 +162,23 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                   <div className="space-y-2">
                     {toolsUsed.map((tool: any, idx: number) => (
                       <div key={idx} className="p-3 bg-gray-50 rounded-lg">
-                        <div className="font-medium">{tool.tool || 'Unknown tool'}</div>
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="font-medium">{tool.tool_name || tool.tool || 'Unknown tool'}</div>
+                          {tool.plan_type && (
+                            <span className="text-xs bg-white border rounded px-2 py-0.5 text-gray-600">{tool.plan_type}</span>
+                          )}
+                        </div>
                         {tool.version && <div className="text-sm text-gray-600">Version: {tool.version}</div>}
+                        {(tool.start_date || tool.end_date) && (
+                          <div className="text-sm text-gray-600">{tool.start_date} – {tool.end_date}</div>
+                        )}
+                        {tool.receipt_url && (
+                          <a href={tool.receipt_url} target="_blank" rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline mt-1">
+                            <ExternalLink className="w-3 h-3" />
+                            View Receipt
+                          </a>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -189,21 +204,63 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                 <CardTitle>Rights Confirmations</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center gap-2">
-                  {likenessConfirmation.confirmed ? (
-                    <CheckCircle className="w-5 h-5 text-green-600" />
+                {/* Likeness */}
+                <div>
+                  <div className="text-sm font-medium text-gray-500 mb-2">Likeness & Identity</div>
+                  {likenessConfirmation.has_licensed_content ? (
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-sm">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <span>Licensed content confirmed</span>
+                      </div>
+                      {likenessConfirmation.license_notes && (
+                        <p className="text-xs text-gray-500 pl-6">{likenessConfirmation.license_notes}</p>
+                      )}
+                    </div>
                   ) : (
-                    <XCircle className="w-5 h-5 text-red-600" />
+                    <div className="space-y-1">
+                      {[
+                        ['No real faces', likenessConfirmation.no_real_faces],
+                        ['No real voices', likenessConfirmation.no_real_voices],
+                        ['No lookalikes', likenessConfirmation.no_lookalikes],
+                        ['No synthetic people intended to deceive', likenessConfirmation.no_synthetic_people],
+                      ].map(([label, val]) => (
+                        <div key={label as string} className="flex items-center gap-2 text-sm">
+                          <CheckCircle className={`w-4 h-4 ${val ? 'text-green-500' : 'text-gray-300'}`} />
+                          <span className="text-gray-700">{label as string}</span>
+                        </div>
+                      ))}
+                    </div>
                   )}
-                  <span className="font-medium">Likeness & Identity Confirmation</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  {ipConfirmation.confirmed ? (
-                    <CheckCircle className="w-5 h-5 text-green-600" />
+
+                {/* IP */}
+                <div>
+                  <div className="text-sm font-medium text-gray-500 mb-2">IP & Brand</div>
+                  {ipConfirmation.has_licensed_content ? (
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-sm">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <span>Licensed content confirmed</span>
+                      </div>
+                      {ipConfirmation.license_notes && (
+                        <p className="text-xs text-gray-500 pl-6">{ipConfirmation.license_notes}</p>
+                      )}
+                    </div>
                   ) : (
-                    <XCircle className="w-5 h-5 text-red-600" />
+                    <div className="space-y-1">
+                      {[
+                        ['No copyrighted characters', ipConfirmation.no_copyrighted_characters],
+                        ['No brand imitation', ipConfirmation.no_brand_imitation],
+                        ['No trademarked IP', ipConfirmation.no_trademarked_ip],
+                      ].map(([label, val]) => (
+                        <div key={label as string} className="flex items-center gap-2 text-sm">
+                          <CheckCircle className={`w-4 h-4 ${val ? 'text-green-500' : 'text-gray-300'}`} />
+                          <span className="text-gray-700">{label as string}</span>
+                        </div>
+                      ))}
+                    </div>
                   )}
-                  <span className="font-medium">IP & Brand Confirmation</span>
                 </div>
               </CardContent>
             </Card>
@@ -328,17 +385,8 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                   <div className="text-gray-700">{submission.territory_preferences || 'Global'}</div>
                 </div>
                 <div>
-                  <div className="text-gray-500 mb-1">Modification Rights</div>
-                  <div className="text-gray-700">
-                    {submission.modification_authorized ? (
-                      <span className="text-green-600">✓ Authorized</span>
-                    ) : (
-                      <span className="text-gray-500">Not authorized</span>
-                    )}
-                  </div>
-                  {submission.modification_scope && (
-                    <div className="text-xs text-gray-500 mt-1">Scope: {submission.modification_scope}</div>
-                  )}
+                  <div className="text-gray-500 mb-1">Tier</div>
+                  <div className="text-gray-700 capitalize">{(submission as any).tier?.replace('_', ' ') || 'SI8 Certified'}</div>
                 </div>
               </CardContent>
             </Card>
