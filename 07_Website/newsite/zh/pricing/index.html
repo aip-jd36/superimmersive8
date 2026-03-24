@@ -1,14 +1,24 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-628BLE9N15"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-628BLE9N15');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>定價 | SuperImmersive 8</title>
+    <meta name="description" content="兩個 AI 影片文件等級。創作者記錄 $29（自主申報）或 SI8 認證 $499（人工審核，通過商業使用認證）。AI 影片 Chain of Title 文件服務。">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/newsite/styles.css">
     <style>
+        /* ── Pricing tier cards ── */
         .pricing-tiers-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -29,7 +39,7 @@
         }
         .tier-box.tier-featured {
             border-color: var(--color-accent);
-            background: rgba(129,140,248,0.06);
+            background: rgba(245,158,11,0.05);
             position: relative;
         }
         .tier-badge {
@@ -64,11 +74,18 @@
             font-size: 0.9rem;
             color: rgba(255,255,255,0.6);
             margin-bottom: 1.5rem;
-            line-height: 1.5;
+            line-height: 1.6;
         }
-        .tier-price-block {
+        .tier-why {
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.38);
+            font-style: italic;
             margin-bottom: 1.5rem;
+            line-height: 1.5;
+            border-left: 2px solid rgba(255,255,255,0.1);
+            padding-left: 0.75rem;
         }
+        .tier-price-block { margin-bottom: 1.5rem; }
         .tier-price-original {
             font-size: 1rem;
             color: rgba(255,255,255,0.35);
@@ -120,9 +137,15 @@
             color: rgba(255,255,255,0.5);
         }
         .tier-stamp.stamp-certified {
-            background: rgba(129,140,248,0.12);
-            border: 1px solid rgba(129,140,248,0.4);
+            background: rgba(245,158,11,0.12);
+            border: 1px solid rgba(245,158,11,0.4);
             color: var(--color-accent);
+        }
+        .tier-for {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 1.25rem;
+            font-style: italic;
         }
         .tier-checklist {
             list-style: none;
@@ -142,24 +165,7 @@
         .tier-checklist li:last-child { border-bottom: none; }
         .tier-checklist li .check { color: var(--color-accent); flex-shrink: 0; }
         .tier-checklist li .dim { color: rgba(255,255,255,0.4); }
-        .tier-for {
-            font-size: 0.8rem;
-            color: rgba(255,255,255,0.45);
-            margin-bottom: 1.25rem;
-            font-style: italic;
-        }
-        .tier-cta {
-            margin-top: auto;
-        }
-        .tier-divider {
-            text-align: center;
-            padding: 3rem 0 1rem;
-            color: rgba(255,255,255,0.3);
-            font-size: 0.85rem;
-            font-style: italic;
-            max-width: 960px;
-            margin: 0 auto;
-        }
+        .tier-cta { margin-top: auto; }
         .upgrade-note {
             text-align: center;
             background: rgba(255,255,255,0.04);
@@ -173,6 +179,207 @@
             line-height: 1.6;
         }
         .upgrade-note strong { color: rgba(255,255,255,0.9); }
+
+        /* ── Comparison tables ── */
+        .comparison-section {
+            padding: 5rem 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .comparison-section h2 {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .comparison-table th,
+        .comparison-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            color: rgba(255,255,255,0.75);
+        }
+        .comparison-table th {
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.04);
+            font-size: 0.85rem;
+        }
+        .comparison-table td:first-child { color: rgba(255,255,255,0.6); }
+        .comparison-table .highlight {
+            color: var(--color-accent);
+            font-weight: 500;
+        }
+        .comparison-table th.highlight { background: rgba(245,158,11,0.08); }
+        .comparison-note {
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.4);
+            font-style: italic;
+            text-align: center;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media (max-width: 768px) {
+            .comparison-table { font-size: 0.8rem; }
+            .comparison-table th, .comparison-table td { padding: 0.6rem 0.5rem; }
+        }
+
+        /* ── Catalog licensing tiers ── */
+        .catalog-licensing-section {
+            padding: 5rem 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .catalog-licensing-section h2 {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        .catalog-licensing-section > p {
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 3rem;
+            max-width: 580px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+        .licensing-tiers {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 2.5rem;
+        }
+        @media (max-width: 900px) {
+            .licensing-tiers { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 500px) {
+            .licensing-tiers { grid-template-columns: 1fr; }
+        }
+        .license-card {
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 1.5rem 1.25rem;
+            background: rgba(255,255,255,0.03);
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .license-card-name {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-accent);
+        }
+        .license-card-price {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.1;
+        }
+        .license-card-earn {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+        }
+        .license-card-earn strong { color: rgba(255,255,255,0.8); }
+        .license-card-divider {
+            width: 100%;
+            height: 1px;
+            background: rgba(255,255,255,0.07);
+            margin: 0.25rem 0;
+        }
+        .license-card-desc {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.5;
+        }
+        .license-card-uses {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.45);
+        }
+        .license-card-uses li::before {
+            content: "· ";
+            color: var(--color-accent);
+        }
+        .licensing-note {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.4);
+            line-height: 1.6;
+            max-width: 640px;
+            margin: 0 auto 2rem;
+        }
+        .licensing-note strong { color: rgba(255,255,255,0.7); }
+
+        /* ── FAQ ── */
+        .faq-section {
+            padding: 5rem 2rem;
+            max-width: 760px;
+            margin: 0 auto;
+        }
+        .faq-section .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .section-pretitle {
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #fff;
+        }
+        .faq-list { display: flex; flex-direction: column; gap: 0; }
+        .faq-item { border-bottom: 1px solid rgba(255,255,255,0.07); }
+        .faq-question {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
+            padding: 1.25rem 0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+        .faq-question::after {
+            content: "+";
+            font-size: 1.25rem;
+            color: var(--color-accent);
+            flex-shrink: 0;
+            transition: transform 0.2s;
+        }
+        .faq-item.open .faq-question::after { transform: rotate(45deg); }
+        .faq-answer {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.75;
+            padding-bottom: 1.25rem;
+            display: none;
+        }
+        .faq-item.open .faq-answer { display: block; }
+        .faq-answer a { color: var(--color-accent); text-decoration: none; border-bottom: 1px solid rgba(245,158,11,0.4); }
+        .faq-answer a:hover { border-color: var(--color-accent); }
     </style>
 </head>
 <body>
@@ -208,9 +415,9 @@
                 <li><a href="/auth/signup" class="nav-cta">立即申請認證</a></li>
             </ul>
             <div class="lang-selector">
-                <a href="/newsite/pricing/index.html">EN</a>
+                <a href="/newsite/pricing/">EN</a>
                 <span>/</span>
-                <a href="/newsite/zh/pricing/index.html" class="active">繁體中文</a>
+                <a href="/newsite/zh/pricing/" class="active">繁體中文</a>
             </div>
             <button class="mobile-menu-btn" aria-label="Toggle menu">
                 <span></span>
@@ -220,7 +427,7 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
+    <!-- Hero -->
     <section class="hero">
         <div class="hero-content">
             <h1>兩個信任等級</h1>
@@ -232,11 +439,12 @@
     <section class="pricing-section">
         <div class="pricing-tiers-grid">
 
-            <!-- Tier 1: Self-Declared -->
+            <!-- Tier 1: Creator Record -->
             <div class="tier-box">
                 <div class="tier-label">自主申報</div>
                 <div class="tier-name">創作者記錄</div>
-                <div class="tier-desc">以結構化格式記錄你的 AI 影片。全自動處理，無需人工審核。</div>
+                <div class="tier-desc">由 SI8 出具、附有永久記錄編號的結構化 AI 申報文件。全自動處理，無需人工審核。</div>
+                <p class="tier-why">你可以自己在文件裡寫下使用的工具。但創作者記錄不是你自己寫的——它由 SI8 正式出具，擁有永久記錄編號（如 CR-2026-XXXXXXXX），附有時間戳記，並存入第三方系統。當你的作品受到關注時，這個差別至關重要。</p>
 
                 <div class="tier-price-block">
                     <div class="tier-price-original">$49</div>
@@ -258,9 +466,11 @@
                     <li><span class="check">✓</span> IP 與肖像自主聲明</li>
                     <li><span class="check">✓</span> 人類創作聲明</li>
                     <li><span class="check">✓</span> 即時自動交付</li>
-                    <li><span class="check">✓</span> 存入 SI8 系統，日後可升級</li>
-                    <li><span class="dim">✗</span> <span class="dim">無人工審核</span></li>
-                    <li><span class="dim">✗</span> <span class="dim">不適用於商業或品牌用途</span></li>
+                    <li><span class="check">✓</span> 存入 SI8 系統並附永久記錄編號</li>
+                    <li><span class="check">✓</span> 可選加入目錄（顯示自主申報徽章）</li>
+                    <li><span class="check">✓</span> 隨時升級至 SI8 認證，無需重新提交</li>
+                    <li><span class="dim">✗</span><span class="dim">無人工審核</span></li>
+                    <li><span class="dim">✗</span><span class="dim">不適用於商業或品牌用途</span></li>
                 </ul>
 
                 <div class="tier-cta">
@@ -273,7 +483,7 @@
                 <div class="tier-badge">最受歡迎</div>
                 <div class="tier-label">SI8 認證</div>
                 <div class="tier-name">商業使用認證</div>
-                <div class="tier-desc">完整人工審核，通過品牌法務審查、開立發票，並符合 E&O 保險承保要求。</div>
+                <div class="tier-desc">完整人工審核，通過品牌法務審查、開立客戶發票，並符合 E&amp;O 保險承保要求。</div>
 
                 <div class="tier-price-block">
                     <div class="tier-price-main">
@@ -293,7 +503,7 @@
                     <li><span class="check">✓</span> 收據與商業授權驗證</li>
                     <li><span class="check">✓</span> 9 欄位完整 Chain of Title 文件（PDF）</li>
                     <li><span class="check">✓</span> Rights Verified 徽章 + 目錄 ID（SI8-YYYY-####）</li>
-                    <li><span class="check">✓</span> 符合 E&O 保險承保要求的文件</li>
+                    <li><span class="check">✓</span> 符合 E&amp;O 保險承保要求的文件</li>
                     <li><span class="check">✓</span> 風險提示 + 修正建議（如需要）</li>
                     <li><span class="check">✓</span> 3–5 個工作天交件</li>
                     <li><span class="check">✓</span> 需補正時可免費重新提交</li>
@@ -308,11 +518,11 @@
         </div>
 
         <div class="upgrade-note">
-            <strong>先取得創作者記錄，隨時可升級。</strong>若日後有商業機會，只需登入並將現有提交升級為 SI8 認證即可，無需重新填寫表單。
+            <strong>先取得創作者記錄，隨時可升級。</strong>若日後有商業機會，只需登入並將現有提交升級為 SI8 認證即可——無需重新填寫表單。
         </div>
     </section>
 
-    <!-- Who Each Tier Is For -->
+    <!-- Which tier do I need? -->
     <section class="comparison-section">
         <h2>我需要哪個等級？</h2>
 
@@ -356,22 +566,22 @@
                     <td class="highlight">✓ 必須使用</td>
                 </tr>
                 <tr>
-                    <td>串流 / 發行用短片（如 MyVideo）</td>
+                    <td>串流 / 發行用短片</td>
                     <td>✗ 不受理</td>
                     <td class="highlight">✓ 必須使用</td>
                 </tr>
                 <tr>
-                    <td>E&O 保險文件</td>
+                    <td>E&amp;O 保險文件</td>
                     <td>✗ 不受理</td>
                     <td class="highlight">✓ 必須使用</td>
                 </tr>
             </tbody>
         </table>
 
-        <p class="comparison-note">「串流平台、發行商與 E&O 保險業者會要求提供使用工具清單、訓練資料來源說明，以及風險清除備忘錄。SI8 認證提供的正是這些文件。」— 娛樂法律顧問實務指引，2026 年 3 月</p>
+        <p class="comparison-note">「串流平台、發行商與 E&amp;O 保險業者會要求提供使用工具清單、訓練資料來源說明，以及風險清除備忘錄。SI8 認證提供的正是這些文件。」— 娛樂法律顧問實務指引，2026 年 3 月</p>
     </section>
 
-    <!-- Compare to Alternatives -->
+    <!-- SI8 Certified vs. Alternatives -->
     <section class="comparison-section">
         <h2>SI8 認證 vs. 其他方案</h2>
 
@@ -404,7 +614,7 @@
                     <td class="highlight">9 欄位完整認證文件包</td>
                 </tr>
                 <tr>
-                    <td><strong>E&O 保險文件適用性</strong></td>
+                    <td><strong>E&amp;O 保險文件適用性</strong></td>
                     <td>僅限 Adobe 範圍</td>
                     <td>無</td>
                     <td class="highlight">符合保險業者要求的文件</td>
@@ -436,55 +646,71 @@
     <!-- Optional: Catalog Licensing -->
     <section class="catalog-licensing-section">
         <h2>選填：透過授權獲得被動收入</h2>
-        <p>完成 SI8 認證後，可選擇加入我們的 Showcase 市集。品牌授權你的作品時，你保留授權費的 80%。</p>
+        <p>完成 SI8 認證後，可選擇加入我們的 Showcase 市集。品牌授權你的作品時，你保留授權費的 80%。創作者記錄用戶也可加入——以自主申報徽章顯示。</p>
 
         <div class="licensing-tiers">
-            <div class="tier-card">
-                <h3>編輯使用</h3>
-                <p class="tier-price">$500 – $1,500</p>
-                <p class="tier-earnings">你可獲得：$400 – $1,200</p>
-                <p class="tier-description">新聞報導、紀錄片、教育內容</p>
+
+            <div class="license-card">
+                <div class="license-card-name">數位與社群</div>
+                <div class="license-card-price">$500–$2,000</div>
+                <div class="license-card-earn">你可獲得：<strong>$400–$1,600</strong></div>
+                <div class="license-card-divider"></div>
+                <div class="license-card-desc">非獨家授權。1 年授權期。</div>
+                <ul class="license-card-uses">
+                    <li>社群媒體行銷活動</li>
+                    <li>付費數位廣告</li>
+                    <li>網站與線上內容</li>
+                    <li>YouTube 與串流平台</li>
+                </ul>
             </div>
 
-            <div class="tier-card">
-                <h3>非獨家授權</h3>
-                <p class="tier-price">$2,000 – $5,000</p>
-                <p class="tier-earnings">你可獲得：$1,600 – $4,000</p>
-                <p class="tier-description">商業使用，可授權給多個買家</p>
+            <div class="license-card">
+                <div class="license-card-name">廣播與行銷活動</div>
+                <div class="license-card-price">$2,000–$8,000</div>
+                <div class="license-card-earn">你可獲得：<strong>$1,600–$6,400</strong></div>
+                <div class="license-card-divider"></div>
+                <div class="license-card-desc">非獨家授權。1–2 年授權期。</div>
+                <ul class="license-card-uses">
+                    <li>電視與廣播廣告</li>
+                    <li>OTT 與串流平台廣告</li>
+                    <li>跨媒體品牌行銷活動</li>
+                    <li>戶外廣告</li>
+                </ul>
             </div>
 
-            <div class="tier-card">
-                <h3>類別獨家授權</h3>
-                <p class="tier-price">$5,000 – $10,000</p>
-                <p class="tier-earnings">你可獲得：$4,000 – $8,000</p>
-                <p class="tier-description">在特定行業類別內獨家授權（例如：汽車產業）</p>
+            <div class="license-card">
+                <div class="license-card-name">類別獨家授權</div>
+                <div class="license-card-price">$8,000–$20,000</div>
+                <div class="license-card-earn">你可獲得：<strong>$6,400–$16,000</strong></div>
+                <div class="license-card-divider"></div>
+                <div class="license-card-desc">特定行業獨家。2–3 年，全媒體。</div>
+                <ul class="license-card-uses">
+                    <li>僅限一個品牌類別（如汽車業）</li>
+                    <li>同類競品無法授權同一影片</li>
+                    <li>含所有平台與地區</li>
+                </ul>
             </div>
 
-            <div class="tier-card">
-                <h3>全類別獨家授權</h3>
-                <p class="tier-price">$10,000+</p>
-                <p class="tier-earnings">你可獲得：$8,000+</p>
-                <p class="tier-description">跨所有類別與地區的完全獨家使用</p>
+            <div class="license-card">
+                <div class="license-card-name">全類別買斷</div>
+                <div class="license-card-price">$20,000+</div>
+                <div class="license-card-earn">你可獲得：<strong>$16,000+</strong></div>
+                <div class="license-card-divider"></div>
+                <div class="license-card-desc">單一買家。全部權利。永久授權。</div>
+                <ul class="license-card-uses">
+                    <li>含所有類別與地區</li>
+                    <li>永久授權期</li>
+                    <li>不再授權給任何其他買家</li>
+                </ul>
             </div>
+
         </div>
 
-        <p class="note"><strong>無前期費用。</strong>只有成交時才收取 20% 服務費。認證費（$499）為獨立收費，於申請時預先支付。創作者記錄（$29）不含目錄上架功能。</p>
+        <p class="licensing-note"><strong>無前期費用。</strong>只有成交時才收取 20% 服務費。認證費（$499）為獨立收費，於申請時預先支付。所有金額為參考價格，實際授權費用依個案洽談而定。</p>
 
-        <div style="text-align: center; margin-top: 3rem;">
+        <div style="text-align: center; margin-top: 2rem;">
             <a href="/catalog" class="btn btn-secondary">瀏覽目錄 →</a>
         </div>
-    </section>
-
-    <!-- Volume Discounts -->
-    <section class="volume-section">
-        <h2>批量優惠</h2>
-        <p>計畫認證多支影片？歡迎洽詢 SI8 認證的批量定價：</p>
-        <ul>
-            <li>5 支以上：每支 $399（省 20%）</li>
-            <li>10 支以上：每支 $349（省 30%）</li>
-        </ul>
-        <p class="note">批量優惠將於第二年正式推出。歡迎聯繫我們提前洽詢。</p>
-        <a href="mailto:contact@superimmersive8.com" class="btn btn-secondary">聯繫我們洽詢批量定價</a>
     </section>
 
     <!-- FAQ -->
@@ -497,83 +723,72 @@
         <div class="faq-list">
 
             <div class="faq-item">
-                <div class="faq-question">
-                    創作者記錄與 SI8 認證有什麼差別？
-                </div>
+                <div class="faq-question">我為什麼要付 $29，而不是自己寫一份記錄？</div>
                 <div class="faq-answer">
-                    創作者記錄（$29）為全自動處理——填完表單後，系統即生成一份蓋有「自主申報 — 不適用於商業用途」印記的 PDF。這份文件適合用於個人存檔、作品集或小型客戶交件。SI8 認證（$499）則由專業人員進行 90 分鐘的人工審核，核查收據、篩查 IP 與肖像風險，並出具蓋有「已通過商業使用認證」的正式文件，符合品牌法務團隊及 E&O 保險業者的要求。
+                    你當然可以自己在文件裡記下使用的工具。但創作者記錄不是你自己寫的——它由 SI8 正式出具，擁有永久記錄編號（如 CR-2026-XXXXXXXX），附有時間戳記，並存入第三方系統。這個差別很重要：這是「你說你有做記錄」與「一份獨立存在、有據可查的文件」之間的差距。
                 </div>
             </div>
 
             <div class="faq-item">
-                <div class="faq-question">
-                    品牌或代理商可以使用創作者記錄（$29）文件嗎？
-                </div>
+                <div class="faq-question">創作者記錄與 SI8 認證有什麼差別？</div>
                 <div class="faq-answer">
-                    不行。創作者記錄明確標示「不適用於商業用途」，品牌法務團隊及 E&O 保險業者不接受此文件作為合規證明。凡涉及商業應用——包括廣告、贊助內容、串流發行或授權——均須使用 SI8 認證。
+                    創作者記錄（$29）為全自動處理——填完表單後，系統即生成一份蓋有「自主申報 — 不適用於商業用途」印記的 PDF。這份文件適合用於個人存檔、作品集或小型客戶交件。SI8 認證（$499）則由專業人員進行 90 分鐘的人工審核，核查收據、篩查 IP 與肖像風險，並出具蓋有「已通過商業使用認證」的正式文件，符合品牌法務團隊及 E&amp;O 保險業者的要求。
                 </div>
             </div>
 
             <div class="faq-item">
-                <div class="faq-question">
-                    要發行或串流的短片應選哪個等級？
+                <div class="faq-question">品牌或代理商可以使用創作者記錄（$29）文件嗎？</div>
+                <div class="faq-answer">
+                    不行。創作者記錄明確標示「不適用於商業用途」，品牌法務團隊及 E&amp;O 保險業者不接受此文件作為合規證明。凡涉及商業應用——包括廣告、贊助內容、串流發行或授權——均須使用 SI8 認證。
                 </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">要發行或串流的短片應選哪個等級？</div>
                 <div class="faq-answer">
                     必須使用 SI8 認證。串流平台授權你的短片與品牌用於廣告所承擔的法律責任相同。法律責任等級由買方決定，而非內容格式。
                 </div>
             </div>
 
             <div class="faq-item">
-                <div class="faq-question">
-                    可以之後從創作者記錄升級為 SI8 認證嗎？
-                </div>
+                <div class="faq-question">可以之後從創作者記錄升級為 SI8 認證嗎？</div>
                 <div class="faq-answer">
-                    可以。登入帳號，找到你的提交記錄，申請升級即可。支付 $499 費用後，提交記錄將進入人工審核佇列，無需重新填寫表單。
+                    可以。登入帳號，找到你的提交記錄，申請升級即可。支付 $499 費用後，提交記錄將進入人工審核佇列——無需重新填寫表單，現有記錄即為審核基礎。
                 </div>
             </div>
 
             <div class="faq-item">
-                <div class="faq-question">
-                    支援哪些付款方式？
-                </div>
-                <div class="faq-answer">
-                    透過 Stripe 支援信用卡付款（Visa、Mastercard、Amex）。審核開始前需預先完成付款。
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">
-                    SI8 認證需要多久時間？
-                </div>
+                <div class="faq-question">SI8 認證需要多久時間？</div>
                 <div class="faq-answer">
                     最長 3–5 個工作天。大多數案件在 2–3 天內完成。實際審核約需 90 分鐘，我們保留緩衝時間以管理排隊狀況。
                 </div>
             </div>
 
             <div class="faq-item">
-                <div class="faq-question">
-                    是否提供退款？
-                </div>
+                <div class="faq-question">是否提供退款？</div>
                 <div class="faq-answer">
                     不提供退款。若 SI8 認證提交未通過，我們將提供詳細說明，並允許修正後免費重新提交。常見未通過原因為缺少收據或使用禁用工具——兩者均可修正。
                 </div>
             </div>
 
             <div class="faq-item">
-                <div class="faq-question">
-                    哪些工具不在認證範圍內？
-                </div>
+                <div class="faq-question">哪些工具不在認證範圍內？</div>
                 <div class="faq-answer">
-                    我們不受理以下禁用或高風險工具生成的內容：Hailuo（訓練資料疑慮）、Veo（存取限制）、Midjourney（僅限靜態圖像），或任何使用免費/非商業方案的工具。完整工具分級清單請見 <a href="/newsite/zh/rights-verified/playbook">Rights Playbook</a>。
+                    我們不受理以下禁用或高風險工具生成的內容：Hailuo（訓練資料疑慮）、Veo（存取限制）、Midjourney（僅限靜態圖像），或任何使用免費／非商業方案的工具。完整工具分級清單請見 <a href="/newsite/zh/rights-verified/playbook">Rights Playbook</a>。
                 </div>
             </div>
 
             <div class="faq-item">
-                <div class="faq-question">
-                    是否一定要加入 Showcase 目錄？
-                </div>
+                <div class="faq-question">支援哪些付款方式？</div>
                 <div class="faq-answer">
-                    不需要。許多創作者使用 SI8 認證純粹是為了提供給自己的客戶作為合規文件。目錄加入完全出於自願，且僅限 SI8 認證用戶。你可以隨時從帳號控制台申請下架。
+                    透過 Stripe 支援信用卡付款（Visa、Mastercard、Amex）。審核開始前需預先完成付款。
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">是否一定要加入 Showcase 目錄？</div>
+                <div class="faq-answer">
+                    不需要。許多創作者使用 SI8 認證純粹是為了提供給自己的客戶作為合規文件。目錄加入完全出於自願，兩個等級均可選擇——SI8 認證作品顯示「Rights Verified」徽章，創作者記錄作品顯示「自主申報」徽章。你可以隨時從帳號控制台申請下架。
                 </div>
             </div>
 
@@ -583,7 +798,7 @@
     <!-- Final CTA -->
     <section class="cta-section">
         <div class="cta-content">
-            <h2 class="cta-title">準備好為你的 AI 影片取得認證了嗎？</h2>
+            <h2 class="cta-title">準備好為你的 AI 影片建立文件了嗎？</h2>
             <p class="cta-subtitle">
                 創作者記錄 $29 · SI8 認證 $499 · Chain of Title 文件
             </p>
@@ -600,7 +815,7 @@
             <div class="footer-brand">
                 <h3>SuperImmersive <span style="color: var(--color-accent);">8</span></h3>
                 <p>
-                    AI 影片版權來源認證服務。
+                    AI 影片版權來源認證服務。<br>
                     總部設於台北，服務全球創作者。
                 </p>
             </div>
@@ -616,29 +831,39 @@
             </div>
 
             <div class="footer-links">
-                <h4>公司</h4>
+                <h4>Rights Verified</h4>
                 <ul>
-                    <li><a href="/about">關於我們</a></li>
-                    <li><a href="/contact">聯絡方式</a></li>
-                    <li><a href="/blog">部落格</a></li>
+                    <li><a href="/newsite/zh/rights-verified">總覽</a></li>
+                    <li><a href="/newsite/zh/rights-verified/chain-of-title">版權來源文件</a></li>
+                    <li><a href="/newsite/zh/rights-verified/playbook">完整審核手冊</a></li>
                 </ul>
             </div>
 
             <div class="footer-links">
-                <h4>法律</h4>
+                <h4>資源</h4>
                 <ul>
-                    <li><a href="/terms">服務條款</a></li>
-                    <li><a href="/privacy">隱私政策</a></li>
+                    <li><a href="/auth/login">創作者登入</a></li>
+                    <li><a href="/auth/signup">提交作品</a></li>
                 </ul>
             </div>
         </div>
 
         <div class="footer-bottom">
-            <p>&copy; 2026 SuperImmersive 8. 版權所有。</p>
-            <p>用心打造於台北 ❤️</p>
+            <p>&copy; 2026 PMF Strategy Inc. d/b/a SuperImmersive 8. 版權所有。</p>
         </div>
     </footer>
 
     <script src="/newsite/script.js"></script>
+    <script>
+        // FAQ accordion
+        document.querySelectorAll('.faq-question').forEach(q => {
+            q.addEventListener('click', () => {
+                const item = q.parentElement;
+                const wasOpen = item.classList.contains('open');
+                document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+                if (!wasOpen) item.classList.add('open');
+            });
+        });
+    </script>
 </body>
 </html>
