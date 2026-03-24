@@ -39,15 +39,16 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: 'This endpoint is for Creator Record submissions only' }, { status: 400 })
     }
 
-    // Check if already generated
+    // Check if already generated — admin can force-regenerate by passing ?force=true
+    const forceRegenerate = new URL(request.url).searchParams.get('force') === 'true'
     const { data: existing } = await supabaseAdmin
       .from('rights_packages')
       .select('id, document_url')
       .eq('submission_id', params.id)
       .maybeSingle()
 
-    if (existing?.document_url) {
-      return NextResponse.json({ error: 'Creator Record PDF already exists', documentUrl: existing.document_url }, { status: 400 })
+    if (existing?.document_url && !forceRegenerate) {
+      return NextResponse.json({ error: 'Creator Record PDF already exists. Use ?force=true to regenerate.', documentUrl: existing.document_url }, { status: 400 })
     }
 
     // Parse JSONB fields

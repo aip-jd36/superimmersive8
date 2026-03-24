@@ -108,7 +108,7 @@ export function GenerateRightsPackageButton({
             onClick={async () => {
               setLoading(true)
               try {
-                const res = await fetch(`/api/admin/submissions/${submissionId}/generate-creator-record`, { method: 'POST' })
+                const res = await fetch(`/api/admin/submissions/${submissionId}/generate-creator-record?force=true`, { method: 'POST' })
                 const data = await res.json()
                 if (res.ok) {
                   alert('Creator Record PDF generated successfully!')
