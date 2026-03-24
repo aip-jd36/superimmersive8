@@ -61,11 +61,17 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
     .eq('submission_id', params.id)
     .single()
 
-  // Parse JSONB fields
-  const toolsUsed = submission.tools_used ? JSON.parse(submission.tools_used) : []
-  const audioDisclosure = submission.audio_disclosure ? JSON.parse(submission.audio_disclosure) : {}
-  const likenessConfirmation = submission.likeness_confirmation ? JSON.parse(submission.likeness_confirmation) : {}
-  const ipConfirmation = submission.ip_confirmation ? JSON.parse(submission.ip_confirmation) : {}
+  // Parse JSONB fields — Supabase returns JSONB as already-parsed JS objects,
+  // but may return TEXT as strings. Handle both cases.
+  const parseJsonb = (val: any, fallback: any) => {
+    if (!val) return fallback
+    if (typeof val === 'string') { try { return JSON.parse(val) } catch { return fallback } }
+    return val
+  }
+  const toolsUsed = parseJsonb(submission.tools_used, [])
+  const audioDisclosure = parseJsonb(submission.audio_disclosure, {})
+  const likenessConfirmation = parseJsonb(submission.likeness_confirmation, {})
+  const ipConfirmation = parseJsonb(submission.ip_confirmation, {})
 
   const getStatusColor = (status: string) => {
     const colors = {

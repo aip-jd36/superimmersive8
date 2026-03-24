@@ -108,14 +108,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
         // Generate Chain of Title PDF
         console.log('📄 Generating Chain of Title PDF for', catalogId)
 
-        // Parse tools from JSONB
-        let tools = []
-        try {
-          tools = JSON.parse(submission.tools_used as string || '[]')
-        } catch (e) {
-          console.error('Error parsing tools_used:', e)
-          tools = []
-        }
+        // Parse tools from JSONB — handle both string (legacy) and already-parsed cases
+        const parseJsonb = (val: any, fb: any) => { if (!val) return fb; if (typeof val === 'string') { try { return JSON.parse(val) } catch { return fb } } return val }
+        const tools = parseJsonb(submission.tools_used, [])
 
         // Parse modification rights
         const modificationRights = {

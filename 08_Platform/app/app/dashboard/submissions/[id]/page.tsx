@@ -104,18 +104,16 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
     .eq('submission_id', params.id)
     .maybeSingle()
 
-  // Parse JSONB fields
-  let tools: any[] = []
-  try { tools = JSON.parse(submission.tools_used as string || '[]') } catch {}
-
-  let likenessConfirmation: any = {}
-  try { likenessConfirmation = JSON.parse(submission.likeness_confirmation as string || '{}') } catch {}
-
-  let ipConfirmation: any = {}
-  try { ipConfirmation = JSON.parse(submission.ip_confirmation as string || '{}') } catch {}
-
-  let audioInfo: any = {}
-  try { audioInfo = JSON.parse(submission.audio_disclosure as string || '{}') } catch {}
+  // Parse JSONB fields — handle both string (legacy) and already-parsed (JSONB) cases
+  const parseJsonb = (val: any, fallback: any) => {
+    if (!val) return fallback
+    if (typeof val === 'string') { try { return JSON.parse(val) } catch { return fallback } }
+    return val
+  }
+  const tools: any[] = parseJsonb(submission.tools_used, [])
+  const likenessConfirmation: any = parseJsonb(submission.likeness_confirmation, {})
+  const ipConfirmation: any = parseJsonb(submission.ip_confirmation, {})
+  const audioInfo: any = parseJsonb(submission.audio_disclosure, {})
 
   const statusLabel: Record<string, string> = {
     pending: 'PENDING',

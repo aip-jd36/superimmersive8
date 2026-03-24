@@ -51,15 +51,11 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: 'Creator Record PDF already exists. Use ?force=true to regenerate.', documentUrl: existing.document_url }, { status: 400 })
     }
 
-    // Parse JSONB fields
-    let tools: any[] = []
-    try { tools = JSON.parse(submission.tools_used as string || '[]') } catch {}
-
-    let likenessConfirmation: Record<string, boolean> = {}
-    try { likenessConfirmation = JSON.parse(submission.likeness_confirmation as string || '{}') } catch {}
-
-    let ipConfirmation: Record<string, boolean> = {}
-    try { ipConfirmation = JSON.parse(submission.ip_confirmation as string || '{}') } catch {}
+    // Parse JSONB fields — handle both string (legacy) and already-parsed (JSONB) cases
+    const parseJsonb = (val: any, fb: any) => { if (!val) return fb; if (typeof val === 'string') { try { return JSON.parse(val) } catch { return fb } } return val }
+    const tools: any[] = parseJsonb(submission.tools_used, [])
+    const likenessConfirmation: Record<string, boolean> = parseJsonb(submission.likeness_confirmation, {})
+    const ipConfirmation: Record<string, boolean> = parseJsonb(submission.ip_confirmation, {})
 
     console.log('📄 Admin: Triggering Creator Record PDF for submission', params.id)
 

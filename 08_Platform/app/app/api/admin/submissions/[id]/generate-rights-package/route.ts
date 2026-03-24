@@ -9,13 +9,25 @@ type RouteContext = {
   }
 }
 
+// Safe JSONB parser — handles both string (legacy) and already-parsed (JSONB) values
+function parseJsonb(val: any, fallback: any) {
+  if (!val) return fallback
+  if (typeof val === 'string') { try { return JSON.parse(val) } catch { return fallback } }
+  return val
+}
+
+// Resolve tool name from either schema (tool_name = new, tool = legacy)
+function toolName(t: any): string {
+  return t.tool_name || t.tool || 'Unknown'
+}
+
 // Auto-determine tier based on tools used
 function determineTier(toolsUsed: any[]): string {
   // If all tools are Adobe Firefly, tier is Certified
   // Otherwise, tier is Standard
   const allFirefly = toolsUsed.every((tool: any) => {
-    const toolName = (tool.tool || '').toLowerCase()
-    return toolName.includes('firefly') || toolName.includes('adobe')
+    const name = toolName(tool).toLowerCase()
+    return name.includes('firefly') || name.includes('adobe')
   })
 
   return allFirefly ? 'Certified' : 'Standard'
@@ -79,12 +91,12 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     }
 
     // Parse submission JSONB fields
-    const toolsUsed = submission.tools_used ? JSON.parse(submission.tools_used) : []
+    const toolsUsed = parseJsonb(submission.tools_used, [])
 
     // AUTO-DETERMINE all fields from submission data
     const tier = determineTier(toolsUsed)
     const categoryConflicts = determineCategoryConflicts(submission)
-    const modelDisclosure = toolsUsed.map((t: any) => t.tool || 'Unknown').join(', ')
+    const modelDisclosure = toolsUsed.map((t: any) => toolName(t)).join(', ')
 
     // Build 9-field Rights Package data (all auto-populated)
     const rightsPackageData = {
@@ -94,7 +106,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       // Field 1: Tool Provenance Log (JSONB) - Auto-populated from submission
       tool_provenance_log: {
         tools: toolsUsed.map((tool: any) => ({
-          name: tool.tool || 'Unknown',
+          name: toolName(tool),
           version: tool.version || 'Not specified',
           plan_type: tool.plan_type || 'commercial',
           dates: tool.dates || 'Not specified',
@@ -119,7 +131,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       commercial_use_authorization: {
         authorized: true,
         basis: 'Paid commercial plan receipts verified',
-        tools_verified: toolsUsed.map((t: any) => t.tool || 'Unknown'),
+        tools_verified: toolsUsed.map((t: any) => toolName(t)),
         verification_date: new Date().toISOString(),
       },
 
@@ -178,7 +190,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
     // Parse tools for PDF generator
     const tools = toolsUsed.map((t: any) => ({
-      tool_name: t.tool || 'Unknown',
+      tool_name: toolName(t),
       version: t.version || 'Not specified',
       plan_type: t.plan_type || 'Pro',
       start_date: t.start_date || '',
