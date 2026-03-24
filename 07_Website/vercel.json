@@ -2,7 +2,12 @@
   "redirects": [
     {
       "source": "/catalog",
-      "destination": "https://si8-creator-portal.vercel.app/catalog",
+      "destination": "https://si8-creator-portal.vercel.app/showcase",
+      "permanent": false
+    },
+    {
+      "source": "/showcase",
+      "destination": "https://si8-creator-portal.vercel.app/showcase",
       "permanent": false
     },
     {

@@ -60,11 +60,11 @@ export default async function DashboardLayout({
                   Submit New
                 </Link>
                 <Link
-                  href="/catalog"
+                  href="/showcase"
                   className="px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-secondary"
                   style={{ color: '#52504A' }}
                 >
-                  Catalog
+                  Showcase
                 </Link>
               </div>
             </div>
