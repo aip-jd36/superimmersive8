@@ -1139,6 +1139,270 @@ footer {
 }
 
 /* ============================
+   Without / With Section
+   ============================ */
+.without-with-section {
+    padding: 8rem 2rem;
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.without-with-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    max-width: 1000px;
+    margin: 3rem auto 0;
+}
+
+.without-card,
+.with-card {
+    border-radius: 12px;
+    padding: 2.5rem;
+}
+
+.without-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.with-card {
+    background: rgba(245,158,11,0.05);
+    border: 1px solid rgba(245,158,11,0.25);
+}
+
+.without-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 1.5rem;
+}
+
+.with-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 1.5rem;
+}
+
+.without-card ul,
+.with-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.without-card li {
+    font-size: 0.92rem;
+    color: rgba(255,255,255,0.48);
+    line-height: 1.6;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.without-card li::before {
+    content: '✗';
+    position: absolute;
+    left: 0;
+    color: rgba(255,255,255,0.22);
+    font-weight: 600;
+}
+
+.with-card li {
+    font-size: 0.92rem;
+    color: rgba(255,255,255,0.82);
+    line-height: 1.6;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.with-card li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--color-accent);
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+    .without-with-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================
+   Documentation Tiers Section
+   ============================ */
+.doc-tiers {
+    padding: 8rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.doc-tiers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    gap: 2rem;
+    margin-top: 4rem;
+}
+
+.doc-tier-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    transition: all 0.3s;
+}
+
+.doc-tier-card.featured {
+    border-color: rgba(245,158,11,0.4);
+    background: rgba(245,158,11,0.04);
+}
+
+.doc-tier-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+}
+
+.doc-tier-stamp {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 5px 12px;
+    border-radius: 4px;
+    align-self: flex-start;
+}
+
+.doc-tier-stamp.self-attested {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.45);
+}
+
+.doc-tier-stamp.certified {
+    background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.4);
+    color: var(--color-accent);
+}
+
+.doc-tier-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+}
+
+.doc-tier-price {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1;
+}
+
+.doc-tier-price span {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--color-text-secondary);
+}
+
+.doc-tier-desc {
+    color: var(--color-text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    margin: 0;
+}
+
+.doc-tier-divider {
+    height: 1px;
+    background: var(--color-border);
+}
+
+.doc-tier-for-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-bottom: 0.75rem;
+}
+
+.doc-tier-for ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.doc-tier-for li {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    padding-left: 1.25rem;
+    position: relative;
+    line-height: 1.5;
+}
+
+.doc-tier-for li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--color-accent);
+    font-size: 0.8rem;
+}
+
+.doc-tier-not-for {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.28);
+    font-style: italic;
+    border-top: 1px solid var(--color-border);
+    padding-top: 0.75rem;
+}
+
+.doc-tier-upgrade-note {
+    font-size: 0.82rem;
+    color: rgba(245,158,11,0.65);
+    font-style: italic;
+}
+
+.doc-tiers-note {
+    text-align: center;
+    margin-top: 2.5rem;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+.doc-tiers-note a {
+    color: var(--color-accent);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(245,158,11,0.4);
+}
+
+.doc-tiers-note a:hover {
+    border-color: var(--color-accent);
+}
+
+@media (max-width: 900px) {
+    .doc-tiers-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================
    Sample Document Section
    ============================ */
 .sample-section {
