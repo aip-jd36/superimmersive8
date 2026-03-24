@@ -184,7 +184,6 @@
                         <li>Any commercial deployment of AI-generated video</li>
                     </ul>
                 </div>
-                <div class="doc-tier-upgrade-note">Start for $29. Upgrade only when you land a deal — no resubmission required.</div>
                 <a href="/auth/signup" class="btn btn-primary" style="width: 100%; justify-content: center;">Get Certified →</a>
             </div>
         </div>
@@ -340,29 +339,69 @@
         </div>
     </section>
 
-    <!-- Contact / Book a Call -->
+    <!-- Contact / Request Demo -->
+    <style>
+        #demo-form input,
+        #demo-form select {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            padding: 0.65rem 1rem;
+            color: rgba(255,255,255,0.85);
+            font-size: 0.875rem;
+            width: 100%;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        #demo-form input:focus,
+        #demo-form select:focus {
+            border-color: var(--color-accent);
+        }
+        #demo-form select option {
+            background: #1a1a1a;
+            color: rgba(255,255,255,0.85);
+        }
+        #demo-form input::placeholder {
+            color: rgba(255,255,255,0.3);
+        }
+    </style>
     <section class="contact-section" id="contact">
         <div class="section-header">
             <p class="section-pretitle">Get in Touch</p>
             <h2 class="section-title">Questions? Let's Talk.</h2>
             <p class="section-subtitle">
-                Book a 20-minute call to walk through the process, or send us an email.
-                We respond within one business day.
+                Book a 20-minute call or request a demo — we'll walk through the process and answer any questions.
             </p>
         </div>
-        <div class="contact-options-grid">
+        <div class="contact-options-grid" style="max-width: 900px;">
             <a href="https://calendly.com/aipenguins/superimmersive8" target="_blank" rel="noopener" class="contact-option-card featured-contact">
                 <div class="contact-option-icon">📅</div>
                 <h4>Book a Call</h4>
                 <p>20-minute intro — walk through the process, ask questions, get a quote for your project.</p>
                 <span class="contact-option-cta">Schedule Now →</span>
             </a>
-            <a href="mailto:jd@superimmersive8.com" class="contact-option-card">
-                <div class="contact-option-icon">✉️</div>
-                <h4>Send an Email</h4>
-                <p>Prefer to write? Email us at jd@superimmersive8.com. We'll reply within one business day.</p>
-                <span class="contact-option-cta">jd@superimmersive8.com</span>
-            </a>
+            <div class="contact-option-card" style="cursor: default;">
+                <div class="contact-option-icon">📋</div>
+                <h4>Request a Demo</h4>
+                <form id="demo-form" action="/api/formspree-to-kit" method="POST" style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.25rem;">
+                    <input type="hidden" name="_subject" value="Request Demo — SI8 Homepage">
+                    <input type="hidden" name="download" value="Request Demo">
+                    <input type="text" name="name" placeholder="Your name *" required>
+                    <input type="email" name="email" placeholder="Work email *" required>
+                    <select name="role" required>
+                        <option value="">I am a… *</option>
+                        <option value="agency">Agency / Production House</option>
+                        <option value="brand">Brand / Marketing Team</option>
+                        <option value="filmmaker">AI Filmmaker / Creator</option>
+                        <option value="legal">Legal / Compliance</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <button type="submit" id="demo-submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 0.25rem;">
+                        Request a Demo →
+                    </button>
+                </form>
+            </div>
         </div>
     </section>
 
@@ -432,5 +471,47 @@
     </footer>
 
     <script src="/newsite/script.js"></script>
+    <script>
+        document.getElementById('demo-form')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const btn = document.getElementById('demo-submit');
+            const original = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = 'Sending…';
+            try {
+                const fd = new FormData(form);
+                const res = await fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: fd.get('email'),
+                        name: fd.get('name'),
+                        role: fd.get('role'),
+                        source: 'homepage-demo'
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    btn.textContent = '✓ We\'ll be in touch soon';
+                    btn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+                    form.reset();
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.textContent = original;
+                        btn.style.background = '';
+                    }, 4000);
+                } else throw new Error(data.error || 'Failed');
+            } catch(err) {
+                btn.textContent = '✗ Error — please try again';
+                btn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.textContent = original;
+                    btn.style.background = '';
+                }, 3000);
+            }
+        });
+    </script>
 </body>
 </html>
