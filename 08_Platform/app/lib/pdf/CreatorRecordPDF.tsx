@@ -193,18 +193,28 @@ export const CreatorRecordPDF: React.FC<{ data: CreatorRecordData }> = ({ data }
     })
   }
 
-  const likenessItems = [
-    ['No real faces or identifiable likenesses', data.likenessConfirmation?.no_real_faces],
-    ['No real voices cloned or replicated', data.likenessConfirmation?.no_real_voices],
-    ['No lookalikes of real persons', data.likenessConfirmation?.no_lookalikes],
-    ['No synthetic people intended to deceive', data.likenessConfirmation?.no_synthetic_people],
-  ] as [string, boolean | undefined][]
+  const likenessHasLicense = (data.likenessConfirmation as any)?.has_licensed_content === true
+  const likenessLicenseNotes = (data.likenessConfirmation as any)?.license_notes
 
-  const ipItems = [
-    ['No copyrighted characters or franchises', data.ipConfirmation?.no_copyrighted_characters],
-    ['No brand imitation or unauthorized logos', data.ipConfirmation?.no_brand_imitation],
-    ['No trademarked IP without authorization', data.ipConfirmation?.no_trademarked_ip],
-  ] as [string, boolean | undefined][]
+  const likenessItems = likenessHasLicense
+    ? [['Licensed content — creator holds rights documentation', true]] as [string, boolean][]
+    : [
+        ['No real faces or identifiable likenesses', data.likenessConfirmation?.no_real_faces],
+        ['No real voices cloned or replicated', data.likenessConfirmation?.no_real_voices],
+        ['No lookalikes of real persons', data.likenessConfirmation?.no_lookalikes],
+        ['No synthetic people intended to deceive', data.likenessConfirmation?.no_synthetic_people],
+      ] as [string, boolean | undefined][]
+
+  const ipHasLicense = (data.ipConfirmation as any)?.has_licensed_content === true
+  const ipLicenseNotes = (data.ipConfirmation as any)?.license_notes
+
+  const ipItems = ipHasLicense
+    ? [['Licensed content — creator holds rights documentation', true]] as [string, boolean][]
+    : [
+        ['No copyrighted characters or franchises', data.ipConfirmation?.no_copyrighted_characters],
+        ['No brand imitation or unauthorized logos', data.ipConfirmation?.no_brand_imitation],
+        ['No trademarked IP without authorization', data.ipConfirmation?.no_trademarked_ip],
+      ] as [string, boolean | undefined][]
 
   return (
     <Document>
@@ -319,6 +329,11 @@ export const CreatorRecordPDF: React.FC<{ data: CreatorRecordData }> = ({ data }
               <Text style={styles.checkLabel}>{label}</Text>
             </View>
           ))}
+          {likenessHasLicense && likenessLicenseNotes ? (
+            <Text style={[styles.checkLabel, { marginTop: 4, color: '#6b7280' }]}>
+              Notes: {likenessLicenseNotes}
+            </Text>
+          ) : null}
         </View>
 
         {/* IP & Brand */}
@@ -330,6 +345,11 @@ export const CreatorRecordPDF: React.FC<{ data: CreatorRecordData }> = ({ data }
               <Text style={styles.checkLabel}>{label}</Text>
             </View>
           ))}
+          {ipHasLicense && ipLicenseNotes ? (
+            <Text style={[styles.checkLabel, { marginTop: 4, color: '#6b7280' }]}>
+              Notes: {ipLicenseNotes}
+            </Text>
+          ) : null}
         </View>
 
         {/* Evidence Custodian */}

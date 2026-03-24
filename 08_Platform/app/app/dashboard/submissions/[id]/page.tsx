@@ -115,7 +115,7 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
   try { ipConfirmation = JSON.parse(submission.ip_confirmation as string || '{}') } catch {}
 
   let audioInfo: any = {}
-  try { audioInfo = JSON.parse(submission.audio_information as string || '{}') } catch {}
+  try { audioInfo = JSON.parse(submission.audio_disclosure as string || '{}') } catch {}
 
   const statusLabel: Record<string, string> = {
     pending: 'PENDING',
@@ -314,36 +314,60 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
             {/* Likeness */}
             <div>
               <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Likeness & Identity</p>
-              <div className="space-y-1.5">
-                {[
-                  ['No real faces', likenessConfirmation.no_real_faces],
-                  ['No real voices', likenessConfirmation.no_real_voices],
-                  ['No lookalikes', likenessConfirmation.no_lookalikes],
-                  ['No synthetic people intended to deceive', likenessConfirmation.no_synthetic_people],
-                ].map(([label, val]) => (
-                  <div key={label as string} className="flex items-center gap-2 text-sm">
-                    <CheckCircle className={`w-4 h-4 ${val ? 'text-green-500' : 'text-gray-300'}`} />
-                    <span className="text-gray-700">{label as string}</span>
+              {likenessConfirmation.has_licensed_content ? (
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span className="text-gray-700">Licensed content confirmed</span>
                   </div>
-                ))}
-              </div>
+                  {likenessConfirmation.license_notes && (
+                    <p className="text-xs text-gray-500 pl-6">{likenessConfirmation.license_notes}</p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  {[
+                    ['No real faces', likenessConfirmation.no_real_faces],
+                    ['No real voices', likenessConfirmation.no_real_voices],
+                    ['No lookalikes', likenessConfirmation.no_lookalikes],
+                    ['No synthetic people intended to deceive', likenessConfirmation.no_synthetic_people],
+                  ].map(([label, val]) => (
+                    <div key={label as string} className="flex items-center gap-2 text-sm">
+                      <CheckCircle className={`w-4 h-4 ${val ? 'text-green-500' : 'text-gray-300'}`} />
+                      <span className="text-gray-700">{label as string}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* IP */}
             <div>
               <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">IP & Brand</p>
-              <div className="space-y-1.5">
-                {[
-                  ['No copyrighted characters', ipConfirmation.no_copyrighted_characters],
-                  ['No brand imitation', ipConfirmation.no_brand_imitation],
-                  ['No trademarked IP', ipConfirmation.no_trademarked_ip],
-                ].map(([label, val]) => (
-                  <div key={label as string} className="flex items-center gap-2 text-sm">
-                    <CheckCircle className={`w-4 h-4 ${val ? 'text-green-500' : 'text-gray-300'}`} />
-                    <span className="text-gray-700">{label as string}</span>
+              {ipConfirmation.has_licensed_content ? (
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span className="text-gray-700">Licensed content confirmed</span>
                   </div>
-                ))}
-              </div>
+                  {ipConfirmation.license_notes && (
+                    <p className="text-xs text-gray-500 pl-6">{ipConfirmation.license_notes}</p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  {[
+                    ['No copyrighted characters', ipConfirmation.no_copyrighted_characters],
+                    ['No brand imitation', ipConfirmation.no_brand_imitation],
+                    ['No trademarked IP', ipConfirmation.no_trademarked_ip],
+                  ].map(([label, val]) => (
+                    <div key={label as string} className="flex items-center gap-2 text-sm">
+                      <CheckCircle className={`w-4 h-4 ${val ? 'text-green-500' : 'text-gray-300'}`} />
+                      <span className="text-gray-700">{label as string}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Audio */}
@@ -351,16 +375,6 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
               <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Audio Source</p>
               <p className="text-sm text-gray-900 capitalize">
                 {audioInfo.source_type?.replace('_', ' ') || submission.audio_source?.replace('_', ' ') || '—'}
-              </p>
-            </div>
-
-            {/* Modification */}
-            <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Modification Rights</p>
-              <p className="text-sm text-gray-900">
-                {submission.modification_authorized
-                  ? `Authorized${submission.modification_scope ? ` — ${submission.modification_scope}` : ''}`
-                  : 'Not authorized (Tier 1 licensing only)'}
               </p>
             </div>
 
