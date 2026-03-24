@@ -259,7 +259,7 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 - [ ] Switch Stripe to live mode ($29 Creator Record + $499 SI8 Certified real keys)
 - [ ] Clean test data from production DB (STEC_TEST, STEC_TEST3, TESTLINK)
 - [ ] Fix "Unknown tool" display in admin panel when tool name uses `tool_name` field (admin reads `tool.tool`, form saves `tool.tool_name`)
-- [ ] Run DB migration: `20260323000000_add_tier_and_submission_mode.sql` (adds `tier` and `submission_mode` columns)
+- [x] Run DB migration: `20260323000000_add_tier_and_submission_mode.sql` (adds `tier` and `submission_mode` columns) — confirmed live
 - [ ] Test SI8 Certified full flow: submit → pending → admin approve → assign Catalog ID → generate Chain of Title PDF → creator downloads
 
 **Two-Tier Platform (Completed Mar 23, 2026):**
@@ -275,6 +275,16 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 - [x] Admin manual retry button — if auto-generation fails, admin can trigger via `/api/admin/submissions/[id]/generate-creator-record`
 - [x] DB migration run: `tier` and `submission_mode` columns confirmed live in production
 - [x] DB migration file created for tier + submission_mode columns
+
+**Submit Form & Creator Portal Polish (Completed Mar 24, 2026):**
+- [x] Submit form Sections 5 & 6: "I have a license" alternative path — `has_licensed_content` checkbox + `license_notes` textarea; section-level validation allows either path (Mar 24, 2026)
+- [x] Submit form Section 7 (Audio): file upload required when `audio_source === 'licensed'`; uploads to Supabase, stores `license_path` in `audio_disclosure` JSON (Mar 24, 2026)
+- [x] Submit form Section 8 (Modification Rights) removed — v3 remnant; `modification_authorized: false` hardcoded; form renumbered to 10 sections total (Mar 24, 2026)
+- [x] Creator Record catalog opt-in: all creator submissions can opt into public catalog (removed certified-only restriction); serves as upgrade lead magnet (Mar 24, 2026)
+- [x] Creator detail page: fixed `audio_information` → `audio_disclosure` field name; shows "Licensed content confirmed + notes" when `has_licensed_content=true`; Modification Rights section removed (Mar 24, 2026)
+- [x] CreatorRecordPDF: shows `[Y] Licensed content — creator holds rights documentation` when `has_licensed_content=true`; displays `license_notes` below (Mar 24, 2026)
+- [x] Admin retry route supports `?force=true` to regenerate Creator Record PDF without manual DB delete (Mar 24, 2026)
+- [x] Admin submissions table: "Show in Catalog" toggle column — `ToggleVisibilityButton` for opted-in submissions, grey "Not opted in" for others (Mar 24, 2026)
 
 ### 3g. Public Catalog with Video Player (Completed Mar 19, 2026 — Updated Mar 21, 2026)
 - [x] Submit form Section 10: Video & Catalog — ✓ video_url, thumbnail_url, public_description, catalog opt-in checkbox
