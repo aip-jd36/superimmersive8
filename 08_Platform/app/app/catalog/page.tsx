@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Play, Search, Clock, User, Tag, Filter } from 'lucide-react'
+import { X, Play, Search, Clock, User, CheckCircle, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
 type CatalogEntry = {
@@ -56,7 +56,7 @@ function formatRuntime(seconds: number | null): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
-export default function CatalogPage() {
+export default function ShowcasePage() {
   const [entries, setEntries] = useState<CatalogEntry[]>([])
   const [filteredEntries, setFilteredEntries] = useState<CatalogEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -101,7 +101,7 @@ export default function CatalogPage() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#0f0f0f', color: '#ffffff', fontFamily: 'Inter, sans-serif' }}>
 
-      {/* Nav — matches marketing site */}
+      {/* ── Nav ── */}
       <nav style={{ position: 'sticky', top: 0, backgroundColor: 'rgba(15,15,15,0.95)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #333', zIndex: 100 }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '72px' }}>
           <Link href="https://superimmersive8.com/newsite" style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em', color: '#ffffff', textDecoration: 'none' }}>
@@ -110,7 +110,7 @@ export default function CatalogPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
             <Link href="https://superimmersive8.com/newsite/how-it-works" style={{ color: '#a0a0a0', textDecoration: 'none', fontSize: '0.95rem' }}>How It Works</Link>
             <Link href="https://superimmersive8.com/newsite/pricing" style={{ color: '#a0a0a0', textDecoration: 'none', fontSize: '0.95rem' }}>Pricing</Link>
-            <span style={{ color: '#ffffff', fontSize: '0.95rem', fontWeight: 500 }}>Catalog</span>
+            <span style={{ color: '#ffffff', fontSize: '0.95rem', fontWeight: 500 }}>Showcase</span>
             <Link href="/auth/login" style={{ color: '#a0a0a0', textDecoration: 'none', fontSize: '0.95rem' }}>Login</Link>
             <Link href="/auth/signup" style={{ backgroundColor: '#f59e0b', color: '#000000', padding: '0.5rem 1.25rem', borderRadius: '6px', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none' }}>
               Get Verified
@@ -119,22 +119,31 @@ export default function CatalogPage() {
         </div>
       </nav>
 
-      {/* Header */}
+      {/* ── Header (Top — B2B / Agency framing) ── */}
       <div style={{ borderBottom: '1px solid #222', padding: '4rem 2rem 3rem' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.5rem', marginBottom: '2.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.5rem', marginBottom: '1.5rem' }}>
             <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '999px', padding: '4px 14px', marginBottom: '1rem' }}>
+                <CheckCircle style={{ width: '14px', height: '14px', color: '#f59e0b' }} />
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#f59e0b', letterSpacing: '0.05em' }}>SI8 VERIFIED SHOWCASE</span>
+              </div>
               <h1 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '2.75rem', fontWeight: 700, letterSpacing: '-0.02em', marginBottom: '0.75rem' }}>
-                Rights Verified Catalog
+                Cleared for Commercial Use.
               </h1>
-              <p style={{ color: '#a0a0a0', fontSize: '1.05rem', lineHeight: 1.6, maxWidth: '540px' }}>
-                AI-generated films with verified rights documentation. Ready for commercial licensing.
+              <p style={{ color: '#a0a0a0', fontSize: '1.05rem', lineHeight: 1.6, maxWidth: '560px' }}>
+                Every film below has passed SI8's 90-minute rights review and holds a signed Chain of Title document. These are AI-generated works your legal team can actually approve.
               </p>
             </div>
             {!loading && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '999px', padding: '0.5rem 1.125rem' }}>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite' }} />
-                <span style={{ fontSize: '0.875rem', fontWeight: 500, color: '#a0a0a0' }}>{entries.length} Available</span>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '999px', padding: '0.5rem 1.125rem' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'pulse 2s infinite' }} />
+                  <span style={{ fontSize: '0.875rem', fontWeight: 500, color: '#a0a0a0' }}>{entries.length} Available for Licensing</span>
+                </div>
+                <p style={{ fontSize: '0.75rem', color: '#555', textAlign: 'right' }}>
+                  Click any film to watch and request a license
+                </p>
               </div>
             )}
           </div>
@@ -148,37 +157,28 @@ export default function CatalogPage() {
                 placeholder="Search by title, filmmaker, or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  width: '100%', padding: '0.75rem 1rem 0.75rem 2.75rem',
-                  backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px',
-                  color: '#ffffff', fontSize: '0.95rem', outline: 'none',
-                }}
+                style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.75rem', backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px', color: '#ffffff', fontSize: '0.95rem', outline: 'none' }}
               />
             </div>
             <select
               value={selectedGenre}
               onChange={(e) => setSelectedGenre(e.target.value)}
-              style={{
-                padding: '0.75rem 1rem', backgroundColor: '#1a1a1a', border: '1px solid #333',
-                borderRadius: '8px', color: '#ffffff', fontSize: '0.95rem', cursor: 'pointer',
-              }}
+              style={{ padding: '0.75rem 1rem', backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px', color: '#ffffff', fontSize: '0.95rem', cursor: 'pointer' }}
             >
               {genres.map(genre => (
-                <option key={genre} value={genre}>
-                  {genre === 'all' ? 'All Genres' : genre}
-                </option>
+                <option key={genre} value={genre}>{genre === 'all' ? 'All Genres' : genre}</option>
               ))}
             </select>
           </div>
         </div>
       </div>
 
-      {/* Grid */}
+      {/* ── Video Grid (Top ~70% — Proof of Work for agencies) ── */}
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '3rem 2rem' }}>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '5rem 0' }}>
             <div style={{ width: '40px', height: '40px', border: '2px solid #333', borderTopColor: '#f59e0b', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 1rem' }} />
-            <p style={{ color: '#666' }}>Loading catalog...</p>
+            <p style={{ color: '#666' }}>Loading Showcase...</p>
           </div>
         ) : filteredEntries.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '5rem 0' }}>
@@ -191,13 +191,13 @@ export default function CatalogPage() {
             <p style={{ color: '#666', fontSize: '0.9rem' }}>
               {searchQuery || selectedGenre !== 'all'
                 ? 'Try adjusting your search or filters'
-                : 'Approved works will appear here once filmmakers opt in.'}
+                : 'Verified works will appear here once filmmakers opt in.'}
             </p>
           </div>
         ) : (
           <>
             <p style={{ color: '#666', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
-              Showing <strong style={{ color: '#ffffff' }}>{filteredEntries.length}</strong> {filteredEntries.length === 1 ? 'entry' : 'entries'}
+              Showing <strong style={{ color: '#ffffff' }}>{filteredEntries.length}</strong> verified {filteredEntries.length === 1 ? 'work' : 'works'} available for licensing
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.5rem' }}>
               {filteredEntries.map((entry) => (
@@ -208,7 +208,6 @@ export default function CatalogPage() {
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#f59e0b'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)' }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#282828'; (e.currentTarget as HTMLElement).style.transform = 'translateY(0)' }}
                 >
-                  {/* Thumbnail */}
                   <div style={{ position: 'relative', aspectRatio: '16/9', backgroundColor: '#111', overflow: 'hidden' }}>
                     <img
                       src={getThumbnailUrl(entry.video_url, entry.thumbnail_url)}
@@ -216,8 +215,16 @@ export default function CatalogPage() {
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)' }} />
+
+                    {/* Rights Verified badge — top left */}
+                    <div style={{ position: 'absolute', top: '12px', left: '12px', display: 'flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(245,158,11,0.92)', color: '#000000', fontSize: '0.65rem', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', letterSpacing: '0.05em' }}>
+                      <CheckCircle style={{ width: '10px', height: '10px' }} />
+                      RIGHTS VERIFIED
+                    </div>
+
                     {/* Play overlay */}
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0)', transition: 'background-color 0.2s' }}
+                    <div
+                      style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0)', transition: 'background-color 0.2s' }}
                       onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(0,0,0,0.4)'}
                       onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(0,0,0,0)'}
                     >
@@ -225,13 +232,15 @@ export default function CatalogPage() {
                         <Play style={{ width: '24px', height: '24px', color: '#111', marginLeft: '3px' }} fill="currentColor" />
                       </div>
                     </div>
-                    {/* Catalog ID */}
+
+                    {/* Catalog ID — top right */}
                     {entry.catalog_id && (
                       <div style={{ position: 'absolute', top: '12px', right: '12px', backgroundColor: 'rgba(0,0,0,0.8)', color: '#a0a0a0', fontSize: '0.7rem', fontFamily: 'monospace', padding: '4px 10px', borderRadius: '999px', border: '1px solid #333' }}>
                         {entry.catalog_id}
                       </div>
                     )}
-                    {/* Runtime */}
+
+                    {/* Runtime — bottom right */}
                     {entry.submission.runtime && (
                       <div style={{ position: 'absolute', bottom: '10px', right: '10px', backgroundColor: 'rgba(0,0,0,0.8)', color: '#a0a0a0', fontSize: '0.75rem', padding: '3px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <Clock style={{ width: '11px', height: '11px' }} />
@@ -240,7 +249,6 @@ export default function CatalogPage() {
                     )}
                   </div>
 
-                  {/* Card content */}
                   <div style={{ padding: '1.25rem' }}>
                     <h3 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem', lineHeight: 1.3 }}>
                       {entry.submission.title}
@@ -267,7 +275,7 @@ export default function CatalogPage() {
                         onClick={(e) => { e.stopPropagation(); setSelectedVideo(entry) }}
                       >
                         <Play style={{ width: '14px', height: '14px' }} />
-                        Watch & License
+                        Watch & Request License
                       </button>
                     </div>
                   </div>
@@ -278,7 +286,58 @@ export default function CatalogPage() {
         )}
       </div>
 
-      {/* Video Modal */}
+      {/* ── Creator CTA Section (Bottom ~30% — Creator acquisition) ── */}
+      <div style={{ borderTop: '1px solid #1f1f1f', backgroundColor: '#0a0a0a', padding: '5rem 2rem' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid #333', borderRadius: '999px', padding: '4px 14px', marginBottom: '1.5rem' }}>
+            <span style={{ fontSize: '0.8rem', color: '#a0a0a0', letterSpacing: '0.05em' }}>FOR AI FILMMAKERS</span>
+          </div>
+
+          <h2 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '2.25rem', fontWeight: 700, letterSpacing: '-0.02em', marginBottom: '1rem', lineHeight: 1.2 }}>
+            Is your AI film in the Showcase?
+          </h2>
+
+          <p style={{ color: '#a0a0a0', fontSize: '1.05rem', lineHeight: 1.7, marginBottom: '2.5rem', maxWidth: '640px', margin: '0 auto 2.5rem' }}>
+            Get your film verified first — then opt in to the Showcase. When brands license your work through SI8, you keep <strong style={{ color: '#ffffff' }}>80% of the licensing fee</strong>. We handle the negotiation, contracts, and payment.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', maxWidth: '700px', margin: '0 auto 3rem', textAlign: 'left' }}>
+            {[
+              { range: 'Digital & Social', earn: 'You earn $400–$1,600' },
+              { range: 'Broadcast & Campaign', earn: 'You earn $1,600–$6,400' },
+              { range: 'Category-Exclusive', earn: 'You earn $6,400–$16,000' },
+              { range: 'Full Buyout', earn: 'You earn $16,000+' },
+            ].map(({ range, earn }) => (
+              <div key={range} style={{ backgroundColor: '#1a1a1a', border: '1px solid #282828', borderRadius: '10px', padding: '1.25rem' }}>
+                <div style={{ fontSize: '0.8rem', color: '#a0a0a0', marginBottom: '0.4rem' }}>{range}</div>
+                <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#f59e0b' }}>{earn}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <a
+              href="/auth/signup"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#f59e0b', color: '#000000', padding: '0.875rem 2rem', borderRadius: '8px', fontWeight: 700, fontSize: '1rem', textDecoration: 'none', fontFamily: 'Space Grotesk, sans-serif' }}
+            >
+              Get Your Film Verified
+              <ArrowRight style={{ width: '18px', height: '18px' }} />
+            </a>
+            <a
+              href="https://superimmersive8.com/newsite/pricing"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'transparent', color: '#ffffff', padding: '0.875rem 2rem', borderRadius: '8px', fontWeight: 600, fontSize: '1rem', textDecoration: 'none', border: '1px solid #444' }}
+            >
+              See Pricing
+            </a>
+          </div>
+
+          <p style={{ color: '#555', fontSize: '0.8rem', marginTop: '1.5rem' }}>
+            Verification from $29 (Creator Record) · Showcase listing is opt-in after approval · No upfront listing fee
+          </p>
+        </div>
+      </div>
+
+      {/* ── Video Modal ── */}
       {selectedVideo && (
         <div
           style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}
@@ -288,7 +347,6 @@ export default function CatalogPage() {
             style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '16px', maxWidth: '900px', width: '100%', maxHeight: '90vh', overflow: 'hidden' }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem 1.5rem', borderBottom: '1px solid #282828' }}>
               <div>
                 <h2 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.25rem' }}>
@@ -299,6 +357,10 @@ export default function CatalogPage() {
                   {selectedVideo.catalog_id && (
                     <span style={{ fontFamily: 'monospace', color: '#f59e0b' }}>{selectedVideo.catalog_id}</span>
                   )}
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#f59e0b', fontWeight: 600, fontSize: '0.75rem' }}>
+                    <CheckCircle style={{ width: '12px', height: '12px' }} />
+                    RIGHTS VERIFIED
+                  </span>
                 </div>
               </div>
               <button
@@ -309,7 +371,6 @@ export default function CatalogPage() {
               </button>
             </div>
 
-            {/* Video */}
             <div style={{ aspectRatio: '16/9', backgroundColor: '#000' }}>
               <iframe
                 src={getEmbedUrl(selectedVideo.video_url)}
@@ -319,9 +380,8 @@ export default function CatalogPage() {
               />
             </div>
 
-            {/* Modal footer */}
             <div style={{ padding: '1.25rem 1.5rem', borderTop: '1px solid #282828', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', flex: 1 }}>
                 {selectedVideo.submission.genre && (
                   <span style={{ backgroundColor: 'rgba(245,158,11,0.12)', color: '#f59e0b', fontSize: '0.8rem', fontWeight: 500, padding: '4px 12px', borderRadius: '999px' }}>
                     {selectedVideo.submission.genre}
@@ -340,10 +400,11 @@ export default function CatalogPage() {
                 )}
               </div>
               <a
-                href="mailto:jd@superimmersive8.com?subject=License Inquiry"
-                style={{ backgroundColor: '#f59e0b', color: '#000000', padding: '0.625rem 1.5rem', borderRadius: '8px', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', whiteSpace: 'nowrap' }}
+                href={`mailto:jd@superimmersive8.com?subject=License Inquiry — ${encodeURIComponent(selectedVideo.submission.title)} (${selectedVideo.catalog_id || 'Showcase'})`}
+                style={{ backgroundColor: '#f59e0b', color: '#000000', padding: '0.625rem 1.5rem', borderRadius: '8px', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }}
               >
                 Request License
+                <ArrowRight style={{ width: '15px', height: '15px' }} />
               </a>
             </div>
           </div>
