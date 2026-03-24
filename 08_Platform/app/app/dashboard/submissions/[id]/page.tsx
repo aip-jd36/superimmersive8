@@ -244,12 +244,45 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                 <p className="text-sm text-gray-900 break-words">{submission.logline}</p>
               </div>
             )}
-            {submission.intended_use && (
-              <div className="col-span-2">
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Intended Use</p>
-                <p className="text-sm text-gray-900 break-words">{submission.intended_use}</p>
-              </div>
-            )}
+            {submission.intended_use && (() => {
+              const iu = parseJsonb(submission.intended_use, null)
+              if (!iu) return null
+              const primaryLabels: Record<string, string> = {
+                agency_deliverable: 'Agency Deliverable / Client Work',
+                personal_showcase: 'Personal Showcase',
+                licensing_marketplace: 'Licensing / Marketplace',
+                film_festival: 'Film Festival Submission',
+                internal_use: 'Internal Use',
+              }
+              return (
+                <div className="col-span-2 space-y-2">
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Intended Use</p>
+                  {iu.primary_use && (
+                    <p className="text-sm text-gray-900">{primaryLabels[iu.primary_use] || iu.primary_use.replace(/_/g, ' ')}</p>
+                  )}
+                  {iu.suitable_categories?.length > 0 && (
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Suitable for</p>
+                      <div className="flex flex-wrap gap-1">
+                        {iu.suitable_categories.map((c: string) => (
+                          <span key={c} className="inline-block text-xs bg-green-50 text-green-700 border border-green-200 rounded px-2 py-0.5">{c}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {iu.excluded_categories?.length > 0 && (
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Do not use with</p>
+                      <div className="flex flex-wrap gap-1">
+                        {iu.excluded_categories.map((c: string) => (
+                          <span key={c} className="inline-block text-xs bg-red-50 text-red-700 border border-red-200 rounded px-2 py-0.5">{c}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
           </CardContent>
         </Card>
 
@@ -277,12 +310,10 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                       {(tool.start_date || tool.startDate) && ` · ${tool.start_date || tool.startDate}`}
                       {(tool.end_date || tool.endDate) && ` – ${tool.end_date || tool.endDate}`}
                     </p>
-                    {(tool.receipt_url) && (
-                      <a href={tool.receipt_url} target="_blank" rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline mt-1">
-                        <ExternalLink className="w-3 h-3" />
-                        View Receipt
-                      </a>
+                    {tool.receipt_url && (
+                      <span className="inline-flex items-center gap-1 text-xs text-green-600 mt-1">
+                        ✓ Receipt uploaded
+                      </span>
                     )}
                   </div>
                 ))}

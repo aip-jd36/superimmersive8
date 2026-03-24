@@ -104,8 +104,16 @@ const styles = StyleSheet.create({
   checkMark: {
     fontSize: 10,
     color: '#059669',
-    marginRight: 6,
-    width: 12,
+    marginRight: 8,
+    width: 16,
+    flexShrink: 0,
+  },
+  checkMarkEmpty: {
+    fontSize: 10,
+    color: '#9ca3af',
+    marginRight: 8,
+    width: 16,
+    flexShrink: 0,
   },
   checkLabel: {
     fontSize: 9,
@@ -325,7 +333,7 @@ export const CreatorRecordPDF: React.FC<{ data: CreatorRecordData }> = ({ data }
           <Text style={styles.sectionTitle}>3. Likeness & Identity — Self-Attestation</Text>
           {likenessItems.map(([label, val], idx) => (
             <View key={idx} style={styles.checkRow}>
-              <Text style={styles.checkMark}>{val ? '[Y]' : '[ ]'}</Text>
+              <Text style={val ? styles.checkMark : styles.checkMarkEmpty}>{val ? '\u2713' : '\u25CB'}</Text>
               <Text style={styles.checkLabel}>{label}</Text>
             </View>
           ))}
@@ -341,7 +349,7 @@ export const CreatorRecordPDF: React.FC<{ data: CreatorRecordData }> = ({ data }
           <Text style={styles.sectionTitle}>4. IP & Brand — Self-Attestation</Text>
           {ipItems.map(([label, val], idx) => (
             <View key={idx} style={styles.checkRow}>
-              <Text style={styles.checkMark}>{val ? '[Y]' : '[ ]'}</Text>
+              <Text style={val ? styles.checkMark : styles.checkMarkEmpty}>{val ? '\u2713' : '\u25CB'}</Text>
               <Text style={styles.checkLabel}>{label}</Text>
             </View>
           ))}

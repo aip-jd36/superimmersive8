@@ -707,7 +707,7 @@ export default function SubmitPage() {
                       {/* Brand Safety — Suitable Categories */}
                       <div className="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
                         <Label className="text-sm font-semibold">Brand Categories — Suitable For</Label>
-                        <p className="text-xs text-gray-500">Check all brand categories this content is appropriate for. Leave blank if unsure — our reviewer will assess during the 90-minute review.</p>
+                        <p className="text-xs text-gray-500">Check all brand categories this content is appropriate for.</p>
                         <div className="grid grid-cols-2 gap-2">
                           {SUITABLE_CATEGORIES.map((cat) => (
                             <label key={cat} className="flex items-center gap-2 text-sm cursor-pointer">
@@ -1116,7 +1116,7 @@ export default function SubmitPage() {
                               alert('Please upload your audio license documentation before continuing.')
                               return
                             }
-                            setCurrentSection(submissionMode === 'agency' ? 9 : 8)
+                            setCurrentSection(submissionMode === 'agency' || selectedTier === 'creator_record' ? 9 : 8)
                           }}
                         >
                           Continue →
@@ -1126,7 +1126,7 @@ export default function SubmitPage() {
                   )}
 
                   {/* ── Section 8: Territory ── */}
-                  {currentSection === 8 && submissionMode === 'creator' && (
+                  {currentSection === 8 && submissionMode === 'creator' && selectedTier !== 'creator_record' && (
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold">8. Territory & Exclusivity Preferences</h3>
 
@@ -1229,7 +1229,7 @@ export default function SubmitPage() {
                       )}
 
                       <div className="flex gap-4">
-                        <Button type="button" variant="outline" onClick={() => setCurrentSection(submissionMode === 'agency' ? 7 : 8)}>← Back</Button>
+                        <Button type="button" variant="outline" onClick={() => setCurrentSection(submissionMode === 'agency' || selectedTier === 'creator_record' ? 7 : 8)}>← Back</Button>
                         <Button type="button" onClick={() => setCurrentSection(10)}>Continue →</Button>
                       </div>
                     </div>
