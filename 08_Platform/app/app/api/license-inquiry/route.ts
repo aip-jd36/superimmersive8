@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
-      replyTo: inquirerEmail,
+      reply_to: inquirerEmail,
       subject,
       html: `
         <div style="font-family: Inter, sans-serif; max-width: 600px; margin: 0 auto; color: #1a1918;">
