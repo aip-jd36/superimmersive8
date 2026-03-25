@@ -286,6 +286,16 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 - [x] Admin retry route supports `?force=true` to regenerate Creator Record PDF without manual DB delete (Mar 24, 2026)
 - [x] Admin submissions table: "Show in Catalog" toggle column — `ToggleVisibilityButton` for opted-in submissions, grey "Not opted in" for others (Mar 24, 2026)
 
+**RecordForm / CertForm Product Design (Completed Mar 26, 2026):**
+- [x] Named the two forms: **RecordForm** ($29 Creator Record, route `/record`) and **CertForm** ($499 SI8 Certified, route `/certify`) — separate products, separate routes, not a shared form with tier selection
+- [x] PRD: RecordForm — `08_Platform/prds/PRD_RECORD_FORM.md` — complete product doc with all decisions, sections, automated flow, known gaps
+- [x] PRD: CertForm — `08_Platform/prds/PRD_CERT_FORM.md` — complete product doc: 11 sections, Risk Rating system (Low/Standard/Elevated/High), 6-step reviewer checklist (~90 min), file uploads for Sections 5 & 6, Fair Use Path C, commercial context layer
+- [x] Implementation: RecordForm — `08_Platform/implementation/RECORD_FORM_IMPL.md` — current state audit, remaining work (URL migration, admin bug, Stripe live mode), file map, test plan
+- [x] Implementation: CertForm — `08_Platform/implementation/CERT_FORM_IMPL.md` — 8-phase build order, DB migration (14 new columns), section-by-section build notes, reviewer workflow, PDF stamp change
+- [ ] CertForm stamp change: "CLEARED FOR COMMERCIAL USE" → "SI8 VERIFIED · COMMERCIAL AUDIT PASSED" — applied to `ChainOfTitlePDF.tsx` as part of CertForm buildout
+- [ ] URL migration: `/submit` → `/record` (RecordForm) and `/certify` (CertForm)
+- [ ] CertForm build — route `/certify`, DB migration, file uploads, reviewer checklist in admin
+
 ### 3g. Public Catalog with Video Player (Completed Mar 19, 2026 — Updated Mar 21, 2026)
 - [x] Submit form Section 10: Video & Catalog — ✓ video_url, thumbnail_url, public_description, catalog opt-in checkbox
 - [x] Catalog opt-in system — ✓ Creates opt_ins record when checkbox enabled
@@ -470,7 +480,11 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 | **PRD: Admin Panel** | `08_Platform/prds/PRD_ADMIN_PANEL.md` | Review queue, PDF generation, catalog management |
 | **PRD: Public Catalog** | `08_Platform/prds/PRD_PUBLIC_CATALOG.md` | Marketplace, licensing requests, Rights Verified badges |
 | **PRD: CaaS Website** | `08_Platform/prds/PRD_CAAS_WEBSITE.md` | Homepage redesign for v4 model (How It Works, Pricing) |
+| **PRD: RecordForm** | `08_Platform/prds/PRD_RECORD_FORM.md` | $29 Creator Record — self-attested, 9 sections, automated flow (Mar 2026) |
+| **PRD: CertForm** | `08_Platform/prds/PRD_CERT_FORM.md` | $499 SI8 Certified — 11 sections, human review, Risk Rating, reviewer checklist (Mar 2026) |
 | **4-Week Sprint Plan** | `08_Platform/implementation/4_WEEK_SPRINT_PLAN.md` | Day-by-day implementation plan (Feb 19 - Mar 18, 2026) |
+| **RecordForm Implementation** | `08_Platform/implementation/RECORD_FORM_IMPL.md` | Engineering plan: current state audit, URL migration to /record, known bugs, test plan |
+| **CertForm Implementation** | `08_Platform/implementation/CERT_FORM_IMPL.md` | Engineering plan: 8-phase build order, DB migration, reviewer workflow, PDF updates |
 | **Chain of Title Examples — README** | `05_Catalog/_examples/README.md` | Chain of Title examples overview; sales and onboarding tool |
 | **Chain of Title Template** | `05_Catalog/_examples/TEMPLATE.md` | Blank Chain of Title template for new catalog entries |
 | **Example 001: Neon Dreams** | `05_Catalog/_examples/example-001-neon-dreams/` | First complete Chain of Title example (cyberpunk commercial, Tier 1+2) |
