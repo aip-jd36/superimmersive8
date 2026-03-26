@@ -292,9 +292,10 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 - [x] PRD: CertForm — `08_Platform/prds/PRD_CERT_FORM.md` — complete product doc: 11 sections, Risk Rating system (Low/Standard/Elevated/High), 6-step reviewer checklist (~90 min), file uploads for Sections 5 & 6, Fair Use Path C, commercial context layer
 - [x] Implementation: RecordForm — `08_Platform/implementation/RECORD_FORM_IMPL.md` — current state audit, remaining work (URL migration, admin bug, Stripe live mode), file map, test plan
 - [x] Implementation: CertForm — `08_Platform/implementation/CERT_FORM_IMPL.md` — 8-phase build order, DB migration (14 new columns), section-by-section build notes, reviewer workflow, PDF stamp change
-- [ ] CertForm stamp change: "CLEARED FOR COMMERCIAL USE" → "SI8 VERIFIED · COMMERCIAL AUDIT PASSED" — applied to `ChainOfTitlePDF.tsx` as part of CertForm buildout
-- [ ] URL migration: `/submit` → `/record` (RecordForm) and `/certify` (CertForm)
-- [ ] CertForm build — route `/certify`, DB migration, file uploads, reviewer checklist in admin
+- [x] CertForm stamp change: "SI8 VERIFIED · COMMERCIAL AUDIT PASSED" — applied to `ChainOfTitlePDF.tsx` (Mar 26, 2026)
+- [ ] URL migration: `/submit` → `/record` (RecordForm) — CertForm is at `/certify` ✓
+- [x] CertForm build — route `/certify`, all 11 sections, file uploads, reviewer checklist in admin, Risk Rating PDF output (Mar 26, 2026)
+- [ ] **Apply DB migration** `20260401000000_add_certform_fields.sql` to production via Supabase SQL editor
 
 ### 3g. Public Catalog with Video Player (Completed Mar 19, 2026 — Updated Mar 21, 2026)
 - [x] Submit form Section 10: Video & Catalog — ✓ video_url, thumbnail_url, public_description, catalog opt-in checkbox

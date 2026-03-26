@@ -7,6 +7,7 @@ import { formatDate, formatCurrency } from '@/lib/utils'
 import { ArrowLeft, CheckCircle, XCircle, AlertCircle, ExternalLink } from 'lucide-react'
 import { ApproveRejectButtons } from './ApproveRejectButtons'
 import { GenerateRightsPackageButton } from './GenerateRightsPackageButton'
+import { ReviewerChecklist } from './ReviewerChecklist'
 import { notFound } from 'next/navigation'
 
 type PageProps = {
@@ -60,6 +61,19 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
     .select('id, document_url, document_path, generated_at, format')
     .eq('submission_id', params.id)
     .single()
+
+  const isCertified = (submission as any).tier === 'si8_certified'
+  const reviewerChecklist = (submission as any).reviewer_checklist
+  const checklistState = reviewerChecklist || {}
+  const checklistComplete = !!(
+    checklistState.pre_screen_complete &&
+    checklistState.video_watched &&
+    checklistState.tool_receipts_verified &&
+    checklistState.authorship_reviewed &&
+    checklistState.rights_docs_reviewed &&
+    checklistState.risk_assessed &&
+    (submission as any).risk_rating
+  )
 
   // Parse JSONB fields — Supabase returns JSONB as already-parsed JS objects,
   // but may return TEXT as strings. Handle both cases.
@@ -290,6 +304,16 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
               </CardContent>
             </Card>
 
+            {/* Reviewer Checklist — SI8 Certified only */}
+            {isCertified && submission.status !== 'approved' && submission.status !== 'rejected' && (
+              <ReviewerChecklist
+                submissionId={params.id}
+                initialChecklist={checklistState}
+                initialRiskRating={(submission as any).risk_rating}
+                initialRiskNotes={(submission as any).risk_notes}
+              />
+            )}
+
             {/* Catalog Opt-In */}
             {optIn && (
               <Card>
@@ -346,6 +370,8 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
               submissionId={params.id}
               currentStatus={submission.status}
               hasOptIn={!!optIn}
+              checklistRequired={isCertified}
+              checklistComplete={checklistComplete}
             />
 
             <GenerateRightsPackageButton

@@ -25,6 +25,8 @@ interface GenerateChainOfTitleParams {
   }
   territory: string
   reviewedBy?: string
+  riskRating?: 'low' | 'standard' | 'elevated' | 'high'
+  riskNotes?: string
 }
 
 /**
@@ -56,6 +58,8 @@ export async function generateChainOfTitlePDF(
         scenes: params.modificationRights.scope,
       },
       versionHistory: `Original version approved ${new Date().toLocaleDateString('en-US')}`,
+      riskRating: params.riskRating,
+      riskNotes: params.riskNotes,
     }
 
     // Generate PDF stream
@@ -105,6 +109,8 @@ export async function generateChainOfTitlePDF(
         document_path: filePath,
         generated_at: new Date().toISOString(),
         format: 'pdf',
+        risk_rating: params.riskRating || null,
+        risk_notes: params.riskNotes || null,
       })
 
     if (dbError) {

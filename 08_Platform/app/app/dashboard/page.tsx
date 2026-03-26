@@ -154,18 +154,28 @@ export default async function DashboardPage() {
               <CardTitle>Your Submissions</CardTitle>
               <CardDescription>Track the status of your video submissions</CardDescription>
             </div>
-            <Button asChild>
-              <Link href="/submit">Submit New Video</Link>
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/submit">Creator Record — $29</Link>
+              </Button>
+              <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white" asChild>
+                <Link href="/certify">SI8 Certified — $499</Link>
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
           {submissions.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 mb-4">You haven't submitted any videos yet.</p>
-              <Button asChild>
-                <Link href="/submit">Submit Your First Video</Link>
-              </Button>
+              <p className="text-gray-500 mb-6">You haven't submitted any videos yet.</p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button variant="outline" asChild>
+                  <Link href="/submit">Creator Record — $29</Link>
+                </Button>
+                <Button className="bg-amber-600 hover:bg-amber-700 text-white" asChild>
+                  <Link href="/certify">SI8 Certified — $499</Link>
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="overflow-x-auto">

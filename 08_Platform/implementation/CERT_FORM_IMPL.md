@@ -1,7 +1,7 @@
 # Implementation Plan: CertForm ($499 SI8 Certified)
 
 **PRD:** `08_Platform/prds/PRD_CERT_FORM.md`
-**Status:** Not yet built. Design complete. Ready for implementation.
+**Status:** Built and complete (Mar 26, 2026). All 8 phases done. DB migration pending production apply.
 **Route:** `/certify`
 **Build order:** Database migration → Form → Payment → Reviewer workflow → PDF updates → Emails
 

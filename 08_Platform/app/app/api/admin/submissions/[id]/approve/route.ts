@@ -35,6 +35,38 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
     console.log('🔍 Approving submission:', params.id, 'hasOptIn:', hasOptIn)
 
+    // For SI8 Certified, verify reviewer checklist is complete before approving
+    const { data: submissionCheck } = await supabaseAdmin
+      .from('submissions')
+      .select('tier, reviewer_checklist, risk_rating')
+      .eq('id', params.id)
+      .single()
+
+    if (submissionCheck?.tier === 'si8_certified') {
+      const checklist = submissionCheck.reviewer_checklist as any
+      const allStepsComplete = checklist &&
+        checklist.pre_screen_complete &&
+        checklist.video_watched &&
+        checklist.tool_receipts_verified &&
+        checklist.authorship_reviewed &&
+        checklist.rights_docs_reviewed &&
+        checklist.risk_assessed
+
+      if (!allStepsComplete) {
+        return NextResponse.json(
+          { error: 'Reviewer checklist must be completed before approving an SI8 Certified submission' },
+          { status: 400 }
+        )
+      }
+
+      if (!submissionCheck.risk_rating) {
+        return NextResponse.json(
+          { error: 'Risk rating must be assigned before approving' },
+          { status: 400 }
+        )
+      }
+    }
+
     // Fetch submission with user data for email
     // Use explicit foreign key (!user_id) to avoid ambiguous relationship error
     const { data: submission, error: fetchError } = await supabaseAdmin
@@ -127,6 +159,8 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
           tools,
           modificationRights,
           territory: submission.territory_preferences || 'Global',
+          riskRating: submission.risk_rating as any || undefined,
+          riskNotes: submission.risk_notes || undefined,
         })
 
         if (pdfUrl) {
@@ -152,7 +186,8 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       submission.filmmaker_name,
       submission.title,
       dashboardUrl,
-      submission.user.email
+      submission.user.email,
+      submission.risk_rating || undefined
     )
 
     console.log(`Submission ${params.id} approved and email sent to ${submission.user.email}`)

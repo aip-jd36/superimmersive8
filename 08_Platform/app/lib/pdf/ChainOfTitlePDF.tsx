@@ -121,6 +121,33 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 4,
   },
+  riskBadge: {
+    padding: '4 10',
+    borderRadius: 4,
+    fontSize: 11,
+    fontWeight: 'bold',
+    marginBottom: 6,
+    alignSelf: 'flex-start',
+  },
+  riskLow: { backgroundColor: '#dcfce7', color: '#166534' },
+  riskStandard: { backgroundColor: '#dbeafe', color: '#1e40af' },
+  riskElevated: { backgroundColor: '#fef3c7', color: '#92400e' },
+  riskHigh: { backgroundColor: '#fee2e2', color: '#991b1b' },
+  riskCategory: {
+    marginBottom: 8,
+  },
+  riskCategoryLabel: {
+    fontSize: 9,
+    color: '#6b7280',
+    marginBottom: 2,
+    fontWeight: 'bold',
+  },
+  riskCategoryValue: {
+    fontSize: 9,
+    color: '#374151',
+    lineHeight: 1.4,
+    paddingLeft: 8,
+  },
 })
 
 interface Tool {
@@ -154,6 +181,8 @@ interface ChainOfTitleData {
     scenes?: string
   }
   versionHistory: string
+  riskRating?: 'low' | 'standard' | 'elevated' | 'high'
+  riskNotes?: string
 }
 
 export const ChainOfTitlePDF: React.FC<{ data: ChainOfTitleData }> = ({ data }) => {
@@ -175,7 +204,7 @@ export const ChainOfTitlePDF: React.FC<{ data: ChainOfTitleData }> = ({ data }) 
           <Text style={styles.headerSubtitle}>
             Rights Verified Content • Catalog ID: {data.catalogId}
           </Text>
-          <Text style={styles.watermark}>Rights Verified</Text>
+          <Text style={styles.watermark}>SI8 VERIFIED · COMMERCIAL AUDIT PASSED</Text>
         </View>
 
         {/* Film Information */}
@@ -249,7 +278,7 @@ export const ChainOfTitlePDF: React.FC<{ data: ChainOfTitleData }> = ({ data }) 
           </View>
           <View style={styles.field}>
             <Text style={styles.fieldValue}>
-              This content has passed SI8's Rights Verified review process and has been cleared for commercial licensing.
+              This content has passed SI8's structured commercial audit process. SI8 VERIFIED · COMMERCIAL AUDIT PASSED.
             </Text>
           </View>
         </View>
@@ -348,6 +377,33 @@ export const ChainOfTitlePDF: React.FC<{ data: ChainOfTitleData }> = ({ data }) 
           <Text style={styles.sectionTitle}>9. Version History</Text>
           <Text style={styles.fieldValue}>{data.versionHistory}</Text>
         </View>
+
+        {/* Risk Assessment */}
+        {data.riskRating && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Risk Assessment</Text>
+            <Text style={[
+              styles.riskBadge,
+              data.riskRating === 'low' ? styles.riskLow
+                : data.riskRating === 'standard' ? styles.riskStandard
+                : data.riskRating === 'elevated' ? styles.riskElevated
+                : styles.riskHigh,
+            ]}>
+              {data.riskRating.toUpperCase()}
+            </Text>
+            {data.riskNotes && (
+              <View style={styles.riskCategory}>
+                <Text style={styles.riskCategoryLabel}>Reviewer Notes</Text>
+                <Text style={styles.riskCategoryValue}>{data.riskNotes}</Text>
+              </View>
+            )}
+            <View style={styles.field}>
+              <Text style={{ fontSize: 8, color: '#9ca3af', marginTop: 4 }}>
+                Low: Clean audit, no flags. Standard: Solid, minor notes. Elevated: Buyer's legal team should review flagged items. High: Recommend legal clearance before deployment.
+              </Text>
+            </View>
+          </View>
+        )}
 
         {/* Footer */}
         <View style={styles.footer}>

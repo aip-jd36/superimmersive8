@@ -21,13 +21,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
-    const validFolders = ['receipts', 'screenshots', 'audio-docs']
+    const validFolders = [
+      'receipts', 'screenshots', 'audio-docs',
+      'likeness-releases', 'ip-licenses', 'fair-use-docs', 'production-evidence',
+    ]
     if (!folder || !validFolders.includes(folder)) {
       return NextResponse.json({ error: 'Invalid folder' }, { status: 400 })
     }
 
     // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf']
+    const allowedTypes = [
+      'image/jpeg', 'image/png', 'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ]
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json({ error: 'Invalid file type' }, { status: 400 })
     }

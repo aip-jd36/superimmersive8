@@ -48,8 +48,19 @@ export async function sendSubmissionApprovedEmail(
   creatorName: string,
   filmTitle: string,
   dashboardUrl: string,
-  creatorEmail: string
+  creatorEmail: string,
+  riskRating?: string
 ) {
+  const riskLabel = riskRating
+    ? riskRating.charAt(0).toUpperCase() + riskRating.slice(1)
+    : null
+  const riskColor: Record<string, string> = {
+    low: '#166534', standard: '#1e40af', elevated: '#92400e', high: '#991b1b',
+  }
+  const riskBgColor: Record<string, string> = {
+    low: '#dcfce7', standard: '#dbeafe', elevated: '#fef3c7', high: '#fee2e2',
+  }
+
   try {
     await resend.emails.send({
       from: FROM_EMAIL,
@@ -57,10 +68,16 @@ export async function sendSubmissionApprovedEmail(
       subject: `Approved: ${filmTitle} — Chain of Title ready`,
       html: `
         <h2>Congratulations, ${creatorName}!</h2>
-        <p>Your submission <strong>${filmTitle}</strong> has passed SI8's Rights Verified review and is now cleared for commercial use.</p>
+        <p>Your submission <strong>${filmTitle}</strong> has passed SI8's commercial audit and is now <strong>SI8 VERIFIED · COMMERCIAL AUDIT PASSED</strong>.</p>
+        ${riskLabel ? `
+        <p style="margin: 16px 0;">
+          <strong>Your Risk Rating:</strong>
+          <span style="display: inline-block; background: ${riskBgColor[riskRating!] || '#f3f4f6'}; color: ${riskColor[riskRating!] || '#374151'}; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 14px; margin-left: 8px;">${riskLabel}</span>
+        </p>
+        ` : ''}
         <h3>What's Next?</h3>
         <ol>
-          <li><strong>Download your Chain of Title PDF</strong> — Your commercial clearance documentation is ready in your dashboard</li>
+          <li><strong>Download your Chain of Title PDF</strong> — Your SI8 Verified documentation is ready in your dashboard</li>
           <li><strong>Optional: List in SI8 Catalog</strong> — Opt in to earn licensing revenue (you keep 80%)</li>
         </ol>
         <p><a href="${dashboardUrl}" style="background: #818cf8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">View Your Dashboard</a></p>

@@ -10,9 +10,17 @@ type Props = {
   submissionId: string
   currentStatus: string
   hasOptIn: boolean
+  checklistRequired?: boolean
+  checklistComplete?: boolean
 }
 
-export function ApproveRejectButtons({ submissionId, currentStatus, hasOptIn }: Props) {
+export function ApproveRejectButtons({
+  submissionId,
+  currentStatus,
+  hasOptIn,
+  checklistRequired = false,
+  checklistComplete = false,
+}: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [showRejectModal, setShowRejectModal] = useState(false)
@@ -126,10 +134,16 @@ export function ApproveRejectButtons({ submissionId, currentStatus, hasOptIn }: 
         <CardContent className="space-y-3">
           {isPending && (
             <>
+              {checklistRequired && !checklistComplete && (
+                <div className="text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded-lg p-2 mb-1 text-center">
+                  Complete the reviewer checklist below to unlock
+                </div>
+              )}
               <Button
                 onClick={handleApprove}
-                disabled={loading}
-                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                disabled={loading || (checklistRequired && !checklistComplete)}
+                className="w-full bg-green-600 hover:bg-green-700 text-white disabled:opacity-40"
+                title={checklistRequired && !checklistComplete ? 'Complete reviewer checklist first' : ''}
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
