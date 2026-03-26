@@ -262,6 +262,9 @@ export default function CertifyPage() {
   const [suitableCategories, setSuitableCategories] = useState<string[]>([])
   const [excludedCategories, setExcludedCategories] = useState<string[]>([])
 
+  // ── Agency licensing auth (Section 10, agency mode) ────
+  const [agencyLicensingAuth, setAgencyLicensingAuth] = useState(false)
+
   const {
     register,
     handleSubmit,
@@ -338,6 +341,11 @@ export default function CertifyPage() {
   const onSubmit = async (data: FormData) => {
     if (tools.length === 0) { setToolsError('At least one tool is required'); setCurrentSection(2); return }
     if (!hasPrimaryTool) { setToolsError('Mark one tool as primary'); setCurrentSection(2); return }
+    if (submissionMode === 'agency' && data.catalog_opt_in && !agencyLicensingAuth) {
+      setError('Confirm licensing authorization to list in Showcase, or uncheck the Showcase option.')
+      setCurrentSection(10)
+      return
+    }
     if (!indemnificationAccepted || !contentIntegrityAccepted || !scopeAcknowledged) { return }
 
     try {
@@ -438,7 +446,7 @@ export default function CertifyPage() {
         scope_acknowledged: scopeAcknowledged,
       }
 
-      const catalogData = data.catalog_opt_in && submissionMode === 'creator' ? {
+      const catalogData = data.catalog_opt_in ? {
         catalog_opt_in: true,
         video_url: data.video_url,
         thumbnail_url: data.thumbnail_url || null,
@@ -1215,19 +1223,42 @@ export default function CertifyPage() {
                     <p className="text-xs text-gray-500 mt-1">If not provided, we'll use your logline.</p>
                   </div>
 
-                  {submissionMode === 'creator' && (
-                    <>
-                      <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
+                  {/* Showcase opt-in — available for all submission modes */}
+                  <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
+                    <div className="flex items-start gap-3">
+                      <input type="checkbox" id="catalog_opt_in" {...register('catalog_opt_in')} className="mt-1" />
+                      <div>
+                        <Label htmlFor="catalog_opt_in" className="cursor-pointer font-medium">List in Showcase (after approval)</Label>
+                        <p className="text-xs text-gray-600 mt-1">
+                          {submissionMode === 'creator'
+                            ? 'Your film appears in SI8 Showcase with a Rights Verified badge. Brands can discover and license your work — you keep 80%.'
+                            : 'The film appears in SI8 Showcase with a Rights Verified badge. Brands can discover and license the content — the rights holder keeps 80%.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Agency licensing auth — required when agency opts in */}
+                    {submissionMode === 'agency' && watch('catalog_opt_in') && (
+                      <div className="mt-3 pt-3 border-t border-blue-200">
                         <div className="flex items-start gap-3">
-                          <input type="checkbox" id="catalog_opt_in" {...register('catalog_opt_in')} className="mt-1" />
-                          <div>
-                            <Label htmlFor="catalog_opt_in" className="cursor-pointer font-medium">List in Showcase (after approval)</Label>
-                            <p className="text-xs text-gray-600 mt-1">Your film appears in SI8 Showcase with a Rights Verified badge. Brands can discover and license your work — you keep 80%.</p>
-                          </div>
+                          <input
+                            type="checkbox"
+                            id="agency_licensing_auth"
+                            checked={agencyLicensingAuth}
+                            onChange={(e) => setAgencyLicensingAuth(e.target.checked)}
+                            className="h-4 w-4 mt-0.5 flex-shrink-0"
+                          />
+                          <Label htmlFor="agency_licensing_auth" className="cursor-pointer text-xs font-normal text-blue-900">
+                            I confirm I hold the rights (or have written client authorization) to license this content through SI8 Showcase. The client has been informed.
+                          </Label>
                         </div>
                       </div>
+                    )}
+                  </div>
 
-                      {/* Brand safety for creator mode */}
+                  {/* Brand suitability — shown whenever showcase is opted in */}
+                  {watch('catalog_opt_in') && (
+                    <>
                       <div className="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
                         <Label className="text-sm font-semibold">Brand Suitability (Showcase)</Label>
                         <p className="text-xs text-gray-500">Check all brand categories this content is appropriate for. Documented in your Chain of Title.</p>
@@ -1253,12 +1284,6 @@ export default function CertifyPage() {
                         </div>
                       </div>
                     </>
-                  )}
-
-                  {submissionMode === 'agency' && (
-                    <div className="bg-gray-50 p-4 rounded-md text-sm text-gray-500 border border-gray-200">
-                      Showcase listing is not available for agency submissions. The Chain of Title is delivered directly to you.
-                    </div>
                   )}
 
                   <div className="flex gap-4">
