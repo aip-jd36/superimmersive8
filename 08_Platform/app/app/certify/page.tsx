@@ -98,6 +98,86 @@ interface ThirdPartyItem {
   type: string
   description: string
   license_status: string
+  file_path?: string
+}
+
+const EVIDENCE_TYPES = [
+  'Generation Screenshot',
+  'Session Export',
+  'Iteration Sample',
+  'Timeline Export',
+  'Prompt Log',
+  'Other',
+]
+
+interface ProductionEvidenceItem {
+  id: string
+  type: string
+  title: string
+  path: string
+}
+
+// ─── Evidence Uploader Component ────────────────────────────────────────────
+
+interface EvidenceUploaderProps {
+  onAdd: (item: ProductionEvidenceItem) => void
+  uploadFile: (file: File, folder: string) => Promise<string | null>
+}
+
+function EvidenceUploader({ onAdd, uploadFile }: EvidenceUploaderProps) {
+  const [type, setType] = useState('')
+  const [title, setTitle] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!type) { setError('Select an evidence type first'); return }
+    if (file.size > 10 * 1024 * 1024) { setError('File must be under 10MB'); return }
+    setError(null)
+    setUploading(true)
+    const path = await uploadFile(file, 'production-evidence')
+    setUploading(false)
+    if (!path) { setError('Upload failed — please try again'); return }
+    onAdd({ id: crypto.randomUUID(), type, title: title || file.name, path })
+    setType('')
+    setTitle('')
+    e.target.value = ''
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label className="text-xs text-gray-600 font-medium">Evidence Type *</label>
+          <select value={type} onChange={(e) => setType(e.target.value)} className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1">
+            <option value="">Select type...</option>
+            {EVIDENCE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="text-xs text-gray-600 font-medium">Label / Title (optional)</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g., Opening scene iteration 3"
+            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1"
+          />
+        </div>
+      </div>
+      <input
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png,.mp4,.mov,.zip"
+        disabled={uploading}
+        onChange={handleFile}
+        className="block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-medium file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 disabled:opacity-50"
+      />
+      {uploading && <p className="text-xs text-blue-600">Uploading...</p>}
+      {error && <p className="text-xs text-red-500">{error}</p>}
+    </div>
+  )
 }
 
 // ─── Scene Attribution Row ───────────────────────────────────────────────────
@@ -166,8 +246,12 @@ export default function CertifyPage() {
 
   // ── Production evidence (Section 8) ────
   const [hasProductionEvidence, setHasProductionEvidence] = useState(false)
-  const [productionEvidencePaths, setProductionEvidencePaths] = useState<string[]>([])
+  const [productionEvidenceItems, setProductionEvidenceItems] = useState<ProductionEvidenceItem[]>([])
+  const [productionEvidenceNotes, setProductionEvidenceNotes] = useState('')
   const [evidenceUploading, setEvidenceUploading] = useState(false)
+
+  // ── Third-party asset upload tracking ────
+  const [uploadingThirdPartyId, setUploadingThirdPartyId] = useState<string | null>(null)
 
   // ── Review checkboxes (Section 11) ────
   const [indemnificationAccepted, setIndemnificationAccepted] = useState(false)
@@ -348,7 +432,7 @@ export default function CertifyPage() {
           scenes: sceneRows,
         }),
         ai_percentage: aiPercentage,
-        production_evidence_paths: JSON.stringify(productionEvidencePaths),
+        production_evidence_paths: JSON.stringify({ items: productionEvidenceItems, notes: productionEvidenceNotes }),
         client_name: submissionMode === 'agency' ? clientName : null,
         content_integrity_accepted: contentIntegrityAccepted,
         scope_acknowledged: scopeAcknowledged,
@@ -619,6 +703,23 @@ export default function CertifyPage() {
                             <Label className="text-xs">Description</Label>
                             <Input value={item.description} onChange={(e) => updateThirdPartyItem(item.id, 'description', e.target.value)} placeholder="Brief description of the asset and its use in the film" className="mt-1 text-sm" />
                           </div>
+                          <div>
+                            <Label className="text-xs">License document (optional — PDF, JPG, PNG, max 10MB)</Label>
+                            <input type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                              className="mt-1 block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-medium file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0]
+                                if (!file) return
+                                if (file.size > 10 * 1024 * 1024) { alert('File must be under 10MB'); return }
+                                setUploadingThirdPartyId(item.id)
+                                const path = await uploadFile(file, 'ip-licenses')
+                                if (path) updateThirdPartyItem(item.id, 'file_path' as any, path)
+                                setUploadingThirdPartyId(null)
+                              }}
+                            />
+                            {uploadingThirdPartyId === item.id && <p className="text-xs text-blue-600 mt-1">Uploading...</p>}
+                            {item.file_path && <p className="text-xs text-green-600 mt-1">✓ Document uploaded</p>}
+                          </div>
                           <button type="button" onClick={() => removeThirdPartyItem(item.id)} className="text-xs text-red-500 hover:underline">Remove</button>
                         </div>
                       ))}
@@ -702,14 +803,26 @@ export default function CertifyPage() {
                       <Button type="button" variant="outline" onClick={addSceneRow} className="text-sm">+ Add Scene Attribution</Button>
                     ) : (
                       <>
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           {sceneRows.map((row) => (
-                            <div key={row.id} className="grid grid-cols-3 gap-2 items-center">
-                              <Input value={row.scene} onChange={(e) => updateSceneRow(row.id, 'scene', e.target.value)} placeholder="Scene / segment" className="text-xs" />
-                              <Input value={row.tool} onChange={(e) => updateSceneRow(row.id, 'tool', e.target.value)} placeholder="Tool used" className="text-xs" />
-                              <div className="flex gap-1">
-                                <Input value={row.prompt_summary} onChange={(e) => updateSceneRow(row.id, 'prompt_summary', e.target.value)} placeholder="Prompt summary" className="text-xs flex-1" />
-                                <button type="button" onClick={() => removeSceneRow(row.id)} className="text-red-400 text-xs px-1">✕</button>
+                            <div key={row.id} className="bg-white border border-gray-200 rounded-lg p-3 space-y-2">
+                              <div className="grid grid-cols-2 gap-2 items-center">
+                                <Input value={row.scene} onChange={(e) => updateSceneRow(row.id, 'scene', e.target.value)} placeholder="Scene / segment (e.g. Opening sequence)" className="text-xs" />
+                                <div className="flex gap-1">
+                                  <Input value={row.tool} onChange={(e) => updateSceneRow(row.id, 'tool', e.target.value)} placeholder="Tool used (e.g. Runway Gen-3)" className="text-xs flex-1" />
+                                  <button type="button" onClick={() => removeSceneRow(row.id)} className="text-red-400 text-xs px-1.5">✕</button>
+                                </div>
+                              </div>
+                              <div>
+                                <textarea
+                                  value={row.prompt_summary}
+                                  onChange={(e) => {
+                                    if (e.target.value.length <= 500) updateSceneRow(row.id, 'prompt_summary', e.target.value)
+                                  }}
+                                  placeholder="Prompt summary — describe the visual direction, style reference, or key prompt elements (no need to share exact prompts)"
+                                  className="w-full text-xs border border-gray-200 rounded px-2 py-1.5 min-h-[72px] focus:outline-none focus:border-amber-400 resize-y"
+                                />
+                                <div className="text-right text-xs text-gray-400">{row.prompt_summary.length}/500</div>
                               </div>
                             </div>
                           ))}
@@ -746,12 +859,12 @@ export default function CertifyPage() {
               {currentSection === 5 && (
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">5. Likeness & Identity</h3>
-                  <p className="text-sm text-gray-600">Choose one path:</p>
+                  <p className="text-sm text-gray-600">Choose the option that best describes your film:</p>
 
                   <div className="space-y-3">
                     {/* Path A */}
                     <div className={`rounded-lg border-2 p-4 cursor-pointer transition-all ${likenessPath === 'a' ? 'border-amber-400 bg-amber-50' : 'border-gray-200'}`} onClick={() => setLikenessPath('a')}>
-                      <div className="font-medium text-sm mb-3">Path A — No real person content</div>
+                      <div className="font-medium text-sm mb-3">All AI-generated — no real people</div>
                       {likenessPath === 'a' && (
                         <div className="space-y-2">
                           {[
@@ -771,8 +884,8 @@ export default function CertifyPage() {
 
                     {/* Path B */}
                     <div className={`rounded-lg border-2 p-4 cursor-pointer transition-all ${likenessPath === 'b' ? 'border-amber-400 bg-amber-50' : 'border-gray-200'}`} onClick={() => setLikenessPath('b')}>
-                      <div className="font-medium text-sm mb-1">Path B — Licensed content (file upload required)</div>
-                      <div className="text-xs text-gray-500 mb-3">I have a signed release or consent agreement on file</div>
+                      <div className="font-medium text-sm mb-1">I have a signed release on file</div>
+                      <div className="text-xs text-gray-500 mb-3">Upload your signed release or consent agreement (required)</div>
                       {likenessPath === 'b' && (
                         <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
                           <p className="text-xs text-gray-600">Upload your release or consent document (PDF, DOC, JPG, PNG — max 10MB)</p>
@@ -803,7 +916,7 @@ export default function CertifyPage() {
                       if (!likenessPath) { setLikenessError('Please choose a path'); return }
                       if (likenessPath === 'a') {
                         const noneChecked = !watch('likeness_no_real_faces') && !watch('likeness_no_real_voices') && !watch('likeness_no_lookalikes') && !watch('likeness_no_synthetic_people')
-                        if (noneChecked) { setLikenessError('Check at least one box in Path A'); return }
+                        if (noneChecked) { setLikenessError('Check at least one box to confirm'); return }
                       }
                       if (likenessPath === 'b' && !likenessUploadPath) { setLikenessError('Upload your release document to continue'); return }
                       setLikenessError(null)
@@ -817,12 +930,12 @@ export default function CertifyPage() {
               {currentSection === 6 && (
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">6. IP & Brand</h3>
-                  <p className="text-sm text-gray-600">Choose one path:</p>
+                  <p className="text-sm text-gray-600">Choose the option that best describes your film:</p>
 
                   <div className="space-y-3">
                     {/* Path A */}
                     <div className={`rounded-lg border-2 p-4 cursor-pointer transition-all ${ipPath === 'a' ? 'border-amber-400 bg-amber-50' : 'border-gray-200'}`} onClick={() => setIpPath('a')}>
-                      <div className="font-medium text-sm mb-3">Path A — No unlicensed IP</div>
+                      <div className="font-medium text-sm mb-3">All AI-generated — no licensed or third-party IP</div>
                       {ipPath === 'a' && (
                         <div className="space-y-2">
                           {[
@@ -841,8 +954,8 @@ export default function CertifyPage() {
 
                     {/* Path B */}
                     <div className={`rounded-lg border-2 p-4 cursor-pointer transition-all ${ipPath === 'b' ? 'border-amber-400 bg-amber-50' : 'border-gray-200'}`} onClick={() => setIpPath('b')}>
-                      <div className="font-medium text-sm mb-1">Path B — Licensed IP (file upload required)</div>
-                      <div className="text-xs text-gray-500 mb-3">I have a written license or authorization on file</div>
+                      <div className="font-medium text-sm mb-1">I have a license or authorization on file</div>
+                      <div className="text-xs text-gray-500 mb-3">Upload your IP license or written authorization (required)</div>
                       {ipPath === 'b' && (
                         <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
                           <p className="text-xs text-gray-600">Upload your IP license or authorization document (PDF, DOC, JPG, PNG — max 10MB)</p>
@@ -866,7 +979,7 @@ export default function CertifyPage() {
 
                     {/* Path C — Fair Use */}
                     <div className={`rounded-lg border-2 p-4 cursor-pointer transition-all ${ipPath === 'c' ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200'}`} onClick={() => setIpPath('c')}>
-                      <div className="font-medium text-sm mb-1">Path C — Fair Use Claim</div>
+                      <div className="font-medium text-sm mb-1">Fair use applies</div>
                       <div className="text-xs text-gray-500 mb-3">I believe this use qualifies as fair use (commentary, parody, transformative work)</div>
                       {ipPath === 'c' && (
                         <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
@@ -982,32 +1095,43 @@ export default function CertifyPage() {
                   </div>
 
                   {hasProductionEvidence && (
-                    <div className="space-y-2">
-                      <p className="text-xs text-gray-500">Accepted: PDF, PNG, JPG (max 10MB per file). Upload multiple files one at a time.</p>
-                      <input type="file" accept=".pdf,.jpg,.jpeg,.png"
-                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0]
-                          if (!file) return
-                          if (file.size > 10 * 1024 * 1024) { alert('File must be under 10MB'); return }
-                          setEvidenceUploading(true)
-                          const path = await uploadFile(file, 'production-evidence')
-                          if (path) setProductionEvidencePaths((p) => [...p, path])
-                          setEvidenceUploading(false)
-                          e.target.value = '' // reset for next upload
-                        }}
-                      />
-                      {evidenceUploading && <p className="text-xs text-blue-600">Uploading...</p>}
-                      {productionEvidencePaths.length > 0 && (
-                        <div className="space-y-1">
-                          {productionEvidencePaths.map((p, i) => (
-                            <div key={i} className="flex items-center justify-between text-xs bg-green-50 border border-green-200 rounded px-2 py-1">
-                              <span className="text-green-700">✓ File {i + 1} uploaded</span>
-                              <button type="button" onClick={() => setProductionEvidencePaths((prev) => prev.filter((_, idx) => idx !== i))} className="text-red-400 hover:underline">Remove</button>
+                    <div className="space-y-4">
+                      {/* Per-file items */}
+                      {productionEvidenceItems.length > 0 && (
+                        <div className="space-y-2">
+                          {productionEvidenceItems.map((item, i) => (
+                            <div key={item.id} className="flex items-center justify-between text-xs bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="text-green-700 font-medium">✓</span>
+                                <span className="text-gray-700 font-medium truncate">{item.title || `File ${i + 1}`}</span>
+                                <span className="text-gray-400">·</span>
+                                <span className="text-gray-500">{item.type}</span>
+                              </div>
+                              <button type="button" onClick={() => setProductionEvidenceItems((prev) => prev.filter((x) => x.id !== item.id))} className="text-red-400 hover:underline ml-2 flex-shrink-0">Remove</button>
                             </div>
                           ))}
                         </div>
                       )}
+
+                      {/* Add new file */}
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 space-y-2">
+                        <p className="text-xs font-medium text-gray-700">Add a file</p>
+                        <EvidenceUploader
+                          onAdd={(item) => setProductionEvidenceItems((p) => [...p, item])}
+                          uploadFile={uploadFile}
+                        />
+                      </div>
+
+                      {/* General notes */}
+                      <div>
+                        <Label className="text-xs">General production notes (optional)</Label>
+                        <textarea
+                          value={productionEvidenceNotes}
+                          onChange={(e) => setProductionEvidenceNotes(e.target.value)}
+                          placeholder="Any context that helps the reviewer understand your production workflow, tools used, iteration process, or anything not captured in the files above..."
+                          className="w-full text-sm border border-gray-200 rounded px-3 py-2 mt-1 min-h-[80px] focus:outline-none focus:border-amber-400"
+                        />
+                      </div>
                     </div>
                   )}
 
