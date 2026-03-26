@@ -1257,7 +1257,7 @@ export default function CertifyPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveTool}
-        editingTool={editingTool}
+        editTool={editingTool}
         requireReceipt={true}
       />
     </div>
