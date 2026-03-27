@@ -24,6 +24,8 @@ function getEmbedUrl(url: string): string {
     let videoId = ''
     if (url.includes('youtube.com/watch')) {
       videoId = new URL(url).searchParams.get('v') || ''
+    } else if (url.includes('youtube.com/shorts/')) {
+      videoId = url.split('youtube.com/shorts/')[1]?.split('?')[0] || ''
     } else if (url.includes('youtu.be/')) {
       videoId = url.split('youtu.be/')[1]?.split('?')[0] || ''
     }
@@ -41,6 +43,8 @@ function getYouTubeThumbnail(videoUrl: string): string | null {
     let videoId = ''
     if (videoUrl.includes('youtube.com/watch')) {
       try { videoId = new URL(videoUrl).searchParams.get('v') || '' } catch { return null }
+    } else if (videoUrl.includes('youtube.com/shorts/')) {
+      videoId = videoUrl.split('youtube.com/shorts/')[1]?.split('?')[0] || ''
     } else if (videoUrl.includes('youtu.be/')) {
       videoId = videoUrl.split('youtu.be/')[1]?.split('?')[0] || ''
     }
