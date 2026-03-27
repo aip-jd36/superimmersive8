@@ -79,14 +79,24 @@ Connection degree: 2nd (warm) first, then 3rd
 
 ---
 
-## Connection Request
+## Connection Request Notes
 
-**Recommended: Send with NO note** (higher acceptance rate — learned from March)
+Always send a note. Hit the pain point directly — no intro fluff, no pitch.
 
-Optional short note (use sparingly for targeted, warm 2nd-degree connections):
-> "Hi [Name] — see you're in creative production. Connecting."
+**Campaign A — Legal Friction:**
+> Hi [Name] — agencies using AI video for clients are starting to hit friction when brand legal teams ask for documentation on how it was made. Curious if you're seeing this yet.
 
-*(Under 200 chars. No pitch in the connection note.)*
+*(172 chars)*
+
+**Campaign B — Tool Gap:**
+> Hi [Name] — Sora, Runway, and Kling have no official clearance path. Adobe covers Firefly — but for everything else, agencies are on their own when clients ask for documentation. Curious if this has come up.
+
+*(210 chars)*
+
+**Campaign C — Soft Open:**
+> Hi [Name] — AI video is moving fast but most agencies don't have a documentation process for when clients ask how the content was cleared. Curious if this has come up for your team yet.
+
+*(186 chars)*
 
 ---
 
