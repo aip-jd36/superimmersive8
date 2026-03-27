@@ -15,6 +15,7 @@ type CatalogEntry = {
     genre: string | null
     filmmaker_name: string
     runtime: number | null
+    tier: string | null
   }
 }
 
@@ -78,6 +79,8 @@ export default function ShowcasePage() {
   const [licenseSubmitting, setLicenseSubmitting] = useState(false)
   const [licenseSuccess, setLicenseSuccess] = useState(false)
   const [licenseError, setLicenseError] = useState('')
+  const [rightsVerifiedOpen, setRightsVerifiedOpen] = useState(false)
+  const [loginOpen, setLoginOpen] = useState(false)
 
   useEffect(() => { fetchCatalog() }, [])
   useEffect(() => { filterEntries() }, [entries, searchQuery, selectedGenre])
@@ -161,14 +164,62 @@ export default function ShowcasePage() {
           <Link href="https://superimmersive8.com" style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em', color: '#ffffff', textDecoration: 'none' }}>
             SuperImmersive <span style={{ color: '#f59e0b' }}>8</span>
           </Link>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.75rem' }}>
             <Link href="https://superimmersive8.com/how-it-works" style={{ color: '#a0a0a0', textDecoration: 'none', fontSize: '0.95rem' }}>How It Works</Link>
             <Link href="https://superimmersive8.com/pricing" style={{ color: '#a0a0a0', textDecoration: 'none', fontSize: '0.95rem' }}>Pricing</Link>
             <span style={{ color: '#ffffff', fontSize: '0.95rem', fontWeight: 500 }}>Showcase</span>
-            <Link href="/auth/login" style={{ color: '#a0a0a0', textDecoration: 'none', fontSize: '0.95rem' }}>Login</Link>
+
+            {/* Rights Verified dropdown */}
+            <div
+              style={{ position: 'relative' }}
+              onMouseEnter={() => setRightsVerifiedOpen(true)}
+              onMouseLeave={() => setRightsVerifiedOpen(false)}
+            >
+              <button style={{ background: 'none', border: 'none', color: '#a0a0a0', fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', padding: 0 }}>
+                Rights Verified <span style={{ fontSize: '0.65rem' }}>▼</span>
+              </button>
+              {rightsVerifiedOpen && (
+                <div style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px', padding: '0.5rem 0', minWidth: '200px', marginTop: '8px' }}>
+                  <a href="https://superimmersive8.com/rights-verified" style={{ display: 'block', padding: '0.5rem 1rem', color: '#a0a0a0', textDecoration: 'none', fontSize: '0.9rem' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#ffffff')} onMouseLeave={e => (e.currentTarget.style.color = '#a0a0a0')}>Overview</a>
+                  <a href="https://superimmersive8.com/rights-verified/playbook" style={{ display: 'block', padding: '0.5rem 1rem', color: '#a0a0a0', textDecoration: 'none', fontSize: '0.9rem' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#ffffff')} onMouseLeave={e => (e.currentTarget.style.color = '#a0a0a0')}>Full Playbook</a>
+                  <a href="https://superimmersive8.com/rights-verified/chain-of-title" style={{ display: 'block', padding: '0.5rem 1rem', color: '#a0a0a0', textDecoration: 'none', fontSize: '0.9rem' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#ffffff')} onMouseLeave={e => (e.currentTarget.style.color = '#a0a0a0')}>Chain of Title</a>
+                </div>
+              )}
+            </div>
+
+            {/* Login dropdown */}
+            <div
+              style={{ position: 'relative' }}
+              onMouseEnter={() => setLoginOpen(true)}
+              onMouseLeave={() => setLoginOpen(false)}
+            >
+              <button style={{ background: 'none', border: 'none', color: '#a0a0a0', fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', padding: 0 }}>
+                Login <span style={{ fontSize: '0.65rem' }}>▼</span>
+              </button>
+              {loginOpen && (
+                <div style={{ position: 'absolute', top: '100%', right: 0, backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px', padding: '0.5rem 0', minWidth: '160px', marginTop: '8px' }}>
+                  <Link href="/auth/login" style={{ display: 'block', padding: '0.5rem 1rem', color: '#a0a0a0', textDecoration: 'none', fontSize: '0.9rem' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#ffffff')} onMouseLeave={e => (e.currentTarget.style.color = '#a0a0a0')}>Creator Login</Link>
+                  <Link href="/auth/login" style={{ display: 'block', padding: '0.5rem 1rem', color: '#a0a0a0', textDecoration: 'none', fontSize: '0.9rem' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#ffffff')} onMouseLeave={e => (e.currentTarget.style.color = '#a0a0a0')}>Admin Login</Link>
+                </div>
+              )}
+            </div>
+
             <Link href="/auth/signup" style={{ backgroundColor: '#f59e0b', color: '#000000', padding: '0.5rem 1.25rem', borderRadius: '6px', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none' }}>
               Get Verified
             </Link>
+
+            {/* EN / ZH toggle */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+              <span style={{ color: '#ffffff', fontWeight: 600 }}>EN</span>
+              <span style={{ color: '#555' }}>/</span>
+              <a href="https://superimmersive8.com/zh" style={{ color: '#a0a0a0', textDecoration: 'none' }}
+                onMouseEnter={e => (e.currentTarget.style.color = '#ffffff')} onMouseLeave={e => (e.currentTarget.style.color = '#a0a0a0')}>繁體中文</a>
+            </div>
           </div>
         </div>
       </nav>
