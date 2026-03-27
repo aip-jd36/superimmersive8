@@ -1,76 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-628BLE9N15"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-628BLE9N15');
-    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperImmersive 8 | AI Film Rights Agency</title>
-    <meta name="description" content="Safe lane AI video content for brands and agencies. Vetted catalog, documented rights, brand placement available. The trusted vetting layer for AI video.">
+    <title>SuperImmersive 8 - Chain of Title Verification for AI Video</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        /* CTA responsive layouts */
-        @media (max-width: 768px) {
-            /* For Brands section - three-button layout */
-            .cta-group > div {
-                grid-template-columns: 1fr !important;
-            }
-            .cta-group .btn {
-                font-size: 15px !important;
-                padding: 14px 24px !important;
-            }
-            /* For Creators section - two-button layout */
-            .filmmaker-ctas {
-                grid-template-columns: 1fr !important;
-                max-width: 100% !important;
-            }
-            /* Rights Verified section - two-button layout */
-            .safe-lane-ctas {
-                grid-template-columns: 1fr !important;
-                max-width: 100% !important;
-            }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="nav">
+    <nav>
         <div class="nav-container">
-            <a href="#" class="logo">
-                <span class="logo-text">SI<span class="logo-accent">8</span></span>
-            </a>
-            <div class="nav-links">
-                <a href="#catalog">The Catalog</a>
-                <div class="nav-dropdown">
-                    <a href="#rights-verified">Rights Verified ▾</a>
-                    <div class="dropdown-content">
-                        <a href="/rights-verified-how-it-works">How It Works</a>
-                        <a href="/rights-verified-chain-of-title">Rights Package</a>
-                        <a href="/rights-verified-vetting-criteria">Vetting Criteria</a>
-                        <a href="/rights-verified-legal-brief">Legal Risk Brief</a>
-                        <a href="/rights-verified-rights-playbook">Rights Playbook</a>
+            <a href="/" class="logo">SuperImmersive <span>8</span></a>
+            <ul class="nav-links">
+                <li><a href="/how-it-works">How It Works</a></li>
+                <li><a href="/pricing">Pricing</a></li>
+                <li><a href="/showcase">Showcase</a></li>
+                <li class="nav-dropdown">
+                    <span class="nav-dropdown-trigger">
+                        <span>Rights Verified</span>
+                        <span>▼</span>
+                    </span>
+                    <div class="nav-dropdown-content">
+                        <a href="/rights-verified">Overview</a>
+                        <a href="/rights-verified/playbook">Full Playbook</a>
+                        <a href="/rights-verified/chain-of-title">Chain of Title</a>
                     </div>
-                </div>
-                <a href="#brands">For Brands</a>
-                <a href="#creators">For Creators</a>
-                <a href="/risk-briefing">Risk Briefing</a>
-                <a href="/pricing">Pricing</a>
-                <a href="/submit" class="nav-cta nav-cta-secondary" onclick="gtag('event', 'submit_video_click', {'button_location': 'navigation', 'button_text': 'Submit Video', 'language': 'en'});">Submit Video</a>
-                <a href="#contact" class="nav-cta">Book a Call</a>
-            </div>
-            <div class="lang-selector" style="display:flex;align-items:center;gap:6px;font-size:0.8rem;opacity:0.7;margin-left:12px;">
-                <a href="index.html" style="color:var(--color-accent);text-decoration:none;font-weight:500;">EN</a>
-                <span style="color:var(--color-text-muted);">/</span>
-                <a href="index-zh.html" style="color:var(--color-text-muted);text-decoration:none;">繁體中文</a>
+                </li>
+                <li class="nav-dropdown">
+                    <span class="nav-dropdown-trigger">
+                        <span>Login</span>
+                        <span>▼</span>
+                    </span>
+                    <div class="nav-dropdown-content">
+                        <a href="/auth/login">Creator Login</a>
+                        <a href="/auth/admin/login">Admin Login</a>
+                    </div>
+                </li>
+                <li><a href="/auth/signup" class="nav-cta">Get Verified</a></li>
+            </ul>
+            <div class="lang-selector">
+                <a href="/index.html" class="active">EN</a>
+                <span>/</span>
+                <a href="/zh/index.html">繁體中文</a>
             </div>
             <button class="mobile-menu-btn" aria-label="Toggle menu">
                 <span></span>
@@ -82,611 +56,463 @@
 
     <!-- Hero Section -->
     <section class="hero">
-        <div class="hero-bg">
-            <div class="gradient-orb orb-1"></div>
-            <div class="gradient-orb orb-2"></div>
-            <div class="gradient-orb orb-3"></div>
-        </div>
         <div class="hero-content">
-            <h1>AI video content<br>your legal team<br><span class="highlight">won't flag.</span></h1>
-            <p class="hero-subtitle">Every production in our catalog has been through our safe lane process — tool provenance documented, rights verified, brand safety cleared. License it as-is, or place your brand directly into the production. No reshoot required.</p>
+            <div class="hero-badge">
+                <span class="hero-badge-dot"></span>
+                <span>Now verifying Sora, Runway, Kling, Pika, and more</span>
+            </div>
+
+            <h1>Get Your AI Video Cleared for Commercial Use</h1>
+
+            <p class="hero-subtitle">
+                Adobe verifies Firefly only. We verify Sora, Runway, and Kling — the tools your clients actually want to use.
+                <strong style="color: var(--color-text);">Without documentation, brands won't approve your campaign.</strong>
+                $499 per video, 5-day turnaround.
+            </p>
+
+            <div class="hero-cta-group">
+                <a href="/auth/signup" class="btn btn-primary">
+                    Get Verified
+                    <span>→</span>
+                </a>
+                <a href="/rights-verified-chain-of-title#sample" class="btn btn-secondary">
+                    View Sample Rights Package
+                </a>
+            </div>
         </div>
     </section>
 
-    <!-- Catalog Grid Section -->
-    <section id="catalog" class="catalog-section">
-        <div class="container">
-            <div class="catalog-top">
-                <div class="section-header">
-                    <span class="section-tag">The Catalog</span>
-                    <h2>Rights Verified<br>AI videos</h2>
+    <!-- The Problem -->
+    <section class="problem-section">
+        <div class="problem-content">
+            <p class="section-pretitle">The Problem</p>
+            <h2 class="problem-title">Brands want AI video. Legal teams say "not yet."</h2>
+
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <h3>Adobe Stock</h3>
+                    <p>Only verifies Firefly. If you want to use Sora, Runway, or Kling, you're on your own.</p>
                 </div>
-                <div class="catalog-filters">
-                    <button class="filter-btn active" data-filter="all">All</button>
-                    <button class="filter-btn" data-filter="short-film">Short Film</button>
-                    <button class="filter-btn" data-filter="experimental">Experimental</button>
-                    <button class="filter-btn" data-filter="narrative">Narrative</button>
+
+                <div class="problem-card highlight">
+                    <h3><span style="color: #4ade80; margin-right: 0.4rem;">✓</span> SuperImmersive 8</h3>
+                    <p>We verify the best AI tools on the market. Get documentation that helps brands move faster—without legal headaches.</p>
+                </div>
+
+                <div class="problem-card">
+                    <h3>DIY Approach</h3>
+                    <p>No expert review. Brands assume 100% of the risk. Legal approval takes weeks, if it happens at all.</p>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <div class="catalog-grid">
+    <!-- Without / With Risk Visualization -->
+    <section class="without-with-section">
+        <div class="section-header">
+            <p class="section-pretitle">The Stakes</p>
+            <h2 class="section-title">When there's no documentation</h2>
+        </div>
+        <div class="without-with-grid">
+            <div class="without-card">
+                <div class="without-label">Without SI8</div>
+                <ul>
+                    <li>"Our legal team needs 3 weeks to review this AI content before we can approve it."</li>
+                    <li>"We don't know which tools were used or what the IP exposure is."</li>
+                    <li>"Our E&amp;O insurer won't cover this without a clearance memo."</li>
+                    <li>"We've killed campaigns at the last minute. Legal said no."</li>
+                </ul>
+            </div>
+            <div class="with-card">
+                <div class="with-label"><span style="color: #4ade80; margin-right: 0.3rem;">✓</span> With SI8 Certified</div>
+                <ul>
+                    <li>9-field Chain of Title PDF — reviewed by a human specialist</li>
+                    <li>Tool provenance log for Sora, Runway, Kling — documented and verified</li>
+                    <li>IP and likeness review complete, risk flags documented</li>
+                    <li>E&amp;O-ready documentation package, accepted by underwriters</li>
+                    <li>5-day turnaround. Legal reviews in minutes, not weeks.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
 
-                <!-- Card 1: Time Passing -->
-                <div class="catalog-card" data-category="experimental">
-                    <div class="card-thumbnail">
-                        <img src="images/time-passing.png" alt="Time Passing" loading="lazy">
-                        <div class="card-overlay">
-                            <div class="card-play-btn">
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>
-                            </div>
-                            <div class="card-actions">
-                                <a href="#contact" class="btn-sm btn-outline">License</a>
-                                <a href="#contact" class="btn-sm btn-amber">Place Brand</a>
-                            </div>
-                        </div>
-                        <div class="card-badges">
-                            <span class="badge-safe-lane">Rights Verified ✓</span>
-                            <span class="badge-placement">Placement Available</span>
-                        </div>
-                    </div>
-                    <div class="card-info">
-                        <div class="card-info-left">
-                            <span class="card-title">Time Passing</span>
-                            <span class="card-filmmaker">Dir. Damon Chang</span>
-                        </div>
-                        <span class="card-type">Experimental · 4:32</span>
-                    </div>
-                </div>
-
-                <!-- Card 2: One Fleeting Moment -->
-                <div class="catalog-card" data-category="short-film">
-                    <div class="card-thumbnail">
-                        <img src="images/one-fleeting-moment.png" alt="One Fleeting Moment" loading="lazy">
-                        <div class="card-overlay">
-                            <div class="card-play-btn">
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>
-                            </div>
-                            <div class="card-actions">
-                                <a href="#contact" class="btn-sm btn-outline">License</a>
-                            </div>
-                        </div>
-                        <div class="card-badges">
-                            <span class="badge-safe-lane">Rights Verified ✓</span>
-                            <span class="badge-spacer"></span>
-                        </div>
-                    </div>
-                    <div class="card-info">
-                        <div class="card-info-left">
-                            <span class="card-title">One Fleeting Moment</span>
-                            <span class="card-filmmaker">Dir. Michy1591</span>
-                        </div>
-                        <span class="card-type">Short Film · 6:18</span>
-                    </div>
-                </div>
-
-                <!-- Card 3: The Adventures of Sam and Cole -->
-                <div class="catalog-card" data-category="narrative">
-                    <div class="card-thumbnail">
-                        <img src="images/sam-and-cole.png" alt="The Adventures of Sam and Cole" loading="lazy">
-                        <div class="card-overlay">
-                            <div class="card-play-btn">
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>
-                            </div>
-                            <div class="card-actions">
-                                <a href="#contact" class="btn-sm btn-outline">License</a>
-                                <a href="#contact" class="btn-sm btn-amber">Place Brand</a>
-                            </div>
-                        </div>
-                        <div class="card-badges">
-                            <span class="badge-safe-lane">Rights Verified ✓</span>
-                            <span class="badge-placement">Placement Available</span>
-                        </div>
-                    </div>
-                    <div class="card-info">
-                        <div class="card-info-left">
-                            <span class="card-title">The Adventures of Sam and Cole</span>
-                            <span class="card-filmmaker">Dir. Jsizzle</span>
-                        </div>
-                        <span class="card-type">Narrative · 8:45</span>
-                    </div>
-                </div>
-
-                <!-- Card 4: Signal Lost -->
-                <div class="catalog-card" data-category="experimental">
-                    <div class="card-thumbnail">
-                        <img src="https://picsum.photos/seed/si8-signal/800/450" alt="Signal Lost" loading="lazy">
-                        <div class="card-overlay">
-                            <div class="card-play-btn">
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>
-                            </div>
-                            <div class="card-actions">
-                                <a href="#contact" class="btn-sm btn-outline">License</a>
-                                <a href="#contact" class="btn-sm btn-amber">Place Brand</a>
-                            </div>
-                        </div>
-                        <div class="card-badges">
-                            <span class="badge-safe-lane">Rights Verified ✓</span>
-                            <span class="badge-placement">Placement Available</span>
-                        </div>
-                    </div>
-                    <div class="card-info">
-                        <div class="card-info-left">
-                            <span class="card-title">Signal Lost</span>
-                            <span class="card-filmmaker">Dir. David Tan</span>
-                        </div>
-                        <span class="card-type">Experimental · 3:56</span>
-                    </div>
-                </div>
-
-                <!-- Card 5: Overtime -->
-                <div class="catalog-card" data-category="short-film">
-                    <div class="card-thumbnail">
-                        <img src="images/overtime.png" alt="Overtime" loading="lazy">
-                        <div class="card-overlay">
-                            <div class="card-play-btn">
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>
-                            </div>
-                            <div class="card-actions">
-                                <a href="#contact" class="btn-sm btn-outline">License</a>
-                            </div>
-                        </div>
-                        <div class="card-badges">
-                            <span class="badge-safe-lane">Rights Verified ✓</span>
-                            <span class="badge-spacer"></span>
-                        </div>
-                    </div>
-                    <div class="card-info">
-                        <div class="card-info-left">
-                            <span class="card-title">Overtime</span>
-                            <span class="card-filmmaker">Dir. JerBear</span>
-                        </div>
-                        <span class="card-type">Short Film · 7:11</span>
-                    </div>
-                </div>
-
-                <!-- Card 6: Karoake Time! -->
-                <div class="catalog-card" data-category="narrative">
-                    <div class="card-thumbnail">
-                        <img src="images/karoake-time.png" alt="Karoake Time!" loading="lazy">
-                        <div class="card-overlay">
-                            <div class="card-play-btn">
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>
-                            </div>
-                            <div class="card-actions">
-                                <a href="#contact" class="btn-sm btn-outline">License</a>
-                            </div>
-                        </div>
-                        <div class="card-badges">
-                            <span class="badge-safe-lane">Rights Verified ✓</span>
-                            <span class="badge-spacer"></span>
-                        </div>
-                    </div>
-                    <div class="card-info">
-                        <div class="card-info-left">
-                            <span class="card-title">Karoake Time!</span>
-                            <span class="card-filmmaker">Dir. Machete in the Woods</span>
-                        </div>
-                        <span class="card-type">Narrative · 5:20</span>
-                    </div>
-                </div>
-
-            </div><!-- /.catalog-grid -->
-
-            <p class="catalog-footer">
-                Catalog actively growing. <a href="#contact">Submit your work</a> or <a href="#contact">inquire about licensing</a>.
+    <!-- Documentation Tiers -->
+    <section class="doc-tiers">
+        <div class="section-header">
+            <p class="section-pretitle">Two Levels of Documentation</p>
+            <h2 class="section-title">Choose Your Documentation</h2>
+            <p class="section-subtitle">
+                Every AI video deserves a paper trail. The right level depends on what you're doing with it.
             </p>
         </div>
+
+        <div class="doc-tiers-grid">
+            <!-- Creator Record -->
+            <div class="doc-tier-card" style="border-color: rgba(255,255,255,0.1); background: rgba(255,255,255,0.03);">
+                <div class="doc-tier-stamp self-attested">Pre-Commercial Record</div>
+                <h3>Creator Record</h3>
+                <div class="doc-tier-price">$29 <span>/ video</span></div>
+                <p class="doc-tier-desc">Automated Chain of Title record issued by SI8 with a permanent record ID. You fill out the form; the system generates and files your PDF. No human review.</p>
+                <div class="doc-tier-divider"></div>
+                <div class="doc-tier-for">
+                    <div class="doc-tier-for-label">Who uses this</div>
+                    <ul>
+                        <li>Independent creators archiving their production process</li>
+                        <li>Festival submissions requiring tool disclosure</li>
+                        <li>Social media and YouTube creators building a paper trail</li>
+                        <li>Anyone who wants third-party documentation on file</li>
+                    </ul>
+                </div>
+                <div class="doc-tier-not-for">Not accepted by brand legal teams or E&amp;O underwriters for commercial use.</div>
+                <a href="/auth/signup" class="btn btn-secondary" style="width: 100%; justify-content: center;">Get Your Record →</a>
+                <!-- /record will redirect to portal submit form when /record URL migration is done -->
+            </div>
+
+            <!-- SI8 Certified -->
+            <div class="doc-tier-card featured">
+                <div class="doc-tier-stamp certified">CLEARED FOR COMMERCIAL USE</div>
+                <h3>SI8 Certified</h3>
+                <div class="doc-tier-price">$499 <span>/ video</span></div>
+                <p class="doc-tier-desc">90-minute human review across 7 categories. Full Chain of Title documentation, cleared for brand, agency, and distribution use. Used to unlock $5K–$50K campaigns. 3–5 business day turnaround.</p>
+                <div class="doc-tier-divider"></div>
+                <div class="doc-tier-for">
+                    <div class="doc-tier-for-label">Who uses this</div>
+                    <ul>
+                        <li>Ad agencies delivering AI video to brand legal teams</li>
+                        <li>Production houses submitting to streaming platforms</li>
+                        <li>Brands deploying AI-generated content in paid advertising</li>
+                        <li>Filmmakers who need E&amp;O insurer-ready documentation</li>
+                        <li>Any commercial deployment of AI-generated video</li>
+                    </ul>
+                </div>
+                <a href="/certify" class="btn btn-primary" style="width: 100%; justify-content: center;">Get Certified →</a>
+            </div>
+        </div>
+
+        <div class="doc-tiers-note">
+            Need help choosing? <a href="/pricing">See full comparison and FAQ →</a>
+        </div>
     </section>
 
-    <!-- What We Offer Section -->
-    <section id="how-it-works" class="services">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">What We Offer</span>
-                <h2>Two ways to use<br>Rights Verified AI videos.</h2>
+    <!-- Social Proof -->
+    <section class="social-proof">
+        <div class="section-header">
+            <p class="section-pretitle">Testimonials</p>
+            <h2 class="section-title">Trusted by Creators</h2>
+            <p class="section-subtitle">
+                Filmmakers and brands rely on our verification process for peace of mind.
+            </p>
+        </div>
+
+        <div class="testimonial-grid">
+            <div class="testimonial-card">
+                <p class="testimonial-text">
+                    "This is exactly what I needed to show my client. AI video is now usable for commercial work!"
+                </p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">IL</div>
+                    <div class="testimonial-info">
+                        <h4>Ivy Lin</h4>
+                        <p>Brand Manager</p>
+                    </div>
+                </div>
             </div>
-            <div class="services-grid">
-                <div class="service-card">
-                    <div class="service-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
+
+            <div class="testimonial-card">
+                <p class="testimonial-text">
+                    "Filling out the Creator Record was very easy and painless. Would recommend."
+                </p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">DC</div>
+                    <div class="testimonial-info">
+                        <h4>Damon Chang</h4>
+                        <p>Filmmaker</p>
                     </div>
-                    <h3>License from the Catalog</h3>
-                    <p>Vetted AI productions, ready to license. Tool provenance logged. Safe lane sign-off included. Rights documentation provided for every catalog entry.</p>
-                    <ul class="service-features">
-                        <li>Full rights documentation</li>
-                        <li>Safe lane verified</li>
-                        <li>Platform-compliant delivery</li>
-                        <li>Brand-safe productions</li>
-                    </ul>
                 </div>
-                <div class="service-card featured">
-                    <div class="service-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-                        </svg>
+            </div>
+
+            <div class="testimonial-card">
+                <p class="testimonial-text">
+                    "SI8 puts a lot of effort into making sure their Chain of Title reviews are with current trends. Very helpful."
+                </p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">CH</div>
+                    <div class="testimonial-info">
+                        <h4>C. Huang</h4>
+                        <p>Creative Director</p>
                     </div>
-                    <h3>Place Your Brand</h3>
-                    <p>Your brand elements, regenerated into an existing AI production. Category-exclusive by default. No reshoot. No new production budget required.</p>
-                    <ul class="service-features">
-                        <li>Category-exclusive placement</li>
-                        <li>AI-regenerated brand integration</li>
-                        <li>Existing catalog productions</li>
-                        <li>Premium campaign option</li>
-                    </ul>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                        </svg>
-                    </div>
-                    <h3>Advisory & Rights Management</h3>
-                    <p>Building your own AI content pipeline? We help brands and agencies navigate tool selection, documentation standards, and rights workflows.</p>
-                    <ul class="service-features">
-                        <li>Rights landscape guidance</li>
-                        <li>Tool vetting & selection</li>
-                        <li>Documentation standards</li>
-                        <li>Ongoing advisory</li>
-                    </ul>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Rights & Rights Verified Section -->
-    <section id="rights-verified" class="rights-section">
-        <div class="container">
-            <div class="rights-content">
-                <div class="rights-text">
-                    <span class="section-tag">Rights Verified</span>
-                    <h2>The Rights Verified Process</h2>
-                    <p>The AI content landscape is full of unvetted work from unvetted creators. Copyright questions. Training data exposure. Platform policy violations. Brand safety risks.</p>
-                    <p><strong>SI8's Rights Verified process is what turns AI video from a legal risk into a brand-safe asset.</strong></p>
-                    <p>Every catalog entry carries a documented rights package — tool provenance, model disclosure, commercial use authorization, and Rights Verified sign-off. The documentation is already done before you license it.</p>
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="section-header">
+            <p class="section-pretitle">FAQ</p>
+            <h2 class="section-title">Frequently Asked Questions</h2>
+        </div>
+
+        <div class="faq-list">
+            <div class="faq-item">
+                <div class="faq-question">
+                    What AI tools do you verify?
                 </div>
-                <div class="rights-list">
-                    <h4>Our Rights Verified process</h4>
-                    <ul class="safe-lane-list">
-                        <li class="safe-yes"><span>&#10003;</span> Original AI-generated content</li>
-                        <li class="safe-yes"><span>&#10003;</span> Clear rights documentation</li>
-                        <li class="safe-yes"><span>&#10003;</span> Platform-compliant delivery</li>
-                        <li class="safe-yes"><span>&#10003;</span> Brand-safe productions</li>
-                        <li class="safe-no"><span>&#10005;</span> No celebrity likenesses</li>
-                        <li class="safe-no"><span>&#10005;</span> No voice cloning of real people</li>
-                        <li class="safe-no"><span>&#10005;</span> No copyrighted IP imitation</li>
-                        <li class="safe-no"><span>&#10005;</span> No deepfakes or deceptive content</li>
-                    </ul>
+                <div class="faq-answer">
+                    We verify commercial-grade AI video tools including Sora, Runway, Kling, Pika, and others.
+                    Each tool is reviewed for commercial use authorization and training data safety.
+                    Adobe Firefly is also supported. We do NOT verify tools with unclear IP policies or those trained on unlicensed content.
                 </div>
             </div>
 
-            <!-- Rights Verified CTAs -->
-            <div class="cta-group safe-lane-ctas" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 500px; margin: 48px 0 0 0;">
-                <a href="/rights-verified-legal-brief" class="btn btn-primary" style="text-align: center;">
-                    Download Legal Risk Brief
+            <div class="faq-item">
+                <div class="faq-question">
+                    What if my video is rejected?
+                </div>
+                <div class="faq-answer">
+                    If your submission doesn't meet our criteria, we'll provide a detailed explanation.
+                    In some cases, you can resubmit with corrections. Rejections typically occur when tools weren't used with paid commercial plans,
+                    or when there's clear IP imitation. We're here to help you understand what needs to change.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    How long does verification take?
+                </div>
+                <div class="faq-answer">
+                    Our target turnaround is 5 business days. Most reviews are completed within 90 minutes of review time,
+                    but we allow buffer for queue management. Rush processing may be available—contact us for details.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    Do I have to opt into the marketplace?
+                </div>
+                <div class="faq-answer">
+                    No. The marketplace is completely optional. Many creators just want the verification documentation
+                    for their own client work. If you do opt-in, you can remove your work from the Showcase at any time.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    How does the 80/20 commission split work?
+                </div>
+                <div class="faq-answer">
+                    If you opt into our Showcase marketplace and a brand licenses your work, you receive 80% of the licensing fee.
+                    SI8 keeps 20% for handling negotiations, contracts, and payments. You'll be notified of every deal
+                    and receive payment within 30 days of the deal closing.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sample Document -->
+    <section class="sample-section">
+        <div class="section-header">
+            <p class="section-pretitle">See the Product</p>
+            <h2 class="section-title">What You Actually Receive</h2>
+            <p class="section-subtitle">
+                Download a real Chain of Title document from a verified AI film.
+                See exactly what brands and legal teams receive.
+            </p>
+        </div>
+        <div class="sample-card">
+            <div class="sample-preview">
+                <div class="sample-doc-icon">📄</div>
+                <div class="sample-doc-info">
+                    <h4>Neon Dreams — Sample Chain of Title</h4>
+                    <p>12-page documentation package · 9-field Chain of Title · Tier 1 + Tier 2 certified</p>
+                    <p class="sample-meta">Tools: Adobe Firefly, Runway · Territory: Global · Modification Rights: Authorized</p>
+                </div>
+            </div>
+            <div class="sample-cta-group">
+                <a href="/rights-verified-chain-of-title#sample" class="btn btn-primary">
+                    Download Sample PDF
+                    <span>↓</span>
                 </a>
-                <a href="/rights-verified-chain-of-title#sample" class="btn btn-secondary" style="text-align: center;">
-                    Sample Rights Package
+                <a href="/rights-verified/chain-of-title" class="btn btn-secondary">
+                    View Documentation Fields
                 </a>
             </div>
         </div>
     </section>
 
-    <!-- For Brands Section -->
-    <section id="brands" class="audience-section brands-section">
-        <div class="container">
-            <div class="audience-grid reverse">
-                <div class="audience-visual">
-                    <div class="visual-card dark">
-                        <div class="buyer-types">
-                            <div class="buyer-type">
-                                <span class="buyer-icon">&#128196;</span>
-                                <span>License from Catalog</span>
-                            </div>
-                            <div class="buyer-type">
-                                <span class="buyer-icon">&#10230;</span>
-                                <span>Ready to use immediately</span>
-                            </div>
-                            <div class="buyer-type" style="margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.1);">
-                                <span class="buyer-icon">&#11088;</span>
-                                <span>Place Your Brand</span>
-                            </div>
-                            <div class="buyer-type">
-                                <span class="buyer-icon">&#10230;</span>
-                                <span>Category-exclusive placement</span>
-                            </div>
-                            <div class="buyer-type">
-                                <span class="buyer-icon">&#10230;</span>
-                                <span>No reshoot required</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="audience-content">
-                    <span class="section-tag">For Brands & Agencies</span>
-                    <h2>Why unvetted AI video<br>is a <span class="highlight">legal time bomb.</span></h2>
-                    <p class="audience-intro">AI-generated content creates three liability exposures: copyright infringement risk, regulatory non-compliance, and ownership uncertainty. Most brands don't know they're exposed until legal flags the campaign.</p>
-
-                    <div class="risk-stats">
-                        <div class="risk-stat">
-                            <div class="stat-number">73%+</div>
-                            <div class="stat-label">Damage reduction with documentation</div>
-                        </div>
-                        <div class="risk-stat">
-                            <div class="stat-number">$150K</div>
-                            <div class="stat-label">Willful infringement penalty (per work)</div>
-                        </div>
-                        <div class="risk-stat">
-                            <div class="stat-number">$20K</div>
-                            <div class="stat-label">Colorado AI Act penalty (per violation)</div>
-                        </div>
-                    </div>
-
-                    <div class="value-props">
-                        <div class="value-prop">
-                            <div class="value-icon">&#128196;</div>
-                            <div>
-                                <h4>Rights Verified Vetting = Risk Reduction</h4>
-                                <p>Our 4-stage process documents tool provenance, verifies rights, and creates the legal paper trail courts require for damage mitigation.</p>
-                            </div>
-                        </div>
-                        <div class="value-prop">
-                            <div class="value-icon">&#9202;</div>
-                            <div>
-                                <h4>3 Days, Not 3 Weeks</h4>
-                                <p>We reduce time from creative brief to legal approval. The Chain of Title documentation is already built before you license it.</p>
-                            </div>
-                        </div>
-                        <div class="value-prop">
-                            <div class="value-icon">&#11088;</div>
-                            <div>
-                                <h4>Getty for AI Video</h4>
-                                <p>Brands pay Getty $450 for the legal guarantee, $50 for the JPEG. We sell the same value layer for AI video: defensibility, not pixels.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="cta-group" style="display: flex; flex-direction: column; gap: 16px; align-items: center;">
-                        <!-- Primary CTA -->
-                        <a href="/rights-verified-legal-brief" class="btn btn-primary" style="width: 100%; max-width: 450px; text-align: center;">
-                            Download Legal Risk Brief
-                        </a>
-
-                        <!-- Secondary CTAs -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 450px;">
-                            <a href="/rights-verified-chain-of-title#sample" class="btn btn-secondary" style="text-align: center; padding: 12px 20px; font-size: 14px;">
-                                Sample Rights Package
-                            </a>
-                            <a href="#catalog" class="btn btn-secondary" style="text-align: center; padding: 12px 20px; font-size: 14px;">
-                                Browse Catalog
-                            </a>
-                        </div>
-                    </div>
-                </div>
+    <!-- Contact / Request Demo -->
+    <style>
+        #demo-form input,
+        #demo-form select {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            padding: 0.65rem 1rem;
+            color: rgba(255,255,255,0.85);
+            font-size: 0.875rem;
+            width: 100%;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        #demo-form input:focus,
+        #demo-form select:focus {
+            border-color: var(--color-accent);
+        }
+        #demo-form select option {
+            background: #1a1a1a;
+            color: rgba(255,255,255,0.85);
+        }
+        #demo-form input::placeholder {
+            color: rgba(255,255,255,0.3);
+        }
+    </style>
+    <section class="contact-section" id="contact">
+        <div class="section-header">
+            <p class="section-pretitle">Get in Touch</p>
+            <h2 class="section-title">Questions? Let's Talk.</h2>
+            <p class="section-subtitle">
+                Book a 20-minute call or request a demo — we'll walk through the process and answer any questions.
+            </p>
+        </div>
+        <div class="contact-options-grid" style="max-width: 900px;">
+            <a href="https://calendly.com/aipenguins/superimmersive8" target="_blank" rel="noopener" class="contact-option-card featured-contact">
+                <div class="contact-option-icon">📅</div>
+                <h4>Book a Call</h4>
+                <p>20-minute intro — walk through the process, ask questions, get a quote for your project.</p>
+                <span class="contact-option-cta">Schedule Now →</span>
+            </a>
+            <div class="contact-option-card" style="cursor: default;">
+                <div class="contact-option-icon">📋</div>
+                <h4>Request a Demo</h4>
+                <form id="demo-form" action="/api/formspree-to-kit" method="POST" style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.25rem;">
+                    <input type="hidden" name="_subject" value="Request Demo — SI8 Homepage">
+                    <input type="hidden" name="download" value="Request Demo">
+                    <input type="text" name="name" placeholder="Your name *" required>
+                    <input type="email" name="email" placeholder="Work email *" required>
+                    <select name="role" required>
+                        <option value="">I am a… *</option>
+                        <option value="agency">Agency / Production House</option>
+                        <option value="brand">Brand / Marketing Team</option>
+                        <option value="filmmaker">AI Filmmaker / Creator</option>
+                        <option value="legal">Legal / Compliance</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <button type="submit" id="demo-submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 0.25rem;">
+                        Request a Demo →
+                    </button>
+                </form>
             </div>
         </div>
     </section>
 
-    <!-- For Creators Section -->
-    <section id="creators" class="audience-section creators-section">
-        <div class="container">
-            <div class="audience-grid">
-                <div class="audience-content">
-                    <span class="section-tag">For Creators</span>
-                    <h2>Earn Royalties<br>+ Production Fees</h2>
-                    <p class="audience-intro">Submit your work to SI8's Rights Verified catalog. Earn 20% royalty on enterprise licenses ($300+ per sale). Plus 50/50 on custom brand placements ($6K-$15K). Non-exclusive — you keep your rights.</p>
-
-                    <div class="value-props">
-                        <div class="value-prop">
-                            <div class="value-icon">$</div>
-                            <div>
-                                <h4>20% Royalty on Catalog Licensing</h4>
-                                <p>Earn 20% on every license ($300-$1K per sale). Passive income — no additional work required.</p>
-                            </div>
-                        </div>
-                        <div class="value-prop">
-                            <div class="value-icon">*</div>
-                            <div>
-                                <h4>50/50 on Brand Placements</h4>
-                                <p>When brands want custom AI regeneration, you earn 50% ($6K-$15K). Active work, higher earnings.</p>
-                            </div>
-                        </div>
-                        <div class="value-prop">
-                            <div class="value-icon">+</div>
-                            <div>
-                                <h4>Non-Exclusive, Global Reach</h4>
-                                <p>You retain copyright and can license elsewhere. SI8 handles sales, legal vetting, and documentation. You create, we sell.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="cta-group filmmaker-ctas" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 500px;">
-                        <a href="/submit" class="btn btn-primary" style="text-align: center;" onclick="gtag('event', 'submit_video_click', {'button_location': 'creators_section', 'button_text': 'Submit Your Video', 'language': 'en'});">
-                            Submit Your Video
-                        </a>
-                        <a href="/rights-verified-how-it-works" class="btn btn-secondary" style="text-align: center;">
-                            How It Works
-                        </a>
-                    </div>
-                </div>
-                <div class="audience-visual">
-                    <div class="visual-card">
-                        <div class="visual-stat">
-                            <span class="stat-number">20%</span>
-                            <span class="stat-label">Royalty (Tier 1 licensing)</span>
-                        </div>
-                        <div class="visual-stat">
-                            <span class="stat-number">50%</span>
-                            <span class="stat-label">Split (Tier 2 placements)</span>
-                        </div>
-                        <div class="visual-stat">
-                            <span class="stat-number">Non-Exclusive</span>
-                            <span class="stat-label">You keep rights</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="about-section">
-        <div class="container">
-            <div class="about-grid">
-                <div class="about-content">
-                    <span class="section-tag">About</span>
-                    <h2>Built at the Intersection</h2>
-                    <p>SuperImmersive 8 was founded by someone who's lived at the crossroads of film, technology, and entrepreneurship.</p>
-                    <p>With a background spanning indie film production in Los Angeles, tech startups in Taipei, and immersive exhibition distribution across Asia, we understand both the creative and business sides of emerging media.</p>
-                    <p>In 2023, we distributed two major immersive exhibitions to Taiwan. Now, we're applying that same model to the most exciting new medium in decades: AI-generated film.</p>
-
-                    <div class="credentials">
-                        <div class="credential">
-                            <span class="credential-label">Based in</span>
-                            <span class="credential-value">Austin, TX · Taipei, Taiwan</span>
-                        </div>
-                        <div class="credential">
-                            <span class="credential-label">Focus</span>
-                            <span class="credential-value">Global</span>
-                        </div>
-                        <div class="credential">
-                            <span class="credential-label">Founded</span>
-                            <span class="credential-value">2026</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="about-visual">
-                    <div class="about-quote">
-                        <blockquote>"The rights infrastructure layer for AI video is being built right now. The company that owns the vetting pipeline owns the market — the same way Getty owns photography licensing without owning the photographs."</blockquote>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="contact-section">
-        <div class="container">
-            <div class="contact-grid">
-                <div class="contact-content">
-                    <span class="section-tag">Get In Touch</span>
-                    <h2>Let's Talk.</h2>
-                    <p>Whether you're a brand looking for vetted AI content, a filmmaker who wants your work in the catalog, or a potential partner — book a call or send a message.</p>
-
-                    <div class="contact-options">
-                        <a href="https://calendly.com/aipenguins/superimmersive8" target="_blank" class="contact-option featured">
-                            <span class="contact-icon">&#128197;</span>
-                            <span>Book a Call</span>
-                        </a>
-                        <a href="mailto:jd@superimmersive8.com" class="contact-option">
-                            <span class="contact-icon">&#9993;</span>
-                            <span>jd@superimmersive8.com</span>
-                        </a>
-                    </div>
-                </div>
-                <div class="contact-form-container">
-                    <form class="contact-form" action="/api/contact-form" method="POST">
-                        <!-- Honeypot field (hidden from humans, bots will fill it) -->
-                        <input type="text" name="website" style="display: none;" tabindex="-1" autocomplete="off">
-
-                        <!-- Timestamp field (populated on page load) -->
-                        <input type="hidden" name="formLoadTime" id="formLoadTime">
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="name">Name *</label>
-                                <input type="text" id="name" name="name" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="email">Email *</label>
-                                <input type="email" id="email" name="email" required>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="company">Company</label>
-                                <input type="text" id="company" name="company">
-                            </div>
-                            <div class="form-group">
-                                <label for="type">I am a... *</label>
-                                <select id="type" name="type" required>
-                                    <option value="">Select one</option>
-                                    <option value="filmmaker">AI Filmmaker</option>
-                                    <option value="agency">Agency / Production Company</option>
-                                    <option value="brand">Brand / Marketing Team</option>
-                                    <option value="platform">Streaming / Platform</option>
-                                    <option value="educator">Educational Institution</option>
-                                    <option value="sponsor">Event Sponsor</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="interest">What are you interested in?</label>
-                            <select id="interest" name="interest">
-                                <option value="">Select one</option>
-                                <option value="catalog-licensing">Catalog Licensing</option>
-                                <option value="brand-placement">Brand Placement</option>
-                                <option value="advisory">Advisory / Rights Management</option>
-                                <option value="filmmaker">Filmmaker Representation</option>
-                                <option value="other">Something Else</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="message">Tell us more *</label>
-                            <textarea id="message" name="message" rows="4" placeholder="What brings you here? How can we help?" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-full">Send Message</button>
-                        <p class="form-note">Or <a href="https://calendly.com/aipenguins/superimmersive8" target="_blank">book a call directly</a></p>
-                    </form>
-                </div>
+    <!-- Final CTA -->
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2 class="cta-title">Ready to Get Verified?</h2>
+            <p class="cta-subtitle">
+                Join creators who are making their AI video work commercially safe.
+                5-day turnaround, $499 per video.
+            </p>
+            <div class="hero-cta-group">
+                <a href="/auth/signup" class="btn btn-primary">
+                    Get Verified
+                    <span>→</span>
+                </a>
+                <a href="/how-it-works" class="btn btn-secondary">
+                    Learn How It Works
+                </a>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <div class="logo">
-                        <span class="logo-text">SI<span class="logo-accent">8</span></span>
-                    </div>
-                    <p>AI Film Rights Agency<br>Austin, TX · Taipei, Taiwan</p>
-                </div>
-                <div class="footer-links">
-                    <div class="footer-column">
-                        <h4>Platform</h4>
-                        <a href="#catalog">The Catalog</a>
-                        <a href="#rights-verified">Rights Verified</a>
-                        <a href="/pricing">Pricing</a>
-                    </div>
-                    <div class="footer-column">
-                        <h4>For Brands</h4>
-                        <a href="#brands">License Content</a>
-                        <a href="#brands">Brand Placement</a>
-                        <a href="#contact">Book a Call</a>
-                    </div>
-                    <div class="footer-column">
-                        <h4>For Creators</h4>
-                        <a href="#creators">Join Our Roster</a>
-                        <a href="/submit" onclick="gtag('event', 'submit_video_click', {'button_location': 'footer', 'button_text': 'Submit Work', 'language': 'en'});">Submit Work</a>
-                    </div>
-                    <div class="footer-column">
-                        <h4>Resources</h4>
-                        <a href="/rights-verified-how-it-works">How It Works</a>
-                        <a href="/rights-verified-legal-brief">Legal Risk Brief</a>
-                        <a href="/risk-briefing">Risk Briefing</a>
-                    </div>
-                </div>
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3>SuperImmersive <span style="color: var(--color-accent);">8</span></h3>
+                <p>
+                    Chain of Title verification for AI video content.
+                    Based in Taipei, serving creators globally.
+                </p>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 PMF Strategy Inc. d/b/a SuperImmersive 8. All rights reserved.</p>
+
+            <div class="footer-links">
+                <h4>Product</h4>
+                <ul>
+                    <li><a href="/how-it-works">How It Works</a></li>
+                    <li><a href="/pricing">Pricing</a></li>
+                    <li><a href="/showcase">Showcase</a></li>
+                    <li><a href="/auth/signup">Get Verified</a></li>
+                </ul>
             </div>
+
+            <div class="footer-links">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                    <li><a href="/blog">Blog</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="/terms">Terms of Service</a></li>
+                    <li><a href="/privacy">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 SuperImmersive 8. All rights reserved.</p>
+            <p>Built with ❤️ in Taipei</p>
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="/script.js"></script>
+    <script>
+        document.getElementById('demo-form')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const btn = document.getElementById('demo-submit');
+            const original = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = 'Sending…';
+            try {
+                const fd = new FormData(form);
+                const res = await fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: fd.get('email'),
+                        name: fd.get('name'),
+                        role: fd.get('role'),
+                        source: 'homepage-demo'
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    btn.textContent = '✓ We\'ll be in touch soon';
+                    btn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+                    form.reset();
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.textContent = original;
+                        btn.style.background = '';
+                    }, 4000);
+                } else throw new Error(data.error || 'Failed');
+            } catch(err) {
+                btn.textContent = '✗ Error — please try again';
+                btn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.textContent = original;
+                    btn.style.background = '';
+                }, 3000);
+            }
+        });
+    </script>
 </body>
 </html>
