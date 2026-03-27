@@ -312,6 +312,37 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 - [x] Live mode end-to-end test: COMP-TEST-LIVE (100% off) → $0 → webhook → auto-approve → PDF generated ✅
 - [ ] Showcase seed videos: 1 of 3 complete ("Cloud World") — 2 more needed before public launch
 
+### 3l. Analytics, Tracking & Marketing Site Fixes (Completed Mar 28, 2026)
+
+**Google Analytics (GA4 — G-628BLE9N15):**
+- [x] GA tag was only on 2 pages post-v4 migration (pricing EN + ZH) — added to all 13 marketing site pages (Mar 28, 2026)
+- [x] Custom event tracking added to homepage + pricing page:
+  - `get_verified_click` — "Get Verified" / "Get Certified" CTA clicks
+  - `creator_record_click` — Creator Record CTA clicks
+  - `view_sample_click` — "View Sample Rights Package" clicks
+  - `book_call_click` — Calendly link clicks
+  - `request_demo_submit` — Request Demo form submissions
+- [x] Events appear in GA4 → Admin → Events → Recent events after 24–48hr processing delay
+- [x] To mark as Key Events (conversions): star `get_verified_click`, `request_demo_submit`, `book_call_click` once they appear
+
+**Hotjar / ContentSquare (Project ID: 715376):**
+- [x] Snippet added to all 12 marketing site HTML pages (EN + ZH) — Mar 27, 2026
+- [x] Mapping: "SI8 Marketing Site" — 3 page groups: Homepage, Pricing, How It Works
+- [x] URL format used: full URL (e.g. `https://www.superimmersive8.com/how-it-works`) — matches ContentSquare's path field behavior
+- [x] Session Replay: auto-enabled; data accumulates as real traffic arrives
+- [x] Zoning Analysis (heatmaps): requires ~30–50 sessions per page before patterns are meaningful
+
+**Demo Form (Request Demo — homepage):**
+- [x] `formspree-to-kit.js` was Kit-only (no email) — updated to send Resend admin notification to `jd@superimmersive8.com` on every submission (Mar 28, 2026)
+- [x] Notification email includes: name, email, role, timestamp (Taipei time), source
+- [x] All 3 env vars confirmed in marketing site Vercel project: `RESEND_API_KEY`, `KIT_API_SECRET`, `KIT_TAG_ID`
+
+**Sample Chain of Title v4:**
+- [x] New page at `/sample` — v4 Chain of Title for "Urban Drift" (fictional agency commercial, Runway + Sora, Risk: LOW, "SI8 VERIFIED · COMMERCIAL AUDIT PASSED" stamp)
+- [x] Replaces v3 "Neon Dreams" example (wrong model — v3 Rights Agency with product placement tiers)
+- [x] Hero "View Sample Rights Package" button fixed — was linking to broken v3 URL `/rights-verified-chain-of-title#sample`
+- [x] Sample section copy updated: removed "Tier 1+2", "Modification Rights", "Adobe Firefly" (all v3 language)
+
 ### 3g. Public Catalog with Video Player (Completed Mar 19, 2026 — Updated Mar 21, 2026)
 - [x] Submit form Section 10: Video & Catalog — ✓ video_url, thumbnail_url, public_description, catalog opt-in checkbox
 - [x] Catalog opt-in system — ✓ Creates opt_ins record when checkbox enabled
