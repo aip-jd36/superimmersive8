@@ -2,7 +2,99 @@
 **Written:** March 27, 2026
 **Model:** CaaS (Compliance as a Service) — $499 SI8 Certified verification
 **Tool:** Dripify + Standing Encore personas
-**Status:** Ready to send
+**Status:** Active — 4 agency campaigns loaded in Dripify
+
+## Channel Scope: Agencies Only
+
+LinkedIn is used exclusively for **agency outreach** (Creative Directors, Heads of Production, EPs).
+Creator campaigns (V4-E and V4-F) have moved to Instagram — see `03_Sales/outreach/INSTAGRAM-CAMPAIGNS-CREATORS-V1.md`.
+
+## Dripify Campaigns — Live (March 2026)
+
+| Dripify Campaign Name | Angle | Messages |
+|-----------------------|-------|----------|
+| **SI8_Legal Friction** | Client legal teams asking for documentation | 4 msgs |
+| **SI8_Early Days** | Is AI video something your clients are asking about? | 4 msgs |
+| **SI8_Hitting a Wall** | Production houses hit a wall on missing documentation | 4 msgs |
+| **SI8_Blocks AI Campaign** | When a client's legal team blocks an AI video campaign | 4 msgs |
+
+All 4 campaigns share the same Message 2–4 sequence. Only Message 1 / connection note varies.
+
+---
+
+---
+
+## Live Campaign Messages (Dripify — March 2026)
+
+### SI8_Legal Friction
+
+**Connection note (Dripify):** Hi %%first_name%%, more agencies are hitting a wall when client legal teams reject AI video over missing documentation. If you're producing AI content for clients, curious if this has come up for you yet.
+
+**Message 1** — Send immediately after connection:
+> Hi %%first_name%%, Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made? Seeing this come up more this year.
+
+**Message 2** — Day 5:
+> Hi %%first_name%%, thanks for connecting! In case it's relevant: we run a 90-minute rights review for AI video. Creator submits → we issue a Chain of Title document → brand legal gets what they need to approve the campaign. $499 per video. You can see a sample at www.superimmersive8.com — the "How It Works" page has the full breakdown. Would you be open to a quick 15-min call to learn more? Vanessa / www.superimmersive8.com
+
+**Message 3** — Day 10:
+> If you've got a campaign with AI-generated content that needs to pass legal review, that's exactly what we solve. Happy to send a sample Chain of Title document directly, or jump on a 15-minute call to walk through the process. Just say the word. Thanks! Vanessa
+
+**Message 4** — Day 17 (Break-up):
+> No worries if the timing isn't right. When a client starts asking for documentation on AI film/video, we're at superimmersive8.com. Good luck with what you're working on. Have a great day, Vanessa / www.superimmersive8.com
+
+---
+
+### SI8_Early Days
+
+**Connection note (Dripify):** Hi %%first_name%%, AI video is moving fast but most agencies don't have a documentation process for when clients ask how the content was cleared. Curious if this has come up for your team yet.
+
+**Message 1** — Send immediately after connection:
+> Hi %%first_name%%, We run a rights verification service for AI-generated video (Sora, Runway, Kling). Curious: is AI video something your clients are starting to ask about, or still early days for your agency?
+
+**Message 2** — Day 5:
+> Hi %%first_name%%, thanks for connecting! In case it's relevant: we run a 90-minute rights review for AI video. Creator submits → we issue a Chain of Title document → brand legal gets what they need to approve the campaign. $499 per video. You can see a sample at www.superimmersive8.com — the "How It Works" page has the full breakdown. Would you be open to a quick 15-min call to learn more? Vanessa / www.superimmersive8.com
+
+**Message 3** — Day 10:
+> If you've got a campaign with AI-generated content that needs to pass legal review, that's exactly what we solve. Happy to send a sample Chain of Title document directly, or jump on a 15-minute call to walk through the process. Just say the word. Thanks! Vanessa
+
+**Message 4** — Day 17 (Break-up):
+> No worries if the timing isn't right. When a client starts asking for documentation on AI film/video, we're at superimmersive8.com. Good luck with what you're working on. Have a great day, Vanessa / www.superimmersive8.com
+
+---
+
+### SI8_Hitting a Wall
+
+**Connection note (Dripify):** Hi %%first_name%%, more agencies are hitting a wall when client legal teams reject AI video over missing documentation. If you're producing AI content for clients, curious if this has come up for you?
+
+**Message 1** — Send immediately after connection:
+> Hi %%first_name%%, More and more production houses are hitting a wall when client legal teams reject AI video over missing documentation. If you're producing AI content for clients, curious if this has come up for you?
+
+**Message 2** — Day 5:
+> Hi %%first_name%%, thanks for connecting! What we do: submit AI video → 90-minute human review → Chain of Title document delivered to your inbox so you can send to your client's legal team. Built for agencies who need AI content cleared before brand approval or E&O insurance. $499 per video submission. Would you be open to a quick 15-min call to learn more? Vanessa / www.superimmersive8.com
+
+**Message 3** — Day 10:
+> If it'd help to see what the documentation actually looks like, I'm happy to send a sample Chain of Title. No call needed, just a look at the output. Let me know. Thanks! Vanessa
+
+**Message 4** — Day 17 (Break-up):
+> No worries if the timing isn't right. When a client starts asking for documentation on AI film/video, we're at superimmersive8.com. Good luck with what you're working on. Have a great day, Vanessa / www.superimmersive8.com
+
+---
+
+### SI8_Blocks AI Campaign
+
+**Connection note (Dripify):** Hi %%first_name%%, more agencies are hitting a wall when client legal teams reject AI video over missing documentation. If you're producing AI content for clients, curious if this has come up for you yet.
+
+**Message 1** — Send immediately after connection:
+> Hi %%first_name%%, When a client's legal team blocks an AI video campaign — what's your current process?
+
+**Message 2** — Day 5:
+> Hi %%first_name%%, thanks for connecting! In case it's relevant: we run a 90-minute rights review for AI video. Creator submits → we issue a Chain of Title document → brand legal gets what they need to approve the campaign. $499 per video. You can see a sample at www.superimmersive8.com — the "How It Works" page has the full breakdown. Would you be open to a quick 15-min call to learn more? Vanessa / www.superimmersive8.com
+
+**Message 3** — Day 10:
+> If it'd help to see what the documentation actually looks like, I'm happy to send a sample Chain of Title. No call needed, just a look at the output. Let me know. Thanks! Vanessa
+
+**Message 4** — Day 17 (Break-up):
+> No worries if the timing isn't right. When a client starts asking for documentation on AI film/video, we're at superimmersive8.com. Good luck with what you're working on. Have a great day, Vanessa / www.superimmersive8.com
 
 ---
 
@@ -211,20 +303,19 @@ Always send a note. Hit the pain point directly — no intro fluff, no pitch.
 
 ---
 
-## Campaign Prioritization & Volume
+## Campaign Prioritization & Volume (Agency Only)
 
-| Campaign | Target | Priority | Volume | Geography |
-|----------|--------|----------|--------|-----------|
-| **C — Soft Open** | Agencies | 🥇 Primary | 400 leads | Singapore + London |
-| **A — Legal Friction** | Agencies | 🥈 Secondary | 200 leads | London first |
-| **D — Legal Team Blocked It** | Agencies (larger) | 🥈 Secondary | 200 leads | London + Singapore |
-| **B — Tool Gap** | Agencies | 🥉 Tertiary | 100 leads | London |
-| **E — Festival & Distribution** | Creators (SI8 Certified) | 🎬 Creator primary | 200 leads | Global English |
-| **F — Creator Record** | Creators ($29) | 🎬 Creator secondary | 200 leads | Global English |
+| Dripify Campaign | Angle | Priority | Volume | Geography |
+|-----------------|-------|----------|--------|-----------|
+| **SI8_Early Days** | Is AI video on clients' radar yet? | 🥇 Primary | 400 leads | Singapore + London |
+| **SI8_Legal Friction** | Legal teams asking for documentation | 🥈 Secondary | 200 leads | London first |
+| **SI8_Hitting a Wall** | Production houses blocked on documentation | 🥈 Secondary | 200 leads | London + Singapore |
+| **SI8_Blocks AI Campaign** | Legal team already blocked a campaign | 🥉 Tertiary | 100 leads | London |
 
-**Week 1 target:** 1,300 leads across 6 campaigns
-**Agency campaigns:** 900 leads (C, A, D, B)
-**Creator campaigns:** 400 leads (E, F)
+**Week 1 target:** 900 agency leads across 4 campaigns
+
+**Creator campaigns (V4-E and V4-F) → moved to Instagram**
+See: `03_Sales/outreach/INSTAGRAM-CAMPAIGNS-CREATORS-V1.md`
 
 ---
 
