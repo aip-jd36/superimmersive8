@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Play, Search, Clock, User, CheckCircle, ArrowRight, Mail } from 'lucide-react'
+import { X, Play, Search, Clock, User, CheckCircle, ArrowRight, Mail, FileText } from 'lucide-react'
 import Link from 'next/link'
 
 type CatalogEntry = {
@@ -158,12 +158,12 @@ export default function ShowcasePage() {
       {/* ── Nav ── */}
       <nav style={{ position: 'sticky', top: 0, backgroundColor: 'rgba(15,15,15,0.95)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #333', zIndex: 100 }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '72px' }}>
-          <Link href="https://superimmersive8.com/newsite" style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em', color: '#ffffff', textDecoration: 'none' }}>
+          <Link href="https://superimmersive8.com" style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em', color: '#ffffff', textDecoration: 'none' }}>
             SuperImmersive <span style={{ color: '#f59e0b' }}>8</span>
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-            <Link href="https://superimmersive8.com/newsite/how-it-works" style={{ color: '#a0a0a0', textDecoration: 'none', fontSize: '0.95rem' }}>How It Works</Link>
-            <Link href="https://superimmersive8.com/newsite/pricing" style={{ color: '#a0a0a0', textDecoration: 'none', fontSize: '0.95rem' }}>Pricing</Link>
+            <Link href="https://superimmersive8.com/how-it-works" style={{ color: '#a0a0a0', textDecoration: 'none', fontSize: '0.95rem' }}>How It Works</Link>
+            <Link href="https://superimmersive8.com/pricing" style={{ color: '#a0a0a0', textDecoration: 'none', fontSize: '0.95rem' }}>Pricing</Link>
             <span style={{ color: '#ffffff', fontSize: '0.95rem', fontWeight: 500 }}>Showcase</span>
             <Link href="/auth/login" style={{ color: '#a0a0a0', textDecoration: 'none', fontSize: '0.95rem' }}>Login</Link>
             <Link href="/auth/signup" style={{ backgroundColor: '#f59e0b', color: '#000000', padding: '0.5rem 1.25rem', borderRadius: '6px', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none' }}>
@@ -183,10 +183,10 @@ export default function ShowcasePage() {
                 <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#f59e0b', letterSpacing: '0.05em' }}>SI8 VERIFIED SHOWCASE</span>
               </div>
               <h1 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '2.75rem', fontWeight: 700, letterSpacing: '-0.02em', marginBottom: '0.75rem' }}>
-                Cleared for Commercial Use.
+                AI Films Available for Licensing.
               </h1>
               <p style={{ color: '#a0a0a0', fontSize: '1.05rem', lineHeight: 1.6, maxWidth: '560px' }}>
-                Every film below has passed SI8&apos;s 90-minute rights review and holds a signed Chain of Title document. These are AI-generated works your legal team can actually approve.
+                SI8 Certified works have passed a 90-minute rights review and hold a signed Chain of Title document — cleared for commercial use. Creator Records are self-attested with documentation on file, available for preview and licensing discussion.
               </p>
             </div>
             {!loading && (
@@ -282,11 +282,18 @@ export default function ShowcasePage() {
                     />
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)' }} />
 
-                    {/* Rights Verified badge */}
-                    <div style={{ position: 'absolute', top: '12px', left: '12px', display: 'flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(245,158,11,0.92)', color: '#000000', fontSize: '0.65rem', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', letterSpacing: '0.05em' }}>
-                      <CheckCircle style={{ width: '10px', height: '10px' }} />
-                      RIGHTS VERIFIED
-                    </div>
+                    {/* Tier badge */}
+                    {(entry.submission as any).tier === 'creator_record' ? (
+                      <div style={{ position: 'absolute', top: '12px', left: '12px', display: 'flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(0,0,0,0.75)', color: '#a0a0a0', fontSize: '0.65rem', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', letterSpacing: '0.05em', border: '1px solid #555' }}>
+                        <FileText style={{ width: '10px', height: '10px' }} />
+                        CREATOR RECORD
+                      </div>
+                    ) : (
+                      <div style={{ position: 'absolute', top: '12px', left: '12px', display: 'flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(245,158,11,0.92)', color: '#000000', fontSize: '0.65rem', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', letterSpacing: '0.05em' }}>
+                        <CheckCircle style={{ width: '10px', height: '10px' }} />
+                        SI8 CERTIFIED
+                      </div>
+                    )}
 
                     {/* Play overlay */}
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0)', transition: 'background-color 0.2s' }}
@@ -400,7 +407,7 @@ export default function ShowcasePage() {
               <ArrowRight style={{ width: '18px', height: '18px' }} />
             </a>
             <a
-              href="https://superimmersive8.com/newsite/pricing"
+              href="https://superimmersive8.com/pricing"
               style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'transparent', color: '#ffffff', padding: '0.875rem 2rem', borderRadius: '8px', fontWeight: 600, fontSize: '1rem', textDecoration: 'none', border: '1px solid #444' }}
             >
               See Pricing

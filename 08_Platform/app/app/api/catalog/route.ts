@@ -23,7 +23,9 @@ export async function GET(request: NextRequest) {
           title,
           genre,
           filmmaker_name,
-          status
+          status,
+          tier,
+          runtime
         )
       `)
       .eq('opted_in', true)
