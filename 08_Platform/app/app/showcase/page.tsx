@@ -495,10 +495,17 @@ export default function ShowcasePage() {
                   {selectedVideo.catalog_id && (
                     <span style={{ fontFamily: 'monospace', color: '#f59e0b' }}>{selectedVideo.catalog_id}</span>
                   )}
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#f59e0b', fontWeight: 600, fontSize: '0.75rem' }}>
-                    <CheckCircle style={{ width: '12px', height: '12px' }} />
-                    RIGHTS VERIFIED
-                  </span>
+                  {selectedVideo.submission.tier === 'si8_certified' ? (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#f59e0b', fontWeight: 600, fontSize: '0.75rem' }}>
+                      <CheckCircle style={{ width: '12px', height: '12px' }} />
+                      SI8 CERTIFIED
+                    </span>
+                  ) : (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#a0a0a0', fontWeight: 600, fontSize: '0.75rem' }}>
+                      <FileText style={{ width: '12px', height: '12px' }} />
+                      CREATOR RECORD
+                    </span>
+                  )}
                 </div>
               </div>
               <button
