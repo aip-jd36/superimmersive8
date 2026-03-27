@@ -213,13 +213,18 @@ Always send a note. Hit the pain point directly — no intro fluff, no pitch.
 
 ## Campaign Prioritization & Volume
 
-| Campaign | Priority | Initial Volume | Geography | Why |
-|----------|----------|---------------|-----------|-----|
-| **C — Soft Open** | 🥇 Primary | 400 leads | Singapore + London | Proven approach (March Campaign C = 2.75%). Rebuild with new product. |
-| **A — Legal Friction** | 🥈 Secondary | 200 leads | London first | Risk/documentation angle — unproven at scale but promising (March Campaign B got 1 call booked from 101 leads) |
-| **B — Tool Gap** | 🥉 Tertiary | 100 leads | London | Requires more targeting precision — use only on confirmed AI tool users |
+| Campaign | Target | Priority | Volume | Geography |
+|----------|--------|----------|--------|-----------|
+| **C — Soft Open** | Agencies | 🥇 Primary | 400 leads | Singapore + London |
+| **A — Legal Friction** | Agencies | 🥈 Secondary | 200 leads | London first |
+| **D — Legal Team Blocked It** | Agencies (larger) | 🥈 Secondary | 200 leads | London + Singapore |
+| **B — Tool Gap** | Agencies | 🥉 Tertiary | 100 leads | London |
+| **E — Festival & Distribution** | Creators (SI8 Certified) | 🎬 Creator primary | 200 leads | Global English |
+| **F — Creator Record** | Creators ($29) | 🎬 Creator secondary | 200 leads | Global English |
 
-**Week 1 target:** 700 leads in Dripify, 3 campaigns running simultaneously
+**Week 1 target:** 1,300 leads across 6 campaigns
+**Agency campaigns:** 900 leads (C, A, D, B)
+**Creator campaigns:** 400 leads (E, F)
 
 ---
 
@@ -277,3 +282,133 @@ Track per campaign:
 2. **The objection to examples is now solved** — showcase exists, sample Chain of Title PDF exists.
 3. **ICP is narrower** — agencies that MAKE AI video, not agencies that BUY it. Should reduce off-target noise.
 4. **The pain is more acute now** — brand legal teams are actively blocking AI content. March 2026 was earlier in the cycle.
+
+---
+
+## CAMPAIGN D — "Legal Team Blocked It"
+**Angle:** Direct — assumes the legal blockage has already happened or is imminent. More specific than Campaign A.
+**Tone:** Problem-first, solution-ready
+**Product:** SI8 Certified $499
+**Best for:** Larger agencies (20–100 employees) where legal/procurement teams are actively involved in content approval
+
+**ICP:** Same as Campaigns A–C — Creative Director / Head of Production / EP at creative agencies and production houses
+
+---
+
+**Connection Note:**
+> Hi [Name] — more agencies are hitting a wall when client legal teams reject AI video over missing documentation. If you're producing AI content for clients, curious if this has come up for you yet.
+
+*(194 chars)*
+
+---
+
+**Message 1** — Send immediately after connection
+
+> When a client's legal team blocks an AI video campaign — what's your current process? Most agencies don't have one yet. That's the gap we solve.
+
+---
+
+**Message 2** — Day 5
+
+> SI8 reviews AI-generated video and issues a Chain of Title document — the documentation brand legal teams and E&O insurers need to approve campaigns. 90 minutes, $499 per video. superimmersive8.com/how-it-works has the full process breakdown.
+
+---
+
+**Message 3** — Day 10
+
+> Happy to send a sample Chain of Title so you can see exactly what a client's legal team receives. No commitment — just a concrete look at the document. Let me know.
+
+---
+
+**Message 4** — Day 17 — Break-up
+
+> No worries if the timing isn't right. When a client's legal team next flags an AI video, we're at superimmersive8.com.
+
+---
+
+## CAMPAIGN E — "Festival & Distribution Ready" (Creator — SI8 Certified)
+**Angle:** Creators building serious AI work — festival submissions, licensing interest — but no documentation to back it up when someone asks.
+**Tone:** Peer-to-peer, filmmaker-to-filmmaker — not corporate
+**Product:** SI8 Certified $499
+**Best for:** AI filmmakers, independent directors, creators making AI short films with artistic/commercial ambition
+
+**ICP (different from agency campaigns):**
+- Job titles: Filmmaker, Director, AI Artist, Creative Director (independent), Animator, Video Artist
+- NOT agency employees — independent creators, boutique studio founders
+- Geography: Global English-speaking (US, UK, Australia, Singapore, Hong Kong, Taiwan)
+- Activity signals: posting AI film work on LinkedIn, AI festival participation, Runway/Kling/Sora mentions
+
+---
+
+**Connection Note:**
+> Hi [Name] — if your AI film gets distribution interest or a festival invite, do you have rights documentation ready? Most AI creators don't — until they need it and the deal is already on the table.
+
+*(196 chars)*
+
+---
+
+**Message 1** — Send immediately after connection
+
+> Getting a festival invite or licensing inquiry on your AI film is the goal — but if you can't answer "who owns this, how was it made, what tools were used?" the deal stalls. For AI-generated work, that documentation doesn't exist unless you create it.
+
+---
+
+**Message 2** — Day 5
+
+> SI8 issues a Chain of Title document for AI-generated film — covers tool provenance, authorship, rights confirmations, commercial clearance. $499, 90-minute review. It's what distributors and festival programmers are starting to ask for. superimmersive8.com — sample document available on the site.
+
+---
+
+**Message 3** — Day 10
+
+> Happy to send you a sample Chain of Title — concrete look at what distribution-ready documentation covers for AI film. No commitment. Just let me know.
+
+---
+
+**Message 4** — Day 17 — Break-up
+
+> No worries if timing isn't right. If a festival or distributor asks about rights on your AI work, we're at superimmersive8.com. Good luck with the work.
+
+---
+
+## CAMPAIGN F — "Creator Record" ($29 — Start Before You Need It)
+**Angle:** Creators who aren't commercial yet but are building a body of AI work — the $29 Creator Record is the low-friction entry point to start documenting now.
+**Tone:** Helpful peer, not salesy — "you should know this exists"
+**Product:** Creator Record $29
+**Best for:** AI video creators at any stage — the $29 record is a low-stakes ask. Can upgrade to $499 SI8 Certified when they land something real.
+
+**ICP:**
+- Same as Campaign E (independent AI creators, filmmakers, content creators)
+- Slightly earlier stage — not necessarily chasing distribution yet, but actively making AI work
+- May have heard of rights issues but hasn't done anything about it
+
+---
+
+**Connection Note:**
+> Hi [Name] — most AI video creators don't document their work until they need to. By then the deal's already on the table. Even a basic self-attested rights record protects your authorship before someone else challenges it.
+
+*(219 chars)*
+
+---
+
+**Message 1** — Send immediately after connection
+
+> Quick question — do you have any documentation for the AI videos you've made? Tool used, authorship, date, rights confirmations? Most creators don't. It's usually not a problem until it suddenly is.
+
+---
+
+**Message 2** — Day 5
+
+> We have a $29 Creator Record for exactly this: fill in the details on your AI video → instant Chain of Title PDF delivered automatically. Self-attested — not for commercial use, but it establishes your authorship trail before you need it. superimmersive8.com/record if you want to see it.
+
+---
+
+**Message 3** — Day 10
+
+> Worth knowing: the $29 Creator Record is also the first step toward our $499 SI8 Certified review — what festivals, distributors, and brand clients actually require. Some creators start with the Record, upgrade when they land something. No resubmission needed. Just FYI.
+
+---
+
+**Message 4** — Day 17 — Break-up
+
+> Closing the loop. If you ever want a quick rights record on your AI work, it's $29 at superimmersive8.com/record. Good luck with everything you're making.
