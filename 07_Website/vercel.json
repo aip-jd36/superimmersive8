@@ -2,37 +2,37 @@
   "redirects": [
     {
       "source": "/catalog",
-      "destination": "https://si8-creator-portal.vercel.app/showcase",
+      "destination": "https://app.superimmersive8.com/showcase",
       "permanent": false
     },
     {
       "source": "/showcase",
-      "destination": "https://si8-creator-portal.vercel.app/showcase",
+      "destination": "https://app.superimmersive8.com/showcase",
       "permanent": false
     },
     {
       "source": "/certify",
-      "destination": "https://si8-creator-portal.vercel.app/certify",
+      "destination": "https://app.superimmersive8.com/certify",
       "permanent": false
     },
     {
       "source": "/record",
-      "destination": "https://si8-creator-portal.vercel.app/record",
+      "destination": "https://app.superimmersive8.com/record",
       "permanent": false
     },
     {
       "source": "/auth/signup",
-      "destination": "https://si8-creator-portal.vercel.app/auth/signup",
+      "destination": "https://app.superimmersive8.com/auth/signup",
       "permanent": false
     },
     {
       "source": "/auth/login",
-      "destination": "https://si8-creator-portal.vercel.app/auth/login",
+      "destination": "https://app.superimmersive8.com/auth/login",
       "permanent": false
     },
     {
       "source": "/auth/admin/login",
-      "destination": "https://si8-creator-portal.vercel.app/auth/login",
+      "destination": "https://app.superimmersive8.com/auth/login",
       "permanent": false
     }
   ]
