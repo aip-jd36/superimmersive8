@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-628BLE9N15"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-628BLE9N15');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SuperImmersive 8 - Chain of Title Verification for AI Video</title>
@@ -513,6 +521,64 @@
                     btn.textContent = original;
                     btn.style.background = '';
                 }, 3000);
+            }
+        });
+    </script>
+
+    <!-- GA4 Custom Event Tracking -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get Verified CTA clicks (hero, nav, tier cards)
+            document.querySelectorAll('a[href="/auth/signup"], a[href="/certify"]').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    gtag('event', 'get_verified_click', {
+                        'event_category': 'CTA',
+                        'event_label': el.textContent.trim()
+                    });
+                });
+            });
+
+            // Creator Record CTA
+            document.querySelectorAll('a[href="/record"], a[href="/auth/signup"]').forEach(function(el) {
+                if (el.textContent.trim().toLowerCase().includes('record')) {
+                    el.addEventListener('click', function() {
+                        gtag('event', 'creator_record_click', {
+                            'event_category': 'CTA',
+                            'event_label': 'Creator Record'
+                        });
+                    });
+                }
+            });
+
+            // View Sample Rights Package
+            document.querySelectorAll('a[href="/sample"]').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    gtag('event', 'view_sample_click', {
+                        'event_category': 'CTA',
+                        'event_label': el.textContent.trim()
+                    });
+                });
+            });
+
+            // Book a Call (Calendly)
+            document.querySelectorAll('a[href*="calendly"]').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    gtag('event', 'book_call_click', {
+                        'event_category': 'Lead',
+                        'event_label': 'Calendly'
+                    });
+                });
+            });
+
+            // Request Demo form submit
+            var demoForm = document.getElementById('demo-form');
+            if (demoForm) {
+                demoForm.addEventListener('submit', function() {
+                    gtag('event', 'request_demo_submit', {
+                        'event_category': 'Lead',
+                        'event_label': 'Request Demo Form'
+                    });
+                });
             }
         });
     </script>

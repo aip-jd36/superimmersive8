@@ -821,5 +821,27 @@
             });
         });
     </script>
+
+    <!-- GA4 Custom Event Tracking -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('a[href="/certify"], a[href="/auth/signup"]').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    gtag('event', 'get_verified_click', {
+                        'event_category': 'CTA',
+                        'event_label': el.textContent.trim() + ' (pricing page)'
+                    });
+                });
+            });
+            document.querySelectorAll('a[href*="calendly"]').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    gtag('event', 'book_call_click', {
+                        'event_category': 'Lead',
+                        'event_label': 'Calendly (pricing page)'
+                    });
+                });
+            });
+        });
+    </script>
 </body>
 </html>
