@@ -1,67 +1,117 @@
-// Vercel Serverless Function: Formspree → Kit Integration
-// Receives webhook from Formspree and adds subscriber to Kit with tag
+// Vercel Serverless Function: Request Demo handler
+// 1. Sends admin notification email via Resend
+// 2. Adds subscriber to Kit with tag
 
 export default async function handler(req, res) {
-  // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    // Extract form data from Formspree webhook
-    const { email, name } = req.body;
+    let body = req.body;
+    if (!body || typeof body === 'string') {
+      body = JSON.parse(req.body || '{}');
+    }
 
-    // Validate required fields
+    const { email, name, role } = body;
+
     if (!email) {
       return res.status(400).json({ error: 'Email is required' });
     }
 
-    // Kit API credentials from environment variables
+    const RESEND_API_KEY = process.env.RESEND_API_KEY;
     const KIT_API_SECRET = process.env.KIT_API_SECRET;
     const KIT_TAG_ID = process.env.KIT_TAG_ID;
 
-    if (!KIT_API_SECRET || !KIT_TAG_ID) {
-      console.error('Missing environment variables');
-      return res.status(500).json({ error: 'Server configuration error' });
-    }
+    const roleLabels = {
+      agency: 'Agency / Production House',
+      brand: 'Brand / Marketing Team',
+      filmmaker: 'AI Filmmaker / Creator',
+      legal: 'Legal / Compliance',
+      other: 'Other'
+    };
+    const roleLabel = roleLabels[role] || role || 'Not specified';
 
-    // Call Kit API to add subscriber with tag
-    const kitResponse = await fetch(
-      `https://api.kit.com/v3/tags/${KIT_TAG_ID}/subscribe`,
-      {
+    // ============================================
+    // 1. SEND ADMIN NOTIFICATION VIA RESEND
+    // ============================================
+
+    let emailSent = false;
+    if (RESEND_API_KEY) {
+      const emailResponse = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${RESEND_API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          api_secret: KIT_API_SECRET,
-          email: email,
-          first_name: name || '', // Optional: use name if provided
+          from: 'SI8 Website <onboarding@resend.dev>',
+          to: ['jd@superimmersive8.com'],
+          subject: `New Demo Request — ${name || email} (${roleLabel})`,
+          html: `
+            <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #FFFBF5; border: 1px solid #C8900A; border-radius: 8px;">
+              <h2 style="color: #C8900A; margin-top: 0;">New Demo Request</h2>
+              <div style="background: white; padding: 20px; border-radius: 6px; margin: 20px 0;">
+                <p style="margin: 8px 0;"><strong>Name:</strong> ${name || 'Not provided'}</p>
+                <p style="margin: 8px 0;"><strong>Email:</strong> <a href="mailto:${email}" style="color: #C8900A;">${email}</a></p>
+                <p style="margin: 8px 0;"><strong>Role:</strong> ${roleLabel}</p>
+              </div>
+              <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 14px; color: #666;">
+                <p style="margin: 4px 0;">Reply to: <a href="mailto:${email}" style="color: #C8900A;">${email}</a></p>
+                <p style="margin: 4px 0;">Submitted: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Taipei', dateStyle: 'full', timeStyle: 'short' })} (Taipei time)</p>
+                <p style="margin: 4px 0;">Source: superimmersive8.com homepage demo form</p>
+              </div>
+            </div>
+          `,
         }),
-      }
-    );
-
-    const kitData = await kitResponse.json();
-
-    // Check if Kit API call was successful
-    if (!kitResponse.ok) {
-      console.error('Kit API error:', kitData);
-      return res.status(500).json({
-        error: 'Failed to add subscriber to Kit',
-        details: kitData
       });
+      emailSent = emailResponse.ok;
+      if (!emailResponse.ok) {
+        const errData = await emailResponse.json();
+        console.error('Resend error:', errData);
+      }
+    } else {
+      console.error('Missing RESEND_API_KEY');
     }
 
-    // Success!
-    console.log('Subscriber added to Kit:', email);
+    // ============================================
+    // 2. ADD TO KIT
+    // ============================================
+
+    let kitAdded = false;
+    if (KIT_API_SECRET && KIT_TAG_ID) {
+      try {
+        const kitResponse = await fetch(
+          `https://api.kit.com/v3/tags/${KIT_TAG_ID}/subscribe`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              api_secret: KIT_API_SECRET,
+              email: email,
+              first_name: name || '',
+            }),
+          }
+        );
+        kitAdded = kitResponse.ok;
+        if (!kitResponse.ok) {
+          const kitData = await kitResponse.json();
+          console.error('Kit error (non-fatal):', kitData);
+        }
+      } catch (kitError) {
+        console.error('Kit exception (non-fatal):', kitError.message);
+      }
+    }
+
     return res.status(200).json({
       success: true,
-      message: 'Subscriber added successfully',
-      subscriber: kitData.subscription
+      message: 'Demo request received.',
+      email_sent: emailSent,
+      kit_added: kitAdded
     });
 
   } catch (error) {
-    console.error('Error processing webhook:', error);
+    console.error('Fatal error in demo form handler:', error);
     return res.status(500).json({
       error: 'Internal server error',
       message: error.message
