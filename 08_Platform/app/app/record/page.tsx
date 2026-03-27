@@ -1092,7 +1092,9 @@ export default function SubmitPage() {
                               if (!file) return
                               if (file.size > 10 * 1024 * 1024) { alert('File must be under 10MB'); return }
                               setAudioLicenseUploading(true)
-                              const path = `${userId}/audio-license-${Date.now()}.${file.name.split('.').pop()}`
+                              const { data: { session: uploadSession } } = await supabase.auth.getSession()
+                              if (!uploadSession?.user?.id) { alert('Session expired. Please refresh the page and try again.'); setAudioLicenseUploading(false); return }
+                              const path = `${uploadSession.user.id}/audio-license-${Date.now()}.${file.name.split('.').pop()}`
                               const { error } = await supabase.storage.from('submission-files').upload(path, file)
                               if (!error) {
                                 setAudioLicensePath(path)
