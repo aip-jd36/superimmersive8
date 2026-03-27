@@ -315,8 +315,24 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 - [x] vercel.json redirects — ✓ `/catalog`, `/auth/signup`, `/auth/login`, `/auth/admin/login`, `/rights-verified`, `/rights-verified/chain-of-title`, `/rights-verified/playbook` all redirect correctly
 - [x] Nav dropdown fix — ✓ Eliminated 1rem gap that caused hover menu to close before clicking
 - [x] Rights Verified content width — ✓ Narrowed from 1200px → 860px (chain-of-title, playbook), 1400px → 1000px (overview)
-- [x] Sample document CTA — ✓ Added to newsite homepage — Neon Dreams Chain of Title download
+- [x] Sample document CTA — ✓ Added to homepage — Neon Dreams Chain of Title download
 - [x] Contact/Book a Call section — ✓ Replaced with Request Demo form (Kit-connected via /api/formspree-to-kit) + Book a Call Calendly card
+
+### 3j. Marketing Site v4 Promotion to Root (Mar 27, 2026)
+- [x] Migration plan documented — ✓ `07_Website/MIGRATION_v4.md` with rollback procedures
+- [x] v3 files archived — ✓ `07_Website/_archive/` with `README.md` (file inventory + 3 restore options)
+- [x] Git checkpoint committed — ✓ commit `cf392fd` is safe fallback before any migration
+- [x] v4 files promoted from `newsite/` to `07_Website/` root — ✓ all 12 HTML files + styles + scripts
+- [x] `/newsite/` path prefix stripped from all internal links — ✓ global find/replace across all files
+- [x] `vercel.json` simplified — ✓ removed 6 `/newsite/` redirects; kept all creator portal redirects
+- [x] `newsite/` directory removed — ✓ cleaned up
+- [x] Deployed and verified live — ✓ `www.superimmersive8.com` now serves v4 CaaS site
+
+**File structure post-migration:**
+- `07_Website/index.html` — v4 homepage
+- `07_Website/how-it-works/`, `pricing/`, `rights-verified/`, `zh/` — v4 pages
+- `07_Website/_archive/` — v3 files preserved (index.html, styles.css, pricing.html, rights-verified-*.html, etc.)
+- `07_Website/api/` — Vercel serverless functions (untouched)
 
 ### 3i. Marketing Site v4 Redesign (Mar 24, 2026)
 - [x] Homepage H1 — ✓ "Get Your AI Video Cleared for Commercial Use"
@@ -647,6 +663,14 @@ SuperImmersive8/
 **Git:** https://github.com/aip-jd36/superimmersive8.git
 **Vercel Project:** superimmersive8
 **Root Directory:** `07_Website/`
+**Git credentials:** Push with `jd@superimmersive8.com` / `aip-jd36` GitHub account via SSH (`git@github-aip-jd36`)
+
+**Marketing site structure (v4, post-migration Mar 27, 2026):**
+- `07_Website/index.html` — v4 homepage (CaaS positioning)
+- `07_Website/how-it-works/`, `pricing/`, `rights-verified/`, `zh/` — v4 pages
+- `07_Website/_archive/` — v3 files preserved with restore instructions
+- `07_Website/api/` — Vercel serverless functions
+- v3 site archived at `_archive/` — see `_archive/README.md` to restore
 
 **To deploy:**
 1. Make changes to files in `07_Website/`
