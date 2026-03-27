@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       ],
       mode: 'payment',
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?payment=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/submit?payment=cancelled`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/record?payment=cancelled`,
       client_reference_id: submissionId,
       customer_email: creatorEmail,
       metadata: {

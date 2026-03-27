@@ -156,7 +156,7 @@ export default async function DashboardPage() {
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" asChild>
-                <Link href="/submit">Creator Record — $29</Link>
+                <Link href="/record">Creator Record — $29</Link>
               </Button>
               <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white" asChild>
                 <Link href="/certify">SI8 Certified — $499</Link>
@@ -170,7 +170,7 @@ export default async function DashboardPage() {
               <p className="text-gray-500 mb-6">You haven't submitted any videos yet.</p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button variant="outline" asChild>
-                  <Link href="/submit">Creator Record — $29</Link>
+                  <Link href="/record">Creator Record — $29</Link>
                 </Button>
                 <Button className="bg-amber-600 hover:bg-amber-700 text-white" asChild>
                   <Link href="/certify">SI8 Certified — $499</Link>

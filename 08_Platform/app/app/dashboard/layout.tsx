@@ -53,7 +53,7 @@ export default async function DashboardLayout({
                   Dashboard
                 </Link>
                 <Link
-                  href="/submit"
+                  href="/record"
                   className="px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-secondary"
                   style={{ color: '#52504A' }}
                 >
