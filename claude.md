@@ -256,11 +256,11 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 **Tech Stack:** Next.js 14 (App Router) + Supabase (PostgreSQL + Auth) + Stripe (payments) + Resend (emails) + Vercel (hosting)
 
 **Remaining:**
-- [ ] Switch Stripe to live mode ($29 Creator Record + $499 SI8 Certified real keys)
-- [ ] Clean test data from production DB (STEC_TEST, STEC_TEST3, TESTLINK)
-- [ ] Fix "Unknown tool" display in admin panel when tool name uses `tool_name` field (admin reads `tool.tool`, form saves `tool.tool_name`)
+- [x] Switch Stripe to live mode ($29 Creator Record + $499 SI8 Certified real keys) — live (Mar 27, 2026)
+- [x] Clean test data from production DB — all test submissions deleted; only "Cloud World" remains (Mar 27, 2026)
+- [x] Fix "Unknown tool" display in admin panel — reads `tool.tool_name || tool.tool` (Mar 27, 2026)
 - [x] Run DB migration: `20260323000000_add_tier_and_submission_mode.sql` (adds `tier` and `submission_mode` columns) — confirmed live
-- [ ] Test SI8 Certified full flow: submit → pending → admin approve → assign Catalog ID → generate Chain of Title PDF → creator downloads
+- [x] Test SI8 Certified full flow: PASSED (Mar 27, 2026)
 
 **Two-Tier Platform (Completed Mar 23, 2026):**
 - [x] Tier selection in submit form (Section 1): Creator Record $29 vs SI8 Certified $499
@@ -293,9 +293,24 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 - [x] Implementation: RecordForm — `08_Platform/implementation/RECORD_FORM_IMPL.md` — current state audit, remaining work (URL migration, admin bug, Stripe live mode), file map, test plan
 - [x] Implementation: CertForm — `08_Platform/implementation/CERT_FORM_IMPL.md` — 8-phase build order, DB migration (14 new columns), section-by-section build notes, reviewer workflow, PDF stamp change
 - [x] CertForm stamp change: "SI8 VERIFIED · COMMERCIAL AUDIT PASSED" — applied to `ChainOfTitlePDF.tsx` (Mar 26, 2026)
-- [ ] URL migration: `/submit` → `/record` (RecordForm) — CertForm is at `/certify` ✓
+- [x] URL migration: `/submit` → `/record` complete; `/submit` redirects to `/record` (Mar 27, 2026)
 - [x] CertForm build — route `/certify`, all 11 sections, file uploads, reviewer checklist in admin, Risk Rating PDF output (Mar 26, 2026)
-- [ ] **Apply DB migration** `20260401000000_add_certform_fields.sql` to production via Supabase SQL editor
+- [x] Apply DB migration `20260401000000_add_certform_fields.sql` to production — confirmed live (Mar 27, 2026)
+
+### 3k. Platform Launch Hardening (Completed Mar 27, 2026)
+- [x] Stripe live mode activated — `sk_live`, `pk_live`, `whsec_live` in Vercel env vars; webhook endpoint at `app.superimmersive8.com/api/webhooks/stripe`
+- [x] Promo codes (live mode): 4 tiers — EARLY10 (10%/200 uses), AGENCY30 (30%/50 uses), BETA-[NAME] (50%/per-person), COMP-[NAME] (100%/per-person single-use)
+- [x] `allow_promotion_codes: true` added to Stripe checkout session — promo field shows in Stripe Checkout UI
+- [x] Custom domain `app.superimmersive8.com` — CNAME added in Bluehost DNS, configured in Vercel, live
+- [x] `NEXT_PUBLIC_SITE_URL` updated to `https://app.superimmersive8.com` in Vercel
+- [x] Marketing site `vercel.json` — all redirects updated from `si8-creator-portal.vercel.app` to `app.superimmersive8.com`
+- [x] Showcase: YouTube Shorts embed fix — `youtube.com/shorts/` URL pattern added to `getEmbedUrl()` and `getYouTubeThumbnail()`
+- [x] Showcase: tier-aware modal badge — amber "SI8 CERTIFIED" vs gray "CREATOR RECORD"
+- [x] Showcase: full marketing site nav (Rights Verified dropdown, Login dropdown, EN/繁體中文 toggle)
+- [x] RecordForm audio upload fix — upload handler gets userId from live session (not stale state), prevents RLS failures
+- [x] Production DB clean — all test submissions deleted; only "Cloud World: Pan from Baby to Auntie Guard" remains
+- [x] Live mode end-to-end test: COMP-TEST-LIVE (100% off) → $0 → webhook → auto-approve → PDF generated ✅
+- [ ] Showcase seed videos: 1 of 3 complete ("Cloud World") — 2 more needed before public launch
 
 ### 3g. Public Catalog with Video Player (Completed Mar 19, 2026 — Updated Mar 21, 2026)
 - [x] Submit form Section 10: Video & Catalog — ✓ video_url, thumbnail_url, public_description, catalog opt-in checkbox
