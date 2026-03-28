@@ -320,6 +320,16 @@ export default function SubmitPage() {
   }, [supabase])
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('event', 'checkout_started', {
+        event_category: 'Conversion',
+        event_label: 'Creator Record $29',
+        value: 29
+      })
+    }
+  }, [])
+
+  useEffect(() => {
     const subscription = watch((value) => {
       localStorage.setItem('submission-draft', JSON.stringify(value))
     })

@@ -292,6 +292,16 @@ export default function CertifyPage() {
     })
   }, [supabase])
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('event', 'checkout_started', {
+        event_category: 'Conversion',
+        event_label: 'SI8 Certified $499',
+        value: 499
+      })
+    }
+  }, [])
+
   const hasPrimaryTool = tools.some((t) => t.isPrimary)
   const authorshipText = watch('authorship_statement') || ''
   const wordCount = countWords(authorshipText)

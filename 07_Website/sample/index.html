@@ -755,5 +755,35 @@
     </div>
 </div>
 
+<script>
+(function() {
+    var milestones = [25, 50, 75, 100];
+    var fired = {};
+    window.addEventListener('scroll', function() {
+        var scrollTop = window.scrollY || document.documentElement.scrollTop;
+        var docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        var pct = Math.round((scrollTop / docHeight) * 100);
+        milestones.forEach(function(m) {
+            if (pct >= m && !fired[m]) {
+                fired[m] = true;
+                gtag('event', 'sample_scroll_depth', {
+                    'event_category': 'Engagement',
+                    'event_label': m + '%',
+                    'value': m
+                });
+            }
+        });
+    });
+    // Track CTA clicks on sample page
+    document.querySelectorAll('a[href="/auth/signup"]').forEach(function(el) {
+        el.addEventListener('click', function() {
+            gtag('event', 'get_verified_click', {
+                'event_category': 'CTA',
+                'event_label': 'Sample Page'
+            });
+        });
+    });
+})();
+</script>
 </body>
 </html>
