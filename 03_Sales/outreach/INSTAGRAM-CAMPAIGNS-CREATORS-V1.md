@@ -237,7 +237,41 @@ Before sending ANY DM:
 
 ## V4 Repositioning Scripts — For V3 Leads Who Replied
 
-These are for the 5 creators who replied to the original March 2026 streaming pitch and now need an honest, updated response. The streaming opportunity (Gear C / MyVideo) is still real — but whoever gets selected for programming will need rights verification. That's what we built.
+These are for creators who replied to the original March 2026 streaming pitch and now need an honest, updated response.
+
+---
+
+### Standard Reply Template (v4 — finalized Mar 29, 2026)
+
+*Customize [XX] and [COMP-NAME]. Offer free Creator Record to all warm/hot replies.*
+
+> Hey [XX]! Thanks for getting back.
+>
+> So here's how it works — we're building a showcase of rights-verified AI films for licensing to streaming platforms and brands in Asia. The streaming conversation is real, but it's not a guaranteed placement — it depends on fit and timing.
+>
+> What we do first is get your work rights-verified. There are two levels:
+>
+> **Creator Record ($29)** — self-attested documentation you can show to festivals, platforms, or any interested buyer. Useful regardless of what happens with us.
+>
+> **SI8 Certified ($499)** — full human review, the document brands and streaming platforms actually require for commercial use.
+>
+> Once verified, your film can be listed on our Showcase — that's where programmers and brands come to find their next project. If they find you there and reach out directly, that deal is yours, no cut taken.
+>
+> Where we take 20% is when we actively go out and make a distribution deal happen — pitching your work, negotiating, closing.
+>
+> Right now we're giving 30 creators a free Creator Record to get started — happy to send you a code if your work looks like a fit.
+>
+> What kind of AI films are you making? Send me a link and I'll take a look.
+
+**Key decisions baked into this template:**
+- Showcase direct discovery = 0% commission (creator keeps everything)
+- SI8-brokered deals = 20% SI8 / 80% creator
+- 30 free Creator Record codes available (COMP-[NAME] in Stripe)
+- Streaming opportunity framed as real but not guaranteed
+
+---
+
+**Individual scripts below are legacy v4-repositioning drafts (pre-template). Use standard template above going forward.**
 
 **Core message:**
 1. The streaming opportunity is still real and in progress
@@ -347,6 +381,8 @@ For each creator offered a free Creator Record, create a single-use code in Stri
 | Aditya Rizalah (exposuro) | COMP-ADITYA | 1 |
 | Ferry Arya Seto (ferikid) | COMP-FERRY | 1 |
 | Vishal Biswajit (vidn_er) | COMP-VISHAL | 1 |
+
+**Offer:** 30 free Creator Record codes available. Send to any warm/hot reply. No strings attached — code gives them $29 Creator Record for free. Upgrade to $499 SI8 Certified is their choice.
 
 Offer free Creator Record to any creator willing to opt their work into the Showcase after submission.
 
