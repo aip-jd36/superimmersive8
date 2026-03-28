@@ -551,12 +551,20 @@
             });
 
             // View Sample Rights Package
+            // Uses event_callback + preventDefault to ensure beacon sends before navigation
             document.querySelectorAll('a[href="/sample"]').forEach(function(el) {
-                el.addEventListener('click', function() {
+                el.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var dest = el.href;
                     gtag('event', 'view_sample_click', {
                         'event_category': 'CTA',
-                        'event_label': el.textContent.trim()
+                        'event_label': el.textContent.trim(),
+                        'event_callback': function() {
+                            window.location = dest;
+                        }
                     });
+                    // Fallback: navigate after 500ms if callback doesn't fire
+                    setTimeout(function() { window.location = dest; }, 500);
                 });
             });
 
