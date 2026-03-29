@@ -30,9 +30,79 @@ That's the point.
 
 ---
 
-## IG/FB Adaptation
+## IG Carousel — Slide by Slide
 
-"OpenAI just shut down Sora. Disney pulled $1B. If your AI video compliance was tied to a vendor — not the content itself — you're starting over. Chain of Title doesn't expire when the tool does."
+**Topic tag (Slide 1 label):** SI8 · AI VIDEO
+
+---
+
+**Slide 1 — Hook**
+> OpenAI just shut down Sora.
+> Disney pulled a $1 billion investment.
+
+---
+
+**Slide 2 — Context**
+Label: WHAT HAPPENED
+
+> OpenAI closed the Sora video app this week.
+> Disney, which had been in talks for a $1B deal,
+> walked away entirely.
+> Agencies that built workflows around Sora
+> are starting over.
+
+---
+
+**Slide 3 — The Problem**
+Label: THE PATTERN
+
+> This isn't the first time a major AI video tool
+> has disappeared or changed its terms mid-campaign.
+> It won't be the last.
+> Runway, Kling, Pika — every tool has its own risk profile.
+> Vendor lock-in is the wrong compliance strategy.
+
+---
+
+**Slide 4 — The Shift**
+Label: WHAT RESILIENCE LOOKS LIKE
+
+> The agencies that aren't affected right now
+> didn't tie their documentation to a specific tool.
+> They documented the content —
+> what it is, how it was made, what rights exist —
+> independent of which platform generated it.
+
+---
+
+**Slide 5 — SI8 Angle**
+Label: TOOL-AGNOSTIC BY DESIGN
+
+> Chain of Title documentation is tool-agnostic.
+> Sora shuts down. Runway pivots. Kling changes its terms.
+> The documentation stays valid.
+> We removed Sora from our verified tools list this week.
+> Existing Sora footage with Chain of Title is still cleared.
+> Nothing changes for those creators.
+
+---
+
+**Slide 6 — CTA**
+> Future-proof your AI video documentation.
+> superimmersive8.com
+
+---
+
+**Caption:**
+OpenAI shut down Sora this week. Disney pulled a $1 billion investment.
+
+If your compliance workflow was built around a specific vendor, you're starting over. This is the second major AI video tool to disappear from commercial availability in the past year.
+
+Chain of Title documentation is tool-agnostic — it documents the content, not the platform. When the tool goes away, the documentation stays valid.
+
+→ Link in bio.
+
+#AIVideo #ChainOfTitle #Sora #GenerativeAI #AIRights #ContentCompliance #BrandSafety #AIMarketing
 
 ## Notes
 

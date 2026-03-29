@@ -27,9 +27,74 @@ That's what separates "we ran AI content" from "we ran vetted, documented AI con
 
 ---
 
-## IG/FB Adaptation
+## IG Carousel — Slide by Slide
 
-"Facebook banned an AI ad for misleading customers. No one intended to deceive — they just didn't document what was in the video before it ran. This is what unverified AI content costs brands."
+**Topic tag (Slide 1 label):** SI8 · AI CONTENT RISK
+
+---
+
+**Slide 1 — Hook**
+> Facebook just banned an AI-generated ad for misleading customers.
+
+---
+
+**Slide 2 — Context**
+Label: WHAT HAPPENED
+
+> The ad showed a robot puppy.
+> Customers thought they were buying a real one.
+> The ad was banned. Complaints were filed.
+> No one intended to deceive anyone.
+
+---
+
+**Slide 3 — The Problem**
+Label: THE ACTUAL RISK
+
+> The brand didn't set out to mislead anyone.
+> They just deployed AI video without documenting
+> what it was — and what it claimed to show.
+> Intent doesn't matter when a customer files a complaint.
+
+---
+
+**Slide 4 — The Shift**
+Label: THE PAPER TRAIL PROBLEM
+
+> A banned ad is the mild outcome.
+> The worse version: advertising standards complaint.
+> Regulatory fine. Customer lawsuit.
+> "We didn't know" only works if you can prove you tried to know.
+
+---
+
+**Slide 5 — SI8 Angle**
+Label: WHAT CHANGES
+
+> Chain of Title documentation creates the audit trail
+> that shows what your video is, what tools made it,
+> and what was disclosed — before it ran.
+> That's the difference between "we ran AI content"
+> and "we ran vetted, documented AI content."
+
+---
+
+**Slide 6 — CTA**
+> Don't wait for a ban to start documenting.
+> superimmersive8.com
+
+---
+
+**Caption:**
+Facebook banned an AI-generated ad this week. The brand didn't intend to mislead anyone — they just had no documentation showing what was in the video before they ran it.
+
+A banned ad is the mild outcome. Advertising standards complaints, regulatory fines, and customer lawsuits are the worse versions.
+
+Chain of Title documentation is the audit trail that proves you knew what you were running — before you ran it.
+
+→ Link in bio.
+
+#AIVideo #ChainOfTitle #ContentCompliance #AIMarketing #BrandSafety #GenerativeAI #AIRights #DigitalAdvertising
 
 ## Notes
 
