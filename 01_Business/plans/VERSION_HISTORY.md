@@ -24,6 +24,26 @@
 
 ---
 
+## v5.0 — March 29, 2026
+**File:** `BUSINESS_PLAN_v5.md`
+**Status:** FUTURE ROADMAP — Not active. Return when v4 reaches consistent revenue.
+
+**What it documents:**
+- Expansion from AI-only into traditional live-action and hybrid production clearance
+- "Rights Clearance Infrastructure for ALL media" as the long-term positioning
+- The Wedge Strategy: AI video → hybrid → live-action (Phases 1–4)
+- What can and cannot be automated in clearance workflows
+- 4-layer product architecture (Documentation → AI-assisted → Reviewer → Platform)
+- Financial opportunity and competitive landscape in v5 era
+- Prerequisites before v5 activation (20+ verifications/month, trained reviewers, E&O insurer relationship)
+
+**Why documented now:**
+Validated independently by Claude, ChatGPT, and Gemini — all three converged on the same wedge strategy conclusion. Captured to inform product roadmap decisions without distracting from v4 execution.
+
+**Prerequisite:** v4 CaaS must prove consistent verifications + agency trust before v5 activates.
+
+---
+
 ## v4.0 — March 2026
 **File:** `BUSINESS_PLAN_v4.md`
 **Status:** Current direction (major pivot from v3)
