@@ -646,6 +646,7 @@ Traditional lawyers are conservative and don't trust automation — BUT they're 
 | **Peer Review Summary (CaaS)** | `01_Business/plans/PEER_REVIEW_SUMMARY_CAAS.md` | ChatGPT (Opus) + Gemini feedback synthesis on v4 pivot |
 | **Revenue Model v4** | `01_Business/financials/REVENUE_MODEL_v4.md` | Three-gear economics, unit economics, projections |
 | **Competitive Analysis (CaaS)** | `01_Business/research/COMPETITIVE_ANALYSIS_CAAS_2026.md` | Updated competitive landscape for CaaS model |
+| **Competitor Deep Dive: FADEL** | `01_Business/research/COMPETITOR-FADEL-ANALYSIS.md` | Adjacent player — enterprise IP/royalty mgmt; validates category, not a direct competitor (Mar 2026) |
 | Business Plan v3 (superseded) | `01_Business/plans/BUSINESS_PLAN_v3.md` | Rights Agency + AI Product Placement (Feb-Mar 2026) |
 | Business Plan v2 (superseded) | `01_Business/plans/BUSINESS_PLAN_v2.md` | Demand-side first — reference for operational decisions |
 | Business Plan v1 (archived) | `01_Business/plans/BUSINESS_PLAN_v1.md` | Supply-side first — reference only |

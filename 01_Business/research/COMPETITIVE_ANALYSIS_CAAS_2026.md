@@ -426,6 +426,36 @@
 
 ---
 
+### Threat 2b: FADEL Builds AI Video Provenance Module
+
+**Who they are:** Enterprise IP licensing and royalty management platform. ~$14.5M revenue, 101-200 employees, founded 2003. Clients: Disney, Marvel, Hasbro, Warner Bros., Pearson. Products cover contract/deal management, royalty processing, brand compliance monitoring, and product approval for physical goods licensees. See `COMPETITOR-FADEL-ANALYSIS.md` for full breakdown.
+
+**What would happen:**
+- FADEL adds a "Generative AI Clearance" module to their IPM Suite or Brand Vision product
+- Sells it into their existing Fortune 500 client base (studios, publishers, consumer goods companies)
+- Positions as "upstream clearance layer before rights management"
+
+**Impact on SI8:**
+- FADEL has existing enterprise trust and relationships SI8 lacks in Year 1
+- If they capture the enterprise buyer (studios, large brands), SI8 is squeezed into SMB/agency tier
+- Their brand compliance monitoring (Brand Vision) already scans video for logos — adding AI provenance checks is a plausible extension
+
+**Likelihood:** Low-Medium. FADEL's entire product assumes rights are already structured and known. AI-generated content breaks that assumption at a fundamental level. They'd need significant reorientation, not just a feature add.
+
+**Timeline:** 18-36 months (if they see market signal)
+
+**SI8 response:**
+- Own the creator/agency tier (FADEL is enterprise-only, min 6-figure contracts)
+- Build brand trust with agencies before FADEL moves downstream
+- Transactional speed ($499, same-week turnaround) vs. enterprise sales cycle (6-12 months)
+- "FADEL manages rights after they exist. We determine whether rights exist in the first place."
+
+**Monitor:** FADEL product announcements, particularly anything mentioning AI-generated content, generative AI, or chain of title for synthetic media
+
+**Strategic note:** More likely partner/acquirer than direct competitor in Years 1-2. If SI8 builds the AI clearance category, FADEL is a natural acquirer — they have the enterprise distribution, SI8 has the AI-native clearance product they can't build quickly.
+
+---
+
 ### Threat 3: Escape.ai Adds Rights Verification Layer
 
 **What would happen:**
@@ -554,8 +584,14 @@
 | **Vimeo Stock** | Stock marketplace | Minimal | Yes | No | Low |
 | **C2PA** | Provenance standard | No (metadata only) | No | N/A | Low |
 | **Runway / Sora** | AI tools | No | No | Yes (tool) | N/A (complementary) |
+| **FADEL** | Enterprise IP/royalty mgmt | No (traditional IP only) | No | No | Low (today) / Medium (long-term) |
 
 **SI8 is the only player offering:** B2B verification service (CaaS) for non-Adobe AI video tools + opt-in marketplace + producer curation track.
+
+**Adjacent players to monitor (not direct competitors today):**
+- **FADEL** — Enterprise rights/royalty management for traditional IP (Disney/Marvel-tier). Validates the category. Not solving AI-generated content clearance. Possible future acquirer or partner. Full analysis: `COMPETITOR-FADEL-ANALYSIS.md`
+- **ClearStory** — Chain of Title tracking software for traditional film/TV. No AI layer, no clearance execution.
+- **Rightsline** — Enterprise rights management platform. No SMB/indie tier, no AI content focus.
 
 ---
 
