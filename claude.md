@@ -343,6 +343,48 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 - [x] Hero "View Sample Rights Package" button fixed — was linking to broken v3 URL `/rights-verified-chain-of-title#sample`
 - [x] Sample section copy updated: removed "Tier 1+2", "Modification Rights", "Adobe Firefly" (all v3 language)
 
+### 3m. Marketing Site + Creator Outreach Updates (Mar 28–29, 2026)
+
+**Sora removed from marketing copy:**
+- [x] Removed from all EN + ZH marketing pages (hero, competitive framing, tool tier tables, FAQ) — OpenAI shut down Sora (Mar 2026)
+- [x] Replaced with Runway, Kling, Pika throughout
+- [x] Sora kept as tool option in RecordForm/CertForm (creators may have existing Sora footage to verify)
+- [x] Files updated: index.html, pricing/, how-it-works/, rights-verified/, zh/ equivalents
+
+**Nav login simplified:**
+- [x] Login dropdown ("Creator Login" + "Admin Login") → single "Login" link (`/auth/login`) on all 12 EN + ZH pages
+
+**Additional analytics (Mar 28–29, 2026):**
+- [x] `sample/index.html`: scroll depth events at 25/50/75/100% (`sample_scroll_depth`) + `get_verified_click` on CTA
+- [x] Creator portal `layout.tsx`: GA4 tag added (was missing entirely from `app.superimmersive8.com`)
+- [x] `certify/page.tsx` + `record/page.tsx`: `checkout_started` event fires on page load ($499/$29)
+- [x] GA4 funnels built: "Homepage → Pricing → CTA", "Sample → Certification Intent", "Homepage → Demo Request"
+- [x] GA4 internal IP filter: `36.230.101.105` (JD home router) set to Active
+- [x] ContentSquare: Homepage page group fixed (Path `/` instead of full URL) — 100% traffic coverage achieved
+- [x] Key Events starred: `get_verified_click`, `book_call_click`, `request_demo_submit`, `view_sample_click`
+
+**ZH homepage sample button fix:**
+- [x] Both sample buttons on `zh/index.html` updated from v3 URL to `/sample`
+
+**Showcase commission model clarified (Mar 29, 2026):**
+- [x] Direct discovery (buyer finds creator through Showcase independently) = 0% SI8 commission
+- [x] SI8-brokered deals (SI8 pitches, negotiates, closes) = 20% SI8 / 80% creator
+- [x] Updated in IG outreach templates and memory
+
+**Instagram creator outreach (Mar 29, 2026):**
+- [x] Standard v4 reply template finalized — see `03_Sales/outreach/INSTAGRAM-CAMPAIGNS-CREATORS-V1.md`
+- [x] v4 replies sent to all 5 waiting creators: Vishal, Shingo, Lê Công Thoại, Aditya, Ferry
+- [x] keeper505 (hot lead) — detailed Q&A reply sent Mar 29; COMP-KEEPER code to create in Stripe
+- [x] 30 free Creator Record comp codes offered (up from 20)
+- [x] Instagram bio updated to v4 positioning:
+  ```
+  🎬 Get your AI film ready to license!
+  Chain of Title documentation
+  $29 self-attested · $499 human-reviewed
+  List in Showcase — buyers find you
+  Click 👇
+  ```
+
 ### 3g. Public Catalog with Video Player (Completed Mar 19, 2026 — Updated Mar 21, 2026)
 - [x] Submit form Section 10: Video & Catalog — ✓ video_url, thumbnail_url, public_description, catalog opt-in checkbox
 - [x] Catalog opt-in system — ✓ Creates opt_ins record when checkbox enabled

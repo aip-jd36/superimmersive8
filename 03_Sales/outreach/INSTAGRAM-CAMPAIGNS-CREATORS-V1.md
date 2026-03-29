@@ -398,11 +398,11 @@ Offer free Creator Record to any creator willing to opt their work into the Show
 | Mar 5 | Rodolfo Roth | @rodszera.ai | V3 Msg 2 | "Ho, i just have two short films, how this would works?" | Yes | Work requested | Pending |
 | Mar 5 | Chris Vespaziani | @syntaxdiffusion | V3 Msg 2 | "Yes" | Yes | Work requested | Pending |
 | Mar 5 | keeper505 | @keeper505 | V3 Msg 2 | Detailed: asked platform, terms, territories | Yes — v4 reply sent Mar 29 | Awaiting reply; COMP-KEEPER ready to send | Hot |
-| Mar 26 | Shingo | shingo4987.film | V3 Msg 2 | 5 detailed questions | Pending v4 reply | Send v4 reposition | Awaiting |
-| Mar 26 | Lê Công Thoại | kngthoa.id | V3 Msg 2 | "Yah im interested" | Pending v4 reply | Send v4 reposition | Awaiting |
-| Mar 26 | Aditya Rizalah | exposuro | V3 Msg 2 | "give me more info" | Pending v4 reply | Send v4 reposition | Awaiting |
-| Mar 26 | Ferry Arya Seto | ferikid | V3 Msg 2 | "Sure, send me the details" | Pending v4 reply | Send v4 reposition | Awaiting |
-| Mar 26 | Vishal Biswajit | vidn_er | V3 Msg 2 | "Hey! Sup / Tell me more on this" | Pending v4 reply | Send v4 reposition | Awaiting |
+| Mar 26 | Shingo | shingo4987.film | V3 Msg 2 | 5 detailed questions | v4 reply sent Mar 29 | Awaiting reply; COMP-SHINGO ready | Hot |
+| Mar 26 | Lê Công Thoại | kngthoa.id | V3 Msg 2 | "Yah im interested" | v4 reply sent Mar 29 | Awaiting reply; COMP-THOA ready | Warm |
+| Mar 26 | Aditya Rizalah | exposuro | V3 Msg 2 | "give me more info" | v4 reply sent Mar 29 | Awaiting reply; COMP-ADITYA ready | Warm |
+| Mar 26 | Ferry Arya Seto | ferikid | V3 Msg 2 | "Sure, send me the details" | v4 reply sent Mar 29 | Awaiting reply; COMP-FERRY ready | Warm |
+| Mar 26 | Vishal Biswajit | vidn_er | V3 Msg 2 | "Hey! Sup / Tell me more on this" | v4 reply sent Mar 29 | Awaiting reply; COMP-VISHAL ready | Warm |
 
 ### V4 Campaign (April 2026+)
 
