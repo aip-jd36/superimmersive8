@@ -398,7 +398,7 @@ Offer free Creator Record to any creator willing to opt their work into the Show
 | Mar 5 | Rodolfo Roth | @rodszera.ai | V3 Msg 2 | "Ho, i just have two short films, how this would works?" | Yes | Work requested | Pending |
 | Mar 5 | Chris Vespaziani | @syntaxdiffusion | V3 Msg 2 | "Yes" | Yes | Work requested | Pending |
 | Mar 5 | keeper505 | @keeper505 | V3 Msg 2 | Detailed: asked platform, terms, territories | Yes — v4 reply sent Mar 29 | Awaiting reply; COMP-KEEPER ready to send | Hot |
-| Mar 26 | Shingo | shingo4987.film | V3 Msg 2 | 5 detailed questions | v4 reply sent Mar 29 | Awaiting reply; COMP-SHINGO ready | Hot |
+| Mar 26 | Shingo | shingo4987.film | V3 Msg 2 | 5 detailed questions → asked for proof of partnerships/deals | v4 reply sent Mar 29; honest "we're early" follow-up drafted | Send honest follow-up; COMP-SHINGO ready | Hot |
 | Mar 26 | Lê Công Thoại | kngthoa.id | V3 Msg 2 | "Yah im interested" | v4 reply sent Mar 29 | Awaiting reply; COMP-THOA ready | Warm |
 | Mar 26 | Aditya Rizalah | exposuro | V3 Msg 2 | "give me more info" | v4 reply sent Mar 29 | Awaiting reply; COMP-ADITYA ready | Warm |
 | Mar 26 | Ferry Arya Seto | ferikid | V3 Msg 2 | "Sure, send me the details" | v4 reply sent Mar 29 | Awaiting reply; COMP-FERRY ready | Warm |
