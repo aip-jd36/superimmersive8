@@ -526,6 +526,88 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 - [ ] Red flags in clients (when to say no)
 - [ ] When to fire a client
 
+### 16. Future Roadmap Opportunity: Live-Action Rights Clearance Automation
+
+**Decision (Mar 29, 2026): Stay focused on AI content for Year 1 GTM. Document this as a future opportunity.**
+*Validated by Claude, ChatGPT, and Gemini — all three reached the same conclusion independently.*
+
+---
+
+**Positioning (IMPORTANT):**
+- DO NOT position as: "AI video compliance tool" or "Chain of Title generator"
+- Position as: **"Rights Clearance Infrastructure for AI Media"**
+- Internal future vision: **"Rights Infrastructure for ALL media"**
+- Long-term vision: **"Infrastructure layer between content creation and commercialization"**
+
+**The Long-Term Narrative Arc:**
+- Today: "We help AI videos get cleared for commercial use"
+- Tomorrow: "We power rights clearance for all digital media"
+- Endgame: "The infrastructure layer between content creation and commercialization"
+
+---
+
+**The Wedge Strategy (Gemini framing):**
+AI video is the "books" (Amazon analogy) — the urgent, unsolved, standardized wedge into a much larger market. Once agencies trust SI8 for AI compliance, they'll ask to use it for live-action too.
+
+**The Lawyer Paradox:**
+Traditional lawyers are conservative and don't trust automation — BUT they're completely lost on AI. By solving AI clearance FOR lawyers, SI8 becomes their favorite tool. Once they use SI8 for AI, they naturally bring their live-action workflows too. Conquer lawyers by saving them first.
+
+---
+
+**Industry Reality — Traditional Clearance Today (Still Highly Manual):**
+- Chain of Title: entertainment lawyer reviews all agreements, writes opinion letter ($1K–$5K+)
+- Script clearance: specialist firms flag risky names, brands, props ($500–$2K)
+- Music clearance: sync + master licenses negotiated separately ($500–$50K+ per song)
+- Appearance/location releases: tracked manually in spreadsheets/PDFs
+- E&O insurance: requires all of the above; insurer reviews manually ($3K–$15K/year)
+- Tools used: Email, Dropbox, Excel, law firms — NO unified system
+- Total cost per project: $5,000–$20,000+. TAM: $5B+ globally.
+
+**Why it hasn't been automated:** Not a data problem — it's a judgment + liability problem. AI can detect a Nike logo; it cannot decide if it's legally risky in this context.
+
+---
+
+**SI8 Product Roadmap — The Wedge:**
+
+| Phase | When | Focus |
+|-------|------|-------|
+| **Phase 1: AI Wedge** | Now (Year 1) | AI video only — highest urgency, zero competition, define the category |
+| **Phase 2: Workflow Automation** | Year 2 | Agency dashboard, AI-assisted pre-screening (90 min → 20 min review), white-labeled E&O packets |
+| **Phase 3: Live-Action Expansion** | Year 3+ | Digital appearance/location release tracking, deliverables matrices, script clearance integration |
+
+**4-Layer Product Architecture (build in order):**
+1. **Documentation** (built): Chain of Title, structured disclosures, audit trail
+2. **AI-assisted analysis** (Year 2): visual scan for logos/faces, risk flags, inconsistencies, audio fingerprinting
+3. **Reviewer system** (Year 2): human-in-the-loop dashboard, risk scoring, clearance summary memo
+4. **Platform** (Year 3+): asset tracking, rights lifecycle management, licensing integrations
+
+---
+
+**What CAN be automated (future):**
+- Visual detection: logos, faces, celebrities, brand elements, text in video
+- Document structuring: already doing this
+- License validation: territory, usage rights, expiration checking
+- Music identification: audio fingerprinting (ACRCloud APIs)
+- Copyright search: API into USPTO / Copyright Office databases
+- Appearance release collection: digital signature workflows
+
+**What CANNOT be automated (ever):**
+- Legal judgment (is this parody or infringement?)
+- Final clearance decision (taking on liability)
+- Music licensing negotiation
+- E&O underwriting decisions
+
+**The winning model:** Automate everything EXCEPT the decision. Human = final reviewer. Like TurboTax — automates inputs/structure, does NOT replace tax law or assume liability.
+
+---
+
+**Why not now:**
+- Loses AI differentiation moat in Year 1
+- Established competitors in traditional clearance (ClearStory, Rightsline, entertainment law firms)
+- Higher liability exposure on traditional productions
+- Music licensing complexity is a separate industry
+- Destroys the 15-hour/week operating model
+
 ### 15. E&O Insurance (Future Investigation)
 - [ ] Research whether E&O insurance for AI-generated content is available from standard media liability insurers
 - [ ] Get quotes at small agency scale
