@@ -652,6 +652,11 @@ Traditional lawyers are conservative and don't trust automation — BUT they're 
 | Business Plan v1 (archived) | `01_Business/plans/BUSINESS_PLAN_v1.md` | Supply-side first — reference only |
 | Version History | `01_Business/plans/VERSION_HISTORY.md` | Plan version log |
 | Build in Public Log | `02_Marketing/content/BUILD_IN_PUBLIC_LOG.md` | Insights for LinkedIn content |
+| **News Intelligence Digest** | `tools/news-digest/` | Automated weekly news monitor: Google News RSS → Claude Haiku scoring → Resend email + DIGEST-LOG.md update |
+| **Digest Log** | `02_Marketing/intelligence/DIGEST-LOG.md` | Auto-updated weekly: all articles scored by digest engine, High/Monitor tables with acted-on tracking |
+| **Content Calendar** | `02_Marketing/content/CONTENT-CALENDAR.md` | Single source of truth for all outbound content: LinkedIn, Email, IG, FB — status, file link, source article |
+| **Canva Brand Spec** | `02_Marketing/brand/CANVA-BRAND-SPEC.md` | IG carousel template spec: colors, fonts, 6-slide layout, tone rules, caption template |
+| **Post Drafts** | `02_Marketing/content/posts/YYYY-MM/` | LinkedIn + IG carousel drafts, organized by date; each file has LinkedIn copy, slide-by-slide breakdown, caption, hashtags |
 | **Pricing Strategy v2.0** (current) | `01_Business/pricing/PRICING-STRATEGY-v2.0.md` | Two-tier CaaS pricing: Creator Record $29 + SI8 Certified $499 (March 2026) |
 | Pricing Strategy v1.0 (archived) | `01_Business/pricing/PRICING-STRATEGY-v1.0.md` | v3 licensing tiers (Rights Agency model — archived) |
 | Rights Playbook v0.1 | `06_Operations/legal/rights-playbook/versions/v0.1.md` | Rights vetting — sales asset for buyers |
