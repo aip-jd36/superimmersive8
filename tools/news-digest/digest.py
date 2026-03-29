@@ -22,9 +22,14 @@ import feedparser
 import requests
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
+from pathlib import Path
 
 from anthropic import Anthropic
 from keywords import KEYWORD_CLUSTERS, SI8_CONTEXT
+
+# Path to the digest log relative to this script (tools/news-digest/ → repo root)
+REPO_ROOT = Path(__file__).parent.parent.parent
+DIGEST_LOG_PATH = REPO_ROOT / "02_Marketing" / "intelligence" / "DIGEST-LOG.md"
 
 # ---------------------------------------------------------------------------
 # Config
@@ -397,7 +402,96 @@ def send_email(html: str, week_str: str, dry_run: bool = False) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# 5. Main
+# 5. Write digest log to repo
+# ---------------------------------------------------------------------------
+
+ACTION_LABELS = {
+    "post_linkedin":   "post",
+    "update_docs":     "update",
+    "post_and_update": "post+update",
+    "monitor":         "monitor",
+    "skip":            "skip",
+}
+
+
+def build_log_entry(all_scored: list[dict], week_str: str, lookback_days: int, run_date: str) -> str:
+    """Build a markdown section for this week's digest to prepend to DIGEST-LOG.md."""
+    high = [a for a in all_scored if a.get("relevance_score", 0) >= 7 and a.get("action") != "skip"]
+    mid  = [a for a in all_scored if 4 <= a.get("relevance_score", 0) <= 6 and a.get("action") != "skip"]
+
+    def table_rows(articles: list[dict]) -> str:
+        rows = []
+        for a in sorted(articles, key=lambda x: x.get("relevance_score", 0), reverse=True):
+            score  = a.get("relevance_score", 0)
+            action = ACTION_LABELS.get(a.get("action", "skip"), "—")
+            title  = a.get("title", "").replace("|", "\\|")
+            url    = a.get("url", "#")
+            source = a.get("source", "").replace("|", "\\|")
+            date   = a.get("published", "")[:16]
+            rows.append(f"| {score} | {action} | [{title}]({url}) | {source} | {date} | ☐ |")
+        return "\n".join(rows)
+
+    high_section = ""
+    if high:
+        high_section = (
+            "\n### 🔴 High Relevance (7–10)\n\n"
+            "| Score | Action | Title | Source | Date | Acted On |\n"
+            "|-------|--------|-------|--------|------|----------|\n"
+            + table_rows(high) + "\n"
+        )
+
+    mid_section = ""
+    if mid:
+        mid_section = (
+            "\n### 🟡 Monitor (4–6)\n\n"
+            "| Score | Action | Title | Source | Date | Acted On |\n"
+            "|-------|--------|-------|--------|------|----------|\n"
+            + table_rows(mid) + "\n"
+        )
+
+    return (
+        f"## Week of {week_str}\n"
+        f"*Run: {run_date} · {len(high)} high · {len(mid)} monitor · lookback {lookback_days} days*\n"
+        + high_section
+        + mid_section
+        + "\n---\n"
+    )
+
+
+def update_digest_log(all_scored: list[dict], week_str: str, lookback_days: int) -> None:
+    """Prepend this week's entry to DIGEST-LOG.md, preserving existing content."""
+    run_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    new_entry = build_log_entry(all_scored, week_str, lookback_days, run_date)
+
+    DIGEST_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+    if DIGEST_LOG_PATH.exists():
+        existing = DIGEST_LOG_PATH.read_text(encoding="utf-8")
+        # Insert after the header block (everything before the first "---\n\n##")
+        divider = "---\n\n"
+        if divider in existing:
+            header, rest = existing.split(divider, 1)
+            updated = header + divider + new_entry + "\n" + rest
+        else:
+            updated = existing.rstrip() + "\n\n---\n\n" + new_entry
+    else:
+        header = (
+            "# SI8 Intelligence — Digest Article Log\n\n"
+            "All articles surfaced by the weekly news digest, regardless of action taken.\n"
+            "**Auto-updated every Monday** by the digest script via GitHub Actions.\n\n"
+            "To mark an article as acted on, change `☐` → `☑` in the last column.\n\n"
+            "**Action key:** `post` = LinkedIn post · `update` = internal doc updated · "
+            "`post+update` = both · `monitor` = no action needed\n\n"
+            "---\n\n"
+        )
+        updated = header + new_entry
+
+    DIGEST_LOG_PATH.write_text(updated, encoding="utf-8")
+    print(f"✓ Digest log updated: {DIGEST_LOG_PATH}")
+
+
+# ---------------------------------------------------------------------------
+# 6. Main
 # ---------------------------------------------------------------------------
 
 def main():
@@ -432,6 +526,10 @@ def main():
     # Step 4: Send
     print("Step 4: Sending email...")
     send_email(html, week_str, dry_run=args.dry_run)
+
+    # Step 5: Update digest log
+    print("Step 5: Updating digest log...")
+    update_digest_log(scored, week_str, args.lookback)
 
     # Summary
     high = [a for a in relevant if a.get("relevance_score", 0) >= 7]
