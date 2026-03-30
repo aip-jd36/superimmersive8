@@ -306,13 +306,33 @@ Shingo is a Japan-based AI filmmaker who responded to SI8's IG outreach. He is a
   2. What would need to be true about a project for him to feel like it's "ready" to document or put in a catalog?
 - Awaiting response
 
-**What we hope to learn:**
-- Whether the festival circuit is creating any documentation demand upstream (do festivals ask about provenance/tools?)
-- What "commercially ready" means to a creator who is actively winning festival awards with finished films
-- Whether the barrier is intent (not trying to license), knowledge (doesn't know how), or something else
+**What we hoped to learn:**
+- Whether the festival circuit is creating any documentation demand upstream
+- What "commercially ready" means to a creator with finished, award-winning work
+
+**Shingo's response (March 30, 2026):**
+
+On festivals:
+> "At WAIFF (World AI Film Festival in Japan), they only accept works that comply with their generative AI policy. I also had to disclose all of the tools I used when submitting my film, so there was a clear emphasis on transparency around how the work was made."
+
+On readiness:
+> "First, I need to feel confident as a creator that the piece actually expresses what I want to express, both conceptually and aesthetically. From another angle, I also care a lot about the platform itself – its curation philosophy, how it's run, and what kind of track record it has. Those things would definitely influence my decision about where to list a project."
+
+**What we learned:**
+
+1. **Festivals are already creating upstream documentation demand.** WAIFF requires tool disclosure as a submission condition. Creators submitting to AI film festivals are already in disclosure mode — they're the most natural entry point for Creator Record outreach. Festival participants aren't a future audience; they're an active one right now.
+
+2. **"Ready" = creative confidence + platform trust. Not commercial intent.** Shingo's barrier wasn't that the film wasn't finished or that he doesn't want to commercialize. It was that SI8 hadn't yet earned his trust as a platform. "Curation philosophy, how it's run, track record" are what he evaluates before listing. This is a platform credibility problem, not a messaging problem.
+
+3. **Serious creators apply quality filters to platforms.** They're selective about where they list — which is actually good for SI8's long-term positioning (curation = quality signal), but means SI8 needs to communicate its curation standards clearly and build visible track record before serious creators will commit.
+
+**JD's reply:**
+> "Super helpful! Thanks and excited to see/follow your work!"
+
+Kept warm, no pressure. Relationship stays open. Shingo is now a warm contact — follow his work and reconnect when he releases something new.
 
 **Product decision:**
-→ Pending Shingo's response. If festivals are already asking about tools/training data, that's a new distribution channel for SI8 outreach. If "ready" means something specific (e.g., "I have a buyer interested"), that changes how SI8 should frame the Creator Record entry point.
+→ Two implications: (1) AI film festival participants are a high-fit outreach segment — they're already documenting tools, already thinking about transparency, already in the ecosystem. Future outreach should include festival-adjacent channels (WAIFF, OMNI, etc.). (2) Creator-facing materials need to articulate SI8's curation philosophy more clearly — not just "we verify rights" but "here's how we evaluate what gets listed and why." Platform trust is built through visible evidence of quality curation, not just through the verification product.
 
 ---
 
@@ -345,9 +365,13 @@ Shingo posted about his OMNI AI Film Festival Silver Award on Instagram. Within 
 Both supply and demand sides said the same thing from opposite directions: "show me the other side first." Creators needed proof of buyers; buyers needed proof of catalog. CaaS solved this by making verification (not the catalog) the primary product.
 *Sources: Essa, Leon, Isaac, The Media Shop*
 
-**Pattern 2: Creator "readiness" gap**
-Creators — even those with finished, award-winning films — don't automatically see their work as ready for commercial documentation. The line between "festival film" and "catalog-ready film" is not obvious. SI8 needs to understand what makes a creator feel their work is ready.
+**Pattern 2: Creator "readiness" = creative confidence + platform trust**
+Creators — even those with finished, award-winning films — don't automatically see their work as ready for commercial documentation. The barrier is not commercial intent or film completion: it's trust in the platform. Serious creators evaluate curation philosophy, track record, and how a platform is run before listing. SI8 needs visible evidence of quality curation to earn that trust.
 *Sources: Shingo (March 2026)*
+
+**Pattern 6: Festivals are already asking for tool disclosure**
+AI film festivals (WAIFF confirmed) require tool disclosure as a submission condition. Creators entering festival circuits are already building documentation habits around transparency. This is an upstream channel SI8 hasn't yet tapped — festival participants are a high-fit, already-primed audience for Creator Record.
+*Sources: Shingo / WAIFF (March 2026)*
 
 **Pattern 3: Regulatory anxiety is real and growing**
 European and UK markets showed stronger response to the compliance framing than Singapore/SEA. EU AI Act awareness, TikTok enforcement failures, Facebook banned AI ads — the regulatory pressure is creating real anxiety in the agency market. SI8's compliance positioning is well-timed.
