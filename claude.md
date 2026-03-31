@@ -647,6 +647,7 @@ Traditional lawyers are conservative and don't trust automation — BUT they're 
 | **Revenue Model v4** | `01_Business/financials/REVENUE_MODEL_v4.md` | Three-gear economics, unit economics, projections |
 | **Competitive Analysis (CaaS)** | `01_Business/research/COMPETITIVE_ANALYSIS_CAAS_2026.md` | Updated competitive landscape for CaaS model |
 | **Customer Discovery Log** | `01_Business/research/CUSTOMER-DISCOVERY-LOG.md` | Chronological record of market signals + conversations that drove v1→v4 product decisions; source doc for investor memos + blog posts |
+| **CRM** | `03_Sales/CRM.md` | All active leads: agency/brand buyers (LinkedIn) + creators (IG); pipeline stages, ICP analysis, messaging analysis; single source of truth pre-Airtable |
 | **Competitor Deep Dive: FADEL** | `01_Business/research/COMPETITOR-FADEL-ANALYSIS.md` | Adjacent player — enterprise IP/royalty mgmt; validates category, not a direct competitor (Mar 2026) |
 | Business Plan v3 (superseded) | `01_Business/plans/BUSINESS_PLAN_v3.md` | Rights Agency + AI Product Placement (Feb-Mar 2026) |
 | Business Plan v2 (superseded) | `01_Business/plans/BUSINESS_PLAN_v2.md` | Demand-side first — reference for operational decisions |
