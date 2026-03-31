@@ -181,39 +181,114 @@
 
 ### Buyer ICP (Agency / Brand)
 
-**Strongest signal to date — Hossein Jafari (Wowspot, London MD):**
-Confirmed unprompted that ASA and IAB 2026 updates have made documentation a **standard requirement** for London projects. This is the first contact to validate SI8's premise from their own regulatory awareness, not from SI8 prompting. Points to: London MDs at creative/digital agencies are the warmest ICP segment identified so far.
+**Last updated: March 31, 2026 — based on 41 named responses across ~1,000+ contacts**
 
-**Signals that work:**
-- London MDs and senior creative roles respond to compliance/documentation framing when they're already feeling regulatory pressure
-- "Legal Friction" campaign (question-based opener) is generating substantive replies — both validation (Hossein) and useful market research (Amr: "labeling is main criteria", Ayesha: "I'm not sure")
-- Campaign C "Trusted AI Supplier" (2.75% response rate) outperforms assumption-based Campaign A (1.2%)
+---
 
-**Signals that don't work:**
-- Media buying agencies (The Media Shop) are wrong buyer type
-- PR directors (William Lim / SHEIN) are wrong role — not content decision-makers
-- Assumptive opener ("Your clients want AI video, but...") creates pushback
-- India and Abu Dhabi contacts are off-target geography
+#### Geography Analysis
 
-**Emerging buyer segmentation (needs validation):**
+| Location | Warm/Hot/Conditional | Polite Pass | Not a Fit | Signal Quality |
+|----------|---------------------|-------------|-----------|----------------|
+| **London** | 7 | 4 | 4 | **High** — when they respond, they mean it |
+| **Singapore** | 2 (both wrong type) | 5 | 2 | Low — high acceptance, low buying intent |
+| India | 1 (off-target) | 0 | 1 | Off-target — pause |
+| Hong Kong | 0 | 0 | 1 | Too small sample |
+| Abu Dhabi | 0 | 1 | 0 | Off-target — pause |
+| Sydney | 0 | 1 | 0 | Off-target — pause |
 
-| Segment | Primary Pain | Rights Sensitivity | Evidence |
-|---------|-------------|-------------------|---------|
-| London MDs / Creative Directors (mid-size digital agencies) | Documentation + compliance | High — regulatory awareness | Hossein Jafari (N=1 strong) |
-| Small agencies (<10 employees) | Quality / photorealism | Low | Isaac (N=1) |
-| Mid-size agencies Singapore (10–50) | Rights / legal risk | Medium | The Media Shop (N=1) |
-| Retail media directors | Labeling compliance | Low on IP layer | Amr Hamad (N=1) |
-| Production houses | Unknown | Unknown | No data yet |
+**Verdict: London is the only geography producing real signal. Pause Singapore, Sydney, Abu Dhabi, India until London is proven.**
 
-**ICP hypothesis (current best guess):**
-- **Primary:** Managing Director or Creative Director at a mid-size creative/digital agency (10–50 employees), London, already aware of ASA/IAB 2026 requirements, producing or commissioning AI video for brand clients
-- **Secondary:** Head of Production or Creative Director at Singapore agencies with brand legal teams asking questions
-- **NOT:** Media buyers, PR directors, consultants, nonprofits, solo ops, India/Abu Dhabi geographies
+---
 
-**Targeting fix needed:**
-- Remove: Media Director, Media Planner, PR Director
-- Add: Creative Director, Managing Director (agency), Head of Production, Executive Producer
-- Geography: London primary, Singapore secondary. Pause Sydney, Abu Dhabi, India.
+#### Role / Title Analysis
+
+| Role Type | Outcome | Examples |
+|-----------|---------|---------|
+| **MD / Founder** | Best — hot or warm | Hossein (MD/hot), Isaac (Founder/call), David O'B (Founder/nurture), Mark Johnson (Founder/lukewarm) |
+| **Director-level creative/digital** | Conditional or warm | Barney, Amr, Mainul |
+| **Media Director / Planner** | Wrong buyer type | Elaine Tan |
+| **PR Director** | Wrong role | William Lim (SHEIN) |
+| **Partnerships / Consultants** | Not a fit | Iona, Andrzej, Ketan |
+| **Solo / self-employed** | Not a fit | Mikhail, Vanesse |
+
+**Verdict: MD and Founder at agencies are the sweet spot — feel compliance pain directly, have budget authority. Media Directors route to production partners. PR Directors don't own content decisions.**
+
+---
+
+#### Company Type Analysis
+
+| Type | Outcome | Examples |
+|------|---------|---------|
+| **Creative / digital agency (small-mid)** | Best | Wowspot (hot), We Do Ads (call), eSaviour (conditional) |
+| **Consulting / advisory** | Untested | AlixPartners (Barney — call not yet booked) |
+| **Media buying agency** | Wrong buyer type | The Media Shop |
+| **PR agency** | Wrong role | SHEIN PR, GPS Marketing |
+| **AI company** | Unclear | SwiftScale AI (lukewarm) |
+| **Nonprofit / NGO** | Not a fit | Singapore Kindness Movement |
+| **FinTech / Blockchain PR** | Not a fit | MediaX |
+
+**Verdict: Creative and digital agencies with production responsibilities. Media buyers and PR agencies don't own the content decision — wrong entry point.**
+
+---
+
+#### Pain Awareness Level — Most Predictive Dimension
+
+| Awareness Level | Response Quality | Examples |
+|----------------|-----------------|---------|
+| **Already aware of regulatory requirement** | HOT | Hossein: "since the 2026 ASA/IAB updates, it's standard" |
+| **Aware of labeling, not IP/Chain of Title layer** | Lukewarm | Amr: "main criteria is brand guidelines / labeling" |
+| **Unaware / not sure** | Polite pass or low signal | Ayesha: "I'm not sure", Mikhail: "I don't know" |
+| **Pain real but not urgent** | Conditional | Isaac: "it's interesting… but not a buying driver" |
+
+**Verdict: Pain awareness level is the strongest predictor of conversion — stronger than title or geography alone. Contacts already feeling regulatory pressure convert faster. Those who need educating from scratch are slow or don't convert.**
+
+---
+
+#### ICP Profile (Current Best Guess — March 31, 2026)
+
+> **Managing Director or Creative Director at a small-to-mid creative or digital agency (10–50 employees) in London, already aware of AI content documentation requirements from regulatory pressure (ASA/IAB 2026) or client legal teams pushing back — and directly responsible for delivering AI video campaigns.**
+
+**Positive signals (qualify in):**
+- London-based
+- MD, Founder, Creative Director, or Head of Production title
+- Creative/digital/production agency (not media buying, not PR)
+- 10–50 employees
+- Already producing or commissioning AI video
+- Mentions legal, compliance, or documentation unprompted
+
+**Disqualifiers (filter out fast):**
+- Geography outside London (for now)
+- Media buying, PR, consulting, nonprofit company type
+- Media Director, Planner, PR Director, Partnerships Manager titles
+- No AI video in workflow
+- Needs to be educated on why compliance matters before engaging
+
+---
+
+#### Targeting Changes for Next Dripify Batch
+
+**LinkedIn filter changes:**
+
+| Remove | Add |
+|--------|-----|
+| Media Director | Managing Director |
+| Media Planner | Creative Director |
+| Media Strategist | Head of Production |
+| PR Director | Executive Producer |
+| Partnerships Manager | Founder (filter: agency/production) |
+
+**Company industry filter:**
+- Keep: Advertising Services, Marketing Services, Video Production, Digital Media
+- Remove: Media Buying, Public Relations, Management Consulting, Nonprofit
+
+**Geography:**
+- Primary: Greater London only
+- Pause: Singapore, Sydney, Abu Dhabi, India
+
+**Campaign to scale:**
+- Scale: SI8_Legal Friction (question-based, self-selects pain-aware contacts)
+- Scale: SI8_Trusted AI Supplier (Campaign C — 2.75% response rate, lowest pushback)
+- Fix or retire: SI8_Vetting Takes Weeks / Campaign A (assumptive opener, highest pushback)
 
 ---
 
