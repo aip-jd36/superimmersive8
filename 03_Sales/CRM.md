@@ -52,7 +52,7 @@
 | Nurture | 2 |
 | Polite Pass | 16 |
 | Not a Fit | 8 |
-| **Total Named Responses** | 41 |
+| **Total Named Responses** | 47 |
 | **Total Leads Contacted** | ~1,000+ |
 
 ---
@@ -74,11 +74,15 @@
 | Name | Company | Title | Location | Campaign | Stage | Their Response (Summary) | Last Action | Next Step |
 |------|---------|-------|----------|----------|-------|--------------------------|-------------|-----------|
 | **Barney O'Kelly** | AlixPartners | — (Global consulting) | London | Campaign A | Replied — Warm | "Hi Vanessa, I'd be interested in learning more." | None yet | Send Calendly + 1-pager PDF |
-| **Syed Tabish Hasan** | Zedtronix | — | London | Campaign A | Replied — Warm | "Sure" | Duplicate outreach (Lilly + Vanessa) | Consolidate persona; send Calendly + 1-pager |
+| **Syed Tabish Hasan** | Zedtronix | CEO / Founder | London | Campaign A | Replied — Warm | "Sure" | Duplicate outreach (Lilly + Vanessa) | Consolidate persona; send Calendly + 1-pager |
+| **Bee Lin Ang** | Stewardship Asia Centre | Head of Digital Strategy & Comms | Singapore | Campaign A | Replied — Warm | "Thanks, where are u based? Yes, I would not mind learning more." | None | Reply with location (Taipei/remote) + Calendly |
+| **Tery Chua** | Syntroph Pte. Ltd. | Managing Partner | Singapore | Campaign C | Replied — Warm | "Sorry, I don't quite understand the solution your company is selling. Are you selling rights for pre-made AI videos?" | None | Clarify v4 model — not selling pre-made video rights; selling Chain of Title documentation for AI video they produce |
+| **Rawand Latif** | ARUBA CREATIVE L.L.C. | Co-Founder & Creative Director | Sulaymaniyah, Iraq | SI8_Hitting a Wall | Replied — Warm | "Hello Ivy, Sounds interesting, what's your services!" | None | Explain v4 CaaS — note: Iraq is off-target geography but creative director role is right |
 | **Mainul Islam** | eSaviour Limited | — | London | Campaign A | Replied — Conditional | "ready 1-2 samples first then we will let you know" | None | Re-engage once 2-3 sample works ready |
 | **James Byrne** | BeyondWords | — (ESG reporting) | London | Campaign A | Replied — Conditional | "Can you share some examples so I can understand" | None | Re-engage once samples ready |
 | **Qaiser Mehmood** | ECONROAD International | — | Singapore | Campaign C | Replied — Conditional | "Okay. Do u have any website?" | None | Send website link — superimmersive8.com |
-| **Aswini Ruidas** | MediaX | Sales Manager | Durgapur, India | SI8_Hitting a Wall | Replied — Lukewarm | Suggested Telegram; when declined, offered WhatsApp: +91 6296601182 | Ivy asked if on WhatsApp; he confirmed | Low priority — India is off-target geography, FinTech/Blockchain PR is off-target sector. Park. |
+| **Emmanuel Stralka** | Think Global Solutions | Co-Founder | London | Campaign A | Replied — Clarifying | "Interesting - we're a Marketing Cultural intelligence platform... not sure how we can connect with what you guys do?" | None | Clarify SI8 use case — note: marketing intelligence platform may not produce AI video |
+| **Aswini Ruidas** | MediaX | Sales Manager | Durgapur, India | SI8_Hitting a Wall | Replied — Lukewarm | Suggested Telegram; when declined, offered WhatsApp: +91 6296601182 | Ivy asked if on WhatsApp; he confirmed | Low priority — India off-target, FinTech PR off-target sector. Park. |
 
 ---
 
@@ -146,23 +150,31 @@
 ### Pipeline Snapshot
 | Stage | Count |
 |-------|-------|
-| Interested / Hot | 1 |
+| Interested / Hot — needs v4 follow-up | 4 |
 | Nurture | 1 |
-| Replied — Awaiting | 4 |
-| **Total Contacted** | 7 |
+| Replied — Awaiting (v4) | 4 |
+| **Total Contacted** | 11 |
+
+---
+
+### ⚠️ Important: v3 vs v4 Pitch
+The four leads below (keeper505, Chris Vespaziani, Rodolfo Roth, Absolutely Ai) all replied to the **v3 streaming platform pitch** ("licensing to a leading streaming platform in Asia — 20% royalty"). They said yes to a different offer. All need a v4 follow-up to convert to the current model (Creator Record / SI8 Certified documentation + optional Showcase listing).
 
 ---
 
 ### 🔴 Priority: Active
 
-| Handle | Name | Location | Stage | Exchange Summary | Last Action | Next Step |
-|--------|------|----------|-------|-----------------|-------------|-----------|
-| **keeper505** | — | — | Interested | Responded to v4 outreach with detailed questions about platform, documentation, and licensing. High engagement. | Sent detailed Q&A reply Mar 29 | Create COMP-KEEPER in Stripe (100% off) before she replies; send code with next message |
-| **shingo4987.film** | Shingo | Japan | Nurture | Award-winning AI filmmaker (OMNI Silver Award). Said "not ready" despite finished film. Gave key market research: WAIFF requires tool disclosure; creator readiness = creative confidence + platform trust. Warm relationship. | "Super helpful! Thanks and excited to follow your work!" Mar 30 | Follow his work; reconnect when he releases new project |
+| Handle | Name | Location | Stage | Exchange Summary | Pitch Version | Next Step |
+|--------|------|----------|-------|-----------------|---------------|-----------|
+| **keeper505** | — | — | Interested | Detailed questions about platform, documentation, licensing. Film "Abyssal Gaze" — festival recognized. Asked about territories, duration, which streaming platform. | v3 streaming pitch | Create COMP-KEEPER in Stripe; send v4 follow-up explaining current model |
+| **@syntaxdiffusion** | Chris Vespaziani | — | Interested | Replied "Yes" to streaming platform pitch | v3 streaming pitch | Send v4 follow-up — explain Creator Record / Showcase model |
+| **@rodszera.ai** | Rodolfo Roth | — | Interested | "I just have two short films, how would this work?" | v3 streaming pitch | Send v4 follow-up + explain 2 films is enough to start |
+| **@absolutely.ai** | Absolutely Ai | — | Interested | "Sure - always happy to hear more" | v3 streaming pitch | Send v4 follow-up |
+| **shingo4987.film** | Shingo | Japan | Nurture | Award-winning AI filmmaker (OMNI Silver Award). Said "not ready" despite finished film. Key market research: WAIFF requires tool disclosure; creator readiness = creative confidence + platform trust. | v4 | Follow his work; reconnect when he releases new project |
 
 ---
 
-### 🟡 Replied — Awaiting Response
+### 🟡 Replied — Awaiting Response (v4)
 
 | Handle | Location | v4 Reply Sent | Status |
 |--------|----------|---------------|--------|
@@ -170,6 +182,14 @@
 | Lê Công Thoại | Vietnam (est.) | Mar 29 | Awaiting |
 | Aditya | — | Mar 29 | Awaiting |
 | Ferry | — | Mar 29 | Awaiting |
+
+---
+
+### 🔄 Reclassify — Consider Moving to Creator Pipeline
+
+| Handle | Name | Company | Current CRM Status | Why Reconsider |
+|--------|------|---------|-------------------|----------------|
+| Uma Rudd Chia | — | OH MY STRAWBERRY | Buyer — Not a Fit | She's an AI video creator (early OpenAI tester, API access, creates content) — wrong side of market as a buyer, but right profile as a creator |
 
 ---
 
