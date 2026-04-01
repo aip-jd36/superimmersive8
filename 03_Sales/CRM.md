@@ -61,7 +61,7 @@
 
 | Name | Company | Title | Location | Campaign | Stage | Their Response (Summary) | Next Step |
 |------|---------|-------|----------|----------|-------|--------------------------|-----------|
-| **Hossein Jafari** | Wowspot Ltd. | Managing Director | London | SI8_Legal Friction | Replied — Hot | 👍 then: *"You're right about the documentation; since the 2026 ASA and IAB updates, it's become a standard requirement for London projects. Having your team follow these disclosure rules is the best way to keep the campaign's copyright and IP safe under UK law."* | **Respond now.** He confirmed documentation is already a standard requirement. Book a call. |
+| **Hossein Jafari** | Wowspot Ltd. | Managing Director | London | SI8_Legal Friction | Followed Up | 👍 then: *"You're right about the documentation; since the 2026 ASA and IAB updates, it's become a standard requirement for London projects. Having your team follow these disclosure rules is the best way to keep the campaign's copyright and IP safe under UK law."* | Apr 1 — conversational reply sent with Urban Drift PDF, Runway/Kling vs Firefly gap, asked for call | Await reply; book call |
 
 **Why Hossein matters:** He's a London MD who unprompted validated SI8's entire premise — documentation is now standard in London due to ASA/IAB 2026 updates. This is the first contact who has confirmed a regulatory/industry driver without prompting. Highest signal response to date.
 
@@ -73,15 +73,14 @@
 
 | Name | Company | Title | Location | Campaign | Stage | Their Response (Summary) | Last Action | Next Step |
 |------|---------|-------|----------|----------|-------|--------------------------|-------------|-----------|
-| **Barney O'Kelly** | AlixPartners | — (Global consulting) | London | Campaign A | Replied — Warm | "Hi Vanessa, I'd be interested in learning more." | None yet | Send Calendly + 1-pager PDF |
-| **Syed Tabish Hasan** | Zedtronix | CEO / Founder | London | Campaign A | Replied — Warm | "Sure" | Duplicate outreach (Lilly + Vanessa) | Consolidate persona; send Calendly + 1-pager |
-| **Bee Lin Ang** | Stewardship Asia Centre | Head of Digital Strategy & Comms | Singapore | Campaign A | Replied — Warm | "Thanks, where are u based? Yes, I would not mind learning more." | None | Reply with location (Taipei/remote) + Calendly |
-| **Tery Chua** | Syntroph Pte. Ltd. | Managing Partner | Singapore | Campaign C | Replied — Warm | "Sorry, I don't quite understand the solution your company is selling. Are you selling rights for pre-made AI videos?" | None | Clarify v4 model — not selling pre-made video rights; selling Chain of Title documentation for AI video they produce |
+| **Barney O'Kelly** | AlixPartners | — (Global consulting) | London | Campaign A | Followed Up | "Hi Vanessa, I'd be interested in learning more." | Apr 1 — follow-up sent with v4 Urban Drift Chain of Title PDF | Await reply; book call |
+| **Syed Tabish Hasan** | Zedtronix | CEO / Founder | London | Campaign A | Followed Up | "Sure" | Apr 1 — follow-up sent with v4 framing, Urban Drift PDF, Calendly link (Lilly persona) | Await reply; book call |
+| **Bee Lin Ang** | Stewardship Asia Centre | Head of Digital Strategy & Comms | Singapore | Campaign A | Followed Up | "Thanks, where are u based? Yes, I would not mind learning more." | Apr 1 — second follow-up sent with Urban Drift PDF + Calendly (first Calendly sent Mar 12, no booking) | Await reply; book call |
 | **Rawand Latif** | ARUBA CREATIVE L.L.C. | Co-Founder & Creative Director | Sulaymaniyah, Iraq | SI8_Hitting a Wall | Replied — Warm | "Hello Ivy, Sounds interesting, what's your services!" | None | Explain v4 CaaS — note: Iraq is off-target geography but creative director role is right |
 | **Mainul Islam** | eSaviour Limited | — | London | Campaign A | Replied — Conditional | "ready 1-2 samples first then we will let you know" | None | Re-engage once 2-3 sample works ready |
 | **James Byrne** | BeyondWords | — (ESG reporting) | London | Campaign A | Replied — Conditional | "Can you share some examples so I can understand" | None | Re-engage once samples ready |
-| **Qaiser Mehmood** | ECONROAD International | — | Singapore | Campaign C | Replied — Conditional | "Okay. Do u have any website?" | None | Send website link — superimmersive8.com |
-| **Emmanuel Stralka** | Think Global Solutions | Co-Founder | London | Campaign A | Replied — Clarifying | "Interesting - we're a Marketing Cultural intelligence platform... not sure how we can connect with what you guys do?" | None | Clarify SI8 use case — note: marketing intelligence platform may not produce AI video |
+| **Qaiser Mehmood** | ECONROAD International | Director of Business Development | Singapore | Campaign C | Followed Up | "Okay. Do u have any website?" | Apr 1 — follow-up sent with v4 Urban Drift PDF + Calendly (website + v3 PDF sent Mar 15, no reply) | Await reply; book call |
+| **Emmanuel Stralka** | Think Global Solutions | Co-Founder | London | Campaign A | Followed Up | "Interesting - we're a Marketing Cultural intelligence platform... not sure how we can connect with what you guys do?" | Apr 1 — qualifying reply sent; checking if clients run AI video in market entry campaigns | Await reply; qualify out if no AI video use case |
 | **Aswini Ruidas** | MediaX | Sales Manager | Durgapur, India | SI8_Hitting a Wall | Replied — Lukewarm | Suggested Telegram; when declined, offered WhatsApp: +91 6296601182 | Ivy asked if on WhatsApp; he confirmed | Low priority — India off-target, FinTech PR off-target sector. Park. |
 
 ---

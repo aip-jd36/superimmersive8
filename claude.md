@@ -649,6 +649,7 @@ Traditional lawyers are conservative and don't trust automation — BUT they're 
 | **Customer Discovery Log** | `01_Business/research/CUSTOMER-DISCOVERY-LOG.md` | Chronological record of market signals + conversations that drove v1→v4 product decisions; source doc for investor memos + blog posts |
 | **CRM** | `03_Sales/CRM.md` | All active leads: agency/brand buyers (LinkedIn) + creators (IG); pipeline stages, ICP analysis, messaging analysis; single source of truth pre-Airtable |
 | **Competitor Deep Dive: FADEL** | `01_Business/research/COMPETITOR-FADEL-ANALYSIS.md` | Adjacent player — enterprise IP/royalty mgmt; validates category, not a direct competitor (Mar 2026) |
+| **ASA & IAB 2026 Research** | `01_Business/research/ASA-IAB-2026-AI-CONTENT-RESEARCH.md` | 2026 regulatory tailwinds: IAB framework (Jan 2026), ASA enforcement, EU AI Act Aug 2026. SI8 positioning + sales applications (Apr 2026) |
 | Business Plan v3 (superseded) | `01_Business/plans/BUSINESS_PLAN_v3.md` | Rights Agency + AI Product Placement (Feb-Mar 2026) |
 | Business Plan v2 (superseded) | `01_Business/plans/BUSINESS_PLAN_v2.md` | Demand-side first — reference for operational decisions |
 | Business Plan v1 (archived) | `01_Business/plans/BUSINESS_PLAN_v1.md` | Supply-side first — reference only |

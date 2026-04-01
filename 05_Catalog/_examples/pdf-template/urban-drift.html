@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chain of Title — Urban Drift | SI8 Certified</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ===========================
+           SI8 Design System — PDF Version
+           Chain of Title v4 (CaaS Model)
+           =========================== */
+
+        :root {
+            --color-bg: #FFFBF5;
+            --color-surface: #FFFFFF;
+            --color-surface-2: #FAF6EF;
+            --color-text-primary: #1a1a1a;
+            --color-text-secondary: #4a4a4a;
+            --color-text-muted: #6b6b6b;
+            --color-accent: #C8900A;
+            --color-accent-light: #F5E6C8;
+            --color-accent-border: rgba(200,144,10,0.25);
+            --color-success: #15803d;
+            --color-success-bg: #f0fdf4;
+            --color-success-border: rgba(21,128,61,0.25);
+            --color-border: #E8E0D4;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        /* ===========================
+           Print Settings
+           =========================== */
+
+        @page {
+            size: A4;
+            margin: 18mm 15mm 20mm;
+        }
+
+        @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .page-break { page-break-before: always; }
+            .no-break { page-break-inside: avoid; }
+            h2, h3 { page-break-after: avoid; }
+            table { page-break-inside: avoid; }
+            .cover-page { page-break-after: always; }
+        }
+
+        /* ===========================
+           Base
+           =========================== */
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--color-bg);
+            color: var(--color-text-primary);
+            font-family: var(--font-body);
+            font-size: 10pt;
+            line-height: 1.55;
+        }
+
+        /* ===========================
+           Cover Page
+           =========================== */
+
+        .cover-page {
+            background: var(--color-bg);
+            padding: 8mm 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cover-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 14mm;
+            padding-bottom: 6mm;
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        .cover-logo {
+            font-family: var(--font-display);
+            font-size: 15pt;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            letter-spacing: -0.01em;
+        }
+
+        .cover-logo span { color: var(--color-accent); }
+
+        .cover-doc-type {
+            font-family: var(--font-display);
+            font-size: 7.5pt;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--color-text-muted);
+            text-align: right;
+            padding-top: 3px;
+        }
+
+        .cover-title-block {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 5mm 0;
+        }
+
+        .cover-sample-badge {
+            display: inline-block;
+            background: var(--color-accent-light);
+            border: 1px solid var(--color-accent-border);
+            color: var(--color-accent);
+            font-family: var(--font-display);
+            font-size: 7pt;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 3px;
+            margin-bottom: 5mm;
+            width: fit-content;
+        }
+
+        .cover-work-title {
+            font-family: var(--font-display);
+            font-size: 26pt;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            line-height: 1.15;
+            margin-bottom: 3mm;
+            letter-spacing: -0.02em;
+        }
+
+        .cover-subtitle {
+            font-size: 11pt;
+            color: var(--color-text-secondary);
+            margin-bottom: 8mm;
+        }
+
+        .cover-stamp {
+            background: var(--color-success-bg);
+            border: 1.5px solid var(--color-success-border);
+            border-radius: 6px;
+            padding: 5mm 7mm;
+            display: flex;
+            align-items: center;
+            gap: 5mm;
+            margin-bottom: 8mm;
+        }
+
+        .stamp-checkmark {
+            width: 32px;
+            height: 32px;
+            background: var(--color-success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: white;
+            font-size: 14pt;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .stamp-text-main {
+            font-family: var(--font-display);
+            font-size: 12pt;
+            font-weight: 700;
+            color: var(--color-success);
+            letter-spacing: 0.04em;
+            display: block;
+            margin-bottom: 1px;
+        }
+
+        .stamp-text-sub {
+            font-size: 8.5pt;
+            color: var(--color-text-muted);
+        }
+
+        .risk-pill {
+            margin-left: auto;
+            background: var(--color-success-bg);
+            border: 1.5px solid var(--color-success-border);
+            color: var(--color-success);
+            font-family: var(--font-display);
+            font-size: 8pt;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 20px;
+            flex-shrink: 0;
+            align-self: center;
+        }
+
+        .cover-meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 4mm 8mm;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            padding: 5mm 6mm;
+        }
+
+        .cover-meta-item label {
+            display: block;
+            font-size: 7pt;
+            font-weight: 600;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            color: var(--color-text-muted);
+            margin-bottom: 2px;
+        }
+
+        .cover-meta-item span {
+            font-family: var(--font-display);
+            font-size: 9pt;
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        .cover-footer {
+            margin-top: 8mm;
+            padding-top: 6mm;
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cover-footer-left {
+            font-size: 8pt;
+            color: var(--color-text-muted);
+        }
+
+        .cover-footer-right {
+            font-size: 7.5pt;
+            color: var(--color-text-muted);
+            text-align: right;
+        }
+
+        /* ===========================
+           Content Pages
+           =========================== */
+
+        .content-pages {
+            padding: 6mm 0;
+        }
+
+        /* Page header (repeats on content pages) */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 4mm;
+            border-bottom: 1px solid var(--color-border);
+            margin-bottom: 6mm;
+        }
+
+        .page-header-title {
+            font-family: var(--font-display);
+            font-size: 7.5pt;
+            font-weight: 700;
+            color: var(--color-text-muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .page-header-id {
+            font-family: var(--font-display);
+            font-size: 7.5pt;
+            color: var(--color-text-muted);
+        }
+
+        /* Section blocks */
+        .doc-section {
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 5mm;
+        }
+
+        .doc-section-header {
+            background: var(--color-surface-2);
+            border-bottom: 1px solid var(--color-border);
+            padding: 3mm 5mm;
+            display: flex;
+            align-items: center;
+            gap: 3mm;
+        }
+
+        .section-num-badge {
+            width: 20px;
+            height: 20px;
+            background: var(--color-accent-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-size: 7pt;
+            font-weight: 700;
+            color: var(--color-accent);
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 9.5pt;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            flex: 1;
+        }
+
+        .section-status {
+            font-size: 8pt;
+            font-weight: 600;
+            color: var(--color-success);
+        }
+
+        .doc-section-body {
+            padding: 4mm 5mm;
+            background: var(--color-surface);
+        }
+
+        /* Field rows */
+        .field-row {
+            display: flex;
+            gap: 5mm;
+            padding: 2.5mm 0;
+            border-bottom: 1px solid #F2ECE3;
+        }
+
+        .field-row:last-child { border-bottom: none; }
+
+        .field-label {
+            font-size: 7.5pt;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            min-width: 115px;
+            padding-top: 1px;
+            flex-shrink: 0;
+        }
+
+        .field-value {
+            font-size: 9pt;
+            color: var(--color-text-primary);
+            line-height: 1.5;
+            flex: 1;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8.5pt;
+        }
+
+        thead { background: var(--color-accent-light); }
+
+        th {
+            text-align: left;
+            font-size: 7pt;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            padding: 3mm 3.5mm;
+            border-bottom: 1px solid var(--color-accent-border);
+        }
+
+        td {
+            padding: 2.5mm 3.5mm;
+            border-bottom: 1px solid #F2ECE3;
+            vertical-align: top;
+            color: var(--color-text-primary);
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:nth-child(even) td { background: #FDFAF5; }
+
+        .verified { color: var(--color-success); font-weight: 600; font-size: 8pt; }
+
+        /* Checklist */
+        .checklist { list-style: none; }
+
+        .checklist li {
+            display: flex;
+            align-items: flex-start;
+            gap: 3mm;
+            padding: 2mm 0;
+            border-bottom: 1px solid #F2ECE3;
+            font-size: 9pt;
+            color: var(--color-text-primary);
+        }
+
+        .checklist li:last-child { border-bottom: none; }
+
+        .check-icon {
+            color: var(--color-success);
+            font-weight: 700;
+            font-size: 9pt;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .reviewer-note {
+            margin-top: 3mm;
+            padding: 3mm 4mm;
+            background: #F7F3EC;
+            border-left: 2px solid var(--color-accent);
+            border-radius: 0 4px 4px 0;
+            font-size: 8.5pt;
+            color: var(--color-text-secondary);
+            font-style: italic;
+        }
+
+        /* Review summary box */
+        .review-summary-box {
+            background: var(--color-success-bg);
+            border: 1px solid var(--color-success-border);
+            border-radius: 5px;
+            padding: 4mm 5mm;
+            margin-bottom: 4mm;
+            font-size: 9pt;
+            font-style: italic;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Risk rating */
+        .risk-rating-row {
+            display: flex;
+            align-items: center;
+            gap: 4mm;
+            padding: 3mm 0;
+            border-bottom: 1px solid #F2ECE3;
+        }
+
+        .risk-label {
+            font-size: 7.5pt;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            min-width: 115px;
+        }
+
+        .risk-value-low {
+            font-family: var(--font-display);
+            font-size: 10pt;
+            font-weight: 700;
+            color: var(--color-success);
+        }
+
+        .risk-tag-low {
+            background: var(--color-success-bg);
+            border: 1px solid var(--color-success-border);
+            color: var(--color-success);
+            font-family: var(--font-display);
+            font-size: 7.5pt;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 2px 10px;
+            border-radius: 20px;
+        }
+
+        /* Reviewer sign-off block */
+        .reviewer-block {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 4mm;
+            background: var(--color-surface-2);
+            border: 1px solid var(--color-border);
+            border-radius: 5px;
+            padding: 4mm 5mm;
+            margin-top: 4mm;
+        }
+
+        .reviewer-block label {
+            display: block;
+            font-size: 7pt;
+            font-weight: 700;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            color: var(--color-text-muted);
+            margin-bottom: 2px;
+        }
+
+        .reviewer-block span {
+            font-family: var(--font-display);
+            font-size: 9pt;
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        .reviewer-block .outcome-approved {
+            color: var(--color-success);
+            font-weight: 700;
+        }
+
+        /* Audit trail table */
+        .audit-table th { color: var(--color-accent); }
+
+        /* Disclaimer */
+        .disclaimer-box {
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            padding: 4mm 5mm;
+            font-size: 8pt;
+            color: var(--color-text-muted);
+            line-height: 1.6;
+            margin-top: 5mm;
+            background: var(--color-surface);
+        }
+
+        .disclaimer-box strong { color: var(--color-text-secondary); }
+
+        .disclaimer-box p { margin-bottom: 2mm; }
+        .disclaimer-box p:last-child { margin-bottom: 0; }
+
+        /* Page footer */
+        .page-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 4mm;
+            margin-top: 5mm;
+            border-top: 1px solid var(--color-border);
+            font-size: 7.5pt;
+            color: var(--color-text-muted);
+        }
+
+        .footer-stamp {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 7.5pt;
+            color: var(--color-accent);
+            letter-spacing: 0.04em;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ============================================================
+     COVER PAGE
+     ============================================================ -->
+
+<div class="cover-page">
+
+    <div class="cover-header">
+        <div class="cover-logo">SuperImmersive <span>8</span></div>
+        <div class="cover-doc-type">Chain of Title<br>SI8 Certified · v1.0</div>
+    </div>
+
+    <div class="cover-title-block">
+        <div class="cover-sample-badge">Sample Document — For Illustration Only</div>
+
+        <div class="cover-work-title">Urban Drift</div>
+        <div class="cover-subtitle">30-second Brand Commercial — SI8 Certified Verification</div>
+
+        <div class="cover-stamp">
+            <div class="stamp-checkmark">✓</div>
+            <div>
+                <span class="stamp-text-main">SI8 VERIFIED · COMMERCIAL AUDIT PASSED</span>
+                <span class="stamp-text-sub">Reviewed by a human specialist across 7 categories. Accepted by brand legal teams and E&amp;O underwriters.</span>
+            </div>
+            <div class="risk-pill">Risk: LOW</div>
+        </div>
+
+        <div class="cover-meta-grid">
+            <div class="cover-meta-item">
+                <label>Catalog ID</label>
+                <span>SI8-2026-0042</span>
+            </div>
+            <div class="cover-meta-item">
+                <label>Submission Mode</label>
+                <span>Agency / Production House</span>
+            </div>
+            <div class="cover-meta-item">
+                <label>Review Tier</label>
+                <span>SI8 Certified — $499</span>
+            </div>
+            <div class="cover-meta-item">
+                <label>Submitted By</label>
+                <span>Parallax Creative</span>
+            </div>
+            <div class="cover-meta-item">
+                <label>Client / Brand</label>
+                <span>Velocity Sportswear</span>
+            </div>
+            <div class="cover-meta-item">
+                <label>Creative Director</label>
+                <span>Marcos Reyes</span>
+            </div>
+            <div class="cover-meta-item">
+                <label>Package Date</label>
+                <span>March 20, 2026</span>
+            </div>
+            <div class="cover-meta-item">
+                <label>Review Duration</label>
+                <span>87 minutes</span>
+            </div>
+            <div class="cover-meta-item">
+                <label>Document Version</label>
+                <span>v1.0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="cover-footer">
+        <div class="cover-footer-left">
+            SuperImmersive 8 · PMF Strategy Inc. d/b/a SuperImmersive 8<br>
+            superimmersive8.com · jd@superimmersive8.com
+        </div>
+        <div class="cover-footer-right">
+            Confidential — issued to submitting party only<br>
+            Not for public distribution without SI8 written consent
+        </div>
+    </div>
+
+</div>
+
+
+<!-- ============================================================
+     CONTENT PAGES
+     ============================================================ -->
+
+<div class="content-pages">
+
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-title">Chain of Title — Urban Drift</div>
+        <div class="page-header-id">SI8-2026-0042 · March 20, 2026</div>
+    </div>
+
+    <!-- ── Section 1: Tool Provenance ─────────────────────── -->
+    <div class="doc-section no-break">
+        <div class="doc-section-header">
+            <div class="section-num-badge">1</div>
+            <div class="section-title">Tool Provenance Log</div>
+            <div class="section-status">✓ Verified</div>
+        </div>
+        <div class="doc-section-body">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tool / Service</th>
+                        <th>Model / Version</th>
+                        <th>Plan Type</th>
+                        <th>Production Period</th>
+                        <th>Receipt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Runway ML</td>
+                        <td>Gen-3 Alpha Turbo</td>
+                        <td>Pro Plan ($76/mo)</td>
+                        <td>Mar 5–11, 2026</td>
+                        <td class="verified">✓ Verified</td>
+                    </tr>
+                    <tr>
+                        <td>Sora (OpenAI)</td>
+                        <td>Sora 1.0</td>
+                        <td>Plus Plan ($20/mo)</td>
+                        <td>Mar 8–10, 2026</td>
+                        <td class="verified">✓ Verified</td>
+                    </tr>
+                    <tr>
+                        <td>ElevenLabs</td>
+                        <td>Sound Effects v2</td>
+                        <td>Creator Plan ($22/mo)</td>
+                        <td>Mar 12, 2026</td>
+                        <td class="verified">✓ Verified</td>
+                    </tr>
+                    <tr>
+                        <td>Adobe Premiere Pro</td>
+                        <td>CC 2025</td>
+                        <td>Creative Cloud (licensed)</td>
+                        <td>Mar 12–14, 2026</td>
+                        <td class="verified">✓ Verified</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="margin-top: 3mm;">
+                <div class="field-row">
+                    <span class="field-label">Primary Tool</span>
+                    <span class="field-value">Runway Gen-3 Alpha Turbo (primary generation); Sora 1.0 (supplementary scenes)</span>
+                </div>
+                <div class="field-row">
+                    <span class="field-label">Usage Summary</span>
+                    <span class="field-value">31 prompts written by creative director across 6 scenes · 94 clips generated · 18 selected for final 30-second edit · Human editorial control at every stage</span>
+                </div>
+                <div class="field-row">
+                    <span class="field-label">Training Data</span>
+                    <span class="field-value">Runway: Licensed stock footage + proprietary datasets per Runway model card (Mar 2026) · Sora: OpenAI licensed data per public model card · Status: <strong>Confirmed (both tools)</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Section 2: Human Authorship ───────────────────── -->
+    <div class="doc-section no-break">
+        <div class="doc-section-header">
+            <div class="section-num-badge">2</div>
+            <div class="section-title">Human Authorship Declaration</div>
+            <div class="section-status">✓ Verified</div>
+        </div>
+        <div class="doc-section-body">
+            <div class="field-row">
+                <span class="field-label">Submitted By</span>
+                <span class="field-value">Parallax Creative — Marcos Reyes, Creative Director</span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">Client</span>
+                <span class="field-value">Velocity Sportswear</span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">Declaration</span>
+                <span class="field-value">I directed this commercial from concept through final delivery. I wrote all 31 prompts, directed the selection of every clip, supervised color grading and the final cut in Premiere Pro. The creative direction, visual language, and edit decisions are mine. AI tools were used to generate footage under my direction — not to replace creative judgment.</span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">Evidence On File</span>
+                <span class="field-value">
+                    ✓ Runway generation history (94 clips with prompt records)<br>
+                    ✓ Sora session screenshots (8 clips, prompt details)<br>
+                    ✓ Adobe Premiere Pro project file and timeline screenshots<br>
+                    ✓ Signed Evidence Custodian Declaration
+                </span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">Reviewer Assessment</span>
+                <span class="field-value">Strong human authorship. Prompt records demonstrate specific creative direction. Editorial control documented through Premiere timeline. No evidence of fully automated or AI-autonomous generation.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Section 3: Likeness & Personality Rights ──────── -->
+    <div class="doc-section no-break">
+        <div class="doc-section-header">
+            <div class="section-num-badge">3</div>
+            <div class="section-title">Likeness &amp; Personality Rights</div>
+            <div class="section-status">✓ Clear</div>
+        </div>
+        <div class="doc-section-body">
+            <ul class="checklist">
+                <li><span class="check-icon">✓</span> No real person's face or voice appears in the content</li>
+                <li><span class="check-icon">✓</span> No celebrity likeness, voice clone, or AI-generated persona based on a real individual</li>
+                <li><span class="check-icon">✓</span> No background crowds or individuals identifiable as specific real people</li>
+                <li><span class="check-icon">✓</span> AI-generated athlete figures are fully fictional (no resemblance to known athletes confirmed by reviewer)</li>
+            </ul>
+            <div class="reviewer-note">Reviewer note: Content features AI-generated abstract human silhouettes in motion. No facial features rendered at sufficient resolution to identify or resemble any real person. No personality rights exposure identified.</div>
+        </div>
+    </div>
+
+    <!-- ── Section 4: IP & Copyright ─────────────────────── -->
+    <div class="doc-section no-break">
+        <div class="doc-section-header">
+            <div class="section-num-badge">4</div>
+            <div class="section-title">IP &amp; Copyright Assessment</div>
+            <div class="section-status">✓ Clear</div>
+        </div>
+        <div class="doc-section-body">
+            <ul class="checklist">
+                <li><span class="check-icon">✓</span> No recognizable copyrighted characters, fictional IP, or branded marks appear in content</li>
+                <li><span class="check-icon">✓</span> No architectural works, artworks, or sculptures protectable by copyright</li>
+                <li><span class="check-icon">✓</span> Visual style is generic athletic/motion aesthetic — no imitation of a specific protected work</li>
+                <li><span class="check-icon">✓</span> No logos, slogans, or trade dress belonging to third parties</li>
+                <li><span class="check-icon">✓</span> No fair use analysis required — no third-party IP present</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ── Section 5: Audio Rights ───────────────────────── -->
+    <div class="doc-section no-break">
+        <div class="doc-section-header">
+            <div class="section-num-badge">5</div>
+            <div class="section-title">Audio Rights</div>
+            <div class="section-status">✓ Clear</div>
+        </div>
+        <div class="doc-section-body">
+            <div class="field-row">
+                <span class="field-label">Audio Source</span>
+                <span class="field-value">AI-generated sound design via ElevenLabs Sound Effects v2 (Creator Plan — commercial use authorized per ElevenLabs ToS)</span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">Music</span>
+                <span class="field-value">No music track — sound design only (impact effects, wind, crowd ambience)</span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">Voiceover</span>
+                <span class="field-value">No voiceover in submitted version</span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">Receipt Status</span>
+                <span class="field-value">✓ ElevenLabs Creator Plan billing statement (March 2026) verified and on file</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Section 6: Brand Safety ───────────────────────── -->
+    <div class="doc-section no-break">
+        <div class="doc-section-header">
+            <div class="section-num-badge">6</div>
+            <div class="section-title">Brand Safety Assessment</div>
+            <div class="section-status">✓ Brand Safe</div>
+        </div>
+        <div class="doc-section-body">
+            <ul class="checklist">
+                <li><span class="check-icon">✓</span> No violent, graphic, or disturbing imagery</li>
+                <li><span class="check-icon">✓</span> No adult or sexually suggestive content</li>
+                <li><span class="check-icon">✓</span> No political messaging or controversial viewpoints</li>
+                <li><span class="check-icon">✓</span> No misinformation or deceptive content</li>
+                <li><span class="check-icon">✓</span> Appropriate for mainstream brand advertising across all standard categories</li>
+            </ul>
+            <div class="reviewer-note">Content features abstract athletic motion — suitable for sports, lifestyle, apparel, tech, and automotive brand categories.</div>
+        </div>
+    </div>
+
+    <!-- ── Section 7: SI8 Reviewer Assessment & Risk Rating ── -->
+    <div class="doc-section no-break">
+        <div class="doc-section-header">
+            <div class="section-num-badge">7</div>
+            <div class="section-title">SI8 Reviewer Assessment &amp; Risk Rating</div>
+            <div class="section-status" style="color: var(--color-success);">Risk: LOW</div>
+        </div>
+        <div class="doc-section-body">
+            <div class="review-summary-box">
+                "Urban Drift" passed SI8 Certified review with no flags. The work demonstrates clear human creative direction (31 prompts, full editorial control documented). All AI tools used under paid commercial plans with receipts verified. No third-party IP, real person likeness, or brand safety concerns identified. Audio is fully AI-generated under authorized commercial use terms. Content is brand-safe and suitable for mainstream commercial deployment.
+            </div>
+
+            <div class="risk-rating-row">
+                <span class="risk-label">Risk Rating</span>
+                <span class="risk-value-low">LOW</span>
+                <span class="risk-tag-low">No Significant Exposure</span>
+            </div>
+
+            <div class="field-row">
+                <span class="field-label">Risk Notes</span>
+                <span class="field-value">Minor: Sora model card does not fully disclose training data composition. Risk assessed as LOW given content type (abstract motion, no culturally sensitive elements). Buyer should conduct own review if deploying on platforms with strict AI content labeling policies (e.g., EU market placement).</span>
+            </div>
+            <div class="field-row">
+                <span class="field-label">Remediation Required</span>
+                <span class="field-value">None</span>
+            </div>
+
+            <div class="reviewer-block">
+                <div>
+                    <label>Reviewer</label>
+                    <span>SI8 Review Team</span>
+                </div>
+                <div>
+                    <label>Review Date</label>
+                    <span>March 20, 2026</span>
+                </div>
+                <div>
+                    <label>Duration</label>
+                    <span>87 minutes</span>
+                </div>
+                <div>
+                    <label>Outcome</label>
+                    <span class="outcome-approved">✓ Approved</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Section 8: Version History & Audit Trail ──────── -->
+    <div class="doc-section no-break">
+        <div class="doc-section-header">
+            <div class="section-num-badge">8</div>
+            <div class="section-title">Version History &amp; Audit Trail</div>
+        </div>
+        <div class="doc-section-body">
+            <table class="audit-table">
+                <thead>
+                    <tr>
+                        <th>Version</th>
+                        <th>Date</th>
+                        <th>Event</th>
+                        <th>Party</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>v1.0</td>
+                        <td>Mar 14, 2026</td>
+                        <td>Production complete — 30-second edit finalized</td>
+                        <td>Parallax Creative</td>
+                    </tr>
+                    <tr>
+                        <td>v1.0</td>
+                        <td>Mar 15, 2026</td>
+                        <td>Submitted to SI8 for Certified review</td>
+                        <td>Marcos Reyes / Parallax Creative</td>
+                    </tr>
+                    <tr>
+                        <td>v1.0</td>
+                        <td>Mar 20, 2026</td>
+                        <td>SI8 Certified review complete — APPROVED</td>
+                        <td>SI8 Review Team</td>
+                    </tr>
+                    <tr>
+                        <td>v1.0</td>
+                        <td>Mar 20, 2026</td>
+                        <td>Chain of Title v1.0 issued · Catalog ID: SI8-2026-0042</td>
+                        <td>SI8 Operations</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="disclaimer-box">
+        <p><strong>What this document is:</strong> A factual record of production provenance, tool usage, authorship, and review outcome. Issued by SuperImmersive 8 after a 90-minute human review of the submitted AI-generated video.</p>
+        <p><strong>What this document is not:</strong> Legal advice, a legal warranty, or E&amp;O insurance. SuperImmersive 8 is not a law firm. Buyers and submitting parties should conduct their own legal review appropriate to their use case and jurisdiction. All statements are accurate as of the package date; tool provider terms and the legal landscape for AI content may evolve.</p>
+        <p><strong>This is a sample document for illustration purposes.</strong> The film, agency, and client depicted are fictional. The structure, fields, and review methodology are representative of the actual SI8 Certified output.</p>
+    </div>
+
+    <!-- Page footer -->
+    <div class="page-footer">
+        <span>SuperImmersive 8 · PMF Strategy Inc. d/b/a SuperImmersive 8 · superimmersive8.com</span>
+        <span class="footer-stamp">SI8 VERIFIED · COMMERCIAL AUDIT PASSED</span>
+    </div>
+
+</div>
+
+</body>
+</html>
