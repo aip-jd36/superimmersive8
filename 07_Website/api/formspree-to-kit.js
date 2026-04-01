@@ -13,10 +13,34 @@ export default async function handler(req, res) {
       body = JSON.parse(req.body || '{}');
     }
 
-    const { email, name, role } = body;
+    const { email, name, role, website } = body;
 
+    // Honeypot check — bots fill this field, humans don't see it
+    if (website) {
+      return res.status(200).json({ success: true, message: 'Demo request received.' });
+    }
+
+    // Basic field validation
     if (!email) {
       return res.status(400).json({ error: 'Email is required' });
+    }
+
+    // Email format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Invalid email address' });
+    }
+
+    // Name validation — reject bot-generated random strings
+    if (name) {
+      // Reject names over 60 chars with no spaces (random string pattern)
+      if (name.length > 60 && !name.includes(' ')) {
+        return res.status(200).json({ success: true, message: 'Demo request received.' });
+      }
+      // Reject names that are purely alphanumeric with no spaces and over 20 chars
+      if (/^[A-Za-z0-9]{20,}$/.test(name)) {
+        return res.status(200).json({ success: true, message: 'Demo request received.' });
+      }
     }
 
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
