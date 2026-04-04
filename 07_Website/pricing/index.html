@@ -816,13 +816,25 @@
     <!-- GA4 Custom Event Tracking -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('a[href="/certify"], a[href="/auth/signup"]').forEach(function(el) {
+            // SI8 Certified CTA
+            document.querySelectorAll('a[href="/certify"]').forEach(function(el) {
                 el.addEventListener('click', function() {
                     gtag('event', 'get_verified_click', {
                         'event_category': 'CTA',
                         'event_label': el.textContent.trim() + ' (pricing page)'
                     });
                 });
+            });
+            // Creator Record CTA
+            document.querySelectorAll('a[href="/auth/signup"]').forEach(function(el) {
+                if (el.textContent.trim().toLowerCase().includes('record')) {
+                    el.addEventListener('click', function() {
+                        gtag('event', 'creator_record_click', {
+                            'event_category': 'CTA',
+                            'event_label': 'Creator Record (pricing page)'
+                        });
+                    });
+                }
             });
             document.querySelectorAll('a[href*="calendly"]').forEach(function(el) {
                 el.addEventListener('click', function() {
