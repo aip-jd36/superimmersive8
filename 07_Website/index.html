@@ -165,8 +165,7 @@
                     </ul>
                 </div>
                 <div class="doc-tier-not-for">Not accepted by brand legal teams or E&amp;O underwriters for commercial use.</div>
-                <a href="/auth/signup" class="btn btn-secondary" style="width: 100%; justify-content: center;">Get Your Record →</a>
-                <!-- /record will redirect to portal submit form when /record URL migration is done -->
+                <a href="/auth/signup?next=/record" class="btn btn-secondary" style="width: 100%; justify-content: center;">Get Your Record →</a>
             </div>
 
             <!-- SI8 Certified -->
@@ -186,7 +185,7 @@
                         <li>Any commercial deployment of AI-generated video</li>
                     </ul>
                 </div>
-                <a href="/certify" class="btn btn-primary" style="width: 100%; justify-content: center;">Get Certified →</a>
+                <a href="/auth/signup?next=/certify" class="btn btn-primary" style="width: 100%; justify-content: center;">Get Certified →</a>
             </div>
         </div>
 
@@ -526,18 +525,20 @@
     <!-- GA4 Custom Event Tracking -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Get Verified CTA clicks (hero, nav, tier cards)
-            document.querySelectorAll('a[href="/auth/signup"], a[href="/certify"]').forEach(function(el) {
-                el.addEventListener('click', function() {
-                    gtag('event', 'get_verified_click', {
-                        'event_category': 'CTA',
-                        'event_label': el.textContent.trim()
+            // Get Verified / Get Certified CTA clicks
+            document.querySelectorAll('a[href="/auth/signup"], a[href="/auth/signup?next=/certify"]').forEach(function(el) {
+                if (!el.textContent.trim().toLowerCase().includes('record')) {
+                    el.addEventListener('click', function() {
+                        gtag('event', 'get_verified_click', {
+                            'event_category': 'CTA',
+                            'event_label': el.textContent.trim()
+                        });
                     });
-                });
+                }
             });
 
             // Creator Record CTA
-            document.querySelectorAll('a[href="/record"], a[href="/auth/signup"]').forEach(function(el) {
+            document.querySelectorAll('a[href="/auth/signup?next=/record"]').forEach(function(el) {
                 if (el.textContent.trim().toLowerCase().includes('record')) {
                     el.addEventListener('click', function() {
                         gtag('event', 'creator_record_click', {

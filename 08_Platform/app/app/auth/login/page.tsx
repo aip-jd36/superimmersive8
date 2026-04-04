@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -22,7 +22,14 @@ type LoginForm = z.infer<typeof loginSchema>
 export default function LoginPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
+  const [nextPath, setNextPath] = useState<string>('')
   const supabase = createClient()
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    // Support both ?next= (from signup flow) and ?redirectedFrom= (from middleware)
+    setNextPath(params.get('next') || params.get('redirectedFrom') || '')
+  }, [])
 
   const {
     register,
@@ -43,7 +50,8 @@ export default function LoginPage() {
 
       if (authError) throw authError
 
-      router.push('/dashboard')
+      const destination = nextPath && nextPath.startsWith('/') ? nextPath : '/dashboard'
+      router.push(destination)
       router.refresh()
     } catch (err: any) {
       setError(err.message || 'Invalid email or password')
@@ -100,7 +108,7 @@ export default function LoginPage() {
 
           <div className="mt-4 text-center text-sm text-gray-600">
             Don't have an account?{' '}
-            <Link href="/auth/signup" className="text-primary hover:underline">
+            <Link href={nextPath ? `/auth/signup?next=${encodeURIComponent(nextPath)}` : '/auth/signup'} className="text-primary hover:underline">
               Sign up
             </Link>
           </div>
