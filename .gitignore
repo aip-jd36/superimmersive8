@@ -14,3 +14,9 @@ CREDENTIALS.txt
 
 # Node modules (if you add npm packages later)
 node_modules/
+
+# GA4 OAuth token file (refresh token stored as GitHub secret instead)
+tools/ga4_token.json
+
+# Downloaded archives
+*.tar.gz

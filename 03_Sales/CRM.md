@@ -2,7 +2,7 @@
 
 **Purpose:** Single source of truth for all active leads — agency/brand buyers (LinkedIn) and creators (Instagram). Used for pattern analysis, ICP refinement, and messaging decisions. Pipeline operations will move to Airtable once ICP and messaging are validated.
 
-**Last updated:** March 31, 2026
+**Last updated:** April 3, 2026
 
 ---
 
@@ -46,13 +46,13 @@
 | Call Completed | 2 |
 | Call Booked | 0 |
 | Replied — Hot (follow-up urgent) | 1 |
-| Replied — Warm | 3 |
-| Replied — Conditional | 3 |
-| Replied — Lukewarm | 6 |
-| Nurture | 2 |
-| Polite Pass | 16 |
-| Not a Fit | 8 |
-| **Total Named Responses** | 47 |
+| Replied — Warm | 5 |
+| Replied — Conditional | 4 |
+| Replied — Lukewarm | 7 |
+| Nurture | 3 |
+| Polite Pass | 19 |
+| Not a Fit | 10 |
+| **Total Named Responses** | 57 |
 | **Total Leads Contacted** | ~1,000+ |
 
 ---
@@ -62,6 +62,7 @@
 | Name | Company | Title | Location | Campaign | Stage | Their Response (Summary) | Next Step |
 |------|---------|-------|----------|----------|-------|--------------------------|-----------|
 | **Hossein Jafari** | Wowspot Ltd. | Managing Director | London | SI8_Legal Friction | Followed Up | 👍 then: *"You're right about the documentation; since the 2026 ASA and IAB updates, it's become a standard requirement for London projects. Having your team follow these disclosure rules is the best way to keep the campaign's copyright and IP safe under UK law."* | Apr 1 — conversational reply sent with Urban Drift PDF, Runway/Kling vs Firefly gap, asked for call | Await reply; book call |
+| **Troy Macdonald** | HyFi Corp | Chairman of the Board & CEiR | Miami | SI8_Hitting a Wall | Replied — Conditional | "Hi Ivy, sure send a sample and then lets arrange a call." | Apr 3 — Urban Drift Chain of Title PDF sent (attached); Calendly link included | Await reply; book call |
 
 **Why Hossein matters:** He's a London MD who unprompted validated SI8's entire premise — documentation is now standard in London due to ASA/IAB 2026 updates. This is the first contact who has confirmed a regulatory/industry driver without prompting. Highest signal response to date.
 
@@ -80,7 +81,9 @@
 | **Mainul Islam** | eSaviour Limited | — | London | Campaign A | Replied — Conditional | "ready 1-2 samples first then we will let you know" | None | Re-engage once 2-3 sample works ready |
 | **James Byrne** | BeyondWords | — (ESG reporting) | London | Campaign A | Replied — Conditional | "Can you share some examples so I can understand" | None | Re-engage once samples ready |
 | **Qaiser Mehmood** | ECONROAD International | Director of Business Development | Singapore | Campaign C | Followed Up | "Okay. Do u have any website?" | Apr 1 — follow-up sent with v4 Urban Drift PDF + Calendly (website + v3 PDF sent Mar 15, no reply) | Await reply; book call |
-| **Emmanuel Stralka** | Think Global Solutions | Co-Founder | London | Campaign A | Followed Up | "Interesting - we're a Marketing Cultural intelligence platform... not sure how we can connect with what you guys do?" | Apr 1 — qualifying reply sent; checking if clients run AI video in market entry campaigns | Await reply; qualify out if no AI video use case |
+| **Hugo Barbera** | HumAIn | AI Director | Paris | SI8_Hitting a Wall | Followed Up | Reviews client legal T&Cs before taking projects. "We never got anything rejected in more than 3 years... we work with big agency networks and their legal teams." | Apr 3 — reply sent: distinguished contractual compliance from content-level documentation (IAB framework, EU AI Act, tool provenance inside the video) | Await reply; see if content-level documentation is a gap in their process |
+| **Ivan Ng** | Bacon Creatives | Creative Consultant | Singapore | SI8_Hitting a Wall | Replied — Warm | "No this has not come up. But one of the creative agencies I consult with may be looking for a new AI partner to bring their AI influencer to life. Is this something you guys do?" | Apr 3 — pivot reply sent: clarified SI8 is documentation layer not production; if agency is building AI influencer, they'll need Chain of Title when it goes live; asked what stage they're at | Await reply — Singapore ICP, has a live client use case |
+| **Leimi Zhou** | WOMBO | Digital Marketing Strategist & Video Artist | London | SI8_Legal Friction | Replied — Lukewarm | "I've never been asked for documentation on my process. Why do you ask? Just curious" | Apr 3 — educational reply: explained IAB January framework, ASA robot puppy ruling, EU AI Act August; offered to send sample | Await reply — WOMBO is an AI company; good market research data point regardless |
 | **Aswini Ruidas** | MediaX | Sales Manager | Durgapur, India | SI8_Hitting a Wall | Replied — Lukewarm | Suggested Telegram; when declined, offered WhatsApp: +91 6296601182 | Ivy asked if on WhatsApp; he confirmed | Low priority — India off-target, FinTech PR off-target sector. Park. |
 
 ---
@@ -100,6 +103,7 @@
 |------|---------|-------|----------|----------|--------------------|-------|
 | **Mark Johnson** | SwiftScale AI | Founder & MD | London | SI8_Vetting Takes Weeks | "Thanks Ivy" → "Okay" after Msg 2 | Minimal engagement. SwiftScale AI is an AI company itself — possibly wrong side of market. Monitor. |
 | **Amr Hamad** | Stackline | Director, Retail Media EU & APAC | London | SI8_Legal Friction | Confirmed labeling is main criteria; "Not to my knowledge" on IP/training data layer | Pain is at labeling layer, not Chain of Title layer yet. Not urgent pain. Downgrade from Warm to Lukewarm. Follow up after ASA/IAB research. |
+| **Emmanuel Stralka** | Think Global Solutions | Co-Founder | London | Campaign A | "We will keep you in mind when it comes to video-based assets as your AI probably provides speed to market advantages." | Cultural intelligence / market entry platform. Not content production. Soft referral interest — if their brand clients run AI video in launch campaigns. Apr 3 — acknowledged; floated referral arrangement. |
 | **William Tan** | Tareo Digital Advisory | — | Singapore | Campaign C | "Too many individuals have flooded my inbox... teams are evaluating" | Follow up early April — "have you had a chance to evaluate?" |
 | **Quincy Yong** | Merandi Global Consulting | — | Singapore | Campaign C | "Okay" | Minimal — send Message #2 |
 | **Ayesha Akhtar** | Arrangers Digital Media | Strategic Marketing Consultant | Gurugram, India | SI8_Legal Friction | "I'm not sure" (when asked if clients ask for documentation) | Market research data point: pain not felt yet at this level. Off-target geography (India). |
@@ -124,6 +128,9 @@
 | Beng Huan Tey | Podium | — | Singapore | Wrong fit |
 | Leopold Cox | Mahleon | — | London | "Not interested but happy to keep in touch" |
 | Jenny Brett | First Brand Kit | — | London | "None of my clients are looking for AI videos right now" |
+| Guy Azouri | Private Investment Group | CTO / Lead AI & Technology Architect | London | "Thanks but not interested" |
+| Cory Warfield | Starchild Music | Chief Growth Officer | Chicago | "It hasn't" (re: legal rejection problem) — graceful exit sent |
+| Barış Buhar | Freelance Motion Designer | Motion Designer | Ankara | "I don't have this problem right now, but I'll definitely write to you when I do" |
 
 ---
 
@@ -131,7 +138,6 @@
 
 | Name | Company | Title | Location | Reason |
 |------|---------|-------|----------|--------|
-| Emmanuel Stralka | Think Global Solutions | Co-Founder | London | Marketing cultural intelligence / market entry — not content production |
 | Mikhail Rakov | Self-Employed | Audiodrama Director | London | Audio, not video |
 | Mubarak Ali | Human Intelligence Movement / FinTech Academy | Board Advisor | Singapore | Academic/policy, not a buyer |
 | Cove Overley Emba | Toy Exploder | Chief Explosive Agent | Hong Kong | "No plans to incorporate AI video" |
@@ -141,6 +147,9 @@
 | Starcom / Gavin | Stellantis | — | London | Authenticity concern ("are you a real person?") |
 | Uma Rudd Chia | OH MY STRAWBERRY | — | Singapore | AI creator, not buyer — wrong side of market |
 | Vanesse Ang | VAN Consultancy | — | Singapore | Not in business |
+| Roman Zincenko | IC Publications | Commercial Director | UK | "I don't do AI videos for clients" |
+| Daniel Kwintner | ShowTex Asia | Branch Manager | Tokyo | Prefers organic content; clients share that preference — no AI video use case |
+| Giulia Willcox | Instituto de Tecnologia e Sociedade (ITS Rio) | Professor | Rio de Janeiro | Academic/researcher — not a buyer; educational reply sent; Brazil off-target geography |
 
 ---
 
@@ -200,7 +209,7 @@ The four leads below (keeper505, Chris Vespaziani, Rodolfo Roth, Absolutely Ai) 
 
 ### Buyer ICP (Agency / Brand)
 
-**Last updated: March 31, 2026 — based on 41 named responses across ~1,000+ contacts**
+**Last updated: April 4, 2026 — based on 57 named responses across ~1,000+ contacts**
 
 ---
 
@@ -208,14 +217,16 @@ The four leads below (keeper505, Chris Vespaziani, Rodolfo Roth, Absolutely Ai) 
 
 | Location | Warm/Hot/Conditional | Polite Pass | Not a Fit | Signal Quality |
 |----------|---------------------|-------------|-----------|----------------|
-| **London** | 7 | 4 | 4 | **High** — when they respond, they mean it |
-| **Singapore** | 2 (both wrong type) | 5 | 2 | Low — high acceptance, low buying intent |
+| **London** | 8 | 7 | 4 | **High** — when they respond, they mean it; Leimi Zhou (WOMBO) adds AI company signal |
+| **Singapore** | 3 (Ivan Ng = warm pivot; others wrong type) | 5 | 2 | Rising — Ivan Ng is first Singapore lead with a live client use case |
+| **Paris / EU** | 1 (Hugo Barbera — warm) | 0 | 0 | New signal — EU AI Act August deadline opening EU as secondary geography |
+| Miami / US | 1 (Troy Macdonald — conditional) | 0 | 0 | Isolated — US off-strategy Year 1, but responds when pain is real |
 | India | 1 (off-target) | 0 | 1 | Off-target — pause |
 | Hong Kong | 0 | 0 | 1 | Too small sample |
 | Abu Dhabi | 0 | 1 | 0 | Off-target — pause |
 | Sydney | 0 | 1 | 0 | Off-target — pause |
 
-**Verdict: London is the only geography producing real signal. Pause Singapore, Sydney, Abu Dhabi, India until London is proven.**
+**Verdict: London remains primary. Singapore is showing its first genuine use-case lead (Ivan Ng). EU/Paris is opening via the August 2026 EU AI Act deadline — worth a small test batch targeting EU-facing production studios. US responds but is off-strategy for Year 1.**
 
 ---
 
@@ -225,12 +236,15 @@ The four leads below (keeper505, Chris Vespaziani, Rodolfo Roth, Absolutely Ai) 
 |-----------|---------|---------|
 | **MD / Founder** | Best — hot or warm | Hossein (MD/hot), Isaac (Founder/call), David O'B (Founder/nurture), Mark Johnson (Founder/lukewarm) |
 | **Director-level creative/digital** | Conditional or warm | Barney, Amr, Mainul |
+| **AI Director / AI Practitioner** | Warm — distinct persona | Hugo Barbera (HumAIn): sophisticated, has informal process, thinks he's covered. Needs different pitch — not "do you have a problem" but "is your process producing documentation that travels with the file?" |
+| **Creative Consultant** | Warm if client use case present | Ivan Ng (Singapore): no personal pain, but active client use case (AI influencer). Qualification depends on whether their client is real and imminent. |
+| **Digital Marketing / Video Artist at AI company** | Lukewarm — market research value | Leimi Zhou (WOMBO): no pain yet, genuinely curious. AI companies are early indicators — they'll feel documentation pressure before agencies do. |
 | **Media Director / Planner** | Wrong buyer type | Elaine Tan |
 | **PR Director** | Wrong role | William Lim (SHEIN) |
 | **Partnerships / Consultants** | Not a fit | Iona, Andrzej, Ketan |
 | **Solo / self-employed** | Not a fit | Mikhail, Vanesse |
 
-**Verdict: MD and Founder at agencies are the sweet spot — feel compliance pain directly, have budget authority. Media Directors route to production partners. PR Directors don't own content decisions.**
+**Verdict: MD and Founder remain the sweet spot. A new persona has emerged: the sophisticated AI practitioner (Hugo Barbera type) who has an informal process and believes they're compliant. These are real prospects but require a different entry point — position around the IAB framework's content-level documentation requirement, not the "do you have a problem" question they'll answer no to.**
 
 ---
 
@@ -239,14 +253,17 @@ The four leads below (keeper505, Chris Vespaziani, Rodolfo Roth, Absolutely Ai) 
 | Type | Outcome | Examples |
 |------|---------|---------|
 | **Creative / digital agency (small-mid)** | Best | Wowspot (hot), We Do Ads (call), eSaviour (conditional) |
+| **AI-specialist agency** | Warm — new data point | HumAIn (Hugo): AI training + advertising for Fortune 500. Has a process but it's relationship-based, not document-based. Likely a common profile among established AI practitioners. |
+| **AI company (tool/product side)** | Lukewarm — early indicator | WOMBO (Leimi): AI video tool company. No current pain but ahead of the curve. Worth educating — they will feel pressure before agencies do. |
+| **Creative consultant (with active client use case)** | Warm — depends on client reality | Bacon Creatives / Ivan Ng (Singapore): value depends entirely on whether the client's AI influencer project is real. |
 | **Consulting / advisory** | Untested | AlixPartners (Barney — call not yet booked) |
 | **Media buying agency** | Wrong buyer type | The Media Shop |
 | **PR agency** | Wrong role | SHEIN PR, GPS Marketing |
-| **AI company** | Unclear | SwiftScale AI (lukewarm) |
 | **Nonprofit / NGO** | Not a fit | Singapore Kindness Movement |
 | **FinTech / Blockchain PR** | Not a fit | MediaX |
+| **Investment / VC / finance** | Not a fit | Guy Azouri (Private Investment Group): CTO at investment firm — no content production use case |
 
-**Verdict: Creative and digital agencies with production responsibilities. Media buyers and PR agencies don't own the content decision — wrong entry point.**
+**Verdict: Creative and digital agencies with production responsibilities remain the core. AI-specialist agencies are a new qualified segment — they produce AI video at scale for major clients but rely on informal compliance processes that the IAB framework now makes insufficient. AI companies (tool side) are early-indicator contacts worth warming up for when the documentation requirement hits their clients.**
 
 ---
 
@@ -255,36 +272,47 @@ The four leads below (keeper505, Chris Vespaziani, Rodolfo Roth, Absolutely Ai) 
 | Awareness Level | Response Quality | Examples |
 |----------------|-----------------|---------|
 | **Already aware of regulatory requirement** | HOT | Hossein: "since the 2026 ASA/IAB updates, it's standard" |
+| **Has an informal process, believes they're covered** | Warm — different pitch required | Hugo Barbera: "we've never been rejected in 3 years, we work with big agency networks." Contractual compliance ≠ content-level documentation. This persona needs to understand the IAB framework creates a new, specific requirement. |
 | **Aware of labeling, not IP/Chain of Title layer** | Lukewarm | Amr: "main criteria is brand guidelines / labeling" |
+| **Unaware but curious** | Lukewarm — educational | Leimi Zhou: "I've never been asked. Why do you ask?" WOMBO is an AI company — her curiosity is genuine. |
 | **Unaware / not sure** | Polite pass or low signal | Ayesha: "I'm not sure", Mikhail: "I don't know" |
 | **Pain real but not urgent** | Conditional | Isaac: "it's interesting… but not a buying driver" |
 
-**Verdict: Pain awareness level is the strongest predictor of conversion — stronger than title or geography alone. Contacts already feeling regulatory pressure convert faster. Those who need educating from scratch are slow or don't convert.**
+**Verdict: Pain awareness is still the strongest predictor. A new level has emerged — "has an informal process and thinks they're covered." These contacts don't respond to "do you have this problem?" They respond to "is your current process producing documentation that satisfies the IAB framework?" The pitch is about the gap between what they do today and what the industry now requires.**
 
 ---
 
-#### ICP Profile (Current Best Guess — March 31, 2026)
+#### ICP Profile (Updated April 4, 2026 — N=57)
 
+**Primary ICP (unchanged):**
 > **Managing Director or Creative Director at a small-to-mid creative or digital agency (10–50 employees) in London, already aware of AI content documentation requirements from regulatory pressure (ASA/IAB 2026) or client legal teams pushing back — and directly responsible for delivering AI video campaigns.**
 
+**Secondary ICP — new (April 2026):**
+> **AI Director or senior practitioner at an established AI-specialist agency, working with Fortune 500 clients or holding group agency networks. Has an informal compliance process (reviewing client T&Cs, relationship with legal teams) but has not produced structured content-level documentation. EU-facing agencies within 4 months of the EU AI Act August 2026 deadline are particularly qualified.**
+
+**High-value use case to target explicitly — new (April 2026):**
+> **Any agency or studio building AI influencer campaigns (synthetic avatars for ongoing brand use).** This is an IAB mandatory disclosure trigger. Documentation complexity is higher (persona ownership, likeness, ongoing use rights), deal value is higher, and urgency is clearer than a one-off campaign video.
+
 **Positive signals (qualify in):**
-- London-based
-- MD, Founder, Creative Director, or Head of Production title
-- Creative/digital/production agency (not media buying, not PR)
-- 10–50 employees
+- London-based (primary) or EU-facing (secondary, especially Paris/Amsterdam/Hamburg)
+- MD, Founder, Creative Director, Head of Production, or AI Director title
+- Creative/digital/production agency or AI-specialist agency (not media buying, not PR)
+- 10–100 employees
 - Already producing or commissioning AI video
 - Mentions legal, compliance, or documentation unprompted
+- Working with brand clients or holding group agency networks
+- Building or pitching AI influencer / synthetic avatar content
 
 **Disqualifiers (filter out fast):**
-- Geography outside London (for now)
-- Media buying, PR, consulting, nonprofit company type
+- No AI video in workflow — the single most common reason for a polite pass
+- Media buying, PR, nonprofit, investment/finance, market intelligence company type
 - Media Director, Planner, PR Director, Partnerships Manager titles
-- No AI video in workflow
-- Needs to be educated on why compliance matters before engaging
+- Geography outside London/EU/Singapore (for now)
+- Needs full education on why compliance matters before engaging (conversion too slow)
 
 ---
 
-#### Targeting Changes for Next Dripify Batch
+#### Targeting Changes for Next Dripify Batch (Updated April 4, 2026)
 
 **LinkedIn filter changes:**
 
@@ -295,19 +323,25 @@ The four leads below (keeper505, Chris Vespaziani, Rodolfo Roth, Absolutely Ai) 
 | Media Strategist | Head of Production |
 | PR Director | Executive Producer |
 | Partnerships Manager | Founder (filter: agency/production) |
+| — | AI Director (new: targets Hugo-type persona) |
 
 **Company industry filter:**
 - Keep: Advertising Services, Marketing Services, Video Production, Digital Media
-- Remove: Media Buying, Public Relations, Management Consulting, Nonprofit
+- Add: AI and Machine Learning (catches HumAIn-type AI-specialist agencies)
+- Remove: Media Buying, Public Relations, Management Consulting, Nonprofit, Investment Management, Market Research
 
 **Geography:**
-- Primary: Greater London only
-- Pause: Singapore, Sydney, Abu Dhabi, India
+- Primary: Greater London
+- Secondary test batch: Paris, Amsterdam, Hamburg (EU AI Act deadline = August 2, 2026 — 4 months out; use deadline as hook)
+- Resume carefully: Singapore (Ivan Ng signal — one live use case; test small batch with AI influencer angle)
+- Pause: Sydney, Abu Dhabi, India, US
 
 **Campaign to scale:**
-- Scale: SI8_Legal Friction (question-based, self-selects pain-aware contacts)
-- Scale: SI8_Trusted AI Supplier (Campaign C — 2.75% response rate, lowest pushback)
-- Fix or retire: SI8_Vetting Takes Weeks / Campaign A (assumptive opener, highest pushback)
+- Scale: SI8_Legal Friction — best self-qualifier; opener requires them to already be delivering AI video
+- Test new angle: EU AI Act deadline campaign for Paris/Amsterdam batch (hook: "August 2 deadline")
+- Test new angle: AI influencer documentation campaign (hook: IAB mandatory disclosure for synthetic avatars)
+- Fix or retire: SI8_Vetting Takes Weeks / Campaign A (assumptive opener produces polite passes and pushback; people connect through 4 messages then decline — worst pre-qualification of all campaigns)
+- Monitor: SI8_Hitting a Wall — good volume but needs better targeting to avoid non-AI-video contacts getting through
 
 ---
 
@@ -332,15 +366,19 @@ The four leads below (keeper505, Chris Vespaziani, Rodolfo Roth, Absolutely Ai) 
 
 | Campaign | Response Rate | Pushback | Best Outcome | Verdict |
 |----------|--------------|----------|--------------|---------|
-| Campaign A — Vetting Takes Weeks | 1.2% | High (2 explicit) | Barney O'Kelly (warm) | Fix or retire — assumptive opener backfires |
+| Campaign A — Vetting Takes Weeks | 1.2% | High (2 explicit) | Barney O'Kelly (warm) | Retire or fix — assumptive opener produces polite passes after 4 messages (Guy Azouri: 4 msgs then "not interested"). Worst pre-qualifier. |
 | Campaign B — Documented Provenance | 1% (N=1) | 0 | Elaine Tan (call booked) | Unproven — scale to 400 leads |
 | Campaign C — Trusted AI Supplier | 2.75% ⭐ | Low | Isaac Twidale (call completed) | Best performer — scale this |
-| SI8_Legal Friction | TBD | 0 | Hossein Jafari (hot validation) | Strong signal — question opener generates substantive replies AND market research |
-| SI8_Hitting a Wall | TBD | Low | Aswini (engaged, off-target) | Too early — needs more data |
+| SI8_Legal Friction | TBD | 0 | Hossein Jafari (hot), Leimi Zhou (lukewarm/educational) | Best pre-qualifier — opener requires person to be delivering AI video; self-selects in or out on message 1 |
+| SI8_Hitting a Wall | TBD | Low | Troy Macdonald (conditional), Ivan Ng (warm pivot) | Volume good, quality mixed — non-AI-video contacts get through; tighten ICP filter |
 | SI8_Early Days | TBD | 0 | — | Polite passes only so far |
 | IG v4 Template | ~28% (2/7) | 0 | Shingo (research), keeper505 (hot) | Strong — comp code reduces friction |
 
-**Key pattern:** Question-based openers (Legal Friction, Early Days, Campaign C) generate more useful signal than assertion-based openers (Campaign A). Even "I'm not sure" responses are market research data.
+**Key patterns:**
+- Question-based openers (Legal Friction, Campaign C) outperform assertion-based openers (Campaign A) in quality and pushback rate
+- SI8_Legal Friction is the strongest pre-qualifier because the opener requires active AI video delivery — people who aren't doing it don't answer; people who are give you substantive market research
+- SI8_Hitting a Wall's assertion opener ("more and more production houses are hitting a wall") lets non-qualified contacts through all 4 messages before declining
+- The single most useful filter missing from all campaigns: explicitly requires the person to currently be delivering AI video for clients
 
 ---
 

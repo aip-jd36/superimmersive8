@@ -657,6 +657,7 @@ Traditional lawyers are conservative and don't trust automation — BUT they're 
 | Build in Public Log | `02_Marketing/content/BUILD_IN_PUBLIC_LOG.md` | Insights for LinkedIn content |
 | **News Intelligence Digest** | `tools/news-digest/` | Automated weekly news monitor: Google News RSS → Claude Haiku scoring → Resend email + DIGEST-LOG.md update |
 | **Digest Log** | `02_Marketing/intelligence/DIGEST-LOG.md` | Auto-updated weekly: all articles scored by digest engine, High/Monitor tables with acted-on tracking |
+| **GTM + GA4 Weekly Report** | `tools/gtm-report/` | Automated Monday email: GA4 Data API → Claude GTM analysis + recommendations → Resend to jd@superimmersive8.com |
 | **Content Calendar** | `02_Marketing/content/CONTENT-CALENDAR.md` | Single source of truth for all outbound content: LinkedIn, Email, IG, FB — status, file link, source article |
 | **Canva Brand Spec** | `02_Marketing/brand/CANVA-BRAND-SPEC.md` | IG carousel template spec: colors, fonts, 6-slide layout, tone rules, caption template |
 | **Post Drafts** | `02_Marketing/content/posts/YYYY-MM/` | LinkedIn + IG carousel drafts, organized by date; each file has LinkedIn copy, slide-by-slide breakdown, caption, hashtags |
@@ -875,6 +876,7 @@ SuperImmersive8/
 - Parallel strategy: MyVideo (credibility) + SEA agencies (revenue)
 - Legal/rights expertise is a core competency, not just admin
 - Prioritize simplicity — this is a lean, solo-founder operation
+- **GA4 Data API is accessible** — use `tools/ga4_query.py` to pull live analytics data when the user asks about website performance, campaign validation, or GTM analysis. Property ID: `326271443`. Auth uses OAuth2 refresh token at `tools/ga4_token.json` (requires `tools/ga4_auth.py` if token expires). Run: `python tools/ga4_query.py` from repo root. This is a regular tool for verifying if GTM approaches are working.
 
 ---
 

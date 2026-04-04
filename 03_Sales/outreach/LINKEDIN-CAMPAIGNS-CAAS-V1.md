@@ -112,20 +112,33 @@ All 4 campaigns share the same Message 2–4 sequence. Only Message 1 / connecti
 
 ## ICP (Ideal Customer Profile)
 
+**Updated: April 4, 2026 — based on N=57 named responses**
+
 **Primary:**
-- Creative Director / Head of Creative / Head of Production / Executive Producer
+- MD / Founder / Creative Director / Head of Production / Executive Producer
 - At: creative agencies, production houses, content studios (10–100 employees)
-- Using: Sora, Runway, Kling, Hailuo, or similar for client work
+- Using: Runway, Kling, Pika, or similar for client work
 - Pain: client legal teams, brand approval workflows, E&O insurance requirements blocking AI video
+- Geography: London (primary), Singapore (secondary)
 
-**Secondary:**
-- In-house brand creative teams at mid-size companies producing AI content internally
-- Freelance producers / boutique studios making AI video for agency clients
+**Secondary — new (April 2026):**
+- AI Director / AI Practitioner at AI-specialist agencies working with Fortune 500 or holding group networks
+- Has an informal compliance process (reviews T&Cs, relationship with agency legal teams) but not producing structured content-level documentation
+- EU-facing agencies especially qualified — EU AI Act Article 50 deadline is August 2, 2026
+- Target geography for this persona: Paris, Amsterdam, Hamburg
 
-**NOT targets (learned from March campaigns):**
-- Media buying agencies / media planners (not creative buyers — The Media Shop lesson)
-- Solo consultants, non-agency contacts
+**High-value use case — add to targeting (April 2026):**
+- Agencies or studios building AI influencer campaigns (synthetic avatars for ongoing brand use)
+- IAB mandatory disclosure trigger — documentation complexity and deal value are both higher than one-off campaign video
+- No resubmission needed each campaign if the underlying Chain of Title is established once
+
+**NOT targets:**
+- Media buying agencies / media planners (not creative buyers)
+- Investment / finance / VC (Guy Azouri: CTO at investment group — 4 messages, then "not interested")
+- Market intelligence / cultural consulting (Think Global Solutions type — not content production)
+- Music companies, nonprofits, solo consultants without active client use cases
 - HR, operations, non-creative roles
+- Anyone who doesn't currently produce AI video for clients — the single most common reason for a polite pass
 
 ---
 
@@ -143,6 +156,7 @@ Job titles (include ANY):
 - Managing Director (at agency)
 - Co-Founder (at agency)
 - Founder (at agency)
+- AI Director (new — targets AI-specialist agency persona)
 
 Job titles (EXCLUDE):
 - Media Director
@@ -150,6 +164,9 @@ Job titles (EXCLUDE):
 - Account Planning
 - HR
 - Recruiter
+- Partnerships Manager
+- Commercial Director
+- Investment Director
 
 Company industries:
 - Advertising Services
@@ -157,14 +174,23 @@ Company industries:
 - Creative Services
 - Media Production
 - Marketing Services
+- Technology, Information and Internet (for AI-specialist agencies like HumAIn)
+
+Company industries (EXCLUDE):
+- Investment Management
+- Financial Services
+- Market Research
+- Media Buying
+- Public Relations (standalone)
+- Nonprofit
 
 Company headcount: 11–200 employees
 
-Geography (in priority order):
-1. Singapore
-2. London
-3. Kuala Lumpur
-4. Manila
+Geography (updated priority order — April 2026):
+1. London (primary)
+2. Singapore (secondary — AI influencer angle)
+3. Paris / Amsterdam / Hamburg (new — EU AI Act deadline batch)
+4. Pause: Kuala Lumpur, Manila, Sydney, Abu Dhabi, India, US
 
 Connection degree: 2nd (warm) first, then 3rd
 ```
@@ -325,6 +351,10 @@ See: `03_Sales/outreach/INSTAGRAM-CAMPAIGNS-CREATORS-V1.md`
 Previously: catalog blocker. Now: two answers.
 > "Here's our showcase page with verified works: superimmersive8.com/showcase. And here's a sample Chain of Title document so you can see exactly what your client's legal team would receive: [link to Neon Dreams PDF]."
 
+### "We already have a process / we've never been rejected" (new — April 2026)
+This is the Hugo Barbera objection: "We review client T&Cs before committing, we work with big agency networks, never been rejected in 3 years." Contractual compliance ≠ content-level documentation. Do not argue — acknowledge and reframe.
+> "That makes total sense — reviewing client requirements upfront is exactly the right instinct. What the IAB framework added in January is a second layer: documentation about what's inside the video itself. Which tools, training data status, whether any real person's likeness appears. That's content-level, not contractual — and it's what holding group compliance teams are now asking for as a separate deliverable. If that's something you're already producing, you're ahead of most. Curious whether that's part of your current workflow."
+
 ### "We handle this internally / our legal team hasn't flagged this yet"
 > "Totally — most agencies say the same thing until a brand's procurement team adds it to the brief. When that happens, having a 90-minute turnaround process is useful. Happy to keep the door open."
 
@@ -462,6 +492,86 @@ Track per campaign:
 
 ---
 
+## CAMPAIGN G — "EU AI Act Deadline" (New — April 2026)
+**Angle:** August 2, 2026 deadline for EU AI Act Article 50 transparency obligations — 4 months out. Agencies running AI video in EU markets need documentation now.
+**Tone:** Deadline-driven, specific, peer-to-peer
+**Product:** SI8 Certified $499
+**Best for:** EU-facing production studios, agencies, and brands in Paris, Amsterdam, Hamburg running AI video in European campaigns
+**Geography:** France, Netherlands, Germany
+
+---
+
+**Connection Note:**
+> Hi [Name] — the EU AI Act transparency obligations for AI video kick in August 2, 2026. Most agencies running AI campaigns in European markets don't have documentation in place yet. Curious if this has come up for you.
+
+*(192 chars)*
+
+---
+
+**Message 1** — Send immediately after connection
+
+> Quick question — are you running AI-generated video in any European campaigns? The EU AI Act Article 50 transparency requirements hit August 2. Four months out. The documentation it requires (tool provenance, authorship, disclosure) is exactly what we produce.
+
+---
+
+**Message 2** — Day 5
+
+> What we do: 90-minute human review of AI video → Chain of Title document covering tool provenance, authorship, likeness, IP, and brand safety — the audit trail that satisfies the IAB framework and EU AI Act requirements. $499 per video. superimmersive8.com/how-it-works for the full breakdown.
+
+---
+
+**Message 3** — Day 10
+
+> Happy to send a sample Chain of Title — concrete look at what EU-compliant documentation covers for AI video. No commitment. Just let me know.
+
+---
+
+**Message 4** — Day 17 — Break-up
+
+> No worries if timing isn't right. The August 2 deadline will be here quickly. We're at superimmersive8.com when you're ready.
+
+---
+
+## CAMPAIGN H — "AI Influencer Documentation" (New — April 2026)
+**Angle:** Agencies building AI influencer campaigns (synthetic avatars in ongoing brand use) face the most complex documentation requirements — and the highest stakes if something goes wrong.
+**Tone:** Specific, knowledgeable, peer
+**Product:** SI8 Certified $499
+**Best for:** Agencies and studios building or pitching AI influencer / synthetic avatar campaigns for brand clients
+**Note:** AI influencer content is an IAB mandatory disclosure trigger and requires documentation of persona ownership, likeness basis, tool provenance, and ongoing use rights
+
+---
+
+**Connection Note:**
+> Hi [Name] — if you're building AI influencer content for brand clients, the Chain of Title documentation question is going to come up from their legal teams. Most agencies aren't prepared for it yet.
+
+*(192 chars)*
+
+---
+
+**Message 1** — Send immediately after connection
+
+> Quick question — are you producing AI influencer or synthetic avatar content for brand clients? The documentation requirements are more complex than a one-off AI video: persona ownership, likeness basis, tool provenance, ongoing use rights. Curious how you're handling it.
+
+---
+
+**Message 2** — Day 5
+
+> We issue a Chain of Title document that covers all of it — tool provenance, authorship, likeness assessment, IP review, brand safety, risk rating. Built for exactly this use case. Once the documentation is established for the AI character, it travels with every campaign use. $499 per video, 90-minute review. superimmersive8.com
+
+---
+
+**Message 3** — Day 10
+
+> Happy to send a sample Chain of Title — shows exactly what a brand legal team receives. No commitment, just a concrete look at the output. Let me know.
+
+---
+
+**Message 4** — Day 17 — Break-up
+
+> Closing the loop. When a client's legal team asks for Chain of Title documentation on an AI character, we're at superimmersive8.com.
+
+---
+
 ## CAMPAIGN F — "Creator Record" ($29 — Start Before You Need It)
 **Angle:** Creators who aren't commercial yet but are building a body of AI work — the $29 Creator Record is the low-friction entry point to start documenting now.
 **Tone:** Helpful peer, not salesy — "you should know this exists"
@@ -503,3 +613,51 @@ Track per campaign:
 **Message 4** — Day 17 — Break-up
 
 > Closing the loop. If you ever want a quick rights record on your AI work, it's $29 at superimmersive8.com/record. Good luck with everything you're making.
+
+---
+
+## Website Performance (GA4 Analysis)
+
+**Updated: April 4, 2026 — first full GA4 read via Data API**
+
+### Key Findings
+
+**Traffic quality is good — conversion path is broken**
+- Organic Google and LinkedIn are the two highest-quality traffic sources (lowest bounce rate)
+- LinkedIn-referred visitors spend significantly more time on site than average — messaging is resonating with people who actually arrive
+- 60% of traffic is mobile — but mobile conversion rate is far below desktop; forms and checkout flow need mobile review
+
+**The `/sample` page is the best bottom-of-funnel asset we have**
+- Visitors who reach the Urban Drift sample Chain of Title spend the longest time on any page on the site
+- This is the clearest signal that the product concept works — when people see the actual output, they engage
+- Action: add a direct CTA at the bottom of `/sample` — "Get this for your video — $29 to start" — and track `get_verified_click` from that page specifically
+
+**17 `checkout_started` events — origin unknown**
+- Someone reached the Stripe checkout page 17 times in the tracked window; unknown how many completed
+- Check Stripe Dashboard for successful payments against these sessions
+- If most abandoned: friction in checkout is the problem — consider adding a FAQ or trust badge alongside Stripe Checkout
+- If most completed: attribution gap in GA4 (webhook success not firing back to analytics)
+
+**Demo form spam now resolved**
+- 23 `request_demo_submit` GA4 events, only 1 confirmed real submission (Yoshi Suenaga, Japan)
+- Fixed April 4, 2026: added 3-second time check + 45 disposable domain blocklist to `/api/formspree-to-kit.js`
+- Going forward: `request_demo_submit` GA4 events are real submissions
+
+**`/record` and `/certify` pages have low direct traffic**
+- Most traffic enters through homepage or sample page, then drops off before reaching product pages
+- The path from homepage → product page is not clear enough
+- Action: test a more direct CTA on homepage hero — "Start for $29 →" pointing to `/record`
+
+### GA4 → GTM Implications
+
+| Data Signal | What It Suggests | Action |
+|-------------|-----------------|--------|
+| LinkedIn traffic has lowest bounce | Messaging/ICP alignment is working for LinkedIn | Don't change campaign copy — it's getting the right people |
+| `/sample` = highest engagement | Product concept resonates once people see the output | Make sample page a higher-priority CTA destination |
+| 17 checkout_started, unknown conversions | Funnel drop somewhere in checkout | Audit Stripe Dashboard; test checkout page trust signals |
+| EU traffic growing | Matches LinkedIn reply trend — EU AI Act urgency is real | Prioritize Campaign G sends to Paris/Amsterdam/Hamburg |
+| Mobile traffic doesn't convert | Form/checkout friction on mobile | Manually test full `/record` and `/certify` flow on mobile |
+
+### Weekly GTM Report
+An automated weekly email report is generated every Monday morning combining fresh GA4 data with GTM analysis.
+See: `tools/gtm-report/` and `.github/workflows/gtm-report.yml`

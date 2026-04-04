@@ -1,0 +1,55 @@
+name: SI8 Weekly GTM Report
+
+on:
+  schedule:
+    # Every Monday at 01:00 UTC = 09:00 Taipei time (UTC+8)
+    # Runs 1 hour after news digest so both arrive together Monday morning
+    - cron: '0 1 * * 1'
+  workflow_dispatch:
+    inputs:
+      lookback_days:
+        description: 'Days to look back for GA4 data'
+        required: false
+        default: '7'
+      dry_run:
+        description: 'Dry run (build email but do not send)'
+        required: false
+        default: 'false'
+
+jobs:
+  gtm-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: tools/gtm-report/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r tools/gtm-report/requirements.txt
+
+      - name: Run GTM report
+        working-directory: tools/gtm-report
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          GA4_CLIENT_ID: ${{ secrets.GA4_CLIENT_ID }}
+          GA4_CLIENT_SECRET: ${{ secrets.GA4_CLIENT_SECRET }}
+          GA4_REFRESH_TOKEN: ${{ secrets.GA4_REFRESH_TOKEN }}
+          GA4_PROPERTY_ID: '326271463'
+          GTM_TO_EMAIL: jd@superimmersive8.com
+          GTM_FROM_EMAIL: digest@superimmersive8.com
+          LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '7' }}
+        run: |
+          DRY_RUN_FLAG=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+          fi
+          python report.py --lookback $LOOKBACK_DAYS $DRY_RUN_FLAG
