@@ -13,11 +13,19 @@ export default async function handler(req, res) {
       body = JSON.parse(req.body || '{}');
     }
 
-    const { email, name, role, website } = body;
+    const { email, name, role, website, _loadTime } = body;
 
     // Honeypot check — bots fill this field, humans don't see it
     if (website) {
       return res.status(200).json({ success: true, message: 'Demo request received.' });
+    }
+
+    // Time-based check — bots submit too fast (require 3 seconds minimum)
+    if (_loadTime) {
+      const elapsed = Date.now() - parseInt(_loadTime, 10);
+      if (elapsed < 3000) {
+        return res.status(200).json({ success: true, message: 'Demo request received.' });
+      }
     }
 
     // Basic field validation
@@ -29,6 +37,23 @@ export default async function handler(req, res) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ error: 'Invalid email address' });
+    }
+
+    // Disposable/throwaway email domain block
+    const disposableDomains = [
+      'mailinator.com','guerrillamail.com','tempmail.com','throwam.com','sharklasers.com',
+      'guerrillamailblock.com','grr.la','guerrillamail.info','guerrillamail.biz','guerrillamail.de',
+      'guerrillamail.net','guerrillamail.org','spam4.me','yopmail.com','yopmail.fr','cool.fr.nf',
+      'jetable.fr.nf','nospam.ze.tc','nomail.xl.cx','mega.zik.dj','speed.1s.fr','courriel.fr.nf',
+      'moncourrier.fr.nf','monemail.fr.nf','monmail.fr.nf','trashmail.at','trashmail.io',
+      'trashmail.me','trashmail.net','dispostable.com','maildrop.cc','fakeinbox.com',
+      'mailnull.com','spamgourmet.com','trashmail.com','getairmail.com','filzmail.com',
+      'throwam.com','spamherelots.com','spamhereplease.com','mailexpire.com','tempr.email',
+      'discard.email','spamgourmet.net','spamgourmet.org','spamspot.com','spamthis.co.uk'
+    ];
+    const emailDomain = email.split('@')[1]?.toLowerCase();
+    if (disposableDomains.includes(emailDomain)) {
+      return res.status(200).json({ success: true, message: 'Demo request received.' });
     }
 
     // Name validation — reject bot-generated random strings

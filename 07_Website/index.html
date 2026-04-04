@@ -391,6 +391,8 @@
                     <input type="hidden" name="download" value="Request Demo">
                     <!-- Honeypot: hidden from humans, bots fill it -->
                     <input type="text" name="website" tabindex="-1" autocomplete="off" style="opacity:0;position:absolute;top:0;left:0;height:0;width:0;z-index:-1;">
+                    <!-- Time-based spam check: set on page load -->
+                    <input type="hidden" name="_loadTime" id="demo-load-time" value="">
                     <input type="text" name="name" placeholder="Your name *" required>
                     <input type="email" name="email" placeholder="Work email *" required>
                     <select name="role" required>
@@ -476,6 +478,9 @@
 
     <script src="/script.js"></script>
     <script>
+        // Set load time for spam detection
+        document.getElementById('demo-load-time').value = Date.now();
+
         document.getElementById('demo-form')?.addEventListener('submit', async function(e) {
             e.preventDefault();
             const form = e.target;
