@@ -54,6 +54,13 @@ export default async function AdminLayout({
                 >
                   Catalog
                 </Link>
+                <Link
+                  href="/admin/users"
+                  className="px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-secondary"
+                  style={{ color: '#52504A' }}
+                >
+                  Users
+                </Link>
               </div>
             </div>
 
