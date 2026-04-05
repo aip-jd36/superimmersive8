@@ -67,6 +67,41 @@ export async function POST(request: NextRequest) {
 
       console.log('✅ Webhook: Submission payment updated successfully')
 
+      // Fire GA4 purchase event via Measurement Protocol (server-side)
+      try {
+        const ga4ApiSecret = process.env.GA4_API_SECRET
+        const ga4MeasurementId = 'G-628BLE9N15'
+        if (ga4ApiSecret) {
+          await fetch(
+            `https://www.google-analytics.com/mp/collect?measurement_id=${ga4MeasurementId}&api_secret=${ga4ApiSecret}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                client_id: session.customer_email || session.id,
+                events: [{
+                  name: 'purchase',
+                  params: {
+                    transaction_id: session.id,
+                    value: (session.amount_total || 0) / 100,
+                    currency: session.currency?.toUpperCase() || 'USD',
+                    items: [{
+                      item_id: isCreatorRecord ? 'creator_record' : 'si8_certified',
+                      item_name: isCreatorRecord ? 'Creator Record' : 'SI8 Certified',
+                      price: isCreatorRecord ? 29 : 499,
+                      quantity: 1,
+                    }],
+                  },
+                }],
+              }),
+            }
+          )
+          console.log('✅ Webhook: GA4 purchase event sent')
+        }
+      } catch (ga4Error) {
+        console.error('⚠️ Webhook: GA4 purchase event failed (non-fatal):', ga4Error)
+      }
+
       // Get user info for email (separate query to avoid relationship ambiguity)
       const { data: user } = await supabaseAdmin
         .from('users')
