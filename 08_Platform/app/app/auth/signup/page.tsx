@@ -85,18 +85,36 @@ function ProductContext({ nextPath }: { nextPath: string }) {
     )
   }
 
-  // No next param — just reassure, no product choice needed
+  // No next param — lite tier comparison
   return (
     <div style={{
       background: '#FFFBF5',
       border: '1px solid #e8d5a3',
       borderRadius: '8px',
-      padding: '14px 18px',
+      padding: '16px 18px',
       marginBottom: '24px',
     }}>
-      <p style={{ color: '#5a3e00', fontSize: '13px', margin: 0, lineHeight: 1.5 }}>
-        Create your account to get started. You'll choose your documentation tier — $29 Creator Record or $499 SI8 Certified — after signing up.
+      <p style={{ color: '#8C7A4A', fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', margin: '0 0 12px' }}>
+        Choose your tier after signing up
       </p>
+      <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ flex: 1, borderRight: '1px solid #e8d5a3', paddingRight: '12px' }}>
+          <div style={{ color: '#1a1918', fontWeight: 700, fontSize: '13px', marginBottom: '6px' }}>Creator Record — $29</div>
+          <div style={{ color: '#6b6458', fontSize: '12px', lineHeight: 1.6 }}>
+            ✓ Instant automated delivery<br />
+            ✓ Chain of Title on file<br />
+            ✗ Not for commercial campaigns
+          </div>
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ color: '#C8900A', fontWeight: 700, fontSize: '13px', marginBottom: '6px' }}>SI8 Certified — $499</div>
+          <div style={{ color: '#6b6458', fontSize: '12px', lineHeight: 1.6 }}>
+            ✓ 90-min human review<br />
+            ✓ Accepted by brand legal & E&O<br />
+            ✓ Unlocks $5K–$50K campaigns
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
