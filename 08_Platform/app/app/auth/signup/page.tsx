@@ -85,7 +85,7 @@ function ProductContext({ nextPath }: { nextPath: string }) {
     )
   }
 
-  // No next param — show both products briefly
+  // No next param — just reassure, no product choice needed
   return (
     <div style={{
       background: '#FFFBF5',
@@ -94,19 +94,9 @@ function ProductContext({ nextPath }: { nextPath: string }) {
       padding: '14px 18px',
       marginBottom: '24px',
     }}>
-      <p style={{ color: '#5a3e00', fontSize: '13px', margin: '0 0 10px', fontWeight: 600 }}>
-        Two ways to document your AI video:
+      <p style={{ color: '#5a3e00', fontSize: '13px', margin: 0, lineHeight: 1.5 }}>
+        Create your account to get started. You'll choose your documentation tier — $29 Creator Record or $499 SI8 Certified — after signing up.
       </p>
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: '140px' }}>
-          <div style={{ color: '#1a1918', fontWeight: 700, fontSize: '13px' }}>Creator Record — $29</div>
-          <div style={{ color: '#777', fontSize: '12px', marginTop: '2px' }}>Self-attested · Automated · Pre-commercial</div>
-        </div>
-        <div style={{ flex: 1, minWidth: '140px' }}>
-          <div style={{ color: '#C8900A', fontWeight: 700, fontSize: '13px' }}>SI8 Certified — $499</div>
-          <div style={{ color: '#777', fontSize: '12px', marginTop: '2px' }}>Human review · Cleared for commercial use</div>
-        </div>
-      </div>
     </div>
   )
 }
