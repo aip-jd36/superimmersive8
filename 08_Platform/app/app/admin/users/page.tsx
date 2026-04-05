@@ -1,8 +1,7 @@
 import { requireAdmin } from '@/lib/auth/admin'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import Link from 'next/link'
-import { DeleteUserButton } from './DeleteUserButton'
+import { UsersTable } from './UsersTable'
 
 export default async function AdminUsersPage() {
   await requireAdmin()
@@ -37,13 +36,17 @@ export default async function AdminUsersPage() {
     }
   }
 
-  // Sort: admins first, then by signup date desc
-  const sorted = [...authUsers].sort((a, b) => {
-    const aAdmin = adminFlags[a.id] ? 1 : 0
-    const bAdmin = adminFlags[b.id] ? 1 : 0
-    if (bAdmin !== aAdmin) return bAdmin - aAdmin
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  })
+  // Flatten into serializable rows for client component
+  const userRows = authUsers.map(u => ({
+    id: u.id,
+    email: u.email || '',
+    fullName: u.user_metadata?.full_name || '—',
+    createdAt: u.created_at,
+    verified: !!u.email_confirmed_at,
+    isAdmin: !!adminFlags[u.id],
+    submissionCount: submissionStats[u.id]?.count || 0,
+    totalRevenue: submissionStats[u.id]?.totalRevenue || 0,
+  }))
 
   const totalUsers = authUsers.length
   const verifiedUsers = authUsers.filter(u => u.email_confirmed_at).length
@@ -89,116 +92,10 @@ export default async function AdminUsersPage() {
         <Card>
           <CardHeader>
             <CardTitle>All Users</CardTitle>
-            <CardDescription>Admins shown first, then newest signups.</CardDescription>
+            <CardDescription>Admins pinned first. Click any column header to sort.</CardDescription>
           </CardHeader>
           <CardContent>
-            {sorted.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500">No users yet.</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b bg-gray-50">
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Name / Email</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Signed Up</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Verified</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Submissions</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Total Paid</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Role</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sorted.map((user) => {
-                      const isAdmin = adminFlags[user.id]
-                      const stats = submissionStats[user.id] || { count: 0, paid: 0, totalRevenue: 0 }
-                      const verified = !!user.email_confirmed_at
-                      const fullName = user.user_metadata?.full_name || '—'
-                      const signupDate = new Date(user.created_at).toLocaleDateString('en-US', {
-                        month: 'short', day: 'numeric', year: 'numeric'
-                      })
-
-                      return (
-                        <tr key={user.id} className="border-b hover:bg-gray-50 transition-colors">
-
-                          {/* Name / Email */}
-                          <td className="py-4 px-4">
-                            <div className="font-medium text-sm text-gray-900">{fullName}</div>
-                            <div className="text-xs text-gray-500 mt-0.5">{user.email}</div>
-                          </td>
-
-                          {/* Signed up */}
-                          <td className="py-4 px-4 text-sm text-gray-600">{signupDate}</td>
-
-                          {/* Verified */}
-                          <td className="py-4 px-4">
-                            {verified ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700">
-                                ✓ Verified
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-700">
-                                ⏳ Pending
-                              </span>
-                            )}
-                          </td>
-
-                          {/* Submissions */}
-                          <td className="py-4 px-4">
-                            {stats.count > 0 ? (
-                              <Link
-                                href={`/admin?user=${user.id}`}
-                                className="text-sm font-medium hover:underline"
-                                style={{ color: '#C8900A' }}
-                              >
-                                {stats.count} submission{stats.count !== 1 ? 's' : ''}
-                              </Link>
-                            ) : (
-                              <span className="text-sm text-gray-400">None</span>
-                            )}
-                          </td>
-
-                          {/* Total paid */}
-                          <td className="py-4 px-4">
-                            {stats.totalRevenue > 0 ? (
-                              <span className="text-sm font-semibold text-gray-800">
-                                ${stats.totalRevenue.toFixed(0)}
-                              </span>
-                            ) : (
-                              <span className="text-sm text-gray-400">$0</span>
-                            )}
-                          </td>
-
-                          {/* Role */}
-                          <td className="py-4 px-4">
-                            {isAdmin ? (
-                              <span className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold"
-                                style={{ background: '#FEF3C7', color: '#92400E' }}>
-                                Admin
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-600">
-                                Creator
-                              </span>
-                            )}
-                          </td>
-
-                          {/* Actions */}
-                          <td className="py-4 px-4">
-                            {!isAdmin && (
-                              <DeleteUserButton userId={user.id} userEmail={user.email || ''} />
-                            )}
-                          </td>
-
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            <UsersTable users={userRows} />
           </CardContent>
         </Card>
       </div>
