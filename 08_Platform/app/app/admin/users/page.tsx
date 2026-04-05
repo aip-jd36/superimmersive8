@@ -32,7 +32,7 @@ export default async function AdminUsersPage() {
     submissionStats[s.user_id].count++
     if (s.payment_status === 'paid') {
       submissionStats[s.user_id].paid++
-      submissionStats[s.user_id].totalRevenue += s.amount_paid || 0
+      submissionStats[s.user_id].totalRevenue += (s.amount_paid || 0) / 100
     }
   }
 
