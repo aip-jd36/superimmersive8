@@ -5,6 +5,43 @@ const resend = new Resend(process.env.RESEND_API_KEY!)
 const FROM_EMAIL = 'SI8 Creator Portal <noreply@superimmersive8.com>'
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'jd@superimmersive8.com'
 
+export async function sendNewUserSignupEmail(
+  fullName: string,
+  email: string,
+  nextPath: string
+) {
+  const productLabel = nextPath === '/certify'
+    ? 'SI8 Certified ($499)'
+    : nextPath === '/record'
+    ? 'Creator Record ($29)'
+    : 'Not specified'
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject: `New signup — ${fullName} (${email})`,
+      html: `
+        <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 560px; margin: 0 auto; padding: 20px; background: #FFFBF5; border: 1px solid #C8900A; border-radius: 8px;">
+          <h2 style="color: #C8900A; margin-top: 0;">New Account Created</h2>
+          <div style="background: white; padding: 16px 20px; border-radius: 6px; margin: 16px 0;">
+            <p style="margin: 6px 0;"><strong>Name:</strong> ${fullName}</p>
+            <p style="margin: 6px 0;"><strong>Email:</strong> <a href="mailto:${email}" style="color: #C8900A;">${email}</a></p>
+            <p style="margin: 6px 0;"><strong>Signed up for:</strong> ${productLabel}</p>
+            <p style="margin: 6px 0;"><strong>Status:</strong> Email verification pending</p>
+          </div>
+          <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #ddd; font-size: 13px; color: #666;">
+            <p style="margin: 4px 0;">Signed up: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Taipei', dateStyle: 'full', timeStyle: 'short' })} (Taipei time)</p>
+            <p style="margin: 4px 0;"><a href="${process.env.NEXT_PUBLIC_SITE_URL}/admin" style="color: #C8900A;">View Admin Panel →</a></p>
+          </div>
+        </div>
+      `,
+    })
+  } catch (error) {
+    console.error('Error sending new user signup email:', error)
+  }
+}
+
 export async function sendSubmissionReceivedEmail(
   creatorName: string,
   filmTitle: string,

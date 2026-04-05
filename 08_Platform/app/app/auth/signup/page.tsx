@@ -153,6 +153,13 @@ export default function SignupPage() {
 
       if (authError) throw authError
 
+      // Notify admin of new signup (non-blocking — don't await)
+      fetch('/api/notify-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullName: data.fullName, email: data.email, nextPath }),
+      }).catch(() => {}) // silently ignore if notification fails
+
       setSuccess(true)
     } catch (err: any) {
       setError(err.message || 'An error occurred during signup')
