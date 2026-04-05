@@ -99,7 +99,7 @@ function ProductContext({ nextPath }: { nextPath: string }) {
       </p>
       <div style={{ display: 'flex', gap: '12px' }}>
         <div style={{ flex: 1, borderRight: '1px solid #e8d5a3', paddingRight: '12px' }}>
-          <div style={{ color: '#1a1918', fontWeight: 700, fontSize: '13px', marginBottom: '6px' }}>Creator Record — $29</div>
+          <div style={{ color: '#C8900A', fontWeight: 700, fontSize: '13px', marginBottom: '6px' }}>Creator Record — $29</div>
           <div style={{ color: '#6b6458', fontSize: '12px', lineHeight: 1.6 }}>
             ✓ Instant automated delivery<br />
             ✓ Chain of Title on file<br />
