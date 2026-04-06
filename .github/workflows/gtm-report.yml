@@ -1,10 +1,10 @@
-name: SI8 Weekly GTM Report
+name: SI8 GTM Snapshot
 
 on:
   schedule:
-    # Every Monday at 01:00 UTC = 09:00 Taipei time (UTC+8)
-    # Runs 1 hour after news digest so both arrive together Monday morning
-    - cron: '0 1 * * 1'
+    # Every 3 days at 02:00 UTC = 10:00 Taipei time (UTC+8)
+    # Runs 1 hour after News Intelligence so both arrive same morning
+    - cron: '0 2 */3 * *'
   workflow_dispatch:
     inputs:
       lookback_days:

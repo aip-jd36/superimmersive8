@@ -393,7 +393,7 @@ def send_email(html: str, week_str: str, dry_run: bool = False) -> bool:
         json={
             "from": FROM_EMAIL,
             "to": [TO_EMAIL],
-            "subject": f"SI8 Intel Digest — {week_str}",
+            "subject": f"SI8 News Intelligence — {week_str}",
             "html": html,
         },
         timeout=15,
