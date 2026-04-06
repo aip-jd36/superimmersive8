@@ -9,6 +9,35 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of April 06, 2026
+*Run: 2026-04-06 · 8 high · 6 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [EU bars AI-generated content from official communications, according to Politico](https://news.google.com/rss/articles/CBMipwFBVV95cUxQUEtKUzRpQVYtT0ppZW0tZnlIT21HdDFGTURwWHVfeHRWRmtrZW8yUGtNNENvNVRkRkRIbkQ2aHp4bGkxbFA1UTJTb0phQXRucVRhRDc0S3FyQkRVVG5PUWYxNjAyM1h1OVlUX0o5LUNkX0RBcUd0TWZrQ0ptOHdtQUpFdjM3Q2lPMExMNWV2aFR2MmMwSUJHVmFva195UGlYQlVtLUVvaw?oc=5) | the-decoder.com | Wed, 01 Apr 2026 | ☐ |
+| 9 | post+update | [New IT Rules 2026: Mandatory AI Disclosure and 3-Hour Takedown for Digital News Creators](https://news.google.com/rss/articles/CBMiuAFBVV95cUxNRXlpS1BiOGRleXZpX0dfenA2YlRmSG51WGhMYWdGZWczdk5XQ1VJbzMwTlFEM1ZwS3lJa0F3Y01kbFRheWVUaGhQU0h6aHh0NTlxYmdDNmZ3b1VreV9PMTRYajRSOEVHczhVZmdsaVlvZ21DQmgxNVdSc21IM0VNMFNiSWJ1ME94UGdIaU5USTVWN09JZm8tV3JjLXR3UlZHN1lIVmtxOFdRc0EydmQ0WHA0OUlrRUFf?oc=5) | kalingatv.com | Tue, 31 Mar 2026 | ☐ |
+| 8 | post+update | [Federal Regulators Face Growing Pressure to Define AI-Generated Content as Policy Gap Widens](https://news.google.com/rss/articles/CBMiogFBVV95cUxQbnJkZFJDaXZ6d2Jmc2J3Mi1DbXR0Mk1DY3R1Q1g2OFNucXpsdFJMSUFxcHNpNTloYmJ0cG9wM2gyZGM0SXh4bkZaTFVyT3hlNGx5RnhsUnhiNEs4NDJydnBpV2p1S2hlZjhmX05Lc29KRERhWHdmc21tS2FET0s5b3c5QzBMMnVIVUNpNmNFM29heHBDOGhBMktZZEdtRHBCdkE?oc=5) | altitudesmagazine.com | Sat, 04 Apr 2026 | ☐ |
+| 8 | post+update | [User-Generated Content and AI Raise IP Concerns](https://news.google.com/rss/articles/CBMikgFBVV95cUxOS21QS0VUTTE3dkdYM1pPTEdNOGdGWlh0OExJT0llNEp3MXhtNWxJRzdUNGtMbUk4U2VuR3pNd1VOSzZ0UkVRQVEya3k2b2RSZWQ2Q0tKWDNMWGZKOU9KOTVZZERNcVktR054TlhTUmlnS0txSHMyUmRWdnBtZFVIX3RCc1ViODRySFNSTHVob1RhZw?oc=5) | licensinginternational.org | Wed, 01 Apr 2026 | ☐ |
+| 8 | post+update | [UK government maintains status quo on AI and copyright, playing the long game on potential reform](https://news.google.com/rss/articles/CBMi1gFBVV95cUxOWjZsalp4dlNmLWFPOTJENEZCd3dBR2h1aHVVLUZmd01ncDJ1QnhTOVQwSWM4SllVbjdORERycXBUTDIteGhkRGxBcFU0VEFVUHJMZ1RzNmw0dDVqMmVDWTM4ZVlIOTBxWVc5dkpHa3FzYkpfS01UbnpHM1FodWxRUFJRSE5seXkwWWpYRkVmV0FGaURyYWRocmFVSTZHeWdpUDVyMmsydDdIR0RwTkVIVi1xb0FFaVFNV25LczdJREt6Tll1M2w1aEw4QXo0Sm80S0d4M0FB?oc=5) | Fieldfisher | Tue, 31 Mar 2026 | ☐ |
+| 7 | post+update | [Washington will require labels on AI images, rein in chatbots](https://news.google.com/rss/articles/CBMitgFBVV95cUxNNG1Ea3BCYjAyb3dCRVhpRDVRdEJzSVdmQVRhSEE5cW5YYnNxU3g0WlJLRWR2YlJyN0FOb29FTDhmSFZrckJFbjBUS2x6c1pTenJHZFoxX08tbktETGNIcmI2WW5pTDBEYmlwMzJFc09wX2Y1ZnU5YVhmSi1PWHZIVlVJRVNqNWsyeVFoM1Z5bkUtSjFTcjVkZFlOUG93OTdaZmkxWWNIUHIxTzdlMmZaeVM5Zm5TZw?oc=5) | Axios | Fri, 03 Apr 2026 | ☐ |
+| 7 | post | [OpenAI sunsets Sora: 5 AI video tools you can switch to right now](https://news.google.com/rss/articles/CBMi_AFBVV95cUxPRWlBRFE3MGtld1B3YUNpcmdGUU00QV94Z0JIWUlIMG9TVU9QY1B5RzFFVmV3STd3NEF0V0VCckUzZVZPc1JGR0JzUnFrS3NpaTIzbEl2VVpnU01sak05c1VGTEI4VGVyZHBaUUk3ZDBCYzFMaDhRLVFFTW1jaVZTc0xzQXJzR2EwQ0g3UHl3R2Y5SURnVGRmb3BwazJUT2tsWXlwVW1Pb3VjV3dLeU84NTNKaGtDNF80Vm5fajdsQzRnWTVod3NfTFV6X1ZkUWt1WDBfQUczZFFnXzEzaW1DSzEzTnlfU2F5SkpkNWNqbnpvZGJ4clhhZVdSTTE?oc=5) | MSN | Thu, 02 Apr 2026 | ☐ |
+| 7 | post | [AI Models Banned by Pamela Anderson’s New Campaign](https://news.google.com/rss/articles/CBMihAFBVV95cUxQa0luaHc5dHdMU3dJc01Td0llbkpwNEVfaHFmNlNMNnltRGFrV0ZBOWk3RzZNY3BFSThUbzR2RG5rQ0MtZDlvR09ZVjRZZXpoVl9FLTNWZ2xkaGRtQlQzVHNLek1IbWVOSXZ3SHotbHE2dGhBcjV1OHU5V2NOcGJZTEVMaXQ?oc=5) | artthreat.net | Mon, 30 Mar 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Google Pressured To Stop Serving AI Video To Kids 04/01/2026](https://news.google.com/rss/articles/CBMiwAFBVV95cUxNOHJfRWVmOGFZU0xtYjZUYm5Yb2xPOGE5S1dzWFl2WXZmcUk4Y01QYXVpLThNdXdEWU5zOVFvT3ZpWDZlcmExUEpSZVA4Q0ItckYtWnUwdWZNQXZjd1dDblozTzBET2dPbDFKcFMzbzZzMXVLc3NxQzFwc1RJbEc5QWZfT3FKXzhDZ3RrbG83WEZ3VGhMd3BBSFN3bE9VcEJ5V0xFRGJhbV9oWFJWZUZpV2t0ck1uTDliR1djbWpxRjY?oc=5) | MediaPost | Fri, 03 Apr 2026 | ☐ |
+| 6 | monitor | [AI Enforcement Accelerates as Federal Policy Stalls and States Step In](https://news.google.com/rss/articles/CBMisAFBVV95cUxNS3Rka2VjOVZWNkM5eFBSMktRV3VrRHJkdnBHM2NKd0JXbmpwU3pJN0REZHQybmRXaXNZa2NJSVNaWHRvRlp1SnhzS1pxOXU5dlY3VjNMaE1kSjJGakZkQlBqY0g4R0xBTm5JekpDOWtmbFBiMU1RVHdOUFlXbHBpbEozSG4xbkhTU2xSZE1FRXBHYl9jZDNTVlE3SElpMVRCM25za1hzV0FKcGNOd3J3Sw?oc=5) | Morgan Lewis | Thu, 02 Apr 2026 | ☐ |
+| 6 | monitor | [How AI, digital doubles and new laws are rewriting fashion and beauty](https://news.google.com/rss/articles/CBMitwFBVV95cUxObVp1cWhBX2JyczA5VURNY21sTTUzRkRKaVZrVnN4a1NHeklnX0pNaE96c0R6VzNVVlFmTjFQZWJ0OVVZVHBTaUNQZEh6T1hmMUM0NDN3alIzZ3NBYnNGX1FPZ1ZFM3JvNXVzZWZzeThMT2R3RFRtR2FGNjh0bURBdzQtZHFpX0owRHF2UjkxVk1QRVlhM0hWek1qam9rLWhVUU1kaGFMSlgxbkhlQUM5Y3RxdUd0aXc?oc=5) | The Global Legal Post | Wed, 01 Apr 2026 | ☐ |
+| 5 | monitor | [AI video generation startup Runway rolls out $10 million VC fund: Report](https://news.google.com/rss/articles/CBMi2AFBVV95cUxQYWZ1QWNQdmxaOVdnSW1JY1NtYktvMl9sZkxBT2dVWXY2UjBycEY4ZEotQWQ0SUtVMDM3X2dCS2NCdXRHbWhCN2dKQ19SZWw2WlBDUXZLcTJNdVlvSTZwRGhQR003NTMyd0cyT05La1NtSVVyTHNIYXVaMTRnVmhkWmJPQ1pxclo1cHcwWGpqMHJNcnpoLVZ6NnJmV3R3RWMtNHd2WUV5M0gzcHNkU0VjQndlaDV4NENiQkJYQS1TbnBjclpTYVpab01WV2pxWk9wZU9pRVA2SkjSAdgBQVVfeXFMUGFmdUFjUHZsWjlXZ0ltSWNTbWJLbzJfbGZMQU9nVVl2NlIwcnBGOGRKLUFkNElLVTAzN19nQktjQnV0R21oQjdnSkNfUmVsNlpQQ1F2S3EyTXVZb0k2cERoUEdNNzUzMndHMk9OS2tTbUlVckxzSGF1WjE0Z1ZoZFpiT0NacXJaNXB3MFhqajByTXJ6aC1WejZyZld0d0VjLTR3dllFeTNIM3BzZFNFY0J3ZWg1eDRDYkJCWEEtU25wY3JaU2FaWm9NVldqcVpPcGVPaUVQNkpI?oc=5) | The Economic Times | Tue, 31 Mar 2026 | ☐ |
+| 5 | update | [Runway launches $10 million fund for AI, media, world simulation startups](https://news.google.com/rss/articles/CBMiugFBVV95cUxQVXlQMG1iaWNkdVVIbmY5c3BKc0llLThBVy1oSk5ZQ0kyYXJjbVdDazBPZFhwRlpJb2dZRU9qRW5md1U3YWdaaGFWWnlhUDZOTnRPZVh0VjRFNV9BREZoVjZoMjlZdzFaMmd0akV3a0FEUk1zNElkOHozRGtCTEJyUnBPQVRpeEpDbkRxSEVCME1PUkdfbllrUmhabFdZM3pINUo1WW4yZEViMjZOOUEtYjZrRjN5Q212Ync?oc=5) | newsbytesapp.com | Tue, 31 Mar 2026 | ☐ |
+| 4 | monitor | [AI Legislative Update: April 3, 2026](https://news.google.com/rss/articles/CBMigAFBVV95cUxNSjFWMnVUeU83dG5OcDBtR3piZXJreEM3VzNVcTNUR2NJZ2d5aFVzd21SLXpWaVZmUlNadmtDZjlydmM0ZnF6ZTlQYUlZRG1TdmkxLTZ2Y2VJQTVZVm1HNWgxMzU2UmRwR3l0ajVHcEFYT0hlcUFod1dlWFRqOWEtRQ?oc=5) | Transparency Coalition | Fri, 03 Apr 2026 | ☐ |
+
+---
+
 ## Week of March 30, 2026
 *Run: 2026-03-30 · 12 high · 12 monitor · lookback 7 days*
 
