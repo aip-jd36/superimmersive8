@@ -114,8 +114,14 @@ SI8 posts are grounded in one of four angles:
 - No exclamation marks
 - No em-dashes (—) — use a period or restructure
 - Never say "rights-cleared" — say "verified" or "documented"
-- Do not pitch SI8 directly in every post — some posts build credibility through observation alone
 - No hashtags in the generated text
+
+**When to mention SI8 directly:**
+SI8 should appear in roughly 1 in 3 posts — not every one. Constant self-promotion reads as advertising and erodes authority. The goal is to be the account that tells the truth about the industry, not the account that pitches its product at every opportunity.
+
+- **Mention SI8** when the post naturally arrives at a solution and SI8 is the specific answer (e.g. a new regulation that requires exactly what SI8 provides)
+- **Do not mention SI8** when the post's value is in the observation itself — the market signal, the regulatory gap, the industry mistake. Let the insight stand alone. Readers will connect the dots.
+- **Never end with a product pitch** unless SI8 was mentioned earlier in the post as a natural part of the argument. A post that builds a strong case and then closes with "SI8 Certified exists to close that gap" undercuts the credibility built in the previous sentences.
 
 **Example (good):**
 > The EU just banned AI-generated content from its own official communications. That is not a regulatory footnote. It is a signal that the same documentation gap affecting brand campaigns is now visible at the highest level of government procurement. Agencies producing AI video for public sector or EU-regulated clients are operating without the paper trail that will soon be required. Chain of Title documentation is not a nice-to-have in this environment.
