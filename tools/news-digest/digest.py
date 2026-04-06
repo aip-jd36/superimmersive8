@@ -76,16 +76,15 @@ def fetch_google_news(query: str, lookback_days: int) -> list[dict]:
                 source = parts[1].strip()
 
             summary_html = entry.get("summary", "")
-            # Extract real article URL from summary HTML before stripping tags.
-            # Google News RSS summary contains <a href="REAL_URL">...</a> — the
-            # entry.link is a news.google.com redirect that fails in mobile browsers.
             import re
-            real_url_match = re.search(r'<a\s+href="(https?://(?!news\.google\.com)[^"]+)"', summary_html)
-            resolved_url = real_url_match.group(1) if real_url_match else entry.get("link", "")
-            # DEBUG: print raw summary HTML and resolved URL to diagnose mobile link failures
-            print(f"  [DEBUG] summary_html[:200]: {summary_html[:200]!r}", file=sys.stderr)
-            print(f"  [DEBUG] resolved_url: {resolved_url}", file=sys.stderr)
             summary = re.sub(r"<[^>]+>", "", summary_html)[:400].strip()
+            raw_url = entry.get("link", "")
+            try:
+                from googlenewsdecoder import new_decoderv1
+                result = new_decoderv1(raw_url)
+                resolved_url = result["decoded_url"] if result.get("status") else raw_url
+            except Exception:
+                resolved_url = raw_url
 
             articles.append({
                 "title": title,
