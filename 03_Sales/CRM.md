@@ -2,7 +2,47 @@
 
 **Purpose:** Single source of truth for all active leads — agency/brand buyers (LinkedIn) and creators (Instagram). Used for pattern analysis, ICP refinement, and messaging decisions. Pipeline operations will move to Airtable once ICP and messaging are validated.
 
-**Last updated:** April 3, 2026
+**Last updated:** April 6, 2026
+
+---
+
+## PIPELINE — Machine Readable
+*Maintained by Claude. Updated whenever JD reports an action. Read by daily digest script.*
+*Urgency: HIGH=flag after 3 days, MEDIUM=5 days, LOW=14 days, MONITOR=never auto-flag*
+*follow_up_by: explicit date overrides auto-calc. Use YYYY-MM-DD or — for auto.*
+
+<!-- pipeline:start -->
+| id | name | company | type | stage | last_action_date | last_action | next_action | follow_up_by | urgency |
+|----|------|---------|------|-------|-----------------|-------------|-------------|-------------|---------|
+| B001 | Leimi Zhou | WOMBO | buyer | Replied-Conditional | 2026-04-04 | Educational reply + offered sample | Send Urban Drift sample link | 2026-04-06 | HIGH |
+| B002 | Theodor Sandu | McCann/Unilever @ Omnicom | buyer | Replied-Conditional | 2026-04-04 | Sample requested; he said sure anytime | Send Urban Drift sample link | 2026-04-06 | HIGH |
+| B003 | Hossein Jafari | Wowspot Ltd | buyer | Followed Up | 2026-04-01 | Urban Drift PDF + Runway/Kling gap + asked for call | Await reply; book call | — | HIGH |
+| B004 | Troy Macdonald | HyFi Corp | buyer | Followed Up | 2026-04-04 | Sample + Calendly sent; got thumbs up | Follow up to book call | 2026-04-06 | HIGH |
+| B005 | Isaac Twidale | We Do Ads | buyer | Call Completed | 2026-03-15 | Discovery call done | Send 3-5 photorealistic portfolio examples | — | HIGH |
+| B006 | Rawand Latif | ARUBA CREATIVE | buyer | Replied-Warm | 2026-04-03 | No action taken yet | Send v4 CaaS explanation + sample | 2026-04-06 | HIGH |
+| B007 | Elaine Tan + Joseph Lee | The Media Shop | buyer | Call Completed | 2026-03-18 | Discovery call done | Send thank-you + 1-pager; request Germany intro from Joseph | — | HIGH |
+| B008 | Barney O'Kelly | AlixPartners | buyer | Followed Up | 2026-04-01 | Urban Drift PDF sent | Await reply; book call | — | MEDIUM |
+| B009 | Syed Tabish Hasan | Zedtronix | buyer | Followed Up | 2026-04-01 | v4 framing + Urban Drift + Calendly | Await reply; book call | — | MEDIUM |
+| B010 | Bee Lin Ang | Stewardship Asia Centre | buyer | Followed Up | 2026-04-01 | Second follow-up + Urban Drift + Calendly | Await reply; book call | — | MEDIUM |
+| B011 | Hugo Barbera | HumAIn | buyer | Followed Up | 2026-04-03 | Content-level doc vs contractual compliance reply | Await reply; see if IAB gap lands | — | MEDIUM |
+| B012 | Ivan Ng | Bacon Creatives | buyer | Followed Up | 2026-04-03 | Pivot: SI8 as doc layer; asked about client stage | Await reply; Singapore use case | — | MEDIUM |
+| B013 | Qaiser Mehmood | ECONROAD International | buyer | Followed Up | 2026-04-01 | Urban Drift PDF + Calendly | Await reply; book call | — | MEDIUM |
+| B014 | Shahrman Nayan | onedash22 | buyer | Replied | 2026-04-03 | No action taken | Continue sequence msg 3 | — | MEDIUM |
+| B015 | William Tan | Tareo Digital Advisory | buyer | Lukewarm | 2026-04-01 | No action taken | Follow-up: have you had a chance to evaluate? | — | MEDIUM |
+| B016 | Mainul Islam | eSaviour Limited | buyer | Replied-Conditional | 2026-03-15 | No action | Re-engage once 2-3 sample works ready | — | LOW |
+| B017 | James Byrne | BeyondWords | buyer | Replied-Conditional | 2026-03-15 | No action | Re-engage once samples ready | — | LOW |
+| B018 | Carlos Cortiñas | Transmission | buyer | Replied | 2026-04-06 | Thumbs up only on msg 1 | Continue sequence or drop | — | LOW |
+| B019 | Cory Warfield | Starchild Music | buyer | Nurture | 2026-04-04 | Graceful exit sent | Soft referral mention if opportunity arises | — | MONITOR |
+| B020 | Salem Al-Kuwari | SAM Strategic Access | buyer | Nurture | 2026-04-04 | Polite acknowledgment; not scheduling now | Check in Q3 | 2026-07-01 | MONITOR |
+| B021 | Vignesh Ilangovan | Triken Studios | buyer | Soft No | 2026-04-05 | No action | Mark for Q3 follow-up | 2026-09-01 | MONITOR |
+| B022 | Mark Johnson | SwiftScale AI | buyer | Lukewarm | 2026-04-01 | No action | Monitor — possibly wrong side of market | — | MONITOR |
+| B023 | Amr Hamad | Stackline | buyer | Lukewarm | 2026-04-01 | No action | Follow up after ASA/IAB research complete | — | MONITOR |
+| C001 | keeper505 | — | creator | Interested | 2026-03-29 | v4 reply sent | Create COMP-KEEPER in Stripe; send v4 follow-up | 2026-04-06 | HIGH |
+| C002 | @syntaxdiffusion | — | creator | Interested | 2026-03-29 | v4 reply sent | Send v4 follow-up | — | MEDIUM |
+| C003 | @rodszera.ai | — | creator | Interested | 2026-03-29 | v4 reply sent | Send v4 follow-up explaining 2 films is enough | — | MEDIUM |
+| C004 | @absolutely.ai | — | creator | Interested | 2026-03-29 | v4 reply sent | Send v4 follow-up | — | MEDIUM |
+| C005 | shingo4987 | — | creator | Nurture | 2026-03-29 | v4 reply sent | Follow his work; reconnect on next release | — | MONITOR |
+<!-- pipeline:end -->
 
 ---
 

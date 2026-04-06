@@ -1,0 +1,36 @@
+name: Daily Operations Digest
+
+on:
+  schedule:
+    - cron: '0 1 * * *'   # 9:00 AM Taipei (UTC+8) daily
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run — print output, do not send email'
+        required: false
+        default: 'false'
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install certifi
+
+      - name: Run daily digest
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          RESEND_API_KEY:    ${{ secrets.RESEND_API_KEY }}
+          GA4_CLIENT_ID:     ${{ secrets.GA4_CLIENT_ID }}
+          GA4_CLIENT_SECRET: ${{ secrets.GA4_CLIENT_SECRET }}
+          GA4_REFRESH_TOKEN: ${{ secrets.GA4_REFRESH_TOKEN }}
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then ARGS="--dry-run"; fi
+          python tools/daily-digest/digest.py $ARGS
