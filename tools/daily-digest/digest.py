@@ -249,7 +249,7 @@ def send_email(html, today_str, dry_run):
         return
     headers = {'Authorization': f'Bearer {os.environ["RESEND_API_KEY"]}', 'Content-Type': 'application/json'}
     r = http_post('https://api.resend.com/emails', {
-        'from':    'SI8 Digest <digest@superimmersive8.com>',
+        'from':    'digest@superimmersive8.com',
         'to':      [ADMIN_EMAIL],
         'subject': f'SI8 Daily — {today_str}',
         'html':    html,
