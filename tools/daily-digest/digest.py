@@ -247,7 +247,7 @@ def send_email(html, today_str, dry_run):
         print('── DRY RUN ── email not sent')
         print(html[:800])
         return
-    headers = {'Authorization': f'Bearer {os.environ["RESEND_API_KEY"]}', 'Content-Type': 'application/json'}
+    headers = {'Authorization': f'Bearer {os.environ["RESEND_API_KEY"]}', 'Content-Type': 'application/json', 'User-Agent': 'python-resend/1.0'}
     payload = {
         'from':    'digest@superimmersive8.com',
         'to':      [ADMIN_EMAIL],
