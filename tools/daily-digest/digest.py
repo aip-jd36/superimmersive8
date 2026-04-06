@@ -248,13 +248,19 @@ def send_email(html, today_str, dry_run):
         print(html[:800])
         return
     headers = {'Authorization': f'Bearer {os.environ["RESEND_API_KEY"]}', 'Content-Type': 'application/json'}
-    r = http_post('https://api.resend.com/emails', {
+    payload = {
         'from':    'digest@superimmersive8.com',
         'to':      [ADMIN_EMAIL],
         'subject': f'SI8 Daily — {today_str}',
         'html':    html,
-    }, headers)
-    print(f'Email sent: {r.get("id", r)}')
+    }
+    try:
+        r = http_post('https://api.resend.com/emails', payload, headers)
+        print(f'Email sent: {r.get("id", r)}')
+    except urllib.error.HTTPError as e:
+        body = e.read().decode('utf-8', errors='replace')
+        print(f'Resend error {e.code}: {body}')
+        raise
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main():
