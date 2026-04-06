@@ -33,8 +33,15 @@ DIGEST_LOG_PATH = REPO_ROOT / "02_Marketing" / "intelligence" / "DIGEST-LOG.md"
 VOICE_SPEC_PATH = REPO_ROOT / "02_Marketing" / "brand" / "SI8_VOICE.md"
 
 def load_voice_spec() -> str:
+    """Extract the compact prompt rules from SI8_VOICE.md for injection into Claude prompts."""
     try:
-        return VOICE_SPEC_PATH.read_text()
+        text = VOICE_SPEC_PATH.read_text()
+        # Extract just the LinkedIn Post Structure section — concise enough for prompt injection
+        import re
+        match = re.search(r'## LinkedIn Post Structure.*?(?=\n## )', text, re.DOTALL)
+        if match:
+            return match.group(0).strip()
+        return text[:2000]  # fallback: first 2000 chars
     except Exception:
         return ""
 
@@ -196,7 +203,7 @@ def score_batch(articles: list[dict]) -> list[dict]:
     try:
         response = client.messages.create(
             model="claude-haiku-4-5-20251001",
-            max_tokens=3000,
+            max_tokens=6000,
             messages=[{"role": "user", "content": prompt}],
         )
 
@@ -217,7 +224,7 @@ def score_batch(articles: list[dict]) -> list[dict]:
                 "relevance_reason": score_data.get("relevance_reason", ""),
                 "action": score_data.get("action", "skip"),
                 "doc_to_update": score_data.get("doc_to_update"),
-                "draft_hook": score_data.get("draft_hook"),
+                "linkedin_post": score_data.get("linkedin_post"),
             })
 
         return articles

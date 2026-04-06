@@ -94,21 +94,34 @@ SI8 posts are grounded in one of four angles:
 
 ## LinkedIn Post Structure (Company Page)
 
-**Length:** 3–6 sentences. No headers or bullets in the post body — this is prose, not a listicle.
+> This section is injected into automated Claude prompts. Keep it concise and directive.
+
+
+**This is a social post, not an article summary.** Write as if you have a strong opinion about what this news means for the industry — not as if you are recapping it. The reader already knows the news. Tell them what to think about it.
+
+**Length:** 3–5 sentences. Prose only — no bullets, no headers.
+
+**Tone:** Direct. Confident. Slightly provocative. Read like a founder who knows something most agencies haven't figured out yet.
 
 **Structure:**
-1. **Signal sentence** — state the news or market development plainly (1 sentence)
-2. **Gap sentence** — explain why this creates a documentation or compliance problem (1–2 sentences)
-3. **SI8 connection** — connect to what SI8 provides, specifically (1–2 sentences)
-4. **Implication** — direct statement of what this means for the target reader: agency, brand, or production house (1 sentence)
+1. **Hook** — a sharp observation about the news, not a restatement of it. What does it signal? What does it change? (1 sentence)
+2. **The gap** — what most brands or agencies are getting wrong, or what they aren't doing yet (1–2 sentences)
+3. **The implication** — what this means practically for the reader; connect to documentation or verification where it's natural, not forced (1–2 sentences)
 
-**No call-to-action required** in every post. SI8 builds authority through accurate observation, not constant conversion prompts. Add a CTA only when genuinely relevant.
+**Hard rules:**
+- No "This article highlights..." or "According to..." — don't reference the source article
+- No "In today's landscape..." or "As AI continues to..." — cut all warm-up phrases
+- No exclamation marks
+- No em-dashes (—) — use a period or restructure
+- Never say "rights-cleared" — say "verified" or "documented"
+- Do not pitch SI8 directly in every post — some posts build credibility through observation alone
+- No hashtags in the generated text
 
 **Example (good):**
-> The EU AI Act's transparency requirements take effect August 2, 2026. Brands deploying AI video in EU markets will need documented proof of tool provenance and disclosure compliance — not just internal records, but audit-ready documentation that travels with the file. C2PA metadata tells you what tool made the content. It does not tell you whether the output is safe to run commercially. SI8 Certified fills that gap: a structured 90-minute audit producing Chain of Title documentation accepted by brand legal teams and E&O underwriters.
+> The EU just banned AI-generated content from its own official communications. That is not a regulatory footnote. It is a signal that the same documentation gap affecting brand campaigns is now visible at the highest level of government procurement. Agencies producing AI video for public sector or EU-regulated clients are operating without the paper trail that will soon be required. Chain of Title documentation is not a nice-to-have in this environment.
 
 **Example (bad):**
-> Exciting news in the AI space! The EU AI Act is now live and it's a game-changer for content creators. We at SI8 are here to help you navigate these complex regulations and make sure your content is compliant. Reach out to learn more!
+> This article highlights how the EU AI Act is creating new compliance challenges for content creators. It's important for brands to understand these regulations and ensure their AI-generated content meets the required standards. SI8 Certified can help you navigate this complex landscape!
 
 ---
 
