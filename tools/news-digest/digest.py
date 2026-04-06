@@ -82,6 +82,9 @@ def fetch_google_news(query: str, lookback_days: int) -> list[dict]:
             import re
             real_url_match = re.search(r'<a\s+href="(https?://(?!news\.google\.com)[^"]+)"', summary_html)
             resolved_url = real_url_match.group(1) if real_url_match else entry.get("link", "")
+            # DEBUG: print raw summary HTML and resolved URL to diagnose mobile link failures
+            print(f"  [DEBUG] summary_html[:200]: {summary_html[:200]!r}", file=sys.stderr)
+            print(f"  [DEBUG] resolved_url: {resolved_url}", file=sys.stderr)
             summary = re.sub(r"<[^>]+>", "", summary_html)[:400].strip()
 
             articles.append({
