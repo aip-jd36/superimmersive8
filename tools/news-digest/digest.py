@@ -30,6 +30,13 @@ from keywords import KEYWORD_CLUSTERS, SI8_CONTEXT
 # Path to the digest log relative to this script (tools/news-digest/ → repo root)
 REPO_ROOT = Path(__file__).parent.parent.parent
 DIGEST_LOG_PATH = REPO_ROOT / "02_Marketing" / "intelligence" / "DIGEST-LOG.md"
+VOICE_SPEC_PATH = REPO_ROOT / "02_Marketing" / "brand" / "SI8_VOICE.md"
+
+def load_voice_spec() -> str:
+    try:
+        return VOICE_SPEC_PATH.read_text()
+    except Exception:
+        return ""
 
 # ---------------------------------------------------------------------------
 # Config
@@ -138,6 +145,9 @@ SCORE_PROMPT = """You are an intelligence analyst for SuperImmersive 8 (SI8).
 
 {context}
 
+## SI8 BRAND VOICE SPECIFICATION
+{si8_voice}
+
 Assess the following {n} news articles for relevance to SI8's business. For each article, return:
 
 - relevance_score: integer 1–10 (10 = directly impacts SI8's positioning or validates its pain point)
@@ -178,6 +188,7 @@ def score_batch(articles: list[dict]) -> list[dict]:
 
     prompt = SCORE_PROMPT.format(
         context=SI8_CONTEXT,
+        si8_voice=load_voice_spec(),
         n=len(articles),
         articles=articles_text,
     )
