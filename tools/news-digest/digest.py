@@ -80,9 +80,19 @@ def fetch_google_news(query: str, lookback_days: int) -> list[dict]:
             import re
             summary = re.sub(r"<[^>]+>", "", summary)[:400].strip()
 
+            raw_url = entry.get("link", "")
+            # Resolve Google News redirect URL → real article URL
+            # (news.google.com redirect URLs fail in mobile email in-app browsers)
+            try:
+                resp = requests.head(raw_url, allow_redirects=True, timeout=5,
+                                     headers={"User-Agent": "Mozilla/5.0"})
+                resolved_url = resp.url if resp.url != raw_url else raw_url
+            except Exception:
+                resolved_url = raw_url
+
             articles.append({
                 "title": title,
-                "url": entry.get("link", ""),
+                "url": resolved_url,
                 "source": source,
                 "published": entry.get("published", ""),
                 "pub_date": pub_date,
