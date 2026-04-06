@@ -149,7 +149,7 @@ Assess the following {n} news articles for relevance to SI8's business. For each
     "monitor"         — relevant context, no immediate action needed (score 4–6)
     "skip"            — not relevant to SI8 (score 1–3)
 - doc_to_update: if action includes update_docs, name the specific SI8 file (e.g., "COMPETITIVE_ANALYSIS_CAAS_2026.md", "BUSINESS_PLAN_v4.md", "COMPETITOR-FADEL-ANALYSIS.md") — null if not applicable
-- draft_hook: if action includes post_linkedin, a 1-sentence LinkedIn hook in JD's voice (founder, direct, no fluff) — null if not applicable
+- linkedin_post: if action includes post_linkedin, a ready-to-post LinkedIn update for the SI8 company page (not JD personally). 3–5 sentences. Lead with the news signal, connect it to the compliance/documentation gap SI8 solves, end with a direct implication for brands or agencies. Direct, no fluff, no hashtags, no em-dashes. Suitable to copy/paste with minimal editing. null if not applicable.
 
 Return ONLY a valid JSON array with exactly {n} objects in the same order as the input. No prose, no markdown fences.
 
@@ -160,7 +160,7 @@ Example:
     "relevance_reason": "E&O insurers adding AI video exclusions directly validates SI8's core pain point and gives JD a timely hook.",
     "action": "post_and_update",
     "doc_to_update": "COMPETITIVE_ANALYSIS_CAAS_2026.md",
-    "draft_hook": "E&O insurers are now excluding AI video from standard media policies. This is exactly the moment Chain of Title documentation becomes non-negotiable."
+    "linkedin_post": "E&O insurers are now excluding AI-generated video from standard media liability policies. The reason is straightforward: there is no documented Chain of Title proving who owns what. SI8 Certified provides exactly that documentation -- a structured 90-minute audit that gives insurers and brand legal teams what they need to approve campaigns. If your agency is producing AI video for clients, this is the moment to get documentation in place before your insurer does it for you."
   }}
 ]
 
@@ -278,7 +278,7 @@ def article_card(a: dict) -> str:
     badge = ACTION_BADGES.get(action, "")
     score_color = SCORE_COLORS.get(score, "#999")
     doc = a.get("doc_to_update")
-    hook = a.get("draft_hook")
+    linkedin_post = a.get("linkedin_post") or a.get("draft_hook")  # fallback for legacy field
 
     pub = a.get("published", "")[:16]
 
@@ -289,10 +289,13 @@ def article_card(a: dict) -> str:
     ) if doc else ""
 
     hook_block = (
-        f'<div style="background:#fffbf0;border-left:3px solid #C8900A;padding:8px 12px;'
-        f'margin-top:10px;font-size:13px;color:#5a3e00;font-style:italic;">'
-        f'<strong style="font-style:normal;">Draft hook:</strong> {hook}</div>'
-    ) if hook else ""
+        f'<div style="background:#fffbf0;border-left:3px solid #C8900A;padding:10px 14px;'
+        f'margin-top:10px;">'
+        f'<div style="font-size:11px;font-weight:700;color:#C8900A;letter-spacing:0.5px;'
+        f'text-transform:uppercase;margin-bottom:6px;">LinkedIn Post</div>'
+        f'<p style="margin:0;font-size:13px;color:#1a1918;line-height:1.6;">{linkedin_post}</p>'
+        f'</div>'
+    ) if linkedin_post else ""
 
     return f"""
     <div style="border:1px solid #e5e5e5;border-radius:6px;padding:16px 18px;margin-bottom:10px;background:#fff;">
