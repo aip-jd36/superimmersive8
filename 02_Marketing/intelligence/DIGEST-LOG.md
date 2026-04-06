@@ -10,6 +10,32 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 ---
 
 ## Week of April 06, 2026
+*Run: 2026-04-06 · 5 high · 6 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [EU bars AI-generated content from official communications, according to Politico](https://the-decoder.com/eu-bars-ai-generated-content-from-official-communications-according-to-politico/) | the-decoder.com | Wed, 01 Apr 2026 | ☐ |
+| 8 | post | [What the EU AI Act Means for Your Content Library](https://www.bbntimes.com/society/what-the-eu-ai-act-means-for-your-content-library) | BBN Times | Mon, 06 Apr 2026 | ☐ |
+| 8 | post+update | [OpenAI sunsets Sora: 5 AI video tools you can switch to right now](https://www.msn.com/en-in/money/topstories/openai-sunsets-sora-5-ai-video-tools-you-can-switch-to-right-now/ar-AA1ZmlOy?gemSnapshotKey=GMF0C7905F-snapshot-7&uxmode=ruby) | MSN | Thu, 02 Apr 2026 | ☐ |
+| 8 | post+update | [New IT Rules 2026: Mandatory AI Disclosure and 3-Hour Takedown for Digital News Creators](https://kalingatv.com/nation/new-it-rules-2026-mandatory-ai-disclosure-and-3-hour-takedown-for-digital-news-creators/) | KalingaTV | Tue, 31 Mar 2026 | ☐ |
+| 7 | post+update | [User-Generated Content and AI Raise IP Concerns](https://licensinginternational.org/news/user-generated-content-and-ai-raise-ip-concerns/) | licensinginternational.org | Wed, 01 Apr 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Federal Regulators Face Growing Pressure to Define AI-Generated Content as Policy Gap Widens](https://www.altitudesmagazine.com/federal-regulators-face-growing-pressure-define-generated-content/) | Altitudes Magazine | Sat, 04 Apr 2026 | ☐ |
+| 6 | monitor | [AI Models Banned by Pamela Anderson’s New Campaign](https://artthreat.net/14524-ai-models-banned-by-pamela-andersons-new-campaign/) | artthreat.net | Mon, 30 Mar 2026 | ☐ |
+| 5 | monitor | [Washington will require labels on AI images, rein in chatbots](https://www.axios.com/local/seattle/2026/04/03/washington-ai-disclosure-law-images-video-watermarks-chatbots-minors) | Axios | Fri, 03 Apr 2026 | ☐ |
+| 5 | monitor | [Runway launches $10 million fund for AI, media, world simulation startups](https://www.newsbytesapp.com/news/business/runway-launches-10-million-fund-for-ai-media-world-simulation-startups/tldr) | NewsBytes | Tue, 31 Mar 2026 | ☐ |
+| 4 | monitor | [Meta, Google under attack as court cases bypass 30-year-old legal shield](https://www.cnbc.com/2026/04/03/meta-google-under-attack-court-cases-bypass-30-year-old-legal-shield.html) | CNBC | Fri, 03 Apr 2026 | ☐ |
+| 4 | monitor | [How AI, digital doubles and new laws are rewriting fashion and beauty](https://www.globallegalpost.com/news/how-ai-digital-doubles-and-new-laws-are-rewriting-fashion-and-beauty-1113297119) | The Global Legal Post | Wed, 01 Apr 2026 | ☐ |
+
+---
+
+## Week of April 06, 2026
 *Run: 2026-04-06 · 7 high · 9 monitor · lookback 7 days*
 
 ### 🔴 High Relevance (7–10)
