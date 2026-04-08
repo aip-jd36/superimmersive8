@@ -33,15 +33,18 @@ DIGEST_LOG_PATH = REPO_ROOT / "02_Marketing" / "intelligence" / "DIGEST-LOG.md"
 VOICE_SPEC_PATH = REPO_ROOT / "02_Marketing" / "brand" / "SI8_VOICE.md"
 
 def load_voice_spec() -> str:
-    """Extract the compact prompt rules from SI8_VOICE.md for injection into Claude prompts."""
+    """Extract LinkedIn + Instagram sections from SI8_VOICE.md for prompt injection."""
     try:
         text = VOICE_SPEC_PATH.read_text()
-        # Extract just the LinkedIn Post Structure section — concise enough for prompt injection
         import re
-        match = re.search(r'## LinkedIn Post Structure.*?(?=\n## )', text, re.DOTALL)
-        if match:
-            return match.group(0).strip()
-        return text[:2000]  # fallback: first 2000 chars
+        linkedin_match  = re.search(r'## LinkedIn Post Structure.*?(?=\n## )', text, re.DOTALL)
+        instagram_match = re.search(r'## Instagram Caption Structure.*?(?=\n## )', text, re.DOTALL)
+        sections = []
+        if linkedin_match:
+            sections.append(linkedin_match.group(0).strip())
+        if instagram_match:
+            sections.append(instagram_match.group(0).strip())
+        return "\n\n".join(sections) if sections else text[:2000]
     except Exception:
         return ""
 
@@ -166,7 +169,10 @@ Assess the following {n} news articles for relevance to SI8's business. For each
     "monitor"         — relevant context, no immediate action needed (score 4–6)
     "skip"            — not relevant to SI8 (score 1–3)
 - doc_to_update: if action includes update_docs, name the specific SI8 file (e.g., "COMPETITIVE_ANALYSIS_CAAS_2026.md", "BUSINESS_PLAN_v4.md", "COMPETITOR-FADEL-ANALYSIS.md") — null if not applicable
-- linkedin_post: if action includes post_linkedin, a ready-to-post LinkedIn update for the SI8 company page (not JD personally). 3–5 sentences. Lead with the news signal, connect it to the compliance/documentation gap SI8 solves, end with a direct implication for brands or agencies. Direct, no fluff, no hashtags, no em-dashes. Suitable to copy/paste with minimal editing. null if not applicable.
+- linkedin_post: if action includes post_linkedin, a ready-to-post LinkedIn update for the SI8 company page (not JD personally). 3–5 sentences. Lead with the news signal, connect it to the compliance/documentation gap SI8 solves, end with a direct implication for brands or agencies. Direct, no fluff, no hashtags in the body, no em-dashes. Suitable to copy/paste with minimal editing. null if not applicable.
+- linkedin_hashtags: if action includes post_linkedin, 3–5 hashtags for the LinkedIn post. Always include: #AIVideo #ChainOfTitle #ContentCompliance. Add 0–2 from this pool based on article content: #AIRegulation #BrandSafety #GenerativeAI #AIMarketing #EUAIAct #DigitalRights #AIRights #EOInsurance. Return as a single space-separated string. null if not applicable.
+- instagram_caption: if action includes post_linkedin, a ready-to-post Instagram caption. Structure: hook line (1 sentence, same idea as Slide 1) → 2–3 expanding lines → 1 line connecting to SI8 or Chain of Title → "→ Link in bio." → hashtags on new line (always #AIVideo #ChainOfTitle #ContentCompliance plus 0–2 dynamic from the same pool above, max 5 total). null if not applicable.
+- carousel_slides: if action includes post_linkedin, a 6-slide carousel breakdown as a JSON array: [{{"slide":1,"type":"hook","text":"hook headline — max 8 words"}},{{"slide":2,"type":"content","label":"THE SIGNAL","text":"2–3 lines on the news signal"}},{{"slide":3,"type":"content","label":"THE GAP","text":"2–3 lines on what brands/agencies are missing"}},{{"slide":4,"type":"content","label":"THE IMPACT","text":"2–3 lines on practical consequences"}},{{"slide":5,"type":"si8_angle","label":"WHY THIS MATTERS","text":"2–3 lines connecting to Chain of Title documentation"}},{{"slide":6,"type":"cta","text":"1 action line — max 6 words"}}]. null if not applicable.
 
 Return ONLY a valid JSON array with exactly {n} objects in the same order as the input. No prose, no markdown fences.
 
@@ -177,7 +183,10 @@ Example:
     "relevance_reason": "E&O insurers adding AI video exclusions directly validates SI8's core pain point and gives JD a timely hook.",
     "action": "post_and_update",
     "doc_to_update": "COMPETITIVE_ANALYSIS_CAAS_2026.md",
-    "linkedin_post": "E&O insurers are now excluding AI-generated video from standard media liability policies. The reason is straightforward: there is no documented Chain of Title proving who owns what. SI8 Certified provides exactly that documentation -- a structured 90-minute audit that gives insurers and brand legal teams what they need to approve campaigns. If your agency is producing AI video for clients, this is the moment to get documentation in place before your insurer does it for you."
+    "linkedin_post": "E&O insurers are now excluding AI-generated video from standard media liability policies. The reason is straightforward: there is no documented Chain of Title proving who owns what. SI8 Certified provides exactly that documentation -- a structured 90-minute audit that gives insurers and brand legal teams what they need to approve campaigns. If your agency is producing AI video for clients, this is the moment to get documentation in place before your insurer does it for you.",
+    "linkedin_hashtags": "#AIVideo #ChainOfTitle #ContentCompliance #EOInsurance #BrandSafety",
+    "instagram_caption": "E&O insurers are now excluding AI-generated video from standard media liability policies.\n\nThe reason is simple: no Chain of Title means no proof of what was used to make the content. Brand legal teams and underwriters are asking the same question.\n\nChain of Title documentation is what closes that gap.\n\n→ Link in bio.\n\n#AIVideo #ChainOfTitle #ContentCompliance #EOInsurance #BrandSafety",
+    "carousel_slides": [{{"slide":1,"type":"hook","text":"E&O insurers are now excluding AI video"}},{{"slide":2,"type":"content","label":"THE SIGNAL","text":"Standard media liability policies are adding AI video exclusions. Insurers say there is no documented proof of what was used to make the content."}},{{"slide":3,"type":"content","label":"THE GAP","text":"Most agencies producing AI video cannot answer the first question an underwriter asks: which tools generated this, and is the training data cleared?"}},{{"slide":4,"type":"content","label":"THE IMPACT","text":"Without documentation, campaigns cannot be insured. Without insurance, brands will not approve. The compliance gap is now a revenue gap."}},{{"slide":5,"type":"si8_angle","label":"WHY THIS MATTERS","text":"Chain of Title documentation proves exactly what insurers are asking for. One 90-minute review. One structured PDF. One less reason for legal to say no."}},{{"slide":6,"type":"cta","text":"Get your AI video documented"}}]
   }}
 ]
 
@@ -203,7 +212,7 @@ def score_batch(articles: list[dict]) -> list[dict]:
     try:
         response = client.messages.create(
             model="claude-haiku-4-5-20251001",
-            max_tokens=6000,
+            max_tokens=8000,
             messages=[{"role": "user", "content": prompt}],
         )
 
@@ -220,11 +229,14 @@ def score_batch(articles: list[dict]) -> list[dict]:
 
         for article, score_data in zip(articles, scores):
             article.update({
-                "relevance_score": score_data.get("relevance_score", 0),
-                "relevance_reason": score_data.get("relevance_reason", ""),
-                "action": score_data.get("action", "skip"),
-                "doc_to_update": score_data.get("doc_to_update"),
-                "linkedin_post": score_data.get("linkedin_post"),
+                "relevance_score":   score_data.get("relevance_score", 0),
+                "relevance_reason":  score_data.get("relevance_reason", ""),
+                "action":            score_data.get("action", "skip"),
+                "doc_to_update":     score_data.get("doc_to_update"),
+                "linkedin_post":     score_data.get("linkedin_post"),
+                "linkedin_hashtags": score_data.get("linkedin_hashtags"),
+                "instagram_caption": score_data.get("instagram_caption"),
+                "carousel_slides":   score_data.get("carousel_slides"),
             })
 
         return articles
@@ -291,14 +303,16 @@ SCORE_COLORS = {
 
 
 def article_card(a: dict) -> str:
-    score = a.get("relevance_score", 0)
-    action = a.get("action", "skip")
-    badge = ACTION_BADGES.get(action, "")
-    score_color = SCORE_COLORS.get(score, "#999")
-    doc = a.get("doc_to_update")
-    linkedin_post = a.get("linkedin_post") or a.get("draft_hook")  # fallback for legacy field
-
-    pub = a.get("published", "")[:16]
+    score           = a.get("relevance_score", 0)
+    action          = a.get("action", "skip")
+    badge           = ACTION_BADGES.get(action, "")
+    score_color     = SCORE_COLORS.get(score, "#999")
+    doc             = a.get("doc_to_update")
+    linkedin_post   = a.get("linkedin_post") or a.get("draft_hook")
+    linkedin_tags   = a.get("linkedin_hashtags")
+    ig_caption      = a.get("instagram_caption")
+    carousel_slides = a.get("carousel_slides")
+    pub             = a.get("published", "")[:16]
 
     doc_line = (
         f'<p style="margin:6px 0 0;font-size:12px;color:#666;">'
@@ -306,14 +320,55 @@ def article_card(a: dict) -> str:
         f'border-radius:2px;font-size:11px;">{doc}</code></p>'
     ) if doc else ""
 
-    hook_block = (
-        f'<div style="background:#fffbf0;border-left:3px solid #C8900A;padding:10px 14px;'
-        f'margin-top:10px;">'
-        f'<div style="font-size:11px;font-weight:700;color:#C8900A;letter-spacing:0.5px;'
-        f'text-transform:uppercase;margin-bottom:6px;">LinkedIn Post</div>'
-        f'<p style="margin:0;font-size:13px;color:#1a1918;line-height:1.6;">{linkedin_post}</p>'
-        f'</div>'
-    ) if linkedin_post else ""
+    # LinkedIn post + hashtags block
+    if linkedin_post:
+        tags_line = (
+            f'<p style="margin:8px 0 0;font-size:12px;color:#888;">{linkedin_tags}</p>'
+        ) if linkedin_tags else ""
+        linkedin_block = (
+            f'<div style="background:#fffbf0;border-left:3px solid #C8900A;padding:10px 14px;margin-top:10px;">'
+            f'<div style="font-size:11px;font-weight:700;color:#C8900A;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px;">LinkedIn Post</div>'
+            f'<p style="margin:0;font-size:13px;color:#1a1918;line-height:1.6;">{linkedin_post}</p>'
+            f'{tags_line}'
+            f'</div>'
+        )
+    else:
+        linkedin_block = ""
+
+    # Instagram caption block
+    if ig_caption:
+        ig_formatted = ig_caption.replace("\n", "<br>")
+        ig_block = (
+            f'<div style="background:#f5f0ff;border-left:3px solid #7c3aed;padding:10px 14px;margin-top:8px;">'
+            f'<div style="font-size:11px;font-weight:700;color:#7c3aed;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px;">Instagram Caption</div>'
+            f'<p style="margin:0;font-size:13px;color:#1a1918;line-height:1.6;">{ig_formatted}</p>'
+            f'</div>'
+        )
+    else:
+        ig_block = ""
+
+    # Carousel slides block
+    if carousel_slides and isinstance(carousel_slides, list):
+        slide_rows = ""
+        for s in carousel_slides:
+            label = s.get("label") or s.get("type", "").upper().replace("_", " ")
+            text  = s.get("text", "")
+            num   = s.get("slide", "")
+            slide_rows += (
+                f'<tr>'
+                f'<td style="padding:5px 8px;font-size:11px;font-weight:700;color:#C8900A;white-space:nowrap;vertical-align:top;">S{num}</td>'
+                f'<td style="padding:5px 8px;font-size:11px;color:#555;white-space:nowrap;vertical-align:top;text-transform:uppercase;letter-spacing:0.3px;">{label}</td>'
+                f'<td style="padding:5px 8px;font-size:12px;color:#1a1918;line-height:1.5;">{text}</td>'
+                f'</tr>'
+            )
+        carousel_block = (
+            f'<div style="background:#f9f9f7;border-left:3px solid #888;padding:10px 14px;margin-top:8px;">'
+            f'<div style="font-size:11px;font-weight:700;color:#555;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px;">Carousel Slides — Paste into Canva</div>'
+            f'<table style="width:100%;border-collapse:collapse;">{slide_rows}</table>'
+            f'</div>'
+        )
+    else:
+        carousel_block = ""
 
     return f"""
     <div style="border:1px solid #e5e5e5;border-radius:6px;padding:16px 18px;margin-bottom:10px;background:#fff;">
@@ -325,7 +380,9 @@ def article_card(a: dict) -> str:
       <div style="color:#999;font-size:12px;margin:5px 0;">{a['source']} &middot; {pub}</div>
       <p style="color:#444;font-size:13px;margin:8px 0 0;line-height:1.5;">{a.get('relevance_reason', '')}</p>
       {doc_line}
-      {hook_block}
+      {linkedin_block}
+      {ig_block}
+      {carousel_block}
     </div>
     """
 
