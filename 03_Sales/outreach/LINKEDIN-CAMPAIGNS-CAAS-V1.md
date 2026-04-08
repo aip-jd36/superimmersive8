@@ -4,6 +4,12 @@
 **Tool:** Dripify + Standing Encore personas
 **Status:** Active — 4 agency campaigns loaded in Dripify
 
+## Persona Tracking — SOP
+
+When a lead responds to a Dripify sequence, JD shares the message thread. The **alias field at the end** identifies which persona sent it. All manual follow-ups must use the same persona name. See `03_Sales/outreach/PERSONAS.md` for full persona list and tone guidelines.
+
+---
+
 ## Channel Scope: Agencies Only
 
 LinkedIn is used exclusively for **agency outreach** (Creative Directors, Heads of Production, EPs).

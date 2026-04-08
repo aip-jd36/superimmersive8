@@ -2,7 +2,7 @@
 
 **Purpose:** Single source of truth for all active leads — agency/brand buyers (LinkedIn) and creators (Instagram). Used for pattern analysis, ICP refinement, and messaging decisions. Pipeline operations will move to Airtable once ICP and messaging are validated.
 
-**Last updated:** April 6, 2026
+**Last updated:** April 7, 2026
 
 ---
 
@@ -12,36 +12,39 @@
 *follow_up_by: explicit date overrides auto-calc. Use YYYY-MM-DD or — for auto.*
 
 <!-- pipeline:start -->
-| id | name | company | type | stage | last_action_date | last_action | next_action | follow_up_by | urgency |
-|----|------|---------|------|-------|-----------------|-------------|-------------|-------------|---------|
-| B001 | Leimi Zhou | WOMBO | buyer | Replied-Conditional | 2026-04-04 | Educational reply + offered sample | Send Urban Drift sample link | 2026-04-06 | HIGH |
-| B002 | Theodor Sandu | McCann/Unilever @ Omnicom | buyer | Replied-Conditional | 2026-04-04 | Sample requested; he said sure anytime | Send Urban Drift sample link | 2026-04-06 | HIGH |
-| B003 | Hossein Jafari | Wowspot Ltd | buyer | Followed Up | 2026-04-01 | Urban Drift PDF + Runway/Kling gap + asked for call | Await reply; book call | — | HIGH |
-| B004 | Troy Macdonald | HyFi Corp | buyer | Followed Up | 2026-04-04 | Sample + Calendly sent; got thumbs up | Follow up to book call | 2026-04-06 | HIGH |
-| B005 | Isaac Twidale | We Do Ads | buyer | Call Completed | 2026-03-15 | Discovery call done | Send 3-5 photorealistic portfolio examples | — | HIGH |
-| B006 | Rawand Latif | ARUBA CREATIVE | buyer | Replied-Warm | 2026-04-03 | No action taken yet | Send v4 CaaS explanation + sample | 2026-04-06 | HIGH |
-| B007 | Elaine Tan + Joseph Lee | The Media Shop | buyer | Call Completed | 2026-03-18 | Discovery call done | Send thank-you + 1-pager; request Germany intro from Joseph | — | HIGH |
-| B008 | Barney O'Kelly | AlixPartners | buyer | Followed Up | 2026-04-01 | Urban Drift PDF sent | Await reply; book call | — | MEDIUM |
-| B009 | Syed Tabish Hasan | Zedtronix | buyer | Followed Up | 2026-04-01 | v4 framing + Urban Drift + Calendly | Await reply; book call | — | MEDIUM |
-| B010 | Bee Lin Ang | Stewardship Asia Centre | buyer | Followed Up | 2026-04-01 | Second follow-up + Urban Drift + Calendly | Await reply; book call | — | MEDIUM |
-| B011 | Hugo Barbera | HumAIn | buyer | Followed Up | 2026-04-03 | Content-level doc vs contractual compliance reply | Await reply; see if IAB gap lands | — | MEDIUM |
-| B012 | Ivan Ng | Bacon Creatives | buyer | Followed Up | 2026-04-03 | Pivot: SI8 as doc layer; asked about client stage | Await reply; Singapore use case | — | MEDIUM |
-| B013 | Qaiser Mehmood | ECONROAD International | buyer | Followed Up | 2026-04-01 | Urban Drift PDF + Calendly | Await reply; book call | — | MEDIUM |
-| B014 | Shahrman Nayan | onedash22 | buyer | Replied | 2026-04-03 | No action taken | Continue sequence msg 3 | — | MEDIUM |
-| B015 | William Tan | Tareo Digital Advisory | buyer | Lukewarm | 2026-04-01 | No action taken | Follow-up: have you had a chance to evaluate? | — | MEDIUM |
-| B016 | Mainul Islam | eSaviour Limited | buyer | Replied-Conditional | 2026-03-15 | No action | Re-engage once 2-3 sample works ready | — | LOW |
-| B017 | James Byrne | BeyondWords | buyer | Replied-Conditional | 2026-03-15 | No action | Re-engage once samples ready | — | LOW |
-| B018 | Carlos Cortiñas | Transmission | buyer | Replied | 2026-04-06 | Thumbs up only on msg 1 | Continue sequence or drop | — | LOW |
-| B019 | Cory Warfield | Starchild Music | buyer | Nurture | 2026-04-04 | Graceful exit sent | Soft referral mention if opportunity arises | — | MONITOR |
-| B020 | Salem Al-Kuwari | SAM Strategic Access | buyer | Nurture | 2026-04-04 | Polite acknowledgment; not scheduling now | Check in Q3 | 2026-07-01 | MONITOR |
-| B021 | Vignesh Ilangovan | Triken Studios | buyer | Soft No | 2026-04-05 | No action | Mark for Q3 follow-up | 2026-09-01 | MONITOR |
-| B022 | Mark Johnson | SwiftScale AI | buyer | Lukewarm | 2026-04-01 | No action | Monitor — possibly wrong side of market | — | MONITOR |
-| B023 | Amr Hamad | Stackline | buyer | Lukewarm | 2026-04-01 | No action | Follow up after ASA/IAB research complete | — | MONITOR |
-| C001 | keeper505 | — | creator | Interested | 2026-03-29 | v4 reply sent | Create COMP-KEEPER in Stripe; send v4 follow-up | 2026-04-06 | HIGH |
-| C002 | @syntaxdiffusion | — | creator | Interested | 2026-03-29 | v4 reply sent | Send v4 follow-up | — | MEDIUM |
-| C003 | @rodszera.ai | — | creator | Interested | 2026-03-29 | v4 reply sent | Send v4 follow-up explaining 2 films is enough | — | MEDIUM |
-| C004 | @absolutely.ai | — | creator | Interested | 2026-03-29 | v4 reply sent | Send v4 follow-up | — | MEDIUM |
-| C005 | shingo4987 | — | creator | Nurture | 2026-03-29 | v4 reply sent | Follow his work; reconnect on next release | — | MONITOR |
+| id | name | company | type | stage | last_action_datetime | last_action | next_action | follow_up_by | urgency | status |
+|----|------|---------|------|-------|---------------------|-------------|-------------|-------------|---------|--------|
+| B001 | Leimi Zhou | WOMBO | buyer | Followed Up | 2026-04-07 18:00 | Sample (fictional Chain of Title) attached + product feedback question | Await reply | — | MEDIUM | waiting |
+| B002 | Theodor Sandu | McCann/Unilever @ Omnicom | buyer | Followed Up | 2026-04-07 18:00 | Sample (fictional Chain of Title) attached + product feedback question + Calendly [Lilly] | Await reply; book call | — | MEDIUM | waiting |
+| B003 | Hossein Jafari | Wowspot Ltd | buyer | Followed Up | 2026-04-01 | Urban Drift PDF + Runway/Kling gap + asked for call | Nudge — 7 days no reply | — | HIGH | pending |
+| B004 | Troy Macdonald | HyFi Corp | buyer | Followed Up | 2026-04-07 18:00 | Product feedback question + Calendly sent | Await reply; book call | — | MEDIUM | waiting |
+| B005 | Isaac Twidale | We Do Ads | buyer | Call Completed | 2026-03-15 | Discovery call done | Send 3-5 photorealistic portfolio examples | — | HIGH | pending |
+| B006 | Rawand Latif | ARUBA CREATIVE | buyer | Followed Up | 2026-04-07 18:00 | v4 CaaS explanation + sample attached + Calendly | Await reply; book call | — | MEDIUM | waiting |
+| B007 | Elaine Tan + Joseph Lee | The Media Shop | buyer | Call Completed | 2026-03-18 | Discovery call done | Send thank-you + 1-pager; request Germany intro from Joseph | — | HIGH | pending |
+| B008 | Barney O'Kelly | AlixPartners | buyer | Followed Up | 2026-04-01 | Urban Drift PDF sent | Nudge — 7 days no reply | — | MEDIUM | pending |
+| B009 | Syed Tabish Hasan | Zedtronix | buyer | Followed Up | 2026-04-01 | v4 framing + Urban Drift + Calendly | Await reply; book call | — | MEDIUM | waiting |
+| B010 | Bee Lin Ang | Stewardship Asia Centre | buyer | Followed Up | 2026-04-01 | Second follow-up + Urban Drift + Calendly | Await reply; book call | — | MEDIUM | waiting |
+| B011 | Hugo Barbera | HumAIn | buyer | Replied-Warm | 2026-04-08 09:00 | Hugo replied positively — already produces compliance reports, asked what materials SI8 needs | Send drafted reply: validate his position, explain materials, format gap, offer compare-notes call | — | HIGH | pending |
+| B012 | Ivan Ng | Bacon Creatives | buyer | Followed Up | 2026-04-03 | Pivot: SI8 as doc layer; asked about client stage | Await reply; Singapore use case | — | MEDIUM | waiting |
+| B013 | Qaiser Mehmood | ECONROAD International | buyer | Followed Up | 2026-04-01 | Urban Drift PDF + Calendly | Await reply; book call | — | MEDIUM | waiting |
+| B014 | Shahrman Nayan | onedash22 | buyer | Replied | 2026-04-03 | No action taken | Continue sequence msg 3 | — | MEDIUM | pending |
+| B015 | William Tan | Tareo Digital Advisory | buyer | Lukewarm | 2026-04-01 | No action taken | Follow-up: have you had a chance to evaluate? | — | MEDIUM | pending |
+| B016 | Mainul Islam | eSaviour Limited | buyer | Replied-Conditional | 2026-03-15 | No action | Re-engage once 2-3 sample works ready | — | LOW | pending |
+| B017 | James Byrne | BeyondWords | buyer | Replied-Conditional | 2026-03-15 | No action | Re-engage once samples ready | — | LOW | pending |
+| B018 | Carlos Cortiñas | Transmission | buyer | Polite Pass | 2026-04-06 | Replied "No thanks Vanessa" — closed | — | — | — | done |
+| B019 | Cory Warfield | Starchild Music | buyer | Nurture | 2026-04-04 | Graceful exit sent | Soft referral mention if opportunity arises | — | MONITOR | — |
+| B020 | Salem Al-Kuwari | SAM Strategic Access | buyer | Nurture | 2026-04-04 | Polite acknowledgment; not scheduling now | Check in Q3 | 2026-07-01 | MONITOR | — |
+| B021 | Vignesh Ilangovan | Triken Studios | buyer | Soft No | 2026-04-05 | No action | Mark for Q3 follow-up | 2026-09-01 | MONITOR | — |
+| B022 | Mark Johnson | SwiftScale AI | buyer | Lukewarm | 2026-04-01 | No action | Monitor — possibly wrong side of market | — | MONITOR | — |
+| B023 | Amr Hamad | Stackline | buyer | Lukewarm | 2026-04-01 | No action | Follow up after ASA/IAB research complete | — | MONITOR | — |
+| B024 | Chitra J | GrapheneAI | buyer | Followed Up | 2026-04-07 18:00 | Message 2: $499/90-min review + Chain of Title description + Calendly sent | Await reply; book call | — | MEDIUM | waiting |
+| B025 | Aswini Ruidas | MediaX | buyer | Replied-Lukewarm | 2026-04-03 | Ivy confirmed on WhatsApp (+91 6296601182) | India market discovery — send v4 pitch via WhatsApp | 2026-04-10 | HIGH | pending |
+| C006 | Essa | — (Hong Kong) | creator | Followed Up | 2026-04-07 20:00 | v4 re-pitch sent via WhatsApp — docs model, revised commission, comp CR codes offered, MyVideo still active | Await reply | — | MEDIUM | waiting |
+| C001 | keeper505 | — | creator | Interested | 2026-03-29 | v4 reply sent | Create COMP-KEEPER in Stripe; send v4 follow-up | 2026-04-06 | HIGH | pending |
+| C002 | @syntaxdiffusion | — | creator | Interested | 2026-03-29 | v4 reply sent | Send v4 follow-up | — | MEDIUM | pending |
+| C003 | @rodszera.ai | — | creator | Interested | 2026-03-29 | v4 reply sent | Send v4 follow-up explaining 2 films is enough | — | MEDIUM | pending |
+| C004 | @absolutely.ai | — | creator | Interested | 2026-03-29 | v4 reply sent | Send v4 follow-up | — | MEDIUM | pending |
+| C005 | shingo4987 | — | creator | Nurture | 2026-03-29 | v4 reply sent | Follow his work; reconnect on next release | — | MONITOR | — |
 <!-- pipeline:end -->
 
 ---
@@ -86,13 +89,13 @@
 | Call Completed | 2 |
 | Call Booked | 0 |
 | Replied — Hot (follow-up urgent) | 1 |
-| Replied — Warm | 5 |
+| Replied — Warm | 6 |
 | Replied — Conditional | 4 |
 | Replied — Lukewarm | 7 |
 | Nurture | 3 |
-| Polite Pass | 19 |
+| Polite Pass | 20 |
 | Not a Fit | 10 |
-| **Total Named Responses** | 57 |
+| **Total Named Responses** | 59 |
 | **Total Leads Contacted** | ~1,000+ |
 
 ---
@@ -121,10 +124,11 @@
 | **Mainul Islam** | eSaviour Limited | — | London | Campaign A | Replied — Conditional | "ready 1-2 samples first then we will let you know" | None | Re-engage once 2-3 sample works ready |
 | **James Byrne** | BeyondWords | — (ESG reporting) | London | Campaign A | Replied — Conditional | "Can you share some examples so I can understand" | None | Re-engage once samples ready |
 | **Qaiser Mehmood** | ECONROAD International | Director of Business Development | Singapore | Campaign C | Followed Up | "Okay. Do u have any website?" | Apr 1 — follow-up sent with v4 Urban Drift PDF + Calendly (website + v3 PDF sent Mar 15, no reply) | Await reply; book call |
-| **Hugo Barbera** | HumAIn | AI Director | Paris | SI8_Hitting a Wall | Followed Up | Reviews client legal T&Cs before taking projects. "We never got anything rejected in more than 3 years... we work with big agency networks and their legal teams." | Apr 3 — reply sent: distinguished contractual compliance from content-level documentation (IAB framework, EU AI Act, tool provenance inside the video) | Await reply; see if content-level documentation is a gap in their process |
+| **Hugo Barbera** | HumAIn | AI Director | Paris | SI8_Hitting a Wall | Followed Up | Reviews client legal T&Cs before taking projects. "We never got anything rejected in more than 3 years... we work with big agency networks and their legal teams." New: "client legal tells us which models are allowed before we start." | Apr 7 — drafted follow-up: delivery-level doc gap vs pre-project model approval (Chain of Title is for the deliverable, not the intake) | Send drafted follow-up; book call |
 | **Ivan Ng** | Bacon Creatives | Creative Consultant | Singapore | SI8_Hitting a Wall | Replied — Warm | "No this has not come up. But one of the creative agencies I consult with may be looking for a new AI partner to bring their AI influencer to life. Is this something you guys do?" | Apr 3 — pivot reply sent: clarified SI8 is documentation layer not production; if agency is building AI influencer, they'll need Chain of Title when it goes live; asked what stage they're at | Await reply — Singapore ICP, has a live client use case |
 | **Leimi Zhou** | WOMBO | Digital Marketing Strategist & Video Artist | London | SI8_Legal Friction | Replied — Lukewarm | "I've never been asked for documentation on my process. Why do you ask? Just curious" | Apr 3 — educational reply: explained IAB January framework, ASA robot puppy ruling, EU AI Act August; offered to send sample | Await reply — WOMBO is an AI company; good market research data point regardless |
-| **Aswini Ruidas** | MediaX | Sales Manager | Durgapur, India | SI8_Hitting a Wall | Replied — Lukewarm | Suggested Telegram; when declined, offered WhatsApp: +91 6296601182 | Ivy asked if on WhatsApp; he confirmed | Low priority — India off-target, FinTech PR off-target sector. Park. |
+| **Chitra J** | GrapheneAI | Creative Head | Bengaluru, India | SI8_Hitting a Wall | Replied — Warm | "This is exactly what we need! We've been struggling to get our AI-generated content approved by clients." Described exact SI8 pain point unprompted. | None yet | Send Message 2: 90-min review, $499, Chain of Title deliverable, offer 15-min call |
+| **Aswini Ruidas** | MediaX | Sales Manager | Durgapur, India | SI8_Hitting a Wall | Replied — Lukewarm | Suggested Telegram; when declined, offered WhatsApp: +91 6296601182 | Ivy confirmed on WhatsApp | India market discovery test — elevated to HIGH. Send v4 pitch via WhatsApp. Note: MediaX/FinTech PR is off-sector but contact is live on WhatsApp and India is being tested. |
 
 ---
 
@@ -171,6 +175,7 @@
 | Guy Azouri | Private Investment Group | CTO / Lead AI & Technology Architect | London | "Thanks but not interested" |
 | Cory Warfield | Starchild Music | Chief Growth Officer | Chicago | "It hasn't" (re: legal rejection problem) — graceful exit sent |
 | Barış Buhar | Freelance Motion Designer | Motion Designer | Ankara | "I don't have this problem right now, but I'll definitely write to you when I do" |
+| Carlos Cortiñas | Transmission | — | London | "No thanks Vanessa" — closed Apr 6, 2026 |
 
 ---
 
@@ -261,7 +266,7 @@ The four leads below (keeper505, Chris Vespaziani, Rodolfo Roth, Absolutely Ai) 
 | **Singapore** | 3 (Ivan Ng = warm pivot; others wrong type) | 5 | 2 | Rising — Ivan Ng is first Singapore lead with a live client use case |
 | **Paris / EU** | 1 (Hugo Barbera — warm) | 0 | 0 | New signal — EU AI Act August deadline opening EU as secondary geography |
 | Miami / US | 1 (Troy Macdonald — conditional) | 0 | 0 | Isolated — US off-strategy Year 1, but responds when pain is real |
-| India | 1 (off-target) | 0 | 1 | Off-target — pause |
+| India | 2 (Chitra J = warm; Aswini = off-sector) | 0 | 1 | Emerging signal — Chitra unprompted described exact SI8 pain. Future discovery test flagged. Not Year 1 primary. |
 | Hong Kong | 0 | 0 | 1 | Too small sample |
 | Abu Dhabi | 0 | 1 | 0 | Off-target — pause |
 | Sydney | 0 | 1 | 0 | Off-target — pause |

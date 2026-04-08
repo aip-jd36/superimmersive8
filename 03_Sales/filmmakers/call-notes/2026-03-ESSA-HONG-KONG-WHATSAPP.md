@@ -5,7 +5,7 @@
 **Location:** Hong Kong
 **Platform:** Instagram DM → WhatsApp
 **Contact:** essahqinoirs@gmail.com, +852 5239 3254
-**Status:** ⏳ Pending response (JD asked if interested in submitting, no reply yet)
+**Status:** ⏳ Pending response (v4 re-pitch sent April 7, 2026)
 
 ---
 
@@ -437,4 +437,5 @@ JD
 ---
 
 **Conversation Documented:** March 2026
-**Next Review:** After Essa responds OR after 2-3 more filmmaker conversations
+**Updated:** April 7, 2026 — v4 re-pitch sent via WhatsApp. Key changes communicated: documentation is now primary product ($29 CR / $499 SI8 Certified), Showcase listing optional, commission revised to 20% SI8 / 80% creator for brokered deals (0% direct discovery), MyVideo deal still active — Showcase links would be sent to them. Comp Creator Record codes offered. One video per category recommended.
+**Next Review:** Await Essa's reply

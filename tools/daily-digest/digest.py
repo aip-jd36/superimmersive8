@@ -84,9 +84,16 @@ def get_icp_section(crm):
     m = re.search(r'## SECTION 3 — ICP Analysis(.*?)## SECTION 4', crm, re.DOTALL)
     return m.group(1).strip()[:3500] if m else ''
 
+def parse_date(date_str):
+    """Parse YYYY-MM-DD or YYYY-MM-DD HH:MM — returns date object or None"""
+    try:
+        return date.fromisoformat(date_str.strip().split()[0])
+    except:
+        return None
+
 def days_since(date_str, today):
     try:
-        return (today - date.fromisoformat(date_str)).days
+        return (today - parse_date(date_str)).days
     except:
         return 0
 
@@ -94,7 +101,7 @@ def is_due(lead, today):
     """Returns (due: bool, days_overdue: int)"""
     urgency      = lead.get('urgency', 'MEDIUM').upper()
     follow_up_by = lead.get('follow_up_by', '—').strip()
-    last_date    = lead.get('last_action_date', '').strip()
+    last_date    = lead.get('last_action_datetime', '').strip()
 
     if urgency == 'MONITOR':
         return False, 0
@@ -112,7 +119,7 @@ def is_due(lead, today):
     if last_date and last_date != '—':
         try:
             threshold = DAYS_UNTIL_DUE.get(urgency, 5)
-            due = date.fromisoformat(last_date) + timedelta(days=threshold)
+            due = parse_date(last_date) + timedelta(days=threshold)
             overdue = max(0, (today - due).days)
             return due <= today, overdue
         except:
@@ -130,7 +137,7 @@ def claude_digest(urgent, followup, awaiting, icp_section, ga4_text, today_str):
             overdue = f' [OVERDUE {l["_overdue"]}d]' if l.get('_overdue', 0) > 0 else ''
             rows.append(
                 f'  • {l["name"]} | {l["company"]} ({l["type"]}) | {l["stage"]}'
-                f' | Last contact: {l["last_action_date"]}{overdue}'
+                f' | Last contact: {l["last_action_datetime"]}{overdue}'
                 f'\n    Last: {l["last_action"]}'
                 f'\n    Next: {l["next_action"]}'
             )
@@ -280,7 +287,8 @@ def main():
     urgent, followup, awaiting = [], [], []
     for lead in leads:
         urgency = lead.get('urgency', '').upper()
-        if urgency == 'MONITOR':
+        status  = lead.get('status', 'pending').lower()
+        if urgency == 'MONITOR' or status in ('done', 'waiting'):
             continue
         due, overdue = is_due(lead, today)
         lead['_overdue'] = overdue
