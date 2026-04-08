@@ -195,6 +195,34 @@ Articles:
 {articles}"""
 
 
+def sanitize_json(text: str) -> str:
+    """Replace raw control characters inside JSON strings with escape sequences.
+    Claude sometimes emits literal newlines/tabs within string values, which breaks json.loads().
+    This walks the text char-by-char tracking string context and fixes them in place."""
+    result = []
+    in_string = False
+    escaped = False
+    for char in text:
+        if escaped:
+            result.append(char)
+            escaped = False
+        elif char == '\\' and in_string:
+            result.append(char)
+            escaped = True
+        elif char == '"':
+            result.append(char)
+            in_string = not in_string
+        elif in_string and char == '\n':
+            result.append('\\n')
+        elif in_string and char == '\r':
+            result.append('\\r')
+        elif in_string and char == '\t':
+            result.append('\\t')
+        else:
+            result.append(char)
+    return ''.join(result)
+
+
 def score_batch(articles: list[dict]) -> list[dict]:
     """Score a batch of articles with Claude haiku. Returns articles with score fields added."""
     articles_text = "\n\n".join(
@@ -224,6 +252,9 @@ def score_batch(articles: list[dict]) -> list[dict]:
             match = re.search(r"```(?:json)?\s*([\s\S]+?)\s*```", result_text)
             if match:
                 result_text = match.group(1)
+
+        # Fix raw control characters inside JSON string values (newlines, tabs, etc.)
+        result_text = sanitize_json(result_text)
 
         scores = json.loads(result_text)
 
