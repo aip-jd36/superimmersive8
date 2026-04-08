@@ -10,6 +10,42 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 ---
 
 ## Week of April 08, 2026
+*Run: 2026-04-08 · 12 high · 9 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Adverts using AI-generated images of people must disclose use: Fair Trade Commission](https://koreajoongangdaily.joins.com/news/2026-04-08/business/industry/Adverts-using-AIgenerated-images-of-people-must-disclose-use-Fair-Trade-Commission/2564121) | Korea JoongAng Daily | Wed, 08 Apr 2026 | ☐ |
+| 9 | update | [South Korea to require disclosure of AI characters in advertisements](https://www.mlex.com/mlex/articles/2462772/south-korea-to-require-disclosure-of-ai-characters-in-advertisements) | MLex | Wed, 08 Apr 2026 | ☐ |
+| 9 | post+update | [“A-Eye” on Coverage: Maximizing Insurance for AI Risks Amid Emerging Exclusions](https://www.jonesday.com/en/insights/2026/04/aeye-on-coverage-maximizing-insurance-for-ai-risks-amid-emerging-exclusions) | Jones Day | Tue, 07 Apr 2026 | ☐ |
+| 9 | post+update | [Brands Adopt ‘No AI’ Disclaimers to Stand Out Amid the Slop](https://www.wsj.com/cmo-today/brands-adopt-no-ai-disclaimers-to-stand-out-amid-the-slop-a92352af) | WSJ | Mon, 06 Apr 2026 | ☐ |
+| 8 | post | [Can AI Labels on Social Media Rebuild Trust?](https://www.impactonnet.com/impact-stories/can-ai-labels-on-social-media-rebuild-trust-13962.html) | IMPACT Magazine | Wed, 08 Apr 2026 | ☐ |
+| 8 | update | [Korea Fair Trade Commission Mandates Labels for AI Virtual Characters](https://www.chosun.com/english/market-money-en/2026/04/08/SHH4VC3M6RC73G3IN6GP4HEYWI/) | 조선일보 | Wed, 08 Apr 2026 | ☐ |
+| 8 | post+update | [AI disclosure in marketing with WFA AI guidelines](https://www.contentgrip.com/ai-disclosure-guidelines-wfa-marketing/) | ContentGrip | Tue, 07 Apr 2026 | ☐ |
+| 8 | post+update | [What the EU AI Act Means for Your Content Library](https://www.bbntimes.com/society/what-the-eu-ai-act-means-for-your-content-library) | BBN Times | Mon, 06 Apr 2026 | ☐ |
+| 8 | post+update | [User-Generated Content and AI Raise IP Concerns](https://licensinginternational.org/news/user-generated-content-and-ai-raise-ip-concerns/) | Licensing International | Wed, 01 Apr 2026 | ☐ |
+| 7 | post | [Could AI ads be exposing your business to risks?](https://www.lexology.com/pro/content/could-ai-ads-be-exposing-your-business-risks) | Lexology | Wed, 08 Apr 2026 | ☐ |
+| 7 | post | [How Stacker Delivers Stories You Can Trust in a World of AI-Generated Content](https://stacker.com/blog/how-stacker-delivers-stories-you-can-trust-in-a-world-of-ai-generated-content) | Stacker | Mon, 06 Apr 2026 | ☐ |
+| 7 | update | [Washington will require labels on AI images, rein in chatbots](https://www.axios.com/local/seattle/2026/04/03/washington-ai-disclosure-law-images-video-watermarks-chatbots-minors) | axios.com | Fri, 03 Apr 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Advertisers Reframe Safety Around AI-Powered Ecosystem](https://letsdatascience.com/news/advertisers-reframe-safety-around-ai-powered-ecosystem-491b2747) | Let's Data Science | Wed, 08 Apr 2026 | ☐ |
+| 6 | monitor | [YouTube Creators Sue Apple Over Alleged Illegal Video Scraping for AI Training](https://opentools.ai/news/youtube-creators-sue-apple-over-alleged-illegal-video-scraping-for-ai-training) | opentools.ai | Tue, 07 Apr 2026 | ☐ |
+| 6 | monitor | [Best AI Video Generators of 2026, Reviewed and Ranked](https://www.cnet.com/tech/services-and-software/best-ai-video-generators/) | CNET | Mon, 06 Apr 2026 | ☐ |
+| 6 | monitor | [Federal Regulators Face Growing Pressure to Define AI-Generated Content as Policy Gap Widens](https://www.altitudesmagazine.com/federal-regulators-face-growing-pressure-define-generated-content/) | Undiscovered America TV | Sat, 04 Apr 2026 | ☐ |
+| 5 | monitor | [Relearning trade secret protection in the age of AI agents](https://law.asia/relearning-trade-secret-protection-ai-agents-age/) | Law.asia | Tue, 07 Apr 2026 | ☐ |
+| 5 | monitor | [OpenAI sunsets Sora: 5 AI video tools you can switch to right now](https://www.msn.com/en-in/money/topstories/openai-sunsets-sora-5-ai-video-tools-you-can-switch-to-right-now/ar-AA1ZmlOy?gemSnapshotKey=GMF0C7905F-snapshot-7&uxmode=ruby) | MSN | Mon, 06 Apr 2026 | ☐ |
+| 5 | monitor | [Meta, Google under attack as court cases bypass 30-year-old legal shield](https://www.cnbc.com/2026/04/03/meta-google-under-attack-court-cases-bypass-30-year-old-legal-shield.html) | CNBC | Fri, 03 Apr 2026 | ☐ |
+| 4 | monitor | [Eluvio Introduces Inline Frame-Accurate Video Intelligence and Next-Gen Eluvio Video Intelligence Editor (EVIE) with New Advanced AI Tools for Agentic Orchestration of Title Libraries and Live Sports at NAB 2026](https://www.prnewswire.com/news-releases/eluvio-introduces-inline-frame-accurate-video-intelligence-and-next-gen-eluvio-video-intelligence-editor-evie-with-new-advanced-ai-tools-for-agentic-orchestration-of-title-libraries-and-live-sports-at-nab-2026-302735290.html) | PR Newswire | Tue, 07 Apr 2026 | ☐ |
+| 4 | monitor | [Campaign ads must disclose use of AI as part of proposed bill](https://www.kplctv.com/2026/04/02/campaign-ads-must-disclose-use-ai-part-proposed-bill/) | KPLC 7 News | Thu, 02 Apr 2026 | ☐ |
+
+---
+
+## Week of April 08, 2026
 *Run: 2026-04-08 · 12 high · 6 monitor · lookback 7 days*
 
 ### 🔴 High Relevance (7–10)
