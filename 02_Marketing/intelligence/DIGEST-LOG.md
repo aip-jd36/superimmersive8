@@ -9,6 +9,11 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of April 08, 2026
+*Run: 2026-04-08 · 0 high · 0 monitor · lookback 7 days*
+
+---
+
 ## Week of April 07, 2026
 *Run: 2026-04-07 · 8 high · 5 monitor · lookback 7 days*
 
