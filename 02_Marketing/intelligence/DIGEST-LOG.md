@@ -9,6 +9,45 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of April 10, 2026
+*Run: 2026-04-10 · 13 high · 11 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Who owns ideas in the AI age?](https://fortune.com/2026/04/08/hachette-ceo-david-shelley-publishing-google-copyright-lawsuit-ai-llm/) | Fortune | Wed, 08 Apr 2026 | ☐ |
+| 9 | post+update | [Apple may have scraped YouTube videos without permission for AI training](https://appleinsider.com/articles/26/04/06/apple-may-have-scraped-youtube-videos-without-permission-for-ai-training) | AppleInsider | Mon, 06 Apr 2026 | ☐ |
+| 9 | post+update | [Brands Adopt ‘No AI’ Disclaimers to Stand Out Amid the Slop](https://www.wsj.com/cmo-today/brands-adopt-no-ai-disclaimers-to-stand-out-amid-the-slop-a92352af) | WSJ | Mon, 06 Apr 2026 | ☐ |
+| 8 | post+update | [Haast Raises $12M Series A to Solve the Compliance Bottleneck Stalling AI-Driven Enterprises](https://pressreleasehub.pa.media/article/haast-raises-12m-series-a-to-solve-the-compliance-bottleneck-stalling-ai-driven-enterprises-70690.html) | PA Media | Thu, 09 Apr 2026 | ☐ |
+| 8 | update | [Haast raises $12M to help legal teams make haste with compliant AI-generated content](https://siliconangle.com/2026/04/09/haast-raises-12m-help-legal-teams-make-haste-compliant-ai-generated-content/) | SiliconANGLE | Thu, 09 Apr 2026 | ☐ |
+| 8 | post | [AI Disclosure in 2026: Recent Developments and Practical Steps for Brands and Influencers.](https://www.dynamisllp.com/knowledge/ai-disclosure-in-2026-recent-developments-and-practical-steps-for-brands-and-influencers) | Dynamis LLP | Wed, 08 Apr 2026 | ☐ |
+| 8 | post | [Could AI ads be exposing your business to risks?](https://www.lexology.com/pro/content/could-ai-ads-be-exposing-your-business-risks) | Lexology | Wed, 08 Apr 2026 | ☐ |
+| 8 | post+update | [YouTube Creators Sue Apple Over Alleged Illegal Video Scraping for AI Training](https://opentools.ai/news/youtube-creators-sue-apple-over-alleged-illegal-video-scraping-for-ai-training) | OpenTools | Tue, 07 Apr 2026 | ☐ |
+| 8 | post+update | [AI disclosure in marketing with WFA AI guidelines](https://www.contentgrip.com/ai-disclosure-guidelines-wfa-marketing/) | ContentGrip | Tue, 07 Apr 2026 | ☐ |
+| 7 | post | [Advertisers Reframe Safety Around AI-Powered Ecosystem](https://letsdatascience.com/news/advertisers-reframe-safety-around-ai-powered-ecosystem-491b2747) | Let's Data Science | Wed, 08 Apr 2026 | ☐ |
+| 7 | post | [KFTC Requires Virtual Figure Labels in AI Ads](https://www.chosun.com/english/market-money-en/2026/04/09/FFEYGVUMU5DFJAKIIT2O5D24RQ/) | 조선일보 | Wed, 08 Apr 2026 | ☐ |
+| 7 | post | [Can AI Labels on Social Media Rebuild Trust?](https://www.impactonnet.com/impact-stories/can-ai-labels-on-social-media-rebuild-trust-13962.html) | IMPACT Magazine | Wed, 08 Apr 2026 | ☐ |
+| 7 | post | [Washington will require labels on AI images, rein in chatbots](https://www.axios.com/local/seattle/2026/04/03/washington-ai-disclosure-law-images-video-watermarks-chatbots-minors) | Axios | Fri, 03 Apr 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Apple accused of copyright infringement over AI training on YouTube videos](https://hi-tech.ua/en/apple-accused-of-copyright-infringement-over-ai-training-on-youtube-videos/) | hi-Tech.ua | Thu, 09 Apr 2026 | ☐ |
+| 6 | monitor | [Brand Safety 2026](https://www.emarketer.com/content/brand-safety-2026) | eMarketer | Wed, 08 Apr 2026 | ☐ |
+| 6 | monitor | [Adverts using AI-generated images of people must disclose use: Fair Trade Commission](https://koreajoongangdaily.joins.com/news/2026-04-08/business/industry/Adverts-using-AIgenerated-images-of-people-must-disclose-use-Fair-Trade-Commission/2564121) | Korea JoongAng Daily | Wed, 08 Apr 2026 | ☐ |
+| 6 | monitor | [South Korea to require disclosure of AI characters in advertisements](https://www.mlex.com/mlex/articles/2462772/south-korea-to-require-disclosure-of-ai-characters-in-advertisements) | MLex | Wed, 08 Apr 2026 | ☐ |
+| 6 | monitor | [Korea Fair Trade Commission Mandates Labels for AI Virtual Characters](https://www.chosun.com/english/market-money-en/2026/04/08/SHH4VC3M6RC73G3IN6GP4HEYWI/) | 조선일보 | Wed, 08 Apr 2026 | ☐ |
+| 6 | monitor | [OpenAI sunsets Sora: 5 AI video tools you can switch to right now](https://www.msn.com/en-in/money/topstories/openai-sunsets-sora-5-ai-video-tools-you-can-switch-to-right-now/ar-AA1ZmlOy?gemSnapshotKey=GMF0C7905F-snapshot-7&uxmode=ruby) | MSN | Mon, 06 Apr 2026 | ☐ |
+| 6 | monitor | [Veo 3.1, Lyria 3 aid Google Vids with higher quality AI-generated content](https://www.msn.com/en-gb/money/technology/veo-3-1-lyria-3-aid-google-vids-with-higher-quality-ai-generated-content/ar-AA204HDe) | MSN | Sat, 04 Apr 2026 | ☐ |
+| 5 | monitor | [Supreme Court Ruling Strengthens Legal Shield for AI, Internet Providers, Legal Expert Says](https://broadbandbreakfast.com/supreme-court-ruling-strengthens-legal-shield-for-ai-internet-providers-legal-expert-says/) | Broadband Breakfast | Wed, 08 Apr 2026 | ☐ |
+| 5 | monitor | [Best AI Video Generators of 2026, Reviewed and Ranked](https://www.cnet.com/tech/services-and-software/best-ai-video-generators/) | CNET | Mon, 06 Apr 2026 | ☐ |
+| 4 | monitor | [Top AI Platforms Pursue Divergent Revenue Models](https://letsdatascience.com/news/top-ai-platforms-pursue-divergent-revenue-models-bc242472) | Let's Data Science | Wed, 08 Apr 2026 | ☐ |
+| 4 | monitor | [Relearning trade secret protection in the age of AI agents](https://law.asia/relearning-trade-secret-protection-ai-agents-age/) | Law.asia | Tue, 07 Apr 2026 | ☐ |
+
+---
+
 ## Week of April 08, 2026
 *Run: 2026-04-08 · 12 high · 9 monitor · lookback 7 days*
 
