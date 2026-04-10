@@ -2,7 +2,9 @@
 
 **Purpose:** Single source of truth for all active leads — agency/brand buyers (LinkedIn) and creators (Instagram). Used for pattern analysis, ICP refinement, and messaging decisions. Pipeline operations will move to Airtable once ICP and messaging are validated.
 
-**Last updated:** April 7, 2026
+**Logging rule (added April 10, 2026):** Every response must be logged — good, bad, or generic. A polite pass, a thumbs-up, a "not for me," a "we don't use AI" — all of it goes in. Campaign and alias must be recorded for every entry. This is the only way to run campaign-level analysis on the full response pool, not just on leads that showed signal. No response is too small to log.
+
+**Last updated:** April 10, 2026
 
 ---
 
@@ -17,14 +19,14 @@
 | B001 | Leimi Zhou | WOMBO | buyer | Followed Up | 2026-04-07 18:00 | Sample (fictional Chain of Title) attached + product feedback question | Await reply | — | MEDIUM | waiting |
 | B002 | Theodor Sandu | McCann/Unilever @ Omnicom | buyer | Followed Up | 2026-04-07 18:00 | Sample (fictional Chain of Title) attached + product feedback question + Calendly [Lilly] | Await reply; book call | — | MEDIUM | waiting |
 | B003 | Hossein Jafari | Wowspot Ltd | buyer | Followed Up | 2026-04-01 | Urban Drift PDF + Runway/Kling gap + asked for call | Nudge — 7 days no reply | — | HIGH | pending |
-| B004 | Troy Macdonald | HyFi Corp | buyer | Followed Up | 2026-04-07 18:00 | Product feedback question + Calendly sent | Await reply; book call | — | MEDIUM | waiting |
-| B005 | Isaac Twidale | We Do Ads | buyer | Call Completed | 2026-03-15 | Discovery call done | Send 3-5 photorealistic portfolio examples | — | HIGH | pending |
+| B004 | Troy Macdonald | HyFi Corp | buyer | Nurture | 2026-04-07 | Replied: "I don't think it's for me at this time. Happy to stay in touch." [Ivy] | Check in Q3 | 2026-07-01 | MONITOR | — |
+| B005 | Isaac Twidale | We Do Ads | buyer | Nurture | 2026-03-15 | Discovery call done — asked for photorealistic portfolio examples | Re-engage as Gear B catalog buyer when Showcase has 5+ films | — | MONITOR | — |
 | B006 | Rawand Latif | ARUBA CREATIVE | buyer | Followed Up | 2026-04-07 18:00 | v4 CaaS explanation + sample attached + Calendly | Await reply; book call | — | MEDIUM | waiting |
-| B007 | Elaine Tan + Joseph Lee | The Media Shop | buyer | Call Completed | 2026-03-18 | Discovery call done | Send thank-you + 1-pager; request Germany intro from Joseph | — | HIGH | pending |
+| B007 | Elaine Tan + Joseph Lee | The Media Shop | buyer | Nurture | 2026-03-18 | Discovery call done — media buying agency, Gear B/C profile not Gear A | Re-engage as catalog/licensing buyer when Showcase has 5+ films; Joseph Germany intro for expansion | — | MONITOR | — |
 | B008 | Barney O'Kelly | AlixPartners | buyer | Followed Up | 2026-04-01 | Urban Drift PDF sent | Nudge — 7 days no reply | — | MEDIUM | pending |
 | B009 | Syed Tabish Hasan | Zedtronix | buyer | Followed Up | 2026-04-01 | v4 framing + Urban Drift + Calendly | Await reply; book call | — | MEDIUM | waiting |
 | B010 | Bee Lin Ang | Stewardship Asia Centre | buyer | Followed Up | 2026-04-01 | Second follow-up + Urban Drift + Calendly | Await reply; book call | — | MEDIUM | waiting |
-| B011 | Hugo Barbera | HumAIn | buyer | Replied-Warm | 2026-04-08 09:00 | Hugo replied positively — already produces compliance reports, asked what materials SI8 needs | Send drafted reply: validate his position, explain materials, format gap, offer compare-notes call | — | HIGH | pending |
+| B011 | Hugo Barbera | HumAIn | buyer | Meeting Requested | 2026-04-10 | Confirmed interest in SI8 Certified — wants to outsource report workflow; proposed meeting after Paris trip (back ~Apr 21) [Ivy] | Confirm meeting week of Apr 21 | 2026-04-21 | HIGH | waiting |
 | B012 | Ivan Ng | Bacon Creatives | buyer | Followed Up | 2026-04-03 | Pivot: SI8 as doc layer; asked about client stage | Await reply; Singapore use case | — | MEDIUM | waiting |
 | B013 | Qaiser Mehmood | ECONROAD International | buyer | Followed Up | 2026-04-01 | Urban Drift PDF + Calendly | Await reply; book call | — | MEDIUM | waiting |
 | B014 | Shahrman Nayan | onedash22 | buyer | Replied | 2026-04-03 | No action taken | Continue sequence msg 3 | — | MEDIUM | pending |
@@ -39,8 +41,23 @@
 | B023 | Amr Hamad | Stackline | buyer | Lukewarm | 2026-04-01 | No action | Follow up after ASA/IAB research complete | — | MONITOR | — |
 | B024 | Chitra J | GrapheneAI | buyer | Followed Up | 2026-04-07 18:00 | Message 2: $499/90-min review + Chain of Title description + Calendly sent | Await reply; book call | — | MEDIUM | waiting |
 | B025 | Aswini Ruidas | MediaX | buyer | Replied-Lukewarm | 2026-04-03 | Ivy confirmed on WhatsApp (+91 6296601182) | India market discovery — send v4 pitch via WhatsApp | 2026-04-10 | HIGH | pending |
+| B026 | Dominic Ho | SYS.Studio | buyer | Nurture | 2026-04-07 | Replied: "I will let you know when we do need this service." [Lilly] | Check in Q3 | 2026-07-01 | MONITOR | — |
+| B027 | Marc Danielle De Guzman | UnaFinancial | buyer | Followed Up | 2026-04-09 | Sample attached + asked for 15-20 min call with JD for product feedback [Lilly] | Await reply; book call with JD | — | MEDIUM | waiting |
+| B028 | Keir Finlow-Bates | Artema LABS | buyer | Not a Fit | 2026-04-07 | Responded with book promotion — CTO, wrong profile for CaaS. [Ivy] | — | — | — | done |
+| B029 | Ron David Ben Ishay | Liquidity Group | buyer | Polite Pass | 2026-04-07 | Replied "Uhno thnx" [Lilly — note: Msg 2 was signed Ivy, persona mismatch] | — | — | — | done |
+| B030 | Matthieu Fernandes | Sensai | buyer | Not a Fit | 2026-04-07 | "No needs atm" + counter-pitched AI automation services. CMO, wrong buyer side. [Vanessa] | — | — | — | done |
+| B031 | Steve Mcpartland | Visually Sonic | buyer | Followed Up | 2026-04-09 | v4 explanation + price + asked about tools used + offered sample or call [Vanessa] | Await reply | — | HIGH | waiting |
+| B032 | Simon Lee | Vantage Branding | buyer | Not Interested | 2026-04-10 | "no thanks" after msg 3 [Lilly] | — | — | — | done |
+| B033 | Tunde Olowo-Ake | Ingenium Communications | buyer | Not a Fit | 2026-04-10 | 👍 reaction only — Lagos, off-geo [Lilly] | — | — | — | done |
+| B034 | Paul L | Excelsior-Studios | buyer | Not a Fit | 2026-04-10 | "We don't use AI to create anything" [Lilly] | — | — | — | done |
+| B035 | Jorge Enueve | ex1t.one | buyer | Polite Pass | 2026-04-10 | "Not for me at the moment" after msg 2 [Ivy] | Revisit Q3 if still active | 2026-09-01 | MONITOR | — |
+| B036 | David Tamayo | Prose on Pixels | buyer | Replied-Warm | 2026-04-10 | "Big network with Legal team dedicated to AI" — aware of US vs global law differences; EU AI Act angle sent [Ivy] | Await reply | — | MEDIUM | waiting |
+| B037 | Mitch Turnbull | University of Bristol | buyer | Not a Fit | 2026-04-10 | Academic researcher — hasn't produced AI for clients [Ivy] | — | — | — | done |
+| B038 | Raúl Pineda Rojas | Monks | buyer | Polite Pass | 2026-04-10 | "Gracias por la información" — Mexico City, off-geo [Vanessa] | — | — | — | done |
+| B039 | Chee Wong | Opus Artz Ltd | buyer | Not a Fit | 2026-04-10 | "Not within our remit" after msg 1 [Vanessa] | — | — | — | done |
+| B040 | Hasan Sarwar | — | buyer | Replied-Warm | 2026-04-10 | "I'd love to see the Example Rights Package" — Vetting Takes Weeks msg 1 [Vanessa] | Send sample Chain of Title | — | MEDIUM | pending |
 | C006 | Essa | — (Hong Kong) | creator | Followed Up | 2026-04-07 20:00 | v4 re-pitch sent via WhatsApp — docs model, revised commission, comp CR codes offered, MyVideo still active | Await reply | — | MEDIUM | waiting |
-| C001 | keeper505 | — | creator | Interested | 2026-03-29 | v4 reply sent | Create COMP-KEEPER in Stripe; send v4 follow-up | 2026-04-06 | HIGH | pending |
+| C001 | keeper505 | — | creator | Followed Up | 2026-04-09 | Follow-up message sent — no reply yet | Await reply; create COMP-KEEPER in Stripe only when she confirms interest | — | MEDIUM | waiting |
 | C002 | @syntaxdiffusion | — | creator | Interested | 2026-03-29 | v4 reply sent | Send v4 follow-up | — | MEDIUM | pending |
 | C003 | @rodszera.ai | — | creator | Interested | 2026-03-29 | v4 reply sent | Send v4 follow-up explaining 2 films is enough | — | MEDIUM | pending |
 | C004 | @absolutely.ai | — | creator | Interested | 2026-03-29 | v4 reply sent | Send v4 follow-up | — | MEDIUM | pending |
@@ -124,7 +141,7 @@
 | **Mainul Islam** | eSaviour Limited | — | London | Campaign A | Replied — Conditional | "ready 1-2 samples first then we will let you know" | None | Re-engage once 2-3 sample works ready |
 | **James Byrne** | BeyondWords | — (ESG reporting) | London | Campaign A | Replied — Conditional | "Can you share some examples so I can understand" | None | Re-engage once samples ready |
 | **Qaiser Mehmood** | ECONROAD International | Director of Business Development | Singapore | Campaign C | Followed Up | "Okay. Do u have any website?" | Apr 1 — follow-up sent with v4 Urban Drift PDF + Calendly (website + v3 PDF sent Mar 15, no reply) | Await reply; book call |
-| **Hugo Barbera** | HumAIn | AI Director | Paris | SI8_Hitting a Wall | Followed Up | Reviews client legal T&Cs before taking projects. "We never got anything rejected in more than 3 years... we work with big agency networks and their legal teams." New: "client legal tells us which models are allowed before we start." | Apr 7 — drafted follow-up: delivery-level doc gap vs pre-project model approval (Chain of Title is for the deliverable, not the intake) | Send drafted follow-up; book call |
+| **Hugo Barbera** | HumAIn | AI Director | Paris | SI8_Hitting a Wall | Meeting Requested | Fully engaged: "if you can do that report for me, it's interesting with the higher price — we only do it when clients ask and it's time-consuming." Wants to meet week of Apr 21 after Paris trip. | Apr 10 — meeting confirmation reply sent [Ivy] | Confirm week of Apr 21; book call |
 | **Ivan Ng** | Bacon Creatives | Creative Consultant | Singapore | SI8_Hitting a Wall | Replied — Warm | "No this has not come up. But one of the creative agencies I consult with may be looking for a new AI partner to bring their AI influencer to life. Is this something you guys do?" | Apr 3 — pivot reply sent: clarified SI8 is documentation layer not production; if agency is building AI influencer, they'll need Chain of Title when it goes live; asked what stage they're at | Await reply — Singapore ICP, has a live client use case |
 | **Leimi Zhou** | WOMBO | Digital Marketing Strategist & Video Artist | London | SI8_Legal Friction | Replied — Lukewarm | "I've never been asked for documentation on my process. Why do you ask? Just curious" | Apr 3 — educational reply: explained IAB January framework, ASA robot puppy ruling, EU AI Act August; offered to send sample | Await reply — WOMBO is an AI company; good market research data point regardless |
 | **Chitra J** | GrapheneAI | Creative Head | Bengaluru, India | SI8_Hitting a Wall | Replied — Warm | "This is exactly what we need! We've been struggling to get our AI-generated content approved by clients." Described exact SI8 pain point unprompted. | None yet | Send Message 2: 90-min review, $499, Chain of Title deliverable, offer 15-min call |
@@ -157,44 +174,56 @@
 
 ### ⚪ Polite Pass — Closed
 
-| Name | Company | Title | Location | Response Summary |
-|------|---------|-------|----------|-----------------|
-| David O'Beirne | Quietly Good | Founder | London | "Not in a position to work with you at the moment, but hope this will change soon." — Nurture potential; warm tone |
-| William Lim | SHEIN | Director, PR APAC | Singapore | "Interesting solution, but no current need" — PR role, not creative/production |
-| George Arbid | Unreal Engine UAE / Ardor Ideas | Lead Organizer | Abu Dhabi | "Not interested right now" |
-| Pauline Sayers | GPS Marketing & Distribution | Director | Woking | "Not for me thank you" |
-| Iona Milne | Reg&Partners | Partnerships Manager | London | "This isn't relevant for me" |
-| Benedict Chow | EFC International | — | Singapore | "Not looking to arrange a call, will keep in mind" |
-| Kimberly Fravil | Mercer | — | Singapore | "No thank you" |
-| Jeevan Thavasukannu | Flash Health | — | Singapore | "Will reach out if needed" |
-| Muhammad Ishaq Khan | Somi Buzz | — | London | "Not in need at the moment" |
-| Troy James Maclean | ASCENDEA | — | Sydney | "No thank you Lily" |
-| Beng Huan Tey | Podium | — | Singapore | Wrong fit |
-| Leopold Cox | Mahleon | — | London | "Not interested but happy to keep in touch" |
-| Jenny Brett | First Brand Kit | — | London | "None of my clients are looking for AI videos right now" |
-| Guy Azouri | Private Investment Group | CTO / Lead AI & Technology Architect | London | "Thanks but not interested" |
-| Cory Warfield | Starchild Music | Chief Growth Officer | Chicago | "It hasn't" (re: legal rejection problem) — graceful exit sent |
-| Barış Buhar | Freelance Motion Designer | Motion Designer | Ankara | "I don't have this problem right now, but I'll definitely write to you when I do" |
-| Carlos Cortiñas | Transmission | — | London | "No thanks Vanessa" — closed Apr 6, 2026 |
+| Name | Company | Title | Location | Campaign | Alias | Response Summary |
+|------|---------|-------|----------|----------|-------|-----------------|
+| David O'Beirne | Quietly Good | Founder | London | — | — | "Not in a position to work with you at the moment, but hope this will change soon." — Nurture potential; warm tone |
+| William Lim | SHEIN | Director, PR APAC | Singapore | — | — | "Interesting solution, but no current need" — PR role, not creative/production |
+| George Arbid | Unreal Engine UAE / Ardor Ideas | Lead Organizer | Abu Dhabi | — | — | "Not interested right now" |
+| Pauline Sayers | GPS Marketing & Distribution | Director | Woking | — | — | "Not for me thank you" |
+| Iona Milne | Reg&Partners | Partnerships Manager | London | — | — | "This isn't relevant for me" |
+| Benedict Chow | EFC International | — | Singapore | — | — | "Not looking to arrange a call, will keep in mind" |
+| Kimberly Fravil | Mercer | — | Singapore | — | — | "No thank you" |
+| Jeevan Thavasukannu | Flash Health | — | Singapore | — | — | "Will reach out if needed" |
+| Muhammad Ishaq Khan | Somi Buzz | — | London | — | — | "Not in need at the moment" |
+| Troy James Maclean | ASCENDEA | — | Sydney | — | — | "No thank you Lily" |
+| Beng Huan Tey | Podium | — | Singapore | — | — | Wrong fit |
+| Leopold Cox | Mahleon | — | London | — | — | "Not interested but happy to keep in touch" |
+| Jenny Brett | First Brand Kit | — | London | — | — | "None of my clients are looking for AI videos right now" |
+| Guy Azouri | Private Investment Group | CTO / Lead AI & Technology Architect | London | — | — | "Thanks but not interested" |
+| Cory Warfield | Starchild Music | Chief Growth Officer | Chicago | Hitting a Wall | Ivy | "It hasn't" (re: legal rejection problem) — graceful exit sent |
+| Barış Buhar | Freelance Motion Designer | Motion Designer | Ankara | — | — | "I don't have this problem right now, but I'll definitely write to you when I do" |
+| Carlos Cortiñas | Transmission | — | London | Hitting a Wall | Vanessa | "No thanks Vanessa" — closed Apr 6, 2026 |
+| Simon Lee | Vantage Branding | Managing & Creative Director | Singapore | Hitting a Wall | Lilly | "no thanks" — after msg 3 |
+| Jorge Enueve | ex1t.one | Creative Director | UK | Hitting a Wall | Ivy | "Thank you, Ivy. However, it's not for me at the moment." — after msg 2 |
+| Raúl Pineda Rojas | Monks | VP Creativo | Mexico City | Blocks AI Campaign | Vanessa | "Gracias por la información Vanessa" — after msg 2 |
+| Ali Thompson | RARE 80 | Director | — | Legal Friction | — | Polite pass — untracked response found in CSV export |
+| Cathy Bracher | Active Planning Leads | Managing Director | — | Legal Friction | — | Polite pass — untracked response found in CSV export |
 
 ---
 
 ### ⛔ Not a Fit — Closed
 
-| Name | Company | Title | Location | Reason |
-|------|---------|-------|----------|--------|
-| Mikhail Rakov | Self-Employed | Audiodrama Director | London | Audio, not video |
-| Mubarak Ali | Human Intelligence Movement / FinTech Academy | Board Advisor | Singapore | Academic/policy, not a buyer |
-| Cove Overley Emba | Toy Exploder | Chief Explosive Agent | Hong Kong | "No plans to incorporate AI video" |
-| David Aston | Clubworld Travel | Social Media Coordinator | London | AR software, not AI video |
-| Richard Clark | boodsta | — | London | Pushback on assumptive opener |
-| Charlie Mcneill Love | afoofa.io | — | London | Pushback on assumptive opener |
-| Starcom / Gavin | Stellantis | — | London | Authenticity concern ("are you a real person?") |
-| Uma Rudd Chia | OH MY STRAWBERRY | — | Singapore | AI creator, not buyer — wrong side of market |
-| Vanesse Ang | VAN Consultancy | — | Singapore | Not in business |
-| Roman Zincenko | IC Publications | Commercial Director | UK | "I don't do AI videos for clients" |
-| Daniel Kwintner | ShowTex Asia | Branch Manager | Tokyo | Prefers organic content; clients share that preference — no AI video use case |
-| Giulia Willcox | Instituto de Tecnologia e Sociedade (ITS Rio) | Professor | Rio de Janeiro | Academic/researcher — not a buyer; educational reply sent; Brazil off-target geography |
+| Name | Company | Title | Location | Campaign | Alias | Reason / Response |
+|------|---------|-------|----------|----------|-------|------------------|
+| Mikhail Rakov | Self-Employed | Audiodrama Director | London | — | — | Audio, not video |
+| Mubarak Ali | Human Intelligence Movement / FinTech Academy | Board Advisor | Singapore | — | — | Academic/policy, not a buyer |
+| Cove Overley Emba | Toy Exploder | Chief Explosive Agent | Hong Kong | — | — | "No plans to incorporate AI video" |
+| David Aston | Clubworld Travel | Social Media Coordinator | London | — | — | AR software, not AI video |
+| Richard Clark | boodsta | — | London | — | — | Pushback on assumptive opener |
+| Charlie Mcneill Love | afoofa.io | — | London | — | — | Pushback on assumptive opener |
+| Starcom / Gavin | Stellantis | — | London | — | — | Authenticity concern ("are you a real person?") |
+| Uma Rudd Chia | OH MY STRAWBERRY | — | Singapore | — | — | AI creator, not buyer — wrong side of market |
+| Vanesse Ang | VAN Consultancy | — | Singapore | — | — | Not in business |
+| Roman Zincenko | IC Publications | Commercial Director | UK | — | — | "I don't do AI videos for clients" |
+| Daniel Kwintner | ShowTex Asia | Branch Manager | Tokyo | — | — | Prefers organic content; clients share that preference — no AI video use case |
+| Giulia Willcox | Instituto de Tecnologia e Sociedade (ITS Rio) | Professor | Rio de Janeiro | — | — | Academic/researcher — not a buyer; educational reply sent; Brazil off-target geography |
+| Paul L | Excelsior-Studios | Co-Founder | London | Blocks AI Campaign | Lilly | "We don't have one because we don't use AI to create anything really." |
+| Tunde Olowo-Ake | Ingenium Communications | Creative Director | Lagos | Blocks AI Campaign | Lilly | 👍 reaction only — Lagos, off-geo |
+| Mitch Turnbull | University of Bristol | Senior Research Associate | Bristol | Hitting a Wall | Ivy | "I've not produced AI generated image content for clients — I would also make sure that I generate an AI disclosure document if I did." |
+| Keir Finlow-Bates | Artema LABS | CTO | — | Hitting a Wall | Ivy | Responded with book promotion — wrong profile for CaaS |
+| Ron David Ben Ishay | Liquidity Group | — | — | Hitting a Wall | Lilly | "Uhno thnx" |
+| Matthieu Fernandes | Sensai | CMO | — | Blocks AI Campaign | Vanessa | "No needs atm" — counter-pitched AI automation services |
+| Chee Wong | Opus Artz Ltd | Creative Director & CEO | London | Blocks AI Campaign | Vanessa | "Hi. not sure, it's not something we encountered or is within our remit" |
 
 ---
 
@@ -250,11 +279,13 @@ The four leads below (keeper505, Chris Vespaziani, Rodolfo Roth, Absolutely Ai) 
 
 *Living analysis layer — updated as patterns emerge. This is the working thinking, not a static summary.*
 
+**⚠️ Source of truth:** This section is derived from `03_Sales/outreach/LINKEDIN-CAMPAIGN-ANALYSIS.md`. When updating the ICP thesis, read that file first — do not define the ICP here and backfill it into the campaign analysis. Data flows one way: LinkedIn responses → campaign analysis → this section. See `03_Sales/SALES-INTELLIGENCE-ARCHITECTURE.md` for the full hierarchy.
+
 ---
 
 ### Buyer ICP (Agency / Brand)
 
-**Last updated: April 4, 2026 — based on 57 named responses across ~1,000+ contacts**
+**Last updated: April 10, 2026 — based on ~65 named responses across ~1,000+ contacts**
 
 ---
 
@@ -262,9 +293,9 @@ The four leads below (keeper505, Chris Vespaziani, Rodolfo Roth, Absolutely Ai) 
 
 | Location | Warm/Hot/Conditional | Polite Pass | Not a Fit | Signal Quality |
 |----------|---------------------|-------------|-----------|----------------|
-| **London** | 8 | 7 | 4 | **High** — when they respond, they mean it; Leimi Zhou (WOMBO) adds AI company signal |
-| **Singapore** | 3 (Ivan Ng = warm pivot; others wrong type) | 5 | 2 | Rising — Ivan Ng is first Singapore lead with a live client use case |
-| **Paris / EU** | 1 (Hugo Barbera — warm) | 0 | 0 | New signal — EU AI Act August deadline opening EU as secondary geography |
+| **London** | 8 | 9 | 6 | **High** — when they respond, they mean it; Leimi Zhou (WOMBO) adds AI company signal; April batch added Paul L (no AI), Jorge Enueve (soft pass), Chee Wong (not in remit) |
+| **Singapore** | 3 (Ivan Ng = warm pivot; others wrong type) | 6 | 2 | Rising — Ivan Ng is first Singapore lead with a live client use case; Simon Lee (Vantage Branding, MD) hard passed Apr 10 — doesn't change verdict |
+| **Paris / EU** | 2 (Hugo Barbera — meeting requested; David Tamayo — probe sent) | 0 | 0 | Growing signal — EU AI Act August deadline; Hugo confirmed interest Apr 10; David Tamayo (Prose on Pixels, Creative AI Director) engaged with EU law awareness; await his reply |
 | Miami / US | 1 (Troy Macdonald — conditional) | 0 | 0 | Isolated — US off-strategy Year 1, but responds when pain is real |
 | India | 2 (Chitra J = warm; Aswini = off-sector) | 0 | 1 | Emerging signal — Chitra unprompted described exact SI8 pain. Future discovery test flagged. Not Year 1 primary. |
 | Hong Kong | 0 | 0 | 1 | Too small sample |
@@ -337,6 +368,9 @@ The four leads below (keeper505, Chris Vespaziani, Rodolfo Roth, Absolutely Ai) 
 
 **High-value use case to target explicitly — new (April 2026):**
 > **Any agency or studio building AI influencer campaigns (synthetic avatars for ongoing brand use).** This is an IAB mandatory disclosure trigger. Documentation complexity is higher (persona ownership, likeness, ongoing use rights), deal value is higher, and urgency is clearer than a one-off campaign video.
+
+**3rd conversion pathway — confirmed April 10, 2026 (Hugo Barbera signal):**
+> **AI Director or practitioner at an AI-specialist agency who already produces Chain of Title type reports themselves but finds it costly or time-consuming.** These contacts answer "no" to "do you have this problem?" because they've solved it informally. The entry point is not the compliance gap — it's workflow efficiency. "We only do it when clients ask and it's time-consuming" = the outsource signal. Different opener needed: focus on whether their current process produces documentation that travels with the file and satisfies the IAB framework's specific requirements, not whether they have a compliance problem.
 
 **Positive signals (qualify in):**
 - London-based (primary) or EU-facing (secondary, especially Paris/Amsterdam/Hamburg)

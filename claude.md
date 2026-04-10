@@ -647,7 +647,9 @@ Traditional lawyers are conservative and don't trust automation — BUT they're 
 | **Revenue Model v4** | `01_Business/financials/REVENUE_MODEL_v4.md` | Three-gear economics, unit economics, projections |
 | **Competitive Analysis (CaaS)** | `01_Business/research/COMPETITIVE_ANALYSIS_CAAS_2026.md` | Updated competitive landscape for CaaS model |
 | **Customer Discovery Log** | `01_Business/research/CUSTOMER-DISCOVERY-LOG.md` | Chronological record of market signals + conversations that drove v1→v4 product decisions; source doc for investor memos + blog posts |
-| **CRM** | `03_Sales/CRM.md` | All active leads: agency/brand buyers (LinkedIn) + creators (IG); pipeline stages, ICP analysis, messaging analysis; single source of truth pre-Airtable |
+| **CRM** | `03_Sales/CRM.md` | **Warm/active leads only** — pipeline stages, urgency, next action, follow_up_by; Section 3 = ICP thesis. NOT a log of all responses — polite passes and not-a-fits live in Supabase CSV only. Read by daily digest. |
+| **Sales response database** | Supabase CSV export (local, `~/Desktop/`) | ALL LinkedIn responses — good, bad, generic. Full conversation, campaign, alias, message number, timestamp. Export every 1-3 days. Source of truth for full-pool campaign analysis. |
+| **Sales Intelligence Architecture** | `03_Sales/SALES-INTELLIGENCE-ARCHITECTURE.md` | Full data hierarchy: CSV → campaign analysis → ICP thesis → campaign playbook. Data flows one direction only. |
 | **Competitor Deep Dive: FADEL** | `01_Business/research/COMPETITOR-FADEL-ANALYSIS.md` | Adjacent player — enterprise IP/royalty mgmt; validates category, not a direct competitor (Mar 2026) |
 | **ASA & IAB 2026 Research** | `01_Business/research/ASA-IAB-2026-AI-CONTENT-RESEARCH.md` | 2026 regulatory tailwinds: IAB framework (Jan 2026), ASA enforcement, EU AI Act Aug 2026. SI8 positioning + sales applications (Apr 2026) |
 | Business Plan v3 (superseded) | `01_Business/plans/BUSINESS_PLAN_v3.md` | Rights Agency + AI Product Placement (Feb-Mar 2026) |

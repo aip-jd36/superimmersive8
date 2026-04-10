@@ -2,7 +2,7 @@
 
 **Purpose:** Track the outreach personas used across LinkedIn and Instagram campaigns. When drafting follow-up messages, always match the persona that initiated the conversation. Persona name is recorded in the CRM and noted in the alias field of LinkedIn responses JD shares.
 
-**Last updated:** April 7, 2026
+**Last updated:** April 9, 2026
 
 ---
 
@@ -57,6 +57,9 @@
 - Product-feedback oriented: "Does this match what you'd expect...?"
 - Context-specific: references the recipient's company or client by name where possible
 - Open-ended: invites a real answer, not a yes/no
+
+**Sample follow-up goal (post-sample send):**
+When a sample has been sent, the primary goal shifts to getting product feedback — not just booking a call. The CTA should ask for JD directly: "Would you have 15-20 minutes to talk with my CEO JD, who is building the report process?" Frame it as feedback, not a sales call. This applies to any lead who has received the sample Chain of Title.
 
 **What to avoid:**
 - Warm-up phrases ("Hope you're well", "I wanted to reach out")

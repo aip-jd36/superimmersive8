@@ -118,6 +118,8 @@ All 4 campaigns share the same Message 2–4 sequence. Only Message 1 / connecti
 
 ## ICP (Ideal Customer Profile)
 
+**⚠️ This section is a downstream summary.** Primary ICP data lives in `03_Sales/outreach/LINKEDIN-CAMPAIGN-ANALYSIS.md` (raw campaign stats) and `03_Sales/CRM.md` Section 3 (synthesized thesis). Update those files first — then sync this section. See `03_Sales/SALES-INTELLIGENCE-ARCHITECTURE.md` for the full hierarchy.
+
 **Updated: April 4, 2026 — based on N=57 named responses**
 
 **Primary:**
