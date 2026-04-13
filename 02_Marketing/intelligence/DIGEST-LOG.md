@@ -9,6 +9,39 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of April 13, 2026
+*Run: 2026-04-13 · 12 high · 6 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Could AI ads be exposing your business to risks?](https://www.lexology.com/pro/content/could-ai-ads-be-exposing-your-business-risks) | Lexology | Wed, 08 Apr 2026 | ☐ |
+| 9 | post+update | [Who owns ideas in the AI age?](https://fortune.com/2026/04/08/hachette-ceo-david-shelley-publishing-google-copyright-lawsuit-ai-llm/) | Fortune | Wed, 08 Apr 2026 | ☐ |
+| 9 | post+update | [“A-Eye” on Coverage: Maximizing Insurance for AI Risks Amid Emerging Exclusions](https://www.jonesday.com/en/insights/2026/04/aeye-on-coverage-maximizing-insurance-for-ai-risks-amid-emerging-exclusions) | Jones Day | Tue, 07 Apr 2026 | ☐ |
+| 8 | post+update | [OpenAI retires Sora: the AI ​​video platform will continue to operate in Spain for another year](https://veritas.enc.edu/technology/openai-retires-sora-the-ai-video-platform-will-continue-to-operate-in-spain-for-another-year/) | MVNU | Sat, 11 Apr 2026 | ☐ |
+| 8 | post+update | [Apple accused of copyright infringement over AI training on YouTube videos](https://hi-tech.ua/en/apple-accused-of-copyright-infringement-over-ai-training-on-youtube-videos/) | hi-Tech.ua | Thu, 09 Apr 2026 | ☐ |
+| 8 | post+update | [KFTC Requires Virtual Figure Labels in AI Ads](https://www.chosun.com/english/market-money-en/2026/04/09/FFEYGVUMU5DFJAKIIT2O5D24RQ/) | 조선일보 | Wed, 08 Apr 2026 | ☐ |
+| 8 | post+update | [AI Disclosure in 2026: Recent Developments and Practical Steps for Brands and Influencers.](https://www.dynamisllp.com/knowledge/ai-disclosure-in-2026-recent-developments-and-practical-steps-for-brands-and-influencers) | Dynamis LLP | Wed, 08 Apr 2026 | ☐ |
+| 8 | update | [Whose AI Is It Anyway? Key Developments in the Evolving Relationship Between AI and IP](https://www.skadden.com/insights/publications/2026/04/insights-april-2026/whose-ai-is-it-anyway) | Skadden, Arps, Slate, Meagher & Flom LLP | Wed, 08 Apr 2026 | ☐ |
+| 8 | post+update | [Brands Adopt ‘No AI’ Disclaimers to Stand Out Amid the Slop](https://www.wsj.com/cmo-today/brands-adopt-no-ai-disclaimers-to-stand-out-amid-the-slop-a92352af) | WSJ | Mon, 06 Apr 2026 | ☐ |
+| 7 | post+update | [China Issues Draft Regulations on AI Copyright Infringement](https://www.sixthtone.com/news/1018405/china-issues-draft-regulations-on-ai-copyright-infringement) | Sixth Tone | Fri, 10 Apr 2026 | ☐ |
+| 7 | update | [Brand Safety 2026](https://www.emarketer.com/content/brand-safety-2026) | eMarketer | Wed, 08 Apr 2026 | ☐ |
+| 7 | post+update | [Apple may have scraped YouTube videos without permission for AI training](https://appleinsider.com/articles/26/04/06/apple-may-have-scraped-youtube-videos-without-permission-for-ai-training) | AppleInsider | Mon, 06 Apr 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | update | [Haast Closes $12M Series A to Solve the Compliance Bottleneck Stalling AI-Driven Enterprises](https://theaiinsider.tech/2026/04/10/haast-closes-12m-series-a-to-solve-the-compliance-bottleneck-stalling-ai-driven-enterprises/) | AI Insider | Fri, 10 Apr 2026 | ☐ |
+| 6 | monitor | [The top 5 AI marketing activations to know about right now](https://adage.com/creativity/campaigns-commercials/aa-top-5-ai-google-meta-amazon-lexus/) | Ad Age | Thu, 09 Apr 2026 | ☐ |
+| 6 | monitor | [Relearning trade secret protection in the age of AI agents](https://law.asia/relearning-trade-secret-protection-ai-agents-age/) | Law.asia | Tue, 07 Apr 2026 | ☐ |
+| 5 | monitor | [Transitioning from Automated Language to Brand-Safe Content: AI Content Workflows](https://hrnews.co.uk/transitioning-from-automated-language-to-brand-safe-content-ai-content-workflows/) | hrnews.co.uk | Fri, 10 Apr 2026 | ☐ |
+| 5 | monitor | [Advertisers Reframe Safety Around AI-Powered Ecosystem](https://letsdatascience.com/news/advertisers-reframe-safety-around-ai-powered-ecosystem-491b2747) | Let's Data Science | Wed, 08 Apr 2026 | ☐ |
+| 4 | monitor | [HappyHorse-1.0 Crowned #1 Open-Source AI Video Generator, Tops Artificial Analysis Global Leaderboard](https://www.24-7pressrelease.com/press-release/533676/happyhorse-10-crowned-1-open-source-ai-video-generator-tops-artificial-analysis-global-leaderboard) | 24-7 Press Release Newswire | Fri, 10 Apr 2026 | ☐ |
+
+---
+
 ## Week of April 10, 2026
 *Run: 2026-04-10 · 13 high · 11 monitor · lookback 7 days*
 
