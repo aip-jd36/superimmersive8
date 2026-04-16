@@ -9,6 +9,31 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of April 16, 2026
+*Run: 2026-04-16 · 7 high · 3 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 8 | post+update | [The Insurance Implications of AI in Your Business- Is Your Current Coverage Keeping Up?](https://natlawreview.com/article/insurance-implications-ai-your-business-your-current-coverage-keeping) | The National Law Review | Wed, 15 Apr 2026 | ☐ |
+| 8 | post+update | [Two free video generations: Shutterstock adds Google, Runway AI](https://www.stocktitan.net/news/SSTK/shutterstock-expands-commercial-ready-gen-ai-solutions-with-ai-video-2svvako1ufs6.html) | Stock Titan | Wed, 15 Apr 2026 | ☐ |
+| 8 | post+update | [AI-Generated Animation: Implement Legal Regulations to Protect Copyright Holders](https://japannews.yomiuri.co.jp/editorial/yomiuri-editorial/20260413-321909/) | The Japan News | Mon, 13 Apr 2026 | ☐ |
+| 8 | post+update | [Apple accused of copyright infringement over AI training on YouTube videos](https://hi-tech.ua/en/apple-accused-of-copyright-infringement-over-ai-training-on-youtube-videos/) | hi-Tech.ua | Thu, 09 Apr 2026 | ☐ |
+| 7 | post+update | [Shutterstock Expands Commercial-Ready GenAI Solutions with AI Video Generator](https://www.prnewswire.com/news-releases/shutterstock-expands-commercial-ready-genai-solutions-with-ai-video-generator-302742501.html) | PR Newswire | Wed, 15 Apr 2026 | ☐ |
+| 7 | post | [Top Legal Issues Facing Fashion & Retail in 2026 – Part I](https://www.thefashionlaw.com/top-legal-issues-facing-fashion-retail-in-2026-part-i/) | The Fashion Law | Tue, 14 Apr 2026 | ☐ |
+| 7 | post+update | [China Issues Draft Regulations on AI Copyright Infringement](https://www.sixthtone.com/news/1018405/china-issues-draft-regulations-on-ai-copyright-infringement) | Sixth Tone | Fri, 10 Apr 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [80% of Marketers Use AI, Yet Usable Content Remains a Challenge](https://news.designrush.com/why-80-percent-marketers-struggle-usable-ai-generated-content) | DesignRush | Wed, 15 Apr 2026 | ☐ |
+| 6 | monitor | [The AI Playbook: What sports stars must do now to protect their IP in the age of artificial intelligence](https://www.pryorcashman.com/publications/the-ai-playbook-what-sports-stars-must-do-now-to-protect-their-ip-in-the-age-of-artificial-intelligence) | Pryor Cashman LLP | Mon, 13 Apr 2026 | ☐ |
+| 4 | monitor | [Presidio Expands Resonate with Modular AI Solutions for Sports, Broadcasting, and News Media](https://markets.businessinsider.com/news/stocks/presidio-expands-resonate-with-modular-ai-solutions-for-sports-broadcasting-and-news-media-1036025014) | markets.businessinsider.com | Wed, 15 Apr 2026 | ☐ |
+
+---
+
 ## Week of April 13, 2026
 *Run: 2026-04-13 · 12 high · 6 monitor · lookback 7 days*
 
