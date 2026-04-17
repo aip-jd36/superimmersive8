@@ -26,7 +26,7 @@
 | B008 | Barney O'Kelly | AlixPartners | buyer | Followed Up | 2026-04-01 | Urban Drift PDF sent | Nudge — 7 days no reply | — | MEDIUM | pending |
 | B009 | Syed Tabish Hasan | Zedtronix | buyer | Followed Up | 2026-04-01 | v4 framing + Urban Drift + Calendly | Await reply; book call | — | MEDIUM | waiting |
 | B010 | Bee Lin Ang | Stewardship Asia Centre | buyer | Followed Up | 2026-04-01 | Second follow-up + Urban Drift + Calendly | Await reply; book call | — | MEDIUM | waiting |
-| B011 | Hugo Barbera | HumAIn | buyer | Meeting Requested | 2026-04-10 | Confirmed interest in SI8 Certified — wants to outsource report workflow; proposed meeting after Paris trip (back ~Apr 21) [Ivy] | Confirm meeting week of Apr 21 | 2026-04-21 | HIGH | waiting |
+| B011 | Hugo Barbera | HumAIn | buyer | Meeting Requested | 2026-04-17 | Sent availability for Tue/Thu 10am Paris time — proposed JD meeting [Ivy] | Await confirmation; book Tue Apr 22 or Thu Apr 24 | 2026-04-21 | HIGH | waiting |
 | B012 | Ivan Ng | Bacon Creatives | buyer | Followed Up | 2026-04-03 | Pivot: SI8 as doc layer; asked about client stage | Await reply; Singapore use case | — | MEDIUM | waiting |
 | B013 | Qaiser Mehmood | ECONROAD International | buyer | Followed Up | 2026-04-01 | Urban Drift PDF + Calendly | Await reply; book call | — | MEDIUM | waiting |
 | B014 | Shahrman Nayan | onedash22 | buyer | Replied | 2026-04-03 | No action taken | Continue sequence msg 3 | — | MEDIUM | pending |
@@ -58,12 +58,12 @@
 | B040 | Hasan Sarwar | — | buyer | Replied-Warm | 2026-04-10 | "I'd love to see the Example Rights Package" — Vetting Takes Weeks msg 1 [Vanessa] | Send sample Chain of Title | — | MEDIUM | pending |
 | B041 | Nourhan Mostafa | Ai Studio | buyer | Replied-Warm | 2026-04-13 | Described compliance process in detail + asked question back — "Creative Director – AI Content" title, strong signal; Egypt off-geo [Vanessa, Blocks AI msg#1] | Reply + explore use case; off-geo but high ICP signal | — | MEDIUM | pending |
 | B042 | Shray Vaidya | Creative Chimps | buyer | Nurture | 2026-04-13 | "It might be in the future. Let's keep in touch." — soft nurture [Blocks AI msg#1, London] | Check in Q3 | 2026-07-01 | MONITOR | — |
-| B043 | Luke Brady | Sublime Animations Ltd | buyer | Replied-Warm | 2026-04-13 | Gave phone number + "available anytime" — Legal Friction msg#1 [UK] | Call Luke — gave direct number | — | HIGH | pending |
-| B044 | Shaun Yeo | Reel Loco Productions | buyer | Replied-Warm | 2026-04-13 | Wants 15-min call next week — Hitting a Wall msg#2 [Singapore] | Schedule 15-min call | — | HIGH | pending |
-| B045 | Mike Harris | Seenit | buyer | Replied-Warm | 2026-04-13 | "open to finding out more and a short call" — Legal Friction msg#2 [London] | Book short call | — | HIGH | pending |
+| B043 | Luke Brady | Sublime Animations Ltd | buyer | Meeting Requested | 2026-04-17 | Explained Chain of Title value add; proposed JD call next week 9:30 or 10am UK time [Ivy] | Await confirmation; JD to call at agreed time | — | HIGH | waiting |
+| B044 | Shaun Yeo | Reel Loco Productions | buyer | Followed Up | 2026-04-18 | Sent Calendly link for JD call [Lilly] | Await booking | — | HIGH | waiting |
+| B045 | Mike Harris | Seenit | buyer | Meeting Requested | 2026-04-18 | Proposed Mon Apr 20, 9am or 10am UK time for JD call [Ivy] | Await confirmation | 2026-04-20 | HIGH | waiting |
 | B046 | Kd Pascall | Bluvision Studios | buyer | Replied-Warm | 2026-04-13 | "Of recent yes, before it was never an issue" — Legal Friction msg#1 [London] | Reply + explore current use case | — | MEDIUM | pending |
-| B047 | Hugo Faustino | Canon EMEA | buyer | Replied-Warm | 2026-04-13 | "legal/compliance require documentation BEFOREHAND" — enterprise validation — Legal Friction msg#1 [Amsterdam] | Send sample + book call | — | HIGH | pending |
-| B048 | Piotr Nierobisz | Munchingsquare | buyer | Replied-Warm | 2026-04-13 | "would not pitch AI campaign without clearing with client legal" — Blocks AI msg#1 [UK] | Reply + send sample | — | HIGH | pending |
+| B047 | Hugo Faustino | Canon EMEA | buyer | Followed Up | 2026-04-18 | Validated pre-production gap; sent sample link + offered JD call [Vanessa] | Await reply; book call | — | HIGH | waiting |
+| B048 | Piotr Nierobisz | Munchingsquare | buyer | Followed Up | 2026-04-18 | Positioned Chain of Title as the legal clearance doc; sent sample + offered JD call [Vanessa] | Await reply; book call | — | HIGH | waiting |
 | B049 | Ruth Teasdale | Motion World Ltd | buyer | Replied-Warm | 2026-04-13 | P2: described licensed package process — Legal Friction [UK] | Reply + position SI8 as structured version of their informal process | — | MEDIUM | pending |
 | B050 | Julia N'Diamoi | T&P | buyer | Replied-Warm | 2026-04-13 | P2: vetted AI tool stack process — Legal Friction msg#1 [UK] | Reply + position SI8 as documentation layer | — | MEDIUM | pending |
 | B051 | Kiel Robinson | Ok let's play Studios | buyer | Replied-Warm | 2026-04-13 | P2: raw materials + metadata tracking — Legal Friction msg#1 [London] | Reply + send sample | — | MEDIUM | pending |
