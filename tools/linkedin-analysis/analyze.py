@@ -208,6 +208,11 @@ def load_csv(path: str) -> list:
         if alias in ('LH',): alias = 'Lilly'
         if alias in ('IL',): alias = 'Ivy'
         r['_alias'] = alias
+        # Target list name (audience list) — distinct from sequence/message name
+        target_list = r.get('target_list_name', '') or ''
+        # Strip "SI8_RV_R4LI_" prefix for readability
+        target_list = re.sub(r'^SI8_RV_R\d+[A-Z]*_', '', target_list)
+        r['_target_list'] = target_list if target_list else 'Unknown'
     return rows
 
 
@@ -352,13 +357,17 @@ def generate_report(rows: list, csv_path: str) -> str:
     a(f"")
 
     # -----------------------------------------------------------------------
-    # PART 3: CAMPAIGN MESSAGE ANALYSIS
+    # PART 3: CAMPAIGN MESSAGE + AUDIENCE LIST ANALYSIS
     # -----------------------------------------------------------------------
-    a(f"## Part 3: Campaign Message Performance")
+    a(f"## Part 3: Campaign Performance")
     a(f"")
-    a(f"*Each campaign message maps to a hypothesis about what pain resonates.*")
+
+    # --- 3a: Message sequence performance ---
+    a(f"### 3a. Message Sequence Performance")
     a(f"")
-    a(f"| Campaign | Version | N | Warm | Warm% | Pass% | NAF% | Status | Hypothesis |")
+    a(f"*Each sequence maps to a hypothesis about what pain resonates.*")
+    a(f"")
+    a(f"| Sequence | Version | N | Warm | Warm% | Pass% | NAF% | Status | Hypothesis |")
     a(f"|----------|---------|---|------|-------|-------|------|--------|-----------|")
     camp_data = dim_table(rows, lambda r: r['campaign_name'])
     for camp, d in sorted(camp_data.items(), key=lambda x: -(x[1].get('warm', 0) / max(x[1]['total'], 1))):
@@ -367,9 +376,26 @@ def generate_report(rows: list, csv_path: str) -> str:
         w = d['warm']
         p = d['pass']
         naf = d['naf']
-        # Shorten campaign name for display
         short_name = meta['name']
         a(f"| {short_name} | {meta['version']} | {n} | {w} | {w/n*100:.0f}% | {p/n*100:.0f}% | {naf/n*100:.0f}% | {meta['status']} | {meta['hypothesis'][:60]}... |")
+    a(f"")
+
+    # --- 3b: Audience list performance ---
+    a(f"### 3b. Audience List Performance")
+    a(f"")
+    a(f"*Performance by target audience list (target_list_name). AI-filtered vs. broad lists compared here.*")
+    a(f"")
+    a(f"| Audience List | N | Warm | Warm% | Pass% | NAF% | Confidence | Verdict |")
+    a(f"|--------------|---|------|-------|-------|------|------------|---------|")
+    list_data = dim_table(rows, lambda r: r['_target_list'])
+    for lst, d in sorted(list_data.items(), key=lambda x: -(x[1].get('warm', 0) / max(x[1]['total'], 1))):
+        n = d['total']
+        w = d['warm']
+        p = d['pass']
+        naf = d['naf']
+        conf = confidence_score(n, w)
+        verdict = scale_verdict(n, w, conf)
+        a(f"| {lst} | {n} | {w} | {w/n*100:.0f}% | {p/n*100:.0f}% | {naf/n*100:.0f}% | {conf} | {verdict} |")
     a(f"")
 
     # --- Message number breakdown ---
@@ -456,7 +482,7 @@ def generate_report(rows: list, csv_path: str) -> str:
     for r in warm_rows:
         reply_preview = r['_reply'].replace('\n', ' ').strip()[:250]
         a(f"**{r['lead_name']}** · {r['lead_title']} · {r.get('lead_company', '')} · {r['_geo']}  ")
-        a(f"Campaign: `{r['campaign_name']}` · Msg #{r.get('sequence_message_number', '?')} · Alias: {r['_alias']}  ")
+        a(f"Sequence: `{r['campaign_name']}` · List: `{r['_target_list']}` · Msg #{r.get('sequence_message_number', '?')} · Alias: {r['_alias']}  ")
         a(f"Pathway: `{r['_pathway']}`  ")
         a(f"> {reply_preview}")
         a(f"")
@@ -491,13 +517,23 @@ def generate_report(rows: list, csv_path: str) -> str:
         a(f"- **{geo}** (n={n}, warm={w/n*100:.0f}%): {verdict}")
     a(f"")
 
-    # Campaign verdicts
-    a(f"### Campaign Messages")
+    # Campaign message verdicts
+    a(f"### Campaign Sequences")
     for camp, d in sorted(camp_data.items(), key=lambda x: -(x[1].get('warm', 0) / max(x[1]['total'], 1))):
         meta = get_campaign_meta(camp)
         n = d['total']
         w = d['warm']
         a(f"- **{meta['name']}** (n={n}, warm={w/n*100:.0f}%): {meta['status']}")
+    a(f"")
+
+    # Audience list verdicts
+    a(f"### Audience Lists")
+    for lst, d in sorted(list_data.items(), key=lambda x: -(x[1].get('warm', 0) / max(x[1]['total'], 1))):
+        n = d['total']
+        w = d['warm']
+        conf = confidence_score(n, w)
+        verdict = scale_verdict(n, w, conf)
+        a(f"- **{lst}** (n={n}, warm={w/n*100:.0f}%): {verdict}")
     a(f"")
     a(f"---")
     a(f"")

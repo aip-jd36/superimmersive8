@@ -182,6 +182,12 @@ def classify_reply(reply: str) -> str:
         if p in t:
             return 'naf'
 
+    # Negated warm signals — "not interested" contains "interested" → must catch before warm loop
+    NEGATED_WARM = ["not interested", "isn't interested", "no interest"]
+    for neg in NEGATED_WARM:
+        if neg in t:
+            return 'pass'
+
     # Warm before pass — genuine interest beats hedging language
     for p in WARM_PATTERNS:
         if p in t:
