@@ -4,7 +4,7 @@
 
 **Logging rule (added April 10, 2026):** Every response must be logged — good, bad, or generic. A polite pass, a thumbs-up, a "not for me," a "we don't use AI" — all of it goes in. Campaign and alias must be recorded for every entry. This is the only way to run campaign-level analysis on the full response pool, not just on leads that showed signal. No response is too small to log.
 
-**Last updated:** April 10, 2026
+**Last updated:** April 13, 2026
 
 ---
 
@@ -56,6 +56,21 @@
 | B038 | Raúl Pineda Rojas | Monks | buyer | Polite Pass | 2026-04-10 | "Gracias por la información" — Mexico City, off-geo [Vanessa] | — | — | — | done |
 | B039 | Chee Wong | Opus Artz Ltd | buyer | Not a Fit | 2026-04-10 | "Not within our remit" after msg 1 [Vanessa] | — | — | — | done |
 | B040 | Hasan Sarwar | — | buyer | Replied-Warm | 2026-04-10 | "I'd love to see the Example Rights Package" — Vetting Takes Weeks msg 1 [Vanessa] | Send sample Chain of Title | — | MEDIUM | pending |
+| B041 | Nourhan Mostafa | Ai Studio | buyer | Replied-Warm | 2026-04-13 | Described compliance process in detail + asked question back — "Creative Director – AI Content" title, strong signal; Egypt off-geo [Vanessa, Blocks AI msg#1] | Reply + explore use case; off-geo but high ICP signal | — | MEDIUM | pending |
+| B042 | Shray Vaidya | Creative Chimps | buyer | Nurture | 2026-04-13 | "It might be in the future. Let's keep in touch." — soft nurture [Blocks AI msg#1, London] | Check in Q3 | 2026-07-01 | MONITOR | — |
+| B043 | Luke Brady | Sublime Animations Ltd | buyer | Replied-Warm | 2026-04-13 | Gave phone number + "available anytime" — Legal Friction msg#1 [UK] | Call Luke — gave direct number | — | HIGH | pending |
+| B044 | Shaun Yeo | Reel Loco Productions | buyer | Replied-Warm | 2026-04-13 | Wants 15-min call next week — Hitting a Wall msg#2 [Singapore] | Schedule 15-min call | — | HIGH | pending |
+| B045 | Mike Harris | Seenit | buyer | Replied-Warm | 2026-04-13 | "open to finding out more and a short call" — Legal Friction msg#2 [London] | Book short call | — | HIGH | pending |
+| B046 | Kd Pascall | Bluvision Studios | buyer | Replied-Warm | 2026-04-13 | "Of recent yes, before it was never an issue" — Legal Friction msg#1 [London] | Reply + explore current use case | — | MEDIUM | pending |
+| B047 | Hugo Faustino | Canon EMEA | buyer | Replied-Warm | 2026-04-13 | "legal/compliance require documentation BEFOREHAND" — enterprise validation — Legal Friction msg#1 [Amsterdam] | Send sample + book call | — | HIGH | pending |
+| B048 | Piotr Nierobisz | Munchingsquare | buyer | Replied-Warm | 2026-04-13 | "would not pitch AI campaign without clearing with client legal" — Blocks AI msg#1 [UK] | Reply + send sample | — | HIGH | pending |
+| B049 | Ruth Teasdale | Motion World Ltd | buyer | Replied-Warm | 2026-04-13 | P2: described licensed package process — Legal Friction [UK] | Reply + position SI8 as structured version of their informal process | — | MEDIUM | pending |
+| B050 | Julia N'Diamoi | T&P | buyer | Replied-Warm | 2026-04-13 | P2: vetted AI tool stack process — Legal Friction msg#1 [UK] | Reply + position SI8 as documentation layer | — | MEDIUM | pending |
+| B051 | Kiel Robinson | Ok let's play Studios | buyer | Replied-Warm | 2026-04-13 | P2: raw materials + metadata tracking — Legal Friction msg#1 [London] | Reply + send sample | — | MEDIUM | pending |
+| B052 | Loewe Chung Nin Lee | — | buyer | Replied-Warm | 2026-04-13 | "started seeing this come up more recently" — Legal Friction msg#1 [UK] | Reply + send sample | — | MEDIUM | pending |
+| B053 | Graham Vincent | grigio:london | buyer | Replied-Warm | 2026-04-13 | "Yes, of course" — confirms legal teams ask — Legal Friction msg#1 [London] | Reply + send sample | — | MEDIUM | pending |
+| B054 | Steve Cholerton | Sentient Pictures | buyer | Nurture | 2026-04-13 | "one client has asked for metadata" — Hitting a Wall msg#1 | Monitor; re-engage when more clients ask | — | MONITOR | — |
+| B055 | Owen Bryant | — | buyer | Nurture | 2026-04-13 | CD, not creating AI videos now but open to future | Check in Q3 | 2026-07-01 | MONITOR | — |
 | C006 | Essa | — (Hong Kong) | creator | Followed Up | 2026-04-07 20:00 | v4 re-pitch sent via WhatsApp — docs model, revised commission, comp CR codes offered, MyVideo still active | Await reply | — | MEDIUM | waiting |
 | C001 | keeper505 | — | creator | Followed Up | 2026-04-09 | Follow-up message sent — no reply yet | Await reply; create COMP-KEEPER in Stripe only when she confirms interest | — | MEDIUM | waiting |
 | C002 | @syntaxdiffusion | — | creator | Interested | 2026-03-29 | v4 reply sent | Send v4 follow-up | — | MEDIUM | pending |
@@ -105,15 +120,15 @@
 |-------|-------|
 | Call Completed | 2 |
 | Call Booked | 0 |
-| Replied — Hot (follow-up urgent) | 1 |
-| Replied — Warm | 6 |
+| Replied — Hot (follow-up urgent) | 2 |
+| Replied — Warm | 16 |
 | Replied — Conditional | 4 |
 | Replied — Lukewarm | 7 |
-| Nurture | 3 |
-| Polite Pass | 20 |
-| Not a Fit | 10 |
-| **Total Named Responses** | 59 |
-| **Total Leads Contacted** | ~1,000+ |
+| Nurture | 5 |
+| Polite Pass | 31 |
+| Not a Fit | 12 |
+| **Total Named Responses** | 86 |
+| **Total Leads Contacted** | ~1,100+ |
 
 ---
 
@@ -123,6 +138,7 @@
 |------|---------|-------|----------|----------|-------|--------------------------|-----------|
 | **Hossein Jafari** | Wowspot Ltd. | Managing Director | London | SI8_Legal Friction | Followed Up | 👍 then: *"You're right about the documentation; since the 2026 ASA and IAB updates, it's become a standard requirement for London projects. Having your team follow these disclosure rules is the best way to keep the campaign's copyright and IP safe under UK law."* | Apr 1 — conversational reply sent with Urban Drift PDF, Runway/Kling vs Firefly gap, asked for call | Await reply; book call |
 | **Troy Macdonald** | HyFi Corp | Chairman of the Board & CEiR | Miami | SI8_Hitting a Wall | Replied — Conditional | "Hi Ivy, sure send a sample and then lets arrange a call." | Apr 3 — Urban Drift Chain of Title PDF sent (attached); Calendly link included | Await reply; book call |
+| **Luke Brady** | Sublime Animations Ltd | Founder | UK | SI8_Legal Friction | Replied-Warm | Gave direct phone number + "available anytime" — unprompted contact escalation | Reply with call availability | — | Call Luke directly |
 
 **Why Hossein matters:** He's a London MD who unprompted validated SI8's entire premise — documentation is now standard in London due to ASA/IAB 2026 updates. This is the first contact who has confirmed a regulatory/industry driver without prompting. Highest signal response to date.
 
@@ -146,6 +162,16 @@
 | **Leimi Zhou** | WOMBO | Digital Marketing Strategist & Video Artist | London | SI8_Legal Friction | Replied — Lukewarm | "I've never been asked for documentation on my process. Why do you ask? Just curious" | Apr 3 — educational reply: explained IAB January framework, ASA robot puppy ruling, EU AI Act August; offered to send sample | Await reply — WOMBO is an AI company; good market research data point regardless |
 | **Chitra J** | GrapheneAI | Creative Head | Bengaluru, India | SI8_Hitting a Wall | Replied — Warm | "This is exactly what we need! We've been struggling to get our AI-generated content approved by clients." Described exact SI8 pain point unprompted. | None yet | Send Message 2: 90-min review, $499, Chain of Title deliverable, offer 15-min call |
 | **Aswini Ruidas** | MediaX | Sales Manager | Durgapur, India | SI8_Hitting a Wall | Replied — Lukewarm | Suggested Telegram; when declined, offered WhatsApp: +91 6296601182 | Ivy confirmed on WhatsApp | India market discovery test — elevated to HIGH. Send v4 pitch via WhatsApp. Note: MediaX/FinTech PR is off-sector but contact is live on WhatsApp and India is being tested. |
+| **Shaun Yeo** | Reel Loco Productions | Creative Business Director | Singapore | SI8_Hitting a Wall | Replied-Warm | Wants 15-min call next week (msg#2) | None | Book 15-min call |
+| **Mike Harris** | Seenit | Product Manager | London | SI8_Legal Friction | Replied-Warm | "open to finding out more and a short call" (msg#2) | None | Book short call |
+| **Hugo Faustino** | Canon EMEA | — | Amsterdam | SI8_Legal Friction | Replied-Warm | Enterprise validation: "legal/compliance require documentation BEFOREHAND" — strong ICP signal from major brand (msg#1) | None | Send sample + offer call |
+| **Piotr Nierobisz** | Munchingsquare | CD & Founder | UK | SI8_Blocks AI | Replied-Warm | "would not pitch AI campaign without clearing with client legal" — self-imposed gate (msg#1) | None | Reply + send sample |
+| **Kd Pascall** | Bluvision Studios | Creative Director | London | SI8_Legal Friction | Replied-Warm | "Of recent yes, before it was never an issue" — pain is recent + growing (msg#1) | None | Reply + probe current use case |
+| **Ruth Teasdale** | Motion World Ltd | Director & Client Lead | UK | SI8_Legal Friction | Replied-Warm | P2 informal process: "we use licensed packages" — has workaround, doesn't have structured docs | None | Reply + position SI8 as the structured version |
+| **Julia N'Diamoi** | T&P | Creative Technologist | UK | SI8_Legal Friction | Replied-Warm | P2 informal process: vetted AI tool stack; knows which tools are "brand safe" (msg#1) | None | Reply + position SI8 as documentation layer on top of their existing process |
+| **Kiel Robinson** | Ok let's play Studios | Filmmaker | London | SI8_Legal Friction | Replied-Warm | P2 informal process: tracks raw materials + metadata per project (msg#1) | None | Reply + send sample — already does the work, SI8 formalizes it |
+| **Loewe Chung Nin Lee** | — | AI Video & Digital Content Producer | UK | SI8_Legal Friction | Replied-Warm | "started seeing this come up more recently" — early mover signal (msg#1) | None | Reply + send sample |
+| **Graham Vincent** | grigio:london | Creative Director | London | SI8_Legal Friction | Replied-Warm | "Yes, of course" — confirms legal teams routinely ask; London CD (msg#1) | None | Reply + send sample |
 
 ---
 
@@ -169,6 +195,8 @@
 | **Quincy Yong** | Merandi Global Consulting | — | Singapore | Campaign C | "Okay" | Minimal — send Message #2 |
 | **Ayesha Akhtar** | Arrangers Digital Media | Strategic Marketing Consultant | Gurugram, India | SI8_Legal Friction | "I'm not sure" (when asked if clients ask for documentation) | Market research data point: pain not felt yet at this level. Off-target geography (India). |
 | **Karun Sbaram** | Singapore Kindness Movement | — | Singapore | Campaign A | "Sure" after Msg 3 | Nonprofit — not a commercial buyer. Wrong target. |
+| **Steve Cholerton** | Sentient Pictures | Owner | UK | SI8_Hitting a Wall | "one client has asked for metadata" (msg#1) | Early signal — one client asking. Not ready yet. Re-engage when volume increases. |
+| **Owen Bryant** | — | Creative Director | UK | — | Not currently creating AI videos but open to future | Check in Q3 when they may have started. |
 
 ---
 
@@ -198,6 +226,21 @@
 | Raúl Pineda Rojas | Monks | VP Creativo | Mexico City | Blocks AI Campaign | Vanessa | "Gracias por la información Vanessa" — after msg 2 |
 | Ali Thompson | RARE 80 | Director | — | Legal Friction | — | Polite pass — untracked response found in CSV export |
 | Cathy Bracher | Active Planning Leads | Managing Director | — | Legal Friction | — | Polite pass — untracked response found in CSV export |
+| Helen Niland | Made In England Creative | Creative Director | London | Hitting a Wall | Ivy | "Not at the moment but I'll bear you in mind." — msg#3 |
+| Richard Smith | MiddleSmith | Creative Director | London | Blocks AI Campaign | Lilly | "Should that be subject to change I'll let you know." — msg#2 |
+| Joseph Clark | Oh Studio | Creative Director | London | Blocks AI Campaign | — | "Not a scenario I've encountered I'm afraid! Lovely to connect." — msg#1 |
+| Mar Vin Foo | iMerv Digital | Founder & Principal | Singapore | Trusted AI Supplier | Vanessa | "Hi Vanessa" — minimal reply to msg#3, no signal |
+| Katalin Marton | — | — | — | — | — | Polite pass — Apr 13 CSV |
+| Fatima Isse | — | — | — | — | — | Polite pass — Apr 13 CSV |
+| Sara Orfali | — | — | — | — | — | Polite pass — Apr 13 CSV |
+| Dan Ablan | — | — | — | — | — | Polite pass — Apr 13 CSV |
+| Rory Woodbridge | — | — | — | — | — | Polite pass — Apr 13 CSV |
+| Elliott Prompts | — | — | — | — | — | Polite pass — Apr 13 CSV |
+| Margarita Repina | — | — | — | — | — | Polite pass — Apr 13 CSV |
+| Derek Bender | — | — | — | — | — | Polite pass — Apr 13 CSV |
+| Stuart Parker | — | — | — | — | — | Polite pass — Apr 13 CSV |
+| Ajibola Olayiwola | — | — | — | — | — | Polite pass — Apr 13 CSV |
+| Kamal Chugh | — | — | — | — | — | "we have an inhouse team" — Apr 13 CSV |
 
 ---
 
@@ -224,6 +267,12 @@
 | Ron David Ben Ishay | Liquidity Group | — | — | Hitting a Wall | Lilly | "Uhno thnx" |
 | Matthieu Fernandes | Sensai | CMO | — | Blocks AI Campaign | Vanessa | "No needs atm" — counter-pitched AI automation services |
 | Chee Wong | Opus Artz Ltd | Creative Director & CEO | London | Blocks AI Campaign | Vanessa | "Hi. not sure, it's not something we encountered or is within our remit" |
+| Samuel Levesley-Turner | Point8 | Creative Director | London | Hitting a Wall | Ivy | "We don't produce AI content at all and never will." — msg#2 |
+| Vijendra Kunwar Mmc | Fitter Circle | Founder | London | Documented Provenance | Vanessa | "We don't recommend any AI videos" — fitness vertical, wrong fit |
+| Vigneshwaran Velusamy | Octupus.ai | Co-Founder | London | Trusted AI Supplier | Ivy | Counter-pitched SEO/web dev services — wrong side of market |
+| Anas Nasir | Magentus | Training Lead (Pathology) | London | Blocks AI Campaign | Lilly | "Not something I'd be interested in" — healthcare training, wrong role |
+| Nuray Dal Ulualan | — | — | — | — | — | Counter-pitched AI presales tool — wrong side of market |
+| Jaron Goh | — | Channel Account Exec | — | — | — | Cybersecurity firm — no AI video use case |
 
 ---
 
