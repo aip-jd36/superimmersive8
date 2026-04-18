@@ -51,7 +51,7 @@ def md_to_html(md: str) -> str:
             if i == 1 and all(re.match(r'^[-: ]+$', c) for c in cells):
                 continue  # skip separator row
             tag = "th" if i == 0 else "td"
-            html.append("<tr>" + "".join(f"<{tag} style='padding:4px 8px;border:1px solid #ddd;'>{c}</{tag}>" for c in cells) + "</tr>")
+            html.append("<tr>" + "".join(f"<{tag} style='padding:4px 8px;border:1px solid #ddd;'>{_inline(c)}</{tag}>" for c in cells) + "</tr>")
         html.append("</table>")
         return "\n".join(html)
 
