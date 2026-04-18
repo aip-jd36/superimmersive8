@@ -1,0 +1,39 @@
+name: SI8 LinkedIn ICP Report Digest
+
+on:
+  schedule:
+    # Every 3 days at 01:00 UTC = 09:00 Taipei time (UTC+8)
+    - cron: '0 1 */3 * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run — print output, do not send email'
+        required: false
+        default: 'false'
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run LinkedIn ICP report digest
+        env:
+          RESEND_API_KEY:    ${{ secrets.RESEND_API_KEY }}
+          DIGEST_TO_EMAIL:   jd@superimmersive8.com
+          DIGEST_FROM_EMAIL: digest@superimmersive8.com
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then ARGS="--dry-run"; fi
+          python tools/linkedin-analysis/report_digest.py $ARGS
