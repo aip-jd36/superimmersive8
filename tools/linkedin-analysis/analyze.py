@@ -24,7 +24,7 @@ from datetime import date
 
 # Allow running from repo root or from tools/linkedin-analysis/
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
-from classify import extract_reply, classify_reply, detect_pathway
+from classify import extract_reply, classify_reply, detect_pathway, is_product_feedback
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
@@ -201,6 +201,7 @@ def load_csv(path: str) -> list:
         r['_reply'] = reply
         r['_class'] = classify_reply(reply)
         r['_pathway'] = detect_pathway(reply) if r['_class'] == 'warm' else ''
+        r['_product_feedback'] = is_product_feedback(reply)
         r['_geo'] = norm_geo(r.get('lead_location', ''))
         r['_title'] = norm_title(r.get('lead_title', ''))
         # Normalize alias
@@ -486,6 +487,39 @@ def generate_report(rows: list, csv_path: str) -> str:
         a(f"Pathway: `{r['_pathway']}`  ")
         a(f"> {reply_preview}")
         a(f"")
+    a(f"---")
+    a(f"")
+
+    # -----------------------------------------------------------------------
+    # PART 6b: PRODUCT FEEDBACK QUEUE (non-warm leads with product signal)
+    # -----------------------------------------------------------------------
+    a(f"## Part 6b: Product Feedback Queue")
+    a(f"")
+    a(f"*Non-warm leads whose replies contain product validation signals.*  ")
+    a(f"*These are NOT sales leads. Send a discovery question, not a CTA.*  ")
+    a(f"*Suggested reply: ask about their current process, what documentation looks like, who owns the decision.*")
+    a(f"")
+
+    feedback_rows = [
+        r for r in rows
+        if r['_product_feedback'] and r['_class'] != 'warm'
+    ]
+
+    if not feedback_rows:
+        a(f"*No product feedback signals detected in non-warm leads.*")
+    else:
+        a(f"**{len(feedback_rows)} leads with product signal** (classified: "
+          f"{sum(1 for r in feedback_rows if r['_class']=='pass')} pass, "
+          f"{sum(1 for r in feedback_rows if r['_class']=='naf')} naf, "
+          f"{sum(1 for r in feedback_rows if r['_class']=='minimal')} minimal)")
+        a(f"")
+        for r in feedback_rows:
+            reply_preview = r['_reply'].replace('\n', ' ').strip()[:300]
+            badge = {'pass': '⚪ PASS', 'naf': '🔴 NAF', 'minimal': '➖ MIN'}[r['_class']]
+            a(f"**{r['lead_name']}** · {r['lead_title']} · {r.get('lead_company', '')} · {r['_geo']}  ")
+            a(f"{badge} · List: `{r['_target_list']}` · Msg #{r.get('sequence_message_number', '?')} · Alias: {r['_alias']}  ")
+            a(f"> {reply_preview}")
+            a(f"")
     a(f"---")
     a(f"")
 

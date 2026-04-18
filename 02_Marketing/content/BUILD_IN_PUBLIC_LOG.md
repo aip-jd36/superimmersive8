@@ -2215,6 +2215,117 @@ This is Year 1 workflow. Keeps admin in control of catalog quality. Year 2-3: bu
 
 ---
 
+### #48: Two Classifiers, Two Jobs — How We Read LinkedIn Responses at Scale
+
+**Date:** April 18, 2026
+
+**The problem:**
+After logging ~150 LinkedIn responses, we had a messy pile of replies ranging from "not interested thanks" to detailed 4-paragraph breakdowns of how an agency's legal team currently handles AI video documentation. The first classifier treated these the same way — both got labeled "minimal" and dropped.
+
+That was wrong. The second reply is product gold. We just couldn't see it.
+
+**The insight — two completely different jobs:**
+
+Not every reply is a sales signal. Some replies are market intelligence.
+
+| Reply type | What it tells you | What to do |
+|------------|------------------|------------|
+| "Sounds interesting, happy to chat" | Buying intent | Sales CTA — book a call |
+| "Yes, our legal team blocks AI campaigns about once a quarter" | Product validation | Discovery question — ask how they handle it |
+| "No thanks, not relevant" | Polite no | Archive |
+| "We run everything locally so ownership is clearly defined between us and the client" | Process description | Discovery question — what does that look like? |
+
+The first classifier (sales classifier) answers: *is this person ready to buy?*
+The second classifier (product feedback classifier) answers: *does this reply validate that the problem exists?*
+
+These are orthogonal. A lead can be:
+- **WARM + product signal** — confirmed pain + buying intent → your best leads
+- **PASS + product signal** — confirmed pain, not buying now → ask discovery questions
+- **MIN + product signal** — described their process without an interest signal → still useful
+- **NAF + product signal** — wrong role but confirmed the problem exists → market validation
+
+**How the sales classifier works:**
+
+Order matters: NAF → [negation check] → WARM → PASS → MINIMAL
+
+1. **NAF first** — "don't use AI", "never will", "not in our remit" — definitive wrong fit, stop immediately
+2. **Negation override** — "not interested" contains "interested" → must catch this before the warm loop (found this bug when 6 leads were misclassified as warm)
+3. **Warm before pass** — genuine interest beats hedging language. "Tell me more" wins over "it might be in the future"
+4. **Pass** — polite no after we've confirmed they're not warm
+5. **Minimal** — everything else: too short, too vague, or genuinely ambiguous
+
+The ordering bug (NAF → PASS → WARM in the first version) caused misclassifications: Marc Danielle and Ivan Ng were NAF'd despite warm language because pass patterns matched first.
+
+**How the product feedback classifier works:**
+
+Intentionally different philosophy: **wide net, false positives acceptable.**
+
+For the sales classifier, a false positive (marking a cold lead warm) wastes your time on bad follow-ups. Bad.
+
+For the product feedback classifier, a false positive means you ask a discovery question to someone who's slightly less relevant. Fine. The cost is one slightly-off message. The cost of a false negative is missing market intelligence from a reply that took a senior creative director 3 minutes to write.
+
+So the product feedback patterns are deliberately broad:
+- Any mention of legal teams, compliance, documentation, usage rights, metadata
+- Any process description: "from my experience", "what we do", "our workflow"
+- Any trend observation: "becoming more common", "we're seeing this more"
+- Any industry context: enterprise level, brand side, larger clients
+- Even clarifying questions: "what kind of documentation?" — engaged, wants to understand
+
+One gate: replies under 40 characters are excluded. "Yes." and "👍" don't contain product signal regardless of keywords.
+
+**What changed in the data:**
+
+Before the negation fix: 37 warm leads
+After: 31 warm leads (6 false positives corrected)
+
+After adding product feedback classifier: ~40+ leads flagged for discovery conversations
+These were previously invisible in the data — labeled minimal and dropped.
+
+**The workflow this creates:**
+
+Two action queues instead of one:
+
+```
+Sales queue (Part 6):   WARM leads → book a call
+Discovery queue (Part 6b): non-WARM leads with product signal → ask about their process
+```
+
+The discovery queue reply is different in tone:
+- Not: "Here's the SI8 Certified package at $499..."
+- Yes: "Interesting — when you say your legal team reviews it beforehand, what does that documentation look like? Is it a standard template or something you build per project?"
+
+This is how you turn a "not buying" reply into product research, ICP refinement, and occasionally a slow-burn warm lead who wasn't ready in month 1 but buys in month 4.
+
+**Why this matters beyond SI8:**
+
+Any B2B founder doing outreach at volume faces this problem: you get replies that don't convert but tell you something real about the market. Standard CRM systems throw these away. We're building infrastructure to capture them.
+
+The insight: **a LinkedIn outreach campaign is not just a sales channel — it's a market research instrument.** Every reply, including the passes, is a data point about whether your product hypothesis is true.
+
+**What's next:**
+
+- Route product feedback leads to a separate follow-up sequence (discovery, not sales)
+- Track which discovery conversations eventually convert — test whether slow-burn is real
+- Use the product feedback corpus to refine messaging: the exact language people use to describe their current process becomes your email subject lines
+
+**LinkedIn-ready excerpt:**
+> "We built two classifiers for our LinkedIn outreach data.
+>
+> The first answers: is this person ready to buy?
+> The second answers: does this reply validate that the problem exists?
+>
+> They're completely different jobs. And mixing them up cost us 6 false positives and about 40 missed product conversations.
+>
+> The lesson: a LinkedIn reply that says 'not for me, but yes our legal team reviews AI video documentation before every client campaign' is not a dead lead. It's market research.
+>
+> Standard CRM throws this away. We built a secondary classifier to catch it.
+>
+> False positives are fine here — the cost is one slightly-off follow-up message. The cost of a false negative is missing a senior CD who just described your ICP's exact workflow.
+>
+> Two action queues: sales (book a call) and discovery (ask about their process). Different reply, different goal, different timeline."
+
+---
+
 ## Decisions Log
 
 | Date | Decision | Rationale |

@@ -321,6 +321,148 @@ Pathway: `unknown`
 
 ---
 
+## Part 6b: Product Feedback Queue
+
+*Non-warm leads whose replies contain product validation signals.*  
+*These are NOT sales leads. Send a discovery question, not a CTA.*  
+*Suggested reply: ask about their current process, what documentation looks like, who owns the decision.*
+
+**33 leads with product signal** (classified: 4 pass, 5 naf, 24 minimal)
+
+**Piotr Nierobisz** · Creative Director & Founder · Munchingsquare · London/UK  
+➖ MIN · List: `VP+_Creative_London_0426A_VP` · Msg #1 · Alias: Vanessa  
+> Vanessa, thanks for request09:48 am I would not pitch / work on AI campaign without clearing this out with client legal department as it's wasted effort09:48 am in most cases09:49 am
+
+**Dan Ablan** · Creative Director, Design and Multimedia · Association of International Certified Professional Accountants · USA  
+➖ MIN · List: `VP+_Creative_London_0426A_VP` · Msg #2 · Alias: Vanessa  
+> Thanks. We’re all set internally for now but if it changes I’ll reach out.08:29 pm
+
+**Lev Myskin** · Content Strategy Consultant and Podcast Interview Specialist · Fame · Other  
+➖ MIN · List: `VP+_Creative_London_0426A_VP` · Msg #1 · Alias: Vanessa  
+> Hi Vanessa,  Thanks for messaging but this has absolutely no relevance to me, I abhor AI videos, campaigns, and anything that takes employment away from highly trained real people.  Lev04:53 am
+
+**Vijendra Kunwar Mmc** · Founder · Fitter Circle · London/UK  
+🔴 NAF · List: `Mgr+_Mktg_London_0326F_VP` · Msg #3 · Alias: Vanessa  
+> Hi Vanessa, thanks for reaching out. We don’t recommend any AI videos so this would not be relevant for us. Wish you the very best.04:54 pm
+
+**Salem Al-Kuwari** · Founder & Managing Director | SAM Strategic Access · SAM Strategic Access Ltd · Other  
+➖ MIN · List: `Mgr+_Mktg_London_0326E_LH` · Msg #2 · Alias: Lilly  
+> Sat Apr 04 2026 Hi Lilly  Thank you for sharing this, and apologies for the delayed reply.  It is a relevant area, especially as questions around IP, documentation, and commercial use in AI content become more important.  I am not scheduling around this immediately, but I appreciate the note and wou
+
+**Cove Overley Emba** · Chief Explosive⚡️Agent 000 · Toy Exploder · Hong Kong  
+🔴 NAF · List: `CMO_SPG_0326A_LH` · Msg #1 · Alias: Lilly  
+> Yesterday  Hi Cove,  We run a rights verification service for AI-generated video (Sora, Runway, Kling). Curious: is AI video something your clients are starting to ask about, or still early days for your agency?01:37 pm At this moment there are no plans to incorporate AI Video. I will be in touch if
+
+**Owen Bryant** · Creative Director · Partners4Access · Other  
+➖ MIN · List: `VP+_Creative_London_0426B_IL` · Msg #1 · Alias: Ivy  
+> Hi Ivy,  I'm not creating videos at the moment, but as we know, things change and change quickly. Be good to connect to discuss when the need arises.07:41 pm
+
+**Fatima Isse** · Creative Director · River Lake Studios · London/UK  
+⚪ PASS · List: `VP+_Creative_London_0426B_IL` · Msg #null · Alias: Ivy  
+> Hi Ivy,  Thanks for reaching out - interesting point. I don't currently work with Al-generated video content, so it hasn't come up in my work directly.  Happy to connect and stay in touch.  Best, Fatima11:22 pm
+
+**Margarita Repina** · Founder and Creative Director · Atelier Catalyst · London/UK  
+➖ MIN · List: `VP+_Creative_London_0426B_IL` · Msg #1 · Alias: Ivy  
+> Yesterday Hi Ivy, it’s my basic rule to have a contract always 😊05:18 am
+
+**Samuel Levesley-Turner** · Creative Director · Point8 · London/UK  
+🔴 NAF · List: `VP+_Creative_London_0426B_IL` · Msg #2 · Alias: Ivy  
+> We don’t produce ai content… at all. So this is not a problem we run into whatsoever and never will.05:16 pm
+
+**Helen Niland** · Creative Director, Made In England Creative (current) · Made In England Creative · London/UK  
+⚪ PASS · List: `VP+_Creative_London_0426B_IL` · Msg #3 · Alias: Ivy  
+> Sat Apr 11 2026 Thanks ivy. Not at the moment but I’ll bear you in mind. All the best with it. X08:04 pm
+
+**Mitch Turnbull** · Senior Research Associate in Immersive Natural History Experiences · University of Bristol · Other  
+🔴 NAF · List: `VP+_Creative_London_0426B_IL` · Msg #1 · Alias: Ivy  
+> I've not produced AI generated image content for clients - I would also make sure that I generate an AI disclosure document if I did.  Best,  Mitch.10:08 pm
+
+**Dominic Ho** · Co-Founder · SYS.Studio · Singapore  
+➖ MIN · List: `VP+_Creative_SPG_0426A_LH` · Msg #2 · Alias: Lilly  
+> Yesterday hello! thanks for reaching out! I will let you know when we do need this service!02:01 pm
+
+**Giulia Willcox** · Professor assistente · Instituto de Tecnologia e Sociedade (ITS Rio) · Other  
+➖ MIN · List: `NA_MetaV_Agency_Gbl_0326A_IL` · Msg #1 · Alias: Ivy  
+> Hi, Ivy! Thanks for the connection! I don’t think I get your question. What kind of documentation is required for AI video production?  I don’t have much experience producing AI content for clients, but would certainly like to explore this in the future.  Best regards!03:18 am
+
+**Daniel Kwintner** · Branch Manager · ShowTex Asia · Other  
+➖ MIN · List: `VP+_Creative_SPG_0426A_LH` · Msg #1 · Alias: Lilly  
+> I am happy to Connect with you but I don’t deal with Ai for Video production for now. Everything is still done from scratch. Just love it better. And yes, my clients would prefer original content produced by an organic than an artificial.07:47 am
+
+**Derek Bender** · Staff Product Designer · Uber · Netherlands  
+🔴 NAF · List: `CreaDir_AI Video_AmsDm_0426A_VP` · Msg #1 · Alias: Vanessa  
+> Hi Vanessa. Honestly not something I run into, I don't work much with video, and most of the teams I work with are early enough that there's no legal department in the picture yet. Interesting signal though, makes sense that's starting to surface at scale.09:38 pm
+
+**Nuray Dal Ulualan** · Co-Founder & COO · WinIQ AI · London/UK  
+➖ MIN · List: `CreaDir_AI Video_England_0426A_IL` · Msg #1 · Alias: Ivy  
+> Hi Mara Ivy   I believe that to boost PreSales win rates today, teams need more than just generic AI like ChatGPT. They need an intelligence layer that actually speaks the language of your company’s data.  At WINIQ.AI, we’ve centralized the three most time-consuming areas: RFP analysis, competitive 
+
+**Steve Cholerton** · Owner · Sentient Pictures Ltd · London/UK  
+➖ MIN · List: `CreaDir_AI Video_England_0426A_IL` · Msg #1 · Alias: Ivy  
+> Hi Ivy  We're relatively new to the Ai game, but so far, generally no - we only have a few clients and only one has asked for metadata to be available if necessary.  S08:25 am
+
+**Elliott Prompts** · Ai Creative Director · ElliottPrompts Ai Creative Studio · Other  
+➖ MIN · List: `CreaDir_AI Video_England_0426A_IL` · Msg #1 · Alias: Ivy  
+> Nothing yet on that from my experiences what about yourself? Pleasure to connect if you ever need any support or work let me know01:03 pm
+
+**Elliott Prompts** · Ai Creative Director · ElliottPrompts Ai Creative Studio · Other  
+➖ MIN · List: `CreaDir_AI Video_England_0426A_IL` · Msg #1 · Alias: Ivy  
+> Nothing yet on that from my experiences what about yourself? Pleasure to connect if you ever need any support or work let me know01:03 pm
+
+**Kd Pascall** · Creative Director · Bluvision studios · London/UK  
+➖ MIN · List: `CreaDir_AI Video_England_0426A_IL` · Msg #1 · Alias: Ivy  
+> Hey Ivy    Of recent yes. before it was never an issue. lol. i think maybe because its becoming more widely used now.06:51 pm Hows business anyway? Is there anything we can colloborate on?im trying to align myself with fellow content creators and business leaders.06:53 pm
+
+**Ali Thompson** · Director · RARE 80 · London/UK  
+⚪ PASS · List: `Mgr+_Mktg_London_0326G_VP` · Msg #2 · Alias: Vanessa  
+> Thanks Vanessa - not relevant to my needs at the moment but good to be connected. All the best, A03:23 pm
+
+**Iona Milne** · Partnerships Manager · Reg&Partners · London/UK  
+➖ MIN · List: `Mgr+_Mktg_London_0326G_VP` · Msg #1 · Alias: Vanessa  
+> This isn't relevant for me, but thank you03:53 pm
+
+**Hossein Jafari** · Managing Director · Wowspot Ltd. · London/UK  
+➖ MIN · List: `Mgr+_Mktg_London_0326G_VP` · Msg #1 · Alias: Vanessa  
+> 👍06:37 am Hi Vanessa, Lovely to meet you! You’re right about the documentation; since the 2026 ASA and IAB updates, it’s become a standard requirement for London projects. Having your team follow these disclosure rules is the best way to keep the campaign’s copyright and IP safe under UK law. Cheers
+
+**Amr Hamad** · Director, Retail Media – EU & APAC · Stackline · London/UK  
+➖ MIN · List: `Mgr+_Mktg_London_0326G_VP` · Msg #1 · Alias: Vanessa  
+> Hey Vanessa, honestly the main criteria we usually have is that it follows the clients brand guidelines. AI guidelines will depend on as well where you are serving the video, some instances you will need it to be labelled as AI generated.10:50 pm
+
+**David Aston** · Social Media Coordinator · CLUBWORLD TRAVEL · London/UK  
+➖ MIN · List: `Mgr+_Mktg_London_0326G_VP` · Msg #1 · Alias: Vanessa  
+> Hi Venessa02:58 am Thanks so much for reaching out02:58 am We don’t creat AI videos for clients, we use AR development software 🙂02:59 am
+
+**Uma Rudd Chia** · Singapore · OH MY STRAWBERRY · Other  
+➖ MIN · List: `Mgr+_Adv_SPG_0326A_LH` · Msg #2 · Alias: Lilly  
+> Hey, this is great but actually I create my own AI videos and I subscribe to a lot of different AI platform. I was one of the first 200 to be the test for open AI and therefore have access to a lot of API and first dips on a lot of technologies in Martec AI that no one else has because I review them
+
+**Fahad A** · Fractional Sales Director · Be Guided Agency · London/UK  
+➖ MIN · List: `Mgr+_Mktg_London_0326C_IL` · Msg #3 · Alias: Ivy  
+> Wed Mar 18 2026 Hi Ivy, thanks for reaching out.   It's something I'll certainly keep in mind, esp when we expand out offering. But as it stands it's not something for us at the moment, pls do stay in touch however.10:02 pm
+
+**Benedict Chow Csp Cesga Mcieem** · Director, Global EHS Operations · EFC International · Singapore  
+⚪ PASS · List: `Owner+_BizCons, Mktg_SGP_0326A_VP` · Msg #2 · Alias: Vanessa  
+> Hi Vanessa,  Thank you for connecting and for the introduction. I appreciate you sharing about SI8.  At this stage, I am not looking to arrange a call, but I will keep this in mind and get back to you if there is a relevant opportunity in the future.  Thanks again, and all the best.  Best regards, B
+
+**Andrzej Wisniewski** · Co-Founder · AWsome Growth · Singapore  
+➖ MIN · List: `Owner+_BizCons, Mktg_SGP_0326A_VP` · Msg #2 · Alias: Vanessa  
+> Yesterday Hey Vanessa, appreciate the intro. Sounds like an interesting model you've built.  I'm actually on the services side helping B2B founders grow their visibility and pipeline, so not sure I'd be the right fit as an agency partner for AI video.  Who's your ideal client profile right now?01:40
+
+**Emmanuel Stralka** · Co-Founder -- International Growth & Market Expansion Platform (THINK) · Think Global Solutions · London/UK  
+➖ MIN · List: `Mgr+_Mktg_London_0326A_LH` · Msg #null · Alias: Lilly  
+> Thanks Hsiao -  This is good to know - we help companies enter new markets by providing culture-based readiness assessment and GTM plans optimization. Our tech helps flags cultural, governance and regulatory red flags before a brand scales their investments.  We also provide support through our part
+
+**Alistair Bendyshe-Brown** · CEO / Founder / Strategic Marketing and Creative Director · Summer Day Media · Other  
+➖ MIN · List: `Mgr+_Mktg_London_0326D_IL` · Msg #2 · Alias: Ivy  
+> Hi Ivy, Thanks for your message, but we don't need this at the moment. I'll keep you in mind if a need arises. Best Alistair08:29 pm
+
+**Jp Sing** · Head of Demand Marketing · Universal Music Group · London/UK  
+➖ MIN · List: `Mgr+_Mktg_London_0326A_LH` · Msg #2 · Alias: Lilly  
+> Yesterday Hi Lilly,   Thank you for the connection and message.   Fortunately, we have an in-house team who are responsible for this and when it comes to rich media, we have a handful of talent working on developing assets for marketing purposes.   I will have to regretfully decline for further conv
+
+---
+
 ## Part 7: Scale Readiness — What to Scale, Kill, or Keep Testing
 
 *Based on confidence scores from Parts 2-3.*

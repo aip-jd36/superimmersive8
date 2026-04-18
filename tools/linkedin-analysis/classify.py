@@ -228,6 +228,97 @@ PATHWAY_3_PATTERNS = [
 ]
 
 
+# ---------------------------------------------------------------------------
+# Product feedback detection (secondary classifier — independent of sales signal)
+# ---------------------------------------------------------------------------
+#
+# Purpose: identify replies that validate the product promise even if the lead
+# isn't buying. These are routed to a discovery conversation, not a sales CTA.
+#
+# Deliberately wide — prefer false positives over missing a product conversation.
+# A lead can be WARM + product_feedback=True, PASS + True, MIN + True, NAF + True.
+#
+# Caller should suppress for very short replies (< ~30 chars) that happen to match
+# a common word — the length gate handles noise.
+
+PRODUCT_FEEDBACK_PATTERNS = [
+    # Trend / market observation
+    "becoming more", "more widely", "more recently", "more important", "increasingly",
+    "starting to", "coming up more", "it has come up", "has come up", "have come up",
+    "popping up", "we're seeing", "i'm seeing", "seeing this", "hearing this",
+    "more scrutiny", "growing concern", "it's coming up", "it is coming up",
+    "more common", "more prevalent", "this is growing", "this is coming",
+    "more and more", "emerging issue", "evolving", "as ai", "with ai",
+    # Pain / problem confirmation
+    "legal team", "legal department", "legal review", "legal side", "legal ask",
+    "compliance team", "compliance requirement", "compliance issue",
+    "documentation", "doc requirement", "usage rights", "chain of title",
+    "provenance", "metadata", "disclosure", "ip rights", "intellectual property",
+    "clearance", "cleared", "rights package", "rights documentation",
+    "audit trail", "ownership", "client approval", "brand approval",
+    "platform require", "broadcaster", "broadcaster require",
+    # Own process description
+    "from my experience", "in my experience", "my process", "our process",
+    "what we do", "how we handle", "we handle", "we manage", "we usually",
+    "we typically", "we always", "we disclose", "we provide", "we include",
+    "we ask for", "we require", "we check", "we ensure", "we do this",
+    "we run", "we work with", "we already", "our workflow", "our approach",
+    "we've been", "we have been", "i've been", "i usually", "i typically",
+    "my approach", "my workflow", "how i handle", "how i work",
+    "case by case", "per project", "project by project", "depends on the client",
+    "it depends", "depends on", "varies by", "in-house", "internally",
+    "informal", "ad hoc", "manual process", "spreadsheet", "we track",
+    # Workaround / current solution
+    "we use a", "we have a system", "we have a process", "we have a template",
+    "we build", "we create a", "we produce a", "we generate",
+    "our own", "we built", "we set up", "we put together",
+    "contract", "agreement", "nda", "terms", "licence", "license",
+    "signed off", "client sign", "client approval", "approved by",
+    # Industry context / observation
+    "enterprise level", "at enterprise", "larger clients", "bigger brands",
+    "major clients", "agency side", "brand side", "client side",
+    "production house", "post production", "broadcast", "platform side",
+    "regulated", "highly regulated", "financial services", "pharma", "healthcare",
+    # Validation of the question / problem space
+    "good question", "great question", "relevant", "valid point", "fair point",
+    "interesting point", "makes sense", "you're right", "that's right",
+    "hadn't thought", "hadn't considered", "worth exploring", "worth looking",
+    "something to think", "actually", "honestly", "to be honest",
+    "fair enough", "exactly", "indeed", "absolutely", "i agree",
+    # Future signal (not now, but problem-aware)
+    "when we do", "if we do", "eventually", "down the line", "at some point",
+    "as this grows", "as it develops", "when it becomes", "when the need",
+    "future use", "future project", "next project", "next campaign",
+    "keep in mind", "keep you in mind", "bear in mind", "bear you in mind",
+    # Describing own AI production activity (confirms they ARE the market)
+    "we produce ai", "we create ai", "we make ai", "we generate ai",
+    "we use ai", "we work with ai", "we've used", "we have used",
+    "i produce", "i create", "i make videos", "i work on",
+    "our clients use", "our clients ask", "client asked", "clients want",
+    # Asking clarifying questions (engaged, wants to understand)
+    "what kind", "what does", "what is", "how does", "what would",
+    "what do you", "can you explain", "tell me more about", "what exactly",
+    "i don't understand", "could you clarify", "what format",
+]
+
+
+def is_product_feedback(reply: str) -> bool:
+    """
+    Returns True if the reply contains signals useful for product discovery,
+    regardless of sales classification.
+
+    Intentionally wide — false positives are acceptable.
+    Suppressed for very short replies (< 40 chars) to avoid noise.
+    """
+    t = normalize(reply)
+    if len(t) < 40:
+        return False
+    for p in PRODUCT_FEEDBACK_PATTERNS:
+        if p in t:
+            return True
+    return False
+
+
 def detect_pathway(reply: str) -> str:
     """
     For warm leads, detect which conversion pathway applies.
