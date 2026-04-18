@@ -7,7 +7,73 @@
 
 ---
 
-## Part 1: Response Pool Snapshot
+## Part 1: Next 3 Suggested Campaigns
+
+*Data-driven recommendations. Each suggestion includes: what to build, which sequence to use, expected warm rate, and why the data supports it.*
+
+### Campaign 1: AI-Filtered Creative Directors — Singapore
+
+| Field | Value |
+|-------|-------|
+| **Audience list** | Creative Directors + AI Video Directors in Singapore, filtered by AI video keywords in profile/posts |
+| **Sequence** | Legal Friction |
+| **Alias** | Lilly |
+| **List size** | 150–300 leads |
+| **Expected warm rate** | ~38% (based on CreaDir_AI Video_England_0426A_IL, n=13) |
+| **Priority** | 🔴 HIGH — replicates best-performing list pattern |
+
+**Why:**  
+The AI-keyword-filtered Creative Director list in England/UK (CreaDir_AI Video_England_0426A_IL) returned 38% warm (n=13) — the strongest signal in the dataset. The filter works because it targets CDs who already self-identify with AI video production, meaning they've already crossed the 'do I even care about this?' threshold before message #1 arrives. Singapore is the next logical market: sufficient professional LinkedIn density, English as business language, and strong agency culture.
+
+**Data signal:**  
+Best AI-filtered list: `CreaDir_AI Video_England_0426A_IL` — 5 warm / 13 responses (38% warm rate). No broad CD list tested in Singapore yet — baseline unknown. AI-filter hypothesis: CDs who self-identify with AI = pre-qualified on the core question.
+
+**Watch out for:**  
+LinkedIn search for AI video keyword filtering varies by market — profile density of 'AI video' keywords may be lower outside English-speaking markets. If list size < 100, broaden to 'AI content' or 'generative AI' in profile.
+
+### Campaign 2: Dedicated AI Director / AI Content List — Volume Test
+
+| Field | Value |
+|-------|-------|
+| **Audience list** | AI Director / AI Content titles in London/UK + Singapore, no additional filters (test broad first to establish baseline) |
+| **Sequence** | Hitting a Wall |
+| **Alias** | Ivy |
+| **List size** | 200–400 leads |
+| **Expected warm rate** | ~100% if signal holds (n=4 so far — INSUFFICIENT DATA) |
+| **Priority** | 🟡 MEDIUM — confirm or kill this title segment |
+
+**Why:**  
+'AI Director / AI Content' has the highest warm rate of any title with at least 3 responses (100%, n=4), but the sample is too small to act on. A dedicated 200–400 lead batch targeting this title exclusively would either confirm it as a primary ICP segment (→ scale to email) or rule it out. Either outcome is valuable — it removes uncertainty from the ICP thesis.
+
+**Data signal:**  
+Current data: 4 warm / 4 responses (100% warm rate). Confidence: INSUFFICIENT DATA — need n≥15 at ≥15% warm rate for CONFIRMED status. If the rate holds at scale, this becomes a primary targeting segment.
+
+**Watch out for:**  
+Warm rate on thin samples is volatile — one or two extra warm replies can inflate the number significantly. Treat current rate as a hypothesis, not a confirmed signal.
+
+### Campaign 3: Outsource Opener — Singapore (New Message Variant)
+
+| Field | Value |
+|-------|-------|
+| **Audience list** | AI Directors, Head of Production, Creative Directors in Singapore who already produce AI video for clients — use AI video keywords + 'compliance' / 'documentation' in profile as filter |
+| **Sequence** | New: Outsource Opener (P3 dedicated) |
+| **Alias** | Lilly |
+| **List size** | 100–200 leads |
+| **Expected warm rate** | Unknown for new sequence — benchmark against Legal Friction (23% in Singapore) |
+| **Priority** | 🟡 MEDIUM — tests a new message for the P3 archetype |
+
+**Why:**  
+Current sequences ask 'do you have this problem?' — they work for P1 (pain-aware) and P2 (informal process) leads. But the Hugo Barbera archetype (P3 — outsource) already KNOWS they have the problem and already charges clients for documentation. They don't respond to 'is this an issue for you?' because it's not an issue — it's a revenue line. The opener needs to be: 'Are you producing Chain of Title documentation for AI video clients — and is that something you'd consider outsourcing?' This speaks directly to their workflow and positions SI8 as a subcontractor, not a new service they need to justify internally.
+
+**Data signal:**  
+Singapore is your strongest confirmed geo (23% warm, n=26). Running a new message variant here gives you a clean comparison against the existing Legal Friction / Hitting a Wall baseline. P3 outsource pathway not yet detected at scale — test with a small batch first.
+
+**Watch out for:**  
+This is a new sequence — no benchmark yet. Run 100 leads before drawing conclusions. The outsource framing may feel presumptuous to leads who don't yet produce reports — filter for AI video keywords in profile to reduce this risk.
+
+---
+
+## Part 2: Response Pool Snapshot
 
 | Classification | Count | % of responses |
 |---------------|-------|---------------|
@@ -21,7 +87,7 @@
 
 ---
 
-## Part 2: ICP Segment Scorecard
+## Part 3: ICP Segment Scorecard
 
 *Each segment scored by: warm rate, sample size, and confidence level.*  
 *Confidence: CONFIRMED ✅ (n≥15, warm≥15%) | PROMISING 🟡 (n≥10, warm≥10%) | EARLY SIGNAL 🔵 | DISQUALIFIED ❌ | INSUFFICIENT DATA*
@@ -78,7 +144,7 @@
 
 ---
 
-## Part 3: Campaign Performance
+## Part 4: Campaign Performance
 
 ### 3a. Message Sequence Performance
 
@@ -135,7 +201,7 @@
 
 ---
 
-## Part 4: Alias Performance
+## Part 5: Alias Performance
 
 | Alias | N | Warm | Warm% | Pass% | NAF% |
 |-------|---|------|-------|-------|------|
@@ -145,7 +211,7 @@
 
 ---
 
-## Part 5: Conversion Pathway Breakdown
+## Part 6: Conversion Pathway Breakdown
 
 *For warm leads only. Three pathways identified from ICP discovery.*
 
@@ -160,7 +226,7 @@
 
 ---
 
-## Part 6: Warm Lead Signals
+## Part 7: Warm Lead Signals
 
 *Actual language from warm replies. This is your email copy and objection handling.*
 
@@ -321,7 +387,7 @@ Pathway: `unknown`
 
 ---
 
-## Part 6b: Product Feedback Queue
+## Part 7b: Product Feedback Queue
 
 *Non-warm leads whose replies contain product validation signals.*  
 *These are NOT sales leads. Send a discovery question, not a CTA.*  
@@ -463,7 +529,7 @@ Pathway: `unknown`
 
 ---
 
-## Part 7: Scale Readiness — What to Scale, Kill, or Keep Testing
+## Part 8: Scale Readiness — What to Scale, Kill, or Keep Testing
 
 *Based on confidence scores from Parts 2-3.*
 
@@ -524,7 +590,7 @@ Pathway: `unknown`
 
 ---
 
-## Part 8: Open Questions + Recommended Next Tests
+## Part 9: Open Questions + Recommended Next Tests
 
 1. **AI Director sample too small (n=4)** — Run a dedicated Hitting a Wall campaign targeting AI Director titles in London/Singapore. This is the highest warm-rate title but needs more data to confirm.
 
@@ -535,72 +601,6 @@ Pathway: `unknown`
 4. **Hitting a Wall vs. Legal Friction on identical audience** — Both campaigns run on different list types, making direct comparison noisy. Test both messages on same title/geo combo to isolate message effect cleanly.
 
 5. **Outsource pathway (P3) has 1 confirmed leads** — Hugo Barbera archetype: agencies that ALREADY produce compliance reports and want to outsource. These won't respond to 'do you have this problem?' — need a dedicated opener: 'Are you currently producing Chain of Title documentation for AI video clients — and is that something you'd consider outsourcing?'
-
----
-
-## Part 9: Next 3 Suggested Campaigns
-
-*Data-driven recommendations. Each suggestion includes: what to build, which sequence to use, expected warm rate, and why the data supports it.*
-
-### Campaign 1: AI-Filtered Creative Directors — Singapore
-
-| Field | Value |
-|-------|-------|
-| **Audience list** | Creative Directors + AI Video Directors in Singapore, filtered by AI video keywords in profile/posts |
-| **Sequence** | Legal Friction |
-| **Alias** | Lilly |
-| **List size** | 150–300 leads |
-| **Expected warm rate** | ~38% (based on CreaDir_AI Video_England_0426A_IL, n=13) |
-| **Priority** | 🔴 HIGH — replicates best-performing list pattern |
-
-**Why:**  
-The AI-keyword-filtered Creative Director list in England/UK (CreaDir_AI Video_England_0426A_IL) returned 38% warm (n=13) — the strongest signal in the dataset. The filter works because it targets CDs who already self-identify with AI video production, meaning they've already crossed the 'do I even care about this?' threshold before message #1 arrives. Singapore is the next logical market: sufficient professional LinkedIn density, English as business language, and strong agency culture.
-
-**Data signal:**  
-Best AI-filtered list: `CreaDir_AI Video_England_0426A_IL` — 5 warm / 13 responses (38% warm rate). No broad CD list tested in Singapore yet — baseline unknown. AI-filter hypothesis: CDs who self-identify with AI = pre-qualified on the core question.
-
-**Watch out for:**  
-LinkedIn search for AI video keyword filtering varies by market — profile density of 'AI video' keywords may be lower outside English-speaking markets. If list size < 100, broaden to 'AI content' or 'generative AI' in profile.
-
-### Campaign 2: Dedicated AI Director / AI Content List — Volume Test
-
-| Field | Value |
-|-------|-------|
-| **Audience list** | AI Director / AI Content titles in London/UK + Singapore, no additional filters (test broad first to establish baseline) |
-| **Sequence** | Hitting a Wall |
-| **Alias** | Ivy |
-| **List size** | 200–400 leads |
-| **Expected warm rate** | ~100% if signal holds (n=4 so far — INSUFFICIENT DATA) |
-| **Priority** | 🟡 MEDIUM — confirm or kill this title segment |
-
-**Why:**  
-'AI Director / AI Content' has the highest warm rate of any title with at least 3 responses (100%, n=4), but the sample is too small to act on. A dedicated 200–400 lead batch targeting this title exclusively would either confirm it as a primary ICP segment (→ scale to email) or rule it out. Either outcome is valuable — it removes uncertainty from the ICP thesis.
-
-**Data signal:**  
-Current data: 4 warm / 4 responses (100% warm rate). Confidence: INSUFFICIENT DATA — need n≥15 at ≥15% warm rate for CONFIRMED status. If the rate holds at scale, this becomes a primary targeting segment.
-
-**Watch out for:**  
-Warm rate on thin samples is volatile — one or two extra warm replies can inflate the number significantly. Treat current rate as a hypothesis, not a confirmed signal.
-
-### Campaign 3: Outsource Opener — Singapore (New Message Variant)
-
-| Field | Value |
-|-------|-------|
-| **Audience list** | AI Directors, Head of Production, Creative Directors in Singapore who already produce AI video for clients — use AI video keywords + 'compliance' / 'documentation' in profile as filter |
-| **Sequence** | New: Outsource Opener (P3 dedicated) |
-| **Alias** | Lilly |
-| **List size** | 100–200 leads |
-| **Expected warm rate** | Unknown for new sequence — benchmark against Legal Friction (23% in Singapore) |
-| **Priority** | 🟡 MEDIUM — tests a new message for the P3 archetype |
-
-**Why:**  
-Current sequences ask 'do you have this problem?' — they work for P1 (pain-aware) and P2 (informal process) leads. But the Hugo Barbera archetype (P3 — outsource) already KNOWS they have the problem and already charges clients for documentation. They don't respond to 'is this an issue for you?' because it's not an issue — it's a revenue line. The opener needs to be: 'Are you producing Chain of Title documentation for AI video clients — and is that something you'd consider outsourcing?' This speaks directly to their workflow and positions SI8 as a subcontractor, not a new service they need to justify internally.
-
-**Data signal:**  
-Singapore is your strongest confirmed geo (23% warm, n=26). Running a new message variant here gives you a clean comparison against the existing Legal Friction / Hitting a Wall baseline. P3 outsource pathway not yet detected at scale — test with a small batch first.
-
-**Watch out for:**  
-This is a new sequence — no benchmark yet. Run 100 leads before drawing conclusions. The outsource framing may feel presumptuous to leads who don't yet produce reports — filter for AI video keywords in profile to reduce this risk.
 
 ---
 

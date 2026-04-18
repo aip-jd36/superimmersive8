@@ -262,6 +262,24 @@ def generate_report(rows: list, csv_path: str) -> str:
 
     warm_rows = [r for r in rows if r['_class'] == 'warm']
 
+    # Pre-compute all dimension tables so campaign suggestions can run first
+    title_data = dim_table(rows, lambda r: r['_title'])
+    geo_data   = dim_table(rows, lambda r: r['_geo'])
+    list_data  = dim_table(rows, lambda r: r['_target_list'])
+    camp_data  = dim_table(rows, lambda r: r['campaign_name'])
+
+    cross = defaultdict(lambda: defaultdict(int))
+    for r in rows:
+        cross[(r['_title'], r['_geo'])]['total'] += 1
+        cross[(r['_title'], r['_geo'])][r['_class']] += 1
+
+    pathway_counts = defaultdict(int)
+    for r in warm_rows:
+        pathway_counts[r['_pathway']] += 1
+
+    # Campaign suggestions computed once, used at top of report
+    suggestions = suggest_next_campaigns(rows, title_data, geo_data, list_data, camp_data, pathway_counts)
+
     lines = []
     a = lines.append
 
@@ -279,9 +297,41 @@ def generate_report(rows: list, csv_path: str) -> str:
     a(f"")
 
     # -----------------------------------------------------------------------
-    # PART 1: OVERALL SNAPSHOT
+    # PART 1: NEXT 3 SUGGESTED CAMPAIGNS (actionable — always first)
     # -----------------------------------------------------------------------
-    a(f"## Part 1: Response Pool Snapshot")
+    a(f"## Part 1: Next 3 Suggested Campaigns")
+    a(f"")
+    a(f"*Data-driven recommendations. Each suggestion includes: what to build, which sequence to use, expected warm rate, and why the data supports it.*")
+    a(f"")
+    for i, s in enumerate(suggestions, 1):
+        a(f"### Campaign {i}: {s['name']}")
+        a(f"")
+        a(f"| Field | Value |")
+        a(f"|-------|-------|")
+        a(f"| **Audience list** | {s['audience']} |")
+        a(f"| **Sequence** | {s['sequence']} |")
+        a(f"| **Alias** | {s['alias']} |")
+        a(f"| **List size** | {s['list_size']} |")
+        a(f"| **Expected warm rate** | {s['expected_warm_rate']} |")
+        a(f"| **Priority** | {s['priority']} |")
+        a(f"")
+        a(f"**Why:**  ")
+        a(f"{s['why']}")
+        a(f"")
+        a(f"**Data signal:**  ")
+        a(f"{s['data_signal']}")
+        a(f"")
+        if s.get('watch_out'):
+            a(f"**Watch out for:**  ")
+            a(f"{s['watch_out']}")
+            a(f"")
+    a(f"---")
+    a(f"")
+
+    # -----------------------------------------------------------------------
+    # PART 2: OVERALL SNAPSHOT
+    # -----------------------------------------------------------------------
+    a(f"## Part 2: Response Pool Snapshot")
     a(f"")
     a(f"| Classification | Count | % of responses |")
     a(f"|---------------|-------|---------------|")
@@ -298,9 +348,9 @@ def generate_report(rows: list, csv_path: str) -> str:
     a(f"")
 
     # -----------------------------------------------------------------------
-    # PART 2: ICP SEGMENT SCORECARD
+    # PART 3: ICP SEGMENT SCORECARD
     # -----------------------------------------------------------------------
-    a(f"## Part 2: ICP Segment Scorecard")
+    a(f"## Part 3: ICP Segment Scorecard")
     a(f"")
     a(f"*Each segment scored by: warm rate, sample size, and confidence level.*  ")
     a(f"*Confidence: CONFIRMED ✅ (n≥15, warm≥15%) | PROMISING 🟡 (n≥10, warm≥10%) | EARLY SIGNAL 🔵 | DISQUALIFIED ❌ | INSUFFICIENT DATA*")
@@ -311,7 +361,6 @@ def generate_report(rows: list, csv_path: str) -> str:
     a(f"")
     a(f"| Title | N | Warm | Warm% | Pass% | NAF% | Confidence | Scale Verdict |")
     a(f"|-------|---|------|-------|-------|------|------------|--------------|")
-    title_data = dim_table(rows, lambda r: r['_title'])
     for title, d in sorted(title_data.items(), key=lambda x: -(x[1].get('warm', 0) / max(x[1]['total'], 1))):
         n = d['total']
         w = d['warm']
@@ -327,7 +376,6 @@ def generate_report(rows: list, csv_path: str) -> str:
     a(f"")
     a(f"| Geography | N | Warm | Warm% | Pass% | NAF% | Confidence | Scale Verdict |")
     a(f"|-----------|---|------|-------|-------|------|------------|--------------|")
-    geo_data = dim_table(rows, lambda r: r['_geo'])
     for geo, d in sorted(geo_data.items(), key=lambda x: -x[1]['total']):
         n = d['total']
         w = d['warm']
@@ -343,10 +391,6 @@ def generate_report(rows: list, csv_path: str) -> str:
     a(f"")
     a(f"| Title | Geo | N | Warm | Warm% | Confidence |")
     a(f"|-------|-----|---|------|-------|------------|")
-    cross = defaultdict(lambda: defaultdict(int))
-    for r in rows:
-        cross[(r['_title'], r['_geo'])]['total'] += 1
-        cross[(r['_title'], r['_geo'])][r['_class']] += 1
     combos = [(k, v) for k, v in cross.items() if v['total'] >= 3]
     for (title, geo), d in sorted(combos, key=lambda x: -(x[1].get('warm', 0) / max(x[1]['total'], 1))):
         n = d['total']
@@ -358,9 +402,9 @@ def generate_report(rows: list, csv_path: str) -> str:
     a(f"")
 
     # -----------------------------------------------------------------------
-    # PART 3: CAMPAIGN MESSAGE + AUDIENCE LIST ANALYSIS
+    # PART 4: CAMPAIGN MESSAGE + AUDIENCE LIST ANALYSIS
     # -----------------------------------------------------------------------
-    a(f"## Part 3: Campaign Performance")
+    a(f"## Part 4: Campaign Performance")
     a(f"")
 
     # --- 3a: Message sequence performance ---
@@ -370,7 +414,6 @@ def generate_report(rows: list, csv_path: str) -> str:
     a(f"")
     a(f"| Sequence | Version | N | Warm | Warm% | Pass% | NAF% | Status | Hypothesis |")
     a(f"|----------|---------|---|------|-------|-------|------|--------|-----------|")
-    camp_data = dim_table(rows, lambda r: r['campaign_name'])
     for camp, d in sorted(camp_data.items(), key=lambda x: -(x[1].get('warm', 0) / max(x[1]['total'], 1))):
         meta = get_campaign_meta(camp)
         n = d['total']
@@ -388,7 +431,6 @@ def generate_report(rows: list, csv_path: str) -> str:
     a(f"")
     a(f"| Audience List | N | Warm | Warm% | Pass% | NAF% | Confidence | Verdict |")
     a(f"|--------------|---|------|-------|-------|------|------------|---------|")
-    list_data = dim_table(rows, lambda r: r['_target_list'])
     for lst, d in sorted(list_data.items(), key=lambda x: -(x[1].get('warm', 0) / max(x[1]['total'], 1))):
         n = d['total']
         w = d['warm']
@@ -426,9 +468,9 @@ def generate_report(rows: list, csv_path: str) -> str:
     a(f"")
 
     # -----------------------------------------------------------------------
-    # PART 4: ALIAS PERFORMANCE
+    # PART 5: ALIAS PERFORMANCE
     # -----------------------------------------------------------------------
-    a(f"## Part 4: Alias Performance")
+    a(f"## Part 5: Alias Performance")
     a(f"")
     a(f"| Alias | N | Warm | Warm% | Pass% | NAF% |")
     a(f"|-------|---|------|-------|-------|------|")
@@ -444,18 +486,14 @@ def generate_report(rows: list, csv_path: str) -> str:
     a(f"")
 
     # -----------------------------------------------------------------------
-    # PART 5: CONVERSION PATHWAY BREAKDOWN
+    # PART 6: CONVERSION PATHWAY BREAKDOWN
     # -----------------------------------------------------------------------
-    a(f"## Part 5: Conversion Pathway Breakdown")
+    a(f"## Part 6: Conversion Pathway Breakdown")
     a(f"")
     a(f"*For warm leads only. Three pathways identified from ICP discovery.*")
     a(f"")
     a(f"| Pathway | Description | Count | % of warm |")
     a(f"|---------|-------------|-------|----------|")
-    pathway_counts = defaultdict(int)
-    for r in warm_rows:
-        pathway_counts[r['_pathway']] += 1
-
     pathway_labels = {
         'P1-pain-aware': 'P1 — Pain-aware: legal team has blocked/rejected AI video',
         'P2-informal-process': 'P2 — Informal process: has workaround, thinks covered',
@@ -474,9 +512,9 @@ def generate_report(rows: list, csv_path: str) -> str:
     a(f"")
 
     # -----------------------------------------------------------------------
-    # PART 6: WARM LEAD SIGNALS (language mining)
+    # PART 7: WARM LEAD SIGNALS (language mining)
     # -----------------------------------------------------------------------
-    a(f"## Part 6: Warm Lead Signals")
+    a(f"## Part 7: Warm Lead Signals")
     a(f"")
     a(f"*Actual language from warm replies. This is your email copy and objection handling.*")
     a(f"")
@@ -491,9 +529,9 @@ def generate_report(rows: list, csv_path: str) -> str:
     a(f"")
 
     # -----------------------------------------------------------------------
-    # PART 6b: PRODUCT FEEDBACK QUEUE (non-warm leads with product signal)
+    # PART 7b: PRODUCT FEEDBACK QUEUE (non-warm leads with product signal)
     # -----------------------------------------------------------------------
-    a(f"## Part 6b: Product Feedback Queue")
+    a(f"## Part 7b: Product Feedback Queue")
     a(f"")
     a(f"*Non-warm leads whose replies contain product validation signals.*  ")
     a(f"*These are NOT sales leads. Send a discovery question, not a CTA.*  ")
@@ -524,9 +562,9 @@ def generate_report(rows: list, csv_path: str) -> str:
     a(f"")
 
     # -----------------------------------------------------------------------
-    # PART 7: SCALE READINESS SUMMARY
+    # PART 8: SCALE READINESS SUMMARY
     # -----------------------------------------------------------------------
-    a(f"## Part 7: Scale Readiness — What to Scale, Kill, or Keep Testing")
+    a(f"## Part 8: Scale Readiness — What to Scale, Kill, or Keep Testing")
     a(f"")
     a(f"*Based on confidence scores from Parts 2-3.*")
     a(f"")
@@ -573,9 +611,9 @@ def generate_report(rows: list, csv_path: str) -> str:
     a(f"")
 
     # -----------------------------------------------------------------------
-    # PART 8: OPEN QUESTIONS + NEXT TESTS
+    # PART 9: OPEN QUESTIONS + NEXT TESTS
     # -----------------------------------------------------------------------
-    a(f"## Part 8: Open Questions + Recommended Next Tests")
+    a(f"## Part 9: Open Questions + Recommended Next Tests")
     a(f"")
 
     # Auto-generate based on data gaps
@@ -631,40 +669,6 @@ def generate_report(rows: list, csv_path: str) -> str:
     a(f"---")
     a(f"")
 
-    # -----------------------------------------------------------------------
-    # PART 9: NEXT 3 SUGGESTED CAMPAIGNS
-    # -----------------------------------------------------------------------
-    a(f"## Part 9: Next 3 Suggested Campaigns")
-    a(f"")
-    a(f"*Data-driven recommendations. Each suggestion includes: what to build, which sequence to use, expected warm rate, and why the data supports it.*")
-    a(f"")
-
-    suggestions = suggest_next_campaigns(rows, title_data, geo_data, list_data, camp_data, pathway_counts)
-    for i, s in enumerate(suggestions, 1):
-        a(f"### Campaign {i}: {s['name']}")
-        a(f"")
-        a(f"| Field | Value |")
-        a(f"|-------|-------|")
-        a(f"| **Audience list** | {s['audience']} |")
-        a(f"| **Sequence** | {s['sequence']} |")
-        a(f"| **Alias** | {s['alias']} |")
-        a(f"| **List size** | {s['list_size']} |")
-        a(f"| **Expected warm rate** | {s['expected_warm_rate']} |")
-        a(f"| **Priority** | {s['priority']} |")
-        a(f"")
-        a(f"**Why:**  ")
-        a(f"{s['why']}")
-        a(f"")
-        a(f"**Data signal:**  ")
-        a(f"{s['data_signal']}")
-        a(f"")
-        if s.get('watch_out'):
-            a(f"**Watch out for:**  ")
-            a(f"{s['watch_out']}")
-            a(f"")
-
-    a(f"---")
-    a(f"")
     a(f"*Report generated by `tools/linkedin-analysis/analyze.py` · SI8 Sales Intelligence*")
 
     return '\n'.join(lines)
