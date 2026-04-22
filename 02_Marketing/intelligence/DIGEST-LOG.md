@@ -9,6 +9,38 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of April 22, 2026
+*Run: 2026-04-22 · 11 high · 6 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Adobe Introduces Brand Intelligence and Expands GenStudio Content Supply Chain Solution for Customer Experience Orchestration](https://news.adobe.com/news/2026/04/adobe-introduces-brand-intelligence) | Adobe Newsroom | Mon, 20 Apr 2026 | ☐ |
+| 9 | post+update | [Insurance carriers quietly back away from covering AI outputs](https://www.csoonline.com/article/4159292/insurance-carriers-quietly-back-away-from-covering-ai-outputs.html) | csoonline.com | Thu, 16 Apr 2026 | ☐ |
+| 9 | post+update | [Generative AI – IP cases and policy tracker](https://www.mishcon.com/generative-ai-intellectual-property-cases-and-policy-tracker) | Mishcon de Reya LLP | Wed, 15 Apr 2026 | ☐ |
+| 8 | post+update | [Government Proposes Stricter AI Content Disclosure Norms](https://www.devdiscourse.com/article/law-order/3882079-government-proposes-stricter-ai-content-disclosure-norms) | Devdiscourse | Tue, 21 Apr 2026 | ☐ |
+| 8 | post+update | [AI Advertising and the Authenticity Paradox](https://www.orfonline.org/expert-speak/ai-advertising-and-the-authenticity-paradox) | orfonline.org | Mon, 20 Apr 2026 | ☐ |
+| 8 | post+update | [Who is liable when artificial intelligence makes mistakes?](https://www.ft.com/content/51b55431-30e8-4eb3-9730-f5e89c24ad56?syn-25a6b1a6=1) | Financial Times | Mon, 20 Apr 2026 | ☐ |
+| 8 | post+update | [The Insurance Implications of AI in Your Business: Is Your Current Coverage Keeping Up?](https://www.jdsupra.com/legalnews/the-insurance-implications-of-ai-in-4098538/) | JD Supra | Thu, 16 Apr 2026 | ☐ |
+| 7 | update | [China’s top court moves to draft guidelines to tackle AI-related disputes](https://www.globaltimes.cn/page/202604/1359360.shtml) | Global Times | Mon, 20 Apr 2026 | ☐ |
+| 7 | post+update | [Google Veo 4: The Next AI Video Revolution in 2026](https://www.tech-critter.com/google-veo-4-the-next-ai-video-revolution-in-2026/) | Tech Critter | Fri, 17 Apr 2026 | ☐ |
+| 7 | update | [Shutterstock Expands Commercial-Ready GenAI Solutions with AI Video Generator](https://www.sahmcapital.com/news/content/shutterstock-expands-commercial-ready-genai-solutions-with-ai-video-generator-2026-04-15) | Sahm | Thu, 16 Apr 2026 | ☐ |
+| 7 | post | [80% of Marketers Use AI, Yet Usable Content Remains a Challenge](https://news.designrush.com/why-80-percent-marketers-struggle-usable-ai-generated-content) | DesignRush | Wed, 15 Apr 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [22 Best AI Video Generators for 2026 (Tested & Reviewed)](https://www.perfectcorp.com/consumer/blog/video-editing/best-ai-video-generators) | perfectcorp.com | Sun, 19 Apr 2026 | ☐ |
+| 6 | monitor | [Two free video generations: Shutterstock adds Google, Runway AI](https://www.stocktitan.net/news/SSTK/shutterstock-expands-commercial-ready-gen-ai-solutions-with-ai-video-2svvako1ufs6.html) | Stock Titan | Wed, 15 Apr 2026 | ☐ |
+| 5 | monitor | [Business vs. provider: AI software restrictions to know](https://www.techtarget.com/searchenterpriseai/feature/Business-vs-provider-AI-software-restrictions-to-know) | TechTarget | Mon, 20 Apr 2026 | ☐ |
+| 5 | monitor | [How Is AI Regulated? Examples, Benefits, & Drawbacks](https://www.britannica.com/money/ai-rules-and-regulations) | Britannica | Fri, 17 Apr 2026 | ☐ |
+| 4 | monitor | [MediaPET.ai launches industry-first Conversational AI agent for video creation](https://natlawreview.com/press-releases/mediapetai-launches-industry-first-conversational-ai-agent-video-creation) | The National Law Review | Mon, 20 Apr 2026 | ☐ |
+| 4 | monitor | [Publisher Training Data Win: $1.5B Anthropic Deal](https://www.aicerts.ai/news/publisher-training-data-win-1-5b-anthropic-deal/) | AI CERTs | Thu, 16 Apr 2026 | ☐ |
+
+---
+
 ## Week of April 19, 2026
 *Run: 2026-04-19 · 9 high · 5 monitor · lookback 7 days*
 
