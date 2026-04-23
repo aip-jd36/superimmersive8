@@ -4,7 +4,7 @@
 
 **Logging rule (added April 10, 2026):** Every response must be logged — good, bad, or generic. A polite pass, a thumbs-up, a "not for me," a "we don't use AI" — all of it goes in. Campaign and alias must be recorded for every entry. This is the only way to run campaign-level analysis on the full response pool, not just on leads that showed signal. No response is too small to log.
 
-**Last updated:** April 13, 2026
+**Last updated:** April 24, 2026
 
 ---
 
@@ -71,6 +71,11 @@
 | B053 | Graham Vincent | grigio:london | buyer | Replied-Warm | 2026-04-13 | "Yes, of course" — confirms legal teams ask — Legal Friction msg#1 [London] | Reply + send sample | — | MEDIUM | pending |
 | B054 | Steve Cholerton | Sentient Pictures | buyer | Nurture | 2026-04-13 | "one client has asked for metadata" — Hitting a Wall msg#1 | Monitor; re-engage when more clients ask | — | MONITOR | — |
 | B055 | Owen Bryant | — | buyer | Nurture | 2026-04-13 | CD, not creating AI videos now but open to future | Check in Q3 | 2026-07-01 | MONITOR | — |
+| B056 | Michael Christodoulou | MOI Global | buyer | Replied-Warm | 2026-04-19 | "Sure" — replied to sample offer (msg#3) [Vanessa] | Send sample Chain of Title | — | MEDIUM | pending |
+| B057 | Rheea Aranha | Vincent Studios | buyer | Replied-Warm | 2026-04-19 | "Will be in touch at the time this is required. A sample of Chain of title via email would be helpful." (msg#4) [Ivy] | Send sample Chain of Title via email | — | MEDIUM | pending |
+| B058 | Chun Man Chan | Dustinhill Productions | buyer | Replied-Lukewarm | 2026-04-21 | "As of now no... Why do you ask?" — uses AI in production pipeline but not 100% AI final output; Singapore [Lilly] | Reply + explain regulatory trend; nurture for Q3 | — | LOW | pending |
+| B059 | Alan Geoy | Antigravity Studio | buyer | Replied-Lukewarm | 2026-04-17 | "limited to certain ai tools that are approved by agencies/clients" — tool approval gate; Singapore [Lilly] | Reply + probe which tools; client-dictated approved-tool policy = secondary ICP signal | — | LOW | pending |
+| B060 | Konstantin Dimitrov | Pathbind Games | buyer | Replied-Lukewarm | 2026-04-06 | "Do you mind rephrasing the question to elaborate?" — asked for clarification [Vanessa] | Reply with clearer description | — | LOW | pending |
 | C006 | Essa | — (Hong Kong) | creator | Followed Up | 2026-04-07 20:00 | v4 re-pitch sent via WhatsApp — docs model, revised commission, comp CR codes offered, MyVideo still active | Await reply | — | MEDIUM | waiting |
 | C001 | keeper505 | — | creator | Followed Up | 2026-04-09 | Follow-up message sent — no reply yet | Await reply; create COMP-KEEPER in Stripe only when she confirms interest | — | MEDIUM | waiting |
 | C002 | @syntaxdiffusion | — | creator | Interested | 2026-03-29 | v4 reply sent | Send v4 follow-up | — | MEDIUM | pending |
@@ -121,13 +126,13 @@
 | Call Completed | 2 |
 | Call Booked | 0 |
 | Replied — Hot (follow-up urgent) | 2 |
-| Replied — Warm | 16 |
+| Replied — Warm | 18 |
 | Replied — Conditional | 4 |
-| Replied — Lukewarm | 7 |
+| Replied — Lukewarm | 10 |
 | Nurture | 5 |
-| Polite Pass | 31 |
-| Not a Fit | 12 |
-| **Total Named Responses** | 86 |
+| Polite Pass | 38 |
+| Not a Fit | 16 |
+| **Total Named Responses** | 102 |
 | **Total Leads Contacted** | ~1,100+ |
 
 ---
@@ -172,6 +177,8 @@
 | **Kiel Robinson** | Ok let's play Studios | Filmmaker | London | SI8_Legal Friction | Replied-Warm | P2 informal process: tracks raw materials + metadata per project (msg#1) | None | Reply + send sample — already does the work, SI8 formalizes it |
 | **Loewe Chung Nin Lee** | — | AI Video & Digital Content Producer | UK | SI8_Legal Friction | Replied-Warm | "started seeing this come up more recently" — early mover signal (msg#1) | None | Reply + send sample |
 | **Graham Vincent** | grigio:london | Creative Director | London | SI8_Legal Friction | Replied-Warm | "Yes, of course" — confirms legal teams routinely ask; London CD (msg#1) | None | Reply + send sample |
+| **Michael Christodoulou** | MOI Global | Creative Director EMEA & NAM | London | SI8_Blocks AI Campaign | Replied-Warm | "Sure" — replied to sample offer on msg#3 | None | Send sample Chain of Title |
+| **Rheea Aranha** | Vincent Studios | Creative Director | London | SI8_Hitting a Wall | Replied-Warm | "We will be in touch at the time this is required. A sample of Chain of title via email would be helpful." — msg#4; explicitly asked for sample | None | Send sample Chain of Title via email |
 
 ---
 
@@ -197,6 +204,9 @@
 | **Karun Sbaram** | Singapore Kindness Movement | — | Singapore | Campaign A | "Sure" after Msg 3 | Nonprofit — not a commercial buyer. Wrong target. |
 | **Steve Cholerton** | Sentient Pictures | Owner | UK | SI8_Hitting a Wall | "one client has asked for metadata" (msg#1) | Early signal — one client asking. Not ready yet. Re-engage when volume increases. |
 | **Owen Bryant** | — | Creative Director | UK | — | Not currently creating AI videos but open to future | Check in Q3 when they may have started. |
+| **Chun Man Chan** | Dustinhill Productions | Creative Director | Singapore | SI8_Hitting a Wall | "As of now no... Why do you ask?" — uses AI only to speed up pipeline; final output is 3D/Film capture not 100% AI (msg#1) | Not ready. Singapore. Check in Q3 when they start full AI output. |
+| **Alan Geoy** | Antigravity Studio | Lead Motion Designer & GenAI Specialist | Singapore | SI8_Hitting a Wall | "It hasn't come up to me, but we are limited to certain ai tools that are approved by agencies/clients." (msg#1) | Singapore signal — client-dictated tool approval policy is an ICP signal. They're inside the compliance gate already; SI8 documents the output. Reply + probe which tools are on their approved list. |
+| **Konstantin Dimitrov** | Pathbind Games | Creative Director | Ware, UK | SI8_Blocks AI Campaign | "Do you mind rephrasing the question to elaborate?" — asked for clarification (msg#1) | Low signal — curiosity or genuine confusion. Send clearer description of service. |
 
 ---
 
@@ -231,16 +241,23 @@
 | Joseph Clark | Oh Studio | Creative Director | London | Blocks AI Campaign | — | "Not a scenario I've encountered I'm afraid! Lovely to connect." — msg#1 |
 | Mar Vin Foo | iMerv Digital | Founder & Principal | Singapore | Trusted AI Supplier | Vanessa | "Hi Vanessa" — minimal reply to msg#3, no signal |
 | Katalin Marton | — | — | — | — | — | Polite pass — Apr 13 CSV |
-| Fatima Isse | — | — | — | — | — | Polite pass — Apr 13 CSV |
+| Fatima Isse | River Lake Studios | Creative Director | London | SI8_Hitting a Wall | Ivy | "I don't currently work with AI-generated video content, so it hasn't come up in my work directly." — not a fit; moved to Not a Fit section |
 | Sara Orfali | — | — | — | — | — | Polite pass — Apr 13 CSV |
-| Dan Ablan | — | — | — | — | — | Polite pass — Apr 13 CSV |
+| Dan Ablan | Association of International Certified Professional Accountants | Creative Director | Greater Chicago Area | SI8_Blocks AI Campaign | Vanessa | "We're all set internally for now but if it changes I'll reach out." — US, off-geo |
 | Rory Woodbridge | — | — | — | — | — | Polite pass — Apr 13 CSV |
 | Elliott Prompts | — | — | — | — | — | Polite pass — Apr 13 CSV |
-| Margarita Repina | — | — | — | — | — | Polite pass — Apr 13 CSV |
+| Margarita Repina | Atelier Catalyst | Founder & Creative Director | UK | SI8_Hitting a Wall | Ivy | "it's my basic rule to have a contract always 😊" — contract-minded but no AI video use case confirmed |
 | Derek Bender | — | — | — | — | — | Polite pass — Apr 13 CSV |
-| Stuart Parker | — | — | — | — | — | Polite pass — Apr 13 CSV |
+| Stuart Parker | Ted Experience | Client Development Director | London | SI8_Documented Provenance | Vanessa | "Thanks Vanessa - I'll keep yiu in mind 🙏" (msg#4) |
 | Ajibola Olayiwola | — | — | — | — | — | Polite pass — Apr 13 CSV |
-| Kamal Chugh | — | — | — | — | — | "we have an inhouse team" — Apr 13 CSV |
+| Kamal Chugh | StepOut | Creative Director | Gurgaon, India | SI8_Hitting a Wall | Lilly | "We have an inhouse team" — India off-geo |
+| Joey Johnson | Mother | Creative Director | Los Angeles | SI8_Blocks AI Campaign | Vanessa | "not relevant to our working process at this time" (msg#2) — US, off-geo |
+| Robert Nyquist | Wootly | Co-Founder | Bristol | SI8_Blocks AI Campaign | Vanessa | "Not something we would use but thanks" (msg#3) |
+| Andy Vasey | Channel 4 | Creative Director | London | SI8_Hitting a Wall | Ivy | "Not something for me right now" (msg#4) |
+| Richard Silbermann | Brand Remedy | Creative Director | Brentford | SI8_Hitting a Wall | Ivy | "Not something we need right now, but thanks for the info" (msg#2) |
+| Kat Buckley | Good Yolk | Director & Co-Founder | London | SI8_Documented Provenance | Vanessa | "Not what I'm looking for right now, but I'll keep you guys in mind" (msg#1) |
+| Mos . | intent.ly | Global Partnerships Director | UK | SI8_Documented Provenance | Lilly | "Not for us thank you!" (msg#2) |
+| Rejoice Bhila | Careconnectshow | Director | Epping, UK | SI8_Documented Provenance | Lilly | "Thanks Lilly. Will be in touch." (msg#2) — healthcare/community, wrong profile |
 
 ---
 
@@ -272,7 +289,12 @@
 | Vigneshwaran Velusamy | Octupus.ai | Co-Founder | London | Trusted AI Supplier | Ivy | Counter-pitched SEO/web dev services — wrong side of market |
 | Anas Nasir | Magentus | Training Lead (Pathology) | London | Blocks AI Campaign | Lilly | "Not something I'd be interested in" — healthcare training, wrong role |
 | Nuray Dal Ulualan | — | — | — | — | — | Counter-pitched AI presales tool — wrong side of market |
-| Jaron Goh | — | Channel Account Exec | — | — | — | Cybersecurity firm — no AI video use case |
+| Jaron Goh | BitCyber | Channel Account Exec | Singapore | SI8_Hitting a Wall | Lilly | "I'm not focusing on my production business right now" — cybersecurity firm, no AI video use case |
+| Lev Myskin | Fame | Content Strategy Consultant | Wolverhampton | SI8_Blocks AI Campaign | Vanessa | "I abhor AI videos, campaigns, and anything that takes employment away from highly trained real people." — strong anti-AI; do not re-engage |
+| Francis Oldfield | Cheddar Media | Creative Director | Hong Kong SAR | SI8_Hitting a Wall | Lilly | "I'm not in video production. More in the brand strategy and identity space." (msg#1) |
+| Hans Olof Karlsson | Mimir LLC VR/3D Creative Agency | CTO & Co-Founder | Gifu, Japan | SI8_Hitting a Wall | Ivy | "We are not making AI video. We make VR and 3D models :)" (msg#1) |
+| Tom Readdy | Yes Please Productions | Creative Director | London | SI8_Hitting a Wall | Ivy | "we don't use any AI" (msg#2) |
+| Fatima Isse | River Lake Studios | Creative Director | London | SI8_Hitting a Wall | Ivy | "I don't currently work with AI-generated video content, so it hasn't come up in my work directly." (msg#1) |
 
 ---
 
