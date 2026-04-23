@@ -18,7 +18,7 @@
 |----|------|---------|------|-------|---------------------|-------------|-------------|-------------|---------|--------|
 | B001 | Leimi Zhou | WOMBO | buyer | Followed Up | 2026-04-07 18:00 | Sample (fictional Chain of Title) attached + product feedback question | Await reply | — | MEDIUM | waiting |
 | B002 | Theodor Sandu | McCann/Unilever @ Omnicom | buyer | Followed Up | 2026-04-07 18:00 | Sample (fictional Chain of Title) attached + product feedback question + Calendly [Lilly] | Await reply; book call | — | MEDIUM | waiting |
-| B003 | Hossein Jafari | Wowspot Ltd | buyer | Followed Up | 2026-04-01 | Urban Drift PDF + Runway/Kling gap + asked for call | Nudge — 7 days no reply | — | HIGH | pending |
+| B003 | Hossein Jafari | Wowspot Ltd | buyer | Followed Up | 2026-04-24 | Nudge sent: referenced sample + ASA enforcement moving fast + offered quick call | Await reply; book call | — | HIGH | waiting |
 | B004 | Troy Macdonald | HyFi Corp | buyer | Nurture | 2026-04-07 | Replied: "I don't think it's for me at this time. Happy to stay in touch." [Ivy] | Check in Q3 | 2026-07-01 | MONITOR | — |
 | B005 | Isaac Twidale | We Do Ads | buyer | Nurture | 2026-03-15 | Discovery call done — asked for photorealistic portfolio examples | Re-engage as Gear B catalog buyer when Showcase has 5+ films | — | MONITOR | — |
 | B006 | Rawand Latif | ARUBA CREATIVE | buyer | Followed Up | 2026-04-07 18:00 | v4 CaaS explanation + sample attached + Calendly | Await reply; book call | — | MEDIUM | waiting |
@@ -26,7 +26,7 @@
 | B008 | Barney O'Kelly | AlixPartners | buyer | Followed Up | 2026-04-01 | Urban Drift PDF sent | Nudge — 7 days no reply | — | MEDIUM | pending |
 | B009 | Syed Tabish Hasan | Zedtronix | buyer | Followed Up | 2026-04-01 | v4 framing + Urban Drift + Calendly | Await reply; book call | — | MEDIUM | waiting |
 | B010 | Bee Lin Ang | Stewardship Asia Centre | buyer | Followed Up | 2026-04-01 | Second follow-up + Urban Drift + Calendly | Await reply; book call | — | MEDIUM | waiting |
-| B011 | Hugo Barbera | HumAIn | buyer | Meeting Requested | 2026-04-17 | Sent availability for Tue/Thu 10am Paris time — proposed JD meeting [Ivy] | Await confirmation; book Tue Apr 22 or Thu Apr 24 | 2026-04-21 | HIGH | waiting |
+| B011 | Hugo Barbera | HumAIn | buyer | Followed Up | 2026-04-24 | Nudge sent: are you back from Paris? offered slot next week with JD [Ivy] | Await reply; book call | — | HIGH | waiting |
 | B012 | Ivan Ng | Bacon Creatives | buyer | Followed Up | 2026-04-03 | Pivot: SI8 as doc layer; asked about client stage | Await reply; Singapore use case | — | MEDIUM | waiting |
 | B013 | Qaiser Mehmood | ECONROAD International | buyer | Followed Up | 2026-04-01 | Urban Drift PDF + Calendly | Await reply; book call | — | MEDIUM | waiting |
 | B014 | Shahrman Nayan | onedash22 | buyer | Replied | 2026-04-03 | No action taken | Continue sequence msg 3 | — | MEDIUM | pending |
@@ -46,7 +46,7 @@
 | B028 | Keir Finlow-Bates | Artema LABS | buyer | Not a Fit | 2026-04-07 | Responded with book promotion — CTO, wrong profile for CaaS. [Ivy] | — | — | — | done |
 | B029 | Ron David Ben Ishay | Liquidity Group | buyer | Polite Pass | 2026-04-07 | Replied "Uhno thnx" [Lilly — note: Msg 2 was signed Ivy, persona mismatch] | — | — | — | done |
 | B030 | Matthieu Fernandes | Sensai | buyer | Not a Fit | 2026-04-07 | "No needs atm" + counter-pitched AI automation services. CMO, wrong buyer side. [Vanessa] | — | — | — | done |
-| B031 | Steve Mcpartland | Visually Sonic | buyer | Followed Up | 2026-04-09 | v4 explanation + price + asked about tools used + offered sample or call [Vanessa] | Await reply | — | HIGH | waiting |
+| B031 | Steve Mcpartland | Visually Sonic | buyer | Followed Up | 2026-04-24 | Nudge sent: circled back + offered to send sample Chain of Title [Vanessa] | Await reply | — | HIGH | waiting |
 | B032 | Simon Lee | Vantage Branding | buyer | Not Interested | 2026-04-10 | "no thanks" after msg 3 [Lilly] | — | — | — | done |
 | B033 | Tunde Olowo-Ake | Ingenium Communications | buyer | Not a Fit | 2026-04-10 | 👍 reaction only — Lagos, off-geo [Lilly] | — | — | — | done |
 | B034 | Paul L | Excelsior-Studios | buyer | Not a Fit | 2026-04-10 | "We don't use AI to create anything" [Lilly] | — | — | — | done |
@@ -60,7 +60,7 @@
 | B042 | Shray Vaidya | Creative Chimps | buyer | Nurture | 2026-04-13 | "It might be in the future. Let's keep in touch." — soft nurture [Blocks AI msg#1, London] | Check in Q3 | 2026-07-01 | MONITOR | — |
 | B043 | Luke Brady | Sublime Animations Ltd | buyer | Meeting Confirmed | 2026-04-24 | JD confirmed Fri Apr 24 10am UK — asked Zoom or WhatsApp | Await format reply; join call | 2026-04-24 | HIGH | confirmed |
 | B044 | Shaun Yeo | Reel Loco Productions | buyer | Followed Up | 2026-04-18 | Sent Calendly link for JD call [Lilly] | Await booking | — | HIGH | waiting |
-| B045 | Mike Harris | Seenit | buyer | Meeting Requested | 2026-04-18 | Proposed Mon Apr 20, 9am or 10am UK time for JD call [Ivy] | Await confirmation | 2026-04-20 | HIGH | waiting |
+| B045 | Mike Harris | Seenit | buyer | Followed Up | 2026-04-24 | Nudge sent: offered to rebook if Monday didn't work; JD available next week [Ivy] | Await reply; book call | — | HIGH | waiting |
 | B046 | Kd Pascall | Bluvision Studios | buyer | Replied-Warm | 2026-04-13 | "Of recent yes, before it was never an issue" — Legal Friction msg#1 [London] | Reply + explore current use case | — | MEDIUM | pending |
 | B047 | Hugo Faustino | Canon EMEA | buyer | Nurture | 2026-04-23 | Declined call: "Thank you for feedback Vanessa, but no need for a meeting." [Vanessa] | Check in Q3 | 2026-07-01 | MONITOR | — |
 | B048 | Piotr Nierobisz | Munchingsquare | buyer | Followed Up | 2026-04-18 | Positioned Chain of Title as the legal clearance doc; sent sample + offered JD call [Vanessa] | Await reply; book call | — | HIGH | waiting |
