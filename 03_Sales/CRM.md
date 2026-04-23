@@ -16,16 +16,16 @@
 <!-- pipeline:start -->
 | id | name | company | type | stage | last_action_datetime | last_action | next_action | follow_up_by | urgency | status |
 |----|------|---------|------|-------|---------------------|-------------|-------------|-------------|---------|--------|
-| B001 | Leimi Zhou | WOMBO | buyer | Followed Up | 2026-04-07 18:00 | Sample (fictional Chain of Title) attached + product feedback question | Await reply | — | MEDIUM | waiting |
-| B002 | Theodor Sandu | McCann/Unilever @ Omnicom | buyer | Followed Up | 2026-04-07 18:00 | Sample (fictional Chain of Title) attached + product feedback question + Calendly [Lilly] | Await reply; book call | — | MEDIUM | waiting |
+| B001 | Leimi Zhou | WOMBO | buyer | Followed Up | 2026-04-24 | Nudge sent: documentation hits agencies first but creators next; relevant to WOMBO's direction [Vanessa] | Await reply | — | MEDIUM | waiting |
+| B002 | Theodor Sandu | McCann/Unilever @ Omnicom | buyer | Followed Up | 2026-04-24 | Nudge sent: any initial thoughts on sample? offered JD call [Lilly] | Await reply; book call | — | MEDIUM | waiting |
 | B003 | Hossein Jafari | Wowspot Ltd | buyer | Followed Up | 2026-04-24 | Nudge sent: referenced sample + ASA enforcement moving fast + offered quick call | Await reply; book call | — | HIGH | waiting |
 | B004 | Troy Macdonald | HyFi Corp | buyer | Nurture | 2026-04-07 | Replied: "I don't think it's for me at this time. Happy to stay in touch." [Ivy] | Check in Q3 | 2026-07-01 | MONITOR | — |
 | B005 | Isaac Twidale | We Do Ads | buyer | Nurture | 2026-03-15 | Discovery call done — asked for photorealistic portfolio examples | Re-engage as Gear B catalog buyer when Showcase has 5+ films | — | MONITOR | — |
 | B006 | Rawand Latif | ARUBA CREATIVE | buyer | Followed Up | 2026-04-07 18:00 | v4 CaaS explanation + sample attached + Calendly | Await reply; book call | — | MEDIUM | waiting |
 | B007 | Elaine Tan + Joseph Lee | The Media Shop | buyer | Nurture | 2026-03-18 | Discovery call done — media buying agency, Gear B/C profile not Gear A | Re-engage as catalog/licensing buyer when Showcase has 5+ films; Joseph Germany intro for expansion | — | MONITOR | — |
-| B008 | Barney O'Kelly | AlixPartners | buyer | Followed Up | 2026-04-01 | Urban Drift PDF sent | Nudge — 7 days no reply | — | MEDIUM | pending |
-| B009 | Syed Tabish Hasan | Zedtronix | buyer | Followed Up | 2026-04-01 | v4 framing + Urban Drift + Calendly | Await reply; book call | — | MEDIUM | waiting |
-| B010 | Bee Lin Ang | Stewardship Asia Centre | buyer | Followed Up | 2026-04-01 | Second follow-up + Urban Drift + Calendly | Await reply; book call | — | MEDIUM | waiting |
+| B008 | Barney O'Kelly | AlixPartners | buyer | Followed Up | 2026-04-24 | Nudge sent: did you see the Chain of Title doc? offered 15-min JD call [Vanessa] | Await reply; book call | — | MEDIUM | waiting |
+| B009 | Syed Tabish Hasan | Zedtronix | buyer | Followed Up | 2026-04-24 | Nudge sent: did you see the Chain of Title sample? offered JD call [Lilly] | Await reply; book call | — | MEDIUM | waiting |
+| B010 | Bee Lin Ang | Stewardship Asia Centre | buyer | Followed Up | 2026-04-24 | Nudge sent: did you get a chance to look at the sample? offered JD call [Lilly] | Await reply; book call | — | MEDIUM | waiting |
 | B011 | Hugo Barbera | HumAIn | buyer | Followed Up | 2026-04-24 | Nudge sent: are you back from Paris? offered slot next week with JD [Ivy] | Await reply; book call | — | HIGH | waiting |
 | B012 | Ivan Ng | Bacon Creatives | buyer | Followed Up | 2026-04-03 | Pivot: SI8 as doc layer; asked about client stage | Await reply; Singapore use case | — | MEDIUM | waiting |
 | B013 | Qaiser Mehmood | ECONROAD International | buyer | Followed Up | 2026-04-01 | Urban Drift PDF + Calendly | Await reply; book call | — | MEDIUM | waiting |
