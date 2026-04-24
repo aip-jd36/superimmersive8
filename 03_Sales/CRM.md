@@ -4,7 +4,7 @@
 
 **Logging rule (added April 10, 2026):** Every response must be logged — good, bad, or generic. A polite pass, a thumbs-up, a "not for me," a "we don't use AI" — all of it goes in. Campaign and alias must be recorded for every entry. This is the only way to run campaign-level analysis on the full response pool, not just on leads that showed signal. No response is too small to log.
 
-**Last updated:** April 24, 2026
+**Last updated:** April 24, 2026 (B071-B078 added; 8 not-a-fits, 3 polite passes, 3 lukewarm, 5 warm — CSV fully exhausted)
 
 ---
 
@@ -86,6 +86,14 @@
 | B068 | Marchel De Haan | Palo Alto Networks | buyer | Replied-Lukewarm | 2026-04-22 | "some do and some don't" — Associate CD EMEA & LATAM, Amsterdam [SI8_Legal Friction] | Follow up; not urgent yet | — | LOW | pending |
 | B069 | Shahrukh Kazmi | — | buyer | Replied-Lukewarm | 2026-04-22 | "some legal teams are starting to ask" — Freelance AI design Specialist, Amsterdam [SI8_Legal Friction] | Reply; monitor | — | LOW | pending |
 | B070 | Marinus Bergsma | SocialNow | buyer | Replied-Lukewarm | 2026-04-22 | Makes everything in AI; "always clear" upfront — Founder & Creative Art Director, Amsterdam [SI8_Legal Friction] | Reply; explore if clients ask for docs | — | LOW | pending |
+| B071 | Jenny Springett | Electric Violet TV | buyer | Replied-Warm | 2026-04-22 | "Yes absolutely. It's required to broadcast anywhere in the EU so smart to be compliant even outside." — Development Executive, London [Ivy, SI8_Legal Friction] | Reply + position SI8 as formal Chain of Title for EU broadcast compliance | — | MEDIUM | pending |
+| B072 | Nick Craske | Havas Lynx | buyer | Replied-Warm | 2026-04-22 | "Yes, and a wider view of the application and use cases of Gen AI." — Creative Director & AI Technologist, Manchester [Ivy, SI8_Legal Friction] | Reply + position SI8 as compliance layer for broader GenAI use cases | — | MEDIUM | pending |
+| B073 | Alessio Garbin | Barilla Group | buyer | Replied-Warm | 2026-04-22 | "They always ask 😉" — Global Digital Experience Director, Amsterdam [Vanessa, SI8_Legal Friction] | Reply + probe which clients ask + send sample | — | MEDIUM | pending |
+| B074 | Graeme Carr | OBSIDIAN | buyer | Replied-Warm | 2026-04-22 | "we do keep record of what was uploaded where... we disclose which tools we use" — VFX & AI Artist, Amsterdam [Vanessa, SI8_Legal Friction] | Reply + position SI8 as formalized version of their existing process | — | MEDIUM | pending |
+| B075 | Alexander Kraemer | AK/83 | buyer | Replied-Warm | 2026-04-22 | "yes, it's coming up more frequently... curious what you're working on?" — Experience Architect / Digital Creative, Amsterdam [Vanessa, SI8_Legal Friction] | Reply + send sample + answer curiosity | — | MEDIUM | pending |
+| B076 | Dagny Rozniak | Pencil | buyer | Replied-Lukewarm | 2026-04-22 | "not sure if legal teams ask anything specific" — Gen AI Creative Director, Amsterdam [Vanessa, SI8_Legal Friction] | Reply — educate on IAB framework requirements | — | LOW | pending |
+| B077 | Ricardo Barchan | Joolz Jewellery | buyer | Replied-Lukewarm | 2026-04-22 | Confirmed yes but wrong role (retoucher); asked about collaboration [Ivy, SI8_Legal Friction] | Close — wrong role | — | — | done |
+| B078 | Daniel Simler | Samsung SDS Europe | buyer | Replied-Lukewarm | 2026-04-22 | "Not at the moment but there need to be more regulations" — Creative Content Production PM, London [Ivy, SI8_Legal Friction] | Nurture — re-engage when EU AI Act August deadline approaches | — | LOW | pending |
 | C006 | Essa | — (Hong Kong) | creator | Followed Up | 2026-04-07 20:00 | v4 re-pitch sent via WhatsApp — docs model, revised commission, comp CR codes offered, MyVideo still active | Await reply | — | MEDIUM | waiting |
 | C001 | keeper505 | — | creator | Followed Up | 2026-04-09 | Follow-up message sent — no reply yet | Await reply; create COMP-KEEPER in Stripe only when she confirms interest | — | MEDIUM | waiting |
 | C002 | @syntaxdiffusion | — | creator | Interested | 2026-03-29 | v4 reply sent | Send v4 follow-up | — | MEDIUM | pending |
@@ -136,13 +144,13 @@
 | Call Completed | 2 |
 | Call Booked | 0 |
 | Replied — Hot (follow-up urgent) | 3 |
-| Replied — Warm | 23 |
+| Replied — Warm | 28 |
 | Replied — Conditional | 4 |
-| Replied — Lukewarm | 14 |
+| Replied — Lukewarm | 17 |
 | Nurture | 6 |
-| Polite Pass | 39 |
-| Not a Fit | 25 |
-| **Total Named Responses** | 122 |
+| Polite Pass | 42 |
+| Not a Fit | 33 |
+| **Total Named Responses** | 141 |
 | **Total Leads Contacted** | ~1,100+ |
 
 ---
@@ -196,6 +204,11 @@
 | **Oscar Julius Marmelstein** | The Shed Editing | Founder | Amsterdam | SI8_Legal Friction | Replied-Warm | Informal logs; "flying over the Atlantic soon" — keeps informal records but not structured docs (msg#1) | None | Reply + send sample; offer to connect when he's in transit |
 | **Christiaan Compaan** | — | Freelance GenAI | Amsterdam | SI8_Legal Friction | Replied-Warm | Pre-production sourcing; informal process — Hugo Barbera-type: does the work but no Chain of Title output (msg#1) | None | Reply + position as structured Chain of Title |
 | **Uli Redkina** | — | Creative AI Producer | London | SI8_Legal Friction | Replied-Warm | Contract-based, informal rights management — tracks rights per project but no formal documentation output (msg#1) | None | Reply + position SI8 as formalized version of their current process |
+| **Jenny Springett** | Electric Violet TV | Development Executive | London | SI8_Legal Friction | Replied-Warm | "Yes absolutely. It's required to broadcast anywhere in the EU so smart to be compliant even outside." — EU broadcast compliance confirmed unprompted (msg#1) | None | Reply + position SI8 as formal Chain of Title for EU broadcast compliance |
+| **Nick Craske** | Havas Lynx | Creative Director & AI Technologist | Manchester | SI8_Legal Friction | Replied-Warm | "Yes, and a wider view of the application and use cases of Gen AI." — signals GenAI compliance awareness (msg#1) | None | Reply + position SI8 as compliance layer for broader GenAI use cases |
+| **Alessio Garbin** | Barilla Group | Global Digital Experience Director | Amsterdam | SI8_Legal Friction | Replied-Warm | "They always ask 😉" — confirmed clients ask for documentation (msg#1) | None | Reply + probe which clients ask + send sample |
+| **Graeme Carr** | OBSIDIAN | VFX & AI Artist | Amsterdam | SI8_Legal Friction | Replied-Warm | "we do keep record of what was uploaded where... we disclose which tools we use" — informal process; Hugo Barbera profile (msg#1) | None | Reply + position SI8 as formalized version of their existing process |
+| **Alexander Kraemer** | AK/83 | Experience Architect / Digital Creative | Amsterdam | SI8_Legal Friction | Replied-Warm | "yes, it's coming up more frequently... curious what you're working on?" — rising frequency confirmed + proactive curiosity (msg#1) | None | Reply + send sample + answer curiosity question |
 
 ---
 
@@ -228,6 +241,9 @@
 | **Shahrukh Kazmi** | — | Freelance AI Design Specialist | Amsterdam | SI8_Legal Friction | "some legal teams are starting to ask" (msg#1) | Early signal — awareness is growing but not at a gate yet. Amsterdam batch. |
 | **Marinus Bergsma** | SocialNow | Founder & Creative Art Director | Amsterdam | SI8_Legal Friction | Makes everything in AI; "always clear" upfront with clients (msg#1) | Interesting: proactively discloses AI use but without structured docs. Explore if clients need a Chain of Title. Amsterdam batch. |
 | **Alena Stepanova** | Philip Morris | Manager Content Intelligence & Gen AI | London | SI8_Legal Friction | Client-side (brand) — asked follow-up question after msg#1 | Wrong role (brand-side, not agency/production). But senior AI content role at a major brand — may commission AI video from agencies. Probe if they set documentation requirements for their agencies. |
+| **Dagny Rozniak** | Pencil | Gen AI Creative Director | Amsterdam | SI8_Legal Friction | "not sure if legal teams ask anything specific" (msg#1) | Pain not fully formed yet. Gen AI CD at AI-native production co — good role, wrong timing. Re-engage when EU AI Act August deadline is closer. |
+| **Ricardo Barchan** | Joolz Jewellery | Beauty & Jewellery Retoucher | UK | SI8_Legal Friction | Confirmed yes but wrong role (retoucher, not CD/decision maker); asked about collaboration (msg#1) | Close — wrong role; no follow-up needed. |
+| **Daniel Simler** | Samsung SDS Europe | Creative Content Production PM | London | SI8_Legal Friction | "Not at the moment but there need to be more regulations" — forward-looking, no current pain (msg#1) | Samsung SDS = tech-side; PM role not decision maker. Monitor; re-engage Q3. |
 
 ---
 
@@ -280,6 +296,9 @@
 | Mos . | intent.ly | Global Partnerships Director | UK | SI8_Documented Provenance | Lilly | "Not for us thank you!" (msg#2) |
 | Rejoice Bhila | Careconnectshow | Director | Epping, UK | SI8_Documented Provenance | Lilly | "Thanks Lilly. Will be in touch." (msg#2) — healthcare/community, wrong profile |
 | Michael Sandiford | 7video Ltd | Production Manager | UK | SI8_Legal Friction | — | "No they're not" — clients don't ask for documentation; production manager (not CD/decision maker) |
+| Dave Waldman | Apple | Senior Producer | London | SI8_Legal Friction | — | "haven't had to do any of this yet" — Apple internal production; not there yet |
+| Lucy Batley | Welcome to MOTHER | — | Newcastle | SI8_Legal Friction | — | Polite pass — Newcastle off-primary-target |
+| Christian Iachini | Xponential7 | — | London | SI8_Legal Friction | — | "not interested" |
 
 ---
 
@@ -326,6 +345,14 @@
 | Tjaša Lea Kosmatin | — | Social Media Designer | Amsterdam | SI8_Legal Friction | — | "i dont deliver ai generated videos" — wrong role; social media content, not campaign AI video (msg#1) |
 | Neil Hanratty | Reddit | Creative Strategist | Amsterdam | SI8_Legal Friction | — | Anti-AI content policy at Reddit level — platform constraint blocks use case entirely (msg#1) |
 | Efe Anidi | Framecoda | Developer | London | SI8_Legal Friction | — | Wrong role — developer, not creative/production (msg#1) |
+| Peter Darrell | 4Ax Technologies | Data Scientist | London | SI8_Legal Friction | — | Wrong role — data scientist, not creative/production (msg#1) |
+| Adam Ridges | OneAdvanced | Project Manager | Birmingham | SI8_Legal Friction | — | Wrong role — PM at software co; no AI video use case (msg#1) |
+| Eudonni Moricom | Aspargo Laboratories | Project Manager | London | SI8_Legal Friction | — | Wrong role — pharma PM, no AI video use case (msg#1) |
+| Chris Ogunsalu | Putitonline Tech Services | Project Manager | London | SI8_Legal Friction | — | Wrong role — tech PM, no AI video use case (msg#1) |
+| Jasper Klimbie | CDI Services | Conversational AI Consultant | Amsterdam | SI8_Legal Friction | — | Wrong role — AI consultant (chatbots/conversational), not video production (msg#1) |
+| Gianni Lieuw-A-Soe | Internationaal Theater Amsterdam | Supervisory Board Member | Amsterdam | SI8_Legal Friction | — | Wrong role — theater governance, not AI video production (msg#1) |
+| Noah Makmel | AI for Detail | AI Creative | Amsterdam | SI8_Legal Friction | — | Creator, not buyer — wrong side of market; AI creative makes content, doesn't commission it (msg#1) |
+| Ketan Shah | Parity UK | Lead Web Developer | UK | SI8_Legal Friction | — | Counter-pitched web development services — wrong side of market (msg#1) |
 
 ---
 
