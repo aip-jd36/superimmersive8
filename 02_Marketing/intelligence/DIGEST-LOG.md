@@ -9,6 +9,31 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of April 25, 2026
+*Run: 2026-04-25 · 4 high · 6 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Who is liable when artificial intelligence makes mistakes?](https://www.ft.com/content/51b55431-30e8-4eb3-9730-f5e89c24ad56?syn-25a6b1a6=1) | Financial Times | Mon, 20 Apr 2026 | ☐ |
+| 8 | post | [AI Advertising and the Authenticity Paradox](https://www.orfonline.org/expert-speak/ai-advertising-and-the-authenticity-paradox) | orfonline.org | Mon, 20 Apr 2026 | ☐ |
+| 7 | post+update | [XR EXTREME REACH EXPANDS CELEBRITY PAYMENTS TO SUPPORT AI PERFORMERS IN ADVERTISING](https://www.adweek.com/adweek-wire/xr-extreme-reach-expands-celebrity-payments-to-support-ai-performers-in-advertising/) | ADWEEK | Thu, 23 Apr 2026 | ☐ |
+| 7 | post | [AI Broke Your Content Governance — Here's the Fix](https://www.cmswire.com/digital-asset-management/ai-broke-your-content-governance-now-what/) | CMSWire | Wed, 22 Apr 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | update | [Explainer: How Adobe is building agentic marketing](https://itbrief.com.au/story/explainer-how-adobe-is-building-agentic-marketing) | IT Brief Australia | Thu, 23 Apr 2026 | ☐ |
+| 6 | update | [Adobe Introduces Brand Intelligence and Expands GenStudio Content Supply Chain Solution for Customer Experience Orchestration](https://news.adobe.com/news/2026/04/adobe-introduces-brand-intelligence) | Adobe Newsroom | Mon, 20 Apr 2026 | ☐ |
+| 5 | monitor | [DarkIris adds $3.8M and 10 film titles for its AI media push](https://www.stocktitan.net/news/DKI/dark-iris-inc-announces-closing-of-3-8-million-pipe-financing-and-bix1s9jl8clv.html) | Stock Titan | Fri, 24 Apr 2026 | ☐ |
+| 5 | monitor | [The 12-point AI checkup: A practical starting point for Western Canadian organizations](https://www.mltaikins.com/insights/the-12-point-ai-checkup/) | MLT Aikins | Wed, 22 Apr 2026 | ☐ |
+| 4 | monitor | [Tagshop AI Expands Platform with AI UGC Video Ads Generator Feature](https://www.openpr.com/news/4485240/tagshop-ai-expands-platform-with-ai-ugc-video-ads-generator) | openPR.com | Thu, 23 Apr 2026 | ☐ |
+| 4 | monitor | [22 Best AI Video Generators for 2026 (Tested & Reviewed)](https://www.perfectcorp.com/consumer/blog/video-editing/best-ai-video-generators) | perfectcorp.com | Sun, 19 Apr 2026 | ☐ |
+
+---
+
 ## Week of April 22, 2026
 *Run: 2026-04-22 · 11 high · 6 monitor · lookback 7 days*
 
