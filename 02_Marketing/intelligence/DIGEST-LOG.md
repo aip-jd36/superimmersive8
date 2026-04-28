@@ -9,6 +9,26 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of April 28, 2026
+*Run: 2026-04-28 · 2 high · 3 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 7 | post | [Can AI Influencers Break FTC Rules? US Advertising Law, Disclosure & Liability Risks](https://www.lawyer-monthly.com/2026/04/ai-influencers-ftc-rules-us-advertising-law-liability/) | Lawyer Monthly | Mon, 27 Apr 2026 | ☐ |
+| 7 | post | [AI Broke Your Content Governance — Now What?](https://www.cmswire.com/digital-asset-management/ai-broke-your-content-governance-now-what/) | CMSWire | Wed, 22 Apr 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 5 | monitor | [YouTube Just Expanded Its AI Deepfake Protection to All of Hollywood](https://nofilmschool.com/youtube-deepfake-detection-tool) | No Film School | Tue, 21 Apr 2026 | ☐ |
+| 4 | monitor | [Forbes 2026 AI 50 List \| Top Artificial Intelligence Companies](https://www.forbes.com/lists/ai50/) | Forbes | Mon, 27 Apr 2026 | ☐ |
+| 4 | monitor | [Google blocks 8.3B ads with Gemini AI enforcement](https://www.contentgrip.com/google-gemini-ad-safety-ai/) | ContentGrip | Tue, 21 Apr 2026 | ☐ |
+
+---
+
 ## Week of April 25, 2026
 *Run: 2026-04-25 · 4 high · 6 monitor · lookback 7 days*
 
