@@ -9,6 +9,40 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of May 01, 2026
+*Run: 2026-05-01 · 9 high · 10 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 8 | post+update | [Marketing Teams Hesitate on AI Adoption Despite Mandates](https://letsdatascience.com/news/marketing-teams-hesitate-on-ai-adoption-despite-mandates-851b554a) | Let's Data Science | Thu, 30 Apr 2026 | ☐ |
+| 8 | post+update | [Counterpart Raises $50M for AI Insurance Coverage](https://ventureburn.com/counterpart-raises-50m-for-ai-insurance-coverage/) | Ventureburn | Wed, 29 Apr 2026 | ☐ |
+| 8 | post+update | [As AI ‘performers’ enter ads, XR helps track rights, payment compliance](https://www.streamtvinsider.com/advertising/ai-performers-enter-ads-xr-helps-track-rights-payment-compliance) | StreamTV Insider | Tue, 28 Apr 2026 | ☐ |
+| 8 | post+update | [Navigating IP rights and infringement risks in the age of AI](https://www.nortonrosefulbright.com/en-us/knowledge/webinars-and-events/d11bc786/innovate-protect-monetize-navigating-ip-rights-and-infringement-risks-in-the-age-of-ai) | Norton Rose Fulbright | Mon, 27 Apr 2026 | ☐ |
+| 8 | update | [AI startups are raising millions to disrupt Hollywood. Read the pitch decks 9 used to get funding.](https://www.businessinsider.com/ai-startups-hollywood-pitch-decks-raised-millions-2025-10) | Business Insider | Fri, 24 Apr 2026 | ☐ |
+| 7 | update | [Axel Springer Maintains $110K Lobbying Push on Copyright and AI](https://legis1.com/news/ai-copyright-lobbying-axel-springer-maintains) | Legis1 | Thu, 30 Apr 2026 | ☐ |
+| 7 | update | [V4b.AI Unveils Proprietary AI-Powered Video Production for Brands, Ecommerce and Fashion Industry](https://natlawreview.com/press-releases/v4bai-unveils-proprietary-ai-powered-video-production-brands-ecommerce-and) | The National Law Review | Tue, 28 Apr 2026 | ☐ |
+| 7 | post | [FAQ on brand safety: How AI content and creator marketing are reshaping risk in 2026](https://www.emarketer.com/content/faq-on-brand-safety--how-ai-content-creator-marketing-reshaping-risk-2026) | eMarketer | Tue, 28 Apr 2026 | ☐ |
+| 7 | post+update | [The AI Governance Gap](https://www.emarketer.com/content/ai-governance-gap) | eMarketer | Fri, 24 Apr 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Hollywood’s A.I.-Infringement Terminator](https://puck.news/celebrity-deepfakes-become-big-business-after-sora-shutdown/) | Puck | Thu, 30 Apr 2026 | ☐ |
+| 6 | monitor | [Taylor Swift draws a line in the AI sand with voice and image trademarks](https://www.malaymail.com/news/showbiz/2026/04/28/taylor-swift-draws-a-line-in-the-ai-sand-with-voice-and-image-trademarks/217923) | Malay Mail | Tue, 28 Apr 2026 | ☐ |
+| 5 | monitor | [AI and IP Across Borders \| AI and IP: The Legal Frontier - Special Video Episode](https://www.jdsupra.com/legalnews/ai-and-ip-across-borders-ai-and-ip-the-7532514/) | JD Supra | Thu, 30 Apr 2026 | ☐ |
+| 5 | monitor | [5 Best AI Video Generators to Create Stunning Videos (Tested & Compared for 2026)](https://aijourn.com/5-best-ai-video-generators-to-create-stunning-videos-tested-compared-for-2026/) | The AI Journal | Thu, 30 Apr 2026 | ☐ |
+| 5 | monitor | [Creo Debuts AI Solution for Real-Time Creator Content Editing, Reducing Costs and Time-to-Market While Ensuring Brand Compliance at Scale](https://www.prnewswire.com/news-releases/creo-debuts-ai-solution-for-real-time-creator-content-editing-reducing-costs-and-time-to-market-while-ensuring-brand-compliance-at-scale-302755923.html) | PR Newswire | Tue, 28 Apr 2026 | ☐ |
+| 5 | monitor | [TikTok AI remix feature paused after creator backlash](https://www.contentgrip.com/tiktok-ai-remixing-privacy-concerns/) | ContentGrip | Sat, 25 Apr 2026 | ☐ |
+| 4 | monitor | [Experian Announces Agent Trust to Power Trusted AI Driven Commerce](https://www.morningstar.com/news/business-wire/20260430719198/experian-announces-agent-trust-to-power-trusted-ai-driven-commerce) | Morningstar | Thu, 30 Apr 2026 | ☐ |
+| 4 | monitor | [Emerging technology trends brands and agencies need to know about](https://adage.com/technology/ai/aa-emerging-news-and-trends-meta-snap-google/) | Ad Age | Thu, 30 Apr 2026 | ☐ |
+| 4 | monitor | [Opinion: Those who don’t create intellectual property should respect the creations of those who do](https://www.theglobeandmail.com/opinion/article-artificial-intelligence-intellectual-property-work-students-university/) | The Globe and Mail | Wed, 29 Apr 2026 | ☐ |
+| 4 | monitor | [China’s tech titans tussle in AI video gold rush](https://www.thinkchina.sg/technology/chinas-tech-titans-tussle-ai-video-gold-rush) | ThinkChina | Mon, 27 Apr 2026 | ☐ |
+
+---
+
 ## Week of April 28, 2026
 *Run: 2026-04-28 · 2 high · 3 monitor · lookback 7 days*
 
