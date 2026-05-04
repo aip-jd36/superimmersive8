@@ -9,6 +9,37 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of May 04, 2026
+*Run: 2026-05-04 · 9 high · 7 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Counterpart Raises $50M for AI Insurance Coverage](https://ventureburn.com/counterpart-raises-50m-for-ai-insurance-coverage/) | Ventureburn | Wed, 29 Apr 2026 | ☐ |
+| 8 | post+update | [Billlie's Agency Denies Plagiarism Over AI‑Assisted Video as France's GOBELINS School Threatens Legal Action](https://www.kpopstarz.com/articles/322973/20260502/billlies-agency-denies-plagiarism-over-aiassisted-video-frances-gobelins-school-threatens-legal.htm) | Kpopstarz | Sat, 02 May 2026 | ☐ |
+| 8 | post+update | [Big Insurance Backs Away From AI Risk and Startups Rush In](https://www.pymnts.com/artificial-intelligence-2/2026/big-insurance-backs-away-from-ai-risk-and-startups-rush-in/) | PYMNTS.com | Fri, 01 May 2026 | ☐ |
+| 8 | post+update | [Insurers Exclude AI Liability, New Market Emerges](https://letsdatascience.com/news/insurers-exclude-ai-liability-new-market-emerges-48e65009) | Let's Data Science | Fri, 01 May 2026 | ☐ |
+| 8 | post+update | [Marketing Teams Hesitate on AI Adoption Despite Mandates](https://letsdatascience.com/news/marketing-teams-hesitate-on-ai-adoption-despite-mandates-851b554a) | Let's Data Science | Thu, 30 Apr 2026 | ☐ |
+| 8 | post+update | [As AI ‘performers’ enter ads, XR helps track rights, payment compliance](https://www.streamtvinsider.com/advertising/ai-performers-enter-ads-xr-helps-track-rights-payment-compliance) | StreamTV Insider | Tue, 28 Apr 2026 | ☐ |
+| 8 | post+update | [Fusion of AI and Human Talent Puts IP Protection at a Crossroad](https://news.bloomberglaw.com/legal-exchange-insights-and-commentary/fusion-of-ai-and-human-talent-puts-ip-protection-at-a-crossroad) | Bloomberg Law News | Mon, 27 Apr 2026 | ☐ |
+| 7 | update | [How AI, Digital Doubles, and New Laws Are Rewriting Fashion and Beauty](https://natlawreview.com/article/how-ai-digital-doubles-and-new-laws-are-rewriting-fashion-and-beauty?amp) | The National Law Review | Fri, 01 May 2026 | ☐ |
+| 7 | update | [V4b.AI Unveils Proprietary AI-Powered Video Production for Brands, Ecommerce and Fashion Industry](https://natlawreview.com/press-releases/v4bai-unveils-proprietary-ai-powered-video-production-brands-ecommerce-and) | The National Law Review | Tue, 28 Apr 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [AI and IP Across Borders \| AI and IP: The Legal Frontier - Special Video Episode](https://www.jdsupra.com/legalnews/ai-and-ip-across-borders-ai-and-ip-the-7532514/) | JD Supra | Thu, 30 Apr 2026 | ☐ |
+| 6 | monitor | [Ad policies](https://openai.com/policies/ad-policies/) | OpenAI | Wed, 29 Apr 2026 | ☐ |
+| 5 | monitor | [Vedder Selects AIQA Global for Independent AI Governance Assessment](https://www.morningstar.com/news/pr-newswire/20260430fl47966/vedder-selects-aiqa-global-for-independent-ai-governance-assessment) | Morningstar | Thu, 30 Apr 2026 | ☐ |
+| 5 | monitor | [Emerging technology trends brands and agencies need to know about](https://adage.com/technology/ai/aa-emerging-news-and-trends-meta-snap-google/) | Ad Age | Thu, 30 Apr 2026 | ☐ |
+| 4 | monitor | [Experian Announces Agent Trust to Power Trusted AI Driven Commerce](https://www.morningstar.com/news/business-wire/20260430719198/experian-announces-agent-trust-to-power-trusted-ai-driven-commerce) | Morningstar | Thu, 30 Apr 2026 | ☐ |
+| 4 | monitor | [Creator and influencer trends brand marketers need to know about right now](https://adage.com/influencers-creators/aa-trends-virgin-voyages-starface-cava-parke/) | Ad Age | Tue, 28 Apr 2026 | ☐ |
+| 4 | monitor | [China’s tech titans tussle in AI video gold rush](https://www.thinkchina.sg/technology/chinas-tech-titans-tussle-ai-video-gold-rush) | ThinkChina | Mon, 27 Apr 2026 | ☐ |
+
+---
+
 ## Week of May 01, 2026
 *Run: 2026-05-01 · 9 high · 10 monitor · lookback 7 days*
 
