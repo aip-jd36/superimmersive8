@@ -9,6 +9,39 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of May 07, 2026
+*Run: 2026-05-07 · 11 high · 7 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Insurers Exclude AI Liability, New Market Emerges](https://letsdatascience.com/news/insurers-exclude-ai-liability-new-market-emerges-48e65009) | Let's Data Science | Fri, 01 May 2026 | ☐ |
+| 8 | post+update | [Meta and Mark Zuckerberg sued by US publishers for copyright infringement to develop its AI](https://www.thebookseller.com/news/meta-and-mark-zuckerberg-sued-by-us-publishers-for-copyright-infringement-to-develop-its-ai) | The Bookseller | Wed, 06 May 2026 | ☐ |
+| 8 | post+update | [Scale marketing campaigns with orchestration and efficiency](https://business.adobe.com/blog/scaling-marketing-campaigns) | Adobe for Business | Wed, 06 May 2026 | ☐ |
+| 8 | post+update | [Scott Turow and Major Publishers Allege Mark Zuckerberg Personally Authorized Meta’s Mass Copying of Copyrighted Books and That Allegation Changes Everything About This Lawsuit](https://startupfortune.com/scott-turow-and-major-publishers-allege-mark-zuckerberg-personally-authorized-metas-mass-copying-of-copyrighted-books-and-that-allegation-changes-everything-about-this-lawsuit/) | Startup Fortune | Tue, 05 May 2026 | ☐ |
+| 8 | update | [Mark Zuckerberg ‘personally authorized’ Meta’s copyright infringement, publishers allege](https://www.bostonherald.com/2026/05/05/books-meta-lawsuit/) | Boston Herald | Tue, 05 May 2026 | ☐ |
+| 8 | post+update | [Big Insurance Backs Away From AI Risk and Startups Rush In](https://www.pymnts.com/artificial-intelligence-2/2026/big-insurance-backs-away-from-ai-risk-and-startups-rush-in/) | PYMNTS.com | Fri, 01 May 2026 | ☐ |
+| 8 | post+update | [AI-Generated Content and Copyright Law: What We Know](https://builtin.com/artificial-intelligence/ai-copyright) | Built In | Thu, 30 Apr 2026 | ☐ |
+| 7 | post+update | [AI is pushing copyright enforcement into DAM](https://martech.org/ai-is-pushing-copyright-enforcement-into-dam/) | MarTech | Wed, 06 May 2026 | ☐ |
+| 7 | post+update | [PUNX Launches as AI-Native Creative Agency to Solve the Global Marketing Execution Crisis](https://natlawreview.com/press-releases/punx-launches-ai-native-creative-agency-solve-global-marketing-execution) | The National Law Review | Wed, 06 May 2026 | ☐ |
+| 7 | update | [Mark Zuckerberg ‘Personally Authorized and Actively Encouraged’ Meta’s Massive Copyright Infringement to Train AI Systems, Publishers and Scott Turow Allege in Lawsuit](https://variety.com/2026/digital/news/meta-ai-mark-zuckerberg-copyright-infringement-lawsuit-publishers-scott-turow-1236738383/) | Variety | Tue, 05 May 2026 | ☐ |
+| 7 | post+update | [Adobe's legal chief urges balanced AI copyright reform](https://www.msn.com/en-us/news/other/adobes-legal-chief-urges-balanced-ai-copyright-reform/gm-GMFA74063B) | MSN | Sun, 03 May 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Beastie Boys’ ‘Sabotage’ video recreated with AI in FBI director’s fraud takedown clip](https://artthreat.net/28958-98514-beastie-boys-sabotage-video-recreated-with-ai-in-fbi-director-s-fraud-takedown-c/) | artthreat.net | Mon, 04 May 2026 | ☐ |
+| 5 | monitor | [Publishers Accuse Meta Of Massive Copyright Infringement](https://dataconomy.com/2026/05/06/publishers-accuse-meta-of-massive-copyright-infringement/) | Dataconomy | Wed, 06 May 2026 | ☐ |
+| 5 | monitor | [Corgi launches AI insurance product to cover emerging risks](https://fintech.global/2026/05/06/corgi-launches-ai-insurance-product-to-cover-emerging-risks/) | FinTech Global | Wed, 06 May 2026 | ☐ |
+| 5 | monitor | [Fashion entrepreneur Thomas Cohen, formerly of Bonton and Merci, aims to create a SACEM for generative AI](https://us.fashionnetwork.com/news/Fashion-entrepreneur-thomas-cohen-formerly-of-bonton-and-merci-aims-to-create-a-sacem-for-generative-ai,1829404.html) | FashionNetwork USA | Tue, 05 May 2026 | ☐ |
+| 5 | monitor | [The Secret Weapon Against AI Dominance](https://www.theatlantic.com/ideas/2026/04/creative-labor-ai-copyright/687000/) | The Atlantic | Thu, 30 Apr 2026 | ☐ |
+| 4 | monitor | [AI-generated Images Flood Met Gala Coverage](https://letsdatascience.com/news/ai-generated-images-flood-met-gala-coverage-835e8c99) | Let's Data Science | Tue, 05 May 2026 | ☐ |
+| 4 | monitor | [5 Best Free AI Video Generators in 2026: Top Tools for Creators Seeking Quality Without Cost](https://www.ibtimes.com.au/5-best-free-ai-video-generators-2026-top-tools-creators-seeking-quality-without-cost-1867926) | International Business Times Australia | Fri, 01 May 2026 | ☐ |
+
+---
+
 ## Week of May 04, 2026
 *Run: 2026-05-04 · 9 high · 7 monitor · lookback 7 days*
 
