@@ -9,6 +9,38 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of May 10, 2026
+*Run: 2026-05-10 · 10 high · 7 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Is saying ‘no AI’ now a strategic advantage for advertisers?](https://www.digitaljournal.com/business/is-saying-no-ai-now-a-strategic-advantage-for-advertisers/article) | Digital Journal | Fri, 08 May 2026 | ☐ |
+| 9 | post+update | [Mark Zuckerberg, Meta hit with explosive copyright lawsuit over alleged use of pirated books to train Llama AI](https://crispng.com/mark-zuckerberg-meta-llama-ai-copyright-lawsuit/) | crispng.com | Thu, 07 May 2026 | ☐ |
+| 8 | post+update | [Kling Native 4K Generation Breaks the AI Video Commercial Quality Ceiling](https://pandaily.com/kling-native-4k-ai-video-commercial-quality) | Pandaily | Sat, 09 May 2026 | ☐ |
+| 8 | post+update | [Face-off over AI dramas' illegal use of personality rights](https://www.chinadaily.com.cn/a/202605/08/WS69fd1f44a310d6866eb47632.html) | China Daily | Thu, 07 May 2026 | ☐ |
+| 8 | post | [AI-Generated Spencer Pratt Ad Sees Gavin Newsom Eat Cake and Competitor Karen Bass as The Joker \| Video](https://www.thewrap.com/media-platforms/politics/ai-generated-spencer-pratt-ad-video/) | TheWrap | Wed, 06 May 2026 | ☐ |
+| 8 | post+update | [Navigating Copyright in the Age of Generative AI: EU, French, and UK Developments and Approaches](https://www.jonesday.com/en/insights/2026/05/navigating-copyright-in-the-age-of-generative-ai-eu-french-and-uk-developments-and-approaches) | Jones Day | Mon, 04 May 2026 | ☐ |
+| 7 | update | [Google’s Veo 4 Is Almost Here—and It Looks Powerful](https://www.socialnews.xyz/2026/05/08/googles-veo-4-is-almost-here-and-it-looks-powerful/) | Social News XYZ | Fri, 08 May 2026 | ☐ |
+| 7 | update | [IP Strategy Highlights Poseidon’s Launch of Numo, Expanding Supply of Rights-Cleared AI Training Data on Story](https://www.manilatimes.net/2026/05/08/tmt-newswire/globenewswire/ip-strategy-highlights-poseidons-launch-of-numo-expanding-supply-of-rights-cleared-ai-training-data-on-story/2339537) | The Manila Times | Fri, 08 May 2026 | ☐ |
+| 7 | post | [Actors speak out against AI-generated promos that put them in fake sex scenes](https://www.businessinsider.com/actors-sexualized-fake-ads-promote-micro-dramas-tiktok-meta-2026-5) | Business Insider | Thu, 07 May 2026 | ☐ |
+| 7 | post+update | [AI is pushing copyright enforcement into DAM](https://martech.org/ai-is-pushing-copyright-enforcement-into-dam/) | MarTech | Wed, 06 May 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [AI Legislative Update: May 8, 2026](https://www.transparencycoalition.ai/news/ai-legislative-update-may8-2026) | Transparency Coalition | Fri, 08 May 2026 | ☐ |
+| 6 | monitor | [Singapore startup Video Rebirth launches AI video tool](https://www.techinasia.com/news/singapore-startup-video-rebirth-launches-ai-video-tool) | Tech in Asia | Thu, 07 May 2026 | ☐ |
+| 5 | monitor | [PUNX Launches as AI-Native Creative Agency to Solve the Global Marketing Execution Crisis](https://natlawreview.com/press-releases/punx-launches-ai-native-creative-agency-solve-global-marketing-execution) | The National Law Review | Wed, 06 May 2026 | ☐ |
+| 5 | monitor | [TransPerfect Releases 2026 Business Outlook Report: AI Is Now the Standard for Global Content Operations](https://www.morningstar.com/news/pr-newswire/20260505ny49668/transperfect-releases-2026-business-outlook-report-ai-is-now-the-standard-for-global-content-operations) | Morningstar | Tue, 05 May 2026 | ☐ |
+| 4 | monitor | [Why Enterprise Content Management Is Becoming a Strategic Priority in the Age of AI](https://www.globalbankingandfinance.com/why-enterprise-content-management-is-becoming-a-strategic-priority-in-the-age-of-ai/) | Global Banking & Finance Review | Fri, 08 May 2026 | ☐ |
+| 4 | monitor | [Reserv Announces $125 Million Series C Financing Led by KKR to Accelerate AI-Driven Transformation of Insurance Claims](https://www.morningstar.com/news/business-wire/20260504407536/reserv-announces-125-million-series-c-financing-led-by-kkr-to-accelerate-ai-driven-transformation-of-insurance-claims) | Morningstar | Mon, 04 May 2026 | ☐ |
+| 4 | monitor | [Adobe's legal chief urges balanced AI copyright reform](https://www.msn.com/en-us/news/other/adobes-legal-chief-urges-balanced-ai-copyright-reform/gm-GMFA74063B) | MSN | Sun, 03 May 2026 | ☐ |
+
+---
+
 ## Week of May 07, 2026
 *Run: 2026-05-07 · 11 high · 7 monitor · lookback 7 days*
 
