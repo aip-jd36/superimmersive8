@@ -9,6 +9,47 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of May 16, 2026
+*Run: 2026-05-16 · 16 high · 10 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Brands Want Creators’ AI Likeness Rights But Contracts Aren't Keeping Up](https://www.forbes.com/sites/ianshepherd/2026/05/15/the-creator-economys-next-war-is-over-ai-ownership/) | Forbes | Fri, 15 May 2026 | ☐ |
+| 9 | post+update | [AI video has a production problem](https://adage.com/studio-30/publishing-partners/aa-ai-video-has-a-production-problem/) | Ad Age | Thu, 14 May 2026 | ☐ |
+| 9 | post+update | [Who owns AI-generated content?](https://www.legalcheek.com/lc-journal-posts/who-owns-ai-generated-content/) | Legal Cheek | Thu, 14 May 2026 | ☐ |
+| 9 | post+update | [Who Owns AI-Generated Content? Human Authorship Still Controls, and Documenting the Creation Process Is Critical](https://natlawreview.com/article/who-owns-ai-generated-content-human-authorship-still-controls-and-documenting) | The National Law Review | Wed, 13 May 2026 | ☐ |
+| 9 | post+update | [ASCI releases draft AI labelling guidelines for advertising](https://www.impactonnet.com/more-from-impact/asci-releases-draft-ai-labelling-guidelines-for-advertising-14469.html) | IMPACT Magazine | Tue, 12 May 2026 | ☐ |
+| 9 | post+update | [ASCI drafts guidelines for labelling of AI-generated content in ads](https://www.manifest-media.in/advertising/120526/asci-drafts-guidelines-for-labelling-of-ai-generated-content-in-ads.html) | manifest-media.in | Tue, 12 May 2026 | ☐ |
+| 9 | update | [India’s advertising watchdog sets new rules on AI-generated content in ads](https://indiantelevision.com/mam/indias-advertising-watchdog-sets-new-rules-on-ai-generated-content-in-ads/) | Indian Television Dot Com | Tue, 12 May 2026 | ☐ |
+| 9 | post+update | [AI Act](https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai) | EU Digital Strategy | Mon, 11 May 2026 | ☐ |
+| 8 | post+update | [Matthew McConaughey Trademarks His Image to Block AI Use](https://letsdatascience.com/news/matthew-mcconaughey-trademarks-his-image-to-block-ai-use-89579c39) | Let's Data Science | Thu, 14 May 2026 | ☐ |
+| 8 | post | [The law & brands in the age of AI technology](https://www.myjoyonline.com/the-law-brands-in-the-age-of-ai-technology/) | MyJoyOnline | Thu, 14 May 2026 | ☐ |
+| 8 | post+update | [10 Takeaways: European Commission Draft Guidelines on AI Transparency under the EU AI Act](https://www.insideglobaltech.com/2026/05/12/10-takeaways-european-commission-draft-guidelines-on-ai-transparency-under-the-eu-ai-act/) | Inside Global Tech | Tue, 12 May 2026 | ☐ |
+| 8 | post | [AI labels won’t protect misleading ads, says ASCI new guidelines](https://bestmediainfo.com/mediainfo/mediainfo-digital/ai-labels-wont-protect-misleading-ads-says-asci-new-guidelines-11825714) | bestmediainfo.com | Tue, 12 May 2026 | ☐ |
+| 8 | post+update | [Meta’s AI copyright fight now reaches Mark Zuckerberg personally](https://startupfortune.com/metas-ai-copyright-fight-now-reaches-mark-zuckerberg-personally/) | Startup Fortune | Mon, 11 May 2026 | ☐ |
+| 8 | post | [Kling Native 4K Generation Breaks the AI Video Commercial Quality Ceiling](https://pandaily.com/kling-native-4k-ai-video-commercial-quality) | Pandaily | Sat, 09 May 2026 | ☐ |
+| 7 | post+update | [The law & brands in the age of AI Technology: Intellectual Property, Liability and Regulation](https://www.citinewsroom.com/2026/05/the-law-brands-in-the-age-of-ai-technology-intellectual-property-liability-and-regulation/) | CitiNewsroom.com | Thu, 14 May 2026 | ☐ |
+| 7 | post | [ASCI suggests risk-based disclosure norms for AI-generated ads](https://www.thehindubusinessline.com/info-tech/asci-proposes-risk-based-approach-for-responsible-labelling-on-ads-made-with-ai/article70969237.ece) | BusinessLine | Tue, 12 May 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [AI Legislative Update: May 15, 2026](https://www.transparencycoalition.ai/news/ai-legislative-update-may15-2026) | Transparency Coalition | Thu, 14 May 2026 | ☐ |
+| 6 | monitor | [AI storm stirs arts industry . . . Nyanhi rejects creative shutdown](https://www.heraldonline.co.zw/ai-storm-stirs-arts-industry-nyanhi-rejects-creative-shutdown/) | The Herald ZW | Wed, 13 May 2026 | ☐ |
+| 6 | monitor | [AI Advertising and the Authenticity Paradox](https://www.orfonline.org/english/expert-speak/ai-advertising-and-the-authenticity-paradox) | orfonline.org | Tue, 12 May 2026 | ☐ |
+| 5 | monitor | [Why enterprise AI fails without the right content foundations](https://www.raconteur.net/technology/why-enterprise-ai-fails-without-the-right-content-foundations) | Raconteur | Thu, 14 May 2026 | ☐ |
+| 5 | monitor | [Top 10 AI Video Generator Tools in 2026: The Ultimate Guide for Creators](https://techbullion.com/top-10-ai-video-generator-tools-in-2026-the-ultimate-guide-for-creators/) | TechBullion | Thu, 14 May 2026 | ☐ |
+| 5 | monitor | [Stay ADvised: Connecticut Leads on Kids—From Cosmetic Marketing to AI Safety](https://www.dwt.com/insights/2026/05/stay-advised-brand-protection-may-12) | Davis Wright Tremaine | Mon, 11 May 2026 | ☐ |
+| 4 | monitor | [Stratagon Launches CampusBrain™ AI Video Agent and Related Tools](https://natlawreview.com/press-releases/stratagon-launches-campusbraintm-ai-video-agent-and-related-tools) | The National Law Review | Thu, 14 May 2026 | ☐ |
+| 4 | update | [Kling 3.5 AI Video Generator Launches Browser-Based Platform for Text and Image to Video Creation](https://www.openpr.com/news/4511397/kling-3-5-ai-video-generator-launches-browser-based-platform) | openPR.com | Wed, 13 May 2026 | ☐ |
+| 4 | monitor | [Google VEO, Kling, Luma Ray, Runway, Pika Labs Excel at AI Video Generation](https://www.topnews.in/google-veo-kling-luma-ray-runway-pika-labs-excel-ai-video-generation-2418924) | topnews.in | Tue, 12 May 2026 | ☐ |
+| 4 | monitor | [Kuaishou Reportedly Eyes $2 Billion Kling AI Spin-Off Amid Booming AI Video Demand](https://www.cxodigitalpulse.com/kuaishou-reportedly-eyes-2-billion-kling-ai-spin-off-amid-booming-ai-video-demand/) | CXO Digitalpulse | Tue, 12 May 2026 | ☐ |
+
+---
+
 ## Week of May 13, 2026
 *Run: 2026-05-13 · 16 high · 16 monitor · lookback 7 days*
 
