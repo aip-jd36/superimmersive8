@@ -9,6 +9,48 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of May 19, 2026
+*Run: 2026-05-19 · 17 high · 10 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 10 | post+update | [Who Owns AI-Generated Content? Human Authorship Still Controls, and Documenting the Creation Process Is Critical](https://www.jdsupra.com/legalnews/who-owns-ai-generated-content-human-1509048/) | JD Supra | Thu, 14 May 2026 | ☐ |
+| 9 | post+update | [Channel Factory’s Nico Greco: Brand Safety Rules were ‘Designed for Human Authors,’ not AI-Generated Content](https://www.beet.tv/2026/05/channel-factorys-nico-greco-brand-safety-rules-were-designed-for-human-authors-not-ai-generated-content.html) | Beet.TV | Mon, 18 May 2026 | ☐ |
+| 9 | post+update | [Wirestock raises $23 million as AI labs hunt for licensed creative data](https://startupfortune.com/wirestock-raises-23-million-as-ai-labs-hunt-for-licensed-creative-data/) | Startup Fortune | Thu, 14 May 2026 | ☐ |
+| 9 | post+update | [Who owns AI-generated content?](https://www.legalcheek.com/lc-journal-posts/who-owns-ai-generated-content/) | Legal Cheek | Thu, 14 May 2026 | ☐ |
+| 9 | post+update | [ASCI releases draft AI labelling guidelines for advertising](https://www.impactonnet.com/more-from-impact/asci-releases-draft-ai-labelling-guidelines-for-advertising-14469.html) | IMPACT Magazine | Tue, 12 May 2026 | ☐ |
+| 8 | post | [AI dominates global IP debate at INTA conference in London](https://www.dailyjournal.com/articles/391453-ai-dominates-global-ip-debate-at-inta-conference-in-london) | Daily Journal | Mon, 18 May 2026 | ☐ |
+| 8 | post+update | [ASCI’s AI disclosure norms put advertising through new compliance test](https://bestmediainfo.com/mediainfo/advertising/ascis-ai-disclosure-norms-put-advertising-through-new-compliance-test-11846073) | bestmediainfo.com | Mon, 18 May 2026 | ☐ |
+| 8 | post+update | [Judge Delays Final Approval of Anthropic’s $1.5bn Copyright Settlement as Authors Push Back on AI Training Deal](https://www.tekedia.com/judge-delays-final-approval-of-anthropics-1-5bn-copyright-settlement-as-authors-push-back-on-ai-training-deal/) | Tekedia | Sat, 16 May 2026 | ☐ |
+| 8 | post | [The AI-generated ad that aired during the NBA finals took $2,000 and 2 days to make](https://www.msn.com/en-us/sports/nba/the-ai-generated-ad-that-aired-during-the-nba-finals-took-2-000-and-2-days-to-make/ar-AA1GFkYc?apiversion=v2&noservercache=1&domshim=1&renderwebcomponents=1&wcseo=1&batchservertelemetry=1&noservertelemetry=1&bundles=feat-es2020-t) | MSN | Fri, 15 May 2026 | ☐ |
+| 8 | post+update | [10 Takeaways: European Commission Draft Guidelines on AI Transparency under the EU AI Act](https://www.insideglobaltech.com/2026/05/12/10-takeaways-european-commission-draft-guidelines-on-ai-transparency-under-the-eu-ai-act/) | Inside Global Tech | Tue, 12 May 2026 | ☐ |
+| 7 | update | [CrePal Launches TVC Mode, a Pre-Production System for AI Commercial Video](https://natlawreview.com/press-releases/crepal-launches-tvc-mode-pre-production-system-ai-commercial-video) | The National Law Review | Mon, 18 May 2026 | ☐ |
+| 7 | update | [Chinese AI groups pull ahead of US rivals in video generation race](https://www.ft.com/content/9804b1de-653b-40b2-bffb-17c76ebebe34?syn-25a6b1a6=1) | Financial Times | Sun, 17 May 2026 | ☐ |
+| 7 | update | [Seedance, Kling and the Chinese AI Video Ecosystem](https://www.chinatalk.media/p/seedance-kling-and-the-chinese-ai?publication_id=4220&post_id=182359623&isFreemail=true&r=3i9oq1&triedRedirect=true&utm_source=substack&utm_medium=email) | ChinaTalk \| Jordan Schneider | Sat, 16 May 2026 | ☐ |
+| 7 | post | [The law and brands in the age of AI Technology: Intellectual Property, Liability and Regulation](https://www.modernghana.com/news/1493295/the-law-and-brands-in-the-age-of-ai-technology.amp) | Modern Ghana | Sat, 16 May 2026 | ☐ |
+| 7 | post | [AI video has a production problem](https://adage.com/studio-30/publishing-partners/aa-ai-video-has-a-production-problem/) | Ad Age | Thu, 14 May 2026 | ☐ |
+| 7 | update | [AI Advertising and the Authenticity Paradox](https://www.orfonline.org/english/expert-speak/ai-advertising-and-the-authenticity-paradox) | orfonline.org | Tue, 12 May 2026 | ☐ |
+| 7 | post | [AI labels won’t protect misleading ads, says ASCI new guidelines](https://bestmediainfo.com/mediainfo/mediainfo-digital/ai-labels-wont-protect-misleading-ads-says-asci-new-guidelines-11825714) | bestmediainfo.com | Tue, 12 May 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [IntelligenceBank Expands AI-Powered Brand Compliance Capabilities to 10x Content Approvals](https://www.accessnewswire.com/newsroom/en/computers-technology-and-internet/intelligencebank-expands-ai-powered-brand-compliance-capabilities-1168114) | ACCESS Newswire | Tue, 19 May 2026 | ☐ |
+| 6 | update | [MakeInfluencer: Deploy Custom AI Stars with Veo & Lip Sync – Revolutionize Marketing & Content](https://quasa.io/video/makeinfluencer-deploy-custom-ai-stars-with-sora-veo-lip-sync-revolutionize-marketing-content) | quasa.io | Sun, 17 May 2026 | ☐ |
+| 6 | monitor | [India’s advertising watchdog sets new rules on AI-generated content in ads](https://indiantelevision.com/mam/indias-advertising-watchdog-sets-new-rules-on-ai-generated-content-in-ads/) | Indian Television Dot Com | Tue, 12 May 2026 | ☐ |
+| 6 | monitor | [ASCI suggests risk-based disclosure norms for AI-generated ads](https://www.thehindubusinessline.com/info-tech/asci-proposes-risk-based-approach-for-responsible-labelling-on-ads-made-with-ai/article70969237.ece) | BusinessLine | Tue, 12 May 2026 | ☐ |
+| 6 | monitor | [ASCI Proposes New Rules for AI-Generated Ads, Introduces Risk-Based Labelling System](https://brandequity.economictimes.indiatimes.com/news/research/advertising/asci-proposes-new-rules-for-ai-generated-ads-introduces-risk-based-labelling-system/131035059) | ET BrandEquity | Tue, 12 May 2026 | ☐ |
+| 6 | monitor | [ASCI releases draft guidelines for responsible labelling of AI-generated advertising content](https://www.medianews4u.com/asci-releases-draft-guidelines-for-responsible-labelling-of-ai-generated-advertising-content/) | MediaNews4U | Tue, 12 May 2026 | ☐ |
+| 6 | monitor | [ASCI advocates ‘risk-based approach’ for synthetically generated content in advertising](https://www.exchange4media.com/advertising-news/asci-advocates-risk-based-approach-for-synthetically-generated-content-in-advertising-154586.html) | Exchange4Media | Tue, 12 May 2026 | ☐ |
+| 6 | monitor | [ASCI releases draft guidelines for responsible labelling of AI-generated content in advertising](https://mediabrief.com/asci-draft-guidelines-for-labelling-of-ai-generated-content/) | Mediabrief.com | Tue, 12 May 2026 | ☐ |
+| 6 | monitor | [ASCI targets transparency in AI advertising with new draft labelling framework](https://www.storyboard18.com/advertising/asci-targets-transparency-in-ai-advertising-with-new-draft-labelling-framework-97831.htm) | Storyboard18 | Tue, 12 May 2026 | ☐ |
+| 5 | monitor | [Hedra: AI That Turns Text & Images into Lifelike Talking, Singing Avatars in Seconds](https://quasa.io/video/hedra-ai-that-turns-text-images-into-lifelike-talking-singing-avatars-in-seconds) | quasa.io | Wed, 13 May 2026 | ☐ |
+
+---
+
 ## Week of May 16, 2026
 *Run: 2026-05-16 · 16 high · 10 monitor · lookback 7 days*
 
