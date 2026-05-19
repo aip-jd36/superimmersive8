@@ -9,6 +9,286 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of May 19, 2026
+*Run: 2026-05-19 · 17 high · 10 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 10 | post+update | [Who Owns AI-Generated Content? Human Authorship Still Controls, and Documenting the Creation Process Is Critical](https://www.jdsupra.com/legalnews/who-owns-ai-generated-content-human-1509048/) | JD Supra | Thu, 14 May 2026 | ☐ |
+| 9 | post+update | [Channel Factory’s Nico Greco: Brand Safety Rules were ‘Designed for Human Authors,’ not AI-Generated Content](https://www.beet.tv/2026/05/channel-factorys-nico-greco-brand-safety-rules-were-designed-for-human-authors-not-ai-generated-content.html) | Beet.TV | Mon, 18 May 2026 | ☐ |
+| 9 | post+update | [Wirestock raises $23 million as AI labs hunt for licensed creative data](https://startupfortune.com/wirestock-raises-23-million-as-ai-labs-hunt-for-licensed-creative-data/) | Startup Fortune | Thu, 14 May 2026 | ☐ |
+| 9 | post+update | [Who owns AI-generated content?](https://www.legalcheek.com/lc-journal-posts/who-owns-ai-generated-content/) | Legal Cheek | Thu, 14 May 2026 | ☐ |
+| 9 | post+update | [ASCI releases draft AI labelling guidelines for advertising](https://www.impactonnet.com/more-from-impact/asci-releases-draft-ai-labelling-guidelines-for-advertising-14469.html) | IMPACT Magazine | Tue, 12 May 2026 | ☐ |
+| 8 | post | [AI dominates global IP debate at INTA conference in London](https://www.dailyjournal.com/articles/391453-ai-dominates-global-ip-debate-at-inta-conference-in-london) | Daily Journal | Mon, 18 May 2026 | ☐ |
+| 8 | post+update | [ASCI’s AI disclosure norms put advertising through new compliance test](https://bestmediainfo.com/mediainfo/advertising/ascis-ai-disclosure-norms-put-advertising-through-new-compliance-test-11846073) | bestmediainfo.com | Mon, 18 May 2026 | ☐ |
+| 8 | post+update | [Judge Delays Final Approval of Anthropic’s $1.5bn Copyright Settlement as Authors Push Back on AI Training Deal](https://www.tekedia.com/judge-delays-final-approval-of-anthropics-1-5bn-copyright-settlement-as-authors-push-back-on-ai-training-deal/) | Tekedia | Sat, 16 May 2026 | ☐ |
+| 8 | post | [The AI-generated ad that aired during the NBA finals took $2,000 and 2 days to make](https://www.msn.com/en-us/sports/nba/the-ai-generated-ad-that-aired-during-the-nba-finals-took-2-000-and-2-days-to-make/ar-AA1GFkYc?apiversion=v2&noservercache=1&domshim=1&renderwebcomponents=1&wcseo=1&batchservertelemetry=1&noservertelemetry=1&bundles=feat-es2020-t) | MSN | Fri, 15 May 2026 | ☐ |
+| 8 | post+update | [10 Takeaways: European Commission Draft Guidelines on AI Transparency under the EU AI Act](https://www.insideglobaltech.com/2026/05/12/10-takeaways-european-commission-draft-guidelines-on-ai-transparency-under-the-eu-ai-act/) | Inside Global Tech | Tue, 12 May 2026 | ☐ |
+| 7 | update | [CrePal Launches TVC Mode, a Pre-Production System for AI Commercial Video](https://natlawreview.com/press-releases/crepal-launches-tvc-mode-pre-production-system-ai-commercial-video) | The National Law Review | Mon, 18 May 2026 | ☐ |
+| 7 | update | [Chinese AI groups pull ahead of US rivals in video generation race](https://www.ft.com/content/9804b1de-653b-40b2-bffb-17c76ebebe34?syn-25a6b1a6=1) | Financial Times | Sun, 17 May 2026 | ☐ |
+| 7 | update | [Seedance, Kling and the Chinese AI Video Ecosystem](https://www.chinatalk.media/p/seedance-kling-and-the-chinese-ai?publication_id=4220&post_id=182359623&isFreemail=true&r=3i9oq1&triedRedirect=true&utm_source=substack&utm_medium=email) | ChinaTalk \| Jordan Schneider | Sat, 16 May 2026 | ☐ |
+| 7 | post | [The law and brands in the age of AI Technology: Intellectual Property, Liability and Regulation](https://www.modernghana.com/news/1493295/the-law-and-brands-in-the-age-of-ai-technology.amp) | Modern Ghana | Sat, 16 May 2026 | ☐ |
+| 7 | post | [AI video has a production problem](https://adage.com/studio-30/publishing-partners/aa-ai-video-has-a-production-problem/) | Ad Age | Thu, 14 May 2026 | ☐ |
+| 7 | update | [AI Advertising and the Authenticity Paradox](https://www.orfonline.org/english/expert-speak/ai-advertising-and-the-authenticity-paradox) | orfonline.org | Tue, 12 May 2026 | ☐ |
+| 7 | post | [AI labels won’t protect misleading ads, says ASCI new guidelines](https://bestmediainfo.com/mediainfo/mediainfo-digital/ai-labels-wont-protect-misleading-ads-says-asci-new-guidelines-11825714) | bestmediainfo.com | Tue, 12 May 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [IntelligenceBank Expands AI-Powered Brand Compliance Capabilities to 10x Content Approvals](https://www.accessnewswire.com/newsroom/en/computers-technology-and-internet/intelligencebank-expands-ai-powered-brand-compliance-capabilities-1168114) | ACCESS Newswire | Tue, 19 May 2026 | ☐ |
+| 6 | update | [MakeInfluencer: Deploy Custom AI Stars with Veo & Lip Sync – Revolutionize Marketing & Content](https://quasa.io/video/makeinfluencer-deploy-custom-ai-stars-with-sora-veo-lip-sync-revolutionize-marketing-content) | quasa.io | Sun, 17 May 2026 | ☐ |
+| 6 | monitor | [India’s advertising watchdog sets new rules on AI-generated content in ads](https://indiantelevision.com/mam/indias-advertising-watchdog-sets-new-rules-on-ai-generated-content-in-ads/) | Indian Television Dot Com | Tue, 12 May 2026 | ☐ |
+| 6 | monitor | [ASCI suggests risk-based disclosure norms for AI-generated ads](https://www.thehindubusinessline.com/info-tech/asci-proposes-risk-based-approach-for-responsible-labelling-on-ads-made-with-ai/article70969237.ece) | BusinessLine | Tue, 12 May 2026 | ☐ |
+| 6 | monitor | [ASCI Proposes New Rules for AI-Generated Ads, Introduces Risk-Based Labelling System](https://brandequity.economictimes.indiatimes.com/news/research/advertising/asci-proposes-new-rules-for-ai-generated-ads-introduces-risk-based-labelling-system/131035059) | ET BrandEquity | Tue, 12 May 2026 | ☐ |
+| 6 | monitor | [ASCI releases draft guidelines for responsible labelling of AI-generated advertising content](https://www.medianews4u.com/asci-releases-draft-guidelines-for-responsible-labelling-of-ai-generated-advertising-content/) | MediaNews4U | Tue, 12 May 2026 | ☐ |
+| 6 | monitor | [ASCI advocates ‘risk-based approach’ for synthetically generated content in advertising](https://www.exchange4media.com/advertising-news/asci-advocates-risk-based-approach-for-synthetically-generated-content-in-advertising-154586.html) | Exchange4Media | Tue, 12 May 2026 | ☐ |
+| 6 | monitor | [ASCI releases draft guidelines for responsible labelling of AI-generated content in advertising](https://mediabrief.com/asci-draft-guidelines-for-labelling-of-ai-generated-content/) | Mediabrief.com | Tue, 12 May 2026 | ☐ |
+| 6 | monitor | [ASCI targets transparency in AI advertising with new draft labelling framework](https://www.storyboard18.com/advertising/asci-targets-transparency-in-ai-advertising-with-new-draft-labelling-framework-97831.htm) | Storyboard18 | Tue, 12 May 2026 | ☐ |
+| 5 | monitor | [Hedra: AI That Turns Text & Images into Lifelike Talking, Singing Avatars in Seconds](https://quasa.io/video/hedra-ai-that-turns-text-images-into-lifelike-talking-singing-avatars-in-seconds) | quasa.io | Wed, 13 May 2026 | ☐ |
+
+---
+
+## Week of May 16, 2026
+*Run: 2026-05-16 · 16 high · 10 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Brands Want Creators’ AI Likeness Rights But Contracts Aren't Keeping Up](https://www.forbes.com/sites/ianshepherd/2026/05/15/the-creator-economys-next-war-is-over-ai-ownership/) | Forbes | Fri, 15 May 2026 | ☐ |
+| 9 | post+update | [AI video has a production problem](https://adage.com/studio-30/publishing-partners/aa-ai-video-has-a-production-problem/) | Ad Age | Thu, 14 May 2026 | ☐ |
+| 9 | post+update | [Who owns AI-generated content?](https://www.legalcheek.com/lc-journal-posts/who-owns-ai-generated-content/) | Legal Cheek | Thu, 14 May 2026 | ☐ |
+| 9 | post+update | [Who Owns AI-Generated Content? Human Authorship Still Controls, and Documenting the Creation Process Is Critical](https://natlawreview.com/article/who-owns-ai-generated-content-human-authorship-still-controls-and-documenting) | The National Law Review | Wed, 13 May 2026 | ☐ |
+| 9 | post+update | [ASCI releases draft AI labelling guidelines for advertising](https://www.impactonnet.com/more-from-impact/asci-releases-draft-ai-labelling-guidelines-for-advertising-14469.html) | IMPACT Magazine | Tue, 12 May 2026 | ☐ |
+| 9 | post+update | [ASCI drafts guidelines for labelling of AI-generated content in ads](https://www.manifest-media.in/advertising/120526/asci-drafts-guidelines-for-labelling-of-ai-generated-content-in-ads.html) | manifest-media.in | Tue, 12 May 2026 | ☐ |
+| 9 | update | [India’s advertising watchdog sets new rules on AI-generated content in ads](https://indiantelevision.com/mam/indias-advertising-watchdog-sets-new-rules-on-ai-generated-content-in-ads/) | Indian Television Dot Com | Tue, 12 May 2026 | ☐ |
+| 9 | post+update | [AI Act](https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai) | EU Digital Strategy | Mon, 11 May 2026 | ☐ |
+| 8 | post+update | [Matthew McConaughey Trademarks His Image to Block AI Use](https://letsdatascience.com/news/matthew-mcconaughey-trademarks-his-image-to-block-ai-use-89579c39) | Let's Data Science | Thu, 14 May 2026 | ☐ |
+| 8 | post | [The law & brands in the age of AI technology](https://www.myjoyonline.com/the-law-brands-in-the-age-of-ai-technology/) | MyJoyOnline | Thu, 14 May 2026 | ☐ |
+| 8 | post+update | [10 Takeaways: European Commission Draft Guidelines on AI Transparency under the EU AI Act](https://www.insideglobaltech.com/2026/05/12/10-takeaways-european-commission-draft-guidelines-on-ai-transparency-under-the-eu-ai-act/) | Inside Global Tech | Tue, 12 May 2026 | ☐ |
+| 8 | post | [AI labels won’t protect misleading ads, says ASCI new guidelines](https://bestmediainfo.com/mediainfo/mediainfo-digital/ai-labels-wont-protect-misleading-ads-says-asci-new-guidelines-11825714) | bestmediainfo.com | Tue, 12 May 2026 | ☐ |
+| 8 | post+update | [Meta’s AI copyright fight now reaches Mark Zuckerberg personally](https://startupfortune.com/metas-ai-copyright-fight-now-reaches-mark-zuckerberg-personally/) | Startup Fortune | Mon, 11 May 2026 | ☐ |
+| 8 | post | [Kling Native 4K Generation Breaks the AI Video Commercial Quality Ceiling](https://pandaily.com/kling-native-4k-ai-video-commercial-quality) | Pandaily | Sat, 09 May 2026 | ☐ |
+| 7 | post+update | [The law & brands in the age of AI Technology: Intellectual Property, Liability and Regulation](https://www.citinewsroom.com/2026/05/the-law-brands-in-the-age-of-ai-technology-intellectual-property-liability-and-regulation/) | CitiNewsroom.com | Thu, 14 May 2026 | ☐ |
+| 7 | post | [ASCI suggests risk-based disclosure norms for AI-generated ads](https://www.thehindubusinessline.com/info-tech/asci-proposes-risk-based-approach-for-responsible-labelling-on-ads-made-with-ai/article70969237.ece) | BusinessLine | Tue, 12 May 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [AI Legislative Update: May 15, 2026](https://www.transparencycoalition.ai/news/ai-legislative-update-may15-2026) | Transparency Coalition | Thu, 14 May 2026 | ☐ |
+| 6 | monitor | [AI storm stirs arts industry . . . Nyanhi rejects creative shutdown](https://www.heraldonline.co.zw/ai-storm-stirs-arts-industry-nyanhi-rejects-creative-shutdown/) | The Herald ZW | Wed, 13 May 2026 | ☐ |
+| 6 | monitor | [AI Advertising and the Authenticity Paradox](https://www.orfonline.org/english/expert-speak/ai-advertising-and-the-authenticity-paradox) | orfonline.org | Tue, 12 May 2026 | ☐ |
+| 5 | monitor | [Why enterprise AI fails without the right content foundations](https://www.raconteur.net/technology/why-enterprise-ai-fails-without-the-right-content-foundations) | Raconteur | Thu, 14 May 2026 | ☐ |
+| 5 | monitor | [Top 10 AI Video Generator Tools in 2026: The Ultimate Guide for Creators](https://techbullion.com/top-10-ai-video-generator-tools-in-2026-the-ultimate-guide-for-creators/) | TechBullion | Thu, 14 May 2026 | ☐ |
+| 5 | monitor | [Stay ADvised: Connecticut Leads on Kids—From Cosmetic Marketing to AI Safety](https://www.dwt.com/insights/2026/05/stay-advised-brand-protection-may-12) | Davis Wright Tremaine | Mon, 11 May 2026 | ☐ |
+| 4 | monitor | [Stratagon Launches CampusBrain™ AI Video Agent and Related Tools](https://natlawreview.com/press-releases/stratagon-launches-campusbraintm-ai-video-agent-and-related-tools) | The National Law Review | Thu, 14 May 2026 | ☐ |
+| 4 | update | [Kling 3.5 AI Video Generator Launches Browser-Based Platform for Text and Image to Video Creation](https://www.openpr.com/news/4511397/kling-3-5-ai-video-generator-launches-browser-based-platform) | openPR.com | Wed, 13 May 2026 | ☐ |
+| 4 | monitor | [Google VEO, Kling, Luma Ray, Runway, Pika Labs Excel at AI Video Generation](https://www.topnews.in/google-veo-kling-luma-ray-runway-pika-labs-excel-ai-video-generation-2418924) | topnews.in | Tue, 12 May 2026 | ☐ |
+| 4 | monitor | [Kuaishou Reportedly Eyes $2 Billion Kling AI Spin-Off Amid Booming AI Video Demand](https://www.cxodigitalpulse.com/kuaishou-reportedly-eyes-2-billion-kling-ai-spin-off-amid-booming-ai-video-demand/) | CXO Digitalpulse | Tue, 12 May 2026 | ☐ |
+
+---
+
+## Week of May 13, 2026
+*Run: 2026-05-13 · 16 high · 16 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [ASCI releases draft AI labelling guidelines for advertising](https://www.impactonnet.com/more-from-impact/asci-releases-draft-ai-labelling-guidelines-for-advertising-14469.html) | IMPACT Magazine | Tue, 12 May 2026 | ☐ |
+| 9 | post+update | [ASCI drafts guidelines for labelling of AI-generated content in ads](https://www.manifest-media.in/advertising/120526/asci-drafts-guidelines-for-labelling-of-ai-generated-content-in-ads.html) | manifest-media.in | Tue, 12 May 2026 | ☐ |
+| 9 | post+update | [AI ads face ASCI test as draft rules target deepfakes, misleading claims](https://www.business-standard.com/industry/news/ai-ads-face-asci-test-as-draft-rules-target-deepfakes-misleading-claims-126051201030_1.html) | Business Standard | Tue, 12 May 2026 | ☐ |
+| 9 | post+update | [ASCI releases draft guidelines for responsible labelling of AI-generated advertising content](https://www.medianews4u.com/asci-releases-draft-guidelines-for-responsible-labelling-of-ai-generated-advertising-content/) | MediaNews4U | Tue, 12 May 2026 | ☐ |
+| 9 | post+update | [ASCI advocates ‘risk-based approach’ for synthetically generated content in advertising](https://www.exchange4media.com/advertising-news/asci-advocates-risk-based-approach-for-synthetically-generated-content-in-advertising-154586.html) | Exchange4Media | Tue, 12 May 2026 | ☐ |
+| 9 | update | [ASCI targets transparency in AI advertising with new draft labelling framework](https://www.storyboard18.com/advertising/asci-targets-transparency-in-ai-advertising-with-new-draft-labelling-framework-97831.htm) | Storyboard18 | Tue, 12 May 2026 | ☐ |
+| 8 | post+update | [RSL Media launches Human Consent Standard for AI licensing](https://letsdatascience.com/news/rsl-media-launches-human-consent-standard-for-ai-licensing-1dc6ae97) | Let's Data Science | Tue, 12 May 2026 | ☐ |
+| 8 | post+update | [ASCI suggests risk-based disclosure norms for AI-generated ads](https://www.thehindubusinessline.com/companies/asci-proposes-risk-based-approach-for-responsible-labelling-on-ads-made-with-ai/article70969237.ece) | BusinessLine | Tue, 12 May 2026 | ☐ |
+| 8 | update | [ASCI Proposes New Rules for AI-Generated Ads, Introduces Risk-Based Labelling System](https://brandequity.economictimes.indiatimes.com/news/research/advertising/asci-proposes-new-rules-for-ai-generated-ads-introduces-risk-based-labelling-system/131035059) | ET BrandEquity | Tue, 12 May 2026 | ☐ |
+| 8 | post+update | [China’s Kuaishou Plans to Spin Off Kling AI Video Unit at $20 Billion Valuation](https://www.theinformation.com/articles/chinas-kuaishou-plans-spin-kling-ai-video-unit-20-billion-valuation) | The Information | Mon, 11 May 2026 | ☐ |
+| 8 | post+update | [AI is pushing copyright enforcement into DAM](https://martech.org/ai-is-pushing-copyright-enforcement-into-dam/) | MarTech | Wed, 06 May 2026 | ☐ |
+| 7 | post+update | [ASCI's new draft rules aim to curb misleading AI-generated advertising content](https://www.socialsamosa.com/industry-updates/asci-rules-ai-advertising-11825977) | Social Samosa | Tue, 12 May 2026 | ☐ |
+| 7 | update | [AI labels won’t protect misleading ads, says ASCI new guidelines](https://bestmediainfo.com/mediainfo/mediainfo-digital/ai-labels-wont-protect-misleading-ads-says-asci-new-guidelines-11825714) | bestmediainfo.com | Tue, 12 May 2026 | ☐ |
+| 7 | post | [Meta’s AI copyright fight now reaches Mark Zuckerberg personally](https://startupfortune.com/metas-ai-copyright-fight-now-reaches-mark-zuckerberg-personally/) | Startup Fortune | Mon, 11 May 2026 | ☐ |
+| 7 | post | [Kling Native 4K Generation Breaks the AI Video Commercial Quality Ceiling](https://pandaily.com/kling-native-4k-ai-video-commercial-quality) | Pandaily | Sat, 09 May 2026 | ☐ |
+| 7 | post | [AI is reshaping ad creative. Here’s how brands can get it right.](https://blog.google/products/ads-commerce/ads-decoded-podcast-ai-creative/) | blog.google | Wed, 06 May 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [AI Advertising and the Authenticity Paradox](https://www.orfonline.org/english/expert-speak/ai-advertising-and-the-authenticity-paradox) | orfonline.org | Tue, 12 May 2026 | ☐ |
+| 6 | monitor | [India’s advertising watchdog sets new rules on AI-generated content in ads](https://indiantelevision.com/mam/indias-advertising-watchdog-sets-new-rules-on-ai-generated-content-in-ads/) | Indian Television Dot Com | Tue, 12 May 2026 | ☐ |
+| 6 | monitor | [Character AI Lawsuit: Key Implications for 2026](https://technosports.co.in/?p=1295936) | TechnoSports Media Group | Sun, 10 May 2026 | ☐ |
+| 6 | monitor | [Agencies Using Cloud Campaign's New AI Service Cut Content Production Time by Over 85%](https://www.morningstar.com/news/pr-newswire/20260507la53487/agencies-using-cloud-campaigns-new-ai-service-cut-content-production-time-by-over-85) | Morningstar | Thu, 07 May 2026 | ☐ |
+| 6 | monitor | [Corgi raises $160M at $1.3B valuation to expand AI-native insurance platform](https://siliconangle.com/2026/05/06/corgi-raises-160m-1-3b-valuation-expand-ai-native-insurance-platform/) | SiliconANGLE | Wed, 06 May 2026 | ☐ |
+| 6 | monitor | [PUNX Launches as AI-Native Creative Agency to Solve the Global Marketing Execution Crisis](https://natlawreview.com/press-releases/punx-launches-ai-native-creative-agency-solve-global-marketing-execution) | The National Law Review | Wed, 06 May 2026 | ☐ |
+| 5 | monitor | [Google VEO, Kling, Luma Ray, Runway, Pika Labs Excel at AI Video Generation](https://www.topnews.in/google-veo-kling-luma-ray-runway-pika-labs-excel-ai-video-generation-2418924) | topnews.in | Tue, 12 May 2026 | ☐ |
+| 5 | monitor | [How Indian Media Brands Are Using AI Video Tools to Scale Content？](https://indiantelevision.com/mam/how-indian-media-brands-are-using-ai-video-tools-to-scale-content/) | Indian Television Dot Com | Tue, 12 May 2026 | ☐ |
+| 5 | monitor | [Why Gen AI is a Win for MedTech: And, How to Unlock its Potential with the Right Policies](https://medtechintelligence.com/viewpoint/why-gen-ai-is-a-win-for-medtech-and-how-to-unlock-its-potential-with-the-right-policies/) | MedTech Intelligence | Mon, 11 May 2026 | ☐ |
+| 5 | monitor | [Mark Zuckerberg, Meta hit with explosive copyright lawsuit over alleged use of pirated books to train Llama AI](https://crispng.com/mark-zuckerberg-meta-llama-ai-copyright-lawsuit/) | crispng.com | Thu, 07 May 2026 | ☐ |
+| 5 | monitor | [Publishers and Authors Sue Meta, Alleging ‘Massive’ Copyright Infringement Behind Its Llama AI Service](https://publishingperspectives.com/2026/05/publishers-and-authors-sue-meta-alleging-massive-copyright-infringement-behind-its-llama-ai-service/) | Publishing Perspectives | Wed, 06 May 2026 | ☐ |
+| 4 | monitor | [From Execution to Orchestration: How to Leverage Generative AI Without Losing Control](https://lbbonline.com/news/From-Execution-to-Orchestration-How-to-Leverage-Generative-AI-Without-Losing-Control) | Little Black Book \| LBBOnline | Tue, 12 May 2026 | ☐ |
+| 4 | monitor | [Kuaishou Reportedly Eyes $2 Billion Kling AI Spin-Off Amid Booming AI Video Demand](https://www.cxodigitalpulse.com/kuaishou-reportedly-eyes-2-billion-kling-ai-spin-off-amid-booming-ai-video-demand/) | CXO Digitalpulse | Tue, 12 May 2026 | ☐ |
+| 4 | monitor | [Stay ADvised: Connecticut Leads on Kids—From Cosmetic Marketing to AI Safety](https://www.dwt.com/insights/2026/05/stay-advised-brand-protection-may-12) | Davis Wright Tremaine | Mon, 11 May 2026 | ☐ |
+| 4 | monitor | [Meta and Mark Zuckerberg sued by US publishers for copyright infringement to develop its AI](https://www.thebookseller.com/news/meta-and-mark-zuckerberg-sued-by-us-publishers-for-copyright-infringement-to-develop-its-ai) | The Bookseller | Wed, 06 May 2026 | ☐ |
+| 4 | monitor | [Publishers sue Meta, claiming it violated copyrights in training AI with their books](https://www.washingtonpost.com/national-security/2026/05/05/publishers-sue-meta-ai-copyright/) | The Washington Post | Wed, 06 May 2026 | ☐ |
+
+---
+
+## Week of May 10, 2026
+*Run: 2026-05-10 · 10 high · 7 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Is saying ‘no AI’ now a strategic advantage for advertisers?](https://www.digitaljournal.com/business/is-saying-no-ai-now-a-strategic-advantage-for-advertisers/article) | Digital Journal | Fri, 08 May 2026 | ☐ |
+| 9 | post+update | [Mark Zuckerberg, Meta hit with explosive copyright lawsuit over alleged use of pirated books to train Llama AI](https://crispng.com/mark-zuckerberg-meta-llama-ai-copyright-lawsuit/) | crispng.com | Thu, 07 May 2026 | ☐ |
+| 8 | post+update | [Kling Native 4K Generation Breaks the AI Video Commercial Quality Ceiling](https://pandaily.com/kling-native-4k-ai-video-commercial-quality) | Pandaily | Sat, 09 May 2026 | ☐ |
+| 8 | post+update | [Face-off over AI dramas' illegal use of personality rights](https://www.chinadaily.com.cn/a/202605/08/WS69fd1f44a310d6866eb47632.html) | China Daily | Thu, 07 May 2026 | ☐ |
+| 8 | post | [AI-Generated Spencer Pratt Ad Sees Gavin Newsom Eat Cake and Competitor Karen Bass as The Joker \| Video](https://www.thewrap.com/media-platforms/politics/ai-generated-spencer-pratt-ad-video/) | TheWrap | Wed, 06 May 2026 | ☐ |
+| 8 | post+update | [Navigating Copyright in the Age of Generative AI: EU, French, and UK Developments and Approaches](https://www.jonesday.com/en/insights/2026/05/navigating-copyright-in-the-age-of-generative-ai-eu-french-and-uk-developments-and-approaches) | Jones Day | Mon, 04 May 2026 | ☐ |
+| 7 | update | [Google’s Veo 4 Is Almost Here—and It Looks Powerful](https://www.socialnews.xyz/2026/05/08/googles-veo-4-is-almost-here-and-it-looks-powerful/) | Social News XYZ | Fri, 08 May 2026 | ☐ |
+| 7 | update | [IP Strategy Highlights Poseidon’s Launch of Numo, Expanding Supply of Rights-Cleared AI Training Data on Story](https://www.manilatimes.net/2026/05/08/tmt-newswire/globenewswire/ip-strategy-highlights-poseidons-launch-of-numo-expanding-supply-of-rights-cleared-ai-training-data-on-story/2339537) | The Manila Times | Fri, 08 May 2026 | ☐ |
+| 7 | post | [Actors speak out against AI-generated promos that put them in fake sex scenes](https://www.businessinsider.com/actors-sexualized-fake-ads-promote-micro-dramas-tiktok-meta-2026-5) | Business Insider | Thu, 07 May 2026 | ☐ |
+| 7 | post+update | [AI is pushing copyright enforcement into DAM](https://martech.org/ai-is-pushing-copyright-enforcement-into-dam/) | MarTech | Wed, 06 May 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [AI Legislative Update: May 8, 2026](https://www.transparencycoalition.ai/news/ai-legislative-update-may8-2026) | Transparency Coalition | Fri, 08 May 2026 | ☐ |
+| 6 | monitor | [Singapore startup Video Rebirth launches AI video tool](https://www.techinasia.com/news/singapore-startup-video-rebirth-launches-ai-video-tool) | Tech in Asia | Thu, 07 May 2026 | ☐ |
+| 5 | monitor | [PUNX Launches as AI-Native Creative Agency to Solve the Global Marketing Execution Crisis](https://natlawreview.com/press-releases/punx-launches-ai-native-creative-agency-solve-global-marketing-execution) | The National Law Review | Wed, 06 May 2026 | ☐ |
+| 5 | monitor | [TransPerfect Releases 2026 Business Outlook Report: AI Is Now the Standard for Global Content Operations](https://www.morningstar.com/news/pr-newswire/20260505ny49668/transperfect-releases-2026-business-outlook-report-ai-is-now-the-standard-for-global-content-operations) | Morningstar | Tue, 05 May 2026 | ☐ |
+| 4 | monitor | [Why Enterprise Content Management Is Becoming a Strategic Priority in the Age of AI](https://www.globalbankingandfinance.com/why-enterprise-content-management-is-becoming-a-strategic-priority-in-the-age-of-ai/) | Global Banking & Finance Review | Fri, 08 May 2026 | ☐ |
+| 4 | monitor | [Reserv Announces $125 Million Series C Financing Led by KKR to Accelerate AI-Driven Transformation of Insurance Claims](https://www.morningstar.com/news/business-wire/20260504407536/reserv-announces-125-million-series-c-financing-led-by-kkr-to-accelerate-ai-driven-transformation-of-insurance-claims) | Morningstar | Mon, 04 May 2026 | ☐ |
+| 4 | monitor | [Adobe's legal chief urges balanced AI copyright reform](https://www.msn.com/en-us/news/other/adobes-legal-chief-urges-balanced-ai-copyright-reform/gm-GMFA74063B) | MSN | Sun, 03 May 2026 | ☐ |
+
+---
+
+## Week of May 07, 2026
+*Run: 2026-05-07 · 11 high · 7 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Insurers Exclude AI Liability, New Market Emerges](https://letsdatascience.com/news/insurers-exclude-ai-liability-new-market-emerges-48e65009) | Let's Data Science | Fri, 01 May 2026 | ☐ |
+| 8 | post+update | [Meta and Mark Zuckerberg sued by US publishers for copyright infringement to develop its AI](https://www.thebookseller.com/news/meta-and-mark-zuckerberg-sued-by-us-publishers-for-copyright-infringement-to-develop-its-ai) | The Bookseller | Wed, 06 May 2026 | ☐ |
+| 8 | post+update | [Scale marketing campaigns with orchestration and efficiency](https://business.adobe.com/blog/scaling-marketing-campaigns) | Adobe for Business | Wed, 06 May 2026 | ☐ |
+| 8 | post+update | [Scott Turow and Major Publishers Allege Mark Zuckerberg Personally Authorized Meta’s Mass Copying of Copyrighted Books and That Allegation Changes Everything About This Lawsuit](https://startupfortune.com/scott-turow-and-major-publishers-allege-mark-zuckerberg-personally-authorized-metas-mass-copying-of-copyrighted-books-and-that-allegation-changes-everything-about-this-lawsuit/) | Startup Fortune | Tue, 05 May 2026 | ☐ |
+| 8 | update | [Mark Zuckerberg ‘personally authorized’ Meta’s copyright infringement, publishers allege](https://www.bostonherald.com/2026/05/05/books-meta-lawsuit/) | Boston Herald | Tue, 05 May 2026 | ☐ |
+| 8 | post+update | [Big Insurance Backs Away From AI Risk and Startups Rush In](https://www.pymnts.com/artificial-intelligence-2/2026/big-insurance-backs-away-from-ai-risk-and-startups-rush-in/) | PYMNTS.com | Fri, 01 May 2026 | ☐ |
+| 8 | post+update | [AI-Generated Content and Copyright Law: What We Know](https://builtin.com/artificial-intelligence/ai-copyright) | Built In | Thu, 30 Apr 2026 | ☐ |
+| 7 | post+update | [AI is pushing copyright enforcement into DAM](https://martech.org/ai-is-pushing-copyright-enforcement-into-dam/) | MarTech | Wed, 06 May 2026 | ☐ |
+| 7 | post+update | [PUNX Launches as AI-Native Creative Agency to Solve the Global Marketing Execution Crisis](https://natlawreview.com/press-releases/punx-launches-ai-native-creative-agency-solve-global-marketing-execution) | The National Law Review | Wed, 06 May 2026 | ☐ |
+| 7 | update | [Mark Zuckerberg ‘Personally Authorized and Actively Encouraged’ Meta’s Massive Copyright Infringement to Train AI Systems, Publishers and Scott Turow Allege in Lawsuit](https://variety.com/2026/digital/news/meta-ai-mark-zuckerberg-copyright-infringement-lawsuit-publishers-scott-turow-1236738383/) | Variety | Tue, 05 May 2026 | ☐ |
+| 7 | post+update | [Adobe's legal chief urges balanced AI copyright reform](https://www.msn.com/en-us/news/other/adobes-legal-chief-urges-balanced-ai-copyright-reform/gm-GMFA74063B) | MSN | Sun, 03 May 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Beastie Boys’ ‘Sabotage’ video recreated with AI in FBI director’s fraud takedown clip](https://artthreat.net/28958-98514-beastie-boys-sabotage-video-recreated-with-ai-in-fbi-director-s-fraud-takedown-c/) | artthreat.net | Mon, 04 May 2026 | ☐ |
+| 5 | monitor | [Publishers Accuse Meta Of Massive Copyright Infringement](https://dataconomy.com/2026/05/06/publishers-accuse-meta-of-massive-copyright-infringement/) | Dataconomy | Wed, 06 May 2026 | ☐ |
+| 5 | monitor | [Corgi launches AI insurance product to cover emerging risks](https://fintech.global/2026/05/06/corgi-launches-ai-insurance-product-to-cover-emerging-risks/) | FinTech Global | Wed, 06 May 2026 | ☐ |
+| 5 | monitor | [Fashion entrepreneur Thomas Cohen, formerly of Bonton and Merci, aims to create a SACEM for generative AI](https://us.fashionnetwork.com/news/Fashion-entrepreneur-thomas-cohen-formerly-of-bonton-and-merci-aims-to-create-a-sacem-for-generative-ai,1829404.html) | FashionNetwork USA | Tue, 05 May 2026 | ☐ |
+| 5 | monitor | [The Secret Weapon Against AI Dominance](https://www.theatlantic.com/ideas/2026/04/creative-labor-ai-copyright/687000/) | The Atlantic | Thu, 30 Apr 2026 | ☐ |
+| 4 | monitor | [AI-generated Images Flood Met Gala Coverage](https://letsdatascience.com/news/ai-generated-images-flood-met-gala-coverage-835e8c99) | Let's Data Science | Tue, 05 May 2026 | ☐ |
+| 4 | monitor | [5 Best Free AI Video Generators in 2026: Top Tools for Creators Seeking Quality Without Cost](https://www.ibtimes.com.au/5-best-free-ai-video-generators-2026-top-tools-creators-seeking-quality-without-cost-1867926) | International Business Times Australia | Fri, 01 May 2026 | ☐ |
+
+---
+
+## Week of May 04, 2026
+*Run: 2026-05-04 · 9 high · 7 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Counterpart Raises $50M for AI Insurance Coverage](https://ventureburn.com/counterpart-raises-50m-for-ai-insurance-coverage/) | Ventureburn | Wed, 29 Apr 2026 | ☐ |
+| 8 | post+update | [Billlie's Agency Denies Plagiarism Over AI‑Assisted Video as France's GOBELINS School Threatens Legal Action](https://www.kpopstarz.com/articles/322973/20260502/billlies-agency-denies-plagiarism-over-aiassisted-video-frances-gobelins-school-threatens-legal.htm) | Kpopstarz | Sat, 02 May 2026 | ☐ |
+| 8 | post+update | [Big Insurance Backs Away From AI Risk and Startups Rush In](https://www.pymnts.com/artificial-intelligence-2/2026/big-insurance-backs-away-from-ai-risk-and-startups-rush-in/) | PYMNTS.com | Fri, 01 May 2026 | ☐ |
+| 8 | post+update | [Insurers Exclude AI Liability, New Market Emerges](https://letsdatascience.com/news/insurers-exclude-ai-liability-new-market-emerges-48e65009) | Let's Data Science | Fri, 01 May 2026 | ☐ |
+| 8 | post+update | [Marketing Teams Hesitate on AI Adoption Despite Mandates](https://letsdatascience.com/news/marketing-teams-hesitate-on-ai-adoption-despite-mandates-851b554a) | Let's Data Science | Thu, 30 Apr 2026 | ☐ |
+| 8 | post+update | [As AI ‘performers’ enter ads, XR helps track rights, payment compliance](https://www.streamtvinsider.com/advertising/ai-performers-enter-ads-xr-helps-track-rights-payment-compliance) | StreamTV Insider | Tue, 28 Apr 2026 | ☐ |
+| 8 | post+update | [Fusion of AI and Human Talent Puts IP Protection at a Crossroad](https://news.bloomberglaw.com/legal-exchange-insights-and-commentary/fusion-of-ai-and-human-talent-puts-ip-protection-at-a-crossroad) | Bloomberg Law News | Mon, 27 Apr 2026 | ☐ |
+| 7 | update | [How AI, Digital Doubles, and New Laws Are Rewriting Fashion and Beauty](https://natlawreview.com/article/how-ai-digital-doubles-and-new-laws-are-rewriting-fashion-and-beauty?amp) | The National Law Review | Fri, 01 May 2026 | ☐ |
+| 7 | update | [V4b.AI Unveils Proprietary AI-Powered Video Production for Brands, Ecommerce and Fashion Industry](https://natlawreview.com/press-releases/v4bai-unveils-proprietary-ai-powered-video-production-brands-ecommerce-and) | The National Law Review | Tue, 28 Apr 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [AI and IP Across Borders \| AI and IP: The Legal Frontier - Special Video Episode](https://www.jdsupra.com/legalnews/ai-and-ip-across-borders-ai-and-ip-the-7532514/) | JD Supra | Thu, 30 Apr 2026 | ☐ |
+| 6 | monitor | [Ad policies](https://openai.com/policies/ad-policies/) | OpenAI | Wed, 29 Apr 2026 | ☐ |
+| 5 | monitor | [Vedder Selects AIQA Global for Independent AI Governance Assessment](https://www.morningstar.com/news/pr-newswire/20260430fl47966/vedder-selects-aiqa-global-for-independent-ai-governance-assessment) | Morningstar | Thu, 30 Apr 2026 | ☐ |
+| 5 | monitor | [Emerging technology trends brands and agencies need to know about](https://adage.com/technology/ai/aa-emerging-news-and-trends-meta-snap-google/) | Ad Age | Thu, 30 Apr 2026 | ☐ |
+| 4 | monitor | [Experian Announces Agent Trust to Power Trusted AI Driven Commerce](https://www.morningstar.com/news/business-wire/20260430719198/experian-announces-agent-trust-to-power-trusted-ai-driven-commerce) | Morningstar | Thu, 30 Apr 2026 | ☐ |
+| 4 | monitor | [Creator and influencer trends brand marketers need to know about right now](https://adage.com/influencers-creators/aa-trends-virgin-voyages-starface-cava-parke/) | Ad Age | Tue, 28 Apr 2026 | ☐ |
+| 4 | monitor | [China’s tech titans tussle in AI video gold rush](https://www.thinkchina.sg/technology/chinas-tech-titans-tussle-ai-video-gold-rush) | ThinkChina | Mon, 27 Apr 2026 | ☐ |
+
+---
+
+## Week of May 01, 2026
+*Run: 2026-05-01 · 9 high · 10 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 8 | post+update | [Marketing Teams Hesitate on AI Adoption Despite Mandates](https://letsdatascience.com/news/marketing-teams-hesitate-on-ai-adoption-despite-mandates-851b554a) | Let's Data Science | Thu, 30 Apr 2026 | ☐ |
+| 8 | post+update | [Counterpart Raises $50M for AI Insurance Coverage](https://ventureburn.com/counterpart-raises-50m-for-ai-insurance-coverage/) | Ventureburn | Wed, 29 Apr 2026 | ☐ |
+| 8 | post+update | [As AI ‘performers’ enter ads, XR helps track rights, payment compliance](https://www.streamtvinsider.com/advertising/ai-performers-enter-ads-xr-helps-track-rights-payment-compliance) | StreamTV Insider | Tue, 28 Apr 2026 | ☐ |
+| 8 | post+update | [Navigating IP rights and infringement risks in the age of AI](https://www.nortonrosefulbright.com/en-us/knowledge/webinars-and-events/d11bc786/innovate-protect-monetize-navigating-ip-rights-and-infringement-risks-in-the-age-of-ai) | Norton Rose Fulbright | Mon, 27 Apr 2026 | ☐ |
+| 8 | update | [AI startups are raising millions to disrupt Hollywood. Read the pitch decks 9 used to get funding.](https://www.businessinsider.com/ai-startups-hollywood-pitch-decks-raised-millions-2025-10) | Business Insider | Fri, 24 Apr 2026 | ☐ |
+| 7 | update | [Axel Springer Maintains $110K Lobbying Push on Copyright and AI](https://legis1.com/news/ai-copyright-lobbying-axel-springer-maintains) | Legis1 | Thu, 30 Apr 2026 | ☐ |
+| 7 | update | [V4b.AI Unveils Proprietary AI-Powered Video Production for Brands, Ecommerce and Fashion Industry](https://natlawreview.com/press-releases/v4bai-unveils-proprietary-ai-powered-video-production-brands-ecommerce-and) | The National Law Review | Tue, 28 Apr 2026 | ☐ |
+| 7 | post | [FAQ on brand safety: How AI content and creator marketing are reshaping risk in 2026](https://www.emarketer.com/content/faq-on-brand-safety--how-ai-content-creator-marketing-reshaping-risk-2026) | eMarketer | Tue, 28 Apr 2026 | ☐ |
+| 7 | post+update | [The AI Governance Gap](https://www.emarketer.com/content/ai-governance-gap) | eMarketer | Fri, 24 Apr 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Hollywood’s A.I.-Infringement Terminator](https://puck.news/celebrity-deepfakes-become-big-business-after-sora-shutdown/) | Puck | Thu, 30 Apr 2026 | ☐ |
+| 6 | monitor | [Taylor Swift draws a line in the AI sand with voice and image trademarks](https://www.malaymail.com/news/showbiz/2026/04/28/taylor-swift-draws-a-line-in-the-ai-sand-with-voice-and-image-trademarks/217923) | Malay Mail | Tue, 28 Apr 2026 | ☐ |
+| 5 | monitor | [AI and IP Across Borders \| AI and IP: The Legal Frontier - Special Video Episode](https://www.jdsupra.com/legalnews/ai-and-ip-across-borders-ai-and-ip-the-7532514/) | JD Supra | Thu, 30 Apr 2026 | ☐ |
+| 5 | monitor | [5 Best AI Video Generators to Create Stunning Videos (Tested & Compared for 2026)](https://aijourn.com/5-best-ai-video-generators-to-create-stunning-videos-tested-compared-for-2026/) | The AI Journal | Thu, 30 Apr 2026 | ☐ |
+| 5 | monitor | [Creo Debuts AI Solution for Real-Time Creator Content Editing, Reducing Costs and Time-to-Market While Ensuring Brand Compliance at Scale](https://www.prnewswire.com/news-releases/creo-debuts-ai-solution-for-real-time-creator-content-editing-reducing-costs-and-time-to-market-while-ensuring-brand-compliance-at-scale-302755923.html) | PR Newswire | Tue, 28 Apr 2026 | ☐ |
+| 5 | monitor | [TikTok AI remix feature paused after creator backlash](https://www.contentgrip.com/tiktok-ai-remixing-privacy-concerns/) | ContentGrip | Sat, 25 Apr 2026 | ☐ |
+| 4 | monitor | [Experian Announces Agent Trust to Power Trusted AI Driven Commerce](https://www.morningstar.com/news/business-wire/20260430719198/experian-announces-agent-trust-to-power-trusted-ai-driven-commerce) | Morningstar | Thu, 30 Apr 2026 | ☐ |
+| 4 | monitor | [Emerging technology trends brands and agencies need to know about](https://adage.com/technology/ai/aa-emerging-news-and-trends-meta-snap-google/) | Ad Age | Thu, 30 Apr 2026 | ☐ |
+| 4 | monitor | [Opinion: Those who don’t create intellectual property should respect the creations of those who do](https://www.theglobeandmail.com/opinion/article-artificial-intelligence-intellectual-property-work-students-university/) | The Globe and Mail | Wed, 29 Apr 2026 | ☐ |
+| 4 | monitor | [China’s tech titans tussle in AI video gold rush](https://www.thinkchina.sg/technology/chinas-tech-titans-tussle-ai-video-gold-rush) | ThinkChina | Mon, 27 Apr 2026 | ☐ |
+
+---
+
+## Week of April 28, 2026
+*Run: 2026-04-28 · 2 high · 3 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 7 | post | [Can AI Influencers Break FTC Rules? US Advertising Law, Disclosure & Liability Risks](https://www.lawyer-monthly.com/2026/04/ai-influencers-ftc-rules-us-advertising-law-liability/) | Lawyer Monthly | Mon, 27 Apr 2026 | ☐ |
+| 7 | post | [AI Broke Your Content Governance — Now What?](https://www.cmswire.com/digital-asset-management/ai-broke-your-content-governance-now-what/) | CMSWire | Wed, 22 Apr 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 5 | monitor | [YouTube Just Expanded Its AI Deepfake Protection to All of Hollywood](https://nofilmschool.com/youtube-deepfake-detection-tool) | No Film School | Tue, 21 Apr 2026 | ☐ |
+| 4 | monitor | [Forbes 2026 AI 50 List \| Top Artificial Intelligence Companies](https://www.forbes.com/lists/ai50/) | Forbes | Mon, 27 Apr 2026 | ☐ |
+| 4 | monitor | [Google blocks 8.3B ads with Gemini AI enforcement](https://www.contentgrip.com/google-gemini-ad-safety-ai/) | ContentGrip | Tue, 21 Apr 2026 | ☐ |
+
+---
+
 ## Week of April 25, 2026
 *Run: 2026-04-25 · 4 high · 6 monitor · lookback 7 days*
 
