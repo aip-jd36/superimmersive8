@@ -629,12 +629,17 @@ Traditional lawyers are conservative and don't trust automation — BUT they're 
 
 ## GEOGRAPHIC FOCUS (Refined)
 
-**Month 1-2: Singapore ONLY**
-- Trying Singapore + Manila + KL + Bangkok + Jakarta = getting none
-- Pick ONE city first, prove the model, then expand
+**Active target geos (May 2026):**
+- **England / UK** — primary; Legal Friction campaign running; 90+ responses; Ivy alias
+- **Amsterdam / Netherlands** — strong signal; Legal Friction campaign running; Vanessa alias
+- **Dubai / UAE** — added May 1, 2026; response rate exceeds London; Lilly alias; Logline-Global-v1 (CarFax)
+- **Singapore** — secondary; smaller pipeline; Lilly alias
 
-**Month 3+: Expand to other SEA markets**
-- Only after Singapore playbook is working
+**Month 1-2 (original plan): Singapore ONLY**
+- Expanded organically based on response data — UK and Amsterdam outperformed
+
+**Month 3+: Expand further as playbooks proven**
+- SEA markets (Manila, KL, Bangkok, Jakarta) on hold until Dubai/Singapore playbooks validated
 
 ---
 
