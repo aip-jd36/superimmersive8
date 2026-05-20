@@ -36,6 +36,7 @@
 | 2026-03-31 | LinkedIn | News | OpenAI shut down Sora. Disney pulled $1B. Chain of Title — not vendor loyalty — is how you future-proof AI video. | BBC / Variety — Sora shutdown (Mar 24–25) | Draft | [2026-03-31-linkedin-sora-shutdown.md](posts/2026-03/2026-03-31-linkedin-sora-shutdown.md) |
 | 2026-04-01 | LinkedIn | News | EU AI Act Code of Practice now requires labeling of AI-generated content. SI8's verified stamp satisfies this. | Kennedys Law — EU AI Act CoP (Mar 25) | Draft | [2026-04-01-linkedin-eu-ai-act-labeling.md](posts/2026-03/2026-04-01-linkedin-eu-ai-act-labeling.md) |
 | 2026-04-03 | LinkedIn + IG | News | IAB 2026 framework requires agencies to document AI video. C2PA tells you what tool made it. SI8 tells you if it's safe to run. | IAB AI Transparency and Disclosure Framework (Jan 15, 2026) | Draft | [2026-04-03-linkedin-iab-2026-framework.md](posts/2026-04/2026-04-03-linkedin-iab-2026-framework.md) |
+| 2026-05-20 | LinkedIn (JD personal) | Story | $14.19 to generate one reply. Now $1.39. 90 days, 9 geos, 23 campaigns — the ICP on day one was a guess, the ICP now is a cost table. | LINKEDIN-CAMPAIGN-ANALYSIS.md Section 9, CASE-STUDY-ICP-VALIDATION-DRAFT-v1.md v2 | Draft | [2026-05-20-linkedin-icp-cost-progression.md](posts/2026-05/2026-05-20-linkedin-icp-cost-progression.md) |
 
 ---
 

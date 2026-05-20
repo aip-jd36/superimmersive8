@@ -19,7 +19,7 @@ tools/daily-digest/digest.py  (ICP signal check in daily email)
 
 See `03_Sales/SALES-INTELLIGENCE-ARCHITECTURE.md` for the full hierarchy and update process.
 
-**Last updated:** April 10, 2026
+**Last updated:** May 20, 2026
 
 ---
 
@@ -298,7 +298,7 @@ Director (other) is dead weight — 0% warm, 39% pass+naf. These are media direc
 ## 7. Open Questions / Next Analysis
 
 - [x] **Attribution gap RESOLVED:** Supabase CSV export has campaign name + alias on every row. CRM is warm/active leads only — full response log lives in CSV. Export every 1-3 days for analysis.
-- [ ] **Cost per lead:** Add outreach tool monthly cost and calculate $ per good ICP lead once known.
+- [x] **Cost per lead:** RESOLVED May 20, 2026 — see Section 9: Geo Cost Analysis. Cost basis: $100/month = 700 outreaches ($0.143/lead sent). Dubai = $1.39/warm reply, $27.71/call request. UK/England = $2.05/warm, $46.57/call.
 - [ ] **v4 vs v3 ICP quality:** Do v4-message leads convert at a higher rate to qualified conversations? Track separately as more v4 campaigns complete.
 - [ ] **Title tier validation:** VP+ Creative has lower response rate but may produce better ICP quality leads. Track separately.
 - [ ] **Manila signal:** Marc Danielle came from outside the core London/Singapore target. Investigate whether Manila deserves its own campaign list.
@@ -306,6 +306,120 @@ Director (other) is dead weight — 0% warm, 39% pass+naf. These are media direc
 - [ ] **Blocks AI Campaign retirement decision:** April 10 data confirms poor lead quality from this campaign even when they accept. Decide: retire, rewrite opener, or test one more batch before retiring.
 - [ ] **Outsource workflow segment:** Hugo Barbera's conversion reveals a segment — agencies that currently produce their own compliance reports. These contacts will answer "no" to "do you have this problem?" because they've solved it themselves. Need a different opener: "Are you currently producing Chain of Title documentation for your AI video clients — and is that a workflow you'd consider outsourcing?" Consider a targeted campaign to AI Director / AI Practitioner titles.
 - [ ] **David Tamayo (Prose on Pixels, France) probe:** Creative AI Director, "big network with Legal team dedicated to AI," aware of US vs. global law differences. Replied defensively (similar to Hugo's initial pattern). EU AI Act follow-up sent April 10 — track response. If he engages, France/EU is validating as a real test batch territory.
+
+---
+
+## 9. ICP Progression — Cost Per Response Over Time (Mar–May 2026)
+
+**The story:** Three months of campaigns reveal a clear progression from wrong ICP + wrong message to right ICP + right message + right geo. Cost per response improved 16× from worst to best. Cost per warm (buying-intent) reply improved in parallel once Legal Friction + CreaDir targeting converged.
+
+**Cost basis:** $100/month = 700 outreaches = **$0.143 per lead sent**
+
+| Campaign cluster | ICP targeted | Message angle | Geo | Leads | Response rate | $/response | $/warm reply |
+|----------------|-------------|--------------|-----|-------|-------------|-----------|------------|
+| **— PHASE 1: Wrong ICP + Wrong Message (Mar 2026) —** | | | | | | | |
+| Sydney Owner+ | Owner+ / BizCons+Mktg | Vetting Takes Weeks (v3) | Sydney | 298 | 1.0% | $14.19 | — |
+| London Mgr+ (v3 messages) | Mgr+ Marketing | Vetting/DocProv/TrustedAI (v3) | London | 1,198 | 3.8% | $3.80 | — |
+| Singapore CMO/Mgr+/VP+ | CMO / Mgr+ / VP+ | Mixed v3 + v4 | Singapore | 1,033 | 4.9% | $2.89 | — |
+| **— PHASE 2: Right Message, Wrong ICP (Mar–Apr 2026) —** | | | | | | | |
+| London VP+ Creative | VP+ Creative | Hitting a Wall / Blocks AI (v4) | London | 783 | 4.6% | $3.11 | — |
+| London Mgr+ Legal Friction | Mgr+ Marketing | Legal Friction (v4) | London | 199 | 7.0% | $2.03 | — |
+| **— PHASE 3: Right ICP + Right Message + Right Geo (Apr–May 2026) —** | | | | | | | |
+| England CreaDir AI Video | Creative Director | Legal Friction (v4) | England | 978 | 10.5% | $1.36 | $2.05 |
+| Amsterdam CreaDir | Creative Director | Legal Friction (v4) | Amsterdam | 300 | 11.7% | $1.22 | $2.26 |
+| LA CreaDir AI Video | Creative Director | Legal Friction (v4) | Los Angeles | 650 | 9.4% | $1.52 | $4.42 |
+| Berlin CreaDir AI Video | Creative Director | Legal Friction (v4) | Berlin | 364 | 9.3% | $1.53 | $4.73 |
+| **Dubai CreaDir AI Video** | **Creative Director** | **Legal Friction (v4)** | **Dubai** | **388** | **16.2%** | **$0.88** | **$1.39** |
+
+$/warm reply = cost per buying-intent reply (Legal Friction campaigns only — warm signal classification from Supabase CSV).
+$/response = cost per any reply (Dripify dashboard numbers — all campaigns).
+
+### What drove each improvement
+
+**Phase 1 → Phase 2: Message change alone cut cost nearly in half on the same ICP.**
+London Mgr+ with v3 messages: $3.80/response. Same titles, same geo, switched to Legal Friction (v4): $2.03/response. The message accounted for a ~47% cost reduction before touching the ICP at all.
+
+**Phase 2 → Phase 3: Adding the right ICP (CreaDir) cut cost another 2–4×.**
+Switching from Mgr+/VP+ to Creative Director targeting, while keeping Legal Friction, dropped cost from $2.03 to $0.88–$1.52/response depending on geo. The ICP is where the pain is actually felt — Creative Directors own the AI video workflow and face client legal friction directly.
+
+**Geo is the multiplier, not the foundation.**
+Same ICP + same message in different geos: England $1.36, Amsterdam $1.22, LA $1.52, Berlin $1.53, Dubai $0.88. Dubai's acceptance rate (54% vs 22–30% elsewhere) is the differentiator — Dubai connects more freely, which inflates the response pool. Geo matters, but only after ICP and message are right.
+
+**The 16× improvement (Sydney → Dubai):**
+- Sydney: $14.19/response — wrong geo, wrong ICP, wrong message
+- Dubai CreaDir Legal Friction: $0.88/response — right everything
+- Warm reply basis: $1.39/warm (Dubai) vs no warm leads at all from Sydney
+
+### Key number for content / investor narrative
+
+> Starting at **$14/response** with a v3 pitch targeting the wrong titles in a dead geo. Now at **$0.88/response** and **$1.39/warm reply** — a 16× improvement in 90 days through iterative ICP and message testing.
+
+---
+
+## 10. Geo Cost Analysis — May 20, 2026
+
+**Source:** Dripify campaign dashboard (leads sent) + Supabase CSV export (warm reply + call request classification from conversation_raw). Legal Friction campaign only. UK/England = CreaDir AI Video targeting only (excludes older London Mgr+/VP+ campaigns).
+
+**Cost basis:** $100/month = 700 LinkedIn outreaches = **$0.143 per lead sent**
+
+### Cost per Warm Reply and Call Request
+
+| Geo | Leads sent | Total cost | Warm replies | $/warm reply | Verified call requests | $/call request |
+|-----|-----------|-----------|-------------|-------------|----------------------|---------------|
+| **Dubai** | 388 | $55 | 40 | **$1.39** | 2 | **$27.71** |
+| **UK / England** | 978 | $140 | 68 | **$2.05** | 3 | **$46.57** |
+| **Amsterdam** | 300 | $43 | 19 | **$2.26** | 0 | — |
+| Los Angeles | 650 | $93 | 21 | $4.42 | 0 | — |
+| Berlin | 364 | $52 | 11 | $4.73 | 0 | — |
+
+**Warm reply** = Supabase CSV conversation classified as buying-intent signal (algorithm-scored; reliable).
+**Call request** = manually verified by reading full conversation_raw. Algorithm produced significant false positives (see methodology note below).
+
+### Verified Call Requests by Geo
+
+**Dubai (2 verified):**
+- Ramez Tabshi — "I would love to see the platform in action and run a test review. Let me know when you have time for a quick walkthrough." (B100 in CRM — Calendly sent)
+- Ankita Biswas (HTCreaTec, Art Director) — "I'd love to know more about it and also talk about it over a chat! Ping me when you're available to discuss!" (B096 in CRM)
+- Note: Abbas Saleem was tagged by algorithm but he invited Lilly to HIS consultancy calendly — false positive
+
+**UK / England (3 verified):**
+- Mike Harris (Seenit, Product Manager) — "Yes I will be open to finding out more and a short call." → "Thanks, - booked!" (B045 in CRM — call confirmed)
+- Oliyah Joseph (Visual Vibe, AI Creative Director) — "Happy to speak with JD. Let me know a couple of time options and I'll confirm." (B089 in CRM — awaiting slot)
+- Luke Brady (Sublime Animations, Founder) — Direct phone number given, confirmed Monday call multiple times, ongoing scheduling (B043 in CRM)
+- Note: Gabriel Preston was tagged by algorithm via "nice to connect with you" — false positive
+
+**Amsterdam (0 verified):**
+- Hugo Faustino explicitly declined: "no need for a meeting" — algorithm fired on the word "meeting" in a rejection
+- Lina De Groot, Kees-Jan Husselman — warm engagement, no call request
+- All 10 algorithm-tagged "call requests" were false positives
+
+**Los Angeles (0 verified, 1 borderline):**
+- Dunya Djordjevic (The Owl Syndicate, Partner) — "Happy to chat further if you have any questions" — passive open door, not an active call request
+
+**Berlin (0 verified):**
+- Both algorithm-tagged leads answered the question substantively; no call intent. Gulzar Junaid (Kling AI, Creative Partner) actually pushed back on the need for documentation.
+
+### Key Findings
+
+**Dubai is the most efficient geo on every metric.** Cheapest warm reply ($1.39), cheapest call request ($27.71), highest response rate (16.2%), highest acceptance rate (53.9%). Only 388 leads ever sent — massive headroom to scale.
+
+**UK/England generates the most warm replies in absolute volume** (68) because 978 leads sent vs Dubai's 388. Cost per warm reply is competitive ($2.05). Call conversion is weaker proportionally — the pipeline is warm but needs more active follow-up to convert to calls.
+
+**Amsterdam: warm replies are real, call conversion is zero.** 19 warm replies from 300 leads ($2.26 each) is solid, but none converted to a call request in this dataset. Follow-up timing or CTA clarity may be the issue — not targeting.
+
+**Berlin: underpenetrated, warm signals present, call conversion unclear.** 11 warm replies from 364 leads at $4.73 each. Only 1 campaign run. Call requests may materialise with follow-up; too early to judge.
+
+**LA: off-geo for Year 1.** $4.42/warm reply and no call conversions. Single campaign. Not worth new budget in Year 1.
+
+### Algorithm False Positive Note
+
+Call request detection from keyword matching produced ~80% false positives. Common failure modes:
+1. "Nice to meet you" / "e-meet you" triggering the "meet" keyword
+2. Explicit rejections ("no need for a meeting") firing as positives
+3. "Connect with you" as a LinkedIn greeting triggering "connect with"
+4. Duplicate CSV rows counting the same lead twice
+
+**Recommendation:** Use warm reply count as the primary efficiency metric for geo comparison. Manually review call requests from the CRM — do not rely on automated call classification from CSV.
 
 ---
 

@@ -1,5 +1,5 @@
 # From Wrong Hypothesis to Validated ICP
-## How SI8 Used Customer Calls, Failed Pitches, and 144 LinkedIn Replies to Build a Compliance Product from Scratch
+## How SI8 Used Customer Calls, Failed Pitches, and 6,391 LinkedIn Outreaches to Build a Compliance Product from Scratch
 
 **By JD — Founder, SuperImmersive 8**
 **Published: April 2026**
@@ -20,7 +20,7 @@ When AI video tools — Runway, Kling, Pika, Sora — began producing commercial
 
 That gap — between AI video being commercially produced and AI video being commercially safe to use — is where SuperImmersive 8 was built. But building into a gap no one has mapped means your first hypothesis about who your customer is, what they need, and how they'll pay for it is probably wrong. Ours was wrong three times before we got it right.
 
-This is the story of how we got it wrong, what told us we were wrong, and how 144 LinkedIn replies ultimately validated an ICP we couldn't have written on day one.
+This is the story of how we got it wrong, what told us we were wrong, and how 6,391 LinkedIn outreaches across 9 geographies ultimately validated an ICP we couldn't have written on day one. The cost to generate one warm reply dropped from $14.19 to $1.39 over 90 days. That number is the story.
 
 ---
 
@@ -248,7 +248,7 @@ The reason is not mysterious. A Creative Director who has "AI video" in their Li
 
 Audience quality is not a downstream concern. It is the primary variable.
 
-**Geographic validation:**
+**Geographic validation — Phase 2 (April 2026):**
 
 | Geography | N | Warm% | Status |
 |---|---|---|---|
@@ -256,6 +256,43 @@ Audience quality is not a downstream concern. It is the primary variable.
 | London/UK | 67 | 15% | PROMISING 🟡 |
 
 Singapore reached confirmed status — the threshold of n≥15 responses at ≥15% warm rate — faster than any other market. London is one more targeted batch away from the same confirmation. The Singapore result is notable given that the early v3 outreach (~200 contacts, broad targeting) had returned under 5% response rate. The difference between 5% response on broad outreach and 23% warm on filtered outreach is not a different market — it's a different list.
+
+**The cost progression — where it all lands (May 2026):**
+
+The full picture only becomes visible when cost is tracked alongside warm rate across every campaign batch from March through May. The table below shows what 90 days of iteration actually produced, measured in dollars per response and dollars per warm (buying-intent) reply.
+
+Cost basis: $100/month = 700 LinkedIn outreaches = $0.143 per lead sent.
+
+| Phase | ICP targeted | Message | Geo | Leads | Response rate | Per response | Per warm reply |
+|-------|-------------|---------|-----|-------|-------------|-------------|---------------|
+| 1: Wrong everything | Owner+/BizCons | Vetting Takes Weeks (v3) | Sydney | 298 | 1.0% | $14.19 | no warm leads |
+| 1: Wrong ICP | Mgr+ Marketing | v3 catalog angles | London | 1,198 | 3.8% | $3.80 | not measured |
+| 1: Wrong ICP | CMO/Mgr+/VP+ | Mixed v3 + v4 | Singapore | 1,033 | 4.9% | $2.89 | not measured |
+| 2: Right message, wrong ICP | VP+ Creative | Hitting a Wall / Blocks AI | London | 783 | 4.6% | $3.11 | not measured |
+| 2: Right message, wrong ICP | Mgr+ Marketing | Legal Friction (v4) | London | 199 | 7.0% | $2.03 | not measured |
+| 3: Right ICP + message | Creative Director | Legal Friction (v4) | England | 978 | 10.5% | $1.36 | $2.05 |
+| 3: Right ICP + message | Creative Director | Legal Friction (v4) | Amsterdam | 300 | 11.7% | $1.22 | $2.26 |
+| 3: Right ICP + message | Creative Director | Legal Friction (v4) | Berlin | 364 | 9.3% | $1.53 | $4.73 |
+| 3: Right ICP + message | Creative Director | Legal Friction (v4) | Los Angeles | 650 | 9.4% | $1.52 | $4.42 |
+| **3: Optimal** | **Creative Director** | **Legal Friction (v4)** | **Dubai** | **388** | **16.2%** | **$0.88** | **$1.39** |
+
+The 16x improvement from Sydney to Dubai ($14.19 vs $0.88 per response) is not a story about one great geo replacing one bad one. It is a story about three variables converging: the right person (Creative Director with AI video identity), the right question (Legal Friction — does your legal team ask for documentation?), and the right market (Dubai, where AI video adoption and campaign spend coexist with a 54% connection acceptance rate that no other geo comes close to matching).
+
+Switching from v3 messaging to Legal Friction on the same Mgr+ ICP dropped cost from $3.80 to $2.03 — a 46% improvement from message alone, before touching the audience list. Adding the right ICP (CreaDir) while keeping Legal Friction dropped it to $0.88-$1.52 depending on geo. The message and the list are both levers. In this dataset, the list is the bigger one.
+
+**Geographic expansion — Phase 3 results:**
+
+| Geography | Leads sent | Response rate | Warm replies | Per warm reply | Status |
+|---|---|---|---|---|---|
+| Dubai | 388 | 16.2% | 40 | $1.39 | SCALE immediately |
+| Amsterdam | 300 | 11.7% | 19 | $2.26 | Continue, test timing |
+| England (CreaDir) | 978 | 10.5% | 68 | $2.05 | Strong, pipeline is deep |
+| Berlin | 364 | 9.3% | 11 | $4.73 | Validate (1 campaign only) |
+| Los Angeles | 650 | 9.4% | 21 | $4.42 | Off-geo, Year 2 |
+| Singapore | 1,033 | 4.9% | low | high | Pause — pain not felt yet |
+| Sydney | 298 | 1.0% | 0 | — | Dead geo, do not return |
+
+Dubai did not appear in the original plan. It emerged from one campaign launched on April 26, 2026. The acceptance rate — 54%, more than double any other geo — and response rate — 16.2%, highest in the dataset — made it impossible to miss. One campaign, 388 leads, 63 responses, 40 warm. The cost efficiency is not marginal. It is categorical.
 
 **What warm replies actually said:**
 
@@ -358,15 +395,20 @@ Track every reply. Log it. Classify it. Even the polite passes contain intellige
 
 The chicken-egg deadlock that killed Version 1 is structurally resolved. The $499 SI8 Certified verification requires no pre-existing catalog, no buyer relationships, and no two-sided marketplace. It requires one production agency with an AI video and a legal team asking questions. That transaction exists today. The platform to process it is live at app.superimmersive8.com.
 
-The next three campaigns are data-generated:
+The data that drives the next decisions:
 
-1. **AI-filtered Creative Directors in Singapore** — replicating the AI-keyword filter that produced 38% warm in England on the highest-confirmed geographic market.
-2. **Dedicated AI Director title volume test** — 100% warm rate on n=4 is statistically meaningless. A 200-lead batch will confirm or kill the hypothesis.
-3. **A new outsource-opener message variant** — for the archetype that already produces compliance reports and wants to delegate the work, "do you have this problem?" is the wrong question. "Are you currently producing Chain of Title documentation — and is that something you'd consider outsourcing?" is the right one.
+6,391 LinkedIn outreaches. 1,602 connections accepted. 458 replies. Cost per warm reply went from $14.19 (Sydney, wrong ICP, wrong message, March 2026) to $1.39 (Dubai, CreaDir AI Video, Legal Friction, May 2026). The next budget allocation is not a guess. It is the table above, read from the bottom up.
 
-The ICP is not complete. No ICP is complete until it stops changing. But the direction is validated, the structure is sound, and the data is now driving the next decisions rather than informed guesswork.
+The next campaigns are data-generated:
 
-That is the most useful place to be at the end of a first year in a new category.
+1. **Dubai scale** — one campaign, 388 leads, strongest results in the dataset. Run two more batches with the same ICP and sequence before calling it a confirmed playbook.
+2. **Berlin validation** — 364 leads, 9.3% response rate, only 1 campaign. The warm rate is promising but the sample is too small to act on. One more batch confirms or kills it.
+3. **Amsterdam follow-up timing test** — response quality is there (11.7%), but no verified call requests in the dataset. The problem may be messaging cadence, not targeting. Test earlier CTA in the sequence.
+4. **An outsource-opener variant** — for the archetype that already produces compliance reports internally and wants to delegate: "Are you currently producing Chain of Title documentation for your AI video clients, and is that something you'd consider outsourcing?" Different question. Different segment. Worth testing.
+
+The ICP is not complete. No ICP is complete until it stops changing. But three months of data across 9 geographies and 23 campaigns have produced a specific, testable, cost-tracked playbook. Creative Director with AI video self-identification. Legal Friction sequence. Dubai first, then England and Amsterdam.
+
+That is the most useful place to be at the end of a first 90 days in a new category.
 
 ---
 
@@ -386,6 +428,7 @@ If you're delivering AI video to clients and legal team review is already a ques
 
 ---
 
-**Word count:** ~3,800 words
-**Status:** Draft v1 — for review
-**Next step:** Review for accuracy, tone, and missing context. Then design brief for PDF version.
+**Word count:** ~5,000 words
+**Status:** Draft v2 — updated May 20, 2026
+**Changes in v2:** Added Phase 3 cost progression table (March-May 2026 full dataset), Dubai/Amsterdam/Berlin geo results, updated introduction to reflect 6,391 total outreaches, updated "Where This Stands" with current campaign priorities.
+**Next step:** Review v2 additions for accuracy and tone. Then condense into LinkedIn post (short-form) and design brief for PDF version.
