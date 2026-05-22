@@ -19,6 +19,7 @@ import csv
 import sys
 import os
 import glob
+import json
 import argparse
 from collections import defaultdict
 from datetime import date
@@ -32,6 +33,7 @@ COST_PER_LEAD = 100 / 700          # $100/month Dripify = 700 outreaches
 OUTPUT_PATH   = os.path.join(REPO_ROOT, '03_Sales', 'CAMPAIGN-PERFORMANCE-LOG.md')
 DEFAULT_DRIP  = os.path.join(REPO_ROOT, 'data', 'dripify-campaigns.csv')
 DEFAULT_GEO   = os.path.join(REPO_ROOT, 'data', 'geo-cost-inputs.csv')
+DEFAULT_SEQ   = os.path.join(REPO_ROOT, 'data', 'sequence-content.json')
 
 # Maps the geo label the user writes in dripify-campaigns.csv → the normalized geo
 # used when grouping Supabase lead_location values. Must stay in sync with norm_location().
@@ -52,6 +54,11 @@ DRIP_TO_NORM = {
     'DACH':        'Germany',
     'Sydney':      'Sydney/AU',
     'Australia':   'Sydney/AU',
+    'Paris':       'France/Paris',
+    'France':      'France/Paris',
+    'Stockholm':   'Sweden/Stockholm',
+    'Sweden':      'Sweden/Stockholm',
+    'STHM':        'Sweden/Stockholm',
     'Global':      'Other',
 }
 
@@ -71,6 +78,8 @@ def norm_location(location: str) -> str:
         return 'Germany'
     if any(x in loc for x in ['paris', 'france']):
         return 'France/Paris'
+    if any(x in loc for x in ['stockholm', 'sweden', 'gothenburg']):
+        return 'Sweden/Stockholm'
     if any(x in loc for x in ['sydney', 'australia', 'melbourne']):
         return 'Sydney/AU'
     if any(x in loc for x in ['los angeles', 'new york', 'united states', 'usa', 'chicago']):
@@ -146,6 +155,14 @@ def load_dripify(path: str) -> list:
     return campaigns
 
 
+def load_sequence_content(path: str) -> dict:
+    """Load sequence message content from JSON. Returns {} if file not found."""
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding='utf-8') as f:
+        return json.load(f)
+
+
 def load_geo_cost(path: str) -> dict:
     """Load manually verified call counts per normalized geo from geo-cost-inputs.csv."""
     if not os.path.exists(path):
@@ -161,7 +178,7 @@ def load_geo_cost(path: str) -> dict:
 # Report generation
 # ---------------------------------------------------------------------------
 
-def generate(campaigns, supabase_rows, geo_calls, supabase_path, dripify_path) -> str:
+def generate(campaigns, supabase_rows, geo_calls, seq_content, supabase_path, dripify_path) -> str:
     today = date.today().isoformat()
     L = []
     a = L.append
@@ -241,6 +258,37 @@ def generate(campaigns, supabase_rows, geo_calls, supabase_path, dripify_path) -
     a(f"|-----|-----------|-------|----------|----------|-----------|------------|-------|")
     for geo, g in geo_sorted:
         a(f"| {geo} | {g['n']} | {g['leads']:,} | {g['acc']:,} | {pct(g['acc'], g['leads'])} | {g['resp']:,} | {pct(g['resp'], g['leads'])} | |")
+    a(f"")
+    a(f"---")
+    a(f"")
+
+    # -----------------------------------------------------------------------
+    # By sequence
+    # -----------------------------------------------------------------------
+    seq_totals = defaultdict(lambda: {'n': 0, 'leads': 0, 'acc': 0, 'resp': 0})
+    for c in campaigns:
+        g = seq_totals[c['sequence']]
+        g['n'] += 1; g['leads'] += c['leads']
+        g['acc'] += c['accepted']; g['resp'] += c['responded']
+    seq_sorted = sorted(
+        seq_totals.items(),
+        key=lambda x: x[1]['resp'] / max(x[1]['leads'], 1),
+        reverse=True
+    )
+
+    a(f"## By Sequence")
+    a(f"")
+    a(f"| Sequence | Campaigns | Leads | Accept % | Response % | Msg 1 hook |")
+    a(f"|----------|-----------|-------|----------|------------|------------|")
+    for seq_name, g in seq_sorted:
+        hook = ''
+        if seq_content and seq_name in seq_content:
+            raw = seq_content[seq_name].get('msg1', '')
+            # Skip greeting line ("Hi %%first_name%%,..."), take first substantive line
+            lines = [l.strip() for l in raw.split('\n') if l.strip() and '%%first_name%%' not in l.lower()]
+            if lines:
+                hook = (lines[0][:82] + '…') if len(lines[0]) > 82 else lines[0]
+        a(f"| {seq_name} | {g['n']} | {g['leads']:,} | {pct(g['acc'], g['leads'])} | {pct(g['resp'], g['leads'])} | {hook} |")
     a(f"")
     a(f"---")
     a(f"")
@@ -390,9 +438,12 @@ def generate(campaigns, supabase_rows, geo_calls, supabase_path, dripify_path) -
             continue
         a(f"**{geo_norm}** ({len(here)} warm leads):")
         for r in here:
-            preview = r['_reply'].replace('\n', ' ').strip()[:150]
+            full = r.get('conversation_raw', r['_reply']).strip()
             a(f"- {r.get('lead_name', '?')} · {r.get('lead_title', '?')} · {r.get('lead_company', '?')}")
-            a(f"  > \"{preview}\"")
+            a(f"")
+            for line in full.splitlines():
+                a(f"  {line}")
+            a(f"")
         a(f"")
 
     return '\n'.join(L)
@@ -418,15 +469,17 @@ def main():
     print(f"Loading Supabase: {supabase_path}")
     print(f"Loading geo cost: {DEFAULT_GEO}")
 
-    campaigns    = load_dripify(dripify_path)
+    campaigns     = load_dripify(dripify_path)
     supabase_rows = load_supabase(supabase_path)
-    geo_calls    = load_geo_cost(DEFAULT_GEO)
+    geo_calls     = load_geo_cost(DEFAULT_GEO)
+    seq_content   = load_sequence_content(DEFAULT_SEQ)
 
     cost_n = sum(1 for c in campaigns if c['in_cost'])
     print(f"Campaigns: {len(campaigns)} total, {cost_n} in cost analysis")
     print(f"Supabase:  {len(supabase_rows)} responses (is_latest_version=true)")
+    print(f"Sequences: {len(seq_content)} loaded from sequence-content.json")
 
-    report = generate(campaigns, supabase_rows, geo_calls, supabase_path, dripify_path)
+    report = generate(campaigns, supabase_rows, geo_calls, seq_content, supabase_path, dripify_path)
 
     if args.dry_run:
         print('\n' + report)

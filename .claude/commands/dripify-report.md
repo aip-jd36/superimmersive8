@@ -1,6 +1,6 @@
 Run the SI8 monthly Dripify LinkedIn campaign performance report wizard.
 
-Walk the user through all 5 steps below using your tools. Use AskUserQuestion for structured choices. For numeric inputs, ask in plain text and process the reply.
+Walk the user through all 6 steps below using your tools. Use AskUserQuestion for structured choices. For numeric inputs, ask in plain text and process the reply.
 
 ---
 
@@ -48,7 +48,28 @@ Append to `data/dripify-campaigns.csv`.
 
 ---
 
-## Step 4: Run Report
+## Step 4: Sequence Content
+
+Read `data/sequence-content.json`. Show a summary table:
+- Sequence name
+- Msg 1 hook (first non-greeting line, truncated to ~80 chars)
+- Number of campaigns using this sequence (from `data/dripify-campaigns.csv`)
+
+Ask (AskUserQuestion):
+- "Any new or updated message sequences?" → Yes / No
+
+If No: skip.
+
+If Yes: for each sequence being added or updated:
+1. Ask for the sequence name (must match `sequence` column in `dripify-campaigns.csv` exactly)
+2. Ask for the Dripify display name (e.g. "SI8_Legal Friction (4 Msg)")
+3. Ask the user to paste each of the 4 messages in turn (blank line to finish each one)
+
+Write updated entries to `data/sequence-content.json`.
+
+---
+
+## Step 5: Run Report
 
 Run: `python3 tools/campaign-report/report.py`
 
@@ -60,7 +81,7 @@ Read `03_Sales/CAMPAIGN-PERFORMANCE-LOG.md` and show the user:
 
 ---
 
-## Step 5: Call Verification
+## Step 6: Call Verification
 
 Read `03_Sales/CAMPAIGN-PERFORMANCE-LOG.md`. Find the `### Call Verification Checklist` section.
 
@@ -87,7 +108,7 @@ Ask (AskUserQuestion):
 - "Commit this report?" → Yes / No
 
 If Yes: 
-- `git add data/dripify-campaigns.csv data/geo-cost-inputs.csv 03_Sales/CAMPAIGN-PERFORMANCE-LOG.md`
+- `git add data/dripify-campaigns.csv data/geo-cost-inputs.csv data/sequence-content.json 03_Sales/CAMPAIGN-PERFORMANCE-LOG.md`
 - Read the campaign count and total leads from the CSV for the commit message
 - Commit with message: "Sales: [Month Year] campaign report — [N] campaigns, [N,NNN] leads"
 

@@ -102,11 +102,15 @@ python tools/campaign-report/report.py --supabase data/supabase-exports/supabase
 
 ### Step 4: Verify call requests (manual — 15 min)
 
-At the bottom of the generated report is a **Call Verification Checklist** — a list of all warm leads from the Supabase CSV, grouped by geo, with their reply excerpts.
+At the bottom of the generated report is a **Call Verification Checklist** — a list of all warm leads from the Supabase CSV, grouped by geo. Each entry shows the **full `conversation_raw`** (the complete multi-message thread between SI8 and the lead).
+
+**Critical: You must read the entire thread, not just the first reply.** Call requests frequently appear in message 3 or 4, after the lead has asked follow-up questions or after SI8 has replied with more context. A lead who gave a minimal reply to message 1 may have explicitly asked for a call in a later exchange. Reviewing only the initial reply (or a short preview) will systematically undercount verified calls.
+
+The checklist format shows the full thread verbatim per lead — scroll through the entire exchange before marking any lead as "not a call request."
 
 For each warm lead listed:
-1. Read the full `conversation_raw` in the Supabase CSV (or in Dripify conversation view)
-2. Mark as a verified call request ONLY if they **explicitly** asked for a meeting/demo/call
+1. Read the **entire conversation thread** as displayed in the checklist
+2. Mark as a verified call request ONLY if they **explicitly** asked for a meeting/demo/call in any message
 3. Reject these common false positives:
    - "Nice to e-meet you" / "lovely to connect" (LinkedIn greeting, not a call request)
    - Explicit rejection: "no need for a meeting" (algorithm fires on "meeting")

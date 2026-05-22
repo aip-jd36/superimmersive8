@@ -6,12 +6,13 @@ Step-by-step interactive guide for the monthly Dripify LinkedIn campaign report.
 Usage:  python3 tools/campaign-report/wizard.py
 """
 
-import csv, os, sys, subprocess, glob, re
+import csv, json, os, sys, subprocess, glob, re
 from datetime import date
 
 REPO      = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 DRIP_CSV  = os.path.join(REPO, 'data', 'dripify-campaigns.csv')
 GEO_CSV   = os.path.join(REPO, 'data', 'geo-cost-inputs.csv')
+SEQ_JSON  = os.path.join(REPO, 'data', 'sequence-content.json')
 SUP_DIR   = os.path.join(REPO, 'data', 'supabase-exports')
 REPORT_MD = os.path.join(REPO, '03_Sales', 'CAMPAIGN-PERFORMANCE-LOG.md')
 SCRIPT    = os.path.join(REPO, 'tools', 'campaign-report', 'report.py')
@@ -359,7 +360,7 @@ def step2_dripify():
 # ── Step 3: Additional new campaigns (not in paste) ──────────────────────────
 
 def step3_new_campaigns():
-    header(3, 4, "Any Other New Campaigns?")
+    header(3, 5, "Any Other New Campaigns?")
     info("If you have campaigns that weren't included in the paste above,")
     info("add them here. Otherwise press Enter to skip.")
     blank()
@@ -415,10 +416,72 @@ def step3_new_campaigns():
     ok(f"Saved dripify-campaigns.csv ({len(campaigns)} campaigns total)")
 
 
-# ── Step 4: Run report ────────────────────────────────────────────────────────
+# ── Step 4: Sequence content ──────────────────────────────────────────────────
+
+def load_seq_content():
+    if os.path.exists(SEQ_JSON):
+        with open(SEQ_JSON, encoding='utf-8') as f:
+            return json.load(f)
+    return {}
+
+def save_seq_content(data):
+    with open(SEQ_JSON, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+def step4_sequence_content():
+    header(4, 5, "Sequence Content")
+    blank()
+
+    seq = load_seq_content()
+    if seq:
+        info(f"Current sequences in sequence-content.json:")
+        for name in sorted(seq.keys()):
+            raw = seq[name].get('msg1', '')
+            lines = [l.strip() for l in raw.split('\n') if l.strip() and '%%first_name%%' not in l.lower()]
+            hook = (lines[0][:72] + '…') if lines and len(lines[0]) > 72 else (lines[0] if lines else '?')
+            info(f"  {name}  →  \"{hook}\"")
+    else:
+        warn("No sequence-content.json found.")
+    blank()
+
+    if not yn("Add or update any message sequences?"):
+        info("Skipping.")
+        return
+
+    while True:
+        blank()
+        print(f"  {B}Sequence name{R} — must match 'sequence' column in dripify-campaigns.csv exactly.")
+        print(f"  {DIM}Existing: {', '.join(sorted(seq.keys()))}{R}")
+        name = ask("sequence name")
+
+        if name in seq:
+            info(f"Updating existing sequence: {name}")
+        else:
+            info(f"Adding new sequence: {name}")
+
+        dripify_name = ask("Dripify display name (e.g. 'SI8_Legal Friction (4 Msg)')")
+
+        blank()
+        for i, label in enumerate(['Message 1', 'Message 2', 'Message 3', 'Message 4'], 1):
+            info(f"Paste {label} text — blank line to finish:")
+            raw_lines = read_paste()
+            seq.setdefault(name, {})
+            seq[name][f'msg{i}'] = '\n'.join(raw_lines).strip()
+
+        seq[name]['dripify_name'] = dripify_name
+        ok(f"Saved: {name}")
+
+        if not yn("Add or update another sequence?"):
+            break
+
+    save_seq_content(seq)
+    ok(f"sequence-content.json updated ({len(seq)} sequences)")
+
+
+# ── Step 5: Run report ────────────────────────────────────────────────────────
 
 def step4_run_report(supabase_path):
-    header(4, 4, "Generating Report")
+    header(5, 5, "Generating Report")
     info(f"Running: python3 tools/campaign-report/report.py")
     blank()
 
@@ -465,7 +528,7 @@ def step4_run_report(supabase_path):
 # ── Step 5: Call verification ─────────────────────────────────────────────────
 
 def step5_verify_calls(supabase_path):
-    header(5, 4, "Call Request Verification")
+    header(5, 5, "Call Request Verification")
     blank()
     info("For each warm lead below, read their reply and decide:")
     info("  CALL = they explicitly asked for a meeting / demo / walkthrough in their own words")
@@ -582,6 +645,7 @@ def step_commit():
         ['git', 'add',
          'data/dripify-campaigns.csv',
          'data/geo-cost-inputs.csv',
+         'data/sequence-content.json',
          '03_Sales/CAMPAIGN-PERFORMANCE-LOG.md'],
         cwd=REPO, capture_output=True
     )
@@ -603,6 +667,7 @@ def main():
     supabase_path = step1_supabase()
     step2_dripify()
     step3_new_campaigns()
+    step4_sequence_content()
 
     if not step4_run_report(supabase_path):
         sys.exit(1)

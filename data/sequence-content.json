@@ -1,0 +1,51 @@
+{
+  "Vetting Takes Weeks": {
+    "dripify_name": "SI8_Vetting Takes Weeks (4 Msg)",
+    "msg1": "Hi %%first_name%%,\n\nYour clients want AI video, but vetting rights takes weeks? We're a pre-verified AI film catalog so agencies can deliver fast without legal bottlenecks.\n\nLet's chat!",
+    "msg2": "Hi %%first_name%%, thanks for connecting!\n\nWhen clients ask for AI video, agencies spend weeks researching creators, verifying rights, and documenting provenance. That's why we built SI8 – pre-vetted catalog with Chain of Title already in place.\n\nYou skip the legal diligence. We've already done it.\n\nWould you be open to a quick 15-min call to see how you can deliver AI content to your clients?\n\nVanessa\nwww.superimmersive8.com",
+    "msg3": "Just following up. The advantage is speed—clients get AI video without the 3-week legal review. Our catalog is already documented: tool disclosure, authorship verification, commercial authorization.\n\nIf you're curious, I can send an example Rights Package to show what's pre-verified. No obligation.\n\nThanks!\nVanessa",
+    "msg4": "Seems like I caught you at a busy time, %%first_name%%. If you ever need fast turnaround on AI video projects, I hope you'll keep SuperImmersive 8 in mind.\n\nHave a great day,\n\nThanks!\n\nVanessa\nwww.superimmersive8.com"
+  },
+  "Documented Provenance": {
+    "dripify_name": "SI8_Documented Provence (4 Msg)",
+    "msg1": "Hi %%first_name%%,\n\nWorried about recommending AI video to clients without verified rights? We provide documented provenance so agencies don't take on legal risk.\n\nLet's chat!",
+    "msg2": "Hi %%first_name%%, thanks for connecting!\n\nWhen agencies recommend AI content, they inherit liability—if training data or IP issues surface, the client looks to you. That's why we built SI8 – rights-verified catalog with full documentation so the risk doesn't fall on the agency.\n\nThink: Getty protects you from image liability. We do the same for AI video.\n\nWould you be open to a quick 15-min call to see how we de-risk AI content for agencies?\n\nVanessa\nwww.superimmersive8.com",
+    "msg3": "Just following up. The Chain of Title documentation we provide covers: tool disclosure, human authorship, IP verification, commercial authorization. If a client's legal team asks questions, you have answers.\n\nIf you're curious, I can send an example so you see what's documented. No strings attached.\n\nThanks!\nVanessa",
+    "msg4": "Seems like I caught you at a busy time, %%first_name%%. If you ever need to pitch AI video to risk-conscious clients, I hope you'll keep SI8 in mind.\n\nHave a great day,\n\nThanks!\n\nVanessa\nwww.superimmersive8.com"
+  },
+  "Trusted AI Supplier": {
+    "dripify_name": "SI8_Trusted AI Supplier (4 Msg)",
+    "msg1": "Hi %%first_name%%,\n\nWant to add AI video as a service offering but need a trusted supplier? We handle the catalog, rights verification, and documentation—you handle the client.\n\nLet's chat!",
+    "msg2": "Hi %%first_name%%, thanks for connecting!\n\nAgencies see AI video demand but don't want to become AI specialists. That's why we built SI8 – you pitch AI content to clients, we supply the vetted catalog and documentation. You add revenue without adding headcount.\n\nThink: white-label supply partner for AI video.\n\nWould you be open to a quick 15-min call to see how we de-risk AI content for agencies?\n\nVanessa\nwww.superimmersive8.com",
+    "msg3": "Just following up. The model is simple: you identify client opportunities, we provide pre-verified content. You stay focused on creative strategy, we handle the legal infrastructure.\n\nIf you're curious, I can walk you through a sample project workflow. No commitment.\n\nThanks!\nVanessa",
+    "msg4": "Seems like I caught you at a busy time, %%first_name%%. If you ever want to explore AI video as a new revenue stream, I hope you'll keep SuperImmersive 8 in mind.\n\nHave a great day,\n\nThanks!\n\nVanessa\nwww.superimmersive8.com"
+  },
+  "Legal Friction": {
+    "dripify_name": "SI8_Legal Friction (4 Msg)",
+    "msg1": "Hi %%first_name%%,\n\nQuick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made? Seeing this come up more this year.",
+    "msg2": "Hi %%first_name%%, thanks for connecting!\n\nIn case it's relevant: we run a 90-minute rights review for AI video. Creator submits → we issue a Chain of Title document → brand legal gets what they need to approve the campaign.\n\n$499 per video. You can see a sample at www.superimmersive8.com — the \"How It Works\" page has the full breakdown.\n\nWould you be open to a quick 15-min call to learn more?\n\nVanessa\nwww.superimmersive8.com",
+    "msg3": "If you've got a campaign with AI-generated content that needs to pass legal review, that's exactly what we solve. Happy to send a sample Chain of Title document directly, or jump on a 15-minute call to walk through the process. Just say the word.\n\nThanks!\nVanessa",
+    "msg4": "No worries if the timing isn't right. When a client starts asking for documentation on AI film/video, we're at www.superimmersive8.com. Good luck with what you're working on.\n\nHave a great day,\n\nVanessa\nwww.superimmersive8.com"
+  },
+  "Early Days": {
+    "dripify_name": "SI8_Early Days (4 Msg)",
+    "msg1": "Hi %%first_name%%,\n\nWe run a rights verification service for AI-generated video (Sora, Runway, Kling). Curious: is AI video something your clients are starting to ask about, or still early days for your agency?",
+    "msg2": "Hi %%first_name%%, thanks for connecting!\n\nIn case it's relevant: we run a 90-minute rights review for AI video. Creator submits → we issue a Chain of Title document → brand legal gets what they need to approve the campaign.\n\n$499 per video. You can see a sample at www.superimmersive8.com — the \"How It Works\" page has the full breakdown.\n\nWould you be open to a quick 15-min call to learn more?\n\nVanessa\nwww.superimmersive8.com",
+    "msg3": "If you've got a campaign with AI-generated content that needs to pass legal review, that's exactly what we solve. Happy to send a sample Chain of Title document directly, or jump on a 15-minute call to walk through the process. Just say the word.\n\nThanks!\nVanessa",
+    "msg4": "No worries if the timing isn't right. When a client starts asking for documentation on AI film/video, we're at superimmersive8.com. Good luck with what you're working on.\n\nHave a great day,\n\nVanessa\nwww.superimmersive8.com"
+  },
+  "Hitting a Wall": {
+    "dripify_name": "SI8_Hitting a Wall (4 Msg)",
+    "msg1": "Hi %%first_name%%,\n\nMore and more production houses are hitting a wall when client legal teams reject AI video over missing documentation. If you're producing AI content for clients, curious if this has come up for you?\n\nLet's connect!",
+    "msg2": "Hi %%first_name%%, thanks for connecting!\n\nWhat we do: submit AI video → 90-minute human review → Chain of Title document delivered to your inbox so you can send to your client's legal team.\n\nBuilt for agencies who need AI content cleared before brand approval or E&O insurance. $499 per video submission.\n\nWould you be open to a quick 15-min call to learn more?\n\nVanessa\nwww.superimmersive8.com",
+    "msg3": "If it'd help to see what the documentation actually looks like, I'm happy to send a sample Chain of Title. No call needed, just a look at the output. Let me know.\n\nThanks!\nVanessa",
+    "msg4": "No worries if the timing isn't right. When a client starts asking for documentation on AI film/video, we're at superimmersive8.com. Good luck with what you're working on.\n\nHave a great day,\n\nVanessa\nwww.superimmersive8.com"
+  },
+  "Blocks AI Campaign": {
+    "dripify_name": "SI8_Blocks AI Campaign (4 Msg)",
+    "msg1": "Hi %%first_name%%,\n\nWhen a client's legal team blocks an AI video campaign — what's your current process?\n\nLet's connect!",
+    "msg2": "Hi %%first_name%%, thanks for connecting!\n\nIn case it's relevant: we run a 90-minute rights review for AI video. Creator submits → we issue a Chain of Title document → brand legal gets what they need to approve the campaign.\n\n$499 per video. You can see a sample at www.superimmersive8.com — the \"How It Works\" page has the full breakdown.\n\nWould you be open to a quick 15-min call to learn more?\n\nVanessa\nwww.superimmersive8.com",
+    "msg3": "If it'd help to see what the documentation actually looks like, I'm happy to send a sample Chain of Title. No call needed, just a look at the output. Let me know.\n\nThanks!\nVanessa",
+    "msg4": "No worries if the timing isn't right. When a client starts asking for documentation on AI film/video, we're at superimmersive8.com. Good luck with what you're working on.\n\nHave a great day,\n\nVanessa\nwww.superimmersive8.com"
+  }
+}
