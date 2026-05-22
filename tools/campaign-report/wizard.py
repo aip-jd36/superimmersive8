@@ -14,9 +14,12 @@ DRIP_CSV    = os.path.join(REPO, 'data', 'dripify-campaigns.csv')
 GEO_CSV     = os.path.join(REPO, 'data', 'geo-cost-inputs.csv')
 SEQ_JSON    = os.path.join(REPO, 'data', 'sequence-content.json')
 SUP_DIR     = os.path.join(REPO, 'data', 'supabase-exports')
-REPORT_MD   = os.path.join(REPO, '03_Sales', 'CAMPAIGN-PERFORMANCE-LOG.md')
-ARCHIVE_DIR = os.path.join(REPO, '03_Sales', 'campaign-reports')
-SCRIPT      = os.path.join(REPO, 'tools', 'campaign-report', 'report.py')
+REPORT_MD        = os.path.join(REPO, '03_Sales', 'CAMPAIGN-PERFORMANCE-LOG.md')
+DISC_REPORT_MD   = os.path.join(REPO, '03_Sales', 'DISCOVERY-PERFORMANCE-LOG.md')
+ARCHIVE_DIR      = os.path.join(REPO, '03_Sales', 'campaign-reports')
+DISC_ARCHIVE_DIR = os.path.join(REPO, '03_Sales', 'discovery-reports')
+SCRIPT           = os.path.join(REPO, 'tools', 'campaign-report', 'report.py')
+DISC_SCRIPT      = os.path.join(REPO, 'tools', 'campaign-report', 'discovery_report.py')
 
 # ANSI helpers (graceful fallback if terminal doesn't support them)
 try:
@@ -91,6 +94,20 @@ def run_report(supabase_path=None):
         cmd += ['--supabase', supabase_path]
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=REPO)
     return result.stdout, result.stderr, result.returncode
+
+
+def run_discovery_report(supabase_path=None):
+    cmd = [sys.executable, DISC_SCRIPT]
+    if supabase_path:
+        cmd += ['--supabase', supabase_path]
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=REPO)
+    return result.stdout, result.stderr, result.returncode
+
+
+def dated_discovery_path(supabase_path):
+    m = re.search(r'supabase-export-(\d{4}-\d{2}-\d{2})', supabase_path or '')
+    report_date = m.group(1) if m else date.today().isoformat()
+    return os.path.join(DISC_ARCHIVE_DIR, f'DISCOVERY-REPORT-{report_date}.md')
 
 
 # ── Step 1: Supabase CSV ──────────────────────────────────────────────────────
@@ -631,6 +648,64 @@ def step5_verify_calls(supabase_path):
         info("No call counts changed.")
 
 
+# ── Discovery Report ──────────────────────────────────────────────────────────
+
+def step_discovery_report(supabase_path):
+    blank()
+    print(f"  {B}{'─'*62}{R}")
+    blank()
+    print(f"  {B}Product Discovery Report{R}")
+    info("Scanning all replies (warm + pass + naf) for product discovery signals.")
+    info("These are NOT sales leads — workflow descriptions, pain confirmations,")
+    info("product questions worth a follow-up discovery conversation.")
+    blank()
+
+    stdout, stderr, code = run_discovery_report(supabase_path=supabase_path)
+
+    if code != 0:
+        warn("Discovery report error:")
+        print(stderr[:600])
+        return
+
+    for line in stdout.strip().split('\n'):
+        if line.strip():
+            info(line)
+
+    if not os.path.exists(DISC_REPORT_MD):
+        warn("Discovery report file not written.")
+        return
+
+    with open(DISC_REPORT_MD, encoding='utf-8') as f:
+        content = f.read()
+
+    # Show Grand Total table
+    m = re.search(r'(## Grand Total\n.*?)(?=\n## |\Z)', content, re.DOTALL)
+    if m:
+        blank()
+        print(f"  {B}Discovery Signal Summary:{R}")
+        for line in m.group(1).strip().split('\n')[:14]:
+            if line.strip():
+                print(f"  {line}")
+
+    # Show By Geo table
+    m2 = re.search(r'## By Geo\n\n(.*?)(?=\n## |\Z)', content, re.DOTALL)
+    if m2:
+        blank()
+        print(f"  {B}By Geo:{R}")
+        for line in m2.group(1).strip().split('\n'):
+            if line.strip():
+                print(f"  {line}")
+
+    blank()
+    dated = dated_discovery_path(supabase_path)
+    ok(f"Discovery report written:")
+    info(f"Archive: 03_Sales/discovery-reports/{os.path.basename(dated)}")
+    info(f"Latest:  03_Sales/DISCOVERY-PERFORMANCE-LOG.md")
+    blank()
+    info("Review the Discovery Signal Checklist in the report.")
+    info("Add selected leads to 03_Sales/DISCOVERY-PIPELINE.md → Stage: Signal.")
+
+
 # ── Commit ────────────────────────────────────────────────────────────────────
 
 def step_commit(supabase_path=None):
@@ -650,13 +725,16 @@ def step_commit(supabase_path=None):
     msg = (f"Sales: {month} campaign report — {n_camps} campaigns, {total_leads:,} leads\n\n"
            "Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>")
 
-    dated = dated_report_path(supabase_path)
+    dated      = dated_report_path(supabase_path)
+    dated_disc = dated_discovery_path(supabase_path)
     files_to_add = [
         'data/dripify-campaigns.csv',
         'data/geo-cost-inputs.csv',
         'data/sequence-content.json',
         '03_Sales/CAMPAIGN-PERFORMANCE-LOG.md',
+        '03_Sales/DISCOVERY-PERFORMANCE-LOG.md',
         os.path.relpath(dated, REPO),
+        os.path.relpath(dated_disc, REPO),
     ]
     subprocess.run(['git', 'add'] + files_to_add, cwd=REPO, capture_output=True)
     r = subprocess.run(['git', 'commit', '-m', msg], capture_output=True, text=True, cwd=REPO)
@@ -683,12 +761,16 @@ def main():
         sys.exit(1)
 
     step5_verify_calls(supabase_path)
+    step_discovery_report(supabase_path)
     step_commit(supabase_path)
 
-    dated = dated_report_path(supabase_path)
+    dated      = dated_report_path(supabase_path)
+    dated_disc = dated_discovery_path(supabase_path)
     print(f"\n{B}{G}  Done!{R}")
-    print(f"  Archive: 03_Sales/campaign-reports/{os.path.basename(dated)}")
-    print(f"  Latest:  03_Sales/CAMPAIGN-PERFORMANCE-LOG.md\n")
+    print(f"  Sales report:     03_Sales/campaign-reports/{os.path.basename(dated)}")
+    print(f"  Discovery report: 03_Sales/discovery-reports/{os.path.basename(dated_disc)}")
+    print(f"  Latest (both):    03_Sales/CAMPAIGN-PERFORMANCE-LOG.md")
+    print(f"                    03_Sales/DISCOVERY-PERFORMANCE-LOG.md\n")
 
 
 if __name__ == '__main__':

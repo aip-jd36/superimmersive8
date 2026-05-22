@@ -102,7 +102,26 @@ Show the final Cost Efficiency table with the $/call column filled in.
 
 ---
 
-## Step 6: Commit
+## Step 6.5: Product Discovery Report
+
+Run: `python3 tools/campaign-report/discovery_report.py --supabase data/supabase-exports/FILENAME.csv`
+
+(Use the same supabase path from Step 1.)
+
+Show the user:
+1. The Grand Total table (total signals, class breakdown)
+2. The By Geo table
+
+Tell the user: "Review the full Discovery Signal Checklist in `03_Sales/DISCOVERY-PERFORMANCE-LOG.md`.
+Add any leads worth a discovery conversation to `03_Sales/DISCOVERY-PIPELINE.md` → Stage: Signal."
+
+The discovery report is written to:
+- Archive: `03_Sales/discovery-reports/DISCOVERY-REPORT-YYYY-MM-DD.md`
+- Latest: `03_Sales/DISCOVERY-PERFORMANCE-LOG.md`
+
+---
+
+## Step 7: Commit
 
 Ask (AskUserQuestion):
 - "Commit this report?" → Yes / No
@@ -111,7 +130,7 @@ If Yes:
 - The report is written to two places:
   - Archive: `03_Sales/campaign-reports/CAMPAIGN-REPORT-YYYY-MM-DD.md` (dated, permanent)
   - Latest: `03_Sales/CAMPAIGN-PERFORMANCE-LOG.md` (overwritten each run)
-- `git add data/dripify-campaigns.csv data/geo-cost-inputs.csv data/sequence-content.json 03_Sales/CAMPAIGN-PERFORMANCE-LOG.md 03_Sales/campaign-reports/CAMPAIGN-REPORT-YYYY-MM-DD.md`
+- `git add data/dripify-campaigns.csv data/geo-cost-inputs.csv data/sequence-content.json 03_Sales/CAMPAIGN-PERFORMANCE-LOG.md 03_Sales/DISCOVERY-PERFORMANCE-LOG.md 03_Sales/campaign-reports/CAMPAIGN-REPORT-YYYY-MM-DD.md 03_Sales/discovery-reports/DISCOVERY-REPORT-YYYY-MM-DD.md`
 - Read the campaign count and total leads from the CSV for the commit message
 - Commit with message: "Sales: [Month Year] campaign report — [N] campaigns, [N,NNN] leads"
 
