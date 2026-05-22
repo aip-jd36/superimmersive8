@@ -20,3 +20,7 @@ tools/ga4_token.json
 
 # Downloaded archives
 *.tar.gz
+
+# Python cache
+__pycache__/
+*.pyc
