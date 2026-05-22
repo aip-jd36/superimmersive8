@@ -1,0 +1,24 @@
+campaign_name,alias,geo,target_segment,sequence,launch_date,leads_sent,accepted,responded,in_cost_analysis
+"SI8_RV_R4LI_CreaDir_AI Video_Dubai_0426A_LH",Lilly,Dubai,Creative Dir — AI Video,Legal Friction,Apr 26 2026,388,209,63,true
+"SI8_RV_R4LI_CreaDir_AI Video_England_0426B_IL",Ivy,England,Creative Dir — AI Video,Legal Friction,Apr 25 2026,678,149,61,true
+"SI8_RV_R4LI_CreaDir_AI Video_LA_0426A_VP",Vanessa,Los Angeles,Creative Dir — AI Video,Legal Friction,Apr 26 2026,650,141,61,true
+"SI8_RV_R4LI_CreaDir_AI Video_England_0426A_IL",Ivy,England,Creative Dir — AI Video,Legal Friction,Apr 13 2026,300,69,42,true
+"SI8_RV_R4LI_CreaDir_AI Video_AmsDm_0426A_VP",Vanessa,Amsterdam,Creative Dir — AI Video,Legal Friction,Apr 13 2026,300,79,35,true
+"SI8_RV_R4LI_CreaDir_AI Video_Berlin_0626A_AL",Angel,Berlin,Creative Dir — AI Video,Legal Friction,May 4 2026,364,109,34,true
+SI8_RV_R4LI_VP+_Creative_London_0426B_IL,Ivy,London,VP+ Creative,Hitting a Wall,Apr 3 2026,299,91,13,false
+"SI8_RV_R4LI_NA_MetaV_Agency_Gbl_0326A_IL",Ivy,Global,NA MetaVerse Agency,Hitting a Wall,Mar 27 2026,200,60,13,false
+SI8_RV_R4LI_Mgr+_Mktg_London_0326G_VP,Vanessa,London,Manager+ Marketing,Legal Friction,Mar 27 2026,199,55,14,false
+SI8_RV_R4LI_VP+_Creative_London_0426A_VP,Vanessa,London,VP+ Creative,Blocks AI Campaign,Apr 3 2026,285,80,17,false
+SI8_RV_R4LI_VP+_Creative_SPG_0426A_LH,Lilly,Singapore,VP+ Creative,Hitting a Wall,Mar 30 2026,191,66,13,false
+SI8_RV_R4LI_Mgr+_Mktg_London_0326A_LH,Lilly,London,Manager+ Marketing,Vetting Takes Weeks,Mar 11 2026,99,22,13,false
+SI8_RV_R4LI_Mgr+_Mktg_London_0326C_IL,Ivy,London,Manager+ Marketing,Trusted AI Supplier,Mar 11 2026,101,26,8,false
+SI8_RV_R4LI_Mgr+_Mktg_London_0326B_VP,Vanessa,London,Manager+ Marketing,Vetting Takes Weeks,Mar 11 2026,101,26,9,false
+"SI8_RV_R4LI_Owner+_BizCons,Mktg_SGP_0326A_VP",Vanessa,Singapore,Owner+ Biz/Mktg,Trusted AI Supplier,Mar 3 2026,299,86,17,false
+SI8_RV_R4LI_Mgr+_Mktg_London_0326D_IL,Ivy,London,Manager+ Marketing,Vetting Takes Weeks,Mar 14 2026,299,40,6,false
+SI8_RV_R4LI_Mgr+_Mktg_London_0326F_VP,Vanessa,London,Manager+ Marketing,Documented Provenance,Mar 16 2026,299,45,5,false
+SI8_RV_R4LI_Mgr+_Mktg_London_0326E_LH,Lilly,London,Manager+ Marketing,Documented Provenance,Mar 15 2026,299,46,4,false
+SI8_RV_R4LI_VP+_Creative_SPG_0426B_LH,Lilly,Singapore,VP+ Creative,Hitting a Wall,Apr 10 2026,297,69,9,false
+SI8_RV_R4LI_VP+_Creative_London_0426C_LH,Lilly,London,VP+ Creative,Blocks AI Campaign,Apr 3 2026,199,43,6,false
+SI8_RV_R4LI_Mgr+_Adv_SPG_0326A_LH,Lilly,Singapore,Manager+ Advertising,Vetting Takes Weeks,Mar 8 2026,97,37,9,false
+SI8_RV_R4LI_CMO_SPG_0326A_LH,Lilly,Singapore,CMO,Early Days,Mar 27 2026,149,31,3,false
+"SI8_RV_R4LI_Owner+_BizCons,Mktg_Sydney_0326B_LH",Lilly,Sydney,Owner+ Biz/Mktg,Vetting Takes Weeks,Mar 5 2026,298,23,3,false
