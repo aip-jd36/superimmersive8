@@ -18,6 +18,7 @@ See 03_Sales/CAMPAIGN-REPORT-METHODOLOGY.md for full methodology and step-by-ste
 import csv
 import sys
 import os
+import re
 import glob
 import json
 import argparse
@@ -28,12 +29,13 @@ from datetime import date
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'linkedin-analysis'))
 from classify import extract_reply, classify_reply
 
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+REPO_ROOT    = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 COST_PER_LEAD = 100 / 700          # $100/month Dripify = 700 outreaches
-OUTPUT_PATH   = os.path.join(REPO_ROOT, '03_Sales', 'CAMPAIGN-PERFORMANCE-LOG.md')
-DEFAULT_DRIP  = os.path.join(REPO_ROOT, 'data', 'dripify-campaigns.csv')
-DEFAULT_GEO   = os.path.join(REPO_ROOT, 'data', 'geo-cost-inputs.csv')
-DEFAULT_SEQ   = os.path.join(REPO_ROOT, 'data', 'sequence-content.json')
+OUTPUT_PATH  = os.path.join(REPO_ROOT, '03_Sales', 'CAMPAIGN-PERFORMANCE-LOG.md')
+ARCHIVE_DIR  = os.path.join(REPO_ROOT, '03_Sales', 'campaign-reports')
+DEFAULT_DRIP = os.path.join(REPO_ROOT, 'data', 'dripify-campaigns.csv')
+DEFAULT_GEO  = os.path.join(REPO_ROOT, 'data', 'geo-cost-inputs.csv')
+DEFAULT_SEQ  = os.path.join(REPO_ROOT, 'data', 'sequence-content.json')
 
 # Maps the geo label the user writes in dripify-campaigns.csv → the normalized geo
 # used when grouping Supabase lead_location values. Must stay in sync with norm_location().
@@ -484,9 +486,18 @@ def main():
     if args.dry_run:
         print('\n' + report)
     else:
+        # Derive report date from Supabase filename so it matches the data date, not the run date
+        m = re.search(r'supabase-export-(\d{4}-\d{2}-\d{2})', supabase_path)
+        report_date = m.group(1) if m else date.today().isoformat()
+        os.makedirs(ARCHIVE_DIR, exist_ok=True)
+        dated_path = os.path.join(ARCHIVE_DIR, f'CAMPAIGN-REPORT-{report_date}.md')
+
+        with open(dated_path, 'w', encoding='utf-8') as f:
+            f.write(report)
         with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:
             f.write(report)
-        print(f"\nWritten: {OUTPUT_PATH}")
+        print(f"\nWritten:  {dated_path}")
+        print(f"Latest:   {OUTPUT_PATH}")
         print("Next: review the Call Verification Checklist at the bottom of the file,")
         print("      update data/geo-cost-inputs.csv, and re-run to fill in $/call column.")
 

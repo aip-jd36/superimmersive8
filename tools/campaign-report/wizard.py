@@ -9,13 +9,14 @@ Usage:  python3 tools/campaign-report/wizard.py
 import csv, json, os, sys, subprocess, glob, re
 from datetime import date
 
-REPO      = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-DRIP_CSV  = os.path.join(REPO, 'data', 'dripify-campaigns.csv')
-GEO_CSV   = os.path.join(REPO, 'data', 'geo-cost-inputs.csv')
-SEQ_JSON  = os.path.join(REPO, 'data', 'sequence-content.json')
-SUP_DIR   = os.path.join(REPO, 'data', 'supabase-exports')
-REPORT_MD = os.path.join(REPO, '03_Sales', 'CAMPAIGN-PERFORMANCE-LOG.md')
-SCRIPT    = os.path.join(REPO, 'tools', 'campaign-report', 'report.py')
+REPO        = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+DRIP_CSV    = os.path.join(REPO, 'data', 'dripify-campaigns.csv')
+GEO_CSV     = os.path.join(REPO, 'data', 'geo-cost-inputs.csv')
+SEQ_JSON    = os.path.join(REPO, 'data', 'sequence-content.json')
+SUP_DIR     = os.path.join(REPO, 'data', 'supabase-exports')
+REPORT_MD   = os.path.join(REPO, '03_Sales', 'CAMPAIGN-PERFORMANCE-LOG.md')
+ARCHIVE_DIR = os.path.join(REPO, '03_Sales', 'campaign-reports')
+SCRIPT      = os.path.join(REPO, 'tools', 'campaign-report', 'report.py')
 
 # ANSI helpers (graceful fallback if terminal doesn't support them)
 try:
@@ -34,6 +35,13 @@ def ok(msg):     print(f"  {G}✓{R}  {msg}")
 def warn(msg):   print(f"  {Y}!{R}  {msg}")
 def info(msg):   print(f"     {DIM}{msg}{R}")
 def blank():     print()
+
+def dated_report_path(supabase_path):
+    """Return the archive path for a report, derived from the Supabase CSV filename."""
+    m = re.search(r'supabase-export-(\d{4}-\d{2}-\d{2})', supabase_path or '')
+    report_date = m.group(1) if m else date.today().isoformat()
+    return os.path.join(ARCHIVE_DIR, f'CAMPAIGN-REPORT-{report_date}.md')
+
 
 def ask(prompt, default=None):
     d = f" [{default}]" if default not in (None, '') else ""
@@ -521,7 +529,10 @@ def step4_run_report(supabase_path):
             print(f"  {line}")
 
     blank()
-    ok(f"Report written: 03_Sales/CAMPAIGN-PERFORMANCE-LOG.md")
+    dated = dated_report_path(supabase_path)
+    ok(f"Report written:")
+    info(f"Archive: 03_Sales/campaign-reports/{os.path.basename(dated)}")
+    info(f"Latest:  03_Sales/CAMPAIGN-PERFORMANCE-LOG.md")
     return True
 
 
@@ -565,13 +576,11 @@ def step5_verify_calls(supabase_path):
         print(f"  {B}{geo}{R}   ({count_str} warm leads in Supabase CSV)  "
               f"{DIM}current verified calls: {current}{R}")
 
-        # Show each lead
-        leads = re.findall(r'- (.+?)\n\s+> "(.+?)"', leads_text)
-        for name_line, reply in leads:
-            print(f"\n    {B}·{R} {name_line.strip()}")
-            preview = reply.strip()[:160]
-            ellipsis = '...' if len(reply.strip()) > 160 else ''
-            print(f"      \"{preview}{ellipsis}\"")
+        # Show each lead name/title/company (full conversation is in the report file)
+        leads = re.findall(r'^- (.+)$', leads_text, re.MULTILINE)
+        for name_line in leads:
+            if name_line.strip():
+                print(f"\n    {B}·{R} {name_line.strip()}")
 
         blank()
         new_val = ask(f"Verified call requests for {geo}", default=current)
@@ -624,7 +633,7 @@ def step5_verify_calls(supabase_path):
 
 # ── Commit ────────────────────────────────────────────────────────────────────
 
-def step_commit():
+def step_commit(supabase_path=None):
     blank()
     print(f"  {B}{'─'*62}{R}")
     blank()
@@ -635,20 +644,21 @@ def step_commit():
 
     with open(DRIP_CSV, encoding='utf-8') as f:
         rows = list(csv.DictReader(f))
-    n_camps    = len(rows)
+    n_camps     = len(rows)
     total_leads = sum(int(r['leads_sent']) for r in rows)
     month       = date.today().strftime('%B %Y')
     msg = (f"Sales: {month} campaign report — {n_camps} campaigns, {total_leads:,} leads\n\n"
            "Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>")
 
-    subprocess.run(
-        ['git', 'add',
-         'data/dripify-campaigns.csv',
-         'data/geo-cost-inputs.csv',
-         'data/sequence-content.json',
-         '03_Sales/CAMPAIGN-PERFORMANCE-LOG.md'],
-        cwd=REPO, capture_output=True
-    )
+    dated = dated_report_path(supabase_path)
+    files_to_add = [
+        'data/dripify-campaigns.csv',
+        'data/geo-cost-inputs.csv',
+        'data/sequence-content.json',
+        '03_Sales/CAMPAIGN-PERFORMANCE-LOG.md',
+        os.path.relpath(dated, REPO),
+    ]
+    subprocess.run(['git', 'add'] + files_to_add, cwd=REPO, capture_output=True)
     r = subprocess.run(['git', 'commit', '-m', msg], capture_output=True, text=True, cwd=REPO)
     if r.returncode == 0:
         ok(f"Committed: Sales: {month} campaign report — {n_camps} campaigns, {total_leads:,} leads")
@@ -673,9 +683,12 @@ def main():
         sys.exit(1)
 
     step5_verify_calls(supabase_path)
-    step_commit()
+    step_commit(supabase_path)
 
-    print(f"\n{B}{G}  Done!{R}  Report: 03_Sales/CAMPAIGN-PERFORMANCE-LOG.md\n")
+    dated = dated_report_path(supabase_path)
+    print(f"\n{B}{G}  Done!{R}")
+    print(f"  Archive: 03_Sales/campaign-reports/{os.path.basename(dated)}")
+    print(f"  Latest:  03_Sales/CAMPAIGN-PERFORMANCE-LOG.md\n")
 
 
 if __name__ == '__main__':

@@ -108,7 +108,10 @@ Ask (AskUserQuestion):
 - "Commit this report?" → Yes / No
 
 If Yes: 
-- `git add data/dripify-campaigns.csv data/geo-cost-inputs.csv data/sequence-content.json 03_Sales/CAMPAIGN-PERFORMANCE-LOG.md`
+- The report is written to two places:
+  - Archive: `03_Sales/campaign-reports/CAMPAIGN-REPORT-YYYY-MM-DD.md` (dated, permanent)
+  - Latest: `03_Sales/CAMPAIGN-PERFORMANCE-LOG.md` (overwritten each run)
+- `git add data/dripify-campaigns.csv data/geo-cost-inputs.csv data/sequence-content.json 03_Sales/CAMPAIGN-PERFORMANCE-LOG.md 03_Sales/campaign-reports/CAMPAIGN-REPORT-YYYY-MM-DD.md`
 - Read the campaign count and total leads from the CSV for the commit message
 - Commit with message: "Sales: [Month Year] campaign report — [N] campaigns, [N,NNN] leads"
 
