@@ -127,76 +127,245 @@ def step1_supabase():
     return exports[0]
 
 
+# ── Dripify paste parser ──────────────────────────────────────────────────────
+
+def read_paste():
+    """Read multi-line pasted input. One blank line after content = done."""
+    lines = []
+    while True:
+        try:
+            line = input()
+        except EOFError:
+            break
+        if not line.strip():
+            if lines:          # blank line after we have content → stop
+                break
+        else:
+            lines.append(line)
+    return lines
+
+
+def detect_delimiter(lines):
+    tabs   = sum(l.count('\t') for l in lines[:5])
+    commas = sum(l.count(',')  for l in lines[:5])
+    return '\t' if tabs >= commas else ','
+
+
+def parse_dripify_paste(lines):
+    """
+    Parse a Dripify campaign table pasted from the UI (tab or comma separated).
+    Returns list of dicts with keys: name, leads, accepted, responded.
+
+    Dripify columns we care about (others ignored):
+      Campaign name / title  →  name
+      All Leads / Total      →  leads
+      Accepted               →  accepted
+      Responded / Replies    →  responded
+    """
+    if not lines:
+        return []
+
+    delim = detect_delimiter(lines)
+    rows  = [[c.strip() for c in line.split(delim)] for line in lines]
+
+    # Detect header row: first row where any cell looks like a column label
+    HEADER_HINTS = {'campaign', 'name', 'title', 'leads', 'accepted',
+                    'responded', 'replies', 'total', 'all'}
+    first_lower  = [c.lower() for c in rows[0]]
+    has_header   = any(any(h in cell for h in HEADER_HINTS) for cell in first_lower)
+
+    if has_header:
+        header_row = first_lower
+        data_rows  = rows[1:]
+
+        def col(keywords):
+            for i, h in enumerate(header_row):
+                if any(k in h for k in keywords):
+                    return i
+            return None
+
+        name_col  = col(['campaign', 'name', 'title']) or 0
+        leads_col = col(['all lead', 'total lead', 'leads'])
+        acc_col   = col(['accept'])
+        resp_col  = col(['respond', 'repli'])
+
+        # Fallback: if columns not found by name, try positional guesses
+        if leads_col is None:
+            leads_col = 1
+        if acc_col is None:
+            acc_col = 2
+        if resp_col is None:
+            resp_col = 3
+    else:
+        # No header — assume: name, leads, accepted, responded
+        data_rows = rows
+        name_col, leads_col, acc_col, resp_col = 0, 1, 2, 3
+
+    results = []
+    for row in data_rows:
+        if len(row) <= max(name_col, leads_col, acc_col, resp_col):
+            continue
+        name = row[name_col].strip()
+        if not name:
+            continue
+        try:
+            leads    = int(row[leads_col].replace(',', '').strip())
+            accepted = int(row[acc_col].replace(',', '').strip())
+            responded = int(row[resp_col].replace(',', '').strip())
+        except (ValueError, IndexError):
+            continue
+        results.append({'name': name, 'leads': leads,
+                        'accepted': accepted, 'responded': responded})
+
+    return results
+
+
+def find_match(campaigns, name):
+    """Match a pasted campaign name to an existing campaign (exact, then substring)."""
+    name_l = name.lower().strip()
+    for c in campaigns:
+        if c['campaign_name'].lower().strip() == name_l:
+            return c
+    # Substring: either direction (handles truncated names from Dripify UI)
+    for c in campaigns:
+        existing_l = c['campaign_name'].lower().strip()
+        if name_l in existing_l or existing_l in name_l:
+            return c
+    return None
+
+
+def collect_new_campaign_fields(name, parsed):
+    """Ask for the metadata fields Dripify doesn't include. Returns a full campaign dict."""
+    print(f"\n  {B}New campaign detected:{R}  {name}")
+    print(f"  {DIM}leads={parsed['leads']}  acc={parsed['accepted']}  resp={parsed['responded']}{R}")
+    alias     = ask("alias          (Vanessa / Ivy / Lilly / Angel)")
+    geo       = ask("geo            (Dubai / England / London / Amsterdam / Singapore / etc.)")
+    target    = ask("target_segment (e.g. Creative Dir — AI Video)")
+    sequence  = ask("sequence       (Legal Friction / Hitting a Wall / etc.)")
+    launch    = ask("launch_date    (e.g. Jun 5 2026)")
+
+    is_lf  = 'legal friction' in sequence.lower()
+    is_cd  = 'creadir' in name.lower() or 'ai video' in target.lower()
+    in_cost = 'true' if (is_lf and is_cd) else 'false'
+
+    if in_cost == 'true':
+        ok("in_cost_analysis = true (Legal Friction + AI Video — correct)")
+    else:
+        if yn(f"in_cost_analysis = false. Override to true?"):
+            in_cost = 'true'
+
+    return {
+        'campaign_name':    name,
+        'alias':            alias,
+        'geo':              geo,
+        'target_segment':   target,
+        'sequence':         sequence,
+        'launch_date':      launch,
+        'leads_sent':       str(parsed['leads']),
+        'accepted':         str(parsed['accepted']),
+        'responded':        str(parsed['responded']),
+        'in_cost_analysis': in_cost,
+    }
+
+
 # ── Step 2: Dripify numbers ───────────────────────────────────────────────────
 
 def step2_dripify():
     header(2, 5, "Dripify Campaign Numbers")
-    info("Open each alias dashboard in Dripify and copy updated numbers.")
-    info("leads_sent = 'All Leads'   accepted = 'Accepted'   responded = 'Responded'")
+    info("Paste your Dripify campaign table directly from the UI (tab-separated).")
+    info("The script matches campaign names, updates existing rows, and flags new ones.")
+    info("You can paste all campaigns, a single alias's list, or just new campaigns.")
+    blank()
+    info("How to copy from Dripify:  Campaigns tab → select all rows → Ctrl+C")
+    info("Column order doesn't matter — headers are auto-detected.")
     blank()
 
     campaigns = load_campaigns()
 
-    # Display grouped by alias with numbered index
-    aliases = {}
-    for c in campaigns:
-        aliases.setdefault(c['alias'], []).append(c)
+    if not yn("Paste Dripify data now?", default='y'):
+        info("Skipping — campaign numbers unchanged.")
+        return campaigns
 
-    idx_map = {}
-    n = 1
-    for alias in sorted(aliases):
-        print(f"  {B}{alias}{R}")
-        for c in aliases[alias]:
-            short = c['campaign_name'].replace('SI8_RV_R4LI_', '')
-            print(f"  {DIM}[{n:2d}]{R} {short[:46]:<47} "
-                  f"{DIM}leads={c['leads_sent']:>5}  acc={c['accepted']:>4}  resp={c['responded']:>3}{R}")
-            idx_map[n] = c
-            n += 1
+    print(f"\n  {B}Paste below. Press Enter when done.{R}")
+    blank()
+
+    pasted = read_paste()
+
+    if not pasted:
+        warn("Nothing pasted — skipping.")
+        return campaigns
+
+    parsed = parse_dripify_paste(pasted)
+
+    if not parsed:
+        warn("Could not parse pasted data.")
+        info("Expected tab-separated rows with columns: Campaign Name, All Leads, Accepted, Responded")
+        info("Check that you copied the table (not just a single cell) and try again.")
+        return campaigns
+
+    blank()
+    print(f"  {B}Parsed {len(parsed)} campaign rows. Comparing against CSV...{R}")
+    blank()
+
+    updated     = 0
+    new_camps   = []
+    no_change   = 0
+
+    for p in parsed:
+        match = find_match(campaigns, p['name'])
+
+        if match:
+            old = (int(match['leads_sent']), int(match['accepted']), int(match['responded']))
+            new = (p['leads'], p['accepted'], p['responded'])
+            short = match['campaign_name'].replace('SI8_RV_R4LI_', '')
+            if old != new:
+                # Show diff
+                parts = []
+                if old[0] != new[0]: parts.append(f"leads {old[0]}→{new[0]}")
+                if old[1] != new[1]: parts.append(f"acc {old[1]}→{new[1]}")
+                if old[2] != new[2]: parts.append(f"resp {old[2]}→{new[2]}")
+                ok(f"Updated  {short[:50]}  ({', '.join(parts)})")
+                match['leads_sent'] = str(new[0])
+                match['accepted']   = str(new[1])
+                match['responded']  = str(new[2])
+                updated += 1
+            else:
+                info(f"No change  {short[:50]}")
+                no_change += 1
+        else:
+            warn(f"New (not in CSV):  {p['name'][:60]}")
+            new_camps.append(p)
+
+    blank()
+    print(f"  Updated: {G}{updated}{R}   No change: {no_change}   New: {Y}{len(new_camps)}{R}")
+
+    # Handle new campaigns found in the paste
+    for p in new_camps:
         blank()
+        if yn(f"Add '{p['name'][:55]}' to campaigns CSV?"):
+            new_row = collect_new_campaign_fields(p['name'], p)
+            campaigns.append(new_row)
+            ok(f"Added: {p['name'].replace('SI8_RV_R4LI_', '')[:55]}")
 
-    info("Enter a campaign number to update its numbers, or 'done' to continue.")
-    changes = 0
-
-    while True:
-        choice = ask("Campaign # to update (or 'done')").lower()
-        if choice in ('done', 'd', ''):
-            break
-        try:
-            num = int(choice)
-        except ValueError:
-            warn("Enter a number or 'done'")
-            continue
-        if num not in idx_map:
-            warn(f"No campaign #{num}")
-            continue
-
-        c = idx_map[num]
-        short = c['campaign_name'].replace('SI8_RV_R4LI_', '')
-        print(f"\n  {B}{short}{R}  ({c['geo']} / {c['sequence']})")
-        print(f"  Current: leads={c['leads_sent']}, accepted={c['accepted']}, responded={c['responded']}")
-
-        c['leads_sent']  = ask("leads_sent",  default=c['leads_sent'])
-        c['accepted']    = ask("accepted",    default=c['accepted'])
-        c['responded']   = ask("responded",   default=c['responded'])
-        ok(f"Updated #{num}")
-        changes += 1
-
-    if changes:
+    if updated or new_camps:
         save_campaigns(campaigns)
-        ok(f"Saved {changes} update(s) to dripify-campaigns.csv")
+        ok(f"Saved dripify-campaigns.csv ({len(campaigns)} campaigns)")
     else:
-        info("No changes made — current numbers kept.")
+        info("No changes written.")
 
     return campaigns
 
 
-# ── Step 3: New campaigns ─────────────────────────────────────────────────────
+# ── Step 3: Additional new campaigns (not in paste) ──────────────────────────
 
 def step3_new_campaigns():
-    header(3, 5, "New Campaigns")
+    header(3, 4, "Any Other New Campaigns?")
+    info("If you have campaigns that weren't included in the paste above,")
+    info("add them here. Otherwise press Enter to skip.")
+    blank()
 
-    if not yn("Any new campaigns to add since the last report?"):
-        info("No new campaigns — skipping.")
+    if not yn("Add more campaigns manually?"):
+        info("Skipping.")
         return
 
     campaigns = load_campaigns()
@@ -209,20 +378,19 @@ def step3_new_campaigns():
         geo       = ask("geo            (Dubai / England / London / Amsterdam / Singapore / Los Angeles / Berlin / Sydney / Global)")
         target    = ask("target_segment (e.g. Creative Dir — AI Video)")
         sequence  = ask("sequence       (Legal Friction / Hitting a Wall / Blocks AI Campaign / Vetting Takes Weeks / etc.)")
-        launch    = ask("launch_date    (e.g. May 22 2026)")
+        launch    = ask("launch_date    (e.g. Jun 5 2026)")
         leads     = ask("leads_sent")
         accepted  = ask("accepted")
         responded = ask("responded")
 
-        # Auto-detect cost analysis flag
         is_lf  = 'legal friction' in sequence.lower()
         is_cd  = 'creadir' in name.lower() or 'ai video' in target.lower()
         in_cost = 'true' if (is_lf and is_cd) else 'false'
 
         if in_cost == 'true':
-            ok("in_cost_analysis = true  (Legal Friction + CreaDir AI Video — matches criteria)")
+            ok("in_cost_analysis = true  (Legal Friction + CreaDir AI Video)")
         else:
-            info(f"in_cost_analysis = false  (sequence: {sequence}, target: {target})")
+            info(f"in_cost_analysis = false  (sequence: {sequence})")
             if yn("Override to true?"):
                 in_cost = 'true'
 
@@ -250,7 +418,7 @@ def step3_new_campaigns():
 # ── Step 4: Run report ────────────────────────────────────────────────────────
 
 def step4_run_report(supabase_path):
-    header(4, 5, "Generating Report")
+    header(4, 4, "Generating Report")
     info(f"Running: python3 tools/campaign-report/report.py")
     blank()
 
@@ -297,7 +465,7 @@ def step4_run_report(supabase_path):
 # ── Step 5: Call verification ─────────────────────────────────────────────────
 
 def step5_verify_calls(supabase_path):
-    header(5, 5, "Call Request Verification")
+    header(5, 4, "Call Request Verification")
     blank()
     info("For each warm lead below, read their reply and decide:")
     info("  CALL = they explicitly asked for a meeting / demo / walkthrough in their own words")
