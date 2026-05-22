@@ -9,6 +9,38 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of May 22, 2026
+*Run: 2026-05-22 · 7 high · 10 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Channel Factory’s Nico Greco: Brand Safety Rules were ‘Designed for Human Authors,’ not AI-Generated Content](https://www.beet.tv/2026/05/channel-factorys-nico-greco-brand-safety-rules-were-designed-for-human-authors-not-ai-generated-content.html) | Beet.TV | Mon, 18 May 2026 | ☐ |
+| 8 | post+update | [Study: AI Labeling Does Not Hurt Video Ad Performance](https://www.tvtechnology.com/insights/analysis/study-ai-labeling-does-not-hurt-video-ad-performance) | TVTechnology | Thu, 21 May 2026 | ☐ |
+| 8 | post+update | [South Africa Plans AI Content Disclosure Rules and Fact-Checking Platform to Combat Misinformation](https://iafrica.com/south-africa-plans-ai-content-disclosure-rules-and-fact-checking-platform-to-combat-misinformation/) | iAfrica.com | Thu, 21 May 2026 | ☐ |
+| 8 | post+update | [AI dominates global IP debate at INTA conference in London](https://www.dailyjournal.com/articles/391453-ai-dominates-global-ip-debate-at-inta-conference-in-london) | Daily Journal | Mon, 18 May 2026 | ☐ |
+| 8 | post+update | [The law and brands in the age of AI Technology: Intellectual Property, Liability and Regulation](https://www.modernghana.com/news/1493295/the-law-and-brands-in-the-age-of-ai-technology.html) | Modern Ghana | Sat, 16 May 2026 | ☐ |
+| 7 | post+update | [House of Doge, IP Strategy Holdings, and Brag House Announce Strategic Partnership to Advance On-Chain Intellectual Property Monetization](https://www.quiverquant.com/news/House+of+Doge%2C+IP+Strategy+Holdings%2C+and+Brag+House+Announce+Strategic+Partnership+to+Advance+On-Chain+Intellectual+Property+Monetization) | Quiver Quantitative | Thu, 21 May 2026 | ☐ |
+| 7 | update | [CrePal Launches TVC Mode, a Pre-Production System for AI Commercial Video](https://natlawreview.com/press-releases/crepal-launches-tvc-mode-pre-production-system-ai-commercial-video) | The National Law Review | Mon, 18 May 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Silent AI risks finally make some noise](https://www.regulationtomorrow.com/2026/05/silent-ai-risks-finally-make-some-noise/) | Global Regulation Tomorrow | Thu, 21 May 2026 | ☐ |
+| 6 | monitor | [iQIYI Proposes Decentralized AI Production Model for Film and TV](https://letsdatascience.com/news/iqiyi-proposes-decentralized-ai-production-model-for-film-an-c03d2c1e) | Let's Data Science | Thu, 21 May 2026 | ☐ |
+| 6 | monitor | [Best AI Video Generator Platforms in 2026: Create Stunning Clips in Minutes](https://www.analyticsinsight.net/artificial-intelligence/best-ai-video-generator-platforms-in-2026-create-stunning-clips-in-minutes) | Analytics Insight | Tue, 19 May 2026 | ☐ |
+| 6 | update | [FurtherAI Appoints Tom Bradley to Lead UK and EU Expansion](https://www.morningstar.com/news/business-wire/20260518611218/furtherai-appoints-tom-bradley-to-lead-uk-and-eu-expansion) | Morningstar | Mon, 18 May 2026 | ☐ |
+| 5 | monitor | [Meta extends brand safety controls to Threads through IAS partnership expansion](https://marketingedge.com.ng/meta-extends-brand-safety-controls-to-threads-through-ias-partnership-expansion/) | Marketing Edge | Wed, 20 May 2026 | ☐ |
+| 5 | monitor | [IAS expands Meta content block lists to Threads feed](https://itbrief.co.uk/story/ias-expands-meta-content-block-lists-to-threads-feed) | IT Brief UK | Tue, 19 May 2026 | ☐ |
+| 5 | monitor | [Integral Ad Science Extends AI-Driven Content Block Lists To Meta’s Threads Platform](https://smbtech.au/news/integral-ad-science-extends-ai-driven-content-block-lists-to-metas-threads-platform/) | SMBtech | Tue, 19 May 2026 | ☐ |
+| 5 | monitor | [IAS expands Meta content block lists to Threads](https://www.marketing-interactive.com/ias-expands-meta-content-block-lists-to-threads) | Marketing-Interactive | Tue, 19 May 2026 | ☐ |
+| 5 | monitor | [Chinese AI groups pull ahead of US rivals in video generation race](https://www.ft.com/content/9804b1de-653b-40b2-bffb-17c76ebebe34?syn-25a6b1a6=1) | Financial Times | Sun, 17 May 2026 | ☐ |
+| 4 | monitor | [Ethics of Artificial Intelligence - AI](https://www.unesco.org/en/ethics-ai/en/recommendation-ethics) | UNESCO | Thu, 21 May 2026 | ☐ |
+
+---
+
 ## Week of May 19, 2026
 *Run: 2026-05-19 · 17 high · 10 monitor · lookback 7 days*
 
