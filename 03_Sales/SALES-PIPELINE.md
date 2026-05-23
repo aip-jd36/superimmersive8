@@ -124,7 +124,7 @@
 
 ---
 
-## 3. Call Requested (20)
+## 3. Call Requested (24)
 
 *Calendly sent or direct slots offered. Waiting for booking confirmation.*
 
@@ -139,16 +139,18 @@
 | B024 | Chitra J | GrapheneAI | — | 2026-04-07 | Calendly | — |
 | B027 | Marc Danielle De Guzman | UnaFinancial | — | 2026-04-09 | 15-20 min JD call | — |
 | B031 | Steve Mcpartland | Visually Sonic | — | 2026-05-08 | Sample or call (2nd nudge) | — |
+| B043 | Luke Brady | Sublime Animations Ltd | London/UK | 2026-05-23 | Chase — 4th attempt; call never happened | 2026-05-26 |
 | B044 | Shaun Yeo | Reel Loco Productions | Singapore | 2026-04-18 | Calendly | — |
+| B045 | Mike Harris | Seenit | London/UK | 2026-05-23 | Chase — booked via Calendly, no-show | 2026-05-26 |
 | B048 | Piotr Nierobisz | Munchingsquare | Amsterdam | 2026-05-08 | JD call offer | — |
 | B057 | Rheea Aranha | Vincent Studios | London/UK | 2026-05-01 | Asked for email to send sample | — |
 | B061 | Jay Pirabakaran | JAYPRINTS Studio | London/UK | 2026-05-08 | Sample or 15-min JD call | — |
 | B087 | Ibrahim Badi | IKM Marketing | London/UK | 2026-05-08 | Platform + discount code + JD call | — |
 | B088 | Matthew Sergison-Main | OLIVER / Brandtech | London/UK | 2026-05-01 | HPI Check logline — highly engaged | — |
-| B089 | Oliyah Joseph | Visual Vibe | London/UK | 2026-05-19 | Slots proposed Thu 5/21 or Fri 5/22 | 2026-05-22 |
 | B090 | Saira Macleod | Magnific | London/UK | 2026-05-08 | JD call offer | — |
 | B095 | Florent Delavous | Xtendency | Dubai/UAE | 2026-05-08 | Probing collab/competitor | — |
 | B096 | Ankita Biswas | HTCreaTec | Dubai/UAE | 2026-05-08 | Slots: May 14-15 AM Dubai | 2026-05-15 |
+| B099 | Sultan Alsuwaidi | Video tube | Dubai/UAE | 2026-05-08 | Sample offer | — |
 | B100 | Ramez Tabshi | — | Dubai/UAE | 2026-05-22 | Slots: May 26/28/29 + Calendly | 2026-05-29 |
 | B126 | Phil Langer | Jung von Matt SPREE | Germany | 2026-05-20 | Sample offer + platform pitch | — |
 | C001 | keeper505 | — | — | 2026-04-09 | Comp code when she confirms | — |
@@ -156,14 +158,13 @@
 
 ---
 
-## 4. Call Scheduled (2)
+## 4. Call Scheduled (1)
 
-*Call confirmed on calendar. Note: both may have already occurred — verify status.*
+*Call confirmed on calendar.*
 
 | B-ID | Lead | Company | Geo | Call Date | Format | Prep Notes |
 |------|------|---------|-----|-----------|--------|------------|
-| B043 | Luke Brady | Sublime Animations Ltd | London/UK | Mon May 4 10am UK (proposed) | Zoom | Rescheduled 3x — verify if taken or still pending |
-| B045 | Mike Harris | Seenit | London/UK | Booked via Calendly ~May 17 | — | Verify if call happened — move to Call Taken if so |
+| B089 | Oliyah Joseph | Visual Vibe | London/UK | Mon May 25, 2026 | — | Confirmed — calendar invite accepted |
 
 ---
 
