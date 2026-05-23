@@ -130,13 +130,67 @@ Use the column structure defined in each stage section. Fill in what's available
 
 ---
 
+## Step 8: Pipeline ICP Analysis
+
+Read `03_Sales/SALES-PIPELINE.md`. Pull every lead from the **Warm Lead** and **Call Requested** sections only (these are the leads who have shown real signal — not Lead Replied, not Lost).
+
+Run the following analysis framework across those leads. Cross-reference `03_Sales/CRM.md` for title and company details if not visible in the pipeline file.
+
+### Analysis Framework
+
+**A. Geo Breakdown**
+Count leads per geo. Note which geos are punching above weight (high warm rate relative to outreach volume in `CAMPAIGN-PERFORMANCE-LOG.md`).
+
+**B. Company Type**
+Group into: boutique/indie studio · AI-native company · holdco arm · mid-size agency · brand-side · other.
+Note which type has the most leads AND the highest signal quality (not the same thing).
+
+**C. Title Clusters**
+Group titles into: Founder/MD/CEO · Creative Director · Senior Production Specialist · Gen AI Specialist (inside large agency) · Art Director/Designer · Other.
+Flag the "Gen AI Specialist inside a holdco" profile specifically — it is a high-value sleeper ICP.
+
+**D. Signal Trigger Type**
+Classify each warm lead into one of three trigger types:
+- **Trigger 1 — Already Being Asked:** Lead's clients or legal teams are actively requesting documentation NOW. These are in pain today. (E.g. "Yes I am being asked this 100%")
+- **Trigger 2 — Product Curiosity:** Lead is evaluating — asked what SI8 does, requested a sample, or reacted positively to the pitch. Not in pain yet but assessing.
+- **Trigger 3 — Already Building Something:** Lead has independently built an informal solution (prompt logs, metadata docs, email trails). They've validated the problem themselves. These are the most strategically interesting leads — could be competitor, partner, or upgrade buyer.
+
+**E. ICP Thesis**
+From the patterns, write 2-3 sentences describing:
+- The primary ICP (title + company type + geo + trigger)
+- The secondary ICP (if a second distinct profile emerged)
+- The "sweet spot" profile — the single lead type most likely to convert fastest
+
+**F. Targeting Implications**
+List 3-5 specific changes to make to campaign targeting, messaging, or geo prioritization based on what the warm leads are telling you.
+
+**G. What is NOT Working**
+Note title clusters, company types, or geos that appear in Lead Replied but rarely make it to Warm Lead. These are negative ICP signals — useful for tightening targeting.
+
+**H. Compare to Previous Analysis**
+Read the most recent file in `03_Sales/pipeline-analysis/`. Note which trends from last time are holding, which have changed, and what's new. If no previous analysis exists, note this is the baseline.
+
+### Output
+
+Save the full analysis as:
+`03_Sales/pipeline-analysis/PIPELINE-ICP-ANALYSIS-YYYY-MM-DD.md`
+
+Use this template structure (see `03_Sales/pipeline-analysis/PIPELINE-ICP-ANALYSIS-2026-05-24.md` as the reference example):
+- Header: date, analyst, source data, lead count, link to previous analysis
+- Sections 1–8 matching the framework above
+- Section 8: Open Questions for Next Analysis (carry forward unanswered questions + add new ones)
+
+Show the user a brief summary of the top 3 findings before saving.
+
+---
+
 ## Commit
 
 Ask (AskUserQuestion):
 - "Commit this report?" → Yes / No
 
 If Yes:
-- `git add data/dripify-campaigns.csv data/geo-cost-inputs.csv data/sequence-content.json 03_Sales/CAMPAIGN-PERFORMANCE-LOG.md 03_Sales/DISCOVERY-PERFORMANCE-LOG.md 03_Sales/DISCOVERY-PIPELINE.md 03_Sales/SALES-PIPELINE.md 03_Sales/CRM.md 03_Sales/campaign-reports/CAMPAIGN-REPORT-YYYY-MM-DD.md 03_Sales/discovery-reports/DISCOVERY-REPORT-YYYY-MM-DD.md`
+- `git add data/dripify-campaigns.csv data/geo-cost-inputs.csv data/sequence-content.json 03_Sales/CAMPAIGN-PERFORMANCE-LOG.md 03_Sales/DISCOVERY-PERFORMANCE-LOG.md 03_Sales/DISCOVERY-PIPELINE.md 03_Sales/SALES-PIPELINE.md 03_Sales/CRM.md 03_Sales/campaign-reports/CAMPAIGN-REPORT-YYYY-MM-DD.md 03_Sales/discovery-reports/DISCOVERY-REPORT-YYYY-MM-DD.md 03_Sales/pipeline-analysis/PIPELINE-ICP-ANALYSIS-YYYY-MM-DD.md`
 - Read the campaign count and total leads from the CSV for the commit message
 - Commit with message: "Sales: [Month Year] campaign report — [N] campaigns, [N,NNN] leads"
 
@@ -146,3 +200,4 @@ If Yes:
 
 Full methodology: `03_Sales/CAMPAIGN-REPORT-METHODOLOGY.md`
 Data architecture: Dripify UI → `data/dripify-campaigns.csv` + Supabase CSV → `report.py` + `discovery_report.py` → `CAMPAIGN-PERFORMANCE-LOG.md` + `DISCOVERY-PERFORMANCE-LOG.md`
+Pipeline ICP analysis: `03_Sales/pipeline-analysis/` — dated files, one per report cycle. Reference example: `PIPELINE-ICP-ANALYSIS-2026-05-24.md`
