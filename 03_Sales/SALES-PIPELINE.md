@@ -208,12 +208,14 @@
 
 ---
 
-## Lost (13)
+## Lost (15)
 
 *Explicitly declined, wrong ICP, or permanently closed.*
 
 | B-ID | Lead | Company | Geo | Lost Date | Reason | Reactivate? |
 |------|------|---------|-----|-----------|--------|-------------|
+| B005 | Isaac Twidale | We Do Ads | — | 2026-03-15 | Call done — wrong ICP; asked for photorealistic portfolio (Gear B buyer, not Gear A) | Yes — when Showcase has 5+ films |
+| B007 | Elaine Tan + Joseph Lee | The Media Shop | — | 2026-03-18 | Call done — media buying agency; Gear B/C profile, not Gear A | Yes — when Showcase has 5+ films |
 | B018 | Carlos Cortiñas | Transmission | — | 2026-04-06 | "No thanks Vanessa" | No |
 | B021 | Vignesh Ilangovan | Triken Studios | — | 2026-04-05 | Soft no | Q3 2026 |
 | B028 | Keir Finlow-Bates | Artema LABS | — | 2026-04-07 | Wrong profile — CTO promoting own book | No |
