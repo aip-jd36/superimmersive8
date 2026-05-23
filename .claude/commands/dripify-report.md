@@ -1,6 +1,6 @@
 Run the SI8 monthly Dripify LinkedIn campaign performance report wizard.
 
-Walk the user through all 6 steps below using your tools. Use AskUserQuestion for structured choices. For numeric inputs, ask in plain text and process the reply.
+Walk the user through all 7 steps below using your tools. Use AskUserQuestion for structured choices. For numeric inputs, ask in plain text and process the reply.
 
 ---
 
@@ -18,37 +18,20 @@ Tell the user: to export, go to Supabase → Table Editor → `linkedin_response
 
 ---
 
-## Step 2: Dripify Campaign Numbers
+## Step 2: Dripify Campaign Numbers + New Campaigns
 
-Read `data/dripify-campaigns.csv`. Display all campaigns grouped by alias in a table showing:
-- Campaign name (short form, strip `SI8_RV_R4LI_` prefix)
-- Current leads_sent / accepted / responded
-- Geo and sequence
+Paste Dripify campaign table from UI (tab-separated). The wizard auto-matches names, updates existing rows, and prompts for metadata on new ones.
 
-Ask (AskUserQuestion):
-- "Do any campaigns have updated numbers from Dripify?" → Yes / No
-
-If Yes: ask "Which campaigns need updates? List the short names (or say 'all of Lilly' etc.)."
-Then for each campaign that needs updating, show current values and ask for new leads_sent, accepted, responded.
-Edit `data/dripify-campaigns.csv` with the updated values.
-
----
-
-## Step 3: New Campaigns
-
-Ask (AskUserQuestion):
-- "Any new campaigns to add since last report?" → Yes / No
-
-If Yes: collect all required fields for each new campaign:
+Then asks: "Any additional campaigns to add manually?" — collects required fields for each:
 - campaign_name, alias, geo, target_segment, sequence, launch_date, leads_sent, accepted, responded
 - Auto-set in_cost_analysis=true if sequence contains "Legal Friction" AND target contains "AI Video" / "CreaDir"
 - Ask user to confirm the in_cost_analysis flag
 
-Append to `data/dripify-campaigns.csv`.
+Saves to `data/dripify-campaigns.csv`.
 
 ---
 
-## Step 4: Sequence Content
+## Step 3: Sequence Content
 
 Read `data/sequence-content.json`. Show a summary table:
 - Sequence name
@@ -69,25 +52,31 @@ Write updated entries to `data/sequence-content.json`.
 
 ---
 
-## Step 5: Run Report
+## Step 4: Run Both Reports
 
-Run: `python3 tools/campaign-report/report.py`
+Run sales report:
+`python3 tools/campaign-report/report.py --supabase data/supabase-exports/FILENAME.csv`
 
-If a specific supabase path was chosen in Step 1: `python3 tools/campaign-report/report.py --supabase data/supabase-exports/FILENAME.csv`
+Run discovery report:
+`python3 tools/campaign-report/discovery_report.py --supabase data/supabase-exports/FILENAME.csv`
 
-Read `03_Sales/CAMPAIGN-PERFORMANCE-LOG.md` and show the user:
+Show from `03_Sales/CAMPAIGN-PERFORMANCE-LOG.md`:
 1. The Key Insights section
-2. The Cost Efficiency table (without the call verification checklist — that comes next)
+2. The Cost Efficiency table ($/warm reply — $/call comes after call verification)
+
+Show from `03_Sales/DISCOVERY-PERFORMANCE-LOG.md`:
+1. Grand Total table (total signals, class breakdown)
+2. By Geo table
 
 ---
 
-## Step 6: Call Verification
+## Step 5: Call Verification
 
 Read `03_Sales/CAMPAIGN-PERFORMANCE-LOG.md`. Find the `### Call Verification Checklist` section.
 
 For each geo block listed:
 1. Show the geo name and warm lead count
-2. Show each lead: name · title · company and their reply excerpt
+2. Show each lead: name · title · company
 3. Ask the user: "How many verified call requests for [geo]?" (show current count from `data/geo-cost-inputs.csv`)
 
 Rules for verified calls (remind the user):
@@ -102,35 +91,44 @@ Show the final Cost Efficiency table with the $/call column filled in.
 
 ---
 
-## Step 6.5: Product Discovery Report
+## Step 6: Discovery Signal Review
 
-Run: `python3 tools/campaign-report/discovery_report.py --supabase data/supabase-exports/FILENAME.csv`
+Read `03_Sales/DISCOVERY-PERFORMANCE-LOG.md`. Parse the `## Discovery Signal Checklist` section.
 
-(Use the same supabase path from Step 1.)
+Display each lead as a numbered entry:
+```
+[N] [CLASS]  Name · Title · Company
+      Geo: GeoName
+      "excerpt from reply..."
+```
 
-Show the user:
-1. The Grand Total table (total signals, class breakdown)
-2. The By Geo table
+Ask the user: "Add to Discovery Pipeline (e.g. 1,3,5  /  all  /  none)"
 
-Tell the user: "Review the full Discovery Signal Checklist in `03_Sales/DISCOVERY-PERFORMANCE-LOG.md`.
-Add any leads worth a discovery conversation to `03_Sales/DISCOVERY-PIPELINE.md` → Stage: Signal."
+For each selected lead, append a row to the Signal table in `03_Sales/DISCOVERY-PIPELINE.md`:
+- Columns: Lead | Title | Company | Geo | Sales Class | Campaign | Key insight excerpt | Added
+- Update the `## Signal (N)` count
 
-The discovery report is written to:
-- Archive: `03_Sales/discovery-reports/DISCOVERY-REPORT-YYYY-MM-DD.md`
-- Latest: `03_Sales/DISCOVERY-PERFORMANCE-LOG.md`
+Remind the user: full conversations are in `03_Sales/DISCOVERY-PERFORMANCE-LOG.md`.
 
 ---
 
-## Step 7: Commit
+## Step 7: CRM Quick Sync
+
+Ask the user: "Any CRM stage updates? Enter B-ID:Stage pairs (e.g. B050:Call Scheduled, B042:Evaluating) or press Enter to skip."
+
+Valid stages: Lead Replied · Warm Lead · Call Requested · Call Scheduled · Call Taken · Evaluating · Creator Submitted · Rights Verified Submitted · Won · Lost
+
+For each pair, find the matching row in `03_Sales/CRM.md` pipeline table (between `<!-- pipeline:start -->` and `<!-- pipeline:end -->`) and update the stage field.
+
+---
+
+## Commit
 
 Ask (AskUserQuestion):
 - "Commit this report?" → Yes / No
 
-If Yes: 
-- The report is written to two places:
-  - Archive: `03_Sales/campaign-reports/CAMPAIGN-REPORT-YYYY-MM-DD.md` (dated, permanent)
-  - Latest: `03_Sales/CAMPAIGN-PERFORMANCE-LOG.md` (overwritten each run)
-- `git add data/dripify-campaigns.csv data/geo-cost-inputs.csv data/sequence-content.json 03_Sales/CAMPAIGN-PERFORMANCE-LOG.md 03_Sales/DISCOVERY-PERFORMANCE-LOG.md 03_Sales/campaign-reports/CAMPAIGN-REPORT-YYYY-MM-DD.md 03_Sales/discovery-reports/DISCOVERY-REPORT-YYYY-MM-DD.md`
+If Yes:
+- `git add data/dripify-campaigns.csv data/geo-cost-inputs.csv data/sequence-content.json 03_Sales/CAMPAIGN-PERFORMANCE-LOG.md 03_Sales/DISCOVERY-PERFORMANCE-LOG.md 03_Sales/DISCOVERY-PIPELINE.md 03_Sales/CRM.md 03_Sales/campaign-reports/CAMPAIGN-REPORT-YYYY-MM-DD.md 03_Sales/discovery-reports/DISCOVERY-REPORT-YYYY-MM-DD.md`
 - Read the campaign count and total leads from the CSV for the commit message
 - Commit with message: "Sales: [Month Year] campaign report — [N] campaigns, [N,NNN] leads"
 
@@ -139,4 +137,4 @@ If Yes:
 ## Reference
 
 Full methodology: `03_Sales/CAMPAIGN-REPORT-METHODOLOGY.md`
-Data architecture: Dripify UI → `data/dripify-campaigns.csv` + Supabase CSV → `report.py` → `CAMPAIGN-PERFORMANCE-LOG.md`
+Data architecture: Dripify UI → `data/dripify-campaigns.csv` + Supabase CSV → `report.py` + `discovery_report.py` → `CAMPAIGN-PERFORMANCE-LOG.md` + `DISCOVERY-PERFORMANCE-LOG.md`

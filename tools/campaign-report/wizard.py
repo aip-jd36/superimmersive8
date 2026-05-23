@@ -9,6 +9,13 @@ Usage:  python3 tools/campaign-report/wizard.py
 import csv, json, os, sys, subprocess, glob, re
 from datetime import date
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'linkedin-analysis'))
+try:
+    from classify import extract_reply, classify_reply, is_product_feedback
+    _CLASSIFY_AVAILABLE = True
+except ImportError:
+    _CLASSIFY_AVAILABLE = False
+
 REPO        = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 DRIP_CSV    = os.path.join(REPO, 'data', 'dripify-campaigns.csv')
 GEO_CSV     = os.path.join(REPO, 'data', 'geo-cost-inputs.csv')
@@ -16,12 +23,16 @@ SEQ_JSON    = os.path.join(REPO, 'data', 'sequence-content.json')
 SUP_DIR     = os.path.join(REPO, 'data', 'supabase-exports')
 REPORT_MD        = os.path.join(REPO, '03_Sales', 'CAMPAIGN-PERFORMANCE-LOG.md')
 DISC_REPORT_MD   = os.path.join(REPO, '03_Sales', 'DISCOVERY-PERFORMANCE-LOG.md')
+DISC_PIPELINE    = os.path.join(REPO, '03_Sales', 'DISCOVERY-PIPELINE.md')
+CRM_MD           = os.path.join(REPO, '03_Sales', 'CRM.md')
 ARCHIVE_DIR      = os.path.join(REPO, '03_Sales', 'campaign-reports')
 DISC_ARCHIVE_DIR = os.path.join(REPO, '03_Sales', 'discovery-reports')
 SCRIPT           = os.path.join(REPO, 'tools', 'campaign-report', 'report.py')
 DISC_SCRIPT      = os.path.join(REPO, 'tools', 'campaign-report', 'discovery_report.py')
 
-# ANSI helpers (graceful fallback if terminal doesn't support them)
+TOTAL_STEPS = 7
+
+# ANSI helpers
 try:
     import sys; sys.stdout.isatty()
     B  = '\033[1m';  G  = '\033[32m'; Y = '\033[33m'
@@ -29,21 +40,27 @@ try:
 except Exception:
     B = G = Y = C = DIM = R = ''
 
+
 def header(step, total, title):
     print(f"\n{B}{C}{'─'*62}{R}")
     print(f"{B}{C}  Step {step}/{total}:  {title}{R}")
     print(f"{B}{C}{'─'*62}{R}")
 
-def ok(msg):     print(f"  {G}✓{R}  {msg}")
-def warn(msg):   print(f"  {Y}!{R}  {msg}")
-def info(msg):   print(f"     {DIM}{msg}{R}")
-def blank():     print()
+def ok(msg):   print(f"  {G}✓{R}  {msg}")
+def warn(msg): print(f"  {Y}!{R}  {msg}")
+def info(msg): print(f"     {DIM}{msg}{R}")
+def blank():   print()
+
 
 def dated_report_path(supabase_path):
-    """Return the archive path for a report, derived from the Supabase CSV filename."""
     m = re.search(r'supabase-export-(\d{4}-\d{2}-\d{2})', supabase_path or '')
     report_date = m.group(1) if m else date.today().isoformat()
     return os.path.join(ARCHIVE_DIR, f'CAMPAIGN-REPORT-{report_date}.md')
+
+def dated_discovery_path(supabase_path):
+    m = re.search(r'supabase-export-(\d{4}-\d{2}-\d{2})', supabase_path or '')
+    report_date = m.group(1) if m else date.today().isoformat()
+    return os.path.join(DISC_ARCHIVE_DIR, f'DISCOVERY-REPORT-{report_date}.md')
 
 
 def ask(prompt, default=None):
@@ -95,7 +112,6 @@ def run_report(supabase_path=None):
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=REPO)
     return result.stdout, result.stderr, result.returncode
 
-
 def run_discovery_report(supabase_path=None):
     cmd = [sys.executable, DISC_SCRIPT]
     if supabase_path:
@@ -104,16 +120,10 @@ def run_discovery_report(supabase_path=None):
     return result.stdout, result.stderr, result.returncode
 
 
-def dated_discovery_path(supabase_path):
-    m = re.search(r'supabase-export-(\d{4}-\d{2}-\d{2})', supabase_path or '')
-    report_date = m.group(1) if m else date.today().isoformat()
-    return os.path.join(DISC_ARCHIVE_DIR, f'DISCOVERY-REPORT-{report_date}.md')
-
-
 # ── Step 1: Supabase CSV ──────────────────────────────────────────────────────
 
 def step1_supabase():
-    header(1, 5, "Supabase CSV Export")
+    header(1, TOTAL_STEPS, "Supabase CSV Export")
     info("This is the full response database — all LinkedIn replies with classification data.")
     blank()
 
@@ -164,7 +174,7 @@ def read_paste():
         except EOFError:
             break
         if not line.strip():
-            if lines:          # blank line after we have content → stop
+            if lines:
                 break
         else:
             lines.append(line)
@@ -178,23 +188,12 @@ def detect_delimiter(lines):
 
 
 def parse_dripify_paste(lines):
-    """
-    Parse a Dripify campaign table pasted from the UI (tab or comma separated).
-    Returns list of dicts with keys: name, leads, accepted, responded.
-
-    Dripify columns we care about (others ignored):
-      Campaign name / title  →  name
-      All Leads / Total      →  leads
-      Accepted               →  accepted
-      Responded / Replies    →  responded
-    """
     if not lines:
         return []
 
     delim = detect_delimiter(lines)
     rows  = [[c.strip() for c in line.split(delim)] for line in lines]
 
-    # Detect header row: first row where any cell looks like a column label
     HEADER_HINTS = {'campaign', 'name', 'title', 'leads', 'accepted',
                     'responded', 'replies', 'total', 'all'}
     first_lower  = [c.lower() for c in rows[0]]
@@ -215,15 +214,10 @@ def parse_dripify_paste(lines):
         acc_col   = col(['accept'])
         resp_col  = col(['respond', 'repli'])
 
-        # Fallback: if columns not found by name, try positional guesses
-        if leads_col is None:
-            leads_col = 1
-        if acc_col is None:
-            acc_col = 2
-        if resp_col is None:
-            resp_col = 3
+        if leads_col is None: leads_col = 1
+        if acc_col   is None: acc_col   = 2
+        if resp_col  is None: resp_col  = 3
     else:
-        # No header — assume: name, leads, accepted, responded
         data_rows = rows
         name_col, leads_col, acc_col, resp_col = 0, 1, 2, 3
 
@@ -235,24 +229,21 @@ def parse_dripify_paste(lines):
         if not name:
             continue
         try:
-            leads    = int(row[leads_col].replace(',', '').strip())
-            accepted = int(row[acc_col].replace(',', '').strip())
+            leads     = int(row[leads_col].replace(',', '').strip())
+            accepted  = int(row[acc_col].replace(',', '').strip())
             responded = int(row[resp_col].replace(',', '').strip())
         except (ValueError, IndexError):
             continue
         results.append({'name': name, 'leads': leads,
                         'accepted': accepted, 'responded': responded})
-
     return results
 
 
 def find_match(campaigns, name):
-    """Match a pasted campaign name to an existing campaign (exact, then substring)."""
     name_l = name.lower().strip()
     for c in campaigns:
         if c['campaign_name'].lower().strip() == name_l:
             return c
-    # Substring: either direction (handles truncated names from Dripify UI)
     for c in campaigns:
         existing_l = c['campaign_name'].lower().strip()
         if name_l in existing_l or existing_l in name_l:
@@ -261,23 +252,22 @@ def find_match(campaigns, name):
 
 
 def collect_new_campaign_fields(name, parsed):
-    """Ask for the metadata fields Dripify doesn't include. Returns a full campaign dict."""
     print(f"\n  {B}New campaign detected:{R}  {name}")
     print(f"  {DIM}leads={parsed['leads']}  acc={parsed['accepted']}  resp={parsed['responded']}{R}")
-    alias     = ask("alias          (Vanessa / Ivy / Lilly / Angel)")
-    geo       = ask("geo            (Dubai / England / London / Amsterdam / Singapore / etc.)")
-    target    = ask("target_segment (e.g. Creative Dir — AI Video)")
-    sequence  = ask("sequence       (Legal Friction / Hitting a Wall / etc.)")
-    launch    = ask("launch_date    (e.g. Jun 5 2026)")
+    alias    = ask("alias          (Vanessa / Ivy / Lilly / Angel)")
+    geo      = ask("geo            (Dubai / England / London / Amsterdam / Singapore / etc.)")
+    target   = ask("target_segment (e.g. Creative Dir — AI Video)")
+    sequence = ask("sequence       (Legal Friction / Hitting a Wall / etc.)")
+    launch   = ask("launch_date    (e.g. Jun 5 2026)")
 
-    is_lf  = 'legal friction' in sequence.lower()
-    is_cd  = 'creadir' in name.lower() or 'ai video' in target.lower()
+    is_lf   = 'legal friction' in sequence.lower()
+    is_cd   = 'creadir' in name.lower() or 'ai video' in target.lower()
     in_cost = 'true' if (is_lf and is_cd) else 'false'
 
     if in_cost == 'true':
         ok("in_cost_analysis = true (Legal Friction + AI Video — correct)")
     else:
-        if yn(f"in_cost_analysis = false. Override to true?"):
+        if yn("in_cost_analysis = false. Override to true?"):
             in_cost = 'true'
 
     return {
@@ -294,10 +284,10 @@ def collect_new_campaign_fields(name, parsed):
     }
 
 
-# ── Step 2: Dripify numbers ───────────────────────────────────────────────────
+# ── Step 2: Dripify numbers + new campaigns ───────────────────────────────────
 
 def step2_dripify():
-    header(2, 5, "Dripify Campaign Numbers")
+    header(2, TOTAL_STEPS, "Dripify Campaign Numbers")
     info("Paste your Dripify campaign table directly from the UI (tab-separated).")
     info("The script matches campaign names, updates existing rows, and flags new ones.")
     info("You can paste all campaigns, a single alias's list, or just new campaigns.")
@@ -309,139 +299,114 @@ def step2_dripify():
     campaigns = load_campaigns()
 
     if not yn("Paste Dripify data now?", default='y'):
-        info("Skipping — campaign numbers unchanged.")
-        return campaigns
-
-    print(f"\n  {B}Paste below. Press Enter when done.{R}")
-    blank()
-
-    pasted = read_paste()
-
-    if not pasted:
-        warn("Nothing pasted — skipping.")
-        return campaigns
-
-    parsed = parse_dripify_paste(pasted)
-
-    if not parsed:
-        warn("Could not parse pasted data.")
-        info("Expected tab-separated rows with columns: Campaign Name, All Leads, Accepted, Responded")
-        info("Check that you copied the table (not just a single cell) and try again.")
-        return campaigns
-
-    blank()
-    print(f"  {B}Parsed {len(parsed)} campaign rows. Comparing against CSV...{R}")
-    blank()
-
-    updated     = 0
-    new_camps   = []
-    no_change   = 0
-
-    for p in parsed:
-        match = find_match(campaigns, p['name'])
-
-        if match:
-            old = (int(match['leads_sent']), int(match['accepted']), int(match['responded']))
-            new = (p['leads'], p['accepted'], p['responded'])
-            short = match['campaign_name'].replace('SI8_RV_R4LI_', '')
-            if old != new:
-                # Show diff
-                parts = []
-                if old[0] != new[0]: parts.append(f"leads {old[0]}→{new[0]}")
-                if old[1] != new[1]: parts.append(f"acc {old[1]}→{new[1]}")
-                if old[2] != new[2]: parts.append(f"resp {old[2]}→{new[2]}")
-                ok(f"Updated  {short[:50]}  ({', '.join(parts)})")
-                match['leads_sent'] = str(new[0])
-                match['accepted']   = str(new[1])
-                match['responded']  = str(new[2])
-                updated += 1
-            else:
-                info(f"No change  {short[:50]}")
-                no_change += 1
-        else:
-            warn(f"New (not in CSV):  {p['name'][:60]}")
-            new_camps.append(p)
-
-    blank()
-    print(f"  Updated: {G}{updated}{R}   No change: {no_change}   New: {Y}{len(new_camps)}{R}")
-
-    # Handle new campaigns found in the paste
-    for p in new_camps:
-        blank()
-        if yn(f"Add '{p['name'][:55]}' to campaigns CSV?"):
-            new_row = collect_new_campaign_fields(p['name'], p)
-            campaigns.append(new_row)
-            ok(f"Added: {p['name'].replace('SI8_RV_R4LI_', '')[:55]}")
-
-    if updated or new_camps:
-        save_campaigns(campaigns)
-        ok(f"Saved dripify-campaigns.csv ({len(campaigns)} campaigns)")
+        info("Skipping paste — campaign numbers unchanged.")
     else:
-        info("No changes written.")
+        print(f"\n  {B}Paste below. Press Enter on a blank line when done.{R}")
+        blank()
+        pasted = read_paste()
+
+        if not pasted:
+            warn("Nothing pasted — skipping.")
+        else:
+            parsed = parse_dripify_paste(pasted)
+            if not parsed:
+                warn("Could not parse pasted data.")
+                info("Expected tab-separated rows: Campaign Name, All Leads, Accepted, Responded")
+            else:
+                blank()
+                print(f"  {B}Parsed {len(parsed)} rows. Comparing against CSV...{R}")
+                blank()
+
+                updated, new_camps, no_change = 0, [], 0
+                for p in parsed:
+                    match = find_match(campaigns, p['name'])
+                    if match:
+                        old   = (int(match['leads_sent']), int(match['accepted']), int(match['responded']))
+                        new   = (p['leads'], p['accepted'], p['responded'])
+                        short = match['campaign_name'].replace('SI8_RV_R4LI_', '')
+                        if old != new:
+                            parts = []
+                            if old[0] != new[0]: parts.append(f"leads {old[0]}→{new[0]}")
+                            if old[1] != new[1]: parts.append(f"acc {old[1]}→{new[1]}")
+                            if old[2] != new[2]: parts.append(f"resp {old[2]}→{new[2]}")
+                            ok(f"Updated  {short[:50]}  ({', '.join(parts)})")
+                            match['leads_sent'] = str(new[0])
+                            match['accepted']   = str(new[1])
+                            match['responded']  = str(new[2])
+                            updated += 1
+                        else:
+                            info(f"No change  {short[:50]}")
+                            no_change += 1
+                    else:
+                        warn(f"New (not in CSV):  {p['name'][:60]}")
+                        new_camps.append(p)
+
+                blank()
+                print(f"  Updated: {G}{updated}{R}   No change: {no_change}   New: {Y}{len(new_camps)}{R}")
+
+                for p in new_camps:
+                    blank()
+                    if yn(f"Add '{p['name'][:55]}' to campaigns CSV?"):
+                        new_row = collect_new_campaign_fields(p['name'], p)
+                        campaigns.append(new_row)
+                        ok(f"Added: {p['name'].replace('SI8_RV_R4LI_', '')[:55]}")
+
+                if updated or new_camps:
+                    save_campaigns(campaigns)
+                    ok(f"Saved dripify-campaigns.csv ({len(campaigns)} campaigns)")
+
+    # Manual additions not in the paste
+    blank()
+    if yn("Any additional campaigns to add manually?"):
+        campaigns = load_campaigns()
+        while True:
+            blank()
+            print(f"  {B}New campaign:{R}")
+            name     = ask("campaign_name  (full Dripify name)")
+            alias    = ask("alias          (Vanessa / Ivy / Lilly / Angel)")
+            geo      = ask("geo            (Dubai / England / London / Amsterdam / Singapore / Los Angeles / Berlin / Sydney / Global)")
+            target   = ask("target_segment (e.g. Creative Dir — AI Video)")
+            sequence = ask("sequence       (Legal Friction / Hitting a Wall / Blocks AI Campaign / Vetting Takes Weeks / etc.)")
+            launch   = ask("launch_date    (e.g. Jun 5 2026)")
+            leads_in = ask("leads_sent")
+            acc_in   = ask("accepted")
+            resp_in  = ask("responded")
+
+            is_lf   = 'legal friction' in sequence.lower()
+            is_cd   = 'creadir' in name.lower() or 'ai video' in target.lower()
+            in_cost = 'true' if (is_lf and is_cd) else 'false'
+
+            if in_cost == 'true':
+                ok("in_cost_analysis = true  (Legal Friction + CreaDir AI Video)")
+            else:
+                info(f"in_cost_analysis = false  (sequence: {sequence})")
+                if yn("Override to true?"):
+                    in_cost = 'true'
+
+            campaigns.append({
+                'campaign_name':    name,
+                'alias':            alias,
+                'geo':              geo,
+                'target_segment':   target,
+                'sequence':         sequence,
+                'launch_date':      launch,
+                'leads_sent':       leads_in,
+                'accepted':         acc_in,
+                'responded':        resp_in,
+                'in_cost_analysis': in_cost,
+            })
+            ok(f"Added: {name.replace('SI8_RV_R4LI_', '')}")
+
+            if not yn("Add another?"):
+                break
+
+        save_campaigns(campaigns)
+        ok(f"Saved dripify-campaigns.csv ({len(campaigns)} campaigns total)")
 
     return campaigns
 
 
-# ── Step 3: Additional new campaigns (not in paste) ──────────────────────────
-
-def step3_new_campaigns():
-    header(3, 5, "Any Other New Campaigns?")
-    info("If you have campaigns that weren't included in the paste above,")
-    info("add them here. Otherwise press Enter to skip.")
-    blank()
-
-    if not yn("Add more campaigns manually?"):
-        info("Skipping.")
-        return
-
-    campaigns = load_campaigns()
-
-    while True:
-        blank()
-        print(f"  {B}New campaign:{R}")
-        name      = ask("campaign_name  (full Dripify name)")
-        alias     = ask("alias          (Vanessa / Ivy / Lilly / Angel)")
-        geo       = ask("geo            (Dubai / England / London / Amsterdam / Singapore / Los Angeles / Berlin / Sydney / Global)")
-        target    = ask("target_segment (e.g. Creative Dir — AI Video)")
-        sequence  = ask("sequence       (Legal Friction / Hitting a Wall / Blocks AI Campaign / Vetting Takes Weeks / etc.)")
-        launch    = ask("launch_date    (e.g. Jun 5 2026)")
-        leads     = ask("leads_sent")
-        accepted  = ask("accepted")
-        responded = ask("responded")
-
-        is_lf  = 'legal friction' in sequence.lower()
-        is_cd  = 'creadir' in name.lower() or 'ai video' in target.lower()
-        in_cost = 'true' if (is_lf and is_cd) else 'false'
-
-        if in_cost == 'true':
-            ok("in_cost_analysis = true  (Legal Friction + CreaDir AI Video)")
-        else:
-            info(f"in_cost_analysis = false  (sequence: {sequence})")
-            if yn("Override to true?"):
-                in_cost = 'true'
-
-        campaigns.append({
-            'campaign_name':    name,
-            'alias':            alias,
-            'geo':              geo,
-            'target_segment':   target,
-            'sequence':         sequence,
-            'launch_date':      launch,
-            'leads_sent':       leads,
-            'accepted':         accepted,
-            'responded':        responded,
-            'in_cost_analysis': in_cost,
-        })
-        ok(f"Added: {name.replace('SI8_RV_R4LI_', '')}")
-
-        if not yn("Add another?"):
-            break
-
-    save_campaigns(campaigns)
-    ok(f"Saved dripify-campaigns.csv ({len(campaigns)} campaigns total)")
-
-
-# ── Step 4: Sequence content ──────────────────────────────────────────────────
+# ── Step 3: Sequence content ──────────────────────────────────────────────────
 
 def load_seq_content():
     if os.path.exists(SEQ_JSON):
@@ -453,17 +418,17 @@ def save_seq_content(data):
     with open(SEQ_JSON, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
-def step4_sequence_content():
-    header(4, 5, "Sequence Content")
+def step3_sequence_content():
+    header(3, TOTAL_STEPS, "Sequence Content")
     blank()
 
     seq = load_seq_content()
     if seq:
-        info(f"Current sequences in sequence-content.json:")
+        info("Current sequences in sequence-content.json:")
         for name in sorted(seq.keys()):
-            raw = seq[name].get('msg1', '')
+            raw   = seq[name].get('msg1', '')
             lines = [l.strip() for l in raw.split('\n') if l.strip() and '%%first_name%%' not in l.lower()]
-            hook = (lines[0][:72] + '…') if lines and len(lines[0]) > 72 else (lines[0] if lines else '?')
+            hook  = (lines[0][:72] + '…') if lines and len(lines[0]) > 72 else (lines[0] if lines else '?')
             info(f"  {name}  →  \"{hook}\"")
     else:
         warn("No sequence-content.json found.")
@@ -503,17 +468,19 @@ def step4_sequence_content():
     ok(f"sequence-content.json updated ({len(seq)} sequences)")
 
 
-# ── Step 5: Run report ────────────────────────────────────────────────────────
+# ── Step 4: Run both reports ──────────────────────────────────────────────────
 
-def step4_run_report(supabase_path):
-    header(5, 5, "Generating Report")
-    info(f"Running: python3 tools/campaign-report/report.py")
+def step4_run_reports(supabase_path):
+    header(4, TOTAL_STEPS, "Generating Reports")
+    info("Running sales report + product discovery report...")
     blank()
 
+    # Sales report
+    info("Running: python3 tools/campaign-report/report.py")
     stdout, stderr, code = run_report(supabase_path=supabase_path)
 
     if code != 0:
-        warn("Script error:")
+        warn("Sales report error:")
         print(stderr[:800])
         return False
 
@@ -522,13 +489,12 @@ def step4_run_report(supabase_path):
             info(line)
 
     if not os.path.exists(REPORT_MD):
-        warn("Report file not written.")
+        warn("Sales report file not written.")
         return False
 
     with open(REPORT_MD, encoding='utf-8') as f:
         content = f.read()
 
-    # Show Key Insights
     m = re.search(r'## Key Insights\n(.*?)(?=\n## |\Z)', content, re.DOTALL)
     if m:
         blank()
@@ -537,7 +503,6 @@ def step4_run_report(supabase_path):
             if line.strip():
                 print(f"  {line}")
 
-    # Show Cost Efficiency table header + rows
     m2 = re.search(r'((?:\| Geo \|.+\n)(?:\|[-| ]+\n)(?:\| \*\*.+\n)+)', content)
     if m2:
         blank()
@@ -547,21 +512,62 @@ def step4_run_report(supabase_path):
 
     blank()
     dated = dated_report_path(supabase_path)
-    ok(f"Report written:")
-    info(f"Archive: 03_Sales/campaign-reports/{os.path.basename(dated)}")
-    info(f"Latest:  03_Sales/CAMPAIGN-PERFORMANCE-LOG.md")
+    ok("Sales report written:")
+    info(f"  Archive: 03_Sales/campaign-reports/{os.path.basename(dated)}")
+    info(f"  Latest:  03_Sales/CAMPAIGN-PERFORMANCE-LOG.md")
+
+    # Discovery report
+    blank()
+    info("Running: python3 tools/campaign-report/discovery_report.py")
+    stdout2, stderr2, code2 = run_discovery_report(supabase_path=supabase_path)
+
+    if code2 != 0:
+        warn("Discovery report error:")
+        print(stderr2[:600])
+        return True  # sales report succeeded; continue
+
+    for line in stdout2.strip().split('\n'):
+        if line.strip():
+            info(line)
+
+    if os.path.exists(DISC_REPORT_MD):
+        with open(DISC_REPORT_MD, encoding='utf-8') as f:
+            disc_content = f.read()
+
+        m3 = re.search(r'## Grand Total\n(.*?)(?=\n## |\Z)', disc_content, re.DOTALL)
+        if m3:
+            blank()
+            print(f"  {B}Discovery Signal Summary:{R}")
+            for line in m3.group(1).strip().split('\n')[:12]:
+                if line.strip():
+                    print(f"  {line}")
+
+        m4 = re.search(r'## By Geo\n\n(.*?)(?=\n## |\Z)', disc_content, re.DOTALL)
+        if m4:
+            blank()
+            print(f"  {B}Discovery By Geo:{R}")
+            for line in m4.group(1).strip().split('\n'):
+                if line.strip():
+                    print(f"  {line}")
+
+        blank()
+        dated_d = dated_discovery_path(supabase_path)
+        ok("Discovery report written:")
+        info(f"  Archive: 03_Sales/discovery-reports/{os.path.basename(dated_d)}")
+        info(f"  Latest:  03_Sales/DISCOVERY-PERFORMANCE-LOG.md")
+
     return True
 
 
 # ── Step 5: Call verification ─────────────────────────────────────────────────
 
 def step5_verify_calls(supabase_path):
-    header(5, 5, "Call Request Verification")
+    header(5, TOTAL_STEPS, "Call Request Verification")
     blank()
     info("For each warm lead below, read their reply and decide:")
-    info("  CALL = they explicitly asked for a meeting / demo / walkthrough in their own words")
-    info("  NOT a call: 'nice to e-meet you', rejection + 'no need for a meeting',")
-    info("              consultant who sent their own Calendly, passive 'happy to chat if needed'")
+    info("  ✓ CALL = they explicitly asked for a meeting / demo / walkthrough in their own words")
+    info("  ✗ NOT:  'nice to e-meet you', rejection + 'no need for a meeting',")
+    info("          consultant who sent their own Calendly, passive 'happy to chat if needed'")
     blank()
 
     with open(REPORT_MD, encoding='utf-8') as f:
@@ -569,7 +575,6 @@ def step5_verify_calls(supabase_path):
 
     geo_calls = load_geo_calls()
 
-    # Extract Call Verification Checklist section
     m = re.search(r'### Call Verification Checklist(.*?)$', content, re.DOTALL)
     if not m:
         warn("Call verification section not found in report.")
@@ -577,7 +582,6 @@ def step5_verify_calls(supabase_path):
 
     checklist = m.group(1)
 
-    # Parse each geo block: **GeoName** (N warm leads): ...leads...
     geo_blocks = re.findall(
         r'\*\*([^*]+)\*\*\s+\((\d+) warm leads?\):(.*?)(?=\n\*\*|\Z)',
         checklist,
@@ -586,14 +590,13 @@ def step5_verify_calls(supabase_path):
 
     updated = False
     for geo, count_str, leads_text in geo_blocks:
-        geo = geo.strip()
+        geo     = geo.strip()
         current = geo_calls.get(geo, '0')
         blank()
         print(f"  {B}{'─'*50}{R}")
-        print(f"  {B}{geo}{R}   ({count_str} warm leads in Supabase CSV)  "
+        print(f"  {B}{geo}{R}   ({count_str} warm leads)  "
               f"{DIM}current verified calls: {current}{R}")
 
-        # Show each lead name/title/company (full conversation is in the report file)
         leads = re.findall(r'^- (.+)$', leads_text, re.MULTILINE)
         for name_line in leads:
             if name_line.strip():
@@ -612,7 +615,6 @@ def step5_verify_calls(supabase_path):
         except ValueError:
             warn(f"Invalid — keeping {current}")
 
-    # Handle geos with 0 warm leads that still have calls tracked
     for geo, calls in geo_calls.items():
         if not any(geo.strip() == b[0].strip() for b in geo_blocks):
             blank()
@@ -630,7 +632,7 @@ def step5_verify_calls(supabase_path):
         save_geo_calls(geo_calls)
         ok("Saved data/geo-cost-inputs.csv")
         blank()
-        info("Re-running report with updated call counts...")
+        info("Re-running sales report with updated call counts...")
         stdout, stderr, code = run_report(supabase_path=supabase_path)
         if code == 0:
             with open(REPORT_MD, encoding='utf-8') as f:
@@ -648,62 +650,230 @@ def step5_verify_calls(supabase_path):
         info("No call counts changed.")
 
 
-# ── Discovery Report ──────────────────────────────────────────────────────────
+# ── Step 6: Discovery signal review ──────────────────────────────────────────
 
-def step_discovery_report(supabase_path):
-    blank()
-    print(f"  {B}{'─'*62}{R}")
-    blank()
-    print(f"  {B}Product Discovery Report{R}")
-    info("Scanning all replies (warm + pass + naf) for product discovery signals.")
-    info("These are NOT sales leads — workflow descriptions, pain confirmations,")
-    info("product questions worth a follow-up discovery conversation.")
-    blank()
+def parse_discovery_checklist(content):
+    """Parse DISCOVERY-PERFORMANCE-LOG.md checklist into list of lead dicts."""
+    m = re.search(r'## Discovery Signal Checklist(.*?)$', content, re.DOTALL)
+    if not m:
+        return []
 
-    stdout, stderr, code = run_discovery_report(supabase_path=supabase_path)
+    checklist   = m.group(1)
+    leads       = []
+    current_geo = 'Other'
+    lines       = checklist.split('\n')
+    i = 0
 
-    if code != 0:
-        warn("Discovery report error:")
-        print(stderr[:600])
+    while i < len(lines):
+        line = lines[i]
+
+        geo_m = re.match(r'\*\*([^*]+)\*\*\s+\(\d+ signals?\):', line)
+        if geo_m:
+            current_geo = geo_m.group(1).strip()
+            i += 1
+            continue
+
+        lead_m = re.match(r'- (\[(?:WARM|PASS|NAF|MINIMAL)\])\s+(.+)', line)
+        if lead_m:
+            cls_label = lead_m.group(1)
+            name_line = lead_m.group(2).strip()
+            parts   = [p.strip() for p in name_line.split(' · ')]
+            name    = parts[0] if len(parts) > 0 else '?'
+            title   = parts[1] if len(parts) > 1 else '?'
+            company = parts[2] if len(parts) > 2 else '?'
+
+            # Collect conversation lines
+            conv_lines = []
+            j = i + 1
+            while j < len(lines):
+                if re.match(r'- \[(?:WARM|PASS|NAF|MINIMAL)\]', lines[j]):
+                    break
+                if re.match(r'\*\*[^*]+\*\*\s+\(\d+ signals?\):', lines[j]):
+                    break
+                stripped = lines[j].strip()
+                if stripped:
+                    conv_lines.append(stripped)
+                j += 1
+
+            excerpt_raw = ' '.join(conv_lines[:2])
+            excerpt = (excerpt_raw[:80] + '…') if len(excerpt_raw) > 80 else excerpt_raw
+
+            leads.append({
+                'name':    name,
+                'title':   title,
+                'company': company,
+                'geo':     current_geo,
+                'cls':     cls_label,
+                'excerpt': excerpt,
+            })
+
+        i += 1
+
+    return leads
+
+
+def append_to_discovery_pipeline(selected_leads):
+    """Append selected leads to DISCOVERY-PIPELINE.md Signal table and update count."""
+    today = date.today().isoformat()
+
+    with open(DISC_PIPELINE, encoding='utf-8') as f:
+        content = f.read()
+
+    new_rows = []
+    for lead in selected_leads:
+        excerpt = lead['excerpt'].replace('|', '/').replace('\n', ' ')
+        row = (f"| {lead['name']} | {lead['title']} | {lead['company']} | "
+               f"{lead['geo']} | {lead['cls']} | — | {excerpt} | {today} |")
+        new_rows.append(row)
+
+    sep = '|------|-------|---------|-----|-------------|----------|---------------------|-------|'
+    if sep in content:
+        content = content.replace(sep + '\n', sep + '\n' + '\n'.join(new_rows) + '\n', 1)
+    else:
+        warn("Could not locate Signal table separator in DISCOVERY-PIPELINE.md")
         return
 
-    for line in stdout.strip().split('\n'):
-        if line.strip():
-            info(line)
+    count_m = re.search(r'## Signal \((\d+)\)', content)
+    if count_m:
+        old_count = int(count_m.group(1))
+        content = content.replace(
+            f'## Signal ({old_count})',
+            f'## Signal ({old_count + len(selected_leads)})',
+            1
+        )
+
+    with open(DISC_PIPELINE, 'w', encoding='utf-8') as f:
+        f.write(content)
+
+
+def step6_discovery_review(supabase_path):
+    header(6, TOTAL_STEPS, "Discovery Signal Review")
+    blank()
+    info("Review leads flagged for product discovery.")
+    info("Select which to add to DISCOVERY-PIPELINE.md → Stage: Signal.")
+    blank()
 
     if not os.path.exists(DISC_REPORT_MD):
-        warn("Discovery report file not written.")
+        warn("Discovery report not found — skipping.")
         return
 
     with open(DISC_REPORT_MD, encoding='utf-8') as f:
         content = f.read()
 
-    # Show Grand Total table
-    m = re.search(r'(## Grand Total\n.*?)(?=\n## |\Z)', content, re.DOTALL)
-    if m:
-        blank()
-        print(f"  {B}Discovery Signal Summary:{R}")
-        for line in m.group(1).strip().split('\n')[:14]:
-            if line.strip():
-                print(f"  {line}")
+    leads = parse_discovery_checklist(content)
 
-    # Show By Geo table
-    m2 = re.search(r'## By Geo\n\n(.*?)(?=\n## |\Z)', content, re.DOTALL)
-    if m2:
-        blank()
-        print(f"  {B}By Geo:{R}")
-        for line in m2.group(1).strip().split('\n'):
-            if line.strip():
-                print(f"  {line}")
+    if not leads:
+        info("No discovery signals found in report.")
+        return
 
+    print(f"  {B}{len(leads)} discovery signals:{R}")
     blank()
-    dated = dated_discovery_path(supabase_path)
-    ok(f"Discovery report written:")
-    info(f"Archive: 03_Sales/discovery-reports/{os.path.basename(dated)}")
-    info(f"Latest:  03_Sales/DISCOVERY-PERFORMANCE-LOG.md")
+
+    for i, lead in enumerate(leads, 1):
+        print(f"  {B}[{i:2d}]{R} {lead['cls']}  "
+              f"{lead['name']} · {lead['title']} · {lead['company']}")
+        print(f"        {DIM}Geo: {lead['geo']}{R}")
+        if lead['excerpt']:
+            print(f"        {DIM}\"{lead['excerpt']}\"{R}")
+        blank()
+
+    info("Full conversations: 03_Sales/DISCOVERY-PERFORMANCE-LOG.md")
     blank()
-    info("Review the Discovery Signal Checklist in the report.")
-    info("Add selected leads to 03_Sales/DISCOVERY-PIPELINE.md → Stage: Signal.")
+    sel_raw = ask(
+        "Add to Discovery Pipeline (e.g. 1,3,5  /  all  /  none)",
+        default='none'
+    ).strip().lower()
+
+    if not sel_raw or sel_raw == 'none':
+        info("Skipping — no leads added to discovery pipeline.")
+        return
+
+    if sel_raw == 'all':
+        selected = leads
+    else:
+        selected = []
+        for part in sel_raw.replace(' ', '').split(','):
+            try:
+                idx = int(part) - 1
+                if 0 <= idx < len(leads):
+                    selected.append(leads[idx])
+                else:
+                    warn(f"Index {part} out of range — skipped")
+            except ValueError:
+                warn(f"Could not parse '{part}' — skipped")
+
+    if not selected:
+        info("No valid selections.")
+        return
+
+    append_to_discovery_pipeline(selected)
+    ok(f"Added {len(selected)} lead(s) to DISCOVERY-PIPELINE.md → Signal")
+    for lead in selected:
+        info(f"  {lead['name']} · {lead['title']} · {lead['company']}  ({lead['geo']})")
+
+
+# ── Step 7: CRM quick sync ────────────────────────────────────────────────────
+
+def update_crm_stage_in_text(crm_text, bid, new_stage):
+    """Update stage field for bid in CRM pipeline table. Returns (text, n_changed)."""
+    lines     = crm_text.split('\n')
+    n_changed = 0
+    for i, line in enumerate(lines):
+        if '|' not in line:
+            continue
+        parts = [p.strip() for p in line.split('|')]
+        # | '' | id | name | company | type | stage | last_action_datetime | ... |
+        if len(parts) >= 7 and parts[1] == bid:
+            raw_parts = line.split('|')
+            if len(raw_parts) >= 7:
+                raw_parts[5] = f' {new_stage} '
+                lines[i]     = '|'.join(raw_parts)
+                n_changed   += 1
+    return '\n'.join(lines), n_changed
+
+
+def step7_crm_sync():
+    header(7, TOTAL_STEPS, "CRM Quick Sync")
+    blank()
+    info("Update CRM stage for any leads that moved this report cycle.")
+    info("Stages: Lead Replied · Warm Lead · Call Requested · Call Scheduled ·")
+    info("        Call Taken · Evaluating · Creator Submitted · Rights Verified Submitted · Won · Lost")
+    blank()
+    info("Format: B050:Call Scheduled, B042:Evaluating   (comma-separated)")
+    info("Press Enter to skip.")
+    blank()
+
+    raw = ask("B-ID:Stage pairs", default='').strip()
+    if not raw:
+        info("Skipping CRM sync.")
+        return
+
+    pairs = [p.strip() for p in raw.split(',') if ':' in p.strip()]
+    if not pairs:
+        info("No valid pairs found.")
+        return
+
+    with open(CRM_MD, encoding='utf-8') as f:
+        crm = f.read()
+
+    updated = 0
+    for pair in pairs:
+        idx   = pair.index(':')
+        bid   = pair[:idx].strip()
+        stage = pair[idx + 1:].strip()
+        crm, n = update_crm_stage_in_text(crm, bid, stage)
+        if n:
+            ok(f"{bid} → {stage}")
+            updated += 1
+        else:
+            warn(f"{bid} not found in CRM pipeline table")
+
+    if updated:
+        with open(CRM_MD, 'w', encoding='utf-8') as f:
+            f.write(crm)
+        ok(f"Updated {updated} CRM record(s) in 03_Sales/CRM.md")
+    else:
+        info("No CRM updates written.")
 
 
 # ── Commit ────────────────────────────────────────────────────────────────────
@@ -733,13 +903,15 @@ def step_commit(supabase_path=None):
         'data/sequence-content.json',
         '03_Sales/CAMPAIGN-PERFORMANCE-LOG.md',
         '03_Sales/DISCOVERY-PERFORMANCE-LOG.md',
+        '03_Sales/DISCOVERY-PIPELINE.md',
+        '03_Sales/CRM.md',
         os.path.relpath(dated, REPO),
         os.path.relpath(dated_disc, REPO),
     ]
     subprocess.run(['git', 'add'] + files_to_add, cwd=REPO, capture_output=True)
     r = subprocess.run(['git', 'commit', '-m', msg], capture_output=True, text=True, cwd=REPO)
     if r.returncode == 0:
-        ok(f"Committed: Sales: {month} campaign report — {n_camps} campaigns, {total_leads:,} leads")
+        ok(f"Committed: {month} campaign report — {n_camps} campaigns, {total_leads:,} leads")
     else:
         warn("Commit failed (nothing to commit, or hook error):")
         if r.stderr: print(f"  {r.stderr[:300]}")
@@ -749,19 +921,19 @@ def step_commit(supabase_path=None):
 
 def main():
     print(f"\n{B}{C}  SI8 Campaign Performance Report Wizard{R}")
-    print(f"  {DIM}Monthly Dripify LinkedIn outreach analysis{R}")
+    print(f"  {DIM}Monthly Dripify LinkedIn outreach analysis  ({TOTAL_STEPS} steps){R}")
     print(f"  {DIM}Reference: 03_Sales/CAMPAIGN-REPORT-METHODOLOGY.md{R}")
 
     supabase_path = step1_supabase()
     step2_dripify()
-    step3_new_campaigns()
-    step4_sequence_content()
+    step3_sequence_content()
 
-    if not step4_run_report(supabase_path):
+    if not step4_run_reports(supabase_path):
         sys.exit(1)
 
     step5_verify_calls(supabase_path)
-    step_discovery_report(supabase_path)
+    step6_discovery_review(supabase_path)
+    step7_crm_sync()
     step_commit(supabase_path)
 
     dated      = dated_report_path(supabase_path)
@@ -769,7 +941,7 @@ def main():
     print(f"\n{B}{G}  Done!{R}")
     print(f"  Sales report:     03_Sales/campaign-reports/{os.path.basename(dated)}")
     print(f"  Discovery report: 03_Sales/discovery-reports/{os.path.basename(dated_disc)}")
-    print(f"  Latest (both):    03_Sales/CAMPAIGN-PERFORMANCE-LOG.md")
+    print(f"  Latest:           03_Sales/CAMPAIGN-PERFORMANCE-LOG.md")
     print(f"                    03_Sales/DISCOVERY-PERFORMANCE-LOG.md\n")
 
 
