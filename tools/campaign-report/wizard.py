@@ -695,7 +695,15 @@ def parse_discovery_checklist(content):
                     conv_lines.append(stripped)
                 j += 1
 
-            excerpt_raw = ' '.join(conv_lines[:2])
+            raw_conv = '\n'.join(conv_lines)
+            if _CLASSIFY_AVAILABLE:
+                try:
+                    lead_reply  = extract_reply(raw_conv)
+                    excerpt_raw = lead_reply.strip() if lead_reply and len(lead_reply) > 20 else ' '.join(conv_lines[:2])
+                except Exception:
+                    excerpt_raw = ' '.join(conv_lines[:2])
+            else:
+                excerpt_raw = ' '.join(conv_lines[:2])
             excerpt = (excerpt_raw[:80] + '…') if len(excerpt_raw) > 80 else excerpt_raw
 
             leads.append({
