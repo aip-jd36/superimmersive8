@@ -112,13 +112,21 @@ Remind the user: full conversations are in `03_Sales/DISCOVERY-PERFORMANCE-LOG.m
 
 ---
 
-## Step 7: CRM Quick Sync
+## Step 7: Sales Pipeline Sync
 
-Ask the user: "Any CRM stage updates? Enter B-ID:Stage pairs (e.g. B050:Call Scheduled, B042:Evaluating) or press Enter to skip."
+Ask the user: "Any sales pipeline stage updates? Enter B-ID:Stage pairs (e.g. B050:Call Scheduled, B042:Evaluating) or press Enter to skip."
 
-Valid stages: Lead Replied · Warm Lead · Call Requested · Call Scheduled · Call Taken · Evaluating · Creator Submitted · Rights Verified Submitted · Won · Lost
+Valid stages: Lead Replied · Warm Lead · Call Requested · Call Scheduled · Call Taken · Evaluating · Creator Submitted · Rights Verified Submitted · Lost
 
-For each pair, find the matching row in `03_Sales/CRM.md` pipeline table (between `<!-- pipeline:start -->` and `<!-- pipeline:end -->`) and update the stage field.
+**Do NOT update CRM.md.** All stage changes go into `03_Sales/SALES-PIPELINE.md` only.
+
+For each pair provided:
+1. Look up the lead's name, company, and geo from `03_Sales/CRM.md` (read-only reference).
+2. Add or move the lead row into the correct stage section of `03_Sales/SALES-PIPELINE.md` (between `<!-- sales-pipeline:start -->` and `<!-- sales-pipeline:end -->`).
+3. Update the stage section count (e.g. `## 3. Call Requested (0)` → `## 3. Call Requested (1)`).
+4. If the lead already exists in an earlier stage section, remove it from there before adding to the new one.
+
+Use the column structure defined in each stage section. Fill in what's available from CRM context; use `—` for unknowns.
 
 ---
 
@@ -128,7 +136,7 @@ Ask (AskUserQuestion):
 - "Commit this report?" → Yes / No
 
 If Yes:
-- `git add data/dripify-campaigns.csv data/geo-cost-inputs.csv data/sequence-content.json 03_Sales/CAMPAIGN-PERFORMANCE-LOG.md 03_Sales/DISCOVERY-PERFORMANCE-LOG.md 03_Sales/DISCOVERY-PIPELINE.md 03_Sales/CRM.md 03_Sales/campaign-reports/CAMPAIGN-REPORT-YYYY-MM-DD.md 03_Sales/discovery-reports/DISCOVERY-REPORT-YYYY-MM-DD.md`
+- `git add data/dripify-campaigns.csv data/geo-cost-inputs.csv data/sequence-content.json 03_Sales/CAMPAIGN-PERFORMANCE-LOG.md 03_Sales/DISCOVERY-PERFORMANCE-LOG.md 03_Sales/DISCOVERY-PIPELINE.md 03_Sales/SALES-PIPELINE.md 03_Sales/CRM.md 03_Sales/campaign-reports/CAMPAIGN-REPORT-YYYY-MM-DD.md 03_Sales/discovery-reports/DISCOVERY-REPORT-YYYY-MM-DD.md`
 - Read the campaign count and total leads from the CSV for the commit message
 - Commit with message: "Sales: [Month Year] campaign report — [N] campaigns, [N,NNN] leads"
 
