@@ -29,7 +29,7 @@
 
 <!-- sales-pipeline:start -->
 
-## 1. Lead Replied (58)
+## 1. Lead Replied (69)
 
 *Substantive reply received. Assessing fit and next move.*
 
@@ -95,10 +95,21 @@
 | B136 | Tom Freeman | Freeman Studio | Germany | "Clients tell me which AI models are ok" | Reply + position SI8 as the document | — |
 | B137 | Akbar Shaikh | Dept of Culture – Abu Dhabi | Dubai/UAE | "No one asked yet, but they ask which tool used" | Reply + tool disclosure is step 1 | — |
 | B140 | Stephane Jacob | Atlantic Venture Group | Dubai/UAE | "I don't go above 30% AI — I consider it stock footage" | Reply + probe client requirements | — |
+| B006 | Rawand Latif | ARUBA CREATIVE | — | v4 sample + Calendly sent — no reply | Send follow-up | — |
+| B008 | Barney O'Kelly | AlixPartners | — | Nudge sent — no reply to call offer | Send follow-up | — |
+| B010 | Bee Lin Ang | Stewardship Asia Centre | Singapore | Nudge sent — no reply to call offer | Send follow-up | — |
+| B013 | Qaiser Mehmood | ECONROAD International | — | Sample + Calendly sent — no reply | Send follow-up | — |
+| B024 | Chitra J | GrapheneAI | — | Msg 2 with Calendly — no reply | Send follow-up | — |
+| B031 | Steve Mcpartland | Visually Sonic | — | 2nd nudge — no reply | Send follow-up | — |
+| B044 | Shaun Yeo | Reel Loco Productions | Singapore | Calendly sent — no reply | Send follow-up | — |
+| B048 | Piotr Nierobisz | Munchingsquare | Amsterdam | 2nd nudge with call offer — no reply | Send follow-up | — |
+| B061 | Jay Pirabakaran | JAYPRINTS Studio | London/UK | 2nd nudge — no reply | Send follow-up | — |
+| C001 | keeper505 | — | — | Creator follow-up — no reply | Chase on IG | — |
+| C006 | Essa | — | Hong Kong | v4 WhatsApp re-pitch — no reply | Chase on WhatsApp | — |
 
 ---
 
-## 2. Warm Lead (17)
+## 2. Warm Lead (26)
 
 *Clear ICP signal or acknowledged pain. Moving toward a call or sample.*
 
@@ -121,40 +132,29 @@
 | B138 | Tunç Topçuoglu | HOOD Studio | Amsterdam | "Checked your product — very interesting. Would love to hear more." | Yes (product reviewed) | Reply + send sample + book JD call | — |
 | B139 | James Hilditch | BearJam | London/UK | "Yes, sometimes. Important part of the process." | No | Reply + send sample | — |
 | C002 | @syntaxdiffusion | — | — | Interested — v4 reply sent | No | Send v4 follow-up | — |
+| B009 | Syed Tabish Hasan | Zedtronix | — | Previously showed interest; Calendly nudge sent — gone cold | Send follow-up | — |
+| B027 | Marc Danielle De Guzman | UnaFinancial | — | Sample sent + invited for 15-20 min product feedback call | Await reply — book JD call | — |
+| B057 | Rheea Aranha | Vincent Studios | London/UK | Asked for sample by email — we asked for her email address | Await email address | — |
+| B087 | Ibrahim Badi | IKM Marketing | London/UK | "Yes especially in regulated sectors" — asked to beta test platform | Await reply — confirm JD call | — |
+| B088 | Matthew Sergison-Main | OLIVER / Brandtech | London/UK | "Yes I am being asked this 100%" — strongest pain signal in UK batch | Reply + push for call | — |
+| B090 | Saira Macleod | Magnific | London/UK | Asked what the checker looks for — product question | Await reply — confirm JD call | — |
+| B095 | Florent Delavous | Xtendency | Dubai/UAE | "Already working on something in this space" — CEO | Probe collab/competitor + book call | — |
+| B099 | Sultan Alsuwaidi | Video tube | Dubai/UAE | "Yes — becoming standard now" — sample sent | Await reply | — |
+| B126 | Phil Langer | Jung von Matt SPREE | Germany | Major holdco (JvM) — pitch + sample sent | Await reply | — |
 
 ---
 
-## 3. Call Requested (24)
+## 3. Call Requested (5)
 
-*Calendly sent or direct slots offered. Waiting for booking confirmation.*
+*The lead has expressed interest in a call, or confirmed a booking that didn't happen.*
 
-| B-ID | Lead | Company | Geo | Request Date | Format | Follow Up By |
-|------|------|---------|-----|--------------|--------|--------------|
-| B006 | Rawand Latif | ARUBA CREATIVE | — | 2026-04-07 | Calendly | — |
-| B008 | Barney O'Kelly | AlixPartners | — | 2026-04-24 | JD call offer | — |
-| B009 | Syed Tabish Hasan | Zedtronix | — | 2026-05-08 | Calendly nudge + direct slots | — |
-| B010 | Bee Lin Ang | Stewardship Asia Centre | Singapore | 2026-04-24 | JD call offer | — |
-| B011 | Hugo Barbera | HumAIn | — | 2026-05-08 | Sample or call (2nd nudge) | — |
-| B013 | Qaiser Mehmood | ECONROAD International | — | 2026-04-01 | Calendly | — |
-| B024 | Chitra J | GrapheneAI | — | 2026-04-07 | Calendly | — |
-| B027 | Marc Danielle De Guzman | UnaFinancial | — | 2026-04-09 | 15-20 min JD call | — |
-| B031 | Steve Mcpartland | Visually Sonic | — | 2026-05-08 | Sample or call (2nd nudge) | — |
-| B043 | Luke Brady | Sublime Animations Ltd | London/UK | 2026-05-23 | Chase — 4th attempt; call never happened | 2026-05-26 |
-| B044 | Shaun Yeo | Reel Loco Productions | Singapore | 2026-04-18 | Calendly | — |
-| B045 | Mike Harris | Seenit | London/UK | 2026-05-23 | Chase — booked via Calendly, no-show | 2026-05-26 |
-| B048 | Piotr Nierobisz | Munchingsquare | Amsterdam | 2026-05-08 | JD call offer | — |
-| B057 | Rheea Aranha | Vincent Studios | London/UK | 2026-05-01 | Asked for email to send sample | — |
-| B061 | Jay Pirabakaran | JAYPRINTS Studio | London/UK | 2026-05-08 | Sample or 15-min JD call | — |
-| B087 | Ibrahim Badi | IKM Marketing | London/UK | 2026-05-08 | Platform + discount code + JD call | — |
-| B088 | Matthew Sergison-Main | OLIVER / Brandtech | London/UK | 2026-05-01 | HPI Check logline — highly engaged | — |
-| B090 | Saira Macleod | Magnific | London/UK | 2026-05-08 | JD call offer | — |
-| B095 | Florent Delavous | Xtendency | Dubai/UAE | 2026-05-08 | Probing collab/competitor | — |
-| B096 | Ankita Biswas | HTCreaTec | Dubai/UAE | 2026-05-08 | Slots: May 14-15 AM Dubai | 2026-05-15 |
-| B099 | Sultan Alsuwaidi | Video tube | Dubai/UAE | 2026-05-08 | Sample offer | — |
-| B100 | Ramez Tabshi | — | Dubai/UAE | 2026-05-22 | Slots: May 26/28/29 + Calendly | 2026-05-29 |
-| B126 | Phil Langer | Jung von Matt SPREE | Germany | 2026-05-20 | Sample offer + platform pitch | — |
-| C001 | keeper505 | — | — | 2026-04-09 | Comp code when she confirms | — |
-| C006 | Essa | — | Hong Kong | 2026-04-07 | v4 WhatsApp re-pitch | — |
+| B-ID | Lead | Company | Geo | How They Requested | Last Action | Follow Up By |
+|------|------|---------|-----|--------------------|-------------|--------------|
+| B011 | Hugo Barbera | HumAIn | — | Expressed interest — 2nd nudge sent | Sample or call offered | — |
+| B043 | Luke Brady | Sublime Animations Ltd | London/UK | Confirmed calls 3x — all missed | Chase — 4th attempt | 2026-05-26 |
+| B045 | Mike Harris | Seenit | London/UK | "Thanks, booked!" via Calendly — no-show | Chase | 2026-05-26 |
+| B096 | Ankita Biswas | HTCreaTec | Dubai/UAE | "I'd love to know more and talk over a chat!" | Slots proposed May 14-15 — no confirmation | 2026-05-26 |
+| B100 | Ramez Tabshi | — | Dubai/UAE | Engaged — specific slots sent | Tue May 26 / Thu May 28 / Fri May 29 @ 1pm Dubai | 2026-05-29 |
 
 ---
 
