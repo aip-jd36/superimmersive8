@@ -9,6 +9,40 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of May 25, 2026
+*Run: 2026-05-25 · 11 high · 8 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Channel Factory’s Nico Greco: Brand Safety Rules were ‘Designed for Human Authors,’ not AI-Generated Content](https://www.beet.tv/2026/05/channel-factorys-nico-greco-brand-safety-rules-were-designed-for-human-authors-not-ai-generated-content.html) | Beet.TV | Mon, 18 May 2026 | ☐ |
+| 8 | post | [AI content governance for marketing teams](https://www.contentgrip.com/ai-content-governance-marketing/) | ContentGrip | Sun, 24 May 2026 | ☐ |
+| 8 | post+update | [Firefly Video: Generative AI with Safe Commercial License](https://foro3d.com/en/2026/mayo/firefly-video-ia-generativa-con-licencia-comercial-segura.html) | Foro3D | Sat, 23 May 2026 | ☐ |
+| 8 | post+update | [IP system must adapt to survive, say EUIPO leaders](https://www.worldipreview.com/trademark/ip-system-must-adapt-to-survive-say-euipo-leaders) | World IP Review | Fri, 22 May 2026 | ☐ |
+| 8 | post+update | [Mind the Gap: States Step in to Address Ownership of AI-Generated Works Amid Federal Uncertainty](https://www.mayerbrown.com/en/insights/publications/2026/05/mind-the-gap-states-step-in-to-address-ownership-of-ai-generated-works-amid-federal-uncertainty) | Mayer Brown | Fri, 22 May 2026 | ☐ |
+| 8 | post | [Study: AI Labeling Does Not Hurt Video Ad Performance](https://www.tvtechnology.com/insights/analysis/study-ai-labeling-does-not-hurt-video-ad-performance) | TVTechnology | Thu, 21 May 2026 | ☐ |
+| 8 | post+update | [AI dominates global IP debate at INTA conference in London](https://www.dailyjournal.com/articles/391453-ai-dominates-global-ip-debate-at-inta-conference-in-london) | Daily Journal | Mon, 18 May 2026 | ☐ |
+| 7 | post | [Ansel Adams trust condemns unauthorized AI colorized work](https://startupfortune.com/ansel-adams-trust-condemns-unauthorized-ai-colorized-work/) | Startup Fortune | Sat, 23 May 2026 | ☐ |
+| 7 | post | [Seven times creators lost out after depending on tech platforms and why OpenAI’s ‘Critterz’ may be the latest example](https://www.livemint.com/technology/seven-times-creators-lost-out-after-depending-on-tech-platforms-and-why-openai-s-critterz-may-be-the-latest-example-11779506284405.html) | Mint | Sat, 23 May 2026 | ☐ |
+| 7 | post | [AI Advertising and the Authenticity Paradox](https://www.orfonline.org/english/expert-speak/ai-advertising-and-the-authenticity-paradox) | orfonline.org | Fri, 22 May 2026 | ☐ |
+| 7 | post+update | [South Africa Plans AI Content Disclosure Rules and Fact-Checking Platform to Combat Misinformation](https://iafrica.com/south-africa-plans-ai-content-disclosure-rules-and-fact-checking-platform-to-combat-misinformation/) | iAfrica.com | Thu, 21 May 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Text-to-Video AI Explained: A Beginner’s Guide to AI Video Models](https://editorialge.com/text-to-video-ai-explained/) | Editorialge | Sun, 24 May 2026 | ☐ |
+| 6 | monitor | [Rising AI Mistakes in Legal Pose Quandary for Law Firms' Insurance Policies](https://www.law.com/americanlawyer/2026/05/21/rising-ai-mistakes-in-legal-pose-quandary-for-law-firms-insurance-policies/) | Law.com | Thu, 21 May 2026 | ☐ |
+| 6 | monitor | [Journalists sue tech giants over 'stolen' voices for AI training](https://www.sj-r.com/story/news/politics/state/2026/05/19/tech-giants-sued-over-stolen-voices-for-ai/90147844007/) | The State Journal-Register | Tue, 19 May 2026 | ☐ |
+| 5 | monitor | [French Mistral CEO: AI companies should pay a content levy in Europe and get legal protection](https://eurasiabusinessnews.com/2026/05/23/french-mistral-ceo-ai-companies-should-pay-a-content-levy-in-europe-and-get-legal-protection/) | Eurasia Business News | Sat, 23 May 2026 | ☐ |
+| 5 | monitor | [Universal Music Group, TikTok Strike New Licensing Deal For the AI Era](https://www.hollywoodreporter.com/music/music-industry-news/universal-music-group-tiktok-licensing-agreement-1236604219/) | The Hollywood Reporter | Fri, 22 May 2026 | ☐ |
+| 5 | update | [FurtherAI Appoints Tom Bradley to Lead UK and EU Expansion](https://www.morningstar.com/news/business-wire/20260518611218/furtherai-appoints-tom-bradley-to-lead-uk-and-eu-expansion) | Morningstar | Mon, 18 May 2026 | ☐ |
+| 4 | monitor | [AI Startup Insurance: Guide to Protecting Your Tech](https://tynmagazine.com/ai-startup-insurance-explained-how-to-protect-your-tech-business/) | TyN Magazine | Thu, 21 May 2026 | ☐ |
+| 4 | monitor | [Not Every Ad Server Needs AI. Here's Where It Actually Matters](https://www.exchangewire.com/blog/2026/05/20/not-every-ad-server-needs-ai-heres-where-it-actually-matters/) | exchangewire.com | Wed, 20 May 2026 | ☐ |
+
+---
+
 ## Week of May 22, 2026
 *Run: 2026-05-22 · 7 high · 10 monitor · lookback 7 days*
 
