@@ -128,6 +128,26 @@ For each pair provided:
 
 Use the column structure defined in each stage section. Fill in what's available from CRM context; use `—` for unknowns.
 
+### Call Taken — additional step
+
+If any lead moves to **Call Taken**, ask: "Do you have a call transcript for [lead name]?"
+
+If yes:
+1. Ask for the transcript path (or confirm it's in `03_Sales/transcripts/`).
+2. Read the transcript and generate a call note at `03_Sales/call-notes/CALL-YYYY-MM-DD-BXXX-Name.md` using this structure:
+   - Header: date, duration, participants, B-ID, transcript path
+   - ICP Verdict (fit / not fit + 1-line reason)
+   - Summary (2-3 sentences)
+   - Key Signals (bullets)
+   - Objections Heard (bullets)
+   - Product Feedback / Discovery Notes
+   - Next Steps (checkboxes)
+   - Re-engage Trigger (if nurture)
+3. Update the `CRM.md` entry to add `Call notes: 03_Sales/call-notes/CALL-YYYY-MM-DD-BXXX-Name.md` in the notes field.
+4. Update the `SALES-PIPELINE.md` card: condense to 2-3 line verdict + link `→ [Call notes](call-notes/CALL-YYYY-MM-DD-BXXX-Name.md)`.
+
+If no transcript: note "No transcript — verbal notes only" in the pipeline card and ask JD to add a brief summary to the call note file manually.
+
 ---
 
 ## Step 8: Pipeline ICP Analysis

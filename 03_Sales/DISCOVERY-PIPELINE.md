@@ -7,7 +7,7 @@ is discovery calls to validate PMF, surface edge cases, and identify product gap
 **Source:** `03_Sales/DISCOVERY-PERFORMANCE-LOG.md` → Discovery Signal Checklist → manual review.
 A lead can appear in BOTH this pipeline and `03_Sales/CRM.md` if they are also a sales prospect.
 
-**Last updated:** 2026-05-23
+**Last updated:** 2026-05-26
 
 ---
 
@@ -27,12 +27,17 @@ A lead can appear in BOTH this pipeline and `03_Sales/CRM.md` if they are also a
 
 <!-- discovery-pipeline:start -->
 
-## Signal (93)
+## Signal (98)
 
 *Leads flagged from discovery report, pending outreach decision.*
 
 | Lead | Title | Company | Geo | Sales Class | Campaign | Key insight excerpt | Added |
 |------|-------|---------|-----|-------------|----------|---------------------|-------|
+| Mike Harris | Product Manager | Seenit | London/UK | [WARM] | — | "Yes I will be open to finding out more and a short call." — explicit call request | 2026-05-26 |
+| Gabriel Preston | Head of Engagement & Directors Rep | Imagine This Creative Studio | London/UK | [MINIMAL] | — | "Client has approved platform list for indemnity… we share prompt sheets and workflow docs… increased focus on talent usage and likeness rights" | 2026-05-26 |
+| Ankita Biswas | Art Director | HTCreaTec | UAE/Dubai | [WARM] | — | "Yess! They do at times!… I'd love to know more about it and also talk about it over a chat! Ping me when you're available to discuss!" | 2026-05-26 |
+| Tunç Topçuoglu | Co-Founder + Hybrid Film Director | HOOD Studio | Netherlands | [WARM] | — | "I checked your product and platform its very interesting. I would love to hear more about it." — proactively visited site | 2026-05-26 |
+| Steve Bannerman | Head of Post-production Intl Originals APAC + Head of Intl VFX | Prime Video & Amazon MGM Studios | London/UK | [MINIMAL] | — | "In the feature film space, provenance of the video is HUGELY important. You will indeed see it coming up more and more…" | 2026-05-26 |
 | Rheea Aranha | Creative Director | Vincent Studios | London/UK | [WARM] | — | Thanks, We will be in touch at the time this is required. A sample of Chain of t… | 2026-05-23 |
 | Nikolay Kolev | VR Designer | XR Future LTD | London/UK | [WARM] | — | Hi Ivy, Yes, more often now, especially with enterprise and regulated brands. Le… | 2026-05-23 |
 | Graham Vincent | Creative Director | grigio:london | London/UK | [WARM] | — | Yes, of course. G01:31 am Mon May 04 2026 Hi Graham, good to hear — and that's w… | 2026-05-23 |

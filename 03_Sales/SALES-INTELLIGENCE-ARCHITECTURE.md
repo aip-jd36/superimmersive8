@@ -2,7 +2,7 @@
 
 **Purpose:** Single reference for how sales data flows through the system — from raw LinkedIn responses to ICP thesis to campaign decisions. For human review and future AI agents.
 
-**Last updated:** April 9, 2026
+**Last updated:** 2026-05-26
 
 ---
 
@@ -91,6 +91,21 @@
 4. If the pattern changes the ICP thesis, update `CRM.md` Section 3
 5. If targeting filters need to change, update `LINKEDIN-CAMPAIGNS-CAAS-V1.md` LinkedIn Search Filters section
 
+### When a call is taken:
+1. Copy transcript VTT from Downloads → `03_Sales/transcripts/` (keep Zoom filename)
+2. Generate call note: `03_Sales/call-notes/CALL-YYYY-MM-DD-BXXX-Name.md`
+   - Header: date, duration, participants, B-ID, transcript path
+   - ICP verdict (fit / not fit + reason)
+   - Summary (2-3 sentences)
+   - Key signals (bullets)
+   - Objections heard
+   - Product feedback / discovery notes
+   - Next steps (checkboxes)
+   - Re-engage trigger (if nurture)
+3. Update `CRM.md` entry: add `Call notes: 03_Sales/call-notes/CALL-YYYY-MM-DD-BXXX-Name.md` to the notes field
+4. Update `SALES-PIPELINE.md` card: condense verdict to 2-3 lines + link to call note file
+5. If ICP-confirming or ICP-breaking, propagate signal to `CRM.md` Section 3
+
 ### When a campaign batch completes:
 1. Pull final stats from outreach tool (accepted, responses per list)
 2. Update `LINKEDIN-CAMPAIGN-ANALYSIS.md` Section 2 (raw data table) and Section 4 (funnel summary)
@@ -113,6 +128,9 @@
 | `03_Sales/outreach/LINKEDIN-CAMPAIGN-ANALYSIS.md` | 1 | Campaign stats, warm rates by campaign/alias/geo/title/message number, ICP lead log, key learnings |
 | `03_Sales/CRM.md` Section 3 | 2 | Synthesized ICP thesis (title ranking, geo verdict, company type, pain levels, conversion pathways) |
 | `03_Sales/CRM.md` pipeline table | 2 | Active pipeline — warm/good leads only (stage, urgency, next action). Read by daily digest. |
+| `03_Sales/SALES-PIPELINE.md` | 2 | Stage-by-stage funnel view (7 stages). Updated via `/dripify-report` Step 7. Pipeline cards reference call notes. |
+| `03_Sales/call-notes/` | 2 | One markdown file per sales call — summary, ICP verdict, objections, next steps, transcript path. Named `CALL-YYYY-MM-DD-BXXX-Name.md`. |
+| `03_Sales/transcripts/` | 0 | Raw Zoom/call transcript VTT files. Named as received from Zoom. Referenced by call note files. |
 | `03_Sales/outreach/LINKEDIN-CAMPAIGNS-CAAS-V1.md` | 3 | Campaign playbook + targeting filters (downstream of Layer 2) |
 | `03_Sales/outreach/PERSONAS.md` | 3 | Persona SOP + tone rules (downstream consumer) |
 | `tools/daily-digest/digest.py` | 3 | Reads CRM Section 3 for daily ICP signal check |

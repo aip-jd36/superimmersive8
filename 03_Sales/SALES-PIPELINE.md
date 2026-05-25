@@ -158,23 +158,23 @@
 
 ---
 
-## 4. Call Scheduled (1)
+## 4. Call Scheduled (0)
 
 *Call confirmed on calendar.*
 
 | B-ID | Lead | Company | Geo | Call Date | Format | Prep Notes |
 |------|------|---------|-----|-----------|--------|------------|
-| B089 | Oliyah Joseph | Visual Vibe | London/UK | Mon May 25, 2026 | — | Confirmed — calendar invite accepted |
+| — | — | — | — | — | — | — |
 
 ---
 
-## 5. Call Taken (0)
+## 5. Call Taken (1)
 
 *Discovery call completed. Notes filed in CRM.*
 
 | B-ID | Lead | Company | Geo | Call Date | Key Signal | Next Action |
 |------|------|---------|-----|-----------|------------|-------------|
-| — | — | — | — | — | — | — |
+| B089 | Oliyah Joseph + Paul (husband) | Visual Vibe | London/UK | May 25, 2026 | **Wrong ICP — AI images only, SMB/e-commerce clients, no legal friction.** Paul: "Never been asked for any documentation — just privacy NDAs." Paul skeptical: "Anybody can sign a bit of paper." But validated thesis: "You are playing ahead — matter of time, give it 6 months." Comp codes offered, declined. → [Call notes](call-notes/CALL-2026-05-25-B089-Oliyah-Joseph.md) | Thank-you email sent 5/25. TODO: LinkedIn add (Oliyah + Paul); nurture Q4 2026 when EU AI Act enforcement heats up. |
 
 ---
 
