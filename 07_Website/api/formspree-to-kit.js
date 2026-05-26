@@ -58,12 +58,12 @@ export default async function handler(req, res) {
 
     // Name validation — reject bot-generated random strings
     if (name) {
-      // Reject names over 60 chars with no spaces (random string pattern)
-      if (name.length > 60 && !name.includes(' ')) {
+      // Reject names over 30 chars with no spaces (random string pattern)
+      if (name.length > 30 && !name.includes(' ')) {
         return res.status(200).json({ success: true, message: 'Demo request received.' });
       }
-      // Reject names that are purely alphanumeric with no spaces and over 20 chars
-      if (/^[A-Za-z0-9]{20,}$/.test(name)) {
+      // Reject names that are purely alphanumeric with no spaces and over 12 chars
+      if (/^[A-Za-z0-9]{12,}$/.test(name)) {
         return res.status(200).json({ success: true, message: 'Demo request received.' });
       }
     }
