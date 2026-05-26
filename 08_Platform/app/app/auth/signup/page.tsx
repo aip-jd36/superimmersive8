@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
+import { Turnstile } from '@marsidev/react-turnstile'
 
 const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -124,7 +125,9 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [nextPath, setNextPath] = useState<string>('')
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const supabase = createClient()
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -143,6 +146,11 @@ export default function SignupPage() {
     try {
       setError(null)
 
+      if (turnstileSiteKey && !captchaToken) {
+        setError('Please complete the verification check.')
+        return
+      }
+
       const callbackUrl = nextPath
         ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
         : `${window.location.origin}/auth/callback`
@@ -156,6 +164,7 @@ export default function SignupPage() {
             role: 'creator',
           },
           emailRedirectTo: callbackUrl,
+          captchaToken: captchaToken ?? undefined,
         },
       })
 
@@ -257,13 +266,28 @@ export default function SignupPage() {
               )}
             </div>
 
+            {turnstileSiteKey && (
+              <div className="flex justify-center">
+                <Turnstile
+                  siteKey={turnstileSiteKey}
+                  onSuccess={(token) => setCaptchaToken(token)}
+                  onExpire={() => setCaptchaToken(null)}
+                  options={{ theme: 'light' }}
+                />
+              </div>
+            )}
+
             {error && (
               <div className="p-3 text-sm text-red-500 bg-red-50 border border-red-200 rounded">
                 {error}
               </div>
             )}
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isSubmitting || (!!turnstileSiteKey && !captchaToken)}
+            >
               {isSubmitting ? 'Creating account...' : 'Sign Up'}
             </Button>
           </form>
