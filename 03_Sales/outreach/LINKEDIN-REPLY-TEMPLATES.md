@@ -161,6 +161,46 @@ First used: B091 Abi Tomasiewicz (May 8)
 
 ---
 
+## JD PERSONAL LINKEDIN — POST-CONNECTION TEMPLATES
+
+Templates for JD's personal LinkedIn account, used after connecting with leads who were handed off from a Lilly/alias campaign.
+
+---
+
+### JD-Connect-v1 — Connection Request Message
+
+Sent with the connection request itself. Short — references Lilly by name.
+
+> Hi [Name] — I'm JD, Lilly's colleague and founder of SI8. She mentioned you two had a great exchange and suggested I reach out directly. Would love to connect and continue the conversation.
+
+**First used:** May 26, 2026 — 18 Lilly handoff leads (Dubai, UK, Singapore)
+
+---
+
+### JD-FollowUp-v1 — First DM After Connection Accepted
+
+**Formula:** Intro (Lilly reference) → Pain statement → Have you been asked? → Can you review my survey?
+
+> [Greeting + name]! [Pain statement — brands/legal teams requiring documentation before approving AI video for commercial use.] Lilly mentioned [their specific signal]. Have [they/clients] started asking for anything specific yet? I've built a Chain of Title questionnaire to capture all of this — would you be open to a quick look to see if I'm missing anything?
+
+**Examples sent May 26, 2026:**
+
+**B103 Ahmed Samy Amin (GTCFX)** — financial/brand clients
+> Happy to connect Ahmed! Brand legal teams are increasingly blocking AI video until creators can prove clean IP — tools used, training data, prompt logs. Lilly mentioned you've been navigating this a lot for financial and brand clients. Have clients started asking for anything specific yet? I've built a Chain of Title questionnaire to capture all of this — would you be open to a quick look to see if I'm missing anything?
+
+**B122 Mhd. Ali (Monks)** — tool transparency
+> Thanks for connecting Mhd! Legal teams at major brands are starting to require documented proof of how AI video was made before they'll approve it for commercial use. Lilly mentioned your clients are already asking about tool transparency. Have they gotten specific about what they want to see? I've built a Chain of Title questionnaire for exactly this — would you be up for a quick look to tell me if I'm leaving anything out?
+
+**B142 Asif N (Fundfloat Academy)** — legal teams requesting transparency docs
+> Nice to meet you Asif! As AI video moves into bigger campaigns, legal teams are requiring documentation — tools used, commercial rights, no copyrighted assets — before they'll sign off. Lilly mentioned you're already seeing this. Has anything specific come up that clients are asking for? I've built a questionnaire to capture all of this — would you be open to taking a look to see if I'm missing anything?
+
+**B106 Mohammed Magdy Alzahran (Dybaja AI Creative Studio)** — NDA + ownership rights
+> Hi Mohammed! Legal teams are increasingly requiring a documented chain of ownership before approving AI video for commercial use — going beyond just an NDA. Lilly mentioned you're already dealing with this. Have clients gotten specific about what they want documented? I've built a Chain of Title questionnaire for exactly this — would you be open to a quick look to see if there's anything I should be capturing?
+
+**Key principle:** The ask is to review the survey — not to book a call. Low friction. Gets them engaged with the product before any sales conversation.
+
+---
+
 ## SPLIT TEST RESULTS (update as replies come in)
 
 | Logline | Sent | Replied | Reply Rate | Notes |
