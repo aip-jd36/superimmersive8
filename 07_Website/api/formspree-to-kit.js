@@ -13,7 +13,7 @@ export default async function handler(req, res) {
       body = JSON.parse(req.body || '{}');
     }
 
-    const { email, name, role, website, _loadTime } = body;
+    const { email, name, role, website, _loadTime, interest, interest_detail } = body;
 
     // Honeypot check — bots fill this field, humans don't see it
     if (website) {
@@ -68,6 +68,16 @@ export default async function handler(req, res) {
       }
     }
 
+    // Interest field validation — must be a known value (bots skipping the form won't know these)
+    const validInterests = ['clear_video', 'compliance', 'verify', 'evaluate', 'other'];
+    if (!interest || !validInterests.includes(interest)) {
+      return res.status(200).json({ success: true, message: 'Demo request received.' });
+    }
+    // If "other", require a meaningful description (≥15 chars)
+    if (interest === 'other' && (!interest_detail || interest_detail.trim().length < 15)) {
+      return res.status(200).json({ success: true, message: 'Demo request received.' });
+    }
+
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
     const KIT_API_SECRET = process.env.KIT_API_SECRET;
     const KIT_TAG_ID = process.env.KIT_TAG_ID;
@@ -80,6 +90,15 @@ export default async function handler(req, res) {
       other: 'Other'
     };
     const roleLabel = roleLabels[role] || role || 'Not specified';
+
+    const interestLabels = {
+      clear_video: 'I need to clear an AI video for a client',
+      compliance: 'I want to understand our compliance exposure',
+      verify: 'I produce AI video and want it verified',
+      evaluate: "I'm evaluating tools for my agency / team",
+      other: 'Other'
+    };
+    const interestLabel = interestLabels[interest] || interest || 'Not specified';
 
     // ============================================
     // 1. SEND ADMIN NOTIFICATION VIA RESEND
@@ -104,6 +123,8 @@ export default async function handler(req, res) {
                 <p style="margin: 8px 0;"><strong>Name:</strong> ${name || 'Not provided'}</p>
                 <p style="margin: 8px 0;"><strong>Email:</strong> <a href="mailto:${email}" style="color: #C8900A;">${email}</a></p>
                 <p style="margin: 8px 0;"><strong>Role:</strong> ${roleLabel}</p>
+                <p style="margin: 8px 0;"><strong>Interest:</strong> ${interestLabel}</p>
+                ${interest === 'other' && interest_detail ? `<p style="margin: 8px 0;"><strong>Details:</strong> ${interest_detail.trim()}</p>` : ''}
               </div>
               <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 14px; color: #666;">
                 <p style="margin: 4px 0;">Reply to: <a href="mailto:${email}" style="color: #C8900A;">${email}</a></p>

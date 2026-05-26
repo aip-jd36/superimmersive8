@@ -343,7 +343,8 @@
     <!-- Contact / Request Demo -->
     <style>
         #demo-form input,
-        #demo-form select {
+        #demo-form select,
+        #demo-form textarea {
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.12);
             border-radius: 8px;
@@ -356,15 +357,21 @@
             transition: border-color 0.2s;
         }
         #demo-form input:focus,
-        #demo-form select:focus {
+        #demo-form select:focus,
+        #demo-form textarea:focus {
             border-color: var(--color-accent);
         }
         #demo-form select option {
             background: #1a1a1a;
             color: rgba(255,255,255,0.85);
         }
-        #demo-form input::placeholder {
+        #demo-form input::placeholder,
+        #demo-form textarea::placeholder {
             color: rgba(255,255,255,0.3);
+        }
+        #demo-form textarea {
+            resize: vertical;
+            min-height: 72px;
         }
     </style>
     <section class="contact-section" id="contact">
@@ -402,6 +409,15 @@
                         <option value="legal">Legal / Compliance</option>
                         <option value="other">Other</option>
                     </select>
+                    <select name="interest" id="demo-interest" required>
+                        <option value="">What brings you here? *</option>
+                        <option value="clear_video">I need to clear an AI video for a client</option>
+                        <option value="compliance">I want to understand our compliance exposure</option>
+                        <option value="verify">I produce AI video and want it verified</option>
+                        <option value="evaluate">I'm evaluating tools for my agency / team</option>
+                        <option value="other">Other (please describe)</option>
+                    </select>
+                    <textarea name="interest_detail" id="demo-interest-detail" placeholder="Tell us a bit more… *" rows="2" style="display:none;"></textarea>
                     <button type="submit" id="demo-submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 0.25rem;">
                         Request a Demo →
                     </button>
@@ -480,6 +496,19 @@
         // Set load time for spam detection
         document.getElementById('demo-load-time').value = Date.now();
 
+        // Show/hide "Other" detail textarea
+        document.getElementById('demo-interest')?.addEventListener('change', function() {
+            const detail = document.getElementById('demo-interest-detail');
+            if (this.value === 'other') {
+                detail.style.display = 'block';
+                detail.required = true;
+            } else {
+                detail.style.display = 'none';
+                detail.required = false;
+                detail.value = '';
+            }
+        });
+
         document.getElementById('demo-form')?.addEventListener('submit', async function(e) {
             e.preventDefault();
             const form = e.target;
@@ -496,6 +525,9 @@
                         email: fd.get('email'),
                         name: fd.get('name'),
                         role: fd.get('role'),
+                        interest: fd.get('interest'),
+                        interest_detail: fd.get('interest_detail'),
+                        _loadTime: fd.get('_loadTime'),
                         source: 'homepage-demo'
                     })
                 });

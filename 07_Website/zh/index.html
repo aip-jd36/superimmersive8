@@ -335,7 +335,8 @@
     <!-- Contact / Request Demo -->
     <style>
         #demo-form-zh input,
-        #demo-form-zh select {
+        #demo-form-zh select,
+        #demo-form-zh textarea {
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.12);
             border-radius: 8px;
@@ -348,15 +349,21 @@
             transition: border-color 0.2s;
         }
         #demo-form-zh input:focus,
-        #demo-form-zh select:focus {
+        #demo-form-zh select:focus,
+        #demo-form-zh textarea:focus {
             border-color: var(--color-accent);
         }
         #demo-form-zh select option {
             background: #1a1a1a;
             color: rgba(255,255,255,0.85);
         }
-        #demo-form-zh input::placeholder {
+        #demo-form-zh input::placeholder,
+        #demo-form-zh textarea::placeholder {
             color: rgba(255,255,255,0.3);
+        }
+        #demo-form-zh textarea {
+            resize: vertical;
+            min-height: 72px;
         }
     </style>
     <section class="contact-section" id="contact">
@@ -380,6 +387,10 @@
                 <form id="demo-form-zh" action="/api/formspree-to-kit" method="POST" style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.25rem;">
                     <input type="hidden" name="_subject" value="Request Demo — SI8 Homepage ZH">
                     <input type="hidden" name="download" value="Request Demo">
+                    <!-- Honeypot: hidden from humans, bots fill it -->
+                    <input type="text" name="website" tabindex="-1" autocomplete="off" style="opacity:0;position:absolute;top:0;left:0;height:0;width:0;z-index:-1;">
+                    <!-- Time-based spam check: set on page load -->
+                    <input type="hidden" name="_loadTime" id="demo-load-time-zh" value="">
                     <input type="text" name="name" placeholder="你的姓名 *" required>
                     <input type="email" name="email" placeholder="工作信箱 *" required>
                     <select name="role" required>
@@ -390,6 +401,15 @@
                         <option value="legal">法務 / 合規團隊</option>
                         <option value="other">其他</option>
                     </select>
+                    <select name="interest" id="demo-interest-zh" required>
+                        <option value="">請問您來這裡的目的？*</option>
+                        <option value="clear_video">我需要為客戶的活動清查 AI 影片</option>
+                        <option value="compliance">我想了解我們的 AI 合規風險</option>
+                        <option value="verify">我製作 AI 影片，希望取得認證</option>
+                        <option value="evaluate">我正在為我的團隊評估工具</option>
+                        <option value="other">其他（請說明）</option>
+                    </select>
+                    <textarea name="interest_detail" id="demo-interest-detail-zh" placeholder="請多說一點… *" rows="2" style="display:none;"></textarea>
                     <button type="submit" id="demo-submit-zh" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 0.25rem;">
                         申請示範說明 →
                     </button>
@@ -465,6 +485,22 @@
 
     <script src="/script.js"></script>
     <script>
+        // Set load time for spam detection
+        document.getElementById('demo-load-time-zh').value = Date.now();
+
+        // Show/hide "Other" detail textarea
+        document.getElementById('demo-interest-zh')?.addEventListener('change', function() {
+            const detail = document.getElementById('demo-interest-detail-zh');
+            if (this.value === 'other') {
+                detail.style.display = 'block';
+                detail.required = true;
+            } else {
+                detail.style.display = 'none';
+                detail.required = false;
+                detail.value = '';
+            }
+        });
+
         document.getElementById('demo-form-zh')?.addEventListener('submit', async function(e) {
             e.preventDefault();
             const form = e.target;
@@ -481,6 +517,9 @@
                         email: fd.get('email'),
                         name: fd.get('name'),
                         role: fd.get('role'),
+                        interest: fd.get('interest'),
+                        interest_detail: fd.get('interest_detail'),
+                        _loadTime: fd.get('_loadTime'),
                         source: 'homepage-zh-demo'
                     })
                 });
