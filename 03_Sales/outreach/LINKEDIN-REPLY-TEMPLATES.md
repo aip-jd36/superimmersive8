@@ -201,6 +201,125 @@ Sent with the connection request itself. Short — references Lilly by name.
 
 ---
 
+## BUCKET 2 — FREE CODE ACTIVATION
+
+**Purpose:** Convert current-pain leads with shorter or less-detailed responses. Goal is platform activation — get them to submit a video and see the output PDF. Not a call pitch.
+
+**When to use:** Lead confirmed current pain ("yes, this is happening now" or "we already have a process") but response was brief. They have the problem; they haven't screamed for help. The product is the pitch.
+
+**Formula:** Mirror phrase → "you're already doing this" bridge → 9 questions → two-tier note → free code offer → platform link offer
+
+---
+
+### BUCKET-2-v1-A — Long (full tier descriptions)
+
+*Hypothesis: More legible tier distinction may drive higher $499 upgrade rate.*
+
+> [Mirror their exact phrase back — one sentence. e.g., "You mentioned clients are approving the *process* now, not just the video."]
+>
+> If you're already handling this, most of what we capture you probably already know. Here's what the submission form covers:
+>
+> 1. Which AI tools did you use? (e.g., Runway, Kling, Pika — version and plan type)
+> 2. Do you own the output commercially under your tool's TOS?
+> 3. Did you use any stock footage, 3D assets, or licensed elements?
+> 4. Does the video include any real faces, voices, or identifiable people?
+> 5. Does it reference or reproduce any brand logos, copyrighted characters, or trademarked visuals?
+> 6. What music or audio is in the video — original, licensed, or AI-generated?
+> 7. In what territories do you plan to distribute it?
+> 8. What's the intended commercial use? (ad campaign, social content, internal use, etc.)
+> 9. Do you have screenshots, session exports, or generation logs you could attach?
+>
+> We have two tiers:
+> **Creator Record ($29)** — self-attested. You answer the questions, we generate and file a Chain of Title PDF. Automated, instant.
+> **SI8 Certified ($499)** — evidence-based. You upload receipts, license docs, and production files. A human reviewer watches the actual video and goes deeper: scene-by-scene tool attribution, commercial context, third-party asset documentation. Output is a clearance report — green light or specific red flags — accepted by brand legal teams.
+>
+> I can send you a free code for the Creator Record to run a video through and see what comes out. Or if you'd like to see the live platform first, happy to send the link.
+>
+> Thanks,
+> [Alias]
+
+---
+
+### BUCKET-2-v1-B — Short (one-line tier summary)
+
+*Hypothesis: Faster to scan, may get more replies. Tests whether tier detail is needed to convert or just adds friction.*
+
+> [Mirror their exact phrase back — one sentence. e.g., "You mentioned clients are approving the *process* now, not just the video."]
+>
+> If you're already handling this, most of what we capture you probably already know. Here's what the submission form covers:
+>
+> 1. Which AI tools did you use? (e.g., Runway, Kling, Pika — version and plan type)
+> 2. Do you own the output commercially under your tool's TOS?
+> 3. Did you use any stock footage, 3D assets, or licensed elements?
+> 4. Does the video include any real faces, voices, or identifiable people?
+> 5. Does it reference or reproduce any brand logos, copyrighted characters, or trademarked visuals?
+> 6. What music or audio is in the video — original, licensed, or AI-generated?
+> 7. In what territories do you plan to distribute it?
+> 8. What's the intended commercial use? (ad campaign, social content, internal use, etc.)
+> 9. Do you have screenshots, session exports, or generation logs you could attach?
+>
+> We have two tiers — $29 (self-attested PDF, automated) or $499 where a human reviewer watches the actual video and goes deeper: scene-by-scene tool attribution, commercial context, third-party asset documentation. Output is a clearance report — green light or specific red flags — accepted by brand legal teams.
+>
+> I can send you a free code for the $29 tier to run a video through and see what comes out. Or if you'd like to see the live platform first, happy to send the link.
+>
+> Thanks,
+> [Alias]
+
+---
+
+### Bucket 2 Lead Breakdown (as of 2026-05-27)
+
+**IVY — UK leads**
+
+| Lead | Company | Signal Quote | Mirror Hook |
+|------|---------|-------------|-------------|
+| B050 Julia N'Diamoi | T&P | Active AI tool vetting process | "You mentioned you're already vetting tools before production." |
+| B051 Kiel Robinson | Ok let's play Studios | Already tracking raw materials + metadata | "You mentioned tracking raw materials and metadata — that's exactly the foundation." |
+| B052 Loewe Chung Nin Lee | — | *"Started seeing this come up more recently"* | "You mentioned this is coming up more — it's accelerating fast." |
+| B054 Steve Cholerton | Sentient Pictures | *"One client has asked for metadata"* | "You mentioned a client already asked for metadata — that's usually the start." |
+
+*Note on B054:* Check which alias sent the Round 1 message before sending ("Hitting a Wall msg#1" — alias TBC).
+
+---
+
+**VANESSA — Amsterdam leads**
+
+| Lead | Company | Signal Quote | Mirror Hook |
+|------|---------|-------------|-------------|
+| B069 Shahrukh Kazmi | Freelance | *"Some legal teams are starting to ask"* | "You mentioned legal teams are starting to ask — it's picking up fast." |
+| B070 Marinus Bergsma | SocialNow | *"Always clear"* upfront — built current practice | "You mentioned being 'always clear' upfront — sounds like you've built a practice around this." |
+
+---
+
+**LILLY — Dubai leads**
+
+| Lead | Company | Signal Quote | Mirror Hook |
+|------|---------|-------------|-------------|
+| B105 Ayman Hussein | AI-Driven Motion | *"Smaller campaigns don't ask. Larger campaigns break it down"* | "You mentioned larger campaigns want it broken down — that's the inflection point we see everywhere." |
+| B108 Balendu Sharma Dadhich | AILGO | *"We give a guarantee the process doesn't violate any laws, rules or ethics"* | "You mentioned giving a guarantee — having a filed document behind that changes how legal teams respond to it." |
+| B133 Mohamed Samir | Emerald Group | *"Some insist on that of course"* | "You mentioned some clients insist on it — that group is growing fast." |
+
+*Note: B100 Ramez Tabshi moved to Call Requested (June 1 Zoom) — skip Bucket 2.*
+
+---
+
+**JD Personal — pending connection acceptance**
+
+These leads were handed off from Lilly but JD is reaching out directly. Send free code message once connection is accepted (after JD-FollowUp-v1 or if FollowUp already sent).
+
+| Lead | Company | Signal Quote |
+|------|---------|-------------|
+| B095 Florent Delavous | Xtendency AI Video Production | *"Already working with legal team on documentation"* — consider Bucket 1 call-first given depth |
+| B099 Sultan Alsuwaidi | Video tube | *"Clients now approve the process, not just the video"* |
+| B101 Anas Bakal | Monoud Trading | Articulated SI8 product back unprompted: *"Tool ownership, prompt logs"* |
+| B104 Ashraf Selo | MultiBank Group | *"Becoming standard with bigger campaigns"* |
+
+---
+
+**Promo code to create:** COMP-B2-2026 (100% off Creator Record, 20 uses, shared batch) — or individual COMP-[NAME] codes per lead. Create in Stripe before sending messages.
+
+---
+
 ## SPLIT TEST RESULTS (update as replies come in)
 
 | Logline | Sent | Replied | Reply Rate | Notes |
@@ -209,6 +328,10 @@ Sent with the connection request itself. Short — references Lilly by name.
 | Email-Request-v1 (no logline) | 1 | 0 | — | Rheea Aranha — asked for email to send sample |
 | Logline-Global-v1 | 20 | 0 | — | First deployed May 8 — 20 Dubai leads; 07:25–08:20 GST |
 | Logline-Short-v1 | 0 | — | — | Not deployed |
+| **BUCKET-2-v1-A** (long) | 0 | — | — | Full tier descriptions — track reply rate + $499 upgrade rate |
+| **BUCKET-2-v1-B** (short) | 0 | — | — | One-line tier summary — track reply rate; compare vs A |
+
+**Bucket 2 split test tracking:** Split leads roughly 50/50 across aliases. Suggested: IVY leads → v1-A, VANESSA + LILLY Dubai leads → v1-B. Track: (1) reply rate, (2) platform activation (did they submit?), (3) tier chosen ($29 vs $499). First meaningful read when N≥5 per variant.
 
 **Send Time Tracking:**
 
