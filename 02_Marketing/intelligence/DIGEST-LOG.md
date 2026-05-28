@@ -9,6 +9,33 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of May 28, 2026
+*Run: 2026-05-28 · 7 high · 5 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Mind the Gap: States Step in to Address Ownership of AI-Generated Works Amid Federal Uncertainty](https://www.mayerbrown.com/en/insights/publications/2026/05/mind-the-gap-states-step-in-to-address-ownership-of-ai-generated-works-amid-federal-uncertainty) | Mayer Brown | Fri, 22 May 2026 | ☐ |
+| 8 | update | [Rightsline Secures $500M From Hg to Expand Rights Management and AI Operations Platform](https://www.citybiz.co/article/851417/rightsline-secures-500m-from-hg-to-expand-rights-management-and-ai-operations-platform/) | citybiz | Wed, 27 May 2026 | ☐ |
+| 8 | post+update | [Firefly Video: Generative AI with Safe Commercial License](https://foro3d.com/en/2026/mayo/firefly-video-ia-generativa-con-licencia-comercial-segura.html) | Foro3D | Sat, 23 May 2026 | ☐ |
+| 8 | post+update | [Study: AI Labeling Does Not Hurt Video Ad Performance](https://www.tvtechnology.com/insights/analysis/study-ai-labeling-does-not-hurt-video-ad-performance) | TVTechnology | Thu, 21 May 2026 | ☐ |
+| 7 | post+update | [Amazon MGM Studios Embraces AI: Greenlights Three Series for Prime Video Under New ‘GenAI Creators’ Fund’](https://variety.com/2026/tv/news/amazon-mgm-studios-genai-creators-fund-greenlights-series-1236759131/) | Variety | Wed, 27 May 2026 | ☐ |
+| 7 | post+update | [Supreme People’s Court of China to refine rules on AI content and data ownership](https://cryptobriefing.com/china-supreme-court-ai-content-data-ownership/) | Crypto Briefing | Wed, 27 May 2026 | ☐ |
+| 7 | post | [Miami-Dade, Broward courts issue unified AI disclosure rules](https://www.floridabar.org/the-florida-bar-news/miami-dade-broward-courts-issue-unified-ai-disclosure-rules/) | The Florida Bar | Thu, 21 May 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [AI Advertising and the Authenticity Paradox](https://www.orfonline.org/english/expert-speak/ai-advertising-and-the-authenticity-paradox) | orfonline.org | Fri, 22 May 2026 | ☐ |
+| 6 | monitor | [AI Startup Insurance: Guide to Protecting Your Tech](https://tynmagazine.com/ai-startup-insurance-explained-how-to-protect-your-tech-business/) | TyN Magazine | Thu, 21 May 2026 | ☐ |
+| 5 | monitor | [Rising AI Mistakes in Legal Pose Quandary for Law Firms' Insurance Policies](https://www.law.com/americanlawyer/2026/05/21/rising-ai-mistakes-in-legal-pose-quandary-for-law-firms-insurance-policies/) | Law.com | Thu, 21 May 2026 | ☐ |
+| 4 | monitor | [AI-Generated Film Premieres at Tribeca Film Festival](https://letsdatascience.com/news/ai-generated-film-premieres-at-tribeca-film-festival-52d57307) | Let's Data Science | Wed, 27 May 2026 | ☐ |
+| 4 | monitor | [Navos Integrates Seedance 2.0, Launching Next-Generation AI Video Creation Capabilities](https://natlawreview.com/press-releases/navos-integrates-seedance-20-launching-next-generation-ai-video-creation) | The National Law Review | Fri, 22 May 2026 | ☐ |
+
+---
+
 ## Week of May 25, 2026
 *Run: 2026-05-25 · 11 high · 8 monitor · lookback 7 days*
 
