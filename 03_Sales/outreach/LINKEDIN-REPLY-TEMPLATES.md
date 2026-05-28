@@ -316,7 +316,7 @@ These leads were handed off from Lilly but JD is reaching out directly. Send fre
 
 ---
 
-**Promo code to create:** COMP-B2-2026 (100% off Creator Record, 20 uses, shared batch) — or individual COMP-[NAME] codes per lead. Create in Stripe before sending messages.
+**Promo code:** `COMP-B2` — live in Stripe (promo_1TbwytDHFv9ajBxSiHs14rCd), 100% off, 25 uses, first-time order only. Created May 28, 2026.
 
 ---
 
