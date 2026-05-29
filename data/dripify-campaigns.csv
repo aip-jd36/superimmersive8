@@ -1,10 +1,10 @@
 campaign_name,alias,geo,target_segment,sequence,launch_date,leads_sent,accepted,responded,in_cost_analysis
 "SI8_RV_R4LI_CreaDir_AI Video_Dubai_0426A_LH",Lilly,Dubai,Creative Dir — AI Video,Legal Friction,Apr 26 2026,388,209,63,true
-"SI8_RV_R4LI_CreaDir_AI Video_England_0426B_IL",Ivy,England,Creative Dir — AI Video,Legal Friction,Apr 25 2026,678,157,64,true
-"SI8_RV_R4LI_CreaDir_AI Video_LA_0426A_VP",Vanessa,Los Angeles,Creative Dir — AI Video,Legal Friction,Apr 26 2026,650,156,68,true
+"SI8_RV_R4LI_CreaDir_AI Video_England_0426B_IL",Ivy,England,Creative Dir — AI Video,Legal Friction,Apr 25 2026,678,165,67,true
+"SI8_RV_R4LI_CreaDir_AI Video_LA_0426A_VP",Vanessa,Los Angeles,Creative Dir — AI Video,Legal Friction,Apr 26 2026,650,161,68,true
 "SI8_RV_R4LI_CreaDir_AI Video_England_0426A_IL",Ivy,England,Creative Dir — AI Video,Legal Friction,Apr 13 2026,300,73,44,true
 "SI8_RV_R4LI_CreaDir_AI Video_AmsDm_0426A_VP",Vanessa,Amsterdam,Creative Dir — AI Video,Legal Friction,Apr 13 2026,300,79,35,true
-"SI8_RV_R4LI_CreaDir_AI Video_Berlin_0626A_AL",Angel,Berlin,Creative Dir — AI Video,Legal Friction,May 4 2026,364,114,37,true
+"SI8_RV_R4LI_CreaDir_AI Video_Berlin_0626A_AL",Angel,Berlin,Creative Dir — AI Video,Legal Friction,May 4 2026,364,116,38,true
 SI8_RV_R4LI_VP+_Creative_London_0426B_IL,Ivy,London,VP+ Creative,Hitting a Wall,Apr 3 2026,299,91,13,false
 "SI8_RV_R4LI_NA_MetaV_Agency_Gbl_0326A_IL",Ivy,Global,NA MetaVerse Agency,Hitting a Wall,Mar 27 2026,200,60,13,false
 SI8_RV_R4LI_Mgr+_Mktg_London_0326G_VP,Vanessa,London,Manager+ Marketing,Legal Friction,Mar 27 2026,199,55,14,false
@@ -22,6 +22,6 @@ SI8_RV_R4LI_VP+_Creative_London_0426C_LH,Lilly,London,VP+ Creative,Blocks AI Cam
 SI8_RV_R4LI_Mgr+_Adv_SPG_0326A_LH,Lilly,Singapore,Manager+ Advertising,Vetting Takes Weeks,Mar 8 2026,97,37,9,false
 SI8_RV_R4LI_CMO_SPG_0326A_LH,Lilly,Singapore,CMO,Early Days,Mar 27 2026,149,31,3,false
 "SI8_RV_R4LI_Owner+_BizCons,Mktg_Sydney_0326B_LH",Lilly,Sydney,Owner+ Biz/Mktg,Vetting Takes Weeks,Mar 5 2026,298,23,3,false
-"SI8_RV_R4LI_CreaDir_AI Video_Paris_0526A_AL",Angel,Singapore,Creative Dir — AI Video,Legal Friction,May 20 2026,61,26,10,true
-"SI8_RV_R4LI_CreaDir_AI Video_SPG_0526A_IL",Ivy,Singapore,Creative Dir — AI Video,Legal Friction,May 20 2026,232,28,15,true
-"SI8_RV_R4LI_CreaDir_AI Video_STHM_0526A_VP",Vanessa,Stockholm,Creative Dir — AI Video,Legal Friction,May 20 2026,341,23,9,true
+"SI8_RV_R4LI_CreaDir_AI Video_Paris_0526A_AL",Angel,France,Creative Dir — AI Video,Legal Friction,May 20 2026,61,26,10,true
+"SI8_RV_R4LI_CreaDir_AI Video_SPG_0526A_IL",Ivy,Singapore,Creative Dir — AI Video,Legal Friction,May 20 2026,232,56,25,true
+"SI8_RV_R4LI_CreaDir_AI Video_STHM_0526A_VP",Vanessa,Stockholm,Creative Dir — AI Video,Legal Friction,May 20 2026,341,56,19,true

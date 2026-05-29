@@ -139,12 +139,17 @@ B121 Gabriel Preston [Ivy]
 | 2026-05-28 | Test 2 v2-B | Ivan Petruzzelli (State Street VP, London) replied "Yes we are" within 24hrs — EU Act client-pull re-activated a lukewarm lead | Test 2 v2-B first result |
 | 2026-05-29 | Test 3 v3-B | Ibrahim Badi answered 9 intake questions inline without prompting — process-first framing works for leads with existing workflows | Added Ibrahim retroactively to v3-B |
 | 2026-05-29 | Test 1 | v1-B voided — Lilly alias inaccessible; Test 1 cannot be concluded without new v1-B cohort | — |
+| 2026-05-30 | Test 2 | Geo-split emerging: v2-B (client-pull) confirmed for UK/financial services (Ivan Petruzzelli). v2-A (deadline-first) may be right for Nordic/Germany — Henrik Sylvén (Stockholm) volunteered the EU AI Act August 2 deadline unprompted, suggesting the regulatory framing lands organically in those markets without needing to lead with it | Informs future Test 2 geo assignment; v2-A leads should prioritize DE/SE over UK |
+| 2026-05-30 | Test 3 | Process-first (v3-B) can REPEL leads who have already formalized their own process — Kris Tan (Mocreative, SG) explicitly guards his internal workflow; Shyan Pawl (USA) and Derek Du Chesne (USA) have baked AI terms into contracts already. 9 questions reads as redundant to this segment. | v3-B assignment criteria: informal/developing process only — NOT leads who describe an existing formal solution |
+| 2026-05-30 | Test 3 | A third arm is needed for "already-solved-informally" leads — neither v3-A (sample output) nor v3-B (9 questions) fits leads who've already built a workaround. This segment needs a differentiation frame: "here's how our output compares to what you're already doing." Candidate leads: Jian Yi Lay (VaynerMedia APAC, SG), Al Hafeez Jamil (The Daily Creative, SG) | Flag for Test 3 v3-C design when next report cycle runs |
+| 2026-05-30 | All | Discovery pool analysis (122 new leads, May 29 batch): Singapore warm rate 42% (8/19) vs UK 6% (2/32) — Singapore is underweighted in current campaign volumes relative to conversion signal. Stockholm new geo showing EU Act organic awareness. UAE/Dubai skewing future-intent ("not yet but soon") rather than current pain across new batch | Informs geo prioritisation for next campaign launch |
 
 ---
 
 ## Open Questions
 
 - [ ] Test 1 v1-B is voided (Lilly inaccessible). To revive: find 3+ Bucket 2 profile leads on an accessible alias and assign to v1-B.
-- [ ] Test 2 v2-A has no leads — void. v2-B has 4 leads (1 reply so far). No A/B comparison possible; treat v2-B as standalone re-engagement test.
-- [ ] Test 3 v3-B has 2 leads (Ibrahim + Gabriel). Ibrahim answered inline ✅. Awaiting Gabriel. Add more process-describing warm leads to this arm when they surface.
+- [ ] Test 2 v2-A has no leads — void. v2-B has 4 leads (1 reply so far). No A/B comparison possible; treat v2-B as standalone re-engagement test. When v2-A is revived, assign DE/SE leads preferentially.
+- [ ] Test 3 v3-B has 2 leads (Ibrahim + Gabriel). Ibrahim answered inline ✅. Awaiting Gabriel. Add more process-describing warm leads to this arm when they surface — but screen out leads who describe an already-formalized solution.
+- [ ] Test 3 v3-C design needed: differentiation frame for "already-solved-informally" segment. Draft message: "here's how our output compares to what you're already doing."
 - [ ] Should we add a Test 5 for direct "beta tester" campaign via JD personal alias once warm pipeline data is in?

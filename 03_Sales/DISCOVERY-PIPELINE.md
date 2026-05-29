@@ -7,7 +7,7 @@ is discovery calls to validate PMF, surface edge cases, and identify product gap
 **Source:** `03_Sales/DISCOVERY-PERFORMANCE-LOG.md` → Discovery Signal Checklist → manual review.
 A lead can appear in BOTH this pipeline and `03_Sales/CRM.md` if they are also a sales prospect.
 
-**Last updated:** 2026-05-26
+**Last updated:** 2026-05-29
 
 ---
 
@@ -27,7 +27,7 @@ A lead can appear in BOTH this pipeline and `03_Sales/CRM.md` if they are also a
 
 <!-- discovery-pipeline:start -->
 
-## Signal (98)
+## Signal (220)
 
 *Leads flagged from discovery report, pending outreach decision.*
 
@@ -131,6 +131,128 @@ A lead can appear in BOTH this pipeline and `03_Sales/CRM.md` if they are also a
 | David Tamayo | Creative AI Director | Prose on Pixels | France/Paris | [WARM] | — | Hey we are a big network with Legal team, dedicated to AI. Laws in the US are re… | 2026-05-23 |
 | Hugo Barbera | AI Director & Fortune 500 AI trainings | Advertising & Fashion | HumAIn | France/Paris | [WARM] | — | Hello06:29 pm So we have all terms and conditions from legal team in advance. Th… | 2026-05-23 |
 | Billy Boman | Founder | Billy Boman AI Productions | Sweden/Stockholm | [WARM] | — | Hey, No not documentation around every prompt as the liability is on us as the p… | 2026-05-23 |
+| Nick Jones | DIRECTOR - VP | null | London/UK | [MINIMAL] | — | "I have absolutely no idea what you are talking about, who you are, or what you're trying to sell me." | 2026-05-29 |
+| Piotr Nierobisz | Creative Director & Founder | Munchingsquare | London/UK | [MINIMAL] | — | "I would not pitch / work on AI campaign without clearing this out with client legal department as it's wasted effort" | 2026-05-29 |
+| Vijendra Kunwar Mmc | Founder | Fitter Circle | London/UK | [NAF] | — | "We don't recommend any AI videos so this would not be relevant for us." | 2026-05-29 |
+| Fatima Isse | Creative Director | River Lake Studios | London/UK | [PASS] | — | "I don't currently work with Al-generated video content, so it hasn't come up in my work directly." | 2026-05-29 |
+| Margarita Repina | Founder and Creative Director | Atelier Catalyst | London/UK | [MINIMAL] | — | "it's my basic rule to have a contract always 😊" | 2026-05-29 |
+| Samuel Levesley-Turner | Creative Director | Point8 | London/UK | [NAF] | — | "We don't produce ai content… at all. So this is not a problem we run into whatsoever and never will." | 2026-05-29 |
+| Helen Niland | Creative Director | Made In England Creative | London/UK | [PASS] | — | "Not at the moment but I'll bear you in mind. All the best with it." | 2026-05-29 |
+| Volodymyr Dovbnia | Creative Director & Co-Founder | Mister Pixel Studio | London/UK | [MINIMAL] | — | "We usually obtain copyrights under a contract with the client… your service is interesting. I'll keep it in mind." | 2026-05-29 |
+| Fábio Pinho | Diretor de criação | null | London/UK | [MINIMAL] | — | "No, we don't need any documentation. In some cases you just link the video in one option" | 2026-05-29 |
+| Neil Alphonso | Studio Creative Director | Splash Damage | London/UK | [MINIMAL] | — | "this isn't relevant to me, at the moment anyway. I've long been focused on software more than video" | 2026-05-29 |
+| Federica Di Mitri | Business Development Manager | Fashion Academics | London/UK | [MINIMAL] | — | "yes I had the same issue, but only in Europe. AI-generated video and visuals must be identifiable and properly labeled." | 2026-05-29 |
+| Kelly Hogan | Founder | ELITE STORI LND | London/UK | [MINIMAL] | — | "It can pop up however you always deliver the terms and conditions etc that outline exactly what you're delivering" | 2026-05-29 |
+| Marc Winklhofer | Creative Technology Director | Composition X Limited | London/UK | [MINIMAL] | — | "It depends on the client, however due to NDAs I'm not at liberty to go into detail here, sorry." | 2026-05-29 |
+| Maylene Seah | Brand strategist, mentor, speaker, creative director | studio NOOR ANISA | London/UK | [PASS] | — | "Thank you Ivy and no it's not relevant to me at this point." | 2026-05-29 |
+| Emma De La Fosse | Creative Consultant | The Effectiveness Partnership | London/UK | [NAF] | — | "I don't use Ai generated video for anything outside an organisation Ivy. We use it to help clients understand concepts." | 2026-05-29 |
+| Kosmo Crocco | London Area | Satellite-Five | London/UK | [MINIMAL] | — | "I have yet to work at that level of approval… companies' legal dept being quite strict about models that have been used" | 2026-05-29 |
+| Tunc Akyuz | Production Director | Big Media & Technology | London/UK | [PASS] | — | "It hasn't been asked yet, but a contract is being signed stating that I am responsible for the IP of all content" | 2026-05-29 |
+| Uli Redkina | Creative Ai Producer | null | London/UK | [MINIMAL] | — | "We usually make a contract that grants me full rights to the images/videos" | 2026-05-29 |
+| Alena Stepanova | Manager Content Intelligence & Gen AI | Philip Morris International | London/UK | [MINIMAL] | — | "I work on the client side, so I'm not involved in the agency-client approval loops. It's an interesting space though" | 2026-05-29 |
+| Jenny Springett | Development Executive | Electric Violet TV | London/UK | [MINIMAL] | — | "Yes absolutely. It's required to broadcast anywhere in the EU so smart to be compliant even outside." | 2026-05-29 |
+| Ricardo Barchan | Beauty and Jewellery Retoucher | Joolz Jewellery | London/UK | [MINIMAL] | — | "As of recent, yes or it is worded in the contracts so everything is above board and clear." | 2026-05-29 |
+| Nuray Dal Ulualan | Co-Founder & COO | WinIQ AI | London/UK | [MINIMAL] | — | Sent automated sales pitch in reply — no discovery signal but shows segment awareness | 2026-05-29 |
+| Steve Cholerton | Owner | Sentient Pictures Ltd | London/UK | [MINIMAL] | — | "only one has asked for metadata to be available if necessary" | 2026-05-29 |
+| Kd Pascall | Creative Director | Bluvision studios | London/UK | [MINIMAL] | — | "Of recent yes. before it was never an issue. lol. i think maybe because its becoming more widely used now." | 2026-05-29 |
+| Ali Thompson | Director | RARE 80 | London/UK | [PASS] | — | "not relevant to my needs at the moment but good to be connected. All the best" | 2026-05-29 |
+| Iona Milne | Partnerships Manager | Reg&Partners | London/UK | [MINIMAL] | — | "This isn't relevant for me, but thank you" | 2026-05-29 |
+| David Aston | Social Media Coordinator | CLUBWORLD TRAVEL | London/UK | [MINIMAL] | — | "We don't creat AI videos for clients, we use AR development software" | 2026-05-29 |
+| Fahad A | Fractional Sales Director | Be Guided Agency | London/UK | [MINIMAL] | — | "It's something I'll certainly keep in mind, esp when we expand out offering." | 2026-05-29 |
+| James Byrne | Sustainability reports, comms and PR expert | BeyondWords | London/UK | [WARM] | — | "Yes that would be great thanks" — accepted connection after Lilly's outreach; new to AI video space | 2026-05-29 |
+| Lindsay Fenn | Fractional Growth & Retention Partner | Roots Marketing Co UK | London/UK | [NAF] | — | "I'm not currently creating any AI content for my clients. It may be something I do in the future" | 2026-05-29 |
+| Emmanuel Stralka | Co-Founder — International Growth & Market Expansion Platform | Think Global Solutions | London/UK | [MINIMAL] | — | "We will keep you in mind when it comes to video-based assets as your ai prolly provide speed to market advantages." | 2026-05-29 |
+| Jp Sing | Head of Demand Marketing | Universal Music Group | London/UK | [MINIMAL] | — | "we have an in-house team who are responsible for this… I will have to regretfully decline for further conversations." | 2026-05-29 |
+| Lev Myskin | Content Strategy Consultant | Fame | Other | [MINIMAL] | — | "I abhor AI videos, campaigns, and anything that takes employment away from highly trained real people." | 2026-05-29 |
+| Salem Al-Kuwari | Founder & Managing Director | SAM Strategic Access Ltd | Other | [MINIMAL] | — | "It is a relevant area, especially as questions around IP, documentation, and commercial use in AI content become more important." | 2026-05-29 |
+| Cove Overley Emba | Chief Explosive Agent 000 | Toy Exploder | Other | [NAF] | — | "At this moment there are no plans to incorporate AI Video." | 2026-05-29 |
+| Owen Bryant | Creative Director | Partners4Access | Other | [MINIMAL] | — | "I'm not creating videos at the moment, but as we know, things change and change quickly." | 2026-05-29 |
+| Mitch Turnbull | Senior Research Associate | University of Bristol | Other | [NAF] | — | "I've not produced AI generated image content for clients - I would also make sure that I generate an AI disclosure document if I did." | 2026-05-29 |
+| Giulia Willcox | Professor assistente | Instituto de Tecnologia e Sociedade (ITS Rio) | Other | [MINIMAL] | — | "I don't think I get your question. What kind of documentation is required for AI video production?" | 2026-05-29 |
+| Daniel Kwintner | Branch Manager | ShowTex Asia | Other | [MINIMAL] | — | "I don't deal with Ai for Video production for now. Everything is still done from scratch." | 2026-05-29 |
+| Klaus Borges | Associate Creative Director | KBL STORES | Other | [MINIMAL] | — | "I have not seen this question yet; however, I pay for licences. It should be fine. Any advice?" | 2026-05-29 |
+| Brian Cox | Senior Director of Forward Deployed Engineering | Inworld AI | Other | [WARM] | — | "no, there are no legal teams asking any questions." — Inworld AI (AI content company) notable for having no legal review process | 2026-05-29 |
+| Tom Furse | Artist and Creative Machine Learning Specialist | null | Other | [PASS] | — | "Honestly that hasn't come up much. I sit a bit more on the artist side of the spectrum and so my clients are often a bit less nervous." | 2026-05-29 |
+| Karina L. | Founder & Strategist | KL Marketing Solutions | Other | [MINIMAL] | — | Has AI disclosure language baked into contracts: "Content produced under this agreement may be created using a combination of AI tools and human input." | 2026-05-29 |
+| Andrew Fox | CEO & Founder | Foxy Digital | Other | [MINIMAL] | — | "Not now but could be useful in the future. I'll add you to my list of production folks so when the need arises, we can touch base." | 2026-05-29 |
+| Nupur Vartak | Senior Art Director | Famous Innovations | Other | [MINIMAL] | — | "they can ask that as content that is created with AI has authorship issues, so to avoid trouble in future, they might ask for documentation" | 2026-05-29 |
+| Ted Hemberger | Post Producer / Lead Video Editor | micro1 | Other | [MINIMAL] | — | "it honestly depends on the company… if it is just a one off for one client… you usually need to have some type of proof" | 2026-05-29 |
+| Anastasia Khanova | Creative Producer | Novakid Inc | Other | [MINIMAL] | — | "It depends on the platform." | 2026-05-29 |
+| Albert Centell | Founder & AI Creative Director | Revolmind | Other | [MINIMAL] | — | "I'll keep Super Immersive in mind and reach out if something relevant comes up on my side." | 2026-05-29 |
+| Harry Murugan | Creative Director | CLLOUD.AI | Other | [MINIMAL] | — | "I dont actually use AI within my work, and if i do i declare it." | 2026-05-29 |
+| Ed Job | Post Producer | Gramercy Park Studios | Other | [MINIMAL] | — | "this question will come up more and more as AI evolves… Is the actor entitled to more money as we are using their body…" | 2026-05-29 |
+| Anthony Ferreri | Early Adopter (First 500 Member) | Anthony Ferreri | Other | [MINIMAL] | — | "I don't deal with AI-generated video as a deliverable for my clients." | 2026-05-29 |
+| Ashutosh Labroo | Managing Partner | successioniq | Other | [PASS] | — | "Not relevant for me and my my firm. I wish you good luck Lilly 🙏" | 2026-05-29 |
+| Kasra Mirzarezaie | Creative Director \| AI Video | Case Connect LLC | Other | [MINIMAL] | — | "in CA we have strict standards that need to be followed… Outside CA we dont need any approval." | 2026-05-29 |
+| Elliott Prompts | Ai Creative Director | ElliottPrompts Ai Creative Studio | Other | [MINIMAL] | — | "Nothing yet on that from my experiences what about yourself?" | 2026-05-29 |
+| Uma Rudd Chia | Singapore | OH MY STRAWBERRY | Other | [MINIMAL] | — | "I create my own AI videos and I subscribe to a lot of different AI platform… I know that I have the rights to them" | 2026-05-29 |
+| Ray Gong | Associate Vice President | DSJ Global | Other | [MINIMAL] | — | "this isn't something I'm actively exploring, but I do see how this could be relevant as AI content adoption evolves." | 2026-05-29 |
+| Alistair Bendyshe-Brown | CEO / Founder | Summer Day Media | Other | [MINIMAL] | — | "we don't need this at the moment. I'll keep you in mind if a need arises." | 2026-05-29 |
+| Abbas Saleem - 游联宇 - سليم عباس | Llama & Griffin | Llama & Griffin | UAE/Dubai | [MINIMAL] | — | "you need to be upfront about your toolset because it will be upto the client to manage community and PR" | 2026-05-29 |
+| Moein Al-Din Zarean | null | null | UAE/Dubai | [MINIMAL] | — | "most clients are currently still focused primarily on the quality of the final output… providing a 'Production Log' will soon become standard" | 2026-05-29 |
+| Collins Agure | Senior Executive, Marketing & Communication | The Source | UAE/Dubai | [MINIMAL] | — | "the clients don't really care about how it was made… They only care that it is effective, looks cool and communicates their brand values" | 2026-05-29 |
+| Keegan Desouza | null | Shaerp Next | UAE/Dubai | [MINIMAL] | — | "I dont think the legal side of things is mature yet, but i believe in a few months time this will be a big thing" | 2026-05-29 |
+| Lucy Aziz | null | Burson | UAE/Dubai | [MINIMAL] | — | "Not really as long as we disclose it is made with help of AI" | 2026-05-29 |
+| Ashraf Selo | Multimedia Designer | MultiBank Group | UAE/Dubai | [PASS] | — | "Yeah, starting to see this more now… confirmation everything is original or properly licensed… becoming standard with bigger campaigns." | 2026-05-29 |
+| Manoj Reddy | Generative AI specialist and Production Manager | ALBAB Media LLC | UAE/Dubai | [MINIMAL] | — | "none of my clients have asked for that documentation yet. But I can see why it's becoming a bigger topic this year" | 2026-05-29 |
+| Mohammed Magdy Alzahran | Prompt Engineer | Dybaja - ديباجة \| AI Creative Studio | UAE/Dubai | [MINIMAL] | — | "Yes some of clients ask for NDA first, and some times ask for Transfer of ownership rights" | 2026-05-29 |
+| Joey Johnson | Creative Director | Mother | USA | [PASS] | — | "unfortunately this is not relevant to our working process at this time." | 2026-05-29 |
+| Dan Ablan | Creative Director, Design and Multimedia | Association of International Certified Professional Accountants | USA | [MINIMAL] | — | "We're all set internally for now but if it changes I'll reach out." | 2026-05-29 |
+| Jon Cvack | AV Producer/Director + Gen-AI Specialist | City of Los Angeles | USA | [MINIMAL] | — | "I'm actually not involved on the legal side. I just create the content… I can see where that would be a necessity at some point." | 2026-05-29 |
+| Cam Cloman | Founder | Surf Noir Studios | USA | [PASS] | — | "it hasn't been an issue for me in any of my work but I'll keep you in mind in the future." | 2026-05-29 |
+| Tim Koranda | Sr. Director of Creative Systems | TechStyleOS (now Fabletics) | USA | [MINIMAL] | — | "It really depends on the organization and the models being used. If a company uses indemnified models or train their own models, its a non issue." | 2026-05-29 |
+| Brian Gaffney | VP of Product, Software Division | MTI Film | USA | [PASS] | — | "That's not relevant to our AI workflows." | 2026-05-29 |
+| Derek Du Chesne | Chief Executive Officer, Director | Better U | USA | [MINIMAL] | — | "we already have arrangements and processes in place for how AI-generated video content is produced and reviewed" | 2026-05-29 |
+| Joe Maziarski | Senior Creative AI Producer | Amazon | USA | [MINIMAL] | — | "They should be - it's a grey area. Platforms like firefly are built on cleared assets while others were conceivably trained on copy-written material." | 2026-05-29 |
+| Emile Smith | Visual Effects Supervisor | Independent | USA | [MINIMAL] | — | "I actually haven't had anyone ask me for that as of yet. I am sure I will come across it though" | 2026-05-29 |
+| Shyan Pawl | AI Filmmaker / Creative Director (Independent) | Self-employed | USA | [MINIMAL] | — | "Contracts already mention that the client agrees the content will be AI-generated and that the copyrights cannot be exclusively transferred" | 2026-05-29 |
+| Evan Mathis | Senior Creative Director | Prime Video & Amazon MGM Studios | USA | [MINIMAL] | — | "in sports, we can not legally put any AI produced assets into any deliverables due to NIL and league rights agreements" | 2026-05-29 |
+| Fred M Davis Agentic Agi | Account Executive | AIEntertainment (tm) | USA | [MINIMAL] | — | "Some do and some don't do real agreements. Most all do say what they did is AI. We should come up with a generic agreement" | 2026-05-29 |
+| Shamus Halkowich | AI IMAGE AND VIDEO EXPERT | xAI | USA | [MINIMAL] | — | "Providence is super important for a Gen AI pipeline… The risk of using commercial engines is that the training data is not public or necessarily licensed" | 2026-05-29 |
+| Lawrence Low | Sales Director & Leadgen | Positivity ® | Singapore | [PASS] | — | "No, I think with AI we just make videos, no need for review." | 2026-05-29 |
+| Alan Geoy | Lead Motion Designer & GenAI Specialist | Antigravity Studio | Singapore | [PASS] | — | "It hasn't come up to me, but we are limited to certain ai tools that are approved by agencies / clients." | 2026-05-29 |
+| Dominic Ho | Co-Founder | SYS.Studio | Singapore | [MINIMAL] | — | "I will let you know when we do need this service!" | 2026-05-29 |
+| Jia Jin ( JJ ) Goh | Director | Alternate Video Production | Singapore | [WARM] | — | "all my client do not ask for documentation. We will tell them that some content are AI generated and they have commercial rights." | 2026-05-29 |
+| Victor Masin | Co-Founder, Head of Creative | Always Wonder video agency | Singapore | [WARM] | — | "larger and more regulated clients are the ones who start asking how the cut was made. Still feels early." | 2026-05-29 |
+| Ali Wahap | Senior Visual Designer, Video Editor & Social Content Creator | null | Singapore | [MINIMAL] | — | "Most of the times their legal just asks to make sure it's not copying likeness to known work" | 2026-05-29 |
+| Al Hafeez Jamil | Creative Producer | The Daily Creative | Singapore | [WARM] | — | "we have not had client legal teams ask for that level of documentation just yet. However, we are actively preparing for it to become a standard practice soon." | 2026-05-29 |
+| Raymond Choong | Lead Videographer | Craft Creative Pte Ltd | Singapore | [WARM] | — | "I actually haven't run into that just yet… What kind of documentation are they starting to ask for on your end?" | 2026-05-29 |
+| Darius Shah | Creative Director \| Managing Partner | Meta Hive | Singapore | [WARM] | — | "Sure, send over the sample. Not something that has been relevant to us or our Current roster of clients. But curious to know more." | 2026-05-29 |
+| Jian Yi Lay | Group Creative Director | VaynerMedia APAC | Singapore | [WARM] | — | "Before starting work, the usage of AI and which platform must be cleared by both agency and clients legal team first." | 2026-05-29 |
+| Kris Tan | Generative A.i Artist | Mocreative Pte Ltd | Singapore | [MINIMAL] | — | "The methods, techniques, workflows, and training behind our process are… valuable assets… we do not disclose our complete internal workflow" | 2026-05-29 |
+| sanjay revee | Executive Producer / Creative DIrector / TV Director | Various Companies | Singapore | [WARM] | — | "So far it's not cropped up. I guess if the AI actors look similar to well known personalities/celebrities then it's best to get consent" | 2026-05-29 |
+| Victor Manggunio | Chief Product Designer | Viper Gears Private Limited | Singapore | [MINIMAL] | — | "as ethics and best practice rules start being more consistent, I'm sure it's going to be part of the release or contract stipulations" | 2026-05-29 |
+| Henri Kang | AI Artist / Director / Generalist | Kartel.ai | Singapore | [WARM] | — | "the heavier legal/documentation side usually comes in with larger agencies, enterprise brands, or markets with stricter compliance requirements." | 2026-05-29 |
+| Glenn Ng | null | Multi-disciplinary Creative Director & Film Director | Singapore | [MINIMAL] | — | "Usually these conversations are upfront (not at delivery), whether the brand is okay with AI usage" | 2026-05-29 |
+| ROB GAX | Director of Creative & Content | KellerMedia | Singapore | [MINIMAL] | — | "the law states that whomever drafts the prompt owns the work… depends on usage… could be an infringement" | 2026-05-29 |
+| Social Rebels | null | Creative Director \| Art-Based & Gen-AI Creative | Singapore | [MINIMAL] | — | "No, they don't. As we ensure that contents are original created." | 2026-05-29 |
+| Benedict Chow Csp Cesga Mcieem | Director, Global EHS Operations | EFC International | Singapore | [PASS] | — | "I am not looking to arrange a call, but I will keep this in mind and get back to you if there is a relevant opportunity" | 2026-05-29 |
+| Andrzej Wisniewski | Co-Founder | AWsome Growth | Singapore | [MINIMAL] | — | "Sounds like an interesting model you've built… Who's your ideal client profile right now?" | 2026-05-29 |
+| Cj Cheung | Executive Producer 監製 | Orange Fever | Netherlands | [MINIMAL] | — | "we aren't doing much with AI, so I don't think your solution is the right fit for us right now" | 2026-05-29 |
+| Marinus Bergsma | Founder & Creative Art Director | SocialNow | Netherlands | [MINIMAL] | — | "i make almost everything with ai so it's always clear before i start working for a client." | 2026-05-29 |
+| Niloufar Davoudianfar | Creative Designer @Dyson | WPP Production | Netherlands | [MINIMAL] | — | "I'm not doing this actually 😅" | 2026-05-29 |
+| Christiaan Compaan | Freelance Tech AI / Gen Ai | Freelance | Netherlands | [MINIMAL] | — | "I actually never had this issue because usually in preproduction all the assets that are used in the AI production already get sourced and approved." | 2026-05-29 |
+| Quim Español | Creative Director | Monks | Netherlands | [MINIMAL] | — | "bigger companies tend to have more questions about the tooling, gen AI models used and sometimes a record of prompts used." | 2026-05-29 |
+| Alessio Garbin | Global Digital Experience Director | Barilla Group | Netherlands | [MINIMAL] | — | "Hello, yes, indeed. They always ask 😉" — enterprise brand (Barilla) confirms legal teams always require documentation | 2026-05-29 |
+| Gianni Lieuw-A-Soe | Member of The Supervisory Board | Internationaal Theater Amsterdam | Netherlands | [MINIMAL] | — | "No, not in my experience" | 2026-05-29 |
+| Derek Bender | Staff Product Designer | Uber | Netherlands | [NAF] | — | "Interesting signal though, makes sense that's starting to surface at scale." | 2026-05-29 |
+| Markus Müller-Hahnefeld | AI Trainer und Regisseur | Immersive AI: Academy & Production | Germany | [MINIMAL] | — | "This really depends on the project. Are you also a creator or what's the reason for your question?" | 2026-05-29 |
+| Salomey Dankwah | Marketing Localization Management | TeamViewer | Germany | [WARM] | — | "I've noticed conversations around transparency and AI workflows becoming more common recently, especially for commercial campaigns." | 2026-05-29 |
+| Robert Franke | CEO | Intaglio Films | Germany | [PASS] | — | "I only use ai which is trained on content I or my partners actually own so no need for retroactive rights clearance" | 2026-05-29 |
+| Adrian Anuj Kuckian | Manager | PwC Deutschland | Germany | [MINIMAL] | — | "It depends on the customer and the use case" | 2026-05-29 |
+| Tyler Vesneski | Video Content Creator | Sumsub | Germany | [MINIMAL] | — | "I know it has to go through legal, but I haven't experienced the documentation portion of it yet." | 2026-05-29 |
+| Stéphane Martineau | Overseas, Remote and On-Site Animation Supervision | Netflix, Amazon, Disney | Germany | [MINIMAL] | — | "It has never happened to me yet, but I can guess that it will happen in the near future." | 2026-05-29 |
+| Gulzar Junaid | Creative Partner | Kling AI | Germany | [MINIMAL] | — | "Most clients don't ask for production methodology unless it's explicitly part of the brief" — insider at Kling AI | 2026-05-29 |
+| Vyra Sachse | AI Image & Video Consultant | xAI | Germany | [PASS] | — | "It's not relevant for me. I am working directly with xAI as an AI creative consultant." | 2026-05-29 |
+| Sven Bliedung Von Der Heide | Chief Executive Officer | Volucap | Germany | [MINIMAL] | — | "Yes and we need to prove that we have our own trained models and use our own data which needs to comply with the EU." | 2026-05-29 |
+| Magnus Leppaeniemi | Medgrundare | NextGen Venturez | Sweden/Stockholm | [WARM] | — | "Nope, legal teams don't care for the moment" | 2026-05-29 |
+| Fredrik Rosengren | User Experience Designer | Embark Studios | Sweden/Stockholm | [MINIMAL] | — | "Copyright paradox: purely AI video may have no legal recourse to stop a competitor from downloading and using your exact video…" | 2026-05-29 |
+| Henrik Sylvén | Creative AI Consultant | Henrik Sylvén International AB | Sweden/Stockholm | [WARM] | — | "EU AI Act coming into effect Aug 2 which is bound to raise the heads at legal 🙂" — EU Act urgency framing | 2026-05-29 |
+| Nina Salehi | Digital Marketing Specialist | Envac | Sweden/Stockholm | [NAF] | — | "I don't use AI-generated video tools… legal teams want to ensure there are no copyright or privacy issues" | 2026-05-29 |
+| Christian Schaffner | Chief Creative Officer (CCO) | Tallium Inc. | Sweden/Stockholm | [MINIMAL] | — | "Sometimes yes… One thing that I see more and more upcoming from legal is that they want to know what different tools I use and the T&C" | 2026-05-29 |
+| David Pears | Co-Founder & CTO | NaviSavi Travel | Sweden/Stockholm | [MINIMAL] | — | "We don't deal with AI generated video." | 2026-05-29 |
+| Marthe Vangman | Founder | Cléon Entertainment | Sweden/Stockholm | [MINIMAL] | — | "I don't deliver any AI videos for campaigns, I work with company in-house AI creators who produces the content." | 2026-05-29 |
+| Giulio Musi | Managing Director of Chimney AI Studio | The Chimney Pot | Sweden/Stockholm | [MINIMAL] | — | "It totally depends on the client :) so we're very keen to discuss the legal frameworks before project go" | 2026-05-29 |
 
 ---
 
