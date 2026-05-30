@@ -152,4 +152,49 @@ B121 Gabriel Preston [Ivy]
 - [ ] Test 2 v2-A has no leads — void. v2-B has 4 leads (1 reply so far). No A/B comparison possible; treat v2-B as standalone re-engagement test. When v2-A is revived, assign DE/SE leads preferentially.
 - [ ] Test 3 v3-B has 2 leads (Ibrahim + Gabriel). Ibrahim answered inline ✅. Awaiting Gabriel. Add more process-describing warm leads to this arm when they surface — but screen out leads who describe an already-formalized solution.
 - [ ] Test 3 v3-C design needed: differentiation frame for "already-solved-informally" segment. Draft message: "here's how our output compares to what you're already doing."
-- [ ] Should we add a Test 5 for direct "beta tester" campaign via JD personal alias once warm pipeline data is in?
+- [ ] Test 5 launched (see below) — track reply rates and survey engagement by cohort.
+
+---
+
+## TEST 5 — JD Personal Alias: EU Act Sequence (France/Paris vs London/FinServ)
+
+**Hypothesis:** A 4-message sequence leading with the EU AI Act August 2 deadline (regulatory urgency → self-assessment survey → free Creator Record offer) will convert cold leads to warm without manual follow-up, by having the survey questions do the qualification work in message 3. Running two parallel geo/segment cohorts to isolate which converts better to the same sequence.
+
+**Sequence:** SI8_EU AI (4 Msg) — JD personal alias
+- Msg 1 (connection note): EU Act enforcement starts August 2 — are clients asking for documentation?
+- Msg 2: EU Act context + single qualifying question (current pain vs. a few months away?)
+- Msg 3: 5-question self-assessment survey ("does your workflow cover these?")
+- Msg 4: Free Creator Record offer ("want me to send you a code?") framed as pre-August deadline
+
+**What we're measuring:**
+- Connection acceptance rate vs. other sequences (EU Act hook as note)
+- Reply rate to Msg 2 (does the regulatory frame open dialogue?)
+- Survey engagement in Msg 3 — which questions get answered and how many
+- Msg 4 conversion — do silent leads activate on the free offer?
+- Cohort A (France) vs Cohort B (London/FinServ) — same sequence, different geo/segment
+
+**Cohort A — France/Paris (Creative Dir — AI Video):**
+Campaign: SI8_RV_R4LI_CreaDir_AI Video_Paris_0626A_JD
+Alias: JD
+Target: Creative Dir — AI Video
+Volume: 300–400 leads
+Launch: TBD
+
+**Cohort B — London/Financial Services (In-house creative at banks, fintechs, insurers):**
+Campaign: SI8_RV_R4LI_FinServ_London_0626A_JD
+Alias: JD
+Target: Creative/Content production roles at financial institutions
+Volume: 150–200 leads
+Launch: TBD
+
+**Results:**
+
+| Lead | Cohort | Msg replied | Survey Qs answered | Code requested? | Notes |
+|------|--------|-------------|-------------------|-----------------|-------|
+| — | — | — | — | — | — |
+
+**Analysis criteria:**
+- Verdict threshold: 5+ replies per cohort before drawing conclusions
+- Key signal: does Msg 3 (survey) generate more replies than a standard follow-up would?
+- Does Cohort B (FinServ) reply with more specificity than Cohort A (Creative Dir)?
+- Does the August 2 deadline create urgency, or does it read as abstract regulation?
