@@ -9,6 +9,41 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of May 31, 2026
+*Run: 2026-05-31 · 11 high · 9 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [CNN sues Perplexity over alleged AI copyright theft](https://www.cnn.com/2026/05/28/media/cnn-sues-perplexity-ai-copyright) | CNN | Thu, 28 May 2026 | ☐ |
+| 9 | post+update | [AI-Generated UGC Regulations & FTC Disclosure Compliance: Guide Released](https://markets.businessinsider.com/news/stocks/ai-generated-ugc-regulations-ftc-disclosure-compliance-guide-released-1036200525) | markets.businessinsider.com | Thu, 28 May 2026 | ☐ |
+| 8 | post+update | [How Gemini Omni From Google Turns AI Video Into A Living Asset](https://www.forbes.com/sites/moinroberts-islam/2026/05/28/how-gemini-omni-from-google-turns-ai-video-into-a-living-asset/) | Forbes | Thu, 28 May 2026 | ☐ |
+| 8 | post+update | [Brands Are Rethinking Influencer Deals as AI Content Blurs What’s Real](https://freedomforallamericans.org/ai-content-influencer-deals/) | Freedom For All Americans | Thu, 28 May 2026 | ☐ |
+| 8 | post+update | [Rightsline Secures $500M From Hg to Expand Rights Management and AI Operations Platform](https://www.citybiz.co/article/851417/rightsline-secures-500m-from-hg-to-expand-rights-management-and-ai-operations-platform/) | citybiz | Wed, 27 May 2026 | ☐ |
+| 7 | post+update | [Delhi high court gives interim protection to Naga Chaitanya in personality rights case over AI misuse](https://www.india.com/entertainment/delhi-hc-grants-naga-chaitanya-interim-relief-in-case-over-samantha-ruth-prabhu-cheating-allegations-and-deepfakes-8430581/) | India.Com | Sat, 30 May 2026 | ☐ |
+| 7 | post | [CNN sues Perplexity for copying 17,000 works in landmark AI copyright case](https://ppc.land/cnn-sues-perplexity-for-copying-17-000-works-in-landmark-ai-copyright-case/) | PPC Land | Fri, 29 May 2026 | ☐ |
+| 7 | post | [Kling.ai Review 2026: Is Kling AI the Best AI Video Generator Right Now? -](https://quintdaily.com/2026/05/kling-ai-review/) | QuintDaily | Thu, 28 May 2026 | ☐ |
+| 7 | post | [Global Filmmakers Are Leveraging Kling AI to Push the Boundaries of Storytelling, Cannes Panel Presents](https://www.tradingview.com/news/eqs:062bf5e56094b:0-global-filmmakers-are-leveraging-kling-ai-to-push-the-boundaries-of-storytelling-cannes-panel-presents/) | TradingView | Thu, 28 May 2026 | ☐ |
+| 7 | post | [YouTube’s New AI Labels Could Permanently Change How Billions Trust Videos Online](https://thelogicalindian.com/youtubes-new-ai-labels-could-permanently-change-how-billions-trust-videos-online/) | The Logical Indian | Thu, 28 May 2026 | ☐ |
+| 7 | post | [Runway: The Generative AI Powerhouse Redefining Professional Video & Visual Effects.](https://quasa.io/video/runway-the-generative-ai-powerhouse-redefining-professional-video-visual-effects) | quasa.io | Mon, 25 May 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [YouTube Now Auto-Labels AI Videos: What Every Content Creator Needs to Know in 2026](https://memeburn.com/youtube-now-auto-labels-ai-videos/) | Memeburn | Sat, 30 May 2026 | ☐ |
+| 6 | monitor | [Automatic AI Labels Arrive on YouTube, But Creators Will Not Be Penalized](https://www.qoo10.co.id/en/tech/105044/automatic-ai-labels-arrive-on-youtube-but-creators-will-not-be-penalized/) | Qoo Media | Sat, 30 May 2026 | ☐ |
+| 6 | monitor | [Strategic AI Integration: Protecting Your Business from Emerging Legal Risks](https://www.jdsupra.com/legalnews/strategic-ai-integration-protecting-8459743/) | JD Supra | Fri, 29 May 2026 | ☐ |
+| 6 | monitor | [Your Employees Are Already Using AI You Don't Know About](https://www.savannahnow.com/story/special/contributor-content/2026/05/28/your-employees-are-already-using-ai-you-dont-know-about/90303734007/) | Savannah Morning News | Thu, 28 May 2026 | ☐ |
+| 6 | monitor | [3 things you must know to get AI-native advertising right](https://martech.org/3-things-you-must-know-to-get-ai-native-advertising-right/) | MarTech | Thu, 28 May 2026 | ☐ |
+| 5 | update | [Checkstep nets £3 million to scale AI safety platform](https://bdaily.co.uk/articles/2026/05/29/checkstep-nets-3-million-to-scale-ai-safety-platform) | Bdaily | Fri, 29 May 2026 | ☐ |
+| 4 | monitor | [Ceartas: The AI “Internet Delete Button” That Protects Creators Instantly.](https://quasa.io/video/ceartas-the-ai-internet-delete-button-that-protects-creators-instantly) | quasa.io | Sat, 30 May 2026 | ☐ |
+| 4 | monitor | [Delhi HC issues summons, signals interim protection for actor Naga Chaitanya's personality rights](https://legal.economictimes.indiatimes.com/news/litigation/delhi-high-court-protects-naga-chaitanyas-personality-rights-against-misuse/131387020) | ETLegalWorld.com | Fri, 29 May 2026 | ☐ |
+| 4 | monitor | [Colorado Hits Reset on AI Regulation: SB 26-189 Repeals and Reenacts the Colorado AI Act](https://www.crowell.com/en/insights/client-alerts/colorado-hits-reset-on-ai-regulation-sb-26-189-repeals-and-reenacts-the-colorado-ai-act) | Crowell & Moring LLP | Wed, 27 May 2026 | ☐ |
+
+---
+
 ## Week of May 28, 2026
 *Run: 2026-05-28 · 7 high · 5 monitor · lookback 7 days*
 
