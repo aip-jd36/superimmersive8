@@ -1,6 +1,6 @@
 # SI8 Campaign Queue
 **Purpose:** Single source of truth for campaign status across all aliases — what's running, what to build next, what's waiting.
-**Updated:** 2026-05-31
+**Updated:** 2026-06-01
 
 ---
 
@@ -11,6 +11,7 @@
 | Ivy | `CreaDir_AI Video_England_0426A_IL` | England | Legal Friction | 300 |
 | Ivy | `CreaDir_AI Video_England_0426B_IL` | England | Legal Friction | 678 |
 | Ivy | `CreaDir_AI Video_SPG_0526A_IL` | Singapore | Legal Friction | 232 |
+| Ivy | `CreaDir_AI_Posted_LI_Eng_0626A_IL` | England | EU AI Act | 25 |
 | Vanessa | `CreaDir_AI Video_AmsDm_0426A_VP` | Amsterdam | Legal Friction | 300 |
 | Vanessa | `CreaDir_AI Video_STHM_0526A_VP` | Stockholm | Legal Friction | 341 |
 | Angel | `CreaDir_AI Video_Berlin_0626A_AL` | Berlin | Legal Friction | 364 |
@@ -27,7 +28,7 @@ Build in this order:
 | Priority | Alias | Proposed campaign name | Geo | Sequence | Est. leads | Notes |
 |----------|-------|----------------------|-----|----------|-----------|-------|
 | 1 | Angel | `CreaDir_AI Video_Berlin_0626B_AL` | Berlin Metro | EU AI Act | ~50–80 net new | 229 raw; deduped vs 364 existing Berlin. Phase 1 of 2-phase Germany test. |
-| 2 | Ivy | `CreaDir_AI Video_England_0626A_IL` | England | EU AI Act | 229 | Posted on LI + AI keyword search |
+| 2 | Ivy | ~~`CreaDir_AI Video_England_0626A_IL`~~ | England | EU AI Act | — | Launched as `CreaDir_AI_Posted_LI_Eng_0626A_IL` Jun 1 — only 25 leads imported (check if Dripify still importing from Sales Nav search) |
 | 3 | Ivy | `CreaDir_AI Video_SPG_0626A_IL` | Singapore | Legal Friction | 181 | Batch 2; deduped vs 232 already sent |
 | 4 | Vanessa | `CreaDir_AI Video_STHM_0626A_VP` | Stockholm | EU AI Act | ~200–250 net new | 336 raw; deduped vs 341 existing. EU Act fits Stockholm organic awareness. |
 | 5 | JD | `CreaDir_AI Video_FinServ_London_0626A_JC` | London / FinServ | EU AI Act | ~150–180 | 298 England finserv raw; apply Posted on LI filter to trim to active leads. Ivan Petruzzelli (State Street) is proof point for this segment. |
