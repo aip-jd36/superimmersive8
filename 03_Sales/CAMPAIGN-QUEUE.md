@@ -11,7 +11,7 @@
 | Ivy | `CreaDir_AI Video_England_0426A_IL` | England | Legal Friction | 300 |
 | Ivy | `CreaDir_AI Video_England_0426B_IL` | England | Legal Friction | 678 |
 | Ivy | `CreaDir_AI Video_SPG_0526A_IL` | Singapore | Legal Friction | 232 |
-| Ivy | `CreaDir_AI_Posted_LI_Eng_0626A_IL` | England | EU AI Act | 25 |
+| Ivy | `CreaDir_AI_Posted_LI_Eng_0626A_IL` | England | EU AI Act | 171 |
 | Vanessa | `CreaDir_AI Video_AmsDm_0426A_VP` | Amsterdam | Legal Friction | 300 |
 | Vanessa | `CreaDir_AI Video_STHM_0526A_VP` | Stockholm | Legal Friction | 341 |
 | Angel | `CreaDir_AI Video_Berlin_0626A_AL` | Berlin | Legal Friction | 364 |
