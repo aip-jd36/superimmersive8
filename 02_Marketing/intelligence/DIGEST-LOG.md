@@ -9,6 +9,45 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of June 01, 2026
+*Run: 2026-06-01 · 11 high · 13 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [The hidden copyright risk inside AI-generated content](https://www.calcalistech.com/ctechnews/article/19gjuao9c) | CTech | Sun, 31 May 2026 | ☐ |
+| 8 | post+update | [AI-Created IP: What Must Be Disclosed and What Can Stay Confidential](https://aijourn.com/ai-created-ip-what-must-be-disclosed-and-what-can-stay-confidential/) | The AI Journal | Sun, 31 May 2026 | ☐ |
+| 8 | post+update | [“Thought It Was a Real Person, but It’s AI?”…Virtual Character Label Now Required in All Virtual Character Ads](https://www.asiae.co.kr/en/article/2026052911131838100) | 아시아경제 | Sun, 31 May 2026 | ☐ |
+| 8 | post+update | [Metacloud accelerates AI content verification as global demand surges - CHOSUNBIZ](https://biz.chosun.com/en/en-industry/2026/05/30/LQPUW5YUWRDLBC6X3JP7EVLMBY/) | Chosunbiz | Fri, 29 May 2026 | ☐ |
+| 8 | post+update | [CNN sues Perplexity for copying 17,000 works in landmark AI copyright case](https://ppc.land/cnn-sues-perplexity-for-copying-17-000-works-in-landmark-ai-copyright-case/) | PPC Land | Fri, 29 May 2026 | ☐ |
+| 8 | update | [CNN takes Perplexity AI to court for copyright and trademark infringement](https://www.medianama.com/2026/05/223-cnn-perplexity-ai-copyright-trademark-infringement/) | MediaNama | Fri, 29 May 2026 | ☐ |
+| 8 | post+update | [Advertising industry rejects AI, embraces analog](https://www.msn.com/en-xl/news/other/advertising-industry-rejects-ai-embraces-analog/ar-AA24hc6V) | MSN | Thu, 28 May 2026 | ☐ |
+| 7 | post | [Ohio voters literally can't believe our eyes. Danger of AI ads not overblown \| Letters](https://www.dispatch.com/story/opinion/letters/2026/05/30/ai-is-threatening-ohio-elections-bill-doesnt-go-far-enough-letters/90289413007/) | The Columbus Dispatch | Sat, 30 May 2026 | ☐ |
+| 7 | post+update | [How Gemini Omni From Google Turns AI Video Into A Living Asset](https://www.forbes.com/sites/moinroberts-islam/2026/05/28/how-gemini-omni-from-google-turns-ai-video-into-a-living-asset/) | Forbes | Thu, 28 May 2026 | ☐ |
+| 7 | post | [Brands Are Rethinking Influencer Deals as AI Content Blurs What’s Real](https://freedomforallamericans.org/ai-content-influencer-deals/) | Freedom For All Americans | Thu, 28 May 2026 | ☐ |
+| 7 | post+update | [Spotting Winners: Getty Images (NYSE:GETY) And Digital Media & Content Platforms Stocks In Q1](https://stockstory.org/us/stocks/nyse/gety/news/earnings/spotting-winners-getty-images-nysegety-and-digital-media-and-content-platforms-stocks-in-q1) | StockStory | Mon, 25 May 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | update | [Creatify: The AI Video Ad Generator Brands Use to Replace Entire Creative Teams](https://quasa.io/video/creatify-the-ai-video-ad-generator-brands-use-to-replace-entire-creative-teams) | quasa.io | Sun, 31 May 2026 | ☐ |
+| 6 | monitor | [YouTube Now Auto-Labels AI Videos: What Every Content Creator Needs to Know in 2026](https://memeburn.com/youtube-now-auto-labels-ai-videos/) | Memeburn | Sat, 30 May 2026 | ☐ |
+| 6 | update | [Kling.ai Review 2026: Is Kling AI the Best AI Video Generator Right Now? -](https://quintdaily.com/2026/05/kling-ai-review/) | QuintDaily | Thu, 28 May 2026 | ☐ |
+| 6 | monitor | [Can you own a voice? Taylor Swift’s latest legal move raises big questions for AI and copyright](https://theconversation.com/can-you-own-a-voice-taylor-swifts-latest-legal-move-raises-big-questions-for-ai-and-copyright-282754) | The Conversation | Tue, 26 May 2026 | ☐ |
+| 5 | monitor | [AI marketing decision rights: how to keep control as platforms automate execution](https://www.contentgrip.com/ai-marketing-decision-rights/) | ContentGrip | Sun, 31 May 2026 | ☐ |
+| 5 | monitor | [Automatic AI Labels Arrive on YouTube, But Creators Will Not Be Penalized](https://www.qoo10.co.id/en/tech/105044/automatic-ai-labels-arrive-on-youtube-but-creators-will-not-be-penalized/) | Qoo Media | Sat, 30 May 2026 | ☐ |
+| 5 | monitor | [Strategic AI Integration: Protecting Your Business from Emerging Legal Risks](https://www.jdsupra.com/legalnews/strategic-ai-integration-protecting-8459743/) | JD Supra | Fri, 29 May 2026 | ☐ |
+| 5 | update | [The video generation AI 'Runway' is now available for use within ChatGPT and Claude chats, allowing users to input reference images and ideas via chat to create videos.](https://gigazine.net/gsc_news/en/20260528-runway-mcp-chatgpt-claude/) | GIGAZINE | Thu, 28 May 2026 | ☐ |
+| 5 | monitor | [How Is AI Regulated? Examples, Benefits, & Drawbacks \| Britannica Money](https://www.britannica.com/money/ai-rules-and-regulations) | Britannica | Wed, 27 May 2026 | ☐ |
+| 5 | update | [Runway: The Generative AI Powerhouse Redefining Professional Video & Visual Effects.](https://quasa.io/video/runway-the-generative-ai-powerhouse-redefining-professional-video-visual-effects) | quasa.io | Mon, 25 May 2026 | ☐ |
+| 4 | monitor | [Delhi HC issues summons, signals interim protection for actor Naga Chaitanya's personality rights](https://legal.economictimes.indiatimes.com/news/litigation/delhi-high-court-protects-naga-chaitanyas-personality-rights-against-misuse/131387020) | ETLegalWorld.com | Fri, 29 May 2026 | ☐ |
+| 4 | monitor | [CNN vs Perplexity: Lawsuit That Could Redraw Global Rules for AI News Search and Copyright](https://thelogicalindian.com/cnn-vs-perplexity-lawsuit-that-could-redraw-global-rules-for-ai-news-search-and-copyright/) | The Logical Indian | Fri, 29 May 2026 | ☐ |
+| 4 | monitor | [23 Best AI Video Generators for 2026 (Tested & Reviewed)](https://www.perfectcorp.com/consumer/blog/video-editing/best-ai-video-generators) | perfectcorp.com | Thu, 28 May 2026 | ☐ |
+
+---
+
 ## Week of May 31, 2026
 *Run: 2026-05-31 · 11 high · 9 monitor · lookback 7 days*
 
