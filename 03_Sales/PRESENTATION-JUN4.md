@@ -265,7 +265,7 @@ One loop. Runs every two weeks.
 
 **Slide content:**
 ```
-Same $0.40/message. New ICP. New message.
+Same $0.38/message. New ICP. New message.
 
 Response rate:    1.5%  →  16.4%
 Cost per reply:   $25.33 →  $2.32
