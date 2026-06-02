@@ -88,7 +88,9 @@ AI video compliance for agencies
 
 **Slide content:**
 ```
-How do founders get early product feedback?
+You think you know who your customer is.
+You're probably wrong.
+How long will it take you to find out?
 
 Option A: Cold email
   → People only reply if they want to buy.
@@ -203,11 +205,11 @@ Reply breakdown:
 
 ---
 
-### SLIDE 5 — The Old Way *(30 seconds)*
+### SLIDE 5 — ICP Hypothesis #1: My First Guess *(1 min)*
 
 **Slide content:**
 ```
-The Old Way
+ICP Hypothesis #1: My First Guess
 
 26 campaigns.  7,025 messages.  Early results:
 
@@ -217,11 +219,22 @@ Target: Marketing Managers, London
 Response rate:   1.5%
 Cost per reply:  $25.33
 Calls booked:    0
+
+One LinkedIn campaign cycle: 10–14 days.
+One focus group cycle:       4 weeks + $8,000.
 ```
 
 **Speaker notes:**
 
-> "When I started, I was guessing. Wrong titles, wrong message, wrong framing. This is what that looked like. One in sixty-seven messages got a reply. Zero calls. $26 a response, and none of those responses were actually useful."
+> "When I started, I was guessing. Wrong titles, wrong message, wrong framing. Marketing Managers in London — seemed logical at the time.
+>
+> One in sixty-seven messages got a reply. Zero calls. $25 a response, and none of those responses were actually useful. Classic wrong-ICP problem.
+>
+> Now here's the thing: if I'd used a focus group to test that hypothesis, I would have spent $8,000 and waited four weeks to learn what I learned in ten days for $380. If I'd tried customer interviews, I'd have spent two weeks scheduling calls with people who might not even be my ICP. If I'd done email outreach, nobody would have replied at all — because I didn't have PMF yet, so there was nothing compelling to say.
+>
+> LinkedIn compressed the feedback loop. One campaign cycle is 10 to 14 days. I ran three ICP iterations in six weeks for under $1,000 total. With any other channel, that same learning would have taken four to six months.
+>
+> The point isn't that I was wrong. Everyone's first guess is wrong. The point is how fast I found out."
 
 ---
 
