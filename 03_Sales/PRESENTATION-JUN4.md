@@ -88,9 +88,8 @@ AI video compliance for agencies
 
 **Slide content:**
 ```
-You think you know who your customer is.
-You're probably wrong.
-How long will it take you to find out?
+The most expensive mistake a B2B founder makes
+is pitching to the wrong person for 6 months.
 
 Option A: Cold email
   → People only reply if they want to buy.
