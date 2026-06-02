@@ -26,14 +26,14 @@
 
 | Metric | Value | Source |
 |--------|-------|--------|
-| Cost per message thread | $0.40 | Standing Encore 500-credit tier |
+| Cost per message thread | $0.38 | Standing Encore 1,000-credit tier |
 | Early response rate (wrong ICP + sequence) | 1.5% | Documented Provenance campaigns, London Mgr+Mktg |
-| Early cost per response | **$26.67** | $0.40 ÷ 1.5% |
+| Early cost per response | **$25.33** | $0.38 ÷ 1.5% |
 | Best response rate (right ICP + sequence) | 16.4% | Legal Friction, France campaign |
-| Best cost per response | **$2.44** | $0.40 ÷ 16.4% |
-| Improvement ratio | **11x** | $26.67 ÷ $2.44 |
-| Cost per discovery call (Dubai, best geo) | **$38.80** | 388 leads × $0.40 ÷ 4 verified calls |
-| Cost per discovery call (UK) | **$55.89** | 978 leads × $0.40 ÷ 7 verified calls |
+| Best cost per response | **$2.32** | $0.38 ÷ 16.4% |
+| Improvement ratio | **11x** | $25.33 ÷ $2.32 |
+| Cost per discovery call (Dubai, best geo) | **$36.86** | 388 leads × $0.38 ÷ 4 verified calls |
+| Cost per discovery call (UK) | **$53.09** | 978 leads × $0.38 ÷ 7 verified calls |
 | Total campaigns run | 26 | — |
 | Total leads messaged | 7,025 | — |
 | Total responses received | 531 | — |
@@ -93,7 +93,7 @@ Sequence: "Documented Provenance"
 Target: Marketing Managers, London
 
 Response rate:   1.5%
-Cost per reply:  $26.67
+Cost per reply:  $25.33
 Calls booked:    0
 ```
 
@@ -134,11 +134,11 @@ One loop. Runs every two weeks.
 Same $0.40/message. New ICP. New message.
 
 Response rate:    1.5%  →  16.4%
-Cost per reply:   $26.67 →  $2.44
+Cost per reply:   $25.33 →  $2.32
 
 11x cheaper.
 
-Cost per discovery call: ~$39 (Dubai), ~$56 (UK)
+Cost per discovery call: ~$37 (Dubai), ~$53 (UK)
 
 26 warm leads.  5 calls requested.  1 call taken.  0 closed.
 
@@ -321,8 +321,8 @@ Standing Encore: www.standingencore.com
 | How many messages total? | 7,025 across 26 campaigns |
 | Best response rate? | 16.4% (France, Legal Friction sequence) |
 | Worst response rate? | 1.0% (Sydney, Vetting Takes Weeks) |
-| Cost per message (Standing Encore)? | $0.40 (500-credit tier) |
-| Best cost per call? | ~$39 (Dubai, 4 verified calls) |
+| Cost per message (Standing Encore)? | $0.38 (1,000-credit tier) |
+| Best cost per call? | ~$37 (Dubai, 4 verified calls) |
 | How long to build this system? | About 2 months of active iteration |
 | What sequence works best? | Legal Friction — conversational question, not a pitch |
 | What ICP works best? | Creative Director / Founder at AI video studio, 10–50 people, UK or Germany |
