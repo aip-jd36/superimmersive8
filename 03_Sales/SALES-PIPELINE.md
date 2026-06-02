@@ -154,7 +154,7 @@
 | B043 | Luke Brady | Sublime Animations Ltd | London/UK | Confirmed calls 3x — all missed | Chase — 4th attempt | 2026-05-26 |
 | B045 | Mike Harris | Seenit | London/UK | "Thanks, booked!" via Calendly — no-show | Chase | 2026-05-26 |
 | B096 | Ankita Biswas | HTCreaTec | Dubai/UAE | "I'd love to know more and talk over a chat!" | Slots proposed May 14-15 — no confirmation | 2026-05-26 |
-| B100 | Ramez Tabshi | — | Dubai/UAE | Engaged — specific slots sent | Tue May 26 / Thu May 28 / Fri May 29 @ 1pm Dubai | 2026-05-29 |
+| B100 | Ramez Tabshi | — | Dubai/UAE | Engaged — Jun 1 slots offered, no confirmation received | Offer fresh slots — all previous slots expired | 2026-06-02 |
 
 ---
 
