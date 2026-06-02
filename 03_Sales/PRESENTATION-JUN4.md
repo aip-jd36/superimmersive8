@@ -11,10 +11,13 @@
 
 | Segment | Time | Duration |
 |---------|------|----------|
-| Personal intro + SI8 story | 15:00 | 3 min |
-| The system (slides) | 15:03 | 4 min |
-| Live demo setup | 15:07 | 1 min |
-| Live demo — 5 prompts | 15:08 | 14 min |
+| Personal intro + SI8 story | 15:00 | 2.5 min |
+| Problem: product discovery is broken | 15:02 | 1.5 min |
+| Why LinkedIn is different (+ convo screenshots) | 15:04 | 2 min |
+| The evidence: LinkedIn as discovery channel (chart) | 15:06 | 1 min |
+| The system + result | 15:07 | 2 min |
+| Live demo setup | 15:09 | 1 min |
+| Live demo — 5 prompts | 15:10 | 12 min |
 | Takeaways + CTA | 15:22 | 3 min |
 | Buffer / audience questions | 15:25 | — |
 
@@ -40,7 +43,7 @@
 
 ---
 
-## Slide Deck (4 slides before demo)
+## Slide Deck (7 slides before demo)
 
 ---
 
@@ -81,7 +84,126 @@ AI video compliance for agencies
 
 ---
 
-### SLIDE 2 — The Old Way *(30 seconds)*
+### SLIDE 2 — The Product Discovery Problem *(1.5 min)*
+
+**Slide content:**
+```
+How do founders get early product feedback?
+
+Option A: Cold email
+  → People only reply if they want to buy.
+  → No PMF yet = no replies. You need the answer to get the answer.
+
+Option B: Focus groups
+  → $4,000–$12,000 per session
+  → 2–4 weeks to recruit 8–10 people
+  → You still have to find the right people first
+
+Option C: Customer interviews (B2B)
+  → $100–$300 per participant just to recruit
+  → 2–3 weeks of scheduling
+  → 45 minutes per call × 10 calls = 2 weeks of your life
+
+All three assume you already know who your customer is.
+```
+
+**Speaker notes:**
+
+> "When you're building something new, you need product feedback before you have a product. And the standard options are all broken in the same way.
+>
+> Cold email: people only reply if they want to buy. If you don't have product-market fit yet, nobody responds. You need the answer to get the answer. It's circular.
+>
+> Focus groups: a professional session with 8 to 10 people costs between $4,000 and $12,000 once you factor in recruiting, the facility, the moderator, and participant incentives. And it takes 2 to 4 weeks to set up. That's before you've learned anything.
+>
+> B2B customer interviews are cheaper but not by much. Recruiting one qualified B2B professional through a platform like Respondent costs $100 to $300. And you still need to do the scheduling, the call prep, and the synthesis. Ten interviews is a month of work.
+>
+> The catch with all three: they assume you already know who your customer is. You don't get to filter by 'Creative Director at an AI video agency in Germany who's posted about AI in the last 30 days.' You just get... people."
+
+---
+
+### SLIDE 3 — Why LinkedIn Is Different *(2 min — screenshot slide)*
+
+**Slide content:**
+```
+LinkedIn outreach is not email.
+
+Target by: job title · company size · geo · industry · keyword · activity
+→ "Creative Director + AI + Berlin + posted on LinkedIn"
+
+And people actually reply — with their real opinions.
+
+[SCREENSHOT 1: Ramez Tabshi conversation]
+[SCREENSHOT 2: Ibrahim Badi conversation]
+```
+
+**Screenshots to use:**
+
+**Screenshot 1 — Ramez Tabshi (Dubai)**
+Show: Msg 1 ("Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?") and Ramez's reply describing his Provenance Dossier — Stack Transparency, Generation Proof, Likeness Verification sections, ending with "I would love to see the platform in action."
+
+Crop to: just Msg 1 + his first detailed reply. Caption: *"One question. One reply. Four product features described."*
+
+**Screenshot 2 — Ibrahim Badi (UK)**
+Show: Msg 1 and Ibrahim's reply: "I document: AI models used, commercial licensing, editing workflow, IP ownership... Your clearance platform sounds like exactly what the industry needs."
+
+Crop to: just Msg 1 + his reply. Caption: *"He described our product spec before we'd finished building it."*
+
+**Speaker notes:**
+
+> "LinkedIn is fundamentally different from email for one reason: it's a social network, not a commercial inbox. When someone gets a cold email, they're in sales-pitch mode. When someone gets a LinkedIn message from a peer asking a genuine professional question, they're in conversation mode.
+>
+> And the targeting is unlike anything else available to a solo founder. I can reach exactly: Creative Director, AI keyword in their profile, Berlin metropolitan area, posted on LinkedIn in the last 30 days. That's my ICP in one search. No agency, no recruiter, no database purchase.
+>
+> But the part that surprised me was this — [show Screenshot 1] — I sent one question to Ramez in Dubai. He wrote back a four-paragraph breakdown of his documentation workflow. He called it a 'Provenance Dossier.' He described Stack Transparency, Generation Proof, Likeness Verification. He essentially wrote my product spec for me — unprompted — in a LinkedIn reply.
+>
+> [show Screenshot 2] — Ibrahim in London described his entire markdown-to-PDF workflow, listed exactly what fields he tracks, and said 'your clearance platform sounds like exactly what the industry needs.'
+>
+> This isn't a sales pipeline. This is market research. The LinkedIn message is the survey question. The replies are the data."
+
+---
+
+### SLIDE 4 — The Evidence *(1 min — data slide)*
+
+**Slide content:**
+```
+7,025 messages sent.  531 replies received.  220 classified as discovery signals.
+
+What people told us:
+
+"Yes, especially in regulated sectors. I document:
+ AI models used, commercial licensing, editing workflow, IP ownership."
+— Managing Director, London agency
+
+"It's becoming standard practice. They ask for tool licensing,
+ training data provenance, and likeness rights."
+— Video producer, Dubai
+
+"For enterprise and regulated brands, legal teams ask for:
+ tool licensing · synthetic voice/face disclosure · copyright assurances."
+— VR Designer, London
+
+"Before starting work, the usage of AI and which platform must be
+ cleared by both agency and client legal team first."
+— Group Creative Director, VaynerMedia APAC, Singapore
+
+Reply breakdown:
+  Already being asked (Trigger 1):  ~45%
+  Curious / evaluating (Trigger 2):  ~35%
+  Already built their own solution:  ~10%
+  Not relevant / off-ICP:            ~10%
+```
+
+**Speaker notes:**
+
+> "531 replies. 220 of them contained real product intelligence — descriptions of their current process, what clients are asking for, what tools they use, what's blocking them.
+>
+> Look at these quotes. These aren't sales leads. These are product interviews. This Group Creative Director at VaynerMedia in Singapore told me that AI tool approval has to happen at both the agency AND client legal level before production even starts. That's a product requirement. That's something I'd have paid $200 to learn in a customer interview — and I got it for 38 cents.
+>
+> The data also told me something I didn't expect: about 10% of respondents had already built their own informal solution. Spreadsheets, markdown files, email trails. They'd validated the problem themselves. Those leads are not the same as the ones who haven't thought about it yet — they need a completely different message. I wouldn't have known that segment existed without doing this at scale."
+
+---
+
+### SLIDE 5 — The Old Way *(30 seconds)*
 
 **Slide content:**
 ```
@@ -103,7 +225,7 @@ Calls booked:    0
 
 ---
 
-### SLIDE 3 — The System *(1 min)*
+### SLIDE 6 — The System *(1 min)*
 
 **Slide content:**
 ```
@@ -127,7 +249,7 @@ One loop. Runs every two weeks.
 
 ---
 
-### SLIDE 4 — The Result *(30 seconds)*
+### SLIDE 7 — The Result *(30 seconds)*
 
 **Slide content:**
 ```
