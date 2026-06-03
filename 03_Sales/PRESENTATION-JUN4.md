@@ -51,8 +51,7 @@
 
 **Slide content:**
 ```
-LinkedIn Is the Most Powerful Product Research Tool
-Most Entrepreneurs Overlook
+LinkedIn is the Product Research Tool Most Entrepreneurs Overlook
 
 JD Chang · CEO, Standing Encore · Founder, SuperImmersive 8
 ```
