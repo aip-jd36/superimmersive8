@@ -139,15 +139,15 @@ And people actually reply — with their real opinions.
 
 **Screenshots to use:**
 
-**Screenshot 1 — Ramez Tabshi (Dubai)**
-Show: Msg 1 ("Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?") and Ramez's reply describing his Provenance Dossier — Stack Transparency, Generation Proof, Likeness Verification sections, ending with "I would love to see the platform in action."
+**Screenshot 1 — Lina de Groot (Amsterdam) — `Vanessa Pics/Lina1.png`**
+Show: Lina's reply: "Good question - I've had it a few times, mostly from larger brands. It's less about how it's technically made, more about rights and where things come from (faces, data, etc.). As long as that's clear, it usually goes through fine. Curious what you're seeing — is it becoming more structured on your side?"
 
-Crop to: just Msg 1 + his first detailed reply. Caption: *"One question. One reply. Four product features described."*
+Caption: *"She named our product categories — faces, data, rights — without knowing what we built."*
 
-**Screenshot 2 — Ibrahim Badi (UK)**
-Show: Msg 1 and Ibrahim's reply: "I document: AI models used, commercial licensing, editing workflow, IP ownership... Your clearance platform sounds like exactly what the industry needs."
+**Screenshot 2 — Shahrukh Kazmi (Amsterdam) — `Vanessa Pics/Shahruk1.png`**
+Show: Msg 1 ("Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?") + Shahrukh's reply: "Not everyone, but yeah, some legal teams are starting to ask. I usually just share what tools were used, my process overall of making the video and provide license links for things like royalty-free background music. Nothing too heavy, just basic transparency."
 
-Crop to: just Msg 1 + his reply. Caption: *"He described our product spec before we'd finished building it."*
+Caption: *"His informal process IS our product. He just hadn't formalized it yet."*
 
 **Speaker notes:**
 
@@ -155,9 +155,9 @@ Crop to: just Msg 1 + his reply. Caption: *"He described our product spec before
 >
 > And the targeting is unlike anything else available to a solo founder. I can reach exactly: Creative Director, AI keyword in their profile, Berlin metropolitan area, posted on LinkedIn in the last 30 days. That's my ICP in one search. No agency, no recruiter, no database purchase.
 >
-> But the part that surprised me was this — [show Screenshot 1] — I sent one question to Ramez in Dubai. He wrote back a four-paragraph breakdown of his documentation workflow. He called it a 'Provenance Dossier.' He described Stack Transparency, Generation Proof, Likeness Verification. He essentially wrote my product spec for me — unprompted — in a LinkedIn reply.
+> But the part that surprised me was this — [show Screenshot 1] — I sent one question to Lina in Amsterdam. She replied: 'It's less about how it's technically made, more about rights and where things come from — faces, data, et cetera.' She named our exact product categories — faces, data, rights — without knowing what we were building. That's not a sales reply. That's a product brief.
 >
-> [show Screenshot 2] — Ibrahim in London described his entire markdown-to-PDF workflow, listed exactly what fields he tracks, and said 'your clearance platform sounds like exactly what the industry needs.'
+> [show Screenshot 2] — Shahrukh, also Amsterdam, described his entire informal workflow: tools used, overall process, license links for background music. 'Nothing too heavy, just basic transparency.' His informal process is exactly what SI8 formalizes into a Chain of Title document. He'd already validated the problem — he just hadn't structured the solution yet.
 >
 > This isn't a sales pipeline. This is market research. The LinkedIn message is the survey question. The replies are the data."
 
