@@ -51,13 +51,10 @@
 
 **Slide content:**
 ```
-JD Chang
-CEO, Standing Encore
-───────────────────────────────────────
-Side project: SuperImmersive 8 (SI8)
-AI video compliance for agencies
+LinkedIn Is the Most Powerful Product Research Tool
+Most Entrepreneurs Overlook
 
-10 hours/week. No sales team. No budget for mistakes.
+JD Chang · CEO, Standing Encore · Founder, SuperImmersive 8
 ```
 
 **Speaker notes — what to say (3 min):**
