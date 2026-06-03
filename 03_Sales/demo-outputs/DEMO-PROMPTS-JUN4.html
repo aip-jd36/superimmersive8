@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SI8 Demo Prompts — Jun 4, 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0f0e0d;
+    --surface: #1a1918;
+    --amber: #C8900A;
+    --amber-light: #e8a812;
+    --text: #FAFAF7;
+    --muted: #9a9690;
+    --border: #2e2c2a;
+    --green: #5a8a6a;
+    --red: #a05050;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 48px;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .doc-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 24px;
+    margin-bottom: 40px;
+  }
+
+  .doc-header .eyebrow {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 8px;
+  }
+
+  .doc-header h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .doc-header .meta {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .prompt-block {
+    margin-bottom: 56px;
+    page-break-inside: avoid;
+  }
+
+  .prompt-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--amber);
+    color: #0f0e0d;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 50%;
+    margin-bottom: 12px;
+  }
+
+  .prompt-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .prompt-text {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--amber-light);
+    background: rgba(200,144,10,0.07);
+    border-left: 3px solid var(--amber);
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+
+  .response-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .response-body {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+  }
+
+  h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+
+  h2:first-child { margin-top: 0; }
+
+  p { color: #c8c5c0; margin-bottom: 12px; }
+  p:last-child { margin-bottom: 0; }
+
+  ul, ol {
+    padding-left: 20px;
+    margin-bottom: 12px;
+  }
+
+  li {
+    color: #c8c5c0;
+    margin-bottom: 6px;
+    line-height: 1.6;
+  }
+
+  .highlight { color: var(--text); font-weight: 600; }
+  .amber { color: var(--amber); font-weight: 600; }
+  .green { color: #7ab88a; font-weight: 600; }
+  .red { color: #c07070; }
+  .muted { color: var(--muted); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 13px;
+  }
+
+  th {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 9px 12px;
+    border-bottom: 1px solid rgba(46,44,42,0.5);
+    color: #c8c5c0;
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  .tag {
+    display: inline-block;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    margin: 2px 3px 2px 0;
+  }
+
+  .tag.amber { color: var(--amber); border-color: rgba(200,144,10,0.4); background: rgba(200,144,10,0.07); font-weight: 500; }
+  .tag.green { color: #7ab88a; border-color: rgba(90,138,106,0.4); background: rgba(90,138,106,0.07); font-weight: 500; }
+  .tag.red { color: #c07070; border-color: rgba(160,80,80,0.4); background: rgba(160,80,80,0.07); font-weight: 500; }
+
+  .verdict-box {
+    background: rgba(200,144,10,0.06);
+    border: 1px solid rgba(200,144,10,0.25);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 16px 0 0;
+  }
+
+  .verdict-box .vb-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 6px;
+  }
+
+  .verdict-box p { color: var(--text); margin-bottom: 0; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+
+  /* Print */
+  @media print {
+    body { background: #fff; color: #1a1918; padding: 24px; }
+    .prompt-block { page-break-inside: avoid; }
+    .response-body { background: #f5f4f0; border-color: #ddd; }
+    .prompt-text { background: #fef9ed; border-color: #C8900A; }
+    h2 { color: #1a1918; }
+    p, li, td { color: #3a3835; }
+    .amber { color: #C8900A; }
+    .green { color: #3a7a4a; }
+    .red { color: #a03030; }
+    .muted { color: #888; }
+    .highlight { color: #1a1918; }
+    th { color: #888; }
+    .verdict-box { background: #fef9ed; border-color: #C8900A; }
+    .verdict-box p { color: #1a1918; }
+    .doc-header { border-color: #ddd; }
+    table { border: 1px solid #ddd; }
+    th, td { border-color: #ddd; }
+    .tag { border-color: #ddd; color: #666; }
+    .tag.amber { background: #fef9ed; color: #C8900A; border-color: #C8900A; }
+    .tag.green { background: #edf5ef; color: #3a7a4a; border-color: #3a7a4a; }
+    .tag.red { background: #fdeaea; color: #a03030; border-color: #a03030; }
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <div class="eyebrow">Standing Encore · FutureWard Taipei · Jun 4, 2026</div>
+  <h1>SI8 Live Demo — 5 Prompt Responses</h1>
+  <div class="meta">Backup outputs generated from live campaign data · SuperImmersive 8 (SI8) · JD Chang</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- PROMPT 1 -->
+<!-- ══════════════════════════════════════════════════ -->
+
+<div class="prompt-block">
+  <div class="prompt-number">1</div>
+  <div class="prompt-label">Prompt</div>
+  <div class="prompt-text">"Who is our ICP right now based on our warm leads?"</div>
+  <div class="response-label">Response — Claude Code</div>
+  <div class="response-body">
+
+    <h2>Primary ICP</h2>
+    <p><span class="highlight">Creative Director or Senior Producer at a mid-size independent agency or boutique studio in the UK/London or Dubai/UAE</span> who is already being asked by clients for AI documentation but has no structured solution in place.</p>
+    <p>They know the problem exists. They're managing it informally — spreadsheets, email trails, verbal disclosure. They haven't formalized it because no product existed for it. SI8 is the first thing that fits their exact need.</p>
+
+    <h2>Secondary ICP</h2>
+    <p><span class="highlight">Gen AI Specialist or Founder at an AI-native studio in Germany</span>, driven by EU AI Act urgency. These leads bring up the August 2 enforcement deadline organically — they don't need to be persuaded the regulation is real.</p>
+
+    <h2>The Sweet Spot Profile</h2>
+    <p>Leads like <span class="highlight">Matthew Sergison-Main</span> (OLIVER / Brandtech, London) — "Yes I am being asked this 100%." Holdco-adjacent agency, strong institutional pain, senior enough to make a decision. This is the profile most likely to convert fastest.</p>
+
+    <h2>Warm Lead Breakdown (26 active)</h2>
+    <table>
+      <tr><th>Geo</th><th>Count</th><th>Top Signal</th></tr>
+      <tr><td>UK / London</td><td><span class="amber">9</span></td><td>"Yes I am being asked this 100%" · "Required to broadcast in EU"</td></tr>
+      <tr><td>Dubai / UAE</td><td><span class="amber">6</span></td><td>"Yes, becoming standard now" · "Already working on something in this space"</td></tr>
+      <tr><td>Germany</td><td><span class="amber">5</span></td><td>EU AI Act framing · "Legal teams asking with increasing frequency"</td></tr>
+      <tr><td>Amsterdam</td><td><span class="amber">3</span></td><td>"Checked your product — very interesting" · Monks holdco signal</td></tr>
+      <tr><td>Other</td><td>3</td><td>Off-geo or early-stage signals</td></tr>
+    </table>
+
+    <h2>What is NOT Working</h2>
+    <p>Marketing Managers, VP+ Creative generalists, CMOs, and Owner/Biz titles respond but almost never convert to warm leads. They lack the operational pain — it's not their problem to solve.</p>
+
+    <div class="verdict-box">
+      <div class="vb-label">Targeting Implication</div>
+      <p>Double down on Creative Director + AI keyword + Legal Friction sequence in UK, Dubai, and Germany. Remove Manager+ and VP+ Creative from new campaigns — the data is clear.</p>
+    </div>
+
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- PROMPT 2 -->
+<!-- ══════════════════════════════════════════════════ -->
+
+<div class="prompt-block">
+  <div class="prompt-number">2</div>
+  <div class="prompt-label">Prompt</div>
+  <div class="prompt-text">"Which campaigns worked and which didn't, and why?"</div>
+  <div class="response-label">Response — Claude Code</div>
+  <div class="response-body">
+
+    <h2>What Worked</h2>
+    <table>
+      <tr><th>Campaign</th><th>Geo</th><th>Target</th><th>Response %</th></tr>
+      <tr><td>CreaDir_AI Video_Paris_0526A_AL</td><td>France</td><td>Creative Dir — AI Video</td><td><span class="green">16.4%</span></td></tr>
+      <tr><td>CreaDir_AI Video_Dubai_0426A_LH</td><td>Dubai</td><td>Creative Dir — AI Video</td><td><span class="green">16.2%</span></td></tr>
+      <tr><td>CreaDir_AI Video_England_0426A_IL</td><td>England</td><td>Creative Dir — AI Video</td><td><span class="green">14.7%</span></td></tr>
+      <tr><td>CreaDir_AI Video_AmsDm_0426A_VP</td><td>Amsterdam</td><td>Creative Dir — AI Video</td><td><span class="green">11.7%</span></td></tr>
+      <tr><td>CreaDir_AI Video_Berlin_0626A_AL</td><td>Berlin</td><td>Creative Dir — AI Video</td><td><span class="green">10.4%</span></td></tr>
+    </table>
+    <p><strong>Why:</strong> Right title (Creative Director, specifically AI video work), right message (Legal Friction — "are their legal teams asking?"), right geo (active markets where clients are pushing back on AI content).</p>
+
+    <h2>What Didn't Work</h2>
+    <table>
+      <tr><th>Campaign</th><th>Geo / Target</th><th>Response %</th><th>Why</th></tr>
+      <tr><td>Documented Provenance sequence</td><td>London / Mgr+</td><td><span class="red">1.5%</span></td><td>Wrong message — led with "worried about AI video?" Not a pain they felt yet</td></tr>
+      <tr><td>CMO Singapore</td><td>Singapore / CMO</td><td><span class="red">2.0%</span></td><td>Too senior — CMOs delegate this problem, don't own it operationally</td></tr>
+      <tr><td>Owner+ Biz/Mktg Sydney</td><td>Sydney / Owners</td><td><span class="red">1.0%</span></td><td>Wrong geo AND wrong title. Sydney has no active AI video market signal</td></tr>
+      <tr><td>Vetting Takes Weeks (5 campaigns)</td><td>London / Mgr+</td><td><span class="red">4.5% avg</span></td><td>Wrong frame — "vetting takes weeks" is a vendor problem, not a client-legal problem</td></tr>
+      <tr><td>Hitting a Wall (4 campaigns)</td><td>London / VP+</td><td><span class="red">4.9% avg</span></td><td>Too abstract — "hitting a wall" doesn't name the specific pain point</td></tr>
+    </table>
+
+    <div class="verdict-box">
+      <div class="vb-label">The Pattern</div>
+      <p>Every campaign that named the specific pain — <em>"are their legal teams asking for documentation on how it was made?"</em> — dramatically outperformed everything else. Title matters less than message specificity. Legal Friction outperforms all other sequences by 2–7×.</p>
+    </div>
+
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- PROMPT 3 -->
+<!-- ══════════════════════════════════════════════════ -->
+
+<div class="prompt-block">
+  <div class="prompt-number">3</div>
+  <div class="prompt-label">Prompt</div>
+  <div class="prompt-text">"What did we learn from our split tests?"</div>
+  <div class="response-label">Response — Claude Code</div>
+  <div class="response-body">
+
+    <h2>Test 2 — EU Act Trigger: Deadline-First vs. Client-Pull</h2>
+    <p><span class="tag amber">Confirmed</span> <span class="highlight">Client-pull framing</span> ("your clients are now asking because of August") outperforms deadline-first ("EU AI Act enforcement starts August 2") for UK / financial services leads.</p>
+    <p><span class="highlight">Ivan Petruzzelli</span> (State Street Investment Mgmt, London) replied "Yes we are" within 24 hours of receiving the client-pull message — re-activating a lukewarm lead who had gone cold after his initial reply.</p>
+    <p><span class="tag">Geo exception:</span> Nordic and German leads appear to bring up the August 2 deadline <em>unprompted</em> — Henrik Sylvén (Stockholm) cited the EU AI Act deadline without prompting. Deadline-first may work better in DE/SE, where regulatory awareness is organic.</p>
+
+    <h2>Test 3 — Sample Output vs. 9-Question Survey</h2>
+    <p><span class="tag green">Working</span> <span class="highlight">Process-first (9 questions)</span> works for leads with informal, developing workflows. Ibrahim Badi answered 4 of 9 questions inline without prompting — "Creator Record makes sense as next step."</p>
+    <p><span class="tag red">Warning</span> Process-first <strong>repels</strong> leads who have already formalized their own solution. Kris Tan (Mocreative, SG) explicitly guards his internal workflow. Shyan Pawl and Derek Du Chesne have already baked AI terms into contracts — the 9 questions read as redundant.</p>
+    <p><span class="tag">Gap identified:</span> A third arm is needed for "already-solved-informally" leads — a differentiation frame: <em>"here's how our output compares to what you're already doing."</em></p>
+
+    <h2>Test 1 — Long vs. Short Product Description</h2>
+    <p><span class="tag red">Voided</span> Lilly alias inaccessible — the short-form variant (v1-B) had no leads. Cannot conclude. Needs to be relaunched with a different alias when 3+ Bucket 2 profile leads surface.</p>
+
+    <div class="verdict-box">
+      <div class="vb-label">Most Actionable Learning</div>
+      <p>Before sending a follow-up, classify the lead's prior reply: do they have no solution (send questions), an informal solution (send questions), or a formalized solution (send differentiation frame). Same product, three different messages.</p>
+    </div>
+
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- PROMPT 4 -->
+<!-- ══════════════════════════════════════════════════ -->
+
+<div class="prompt-block">
+  <div class="prompt-number">4</div>
+  <div class="prompt-label">Prompt</div>
+  <div class="prompt-text">"A Creative Director in Berlin just replied: 'clients are starting to ask about this more.' What stage is this lead and what should I send?"</div>
+  <div class="response-label">Response — Claude Code</div>
+  <div class="response-body">
+
+    <h2>Stage Classification</h2>
+    <p>This is a <span class="tag amber">Warm Lead</span> — move from Lead Replied immediately. The phrase "starting to ask about this more" is a <strong>Trigger 1 signal</strong>: clients are actively creating friction in real projects, right now. This is not future-tense curiosity.</p>
+    <p>Berlin geo adds EU AI Act urgency — enforcement starts <strong>August 2, 2026</strong>, which is ~8 weeks away. This lead has a real external deadline accelerating their problem.</p>
+
+    <h2>Comparable Leads for Reference</h2>
+    <table>
+      <tr><th>Lead</th><th>Company</th><th>Their Reply</th><th>Current Stage</th></tr>
+      <tr><td>Ulrike Kerber</td><td>Viva Design Inc.</td><td>"Legal teams asking with increasing frequency"</td><td><span class="tag amber">Warm Lead</span></td></tr>
+      <tr><td>Joachim Klatt</td><td>one.GLOBAL-VISION</td><td>"More relevant especially for larger brands"</td><td><span class="tag">Lead Replied</span></td></tr>
+      <tr><td>Ehsan Aliabadi</td><td>Loudestudio</td><td>"Documentation more important for larger campaigns"</td><td><span class="tag">Lead Replied</span></td></tr>
+    </table>
+
+    <h2>What to Send</h2>
+    <p>Mirror their language, add EU Act urgency, offer the sample Chain of Title, close with a soft call offer:</p>
+
+    <div class="verdict-box">
+      <div class="vb-label">Suggested Reply</div>
+      <p>"Exactly what we're seeing across the board — and with the EU AI Act enforcement starting August 2, the frequency is only going up.<br><br>
+      We built a Chain of Title review for AI video — 90 minutes, $499, you get a clearance report that travels with the deliverable when the client's legal team asks. Would it help to see a sample output? Happy to drop one directly in the chat.<br><br>
+      And if you'd rather just talk through how it works — I'm JD, the founder — 15 minutes, no pitch."</p>
+    </div>
+
+    <p style="margin-top:14px;"><span class="muted">Note:</span> Do not send the 9-question survey to this lead. The reply is short and confident — they're describing a real problem, not building an informal process. This profile responds better to seeing the output than to being asked questions.</p>
+
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- PROMPT 5 -->
+<!-- ══════════════════════════════════════════════════ -->
+
+<div class="prompt-block">
+  <div class="prompt-number">5</div>
+  <div class="prompt-label">Prompt</div>
+  <div class="prompt-text">"What campaigns should Standing Encore run next for SI8?"</div>
+  <div class="response-label">Response — Claude Code</div>
+  <div class="response-body">
+
+    <h2>Launch in This Order</h2>
+    <table>
+      <tr><th>Priority</th><th>Alias</th><th>Campaign</th><th>Geo</th><th>Sequence</th><th>Est. Leads</th></tr>
+      <tr>
+        <td><span class="amber">1</span></td>
+        <td>Angel</td>
+        <td>CreaDir_AI Video_Berlin_0626B_AL</td>
+        <td>Berlin Metro</td>
+        <td>EU AI Act</td>
+        <td>~50–80 net new</td>
+      </tr>
+      <tr>
+        <td><span class="amber">2</span></td>
+        <td>Ivy</td>
+        <td>CreaDir_AI Video_SPG_0626A_IL</td>
+        <td>Singapore</td>
+        <td>Legal Friction</td>
+        <td>181 net new</td>
+      </tr>
+      <tr>
+        <td><span class="amber">3</span></td>
+        <td>Vanessa</td>
+        <td>CreaDir_AI Video_STHM_0626A_VP</td>
+        <td>Stockholm</td>
+        <td>EU AI Act</td>
+        <td>~200–250 net new</td>
+      </tr>
+      <tr>
+        <td><span class="amber">4</span></td>
+        <td>JD</td>
+        <td>CreaDir_AI Video_FinServ_London_0626A_JC</td>
+        <td>London / FinServ</td>
+        <td>EU AI Act</td>
+        <td>~150–180</td>
+      </tr>
+    </table>
+
+    <h2>Hold Until Data Comes In</h2>
+    <table>
+      <tr><th>Alias</th><th>Campaign</th><th>Wait For</th></tr>
+      <tr>
+        <td>Angel</td>
+        <td>Germany broad (~543 net new)</td>
+        <td>Berlin Metro day 7–10: acceptance ≥ 20% AND at least 1 substantive reply mentioning EU Act</td>
+      </tr>
+      <tr>
+        <td>JD</td>
+        <td>EMEA (2,500+ dripped over weeks)</td>
+        <td>London FinServ campaign live first</td>
+      </tr>
+    </table>
+
+    <h2>Reasoning</h2>
+    <ul>
+      <li><strong>Berlin Metro first</strong> — tests EU AI Act sequence in Germany before committing 543 leads to the broad campaign. Berlin already ran 31.9% acceptance on Legal Friction. The EU Act frame should perform at least as well, and German leads show organic regulatory awareness.</li>
+      <li><strong>Singapore batch 2</strong> — warm rate of 42% in May 29 discovery batch vs. 6% in UK. Underweighted relative to signal. 181 leads available now.</li>
+      <li><strong>Stockholm EU Act</strong> — Henrik Sylvén cited August 2 deadline unprompted. Nordic market has organic regulatory awareness; EU Act sequence should land without needing to explain the law.</li>
+      <li><strong>London FinServ</strong> — Ivan Petruzzelli (State Street) confirmed financial services clients are moving toward structured documentation. Segment is validation-ready. Apply "Posted on LinkedIn" filter to prioritise active leads.</li>
+    </ul>
+
+    <div class="verdict-box">
+      <div class="vb-label">Blocked</div>
+      <p>Lilly alias is inaccessible — no new campaigns until resolved. Dubai pipeline is warm (26 warm leads, 4 verified calls) — focus is on converting existing leads, not adding volume.</p>
+    </div>
+
+  </div>
+</div>
+
+<div style="margin-top:48px; padding-top:24px; border-top:1px solid var(--border); font-size:12px; color:var(--muted); text-align:center; font-family:'Space Grotesk',sans-serif;">
+  SI8 · SuperImmersive 8 · Generated Jun 4, 2026 · Data source: Dripify campaigns + Supabase CRM
+</div>
+
+</body>
+</html>
