@@ -9,6 +9,49 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of June 04, 2026
+*Run: 2026-06-04 · 18 high · 10 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [AI Video Copyright: Ownership, Legal Risks, and Safe Use](https://editorialge.com/ai-video-copyright/) | Editorialge | Tue, 02 Jun 2026 | ☐ |
+| 9 | post+update | [The hidden copyright risk inside AI-generated content](https://www.calcalistech.com/ctechnews/article/19gjuao9c) | CTech | Sun, 31 May 2026 | ☐ |
+| 9 | post+update | [YouTube’s New AI Labels Could Permanently Change How Billions Trust Videos Online](https://thelogicalindian.com/youtubes-new-ai-labels-could-permanently-change-how-billions-trust-videos-online/) | The Logical Indian | Thu, 28 May 2026 | ☐ |
+| 8 | post+update | [AI-Generated Advertising: Key Legal Considerations for Retailers](https://www.hunton.com/hunton-retail-law-resource/ai-generated-advertising-key-legal-considerations-for-retailers) | Hunton Andrews Kurth LLP | Wed, 03 Jun 2026 | ☐ |
+| 8 | post+update | [ASCI Drafts AI Ad Rules, Proposes Ban on Certain Uses](https://www.medianama.com/2026/06/223-asci-draft-synthetic-media-guidelines-ads-uses-prohibited-entirely/) | MediaNama | Tue, 02 Jun 2026 | ☐ |
+| 8 | post+update | [YouTube to auto-label photorealistic AI videos for transparency](http://www.msn.com/en-in/money/news/youtube-to-auto-label-photorealistic-ai-videos-for-transparency/ss-AA24ei8V) | MSN | Mon, 01 Jun 2026 | ☐ |
+| 8 | post+update | [Korea to Require "Virtual Person" Labels on AI-Generated Ads from June](https://en.sedaily.com/news/2026/05/31/korea-to-require-virtual-person-labels-on-ai-generated-ads) | Seoul Economic Daily | Sun, 31 May 2026 | ☐ |
+| 8 | update | [“Thought It Was a Real Person, but It’s AI?”…Virtual Character Label Now Required in All Virtual Character Ads](https://www.asiae.co.kr/en/article/2026052911131838100) | 아시아경제 | Sun, 31 May 2026 | ☐ |
+| 8 | post+update | [CNN sues Perplexity for copying 17,000 works in landmark AI copyright case](https://ppc.land/cnn-sues-perplexity-for-copying-17-000-works-in-landmark-ai-copyright-case/) | PPC Land | Fri, 29 May 2026 | ☐ |
+| 8 | post+update | [Who’s suing AI and who’s signing: CNN latest to sue Perplexity](https://pressgazette.co.uk/platforms/news-publisher-ai-deals-lawsuits-openai-google/) | Press Gazette | Fri, 29 May 2026 | ☐ |
+| 8 | post+update | [CNN sues Perplexity over alleged AI copyright theft](https://www.cnn.com/2026/05/28/media/cnn-sues-perplexity-ai-copyright) | CNN | Thu, 28 May 2026 | ☐ |
+| 8 | post+update | [AI-Generated UGC Regulations & FTC Disclosure Compliance: Guide Released](https://markets.businessinsider.com/news/stocks/ai-generated-ugc-regulations-ftc-disclosure-compliance-guide-released-1036200525) | markets.businessinsider.com | Thu, 28 May 2026 | ☐ |
+| 7 | post+update | [Self-regulation has grown up. Now it has to keep up.](https://www.lewissilkin.com/insights/2026/06/02/self-regulation-has-grown-up-now-it-has-to-keep-up-102n0s8) | Lewis Silkin LLP | Tue, 02 Jun 2026 | ☐ |
+| 7 | post+update | [Infringement risks of generative AI in the entertainment industry (Part 1) \| China](https://law.asia/generative-ai-entertainment-industry/) | Law.asia | Mon, 01 Jun 2026 | ☐ |
+| 7 | update | [AI-Created IP: What Must Be Disclosed and What Can Stay Confidential](https://aijourn.com/ai-created-ip-what-must-be-disclosed-and-what-can-stay-confidential/) | The AI Journal | Sun, 31 May 2026 | ☐ |
+| 7 | update | [YouTube Now Auto-Labels AI Videos: What Every Content Creator Needs to Know in 2026](https://memeburn.com/youtube-now-auto-labels-ai-videos/) | Memeburn | Sat, 30 May 2026 | ☐ |
+| 7 | post+update | [Strategic AI Integration: Protecting Your Business from Emerging Legal Risks](https://www.jdsupra.com/legalnews/strategic-ai-integration-protecting-8459743/) | JD Supra | Fri, 29 May 2026 | ☐ |
+| 7 | post | [Brands Are Rethinking Influencer Deals as AI Content Blurs What’s Real](https://freedomforallamericans.org/ai-content-influencer-deals/) | Freedom For All Americans | Thu, 28 May 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [IAS makes AI slop avoidance generally available with hard performance data](https://ppc.land/ias-makes-ai-slop-avoidance-generally-available-with-hard-performance-data/) | PPC Land | Wed, 03 Jun 2026 | ☐ |
+| 6 | update | [Delhi High Court orders takedown of AI deepfakes of Varun Dhawan, restrains unauthorised merchandise sale](https://www.medianama.com/2026/06/223-delhi-high-court-takedown-ai-deepfakes-varun-dhawan-restrains-unauthorised-merchandise-sale/) | MediaNama | Tue, 02 Jun 2026 | ☐ |
+| 6 | update | [Cox and Effect: Why Volitional Conduct Is AI Copyright’s Next Battleground](https://copyrightlately.com/cox-sony-volitional-conduct-ai-copyright/) | Copyright Lately | Mon, 01 Jun 2026 | ☐ |
+| 6 | monitor | [YouTube shifts generative AI labels to spots viewers will actually see](https://ppc.land/youtube-shifts-generative-ai-labels-to-spots-viewers-will-actually-see/) | PPC Land | Sat, 30 May 2026 | ☐ |
+| 5 | monitor | [SimplifyGenAI showcases AI filmmaking capabilities through founder-led short film](https://www.impactonnet.com/more-from-impact/simplifygenai-showcases-ai-filmmaking-capabilities-through-founder-led-short-film-14768.html) | IMPACT Magazine | Wed, 03 Jun 2026 | ☐ |
+| 5 | monitor | [The creator economy's next disruption: AI influencers, AI studios & AI commerce](https://www.exchange4media.com/influence-zone-news/the-creator-economys-next-disruption-ai-influencers-ai-studios-ai-commerce-155163.html) | Exchange4Media | Wed, 03 Jun 2026 | ☐ |
+| 5 | monitor | [AI Legislative Update: May 29, 2026](https://www.transparencycoalition.ai/news/ai-legislative-update-may29-2026) | Transparency Coalition | Thu, 28 May 2026 | ☐ |
+| 4 | monitor | [AI Video Security: Deepfake Detection for Brands](https://www.blockchain-council.org/ai/ai-video-security-detecting-deepfakes-protecting-brands-forensic-verification/) | Blockchain Council | Tue, 02 Jun 2026 | ☐ |
+| 4 | monitor | [NYT publisher accuses AI firms of ‘Intellectual Property Theft’, warns of risks to Journalism](https://www.storyboard18.com/brand-makers/nyt-publisher-accuses-ai-firms-of-intellectual-property-theft-warns-of-risks-to-journalism-99916.htm) | Storyboard18 | Tue, 02 Jun 2026 | ☐ |
+| 4 | monitor | [Global Filmmakers Are Leveraging Kling AI to Push the Boundaries of Storytelling, Cannes Panel Presents](https://www.tradingview.com/news/eqs:062bf5e56094b:0-global-filmmakers-are-leveraging-kling-ai-to-push-the-boundaries-of-storytelling-cannes-panel-presents/) | TradingView | Thu, 28 May 2026 | ☐ |
+
+---
+
 ## Week of June 01, 2026
 *Run: 2026-06-01 · 11 high · 13 monitor · lookback 7 days*
 
