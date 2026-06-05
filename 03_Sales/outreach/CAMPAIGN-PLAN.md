@@ -27,7 +27,7 @@
 
 | Alias | Campaign | Geo | Sequence | List Size | Notes |
 |-------|----------|-----|----------|-----------|-------|
-| Vanessa | CreaDir AI Video | Spain | EU AI Act | TBD — confirm size | Sourced via JD's Standing Encore account Apr 25; EU territory, August 2 applies; first Spain test |
+| Vanessa | CreaDir AI Video | Spain | EU AI Act | 498 | Launched Jun 6 2026. Sourced via JD's Standing Encore account Apr 25; EU territory, August 2 applies; first Spain test |
 | Angel | CreaDir AI Video | Germany (broader) | Legal Friction | 907 | Expansion of proven Berlin formula after Berlin Metro completes |
 | JD | TBD | TBD | TBD | TBD | After France winds down (~Jun 16) |
 
@@ -60,7 +60,7 @@
 
 ## Open Questions
 
-- [ ] Spain list size — confirm via Standing Encore before loading
+- [x] Spain list size — 498 leads, launched Jun 6 2026
 - [ ] JD France acceptance rate: is the problem the alias, the geo, or the sequence? Diagnose before JD's next campaign
 - [ ] Lilly alias: what's the access issue and can it be resolved? Dubai is $2.13/warm reply — highest ROI geo
 - [ ] Posted on LinkedIn filter: does Ivy's 841 (no filter) campaign match or underperform the 171 Posted LI campaign?
