@@ -7,7 +7,7 @@ is discovery calls to validate PMF, surface edge cases, and identify product gap
 **Source:** `03_Sales/DISCOVERY-PERFORMANCE-LOG.md` → Discovery Signal Checklist → manual review.
 A lead can appear in BOTH this pipeline and `03_Sales/CRM.md` if they are also a sales prospect.
 
-**Last updated:** 2026-05-29
+**Last updated:** 2026-06-05
 
 ---
 
@@ -27,7 +27,7 @@ A lead can appear in BOTH this pipeline and `03_Sales/CRM.md` if they are also a
 
 <!-- discovery-pipeline:start -->
 
-## Signal (220)
+## Signal (229)
 
 *Leads flagged from discovery report, pending outreach decision.*
 
@@ -131,6 +131,15 @@ A lead can appear in BOTH this pipeline and `03_Sales/CRM.md` if they are also a
 | David Tamayo | Creative AI Director | Prose on Pixels | France/Paris | [WARM] | — | Hey we are a big network with Legal team, dedicated to AI. Laws in the US are re… | 2026-05-23 |
 | Hugo Barbera | AI Director & Fortune 500 AI trainings | Advertising & Fashion | HumAIn | France/Paris | [WARM] | — | Hello06:29 pm So we have all terms and conditions from legal team in advance. Th… | 2026-05-23 |
 | Billy Boman | Founder | Billy Boman AI Productions | Sweden/Stockholm | [WARM] | — | Hey, No not documentation around every prompt as the liability is on us as the p… | 2026-05-23 |
+| Simon Helm | AI Creative Director / AI Creator / Head of Art | Various ad agencies & direct clients | London/UK | [WARM] | EU AI Act | "Yeah this feels very relevant and I've been advising clients already. Do you have more info? Can we chat?" — explicit call request | 2026-06-05 |
+| Alex Jenkins | Executive Creative Director | Nexus Studios | London/UK | [WARM] | EU AI Act | "I know one of my clients want us to document whenever we use AI, I suspect this will be the steps towards this." | 2026-06-05 |
+| Daniele Zennaro | Founder — Creative Director | AiYR4 | London/UK | [WARM] | EU AI Act | "yes, it's starting to become a topic, especially with agencies and larger clients. Still not fully structured, but AI usage, rights and documentation are definitely becoming more relevant." | 2026-06-05 |
+| Wu-Ching Chang (Aco) | Director and Founder | Shih Chien University | London/UK | [WARM] | EU AI Act | "we are starting to see early questions around AI usage disclosure and workflow transparency, especially for projects with European partners." | 2026-06-05 |
+| Cris Cerqueira | Creative Director / Head of design | Cris Cerqueira Studio | London/UK | [WARM] | EU AI Act | "I keep a record of the tools used and the creative workflow, which I suspect will become increasingly important as the EU AI Act requirements are implemented." | 2026-06-05 |
+| Laurence Quinn | Creative Director (Brand & AI) | Ai4ADS | London/UK | [WARM] | EU AI Act | "Not yet. but I am aware of logging everything." | 2026-06-05 |
+| Phil Harper | Creative Director | IMRGE | London/UK | [WARM] | EU AI Act | "This isn't really for me right now." | 2026-06-05 |
+| Mike Jassi | Creative Lead | GoodFolks | London/UK | [MINIMAL] | EU AI Act | "Still a few months away but always worth exploring." | 2026-06-05 |
+| Carlos Franco | Founder | mañana.today | London/UK | [WARM] | Legal Friction | — | 2026-06-05 |
 | Nick Jones | DIRECTOR - VP | null | London/UK | [MINIMAL] | — | "I have absolutely no idea what you are talking about, who you are, or what you're trying to sell me." | 2026-05-29 |
 | Piotr Nierobisz | Creative Director & Founder | Munchingsquare | London/UK | [MINIMAL] | — | "I would not pitch / work on AI campaign without clearing this out with client legal department as it's wasted effort" | 2026-05-29 |
 | Vijendra Kunwar Mmc | Founder | Fitter Circle | London/UK | [NAF] | — | "We don't recommend any AI videos so this would not be relevant for us." | 2026-05-29 |
