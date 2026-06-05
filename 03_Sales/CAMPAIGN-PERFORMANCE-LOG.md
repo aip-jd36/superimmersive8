@@ -44,11 +44,11 @@
 | England | 3 | 1,149 | 278 | 24.2% | 123 | 10.7% | |
 | Los Angeles | 1 | 650 | 168 | 25.8% | 69 | 10.6% | |
 | Stockholm | 1 | 341 | 78 | 22.9% | 26 | 7.6% | |
-| Singapore | 6 | 1,265 | 357 | 28.2% | 83 | 6.6% | |
+| Singapore | 7 | 1,326 | 384 | 29.0% | 93 | 7.0% | |
 | Global | 1 | 200 | 60 | 30.0% | 13 | 6.5% | |
 | London | 10 | 2,180 | 474 | 21.7% | 96 | 4.4% | |
-| France | 2 | 301 | 33 | 11.0% | 11 | 3.7% | |
 | Sydney | 1 | 298 | 23 | 7.7% | 3 | 1.0% | |
+| France | 1 | 240 | 6 | 2.5% | 1 | 0.4% | |
 
 ---
 
@@ -74,7 +74,7 @@
 | Campaign | Geo | Target | Sequence | Launch | Leads | Accepted | Accept % | Responded | Response % |
 |----------|-----|--------|----------|--------|-------|----------|----------|-----------|------------|
 | SI8_RV_R4LI_CreaDir_AI Video_Berlin_0626A_AL | Berlin | Creative Dir — AI Video | Legal Friction | May 4 2026 | 364 | 120 | 33.0% | 40 | 11.0% |
-| SI8_RV_R4LI_CreaDir_AI Video_Paris_0526A_AL | France | Creative Dir — AI Video | Legal Friction | May 20 2026 | 61 | 27 | 44.3% | 10 | 16.4% |
+| SI8_RV_R4LI_CreaDir_AI Video_Paris_0526A_AL | Singapore | Creative Dir — AI Video | Legal Friction | May 20 2026 | 61 | 27 | 44.3% | 10 | 16.4% |
 | **Angel Total** | | | | | **425** | **147** | **34.6%** | **50** | **11.8%** |
 
 ### Ivy
@@ -134,7 +134,7 @@
 ### Top 5 by Response Rate
 | Rank | Campaign | Geo | Target | Response % | Responded |
 |------|----------|-----|--------|------------|-----------|
-| 1 | SI8_RV_R4LI_CreaDir_AI Video_Paris_0526A_AL | France | Creative Dir — AI Video | **16.4%** | 10 |
+| 1 | SI8_RV_R4LI_CreaDir_AI Video_Paris_0526A_AL | Singapore | Creative Dir — AI Video | **16.4%** | 10 |
 | 2 | SI8_RV_R4LI_CreaDir_AI Video_Dubai_0426A_LH | Dubai | Creative Dir — AI Video | **16.2%** | 63 |
 | 3 | SI8_RV_R4LI_CreaDir_AI Video_England_0426A_IL | England | Creative Dir — AI Video | **14.7%** | 44 |
 | 4 | SI8_RV_R4LI_Mgr+_Mktg_London_0326A_LH | London | Manager+ Marketing | **13.1%** | 13 |
@@ -153,7 +153,7 @@
 | Rank | Campaign | Geo | Target | Accept % | Accepted |
 |------|----------|-----|--------|----------|----------|
 | 1 | SI8_RV_R4LI_CreaDir_AI Video_Dubai_0426A_LH | Dubai | Creative Dir — AI Video | **53.9%** | 209 |
-| 2 | SI8_RV_R4LI_CreaDir_AI Video_Paris_0526A_AL | France | Creative Dir — AI Video | **44.3%** | 27 |
+| 2 | SI8_RV_R4LI_CreaDir_AI Video_Paris_0526A_AL | Singapore | Creative Dir — AI Video | **44.3%** | 27 |
 | 3 | SI8_RV_R4LI_Mgr+_Adv_SPG_0326A_LH | Singapore | Manager+ Advertising | **38.1%** | 37 |
 | 4 | SI8_RV_R4LI_VP+_Creative_SPG_0426A_LH | Singapore | VP+ Creative | **34.6%** | 66 |
 | 5 | SI8_RV_R4LI_CreaDir_AI Video_Berlin_0626A_AL | Berlin | Creative Dir — AI Video | **33.0%** | 120 |
@@ -162,13 +162,13 @@
 
 ## Key Insights
 
-**Best response rate:** `SI8_RV_R4LI_CreaDir_AI Video_Paris_0526A_AL` (France) — 16.4% (10 from 61 leads).
+**Best response rate:** `SI8_RV_R4LI_CreaDir_AI Video_Paris_0526A_AL` (Singapore) — 16.4% (10 from 61 leads).
 
 **Best acceptance rate:** `SI8_RV_R4LI_CreaDir_AI Video_Dubai_0426A_LH` (Dubai) — 53.9% acceptance rate.
 
 **Best geo:** Dubai — 16.2% response rate (63 replies from 388 leads).
 
-**Dead geos (< 2% response, n ≥ 50):** Sydney — do not pursue.
+**Dead geos (< 2% response, n ≥ 50):** Sydney, France — do not pursue.
 
 ---
 
@@ -182,13 +182,13 @@
 | Geo | Leads | Total cost | Warm replies | $/warm reply | Verified calls | $/call |
 |-----|-------|-----------|-------------|-------------|---------------|--------|
 | **UAE/Dubai** | 388 | $55.43 | 26 | $2.13 | 4 | $13.86 |
-| **Singapore** | 232 | $33.14 | 10 | $3.31 | 0 | — |
 | **Netherlands** | 300 | $42.86 | 12 | $3.57 | 0 | — |
+| **Singapore** | 293 | $41.86 | 10 | $4.19 | 0 | — |
 | **London/UK** | 1,149 | $164.14 | 29 | $5.66 | 7 | $23.45 |
 | **Germany** | 364 | $52.00 | 9 | $5.78 | 0 | — |
 | **USA** | 650 | $92.86 | 13 | $7.14 | 0 | — |
 | **Sweden/Stockholm** | 341 | $48.71 | 3 | $16.24 | 0 | — |
-| **France/Paris** | 301 | $43.00 | 0 | — | 0 | — |
+| **France/Paris** | 240 | $34.29 | 0 | — | 0 | — |
 
 **Budget recommendation:** Scale the geo with lowest $/warm reply first.
 Geos with 0 verified calls: pipeline is warm — needs follow-up to convert, not more outreach.
@@ -641,162 +641,6 @@ Geos with 0 verified calls: pipeline is warm — needs follow-up to convert, not
   Yess! They do at times! How’d you get the idea!? Are you working on a research!? I’d love to know more about it and also talk about it over a chat! Ping me when you’re available to discuss!03:23 am
 
 
-**Singapore** (10 warm leads):
-- Jia Jin ( JJ ) Goh · Director · Alternate Video Production
-
-  Mon May 25 2026
-  
-  Hi Jia Jin,
-  
-  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
-  
-  Seeing this come up more this year.12:00 pm
-  Thanks for connecting Ivy. Nice to e meet you. JJ here12:00 pm
-  To answer your question, all my client do not ask for documentation. We will tell them that some content are AI generated and they have commercial rights.
-  
-  We leave the issue of whether AI is stealing work to the platform legal team.12:02 pm
-
-- Victor Masin · Co-Founder, Head of Creative · Always Wonder video agency
-
-  Mon May 25 2026
-  
-  Hi Victor,
-  
-  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
-  
-  Seeing this come up more this year.10:46 pm
-  Hi Ivy. Good question, and an interesting one.
-  Most of what we deliver is live action, so the documentation ask has not hit us hard yet. Where we have used AI elements, the larger and more regulated clients are the ones who start asking how the cut was made. Still feels early.
-  More curious what you are seeing. Is legal sending a written checklist, or is it coming up verbally at approval stage?10:48 pm
-
-- Al Hafeez Jamil · Creative Producer · The Daily Creative
-
-  Wed May 27 2026
-  
-  Hi Al Hafeez,
-  
-  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
-  
-  Seeing this come up more this year.06:17 am
-  Hi Ivy,
-  
-  Good to hear from you. Interestingly, we have not had client legal teams ask for that level of documentation just yet. However, we are actively preparing for it to become a standard practice soon.
-  
-  Are you finding that certain industries or types of clients are asking for this more than others? I would love to hear what specific documentation they are requesting so we know what to expect.07:19 am
-
-- Raymond Choong · Lead Videographer · Craft Creative Pte Ltd
-
-  Yesterday
-  
-  Hi Raymond,
-  
-  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
-  
-  Seeing this come up more this year.06:24 am
-  Hi Ivy, good to hear from you. I actually haven't run into that just yet. My workflow approvals have remained pretty standard so far. What kind of documentation are they starting to ask for on your end? I'd love to hear more about what you're seeing.06:24 am
-
-- Darius Shah · Creative Director | Managing Partner · Meta Hive
-
-  Sun May 24 2026
-  
-  Hi Darius,
-  
-  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
-  
-  Seeing this come up more this year.09:04 am
-  
-  Thanks for connecting, Darius.
-  
-  In case it's relevant: we run a 90-minute rights review for AI video. Creator submits → we issue a Chain of Title document → brand legal gets what they need to approve the campaign.
-  
-  $499 per video. You can see a sample at www.superimmersive8.com — the "How It Works" page has the full breakdown.
-  
-  Would you be open to a quick 15-min call to learn more?
-  
-  Ivy
-  www.superimmersive8.com03:11 pm
-  Yesterday
-  
-  Hi Darius,
-  
-  If you've got a campaign with AI-generated content that needs to pass legal review, that's exactly what we solve. Happy to send a sample Chain of Title document directly, or jump on a 15-minute call to walk through the process.
-  
-  Thanks!
-  Ivy12:26 am
-  Hi Ivy, Glad to connect. Sure, send over the sample. Not something that has been relevant to us or our Current roster of clients. But curious to know more.11:48 am
-
-- Jian Yi Lay · Group Creative Director · VaynerMedia APAC
-
-  Yesterday
-  
-  Hi Jian Yi,
-  
-  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
-  
-  Seeing this come up more this year.03:18 pm
-  Hi Ivy, 
-  
-  Before starting work, the usage of AI and which platform must be cleared by both agency and clients legal team first. 
-  
-  As you know some AI platform are not fully transparent and might be using clients work for their training, sensitive information might be compromise. 
-  
-  Hope this helps. 
-  
-  Regards,
-  Lay03:21 pm
-
-- sanjay revee · Executive Producer / Creative DIrector / TV Director · Various Companies
-
-  Sat May 23 2026
-  
-  Hi Sanjay,
-  
-  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
-  
-  Seeing this come up more this year.01:51 pm
-  Hi there. So far it’s not cropped up. I guess if the “AI actors” look similar to well known personalities/celebrities then it’s best to get consent from the celebs and pay them loading fees for using their likeness. That should satisfy legal teams.02:00 pm
-
-- Henri Kang · AI Artist / Director / Generalist · Kartel.ai
-
-  Fri May 22 2026
-  
-  Hi Henri,
-  
-  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
-  
-  Seeing this come up more this year.06:49 pm
-  Hey Yu-Chieh! Thanks for connecting.06:50 pm
-  Honestly I don’t get asked much either. Most of the clients I have worked with are more focused on the final output and whether it fits the campaign. I think the heavier legal/documentation side usually comes in with larger agencies, enterprise brands, or markets with stricter compliance requirements.
-  
-  Feels like the industry is still in that transition phase where some companies are super cautious, while others are just treating AI like another creative tool in the pipeline.06:53 pm
-
-- Mikhail Conrad Roberto · Creative Director · PropertyLimBrothers
-
-  Yesterday
-  
-  Hi Mikhail Conrad,
-  
-  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
-  
-  Seeing this come up more this year.12:30 pm
-  Hi Ivy, I haven’t encountered legal teams asking for processes, we do however ensure that we have consent if we’re someone’s likeness from within the team as an AI Actor.12:33 pm
-
-- Shivalii Maheshwari Somani · Senior Creative Designer · The Digital Banker
-
-  Yesterday
-  
-  Hi Shivalii,
-  
-  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
-  
-  Seeing this come up more this year.09:05 am
-  Hi Yu Chieh
-  
-  In my experience so far, no. I haven’t had clients ask for formal documentation on how the AI-generated video was made. Usually approvals are focused more on the final output, usage rights, brand alignment, and whether any copyrighted assets or likenesses were used.
-  
-  But I have been noticing conversations around AI disclosure and compliance becoming more common this year, especially with larger brands/legal teams.09:14 am
-
-
 **Netherlands** (12 warm leads):
 - Graeme Carr · VFX & AI Artist (Commercials, Brand Films) · OBSIDIAN
 
@@ -999,6 +843,162 @@ Geos with 0 verified calls: pipeline is warm — needs follow-up to convert, not
   
   Regards
   Hugo08:11 pm
+
+
+**Singapore** (10 warm leads):
+- Jia Jin ( JJ ) Goh · Director · Alternate Video Production
+
+  Mon May 25 2026
+  
+  Hi Jia Jin,
+  
+  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
+  
+  Seeing this come up more this year.12:00 pm
+  Thanks for connecting Ivy. Nice to e meet you. JJ here12:00 pm
+  To answer your question, all my client do not ask for documentation. We will tell them that some content are AI generated and they have commercial rights.
+  
+  We leave the issue of whether AI is stealing work to the platform legal team.12:02 pm
+
+- Victor Masin · Co-Founder, Head of Creative · Always Wonder video agency
+
+  Mon May 25 2026
+  
+  Hi Victor,
+  
+  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
+  
+  Seeing this come up more this year.10:46 pm
+  Hi Ivy. Good question, and an interesting one.
+  Most of what we deliver is live action, so the documentation ask has not hit us hard yet. Where we have used AI elements, the larger and more regulated clients are the ones who start asking how the cut was made. Still feels early.
+  More curious what you are seeing. Is legal sending a written checklist, or is it coming up verbally at approval stage?10:48 pm
+
+- Al Hafeez Jamil · Creative Producer · The Daily Creative
+
+  Wed May 27 2026
+  
+  Hi Al Hafeez,
+  
+  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
+  
+  Seeing this come up more this year.06:17 am
+  Hi Ivy,
+  
+  Good to hear from you. Interestingly, we have not had client legal teams ask for that level of documentation just yet. However, we are actively preparing for it to become a standard practice soon.
+  
+  Are you finding that certain industries or types of clients are asking for this more than others? I would love to hear what specific documentation they are requesting so we know what to expect.07:19 am
+
+- Raymond Choong · Lead Videographer · Craft Creative Pte Ltd
+
+  Yesterday
+  
+  Hi Raymond,
+  
+  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
+  
+  Seeing this come up more this year.06:24 am
+  Hi Ivy, good to hear from you. I actually haven't run into that just yet. My workflow approvals have remained pretty standard so far. What kind of documentation are they starting to ask for on your end? I'd love to hear more about what you're seeing.06:24 am
+
+- Darius Shah · Creative Director | Managing Partner · Meta Hive
+
+  Sun May 24 2026
+  
+  Hi Darius,
+  
+  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
+  
+  Seeing this come up more this year.09:04 am
+  
+  Thanks for connecting, Darius.
+  
+  In case it's relevant: we run a 90-minute rights review for AI video. Creator submits → we issue a Chain of Title document → brand legal gets what they need to approve the campaign.
+  
+  $499 per video. You can see a sample at www.superimmersive8.com — the "How It Works" page has the full breakdown.
+  
+  Would you be open to a quick 15-min call to learn more?
+  
+  Ivy
+  www.superimmersive8.com03:11 pm
+  Yesterday
+  
+  Hi Darius,
+  
+  If you've got a campaign with AI-generated content that needs to pass legal review, that's exactly what we solve. Happy to send a sample Chain of Title document directly, or jump on a 15-minute call to walk through the process.
+  
+  Thanks!
+  Ivy12:26 am
+  Hi Ivy, Glad to connect. Sure, send over the sample. Not something that has been relevant to us or our Current roster of clients. But curious to know more.11:48 am
+
+- Jian Yi Lay · Group Creative Director · VaynerMedia APAC
+
+  Yesterday
+  
+  Hi Jian Yi,
+  
+  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
+  
+  Seeing this come up more this year.03:18 pm
+  Hi Ivy, 
+  
+  Before starting work, the usage of AI and which platform must be cleared by both agency and clients legal team first. 
+  
+  As you know some AI platform are not fully transparent and might be using clients work for their training, sensitive information might be compromise. 
+  
+  Hope this helps. 
+  
+  Regards,
+  Lay03:21 pm
+
+- sanjay revee · Executive Producer / Creative DIrector / TV Director · Various Companies
+
+  Sat May 23 2026
+  
+  Hi Sanjay,
+  
+  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
+  
+  Seeing this come up more this year.01:51 pm
+  Hi there. So far it’s not cropped up. I guess if the “AI actors” look similar to well known personalities/celebrities then it’s best to get consent from the celebs and pay them loading fees for using their likeness. That should satisfy legal teams.02:00 pm
+
+- Henri Kang · AI Artist / Director / Generalist · Kartel.ai
+
+  Fri May 22 2026
+  
+  Hi Henri,
+  
+  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
+  
+  Seeing this come up more this year.06:49 pm
+  Hey Yu-Chieh! Thanks for connecting.06:50 pm
+  Honestly I don’t get asked much either. Most of the clients I have worked with are more focused on the final output and whether it fits the campaign. I think the heavier legal/documentation side usually comes in with larger agencies, enterprise brands, or markets with stricter compliance requirements.
+  
+  Feels like the industry is still in that transition phase where some companies are super cautious, while others are just treating AI like another creative tool in the pipeline.06:53 pm
+
+- Mikhail Conrad Roberto · Creative Director · PropertyLimBrothers
+
+  Yesterday
+  
+  Hi Mikhail Conrad,
+  
+  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
+  
+  Seeing this come up more this year.12:30 pm
+  Hi Ivy, I haven’t encountered legal teams asking for processes, we do however ensure that we have consent if we’re someone’s likeness from within the team as an AI Actor.12:33 pm
+
+- Shivalii Maheshwari Somani · Senior Creative Designer · The Digital Banker
+
+  Yesterday
+  
+  Hi Shivalii,
+  
+  Quick question. When you deliver AI-generated video to a client for campaign approval, are their legal teams asking for documentation on how it was made?
+  
+  Seeing this come up more this year.09:05 am
+  Hi Yu Chieh
+  
+  In my experience so far, no. I haven’t had clients ask for formal documentation on how the AI-generated video was made. Usually approvals are focused more on the final output, usage rights, brand alignment, and whether any copyrighted assets or likenesses were used.
+  
+  But I have been noticing conversations around AI disclosure and compliance becoming more common this year, especially with larger brands/legal teams.09:14 am
 
 
 **London/UK** (29 warm leads):
