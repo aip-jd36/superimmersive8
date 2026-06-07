@@ -10,6 +10,40 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 ---
 
 ## Week of June 07, 2026
+*Run: 2026-06-07 · 8 high · 11 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [New York laws cracking down on AI in ads are here](https://www.emarketer.com/content/new-york-laws-cracking-down-on-ai-ads-here) | eMarketer | Fri, 05 Jun 2026 | ☐ |
+| 9 | post+update | [Fake performer, real penalty: What advertisers need to know before June 9](https://www.reedsmith.com/our-insights/blogs/viewpoints/102n129/fake-performer-real-penalty-what-advertisers-need-to-know-before-june-9/) | Reed Smith LLP | Thu, 04 Jun 2026 | ☐ |
+| 8 | post+update | [SAG-AFTRA’s AI Win Leaves Influencers and Smaller Creators Facing A Harder Fight](https://starmagazine.com/sag-aftras-ai-win-leaves-influencers-and-smaller-creators-facing-a-harder-fight/) | Star Magazine | Thu, 04 Jun 2026 | ☐ |
+| 8 | post+update | [AI-Generated Advertising: Key Legal Considerations for Retailers](https://www.hunton.com/hunton-retail-law-resource/ai-generated-advertising-key-legal-considerations-for-retailers) | Hunton Andrews Kurth LLP | Wed, 03 Jun 2026 | ☐ |
+| 8 | post+update | [HFSS advertising enforcement: Practical takeaways from the ASA's recent rulings](https://www.tlt.com/insights-and-events/insight/hfss-advertising-enforcement-practical-takeaways-from-the-asas-recent-rulings) | TLT LLP | Wed, 03 Jun 2026 | ☐ |
+| 8 | post+update | [Cox and Effect: Why Volitional Conduct Is AI Copyright’s Next Battleground](https://copyrightlately.com/cox-sony-volitional-conduct-ai-copyright/) | Copyright Lately | Mon, 01 Jun 2026 | ☐ |
+| 7 | post+update | [The EU Artificial Intelligence Act: A tl;dr](https://www.wiz.io/academy/ai-security/eu-artificial-intelligence-act) | wiz.io | Fri, 05 Jun 2026 | ☐ |
+| 7 | post | [Navigating IP rights and infringement risks in the age of AI](https://www.nortonrosefulbright.com/en-pl/knowledge/webinars-and-events/d11bc786/innovate-protect-monetize-navigating-ip-rights-and-infringement-risks-in-the-age-of-ai) | Norton Rose Fulbright | Tue, 02 Jun 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Brandenburg's LLMoin AI Rollout Stirs Union Backlash as EU AI Act Enforcement Nears](https://www.ad-hoc-news.de/boerse/news/ueberblick/brandenburg-s-llmoin-ai-rollout-stirs-union-backlash-as-eu-ai-act/69494355) | AD HOC NEWS | Sat, 06 Jun 2026 | ☐ |
+| 6 | monitor | [Best AI Video Models for Cinematic Ads and Commercials in 2026](https://www.technology.org/2026/06/05/best-ai-video-models-for-cinematic-ads-and-commercials-in-2026/) | Technology Org | Fri, 05 Jun 2026 | ☐ |
+| 6 | update | [Midnight Labs Raises Strategic Investment From Sony Innovation Fund To Expand AI-Powered IP Protection](https://pulse2.com/midnight-labs-raises-strategic-investment-from-sony-innovation-fund-to-expand-ai-powered-ip-protection/) | Pulse 2.0 | Thu, 04 Jun 2026 | ☐ |
+| 6 | monitor | [Best AI Video Generators for Marketing Agencies in 2026 (Tested & Compared)](https://www.financialcontent.com/article/abnewswire-2026-6-2-best-ai-video-generators-for-marketing-agencies-in-2026-tested-and-compared) | FinancialContent | Tue, 02 Jun 2026 | ☐ |
+| 6 | monitor | [AI Video Copyright: Ownership, Legal Risks, and Safe Use](https://editorialge.com/ai-video-copyright/) | Editorialge | Tue, 02 Jun 2026 | ☐ |
+| 5 | monitor | [Best AI Image and Video Generators for Marketers (2026 Guide)](https://autogpt.net/best-ai-image-and-video-generators-for-marketers/) | autogpt.net | Fri, 05 Jun 2026 | ☐ |
+| 5 | monitor | [Frustrated by content production? \| Deloitte Canada](https://www.deloitte.com/ca/en/Industries/financial-services/perspectives/content-supply-chain-financial-services.html) | Deloitte | Thu, 04 Jun 2026 | ☐ |
+| 5 | monitor | [Top 22 AI-Powered Influencer Marketing Platforms for Brands & Agencies](https://influencermarketinghub.com/ai-influencer-marketing-platforms/) | Influencer Marketing Hub | Tue, 02 Jun 2026 | ☐ |
+| 5 | monitor | [New York Times Publisher Warns That AI Companies Are Making Choices That ‘Violate Settled Law’ and Could Cause a ‘Great Deal of Unnecessary Harm’](https://variety.com/2026/biz/news/new-york-times-ai-companies-choices-unnecessary-harm-1236763934/) | Variety | Mon, 01 Jun 2026 | ☐ |
+| 4 | monitor | [The Privacy Filter: June 2026](https://natlawreview.com/article/privacy-filter-june-2026) | The National Law Review | Wed, 03 Jun 2026 | ☐ |
+| 4 | monitor | [AI Governance for Startups: Pass Enterprise Reviews](https://securityboulevard.com/2026/06/ai-governance-for-startups-pass-enterprise-reviews/) | Security Boulevard | Tue, 02 Jun 2026 | ☐ |
+
+---
+
+## Week of June 07, 2026
 *Run: 2026-06-07 · 8 high · 12 monitor · lookback 7 days*
 
 ### 🔴 High Relevance (7–10)
