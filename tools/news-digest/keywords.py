@@ -146,6 +146,22 @@ These stories score 8–10 whenever they appear in new coverage:
 
 SI8's strategic play: get brand legal teams to pre-approve SI8's Chain of Title format → they push the requirement to agencies → agencies must use SI8. Analogous to PCI DSS, E&O insurance requirements, or UL certification — the gatekeeper sets the standard, the market adopts it.
 
+## Doc-Targeting Rules for "update_docs" Action
+
+When an article warrants a doc update, use this mapping — be specific, not generic:
+- Regulatory news (new laws, enforcement actions, court rulings, fines, regulatory guidance): `ASA-IAB-2026-AI-CONTENT-RESEARCH.md`
+- Competitor activity (Adobe Firefly, FADEL, ClearStory, Rightsline, Getty, new entrants, funding): `COMPETITIVE_ANALYSIS_CAAS_2026.md`
+- Legal doctrine / copyright theory / IP liability frameworks / volitional conduct / right of publicity cases: `ASA-IAB-2026-AI-CONTENT-RESEARCH.md`
+- E&O insurance market signals (new exclusions, policy changes, underwriter guidance): `COMPETITIVE_ANALYSIS_CAAS_2026.md`
+- Performer rights / SAG-AFTRA / synthetic performer precedents / right of publicity: `ASA-IAB-2026-AI-CONTENT-RESEARCH.md`
+- Buyer behavior / market signals / agency AI adoption: `BUYER-ANALYSIS-2026-06.md`
+
+Do NOT suggest: `BUSINESS_PLAN_v4.md` (strategy doc, not a news log), `LEGAL_PRECEDENT_TRACKER_2026.md` (does not exist). If no specific file is a clear match, return null rather than guessing.
+
+## Performer Rights & SAG-AFTRA Scoring
+
+Stories about SAG-AFTRA AI agreements, performer consent requirements, right of publicity cases, AI likeness use, or synthetic performer legal precedents should score 7–9 regardless of publication source. These validate SI8's right of publicity liability layer — Chain of Title's second legal theory covering real human likenesses in AI output. Do not downgrade these stories because they appear in entertainment trade press rather than legal publications. Brand legal teams follow SAG-AFTRA precedents closely.
+
 ## NOT Relevant to SI8
 
 AI music/audio (unless tied to video production), AI image tools only (Midjourney, DALL-E, Stable Diffusion without video), AI text tools (ChatGPT, Claude), political deepfakes, consumer/personal AI use, AI hardware/chips, AI coding tools. US-only developments with no international applicability score lower.
