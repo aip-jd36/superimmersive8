@@ -9,6 +9,42 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of June 07, 2026
+*Run: 2026-06-07 · 14 high · 7 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [ASCI Drafts AI Ad Rules, Proposes Ban on Certain Uses](https://www.medianama.com/2026/06/223-asci-draft-synthetic-media-guidelines-ads-uses-prohibited-entirely/) | MediaNama | Tue, 02 Jun 2026 | ☐ |
+| 9 | post+update | [“Thought It Was a Real Person, but It’s AI?”…Virtual Character Label Now Required in All Virtual Character Ads](https://www.asiae.co.kr/en/article/2026052911131838100) | 아시아경제 | Sun, 31 May 2026 | ☐ |
+| 8 | post+update | [Sony Invests in AI Copyright-Protection Firm Midnight Labs](https://variety.com/2026/biz/news/ip-ai-firm-midnight-labs-sony-million-dollar-investment-1236766931/) | Variety | Thu, 04 Jun 2026 | ☐ |
+| 8 | post+update | [Midnight Labs Raises Strategic Investment From Sony Innovation Fund To Expand AI-Powered IP Protection](https://pulse2.com/midnight-labs-raises-strategic-investment-from-sony-innovation-fund-to-expand-ai-powered-ip-protection/) | Pulse 2.0 | Thu, 04 Jun 2026 | ☐ |
+| 8 | post+update | [AI-Generated Advertising: Key Legal Considerations for Retailers](https://www.hunton.com/hunton-retail-law-resource/ai-generated-advertising-key-legal-considerations-for-retailers) | Hunton Andrews Kurth LLP | Wed, 03 Jun 2026 | ☐ |
+| 8 | post+update | [Best AI Video Generators for Marketing Agencies in 2026 (Tested & Compared)](https://www.financialcontent.com/article/abnewswire-2026-6-2-best-ai-video-generators-for-marketing-agencies-in-2026-tested-and-compared) | FinancialContent | Tue, 02 Jun 2026 | ☐ |
+| 8 | post+update | [AI Video Copyright: Ownership, Legal Risks, and Safe Use](https://editorialge.com/ai-video-copyright/) | Editorialge | Tue, 02 Jun 2026 | ☐ |
+| 8 | update | [Cox and Effect: Why Volitional Conduct Is AI Copyright’s Next Battleground](https://copyrightlately.com/cox-sony-volitional-conduct-ai-copyright/) | Copyright Lately | Mon, 01 Jun 2026 | ☐ |
+| 8 | post+update | [The hidden copyright risk inside AI-generated content](https://www.calcalistech.com/ctechnews/article/19gjuao9c) | CTech | Sun, 31 May 2026 | ☐ |
+| 7 | update | [Adobe adds Brand Intelligence to GenStudio, expands content supply chain with AI agents](https://www.digitaltoday.co.kr/en/view/60871/adobe-adds-brand-intelligence-to-genstudio-expands-content-supply-chain-with-ai-agents) | 디지털투데이 | Fri, 05 Jun 2026 | ☐ |
+| 7 | post+update | [UK Tightens Rules On Google’s AI Content Use, Gives Publishers Stronger Rights](https://the420.in/uk-google-ai-search-publisher-rights-content-approval-cma-rules/) | The420.in | Thu, 04 Jun 2026 | ☐ |
+| 7 | post | [Navigating IP rights and infringement risks in the age of AI](https://www.nortonrosefulbright.com/zh-cn/knowledge/webinars-and-events/d11bc786/innovate-protect-monetize-navigating-ip-rights-and-infringement-risks-in-the-age-of-ai) | Norton Rose Fulbright | Wed, 03 Jun 2026 | ☐ |
+| 7 | update | [Infringement risks of generative AI in the entertainment industry (Part 1) \| China](https://law.asia/generative-ai-entertainment-industry/) | Law.asia | Mon, 01 Jun 2026 | ☐ |
+| 7 | update | [AI-Created IP: What Must Be Disclosed and What Can Stay Confidential](https://aijourn.com/ai-created-ip-what-must-be-disclosed-and-what-can-stay-confidential/) | The AI Journal | Sun, 31 May 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Immersive Franchise Experiences Create New Legal Questions for Hollywood IP Owners](https://www.pymnts.com/cpi-posts/immersive-franchise-experiences-create-new-legal-questions-for-hollywood-ip-owners/) | PYMNTS.com | Thu, 04 Jun 2026 | ☐ |
+| 5 | monitor | [What Companies Should Know About Connecticut’s New Omnibus AI Law \| WilmerHale](https://www.jdsupra.com/legalnews/what-companies-should-know-about-4728492/) | JD Supra | Fri, 05 Jun 2026 | ☐ |
+| 5 | monitor | [Supreme Court Releases Draft AI Rules For Courts; Lawyers Must Disclose Use Of AI In Pleadings](https://lawbeat.in/top-stories/supreme-court-releases-draft-ai-rules-for-courts-lawyers-must-disclose-use-of-ai-in-pleadings-1598628) | LawBeat | Thu, 04 Jun 2026 | ☐ |
+| 5 | monitor | [Top 15 neural networks for video generation in 2025-2026](https://incrypted.com/en/top-neural-networks-video/) | incrypted | Wed, 03 Jun 2026 | ☐ |
+| 5 | monitor | [When generative AI enters business and legal workflows, the risk of unintended disclosures follows](https://www.bizjournals.com/columbus/news/2026/06/01/legal-team-protect-ai-prompts-litigation-exposure.html) | The Business Journals | Mon, 01 Jun 2026 | ☐ |
+| 4 | monitor | [Identity Verification Market to Reach USD 42.5 billion by 2035 \| APAC Leads Digital Identity Growth](https://www.openpr.com/news/4539250/identity-verification-market-to-reach-usd-42-5-billion-by-2035) | openPR.com | Fri, 05 Jun 2026 | ☐ |
+| 4 | monitor | [YouTube Shorts gets its first MRC brand safety accreditation - a short-form first](https://ppc.land/youtube-shorts-gets-its-first-mrc-brand-safety-accreditation-a-short-form-first/) | PPC Land | Wed, 03 Jun 2026 | ☐ |
+
+---
+
 ## Week of June 04, 2026
 *Run: 2026-06-04 · 18 high · 10 monitor · lookback 7 days*
 
