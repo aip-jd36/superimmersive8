@@ -15,8 +15,9 @@ import certifi
 # ── Config ────────────────────────────────────────────────────────────────────
 GA4_PROPERTY    = "326271463"
 ADMIN_EMAIL     = "jd@superimmersive8.com"
-CRM_PATH        = os.path.join(os.path.dirname(__file__), "../../03_Sales/CRM.md")
-DAYS_UNTIL_DUE  = {'HIGH': 3, 'MEDIUM': 5, 'LOW': 14}
+CRM_PATH                = os.path.join(os.path.dirname(__file__), "../../03_Sales/CRM.md")
+DISCOVERY_PIPELINE_PATH = os.path.join(os.path.dirname(__file__), "../../03_Sales/DISCOVERY-PIPELINE.md")
+DAYS_UNTIL_DUE          = {'HIGH': 3, 'MEDIUM': 5, 'LOW': 14}
 ssl_ctx         = ssl.create_default_context(cafile=certifi.where())
 
 def http_post(url, data, headers):
@@ -128,7 +129,7 @@ def is_due(lead, today):
     return False, 0
 
 # ── Claude ────────────────────────────────────────────────────────────────────
-def claude_digest(urgent, followup, awaiting, icp_section, ga4_text, today_str):
+def claude_digest(urgent, followup, awaiting, icp_section, ga4_text, discovery_text, today_str):
     def fmt_leads(lst):
         if not lst:
             return '  (none)'
@@ -151,12 +152,25 @@ def claude_digest(urgent, followup, awaiting, icp_section, ga4_text, today_str):
 
     prompt = f"""You are the daily sales intelligence assistant for SuperImmersive 8 (SI8).
 
-SI8 sells: $499 SI8 Certified — 90-min human review, Chain of Title documentation for AI video, accepted by brand legal teams and E&O insurers. Also $29 Creator Record (self-attested).
+SI8 is a B2B compliance infrastructure provider for AI-generated video. Core product: Chain of Title verification — an IP provenance document covering copyright, right of publicity, and trademark. Two tiers: SI8 Certified ($499, 90-min human review, accepted by brand legal teams and E&O insurers) and Creator Record ($29, self-attested).
+
+Three target ICPs:
+1. Creative Directors / Heads of AI Production at agencies — submit AI video for brand approval, get blocked. Pain: campaign stuck.
+2. Brand Legal / IP Counsel at major advertisers — they ARE the gatekeepers who set the documentation requirement. Pain: no standard format to point agencies to.
+3. Line Producers / Executive Producers — need E&O insurance for AI content but insurers are adding AI exclusions. Pain: can't get full coverage.
+
+B2B2B model: target brand legal teams to pre-approve SI8's format → they push requirement to agencies → agencies use SI8.
+Active regulatory deadlines: NY Synthetic Performer Law (Jun 9, 2026), EU AI Act Article 50 (Aug 2, 2026), UAE AI Act (Sept 2026).
+Active geos: UK/London (primary), Amsterdam/EU, Dubai/UAE, Singapore.
+Active discovery campaigns (brand legal): SI8_Who's Asking (UK), SI8_What Would Work (Dubai), SI8_Writing the Standard (Amsterdam).
 
 Today: {today_str}
 
-## ACTIVE PIPELINE
+## ACTIVE SALES PIPELINE
 {leads_block}
+
+## DISCOVERY PIPELINE (brand legal validation leads)
+{discovery_text}
 
 ## CURRENT ICP THESIS
 {icp_section}
@@ -171,6 +185,7 @@ Write a daily operations digest. Be direct and specific. No fluff.
 For each 🔥 lead: one specific action sentence (what to write/send/say).
 For each 🟡 lead: one specific action sentence.
 List ⏳ leads as a compact comma-separated line — no descriptions needed.
+If any discovery pipeline leads have no follow-up logged, flag them as: 🔍 DISCOVERY: [name] — [suggested question to ask].
 Skip MONITOR leads unless something is notable.
 
 ### ICP SIGNAL CHECK
@@ -181,7 +196,7 @@ Skip MONITOR leads unless something is notable.
 End with one sentence: "Overall ICP confidence: HIGH / MEDIUM / LOW — [one reason]"
 
 ### GA4 PULSE
-2 sentences max. Flag anything notable. If quiet, say so."""
+2 sentences max. Flag checkout_started, book_call_click, and request_demo_submit specifically. If quiet, say so."""
 
     headers = {
         'x-api-key':          os.environ['ANTHROPIC_API_KEY'],
@@ -316,12 +331,29 @@ def main():
         f"checkout_started={events.get('checkout_started',0)}, "
         f"purchase={events.get('purchase',0)}, "
         f"get_verified_click={events.get('get_verified_click',0)}, "
-        f"creator_record_click={events.get('creator_record_click',0)}"
+        f"creator_record_click={events.get('creator_record_click',0)}, "
+        f"book_call_click={events.get('book_call_click',0)}, "
+        f"request_demo_submit={events.get('request_demo_submit',0)}, "
+        f"view_sample_click={events.get('view_sample_click',0)}"
     )
+
+    # Discovery pipeline
+    discovery_text = '(none logged)'
+    try:
+        with open(DISCOVERY_PIPELINE_PATH) as f:
+            dp = f.read()
+        # Extract Signal table rows (between pipeline markers or just grab table lines)
+        table_lines = [l for l in dp.split('\n') if l.startswith('|') and not l.startswith('| Lead') and not re.match(r'\|[-\s|]+\|', l)]
+        if table_lines:
+            discovery_text = '\n'.join(table_lines[:20])  # cap at 20 rows
+        else:
+            discovery_text = '(discovery pipeline empty or no signals logged yet)'
+    except Exception:
+        discovery_text = '(DISCOVERY-PIPELINE.md not found or unreadable)'
 
     # Claude
     print('Running Claude analysis...')
-    analysis = claude_digest(urgent, followup, awaiting, icp_section, ga4_text, today_str)
+    analysis = claude_digest(urgent, followup, awaiting, icp_section, ga4_text, discovery_text, today_str)
 
     # Email
     html = build_html(analysis, today_str, totals, events)

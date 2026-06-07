@@ -169,33 +169,39 @@ def pull_ga4_data(token: str, lookback_days: int) -> dict:
 # ---------------------------------------------------------------------------
 
 GTM_CONTEXT = """
-SuperImmersive 8 (SI8) is an AI video rights verification service based in Taipei.
+SuperImmersive 8 (SI8) is a B2B compliance infrastructure provider for AI-generated video, based in Taipei with operations in London, Amsterdam, Dubai, and Singapore.
 
 PRODUCTS:
-- Creator Record ($29): Self-attested Chain of Title documentation. Route: /record. Auto-approved, PDF delivered instantly. Funnel mechanism.
-- SI8 Certified ($499): 90-minute human review. Route: /certify. Delivers Chain of Title document accepted by brand legal teams and E&O insurers.
+- Creator Record ($29): Self-attested Chain of Title documentation. Route: /record. Auto-approved, PDF delivered instantly. Funnel mechanism for creator audience.
+- SI8 Certified ($499): 90-minute human review. Route: /certify. Delivers Chain of Title IP provenance document (copyright + right of publicity + trademark) accepted by brand legal teams and E&O insurers.
+
+THREE TARGET ICPs:
+1. Creative Directors / Heads of AI Production at agencies — submit AI video, get blocked by brand legal. Pain: campaign stuck, deadline missed.
+2. Brand Legal / IP Counsel at large advertisers — they are the gatekeepers who set the documentation requirement. Pain: no standard format exists; every submission is ad hoc.
+3. Line Producers / Executive Producers — need E&O insurance for AI content but insurers are adding AI exclusions. Pain: can't get full coverage without AI documentation.
 
 CURRENT GTM:
-- Primary channel: LinkedIn outbound to Creative Directors, Heads of Production, EPs at creative agencies (10–200 employees) in London (primary) and Singapore (secondary)
+- Primary channel: LinkedIn outbound (Dripify) to CDs/EPs/AI Directors at agencies in London (primary), Amsterdam, Dubai/UAE, Singapore
+- B2B2B discovery campaigns (new, June 2026): targeting brand legal teams directly (IP Counsel, Brand Legal, Holdco AI Governance) via SI8_Who's Asking, SI8_What Would Work, SI8_Writing the Standard
 - Secondary: Instagram outreach to AI filmmakers/creators for Creator Record ($29)
-- Pain being sold: Brand legal teams and E&O insurers are blocking AI video campaigns because there is no Chain of Title documentation
-- Geographic focus: London, Singapore, and EU agencies facing EU AI Act Article 50 deadline (August 2, 2026)
-- Current personas responding: agency CDs/EPs, AI influencer agency builders (new), EU-facing production studios (new)
+- Active regulatory urgency hooks: NY Synthetic Performer Law (effective June 9, 2026), EU AI Act Article 50 enforcement (August 2, 2026), UAE AI Act (grace period ends September 2026)
+- Geographic priority order: UK/London → Amsterdam/EU → Dubai/UAE → Singapore
 
 KEY CONVERSION FUNNEL EVENTS (GA4):
-- get_verified_click: clicks on "Get Verified" / "Get Certified" CTAs
+- get_verified_click: clicks on "Get Verified" / "Get Certified" CTAs (intent signal)
 - creator_record_click: clicks on Creator Record ($29) CTAs
-- view_sample_click: clicks to view sample Chain of Title
-- book_call_click: Calendly booking clicks
-- request_demo_submit: Demo request form submissions (real leads since April 4 spam fix)
+- view_sample_click: clicks to view sample Chain of Title (bottom-of-funnel research signal)
+- book_call_click: Calendly booking clicks (high intent)
+- request_demo_submit: Demo request form submissions (qualified B2B lead)
 - checkout_started: Arrived at Stripe checkout page ($29 or $499)
+- purchase: Completed Stripe payment (actual revenue event)
 
 CURRENT HYPOTHESES TO VALIDATE:
-1. LinkedIn traffic is highest quality (lowest bounce)
-2. /sample page drives highest engagement and is key bottom-of-funnel tool
-3. Mobile traffic doesn't convert (form/checkout friction)
-4. EU traffic is growing (Campaign G — EU AI Act deadline angle)
-5. 17 checkout_started in prior period — need to know if any converted
+1. LinkedIn is the primary traffic driver and has lowest bounce rate vs. other sources
+2. /sample page is the key bottom-of-funnel page — view_sample_click correlates with checkout_started
+3. /certify ($499) checkout ratio vs. /record ($29) — is anyone attempting the higher tier?
+4. UAE and Amsterdam traffic emerging as UK outreach expands to new geos
+5. book_call_click and request_demo_submit are leading indicators of pipeline even when purchase=0
 """
 
 ANALYSIS_PROMPT = """You are the GTM analyst for SuperImmersive 8 (SI8). Here is the company context:
@@ -380,6 +386,11 @@ def build_email_html(analysis_text: str, data: dict, week_str: str, lookback_day
         <div style="flex:1;min-width:140px;background:#f9f9f6;border-radius:6px;padding:14px 16px;text-align:center;">
           <div style="font-size:22px;font-weight:700;color:#C8900A;">{event_counts.get('request_demo_submit', 0)}</div>
           <div style="font-size:11px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:0.5px;">Demo Requests</div>
+        </div>
+
+        <div style="flex:1;min-width:140px;background:#f9f9f6;border-radius:6px;padding:14px 16px;text-align:center;">
+          <div style="font-size:22px;font-weight:700;color:#16a34a;">{event_counts.get('purchase', 0)}</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:0.5px;">Purchases</div>
         </div>
 
       </div>

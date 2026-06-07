@@ -80,6 +80,12 @@ NAF_PATTERNS = [
     "no plans to incorporate",
     "do you need any support with seo",   # counter-pitch / wrong side of market
     "not something we", "not something i",
+    # Legal ICP NAF — wrong department or defers to agency
+    "the agency handles that", "agency handles that",
+    "that's handled by our agency", "handled by the agency",
+    "not our area", "not our department",
+    "we don't buy ai video", "we dont buy ai video",
+    "we don't commission ai", "we dont commission ai",
 ]
 
 PASS_PATTERNS = [
@@ -165,6 +171,22 @@ WARM_PATTERNS = [
     "i'd be interested",
     "love to see",
     "i'd love to see",
+    # Legal ICP warm signals — brand legal / IP counsel / holdco governance
+    "yes we ask", "we do ask", "we require agencies",
+    "we ask for documentation", "we ask agencies",
+    "asking agencies to produce", "we currently ask",
+    "yes we are tracking", "we are tracking this",
+    "yes that's something we track", "yes, we track",
+    "no standard format", "no standard exists", "no agreed format",
+    "case by case basis", "handled case by case", "ad hoc basis",
+    "this is something we're looking at", "we're looking at this",
+    "network-wide standard", "writing the standard", "setting the standard",
+    "yes absolutely", "yes, absolutely",
+    "yes 100%", "yes i am", "yes we are",
+    "we would need", "we would require", "we would accept",
+    "that would satisfy", "that would work for us",
+    "yes it is", "yes, it is", "yes this is",
+    "we're seeing this", "seeing this come up",
 ]
 
 
@@ -225,6 +247,19 @@ PATHWAY_3_PATTERNS = [
     "outsource", "time-consuming", "takes time",
     "the full report", "we produce reports", "we create reports",
     "we do this already", "we already do",
+]
+
+# P4: Legal/discovery validation — brand legal team confirms they ARE the gatekeeper
+# and either describe what they require or validate that SI8's format would satisfy it
+PATHWAY_4_PATTERNS = [
+    "yes we ask", "we do ask for", "we require agencies",
+    "asking agencies to produce", "we currently ask",
+    "no standard format", "no standard exists", "no agreed format",
+    "case by case basis", "ad hoc basis",
+    "that would satisfy", "that would work for us",
+    "we would accept", "we would require",
+    "network-wide standard", "writing the standard",
+    "yes we are tracking", "we are tracking this",
 ]
 
 
@@ -322,9 +357,13 @@ def is_product_feedback(reply: str) -> bool:
 def detect_pathway(reply: str) -> str:
     """
     For warm leads, detect which conversion pathway applies.
-    Returns: 'P1-pain-aware' | 'P2-informal-process' | 'P3-outsource' | 'unknown'
+    Returns: 'P1-pain-aware' | 'P2-informal-process' | 'P3-outsource' | 'P4-legal-validation' | 'unknown'
+    P4 = brand legal / IP counsel validates they ARE the gatekeeper setting the requirement.
     """
     t = normalize(reply)
+    for p in PATHWAY_4_PATTERNS:
+        if p in t:
+            return 'P4-legal-validation'
     for p in PATHWAY_3_PATTERNS:
         if p in t:
             return 'P3-outsource'

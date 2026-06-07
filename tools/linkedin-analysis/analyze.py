@@ -77,6 +77,30 @@ CAMPAIGN_META = {
         'msg1': 'Is AI video something your clients are asking about?',
         'status': 'KILL',
     },
+    'Logline-Global': {
+        'version': 'v4',
+        'hypothesis': 'H-MSG: CarFax framing — documented AI provenance as the commercial unlock',
+        'msg1': 'Think of it like CarFax for AI video — documented proof of what tools were used...',
+        'status': 'TEST',
+    },
+    "Who's Asking": {
+        'version': 'v4-discovery',
+        'hypothesis': 'H-ICP (B2B2B): Brand legal teams are the gatekeepers — validate format directly',
+        'msg1': 'is documentation of AI tool usage something your team is currently asking agencies to produce?',
+        'status': 'DISCOVERY',
+    },
+    'What Would Work': {
+        'version': 'v4-discovery',
+        'hypothesis': 'H-ICP (B2B2B): UAE brand legal teams describe their documentation requirement',
+        'msg1': 'when an agency submits AI video creative for approval, is there a standard documentation process?',
+        'status': 'DISCOVERY',
+    },
+    'Writing the Standard': {
+        'version': 'v4-discovery',
+        'hypothesis': 'H-ICP (B2B2B): Holdco governance teams are defining the AI content standard now',
+        'msg1': 'is [Company] working toward a network-wide standard for what agencies should produce?',
+        'status': 'DISCOVERY',
+    },
 }
 
 
@@ -111,6 +135,8 @@ def norm_geo(location: str) -> str:
         return 'India'
     if any(x in loc for x in ['egypt', 'cairo']):
         return 'Egypt/MENA'
+    if any(x in loc for x in ['dubai', 'uae', 'abu dhabi', 'united arab emirates', 'sharjah']):
+        return 'Dubai/UAE'
     if any(x in loc for x in ['usa', 'united states', 'new york', 'chicago', 'los angeles']):
         return 'USA'
     if any(x in loc for x in ['manila', 'philippines']):
@@ -129,6 +155,18 @@ def norm_title(title: str) -> str:
     if any(x in t for x in ['ai director', 'director of ai', 'head of ai', 'ai content director',
                               'creative director – ai', 'creative director - ai', 'ai practitioner']):
         return 'AI Director / AI Content'
+    if any(x in t for x in ['ai governance', 'head of ai policy', 'chief ai officer',
+                              'responsible ai', 'ai policy', 'ai ethics', 'ai strategy']):
+        return 'AI Governance'
+    if any(x in t for x in ['ip counsel', 'brand counsel', 'head of ip', 'brand legal',
+                              'brand protection', 'ip director', 'director legal affairs',
+                              'commercial counsel', 'commercial affairs', 'vp legal (marketing)',
+                              'vp, legal', 'legal (marketing)']):
+        return 'Brand Legal / IP Counsel'
+    if any(x in t for x in ['general counsel', 'deputy gc', 'vp legal affairs',
+                              'head of legal', 'legal affairs', 'chief legal officer',
+                              'associate general counsel']):
+        return 'General Counsel / VP Legal'
     if 'creative director' in t or 'chief creative' in t or 'ecd' in t or 'executive creative' in t:
         return 'Creative Director'
     if any(x in t for x in ['founder', 'co-founder', 'cofounder']):
@@ -140,6 +178,8 @@ def norm_title(title: str) -> str:
     if 'cmo' in t or 'chief marketing' in t:
         return 'CMO'
     if 'head of production' in t or 'executive producer' in t or 'ep' == t.strip():
+        return 'Head of Production / EP'
+    if 'line producer' in t:
         return 'Head of Production / EP'
     if 'head of' in t:
         return 'Head of (other)'
@@ -208,6 +248,7 @@ def load_csv(path: str) -> list:
         alias = r.get('alias_profile', '') or ''
         if alias in ('LH',): alias = 'Lilly'
         if alias in ('IL',): alias = 'Ivy'
+        if alias in ('AN', 'ANG'): alias = 'Angel'
         r['_alias'] = alias
         # Target list name (audience list) — distinct from sequence/message name
         target_list = r.get('target_list_name', '') or ''
@@ -498,6 +539,7 @@ def generate_report(rows: list, csv_path: str) -> str:
         'P1-pain-aware': 'P1 — Pain-aware: legal team has blocked/rejected AI video',
         'P2-informal-process': 'P2 — Informal process: has workaround, thinks covered',
         'P3-outsource': 'P3 — Outsource: already produces compliance reports, wants to delegate',
+        'P4-legal-validation': 'P4 — Legal validation: brand legal/IP counsel confirms they set the requirement',
         'unknown': 'Unclassified warm',
     }
     for pw, label in pathway_labels.items():
@@ -506,7 +548,8 @@ def generate_report(rows: list, csv_path: str) -> str:
         a(f"| {label} | {count} | {pct:.0f}% |")
     a(f"")
     a(f"**Implication:** Each pathway requires a different message. P1 responds to Hitting a Wall. "
-      f"P2 needs the 'your informal process won't hold up' reframe. P3 needs the outsource pitch directly.")
+      f"P2 needs the 'your informal process won't hold up' reframe. P3 needs the outsource pitch directly. "
+      f"P4 (brand legal) needs a format validation — send a sample Chain of Title and ask: 'Would this satisfy your review?'")
     a(f"")
     a(f"---")
     a(f"")
@@ -685,23 +728,25 @@ GEO_LIST_LABELS = {
     'France/Paris': 'Paris/France',
     'Netherlands':  'Amsterdam/NL',
     'Germany':      'DACH',
+    'Dubai/UAE':    'Dubai/UAE',
     'India':        'India',
     'USA':          'USA',
     'Sydney/AU':    'Australia',
 }
 
 # Sequences ordered best → worst (based on accumulated campaign data)
-SEQUENCE_RANK = ['Legal Friction', 'Hitting a Wall', 'Blocks AI Campaign',
+SEQUENCE_RANK = ['Legal Friction', 'Hitting a Wall', 'Logline-Global', 'Blocks AI Campaign',
                  'Trusted AI Supplier', 'Vetting Takes Weeks', 'Documented Provenance', 'Early Days']
 
 # Preferred aliases per geo
 GEO_ALIAS = {
-    'London/UK': 'Ivy',
-    'Singapore': 'Lilly',
+    'London/UK':    'Ivy',
+    'Singapore':    'Lilly',
+    'Dubai/UAE':    'Lilly',
     'France/Paris': 'Vanessa',
-    'Netherlands': 'Vanessa',
-    'Germany': 'Vanessa',
-    'default': 'Ivy',
+    'Netherlands':  'Vanessa',
+    'Germany':      'Vanessa',
+    'default':      'Ivy',
 }
 
 
@@ -773,6 +818,7 @@ def suggest_next_campaigns(rows, title_data, geo_data, list_data, camp_data, pat
             'France/Paris': ['paris', 'france'],
             'Netherlands':  ['amsdm', 'amsterdam', 'nl'],
             'Germany':      ['dach', 'germany', 'berlin'],
+            'Dubai/UAE':    ['dubai', 'uae', 'gulf'],
             'India':        ['india'],
             'USA':          ['usa', 'us_'],
             'Sydney/AU':    ['au', 'sydney', 'australia'],
