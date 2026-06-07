@@ -1,7 +1,8 @@
 # ASA & IAB 2026 AI Video Documentation — Market Research
 
 **Researched:** April 1, 2026
-**Updated:** June 6, 2026 — Article 50 clarification (Tim Deussen signal) + market urgency ranking added (Sections 7–9)
+**Updated:** June 7, 2026 — Global regulatory landscape added (Section 10): NY Synthetic Performer Law, global equivalents, brand liability architecture, geo-specific outreach hooks
+**Previous update:** June 6, 2026 — Article 50 clarification (Tim Deussen signal) + market urgency ranking added (Sections 7–9)
 **Purpose:** Understand regulatory tailwinds for SI8's Chain of Title documentation product. Hossein Jafari (MD, London agency lead) cited ASA and IAB updates as validation of SI8's model.
 
 ---
@@ -323,3 +324,107 @@ Honest caveat: Platform enforcement is inconsistent and largely automated. The c
 - Branded entertainment (longer-form brand-produced content)
 - NOT typically: 15-second social ads or quick campaign videos
 - AI-specific: E&O underwriters in 2026 are starting to require documentation of AI tool provenance before issuing coverage on AI-heavy productions
+
+---
+
+## 10. Global AI Advertising Disclosure Laws — Regulatory Landscape
+
+*Added June 7, 2026. Research triggered by NY Synthetic Performer Law (S.8420-A, effective June 9, 2026). Purpose: identify urgency hooks for legal team outreach campaigns.*
+
+### The Key Finding
+
+**No brand has been sued directly for using AI video in advertising yet.** All litigation to date targets AI tool companies (training data). But the legal architecture for brand liability is now fully in place — NY law, right of publicity framework, tool provider liability disclaimers, AI content discoverable in litigation. The first major case is a matter of when, not if.
+
+**Urgency for outreach:** "The regulatory framework that makes your brand liable for uncleared AI video is live. The first lawsuit is the signal nobody wants to be in."
+
+---
+
+### New York Synthetic Performer Disclosure Law (S.8420-A)
+
+**Status:** Signed December 11, 2025. **Effective June 9, 2026.**
+
+**What it does:**
+- Creates a new category: "synthetic performer" = digitally created human figure using generative AI, not recognizable as a specific real person
+- Requires disclosure in advertisements featuring synthetic performers
+- Applies to **advertisers and producers of advertisements** — NOT platforms
+- Applies to any ad **reaching NY audiences** regardless of where the advertiser is located (global reach)
+- Penalties: **$1,000 first violation, $5,000 subsequent violations**
+
+**Scope exclusions:**
+- Audio-only content
+- Language translation use
+- Expressive works (not advertising)
+
+**Why this is significant:** First US law creating **direct advertiser liability** for AI-generated synthetic performers in advertising. Governor Hochul described it as "first-in-nation." Any brand running AI video featuring AI-generated human figures in US campaigns is now within scope.
+
+**SI8 relevance:** CertForm should generate disclosure language for synthetic performer presence. Q4 (AI likenesses) + Q8 (commercial dissemination) = NY law trigger. The deliverable covers it; the marketing needs to name it.
+
+---
+
+### Global Equivalents — Jurisdiction-by-Jurisdiction
+
+| Jurisdiction | Law / Rule | Effective Date | Key Obligation | Penalty |
+|---|---|---|---|---|
+| **New York (US)** | S.8420-A — Synthetic Performer Disclosure | June 9, 2026 | Disclose AI-generated synthetic performers in ads | $1K–$5K per violation |
+| **EU (27 countries)** | AI Act Article 50(4) | August 2, 2026 | Label deepfakes/AI public-interest content visibly throughout video duration | €15M or 3% global turnover |
+| **California (US)** | SB 942 — AI Transparency Act | January 1, 2026 | Machine-readable metadata in AI-generated content by large platforms | Not specified yet |
+| **Tennessee (US)** | ELVIS Act | 2024 (in force) | Unauthorized AI voice cloning of a person = Class A misdemeanor | Criminal |
+| **South Korea** | AI-generated ad labeling requirement | Q1 2026 | Disclosure for AI-generated content in advertising | TBC |
+| **Australia** | ACMA — Synthetic Voice Rules | February 2026 | Disclosure of synthetic AI voice in news, radio advertising | Administrative |
+| **Australia** | Privacy Act AI Amendments | December 2026 (proposed) | AI-generated biometric data handling | TBC |
+| **Massachusetts (US)** | Pending AI disclosure bill | Pending | AI disclosure in all AI-generated content | TBC |
+| **UK** | No AI-specific advertising law | — | Existing CAP code applies (ASA Robot Puppy ruling established precedent) | Ad removal, sanctions |
+| **FTC (US federal)** | Dedicated AI Enforcement Unit | January 2026 | Deceptive AI content in advertising = FTC Act violation | **$53,088 per violation** |
+
+---
+
+### The Legal Architecture for Brand Liability (Even Without a Case Yet)
+
+**Why brands can be sued today even though nobody has been:**
+
+1. **NY Synthetic Performer Law (June 9, 2026):** Direct statutory liability. $1K–$5K per ad, per violation. No lawsuit needed — it's an administrative infringement.
+
+2. **Right of Publicity framework (active everywhere):** If an AI-generated character substantially resembles a real person, right of publicity claims apply. Taylor Swift's legal team filed trademark protections on her name + likeness in April 2026 — signaling her team is building the legal infrastructure to sue the first brand that uses an AI Taylor Swift without authorization.
+
+3. **Tool provider liability disclaimers:** Runway, Kling, and Udio all disclaim liability for copyright infringement in their user terms. The liability flows to the user (the agency or brand). SI8 is the documentation that proves the agency did due diligence, which affects damages exposure.
+
+4. **AI content is discoverable in litigation (K&L Gates, Feb 2026):** AI-generated content, prompts, and generation logs can be subpoenaed. Without a Chain of Title document, there's no organized defense. With one, you have evidence of prior review.
+
+5. **E&O underwriters are shifting (2026):** Some underwriters are now declining coverage or adding AI exclusion clauses without documentation. An uncovered production that's sued has no defense pool.
+
+---
+
+### Outreach Urgency Hooks by Geo
+
+**UK / London:**
+- ASA Robot Puppy ruling (March 2026) — first banned AI ad under existing CAP code
+- Getty v. Stability AI trademark aspect (Nov 2025) — UK court allowed trademark claim alongside copyright
+- ASA proactive scanning 40M ads in 2026 — algorithmic enforcement, not complaint-driven
+- No AI-specific law yet → window to set the standard before law is imposed
+
+**Germany / Amsterdam (EU):**
+- GEMA v. OpenAI (Munich, Nov 2025) — German court treating AI training data as licensing-eligible
+- Frankfurt court ruling: Article 50 disclosures can be cited against copyright ownership claims
+- EU AI Act enforcement: August 2, 2026 deadline is 56 days away
+- BVerwG (Federal Administrative Court) has taken a stringent AI regulatory posture
+
+**Dubai / UAE:**
+- UAE AI Act (March 2026, grace period ends September 2026) — national AI law with advertising disclosure requirements
+- UAE Advertiser Permit (February 2026): AED 1,000,000 fines for non-compliant AI advertising
+- UAE is building regulatory infrastructure faster than expected — early adopters get the framework right before enforcement
+
+**Singapore:**
+- Commissioner of Online Safety operational 2026 — AI-generated content in scope
+- No specific advertising AI law yet → same "set the standard" angle as UK
+
+---
+
+### The Synthesis Statement for Sales
+
+*Use when a lead says "we're watching regulatory developments" (i.e., Trigger 2 — not in pain yet):*
+
+"The regulatory framework is already live in the US (New York, effective June 9) and EU (August 2). The platforms already have disclosure requirements. The tool providers have already disclaimed liability back to you. The missing piece is documentation that proves you did the review before deployment. That's not a future problem — the liability architecture is live today."
+
+*Use when a lead says "we haven't seen any lawsuits against brands" (i.e., accurate but deflecting):*
+
+"That's true — no brand has been sued for AI video yet. But the legal architecture for it is fully in place: NY law creates direct statutory liability starting this month, right of publicity claims are being prepared (Taylor Swift trademark filings April 2026), and your tool providers have already written liability disclaimers that flow to you. The first case will be very visible. Documentation is cheaper before that than after."
