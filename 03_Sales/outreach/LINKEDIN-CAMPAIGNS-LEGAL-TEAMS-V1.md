@@ -1,6 +1,6 @@
 # LinkedIn Outbound Campaigns — Legal Team Discovery
 **Written:** June 7, 2026
-**Updated:** June 7, 2026 — Restructured as discovery-first campaigns (no pitch, pure validation)
+**Updated:** June 7, 2026 — Added Campaign 4 (Germany/GEMA hook) and Campaign 5 (New York/NY Synthetic Performer Law)
 **Model:** Discovery → validate what brand legal teams need before building sales campaigns
 **Tool:** Dripify — separate from agency campaigns
 **Status:** Draft — ready to load into Dripify
@@ -24,17 +24,20 @@ These are NOT sales campaigns. Goal: get brand legal teams and holdco governance
 ## Personas
 - UK/London: **Ivy**
 - Amsterdam/EU: **Angel**
-- Dubai: **Lilly**
+- Dubai: **Vanessa** (confirm with JD — Lilly was previously used here but is now retired)
+- Germany: **Angel**
+- New York: **Ivy** (US campaign — use existing alias; confirm with JD if a different one fits better)
 
 ## What We're Split-Testing
 
-| | Campaign 1 | Campaign 2 | Campaign 3 |
-|---|---|---|---|
-| **Name** | SI8_Who's Asking | SI8_What Would Work | SI8_Writing the Standard |
-| **Geo** | UK | Dubai | Amsterdam/EU |
-| **ICP** | Brand-side IP/Legal | Brand-side IP/Legal | Holdco AI Governance |
-| **Hook** | A/B: ASA ruling vs. NY law | UAE AI Act | EU AI Act |
-| **Title split** | — | — | Governance title vs. GC/VP Legal |
+| | Campaign 1 | Campaign 2 | Campaign 3 | Campaign 4 | Campaign 5 |
+|---|---|---|---|---|---|
+| **Name** | SI8_Who's Asking | SI8_What Would Work | SI8_Writing the Standard | SI8_Already in Court | SI8_What New York Now Requires |
+| **Geo** | UK | Dubai | Amsterdam/EU | Germany | New York |
+| **ICP** | Brand-side IP/Legal | Brand-side IP/Legal | Holdco AI Governance | Brand-side IP/Legal | Brand-side IP/Legal |
+| **Hook** | A/B: ASA ruling vs. NY law | UAE AI Act | EU AI Act | A/B: GEMA Munich ruling vs. Art. 50 deadline | NY Synthetic Performer Law (eff. June 9) |
+| **Title split** | — | — | Governance title vs. GC/VP Legal | — | — |
+| **Audience list** | London 148 | Dubai 141 | TBD (holdco filter) | Germany 202 | New York 201 |
 
 ---
 
@@ -88,7 +91,7 @@ The insight: Brand legal teams at advertisers are the source of the documentatio
 **Title filters:** Same as Campaign 1
 **Company type:** Large advertisers in UAE — automotive, luxury, FMCG, finance, retail
 **Geo:** Dubai / UAE
-**Persona:** Lilly
+**Persona:** Vanessa (Lilly is retired — confirm with JD)
 **Split test:** Geo — same ICP as Campaign 1, different geography and urgency hook. Tells us whether the UAE Act urgency drives more responses than ASA/NY hooks in UK.
 
 ---
@@ -162,6 +165,93 @@ The insight: Holding groups are writing AI content policies right now. The perso
 > If AI content documentation policy isn't in your current workload, completely understood.
 >
 > If it comes up — especially as major brand clients start requiring documentation as a condition of campaign approval — I'd be glad to share what I'm learning and show you the format I've built. The goal is a standard that holdco governance teams would actually accept. Thanks for connecting.
+
+---
+
+## Campaign 4: SI8_Already in Court
+
+**ICP:** IP Counsel, Brand Legal, Head of Legal (Marketing/Commercial), Director of Commercial Affairs at large advertisers with German or EU operations
+**Title filters:** Same as Campaign 1 (IP Counsel, Brand Counsel, Head of IP, VP Legal, Director Legal Affairs, Director of Intellectual Property)
+**Company type:** Large advertisers in Germany — automotive, pharma, FMCG, luxury, finance
+**Geo:** Germany / Berlin / Hamburg
+**Persona:** Angel (Amsterdam EU persona) — or create a German-name alias if connection acceptance is low
+**Audience list:** Germany/Berlin/Hamburg 202 — "Recently Posted on LI" filter active (high-quality engaged leads)
+**Split test:** Message 1A vs. 1B — GEMA/Munich hook (German-law specific) vs. Article 50 deadline (EU urgency). The GEMA hook is the differentiator from Campaign 3; Article 50 tells us if the August 2 deadline creates its own urgency independent of the German case law.
+
+The insight: Germany is the most legally hostile market for AI training without licensing in the EU. The GEMA v. OpenAI Munich ruling establishes actionable precedent for brand legal teams — their clients are exposed on IP provenance AND disclosure simultaneously. The documentation requirement is more acute here than in any other EU market right now.
+
+---
+
+### Message 1A — GEMA / Munich ruling hook
+> Hi [First Name] — I'm researching how brand legal teams in Germany are approaching AI video campaign approvals. A Munich court ruled last November that AI training on unlicensed audio is actionable under German law — and Frankfurt courts have since noted that Article 50 disclosures don't resolve the underlying IP provenance question for advertisers. When an agency submits AI video creative, is documentation of which tools were used and how training data was licensed something your team currently requires? — Angel
+
+### Message 1B — Article 50 deadline hook
+> Hi [First Name] — I'm building a documentation standard for AI video and want to understand what brand legal teams in Germany are actually requiring before campaign sign-off. EU AI Act Article 50 enforcement begins August 2 — eight weeks out. When an agency submits AI video creative, is there a standard documentation process your team uses — or is it still handled case by case? — Angel
+
+---
+
+### Message 2 (Day 3 — same for both)
+> Hi [First Name], thanks for connecting.
+>
+> The specific gap I'm trying to understand: when an agency submits AI video for your review, what are you currently asking them to produce? Tool provenance, training data licensing confirmation, likeness assessment — is there a standard checklist, or is it case by case?
+>
+> I'm speaking with brand legal teams across Germany and the UK to map the range of approaches. Happy to share what I'm hearing in return.
+
+### Message 3 (Day 7)
+> Hi [First Name] — one follow-up worth sharing.
+>
+> Something that's come up in my research: the GEMA v. OpenAI ruling established that AI training without licensing is actionable under German law. Frankfurt courts have since noted that Article 50 disclosures — the tool provider labels — don't resolve the IP provenance question for advertisers or agencies. That documentation gap is separate, and it's being handled ad hoc right now.
+>
+> Is that consistent with what you're seeing? Even a quick exchange about how your team handles this would be useful.
+
+### Message 4 (Day 14)
+> Hi [First Name] — last note from me.
+>
+> If AI video documentation isn't something your team is dealing with yet, completely understood.
+>
+> If it surfaces — especially as Article 50 enforcement begins August 2 and clients start raising IP provenance questions — I'd be glad to share what I'm learning and show you the format I've built. Even if it doesn't fit, the feedback is valuable. Thanks for connecting.
+
+---
+
+## Campaign 5: SI8_What New York Now Requires
+
+**ICP:** IP Counsel, Brand Legal, Head of Legal (Marketing/Commercial), Director of Commercial Affairs at large advertisers with US / New York operations
+**Title filters:** Same as Campaign 1 (IP Counsel, Brand Counsel, Head of IP, VP Legal, Director Legal Affairs)
+**Company type:** Large advertisers in NY Metro — CPG, finance, pharma, media, luxury, retail
+**Geo:** New York Metro
+**Persona:** Ivy (confirm with JD — assign one of the four active aliases: JD, Angel, Ivy, Vanessa)
+**Audience list:** New York Metro 201 — Brand keyword filter
+**Urgency:** NY Synthetic Performer Disclosure Law (S.8420-A) effective June 9, 2026 — direct advertiser liability for undisclosed AI-generated voices and likenesses. This is the most time-sensitive list in the set.
+
+Note on US priority: US is not a current sales geo target, but for *discovery validation* this list is uniquely valuable — NY brand legal teams are being asked about the NY law right now, in real time, by their own clients. Replies from this list will validate whether the liability framing drives engagement independently of the UK/EU regulatory narrative.
+
+---
+
+### Message 1
+> Hi [First Name] — I'm building a documentation standard for AI video and want to understand what brand legal teams are actually requiring before campaign sign-off. New York's Synthetic Performer Disclosure Law takes effect this week — creating direct advertiser liability for undisclosed AI-generated voices and likenesses. Is this something your team is tracking? — [Alias]
+
+---
+
+### Message 2 (Day 3)
+> Hi [First Name], thanks for connecting.
+>
+> The specific question I'm trying to answer: when an agency submits an AI video campaign for your approval, what documentation are you currently asking for — which AI tools were used, whether any real likenesses appear, how the commercial license is structured? Or is that still on the agency to manage independently?
+>
+> I'm speaking with brand legal teams in New York and London to map how approaches differ. Happy to share what I'm hearing in return.
+
+### Message 3 (Day 7)
+> Hi [First Name] — one pattern worth noting.
+>
+> Under the NY Synthetic Performer Law, liability attaches to advertisers and agencies who use AI-generated likenesses or voices without proper documentation — not just the AI tool providers. The law doesn't prescribe what documentation looks like. Which means brand legal teams are defining that standard themselves right now.
+>
+> Is that a conversation happening at [Company]? Even understanding where the current gap is would be useful.
+
+### Message 4 (Day 14)
+> Hi [First Name] — last note from me.
+>
+> If AI video documentation isn't on your team's radar yet, completely understood.
+>
+> If it comes up — especially with clients asking what documentation covers AI-generated talent or voice under the new law — I'd be glad to share what I'm learning and show you the format I've built. Thanks for connecting.
 
 ---
 
@@ -247,20 +337,23 @@ https://www.linkedin.com/sales/search/people?query=(spellCorrectionEnabled%3Atru
 Strong urgency hook available: GEMA v. OpenAI (Munich court, Nov 2025) + EU AI Act Article 50 enforcement August 2. The "Recently Posted on LI" filter is good practice — these leads are active on the platform. Need a Campaign 4 using the EU/German regulatory angle. Persona: Angel (Amsterdam) or a new German persona. Suggest adapting Campaign 3 (SI8_Writing the Standard) messages with the GEMA/Article 50 hook.
 
 **New York Metro (201)**
-Highest-urgency list in the set. NY Synthetic Performer Law (S.8420-A) took effect June 9, 2026 — brand IP lawyers in NY are being asked about this right now. Message 1B from Campaign 1 (NY law hook) can be used directly on this list. Persona: new US alias needed. Note: US is not a current priority geo for sales, but for *discovery/validation* purposes this list is extremely timely.
+Highest-urgency list in the set. NY Synthetic Performer Law (S.8420-A) took effect June 9, 2026 — brand IP lawyers in NY are being asked about this right now. Message 1B from Campaign 1 (NY law hook) can be used directly on this list. Persona: use one of the four active aliases (JD, Angel, Ivy, Vanessa). Note: US is not a current priority geo for sales, but for *discovery/validation* purposes this list is extremely timely.
 
 ---
 
 ## Next Steps
 
-- [ ] Load Campaign 1A into Dripify using London/UK list (148 leads) — Message 1A (ASA hook), Ivy persona
-- [ ] Load Campaign 1B into Dripify using London/UK list (148 leads) — Message 1B (NY law hook), Ivy persona
-- [ ] Load Campaign 2 into Dripify using Dubai/UAE list (141 leads) — Lilly persona
-- [ ] Load Campaign 3A + 3B (Amsterdam holdco governance) — separate audience lists needed for holdco governance vs. GC/VP Legal titles
-- [ ] Germany list (202): adapt Campaign 3 messages with GEMA/Article 50 hook → load as Campaign 4
-- [ ] New York list (201): use Message 1B (NY law hook already written) → needs a US persona alias in Dripify
-- [ ] Priority warm intro: Matthew Sergison-Main (B088, OLIVER/Brandtech) → ask what the brand legal contact specifically asked him to produce → seek intro to that person → fastest path to validating Campaign 1 without waiting for Dripify data
-- [ ] After 3–4 weeks: compare reply rates and reply quality → use findings to write the first sales campaign for brand legal teams
+**Load order — most urgent first:**
+
+- [ ] **Campaign 5 — NEW YORK (most urgent):** NY Synthetic Performer Law effective June 9 — load immediately. Audience: New York 201 list. Persona: assign one of the four active aliases (JD, Angel, Ivy, Vanessa) — confirm with JD.
+- [ ] **Campaign 4A — GERMANY (GEMA hook):** Load Germany 202 list with Message 1A. Persona: Angel (or new German alias). "Recently Posted on LI" filter already on the saved search.
+- [ ] **Campaign 4B — GERMANY (Article 50 hook):** Same Germany 202 list, Message 1B, separate Dripify campaign for clean A/B data.
+- [ ] **Campaign 1A — UK (ASA hook):** London 148 list, Message 1A, Ivy persona.
+- [ ] **Campaign 1B — UK (NY law hook):** London 148 list, Message 1B, Ivy persona — separate campaign.
+- [ ] **Campaign 2 — DUBAI:** Dubai 141 list, Vanessa persona (confirm with JD — Lilly is retired).
+- [ ] **Campaign 3A + 3B — AMSTERDAM HOLDCO:** Audience lists not yet built — need Sales Nav filter URLs for holdco governance titles (3A) and GC/VP Legal titles (3B) within WPP/Publicis/IPG/Omnicom/Dentsu European arms.
+- [ ] **Priority warm intro:** Matthew Sergison-Main (B088, OLIVER/Brandtech) → ask what the brand legal contact specifically asked him to produce → seek intro to that person → fastest path to validating Campaign 1 without waiting for Dripify data.
+- [ ] **After 3–4 weeks:** Compare reply rates and reply quality across all campaigns → use findings to write the first sales campaign for brand legal teams.
 
 ---
 

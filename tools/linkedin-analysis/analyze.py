@@ -101,6 +101,18 @@ CAMPAIGN_META = {
         'msg1': 'is [Company] working toward a network-wide standard for what agencies should produce?',
         'status': 'DISCOVERY',
     },
+    'Already in Court': {
+        'version': 'v4-discovery',
+        'hypothesis': 'H-ICP (B2B2B): German brand legal teams post-GEMA ruling — IP provenance gap is acute',
+        'msg1': 'documentation of which tools were used and how training data was licensed — something your team currently requires?',
+        'status': 'DISCOVERY',
+    },
+    'What New York Now Requires': {
+        'version': 'v4-discovery',
+        'hypothesis': 'H-ICP (B2B2B): NY brand legal teams under S.8420-A — synthetic performer law creates advertiser liability',
+        'msg1': 'New York\'s Synthetic Performer Disclosure Law takes effect this week — is this something your team is tracking?',
+        'status': 'DISCOVERY',
+    },
 }
 
 
@@ -741,11 +753,12 @@ SEQUENCE_RANK = ['Legal Friction', 'Hitting a Wall', 'Logline-Global', 'Blocks A
 # Preferred aliases per geo
 GEO_ALIAS = {
     'London/UK':    'Ivy',
-    'Singapore':    'Lilly',
-    'Dubai/UAE':    'Lilly',
+    'Singapore':    'Vanessa',
+    'Dubai/UAE':    'Vanessa',
     'France/Paris': 'Vanessa',
     'Netherlands':  'Vanessa',
-    'Germany':      'Vanessa',
+    'Germany':      'Angel',
+    'USA':          'Ivy',
     'default':      'Ivy',
 }
 
@@ -797,7 +810,7 @@ def suggest_next_campaigns(rows, title_data, geo_data, list_data, camp_data, pat
         # Suggest the next highest-traffic geo not already covered by AI-filtered list
         covered_geos = {lst.lower() for lst in list_data}
         next_geo_options = [
-            ('Singapore', 'spg', 'Lilly'),
+            ('Singapore', 'spg', 'Vanessa'),
             ('Paris/France', 'paris', 'Vanessa'),
             ('Amsterdam/NL', 'amsdm', 'Vanessa'),
             ('DACH', 'dach', 'Vanessa'),
