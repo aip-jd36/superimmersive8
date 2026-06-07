@@ -200,11 +200,65 @@ After 3–4 weeks, compare across all campaigns:
 
 ---
 
+## Sales Navigator Audience Lists
+
+Saved searches for loading into Dripify. Each URL is a ready-to-use Sales Nav filter.
+
+| List | Geo | Count | Keyword | Notes | Maps to Campaign |
+|------|-----|-------|---------|-------|-----------------|
+| IP Lawyers / Brand — London | Greater London, UK | 148 | Brand | "Brand" keyword ensures brand-side, not law firm | **Campaign 1A + 1B** |
+| IP Lawyers — Dubai | Dubai, UAE | 141 | — | No keyword filter; full IP/legal pool | **Campaign 2** |
+| IP Lawyers — Germany | Germany / Berlin / Hamburg | 202 | — | "Recently Posted on LI" filter = active users only | **No campaign yet — see below** |
+| IP Lawyers / Brand — New York | New York Metro | 201 | Brand | NY Synthetic Performer Law took effect June 9 — high urgency hook | **No campaign yet — see below** |
+| IP Lawyers / Brand — EMEA | EMEA broad | 1,000+ | Brand | Too broad to run as-is; useful as reserve or filtered further | Reserve pool |
+
+**Saved search URLs:**
+
+**London/UK (148) — Brand keyword**
+```
+https://www.linkedin.com/sales/search/people?query=(spellCorrectionEnabled%3Atrue%2CrecentSearchParam%3A(id%3A5633863130%2CdoLogHistory%3Atrue)%2Cfilters%3AList((type%3ACURRENT_TITLE%2Cvalues%3AList((id%3A16186%2Ctext%3AIntellectual%2520Property%2520Lawyer%2CselectionType%3AINCLUDED)%2C(id%3A6588%2Ctext%3AIntellectual%2520Property%2520Attorney%2CselectionType%3AINCLUDED)%2C(id%3A2926%2Ctext%3AIntellectual%2520Property%2520Manager%2CselectionType%3AINCLUDED)%2C(text%3ALegal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A6737%2Ctext%3ADirector%2520of%2520Legal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A10026%2Ctext%3AVice%2520President%2520Legal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A13032%2Ctext%3AHead%2520of%2520Legal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A4888%2Ctext%3ADirector%2520of%2520Intellectual%2520Property%2CselectionType%3AINCLUDED)))%2C(type%3AREGION%2Cvalues%3AList((id%3A102257491%2Ctext%3AGreater%2520London%252C%2520England%252C%2520United%2520Kingdom%2CselectionType%3AINCLUDED))))%2Ckeywords%3Abrand)&sessionId=KRb8Pu3fTl6tR7H5QPxtZg%3D%3D&viewAllFilters=true
+```
+
+**Germany / Berlin / Hamburg (202) — Recently Posted on LI**
+```
+https://www.linkedin.com/sales/search/people?query=(recentSearchParam%3A(id%3A5633863130%2CdoLogHistory%3Atrue)%2Cfilters%3AList((type%3ACURRENT_TITLE%2Cvalues%3AList((id%3A16186%2Ctext%3AIntellectual%2520Property%2520Lawyer%2CselectionType%3AINCLUDED)%2C(id%3A6588%2Ctext%3AIntellectual%2520Property%2520Attorney%2CselectionType%3AINCLUDED)%2C(id%3A2926%2Ctext%3AIntellectual%2520Property%2520Manager%2CselectionType%3AINCLUDED)%2C(text%3ALegal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A6737%2Ctext%3ADirector%2520of%2520Legal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A10026%2Ctext%3AVice%2520President%2520Legal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A13032%2Ctext%3AHead%2520of%2520Legal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A4888%2Ctext%3ADirector%2520of%2520Intellectual%2520Property%2CselectionType%3AINCLUDED)))%2C(type%3AREGION%2Cvalues%3AList((id%3A101282230%2Ctext%3AGermany%2CselectionType%3AINCLUDED)%2C(id%3A90009712%2Ctext%3ABerlin%2520Metropolitan%2520Area%2CselectionType%3AINCLUDED)%2C(id%3A90009725%2Ctext%3AGreater%2520Hamburg%2520Area%2CselectionType%3AINCLUDED)))%2C(type%3APOSTED_ON_LINKEDIN%2Cvalues%3AList((id%3ARPOL%2CselectionType%3AINCLUDED)))))&sessionId=x0hfChc6QW2Np72lPP%2BtcQ%3D%3D&viewAllFilters=true
+```
+
+**Dubai/UAE (141)**
+```
+https://www.linkedin.com/sales/search/people?query=(recentSearchParam%3A(id%3A5633863130%2CdoLogHistory%3Atrue)%2Cfilters%3AList((type%3ACURRENT_TITLE%2Cvalues%3AList((id%3A16186%2Ctext%3AIntellectual%2520Property%2520Lawyer%2CselectionType%3AINCLUDED)%2C(id%3A6588%2Ctext%3AIntellectual%2520Property%2520Attorney%2CselectionType%3AINCLUDED)%2C(id%3A2926%2Ctext%3AIntellectual%2520Property%2520Manager%2CselectionType%3AINCLUDED)%2C(text%3ALegal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A6737%2Ctext%3ADirector%2520of%2520Legal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A10026%2Ctext%3AVice%2520President%2520Legal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A13032%2Ctext%3AHead%2520of%2520Legal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A4888%2Ctext%3ADirector%2520of%2520Intellectual%2520Property%2CselectionType%3AINCLUDED)))%2C(type%3AREGION%2Cvalues%3AList((id%3A106204383%2Ctext%3ADubai%252C%2520United%2520Arab%2520Emirates%2CselectionType%3AINCLUDED)))))&sessionId=x0hfChc6QW2Np72lPP%2BtcQ%3D%3D&viewAllFilters=true
+```
+
+**New York Metro (201) — Brand keyword**
+```
+https://www.linkedin.com/sales/search/people?query=(spellCorrectionEnabled%3Atrue%2CrecentSearchParam%3A(id%3A5633863130%2CdoLogHistory%3Atrue)%2Cfilters%3AList((type%3ACURRENT_TITLE%2Cvalues%3AList((id%3A16186%2Ctext%3AIntellectual%2520Property%2520Lawyer%2CselectionType%3AINCLUDED)%2C(id%3A6588%2Ctext%3AIntellectual%2520Property%2520Attorney%2CselectionType%3AINCLUDED)%2C(id%3A2926%2Ctext%3AIntellectual%2520Property%2520Manager%2CselectionType%3AINCLUDED)%2C(text%3ALegal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A6737%2Ctext%3ADirector%2520of%2520Legal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A10026%2Ctext%3AVice%2520President%2520Legal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A13032%2Ctext%3AHead%2520of%2520Legal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A4888%2Ctext%3ADirector%2520of%2520Intellectual%2520Property%2CselectionType%3AINCLUDED)))%2C(type%3AREGION%2Cvalues%3AList((id%3A90000070%2Ctext%3ANew%2520York%2520City%2520Metropolitan%2520Area%2CselectionType%3AINCLUDED))))%2Ckeywords%3Abrand)&sessionId=RQ723Q3FTdO1yY0iS9VssA%3D%3D&viewAllFilters=true
+```
+
+**EMEA Broad (1,000+) — Brand keyword**
+```
+https://www.linkedin.com/sales/search/people?query=(spellCorrectionEnabled%3Atrue%2CrecentSearchParam%3A(id%3A5633863130%2CdoLogHistory%3Atrue)%2Cfilters%3AList((type%3ACURRENT_TITLE%2Cvalues%3AList((id%3A16186%2Ctext%3AIntellectual%2520Property%2520Lawyer%2CselectionType%3AINCLUDED)%2C(id%3A6588%2Ctext%3AIntellectual%2520Property%2520Attorney%2CselectionType%3AINCLUDED)%2C(id%3A2926%2Ctext%3AIntellectual%2520Property%2520Manager%2CselectionType%3AINCLUDED)%2C(text%3ALegal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A6737%2Ctext%3ADirector%2520of%2520Legal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A10026%2Ctext%3AVice%2520President%2520Legal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A13032%2Ctext%3AHead%2520of%2520Legal%2520Affairs%2CselectionType%3AINCLUDED)%2C(id%3A4888%2Ctext%3ADirector%2520of%2520Intellectual%2520Property%2CselectionType%3AINCLUDED)))%2C(type%3AREGION%2Cvalues%3AList((id%3A91000007%2Ctext%3AEMEA%2CselectionType%3AINCLUDED))))%2Ckeywords%3Abrand)&sessionId=KRb8Pu3fTl6tR7H5QPxtZg%3D%3D&viewAllFilters=true
+```
+
+---
+
+### Lists Without Campaigns Yet
+
+**Germany / Berlin / Hamburg (202)**
+Strong urgency hook available: GEMA v. OpenAI (Munich court, Nov 2025) + EU AI Act Article 50 enforcement August 2. The "Recently Posted on LI" filter is good practice — these leads are active on the platform. Need a Campaign 4 using the EU/German regulatory angle. Persona: Angel (Amsterdam) or a new German persona. Suggest adapting Campaign 3 (SI8_Writing the Standard) messages with the GEMA/Article 50 hook.
+
+**New York Metro (201)**
+Highest-urgency list in the set. NY Synthetic Performer Law (S.8420-A) took effect June 9, 2026 — brand IP lawyers in NY are being asked about this right now. Message 1B from Campaign 1 (NY law hook) can be used directly on this list. Persona: new US alias needed. Note: US is not a current priority geo for sales, but for *discovery/validation* purposes this list is extremely timely.
+
+---
+
 ## Next Steps
 
-- [ ] Load Campaign 1A and 1B as two separate Dripify campaigns (same ICP, same Messages 2–4, different Message 1) so reply rates are directly comparable
-- [ ] Load Campaign 2 (Dubai, Lilly persona)
-- [ ] Load Campaign 3A and 3B as two separate Dripify campaigns (same geo, different title filters) for the holdco title split
+- [ ] Load Campaign 1A into Dripify using London/UK list (148 leads) — Message 1A (ASA hook), Ivy persona
+- [ ] Load Campaign 1B into Dripify using London/UK list (148 leads) — Message 1B (NY law hook), Ivy persona
+- [ ] Load Campaign 2 into Dripify using Dubai/UAE list (141 leads) — Lilly persona
+- [ ] Load Campaign 3A + 3B (Amsterdam holdco governance) — separate audience lists needed for holdco governance vs. GC/VP Legal titles
+- [ ] Germany list (202): adapt Campaign 3 messages with GEMA/Article 50 hook → load as Campaign 4
+- [ ] New York list (201): use Message 1B (NY law hook already written) → needs a US persona alias in Dripify
 - [ ] Priority warm intro: Matthew Sergison-Main (B088, OLIVER/Brandtech) → ask what the brand legal contact specifically asked him to produce → seek intro to that person → fastest path to validating Campaign 1 without waiting for Dripify data
 - [ ] After 3–4 weeks: compare reply rates and reply quality → use findings to write the first sales campaign for brand legal teams
 
