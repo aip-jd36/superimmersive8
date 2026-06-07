@@ -26,7 +26,7 @@ These are NOT sales campaigns. Goal: get brand legal teams and holdco governance
 - Amsterdam/EU: **Angel**
 - Dubai: **Vanessa** (confirm with JD — Lilly was previously used here but is now retired)
 - Germany: **Angel**
-- New York: **Ivy** (US campaign — use existing alias; confirm with JD if a different one fits better)
+- New York: **JD**
 
 ## What We're Split-Testing
 
@@ -37,7 +37,8 @@ These are NOT sales campaigns. Goal: get brand legal teams and holdco governance
 | **ICP** | Brand-side IP/Legal | Brand-side IP/Legal | Holdco AI Governance | Brand-side IP/Legal | Brand-side IP/Legal |
 | **Hook** | A/B: ASA ruling vs. NY law | UAE AI Act | EU AI Act | A/B: GEMA Munich ruling vs. Art. 50 deadline | NY Synthetic Performer Law (eff. June 9) |
 | **Title split** | — | — | Governance title vs. GC/VP Legal | — | — |
-| **Audience list** | London 148 | Dubai 141 | TBD (holdco filter) | Germany 202 | New York 201 |
+| **Audience list** | London 148 | Dubai 141 | TBD — next batch | Germany 202 | New York 201 |
+| **Persona** | Ivy | Vanessa | Angel | Angel | JD |
 
 ---
 
@@ -219,7 +220,7 @@ The insight: Germany is the most legally hostile market for AI training without 
 **Title filters:** Same as Campaign 1 (IP Counsel, Brand Counsel, Head of IP, VP Legal, Director Legal Affairs)
 **Company type:** Large advertisers in NY Metro — CPG, finance, pharma, media, luxury, retail
 **Geo:** New York Metro
-**Persona:** Ivy (confirm with JD — assign one of the four active aliases: JD, Angel, Ivy, Vanessa)
+**Persona:** JD
 **Audience list:** New York Metro 201 — Brand keyword filter
 **Urgency:** NY Synthetic Performer Disclosure Law (S.8420-A) effective June 9, 2026 — direct advertiser liability for undisclosed AI-generated voices and likenesses. This is the most time-sensitive list in the set.
 
@@ -351,7 +352,7 @@ Highest-urgency list in the set. NY Synthetic Performer Law (S.8420-A) took effe
 - [ ] **Campaign 1A — UK (ASA hook):** London 148 list, Message 1A, Ivy persona.
 - [ ] **Campaign 1B — UK (NY law hook):** London 148 list, Message 1B, Ivy persona — separate campaign.
 - [ ] **Campaign 2 — DUBAI:** Dubai 141 list, Vanessa persona (confirm with JD — Lilly is retired).
-- [ ] **Campaign 3A + 3B — AMSTERDAM HOLDCO:** Audience lists not yet built — need Sales Nav filter URLs for holdco governance titles (3A) and GC/VP Legal titles (3B) within WPP/Publicis/IPG/Omnicom/Dentsu European arms.
+- [ ] **Campaign 3A + 3B — AMSTERDAM HOLDCO:** Deferred to next batch. Audience lists not yet built — need Sales Nav filter URLs for holdco governance titles (3A) and GC/VP Legal titles (3B) within WPP/Publicis/IPG/Omnicom/Dentsu European arms.
 - [ ] **Priority warm intro:** Matthew Sergison-Main (B088, OLIVER/Brandtech) → ask what the brand legal contact specifically asked him to produce → seek intro to that person → fastest path to validating Campaign 1 without waiting for Dripify data.
 - [ ] **After 3–4 weeks:** Compare reply rates and reply quality across all campaigns → use findings to write the first sales campaign for brand legal teams.
 
