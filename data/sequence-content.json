@@ -48,6 +48,13 @@
     "msg3": "If it'd help to see what the documentation actually looks like, I'm happy to send a sample Chain of Title. No call needed, just a look at the output. Let me know.\n\nThanks!\nVanessa",
     "msg4": "No worries if the timing isn't right. When a client starts asking for documentation on AI film/video, we're at superimmersive8.com. Good luck with what you're working on.\n\nHave a great day,\n\nVanessa\nwww.superimmersive8.com"
   },
+  "Who's Asking": {
+    "dripify_name": "SI8_Who's Asking_ASA (4 Msg)",
+    "msg1": "Hi %%first_name%%,\n\nI'm researching how brand legal teams are handling AI video campaign approvals. The ASA banned its first AI ad in March under existing CAP code. I'm curious: is documentation of AI tool usage something your team is currently asking agencies to produce — or is it still ad hoc?",
+    "msg2": "Hi %%first_name%%, thanks for connecting!\n\nThe specific question I'm trying to answer: when an agency submits an AI video campaign for your approval, what information are you asking them to produce? And when they can't produce it, what happens to the campaign?\n\nEven a brief exchange about how your team currently handles this would be genuinely useful. Happy to share what I'm hearing from others in return.\n\nIvy\nwww.superimmersive8.com",
+    "msg3": "The thing I'm trying to understand: when you ask an agency for documentation — which AI tools were used, training data sources, any likeness elements — is what they come back with good enough to satisfy your review? Or is there a consistent gap?\n\nThat gap is what I'm designing around. Worth a quick exchange if you have a few minutes.\n\nIvy\nwww.superimmersive8.com",
+    "msg4": "Hi %%first_name%%— last note from me.\n\nIf AI video documentation isn't something your team is dealing with yet, completely understood.\n\nIf it is — I'd be glad to share what I've been hearing from other brand legal teams about what they're requiring, and show you the format I've built. Even if it doesn't fit, the feedback would be useful.\n\nThanks for connecting."
+  },
   "EU AI Act": {
     "dripify_name": "SI8_EU AI (4 Msg)",
     "msg1": "Hi %%first_name%%,\n\nEU AI Act enforcement starts August 2 — are your clients starting to ask for documentation around AI-generated content?",

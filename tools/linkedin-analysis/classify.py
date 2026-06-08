@@ -33,8 +33,10 @@ def extract_reply(conversation_raw: str) -> str:
     """
     pattern = (
         r"(Let's connect!|Let's chat!|www\.superimmersive8\.com"
-        r"|Thanks[!,]\s*\n(?:Ivy|Vanessa|Lilly)"
+        r"|Thanks[!,]\s*\n(?:Ivy|Vanessa|Lilly|Angel|JD)"
+        r"|Thanks for connecting\."          # Who's Asking msg#4 ending (no alias line)
         r"|Seeing this come up more this year\.?"  # Legal Friction msg#1 ending
+        r"|or is it still ad hoc\?"          # Who's Asking msg#1 ending
         r")"
         r"\s*\d{1,2}:\d{2}\s*(?:am|pm)"
     )
