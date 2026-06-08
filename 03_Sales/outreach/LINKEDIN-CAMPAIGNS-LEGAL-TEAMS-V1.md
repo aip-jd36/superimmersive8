@@ -349,7 +349,7 @@ Highest-urgency list in the set. NY Synthetic Performer Law (S.8420-A) took effe
 - [ ] **Campaign 5 — NEW YORK (most urgent):** NY Synthetic Performer Law effective June 9 — load immediately. Audience: New York 201 list. Persona: JD.
 - [ ] **Campaign 4A — GERMANY (GEMA hook):** Load Germany 202 list with Message 1A. Persona: Angel (or new German alias). "Recently Posted on LI" filter already on the saved search.
 - [ ] **Campaign 4B — GERMANY (Article 50 hook):** Same Germany 202 list, Message 1B, separate Dripify campaign for clean A/B data.
-- [ ] **Campaign 1A — UK (ASA hook):** London 148 list, Message 1A, Ivy persona.
+- [x] **Campaign 1A — UK (ASA hook):** London 148 list, Message 1A, Ivy persona. ✓ Active Jun 8, 2026
 - [ ] **Campaign 1B — UK (NY law hook):** London 148 list, Message 1B, Ivy persona — separate campaign.
 - [ ] **Campaign 2 — DUBAI:** Dubai 141 list, Vanessa persona.
 - [ ] **Campaign 3A + 3B — AMSTERDAM HOLDCO:** Deferred to next batch. Audience lists not yet built — need Sales Nav filter URLs for holdco governance titles (3A) and GC/VP Legal titles (3B) within WPP/Publicis/IPG/Omnicom/Dentsu European arms.
