@@ -6,7 +6,7 @@
 
 **Lead reference:** Every row maps to a B-ID or C-ID in `03_Sales/CRM.md`. Nurture/MONITOR leads are excluded — they are not in the active funnel.
 
-**Last updated:** 2026-05-23
+**Last updated:** 2026-06-09 (Test 6 sent; B143 Simon Helm → Call Requested; B124 Sven → Lost; 7 Lilly-void leads removed; B144-B147 added)
 
 ---
 
@@ -29,7 +29,7 @@
 
 <!-- sales-pipeline:start -->
 
-## 1. Lead Replied (69)
+## 1. Lead Replied (66)
 
 *Substantive reply received. Assessing fit and next move.*
 
@@ -70,14 +70,11 @@
 | B084 | Tahreem Khan | Xperia Labs | London/UK | "Copyright issues concern me" | Await reply | — |
 | B086 | Daniel Fox-Evans | The Kitchen London | London/UK | Consumer backlash is main blocker | Await reply — is legal also coming up? | — |
 | B092 | Lina De Groot | Stealth AI Startup | Amsterdam | Answered her Q on hardening areas | Await reply | — |
-| B097 | James Larkin | Saatchi & Saatchi | Dubai/UAE | "Can't say I have an NDA" | Reply — clarify + probe | — |
 | B098 | Michelle Ponto | Blue Gecko Communications | Dubai/UAE | "Yes, asking about prompts and sequence" | Await reply | — |
 | B101 | Anas Bakal | Monoud Trading | Dubai/UAE | Detailed existing process — validated it | Await reply | — |
 | B103 | Ahmed Samy Amin | GTCFX | Dubai/UAE | "Would love to compare notes" — Financial services | Await reply | — |
 | B104 | Ashraf Selo | MultiBank Group | Dubai/UAE | "Starting to see this more, larger campaigns" | Await reply | — |
-| B105 | Ayman Hussein | — | Dubai/UAE | "Larger campaigns break it down" | Await reply | — |
 | B106 | Mohammed Magdy Alzahran | Dybaja AI Creative Studio | Dubai/UAE | NDA + Transfer of ownership rights | Await reply | — |
-| B108 | Balendu Sharma Dadhich | AILGO | Dubai/UAE | "We give a guarantee — no laws violated" | Await reply | — |
 | B109 | Shahin Sha | Rafaz Properties | Dubai/UAE | Risk/ownership/disclosure framing | Await reply | — |
 | B110 | Nikan Nazari | Freelance | Dubai/UAE | "Document every word in the contract" | Await reply | — |
 | B111 | Anwar Al Amin | The Film Craft MENA | Dubai/UAE | "Depends on client requirement" | Await reply | — |
@@ -85,16 +82,16 @@
 | B113 | Mohanaselvan Jeyapalan | Expo City Dubai | Dubai/UAE | Dubai Future Academy AI labeling | Await reply — research signal | — |
 | B114 | Debjani Mukherjee | GEMS World Academy | Dubai/UAE | "Increasingly so… what are you seeing?" | Await reply — research signal | — |
 | B115 | Anuj Gunasena | Al Tayer / Bloomingdale's | Dubai/UAE | "What are you seeing?" | Await reply — research signal | — |
-| B123 | Gulzar Junaid | Kling AI | Germany | Thoughtful but skeptical; works at Kling AI | Reply — educate on regulatory shift | — |
-| B130 | Ivan Petruzzelli | State Street Investment Mgmt | London/UK | "Tell your legal team the video used AI" | Reply — Chain of Title goes deeper | — |
+| B123 | Gulzar Junaid | Kling AI | Germany | "Usually driven by legal or brand safety, not technical curiosity" — pre-validated B2B2B before probe sent | Test 6 v6-A probe sent Jun 9; await reply | — |
+| B130 | Ivan Petruzzelli | State Street Investment Mgmt | London/UK | "Yes we are" — moving toward structured documentation (Test 2 v2-B) | Await reply to EU Act client-pull message | — |
+| B144 | Laurence Quinn | Ai4ADS | England | "Not yet, but I am aware of logging everything" | Test 6 v6-B pitch sent Jun 9: showed formalised sample | — |
+| B145 | Daniele Zennaro | AiYR4 | England | "Starting to be a topic, especially with agencies and larger clients" | Test 6 v6-A probe sent Jun 9: legal or creative pressure? | — |
+| B146 | Alex Jenkins | Nexus Studios | England | "One client wants us to document AI usage. May I ask why?" | Test 6 v6-A probe sent Jun 9: explained SI8 + legal/creative source probe | — |
+| B147 | Cris Cerqueira | Cris Cerqueira Studio | England | Packaging/branding; keeps records; future-aware ("legal teams will ask") | Test 6 v6-B pitch sent Jun 9: showed formalised sample | — |
 | B131 | Natalia Zablotska | Agro-Bondarivka | London/UK | "Seeing more of this lately" | Reply + send sample | — |
-| B132 | Mikhail Gulkov | Volna vision | Dubai/UAE | Own proprietary AI workflow — "perfectly clean" | Reply + probe third-party tool use | — |
-| B133 | Mohamed Samir | Emerald Group | Dubai/UAE | "Some insist on that of course" | Reply + probe which clients | — |
-| B134 | Joachim Klatt | one.GLOBAL-VISION | Germany | "More relevant especially for larger brands" | Reply + send sample | — |
-| B135 | Ehsan Aliabadi | Loudestudio | Germany | "Documentation more important for larger campaigns" | Reply + send sample | — |
-| B136 | Tom Freeman | Freeman Studio | Germany | "Clients tell me which AI models are ok" | Reply + position SI8 as the document | — |
-| B137 | Akbar Shaikh | Dept of Culture – Abu Dhabi | Dubai/UAE | "No one asked yet, but they ask which tool used" | Reply + tool disclosure is step 1 | — |
-| B140 | Stephane Jacob | Atlantic Venture Group | Dubai/UAE | "I don't go above 30% AI — I consider it stock footage" | Reply + probe client requirements | — |
+| B134 | Joachim Klatt | one.GLOBAL-VISION | Germany | "More relevant especially for larger brands" | Test 6 v6-B pitch + sample link sent Jun 9; await reply | — |
+| B135 | Ehsan Aliabadi | Loudestudio | Germany | "Documentation more important for larger campaigns" | Test 6 v6-A probe sent Jun 9: legal or creative source? | — |
+| B136 | Tom Freeman | Freeman Studio | Germany | "Clients tell me which AI models are ok" | Test 6 v6-A probe sent Jun 9: is that a legal gate or creative brief? | — |
 | B006 | Rawand Latif | ARUBA CREATIVE | — | v4 sample + Calendly sent — no reply | Send follow-up | — |
 | B008 | Barney O'Kelly | AlixPartners | — | Nudge sent — no reply to call offer | Send follow-up | — |
 | B010 | Bee Lin Ang | Stewardship Asia Centre | Singapore | Nudge sent — no reply to call offer | Send follow-up | — |
@@ -109,7 +106,7 @@
 
 ---
 
-## 2. Warm Lead (26)
+## 2. Warm Lead (25)
 
 *Clear ICP signal or acknowledged pain. Moving toward a call or sample.*
 
@@ -118,14 +115,13 @@
 | B002 | Theodor Sandu | McCann/Unilever @ Omnicom | — | "Sure, anytime :)" — top-tier agency signal | No | Send sample Chain of Title | — |
 | B036 | David Tamayo | Prose on Pixels | — | "Big network with legal team dedicated to AI" | No | Await reply (EU AI Act angle sent) | — |
 | B040 | Hasan Sarwar | — | — | "I'd love to see the Example Rights Package" | No | Send sample Chain of Title | — |
-| B041 | Nourhan Mostafa | Ai Studio | Egypt | "Creative Director – AI Content" — described compliance process in detail | No | Reply + explore use case (off-geo) | — |
+| B041 | Nourhan Mostafa | Ai Studio | Egypt | "Creative Director – AI Content" — described compliance process in detail | No | 4th follow-up sent Jun 8; await reply (off-geo but strong ICP signal) | — |
 | B053 | Graham Vincent | grigio:london | London/UK | 👍 reaction to full pitch — no verbal reply | No | Drop sample directly in message | — |
 | B056 | Michael Christodoulou | MOI Global | — | "Sure" — accepted sample offer | No | Send sample Chain of Title | — |
 | B107 | Keegan Desouza | Shaerp Next | Dubai/UAE | "Legal side isn't mature yet — how does it work?" | No | Reply + explain SI8 briefly | — |
 | B121 | Gabriel Preston | Imagine This Creative Studio | London/UK | Approved platform lists, prompt sheets, likeness rights focus | No | Position SI8 as structured output; likeness angle | — |
 | B122 | Mhd Ali | Monks | Dubai/UAE | "Most of the time" — Monks holdco signal | No | Reply + probe Monks client format | — |
-| B124 | Sven Bliedung Von Der Heide | Volucap | Germany | "We need to prove own models and data — EU compliant" | No | Reply + position for third-party tool users | — |
-| B125 | Tim Deussen | XRBB | Germany | "EU AI Act + data protection compliance" — participates in EU working groups | No | Reply + probe commercial clients | — |
+| B125 | Tim Deussen | XRBB | Germany | Corrected SI8's Art. 50 framing; builds compliance tech + participates in EU working groups | No | Partner/advisor ask sent Jun 8 (from Angel); await reply | — |
 | B127 | Ulrike Kerber | Viva Design Inc. | Germany | "Legal teams asking with increasing frequency" | No | Reply + send sample | — |
 | B128 | Christopher Neitzert | Creative Mayhem | Germany | "Yeah I have a solution. Do you?" — probe competitor/complementary | No | Reply + probe what his solution is | — |
 | B129 | Kelly Hogan | ELITE STORI LND | London/UK | "What do you do?" — asking to understand product | No | Reply + explain SI8 | — |
@@ -135,8 +131,8 @@
 | B009 | Syed Tabish Hasan | Zedtronix | — | Previously showed interest; Calendly nudge sent — gone cold | Send follow-up | — |
 | B027 | Marc Danielle De Guzman | UnaFinancial | — | Sample sent + invited for 15-20 min product feedback call | Await reply — book JD call | — |
 | B057 | Rheea Aranha | Vincent Studios | London/UK | Asked for sample by email — we asked for her email address | Await email address | — |
-| B087 | Ibrahim Badi | IKM Marketing | London/UK | "Yes especially in regulated sectors" — asked to beta test platform | Await reply — confirm JD call | — |
-| B088 | Matthew Sergison-Main | OLIVER / Brandtech | London/UK | "Yes I am being asked this 100%" — strongest pain signal in UK batch | Reply + push for call | — |
+| B087 | Ibrahim Badi | IKM Marketing | London/UK | "Yes especially in regulated sectors" — answered 9 intake Qs inline; Creator Record makes sense as next step | COMP-B2 code sent Jun 8; await reply or form fill | — |
+| B088 | Matthew Sergison-Main | OLIVER / Brandtech | London/UK | "Yes I am being asked this 100%" — strongest pain signal; works at OLIVER (Brandtech holdco) | B2B2B probe sent Jun 8: is requirement from brand legal or creative? If legal confirmed → Test 8 | — |
 | B090 | Saira Macleod | Magnific | London/UK | Asked what the checker looks for — product question | Await reply — confirm JD call | — |
 | B095 | Florent Delavous | Xtendency | Dubai/UAE | "Already working on something in this space" — CEO | Probe collab/competitor + book call | — |
 | B099 | Sultan Alsuwaidi | Video tube | Dubai/UAE | "Yes — becoming standard now" — sample sent | Await reply | — |
@@ -144,17 +140,18 @@
 
 ---
 
-## 3. Call Requested (5)
+## 3. Call Requested (6)
 
 *The lead has expressed interest in a call, or confirmed a booking that didn't happen.*
 
 | B-ID | Lead | Company | Geo | How They Requested | Last Action | Follow Up By |
 |------|------|---------|-----|--------------------|-------------|--------------|
+| B143 | Simon Helm | — | England | "Feels very relevant, advising clients already. Can we chat?" | Ivy asked for Tue/Wed/Thu 9:30–10am UK slot Jun 8; await slot reply | 2026-06-12 |
 | B011 | Hugo Barbera | HumAIn | — | Expressed interest — 2nd nudge sent | Sample or call offered | — |
-| B043 | Luke Brady | Sublime Animations Ltd | London/UK | Confirmed calls 3x — all missed | Chase — 4th attempt | 2026-05-26 |
-| B045 | Mike Harris | Seenit | London/UK | "Thanks, booked!" via Calendly — no-show | Chase | 2026-05-26 |
-| B096 | Ankita Biswas | HTCreaTec | Dubai/UAE | "I'd love to know more and talk over a chat!" | Slots proposed May 14-15 — no confirmation | 2026-05-26 |
-| B100 | Ramez Tabshi | — | Dubai/UAE | Engaged — Jun 1 slots offered, no confirmation received | Offer fresh slots — all previous slots expired | 2026-06-02 |
+| B043 | Luke Brady | Sublime Animations Ltd | London/UK | Confirmed calls 4x — all missed | 4th reschedule attempt sent Jun 8; move to Nurture if no reply by Jun 13 | 2026-06-13 |
+| B045 | Mike Harris | Seenit | London/UK | "Thanks, booked!" via Calendly — no-show | Follow-up sent Jun 8; await reply | 2026-06-13 |
+| B096 | Ankita Biswas | HTCreaTec | Dubai/UAE | "I'd love to know more and talk over a chat!" | Follow-up sent Jun 8; await reply | 2026-06-13 |
+| B100 | Ramez Tabshi | — | Dubai/UAE | Engaged — Jun 1 slots offered, no confirmation | Follow-up sent Jun 8 with fresh slots; await reply | 2026-06-13 |
 
 ---
 
@@ -208,7 +205,7 @@
 
 ---
 
-## Lost (15)
+## Lost (23)
 
 *Explicitly declined, wrong ICP, or permanently closed.*
 
@@ -229,5 +226,13 @@
 | B039 | Chee Wong | Opus Artz Ltd | — | 2026-04-07 | "Not within our remit" | No |
 | B077 | Ricardo Barchan | Joolz Jewellery | — | 2026-04-22 | Wrong role — retoucher | No |
 | B102 | Amr Tahtawi | Arizona State University | — | 2026-05-10 | Tried to charge SI8 $150 — consultant/educator | No |
+| B097 | James Larkin | Saatchi & Saatchi | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent | No |
+| B105 | Ayman Hussein | — | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent | No |
+| B108 | Balendu Sharma Dadhich | AILGO | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent | No |
+| B124 | Sven Bliedung Von Der Heide | Volucap | Germany | 2026-06-09 | Wrong ICP — volumetric camera capture studio; proprietary AI stack, not Runway/Kling/Sora; does not produce AI video for clients | No |
+| B132 | Mikhail Gulkov | Volna vision | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent | No |
+| B133 | Mohamed Samir | Emerald Group | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent | No |
+| B137 | Akbar Shaikh | Dept of Culture – Abu Dhabi | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent | No |
+| B140 | Stephane Jacob | Atlantic Venture Group | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent | No |
 
 <!-- sales-pipeline:end -->

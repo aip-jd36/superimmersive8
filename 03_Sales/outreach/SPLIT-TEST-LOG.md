@@ -1,6 +1,6 @@
 # SI8 Split Test Log
 **Purpose:** Track active split tests — hypothesis, lead assignments, results, learnings
-**Updated:** 2026-05-29
+**Updated:** 2026-06-09
 
 ---
 
@@ -143,6 +143,9 @@ B121 Gabriel Preston [Ivy]
 | 2026-05-30 | Test 3 | Process-first (v3-B) can REPEL leads who have already formalized their own process — Kris Tan (Mocreative, SG) explicitly guards his internal workflow; Shyan Pawl (USA) and Derek Du Chesne (USA) have baked AI terms into contracts already. 9 questions reads as redundant to this segment. | v3-B assignment criteria: informal/developing process only — NOT leads who describe an existing formal solution |
 | 2026-05-30 | Test 3 | A third arm is needed for "already-solved-informally" leads — neither v3-A (sample output) nor v3-B (9 questions) fits leads who've already built a workaround. This segment needs a differentiation frame: "here's how our output compares to what you're already doing." Candidate leads: Jian Yi Lay (VaynerMedia APAC, SG), Al Hafeez Jamil (The Daily Creative, SG) | Flag for Test 3 v3-C design when next report cycle runs |
 | 2026-05-30 | All | Discovery pool analysis (122 new leads, May 29 batch): Singapore warm rate 42% (8/19) vs UK 6% (2/32) — Singapore is underweighted in current campaign volumes relative to conversion signal. Stockholm new geo showing EU Act organic awareness. UAE/Dubai skewing future-intent ("not yet but soon") rather than current pain across new batch | Informs geo prioritisation for next campaign launch |
+| 2026-06-09 | Test 6 | Test 6 designed and all 8 messages sent. v6-A: B136 Tom Freeman, B135 Ehsan Aliabadi, B123 Gulzar Junaid, B145 Daniele Zennaro, B146 Alex Jenkins. v6-B: B134 Joachim Klatt, B144 Laurence Quinn, B147 Cris Cerqueira. | Test 8 activation condition set |
+| 2026-06-09 | Test 6 v6-A | Gulzar Junaid (B123, Kling AI) already answered the probe in his May 17 reply BEFORE it was sent: "usually driven by legal or brand safety concerns, not technical curiosity." First B2B2B confirmation — legal/brand safety is the source, not creative. | B2B2B model receives first data point |
+| 2026-06-09 | All | 5 Lilly-alias Dubai leads voided (B097, B132, B133, B137, B140) — alias inaccessible. Test 1 v1-B also void. These leads cannot be followed up. Test 6 population draws from Berlin (Angel) and England EU Act (Ivy) only. | — |
 
 ---
 
@@ -153,6 +156,147 @@ B121 Gabriel Preston [Ivy]
 - [ ] Test 3 v3-B has 2 leads (Ibrahim + Gabriel). Ibrahim answered inline ✅. Awaiting Gabriel. Add more process-describing warm leads to this arm when they surface — but screen out leads who describe an already-formalized solution.
 - [ ] Test 3 v3-C design needed: differentiation frame for "already-solved-informally" segment. Draft message: "here's how our output compares to what you're already doing."
 - [ ] Test 5 launched (see below) — track reply rates and survey engagement by cohort.
+- [ ] Test 6 v6-A: 5 messages pending send (Tom Freeman, Ehsan Aliabadi, Gulzar Junaid, Daniele Zennaro, Alex Jenkins). Send and begin tracking replies.
+- [ ] Test 6 v6-B: 3 messages pending send (Joachim Klatt, Laurence Quinn, Cris Cerqueira). Send and begin tracking replies.
+- [ ] Test 7 v7-B: design validation-frame message once first Who's Asking replies arrive (campaign launched 2026-06-08).
+- [ ] Test 8: activate once any Test 6 v6-A lead confirms "brand legal team" as documentation source. First candidate: B088 Matthew Sergison-Main (awaiting probe reply).
+
+---
+
+## TEST 6 — B2B2B Probe (v6-A) vs. Pitch-First (v6-B)
+
+**Hypothesis:** The B2B2B model requires that brand legal teams generate the documentation requirement and push it down to agencies. If this is true, v6-A (probing who drives the requirement: legal or creative?) will identify which leads are at that agency-client legal interface. v6-B (pitch-first, no probe) tests whether seeing the product converts faster than gathering intelligence. Comparing reply rate and signal quality across arms.
+
+**What we're measuring:**
+- Does v6-A produce more intelligence about the source of the documentation requirement?
+- Does v6-B produce more sample requests or call bookings?
+- Which arm advances further down the funnel faster?
+
+**Designed:** 2026-06-09
+
+**Variant A — Probe first ("is that coming from brand legal teams or creative/marketing side?"):**
+
+| Lead | B-ID | Alias | Their signal | Message sent |
+|------|------|-------|-------------|-------------|
+| Tom Freeman | B136 | Angel | "Clients tell me which AI models are OK to use" | 2026-06-09 |
+| Ehsan Aliabadi | B135 | Angel | "Documentation becoming important for larger campaigns" | 2026-06-09 |
+| Gulzar Junaid | B123 | Angel | Skeptical; works at Kling AI — "real leverage is delivering great work" | 2026-06-09 |
+| Daniele Zennaro | B145 | Ivy | "It's a topic, especially with agencies and larger clients" | 2026-06-09 |
+| Alex Jenkins | B146 | Ivy | "One client wants us to document AI usage. May I ask why you're enquiring?" | 2026-06-09 |
+
+**v6-A message template — Berlin leads (Angel):**
+
+*Tom Freeman:*
+> Thanks Tom — that pre-approval model is interesting. Is the approved-model list coming from the client's legal or compliance team specifically, or is it more a creative/brand preference? Trying to understand whether it's a formal gate that leaves a documentation trail or just an informal brief.
+>
+> Angel / SuperImmersive 8
+
+*Ehsan Aliabadi:*
+> Thanks Ehsan — when documentation becomes a requirement for larger campaigns, is that request typically coming from the client's legal team, or from the creative/production side? Trying to map where the requirement actually originates.
+>
+> Angel / SuperImmersive 8
+
+*Gulzar Junaid:*
+> Fair point — great work is the main currency. When clients do specify requirements in the brief, is that coming from their legal or brand safety team, or from the creative/marketing side? Curious whether there's a compliance gate somewhere in the approval chain.
+>
+> Angel / SuperImmersive 8
+
+*Daniele Zennaro:*
+> That phrase — "especially with agencies and larger clients" — is the interesting part. When those agencies or larger clients push for documentation on AI usage, is that pressure coming from their legal or compliance teams specifically, or from the creative/marketing side? Trying to map where the requirement actually originates.
+>
+> Ivy / SuperImmersive 8
+
+*Alex Jenkins:*
+> Happy to explain — we run a rights verification service for AI video. Agencies submit AI content and we issue a Chain of Title document covering which tools were used, training data, authorship, and IP confirmations — the documentation brand legal teams reference for campaign approval.
+>
+> That client you mentioned who wants you to document AI usage: is that coming from their legal or compliance team specifically, or from the creative/brand marketing side? Trying to understand whether there's a formal approval gate involved.
+>
+> Ivy / SuperImmersive 8
+
+---
+
+**Variant B — Pitch first (product + sample link, no probe):**
+
+| Lead | B-ID | Alias | Their signal | Message sent |
+|------|------|-------|-------------|-------------|
+| Joachim Klatt | B134 | Angel | "Becoming more relevant, especially for larger brands" | 2026-06-09 |
+| Laurence Quinn | B144 | Ivy | "Not yet, but I am aware of logging everything" | 2026-06-09 |
+| Cris Cerqueira | B147 | Ivy | Packaging/branding (not video); keeps records; future-aware | 2026-06-09 |
+
+**v6-B message template:**
+
+*Joachim Klatt:*
+> That pressure on larger brands is exactly what's driving documentation requests right now. Here's what the output actually looks like — the "How It Works" page at www.superimmersive8.com has the sample. Tool disclosure, training data, authorship, IP confirmations — one document the brand's legal team can reference.
+>
+> Happy to send an example directly, or set up a quick 15-min call. Just say the word.
+>
+> Angel / SuperImmersive 8
+
+*Laurence Quinn:*
+> Smart to be tracking it before it becomes mandatory — puts you ahead of most. Here's what the documentation looks like once clients do start asking: www.superimmersive8.com/sample
+>
+> It formalises exactly the kind of logging you're already doing — tool disclosure, training data, authorship, IP confirmations — into a single PDF a client's legal team can reference. Worth knowing what it looks like before you need it.
+>
+> Ivy / SuperImmersive 8
+
+*Cris Cerqueira:*
+> The record-keeping you're already doing — tools used, workflow, licensed platforms — is exactly the foundation. Here's what it looks like when that gets formalised into a document a client's legal team can actually reference: www.superimmersive8.com/sample
+>
+> It covers the same things you're already tracking in a single verified PDF. Built primarily for AI video right now, but the documentation logic applies to any AI-assisted content. Worth a look when the compliance questions do start coming.
+>
+> Ivy / SuperImmersive 8
+
+---
+
+**Results:**
+
+| Lead | B-ID | Variant | Reply? | Reply Type | Source confirmed (legal vs creative)? | Moved to pitch? | Notes |
+|------|------|---------|--------|-----------|--------------------------------------|-----------------|-------|
+| Tom Freeman | B136 | v6-A | — | — | — | — | — |
+| Ehsan Aliabadi | B135 | v6-A | — | — | — | — | — |
+| Gulzar Junaid | B123 | v6-A | — | — | — | — | Works at Kling AI — intelligence value independent of conversion |
+| Daniele Zennaro | B145 | v6-A | — | — | — | — | — |
+| Alex Jenkins | B146 | v6-A | — | — | — | — | Nexus Studios — large agency; high value if confirms legal source |
+| Joachim Klatt | B134 | v6-B | — | — | — | — | — |
+| Laurence Quinn | B144 | v6-B | — | — | — | — | — |
+| Cris Cerqueira | B147 | v6-B | — | — | — | — | Partial fit — packaging/branding not AI video |
+
+**Analysis criteria:**
+- v6-A reply rate vs. v6-B reply rate (5 vs. 3 — note slight imbalance)
+- Does v6-A produce leads who confirm "brand legal team" as the source? That validates the B2B2B model.
+- Does v6-B produce faster sample requests or call bookings?
+- If v6-A leads confirm legal source → route to Test 8 (pre-approval pitch)
+- Verdict threshold: 2+ replies per arm before drawing conclusions
+
+---
+
+## TEST 7 — Who's Asking: Research Frame (v7-A) vs. Validation Frame (v7-B)
+
+**Hypothesis:** The existing Who's Asking sequence (v7-A) uses a research frame ("I'm researching how brand legal teams handle AI video approvals"). v7-B would use a validation frame ("we've built a format — does it match what you'd require?"). For brand legal ICPs who are already the gatekeeper, seeing a format to evaluate may be more compelling than being asked to participate in research.
+
+**Status:** AWAITING LEADS — Who's Asking campaign launched 2026-06-08 (148 leads, 0 accepted yet). Design v7-B message once first Who's Asking replies arrive.
+
+**Target pool:** IP Legal — Brand (holdco brand legal, IP counsel, brand-side legal teams)
+
+**Variant A — Research frame (existing sequence):**
+"I'm researching how brand legal teams are handling AI video campaign approvals..."
+
+**Variant B — Validation frame (to be designed):**
+"We've built a Chain of Title format that we're getting evaluated by brand legal teams — does it match what you'd require from agencies submitting AI video campaigns?"
+
+**Results:** Not yet active.
+
+---
+
+## TEST 8 — Pre-Approval Pitch (v8-A standard vs. v8-B pre-approval framing)
+
+**Hypothesis:** For leads who have confirmed that brand legal teams are the source of the documentation requirement (Test 6 v6-A confirmations), a pitch framing SI8 as "getting our format pre-approved by brand legal teams" may be more compelling than the standard product pitch. v8-A = standard Chain of Title pitch; v8-B = "we're getting SI8's format pre-approved by brand legal teams — here's what that means for your agency."
+
+**Status:** AWAITING TRIGGERS — needs at least 1 confirmed "brand legal source" reply from Test 6 v6-A before v8-B can be written. B088 Matthew Sergison-Main (awaiting reply to B2B2B probe sent Jun 8) is the first candidate.
+
+**Trigger condition:** Lead confirms in conversation that documentation request originates from client's brand legal team → assign to Test 8.
+
+**Results:** Not yet active.
 
 ---
 
