@@ -418,6 +418,169 @@ Comp codes (100% off Creator Record) significantly reduce friction for initial e
 The LinkedIn campaigns were designed to generate revenue leads, but they are simultaneously generating the most reliable market signal available to a pre-revenue B2B startup: what language do potential buyers use to describe their pain, unprompted? The Legal Friction campaign opener (a question, not a pitch) consistently produced more substantive replies than product-forward openers. When Hossein Jafari cited specific regulatory bodies (ASA, IAB) as validation of SI8's model without being asked, that one reply was worth more than a 100-person survey. The methodology: question-based openers → substantive replies → documented in Customer Discovery Log → drives product positioning, content strategy, and sales messaging. This is deliberate PMF research conducted through the outreach channel that also generates pipeline.
 *Sources: Legal Friction campaign results, Hossein Jafari (Apr 2026), ICP analysis in CRM.md (Mar 2026)*
 
+**Pattern 8: The actual buyer in the B2B2B chain is Business Affairs, not the Creative Director**
+The B2B2B hypothesis had been framed as: brand legal → agency Creative Director → SI8. Daniele Zennaro (AiYR4, June 2026) refined the chain: brand legal originates the requirement, but the request reaches the production team via the commercial or rights clearance function — likely Business Affairs, Broadcast Producer, or Commercial Affairs Manager. Creative Directors may be the first to reply on LinkedIn (they're the outreach target), but they're not the person who actually operationalises the clearance requirement. Business Affairs/Broadcast Producers already own a clearances workflow (music, talent, usage rights) and would treat SI8 as a new line item in that workflow — no education on WHY documentation matters needed, only on HOW SI8's product fits. This is a meaningfully different buyer profile: process-oriented, deadline-driven, budget-holding, already vendor-managing in the clearances category.
+*Sources: Daniele Zennaro / AiYR4 (June 10, 2026)*
+
+**Pattern 9: Pre-production clearance is a second distinct customer job**
+Three independent leads in three different markets described the documentation requirement as occurring *before* production begins — not at delivery. Hugo Faustino (Canon EMEA, Amsterdam), Jean Delaunay (Mathematic Studio, LA), and Jian Yi Lay (VaynerMedia APAC, Singapore) all described a pre-project legal gate where AI tool choices are cleared before creative work starts. This is structurally different from SI8's current product framing ("PDF you deliver with the final video"). Both jobs can be served by Chain of Title documentation, but the pitch and timing differ significantly. Pre-production clearance is likely owned by Business Affairs / Broadcast Affairs roles, not Creative Directors.
+*Sources: Hugo Faustino (Canon EMEA), Jean Delaunay (Mathematic Studio), Jian Yi Lay (VaynerMedia APAC) — June 2026 signal scan*
+
+**Pattern 10: Trigger 3 leads — already built something, need a different pitch**
+A meaningful segment of warm leads has independently built informal compliance processes: enterprise tool licensing agreements, T&C review workflows, manual documentation practices, email trails. These leads have validated the problem themselves — they're not cold converts, they're upgrade buyers. The standard pitch ("here's why AI documentation matters") fails for this segment because they already know. The correct pitch is "formalise what you've already built so you can deliver it to a client without building it manually for every project." Some Trigger 3 leads may also be proto-competitors — they've solved the problem well enough that they haven't been blocked. Distinguishing "likely adopter" from "likely replicator" requires a probe about whether clients are requesting documentation or whether their process is entirely self-directed.
+*Sources: Billy Boman (Billy Boman AI Productions, Stockholm), Hugo Barbera (HumAIn, Paris), Sultan Alsuwaidi (Dubai), Graeme Carr (MPC, London) — June 2026 signal scan*
+
 ---
 
-*Last updated: March 30, 2026*
+### June 10, 2026 — Daniele Zennaro (AiYR4) — B2B2B chain refinement
+
+**Signal type:** Direct conversation / Outreach result
+
+**Context:**
+Daniele Zennaro is a creative professional at AiYR4 in the UK. He responded to SI8's EU AI Act campaign (Test 6 v6-A — B2B2B probe). The probe asked where the documentation requirement originates: legal/compliance teams or creative/marketing side.
+
+**What happened:**
+Daniele's reply:
+> "From what I'm seeing, the request usually comes from the commercial or local production side — basically the people who normally manage rights, clearances and usage with the client. Legal/compliance is probably behind the requirement, especially on larger projects, but in practice the request doesn't usually come to us directly from legal. At the moment it still feels quite case-by-case, but it's definitely becoming more relevant."
+> "It's all about the rights!"
+
+Follow-up sent June 10: fun opener ("you could front-run our entire pitch deck with that line") + title probe: "do you mean Business Affairs? Broadcast Producer? Commercial Affairs Manager?"
+
+**What we learned:**
+
+1. **The B2B2B chain is longer than assumed.** The original hypothesis was brand legal → agency Creative Director. Daniele's description adds a middle layer: brand legal (upstream, not direct contact) → commercial/rights clearance team at the agency → production. Legal generates the requirement, but does not deliver it directly.
+
+2. **The commercial/rights clearance function is the actual touchpoint.** This is most likely Business Affairs, Broadcast Producer, or Commercial Affairs Manager — the people who already manage music rights, talent fees, usage windows, and clearances for traditional campaigns. They would treat SI8 as a new supplier in an existing category.
+
+3. **This is a better ICP than Creative Director.** Business Affairs people don't need to be convinced the problem exists — they manage clearances for a living. They need a supplier who can handle the AI-specific documentation layer. The sales conversation shifts from "here's why this matters" to "here's how we fit into your existing workflow."
+
+4. **The title probe is pending.** Awaiting Daniele's confirmation of which specific title applies in his context. Business Affairs is the most common UK/EU agency title for this function.
+
+**Product decision:**
+→ No immediate product change. Targeting implication: consider adding Business Affairs and Broadcast Producer title clusters to LinkedIn campaign targeting. Messaging implication: for Business Affairs outreach, lead with "we handle the AI documentation layer the same way your music clearance house handles sync rights" — workflow fit framing, not problem education. See `03_Sales/pipeline-analysis/` for targeting update in next analysis cycle.
+
+---
+
+### June 10, 2026 — LA/US Market Signal Cluster — unexpected depth in a market we hadn't prioritized
+
+**Signal type:** Outreach result / Full-dataset signal scan
+
+**Context:**
+The June 10 signal scan reviewed the full Supabase CSV export (571 responses, `is_latest_version=true`) for any signals outside the primary warm lead pool. The scan surfaced a cluster of US/LA-based responses — a market SI8 had deliberately deprioritized in Year 1 in favor of UK, Amsterdam, and Dubai. The cluster was not sought; it emerged from the full-pool scan.
+
+**What happened:**
+Four US/LA leads with material signal surfaced from the scan:
+
+- **Spencer Stander (STANDER PRODUCTIONS INC, LA) — B149:** Replied to Msg 1 of the Legal Friction sequence: "Less about creative process, more about clearance — model releases, music/image rights, platforms and territories." Detailed BA-language reply. Only automated Msg 2 was sent — no manual follow-up. Warm lead stalled.
+- **Joe Maziarski (Senior Creative AI Producer, Amazon, LA) — B150:** "They should be [asking for documentation] — it's a grey area. Firefly is built on cleared assets while others were trained on copyrighted material." Named the tool provenance gap directly; this is the exact distinction SI8 documents.
+- **Justin Lufair Brown (Creative Director, Amazon, London/LA context) — B094:** "Happy to go deeper if you are." SAG-AFTRA AI clauses tightening in productions surfaced as adjacent pull mechanism — union contract language pulling documentation requirements forward in union productions.
+- **Jean Delaunay (CD/Designer, Mathematic Studio, LA) — B151:** "Initial conversation about tools before production — client/agency runs it through legal so we know limitations very early." Described pre-production vetting as standard practice.
+
+**What we learned:**
+
+1. **The US/LA market is more advanced than the EU/UK on AI video adoption.** These contacts are not in early-awareness stage — they're already managing AI documentation requirements as part of workflow. This is ahead of most UK/EU replies.
+
+2. **SAG-AFTRA is a pull mechanism SI8 hadn't modeled.** As union productions tighten AI clauses, documentation of which tools were used and what training data they were trained on becomes a contractual requirement, not just a legal-team preference. This creates a distinct US pull mechanism independent of the EU AI Act or ASA enforcement tracks.
+
+3. **The LA market is a Year 2 priority, not Year 3.** Depth of signals suggests the market is ready. The constraint is SI8's geographic focus and outreach capacity, not buyer readiness.
+
+4. **Spencer Stander is a stalled warm lead with clearance framing.** He used the exact language a Business Affairs professional would use ("model releases, music/image rights, platforms and territories") — but only received an automated second message. Manual follow-up with clearance-specific framing is overdue.
+
+**Product decision:**
+→ No product change. Campaign planning implication: LA/US is flagged as Year 2 market. Spencer Stander (B149) and Justin Lufair Brown (B094) added to active follow-up queue with manual messaging. SAG-AFTRA angle documented as US-specific urgency hook for future Track A and Track B campaigns targeting US market. Joe Maziarski (B150) and Jean Delaunay (B151) flagged MONITOR.
+
+---
+
+### June 10, 2026 — Pre-Production Clearance Pattern — three independent descriptions of the same workflow
+
+**Signal type:** Outreach result / Cross-lead pattern analysis
+
+**Context:**
+The June 10 signal scan identified three leads who independently described the documentation requirement as occurring *before* production begins — not at delivery. This is structurally different from the standard SI8 framing ("documentation you deliver with the final video").
+
+**What happened:**
+Three leads described pre-production clearance unprompted, in separate campaigns, with no shared phrasing:
+
+- **Hugo Faustino (Marketing Manager, Canon EMEA, Amsterdam) — CSV line 7946:** Described a "pre-production consultation process" — tool vetting done before a project starts, not after.
+- **Jean Delaunay (CD/Designer, Mathematic Studio, LA) — B151:** "Initial conversation about tools before production — client/agency runs it through legal so we know limitations very early."
+- **Jian Yi Lay (Group Creative Director, VaynerMedia APAC, Singapore) — B152:** "Before starting work, AI usage and which platform must be cleared by both agency and clients legal team first." Described a formal pre-project legal gate already in place.
+
+Three independent descriptions of the same workflow — in Amsterdam, LA, and Singapore — with no shared language or prompt.
+
+**What we learned:**
+
+1. **There are two distinct customer jobs, not one.** Job 1 ("documentation at delivery") is what SI8's current product directly addresses — Chain of Title documentation delivered with the final video as a PDF. Job 2 ("clearance before production starts") is a pre-production gate where agencies check which tools are approved before committing to a project. Current SI8 messaging is designed entirely for Job 1.
+
+2. **Job 2 may be more urgent for the buyer.** Pre-production clearance happens at the point where a client brief is won and a tool decision is being made. The cost of discovering a documentation problem at delivery is higher than discovering it at brief. Job 2 customers are willing to pay for answers earlier in the process.
+
+3. **Business Affairs is the natural owner of Job 2.** The pre-production clearance workflow described by all three contacts involves someone who manages which tools are approved before creative work begins — this is the Head of Business Affairs or Broadcast Affairs role more directly than the Creative Director role.
+
+4. **The Clearance-Pro sequence (Track B) needs a Job 2 variant.** Current Clearance-Pro Msg 3 ("PDF you attach to the deliverable package") is a delivery-stage frame. A v9-C variant framing SI8 as a pre-production tool approval resource could outperform for the BA/EP/HoP audience.
+
+**Product decision:**
+→ No immediate product change — SI8's current Chain of Title documentation can address both jobs (delivery and pre-production review). Messaging update needed: add pre-production framing as a second Clearance-Pro sequence variant (v9-C) for the BA/EP/LP audience. Flag pre-production clearance as a potential Year 2 product feature (pre-approved tool list, standing clearance for commonly used tools).
+
+---
+
+### June 10, 2026 — Trigger 3 Segment — leads who already built something
+
+**Signal type:** Outreach result / Cross-lead pattern analysis
+
+**Context:**
+The June 10 signal scan identified a segment of leads who had already built informal compliance processes independently — without being prompted by SI8. These leads are structurally different from standard warm leads and require a different pitch. They were previously misclassified as standard warm or minimal and received no specialized follow-up.
+
+**What happened:**
+Four leads described existing DIY compliance processes with specificity:
+
+- **Billy Boman (Founder, Billy Boman AI Productions, Stockholm) — B154:** "Enterprise license with No Training policy on client assets + legal indemnification up to 3M EUR." Has enterprise-tier tool licensing and indemnification agreements already in place. His compliance layer covers the *tool* side; SI8 covers the *deliverable documentation* side — a different layer.
+- **Hugo Barbera (Head of AI, HumAIn, Paris):** Reviews client T&Cs before committing to tool selection. Process is relationship-based and informal but deliberate.
+- **Sultan Alsuwaidi (Video tube, Dubai) — CSV line 6728:** "It's becoming standard now. I have clear documentation of the tools I use and the licenses they have." Already maintaining documentation; problem is standardization and transportability.
+- **Graeme Carr (MPC, London):** Described an existing internal process for AI disclosure in agency deliverables.
+
+**What we learned:**
+
+1. **Trigger 3 leads have validated the problem themselves.** A contact who built an informal solution is a different type of buyer than one who is pain-aware but has no process. They've already decided the problem is real and worth solving — they're not evaluating whether to act, they're evaluating whether SI8's solution is better than theirs.
+
+2. **The standard pitch doesn't work.** "Here's why AI documentation matters" is irrelevant — they know. The correct pitch is: "Here's how SI8 formalizes what you're already doing, so you can deliver it to a client without creating it manually for every project." Or for the tool-layer vs. deliverable-layer distinction: "You've covered the tool licensing side. We cover the deliverable documentation that clients actually receive."
+
+3. **Trigger 3 leads are upgrade buyers, not cold converts.** They're not being sold a new concept. They're being sold a more efficient, more credible, more client-presentable version of their existing process.
+
+4. **Some Trigger 3 leads may become competitors.** Hugo Barbera built a process good enough that he runs AI video for Fortune 500 clients without rejection. If he productized that, he'd be a competitor. SI8 should understand whether this segment is "likely adopters" or "likely replicators" — distinguishing between them requires a probe question about whether they've been asked to produce documentation by a client, or whether their process is entirely self-directed.
+
+**Product decision:**
+→ No product change. Sales methodology update: create a Trigger 3-specific reply template for the Clearance-Pro sequence and any warm follow-ups where a lead has described an existing process. Lead with "formalise what you've built, not build from scratch." Framing: SI8 as the client-facing documentation layer on top of the process they already own. Add to the response matrix in `LINKEDIN-CAMPAIGNS-CLEARANCE-PRO-V1.md`: "We have a process — we do X" → probe what that process produces at the deliverable level; position SI8 as the standardized output format.
+
+---
+
+### June 10, 2026 — Myron Stapleton / RileyAI — clearest "ready to buy" signal in the dataset
+
+**Signal type:** Outreach result / Full-dataset signal scan
+
+**Context:**
+Myron Stapleton (Founder & MD, RileyAI, Newbury UK) responded to SI8's Legal Friction sequence (Ivy alias, UK) with a four-message sequence. His final reply to Msg 4 was the warmest single reply in the full dataset. It was identified in the June 10 signal scan after being classified warm but not escalated to a priority follow-up action.
+
+**What happened:**
+Myron's reply after the full 4-message sequence: "Perfect solution to this exact headache... worth its weight in gold... first person I reach out to when we start ramping up content."
+
+Key language markers:
+- "Perfect solution" — product-fit confirmation, not interest
+- "This exact headache" — confirms the problem is live and felt
+- "Worth its weight in gold" — price-value assessment, buyer framing
+- "When we start ramping up content" — timing friction only; buying intent is stated
+
+The sequence had run to completion (Msg 4 sent). No manual JD follow-up had been sent.
+
+**What we learned:**
+
+1. **The warmest signal in the dataset was stalled for weeks.** Myron's reply has the clearest buyer language of any lead in the Supabase CSV — more direct than Matthew Sergison-Main's "asked this 100%", more actionable than Nikolay Kolev's checklist reply. It was not escalated because it came at the end of an automated sequence and no manual routing was in place.
+
+2. **"When we ramp up content" is a timing trigger, not a rejection.** The correct follow-up is not a pitch — it's a question about when "ramping up content" is. August 2 (EU AI Act enforcement) is a concrete external deadline that can move that timeline forward: "What's the trigger for when you start ramping? If it's Q3, the EU Act enforcement date in August is worth knowing about."
+
+3. **Automated sequences can exhaust a warm lead before a human takes over.** Four automated messages, ending with no human response after Myron's warmest possible reply, represents a gap in the follow-up system. Any lead with explicit "when I'm ready, you're first" language should route to a manual JD follow-up queue immediately, not continue waiting.
+
+**Product decision:**
+→ No product change. Process change: add explicit routing rule — any reply containing "first person I reach out to", "worth its weight", "perfect solution", or timing language ("when we ramp up", "when we scale") triggers immediate manual JD follow-up, bypassing standard queue. JD direct message drafted: mirror "ramping up" trigger; August 2 EU Act enforcement as reason to act now; send sample unprompted. Added to CRM as B148, HIGH urgency.
+
+---
+
+*Last updated: June 10, 2026*

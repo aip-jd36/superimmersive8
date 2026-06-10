@@ -53,8 +53,11 @@
 | Senior Video / Production Specialist | Matthew Sergison-Main, Gabriel Preston | Very high | Same |
 | Gen AI Specialist (inside large agency) | Mhd Ali (Monks), Ulrike Kerber | High | Same |
 | Art Director / AI Designer | Ankita Biswas | Medium | Same |
+| **Business Affairs / Broadcast Affairs / EP / Line Producer / Head of Production** | *(not yet in pipeline — identified Jun 10 via Daniele Zennaro signal)* | **Unvalidated — high potential** | **New** |
 
 **New signal from EU Act campaign:** "AI Creative Director" title is appearing in new warm replies (Simon Helm, Alex Jenkins / Executive Creative Director). This title cluster at agencies with EU-facing clients is showing higher responsiveness than generic Creative Director — they're already acting as internal EU Act advisors, making SI8 a credibility tool for them.
+
+**Jun 10 structural finding:** The Business Affairs / Broadcast Affairs cluster has not appeared in the pipeline yet because SI8 has not targeted it directly. Based on Daniele Zennaro's reply, this function is the *operational buyer* in the B2B2B chain — the person who receives the documentation requirement from brand legal and needs to procure a solution. Creative Directors are the correct *outreach* target (they reply and engage), but Business Affairs / EPs / HoP may be the correct *buyer* target for direct campaign testing. See ICP Thesis (Section 5) for full framing.
 
 **Open question from May 24 — no answer yet:** Does "Gen AI Specialist" outperform "Creative Director" on conversion? Still no call completions to compare.
 
@@ -98,7 +101,7 @@
 
 ---
 
-## 5. ICP Thesis (as of 2026-06-05)
+## 5. ICP Thesis (as of 2026-06-05, updated Jun 10)
 
 **Primary ICP — Boutique Founder / CD at AI Video Studio (UK / Germany / Dubai):**
 - 1-20 person studio producing AI video for brand clients
@@ -111,6 +114,17 @@
 - Fielding client questions about AI documentation day-to-day
 - Longer sales cycle (3-6 months) but potential for volume accounts
 - Still represents 4 of the highest-value leads in the pipeline; none have converted to calls
+
+**Tertiary ICP — Business Affairs / Broadcast Affairs / EP / Line Producer / Head of Production *(added Jun 10 — not yet in pipeline)***
+- The operational clearance function at advertising agencies and commercial production companies
+- Titles: Head of Business Affairs, Business Affairs Manager, Broadcast Affairs, Executive Producer, Line Producer, Head of Production
+- These people already own a clearances workflow (music, talent, usage windows, stock) — SI8 is a new line item in an existing category they manage
+- They do NOT need to be educated on why documentation matters; they need to know how SI8 fits their existing process
+- Correct messaging frame: "we handle AI documentation the way your music clearance house handles sync rights"
+- Not yet targeted directly; identified via Daniele Zennaro (AiYR4) B2B2B chain analysis Jun 10
+- **Market size:** UK ~800–1,500 total / ~200–400 active AI video today; EU ~2,000–4,000 total / ~500–1,200 active; Global ~15,000–30,000 total
+- Small, concentrated, reachable — clusters around trade bodies (IPA Business Affairs Group, APA, PACT)
+- **Open question:** Does direct Business Affairs outreach convert faster than routing through Creative Director? Not yet tested.
 
 **The Sweet Spot Profile (unchanged from May 24):**
 Someone who has already improvised a compliance process (prompt logs, metadata, informal email trails) and wants a standardized output to hand to clients. Gabriel Preston, Matthew Sergison-Main, Ibrahim Badi, Sultan Alsuwaidi all fit this. **The new addition:** Simon Helm and Alex Jenkins — already advising clients on EU Act compliance but without a structured documentation product. They need SI8 as their deliverable tool.
@@ -173,3 +187,27 @@ Same as May 24 baseline:
 - [ ] Is the holdco arm profile closeable at $499 or does it require a different offer? (Still no data)
 - [ ] What is breaking down at the Call Requested → Call Scheduled transition? (Ramez, Mike Harris, Luke Brady, Ankita all stalled — is this a follow-up timing issue, a Calendly friction issue, or a fit issue?)
 - [ ] Does Stockholm justify a dedicated EU Act batch? (Henrik Sylvén cited August 2 explicitly)
+- [ ] **NEW (Jun 10):** Does Business Affairs / Broadcast Producer title targeting outperform Creative Director on conversion rate? Daniele Zennaro (AiYR4) identified Business Affairs as the commercial/rights clearance function that receives documentation requests at agencies — they are potentially the real buyer, not the CD who replies to our outreach.
+
+---
+
+## Addendum — June 10, 2026
+
+**New finding: B2B2B chain has a middle layer — Business Affairs is the likely direct buyer**
+
+Daniele Zennaro (B145, AiYR4) replied to Test 6 v6-A probe and clarified the actual chain:
+- Brand legal → commercial/rights clearance team at agency → production
+- The request does NOT come from legal directly in practice
+- The commercial/rights team = the people who "manage rights, clearances and usage with the client" — almost certainly Business Affairs or Broadcast Producer title
+
+**Why this matters for this analysis:**
+
+Section 3 (Title Patterns) has been targeting Creative Directors as the primary ICP. CDs are the right outreach target (they respond and are engaged), but they are likely NOT the buyer. Business Affairs / Broadcast Producers are the people who would actually procure SI8. They already hold clearance budgets, manage clearance suppliers (music houses, talent agents, stock libraries), and are operationally accountable for documentation.
+
+**ICP revision for next cycle:**
+- Outreach target (who replies): Creative Director — correct, keep targeting
+- Buyer/champion (who procures): Business Affairs, Broadcast Producer, Commercial Affairs Manager
+- The Creative Director may be the internal referral path to Business Affairs — not the end buyer
+
+**Messaging implication:**
+For Business Affairs-targeted outreach: workflow fit framing ("we handle AI documentation the way your music clearance house handles sync rights"), not problem education. They already know the problem exists.

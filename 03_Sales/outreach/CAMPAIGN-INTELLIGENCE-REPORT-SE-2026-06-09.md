@@ -206,3 +206,39 @@ The B2B2B mechanism is plausible and directionally supported. The evidence base 
 ---
 
 *Report generated Jun 9, 2026 — data through Jun 5, 2026 export. Next update: after Test 6 replies received or next Supabase export cycle.*
+
+---
+
+## Addendum — June 10, 2026
+
+### New Finding: Business Affairs is the Operational Buyer — ICP Stack Revised
+
+**Source:** Daniele Zennaro (B145, AiYR4) reply to Test 6 v6-A probe, Jun 10, 2026.
+
+Daniele confirmed the B2B2B chain but added a structural refinement: the documentation requirement doesn't flow from brand legal directly to creative. It routes through **the commercial/rights clearance function** at the agency — the people who "manage rights, clearances and usage with the client." This is Business Affairs, Broadcast Affairs, Broadcast Producer, or Commercial Affairs Manager — the same function that processes music clearances, talent usage, and stock rights.
+
+**ICP stack revision as of June 10:**
+
+| Track | ICP | Role in B2B2B chain | Campaign status |
+|-------|-----|---------------------|-----------------|
+| **Track A** | Creative Director / Senior Producer | Responder, potential internal champion — replies to outreach, engaged with problem, but likely NOT the buyer | Active — proven 30% warm rate |
+| **Track B** *(new)* | Business Affairs / Broadcast Affairs / EP / Line Producer / HoP | **Operational buyer** — holds clearance budget, manages clearance suppliers, receives documentation requirements from brand legal and procures solutions | Test 9 sequence loaded; UK target list needed |
+| **Track C** | Brand Legal / In-house IP Counsel / Holdco AI Governance | Originator of the requirement — validates B2B2B chain from top, Test 8 upside | Campaign 1A active; Campaign 5 (NY) load now |
+
+**Why this changes the strategic picture:**
+
+The Jun 9 report listed the ICP priority stack as CD → Brand Legal → Production House. That framing was correct at the time, but it treated Creative Directors as the end buyer. Daniele's signal clarifies that CDs are the *outreach entry point* — not the procurement decision-maker. Business Affairs is the buyer. The correct model is:
+
+- Track A (CDs) generates warm signals and surfaces pain
+- Track B (Business Affairs) is where the money moves
+- Track C (Brand Legal) validates the chain and creates Test 8 pull
+
+These three tracks are complementary. Running all three in parallel is coherent. The risk is conflating them: measuring Track C on warm reply rates (wrong metric) or expecting CDs to close without involving Business Affairs (wrong assumption).
+
+**Immediate action added:** Build UK Business Affairs target list for Test 9 (Clearance-Pro-v1). Titles: Head of Business Affairs, Business Affairs Director/Manager, Broadcast Affairs, Broadcast Business Affairs, Executive Producer, Line Producer, Head of Production, Director of Production. Company type: advertising agencies + commercial production companies. NOT entertainment B&LA, sports leagues, talent agencies. Estimated UK pool: 800–1,500 total. Start with 150–200 leads.
+
+**Classifier note:** SI8_Clearance-Pro-v1 Message 1 ends with "Would love to connect!" — this pattern is not yet in `classify.py` `extract_reply()`. Flag for next classify.py update. Messages 2 and 3 both end with `www.superimmersive8.com` and are covered by existing patterns.
+
+See full campaign brief: `03_Sales/outreach/LINKEDIN-CAMPAIGNS-CLEARANCE-PRO-V1.md`
+See updated ICP analysis: `03_Sales/pipeline-analysis/PIPELINE-ICP-ANALYSIS-2026-06-05.md` (Addendum — Jun 10)
+See updated campaign plan: `03_Sales/outreach/CAMPAIGN-PLAN.md`

@@ -37,6 +37,7 @@ def extract_reply(conversation_raw: str) -> str:
         r"|Thanks for connecting\."          # Who's Asking msg#4 ending (no alias line)
         r"|Seeing this come up more this year\.?"  # Legal Friction msg#1 ending
         r"|or is it still ad hoc\?"          # Who's Asking msg#1 ending
+        r"|Would love to connect!"           # Clearance-Pro msg#1 ending
         r")"
         r"\s*\d{1,2}:\d{2}\s*(?:am|pm)"
     )

@@ -146,6 +146,7 @@ B121 Gabriel Preston [Ivy]
 | 2026-06-09 | Test 6 | Test 6 designed and all 8 messages sent. v6-A: B136 Tom Freeman, B135 Ehsan Aliabadi, B123 Gulzar Junaid, B145 Daniele Zennaro, B146 Alex Jenkins. v6-B: B134 Joachim Klatt, B144 Laurence Quinn, B147 Cris Cerqueira. | Test 8 activation condition set |
 | 2026-06-09 | Test 6 v6-A | Gulzar Junaid (B123, Kling AI) already answered the probe in his May 17 reply BEFORE it was sent: "usually driven by legal or brand safety concerns, not technical curiosity." First B2B2B confirmation — legal/brand safety is the source, not creative. | B2B2B model receives first data point |
 | 2026-06-09 | All | 5 Lilly-alias Dubai leads voided (B097, B132, B133, B137, B140) — alias inaccessible. Test 1 v1-B also void. These leads cannot be followed up. Test 6 population draws from Berlin (Angel) and England EU Act (Ivy) only. | — |
+| 2026-06-10 | Test 6 v6-A | Daniele Zennaro (B145, AiYR4) replied to probe: "request comes via commercial/local production side — people who manage rights/clearances. Legal/compliance is probably behind it, especially on larger projects, but the request doesn't come to us directly from legal." B2B2B chain refinement: legal → commercial/rights → agency. Legal originates the requirement; commercial/rights people operationalise it. | B2B2B model holds but direct contact point is commercial/rights, not legal themselves |
 
 ---
 
@@ -160,6 +161,7 @@ B121 Gabriel Preston [Ivy]
 - [ ] Test 6 v6-B: 3 messages pending send (Joachim Klatt, Laurence Quinn, Cris Cerqueira). Send and begin tracking replies.
 - [ ] Test 7 v7-B: design validation-frame message once first Who's Asking replies arrive (campaign launched 2026-06-08).
 - [ ] Test 8: activate once any Test 6 v6-A lead confirms "brand legal team" as documentation source. First candidate: B088 Matthew Sergison-Main (awaiting probe reply).
+- [ ] Test 9: sequence loaded ✅. Next: build UK target list (Business Affairs / Broadcast Affairs / EP / Line Producer / HoP at ad agencies + production companies) and assign leads to v9-A and v9-B arms.
 
 ---
 
@@ -255,10 +257,10 @@ B121 Gabriel Preston [Ivy]
 | Tom Freeman | B136 | v6-A | — | — | — | — | — |
 | Ehsan Aliabadi | B135 | v6-A | — | — | — | — | — |
 | Gulzar Junaid | B123 | v6-A | — | — | — | — | Works at Kling AI — intelligence value independent of conversion |
-| Daniele Zennaro | B145 | v6-A | — | — | — | — | — |
+| Daniele Zennaro | B145 | v6-A | YES | warm | PARTIAL — "legal/compliance is probably behind it but request comes via commercial/rights side" | Pitch + sample | B2B2B chain is legal→commercial/rights→agency, not legal→agency direct |
 | Alex Jenkins | B146 | v6-A | — | — | — | — | Nexus Studios — large agency; high value if confirms legal source |
 | Joachim Klatt | B134 | v6-B | — | — | — | — | — |
-| Laurence Quinn | B144 | v6-B | — | — | — | — | — |
+| Laurence Quinn | B144 | v6-B | YES | pass/minimal | N/A (v6-B) | N/A | "Thanks Ivy" — polite close; no product engagement; → Nurture (Aug 2 hook) |
 | Cris Cerqueira | B147 | v6-B | — | — | — | — | Partial fit — packaging/branding not AI video |
 
 **Analysis criteria:**
@@ -342,3 +344,59 @@ Launch: TBD
 - Key signal: does Msg 3 (survey) generate more replies than a standard follow-up would?
 - Does Cohort B (FinServ) reply with more specificity than Cohort A (Creative Dir)?
 - Does the August 2 deadline create urgency, or does it read as abstract regulation?
+
+---
+
+## TEST 9 — Clearance Pro: Pure Probe (v9-A) vs. Probe + Product Hint (v9-B)
+
+**Hypothesis:** The Business Affairs / Broadcast Affairs / EP / Line Producer / HoP function at advertising agencies and production companies is beginning to receive AI video documentation requirements from brand clients — and would treat SI8 as a new clearance supplier rather than a new concept. Testing whether a pure peer-level probe (v9-A) or a probe with a one-line product frame (v9-B) produces more warm replies from this ICP.
+
+**ICP:** Business Affairs / Broadcast Affairs / Executive Producers / Line Producers / Head of Production at advertising agencies and commercial production companies. NOT entertainment B&LA, sports leagues, or music orgs.
+
+**Source of insight:** Daniele Zennaro (B145) reply Jun 10 — identified the "commercial or local production side — people who manage rights, clearances and usage with the client" as the actual documentation request recipient. B2B2B chain: brand legal → commercial/rights → production.
+
+**Sequence:** SI8_Clearance-Pro-v1 (4 messages) — see `03_Sales/outreach/LINKEDIN-CAMPAIGNS-CLEARANCE-PRO-V1.md`
+
+**Status:** LIVE — loaded into Dripify 2026-06-10. 3 messages (no soft close). UK first (Ivy). Pending lead assignment.
+
+**What we're measuring:**
+- Does this ICP have a higher warm reply rate than Creative Directors? (hypothesis: yes — no problem education needed)
+- Does the clearance workflow framing ("alongside music and talent") land as peer-level or confusing?
+- Does v9-A (pure probe) produce richer intelligence replies?
+- Does v9-B (probe + product hint) produce more direct sample requests?
+- Verdict threshold: 5+ replies per variant before drawing conclusions
+
+**Variant A — Pure probe (no product mention in Msg 1):**
+
+> Hi [First name],
+>
+> As AI video becomes more common in commercial production, are you seeing brand clients start adding documentation requirements to clearance sign-off — alongside music and talent?
+>
+> Curious what you're running into on your end.
+>
+> Thanks,
+> Ivy
+
+**Variant B — Probe + product hint:**
+
+> Hi [First name],
+>
+> As AI video becomes more common in commercial production, are you seeing brand clients start adding documentation requirements to clearance sign-off — alongside music and talent?
+>
+> We've built what amounts to a music clearance report for AI video — happy to explain if it's coming up.
+>
+> Thanks,
+> Ivy
+
+**Results:**
+
+| Lead | B-ID | Geo | Title | Company | Variant | Reply? | Reply type | Notes |
+|------|------|-----|-------|---------|---------|--------|-----------|-------|
+| — | — | — | — | — | — | — | — | No leads assigned yet |
+
+**Analysis criteria:**
+- v9-A vs v9-B reply rate (target: which produces more substantive first replies?)
+- Does the music/talent clearance analogy land as peer-level framing?
+- Ideal reply: "Yes, clients have started asking — handling it informally right now"
+- Does this ICP convert to sample requests faster than Creative Directors?
+- Does this ICP ask about pricing earlier (operational buyers evaluate suppliers on practical terms)?

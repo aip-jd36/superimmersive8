@@ -6,7 +6,7 @@
 
 **Lead reference:** Every row maps to a B-ID or C-ID in `03_Sales/CRM.md`. Nurture/MONITOR leads are excluded — they are not in the active funnel.
 
-**Last updated:** 2026-06-09 (Test 6 sent; B143 Simon Helm → Call Requested; B124 Sven → Lost; 7 Lilly-void leads removed; B144-B147 added)
+**Last updated:** 2026-06-09 (Test 6 sent; B143 Simon Helm → Call Requested; B124 Sven → Lost; 7 Lilly-void leads removed; B144-B147 added; B144 Laurence Quinn → Nurture soft close)
 
 ---
 
@@ -29,7 +29,7 @@
 
 <!-- sales-pipeline:start -->
 
-## 1. Lead Replied (66)
+## 1. Lead Replied (64)
 
 *Substantive reply received. Assessing fit and next move.*
 
@@ -84,8 +84,6 @@
 | B115 | Anuj Gunasena | Al Tayer / Bloomingdale's | Dubai/UAE | "What are you seeing?" | Await reply — research signal | — |
 | B123 | Gulzar Junaid | Kling AI | Germany | "Usually driven by legal or brand safety, not technical curiosity" — pre-validated B2B2B before probe sent | Test 6 v6-A probe sent Jun 9; await reply | — |
 | B130 | Ivan Petruzzelli | State Street Investment Mgmt | London/UK | "Yes we are" — moving toward structured documentation (Test 2 v2-B) | Await reply to EU Act client-pull message | — |
-| B144 | Laurence Quinn | Ai4ADS | England | "Not yet, but I am aware of logging everything" | Test 6 v6-B pitch sent Jun 9: showed formalised sample | — |
-| B145 | Daniele Zennaro | AiYR4 | England | "Starting to be a topic, especially with agencies and larger clients" | Test 6 v6-A probe sent Jun 9: legal or creative pressure? | — |
 | B146 | Alex Jenkins | Nexus Studios | England | "One client wants us to document AI usage. May I ask why?" | Test 6 v6-A probe sent Jun 9: explained SI8 + legal/creative source probe | — |
 | B147 | Cris Cerqueira | Cris Cerqueira Studio | England | Packaging/branding; keeps records; future-aware ("legal teams will ask") | Test 6 v6-B pitch sent Jun 9: showed formalised sample | — |
 | B131 | Natalia Zablotska | Agro-Bondarivka | London/UK | "Seeing more of this lately" | Reply + send sample | — |
@@ -106,12 +104,13 @@
 
 ---
 
-## 2. Warm Lead (25)
+## 2. Warm Lead (26)
 
 *Clear ICP signal or acknowledged pain. Moving toward a call or sample.*
 
 | B-ID | Lead | Company | Geo | Signal Summary | Sample Sent? | Next Action | Follow Up By |
 |------|------|---------|-----|----------------|-------------|-------------|--------------|
+| B145 | Daniele Zennaro | AiYR4 | England | "Request via commercial/rights side — legal/compliance probably behind it." Partial B2B2B confirmation. Chain: legal→commercial/rights→agency. Case-by-case but trending structured. Test 6 v6-A. | No | Pitch + send sample (superimmersive8.com/sample) — position as what the commercial/rights clearance request formalises | — |
 | B002 | Theodor Sandu | McCann/Unilever @ Omnicom | — | "Sure, anytime :)" — top-tier agency signal | No | Send sample Chain of Title | — |
 | B036 | David Tamayo | Prose on Pixels | — | "Big network with legal team dedicated to AI" | No | Await reply (EU AI Act angle sent) | — |
 | B040 | Hasan Sarwar | — | — | "I'd love to see the Example Rights Package" | No | Send sample Chain of Title | — |
