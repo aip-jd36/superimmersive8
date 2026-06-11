@@ -26,19 +26,19 @@ These are NOT sales campaigns. Goal: get brand legal teams and holdco governance
 - Amsterdam/EU: **Angel**
 - Dubai: **Vanessa**
 - Germany: **Angel**
-- New York: **JD**
+- New York: **Vanessa**
 
 ## What We're Split-Testing
 
 | | Campaign 1 | Campaign 2 | Campaign 3 | Campaign 4 | Campaign 5 |
 |---|---|---|---|---|---|
-| **Name** | SI8_Who's Asking | SI8_What Would Work | SI8_Writing the Standard | SI8_Already in Court | SI8_What New York Now Requires |
+| **Name** | SI8_Who's Asking | SI8_What Would Work | SI8_Writing the Standard | SI8_Already in Court | SI8_NY 1st Law (4 Msg) |
 | **Geo** | UK | Dubai | Amsterdam/EU | Germany | New York |
 | **ICP** | Brand-side IP/Legal | Brand-side IP/Legal | Holdco AI Governance | Brand-side IP/Legal | Brand-side IP/Legal |
 | **Hook** | A/B: ASA ruling vs. NY law | UAE AI Act | EU AI Act | A/B: GEMA Munich ruling vs. Art. 50 deadline | NY Synthetic Performer Law (eff. June 9) |
 | **Title split** | — | — | Governance title vs. GC/VP Legal | — | — |
 | **Audience list** | London 148 | Dubai 141 | TBD — next batch | Germany 202 | New York 201 |
-| **Persona** | Ivy | Vanessa | Angel | Angel | JD |
+| **Persona** | Ivy | Vanessa | Angel | Angel | Vanessa |
 
 ---
 
@@ -214,13 +214,13 @@ The insight: Germany is the most legally hostile market for AI training without 
 
 ---
 
-## Campaign 5: SI8_What New York Now Requires
+## Campaign 5: SI8_NY 1st Law (4 Msg)
 
 **ICP:** IP Counsel, Brand Legal, Head of Legal (Marketing/Commercial), Director of Commercial Affairs at large advertisers with US / New York operations
-**Title filters:** Same as Campaign 1 (IP Counsel, Brand Counsel, Head of IP, VP Legal, Director Legal Affairs)
+**Title filters:** IP Lawyer/Attorney/Manager, Dir. IP, Legal Affairs, Dir. LA, VP LA, Head of LA
 **Company type:** Large advertisers in NY Metro — CPG, finance, pharma, media, luxury, retail
 **Geo:** New York Metro
-**Persona:** JD
+**Persona:** Vanessa
 **Audience list:** New York Metro 201 — Brand keyword filter
 **Urgency:** NY Synthetic Performer Disclosure Law (S.8420-A) effective June 9, 2026 — direct advertiser liability for undisclosed AI-generated voices and likenesses. This is the most time-sensitive list in the set.
 
@@ -228,31 +228,54 @@ Note on US priority: US is not a current sales geo target, but for *discovery va
 
 ---
 
-### Message 1
-> Hi [First Name] — I'm building a documentation standard for AI video and want to understand what brand legal teams are actually requiring before campaign sign-off. New York's Synthetic Performer Disclosure Law takes effect this week — creating direct advertiser liability for undisclosed AI-generated voices and likenesses. Is this something your team is tracking? — [Alias]
+### Message 1 — Connection note
+> Hi %%first_name%%,
+>
+> New York just passed the first US law creating direct advertiser liability for AI-generated voices and likenesses. Is this something your team is tracking?
+>
+> Let's connect!
+
+*Ends with "Let's connect!" — matches existing extract_reply() pattern in classify.py ✅*
 
 ---
 
 ### Message 2 (Day 3)
-> Hi [First Name], thanks for connecting.
+> Hi %%first_name%%, thanks for connecting!
 >
 > The specific question I'm trying to answer: when an agency submits an AI video campaign for your approval, what documentation are you currently asking for — which AI tools were used, whether any real likenesses appear, how the commercial license is structured? Or is that still on the agency to manage independently?
 >
 > I'm speaking with brand legal teams in New York and London to map how approaches differ. Happy to share what I'm hearing in return.
+>
+> Vanessa
+> www.superimmersive8.com
+
+*Ends with www.superimmersive8.com — matches extract_reply() pattern ✅*
+
+---
 
 ### Message 3 (Day 7)
-> Hi [First Name] — one pattern worth noting.
->
 > Under the NY Synthetic Performer Law, liability attaches to advertisers and agencies who use AI-generated likenesses or voices without proper documentation — not just the AI tool providers. The law doesn't prescribe what documentation looks like. Which means brand legal teams are defining that standard themselves right now.
 >
-> Is that a conversation happening at [Company]? Even understanding where the current gap is would be useful.
+> Is that a conversation happening at your end?
+>
+> Vanessa
+> http://www.superimmersive8.com
+
+*Ends with www.superimmersive8.com — matches extract_reply() pattern ✅*
+
+---
 
 ### Message 4 (Day 14)
-> Hi [First Name] — last note from me.
+> Hi %%first_name%% — last note from me.
 >
-> If AI video documentation isn't on your team's radar yet, completely understood.
+> If AI video documentation isn't on your team's radar yet, completely understood. If it comes up — especially with clients asking what documentation covers AI-generated talent or voice under the new law — I'd be glad to share what I'm learning and show you the format I've built.
 >
-> If it comes up — especially with clients asking what documentation covers AI-generated talent or voice under the new law — I'd be glad to share what I'm learning and show you the format I've built. Thanks for connecting.
+> Thanks for connecting.
+>
+> Vanessa
+> www.superimmersive8.com
+
+*Ends with www.superimmersive8.com — matches extract_reply() pattern ✅*
 
 ---
 

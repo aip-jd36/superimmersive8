@@ -27,7 +27,8 @@ SI8 is now running three structurally different campaign types in parallel. They
 | Ivy | CreaDir AI — Posted on LinkedIn | A | England | EU AI Act | Jun 1 2026 | 171 | Active — winding down |
 | JD | CreaDir AI Video | A | France/Paris | EU AI Act | May 30 2026 | 240 | ~10 days remaining; diagnose 2.5% acceptance before next JD campaign |
 | Ivy | Who's Asking v1A (ASA hook) | C | UK/London | SI8_Who's Asking 1A | Jun 8 2026 | ~73 | Active — awaiting first replies |
-| Ivy | Who's Asking v1B (NY law hook) | C | UK/London | SI8_Who's Asking_NY Law | Jun 10 2026 | 75 | Active — just launched |
+| Ivy | Who's Asking v1B (NY law hook) | C | UK/London | SI8_Who's Asking_NY Law | Jun 10 2026 | 75 | Active |
+| Vanessa | What New York Now Requires | C | New York Metro | SI8_NY 1st Law (4 Msg) | Jun 11 2026 | 201 | Active — just launched |
 
 ---
 
@@ -35,7 +36,7 @@ SI8 is now running three structurally different campaign types in parallel. They
 
 | Priority | Alias | Campaign | Track | Geo | Sequence | List Size | Notes |
 |----------|-------|----------|-------|-----|----------|-----------|-------|
-| **1** | JD | What New York Now Requires | C | New York Metro | SI8_What New York Now Requires | 201 | **MOST URGENT** — NY Synthetic Performer Law eff. Jun 9; JD will be free ~Jun 16; hook is at peak relevance now |
+| **1** | Angel | CreaDir AI Video — Berlin Metro | A | Berlin | EU AI Act | 229 | Load now — Angel free |
 | **2** | — | Clearance-Pro UK | B | England | SI8_Clearance-Pro-v1 | TBD | **BUILD LIST FIRST** — need BA/Broadcast Affairs/EP/LP/HoP at UK ad agencies + production cos (APA members, IPA Business Affairs Group); NOT entertainment B&LA or sports; Test 9 sequence loaded in Dripify, awaiting leads |
 | **3** | Ivy | CreaDir AI Video (no Posted LI filter) | A | England | EU AI Act | 841 | Control test — no activity filter; loads after Ivy's current 171 campaign ends |
 | **4** | Angel | CreaDir AI Video — Berlin Metro | A | Berlin | EU AI Act | 229 | EU Act in EU-native market; Angel free after Legal Friction |
@@ -63,7 +64,7 @@ All Track C campaigns are discovery, not sales. Measure on reply quality, not wa
 
 | Priority | Campaign | Status | Urgency Reason |
 |----------|----------|--------|----------------|
-| 🔴 **1 — Campaign 5 (NY)** | SI8_What New York Now Requires | Load now — JD | NY law eff. Jun 9 — hook peaks in June, fades by August |
+| 🔴 **1 — Campaign 5 (NY)** | SI8_NY 1st Law (4 Msg) | Load now — Vanessa | NY law eff. Jun 9 — hook peaks in June, fades by August; 201 leads (Brand keyword filter) |
 | 🟢 **2 — Campaign 1B (UK)** | SI8_Who's Asking_NY Law | **Active — launched Jun 10** | 75 leads, Ivy alias; A/B vs. 1A (ASA hook) |
 | 🟡 **3 — Campaign 2 (Dubai)** | SI8_What Would Work | Load when Vanessa free | UAE AI Act; Lilly retired, Vanessa takes Dubai discovery |
 | 🟡 **4 — Campaign 4A (Germany/GEMA)** | SI8_Already in Court | Load when Angel free | GEMA/Munich ruling most distinctive hook; differentiated from Campaign 3 |
@@ -104,7 +105,7 @@ Test 9 sequence is live in Dripify. What's needed to run it: **a UK Business Aff
 | Ivy | England Posted LI EU Act 171 (winding down) | England 841 EU Act → Clearance-Pro UK (once list built) | |
 | Angel | Berlin Legal Friction (done) | Berlin Metro EU Act 229 | Load now |
 | Vanessa | Stockholm Legal Friction (done) | England Finance 298 EU Act → Spain 498 → Dubai What Would Work | Load now |
-| JD | France EU Act (~Jun 16) | NY Legal Teams (Campaign 5) — load when France ends | 2.5% France acceptance — diagnose alias vs. geo vs. sequence before next JD sales campaign |
+| JD | France EU Act (~Jun 16) | TBD — diagnose 2.5% France acceptance before next JD campaign | France acceptance rate low — determine if alias, geo, or sequence issue before loading next campaign |
 | Lilly | — | Retired | Dubai $2.13/warm reply — resolve access issue before Q3 Dubai push |
 
 ---
@@ -116,7 +117,8 @@ Test 9 sequence is live in Dripify. What's needed to run it: **a UK Business Aff
 | 2026-06-10 | Launched Who's Asking v1B (NY law hook, 75 leads, Ivy, UK/London) | A/B split against v1A (ASA hook, ~73 leads); 148-lead London legal pool now fully deployed across both variants; NY Synthetic Performer Law hook most current UK angle |
 | 2026-06-10 | Added Track B — Business Affairs / Clearance-Pro as second sales track | Daniele Zennaro (B145) Jun 10 reply identified BA/Broadcast Producer as the operational buyer in the B2B2B chain; CDs are responders, not buyers; Test 9 loaded; list build is the blocking action |
 | 2026-06-10 | Track C (Legal Teams) is discovery, not sales — measure on reply quality not warm rate | Legal team acceptance rate 4% vs 22-29% in sales tracks; wrong to compare on same metrics; value is B2B2B validation and Test 8 upside |
-| 2026-06-10 | Campaign 5 (NY) is highest priority Track C load | NY Synthetic Performer Law eff. Jun 9 — hook is at peak relevance; unique US discovery data point |
+| 2026-06-11 | Campaign 5 (NY) launched — Vanessa alias, 201 leads, SI8_NY 1st Law (4 Msg) | NY Synthetic Performer Law eff. Jun 9; Brand keyword filter; cross-market researcher framing in msg 2 ("NY and London") |
+| 2026-06-10 | Campaign 5 (NY) is highest priority Track C load — Vanessa alias, 201 leads | NY Synthetic Performer Law eff. Jun 9 — hook at peak relevance; Vanessa chosen over JD (cross-market researcher framing works with "NY and London" msg 2 copy); 201-lead list filtered by Brand keyword (IP/Legal Affairs titles) — cleaner than unfiltered 573-contact LA/BA list |
 | 2026-06-10 | EU Act hook continues through Aug 2, then reassess | Hook remains accurate as urgency catalyst (client demand driven by regulatory awareness) even if Art. 50 isn't direct obligation for agencies; plan hook refresh for September |
 | 2026-06-10 | Do NOT use EU Act framing in Track B (Clearance-Pro) | BA/EP/LP audience is operational, not regulatory; peer-to-peer clearance framing ("are clients adding AI documentation to clearance sign-off?") is more credible and natural |
 | 2026-06-06 | EU Act as primary sequence for all new Track A batches | August 2 enforcement creating live client urgency; EU Act sequence outperforming Legal Friction on quality of warm signals in UK |
