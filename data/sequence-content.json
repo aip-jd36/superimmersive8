@@ -55,6 +55,27 @@
     "msg3": "The thing I'm trying to understand: when you ask an agency for documentation — which AI tools were used, training data sources, any likeness elements — is what they come back with good enough to satisfy your review? Or is there a consistent gap?\n\nThat gap is what I'm designing around. Worth a quick exchange if you have a few minutes.\n\nIvy\nwww.superimmersive8.com",
     "msg4": "Hi %%first_name%%— last note from me.\n\nIf AI video documentation isn't something your team is dealing with yet, completely understood.\n\nIf it is — I'd be glad to share what I've been hearing from other brand legal teams about what they're requiring, and show you the format I've built. Even if it doesn't fit, the feedback would be useful.\n\nThanks for connecting."
   },
+  "Who's Asking (NY Law)": {
+    "dripify_name": "SI8_Who's Asking_NY Law (4 Msg)",
+    "msg1": "Hi %%first_name%%,\n\nI'm building a documentation standard for AI video and want to understand what brand legal teams are requiring before campaign sign-off. NY just passed the first US law creating direct advertiser liability for AI synthetic performers. Is this something your team is tracking?",
+    "msg2": "Hi %%first_name%%, thanks for connecting!\n\nThe specific question I'm trying to answer: when an agency submits an AI video campaign for your approval, what information are you asking them to produce? And when they can't produce it, what happens to the campaign?\n\nEven a brief exchange about how your team currently handles this would be genuinely useful. Happy to share what I'm hearing from others in return.\n\nIvy\nwww.superimmersive8.com",
+    "msg3": "The thing I'm trying to understand: when you ask an agency for documentation — which AI tools were used, training data sources, any likeness elements — is what they come back with good enough to satisfy your review? Or is there a consistent gap?\n\nThat gap is what I'm designing around. Worth a quick exchange if you have a few minutes.\n\nIvy\nwww.superimmersive8.com",
+    "msg4": "Hi %%first_name%%— last note from me.\n\nIf AI video documentation isn't something your team is dealing with yet, completely understood.\n\nIf it is — I'd be glad to share what I've been hearing from other brand legal teams about what they're requiring, and show you the format I've built. Even if it doesn't fit, the feedback would be useful.\n\nThanks for connecting."
+  },
+  "Clearance-Pro-v1": {
+    "dripify_name": "SI8_Clearance-Pro-v1 (3 Msg)",
+    "msg1": "Hi %%first_name%%,\n\nAs AI video becomes more common in commercial production, are you seeing brand clients start adding documentation requirements to clearance sign-off — alongside music and talent? Curious what you're running into on your end.\n\nWould love to connect!",
+    "msg2": "Hi %%first_name%%, thanks for connecting!\n\nFollowing up — EU AI Act enforcement starts August 2, and brand legal teams are starting to formalise the AI documentation requirement ahead of that deadline.\n\nWe produce Chain of Title documentation for AI-generated commercial content — same concept as a music clearance report, but covering the AI layer: tools used, training data, IP ownership, usage rights.\n\nHappy to send a sample if useful.\n\nIvy\nwww.superimmersive8.com",
+    "msg3": "Dropping the sample directly — this is what a Chain of Title for an AI video commercial looks like:\nhttp://www.superimmersive8.com/sample\n\n$499 per video, 90-minute human review, delivered as a PDF you can pass to the client or attach to the deliverable package.\n\nIf this is coming up in your clearance workflow, happy to talk.\n\nIvy\nwww.superimmersive8.com",
+    "msg4": null
+  },
+  "NY 1st Law": {
+    "dripify_name": "SI8_NY 1st Law (4 Msg)",
+    "msg1": "Hi %%first_name%%,\n\nNew York just passed the first US law creating direct advertiser liability for AI-generated voices and likenesses. Is this something your team is tracking?\n\nLet's connect!",
+    "msg2": "Hi %%first_name%%, thanks for connecting!\n\nThe specific question I'm trying to answer: when an agency submits an AI video campaign for your approval, what documentation are you currently asking for — which AI tools were used, whether any real likenesses appear, how the commercial license is structured? Or is that still on the agency to manage independently?\n\nI'm speaking with brand legal teams in New York and London to map how approaches differ. Happy to share what I'm hearing in return.\n\nVanessa\nwww.superimmersive8.com",
+    "msg3": "Under the NY Synthetic Performer Law, liability attaches to advertisers and agencies who use AI-generated likenesses or voices without proper documentation — not just the AI tool providers. The law doesn't prescribe what documentation looks like. Which means brand legal teams are defining that standard themselves right now.\n\nIs that a conversation happening at your end?\n\nVanessa\nhttp://www.superimmersive8.com",
+    "msg4": "Hi %%first_name%%— last note from me.\n\nIf AI video documentation isn't on your team's radar yet, completely understood. If it comes up — especially with clients asking what documentation covers AI-generated talent or voice under the new law — I'd be glad to share what I'm learning and show you the format I've built.\n\nThanks for connecting.\n\nVanessa\nwww.superimmersive8.com"
+  },
   "EU AI Act": {
     "dripify_name": "SI8_EU AI (4 Msg)",
     "msg1": "Hi %%first_name%%,\n\nEU AI Act enforcement starts August 2 — are your clients starting to ask for documentation around AI-generated content?",

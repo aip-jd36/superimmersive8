@@ -27,12 +27,15 @@ A lead can appear in BOTH this pipeline and `03_Sales/CRM.md` if they are also a
 
 <!-- discovery-pipeline:start -->
 
-## Signal (229)
+## Signal (232)
 
 *Leads flagged from discovery report, pending outreach decision.*
 
 | Lead | Title | Company | Geo | Sales Class | Campaign | Key insight excerpt | Added |
 |------|-------|---------|-----|-------------|----------|---------------------|-------|
+| Katherine Kerridge | Creative Director | Adsocial Media | London/UK | [WARM] | — | "we're in the process of finalising our own systems." — Trigger 3: building their own compliance solution | 2026-06-11 |
+| Alba Ruiz | Founder & Creative Director | closet albita | London/UK | [WARM] | EU AI Act | "Not yet, it's food content using our original content" — minimal signal, food content ICP | 2026-06-11 |
+| Christos Savvides | Creative Director | Pablo London | London/UK | [MINIMAL] | — | "I'm leaving my current contract in a few days" — NAF for now, re-engage when settled | 2026-06-11 |
 | Mike Harris | Product Manager | Seenit | London/UK | [WARM] | — | "Yes I will be open to finding out more and a short call." — explicit call request | 2026-05-26 |
 | Gabriel Preston | Head of Engagement & Directors Rep | Imagine This Creative Studio | London/UK | [MINIMAL] | — | "Client has approved platform list for indemnity… we share prompt sheets and workflow docs… increased focus on talent usage and likeness rights" | 2026-05-26 |
 | Ankita Biswas | Art Director | HTCreaTec | UAE/Dubai | [WARM] | — | "Yess! They do at times!… I'd love to know more about it and also talk about it over a chat! Ping me when you're available to discuss!" | 2026-05-26 |
@@ -45,7 +48,7 @@ A lead can appear in BOTH this pipeline and `03_Sales/CRM.md` if they are also a
 | Theodora S | Creative Technologist & Digital Director (Freelancer) | null | London/UK | [WARM] | — | Tue May 05 2026 Hi Ivy, Tell me more about what you're looking for!07:35 pm | 2026-05-23 |
 | Ibrahim Badi | Managing Director | IKM Marketing | London/UK | [WARM] | — | Hi Ivy, Appreciate the connection. Yes especially in regulated sectors. I docume… | 2026-05-23 |
 | Ziyan Zhao | Creative Technologist | WPP | London/UK | [WARM] | — | Hi Ivy，not that I'm aware of. The LLMs we used will green lit by our legal team … | 2026-05-23 |
-| Ivan Petruzzelli | Design Executive & AI Strategist | VP at State Street | 3 Decades Exp | $2.5M+ | State Street Investment Management | London/UK | [WARM] | — | Hi, Ivy03:55 pm Yes you need to tell you legal team that the video has been gene… | 2026-05-23 |
+| Ivan Petruzzelli | Design Executive & AI Strategist | VP at State Street | 3 Decades Exp | $2.5M+ | State Street Investment Management | London/UK | [WARM] | — | **LIVE 2026-06-11** "Yes we are [moving toward structured documentation]" — Ivy asked "Are you building internally or looking at what's out there?" → Call Requested | 2026-05-23 |
 | Louisa Osei | Creative Director | VERVE | London/UK | [WARM] | — | Mon May 11 2026 Hi Ivy, Great question. No legal teams involved the teams I work… | 2026-05-23 |
 | Kelvin Obimba | UX Designer | Betterworks | London/UK | [WARM] | — | Hi Ivy 👋 I don’t create fully AI-generated videos for campaigns. I mainly integr… | 2026-05-23 |
 | Bo-Re Zhang | AI Designer | Prime Intelligence Production | London/UK | [WARM] | — | Hi Ivy, Thanks for reaching out! I actually haven't encountered this yet. Someti… | 2026-05-23 |
@@ -168,7 +171,7 @@ A lead can appear in BOTH this pipeline and `03_Sales/CRM.md` if they are also a
 | Iona Milne | Partnerships Manager | Reg&Partners | London/UK | [MINIMAL] | — | "This isn't relevant for me, but thank you" | 2026-05-29 |
 | David Aston | Social Media Coordinator | CLUBWORLD TRAVEL | London/UK | [MINIMAL] | — | "We don't creat AI videos for clients, we use AR development software" | 2026-05-29 |
 | Fahad A | Fractional Sales Director | Be Guided Agency | London/UK | [MINIMAL] | — | "It's something I'll certainly keep in mind, esp when we expand out offering." | 2026-05-29 |
-| James Byrne | Sustainability reports, comms and PR expert | BeyondWords | London/UK | [WARM] | — | "Yes that would be great thanks" — accepted connection after Lilly's outreach; new to AI video space | 2026-05-29 |
+| James Byrne | Sustainability reports, comms and PR expert | BeyondWords | London/UK | [WARM] | — | **ACTION 2026-06-11** "Yes that would be great thanks" — JD connection request pending (Lilly confirmed); new to AI video space | 2026-05-29 |
 | Lindsay Fenn | Fractional Growth & Retention Partner | Roots Marketing Co UK | London/UK | [NAF] | — | "I'm not currently creating any AI content for my clients. It may be something I do in the future" | 2026-05-29 |
 | Emmanuel Stralka | Co-Founder — International Growth & Market Expansion Platform | Think Global Solutions | London/UK | [MINIMAL] | — | "We will keep you in mind when it comes to video-based assets as your ai prolly provide speed to market advantages." | 2026-05-29 |
 | Jp Sing | Head of Demand Marketing | Universal Music Group | London/UK | [MINIMAL] | — | "we have an in-house team who are responsible for this… I will have to regretfully decline for further conversations." | 2026-05-29 |

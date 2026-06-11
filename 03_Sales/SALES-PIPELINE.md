@@ -6,7 +6,7 @@
 
 **Lead reference:** Every row maps to a B-ID or C-ID in `03_Sales/CRM.md`. Nurture/MONITOR leads are excluded — they are not in the active funnel.
 
-**Last updated:** 2026-06-09 (Test 6 sent; B143 Simon Helm → Call Requested; B124 Sven → Lost; 7 Lilly-void leads removed; B144-B147 added; B144 Laurence Quinn → Nurture soft close)
+**Last updated:** 2026-06-11 (B130 Ivan Petruzzelli → Call Requested; 3 new discovery signals added to DISCOVERY-PIPELINE.md)
 
 ---
 
@@ -29,7 +29,7 @@
 
 <!-- sales-pipeline:start -->
 
-## 1. Lead Replied (64)
+## 1. Lead Replied (63)
 
 *Substantive reply received. Assessing fit and next move.*
 
@@ -83,7 +83,6 @@
 | B114 | Debjani Mukherjee | GEMS World Academy | Dubai/UAE | "Increasingly so… what are you seeing?" | Await reply — research signal | — |
 | B115 | Anuj Gunasena | Al Tayer / Bloomingdale's | Dubai/UAE | "What are you seeing?" | Await reply — research signal | — |
 | B123 | Gulzar Junaid | Kling AI | Germany | "Usually driven by legal or brand safety, not technical curiosity" — pre-validated B2B2B before probe sent | Test 6 v6-A probe sent Jun 9; await reply | — |
-| B130 | Ivan Petruzzelli | State Street Investment Mgmt | London/UK | "Yes we are" — moving toward structured documentation (Test 2 v2-B) | Await reply to EU Act client-pull message | — |
 | B146 | Alex Jenkins | Nexus Studios | England | "One client wants us to document AI usage. May I ask why?" | Test 6 v6-A probe sent Jun 9: explained SI8 + legal/creative source probe | — |
 | B147 | Cris Cerqueira | Cris Cerqueira Studio | England | Packaging/branding; keeps records; future-aware ("legal teams will ask") | Test 6 v6-B pitch sent Jun 9: showed formalised sample | — |
 | B131 | Natalia Zablotska | Agro-Bondarivka | London/UK | "Seeing more of this lately" | Reply + send sample | — |
@@ -139,12 +138,13 @@
 
 ---
 
-## 3. Call Requested (6)
+## 3. Call Requested (7)
 
 *The lead has expressed interest in a call, or confirmed a booking that didn't happen.*
 
 | B-ID | Lead | Company | Geo | How They Requested | Last Action | Follow Up By |
 |------|------|---------|-----|--------------------|-------------|--------------|
+| B130 | Ivan Petruzzelli | State Street Investment Mgmt | London/UK | "Yes we are [moving toward structured documentation]" — Ivy asked "Are you building internally or looking at what's out there?" | Send SI8 pitch + sample + offer JD call | — |
 | B143 | Simon Helm | — | England | "Feels very relevant, advising clients already. Can we chat?" | Ivy asked for Tue/Wed/Thu 9:30–10am UK slot Jun 8; await slot reply | 2026-06-12 |
 | B011 | Hugo Barbera | HumAIn | — | Expressed interest — 2nd nudge sent | Sample or call offered | — |
 | B043 | Luke Brady | Sublime Animations Ltd | London/UK | Confirmed calls 4x — all missed | 4th reschedule attempt sent Jun 8; move to Nurture if no reply by Jun 13 | 2026-06-13 |
