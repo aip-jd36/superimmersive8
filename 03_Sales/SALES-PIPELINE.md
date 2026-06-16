@@ -137,14 +137,13 @@
 
 ---
 
-## 3. Call Requested (7)
+## 3. Call Requested (6)
 
 *The lead has expressed interest in a call, or confirmed a booking that didn't happen.*
 
 | B-ID | Lead | Company | Geo | How They Requested | Last Action | Follow Up By |
 |------|------|---------|-----|--------------------|-------------|--------------|
 | B130 | Ivan Petruzzelli | State Street Investment Mgmt | London/UK | "Yes we are [moving toward structured documentation]" — Ivy asked "Are you building internally or looking at what's out there?" | Send SI8 pitch + sample + offer JD call | — |
-| B027 | Marc De Guzman | UnaFinancial | Manila | "Few clients asked for: source asset docs, workflow/gen logs, human review records, rights representations from vendors — no standardized format yet." Replied same day to gate Q. JD asked for call. | Await slot confirmation | 2026-06-19 |
 | B143 | Simon Helm | — | England | "Feels very relevant, advising clients already. Can we chat?" | Ivy asked for Tue/Wed/Thu 9:30–10am UK slot Jun 8; await slot reply | 2026-06-12 |
 | B011 | Hugo Barbera | HumAIn | — | Expressed interest — 2nd nudge sent | Sample or call offered | — |
 | B043 | Luke Brady | Sublime Animations Ltd | London/UK | Confirmed calls 4x — all missed | 4th reschedule attempt sent Jun 8; move to Nurture if no reply by Jun 13 | 2026-06-13 |
@@ -153,13 +152,14 @@
 
 ---
 
-## 4. Call Scheduled (1)
+## 4. Call Scheduled (2)
 
 *Call confirmed on calendar.*
 
 | B-ID | Lead | Company | Geo | Call Date | Format | Prep Notes |
 |------|------|---------|-----|-----------|--------|------------|
-| B100 | Ramez Tabshi | — | Dubai/UAE | Mon Jun 22, 1pm UAE / 5pm TPE | Zoom (JD leads) | "IP provenance and training data transparency is absolutely escalating with clients" — unprompted T1 validation. Prep: discovery questions on which clients are asking, what he's currently sending them, whether it's satisfying their legal team. No product pitch until gap is confirmed. |
+| B027 | Marc De Guzman | UnaFinancial | Manila | Wed Jun 17, 9:30am TPE/Manila | Zoom (JD leads) | "Few clients asked for source asset docs, workflow/gen logs, human review records, rights representations — no standardized format yet." Open with: "did what you sent satisfy those clients or did they come back with more questions?" Confirm which clients, what UnaFinancial's compliance environment looks like. No pitch until gap confirmed. |
+| B100 | Ramez Tabshi | — | Dubai/UAE | Mon Jun 22, 1pm UAE / 5pm TPE | Zoom (JD leads) | "IP provenance and training data transparency is absolutely escalating with clients" — unprompted T1 validation. Prep: which clients are asking, what he's currently sending them, whether it's satisfying their legal team. No product pitch until gap is confirmed. |
 
 ---
 
