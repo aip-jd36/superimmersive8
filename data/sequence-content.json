@@ -62,13 +62,6 @@
     "msg3": "The thing I'm trying to understand: when you ask an agency for documentation — which AI tools were used, training data sources, any likeness elements — is what they come back with good enough to satisfy your review? Or is there a consistent gap?\n\nThat gap is what I'm designing around. Worth a quick exchange if you have a few minutes.\n\nIvy\nwww.superimmersive8.com",
     "msg4": "Hi %%first_name%%— last note from me.\n\nIf AI video documentation isn't something your team is dealing with yet, completely understood.\n\nIf it is — I'd be glad to share what I've been hearing from other brand legal teams about what they're requiring, and show you the format I've built. Even if it doesn't fit, the feedback would be useful.\n\nThanks for connecting."
   },
-  "Clearance-Pro-v1": {
-    "dripify_name": "SI8_Clearance-Pro-v1 (3 Msg)",
-    "msg1": "Hi %%first_name%%,\n\nAs AI video becomes more common in commercial production, are you seeing brand clients start adding documentation requirements to clearance sign-off — alongside music and talent? Curious what you're running into on your end.\n\nWould love to connect!",
-    "msg2": "Hi %%first_name%%, thanks for connecting!\n\nFollowing up — EU AI Act enforcement starts August 2, and brand legal teams are starting to formalise the AI documentation requirement ahead of that deadline.\n\nWe produce Chain of Title documentation for AI-generated commercial content — same concept as a music clearance report, but covering the AI layer: tools used, training data, IP ownership, usage rights.\n\nHappy to send a sample if useful.\n\nIvy\nwww.superimmersive8.com",
-    "msg3": "Dropping the sample directly — this is what a Chain of Title for an AI video commercial looks like:\nhttp://www.superimmersive8.com/sample\n\n$499 per video, 90-minute human review, delivered as a PDF you can pass to the client or attach to the deliverable package.\n\nIf this is coming up in your clearance workflow, happy to talk.\n\nIvy\nwww.superimmersive8.com",
-    "msg4": null
-  },
   "NY 1st Law": {
     "dripify_name": "SI8_NY 1st Law (4 Msg)",
     "msg1": "Hi %%first_name%%,\n\nNew York just passed the first US law creating direct advertiser liability for AI-generated voices and likenesses. Is this something your team is tracking?\n\nLet's connect!",
@@ -79,8 +72,15 @@
   "EU AI Act": {
     "dripify_name": "SI8_EU AI (4 Msg)",
     "msg1": "Hi %%first_name%%,\n\nEU AI Act enforcement starts August 2 — are your clients starting to ask for documentation around AI-generated content?",
-    "msg2": "Hi %%first_name%%, thanks for connecting!\n\nAugust 2 is the enforcement date for the EU AI Act — and for AI video specifically, it's prompting brands and their legal teams to ask for Chain of Title documentation: which tools were used, who owns the outputs, and whether training data was properly licensed.\n\nIs this something your clients have started raising, or does it feel like it's still a few months away for you?\n\nJD\nwww.superimmersive8.com",
+    "msg2": "Thanks for connecting, %%first_name%%.\n\nAugust 2 is the enforcement date for the EU AI Act — and for AI video specifically, it's prompting brands and their legal teams to ask for Chain of Title documentation: which tools were used, who owns the outputs, and whether training data was properly licensed.\n\nIs this something your clients have started raising, or does it feel like it's still a few months away for you?\n\nJD\nwww.superimmersive8.com",
     "msg3": "Before August 2, it might be worth taking 5 minutes to map out where your current process stands. Here's what we're seeing legal teams ask for — does your workflow cover these?\n\n1. Which AI tools are you using? (Runway, Kling, Pika, other)\n2. Do you maintain any record of the prompts used?\n3. Are there any licensed assets, real faces, or voice in the content?\n4. Has your client specified which AI tools are or aren't approved?\n5. If a client asked for a documentation package tomorrow, what would you send them?\n\nNo need to answer formally — even knowing which of these have gaps is useful.\n\nJD\nwww.superimmersive8.com",
     "msg4": "If any of those questions surfaced gaps in your current process, we can help close them before August. We're offering a free Creator Record to a small group of production-side leads before the August 2 deadline — it's a self-attested Chain of Title document that maps your tools, workflow, and rights confirmations into a single PDF your clients can reference.\n\nWorth doing now while there's still time to sort it before enforcement kicks in. Want me to send you a code?\n\nHave a great day,\n\nJD\nwww.superimmersive8.com"
+  },
+  "Clearance Pro v1": {
+    "dripify_name": "SI8_Clearance-Pro-v1 (3 Msg)",
+    "msg1": "Hi %%first_name%%,\n\nAs AI video becomes more common in commercial production, are you seeing brand clients start adding documentation requirements to clearance sign-off — alongside music and talent? Curious what you're running into on your end.\n\nWould love to connect!",
+    "msg2": "Hi %%first_name%%, thanks for connecting!\n\nWe produce Chain of Title documentation for AI-generated commercial content — same concept as a music clearance report, but covering the AI layer: tools used, training data, IP ownership, usage rights.\n\nHappy to send a sample if useful.\n\nIvy\nwww.superimmersive8.com",
+    "msg3": "Dropping the sample directly — this is what a Chain of Title for an AI video commercial looks like:\nhttp://www.superimmersive8.com/sample\n\n$499 per video, 90-minute human review, delivered as a PDF you can pass to the client or attach to the deliverable package.\n\nIf this is coming up in your clearance workflow, happy to talk.\n\nIvy\nwww.superimmersive8.com",
+    "msg4": null
   }
 }

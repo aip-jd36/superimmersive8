@@ -7,7 +7,7 @@ is discovery calls to validate PMF, surface edge cases, and identify product gap
 **Source:** `03_Sales/DISCOVERY-PERFORMANCE-LOG.md` → Discovery Signal Checklist → manual review.
 A lead can appear in BOTH this pipeline and `03_Sales/CRM.md` if they are also a sales prospect.
 
-**Last updated:** 2026-06-05
+**Last updated:** 2026-06-16
 
 ---
 
@@ -27,7 +27,7 @@ A lead can appear in BOTH this pipeline and `03_Sales/CRM.md` if they are also a
 
 <!-- discovery-pipeline:start -->
 
-## Signal (232)
+## Signal (256)
 
 *Leads flagged from discovery report, pending outreach decision.*
 
@@ -265,6 +265,30 @@ A lead can appear in BOTH this pipeline and `03_Sales/CRM.md` if they are also a
 | David Pears | Co-Founder & CTO | NaviSavi Travel | Sweden/Stockholm | [MINIMAL] | — | "We don't deal with AI generated video." | 2026-05-29 |
 | Marthe Vangman | Founder | Cléon Entertainment | Sweden/Stockholm | [MINIMAL] | — | "I don't deliver any AI videos for campaigns, I work with company in-house AI creators who produces the content." | 2026-05-29 |
 | Giulio Musi | Managing Director of Chimney AI Studio | The Chimney Pot | Sweden/Stockholm | [MINIMAL] | — | "It totally depends on the client :) so we're very keen to discuss the legal frameworks before project go" | 2026-05-29 |
+| Jon Draper | Creative Director, Generative AI | Synima | London/UK | [WARM] | Legal Friction | **Trigger 3 — already building.** "been a big driver behind what we've been integrating behind the scenes at AIAnimation.com, adding AI production auditing processes, quick lineage export. Governance checks." | 2026-06-16 |
+| Christopher Neitzert | Founder, Developer, Managing Director | Creative Mayhem | Germany | [WARM] | Legal Friction | **Trigger 3 — competitor intel.** "Yeah I am, and I have a solution. Do you?" — building doomscroll.fm + rAIdio.bot | 2026-06-16 |
+| James T | Head of Legal Affairs | Connect Management | London/UK | [WARM] | Who's Asking | Legal insider: "certain AI tools are prohibited altogether... required to verify that the tools used do not train on, learn from, or retain creator or client content" | 2026-06-16 |
+| William Finkel | EVP Business and Legal Affairs | Hello Sunshine | USA | [WARM] | Who's Asking (NY Law) | B2B2B chain: "compliance requirement will be passed down the line to agency and then production" — Hello Sunshine = Reese Witherspoon's production co | 2026-06-16 |
+| Myron Stapleton | Founder & Managing Director | RileyAI | London/UK | [WARM] | Legal Friction | Also in CRM as B148. Warm reply after sequence completed. Familiar with AI documentation space. | 2026-06-16 |
+| Kay Ibrahim | Creative Director | Flabbergast | London/UK | [WARM] | Legal Friction | "Most clients are more interested in the final output and whether the rights/compliance side is covered than a detailed breakdown of the generation process" — useful ICP framing | 2026-06-16 |
+| Luke Randall | Digital Operations | Law Friends Society | London/UK | [WARM] | Legal Friction | "If AI is being used it's explicitly defined in advance." — pre-production disclosure approach; law-adjacent company | 2026-06-16 |
+| Anna Sorokina | Graphic Designer/Brand Designer | Axfood | Sweden/Stockholm | [WARM] | Legal Friction | "legal teams will soon require a clear 'bill of materials' or an AI disclosure for transparency" — Axfood is major Nordic retailer | 2026-06-16 |
+| Dan Lazebnik | New Business Manager | malt.films | London/UK | [MINIMAL] | Legal Friction | Declined (no AI video), offered partnership help — malt.films is a freelancer marketplace; potential distribution partner | 2026-06-16 |
+| Bridge Fazio | Freelance Designer | Bridge Fazio Design | London/UK | [MINIMAL] | EU AI Act | "I already use tools for clearance." — competitor user; didn't specify which tool | 2026-06-16 |
+| Justin Hounkpatin | AI Creative Director | AiFicFac (AI Fiction Factory) | London/UK | [MINIMAL] | EU AI Act | "not something my clients have ever required or asked about" — clean pass | 2026-06-16 |
+| Keisha Keyz | Creative Director | otaku outfits uk | London/UK | [WARM] | EU AI Act | "No. Any AI generation I do is solely for my business." — not commercial; EU Act prompt | 2026-06-16 |
+| Matthieu Grambert | Greater Paris Metropolitan Region | AI art director | France/Paris | [WARM] | EU AI Act | "Not yet" — France, minimal signal | 2026-06-16 |
+| Sergey Likharyev | Co-Founder / Creative Director | CKRÉ | Other | [WARM] | EU AI Act | "Some clients ask about copyright, ownership, or which AI tools we use, but so far none have requested specific EU AI Act documentation" | 2026-06-16 |
+| Lou Le Chenadec | Co-founder / Film Director / AI Manager | TRÈS BIEN D'ACCORD | France/Paris | [WARM] | EU AI Act | **Trigger 3 — already built.** "We're already fully covered on that front. I have everything in place internally." | 2026-06-16 |
+| Aurelie Scour | Créative IA & VFX | IMAGO | Other | [WARM] | EU AI Act | "Not yet" — minimal signal | 2026-06-16 |
+| MD Chhafrul Alam Khan | Owner | Md Chhafrul Alam Khan | Germany | [WARM] | Legal Friction | Thoughtful response about documentation importance; also plugged own mobile game — low conversion potential | 2026-06-16 |
+| Azize Touma GRCP | Legal Affairs Manager | Brightline Trains | USA | [PASS] | Who's Asking (NY Law) | "not interested at this time" — legal professional, clean pass | 2026-06-16 |
+| Kimberly Bohle | Senior Talent Executive Advisory | Perlentaucher | Germany | [PASS] | Legal Friction | Talent executive, pass — no meaningful signal in reply | 2026-06-16 |
+| Darren Tieste | Creative Director -Gen Ai | New Ground | London/UK | [MINIMAL] | Legal Friction | "I can create my own videos with AI, that's what I do for brands." — NAF | 2026-06-16 |
+| Jenny Wong | Senior Creative Designer (AI Video focused) | KittyKat | Singapore | [MINIMAL] | Legal Friction | No visible reply — minimal signal | 2026-06-16 |
+| Michele Hill | Commercial Line Producer | Freelance Video Professional | USA | [MINIMAL] | Clearance Pro v1 | "I'm in Los Angeles, and production has slowed down immensely." — LA line producer, off-market currently | 2026-06-16 |
+| Silica Graphics | AI Creative Specialist | SILICAVISION | Other | [WARM] | EU AI Act | "not yet!" — minimal signal | 2026-06-16 |
+| Julia Roga | AR Developer | null | Other | [MINIMAL] | — | AR developer, off-target segment | 2026-06-16 |
 
 ---
 

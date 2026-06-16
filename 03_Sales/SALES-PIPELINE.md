@@ -6,7 +6,7 @@
 
 **Lead reference:** Every row maps to a B-ID or C-ID in `03_Sales/CRM.md`. Nurture/MONITOR leads are excluded — they are not in the active funnel.
 
-**Last updated:** 2026-06-11 (B130 Ivan Petruzzelli → Call Requested; 3 new discovery signals added to DISCOVERY-PIPELINE.md)
+**Last updated:** 2026-06-16 (Jun 16 Dripify report; no stage changes; discovery pipeline updated to 256 signals)
 
 ---
 
