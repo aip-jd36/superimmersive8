@@ -127,7 +127,7 @@
 | B139 | James Hilditch | BearJam | London/UK | "Yes, sometimes. Important part of the process." | No | Reply + send sample | — |
 | C002 | @syntaxdiffusion | — | — | Interested — v4 reply sent | No | Send v4 follow-up | — |
 | B009 | Syed Tabish Hasan | Zedtronix | — | Previously showed interest; Calendly nudge sent — gone cold | Send follow-up | — |
-| B027 | Marc Danielle De Guzman | UnaFinancial | — | Sample sent + invited for 15-20 min product feedback call | Await reply — book JD call | — |
+| B027 | Marc Danielle De Guzman | UnaFinancial | Manila | Connection accepted Jun 16; JD sent gate question — "has a compliance team asked for more than which tools you used? did that satisfy them?" | Await reply — gap story = move to call | 2026-06-19 |
 | B057 | Rheea Aranha | Vincent Studios | London/UK | Asked for sample by email — we asked for her email address | Await email address | — |
 | B087 | Ibrahim Badi | IKM Marketing | London/UK | "Yes especially in regulated sectors" — answered 9 intake Qs inline; Creator Record makes sense as next step | COMP-B2 code sent Jun 8; await reply or form fill | — |
 | B088 | Matthew Sergison-Main | OLIVER / Brandtech | London/UK | "Yes I am being asked this 100%" — strongest pain signal; works at OLIVER (Brandtech holdco) | B2B2B probe sent Jun 8: is requirement from brand legal or creative? If legal confirmed → Test 8 | — |
