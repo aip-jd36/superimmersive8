@@ -1,6 +1,12 @@
 Run the SI8 monthly Dripify LinkedIn campaign performance report wizard.
 
-Walk the user through all 7 steps below using your tools. Use AskUserQuestion for structured choices. For numeric inputs, ask in plain text and process the reply.
+Walk the user through all steps below using your tools. Use AskUserQuestion for structured choices. For numeric inputs, ask in plain text and process the reply.
+
+**Report purpose (v2):** Two goals in priority order:
+1. **Find the beachhead** — the tightest ICP cluster with the highest conversion signal and enough addressable market to build on
+2. **Find the GTM move** — which segment to concentrate on next cycle, what to say, and which regulatory/research trigger to lead with
+
+Cost efficiency ($/call) is still tracked but is now one input to the beachhead analysis, not the headline output.
 
 ---
 
@@ -67,6 +73,7 @@ Show from `03_Sales/CAMPAIGN-PERFORMANCE-LOG.md`:
 Show from `03_Sales/DISCOVERY-PERFORMANCE-LOG.md`:
 1. Grand Total table (total signals, class breakdown)
 2. By Geo table
+3. By Sequence table — note which sequences are producing the highest warm % and which are producing primarily passes or minimal replies
 
 ---
 
@@ -91,16 +98,35 @@ Show the final Cost Efficiency table with the $/call column filled in.
 
 ---
 
-## Step 6: Discovery Signal Review
+## Step 6: Discovery Signal Review + Trigger Classification
 
 Read `03_Sales/DISCOVERY-PERFORMANCE-LOG.md`. Parse the `## Discovery Signal Checklist` section.
 
-Display each lead as a numbered entry:
+Also read `03_Sales/outreach/SPLIT-TEST-LOG.md` — you'll need the active test hypotheses and B-ID assignments for flagging.
+
+Display each lead as a numbered entry with a pre-classification:
+
 ```
 [N] [CLASS]  Name · Title · Company
       Geo: GeoName
+      Trigger: [T1 — Already Being Asked / T2 — Product Curiosity / T3 — Already Building / ?]
+      Split test: [confirms Test X / disconfirms Test X / no active test match]
       "excerpt from reply..."
 ```
+
+**Trigger classification rules (pre-label before JD confirms):**
+- **T1** — reply contains: explicit "yes, clients/legal are asking", "required to", "demanding", "becoming standard", "they want documentation", "blocked", "held up", regulated-sector mention + documentation language
+- **T2** — reply contains: "how does it work", "what does it cover", "can I see an example", "what do you look for", "how much", curiosity without urgency
+- **T3** — reply contains: "I already have", "we built", "I'm working on something", "I have a solution", "we track this internally", competitor-building language
+- **?** — unclear; flag for JD to classify
+
+**Split test cross-reference rules:**
+- T1 reply from a lead with **regulated-sector client exposure** (finance, pharma, legal, insurance context) → "confirms Test A (regulated-sector hypothesis)"
+- Reply from a Business Affairs / Broadcast Affairs / Line Producer / EP title → "confirms Test B / Test 9 (BA-ops ICP)"
+- Reply that mentions documentation blocking a campaign or approval → "confirms Test C (blocker hypothesis)"
+- Reply that describes an informal/workaround process → "confirms Test E (current-solution probe)"
+- Reply citing EU Act in a way that suggests labeling/disclosure expectation (not Chain of Title) → "⚠️ EU Act framing mismatch — see Test 5 watch"
+- Reply mentioning NY Law, ASA, or brand legal requirement → flag for regulatory signal tracker (Step 7)
 
 Ask the user: "Add to Discovery Pipeline (e.g. 1,3,5  /  all  /  none)"
 
@@ -108,11 +134,91 @@ For each selected lead, append a row to the Signal table in `03_Sales/DISCOVERY-
 - Columns: Lead | Title | Company | Geo | Sales Class | Campaign | Key insight excerpt | Added
 - Update the `## Signal (N)` count
 
+After adding, show a brief summary:
+- How many T1 / T2 / T3 signals were added this cycle
+- Which split tests received confirming/disconfirming data points
+
 Remind the user: full conversations are in `03_Sales/DISCOVERY-PERFORMANCE-LOG.md`.
 
 ---
 
-## Step 7: Sales Pipeline Sync
+## Step 7: Split Test + Research Synthesis
+
+This step integrates the split test log with regulatory research to answer: **"What have we learned this cycle, and does it match what the research predicts?"**
+
+### 7A: Split Test Status Update
+
+Read `03_Sales/outreach/SPLIT-TEST-LOG.md`. For each **active test** (currently: A, B, C, D, E, 5, 7, 8, 9):
+
+1. List all B-IDs assigned to that test (from the test's lead tables)
+2. Check the Supabase CSV: has any assigned lead replied this cycle? (match by name or B-ID noted in CRM)
+3. Classify new replies by variant and trigger type
+
+Display a test status table:
+
+```
+| Test | Hypothesis | Leads assigned | Replies this cycle | Status | Verdict |
+|------|-----------|----------------|-------------------|--------|---------|
+| A    | Regulated-sector exposure = ICP discriminant | N | N | Active / Confirmed / Disconfirmed / Insufficient data | — |
+| B    | BA/ops titles feel this as operational today | N | N | ... | — |
+| C    | "Has it blocked you?" separates buyers from aware | N | N | ... | — |
+| D    | Pre vs. post production timing framing | N | N | ... | — |
+| E    | Current-solution probe converts faster than pitch | N | N | ... | — |
+| 5    | EU Act sequence (France + London/FinServ) | N | N | ... | — |
+| 7    | Who's Asking: research frame vs. validation frame | N | N | ... | — |
+| 8    | Pre-approval pitch framing | N | N | ... | — |
+| 9    | Clearance Pro: pure probe vs. probe + product hint | N | N | ... | — |
+```
+
+Status definitions:
+- **Confirmed** — 3+ replies consistently support the hypothesis
+- **Disconfirmed** — replies consistently contradict the hypothesis
+- **Insufficient data** — fewer than 3 replies in either variant
+- **Active** — running but no new data this cycle
+- **Retire** — hypothesis answered or invalidated; recommend closing
+
+For any test with **Confirmed** status, note the specific data points (lead name, quote, B-ID) that confirmed it.
+For any test with **Disconfirmed** status, note what the data actually showed and propose a revised hypothesis.
+
+Ask: "Any test status changes to make manually? (e.g. a reply you received outside the Supabase export)" — update SPLIT-TEST-LOG.md Cumulative Learnings section if yes.
+
+### 7B: Research-Reality Gap Check
+
+Read the following three research files:
+- `01_Business/research/ASA-IAB-2026-AI-CONTENT-RESEARCH.md`
+- `01_Business/research/NY-SYNTHETIC-PERFORMER-LAW-2026.md`
+- `01_Business/research/BUYER-ANALYSIS-2026-06.md`
+
+Cross-reference against reply language from the Supabase CSV this cycle. Specifically check:
+
+**EU Act accuracy check:**
+Scan reply text for "EU Act", "AI Act", "Article 50", "August 2", "August deadline". For any lead citing EU Act:
+- Did they describe a Chain of Title / IP documentation need? (correct fit for SI8)
+- Did they describe a labeling/disclosure need? (Article 50 mismatch — SI8 does not solve this)
+- Flag mismatches: these are leads attracted by wrong framing who will churn or ghost after the sample
+
+**NY Law signal check:**
+Scan for "NY", "New York", "synthetic performer", "S.8420". Did any US leads cite this law? If yes: confirm they are production-side (agencies, studios) not entertainment-side (talent agencies, unions — wrong ICP).
+
+**Regulated-sector confirmation:**
+Scan for "finance", "pharma", "insurance", "healthcare", "legal", "bank", "regulated". Count mentions per geo. Cross-reference against Test A hypothesis (regulated-sector client exposure = ICP discriminant).
+
+**Buyer Analysis alignment:**
+From `BUYER-ANALYSIS-2026-06.md`, check: which of the 5 market drivers are showing up in reply language this cycle? (Client pressure / regulatory requirement / brand liability / competitive differentiation / internal policy). Note which driver is most cited — this should inform the primary message hook for next cycle.
+
+Output a 5-bullet synthesis:
+```
+Research-Reality Synthesis:
+• EU Act framing: [X leads cited Act correctly / Y leads cited labeling mismatch / hook accuracy: N%]
+• Regulated-sector signal: [top sectors mentioned, top geos]
+• Dominant buyer driver: [which of the 5 drivers appears most in reply language]
+• NY Law: [any US signal? production-side or entertainment-side?]
+• Research gap: [anything the research predicts that is NOT showing up in reply language yet]
+```
+
+---
+
+## Step 8: Sales Pipeline Sync
 
 Ask the user: "Any sales pipeline stage updates? Enter B-ID:Stage pairs (e.g. B050:Call Scheduled, B042:Evaluating) or press Enter to skip."
 
@@ -150,57 +256,169 @@ If no transcript: note "No transcript — verbal notes only" in the pipeline car
 
 ---
 
-## Step 8: Pipeline ICP Analysis
+## Step 9: Beachhead + GTM Analysis
 
-Read `03_Sales/SALES-PIPELINE.md`. Pull every lead from the **Warm Lead** and **Call Requested** sections only (these are the leads who have shown real signal — not Lead Replied, not Lost).
+This is the primary strategic output of the report. It synthesizes everything from Steps 4–7 into a single answer: **who is the beachhead, how big is that market, and what is the GTM move for next cycle?**
 
-Run the following analysis framework across those leads. Cross-reference `03_Sales/CRM.md` for title and company details if not visible in the pipeline file.
+Read:
+- `03_Sales/SALES-PIPELINE.md` (Warm Lead + Call Requested sections — these are the conversion signals)
+- `03_Sales/CRM.md` (title and company detail)
+- The split test status from Step 7
+- The research synthesis from Step 7
+- The previous ICP analysis in `03_Sales/pipeline-analysis/` (most recent file)
 
 ### Analysis Framework
 
-**A. Geo Breakdown**
-Count leads per geo. Note which geos are punching above weight (high warm rate relative to outreach volume in `CAMPAIGN-PERFORMANCE-LOG.md`).
+**Section 1: Signal Quality Map**
 
-**B. Company Type**
-Group into: boutique/indie studio · AI-native company · holdco arm · mid-size agency · brand-side · other.
-Note which type has the most leads AND the highest signal quality (not the same thing).
+For all leads in Warm Lead + Call Requested, build a cross-tab:
 
-**C. Title Clusters**
-Group titles into: Founder/MD/CEO · Creative Director · Senior Production Specialist · Gen AI Specialist (inside large agency) · Art Director/Designer · Other.
-Flag the "Gen AI Specialist inside a holdco" profile specifically — it is a high-value sleeper ICP.
+| Geo | T1 (In pain) | T2 (Curious) | T3 (Building) | Total | T1% |
+|-----|-------------|-------------|--------------|-------|-----|
+| London/UK | N | N | N | N | N% |
+| Dubai/UAE | ... | ... | ... | ... | ... |
+| Germany | ... | ... | ... | ... | ... |
+| etc. | ... | ... | ... | ... | ... |
 
-**D. Signal Trigger Type**
-Classify each warm lead into one of three trigger types:
-- **Trigger 1 — Already Being Asked:** Lead's clients or legal teams are actively requesting documentation NOW. These are in pain today. (E.g. "Yes I am being asked this 100%")
-- **Trigger 2 — Product Curiosity:** Lead is evaluating — asked what SI8 does, requested a sample, or reacted positively to the pitch. Not in pain yet but assessing.
-- **Trigger 3 — Already Building Something:** Lead has independently built an informal solution (prompt logs, metadata docs, email trails). They've validated the problem themselves. These are the most strategically interesting leads — could be competitor, partner, or upgrade buyer.
+Then by title cluster:
 
-**E. ICP Thesis**
-From the patterns, write 2-3 sentences describing:
-- The primary ICP (title + company type + geo + trigger)
-- The secondary ICP (if a second distinct profile emerged)
-- The "sweet spot" profile — the single lead type most likely to convert fastest
+| Title cluster | T1 | T2 | T3 | Total | T1% |
+|--------------|----|----|-----|-------|-----|
+| Founder/MD/CEO (boutique) | ... | ... | ... | ... | ... |
+| Creative Director | ... | ... | ... | ... | ... |
+| Senior Production Specialist | ... | ... | ... | ... | ... |
+| Gen AI Specialist (holdco) | ... | ... | ... | ... | ... |
+| BA/Clearance/Ops title | ... | ... | ... | ... | ... |
+| Other | ... | ... | ... | ... | ... |
 
-**F. Targeting Implications**
-List 3-5 specific changes to make to campaign targeting, messaging, or geo prioritization based on what the warm leads are telling you.
+**The beachhead is the intersection of the highest T1% geo AND the highest T1% title cluster with at least 3 leads.** Name it explicitly.
 
-**G. What is NOT Working**
-Note title clusters, company types, or geos that appear in Lead Replied but rarely make it to Warm Lead. These are negative ICP signals — useful for tightening targeting.
+**Section 2: Message Effectiveness**
 
-**H. Compare to Previous Analysis**
-Read the most recent file in `03_Sales/pipeline-analysis/`. Note which trends from last time are holding, which have changed, and what's new. If no previous analysis exists, note this is the baseline.
+From the Supabase CSV and `DISCOVERY-PERFORMANCE-LOG.md`, identify which sequences and message numbers are generating T1 replies (not just any reply).
+
+- Which sequence has the highest T1 reply % (not just reply %)?
+- Which message number in the sequence generates the richest replies? (Msg 1 hook replies vs. Msg 2/3 follow-up replies often differ in quality)
+- Which opening hook produced the most explicit pain signals? (EU Act / NY Law / ASA / CarFax / client-pull — based on campaign + reply language correlation)
+
+Note: if the data doesn't support this breakdown yet, state what data is needed (e.g., need to tag reply quality by campaign in the CSV).
+
+**Section 3: Beachhead Cluster Definition + TAM**
+
+Based on Sections 1 and 2, write the tightest possible description of the beachhead ICP:
+
+```
+Beachhead ICP (as of YYYY-MM-DD):
+Title: [specific title or title cluster]
+Company type: [boutique AI studio / holdco arm / etc.]
+Geo: [specific city or country]
+Trigger: [what makes them T1 — what external force is making documentation mandatory for them]
+Decision: [who buys, does it require approval, what's the price point]
+Velocity: [how quickly do they move from warm reply to call request based on observed data]
+```
+
+Then estimate TAM for this cluster using the available data:
+
+**Bottom-up TAM estimate:**
+- From `data/dripify-campaigns.csv`: how many leads in campaigns targeting this ICP profile (title + geo + company type filter)?
+- Acceptance rate for those campaigns (from Dripify data)
+- Warm reply rate for those accepted leads
+- Extrapolate: if we ran at full Sales Navigator scale, how many warm leads per campaign cycle?
+- Revenue estimate: warm leads × historical conversion rate (warm → call → close) × $499
+
+State TAM clearly as a range with assumptions visible. Example:
+```
+TAM estimate (UK boutique AI studio founders, 1-20 people):
+- Estimated LinkedIn profiles matching: ~800-1,200 (Sales Navigator)
+- Acceptance rate at current volume: ~35%
+- Warm reply rate of accepted: ~15%
+- Estimated warm leads at full saturation: 40-60 per campaign cycle
+- At 10% warm→close conversion: 4-6 deals per cycle × $499 = $2,000-$3,000/cycle
+- At 20% warm→close: 8-12 deals = $4,000-$6,000/cycle
+- Beachhead TAM (addressable in Year 1 with current playbook): ~$30-50K
+```
+
+Note: cross-reference against `01_Business/research/BUYER-ANALYSIS-2026-06.md` for any broader TAM framing that should inform this estimate.
+
+**Section 4: Regulatory Signal Tracker**
+
+From the Step 7 research-reality check, display what regulation is showing up in reply language:
+
+| Regulatory trigger | Times cited in replies (this cycle) | Geo concentration | Fit with SI8 product? |
+|-------------------|-------------------------------------|-------------------|----------------------|
+| EU AI Act (general) | N | UK, Germany | ⚠️ Partial — Article 50 = labeling, not Chain of Title |
+| EU AI Act → client/brand legal pressure | N | UK | ✅ Correct fit |
+| ASA/CAP Code | N | UK | ✅ Correct fit |
+| NY Synthetic Performer Law | N | USA | ✅ Correct fit |
+| "Client legal team is asking" (no law cited) | N | All geos | ✅ Strongest signal |
+| "Regulated sector" (finance/pharma/legal) | N | UK, Dubai | ✅ Test A confirming |
+
+**Framing accuracy rate:** What % of EU Act mentions are correctly framed (client/brand legal pressure) vs. incorrectly framed (labeling/disclosure expectation)? If below 70%, recommend revising EU Act hook in active sequences.
+
+**Section 5: Split Test Integration**
+
+Pull the test status table from Step 7. Summarize:
+- Which tests are confirmed this cycle and what they mean for targeting
+- Which tests are disconfirmed and what that means for the approach
+- Which tests need more data (and what's blocking them — list build, alias issue, not enough replies)
+- Recommended test to retire and recommended new test to launch next cycle
+
+**Section 6: Competitive Signal**
+
+From T3 leads in the pipeline and discovery data, map the competitive landscape:
+
+| Lead | Company | What they're building / using | Implication |
+|------|---------|------------------------------|-------------|
+| [Name] | [Co] | [Description] | Competitor / Partner / Upgrade buyer |
+
+Cross-reference with `01_Business/research/COMPETITIVE-ANALYSIS-AI-VIDEO-MARKETPLACE-2026.md` and `01_Business/research/COMPETITIVE_ANALYSIS_CAAS_2026.md`. Note any new players mentioned in replies that don't appear in the research files.
+
+**Section 7: 30-Day GTM Recommendation**
+
+Based on Sections 1–6, produce a single concrete GTM move for the next cycle:
+
+```
+NEXT 30 DAYS — GTM RECOMMENDATION
+
+Concentrate on: [specific ICP cluster from Section 3]
+
+Why: [2-sentence reason — what the T1 data + regulatory clock says]
+
+Message hook: [which regulatory trigger or pain framing to lead with, based on Section 4]
+
+Campaign to launch: [geo, title filter, sequence, alias, target volume]
+
+Test to run: [the single most important open question to answer next cycle]
+
+Test to retire: [what to stop and why]
+
+Leads to prioritize this week (from current pipeline):
+1. [Lead name, B-ID] — [reason]
+2. [Lead name, B-ID] — [reason]
+3. [Lead name, B-ID] — [reason]
+```
+
+**Section 8: Compare to Previous Analysis**
+
+Read the most recent file in `03_Sales/pipeline-analysis/`. Note:
+- Which trends are holding (cite specific data from both cycles)
+- Which have changed or reversed
+- What's new this cycle that wasn't present before
+- Whether open questions from last cycle have been answered
+
+**Section 9: Open Questions for Next Analysis**
+
+Carry forward unanswered questions from the previous analysis. Add new questions surfaced this cycle. Format as checkboxes with a brief note on what data would answer each question.
 
 ### Output
 
 Save the full analysis as:
 `03_Sales/pipeline-analysis/PIPELINE-ICP-ANALYSIS-YYYY-MM-DD.md`
 
-Use this template structure (see `03_Sales/pipeline-analysis/PIPELINE-ICP-ANALYSIS-2026-05-24.md` as the reference example):
-- Header: date, analyst, source data, lead count, link to previous analysis
-- Sections 1–8 matching the framework above
-- Section 8: Open Questions for Next Analysis (carry forward unanswered questions + add new ones)
-
-Show the user a brief summary of the top 3 findings before saving.
+Before saving, show the user a 3-bullet executive summary:
+- Beachhead cluster (one sentence)
+- Top split test finding (one sentence)
+- GTM recommendation for next 30 days (one sentence)
 
 ---
 
@@ -210,7 +428,7 @@ Ask (AskUserQuestion):
 - "Commit this report?" → Yes / No
 
 If Yes:
-- `git add data/dripify-campaigns.csv data/geo-cost-inputs.csv data/sequence-content.json 03_Sales/CAMPAIGN-PERFORMANCE-LOG.md 03_Sales/DISCOVERY-PERFORMANCE-LOG.md 03_Sales/DISCOVERY-PIPELINE.md 03_Sales/SALES-PIPELINE.md 03_Sales/CRM.md 03_Sales/campaign-reports/CAMPAIGN-REPORT-YYYY-MM-DD.md 03_Sales/discovery-reports/DISCOVERY-REPORT-YYYY-MM-DD.md 03_Sales/pipeline-analysis/PIPELINE-ICP-ANALYSIS-YYYY-MM-DD.md`
+- `git add data/dripify-campaigns.csv data/geo-cost-inputs.csv data/sequence-content.json 03_Sales/CAMPAIGN-PERFORMANCE-LOG.md 03_Sales/DISCOVERY-PERFORMANCE-LOG.md 03_Sales/DISCOVERY-PIPELINE.md 03_Sales/SALES-PIPELINE.md 03_Sales/CRM.md 03_Sales/outreach/SPLIT-TEST-LOG.md 03_Sales/campaign-reports/CAMPAIGN-REPORT-YYYY-MM-DD.md 03_Sales/discovery-reports/DISCOVERY-REPORT-YYYY-MM-DD.md 03_Sales/pipeline-analysis/PIPELINE-ICP-ANALYSIS-YYYY-MM-DD.md`
 - Read the campaign count and total leads from the CSV for the commit message
 - Commit with message: "Sales: [Month Year] campaign report — [N] campaigns, [N,NNN] leads"
 
@@ -220,4 +438,6 @@ If Yes:
 
 Full methodology: `03_Sales/CAMPAIGN-REPORT-METHODOLOGY.md`
 Data architecture: Dripify UI → `data/dripify-campaigns.csv` + Supabase CSV → `report.py` + `discovery_report.py` → `CAMPAIGN-PERFORMANCE-LOG.md` + `DISCOVERY-PERFORMANCE-LOG.md`
-Pipeline ICP analysis: `03_Sales/pipeline-analysis/` — dated files, one per report cycle. Reference example: `PIPELINE-ICP-ANALYSIS-2026-05-24.md`
+Split test log: `03_Sales/outreach/SPLIT-TEST-LOG.md` — active tests: A, B, C, D, E, 5, 7, 8, 9
+Research files: `01_Business/research/` — ASA-IAB, NY Law, Buyer Analysis, Competitive Analysis
+Pipeline ICP analysis: `03_Sales/pipeline-analysis/` — dated files, one per report cycle

@@ -1,6 +1,6 @@
 # SI8 Split Test Log
 **Purpose:** Track active split tests — hypothesis, lead assignments, results, learnings
-**Updated:** 2026-06-11
+**Updated:** 2026-06-12
 **Framework shift:** Format tests (1, 2, 3, 6) retired 2026-06-11. Pain-discovery tests (A–E) replace them. Tests 4, 5, 7, 8, 9 ongoing.
 
 ---
@@ -217,17 +217,29 @@ Campaign: SI8_RV_R4LI_FinServ_London_0626A_JD | Alias: JD | Volume: 150–200 le
 
 **Hypothesis:** The existing Who's Asking sequence (v7-A) uses a research frame ("I'm researching how brand legal teams handle AI video approvals"). v7-B would use a validation frame ("we've built a format — does it match what you'd require?"). For brand legal ICPs who are already the gatekeeper, seeing a format to evaluate may be more compelling than being asked to participate in research.
 
-**Status:** AWAITING LEADS — Who's Asking campaign launched 2026-06-08 (148 leads, 0 accepted yet). Design v7-B message once first Who's Asking replies arrive.
+**Status:** LIVE — Two cohorts running. Design v7-B message once first replies arrive.
 
-**Target pool:** IP Legal — Brand (holdco brand legal, IP counsel, brand-side legal teams)
+**Target pool:** IP Lawyer, Legal Affairs, Business Legal Affairs, Brand Legal (holdco brand legal, IP counsel, brand-side legal teams)
 
-**Variant A — Research frame (existing sequence):**
-"I'm researching how brand legal teams are handling AI video campaign approvals..."
+**Cohort 1 — UK (Ivy alias):**
+- Campaign: SI8_Who's Asking_ASA (4 Msg) — ASA/CAP code regulatory hook
+- Leads: 148 | Launched: 2026-06-08 | Acceptance: 0% | Response: 0%
+- Geo: Greater London
+
+**Cohort 2 — US (JD alias):**
+- Campaign: SI8_RV_R4LI_LegalA_BLA_US_0626A_JC — NY Synthetic Performer Law hook
+- Sequence: SI8_Who's Asking_NY Law (4 Msg)
+- Leads: 110 | Launched: 2026-06-11 | Acceptance: 0% | Response: 0%
+- Geo: US (Legal Affairs, Business Legal Affairs, Director/Manager/VP level, AI keyword)
+
+**Variant A — Research frame (active in both cohorts):**
+UK hook: "The ASA banned its first AI ad in March under existing CAP code..."
+US hook: "NY just passed the first US law creating direct advertiser liability for AI synthetic performers..."
 
 **Variant B — Validation frame (to be designed):**
 "We've built a Chain of Title format that we're getting evaluated by brand legal teams — does it match what you'd require from agencies submitting AI video campaigns?"
 
-**Results:** Not yet active.
+**Results:** Not yet active — both cohorts in early acceptance phase.
 
 ---
 
@@ -253,7 +265,7 @@ Campaign: SI8_RV_R4LI_FinServ_London_0626A_JD | Alias: JD | Volume: 150–200 le
 
 **Sequence:** SI8_Clearance-Pro-v1 (4 messages) — see `03_Sales/outreach/LINKEDIN-CAMPAIGNS-CLEARANCE-PRO-V1.md`
 
-**Status:** LIVE — loaded into Dripify 2026-06-10. UK first (Ivy). Pending lead assignment.
+**Status:** PENDING — Campaign: `SI8_RV_R4LI_LineProducer_LA_0626A_IL` — Ivy, Los Angeles, lead count TBD. Geo changed from EMEA to LA (commercial advertising Line Producers concentrated in LA; "Line Producer" title less standardized in European markets). Build LA Line Producer list in Sales Navigator before launch.
 
 **What we're measuring:**
 - Does this ICP have a higher warm reply rate than Creative Directors? (hypothesis: yes — no problem education needed)
@@ -331,8 +343,9 @@ Campaign: SI8_RV_R4LI_FinServ_London_0626A_JD | Alias: JD | Volume: 150–200 le
 - [ ] **Test 5 EU Act accuracy**: Monitor Msg 2 replies — if leads reply expecting EU Act labeling/disclosure solutions rather than IP compliance, revise sequence framing before Cohort B launches.
 - [ ] **Test 7**: Design v7-B (validation frame) message once first Who's Asking replies arrive from Jun 8 launch.
 - [ ] **Test 8**: Awaiting trigger — confirm "brand legal source" reply from Test 6 v6-A. B088 Matthew Sergison-Main first candidate.
-- [ ] **Test 9**: Build UK target list (Business Affairs / Broadcast Affairs / EP / Line Producer / HoP at ad agencies + production companies) and assign leads to v9-A and v9-B arms.
+- [ ] **Test 9**: Build LA Line Producer list in Sales Navigator (commercial advertising production companies, Line Producer / Commercial Line Producer titles). Load into `SI8_RV_R4LI_LineProducer_LA_0626A_IL` and launch — Ivy is clear to send.
 - [ ] **Tim Deussen (B125)**: Schedule call from Jun 22. Frame as advisory: product framing validation + EU Act accuracy check. Update CRM. NOT a sales call.
+- [ ] **Daniele Zennaro (B145)**: Ask what "MU" means — "Quick one — what did you mean by 'MU'? Wasn't sure if that was industry shorthand I should know!" Reply to Jun 12 message.
 - [ ] **Marc De Guzman (B027)**: Re-engage (pending).
 - [ ] **Jian Yi Lay (B152) + Ali Loveday-Herzinger (B153)**: Send sample when JD connection accepted.
 - [ ] **Ali Loveday-Herzinger (B153)**: Assign to Test 9 v9-A when JD connection accepted.

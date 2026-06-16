@@ -2,7 +2,7 @@
 
 A running log of decisions, insights, and lessons learned while building an AI film distribution company.
 
-*Last updated: June 10, 2026*
+*Last updated: June 14, 2026*
 
 ---
 
@@ -3485,5 +3485,182 @@ For any B2B founder running outbound at volume: your reply database is a market 
 | Apr 2026 | **107-response full-pool analysis: message #3 is the highest-converting touchpoint** | Ran first full analysis of all 107 unique LinkedIn responses from Supabase CSV export; HEADLINE FINDINGS: (1) Message #3 converts to warm at 36% — far above msg#1 (8%) and msg#2 (0% warm, 35% pass); people who stay engaged to message 3 are genuinely interested; the 4-message sequence functions as a progressive filter, not just a follow-up cadence — do not shorten it; (2) Hitting a Wall is the best campaign: 21% warm rate from responses; Legal Friction is 14% but has 43% pass+naf (strong self-qualifier — people who aren't a fit exit fast); (3) Ivy alias outperforms: 15% warm rate vs Vanessa 9% vs Lilly 6%; (4) Singapore has better warm:pass ratio than London (13% pass+naf vs 31%); (5) AI Director title is 33% warm (small sample, Hugo confirms the segment); (6) Director (other) title is dead weight — 0% warm, 39% pass+naf (media directors, PR directors getting through the filter); CAMPAIGNS TO KILL: Blocks AI Campaign (0% warm, 44% pass+naf), Documented Provenance (0% warm), Early Days (0% warm); CAMPAIGNS TO RETIRE: Vetting Takes Weeks + Trusted AI Supplier (v3, 4-6% warm); CAMPAIGN TO SCALE: Hitting a Wall with Ivy alias, Singapore geo, AI Director + Creative Director + Founder titles |
 
 ---
+---
+
+### #65: "Chain of Title" Exists for AI Film. Nobody Has Built It for AI Advertising.
+
+**Date:** June 2026
+
+**The insight:**
+We ran a broad web search this week across law firm alerts, industry trade publications, and film production guides — looking for who's talking about chain of title or provenance for AI video.
+
+Here's what we found: the phrase "chain of title" appears in the film distribution context. Vitrina.ai says AI-generated content "needs chain-of-title tracking equivalent to any licensed underlying work." Luminate says studios "can't sell it because they don't have a clear chain of title." Completion bond complications are adding weeks to closing deals.
+
+In commercial advertising? The phrase appears zero times.
+
+But the *problem* appears constantly — described as "vendor chain documentation," "traceability to creation source," "records of how AI content was created and reviewed," "written certifications from vendors." Eight law firms named the problem in their client guidance after the NY Synthetic Performer Law passed. None named the document.
+
+The concept is proven in film. The standard doesn't exist in advertising. That's the market position.
+
+**Why it matters:**
+SI8 doesn't need to convince the market that AI documentation matters. The market is already describing the problem in detail — it just hasn't named the solution. The sample at superimmersive8.com/sample is the answer to the question every law firm is raising but not answering.
+
+**LinkedIn-ready excerpt:**
+> "We searched for who's talking about chain of title for AI video.
+>
+> In film distribution: everywhere. Vitrina, Luminate, completion bond companies — all using the phrase, all describing the documentation gap.
+>
+> In commercial advertising: zero results. Across eight law firm client alerts on the New York Synthetic Performer Law, the phrase doesn't appear once.
+>
+> But the problem appears constantly. 'Vendor chain documentation.' 'Traceability to creation source.' 'Records of how AI content was created and reviewed.'
+>
+> Every law firm is describing the gap. None are naming the format.
+>
+> We built it."
+
+---
+
+### #66: A Free Taxonomy Launched at Cannes. It Creates the Question We Answer.
+
+**Date:** June 2026
+
+**The insight:**
+In May 2026, The Mise En Scène Company — a London-based film sales agency — launched "Human Provenance in Film" at the Cannes Film Market. It's a three-tier disclosure taxonomy for AI use in film:
+
+- Tier 1: No AI used
+- Tier 2: Assistive AI (editing, scheduling — no generated content in final film)
+- Tier 3: Generative AI (AI-generated visuals, audio, or writing in the final film)
+
+It integrates into existing distribution paperwork. It's free, CC BY 4.0, open for adoption. It's a thoughtful first step.
+
+And it doesn't solve the problem.
+
+A producer checking "Tier 3 — Generative AI" and handing it to their distribution attorney gets the obvious follow-up: "Great. Now show me the chain of title."
+
+Which tools? What training data? Does the commercial license cover distribution? Are there likeness exposures? The taxonomy discloses AI presence. It doesn't document whether the AI use is cleared.
+
+We started noticing this pattern across adjacent markets: a free disclosure standard emerges, creates awareness of the compliance gap, and makes the paid clearance document more necessary — not less.
+
+**Why it matters:**
+This isn't a competitive threat. It's a market education moment that precedes our entry. Watch for it to create confused producers who check Tier 3 and then don't know what to produce when their insurer asks for more. That's when SI8 enters.
+
+**LinkedIn-ready excerpt:**
+> "A new AI disclosure taxonomy launched at Cannes this month. Three tiers. Free. Open source. Good intentions.
+>
+> And it doesn't solve the problem.
+>
+> Tier 3 says: 'We used generative AI.' That's a disclosure.
+>
+> What a distribution attorney asks next: 'Which tools? Training data licensed? Any real likenesses? Commercial rights confirmed?' That's a chain of title.
+>
+> Free taxonomy → creates awareness → creates demand for the actual clearance document.
+>
+> This is how compliance markets develop. We've seen it with music, with talent, with location releases.
+>
+> We're building the document the taxonomy points to but can't produce."
+
+---
+
+### #67: E&O Insurers Aren't Asking for More Documentation. They're Excluding AI Content Entirely.
+
+**Date:** June 2026
+
+**The insight:**
+We went looking for which E&O insurers and completion bond companies are mentioning AI coverage. The answer was more dramatic than we expected.
+
+They're not adding AI documentation requirements. They're adding AI exclusions.
+
+In early 2026, the Insurance Services Office introduced endorsements CG 40 47 and CG 40 48 — optional forms giving commercial general liability carriers the ability to formally exclude generative AI exposures. Coverage B — personal and advertising injury — can now explicitly exclude IP infringement claims from AI-generated material. Chubb, Travelers, and Berkshire Hathaway have adopted them. 80%+ of state regulatory applications were approved.
+
+For film and TV E&O specifically: most 2026 policies now contain "explicit AI exclusions or require representations that the production contains no AI-generated content that cannot be cleared." No major completion bond company has published AI-specific underwriting criteria. AI productions currently cannot access institutional financing.
+
+To get E&O coverage for a film on Netflix, Amazon, or Apple, you need minimum $1M per claim / $3M aggregate. You currently can't get it if your production contains AI-generated content that hasn't been cleared.
+
+**Why it matters:**
+This moves the conversation from "should we document AI?" to "we can't distribute without documentation." That's not a risk discussion — it's a financial blocker. And it's the pattern that will eventually reach commercial advertising, because the same insurers cover media liability across both markets.
+
+**LinkedIn-ready excerpt:**
+> "We searched for which E&O insurers are adding AI requirements. Here's what we found:
+>
+> They're not adding requirements. They're adding exclusions.
+>
+> ISO issued new endorsements in early 2026 that let carriers formally exclude generative AI from commercial general liability — including IP infringement from AI-generated content. Chubb, Travelers, Berkshire Hathaway have adopted them.
+>
+> For film and TV: most E&O policies now exclude AI content unless it can be shown as 'cleared.' No major completion bond company has published underwriting criteria for AI productions. Which means AI films currently can't access institutional financing.
+>
+> 'Chain of title' stopped being optional when the insurer said no.
+>
+> The documentation requirement didn't come from a law. It came from an insurance exclusion."
+
+---
+
+### #68: C2PA Tells You What Made the Video. SI8 Tells You Whether It's Safe to Run.
+
+**Date:** June 2026
+
+**The insight:**
+EU AI Act Article 50 takes effect August 2. It requires tool providers — Runway, Kling, Pika — to embed machine-readable provenance metadata (C2PA or equivalent) in AI-generated video. This is a real enforcement moment with penalties up to €15M or 3% of global turnover.
+
+Here's what C2PA does: cryptographically signs the file with the tool that created it, when it was created, and what edits occurred. It's embedded by the tool. It's verifiable. It's a meaningful step forward.
+
+Here's what C2PA doesn't do: tell you whether the tool's training data was licensed for commercial use. Whether the output is owned by the person who prompted it. Whether real likenesses appear. Whether a human reviewed it. Whether a brand's legal team can approve the campaign.
+
+C2PA answers "what made this." SI8 answers "is this cleared to run."
+
+We've heard a version of this objection in our outreach: "The tools will handle this." That's partially true — the tools will handle the watermark. The judgment layer — the part that decides whether the watermark is attached to something a brand can actually use — that's what we do.
+
+**Why it matters:**
+As EU AI Act enforcement creates awareness of provenance documentation, brands and agencies will start asking about C2PA compliance. SI8's message should acknowledge C2PA and immediately pivot to what it doesn't cover. The August 2 deadline creates exactly the kind of conversation where that distinction is worth having.
+
+**LinkedIn-ready excerpt:**
+> "EU AI Act enforcement starts August 2. Runway, Kling, and Pika will embed C2PA provenance metadata in every video they generate.
+>
+> Here's what that metadata tells you: which tool made it, when, and what edits happened.
+>
+> Here's what it doesn't tell you: whether the training data is licensed for commercial use. Whether the output is legally owned by the person who prompted it. Whether the campaign can be approved by a brand's legal team.
+>
+> C2PA answers 'what made this.'
+>
+> It does not answer 'is this cleared to run.'
+>
+> The watermark tells you the origin. The clearance document tells you whether you can use it.
+>
+> Different questions. Different documents."
+
+---
+
+### #69: We Can't Verify the Training Data. Neither Can Anyone Else. Here's Why That's Still the Right Answer.
+
+**Date:** June 2026
+
+**The insight:**
+The honest limitation of what SI8 does: we cannot independently verify Runway's training data. Neither can Debevoise & Plimpton. Neither can the brand legal team at any Fortune 500 company. Runway hasn't published it.
+
+Every law firm that wrote a client alert after the NY Synthetic Performer Law recommends that brands "seek clear information regarding the sources of training data." Vitrina.ai says "every AI tool in your pipeline needs licensing documentation for its training data — not a vendor's assertion." The advice is consistent. The information doesn't exist.
+
+So what does SI8 actually document? We document what can be documented: which tools were used, what their TOS says about commercial use, whether the submitter holds any licensed third-party assets, and whether a human reviewer flagged known risk factors. We don't collect raw prompts (they're proprietary creative process), but the submitter warrants they retain them internally under our Evidence Custodian Declaration.
+
+The correct answer to "can you guarantee this is clean?" is: no, and neither can anyone. What we give you is a structured review process with documented outputs. If a claim surfaces later, you have evidence you did the due diligence available to you. That's how E&O insurance works. It's how entertainment lawyers think about this. It's not a guarantee — it's evidence of process.
+
+**Why it matters:**
+This is the most important objection to address before it surfaces in sales conversations. The framing "evidence of process, not a guarantee" is already familiar to anyone who has worked with E&O insurance or entertainment lawyers. Using that frame positions SI8 as part of an established compliance logic rather than a novel product making claims it can't back.
+
+**LinkedIn-ready excerpt:**
+> "Someone asked us: 'Can you verify the training data for Runway or Kling?'
+>
+> Honest answer: no. Neither can anyone. They haven't disclosed it.
+>
+> Every law firm that's written about AI documentation compliance says the same thing: 'seek information about training data.' The advice is consistent. The information doesn't exist.
+>
+> Here's what we can document: which tools were used, what the TOS says about commercial use, whether licensed assets appear in the video, and whether a human reviewer flagged known risks.
+>
+> Here's the framing that matters: E&O insurance doesn't guarantee you won't get sued. It documents that you took reasonable precautions.
+>
+> That's what a Chain of Title is. Not a guarantee. Evidence of process.
+>
+> When the claim comes — and eventually one will — the question won't be 'did you guarantee it was clean?' It will be 'did you document that you checked?'"
+
+---
+
 | Mar 2026 | **v4 site migration: newsite/ promoted to root** | After building the v4 CaaS site inside `07_Website/newsite/` to avoid disrupting the live v3 site, executed full promotion to root on Mar 27, 2026; WHAT CHANGED: all v4 HTML files (index.html, how-it-works/, pricing/, rights-verified/, zh/) moved from newsite/ to 07_Website/ root; all internal `/newsite/` path prefixes stripped via global find/replace; vercel.json simplified (6 newsite redirect rules removed, creator portal redirects preserved); newsite/ directory removed; v3 files moved to `_archive/` with restoration docs; ROLLBACK: three options documented — Vercel instant promotion (30 sec), git revert, or manual file restore from _archive/; RESULT: www.superimmersive8.com now serves v4 CaaS site directly; technical debt of the newsite/ workaround fully resolved |
 | Mar 2026 | **Platform pre-launch milestone: items 1–3 of 4 complete** | Three of four pre-launch platform items completed in one session: (1) URL migration `/submit` → `/record` — RecordForm now at canonical URL, old /submit redirects cleanly; (2) Test data cleaned — 9 test submissions (STEC_TEST, STEC_TEST3, TESTLINK variants) deleted from production DB using exact UUIDs; (3) CertForm end-to-end test passed — full flow from /certify form submission through Stripe payment, admin reviewer checklist, risk rating, approve, Chain of Title PDF generation, creator dashboard download verified working; (4) REMAINING: Stripe live mode (swap test keys for live keys, create live products, configure production webhook); platform is functionally complete and tested |
