@@ -9,6 +9,52 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of June 16, 2026
+*Run: 2026-06-16 · 25 high · 6 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [New AI advertisement law goes into effect in New York](https://www.msn.com/en-us/news/other/new-ai-advertisement-law-goes-into-effect-in-new-york/ar-AA25dPwQ?ocid=TobArticle) | MSN | Mon, 15 Jun 2026 | ☐ |
+| 9 | post+update | [New York Bill Goes Into Effect Requiring Advertisements To Be Transparent When AI-Generated Performers Are Featured](https://afrotech.com/new-york-ai-bill-goes-into-effect-requiring-transparency-advertisers) | afrotech.com | Mon, 15 Jun 2026 | ☐ |
+| 9 | post+update | [AI and Deepfakes: Four Things Advertisers Need to Know Before They Hit “Run”](https://www.asa.org.uk/news/ai-and-deepfakes-four-things-advertisers-need-to-know-before-they-hit-run.html) | ASA \| CAP | Thu, 11 Jun 2026 | ☐ |
+| 9 | post+update | [New York synthetic performer ad disclosure law takes effect](https://qz.com/new-york-ai-synthetic-performer-ad-disclosure-law-061026) | qz.com | Wed, 10 Jun 2026 | ☐ |
+| 9 | post+update | [New York now requires disclosure of AI performers in ads. How will that change transparency in advertising?](https://www.marketingbrew.com/stories/new-york-ai-performers-disclosure-advertising-transparency-effects) | Marketing Brew | Wed, 10 Jun 2026 | ☐ |
+| 9 | monitor | [How New York’s AI disclosure law could change transparency in advertising](https://www.marketingbrew.com/stories/new-york-ai-performers-disclosure-advertising-transparency-effects) | Marketing Brew | Wed, 10 Jun 2026 | ☐ |
+| 9 | monitor | [New York’s Synthetic Performer Disclosure Law Raises Compliance Stakes for Advertisers](https://www.pymnts.com/cpi-posts/new-yorks-synthetic-performer-disclosure-law-raises-compliance-stakes-for-advertisers/) | PYMNTS.com | Wed, 10 Jun 2026 | ☐ |
+| 9 | monitor | [New York law mandates disclosure of AI-generated ‘Synthetic Performers’ in ads](https://www.socialsamosa.com/industry-updates/new-york-disclose-ai-in-ads-12020996) | Social Samosa | Wed, 10 Jun 2026 | ☐ |
+| 9 | monitor | [New York’s “synthetic performer” law promises to protect actors from AI](https://cybernews.com/ai-news/new-york-synthetic-performers-law-ai/) | Cybernews | Wed, 10 Jun 2026 | ☐ |
+| 9 | post+update | [New York’s synthetic performer disclosure law: What advertisers need to know](https://www.mcdermottlaw.com/insights/new-yorks-synthetic-performer-disclosure-law-what-advertisers-need-to-know/) | McDermott Will & Schulte | Tue, 09 Jun 2026 | ☐ |
+| 9 | post | [Governor Hochul Announces First-in-the-Nation Law Requiring Disclosure When Advertisements Include AI-Generated Synthetic Performers is in Effect](https://www.longisland.com/news/06-09-26/governor-hochul-announces-first-in-the-nation-law-requiring-disclosure-when-advertisements-include-ai-generated-synthetic-performers-is-in-effect.html) | LongIsland.com | Tue, 09 Jun 2026 | ☐ |
+| 9 | post+update | [Synthetic Performers, Real Consequences: Implications of Trailblazing New York AI Ad Law](https://www.crowell.com/en/insights/client-alerts/synthetic-performers-real-consequences-implications-of-trailblazing-new-york-ai-ad-law) | Crowell & Moring LLP | Tue, 09 Jun 2026 | ☐ |
+| 8 | post+update | [What Happens When a Brand Uses AI to “Alter” Influencer Content?](https://www.thefashionlaw.com/what-happens-when-a-brand-uses-ai-to-alter-an-influencer-content/) | thefashionlaw.com | Mon, 15 Jun 2026 | ☐ |
+| 8 | post+update | [NYS to require advertisers to say if performers are real or AI](https://www.newsday.com/news/region-state/artificial-intelligence-advertising-jcb9c0p3) | Newsday | Fri, 12 Jun 2026 | ☐ |
+| 8 | post+update | [New York now forces ads to admit when actors are AI](https://geekspin.co/new-york-now-forces-ads-to-admit-when-actors-are-ai/) | geekspin | Thu, 11 Jun 2026 | ☐ |
+| 8 | monitor | [New York Requires AI Disclosure In Ads Using Digital People](https://5townscentral.com/2026/06/11/new-york-requires-ai-disclosure-in-ads-using-digital-people/) | 5 Towns Central | Thu, 11 Jun 2026 | ☐ |
+| 8 | post+update | [New York enforces first-in-nation AI ad disclosure law](https://www.msn.com/en-us/news/insight/new-york-enforces-first-in-nation-ai-ad-disclosure-law/gm-GM6927532E?gemSnapshotKey=GM6927532E-snapshot-1) | MSN | Thu, 11 Jun 2026 | ☐ |
+| 8 | post+update | [Hochul says first-in-the-nation AI ad disclosure law is now in effect](https://www.wbng.com/2026/06/10/hochul-says-first-in-the-nation-ai-ad-disclosure-law-is-now-effect/) | WBNG | Wed, 10 Jun 2026 | ☐ |
+| 8 | post+update | [Marking and labelling AI-generated content: EU Commission outlines Code of Practice](https://ieu-monitoring.com/editorial/marking-and-labelling-ai-generated-content-eu-commission-outlines-code-of-practice/1243087?utm_source=ieu-portal) | INSIGHT EU MONITORING | Wed, 10 Jun 2026 | ☐ |
+| 8 | monitor | [New York Requires Labels for Synthetic Performers in Ads](https://letsdatascience.com/news/new-york-requires-labels-for-synthetic-performers-in-ads-5f293984) | Let's Data Science | Tue, 09 Jun 2026 | ☐ |
+| 8 | update | [Washington Becomes the Latest State to Expand Right of Publicity Protections to Digital Replicas](https://www.dwt.com/insights/2026/06/washington-state-right-of-publicity-ai-replicas) | Davis Wright Tremaine | Tue, 09 Jun 2026 | ☐ |
+| 8 | update | [Contracts, Consent, and Clones: Navigating Requirements for AI-Generated Advertising](https://www.jdsupra.com/legalnews/contracts-consent-and-clones-navigating-4384731/) | JD Supra | Tue, 09 Jun 2026 | ☐ |
+| 8 | post+update | [AI-generated Marketing Content Risks Mortgage Lender Compliance](https://www.housingwire.com/articles/ai-mortgage-marketing-compliance-risk/) | HousingWire | Tue, 09 Jun 2026 | ☐ |
+| 7 | post+update | [AI Risk Worries Insurers and Businesses Alike](https://www.darkreading.com/cyber-risk/ai-risk-worries-insurers-businesses-alike) | Dark Reading | Wed, 10 Jun 2026 | ☐ |
+| 7 | update | [Delhi High Court Orders Removal Of AI-Generated Content Misusing Acharya Manish’s Identity](https://the420.in/delhi-high-court-ai-deepfake-acharya-manish-personality-rights/) | The420.in | Tue, 09 Jun 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Compliance Signals 9-13 June 2026: AI transparency, tobacco consumer protection enforcement and Chinese AI tipoffs](https://www.lexology.com/pro/content/compliance-signals-9-13-june-2026-ai-transparency-consumer-protection-enforcement-and-chinese-ai-tipoffs) | Lexology | Sat, 13 Jun 2026 | ☐ |
+| 6 | monitor | [The NO FAKES Act Needs Changes to Protect Video Games \| Blogs \| Jun 11, 2026](https://itif.org/publications/2026/06/11/the-no-fakes-act-needs-changes-to-protect-video-games/) | Information Technology and Innovation Foundation (ITIF) | Thu, 11 Jun 2026 | ☐ |
+| 6 | monitor | [Medical Legal Regulatory Review Orchestration with AI Agents on AWS](https://aws.amazon.com/blogs/industries/medical-legal-regulatory-review-orchestration-with-ai-agents-on-aws/) | Amazon Web Services (AWS) | Thu, 11 Jun 2026 | ☐ |
+| 6 | update | [360 Business Law launches AI Audit for EU Act compliance](https://itbrief.co.uk/story/360-business-law-launches-ai-audit-for-eu-act-compliance) | IT Brief UK | Thu, 11 Jun 2026 | ☐ |
+| 5 | monitor | [These 9 AI-generated ads just won awards. Can you tell what's real?](https://mashable.com/tech/generated-awards-ai-advertisements-videos) | Mashable | Thu, 11 Jun 2026 | ☐ |
+| 4 | monitor | [IndieVisual Launches dAIrector: From Brief to Professional AI Ad Film in Hours, Not Weeks](https://www.indiasnews.net/news/279123949/indievisual-launches-dairector-from-brief-to-professional-ai-ad-film-in-hours-not-weeks) | India's News.Net | Mon, 15 Jun 2026 | ☐ |
+
+---
+
 ## Week of June 13, 2026
 *Run: 2026-06-13 · 32 high · 8 monitor · lookback 7 days*
 
