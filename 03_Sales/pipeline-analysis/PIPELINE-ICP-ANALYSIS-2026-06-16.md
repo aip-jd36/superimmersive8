@@ -360,4 +360,114 @@ Secondary (this week if bandwidth):
 
 ---
 
+## Section 10: Disclosure vs. Chain of Title — Signal Quality Reframe
+
+*Added 2026-06-16, post-analysis of 26 pitch conversations where sample or survey was sent.*
+
+---
+
+### The Hypothesis
+
+When Creative Directors reply "yes, clients are asking for documentation," many of them mean:
+
+> *"Yes, I tell clients I used AI."*
+
+Not:
+
+> *"Yes, a client required a specific document proving the IP chain is clean, the tools are commercially licensed, and a human reviewer signed off."*
+
+These are completely different problems. The first is solved by a sentence in an email or a label in the video. The second is what SI8 actually solves. The current qualification question ("are clients starting to ask for documentation?") does not distinguish between them — and we have been counting both as T1.
+
+---
+
+### Evidence from Pitch Conversations
+
+**Replies that are about disclosure, not Chain of Title:**
+
+| Lead | Reply language | Classification |
+|------|---------------|----------------|
+| Ivan Petruzzelli (State Street) | *"You need to tell your legal team the video was generated using AI and put a disclaimer at the end of the video"* | Disclosure — Article 50 / platform labeling mentality |
+| Oliyah Joseph | *"Legal teams mainly want transparency around how the content is created... doesn't mean anything disruptive like visible watermarks"* | Disclosure framing — not a document requirement |
+| Abi Tomasiewicz (DEPT) | *"These legal requirements are already discussed before they get me to do the job... I have a conversation with them about what models I'll be using"* | Pre-project verbal conversation, not a deliverable |
+| Hossein Jafari | *"Since the 2026 ASA and IAB updates, it's become a standard requirement... having your team follow these disclosure rules"* | Disclosure rules, not provenance documents |
+| Graham Vincent | *"Yes, of course"* → thumbs up → gone after seeing survey questions | Almost certainly disclosure — the Chain of Title scope surprised him |
+| Saira Macleod | *"Yes it is common place to supply all the prompt documentation"* | Ambiguous — likely loose email with tool names, not a structured Chain of Title |
+
+**Replies that are genuinely about Chain of Title:**
+
+| Lead | Reply language | Classification |
+|------|---------------|----------------|
+| Matthew Sergison-Main (OLIVER) | *"Yes I am being asked this 100%"* — holdco context | Formal procurement documentation requirement, not disclosure |
+| Ibrahim Badi | *"I document: AI models used, commercial licensing, editing workflow, IP ownership"* — structured, recurring | Chain of Title-adjacent — specific IP stack |
+| Gabriel Preston | Built approved platform lists, prompt sheets, workflow docs for clients | Chain of Title — already building what SI8 formalizes |
+| William Finkel (Hello Sunshine) | Described B2B2B chain in legal contract terms | Brand legal → production contract → agency requirement |
+| James T (Connect Management) | *"Required to verify tools do not train on, learn from, or retain content"* | IP provenance requirement, not just disclosure |
+
+---
+
+### Revised Signal Count
+
+Of 33 pipeline leads (Warm Lead + Call Requested):
+
+| Signal type | Estimated count | % of pipeline |
+|-------------|----------------|---------------|
+| Genuine Chain of Title T1 (formal document required by client) | ~5 | ~15% |
+| Disclosure T1 (clients asking them to say they used AI) | ~8 | ~25% |
+| T2 (aware, not yet required) | ~12 | ~36% |
+| T3 (already has a solution) | ~3 | ~9% |
+| Unclear | ~5 | ~15% |
+
+**The 54% UK/England T1 rate reported in Section 1 conflates disclosure T1 and Chain of Title T1.** Genuine Chain of Title T1 across the full pipeline is closer to 15%.
+
+---
+
+### Why This Explains the Conversion Failures
+
+- **Sample PDF → ghost:** Lead looks at a 12-page Chain of Title document and thinks "I don't need something this complex — I tell them I used Runway." They're not wrong. They just don't have the Chain of Title problem.
+- **"I already do this" leads don't convert:** They *do* handle disclosure. They're not lying. Their informal process solves the problem they think they have — not the problem SI8 solves.
+- **Calendar booked → no-show:** The call would have revealed the lead is a disclosure buyer. The value proposition doesn't hold for them. Unconsciously they deprioritize it.
+- **Hugo Faustino gave the most insightful reply and declined a meeting:** He understood disclosure requirements perfectly. The Chain of Title requirement hadn't hit him yet.
+
+---
+
+### What the Genuine Chain of Title Buyer Looks Like
+
+The real buyer has experienced one of these:
+
+1. A client's legal team reviewed their informal documentation (an email, a Google doc, a verbal conversation) and came back with more specific questions or rejected the campaign
+2. A holdco's compliance team set a formal requirement that informal documentation cannot satisfy
+3. A regulated-sector client (finance, pharma) whose legal team operates at a higher documentation bar than a typical brand
+4. An E&O underwriter who requires chain of title documentation before issuing coverage (film/TV)
+
+These leads don't say "yes, of course" and go quiet. They describe the gap — "I have this, but it's informal" or "I have to produce something new for each client."
+
+---
+
+### Implications for Targeting and Qualification
+
+**The ICP narrows:**
+The genuine Chain of Title buyer is not "UK Creative Director." It is a CD or Production Specialist at an agency whose clients have **formal procurement requirements** — holdco networks, regulated-sector brands, or clients who have already sent back a documentation request that an informal email couldn't satisfy. Smaller pool, much cleaner signal.
+
+**The E&O / film line producer ICP looks stronger by contrast:**
+Line producers know they are not dealing with disclosure. They need E&O coverage for distribution. The insurer either accepts the documentation or doesn't. There is no ambiguity about what "the client is asking for." The problem is binary and financial — which means qualification is faster and conversion should be higher.
+
+**Qualification must now distinguish disclosure from Chain of Title:**
+
+Current Msg 1 ("are clients starting to ask for documentation?") → does not distinguish.
+
+Proposed new Msg 1 ("has a specific client asked you for this and if so, what did you send them?") → better, but the follow-up matters. If they say "I told them which tools I used" → that's disclosure. The real qualifying signal is what happened next: *"What did the client say when you sent that?"* If they said "great, thanks" — disclosure. If they came back with more questions or didn't approve the campaign — Chain of Title.
+
+**Test to design next cycle:**
+Run a UK CD campaign with a two-part qualification sequence:
+- Msg 1: "Has a specific client asked you for documentation on an AI video you delivered?"
+- If yes → Msg 2: "What did you send them — and did that satisfy their legal team, or did they come back with more questions?"
+
+The second question is the actual T1 filter. Leads who say "it satisfied them" are disclosure buyers. Leads who say "they came back with more questions" or "we had to produce something more formal" are Chain of Title buyers.
+
+---
+
+*This reframe does not invalidate the UK CD ICP — it refines it. The target is not all UK CDs using AI video. It is UK CDs whose clients have already sent back an informal documentation attempt and asked for something more structured. That is the beachhead within the beachhead.*
+
+---
+
 *Next analysis: after next Dripify report cycle. Priority watch items: Simon Helm call (Jun 23), Test E v-E1 probe replies, Test 9 LA Line Producer replies, EU Act deadline approach (August 2) — expect T1 signal increase in July.*
