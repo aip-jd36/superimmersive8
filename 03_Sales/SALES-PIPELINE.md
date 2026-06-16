@@ -145,7 +145,7 @@
 
 | B-ID | Lead | Company | Geo | How They Requested | Last Action | Follow Up By |
 |------|------|---------|-----|--------------------|-------------|--------------|
-| B130 | Ivan Petruzzelli | State Street Investment Mgmt | London/UK | "Yes we are [moving toward structured documentation]" — Ivy asked "Are you building internally or looking at what's out there?" | Send SI8 pitch + sample + offer JD call | — |
+| B130 | Ivan Petruzzelli | State Street Investment Mgmt | London/UK | "We require a structured campaign brief with human summary + machine-readable payload (spreadsheet or JSON) for auditability across AI workflows." ICP 3 signal — State Street defining agency requirements. Format may differ from SI8 PDF output — needs clarification. | JD to draft reply before sending — probe whether requirement is IP provenance or campaign workflow data | 2026-06-17 |
 | B143 | Simon Helm | — | England | "Feels very relevant, advising clients already. Can we chat?" | Ivy asked for Tue/Wed/Thu 9:30–10am UK slot Jun 8; await slot reply | 2026-06-12 |
 | B011 | Hugo Barbera | HumAIn | — | Expressed interest — 2nd nudge sent | Sample or call offered | — |
 | B043 | Luke Brady | Sublime Animations Ltd | London/UK | Confirmed calls 4x — all missed | 4th reschedule attempt sent Jun 8; move to Nurture if no reply by Jun 13 | 2026-06-13 |
