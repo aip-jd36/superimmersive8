@@ -103,7 +103,7 @@
 
 ---
 
-## 2. Warm Lead (26)
+## 2. Warm Lead (25)
 
 *Clear ICP signal or acknowledged pain. Moving toward a call or sample.*
 
@@ -127,7 +127,6 @@
 | B139 | James Hilditch | BearJam | London/UK | "Yes, sometimes. Important part of the process." | No | Reply + send sample | — |
 | C002 | @syntaxdiffusion | — | — | Interested — v4 reply sent | No | Send v4 follow-up | — |
 | B009 | Syed Tabish Hasan | Zedtronix | — | Previously showed interest; Calendly nudge sent — gone cold | Send follow-up | — |
-| B027 | Marc Danielle De Guzman | UnaFinancial | Manila | Connection accepted Jun 16; JD sent gate question — "has a compliance team asked for more than which tools you used? did that satisfy them?" | Await reply — gap story = move to call | 2026-06-19 |
 | B057 | Rheea Aranha | Vincent Studios | London/UK | Asked for sample by email — we asked for her email address | Await email address | — |
 | B087 | Ibrahim Badi | IKM Marketing | London/UK | "Yes especially in regulated sectors" — answered 9 intake Qs inline; Creator Record makes sense as next step | COMP-B2 code sent Jun 8; await reply or form fill | — |
 | B088 | Matthew Sergison-Main | OLIVER / Brandtech | London/UK | "Yes I am being asked this 100%" — strongest pain signal; works at OLIVER (Brandtech holdco) | B2B2B probe sent Jun 8: is requirement from brand legal or creative? If legal confirmed → Test 8 | — |
@@ -138,13 +137,14 @@
 
 ---
 
-## 3. Call Requested (6)
+## 3. Call Requested (7)
 
 *The lead has expressed interest in a call, or confirmed a booking that didn't happen.*
 
 | B-ID | Lead | Company | Geo | How They Requested | Last Action | Follow Up By |
 |------|------|---------|-----|--------------------|-------------|--------------|
 | B130 | Ivan Petruzzelli | State Street Investment Mgmt | London/UK | "Yes we are [moving toward structured documentation]" — Ivy asked "Are you building internally or looking at what's out there?" | Send SI8 pitch + sample + offer JD call | — |
+| B027 | Marc De Guzman | UnaFinancial | Manila | "Few clients asked for: source asset docs, workflow/gen logs, human review records, rights representations from vendors — no standardized format yet." Replied same day to gate Q. JD asked for call. | Await slot confirmation | 2026-06-19 |
 | B143 | Simon Helm | — | England | "Feels very relevant, advising clients already. Can we chat?" | Ivy asked for Tue/Wed/Thu 9:30–10am UK slot Jun 8; await slot reply | 2026-06-12 |
 | B011 | Hugo Barbera | HumAIn | — | Expressed interest — 2nd nudge sent | Sample or call offered | — |
 | B043 | Luke Brady | Sublime Animations Ltd | London/UK | Confirmed calls 4x — all missed | 4th reschedule attempt sent Jun 8; move to Nurture if no reply by Jun 13 | 2026-06-13 |
