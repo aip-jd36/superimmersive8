@@ -72,7 +72,8 @@
 | B092 | Lina De Groot | Stealth AI Startup | Amsterdam | Answered her Q on hardening areas | Await reply | — |
 | B098 | Michelle Ponto | Blue Gecko Communications | Dubai/UAE | "Yes, asking about prompts and sequence" | Await reply | — |
 | B101 | Anas Bakal | Monoud Trading | Dubai/UAE | Detailed existing process — validated it | Await reply | — |
-| B103 | Ahmed Samy Amin | GTCFX | Dubai/UAE | "Would love to compare notes" — Financial services | Await reply | — |
+| B103 | Ahmed Samy Amin | GTCFX | Dubai/UAE | "Would love to compare notes" — navigating finserv + brand client documentation a lot lately | Send compare-notes call invite Jun 17 [JD personal] | 2026-06-17 |
+| B157 | Steve Bannerman | Prime Video & Amazon MGM Studios | LA / APAC | "Provenance of the video is HUGELY important" in feature film. Head of Post-production, International Originals APAC. Film/TV E&O track — Test 12 validation. | Send film-ICP pivot + compare-notes call invite Jun 17 [Vanessa] | 2026-06-17 |
 | B104 | Ashraf Selo | MultiBank Group | Dubai/UAE | Connection accepted Jun 16; JD sent format-structure probe — "formal document or informal sign-off? how structured is the ask?" | Await reply | 2026-06-19 |
 | B106 | Mohammed Magdy Alzahran | Dybaja AI Creative Studio | Dubai/UAE | NDA + Transfer of ownership rights | Await reply | — |
 | B109 | Shahin Sha | Rafaz Properties | Dubai/UAE | Risk/ownership/disclosure framing | Await reply | — |
@@ -103,7 +104,7 @@
 
 ---
 
-## 2. Warm Lead (25)
+## 2. Warm Lead (26)
 
 *Clear ICP signal or acknowledged pain. Moving toward a call or sample.*
 
@@ -131,6 +132,7 @@
 | B087 | Ibrahim Badi | IKM Marketing | London/UK | "Yes especially in regulated sectors" — answered 9 intake Qs inline; Creator Record makes sense as next step | COMP-B2 code sent Jun 8; await reply or form fill | — |
 | B088 | Matthew Sergison-Main | OLIVER / Brandtech | London/UK | "Yes I am being asked this 100%" — strongest pain signal; works at OLIVER (Brandtech holdco) | B2B2B probe sent Jun 8: is requirement from brand legal or creative? If legal confirmed → Test 8 | — |
 | B090 | Saira Macleod | Magnific | London/UK | Asked what the checker looks for — product question | Await reply — confirm JD call | — |
+| B094 | Justin Lufair Brown | Amazon | LA | "Contract language tightened a lot in last 12 months... happy to go deeper if useful." Creative Producer AI Video Production. | Send call invite Jun 17 [Vanessa]: "Still open to that deeper conversation — would a 20-min call this week or next work?" | 2026-06-17 |
 | B095 | Florent Delavous | Xtendency | Dubai/UAE | "Already working on something in this space" — CEO | Probe collab/competitor + book call | — |
 | B099 | Sultan Alsuwaidi | Video tube | Dubai/UAE | "Yes — becoming standard now" — sample sent | Await reply | — |
 | B126 | Phil Langer | Jung von Matt SPREE | Germany | Major holdco (JvM) — pitch + sample sent | Await reply | — |
