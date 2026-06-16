@@ -1,6 +1,6 @@
 # SI8 Split Test Log
 **Purpose:** Track active split tests — hypothesis, lead assignments, results, learnings
-**Updated:** 2026-06-12
+**Updated:** 2026-06-16
 **Framework shift:** Format tests (1, 2, 3, 6) retired 2026-06-11. Pain-discovery tests (A–E) replace them. Tests 4, 5, 7, 8, 9 ongoing.
 
 ---
@@ -309,6 +309,195 @@ US hook: "NY just passed the first US law creating direct advertiser liability f
 
 ---
 
+### TEST 10 — Two-Part Qualifying Question: Gate Question vs. Current Msg 1
+
+**Core question:** Does a two-part qualifying question ("Has a specific client asked you for documentation on an AI video you delivered?" + "What did you send them — and did that satisfy their legal team, or did they come back with more questions?") identify genuine Chain of Title buyers faster than the current Legal Friction Msg 1?
+
+**Hypothesis:** Most CD replies to "are clients asking for documentation?" describe disclosure conversations (Article 50 / platform labeling — "I tell them I used AI"). Genuine Chain of Title buyers are a subset who (a) received a specific client request AND (b) found their informal response didn't satisfy the client's legal team. The second question is the actual T1 filter. Current Msg 1 captures both segments equally, leading to high warm-reply counts but low conversions. A two-part gate should reduce volume, raise quality, and shorten path to call.
+
+**Source of insight:** Analysis of 26 pitch conversations in Supabase CSV (Jun 2026). 5 failure patterns identified. Only confirmed conversion (Ramez Tabshi) described his own process gap before any pitch. All others either described disclosure, said "I already have a process," or went silent after receiving sample or survey.
+
+**What we're measuring:**
+- Does asking part 2 ("what did you send them? did that satisfy legal?") surface a meaningfully different reply quality than current Msg 1?
+- What % of UK CD leads who answer part 1 "yes" also have a gap story in part 2 (i.e. their informal response didn't satisfy the client)?
+- Does removing the sample/survey from the early sequence reduce early exits?
+
+**Target pool:** UK Creative Directors at production companies and independent agencies — where profile keywords ("AI video" OR "generative AI" OR "Runway" OR "Kling" OR "Pika") confirm they actually produce AI video (not CDs at traditional agencies). Sales Navigator filter:
+- Title: "Creative Director" (includes VP CD, ECD, CD, Head of Creative)
+- Location: United Kingdom
+- Company size: 1–200 employees (excludes large holdcos where CD is concept-only)
+- Industry: Advertising / Marketing / Film / Video
+- Keywords in profile: "AI video" OR "generative AI" OR "Runway" OR "Kling" OR "Pika"
+- Estimated pool: 400–800 profiles
+
+**Variant A — Two-part gate (new):**
+> Hi [First name],
+>
+> As AI video becomes more common in agency work, I'm hearing clients starting to ask for documentation alongside delivery. Has a specific client asked you for something like that on an AI video you produced?
+>
+> If so, curious what you sent them — and whether that satisfied their legal team, or if they came back with more questions.
+>
+> [Alias]
+
+**Variant B — Current Legal Friction Msg 1 (control):**
+> Current Legal Friction sequence Msg 1 — exact copy from active sequence.
+
+**Results:**
+
+| Lead | B-ID | Geo | Title | Company | Variant | Msg replied | Part 2 answered? | Gap confirmed? | Status |
+|------|------|-----|-------|---------|---------|------------|-----------------|---------------|--------|
+| — | — | — | — | — | — | — | — | — | No leads assigned yet |
+
+**Analysis criteria:**
+- Verdict threshold: 5+ replies per variant
+- Key signal: what % of v-A replies include a gap story in their answer to part 2?
+- If gap story % > 30%, this is a stronger qualifier than current Msg 1
+- Does v-A reduce "disclosure-only" replies (leads describing Article 50 compliance, not Chain of Title)?
+- Does v-A produce faster path to call (fewer messages before call request)?
+
+---
+
+### TEST 11 — Apollo Email Rapid Validation: Same Gate Question, Email Channel
+
+**Core question:** Can Apollo email outreach validate the Test 10 gate question in 2 weeks vs. 6 weeks on LinkedIn, at comparable cost per response?
+
+**Hypothesis:** Apollo allows sending the same qualifying question to 500–800 UK CD profiles in one batch, bypassing LinkedIn's acceptance-rate friction. Response rate will be lower (1–3% vs. 7% LinkedIn) but iteration speed is 3× faster and list targeting is identical. Apollo is the right channel for rapid message testing; LinkedIn is the right channel for actual sales conversations. This test validates message quality before committing to a LinkedIn campaign.
+
+**Cost-benefit:**
+- LinkedIn COGS: ~$632/month (4 aliases × $158), $2.14/response, 4–6 weeks to data
+- Apollo COGS: ~$124/month total, $2.07/reply (at 3% reply rate on 200 contacts/month), 2 weeks to data
+- Apollo is cost-comparable but 2–3× faster for iteration
+
+**What we're measuring:**
+- Does the two-part gate question generate replies at ≥ 2% rate from email cold outreach?
+- Is reply quality (gap story, specific client described) equivalent to LinkedIn replies?
+- Does email channel produce different segment (more senior, more junior, different company type)?
+- Can we validate Test 10 message before a LinkedIn campaign launch?
+
+**Target pool:** 500–800 UK Creative Directors via Apollo.io
+- Same profile filter as Test 10 (AI video keywords, 1–200 employee companies)
+- Apollo sequence: 3 emails over 10 days (Msg 1 gate question / Msg 2 follow-up if no reply / Msg 3 close or retire)
+
+**Probe message (email Msg 1):**
+> Subject: AI video documentation — quick question
+>
+> Hi [First name],
+>
+> As AI video becomes more common in commercial work, I'm hearing clients starting to ask for documentation on delivery. Has a specific client asked you for something like that on an AI video you produced?
+>
+> Curious what you sent them — and whether it satisfied their legal team or they came back with more questions.
+>
+> [Name], SuperImmersive 8
+
+**Results:**
+
+| Batch | Volume | Sent date | Replies | Gap stories | Call requests | Notes |
+|-------|--------|-----------|---------|-------------|---------------|-------|
+| — | — | — | — | — | — | — |
+
+**Analysis criteria:**
+- ≥ 2% reply rate = channel viable for message testing
+- ≥ 30% of replies include a gap story = gate question is working
+- If 0 gap stories from 50+ replies = question is landing as disclosure (disclosure/Chain of Title conflation confirmed)
+- Compare reply quality against Test 10 LinkedIn replies when both running
+
+---
+
+### TEST 12 — EP / Line Producer E&O ICP: Film/TV Production Channel
+
+**Core question:** Do EPs, Line Producers, and entertainment attorneys at film/TV production companies experience AI Chain of Title as a financial blocker (E&O insurance exclusion) rather than a regulatory concept, making them T1 buyers today?
+
+**Hypothesis:** E&O insurers (Chubb, Travelers, Berkshire, Beazley, Tokio Marine HCC) have added explicit AI exclusions for productions without cleared Chain of Title. Netflix/Amazon/Apple require minimum $1M–$3M E&O coverage that is currently unavailable for uncleared AI productions. EPs and Line Producers who are actively completing E&O applications or seeking completion bonds for AI-inclusive productions are hitting this wall now — and it is creating immediate financial pain, not regulatory awareness. This is a different buyer than the advertising CD: the blocker is a bond/insurance form, not a brand approval email.
+
+**Source of insight:** `01_Business/research/AI-VIDEO-CHAIN-OF-TITLE-MARKET-RESEARCH-2026.md` — Akkerins article ("AI-generated film has no clean chain of title"); Vitrina.ai: "completion bond friction adding weeks to closing"; named insurers: Beazley, Tokio Marine HCC. Research recommendation: "15–20 EPs/line producers/entertainment attorneys, ask if E&O has come up."
+
+**What we're measuring:**
+- Do EPs/LPs describe E&O as an active problem (not a future concept)?
+- Does the E&O probe framing ("insurers are adding AI exclusions — is that something you're running into?") land as peer-level or external?
+- Is film/TV production side closer to payment-ready T1 than advertising CD?
+- Does the Chain of Title format satisfy what an E&O underwriter would actually require, or does SI8 need to clarify product scope?
+
+**Target pool:** 15–20 initial conversations — small enough to do manually (email or LinkedIn), large enough to pattern-match
+- LinkedIn filter: Title = "Executive Producer" OR "Line Producer" OR "Head of Production" / Industry = Film + Video / Location = UK, US, or Canada / Company size 1–50
+- Also: entertainment attorneys at firms that advise on E&O applications (target with research-frame message, not sales pitch)
+- Direct email to Beazley and Tokio Marine HCC media/entertainment underwriting contacts — ask if they are seeing AI exclusion queries and whether any standardized format would satisfy underwriting review
+
+**Probe message (LinkedIn or email, v12-A):**
+> Hi [First name],
+>
+> E&O insurers are starting to add AI exclusions for productions that can't document Chain of Title on AI-generated content. Are you running into this on projects with AI footage — either at the bonding or insurance application stage?
+>
+> Curious how you're handling it if it's come up.
+>
+> [Alias]
+
+**Insurer outreach (v12-B — direct to underwriters at Beazley, Tokio Marine HCC):**
+> Hi [Name],
+>
+> I work with production companies navigating E&O documentation for AI-generated content. I understand underwriters are adding AI exclusions — I'm trying to understand what format of documentation, if any, would satisfy underwriting review for a production that includes AI-generated footage.
+>
+> Would you be the right person to ask, or can you point me to who handles media/entertainment E&O underwriting at [Insurer]?
+>
+> [Name], SuperImmersive 8
+
+**Results:**
+
+| Lead | Type | Title | Company | Reply? | E&O active blocker? | Notes |
+|------|------|-------|---------|--------|---------------------|-------|
+| — | EP/LP/Atty | — | — | — | — | — |
+| Beazley | Insurer | Media Underwriting | — | — | — | Direct inquiry |
+| Tokio Marine HCC | Insurer | Entertainment E&O | — | — | — | Direct inquiry |
+
+**Analysis criteria:**
+- If ≥ 3 of 15–20 EP/LP conversations describe E&O as a current active blocker (not future concern): ICP confirmed, design dedicated campaign
+- If insurer contacts confirm a format that would satisfy underwriting: product scope refinement needed
+- If ≥ 0 EP/LP contacts convert to call within 2 conversations: velocity comparison to CD ICP
+- Verdict threshold: 15 conversations before drawing conclusions (small manual test, not a campaign)
+
+---
+
+### TEST 13 — AI Compliance Advisor Multiplier ICP: Research-Frame Outreach
+
+**Core question:** Do independent AI Compliance Advisors and Responsible AI consultants — who advise multiple agencies simultaneously — convert as multiplier buyers (one relationship = multiple client referrals) at higher velocity than individual Creative Directors?
+
+**Hypothesis:** Simon Helm (Jun 2026 warm lead) is the prototype: independent consultant, advises multiple agencies on AI policy, replied to a research-frame message (not a sales pitch), and booked a call before any product pitch was made. This profile is worth isolating and testing systematically. One Simon Helm = access to 3–10 agency clients who trust his recommendations. The conversion multiplier makes this ICP more valuable per conversation than a single CD buyer.
+
+**Source of insight:** Simon Helm (B-ID: check CRM) — UK, self-employed AI Compliance Advisor. Replied to research frame, confirmed E&O / Chain of Title topic is live with his agency clients. Jun 23 call scheduled.
+
+**What we're measuring:**
+- Does a research-frame message (not a product pitch) produce more replies from this ICP than a standard intro?
+- Do compliance advisor replies include references to specific agency clients with active documentation needs?
+- Does one compliance advisor relationship reliably produce 1–3 agency referrals?
+- Is this ICP worth a dedicated campaign, or is it too small a pool (UK AI Compliance Advisors may number 50–200 total)?
+
+**Target pool:** 30–50 UK leads
+- Sales Navigator filter: Title contains "AI Compliance" OR "AI Governance" OR "Responsible AI" OR "AI Ethics" OR "AI Policy" / Self-employed OR 1–10 employee firm / Location: United Kingdom
+- Estimated pool: 50–150 profiles UK-wide
+
+**Probe message (v13-A — research frame, no product pitch):**
+> Hi [First name],
+>
+> I'm researching how agencies are handling Chain of Title documentation for AI video — specifically whether compliance advisors are finding clients who need a structured format vs. handling it ad hoc.
+>
+> Would you be open to a quick conversation? Happy to share what we're seeing across other agencies in exchange.
+>
+> [Alias]
+
+**Results:**
+
+| Lead | B-ID | Title | Company | Reply? | Agency clients mentioned? | Referral potential | Notes |
+|------|------|-------|---------|--------|--------------------------|-------------------|-------|
+| Simon Helm | [CRM] | AI Compliance Advisor | Self-employed | YES | Yes — call Jun 23 | High — advises multiple agencies | Prototype for this ICP |
+| — | — | — | — | — | — | — | — |
+
+**Analysis criteria:**
+- Verdict threshold: 10 replies before drawing conclusions (small pool)
+- Key signal: does the reply include reference to specific agency clients with active needs?
+- If Simon Helm Jun 23 call confirms 2+ agency referrals: ICP confirmed, expand campaign to 50 profiles
+- If pool is too small (< 30 profiles UK-wide): expand geo to include Ireland, Netherlands, Germany
+
+---
+
 ## Cumulative Learnings
 
 *Updated as results come in.*
@@ -331,6 +520,7 @@ US hook: "NY just passed the first US law creating direct advertiser liability f
 | 2026-06-11 | Test 3 v3-B | **Gabriel Preston role mismatch identified.** "Head of Engagement & Directors Rep" at Imagine This Creative Studio = reps directors, is NOT the tool user. v3-B survey asked "which tools did YOU use / do YOU own the output" — structurally wrong for someone who manages multiple directors' workflows, not his own. **New ICP sub-type:** (1) Direct creator-submitter (Ibrahim Badi — MD at agency, creates content, owns docs, submits once = perfect v3-B fit); (2) Production co. rep/aggregator (Gabriel Preston — manages directors, potential bulk facilitator = wrong single-submission pitch frame). Aggregator pitch should be: "how do you handle documentation for the directors you represent when a client asks?" — not a single-submission offer. Aggregator role is structurally closer to Track B (Business Affairs) than Track A (Creative Director). | v3-B assignment criteria updated: screen for role as tool user, not just process maturity. Do not assign rep/aggregator roles to single-submission survey frame. |
 | 2026-06-11 | Test 4 | **Tim Deussen replied.** Corrected EU Act framing: Article 50 = labeling/disclosure, NOT Chain of Title. SI8's product is IP compliance infrastructure. Critique: "currently still disconnected from the technical process" — SI8's post-delivery document doesn't connect to where compliance actually happens (during/pre-production). Tim is upstream of the beachhead (builds compliance technology for EU working groups) — not a buyer. Advisory/validator profile. | Test D (pre vs. post timing) validated as urgent. EU Act hook in Tests A, C, Test 5 must be corrected to "IP compliance / brand legal requirements." Tim: schedule call from Jun 22, frame as advisory. |
 | 2026-06-11 | Framework | **Framework shift: format → pain-discovery.** Both confirmed buyers (Ivan Petruzzelli, Ibrahim Badi) had EXTERNAL forces making documentation mandatory. Non-responders manage informally by personal choice. Tests 1, 2, 3, 6 retired. Pain-discovery Tests A–E replace them. Targeting discriminant hypothesis: regulated-sector client exposure is the ICP discriminant, not title or geo alone. | Tests A–E design |
+| 2026-06-16 | All — pitch conversion audit | **Disclosure vs. Chain of Title signal reframe.** Analysis of 26 pitch conversations in Supabase CSV revealed 5 failure patterns: (1) sample PDF acts as rejection filter — leads disengage after receiving sample rather than requesting a call; (2) 9-question survey kills momentum — 8+ of 26 went silent after survey was presented; (3) "I already do this" is a non-conversion signal — leads with informal processes don't see a gap; (4) calendar-booked leads are no-shows at high rate; (5) only confirmed conversion (Ramez Tabshi) described his own process gap BEFORE any pitch was made. **Root cause:** Most "yes, clients are asking for documentation" replies describe disclosure conversations (Article 50 / platform labeling — "I told them I used AI"). Genuine Chain of Title buyers are a subset who (a) received a specific client request AND (b) found their informal response didn't satisfy the client's legal team. Revised genuine T1 estimate in current pipeline: ~15% (not 54%). The 54% figure conflated disclosure T1 (aware that clients ask them to disclose AI use) with Chain of Title T1 (client legal team rejected their documentation and they need a structured format). **Fix:** Two-part gate question replaces current Msg 1 hook. Part 1: "Has a specific client asked you for documentation on an AI video you delivered?" Part 2: "What did you send them — and did that satisfy their legal team, or did they come back with more questions?" Part 2 is the actual T1 filter. → Tests 10 and 11 design. | Tests 10, 11 design; pitch sequence redesign |
 
 ---
 
@@ -345,6 +535,11 @@ US hook: "NY just passed the first US law creating direct advertiser liability f
 - [ ] **Test 8**: Awaiting trigger — confirm "brand legal source" reply from Test 6 v6-A. B088 Matthew Sergison-Main first candidate.
 - [ ] **Test 9**: Build LA Line Producer list in Sales Navigator (commercial advertising production companies, Line Producer / Commercial Line Producer titles). Load into `SI8_RV_R4LI_LineProducer_LA_0626A_IL` and launch — Ivy is clear to send.
 - [ ] **Tim Deussen (B125)**: Schedule call from Jun 22. Frame as advisory: product framing validation + EU Act accuracy check. Update CRM. NOT a sales call.
+- [ ] **Test 10**: Build UK CD campaign using two-part gate question. Sales Navigator filter: Creative Director titles, UK, 1–200 employees, AI video keywords in profile. Target: 400–800 profiles. Alias: Ivy or Angel. Launch after Test 11 email validates message.
+- [ ] **Test 11**: Set up Apollo.io account (or confirm existing). Load 200–500 UK CD profiles with AI video keyword filter. Send two-part gate question email sequence (3 messages over 10 days). Target: 2% reply rate, 30%+ gap-story rate.
+- [ ] **Test 12**: Identify 15–20 UK/US EP and Line Producer contacts via LinkedIn. Send E&O probe message. Also: email Beazley and Tokio Marine HCC media underwriting contacts with format inquiry.
+- [ ] **Test 13**: Build 30–50 UK AI Compliance Advisor list in Sales Navigator (AI Compliance / Responsible AI / AI Governance / AI Policy titles, self-employed or 1–10 employee, UK). Send research-frame probe. Prioritise follow-up with Simon Helm post-Jun 23 call.
+- [ ] **Simon Helm (Jun 23 call)**: Confirm whether he has agency clients with active Chain of Title needs. If yes: ask for warm intro to 1–2 of them. This is the multiplier test for ICP 3.
 - [ ] **Daniele Zennaro (B145)**: Ask what "MU" means — "Quick one — what did you mean by 'MU'? Wasn't sure if that was industry shorthand I should know!" Reply to Jun 12 message.
 - [ ] **Marc De Guzman (B027)**: Re-engage (pending).
 - [ ] **Jian Yi Lay (B152) + Ali Loveday-Herzinger (B153)**: Send sample when JD connection accepted.

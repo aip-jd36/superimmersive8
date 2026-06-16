@@ -470,4 +470,56 @@ The second question is the actual T1 filter. Leads who say "it satisfied them" a
 
 ---
 
+---
+
+## Section 11: Broken Sales Motion — Patterns from 26 Pitch Conversations
+
+*Added 2026-06-16. Source: analysis of all conversations in Supabase CSV where a sample PDF or survey questions were sent and dialogue occurred (msg_count ≥ 4).*
+
+---
+
+### The Five Failure Patterns
+
+**Pattern 1 — Sample PDF → Rejection Filter**
+The Chain of Title sample is functioning as a pass/fail test, not a conversion tool. When leads see a 12-page IP provenance document, they make an immediate judgment: "I need this" vs. "I don't need something this complex." Most decide they don't need it — because they've been handling disclosure (telling clients they used AI), and the sample looks like overkill for that problem. Troy Macdonald received the sample and explicitly replied: "I had a look and I don't think it's for me at this time." Hugo Faustino gave the most insightful T1 reply in the dataset and then declined a meeting after seeing the sample link. The sample should go out only after a lead has confirmed a specific documentation gap — not as the default Msg 2 payload.
+
+**Pattern 2 — 9-Question Survey Kills Momentum**
+When the 9-question checklist (tools used, TOS, stock footage, real faces, etc.) is pasted into a LinkedIn message, it reads as a form, not a conversation. It shifts from dialogue to intake. Graham Vincent: "Thanks Ivy." Ivan Petruzzelli: no reply. Ibrahim Badi: "thanks for the detail, genuinely useful context. My current…" and wound down. The questions are the right questions — but sending them as a list in a chat message is the wrong delivery mechanism. They belong on a form after a call, not in a message before one.
+
+**Pattern 3 — "I Already Do This" Leads Don't Convert**
+Every lead who described an existing documentation process — Hugo Barbera, Ibrahim Badi, Saira Macleod, Graeme Carr, Amr Tahtawi — ended up positioning themselves as doing SI8's job, not needing it. Barbera: "We offer the report for a price. If I have to make my report anyways, I rather charge them for it." Badi: "I'm focused on other projects right now." These leads hear "you're already doing it manually, we formalize it" and conclude: "then I don't need you." The differentiation argument ("your informal process doesn't produce a format brand legal teams will actually accept") needs to be deployed earlier and more specifically — not after the survey.
+
+**Pattern 4 — Calendar Booked → No-Show**
+Three leads enthusiastically booked calls and evaporated: Luke Brady (rescheduled twice, final no-show), Oliyah Joseph (confirmed the morning of, then quiet on the Zoom invite), Mike Harris (booked via Calendly, never attended). The commitment ask (15-min call with JD) is creating too much friction relative to urgency. These leads are interested in the topic but the problem isn't urgent enough to protect calendar time. Fix: shorten the ask. "Would you be free for a 10-minute call this week?" is easier to say yes to than a Calendly booking flow. Or send the sample first and use response to that as the call trigger.
+
+**Pattern 5 — The Only Successful Conversion (Ramez Tabshi)**
+Ramez is the only lead in the 26-conversation set who received a pitch and remained genuinely engaged through to a booked call. What was different: he described his own documentation system in operational detail first ("Provenance Dossier" with Stack Transparency, Generation Proof, Likeness Verification), then recognized that SI8 is the final checkpoint he was missing. The pitch felt like filling a gap he had already identified — not a solution looking for a problem. The pattern: he volunteered his process → we confirmed his gap → he asked for a walkthrough. No sample PDF. No survey. One question: "would a call work?"
+
+---
+
+### Root Cause
+
+The pitch sequence is in the wrong order:
+
+**Current order:** Hook → Sample / Survey → Call ask
+
+**Order that works (based on Ramez):** Hook → Let them describe their process → Identify the specific gap → Targeted ask
+
+The sample and the survey both assume the lead has already confirmed a Chain of Title gap. Most leads haven't — they're describing disclosure processes (telling clients they used AI), not Chain of Title gaps. Sending the sample to a disclosure lead is like sending a legal opinion letter to someone who asked "do I need a disclaimer?"
+
+---
+
+### The Fix
+
+Before any sample or survey goes out, confirm one thing:
+
+> *"What did you send them — and did that satisfy their legal team, or did they come back with more questions?"*
+
+If they say "it satisfied them" → disclosure buyer, no immediate Chain of Title need, nurture only.
+If they say "they came back with more questions" or "I had to produce something more formal" → Chain of Title buyer, proceed to sample.
+
+This single follow-up question is the gate. Everything else in the pitch sequence stays the same — it just only activates for leads who clear this filter.
+
+---
+
 *Next analysis: after next Dripify report cycle. Priority watch items: Simon Helm call (Jun 23), Test E v-E1 probe replies, Test 9 LA Line Producer replies, EU Act deadline approach (August 2) — expect T1 signal increase in July.*
