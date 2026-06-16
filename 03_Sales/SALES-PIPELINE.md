@@ -73,7 +73,7 @@
 | B098 | Michelle Ponto | Blue Gecko Communications | Dubai/UAE | "Yes, asking about prompts and sequence" | Await reply | — |
 | B101 | Anas Bakal | Monoud Trading | Dubai/UAE | Detailed existing process — validated it | Await reply | — |
 | B103 | Ahmed Samy Amin | GTCFX | Dubai/UAE | "Would love to compare notes" — Financial services | Await reply | — |
-| B104 | Ashraf Selo | MultiBank Group | Dubai/UAE | "Starting to see this more, larger campaigns" | Await reply | — |
+| B104 | Ashraf Selo | MultiBank Group | Dubai/UAE | Connection accepted Jun 16; JD sent format-structure probe — "formal document or informal sign-off? how structured is the ask?" | Await reply | 2026-06-19 |
 | B106 | Mohammed Magdy Alzahran | Dybaja AI Creative Studio | Dubai/UAE | NDA + Transfer of ownership rights | Await reply | — |
 | B109 | Shahin Sha | Rafaz Properties | Dubai/UAE | Risk/ownership/disclosure framing | Await reply | — |
 | B110 | Nikan Nazari | Freelance | Dubai/UAE | "Document every word in the contract" | Await reply | — |
@@ -110,7 +110,7 @@
 | B-ID | Lead | Company | Geo | Signal Summary | Sample Sent? | Next Action | Follow Up By |
 |------|------|---------|-----|----------------|-------------|-------------|--------------|
 | B145 | Daniele Zennaro | AiYR4 | England | "Request via commercial/rights side — legal/compliance probably behind it." Partial B2B2B confirmation. Chain: legal→commercial/rights→agency. Case-by-case but trending structured. Test 6 v6-A. | No | Pitch + send sample (superimmersive8.com/sample) — position as what the commercial/rights clearance request formalises | — |
-| B002 | Theodor Sandu | McCann/Unilever @ Omnicom | — | "Sure, anytime :)" — top-tier agency signal | No | Send sample Chain of Title | — |
+| B002 | Theodor Sandu | McCann/Unilever @ Omnicom | — | Connection accepted Jun 16; JD sent holdco gate question — "are clients or legal teams asking for documentation on AI video tools/assets at McCann?" | Await reply | 2026-06-19 |
 | B036 | David Tamayo | Prose on Pixels | — | "Big network with legal team dedicated to AI" | No | Await reply (EU AI Act angle sent) | — |
 | B040 | Hasan Sarwar | — | — | "I'd love to see the Example Rights Package" | No | Send sample Chain of Title | — |
 | B041 | Nourhan Mostafa | Ai Studio | Egypt | "Creative Director – AI Content" — described compliance process in detail | No | 4th follow-up sent Jun 8; await reply (off-geo but strong ICP signal) | — |
