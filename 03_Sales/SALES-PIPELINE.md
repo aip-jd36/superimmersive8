@@ -110,7 +110,7 @@
 | B-ID | Lead | Company | Geo | Signal Summary | Sample Sent? | Next Action | Follow Up By |
 |------|------|---------|-----|----------------|-------------|-------------|--------------|
 | B145 | Daniele Zennaro | AiYR4 | England | "Request via commercial/rights side — legal/compliance probably behind it." Partial B2B2B confirmation. Chain: legal→commercial/rights→agency. Case-by-case but trending structured. Test 6 v6-A. | No | Pitch + send sample (superimmersive8.com/sample) — position as what the commercial/rights clearance request formalises | — |
-| B002 | Theodor Sandu | McCann/Unilever @ Omnicom | — | Connection accepted Jun 16; JD sent holdco gate question — "are clients or legal teams asking for documentation on AI video tools/assets at McCann?" | Await reply | 2026-06-19 |
+| B002 | Theodor (Teddy) Sandu | MullenLowe Singapore (IPG) | Singapore | "They are asking for both" — disclosure + Chain of Title. CD at holdco. T1 same-day reply. | No | Send Part 2 gate: what are you sending them and does it satisfy their legal team? | 2026-06-18 |
 | B036 | David Tamayo | Prose on Pixels | — | "Big network with legal team dedicated to AI" | No | Await reply (EU AI Act angle sent) | — |
 | B040 | Hasan Sarwar | — | — | "I'd love to see the Example Rights Package" | No | Send sample Chain of Title | — |
 | B041 | Nourhan Mostafa | Ai Studio | Egypt | "Creative Director – AI Content" — described compliance process in detail | No | 4th follow-up sent Jun 8; await reply (off-geo but strong ICP signal) | — |
@@ -152,13 +152,12 @@
 
 ---
 
-## 4. Call Scheduled (2)
+## 4. Call Scheduled (1)
 
 *Call confirmed on calendar.*
 
 | B-ID | Lead | Company | Geo | Call Date | Format | Prep Notes |
 |------|------|---------|-----|-----------|--------|------------|
-| B027 | Marc De Guzman | UnaFinancial | Manila | Wed Jun 17, 9:30am TPE/Manila | Zoom (JD leads) | "Few clients asked for source asset docs, workflow/gen logs, human review records, rights representations — no standardized format yet." Open with: "did what you sent satisfy those clients or did they come back with more questions?" Confirm which clients, what UnaFinancial's compliance environment looks like. No pitch until gap confirmed. |
 | B100 | Ramez Tabshi | — | Dubai/UAE | Mon Jun 22, 1pm UAE / 5pm TPE | Zoom (JD leads) | "IP provenance and training data transparency is absolutely escalating with clients" — unprompted T1 validation. Prep: which clients are asking, what he's currently sending them, whether it's satisfying their legal team. No product pitch until gap is confirmed. |
 
 ---
