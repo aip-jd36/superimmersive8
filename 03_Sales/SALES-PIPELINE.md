@@ -138,7 +138,7 @@
 
 ---
 
-## 3. Call Requested (7)
+## 3. Call Requested (6)
 
 *The lead has expressed interest in a call, or confirmed a booking that didn't happen.*
 
@@ -150,17 +150,16 @@
 | B043 | Luke Brady | Sublime Animations Ltd | London/UK | Confirmed calls 4x — all missed | 4th reschedule attempt sent Jun 8; move to Nurture if no reply by Jun 13 | 2026-06-13 |
 | B045 | Mike Harris | Seenit | London/UK | "Thanks, booked!" via Calendly — no-show | Follow-up sent Jun 8; await reply | 2026-06-13 |
 | B096 | Ankita Biswas | HTCreaTec | Dubai/UAE | "I'd love to know more and talk over a chat!" | Follow-up sent Jun 8; await reply | 2026-06-13 |
-| B100 | Ramez Tabshi | — | Dubai/UAE | Engaged — Jun 1 slots offered, no confirmation | Follow-up sent Jun 8 with fresh slots; await reply | 2026-06-13 |
 
 ---
 
-## 4. Call Scheduled (0)
+## 4. Call Scheduled (1)
 
 *Call confirmed on calendar.*
 
 | B-ID | Lead | Company | Geo | Call Date | Format | Prep Notes |
 |------|------|---------|-----|-----------|--------|------------|
-| — | — | — | — | — | — | — |
+| B100 | Ramez Tabshi | — | Dubai/UAE | Mon Jun 22, 1pm UAE / 5pm TPE | Zoom (JD leads) | "IP provenance and training data transparency is absolutely escalating with clients" — unprompted T1 validation. Prep: discovery questions on which clients are asking, what he's currently sending them, whether it's satisfying their legal team. No product pitch until gap is confirmed. |
 
 ---
 
