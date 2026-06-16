@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-06-17
 **Source:** Pipeline analysis + verbatim reply review across 600+ Supabase conversations
-**Status:** Two confirmed ICPs with supporting pipeline data. Updated each report cycle as new data comes in.
+**Status:** Two confirmed ICPs with supporting pipeline data. One emerging ICP in testing. Updated each report cycle as new data comes in.
 
 ---
 
@@ -97,6 +97,42 @@ The sales motion is also different: ICP 1 is pitched to the agency creative or p
 | **Geo** | UK, Dubai, Singapore | LA, UK, APAC |
 | **Current pipeline depth** | Strong — 5+ confirmed leads | Early — Test 12 just launched |
 | **Sales motion** | Educate on disclosure vs. Chain of Title gap | Pitch the AI-specific gap only |
+
+---
+
+## ICP 3 (Emerging / In Testing): B2B2B — Brand Legal / Agency GC (Demand Creator)
+
+**The mechanism:** Brand IP/Legal Counsel, Agency General Counsel, and Holdco AI Governance leads are the people who *create* the requirement that flows down to ICP 1. They sit one level above the agency CD or production person and write the contract language or internal policy that makes Chain of Title documentation mandatory. If one brand legal team pre-approves SI8's format and requires it from their agencies, it cascades to every agency on their roster — without SI8 having to sell each one individually.
+
+```
+Title:        Brand IP/Legal Counsel, Agency General Counsel,
+              Holdco AI Governance, EVP Business & Legal Affairs,
+              Head of Legal & Business Affairs
+Company:      Major brands (financial services, pharma, luxury),
+              holdco legal/compliance teams, streaming platforms
+Geo:          UK, USA, Singapore (where regulated-sector brands concentrate)
+Trigger:      Internal AI governance policy or legal team review of AI
+              content risk — they're building requirements, not responding to them
+Pain:         No standardized format exists for what they should require
+              from agencies. SI8's Chain of Title fills that gap.
+Buyer:        Legal/compliance team, not creative — different budget and
+              decision process from ICP 1 and 2
+Sales motion: Research frame, not pitch. "We're getting evaluated by brand
+              legal teams — does our format match what you'd require?"
+              Goal: get them to pre-approve SI8 format → they push requirement
+              to agencies → agencies become ICP 1 buyers.
+```
+
+**Early signals:**
+
+| Lead | B-ID | Signal |
+|------|------|--------|
+| William Finkel | — | EVP Business & Legal Affairs, Hello Sunshine — described B2B2B chain in legal contract terms; most operationally detailed description of how requirement travels from brand legal to agency |
+| Ivan Petruzzelli | B130 | State Street Investment Mgmt — "moving toward structured documentation"; brand-side, not agency-side; B2B2B cascade potential |
+
+**Status:** Hypothesis only — 2 data points, no closed conversations. Campaign designed but not launched: `03_Sales/outreach/LINKEDIN-CAMPAIGNS-LEGAL-TEAMS-V1.md`. Confirm before next report cycle whether to launch.
+
+**Why it's strategically distinct:** ICPs 1 and 2 are direct buyers — SI8 sells $499 to them individually. ICP 3 is a demand amplifier — one conversion multiplies into many ICP 1 buyers without additional outreach. The sales motion and message frame are completely different.
 
 ---
 
