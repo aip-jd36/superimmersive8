@@ -1,6 +1,6 @@
 # SI8 ICP Definitions
 
-**Last updated:** 2026-06-17
+**Last updated:** 2026-06-17 (ICP 1 + Sales Navigator filtering targets; ICP 2 reframed from film LP/E&O to BA/Broadcast Affairs clearance)
 **Source:** Pipeline analysis + verbatim reply review across 600+ Supabase conversations
 **Status:** Two confirmed ICPs with supporting pipeline data. One emerging ICP in testing. Updated each report cycle as new data comes in.
 
@@ -42,61 +42,74 @@ A client's legal team has already reviewed their informal documentation (email, 
 **What this ICP is NOT:**
 Creative Directors who say "I tell clients which tools I used." That is disclosure — a sentence in an email, not Chain of Title. The qualifying gate is Part 2: *"What did you send them — and did that satisfy the legal team, or did they come back asking for more?"*
 
+**How to find more of this ICP:**
+
+- **Geographic proxy (Sales Navigator):** Dubai and Singapore are the fastest filters — any agency CD in those markets has disproportionate finserv client exposure relative to UK or Europe. The geo does the client-roster filtering automatically.
+- **Target known finserv agency networks directly:** Filter by company, not just title. Agencies with known finserv client rosters: MullenLowe, McCann, FCB, Havas, TBWA, Wunderman Thompson, VCCP. Search for CD / Production Specialist / Gen AI Specialist at those specific networks in UK, Dubai, Singapore.
+- **Apollo keyword search:** Apollo searches profile keywords (not just title/company). Search "financial services" + "AI video" in bio or job description to surface people who explicitly mention both. Faster iteration cycle than Dripify for message testing.
+- **Inbound via LinkedIn content:** A post specifically about AI video documentation requirements in financial services marketing self-selects ICP 1 readers. People who comment or DM are pre-qualified — no gate question needed.
+- **Referrals from current warm leads:** One warm intro from Matthew Sergison-Main, Ibrahim Badi, or Ramez Tabshi is worth 50 cold outreach attempts. All three know peers at peer agencies dealing with the same requirement.
+
 ---
 
-## ICP 2: Line Producer / Executive Producer (Film/TV, E&O Insurance Gate)
+## ICP 2: Business Affairs / Broadcast Affairs (Broadcast-Destined AI Content, Clearance Gate)
 
-**The mechanism:** To distribute a film or TV production on Netflix, Amazon, Apple, or through a traditional broadcaster, you need E&O (Errors & Omissions) insurance. E&O insurers are now adding AI exclusions — they won't cover productions that used AI-generated content without cleared Chain of Title documentation. Without E&O, the production cannot be distributed. The LP or EP is the person who manages E&O as part of their job.
+**The mechanism:** The E&O/clearance requirement is real but the addressable market for AI feature films with distribution potential is too small and too hard to find on LinkedIn. The more actionable version of this ICP is Business Affairs and Broadcast Affairs titles at agencies and production companies making long-form or broadcast-destined AI content — brand films, documentaries, streaming-adjacent content — that require formal clearance before broadcast placement or platform delivery. BA/Broadcast Affairs people own this clearance process operationally and already handle it for music, talent, and locations. AI-generated content is a new category they don't yet have a standard process for.
 
 ```
-Title:        Line Producer, Executive Producer, Post Producer,
-              Head of Post-production
-Company:      Independent production companies, studio arms,
-              streaming platform originals (Netflix, Amazon, Apple TV+),
-              documentary and feature film producers
-Geo:          LA (primary — studios and independents), UK (BBC/Channel 4
-              commissioning), APAC (streaming platform originals)
-Trigger:      E&O insurer (Chubb, Beazley, Tokio Marine HCC) requires
-              Chain of Title documentation for AI-generated content as
-              condition of coverage — or excludes it entirely without it
-Pain:         Binary financial blocker — no Chain of Title = no E&O =
-              no distribution deal. Not a "nice to have."
-Buyer:        LP or EP who owns the E&O process; production company
-              absorbs cost as line item
-Price point:  $499/video is trivial relative to E&O premiums and
-              distribution deal value
+Title:        Business Affairs Manager, Broadcast Affairs,
+              Clearance Coordinator, Head of Legal & Business Affairs,
+              Line Producer, Executive Producer
+Company:      Agencies producing long-form or broadcast-destined content,
+              independent production companies with broadcast/streaming clients,
+              studio arms with branded content divisions
+Geo:          LA (primary), UK (BBC/Channel 4/ITV commissioned content),
+              APAC (streaming platform originals — Netflix, Amazon)
+Trigger:      Broadcaster, streaming platform, or brand requires clearance
+              documentation before accepting AI content for distribution or
+              broadcast placement — same gate as music/talent clearance
+Pain:         No standard process or format for AI content clearance.
+              Already owns music, talent, location clearance — AI is
+              a new category with no established workflow.
+Buyer:        BA/Broadcast Affairs person or LP who manages the clearance
+              stack; production company absorbs $499 as a line item
+Price point:  $499 is trivial relative to clearance costs already in budget
+              (music sync alone typically $500–$5K per track)
 ```
 
 **Confirming leads:**
 
 | Lead | B-ID | Signal |
 |------|------|--------|
-| Steve Bannerman | B157 | "In the feature film space, provenance of the video is HUGELY important. You will indeed see it coming up more and more." Head of Post-production, International Originals APAC, Amazon MGM Studios |
+| Steve Bannerman | B157 | "In the feature film space, provenance of the video is HUGELY important. You will indeed see it coming up more and more." Head of Post-production, International Originals APAC, Amazon MGM Studios — confirms mechanism, validates direction |
 | Justin Lufair Brown | B094 | "Contract language has tightened significantly — clients responsible for inputs, we responsible for outputs being clear of third-party rights claims" — Creative Producer AI Video Production, Amazon LA |
 | Joe Maziarski | B150 | "They should be — it's a grey area. Firefly built on cleared assets, others trained on copyrighted material" — Senior Creative AI Producer, Amazon LA |
 | Spencer Stander | B149 | "Questions are usually about clearance: tools used, whether any real person's likeness involved" — Producer, LA |
-| Bernie Su | B156 | Network contact — AI cinema creator, potential E&O/LP/EP connector in LA (Test 12 pipeline) |
+| Bernie Su | B156 | Network contact — AI cinema creator, potential BA/clearance connector in LA (Test 12 pipeline) |
+
+**Why LP/EP for AI feature film is too narrow:**
+AI feature films in active production with genuine distribution potential are rare. Most AI video is advertising, shorts, or experiments — none of which require E&O. LPs and EPs working on AI features are a tiny pool and hard to find on LinkedIn. The BA/Broadcast Affairs title cluster is larger, findable, and already owns the clearance workflow that SI8 plugs into.
 
 **Key difference from ICP 1:**
-ICP 1's pain is reputational and contractual — a client can reject a campaign or pull a contract. ICP 2's pain is **financial and binary** — without Chain of Title, the production literally cannot be distributed or insured. ICP 2 should convert faster and with less price sensitivity because the alternative (no distribution deal) is catastrophically more expensive.
+ICP 1's pain is contractual — a client can reject a campaign. ICP 2's pain is operational and binary — content cannot be broadcast, placed, or distributed without clearance. BA/Broadcast Affairs people already have a clearance budget and workflow. SI8 is a new line item in a process they already run, not a new concept to explain.
 
-The sales motion is also different: ICP 1 is pitched to the agency creative or production person. ICP 2 is pitched to LPs and EPs who **already understand what Chain of Title means** — they deal with it for live-action productions and know exactly why it matters. The concept requires no education; only the AI-specific gap needs to be explained.
+The sales motion: pitch SI8 as the AI clearance layer alongside music, talent, and location clearance — not as a compliance product. "You already clear music and talent. AI-generated content is the gap in your clearance stack."
 
-**Active test:** Test 12 (LA Line Producer / EP campaign) — launched June 14, 122 leads, monitoring for first substantive replies.
+**Active test:** Test 9 (LA BA/Clearance titles, "Clearance Pro" sequence) — launched June 14, 122 leads, monitoring for first substantive replies.
 
 ---
 
 ## The Distinction Between ICPs
 
-| | ICP 1 (Agency / Finserv) | ICP 2 (Film/TV / E&O) |
+| | ICP 1 (Agency / Finserv) | ICP 2 (BA / Broadcast Clearance) |
 |---|---|---|
-| **Pain urgency** | Campaign can be delayed or rejected | Production cannot be distributed |
-| **Financial stakes** | Campaign fee at risk | Distribution deal + E&O premium at risk |
-| **Chain of Title familiarity** | Low — mostly handles disclosure informally | High — already does this for live-action |
-| **Decision speed** | Moderate — self-authorize at $499 | Fast — $499 is trivial vs. deal value |
+| **Pain urgency** | Campaign can be delayed or rejected | Content cannot be broadcast or placed without clearance |
+| **Financial stakes** | Campaign fee at risk | Clearance budget already exists — SI8 is a new line item |
+| **Chain of Title familiarity** | Low — mostly handles disclosure informally | High — already owns music/talent/location clearance workflow |
+| **Decision speed** | Moderate — self-authorize at $499 | Fast — $499 trivial vs. existing clearance spend |
 | **Geo** | UK, Dubai, Singapore | LA, UK, APAC |
-| **Current pipeline depth** | Strong — 5+ confirmed leads | Early — Test 12 just launched |
-| **Sales motion** | Educate on disclosure vs. Chain of Title gap | Pitch the AI-specific gap only |
+| **Current pipeline depth** | Strong — 5+ confirmed leads | Early — Test 9 just launched |
+| **Sales motion** | Educate on disclosure vs. Chain of Title gap | "AI is the gap in your clearance stack" — alongside music and talent |
 
 ---
 
