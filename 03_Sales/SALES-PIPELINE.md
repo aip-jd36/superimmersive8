@@ -104,7 +104,7 @@
 
 ---
 
-## 2. Warm Lead (26)
+## 2. Warm Lead (27)
 
 *Clear ICP signal or acknowledged pain. Moving toward a call or sample.*
 
@@ -132,6 +132,7 @@
 | B087 | Ibrahim Badi | IKM Marketing | London/UK | "Yes especially in regulated sectors" — answered 9 intake Qs inline; Creator Record makes sense as next step | COMP-B2 code sent Jun 8; await reply or form fill | — |
 | B088 | Matthew Sergison-Main | OLIVER / Brandtech | London/UK | "Yes I am being asked this 100%" — strongest pain signal; works at OLIVER (Brandtech holdco) | B2B2B probe sent Jun 8: is requirement from brand legal or creative? If legal confirmed → Test 8 | — |
 | B090 | Saira Macleod | Magnific | London/UK | Asked what the checker looks for — product question | Await reply — confirm JD call | — |
+| B158 | Dan Lantry | Sonova Group | USA | "Would like to better understand the issue." VP Legal Affairs (North America), regulated healthcare brand. ICP 3 — brand legal officer whose requirement cascades to agencies. | Brief NY Law education + call ask Jun 18 [JD alias] | 2026-06-18 |
 | B094 | Justin Lufair Brown | Amazon | LA | "Contract language tightened a lot in last 12 months... happy to go deeper if useful." Creative Producer AI Video Production. | Send call invite Jun 17 [Vanessa]: "Still open to that deeper conversation — would a 20-min call this week or next work?" | 2026-06-17 |
 | B095 | Florent Delavous | Xtendency | Dubai/UAE | "Already working on something in this space" — CEO | Probe collab/competitor + book call | — |
 | B099 | Sultan Alsuwaidi | Video tube | Dubai/UAE | "Yes — becoming standard now" — sample sent | Await reply | — |
