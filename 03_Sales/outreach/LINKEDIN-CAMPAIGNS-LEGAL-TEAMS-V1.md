@@ -1,6 +1,6 @@
 # LinkedIn Outbound Campaigns — Legal Team Discovery
 **Written:** June 7, 2026
-**Updated:** June 7, 2026 — Added Campaign 4 (Germany/GEMA hook) and Campaign 5 (New York/NY Synthetic Performer Law)
+**Updated:** June 17, 2026 — Added Campaign 4 (Germany/GEMA hook) and Campaign 5 (New York/NY Synthetic Performer Law); added Cycle 1 Findings; locked alias assignments for next wave (Angel unavailable Jun 2026)
 **Model:** Discovery → validate what brand legal teams need before building sales campaigns
 **Tool:** Dripify — separate from agency campaigns
 **Status:** Draft — ready to load into Dripify
@@ -23,22 +23,26 @@ These are NOT sales campaigns. Goal: get brand legal teams and holdco governance
 
 ## Personas
 - UK/London: **Ivy**
-- Amsterdam/EU: **Angel**
-- Dubai: **Vanessa**
-- Germany: **Angel**
-- New York: **Vanessa**
+- EMEA (excl. UK, Germany, UAE): **JD** — EU AI Act hook
+- Germany: **Ivy** — GEMA/Article 50 hook (Angel unavailable Jun 2026)
+- UAE/Dubai: **Ivy** — UAE AI Act hook (Angel unavailable Jun 2026)
+- New York: **JD** ✓ active
+- ICP 1 (Agency Creative / Finserv-exposed): **Vanessa** — list to be built
+
+*Note: Angel is unavailable for SI8 campaigns in June 2026 (other client). Reassigned Germany and UAE to Ivy.*
 
 ## What We're Split-Testing
 
-| | Campaign 1 | Campaign 2 | Campaign 3 | Campaign 4 | Campaign 5 |
-|---|---|---|---|---|---|
-| **Name** | SI8_Who's Asking | SI8_What Would Work | SI8_Writing the Standard | SI8_Already in Court | SI8_NY 1st Law (4 Msg) |
-| **Geo** | UK | Dubai | Amsterdam/EU | Germany | New York |
-| **ICP** | Brand-side IP/Legal | Brand-side IP/Legal | Holdco AI Governance | Brand-side IP/Legal | Brand-side IP/Legal |
-| **Hook** | A/B: ASA ruling vs. NY law | UAE AI Act | EU AI Act | A/B: GEMA Munich ruling vs. Art. 50 deadline | NY Synthetic Performer Law (eff. June 9) |
-| **Title split** | — | — | Governance title vs. GC/VP Legal | — | — |
-| **Audience list** | London 148 | Dubai 141 | TBD — next batch | Germany 202 | New York 201 |
-| **Persona** | Ivy | Vanessa | Angel | Angel | Vanessa |
+| | Campaign 1 | Campaign 2 | Campaign 3 | Campaign 4 | Campaign 5 | Campaign 6 |
+|---|---|---|---|---|---|---|
+| **Name** | SI8_Who's Asking | SI8_What Would Work | SI8_Writing the Standard | SI8_Already in Court | SI8_NY 1st Law (4 Msg) | SI8_EU Act_EMEA |
+| **Geo** | UK | UAE/Dubai | EMEA (excl. UK, DE, UAE) | Germany | New York | EMEA broad |
+| **ICP** | Brand-side IP/Legal | Brand-side IP/Legal | Holdco AI Governance | Brand-side IP/Legal | Brand-side IP/Legal | Brand-side IP/Legal |
+| **Hook** | A/B: ASA ruling vs. NY law | UAE AI Act | EU AI Act | GEMA Munich ruling + Art. 50 | NY Synthetic Performer Law (eff. June 9) | EU AI Act (Art. 50 Aug 2) |
+| **Title split** | — | — | Governance title vs. GC/VP Legal | — | — | — |
+| **Audience list** | London 148 | Dubai 141 | TBD — holdco lists | Germany 202 | New York 201 | EMEA 1K+ (filtered) |
+| **Persona** | Ivy | **Ivy** | Deferred | **Ivy** | JD ✓ active | **JD** |
+| **Status** | ✓ Active (both variants) | Next wave | Deferred | Next wave | ✓ Active | Next wave |
 
 ---
 
@@ -279,6 +283,100 @@ Note on US priority: US is not a current sales geo target, but for *discovery va
 
 ---
 
+## Campaign 6: SI8_EU Act_EMEA
+
+**ICP:** IP Counsel, Brand Legal, Head of Legal (Marketing/Commercial), Director of Legal Affairs at large advertisers in continental Europe
+**Title filters:** Same as Campaigns 1–5 (IP Lawyer/Attorney/Manager, Legal Affairs, Dir. LA, VP LA, Head of LA, Dir. IP)
+**Company type:** Large advertisers — CPG, automotive, pharma, finance, luxury, retail — with EU operations
+**Geo:** EMEA broad list (1K+) — **filtered in Sales Navigator to exclude UK, Germany, and UAE** before loading (those geos have dedicated campaigns with sharper local hooks)
+**Remaining pool:** France, Spain, Italy, Nordics, Benelux, Eastern Europe
+**Persona:** JD
+**Hook:** EU AI Act Article 50 enforcement August 2, 2026 — six weeks out at launch
+**Dripify campaign name:** `SI8_RV_R4LI_LegalA_BLA_EMEA_0626A_JC`
+
+**Key message design decision:** Article 50 is a labeling requirement on AI tool providers — not on agencies or brands directly. Message 3 clarifies this explicitly to filter out labeling/disclosure people and attract IP provenance people. The IP documentation requirement (training data clearance, commercial licensing, synthetic performer rights) is being driven by brand legal teams and client contracts, not by Article 50 itself. That's the gap SI8 solves.
+
+---
+
+### Message 1 — Connection note
+> Hi %%first_name%%,
+>
+> I'm building a documentation standard for AI video and want to understand what brand legal teams in Europe are requiring before campaign sign-off. EU AI Act Article 50 enforcement begins August 2 — six weeks out. Is AI content documentation something your team is currently defining — or still waiting to see what enforcement looks like?
+>
+> JD
+
+*Short yes/no question — no product mention, no time ask ✅*
+
+---
+
+### Message 2 (Day 3)
+> Hi %%first_name%%, thanks for connecting!
+>
+> The specific question I'm trying to answer: when an agency submits an AI video campaign for your approval, what documentation are you currently asking them to produce? And when they can't produce it, what happens to the campaign?
+>
+> I'm speaking with brand legal teams across the EU to map how approaches differ by market. Happy to share what I'm hearing in return.
+>
+> JD
+> www.superimmersive8.com
+
+*Ends with www.superimmersive8.com — matches extract_reply() pattern ✅*
+
+---
+
+### Message 3 (Day 7)
+> One thing worth sharing from my research:
+>
+> Article 50 sets labeling requirements on AI tool providers — Runway, Kling, Pika — not on agencies or brands directly. The IP documentation requirement (which tools were used, training data licensing, synthetic performer rights) is being driven by brand legal teams and client contracts, not by Article 50 itself.
+>
+> Which means brand legal teams are defining that standard right now — without a regulatory template to follow. Is that consistent with what you're seeing, or is your team's approach to AI content documentation coming from a different direction?
+>
+> JD
+> www.superimmersive8.com
+
+*Ends with www.superimmersive8.com — matches extract_reply() pattern ✅*
+*Note: explicitly clarifies Article 50 mismatch — filters out labeling/disclosure people, surfaces IP provenance people ✅*
+
+---
+
+### Message 4 (Day 14)
+> Hi %%first_name%% — last note from me.
+>
+> If AI video documentation isn't something your team is dealing with yet, completely understood.
+>
+> If it is — especially as brand clients start requiring documentation as a condition of campaign approval, independently of what Article 50 requires — I'd be glad to share what I'm hearing from other brand legal teams across Europe and show you the format I've built. Even if it doesn't fit, the feedback would be useful.
+>
+> Thanks for connecting.
+>
+> JD
+> www.superimmersive8.com
+
+*Ends with www.superimmersive8.com — matches extract_reply() pattern ✅*
+
+---
+
+## Cycle 1 Findings (Jun 8–17, 2026)
+
+**Rule confirmed: hooks must be local. A foreign law generates dismissals from brand legal audiences.**
+
+| Campaign | Hook | Geo | Audience | Responses | Quality |
+|----------|------|-----|----------|-----------|---------|
+| SI8_Who's Asking_ASA (4 Msg) — Ivy | ASA ruling | UK | IP Legal / Brand, London | 2 | James T (B161) — substantive, talent-side legal, described AI tool prohibition process |
+| SI8_RV_R4LI_IP_Legal_Brand_UK_0626B_IL — Ivy | NY Law | UK | IP Legal / Brand, London | 3 | "This never happens" / "So sorry not interested" / generic hi — all low quality |
+| SI8_RV_R4LI_LegalA_BLA_US_0626A_JC — JD | NY Law | US | Legal Affairs / BLA, New York | 4 | William Finkel (B160, Hello Sunshine EVP B&LA) + Dan Lantry (B158, Sonova VP Legal) — genuine ICP 3 signals |
+
+**Key finding:** The NY Synthetic Performer Law hook works for US brand legal audiences (directly applicable, creates real urgency) and fails for UK brand legal audiences (foreign law, no direct exposure). The ASA hook lands for UK audiences because it's their regulator.
+
+**Implication for future campaigns:**
+- UK BLA → ASA hook only. Do not use NY Law.
+- US BLA → NY Law hook. Do not use ASA or EU Act.
+- Germany BLA → GEMA/Article 50 hook. Do not use ASA or NY Law.
+- Dubai BLA → UAE AI Act hook.
+- The hook must match the audience's legal jurisdiction. Brand legal professionals evaluate relevance instantly — a foreign law signals the sender doesn't understand their context.
+
+**ICP 3 signal rate from US BLA campaign:** 2 genuine ICP 3 leads out of 4 responses (50% quality rate) in 6 days. Strongest signal rate of any legal-targeting campaign to date.
+
+---
+
 ## Measurement: What Success Looks Like
 
 After 3–4 weeks, compare across all campaigns:
@@ -358,26 +456,31 @@ https://www.linkedin.com/sales/search/people?query=(spellCorrectionEnabled%3Atru
 ### Lists Without Campaigns Yet
 
 **Germany / Berlin / Hamburg (202)**
-Strong urgency hook available: GEMA v. OpenAI (Munich court, Nov 2025) + EU AI Act Article 50 enforcement August 2. The "Recently Posted on LI" filter is good practice — these leads are active on the platform. Need a Campaign 4 using the EU/German regulatory angle. Persona: Angel (Amsterdam) or a new German persona. Suggest adapting Campaign 3 (SI8_Writing the Standard) messages with the GEMA/Article 50 hook.
+Strong urgency hook: GEMA v. OpenAI (Munich court, Nov 2025) + EU AI Act Article 50 enforcement August 2. "Recently Posted on LI" filter = active users only. **Persona: Ivy** (Angel unavailable Jun 2026). Use Campaign 4 GEMA hook messages. Load after Ivy's UK BLA campaigns wind down.
+
+**UAE/Dubai (141)**
+Hook: UAE AI Act (grace period ends Sept 2026) + UAE Advertiser Permit (AED 1,000,000 fines). **Persona: Ivy.** Use Campaign 2 messages — update alias name from Lilly → Ivy throughout. Load alongside or after Germany.
+
+**EMEA Broad (1K+) — filtered**
+Before loading: exclude UK, Germany, and UAE leads in Sales Navigator to avoid overlap with active campaigns. Remaining pool = France, Spain, Italy, Nordics, Benelux, Eastern Europe. Hook: EU AI Act Article 50 enforcement August 2. **Persona: JD.** New Campaign 6 — messages to be written (adapt Campaign 3/EU Act framing for brand legal, not holdco governance titles).
 
 **New York Metro (201)**
-Highest-urgency list in the set. NY Synthetic Performer Law (S.8420-A) took effect June 9, 2026 — brand IP lawyers in NY are being asked about this right now. Message 1B from Campaign 1 (NY law hook) can be used directly on this list. Persona: use one of the four active aliases (JD, Angel, Ivy, Vanessa). Note: US is not a current priority geo for sales, but for *discovery/validation* purposes this list is extremely timely.
+✓ Running — JD alias, 108 leads loaded, 4 responses. 93 leads remaining in Sales Nav (existing connections filtered by Dripify).
 
 ---
 
 ## Next Steps
 
-**Load order — most urgent first:**
+**Load order — next wave (Jun 2026):**
 
-- [ ] **Campaign 5 — NEW YORK (most urgent):** NY Synthetic Performer Law effective June 9 — load immediately. Audience: New York 201 list. Persona: JD.
-- [ ] **Campaign 4A — GERMANY (GEMA hook):** Load Germany 202 list with Message 1A. Persona: Angel (or new German alias). "Recently Posted on LI" filter already on the saved search.
-- [ ] **Campaign 4B — GERMANY (Article 50 hook):** Same Germany 202 list, Message 1B, separate Dripify campaign for clean A/B data.
-- [x] **Campaign 1A — UK (ASA hook):** London 148 list, Message 1A, Ivy persona. ✓ Active Jun 8, 2026
-- [ ] **Campaign 1B — UK (NY law hook):** London 148 list, Message 1B, Ivy persona — separate campaign.
-- [ ] **Campaign 2 — DUBAI:** Dubai 141 list, Vanessa persona.
-- [ ] **Campaign 3A + 3B — AMSTERDAM HOLDCO:** Deferred to next batch. Audience lists not yet built — need Sales Nav filter URLs for holdco governance titles (3A) and GC/VP Legal titles (3B) within WPP/Publicis/IPG/Omnicom/Dentsu European arms.
-- [ ] **Priority warm intro:** Matthew Sergison-Main (B088, OLIVER/Brandtech) → ask what the brand legal contact specifically asked him to produce → seek intro to that person → fastest path to validating Campaign 1 without waiting for Dripify data.
-- [ ] **After 3–4 weeks:** Compare reply rates and reply quality across all campaigns → use findings to write the first sales campaign for brand legal teams.
+- [x] **Campaign 5 — NEW YORK:** ✓ Active Jun 11, 2026. JD alias. 108 leads, 4 responses — William Finkel (B160, Hello Sunshine) + Dan Lantry (B158, Sonova) confirmed ICP 3 signals.
+- [x] **Campaign 1A — UK (ASA hook):** ✓ Active Jun 8, 2026. Ivy. 74 leads, 1 substantive reply (James T, B161).
+- [x] **Campaign 1B — UK (NY law hook):** ✓ Active Jun 10, 2026. Ivy. 74 leads, 3 responses — all low quality (2 not interested, 1 generic). **Finding: NY Law hook fails for UK BLA audience.**
+- [ ] **Campaign 4 — GERMANY (GEMA hook):** Load Germany 202 list. **Persona: Ivy** (Angel unavailable). Wait for UK BLA campaigns to wind down before loading. GEMA/Article 50 messages already written above.
+- [ ] **Campaign 2 — UAE/DUBAI:** Load Dubai 141 list. **Persona: Ivy.** Update all "Lilly" references in Campaign 2 messages to "Ivy" before loading.
+- [ ] **Campaign 6 — EMEA (excl. UK, DE, UAE):** Load EMEA 1K+ list filtered in Sales Nav to exclude UK, Germany, UAE. **Persona: JD.** EU AI Act hook. Messages need to be written — adapt Campaign 3 framing for brand legal titles (not holdco governance).
+- [ ] **ICP 1 — Vanessa:** Build finserv-exposed agency creative list (Creative Director / Production Specialist, finserv-adjacent agencies, UK + Dubai + Singapore geo). Legal Friction sequence. List build is the immediate next step — see ICP-DEFINITIONS.md for targeting parameters.
+- [ ] **Campaign 3 — HOLDCO GOVERNANCE:** Deferred. Audience lists not yet built for holdco governance/GC titles within Big 6 European arms.
 
 ---
 

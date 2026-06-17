@@ -1,6 +1,6 @@
 # SI8 ICP Definitions
 
-**Last updated:** 2026-06-17 (ICP 1 + Sales Navigator filtering targets; ICP 2 reframed from film LP/E&O to BA/Broadcast Affairs clearance)
+**Last updated:** 2026-06-17 (ICP 1 + Sales Navigator filtering targets; ICP 2 expanded to cover both BA/Broadcast Affairs clearance gate and LP/EP E&O insurance — two pain points, one ICP)
 **Source:** Pipeline analysis + verbatim reply review across 600+ Supabase conversations
 **Status:** Two confirmed ICPs with supporting pipeline data. One emerging ICP in testing. Updated each report cycle as new data comes in.
 
@@ -52,9 +52,15 @@ Creative Directors who say "I tell clients which tools I used." That is disclosu
 
 ---
 
-## ICP 2: Business Affairs / Broadcast Affairs (Broadcast-Destined AI Content, Clearance Gate)
+## ICP 2: Business Affairs / Broadcast Affairs / Line Producer (Clearance Gate + E&O Insurance)
 
-**The mechanism:** The E&O/clearance requirement is real but the addressable market for AI feature films with distribution potential is too small and too hard to find on LinkedIn. The more actionable version of this ICP is Business Affairs and Broadcast Affairs titles at agencies and production companies making long-form or broadcast-destined AI content — brand films, documentaries, streaming-adjacent content — that require formal clearance before broadcast placement or platform delivery. BA/Broadcast Affairs people own this clearance process operationally and already handle it for music, talent, and locations. AI-generated content is a new category they don't yet have a standard process for.
+**The mechanism:** Two distinct but related pain points under one ICP:
+
+**Pain A — Clearance gate:** BA/Broadcast Affairs titles at agencies and production companies making long-form or broadcast-destined AI content — brand films, documentaries, streaming-adjacent content — require formal clearance before broadcast placement or platform delivery. BA/Broadcast Affairs people own this process operationally and already handle it for music, talent, and locations. AI-generated content is a new category they don't yet have a standard process for.
+
+**Pain B — E&O insurance:** Line Producers and Executive Producers need E&O (Errors & Omissions) insurance for AI content, but insurers are adding AI exclusions or requiring documentation before issuing full coverage. Chain of Title documentation is what closes the gap between "AI content" and "insurable AI content."
+
+Both pain points lead to the same purchase: a structured IP provenance document that satisfies a formal gate. The clearance gate is binary (content cannot be distributed without it); the E&O gate is financial (can't close production without coverage). Both are stronger purchase triggers than ICP 1.
 
 ```
 Title:        Business Affairs Manager, Broadcast Affairs,
@@ -65,16 +71,19 @@ Company:      Agencies producing long-form or broadcast-destined content,
               studio arms with branded content divisions
 Geo:          LA (primary), UK (BBC/Channel 4/ITV commissioned content),
               APAC (streaming platform originals — Netflix, Amazon)
-Trigger:      Broadcaster, streaming platform, or brand requires clearance
-              documentation before accepting AI content for distribution or
-              broadcast placement — same gate as music/talent clearance
-Pain:         No standard process or format for AI content clearance.
-              Already owns music, talent, location clearance — AI is
-              a new category with no established workflow.
-Buyer:        BA/Broadcast Affairs person or LP who manages the clearance
-              stack; production company absorbs $499 as a line item
-Price point:  $499 is trivial relative to clearance costs already in budget
-              (music sync alone typically $500–$5K per track)
+Trigger:      (A) Broadcaster, streaming platform, or brand requires clearance
+              documentation before accepting AI content — same gate as
+              music/talent clearance. (B) E&O insurer requires AI documentation
+              or adds AI exclusion to standard media liability policy.
+Pain:         (A) No standard process or format for AI content clearance.
+              Already owns music/talent/location clearance — AI is a new
+              category with no established workflow.
+              (B) Can't get full E&O coverage without Chain of Title; insurer
+              either excludes AI content or asks for provenance documentation.
+Buyer:        BA/Broadcast Affairs person or LP who manages clearance stack
+              or production insurance; $499 absorbed as a line item
+Price point:  $499 trivial vs. clearance costs (music sync: $500–$5K/track)
+              and E&O premiums ($3K–$15K/year)
 ```
 
 **Confirming leads:**
@@ -87,8 +96,8 @@ Price point:  $499 is trivial relative to clearance costs already in budget
 | Spencer Stander | B149 | "Questions are usually about clearance: tools used, whether any real person's likeness involved" — Producer, LA |
 | Bernie Su | B156 | Network contact — AI cinema creator, potential BA/clearance connector in LA (Test 12 pipeline) |
 
-**Why LP/EP for AI feature film is too narrow:**
-AI feature films in active production with genuine distribution potential are rare. Most AI video is advertising, shorts, or experiments — none of which require E&O. LPs and EPs working on AI features are a tiny pool and hard to find on LinkedIn. The BA/Broadcast Affairs title cluster is larger, findable, and already owns the clearance workflow that SI8 plugs into.
+**Scope note — LP/EP:**
+LP/EP for AI feature film alone is too narrow — AI features in active production with genuine distribution potential are rare, and that pool is hard to find on LinkedIn. The addressable LP/EP segment is broader: any LP or EP producing AI content for a platform, brand, or broadcaster where E&O insurance is required. The BA/Broadcast Affairs title cluster is the operational complement — larger, findable, and already owns the clearance workflow. Both belong in ICP 2.
 
 **Key difference from ICP 1:**
 ICP 1's pain is contractual — a client can reject a campaign. ICP 2's pain is operational and binary — content cannot be broadcast, placed, or distributed without clearance. BA/Broadcast Affairs people already have a clearance budget and workflow. SI8 is a new line item in a process they already run, not a new concept to explain.

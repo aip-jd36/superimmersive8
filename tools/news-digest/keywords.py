@@ -120,16 +120,16 @@ IMPORTANT: Chain of Title is NOT an AI disclosure label. Laws like NY S.8420-A, 
 
 ## Three Target ICPs
 
-1. **Creative Directors / Heads of AI Production at agencies and production houses** — they submit AI video for brand client approval and get blocked. Pain: campaign stuck, client relationship at risk, deadline missed. Trigger: being asked by brand legal for documentation they can't produce. LinkedIn angle: speak to the practical reality of getting a campaign through approval.
+1. **Creative Directors / Senior Production Specialists at agencies with finserv-exposed clients** — they submit AI video for brand client approval and get blocked when the client's legal team adds a documentation requirement to the brief or contract. Pain: campaign stuck, client relationship at risk, deadline missed. Trigger: informal handling (email, tool list) no longer satisfies what the legal team is formally requiring. Best geo: Dubai (finserv market), Singapore, UK/England. LinkedIn angle: speak to the practical reality of getting a campaign through approval.
 
-2. **Brand Legal / IP Counsel / Head of Legal at large advertisers (CPG, automotive, pharma, finance, luxury)** — they ARE the gatekeepers who block campaigns. Pain: they have no standard format to point agencies to; every submission is ad hoc, takes longer to review, and creates liability exposure. Trigger: regulatory pressure (NY Synthetic Performer Law, EU Article 50, UAE AI Act, ASA enforcement) making them realize they need a documented paper trail. LinkedIn angle: speak to the emerging standard they're being asked to enforce.
+2. **BA/Broadcast Affairs / Line Producers / Executive Producers at agencies and production companies making broadcast-destined AI content** — two distinct pain points: (a) clearance gate before broadcast/platform delivery — same process as music/talent/location clearance, no standard format for AI content; (b) E&O insurance — standard policies are adding AI exclusions or requiring documentation riders; can't get full coverage without Chain of Title. Pain: content cannot be distributed or insured without documentation. Geo: LA (primary), UK. LinkedIn angle: speak to the clearance stack gap (AI is the missing category) or the insurance coverage gap.
 
-3. **Line Producers / Executive Producers at production houses** — they need E&O (errors & omissions) insurance for every production. Standard E&O policies are increasingly adding AI exclusions or requiring supplemental AI documentation riders. Pain: can't get full E&O coverage for productions that include AI-generated content; insurer asks for documentation of AI tools used and no standard format exists. LinkedIn angle: speak to the insurance coverage gap and what documentation closes it.
+3. **Brand Legal / IP Counsel / Agency GC at major advertisers and holdcos** — they SET the documentation requirement that flows down to ICP 1. B2B2B cascade: one ICP 3 conversion multiplies into many ICP 1 buyers as the requirement flows through agency contracts. Pain: no standard format exists for what they should require from agencies; every submission is ad hoc, takes longer to review, creates liability exposure. Trigger: regulatory pressure (NY Synthetic Performer Law, EU Article 50, UAE AI Act, ASA enforcement) pushing them to formalize. LinkedIn angle: speak to the emerging standard they're being asked to enforce.
 
 ## Geography (priority order)
 
-UK/London (primary), Amsterdam/Netherlands, Dubai/UAE, Singapore, Germany/EU.
-US developments matter for legal precedent and ICP awareness but SI8's active sales targets are UK/EU/UAE/Singapore.
+UK/England (primary), Dubai/UAE (strong finserv signal — disproportionate agency CD exposure to regulated clients), LA (ICP 2 test), Amsterdam/Netherlands, Singapore, Germany/EU.
+US developments matter for legal precedent (NY Synthetic Performer Law) and ICP 3 awareness but active sales targets are UK/EU/UAE/Singapore/LA.
 
 ## Key Legal Cases and Regulatory Events — Always High Relevance
 

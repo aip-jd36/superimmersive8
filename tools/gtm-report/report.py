@@ -176,16 +176,16 @@ PRODUCTS:
 - SI8 Certified ($499): 90-minute human review. Route: /certify. Delivers Chain of Title IP provenance document (copyright + right of publicity + trademark) accepted by brand legal teams and E&O insurers.
 
 THREE TARGET ICPs:
-1. Creative Directors / Heads of AI Production at agencies — submit AI video, get blocked by brand legal. Pain: campaign stuck, deadline missed.
-2. Brand Legal / IP Counsel at large advertisers — they are the gatekeepers who set the documentation requirement. Pain: no standard format exists; every submission is ad hoc.
-3. Line Producers / Executive Producers — need E&O insurance for AI content but insurers are adding AI exclusions. Pain: can't get full coverage without AI documentation.
+1. ICP 1 (confirmed) — Creative Director / Senior Production Specialist at agencies with finserv-exposed clients. Client legal team adds AI documentation requirement to contract or campaign approval. Pain: informal handling doesn't satisfy the formal requirement. Best geo signal: Dubai, Singapore, UK/England.
+2. ICP 2 (confirmed) — BA/Broadcast Affairs / Line Producer / Executive Producer at agencies or production companies making broadcast-destined AI content. Two pain points: (a) clearance gate before broadcast/platform delivery — same process as music/talent/location clearance; (b) E&O insurance — insurers adding AI exclusions, can't get full coverage without Chain of Title. Geo: LA, UK.
+3. ICP 3 (emerging) — Brand Legal / IP Counsel / Agency GC at major advertisers or holdcos. They SET the documentation requirement that flows to ICP 1. B2B2B cascade: one ICP 3 conversion multiplies into many ICP 1 buyers without additional outreach.
 
 CURRENT GTM:
-- Primary channel: LinkedIn outbound (Dripify) to CDs/EPs/AI Directors at agencies in London (primary), Amsterdam, Dubai/UAE, Singapore
-- B2B2B discovery campaigns (new, June 2026): targeting brand legal teams directly (IP Counsel, Brand Legal, Holdco AI Governance) via SI8_Who's Asking, SI8_What Would Work, SI8_Writing the Standard
+- Primary channel: LinkedIn outbound (Dripify) — ICP 1: Legal Friction sequence across Dubai, England, Amsterdam, Berlin, Singapore, France, Stockholm; ICP 2: Clearance Pro v1 (LA Line Producers, Ivy); ICP 3: SI8_Who's Asking ASA (UK, Ivy), SI8_Who's Asking NY Law (UK, Ivy — split test), BLA US NY Law (JD)
 - Secondary: Instagram outreach to AI filmmakers/creators for Creator Record ($29)
-- Active regulatory urgency hooks: NY Synthetic Performer Law (effective June 9, 2026), EU AI Act Article 50 enforcement (August 2, 2026), UAE AI Act (grace period ends September 2026)
-- Geographic priority order: UK/London → Amsterdam/EU → Dubai/UAE → Singapore
+- Active regulatory urgency hooks: NY Synthetic Performer Law (effective June 9, 2026 — US audience only), EU AI Act Article 50 enforcement (August 2, 2026 — EMEA), UAE AI Act (grace period ends September 2026 — UAE only), ASA/CAP Code (UK only)
+- Local hook rule: regulatory hooks must match audience jurisdiction — mismatched hooks produce lower-quality replies
+- Geographic priority order: UK/England (primary) → Dubai/UAE (strong finserv signal) → LA (ICP 2 test) → Amsterdam/EU → Singapore
 
 KEY CONVERSION FUNNEL EVENTS (GA4):
 - get_verified_click: clicks on "Get Verified" / "Get Certified" CTAs (intent signal)
@@ -200,7 +200,7 @@ CURRENT HYPOTHESES TO VALIDATE:
 1. LinkedIn is the primary traffic driver and has lowest bounce rate vs. other sources
 2. /sample page is the key bottom-of-funnel page — view_sample_click correlates with checkout_started
 3. /certify ($499) checkout ratio vs. /record ($29) — is anyone attempting the higher tier?
-4. UAE and Amsterdam traffic emerging as UK outreach expands to new geos
+4. Dubai and UK are the strongest geo signals — watch for traffic from these markets specifically (UAE traffic emerging from LinkedIn outreach)
 5. book_call_click and request_demo_submit are leading indicators of pipeline even when purchase=0
 """
 

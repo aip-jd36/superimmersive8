@@ -155,14 +155,22 @@ def claude_digest(urgent, followup, awaiting, icp_section, ga4_text, discovery_t
 SI8 is a B2B compliance infrastructure provider for AI-generated video. Core product: Chain of Title verification — an IP provenance document covering copyright, right of publicity, and trademark. Two tiers: SI8 Certified ($499, 90-min human review, accepted by brand legal teams and E&O insurers) and Creator Record ($29, self-attested).
 
 Three target ICPs:
-1. Creative Directors / Heads of AI Production at agencies — submit AI video for brand approval, get blocked. Pain: campaign stuck.
-2. Brand Legal / IP Counsel at major advertisers — they ARE the gatekeepers who set the documentation requirement. Pain: no standard format to point agencies to.
-3. Line Producers / Executive Producers — need E&O insurance for AI content but insurers are adding AI exclusions. Pain: can't get full coverage.
+1. ICP 1 (confirmed) — Creative Director / Senior Production Specialist at agencies with finserv-exposed clients. Client legal team adds AI documentation requirement to contract or campaign approval. Pain: informal handling (email, tool list) doesn't satisfy the formal requirement. Best geo signal: Dubai, Singapore, UK/England.
+2. ICP 2 (confirmed) — BA/Broadcast Affairs / Line Producer / Executive Producer at agencies or production companies making broadcast-destined AI content. Two pain points: (a) clearance gate before broadcast/platform delivery — same process as music/talent/location clearance, no standard format for AI content; (b) E&O insurance — insurers adding AI exclusions, can't get full coverage without Chain of Title documentation. Geo: LA, UK.
+3. ICP 3 (emerging) — Brand Legal / IP Counsel / Agency GC at major advertisers or holdcos. They SET the documentation requirement that flows to ICP 1. B2B2B cascade: one ICP 3 conversion multiplies into many ICP 1 buyers without additional outreach.
 
-B2B2B model: target brand legal teams to pre-approve SI8's format → they push requirement to agencies → agencies use SI8.
-Active regulatory deadlines: NY Synthetic Performer Law (Jun 9, 2026), EU AI Act Article 50 (Aug 2, 2026), UAE AI Act (Sept 2026).
-Active geos: UK/London (primary), Amsterdam/EU, Dubai/UAE, Singapore.
-Active discovery campaigns (brand legal): SI8_Who's Asking (UK), SI8_What Would Work (Dubai), SI8_Writing the Standard (Amsterdam).
+KEY DISCRIMINATOR — Disclosure vs. Chain of Title: Most CD/production replies mean disclosure ("I tell clients which tools I used"). Chain of Title is different — structured IP provenance a legal team formally requires. A lead who says "yes I do this" but means an email with a tool list is NOT T1. A T1 lead describes the gap: their informal handling was reviewed by a legal team and came back with more specific questions, or the contract now specifies a documentation requirement an email cannot satisfy.
+
+T1/T2/T3 classification:
+- T1 (In pain, buying signal): Client/legal team is actively requiring formal documentation. They describe the gap between what they currently do and what's being asked for.
+- T2 (Aware, not yet urgent): Curious about the space, no active requirement yet. "Interesting" or "I can see this coming" replies.
+- T3 (Building own solution): Already building an internal process or tracking system. May need a differentiation frame.
+
+Active regulatory deadlines: NY Synthetic Performer Law (effective Jun 9, 2026), EU AI Act Article 50 (Aug 2, 2026), UAE AI Act (Sept 2026).
+Active geos: UK/England (primary), Dubai/UAE (strong signal — finserv market), LA (ICP 2 test), Singapore (secondary).
+Local hook rule: NY Law hook = US audience only. ASA/CAP Code = UK. EU AI Act = EMEA (excluding UK, Germany, UAE). UAE AI Act = UAE. Mismatched regulatory hooks produce lower-quality replies.
+
+Active campaigns: Legal Friction sequence (ICP 1 — Dubai, England, Amsterdam, Berlin, Singapore, France, Stockholm); SI8_Who's Asking ASA (ICP 3 — UK, Ivy); SI8_Who's Asking NY Law (ICP 3 — UK, Ivy — split test vs ASA); BLA US NY Law (ICP 3 — US, JD); Clearance Pro v1 (ICP 2 — LA Line Producers, Ivy).
 
 Today: {today_str}
 
@@ -189,10 +197,14 @@ If any discovery pipeline leads have no follow-up logged, flag them as: 🔍 DIS
 Skip MONITOR leads unless something is notable.
 
 ### ICP SIGNAL CHECK
-3-5 tight bullets. For each new/recent response pattern:
+For each lead in the pipeline with a recent reply, classify it:
+- T1 / T2 / T3: [Name] — [one-line reason for classification]
+
+Then 2-4 tight bullets on patterns across the pipeline:
 - CONFIRMS: [what the ICP says] because [evidence]
 - CHALLENGES: [what the ICP says] because [evidence]
-- NEW SIGNAL: [unexpected pattern worth testing]
+- DISCLOSURE GATE: flag any lead whose reply suggests they mean "I send a tool list" not "I produce structured IP provenance" — these are T2 or false positives, not T1
+- LOCAL HOOK MISMATCH: flag any lead where the regulatory hook in their campaign doesn't match their jurisdiction (e.g., NY Law hook sent to UK audience)
 End with one sentence: "Overall ICP confidence: HIGH / MEDIUM / LOW — [one reason]"
 
 ### GA4 PULSE
