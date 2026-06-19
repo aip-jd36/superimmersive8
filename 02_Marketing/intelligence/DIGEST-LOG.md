@@ -9,6 +9,44 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of June 19, 2026
+*Run: 2026-06-19 · 16 high · 7 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 10 | post+update | [New York Governor Signs First-in-the-Nation Law Requiring Disclosures for AI-Generated People in Advertisements](https://www.theqgentleman.com/post/2026-06-new-york-governor-signs-first-in-the-nation-law-requiring-disclosures-for-ai-generated-people-in-advertisements/) | The Quintessential Gentleman | Tue, 16 Jun 2026 | ☐ |
+| 9 | post+update | [ASA warns on AI-generated content and deepfakes](https://www.lewissilkin.com/insights/2026/06/18/asa-warns-on-ai-generated-content-and-deepfakes-102n4o1) | Lewis Silkin LLP | Thu, 18 Jun 2026 | ☐ |
+| 9 | post+update | [New York’s New ‘Synthetic Performer’ Law Could Have Wide Reach, Lawyers Say](https://www.law.com/corpcounsel/2026/06/18/new-yorks-new-synthetic-performer-law-could-have-wide-reach-lawyers-say/) | Law.com | Thu, 18 Jun 2026 | ☐ |
+| 9 | post+update | [New AI advertisement law goes into effect in New York](https://www.msn.com/en-us/news/other/new-ai-advertisement-law-goes-into-effect-in-new-york/ar-AA25dPwQ?ocid=TobArticle) | MSN | Mon, 15 Jun 2026 | ☐ |
+| 9 | post+update | [AI debate intensifies as New York enforces performer disclosure law](https://www.msn.com/en-us/news/insight/ai-debate-intensifies-as-new-york-enforces-performer-disclosure-law/gm-GMBDFCA03D?gemSnapshotKey=GMBDFCA03D-snapshot-4&uxmode=ruby) | MSN | Mon, 15 Jun 2026 | ☐ |
+| 9 | post+update | [New York Bill Goes Into Effect Requiring Advertisements To Be Transparent When AI-Generated Performers Are Featured](https://afrotech.com/new-york-ai-bill-goes-into-effect-requiring-transparency-advertisers) | afrotech.com | Mon, 15 Jun 2026 | ☐ |
+| 9 | post+update | [Synthetic Performers, Real Consequences: Implications of Trailblazing New York AI Ad Law](https://www.retailconsumerproductslaw.com/2026/06/synthetic-performers-real-consequences-implications-of-trailblazing-new-york-ai-ad-law/) | retailconsumerproductslaw.com | Fri, 12 Jun 2026 | ☐ |
+| 8 | post+update | [WPP bets on ‘Agentic Media,’ seeking industry rules before AI rewrites TV advertising](https://www.storyboard18.com/how-it-works/wpp-bets-on-agentic-media-seeking-industry-rules-before-ai-rewrites-tv-advertising-101613.htm) | Storyboard18 | Fri, 19 Jun 2026 | ☐ |
+| 8 | post+update | [Lee Ji Hye Warns Fans of AI Ad Scam: Fake Endorsements Using Her Face Spark K-Pop Industry Alarmed](https://www.outlookindia.com/amp/story/art-entertainment/k-drama/lee-ji-hye-warns-fans-of-ai-ad-scam-fake-endorsements-using-her-face-spark-k-pop-industry-alarmed) | Outlook India | Thu, 18 Jun 2026 | ☐ |
+| 8 | post+update | [Pa. House approves bill to force advertisers to tell you when ads are AI-generated](https://www.pennlive.com/news/2026/06/pa-house-approves-bill-to-force-advertisers-to-tell-you-when-ads-are-ai-generated.html) | PennLive.com | Wed, 17 Jun 2026 | ☐ |
+| 8 | post+update | [EU AI Transparency Code: Deepfake Watermarks & Labeling Mandates 2026](https://debuglies.com/2026/06/16/eu-ai-transparency-code-deepfake-watermarks-labeling-mandates-2026/) | debuglies.com | Tue, 16 Jun 2026 | ☐ |
+| 8 | post+update | [UAE Establishes Federal Authority for Artificial Intelligence and Data](https://www.morganlewis.com/pubs/2026/06/uae-establishes-federal-authority-for-artificial-intelligence-and-data) | Morgan Lewis | Mon, 15 Jun 2026 | ☐ |
+| 8 | post | [New NYS law requires advertisers to disclose if performers are real or AI](https://www.newsday.com/news/region-state/artificial-intelligence-advertising-jcb9c0p3) | Newsday | Fri, 12 Jun 2026 | ☐ |
+| 7 | post+update | [Klick adds video review to Guardrail as pharma’s MLR burden grows](https://www.mmm-online.com/news/klick-adds-video-review-guardrail-mlr/) | Medical Marketing and Media | Thu, 18 Jun 2026 | ☐ |
+| 7 | post+update | [German broadcaster removes TV intro after Elon Musk takes legal action](https://www.londondaily.news/german-broadcaster-removes-tv-intro-after-elon-musk-takes-legal-action/) | London Daily News | Wed, 17 Jun 2026 | ☐ |
+| 7 | post+update | [What Happens When a Brand Uses AI to “Alter” Influencer Content?](https://www.thefashionlaw.com/what-happens-when-a-brand-uses-ai-to-alter-an-influencer-content/) | The Fashion Law | Mon, 15 Jun 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [AI Watch: Global regulatory tracker - Spain](https://www.whitecase.com/insight-our-thinking/ai-watch-global-regulatory-tracker-spain) | White & Case LLP | Thu, 18 Jun 2026 | ☐ |
+| 6 | monitor | [AI's fatal flaw that can destroy lives, businesses and insurance firms](https://www.insurancebusinessmag.com/au/news/technology/ais-fatal-flaw-that-can-destroy-lives-businesses-and-insurance-firms-579223.aspx) | Insurance Business | Wed, 17 Jun 2026 | ☐ |
+| 5 | monitor | [Anthropic faces another copyright lawsuit, more than 100 authors say it used pirated books](https://www.indiatoday.in/amp/technology/news/story/anthropic-faces-another-copyright-lawsuit-more-than-100-authors-say-it-used-pirated-books-2929198-2026-06-18) | India Today | Thu, 18 Jun 2026 | ☐ |
+| 5 | monitor | [Compliance Signals 9-13 June 2026: AI transparency, tobacco consumer protection enforcement and Chinese AI tipoffs](https://www.lexology.com/pro/content/compliance-signals-9-13-june-2026-ai-transparency-consumer-protection-enforcement-and-chinese-ai-tipoffs) | Lexology | Sat, 13 Jun 2026 | ☐ |
+| 4 | monitor | [Video as a Competitive Advantage: How Enterprise Teams Are Using AI-Generated Video at Scale](https://aijourn.com/video-as-a-competitive-advantage-how-enterprise-teams-are-using-ai-generated-video-at-scale/) | The AI Journal | Thu, 18 Jun 2026 | ☐ |
+| 4 | monitor | [General Atlantic Eyes Lead Role In $2 Billion Funding Round For Kuaishou's (HKG: 1024) Kling AI](https://www.foreignpolicyjournal.com/2026/06/17/general-atlantic-eyes-lead-role-in-2-billion-funding-round-for-kuaishous-hkg-1024-kling-ai/) | foreignpolicyjournal.com | Wed, 17 Jun 2026 | ☐ |
+| 4 | monitor | [AI disclosure labels don’t hurt ad performance: Here’s what the numbers say](https://www.marketingdive.com/news/ai-disclosure-labels-dont-hurt-ad-performance-heres-what-the-numbers-say/822711/) | Marketing Dive | Fri, 12 Jun 2026 | ☐ |
+
+---
+
 ## Week of June 16, 2026
 *Run: 2026-06-16 · 25 high · 6 monitor · lookback 7 days*
 
