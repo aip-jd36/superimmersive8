@@ -9,6 +9,43 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of June 22, 2026
+*Run: 2026-06-22 · 14 high · 8 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 10 | post+update | [New York’s New ‘Synthetic Performer’ Law Could Have Wide Reach, Lawyers Say](https://www.law.com/corpcounsel/2026/06/18/new-yorks-new-synthetic-performer-law-could-have-wide-reach-lawyers-say/) | Law.com | Thu, 18 Jun 2026 | ☐ |
+| 9 | post+update | [ASA warns on AI-generated content and deepfakes](https://www.lewissilkin.com/insights/2026/06/18/asa-warns-on-ai-generated-content-and-deepfakes-102n4o1) | Lewis Silkin LLP | Thu, 18 Jun 2026 | ☐ |
+| 9 | post+update | [New AI advertisement law goes into effect in New York](https://www.msn.com/en-us/news/other/new-ai-advertisement-law-goes-into-effect-in-new-york/ar-AA25dPwQ?ocid=TobArticle) | MSN | Thu, 18 Jun 2026 | ☐ |
+| 9 | post+update | [New York Governor Signs First-in-the-Nation Law Requiring Disclosures for AI-Generated People in Advertisements](https://www.theqgentleman.com/post/2026-06-new-york-governor-signs-first-in-the-nation-law-requiring-disclosures-for-ai-generated-people-in-advertisements/) | The Quintessential Gentleman | Tue, 16 Jun 2026 | ☐ |
+| 9 | post+update | [AI debate intensifies as New York enforces performer disclosure law](https://www.msn.com/en-us/news/insight/ai-debate-intensifies-as-new-york-enforces-performer-disclosure-law/gm-GMBDFCA03D?gemSnapshotKey=GMBDFCA03D-snapshot-4&uxmode=ruby) | MSN | Mon, 15 Jun 2026 | ☐ |
+| 9 | post+update | [New York Bill Goes Into Effect Requiring Advertisements To Be Transparent When AI-Generated Performers Are Featured](https://afrotech.com/new-york-ai-bill-goes-into-effect-requiring-transparency-advertisers) | afrotech.com | Mon, 15 Jun 2026 | ☐ |
+| 8 | post+update | [Investigation Reveals Brands Secretly Use AI Influencers to Fake Customer Experiences](https://world.infonasional.com/brands-secretly-use-ai-influencers-customer-experiences) | world.infonasional.com | Sun, 21 Jun 2026 | ☐ |
+| 8 | post+update | [Personal Liability and a New Regulator: Germany Girds for AI Act's First Compliance Wave](https://www.ad-hoc-news.de/boerse/news/ueberblick/personal-liability-and-a-new-regulator-germany-girds-for-ai-act-s-first/69578476) | AD HOC NEWS | Fri, 19 Jun 2026 | ☐ |
+| 8 | post+update | [Lee Ji Hye Warns Fans of AI Ad Scam: Fake Endorsements Using Her Face Spark K-Pop Industry Alarmed](https://www.outlookindia.com/amp/story/art-entertainment/k-drama/lee-ji-hye-warns-fans-of-ai-ad-scam-fake-endorsements-using-her-face-spark-k-pop-industry-alarmed) | Outlook India | Thu, 18 Jun 2026 | ☐ |
+| 8 | post+update | [EU AI Transparency Code: Deepfake Watermarks & Labeling Mandates 2026](https://debuglies.com/2026/06/16/eu-ai-transparency-code-deepfake-watermarks-labeling-mandates-2026/) | debuglies.com | Tue, 16 Jun 2026 | ☐ |
+| 8 | update | [Bad Bunny, Taylor Swift Among 21 Million Artists Whose Music Was Secretly Used to Train AI](https://hypebeast.com/2026/6/ai-music-datasets-exposed-in-suno-copyright-clash) | Hypebeast | Tue, 16 Jun 2026 | ☐ |
+| 7 | post+update | [European Retail Giants Say Ads Should Be Exempt from EU’s AI Advertising Labels](https://www.tekedia.com/european-retail-giants-say-ads-should-be-exempt-from-eus-ai-advertising-labels/) | Tekedia | Sat, 20 Jun 2026 | ☐ |
+| 7 | post+update | [Pa. House approves bill to force advertisers to tell you when ads are AI-generated](https://www.pennlive.com/news/2026/06/pa-house-approves-bill-to-force-advertisers-to-tell-you-when-ads-are-ai-generated.html) | PennLive.com | Wed, 17 Jun 2026 | ☐ |
+| 7 | update | [Final Aim, Developer of AI-Generated IP Management Platform “Final Design,” Secures Pre-Series A Funding from MIXI](https://thebridge.jp/en/2026/06/final-aim-developer-of-ai-generated-ip-management-platform-final-design-secures-pre-series-a-funding-from-mixi) | BRIDGE（ブリッジ） | Tue, 16 Jun 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Founders Legal Leads Governance and Risk Advisory for Businesses Using Generative AI](https://www.digitaljournal.com/pr/news/winston-news-wire/founders-legal-leads-governance-risk-1313690104.html) | Digital Journal | Sat, 20 Jun 2026 | ☐ |
+| 6 | monitor | [Video as a Competitive Advantage: How Enterprise Teams Are Using AI-Generated Video at Scale](https://aijourn.com/video-as-a-competitive-advantage-how-enterprise-teams-are-using-ai-generated-video-at-scale/) | The AI Journal | Thu, 18 Jun 2026 | ☐ |
+| 6 | monitor | [Disney Advances AI ads and design with Adobe](https://blockchain.news/ainews/disney-advances-ai-ads-and-design-with-adobe) | blockchain.news | Thu, 18 Jun 2026 | ☐ |
+| 5 | monitor | [Kling 3.0 Turbo Released: Kling AI Brings Fast Video Previews for Rapid Creative Iteration](https://www.openpr.com/news/4554630/kling-3-0-turbo-released-kling-ai-brings-fast-video-previews) | openPR.com | Fri, 19 Jun 2026 | ☐ |
+| 5 | monitor | [AI's fatal flaw that can destroy lives, businesses and insurance firms](https://www.insurancebusinessmag.com/au/news/technology/ais-fatal-flaw-that-can-destroy-lives-businesses-and-insurance-firms-579223.aspx) | Insurance Business | Wed, 17 Jun 2026 | ☐ |
+| 5 | monitor | [Right To Know - June 2026, Vol. 42](https://www.clarkhill.com/news-events/news/right-to-know-june-2026-vol-42/) | Clark Hill | Mon, 15 Jun 2026 | ☐ |
+| 4 | monitor | [AI Watch: Global regulatory tracker - Spain](https://www.whitecase.com/insight-our-thinking/ai-watch-global-regulatory-tracker-spain) | White & Case LLP | Thu, 18 Jun 2026 | ☐ |
+| 4 | monitor | [How Is AI Regulated? Examples, Benefits, & Drawbacks \| Britannica Money](https://www.britannica.com/money/ai-rules-and-regulations) | Britannica | Wed, 17 Jun 2026 | ☐ |
+
+---
+
 ## Week of June 19, 2026
 *Run: 2026-06-19 · 16 high · 7 monitor · lookback 7 days*
 
