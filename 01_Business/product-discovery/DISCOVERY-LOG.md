@@ -18,7 +18,7 @@
 
 **Source:** Competitive research session — ProofSnap (getproofsnap.com), TrueScreen (truescreen.io), RightsDocket (rightsdocket.com), c2pa.ai, Pebblous (blog.pebblous.ai), InCyan (inaccessible).
 
-**Product implication:** RightsDocket is the closest analog in an adjacent market — same model (human review → C2PA embed → per-registration pricing, $20/registration for audio). Validates that the "pay-per-clearance with embedded disclosure" model is proven. Nobody has replicated it for commercial video. C2PA 2.4 spec now mandates "hard bindings + soft bindings" combination — companies selling C2PA-only signing are building to a superseded spec version.
+**Product implication:** RightsDocket is the closest architectural analog — same model (human review → C2PA embed → per-registration pricing, $20/registration for audio). **But RightsDocket launched ~May 2026 (1 month old), has 16 LinkedIn followers, no third-party reviews, and C2PA conformance still pending ("currently entering the program").** This validates the architecture reasoning, not PMF. Smart people independently converging on the same model is signal; it does not prove the market exists. Nobody has built this for commercial video. C2PA 2.4 spec mandates "hard bindings + soft bindings" combination — companies selling C2PA-only signing are building to a superseded spec version.
 
 **Status:** Validated — competitive gap at the agency delivery step confirmed. No direct competitor identified for SI8's specific use case.
 

@@ -314,14 +314,15 @@
 ---
 
 **RightsDocket**
-- **What:** Digital provenance and copyright documentation platform for AI-assisted audio content; C2PA embedding + USCO copyright registration per submission
-- **Model:** $20 per registration (provenance + C2PA + USCO filing)
+- **What:** Human authorship evidence platform for AI-assisted audio; documents contributor records, AI-use logs, and creation evidence; produces structured authorship records for USCO filings, distributors, and sync buyers
+- **Model:** $20 per registration (provenance record + C2PA + USCO filing)
 - **Coverage:** Music creators, audio producers, publishers
-- **C2PA signing:** Yes — for audio files (MP3/WAV/M4A only)
+- **C2PA signing:** Pending — "currently entering the C2PA Conformance Program" as of May 2026; not yet officially recognized as a Claim Generator/Validator. C2PA integration is not yet verified/operational.
 - **Video:** No
-- **EU AI Act angle:** Explicit Article 50 compliance guide published; positions C2PA as the legal answer for audio
-- **SI8 relationship:** **Closest market analog.** RightsDocket proves the "human-reviewed provenance + C2PA embedded in final file + per-registration fee" model works commercially in audio. SI8 v4.1 is this model applied to commercial video. Not a competitor — different medium, different buyer.
-- **Threat level:** None today. Monitor if they expand to video.
+- **Launch date:** ~May 2026 — approximately 1 month old as of this analysis; 16 LinkedIn followers on Signal Fidelity Group page; no Reddit presence, no Product Hunt listing, no third-party reviews
+- **EU AI Act angle:** Explicit Article 50 compliance guide published; strong SEO content strategy; content volume is pre-launch marketing build, not post-traction
+- **SI8 relationship:** **Closest architectural analog — not a validated market proof.** RightsDocket shows smart people independently converging on the same model (human-reviewed provenance + C2PA embed + per-registration fee) in audio. But with 1 month of existence and no visible traction, it validates the architecture reasoning, not the PMF. Not a competitor — different medium, different buyer, pre-traction stage.
+- **Threat level:** None. Monitor for: C2PA conformance completion, video expansion, any signs of traction (follower growth, press, Product Hunt).
 
 ---
 
@@ -668,7 +669,7 @@
 - **FADEL** — Enterprise rights/royalty management for traditional IP (Disney/Marvel-tier). Validates the category. Not solving AI-generated content clearance. Possible future acquirer or partner. Full analysis: `COMPETITOR-FADEL-ANALYSIS.md`
 - **ClearStory** — Chain of Title tracking software for traditional film/TV. No AI layer, no clearance execution.
 - **Rightsline** — Enterprise rights management platform. No SMB/indie tier, no AI content focus.
-- **RightsDocket** — Audio provenance + C2PA embedding at $20/registration. Closest market analog to SI8 v4.1 — same model (human review → C2PA embed → per-registration fee), different medium (audio vs. video). Monitor for video expansion.
+- **RightsDocket** — Audio provenance + C2PA embedding at $20/registration. Closest architectural analog to SI8 v4.1 — same model (human review → C2PA embed → per-registration fee), different medium (audio vs. video). **Note: launched ~May 2026, 16 LinkedIn followers, C2PA conformance still pending — validates the architecture, not PMF.** Monitor for: C2PA conformance completion, video expansion, traction signals.
 - **Capture / Numbers Protocol** — C2PA signing API; integration candidate for SI8 v4.1 (not a competitor). Monitor for: MP4/video support confirmation, agency-side product launches, pricing changes.
 
 ---
@@ -679,7 +680,7 @@
 
 2. **The agency delivery step is unoccupied.** The C2PA disclosure ecosystem (Capture, ProofSnap, TrueScreen, RightsDocket) has sorted into four non-overlapping positions — none of them address the gap where a composited final campaign video needs C2PA re-signing and IP clearance at the point of agency delivery. This is SI8 v4.1's specific opening.
 
-3. **RightsDocket validates the model.** $20/registration for human-reviewed provenance + C2PA embedded in audio files + USCO registration. Paying customers exist for this exact approach in audio. Nobody has built it for commercial video.
+3. **RightsDocket validates the architecture, not the market.** Same model (human-reviewed provenance + C2PA embedded in file + per-registration fee) applied to audio. But RightsDocket launched ~May 2026, has 16 LinkedIn followers, no third-party reviews, and C2PA conformance still pending. Smart people are converging on the same model independently — that validates the reasoning, not PMF. Nobody has proven this model in commercial video.
 
 4. **Biggest threats:**
    - Getty Images adds AI video verification (likely within 12-18 months if market demand is proven)

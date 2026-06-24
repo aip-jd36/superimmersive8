@@ -245,14 +245,18 @@ Competitive research (June 24, 2026) confirms no direct competitor at the agency
 | **c2pa.ai** | Educational/consulting site | ❌ | ❌ | Content present | Irrelevant |
 | **Pebblous** | Research/educational blog | ❌ | ❌ | Content present | Irrelevant |
 
-### Key Insight: RightsDocket as Market Validation
+### Key Insight: RightsDocket as Architectural Analog — Not Market Validation
 
-RightsDocket proves the SI8 v4.1 business model works in an adjacent market:
-- Human-reviewed provenance documentation → C2PA embedded in final file → $20 per registration
-- Builds Chain of Provenance document + C2PA-signed audio file in one service
+RightsDocket is the closest structural analog to SI8 v4.1:
+- Human-reviewed authorship documentation → C2PA embedded in final audio file → $20 per registration
+- Builds authorship evidence record + C2PA-signed file in one service
 - Offers USCO copyright registration as an add-on
 
-The model has paying customers. Nobody has replicated it for commercial video. This is the most direct evidence that the "judgment layer + C2PA embed + per-registration fee" model is commercially viable.
+**However:** RightsDocket launched ~May 2026 (approximately 1 month old as of this writing). Signal Fidelity Group has 16 LinkedIn followers. No Reddit presence. No Product Hunt listing. No third-party reviews. Their C2PA integration is still pending — they are "currently entering the C2PA Conformance Program," not yet recognized as a conforming Claim Generator/Validator.
+
+Their SEO content blitz (many insight articles on DistroKid, Spotify AI Credits, EU AI Act, USCO registration) is pre-launch marketing, not post-traction amplification.
+
+**Correct framing:** RightsDocket shows smart people independently converging on the same model — that validates the architecture reasoning. It does not prove PMF. The market for "human-reviewed provenance + C2PA embed + per-registration fee" is unproven in audio and completely unbuilt in commercial video.
 
 ### C2PA 2.4 Spec Note
 
