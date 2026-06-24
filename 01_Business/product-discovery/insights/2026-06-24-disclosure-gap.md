@@ -264,6 +264,46 @@ C2PA 2.4 (released 2026) introduced "Durable Content Credentials" — now mandat
 
 ---
 
+## Developer & Ecosystem Friction Findings (June 25, 2026)
+
+*GitHub issues, Product Hunt, Capterra, G2, and industry press research. Assessing real-world developer experience to stress-test the SI8 v4.1 integration path.*
+
+### Critical Finding: c2pa-rs MP4/Video Gap
+
+**c2pa-rs** (GitHub: contentauth/c2pa-rs) is the reference C2PA implementation maintained by Adobe and the Content Authenticity Initiative. Stats: 357 stars, 167 forks, **128 open issues** (beta status, 0.x.x).
+
+**MP4/video is a documented major gap in the reference implementation.** arkavo-org/arkavo-rs Issue #33 explicitly documents "Full Video Container (MP4/MOV/ISOBMFF) Support" as a needed feature. Sony professional MXF support is blocked pending SMPTE spec work. The reference implementation focuses on images and PDFs.
+
+**SI8 implication:** If Capture uses c2pa-rs as its underlying implementation (likely, as it's the standard), Capture's MP4 video support may be limited or non-existent even if their marketing suggests otherwise. This **elevates the urgency of the Capture technical call** to the highest priority before any v4.1 build decisions.
+
+Note: The disclosure gap insight file (`2026-06-24-disclosure-gap.md`) listed c2pa-rs as the fallback option with "supports video including MP4/MOV with custom assertions" — **this may be incorrect based on open issues.** The fallback needs verification before being relied upon.
+
+### Capture SDK Developer Signal
+
+Capture SDK (numbersprotocol/capture-sdk): 0 stars, 0 forks, v0.2.1 (January 30, 2026), 15 open issues. Minimal community. Named Capture clients (Reuters, Rolling Stone Ukraine) are likely using the REST API directly, not the SDK. The REST API integration path ($0.001/sign) is the right route for SI8 — the SDK community signal is irrelevant to API reliability.
+
+### Resemble AI PerTH/Videoseal
+
+Perth (audio watermarking, MIT) has 8 open issues and 0 closed — not production-ready for all environments. Key friction: GPU required (no CPU/ONNX path), ~16.8kHz frequency cap, documentation gaps. Videoseal (video invisible watermarking, MIT) exists but no production reviews found. Not an SI8 integration target currently.
+
+### Ecosystem-Level Signal
+
+- C2PA adoption: <1% of news images/videos published globally include C2PA metadata (early 2026)
+- Signing certificate cost: ~$289/year (no free Let's Encrypt equivalent) — adoption barrier for small agencies
+- Entire C2PA disclosure infrastructure space has zero consumer-accessible reviews — confirms this is a developer/enterprise-only market with no self-serve accessibility yet
+- AI Omnibus (May 2026) extended machine-readable marking grace period for pre-existing AI systems to December 2, 2026 — but new campaigns starting August 2 onward still face the August 2 obligation as new deployments (deployer vs. provider distinction)
+
+### Action Required
+
+**Capture technical call — critical questions elevated:**
+1. Does Capture support MP4/video file signing via REST API? (c2pa-rs video gap makes this uncertain)
+2. If yes, does it use c2pa-rs under the hood, or a separate implementation?
+3. Does post-production re-signing satisfy their Art. 50(2) "at generation time" interpretation?
+
+If Capture confirms no video support → c2pa-rs fallback may also be blocked → requires separate implementation path assessment before v4.1 can be scoped.
+
+---
+
 ## Sources
 
 - EU Code of Practice on marking and labelling of AI-generated content: https://digital-strategy.ec.europa.eu/en/policies/code-practice-ai-generated-content

@@ -13,6 +13,29 @@
 
 ## Log
 
+### 2026-06-25 — C2PA Developer Ecosystem Friction: MP4 Video Gap Confirmed
+
+**Insight:** The reference C2PA implementation (c2pa-rs, 357 stars, 128 open issues, beta 0.x.x) has a documented major gap: MP4/video container support is not implemented. arkavo-org Issue #33 explicitly requests "Full Video Container (MP4/MOV/ISOBMFF) Support." If Capture uses c2pa-rs under the hood (likely), Capture's MP4 video support may be limited despite their marketing suggesting otherwise. This elevates the Capture technical call to highest-priority before any v4.1 build decision.
+
+**Source:** GitHub issue research — c2pa-rs (contentauth), Perth (resemble-ai), Capture SDK (numbersprotocol); industry press (PetaPixel, SoftwareSeni); Capterra/G2/Product Hunt review analysis.
+
+**Additional findings:**
+- Perth (Resemble AI audio watermarking): 8 open issues, 0 closed — not production-ready; GPU required, ~16.8kHz cap, docs gaps
+- Capture SDK (numbersprotocol/capture-sdk): 0 stars, 0 forks — minimal community, but REST API path is the right integration regardless
+- Resemble AI/Imatag: no third-party reviews for watermarking products; Imatag has enterprise client (dpa Picture Alliance, May 2026) confirming invisible watermarking is real; Amber Video is stalled (7 years old, zero reviews)
+- Entire C2PA disclosure infrastructure category has zero consumer-accessible reviews — confirmed B2B/developer-only market, no self-serve path exists yet
+- Ecosystem adoption: <1% of published global news images/videos carry C2PA metadata (early 2026); market is pre-traction at the ecosystem level
+
+**Product implication:** **Caution flag on v4.1 build timeline.** The c2pa-rs MP4 gap is a blocker risk. If Capture confirms no MP4/video support → both the Capture integration path AND the c2pa-rs fallback path need re-assessment. Cannot scope the v4.1 build (clearer → sign → deliver) until the Capture technical call resolves this. SI8's sales framing and pipeline development can continue independently; the technical build waits for the call.
+
+**Status:** Hypothesis partially blocked — requires Capture technical call to determine whether v4.1 is buildable on existing infrastructure or requires a custom implementation path.
+
+**Deep-dive:** Added "Developer & Ecosystem Friction Findings" section to [`insights/2026-06-24-disclosure-gap.md`](insights/2026-06-24-disclosure-gap.md); full analysis in new section of [`01_Business/research/COMPETITIVE_ANALYSIS_CAAS_2026.md`](../research/COMPETITIVE_ANALYSIS_CAAS_2026.md)
+
+**Version impact:** v4.1 — does not change the three-deliverable concept, but may change the infrastructure path
+
+---
+
 ### 2026-06-24 — C2PA Ecosystem Competitive Landscape
 **Insight:** No company addresses the agency delivery step — the gap where a final composited campaign video needs C2PA re-signing and IP clearance after post-production strips the original metadata. The ecosystem splits cleanly into four non-overlapping positions: (1) model providers sign at generation; (2) Capture signs AI company outputs at inference; (3) ProofSnap/TrueScreen read and certify existing signals; (4) RightsDocket does per-registration human review + C2PA embed for audio. SI8 v4.1's position — re-sign final agency output with combined IP clearance — is unoccupied by any player.
 

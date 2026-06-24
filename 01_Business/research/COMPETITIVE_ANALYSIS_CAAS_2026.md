@@ -702,12 +702,106 @@
 
 ---
 
+---
+
+## Developer & Ecosystem Friction Research (June 2026)
+
+*Research conducted June 24–25, 2026. Source: GitHub issues, Product Hunt, Capterra, G2, industry press, and tool documentation. Objective: understand real-world developer experience with C2PA disclosure infrastructure tools to stress-test SI8's integration path and identify ecosystem readiness gaps.*
+
+---
+
+### C2PA Ecosystem-Level Friction
+
+**Metadata stripping is fundamental, not edge-case.** Multiple industry sources confirm: "Standard C2PA manifests embedded via JUMBF are lost when a non-C2PA-aware tool resaves the file." Social platforms (WhatsApp, iMessage, Facebook) re-encode on upload. Post-production tools export stripped files. This is not a fringe scenario — it is the standard path for every composited agency campaign video.
+
+**Adoption is real but narrow.** As of 2026, fewer than 1% of news images or videos published globally include C2PA metadata. Hardware support: Google Pixel 10 (signs all photos, hardware-backed keys); Sony PXW-Z300 camcorder (broadcast-grade signing); Samsung Galaxy S25 (only AI-edited images, not standard captures). Nikon Z6 III C2PA support suspended September 2025 after certificate revocation vulnerability — certificates revoked, service not restored.
+
+**Certificate cost creates access barrier.** A trusted signing certificate from DigiCert or SSL.com costs approximately $289/year with no free alternative (no "Let's Encrypt" equivalent for C2PA). This reduces adoption by individual creators and smaller agencies who would otherwise implement it.
+
+**Market is in a coordination standstill.** Camera manufacturers waiting for news publications; publications waiting for camera manufacturers; platforms waiting for market demand. PetaPixel (June 2025): "everyone is waiting for someone else to do something first." This stalemate directly benefits SI8: the gap cannot be filled by organic tool adoption — it requires a service provider to bridge it.
+
+**Public apathy may be the hardest problem.** Even where C2PA credentials display correctly, "public apathy and learned scepticism may be the largest hurdles to C2PA adoption, bigger than any technical challenge." The infrastructure can work while users ignore verification entirely. SI8's B2B positioning bypasses this — agencies don't need end-user trust, they need legal team approval.
+
+---
+
+### c2pa-rs (Reference Rust Implementation — contentauth/c2pa-rs)
+
+**Stats:** 357 stars, 167 forks, 128 open issues, 56 open PRs. Version: beta (0.x.x).
+
+**Critical finding for SI8:** MP4/video is a documented major gap. arkavo-org/arkavo-rs Issue #33 explicitly documents "Full Video Container (MP4/MOV/ISOBMFF) Support" as needed — the reference implementation focuses on images and PDFs. SMPTE professional MXF support is blocked pending spec work. This directly raises the urgency of the Capture technical call: if Capture uses c2pa-rs as its underlying implementation, video support may be limited even if Capture's docs suggest otherwise.
+
+**Developer friction from open issues:** Documentation gaps, SDK behavior inconsistencies, multi-threading safety questions, performance with large batch workloads. The beta version tag means breaking changes between releases are expected.
+
+---
+
+### Perth (Resemble AI Audio Watermarking — resemble-ai/Perth)
+
+**Stats:** 8 open issues, 0 closed issues. Minimal community activity beyond the issues themselves.
+
+**Developer friction documented in issues:**
+- Documentation gaps (#19, #3) — unclear usage for real production scenarios
+- CPU/ONNX support not implemented (#14) — requires GPU; barrier for standard server deployments
+- Audio length constraints (#12) — maximum audio length limits for watermarking
+- Frequency cap ~16.8kHz (#8) — may affect high-frequency audio content
+- Missing dependencies (#7) — environment setup friction
+- Training data clarity (#4) — unclear model training disclosure
+
+**Relevance to SI8:** Perth is MIT-licensed and referenced in SI8 research as a potential audio watermarking layer. Developer adoption challenges indicate it is not production-ready for all use cases without significant integration work. No SI8 dependency exists currently.
+
+---
+
+### Capture SDK (numbersprotocol/capture-sdk)
+
+**Stats:** 0 stars, 0 forks, v0.2.1 (January 30, 2026), 15 open issues, 12 open PRs. TypeScript + Python.
+
+**Community signal:** Zero developer community adoption measured by standard GitHub metrics. The SDK is a very early-stage developer tool. Named clients (Reuters, Starling Lab) are likely direct API integrations rather than SDK users.
+
+**SI8 implication:** Capture's REST API ($0.001/sign) is the integration candidate for SI8 v4.1, not the SDK. The API wrapper can work independently of the SDK's community traction. However, the minimal community means less public troubleshooting documentation, more reliance on Capture's support team.
+
+---
+
+### Resemble AI (PerTH + Videoseal + Watermarking API)
+
+**Adoption signal:** G2 and Gartner Peer Insights reviews exist but focus almost entirely on the voice cloning product (ReplicaAI / Resemble.ai main product). No standalone reviews found for the watermarking/PerTH components. Polarized voice-product reviews (ranges from 1.9/5 to 3.9/5 depending on source and date) create brand noise around the watermarking product.
+
+**PerTH status:** MIT-licensed, on GitHub, with real developer adoption for audio watermarking research. Videoseal (video invisible watermarking) also MIT-licensed. Both are research tools with production applicability — but the review gap confirms no enterprise has publicly reviewed them as production watermarking solutions.
+
+**SI8 relevance:** Not an integration target. Watermarking is a "soft binding" (secondary layer), relevant to EU Code of Practice mandates. If SI8 v4.1 moves to two-layer (C2PA + soft binding), Resemble AI's Videoseal is a candidate to evaluate — but Capture's on-chain ERC-7053 hash approach may be simpler to integrate.
+
+---
+
+### Imatag
+
+**Stats:** 2 Capterra reviews (both 2019–2020, both 5/5). No recent third-party reviews.
+
+**Pricing:** Starting ~€299/month, 10K asset minimum. Enterprise contract.
+
+**Enterprise signal:** dpa Picture Alliance integration announced May 2026 — significant named customer. Imatag is real and functional for image forensic watermarking at enterprise scale.
+
+**SI8 relevance:** Not an integration target. Image-focused, enterprise pricing, wrong scale for SI8's current operation. However, the dpa Picture Alliance deal confirms invisible watermarking is being operationalized by serious media companies — validates the two-layer (C2PA + invisible watermark) approach is where the market is heading.
+
+---
+
+### Amber Video
+
+**Stats:** Blockchain fingerprinting + deepfake detection. Founded 2019. 79 Product Hunt upvotes. Zero user reviews. No recent activity signals. Stalled product.
+
+**SI8 relevance:** None. Stalled 7-year-old product with no community traction. Not relevant to competitive analysis.
+
+---
+
+### Ecosystem Research Meta-Findings
+
+**No consumer-accessible review presence for any disclosure tool.** Zero Capterra reviews for Capture, zero G2 reviews for any C2PA signing service, no Reddit communities discussing EU AI Act compliance tooling (Reddit access blocked during research). This confirms the entire C2PA disclosure infrastructure space is developer APIs and enterprise contracts — there is no self-serve market yet.
+
+**The "40 days" urgency framing requires nuance.** EU AI Act Article 50 enforcement August 2, 2026 applies to deployer obligations on new content. However, the AI Omnibus (provisional agreement, May 2026) extended the machine-readable marking grace period for pre-existing AI systems to December 2, 2026. Correct framing: agencies shipping new AI-generated campaigns from August 2 onward face the obligation on new deployments; the December extension is for providers of AI systems deployed before August 2. This doesn't reduce urgency for agencies — it means the compliance question is active now.
+
+**C2PA is fragmented at the spec level too.** Version 2.3 (December 2025) added live streaming via CMAF segment signing (nascent). Version 2.4 mandated hard bindings + soft bindings (two-layer). The c2pa-rs reference implementation is beta; conformance program is immature; certificate infrastructure is limited to commercial CAs. The spec is ahead of the implementation ecosystem.
+
+---
+
 **Next steps:**
 1. Monitor Getty Images and Adobe announcements quarterly
-2. Track C2PA adoption and market perception
-3. Build deep vetting process documentation (defensible expertise)
-4. Focus on APAC market penetration (geographic moat)
-5. Accumulate verification data (future moat via proprietary dataset)
 
 ---
 
