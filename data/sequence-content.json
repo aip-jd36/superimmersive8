@@ -83,6 +83,27 @@
     "msg3": "Dropping the sample directly — this is what a Chain of Title for an AI video commercial looks like:\nhttp://www.superimmersive8.com/sample\n\n$499 per video, 90-minute human review, delivered as a PDF you can pass to the client or attach to the deliverable package.\n\nIf this is coming up in your clearance workflow, happy to talk.\n\nIvy\nwww.superimmersive8.com",
     "msg4": null
   },
+  "Clearance Pro v2 (LA/LP)": {
+    "dripify_name": "SI8_Clearance-Pro-Research v2 (3 Msg)",
+    "msg1": "Hi %%first_name%%,\n\nWhen AI content goes into a production, are E&O insurers or distributors starting to ask for documentation on the tools and rights behind it? I hear this more and more from line producers and EPs.\n\nWould love to connect!",
+    "msg2": "Hi %%first_name%%, thanks for connecting!\n\nI'm Vanessa from SuperImmersive 8. Two things are pushing AI content documentation requirements in the US right now — SAG-AFTRA's AI provisions are tightening disclosure requirements for synthetic performers, and New York's Synthetic Performer Law (effective June 2026) creates direct advertiser liability for AI-generated likenesses in ads.\n\nThe piece that's typically missing in a clearance stack is a Chain of Title for AI content — same structure as a music clearance report, but covering tools used, commercial licensing, and whether any real likenesses appear in the output.\n\nDo you have any experience with this?\n\nVanessa\nwww.superimmersive8.com",
+    "msg3": "When a production includes AI-generated footage, does it change anything in your clearance or delivery workflow?\n\nVanessa\nwww.superimmersive8.com",
+    "msg4": null
+  },
+  "Legal Friction — FinServ": {
+    "dripify_name": "SI8_Legal Friction_Finserv (4 Msg)",
+    "msg1": "Hi %%first_name%%,\n\nQuick question — when you want to use AI-generated video in a campaign, is your compliance or legal team asking for documentation on the tools and rights behind it? Seeing this come up more across financial services.\n\nWould love to connect!",
+    "msg2": "Hi %%first_name%%, thanks for connecting!\n\nThe reason I asked — I work with creative teams at financial services firms who are hitting this exact wall. Compliance wants documentation before approving AI-generated content: which tools were used, who owns the output, whether there's any IP or likeness exposure.\n\nHave you run into that internally?\n\nIvy\nwww.superimmersive8.com",
+    "msg3": "What we do: Chain of Title documentation for AI-generated video — the paper trail that answers what compliance and legal are usually asking before they'll approve it.\n\nFor financial services specifically, where advertising is already under FCA and ASA scrutiny, AI content is adding a new layer of questions most teams aren't set up to answer yet.\n\nHappy to share a sample — takes about a minute to review.\n\nIvy\nwww.superimmersive8.com",
+    "msg4": "Hi %%first_name%%, one more question before I leave you alone.\n\nWhen AI video is part of a campaign, does your compliance sign-off treat it any differently than live-action? Or is it still a grey area internally?\n\nIvy\nwww.superimmersive8.com"
+  },
+  "Legal Friction — FinServ (NY)": {
+    "dripify_name": "SI8_Legal Friction_Finserv_NY (4 Msg)",
+    "msg1": "Hi %%first_name%%,\n\nQuick question — when you want to use AI-generated video in a campaign, is your compliance or legal team asking for documentation on the tools and rights behind it? Seeing this come up more across financial services.\n\nWould love to connect!",
+    "msg2": "Hi %%first_name%%, thanks for connecting!\n\nThe reason I asked — I work with creative teams at financial services firms who are hitting this exact wall. Compliance wants documentation before approving AI-generated content: which tools were used, who owns the output, whether there's any IP or likeness exposure.\n\nHave you run into that internally?\n\nJD\nwww.superimmersive8.com",
+    "msg3": "What we do: Chain of Title documentation for AI-generated video — the paper trail that answers what compliance and legal are usually asking before they'll approve it.\n\nFor financial services in New York, there's a specific added layer: the NY Synthetic Performer Law (effective June 2026) creates direct advertiser liability for AI-generated voices and likenesses used without documentation. On top of existing SEC and FINRA advertising rules, AI content is adding a new compliance question most teams aren't set up to answer yet.\n\nHappy to share a sample — takes about a minute to review.\n\nJD\nwww.superimmersive8.com",
+    "msg4": "Hi %%first_name%%, one more question before I leave you alone.\n\nWhen AI video is part of a campaign, does your compliance sign-off treat it any differently than live-action? Or is it still a grey area internally?\n\nJD\nwww.superimmersive8.com"
+  },
   "Who's Asking (EU Act)": {
     "dripify_name": "SI8_EU Act_EMEA (4 Msg)",
     "msg1": "Hi %%first_name%%,\n\nI'm building a documentation standard for AI video and want to understand what brand legal teams in Europe are requiring before campaign sign-off. EU AI Act Article 50 enforcement begins August 2 — six weeks out. Is AI content documentation something your team is currently defining — or still waiting to see what enforcement looks like?\n\nJD",

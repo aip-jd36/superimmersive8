@@ -29,7 +29,7 @@
 
 <!-- sales-pipeline:start -->
 
-## 1. Lead Replied (63)
+## 1. Lead Replied (62)
 
 *Substantive reply received. Assessing fit and next move.*
 
@@ -71,7 +71,6 @@
 | B086 | Daniel Fox-Evans | The Kitchen London | London/UK | Consumer backlash is main blocker | Await reply — is legal also coming up? | — |
 | B092 | Lina De Groot | Stealth AI Startup | Amsterdam | Answered her Q on hardening areas | Await reply | — |
 | B098 | Michelle Ponto | Blue Gecko Communications | Dubai/UAE | "Yes, asking about prompts and sequence" | Await reply | — |
-| B101 | Anas Bakal | Monoud Trading | Dubai/UAE | Detailed existing process — validated it | Await reply | — |
 | B103 | Ahmed Samy Amin | GTCFX | Dubai/UAE | "Would love to compare notes" — navigating finserv + brand client documentation a lot lately | Send compare-notes call invite Jun 17 [JD personal] | 2026-06-17 |
 | B157 | Steve Bannerman | Prime Video & Amazon MGM Studios | LA / APAC | "Provenance of the video is HUGELY important" in feature film. Head of Post-production, International Originals APAC. Film/TV E&O track — Test 12 validation. | Send film-ICP pivot + compare-notes call invite Jun 17 [Vanessa] | 2026-06-17 |
 | B104 | Ashraf Selo | MultiBank Group | Dubai/UAE | Connection accepted Jun 16; JD sent format-structure probe — "formal document or informal sign-off? how structured is the ask?" | Await reply | 2026-06-19 |
@@ -104,12 +103,13 @@
 
 ---
 
-## 2. Warm Lead (27)
+## 2. Warm Lead (28)
 
 *Clear ICP signal or acknowledged pain. Moving toward a call or sample.*
 
 | B-ID | Lead | Company | Geo | Signal Summary | Sample Sent? | Next Action | Follow Up By |
 |------|------|---------|-----|----------------|-------------|-------------|--------------|
+| B100 | Ramez Tabshi | — | Dubai/UAE | "IP provenance and training data transparency is absolutely escalating with clients" — unprompted T1. Jun 22 call cancelled; converted to email Q&A. 4 discovery Qs sent to t.ramez@gmail.com. Q3 is the qualifier: does legal come back asking for more? | No | Await email reply | 2026-06-26 |
 | B145 | Daniele Zennaro | AiYR4 | England | "Request via commercial/rights side — legal/compliance probably behind it." Partial B2B2B confirmation. Chain: legal→commercial/rights→agency. Case-by-case but trending structured. Test 6 v6-A. | No | Pitch + send sample (superimmersive8.com/sample) — position as what the commercial/rights clearance request formalises | — |
 | B002 | Theodor (Teddy) Sandu | MullenLowe Singapore (IPG) | Singapore | "They are asking for both" — disclosure + Chain of Title. CD at holdco. T1 same-day reply. | No | Send Part 2 gate: what are you sending them and does it satisfy their legal team? | 2026-06-18 |
 | B036 | David Tamayo | Prose on Pixels | — | "Big network with legal team dedicated to AI" | No | Await reply (EU AI Act angle sent) | — |
@@ -161,7 +161,7 @@
 
 | B-ID | Lead | Company | Geo | Call Date | Format | Prep Notes |
 |------|------|---------|-----|-----------|--------|------------|
-| B100 | Ramez Tabshi | — | Dubai/UAE | Mon Jun 22, 1pm UAE / 5pm TPE | Zoom (JD leads) | "IP provenance and training data transparency is absolutely escalating with clients" — unprompted T1 validation. Prep: which clients are asking, what he's currently sending them, whether it's satisfying their legal team. No product pitch until gap is confirmed. |
+| B101 | Anas Bakal | Monoud Trading | Dubai/UAE | TBD (Calendly self-scheduled) | Calendly (JD leads) | 3-point structured reply Jun 22: (1) licensing AI tools for specific commercial use; (2) prompt logs/generation settings for provenance; (3) digital labeling/signature requirements from platform regulations. Title: AI Creative Director | Luxury Brand Experience Architect. Gate Qs: is documentation requirement written/contractual or conversational? AI campaign volume per month? Direct brand relationships or through agency? |
 
 ---
 

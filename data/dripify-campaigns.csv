@@ -29,10 +29,12 @@ SI8_RV_R4LI_CreaDir_AI Video_Paris_0526A_JC,JD,France,Creative Dir — AI Video,
 SI8_RV_R4LI_CreaDir_AI_Posted_LI_Eng_0626A_IL,Ivy,England,Creative Dir — AI (Posted on LinkedIn),EU AI Act,Jun 1 2026,171,59,15,true,
 SI8_RV_R4LI_CreaDir_AI Video_Eng_0626B_IL,Ivy,England,Creative Dir — AI Video,EU AI Act,TBD,0,0,0,true,
 SI8_RV_R4LI_CreaDir_AI Video_BerlinMet_0626B_AL,Angel,Berlin,Creative Dir — AI Video,EU AI Act,TBD,0,0,0,true,
-SI8_RV_R4LI_CreaDir_FinServ_Eng_0626A_VP,Vanessa,England,Creative Dir — Financial Services,EU AI Act,TBD,0,0,0,true,
+SI8_RV_R4LI_CreaDir_Finserv_England_0626A_IL,Ivy,England,Creative Dir — Financial Services,Legal Friction — FinServ,Jun 22 2026,42,2,0,true,active
 SI8_RV_R4LI_CreaDir_AI Video_Spain_0626A_VP,Vanessa,Spain,Creative Dir — AI Video,EU AI Act,Jun 6 2026,514,10,1,true,paused
 SI8_Who's Asking_ASA (4 Msg),Ivy,England,IP Legal — Brand,Who's Asking,Jun 8 2026,74,10,2,false,active
 SI8_RV_R4LI_IP_Legal_Brand_UK_0626B_IL,Ivy,UK/London,IP Legal — Brand,Who's Asking (NY Law),Jun 10 2026,74,7,3,false,active
 SI8_RV_R4LI_IP_Legal_Brand_NY_0626A_VP,Vanessa,New York,IP Legal — Brand,NY 1st Law,Jun 10 2026,196,1,0,false,paused
 SI8_RV_R4LI_LegalA_BLA_US_0626A_JC,JD,US,Legal Affairs — BLA,Who's Asking (NY Law),Jun 11 2026,108,4,2,false,active
 SI8_RV_R4LI_Line_Prod_LA_0626A_IL,Ivy,Los Angeles,Line Producer — Commercial Production,Clearance Pro v1,Jun 14 2026,122,6,1,false,active
+SI8_RV_R4LI_Line_Prod_LA_0626B_VP,Vanessa,Los Angeles,Line Producer — Commercial Production,Clearance Pro v2 (LA/LP),Jun 19 2026,0,0,0,false,active
+SI8_RV_R4LI_CreaDir_Finserv_NY_0626A_JC,JD,New York,Creative Dir — Financial Services,Legal Friction — FinServ (NY),Jun 21 2026,29,2,0,false,active

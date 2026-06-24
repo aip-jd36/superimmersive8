@@ -24,6 +24,44 @@
 
 ---
 
+## v4.1 — June 24, 2026 (Hypothesis — not yet validated)
+**Status:** Product evolution within v4 CaaS model. No business plan file change — tracked in `01_Business/product-discovery/`.
+
+**What changes from v4.0:**
+- **SI8 Certified now delivers three outputs:** Chain of Title PDF (clearance) + C2PA-signed final video file (in-file disclosure layer) + ERC-7053 on-chain registration (durable secondary layer — survives stripping)
+- **Positioning extends:** From "clearance documentation" to "clearance + disclosure compliance — every legally required layer"
+- **New pitch:** "One submission. Fully compliant on every layer." — PDF for legal team, signed video for platform upload, on-chain hash for auditor verification
+
+**Why:**
+- EU AI Act Art. 50 enforcement: **August 2, 2026** — 39 days from discovery date
+- EU Code of Practice: "no single active marking technique suffices" — C2PA alone is legally insufficient; multi-layer (C2PA + durable secondary signal) is explicitly required
+- C2PA metadata is stripped from final campaign video during post-production export — no tool re-attaches it at the delivery step
+- Agencies have ~25% compliance readiness at the creator/delivery layer; most will fail Capture's 10-question compliance checklist
+- SI8 sits at the delivery step — exactly where the gap is
+- Capture is the integration candidate: provides C2PA signing + ERC-7053 on-chain in one API call at $0.001/sign; targets AI model providers (not agencies), confirming the delivery-step gap is SI8's opening
+
+**Evidence base:**
+- EU Code of Practice on AI-generated content: https://digital-strategy.ec.europa.eu/en/policies/code-practice-ai-generated-content
+- **Capture compliance page:** https://captureapp.xyz/compliance/ — Art. 50 sub-article mapping, multi-layer architecture, 10-question compliance checklist
+- Platform requirement mapping: Meta, YouTube, TikTok (June 2026)
+- Tim Deussen (XRBB Berlin) validation: "no company for front-to-back rights management in generative workflows"
+- Fallback: open-source c2pa-rs SDK (MP4/video with custom assertions) + separate on-chain integration
+
+**What stays the same:**
+- Three-gear model (Gear A/B/C) unchanged
+- $499 price point for SI8 Certified unchanged
+- 90-minute human review unchanged
+- Chain of Title PDF unchanged
+- RecordForm ($29) unchanged
+
+**Prerequisite before marking Built:**
+1. Capture technical call — confirm MP4 video support + post-production re-signing satisfies their Art. 50(2) interpretation
+2. Validate three-deliverable concept with at least one warm lead (B130 Ivan Petruzzelli, B148 Myron Stapleton, or B149 Spencer Stander)
+
+**Deep-dive:** `01_Business/product-discovery/insights/2026-06-24-disclosure-gap.md`
+
+---
+
 ## v5.0 — March 29, 2026
 **File:** `BUSINESS_PLAN_v5.md`
 **Status:** FUTURE ROADMAP — Not active. Return when v4 reaches consistent revenue.

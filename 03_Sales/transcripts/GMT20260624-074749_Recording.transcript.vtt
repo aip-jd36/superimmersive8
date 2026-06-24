@@ -1,0 +1,678 @@
+WEBVTT
+
+1
+00:00:29.230 --> 00:00:31.500
+Tim Deussen: Hey, how are you doing?
+
+2
+00:00:35.880 --> 00:00:38.300
+JD: Hey, Tim, how's it going? Good to meet you.
+
+3
+00:00:39.080 --> 00:00:41.320
+Tim Deussen: Yeah, same.
+
+4
+00:00:41.620 --> 00:00:42.770
+Tim Deussen: Where are you at…
+
+5
+00:00:43.040 --> 00:00:48.319
+JD: I am in, Asia, I'm in Taiwan. I'm in Taiwan.
+
+6
+00:00:48.560 --> 00:00:51.369
+JD: Yeah, yeah, I'm in Taipei. Yeah, and…
+
+7
+00:00:51.800 --> 00:00:55.009
+JD: Traveling right now, or you are in Berlin, or…
+
+8
+00:00:55.010 --> 00:01:02.870
+Tim Deussen: No, I mean, but… Actually, Okay.
+
+9
+00:01:02.870 --> 00:01:03.660
+JD: Cool.
+
+10
+00:01:04.269 --> 00:01:05.299
+JD: Can you hear me?
+
+11
+00:01:09.370 --> 00:01:11.769
+JD: Well… Hello, Tim.
+
+12
+00:01:15.340 --> 00:01:17.709
+JD: Oh, man. Are you, stuck?
+
+13
+00:01:22.220 --> 00:01:23.080
+JD: That came…
+
+14
+00:01:23.560 --> 00:01:25.790
+Tim Deussen: Yes, now it should work again. Alright.
+
+15
+00:01:26.490 --> 00:01:28.519
+JD: Alright, well, cool.
+
+16
+00:01:28.590 --> 00:01:45.679
+JD: Well, I appreciate your time, and I don't want to take up too much of it, but I would love to, you know, tell you a little bit about my background. Also, I took a look at kind of XRBB and everything, and your background.
+
+17
+00:01:45.680 --> 00:01:55.029
+JD: I actually come from the XR space. I worked in VR for, quite a long time, before this, so maybe there's, nice.
+
+18
+00:01:55.150 --> 00:01:56.520
+JD: Mutual background there.
+
+19
+00:01:56.970 --> 00:02:00.890
+Tim Deussen: That's cool, yeah. We're both transitioning, right?
+
+20
+00:02:00.890 --> 00:02:14.519
+JD: Yeah, yeah, well, there was, there's hype around, you know, there's always hype around VR and XR, and it kind of goes in waves, right? Okay. Yeah. I actually worked on a, I…
+
+21
+00:02:14.520 --> 00:02:27.110
+JD: doubt you would know this name, but the company's called Positron, and we made a VR motion chair, and we worked with, large studios to put content,
+
+22
+00:02:27.110 --> 00:02:27.870
+Tim Deussen: Oh, well…
+
+23
+00:02:28.040 --> 00:02:28.440
+JD: Good chair.
+
+24
+00:02:28.440 --> 00:02:30.160
+Tim Deussen: Oh, cool. That's nice.
+
+25
+00:02:30.420 --> 00:02:33.480
+Tim Deussen: Yeah. That's always better working with hardware like that.
+
+26
+00:02:34.230 --> 00:02:40.600
+JD: Yes, yeah, so both content and hardware combined, in one, right? And,
+
+27
+00:02:40.710 --> 00:02:47.739
+JD: Yeah, and we deployed it, and, it's still… it's still around. And then I actually did Immersive for a while, so, I did,
+
+28
+00:02:48.120 --> 00:02:51.100
+JD: Some of those Van Gogh's and, some other.
+
+29
+00:02:51.100 --> 00:02:57.850
+Tim Deussen: Oh, really? Okay, good. I just saw the showcase from Taiwan during CAMS Immersive, actually. Oh, you were there?
+
+30
+00:02:58.190 --> 00:02:58.730
+JD: Okay.
+
+31
+00:02:58.730 --> 00:03:00.110
+Tim Deussen: Yep, yep.
+
+32
+00:03:00.820 --> 00:03:14.660
+Tim Deussen: I was actually on a panel there with kind of, like, some Asian representatives, actually with the Chinese Film Association, so we had a discussion about generative AI and how that basically impacts the whole, kind of, like, creative industry.
+
+33
+00:03:14.930 --> 00:03:15.540
+JD: Sure.
+
+34
+00:03:16.010 --> 00:03:17.990
+Tim Deussen: Hmm, that was interesting.
+
+35
+00:03:19.080 --> 00:03:26.850
+JD: Yeah, so… Anyways, I'm pretty excited to chat with you, so maybe I… let me…
+
+36
+00:03:27.170 --> 00:03:31.539
+JD: share a little bit about, like, in one minute, about, Super Immersive 8. How does that sound?
+
+37
+00:03:32.060 --> 00:03:33.120
+Tim Deussen: Sounds great.
+
+38
+00:03:33.510 --> 00:03:46.479
+JD: Okay, so, given kind of my background, and then before that, I was, I come out of the film industry, but then, since then, my career has been in licensing, all sorts of licensing, hardware, etc.
+
+39
+00:03:46.530 --> 00:04:04.770
+JD: So with that, and the last couple of years with, AI video, right, so AI-generated video, being more and more, prevalent, I think that there's a gap here in the rights management space.
+
+40
+00:04:04.810 --> 00:04:10.739
+JD: And so, just like if you were doing live action, or if you're doing…
+
+41
+00:04:10.880 --> 00:04:17.210
+JD: VR, XR, immersive. At some point, when you get to the commercial stage.
+
+42
+00:04:17.430 --> 00:04:23.529
+JD: Someone is gonna need some form of rights documentation, or licensing documentation.
+
+43
+00:04:23.750 --> 00:04:27.189
+JD: And, that's my hypothesis.
+
+44
+00:04:27.450 --> 00:04:29.100
+JD: And,
+
+45
+00:04:29.670 --> 00:04:39.699
+JD: That's what I've built. So, a couple things. I'm gonna… I'm actually gonna share… maybe I'll share my screen as we talk, but, as…
+
+46
+00:04:39.710 --> 00:04:52.670
+JD: you know, one of the… one of the other things is, coming from the film space, I know how manual it is for things like insurance or E&O insurance, you know, like, you have to gather a bunch of things together.
+
+47
+00:04:52.670 --> 00:04:53.230
+Tim Deussen: you know?
+
+48
+00:04:53.360 --> 00:05:00.639
+JD: So I want to put everything together, and I have a simple, kind of a web app in which, through some steps.
+
+49
+00:05:00.800 --> 00:05:05.320
+JD: And then you come out with, like, a… like a Carfax report.
+
+50
+00:05:05.520 --> 00:05:13.290
+JD: Right? And you can give this report to any, legal department, etc.
+
+51
+00:05:14.090 --> 00:05:24.559
+JD: So, that's my idea. I would love to hear, you know, your thoughts on that idea, good or bad. I mean, bad is really good, because then I can improve.
+
+52
+00:05:24.560 --> 00:05:26.190
+Tim Deussen: Yeah, yeah, yeah.
+
+53
+00:05:26.190 --> 00:05:27.670
+JD: I mean, it…
+
+54
+00:05:27.740 --> 00:05:35.899
+Tim Deussen: Basically, of course, as you mentioned, you know, that's kind of, like, one of the kind of, like, yeah, key, key areas and also important areas.
+
+55
+00:05:36.280 --> 00:05:55.140
+Tim Deussen: somehow relates also to the transparency discussion, you know, like, your colleague asked me about the angel, but there's, of course, two different levels. The transparency is actually just for that, you know, marking, which will be important, depending on what kind of use case you have, and what kind of content, and if it's a public broadcast, or things like that.
+
+56
+00:05:55.170 --> 00:05:58.890
+Tim Deussen: And then that me set is the actual provenance and write management.
+
+57
+00:05:58.930 --> 00:06:01.870
+Tim Deussen: And I think there's, actually right now.
+
+58
+00:06:02.150 --> 00:06:19.679
+Tim Deussen: research institutions, like, for example, the Fraunhofer Focus, they're working on this, of course, you know, and then there's the C2PA standard, I don't know if you… so C2PA is basically a container, mainly for, kind of like, going from camera, chip.
+
+59
+00:06:19.680 --> 00:06:26.709
+Tim Deussen: You know, through to the production pipeline, and underneath, there's another standard that is actually for provenance and rights information.
+
+60
+00:06:26.710 --> 00:06:42.120
+Tim Deussen: You know, software working… creators can fill in their own rights, information, and that is basically… you can extend this, you know, so what we are seeing right now, that it's this technology that's gonna be… that's gonna probably be used to transport
+
+61
+00:06:42.120 --> 00:06:49.530
+Tim Deussen: Kind of, like, copyright and provenance information, and also other production-related information, because a bigger topic,
+
+62
+00:06:49.940 --> 00:06:59.960
+Tim Deussen: that is related to this is that you need to transfer metadata from one production step to the other, you know, like, to basically guide orchestrated agentic systems.
+
+63
+00:07:00.170 --> 00:07:06.510
+Tim Deussen: You know, so that's kind of, like, I think the bigger picture, and that is all gonna be…
+
+64
+00:07:07.000 --> 00:07:16.440
+Tim Deussen: Probably part of systems, actually, or frameworks, you know, because it's, like, probably most companies are not just gonna have one module just for the rights management.
+
+65
+00:07:16.520 --> 00:07:28.260
+Tim Deussen: Because, you know how it is with a production company, you are basically coordinating different departments, different people, you know, so there will be coordination frameworks, and I think it has to be compatible with that.
+
+66
+00:07:28.570 --> 00:07:47.079
+Tim Deussen: And then also, there's maybe an interesting paper for you that's not directly relating, but it's from the EBU, which is the European Broadcaster Union, and they have a… they call it the, kind of like, media factory, and that is a reference architecture for modular…
+
+67
+00:07:47.110 --> 00:07:49.560
+Tim Deussen: Basically, production components
+
+68
+00:07:49.730 --> 00:07:58.490
+Tim Deussen: You know, so that's more like you build one app, one kind of, like, component for a specific purpose, and it needs to be able to plug in to…
+
+69
+00:07:58.490 --> 00:08:20.470
+Tim Deussen: the workflows that people are using, and workflows can be anything when you're in AI, right? It can be runway, but it can also be your own framework calling Vio, or other APIs, or running local models, right? So that's what's happening right now, that there's different production frameworks and different production techniques, and the industry's kind of trying to understand which one is the right one for me.
+
+70
+00:08:20.470 --> 00:08:28.429
+Tim Deussen: And how I should use that. So within that, you want to offer a rights module, so to say. So you have to be interoperable.
+
+71
+00:08:28.430 --> 00:08:46.439
+Tim Deussen: with those other systems, basically, to make it worthwhile. And then there's also some frameworks that do the whole accounting and tax, kind of like, you know, keeping track of that. So it relates a little bit also to what you just mentioned. It's kind of like the bookkeeping, keeping, and documentation of the production.
+
+72
+00:08:46.710 --> 00:08:47.810
+Tim Deussen: Yep.
+
+73
+00:08:48.580 --> 00:08:55.200
+Tim Deussen: I think one aspect that might be actually maybe even the key, which is hard to understand, it's not…
+
+74
+00:08:55.350 --> 00:09:12.709
+Tim Deussen: only the programming of a framework like that, that tracks information and then just kind of, like, puts it together. It's also the legal questions evolving around it, right? What do you have to do to prove copyright and IP when you're using AI systems?
+
+75
+00:09:13.170 --> 00:09:30.180
+Tim Deussen: You know, that is the main legal question, and there have been a couple of decisions from the U.S. Patent Office, for example, where there was… they attributed copyright to artists working with generative systems by… they just did a screen recording of their work, and they proved that they had a considerable input, basically.
+
+76
+00:09:30.750 --> 00:09:45.449
+Tim Deussen: prompting input, the creative intent, those things, right? So you need to clearly track those, and they need to then basically be able to prove your IP and copyright, you know. On the other side, the second thing you mentioned.
+
+77
+00:09:45.600 --> 00:10:01.499
+Tim Deussen: tracking what the, like, what was… what model did you use, what training data was in there, are you safe from lawsuits from the outside when you're using certain things? So those are actually all the… all the topics that are circulating around an app like that.
+
+78
+00:10:01.740 --> 00:10:09.099
+Tim Deussen: And I think it would be most successful if you can address and answer some of those questions. Because the producer is not just going to ask you.
+
+79
+00:10:09.260 --> 00:10:31.089
+Tim Deussen: can you organize my documents, so to say, right? The producer's going to be like, you know, we got some serious legal challenges here, we don't even know if we have IP when we use generative AI. We don't know if we're going to be sued, because in the training data, there might have been some images or audio or anything that somebody's suing for, right? Am I going to be safe if I use a system like that?
+
+80
+00:10:31.100 --> 00:10:37.270
+Tim Deussen: Those are the really questions that are right now moving the industry, and that are also holding back adaptation.
+
+81
+00:10:37.330 --> 00:10:41.290
+Tim Deussen: So I think it's those two elements, actually, that you… all three elements.
+
+82
+00:10:41.290 --> 00:10:59.480
+Tim Deussen: The one is interoperability to other systems, the second one is the legal, actually, kind of, like, framework you're working in, and that is depending on country, also. And then the third one is the actual modularity or the app itself, you know, how it works and how it's going to be done, yeah.
+
+83
+00:11:01.160 --> 00:11:14.539
+JD: Yeah, that's great feedback. You know, if I may, a couple of follow-up questions there. I think the interoperability, I think that's, the modular system that you mentioned, I think that's really, really smart.
+
+84
+00:11:14.540 --> 00:11:24.219
+JD: One thing that I'm, you know, constantly thinking about is, in terms of AI, or in terms of rights management, is this a…
+
+85
+00:11:24.220 --> 00:11:31.680
+JD: pre… Going into production idea, or is this a post-completed production verification?
+
+86
+00:11:31.940 --> 00:11:43.929
+JD: I could see, like, interoperability, that module being hooked up to something that you would do before, or as you're planning the production, but what do you think?
+
+87
+00:11:44.910 --> 00:12:03.480
+Tim Deussen: I think it's part of each production step, right? Because it starts definitely with the project development and the ideation and script writing, because that's a key creative activity, you know, and people are using AI tools for that as well, you know. So each step that… that is basically a creative step.
+
+88
+00:12:03.750 --> 00:12:19.579
+Tim Deussen: that involves the input of artists, and that also involves the usage of AI tools for analyzing, is going to be exactly answering that provenance question, and in the end, it needs to be a chain, you know, because the final product is just the result of this.
+
+89
+00:12:19.670 --> 00:12:37.209
+Tim Deussen: You know, so if somebody already does the tracking, they will not need the tool that does it for you at the end, right? Because then you got all the data, and in a way, it's just a question of how you then, how you then finalize and portray the data. Are you gonna generate an Excel file or any other format?
+
+90
+00:12:37.220 --> 00:12:48.140
+Tim Deussen: That is readable, you know, and that is usable within then, you know, giving it to your bookkeeping department, or handing it into your… handing it to your clients, these kind of things.
+
+91
+00:12:48.690 --> 00:12:49.300
+JD: So…
+
+92
+00:12:49.490 --> 00:12:50.060
+Tim Deussen: Yeah.
+
+93
+00:12:50.310 --> 00:12:51.759
+JD: No, go ahead, please.
+
+94
+00:12:52.080 --> 00:13:00.060
+Tim Deussen: it needs to be hacking safe, right? That is where it loops back to the transparency, you know, because if you can easily manipulate or remove it.
+
+95
+00:13:00.340 --> 00:13:01.880
+Tim Deussen: What's the use, right?
+
+96
+00:13:02.390 --> 00:13:03.140
+Tim Deussen: Nope.
+
+97
+00:13:04.060 --> 00:13:20.370
+JD: You mentioned, in the messages, the EU Act, right? And so one thing about the Article 50 of the EU Act, or the requirement is some sort of digital stamp or digital, right, digital,
+
+98
+00:13:20.370 --> 00:13:28.910
+JD: Yeah, tooling. So, my question is, because you're talking about these modular things, So, what is the current…
+
+99
+00:13:29.390 --> 00:13:39.130
+JD: the leading Or the… what is the leading… company that will deliver
+
+100
+00:13:39.240 --> 00:13:57.150
+JD: this kind of AI, you know, this kind of AI rights management. So if the… if C2PA is a module… is a module that hooks onto some sort of app, right, and maybe rights management hooks onto this app, and, you know, I think about it as maybe plugins, you know, that could change.
+
+101
+00:13:57.150 --> 00:14:06.260
+JD: what is the company that does this? Is it Runway, or is it VO, or is it Movie Magic, or what is that company?
+
+102
+00:14:06.660 --> 00:14:25.950
+Tim Deussen: I mean, I think it's actually, in that sense, not… I'm not sure, you know, I don't think it's there, you know, there's not one obvious company, at least in the discussion that I'm talking to, you know, it's mostly R&D and looking at how you can build, actually, that pipeline. You know, so in that sense, there's maybe not…
+
+103
+00:14:26.030 --> 00:14:43.719
+Tim Deussen: a company for front-to-back rights management in generative workflows. You know, it might be that there is one coming up now, but I didn't see it yet, or hear about it yet. But, so, that… that is actually the chance, in reality, that is the opportunity, and C2PA is just a standard.
+
+104
+00:14:43.950 --> 00:14:54.060
+Tim Deussen: You know, so it's just good to know that standard and confirm with that standard, because it's probably going to be widely used, which is going to ensure interoperability when you're offering a service like that.
+
+105
+00:14:54.370 --> 00:15:07.670
+Tim Deussen: But a company that does that needs legal knowledge, right? They cannot just simply be processing, you know, so that's kind of like, yeah, it would be interesting to look at, actually do, like, a market research, see who's already there.
+
+106
+00:15:08.090 --> 00:15:26.030
+JD: One thing, because we've been asking a lot of, for example, creative directors, a lot of people, the same question, and number one, we haven't found this company. We haven't found, you know, people say, yes, AI rights management, we need to think about that, or we're working on that.
+
+107
+00:15:26.030 --> 00:15:30.720
+JD: And we have found this company. Now, what we have found is in,
+
+108
+00:15:30.810 --> 00:15:40.409
+JD: more regulated industries, like financial service. So, if you're creating a commercial or AI content in financial service.
+
+109
+00:15:40.730 --> 00:15:49.570
+JD: The agencies and the creative directors in that sector are actually creating their own,
+
+110
+00:15:49.790 --> 00:16:07.770
+JD: workflow. So, they have their own tool, you know, that they're doing in-house. You know, it could be simple, it could be Excel. We actually, met with, a financial service, company in which they were creating, basically a machine-read JSON,
+
+111
+00:16:07.910 --> 00:16:14.330
+JD: workflow that just input all of these rights management things, and then it synced up into their IT, right?
+
+112
+00:16:14.330 --> 00:16:14.870
+Tim Deussen: Yep.
+
+113
+00:16:14.870 --> 00:16:15.820
+JD: So…
+
+114
+00:16:16.030 --> 00:16:23.139
+JD: Yeah, so we found that a lot of people are just kind of doing this to fulfill their immediate need, but we haven't found
+
+115
+00:16:23.250 --> 00:16:25.419
+JD: You know, one company that does this.
+
+116
+00:16:26.120 --> 00:16:45.559
+Tim Deussen: Exactly. Yeah, I mean, I think that's possible that there is actually no… no one company that builds a framework like that, because most of them are really concentrated on technical workflows for the actual creative output, for the generative output, and even those pipelines are a work in progress, right?
+
+117
+00:16:45.580 --> 00:16:51.869
+Tim Deussen: So, before we don't really have a framework that's working through. So, for example, Runway is a middleware.
+
+118
+00:16:51.940 --> 00:17:16.290
+Tim Deussen: Right? So there's a company that's pretty good at actually building this framework for, you know, video production, but they don't really have rights management. They give you tracking possibilities of the models you use and things like that, but not really considering once it turns into a business, right? Once it turns into an IP business, and you need to not only prove that you did something in front of a client, but maybe you want to
+
+119
+00:17:16.290 --> 00:17:20.029
+Tim Deussen: sell your product, right? Your film, or your movie, or whatever.
+
+120
+00:17:20.030 --> 00:17:26.120
+Tim Deussen: You know, so yeah, that's a… that's a really good point, actually. Maybe that's really a chance or opportunity.
+
+121
+00:17:27.270 --> 00:17:46.840
+JD: Well, let me ask you that next question. I mean, I got into this, and again, like, I'm kind of coding on my own with AI, of course, right? My passion is just kind of seeing this intersection of AI and film, where I come from, and then rights management and licensing, which I have a lot of experience in.
+
+122
+00:17:46.840 --> 00:17:47.630
+JD: Yeah.
+
+123
+00:17:47.740 --> 00:17:55.769
+JD: So, you know, right now, what I have is the Rights Management app. It's a fairly simple web app, but…
+
+124
+00:17:55.850 --> 00:18:15.110
+JD: if I wanted to expand to be… to try and be that company or that platform, and have even modular, nodes in which you can connect, you know, some… if you wanted to use a specific C2PA tool, great, it's connected to Super Immersive 8.
+
+125
+00:18:15.110 --> 00:18:24.960
+JD: From beginning 10. If I wanted to expand to do that, number one, given all of your experience with associations and everything.
+
+126
+00:18:25.510 --> 00:18:32.949
+JD: what would be a good next step for me? Like, should I talk to associations, you know, meet with them? Like.
+
+127
+00:18:33.080 --> 00:18:35.840
+JD: What are some next steps that you think
+
+128
+00:18:36.400 --> 00:18:44.440
+JD: you know, not in the… not in the technical how to create it, but, like, in the distribution, the go-to-market. Maybe what are some next steps that you would recommend?
+
+129
+00:18:44.910 --> 00:18:48.459
+Tim Deussen: I think probably, actually, doing pilots
+
+130
+00:18:48.570 --> 00:19:03.789
+Tim Deussen: You know? I mean, associations like ours can be interesting for distribution, for example, once you really get into it, you know. That is the other thing, right? Festivals, talks, conferences, you know, introducing new technology, talking about people, not the technical solution, but really the problem.
+
+131
+00:19:03.790 --> 00:19:09.639
+Tim Deussen: Right? Because the problem itself is, how can I prove, my… my kind of, like,
+
+132
+00:19:09.640 --> 00:19:12.399
+Tim Deussen: My provenance in the end, you know?
+
+133
+00:19:12.730 --> 00:19:15.190
+Tim Deussen: And, can I just jump for one second, really quick?
+
+134
+00:19:15.190 --> 00:19:16.560
+JD: Of course. Yes, please.
+
+135
+00:19:16.560 --> 00:19:19.090
+Tim Deussen: Because there's one call I need to go.
+
+136
+00:19:19.270 --> 00:19:20.969
+JD: Yes, of course.
+
+137
+00:19:21.250 --> 00:19:22.000
+Tim Deussen: Yeah, no.
+
+138
+00:20:34.890 --> 00:20:36.890
+Tim Deussen: Yeah, sorry, that was.
+
+139
+00:20:37.230 --> 00:20:51.259
+Tim Deussen: Yeah, so basically, I think the most important step for you personally is actually pilots, and pilots in sense of, you know, there's a lot of opportunities, because what's happening right now, there's a lot of AI movie
+
+140
+00:20:51.260 --> 00:20:54.220
+Tim Deussen: competitions, and AI movie festivals.
+
+141
+00:20:54.220 --> 00:21:14.899
+Tim Deussen: Right? So, just kind of, like, participating either in a festival, you know, doing your own little short movies, or cooperating with creators, doing your own little short movies, and then integrating the pipeline in that production workflow, you know, because then you can really showcase the added value, and you're already talking about, yes, I do… I'm doing this, I'm not talking about doing this.
+
+142
+00:21:14.980 --> 00:21:15.889
+Tim Deussen: Sure. You know.
+
+143
+00:21:15.890 --> 00:21:39.720
+Tim Deussen: So that's kind of, like, I think a very good first step, you know? And then that might… I mean, in the end, you will need to talk to kind of, like, really producers, producer associations. So it's film festivals, you know, where you have those opportunities, and maybe if you really get serious about it, you can also, you know, giving panel talks, there's a lot of panel talks about generative AI workflows and things like that.
+
+144
+00:21:39.720 --> 00:21:46.050
+Tim Deussen: But they might be interested… festivals might be interested in talks or workshops about provenance.
+
+145
+00:21:46.120 --> 00:21:50.260
+Tim Deussen: Right? Yeah. And how to ensure this? So that's kind of like,
+
+146
+00:21:50.340 --> 00:21:56.810
+Tim Deussen: I think the way in, actually, the road in, you know, so that's how I would approach that, actually.
+
+147
+00:21:57.450 --> 00:22:17.940
+JD: Do you think, and that, yeah, definitely that world is one that I come from, so do you think that the path right now is, AI film creative, or creative film, or do you think that the path is more commercials? Like, ad agencies, commercials, you know, AI-generated content like that?
+
+148
+00:22:17.940 --> 00:22:42.809
+Tim Deussen: I mean, it's a different… it's a different use case, basically, right? And it has also different demands, because as you mentioned in your previous email, you're coming more from the kind of idea of commercials, and in that one, you need more the tracking, and really showing your client that it's trustworthy, their content they're produced, and that is definitely a promising field, because that field is already commercially exploding, you know? So film is, like, on its way.
+
+149
+00:22:42.810 --> 00:23:00.290
+Tim Deussen: Right? So that's more, if you have a full-scale film workflow and rights management and distribution, all those topics are kind of like, you know, it's the film industry, it's like this club, you know, where people do things, they're conservative, so it's probably harder to actually scale into.
+
+150
+00:23:00.350 --> 00:23:18.379
+Tim Deussen: You know, so basically, you would need probably different techniques and different versions of your app or of the output, you know, depending on what you're targeting. But again, that's just the output, right? Because the data is basically the same. It's just in the last step how you represent the data then, and what approach you take.
+
+151
+00:23:18.930 --> 00:23:19.420
+Tim Deussen: Nope.
+
+152
+00:23:19.420 --> 00:23:33.050
+JD: Do you… in your experience, one question I've had is, do AI directors, in either case, do they need to track all of their prompts? Like, do they need to record every single prompt?
+
+153
+00:23:33.050 --> 00:23:49.859
+Tim Deussen: They don't… in the end, they will need to do that for several reasons, right? And I don't… I would doubt that they record that inside of the system that you're doing, which does the right management. That could be, but there's a bigger thing of having those prompts, right? Because it's basically know how you're building.
+
+154
+00:23:49.860 --> 00:23:54.049
+Tim Deussen: You know, so you can do more with these prompts than just doing your one shot.
+
+155
+00:23:54.050 --> 00:24:06.330
+Tim Deussen: It's becoming a knowledge base, you know, for your current production and for your future production, you know, so that's… that's kind of like… but in the end, that's essential, because that gives you the possibility to prove your copyright.
+
+156
+00:24:06.500 --> 00:24:12.980
+Tim Deussen: You know, so to answer your question, yes, that is important. People might not do that right now, but yeah.
+
+157
+00:24:13.920 --> 00:24:25.909
+JD: Now, is that something that, like, if they use Runway, or VO, or Kling, or whatever, like, is that something that… that Runway has to figure out? Or is that… you think, is that something that a platform like… has to figure out?
+
+158
+00:24:25.910 --> 00:24:44.169
+Tim Deussen: I mean, they're already doing it, you know, they're already kind of, like, storing the prompts together with the things you generate, right? I mean, I don't know, like, platforms like Runway are moving forward quite fast, you know, and they're gonna integrate anything that is, in the end, part of the professional workflow, you know, because that's how they're positioning themselves.
+
+159
+00:24:44.220 --> 00:24:53.470
+Tim Deussen: But that can also be a chance for you, actually. You know, they might just buy the company if you successfully position it, just to integrate the technology, you know?
+
+160
+00:24:54.130 --> 00:24:54.670
+JD: Yep.
+
+161
+00:24:55.150 --> 00:24:59.209
+JD: Okay. Well, Tim, I know I've taken up a lot of your time. I really
+
+162
+00:25:00.750 --> 00:25:04.219
+JD: Yeah, very, very helpful. I would love to stay in touch.
+
+163
+00:25:04.220 --> 00:25:04.910
+Tim Deussen: Yeah.
+
+164
+00:25:04.910 --> 00:25:10.839
+JD: And maybe every month or a few weeks, if I have some progress, maybe I can reach out and show you.
+
+165
+00:25:11.090 --> 00:25:17.269
+Tim Deussen: Yeah, let's do that. You know, we can be in touch, we can see maybe there's also ways of working together, who knows, right?
+
+166
+00:25:17.500 --> 00:25:35.280
+JD: Yeah, exactly. Okay, then I will… again, thank you for today. And again, I am looking for advisors, not looking so much for investors, I'm kind of building this by myself right now, and I'm totally fine doing that, but it's really more advisors, right? Advisors and…
+
+167
+00:25:35.280 --> 00:25:39.400
+JD: And partners. So, definitely… Sounds good. Okay, thank you so much.
+
+168
+00:25:39.400 --> 00:25:41.280
+Tim Deussen: It's good to meet you.
+
+169
+00:25:41.280 --> 00:25:45.390
+JD: Yes, meeting you as well. Okay, bye. Bye. Bye-bye.
+
