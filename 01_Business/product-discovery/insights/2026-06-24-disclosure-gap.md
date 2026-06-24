@@ -202,6 +202,64 @@ If yes: build. If no: understand what's missing before building.
 
 ---
 
+## Competitive Landscape — Who Else Is In This Space
+
+Competitive research (June 24, 2026) confirms no direct competitor at the agency delivery step.
+
+### The Four Positions — How the Market Has Sorted
+
+```
+[Position 1] Model providers (Runway, Kling, Veo)
+  → C2PA signed at generation time, inside the inference pipeline
+  → Cannot cover composited outputs; metadata stripped in post-production
+
+[Position 2] Capture / Numbers Protocol
+  → C2PA signing + ERC-7053 on-chain via API
+  → Targets AI model providers and media companies (Reuters, AP)
+  → The agency delivery step is explicitly NOT their market
+
+[Position 3] ProofSnap / TrueScreen
+  → Read and certify EXISTING C2PA signals for audit evidence
+  → Do not sign content; do not add new C2PA assertions
+  → Useful after SI8 delivers the signed file — not competitive
+
+[Position 4] RightsDocket
+  → Human review + C2PA embed + USCO registration for audio only
+  → $20/registration; closest model analog to SI8 v4.1
+  → Audio only — no video product exists
+
+[EMPTY] Agency delivery step
+  → Final composited campaign video with zero C2PA remaining
+  → Re-signing with human-reviewed clearance data embedded
+  → SI8 v4.1
+```
+
+### Company-by-Company Breakdown
+
+| Company | What they actually do | C2PA signing? | Video? | EU AI Act angle | SI8 relationship |
+|---------|----------------------|---------------|--------|-----------------|------------------|
+| **Capture (Numbers Protocol)** | C2PA signing + ERC-7053 on-chain via API | ✅ | Unknown — confirm on call | Explicit — compliance page maps all Art. 50 sub-articles | Integration candidate, not competitor |
+| **ProofSnap** | Browser extension that packages existing C2PA signals into court-ready forensic ZIPs | ❌ reader only | ❌ | Explicit EU AI Act compliance page, $4.99–$49.99 | Audit-evidence tool for SI8 clients AFTER delivery |
+| **TrueScreen** | Digital evidence certification at moment of capture (ISO forensic methodology) | ❌ | ✅ (video meetings, screen recordings only) | Limited mention | Insurance/legal/financial — different use case |
+| **RightsDocket** | Provenance + copyright docs for AI-assisted audio; C2PA embedding; USCO registration | ✅ (audio only) | ❌ audio only | EU AI Act Article 50 compliance guide published | Closest analog — same model, different medium |
+| **c2pa.ai** | Educational/consulting site | ❌ | ❌ | Content present | Irrelevant |
+| **Pebblous** | Research/educational blog | ❌ | ❌ | Content present | Irrelevant |
+
+### Key Insight: RightsDocket as Market Validation
+
+RightsDocket proves the SI8 v4.1 business model works in an adjacent market:
+- Human-reviewed provenance documentation → C2PA embedded in final file → $20 per registration
+- Builds Chain of Provenance document + C2PA-signed audio file in one service
+- Offers USCO copyright registration as an add-on
+
+The model has paying customers. Nobody has replicated it for commercial video. This is the most direct evidence that the "judgment layer + C2PA embed + per-registration fee" model is commercially viable.
+
+### C2PA 2.4 Spec Note
+
+C2PA 2.4 (released 2026) introduced "Durable Content Credentials" — now mandates **hard bindings** (cryptographic hashing) + **soft bindings** (invisible watermarking + passive content fingerprinting). Companies building "C2PA signing only" are building to the superseded spec. Capture's two-layer approach (C2PA + ERC-7053 on-chain) aligns with the current mandate.
+
+---
+
 ## Sources
 
 - EU Code of Practice on marking and labelling of AI-generated content: https://digital-strategy.ec.europa.eu/en/policies/code-practice-ai-generated-content

@@ -268,6 +268,78 @@
 
 ---
 
+### Quadrant 3b: C2PA Disclosure Infrastructure Players (June 2026 — New Category)
+
+*Identified during competitive research on EU AI Act compliance tooling. These players address disclosure (making AI-generated content machine-readable) rather than clearance (proving content is legally safe). Distinct from SI8's core product, but SI8 v4.1 hypothesis targets their adjacent gap.*
+
+**The agency delivery step gap:** C2PA metadata embedded at generation (by Runway, Kling, Veo) is stripped when video is exported from Premiere Pro or similar post-production tools. The final composited campaign video reaches the agency with zero C2PA assertions remaining. No tool in this category re-attaches disclosure at the delivery step — that is SI8's v4.1 opening.
+
+---
+
+**Capture / Numbers Protocol**
+- **What:** C2PA signing service + ERC-7053 on-chain registration via REST API and SDKs
+- **Model:** Managed signing at $0.001/sign (pay-as-you-go); free Node.js/Python SDKs (MIT/Apache)
+- **Coverage:** Media companies (Reuters, AP, Starling Lab), AI model providers (integrates into inference pipelines)
+- **C2PA signing:** Yes; EU AI Act compliance page maps all Art. 50 sub-articles explicitly
+- **Video:** Unknown — MP4 support not confirmed in product docs; critical open question
+- **Geographic:** Global; ISO 27001 certified
+- **SI8 relationship:** **Integration candidate.** Capture's market is model providers and media companies — agencies are not their current customer. The agency delivery-step gap is unaddressed by Capture's current offering. SI8 would use Capture's API as a $0.001/sign infrastructure layer, not compete with them.
+- **Threat level:** None (complementary — potential partner/infrastructure provider)
+
+---
+
+**ProofSnap**
+- **What:** Chrome/Edge browser extension that packages existing C2PA/SynthID/EXIF signals into court-ready forensic evidence ZIPs
+- **Model:** $4.99–$49.99 one-time; $28.99/month enterprise
+- **Coverage:** Compliance officers, legal teams, DPOs, auditors verifying existing signals
+- **C2PA signing:** No — reader/audit tool only; does NOT add new C2PA assertions to files
+- **Video:** No
+- **Geographic:** US/UK focus
+- **EU AI Act angle:** Explicit compliance page; positions as the audit evidence layer
+- **SI8 relationship:** Downstream tool — a ProofSnap user would benefit from SI8's C2PA-signed video because it gives them a richer signal to package into their forensic ZIPs. Not competitive.
+- **Threat level:** None
+
+---
+
+**TrueScreen**
+- **What:** Digital evidence certification platform using ISO/IEC 27037 forensic methodology; certifies content at moment of capture via mobile app, Chrome extension, or REST API
+- **Model:** €60/month business; custom enterprise
+- **Coverage:** Insurance, law firms, financial services, public administration
+- **C2PA signing:** No — verification/certification of capture provenance, not C2PA file signing
+- **Video:** Yes, but only video calls and screen recordings captured via their app/extension
+- **EU AI Act angle:** Limited — primarily a source-authenticity tool, not an AI disclosure tool
+- **SI8 relationship:** Different use case; TrueScreen solves "did this screen recording actually happen?" — not "is this AI-generated video cleared for commercial use?"
+- **Threat level:** None
+
+---
+
+**RightsDocket**
+- **What:** Digital provenance and copyright documentation platform for AI-assisted audio content; C2PA embedding + USCO copyright registration per submission
+- **Model:** $20 per registration (provenance + C2PA + USCO filing)
+- **Coverage:** Music creators, audio producers, publishers
+- **C2PA signing:** Yes — for audio files (MP3/WAV/M4A only)
+- **Video:** No
+- **EU AI Act angle:** Explicit Article 50 compliance guide published; positions C2PA as the legal answer for audio
+- **SI8 relationship:** **Closest market analog.** RightsDocket proves the "human-reviewed provenance + C2PA embedded in final file + per-registration fee" model works commercially in audio. SI8 v4.1 is this model applied to commercial video. Not a competitor — different medium, different buyer.
+- **Threat level:** None today. Monitor if they expand to video.
+
+---
+
+**Competitive Position Summary — Disclosure Infrastructure**
+
+| Company | Signs C2PA? | Video? | Agency delivery step? | Business model |
+|---------|------------|--------|----------------------|----------------|
+| **Model providers** (Runway, Kling, Veo) | ✅ at generation | ✅ | ❌ metadata stripped in post | Built into generation tool |
+| **Capture** | ✅ post-hoc | Unknown | ❌ targets model providers | $0.001/sign API |
+| **ProofSnap** | ❌ reader only | ❌ | ❌ | $5–$49 one-time |
+| **TrueScreen** | ❌ | ✅ (capture only) | ❌ | €60/month |
+| **RightsDocket** | ✅ | ❌ audio only | ❌ | $20/registration |
+| **SI8 v4.1 (hypothesis)** | ✅ via Capture API | ✅ | **✅ only player here** | $499 (includes clearance + disclosure) |
+
+**Key finding:** SI8's delivery-step position is unoccupied by every player in the disclosure infrastructure ecosystem. The clearance component (Chain of Title PDF) remains SI8's core differentiation. Adding C2PA signing at $0.001 per file via Capture extends that into the disclosure layer without competing with any existing player.
+
+---
+
 ### Quadrant 4: Full-Stack Competitors (Verification + Marketplace + Production)
 
 **None identified as of March 2026.**
@@ -585,13 +657,19 @@
 | **C2PA** | Provenance standard | No (metadata only) | No | N/A | Low |
 | **Runway / Sora** | AI tools | No | No | Yes (tool) | N/A (complementary) |
 | **FADEL** | Enterprise IP/royalty mgmt | No (traditional IP only) | No | No | Low (today) / Medium (long-term) |
+| **Capture / Numbers Protocol** | C2PA signing API | No (technical layer only) | No | Partial (AI model providers) | None (integration candidate) |
+| **ProofSnap** | C2PA audit/evidence tool | No (reader only) | No | No | None |
+| **TrueScreen** | Source-capture certification | No (different use case) | No | No | None |
+| **RightsDocket** | Audio provenance + copyright | Yes (audio only) | No | Partial (audio AI) | None (adjacent market) |
 
-**SI8 is the only player offering:** B2B verification service (CaaS) for non-Adobe AI video tools + opt-in marketplace + producer curation track.
+**SI8 is the only player offering:** B2B verification service (CaaS) for non-Adobe AI video tools + C2PA disclosure re-signing at the agency delivery step + opt-in marketplace + producer curation track.
 
 **Adjacent players to monitor (not direct competitors today):**
 - **FADEL** — Enterprise rights/royalty management for traditional IP (Disney/Marvel-tier). Validates the category. Not solving AI-generated content clearance. Possible future acquirer or partner. Full analysis: `COMPETITOR-FADEL-ANALYSIS.md`
 - **ClearStory** — Chain of Title tracking software for traditional film/TV. No AI layer, no clearance execution.
 - **Rightsline** — Enterprise rights management platform. No SMB/indie tier, no AI content focus.
+- **RightsDocket** — Audio provenance + C2PA embedding at $20/registration. Closest market analog to SI8 v4.1 — same model (human review → C2PA embed → per-registration fee), different medium (audio vs. video). Monitor for video expansion.
+- **Capture / Numbers Protocol** — C2PA signing API; integration candidate for SI8 v4.1 (not a competitor). Monitor for: MP4/video support confirmation, agency-side product launches, pricing changes.
 
 ---
 
@@ -599,19 +677,24 @@
 
 1. **No direct competitor exists** offering SI8's specific combination (CaaS verification + marketplace + producer track).
 
-2. **Biggest threats:**
+2. **The agency delivery step is unoccupied.** The C2PA disclosure ecosystem (Capture, ProofSnap, TrueScreen, RightsDocket) has sorted into four non-overlapping positions — none of them address the gap where a composited final campaign video needs C2PA re-signing and IP clearance at the point of agency delivery. This is SI8 v4.1's specific opening.
+
+3. **RightsDocket validates the model.** $20/registration for human-reviewed provenance + C2PA embedded in audio files + USCO registration. Paying customers exist for this exact approach in audio. Nobody has built it for commercial video.
+
+4. **Biggest threats:**
    - Getty Images adds AI video verification (likely within 12-18 months if market demand is proven)
    - Adobe expands verification to external tools (conflicts with Firefly strategy, but possible)
 
-3. **Strongest moat:**
+5. **Strongest moat:**
    - Judgment layer (human review of subjective legal/IP risk) cannot be automated
    - As C2PA commoditizes provenance metadata, judgment becomes MORE valuable
+   - C2PA 2.4 now mandates hard bindings + soft bindings — companies building C2PA-only signing are building to a superseded spec; SI8 v4.1's two-layer approach (C2PA + on-chain) aligns with the current mandate
 
-4. **Geographic advantage:**
+6. **Geographic advantage:**
    - APAC/SEA focus with no direct regional competitor
    - Bilingual (EN + ZH-TW), local relationships, local market knowledge
 
-5. **Structural advantage:**
+7. **Structural advantage:**
    - Opt-in flywheel (verification customers → marketplace inventory) solves chicken-egg problem competitors face
 
 **Strategic priority:** Prove the model works (Year 1) before Getty or Adobe enter. Once validated, SI8 has first-mover advantage and can scale aggressively.

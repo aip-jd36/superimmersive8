@@ -13,6 +13,21 @@
 
 ## Log
 
+### 2026-06-24 — C2PA Ecosystem Competitive Landscape
+**Insight:** No company addresses the agency delivery step — the gap where a final composited campaign video needs C2PA re-signing and IP clearance after post-production strips the original metadata. The ecosystem splits cleanly into four non-overlapping positions: (1) model providers sign at generation; (2) Capture signs AI company outputs at inference; (3) ProofSnap/TrueScreen read and certify existing signals; (4) RightsDocket does per-registration human review + C2PA embed for audio. SI8 v4.1's position — re-sign final agency output with combined IP clearance — is unoccupied by any player.
+
+**Source:** Competitive research session — ProofSnap (getproofsnap.com), TrueScreen (truescreen.io), RightsDocket (rightsdocket.com), c2pa.ai, Pebblous (blog.pebblous.ai), InCyan (inaccessible).
+
+**Product implication:** RightsDocket is the closest analog in an adjacent market — same model (human review → C2PA embed → per-registration pricing, $20/registration for audio). Validates that the "pay-per-clearance with embedded disclosure" model is proven. Nobody has replicated it for commercial video. C2PA 2.4 spec now mandates "hard bindings + soft bindings" combination — companies selling C2PA-only signing are building to a superseded spec version.
+
+**Status:** Validated — competitive gap at the agency delivery step confirmed. No direct competitor identified for SI8's specific use case.
+
+**Deep-dive:** Added as "Competitive Landscape" section in [`insights/2026-06-24-disclosure-gap.md`](insights/2026-06-24-disclosure-gap.md) and new section in [`01_Business/research/COMPETITIVE_ANALYSIS_CAAS_2026.md`](../research/COMPETITIVE_ANALYSIS_CAAS_2026.md)
+
+**Version impact:** Confirms v4.1 positioning; no product change required
+
+---
+
 ### 2026-06-24 — The Disclosure Gap
 **Insight:** No tool exists to re-attach AI disclosure (C2PA + ERC-7053 on-chain) to a final composited campaign video after post-production strips the original metadata. Agencies have no workflow for this. EU Code of Practice mandates multi-layer marking (C2PA in file + durable secondary signal) — C2PA alone is legally insufficient.
 
