@@ -2,7 +2,7 @@
 
 A running log of decisions, insights, and lessons learned while building an AI film distribution company.
 
-*Last updated: June 17, 2026*
+*Last updated: June 24, 2026*
 
 ---
 
@@ -3889,6 +3889,352 @@ Finding an ICP that already understands the category and has a budget for it —
 > The sales motion changed immediately. No education needed. Just: 'You already clear music and talent. AI is the gap in your clearance stack. Here's the document.'
 >
 > They already know why. They're waiting for the what."
+
+### #76: The Final Cut Has Zero C2PA. No Tool Fixes This.
+
+**Date:** June 2026
+
+**The insight:**
+The industry narrative on AI disclosure goes like this: model providers embed C2PA at generation (Runway does this, Kling does this, Veo does this), platforms read the metadata on upload and surface a disclosure label to viewers. The chain is complete.
+
+What the narrative skips: what happens to the file in between.
+
+A creative director assembles a campaign from four Runway clips and two Kling clips. They open Premiere Pro, cut the sequence, color grade, export to MP4, compress for delivery. The final file: zero C2PA assertions remaining. Post-production export strips the metadata. This is not an edge case — it's how every production pipeline works. Tools that don't specifically implement Content Credential preservation will strip them on export.
+
+We researched the full landscape of C2PA tooling to understand who addresses this. Capture, the leading C2PA signing API, targets AI model providers (Runway, Reuters, AP) — their integration point is the inference pipeline, not the delivery step. ProofSnap reads and packages existing C2PA signals into court-ready audit evidence — it assumes C2PA is already present. Neither is positioned at the agency delivery step.
+
+The agencies solving this today do it by checking a self-declaration toggle in Meta Ads Manager or TikTok's AIGC field after the file is already done. That satisfies the platform's upload flow. It doesn't satisfy the EU AI Act requirement for machine-readable, auditable marking embedded in the file. And when platforms read C2PA on upload to surface labels to viewers, the final file doesn't have any — it was stripped in post.
+
+The compliance architecture has a hole in the middle. Model providers close the left side. Platforms handle the right side. The agency delivery step — where a final campaign video moves from production to brand to platform — has nothing.
+
+**Why it matters:**
+This is the specific gap SI8 v4.1 addresses. We verify the content before delivery. Re-attaching multi-layer disclosure to that verified file — C2PA in-file plus on-chain registration — closes the only unaddressed position in the compliance chain.
+
+**LinkedIn-ready excerpt:**
+> "Everyone talks about C2PA like the disclosure problem is solved.
+>
+> Runway embeds C2PA at generation. TikTok reads it on upload and adds a label. The chain is complete.
+>
+> Except: what happens to the file in between?
+>
+> An agency assembles a campaign from four Runway clips and two Kling clips. Premiere Pro. Color grade. Export to MP4. Compress for delivery.
+>
+> Final file: zero C2PA assertions remaining.
+>
+> Post-production export strips the metadata. This is not a bug. It's how every production pipeline works.
+>
+> We researched the full landscape of C2PA tooling — signing services, audit tools, provenance platforms. Nobody is positioned at the agency delivery step. Signing services target model providers. Audit tools read what's already there.
+>
+> Model providers close the left side of the chain. Platforms handle the right side.
+>
+> The agency delivery step — where the final video moves from production to brand to platform — has nothing.
+>
+> That's the gap. We're building into it."
+
+---
+
+### #77: We Mapped the EU AI Act Disclosure Stack. One Position Was Empty.
+
+**Date:** June 2026
+
+**The insight:**
+As we built out the technical architecture for SI8 v4.1, we needed to understand every company positioning itself in the EU AI Act compliance space — specifically: who helps AI-generated commercial video carry a legally valid, machine-readable disclosure from production to delivery?
+
+We identified and evaluated five companies: Capture (C2PA signing API), ProofSnap (C2PA audit evidence tool), TrueScreen (source-capture certification platform), RightsDocket (audio provenance platform), and c2pa.ai (educational site). Plus model providers themselves.
+
+The market has sorted into four clean, non-overlapping positions:
+
+1. Model providers sign at generation — inside Runway, Kling, Veo's inference pipeline
+2. Signing services like Capture help AI companies embed C2PA at scale — their customers are model providers and major media organizations (Reuters, AP)
+3. Audit tools like ProofSnap package existing C2PA signals into court-ready evidence ZIPs — they read what's already there, they don't add new assertions
+4. Provenance platforms like RightsDocket document human authorship and C2PA for individual creators — audio only
+
+When we mapped these four positions against the production workflow, one gap was visible: the agency delivery step. The composited final video — post-export, post-production, ready to hand to the brand or upload to the platform. Nobody is here.
+
+We confirmed this from each company's own positioning. Capture explicitly targets model providers. ProofSnap's value proposition assumes C2PA already exists to be read. TrueScreen certifies evidence at the moment of source capture. None are built for an agency handing over a final campaign file that needs disclosure re-attached.
+
+**Why it matters:**
+Knowing exactly where you fit is more valuable than a general competitive sweep. We know we're not competing with any of these players. We're in a position none of them occupy.
+
+**LinkedIn-ready excerpt:**
+> "We spent a week mapping every company helping AI video carry a legally valid disclosure before it reaches a platform.
+>
+> Five companies. Four positions.
+>
+> Model providers sign at generation (inside Runway, Kling, Veo).
+> Signing services help model providers embed C2PA at scale.
+> Audit tools package existing C2PA signals into court-ready evidence.
+> Provenance platforms document human authorship for individual audio creators.
+>
+> Then we mapped these positions against the production workflow.
+>
+> One position was empty.
+>
+> The agency delivery step — the composited final video, post-export, post-production, ready to hand to the brand or upload to the platform. No C2PA remaining. No tool re-attaches it here.
+>
+> We confirmed this from each company's own positioning. The signing services' customers are model providers. The audit tools assume the metadata already exists. None are built for an agency handing over a campaign file.
+>
+> Knowing exactly where the gap is worth more than knowing the names of the companies near it."
+
+---
+
+### #78: The Clearance Problem and the Disclosure Problem Are Not the Same Requirement.
+
+**Date:** June 2026
+
+**The insight:**
+Every legal team conversation we've had in the last 60 days has touched on two questions: whether the content is legally safe to use, and whether it carries the right AI disclosure labeling. Most people discussing "AI compliance" treat these as one topic. They aren't.
+
+They are two separate legal requirements, with separate obligations, separate consequences, and separate technical implementations.
+
+Clearance (the Chain of Title question): Was the AI tool licensed? Are there IP infringement risks in the output? Was any real person's likeness used without consent? Does the content pass commercial use review? This is a judgment question. It requires a qualified human reviewer to assess the specific content against current law and the specific commercial context.
+
+Disclosure (the Article 50 / NY Synthetic Performer Law question): Does the final video carry a machine-readable label declaring it was substantially AI-generated? Does that label survive re-upload, platform processing, and distribution? Can an auditor verify it independently? This is a technical requirement. It requires C2PA metadata and a durable secondary signal embedded in the file.
+
+Most solutions attempt one or the other. C2PA signing services solve disclosure. Law firms solve clearance. No single workflow delivers both together, at the agency delivery step, in one submission.
+
+The most consistent pattern in our legal team conversations: they ask about clearance, then mid-conversation shift to "and what about the disclosure labeling? Are you able to handle that too?" They're looking for one vendor, not two.
+
+**Why it matters:**
+The two-requirement gap is the product opportunity. A submission that returns a Chain of Title PDF for the legal team plus a C2PA-signed video ready for platform upload — that's what legal teams are describing when they ask "can you handle both?"
+
+**LinkedIn-ready excerpt:**
+> "Almost everyone discussing AI compliance conflates two separate legal requirements.
+>
+> Clearance: Is the content legally safe to use commercially? IP risk, licensing, likeness, training data exposure. A judgment call. Requires a human reviewer.
+>
+> Disclosure: Does the final video file carry a machine-readable AI-generated label that survives re-upload and platform processing? EU AI Act Art. 50. A technical implementation. Requires C2PA metadata embedded in the file.
+>
+> Separate obligations. Separate fines. Separate technical paths.
+>
+> C2PA signing services solve disclosure. Law firms solve clearance. Nobody has built a single workflow that delivers both together.
+>
+> The most consistent pattern in our legal team conversations: they ask about clearance, then mid-conversation shift to 'can you also handle the disclosure labeling?'
+>
+> They're describing one workflow. They're not finding it anywhere."
+
+---
+
+### #79: C2PA Is a Container. SI8's Output Is What Goes Inside It.
+
+**Date:** June 2026
+
+**The insight:**
+C2PA is a JSON-LD manifest cryptographically signed and embedded in a media file. It can carry standard fields — what tool generated this, when, what version — and custom assertions: arbitrary structured data defined by the signing party.
+
+When a file is signed with provenance data only, C2PA tells you: "This file was generated by Runway Gen-3 on June 15, 2026." That's useful. It doesn't tell a brand's legal team whether the file is cleared for commercial use.
+
+When a file is signed with SI8's clearance output embedded as custom assertions, C2PA tells you: "This file was generated by Runway Gen-3 and Kling 1.6, reviewed by SI8's human reviewer, IP risk assessed as LOW, no synthetic performers identified, all tools confirmed licensed for commercial use, cleared for broadcast and digital advertising as of June 24, 2026."
+
+Same file. Same technical standard. Different value.
+
+C2PA is not a competitor to SI8 — it's the delivery mechanism for SI8's output. The spec includes custom assertions precisely because it was designed to carry verification data beyond automated provenance. SI8's Chain of Title output maps cleanly onto those assertion fields: clearance status, tool licensing confirmation, likeness assessment, IP risk level, commercial use authorization, reviewer identity, review date.
+
+The critical distinction: no AI tool or C2PA signing service can populate those fields, because those fields require a qualified human to assess the specific content. Runway can sign that it generated the file. Only a human reviewer can sign that the content is cleared for a specific campaign.
+
+**Why it matters:**
+SI8 is not an alternative to C2PA. It's the layer that makes C2PA commercially meaningful. The judgment layer exists above the technical stack.
+
+**LinkedIn-ready excerpt:**
+> "C2PA is a container. It can hold provenance metadata — what tool made this, when, with what inputs.
+>
+> Or it can hold clearance data: what was reviewed, what was found, who confirmed it, and whether it's cleared for commercial use.
+>
+> Without SI8: C2PA says 'Runway Gen-3 made this file on June 15.'
+>
+> With SI8's clearance output embedded as C2PA custom assertions: 'Runway Gen-3 and Kling 1.6 made this. IP risk: LOW. No synthetic performers identified. Cleared for broadcast and digital advertising.'
+>
+> Same standard. Same file. Different value.
+>
+> The spec includes custom assertions precisely because provenance alone doesn't answer the commercial use question.
+>
+> No AI tool can populate those fields. Those fields require a human to assess the specific content against the specific campaign.
+>
+> Runway can sign that it generated the file.
+>
+> Only a human reviewer can sign that it's cleared for a Barclays campaign.
+>
+> C2PA is not our competitor. It's our delivery mechanism."
+
+---
+
+### #80: Forty Days. Most Agencies Will Fail the First Question.
+
+**Date:** June 2026
+
+**The insight:**
+EU AI Act Article 50 enforcement begins August 2, 2026.
+
+The requirement: AI-generated commercial content must carry a machine-readable disclosure — cryptographically signed, auditable, durable. Not a checkbox in an ads manager. Not an on-screen text overlay. A marker embedded in the file.
+
+A C2PA signing service in the compliance ecosystem published a 10-question checklist for Article 50 readiness. We ran through it for the agencies in our active pipeline — the ones currently producing AI video commercially.
+
+Most fail question 1: "Do all AI outputs carry a machine-readable marker before delivery?"
+
+The answer is no. Because the marker is stripped in post-production before delivery. Because nobody re-attaches it. Because the current workflow ends with a self-declaration toggle checked after the video is complete.
+
+Questions 2-5 follow the same pattern. "Does the marker survive a re-upload?" No. "Is marking implemented as multi-layer — in-file plus durable secondary signal?" No. "Can a third-party auditor verify your marking without contacting your team?" No.
+
+These aren't obscure compliance edge cases. They're the baseline requirement. And 40 days out, the agencies producing AI-generated commercial video at the highest volume are the ones with the most exposure — and often the most distance between what their creative teams are doing and what their legal teams require.
+
+The fines are €15M or 3% of global annual turnover. For a holding company agency, 3% of global annual turnover is not a rounding error.
+
+**Why it matters:**
+The deadline creates a forcing function. Legal teams at major agencies are already aware of August 2. Creative directors often aren't — yet. The agencies we're talking to who convert fastest are the ones where legal has already created internal pressure and the CD is looking for a vendor that can close the gap before the deadline.
+
+**LinkedIn-ready excerpt:**
+> "EU AI Act Article 50 enforcement: August 2, 2026. Forty days.
+>
+> The requirement: AI-generated commercial content must carry a machine-readable disclosure — cryptographically signed, auditable, durable. Not a Meta toggle. A marker embedded in the file.
+>
+> We ran a 10-question Article 50 compliance checklist against the agencies in our active pipeline — the ones currently producing AI video commercially.
+>
+> Most fail question 1: 'Do all AI outputs carry a machine-readable marker before delivery?'
+>
+> No. Because the metadata is stripped in post-production. Because nobody re-attaches it. Because the current workflow is a self-declaration toggle checked after the video is done.
+>
+> Questions 2-5: same pattern. Does the marker survive re-upload? No. Is marking multi-layer? No. Can a third-party auditor verify it independently? No.
+>
+> This isn't obscure. It's the baseline.
+>
+> The fines: €15M or 3% of global annual turnover.
+>
+> The agencies producing the most AI video have the most exposure. They also have the most legal infrastructure to recognize the gap — when someone names it clearly enough."
+
+---
+
+### #81: Two Teams Built the Same Architecture Independently. That's a Signal About the Architecture.
+
+**Date:** June 2026
+
+**The insight:**
+While mapping the EU AI Act compliance ecosystem, we found a company called RightsDocket, part of Signal Fidelity Group — founded by a 20-year pharma communications veteran with a background in regulated messaging at J&J MedTech, Takeda, and Boston Scientific.
+
+Their product: human authorship evidence platform for AI-assisted audio. Their model: creator submits a track, human reviewer documents contributor records and AI tool disclosures, C2PA manifest embedded in the audio file, USCO copyright registration facilitated. $20 per registration.
+
+That's the same architecture as SI8 v4.1 applied to a different medium. Human review → structured provenance documentation → C2PA embedded in final file → per-submission fee.
+
+We found it by accident. They launched approximately one month ago. They have 16 LinkedIn followers. Their C2PA integration is still pending — they've entered the conformance program, not yet received recognition.
+
+RightsDocket does not validate market demand. There's no evidence of paying customers, no third-party reviews, no community traction. Their content publishing strategy looks like pre-launch SEO, not post-traction amplification.
+
+What it does validate: the architecture reasoning. Two separate teams, with different backgrounds, working in different media categories, independently converging on the same model. That's not coincidence — it's a signal about the underlying logic.
+
+When two biotech startups independently develop the same drug mechanism, it doesn't prove the market exists. It proves the science is sound. Market validation is still separate work.
+
+**Why it matters:**
+We know what the architecture needs to be. What we don't yet have is the market proof — a paying customer who confirms that receiving a Chain of Title PDF plus a C2PA-signed final video plus on-chain registration in one submission is worth $499 and satisfies their legal team. That's the next validation step.
+
+**LinkedIn-ready excerpt:**
+> "While mapping the EU AI Act compliance ecosystem, we found a company called RightsDocket.
+>
+> Their model: AI-assisted music creator submits a track, human reviewer documents authorship and AI tool disclosures, C2PA manifest embedded in the final audio file, USCO copyright registration facilitated. $20 per registration.
+>
+> That's the same architecture we're building for commercial video.
+>
+> They launched one month ago. 16 LinkedIn followers. C2PA conformance still pending.
+>
+> RightsDocket doesn't validate market demand. No evidence of paying customers. No community traction.
+>
+> What it does validate: the architecture reasoning.
+>
+> Two separate teams. Different backgrounds. Different media categories. Independent convergence on the same model: human review + C2PA embedded in the final file + per-submission fee.
+>
+> That's not coincidence.
+>
+> When two biotech startups independently develop the same drug mechanism, it doesn't prove the market exists. It proves the science is sound.
+>
+> Market validation is still separate work. But independent convergence tells you the underlying logic holds."
+
+---
+
+### #82: "No Company for Front-to-Back Rights Management in Generative Workflows." That Was the Confirmation We Needed.
+
+**Date:** June 2026
+
+**The insight:**
+We had a call this week with the head of an XR production company in Berlin — a practitioner who's been working in generative media workflows for several years and consults with other companies on building their own.
+
+His description of the current market, unprompted:
+
+"There's no company right now for front-to-back rights management in generative workflows. That whole space is basically nothing."
+
+He wasn't describing a problem he hoped would eventually be solved. He was describing the current operational reality — something he navigates around in every project.
+
+The phrase "front-to-back" is specific. It means: from the AI tool selection and licensing decisions at the start of a production, through to the legal documentation and disclosure labeling on the final delivered file. The clearance question and the disclosure question, addressed in one connected workflow.
+
+This is consistently how practitioners closest to the problem describe it — not as "rights management" in the traditional IP ownership sense, and not as "compliance" in the regulatory abstract. Front-to-back: the gap between where production starts and where legal accountability has to exist at the end.
+
+Practitioners who've built personal workarounds for themselves aren't our buyers — they're too small, and they've already adapted. But they're the best diagnosticians of the gap. When they describe it, they're describing what a Creative Director at a 200-person agency will need the moment their client's legal team adds the requirement to the brief.
+
+**Why it matters:**
+Market validation from a practitioner is not a signed contract. But when someone with no incentive to validate your thesis describes your exact opportunity — unprompted, using your language — you've found a signal worth tracking and repeating back in outreach.
+
+**LinkedIn-ready excerpt:**
+> "Call this week with a generative media practitioner in Berlin. XR production, several years in generative workflows, consults with other companies building theirs.
+>
+> His description of the current market, unprompted:
+>
+> 'There's no company right now for front-to-back rights management in generative workflows. That whole space is basically nothing.'
+>
+> Front-to-back. Specific language.
+>
+> Not 'who owns the rights.' Not 'compliance' in the regulatory abstract.
+>
+> From the AI tool selection and licensing decisions at the start of production — to the legal documentation and disclosure labeling on the final deliverable.
+>
+> Clearance at the beginning. Disclosure at the end. Connected in one workflow.
+>
+> He wasn't hoping someone would solve it. He was describing the current operational reality — something he navigates around on every project.
+>
+> Practitioners who've built personal workarounds aren't our buyers. But they're the best diagnosticians of the gap. When they describe it, they're describing what a Creative Director at a major agency will need the moment their client's legal team adds the requirement to the brief.
+>
+> When a practitioner with no incentive to validate your thesis describes your opportunity in your own language, unprompted — that's worth writing down."
+
+---
+
+### #83: The EU Code of Practice Said C2PA Alone Isn't Enough. Nobody Told the Agencies.
+
+**Date:** June 2026
+
+**The insight:**
+The EU Code of Practice on AI-Generated Content published June 10, 2026 — three weeks before EU AI Act Article 50 enforcement begins August 2.
+
+The technical ruling, buried in the implementation guidance: "No single active marking technique suffices."
+
+C2PA embedded in the file — the answer most agencies are working toward — is not legally sufficient on its own. The mandated architecture is multi-layer: C2PA hard binding (in-file) plus a durable secondary signal (soft binding) that survives the file being re-uploaded, re-processed, or exported through a pipeline that doesn't preserve Content Credentials. The code of practice names on-chain hash registration as one qualifying secondary signal.
+
+Most agencies haven't read this closely enough. The compliance conversation centers on "do we have C2PA on our AI video outputs?" as though that completes the requirement. The code of practice says it doesn't.
+
+C2PA metadata is stripped when a file is exported from most NLEs or re-uploaded through platforms that don't actively preserve Content Credentials. The EU Code of Practice mandates the second layer precisely because it knows C2PA alone won't survive real-world delivery workflows. The code was written by people who understand how production pipelines work.
+
+The agencies furthest along on C2PA implementation — the ones who've already integrated Capture or similar signing services into their model outputs — are the ones most likely to have missed this. They've solved the first layer. They haven't implemented the second.
+
+The code of practice narrowed the compliance definition three weeks before enforcement. The gap it named is the exact position SI8 v4.1 is built to close: C2PA in-file plus on-chain hash registration, delivered on the final verified file at the agency delivery step.
+
+**Why it matters:**
+Every agency that thinks C2PA implementation is complete compliance is about to discover they're still non-compliant. The gap the code named is specific and addressable — which means it's a sales conversation, not a general education conversation.
+
+**LinkedIn-ready excerpt:**
+> "The EU Code of Practice on AI-Generated Content published June 10. Three weeks before August 2 enforcement.
+>
+> The technical ruling, buried in the guidance:
+>
+> 'No single active marking technique suffices.'
+>
+> C2PA in the file — the answer most agencies are working toward — is legally insufficient on its own.
+>
+> The required architecture: C2PA hard binding (in-file) + a durable secondary signal (soft binding) that survives re-upload, re-processing, and platform delivery.
+>
+> C2PA metadata is stripped when a file passes through most post-production export workflows. The Code of Practice knows this. That's why it mandates the second layer.
+>
+> The agencies furthest along on C2PA implementation are the ones most likely to have missed it. They've solved the first layer. The second layer hasn't been built.
+>
+> The code narrowed the compliance definition three weeks before enforcement.
+>
+> Every agency that thinks C2PA implementation is complete compliance is about to discover they're still non-compliant.
+>
+> That gap is specific. Specific gaps are addressable. Addressable gaps are sales conversations."
 
 ---
 
