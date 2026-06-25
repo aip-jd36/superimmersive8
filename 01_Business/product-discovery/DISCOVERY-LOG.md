@@ -13,6 +13,24 @@
 
 ## Log
 
+### 2026-06-25 — Capture Integration Confirmed: MP4, Custom Assertions, Workflow Aligned
+
+**Insight:** Sofia Yan (Co-founder & CGO, Numbers Protocol) replied to JD's outreach same day. Three critical unknowns resolved in one email: (1) MP4/MOV/WebM video signing confirmed; (2) custom C2PA assertions confirmed — she specifically named "mapping your review documentation into structured C2PA assertions"; (3) the "sign final delivered MP4 before client handoff" workflow is confirmed as something Capture supports. Meeting being arranged in Taipei.
+
+**Source:** Direct inbound reply from Sofia Yan, Numbers Protocol, June 25, 2026. CRM: P001.
+
+**Product implication:** Capture integration path is unblocked. The three-deliverable concept (Chain of Title PDF + C2PA-signed video + ERC-7053 on-chain record) is technically confirmed viable via Capture's infrastructure. Next step: schema alignment meeting — which fields in SI8's Chain of Title map to which C2PA assertion fields, and verification URL setup.
+
+**Art. 50 framing note:** Sofia was careful on Art. 50(2) — aligned with peer review correction: "signing the final composited video supports Article 50-style transparency and auditability at delivery" is correct; "automatically satisfies the full legal obligation" is not. She recommended preserving source-generation disclosures where relevant. This is the right nuanced framing.
+
+**Status:** Confirmed — integration path viable. Meeting pending in Taipei with Numbers Protocol co-founder.
+
+**Deep-dive:** CRM P001; meeting notes to be filed at `03_Sales/call-notes/` after meeting
+
+**Version impact:** v4.1 — Capture confirmed as Year 1 integration; schema meeting is the next build milestone
+
+---
+
 ### 2026-06-25 — Peer Review Corrections: Gap Reframe, Regulatory Fix, Trust List Required
 
 **Insight:** Three-model peer review (ChatGPT, Gemini, Claude Opus) validated the core clearance gap but corrected four material errors in the v4.1 hypothesis. The thesis survives; the technical wrapper and regulatory framing needed significant correction.
