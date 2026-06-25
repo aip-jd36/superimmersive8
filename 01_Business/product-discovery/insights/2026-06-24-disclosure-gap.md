@@ -123,11 +123,11 @@ Most agencies will answer "no" to 5+ of these:
 
 **Open-source c2pa-rs / c2pa-js — FALLBACK**
 - Reference C2PA implementations maintained by Content Authenticity Initiative (Adobe-led)
-- c2pa-rs (Rust): supports video including MP4/MOV with custom assertions
+- c2pa-rs (Rust): **confirmed support for MP4 and MOV** (`video/mp4`, `application/mp4`, `video/quicktime`) for file-based operations. Limitation: fragmented MP4 (DASH/HLS streaming) has known issues. Regular MP4 export files work.
 - c2pa-js (JavaScript/Node): wraps c2pa-rs via WASM
 - Free, no per-sign cost — SI8 runs its own signing instance
 - Does NOT include ERC-7053 on-chain registration (would need separate integration)
-- **Use if Capture confirms no MP4 video support**
+- **Use if Capture API has friction or pricing issues — not a last resort**
 
 ### C2PA Custom Assertions
 
@@ -268,15 +268,13 @@ C2PA 2.4 (released 2026) introduced "Durable Content Credentials" — now mandat
 
 *GitHub issues, Product Hunt, Capterra, G2, and industry press research. Assessing real-world developer experience to stress-test the SI8 v4.1 integration path.*
 
-### Critical Finding: c2pa-rs MP4/Video Gap
+### CORRECTION: c2pa-rs MP4/Video Gap Was a Research Error
 
-**c2pa-rs** (GitHub: contentauth/c2pa-rs) is the reference C2PA implementation maintained by Adobe and the Content Authenticity Initiative. Stats: 357 stars, 167 forks, **128 open issues** (beta status, 0.x.x).
+**Original finding (June 25) was incorrect.** The "MP4 video gap" was based on Issue #33 from `arkavo-org/arkavo-rs` — a third-party Rust library, not the official reference implementation. The two repos were conflated.
 
-**MP4/video is a documented major gap in the reference implementation.** arkavo-org/arkavo-rs Issue #33 explicitly documents "Full Video Container (MP4/MOV/ISOBMFF) Support" as a needed feature. Sony professional MXF support is blocked pending SMPTE spec work. The reference implementation focuses on images and PDFs.
+**Correct status of `contentauth/c2pa-rs`:** MP4 and MOV are confirmed supported file formats. The official c2patool documentation explicitly lists `video/mp4`, `application/mp4`, and `video/quicktime`. The only real video limitation is fragmented MP4 (DASH/HLS streaming), which has a known "moov atom not found" bug in fmp4 workflows. Standard MP4 export files — which is what SI8 would receive from an agency — work fine.
 
-**SI8 implication:** If Capture uses c2pa-rs as its underlying implementation (likely, as it's the standard), Capture's MP4 video support may be limited or non-existent even if their marketing suggests otherwise. This **elevates the urgency of the Capture technical call** to the highest priority before any v4.1 build decisions.
-
-Note: The disclosure gap insight file (`2026-06-24-disclosure-gap.md`) listed c2pa-rs as the fallback option with "supports video including MP4/MOV with custom assertions" — **this may be incorrect based on open issues.** The fallback needs verification before being relied upon.
+**SI8 implication:** The c2pa-rs fallback path is not blocked. Capture almost certainly supports standard MP4 signing. The Capture technical call remains useful for integration confirmation (API behavior, POC account, Art. 50(2) post-production re-signing question) but is no longer a hard blocker for scoping v4.1.
 
 ### Capture SDK Developer Signal
 

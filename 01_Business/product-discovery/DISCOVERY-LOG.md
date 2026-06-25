@@ -13,26 +13,28 @@
 
 ## Log
 
-### 2026-06-25 — C2PA Developer Ecosystem Friction: MP4 Video Gap Confirmed
+### 2026-06-25 — C2PA Developer Ecosystem Friction (Corrected)
 
-**Insight:** The reference C2PA implementation (c2pa-rs, 357 stars, 128 open issues, beta 0.x.x) has a documented major gap: MP4/video container support is not implemented. arkavo-org Issue #33 explicitly requests "Full Video Container (MP4/MOV/ISOBMFF) Support." If Capture uses c2pa-rs under the hood (likely), Capture's MP4 video support may be limited despite their marketing suggesting otherwise. This elevates the Capture technical call to highest-priority before any v4.1 build decision.
+**Insight:** Initial research (Jun 25 morning) misidentified a video gap in the official c2pa-rs reference implementation. The Issue #33 requesting "Full Video Container support" was on `arkavo-org/arkavo-rs` (a third-party library) — not `contentauth/c2pa-rs`. Corrected after follow-up research. The official c2pa-rs and c2patool **do support MP4 and MOV** for standard file-based operations. Fragmented MP4 (DASH/HLS) has a known bug, but regular MP4 export files — what SI8 receives from agencies — work fine.
 
-**Source:** GitHub issue research — c2pa-rs (contentauth), Perth (resemble-ai), Capture SDK (numbersprotocol); industry press (PetaPixel, SoftwareSeni); Capterra/G2/Product Hunt review analysis.
+**Source:** Official c2patool supported formats documentation (opensource.contentauthenticity.org); GitHub issue #1338 (contentauth/c2pa-rs) — fmp4 fragmented bug, not a general MP4 gap.
 
-**Additional findings:**
-- Perth (Resemble AI audio watermarking): 8 open issues, 0 closed — not production-ready; GPU required, ~16.8kHz cap, docs gaps
-- Capture SDK (numbersprotocol/capture-sdk): 0 stars, 0 forks — minimal community, but REST API path is the right integration regardless
-- Resemble AI/Imatag: no third-party reviews for watermarking products; Imatag has enterprise client (dpa Picture Alliance, May 2026) confirming invisible watermarking is real; Amber Video is stalled (7 years old, zero reviews)
-- Entire C2PA disclosure infrastructure category has zero consumer-accessible reviews — confirmed B2B/developer-only market, no self-serve path exists yet
-- Ecosystem adoption: <1% of published global news images/videos carry C2PA metadata (early 2026); market is pre-traction at the ecosystem level
+**Remaining real friction in the ecosystem:**
+- Perth (Resemble AI audio watermarking): 8 open issues, 0 closed — GPU required, ~16.8kHz cap, docs gaps; not an SI8 dependency
+- Capture SDK (numbersprotocol): 0 stars, 0 forks — minimal community; REST API is the right path regardless
+- Imatag: real enterprise product (dpa Picture Alliance client), image-focused, €299/month min — not an SI8 target
+- Amber Video: stalled 7-year-old product, irrelevant
+- <1% of published global content carries C2PA metadata — ecosystem is pre-traction
+- Signing cert costs ~$289/year with no free alternative — adoption barrier for small agencies
+- AI Omnibus (May 2026): machine-readable marking grace period for pre-existing AI *systems* extended to Dec 2, 2026; new campaign *content* deployed from Aug 2 onward still faces the Aug 2 obligation
 
-**Product implication:** **Caution flag on v4.1 build timeline.** The c2pa-rs MP4 gap is a blocker risk. If Capture confirms no MP4/video support → both the Capture integration path AND the c2pa-rs fallback path need re-assessment. Cannot scope the v4.1 build (clearer → sign → deliver) until the Capture technical call resolves this. SI8's sales framing and pipeline development can continue independently; the technical build waits for the call.
+**Product implication:** No blocker on v4.1 infrastructure path. Both the Capture API integration and the c2pa-rs fallback support standard MP4. Capture technical call is still worth doing for integration confirmation and POC access — not a hard blocker. Three-deliverable concept is viable on existing infrastructure.
 
-**Status:** Hypothesis partially blocked — requires Capture technical call to determine whether v4.1 is buildable on existing infrastructure or requires a custom implementation path.
+**Status:** Hypothesis — infrastructure path confirmed viable. Open: Capture API call for integration confirmation and Art. 50(2) re-signing question. Validate concept with warm lead (B130, B148, or B149).
 
-**Deep-dive:** Added "Developer & Ecosystem Friction Findings" section to [`insights/2026-06-24-disclosure-gap.md`](insights/2026-06-24-disclosure-gap.md); full analysis in new section of [`01_Business/research/COMPETITIVE_ANALYSIS_CAAS_2026.md`](../research/COMPETITIVE_ANALYSIS_CAAS_2026.md)
+**Deep-dive:** [`insights/2026-06-24-disclosure-gap.md`](insights/2026-06-24-disclosure-gap.md) — "Developer & Ecosystem Friction" section (corrected); [`01_Business/research/COMPETITIVE_ANALYSIS_CAAS_2026.md`](../research/COMPETITIVE_ANALYSIS_CAAS_2026.md)
 
-**Version impact:** v4.1 — does not change the three-deliverable concept, but may change the infrastructure path
+**Version impact:** v4.1 — no change to three-deliverable concept or infrastructure path
 
 ---
 

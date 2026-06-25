@@ -728,9 +728,13 @@
 
 **Stats:** 357 stars, 167 forks, 128 open issues, 56 open PRs. Version: beta (0.x.x).
 
-**Critical finding for SI8:** MP4/video is a documented major gap. arkavo-org/arkavo-rs Issue #33 explicitly documents "Full Video Container (MP4/MOV/ISOBMFF) Support" as needed — the reference implementation focuses on images and PDFs. SMPTE professional MXF support is blocked pending spec work. This directly raises the urgency of the Capture technical call: if Capture uses c2pa-rs as its underlying implementation, video support may be limited even if Capture's docs suggest otherwise.
+**MP4/MOV video is supported** for standard file-based operations. The official c2patool documentation lists `video/mp4`, `application/mp4`, and `video/quicktime` as supported formats. Known limitation: fragmented MP4 (DASH/HLS streaming) has a "moov atom not found" bug (Issue #1338) — affects streaming workflows, not standard MP4 export files. SMPTE professional MXF support is blocked pending spec work.
+
+**Note:** Earlier research (Jun 25) incorrectly cited arkavo-org/arkavo-rs Issue #33 as a gap in the official implementation. That issue is in a third-party library, not contentauth/c2pa-rs. Corrected.
 
 **Developer friction from open issues:** Documentation gaps, SDK behavior inconsistencies, multi-threading safety questions, performance with large batch workloads. The beta version tag means breaking changes between releases are expected.
+
+**SI8 relevance:** Standard MP4 signing works. The c2pa-rs fallback path is viable if Capture API has friction. Capture is still the preferred path for the ERC-7053 on-chain layer (c2pa-rs alone does not include on-chain registration).
 
 ---
 
