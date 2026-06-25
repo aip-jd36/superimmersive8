@@ -9,6 +9,48 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of June 25, 2026
+*Run: 2026-06-25 · 17 high · 10 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [EU AI Act Transparency Obligations: Preparing for Compliance by 2 August 2026](https://datamatters.sidley.com/2026/06/24/eu-ai-act-transparency-obligations-preparing-for-compliance-by-2-august-2026/) | Sidley Austin | Wed, 24 Jun 2026 | ☐ |
+| 9 | post+update | [AI Act: the countdown is on for businesses ahead of 2 August 2026](https://www.actuia.com/en/news/ai-act-the-countdown-is-on-for-businesses-ahead-of-2-august-2026/) | ActuIA | Wed, 24 Jun 2026 | ☐ |
+| 9 | post+update | [How A Novel NY Law Fits Into The AI Legal Landscape For Ads](https://www.law360.com/compliance/articles/2491619/how-a-novel-ny-law-fits-into-the-ai-legal-landscape-for-ads) | Law360 | Tue, 23 Jun 2026 | ☐ |
+| 9 | update | [New York: Synthetic performer disclosure Act enters into effect](https://www.dataguidance.com/news/new-york-synthetic-performer-disclosure-act-enters) | DataGuidance | Tue, 23 Jun 2026 | ☐ |
+| 9 | post+update | [Identity in the Age of Synthetic Doubles: Cyprus adopts new copyright provisions on deepfakes](https://legalblogs.wolterskluwer.com/copyright-blog/identity-in-the-age-of-synthetic-doubles-cyprus-adopts-new-copyright-provisions-on-deepfakes/) | Wolters Kluwer | Mon, 22 Jun 2026 | ☐ |
+| 9 | post+update | [ASA warns on AI-generated content and deepfakes](https://www.lewissilkin.com/insights/2026/06/18/asa-warns-on-ai-generated-content-and-deepfakes-102n4o1) | Lewis Silkin | Thu, 18 Jun 2026 | ☐ |
+| 9 | post+update | [New York’s New ‘Synthetic Performer’ Law Could Have Wide Reach, Lawyers Say](https://www.law.com/corpcounsel/2026/06/18/new-yorks-new-synthetic-performer-law-could-have-wide-reach-lawyers-say/) | Law.com | Thu, 18 Jun 2026 | ☐ |
+| 8 | update | [EU’s AI Rules Get a Timeline Overhaul—But Not a Single Large Language Model Passes the Complianc](https://www.ad-hoc-news.de/boerse/news/ueberblick/eu-s-ai-rules-get-a-timeline-overhaul-but-not-a-single-large-language/69614659) | Ad-hoc-news.de | Wed, 24 Jun 2026 | ☐ |
+| 8 | post+update | [Getty Images Partners With OpenAI, Stock Surges 145%](https://www.chosun.com/english/industry-en/2026/06/23/UKCDR3GQANHTLPCNRWJUNKHJQM/) | 조선일보 | Tue, 23 Jun 2026 | ☐ |
+| 8 | update | [Getty Images Stock Soars After OpenAI Licensing Agreement \| June 2026 - News and Statistics](https://www.indexbox.io/blog/getty-images-shares-surge-145-on-openai-licensing-deal/) | IndexBox | Mon, 22 Jun 2026 | ☐ |
+| 8 | update | [Getty Images Soars 200% in Early Trading After OpenAI Deal](https://www.bloomberg.com/news/articles/2026-06-22/getty-images-soars-200-in-early-trading-after-openai-deal) | Bloomberg | Mon, 22 Jun 2026 | ☐ |
+| 8 | post+update | [Getty Images Shares Soar 200% After OpenAI Strikes Licensing Deal](https://www.ndtvprofit.com/markets/getty-images-shares-soar-200-after-openai-strikes-licensing-deal-11671784) | NDTV Profit | Mon, 22 Jun 2026 | ☐ |
+| 8 | post+update | [Lee Ji Hye Warns Fans of AI Ad Scam: Fake Endorsements Using Her Face Spark K-Pop Industry Alarmed](https://www.outlookindia.com/art-entertainment/k-drama/lee-ji-hye-warns-fans-of-ai-ad-scam-fake-endorsements-using-her-face-spark-k-pop-industry-alarmed) | Outlook India | Thu, 18 Jun 2026 | ☐ |
+| 7 | post | [ByteDance Seedance 2.5: Native 30-Second AI Video, No Stitching Required](https://www.techtimes.com/articles/318975/20260624/bytedance-seedance-25-native-30-second-ai-video-no-stitching-required.htm) | Tech Times | Wed, 24 Jun 2026 | ☐ |
+| 7 | update | [AI Act rules on high-risk AI delayed as AI Digital Omnibus agreed](https://www.winstontaylor.com/insights/ai-act-rules-on-high-risk-ai-delayed-as-ai-digital-omnibus-agreed) | Winston Taylor | Tue, 23 Jun 2026 | ☐ |
+| 7 | post+update | [Lots Of Brands Use Fake People, AI Influencers To Sell Their Products](https://memeburn.com/lots-of-brands-use-fake-people-ai-influencers-to-sell-their-products/) | Memeburn | Tue, 23 Jun 2026 | ☐ |
+| 7 | post | [EU AI Act Chatbot Disclosure and Deepfake Labeling: July 22 Signatory Deadline](https://www.techtimes.com/articles/318822/20260622/eu-ai-act-chatbot-disclosure-deepfake-labeling-july-22-signatory-deadline.htm) | Tech Times | Mon, 22 Jun 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Maine Will Soon Require Disclosure of AI-Generated Content in Campaign Advertising: Top Takeaways for Your Organization](https://www.jdsupra.com/legalnews/maine-will-soon-require-disclosure-of-4168278/) | JD Supra | Wed, 24 Jun 2026 | ☐ |
+| 6 | monitor | [The EU's AI Transparency Code of Practice, Explained](https://www.techpolicy.press/the-eus-ai-transparency-code-of-practice-explained/) | Tech Policy Press | Wed, 24 Jun 2026 | ☐ |
+| 6 | monitor | [Six AI Creative Platforms Are Quietly Reshaping How Businesses Produce 3D, Visual, and Audio Content](https://www.24-7pressrelease.com/press-release/536132/six-ai-creative-platforms-are-quietly-reshaping-how-businesses-produce-3d-visual-and-audio-content) | 24-7 Press Release Newswire | Wed, 24 Jun 2026 | ☐ |
+| 6 | monitor | [The Conservative Party recently released an AI-generated ad. How do voters feel about this kind of content?](https://www.cbc.ca/news/politics/conservative-ai-ad-targets-carney-9.7240936) | CBC | Sun, 21 Jun 2026 | ☐ |
+| 6 | monitor | [Personal Liability and a New Regulator: Germany Girds for AI Act's First Compliance Wave](https://www.ad-hoc-news.de/boerse/news/ueberblick/personal-liability-and-a-new-regulator-germany-girds-for-ai-act-s-first/69578476) | Ad-hoc-news.de | Fri, 19 Jun 2026 | ☐ |
+| 5 | monitor | [OpenAI Signs Getty Images Deal for ChatGPT Search](https://winbuzzer.com/2026/06/24/openai-signs-getty-display-deal-for-chatgpt-search-xcxwbn/) | WinBuzzer | Wed, 24 Jun 2026 | ☐ |
+| 5 | monitor | [9 Insidious Ways that AI Agents Increase Your Risk](https://www.jdsupra.com/legalnews/9-insidious-ways-that-ai-agents-1857194/) | JD Supra | Mon, 22 Jun 2026 | ☐ |
+| 5 | monitor | [AI Watch: Global regulatory tracker - Spain](https://www.whitecase.com/insight-our-thinking/ai-watch-global-regulatory-tracker-spain) | White & Case LLP | Thu, 18 Jun 2026 | ☐ |
+| 4 | monitor | [UK: adidas, Uniqlo and CK ads banned for greenwashing](https://www.sgieurope.com/csr-and-sustainability/uk-adidas-uniqlo-and-ck-ads-banned-for-greenwashing/121848.article) | Sporting Goods Intelligence Europe | Wed, 24 Jun 2026 | ☐ |
+| 4 | monitor | [Kling 3.0 Turbo Released: Kling AI Brings Fast Video Previews for Rapid Creative Iteration](https://www.openpr.com/news/4554630/kling-3-0-turbo-released-kling-ai-brings-fast-video-previews) | openPR.com | Fri, 19 Jun 2026 | ☐ |
+
+---
+
 ## Week of June 22, 2026
 *Run: 2026-06-22 · 14 high · 8 monitor · lookback 7 days*
 
