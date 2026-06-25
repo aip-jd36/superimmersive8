@@ -61,86 +61,116 @@ Color grade →
 Export to MP4 →
 Re-compress for delivery →
 
-Final campaign video: ZERO C2PA assertions remaining.
+Final campaign video: C2PA from source clips gone.
+New C2PA credential: Premiere can re-sign at export, but only attaches
+account holder identity — no tool licensing, no clearance data, no IP assessment.
 ```
 
-> "C2PA metadata is stripped when a video file is processed, compressed, or re-uploaded through tools that do not preserve Content Credentials."
-> "Production teams cannot reliably track whether a final render still carries its original Content Credentials."
+**Correction from peer review (June 25, 2026):** Adobe Premiere Pro has native "Export with Content Credentials." The gap is not that *nobody re-signs at the delivery step* — it's that nobody attaches *clearance assertions* at the delivery step. Premiere signs the file. It does not clear what's in it. The credential it produces says "exported by [Adobe account]." It says nothing about what AI tools were used, whether they were licensed, or whether the output is safe for commercial use.
+
+**SI8's defensible gap:** Human-reviewed clearance assertions (tool licensing, IP risk, likeness assessment, training data exposure) embedded in the C2PA credential at the agency delivery step. This is what Premiere cannot do. This is what no tool in the ecosystem does.
 
 **Compliance readiness estimate (2026):**
 - Model provider layer: ~85%
-- Creator/agency layer: ~25%
+- Creator/agency layer (signing): ~25% — but thin credentials only
+- Creator/agency layer (clearance assertions): ~0%
 - Advertiser/brand layer: ~15%
 
-**No tool exists to re-attach AI disclosure to a final composited campaign video.** The current agency workflow:
-1. Check a toggle in Meta/YouTube/TikTok Ads Manager ("Yes, this has AI content")
-2. Maybe add on-screen text disclaimer manually
-3. Hope SynthID survived the export
+**The current agency workflow without SI8:**
+1. Export from Premiere (may attach thin C2PA identity credential)
+2. Check a toggle in Meta/YouTube/TikTok Ads Manager ("Yes, this has AI content")
+3. Maybe add on-screen text disclaimer manually
 
-That's a self-declaration checkbox — satisfies the platform upload, but does not satisfy a legal team asking for documentation of *what* AI was used, *how* it was licensed, and *when* the disclosure was made.
+That satisfies the platform upload and the agency's statutory disclosure obligation. It does not satisfy a legal team asking for documentation of *what* AI was used, *how* it was licensed, and *whether* the output is safe to use commercially.
+
+---
+
+## Regulatory Hook — Correct Framing (Updated June 25, 2026)
+
+**Peer review correction:** The Art. 50 obligations are split between two parties and do not both land on the agency.
+
+- **Art. 50(2) — machine-readable marking:** Provider obligation. Falls on whoever develops/places the generative AI system on the market — Runway, Kling, Veo. They sign at generation. This is not the agency's statutory responsibility.
+- **Art. 50(4) — visible disclosure:** Deployer obligation. Falls on agencies using AI in professional activities. Requires human-recognisable labelling of deepfakes and public-interest content. Platform toggles (Meta/YouTube/TikTok Ads Manager) substantially address this.
+
+**What this means for SI8's pitch:** The statute does not mandate that agencies buy machine-readable re-marking. Pitching Art. 50 as the direct compliance driver for the agency is technically incorrect and will fail in front of anyone who has read the Act.
+
+**The correct hook is commercial risk:** Brand legal teams are demanding documentation regardless of what the statute technically requires of the agency. The market is asking for C2PA — not because Art. 50 forces the agency to provide it, but because the brand's legal team wants a verifiable record before approving spend. That is a legitimate and durable market pull. Frame SI8's value as the commercial risk shield, not the statutory mandate.
 
 ---
 
 ## The Tool Landscape
 
-### SI8's Independent Stack (Primary Path — June 2026)
+### Year 1 Stack: Capture as Primary (Trust List Required)
 
-SI8 does not need Capture or any third-party signing service. The full two-layer disclosure stack can be built and owned independently using open-source tools and a self-deployed smart contract.
+**Why Capture, not self-deploy:** The market is already asking for C2PA by name. When a brand legal team drops a C2PA-signed video into Adobe's Content Authenticity viewer, a signature from an unrecognized signer shows as a yellow warning. For a product whose entire value is credibility to skeptical legal teams, that warning is a direct product failure at the moment of truth. Numbers Protocol (Capture's parent) is on the C2PA Trust List — their signatures show as a named, trusted signer. That credibility is the reason to use Capture in Year 1.
 
 | Component | Tool | Cost |
 |-----------|------|------|
-| **C2PA signing + custom assertions** | c2pa-rs (open source, Adobe/CAI) | ~$289/year signing cert |
-| **On-chain registration (ERC-7053)** | SI8-deployed CommitRegister contract on Polygon or Base | ~$0.001/video in gas |
+| **C2PA signing + clearance assertions** | Capture API (Numbers Protocol, Trust List member) | $0.001/sign |
+| **Signing engine** | c2pa-rs (underlies Capture; also available standalone) | Included |
+| **Audit timestamp** | ERC-7053 via Capture (included) or RFC 3161 (alternative) | Included in Capture |
 | **Chain of Title PDF** | Existing SI8 system | Already built |
 
-**Total infrastructure cost per SI8 Certified submission: under $0.01. No per-call API dependency on any third party.**
+---
+
+### Capture / Numbers Protocol — Primary Path (Year 1)
+
+- C2PA signing + ERC-7053 on-chain registration via REST API
+- **Numbers Protocol is on the C2PA Conformance Program / Trust List** — signatures display as named trusted signer in Adobe/Microsoft C2PA viewers. No "unrecognized signer" warning.
+- $0.001/sign (pay-as-you-go); 1–2 week integration
+- MP4/video support: standard MP4 confirmed (c2pa-rs underlies the implementation)
+- SI8 embeds clearance JSON as C2PA custom assertions via Capture's API
+
+**Why this is the right Year 1 call:** Stack independence is a nice-to-have. Trust List recognition is load-bearing when your buyer is a legal team.
 
 ---
 
-### C2PA Signing — c2pa-rs (Primary)
+### C2PA Signing — c2pa-rs (Infrastructure Layer)
 
-- Open-source reference implementation, maintained by Adobe and the Content Authenticity Initiative
-- **Confirmed MP4 and MOV support** for file-based operations (`video/mp4`, `application/mp4`, `video/quicktime`)
-- Limitation: fragmented MP4 (DASH/HLS) has a known bug — does not affect standard MP4 export files
-- SI8 embeds its clearance JSON as C2PA custom assertions — the spec supports arbitrary structured data
-- One signing certificate from DigiCert or SSL.com (~$289/year) is all that's required
+- Open-source reference implementation (Adobe/CAI)
+- **Confirmed MP4 and MOV support** for standard file-based operations
+- Limitation: fragmented MP4 (DASH/HLS) has a known bug — not relevant for standard MP4 exports
 - c2pa-js (JavaScript/Node) wraps c2pa-rs via WASM for server-side use
+- Capture uses c2pa-rs under the hood — same underlying engine
 
 ---
 
-### On-Chain Registration — SI8-Deployed ERC-7053 (Primary)
+### On-Chain Registration — Correct Framing (Updated June 25, 2026)
 
-ERC-7053 is an open Ethereum standard (~30 lines of Solidity). It is not proprietary to Numbers Protocol. Anyone can deploy their own instance on any EVM-compatible chain.
+**Peer review correction:** The earlier claim that ERC-7053 on-chain registration "survives C2PA stripping on re-upload" is wrong. ERC-7053 registers a hash of specific bytes. When YouTube or Meta re-encode the file on upload, the bytes change, the hash no longer matches the file viewers see. The on-chain record does not track the re-encoded version.
 
-**How it works:**
-1. Hash the signed MP4 file to generate a content identifier (CID)
-2. Call `commit(CID, SI8_clearance_data)` on-chain — emits a permanent event with block timestamp
-3. Store the transaction hash in the Chain of Title PDF as independently verifiable proof
+**What on-chain registration actually is:** A timestamped audit artifact — immutable proof that a specific file version existed and was cleared at a specific moment. Useful for corporate governance and legal indemnification ("we can prove we cleared the file before deployment"), not for tracking the file through platform re-processing.
 
-**Chain choice:** Polygon or Base (Coinbase L2). Both are EVM-compatible, widely supported, and have transaction costs of fractions of a cent. No Ethereum mainnet gas volatility.
+**ERC-7053 is an open standard (~30 lines of Solidity).** Anyone can deploy their own CommitRegister contract on any EVM chain. SI8 can self-deploy this once we have Trust List membership. Not needed in Year 1 — Capture includes on-chain registration in their signing workflow.
 
-**Setup:** One-time contract deployment (~$5–20 in gas). Then one transaction per video. A developer can build and deploy this in roughly a day.
-
-**Ownership advantage:** SI8 owning its own contract is more credible than routing through a third party. The value is the public blockchain record — not which company deployed the contract. Any deployment on a public chain is equally valid and independently verifiable.
+**RFC 3161 timestamping — simpler alternative:** A trusted timestamp from a recognized timestamp authority (TSA) provides "proof this file existed at this time" in a format any lawyer can verify with a public key. RightsDocket uses C2PA + RFC 3161 rather than blockchain. May be easier to explain to a conservative GC than a Polygon transaction. Evaluate both options.
 
 ---
 
-### Capture / Numbers Protocol — Optional Future Upgrade
+### The Actual C2PA "Soft Binding" — Invisible Watermarking (Future Layer)
 
-**Not required. Consider only if:**
-- A buyer specifically asks for Trust List recognition (signatures verified in Adobe Content Authenticity viewer with a named trusted signer badge)
-- SI8 reaches volume (1,000+ videos/month) where a managed signing service reduces operational overhead
+**Peer review correction:** The EU Code of Practice's mandated "durable secondary signal" is defined as invisible watermarking/fingerprinting — not on-chain hashing. In C2PA terminology, "soft binding" means a watermark embedded in the pixels that survives transcoding and cropping, enabling the credential to be rediscovered even if the file's container metadata is stripped.
 
-**What Capture adds over SI8's independent stack:**
-- Numbers Protocol is on the C2PA Trust List — signatures show as a named trusted signer in Adobe/Microsoft viewers rather than "unrecognized signer"
-- Managed infrastructure (no cert renewal, no chain wallet maintenance)
-- $0.001/sign (comparable to SI8's gas costs but with no setup)
+On-chain hashing is not soft binding in the C2PA spec. An invisible watermark (e.g., Resemble AI Videoseal, Digimarc) embedded in the pixels IS soft binding. This is the layer the Code of Practice technically requires as the second durable signal.
 
-**What Capture does NOT add:** Any legal validity that SI8's independent stack doesn't already provide. Trust List recognition is a UX improvement, not a compliance requirement.
+**Year 1 position:** The market is asking for C2PA. It is not yet asking for invisible watermarks. Build this layer when a buyer specifically requires full EU Code of Practice two-layer compliance and can verify what "soft binding" means. Do not build it yet.
 
 ---
 
-### Capture's Article 50 Compliance Checklist (SI8 sales asset — keep regardless of integration decision)
+### C2PA Conformance Program — Apply Now (Parallel Action)
+
+The C2PA Conformance Program (launched mid-2025) is how organizations get on the Trust List as recognized Claim Generators. It requires product evaluation, a legal agreement, and formal acceptance — not just buying a cert.
+
+**SI8 should apply now**, even while using Capture as the Year 1 signing infrastructure. Reasons:
+- Timeline is months — start the clock immediately
+- Being a recognized signer in SI8's own name is the long-term independence goal
+- Once approved, SI8 can self-deploy c2pa-rs + ERC-7053 without routing through Capture
+
+Apply at: contentauthenticity.org/join
+
+---
+
+### Capture's Article 50 Compliance Checklist (SI8 sales asset)
 
 Most agencies will answer "no" to 5+ of these:
 1. Do all AI outputs carry a machine-readable marker?
@@ -158,10 +188,12 @@ Most agencies will answer "no" to 5+ of these:
 
 ---
 
-**Truepic Vision — RULED OUT**
-- Enterprise inspection platform — NOT a file signing API
-- C2PA signing only at point of capture on certified mobile app; JPEG only, no video
-- Not relevant for SI8's use case
+**Truepic — COMPETITOR, NOT RULED OUT**
+- Enterprise C2PA signing-as-a-service; on the C2PA Trust List alongside Google, Meta, OpenAI
+- Does NOT do clearance (IP risk, licensing, likeness assessment)
+- Sits at the signing layer, not the clearance layer — same delivery-step position as Capture
+- Does not threaten SI8's core value (human judgment), but does occupy the re-signing mechanic
+- Monitor for any clearance product additions
 
 ### C2PA Custom Assertions
 
@@ -192,14 +224,16 @@ The video file carries SI8's clearance data cryptographically — tamper-evident
 | Deliverable | What it is | Who uses it |
 |-------------|-----------|-------------|
 | **Chain of Title PDF** | Human-readable clearance document — tools, licensing, likeness, IP risk | Agency legal team, brand legal, E&O insurer |
-| **C2PA-signed video file** | Final campaign video re-signed with SI8 clearance + disclosure assertions embedded | Uploaded directly to YouTube/Meta/TikTok → platform reads C2PA → auto-labels |
-| **ERC-7053 on-chain registration** | Content hash registered on blockchain — survives C2PA stripping on re-upload | Third-party auditor verification; durable proof even if file metadata is lost |
+| **C2PA-signed video file** | Final campaign video re-signed via Capture (Trust List member) with SI8 clearance assertions embedded — shows as verified signer in Adobe Content Authenticity viewer | Uploaded directly to YouTube/Meta/TikTok → platform reads C2PA → auto-labels; legal team can verify signer identity |
+| **Timestamped audit record** | On-chain registration (ERC-7053 via Capture) or RFC 3161 timestamp — immutable proof of which file version was cleared and when | Corporate governance, legal indemnification, audit trail; proves clearance happened before deployment |
+
+**Note on the audit record:** This proves the cleared file existed at a specific time. It does not track the file through platform re-encoding — platforms change the bytes on upload, which breaks the hash. Its value is as an audit artifact, not as a durable disclosure signal.
 
 **The combined pitch to a creative director:**
 
-> "You send us your final cut. We run the clearance review (90 min), re-attach a legally valid multi-layer disclosure to the file, and deliver three things: a Chain of Title PDF for your legal team, a disclosure-ready video for direct upload to Meta, YouTube, or TikTok, and an on-chain registration that proves provenance even after platform re-processing. One submission. Fully compliant on every layer."
+> "You send us your final cut. We run the clearance review (90 min), attach a legally recognized C2PA disclosure credential to the file with our clearance data embedded, and deliver three things: a Chain of Title PDF for your legal team, a disclosure-ready video your platform will recognize as C2PA-signed, and a timestamped audit record proving you cleared it before deployment. One submission. Your legal team, your platform upload, and your compliance audit — all covered."
 
-**Trust mark framing:** "SI8 Certified — Cleared + Disclosed" — SI8 owns the full stack. C2PA signing via c2pa-rs with SI8's own certificate. On-chain registration via SI8-deployed ERC-7053 contract on Polygon/Base. No third-party signing service required.
+**Trust mark framing:** "Cleared by SI8 · Signed via Capture" — SI8 provides the human judgment (clearance data); Capture provides the Trust List-recognized signing infrastructure. The credential is verifiable in Adobe's Content Authenticity viewer as a named trusted signer.
 
 ---
 
@@ -216,25 +250,38 @@ The video file carries SI8's clearance data cryptographically — tamper-evident
 
 ## Validation Plan
 
-**Step 1 — Validate concept with one warm lead (before building)**
-Introduce the three-deliverable concept to:
-- **B130 Ivan Petruzzelli** (State Street) — already asked for "machine-readable payload (spreadsheet or JSON)" in campaign briefs. Highest conceptual alignment.
+**Step 0 — Qualify what buyers mean by "C2PA" (immediate)**
+
+Before building, ask the next lead who mentions C2PA:
+> "When you say you need C2PA — is that for the machine-readable metadata in the file itself, or does it need to show as a verified, named signer when someone checks it in Adobe's Content Authenticity viewer?"
+
+Most buyers don't know the difference yet. But some will — and those are the ones who'll reject an unrecognized signer. The answer determines whether Trust List recognition is a Year 1 requirement or a later upgrade.
+
+**Step 1 — Validate three-deliverable concept with one warm lead**
+- **B130 Ivan Petruzzelli** (State Street) — asked for "machine-readable payload (spreadsheet or JSON)" in campaign briefs. Highest conceptual alignment.
 - **B149 Spencer Stander** (STANDER PRODUCTIONS) — BA/clearance language, "less about creative process, more about clearance." Closest to the buyer who'd pay for this.
 - **B148 Myron Stapleton** (R&M Geoscience) — "worth its weight in gold," delivers to governments and health boards, highest urgency.
 
 **Gate question:**
-> "If we delivered your final video file with a legally valid multi-layer AI disclosure embedded — C2PA in the file plus on-chain registration — alongside the Chain of Title PDF, would that complete your compliance requirement end-to-end?"
+> "If we delivered your final video with a verified C2PA disclosure credential embedded — showing your clearance data, the AI tools used, and the licensing status, signed by a recognized authority — alongside the Chain of Title PDF, would that complete your compliance requirement?"
 
-If yes: build. If no: understand what's missing before building.
+If yes: build. If no: understand what's missing.
 
-**Step 2 — Technical build (one developer, ~1–2 days)**
-- Deploy ERC-7053 CommitRegister contract on Polygon or Base
-- Set up c2pa-rs signing instance with SI8 signing certificate
-- Write the workflow: receive MP4 → sign with c2pa-rs → hash → commit on-chain → deliver signed MP4 + transaction hash
-- Add transaction hash field to Chain of Title PDF template
+**Step 2 — Get a Capture POC account and test the integration**
+- Contact Capture (captureapp.xyz) for trial access
+- Test MP4 signing with custom SI8 clearance assertions
+- Verify output shows as trusted signer in Adobe Content Authenticity viewer (contentcredentials.org/verify)
+- Confirm ERC-7053 on-chain registration is included per sign
+- Estimate 1–2 week integration time
 
-**Step 3 — Capture (optional, later)**
-If a buyer asks specifically for C2PA Trust List recognition (named trusted signer badge in Adobe viewer), evaluate Capture at that point. Not a Year 1 requirement.
+**Step 3 — Apply to C2PA Conformance Program (parallel, start now)**
+- Apply at contentauthenticity.org/join
+- Goal: SI8 recognized as its own Claim Generator on the Trust List
+- Timeline: months — start the clock immediately regardless of Capture decision
+- Once approved: SI8 can self-deploy c2pa-rs + ERC-7053 with its own trusted certificate
+
+**Step 4 — Invisible watermark layer (future, not Year 1)**
+Once a buyer specifically requires full EU Code of Practice two-layer compliance (C2PA hard binding + invisible watermark soft binding), evaluate Resemble AI Videoseal or Digimarc. Do not build this until a buyer asks for it by name.
 
 ---
 
@@ -242,32 +289,41 @@ If a buyer asks specifically for C2PA Trust List recognition (named trusted sign
 
 Competitive research (June 24, 2026) confirms no direct competitor at the agency delivery step.
 
-### The Four Positions — How the Market Has Sorted
+### The Five Positions — How the Market Has Sorted (Updated June 25, 2026)
 
 ```
 [Position 1] Model providers (Runway, Kling, Veo)
   → C2PA signed at generation time, inside the inference pipeline
-  → Cannot cover composited outputs; metadata stripped in post-production
+  → Metadata breaks when clips are composited and re-exported in post-production
 
-[Position 2] Capture / Numbers Protocol
-  → C2PA signing + ERC-7053 on-chain via API
-  → Targets AI model providers and media companies (Reuters, AP)
-  → The agency delivery step is explicitly NOT their market
+[Position 2] Adobe Premiere Pro
+  → "Export with Content Credentials" — native C2PA re-signing at the delivery step
+  → FREE — included in Creative Cloud
+  → THIN credential: attaches account holder identity only
+  → No tool licensing, no IP clearance, no likeness assessment, no clearance assertions
+  → Occupies the re-signing mechanic. Does not occupy the clearance position.
 
-[Position 3] ProofSnap / TrueScreen
+[Position 3] Capture / Numbers Protocol + Truepic
+  → C2PA signing APIs; both on the C2PA Trust List
+  → Capture: $0.001/sign + ERC-7053 on-chain; targets model providers + media companies
+  → Truepic: enterprise signing-as-a-service; alongside Google/Meta/OpenAI on Trust List
+  → Neither does clearance — no human IP review, no licensing assessment
+
+[Position 4] ProofSnap / TrueScreen (audit tools)
   → Read and certify EXISTING C2PA signals for audit evidence
-  → Do not sign content; do not add new C2PA assertions
+  → Do not sign content; do not add new assertions
   → Useful after SI8 delivers the signed file — not competitive
 
-[Position 4] RightsDocket
+[Position 5] RightsDocket
   → Human review + C2PA embed + USCO registration for audio only
-  → $20/registration; closest model analog to SI8 v4.1
-  → Audio only — no video product exists
+  → $20/registration; closest model analog to SI8
+  → Audio only — no video product exists; C2PA conformance still pending
 
-[EMPTY] Agency delivery step
-  → Final composited campaign video with zero C2PA remaining
-  → Re-signing with human-reviewed clearance data embedded
-  → SI8 v4.1
+[SI8's position] Agency delivery step — clearance assertions
+  → Same delivery step as Adobe Premiere, but with human-reviewed clearance data
+  → "Premiere signs the file. We clear it."
+  → C2PA signed via Capture (Trust List) with SI8 clearance assertions embedded
+  → Chain of Title PDF + C2PA-signed video + audit timestamp
 ```
 
 ### Company-by-Company Breakdown

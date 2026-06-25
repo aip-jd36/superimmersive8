@@ -276,15 +276,40 @@
 
 ---
 
+**Adobe Premiere Pro (Content Credentials export)**
+- **What:** Native "Export with Content Credentials" built into Premiere Pro and Media Encoder — re-signs final video export with C2PA at the delivery step
+- **Model:** Free — included in Adobe Creative Cloud subscription
+- **Coverage:** Any agency on Adobe Creative Cloud (the vast majority)
+- **C2PA signing:** Yes — at export, using Adobe's own Trust List membership
+- **Video:** Yes — MP4 export with Content Credentials is the primary use case
+- **What it attaches:** Adobe account holder identity, export timestamp. No tool licensing, no IP clearance, no likeness assessment, no clearance assertions.
+- **SI8 relationship:** **Competitor at the delivery step, but only for the signing mechanic.** Adobe occupies the re-signing position SI8 previously claimed as "empty." The correct reframe: "Premiere signs the file. SI8 clears it." Adobe's credential says who exported it. SI8's credential says it's safe to use commercially.
+- **Threat level:** Medium — occupies re-signing mechanic for free; does not threaten clearance position
+
+---
+
 **Capture / Numbers Protocol**
 - **What:** C2PA signing service + ERC-7053 on-chain registration via REST API and SDKs
 - **Model:** Managed signing at $0.001/sign (pay-as-you-go); free Node.js/Python SDKs (MIT/Apache)
 - **Coverage:** Media companies (Reuters, AP, Starling Lab), AI model providers (integrates into inference pipelines)
 - **C2PA signing:** Yes; EU AI Act compliance page maps all Art. 50 sub-articles explicitly
-- **Video:** Standard MP4 likely supported (c2pa-rs supports MP4; Capture almost certainly built on same)
+- **Video:** Standard MP4 confirmed (c2pa-rs underlies implementation; MP4/MOV supported)
+- **C2PA Trust List:** Yes — Numbers Protocol is a recognized Claim Generator on the Trust List; signatures show as named trusted signer in Adobe/Microsoft viewers
 - **Geographic:** Global; ISO 27001 certified
-- **SI8 relationship:** **Optional future upgrade — not required.** SI8 can deploy c2pa-rs (C2PA signing) and its own ERC-7053 CommitRegister contract (on-chain registration) independently. ERC-7053 is an open standard (~30 lines of Solidity) — not proprietary to Capture. SI8 owns the full stack without any per-call API dependency. Capture adds one thing SI8's independent stack lacks: Numbers Protocol is on the C2PA Trust List, so their signatures show as a named trusted signer in Adobe/Microsoft viewers. Evaluate Capture only if a buyer specifically requests Trust List recognition.
-- **Threat level:** None
+- **SI8 relationship:** **Primary Year 1 integration.** The market is asking for C2PA. An unrecognized signer showing a yellow warning in Adobe's Content Authenticity viewer is a product failure in front of a legal team. Capture's Trust List membership is load-bearing for Year 1 credibility. SI8 uses Capture's API as signing infrastructure, provides the human clearance judgment Capture cannot. Long-term: SI8 applies to the Conformance Program and self-signs as a recognized entity; Capture becomes optional.
+- **Threat level:** None (infrastructure partner, not a competitor — does not do clearance)
+
+---
+
+**Truepic**
+- **What:** Enterprise C2PA signing-as-a-service; explicit trust list membership alongside Google, Meta, OpenAI, LinkedIn
+- **Model:** Enterprise contract (no public pricing)
+- **Coverage:** News, entertainment, advertising industries
+- **C2PA signing:** Yes — Trust List member, recognized Claim Generator
+- **Video:** Yes
+- **What it does NOT do:** Clearance — no human IP review, no licensing assessment, no likeness review
+- **SI8 relationship:** Competitor at the signing layer, not the clearance layer. Truepic can sign a video. It cannot clear one. If an agency uses Truepic for signing and SI8 for clearance, they are complementary. If Truepic adds a clearance product, threat level rises immediately.
+- **Threat level:** Low-Medium — monitor for any clearance product additions
 
 ---
 
@@ -328,16 +353,18 @@
 
 **Competitive Position Summary — Disclosure Infrastructure**
 
-| Company | Signs C2PA? | Video? | Agency delivery step? | Business model |
-|---------|------------|--------|----------------------|----------------|
-| **Model providers** (Runway, Kling, Veo) | ✅ at generation | ✅ | ❌ metadata stripped in post | Built into generation tool |
-| **Capture** | ✅ post-hoc | Unknown | ❌ targets model providers | $0.001/sign API |
-| **ProofSnap** | ❌ reader only | ❌ | ❌ | $5–$49 one-time |
-| **TrueScreen** | ❌ | ✅ (capture only) | ❌ | €60/month |
-| **RightsDocket** | ✅ | ❌ audio only | ❌ | $20/registration |
-| **SI8 v4.1 (hypothesis)** | ✅ c2pa-rs (owned) | ✅ | **✅ only player here** | $499 (includes clearance + disclosure) |
+| Company | Signs C2PA? | Trust List? | Clearance? | Video? | Agency delivery step? | Business model |
+|---------|------------|------------|-----------|--------|----------------------|----------------|
+| **Model providers** (Runway, Kling, Veo) | ✅ at generation | ✅ | ❌ | ✅ | ❌ metadata breaks in post | Built into generation tool |
+| **Adobe Premiere Pro** | ✅ at export | ✅ | ❌ | ✅ | ✅ (thin — identity only) | Free (Creative Cloud) |
+| **Capture** | ✅ post-hoc | ✅ | ❌ | ✅ | ❌ targets model providers | $0.001/sign API |
+| **Truepic** | ✅ | ✅ | ❌ | ✅ | ❌ enterprise only | Custom enterprise |
+| **ProofSnap** | ❌ reader only | — | ❌ | ❌ | ❌ | $5–$49 one-time |
+| **TrueScreen** | ❌ | — | ❌ | ✅ (capture only) | ❌ | €60/month |
+| **RightsDocket** | ✅ (pending) | ❌ pending | ✅ (audio) | ❌ audio only | ❌ | $20/registration |
+| **SI8 v4.1** | ✅ via Capture | ✅ via Capture | **✅ only player** | ✅ | **✅ clearance assertions** | $499 (clearance + disclosure) |
 
-**Key finding:** SI8's delivery-step position is unoccupied by every player in the disclosure infrastructure ecosystem. The clearance component (Chain of Title PDF) remains SI8's core differentiation. SI8 can own the full disclosure stack independently: c2pa-rs for C2PA signing + self-deployed ERC-7053 contract on Polygon/Base for on-chain registration. No third-party API dependency. Infrastructure cost under $0.01 per video.
+**Key finding:** Adobe Premiere occupies the delivery-step re-signing position for free — but with a thin credential (identity only, no clearance data). SI8's defensible position is clearance assertions at the delivery step: the human judgment layer that determines whether the content is legally safe, embedded in a Trust List-recognized C2PA credential. No player combines clearance + Trust List-recognized signing for commercial AI video.
 
 ---
 

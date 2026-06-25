@@ -13,6 +13,32 @@
 
 ## Log
 
+### 2026-06-25 — Peer Review Corrections: Gap Reframe, Regulatory Fix, Trust List Required
+
+**Insight:** Three-model peer review (ChatGPT, Gemini, Claude Opus) validated the core clearance gap but corrected four material errors in the v4.1 hypothesis. The thesis survives; the technical wrapper and regulatory framing needed significant correction.
+
+**Source:** ChatGPT, Gemini, Claude Opus — independent peer review of SI8 v4.1 findings (June 25, 2026).
+
+**Four corrections:**
+
+1. **The gap is narrower than stated.** Adobe Premiere Pro has native "Export with Content Credentials" — it re-signs at the delivery step for free. The gap is not "nobody re-signs at delivery." It is "nobody attaches *clearance assertions* at delivery." Premiere signs the file with account holder identity. It doesn't clear the content. Reframe: "Premiere signs the file. SI8 clears it."
+
+2. **Regulatory framing is wrong on the law.** Art. 50(2) machine-readable marking = provider obligation (Runway/Kling/Veo, already compliant). Art. 50(4) visible disclosure = deployer obligation (agencies), addressed by platform toggles. Agencies are not statutorily required to buy machine-readable re-marking. SI8's hook is commercial risk: brand legal teams demanding documentation regardless of statute. Frame as commercial risk shield, not regulatory mandate.
+
+3. **On-chain hash ≠ C2PA soft binding; doesn't survive platform re-encoding.** ERC-7053 registers a hash of specific bytes. Platform re-encoding changes the bytes → hash no longer matches the file viewers see. On-chain is an audit timestamp artifact, not a durable disclosure signal. C2PA "soft binding" = invisible watermark embedded in pixels (Resemble AI Videoseal, Digimarc) — survives transcoding. Build watermark layer only when a buyer asks for it by name.
+
+4. **Trust List recognition is load-bearing, not cosmetic.** Market is already asking for C2PA. If a legal team drops SI8's signed file into Adobe's Content Authenticity viewer and sees "unrecognized signer," the product fails at the moment of truth. Capture (Numbers Protocol) is on the Trust List — route through Capture for Year 1. Apply to C2PA Conformance Program now in parallel; once approved, SI8 can self-sign as a recognized entity.
+
+**Product implication:** Capture is back as the Year 1 signing infrastructure (not optional). Self-deploy path is the long-term goal after Conformance Program approval. The three-deliverable concept holds — Chain of Title PDF + C2PA-signed video (via Capture, Trust List) + audit timestamp — but pitch the audit layer as proof-of-clearance, not as durable disclosure.
+
+**Status:** Hypothesis updated. Capture technical call is now Step 2 (after lead validation). C2PA Conformance Program application is a parallel action item to start immediately.
+
+**Deep-dive:** [`insights/2026-06-24-disclosure-gap.md`](insights/2026-06-24-disclosure-gap.md) — fully updated with all corrections
+
+**Version impact:** v4.1 — infrastructure path revised (Capture primary, self-deploy future); regulatory framing corrected; competitive map updated (Adobe Premiere + Truepic added)
+
+---
+
 ### 2026-06-25 — SI8 Can Own the Full Disclosure Stack Independently
 
 **Insight:** ERC-7053 is an open Ethereum standard (~30 lines of Solidity), not proprietary to Numbers Protocol or Capture. SI8 can deploy its own CommitRegister contract on Polygon or Base and do on-chain registration independently at ~$0.001/video in gas. Combined with c2pa-rs (open source, confirmed MP4 support) for C2PA signing, SI8 owns the complete two-layer disclosure stack with no per-call API dependency on any third party. Infrastructure cost under $0.01 per SI8 Certified submission.
