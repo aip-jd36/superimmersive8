@@ -83,21 +83,65 @@ That's a self-declaration checkbox — satisfies the platform upload, but does n
 
 ## The Tool Landscape
 
-### C2PA Signing Services
+### SI8's Independent Stack (Primary Path — June 2026)
 
-**Capture (captureapp.xyz) — PRIMARY CANDIDATE**
-- Signs arbitrary files with C2PA credentials + ERC-7053 on-chain registration in one call
-- REST API + Node.js/Python SDKs (MIT/Apache licensed, free)
-- Managed signing: **$0.001 per sign** (pay-as-you-go); 1–2 week integration time
-- Sub-100ms latency; 10,000+ files/hour; ISO 27001 certified
-- C2PA Trust List: certificates via Numbers Protocol intermediate CA, independently verifiable in Adobe/Microsoft C2PA viewers
-- **EU AI Act compliance page:** captureapp.xyz/compliance/ — explicitly maps each Art. 50 sub-article to their two-layer architecture
-- **Capture's market:** AI model providers (inference pipeline integration) and media companies (Reuters, AP, Starling Lab). **Agencies and creative directors are not their current market** — confirms the delivery-step gap SI8 fills is unaddressed by Capture itself
-- **Unknown:** MP4/video support not explicitly confirmed in product docs — requires API test or sales/technical call. This is the critical open question before building.
-- **Capture's framing of 50(2):** "C2PA credentials embedded at generation time" — their language implies generation-time integration. The legal text does not restrict marking to generation time; re-signing the final output post-production should satisfy the requirement. **Confirm on technical call.**
-- Enterprise: white-label dashboard, dedicated infrastructure, 99.9% SLA, custom contracts for 1M+ signs/month
+SI8 does not need Capture or any third-party signing service. The full two-layer disclosure stack can be built and owned independently using open-source tools and a self-deployed smart contract.
 
-**Capture's Article 50 Compliance Checklist (10 questions — SI8 sales asset)**
+| Component | Tool | Cost |
+|-----------|------|------|
+| **C2PA signing + custom assertions** | c2pa-rs (open source, Adobe/CAI) | ~$289/year signing cert |
+| **On-chain registration (ERC-7053)** | SI8-deployed CommitRegister contract on Polygon or Base | ~$0.001/video in gas |
+| **Chain of Title PDF** | Existing SI8 system | Already built |
+
+**Total infrastructure cost per SI8 Certified submission: under $0.01. No per-call API dependency on any third party.**
+
+---
+
+### C2PA Signing — c2pa-rs (Primary)
+
+- Open-source reference implementation, maintained by Adobe and the Content Authenticity Initiative
+- **Confirmed MP4 and MOV support** for file-based operations (`video/mp4`, `application/mp4`, `video/quicktime`)
+- Limitation: fragmented MP4 (DASH/HLS) has a known bug — does not affect standard MP4 export files
+- SI8 embeds its clearance JSON as C2PA custom assertions — the spec supports arbitrary structured data
+- One signing certificate from DigiCert or SSL.com (~$289/year) is all that's required
+- c2pa-js (JavaScript/Node) wraps c2pa-rs via WASM for server-side use
+
+---
+
+### On-Chain Registration — SI8-Deployed ERC-7053 (Primary)
+
+ERC-7053 is an open Ethereum standard (~30 lines of Solidity). It is not proprietary to Numbers Protocol. Anyone can deploy their own instance on any EVM-compatible chain.
+
+**How it works:**
+1. Hash the signed MP4 file to generate a content identifier (CID)
+2. Call `commit(CID, SI8_clearance_data)` on-chain — emits a permanent event with block timestamp
+3. Store the transaction hash in the Chain of Title PDF as independently verifiable proof
+
+**Chain choice:** Polygon or Base (Coinbase L2). Both are EVM-compatible, widely supported, and have transaction costs of fractions of a cent. No Ethereum mainnet gas volatility.
+
+**Setup:** One-time contract deployment (~$5–20 in gas). Then one transaction per video. A developer can build and deploy this in roughly a day.
+
+**Ownership advantage:** SI8 owning its own contract is more credible than routing through a third party. The value is the public blockchain record — not which company deployed the contract. Any deployment on a public chain is equally valid and independently verifiable.
+
+---
+
+### Capture / Numbers Protocol — Optional Future Upgrade
+
+**Not required. Consider only if:**
+- A buyer specifically asks for Trust List recognition (signatures verified in Adobe Content Authenticity viewer with a named trusted signer badge)
+- SI8 reaches volume (1,000+ videos/month) where a managed signing service reduces operational overhead
+
+**What Capture adds over SI8's independent stack:**
+- Numbers Protocol is on the C2PA Trust List — signatures show as a named trusted signer in Adobe/Microsoft viewers rather than "unrecognized signer"
+- Managed infrastructure (no cert renewal, no chain wallet maintenance)
+- $0.001/sign (comparable to SI8's gas costs but with no setup)
+
+**What Capture does NOT add:** Any legal validity that SI8's independent stack doesn't already provide. Trust List recognition is a UX improvement, not a compliance requirement.
+
+---
+
+### Capture's Article 50 Compliance Checklist (SI8 sales asset — keep regardless of integration decision)
+
 Most agencies will answer "no" to 5+ of these:
 1. Do all AI outputs carry a machine-readable marker?
 2. Does that marker survive a screenshot or social-media re-upload?
@@ -118,16 +162,6 @@ Most agencies will answer "no" to 5+ of these:
 - Enterprise inspection platform — NOT a file signing API
 - C2PA signing only at point of capture on certified mobile app; JPEG only, no video
 - Not relevant for SI8's use case
-
----
-
-**Open-source c2pa-rs / c2pa-js — FALLBACK**
-- Reference C2PA implementations maintained by Content Authenticity Initiative (Adobe-led)
-- c2pa-rs (Rust): **confirmed support for MP4 and MOV** (`video/mp4`, `application/mp4`, `video/quicktime`) for file-based operations. Limitation: fragmented MP4 (DASH/HLS streaming) has known issues. Regular MP4 export files work.
-- c2pa-js (JavaScript/Node): wraps c2pa-rs via WASM
-- Free, no per-sign cost — SI8 runs its own signing instance
-- Does NOT include ERC-7053 on-chain registration (would need separate integration)
-- **Use if Capture API has friction or pricing issues — not a last resort**
 
 ### C2PA Custom Assertions
 
@@ -165,7 +199,7 @@ The video file carries SI8's clearance data cryptographically — tamper-evident
 
 > "You send us your final cut. We run the clearance review (90 min), re-attach a legally valid multi-layer disclosure to the file, and deliver three things: a Chain of Title PDF for your legal team, a disclosure-ready video for direct upload to Meta, YouTube, or TikTok, and an on-chain registration that proves provenance even after platform re-processing. One submission. Fully compliant on every layer."
 
-**Trust mark framing:** "Cleared by SI8 · Verified by Capture" — Capture's infrastructure provides the legally recognized two-layer marking; SI8's human judgment provides the clearance data no signing service can generate alone.
+**Trust mark framing:** "SI8 Certified — Cleared + Disclosed" — SI8 owns the full stack. C2PA signing via c2pa-rs with SI8's own certificate. On-chain registration via SI8-deployed ERC-7053 contract on Polygon/Base. No third-party signing service required.
 
 ---
 
@@ -182,23 +216,25 @@ The video file carries SI8's clearance data cryptographically — tamper-evident
 
 ## Validation Plan
 
-**Step 1 — Capture technical call (before building anything)**
-- Confirm MP4/video file support
-- Confirm post-production re-signing satisfies their interpretation of Art. 50(2) ("at generation time" language needs clarification)
-- Confirm how custom C2PA assertions are structured in their API
-- Get a POC or trial account
-- If no video support → fall back to c2pa-rs + separate on-chain integration
-
-**Step 2 — Validate with one warm lead**
+**Step 1 — Validate concept with one warm lead (before building)**
 Introduce the three-deliverable concept to:
 - **B130 Ivan Petruzzelli** (State Street) — already asked for "machine-readable payload (spreadsheet or JSON)" in campaign briefs. Highest conceptual alignment.
 - **B149 Spencer Stander** (STANDER PRODUCTIONS) — BA/clearance language, "less about creative process, more about clearance." Closest to the buyer who'd pay for this.
 - **B148 Myron Stapleton** (R&M Geoscience) — "worth its weight in gold," delivers to governments and health boards, highest urgency.
 
-**Step 3 — Gate question**
+**Gate question:**
 > "If we delivered your final video file with a legally valid multi-layer AI disclosure embedded — C2PA in the file plus on-chain registration — alongside the Chain of Title PDF, would that complete your compliance requirement end-to-end?"
 
 If yes: build. If no: understand what's missing before building.
+
+**Step 2 — Technical build (one developer, ~1–2 days)**
+- Deploy ERC-7053 CommitRegister contract on Polygon or Base
+- Set up c2pa-rs signing instance with SI8 signing certificate
+- Write the workflow: receive MP4 → sign with c2pa-rs → hash → commit on-chain → deliver signed MP4 + transaction hash
+- Add transaction hash field to Chain of Title PDF template
+
+**Step 3 — Capture (optional, later)**
+If a buyer asks specifically for C2PA Trust List recognition (named trusted signer badge in Adobe viewer), evaluate Capture at that point. Not a Year 1 requirement.
 
 ---
 

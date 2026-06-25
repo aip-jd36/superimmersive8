@@ -13,6 +13,29 @@
 
 ## Log
 
+### 2026-06-25 — SI8 Can Own the Full Disclosure Stack Independently
+
+**Insight:** ERC-7053 is an open Ethereum standard (~30 lines of Solidity), not proprietary to Numbers Protocol or Capture. SI8 can deploy its own CommitRegister contract on Polygon or Base and do on-chain registration independently at ~$0.001/video in gas. Combined with c2pa-rs (open source, confirmed MP4 support) for C2PA signing, SI8 owns the complete two-layer disclosure stack with no per-call API dependency on any third party. Infrastructure cost under $0.01 per SI8 Certified submission.
+
+**Source:** ERC-7053 specification (eips.ethereum.org/EIPS/eip-7053) — reference implementation is ~30 lines of Solidity, deploys on any EVM chain, permissionless standard with no canonical registry. c2pa-rs supported formats documentation confirms MP4.
+
+**Product implication:** SI8 v4.1 three-deliverable stack is fully buildable independently:
+- Chain of Title PDF (existing)
+- C2PA-signed MP4 via c2pa-rs + SI8 signing cert (~$289/year)
+- On-chain registration via SI8-deployed ERC-7053 on Polygon/Base (~$0.001/video gas)
+
+Capture is downgraded to "optional future upgrade" — the only thing it adds is C2PA Trust List recognition (named trusted signer badge in Adobe/Microsoft viewers). That is a UX improvement, not a compliance requirement. Evaluate Capture only if a buyer specifically requests it.
+
+Technical build estimate: one developer, ~1–2 days. One-time contract deployment + c2pa-rs signing integration + workflow to hash file → commit on-chain → add transaction hash to Chain of Title PDF.
+
+**Status:** Hypothesis — infrastructure path confirmed viable and fully owned by SI8. Gate: validate three-deliverable concept with one warm lead (B130, B148, or B149) before building.
+
+**Deep-dive:** [`insights/2026-06-24-disclosure-gap.md`](insights/2026-06-24-disclosure-gap.md) — Tool Landscape and Validation Plan sections updated
+
+**Version impact:** v4.1 — changes infrastructure path from "Capture API dependency" to "SI8-owned stack"
+
+---
+
 ### 2026-06-25 — C2PA Developer Ecosystem Friction (Corrected)
 
 **Insight:** Initial research (Jun 25 morning) misidentified a video gap in the official c2pa-rs reference implementation. The Issue #33 requesting "Full Video Container support" was on `arkavo-org/arkavo-rs` (a third-party library) — not `contentauth/c2pa-rs`. Corrected after follow-up research. The official c2pa-rs and c2patool **do support MP4 and MOV** for standard file-based operations. Fragmented MP4 (DASH/HLS) has a known bug, but regular MP4 export files — what SI8 receives from agencies — work fine.

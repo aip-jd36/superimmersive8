@@ -281,10 +281,10 @@
 - **Model:** Managed signing at $0.001/sign (pay-as-you-go); free Node.js/Python SDKs (MIT/Apache)
 - **Coverage:** Media companies (Reuters, AP, Starling Lab), AI model providers (integrates into inference pipelines)
 - **C2PA signing:** Yes; EU AI Act compliance page maps all Art. 50 sub-articles explicitly
-- **Video:** Unknown — MP4 support not confirmed in product docs; critical open question
+- **Video:** Standard MP4 likely supported (c2pa-rs supports MP4; Capture almost certainly built on same)
 - **Geographic:** Global; ISO 27001 certified
-- **SI8 relationship:** **Integration candidate.** Capture's market is model providers and media companies — agencies are not their current customer. The agency delivery-step gap is unaddressed by Capture's current offering. SI8 would use Capture's API as a $0.001/sign infrastructure layer, not compete with them.
-- **Threat level:** None (complementary — potential partner/infrastructure provider)
+- **SI8 relationship:** **Optional future upgrade — not required.** SI8 can deploy c2pa-rs (C2PA signing) and its own ERC-7053 CommitRegister contract (on-chain registration) independently. ERC-7053 is an open standard (~30 lines of Solidity) — not proprietary to Capture. SI8 owns the full stack without any per-call API dependency. Capture adds one thing SI8's independent stack lacks: Numbers Protocol is on the C2PA Trust List, so their signatures show as a named trusted signer in Adobe/Microsoft viewers. Evaluate Capture only if a buyer specifically requests Trust List recognition.
+- **Threat level:** None
 
 ---
 
@@ -335,9 +335,9 @@
 | **ProofSnap** | ❌ reader only | ❌ | ❌ | $5–$49 one-time |
 | **TrueScreen** | ❌ | ✅ (capture only) | ❌ | €60/month |
 | **RightsDocket** | ✅ | ❌ audio only | ❌ | $20/registration |
-| **SI8 v4.1 (hypothesis)** | ✅ via Capture API | ✅ | **✅ only player here** | $499 (includes clearance + disclosure) |
+| **SI8 v4.1 (hypothesis)** | ✅ c2pa-rs (owned) | ✅ | **✅ only player here** | $499 (includes clearance + disclosure) |
 
-**Key finding:** SI8's delivery-step position is unoccupied by every player in the disclosure infrastructure ecosystem. The clearance component (Chain of Title PDF) remains SI8's core differentiation. Adding C2PA signing at $0.001 per file via Capture extends that into the disclosure layer without competing with any existing player.
+**Key finding:** SI8's delivery-step position is unoccupied by every player in the disclosure infrastructure ecosystem. The clearance component (Chain of Title PDF) remains SI8's core differentiation. SI8 can own the full disclosure stack independently: c2pa-rs for C2PA signing + self-deployed ERC-7053 contract on Polygon/Base for on-chain registration. No third-party API dependency. Infrastructure cost under $0.01 per video.
 
 ---
 
