@@ -103,7 +103,7 @@
 
 ---
 
-## 2. Warm Lead (28)
+## 2. Warm Lead (27)
 
 *Clear ICP signal or acknowledged pain. Moving toward a call or sample.*
 
@@ -120,7 +120,6 @@
 | B107 | Keegan Desouza | Shaerp Next | Dubai/UAE | "Legal side isn't mature yet — how does it work?" | No | Reply + explain SI8 briefly | — |
 | B121 | Gabriel Preston | Imagine This Creative Studio | London/UK | Approved platform lists, prompt sheets, likeness rights focus | No | Position SI8 as structured output; likeness angle | — |
 | B122 | Mhd Ali | Monks | Dubai/UAE | "Most of the time" — Monks holdco signal | No | Reply + probe Monks client format | — |
-| B125 | Tim Deussen | XRBB | Germany | Corrected SI8's Art. 50 framing; builds compliance tech + participates in EU working groups | No | Partner/advisor ask sent Jun 8 (from Angel); await reply | — |
 | B127 | Ulrike Kerber | Viva Design Inc. | Germany | "Legal teams asking with increasing frequency" | No | Reply + send sample | — |
 | B128 | Christopher Neitzert | Creative Mayhem | Germany | "Yeah I have a solution. Do you?" — probe competitor/complementary | No | Reply + probe what his solution is | — |
 | B129 | Kelly Hogan | ELITE STORI LND | London/UK | "What do you do?" — asking to understand product | No | Reply + explain SI8 | — |
@@ -165,13 +164,14 @@
 
 ---
 
-## 5. Call Taken (1)
+## 5. Call Taken (2)
 
 *Discovery call completed. Notes filed in CRM.*
 
 | B-ID | Lead | Company | Geo | Call Date | Key Signal | Next Action |
 |------|------|---------|-----|-----------|------------|-------------|
-| B089 | Oliyah Joseph + Paul (husband) | Visual Vibe | London/UK | May 25, 2026 | **Wrong ICP — AI images only, SMB/e-commerce clients, no legal friction.** Paul: "Never been asked for any documentation — just privacy NDAs." Paul skeptical: "Anybody can sign a bit of paper." But validated thesis: "You are playing ahead — matter of time, give it 6 months." Comp codes offered, declined. → [Call notes](call-notes/CALL-2026-05-25-B089-Oliyah-Joseph.md) | Thank-you email sent 5/25. TODO: LinkedIn add (Oliyah + Paul); nurture Q4 2026 when EU AI Act enforcement heats up. |
+| B089 | Oliyah Joseph + Paul (husband) | Visual Vibe | London/UK | May 25, 2026 | **Wrong ICP — AI images only, SMB/e-commerce clients, no legal friction.** Paul: "Never been asked for any documentation — just privacy NDAs." But validated thesis: "You are playing ahead — matter of time, give it 6 months." → [Call notes](call-notes/CALL-2026-05-25-B089-Oliyah-Joseph.md) | Nurture Q4 2026 when EU AI Act enforcement heats up. |
+| B125 | Tim Deussen | XRBB | Germany | Jun 24, 2026 | **Advisory/partner call.** Gap validated: *"That is actually the chance — there's no company for front-to-back rights management in generative workflows."* Art. 50 framing confirmed correct. GTM rec: pilots at AI film festivals first, then panel talks on provenance. Acquisition mentioned unprompted ("they might just buy the company"). Advisor door open. → [Call notes](call-notes/CALL-2026-06-24-B125-TIM-DEUSSEN-XRBB.md) | Check in Jul 15 with a pilot result or new campaign signal. Track Fraunhofer FOKUS (EU C2PA broadcast research). |
 
 ---
 

@@ -7,7 +7,7 @@ is discovery calls to validate PMF, surface edge cases, and identify product gap
 **Source:** `03_Sales/DISCOVERY-PERFORMANCE-LOG.md` → Discovery Signal Checklist → manual review.
 A lead can appear in BOTH this pipeline and `03_Sales/CRM.md` if they are also a sales prospect.
 
-**Last updated:** 2026-06-16
+**Last updated:** 2026-06-27
 
 ---
 
@@ -27,7 +27,7 @@ A lead can appear in BOTH this pipeline and `03_Sales/CRM.md` if they are also a
 
 <!-- discovery-pipeline:start -->
 
-## Signal (256)
+## Signal (258)
 
 *Leads flagged from discovery report, pending outreach decision.*
 
@@ -289,6 +289,8 @@ A lead can appear in BOTH this pipeline and `03_Sales/CRM.md` if they are also a
 | Michele Hill | Commercial Line Producer | Freelance Video Professional | USA | [MINIMAL] | Clearance Pro v1 | "I'm in Los Angeles, and production has slowed down immensely." — LA line producer, off-market currently | 2026-06-16 |
 | Silica Graphics | AI Creative Specialist | SILICAVISION | Other | [WARM] | EU AI Act | "not yet!" — minimal signal | 2026-06-16 |
 | Julia Roga | AR Developer | null | Other | [MINIMAL] | — | AR developer, off-target segment | 2026-06-16 |
+| Dan Lantry | VP, Legal Affairs Americas | Sonova Group | USA | [WARM] | Who's Asking (NY Law) | **T1 + ICP 3.** "No, we aren't tracking it but would like to better understand the issue." — VP Legal Affairs at major medtech brand. NY Synthetic Performer Law triggered interest. Brand legal exec who buys/approves agency deliverables. Also in CRM as B158. | 2026-06-27 |
+| Todd Davidson | Global Head M&A GTM | HP | USA | [WARM] | Who's Asking (NY Law) | **T2 — referral path.** "Not my team personally. There are teams in other groups that maybe looking into it." — offered to identify the right team. HP = enterprise brand legal structure. Referral to correct team could route to ICP 3. | 2026-06-27 |
 
 ---
 
