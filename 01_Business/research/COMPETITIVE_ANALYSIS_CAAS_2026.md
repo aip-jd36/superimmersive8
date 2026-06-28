@@ -338,6 +338,22 @@
 
 ---
 
+**NotarAI (notarai.io)**
+- **What:** C2PA + XMP signing service at the agency delivery step; PDF audit certificates; public verification pages (/verify/:id); REST API integration. Founded by Arthur Temmerman, Belgium; EU-hosted (Frankfurt). Explicitly targets EU AI Act Article 50 compliance.
+- **Model:** SaaS subscription — Starter €29/mo (images only), Business €99/mo (adds MP4/MOV video), Enterprise €199/mo (API + advanced features)
+- **Coverage:** Creative agencies, AI content producers, anyone shipping AI-generated content under EU AI Act obligations
+- **C2PA signing:** Yes — signs files at delivery step; adds XMP metadata as a secondary layer
+- **Video:** Yes — Business plan (€99/mo) supports MP4 and MOV
+- **C2PA Trust List:** Not mentioned anywhere on site or documentation. Almost certainly not yet a Conformance Program member — signatures would show as "unrecognized signer" or yellow warning in Adobe Content Authenticity viewer, not as a named trusted entity
+- **What it does NOT do:** Human IP review, licensing assessment, likeness check, training data provenance analysis, Chain of Title documentation. All declarations are self-attested — the user inputs which AI model was used, generation type, etc. NotarAI does not verify any of it.
+- **SI8 relationship:** **Disclosure-only player. SI8 v4.1 is a strict superset.** NotarAI addresses Art. 50 labeling obligations; SI8 addresses the commercial clearance question (IP risk, likeness, training data, Chain of Title) that brand legal teams require before campaigns go live. A creator or agency using NotarAI has solved disclosure; they have not solved clearance. **NotarAI users are warm SI8 prospects** — they've already paid for compliance infrastructure and know they need it; SI8 upgrades them to full clearance. Competitive framing: **"NotarAI discloses. SI8 clears."**
+- **Strategic significance:** First commercial SaaS product explicitly building a business on the delivery-step signing gap. Validates that agencies will pay for Art. 50 compliance tooling. The €99/mo price point confirms the market is real. The fact that they built without solving clearance proves the market segmentation SI8 predicted — labeling and clearance are two separate purchasing decisions.
+- **Threat level:** Low — occupies disclosure layer only; does not threaten clearance position. Potential referral/upgrade pipeline if SI8 can reach their customer base.
+
+**Monitor:** NotarAI Trust List application status; any product additions moving toward legal review or clearance claims.
+
+---
+
 **RightsDocket**
 - **What:** Human authorship evidence platform for AI-assisted audio; documents contributor records, AI-use logs, and creation evidence; produces structured authorship records for USCO filings, distributors, and sync buyers
 - **Model:** $20 per registration (provenance record + C2PA + USCO filing)
@@ -359,12 +375,13 @@
 | **Adobe Premiere Pro** | ✅ at export | ✅ | ❌ | ✅ | ✅ (thin — identity only) | Free (Creative Cloud) |
 | **Capture** | ✅ post-hoc | ✅ | ❌ | ✅ | ❌ targets model providers | $0.001/sign API |
 | **Truepic** | ✅ | ✅ | ❌ | ✅ | ❌ enterprise only | Custom enterprise |
+| **NotarAI** | ✅ | ❌ not listed | ❌ self-attested only | ✅ (€99/mo) | ✅ (delivery step, disclosure only) | €29–€199/mo SaaS |
 | **ProofSnap** | ❌ reader only | — | ❌ | ❌ | ❌ | $5–$49 one-time |
 | **TrueScreen** | ❌ | — | ❌ | ✅ (capture only) | ❌ | €60/month |
 | **RightsDocket** | ✅ (pending) | ❌ pending | ✅ (audio) | ❌ audio only | ❌ | $20/registration |
 | **SI8 v4.1** | ✅ via Capture | ✅ via Capture | **✅ only player** | ✅ | **✅ clearance assertions** | $499 (clearance + disclosure) |
 
-**Key finding:** Adobe Premiere occupies the delivery-step re-signing position for free — but with a thin credential (identity only, no clearance data). SI8's defensible position is clearance assertions at the delivery step: the human judgment layer that determines whether the content is legally safe, embedded in a Trust List-recognized C2PA credential. No player combines clearance + Trust List-recognized signing for commercial AI video.
+**Key finding:** Two players now occupy the delivery-step signing position — Adobe Premiere (free, Trust List member, identity-only) and NotarAI (€29–€199/mo, not Trust List, self-attested disclosure only). Neither provides clearance. SI8's defensible position is the only combination of clearance assertions + Trust List-recognized C2PA signing for commercial AI video. **NotarAI's existence validates that agencies will pay for delivery-step compliance tooling.** Their customers are warm SI8 prospects: they've solved the Art. 50 labeling problem, and their brand legal team will ask the next question — "is this commercially cleared?"
 
 ---
 
@@ -686,6 +703,7 @@
 | **Runway / Sora** | AI tools | No | No | Yes (tool) | N/A (complementary) |
 | **FADEL** | Enterprise IP/royalty mgmt | No (traditional IP only) | No | No | Low (today) / Medium (long-term) |
 | **Capture / Numbers Protocol** | C2PA signing API | No (technical layer only) | No | Partial (AI model providers) | None (integration candidate) |
+| **NotarAI** | C2PA + XMP delivery-step signing | No (self-attested only, not Trust List) | No | No | Low (disclosure only — users are warm SI8 prospects) |
 | **ProofSnap** | C2PA audit/evidence tool | No (reader only) | No | No | None |
 | **TrueScreen** | Source-capture certification | No (different use case) | No | No | None |
 | **RightsDocket** | Audio provenance + copyright | Yes (audio only) | No | Partial (audio AI) | None (adjacent market) |
@@ -696,6 +714,7 @@
 - **FADEL** — Enterprise rights/royalty management for traditional IP (Disney/Marvel-tier). Validates the category. Not solving AI-generated content clearance. Possible future acquirer or partner. Full analysis: `COMPETITOR-FADEL-ANALYSIS.md`
 - **ClearStory** — Chain of Title tracking software for traditional film/TV. No AI layer, no clearance execution.
 - **Rightsline** — Enterprise rights management platform. No SMB/indie tier, no AI content focus.
+- **NotarAI (notarai.io)** — C2PA + XMP delivery-step signing for AI content. €29–€199/mo SaaS. Not on C2PA Trust List. Disclosure-layer only (no clearance). **Most commercially advanced player in the delivery-step signing market.** Their customer base (agencies paying for Art. 50 compliance tooling) are warm SI8 prospects. Monitor for: Trust List application, clearance product additions, traction signals (press, LinkedIn follower growth). Competitive framing if you encounter them: "NotarAI discloses. SI8 clears."
 - **RightsDocket** — Audio provenance + C2PA embedding at $20/registration. Closest architectural analog to SI8 v4.1 — same model (human review → C2PA embed → per-registration fee), different medium (audio vs. video). **Note: launched ~May 2026, 16 LinkedIn followers, C2PA conformance still pending — validates the architecture, not PMF.** Monitor for: C2PA conformance completion, video expansion, traction signals.
 - **Capture / Numbers Protocol** — C2PA signing API; integration candidate for SI8 v4.1 (not a competitor). Monitor for: MP4/video support confirmation, agency-side product launches, pricing changes.
 
