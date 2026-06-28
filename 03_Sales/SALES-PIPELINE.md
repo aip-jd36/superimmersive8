@@ -98,6 +98,7 @@
 | B044 | Shaun Yeo | Reel Loco Productions | Singapore | Calendly sent — no reply | Send follow-up | — |
 | B048 | Piotr Nierobisz | Munchingsquare | Amsterdam | 2nd nudge with call offer — no reply | Send follow-up | — |
 | B061 | Jay Pirabakaran | JAYPRINTS Studio | London/UK | 2nd nudge — no reply | Send follow-up | — |
+| B162 | Devin Curry | New York Life | New York | Replied Msg#2: "I don't have direct experience but I'm sure some colleagues have!" — referral implicit; wrong title (financial rep, not CD) but right company | Referral ask sent — identify the creative/marketing team | 2026-07-05 |
 | C001 | keeper505 | — | — | Creator follow-up — no reply | Chase on IG | — |
 | C006 | Essa | — | Hong Kong | v4 WhatsApp re-pitch — no reply | Chase on WhatsApp | — |
 
@@ -109,7 +110,7 @@
 
 | B-ID | Lead | Company | Geo | Signal Summary | Sample Sent? | Next Action | Follow Up By |
 |------|------|---------|-----|----------------|-------------|-------------|--------------|
-| B100 | Ramez Tabshi | — | Dubai/UAE | "IP provenance and training data transparency is absolutely escalating with clients" — unprompted T1. Jun 22 call cancelled; converted to email Q&A. 4 discovery Qs sent to t.ramez@gmail.com. Q3 is the qualifier: does legal come back asking for more? | No | Await email reply | 2026-06-26 |
+| B100 | Ramez Tabshi | — | Dubai/UAE | **T1 + PRODUCT FIT CONFIRMED.** Jun 26 reply: "once legal teams get involved, conversation immediately shifts to IP ownership and copyright risks… That IP and commercial licensing document is exactly what they are looking for." Clients = finserv, healthcare, public sector. Current output = technical/security PDF only — explicit gap to SI8 Chain of Title. | No | Send sample (superimmersive8.com/sample) + 20-min call offer by Jul 5 | 2026-07-05 |
 | B145 | Daniele Zennaro | AiYR4 | England | "Request via commercial/rights side — legal/compliance probably behind it." Partial B2B2B confirmation. Chain: legal→commercial/rights→agency. Case-by-case but trending structured. Test 6 v6-A. | No | Pitch + send sample (superimmersive8.com/sample) — position as what the commercial/rights clearance request formalises | — |
 | B002 | Theodor (Teddy) Sandu | MullenLowe Singapore (IPG) | Singapore | "They are asking for both" — disclosure + Chain of Title. CD at holdco. T1 same-day reply. | No | Send Part 2 gate: what are you sending them and does it satisfy their legal team? | 2026-06-18 |
 | B036 | David Tamayo | Prose on Pixels | — | "Big network with legal team dedicated to AI" | No | Await reply (EU AI Act angle sent) | — |

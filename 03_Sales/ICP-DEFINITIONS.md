@@ -1,8 +1,8 @@
 # SI8 ICP Definitions
 
-**Last updated:** 2026-06-22 (ICP 1 split into 1a and 1b; confirming leads corrected; ICP 1b defined; adjacent sector opportunity noted)
-**Source:** Pipeline analysis + verbatim reply review across 600+ Supabase conversations
-**Status:** Two confirmed ICPs with supporting pipeline data. One emerging ICP in testing. Updated each report cycle as new data comes in.
+**Last updated:** 2026-06-28 (v4.1 messaging layer added; ICP 3 upgraded to 4 confirming leads; finserv campaign structural problem documented; regulatory framing section added)
+**Source:** Pipeline analysis + verbatim reply review across 626 Supabase conversations
+**Status:** Two confirmed ICPs with supporting pipeline data. ICP 3 confirmed — campaign launch recommended. Updated each report cycle as new data comes in.
 
 ---
 
@@ -28,7 +28,7 @@ Buyer:        The CD or production person, not the CMO or legal team
 Price point:  $499/video likely self-authorizable at agency level
 ```
 
-**Confirming leads (verified 2026-06-22):**
+**Confirming leads (verified 2026-06-22 / updated 2026-06-28):**
 
 | Lead | B-ID | Signal |
 |------|------|--------|
@@ -36,6 +36,9 @@ Price point:  $499/video likely self-authorizable at agency level
 | Ibrahim Badi | B087 | "Yes especially in regulated sectors. I document: AI models used, commercial licensing, editing workflow, IP ownership." — MD, IKM Marketing. Confirmed finserv/pharma/holdco client base. B2B2B pattern described. |
 | Jian Yi Lay | B152 | "Before starting work, AI usage and which platform must be cleared by both agency and clients legal team first." — Group CD, VaynerMedia APAC. Formal pre-project legal gate confirmed. |
 | Nikolay Kolev | B155 | Unprompted checklist: "which AI tools were used / commercial usage/licensing confirmation / disclosure of synthetic voices/faces / copyright and consent assurances / basic AI provenance/workflow documentation." — VR Designer, XR Future LTD, enterprise/regulated brand clients confirmed. |
+| Daniele Zennaro | B145 | "Request via commercial/rights side — legal/compliance probably behind it." CEO, AiYR4, England. Described B2B2B chain independently: legal → commercial/rights → agency. T1. |
+| James Hilditch | B139 | "Yes, sometimes. Important part of the process." BearJam, London. Unprompted framing of documentation as operational, not exceptional. T1. |
+| Ramez Tabshi | B100 | Jun 26 email: "once their legal teams get involved, conversation immediately shifts to IP ownership and copyright risks… That IP and commercial licensing document is exactly what they are looking for." Enterprise clients: finserv, healthcare, public sector. Independent CD delivering to regulated brands. Product fit confirmed verbatim. |
 
 **Leads removed from ICP 1a (2026-06-22 audit):**
 - Ramez Tabshi (B100): luxury CGI art director, mostly spec/concept work (Lamborghini, Dior, Takis). No confirmed finserv client exposure. Reclassified: T2, wrong profile.
@@ -50,6 +53,20 @@ A client's legal team has already reviewed their informal documentation (email, 
 
 **What this ICP is NOT:**
 Creative Directors who say "I tell clients which tools I used." That is disclosure — a sentence in an email, not Chain of Title. The qualifying gate is Part 2: *"What did you send them — and did that satisfy the legal team, or did they come back asking for more?"*
+
+---
+
+**v4.1 pitch for ICP 1a (use at Msg 2 / later-stage conversations):**
+
+> "You get three things back: the Chain of Title PDF for your legal team, your final video re-signed with our clearance data embedded inside the file, and a timestamped audit record proving you cleared it before deployment. When your client's legal team drops the file into Adobe's Content Authenticity viewer, they can verify the clearance themselves — without asking you to send a separate document. One submission. Your platform upload, your legal team, and your compliance audit — all covered."
+
+**Why this lands for ICP 1a:** The CD's pain is the back-and-forth — informal documentation goes to brand legal, brand legal comes back with more questions. The C2PA-signed file reduces that loop because the clearance data travels with the video. Legal can check it without chasing the agency for attachments.
+
+**Competitive framing (v4.1):** *"Adobe Premiere signs the file at export. We clear it. Premiere's credential says 'exported by [your account].' Ours says what AI tools were used, whether they were commercially licensed, and whether the output is cleared for use. Same technical layer, completely different data inside it."*
+
+**Pre-production timing note (confirmed D1, Jun 2026):** Four independent leads across four geos described documentation as a pre-production gate — tool approval before the work starts, not a document assembled after delivery. Update later-stage pitch to reflect this: *"Some clients are using SI8 before production starts — getting tool approval, logging prompts, clearing the rights plan — so the Chain of Title is complete at delivery, not assembled afterward."*
+
+---
 
 **How to find more of this ICP:**
 
@@ -104,10 +121,19 @@ Price point:  $499 may not be self-authorizable; internal vendor approval
 | Ivan Petruzzelli (B130) | State Street Investment Management — described two-layer provenance standard for agencies they commission. ICP 3 / B2B2B cascade candidate. |
 
 **Current campaigns targeting ICP 1b:**
-- `SI8_RV_R4LI_CreaDir_Finserv_England_0626A_IL` (Ivy, UK, launched Jun 22) — 143 leads, 42 sent, 2 accepted as of Jun 23
-- `SI8_RV_R4LI_CreaDir_Finserv_NY_0626A_JC` (JD, New York, launched Jun 21) — same list type
+- `SI8_RV_R4LI_CreaDir_Finserv_England_0626A_IL` (Ivy, UK, launched Jun 21) — 143 leads, 10 accepted (7%), 1 reply (0.7%) as of Jun 27. **Below baseline** (regular Legal Friction UK: 24–26% acceptance). Do not expand.
+- `SI8_RV_R4LI_CreaDir_Finserv_NY_0626A_JC` (JD, New York, launched Jun 21) — 298 leads, 8 accepted (2.7%), 3 replies (1.0%) as of Jun 27. Worst acceptance rate across all campaigns.
 
-**⚠️ Sequence framing note:** The Legal Friction — FinServ sequence was drafted with agency-side language ("when you deliver AI video to a client for campaign approval, are their legal teams asking for documentation?"). ICP 1b leads don't deliver to external clients — they are the client. Msg 1 hook should be revised to: *"When your compliance or legal team reviews AI-generated video before it goes out, are they asking for documentation on how it was made?"* — revise before Ivy UK campaign launches.
+**⚠️ Structural problem with both campaigns (confirmed Jun 27):**
+The "Financial Services" industry filter on LinkedIn pulls two wrong populations:
+1. **Financial advisors and analysts** with "AD" or "Associate" in their title — not Art Directors or Creative Directors
+2. **Fake/bot accounts** and clearly off-target profiles
+
+5 of 5 replies received were wrong ICP. The filter structurally cannot surface ICP 1a. Recommendation: **do not launch another finserv campaign using Financial Services industry filter.** Let both campaigns exhaust without further investment.
+
+ICP 1a (agency CDs with finserv client exposure) cannot be filtered by company industry on LinkedIn. Their company is Advertising Services. The finserv client signal lives in their profile bio — not accessible via Sales Navigator filter. Use Apollo keyword search or manual bio screening instead.
+
+**⚠️ Sequence framing note:** The Legal Friction — FinServ sequence uses agency-side language ("when you deliver AI video to a client for campaign approval, are their legal teams asking for documentation?"). ICP 1b leads don't deliver to external clients — they are the client. If a dedicated ICP 1b sequence is built, Msg 1 hook: *"When your compliance or legal team reviews AI-generated video before it goes out, are they asking for documentation on how it was made?"*
 
 **Adjacent sector opportunity (flagged 2026-06-22):**
 Beyond finserv, three regulated sectors with similar documentation dynamics are worth a dedicated TAM analysis:
@@ -171,6 +197,14 @@ ICP 1's pain is contractual — a client can reject a campaign. ICP 2's pain is 
 
 The sales motion: pitch SI8 as the AI clearance layer alongside music, talent, and location clearance — not as a compliance product. "You already clear music and talent. AI-generated content is the gap in your clearance stack."
 
+**v4.1 pitch for ICP 2:**
+
+The **timestamped audit record** (ERC-7053 on-chain or RFC 3161) is specifically what E&O underwriters and insurers need: immutable proof that the file was reviewed and cleared *before* it was deployed. This is a stronger insurance artifact than a PDF alone — it proves the clearance happened at a specific moment, not assembled retroactively.
+
+> "You get the Chain of Title PDF for the E&O underwriter, plus the cleared video file with our review data embedded, plus a timestamped audit record proving clearance happened before the content went out. That's the full documentation stack an insurer or broadcaster needs."
+
+The C2PA-signed file is also directly relevant for broadcast/streaming platform acceptance — platforms increasingly read C2PA manifests and may require them for AI content submissions. This is emerging (not yet standard) but positions SI8 ahead of where broadcast clearance requirements are going.
+
 **Active test:** Test 9 (LA BA/Clearance titles, "Clearance Pro" sequence) — launched June 14, 122 leads, monitoring for first substantive replies.
 
 ---
@@ -214,14 +248,29 @@ Sales motion: Research frame, not pitch. "We're getting evaluated by brand
               to agencies → agencies become ICP 1 buyers.
 ```
 
-**Early signals:**
+**Confirming leads (updated 2026-06-28):**
 
 | Lead | B-ID | Signal |
 |------|------|--------|
-| William Finkel | — | EVP Business & Legal Affairs, Hello Sunshine — described B2B2B chain in legal contract terms; most operationally detailed description of how requirement travels from brand legal to agency |
-| Ivan Petruzzelli | B130 | State Street Investment Mgmt — "moving toward structured documentation"; brand-side, not agency-side; B2B2B cascade potential |
+| William Finkel | B160 | EVP Business & Legal Affairs, Hello Sunshine — described B2B2B chain verbatim: "compliance requirement will be passed down the line to agency and then production co… legal should be the last level of confirmation and responsibility." Most operationally precise description of how the requirement travels. |
+| Ivan Petruzzelli | B130 | Head of Creative, State Street Investment Mgmt — asked for "structured campaign brief with human summary + machine-readable payload (spreadsheet or JSON) for auditability across AI workflows." ICP 3 defining the format requirement. SI8's C2PA custom assertions ARE a machine-readable payload. |
+| Dan Lantry | B158 | VP Legal Affairs Americas, Sonova Group (hearing healthcare, regulated medtech) — replied to NY Law outreach: "we aren't tracking it but would like to better understand the issue." Brand legal officer at regulated healthcare brand. NY Synthetic Performer Law triggered interest. |
+| James T | B161 | Head of Legal Affairs, Connect Management (London) — talent-side legal: "certain AI tools are prohibited altogether… required to verify that tools used do not train on, learn from, or retain creator or client content." Different pain (training data consent vs. Chain of Title) but confirms legal-side interest. T2. |
 
-**Status:** Hypothesis only — 2 data points, no closed conversations. Campaign designed but not launched: `03_Sales/outreach/LINKEDIN-CAMPAIGNS-LEGAL-TEAMS-V1.md`. Confirm before next report cycle whether to launch.
+**Status:** 4 confirming signals — upgrade from hypothesis. ICP 3 LinkedIn campaign designed and ready: `03_Sales/outreach/LINKEDIN-CAMPAIGNS-LEGAL-TEAMS-V1.md`. **Recommended: launch in next cycle** (100–150 profiles, London/UK, "Who's Asking" research frame, Angel or Ivy alias).
+
+**v4.1 pitch for ICP 3 — the biggest messaging shift:**
+
+v4.0 to brand legal: *"Here's a PDF document that says the video was reviewed."*
+
+v4.1 to brand legal:
+> "When your agency delivers an AI video, they hand you a file where you can verify the clearance yourself — drop it into Adobe's Content Authenticity viewer and it shows exactly what AI tools were used, what was commercially licensed, and who cleared it. You don't have to ask the agency to send anything. The record is in the file."
+
+This directly answers Ivan Petruzzelli's "machine-readable payload for auditability" requirement. A C2PA-signed file with SI8's clearance assertions embedded IS a machine-readable audit record. Legal teams can verify it without trusting the agency's word or chasing attachments.
+
+**The cascade math:** One ICP 3 legal team pre-approves SI8 format → specifies it in agency contracts → every agency on their roster becomes an ICP 1 buyer without additional SI8 outreach. One ICP 3 conversion → estimated 5–10 ICP 1a certifications/year at minimum. This is the multiplier that makes ICP 3 the highest-leverage target despite the smallest immediate pool.
+
+**Sales motion:** Research frame throughout. *"We're getting evaluated by brand legal teams — does our format match what you'd require from agencies you commission?"* Goal is not to sell them $499. Goal is to get them to specify SI8 in their agency contracts.
 
 **Why it's strategically distinct:** ICPs 1 and 2 are direct buyers — SI8 sells $499 to them individually. ICP 3 is a demand amplifier — one conversion multiplies into many ICP 1 buyers without additional outreach. The sales motion and message frame are completely different.
 
@@ -230,6 +279,44 @@ Sales motion: Research frame, not pitch. "We're getting evaluated by brand
 ## What Is Not an ICP (Common False Positives)
 
 - **Disclosure buyers:** Say "yes" to the gate question but mean "I tell clients which tools I used." Self-exclude when shown the Chain of Title sample.
-- **T3 builders:** Already building their own internal documentation process. Hear SI8's pitch and conclude they don't need it. Require a differentiation frame: "does what you're building produce a format a client's legal team will formally accept?"
+- **EU Act labeling leads:** Reply mentioning EU AI Act but describe a *labeling/disclosure* need — "we need to tag content as AI-generated" or "we need to comply with August 2 disclosure requirements." This is Art. 50(4) / platform toggle territory — SI8 v4.1's C2PA layer helps, but these leads are primarily interested in disclosure, not IP clearance. They will not pay $499 unless they also have a clearance problem. Confirmed false positive pattern: France/Paris campaign (Jun 2026) — 6 signals, 0 Chain of Title descriptions, all labeling/disclosure language.
+- **T3 builders:** Already building their own internal documentation process. Hear SI8's pitch and conclude they don't need it. Require a differentiation frame: "does what you're building produce a format a client's legal team will formally accept — and does it embed that clearance data into the video file itself?"
 - **Boutique founders (general):** High reply rate, high T3 and T2 noise, low T1 rate (29% per pipeline analysis). Not the beachhead — need finserv client exposure specifically to qualify.
 - **Off-geo production (India, LatAm, SEA without regulated clients):** Aware of the topic, not facing formal documentation requirements yet.
+- **Financial advisors and analysts:** LinkedIn titles containing "AD" (Analyst/Advisor) or "Associate" in financial services companies — not Art Directors or Creative Directors. Systematically identified in JD NY FinServ campaign (Jun 2026): ~38 of 299 leads were financial professionals, not creatives.
+
+---
+
+## Regulatory Framing — What SI8 Does and Doesn't Do
+
+**Use this section for call prep and to prevent messaging drift in campaigns.**
+
+### EU AI Act Art. 50
+
+| Sub-article | Who it applies to | What it requires | SI8 v4.1 position |
+|-------------|------------------|-----------------|-------------------|
+| Art. 50(2) — machine-readable marking | **Providers** (Runway, Kling, Veo) | C2PA or equivalent embedded at generation | SI8 restores what gets stripped in post-production assembly — fills a practical gap but the statutory obligation is on the provider, not the agency |
+| Art. 50(4) — visible disclosure | **Deployers** (agencies, brands) | Human-recognisable labelling of AI content | SI8's C2PA-signed file enables platform auto-labelling (YouTube, Meta, TikTok read C2PA → auto-label) — this is a genuine compliance support |
+
+**What SI8 does NOT do:** Guarantee Art. 50 compliance. The correct pitch: *"SI8 de-risks compliance — the documentation and C2PA-signed file give you the evidentiary record to show you took the right steps."*
+
+**Do not pitch as:** "Use SI8 to comply with the EU AI Act." Any legal team that has read the Act will reject this. Art. 50(4) platform obligations are substantially addressed by platform toggles (Meta/YouTube Ads Manager). SI8 is the IP clearance layer on top — not the disclosure mechanism.
+
+### NY Synthetic Performer Law (S.8420-A, effective Jun 9, 2026)
+
+What the law requires: conspicuous disclosure when AI is used to create a synthetic replica of an identifiable person's likeness or voice in an advertisement.
+
+SI8's position:
+- SI8's clearance review specifically checks for synthetic performers and documents whether consent/rights exist — directly relevant to the law's requirements
+- The C2PA assertions flag the disclosure requirement in the file
+- **The agency still has to add conspicuous disclosure to the ad** — SI8 identifies what needs to be disclosed and creates the evidentiary record, but does not itself constitute the required disclosure
+
+**Do not pitch as:** "SI8 satisfies NY Performer Law." The law requires advertiser action (adding disclosure to the ad). SI8 provides the documentation that supports compliance — not the compliance act itself.
+
+### The correct regulatory hook for outbound
+
+The laws create awareness that AI content carries legal risk. They do not directly mandate the specific clearance documentation SI8 produces. What mandates it in practice is **brand legal teams** demanding commercial proof before approving AI campaigns.
+
+> *"Your client's legal team is asking for proof the content is commercially safe — not just that it's labeled as AI. The regulations are why they started asking. SI8 is the answer to what they're asking for."*
+
+This hook is accurate for all regulatory environments (EU Act, NY Law, ASA/CAP Code) and does not overclaim statutory compliance.
