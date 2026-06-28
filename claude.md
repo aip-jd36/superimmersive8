@@ -70,9 +70,9 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 
 ### Revenue Model (Year 1 Target: $80-120K)
 
-**Two-tier pricing (updated March 2026):**
-- **Creator Record** — $29 early access (~~$49~~) · Self-attested, automated, PDF stamp "SELF-ATTESTED — NOT FOR COMMERCIAL USE" · Funnel mechanism, not primary revenue
-- **SI8 Certified** — $499 · 90-minute human review, PDF stamp "CLEARED FOR COMMERCIAL USE" · Primary revenue driver
+**Two-tier pricing (updated June 2026):**
+- **Creator Record** — Free (intake funnel; $29 one-time per submission if abuse requires) · Self-attested, automated, PDF stamp "SELF-ATTESTED — NOT FOR COMMERCIAL USE" · Output language: "Submitted and ready for certification" — never issues commercial safety opinion · NOT a standalone product or disclosure SaaS · NO subscription pricing (research does not support recurring disclosure demand)
+- **SI8 Certified** — $499 · 90-minute human review, PDF stamp "SI8 CERTIFIED · COMMERCIAL AUDIT PASSED" · Only validated commercial product
 
 **Three-gear revenue streams:**
 
@@ -84,7 +84,7 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 | **Layer 1 Production (optional)** | $20-30K | If needed to supplement revenue |
 
 **Unit economics:**
-- Creator Record: $29 revenue, ~$1.50 cost (Stripe) = 95% gross margin (funnel, not revenue focus)
+- Creator Record: Free (intake funnel — not a revenue line; $29 one-time fallback if abuse requires payment gate)
 - SI8 Certified: $499 revenue, ~$17 cost (Stripe + platform overhead) = 97% gross margin
 - Showcase licensing: 20% commission (creator keeps 80%), ~85% margin after platform fees
 - Producer curation: 50% to filmmaker, 50% to SI8 (after absorbing verification cost internally)
@@ -647,6 +647,7 @@ Traditional lawyers are conservative and don't trust automation — BUT they're 
 
 | Document | Location | Purpose |
 |----------|----------|---------|
+| **Product Strategy 2026-06-28** | `01_Business/plans/PRODUCT-STRATEGY-2026-06-28.md` | Major simplification: SI8 Certified is the only validated product; Creator Record = free intake funnel; Workflow → Design Partner Program; Numbers Protocol partnership framing; Sophia Yan meeting goals |
 | **Business Plan v4** (current) | `01_Business/plans/BUSINESS_PLAN_v4.md` | Source of truth for strategy (CaaS + Creator Platform) |
 | **Peer Review Summary (CaaS)** | `01_Business/plans/PEER_REVIEW_SUMMARY_CAAS.md` | ChatGPT (Opus) + Gemini feedback synthesis on v4 pivot |
 | **Revenue Model v4** | `01_Business/financials/REVENUE_MODEL_v4.md` | Three-gear economics, unit economics, projections |
