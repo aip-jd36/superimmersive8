@@ -9,6 +9,45 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of June 28, 2026
+*Run: 2026-06-28 · 14 high · 10 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [CFC to add affirmative AI cover to policies](https://www.insurancetoday.co.uk/i2026062601.php) | Insurance Today | Fri, 26 Jun 2026 | ☐ |
+| 9 | post+update | [How A Novel NY Law Fits Into The AI Legal Landscape For Ads](https://www.law360.com/articles/2491619/how-a-novel-ny-law-fits-into-the-ai-legal-landscape-for-ads) | Law360 | Tue, 23 Jun 2026 | ☐ |
+| 9 | post+update | [EU AI Act Chatbot Disclosure and Deepfake Labeling: July 22 Signatory Deadline](https://www.techtimes.com/articles/318822/20260622/eu-ai-act-chatbot-disclosure-deepfake-labeling-july-22-signatory-deadline.htm) | Tech Times | Mon, 22 Jun 2026 | ☐ |
+| 8 | post+update | [CFC adds affirmative AI coverage across insurance portfolio](https://coverager.com/cfc-adds-affirmative-ai-coverage-across-insurance-portfolio/) | Coverager | Fri, 26 Jun 2026 | ☐ |
+| 8 | update | [CFC introducing affirmative AI coverage](https://www.reinsurancene.ws/cfc-introducing-affirmative-ai-coverage/) | Reinsurance News | Fri, 26 Jun 2026 | ☐ |
+| 8 | post+update | [Insurers rethink policy wording as AI risks rise](https://www.insurancebusinessmag.com/nz/news/cyber/insurers-rethink-policy-wording-as-ai-risks-rise-580369.aspx) | Insurance Business | Thu, 25 Jun 2026 | ☐ |
+| 8 | post+update | [AI Act transparency obligations: Code of Practice and draft Guidelines](https://www.mishcon.com/news/ai-act-transparency-obligations-code-of-practice-and-draft-guidelines) | Mishcon de Reya LLP | Thu, 25 Jun 2026 | ☐ |
+| 8 | post+update | [EU AI Act Transparency Obligations: Preparing for Compliance by 2 August 2026](https://datamatters.sidley.com/2026/06/24/eu-ai-act-transparency-obligations-preparing-for-compliance-by-2-august-2026/) | Sidley Austin | Wed, 24 Jun 2026 | ☐ |
+| 8 | post+update | [Getty Images Stock Soars After OpenAI Licensing Agreement \| June 2026 - News and Statistics](https://www.indexbox.io/blog/getty-images-shares-surge-145-on-openai-licensing-deal/) | IndexBox | Mon, 22 Jun 2026 | ☐ |
+| 8 | post+update | [Getty Images Soars 200% in Early Trading After OpenAI Deal](https://www.bloomberg.com/news/articles/2026-06-22/getty-images-soars-200-in-early-trading-after-openai-deal) | Bloomberg.com | Mon, 22 Jun 2026 | ☐ |
+| 8 | post+update | [Getty Images Shares Soar 200% After OpenAI Strikes Licensing Deal](https://www.ndtvprofit.com/markets/getty-images-shares-soar-200-after-openai-strikes-licensing-deal-11671784) | NDTV Profit | Mon, 22 Jun 2026 | ☐ |
+| 7 | post+update | [CFC unveils updates to embed affirmative AI cover](https://www.businessinsurance.com/cfc-unveils-updates-to-embed-affirmative-ai-cover/) | businessinsurance.com | Fri, 26 Jun 2026 | ☐ |
+| 7 | post+update | [AI use amplifies professional liability risks](https://www.businessinsurance.com/ai-use-amplifies-professional-liability-risks/) | businessinsurance.com | Fri, 26 Jun 2026 | ☐ |
+| 7 | post+update | [Identity in the Age of Synthetic Doubles: Cyprus adopts new copyright provisions on deepfakes](https://legalblogs.wolterskluwer.com/copyright-blog/identity-in-the-age-of-synthetic-doubles-cyprus-adopts-new-copyright-provisions-on-deepfakes/) | Wolters Kluwer | Mon, 22 Jun 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Google Ads API v24.2: AI transparency and PMax segmentation finally arrive](https://ppc.land/google-ads-api-v24-2-ai-transparency-and-pmax-segmentation-finally-arrive/) | PPC Land | Sat, 27 Jun 2026 | ☐ |
+| 6 | update | [OpenAI Signs Getty Images Deal for ChatGPT Search](https://winbuzzer.com/2026/06/24/openai-signs-getty-display-deal-for-chatgpt-search-xcxwbn/) | WinBuzzer | Wed, 24 Jun 2026 | ☐ |
+| 6 | update | [AI Act rules on high-risk AI delayed as AI Digital Omnibus agreed](https://www.winstontaylor.com/insights/ai-act-rules-on-high-risk-ai-delayed-as-ai-digital-omnibus-agreed) | Winston Taylor | Tue, 23 Jun 2026 | ☐ |
+| 6 | monitor | [The Conservative Party recently released an AI-generated ad. How do voters feel about this kind of content?](https://www.cbc.ca/news/politics/conservative-ai-ad-targets-carney-9.7240936) | CBC | Sun, 21 Jun 2026 | ☐ |
+| 5 | monitor | [Adobe Firefly Foundry \| Custom Generative AI Models For Enterprises](https://www.outlookindia.com/xhub/featured-insights/adobe-firefly-foundry-custom-generative-ai-models-for-enterprises) | Outlook India | Fri, 26 Jun 2026 | ☐ |
+| 5 | monitor | [The EU's AI Transparency Code of Practice, Explained](https://www.techpolicy.press/the-eus-ai-transparency-code-of-practice-explained/) | Tech Policy Press | Wed, 24 Jun 2026 | ☐ |
+| 5 | monitor | [Lots Of Brands Use Fake People, AI Influencers To Sell Their Products](https://memeburn.com/lots-of-brands-use-fake-people-ai-influencers-to-sell-their-products/) | Memeburn | Tue, 23 Jun 2026 | ☐ |
+| 4 | monitor | [Asian streamers expand microdramas and AI content](https://letsdatascience.com/news/asian-streamers-expand-microdramas-and-ai-content-a520c94e) | Let's Data Science | Sat, 27 Jun 2026 | ☐ |
+| 4 | monitor | [How Is AI Regulated? Examples, Benefits, & Drawbacks](https://www.britannica.com/money/ai-rules-and-regulations) | Britannica | Wed, 24 Jun 2026 | ☐ |
+| 4 | monitor | [10 Best AI Video Generator Tools in 2026](https://techiexpert.com/best-ai-video-generator-tools/) | Techiexpert.com | Sun, 21 Jun 2026 | ☐ |
+
+---
+
 ## Week of June 25, 2026
 *Run: 2026-06-25 · 17 high · 10 monitor · lookback 7 days*
 
