@@ -9,6 +9,45 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of July 01, 2026
+*Run: 2026-07-01 · 12 high · 12 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Using AI in an ad? You’ve got to disclose it starting this month in New York](https://www.transparencycoalition.ai/news/using-ai-in-an-ad-youve-got-to-disclose-it-starting-this-month-in-new-york) | Transparency Coalition | Mon, 29 Jun 2026 | ☐ |
+| 9 | post+update | [New AI advertisement law goes into effect in New York](https://www.msn.com/en-us/technology/artificial-intelligence/new-ai-advertisement-law-goes-into-effect-in-new-york/ar-AA25dPwQ?ocid=TobArticle) | MSN | Thu, 25 Jun 2026 | ☐ |
+| 8 | post+update | [Advertising and Marketing \| UK Regulatory Outlook June 2026](https://www.osborneclarke.com/insights/regulatory-outlook-june-2026-advertising-marketing) | Osborne Clarke | Tue, 30 Jun 2026 | ☐ |
+| 8 | post+update | [Bankruptcy Issues Raised by Generative AI: Ownership, Licensing, and Asset Values](https://www.morganlewis.com/pubs/2026/06/bankruptcy-issues-raised-by-generative-ai-ownership-licensing-and-asset-values) | Morgan Lewis | Mon, 29 Jun 2026 | ☐ |
+| 8 | post+update | [CFC unveils updates to embed affirmative AI cover](https://www.businessinsurance.com/cfc-unveils-updates-to-embed-affirmative-ai-cover/) | businessinsurance.com | Fri, 26 Jun 2026 | ☐ |
+| 8 | post+update | [CFC adds affirmative AI coverage across insurance portfolio](https://coverager.com/cfc-adds-affirmative-ai-coverage-across-insurance-portfolio/) | Coverager | Fri, 26 Jun 2026 | ☐ |
+| 8 | monitor | [CFC introducing affirmative AI coverage](https://www.reinsurancene.ws/cfc-introducing-affirmative-ai-coverage/) | Reinsurance News | Fri, 26 Jun 2026 | ☐ |
+| 8 | post+update | [AI Act transparency obligations: Code of Practice and draft Guidelines](https://www.mishcon.com/news/ai-act-transparency-obligations-code-of-practice-and-draft-guidelines) | Mishcon de Reya LLP | Thu, 25 Jun 2026 | ☐ |
+| 8 | post+update | [EU AI Act Transparency Obligations: Preparing for Compliance by 2 August 2026](https://datamatters.sidley.com/2026/06/24/eu-ai-act-transparency-obligations-preparing-for-compliance-by-2-august-2026/) | Sidley Austin | Wed, 24 Jun 2026 | ☐ |
+| 7 | post+update | [WPP, Publicis, Omnicom, Havas, Dentsu: Why every advertising holding company is rebuilding itself](https://www.storyboard18.com/how-it-works/wpp-publicis-omnicom-havas-dentsu-why-every-advertising-holding-company-is-rebuilding-itself-102452.htm) | Storyboard18 | Mon, 29 Jun 2026 | ☐ |
+| 7 | post+update | [When The Lawsuit Fails, You License: Getty’s Forced Pivot To OpenAI](https://tvnewscheck.com/ai/article/when-the-lawsuit-fails-you-license-gettys-forced-pivot-to-openai/) | TV News Check | Fri, 26 Jun 2026 | ☐ |
+| 7 | update | [The EU's AI Transparency Code of Practice, Explained](https://techpolicy.press/the-eus-ai-transparency-code-of-practice-explained) | Tech Policy Press | Wed, 24 Jun 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [How AI Video Workflows Are Changing Creative Production for Modern Creators](https://aijourn.com/how-ai-video-workflows-are-changing-creative-production-for-modern-creators/) | The AI Journal | Tue, 30 Jun 2026 | ☐ |
+| 6 | monitor | [How Enterprise Marketing Teams Are Using AI Ad Tools to Scale Creative Without Scaling Headcount](https://seat42f.com/how-enterprise-marketing-teams-are-using-ai-ad-tools-to-scale-creative-without-scaling-headcount/) | Seat42F | Tue, 30 Jun 2026 | ☐ |
+| 6 | monitor | [Complete Guide to EU AI Act Watermarking Requirements for Generative AI](https://www.resemble.ai/resources/complete-guide-to-eu-ai-act-watermarking-requirements-for-generative-ai) | Resemble AI | Mon, 29 Jun 2026 | ☐ |
+| 6 | monitor | [Getty Images Is Stuck Between A Merger And A Debt Wall](https://finimize.com/content/gety-asset-snapshot) | Finimize | Mon, 29 Jun 2026 | ☐ |
+| 6 | monitor | [AI use amplifies professional liability risks](https://www.businessinsurance.com/ai-use-amplifies-professional-liability-risks/) | businessinsurance.com | Fri, 26 Jun 2026 | ☐ |
+| 5 | monitor | [3 Years After ChatGPT, the World Still Can't Agree on AI Rules—and the Clock Is Running Out](https://www.ibtimes.co.uk/global-ai-regulation-eu-us-china-1806017) | International Business Times UK | Tue, 30 Jun 2026 | ☐ |
+| 5 | monitor | [Asian streamers expand microdramas and AI content](https://letsdatascience.com/news/asian-streamers-expand-microdramas-and-ai-content-a520c94e) | Let's Data Science | Sat, 27 Jun 2026 | ☐ |
+| 5 | monitor | [Who's suing AI and who's signing: Collective of US local newspapers sue OpenAI and Microsoft](https://pressgazette.co.uk/platforms/news-publisher-ai-deals-lawsuits-openai-google/) | Press Gazette | Fri, 26 Jun 2026 | ☐ |
+| 5 | monitor | [Google adds AI guidance to Demand Gen campaigns](https://www.socialmediatoday.com/news/google-adds-ai-guidance-to-demand-gen-campaigns/823847/) | Social Media Today | Fri, 26 Jun 2026 | ☐ |
+| 4 | monitor | [AI Watch: Global regulatory tracker - United States](https://www.whitecase.com/insight-our-thinking/ai-watch-global-regulatory-tracker-united-states) | White & Case LLP | Tue, 30 Jun 2026 | ☐ |
+| 4 | monitor | [The 5 Best AI Video Generators in 2026 (Tested and Reviewed)](https://aijourn.com/the-5-best-ai-video-generators-in-2026-tested-and-reviewed/) | The AI Journal | Mon, 29 Jun 2026 | ☐ |
+| 4 | monitor | [Cloud Campaign Officially Launches CloudStudio, Bringing AI-Assisted Social Fulfillment to Agencies](https://finance.yahoo.com/technology/ai/articles/cloud-campaign-officially-launches-cloudstudio-200000185.html) | Yahoo Finance | Thu, 25 Jun 2026 | ☐ |
+
+---
+
 ## Week of June 28, 2026
 *Run: 2026-06-28 · 14 high · 10 monitor · lookback 7 days*
 
