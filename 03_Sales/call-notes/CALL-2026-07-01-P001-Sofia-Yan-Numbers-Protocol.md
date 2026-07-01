@@ -25,15 +25,25 @@ Numbers Protocol is confirmed infra-only ("that's why it's called Numbers Protoc
 
 ## Key Findings
 
-### 1. C2PA Trust List situation — CRITICAL
+### 1. C2PA Trust List situation — UNCONFIRMED, needs follow-up
 
-Old Capture (REST API, upload-based signing) **cannot** get on the new C2PA Trust List under updated C2PA requirements.
+C2PA tightened its requirements in 2024 Q3-Q4. Previously, anyone could upload content and attach a C2PA manifest after the fact. After criticism (how do you trust a manifest attached to an already-created asset?), C2PA now places much greater emphasis on verifying the source of the content.
 
-C2PA changed requirements in 2024 Q3-Q4: sources must now be device-verified. Upload-based signing → no Trust List certification. Only Proof Snap (mobile camera, captures at shutter press) qualifies.
+What Sofia said clearly:
+- Old Capture doesn't satisfy the new C2PA verification requirements — because it allows uploads, the source is unverifiable under the new model
+- Proof Snap IS on the C2PA Trust List — camera-captured only, source is known at shutter press
+- She explicitly acknowledged the practical problem: "PDFs, edited videos, commercial productions" can't all be raw camera captures
+- They are actively working on workarounds for edited/uploaded content
 
-Sofia's exact words: *"旧版的Capture 是没有办法支援 C2PA的 认证的"* (old Capture cannot support C2PA certification). They're working on workarounds for upload-based content but currently have none.
+What was NOT explicitly confirmed:
+- Whether current Capture API signatures appear as "trusted" or "untrusted" in the Adobe Content Authenticity viewer
+- Whether there's any C2PA Trust List signing path available today for edited commercial MP4s
 
-**Implication for SI8:** SI8's v4.1 plan assumed Capture API would deliver Trust List-certified signing for AI video (which is upload-based, not camera-captured). That assumption is wrong. The integration still delivers on-chain registration (ERC-7053) but cannot promise "trusted signer" status in the Adobe Content Authenticity viewer.
+**The gap:** "Old Capture doesn't satisfy the new verification requirements" ≠ "Capture API signatures are Trust List-uncertified." Those are related but not identical. The exact behavior of the current API for edited commercial video is unverified.
+
+**Implication for SI8:** Pause any "C2PA Trust List certified signing" claims in marketing and product copy until the follow-up question is answered. The ERC-7053 on-chain layer is unaffected and is the stronger durability story regardless.
+
+**Follow-up question to send Sofia:** "If SI8 submits a final edited MP4 via the Capture API today, will the resulting C2PA signature appear as a trusted signer in Adobe Content Authenticity? Or is that capability limited to ProofSnap while the newer Capture architecture is still in development?"
 
 ### 2. What Capture CAN still deliver for SI8
 
@@ -96,7 +106,7 @@ Sofia offered API access directly: *"你就是先用给我 OK"* (just reach out 
 
 | Prep question | Answer |
 |---------------|--------|
-| Can SI8 appear as named signer in Adobe viewer? | No — old Capture isn't on Trust List for uploads. Shows as unsigned/unverified C2PA. |
+| Can SI8 appear as named signer in Adobe viewer? | UNCONFIRMED — old Capture doesn't satisfy new C2PA verification requirements; whether API signatures show as trusted/untrusted in Adobe viewer not explicitly stated. Follow-up email needed. |
 | Is there a trial API account? | Yes — Sofia offered directly. |
 | What's pilot pricing for 20–50 signs? | Not discussed. TBD on follow-up. |
 | Does schema map cleanly? | Not tested yet — need to run actual API call. |
@@ -112,17 +122,13 @@ Sofia offered API access directly: *"你就是先用给我 OK"* (just reach out 
 
 ### Immediate (affects v4.1 architecture)
 
-1. **Drop the C2PA Trust List signing claim.** SI8 cannot deliver Trust List-certified C2PA via Capture for AI video. Remove this from product claims and marketing copy until a viable path exists.
+1. **Pause C2PA Trust List claims — pending one follow-up email to Sofia.** Don't remove the language yet; verify first. The question: *"If SI8 submits a final edited MP4 via the Capture API today, will the resulting C2PA signature appear as a trusted signer in Adobe Content Authenticity? Or is that capability limited to ProofSnap while the newer Capture architecture is still in development?"* Answer determines what SI8 can claim.
 
-2. **Reframe the signing deliverable.** What SI8 DOES deliver via Capture:
-   - ERC-7053 on-chain registration (permanent, tamper-proof hash)
-   - C2PA metadata embedded in file (verifiable, but signer = Numbers Protocol, not Trust List member for uploads)
-   
-   Framing: *"Cleared by SI8 · Registered on Numbers Protocol"* — anchor on the on-chain record, not C2PA Trust List.
+2. **On-chain is the stronger durability story regardless.** C2PA metadata gets stripped at re-export or platform re-upload. ERC-7053 on-chain hash cannot be stripped. For legal teams doing due diligence months later, the on-chain record is more defensible. Lead with on-chain in B2B positioning; treat C2PA as an added layer, not the headline.
 
-3. **On-chain is actually the stronger story.** C2PA can be stripped at re-export. On-chain hash cannot be stripped. For legal teams doing due diligence 12 months later, the on-chain record is more durable. Lead with on-chain in B2B positioning.
+3. **Test the API.** Sofia offered access directly — reach out, get credentials, sign a real test video, open the output in Adobe Content Authenticity viewer. That one test answers the Trust List question conclusively.
 
-4. **Test the API.** Contact Sofia → get API access → sign a test video → see actual output in Adobe viewer. What does the signer look like? What metadata shows? This determines what the deliverable actually is.
+4. **"Commercial Assurance" vs "clearance" reframe.** Both Sofia ("SOC 2 audit") and the overall meeting architecture point toward assurance engagement framing rather than binary clearance. Experiment with "Independent Commercial Assurance for AI Media" in next few agency conversations. See which lands better.
 
 ### Medium-term
 
@@ -146,7 +152,7 @@ Sofia offered API access directly: *"你就是先用给我 OK"* (just reach out 
 - [ ] Email Sofia with initial ideas / partnership framing (JD said he'd send this after call)
 - [ ] Request API access via Sofia directly (she offered — just reach out)
 - [ ] Run test sign on a real video via Capture API — document exact output (what shows in Adobe viewer, what the on-chain record looks like, what metadata is embedded)
-- [ ] Revise SI8 v4.1 integration claims: remove "C2PA Trust List certified" language; replace with "registered on Numbers Protocol / ERC-7053"
+- [ ] Send Sofia the follow-up question: "If SI8 submits a final edited MP4 via the Capture API today, will the C2PA signature appear as a trusted signer in Adobe Content Authenticity? Or is that limited to ProofSnap while the new architecture is in development?" — answers before making any product claims about Trust List status
 - [ ] Revisit pilot pricing conversation on next call (not discussed today)
 - [ ] Coffee meeting in Taipei — both said yes, follow up to schedule
 - [ ] Track Capture's Trust List workaround progress — check again in Q4 2026
