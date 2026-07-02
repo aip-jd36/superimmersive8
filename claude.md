@@ -645,72 +645,77 @@ Traditional lawyers are conservative and don't trust automation — BUT they're 
 
 ## Key Documents
 
-| Document | Location | Purpose |
-|----------|----------|---------|
-| **Product Strategy 2026-06-28** | `01_Business/plans/PRODUCT-STRATEGY-2026-06-28.md` | Major simplification: SI8 Certified is the only validated product; Creator Record = free intake funnel; Workflow → Design Partner Program; Numbers Protocol partnership framing; Sophia Yan meeting goals |
-| **Business Plan v4** (current) | `01_Business/plans/BUSINESS_PLAN_v4.md` | Source of truth for strategy (CaaS + Creator Platform) |
-| **Peer Review Summary (CaaS)** | `01_Business/plans/PEER_REVIEW_SUMMARY_CAAS.md` | ChatGPT (Opus) + Gemini feedback synthesis on v4 pivot |
-| **Revenue Model v4** | `01_Business/financials/REVENUE_MODEL_v4.md` | Three-gear economics, unit economics, projections |
-| **Competitive Analysis (CaaS)** | `01_Business/research/COMPETITIVE_ANALYSIS_CAAS_2026.md` | Updated competitive landscape for CaaS model |
-| **Customer Discovery Log** | `01_Business/research/CUSTOMER-DISCOVERY-LOG.md` | Chronological record of market signals + conversations that drove v1→v4 product decisions; source doc for investor memos + blog posts |
-| **CRM** | `03_Sales/CRM.md` | **Warm/active leads only** — pipeline stages, urgency, next action, follow_up_by; Section 3 = ICP thesis. NOT a log of all responses — polite passes and not-a-fits live in Supabase CSV only. Read by daily digest. |
-| **Sales Pipeline** | `03_Sales/SALES-PIPELINE.md` | Stage-by-stage funnel view (HubSpot/Pipedrive style) — 7 stages: Lead Replied → Warm Lead → Call Requested → Call Scheduled → Call Taken → Evaluating → Creator/Rights Verified Submitted (Closed Won). Updated via `/dripify-report` Step 7. |
-| **ICP Definitions** | `03_Sales/ICP-DEFINITIONS.md` | Living reference — two confirmed ICPs: (1) Agency Creative/Production at finserv-exposed clients; (2) Line Producer/EP for film/TV E&O insurance gate. Updated each cycle. Use for call prep, campaign targeting, and alias briefing. |
-| **Pipeline ICP Analysis** | `03_Sales/pipeline-analysis/` | Dated ICP analysis files generated each report cycle — geo breakdown, company type, title clusters, signal trigger types, ICP thesis, targeting implications. Compare across cycles to track if trends hold. Reference: `PIPELINE-ICP-ANALYSIS-2026-05-24.md`. |
-| **Sales response database** | Supabase CSV export (local, `~/Desktop/`) | ALL LinkedIn responses — good, bad, generic. Full conversation, campaign, alias, message number, timestamp. Export every 1-3 days. Source of truth for full-pool campaign analysis. |
-| **Sales Intelligence Architecture** | `03_Sales/SALES-INTELLIGENCE-ARCHITECTURE.md` | Full data hierarchy: CSV → campaign analysis → ICP thesis → campaign playbook. Data flows one direction only. |
-| **Competitor Deep Dive: FADEL** | `01_Business/research/COMPETITOR-FADEL-ANALYSIS.md` | Adjacent player — enterprise IP/royalty mgmt; validates category, not a direct competitor (Mar 2026) |
-| **ASA & IAB 2026 Research** | `01_Business/research/ASA-IAB-2026-AI-CONTENT-RESEARCH.md` | 2026 regulatory tailwinds: IAB framework (Jan 2026), ASA enforcement, EU AI Act Aug 2026. SI8 positioning + sales applications. Updated Jun 7, 2026: Section 10 — global regulatory landscape (NY Synthetic Performer Law, EU Article 50 enforcement, geo-specific urgency hooks, brand liability architecture) |
-| **NY Synthetic Performer Law Research** | `01_Business/research/NY-SYNTHETIC-PERFORMER-LAW-2026.md` | Deep-dive on S.8420-A (effective Jun 9, 2026). Law text, "actual knowledge" compliance gap, legal community guidance review (8 law firms), chain of title/provenance gap analysis, SI8 CertForm mapping, outreach implications. Jun 14, 2026 |
-| **AI Video Chain of Title Market Research** | `01_Business/research/AI-VIDEO-CHAIN-OF-TITLE-MARKET-RESEARCH-2026.md` | Broad market scan: who's talking about chain of title/provenance for AI video, what language they use, competitor-adjacent players (Human Provenance in Film, Vitrina.ai Authorized AI™, C2PA), SI8 whitespace analysis. Jun 14, 2026 |
-| **Buyer Analysis — Market Driver Framework** | `01_Business/research/BUYER-ANALYSIS-2026-06.md` | 5 market drivers × 7 questions: who buys, current solution, SI8 switching rationale, urgency triggers, belief prerequisites, solution cost, recurring vs. one-time. Warm lead mapping. 8 additional PM discovery questions. Jun 2026 |
-| **Product Discovery Log** | `01_Business/product-discovery/DISCOVERY-LOG.md` | Running index of product insights — what we learned, when, from what source, and what it changed. Each entry links to a deep-dive in `insights/`. Start here when reviewing product evolution. |
-| **Disclosure Gap Analysis** | `01_Business/product-discovery/insights/2026-06-24-disclosure-gap.md` | v4.1 hypothesis: SI8 Certified delivers three outputs — Chain of Title PDF (clearance) + C2PA-signed video (in-file disclosure) + ERC-7053 on-chain registration (durable layer). EU Code of Practice mandates multi-layer; C2PA alone insufficient. Capture API is integration candidate ($0.001/sign, C2PA + on-chain in one call). Agency delivery-step gap unaddressed by Capture's own market. Open: confirm MP4 support on Capture technical call. Jun 24, 2026 |
-| **Legal Team LinkedIn Campaigns** | `03_Sales/outreach/LINKEDIN-CAMPAIGNS-LEGAL-TEAMS-V1.md` | 3 B2B2B campaigns targeting Agency GC, Holdco AI Governance, Brand IP/Legal Counsel. Goal: get legal gatekeepers to pre-approve SI8 format → push requirement to agencies. 4-message sequences per campaign with geo-specific urgency hooks (UK ASA, Dubai UAE Act, NY Synthetic Performer Law). Jun 2026 |
-| Business Plan v3 (superseded) | `01_Business/plans/BUSINESS_PLAN_v3.md` | Rights Agency + AI Product Placement (Feb-Mar 2026) |
-| Business Plan v2 (superseded) | `01_Business/plans/BUSINESS_PLAN_v2.md` | Demand-side first — reference for operational decisions |
-| Business Plan v1 (archived) | `01_Business/plans/BUSINESS_PLAN_v1.md` | Supply-side first — reference only |
-| Version History | `01_Business/plans/VERSION_HISTORY.md` | Plan version log |
-| Build in Public Log | `02_Marketing/content/BUILD_IN_PUBLIC_LOG.md` | Insights for LinkedIn content |
-| **News Intelligence Digest** | `tools/news-digest/` | Automated weekly news monitor: Google News RSS → Claude Haiku scoring → Resend email + DIGEST-LOG.md update |
-| **Digest Log** | `02_Marketing/intelligence/DIGEST-LOG.md` | Auto-updated weekly: all articles scored by digest engine, High/Monitor tables with acted-on tracking |
-| **GTM + GA4 Weekly Report** | `tools/gtm-report/` | Automated Monday email: GA4 Data API → Claude GTM analysis + recommendations → Resend to jd@superimmersive8.com |
-| **Content Calendar** | `02_Marketing/content/CONTENT-CALENDAR.md` | Single source of truth for all outbound content: LinkedIn, Email, IG, FB — status, file link, source article |
-| **Canva Brand Spec** | `02_Marketing/brand/CANVA-BRAND-SPEC.md` | IG carousel template spec: colors, fonts, 6-slide layout, tone rules, caption template |
-| **Post Drafts** | `02_Marketing/content/posts/YYYY-MM/` | LinkedIn + IG carousel drafts, organized by date; each file has LinkedIn copy, slide-by-slide breakdown, caption, hashtags |
-| **Pricing Strategy v2.0** (current) | `01_Business/pricing/PRICING-STRATEGY-v2.0.md` | Two-tier CaaS pricing: Creator Record $29 + SI8 Certified $499 (March 2026) |
-| Pricing Strategy v1.0 (archived) | `01_Business/pricing/PRICING-STRATEGY-v1.0.md` | v3 licensing tiers (Rights Agency model — archived) |
-| Rights Playbook v0.1 | `06_Operations/legal/rights-playbook/versions/v0.1.md` | Rights vetting — sales asset for buyers |
-| Rights Playbook Decisions | `06_Operations/legal/rights-playbook/DECISIONS.md` | Playbook version log |
-| Filmmaker Agreement (WIP) | `06_Operations/legal/filmmaker-agreement/WORKING.md` | Terms for filmmaker representation |
-| **Rights Verified — README** | `06_Operations/rights-verified/README.md` | Rights Verified project overview; how all documents relate |
-| **Rights Verified — Submission Requirements** | `06_Operations/rights-verified/SUBMISSION-REQUIREMENTS.md` | Filmmaker-facing: what to provide on submission |
-| **Rights Verified — Review Process** | `06_Operations/rights-verified/REVIEW-PROCESS.md` | SI8 internal: 4-stage review workflow |
-| **Rights Verified — Review Criteria** | `06_Operations/rights-verified/REVIEW-CRITERIA.md` | Pass/fail thresholds per review category |
-| **Rights Verified — Chain of Title Schema** | `06_Operations/rights-verified/CHAIN-OF-TITLE-SCHEMA.md` | 9-field output template per catalog entry |
-| **Rights Verified — Edge Cases** | `06_Operations/rights-verified/EDGE-CASES.md` | Gray areas, judgment calls, precedents (grows with submissions) |
-| **Technical Architecture** | `08_Platform/architecture/TECHNICAL_ARCHITECTURE.md` | Database schema, API structure, tech stack (Supabase + Next.js) |
-| **PRD: Creator Portal** | `08_Platform/prds/PRD_CREATOR_PORTAL.md` | Submission flow, Stripe payment, opt-in to Showcase |
-| **PRD: Admin Panel** | `08_Platform/prds/PRD_ADMIN_PANEL.md` | Review queue, PDF generation, catalog management |
-| **PRD: Public Catalog** | `08_Platform/prds/PRD_PUBLIC_CATALOG.md` | Marketplace, licensing requests, Rights Verified badges |
-| **PRD: CaaS Website** | `08_Platform/prds/PRD_CAAS_WEBSITE.md` | Homepage redesign for v4 model (How It Works, Pricing) |
-| **PRD: RecordForm** | `08_Platform/prds/PRD_RECORD_FORM.md` | $29 Creator Record — self-attested, 9 sections, automated flow (Mar 2026) |
-| **PRD: CertForm** | `08_Platform/prds/PRD_CERT_FORM.md` | $499 SI8 Certified — 11 sections, human review, Risk Rating, reviewer checklist (Mar 2026) |
-| **4-Week Sprint Plan** | `08_Platform/implementation/4_WEEK_SPRINT_PLAN.md` | Day-by-day implementation plan (Feb 19 - Mar 18, 2026) |
-| **RecordForm Implementation** | `08_Platform/implementation/RECORD_FORM_IMPL.md` | Engineering plan: current state audit, URL migration to /record, known bugs, test plan |
-| **CertForm Implementation** | `08_Platform/implementation/CERT_FORM_IMPL.md` | Engineering plan: 8-phase build order, DB migration, reviewer workflow, PDF updates |
-| **Chain of Title Examples — README** | `05_Catalog/_examples/README.md` | Chain of Title examples overview; sales and onboarding tool |
-| **Chain of Title Template** | `05_Catalog/_examples/TEMPLATE.md` | Blank Chain of Title template for new catalog entries |
-| **Example 001: Neon Dreams** | `05_Catalog/_examples/example-001-neon-dreams/` | First complete Chain of Title example (cyberpunk commercial, Tier 1+2) |
-| **Chain of Title Changelog** | `05_Catalog/_examples/versions/CHANGELOG.md` | Template version history and evolution tracking |
-| **Rights Verified — Decisions** | `06_Operations/rights-verified/DECISIONS.md` | Rights Verified version log + open questions |
-| **Corporate Structure Overview** | `06_Operations/corporate/STRUCTURE-OVERVIEW.md` | Legal entity framework (DBA decision, Year 2 transition, buyer perception) |
-| **DBA Filing Guide** | `06_Operations/corporate/DBA-FILING-GUIDE.md` | Step-by-step Texas DBA filing instructions |
-| **Corporate Decisions** | `06_Operations/corporate/DECISIONS.md` | Corporate structure decision log |
-| **Revised Action Plan** (current) | `01_Business/plans/REVISED-ACTION-PLAN.md` | Post-Round 2 execution plan; sequential Week 1, 3-film MyVideo pilot, Tier 3 active offering, contact quotas |
-| **Round 2 Feedback Synthesis** | `01_Business/plans/ROUND-2-SYNTHESIS.md` | ChatGPT + Gemini Round 2 feedback; both AIs caught "win via preparation" pattern |
-| **Weekly Scoreboard** | `01_Business/plans/WEEKLY-SCOREBOARD.md` | Weekly tracking template with contact-focused metrics (manual touches, follow-ups, reply rate) |
-| **Tier 3: Risk Briefing Product** | `03_Sales/tier-3-risk-briefing.md` | Complete Tier 3 product definition (Option A: $2K-$3.5K, Option B: $5K); positioning, deliverables, sales process |
+| Document | Location | Status | Purpose |
+|----------|----------|--------|---------|
+| **Migration Policy** | `MIGRATION.md` | ACTIVE | Strategic OS effective date, migration principles, document status definitions, forward-migration-only rule |
+| **Decision Quality Standards** | `06_Operations/DECISION-QUALITY-STANDARDS.md` | ACTIVE | Five-classification framework (Principle/Fact/Hypothesis/Decision/Open Question), hygiene rules, promotion protocol, recommendation format |
+| **Decision Quality Audit v0.1** | `06_Operations/DECISION-QUALITY-AUDIT-v0.1.md` | ACTIVE | First audit of classification drift across key docs — pending JD review |
+| **Product Strategy 2026-06-28** | `01_Business/plans/PRODUCT-STRATEGY-2026-06-28.md` | ACTIVE | Major simplification: SI8 Certified is the only validated product; Creator Record = free intake funnel; Workflow → Design Partner Program; Numbers Protocol partnership framing; Sophia Yan meeting goals |
+| **Business Plan v4** (current) | `01_Business/plans/BUSINESS_PLAN_v4.md` | ACTIVE | Source of truth for strategy (CaaS + Creator Platform) |
+| **Peer Review Summary (CaaS)** | `01_Business/plans/PEER_REVIEW_SUMMARY_CAAS.md` | ACTIVE | ChatGPT (Opus) + Gemini feedback synthesis on v4 pivot |
+| **Revenue Model v4** | `01_Business/financials/REVENUE_MODEL_v4.md` | ACTIVE | Three-gear economics, unit economics, projections |
+| **Competitive Analysis (CaaS)** | `01_Business/research/COMPETITIVE_ANALYSIS_CAAS_2026.md` | ACTIVE | Updated competitive landscape for CaaS model |
+| **Customer Discovery Log** | `01_Business/research/CUSTOMER-DISCOVERY-LOG.md` | ACTIVE | Chronological record of market signals + conversations that drove v1→v4 product decisions; source doc for investor memos + blog posts |
+| **AI Copyright Research** | `01_Business/research/AI-COPYRIGHT-RESEARCH-2026.md` | ACTIVE | US/EU copyright law for AI output, ownership vs. clearance distinction, commercial risk framework, SI8 positioning implications. Jul 2026 |
+| **CRM** | `03_Sales/CRM.md` | ACTIVE | **Warm/active leads only** — pipeline stages, urgency, next action, follow_up_by; Section 3 = ICP thesis. NOT a log of all responses — polite passes and not-a-fits live in Supabase CSV only. Read by daily digest. |
+| **Sales Pipeline** | `03_Sales/SALES-PIPELINE.md` | ACTIVE | Stage-by-stage funnel view (HubSpot/Pipedrive style) — 7 stages: Lead Replied → Warm Lead → Call Requested → Call Scheduled → Call Taken → Evaluating → Creator/Rights Verified Submitted (Closed Won). Updated via `/dripify-report` Step 7. |
+| **ICP Definitions** | `03_Sales/ICP-DEFINITIONS.md` | ACTIVE | Living reference — two confirmed ICPs: (1) Agency Creative/Production at finserv-exposed clients; (2) Line Producer/EP for film/TV E&O insurance gate. Updated each cycle. Use for call prep, campaign targeting, and alias briefing. |
+| **Pipeline ICP Analysis** | `03_Sales/pipeline-analysis/` | ACTIVE | Dated ICP analysis files generated each report cycle — geo breakdown, company type, title clusters, signal trigger types, ICP thesis, targeting implications. Compare across cycles to track if trends hold. Reference: `PIPELINE-ICP-ANALYSIS-2026-05-24.md`. |
+| **Sales response database** | Supabase CSV export (local, `~/Desktop/`) | ACTIVE | ALL LinkedIn responses — good, bad, generic. Full conversation, campaign, alias, message number, timestamp. Export every 1-3 days. Source of truth for full-pool campaign analysis. |
+| **Sales Intelligence Architecture** | `03_Sales/SALES-INTELLIGENCE-ARCHITECTURE.md` | ACTIVE | Full data hierarchy: CSV → campaign analysis → ICP thesis → campaign playbook. Data flows one direction only. |
+| **Competitor Deep Dive: FADEL** | `01_Business/research/COMPETITOR-FADEL-ANALYSIS.md` | ACTIVE | Adjacent player — enterprise IP/royalty mgmt; validates category, not a direct competitor (Mar 2026) |
+| **ASA & IAB 2026 Research** | `01_Business/research/ASA-IAB-2026-AI-CONTENT-RESEARCH.md` | ACTIVE | 2026 regulatory tailwinds: IAB framework (Jan 2026), ASA enforcement, EU AI Act Aug 2026. SI8 positioning + sales applications. Updated Jun 7, 2026: Section 10 — global regulatory landscape (NY Synthetic Performer Law, EU Article 50 enforcement, geo-specific urgency hooks, brand liability architecture) |
+| **NY Synthetic Performer Law Research** | `01_Business/research/NY-SYNTHETIC-PERFORMER-LAW-2026.md` | ACTIVE | Deep-dive on S.8420-A (effective Jun 9, 2026). Law text, "actual knowledge" compliance gap, legal community guidance review (8 law firms), chain of title/provenance gap analysis, SI8 CertForm mapping, outreach implications. Jun 14, 2026 |
+| **AI Video Chain of Title Market Research** | `01_Business/research/AI-VIDEO-CHAIN-OF-TITLE-MARKET-RESEARCH-2026.md` | ACTIVE | Broad market scan: who's talking about chain of title/provenance for AI video, what language they use, competitor-adjacent players (Human Provenance in Film, Vitrina.ai Authorized AI™, C2PA), SI8 whitespace analysis. Jun 14, 2026 |
+| **Buyer Analysis — Market Driver Framework** | `01_Business/research/BUYER-ANALYSIS-2026-06.md` | ACTIVE | 5 market drivers × 7 questions: who buys, current solution, SI8 switching rationale, urgency triggers, belief prerequisites, solution cost, recurring vs. one-time. Warm lead mapping. 8 additional PM discovery questions. Jun 2026 |
+| **Product Discovery Log** | `01_Business/product-discovery/DISCOVERY-LOG.md` | ACTIVE | Running index of product insights — what we learned, when, from what source, and what it changed. Each entry links to a deep-dive in `insights/`. Start here when reviewing product evolution. |
+| **Disclosure Gap Analysis** | `01_Business/product-discovery/insights/2026-06-24-disclosure-gap.md` | ACTIVE | v4.1 hypothesis: SI8 Certified delivers three outputs — Chain of Title PDF (clearance) + C2PA-signed video (in-file disclosure) + ERC-7053 on-chain registration (durable layer). EU Code of Practice mandates multi-layer; C2PA alone insufficient. Capture API is integration candidate ($0.001/sign, C2PA + on-chain in one call). Agency delivery-step gap unaddressed by Capture's own market. Open: confirm MP4 support on Capture technical call. Jun 24, 2026 |
+| **Legal Team LinkedIn Campaigns** | `03_Sales/outreach/LINKEDIN-CAMPAIGNS-LEGAL-TEAMS-V1.md` | ACTIVE | 3 B2B2B campaigns targeting Agency GC, Holdco AI Governance, Brand IP/Legal Counsel. Goal: get legal gatekeepers to pre-approve SI8 format → push requirement to agencies. 4-message sequences per campaign with geo-specific urgency hooks (UK ASA, Dubai UAE Act, NY Synthetic Performer Law). Jun 2026 |
+| **Call Notes: Sofia Yan (Numbers Protocol)** | `03_Sales/call-notes/CALL-2026-07-01-P001-Sofia-Yan-Numbers-Protocol.md` | ACTIVE | Jul 1, 2026 in-person Taipei meeting. C2PA Trust List status UNCONFIRMED for uploaded MP4 via Capture API. Numbers Protocol confirmed infra-only. Follow-up email sent; awaiting reply on Trust List Q + API credentials. |
+| Business Plan v3 | `01_Business/plans/BUSINESS_PLAN_v3.md` | SUPERSEDED | Rights Agency + AI Product Placement (Feb-Mar 2026) — superseded by v4 CaaS pivot |
+| Business Plan v2 | `01_Business/plans/BUSINESS_PLAN_v2.md` | SUPERSEDED | Demand-side first — superseded by v3 then v4 |
+| Business Plan v1 | `01_Business/plans/BUSINESS_PLAN_v1.md` | ARCHIVED | Supply-side first — reference only |
+| Version History | `01_Business/plans/VERSION_HISTORY.md` | ACTIVE | Plan version log |
+| Build in Public Log | `02_Marketing/content/BUILD_IN_PUBLIC_LOG.md` | ACTIVE | Insights for LinkedIn content |
+| **News Intelligence Digest** | `tools/news-digest/` | ACTIVE | Automated weekly news monitor: Google News RSS → Claude Haiku scoring → Resend email + DIGEST-LOG.md update |
+| **Digest Log** | `02_Marketing/intelligence/DIGEST-LOG.md` | ACTIVE | Auto-updated weekly: all articles scored by digest engine, High/Monitor tables with acted-on tracking |
+| **GTM + GA4 Weekly Report** | `tools/gtm-report/` | ACTIVE | Automated Monday email: GA4 Data API → Claude GTM analysis + recommendations → Resend to jd@superimmersive8.com |
+| **Content Calendar** | `02_Marketing/content/CONTENT-CALENDAR.md` | ACTIVE | Single source of truth for all outbound content: LinkedIn, Email, IG, FB — status, file link, source article |
+| **Canva Brand Spec** | `02_Marketing/brand/CANVA-BRAND-SPEC.md` | ACTIVE | IG carousel template spec: colors, fonts, 6-slide layout, tone rules, caption template |
+| **Post Drafts** | `02_Marketing/content/posts/YYYY-MM/` | ACTIVE | LinkedIn + IG carousel drafts, organized by date; each file has LinkedIn copy, slide-by-slide breakdown, caption, hashtags |
+| **Pricing Strategy v2.0** | `01_Business/pricing/PRICING-STRATEGY-v2.0.md` | ACTIVE | Two-tier CaaS pricing: Creator Record $29 + SI8 Certified $499 (March 2026) |
+| Pricing Strategy v1.0 | `01_Business/pricing/PRICING-STRATEGY-v1.0.md` | ARCHIVED | v3 licensing tiers (Rights Agency model) |
+| Rights Playbook v0.1 | `06_Operations/legal/rights-playbook/versions/v0.1.md` | ACTIVE | Rights vetting — sales asset for buyers |
+| Rights Playbook Decisions | `06_Operations/legal/rights-playbook/DECISIONS.md` | ACTIVE | Playbook version log |
+| Filmmaker Agreement (WIP) | `06_Operations/legal/filmmaker-agreement/WORKING.md` | ACTIVE | Terms for filmmaker representation |
+| **Rights Verified — README** | `06_Operations/rights-verified/README.md` | ACTIVE | Rights Verified project overview; how all documents relate |
+| **Rights Verified — Submission Requirements** | `06_Operations/rights-verified/SUBMISSION-REQUIREMENTS.md` | ACTIVE | Filmmaker-facing: what to provide on submission |
+| **Rights Verified — Review Process** | `06_Operations/rights-verified/REVIEW-PROCESS.md` | ACTIVE | SI8 internal: 4-stage review workflow |
+| **Rights Verified — Review Criteria** | `06_Operations/rights-verified/REVIEW-CRITERIA.md` | ACTIVE | Pass/fail thresholds per review category |
+| **Rights Verified — Chain of Title Schema** | `06_Operations/rights-verified/CHAIN-OF-TITLE-SCHEMA.md` | ACTIVE | 9-field output template per catalog entry |
+| **Rights Verified — Edge Cases** | `06_Operations/rights-verified/EDGE-CASES.md` | ACTIVE | Gray areas, judgment calls, precedents (grows with submissions) |
+| **Technical Architecture** | `08_Platform/architecture/TECHNICAL_ARCHITECTURE.md` | ACTIVE | Database schema, API structure, tech stack (Supabase + Next.js) |
+| **PRD: Creator Portal** | `08_Platform/prds/PRD_CREATOR_PORTAL.md` | ACTIVE | Submission flow, Stripe payment, opt-in to Showcase |
+| **PRD: Admin Panel** | `08_Platform/prds/PRD_ADMIN_PANEL.md` | ACTIVE | Review queue, PDF generation, catalog management |
+| **PRD: Public Catalog** | `08_Platform/prds/PRD_PUBLIC_CATALOG.md` | ACTIVE | Marketplace, licensing requests, Rights Verified badges |
+| **PRD: CaaS Website** | `08_Platform/prds/PRD_CAAS_WEBSITE.md` | ACTIVE | Homepage redesign for v4 model (How It Works, Pricing) |
+| **PRD: RecordForm** | `08_Platform/prds/PRD_RECORD_FORM.md` | ACTIVE | $29 Creator Record — self-attested, 9 sections, automated flow (Mar 2026) |
+| **PRD: CertForm** | `08_Platform/prds/PRD_CERT_FORM.md` | ACTIVE | $499 SI8 Certified — 11 sections, human review, Risk Rating, reviewer checklist (Mar 2026) |
+| 4-Week Sprint Plan | `08_Platform/implementation/4_WEEK_SPRINT_PLAN.md` | SUPERSEDED | Day-by-day implementation plan (Feb 19 - Mar 18, 2026) — sprint completed |
+| **RecordForm Implementation** | `08_Platform/implementation/RECORD_FORM_IMPL.md` | ACTIVE | Engineering plan: current state audit, URL migration to /record, known bugs, test plan |
+| **CertForm Implementation** | `08_Platform/implementation/CERT_FORM_IMPL.md` | ACTIVE | Engineering plan: 8-phase build order, DB migration, reviewer workflow, PDF updates |
+| **Chain of Title Examples — README** | `05_Catalog/_examples/README.md` | ACTIVE | Chain of Title examples overview; sales and onboarding tool |
+| **Chain of Title Template** | `05_Catalog/_examples/TEMPLATE.md` | ACTIVE | Blank Chain of Title template for new catalog entries |
+| Example 001: Neon Dreams | `05_Catalog/_examples/example-001-neon-dreams/` | SUPERSEDED | v3 Chain of Title example (Tier 1+2 framing) — replaced by Urban Drift (v4) at `/sample` |
+| **Chain of Title Changelog** | `05_Catalog/_examples/versions/CHANGELOG.md` | ACTIVE | Template version history and evolution tracking |
+| **Rights Verified — Decisions** | `06_Operations/rights-verified/DECISIONS.md` | ACTIVE | Rights Verified version log + open questions |
+| **Corporate Structure Overview** | `06_Operations/corporate/STRUCTURE-OVERVIEW.md` | ACTIVE | Legal entity framework (DBA decision, Year 2 transition, buyer perception) |
+| DBA Filing Guide | `06_Operations/corporate/DBA-FILING-GUIDE.md` | ARCHIVED | Step-by-step Texas DBA filing instructions — DBA filed and approved Feb 23, 2026 |
+| **Corporate Decisions** | `06_Operations/corporate/DECISIONS.md` | ACTIVE | Corporate structure decision log |
+| Revised Action Plan | `01_Business/plans/REVISED-ACTION-PLAN.md` | SUPERSEDED | Post-Round 2 execution plan (pre-Strategic OS) — describes early execution now largely completed or superseded by v4 strategy |
+| Round 2 Feedback Synthesis | `01_Business/plans/ROUND-2-SYNTHESIS.md` | ARCHIVED | ChatGPT + Gemini Round 2 AI consultation feedback — historical context for v3→v4 pivot |
+| **Weekly Scoreboard** | `01_Business/plans/WEEKLY-SCOREBOARD.md` | ACTIVE | Weekly tracking template with contact-focused metrics (manual touches, follow-ups, reply rate) |
+| Tier 3: Risk Briefing Product | `03_Sales/tier-3-risk-briefing.md` | SUPERSEDED | Tier 3 at $2K-$3.5K / $5K — superseded by Jun 28 product simplification (SI8 Certified only) |
 
 ---
 
@@ -960,6 +965,8 @@ Format: Checklist style, organized by priority tier.
 ---
 
 ## Chief of Staff Operating Standards
+
+**Strategic OS effective date: July 2, 2026. Documents predating this date were produced without the Decision Quality Standards framework and should be treated as historical context unless explicitly reactivated.**
 
 Claude operates as Chief of Staff for SI8. The primary responsibilities of this role are:
 
