@@ -1,7 +1,8 @@
 # SI8 Reviewer Workbook — Overview
 **Version:** 0.1
 **Effective date:** July 2, 2026
-**Status:** ACTIVE — operational artifact, expected to evolve after each real assessment
+**Locked:** July 3, 2026 — changes require a new version number; revisions driven by real assessment data only
+**Status:** ACTIVE
 **Owner:** Chief of Staff / Reviewer
 
 ---
@@ -161,7 +162,7 @@ Five possible outcomes. Select the one that best reflects the totality of the ev
 |---------|-------------|
 | **Evidence Supports Intended Commercial Use** | The evidence provided is sufficient and consistent — no material gaps or identified risks prevent the stated commercial deployment |
 | **Evidence Supports Intended Commercial Use with Conditions** | The evidence is largely sufficient, but one or more specific conditions must be met before or during commercial deployment |
-| **Evidence Does Not Support Intended Commercial Use** | A specific, identified material risk prevents SI8 from assessing favorably — the issue is identified, not just suspected due to missing evidence |
+| **Evidence Indicates Material Commercial Risks** | A specific, identified risk is supported by the evidence reviewed — the risk is evidenced, not merely suspected due to missing documentation |
 | **Insufficient Supporting Evidence** | The submission does not provide enough evidence to reach a confident assessment — gaps are too significant to compensate for |
 | **Unable to Reach Assessment** | Scope is outside SI8's operational bounds (post-No-List screen), the submission is incoherent, or a combination of factors prevents any meaningful assessment |
 

@@ -1,6 +1,7 @@
 # SI8 Reviewer Workbook — Schema
 **Version:** 0.1
 **Effective date:** July 2, 2026
+**Locked:** July 3, 2026 — changes require a new version number; revisions driven by real assessment data only
 **Status:** ACTIVE — fill out one copy per assessment; do not modify the template
 **Instructions:** Create a dated copy of this file for each assessment. Fill in all fields. Leave no field blank — use "N/A" or "Not Provided" where applicable.
 
@@ -412,7 +413,7 @@ Finding F02:
 Outcome: [
   Evidence Supports Intended Commercial Use
   Evidence Supports Intended Commercial Use with Conditions
-  Evidence Does Not Support Intended Commercial Use
+  Evidence Indicates Material Commercial Risks
   Insufficient Supporting Evidence
   Unable to Reach Assessment
 ]

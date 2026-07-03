@@ -1,7 +1,8 @@
 # SI8 Campaign Clearance Assessment Report
 **Template version:** 0.1
 **Effective date:** July 2, 2026
-**Instructions for reviewer:** Replace all `[bracketed]` fields with content from the Reviewer Workbook Section 6. Remove all instructions before delivering to the customer. Retain the Limitation of Assurance section verbatim.
+**Locked:** July 3, 2026 — changes require a new version number; revisions driven by real assessment data only
+**Instructions for reviewer:** Replace all `[bracketed]` fields with content from the Reviewer Workbook Section 6. Remove all instructions before delivering to the customer. The Standard Assurance Language section must appear verbatim — do not edit.
 
 ---
 
@@ -101,7 +102,7 @@ The following domains were assessed as part of this review. Each domain reflects
 >
 > *or*
 >
-> **Evidence Does Not Support Intended Commercial Use**
+> **Evidence Indicates Material Commercial Risks**
 >
 > *or*
 >
@@ -149,9 +150,9 @@ The following risks were identified during the assessment. These are not finding
 
 ---
 
-## Limitation of Assurance
+## Standard Assurance Language — SI8 Methodology v0.1
 
-*This section is reproduced verbatim in every SI8 Assessment Report. Do not edit.*
+*This is controlled policy language. It is reproduced verbatim in every SI8 Assessment Report. It may only be revised through a formal SI8 Methodology revision — not customized per assessment, per client, or per reviewer. If you believe a revision is warranted, document it in the Post-Assessment Review and submit for methodology review.*
 
 ---
 
