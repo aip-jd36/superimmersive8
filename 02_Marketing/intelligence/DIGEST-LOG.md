@@ -9,6 +9,47 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of July 04, 2026
+*Run: 2026-07-04 · 9 high · 17 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [New York Law Regulates AI Generated Performer Advertisons](https://www.harianbasis.co/en/new-york-law-ai-advertisements) | HarianBasis.co | Thu, 02 Jul 2026 | ☐ |
+| 9 | post+update | [New York makes history with first-of-its-kind law regulating AI-powered commercials](https://noticias.foxnews.com/media/new-york-makes-history-first-of-its-kind-law-regulating-ai-powered-commercials) | Fox News | Thu, 02 Jul 2026 | ☐ |
+| 9 | post+update | [AI ads face new disclosure rules as New York law bites](https://fintech.global/2026/07/02/ai-ads-face-new-disclosure-rules-as-new-york-law-bites/) | FinTech Global | Thu, 02 Jul 2026 | ☐ |
+| 9 | post+update | [Who’s left holding the risk when insurers drop AI liability coverage?](https://insurancenewsnet.com/innarticle/whos-left-holding-the-risk-when-insurers-drop-ai-liability-coverage) | InsuranceNewsNet | Wed, 01 Jul 2026 | ☐ |
+| 9 | post+update | [Using AI in an ad? You’ve got to disclose it starting this month in New York](https://www.transparencycoalition.ai/news/using-ai-in-an-ad-youve-got-to-disclose-it-starting-this-month-in-new-york) | Transparency Coalition | Mon, 29 Jun 2026 | ☐ |
+| 8 | post+update | ["Even My Mother Couldn't Recognize Me... Outrage Over 'AI Fake Ads' Made for Just 20,000 Won"](https://www.asiae.co.kr/en/article/world-general/2026070316064480953) | 아시아경제 | Fri, 03 Jul 2026 | ☐ |
+| 8 | post+update | [Getty Images shares soar 200% after OpenAI strikes licensing deal](https://www.msn.com/en-in/lifestyle/pets-animals/getty-images-shares-soar-200-after-openai-strikes-licensing-deal/ar-AA26gzom?uxmode=ruby) | MSN | Thu, 02 Jul 2026 | ☐ |
+| 8 | update | [Advertising and Marketing \| UK Regulatory Outlook June 2026](https://www.osborneclarke.com/insights/regulatory-outlook-june-2026-advertising-marketing) | Osborne Clarke | Tue, 30 Jun 2026 | ☐ |
+| 7 | post+update | [The Take It Down Act Takes Effect: What Online Platforms Need to Know](https://www.jdsupra.com/legalnews/the-take-it-down-act-takes-effect-what-5956083/) | JD Supra | Wed, 01 Jul 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [World Cup brings the best out of UK adverts watchdog](https://sbcnews.co.uk/marketing/2026/07/03/asa-world-cup-gambling/) | sbcnews.co.uk | Fri, 03 Jul 2026 | ☐ |
+| 6 | monitor | [TrueRights launches European AI creator content code](https://itbrief.co.uk/story/truerights-launches-european-ai-creator-content-code) | IT Brief UK | Fri, 03 Jul 2026 | ☐ |
+| 6 | monitor | [3 Years After ChatGPT, the World Still Can't Agree on AI Rules—and the Clock Is Running Out](https://www.ibtimes.co.uk/global-ai-regulation-eu-us-china-1806017) | International Business Times UK | Tue, 30 Jun 2026 | ☐ |
+| 6 | monitor | [Complete Guide to EU AI Act Watermarking Requirements for Generative AI](https://www.resemble.ai/resources/complete-guide-to-eu-ai-act-watermarking-requirements-for-generative-ai) | Resemble AI | Mon, 29 Jun 2026 | ☐ |
+| 6 | monitor | [Getty Images Is Stuck Between A Merger And A Debt Wall](https://finimize.com/content/gety-asset-snapshot) | Finimize | Mon, 29 Jun 2026 | ☐ |
+| 5 | monitor | [Kling AI Raises $2.8 Billion in $18 Billion Valuation Backed By Alibaba & Tencent](https://ventureburn.com/kling-ai-raises-2-8-billion-with-alibaba-backing/) | Ventureburn | Fri, 03 Jul 2026 | ☐ |
+| 5 | monitor | [Kling AI secures 3 billion dollar funding at 18 billion val](https://n24.com.tr/en/companies/kling-ai-secures-3-billion-dollar-funding-at-18-billion-valuation-875) | n24.com.tr | Fri, 03 Jul 2026 | ☐ |
+| 5 | monitor | [Kling AI closes $3B round at $18B valuation as Alibaba and Tencent back China's Sora rival: report](https://techfundingnews.com/kling-ai-closes-3b-round-at-18b-valuation-as-alibaba-and-tencent-back-chinas-sora-rival/) | Tech Funding News | Fri, 03 Jul 2026 | ☐ |
+| 5 | monitor | [Alibaba, Tencent back Kuaishou's Kling AI in $2.8 billion fundraise](https://m.economictimes.com/tech/funding/alibaba-tencent-back-kuaishous-kling-ai-in-2-8-billion-fundraise/amp_articleshow/132158493.cms) | The Economic Times | Fri, 03 Jul 2026 | ☐ |
+| 5 | monitor | [Kuaishou Raises 19 Billion Yuan for Kling AI Subsidiary](https://letsdatascience.com/news/kuaishou-raises-19-billion-yuan-for-kling-ai-subsidiary-18c6f2a8) | Let's Data Science | Fri, 03 Jul 2026 | ☐ |
+| 5 | monitor | [Kuaishou’s Kling AI raises nearly $3 billion in funding](https://technode.com/2026/07/03/kuaishous-kling-ai-raises-nearly-3-billion-in-funding/) | TechNode | Fri, 03 Jul 2026 | ☐ |
+| 5 | monitor | [Kuaishou's Kling AI Closes Nearly $3 Billion Funding Round at $18 Billion Valuation, Setting Global Record](https://finance.biggo.com/news/ec6ddb2d-dfc5-4712-8355-3249156bf040) | finance.biggo.com | Thu, 02 Jul 2026 | ☐ |
+| 5 | monitor | [AI Watch: Global regulatory tracker - United States](https://www.whitecase.com/insight-our-thinking/ai-watch-global-regulatory-tracker-united-states) | White & Case LLP | Tue, 30 Jun 2026 | ☐ |
+| 5 | monitor | [The 5 Best AI Video Generators in 2026 (Tested and Reviewed)](https://aijourn.com/the-5-best-ai-video-generators-in-2026-tested-and-reviewed/) | The AI Journal | Mon, 29 Jun 2026 | ☐ |
+| 5 | monitor | [Media Buying Briefing: The holdco tech heads expound on the ups and downs of building AI](https://digiday.com/media-buying/media-buying-briefing-the-holdco-tech-heads-expound-on-the-ups-and-downs-of-building-ai/) | Digiday | Mon, 29 Jun 2026 | ☐ |
+| 4 | monitor | [All eyes on the World Cup: Our proactive monitoring of gambling ads](https://www.asa.org.uk/news/all-eyes-on-the-world-cup-our-proactive-monitoring-of-gambling-ads.html) | ASA \| CAP | Thu, 02 Jul 2026 | ☐ |
+| 4 | monitor | [WPP, Publicis, Omnicom, Havas, Dentsu: Why every advertising holding company is rebuilding itself](https://www.storyboard18.com/how-it-works/wpp-publicis-omnicom-havas-dentsu-why-every-advertising-holding-company-is-rebuilding-itself-102452.htm) | Storyboard18 | Mon, 29 Jun 2026 | ☐ |
+
+---
+
 ## Week of July 01, 2026
 *Run: 2026-07-01 · 12 high · 12 monitor · lookback 7 days*
 
