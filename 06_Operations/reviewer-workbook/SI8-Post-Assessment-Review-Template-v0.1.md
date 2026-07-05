@@ -139,6 +139,23 @@ Change:     [...]
 
 ---
 
+## Case Library Flag
+
+*A Case Library entry is warranted when this assessment contains a novel pattern, an edge case not previously encountered, a precedent-setting reviewer decision, or a finding with broad applicability to future assessments. When in doubt, flag it — the Case Library editor can filter. P7 requires every assessment to contribute institutional value; this is the mechanism.*
+
+```
+Add to Case Library?   [Yes / No]
+
+If yes — what is the novel pattern, edge case, or precedent that warrants inclusion?
+[Be specific: which domain, what evidence configuration, what made the reviewer decision
+ non-obvious, and what future reviewers should learn from it]
+
+Suggested Case Library title:
+[Short descriptive title — e.g., "Enterprise-tier license without receipt — R domain calibration"]
+```
+
+---
+
 ## Reviewer Notes
 
 *Anything else worth capturing — including observations about customer behavior, industry-specific nuance, or anything that doesn't fit the categories above.*

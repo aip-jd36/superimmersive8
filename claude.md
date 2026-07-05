@@ -672,6 +672,16 @@ Traditional lawyers are conservative and don't trust automation — BUT they're 
 | **Disclosure Gap Analysis** | `01_Business/product-discovery/insights/2026-06-24-disclosure-gap.md` | ACTIVE | v4.1 hypothesis: SI8 Certified delivers three outputs — Chain of Title PDF (clearance) + C2PA-signed video (in-file disclosure) + ERC-7053 on-chain registration (durable layer). EU Code of Practice mandates multi-layer; C2PA alone insufficient. Capture API is integration candidate ($0.001/sign, C2PA + on-chain in one call). Agency delivery-step gap unaddressed by Capture's own market. Open: confirm MP4 support on Capture technical call. Jun 24, 2026 |
 | **Legal Team LinkedIn Campaigns** | `03_Sales/outreach/LINKEDIN-CAMPAIGNS-LEGAL-TEAMS-V1.md` | ACTIVE | 3 B2B2B campaigns targeting Agency GC, Holdco AI Governance, Brand IP/Legal Counsel. Goal: get legal gatekeepers to pre-approve SI8 format → push requirement to agencies. 4-message sequences per campaign with geo-specific urgency hooks (UK ASA, Dubai UAE Act, NY Synthetic Performer Law). Jun 2026 |
 | **Call Notes: Sofia Yan (Numbers Protocol)** | `03_Sales/call-notes/CALL-2026-07-01-P001-Sofia-Yan-Numbers-Protocol.md` | ACTIVE | Jul 1, 2026 in-person Taipei meeting. C2PA Trust List status UNCONFIRMED for uploaded MP4 via Capture API. Numbers Protocol confirmed infra-only. Follow-up email sent; awaiting reply on Trust List Q + API credentials. |
+| **Reviewer Workbook v0.1** | `06_Operations/reviewer-workbook/SI8-Reviewer-Workbook-v0.1.md` | ACTIVE | Overview, workflow, assessment lifecycle, 5 outcomes. Locked July 3, 2026. |
+| **Reviewer Workbook Schema v0.1** | `06_Operations/reviewer-workbook/SI8-Reviewer-Workbook-Schema-v0.1.md` | ACTIVE | 16 controls across 7 domains (A/R/H/I/L/T/D), Evidence Gap Log, Findings Log, Overall Assessment. Locked July 3, 2026. |
+| **Assessment Report Template v0.1** | `06_Operations/reviewer-workbook/SI8-Assessment-Report-Template-v0.1.md` | SUPERSEDED | Original report structure — Chain of Title as primary deliverable. Superseded by v0.2 (Commercial Assurance Assessment structure). |
+| **Assessment Report Template v0.2** | `06_Operations/reviewer-workbook/SI8-Assessment-Report-Template-v0.2.md` | ACTIVE | Redesigned: Commercial Assurance Summary Dashboard leads; Chain of Title becomes Appendix A. Locked July 5, 2026. |
+| **Post-Assessment Review Template v0.1** | `06_Operations/reviewer-workbook/SI8-Post-Assessment-Review-Template-v0.1.md` | ACTIVE | Internal — complete after every assessment. Time log, control difficulties, evidence gaps, Case Library flag, workbook/methodology improvements. |
+| **Evidence Preparation Guide v0.1** | `06_Operations/customer-onboarding/SI8-Evidence-Preparation-Guide-v0.1.md` | ACTIVE | Client-facing — send before or alongside submission. 7 assessment areas in plain language, embedded evidence checklist, incomplete-evidence-is-normal framing. |
+| **Engagement Confirmation Email v0.1** | `06_Operations/customer-onboarding/SI8-Engagement-Confirmation-Email-v0.1.md` | ACTIVE | Internal template — manual send within 24hrs of payment. Three variants: standard / cold-to-warm / warm LinkedIn lead. |
+| **Customer Submission Checklist v0.1** | `06_Operations/customer-onboarding/SI8-Customer-Submission-Checklist-v0.1.md` | ACTIVE | Standalone table-format checklist — Important / Conditional / Optional markers. Share via email, Google Doc, or Notion. |
+| **Customer Journey v1.0** | `06_Operations/customer-experience/SI8-Customer-Journey-v1.0.md` | ACTIVE | Vision document — 10 stages, 10 experience principles, 3 personas, emotional arc, communicate/avoid per stage. Stable; changes require version increment. |
+| **Operational Journey v1.0** | `06_Operations/customer-experience/SI8-Operational-Journey-v1.0.md` | ACTIVE | Execution map — stage-by-stage artifact table with Manual/Automated/Status. Honest gap disclosure. Evolves with each assessment cycle. |
 | Business Plan v3 | `01_Business/plans/BUSINESS_PLAN_v3.md` | SUPERSEDED | Rights Agency + AI Product Placement (Feb-Mar 2026) — superseded by v4 CaaS pivot |
 | Business Plan v2 | `01_Business/plans/BUSINESS_PLAN_v2.md` | SUPERSEDED | Demand-side first — superseded by v3 then v4 |
 | Business Plan v1 | `01_Business/plans/BUSINESS_PLAN_v1.md` | ARCHIVED | Supply-side first — reference only |
@@ -997,6 +1007,7 @@ Claude operates as Chief of Staff for SI8. The primary responsibilities of this 
 | P4 | Human judgment for commercial clearance cannot be automated — AI detects, humans decide |
 | P5 | Disclosure and clearance are different buying decisions — different product, different buyer |
 | P6 | The file is the carrier; the commercial trust layer is the product |
+| P7 | Institutional learning — the organization becomes more capable through the work it performs; every completed assessment should contribute at least one improvement |
 
 ### Decision Hygiene
 

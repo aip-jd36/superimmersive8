@@ -34,6 +34,7 @@ Principles do not expire. They may be revised only through an explicit strategic
 | P4 | **Human judgment for commercial clearance cannot be automated.** AI can detect; it cannot decide. The liability layer requires a human. |
 | P5 | **Disclosure and clearance are different buying decisions.** Disclosure satisfies a labeling obligation. Clearance satisfies a commercial risk question. These are not the same product and not the same buyer. |
 | P6 | **The file is the carrier. The commercial trust layer is the product.** C2PA, blockchain, and PDF are delivery mechanisms. The independent opinion is what the buyer pays for. |
+| P7 | **Institutional learning.** The organization becomes more capable through the work it performs. Every completed assessment should contribute at least one improvement to reviewer judgment, methodology, or customer experience. |
 
 ---
 
