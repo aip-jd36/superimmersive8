@@ -59,6 +59,8 @@ Confirmation that each AI tool was used on a commercially licensed plan at the t
 
 A brief description of how the content was directed and refined. This does not need to be a formal document — a paragraph describing the workflow is sufficient. What was prompted, what was edited, what creative decisions were made by a human, and who made them.
 
+**Generation history export:** If you used a platform that records your generation sessions — such as Runway — export the generation history before ending your session. In Runway: go to **History** in your dashboard and export or screenshot the session records. Generation history is typically available while your session is open but may not be recoverable afterward. This is the single most commonly missing piece of documentation in submissions, and it takes under a minute to capture. If you did not export before closing your session, include a prompt summary in your workflow description — a scene-by-scene note of the prompts you used, the iterations you ran, and which outputs you selected.
+
 ### 5. Audio and Music Rights
 
 The source of all audio in the content — AI-generated, licensed music, original recording, or stock. If music is licensed, include the license or purchase receipt. If audio was AI-generated, include the tool name and commercial license confirmation.
@@ -106,6 +108,7 @@ A condensed version for reference. See `SI8-Customer-Submission-Checklist-v0.1` 
 
 **Human creative contribution:**
 - [ ] Brief workflow description (can be a paragraph)
+- [ ] Generation history export from Runway or other tools (export before ending session — see Section 4 note)
 
 **Audio:**
 - [ ] Audio source identified (AI-generated / licensed / original)
