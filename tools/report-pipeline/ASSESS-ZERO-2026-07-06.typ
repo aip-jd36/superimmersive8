@@ -135,17 +135,19 @@ SI8 reviewed the Campaign Assurance submission for "Clarity — Harborne Financi
   [Low], [Core commercial evidence incomplete or inconsistent. Material gaps affect the reliability of the assessment.],
 )
 
-== Evidence Coverage Overview
+#block(breakable: false)[
+  == Evidence Coverage Overview
 
-#evidence-table((
-  ("Identity & Accountability", "Verified", "None identified"),
-  ("Commercial Rights & Licensing", "Verified", "None identified"),
-  ("Human Creative Contribution", "Verified", "None identified"),
-  ("Third-Party IP", "Verified", "Training data liability — structural residual risk"),
-  ("Likeness & Performer Rights", "Verified", "None identified"),
-  ("Technical Provenance", "Partially Verified", "Medium — prompt history export absent; addressable"),
-  ("Documentation Integrity", "Verified", "None identified"),
-))
+  #evidence-table((
+    ("Identity & Accountability", "Verified", "None identified"),
+    ("Commercial Rights & Licensing", "Verified", "None identified"),
+    ("Human Creative Contribution", "Verified", "None identified"),
+    ("Third-Party IP", "Verified", "Training data liability — structural residual risk"),
+    ("Likeness & Performer Rights", "Verified", "None identified"),
+    ("Technical Provenance", "Partially Verified", "Medium — prompt history export absent; addressable"),
+    ("Documentation Integrity", "Verified", "None identified"),
+  ))
+]
 
 == Key Findings
 

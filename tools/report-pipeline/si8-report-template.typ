@@ -151,6 +151,8 @@
   header: none,
   footer: none,
 )[
+  #set text(hyphenate: false)
+  #set par(justify: false)
 
   // SI8 branding
   #text(size: 30pt, weight: "bold", fill: c-amber)[SI8]
@@ -264,14 +266,16 @@
     text(size: 9.5pt)[#row.at(2)],
   )).flatten()
 
-  table(
-    columns: (2fr, 1.4fr, 2fr),
-    fill: (_, row) => if row == 0 { c-navy } else if calc.even(row) { white } else { c-bg },
-    stroke: none,
-    inset: (x: 10pt, y: 7pt),
-    ..header,
-    ..data,
-  )
+  block(breakable: false)[
+    #table(
+      columns: (2fr, 1.4fr, 2fr),
+      fill: (_, row) => if row == 0 { c-navy } else if calc.even(row) { white } else { c-bg },
+      stroke: none,
+      inset: (x: 10pt, y: 7pt),
+      ..header,
+      ..data,
+    )
+  ]
 }
 
 
