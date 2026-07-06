@@ -147,12 +147,42 @@ Sofia offered API access directly: *"你就是先用给我 OK"* (just reach out 
 
 ---
 
+## Follow-up Email — Sofia Reply Received (6 July 2026)
+
+**Subject:** Re: [original SI8 follow-up]
+
+**Key confirmations from Sofia's email:**
+
+1. **Partnership framing confirmed (FACT):** "Numbers / Capture provides the provenance and verification infrastructure, while SI8 can build the independent commercial clearance layer on top." — Confirmed in writing by the infra partner.
+
+2. **Adobe Trust List status — CONFIRMED NOT YET:** "please think of the output primarily as embedded C2PA metadata plus an ERC-7053 / Numbers provenance record, **not yet as an Adobe Trust List-recognized signer claim**." Before SI8 uses any Trust List language in product messaging, Sofia says: "we should verify the display behavior with a real signed sample and confirm the certificate / product scope." **Implication: strip Trust List language from the Disclosure Gap Analysis and any product copy until a real test confirms it.**
+
+3. **MP4/MOV confirmed as right starting point (FACT).**
+
+4. **Workflow architecture confirmed (FACT):** C2PA Content Credentials on final delivery file + selected Chain of Title fields as C2PA assertions or linked evidence + Capture/Numbers verification URL + optionally ERC-7053/Numbers provenance record.
+
+5. **Pricing confirmed (FACT):** $0.001 per managed sign (public). Enterprise pricing by volume and SLA.
+
+6. **Sandbox credentials pending:** She's finding the right internal access path — specifically to avoid pointing SI8 at the camera-capture (ProofSnap) flow and causing confusion. Not yet received.
+
+7. **Proposed next step:** JD sends a non-confidential MP4/MOV sample + Chain of Title fields he wants represented → Sofia maps what goes into the manifest, what stays external/private, and what customer-facing wording is accurate.
+
+**Public resources she provided:**
+- Capture docs: https://docs.captureapp.xyz/
+- Numbers docs: https://docs.numbersprotocol.io/
+- numbers-c2pa examples: https://github.com/numbersprotocol/numbers-c2pa
+
+---
+
 ## Next Steps
 
-- [ ] Email Sofia with initial ideas / partnership framing (JD said he'd send this after call)
-- [ ] Request API access via Sofia directly (she offered — just reach out)
-- [ ] Run test sign on a real video via Capture API — document exact output (what shows in Adobe viewer, what the on-chain record looks like, what metadata is embedded)
-- [ ] Send Sofia the follow-up question: "If SI8 submits a final edited MP4 via the Capture API today, will the C2PA signature appear as a trusted signer in Adobe Content Authenticity? Or is that limited to ProofSnap while the new architecture is in development?" — answers before making any product claims about Trust List status
-- [ ] Revisit pilot pricing conversation on next call (not discussed today)
+- [x] Email Sofia with initial ideas / partnership framing
+- [x] Send follow-up question on Trust List / API credentials — **answered in her July 6 reply**
+- [ ] Prepare non-confidential MP4/MOV sample for manifest mapping exercise (Cloud World is the obvious candidate)
+- [ ] Prepare Chain of Title fields SI8 wants represented in the C2PA manifest — draft list from the current assessment report fields
+- [ ] Send sample MP4 + Chain of Title fields to Sofia for manifest mapping
+- [ ] Wait for sandbox API credentials (coming separately — she's finding the right internal path)
+- [ ] Once credentials arrive: sign real test video → open in Adobe Content Authenticity viewer → document exact Trust List display behavior before using any Trust List claims in product copy
+- [ ] Revisit pilot pricing conversation on next call (not discussed)
 - [ ] Coffee meeting in Taipei — both said yes, follow up to schedule
 - [ ] Track Capture's Trust List workaround progress — check again in Q4 2026

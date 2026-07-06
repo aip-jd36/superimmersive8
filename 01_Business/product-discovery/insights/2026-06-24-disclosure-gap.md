@@ -102,6 +102,9 @@ That satisfies the platform upload and the agency's statutory disclosure obligat
 
 ### Year 1 Stack: Capture as Primary (Trust List Required)
 
+> **⚠️ CORRECTION — July 6, 2026 (Sofia Yan email reply)**
+> The Trust List assumption below is incorrect for the SI8 use case. Sofia Yan (Co-founder, Numbers Protocol) confirmed: "please think of the output primarily as embedded C2PA metadata plus an ERC-7053 / Numbers provenance record, **not yet as an Adobe Trust List-recognized signer claim**." The original reasoning is preserved below as context. The Trust List claim is **unconfirmed for the edited MP4 upload workflow** — must be verified with a real signed sample before use in product copy or sales materials.
+
 **Why Capture, not self-deploy:** The market is already asking for C2PA by name. When a brand legal team drops a C2PA-signed video into Adobe's Content Authenticity viewer, a signature from an unrecognized signer shows as a yellow warning. For a product whose entire value is credibility to skeptical legal teams, that warning is a direct product failure at the moment of truth. Numbers Protocol (Capture's parent) is on the C2PA Trust List — their signatures show as a named, trusted signer. That credibility is the reason to use Capture in Year 1.
 
 | Component | Tool | Cost |
@@ -116,12 +119,12 @@ That satisfies the platform upload and the agency's statutory disclosure obligat
 ### Capture / Numbers Protocol — Primary Path (Year 1)
 
 - C2PA signing + ERC-7053 on-chain registration via REST API
-- **Numbers Protocol is on the C2PA Conformance Program / Trust List** — signatures display as named trusted signer in Adobe/Microsoft C2PA viewers. No "unrecognized signer" warning.
-- $0.001/sign (pay-as-you-go); 1–2 week integration
-- MP4/video support: standard MP4 confirmed (c2pa-rs underlies the implementation)
+- **C2PA Trust List status for SI8 workflow: UNCONFIRMED** — Sofia Yan (July 6, 2026) confirmed output is C2PA metadata + ERC-7053 provenance record, "not yet as an Adobe Trust List-recognized signer claim." Must verify display behavior with a real signed sample. ProofSnap (camera capture) is on the Trust List; edited MP4 upload path status is unverified.
+- $0.001/sign (pay-as-you-go) — CONFIRMED by Sofia July 6, 2026; enterprise pricing by volume/SLA
+- MP4/video support: CONFIRMED by Sofia July 6, 2026 — "MP4 / MOV, that is the right starting point"
 - SI8 embeds clearance JSON as C2PA custom assertions via Capture's API
 
-**Why this is the right Year 1 call:** Stack independence is a nice-to-have. Trust List recognition is load-bearing when your buyer is a legal team.
+**Why this is the right Year 1 path:** The workflow architecture is confirmed. The Trust List recognition for the edited MP4 case must be tested before making any Trust List claims to buyers.
 
 ---
 
@@ -233,7 +236,7 @@ The video file carries SI8's clearance data cryptographically — tamper-evident
 
 > "You send us your final cut. We run the clearance review (90 min), attach a legally recognized C2PA disclosure credential to the file with our clearance data embedded, and deliver three things: a Chain of Title PDF for your legal team, a disclosure-ready video your platform will recognize as C2PA-signed, and a timestamped audit record proving you cleared it before deployment. One submission. Your legal team, your platform upload, and your compliance audit — all covered."
 
-**Trust mark framing:** "Cleared by SI8 · Signed via Capture" — SI8 provides the human judgment (clearance data); Capture provides the Trust List-recognized signing infrastructure. The credential is verifiable in Adobe's Content Authenticity viewer as a named trusted signer.
+**Trust mark framing (pending verification):** "Cleared by SI8 · Documented via Capture" — SI8 provides the human judgment (clearance data); Capture provides C2PA + ERC-7053 on-chain registration. Whether this appears as a named trusted signer in Adobe's Content Authenticity viewer is unconfirmed for the uploaded MP4 workflow — verify with a real signed sample before using Trust List language in product copy. *(Updated July 6, 2026 per Sofia Yan email.)*
 
 ---
 
