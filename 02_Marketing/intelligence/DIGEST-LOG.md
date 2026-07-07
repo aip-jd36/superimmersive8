@@ -9,6 +9,44 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of July 07, 2026
+*Run: 2026-07-07 · 14 high · 9 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [EU AI Act August 2 Deadline Brings New Transparency and Labelling Duties for AI](https://www.analyticsinsight.net/amp/story/news/eu-ai-act-august-2-deadline-brings-new-transparency-and-labelling-duties-for-ai) | Analytics Insight | Sun, 05 Jul 2026 | ☐ |
+| 9 | post+update | [New York makes history with first-of-its-kind law regulating AI-powered commercials](https://www.foxnews.com/media/new-york-makes-history-first-of-its-kind-law-regulating-ai-powered-commercials) | Fox News | Thu, 02 Jul 2026 | ☐ |
+| 9 | post+update | [AI ads face new disclosure rules as New York law bites](https://fintech.global/2026/07/02/ai-ads-face-new-disclosure-rules-as-new-york-law-bites/) | FinTech Global | Thu, 02 Jul 2026 | ☐ |
+| 9 | post+update | [Who’s left holding the risk when insurers drop AI liability coverage?](https://insurancenewsnet.com/innarticle/whos-left-holding-the-risk-when-insurers-drop-ai-liability-coverage) | InsuranceNewsNet | Wed, 01 Jul 2026 | ☐ |
+| 8 | post+update | [As the threat of AI replacing them looms larger, Pakistan's celebrities are fighting back](https://images.dawn.com/news/1195507) | Dawn Images | Mon, 06 Jul 2026 | ☐ |
+| 8 | post+update | [Delhi High Court Protects Ravi Kishan's Personality Rights, Orders Removal of AI-Generated and Unauthorized Online Content](https://courtbook.in/posts/delhi-high-court-protects-ravi-kishans-personality-rights-orders-takedown-of-ai-generated-and-misleading-online-content) | Court Book | Mon, 06 Jul 2026 | ☐ |
+| 8 | post+update | [Midjourney demands Hollywood studios' secret AI plans in copyright case](https://www.indulgexpress.com/msociety/2026/Jul/04/midjourney-demands-hollywood-studios-secret-ai-plans-in-copyright-case) | Indulge Express | Sat, 04 Jul 2026 | ☐ |
+| 8 | post+update | [China-backed AI tool behind fake Brad Pitt fight making Hollywood inroads](https://www.latimes.com/business/story/2026-07-03/bytedances-tiktok-took-over-social-media-now-its-video-ai-is-taking-over-hollywood) | Los Angeles Times | Fri, 03 Jul 2026 | ☐ |
+| 8 | post+update | [Getty Images shares soar 200% after OpenAI strikes licensing deal](https://www.msn.com/en-in/lifestyle/pets-animals/getty-images-shares-soar-200-after-openai-strikes-licensing-deal/ar-AA26gzom?uxmode=ruby) | MSN | Thu, 02 Jul 2026 | ☐ |
+| 8 | post+update | [AI-Generated Content and Copyright Law: What We Know](https://builtin.com/artificial-intelligence/ai-copyright) | Built In | Wed, 01 Jul 2026 | ☐ |
+| 8 | post+update | [Advertising and Marketing \| UK Regulatory Outlook June 2026](https://www.osborneclarke.com/insights/regulatory-outlook-june-2026-advertising-marketing) | Osborne Clarke | Tue, 30 Jun 2026 | ☐ |
+| 7 | post+update | [EU publishes free AI labelling icons ahead of August 2026 deadline](https://ppc.land/eu-publishes-free-ai-labelling-icons-ahead-of-august-2026-deadline/) | PPC Land | Sun, 05 Jul 2026 | ☐ |
+| 7 | post+update | ["Even My Mother Couldn't Recognize Me... Outrage Over 'AI Fake Ads' Made for Just 20,000 Won"](https://www.asiae.co.kr/en/article/world-general/2026070316064480953) | 아시아경제 | Fri, 03 Jul 2026 | ☐ |
+| 7 | monitor | [Best AI Video Generators of 2026: Need a Sora Substitute? Try One of These](https://www.cnet.com/tech/services-and-software/best-ai-video-generators/) | CNET | Tue, 30 Jun 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [AI Legislative Update: July 3, 2026](https://www.transparencycoalition.ai/news/ai-legislative-update-july3-2026) | Transparency Coalition | Thu, 02 Jul 2026 | ☐ |
+| 6 | monitor | [3 Years After ChatGPT, the World Still Can't Agree on AI Rules—and the Clock Is Running Out](https://www.inkl.com/news/3-years-after-chatgpt-the-world-still-cant-agree-on-ai-rules-and-the-clock-is-running-out) | inkl | Tue, 30 Jun 2026 | ☐ |
+| 5 | monitor | [AI Video Output Quality Pushes Creative Teams Toward Workflow Testing](https://inews.zoombangla.com/ai-video-output-quality-pushes-creative-teams-toward-workflow-testing-2/) | iNews Zoombangla | Mon, 06 Jul 2026 | ☐ |
+| 5 | monitor | [Getty Scraps $3.7B Shutterstock Merger After UK Curbs](https://www.techrepublic.com/article/news-getty-shutterstock-merger-uk-curbs-emea/) | TechRepublic | Thu, 02 Jul 2026 | ☐ |
+| 4 | monitor | [UAE’s BlueFive Capital Leads $3 Billion Funding Round for China’s Kling AI](https://entarabi.com/en/2026/07/uaes-bluefive-capital-leads-3-billion-funding-round-for-chinas-kling-ai/) | entARABI | Sun, 05 Jul 2026 | ☐ |
+| 4 | monitor | [China's Video AI Leader Kling Raises $3 Billion to Battle Seedance](https://en.sedaily.com/international/2026/07/05/chinas-video-ai-leader-kling-raises-3-billion-to-battle) | Seoul Economic Daily | Sun, 05 Jul 2026 | ☐ |
+| 4 | monitor | [From Demo to Commercial Delivery: How Does Kling Capture the Global Creative Market?](https://eu.36kr.com/en/p/3879939471060992) | 36 Kr | Fri, 03 Jul 2026 | ☐ |
+| 4 | monitor | [The Take It Down Act Takes Effect: What Online Platforms Need to Know](https://www.jdsupra.com/legalnews/the-take-it-down-act-takes-effect-what-5956083/) | JD Supra | Wed, 01 Jul 2026 | ☐ |
+| 4 | monitor | [AI Watch: Global regulatory tracker - United States](https://www.whitecase.com/insight-our-thinking/ai-watch-global-regulatory-tracker-united-states) | White & Case LLP | Tue, 30 Jun 2026 | ☐ |
+
+---
+
 ## Week of July 04, 2026
 *Run: 2026-07-04 · 9 high · 17 monitor · lookback 7 days*
 
