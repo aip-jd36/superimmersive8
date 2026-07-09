@@ -718,6 +718,7 @@ Traditional lawyers are conservative and don't trust automation — BUT they're 
 | **PRD: CaaS Website** | `08_Platform/prds/PRD_CAAS_WEBSITE.md` | ACTIVE | Homepage redesign for v4 model (How It Works, Pricing) |
 | **PRD: RecordForm** | `08_Platform/prds/PRD_RECORD_FORM.md` | ACTIVE | $29 Creator Record — self-attested, 9 sections, automated flow (Mar 2026) |
 | **PRD: CertForm** | `08_Platform/prds/PRD_CERT_FORM.md` | ACTIVE | $499 SI8 Certified — 11 sections, human review, Risk Rating, reviewer checklist (Mar 2026) |
+| **PRD: Reviewer Workbook UI** | `08_Platform/prds/PRD_REVIEWER_WORKBOOK_UI.md` | ACTIVE | Admin tool replacing markdown workbook — 6-section guided assessment interface implementing Workbook Schema v0.1; route `/admin/submissions/[id]/review`; `.typ` report generation; `workbook_data` JSONB schema. Jul 2026. |
 | 4-Week Sprint Plan | `08_Platform/implementation/4_WEEK_SPRINT_PLAN.md` | SUPERSEDED | Day-by-day implementation plan (Feb 19 - Mar 18, 2026) — sprint completed |
 | **RecordForm Implementation** | `08_Platform/implementation/RECORD_FORM_IMPL.md` | ACTIVE | Engineering plan: current state audit, URL migration to /record, known bugs, test plan |
 | **CertForm Implementation** | `08_Platform/implementation/CERT_FORM_IMPL.md` | ACTIVE | Engineering plan: 8-phase build order, DB migration, reviewer workflow, PDF updates |
