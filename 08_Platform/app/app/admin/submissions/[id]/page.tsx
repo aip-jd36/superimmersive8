@@ -8,6 +8,9 @@ import { ArrowLeft, CheckCircle, XCircle, AlertCircle, ExternalLink } from 'luci
 import { ApproveRejectButtons } from './ApproveRejectButtons'
 import { GenerateRightsPackageButton } from './GenerateRightsPackageButton'
 import { ReviewerChecklist } from './ReviewerChecklist'
+import { SourceVideoUpload } from './SourceVideoUpload'
+import { ReportPDFUpload } from './ReportPDFUpload'
+import { WorkbookEntryPoint } from './WorkbookEntryPoint'
 import { notFound } from 'next/navigation'
 
 type PageProps = {
@@ -86,6 +89,13 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
   const audioDisclosure = parseJsonb(submission.audio_disclosure, {})
   const likenessConfirmation = parseJsonb(submission.likeness_confirmation, {})
   const ipConfirmation = parseJsonb(submission.ip_confirmation, {})
+
+  // Delivery + workbook fields (added by workbook migration)
+  const sourceVideoUrl = (submission as any).source_video_url as string | null
+  const sourceVideoFilename = (submission as any).source_video_filename as string | null
+  const reportPdfUrl = (submission as any).report_pdf_url as string | null
+  const assessId = (submission as any).assess_id as string | null
+  const workbookData = parseJsonb((submission as any).workbook_data, null)
 
   const getStatusColor = (status: string) => {
     const colors = {
@@ -362,6 +372,26 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                 </CardContent>
               </Card>
             )}
+            {/* Delivery Files — SI8 Certified only */}
+            {isCertified && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-base font-semibold text-gray-700">Delivery Files</h2>
+                  <div className="h-px flex-1 bg-gray-200" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <SourceVideoUpload
+                    submissionId={params.id}
+                    initialVideoUrl={sourceVideoUrl}
+                    initialVideoFilename={sourceVideoFilename}
+                  />
+                  <ReportPDFUpload
+                    submissionId={params.id}
+                    initialReportUrl={reportPdfUrl}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Sidebar - Actions */}
@@ -381,6 +411,15 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
               tier={submission.tier || null}
               existingRightsPackage={rightsPackage}
             />
+
+            {/* Assessment Workbook — SI8 Certified only */}
+            {isCertified && (
+              <WorkbookEntryPoint
+                submissionId={params.id}
+                assessId={assessId}
+                workbookData={workbookData}
+              />
+            )}
 
             {/* Review Notes */}
             <Card>
