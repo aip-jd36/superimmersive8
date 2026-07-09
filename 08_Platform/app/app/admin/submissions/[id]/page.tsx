@@ -11,6 +11,7 @@ import { ReviewerChecklist } from './ReviewerChecklist'
 import { SourceVideoUpload } from './SourceVideoUpload'
 import { ReportPDFUpload } from './ReportPDFUpload'
 import { WorkbookEntryPoint } from './WorkbookEntryPoint'
+import { SignAndDeliverPanel } from './SignAndDeliverPanel'
 import { notFound } from 'next/navigation'
 
 type PageProps = {
@@ -96,6 +97,16 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
   const reportPdfUrl = (submission as any).report_pdf_url as string | null
   const assessId = (submission as any).assess_id as string | null
   const workbookData = parseJsonb((submission as any).workbook_data, null)
+
+  // Provenance / Numbers Protocol fields
+  const provenanceStatus = (submission as any).provenance_status as string ?? 'not_started'
+  const numbersVerifyUrl = (submission as any).numbers_verify_url as string | null
+  const numbersAssetId = (submission as any).numbers_asset_id as string | null
+  const numbersSignedAt = (submission as any).numbers_signed_at as string | null
+  const reportHash = (submission as any).report_hash as string | null
+
+  // Credential gate — computed server-side so the env var is never exposed to the client
+  const hasCredentials = !!process.env.NUMBERS_API_KEY
 
   const getStatusColor = (status: string) => {
     const colors = {
@@ -418,6 +429,23 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                 submissionId={params.id}
                 assessId={assessId}
                 workbookData={workbookData}
+              />
+            )}
+
+            {/* Sign & Deliver — SI8 Certified only */}
+            {isCertified && (
+              <SignAndDeliverPanel
+                submissionId={params.id}
+                assessId={assessId}
+                workbookData={workbookData}
+                hasSourceVideo={!!sourceVideoUrl}
+                hasReportPdf={!!reportPdfUrl}
+                hasCredentials={hasCredentials}
+                provenanceStatus={provenanceStatus}
+                numbersVerifyUrl={numbersVerifyUrl}
+                numbersAssetId={numbersAssetId}
+                numbersSignedAt={numbersSignedAt}
+                reportHash={reportHash}
               />
             )}
 
