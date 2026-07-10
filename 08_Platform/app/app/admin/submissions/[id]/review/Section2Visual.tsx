@@ -117,6 +117,11 @@ export function Section2Visual({ data, submission, onChange }: Props) {
   // Safe read — existing workbooks saved before this schema change have viewing_passes undefined
   const passes = data.viewing_passes ?? DEFAULT_PASSES
 
+  // landmarks_observed was a boolean in the old schema; normalize to string for the new Select
+  const landmarksValue = typeof data.landmarks_observed === 'boolean'
+    ? (data.landmarks_observed ? 'Confirmed' : '')
+    : (data.landmarks_observed as string)
+
   // Pre-populate URL field on first open if still empty
   useEffect(() => {
     if (!data.video_url_confirmed && submission.video_url) {
@@ -271,10 +276,10 @@ export function Section2Visual({ data, submission, onChange }: Props) {
         )}
 
         <Field label="Real-world landmarks or locations">
-          <Sel value={data.landmarks_observed as string} onChange={v => u({ landmarks_observed: v as any })}
+          <Sel value={landmarksValue} onChange={v => u({ landmarks_observed: v as any })}
             options={[...PRESENCE]} placeholder="Select…" />
         </Field>
-        {data.landmarks_observed !== '' && data.landmarks_observed !== 'None observed' && (
+        {landmarksValue !== '' && landmarksValue !== 'None observed' && (
           <Textarea value={data.landmarks_description} onChange={v => u({ landmarks_description: v })} rows={2}
             placeholder="Which landmarks? Could they trigger location clearance requirements?" />
         )}
