@@ -297,6 +297,7 @@ export function WorkbookClient({
             {activeSection === '3' && (
               <Section3Evidence
                 data={workbook.section_3}
+                section2={workbook.section_2}
                 onChange={updates => updateSection('section_3', updates)}
                 onDomainFocus={domain => { setActiveDomain(domain); setRightTab('guidance') }}
               />
