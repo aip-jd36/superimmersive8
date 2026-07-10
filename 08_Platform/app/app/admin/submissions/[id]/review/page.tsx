@@ -51,9 +51,22 @@ export default async function WorkbookPage({ params }: PageProps) {
     : EMPTY_WORKBOOK
 
   // Fetch evidence files for the right panel
-  const { data: evidenceFiles } = await supabaseAdmin.storage
+  const { data: listedFiles } = await supabaseAdmin.storage
     .from('submission-files')
     .list(params.id, { limit: 50 })
+
+  const evidenceFiles: Array<{ name: string; url: string }> = []
+  if (listedFiles && listedFiles.length > 0) {
+    const paths = listedFiles.map(f => `${params.id}/${f.name}`)
+    const { data: signed } = await supabaseAdmin.storage
+      .from('submission-files')
+      .createSignedUrls(paths, 3600) // 1-hour expiry
+    if (signed) {
+      for (let i = 0; i < listedFiles.length; i++) {
+        evidenceFiles.push({ name: listedFiles[i].name, url: signed[i]?.signedUrl ?? '' })
+      }
+    }
+  }
 
   // CATALOG DISABLED: video_url now lives on submissions.video_url directly (migration 20260710000002)
   // No longer fetching opt_ins to get video_url.

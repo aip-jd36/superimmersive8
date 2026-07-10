@@ -23,7 +23,7 @@ interface WorkbookClientProps {
   assessId: string
   initialWorkbook: WorkbookData
   submission: Record<string, any>
-  evidenceFiles: Array<{ name: string }>
+  evidenceFiles: Array<{ name: string; url: string }>
 }
 
 function formatSavedAt(iso: string | null): string {
@@ -455,10 +455,17 @@ export function WorkbookClient({
                   <div className="text-gray-400">No evidence files uploaded.</div>
                 ) : (
                   evidenceFiles.map(file => (
-                    <div key={file.name} className="flex items-center gap-2 p-2 bg-white border rounded text-xs"
-                      style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
-                      <span className="truncate">{file.name}</span>
-                    </div>
+                    <a
+                      key={file.name}
+                      href={file.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 p-2 bg-white border rounded text-xs hover:bg-gray-50 transition-colors"
+                      style={{ borderColor: 'rgba(0,0,0,0.08)' }}
+                    >
+                      <ExternalLink className="w-3 h-3 flex-shrink-0 text-gray-400" />
+                      <span className="truncate text-blue-600">{file.name}</span>
+                    </a>
                   ))
                 )}
               </div>
