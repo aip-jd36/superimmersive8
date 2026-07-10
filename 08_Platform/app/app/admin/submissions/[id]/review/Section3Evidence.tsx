@@ -49,8 +49,8 @@ const CONTROL_OBJECTIVES: Record<ControlId, string> = {
   R01: 'Have all AI tools used to create this content been clearly identified?',
   R02: 'Does the evidence support that each AI tool was used under a license permitting this intended commercial use?',
   R03: 'Were any custom or fine-tuned AI models used, and is their provenance sufficiently documented?',
-  R04: 'Does the evidence support that the submitter has appropriate commercial rights to use this AI-generated output?',
-  H01: 'Is the submitter\'s human creative contribution described clearly enough to understand their role in creating the work?',
+  R04: 'Does the evidence support the submitter\'s commercial rights to use the AI-generated output?',
+  H01: 'Is the submitter\'s human creative contribution sufficiently documented to understand their role in creating the work?',
   H02: 'If authorship claims are made, are they reasonably supported by the evidence provided?',
   I01: 'Did your independent review identify any third-party copyrighted visual content?',
   I02: 'Did your independent review identify any third-party audio requiring commercial rights?',
@@ -197,7 +197,7 @@ function ControlExtras({ id, data, update, section2 }: {
       <div className="space-y-2">
         <Sel value={data.copyright_claim} onChange={v => update({ copyright_claim: v })} className="w-full"
           options={['Yes — claiming copyright', 'No claim stated', 'Unclear']}
-          placeholder="Copyright claim made?" />
+          placeholder="Does the submitter make an authorship or copyright claim?" />
         {data.copyright_claim === 'Yes — claiming copyright' && (
           <>
             <Textarea value={data.claim_basis} onChange={v => update({ claim_basis: v })} rows={2}
@@ -290,7 +290,7 @@ function ControlExtras({ id, data, update, section2 }: {
     case 'L03': return (
       <div className="space-y-2">
         <Check checked={data.real_person_confirmed} onChange={v => update({ real_person_confirmed: v })}
-          label="Real person likeness confirmed in this submission" />
+          label="Was an identifiable real-person likeness found?" />
         {data.real_person_confirmed && (
           <>
             <Text value={data.documentation_type} onChange={v => update({ documentation_type: v })} className="w-full"
@@ -311,17 +311,17 @@ function ControlExtras({ id, data, update, section2 }: {
             <div className="flex items-center gap-3">
               <span className="text-xs text-gray-600 w-36 flex-shrink-0">Declared production workflow</span>
               <Sel value={data.workflow_provided} onChange={v => update({ workflow_provided: v })} className="flex-1"
-                options={['Provided', 'Partially provided', 'Not provided']} placeholder="Status…" />
+                options={['Provided', 'Partially provided', 'Not provided']} placeholder="Evidence provided…" />
             </div>
             <div className="flex items-center gap-3">
               <span className="text-xs text-gray-600 w-36 flex-shrink-0">Prompt history / generation records</span>
               <Sel value={data.prompt_logs} onChange={v => update({ prompt_logs: v })} className="flex-1"
-                options={['Provided', 'Partially provided', 'Not provided']} placeholder="Status…" />
+                options={['Provided', 'Partially provided', 'Not provided']} placeholder="Evidence provided…" />
             </div>
             <div className="flex items-center gap-3">
               <span className="text-xs text-gray-600 w-36 flex-shrink-0">Output file metadata</span>
               <Sel value={data.metadata_provided} onChange={v => update({ metadata_provided: v })} className="flex-1"
-                options={['Provided', 'Partially provided', 'Not provided']} placeholder="Status…" />
+                options={['Provided', 'Partially provided', 'Not provided']} placeholder="Evidence provided…" />
             </div>
           </div>
         </div>
@@ -364,7 +364,7 @@ function ControlExtras({ id, data, update, section2 }: {
             'Suspected — note indicators above',
             'Confirmed — clear evidence of retroactive documentation',
           ]}
-          placeholder="Overall assessment of documentation integrity…" />
+          placeholder="Overall documentation integrity assessment…" />
       </div>
     )
 
@@ -414,23 +414,9 @@ function ControlRow({ id, data, onChange, section2 }: {
             value={ctrl.evidence ?? ''}
             onChange={v => update({ evidence: v })}
             rows={2}
-            placeholder={`Evidence reviewed for ${id}…`}
+            placeholder="Evidence reviewed…"
           />
         )}
-
-        {/* Judgment */}
-        <div>
-          <div className="text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-1">Judgment</div>
-          <select
-            value={ctrl.judgment ?? ''}
-            onChange={e => update({ judgment: e.target.value })}
-            className={`w-full text-sm border rounded px-2 py-2 font-medium ${judgmentColor(ctrl.judgment ?? '')}`}
-            style={{ borderColor: 'rgba(0,0,0,0.15)' }}
-          >
-            <option value="">— Select judgment —</option>
-            {JUDGMENT_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-          </select>
-        </div>
 
         {/* Assessment notes */}
         <div>
@@ -446,6 +432,20 @@ function ControlRow({ id, data, onChange, section2 }: {
           {notesHelper && (
             <div className="text-[11px] text-amber-700 mt-1">{notesHelper}</div>
           )}
+        </div>
+
+        {/* Judgment */}
+        <div>
+          <div className="text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-1">Judgment</div>
+          <select
+            value={ctrl.judgment ?? ''}
+            onChange={e => update({ judgment: e.target.value })}
+            className={`w-full text-sm border rounded px-2 py-2 font-medium ${judgmentColor(ctrl.judgment ?? '')}`}
+            style={{ borderColor: 'rgba(0,0,0,0.15)' }}
+          >
+            <option value="">— Select judgment —</option>
+            {JUDGMENT_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+          </select>
         </div>
       </div>
     </div>
