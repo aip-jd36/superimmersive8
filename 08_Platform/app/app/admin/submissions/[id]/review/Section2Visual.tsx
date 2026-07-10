@@ -1,5 +1,6 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import { WorkbookData } from './workbook-schema'
 
 type S2 = WorkbookData['section_2']
@@ -10,7 +11,7 @@ interface Props {
   onChange: (updates: Partial<S2>) => void
 }
 
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
     <div>
       <label className="block text-sm font-medium mb-1" style={{ color: '#1a1918' }}>{label}</label>
@@ -88,7 +89,7 @@ function Textarea({ value, onChange, rows = 3, placeholder }: {
   )
 }
 
-function Group({ title, children }: { title: string; children: React.ReactNode }) {
+function Group({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="space-y-4">
       <div className="text-xs font-semibold uppercase tracking-wide text-gray-400 pt-2 border-t"
