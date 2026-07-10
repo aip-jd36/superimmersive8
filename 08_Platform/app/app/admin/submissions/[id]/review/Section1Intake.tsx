@@ -19,6 +19,30 @@ const CHECK_LABELS: Record<keyof S1['scope_checks'], string> = {
   certified_tier:             'Submission is SI8 Certified tier ($499)',
 }
 
+const PRIMARY_USE_LABELS: Record<string, string> = {
+  brand_commercial:      'Brand Commercial / Advertisement',
+  agency_deliverable:    'Agency Deliverable / Client Work',
+  streaming_submission:  'Streaming Platform Submission',
+  licensing_marketplace: 'Licensing Marketplace',
+  festival:              'Film Festival',
+  social_media:          'Social Media / YouTube',
+  portfolio:             'Portfolio / Personal Project',
+  other:                 'Other',
+}
+
+function formatIntendedUse(raw: any): string {
+  if (!raw) return '—'
+  let obj: any = raw
+  if (typeof raw === 'string') {
+    try { obj = JSON.parse(raw) } catch { return raw }
+  }
+  const parts: string[] = []
+  if (obj.primary_use) parts.push(PRIMARY_USE_LABELS[obj.primary_use] || obj.primary_use.replace(/_/g, ' '))
+  if (obj.suitable_categories?.length) parts.push(`Suitable: ${obj.suitable_categories.join(', ')}`)
+  if (obj.excluded_categories?.length) parts.push(`Excluded: ${obj.excluded_categories.join(', ')}`)
+  return parts.length ? parts.join(' · ') : '—'
+}
+
 export function Section1Intake({ data, submission, toolsUsed, onChange }: Props) {
   const tools = toolsUsed.map(t => `${t.tool_name || t.tool}${t.plan_type ? ` (${t.plan_type})` : ''}`).join(', ')
 
@@ -38,7 +62,7 @@ export function Section1Intake({ data, submission, toolsUsed, onChange }: Props)
         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
           <div><span className="text-gray-500">Title: </span><span className="font-medium">{submission.title || '—'}</span></div>
           <div><span className="text-gray-500">Creator: </span><span className="font-medium">{submission.filmmaker_name || '—'}</span></div>
-          <div><span className="text-gray-500">Intended use: </span><span>{submission.intended_use || '—'}</span></div>
+          <div><span className="text-gray-500">Intended use: </span><span>{formatIntendedUse(submission.intended_use)}</span></div>
           <div><span className="text-gray-500">Territory: </span><span>{submission.territory_preferences || 'Global'}</span></div>
           {tools && <div className="col-span-2"><span className="text-gray-500">AI tools: </span><span>{tools}</span></div>}
         </div>
