@@ -259,11 +259,14 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                       ['Indemnification Warranty', (submission as any).indemnification_confirmed],
                     ].map(([label, val]) => (
                       <div key={label as string} className="flex items-center gap-2 text-sm">
-                        {val
+                        {val === true
                           ? <CheckCircle className="w-4 h-4 text-green-500" />
-                          : <XCircle className="w-4 h-4 text-red-400" />}
+                          : val === false
+                          ? <XCircle className="w-4 h-4 text-red-400" />
+                          : <AlertCircle className="w-4 h-4 text-amber-400" />}
                         <span className="text-gray-700">{label as string}</span>
-                        {!val && <span className="text-xs text-red-500 font-medium">NOT confirmed</span>}
+                        {val === false && <span className="text-xs text-red-500 font-medium">NOT confirmed</span>}
+                        {val == null && <span className="text-xs text-amber-500 font-medium">not recorded (platform-enforced)</span>}
                       </div>
                     ))}
                   </div>

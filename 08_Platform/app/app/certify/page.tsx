@@ -454,6 +454,8 @@ export default function CertifyPage() {
         client_name: submissionMode === 'agency' ? clientName : null,
         content_integrity_accepted: contentIntegrityAccepted,
         scope_acknowledged: scopeAcknowledged,
+        custodian_declaration: evidenceCustodian,
+        indemnification_confirmed: indemnificationAccepted,
       }
 
       const catalogData = data.catalog_opt_in ? {

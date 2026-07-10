@@ -45,24 +45,28 @@ export function Section1Intake({ data, submission, toolsUsed, onChange }: Props)
 
         {/* Declarations — reviewer needs to verify these before checking scope boxes */}
         <div className="border-t pt-2 mt-1 space-y-1 text-xs" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
-          <div className="flex items-center gap-1.5">
-            <span className={submission.custodian_declaration ? 'text-green-600' : 'text-red-400'}>
-              {submission.custodian_declaration ? '✓' : '✗'}
-            </span>
-            <span className="text-gray-600">Evidence Custodian Declaration</span>
-            <span className={`font-medium ${submission.custodian_declaration ? 'text-green-600' : 'text-red-500'}`}>
-              {submission.custodian_declaration ? 'confirmed at submission' : 'NOT recorded — do not proceed'}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className={submission.indemnification_confirmed ? 'text-green-600' : 'text-amber-500'}>
-              {submission.indemnification_confirmed ? '✓' : '—'}
-            </span>
-            <span className="text-gray-600">Indemnification warranty</span>
-            <span className={`font-medium ${submission.indemnification_confirmed ? 'text-green-600' : 'text-amber-600'}`}>
-              {submission.indemnification_confirmed ? 'confirmed at submission' : 'not recorded'}
-            </span>
-          </div>
+          {[
+            { label: 'Evidence Custodian Declaration', value: submission.custodian_declaration },
+            { label: 'Indemnification Warranty', value: submission.indemnification_confirmed },
+          ].map(({ label, value }) => (
+            <div key={label} className="flex items-center gap-1.5">
+              <span className={value === true ? 'text-green-600' : value === false ? 'text-red-400' : 'text-amber-500'}>
+                {value === true ? '✓' : value === false ? '✗' : '?'}
+              </span>
+              <span className="text-gray-600">{label}</span>
+              <span className={`font-medium ${
+                value === true ? 'text-green-600' :
+                value === false ? 'text-red-500' :
+                'text-amber-600'
+              }`}>
+                {value === true
+                  ? 'confirmed at submission'
+                  : value === false
+                  ? 'NOT confirmed — do not proceed'
+                  : 'not in record (platform-enforced — check submission history)'}
+              </span>
+            </div>
+          ))}
         </div>
 
         {submission.video_url && (

@@ -473,6 +473,8 @@ export default function SubmitPage() {
         submission_mode: submissionMode,
         status: 'pending',
         payment_status: 'unpaid',
+        custodian_declaration: evidenceCustodian,
+        indemnification_confirmed: indemnificationAccepted,
       }
 
       const catalogData = data.catalog_opt_in ? {
