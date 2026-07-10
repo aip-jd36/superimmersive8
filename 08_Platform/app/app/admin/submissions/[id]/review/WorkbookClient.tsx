@@ -6,7 +6,7 @@ import { ArrowLeft, ExternalLink, CheckCircle, Circle, Lock } from 'lucide-react
 import { Button } from '@/components/ui/button'
 import { WorkbookData, EMPTY_WORKBOOK, computeGates, DOMAIN_LABELS, ALL_CONTROLS } from './workbook-schema'
 import { GUIDANCE } from './guidance'
-import { Section1Intake } from './Section1Intake'
+import { Section1Intake, formatIntendedUse } from './Section1Intake'
 import { Section2Visual } from './Section2Visual'
 import { Section3Evidence } from './Section3Evidence'
 import { Section4Gaps } from './Section4Gaps'
@@ -412,7 +412,7 @@ export function WorkbookClient({
                 </div>
                 <div>
                   <div className="font-semibold text-gray-500 uppercase tracking-wide text-[10px] mb-1">Intended Use</div>
-                  <div>{submission.intended_use || '—'}</div>
+                  <div>{formatIntendedUse(submission.intended_use)}</div>
                 </div>
                 <div>
                   <div className="font-semibold text-gray-500 uppercase tracking-wide text-[10px] mb-1">Territory</div>
@@ -434,7 +434,7 @@ export function WorkbookClient({
                 </div>
                 <div>
                   <div className="font-semibold text-gray-500 uppercase tracking-wide text-[10px] mb-1">Authorship</div>
-                  <div className="text-gray-600 text-[11px] leading-4">{submission.authorship_statement || '—'}</div>
+                  <div className="text-gray-600 text-[11px] leading-relaxed whitespace-pre-wrap">{submission.authorship_statement || '—'}</div>
                 </div>
                 {submission.video_url && (
                   <a

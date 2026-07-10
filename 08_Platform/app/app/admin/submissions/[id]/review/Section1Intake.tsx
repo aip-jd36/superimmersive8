@@ -52,7 +52,7 @@ const PRIMARY_USE_LABELS: Record<string, string> = {
   other:                 'Other',
 }
 
-function formatIntendedUse(raw: any): string {
+export function formatIntendedUse(raw: any): string {
   if (!raw) return '—'
   let obj: any = raw
   if (typeof raw === 'string') {
