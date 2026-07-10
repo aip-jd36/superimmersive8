@@ -56,9 +56,11 @@ export default async function WorkbookPage({ params }: PageProps) {
 
   // Tool receipts from tools_used JSONB
   const toolsUsedRaw = (submission as any).tools_used
+  console.log('[evidence] tools_used raw:', JSON.stringify(toolsUsedRaw))
   const toolsArr = Array.isArray(toolsUsedRaw)
     ? toolsUsedRaw
     : (typeof toolsUsedRaw === 'string' ? (() => { try { return JSON.parse(toolsUsedRaw) } catch { return [] } })() : [])
+  console.log('[evidence] toolsArr:', JSON.stringify(toolsArr))
   for (const tool of toolsArr) {
     const path = tool?.receipt_path || tool?.receipt?.path
     if (path) {
@@ -75,6 +77,7 @@ export default async function WorkbookPage({ params }: PageProps) {
   if (audioObj?.license_path) {
     rawPaths.push({ label: 'Audio license', path: audioObj.license_path })
   }
+  console.log('[evidence] rawPaths:', JSON.stringify(rawPaths))
 
   // Generate signed URLs for all found paths (1-hour expiry)
   const evidenceFiles: Array<{ name: string; url: string }> = []
