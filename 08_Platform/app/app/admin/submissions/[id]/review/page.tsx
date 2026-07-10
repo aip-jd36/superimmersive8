@@ -50,17 +50,30 @@ export default async function WorkbookPage({ params }: PageProps) {
     ? (typeof rawWorkbook === 'string' ? JSON.parse(rawWorkbook) : rawWorkbook)
     : EMPTY_WORKBOOK
 
+  // Fetch opt-in to get video_url (stored in opt_ins, not submissions)
+  const { data: optIn } = await supabaseAdmin
+    .from('opt_ins')
+    .select('video_url')
+    .eq('submission_id', params.id)
+    .single()
+
   // Fetch evidence files for the right panel
   const { data: evidenceFiles } = await supabaseAdmin.storage
     .from('submission-files')
     .list(params.id, { limit: 50 })
+
+  // Merge video_url from opt_ins so Section 1 and Section 2 can surface the link
+  const mergedSubmission = {
+    ...(submission as any),
+    video_url: (optIn as any)?.video_url ?? (submission as any).video_url ?? null,
+  }
 
   return (
     <WorkbookClient
       submissionId={params.id}
       assessId={assessId}
       initialWorkbook={initialWorkbook}
-      submission={submission as any}
+      submission={mergedSubmission}
       evidenceFiles={evidenceFiles ?? []}
     />
   )

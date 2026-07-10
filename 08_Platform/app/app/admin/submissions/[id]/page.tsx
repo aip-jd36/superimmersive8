@@ -180,6 +180,21 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                     <p className="text-gray-700">{submission.intended_use}</p>
                   </div>
                 )}
+                {/* Video URL — may come from opt_ins since submissions table doesn't store it directly */}
+                {optIn?.video_url && (
+                  <div>
+                    <div className="text-sm font-medium text-gray-500 mb-1">Video URL</div>
+                    <a
+                      href={optIn.video_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 hover:underline flex items-center gap-1 break-all"
+                    >
+                      <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                      {optIn.video_url}
+                    </a>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -235,6 +250,25 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                 <CardTitle>Rights Confirmations</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Platform declarations */}
+                <div>
+                  <div className="text-sm font-medium text-gray-500 mb-2">Platform Declarations (signed at submission)</div>
+                  <div className="space-y-1">
+                    {[
+                      ['Evidence Custodian Declaration', (submission as any).custodian_declaration],
+                      ['Indemnification Warranty', (submission as any).indemnification_confirmed],
+                    ].map(([label, val]) => (
+                      <div key={label as string} className="flex items-center gap-2 text-sm">
+                        {val
+                          ? <CheckCircle className="w-4 h-4 text-green-500" />
+                          : <XCircle className="w-4 h-4 text-red-400" />}
+                        <span className="text-gray-700">{label as string}</span>
+                        {!val && <span className="text-xs text-red-500 font-medium">NOT confirmed</span>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Likeness */}
                 <div>
                   <div className="text-sm font-medium text-gray-500 mb-2">Likeness & Identity</div>

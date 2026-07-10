@@ -42,11 +42,39 @@ export function Section1Intake({ data, submission, toolsUsed, onChange }: Props)
           <div><span className="text-gray-500">Territory: </span><span>{submission.territory_preferences || 'Global'}</span></div>
           {tools && <div className="col-span-2"><span className="text-gray-500">AI tools: </span><span>{tools}</span></div>}
         </div>
+
+        {/* Declarations — reviewer needs to verify these before checking scope boxes */}
+        <div className="border-t pt-2 mt-1 space-y-1 text-xs" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
+          <div className="flex items-center gap-1.5">
+            <span className={submission.custodian_declaration ? 'text-green-600' : 'text-red-400'}>
+              {submission.custodian_declaration ? '✓' : '✗'}
+            </span>
+            <span className="text-gray-600">Evidence Custodian Declaration</span>
+            <span className={`font-medium ${submission.custodian_declaration ? 'text-green-600' : 'text-red-500'}`}>
+              {submission.custodian_declaration ? 'confirmed at submission' : 'NOT recorded — do not proceed'}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className={submission.indemnification_confirmed ? 'text-green-600' : 'text-amber-500'}>
+              {submission.indemnification_confirmed ? '✓' : '—'}
+            </span>
+            <span className="text-gray-600">Indemnification warranty</span>
+            <span className={`font-medium ${submission.indemnification_confirmed ? 'text-green-600' : 'text-amber-600'}`}>
+              {submission.indemnification_confirmed ? 'confirmed at submission' : 'not recorded'}
+            </span>
+          </div>
+        </div>
+
         {submission.video_url && (
           <a href={submission.video_url} target="_blank" rel="noopener noreferrer"
-            className="text-xs text-blue-600 hover:underline block mt-1">
+            className="text-xs text-blue-600 hover:underline block">
             {submission.video_url}
           </a>
+        )}
+        {!submission.video_url && (
+          <div className="text-xs text-amber-600">
+            ⚠ No video URL on file — note in Scope Limitations below before proceeding to Visual Review.
+          </div>
         )}
       </div>
 
