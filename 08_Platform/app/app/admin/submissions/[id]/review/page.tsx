@@ -60,9 +60,10 @@ export default async function WorkbookPage({ params }: PageProps) {
     ? toolsUsedRaw
     : (typeof toolsUsedRaw === 'string' ? (() => { try { return JSON.parse(toolsUsedRaw) } catch { return [] } })() : [])
   for (const tool of toolsArr) {
-    if (tool?.receipt?.path) {
+    const path = tool?.receipt_path || tool?.receipt?.path
+    if (path) {
       const toolLabel = tool.tool_name || tool.toolName || tool.tool || 'Tool'
-      rawPaths.push({ label: `${toolLabel} receipt`, path: tool.receipt.path })
+      rawPaths.push({ label: `${toolLabel} receipt`, path })
     }
   }
 
