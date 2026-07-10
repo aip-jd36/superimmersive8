@@ -7,7 +7,16 @@ export const GUIDANCE: Record<string, string> = {
 
 Confirm scope before beginning evidence review.
 
-No List check: Review the eight No List items. If any are triggered, stop — do not proceed to assessment. Document why the submission was halted in scope_limitations.
+No List check: Stop and document in scope_limitations if any of the following apply. Do not proceed to assessment.
+
+  1. Celebrity likeness — real person's face used without documented consent
+  2. Voice cloning of a real, identifiable person
+  3. Explicit IP imitation — copyrighted characters, brand mascots, or protected marks
+  4. Political persuasion content
+  5. Deepfakes or content designed to deceive
+  6. Adult or explicit content
+  7. Submission without completed intake form (project brief)
+  8. No confirmed creator bench / production capacity
 
 Evidence Custodian Declaration and Indemnification: These are logged by the platform at submission time. Confirm they appear in the submission context box before checking the boxes. If the platform shows a green ✓, check the box. If either shows ✗ or ?, do not proceed — contact the creator.
 
