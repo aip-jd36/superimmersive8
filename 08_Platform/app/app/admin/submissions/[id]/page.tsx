@@ -51,12 +51,14 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
 
   console.log('✅ Submission found:', submission.title)
 
-  // Check if opt-in exists
+  /* CATALOG DISABLED: opt_ins fetch removed — video_url now on submissions.video_url directly
   const { data: optIn } = await supabaseAdmin
     .from('opt_ins')
     .select('*')
     .eq('submission_id', params.id)
     .single()
+  */
+  const optIn = null // CATALOG DISABLED
 
   // Check if Rights Package (Chain of Title PDF) exists
   const { data: rightsPackage } = await supabaseAdmin
@@ -180,18 +182,18 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                     <p className="text-gray-700">{submission.intended_use}</p>
                   </div>
                 )}
-                {/* Video URL — may come from opt_ins since submissions table doesn't store it directly */}
-                {optIn?.video_url && (
+                {/* Video URL — stored on submissions.video_url (migration 20260710000002) */}
+                {(submission as any).video_url && (
                   <div>
                     <div className="text-sm font-medium text-gray-500 mb-1">Video URL</div>
                     <a
-                      href={optIn.video_url}
+                      href={(submission as any).video_url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm text-blue-600 hover:underline flex items-center gap-1 break-all"
                     >
                       <ExternalLink className="w-3 h-3 flex-shrink-0" />
-                      {optIn.video_url}
+                      {(submission as any).video_url}
                     </a>
                   </div>
                 )}
@@ -352,54 +354,7 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
               </CardContent>
             </Card>
 
-            {/* Catalog Opt-In */}
-            {optIn && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Catalog Opt-In</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                    <span className="font-medium">Opted in to public catalog</span>
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-500 mb-1">Video URL</div>
-                    <a
-                      href={optIn.video_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline flex items-center gap-1"
-                    >
-                      {optIn.video_url}
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
-                  </div>
-                  {optIn.public_description && (
-                    <div>
-                      <div className="text-sm font-medium text-gray-500 mb-1">Public Description</div>
-                      <p className="text-gray-700">{optIn.public_description}</p>
-                    </div>
-                  )}
-                  <div>
-                    <div className="text-sm font-medium text-gray-500 mb-1">Catalog Status</div>
-                    <div className="text-gray-700">
-                      {optIn.visible ? (
-                        <span className="text-green-600 font-medium">✓ Visible in catalog</span>
-                      ) : (
-                        <span className="text-gray-500">Not visible (pending approval)</span>
-                      )}
-                    </div>
-                  </div>
-                  {optIn.catalog_id && (
-                    <div>
-                      <div className="text-sm font-medium text-gray-500 mb-1">Catalog ID</div>
-                      <div className="font-mono text-blue-600">{optIn.catalog_id}</div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
+            {/* CATALOG DISABLED: Catalog Opt-In card removed */}
             {/* Delivery Files — SI8 Certified only */}
             {isCertified && (
               <div className="space-y-4">
@@ -427,14 +382,13 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
             <ApproveRejectButtons
               submissionId={params.id}
               currentStatus={submission.status}
-              hasOptIn={!!optIn}
               checklistRequired={isCertified}
               checklistComplete={checklistComplete}
             />
 
             <GenerateRightsPackageButton
               submissionId={params.id}
-              catalogId={optIn?.catalog_id || null}
+              catalogId={null}
               currentStatus={submission.status}
               tier={submission.tier || null}
               existingRightsPackage={rightsPackage}

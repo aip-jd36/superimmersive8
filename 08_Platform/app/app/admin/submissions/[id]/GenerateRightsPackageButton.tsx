@@ -8,6 +8,7 @@ import { FileText, Loader2, Download } from 'lucide-react'
 
 type Props = {
   submissionId: string
+  // CATALOG DISABLED: catalogId no longer required for PDF generation
   catalogId: string | null
   currentStatus: string
   tier?: string | null
@@ -29,9 +30,9 @@ export function GenerateRightsPackageButton({
   const [loading, setLoading] = useState(false)
 
   const isCreatorRecord = tier === 'creator_record'
-  // SI8 Certified: can generate if approved + has catalog ID
-  // Creator Record: auto-approved but PDF auto-generation not yet built
-  const canGenerate = !isCreatorRecord && currentStatus === 'approved' && catalogId && !existingRightsPackage
+  // SI8 Certified: can generate if approved (catalog ID no longer required)
+  // Creator Record: auto-generation runs on payment webhook
+  const canGenerate = !isCreatorRecord && currentStatus === 'approved' && !existingRightsPackage
 
   const handleGenerate = async () => {
     if (!confirm('Generate Chain of Title document? All fields will be auto-populated from submission data.')) {
@@ -144,9 +145,8 @@ export function GenerateRightsPackageButton({
           Chain of Title
         </CardTitle>
         <CardDescription>
-          {!canGenerate && !catalogId && currentStatus !== 'approved' && 'Approval required first'}
-          {!canGenerate && !catalogId && currentStatus === 'approved' && 'Assign a Catalog ID to enable PDF generation'}
-          {!canGenerate && catalogId && 'Not yet generated'}
+          {!canGenerate && currentStatus !== 'approved' && 'Approval required first'}
+          {!canGenerate && currentStatus === 'approved' && 'Not yet generated'}
           {canGenerate && 'Ready to generate (auto-populated from submission)'}
         </CardDescription>
       </CardHeader>
@@ -172,7 +172,7 @@ export function GenerateRightsPackageButton({
         ) : (
           <Button disabled className="w-full">
             <FileText className="w-4 h-4 mr-2" />
-            {currentStatus !== 'approved' ? 'Approve First' : !catalogId ? 'Needs Catalog ID' : 'Already Generated'}
+            {currentStatus !== 'approved' ? 'Approve First' : 'Already Generated'}
           </Button>
         )}
       </CardContent>

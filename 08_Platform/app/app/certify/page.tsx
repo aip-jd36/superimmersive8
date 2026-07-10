@@ -351,11 +351,7 @@ export default function CertifyPage() {
   const onSubmit = async (data: FormData) => {
     if (tools.length === 0) { setToolsError('At least one tool is required'); setCurrentSection(2); return }
     if (!hasPrimaryTool) { setToolsError('Mark one tool as primary'); setCurrentSection(2); return }
-    if (submissionMode === 'agency' && data.catalog_opt_in && !agencyLicensingAuth) {
-      setError('Confirm licensing authorization to list in Showcase, or uncheck the Showcase option.')
-      setCurrentSection(10)
-      return
-    }
+    // CATALOG DISABLED: agency catalog auth check removed
     if (!indemnificationAccepted || !contentIntegrityAccepted || !scopeAcknowledged) { return }
 
     try {
@@ -456,19 +452,22 @@ export default function CertifyPage() {
         scope_acknowledged: scopeAcknowledged,
         custodian_declaration: evidenceCustodian,
         indemnification_confirmed: indemnificationAccepted,
+        video_url: data.video_url,
       }
 
+      /* CATALOG DISABLED: catalog opt-in removed — video_url stored directly on submission
       const catalogData = data.catalog_opt_in ? {
         catalog_opt_in: true,
         video_url: data.video_url,
         thumbnail_url: data.thumbnail_url || null,
         public_description: data.public_description || data.logline || null,
       } : null
+      */
 
       const subRes = await fetch('/api/submissions/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ submissionData, userId: session.user.id, catalogData }),
+        body: JSON.stringify({ submissionData, userId: session.user.id, catalogData: null }),
       })
       if (!subRes.ok) {
         const err = await subRes.json()
@@ -1215,16 +1214,22 @@ export default function CertifyPage() {
                 </div>
               )}
 
-              {/* ── Section 10: Video & Showcase ── */}
+              {/* ── Section 10: Video ── */}
+              {/* CATALOG DISABLED: Showcase opt-in, thumbnail, public description removed */}
               {currentSection === 10 && (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">10. Video & Showcase</h3>
+                  <h3 className="text-lg font-semibold">10. Video Link</h3>
+                  <p className="text-sm text-gray-600">
+                    Provide a link so our reviewer can watch your submission. This URL is attached to your Chain of Title as the canonical reference for this version of the work.
+                  </p>
                   <div>
                     <Label>Video Screening Link *</Label>
                     <Input placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..." {...register('video_url')} />
                     {errors.video_url && <p className="text-sm text-red-500 mt-1">{errors.video_url.message}</p>}
-                    <p className="text-xs text-gray-500 mt-1">YouTube or Vimeo. Unlisted or public — do not set to private.</p>
+                    <p className="text-xs text-gray-500 mt-1">YouTube or Vimeo. Unlisted or public — do not set to private. The reviewer must be able to watch it.</p>
                   </div>
+
+                  {/* CATALOG DISABLED: Showcase opt-in, thumbnail URL, public description, agency licensing auth, brand suitability preserved below
                   <div>
                     <Label>Thumbnail URL (optional)</Label>
                     <Input placeholder="https://..." {...register('thumbnail_url')} />
@@ -1232,71 +1237,12 @@ export default function CertifyPage() {
                   <div>
                     <Label>Showcase Description (optional)</Label>
                     <textarea className="w-full min-h-[80px] px-3 py-2 text-sm border rounded-md" placeholder="Brief description for Showcase (max 500 characters)" {...register('public_description')} />
-                    <p className="text-xs text-gray-500 mt-1">If not provided, we'll use your logline.</p>
                   </div>
-
-                  {/* Showcase opt-in — available for all submission modes */}
                   <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
-                    <div className="flex items-start gap-3">
-                      <input type="checkbox" id="catalog_opt_in" {...register('catalog_opt_in')} className="mt-1" />
-                      <div>
-                        <Label htmlFor="catalog_opt_in" className="cursor-pointer font-medium">List in Showcase (after approval)</Label>
-                        <p className="text-xs text-gray-600 mt-1">
-                          {submissionMode === 'creator'
-                            ? 'Your film appears in SI8 Showcase with a Rights Verified badge. Brands can discover and license your work — you keep 80%.'
-                            : 'The film appears in SI8 Showcase with a Rights Verified badge. Brands can discover and license the content — the rights holder keeps 80%.'}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Agency licensing auth — required when agency opts in */}
-                    {submissionMode === 'agency' && watch('catalog_opt_in') && (
-                      <div className="mt-3 pt-3 border-t border-blue-200">
-                        <div className="flex items-start gap-3">
-                          <input
-                            type="checkbox"
-                            id="agency_licensing_auth"
-                            checked={agencyLicensingAuth}
-                            onChange={(e) => setAgencyLicensingAuth(e.target.checked)}
-                            className="h-4 w-4 mt-0.5 flex-shrink-0"
-                          />
-                          <Label htmlFor="agency_licensing_auth" className="cursor-pointer text-xs font-normal text-blue-900">
-                            I confirm I hold the rights (or have written client authorization) to license this content through SI8 Showcase. The client has been informed.
-                          </Label>
-                        </div>
-                      </div>
-                    )}
+                    <input type="checkbox" id="catalog_opt_in" {...register('catalog_opt_in')} className="mt-1" />
+                    <Label htmlFor="catalog_opt_in">List in Showcase (after approval)</Label>
                   </div>
-
-                  {/* Brand suitability — shown whenever showcase is opted in */}
-                  {watch('catalog_opt_in') && (
-                    <>
-                      <div className="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <Label className="text-sm font-semibold">Brand Suitability (Showcase)</Label>
-                        <p className="text-xs text-gray-500">Check all brand categories this content is appropriate for. Documented in your Chain of Title.</p>
-                        <div className="grid grid-cols-2 gap-2">
-                          {SUITABLE_CATEGORIES.map((cat) => (
-                            <label key={cat} className="flex items-center gap-2 text-sm cursor-pointer">
-                              <input type="checkbox" checked={suitableCategories.includes(cat)} onChange={() => toggleCat(cat, suitableCategories, setSuitableCategories)} className="h-4 w-4" />
-                              <span>{cat}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="space-y-3 bg-red-50 p-4 rounded-lg border border-red-100">
-                        <Label className="text-sm font-semibold text-red-800">Do NOT Use With</Label>
-                        <div className="grid grid-cols-2 gap-2">
-                          {EXCLUDED_CATEGORIES.map((cat) => (
-                            <label key={cat} className="flex items-center gap-2 text-sm cursor-pointer">
-                              <input type="checkbox" checked={excludedCategories.includes(cat)} onChange={() => toggleCat(cat, excludedCategories, setExcludedCategories)} className="h-4 w-4" />
-                              <span>{cat}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  )}
+                  */}
 
                   <div className="flex gap-4">
                     <Button type="button" variant="outline" onClick={() => setCurrentSection(9)}>← Back</Button>

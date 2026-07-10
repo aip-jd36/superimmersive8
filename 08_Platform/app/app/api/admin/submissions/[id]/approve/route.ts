@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
-import { sendSubmissionApprovedEmail, sendOptInConfirmationEmail } from '@/lib/emails'
+import { sendSubmissionApprovedEmail } from '@/lib/emails'
+// CATALOG DISABLED: import { sendOptInConfirmationEmail } from '@/lib/emails'
 import { generateChainOfTitlePDF } from '@/lib/pdf/generateChainOfTitle'
 
 type RouteContext = {
@@ -31,37 +32,25 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const { hasOptIn } = await request.json()
+    // Parse body — hasOptIn no longer used (CATALOG DISABLED)
+    await request.json().catch(() => {})
 
-    console.log('🔍 Approving submission:', params.id, 'hasOptIn:', hasOptIn)
+    console.log('🔍 Approving submission:', params.id)
 
-    // For SI8 Certified, verify reviewer checklist is complete before approving
+    // For SI8 Certified, verify workbook Section 6 is signed off before approving
     const { data: submissionCheck } = await supabaseAdmin
       .from('submissions')
-      .select('tier, reviewer_checklist, risk_rating')
+      .select('tier, workbook_data, risk_rating')
       .eq('id', params.id)
       .single()
 
     if (submissionCheck?.tier === 'si8_certified') {
-      const checklist = submissionCheck.reviewer_checklist as any
-      const allStepsComplete = checklist &&
-        checklist.pre_screen_complete &&
-        checklist.video_watched &&
-        checklist.tool_receipts_verified &&
-        checklist.authorship_reviewed &&
-        checklist.rights_docs_reviewed &&
-        checklist.risk_assessed
+      const workbookData = submissionCheck.workbook_data as any
+      const workbookSignedOff = workbookData?.section_6?.signed_off === true
 
-      if (!allStepsComplete) {
+      if (!workbookSignedOff) {
         return NextResponse.json(
-          { error: 'Reviewer checklist must be completed before approving an SI8 Certified submission' },
-          { status: 400 }
-        )
-      }
-
-      if (!submissionCheck.risk_rating) {
-        return NextResponse.json(
-          { error: 'Risk rating must be assigned before approving' },
+          { error: 'Reviewer workbook Section 6 must be signed off before approving an SI8 Certified submission' },
           { status: 400 }
         )
       }
@@ -102,82 +91,51 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: 'Failed to update submission' }, { status: 500 })
     }
 
-    // If has opt-in, generate catalog ID and set visible
-    if (hasOptIn) {
-      // Generate catalog ID in format SI8-2026-XXXX
+    // For SI8 Certified: always generate Chain of Title PDF on approval
+    // CATALOG DISABLED: no longer depends on opt_in or catalog ID from opt_ins
+    if (submission.tier === 'si8_certified' || !submission.tier) {
+      // Generate certificate ID in format SI8-YYYY-XXXX using rights_packages count
       const year = new Date().getFullYear()
-
-      // Get highest catalog ID for this year to determine next sequence number
-      const { data: existingEntries } = await supabaseAdmin
-        .from('opt_ins')
-        .select('catalog_id')
+      const { count: existingCount } = await supabaseAdmin
+        .from('rights_packages')
+        .select('id', { count: 'exact', head: true })
         .like('catalog_id', `SI8-${year}-%`)
-        .order('catalog_id', { ascending: false })
-        .limit(1)
 
-      let sequence = 1
-      if (existingEntries && existingEntries.length > 0 && existingEntries[0].catalog_id) {
-        const lastId = existingEntries[0].catalog_id
-        const lastSequence = parseInt(lastId.split('-')[2])
-        sequence = lastSequence + 1
-      }
-
+      const sequence = (existingCount ?? 0) + 1
       const catalogId = `SI8-${year}-${sequence.toString().padStart(4, '0')}`
 
-      // Update opt_in record
-      const { error: optInError } = await supabaseAdmin
-        .from('opt_ins')
-        .update({
-          visible: true,
-          catalog_id: catalogId,
-        })
-        .eq('submission_id', params.id)
+      console.log('📄 Generating Chain of Title PDF for', catalogId)
 
-      if (optInError) {
-        console.error('Error updating opt-in:', optInError)
-        // Don't fail the whole approval if catalog update fails
-      } else {
-        // Generate Chain of Title PDF
-        console.log('📄 Generating Chain of Title PDF for', catalogId)
+      const parseJsonb = (val: any, fb: any) => { if (!val) return fb; if (typeof val === 'string') { try { return JSON.parse(val) } catch { return fb } } return val }
+      const tools = parseJsonb(submission.tools_used, [])
 
-        // Parse tools from JSONB — handle both string (legacy) and already-parsed cases
-        const parseJsonb = (val: any, fb: any) => { if (!val) return fb; if (typeof val === 'string') { try { return JSON.parse(val) } catch { return fb } } return val }
-        const tools = parseJsonb(submission.tools_used, [])
-
-        // Parse modification rights
-        const modificationRights = {
-          authorized: submission.modification_authorized || false,
-          scope: submission.modification_scope || undefined,
-        }
-
-        // Generate PDF
-        const pdfUrl = await generateChainOfTitlePDF({
-          catalogId,
-          submissionId: params.id,
-          filmmakerName: submission.filmmaker_name,
-          title: submission.title,
-          tools,
-          modificationRights,
-          territory: submission.territory_preferences || 'Global',
-          riskRating: submission.risk_rating as any || undefined,
-          riskNotes: submission.risk_notes || undefined,
-        })
-
-        if (pdfUrl) {
-          console.log('✅ Chain of Title PDF generated:', pdfUrl)
-        } else {
-          console.error('❌ Failed to generate Chain of Title PDF')
-        }
-
-        // Send catalog opt-in confirmation email
-        const catalogUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/catalog`
-        await sendOptInConfirmationEmail(
-          submission.filmmaker_name,
-          submission.title,
-          catalogUrl,
-          submission.user.email
-        )
+      const modificationRights = {
+        authorized: submission.modification_authorized || false,
+        scope: submission.modification_scope || undefined,
       }
+
+      const pdfUrl = await generateChainOfTitlePDF({
+        catalogId,
+        submissionId: params.id,
+        filmmakerName: submission.filmmaker_name,
+        title: submission.title,
+        tools,
+        modificationRights,
+        territory: submission.territory_preferences || 'Global',
+        riskRating: submission.risk_rating as any || undefined,
+        riskNotes: submission.risk_notes || undefined,
+      })
+
+      if (pdfUrl) {
+        console.log('✅ Chain of Title PDF generated:', pdfUrl)
+      } else {
+        console.error('❌ Failed to generate Chain of Title PDF')
+      }
+
+      /* CATALOG DISABLED: opt_ins update and catalog email removed
+      await supabaseAdmin.from('opt_ins').update({ visible: true, catalog_id: catalogId }).eq('submission_id', params.id)
+      await sendOptInConfirmationEmail(submission.filmmaker_name, submission.title, catalogUrl, submission.user.email)
+      */
     }
 
     // Send approval email notification

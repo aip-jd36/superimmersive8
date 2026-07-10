@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { formatDate, formatCurrency } from '@/lib/utils'
 import { Eye, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react'
-import { ToggleVisibilityButton } from './catalog/ToggleVisibilityButton'
+// CATALOG DISABLED: import { ToggleVisibilityButton } from './catalog/ToggleVisibilityButton'
 
 type Submission = {
   id: string
@@ -28,14 +28,14 @@ export default async function AdminDashboard() {
     .select('*')
     .order('created_at', { ascending: false })
 
-  // Fetch opt_ins keyed by submission_id
+  /* CATALOG DISABLED: opt_ins fetch removed
   const { data: optIns } = await supabaseAdmin
     .from('opt_ins')
     .select('id, submission_id, opted_in, visible')
-
   const optInMap = Object.fromEntries(
     (optIns || []).map(o => [o.submission_id, o])
   )
+  */
 
   // Calculate summary stats
   const totalSubmissions = submissions?.length || 0
@@ -92,12 +92,10 @@ export default async function AdminDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-display font-bold" style={{ color: '#1a1918' }}>Review Queue</h1>
-              <p className="text-sm mt-1" style={{ color: '#8C8A82' }}>Review submissions and manage catalog</p>
+              <p className="text-sm mt-1" style={{ color: '#8C8A82' }}>Review and approve submissions</p>
             </div>
             <div className="flex gap-3">
-              <Button variant="outline" asChild>
-                <Link href="/admin/catalog">Manage Catalog</Link>
-              </Button>
+              {/* CATALOG DISABLED: <Link href="/admin/catalog">Manage Catalog</Link> */}
               <Button variant="outline" asChild>
                 <Link href="/dashboard">Creator View</Link>
               </Button>
@@ -167,7 +165,7 @@ export default async function AdminDashboard() {
                       <th className="text-left py-3 px-4 font-semibold text-sm text-gray-700">Status</th>
                       <th className="text-left py-3 px-4 font-semibold text-sm text-gray-700">Payment</th>
                       <th className="text-left py-3 px-4 font-semibold text-sm text-gray-700">Submitted</th>
-                      <th className="text-left py-3 px-4 font-semibold text-sm text-gray-700">Show in Catalog</th>
+                      {/* CATALOG DISABLED: <th>Show in Catalog</th> */}
                       <th className="text-left py-3 px-4 font-semibold text-sm text-gray-700">Actions</th>
                     </tr>
                   </thead>
@@ -194,15 +192,7 @@ export default async function AdminDashboard() {
                             {formatDate(submission.created_at)}
                           </div>
                         </td>
-                        <td className="py-4 px-4">
-                          {(() => {
-                            const optIn = optInMap[submission.id]
-                            if (optIn?.opted_in) {
-                              return <ToggleVisibilityButton entryId={optIn.id} currentVisibility={optIn.visible} />
-                            }
-                            return <span className="text-xs text-gray-400">Not opted in</span>
-                          })()}
-                        </td>
+                        {/* CATALOG DISABLED: catalog visibility column removed */}
                         <td className="py-4 px-4">
                           <Button size="sm" asChild>
                             <Link href={`/admin/submissions/${submission.id}`}>

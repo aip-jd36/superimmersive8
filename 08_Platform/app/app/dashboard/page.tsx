@@ -68,11 +68,12 @@ export default async function DashboardPage() {
   // Get user's submissions using service_role (bypasses RLS)
   const submissions = await getSubmissions(user.id)
 
-  // Get user's opt-ins
+  /* CATALOG DISABLED: opt_ins fetch removed
   const { data: optIns } = await supabase
     .from('opt_ins')
     .select('*')
     .eq('user_id', user.id)
+  */
 
   // Get user's licensing deals
   const { data: deals } = await supabase
@@ -81,7 +82,7 @@ export default async function DashboardPage() {
     .eq('creator_id', user.id)
 
   const approvedCount = submissions.filter((s) => s.status === 'approved').length
-  const catalogCount = optIns?.length || 0
+  // CATALOG DISABLED: const catalogCount = optIns?.length || 0
   const totalEarnings = deals?.reduce((sum, deal) => sum + (deal.creator_payout || 0), 0) || 0
 
   const getStatusBadge = (status: string) => {
@@ -114,7 +115,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Total Submissions</CardDescription>
@@ -129,12 +130,14 @@ export default async function DashboardPage() {
           </CardHeader>
         </Card>
 
+        {/* CATALOG DISABLED: Catalog Listings stat card hidden
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Catalog Listings</CardDescription>
             <CardTitle className="text-3xl text-blue-600">{catalogCount}</CardTitle>
           </CardHeader>
         </Card>
+        */}
 
         <Card>
           <CardHeader className="pb-2">

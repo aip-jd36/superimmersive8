@@ -9,7 +9,7 @@ import { CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react'
 type Props = {
   submissionId: string
   currentStatus: string
-  hasOptIn: boolean
+  // CATALOG DISABLED: hasOptIn removed — approval no longer depends on catalog opt-in
   checklistRequired?: boolean
   checklistComplete?: boolean
 }
@@ -17,7 +17,6 @@ type Props = {
 export function ApproveRejectButtons({
   submissionId,
   currentStatus,
-  hasOptIn,
   checklistRequired = false,
   checklistComplete = false,
 }: Props) {
@@ -38,7 +37,7 @@ export function ApproveRejectButtons({
       const response = await fetch(`/api/admin/submissions/${submissionId}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hasOptIn }),
+        body: JSON.stringify({}),
       })
 
       if (response.ok) {

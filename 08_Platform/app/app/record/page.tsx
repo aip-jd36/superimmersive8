@@ -477,17 +477,19 @@ export default function SubmitPage() {
         indemnification_confirmed: indemnificationAccepted,
       }
 
+      /* CATALOG DISABLED: catalog opt-in removed — video_url stored directly on submission
       const catalogData = data.catalog_opt_in ? {
         catalog_opt_in: true,
         video_url: data.video_url,
         thumbnail_url: data.thumbnail_url || null,
         public_description: data.public_description || data.logline || null,
       } : null
+      */
 
       const submissionResponse = await fetch('/api/submissions/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ submissionData, userId: user_id, catalogData }),
+        body: JSON.stringify({ submissionData: { ...submissionData, video_url: data.video_url }, userId: user_id, catalogData: null }),
       })
 
       if (!submissionResponse.ok) {
@@ -1187,10 +1189,11 @@ export default function SubmitPage() {
                     </div>
                   )}
 
-                  {/* ── Section 9: Video & Showcase ── */}
+                  {/* ── Section 9: Video ── */}
+                  {/* CATALOG DISABLED: Showcase opt-in, thumbnail, public description removed */}
                   {currentSection === 9 && (
                     <div className="space-y-4">
-                      <h3 className="text-lg font-semibold">9. Video & Showcase Listing</h3>
+                      <h3 className="text-lg font-semibold">9. Video Link</h3>
 
                       <ChainOfTitleCallout
                         fieldNumber={9}
@@ -1205,42 +1208,22 @@ export default function SubmitPage() {
                         <p className="text-xs text-gray-500 mt-1">YouTube or Vimeo only. Unlisted or public — do not set to private.</p>
                       </div>
 
+                      {/* CATALOG DISABLED: thumbnail_url, public_description, catalog_opt_in, agency note preserved below
                       <div>
                         <Label htmlFor="thumbnail_url">Thumbnail URL (optional)</Label>
                         <Input id="thumbnail_url" placeholder="https://..." {...register('thumbnail_url')} />
-                        <p className="text-xs text-gray-500 mt-1">If not provided, we'll use the video platform's default thumbnail.</p>
                       </div>
-
                       <div>
                         <Label htmlFor="public_description">Showcase Description (optional)</Label>
-                        <textarea
-                          id="public_description"
-                          className="w-full min-h-[80px] px-3 py-2 text-sm border rounded-md"
-                          placeholder="Brief description for Showcase (max 500 characters)"
-                          {...register('public_description')}
-                        />
-                        <p className="text-xs text-gray-500 mt-1">If not provided, we'll use your logline.</p>
+                        <textarea id="public_description" className="w-full min-h-[80px] px-3 py-2 text-sm border rounded-md" {...register('public_description')} />
                       </div>
-
                       {submissionMode === 'creator' && (
                         <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
-                          <div className="flex items-start gap-3">
-                            <input type="checkbox" id="catalog_opt_in" className="mt-1" {...register('catalog_opt_in')} />
-                            <div>
-                              <Label htmlFor="catalog_opt_in" className="cursor-pointer font-medium">List in Showcase (after approval)</Label>
-                              <p className="text-xs text-gray-600 mt-1">
-                                Your film appears in our Showcase with a Rights Verified badge. When brands license your work, you keep 80% of the fee. You can opt out at any time from your dashboard.
-                              </p>
-                            </div>
-                          </div>
+                          <input type="checkbox" id="catalog_opt_in" className="mt-1" {...register('catalog_opt_in')} />
+                          <Label htmlFor="catalog_opt_in">List in Showcase (after approval)</Label>
                         </div>
                       )}
-
-                      {submissionMode === 'agency' && (
-                        <div className="bg-gray-50 p-4 rounded-md text-sm text-gray-500 border border-gray-200">
-                          Showcase listing is not available for agency submissions. The Chain of Title is delivered directly to you.
-                        </div>
-                      )}
+                      */}
 
                       <div className="flex gap-4">
                         <Button type="button" variant="outline" onClick={() => setCurrentSection(submissionMode === 'agency' || selectedTier === 'creator_record' ? 7 : 8)}>← Back</Button>

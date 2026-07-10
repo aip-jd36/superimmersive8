@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { formatDate } from '@/lib/utils'
 import {
   ArrowLeft, CheckCircle, Clock, XCircle, FileText,
-  Download, ExternalLink, AlertCircle, Play
+  Download, ExternalLink, AlertCircle
 } from 'lucide-react'
 
 type PageProps = { params: { id: string } }
@@ -105,12 +105,14 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
     .eq('submission_id', params.id)
     .maybeSingle()
 
-  // Fetch catalog opt-in
+  /* CATALOG DISABLED: opt_ins fetch removed
   const { data: optIn } = await supabaseAdmin
     .from('opt_ins')
     .select('id, catalog_id, video_url, visible, opted_in')
     .eq('submission_id', params.id)
     .maybeSingle()
+  */
+  const optIn = null // CATALOG DISABLED
 
   // Parse JSONB fields — handle both string (legacy) and already-parsed (JSONB) cases
   const parseJsonb = (val: any, fallback: any) => {
@@ -221,34 +223,7 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
           </Card>
         )}
 
-        {/* Catalog Status */}
-        {optIn && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Play className="w-5 h-5" />
-                Catalog Listing
-              </CardTitle>
-              <CardDescription>
-                {optIn.catalog_id
-                  ? `Listed as ${optIn.catalog_id}`
-                  : 'Opted in — pending admin approval'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {optIn.visible && optIn.catalog_id ? (
-                <Button asChild variant="outline">
-                  <Link href={`/catalog`}>
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    View in Public Catalog
-                  </Link>
-                </Button>
-              ) : (
-                <p className="text-sm text-gray-500">Your film will appear in the public catalog once approved by SI8.</p>
-              )}
-            </CardContent>
-          </Card>
-        )}
+        {/* CATALOG DISABLED: Catalog Status card removed */}
 
         {/* Production Overview */}
         <Card>
