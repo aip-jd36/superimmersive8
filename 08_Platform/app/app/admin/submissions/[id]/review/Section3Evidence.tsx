@@ -26,8 +26,8 @@ const DOMAIN_CONTROLS: Record<string, ControlId[]> = {
 }
 
 const CONTROL_DESCRIPTIONS: Record<ControlId, string> = {
-  A01: 'Submitting party identity and authority to submit',
-  R01: 'AI tool identification — all tools named and documented',
+  A01: 'Submitter identification and accountability',
+  R01: 'AI tool identification',
   R02: 'Commercial license confirmation for each named tool',
   R03: 'Custom or fine-tuned model provenance',
   R04: 'AI output ownership and work-for-hire arrangement',
@@ -45,22 +45,22 @@ const CONTROL_DESCRIPTIONS: Record<ControlId, string> = {
 }
 
 const CONTROL_OBJECTIVES: Record<ControlId, string> = {
-  A01: 'Is the submitting party clearly identified with documented authority to submit this content?',
-  R01: 'Are all AI generation tools named and documented with enough specificity to verify license terms?',
-  R02: 'Did each named tool have a commercial license in effect during the production period?',
-  R03: 'If a custom or fine-tuned model was used, is its training data source and licensing documented?',
-  R04: 'Who owns the AI output, and is any work-for-hire arrangement clearly documented?',
-  H01: 'Is the human creative contribution documented at a level that could support a copyright claim?',
-  H02: 'If a copyright claim is made, is the basis plausible and documented?',
-  I01: 'Does the content contain recognizable third-party copyrighted visual elements not cleared by license?',
-  I02: 'Is the audio free of unlicensed third-party copyrighted content?',
-  I03: 'Does the content contain trademarks or brand elements that could create commercial risk?',
-  L01: 'Does any synthetic figure in the content resemble a specific real, identifiable person?',
-  L02: 'Are synthetic performers generic, or could any be confused with a real person?',
-  L03: 'If a real-person likeness is confirmed, is the required rights documentation provided?',
-  T01: 'Is the production workflow documented well enough to establish a coherent provenance record?',
-  D01: 'Are dates, versions, and subscription records internally consistent across all submitted documents?',
-  D02: 'Is there evidence that documentation was created or modified retroactively?',
+  A01: 'Can SI8 clearly identify who submitted this evidence package and their relationship to the project?',
+  R01: 'Have all AI tools used to create this content been clearly identified?',
+  R02: 'Does the evidence support that each AI tool was used under a license permitting this intended commercial use?',
+  R03: 'Were any custom or fine-tuned AI models used, and is their provenance sufficiently documented?',
+  R04: 'Does the evidence support that the submitter has appropriate commercial rights to use this AI-generated output?',
+  H01: 'Is the submitter\'s human creative contribution described clearly enough to understand their role in creating the work?',
+  H02: 'If authorship claims are made, are they reasonably supported by the evidence provided?',
+  I01: 'Did your independent review identify any third-party copyrighted visual content?',
+  I02: 'Did your independent review identify any third-party audio requiring commercial rights?',
+  I03: 'Did your independent review identify trademarks, logos, or brand elements that may require further review?',
+  L01: 'Does any synthetic person appear to resemble a real identifiable individual?',
+  L02: 'Are the synthetic performers generic, or do any appear uniquely identifiable?',
+  L03: 'If an identifiable person appears, is appropriate permission or documentation available?',
+  T01: 'Does the submitted production evidence describe a coherent creation workflow that matches the reviewed content?',
+  D01: 'Are dates, versions, and supporting documents internally consistent?',
+  D02: 'Does any evidence suggest documentation was reconstructed after production rather than captured during production?',
 }
 
 // ── Primitive form components ─────────────────────────────────────────────────
@@ -153,9 +153,9 @@ function ControlExtras({ id, data, update, section2 }: {
     case 'R02': return (
       <div className="space-y-2">
         <Textarea value={data.tools_reviewed} onChange={v => update({ tools_reviewed: v })} rows={2}
-          placeholder="Which tool licenses did you check? (e.g. Runway Gen-3 subscription ToS as of [date])" />
+          placeholder="Commercial licenses reviewed (e.g. Runway Gen-3 subscription ToS as of [date])" />
         <Textarea value={data.license_status} onChange={v => update({ license_status: v })} rows={2}
-          placeholder="License status per tool — include commercial use clause language or lack thereof" />
+          placeholder="Commercial rights confirmed (or outstanding issues per tool)" />
         <Sel value={data.receipts} onChange={v => update({ receipts: v })} className="w-full"
           options={['Provided', 'Partially provided', 'Not provided']} placeholder="Receipts / subscription proof…" />
       </div>
@@ -190,7 +190,7 @@ function ControlExtras({ id, data, update, section2 }: {
     case 'H01': return (
       <Sel value={data.contribution_level} onChange={v => update({ contribution_level: v })} className="w-full"
         options={['Substantial', 'Moderate', 'Minimal']}
-        placeholder="Human contribution level…" />
+        placeholder="Observed level of human creative contribution…" />
     )
 
     case 'H02': return (
@@ -222,7 +222,7 @@ function ControlExtras({ id, data, update, section2 }: {
         <Check checked={data.content_viewed} onChange={v => update({ content_viewed: v })}
           label="Reviewer watched content independently before checking declarations" />
         <Textarea value={data.elements_identified} onChange={v => update({ elements_identified: v })} rows={2}
-          placeholder="Copyrighted elements identified by reviewer (or 'none identified')" />
+          placeholder="Visual copyrighted content observed (or 'none identified')" />
       </div>
     )
 
@@ -235,12 +235,12 @@ function ControlExtras({ id, data, update, section2 }: {
             { label: 'Speech heard', value: section2.speech_heard ? 'Yes' : undefined },
           ]} />
         )}
-        <Check checked={data.audio_reviewed} onChange={v => update({ audio_reviewed: v })} label="Audio reviewed by reviewer" />
+        <Check checked={data.audio_reviewed} onChange={v => update({ audio_reviewed: v })} label="Independent audio review completed" />
         <Textarea value={data.audio_source} onChange={v => update({ audio_source: v })} rows={2}
-          placeholder="Audio source as declared (tool, platform, licensed track, original)" />
+          placeholder="Declared audio source (tool, platform, licensed track, original)" />
         <Sel value={data.license_provided} onChange={v => update({ license_provided: v })} className="w-full"
           options={['License documentation provided', 'Not required (original / AI-generated no-rights)', 'Missing']}
-          placeholder="Audio license status…" />
+          placeholder="Commercial rights for audio…" />
       </div>
     )
 
@@ -268,10 +268,10 @@ function ControlExtras({ id, data, update, section2 }: {
           ]} />
         )}
         <Check checked={data.content_viewed} onChange={v => update({ content_viewed: v })}
-          label="Reviewer watched specifically for likeness (independent of declarations)" />
+          label="Independent likeness review completed" />
         <Sel value={data.likeness_found} onChange={v => update({ likeness_found: v })} className="w-full"
           options={['None identified', 'Suspected — describe in notes', 'Confirmed — describe in notes']}
-          placeholder="Reviewer likeness finding…" />
+          placeholder="Likeness observations…" />
       </div>
     )
 
@@ -309,12 +309,12 @@ function ControlExtras({ id, data, update, section2 }: {
           <div className="text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-2">Evidence documentation</div>
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-600 w-36 flex-shrink-0">Workflow description</span>
+              <span className="text-xs text-gray-600 w-36 flex-shrink-0">Declared production workflow</span>
               <Sel value={data.workflow_provided} onChange={v => update({ workflow_provided: v })} className="flex-1"
                 options={['Provided', 'Partially provided', 'Not provided']} placeholder="Status…" />
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-600 w-36 flex-shrink-0">Prompt logs</span>
+              <span className="text-xs text-gray-600 w-36 flex-shrink-0">Prompt history / generation records</span>
               <Sel value={data.prompt_logs} onChange={v => update({ prompt_logs: v })} className="flex-1"
                 options={['Provided', 'Partially provided', 'Not provided']} placeholder="Status…" />
             </div>
@@ -326,10 +326,10 @@ function ControlExtras({ id, data, update, section2 }: {
           </div>
         </div>
         <div className="pt-2 border-t" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
-          <div className="text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-2">Workflow coherence</div>
+          <div className="text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-2">Overall workflow consistency</div>
           <Sel value={data.workflow_coherence} onChange={v => update({ workflow_coherence: v })} className="w-full"
             options={['Coherent', 'Minor inconsistencies', 'Notable inconsistencies', 'Incoherent']}
-            placeholder="Coherence assessment…" />
+            placeholder="Consistency assessment…" />
         </div>
       </div>
     )
@@ -364,7 +364,7 @@ function ControlExtras({ id, data, update, section2 }: {
             'Suspected — note indicators above',
             'Confirmed — clear evidence of retroactive documentation',
           ]}
-          placeholder="Overall retroactive documentation assessment…" />
+          placeholder="Overall assessment of documentation integrity…" />
       </div>
     )
 
