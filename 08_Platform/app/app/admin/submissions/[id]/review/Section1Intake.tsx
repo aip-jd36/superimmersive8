@@ -11,12 +11,34 @@ interface Props {
   onChange: (updates: Partial<S1>) => void
 }
 
-const CHECK_LABELS: Record<keyof S1['scope_checks'], string> = {
-  no_list_reviewed:           'No List reviewed — none of the 8 exclusions apply to this submission',
-  custodian_declaration:      'Evidence Custodian Declaration confirmed signed in submission record',
-  indemnification_confirmed:  'Indemnification warranty confirmed signed in submission record',
-  video_accessible:           'Video URL is accessible and playable',
-  certified_tier:             'Submission is SI8 Certified tier ($499)',
+const NO_LIST_ITEMS = [
+  "Celebrity likeness — real person's face used without documented consent",
+  'Voice cloning of a real, identifiable person',
+  'Explicit IP imitation — copyrighted characters, brand mascots, or protected marks',
+  'Political persuasion content',
+  'Deepfakes or content designed to deceive',
+  'Adult or explicit content',
+  'Submission without completed intake form (project brief)',
+  'No confirmed creator bench / production capacity',
+]
+
+function DeclarationBadge({ value }: { value: any }) {
+  if (value === true) return <span className="text-xs text-green-600 font-medium">✓ confirmed at submission</span>
+  if (value === false) return <span className="text-xs text-red-500 font-medium">✗ NOT confirmed — do not proceed</span>
+  return <span className="text-xs text-amber-600 font-medium">? not in platform record — check submission history before proceeding</span>
+}
+
+function TierBadge({ tier, paymentStatus }: { tier: any; paymentStatus: any }) {
+  const isCertified = !tier || tier === 'si8_certified'
+  const isPaid = paymentStatus === 'paid' || paymentStatus === 'completed'
+  const tierLabel = isCertified ? 'SI8 Certified ($499)' : tier === 'creator_record' ? 'Creator Record ($29) — not eligible for this workbook' : `tier: ${tier || 'unknown'}`
+  const payLabel = isPaid ? 'payment confirmed' : `payment: ${paymentStatus || 'not recorded'}`
+  const ok = isCertified && isPaid
+  return (
+    <span className={`text-xs font-medium ${ok ? 'text-green-600' : 'text-red-500'}`}>
+      {tierLabel} · {payLabel}
+    </span>
+  )
 }
 
 const PRIMARY_USE_LABELS: Record<string, string> = {
@@ -67,32 +89,6 @@ export function Section1Intake({ data, submission, toolsUsed, onChange }: Props)
           {tools && <div className="col-span-2"><span className="text-gray-500">AI tools: </span><span>{tools}</span></div>}
         </div>
 
-        {/* Declarations — reviewer needs to verify these before checking scope boxes */}
-        <div className="border-t pt-2 mt-1 space-y-1 text-xs" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
-          {[
-            { label: 'Evidence Custodian Declaration', value: submission.custodian_declaration },
-            { label: 'Indemnification Warranty', value: submission.indemnification_confirmed },
-          ].map(({ label, value }) => (
-            <div key={label} className="flex items-center gap-1.5">
-              <span className={value === true ? 'text-green-600' : value === false ? 'text-red-400' : 'text-amber-500'}>
-                {value === true ? '✓' : value === false ? '✗' : '?'}
-              </span>
-              <span className="text-gray-600">{label}</span>
-              <span className={`font-medium ${
-                value === true ? 'text-green-600' :
-                value === false ? 'text-red-500' :
-                'text-amber-600'
-              }`}>
-                {value === true
-                  ? 'confirmed at submission'
-                  : value === false
-                  ? 'NOT confirmed — do not proceed'
-                  : 'not in record (platform-enforced — check submission history)'}
-              </span>
-            </div>
-          ))}
-        </div>
-
         {submission.video_url && (
           <a href={submission.video_url} target="_blank" rel="noopener noreferrer"
             className="text-xs text-blue-600 hover:underline block">
@@ -140,27 +136,69 @@ export function Section1Intake({ data, submission, toolsUsed, onChange }: Props)
       {/* Scope checks */}
       <div>
         <div className="text-sm font-medium mb-3" style={{ color: '#1a1918' }}>Scope checks</div>
-        <div className="space-y-3">
-          {(Object.keys(CHECK_LABELS) as Array<keyof S1['scope_checks']>).map(key => (
-            <label key={key} className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={data.scope_checks[key]}
-                onChange={e => handleCheck(key, e.target.checked)}
-                className="mt-0.5 flex-shrink-0"
-                style={{ accentColor: '#C8900A' }}
-              />
-              <span className="text-sm text-gray-700">{CHECK_LABELS[key]}</span>
-            </label>
-          ))}
-        </div>
+        <div className="space-y-5">
 
-        {/* No List warning */}
-        {!data.scope_checks.no_list_reviewed && (
-          <div className="mt-3 p-3 rounded border text-xs" style={{ borderColor: '#fbbf24', backgroundColor: '#fffbeb', color: '#92400e' }}>
-            Review the No List before proceeding. If any exclusion applies (celebrity likeness, voice cloning, explicit IP imitation, political content, deepfakes, adult content, missing intake form) — stop and document in Scope Limitations below.
+          {/* 1. No List */}
+          <div>
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input type="checkbox" checked={data.scope_checks.no_list_reviewed}
+                onChange={e => handleCheck('no_list_reviewed', e.target.checked)}
+                className="mt-0.5 flex-shrink-0" style={{ accentColor: '#C8900A' }} />
+              <span className="text-sm text-gray-700">No List reviewed — none of the 8 exclusions apply to this submission</span>
+            </label>
+            <div className="ml-6 mt-2 p-3 rounded border text-xs space-y-1.5" style={{ borderColor: 'rgba(0,0,0,0.08)', backgroundColor: '#f5f3f0' }}>
+              <div className="text-gray-500 font-medium mb-1">Stop and document in Scope Limitations if any of these apply:</div>
+              {NO_LIST_ITEMS.map((item, i) => (
+                <div key={i} className="flex gap-2 text-gray-600">
+                  <span className="text-red-400 flex-shrink-0 font-medium">{i + 1}.</span>
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        )}
+
+          {/* 2. Custodian Declaration */}
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" checked={data.scope_checks.custodian_declaration}
+              onChange={e => handleCheck('custodian_declaration', e.target.checked)}
+              className="mt-0.5 flex-shrink-0" style={{ accentColor: '#C8900A' }} />
+            <div>
+              <div className="text-sm text-gray-700">Evidence Custodian Declaration confirmed signed in submission record</div>
+              <div className="mt-0.5"><DeclarationBadge value={submission.custodian_declaration} /></div>
+            </div>
+          </label>
+
+          {/* 3. Indemnification */}
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" checked={data.scope_checks.indemnification_confirmed}
+              onChange={e => handleCheck('indemnification_confirmed', e.target.checked)}
+              className="mt-0.5 flex-shrink-0" style={{ accentColor: '#C8900A' }} />
+            <div>
+              <div className="text-sm text-gray-700">Indemnification warranty confirmed signed in submission record</div>
+              <div className="mt-0.5"><DeclarationBadge value={submission.indemnification_confirmed} /></div>
+            </div>
+          </label>
+
+          {/* 4. Video accessible */}
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" checked={data.scope_checks.video_accessible}
+              onChange={e => handleCheck('video_accessible', e.target.checked)}
+              className="mt-0.5 flex-shrink-0" style={{ accentColor: '#C8900A' }} />
+            <span className="text-sm text-gray-700">Video URL is accessible and playable</span>
+          </label>
+
+          {/* 5. SI8 Certified tier */}
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" checked={data.scope_checks.certified_tier}
+              onChange={e => handleCheck('certified_tier', e.target.checked)}
+              className="mt-0.5 flex-shrink-0" style={{ accentColor: '#C8900A' }} />
+            <div>
+              <div className="text-sm text-gray-700">Submission is SI8 Certified tier ($499)</div>
+              <div className="mt-0.5"><TierBadge tier={submission.tier} paymentStatus={submission.payment_status} /></div>
+            </div>
+          </label>
+
+        </div>
       </div>
 
       {/* Scope limitations */}
