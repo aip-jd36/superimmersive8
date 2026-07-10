@@ -9,7 +9,9 @@ Confirm scope before beginning evidence review.
 
 No List check: Review the eight No List items. If any are triggered, stop — do not proceed to assessment. Document why the submission was halted in scope_limitations.
 
-Evidence Custodian Declaration and Indemnification: These are logged by the platform at submission time. Confirm they appear in the submission data before checking the boxes.
+Evidence Custodian Declaration and Indemnification: These are logged by the platform at submission time. Confirm they appear in the submission context box before checking the boxes. If the platform shows a green ✓, check the box. If either shows ✗ or ?, do not proceed — contact the creator.
+
+Video URL: If no URL appears in the context box, the submission was not submitted with a catalog opt-in or the video was not linked. Note "Video URL not provided — requested from creator" in Scope Limitations. Do not check the video_accessible scope box until you have confirmed the video is watchable. Email the creator immediately; assessment is paused until the URL is received.
 
 Scope limitations: Record anything that will affect the reliability of this assessment. Incomplete evidence, video access issues, unusual commercial context — all belong here. Be specific. "Reviewer unable to verify audio source independently" is useful. "Some limitations noted" is not.`,
 
