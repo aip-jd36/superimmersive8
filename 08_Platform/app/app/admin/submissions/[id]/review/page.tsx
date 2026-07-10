@@ -50,20 +50,43 @@ export default async function WorkbookPage({ params }: PageProps) {
     ? (typeof rawWorkbook === 'string' ? JSON.parse(rawWorkbook) : rawWorkbook)
     : EMPTY_WORKBOOK
 
-  // Fetch evidence files for the right panel
-  const { data: listedFiles } = await supabaseAdmin.storage
-    .from('submission-files')
-    .list(params.id, { limit: 50 })
+  // Collect evidence file paths from submission JSONB fields
+  // Files are stored at {user_id}/{folder}/{filename} — NOT under submission ID
+  const rawPaths: Array<{ label: string; path: string }> = []
 
+  // Tool receipts from tools_used JSONB
+  const toolsUsedRaw = (submission as any).tools_used
+  const toolsArr = Array.isArray(toolsUsedRaw)
+    ? toolsUsedRaw
+    : (typeof toolsUsedRaw === 'string' ? (() => { try { return JSON.parse(toolsUsedRaw) } catch { return [] } })() : [])
+  for (const tool of toolsArr) {
+    if (tool?.receipt?.path) {
+      const toolLabel = tool.tool_name || tool.toolName || tool.tool || 'Tool'
+      rawPaths.push({ label: `${toolLabel} receipt`, path: tool.receipt.path })
+    }
+  }
+
+  // Audio license from audio_disclosure JSONB
+  const audioRaw = (submission as any).audio_disclosure
+  const audioObj = audioRaw
+    ? (typeof audioRaw === 'string' ? (() => { try { return JSON.parse(audioRaw) } catch { return null } })() : audioRaw)
+    : null
+  if (audioObj?.license_path) {
+    rawPaths.push({ label: 'Audio license', path: audioObj.license_path })
+  }
+
+  // Generate signed URLs for all found paths (1-hour expiry)
   const evidenceFiles: Array<{ name: string; url: string }> = []
-  if (listedFiles && listedFiles.length > 0) {
-    const paths = listedFiles.map(f => `${params.id}/${f.name}`)
+  if (rawPaths.length > 0) {
     const { data: signed } = await supabaseAdmin.storage
       .from('submission-files')
-      .createSignedUrls(paths, 3600) // 1-hour expiry
+      .createSignedUrls(rawPaths.map(p => p.path), 3600)
     if (signed) {
-      for (let i = 0; i < listedFiles.length; i++) {
-        evidenceFiles.push({ name: listedFiles[i].name, url: signed[i]?.signedUrl ?? '' })
+      for (let i = 0; i < rawPaths.length; i++) {
+        const signedUrl = signed[i]?.signedUrl
+        if (signedUrl) {
+          evidenceFiles.push({ name: rawPaths[i].label, url: signedUrl })
+        }
       }
     }
   }
