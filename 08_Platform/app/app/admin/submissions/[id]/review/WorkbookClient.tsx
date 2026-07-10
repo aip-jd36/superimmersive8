@@ -355,11 +355,8 @@ export function WorkbookClient({
                   onClick={() => {
                     const sections: Section[] = ['1','2','3','4','5','6','7']
                     const idx = sections.indexOf(activeSection)
-                    const next = sections[idx + 1]
-                    if (next) {
-                      const nextNav = sectionNav.find(n => n.id === next)
-                      if (!nextNav?.locked) setActiveSection(next)
-                    }
+                    const next = sections[idx + 1] as Section | undefined
+                    if (next) setActiveSection(next)
                   }}
                 >
                   Next →
