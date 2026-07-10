@@ -24,7 +24,7 @@ Video URL: Video URL is a required field on all submissions. If no URL appears i
 
 Scope limitations: Record anything that will affect the reliability of this assessment. Incomplete evidence, video access issues, unusual commercial context — all belong here. Be specific. "Reviewer unable to verify audio source independently" is useful. "Some limitations noted" is not.`,
 
-  '2': `SECTION 2 — VISUAL REVIEW
+  '2': `SECTION 2 — INDEPENDENT VIDEO OBSERVATION
 
 Watch the video in full at least once before recording any observations. Do not consult the submitter's declarations first — your observations must be independent.
 

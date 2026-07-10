@@ -18,7 +18,11 @@ export const EMPTY_WORKBOOK = {
   },
   section_2: {
     video_url_confirmed: '',
-    watches_completed: 0,
+    viewing_passes: {
+      first_complete: false,
+      second_viewing: false,
+      frame_by_frame: false,
+    },
     runtime_observed: null as number | null,
     aspect_ratio: '',
     scene_count: null as number | null,
@@ -40,7 +44,7 @@ export const EMPTY_WORKBOOK = {
     trademarks_description: '',
     text_visible: false,
     text_description: '',
-    landmarks_observed: false,
+    landmarks_observed: '',
     landmarks_description: '',
     copyrighted_artwork: '',
     copyrighted_artwork_description: '',
@@ -50,6 +54,7 @@ export const EMPTY_WORKBOOK = {
     unexpected_content: false,
     unexpected_description: '',
     freeform_observations: '',
+    overall_first_impression: '',
   },
   section_3: {
     A01: { evidence: '', judgment: '', notes: '' },
@@ -150,7 +155,9 @@ export function computeGates(workbook: WorkbookData) {
   const s6 = workbook.section_6
 
   const section1Complete = Object.values(s1.scope_checks).every(Boolean)
-  const section2Complete = workbook.section_2.freeform_observations.trim().length >= 20
+  const section2Complete =
+    workbook.section_2.viewing_passes.first_complete &&
+    workbook.section_2.freeform_observations.trim().length >= 20
   const section3Complete = ALL_CONTROLS.every(id => !!(s3 as any)[id]?.judgment)
   const section5Complete = s5.findings.length > 0
   const section6Complete = !!(s6.outcome && s6.commercial_confidence && s6.signed_off)
