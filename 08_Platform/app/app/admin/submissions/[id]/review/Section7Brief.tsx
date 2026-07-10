@@ -216,7 +216,7 @@ _This section is designed for the commercial decision-maker: the brand legal tea
 
 *Outcome: ${esc(outcomeFull)}*
 
-${esc(data.executive_summary || '[COMPLETE: Write 2–4 sentence executive summary for the client's legal team. State what was assessed, what outcome was reached, and the primary basis.]')}
+${esc(data.executive_summary || "[COMPLETE: Write 2–4 sentence executive summary for the client's legal team. State what was assessed, what outcome was reached, and the primary basis.]")}
 
 == Commercial Confidence
 
