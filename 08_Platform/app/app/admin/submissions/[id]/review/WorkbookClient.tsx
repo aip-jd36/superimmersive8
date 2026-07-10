@@ -46,6 +46,7 @@ export function WorkbookClient({
   const [rightTab, setRightTab] = useState<RightTab>('guidance')
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const [savedAt, setSavedAt] = useState<string | null>(null)
+  const [activeDomain, setActiveDomain] = useState<string | null>(null)
   const [savedAtDisplay, setSavedAtDisplay] = useState('')
   const saveTimer = useRef<NodeJS.Timeout>()
   const isFirstRender = useRef(true)
@@ -127,12 +128,13 @@ export function WorkbookClient({
   }
 
   const guidanceKey = activeSection === '3'
-    ? 'R'  // default to first domain; updates as user scrolls
+    ? (activeDomain ?? '3')
     : activeSection
 
   const handleNavClick = (section: Section, locked: boolean) => {
     if (locked) return
     setActiveSection(section)
+    if (section !== '3') setActiveDomain(null)
   }
 
   // ── Progress dots ─────────────────────────────────────────────────────────
@@ -296,7 +298,7 @@ export function WorkbookClient({
               <Section3Evidence
                 data={workbook.section_3}
                 onChange={updates => updateSection('section_3', updates)}
-                onDomainFocus={domain => setRightTab('guidance')}
+                onDomainFocus={domain => { setActiveDomain(domain); setRightTab('guidance') }}
               />
             )}
             {activeSection === '4' && (
