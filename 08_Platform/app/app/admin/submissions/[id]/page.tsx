@@ -7,7 +7,6 @@ import { formatDate, formatCurrency } from '@/lib/utils'
 import { ArrowLeft, CheckCircle, XCircle, AlertCircle, ExternalLink } from 'lucide-react'
 import { ApproveRejectButtons } from './ApproveRejectButtons'
 import { GenerateRightsPackageButton } from './GenerateRightsPackageButton'
-import { ReviewerChecklist } from './ReviewerChecklist'
 import { SourceVideoUpload } from './SourceVideoUpload'
 import { ReportPDFUpload } from './ReportPDFUpload'
 import { WorkbookEntryPoint } from './WorkbookEntryPoint'
@@ -67,17 +66,6 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
     .single()
 
   const isCertified = (submission as any).tier === 'si8_certified'
-  const reviewerChecklist = (submission as any).reviewer_checklist
-  const checklistState = reviewerChecklist || {}
-  const checklistComplete = !!(
-    checklistState.pre_screen_complete &&
-    checklistState.video_watched &&
-    checklistState.tool_receipts_verified &&
-    checklistState.authorship_reviewed &&
-    checklistState.rights_docs_reviewed &&
-    checklistState.risk_assessed &&
-    (submission as any).risk_rating
-  )
 
   // Parse JSONB fields — Supabase returns JSONB as already-parsed JS objects,
   // but may return TEXT as strings. Handle both cases.
@@ -97,6 +85,8 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
   const reportPdfUrl = (submission as any).report_pdf_url as string | null
   const assessId = (submission as any).assess_id as string | null
   const workbookData = parseJsonb((submission as any).workbook_data, null)
+  // Approve gate: workbook section 6 signed off (replaces old reviewer checklist)
+  const checklistComplete = workbookData?.section_6?.signed_off === true
 
   // Provenance / Numbers Protocol fields
   const provenanceStatus = (submission as any).provenance_status as string ?? 'not_started'
@@ -325,16 +315,6 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
               </CardContent>
             </Card>
 
-            {/* Reviewer Checklist — SI8 Certified only */}
-            {isCertified && submission.status !== 'approved' && submission.status !== 'rejected' && (
-              <ReviewerChecklist
-                submissionId={params.id}
-                initialChecklist={checklistState}
-                initialRiskRating={(submission as any).risk_rating}
-                initialRiskNotes={(submission as any).risk_notes}
-              />
-            )}
-
             {/* Catalog Opt-In */}
             {optIn && (
               <Card>
@@ -485,7 +465,11 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                 </div>
                 <div>
                   <div className="text-gray-500 mb-1">Tier</div>
-                  <div className="text-gray-700 capitalize">{(submission as any).tier?.replace('_', ' ') || 'SI8 Certified'}</div>
+                  <div className="text-gray-700">{
+                    (submission as any).tier === 'si8_certified' ? 'SI8 Certified' :
+                    (submission as any).tier === 'creator_record' ? 'Creator Record' :
+                    'SI8 Certified'
+                  }</div>
                 </div>
               </CardContent>
             </Card>
