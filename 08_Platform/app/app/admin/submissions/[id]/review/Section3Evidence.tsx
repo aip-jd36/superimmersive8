@@ -334,8 +334,8 @@ export function Section3Evidence({ data, onChange, onDomainFocus }: Props) {
   return (
     <div className="space-y-2">
       <div className="mb-6">
-        <h2 className="text-lg font-semibold mb-1" style={{ color: '#1a1918' }}>§ 3  Evidence Checklist</h2>
-        <p className="text-sm text-gray-500">16 controls across 7 domains. Assign a judgment to each. All 16 must be judged to unlock Sections 4 and 5.</p>
+        <h2 className="text-lg font-semibold mb-1" style={{ color: '#1a1918' }}>§ 3  Evidence Review</h2>
+        <p className="text-sm text-gray-500">16 controls across 7 domains. Compare submitted evidence against your observations. Assign a judgment to each. All 16 must be judged to unlock Sections 4 and 5.</p>
         <div className={`mt-2 text-xs px-3 py-1.5 rounded inline-block ${
           totalDone === 16 ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-500'
         }`}>

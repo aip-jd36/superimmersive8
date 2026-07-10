@@ -137,11 +137,12 @@ export function Section2Visual({ data, submission, onChange }: Props) {
     <div className="space-y-8">
       <div>
         <h2 className="text-lg font-semibold mb-1" style={{ color: '#1a1918' }}>§ 2  Independent Video Observation</h2>
-        <p className="text-sm text-gray-500">Watch the video in full at least once before recording observations. Do not consult the submitter's declarations first.</p>
+        <p className="text-sm text-gray-500 mb-3">Watch the video in full before recording observations. Do not consult the submitter's declarations first.</p>
         {submission.video_url && (
           <a href={submission.video_url} target="_blank" rel="noopener noreferrer"
-            className="text-xs text-blue-600 hover:underline mt-1 block">
-            Open video ↗
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded"
+            style={{ backgroundColor: '#C8900A', color: '#fff' }}>
+            ↗ Open video — watch before recording
           </a>
         )}
       </div>
@@ -173,12 +174,12 @@ export function Section2Visual({ data, submission, onChange }: Props) {
             />
           </div>
           {!firstViewingDone && (
-            <p className="text-xs text-amber-600 mt-1.5">Complete the first full viewing before recording observations.</p>
+            <p className="text-xs text-amber-600 mt-1.5">Complete one uninterrupted viewing before recording observations.</p>
           )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Runtime observed (seconds)">
+          <Field label="Observed runtime (seconds)">
             <Num value={data.runtime_observed} onChange={v => u({ runtime_observed: v })} placeholder="e.g. 6" />
           </Field>
           <Field label="Scene count (approximate)">
@@ -200,8 +201,8 @@ export function Section2Visual({ data, submission, onChange }: Props) {
         </Field>
       </Group>
 
-      {/* Content Observed */}
-      <Group title="Content Observed">
+      {/* Observed Content */}
+      <Group title="Observed Content">
 
         <SubGroup title="Humans & Likeness" />
 
@@ -324,7 +325,7 @@ export function Section2Visual({ data, submission, onChange }: Props) {
       <Group title="Reviewer Notes">
         <Field
           label="Freeform observations"
-          hint="If another SI8 reviewer took over this assessment tomorrow, what would they need to know from watching this video? Include timestamps. (minimum 20 characters required to unlock Section 3)"
+          hint="What stood out? What would another SI8 reviewer need to know before reviewing this submission? Reference timestamps where useful. (minimum 20 characters required to unlock Section 3)"
         >
           <div className="border-l-2 pl-3" style={{ borderColor: '#C8900A' }}>
             <Textarea
@@ -341,21 +342,35 @@ export function Section2Visual({ data, submission, onChange }: Props) {
 
         <Field label="Overall first impression" hint="Internal calibration only — not surfaced to client or used in outcome determination.">
           <Sel value={data.overall_first_impression} onChange={v => u({ overall_first_impression: v })}
-            options={['Routine', 'Some concerns', 'Significant concerns']} placeholder="Select…" />
+            options={['Routine', 'Notable observations', 'Requires careful review']} placeholder="Select…" />
         </Field>
       </Group>
 
-      {/* Gate status */}
-      <div className={`p-3 rounded text-xs font-medium ${
-        sectionComplete
-          ? 'bg-green-50 text-green-700 border border-green-200'
-          : 'bg-gray-50 text-gray-500 border border-gray-200'
-      }`}>
-        {sectionComplete
-          ? '✓ Section 2 complete — Section 3 is unlocked'
-          : !firstViewingDone
-          ? 'Check "First complete viewing" and write freeform observations to unlock Section 3'
-          : `Freeform observations: ${data.freeform_observations.trim().length}/20 characters`}
+      {/* Gate status — requirements display */}
+      <div className="p-3 rounded border text-xs space-y-2" style={{ borderColor: 'rgba(0,0,0,0.1)', backgroundColor: '#fafaf8' }}>
+        <div className="font-semibold text-gray-600 uppercase tracking-wide text-[10px]">Requirements to continue</div>
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <span className={firstViewingDone ? 'text-green-600 font-bold' : 'text-gray-300'}>
+              {firstViewingDone ? '✓' : '○'}
+            </span>
+            <span className={firstViewingDone ? 'text-green-700' : 'text-gray-500'}>First complete viewing recorded</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={freeformOk ? 'text-green-600 font-bold' : 'text-gray-300'}>
+              {freeformOk ? '✓' : '○'}
+            </span>
+            <span className={freeformOk ? 'text-green-700' : 'text-gray-500'}>
+              Freeform observations entered
+              {!freeformOk && <span className="text-gray-400 ml-1">({data.freeform_observations.trim().length}/20 characters)</span>}
+            </span>
+          </div>
+        </div>
+        {sectionComplete && (
+          <div className="pt-2 border-t font-medium text-green-700" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
+            ✓ Section 3 unlocked
+          </div>
+        )}
       </div>
     </div>
   )

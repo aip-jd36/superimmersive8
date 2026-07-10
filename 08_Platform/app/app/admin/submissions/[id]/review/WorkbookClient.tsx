@@ -103,7 +103,7 @@ export function WorkbookClient({
   const sectionNav: Array<{ id: Section; label: string; complete: boolean; locked: boolean }> = [
     { id: '1', label: '§ 1  Intake & Scope',     complete: gates.section1Complete,  locked: false },
     { id: '2', label: '§ 2  Observation',          complete: gates.section2Complete,  locked: !gates.canEnterSection2 },
-    { id: '3', label: '§ 3  Evidence Checklist',  complete: gates.section3Complete,  locked: !gates.canEnterSection3 },
+    { id: '3', label: '§ 3  Evidence Review',     complete: gates.section3Complete,  locked: !gates.canEnterSection3 },
     { id: '4', label: '§ 4  Gap Log',             complete: false,                   locked: !gates.canEnterSection4 },
     { id: '5', label: '§ 5  Findings',            complete: gates.section5Complete,  locked: !gates.canEnterSection5 },
     { id: '6', label: '§ 6  Overall Assessment',  complete: gates.section6Complete,  locked: !gates.canEnterSection6 },

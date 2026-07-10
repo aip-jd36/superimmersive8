@@ -26,15 +26,25 @@ Scope limitations: Record anything that will affect the reliability of this asse
 
   '2': `SECTION 2 — INDEPENDENT VIDEO OBSERVATION
 
-Watch the video in full at least once before recording any observations. Do not consult the submitter's declarations first — your observations must be independent.
+┌─────────────────────────────────────────────┐
+  This section records what you observed.
+  It does not evaluate whether the submission
+  is accurate.
+└─────────────────────────────────────────────┘
 
-Purpose: This section is a record of what you saw, not a judgment of whether the submission is accurate. Discrepancies between your observations and the submitter's declarations belong in Section 3 notes.
+Discrepancies between your observations and the submitter's declarations belong in Section 3 — not here. Record what you saw; evaluate it later.
 
 Likeness observations: If you suspect a synthetic figure resembles a real identifiable person, describe the resemblance specifically. Do not write "possible likeness" — write who or what the figure resembles and why you think so.
 
 Brand and IP elements: "Possibly" is a valid answer if you cannot clearly read a logo or identify a mark. Record what you see, not what you infer.
 
 Freeform observations: Write what you would tell another reviewer in a handover note. What was unusual? What caught your attention? What would affect your assessment if the submitter's declarations turned out to be wrong?`,
+
+  '3': `SECTION 3 — EVIDENCE REVIEW
+
+Compare submitted evidence against your independent observations from Section 2.
+
+For each control, record what evidence was provided, your judgment (Verified / Partially Verified / Not Provided / Not Applicable), and any notes. Discrepancies between what you observed and what was declared belong here.`,
 
   'A': `DOMAIN A — IDENTITY & ACCOUNTABILITY
 
