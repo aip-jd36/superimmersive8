@@ -109,8 +109,13 @@ function SubGroup({ title }: { title: string }) {
 
 const PRESENCE = ['None observed', 'Possible', 'Confirmed'] as const
 
+const DEFAULT_PASSES = { first_complete: false, second_viewing: false, frame_by_frame: false }
+
 export function Section2Visual({ data, submission, onChange }: Props) {
   const u = (updates: Partial<S2>) => onChange(updates)
+
+  // Safe read — existing workbooks saved before this schema change have viewing_passes undefined
+  const passes = data.viewing_passes ?? DEFAULT_PASSES
 
   // Pre-populate URL field on first open if still empty
   useEffect(() => {
@@ -119,7 +124,7 @@ export function Section2Visual({ data, submission, onChange }: Props) {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const firstViewingDone = data.viewing_passes.first_complete
+  const firstViewingDone = passes.first_complete
   const freeformOk = data.freeform_observations.trim().length >= 20
   const sectionComplete = firstViewingDone && freeformOk
 
@@ -147,18 +152,18 @@ export function Section2Visual({ data, submission, onChange }: Props) {
           <div className="text-sm font-medium mb-2" style={{ color: '#1a1918' }}>Viewing passes</div>
           <div className="space-y-2">
             <Check
-              checked={data.viewing_passes.first_complete}
-              onChange={v => u({ viewing_passes: { ...data.viewing_passes, first_complete: v } })}
+              checked={passes.first_complete}
+              onChange={v => u({ viewing_passes: { ...passes, first_complete: v } })}
               label="First complete viewing (required before proceeding)"
             />
             <Check
-              checked={data.viewing_passes.second_viewing}
-              onChange={v => u({ viewing_passes: { ...data.viewing_passes, second_viewing: v } })}
+              checked={passes.second_viewing}
+              onChange={v => u({ viewing_passes: { ...passes, second_viewing: v } })}
               label="Second viewing — targeted review"
             />
             <Check
-              checked={data.viewing_passes.frame_by_frame}
-              onChange={v => u({ viewing_passes: { ...data.viewing_passes, frame_by_frame: v } })}
+              checked={passes.frame_by_frame}
+              onChange={v => u({ viewing_passes: { ...passes, frame_by_frame: v } })}
               label="Frame-by-frame review (at least one segment)"
             />
           </div>

@@ -156,7 +156,7 @@ export function computeGates(workbook: WorkbookData) {
 
   const section1Complete = Object.values(s1.scope_checks).every(Boolean)
   const section2Complete =
-    workbook.section_2.viewing_passes.first_complete &&
+    (workbook.section_2.viewing_passes?.first_complete ?? false) &&
     workbook.section_2.freeform_observations.trim().length >= 20
   const section3Complete = ALL_CONTROLS.every(id => !!(s3 as any)[id]?.judgment)
   const section5Complete = s5.findings.length > 0
