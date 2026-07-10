@@ -9,6 +9,49 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of July 10, 2026
+*Run: 2026-07-10 · 14 high · 14 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [AI Content Labeling Enforcement Begins in 24 Days as EU Clears Compliance Code](https://www.techtimes.com/articles/319996/20260709/ai-content-labeling-enforcement-begins-24-days-eu-clears-compliance-code.htm) | Tech Times | Thu, 09 Jul 2026 | ☐ |
+| 9 | post+update | [EU AI Act August 2 Deadline Brings New Transparency and Labelling Duties for AI](https://www.analyticsinsight.net/news/eu-ai-act-august-2-deadline-brings-new-transparency-and-labelling-duties-for-ai) | Analytics Insight | Sun, 05 Jul 2026 | ☐ |
+| 9 | post+update | [Midjourney demands Hollywood studios' secret AI plans in copyright case](https://www.indulgexpress.com/msociety/2026/Jul/04/midjourney-demands-hollywood-studios-secret-ai-plans-in-copyright-case) | Indulge Express | Sat, 04 Jul 2026 | ☐ |
+| 8 | post+update | [The tricky business of AI cloning](https://www.politico.com/newsletters/digital-future-daily/2026/07/09/the-tricky-business-of-ai-cloning-00992279) | Politico | Thu, 09 Jul 2026 | ☐ |
+| 8 | post+update | [Bombay HC grants Preity Zinta interim relief against AI deepfakes, chatbots, and merchandise misusing her personality](https://www.medianama.com/2026/07/223-bombay-hc-grants-preity-zinta-interim-relief-ai-deepfakes-chatbots-merchandise-misusing-personality/) | MediaNama | Thu, 09 Jul 2026 | ☐ |
+| 8 | post+update | [EU AI Act – how it will work](https://www.bdo.co.uk/en-gb/insights/advisory/risk-and-advisory-services/eu-ai-act-how-it-will-work) | BDO UK | Wed, 08 Jul 2026 | ☐ |
+| 8 | post+update | [Media, creative agencies' AI push under copyright spotlight, faces policy uncertainty](https://www.exchange4media.com/advertising-news/media-creative-agencies-ai-push-faces-copyright-spotlight-policy-uncertainty-156140.html) | Exchange4Media | Wed, 08 Jul 2026 | ☐ |
+| 8 | post | [AI Act](https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai) | Shaping Europe’s digital future | Tue, 07 Jul 2026 | ☐ |
+| 8 | post+update | [EU publishes free AI labelling icons ahead of August 2026 deadline](https://ppc.land/eu-publishes-free-ai-labelling-icons-ahead-of-august-2026-deadline/) | PPC Land | Sun, 05 Jul 2026 | ☐ |
+| 7 | post+update | [Google begins labeling ads created with AI](https://zamin.uz/en/technology/211533-google-begins-labeling-ads-created-with-ai.html) | Zamin.uz | Thu, 09 Jul 2026 | ☐ |
+| 7 | update | [CAA Calls Out Meta For Making Its Muse AI Video and Photo Tool Opt-Out](https://www.hollywoodreporter.com/business/digital/caa-calls-out-meta-muse-ai-video-photo-tool-instagram-1236642814/) | The Hollywood Reporter | Thu, 09 Jul 2026 | ☐ |
+| 7 | update | [Labeling AI-Generated Content](https://www.taylorwessing.com/en/insights-and-events/insights/2026/07/ki-generierte-werbeinhalte) | Taylor Wessing | Wed, 08 Jul 2026 | ☐ |
+| 7 | post | [Guardrails on Generative AI in Advertising: India’s Regulatory Gap vs Global Standards](https://agencyreporter.com/generative-ai-advertising-regulation-india-vs-global-standards/) | Agency Reporter | Tue, 07 Jul 2026 | ☐ |
+| 7 | update | [As the threat of AI replacement looms larger, Pakistan’s celebrities are fighting back](https://asianews.network/as-the-threat-of-ai-replacement-looms-larger-pakistans-celebrities-are-fighting-back/) | Asia News Network | Tue, 07 Jul 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [When AI Has a Hidden Agenda: The FTC’s New Proposal on Output Steering and Transparency](https://www.jdsupra.com/legalnews/when-ai-has-a-hidden-agenda-the-ftc-s-4888787/) | JD Supra | Thu, 09 Jul 2026 | ☐ |
+| 6 | monitor | [Council of the EU gives AI Omnibus final green light](https://www.lewissilkin.com/insights/2026/07/09/council-of-the-eu-gives-ai-omnibus-final-green-light-102nbb1) | Lewis Silkin | Thu, 09 Jul 2026 | ☐ |
+| 6 | monitor | [FTC Proposes New Policy on AI Accuracy: Hiding How an AI System is Steered May Violate Federal Law](https://www.spencerfane.com/insight/ftc-proposes-new-policy-on-ai-accuracy-hiding-how-an-ai-system-is-steered-may-violate-federal-law/) | Spencer Fane | Wed, 08 Jul 2026 | ☐ |
+| 6 | monitor | [FTC Seeks Comment on Proposed Policy Statement Addressing AI Accuracy and Output Steering](https://www.insideprivacy.com/consumer-protection/ftc-seeks-comment-on-proposed-policy-statement-addressing-ai-accuracy-and-output-steering/) | Inside Privacy | Wed, 08 Jul 2026 | ☐ |
+| 6 | monitor | [7 Best AI Video Tools for Financial Services and Fintech Brands in 2026](https://www.gearbrain.com/best-ai-video-tools-financial-services-fintech-2026-2677147496.html) | Gearbrain | Tue, 07 Jul 2026 | ☐ |
+| 6 | update | [UAE’s BlueFive Capital Leads $3 Billion Funding Round for China’s Kling AI](https://entarabi.com/en/2026/07/uaes-bluefive-capital-leads-3-billion-funding-round-for-chinas-kling-ai/) | entARABI | Sun, 05 Jul 2026 | ☐ |
+| 6 | update | [China's Video AI Leader Kling Raises $3 Billion to Battle Seedance](https://en.sedaily.com/international/2026/07/05/chinas-video-ai-leader-kling-raises-3-billion-to-battle) | Seoul Economic Daily | Sun, 05 Jul 2026 | ☐ |
+| 5 | monitor | [Global Digital Policy Roundup: June 2026](https://www.techpolicy.press/global-digital-policy-roundup-june-2026/) | Tech Policy Press | Thu, 09 Jul 2026 | ☐ |
+| 5 | monitor | [France Gives Meta 15 Days to Pay 1,100 Publishers as EU Copyright Power Shifts](https://www.techtimes.com/articles/319934/20260708/france-gives-meta-15-days-pay-1100-publishers-eu-copyright-power-shifts.htm) | Tech Times | Thu, 09 Jul 2026 | ☐ |
+| 5 | monitor | [World Cup brings the best out of UK adverts watchdog](https://sbcnews.co.uk/marketing/2026/07/03/asa-world-cup-gambling/) | sbcnews.co.uk | Fri, 03 Jul 2026 | ☐ |
+| 4 | monitor | [AI Tools for Creative Teams: How to Build a Production Workflow](https://aijourn.com/ai-tools-for-creative-teams-how-to-build-a-production-workflow/) | The AI Journal | Wed, 08 Jul 2026 | ☐ |
+| 4 | monitor | [AI video has fully matured: Seedance 2.0 takes the lead, with an in-depth horizontal evaluation of 6 mainstream tools](https://eu.36kr.com/en/p/3886403765596418) | 36 Kr | Wed, 08 Jul 2026 | ☐ |
+| 4 | monitor | [Kling AI Raises Record $2.8 Billion: What Creators Owe China Under Beijing Law](https://www.techtimes.com/articles/319708/20260704/kling-ai-raises-record-28-billion-what-creators-owe-china-under-beijing-law.htm) | Tech Times | Sat, 04 Jul 2026 | ☐ |
+| 4 | monitor | [Who's suing AI and who's signing: Microsoft signs Australian Copilot deal, US local newspapers sue](https://pressgazette.co.uk/platforms/news-publisher-ai-deals-lawsuits-openai-google/) | Press Gazette | Fri, 03 Jul 2026 | ☐ |
+
+---
+
 ## Week of July 07, 2026
 *Run: 2026-07-07 · 14 high · 9 monitor · lookback 7 days*
 
