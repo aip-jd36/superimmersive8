@@ -108,7 +108,7 @@ export function WorkbookClient({
     { id: '4', label: '§ 4  Gap Log',             complete: false,                   locked: !gates.canEnterSection4 },
     { id: '5', label: '§ 5  Findings',            complete: gates.section5Complete,  locked: !gates.canEnterSection5 },
     { id: '6', label: '§ 6  Overall Assessment',  complete: gates.section6Complete,  locked: !gates.canEnterSection6 },
-    { id: '7', label: '§ 7  Report Brief',        complete: false,                   locked: !gates.canEnterSection7 },
+    { id: '7', label: '§ 7  Report Draft',        complete: false,                   locked: !gates.canEnterSection7 },
   ]
 
   // Evidence count per section for nav badges
@@ -332,6 +332,7 @@ export function WorkbookClient({
                 data={workbook.section_7}
                 section6={workbook.section_6}
                 section5={workbook.section_5}
+                section4={workbook.section_4}
                 section3={workbook.section_3}
                 assessId={assessId}
                 submission={submission}

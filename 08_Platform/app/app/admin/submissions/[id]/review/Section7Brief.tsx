@@ -1,23 +1,44 @@
 'use client'
 
 import { useState } from 'react'
-import { Download } from 'lucide-react'
+import { Download, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { WorkbookData, DOMAIN_LABELS, OUTCOME_OPTIONS } from './workbook-schema'
 
 type S7 = WorkbookData['section_7']
 type S6 = WorkbookData['section_6']
 type S5 = WorkbookData['section_5']
+type S4 = WorkbookData['section_4']
 type S3 = WorkbookData['section_3']
 
 interface Props {
   data: S7
   section6: S6
   section5: S5
+  section4: S4
   section3: S3
   assessId: string
   submission: Record<string, any>
   onChange: (updates: Partial<S7>) => void
+}
+
+const CONTROL_LABELS_7: Record<string, string> = {
+  A01: 'Identity & Accountability',
+  R01: 'Tool Identification', R02: 'Commercial License',
+  R03: 'Custom Model Provenance', R04: 'Output Ownership',
+  H01: 'Human Contribution', H02: 'Authorship Claim',
+  I01: 'Third-Party IP (Visual)', I02: 'Third-Party IP (Audio)', I03: 'Trademarks',
+  L01: 'Likeness (Reviewer Observed)', L02: 'Performer Distinctness', L03: 'Likeness Releases',
+  T01: 'Technical Provenance',
+  D01: 'Date Consistency', D02: 'Retroactive Documentation',
+}
+
+const IMPACT_SORT: Record<string, number> = {
+  'Positive — supports clearance': 0,
+  'Neutral — informational': 1,
+  'Low risk — noted but unlikely': 2,
+  'Medium risk — relevant consideration': 3,
+  'High risk — material commercial concern': 4,
 }
 
 // Escape special Typst characters in plain text strings
@@ -70,9 +91,14 @@ function buildTypContent(
     return `    ("${esc(name)}", "${esc(judgment)}", "${esc(gapText)}"),`
   }).join('\n')
 
-  // Key findings list (numbered)
-  const findingLines = section5.findings.length > 0
-    ? section5.findings.map(f => `+ *${esc(f.domain ? DOMAIN_LABELS[f.domain] ?? f.domain : 'General')} — ${esc(f.finding.split(':')[0] || f.finding)}:* ${esc(f.finding)}\n`).join('\n')
+  // Key findings list — sorted positive-first
+  const sortedFindings = [...section5.findings].sort((a, b) => {
+    const aO = IMPACT_SORT[a.commercial_impact ?? ''] ?? 5
+    const bO = IMPACT_SORT[b.commercial_impact ?? ''] ?? 5
+    return aO - bO
+  })
+  const findingLines = sortedFindings.length > 0
+    ? sortedFindings.map(f => `+ *${esc(f.domain ? DOMAIN_LABELS[f.domain] ?? f.domain : 'General')} — ${esc(f.finding.split(':')[0] || f.finding)}:* ${esc(f.finding)}\n`).join('\n')
     : '+ No formal findings recorded.\n'
 
   // Conditions
@@ -363,10 +389,56 @@ function StringList({ label, items, onChange, placeholder, hint }: {
 }
 
 export function Section7Brief({
-  data, section6, section5, section3, assessId, submission, onChange,
+  data, section6, section5, section4, section3, assessId, submission, onChange,
 }: Props) {
   const [generating, setGenerating] = useState(false)
   const [generated, setGenerated] = useState(false)
+  const [seeded, setSeeded] = useState(false)
+
+  const canSeed = !!(section6.basis?.trim() || section4.gaps.length > 0)
+
+  const handleSeed = () => {
+    const updates: Partial<S7> = {}
+
+    // Executive summary from section 6 rationale
+    if (!data.executive_summary.trim() && section6.basis?.trim()) {
+      updates.executive_summary = section6.basis.trim()
+    }
+
+    // Residual risks from non-addressable medium/high gaps
+    if (data.residual_risks.length === 0) {
+      const risks = section4.gaps
+        .filter(g =>
+          (g.commercial_impact?.startsWith('High') || g.commercial_impact?.startsWith('Medium')) &&
+          g.addressable?.startsWith('No')
+        )
+        .map(g => {
+          const label = CONTROL_LABELS_7[g.control] || g.control
+          const text = g.impact_description?.trim() || g.what_missing?.trim()
+          return text ? `${label}: ${text}` : label
+        })
+        .filter(Boolean)
+      if (risks.length > 0) updates.residual_risks = risks
+    }
+
+    // Next steps from addressable gaps
+    if (data.next_steps.length === 0) {
+      const steps = section4.gaps
+        .filter(g => g.addressable?.startsWith('Yes') || g.addressable?.startsWith('Partially'))
+        .map(g => {
+          const label = CONTROL_LABELS_7[g.control] || g.control
+          const text = g.what_missing?.trim()
+          return text ? `${label}: ${text}` : label
+        })
+        .filter(Boolean)
+      if (steps.length > 0) updates.next_steps = steps
+    }
+
+    if (Object.keys(updates).length > 0) {
+      onChange(updates)
+      setSeeded(true)
+    }
+  }
 
   const handleGenerate = () => {
     setGenerating(true)
@@ -387,90 +459,167 @@ export function Section7Brief({
     }
   }
 
-  const outcomeLabel_ = section6.outcome ? outcomeLabel(section6.outcome) : 'Not yet set'
+  const outcomeLbl = section6.outcome ? outcomeLabel(section6.outcome) : null
+
+  // Findings sorted positive-first for preview
+  const sortedFindings = [...section5.findings].sort((a, b) => {
+    const aO = IMPACT_SORT[a.commercial_impact ?? ''] ?? 5
+    const bO = IMPACT_SORT[b.commercial_impact ?? ''] ?? 5
+    return aO - bO
+  })
 
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-lg font-semibold mb-1" style={{ color: '#1a1918' }}>§ 7  Report Brief</h2>
+        <h2 className="text-lg font-semibold mb-1" style={{ color: '#1a1918' }}>§ 7  Report Draft</h2>
         <p className="text-sm text-gray-500">
-          Fill in the client-facing report content. This feeds directly into the Typst report template.
-          Write for the client's legal team, not for SI8 internal use.
+          Review and refine the draft content for the client report. Fields are pre-populated from previous
+          sections where possible — edit as needed before generating the Typst source.
         </p>
       </div>
 
       {/* Outcome reminder */}
       <div className="p-3 rounded border text-sm" style={{ borderColor: 'rgba(0,0,0,0.08)', backgroundColor: '#f5f3f0' }}>
-        <span className="text-gray-500 text-xs">Outcome from Section 6: </span>
-        <span className="font-medium">{outcomeLabel_}</span>
+        <span className="text-gray-500 text-xs">Outcome from § 6: </span>
+        <span className="font-medium">{outcomeLbl ?? 'Not yet set'}</span>
         {section6.commercial_confidence && (
           <span className="text-xs text-gray-400 ml-3">Confidence: {section6.commercial_confidence}</span>
         )}
       </div>
 
+      {/* Seed button */}
+      {canSeed && (
+        <div className="p-3 rounded-lg border" style={{ borderColor: 'rgba(200,144,10,0.2)', backgroundColor: 'rgba(200,144,10,0.03)' }}>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="text-sm font-medium mb-0.5" style={{ color: '#1a1918' }}>Draft from previous sections</div>
+              <div className="text-xs text-gray-500">
+                Fills empty fields only — never overwrites existing content. Seeded from: § 6 assessment rationale → Executive summary · § 4 non-addressable gaps → Residual risks · § 4 addressable gaps → Next steps.
+              </div>
+              {seeded && <div className="text-xs text-green-600 mt-1.5">✓ Draft seeded — review and edit each field before generating.</div>}
+            </div>
+            <button
+              type="button"
+              onClick={handleSeed}
+              className="flex-shrink-0 flex items-center gap-1.5 text-xs px-3 py-1.5 rounded border font-medium transition-colors hover:bg-amber-50"
+              style={{ borderColor: '#C8900A', color: '#C8900A' }}
+            >
+              <Sparkles className="w-3 h-3" />
+              Seed draft
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Executive summary */}
       <Textarea
         label="Executive summary"
         value={data.executive_summary}
         onChange={v => onChange({ executive_summary: v })}
         rows={5}
-        placeholder="2–4 sentences. State what was assessed, what outcome was reached, and the primary basis. Avoid hedging — state the finding confidently. Use the exact SI8 outcome language."
-        hint="Write for the client's legal team, brand executive, or E&O underwriter."
+        placeholder="2–4 sentences. Answer: What was reviewed? What outcome was reached? Why? What should the client understand? Avoid hedging — state findings confidently."
+        hint="Write for the client's legal team, brand executive, or E&O underwriter. Seeded from § 6 assessment rationale — expand to add client-facing context."
       />
 
+      {/* Evidence reviewed */}
       <StringList
         label="Evidence reviewed"
         items={data.evidence_reviewed}
         onChange={v => onChange({ evidence_reviewed: v })}
-        placeholder="e.g. Runway Gen-3 subscription receipt (PDF, dated 2026-04-10)"
-        hint="List each piece of evidence reviewed. Be specific about format and date."
+        placeholder="e.g. Kling AI Pro subscription receipt (PDF, Jan 2026)"
+        hint="List each piece of evidence reviewed — receipts, ToS documents, the video itself, declarations. Be specific about format, tool, and date. Always entered manually."
       />
 
-      <StringList
-        label="Key findings (client-facing)"
-        items={data.key_findings}
-        onChange={v => onChange({ key_findings: v })}
-        placeholder="e.g. Commercial licenses confirmed for all three named AI generation tools"
-        hint="Mix positive and negative. Start each finding with a domain label (e.g. 'Commercial Rights —'). These populate Section 1 of the report."
-      />
+      {/* Key findings — read-only preview from Section 5 */}
+      <div>
+        <label className="block text-sm font-medium mb-1" style={{ color: '#1a1918' }}>Key findings</label>
+        <p className="text-xs text-gray-400 mb-2">
+          Seeded from § 5. Findings appear in the report exactly as documented — positive first.
+          Describe evidence, not opinions: "Commercial licensing was independently confirmed for Kling AI Pro"
+          not "Commercial rights look fine." Edit finding statements in § 5 to update.
+        </p>
+        <div className="border rounded-lg p-3 space-y-2 text-xs"
+          style={{ borderColor: 'rgba(0,0,0,0.08)', backgroundColor: '#f5f3f0' }}>
+          {sortedFindings.length === 0 ? (
+            <span className="text-gray-400">No findings documented in § 5.</span>
+          ) : (
+            sortedFindings.map((f, i) => (
+              <div key={f.id} className="flex items-start gap-2">
+                <span className="text-gray-400 flex-shrink-0">{i + 1}.</span>
+                <div className="text-gray-700">
+                  <span className="font-medium">
+                    {f.domain ? (DOMAIN_LABELS[f.domain] ?? f.domain) : 'General'}
+                  </span>
+                  {f.finding && ` — ${f.finding}`}
+                  {f.commercial_impact && (
+                    <span className={`ml-2 text-[10px] ${
+                      f.commercial_impact.startsWith('Positive') ? 'text-green-600'
+                      : f.commercial_impact.includes('High') ? 'text-red-500'
+                      : f.commercial_impact.includes('Medium') ? 'text-amber-600'
+                      : 'text-gray-400'
+                    }`}>
+                      {f.commercial_impact.split(' — ')[0]}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+          <div className="pt-1.5 border-t text-[10px] text-gray-400"
+            style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
+            ← Edit in § 5 Findings to update
+          </div>
+        </div>
+      </div>
 
-      <Textarea
-        label="Overall assessment statement"
-        value={data.overall_statement}
-        onChange={v => onChange({ overall_statement: v })}
-        rows={3}
-        placeholder="The formal outcome statement as it should appear in the report. Must use the exact SI8 outcome language from Section 6."
-        hint="Do not paraphrase the outcome — use the standard language exactly."
-      />
+      {/* Overall assessment statement — read-only */}
+      <div>
+        <label className="block text-sm font-medium mb-1" style={{ color: '#1a1918' }}>
+          Overall assessment statement
+        </label>
+        <p className="text-xs text-gray-400 mb-2">
+          Auto-mapped from § 6 outcome. Uses standard SI8 language — not editable.
+        </p>
+        <div className="border rounded-lg px-3 py-2.5 text-sm font-medium"
+          style={{ borderColor: 'rgba(200,144,10,0.3)', backgroundColor: 'rgba(200,144,10,0.04)', color: '#1a1918' }}>
+          {outcomeLbl ?? (
+            <span className="text-gray-400 font-normal">Not yet set — complete § 6 first</span>
+          )}
+        </div>
+      </div>
 
+      {/* Residual risks */}
       <StringList
         label="Residual risks"
         items={data.residual_risks}
         onChange={v => onChange({ residual_risks: v })}
-        placeholder="e.g. Training data liability: Runway's training data composition is not publicly disclosed"
-        hint="Risks that cannot be resolved through supplemental documentation. Include even for EVIDENCE_SUPPORTS outcomes."
+        placeholder="e.g. Technical Provenance: SI8 could not independently verify contemporaneous prompt history — provenance relies on the submitter's description"
+        hint="Distinguish evidence limitations from commercial risks. 'SI8 could not independently verify contemporaneous prompt history' explains why the client should care. Include even for EVIDENCE_SUPPORTS outcomes. Seeded from § 4 non-addressable gaps."
       />
 
+      {/* Recommended next steps */}
       <StringList
         label="Recommended next steps"
         items={data.next_steps}
         onChange={v => onChange({ next_steps: v })}
-        placeholder="e.g. Retain this report in the campaign file before submission to brand legal review"
-        hint="Specific and actionable. Tell the client exactly what to do, not just 'address concerns.'"
+        placeholder="e.g. Retain contemporaneous prompt history for future productions"
+        hint="Specific, actionable, prioritized. Tell the client exactly what to do — not 'improve documentation' but 'retain tool subscription receipts with project files.' Seeded from § 4 addressable gaps as a starting point — rephrase into clear client actions."
       />
 
+      {/* Post-assessment notes */}
       <Textarea
         label="Post-assessment notes (internal only)"
         value={data.post_assessment_notes}
         onChange={v => onChange({ post_assessment_notes: v })}
         rows={3}
-        placeholder="Internal notes for the post-assessment review. Not included in the client report."
-        hint="What would you do differently? What evidence was hard to assess? Any workbook or methodology improvements?"
+        placeholder="What did this assessment teach SI8? What should change before the next assessment?"
+        hint="Not included in the client report. Feeds the Case Library and Reviewer Manual v0.2 candidates. Reinforces P7 — Institutional Learning."
       />
 
       {/* Generate button */}
       <div className="pt-4 border-t space-y-3" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
         <div>
-          <div className="text-sm font-medium mb-1" style={{ color: '#1a1918' }}>Generate report source</div>
+          <div className="text-sm font-medium mb-1" style={{ color: '#1a1918' }}>Generate client report</div>
           <p className="text-xs text-gray-500">
             Downloads a pre-filled <code className="font-mono">{assessId}.typ</code> source file.
             Place it in <code className="font-mono">tools/report-pipeline/</code> and compile with:
@@ -487,12 +636,12 @@ export function Section7Brief({
           className="flex items-center gap-2"
         >
           <Download className="w-4 h-4" />
-          {generating ? 'Generating…' : generated ? 'Download again' : 'Generate .typ source'}
+          {generating ? 'Generating…' : generated ? 'Download again' : 'Generate Client Report (.typ)'}
         </Button>
 
         {generated && (
           <div className="text-xs text-green-600">
-            ✓ {assessId}.typ downloaded. Open in your editor and fill in any [TODO] markers before compiling.
+            ✓ {assessId}.typ downloaded. Review all fields before compiling to PDF.
           </div>
         )}
       </div>
