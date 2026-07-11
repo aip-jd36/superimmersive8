@@ -153,6 +153,9 @@ export function WorkbookClient({
     return val
   }
   const toolsUsed = parseJsonb(submission.tools_used, [])
+  const likenessConf = parseJsonb(submission.likeness_confirmation, {})
+  const ipConf = parseJsonb(submission.ip_confirmation, {})
+  const audioDisc = parseJsonb(submission.audio_disclosure, {})
 
   return (
     <div className="flex flex-col h-screen" style={{ backgroundColor: '#FAFAF7' }}>
@@ -400,7 +403,9 @@ export function WorkbookClient({
             )}
 
             {rightTab === 'submission' && (
-              <div className="space-y-3">
+              <div className="space-y-4">
+
+                {/* Identity */}
                 <div>
                   <div className="font-semibold text-gray-500 uppercase tracking-wide text-[10px] mb-1">Title</div>
                   <div className="font-medium">{submission.title}</div>
@@ -424,29 +429,98 @@ export function WorkbookClient({
                     <div>{submission.logline}</div>
                   </div>
                 )}
+
+                {/* AI Tools — with dates */}
                 <div>
                   <div className="font-semibold text-gray-500 uppercase tracking-wide text-[10px] mb-1">AI Tools</div>
                   {toolsUsed.length > 0 ? toolsUsed.map((t: any, i: number) => (
-                    <div key={i} className="text-gray-600">
-                      {t.tool_name || t.tool} {t.plan_type ? `(${t.plan_type})` : ''}
+                    <div key={i} className="mb-1.5">
+                      <div className="text-gray-800 text-[11px] font-medium">
+                        {t.tool_name || t.tool}{t.plan_type ? ` (${t.plan_type})` : ''}
+                      </div>
+                      {(t.start_date || t.end_date) && (
+                        <div className="text-gray-400 text-[11px]">
+                          {t.start_date}{t.end_date ? ` – ${t.end_date}` : ''}
+                        </div>
+                      )}
                     </div>
                   )) : <div className="text-gray-400">None declared</div>}
                 </div>
+
+                {/* Audio */}
+                <div>
+                  <div className="font-semibold text-gray-500 uppercase tracking-wide text-[10px] mb-1">Audio</div>
+                  <div className="text-[11px] text-gray-700">
+                    {audioDisc.source_type
+                      ? audioDisc.source_type.replace(/_/g, ' ')
+                      : <span className="text-gray-400">Not specified</span>}
+                  </div>
+                  {audioDisc.documentation && (
+                    <div className="text-[11px] text-gray-500 mt-0.5">{audioDisc.documentation}</div>
+                  )}
+                </div>
+
+                {/* Likeness declarations */}
+                <div>
+                  <div className="font-semibold text-gray-500 uppercase tracking-wide text-[10px] mb-1">Likeness</div>
+                  <div className="space-y-0.5">
+                    {([
+                      ['No real faces', likenessConf.no_real_faces],
+                      ['No real voices', likenessConf.no_real_voices],
+                      ['No lookalikes', likenessConf.no_lookalikes],
+                      ['No synthetic people to deceive', likenessConf.no_synthetic_people],
+                    ] as [string, boolean | undefined][]).map(([label, val]) => (
+                      <div key={label} className={`flex items-center gap-1.5 text-[11px] ${val === false ? 'text-red-500 font-semibold' : 'text-gray-600'}`}>
+                        <span className={val ? 'text-green-500' : val === false ? 'text-red-400' : 'text-gray-300'}>
+                          {val ? '✓' : val === false ? '✗' : '—'}
+                        </span>
+                        {label}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* IP declarations */}
+                <div>
+                  <div className="font-semibold text-gray-500 uppercase tracking-wide text-[10px] mb-1">IP & Brand</div>
+                  <div className="space-y-0.5">
+                    {([
+                      ['No copyrighted characters', ipConf.no_copyrighted_characters],
+                      ['No brand imitation', ipConf.no_brand_imitation],
+                      ['No trademarked IP', ipConf.no_trademarked_ip],
+                    ] as [string, boolean | undefined][]).map(([label, val]) => (
+                      <div key={label} className={`flex items-center gap-1.5 text-[11px] ${val === false ? 'text-red-500 font-semibold' : 'text-gray-600'}`}>
+                        <span className={val ? 'text-green-500' : val === false ? 'text-red-400' : 'text-gray-300'}>
+                          {val ? '✓' : val === false ? '✗' : '—'}
+                        </span>
+                        {label}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Authorship */}
                 <div>
                   <div className="font-semibold text-gray-500 uppercase tracking-wide text-[10px] mb-1">Authorship</div>
                   <div className="text-gray-600 text-[11px] leading-relaxed whitespace-pre-wrap">{submission.authorship_statement || '—'}</div>
                 </div>
-                {submission.video_url && (
-                  <a
-                    href={submission.video_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-blue-600 hover:underline"
-                  >
+
+                {/* Links */}
+                <div className="space-y-1.5 pt-1 border-t" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
+                  {submission.video_url && (
+                    <a href={submission.video_url} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-[11px] text-blue-600 hover:underline">
+                      <ExternalLink className="w-3 h-3" />
+                      Open submission video
+                    </a>
+                  )}
+                  <Link href={`/admin/submissions/${submissionId}`} target="_blank"
+                    className="flex items-center gap-1 text-[11px] text-gray-500 hover:text-gray-700 hover:underline">
                     <ExternalLink className="w-3 h-3" />
-                    Open submission video
-                  </a>
-                )}
+                    View full submission
+                  </Link>
+                </div>
+
               </div>
             )}
 
