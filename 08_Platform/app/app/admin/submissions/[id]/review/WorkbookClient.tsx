@@ -322,6 +322,7 @@ export function WorkbookClient({
               <Section6Assessment
                 data={workbook.section_6}
                 findings={workbook.section_5.findings}
+                gaps={workbook.section_4.gaps}
                 assessId={assessId}
                 onChange={updates => updateSection('section_6', updates)}
               />

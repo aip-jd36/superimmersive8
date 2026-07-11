@@ -56,6 +56,11 @@ export function Section5Findings({ data, onChange }: Props) {
             ✓ {data.findings.length} finding{data.findings.length !== 1 ? 's' : ''} — Section 6 unlocked
           </div>
         )}
+        {data.findings.length === 1 && (
+          <div className="mt-2 text-xs text-gray-500 bg-gray-50 border border-gray-100 px-3 py-2 rounded">
+            One finding is thin for a complete assessment. Consider adding positive findings for domains where evidence was strong — e.g. R (commercial licenses confirmed), I/L (no IP or likeness concerns identified).
+          </div>
+        )}
       </div>
 
       <div className="space-y-4">
