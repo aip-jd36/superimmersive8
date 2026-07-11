@@ -87,19 +87,19 @@ export function Section5Findings({ data, onChange }: Props) {
                 value={finding.finding}
                 onChange={e => updateFinding(i, { finding: e.target.value })}
                 rows={2}
-                placeholder="State the finding clearly. Use factual language — not 'risks noted' but 'Runway Gen-3 Pro subscription confirmed for stated generation period; commercial output license applies.'"
+                placeholder="e.g. 'Commercial licenses for all declared AI tools were adequately established for the stated generation period.' — noun-first, past-tense, factual."
                 className="w-full text-sm border rounded px-2 py-1.5 resize-none"
                 style={{ borderColor: 'rgba(0,0,0,0.12)' }}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Evidence basis</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Supporting evidence</label>
               <input
                 type="text"
                 value={finding.evidence_basis}
                 onChange={e => updateFinding(i, { evidence_basis: e.target.value })}
-                placeholder="What evidence supports this finding? (e.g. 'Stripe receipt dated 2026-04-10, plan: Pro')"
+                placeholder="Cite the specific documents reviewed — e.g. 'Kling AI Pro receipt (Jan 2026); Pro plan ToS reviewed — confirms commercial output rights for paid subscribers'"
                 className="w-full text-sm border rounded px-2 py-1.5"
                 style={{ borderColor: 'rgba(0,0,0,0.12)' }}
               />

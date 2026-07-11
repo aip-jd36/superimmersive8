@@ -148,7 +148,7 @@ export function Section4Gaps({ data, section3, onChange }: Props) {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">What is missing</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Missing evidence</label>
               <textarea
                 value={gap.what_missing}
                 onChange={e => updateGap(i, { what_missing: e.target.value })}
@@ -161,7 +161,7 @@ export function Section4Gaps({ data, section3, onChange }: Props) {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Addressable?</label>
+                <label className="block text-xs font-medium text-gray-500 mb-1">Can this gap be addressed?</label>
                 <select
                   value={gap.addressable}
                   onChange={e => updateGap(i, { addressable: e.target.value })}
@@ -191,12 +191,12 @@ export function Section4Gaps({ data, section3, onChange }: Props) {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Impact description <span className="text-gray-400 font-normal">(optional)</span></label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Commercial significance <span className="text-gray-400 font-normal">(optional)</span></label>
               <input
                 type="text"
                 value={gap.impact_description}
                 onChange={e => updateGap(i, { impact_description: e.target.value })}
-                placeholder="Brief explanation of why this gap matters commercially"
+                placeholder="e.g. Without contemporaneous prompt records, provenance of the generated output cannot be independently confirmed"
                 className="w-full text-sm border rounded px-2 py-1.5"
                 style={{ borderColor: 'rgba(0,0,0,0.12)' }}
               />
