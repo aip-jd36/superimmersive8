@@ -33,6 +33,25 @@ const CONTROL_LABELS_7: Record<string, string> = {
   D01: 'Date Consistency', D02: 'Retroactive Documentation',
 }
 
+const CONTROL_ACTIONS: Record<string, string> = {
+  A01: 'Maintain clear records identifying the submitting entity and its relationship to the production.',
+  R01: 'Retain AI tool subscription receipts and plan documentation covering the active generation period.',
+  R02: 'Confirm and retain documentation of commercial output rights for all AI tools used in production.',
+  R03: 'Provide training data provenance documentation for any custom or fine-tuned models used.',
+  R04: 'Obtain explicit written confirmation of output ownership rights from the AI tool provider.',
+  H01: 'Retain prompt history exports, generation session screenshots, or iteration records for future productions to support independent authorship verification.',
+  H02: 'Include an explicit human authorship statement identifying the creative contributor for AI-assisted content.',
+  I01: 'Conduct and retain documentation of a third-party intellectual property review for all visual elements.',
+  I02: 'Confirm and retain sync and master license documentation for all audio elements before commercial deployment.',
+  I03: 'Confirm that no third-party trademarks appear in the content without documented clearance.',
+  L01: 'Retain release documentation for any identifiable likenesses appearing in the content.',
+  L02: 'Document the basis for any AI-generated performer appearances that could constitute distinctness claims.',
+  L03: 'Obtain and retain release agreements for any performer likenesses reproduced in AI-generated output.',
+  T01: 'Maintain contemporaneous records of AI generation sessions — including tool logs, prompt records, or exported history — to enable independent technical provenance verification.',
+  D01: 'Ensure all tool subscription and licensing records reflect the generation date range of the content.',
+  D02: 'Retain all production documentation contemporaneously; retroactive documentation reduces evidentiary weight.',
+}
+
 const IMPACT_SORT: Record<string, number> = {
   'Positive — supports clearance': 0,
   'Neutral — informational': 1,
@@ -49,6 +68,8 @@ function esc(s: string): string {
     .replace(/@/g, '\\@')
     .replace(/</g, '\\<')
     .replace(/>/g, '\\>')
+    .replace(/\[/g, '\\[')
+    .replace(/\]/g, '\\]')
 }
 
 function outcomeLabel(value: string): string {
@@ -69,8 +90,164 @@ function domainWorstJudgment(domain: string, section3: S3): string {
   return 'Not Provided'
 }
 
+// ─── Domain content helpers ────────────────────────────────────────────────
+
+function formatIntendedUse(raw: any): string {
+  if (!raw) return 'Not specified'
+  if (typeof raw === 'string') { try { raw = JSON.parse(raw) } catch { return raw } }
+  if (typeof raw === 'object') {
+    const map: Record<string, string> = {
+      agency_deliverable: 'Agency deliverable',
+      brand_commercial: 'Brand commercial content',
+      social_media: 'Social media content',
+      broadcast: 'Broadcast content',
+      licensing: 'Content licensing',
+    }
+    const primary = map[raw.primary_use as string] || raw.primary_use || 'Not specified'
+    const suitable = Array.isArray(raw.suitable_categories) && raw.suitable_categories.length > 0
+      ? `; suitable for: ${raw.suitable_categories.join(', ')}` : ''
+    return primary + suitable
+  }
+  return String(raw)
+}
+
+const DOMAIN_CONTROLS: Record<string, string[]> = {
+  A: ['A01'], R: ['R01', 'R02', 'R03', 'R04'], H: ['H01', 'H02'],
+  I: ['I01', 'I02', 'I03'], L: ['L01', 'L02', 'L03'], T: ['T01'], D: ['D01', 'D02'],
+}
+
+function getDomainEvidence(letter: string, controls: string[], section3: S3, section5: S5): string {
+  const fromFindings = section5.findings
+    .filter(f => f.domain === letter).map(f => f.evidence_basis?.trim()).filter(Boolean) as string[]
+  if (fromFindings.length > 0) return fromFindings.join('. ')
+
+  const fromControls = controls
+    .map(id => {
+      const ctrl = (section3 as any)[id]
+      if (!ctrl || ctrl.judgment === 'Not Applicable') return null
+      return ctrl.notes?.trim() || null
+    }).filter(Boolean) as string[]
+  if (fromControls.length > 0) return fromControls.join('. ')
+
+  const allNA = controls.every(id => (section3 as any)[id]?.judgment === 'Not Applicable')
+  if (allNA) return 'Not applicable to this content.'
+  const status = domainWorstJudgment(letter, section3)
+  if (status === 'Not Provided') return 'No evidence provided by submitter for this domain.'
+  return 'CertForm submission and attached documentation reviewed.'
+}
+
+function getDomainFinding(letter: string, controls: string[], section3: S3, section4: S4, section5: S5): string {
+  const fromFindings = section5.findings
+    .filter(f => f.domain === letter).map(f => f.finding?.trim()).filter(Boolean) as string[]
+  if (fromFindings.length > 0) return fromFindings.join(' ')
+
+  const fromGaps = section4.gaps
+    .filter(g => controls.includes(g.control))
+    .map(g => (g.impact_description?.trim() || g.what_missing?.trim())).filter(Boolean) as string[]
+  if (fromGaps.length > 0) return fromGaps.join(' ')
+
+  const allNA = controls.every(id => (section3 as any)[id]?.judgment === 'Not Applicable')
+  if (allNA) return 'Not applicable to this content.'
+  const status = domainWorstJudgment(letter, section3)
+  if (status === 'Verified') return 'Evidence reviewed supports this domain. No material concerns identified during independent review.'
+  if (status === 'Partially Verified') return 'Evidence partially established. Specific gaps are documented in the Gap Log.'
+  if (status === 'Not Provided') return 'No evidence was provided for this domain during the assessment period.'
+  return 'See assessment workbook for detail.'
+}
+
+function getDomainImplication(letter: string, controls: string[], section3: S3, section4: S4, section5: S5): string {
+  const highGaps = section4.gaps.filter(g => controls.includes(g.control) && g.commercial_impact?.startsWith('High'))
+  if (highGaps.length > 0) {
+    const text = highGaps.map(g => (g.impact_description?.trim() || g.what_missing?.trim())).filter(Boolean).join('. ')
+    return text || 'Material evidence gap with high commercial impact — see Gap Log.'
+  }
+
+  const riskFindings = section5.findings
+    .filter(f => f.domain === letter && f.commercial_impact?.includes('risk'))
+    .map(f => f.finding?.trim()).filter(Boolean) as string[]
+  if (riskFindings.length > 0) return riskFindings.join('. ')
+
+  const medGaps = section4.gaps.filter(g => controls.includes(g.control) && g.commercial_impact?.startsWith('Medium'))
+  if (medGaps.length > 0) {
+    const text = medGaps.map(g => (g.impact_description?.trim() || g.what_missing?.trim())).filter(Boolean).join('. ')
+    return text || 'Relevant consideration — review gap detail.'
+  }
+
+  const allNA = controls.every(id => (section3 as any)[id]?.judgment === 'Not Applicable')
+  if (allNA) return 'Not applicable to this content.'
+  const status = domainWorstJudgment(letter, section3)
+  if (status === 'Verified') return 'No commercial concerns identified in this domain.'
+  if (status === 'Partially Verified') return 'Low commercial impact from identified gap. Addressable with supplemental documentation.'
+  if (status === 'Not Provided') return 'Commercial reliance on this domain is unverified pending evidence submission.'
+  return 'See Gap Log for commercial impact detail.'
+}
+
+function buildDomainBlocks(section3: S3, section4: S4, section5: S5): string {
+  return Object.entries(DOMAIN_LABELS).map(([letter, name]) => {
+    const controls = DOMAIN_CONTROLS[letter] ?? []
+    const status = domainWorstJudgment(letter, section3)
+    const evidence = getDomainEvidence(letter, controls, section3, section5)
+    const finding = getDomainFinding(letter, controls, section3, section4, section5)
+    const implication = getDomainImplication(letter, controls, section3, section4, section5)
+    return `#domain-block(
+  name: "${esc(`${letter} — ${name}`)}",
+  status: "${esc(status)}",
+  evidence-reviewed: [${esc(evidence)}],
+  finding: [${esc(finding)}],
+  commercial-implication: [${esc(implication)}],
+)`
+  }).join('\n\n')
+}
+
+function buildScopeBox(section3: S3, section5: S5): string {
+  const anyNotMissing = (ids: string[]) =>
+    ids.some(id => { const j = (section3 as any)[id]?.judgment; return j && j !== 'Not Provided' })
+
+  const items: Array<[boolean, string]> = [
+    [true, 'Submitted video content'],
+    [true, 'Production declarations'],
+    [anyNotMissing(['R01', 'R02']), 'Commercial licensing documentation'],
+    [anyNotMissing(['H01']), 'Human authorship evidence'],
+    [anyNotMissing(['I01', 'I02', 'I03']), 'Third-party IP disclosures'],
+    [anyNotMissing(['L01', 'L02', 'L03']), 'Likeness disclosures'],
+    [anyNotMissing(['T01']), 'Workflow & technical documentation'],
+    [section5.findings.some(f => !!f.evidence_basis?.trim()), 'Supporting evidence package'],
+  ]
+
+  const gridItems = items.map(([checked, label]) => {
+    const icon = checked
+      ? '#text(fill: c-verified-fg, weight: "bold")[#sym.checkmark]'
+      : '#text(fill: c-missing-fg)[○]'
+    return `[${icon} ${esc(label)}]`
+  }).join(',\n    ')
+
+  return `#assurance-box[
+  *Scope of Independent Review*
+  #v(5pt)
+  #set text(size: 9.5pt)
+  #grid(
+    columns: (1fr, 1fr),
+    row-gutter: 5pt,
+    column-gutter: 12pt,
+    ${gridItems},
+  )
+]`
+}
+
+function buildEvidenceList(data: S7, section5: S5): string {
+  if (data.evidence_reviewed.length > 0) return data.evidence_reviewed.map(e => `- ${esc(e)}`).join('\n')
+  const fromFindings = section5.findings.map(f => f.evidence_basis?.trim()).filter(Boolean) as string[]
+  const standard = [
+    'CertForm submission and production declarations',
+    'Evidence Custodian Declaration',
+    'Submitted video content (independent observation)',
+  ]
+  const combined = [...new Set([...fromFindings, ...standard])]
+  return combined.map(e => `- ${esc(e)}`).join('\n')
+}
+
 function buildTypContent(
-  data: S7, section6: S6, section5: S5, section3: S3,
+  data: S7, section6: S6, section5: S5, section4: S4, section3: S3,
   assessId: string, submission: Record<string, any>,
 ): string {
   const reportDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -85,41 +262,36 @@ function buildTypContent(
     const judgment = domainWorstJudgment(domain, section3)
     const gaps = section5.findings
       .filter(f => f.domain === domain && f.commercial_impact?.toLowerCase().includes('risk'))
-      .map(f => f.finding)
-      .join('; ')
-    const gapText = gaps || 'None identified'
-    return `    ("${esc(name)}", "${esc(judgment)}", "${esc(gapText)}"),`
+      .map(f => f.finding).join('; ')
+    return `    ("${esc(name)}", "${esc(judgment)}", "${esc(gaps || 'None identified')}"),`
   }).join('\n')
 
-  // Key findings list — sorted positive-first
-  const sortedFindings = [...section5.findings].sort((a, b) => {
-    const aO = IMPACT_SORT[a.commercial_impact ?? ''] ?? 5
-    const bO = IMPACT_SORT[b.commercial_impact ?? ''] ?? 5
-    return aO - bO
-  })
+  // Key findings — positive-first, domain label only as prefix (no duplication)
+  const sortedFindings = [...section5.findings].sort((a, b) =>
+    ((IMPACT_SORT[a.commercial_impact ?? ''] ?? 5) - (IMPACT_SORT[b.commercial_impact ?? ''] ?? 5))
+  )
   const findingLines = sortedFindings.length > 0
-    ? sortedFindings.map(f => `+ *${esc(f.domain ? DOMAIN_LABELS[f.domain] ?? f.domain : 'General')} — ${esc(f.finding.split(':')[0] || f.finding)}:* ${esc(f.finding)}\n`).join('\n')
+    ? sortedFindings.map(f =>
+        `+ *${esc(f.domain ? DOMAIN_LABELS[f.domain] ?? f.domain : 'General')}:* ${esc(f.finding)}\n`
+      ).join('\n')
     : '+ No formal findings recorded.\n'
 
-  // Conditions
   const conditionsBlock = section6.outcome === 'EVIDENCE_SUPPORTS_WITH_CONDITIONS' && section6.conditions.length > 0
     ? `== Conditions\n\n${section6.conditions.map((c, i) => `*${i + 1}. ${esc(c)}*\n\nTo be addressed before commercial deployment.\n`).join('\n')}\n`
     : ''
 
-  // Residual risks
   const residualBlock = data.residual_risks.length > 0
     ? `== Residual Commercial Risks\n\n${data.residual_risks.map(r => `- ${esc(r)}\n`).join('')}\n`
     : ''
 
-  // Next steps
   const nextStepsBlock = data.next_steps.length > 0
     ? `== Recommended Next Steps\n\n${data.next_steps.map((s, i) => `${i + 1}. ${esc(s)}\n`).join('')}\n`
     : ''
 
-  // Evidence reviewed list
-  const evidenceList = data.evidence_reviewed.length > 0
-    ? data.evidence_reviewed.map(e => `- ${esc(e)}`).join('\n')
-    : '- Submission form and attached documentation'
+  const evidenceList = buildEvidenceList(data, section5)
+  const scopeBox = buildScopeBox(section3, section5)
+  const domainBlocks = buildDomainBlocks(section3, section4, section5)
+  const intendedUse = esc(formatIntendedUse(submission.intended_use))
 
   return `// ─────────────────────────────────────────────────────────────────────────────
 // SI8 Campaign Assurance Assessment Report
@@ -242,7 +414,11 @@ _This section is designed for the commercial decision-maker: the brand legal tea
 
 *Outcome: ${esc(outcomeFull)}*
 
-${esc(data.executive_summary || "[COMPLETE: Write 2–4 sentence executive summary for the client's legal team. State what was assessed, what outcome was reached, and the primary basis.]")}
+${esc(data.executive_summary || '[Complete before delivery: Write 2-4 sentences for the client legal team. State what SI8 independently reviewed, the outcome reached, and the primary evidential basis. Example: "SI8 independently reviewed the submitted video content, AI tool disclosures, and commercial licensing documentation. The evidence reviewed supports the intended commercial use of this content as an agency deliverable. No material IP, likeness, or rights conflicts were identified during the review period."]')}
+
+== Scope of Independent Review
+
+${scopeBox}
 
 == Commercial Confidence
 
@@ -277,7 +453,7 @@ ${conditionsBlock}${residualBlock}${nextStepsBlock}
 = Section 2: Assessment Scope
 
 *Content assessed:*
-"${title}" — submitted by ${filmmaker}. Intended use: ${esc(submission.intended_use ?? 'Not specified')}. Territory: ${esc(submission.territory_preferences ?? 'Global')}.
+"${title}" — submitted by ${filmmaker}. Intended use: ${intendedUse}. Territory: ${esc(submission.territory_preferences ?? 'Global')}.
 
 *Evidence reviewed:*
 
@@ -298,16 +474,32 @@ ${evidenceList}
 
 _Detailed control-level findings for each assessment domain. Each domain is assessed against the SI8 Reviewer Workbook Schema v0.1._
 
-// [TODO: Add domain-block() calls here for each domain with findings]
-// Use the domain-block() component from si8-report-template.typ
-// Example:
-// #domain-block(
-//   name: "A — Identity & Accountability",
-//   status: "Verified",
-//   evidence-reviewed: [Description of evidence],
-//   finding: [Finding statement],
-//   commercial-implication: [Commercial implication],
-// )
+${domainBlocks}
+
+
+// ═════════════════════════════════════════════════════════════════════════════
+// SECTION 4: STANDARD ASSURANCE LANGUAGE
+// ═════════════════════════════════════════════════════════════════════════════
+
+= Section 4: Standard Assurance Language
+
+#assurance-box[
+  *Scope of Assessment*
+
+  This assessment was conducted by PMF Strategy Inc. d/b/a SuperImmersive 8 ("SI8") in accordance with the SI8 Reviewer Manual v0.1 and Reviewer Workbook Schema v0.1. The assessment covers the specific content and evidence submitted and is limited to the scope described in Section 2.
+
+  *Nature of Opinion*
+
+  This report constitutes an independent commercial assurance opinion. It is not legal advice and does not constitute a legal opinion on copyright, trademark, or other intellectual property rights. SI8's opinion reflects the evidence available at the time of assessment and cannot account for undisclosed production history or future third-party claims.
+
+  *Limitations*
+
+  SI8 relies on submitter declarations and submitted evidence. SI8 does not independently verify the completeness of production records that were not provided. Where evidence gaps are identified, they are disclosed in this Assessment and reflected in the commercial confidence rating. Buyers and underwriters should apply independent judgment to gap disclosures.
+
+  *Use of This Report*
+
+  This report is prepared for the use of the identified recipient. It may be shared with the recipient's legal counsel, E&O insurer, or procurement team for the purpose stated in the submission. Redistribution for other purposes requires SI8's prior written consent.
+]
 
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -330,12 +522,12 @@ _Chain of Title documentation for "${title}" as disclosed by the submitter and r
   [Commercial Confidence], [${esc(confidence)}],
 )
 
-_Chain of Title detail to be completed from Section 3 control findings._
+_Chain of Title detail is drawn from the domain findings in Section 3 above._
 
 
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
 // REVIEWER NOTES (INTERNAL — DELETE BEFORE DELIVERY)
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
 
 // Post-assessment notes: ${esc(data.post_assessment_notes || 'None')}
 `
@@ -424,14 +616,15 @@ export function Section7Brief({
       if (risks.length > 0) updates.residual_risks = risks
     }
 
-    // Next steps from addressable gaps
+    // Next steps from addressable gaps — client-facing action language
     if (data.next_steps.length === 0) {
       const steps = section4.gaps
         .filter(g => g.addressable?.startsWith('Yes') || g.addressable?.startsWith('Partially'))
         .map(g => {
+          if (CONTROL_ACTIONS[g.control]) return CONTROL_ACTIONS[g.control]
           const label = CONTROL_LABELS_7[g.control] || g.control
           const text = g.what_missing?.trim()
-          return text ? `${label}: ${text}` : label
+          return text ? `${label}: ${text}` : `Provide documentation for ${label}.`
         })
         .filter(Boolean)
       if (steps.length > 0) updates.next_steps = steps
@@ -447,7 +640,7 @@ export function Section7Brief({
     setGeneratingPdf(true)
     setPdfError(null)
     try {
-      const content = buildTypContent(data, section6, section5, section3, assessId, submission)
+      const content = buildTypContent(data, section6, section5, section4, section3, assessId, submission)
       const res = await fetch(
         `/api/admin/submissions/${encodeURIComponent(submission.id)}/generate-report`,
         {
@@ -480,7 +673,7 @@ export function Section7Brief({
   const handleDownloadTyp = () => {
     setGenerating(true)
     try {
-      const content = buildTypContent(data, section6, section5, section3, assessId, submission)
+      const content = buildTypContent(data, section6, section5, section4, section3, assessId, submission)
       const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -554,8 +747,8 @@ export function Section7Brief({
         value={data.executive_summary}
         onChange={v => onChange({ executive_summary: v })}
         rows={5}
-        placeholder="2–4 sentences. Answer: What was reviewed? What outcome was reached? Why? What should the client understand? Avoid hedging — state findings confidently."
-        hint="Write for the client's legal team, brand executive, or E&O underwriter. Seeded from § 6 assessment rationale — expand to add client-facing context."
+        placeholder={`e.g. "SI8 independently reviewed the submitted video content, AI tool disclosures, and commercial licensing documentation for [Title]. The evidence reviewed supports the intended commercial use of this content as [intended use]. No material IP, likeness, or rights conflicts were identified during the review period. This assessment was conducted in accordance with the SI8 Reviewer Manual v0.1." — institutional tone, not colloquial.`}
+        hint="Write for a brand GC, agency EP, or E&O underwriter. SOC 2 / Deloitte style: what was reviewed, outcome, evidential basis, commercial conclusion. Seeded from § 6 rationale — expand into client-facing language."
       />
 
       {/* Evidence reviewed */}
