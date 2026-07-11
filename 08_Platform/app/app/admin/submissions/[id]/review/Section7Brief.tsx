@@ -393,6 +393,9 @@ export function Section7Brief({
 }: Props) {
   const [generating, setGenerating] = useState(false)
   const [generated, setGenerated] = useState(false)
+  const [generatingPdf, setGeneratingPdf] = useState(false)
+  const [pdfGenerated, setPdfGenerated] = useState(false)
+  const [pdfError, setPdfError] = useState<string | null>(null)
   const [seeded, setSeeded] = useState(false)
 
   const canSeed = !!(section6.basis?.trim() || section4.gaps.length > 0)
@@ -440,7 +443,41 @@ export function Section7Brief({
     }
   }
 
-  const handleGenerate = () => {
+  const handleGeneratePdf = async () => {
+    setGeneratingPdf(true)
+    setPdfError(null)
+    try {
+      const content = buildTypContent(data, section6, section5, section3, assessId, submission)
+      const res = await fetch(
+        `/api/admin/submissions/${encodeURIComponent(submission.id)}/generate-report`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ typContent: content, assessId }),
+        }
+      )
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+        throw new Error(err.error || `HTTP ${res.status}`)
+      }
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${assessId}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      setPdfGenerated(true)
+    } catch (e: any) {
+      setPdfError(e?.message || 'PDF generation failed')
+    } finally {
+      setGeneratingPdf(false)
+    }
+  }
+
+  const handleDownloadTyp = () => {
     setGenerating(true)
     try {
       const content = buildTypContent(data, section6, section5, section3, assessId, submission)
@@ -616,34 +653,58 @@ export function Section7Brief({
         hint="Not included in the client report. Feeds the Case Library and Reviewer Manual v0.2 candidates. Reinforces P7 — Institutional Learning."
       />
 
-      {/* Generate button */}
+      {/* Generate client report */}
       <div className="pt-4 border-t space-y-3" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
         <div>
           <div className="text-sm font-medium mb-1" style={{ color: '#1a1918' }}>Generate client report</div>
           <p className="text-xs text-gray-500">
-            Downloads a pre-filled <code className="font-mono">{assessId}.typ</code> source file.
-            Place it in <code className="font-mono">tools/report-pipeline/</code> and compile with:
-            <code className="block font-mono text-xs mt-1 p-2 bg-gray-100 rounded">
-              typst compile {assessId}.typ {assessId}.pdf
-            </code>
+            Compiles the report to PDF server-side and downloads it directly.
+            Review all fields above before generating.
           </p>
         </div>
 
         <Button
-          onClick={handleGenerate}
-          disabled={generating}
+          onClick={handleGeneratePdf}
+          disabled={generatingPdf}
           style={{ backgroundColor: '#C8900A', color: 'white' }}
           className="flex items-center gap-2"
         >
           <Download className="w-4 h-4" />
-          {generating ? 'Generating…' : generated ? 'Download again' : 'Generate Client Report (.typ)'}
+          {generatingPdf ? 'Compiling PDF…' : pdfGenerated ? 'Download PDF again' : 'Generate Client Report (PDF)'}
         </Button>
 
-        {generated && (
+        {pdfGenerated && !pdfError && (
           <div className="text-xs text-green-600">
-            ✓ {assessId}.typ downloaded. Review all fields before compiling to PDF.
+            ✓ {assessId}.pdf downloaded.
           </div>
         )}
+
+        {pdfError && (
+          <div className="text-xs text-red-600 bg-red-50 border border-red-100 rounded px-3 py-2">
+            <span className="font-medium">PDF generation failed:</span> {pdfError}
+            <div className="mt-1 text-gray-500">
+              Download the source file below to diagnose — open in{' '}
+              <a href="https://typst.app" target="_blank" rel="noreferrer" className="underline">typst.app</a>{' '}
+              or run <code className="font-mono">typst compile {assessId}.typ</code> locally.
+            </div>
+          </div>
+        )}
+
+        <div className="pt-1">
+          <button
+            type="button"
+            onClick={handleDownloadTyp}
+            disabled={generating}
+            className="text-xs text-gray-400 hover:text-gray-600 underline"
+          >
+            {generating ? 'Downloading…' : generated ? 'Download source again (.typ)' : 'Download source (.typ)'}
+          </button>
+          {generated && !pdfError && (
+            <span className="text-xs text-gray-400 ml-2">
+              — place in <code className="font-mono">tools/report-pipeline/</code> to compile manually
+            </span>
+          )}
+        </div>
       </div>
     </div>
   )
