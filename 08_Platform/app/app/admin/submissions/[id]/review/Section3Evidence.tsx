@@ -51,7 +51,7 @@ const CONTROL_OBJECTIVES: Record<ControlId, string> = {
   R03: 'Were any custom or fine-tuned AI models used, and is their provenance sufficiently documented?',
   R04: 'Does the evidence support the submitter\'s commercial rights to use the AI-generated output?',
   H01: 'Is the submitter\'s human creative contribution sufficiently documented to understand their role in creating the work?',
-  H02: 'If authorship claims are made, are they reasonably supported by the evidence provided?',
+  H02: 'Does the submission assert human authorship, and is that assertion reasonably supported by the evidence?',
   I01: 'Did your independent review identify any third-party copyrighted visual content?',
   I02: 'Did your independent review identify any third-party audio requiring commercial rights?',
   I03: 'Did your independent review identify trademarks, logos, or brand elements that may require further review?',
@@ -197,7 +197,7 @@ function ControlExtras({ id, data, update, section2 }: {
       <div className="space-y-2">
         <Sel value={data.copyright_claim} onChange={v => update({ copyright_claim: v })} className="w-full"
           options={['Yes — claiming copyright', 'No claim stated', 'Unclear']}
-          placeholder="Does the submitter make an authorship or copyright claim?" />
+          placeholder="Does the submission assert human authorship?" />
         {data.copyright_claim === 'Yes — claiming copyright' && (
           <>
             <Textarea value={data.claim_basis} onChange={v => update({ claim_basis: v })} rows={2}
