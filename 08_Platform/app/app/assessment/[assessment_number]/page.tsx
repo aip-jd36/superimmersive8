@@ -518,6 +518,9 @@ function NumbersVerificationSection({ assessment }: { assessment: VerificationPa
     )
   }
 
+  // TODO (ADR-001): This URL is provider-specific. If SI8 migrates from Numbers Protocol
+  // to a different provenance provider, this URL pattern will need updating.
+  // See: lib/assessments/ADR-001-provenance-provider-persistence.md
   const verifyUrl = `https://verify.numbersprotocol.io/asset-profile?nid=${numbers_asset_id}`
 
   return (

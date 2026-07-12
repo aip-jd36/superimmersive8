@@ -89,3 +89,53 @@ None. All PRD boundaries were followed. Where the repository conflicted with the
 Customer accounts, dashboard, search, admin UI for assessments, API endpoints for assessments, report version browser, QR codes, bulk operations, analytics, customer report downloads, report editing.
 
 The existing admin UI at `app/admin/submissions/[id]/` continues to serve the workbook, sign, and deliver functions — it is not replaced by this implementation.
+
+---
+
+## Hardening Pass — 2026-07-12
+
+Applied as part of Assessment Service v1.0 hardening review.
+
+### Area 1 — Atomic assessment number generation (IMPLEMENTED)
+
+`generateAssessmentNumber()` previously counted rows and added 1 in application code. This is not atomic under concurrent creation. Two callers could observe the same count and generate the same `ASSESS-NNN` value. The UNIQUE constraint would catch the duplicate at INSERT time, but with no retry, the second creation would fail hard.
+
+**Fix:** Migration `20260712000001_atomic_assessment_number.sql` creates:
+- `assessments_number_seq` — PostgreSQL sequence, globally monotone, no per-day reset
+- `generate_assessment_number()` DB function — calls `nextval()`, formats the string, returns `ASSESS-NNN-YYYY-MM-DD`
+
+`generateAssessmentNumber()` in `repository.ts` now calls `supabase.rpc('generate_assessment_number')` instead of counting rows.
+
+New test file: `__tests__/assessments/assessment-number.test.ts` — covers format contract, sequential uniqueness contract, Verification Page URL construction.
+
+### Area 2 — Verification Page terminology (COMMENT CORRECTION)
+
+The `findAssessmentForVerification()` comment in `repository.ts` now explicitly states:
+
+> "The Verification Page is a public, read-only representation of the authoritative Assessment Registry. The Registry (this table) is the source of truth; the Verification Page reflects it — it does not define it."
+
+No behavioral change.
+
+### Area 3 — Numbers coupling (ADR WRITTEN, TODO ADDED)
+
+`ADR-001-provenance-provider-persistence.md` documents: what the coupling is, why it is not a v1 problem, the trigger for migration, and the likely schema change. A TODO comment was added to `page.tsx` at the hard-coded Numbers verify URL construction.
+
+No code changes to production logic.
+
+### Area 4 — Archival behavior (RLS HARDENED, ARCHIVAL-NOTE WRITTEN)
+
+Migration `20260712000001_atomic_assessment_number.sql` adds an explicit `RESTRICTIVE` RLS policy denying DELETE for `anon` and `authenticated` roles. The prior policy relied on implicit denial (no permissive policy = blocked by default when RLS is enabled). The explicit denial is clearer and survives future policy additions.
+
+`ARCHIVAL-NOTE.md` documents the four layers of delete-prevention, the distinction between archival and withdrawal, and what would need to change before deletion is permitted.
+
+Confirmed: `repository.ts` exposes no delete function. No API routes touch `assessments`.
+
+### Area 5 — Lifecycle auditability (ADR WRITTEN)
+
+`ADR-002-lifecycle-audit-log.md` documents the current traceability state, the accountability gap (no immutable log of intermediate status transitions), the recommended `assessment_events` table design, and the trigger conditions for implementation. Deferred to v2.
+
+### Area 6 — Aggregate boundary (NO CHANGES NEEDED)
+
+`service.ts` is the single orchestration point for writes. `repository.ts` is persistence-only. `page.tsx` reads directly from `repository.ts` for the public Verification Page (acceptable: read-only path with no orchestration logic). No business logic duplication found.
+
+The legacy `sign/route.ts` is a parallel flow that writes to `submissions` columns — it does not touch the `assessments` table and continues to operate independently.

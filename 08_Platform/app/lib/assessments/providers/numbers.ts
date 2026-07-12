@@ -95,9 +95,11 @@ export class NumbersProvenanceProvider implements ProvenanceProvider {
     const formData = new FormData()
 
     // TODO (Numbers API): Confirm file field name ('file') and MIME type handling.
+    // Buffer<ArrayBufferLike> is not directly assignable to BlobPart in strict TS —
+    // cast via Uint8Array which is always a valid BlobPart.
     formData.append(
       'file',
-      new Blob([asset], { type: 'video/mp4' }),
+      new Blob([new Uint8Array(asset)], { type: 'video/mp4' }),
       `${assessment.assessmentNumber}.mp4`,
     )
 
