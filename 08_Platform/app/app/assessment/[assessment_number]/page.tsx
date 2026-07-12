@@ -500,10 +500,10 @@ function NumbersVerificationSection({ assessment }: { assessment: VerificationPa
     return null
   }
 
-  // Numbers verification link unavailable (signing in progress or failed)
+  // Technical Provenance link unavailable (signing in progress, failed, or retrying)
   if (!numbers_asset_id) {
     return (
-      <Section title="Provenance Verification">
+      <Section title="Technical Provenance">
         <div
           style={{
             padding: '1rem 1.25rem',
@@ -524,7 +524,7 @@ function NumbersVerificationSection({ assessment }: { assessment: VerificationPa
   const verifyUrl = `https://verify.numbersprotocol.io/asset-profile?nid=${numbers_asset_id}`
 
   return (
-    <Section title="Provenance Verification">
+    <Section title="Technical Provenance">
       <div
         style={{
           padding: '1rem 1.25rem',
@@ -534,9 +534,7 @@ function NumbersVerificationSection({ assessment }: { assessment: VerificationPa
         }}
       >
         <p style={{ margin: '0 0 0.875rem' }}>
-          The source video associated with this assessment has been registered with the
-          Numbers Protocol network. The registration embeds SI8&apos;s assessment metadata
-          as C2PA credentials in the file.
+          Machine-readable provenance information is associated with this assessed asset.
         </p>
         <a
           href={verifyUrl}
@@ -552,7 +550,7 @@ function NumbersVerificationSection({ assessment }: { assessment: VerificationPa
             textDecoration: 'none',
           }}
         >
-          View on Numbers Protocol
+          View Content Credentials
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ flexShrink: 0 }}>
             <path
               d="M2.5 2.5H9.5M9.5 2.5V9.5M9.5 2.5L2.5 9.5"

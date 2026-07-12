@@ -21,13 +21,14 @@ type ProcessingStatus =
   | 'FAILED'
 
 // Mirrors PERMITTED_TRANSITIONS in repository.ts — must stay in sync.
+// FAILED is recoverable: FAILED → SIGNING is permitted (recovery path).
 const PERMITTED_TRANSITIONS: Record<ProcessingStatus, ProcessingStatus[]> = {
   DRAFT:            ['REPORT_GENERATED', 'FAILED'],
   REPORT_GENERATED: ['SIGNING', 'FAILED'],
   SIGNING:          ['SIGNED', 'FAILED'],
   SIGNED:           ['DELIVERED', 'FAILED'],
   DELIVERED:        ['FAILED'],
-  FAILED:           [],
+  FAILED:           ['SIGNING'],
 }
 
 function isPermitted(from: ProcessingStatus, to: ProcessingStatus): boolean {
@@ -49,11 +50,15 @@ describe('Processing status transitions', () => {
     }
   })
 
-  test('FAILED is terminal — no further transitions', () => {
-    const statuses: ProcessingStatus[] = [
-      'DRAFT', 'REPORT_GENERATED', 'SIGNING', 'SIGNED', 'DELIVERED', 'FAILED',
+  test('FAILED is recoverable — only SIGNING is permitted from FAILED', () => {
+    // FAILED → SIGNING is the one permitted recovery transition.
+    expect(isPermitted('FAILED', 'SIGNING')).toBe(true)
+
+    // All other transitions from FAILED remain forbidden.
+    const forbidden: ProcessingStatus[] = [
+      'DRAFT', 'REPORT_GENERATED', 'SIGNED', 'DELIVERED', 'FAILED',
     ]
-    for (const s of statuses) {
+    for (const s of forbidden) {
       expect(isPermitted('FAILED', s)).toBe(false)
     }
   })
