@@ -210,7 +210,7 @@ export async function signAssessment(
     verificationUrl:      assessment.verification_url,
   }
 
-  let signedResult: { signedAssetUrl: string; provenanceAssetId: string; verificationUrl?: string }
+  let signedResult: { signedAssetUrl: string; provenanceAssetId: string; verificationUrl?: string; signedAssetBuffer?: Buffer }
 
   if (assessment.numbers_asset_id) {
     // numbers_asset_id is set but signed_asset_path is not — partial success.
