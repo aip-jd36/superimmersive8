@@ -68,7 +68,7 @@ export function SignAndDeliverPanel({
       const res = await fetch(`/api/admin/submissions/${submissionId}/sign`, { method: 'POST' })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error ?? 'Signing failed')
+        setError(`${data.error ?? 'Signing failed'}${data.detail ? `: ${data.detail}` : ''}`)
       } else {
         router.refresh()
       }
