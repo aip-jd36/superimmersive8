@@ -170,12 +170,12 @@ Future Campaign Readiness ──►     [No current process — gap]            
 | Field | Detail |
 |-------|--------|
 | Customer stage | Report Delivery |
-| SI8 internal action | (1) Complete Section 6 (Report Brief) of the Reviewer Workbook. (2) Transfer content into Assessment Report Template. (3) Replace all bracketed fields. (4) Delete reviewer instructions. (5) Confirm Standard Assurance Language is verbatim. (6) Export to PDF. (7) Send to customer via email with a brief cover note. (8) Complete Post-Assessment Review within 24 hours. |
-| Artifact used | `SI8-Assessment-Report-Template-v0.1.md`, `SI8-Post-Assessment-Review-Template-v0.1.md`, delivery email (no template — gap) |
+| SI8 internal action | (1) Complete Section 6 (Report Brief) of the Reviewer Workbook. (2) Transfer content into Assessment Report Template. (3) Replace all bracketed fields. (4) Delete reviewer instructions. (5) Confirm Standard Assurance Language is verbatim. (6) Export to PDF. (7) Upload PDF + source video via admin panel. (8) Sign assessment via admin Sign & Deliver panel — issues Assessment Registry record + Public Assessment Record URL. (9) Send to customer via email using Report Delivery SOP (PDF + Verification Page URL). (10) Mark Delivered in admin panel. (11) Complete Post-Assessment Review within 24 hours. |
+| Artifact used | `SI8-Assessment-Report-Template-v0.2.md`, `SI8-Post-Assessment-Review-Template-v0.1.md`, `SI8-Report-Delivery-SOP-v0.1.md`, Admin Sign & Deliver panel (`app.superimmersive8.com/admin`), Public Assessment Record (`app.superimmersive8.com/assessment/{number}`) |
 | Owner | JD |
-| Manual or automated | Manual |
-| Status | **Report Template exists. Post-Assessment Review Template exists.** **Gap: No Report Delivery SOP. No delivery email template.** |
-| Notes | The delivery email is the last customer-facing touchpoint before follow-up. It should include: a brief personal note from JD, the PDF report as an attachment, and an offer to discuss findings. No template currently exists for this email. A simple template (3-5 lines + offer to discuss) would ensure consistency. This is the highest-priority operational gap at current stage. |
+| Manual or automated | Assessment signing: automated (admin-triggered). PDF + video upload: manual. Delivery email: manual. |
+| Status | **Report Template v0.2 exists. Report Delivery SOP v0.1 exists. Sign & Deliver panel live. Public Assessment Record live.** **Gap: No delivery email template integrated with Verification Page URL.** |
+| Notes | The Sign & Deliver panel in the admin interface drives the full signing lifecycle: prerequisites checklist (video uploaded, PDF uploaded, workbook signed off) → Issue Assessment button → Registry record created + Verification Page URL issued → Mark Delivered. The Public Assessment Record is a permanent public URL for the assessment that customers can share with buyers. The Report Delivery SOP covers sending both the PDF and the Verification Page URL in the delivery email. Report Delivery SOP exists at `06_Operations/reviewer-workbook/SI8-Report-Delivery-SOP-v0.1.md`; a dedicated delivery email template integrating the Verification Page URL is the remaining gap. |
 
 ---
 
@@ -223,10 +223,14 @@ Future Campaign Readiness ──►     [No current process — gap]            
 | Engagement Confirmation Email template | `06_Operations/customer-onboarding/` | Purchase | Yes | Exists v0.1 — manual send |
 | Reviewer Workbook | `06_Operations/reviewer-workbook/` | Assessment | No | Exists v0.1 |
 | Reviewer Workbook Schema | `06_Operations/reviewer-workbook/` | Assessment | No | Exists v0.1 |
-| Assessment Report Template | `06_Operations/reviewer-workbook/` | Report Delivery | Yes | Exists v0.1 |
-| Standard Assurance Language | Embedded in Report Template | Report Delivery | Yes | Exists v0.1 |
+| Assessment Report Template | `06_Operations/reviewer-workbook/` | Report Delivery | Yes | Exists v0.2 |
+| Standard Assurance Language | Embedded in Report Template | Report Delivery | Yes | Exists v0.2 |
+| Report Delivery SOP | `06_Operations/reviewer-workbook/SI8-Report-Delivery-SOP-v0.1.md` | Report Delivery | No | Exists v0.1 |
+| Admin Sign & Deliver panel | `app.superimmersive8.com/admin` | Report Delivery | No | Exists — live Jul 12, 2026 |
+| Public Assessment Record | `app.superimmersive8.com/assessment/{number}` | Report Delivery | Yes | Exists — live Jul 12, 2026 |
+| Assessment Registry | Supabase `assessments` table | Report Delivery | No | Exists — live Jul 12, 2026 |
 | Post-Assessment Review Template | `06_Operations/reviewer-workbook/` | Post-Delivery | No | Exists v0.1 |
-| Delivery email template | — | Report Delivery | Yes | **Gap — Needs Draft** |
+| Delivery email template (with Verification Page URL) | — | Report Delivery | Yes | **Gap — Needs Draft** |
 | Submission triage checklist | — | Evidence Submission | No | **Gap — Needs Draft** |
 | Follow-up / clarification protocol | — | Follow-Up | No | **Gap — After Assessment 1** |
 | Future campaign re-engagement | — | Future Readiness | Yes | **Gap — Future** |
@@ -256,7 +260,7 @@ The following gaps are identified in the current operational workflow. Priority 
 
 | Gap | Stage | Priority | Why |
 |-----|-------|----------|-----|
-| Report Delivery SOP + delivery email template | Report Delivery | **High — before Assessment 1** | Last customer touchpoint before follow-up; inconsistent delivery undermines the professional positioning |
+| Delivery email template with Verification Page URL | Report Delivery | **High — before Assessment 1** | Report Delivery SOP exists; delivery email template is the remaining gap. Must include Verification Page URL alongside PDF attachment. |
 | Submission triage checklist | Evidence Submission | **Medium — before Assessment 1** | Ensures JD knows when a submission is ready to review vs. needs follow-up |
 | Mid-review acknowledgment communication | Assessment In Progress | **Medium — after Assessment 1** | Reduces customer anxiety during the review window |
 | Follow-up / clarification protocol | Follow-Up | **Low — after Assessment 1** | Can be improvised for first assessment; write after seeing real question patterns |

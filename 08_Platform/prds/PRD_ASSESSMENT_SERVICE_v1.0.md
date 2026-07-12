@@ -401,6 +401,55 @@ Do not claim implementation is production-ready until the Numbers API contract i
 
 ---
 
+## Implementation Notes (July 12, 2026)
+
+**Status:** Implemented and live. First live assessment issued: `ASSESS-005-2026-07-12` (Cloud World).
+
+### Deliverables checklist
+
+| # | Deliverable | Status |
+|---|-------------|--------|
+| 1 | Database migration — `assessments` table | ✅ Live (`20260712000000_create_assessments_table.sql`) |
+| 2 | TypeScript domain types and enums | ✅ `app/types/assessment.ts` |
+| 3 | Assessment repository / service layer | ✅ `app/lib/assessments/repository.ts` + `service.ts` |
+| 4 | `ProvenanceProvider` contract | ✅ Defined in `types/assessment.ts` |
+| 5 | `NumbersProvenanceProvider` adapter | ✅ `app/lib/assessments/providers/numbers.ts` — TODOs remain for unconfirmed API details |
+| 6 | `MockProvenanceProvider` | ✅ `app/lib/assessments/providers/mock.ts` |
+| 7 | Signed-file storage flow (private bucket) | ✅ `signed-assets` bucket; path `{assessment_number}/signed.mp4` |
+| 8 | Public Verification Page | ✅ `app/app/assessment/[assessment_number]/page.tsx` |
+| 9 | Institutional-status rendering | ✅ ACTIVE / SUPERSEDED / WITHDRAWN states |
+| 10 | Error states | ✅ Unknown assessment → 404; Numbers absent → section hidden |
+| 11 | Tests | ✅ 23 tests in `__tests__/assessments/verification-page-display.test.ts` |
+| 12 | Environment variable documentation | ✅ `NUMBERS_API_KEY` — server-side only; mock provider used when absent |
+| 13 | Implementation note | This section |
+
+### Deviations from PRD spec
+
+**Asset section added (not in PRD)**
+The Verification Page includes an Asset section (Title, Media Type, Runtime) placed between Assessment Details and Assessment Scope. Title and runtime are sourced from a `submissions` join in `findAssessmentForVerification()`; only `title` and `runtime` fields are extracted — no IDs, creator identity, or storage paths are exposed. `asset_media_type` is hardcoded `"Video"` for all v1 assessments. This is a pure additive extension; no PRD boundary was crossed. `VerificationPageData` extended with `asset_title: string`, `asset_runtime: number | null`, `asset_media_type: string`.
+
+Future: `assessments` table may carry its own `asset_title` to allow reviewer-controlled public asset title independent of the submission row.
+
+**Numbers-unavailable state: section hidden (PRD said "temporarily unavailable" message)**
+PRD specified: *"Numbers unavailable → 'Provenance verification is temporarily unavailable.'"*
+Implemented: when `numbers_asset_id` is null, the Technical Provenance section is hidden entirely. Rationale: mock-signed assessments are not "temporarily unavailable" — Numbers was never called. Displaying a "temporarily unavailable" message would be misleading. The section appears only when a real `numbers_asset_id` is present. Recommended PRD update: replace the error state row with *"When `numbers_asset_id` is null (mock mode or not yet signed), the Technical Provenance section is omitted."*
+
+**`SignedAssetResult` extended with `signedAssetBuffer?: Buffer`**
+PRD interface did not include `signedAssetBuffer`. Added to allow the `MockProvenanceProvider` to return the asset buffer directly, bypassing the HTTP download step in `signAssessment()`. `NumbersProvenanceProvider` leaves this field undefined; the service falls back to fetching from `signedAssetUrl`. No behavioral change for the real provider path.
+
+**Reviewer organization display transformation**
+The `reviewer_organization` field stores `"PMF Strategy Inc. d/b/a SuperImmersive 8"` (full legal name). The Verification Page extracts and displays only `"SuperImmersive 8"` (the trade name) via a pattern match. The footer discloses `"PMF Strategy Inc."` as the operating entity. This protects brand consistency on the public record while maintaining legal accuracy in the database.
+
+**Admin Sign & Deliver Panel**
+Not a PRD deliverable, but built as part of the admin workflow to operationalize the signing flow. Located at `app/admin/submissions/[id]/SignAndDeliverPanel.tsx`. Reads from the `assessments` table; drives `sign` and `mark-delivered` API routes.
+
+### Known open items
+
+- `NumbersProvenanceProvider` contains explicit TODOs for unconfirmed API details (Capture endpoint, C2PA custom assertion structure, Trust List status). These are not blockers for mock-mode operation. Awaiting Sofia Yan reply for API credentials and Trust List confirmation.
+- `assessment_number` sequence is live in production (`assessments_number_seq`). Current value: 5 (after ASSESS-001 through ASSESS-005).
+
+---
+
 ## Final Note
 
 This PRD is normative.
