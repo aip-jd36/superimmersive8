@@ -14,6 +14,7 @@ v{major}-{YYYY-MM-DD}/
 
 | Folder | Date | Description | Git tag |
 |--------|------|-------------|---------|
+| `v5-2026-07-12` | Jul 12, 2026 | v5 institutional site — "Independent Commercial Assurance for AI Media". Single-page, Fraunces serif, ink-blue. Terminology aligned: Commercial Assurance Assessment / Assessment Report (PDF) / Public Assessment Record. favicon.svg + og-image.png included. | `marketing-site-v5` |
 | `v4-2026-07-12` | Jul 12, 2026 | v4 CaaS site — "Get Your AI Video Cleared for Commercial Use". Two-tier pricing ($29 Creator Record / $499 SI8 Certified). CarFax framing. Urban Drift sample. | `marketing-site-v4` |
 
 ## What is included in each snapshot
@@ -36,7 +37,7 @@ Not included: `api/` serverless functions, `images/` assets, `_archive/` (v3 fil
 Copy the contents of the snapshot folder over `07_Website/`:
 
 ```powershell
-$ver = "v4-2026-07-12"
+$ver = "v5-2026-07-12"  # or "v4-2026-07-12" to revert to the CaaS design
 $src = "C:\Users\User\Desktop\superimmersive8\07_Website\_versions\$ver"
 $dst = "C:\Users\User\Desktop\superimmersive8\07_Website"
 
@@ -60,6 +61,10 @@ Then commit and push to deploy.
 ### Option B — Restore via git tag
 
 ```bash
+# Restore to v5 (current institutional design)
+git checkout marketing-site-v5 -- 07_Website/index.html 07_Website/styles.css 07_Website/script.js 07_Website/favicon.svg 07_Website/og-image.png 07_Website/how-it-works 07_Website/pricing 07_Website/rights-verified 07_Website/sample 07_Website/zh
+
+# Restore to v4 (CaaS design)
 git checkout marketing-site-v4 -- 07_Website/index.html 07_Website/styles.css 07_Website/script.js 07_Website/how-it-works 07_Website/pricing 07_Website/rights-verified 07_Website/sample 07_Website/zh
 ```
 
@@ -70,7 +75,7 @@ Then commit and push to deploy.
 Before a redesign:
 
 ```powershell
-$label = "v5-2026-08-01"   # adjust version + date
+$label = "v6-2026-08-01"   # adjust version + date
 $src = "C:\Users\User\Desktop\superimmersive8\07_Website"
 $dst = "C:\Users\User\Desktop\superimmersive8\07_Website\_versions\$label"
 # ... (copy commands as above, substituting $label for the destination)
@@ -79,6 +84,6 @@ $dst = "C:\Users\User\Desktop\superimmersive8\07_Website\_versions\$label"
 Then add the new row to the table above and create a git tag:
 
 ```bash
-git tag marketing-site-v5
-git push origin marketing-site-v5
+git tag marketing-site-v6
+git push origin marketing-site-v6
 ```
