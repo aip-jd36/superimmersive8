@@ -23,20 +23,24 @@ import type {
 
 /**
  * Generate the next assessment number in ASSESS-NNN-YYYY-MM-DD format.
- * Counts all existing assessments to assign a sequential NNN.
  *
- * NOTE: This is not atomic — two concurrent calls could theoretically generate
- * the same number. In v1 with a single reviewer this is acceptable; v2 should
- * use a DB sequence.
+ * Delegates to the PostgreSQL function generate_assessment_number(), which uses
+ * a sequence (assessments_number_seq) to guarantee atomic, collision-safe
+ * generation under any concurrency. Two simultaneous callers will always receive
+ * different NNN values.
+ *
+ * Migration: 20260712000001_atomic_assessment_number.sql
  */
 export async function generateAssessmentNumber(): Promise<string> {
-  const { count } = await supabaseAdmin
-    .from('assessments')
-    .select('id', { count: 'exact', head: true })
+  const { data, error } = await supabaseAdmin.rpc('generate_assessment_number')
 
-  const num = String((count ?? 0) + 1).padStart(3, '0')
-  const date = new Date().toISOString().split('T')[0]
-  return `ASSESS-${num}-${date}`
+  if (error || !data) {
+    throw new Error(
+      `Failed to generate assessment number: ${error?.message ?? 'no data returned'}`,
+    )
+  }
+
+  return data as string
 }
 
 // ── Read ──────────────────────────────────────────────────────────────────────
@@ -67,6 +71,11 @@ export async function findAssessmentBySubmissionId(
 
 /**
  * Find assessment by assessment_number for the public Verification Page.
+ *
+ * The Verification Page is a public, read-only representation of the authoritative
+ * Assessment Registry. The Registry (this table) is the source of truth; the
+ * Verification Page reflects it — it does not define it.
+ *
  * Returns only the VerificationPageData subset — safe to pass to public routes.
  * Never returns: customer data, reviewer notes, evidence, confidence, findings.
  */
