@@ -1,625 +1,340 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-628BLE9N15"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-628BLE9N15');
-    </script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperImmersive 8 - Chain of Title Verification for AI Video</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/styles.css">
-    <!-- Hotjar Tracking -->
-    <script src="https://t.contentsquare.net/uxa/723dd205762ba.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SI8 — Independent Commercial Assurance for AI Media</title>
+
+<!-- SEO -->
+<meta name="description" content="Independent commercial assurance for AI-generated video. SI8 reviews the evidence behind AI campaigns and issues an opinion brand legal and agencies can rely on.">
+<link rel="canonical" href="https://www.superimmersive8.com">
+
+<!-- Open Graph -->
+<meta property="og:title" content="SI8 — Independent Commercial Assurance for AI Media">
+<meta property="og:description" content="Independent commercial assurance for AI-generated video. SI8 reviews the evidence behind AI campaigns and issues an opinion brand legal and agencies can rely on.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.superimmersive8.com">
+<meta property="og:image" content="https://www.superimmersive8.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SI8 — Independent Commercial Assurance for AI Media">
+<meta name="twitter:description" content="Independent commercial assurance for AI-generated video. SI8 reviews the evidence behind AI campaigns and issues an opinion brand legal and agencies can rely on.">
+<meta name="twitter:image" content="https://www.superimmersive8.com/og-image.png">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-628BLE9N15"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-628BLE9N15');
+</script>
+
+<style>
+  :root{
+    --ground:#f7f5ef;--raised:#fdfcf9;--ink:#1c1c1e;--ink-soft:#4a4a52;
+    --muted:#83837e;--line:#e0ddd2;--line-soft:#eceae1;
+    --accent:#233f66;--accent-deep:#182c48;--accent-tint:#e9edf3;
+    --serif:'Fraunces',Georgia,serif;--sans:'Inter',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-weight:400;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 34px}
+  section{padding:108px 0;border-top:1px solid var(--line)}
+  .eyebrow{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin-bottom:22px}
+  h1,h2,h3,h4{font-family:var(--serif);font-weight:500;line-height:1.1;letter-spacing:-0.01em;color:var(--ink)}
+  p{color:var(--ink-soft);font-size:17px;max-width:64ch}
+  strong{color:var(--ink);font-weight:600}
+  a{color:var(--accent);text-decoration:none}
+  nav{position:sticky;top:0;z-index:50;background:rgba(247,245,239,0.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .brand{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-0.01em;color:var(--ink)}
+  .brand span{color:var(--accent)}
+  .nav-cta{font-family:var(--sans);font-size:13px;font-weight:600;letter-spacing:0.02em;color:#fff;background:var(--accent);padding:9px 18px;border-radius:2px;transition:background .2s}
+  .nav-cta:hover{background:var(--accent-deep)}
+  .hero{padding:112px 0 120px;border-top:none}
+  .hero .kicker{font-family:var(--sans);font-size:13px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:26px}
+  .hero h1{font-size:clamp(38px,6vw,66px);max-width:17ch;margin-bottom:30px;font-weight:500}
+  .hero h1 em{font-style:italic;color:var(--accent)}
+  .hero-sub{font-size:20px;max-width:58ch;margin-bottom:42px;color:var(--ink-soft)}
+  .hero-actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  .btn-primary{font-family:var(--sans);font-size:15px;font-weight:600;color:#fff;background:var(--accent);padding:15px 30px;border-radius:2px;transition:background .2s}
+  .btn-primary:hover{background:var(--accent-deep)}
+  .btn-ghost{font-family:var(--sans);font-size:15px;font-weight:500;color:var(--ink);padding:15px 4px}
+  .btn-ghost:hover{color:var(--accent)}
+  .verdict{margin-top:80px;border:1px solid var(--line);border-radius:3px;background:var(--raised);padding:38px 42px;max-width:580px;box-shadow:0 1px 0 rgba(0,0,0,0.02),0 18px 40px -28px rgba(35,63,102,0.35)}
+  .verdict-q{font-family:var(--serif);font-size:22px;font-style:italic;color:var(--muted);margin-bottom:20px}
+  .verdict-arrow{color:var(--line);font-size:19px;margin-bottom:20px}
+  .verdict-mark{display:flex;align-items:baseline;gap:14px}
+  .verdict-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;transform:translateY(-3px)}
+  .verdict-label{font-family:var(--serif);font-size:clamp(22px,3.2vw,30px);color:var(--ink);line-height:1.2;font-weight:500}
+  .verdict-foot{margin-top:20px;padding-top:18px;border-top:1px solid var(--line);font-family:var(--sans);font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .verdict-seal{font-family:var(--sans);font-size:10px;letter-spacing:0.12em;color:var(--accent);border:1px solid var(--accent);border-radius:2px;padding:4px 8px}
+  .doors{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:52px}
+  .door{border:1px solid var(--line);border-radius:3px;padding:36px 34px;background:var(--raised)}
+  .door .tag{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:0.13em;text-transform:uppercase;color:var(--accent);margin-bottom:18px}
+  .door h3{font-size:23px;margin-bottom:14px}
+  .door p{font-size:16px}
+  .door .said{margin-top:22px;padding-left:18px;border-left:2px solid var(--accent);font-family:var(--serif);font-style:italic;font-size:17px;color:var(--ink-soft)}
+  .lead h2{font-size:clamp(29px,4.2vw,43px);max-width:21ch;margin-bottom:24px;font-weight:500}
+  .lead p{font-size:18px}
+  .split{display:grid;grid-template-columns:1fr 1fr;margin-top:50px;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+  .split .col{padding:40px 38px}
+  .split .col:first-child{border-right:1px solid var(--line);background:var(--raised)}
+  .split .col.si8{background:var(--accent-tint)}
+  .split .q{font-family:var(--serif);font-size:21px;color:var(--ink);margin-bottom:16px;line-height:1.3;font-weight:500}
+  .split .who{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
+  .split .col.si8 .q{color:var(--accent-deep)}
+  .split .col.si8 .who{color:var(--accent)}
+  .split p{font-size:16px}
+  .domains{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;margin-top:50px;background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+  .domain{background:var(--ground);padding:26px 28px}
+  .domain .idx{font-family:var(--sans);font-size:12px;font-weight:600;color:var(--accent);letter-spacing:0.08em;margin-bottom:10px}
+  .domain h4{font-size:19px;margin-bottom:6px;font-weight:500}
+  .domain p{font-size:14.5px;line-height:1.5}
+  .process{display:flex;gap:38px;margin-top:54px;flex-wrap:wrap}
+  .step{flex:1;min-width:200px}
+  .step .n{font-family:var(--serif);font-size:15px;color:var(--accent);margin-bottom:12px;letter-spacing:0.04em;font-weight:600}
+  .step h4{font-size:20px;margin-bottom:10px;font-weight:500}
+  .step p{font-size:15px}
+  .eu-note{margin-top:34px;padding:24px 28px;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:3px;background:var(--raised)}
+  .eu-note p{font-size:15.5px;color:var(--ink-soft)}
+  .receive{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:50px}
+  .rcard{border:1px solid var(--line);border-radius:3px;padding:30px 28px;background:var(--raised);position:relative}
+  .rcard h4{font-size:20px;margin-bottom:12px;font-weight:500}
+  .rcard p{font-size:15px}
+  .rcard.soon{background:var(--ground);border-style:dashed}
+  .soon-tag{position:absolute;top:20px;right:22px;font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);border-radius:2px;padding:3px 8px}
+  .not-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 40px;margin-top:42px}
+  .not-item{display:flex;gap:14px;align-items:flex-start;padding:8px 0}
+  .not-item .x{color:var(--accent);font-family:var(--serif);font-size:18px;line-height:1.4;flex:none}
+  .not-item p{font-size:16px;color:var(--ink-soft);max-width:none}
+  .founder{display:grid;grid-template-columns:1fr 1.4fr;gap:46px;align-items:start}
+  .founder .who{font-family:var(--serif);font-size:26px;color:var(--ink);line-height:1.25;font-weight:500}
+  .founder .role{font-family:var(--sans);font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-top:10px}
+  .cta-final{text-align:center;padding:124px 0;background:var(--accent-tint)}
+  .cta-final h2{font-size:clamp(32px,5vw,50px);max-width:19ch;margin:0 auto 26px;font-weight:500}
+  .cta-final p{margin:0 auto 38px;font-size:18px;text-align:center;color:var(--ink-soft)}
+  .cta-final .btn-primary{font-size:16px;padding:17px 38px}
+  footer{border-top:1px solid var(--line);padding:42px 0}
+  .foot-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+  .foot-inner .brand{font-size:16px}
+  .foot-inner p{font-size:13px;color:var(--muted);margin:0;max-width:none}
+  @media (max-width:760px){
+    section{padding:76px 0}.wrap{padding:0 22px}
+    .doors,.split,.domains,.receive,.not-grid,.founder{grid-template-columns:1fr}
+    .split .col:first-child{border-right:none;border-bottom:1px solid var(--line)}
+    .hero{padding:72px 0 84px}.founder{gap:22px}.nav-cta{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav>
-        <div class="nav-container">
-            <a href="/" class="logo">SuperImmersive <span>8</span></a>
-            <ul class="nav-links">
-                <li><a href="/how-it-works">How It Works</a></li>
-                <li><a href="/pricing">Pricing</a></li>
-                <li><a href="/showcase">Showcase</a></li>
-                <li class="nav-dropdown">
-                    <span class="nav-dropdown-trigger">
-                        <span>Rights Verified</span>
-                        <span>▼</span>
-                    </span>
-                    <div class="nav-dropdown-content">
-                        <a href="/rights-verified">Overview</a>
-                        <a href="/rights-verified/playbook">Full Playbook</a>
-                        <a href="/rights-verified/chain-of-title">Chain of Title</a>
-                    </div>
-                </li>
-                <li><a href="/auth/login">Login</a></li>
-                <li><a href="/auth/signup" class="nav-cta">Get Verified</a></li>
-            </ul>
-            <div class="lang-selector">
-                <a href="/index.html" class="active">EN</a>
-                <span>/</span>
-                <a href="/zh/index.html">繁體中文</a>
-            </div>
-            <button class="mobile-menu-btn" aria-label="Toggle menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-    </nav>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <div class="hero-badge">
-                <span class="hero-badge-dot"></span>
-                <span>Now verifying Runway, Kling, Pika, and more</span>
-            </div>
+<nav>
+  <div class="wrap nav-inner">
+    <div class="brand">SuperImmersive<span>8</span></div>
+    <a href="https://calendly.com/aipenguins/superimmersive8" target="_blank" rel="noopener" class="nav-cta">Book a call</a>
+  </div>
+</nav>
 
-            <h1>Get Your AI Video Cleared for Commercial Use</h1>
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Independent Commercial Assurance for AI Media</div>
+    <h1>Your team made it with AI. Now someone needs to know it's <em>safe to use</em>.</h1>
+    <p class="hero-sub">When a brand's legal team asks how an AI-generated campaign was made — which tools, which rights, whose likeness — the agency that made it often has no structured answer. SI8 is the independent third party that reviews the evidence and issues a commercial assurance opinion both sides can rely on.</p>
+    <div class="hero-actions">
+      <a href="https://calendly.com/aipenguins/superimmersive8" target="_blank" rel="noopener" class="btn-primary">Book a call</a>
+      <a href="#how" class="btn-ghost">See how the assessment works →</a>
+    </div>
+    <div class="verdict">
+      <div class="verdict-q">"Can we actually use this?"</div>
+      <div class="verdict-arrow">↓</div>
+      <div class="verdict-mark">
+        <span class="verdict-dot"></span>
+        <span class="verdict-label">Evidence supports intended commercial use.</span>
+      </div>
+      <div class="verdict-foot"><span>SI8 Campaign Assurance · Independent Opinion</span><span class="verdict-seal">Assessed</span></div>
+    </div>
+  </div>
+</header>
 
-            <p class="hero-subtitle">
-                Adobe verifies Firefly only. We verify Runway, Kling, and Pika — the tools your clients actually want to use.
-                <strong style="color: var(--color-text);">Without documentation, brands won't approve your campaign.</strong>
-                $499 per video, 5-day turnaround.
-            </p>
+<section id="who">
+  <div class="wrap">
+    <div class="eyebrow">One requirement, two sides</div>
+    <div class="lead">
+      <h2>The demand starts with legal. The work lands on the agency.</h2>
+      <p>A brand's legal team decides AI-generated creative needs documentation before approval. That requirement flows downhill to the agency that produced it. SI8 serves both ends of that handoff — with the same independent assessment.</p>
+    </div>
+    <div class="doors">
+      <div class="door">
+        <div class="tag">If you're the agency</div>
+        <h3>You delivered the work. Now legal wants proof.</h3>
+        <p>Your AI campaign is finished and good. Then the client's legal team asks where the content came from and what rights you hold — and you've never had to document this before. A held-up campaign is the last thing you need.</p>
+        <div class="said">"Yes, I'm being asked this — 100%."<br>— a senior production lead at a global agency</div>
+      </div>
+      <div class="door">
+        <div class="tag">If you're brand legal</div>
+        <h3>You need assurance you didn't write yourself.</h3>
+        <p>The agency's own word that their AI content is clean isn't assurance — it's self-attestation. You need an independent party to review the rights chain, the licensing, and the likeness exposure, and to tell you plainly what the evidence does and doesn't support.</p>
+        <div class="said">"Once legal gets involved, the conversation shifts straight to IP ownership and licensing. That document is exactly what they're looking for."<br>— an independent creative director serving regulated clients</div>
+      </div>
+    </div>
+  </div>
+</section>
 
-            <div class="hero-cta-group">
-                <a href="/auth/signup" class="btn btn-primary">
-                    Get Verified
-                    <span>→</span>
-                </a>
-                <a href="/sample" class="btn btn-secondary">
-                    View Sample Rights Package
-                </a>
-            </div>
-        </div>
-    </section>
+<section id="what">
+  <div class="wrap">
+    <div class="eyebrow">Where SI8 fits</div>
+    <div class="lead">
+      <h2>Provenance proves where a file came from. It doesn't tell you whether you can rely on it.</h2>
+      <p>Standards like C2PA and tools like Adobe Content Credentials establish technical provenance — a cryptographic record of an asset's origin and history. That's necessary, and SI8 builds on it. But it answers a different question than the one a commercial team actually needs answered.</p>
+    </div>
+    <div class="split">
+      <div class="col">
+        <div class="who">Technical provenance</div>
+        <div class="q">"Where did this asset come from?"</div>
+        <p>Records origin, tools, and edit history. Verifiable, automated, and increasingly standard. It establishes technical trust in the file.</p>
+      </div>
+      <div class="col si8">
+        <div class="who">SI8 — Commercial assurance</div>
+        <div class="q">"Can another commercial party confidently rely on this?"</div>
+        <p>An independent human review of the whole evidence picture — licensing, IP, likeness, authorship — producing a considered opinion on commercial readiness. It establishes commercial trust in the decision.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- The Problem -->
-    <section class="problem-section">
-        <div class="problem-content">
-            <p class="section-pretitle">The Problem</p>
-            <h2 class="problem-title">Brands want AI video. Legal teams say "not yet."</h2>
+<section id="how">
+  <div class="wrap">
+    <div class="eyebrow">The assessment</div>
+    <div class="lead">
+      <h2>A consistent method, applied independently, across seven domains.</h2>
+      <p>Every SI8 Campaign Assurance assessment starts with an independent viewing of the content itself — before reading the submitter's declarations — and then reviews the submitted evidence against a fixed set of controls. The result is a structured report a legal, procurement, or executive reader can act on.</p>
+    </div>
+    <div class="domains">
+      <div class="domain"><div class="idx">A</div><h4>Identity &amp; Accountability</h4><p>Who is responsible for the work, and is that accountability documented.</p></div>
+      <div class="domain"><div class="idx">R</div><h4>Commercial Rights &amp; Licensing</h4><p>Whether the AI tools and assets used carry commercial usage rights.</p></div>
+      <div class="domain"><div class="idx">H</div><h4>Human Creative Contribution</h4><p>The nature and evidence of meaningful human direction over the work.</p></div>
+      <div class="domain"><div class="idx">I</div><h4>Third-Party IP</h4><p>Whether external intellectual property appears, and how it's cleared.</p></div>
+      <div class="domain"><div class="idx">L</div><h4>Likeness &amp; Performer Rights</h4><p>Real or synthetic people, and the consent or documentation behind them.</p></div>
+      <div class="domain"><div class="idx">T</div><h4>Technical Provenance</h4><p>The integrity and traceability of the production and generation record.</p></div>
+      <div class="domain"><div class="idx">D</div><h4>Documentation Integrity</h4><p>Whether the submitted evidence is complete, consistent, and reliable.</p></div>
+      <div class="domain"><div class="idx">→</div><h4>One clear outcome</h4><p>A single assurance outcome, with every gap and its commercial impact stated plainly.</p></div>
+    </div>
+    <div class="process">
+      <div class="step"><div class="n">01</div><h4>Independent review</h4><p>SI8 watches the content and reviews the evidence separately from the team that made it. Independence is the point.</p></div>
+      <div class="step"><div class="n">02</div><h4>Evidence, not assertion</h4><p>Findings rest on documented evidence. Where evidence is missing, that absence is recorded and its commercial impact assessed.</p></div>
+      <div class="step"><div class="n">03</div><h4>A report you can hand over</h4><p>A structured Campaign Assurance Report, written for a legal or procurement reader — outcome, findings, residual risks, next steps.</p></div>
+    </div>
+  </div>
+</section>
 
-            <div class="problem-grid">
-                <div class="problem-card">
-                    <h3>Adobe Stock</h3>
-                    <p>Only verifies Firefly. If you want to use Runway, Kling, or Pika, you're on your own.</p>
-                </div>
+<section id="eu">
+  <div class="wrap">
+    <div class="eyebrow">Regulatory context</div>
+    <div class="lead">
+      <h2>The EU AI Act made documentation a live question. It also made it confusing.</h2>
+      <p>From August 2026, transparency obligations under Article 50 change what agencies and brands need to think about for AI content. But the rules split responsibility between the AI provider and the deployer, and much of what counts as sufficient is still settling. Not all AI content even triggers a duty.</p>
+    </div>
+    <div class="eu-note">
+      <p><strong>How SI8 helps — and where it stops.</strong> SI8 helps you understand which of your content actually falls under the obligation, and produces the independent evidence trail — human contribution, rights, provenance — that supports your position. SI8 does not apply your on-screen disclosure for you, and does not give legal advice. Your labeling obligations remain yours; we give your legal team verified evidence to work from.</p>
+    </div>
+  </div>
+</section>
 
-                <div class="problem-card highlight">
-                    <h3><span style="color: #4ade80; margin-right: 0.4rem;">✓</span> SuperImmersive 8</h3>
-                    <p>We verify the best AI tools on the market. Get documentation that helps brands move faster—without legal headaches.</p>
-                </div>
+<section id="receive">
+  <div class="wrap">
+    <div class="eyebrow">What you receive</div>
+    <div class="lead">
+      <h2>A defensible document, not a green light.</h2>
+      <p>SI8 produces an independent opinion designed to support a real commercial decision — the kind a brand legal team, procurement lead, or executive producer can put in a file and rely on.</p>
+    </div>
+    <div class="receive">
+      <div class="rcard"><h4>Independent assessment</h4><p>A full, control-by-control review across all seven domains, conducted independently of the production team.</p></div>
+      <div class="rcard"><h4>Campaign Assurance Report</h4><p>A structured PDF: the assurance outcome, the evidence reviewed, findings, residual risks, and recommended next steps.</p></div>
+      <div class="rcard soon"><span class="soon-tag">Coming soon</span><h4>Verifiable record</h4><p>A cryptographically signed provenance credential and a public verification page, built on the C2PA open standard and a Trust List provenance provider. In development now.</p></div>
+    </div>
+  </div>
+</section>
 
-                <div class="problem-card">
-                    <h3>DIY Approach</h3>
-                    <p>No expert review. Brands assume 100% of the risk. Legal approval takes weeks, if it happens at all.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+<section id="not">
+  <div class="wrap">
+    <div class="eyebrow">Scope, stated plainly</div>
+    <div class="lead">
+      <h2>What SI8 is not.</h2>
+      <p>An assurance opinion is only trustworthy if its limits are explicit. These aren't fine print — they're the boundaries that make the opinion mean something.</p>
+    </div>
+    <div class="not-grid">
+      <div class="not-item"><span class="x">—</span><p>Not legal advice, and not a legal opinion on copyright, trademark, or any other right.</p></div>
+      <div class="not-item"><span class="x">—</span><p>Not a guarantee of any litigation outcome or of copyright ownership.</p></div>
+      <div class="not-item"><span class="x">—</span><p>Not a substitute for your own counsel — it's evidence your counsel can rely on.</p></div>
+      <div class="not-item"><span class="x">—</span><p>Not a compliance certification. Your regulatory obligations remain yours.</p></div>
+      <div class="not-item"><span class="x">—</span><p>Not a claim beyond the evidence submitted at the time of assessment.</p></div>
+      <div class="not-item"><span class="x">—</span><p>Not a pass/fail stamp — it's a considered opinion, with every gap disclosed.</p></div>
+    </div>
+  </div>
+</section>
 
-    <!-- Without / With Risk Visualization -->
-    <section class="without-with-section">
-        <div class="section-header">
-            <p class="section-pretitle">The Stakes</p>
-            <h2 class="section-title">When there's no documentation</h2>
-        </div>
-        <div class="without-with-grid">
-            <div class="without-card">
-                <div class="without-label">Without SI8</div>
-                <ul>
-                    <li>"Our legal team needs 3 weeks to review this AI content before we can approve it."</li>
-                    <li>"We don't know which tools were used or what the IP exposure is."</li>
-                    <li>"Our E&amp;O insurer won't cover this without a clearance memo."</li>
-                    <li>"We've killed campaigns at the last minute. Legal said no."</li>
-                </ul>
-            </div>
-            <div class="with-card">
-                <div class="with-label"><span style="color: #4ade80; margin-right: 0.3rem;">✓</span> With SI8 Certified</div>
-                <ul>
-                    <li>9-field Chain of Title PDF — reviewed by a human specialist</li>
-                    <li>Tool provenance log for Runway, Kling, Pika — documented and verified</li>
-                    <li>IP and likeness review complete, risk flags documented</li>
-                    <li>E&amp;O-ready documentation package, accepted by underwriters</li>
-                    <li>5-day turnaround. Legal reviews in minutes, not weeks.</li>
-                </ul>
-            </div>
-        </div>
-    </section>
+<section id="founder">
+  <div class="wrap">
+    <div class="eyebrow">Who conducts the assessment</div>
+    <div class="founder">
+      <div>
+        <div class="who">SuperImmersive 8</div>
+        <div class="role">Taipei · Founder-led</div>
+      </div>
+      <div>
+        <p style="margin-bottom:20px">SI8 was built by a founder whose background sits exactly where this problem lives: enterprise B2B sales — the work of earning trust from skeptical, high-stakes buyers — and line producing on independent film, where rights, chain of title, and production documentation are the daily material of getting a project cleared for release.</p>
+        <p>That combination is the point. Assessing whether AI-generated commercial content is ready to deploy requires understanding both the commercial-assurance posture a legal team needs and the production reality of how the work actually gets made. SI8's methodology is written from both sides of that.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- Documentation Tiers -->
-    <section class="doc-tiers">
-        <div class="section-header">
-            <p class="section-pretitle">Two Levels of Documentation</p>
-            <h2 class="section-title">Choose Your Documentation</h2>
-            <p class="section-subtitle">
-                Every AI video deserves a paper trail. The right level depends on what you're doing with it.
-            </p>
-        </div>
+<section id="contact" class="cta-final">
+  <div class="wrap">
+    <h2>If a campaign is waiting on an answer, let's talk.</h2>
+    <p>SI8 is taking on a small number of founding assessments now. Tell us about the work you need reviewed and we'll walk you through what an assessment covers.</p>
+    <a href="https://calendly.com/aipenguins/superimmersive8" target="_blank" rel="noopener" class="btn-primary">Book a call</a>
+  </div>
+</section>
 
-        <div class="doc-tiers-grid">
-            <!-- Creator Record -->
-            <div class="doc-tier-card" style="border-color: rgba(255,255,255,0.1); background: rgba(255,255,255,0.03);">
-                <div class="doc-tier-stamp self-attested">Pre-Commercial Record</div>
-                <h3>Creator Record</h3>
-                <div class="doc-tier-price">$29 <span>/ video</span></div>
-                <p class="doc-tier-desc">Automated Chain of Title record issued by SI8 with a permanent record ID. You fill out the form; the system generates and files your PDF. No human review.</p>
-                <div class="doc-tier-divider"></div>
-                <div class="doc-tier-for">
-                    <div class="doc-tier-for-label">Who uses this</div>
-                    <ul>
-                        <li>Independent creators archiving their production process</li>
-                        <li>Festival submissions requiring tool disclosure</li>
-                        <li>Social media and YouTube creators building a paper trail</li>
-                        <li>Anyone who wants third-party documentation on file</li>
-                    </ul>
-                </div>
-                <div class="doc-tier-not-for">Not accepted by brand legal teams or E&amp;O underwriters for commercial use.</div>
-                <a href="/auth/signup?next=/record" class="btn btn-secondary" style="width: 100%; justify-content: center;">Get Your Record →</a>
-            </div>
+<footer>
+  <div class="wrap foot-inner">
+    <div class="brand">SuperImmersive<span style="color:var(--accent)">8</span></div>
+    <p>PMF Strategy Inc. d/b/a SuperImmersive 8 · Taipei, Taiwan · Independent commercial assurance opinions. Not legal advice.</p>
+  </div>
+</footer>
 
-            <!-- SI8 Certified -->
-            <div class="doc-tier-card featured">
-                <div class="doc-tier-stamp certified">CLEARED FOR COMMERCIAL USE</div>
-                <h3>SI8 Certified</h3>
-                <div class="doc-tier-price">$499 <span>/ video</span></div>
-                <p class="doc-tier-desc">90-minute human review across 7 categories. Full Chain of Title documentation, cleared for brand, agency, and distribution use. Used to unlock $5K–$50K campaigns. 3–5 business day turnaround.</p>
-                <div class="doc-tier-divider"></div>
-                <div class="doc-tier-for">
-                    <div class="doc-tier-for-label">Who uses this</div>
-                    <ul>
-                        <li>Ad agencies delivering AI video to brand legal teams</li>
-                        <li>Production houses submitting to streaming platforms</li>
-                        <li>Brands deploying AI-generated content in paid advertising</li>
-                        <li>Filmmakers who need E&amp;O insurer-ready documentation</li>
-                        <li>Any commercial deployment of AI-generated video</li>
-                    </ul>
-                </div>
-                <a href="/auth/signup?next=/certify" class="btn btn-primary" style="width: 100%; justify-content: center;">Get Certified →</a>
-            </div>
-        </div>
-
-        <div class="doc-tiers-note">
-            Need help choosing? <a href="/pricing">See full comparison and FAQ →</a>
-        </div>
-    </section>
-
-    <!-- Social Proof -->
-    <section class="social-proof">
-        <div class="section-header">
-            <p class="section-pretitle">Testimonials</p>
-            <h2 class="section-title">Trusted by Creators</h2>
-            <p class="section-subtitle">
-                Filmmakers and brands rely on our verification process for peace of mind.
-            </p>
-        </div>
-
-        <div class="testimonial-grid">
-            <div class="testimonial-card">
-                <p class="testimonial-text">
-                    "This is exactly what I needed to show my client. AI video is now usable for commercial work!"
-                </p>
-                <div class="testimonial-author">
-                    <div class="testimonial-avatar">IL</div>
-                    <div class="testimonial-info">
-                        <h4>Ivy Lin</h4>
-                        <p>Brand Manager</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="testimonial-card">
-                <p class="testimonial-text">
-                    "Filling out the Creator Record was very easy and painless. Would recommend."
-                </p>
-                <div class="testimonial-author">
-                    <div class="testimonial-avatar">DC</div>
-                    <div class="testimonial-info">
-                        <h4>Damon Chang</h4>
-                        <p>Filmmaker</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="testimonial-card">
-                <p class="testimonial-text">
-                    "SI8 puts a lot of effort into making sure their Chain of Title reviews are with current trends. Very helpful."
-                </p>
-                <div class="testimonial-author">
-                    <div class="testimonial-avatar">CH</div>
-                    <div class="testimonial-info">
-                        <h4>C. Huang</h4>
-                        <p>Creative Director</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FAQ Section -->
-    <section class="faq-section">
-        <div class="section-header">
-            <p class="section-pretitle">FAQ</p>
-            <h2 class="section-title">Frequently Asked Questions</h2>
-        </div>
-
-        <div class="faq-list">
-            <div class="faq-item">
-                <div class="faq-question">
-                    What AI tools do you verify?
-                </div>
-                <div class="faq-answer">
-                    We verify commercial-grade AI video tools including Runway, Kling, Pika, and others.
-                    Each tool is reviewed for commercial use authorization and training data safety.
-                    Adobe Firefly is also supported. We do NOT verify tools with unclear IP policies or those trained on unlicensed content.
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">
-                    What if my video is rejected?
-                </div>
-                <div class="faq-answer">
-                    If your submission doesn't meet our criteria, we'll provide a detailed explanation.
-                    In some cases, you can resubmit with corrections. Rejections typically occur when tools weren't used with paid commercial plans,
-                    or when there's clear IP imitation. We're here to help you understand what needs to change.
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">
-                    How long does verification take?
-                </div>
-                <div class="faq-answer">
-                    Our target turnaround is 5 business days. Most reviews are completed within 90 minutes of review time,
-                    but we allow buffer for queue management. Rush processing may be available—contact us for details.
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">
-                    Do I have to opt into the marketplace?
-                </div>
-                <div class="faq-answer">
-                    No. The marketplace is completely optional. Many creators just want the verification documentation
-                    for their own client work. If you do opt-in, you can remove your work from the Showcase at any time.
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">
-                    How does the 80/20 commission split work?
-                </div>
-                <div class="faq-answer">
-                    If you opt into our Showcase marketplace and a brand licenses your work, you receive 80% of the licensing fee.
-                    SI8 keeps 20% for handling negotiations, contracts, and payments. You'll be notified of every deal
-                    and receive payment within 30 days of the deal closing.
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Sample Document -->
-    <section class="sample-section">
-        <div class="section-header">
-            <p class="section-pretitle">See the Product</p>
-            <h2 class="section-title">What You Actually Receive</h2>
-            <p class="section-subtitle">
-                Download a real Chain of Title document from a verified AI film.
-                See exactly what brands and legal teams receive.
-            </p>
-        </div>
-        <div class="sample-card">
-            <div class="sample-preview">
-                <div class="sample-doc-icon">📄</div>
-                <div class="sample-doc-info">
-                    <h4>Urban Drift — Sample Chain of Title</h4>
-                    <p>SI8 Certified · 8-field documentation package · Risk Rating: LOW · Commercial Audit Passed</p>
-                    <p class="sample-meta">Tools: Runway Gen-3, Kling · Submitted by agency · Cleared for brand commercial use</p>
-                </div>
-            </div>
-            <div class="sample-cta-group">
-                <a href="/sample" class="btn btn-primary">
-                    View Sample Document
-                    <span>→</span>
-                </a>
-                <a href="/rights-verified/chain-of-title" class="btn btn-secondary">
-                    View Documentation Fields
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact / Request Demo -->
-    <style>
-        #demo-form input,
-        #demo-form select,
-        #demo-form textarea {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 8px;
-            padding: 0.65rem 1rem;
-            color: rgba(255,255,255,0.85);
-            font-size: 0.875rem;
-            width: 100%;
-            font-family: inherit;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        #demo-form input:focus,
-        #demo-form select:focus,
-        #demo-form textarea:focus {
-            border-color: var(--color-accent);
-        }
-        #demo-form select option {
-            background: #1a1a1a;
-            color: rgba(255,255,255,0.85);
-        }
-        #demo-form input::placeholder,
-        #demo-form textarea::placeholder {
-            color: rgba(255,255,255,0.3);
-        }
-        #demo-form textarea {
-            resize: vertical;
-            min-height: 72px;
-        }
-    </style>
-    <section class="contact-section" id="contact">
-        <div class="section-header">
-            <p class="section-pretitle">Get in Touch</p>
-            <h2 class="section-title">Questions? Let's Talk.</h2>
-            <p class="section-subtitle">
-                Book a 20-minute call or request a demo — we'll walk through the process and answer any questions.
-            </p>
-        </div>
-        <div class="contact-options-grid" style="max-width: 900px;">
-            <a href="https://calendly.com/aipenguins/superimmersive8" target="_blank" rel="noopener" class="contact-option-card featured-contact">
-                <div class="contact-option-icon">📅</div>
-                <h4>Book a Call</h4>
-                <p>20-minute intro — walk through the process, ask questions, get a quote for your project.</p>
-                <span class="contact-option-cta">Schedule Now →</span>
-            </a>
-            <div class="contact-option-card" style="cursor: default;">
-                <div class="contact-option-icon">📋</div>
-                <h4>Request a Demo</h4>
-                <form id="demo-form" action="/api/formspree-to-kit" method="POST" style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.25rem;">
-                    <input type="hidden" name="_subject" value="Request Demo — SI8 Homepage">
-                    <input type="hidden" name="download" value="Request Demo">
-                    <!-- Honeypot: hidden from humans, bots fill it -->
-                    <input type="text" name="website" tabindex="-1" autocomplete="off" style="opacity:0;position:absolute;top:0;left:0;height:0;width:0;z-index:-1;">
-                    <!-- Time-based spam check: set on page load -->
-                    <input type="hidden" name="_loadTime" id="demo-load-time" value="">
-                    <input type="text" name="name" placeholder="Your name *" required>
-                    <input type="email" name="email" placeholder="Work email *" required>
-                    <select name="role" required>
-                        <option value="">I am a… *</option>
-                        <option value="agency">Agency / Production House</option>
-                        <option value="brand">Brand / Marketing Team</option>
-                        <option value="filmmaker">AI Filmmaker / Creator</option>
-                        <option value="legal">Legal / Compliance</option>
-                        <option value="other">Other</option>
-                    </select>
-                    <select name="interest" id="demo-interest" required>
-                        <option value="">What brings you here? *</option>
-                        <option value="clear_video">I need to clear an AI video for a client</option>
-                        <option value="compliance">I want to understand our compliance exposure</option>
-                        <option value="verify">I produce AI video and want it verified</option>
-                        <option value="evaluate">I'm evaluating tools for my agency / team</option>
-                        <option value="other">Other (please describe)</option>
-                    </select>
-                    <textarea name="interest_detail" id="demo-interest-detail" placeholder="Tell us a bit more… *" rows="2" style="display:none;"></textarea>
-                    <button type="submit" id="demo-submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 0.25rem;">
-                        Request a Demo →
-                    </button>
-                </form>
-            </div>
-        </div>
-    </section>
-
-    <!-- Final CTA -->
-    <section class="cta-section">
-        <div class="cta-content">
-            <h2 class="cta-title">Ready to Get Verified?</h2>
-            <p class="cta-subtitle">
-                Join creators who are making their AI video work commercially safe.
-                5-day turnaround, $499 per video.
-            </p>
-            <div class="hero-cta-group">
-                <a href="/auth/signup" class="btn btn-primary">
-                    Get Verified
-                    <span>→</span>
-                </a>
-                <a href="/how-it-works" class="btn btn-secondary">
-                    Learn How It Works
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-brand">
-                <h3>SuperImmersive <span style="color: var(--color-accent);">8</span></h3>
-                <p>
-                    Chain of Title verification for AI video content.
-                    Based in Taipei, serving creators globally.
-                </p>
-            </div>
-
-            <div class="footer-links">
-                <h4>Product</h4>
-                <ul>
-                    <li><a href="/how-it-works">How It Works</a></li>
-                    <li><a href="/pricing">Pricing</a></li>
-                    <li><a href="/showcase">Showcase</a></li>
-                    <li><a href="/auth/signup">Get Verified</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-links">
-                <h4>Company</h4>
-                <ul>
-                    <li><a href="/about">About</a></li>
-                    <li><a href="/contact">Contact</a></li>
-                    <li><a href="/blog">Blog</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-links">
-                <h4>Legal</h4>
-                <ul>
-                    <li><a href="/terms">Terms of Service</a></li>
-                    <li><a href="/privacy">Privacy Policy</a></li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>&copy; 2026 SuperImmersive 8. All rights reserved.</p>
-            <p>Built with ❤️ in Taipei</p>
-        </div>
-    </footer>
-
-    <script src="/script.js"></script>
-    <script>
-        // Set load time for spam detection
-        document.getElementById('demo-load-time').value = Date.now();
-
-        // Show/hide "Other" detail textarea
-        document.getElementById('demo-interest')?.addEventListener('change', function() {
-            const detail = document.getElementById('demo-interest-detail');
-            if (this.value === 'other') {
-                detail.style.display = 'block';
-                detail.required = true;
-            } else {
-                detail.style.display = 'none';
-                detail.required = false;
-                detail.value = '';
-            }
+<!-- Calendly CTA click tracking -->
+<script>
+  document.querySelectorAll('a[href*="calendly.com"]').forEach(function(el) {
+    el.addEventListener('click', function() {
+      var label = 'final_cta';
+      if (el.closest('nav')) label = 'nav';
+      else if (el.closest('.hero')) label = 'hero';
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'book_call_click', {
+          event_category: 'CTA',
+          event_label: label
         });
+      }
+    });
+  });
+</script>
 
-        document.getElementById('demo-form')?.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const form = e.target;
-            const btn = document.getElementById('demo-submit');
-            const original = btn.textContent;
-            btn.disabled = true;
-            btn.textContent = 'Sending…';
-            try {
-                const fd = new FormData(form);
-                const res = await fetch(form.action, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: fd.get('email'),
-                        name: fd.get('name'),
-                        role: fd.get('role'),
-                        interest: fd.get('interest'),
-                        interest_detail: fd.get('interest_detail'),
-                        _loadTime: fd.get('_loadTime'),
-                        source: 'homepage-demo'
-                    })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    btn.textContent = '✓ We\'ll be in touch soon';
-                    btn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
-                    form.reset();
-                    setTimeout(() => {
-                        btn.disabled = false;
-                        btn.textContent = original;
-                        btn.style.background = '';
-                    }, 4000);
-                } else throw new Error(data.error || 'Failed');
-            } catch(err) {
-                btn.textContent = '✗ Error — please try again';
-                btn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.textContent = original;
-                    btn.style.background = '';
-                }, 3000);
-            }
-        });
-    </script>
-
-    <!-- GA4 Custom Event Tracking -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get Verified / Get Certified CTA clicks
-            document.querySelectorAll('a[href="/auth/signup"], a[href="/auth/signup?next=/certify"]').forEach(function(el) {
-                if (!el.textContent.trim().toLowerCase().includes('record')) {
-                    el.addEventListener('click', function() {
-                        gtag('event', 'get_verified_click', {
-                            'event_category': 'CTA',
-                            'event_label': el.textContent.trim()
-                        });
-                    });
-                }
-            });
-
-            // Creator Record CTA
-            document.querySelectorAll('a[href="/auth/signup?next=/record"]').forEach(function(el) {
-                if (el.textContent.trim().toLowerCase().includes('record')) {
-                    el.addEventListener('click', function() {
-                        gtag('event', 'creator_record_click', {
-                            'event_category': 'CTA',
-                            'event_label': 'Creator Record'
-                        });
-                    });
-                }
-            });
-
-            // View Sample Rights Package
-            // Uses event_callback + preventDefault to ensure beacon sends before navigation
-            document.querySelectorAll('a[href="/sample"]').forEach(function(el) {
-                el.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    var dest = el.href;
-                    gtag('event', 'view_sample_click', {
-                        'event_category': 'CTA',
-                        'event_label': el.textContent.trim(),
-                        'event_callback': function() {
-                            window.location = dest;
-                        }
-                    });
-                    // Fallback: navigate after 500ms if callback doesn't fire
-                    setTimeout(function() { window.location = dest; }, 500);
-                });
-            });
-
-            // Book a Call (Calendly)
-            document.querySelectorAll('a[href*="calendly"]').forEach(function(el) {
-                el.addEventListener('click', function() {
-                    gtag('event', 'book_call_click', {
-                        'event_category': 'Lead',
-                        'event_label': 'Calendly'
-                    });
-                });
-            });
-
-            // Request Demo form submit
-            var demoForm = document.getElementById('demo-form');
-            if (demoForm) {
-                demoForm.addEventListener('submit', function() {
-                    gtag('event', 'request_demo_submit', {
-                        'event_category': 'Lead',
-                        'event_label': 'Request Demo Form'
-                    });
-                });
-            }
-        });
-    </script>
 </body>
 </html>
