@@ -397,6 +397,74 @@ If Capture confirms no video support → c2pa-rs fallback may also be blocked �
 
 ---
 
+---
+
+## Architecture Decisions — July 12, 2026
+
+*Confirmed decisions from architectural review. These update and supersede earlier hypotheses in this document.*
+
+### The C2PA manifest is a fragile pointer — Zone B is the durable record
+
+C2PA metadata lives in the MP4 container, not in the video frames. Standard re-encoding (platform upload to YouTube, Instagram, Meta, TikTok; NLE export; DAM processing) rebuilds the container from scratch and does not carry the C2PA box forward. The manifest is stripped.
+
+**Consequence:** Nothing load-bearing can live only in the C2PA manifest. Design the Verification Page as the source of truth. Design the manifest as a lightweight pointer to it. The question is not "how much should we embed" — the embed is the fragile record.
+
+### EU AI Act Art. 50 obligations are split — SI8 is not the obligor for either
+
+| Article | Obligation | Who it falls on |
+|---------|-----------|-----------------|
+| Art. 50(2) — machine-readable marking | Embed C2PA (or equivalent) at generation time | AI system **provider** (Runway, Kling, Veo) |
+| Art. 50(4) — human-visible disclosure | Visible label to end viewer | **Deployer** (agency/brand) via platform toggles |
+
+SI8 is neither the provider nor the deployer. SI8 is the independent reviewer at the delivery step.
+
+Art. 50(2) was fulfilled by Runway/Kling at generation time. Compositing stripped those assertions. SI8's re-signing at delivery restores machine-readable provenance — but this is not "fulfilling Art. 50(2)." It is filling a workflow gap the regulation does not formally assign to anyone at the delivery step.
+
+Art. 50(4) is fulfilled by platform toggles (Meta AIGC, YouTube AI label, TikTok AIGC). Embedded C2PA is an input to that chain, not the disclosure itself.
+
+**Correct product pitch:** *"We restore the machine-readable provenance signal your compositing workflow stripped, enabling platform auto-labeling and providing a verified record of independent commercial review."*
+
+**Incorrect pitch (do not use):** *"Our C2PA signing fulfills your EU AI Act Article 50 disclosure obligation."* This is a false claim. If a client relies on it without using platform toggles, they are non-compliant and SI8 has a liability problem.
+
+### Custom `si8:*` namespace fields do not fulfill machine-readable compliance mandates
+
+Platform parsers (Meta, YouTube, TikTok) and standard validators look for standard C2PA fields. They do not parse `si8:*` custom namespaces. A manifest containing only custom SI8 fields will appear to automated validators as unsigned content with unrecognized custom data.
+
+**Fix:** Include the standard C2PA `digitalSourceType` field in the `c2pa.actions` assertion alongside custom `si8:*` fields. For composited agency video: `compositeWithTrainedAlgorithmicMedia` (full IPTC URI). This is the standard interoperability signal platforms and validators look for.
+
+### `digitalSourceType` is an interoperability field — not a compliance claim
+
+`digitalSourceType` must not be described as:
+- Article 50 compliance
+- Regulatory compliance
+- Deployer disclosure obligation fulfilled
+- Legal advice
+
+It exists so platforms can auto-label AI-generated content. It is a provenance metadata signal. SI8 includes it because it is the correct standard field for ecosystem interoperability — not because it constitutes any regulatory compliance on SI8's part.
+
+### Custom `c2pa.opened` misuse — do not use for audit events
+
+`c2pa.opened` is a standard C2PA action meaning "this file was opened for editing." It is not an audit action. Using it to signal an independent review misuses a standard field. SI8's audit event belongs in the custom namespace (`si8:assessment_number`, `si8:outcome_code`, etc.), not in a standard C2PA action field.
+
+### Confidence is PDF-only (Zone C)
+
+Confidence level must not appear in:
+- The Assessment Registry (database)
+- The C2PA manifest (Zone A)
+- The Verification Page (Zone B)
+
+"High confidence" embedded in a file or displayed on a public page, divorced from "High confidence *given these specific gaps and scope limitations*," is the overclaim SI8's entire liability posture is built to avoid. The full context — scope, evidence quality, gaps — is what makes confidence meaningful. That context lives in the report.
+
+### Report hash deferred to v1 — stored internally, not embedded or displayed
+
+`pdf_hash_sha256` is stored in the Assessment Registry for internal integrity purposes. It is not embedded in the C2PA manifest in v1 and not displayed on the Verification Page. Reason: if SI8 needs to issue a corrected report before methodology is stable, a hash embedded in an immutable manifest creates a correctability trap (hash mismatch looks like tampering even for legitimate corrections). The correct mechanism for report correction is a new Assessment Number; the Verification Page institutional status field handles supersession. Embed the hash in v2 when correction workflows are established.
+
+### NY Synthetic Performer Law is not addressed by C2PA fields
+
+The NY law (S.8420-A, effective June 9, 2026) requires "conspicuous disclosure" — something a human viewer can see. Embedded C2PA metadata is not visible to human viewers. No C2PA field — standard or custom — constitutes conspicuous disclosure under this law. Compliance requires on-screen text, a platform label, or a visible disclaimer. SI8's `si8:likeness_assessment` field documents review of the likeness question; it is not the disclosure.
+
+---
+
 ## Sources
 
 - EU Code of Practice on marking and labelling of AI-generated content: https://digital-strategy.ec.europa.eu/en/policies/code-practice-ai-generated-content
