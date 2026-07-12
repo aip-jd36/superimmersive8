@@ -90,15 +90,25 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
   // Approve gate: workbook section 6 signed off (replaces old reviewer checklist)
   const checklistComplete = workbookData?.section_6?.signed_off === true
 
-  // Provenance / Numbers Protocol fields
-  const provenanceStatus = (submission as any).provenance_status as string ?? 'not_started'
-  const numbersVerifyUrl = (submission as any).numbers_verify_url as string | null
-  const numbersAssetId = (submission as any).numbers_asset_id as string | null
-  const numbersSignedAt = (submission as any).numbers_signed_at as string | null
-  const reportHash = (submission as any).report_hash as string | null
+  // Assessment record — authoritative source for signing/delivery state.
+  // Falls back gracefully to nulls when no assessment has been created yet.
+  const { data: assessment } = await supabaseAdmin
+    .from('assessments')
+    .select('id, assessment_number, processing_status, verification_url, numbers_asset_id, updated_at')
+    .eq('submission_id', params.id)
+    .maybeSingle()
 
-  // Credential gate — computed server-side so the env var is never exposed to the client
-  const hasCredentials = !!process.env.NUMBERS_API_KEY
+  const processingStatus = assessment?.processing_status ?? null
+  const assessmentNumber = assessment?.assessment_number ?? null
+  const verificationUrl  = assessment?.verification_url  ?? null
+  const assessmentNumbersAssetId = assessment?.numbers_asset_id ?? null
+  // Use updated_at as the signed timestamp when SIGNED or DELIVERED
+  const signedAt = (
+    processingStatus === 'SIGNED' || processingStatus === 'DELIVERED'
+  ) ? (assessment?.updated_at ?? null) : null
+
+  // Informational only — signing works without this key (mock provider is used)
+  const hasNumbersKey = !!process.env.NUMBERS_API_KEY
 
   const getStatusColor = (status: string) => {
     const colors = {
@@ -407,16 +417,15 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
             {isCertified && (
               <SignAndDeliverPanel
                 submissionId={params.id}
-                assessId={assessId}
                 workbookData={workbookData}
                 hasSourceVideo={!!sourceVideoUrl}
                 hasReportPdf={!!reportPdfUrl}
-                hasCredentials={hasCredentials}
-                provenanceStatus={provenanceStatus}
-                numbersVerifyUrl={numbersVerifyUrl}
-                numbersAssetId={numbersAssetId}
-                numbersSignedAt={numbersSignedAt}
-                reportHash={reportHash}
+                hasNumbersKey={hasNumbersKey}
+                processingStatus={processingStatus}
+                assessmentNumber={assessmentNumber}
+                verificationUrl={verificationUrl}
+                numbersAssetId={assessmentNumbersAssetId}
+                signedAt={signedAt}
               />
             )}
 

@@ -5,72 +5,24 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
-  Shield, CheckCircle, AlertCircle, Clock, ChevronDown, ChevronUp,
-  Copy, ExternalLink, Package
+  Shield, CheckCircle, AlertCircle, Clock,
+  Copy, ExternalLink, Package, RefreshCw,
 } from 'lucide-react'
 
 interface SignAndDeliverPanelProps {
   submissionId: string
-  assessId: string | null
   workbookData: Record<string, any> | null
   hasSourceVideo: boolean
   hasReportPdf: boolean
-  hasCredentials: boolean
-  provenanceStatus: string   // not_started | signing | signed | delivered
-  numbersVerifyUrl: string | null
+  /** Informational only — signing works without it (mock provider is used). */
+  hasNumbersKey: boolean
+  /** Processing status from assessments table. null = no assessment yet. */
+  processingStatus: string | null
+  assessmentNumber: string | null
+  verificationUrl: string | null
   numbersAssetId: string | null
-  numbersSignedAt: string | null
-  reportHash: string | null
-}
-
-// Build Zone A preview from workbook data — same logic as the server route
-// so the reviewer can inspect before committing.
-function buildZoneAPreview(
-  workbookData: Record<string, any> | null,
-  assessId: string | null,
-): Record<string, string | boolean> {
-  const s6 = workbookData?.section_6 ?? {}
-  const s3 = workbookData?.section_3 ?? {}
-
-  const outcomeId = s6.outcome || 'INSUFFICIENT_EVIDENCE'
-  const confidenceLevel = (s6.commercial_confidence ?? '').toUpperCase() || 'LOW'
-
-  const authMap: Record<string, string> = {
-    EVIDENCE_SUPPORTS: 'AUTHORIZED',
-    EVIDENCE_SUPPORTS_WITH_CONDITIONS: 'CONDITIONS_APPLY',
-    MATERIAL_RISKS_IDENTIFIED: 'NOT_AUTHORIZED',
-    INSUFFICIENT_EVIDENCE: 'NOT_AUTHORIZED',
-    UNABLE_TO_ASSESS: 'NOT_AUTHORIZED',
-  }
-  const commercialAuth = authMap[outcomeId] ?? 'NOT_AUTHORIZED'
-
-  let likenessAssessment = 'UNABLE_TO_ASSESS'
-  const l01 = s3.L01 ?? {}
-  if (l01.judgment === 'Not Applicable' || l01.likeness_found === 'none') {
-    likenessAssessment = 'NO_SYNTHETIC_PERFORMERS'
-  } else if ((s3.L03 ?? {}).judgment === 'Verified') {
-    likenessAssessment = 'SYNTHETIC_PERFORMERS_CONSENTED'
-  }
-
-  const id = assessId ?? 'ASSESS-UNKNOWN'
-  const assessDate = id.match(/(\d{4}-\d{2}-\d{2})$/)?.[1]
-    ?? new Date().toISOString().split('T')[0]
-
-  return {
-    'si8:assessment_id':                id,
-    'si8:assessment_date':              assessDate,
-    'si8:reviewer_org':                 'PMF Strategy Inc. d/b/a SuperImmersive 8',
-    'si8:methodology_version':          'SI8 Reviewer Manual v0.1',
-    'si8:verification_url':             `https://verify.superimmersive8.com/${id}`,
-    'si8:outcome_id':                   outcomeId,
-    'si8:confidence_level':             confidenceLevel,
-    'si8:commercial_authorization':     commercialAuth,
-    'si8:report_hash':                  '[computed on sign]',
-    'si8:report_version':               'v0.2',
-    'si8:ai_generated_content':         true,
-    'si8:commercial_licenses_confirmed': true,
-    'si8:likeness_assessment':          likenessAssessment,
-  }
+  /** updated_at from assessments row, set when status is SIGNED or DELIVERED. */
+  signedAt: string | null
 }
 
 function formatSignedAt(iso: string | null): string {
@@ -85,31 +37,29 @@ function formatSignedAt(iso: string | null): string {
 
 export function SignAndDeliverPanel({
   submissionId,
-  assessId,
   workbookData,
   hasSourceVideo,
   hasReportPdf,
-  hasCredentials,
-  provenanceStatus,
-  numbersVerifyUrl,
+  hasNumbersKey,
+  processingStatus,
+  assessmentNumber,
+  verificationUrl,
   numbersAssetId,
-  numbersSignedAt,
-  reportHash,
+  signedAt,
 }: SignAndDeliverPanelProps) {
   const router = useRouter()
   const [signing, setSigning] = useState(false)
   const [delivering, setDelivering] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [previewOpen, setPreviewOpen] = useState(false)
   const [copied, setCopied] = useState(false)
 
   const workbookSignedOff = !!(workbookData?.section_6?.signed_off === true)
   const prereqsMet = hasSourceVideo && hasReportPdf && workbookSignedOff
-  const isSigned = provenanceStatus === 'signed' || provenanceStatus === 'delivered'
-  const isDelivered = provenanceStatus === 'delivered'
-  const isSigningInProgress = provenanceStatus === 'signing' || signing
 
-  const zoneAPreview = buildZoneAPreview(workbookData, assessId)
+  const isSigned    = processingStatus === 'SIGNED' || processingStatus === 'DELIVERED'
+  const isDelivered = processingStatus === 'DELIVERED'
+  const isFailed    = processingStatus === 'FAILED'
+  const isSigningInProgress = processingStatus === 'SIGNING' || signing
 
   const handleSign = async () => {
     setError(null)
@@ -148,8 +98,8 @@ export function SignAndDeliverPanel({
   }
 
   const handleCopyVerifyUrl = async () => {
-    if (!numbersVerifyUrl) return
-    await navigator.clipboard.writeText(numbersVerifyUrl)
+    if (!verificationUrl) return
+    await navigator.clipboard.writeText(verificationUrl)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -168,26 +118,33 @@ export function SignAndDeliverPanel({
           <div className="flex items-center gap-2">
             <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
             <span className="text-sm font-semibold text-green-800">
-              {isDelivered ? 'Delivered' : 'Signed with Numbers Protocol'}
+              {isDelivered ? 'Delivered' : 'Assessment issued'}
             </span>
           </div>
 
           <div className="text-xs text-gray-500">
-            Signed: {formatSignedAt(numbersSignedAt)}
+            Signed: {formatSignedAt(signedAt)}
           </div>
 
-          {numbersVerifyUrl && (
+          {assessmentNumber && (
             <div className="space-y-1">
-              <div className="text-xs font-medium text-gray-500">Numbers verify URL</div>
+              <div className="text-xs font-medium text-gray-500">Assessment number</div>
+              <div className="text-xs font-mono text-gray-700">{assessmentNumber}</div>
+            </div>
+          )}
+
+          {verificationUrl && (
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-gray-500">Verification Page</div>
               <div className="flex items-center gap-2">
                 <a
-                  href={numbersVerifyUrl}
+                  href={verificationUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs text-blue-600 hover:underline flex items-center gap-1 flex-1 min-w-0"
                 >
                   <ExternalLink className="w-3 h-3 flex-shrink-0" />
-                  <span className="truncate">{numbersVerifyUrl}</span>
+                  <span className="truncate">{verificationUrl}</span>
                 </a>
                 <button
                   type="button"
@@ -195,7 +152,10 @@ export function SignAndDeliverPanel({
                   className="text-xs text-gray-400 hover:text-gray-600 flex-shrink-0"
                   title="Copy URL"
                 >
-                  {copied ? <CheckCircle className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copied
+                    ? <CheckCircle className="w-3.5 h-3.5 text-green-500" />
+                    : <Copy className="w-3.5 h-3.5" />
+                  }
                 </button>
               </div>
             </div>
@@ -203,15 +163,10 @@ export function SignAndDeliverPanel({
 
           {numbersAssetId && (
             <div className="space-y-1">
-              <div className="text-xs font-medium text-gray-500">Asset CID</div>
-              <div className="text-xs font-mono text-gray-600 break-all">{numbersAssetId}</div>
-            </div>
-          )}
-
-          {reportHash && (
-            <div className="space-y-1">
-              <div className="text-xs font-medium text-gray-500">Report SHA-256</div>
-              <div className="text-xs font-mono text-gray-500 break-all">{reportHash.slice(0, 16)}…</div>
+              <div className="text-xs font-medium text-gray-500">
+                {hasNumbersKey ? 'Numbers Protocol CID' : 'Provenance ID (mock)'}
+              </div>
+              <div className="text-xs font-mono text-gray-500 break-all">{numbersAssetId}</div>
             </div>
           )}
 
@@ -233,14 +188,60 @@ export function SignAndDeliverPanel({
               ✓ Delivery recorded
             </div>
           )}
+
+          {error && (
+            <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
+              <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // ── Failed state — show retry ────────────────────────────────────────────
+  if (isFailed && !signing) {
+    return (
+      <Card className="border-2" style={{ borderColor: 'rgba(239,68,68,0.25)', backgroundColor: '#fff5f5' }}>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Shield className="w-4 h-4 flex-shrink-0" style={{ color: '#dc2626' }} />
+            Sign &amp; Deliver
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+            <span className="text-sm font-semibold text-red-700">Signing failed</span>
+          </div>
+          <p className="text-xs text-gray-500">
+            The previous signing attempt failed. The assessment record is preserved — retry to resume from where it stopped.
+          </p>
+          <Button
+            size="sm"
+            className="w-full text-white"
+            style={{ backgroundColor: '#C8900A' }}
+            onClick={handleSign}
+            disabled={signing}
+          >
+            <RefreshCw className="w-3.5 h-3.5 mr-2" />
+            {signing ? 'Retrying…' : 'Retry Signing'}
+          </Button>
+          {error && (
+            <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
+              <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
         </CardContent>
       </Card>
     )
   }
 
   // ── Not yet signed ──────────────────────────────────────────────────────
-  const borderColor = prereqsMet && hasCredentials ? 'rgba(200,144,10,0.35)' : 'rgba(0,0,0,0.08)'
-  const bgColor = prereqsMet && hasCredentials ? '#fffbf0' : 'white'
+  const borderColor = prereqsMet ? 'rgba(200,144,10,0.35)' : 'rgba(0,0,0,0.08)'
+  const bgColor = prereqsMet ? '#fffbf0' : 'white'
 
   return (
     <Card className="border-2" style={{ borderColor, backgroundColor: bgColor }}>
@@ -269,51 +270,32 @@ export function SignAndDeliverPanel({
           ))}
         </div>
 
-        {/* Credentials status */}
-        {!hasCredentials && (
-          <div className="flex items-start gap-2 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">
-            <Clock className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-            <span>Add <code className="font-mono bg-amber-100 px-1 rounded">NUMBERS_API_KEY</code> to Vercel env vars to enable signing.</span>
-          </div>
-        )}
-
-        {/* Zone A payload preview */}
-        {prereqsMet && (
-          <div>
-            <button
-              type="button"
-              onClick={() => setPreviewOpen(o => !o)}
-              className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700"
-            >
-              {previewOpen
-                ? <ChevronUp className="w-3 h-3" />
-                : <ChevronDown className="w-3 h-3" />
-              }
-              {previewOpen ? 'Hide' : 'Preview'} Zone A manifest
-            </button>
-            {previewOpen && (
-              <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded text-xs font-mono overflow-x-auto">
-                {Object.entries(zoneAPreview).map(([k, v]) => (
-                  <div key={k} className="flex gap-2">
-                    <span className="text-gray-400 flex-shrink-0 w-48 truncate">{k}</span>
-                    <span className="text-gray-700">{String(v)}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        {/* Provider status — informational, not a blocker */}
+        <div className="flex items-start gap-2 p-2 rounded text-xs"
+          style={{
+            backgroundColor: hasNumbersKey ? 'rgba(22,163,74,0.06)' : 'rgba(245,158,11,0.08)',
+            border: `1px solid ${hasNumbersKey ? 'rgba(22,163,74,0.2)' : 'rgba(245,158,11,0.25)'}`,
+          }}
+        >
+          <Clock className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: hasNumbersKey ? '#16a34a' : '#b45309' }} />
+          <span style={{ color: hasNumbersKey ? '#15803d' : '#92400E' }}>
+            {hasNumbersKey
+              ? 'Numbers Protocol key configured — will sign with live provider.'
+              : <>Mock mode — add <code className="font-mono bg-amber-50 px-0.5 rounded">NUMBERS_API_KEY</code> to Vercel env vars for live signing.</>
+            }
+          </span>
+        </div>
 
         {/* Sign button */}
         <Button
           size="sm"
           className="w-full text-white"
-          style={{ backgroundColor: prereqsMet && hasCredentials && !isSigningInProgress ? '#C8900A' : undefined }}
+          style={{ backgroundColor: prereqsMet && !isSigningInProgress ? '#C8900A' : undefined }}
           onClick={handleSign}
-          disabled={!prereqsMet || !hasCredentials || isSigningInProgress}
+          disabled={!prereqsMet || isSigningInProgress}
         >
           <Shield className="w-3.5 h-3.5 mr-2" />
-          {isSigningInProgress ? 'Signing…' : 'Sign with Numbers Protocol'}
+          {isSigningInProgress ? 'Signing…' : 'Issue Assessment'}
         </Button>
 
         {isSigningInProgress && !signing && (
@@ -330,7 +312,7 @@ export function SignAndDeliverPanel({
         )}
 
         <p className="text-xs text-gray-400">
-          Downloads PDF → computes SHA-256 → embeds C2PA credentials → signs MP4 via Numbers Protocol Capture API.
+          Creates assessment record → computes PDF SHA-256 → embeds C2PA credentials in source MP4 → stores signed asset.
         </p>
       </CardContent>
     </Card>
