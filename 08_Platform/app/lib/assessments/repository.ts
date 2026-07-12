@@ -139,6 +139,11 @@ export async function updateAssessment(
  *   SIGNING → SIGNED
  *   SIGNED → DELIVERED
  *   Any non-DRAFT → FAILED (with diagnostic required)
+ *   FAILED → SIGNING  (recovery path — see PERMITTED_TRANSITIONS comment)
+ *
+ * On transition to SIGNED: failure_diagnostic is cleared (set to null).
+ * This implements Option A (retain diagnostic until success): the existing
+ * diagnostic string is preserved during retry, cleared only on SIGNED.
  */
 export async function transitionProcessingStatus(
   id: string,
@@ -170,6 +175,9 @@ export async function transitionProcessingStatus(
   if (to === 'SIGNED') {
     if (options?.numbersAssetId) updates.numbers_asset_id = options.numbersAssetId
     if (options?.signedAssetPath) updates.signed_asset_path = options.signedAssetPath
+    // Option A: retain failure_diagnostic during retry; clear only on successful SIGNED.
+    // A FAILED → SIGNING → SIGNED retry path should leave no stale diagnostic text.
+    updates.failure_diagnostic = null
   }
 
   return updateAssessment(id, updates)
@@ -224,7 +232,22 @@ const PERMITTED_TRANSITIONS: Record<ProcessingStatus, ProcessingStatus[]> = {
   SIGNING:          ['SIGNED', 'FAILED'],
   SIGNED:           ['DELIVERED', 'FAILED'],
   DELIVERED:        ['FAILED'],   // edge case; should be rare
-  FAILED:           [],           // terminal — no further transitions
+  //
+  // FAILED is recoverable — not terminal.
+  //
+  // "FAILED" means "the most recent processing attempt failed", not
+  // "can never be processed again." Transient provider errors (network timeout,
+  // Numbers API 503, download failure) are the expected cause. The assessment
+  // record is preserved with its failure_diagnostic; the reviewer initiates a
+  // retry by transitioning FAILED → SIGNING.
+  //
+  // DELIVERED is the only true terminal state for a completed assessment.
+  // FAILED from DELIVERED remains permitted as an edge case.
+  //
+  // The FAILED → SIGNING recovery path skips Steps 1–2 (REPORT_GENERATED and
+  // SIGNING transitions from DRAFT) because pdf_hash_sha256 is already persisted
+  // from the original attempt. See service.ts signAssessment() retry path.
+  FAILED:           ['SIGNING'],
 }
 
 function validateTransition(from: ProcessingStatus, to: ProcessingStatus): void {

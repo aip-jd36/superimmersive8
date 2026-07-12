@@ -114,7 +114,7 @@ export interface SignAssessmentResult {
 /**
  * Run the full signing flow for an assessment.
  *
- * Steps:
+ * Steps (fresh start from DRAFT):
  *   1. Compute PDF SHA-256, advance status to REPORT_GENERATED
  *   2. Advance status to SIGNING
  *   3. Call ProvenanceProvider.sign (Numbers Protocol)
@@ -122,9 +122,26 @@ export interface SignAssessmentResult {
  *   5. Store signed asset in Supabase Storage (signed-assets bucket)
  *   6. Advance status to SIGNED, persist numbers_asset_id + signed_asset_path
  *
- * On any failure after DRAFT: mark FAILED with diagnostic, never throw silently.
- * Retries are safe: if numbers_asset_id + signed_asset_path are both set, the
- * function returns immediately before any state transitions are attempted.
+ * On any failure: mark FAILED with diagnostic, never throw silently.
+ *
+ * ── Retry paths ──────────────────────────────────────────────────────────────
+ *
+ * Idempotency (already SIGNED): if numbers_asset_id + signed_asset_path are
+ *   both set, return immediately. The assessment is already complete.
+ *
+ * FAILED recovery: if processing_status is 'FAILED', skip Steps 1–2
+ *   (pdf_hash_sha256 is already persisted from the original attempt) and
+ *   transition directly FAILED → SIGNING. Then proceed from Step 3.
+ *   - The failure_diagnostic is preserved during the retry (Option A).
+ *   - It is cleared only on a successful SIGNED transition (in repository.ts).
+ *
+ * Partial-success recovery: if numbers_asset_id is already set but
+ *   signed_asset_path is not, Numbers succeeded but SI8 never received or
+ *   stored the result. Skip the provider.sign() call and proceed from Step 4
+ *   (download). This avoids registering a duplicate asset with Numbers.
+ *   TODO (Numbers API): idempotency key support is unconfirmed — if Numbers
+ *   adds idempotency keys in future, this partial-success guard can be
+ *   replaced with a safe idempotent re-call.
  */
 export async function signAssessment(
   input: SignAssessmentInput,
@@ -138,11 +155,9 @@ export async function signAssessment(
     throw new Error(`Assessment ${assessmentId} not found`)
   }
 
-  // ── Retry guard ───────────────────────────────────────────────────────────
-  // Must run before any state transitions. If both numbers_asset_id and
-  // signed_asset_path are already set, the Numbers call and Supabase upload
-  // completed on a previous attempt. Re-running transitionProcessingStatus
-  // would throw because processing_status is no longer DRAFT.
+  // ── Full idempotency guard (already SIGNED / DELIVERED) ───────────────────
+  // Both fields set = the entire signing flow completed on a previous attempt.
+  // Return without touching state — the assessment is done.
   if (assessment.numbers_asset_id && assessment.signed_asset_path) {
     const reportHash = crypto.createHash('sha256').update(pdfBuffer).digest('hex')
     return {
@@ -153,17 +168,39 @@ export async function signAssessment(
     }
   }
 
-  // ── Step 1: PDF hash + REPORT_GENERATED ──────────────────────────────────
+  // Always compute the PDF hash — same PDF = same hash, and we need it for
+  // the REPORT_GENERATED transition on a fresh start (Step 1).
   const reportHash = crypto.createHash('sha256').update(pdfBuffer).digest('hex')
 
-  await transitionProcessingStatus(assessmentId, 'REPORT_GENERATED', {
-    pdfHashSha256: reportHash,
-  })
+  // ── FAILED recovery path ──────────────────────────────────────────────────
+  // processing_status = 'FAILED': previous attempt failed at some step after
+  // DRAFT. Steps 1–2 are already complete (pdf_hash_sha256 is persisted).
+  // Transition directly FAILED → SIGNING to re-enter the signing flow at Step 3.
+  // The failure_diagnostic string is retained in the DB during this retry;
+  // it will be cleared by the SIGNED transition on success (see repository.ts).
+  if (assessment.processing_status === 'FAILED') {
+    await transitionProcessingStatus(assessmentId, 'SIGNING')
+    // Fall through to Step 3 below.
+  } else {
+    // ── Step 1: PDF hash + REPORT_GENERATED ────────────────────────────────
+    await transitionProcessingStatus(assessmentId, 'REPORT_GENERATED', {
+      pdfHashSha256: reportHash,
+    })
 
-  // ── Step 2: Advance to SIGNING ────────────────────────────────────────────
-  await transitionProcessingStatus(assessmentId, 'SIGNING')
+    // ── Step 2: Advance to SIGNING ──────────────────────────────────────────
+    await transitionProcessingStatus(assessmentId, 'SIGNING')
+  }
 
   // ── Step 3: Call ProvenanceProvider ──────────────────────────────────────
+  //
+  // Partial-success guard: if numbers_asset_id is already set but
+  // signed_asset_path is not, Numbers succeeded on a prior attempt but SI8's
+  // response was lost (crash, timeout) before we could persist it. Skip the
+  // provider call and reconstruct the download URL from the stored CID.
+  //
+  // TODO (Numbers API): idempotency key support is unconfirmed. If Numbers
+  // returns a stable CID for the same (assessmentNumber, file) pair, this
+  // guard can be removed in favour of a safe idempotent re-call.
   const assessmentMeta: AssessmentMetadata = {
     assessmentNumber:     assessment.assessment_number,
     assessmentDate:       assessment.assessment_date,
@@ -173,18 +210,33 @@ export async function signAssessment(
     verificationUrl:      assessment.verification_url,
   }
 
-  let signedResult
-  try {
-    signedResult = await provider.sign(videoBuffer, assessmentMeta, {
-      digitalSourceType: DEFAULT_DIGITAL_SOURCE_TYPE,
-    })
-  } catch (err: any) {
-    await markFailed(assessmentId, {
-      step:      'ProvenanceProvider.sign',
-      error:     err?.message ?? String(err),
-      timestamp: new Date().toISOString(),
-    })
-    throw err
+  let signedResult: { signedAssetUrl: string; provenanceAssetId: string; verificationUrl?: string }
+
+  if (assessment.numbers_asset_id) {
+    // numbers_asset_id is set but signed_asset_path is not — partial success.
+    // Reconstruct the download URL from the known CID and skip provider.sign().
+    // TODO (Numbers API): confirm the stable download URL pattern for a known CID.
+    // If the download URL is not reconstructable from CID alone, a GET call to
+    // /api/v3/assets/{cid}/ may be required.
+    const cid = assessment.numbers_asset_id
+    signedResult = {
+      provenanceAssetId: cid,
+      signedAssetUrl:    `https://api.numbersprotocol.io/api/v3/assets/${cid}/`,
+      verificationUrl:   `https://verify.numbersprotocol.io/asset-profile?nid=${cid}`,
+    }
+  } else {
+    try {
+      signedResult = await provider.sign(videoBuffer, assessmentMeta, {
+        digitalSourceType: DEFAULT_DIGITAL_SOURCE_TYPE,
+      })
+    } catch (err: any) {
+      await markFailed(assessmentId, {
+        step:      'ProvenanceProvider.sign',
+        error:     err?.message ?? String(err),
+        timestamp: new Date().toISOString(),
+      })
+      throw err
+    }
   }
 
   // ── Step 4: Download signed asset from provider URL ───────────────────────
@@ -227,6 +279,7 @@ export async function signAssessment(
   }
 
   // ── Step 6: Advance to SIGNED ─────────────────────────────────────────────
+  // The SIGNED transition clears failure_diagnostic (see repository.ts).
   await transitionProcessingStatus(assessmentId, 'SIGNED', {
     numbersAssetId:   signedResult.provenanceAssetId,
     signedAssetPath:  storagePath,

@@ -100,6 +100,42 @@ The `page.tsx` Numbers URL construction is a known coupling point — annotate i
 
 ---
 
+## Future Architecture: Assessment / AssessmentArtifact / ProvenanceRecord Separation
+
+This section documents a three-entity separation that is NOT implemented in v1. It describes where the v1 flat schema breaks down and what the correct decomposition looks like when those breaks occur.
+
+### The Three Entities
+
+**Assessment** — the primary object. Owns the commercial assurance decision, institutional status, methodology, outcome, and verification URL. It does not own provenance-provider state. In v1, assessment-domain fields and provenance-domain fields coexist on the same table (`assessments`). This is acceptable at one provider, one asset per assessment.
+
+**AssessmentArtifact** — one or more files produced by an assessment. In v1, the only artifact is the signed MP4 at `signed_asset_path`. A future assessment might produce: a signed MP4, a signed still frame, a chain-of-title PDF (once the PDF itself is signed via Capture API), and a provenance manifest export. Each artifact has its own storage path, content type, and lifecycle — it does not belong as a column on the Assessment.
+
+**ProvenanceRecord** — the provider-specific signing record for one artifact. It owns: `provider` (string enum), `asset_id` (the provider CID), `verify_url` (provider-side link), `created_at`. A ProvenanceRecord is 1:1 with an artifact in the common case, but could be 1:N if an artifact is re-signed by multiple providers.
+
+In v1, these three concepts are collapsed: `signed_asset_path` is the AssessmentArtifact and `numbers_asset_id` is the ProvenanceRecord, both as columns on Assessment.
+
+### Five Concrete Migration Triggers
+
+Implement the separation when any of the following occur:
+
+1. **A second provenance provider is introduced** (e.g., self-hosted C2PA signer, Numbrs alternative, or a direct Content Credentials node). At that point, `numbers_asset_id` is no longer sufficient — you need `provider` + `asset_id` + `verify_url` per signing event, not just a CID field whose name encodes the provider.
+
+2. **One assessment produces multiple signed media assets** (e.g., the source MP4 and a compressed delivery version, or a vertical crop signed separately for platform delivery). The current schema has one `signed_asset_path` per assessment — it cannot represent multiple artifacts.
+
+3. **Reports require multiple immutable versions** (e.g., the PDF is revised and the original PDF is retained alongside the replacement). The current schema has no PDF artifact tracking — `pdf_hash_sha256` is a hash of the current PDF with no version history. If SI8 ever issues a corrected report (while keeping the original on record), a separate artifact table is required.
+
+4. **Provider-specific columns begin spreading through assessment-domain code** (e.g., if a `numbers_verify_url` column is added to `assessments`, or if the signing route begins branching on `IF provider == 'numbers' THEN...`). This is the signal that the flat schema is becoming a maintenance problem. The fix is to extract provenance state to a `provenance_records` table keyed on `assessment_id` and `artifact_id`.
+
+5. **Artifact retention or replacement requires independent lifecycle management** (e.g., a signed asset must be re-hosted from Numbers CDN to SI8 Supabase Storage because Numbers is shutting down, or an artifact must be marked superseded without superseding the Assessment itself). Independent lifecycle requires independent tables.
+
+### Why This Is NOT Implemented in v1
+
+- One provider, one artifact per assessment, no report versioning, no artifact supersession — the v1 complexity budget does not justify a three-table join on the Verification Page load.
+- The `ProvenanceProvider` interface and `signAssessment()` orchestration are already provider-agnostic. The only coupling is the column names (`numbers_asset_id`, `signed_asset_path`) and the URL construction in `page.tsx`. This is acceptable until a trigger condition fires.
+- Migration when a trigger fires is an `ALTER TABLE` rename (Option A) or a new `provenance_records` table (Option B) — both are schema-only changes with no business logic impact.
+
+---
+
 ## Related files
 
 - `08_Platform/app/lib/assessments/repository.ts` — confirmed: no Numbers imports
