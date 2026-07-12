@@ -187,7 +187,7 @@ export default async function VerificationPage({ params }: PageProps) {
             based on the evidence submitted at the assessment date. It is not legal advice.
           </p>
           <p style={{ margin: 0 }}>
-            Operated by PMF Strategy Inc. d/b/a SuperImmersive 8 &middot;{' '}
+            SuperImmersive 8 is operated by PMF Strategy Inc. &middot;{' '}
             <a
               href="https://www.superimmersive8.com"
               style={{ color: '#8C8A82', textDecoration: 'none' }}
@@ -448,8 +448,9 @@ function DetailRow({
 /**
  * Display transformer for reviewer_organization.
  *
- * If the canonical value contains "d/b/a SuperImmersive 8", extract "SuperImmersive 8"
- * as the primary display name and show the full legal entity as secondary text.
+ * When the canonical value contains "d/b/a SuperImmersive 8", show only the trade name
+ * ("SuperImmersive 8") — the full legal entity string is intentionally suppressed on the
+ * public record to avoid presenting a redundant secondary line.
  * Otherwise show the full string as-is.
  *
  * Does NOT modify what is stored in the DB or returned by VerificationPageData.
@@ -458,17 +459,8 @@ function ReviewerOrganizationDisplay({ value }: { value: string }) {
   const dbaMatch = value.match(/(.+)\s+d\/b\/a\s+(SuperImmersive\s+8)/i)
 
   if (dbaMatch) {
-    const legalEntity = value // original canonical string
     const displayName = dbaMatch[2] // "SuperImmersive 8"
-
-    return (
-      <div>
-        <div style={{ color: '#1a1918' }}>{displayName}</div>
-        <div style={{ fontSize: '0.8125rem', color: '#8C8A82', marginTop: '0.125rem' }}>
-          {legalEntity}
-        </div>
-      </div>
-    )
+    return <>{displayName}</>
   }
 
   return <>{value}</>

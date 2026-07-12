@@ -78,9 +78,8 @@ export function WorkbookEntryPoint({ submissionId, assessId, workbookData }: Wor
           </p>
         )}
 
-        {assessId && (
-          <p className="text-xs text-gray-400 font-mono">{assessId}</p>
-        )}
+        {/* Legacy submissions.assess_id is not rendered — canonical assessment number
+            comes from the assessments table and is shown in SignAndDeliverPanel. */}
 
         <Button
           asChild
