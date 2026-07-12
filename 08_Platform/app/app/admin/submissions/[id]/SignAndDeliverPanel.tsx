@@ -106,36 +106,65 @@ export function SignAndDeliverPanel({
 
   // ── Signed / Delivered state ────────────────────────────────────────────
   if (isSigned) {
+    // Numbers provenance link — only shown when a real asset ID is present
+    const numbersVerifyUrl = numbersAssetId
+      ? `https://verify.numbersprotocol.io/asset-profile?nid=${numbersAssetId}`
+      : null
+
     return (
       <Card className="border-2" style={{ borderColor: 'rgba(22,163,74,0.3)', backgroundColor: '#f0fdf4' }}>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Shield className="w-4 h-4" style={{ color: '#16a34a' }} />
-            Sign &amp; Deliver
+            Assessment
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
-            <span className="text-sm font-semibold text-green-800">
-              {isDelivered ? 'Delivered' : 'Assessment issued'}
-            </span>
-          </div>
 
-          <div className="text-xs text-gray-500">
-            Signed: {formatSignedAt(signedAt)}
-          </div>
-
-          {assessmentNumber && (
-            <div className="space-y-1">
-              <div className="text-xs font-medium text-gray-500">Assessment number</div>
-              <div className="text-xs font-mono text-gray-700">{assessmentNumber}</div>
+          {/* Issued section */}
+          <div className="space-y-2">
+            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Issued</div>
+            <div className="space-y-1.5">
+              {assessmentNumber && (
+                <div className="grid grid-cols-[auto_1fr] gap-x-3 text-xs">
+                  <span className="text-gray-500">Assessment Number</span>
+                  <span className="font-mono text-gray-700">{assessmentNumber}</span>
+                </div>
+              )}
+              <div className="grid grid-cols-[auto_1fr] gap-x-3 text-xs">
+                <span className="text-gray-500">Issued Date</span>
+                <span className="text-gray-700">{formatSignedAt(signedAt)}</span>
+              </div>
             </div>
-          )}
+          </div>
 
+          {/* Technical Provenance section */}
+          <div className="space-y-2">
+            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Technical Provenance</div>
+            {numbersVerifyUrl ? (
+              <div className="space-y-1">
+                <div className="text-xs text-gray-700">Signed</div>
+                <a
+                  href={numbersVerifyUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                >
+                  <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                  View Provenance Record
+                </a>
+              </div>
+            ) : (
+              <p className="text-xs text-gray-400">
+                Pending — provenance signing will occur when NUMBERS_API_KEY is configured.
+              </p>
+            )}
+          </div>
+
+          {/* Public Assessment Record section */}
           {verificationUrl && (
-            <div className="space-y-1">
-              <div className="text-xs font-medium text-gray-500">Verification Page</div>
+            <div className="space-y-2">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Public Assessment Record</div>
               <div className="flex items-center gap-2">
                 <a
                   href={verificationUrl}
@@ -144,7 +173,7 @@ export function SignAndDeliverPanel({
                   className="text-xs text-blue-600 hover:underline flex items-center gap-1 flex-1 min-w-0"
                 >
                   <ExternalLink className="w-3 h-3 flex-shrink-0" />
-                  <span className="truncate">{verificationUrl}</span>
+                  <span className="truncate">Open Public Assessment Record</span>
                 </a>
                 <button
                   type="button"
@@ -161,33 +190,26 @@ export function SignAndDeliverPanel({
             </div>
           )}
 
-          {numbersAssetId && (
-            <div className="space-y-1">
-              <div className="text-xs font-medium text-gray-500">
-                {hasNumbersKey ? 'Numbers Protocol CID' : 'Provenance ID (mock)'}
+          {/* Delivery section */}
+          <div className="space-y-2">
+            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Delivery</div>
+            {!isDelivered ? (
+              <Button
+                size="sm"
+                className="w-full"
+                onClick={handleMarkDelivered}
+                disabled={delivering}
+                style={{ backgroundColor: '#1C3557', color: 'white' }}
+              >
+                <Package className="w-3.5 h-3.5 mr-2" />
+                {delivering ? 'Updating…' : 'Mark as Delivered'}
+              </Button>
+            ) : (
+              <div className="text-xs text-green-700 font-medium">
+                ✓ Delivery recorded
               </div>
-              <div className="text-xs font-mono text-gray-500 break-all">{numbersAssetId}</div>
-            </div>
-          )}
-
-          {!isDelivered && (
-            <Button
-              size="sm"
-              className="w-full"
-              onClick={handleMarkDelivered}
-              disabled={delivering}
-              style={{ backgroundColor: '#1C3557', color: 'white' }}
-            >
-              <Package className="w-3.5 h-3.5 mr-2" />
-              {delivering ? 'Updating…' : 'Mark as Delivered'}
-            </Button>
-          )}
-
-          {isDelivered && (
-            <div className="text-xs text-center text-green-700 font-medium py-1">
-              ✓ Delivery recorded
-            </div>
-          )}
+            )}
+          </div>
 
           {error && (
             <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
@@ -271,20 +293,12 @@ export function SignAndDeliverPanel({
         </div>
 
         {/* Provider status — informational, not a blocker */}
-        <div className="flex items-start gap-2 p-2 rounded text-xs"
-          style={{
-            backgroundColor: hasNumbersKey ? 'rgba(22,163,74,0.06)' : 'rgba(245,158,11,0.08)',
-            border: `1px solid ${hasNumbersKey ? 'rgba(22,163,74,0.2)' : 'rgba(245,158,11,0.25)'}`,
-          }}
-        >
-          <Clock className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: hasNumbersKey ? '#16a34a' : '#b45309' }} />
-          <span style={{ color: hasNumbersKey ? '#15803d' : '#92400E' }}>
-            {hasNumbersKey
-              ? 'Numbers Protocol key configured — will sign with live provider.'
-              : <>Mock mode — add <code className="font-mono bg-amber-50 px-0.5 rounded">NUMBERS_API_KEY</code> to Vercel env vars for live signing.</>
-            }
-          </span>
-        </div>
+        <p className="text-xs text-gray-400">
+          {hasNumbersKey
+            ? 'Numbers Protocol key configured — provenance signing active.'
+            : 'Provenance signing inactive — add NUMBERS_API_KEY to enable live signing.'
+          }
+        </p>
 
         {/* Sign button */}
         <Button
@@ -312,7 +326,7 @@ export function SignAndDeliverPanel({
         )}
 
         <p className="text-xs text-gray-400">
-          Creates assessment record → computes PDF SHA-256 → embeds C2PA credentials in source MP4 → stores signed asset.
+          Issues the SI8 commercial assurance assessment and registers it in the Assessment Registry.
         </p>
       </CardContent>
     </Card>

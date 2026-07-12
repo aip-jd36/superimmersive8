@@ -23,7 +23,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   return {
-    title: `Assessment ${params.assessment_number} — SuperImmersive 8`,
+    title: `SI8 Public Assessment Record — ${params.assessment_number}`,
     description: 'SI8 commercial assurance assessment verification record.',
     robots: { index: false, follow: false },
   }
@@ -113,7 +113,7 @@ export default async function VerificationPage({ params }: PageProps) {
               marginBottom: '0.5rem',
             }}
           >
-            Commercial Assurance Assessment
+            Public Assessment Record
           </div>
           <h1
             style={{
@@ -140,7 +140,10 @@ export default async function VerificationPage({ params }: PageProps) {
         <Section title="Assessment Details">
           <DetailRow label="Assessment Date" value={formatDate(assessment.assessment_date)} />
           <DetailRow label="Methodology" value={assessment.methodology_version} />
-          <DetailRow label="Reviewer Organization" value={assessment.reviewer_organization} />
+          <DetailRow
+            label="Reviewer Organization"
+            value={<ReviewerOrganizationDisplay value={assessment.reviewer_organization} />}
+          />
           <DetailRow
             label="Institutional Status"
             value={<InstitutionalStatusBadge status={assessment.institutional_status} />}
@@ -155,6 +158,7 @@ export default async function VerificationPage({ params }: PageProps) {
               color: '#52504A',
               marginBottom: '1rem',
               lineHeight: 1.6,
+              padding: '1rem 1.25rem 0',
             }}
           >
             This assessment reviewed the following domains. Domain scope indicates areas
@@ -178,8 +182,19 @@ export default async function VerificationPage({ params }: PageProps) {
             lineHeight: 1.7,
           }}
         >
-          This assessment represents SI8&apos;s independent commercial assurance opinion
-          based on the evidence submitted at the assessment date. It is not legal advice.
+          <p style={{ margin: '0 0 0.5rem' }}>
+            This assessment represents SI8&apos;s independent commercial assurance opinion
+            based on the evidence submitted at the assessment date. It is not legal advice.
+          </p>
+          <p style={{ margin: 0 }}>
+            Operated by PMF Strategy Inc. d/b/a SuperImmersive 8 &middot;{' '}
+            <a
+              href="https://www.superimmersive8.com"
+              style={{ color: '#8C8A82', textDecoration: 'none' }}
+            >
+              superimmersive8.com
+            </a>
+          </p>
         </footer>
       </main>
     </div>
@@ -430,6 +445,35 @@ function DetailRow({
   )
 }
 
+/**
+ * Display transformer for reviewer_organization.
+ *
+ * If the canonical value contains "d/b/a SuperImmersive 8", extract "SuperImmersive 8"
+ * as the primary display name and show the full legal entity as secondary text.
+ * Otherwise show the full string as-is.
+ *
+ * Does NOT modify what is stored in the DB or returned by VerificationPageData.
+ */
+function ReviewerOrganizationDisplay({ value }: { value: string }) {
+  const dbaMatch = value.match(/(.+)\s+d\/b\/a\s+(SuperImmersive\s+8)/i)
+
+  if (dbaMatch) {
+    const legalEntity = value // original canonical string
+    const displayName = dbaMatch[2] // "SuperImmersive 8"
+
+    return (
+      <div>
+        <div style={{ color: '#1a1918' }}>{displayName}</div>
+        <div style={{ fontSize: '0.8125rem', color: '#8C8A82', marginTop: '0.125rem' }}>
+          {legalEntity}
+        </div>
+      </div>
+    )
+  }
+
+  return <>{value}</>
+}
+
 function InstitutionalStatusBadge({ status }: { status: InstitutionalStatus }) {
   const colors: Record<InstitutionalStatus, { bg: string; text: string }> = {
     ACTIVE:     { bg: 'rgba(22,163,74,0.1)',  text: '#15803d' },
@@ -473,14 +517,21 @@ function DomainList() {
             fontSize: '0.875rem',
           }}
         >
+          {/* Subtle monogram badge — visually secondary, muted amber, monospace */}
           <span
             style={{
               fontFamily: 'ui-monospace, "Cascadia Code", monospace',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              color: '#C8900A',
-              width: '20px',
+              fontSize: '0.6875rem',
+              fontWeight: 600,
+              color: 'rgba(200,144,10,0.7)',
+              backgroundColor: 'rgba(200,144,10,0.08)',
+              border: '1px solid rgba(200,144,10,0.18)',
+              borderRadius: '3px',
+              padding: '0.0625rem 0.3125rem',
+              lineHeight: 1.4,
+              letterSpacing: '0.04em',
               flexShrink: 0,
+              userSelect: 'none',
             }}
           >
             {code}
