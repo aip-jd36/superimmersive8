@@ -103,9 +103,12 @@ export async function findAssessmentForVerification(
 
   if (error || !data) return null
 
-  // Extract the joined submission row (Supabase returns it as an object or null).
-  // Use explicit field mapping — do not spread the submission object directly.
-  const sub = data.submission as { title: string; runtime: number | null } | null
+  // Supabase returns joined rows as an array even for to-one relationships.
+  // Unwrap the first element; use explicit field mapping — do not spread.
+  const rawSub = Array.isArray(data.submission)
+    ? (data.submission[0] ?? null)
+    : (data.submission ?? null)
+  const sub = rawSub as { title: string; runtime: number | null } | null
 
   return {
     assessment_number:  data.assessment_number,
