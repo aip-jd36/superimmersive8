@@ -78,6 +78,16 @@ export async function findAssessmentBySubmissionId(
  *
  * Returns only the VerificationPageData subset — safe to pass to public routes.
  * Never returns: customer data, reviewer notes, evidence, confidence, findings.
+ *
+ * Asset section: joins to submissions to pull asset_title and asset_runtime.
+ * The allowlist is explicit — only title and runtime are fetched from submissions.
+ * Submission ID, creator identity, storage paths, and filenames are NOT selected.
+ *
+ * v1: asset_title sourced from submissions.title.
+ * Future: assessments table may carry its own asset_title to allow
+ * reviewer-controlled public asset title independent of submission.
+ * Future: asset_media_type may be stored in assessments for non-video assets.
+ * Future: confidential assets may use "Confidential Commercial Asset" as public title.
  */
 export async function findAssessmentForVerification(
   assessmentNumber: string,
@@ -85,13 +95,34 @@ export async function findAssessmentForVerification(
   const { data, error } = await supabaseAdmin
     .from('assessments')
     .select(
-      'assessment_number, institutional_status, status_reason, outcome, assessment_date, methodology_version, reviewer_organization, numbers_asset_id, processing_status',
+      `assessment_number, institutional_status, status_reason, outcome, assessment_date, methodology_version, reviewer_organization, numbers_asset_id, processing_status,
+       submission:submissions!submission_id ( title, runtime )`,
     )
     .eq('assessment_number', assessmentNumber)
     .single()
 
   if (error || !data) return null
-  return data as VerificationPageData
+
+  // Extract the joined submission row (Supabase returns it as an object or null).
+  // Use explicit field mapping — do not spread the submission object directly.
+  const sub = data.submission as { title: string; runtime: number | null } | null
+
+  return {
+    assessment_number:  data.assessment_number,
+    institutional_status: data.institutional_status,
+    status_reason:      data.status_reason,
+    outcome:            data.outcome,
+    assessment_date:    data.assessment_date,
+    methodology_version: data.methodology_version,
+    reviewer_organization: data.reviewer_organization,
+    numbers_asset_id:   data.numbers_asset_id,
+    processing_status:  data.processing_status,
+    // Asset section — sourced from submissions join.
+    // asset_media_type is hardcoded "Video" for all v1 assessments.
+    asset_title:      sub?.title ?? '',
+    asset_runtime:    sub?.runtime ?? null,
+    asset_media_type: 'Video',
+  }
 }
 
 // ── Write ─────────────────────────────────────────────────────────────────────

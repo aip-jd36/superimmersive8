@@ -150,6 +150,9 @@ export default async function VerificationPage({ params }: PageProps) {
           />
         </Section>
 
+        {/* Asset section */}
+        <AssetSection assessment={assessment} />
+
         {/* Assessment scope */}
         <Section title="Assessment Scope">
           <p
@@ -535,6 +538,32 @@ function DomainList() {
   )
 }
 
+/**
+ * Asset section — shows what media asset was assessed.
+ *
+ * Security: renders only asset_title, asset_runtime, and asset_media_type from
+ * VerificationPageData. These are the only submission fields surfaced publicly.
+ * No creator identity, submission ID, storage paths, or filenames are rendered.
+ *
+ * The last DetailRow in a Section has no bottom border; the existing DetailRow
+ * component always adds borderBottom, so the last row gets a redundant border
+ * against the Section's own bottom edge. This is consistent with Assessment Details
+ * and matches the existing visual treatment throughout the page.
+ */
+function AssetSection({ assessment }: { assessment: VerificationPageData }) {
+  const { asset_title, asset_runtime, asset_media_type } = assessment
+
+  return (
+    <Section title="Asset">
+      <DetailRow label="Title" value={asset_title || '—'} />
+      <DetailRow label="Media Type" value={asset_media_type} />
+      {asset_runtime != null && (
+        <DetailRow label="Runtime" value={formatRuntime(asset_runtime)} />
+      )}
+    </Section>
+  )
+}
+
 function NumbersVerificationSection({ assessment }: { assessment: VerificationPageData }) {
   const { numbers_asset_id } = assessment
 
@@ -604,6 +633,16 @@ function NumbersVerificationSection({ assessment }: { assessment: VerificationPa
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+/**
+ * Format runtime in seconds as M:SS (e.g. 6 → "0:06", 90 → "1:30").
+ * Matches the convention used in admin page and showcase throughout the app.
+ */
+function formatRuntime(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${m}:${s.toString().padStart(2, '0')}`
+}
 
 function formatDate(isoDate: string): string {
   try {

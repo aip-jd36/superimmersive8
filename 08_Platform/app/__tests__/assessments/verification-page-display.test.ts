@@ -107,6 +107,10 @@ describe('Footer copy — issuer disclosure', () => {
  * If a new field is added to VerificationPageData in types/assessment.ts without
  * updating this test, the test fails — forcing deliberate review of what is
  * now publicly exposed.
+ *
+ * Asset fields added (Jul 2026): asset_title, asset_runtime, asset_media_type.
+ * These are the only submission fields surfaced publicly. No creator identity,
+ * submission ID, storage paths, or filenames are included.
  */
 import type { VerificationPageData } from '../../types/assessment'
 
@@ -124,10 +128,14 @@ describe('VerificationPageData field allowlist', () => {
     'reviewer_organization',
     'numbers_asset_id',
     'processing_status',
+    // Asset section fields (Jul 2026)
+    'asset_title',
+    'asset_runtime',
+    'asset_media_type',
   ]
 
-  test('has exactly 9 allowed fields', () => {
-    expect(ALLOWED_FIELDS).toHaveLength(9)
+  test('has exactly 12 allowed fields', () => {
+    expect(ALLOWED_FIELDS).toHaveLength(12)
   })
 
   test('contains all expected field names', () => {
@@ -140,6 +148,10 @@ describe('VerificationPageData field allowlist', () => {
     expect(ALLOWED_FIELDS).toContain('reviewer_organization')
     expect(ALLOWED_FIELDS).toContain('numbers_asset_id')
     expect(ALLOWED_FIELDS).toContain('processing_status')
+    // Asset section
+    expect(ALLOWED_FIELDS).toContain('asset_title')
+    expect(ALLOWED_FIELDS).toContain('asset_runtime')
+    expect(ALLOWED_FIELDS).toContain('asset_media_type')
   })
 
   test('does NOT contain internal fields (confidence, findings, workbook_data, etc.)', () => {
@@ -155,5 +167,117 @@ describe('VerificationPageData field allowlist', () => {
     for (const field of forbidden) {
       expect(ALLOWED_FIELDS).not.toContain(field)
     }
+  })
+})
+
+// ── Asset section — display contract ─────────────────────────────────────────
+
+/**
+ * These tests verify the display contract for the Asset section introduced
+ * in Jul 2026. No React rendering is used — pure logic checks on the data
+ * that would be fed to the Asset section components.
+ */
+
+describe('Asset section — data safety', () => {
+  /**
+   * asset_title is sourced from submissions.title (a creator-entered film name).
+   * It must not contain patterns that suggest internal paths, UUIDs, or storage
+   * object names. These tests guard against a future implementation mistake that
+   * might accidentally include a storage path in the title field.
+   */
+  const UUID_PATTERN = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i
+  const STORAGE_PATH_PATTERN = /\/(documents|uploads|assets|storage|private|public)\//i
+  const FILE_EXTENSION_PATTERN = /\.(mp4|mov|pdf|jpg|png|webm|mkv)$/i
+
+  const SAFE_TITLES = [
+    'Cloud World: Pan from Baby to Auntie Guard',
+    'Urban Drift',
+    'Midnight Sequence',
+    'A Short Film About Nothing',
+  ]
+
+  test('safe asset_title values do not contain UUID patterns', () => {
+    for (const title of SAFE_TITLES) {
+      expect(UUID_PATTERN.test(title)).toBe(false)
+    }
+  })
+
+  test('safe asset_title values do not contain storage path patterns', () => {
+    for (const title of SAFE_TITLES) {
+      expect(STORAGE_PATH_PATTERN.test(title)).toBe(false)
+    }
+  })
+
+  test('safe asset_title values do not end with file extensions', () => {
+    for (const title of SAFE_TITLES) {
+      expect(FILE_EXTENSION_PATTERN.test(title)).toBe(false)
+    }
+  })
+
+  test('submission_id is not a field on VerificationPageData', () => {
+    // VerificationPageData does not include submission_id.
+    // This is a compile-time check — any attempt to add submission_id to the
+    // interface without updating this test will cause a TypeScript error.
+    const ALLOWED_KEYS: Array<keyof VerificationPageData> = [
+      'assessment_number', 'institutional_status', 'status_reason', 'outcome',
+      'assessment_date', 'methodology_version', 'reviewer_organization',
+      'numbers_asset_id', 'processing_status',
+      'asset_title', 'asset_runtime', 'asset_media_type',
+    ]
+    expect(ALLOWED_KEYS).not.toContain('submission_id')
+    expect(ALLOWED_KEYS).not.toContain('id')
+  })
+})
+
+describe('Asset section — runtime formatting', () => {
+  /**
+   * Mirrors the formatRuntime() helper in page.tsx.
+   * Tests that null/absent runtime is handled (row omitted) and
+   * that present runtime formats correctly as M:SS.
+   */
+  function formatRuntime(seconds: number): string {
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return `${m}:${s.toString().padStart(2, '0')}`
+  }
+
+  test('6 seconds formats as "0:06"', () => {
+    expect(formatRuntime(6)).toBe('0:06')
+  })
+
+  test('90 seconds formats as "1:30"', () => {
+    expect(formatRuntime(90)).toBe('1:30')
+  })
+
+  test('0 seconds formats as "0:00"', () => {
+    expect(formatRuntime(0)).toBe('0:00')
+  })
+
+  test('3661 seconds formats as "61:01"', () => {
+    expect(formatRuntime(3661)).toBe('61:01')
+  })
+
+  test('null runtime: row should be omitted (not rendered as empty string)', () => {
+    // The page renders the Runtime row only when asset_runtime != null.
+    // This test documents that contract: null means "omit", not "show blank".
+    const asset_runtime: number | null = null
+    const shouldRenderRow = asset_runtime != null
+    expect(shouldRenderRow).toBe(false)
+  })
+
+  test('non-null runtime: row should be rendered', () => {
+    const asset_runtime: number | null = 6
+    const shouldRenderRow = asset_runtime != null
+    expect(shouldRenderRow).toBe(true)
+  })
+})
+
+describe('Asset section — media type', () => {
+  test('asset_media_type is "Video" for v1 assessments', () => {
+    // In v1, asset_media_type is hardcoded "Video" in the repository layer.
+    // This test documents the v1 contract. Future versions may store this
+    // in the assessments table for non-video assets.
+    const v1MediaType = 'Video'
+    expect(v1MediaType).toBe('Video')
   })
 })

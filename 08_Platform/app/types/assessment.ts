@@ -184,6 +184,11 @@ export interface ProvenanceProvider {
  * Security: customer identity, campaign identity, evidence, reviewer notes,
  * confidence, findings, and internal reasoning are NOT in this type and must
  * never be returned by the public API route.
+ *
+ * Asset fields (asset_title, asset_runtime, asset_media_type) expose only
+ * the publicly-safe media description. They are sourced from submissions via
+ * a join in findAssessmentForVerification(). Submission ID, creator identity,
+ * storage paths, and filenames are NOT included.
  */
 export interface VerificationPageData {
   assessment_number: string
@@ -195,6 +200,10 @@ export interface VerificationPageData {
   reviewer_organization: string
   numbers_asset_id: string | null   // used to construct Numbers verification link
   processing_status: ProcessingStatus
+  // Asset section — publicly safe media description (no creator identity, no paths)
+  asset_title: string
+  asset_runtime: number | null      // runtime in seconds; null = not provided; format as M:SS for display
+  asset_media_type: string          // "Video" for all v1 assessments; future: "Audio", "Image"
 }
 
 // ── Assessment number format ──────────────────────────────────────────────────
