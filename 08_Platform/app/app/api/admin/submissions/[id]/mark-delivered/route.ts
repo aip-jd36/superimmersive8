@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import {
+  findAssessmentBySubmissionId,
+  transitionProcessingStatus,
+} from '@/lib/assessments/repository'
 
 type RouteContext = { params: { id: string } }
 
-export async function POST(request: NextRequest, { params }: RouteContext) {
+export async function POST(_request: NextRequest, { params }: RouteContext) {
   try {
     const supabase = createClient()
     const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
@@ -17,24 +21,27 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Verify signed before marking delivered
-    const { data: sub } = await supabaseAdmin
-      .from('submissions')
-      .select('provenance_status')
-      .eq('id', params.id)
-      .single()
-    if (sub?.provenance_status !== 'signed') {
-      return NextResponse.json({ error: 'Must be signed before marking delivered' }, { status: 400 })
+    // Look up the assessment for this submission
+    const assessment = await findAssessmentBySubmissionId(params.id)
+    if (!assessment) {
+      return NextResponse.json(
+        { error: 'No assessment found for this submission. Sign the assessment first.' },
+        { status: 400 },
+      )
     }
 
-    await supabaseAdmin
-      .from('submissions')
-      .update({ provenance_status: 'delivered', delivered_at: new Date().toISOString() })
-      .eq('id', params.id)
+    if (assessment.processing_status !== 'SIGNED') {
+      return NextResponse.json(
+        { error: `Cannot mark delivered: assessment is in ${assessment.processing_status} state. Must be SIGNED.` },
+        { status: 400 },
+      )
+    }
+
+    await transitionProcessingStatus(assessment.id, 'DELIVERED')
 
     return NextResponse.json({ success: true })
   } catch (err: any) {
-    console.error('Error in mark-delivered route:', err)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('[mark-delivered] Error:', err)
+    return NextResponse.json({ error: 'Internal server error', detail: err?.message }, { status: 500 })
   }
 }

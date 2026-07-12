@@ -493,29 +493,12 @@ function DomainList() {
 }
 
 function NumbersVerificationSection({ assessment }: { assessment: VerificationPageData }) {
-  const { numbers_asset_id, processing_status } = assessment
+  const { numbers_asset_id } = assessment
 
-  // If signing has not yet occurred, don't render this section at all
-  if (processing_status === 'DRAFT' || processing_status === 'REPORT_GENERATED') {
-    return null
-  }
-
-  // Technical Provenance link unavailable (signing in progress, failed, or retrying)
+  // Section is hidden when no real provenance asset ID is available.
+  // This covers: pre-signing states, mock mode (no real CID), signing in progress.
   if (!numbers_asset_id) {
-    return (
-      <Section title="Technical Provenance">
-        <div
-          style={{
-            padding: '1rem 1.25rem',
-            fontSize: '0.875rem',
-            color: '#8C8A82',
-            lineHeight: 1.6,
-          }}
-        >
-          Provenance verification is temporarily unavailable.
-        </div>
-      </Section>
-    )
+    return null
   }
 
   // TODO (ADR-001): This URL is provider-specific. If SI8 migrates from Numbers Protocol

@@ -33,8 +33,8 @@ export class MockProvenanceProvider implements ProvenanceProvider {
   }
 
   async sign(
-    _asset: Buffer,
-    assessment: AssessmentMetadata,
+    asset: Buffer,
+    _assessment: AssessmentMetadata,
     _provenance: ProvenanceMetadata,
   ): Promise<SignedAssetResult> {
     const delay = this.opts.delayMs ?? 10
@@ -44,15 +44,14 @@ export class MockProvenanceProvider implements ProvenanceProvider {
       throw this.opts.throwWith
     }
 
-    const num = assessment.assessmentNumber
-
     return {
-      // Deterministic fake CID derived from assessment number
-      provenanceAssetId: `mock-cid-${num}`,
-      // Deterministic fake download URL
-      signedAssetUrl:    `https://mock.numbersprotocol.io/assets/mock-cid-${num}/signed.mp4`,
-      // Deterministic fake verification URL
-      verificationUrl:   `https://verify.numbersprotocol.io/asset-profile?nid=mock-cid-${num}`,
+      // Empty CID — service treats '' same as null; numbers_asset_id stays unset.
+      // This allows real signing later without the idempotency guard blocking.
+      provenanceAssetId: '',
+      // signedAssetBuffer provided: service skips the HTTP download step entirely.
+      // The original asset is stored as-is (no actual C2PA signing in mock mode).
+      signedAssetUrl:    '',
+      signedAssetBuffer: asset,
     }
   }
 }

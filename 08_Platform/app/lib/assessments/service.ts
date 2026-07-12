@@ -239,21 +239,27 @@ export async function signAssessment(
     }
   }
 
-  // ── Step 4: Download signed asset from provider URL ───────────────────────
+  // ── Step 4: Obtain signed asset buffer ────────────────────────────────────
+  // If the provider pre-computed signedAssetBuffer (e.g. MockProvenanceProvider),
+  // use it directly — no HTTP download needed. Otherwise fetch from signedAssetUrl.
   let signedVideoBuffer: Buffer
-  try {
-    const downloadRes = await fetch(signedResult.signedAssetUrl)
-    if (!downloadRes.ok) {
-      throw new Error(`Download failed: HTTP ${downloadRes.status} from ${signedResult.signedAssetUrl}`)
+  if (signedResult.signedAssetBuffer) {
+    signedVideoBuffer = signedResult.signedAssetBuffer
+  } else {
+    try {
+      const downloadRes = await fetch(signedResult.signedAssetUrl)
+      if (!downloadRes.ok) {
+        throw new Error(`Download failed: HTTP ${downloadRes.status} from ${signedResult.signedAssetUrl}`)
+      }
+      signedVideoBuffer = Buffer.from(await downloadRes.arrayBuffer())
+    } catch (err: any) {
+      await markFailed(assessmentId, {
+        step:      'DownloadSignedAsset',
+        error:     err?.message ?? String(err),
+        timestamp: new Date().toISOString(),
+      })
+      throw err
     }
-    signedVideoBuffer = Buffer.from(await downloadRes.arrayBuffer())
-  } catch (err: any) {
-    await markFailed(assessmentId, {
-      step:      'DownloadSignedAsset',
-      error:     err?.message ?? String(err),
-      timestamp: new Date().toISOString(),
-    })
-    throw err
   }
 
   // ── Step 5: Store signed asset in Supabase Storage ───────────────────────
@@ -280,14 +286,17 @@ export async function signAssessment(
 
   // ── Step 6: Advance to SIGNED ─────────────────────────────────────────────
   // The SIGNED transition clears failure_diagnostic (see repository.ts).
+  // Empty provenanceAssetId (mock mode) is treated as null — not persisted.
+  // This allows real signing later without the idempotency guard blocking.
+  const numbersAssetId = signedResult.provenanceAssetId || null
   await transitionProcessingStatus(assessmentId, 'SIGNED', {
-    numbersAssetId:   signedResult.provenanceAssetId,
-    signedAssetPath:  storagePath,
+    numbersAssetId:  numbersAssetId ?? undefined,
+    signedAssetPath: storagePath,
   })
 
   return {
     reportHash,
-    numbersAssetId:   signedResult.provenanceAssetId,
+    numbersAssetId:   numbersAssetId ?? '',
     numbersVerifyUrl: signedResult.verificationUrl ?? null,
     signedAssetPath:  storagePath,
   }

@@ -139,14 +139,25 @@ export interface ProvenanceMetadata {
 
 /**
  * Result returned by the provenance provider after signing.
+ *
+ * signedAssetBuffer: if provided, the service uses this buffer directly and skips
+ *   the Step 4 download. MockProvenanceProvider sets this (returns the input asset
+ *   unchanged); NumbersProvenanceProvider leaves it undefined (service downloads
+ *   from signedAssetUrl). This keeps the mock path free of external HTTP calls.
+ *
+ * provenanceAssetId: empty string means "no real CID" (mock mode). The service
+ *   treats '' the same as null — does not persist to numbers_asset_id. This allows
+ *   future real signing without the idempotency guard blocking.
  */
 export interface SignedAssetResult {
-  /** URL from which the signed asset can be downloaded (temporary; must be persisted). */
+  /** URL from which the signed asset can be downloaded (real provider only). */
   signedAssetUrl: string
-  /** Provider-assigned asset identifier (Numbers CID). */
+  /** Provider-assigned asset identifier (Numbers CID). Empty string = mock / not available. */
   provenanceAssetId: string
   /** Numbers verification URL for the asset, if returned by the provider. */
   verificationUrl?: string
+  /** Pre-downloaded signed asset buffer. When set, service skips the HTTP download step. */
+  signedAssetBuffer?: Buffer
 }
 
 /**
