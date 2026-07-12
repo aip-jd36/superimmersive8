@@ -385,6 +385,14 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
   Click 👇
   ```
 
+### 3n. Marketing Site v5 + Versioning (Jul 12, 2026)
+- [x] New homepage deployed — ✓ Single-page institutional site at `www.superimmersive8.com`. Design: Fraunces serif + Inter, paper ground `#f7f5ef`, ink-blue accent `#233f66`. Positioning: "Independent Commercial Assurance for AI Media." Single CTA: Book a call (Calendly). No pricing, no tiers, no form, no nav links.
+- [x] Sections: sticky nav → hero (verdict card motif) → two-audience (agency / brand legal) → provenance-vs-assurance split → 7-domain method → EU AI Act context → what you receive (incl. Coming Soon verifiable record) → scope limits → founder → final CTA → footer
+- [x] Production hardening — ✓ meta description, Open Graph (og:title/description/type/url/image), Twitter card `summary_large_image`, canonical, `favicon.svg` (S8 mark), `og-image.png` (1200×630, Georgia + paper ground), GA4 G-628BLE9N15, `book_call_click` event with nav/hero/final_cta labels
+- [x] Terminology aligned to institutional architecture — ✓ "Commercial Assurance Assessment" (product), "Assessment Report (PDF)" (deliverable), "Public Assessment Record" (public representation). Six targeted word-level changes; all generic category language ("Independent Commercial Assurance for AI Media") preserved unchanged.
+- [x] Marketing site versioning instituted — ✓ `07_Website/_versions/` with file snapshots + git tags. `v4-2026-07-12` = CaaS design rollback. `v5-2026-07-12` = current institutional design. See `07_Website/_versions/README.md` for restore instructions.
+- [ ] Chinese (zh-TW) v5 homepage — not yet built; v4-era `zh/` sub-pages remain accessible at their URLs but are not linked from the v5 nav
+
 ### 3g. Public Catalog with Video Player (Completed Mar 19, 2026 — Updated Mar 21, 2026)
 - [x] Submit form Section 10: Video & Catalog — ✓ video_url, thumbnail_url, public_description, catalog opt-in checkbox
 - [x] Catalog opt-in system — ✓ Creates opt_ins record when checkbox enabled
@@ -688,6 +696,7 @@ Traditional lawyers are conservative and don't trust automation — BUT they're 
 | **Report Production Standards v1.0** | `06_Operations/reviewer-workbook/SI8-Report-Production-Standards.md` | ACTIVE | Visual and production standards for all SI8 Assessment Reports: color system, typography, page layout, component specs, file naming, PDF metadata, Assessment ID format, quality checklist, governance. Distinct from Report Delivery SOP (process). Jul 6, 2026. |
 | **Report Pipeline** | `tools/report-pipeline/` | ACTIVE | Typst-based PDF generation pipeline. `si8-report-template.typ` = master template (colors, fonts, components). `[ASSESS-ID].typ` = report source per assessment. README documents install, compile command, troubleshooting. Assessment Zero source: `ASSESS-ZERO-2026-07-06.typ`. Jul 6, 2026. |
 | **Assessments Archive** | `06_Operations/assessments/` | ACTIVE | One subdirectory per assessment (numbered by ASSESS-ID). `assessment-zero/` = system validation dossier. `post-assessment-reviews/` = all PARs. README documents structure and naming convention. Jul 6, 2026. |
+| **Marketing Site Version Snapshots** | `07_Website/_versions/README.md` | ACTIVE | Complete file snapshots before each site redesign. `v4-2026-07-12` = CaaS design. `v5-2026-07-12` = institutional design (current). Two restore paths: PowerShell copy or git tag checkout. |
 | **Provenance Manifest Specification v0.2** | `06_Operations/provenance/SI8-Provenance-Manifest-Specification-v0.2.md` | ACTIVE | Zone A is fragile pointer / Zone B is durable record (key reframe); confidence excluded from Zone A + Registry (PDF-only); report hash deferred to v2; executive summary + gap indicators removed from Zone B; institutional status / revocation protocol added; `digitalSourceType` regulatory boundary clarified; Trust List status updated per Sofia Yan Jul 6. Jul 12, 2026. |
 | Provenance Manifest Specification v0.1 | `06_Operations/provenance/SI8-Provenance-Manifest-Specification-v0.1.md` | SUPERSEDED | Superseded by v0.2 (Jul 12, 2026). |
 | **PRD: Assessment Service v1.0** | `08_Platform/prds/PRD_ASSESSMENT_SERVICE_v1.0.md` | ACTIVE | Engineering implementation spec: Assessment Registry as authoritative source, separate institutional/processing status, ProvenanceProvider abstraction (Numbers as first impl), Verification Page at `/assessment/{assessment_number}`, confidence PDF-only, report hash internal-only in v1. Implemented and live Jul 12, 2026. First live assessment: ASSESS-005-2026-07-12 (Cloud World). See PRD Implementation Notes for deviations. |
@@ -819,6 +828,14 @@ SuperImmersive8/
 - **Catalog**: Collection of licensable content
 - **AI Video Rights Playbook**: Internal legal knowledge base (in development)
 
+**Institutional Product Terminology (frozen Jul 12, 2026 — do not deviate in any customer-facing or internal document):**
+- **Commercial Assurance Assessment** — The institutional product; the independent assessment act conducted by SI8. Use when referring to the product itself. Never say "Campaign Assurance" as a product name.
+- **Assessment Report (PDF)** / **Assessment Report** — The PDF deliverable produced as part of the Assessment. It is one deliverable, not the product. Never call this "Campaign Assurance Report."
+- **Public Assessment Record** — The public-facing digital page for a completed assessment (`app.superimmersive8.com/assessment/{number}`). Never call this "Verification Page."
+- **Assessment Registry** — The authoritative system of record (Supabase `assessments` table). The Registry is canonical; the Report, Public Assessment Record, and C2PA-signed asset are derived representations.
+
+*The distinction that matters: the Assessment is the institutional act (the product). The Report, Public Assessment Record, and signed asset are deliverables/representations produced by it.*
+
 ---
 
 ## Founder Background
@@ -850,23 +867,24 @@ SuperImmersive8/
 
 ## Website Technical Details
 
-**Stack**: Static HTML/CSS/JS
-**Fonts**: Space Grotesk (display), Inter (body)
-**Color Scheme**: Dark theme with purple/pink gradient accents
+**Stack**: Static HTML/CSS/JS (single-page, no build step, no framework)
+**Fonts**: Fraunces (display/serif), Inter (body/sans-serif) — loaded from Google Fonts CDN
+**Color Scheme**: Light "paper" ground, near-black ink, ink-blue accent — institutional/restrained
 
-**Languages:** English + Traditional Chinese (繁體中文) — bilingual required
-- Language selector in nav (EN / 中文 toggle)
-- Full content parity in both languages
-- Mandarin version needed before Taipei B2B outreach begins
-- Traditional Chinese (zh-TW), not Simplified (zh-CN)
-
-**CSS Variables:**
+**CSS Variables (v5):**
 ```css
---color-accent: #818cf8;
---color-gradient-1: #818cf8;
---color-gradient-2: #c084fc;
---color-gradient-3: #f472b6;
+--ground: #f7f5ef;       /* paper background */
+--raised: #fdfcf9;       /* card surfaces */
+--ink: #1c1c1e;          /* near-black text */
+--ink-soft: #4a4a52;     /* body text */
+--muted: #83837e;        /* secondary labels */
+--line: #e0ddd2;         /* borders */
+--accent: #233f66;       /* ink-blue */
+--accent-deep: #182c48;  /* hover state */
+--accent-tint: #e9edf3;  /* light blue bg (CTA section) */
 ```
+
+**Languages:** English only (v5 homepage). v4-era Chinese sub-pages (`zh/`) remain accessible at their URLs but are not linked from the v5 nav. Chinese v5 homepage not yet built.
 
 ### Git Repository
 
@@ -887,12 +905,13 @@ SuperImmersive8/
 **Root Directory:** `07_Website/`
 **Git credentials:** Push with `jd@superimmersive8.com` / `aip-jd36` GitHub account via SSH (`git@github-aip-jd36`)
 
-**Marketing site structure (v4, post-migration Mar 27, 2026):**
-- `07_Website/index.html` — v4 homepage (CaaS positioning)
-- `07_Website/how-it-works/`, `pricing/`, `rights-verified/`, `zh/` — v4 pages
-- `07_Website/_archive/` — v3 files preserved with restore instructions
+**Marketing site structure (v5, Jul 12, 2026):**
+- `07_Website/index.html` — v5 institutional homepage ("Independent Commercial Assurance for AI Media")
+- `07_Website/favicon.svg`, `07_Website/og-image.png` — v5 identity assets
+- `07_Website/how-it-works/`, `pricing/`, `rights-verified/`, `zh/` — v4-era sub-pages (still live; not linked from v5 nav)
+- `07_Website/_versions/` — named snapshots with restore instructions (`v4-2026-07-12`, `v5-2026-07-12`); see `_versions/README.md`
+- `07_Website/_archive/` — v3 files preserved (archived Mar 2026)
 - `07_Website/api/` — Vercel serverless functions
-- v3 site archived at `_archive/` — see `_archive/README.md` to restore
 
 **To deploy:**
 1. Make changes to files in `07_Website/`
