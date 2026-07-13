@@ -9,6 +9,55 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of July 13, 2026
+*Run: 2026-07-13 · 25 high · 9 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [EU AI Act Article 50 Transparency Rules Force Financial Firms To Act Before August Deadline](https://londoninsider.co.uk/eu-ai-act-article-50-transparency-rules-force-financial-firms-to-act-before-august-deadline/) | londoninsider.co.uk | Sun, 12 Jul 2026 | ☐ |
+| 9 | post+update | [AI Actors and The Human Question: Why Hollywood Is Fighting Over the Future of Performance](https://www.insighttrendsworld.com/post/ai-actors-and-the-human-question-why-hollywood-is-fighting-over-the-future-of-performance) | InsightTrendsWorld | Sat, 11 Jul 2026 | ☐ |
+| 9 | post+update | [Part 1 - The NO FAKES Act Moves Forward: How AI Voice and Likeness Rights Could Reshape Entertainment Deals](https://www.jdsupra.com/legalnews/part-1-the-no-fakes-act-moves-forward-4396535/) | JD Supra | Fri, 10 Jul 2026 | ☐ |
+| 9 | post+update | [AI-Generated Content in the European Union: What the Adherence to Code of Practice Means for Article 50 Compliance—Special Focus on Luxembourg's Financial Sector](https://natlawreview.com/article/ai-generated-content-european-union-what-adherence-code-practice-means-article-50) | The National Law Review | Fri, 10 Jul 2026 | ☐ |
+| 9 | post+update | [Google Ads Now Will Say If Ads Helped Create The Ad](https://www.seroundtable.com/google-ads-ai-labels-41659.html) | Search Engine Roundtable | Fri, 10 Jul 2026 | ☐ |
+| 9 | post+update | [AI Content Labeling Enforcement Begins in 24 Days as EU Clears Compliance Code](https://www.techtimes.com/articles/319996/20260709/ai-content-labeling-enforcement-begins-24-days-eu-clears-compliance-code.htm) | Tech Times | Thu, 09 Jul 2026 | ☐ |
+| 9 | post+update | [Intelligence Piracy: The Actor Who Was Never There](https://www.lexology.com/library/detail.aspx?g=f6015368-b9c4-4f6b-97d8-ad017c3f83e8) | Lexology | Thu, 09 Jul 2026 | ☐ |
+| 9 | post+update | [Media, creative agencies' AI push under copyright spotlight, faces policy uncertainty](https://www.exchange4media.com/advertising-news/media-creative-agencies-ai-push-faces-copyright-spotlight-policy-uncertainty-156140.html) | Exchange4Media | Wed, 08 Jul 2026 | ☐ |
+| 8 | post+update | [When The Lawsuit Fails, You License: Getty’s Forced Pivot To OpenAI](https://tvnewscheck.com/ai/article/when-the-lawsuit-fails-you-license-gettys-forced-pivot-to-openai/) | TV News Check | Sun, 12 Jul 2026 | ☐ |
+| 8 | post | [Google adds How this ad was made AI labels 24 days before EU deadline](https://ppc.land/google-adds-how-this-ad-was-made-ai-labels-24-days-before-eu-deadline/) | PPC Land | Sat, 11 Jul 2026 | ☐ |
+| 8 | post+update | [Creating Without Disappearing: The Defining Fight for Creators’ Rights in the Age of AI](https://www.societe.sacem.fr/en/news/our-society/creating-without-disappearing-defining-fight-creators-rights-age-ai) | La Sacem | Fri, 10 Jul 2026 | ☐ |
+| 8 | post+update | [Bay Area Ad World Braces As Google Slaps Warning Labels On AI Ads](https://hoodline.com/2026/07/bay-area-ad-world-braces-as-google-slaps-warning-labels-on-ai-ads/) | Hoodline | Fri, 10 Jul 2026 | ☐ |
+| 8 | post+update | [SynaptIQ launches AI-powered media rights analysis platform](https://www.broadcastnow.co.uk/content-management/synaptiq-launches-ai-powered-media-rights-analysis-platform/5218540.article) | Broadcast | Fri, 10 Jul 2026 | ☐ |
+| 8 | post+update | ['Artists deserve to decide': Hollywood talent agency CAA urges Meta to rethink Muse AI policy](https://www.storyboard18.com/digital/artists-deserve-to-decide-hollywood-talent-agency-caa-urges-meta-to-rethink-muse-ai-policy-103760.htm) | Storyboard18 | Fri, 10 Jul 2026 | ☐ |
+| 8 | update | [Council of the EU gives AI Omnibus final green light](https://www.lewissilkin.com/insights/2026/07/09/council-of-the-eu-gives-ai-omnibus-final-green-light-102nbb1) | Lewis Silkin | Thu, 09 Jul 2026 | ☐ |
+| 8 | post+update | [Unauthorized AI Generation Costs Japanese Celebrities ¥4.5 Billion in Copyright Damages](https://streamlinefeed.co.ke/news/unauthorized-ai-generation-costs-japanese-celebrities-4-5-billion-in-copyright-damages) | streamlinefeed.co.ke | Thu, 09 Jul 2026 | ☐ |
+| 8 | post+update | [EU AI Act – how it will work](https://www.bdo.co.uk/en-gb/insights/advisory/risk-and-advisory-services/eu-ai-act-how-it-will-work) | BDO UK | Wed, 08 Jul 2026 | ☐ |
+| 8 | post+update | [Labeling AI-Generated Content](https://www.taylorwessing.com/en/insights-and-events/insights/2026/07/ki-generierte-werbeinhalte) | Taylor Wessing | Wed, 08 Jul 2026 | ☐ |
+| 7 | post | [Advertisers face mandatory AI ad labels across Google's five platforms](https://ppc.land/advertisers-face-mandatory-ai-ad-labels-across-googles-five-platforms/) | PPC Land | Sun, 12 Jul 2026 | ☐ |
+| 7 | post | [Google and Meta to Slap 'Ingredient Labels' on AI Ads in All-Out Push Against Fake Models and Fraud](https://finance.biggo.com/news/760cc9e7-adcf-494d-a3be-c6eb4896c2d9) | finance.biggo.com | Sat, 11 Jul 2026 | ☐ |
+| 7 | post+update | [Getty Images’ Answer to AI Slop? Authentic, Verified Content](https://campaignsandelections.com/sponsored/getty-images-answer-to-ai-slop-authentic-verified-content/) | Campaigns & Elections | Fri, 10 Jul 2026 | ☐ |
+| 7 | post+update | [Google’s Move Toward AI Generated Advertising Disclosure](https://www.aicerts.ai/news/googles-move-toward-ai-generated-advertising-disclosure/) | AI CERTs | Fri, 10 Jul 2026 | ☐ |
+| 7 | post | [Google will now disclose which ads are made with AI](https://techcrunch.com/2026/07/09/google-will-now-disclose-which-ads-are-made-with-ai/) | TechCrunch | Thu, 09 Jul 2026 | ☐ |
+| 7 | post | [CAA Calls Out Meta For Making Its Muse AI Video and Photo Tool Opt-Out](https://www.hollywoodreporter.com/business/digital/caa-calls-out-meta-muse-ai-video-photo-tool-instagram-1236642814/) | The Hollywood Reporter | Thu, 09 Jul 2026 | ☐ |
+| 7 | post+update | [AI and legal privilege: no confidentiality or privilege where third-party commercial AI system used](https://www.burges-salmon.com/articles/102mim6/ai-and-legal-privilege-no-confidentiality-or-privilege-where-third-party-commerc/) | Burges Salmon | Tue, 07 Jul 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [New York Times says OpenAI hid evidence in ChatGPT copyright trial](https://techcrunch.com/2026/07/09/new-york-times-says-openai-hid-evidence-in-chatgpt-copyright-trial/) | TechCrunch | Thu, 09 Jul 2026 | ☐ |
+| 6 | monitor | [Less healthy food ads: ASA serves up a healthy selection of rulings](https://www.lewissilkin.com/insights/2026/07/08/less-healthy-food-ads-asa-serves-up-a-healthy-selection-of-rulings-102n8ie) | Lewis Silkin | Wed, 08 Jul 2026 | ☐ |
+| 6 | monitor | [Guardrails on Generative AI in Advertising: India’s Regulatory Gap vs Global Standards](https://agencyreporter.com/generative-ai-advertising-regulation-india-vs-global-standards/) | Agency Reporter | Tue, 07 Jul 2026 | ☐ |
+| 5 | monitor | [EU AI Act Enforcement Is Here: Chatbot Rules Live, High-Risk AI Delay Now Binding Law](https://www.techtimes.com/articles/320101/20260710/eu-ai-act-enforcement-here-chatbot-rules-live-high-risk-ai-delay-now-binding-law.htm) | Tech Times | Fri, 10 Jul 2026 | ☐ |
+| 5 | monitor | [FTC Proposes New Policy on AI Accuracy: Hiding How an AI System is Steered May Violate Federal Law](https://www.spencerfane.com/insight/ftc-proposes-new-policy-on-ai-accuracy-hiding-how-an-ai-system-is-steered-may-violate-federal-law/) | Spencer Fane | Wed, 08 Jul 2026 | ☐ |
+| 4 | monitor | [Alex Bauer: AI's Real Problem Isn't Hallucination—It's Trust](https://finance.biggo.com/news/82ac28651a2b2f32) | finance.biggo.com | Sat, 11 Jul 2026 | ☐ |
+| 4 | monitor | [When AI Has a Hidden Agenda: The FTC’s New Proposal on Output Steering and Transparency](https://www.jdsupra.com/legalnews/when-ai-has-a-hidden-agenda-the-ftc-s-4888787/) | JD Supra | Thu, 09 Jul 2026 | ☐ |
+| 4 | monitor | [FTC Seeks Comment on Proposed Policy Statement Addressing AI Accuracy and Output Steering](https://www.insideprivacy.com/consumer-protection/ftc-seeks-comment-on-proposed-policy-statement-addressing-ai-accuracy-and-output-steering/) | Inside Privacy | Wed, 08 Jul 2026 | ☐ |
+| 4 | monitor | [AI video has fully matured: Seedance 2.0 takes the lead, with an in-depth horizontal evaluation of 6 mainstream tools](https://eu.36kr.com/en/p/3886403765596418) | 36Kr | Wed, 08 Jul 2026 | ☐ |
+
+---
+
 ## Week of July 10, 2026
 *Run: 2026-07-10 · 14 high · 14 monitor · lookback 7 days*
 
