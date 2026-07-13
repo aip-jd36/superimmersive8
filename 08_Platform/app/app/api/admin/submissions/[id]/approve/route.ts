@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { sendSubmissionApprovedEmail } from '@/lib/emails'
-// CATALOG DISABLED: import { sendOptInConfirmationEmail } from '@/lib/emails'
-import { generateChainOfTitlePDF } from '@/lib/pdf/generateChainOfTitle'
 
 type RouteContext = {
   params: {
@@ -89,53 +87,6 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     if (updateError) {
       console.error('Error updating submission:', updateError)
       return NextResponse.json({ error: 'Failed to update submission' }, { status: 500 })
-    }
-
-    // For SI8 Certified: always generate Chain of Title PDF on approval
-    // CATALOG DISABLED: no longer depends on opt_in or catalog ID from opt_ins
-    if (submission.tier === 'si8_certified' || !submission.tier) {
-      // Generate certificate ID in format SI8-YYYY-XXXX using rights_packages count
-      const year = new Date().getFullYear()
-      const { count: existingCount } = await supabaseAdmin
-        .from('rights_packages')
-        .select('id', { count: 'exact', head: true })
-        .like('catalog_id', `SI8-${year}-%`)
-
-      const sequence = (existingCount ?? 0) + 1
-      const catalogId = `SI8-${year}-${sequence.toString().padStart(4, '0')}`
-
-      console.log('📄 Generating Chain of Title PDF for', catalogId)
-
-      const parseJsonb = (val: any, fb: any) => { if (!val) return fb; if (typeof val === 'string') { try { return JSON.parse(val) } catch { return fb } } return val }
-      const tools = parseJsonb(submission.tools_used, [])
-
-      const modificationRights = {
-        authorized: submission.modification_authorized || false,
-        scope: submission.modification_scope || undefined,
-      }
-
-      const pdfUrl = await generateChainOfTitlePDF({
-        catalogId,
-        submissionId: params.id,
-        filmmakerName: submission.filmmaker_name,
-        title: submission.title,
-        tools,
-        modificationRights,
-        territory: submission.territory_preferences || 'Global',
-        riskRating: submission.risk_rating as any || undefined,
-        riskNotes: submission.risk_notes || undefined,
-      })
-
-      if (pdfUrl) {
-        console.log('✅ Chain of Title PDF generated:', pdfUrl)
-      } else {
-        console.error('❌ Failed to generate Chain of Title PDF')
-      }
-
-      /* CATALOG DISABLED: opt_ins update and catalog email removed
-      await supabaseAdmin.from('opt_ins').update({ visible: true, catalog_id: catalogId }).eq('submission_id', params.id)
-      await sendOptInConfirmationEmail(submission.filmmaker_name, submission.title, catalogUrl, submission.user.email)
-      */
     }
 
     // Send approval email notification
