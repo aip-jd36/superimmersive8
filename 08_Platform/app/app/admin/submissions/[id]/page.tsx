@@ -60,12 +60,14 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
   */
   const optIn = null // CATALOG DISABLED
 
-  // Check if Rights Package (Chain of Title PDF) exists
-  const { data: rightsPackage } = await supabaseAdmin
-    .from('rights_packages')
-    .select('id, document_url, document_path, generated_at, format')
-    .eq('submission_id', params.id)
-    .single()
+  // COMMENTED OUT: GenerateRightsPackageButton (Chain of Title) removed — replaced by
+  // manual ReportPDFUpload + SignAndDeliverPanel. rights_packages query no longer needed.
+  // const { data: rightsPackage } = await supabaseAdmin
+  //   .from('rights_packages')
+  //   .select('id, document_url, document_path, generated_at, format')
+  //   .eq('submission_id', params.id)
+  //   .single()
+  const rightsPackage = null
 
   const isCertified = (submission as any).tier === 'si8_certified'
 
@@ -186,12 +188,13 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                     <p className="text-gray-700">{submission.logline}</p>
                   </div>
                 )}
+                {/* COMMENTED OUT: Intended Use — displays raw unformatted JSON; not useful to reviewer
                 {submission.intended_use && (
                   <div>
                     <div className="text-sm font-medium text-gray-500 mb-1">Intended Use</div>
                     <p className="text-gray-700">{submission.intended_use}</p>
                   </div>
-                )}
+                )} */}
                 {/* Video URL — stored on submissions.video_url (migration 20260710000002) */}
                 {(submission as any).video_url && (
                   <div>
@@ -396,13 +399,15 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
               checklistComplete={checklistComplete}
             />
 
+            {/* COMMENTED OUT: GenerateRightsPackageButton ("Chain of Title" section) — v3 auto-generation
+                flow replaced by manual ReportPDFUpload + SignAndDeliverPanel.
             <GenerateRightsPackageButton
               submissionId={params.id}
               catalogId={null}
               currentStatus={submission.status}
               tier={submission.tier || null}
               existingRightsPackage={rightsPackage}
-            />
+            /> */}
 
             {/* Assessment Workbook — SI8 Certified only */}
             {isCertified && (
@@ -429,7 +434,7 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
               />
             )}
 
-            {/* Review Notes */}
+            {/* COMMENTED OUT: Review Notes — read-only display with no edit input; not actionable from this screen.
             <Card>
               <CardHeader>
                 <CardTitle>Review Notes</CardTitle>
@@ -442,7 +447,7 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                   <p className="text-sm text-gray-500 italic">No notes yet</p>
                 )}
               </CardContent>
-            </Card>
+            </Card> */}
 
             {/* Quick Info */}
             <Card>
