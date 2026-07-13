@@ -8,6 +8,13 @@ CREDENTIALS.txt
 # Vercel
 .vercel
 
+# Audio/video files (large binaries — store locally, do not commit)
+*.m4a
+*.mp3
+*.mp4
+*.wav
+*.mov
+
 # OS files
 .DS_Store
 *.log

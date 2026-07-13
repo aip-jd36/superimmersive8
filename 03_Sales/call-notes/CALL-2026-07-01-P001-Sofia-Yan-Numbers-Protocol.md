@@ -5,7 +5,8 @@
 **Duration:** ~45 minutes
 **Format:** In-person, Taipei
 **Participants:** JD Chang (SI8), Sofia Yan (Co-founder & CGO, Numbers Protocol)
-**Raw transcript:** `C:\Users\User\Downloads\sofia_yan_transcript.txt` (Whisper, bilingual EN/ZH-TW)
+**Audio file:** `03_Sales/transcripts/Sofia Yan_070126.m4a` (local only — not committed to git)
+**Raw transcript:** `03_Sales/transcripts/sofia-yan-070126-transcript.txt` (Whisper whisper-1, bilingual EN/ZH-TW, transcribed Jul 13, 2026)
 
 ---
 
@@ -419,7 +420,7 @@ CEO | SuperImmersive 8
 - [ ] Await Sofia's feedback on manifest field structure + technical questions (custom namespaces, ERC-7053 calldata, namespace convention)
 - [ ] Wait for sandbox API credentials (coming separately — she's finding the right internal path)
 - [ ] Once credentials arrive: sign real test video → open in Adobe Content Authenticity viewer → document exact Trust List display behavior before using any Trust List claims in product copy
-- [ ] Locate and log audio file path: `Sofia Yan_070126.m4a` (sent to Sofia Jul 1; local path unknown)
-- [ ] Locate and log Whisper transcript path: `sofia_yan_transcript.txt` (referenced in call notes header; not found on disk)
+- [x] Audio file filed: `03_Sales/transcripts/Sofia Yan_070126.m4a` (local only, not in git)
+- [x] Transcript filed: `03_Sales/transcripts/sofia-yan-070126-transcript.txt` (Whisper whisper-1, bilingual EN/ZH-TW, Jul 13, 2026)
 - [ ] Revisit pilot pricing conversation on next call (not discussed)
 - [ ] Track Capture's Trust List workaround progress — check again in Q4 2026
