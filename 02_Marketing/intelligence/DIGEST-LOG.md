@@ -9,6 +9,60 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of July 16, 2026
+*Run: 2026-07-16 · 24 high · 15 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [New York’s AI Disclosure Law Is a Reckoning for Lazy Brands](https://marcommnews.com/new-yorks-ai-disclosure-law-is-a-reckoning-for-lazy-brands/) | Marketing Communication News | Wed, 15 Jul 2026 | ☐ |
+| 9 | post+update | [Next Net and Sundial Media & Technology Group Launch SAIL, a New Rights-Managed Content Standard for AI](https://sg.finance.yahoo.com/news/next-net-sundial-media-technology-130900078.html) | Yahoo Finance Singapore | Tue, 14 Jul 2026 | ☐ |
+| 9 | post+update | [Meta Axed Instagram AI Feature That Generated Anyone’s Likeness Without Consent](https://www.techtimes.com/articles/320268/20260713/meta-axed-instagram-ai-feature-that-generated-anyones-likeness-without-consent.htm) | Tech Times | Mon, 13 Jul 2026 | ☐ |
+| 9 | post+update | [EU AI Act Article 50 Transparency Rules Force Financial Firms To Act Before August Deadline](https://londoninsider.co.uk/eu-ai-act-article-50-transparency-rules-force-financial-firms-to-act-before-august-deadline/) | londoninsider.co.uk | Sun, 12 Jul 2026 | ☐ |
+| 9 | post+update | [AI-Generated Content in the European Union: What the Adherence to Code of Practice Means for Article 50 Compliance—Special Focus on Luxembourg's Financial Sector](https://www.klgates.com/AI-Generated-Content-in-the-European-Union-What-the-Adherence-to-Code-of-Practice-Means-for-Article-50-ComplianceSpecial-Focus-on-Luxembourgs-Financial-Sector-7-10-2026) | K&L Gates | Fri, 10 Jul 2026 | ☐ |
+| 9 | post+update | [AI Content Labeling Enforcement Begins in 24 Days as EU Clears Compliance Code](https://www.techtimes.com/articles/319996/20260709/ai-content-labeling-enforcement-begins-24-days-eu-clears-compliance-code.htm) | Tech Times | Thu, 09 Jul 2026 | ☐ |
+| 8 | post+update | [Part 2 - AI Replica Rights and Entertainment Contracts: What Entertainment Companies Should Be Doing Now](https://www.jdsupra.com/legalnews/part-2-ai-replica-rights-and-6313743/) | JD Supra | Wed, 15 Jul 2026 | ☐ |
+| 8 | post+update | [Google Faces Fresh Copyright Lawsuit Over Gemini AI Training](https://www.bwmarketingworld.com/article/google-faces-fresh-copyright-lawsuit-over-gemini-ai-training-614846) | BW Marketing World | Wed, 15 Jul 2026 | ☐ |
+| 8 | update | [Three Publishers And Scott Turow Sue Google Over Gemini AI Copyright Infringement: 13 Sources (Local Western: 5)](https://newscord.org/article/three-publishers-and-scott-turow-sue-google-over-gemini-ai-copyright-infringemen--Story_20260714_GooglefacesanotherAI21655d10) | NewsCord | Tue, 14 Jul 2026 | ☐ |
+| 8 | post+update | [Google shifts AI ad labeling liability entirely to advertisers](https://ppc.land/google-shifts-ai-ad-labeling-liability-entirely-to-advertisers/) | PPC Land | Tue, 14 Jul 2026 | ☐ |
+| 8 | post+update | [Meta Disables New Muse AI Image Generator After Backlash From CAA and SAG-AFTRA Over Consent Privacy](https://www.ibtimes.com.au/meta-halts-muse-image-ai-tool-backlash-1872233) | International Business Times Australia | Mon, 13 Jul 2026 | ☐ |
+| 8 | post+update | [When The Lawsuit Fails, You License: Getty’s Forced Pivot To OpenAI](https://tvnewscheck.com/ai/article/when-the-lawsuit-fails-you-license-gettys-forced-pivot-to-openai/) | TV News Check | Sun, 12 Jul 2026 | ☐ |
+| 8 | post+update | [Part 1 - The NO FAKES Act Moves Forward: How AI Voice and Likeness Rights Could Reshape Entertainment Deals](https://www.jdsupra.com/legalnews/part-1-the-no-fakes-act-moves-forward-4396535/) | JD Supra | Fri, 10 Jul 2026 | ☐ |
+| 8 | post+update | [EU AI Act Enforcement Is Here: Chatbot Rules Live, High-Risk AI Delay Now Binding Law](https://www.techtimes.com/articles/320101/20260710/eu-ai-act-enforcement-here-chatbot-rules-live-high-risk-ai-delay-now-binding-law.htm) | Tech Times | Fri, 10 Jul 2026 | ☐ |
+| 8 | post+update | [Unauthorized AI Generation Costs Japanese Celebrities ¥4.5 Billion in Copyright Damages](https://streamlinefeed.co.ke/news/unauthorized-ai-generation-costs-japanese-celebrities-4-5-billion-in-copyright-damages) | streamlinefeed.co.ke | Thu, 09 Jul 2026 | ☐ |
+| 7 | update | [Insurers face hidden AI liability as agent risks multiply](https://www.insurancebusinessmag.com/us/news/technology/insurers-face-hidden-ai-liability-as-agent-risks-multiply-582433.aspx) | Insurance Business | Wed, 15 Jul 2026 | ☐ |
+| 7 | update | [When AI Rewrites the Contract: What Film and TV Investors Need to Know](https://aijourn.com/when-ai-rewrites-the-contract-what-film-and-tv-investors-need-to-know/) | The AI Journal | Tue, 14 Jul 2026 | ☐ |
+| 7 | post+update | [Google Introduces AI Disclosure Labels For Ads Across Search, YouTube And Discover](https://www.etvbharat.com/en/technology/google-introduces-ai-disclosure-labels-for-ads-across-search-youtube-and-discover-enn26071403457) | ETV Bharat | Tue, 14 Jul 2026 | ☐ |
+| 7 | post+update | [Google Will Label AI-Generated Ads on Search, YouTube, and the Discover Feed](https://www.trendingtopics.eu/google-will-label-ai-generated-ads-on-search-youtube-and-the-discover-feed/) | trendingtopics.eu | Mon, 13 Jul 2026 | ☐ |
+| 7 | post | [Meta's AI advertising dreams have become a nightmare for brands](https://www.businessinsider.com/metas-ai-ads-push-causes-chaos-for-brands-2026-7) | Business Insider | Mon, 13 Jul 2026 | ☐ |
+| 7 | post+update | [Digest: EU Says Meta Failed to Protect Users; Google Adds AI Labels to Search & YouTube Ads](https://www.exchangewire.com/blog/2026/07/13/digest-eu-says-meta-failed-to-protect-users-google-adds-ai-labels-to-search-youtube-ads/) | exchangewire.com | Mon, 13 Jul 2026 | ☐ |
+| 7 | post | [Advertisers face mandatory AI ad labels across Google's five platforms](https://ppc.land/advertisers-face-mandatory-ai-ad-labels-across-googles-five-platforms/) | PPC Land | Sun, 12 Jul 2026 | ☐ |
+| 7 | update | [Getty Images’ Answer to AI Slop? Authentic, Verified Content](https://campaignsandelections.com/sponsored/getty-images-answer-to-ai-slop-authentic-verified-content/) | Campaigns & Elections | Fri, 10 Jul 2026 | ☐ |
+| 7 | post+update | [Intelligence Piracy: The Actor Who Was Never There](https://www.lexology.com/library/detail.aspx?g=f6015368-b9c4-4f6b-97d8-ad017c3f83e8) | Lexology | Thu, 09 Jul 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [AI agents expose insurance blind spots, report says](https://pressinsider.com/news/ai-agents-expose-insurance-blind-spots-report-says/) | PRESS Insider | Wed, 15 Jul 2026 | ☐ |
+| 6 | monitor | [Book publishers sue Google for copyright infringement over Gemini AI training](https://www.theguardian.com/books/2026/jul/14/publishers-sue-google-gemini-ai-training) | The Guardian | Tue, 14 Jul 2026 | ☐ |
+| 6 | monitor | [The Big Takeaways from the ASA’s First Rulings on Junk Food Ads](https://videoweek.com/2026/07/14/the-big-takeaways-from-the-asas-first-rulings-on-junk-food-ads/) | VideoWeek | Tue, 14 Jul 2026 | ☐ |
+| 6 | monitor | [Meta Adds Clearer AI Labels to Facebook and Instagram Ads](https://almcorp.com/news/meta-ai-labels-facebook-instagram-ads-disclosure-2026/) | ALM Corp | Mon, 13 Jul 2026 | ☐ |
+| 6 | monitor | [EU AI Act Enforcement: Chatbot Transparency Rules Risk Billions in Fines](https://streamlinefeed.co.ke/news/eu-ai-act-enforcement-chatbot-transparency-rules-risk-billions-in-fines) | streamlinefeed.co.ke | Mon, 13 Jul 2026 | ☐ |
+| 6 | monitor | [Google adds How this ad was made AI labels 24 days before EU deadline](https://ppc.land/google-adds-how-this-ad-was-made-ai-labels-24-days-before-eu-deadline/) | PPC Land | Sat, 11 Jul 2026 | ☐ |
+| 6 | monitor | [Bay Area Ad World Braces As Google Slaps Warning Labels On AI Ads](https://hoodline.com/2026/07/bay-area-ad-world-braces-as-google-slaps-warning-labels-on-ai-ads/) | Hoodline | Fri, 10 Jul 2026 | ☐ |
+| 6 | monitor | [New York Times says OpenAI hid evidence in ChatGPT copyright trial](https://techcrunch.com/2026/07/09/new-york-times-says-openai-hid-evidence-in-chatgpt-copyright-trial/) | TechCrunch | Thu, 09 Jul 2026 | ☐ |
+| 6 | monitor | [CAA Calls Out Meta For Making Its Muse AI Video and Photo Tool Opt-Out](https://www.hollywoodreporter.com/business/digital/caa-calls-out-meta-muse-ai-video-photo-tool-instagram-1236642814/) | The Hollywood Reporter | Thu, 09 Jul 2026 | ☐ |
+| 5 | monitor | [TikTok Shop Bans AI Voices From Live Commerce Streams: Violations Now Dent Account Health Score](https://www.techtimes.com/articles/320624/20260715/tiktok-shop-bans-ai-voices-live-commerce-streams-violations-now-dent-account-health-score.htm) | Tech Times | Wed, 15 Jul 2026 | ☐ |
+| 5 | monitor | [TikTok Expands AI Literacy Globally After Research Finds Labels Do Not Work](https://www.techtimes.com/articles/320486/20260714/tiktok-expands-ai-literacy-globally-after-research-finds-labels-do-not-work.htm) | Tech Times | Tue, 14 Jul 2026 | ☐ |
+| 5 | monitor | [Content Authenticity Market Size, Share \| Growth Forecast [2034]](https://www.fortunebusinessinsights.com/content-authenticity-market-118158) | Fortune Business Insights | Tue, 14 Jul 2026 | ☐ |
+| 5 | monitor | [TikTok Has Labeled 3 Billion AI Videos: Here Is What the Research Says They Miss](https://www.techtimes.com/articles/320282/20260713/tiktok-has-labeled-3-billion-ai-videos-here-what-research-says-they-miss.htm) | Tech Times | Mon, 13 Jul 2026 | ☐ |
+| 5 | monitor | [Google’s Move Toward AI Generated Advertising Disclosure](https://www.aicerts.ai/news/googles-move-toward-ai-generated-advertising-disclosure/) | AI CERTs | Fri, 10 Jul 2026 | ☐ |
+| 5 | monitor | [When AI Has a Hidden Agenda: The FTC’s New Proposal on Output Steering and Transparency](https://www.jdsupra.com/legalnews/when-ai-has-a-hidden-agenda-the-ftc-s-4888787/) | JD Supra | Thu, 09 Jul 2026 | ☐ |
+
+---
+
 ## Week of July 13, 2026
 *Run: 2026-07-13 · 25 high · 9 monitor · lookback 7 days*
 
