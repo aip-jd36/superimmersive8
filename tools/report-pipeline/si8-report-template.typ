@@ -157,7 +157,7 @@
   // SI8 branding
   #text(size: 30pt, weight: "bold", fill: c-amber)[SI8]
   #h(0.6em)
-  #text(size: 13pt, weight: "bold", fill: c-navy)[Campaign Assurance]
+  #text(size: 13pt, weight: "bold", fill: c-navy)[Commercial Assurance]
   #v(0.15em)
   #text(size: 9pt, fill: c-gray)[PMF Strategy Inc. d/b/a SuperImmersive 8]
 
@@ -166,7 +166,7 @@
   #v(1fr)
 
   // Report type label
-  #text(size: 10pt, weight: "bold", fill: c-navy, tracking: 1pt)[CAMPAIGN ASSURANCE ASSESSMENT]
+  #text(size: 10pt, weight: "bold", fill: c-navy, tracking: 1pt)[COMMERCIAL ASSURANCE ASSESSMENT]
   #v(0.5em)
 
   // Content title
