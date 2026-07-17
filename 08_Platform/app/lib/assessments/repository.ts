@@ -19,6 +19,24 @@ import type {
   VerificationPageData,
 } from '@/types/assessment'
 
+// ── Public visibility gate ────────────────────────────────────────────────────
+
+/**
+ * Processing statuses that make an assessment publicly resolvable on the
+ * Verification Page. Public visibility follows institutional issuance
+ * (delivery), not merely successful signing — a SIGNED asset may still fail
+ * delivery or be intentionally paused before the customer receives it.
+ *
+ * DRAFT, REPORT_GENERATED, SIGNING, SIGNED, and FAILED assessments must
+ * resolve identically to a nonexistent assessment number: no leaking that a
+ * draft exists, what its preliminary outcome is, or that review is underway.
+ */
+const PUBLICLY_VISIBLE_PROCESSING_STATUSES: readonly ProcessingStatus[] = ['DELIVERED']
+
+export function isPubliclyVisibleProcessingStatus(status: ProcessingStatus): boolean {
+  return PUBLICLY_VISIBLE_PROCESSING_STATUSES.includes(status)
+}
+
 // ── Assessment number generation ──────────────────────────────────────────────
 
 /**
@@ -102,6 +120,11 @@ export async function findAssessmentForVerification(
     .single()
 
   if (error || !data) return null
+
+  // Public exposure gate: an assessment that exists but hasn't been delivered
+  // must resolve exactly like a nonexistent assessment number — no distinguishing
+  // "not found" from "found but not yet issued" in the response.
+  if (!isPubliclyVisibleProcessingStatus(data.processing_status as ProcessingStatus)) return null
 
   // Supabase returns joined rows as an array even for to-one relationships.
   // Unwrap the first element; use explicit field mapping — do not spread.
