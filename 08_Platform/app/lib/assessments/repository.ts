@@ -119,7 +119,33 @@ export async function findAssessmentForVerification(
     .eq('assessment_number', assessmentNumber)
     .single()
 
-  if (error || !data) return null
+  if (error) {
+    // PGRST116 ("JSON object requested, multiple (or no) rows returned") is
+    // .single()'s normal signal for zero matching rows — the expected,
+    // frequent outcome for a genuinely nonexistent or mistyped assessment
+    // number. Not worth logging; would spam logs on every bad lookup.
+    //
+    // Any other code is a real failure (connection issue, malformed
+    // relationship query, permissions problem, etc.) masquerading as an
+    // ordinary "not found" to the public caller — by design, this function
+    // must not leak the distinction externally (a real assessment that
+    // exists but isn't DELIVERED must look identical to one that failed to
+    // query or never existed). But internally, these are different
+    // problems and must be distinguishable in logs. Externally
+    // indistinguishable, internally observable.
+    if (error.code !== 'PGRST116') {
+      console.error('[findAssessmentForVerification] query failed', {
+        assessmentNumber,
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      })
+    }
+    return null
+  }
+
+  if (!data) return null
 
   // Public exposure gate: an assessment that exists but hasn't been delivered
   // must resolve exactly like a nonexistent assessment number — no distinguishing
