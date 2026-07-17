@@ -284,8 +284,19 @@ export async function withdraw(id: string, reason: string): Promise<Assessment> 
 // ── Internal validation ───────────────────────────────────────────────────────
 
 const PERMITTED_TRANSITIONS: Record<ProcessingStatus, ProcessingStatus[]> = {
+  // REPORT_GENERATED is reachable from DRAFT twice over: once via the normal
+  // forward path (Generate Report), and again via DRAFT after a
+  // REPORT_GENERATED → DRAFT invalidation (see below) once the report is
+  // regenerated. Both are just "DRAFT → REPORT_GENERATED".
   DRAFT:            ['REPORT_GENERATED', 'FAILED'],
-  REPORT_GENERATED: ['SIGNING', 'FAILED'],
+  //
+  // REPORT_GENERATED → DRAFT: a generated report is invalidated back to DRAFT
+  // when the reviewer edits workbook data after the report was already
+  // generated. The previously generated PDF no longer reflects the current
+  // review content and must not remain signable. See
+  // service.ts invalidateGeneratedReport(), called from the workbook autosave
+  // route whenever workbook_data changes on a REPORT_GENERATED assessment.
+  REPORT_GENERATED: ['SIGNING', 'FAILED', 'DRAFT'],
   SIGNING:          ['SIGNED', 'FAILED'],
   SIGNED:           ['DELIVERED', 'FAILED'],
   DELIVERED:        ['FAILED'],   // edge case; should be rare
@@ -307,12 +318,20 @@ const PERMITTED_TRANSITIONS: Record<ProcessingStatus, ProcessingStatus[]> = {
   FAILED:           ['SIGNING'],
 }
 
+/**
+ * Whether a processing_status transition is permitted. Exported (alongside
+ * the underlying table) so the state machine itself is unit-testable without
+ * a database — see __tests__/assessments/processing-status-transitions.test.ts.
+ */
+export function canTransitionProcessingStatus(from: ProcessingStatus, to: ProcessingStatus): boolean {
+  return (PERMITTED_TRANSITIONS[from] ?? []).includes(to)
+}
+
 function validateTransition(from: ProcessingStatus, to: ProcessingStatus): void {
-  const allowed = PERMITTED_TRANSITIONS[from] ?? []
-  if (!allowed.includes(to)) {
+  if (!canTransitionProcessingStatus(from, to)) {
     throw new Error(
       `Invalid processing_status transition: ${from} → ${to}. ` +
-      `Permitted from ${from}: [${allowed.join(', ')}]`,
+      `Permitted from ${from}: [${(PERMITTED_TRANSITIONS[from] ?? []).join(', ')}]`,
     )
   }
 }

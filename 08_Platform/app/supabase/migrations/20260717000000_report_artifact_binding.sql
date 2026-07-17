@@ -1,0 +1,49 @@
+-- Migration: Report artifact binding for canonical assessment lifecycle
+-- Date: 2026-07-17
+--
+-- Background: the report PDF used to be generated and manually uploaded
+-- (submissions.report_pdf_url) before the canonical assessments row existed
+-- for it, using the legacy submissions.assess_id field for the visible
+-- Assessment ID. This produced a real ID mismatch in production (see
+-- 06_Operations/assessments/ASSESS-005-2026-07-12/README.md for the
+-- reconciliation of ASSESS-001-2026-07-10 vs ASSESS-005-2026-07-12 — the
+-- same assessment, stamped with two different IDs from two different
+-- systems on either side of the July 12 Assessment Service launch).
+--
+-- Fix (tracked across three commits):
+--   1. This migration + service-layer invariants (this commit)
+--   2. Generate Report wiring: create/retrieve the canonical assessment
+--      BEFORE generating the PDF; stamp the PDF with assessment_number
+--   3. /sign enforcement: require REPORT_GENERATED; validate the uploaded
+--      PDF is bound to the assessment being signed
+--
+-- This migration adds the binding column. See lib/assessments/service.ts
+-- for how it's set (recordReportGenerated) and cleared (invalidateGeneratedReport).
+
+-- =============================================
+-- UP
+-- =============================================
+
+ALTER TABLE submissions ADD COLUMN IF NOT EXISTS report_pdf_assessment_id UUID REFERENCES assessments(id);
+-- Which assessment the current submissions.report_pdf_url was generated for.
+-- NULL until a report has been generated. Set by recordReportGenerated()
+-- immediately after a successful compile + storage upload + hash computation
+-- (the state transition to REPORT_GENERATED is the final step in that
+-- sequence, not the first — a partial failure must never leave the
+-- assessment claiming a report exists when the file or hash is missing).
+--
+-- Cleared (along with report_pdf_url) by invalidateGeneratedReport() when
+-- workbook data changes after REPORT_GENERATED — the previously generated
+-- PDF no longer reflects the current review content and must not be
+-- signable until regenerated.
+--
+-- /sign validates report_pdf_assessment_id = the assessment being signed,
+-- AND that the freshly-downloaded PDF's SHA-256 matches
+-- assessments.pdf_hash_sha256 recorded at generation time. The ID binding
+-- catches wrong-submission mistakes; the hash comparison catches a stale or
+-- manually-swapped file that was never re-bound.
+
+-- =============================================
+-- DOWN (rollback)
+-- =============================================
+-- ALTER TABLE submissions DROP COLUMN IF EXISTS report_pdf_assessment_id;

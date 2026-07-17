@@ -29,6 +29,7 @@ import {
   generateAssessmentNumber,
   markFailed,
   transitionProcessingStatus,
+  updateAssessment,
 } from './repository'
 import type {
   Assessment,
@@ -55,11 +56,20 @@ const DEFAULT_DIGITAL_SOURCE_TYPE: DigitalSourceTypeUri =
 // ── Create assessment ─────────────────────────────────────────────────────────
 
 /**
- * Create an Assessment record from a signed-off workbook.
- * Called by the admin sign route once section_6 is signed off.
+ * Get-or-create the canonical Assessment record for a submission.
  *
- * If an assessment already exists for this submission_id, returns the existing one.
- * This makes the operation idempotent.
+ * Called by the Generate Report action, the first point in the reviewer
+ * workflow where a real assessment_number is needed (the assessments table
+ * requires outcome NOT NULL, so this cannot run before Section 6 is filled
+ * in — Generate Report only becomes available once it is).
+ *
+ * Strictly create-or-return: if an assessment already exists for this
+ * submission_id, it is returned completely unchanged — this function never
+ * mutates an existing row, including outcome. That's a deliberate, separate
+ * step (see syncDraftAssessmentFromWorkbook) so that reconciling drift
+ * between the workbook and an already-created assessment is always an
+ * explicit, auditable operation, never a silent side effect of "just asking
+ * for the assessment."
  */
 export async function createAssessmentFromWorkbook(
   submissionId: string,
@@ -90,6 +100,133 @@ export async function createAssessmentFromWorkbook(
   }
 
   return createAssessment(insert)
+}
+
+/**
+ * Explicitly synchronize outcome from the workbook onto a DRAFT assessment.
+ *
+ * Only valid while the assessment is still DRAFT. Once a report has been
+ * generated (REPORT_GENERATED or later), an outcome change must go through
+ * invalidateGeneratedReport() first — the workbook autosave route does this
+ * automatically whenever workbook data changes on a REPORT_GENERATED
+ * assessment, which reverts it to DRAFT and clears the stale report binding.
+ * This guards against the case where a PDF was generated for Outcome A, the
+ * reviewer silently changes Section 6 to Outcome B, and the (now
+ * substantively wrong) PDF remains signable because only the assessment
+ * number — not the report's content — was being checked.
+ *
+ * No-ops (returns the assessment unchanged, no DB write) if outcome hasn't
+ * actually changed, so routine autosave ticks don't bump updated_at.
+ */
+export async function syncDraftAssessmentFromWorkbook(
+  assessmentId: string,
+  outcome: AssessmentOutcome,
+): Promise<Assessment> {
+  const assessment = await findAssessmentById(assessmentId)
+  if (!assessment) throw new Error(`Assessment ${assessmentId} not found`)
+
+  if (assessment.processing_status !== 'DRAFT') {
+    throw new Error(
+      `Cannot sync outcome onto assessment ${assessmentId}: processing_status is ` +
+      `${assessment.processing_status}, expected DRAFT. A generated report must be ` +
+      `invalidated (see invalidateGeneratedReport) before its outcome can change.`,
+    )
+  }
+
+  if (assessment.outcome === outcome) return assessment
+  return updateAssessment(assessmentId, { outcome })
+}
+
+/**
+ * Record a successfully generated report PDF against its canonical assessment.
+ *
+ * Call ONLY after Typst compilation succeeded, the PDF was uploaded to
+ * Supabase Storage, and its SHA-256 was computed — the REPORT_GENERATED
+ * transition is deliberately the LAST operation in that sequence. A partial
+ * failure upstream (compile error, storage failure) must never leave the
+ * assessment claiming a report exists when the file or hash is missing.
+ *
+ * Idempotent against retry after a partial failure of this function itself:
+ * if the assessment is already REPORT_GENERATED (transition succeeded on a
+ * prior attempt but the submissions binding update below failed), this skips
+ * straight to re-applying the binding rather than attempting an invalid
+ * REPORT_GENERATED → REPORT_GENERATED transition.
+ *
+ * Binds submissions.report_pdf_url to this exact assessment via
+ * report_pdf_assessment_id — validated by /sign before signing (see
+ * signAssessment()).
+ */
+export async function recordReportGenerated(
+  assessmentId: string,
+  submissionId: string,
+  args: { pdfStoragePath: string; pdfHashSha256: string },
+): Promise<Assessment> {
+  const current = await findAssessmentById(assessmentId)
+  if (!current) throw new Error(`Assessment ${assessmentId} not found`)
+
+  const assessment = current.processing_status === 'DRAFT'
+    ? await transitionProcessingStatus(assessmentId, 'REPORT_GENERATED', {
+        pdfHashSha256: args.pdfHashSha256,
+      })
+    : current
+
+  if (assessment.processing_status !== 'REPORT_GENERATED') {
+    throw new Error(
+      `Cannot record report generation for assessment ${assessmentId}: ` +
+      `processing_status is ${assessment.processing_status}, expected DRAFT or REPORT_GENERATED.`,
+    )
+  }
+
+  const { error } = await supabaseAdmin
+    .from('submissions')
+    .update({
+      report_pdf_url:            args.pdfStoragePath,
+      report_pdf_assessment_id:  assessmentId,
+    })
+    .eq('id', submissionId)
+
+  if (error) {
+    throw new Error(
+      `Report generated and hashed for assessment ${assessmentId}, but failed to ` +
+      `bind it to submission ${submissionId}: ${error.message}`,
+    )
+  }
+
+  return assessment
+}
+
+/**
+ * Revert a REPORT_GENERATED assessment back to DRAFT and clear the stale
+ * report binding on its submission.
+ *
+ * Called by the workbook autosave route on every save; no-ops immediately
+ * (no DB write) if there's no assessment yet or it isn't currently
+ * REPORT_GENERATED — the common case, since most saves happen while still
+ * DRAFT, before any report has been generated.
+ *
+ * processing_status is reverted to DRAFT before the submissions binding is
+ * cleared, not after: if the second update fails, /sign is still correctly
+ * blocked (it requires REPORT_GENERATED), even though the now-stale
+ * report_pdf_url briefly remains visible in the admin UI until the clear is
+ * retried.
+ */
+export async function invalidateGeneratedReport(submissionId: string): Promise<void> {
+  const assessment = await findAssessmentBySubmissionId(submissionId)
+  if (!assessment || assessment.processing_status !== 'REPORT_GENERATED') return
+
+  await transitionProcessingStatus(assessment.id, 'DRAFT')
+
+  const { error } = await supabaseAdmin
+    .from('submissions')
+    .update({ report_pdf_url: null, report_pdf_assessment_id: null })
+    .eq('id', submissionId)
+
+  if (error) {
+    throw new Error(
+      `Invalidated generated report for submission ${submissionId} (assessment reverted ` +
+      `to DRAFT) but failed to clear the stale report binding: ${error.message}`,
+    )
+  }
 }
 
 // ── Sign flow ─────────────────────────────────────────────────────────────────
