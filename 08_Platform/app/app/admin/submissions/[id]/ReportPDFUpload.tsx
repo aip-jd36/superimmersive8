@@ -60,13 +60,19 @@ export function ReportPDFUpload({ submissionId, initialReportUrl }: ReportPDFUpl
       })
       if (!uploadRes.ok) throw new Error(`Storage upload failed (${uploadRes.status})`)
 
-      // Step 3: Record path in submissions row
-      const dbRes = await fetch(`/api/admin/submissions/${submissionId}/delivery-files`, {
-        method: 'PATCH',
+      // Step 3: Bind the uploaded file to its canonical assessment (hashes
+      // it, records report_pdf_assessment_id, transitions the assessment to
+      // REPORT_GENERATED). Requires Generate Report to have already been run
+      // in the workbook — that's what creates the assessment this binds to.
+      const dbRes = await fetch(`/api/admin/submissions/${submissionId}/record-report`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ report_pdf_url: path }),
+        body: JSON.stringify({ path }),
       })
-      if (!dbRes.ok) throw new Error('Failed to save file reference')
+      if (!dbRes.ok) {
+        const err = await dbRes.json().catch(() => ({}))
+        throw new Error(err.error || 'Failed to bind uploaded report to its assessment')
+      }
 
       setHasReport(true)
       setStatus('success')
@@ -96,7 +102,8 @@ export function ReportPDFUpload({ submissionId, initialReportUrl }: ReportPDFUpl
               <span className="text-sm font-medium text-green-800">Report uploaded</span>
             </div>
             <p className="text-xs text-gray-500">
-              Report hash will be computed during the Sign &amp; Deliver step before Numbers Protocol signing.
+              Bound to its assessment and hashed. Sign &amp; Deliver validates this binding before
+              Numbers Protocol signing — re-upload here if you regenerate the report.
             </p>
             <button
               type="button"

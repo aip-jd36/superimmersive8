@@ -1,23 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
-import { createAssessmentFromWorkbook, signAssessment } from '@/lib/assessments/service'
+import { signAssessment } from '@/lib/assessments/service'
+import { findAssessmentBySubmissionId } from '@/lib/assessments/repository'
 import { MockProvenanceProvider } from '@/lib/assessments/providers/mock'
 import { NumbersProvenanceProvider } from '@/lib/assessments/providers/numbers'
-import type { AssessmentOutcome, ProvenanceProvider } from '@/types/assessment'
+import type { ProvenanceProvider } from '@/types/assessment'
 
 // Vercel Pro max — downloading + uploading large MP4s needs headroom
 export const maxDuration = 60
 
 type RouteContext = { params: { id: string } }
-
-const VALID_OUTCOMES = new Set<AssessmentOutcome>([
-  'EVIDENCE_SUPPORTS',
-  'EVIDENCE_SUPPORTS_WITH_CONDITIONS',
-  'MATERIAL_RISKS_IDENTIFIED',
-  'INSUFFICIENT_EVIDENCE',
-  'UNABLE_TO_ASSESS',
-])
 
 export async function POST(_request: NextRequest, { params }: RouteContext) {
   try {
@@ -36,7 +29,7 @@ export async function POST(_request: NextRequest, { params }: RouteContext) {
     // Fetch submission
     const { data: submission, error: fetchError } = await supabaseAdmin
       .from('submissions')
-      .select('id, title, workbook_data, source_video_url, report_pdf_url')
+      .select('id, title, workbook_data, source_video_url, report_pdf_url, report_pdf_assessment_id')
       .eq('id', params.id)
       .single()
     if (fetchError || !submission) {
@@ -56,18 +49,21 @@ export async function POST(_request: NextRequest, { params }: RouteContext) {
       )
     }
 
-    // Extract and validate outcome from workbook
-    const rawOutcome: string = (submission.workbook_data as any)?.section_6?.outcome ?? ''
-    if (!VALID_OUTCOMES.has(rawOutcome as AssessmentOutcome)) {
+    // The assessment must already exist — created by Generate Report /
+    // ensure-assessment earlier in the workflow. /sign no longer creates it:
+    // the canonical assessment_number must be embedded in the PDF from the
+    // moment it's generated, not attached retroactively at signing time.
+    const assessment = await findAssessmentBySubmissionId(params.id)
+    if (!assessment) {
       return NextResponse.json(
-        { error: `Invalid or missing outcome in workbook section_6: "${rawOutcome}"` },
+        {
+          error:
+            'No assessment exists for this submission. Run "Generate Client Report (PDF)" in ' +
+            'the Assessment Workbook (§ 7) before signing.',
+        },
         { status: 400 },
       )
     }
-    const outcome = rawOutcome as AssessmentOutcome
-
-    // Create assessment record (idempotent — returns existing if already created)
-    const assessment = await createAssessmentFromWorkbook(params.id, outcome)
 
     // Already fully signed — return success without re-running the signing flow
     if (
@@ -82,6 +78,38 @@ export async function POST(_request: NextRequest, { params }: RouteContext) {
         signedAssetPath:  assessment.signed_asset_path,
         alreadySigned:    true,
       })
+    }
+
+    // The assessment must have a generated (or previously in-flight, now
+    // FAILED) report to sign — never DRAFT or SIGNING at this point.
+    if (assessment.processing_status !== 'REPORT_GENERATED' && assessment.processing_status !== 'FAILED') {
+      return NextResponse.json(
+        {
+          error:
+            `Assessment is not ready to sign (status: ${assessment.processing_status}). ` +
+            `Generate the report in § 7 and upload it before signing.`,
+        },
+        { status: 400 },
+      )
+    }
+
+    // Artifact-binding validation: the uploaded report_pdf_url must have been
+    // bound to THIS assessment by record-report (called from ReportPDFUpload
+    // immediately after upload) — not merely present. Catches stale uploads
+    // (workbook edited and report invalidated after upload, but somehow not
+    // caught by the processing_status check above) and wrong-submission
+    // mistakes. signAssessment() separately re-verifies the file's SHA-256
+    // against what was recorded at binding time as a second, content-level
+    // check — this one only proves the upload *claims* to belong here.
+    if (submission.report_pdf_assessment_id !== assessment.id) {
+      return NextResponse.json(
+        {
+          error:
+            'Uploaded report PDF is not bound to this assessment — it may be stale or from a ' +
+            'different submission. Regenerate the report in § 7 and re-upload before signing.',
+        },
+        { status: 409 },
+      )
     }
 
     // Select provider — real when Numbers API key is present, mock otherwise.

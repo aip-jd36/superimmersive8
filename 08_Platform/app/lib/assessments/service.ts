@@ -142,15 +142,45 @@ export async function syncDraftAssessmentFromWorkbook(
  *
  * Call ONLY after Typst compilation succeeded, the PDF was uploaded to
  * Supabase Storage, and its SHA-256 was computed — the REPORT_GENERATED
- * transition is deliberately the LAST operation in that sequence. A partial
- * failure upstream (compile error, storage failure) must never leave the
- * assessment claiming a report exists when the file or hash is missing.
+ * transition (on first call) is deliberately the LAST operation in that
+ * sequence. A partial failure upstream (compile error, storage failure)
+ * must never leave the assessment claiming a report exists when the file or
+ * hash is missing.
  *
- * Idempotent against retry after a partial failure of this function itself:
- * if the assessment is already REPORT_GENERATED (transition succeeded on a
- * prior attempt but the submissions binding update below failed), this skips
- * straight to re-applying the binding rather than attempting an invalid
- * REPORT_GENERATED → REPORT_GENERATED transition.
+ * pdf_hash_sha256 is ALWAYS written to match args.pdfHashSha256, on every
+ * call, regardless of starting state — not just on the first DRAFT ->
+ * REPORT_GENERATED transition. Every call to this function means "here is
+ * the file currently bound to this assessment," and the stored hash must
+ * always reflect whatever submissions.report_pdf_url currently points to.
+ * Without this, a routine "Replace PDF" re-upload while still
+ * REPORT_GENERATED (no workbook change, no invalidation in between) would
+ * leave the hash stale, and signAssessment()'s hash check would then
+ * incorrectly reject the freshly re-uploaded — and correct — file as
+ * tampered.
+ *
+ * Handles three starting states:
+ *   - DRAFT (normal, first-ever report for this assessment): transitions to
+ *     REPORT_GENERATED with the given hash, atomically.
+ *   - REPORT_GENERATED (a later re-upload, or retry after a partial failure
+ *     of THIS function on a prior attempt where the transition succeeded
+ *     but the binding/hash update below failed): stays REPORT_GENERATED
+ *     (REPORT_GENERATED -> REPORT_GENERATED is not itself a valid
+ *     transition, so this updates the hash directly via updateAssessment
+ *     rather than transitionProcessingStatus).
+ *   - FAILED (re-binding a corrected file after signAssessment() rejected
+ *     the previous one — e.g. its ArtifactBindingValidation hash-mismatch
+ *     check — and marked the assessment FAILED): deliberately stays FAILED,
+ *     not transitioned to REPORT_GENERATED (the state machine does not
+ *     permit that edge; see repository.ts PERMITTED_TRANSITIONS). The hash
+ *     is still updated to match the corrected file. This is safe because
+ *     signAssessment()'s FAILED retry path (FAILED -> SIGNING) does not
+ *     re-verify the hash at all — it assumes a transient signing/provider
+ *     failure, not a content problem — so retrying /sign after this simply
+ *     proceeds with whatever file is now bound.
+ *
+ * Any other starting state (SIGNING, SIGNED, DELIVERED) is rejected — none
+ * of those should ever have Generate Report re-run against them; the admin
+ * UI doesn't expose that path, but this defends against it directly.
  *
  * Binds submissions.report_pdf_url to this exact assessment via
  * report_pdf_assessment_id — validated by /sign before signing (see
@@ -164,16 +194,19 @@ export async function recordReportGenerated(
   const current = await findAssessmentById(assessmentId)
   if (!current) throw new Error(`Assessment ${assessmentId} not found`)
 
-  const assessment = current.processing_status === 'DRAFT'
-    ? await transitionProcessingStatus(assessmentId, 'REPORT_GENERATED', {
-        pdfHashSha256: args.pdfHashSha256,
-      })
-    : current
-
-  if (assessment.processing_status !== 'REPORT_GENERATED') {
+  let assessment: Assessment
+  if (current.processing_status === 'DRAFT') {
+    assessment = await transitionProcessingStatus(assessmentId, 'REPORT_GENERATED', {
+      pdfHashSha256: args.pdfHashSha256,
+    })
+  } else if (current.processing_status === 'REPORT_GENERATED' || current.processing_status === 'FAILED') {
+    assessment = current.pdf_hash_sha256 === args.pdfHashSha256
+      ? current
+      : await updateAssessment(assessmentId, { pdf_hash_sha256: args.pdfHashSha256 })
+  } else {
     throw new Error(
       `Cannot record report generation for assessment ${assessmentId}: ` +
-      `processing_status is ${assessment.processing_status}, expected DRAFT or REPORT_GENERATED.`,
+      `processing_status is ${current.processing_status}, expected DRAFT, REPORT_GENERATED, or FAILED.`,
     )
   }
 
@@ -252,7 +285,16 @@ export interface SignAssessmentResult {
  * Run the full signing flow for an assessment.
  *
  * Steps (fresh start from DRAFT):
- *   1. Compute PDF SHA-256, advance status to REPORT_GENERATED
+ * Preconditions (enforced by the /sign route before this is called, and
+ * re-checked here defensively):
+ *   - processing_status is REPORT_GENERATED (normal) or FAILED (retry).
+ *   - pdf_hash_sha256 is already persisted — recorded by recordReportGenerated()
+ *     when the report PDF was uploaded and bound to this assessment, NOT by
+ *     this function. This function never computes REPORT_GENERATED's hash;
+ *     it only verifies the PDF it was handed still matches that hash.
+ *
+ * Steps from a fresh REPORT_GENERATED start:
+ *   1. Verify pdfBuffer's SHA-256 matches the already-persisted pdf_hash_sha256
  *   2. Advance status to SIGNING
  *   3. Call ProvenanceProvider.sign (Numbers Protocol)
  *   4. Download signed asset from provider URL
@@ -266,8 +308,8 @@ export interface SignAssessmentResult {
  * Idempotency (already SIGNED): if numbers_asset_id + signed_asset_path are
  *   both set, return immediately. The assessment is already complete.
  *
- * FAILED recovery: if processing_status is 'FAILED', skip Steps 1–2
- *   (pdf_hash_sha256 is already persisted from the original attempt) and
+ * FAILED recovery: if processing_status is 'FAILED', skip Step 1's hash
+ *   verification (already verified on the attempt that reached SIGNING) and
  *   transition directly FAILED → SIGNING. Then proceed from Step 3.
  *   - The failure_diagnostic is preserved during the retry (Option A).
  *   - It is cleared only on a successful SIGNED transition (in repository.ts).
@@ -305,27 +347,50 @@ export async function signAssessment(
     }
   }
 
-  // Always compute the PDF hash — same PDF = same hash, and we need it for
-  // the REPORT_GENERATED transition on a fresh start (Step 1).
   const reportHash = crypto.createHash('sha256').update(pdfBuffer).digest('hex')
 
   // ── FAILED recovery path ──────────────────────────────────────────────────
   // processing_status = 'FAILED': previous attempt failed at some step after
-  // DRAFT. Steps 1–2 are already complete (pdf_hash_sha256 is persisted).
+  // REPORT_GENERATED. The hash was already verified on that attempt.
   // Transition directly FAILED → SIGNING to re-enter the signing flow at Step 3.
   // The failure_diagnostic string is retained in the DB during this retry;
   // it will be cleared by the SIGNED transition on success (see repository.ts).
   if (assessment.processing_status === 'FAILED') {
     await transitionProcessingStatus(assessmentId, 'SIGNING')
     // Fall through to Step 3 below.
-  } else {
-    // ── Step 1: PDF hash + REPORT_GENERATED ────────────────────────────────
-    await transitionProcessingStatus(assessmentId, 'REPORT_GENERATED', {
-      pdfHashSha256: reportHash,
-    })
+  } else if (assessment.processing_status === 'REPORT_GENERATED') {
+    // ── Step 1: artifact-binding validation ─────────────────────────────────
+    // pdf_hash_sha256 was recorded when the report was generated and bound
+    // to this assessment (recordReportGenerated, called from the
+    // record-report route immediately after upload) — NOT here. Verifying
+    // the freshly-downloaded PDF still matches it is the last line of
+    // defense against a stale or manually swapped file that was never
+    // re-bound: the /sign route already checks
+    // submissions.report_pdf_assessment_id === assessment.id, but that only
+    // proves *which* assessment the upload claims to belong to, not that the
+    // file's content hasn't changed since binding.
+    if (assessment.pdf_hash_sha256 && assessment.pdf_hash_sha256 !== reportHash) {
+      const diagnostic =
+        `Report PDF hash mismatch: expected ${assessment.pdf_hash_sha256}, got ${reportHash}. ` +
+        `The bound report was regenerated or replaced without re-establishing the binding.`
+      await markFailed(assessmentId, {
+        step:      'ArtifactBindingValidation',
+        error:     diagnostic,
+        timestamp: new Date().toISOString(),
+      })
+      throw new Error(diagnostic)
+    }
 
     // ── Step 2: Advance to SIGNING ──────────────────────────────────────────
     await transitionProcessingStatus(assessmentId, 'SIGNING')
+  } else {
+    // Defensive: the /sign route already rejects any status other than
+    // REPORT_GENERATED or FAILED before calling this function. Reaching here
+    // means that guard was bypassed or this function was called directly.
+    throw new Error(
+      `Cannot sign assessment ${assessmentId}: processing_status is ` +
+      `${assessment.processing_status}, expected REPORT_GENERATED or FAILED.`,
+    )
   }
 
   // ── Step 3: Call ProvenanceProvider ──────────────────────────────────────

@@ -4,7 +4,11 @@ import { createClient } from '@/lib/supabase/server'
 
 type RouteContext = { params: { id: string } }
 
-const ALLOWED_FIELDS = ['source_video_url', 'source_video_filename', 'report_pdf_url'] as const
+// report_pdf_url is deliberately excluded — it must go through
+// /api/admin/submissions/[id]/record-report, which binds the file to its
+// canonical assessment (hash + report_pdf_assessment_id) rather than just
+// recording a path. See ReportPDFUpload.tsx.
+const ALLOWED_FIELDS = ['source_video_url', 'source_video_filename'] as const
 
 export async function PATCH(request: NextRequest, { params }: RouteContext) {
   try {
