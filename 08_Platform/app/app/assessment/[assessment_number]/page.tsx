@@ -17,6 +17,17 @@ import { findAssessmentForVerification } from '@/lib/assessments/repository'
 import { OUTCOME_LABELS, ASSESSMENT_DOMAINS } from '@/types/assessment'
 import type { InstitutionalStatus, VerificationPageData } from '@/types/assessment'
 
+// Must render fresh on every request. Without this, Next.js caches this
+// route's first-ever render per deployment and serves that same snapshot to
+// all subsequent requests, regardless of later processing_status changes —
+// confirmed in production 2026-07-17: a status change to DELIVERED did not
+// become visible because the route had already cached a "not found" render
+// from immediately after the prior deploy, when the same assessment was
+// still SIGNED. See ADR-003 sibling investigation / release chat log for
+// the full diagnosis (Supabase API logs showed zero queries for repeat
+// requests to this route, confirming the render never re-executed).
+export const dynamic = 'force-dynamic'
+
 interface PageProps {
   params: { assessment_number: string }
 }
