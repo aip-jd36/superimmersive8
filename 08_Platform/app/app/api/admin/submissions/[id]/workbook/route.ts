@@ -1,15 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { invalidateGeneratedReport } from '@/lib/assessments/service'
 
 type RouteContext = { params: { id: string } }
 
 // Milestone detection — returns which milestones are newly met so the caller
 // can write immutable snapshots. Checks existing snapshots to avoid duplicates.
+//
+// snapshotTag is a stable internal label for the snapshot rows — historically
+// the legacy submissions.assess_id, now the submission_id. This table is
+// write-only internal audit trail (nothing reads it back), not part of the
+// canonical Assessment Registry, and milestones like intake_complete can be
+// reached before any assessment_number exists (Section 1 can complete well
+// before Section 6 sets an outcome) — so it deliberately does not depend on
+// the canonical assessment_number existing yet.
 async function checkMilestones(
   submissionId: string,
   workbook: Record<string, any>,
-  assessId: string,
+  snapshotTag: string,
 ): Promise<void> {
   const s1 = workbook.section_1?.scope_checks ?? {}
   const s3 = workbook.section_3 ?? {}
@@ -42,7 +51,7 @@ async function checkMilestones(
     if (met && !already.has(milestone)) {
       await supabaseAdmin.from('workbook_snapshots').insert({
         submission_id: submissionId,
-        assess_id: assessId,
+        assess_id: snapshotTag,
         milestone,
         snapshot_data: workbook,
       })
@@ -69,12 +78,6 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: 'workbook_data required' }, { status: 400 })
     }
 
-    const { data: sub } = await supabaseAdmin
-      .from('submissions')
-      .select('assess_id')
-      .eq('id', params.id)
-      .single()
-
     const { error: updateError } = await supabaseAdmin
       .from('submissions')
       .update({ workbook_data })
@@ -85,11 +88,17 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     }
 
     // Milestone check — best-effort, don't block the save response on failure
-    if (sub?.assess_id) {
-      await checkMilestones(params.id, workbook_data, sub.assess_id).catch(err =>
-        console.error('Milestone check failed:', err)
-      )
-    }
+    await checkMilestones(params.id, workbook_data, params.id).catch(err =>
+      console.error('Milestone check failed:', err)
+    )
+
+    // Stale-report invalidation — best-effort, don't block the save response
+    // on failure. No-ops unless a report was already generated (processing_status
+    // REPORT_GENERATED); reverts that assessment to DRAFT and clears the now-stale
+    // report binding so it can't be signed until regenerated from this saved data.
+    await invalidateGeneratedReport(params.id).catch(err =>
+      console.error('Report invalidation check failed:', err)
+    )
 
     return NextResponse.json({ savedAt: new Date().toISOString() })
   } catch (err: any) {

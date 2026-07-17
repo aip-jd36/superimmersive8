@@ -10,7 +10,7 @@ interface Props {
   data: S6
   findings: Finding[]
   gaps: Gap[]
-  assessId: string
+  assessmentNumber: string | null
   onChange: (updates: Partial<S6>) => void
 }
 
@@ -35,7 +35,7 @@ const IMPACT_SORT: Record<string, number> = {
   'High risk — material commercial concern': 4,
 }
 
-export function Section6Assessment({ data, findings, gaps, assessId, onChange }: Props) {
+export function Section6Assessment({ data, findings, gaps, assessmentNumber, onChange }: Props) {
   const isComplete = !!(data.outcome && data.commercial_confidence && data.signed_off)
   const canSignOff = !!(data.outcome && data.commercial_confidence && data.basis.trim().length > 20)
 
@@ -74,7 +74,9 @@ export function Section6Assessment({ data, findings, gaps, assessId, onChange }:
           Synthesize all findings into a single outcome. The signed-off assessment is immutable — a milestone snapshot
           is recorded when you check the sign-off box.
         </p>
-        <div className="text-xs font-mono text-gray-400 mt-1">{assessId}</div>
+        <div className="text-xs font-mono text-gray-400 mt-1">
+          {assessmentNumber ?? 'Assessment number not yet generated — assigned when Generate Report is first run in § 7'}
+        </div>
       </div>
 
       {/* Assessment end time */}

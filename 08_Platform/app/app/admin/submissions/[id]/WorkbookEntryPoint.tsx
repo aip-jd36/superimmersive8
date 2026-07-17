@@ -5,7 +5,6 @@ import { ClipboardList, CheckCircle, ChevronRight } from 'lucide-react'
 
 interface WorkbookEntryPointProps {
   submissionId: string
-  assessId: string | null
   workbookData: Record<string, any> | null
 }
 
@@ -35,9 +34,9 @@ function computeProgress(data: Record<string, any> | null): { completed: number;
   return { completed, total, isSignedOff }
 }
 
-export function WorkbookEntryPoint({ submissionId, assessId, workbookData }: WorkbookEntryPointProps) {
+export function WorkbookEntryPoint({ submissionId, workbookData }: WorkbookEntryPointProps) {
   const { completed, total, isSignedOff } = computeProgress(workbookData)
-  const hasStarted = !!workbookData || !!assessId
+  const hasStarted = !!workbookData
 
   const label = isSignedOff ? 'View Workbook' : hasStarted ? 'Continue Review' : 'Start Review'
   const borderColor = isSignedOff ? 'rgba(22,163,74,0.25)' : 'rgba(200,144,10,0.3)'
@@ -77,9 +76,6 @@ export function WorkbookEntryPoint({ submissionId, assessId, workbookData }: Wor
             7-section guided assessment — 16 controls, findings log, report brief, and provenance sign-off.
           </p>
         )}
-
-        {/* Legacy submissions.assess_id is not rendered — canonical assessment number
-            comes from the assessments table and is shown in SignAndDeliverPanel. */}
 
         <Button
           asChild

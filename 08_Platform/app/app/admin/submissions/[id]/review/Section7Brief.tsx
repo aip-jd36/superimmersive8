@@ -17,7 +17,10 @@ interface Props {
   section5: S5
   section4: S4
   section3: S3
-  assessId: string
+  /** Canonical assessment_number, if one already exists (null before first Generate). */
+  assessmentNumber: string | null
+  /** Called with the canonical number once ensure-assessment creates/returns it. */
+  onAssessmentNumberChange: (assessmentNumber: string) => void
   submission: Record<string, any>
   onChange: (updates: Partial<S7>) => void
 }
@@ -248,7 +251,7 @@ function buildEvidenceList(data: S7, section5: S5): string {
 
 function buildTypContent(
   data: S7, section6: S6, section5: S5, section4: S4, section3: S3,
-  assessId: string, submission: Record<string, any>,
+  assessmentNumber: string, submission: Record<string, any>,
 ): string {
   const reportDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
   const submissionId = submission.id ? `SUB-${submission.id.split('-')[0].toUpperCase()}` : 'SUB-UNKNOWN'
@@ -294,13 +297,13 @@ function buildTypContent(
   const intendedUse = esc(formatIntendedUse(submission.intended_use))
 
   return `// ─────────────────────────────────────────────────────────────────────────────
-// SI8 Campaign Assurance Assessment Report
-// Assessment ID: ${assessId}
+// SI8 Commercial Assurance Assessment Report
+// Assessment ID: ${assessmentNumber}
 // Content: ${submission.title ?? 'Untitled'}
 // Submitter: ${submission.filmmaker_name ?? 'Unknown'}, ${submission.user?.email ?? ''}
 // Report date: ${reportDate}
 //
-// Compile: typst compile ${assessId}.typ ${assessId}.pdf
+// Compile: typst compile ${assessmentNumber}.typ ${assessmentNumber}.pdf
 // ─────────────────────────────────────────────────────────────────────────────
 
 #import "si8-report-template.typ": *
@@ -319,8 +322,8 @@ function buildTypContent(
       #grid(
         columns: (1fr, 1fr, 1fr),
         align: (left, center, right),
-        [*SI8* | Campaign Assurance],
-        [${assessId}],
+        [*SI8* | Commercial Assurance],
+        [${assessmentNumber}],
         [${reportDate}],
       )
       #line(length: 100%, stroke: 0.5pt + c-border)
@@ -393,7 +396,7 @@ function buildTypContent(
 
 #cover-page(
   content-title: "${title}",
-  assess-id: "${assessId}",
+  assess-id: "${assessmentNumber}",
   report-date: "${reportDate}",
   submitter: "${filmmaker}",
   submission-id: "${submissionId}",
@@ -513,7 +516,7 @@ _Chain of Title documentation for "${title}" as disclosed by the submitter and r
 #table(
   columns: (1fr, 2fr),
   [*Field*], [*Detail*],
-  [Assessment ID], [${assessId}],
+  [Assessment ID], [${assessmentNumber}],
   [Content Title], [${title}],
   [Submitter], [${filmmaker}],
   [Submission ID], [${submissionId}],
@@ -581,7 +584,8 @@ function StringList({ label, items, onChange, placeholder, hint }: {
 }
 
 export function Section7Brief({
-  data, section6, section5, section4, section3, assessId, submission, onChange,
+  data, section6, section5, section4, section3,
+  assessmentNumber, onAssessmentNumberChange, submission, onChange,
 }: Props) {
   const [generating, setGenerating] = useState(false)
   const [generated, setGenerated] = useState(false)
@@ -589,6 +593,34 @@ export function Section7Brief({
   const [pdfGenerated, setPdfGenerated] = useState(false)
   const [pdfError, setPdfError] = useState<string | null>(null)
   const [seeded, setSeeded] = useState(false)
+
+  // Get-or-create the canonical assessment_number before generating anything —
+  // the number is embedded IN the document, not attached afterward. If one
+  // already exists (assessmentNumber prop is set), skip the round trip.
+  // Requires an outcome from Section 6 (assessments.outcome is NOT NULL);
+  // the button below is already disabled until outcomeLbl is set, so this
+  // should only throw if that gate is somehow bypassed.
+  const ensureAssessmentNumber = async (): Promise<string> => {
+    if (assessmentNumber) return assessmentNumber
+    if (!section6.outcome) {
+      throw new Error('Complete § 6 (Overall Assessment) before generating a report.')
+    }
+    const res = await fetch(
+      `/api/admin/submissions/${encodeURIComponent(submission.id)}/ensure-assessment`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ outcome: section6.outcome }),
+      }
+    )
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+      throw new Error(err.error || `HTTP ${res.status}`)
+    }
+    const json = await res.json()
+    onAssessmentNumberChange(json.assessmentNumber)
+    return json.assessmentNumber as string
+  }
 
   const canSeed = !!(section6.basis?.trim() || section4.gaps.length > 0)
 
@@ -640,13 +672,14 @@ export function Section7Brief({
     setGeneratingPdf(true)
     setPdfError(null)
     try {
-      const content = buildTypContent(data, section6, section5, section4, section3, assessId, submission)
+      const num = await ensureAssessmentNumber()
+      const content = buildTypContent(data, section6, section5, section4, section3, num, submission)
       const res = await fetch(
         `/api/admin/submissions/${encodeURIComponent(submission.id)}/generate-report`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ typContent: content, assessId }),
+          body: JSON.stringify({ typContent: content, assessId: num }),
         }
       )
       if (!res.ok) {
@@ -657,7 +690,7 @@ export function Section7Brief({
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${assessId}.pdf`
+      a.download = `${num}.pdf`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -670,20 +703,24 @@ export function Section7Brief({
     }
   }
 
-  const handleDownloadTyp = () => {
+  const handleDownloadTyp = async () => {
     setGenerating(true)
+    setPdfError(null)
     try {
-      const content = buildTypContent(data, section6, section5, section4, section3, assessId, submission)
+      const num = await ensureAssessmentNumber()
+      const content = buildTypContent(data, section6, section5, section4, section3, num, submission)
       const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${assessId}.typ`
+      a.download = `${num}.typ`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
       setGenerated(true)
+    } catch (e: any) {
+      setPdfError(e?.message || 'Failed to prepare report source')
     } finally {
       setGenerating(false)
     }
@@ -868,7 +905,7 @@ export function Section7Brief({
 
         {pdfGenerated && !pdfError && (
           <div className="text-xs text-green-600">
-            ✓ {assessId}.pdf downloaded.
+            ✓ {assessmentNumber ?? 'report'}.pdf downloaded.
           </div>
         )}
 
@@ -878,7 +915,7 @@ export function Section7Brief({
             <div className="mt-1 text-gray-500">
               Download the source file below to diagnose — open in{' '}
               <a href="https://typst.app" target="_blank" rel="noreferrer" className="underline">typst.app</a>{' '}
-              or run <code className="font-mono">typst compile {assessId}.typ</code> locally.
+              or run <code className="font-mono">typst compile {assessmentNumber ?? '[assessment-number]'}.typ</code> locally.
             </div>
           </div>
         )}

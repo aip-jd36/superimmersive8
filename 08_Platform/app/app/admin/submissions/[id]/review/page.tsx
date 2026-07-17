@@ -3,20 +3,9 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import { WorkbookClient } from './WorkbookClient'
 import { EMPTY_WORKBOOK } from './workbook-schema'
+import { findAssessmentBySubmissionId } from '@/lib/assessments/repository'
 
 type PageProps = { params: { id: string } }
-
-async function generateAssessId(submissionId: string): Promise<string> {
-  // Count existing assessments to assign a sequential number
-  const { count } = await supabaseAdmin
-    .from('submissions')
-    .select('id', { count: 'exact', head: true })
-    .not('assess_id', 'is', null)
-
-  const num = String((count ?? 0) + 1).padStart(3, '0')
-  const date = new Date().toISOString().split('T')[0]
-  return `ASSESS-${num}-${date}`
-}
 
 export default async function WorkbookPage({ params }: PageProps) {
   await requireAdmin()
@@ -32,18 +21,19 @@ export default async function WorkbookPage({ params }: PageProps) {
 
   if (error || !submission) notFound()
 
-  // Generate assess_id on first workbook open
-  let assessId: string = (submission as any).assess_id
-  if (!assessId) {
-    assessId = await generateAssessId(params.id)
+  // Mark review as started (display only — no longer generates an ID here).
+  // The canonical assessment_number doesn't exist until Generate Report is
+  // clicked (Section 6 must be complete first — assessments.outcome is
+  // NOT NULL). Read-only lookup: never creates or writes an assessment.
+  if (!(submission as any).review_started_at) {
     await supabaseAdmin
       .from('submissions')
-      .update({
-        assess_id: assessId,
-        review_started_at: new Date().toISOString(),
-      })
+      .update({ review_started_at: new Date().toISOString() })
       .eq('id', params.id)
   }
+
+  const existingAssessment = await findAssessmentBySubmissionId(params.id)
+  const assessmentNumber: string | null = existingAssessment?.assessment_number ?? null
 
   const rawWorkbook = (submission as any).workbook_data
   const initialWorkbook = rawWorkbook
@@ -98,7 +88,7 @@ export default async function WorkbookPage({ params }: PageProps) {
   return (
     <WorkbookClient
       submissionId={params.id}
-      assessId={assessId}
+      assessmentNumber={assessmentNumber}
       initialWorkbook={initialWorkbook}
       submission={submission as any}
       evidenceFiles={evidenceFiles ?? []}

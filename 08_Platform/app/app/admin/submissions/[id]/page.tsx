@@ -87,7 +87,6 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
   const sourceVideoUrl = (submission as any).source_video_url as string | null
   const sourceVideoFilename = (submission as any).source_video_filename as string | null
   const reportPdfUrl = (submission as any).report_pdf_url as string | null
-  const assessId = (submission as any).assess_id as string | null
   const workbookData = parseJsonb((submission as any).workbook_data, null)
   // Approve gate: workbook section 6 signed off (replaces old reviewer checklist)
   const checklistComplete = workbookData?.section_6?.signed_off === true
@@ -413,7 +412,6 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
             {isCertified && (
               <WorkbookEntryPoint
                 submissionId={params.id}
-                assessId={assessId}
                 workbookData={workbookData}
               />
             )}

@@ -20,7 +20,7 @@ type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
 interface WorkbookClientProps {
   submissionId: string
-  assessId: string
+  assessmentNumber: string | null
   initialWorkbook: WorkbookData
   submission: Record<string, any>
   evidenceFiles: Array<{ name: string; url: string }>
@@ -37,11 +37,15 @@ function formatSavedAt(iso: string | null): string {
 }
 
 export function WorkbookClient({
-  submissionId, assessId, initialWorkbook, submission, evidenceFiles,
+  submissionId, assessmentNumber: initialAssessmentNumber, initialWorkbook, submission, evidenceFiles,
 }: WorkbookClientProps) {
   const [workbook, setWorkbook] = useState<WorkbookData>(
     Object.keys(initialWorkbook).length > 1 ? initialWorkbook : EMPTY_WORKBOOK
   )
+  // Lifted so the header badge and § 6 both reflect a newly created
+  // assessment number immediately after Generate Report runs, without a
+  // page reload — Section7Brief reports it up via onAssessmentNumberChange.
+  const [assessmentNumber, setAssessmentNumber] = useState<string | null>(initialAssessmentNumber)
   const [activeSection, setActiveSection] = useState<Section>('1')
   const [rightTab, setRightTab] = useState<RightTab>('guidance')
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
@@ -172,7 +176,7 @@ export function WorkbookClient({
               Back
             </Link>
           </Button>
-          <span className="text-xs font-mono text-amber-400">{assessId}</span>
+          <span className="text-xs font-mono text-amber-400">{assessmentNumber ?? 'Not yet generated'}</span>
           <span className="text-sm text-gray-200 font-medium truncate max-w-xs">
             {submission.title}
           </span>
@@ -323,7 +327,7 @@ export function WorkbookClient({
                 data={workbook.section_6}
                 findings={workbook.section_5.findings}
                 gaps={workbook.section_4.gaps}
-                assessId={assessId}
+                assessmentNumber={assessmentNumber}
                 onChange={updates => updateSection('section_6', updates)}
               />
             )}
@@ -334,7 +338,8 @@ export function WorkbookClient({
                 section5={workbook.section_5}
                 section4={workbook.section_4}
                 section3={workbook.section_3}
-                assessId={assessId}
+                assessmentNumber={assessmentNumber}
+                onAssessmentNumberChange={setAssessmentNumber}
                 submission={submission}
                 onChange={updates => updateSection('section_7', updates)}
               />
