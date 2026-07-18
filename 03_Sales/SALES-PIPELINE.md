@@ -4,9 +4,11 @@
 
 **Source:** `03_Sales/CRM.md` is the flat activity log. This file is the stage view — what matters right now, organized by where each lead sits in the funnel.
 
-**Lead reference:** Every row maps to a B-ID or C-ID in `03_Sales/CRM.md`. Nurture/MONITOR leads are excluded — they are not in the active funnel.
+**Lead reference:** Every row maps to a B-ID or C-ID in `03_Sales/CRM.md`. Nurture/MONITOR leads tracked informally in CRM.md's own (separate) stage vocabulary are excluded here unless formally moved into this file's `Nurturing` stage — they are not otherwise part of the active funnel.
 
-**Last updated:** 2026-06-16 (Jun 16 Dripify report; no stage changes; discovery pipeline updated to 256 signals)
+**Stage alignment (2026-07-18):** Stages below now match the SE engineering team's `lead_responses.pipeline_stage` database enum exactly (`supabase/migrations/20260715_pipeline_stage_rename.sql`), so SI8 and SE describe the same pipeline the same way. This replaced the prior 7-stage SI8-only list. See "Reclassification notes" below for how the old stages map to the new ones — nothing was dropped, only relabeled or regrouped.
+
+**Last updated:** 2026-07-18 (stage vocabulary aligned to SE's DB enum; all 118 active + lost leads reclassified, no lead data changed)
 
 ---
 
@@ -14,22 +16,82 @@
 
 | # | Stage | What it means | Entry criteria |
 |---|-------|---------------|----------------|
-| 1 | **Lead Replied** | Substantive reply received — warm, lukewarm, or conditional | Lead responded to any outreach message |
-| 2 | **Warm Lead** | Expressed clear interest or acknowledged the pain point directly | Reply shows genuine ICP signal or asks a follow-up question |
-| 3 | **Call Requested** | JD or alias has explicitly offered a call and lead is open to it | Calendly sent, slots offered, or lead said "sure / let's talk" |
-| 4 | **Call Scheduled** | Call has a confirmed date and time on calendar | Calendar event created, both parties confirmed |
-| 5 | **Call Taken** | Discovery call completed, notes filed | Call happened |
-| 6 | **Evaluating** | Lead is actively considering SI8 — sample reviewed, proposal digested, or internally circulating | Post-call or post-sample; lead is in a decision window |
-| 7a | **Creator Submitted** | Creator Record ($29) or SI8 Certified ($499) submission received | Payment confirmed / submission in platform |
-| 7b | **Rights Verified Submitted** | Agency/brand submitted on behalf of a client | B2B submission confirmed |
+| 1 | **Lead Responded** | Substantive reply received — anywhere from a first reply through active call-scheduling interest, up to (not including) a confirmed meeting on calendar | Lead responded to any outreach message |
+| 2 | **1st Mtg Scheduled** | Meeting has a confirmed date and time on calendar | Calendar event created, both parties confirmed |
+| 3 | **1st Mtg Taken** | Discovery call completed, notes filed | Call happened |
+| 4 | **Evaluating** | Lead is actively considering SI8 — sample reviewed, proposal digested, or internally circulating | Post-call or post-sample; lead is in a decision window |
+| 5 | **Proposal Made** | Formal proposal or SOW sent | Proposal document sent |
+| 6 | **Negotiating** | Active back-and-forth on terms, pricing, or scope | Counter-terms discussed |
+| 7 | **Nurturing** | Not now, but worth revisiting on a schedule | Explicitly deferred, not declined |
+| 8 | **Unqualified** | Wrong ICP, wrong role, wrong geography, or otherwise never a real fit | Determined off-profile regardless of engagement level |
+| 9 | **Closed Won** | Deal closed — Creator Record ($29) / SI8 Certified ($499) submission, or B2B Rights Verified agency submission | Payment confirmed / submission in platform, or B2B account active |
+| 10 | **Closed Lost** | Was a real opportunity; explicitly declined or went cold after real engagement | Lead said no, or an operational failure (e.g. broken outreach channel) killed the opportunity |
 
-**Lost** (terminal): Explicitly declined, permanently off-ICP, or cold after 3+ follow-ups.
+### Reclassification notes (2026-07-18)
+
+- **Lead Replied** + **Warm Lead** + **Call Requested** (the old stages 1–3) all fold into **Lead Responded**, matching SE's list exactly. The old distinction is preserved as sub-groups *within* Lead Responded below (Call Requested / Warm / Replied) rather than lost — SE has no stage between "responded" and "meeting scheduled," so this is presentational grouping inside one formal stage, not three separate stages.
+- **Call Scheduled → 1st Mtg Scheduled**, **Call Taken → 1st Mtg Taken**, **Evaluating → Evaluating** — direct 1:1 renames, no regrouping.
+- **Creator Submitted (7a)** + **Rights Verified Submitted (7b)** merge into one **Closed Won** (SE has a single Closed Won, not two) — the Creator-vs-Agency distinction is preserved via a Deal Type column when this section populates, not dropped.
+- **Lost** (the old catch-all) splits into **Unqualified** vs **Closed Lost** based on the stated reason for each of the 23 leads — this is a judgment call per lead, not mechanical. Wrong ICP / wrong role / off-geo / never-really-a-fit → Unqualified. Explicit decline after real engagement, or an operational failure that killed a real opportunity (e.g. the 7 "Lilly alias inaccessible" VOID entries — the alias broke, not the lead) → Closed Lost. Flagging the VOID group specifically: these weren't sales losses, they were a broken outreach channel; classified as Closed Lost for lack of a better fit in SE's list, but worth a second look if you'd rather track "never actually contacted due to system failure" separately.
+- **Proposal Made**, **Negotiating**, **Nurturing** (formal stage) are new stages this pipeline didn't previously track explicitly — currently empty since no lead has reached that point yet, not because the stages are wrong.
+- CRM.md's own separate stage vocabulary (`Contacted → Replied — Warm/Conditional/Lukewarm → Call Booked → Call Completed → Proposal Sent → Negotiation → Won`, plus `Nurture`/`Polite Pass`/`Not a Fit` for buyers; a different list again for creators) was **not** touched by this change — it's a distinct system with more granularity, out of scope for this update. Worth a separate decision on whether to reconcile it to the same SE-aligned vocabulary later.
 
 ---
 
 <!-- sales-pipeline:start -->
 
-## 1. Lead Replied (62)
+## 1. Lead Responded (95)
+
+*Substantive reply received. Grouped below by how far along they are — Call Requested is the hottest, then Warm, then general Replied.*
+
+### 1a. Call Requested (6)
+
+*The lead has expressed interest in a call, or confirmed a booking that didn't happen.*
+
+| B-ID | Lead | Company | Geo | How They Requested | Last Action | Follow Up By |
+|------|------|---------|-----|--------------------|-------------|--------------|
+| B130 | Ivan Petruzzelli | State Street Investment Mgmt | London/UK | "We require a structured campaign brief with human summary + machine-readable payload (spreadsheet or JSON) for auditability across AI workflows." ICP 3 signal — State Street defining agency requirements. Format may differ from SI8 PDF output — needs clarification. | JD to draft reply before sending — probe whether requirement is IP provenance or campaign workflow data | 2026-06-17 |
+| B143 | Simon Helm | — | England | "Feels very relevant, advising clients already. Can we chat?" | Ivy asked for Tue/Wed/Thu 9:30–10am UK slot Jun 8; await slot reply | 2026-06-12 |
+| B011 | Hugo Barbera | HumAIn | — | Expressed interest — 2nd nudge sent | Sample or call offered | — |
+| B043 | Luke Brady | Sublime Animations Ltd | London/UK | Confirmed calls 4x — all missed | 4th reschedule attempt sent Jun 8; move to Nurture if no reply by Jun 13 | 2026-06-13 |
+| B045 | Mike Harris | Seenit | London/UK | "Thanks, booked!" via Calendly — no-show | Follow-up sent Jun 8; await reply | 2026-06-13 |
+| B096 | Ankita Biswas | HTCreaTec | Dubai/UAE | "I'd love to know more and talk over a chat!" | Follow-up sent Jun 8; await reply | 2026-06-13 |
+
+### 1b. Warm (27)
+
+*Clear ICP signal or acknowledged pain. Moving toward a call or sample.*
+
+| B-ID | Lead | Company | Geo | Signal Summary | Sample Sent? | Next Action | Follow Up By |
+|------|------|---------|-----|----------------|-------------|-------------|--------------|
+| B100 | Ramez Tabshi | — | Dubai/UAE | **T1 + PRODUCT FIT CONFIRMED.** Jun 26 reply: "once legal teams get involved, conversation immediately shifts to IP ownership and copyright risks… That IP and commercial licensing document is exactly what they are looking for." Clients = finserv, healthcare, public sector. Current output = technical/security PDF only — explicit gap to SI8 Chain of Title. | No | Send sample (superimmersive8.com/sample) + 20-min call offer by Jul 5 | 2026-07-05 |
+| B145 | Daniele Zennaro | AiYR4 | England | "Request via commercial/rights side — legal/compliance probably behind it." Partial B2B2B confirmation. Chain: legal→commercial/rights→agency. Case-by-case but trending structured. Test 6 v6-A. | No | Pitch + send sample (superimmersive8.com/sample) — position as what the commercial/rights clearance request formalises | — |
+| B002 | Theodor (Teddy) Sandu | MullenLowe Singapore (IPG) | Singapore | "They are asking for both" — disclosure + Chain of Title. CD at holdco. T1 same-day reply. | No | Send Part 2 gate: what are you sending them and does it satisfy their legal team? | 2026-06-18 |
+| B036 | David Tamayo | Prose on Pixels | — | "Big network with legal team dedicated to AI" | No | Await reply (EU AI Act angle sent) | — |
+| B040 | Hasan Sarwar | — | — | "I'd love to see the Example Rights Package" | No | Send sample Chain of Title | — |
+| B041 | Nourhan Mostafa | Ai Studio | Egypt | "Creative Director – AI Content" — described compliance process in detail | No | 4th follow-up sent Jun 8; await reply (off-geo but strong ICP signal) | — |
+| B053 | Graham Vincent | grigio:london | London/UK | 👍 reaction to full pitch — no verbal reply | No | Drop sample directly in message | — |
+| B056 | Michael Christodoulou | MOI Global | — | "Sure" — accepted sample offer | No | Send sample Chain of Title | — |
+| B107 | Keegan Desouza | Shaerp Next | Dubai/UAE | "Legal side isn't mature yet — how does it work?" | No | Reply + explain SI8 briefly | — |
+| B121 | Gabriel Preston | Imagine This Creative Studio | London/UK | Approved platform lists, prompt sheets, likeness rights focus | No | Position SI8 as structured output; likeness angle | — |
+| B122 | Mhd Ali | Monks | Dubai/UAE | "Most of the time" — Monks holdco signal | No | Reply + probe Monks client format | — |
+| B127 | Ulrike Kerber | Viva Design Inc. | Germany | "Legal teams asking with increasing frequency" | No | Reply + send sample | — |
+| B128 | Christopher Neitzert | Creative Mayhem | Germany | "Yeah I have a solution. Do you?" — probe competitor/complementary | No | Reply + probe what his solution is | — |
+| B129 | Kelly Hogan | ELITE STORI LND | London/UK | "What do you do?" — asking to understand product | No | Reply + explain SI8 | — |
+| B138 | Tunç Topçuoglu | HOOD Studio | Amsterdam | "Checked your product — very interesting. Would love to hear more." | Yes (product reviewed) | Reply + send sample + book JD call | — |
+| B139 | James Hilditch | BearJam | London/UK | "Yes, sometimes. Important part of the process." | No | Reply + send sample | — |
+| C002 | @syntaxdiffusion | — | — | Interested — v4 reply sent | No | Send v4 follow-up | — |
+| B009 | Syed Tabish Hasan | Zedtronix | — | Previously showed interest; Calendly nudge sent — gone cold | Send follow-up | — |
+| B057 | Rheea Aranha | Vincent Studios | London/UK | Asked for sample by email — we asked for her email address | Await email address | — |
+| B087 | Ibrahim Badi | IKM Marketing | London/UK | "Yes especially in regulated sectors" — answered 9 intake Qs inline; Creator Record makes sense as next step | COMP-B2 code sent Jun 8; await reply or form fill | — |
+| B088 | Matthew Sergison-Main | OLIVER / Brandtech | London/UK | "Yes I am being asked this 100%" — strongest pain signal; works at OLIVER (Brandtech holdco) | B2B2B probe sent Jun 8: is requirement from brand legal or creative? If legal confirmed → Test 8 | — |
+| B090 | Saira Macleod | Magnific | London/UK | Asked what the checker looks for — product question | Await reply — confirm JD call | — |
+| B158 | Dan Lantry | Sonova Group | USA | "Would like to better understand the issue." VP Legal Affairs (North America), regulated healthcare brand. ICP 3 — brand legal officer whose requirement cascades to agencies. | Brief NY Law education + call ask Jun 18 [JD alias] | 2026-06-18 |
+| B094 | Justin Lufair Brown | Amazon | LA | "Contract language tightened a lot in last 12 months... happy to go deeper if useful." Creative Producer AI Video Production. | Send call invite Jun 17 [Vanessa]: "Still open to that deeper conversation — would a 20-min call this week or next work?" | 2026-06-17 |
+| B095 | Florent Delavous | Xtendency | Dubai/UAE | "Already working on something in this space" — CEO | Probe collab/competitor + book call | — |
+| B099 | Sultan Alsuwaidi | Video tube | Dubai/UAE | "Yes — becoming standard now" — sample sent | Await reply | — |
+| B126 | Phil Langer | Jung von Matt SPREE | Germany | Major holdco (JvM) — pitch + sample sent | Await reply | — |
+
+### 1c. Replied (62)
 
 *Substantive reply received. Assessing fit and next move.*
 
@@ -104,58 +166,7 @@
 
 ---
 
-## 2. Warm Lead (27)
-
-*Clear ICP signal or acknowledged pain. Moving toward a call or sample.*
-
-| B-ID | Lead | Company | Geo | Signal Summary | Sample Sent? | Next Action | Follow Up By |
-|------|------|---------|-----|----------------|-------------|-------------|--------------|
-| B100 | Ramez Tabshi | — | Dubai/UAE | **T1 + PRODUCT FIT CONFIRMED.** Jun 26 reply: "once legal teams get involved, conversation immediately shifts to IP ownership and copyright risks… That IP and commercial licensing document is exactly what they are looking for." Clients = finserv, healthcare, public sector. Current output = technical/security PDF only — explicit gap to SI8 Chain of Title. | No | Send sample (superimmersive8.com/sample) + 20-min call offer by Jul 5 | 2026-07-05 |
-| B145 | Daniele Zennaro | AiYR4 | England | "Request via commercial/rights side — legal/compliance probably behind it." Partial B2B2B confirmation. Chain: legal→commercial/rights→agency. Case-by-case but trending structured. Test 6 v6-A. | No | Pitch + send sample (superimmersive8.com/sample) — position as what the commercial/rights clearance request formalises | — |
-| B002 | Theodor (Teddy) Sandu | MullenLowe Singapore (IPG) | Singapore | "They are asking for both" — disclosure + Chain of Title. CD at holdco. T1 same-day reply. | No | Send Part 2 gate: what are you sending them and does it satisfy their legal team? | 2026-06-18 |
-| B036 | David Tamayo | Prose on Pixels | — | "Big network with legal team dedicated to AI" | No | Await reply (EU AI Act angle sent) | — |
-| B040 | Hasan Sarwar | — | — | "I'd love to see the Example Rights Package" | No | Send sample Chain of Title | — |
-| B041 | Nourhan Mostafa | Ai Studio | Egypt | "Creative Director – AI Content" — described compliance process in detail | No | 4th follow-up sent Jun 8; await reply (off-geo but strong ICP signal) | — |
-| B053 | Graham Vincent | grigio:london | London/UK | 👍 reaction to full pitch — no verbal reply | No | Drop sample directly in message | — |
-| B056 | Michael Christodoulou | MOI Global | — | "Sure" — accepted sample offer | No | Send sample Chain of Title | — |
-| B107 | Keegan Desouza | Shaerp Next | Dubai/UAE | "Legal side isn't mature yet — how does it work?" | No | Reply + explain SI8 briefly | — |
-| B121 | Gabriel Preston | Imagine This Creative Studio | London/UK | Approved platform lists, prompt sheets, likeness rights focus | No | Position SI8 as structured output; likeness angle | — |
-| B122 | Mhd Ali | Monks | Dubai/UAE | "Most of the time" — Monks holdco signal | No | Reply + probe Monks client format | — |
-| B127 | Ulrike Kerber | Viva Design Inc. | Germany | "Legal teams asking with increasing frequency" | No | Reply + send sample | — |
-| B128 | Christopher Neitzert | Creative Mayhem | Germany | "Yeah I have a solution. Do you?" — probe competitor/complementary | No | Reply + probe what his solution is | — |
-| B129 | Kelly Hogan | ELITE STORI LND | London/UK | "What do you do?" — asking to understand product | No | Reply + explain SI8 | — |
-| B138 | Tunç Topçuoglu | HOOD Studio | Amsterdam | "Checked your product — very interesting. Would love to hear more." | Yes (product reviewed) | Reply + send sample + book JD call | — |
-| B139 | James Hilditch | BearJam | London/UK | "Yes, sometimes. Important part of the process." | No | Reply + send sample | — |
-| C002 | @syntaxdiffusion | — | — | Interested — v4 reply sent | No | Send v4 follow-up | — |
-| B009 | Syed Tabish Hasan | Zedtronix | — | Previously showed interest; Calendly nudge sent — gone cold | Send follow-up | — |
-| B057 | Rheea Aranha | Vincent Studios | London/UK | Asked for sample by email — we asked for her email address | Await email address | — |
-| B087 | Ibrahim Badi | IKM Marketing | London/UK | "Yes especially in regulated sectors" — answered 9 intake Qs inline; Creator Record makes sense as next step | COMP-B2 code sent Jun 8; await reply or form fill | — |
-| B088 | Matthew Sergison-Main | OLIVER / Brandtech | London/UK | "Yes I am being asked this 100%" — strongest pain signal; works at OLIVER (Brandtech holdco) | B2B2B probe sent Jun 8: is requirement from brand legal or creative? If legal confirmed → Test 8 | — |
-| B090 | Saira Macleod | Magnific | London/UK | Asked what the checker looks for — product question | Await reply — confirm JD call | — |
-| B158 | Dan Lantry | Sonova Group | USA | "Would like to better understand the issue." VP Legal Affairs (North America), regulated healthcare brand. ICP 3 — brand legal officer whose requirement cascades to agencies. | Brief NY Law education + call ask Jun 18 [JD alias] | 2026-06-18 |
-| B094 | Justin Lufair Brown | Amazon | LA | "Contract language tightened a lot in last 12 months... happy to go deeper if useful." Creative Producer AI Video Production. | Send call invite Jun 17 [Vanessa]: "Still open to that deeper conversation — would a 20-min call this week or next work?" | 2026-06-17 |
-| B095 | Florent Delavous | Xtendency | Dubai/UAE | "Already working on something in this space" — CEO | Probe collab/competitor + book call | — |
-| B099 | Sultan Alsuwaidi | Video tube | Dubai/UAE | "Yes — becoming standard now" — sample sent | Await reply | — |
-| B126 | Phil Langer | Jung von Matt SPREE | Germany | Major holdco (JvM) — pitch + sample sent | Await reply | — |
-
----
-
-## 3. Call Requested (6)
-
-*The lead has expressed interest in a call, or confirmed a booking that didn't happen.*
-
-| B-ID | Lead | Company | Geo | How They Requested | Last Action | Follow Up By |
-|------|------|---------|-----|--------------------|-------------|--------------|
-| B130 | Ivan Petruzzelli | State Street Investment Mgmt | London/UK | "We require a structured campaign brief with human summary + machine-readable payload (spreadsheet or JSON) for auditability across AI workflows." ICP 3 signal — State Street defining agency requirements. Format may differ from SI8 PDF output — needs clarification. | JD to draft reply before sending — probe whether requirement is IP provenance or campaign workflow data | 2026-06-17 |
-| B143 | Simon Helm | — | England | "Feels very relevant, advising clients already. Can we chat?" | Ivy asked for Tue/Wed/Thu 9:30–10am UK slot Jun 8; await slot reply | 2026-06-12 |
-| B011 | Hugo Barbera | HumAIn | — | Expressed interest — 2nd nudge sent | Sample or call offered | — |
-| B043 | Luke Brady | Sublime Animations Ltd | London/UK | Confirmed calls 4x — all missed | 4th reschedule attempt sent Jun 8; move to Nurture if no reply by Jun 13 | 2026-06-13 |
-| B045 | Mike Harris | Seenit | London/UK | "Thanks, booked!" via Calendly — no-show | Follow-up sent Jun 8; await reply | 2026-06-13 |
-| B096 | Ankita Biswas | HTCreaTec | Dubai/UAE | "I'd love to know more and talk over a chat!" | Follow-up sent Jun 8; await reply | 2026-06-13 |
-
----
-
-## 4. Call Scheduled (1)
+## 2. 1st Mtg Scheduled (1)
 
 *Call confirmed on calendar.*
 
@@ -165,7 +176,7 @@
 
 ---
 
-## 5. Call Taken (2)
+## 3. 1st Mtg Taken (2)
 
 *Discovery call completed. Notes filed in CRM.*
 
@@ -176,7 +187,7 @@
 
 ---
 
-## 6. Evaluating (0)
+## 4. Evaluating (0)
 
 *Lead is in a decision window — sample reviewed, proposal received, or internally circulating.*
 
@@ -186,54 +197,83 @@
 
 ---
 
-## 7a. Creator Submitted — Closed Won (0)
+## 5. Proposal Made (0)
 
-*Creator Record ($29) or SI8 Certified ($499) submission received. Revenue captured.*
+*Formal proposal or SOW sent — new stage, not yet populated.*
 
-| B-ID | Lead | Company | Geo | Tier | Submitted | Revenue |
-|------|------|---------|-----|------|-----------|---------|
+| B-ID | Lead | Company | Geo | Proposal Sent | Terms | Follow Up By |
+|------|------|---------|-----|---------------|-------|--------------|
 | — | — | — | — | — | — | — |
 
 ---
 
-## 7b. Rights Verified Submitted — Closed Won (0)
+## 6. Negotiating (0)
 
-*Agency or brand submitted on behalf of a client. B2B account active.*
+*Active back-and-forth on terms, pricing, or scope — new stage, not yet populated.*
 
-| B-ID | Lead | Company | Geo | Client/Campaign | Tier | Submitted | Revenue |
-|------|------|---------|-----|-----------------|------|-----------|---------|
-| — | — | — | — | — | — | — | — |
+| B-ID | Lead | Company | Geo | Sticking Point | Last Offer | Follow Up By |
+|------|------|---------|-----|-----------------|-----------|--------------|
+| — | — | — | — | — | — | — |
 
 ---
 
-## Lost (23)
+## 7. Nurturing (0)
 
-*Explicitly declined, wrong ICP, or permanently closed.*
+*Explicitly deferred, not declined — worth revisiting on a schedule. New formal stage; CRM.md's own informal Nurture bucket is separate and not yet migrated here.*
 
-| B-ID | Lead | Company | Geo | Lost Date | Reason | Reactivate? |
-|------|------|---------|-----|-----------|--------|-------------|
+| B-ID | Lead | Company | Geo | Revisit Date | Why Deferred | Trigger to Re-engage |
+|------|------|---------|-----|--------------|--------------|----------------------|
+| — | — | — | — | — | — | — |
+
+---
+
+## 8. Unqualified (10)
+
+*Wrong ICP, wrong role, wrong geography, or otherwise never a real fit — regardless of how much they engaged.*
+
+| B-ID | Lead | Company | Geo | Determined Date | Reason | Reactivate? |
+|------|------|---------|-----|-----------------|--------|-------------|
 | B005 | Isaac Twidale | We Do Ads | — | 2026-03-15 | Call done — wrong ICP; asked for photorealistic portfolio (Gear B buyer, not Gear A) | Yes — when Showcase has 5+ films |
 | B007 | Elaine Tan + Joseph Lee | The Media Shop | — | 2026-03-18 | Call done — media buying agency; Gear B/C profile, not Gear A | Yes — when Showcase has 5+ films |
-| B018 | Carlos Cortiñas | Transmission | — | 2026-04-06 | "No thanks Vanessa" | No |
-| B021 | Vignesh Ilangovan | Triken Studios | — | 2026-04-05 | Soft no | Q3 2026 |
 | B028 | Keir Finlow-Bates | Artema LABS | — | 2026-04-07 | Wrong profile — CTO promoting own book | No |
-| B029 | Ron David Ben Ishay | Liquidity Group | — | 2026-04-07 | "Uhno thnx" | No |
-| B030 | Matthieu Fernandes | Sensai | — | 2026-04-07 | "No needs atm" — counter-pitched | No |
-| B032 | Simon Lee | Vantage Branding | — | 2026-04-10 | "No thanks" after msg 3 | No |
 | B033 | Tunde Olowo-Ake | Ingenium Communications | Lagos | 2026-04-10 | Off-geo — Lagos | No |
 | B034 | Paul L | Excelsior-Studios | — | 2026-04-10 | "We don't use AI to create anything" | No |
 | B037 | Mitch Turnbull | University of Bristol | — | 2026-04-10 | Academic researcher — wrong profile | No |
 | B038 | Raúl Pineda Rojas | Monks | Mexico City | 2026-04-10 | Off-geo + "Gracias, no thanks" | No |
-| B039 | Chee Wong | Opus Artz Ltd | — | 2026-04-07 | "Not within our remit" | No |
 | B077 | Ricardo Barchan | Joolz Jewellery | — | 2026-04-22 | Wrong role — retoucher | No |
 | B102 | Amr Tahtawi | Arizona State University | — | 2026-05-10 | Tried to charge SI8 $150 — consultant/educator | No |
-| B097 | James Larkin | Saatchi & Saatchi | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent | No |
-| B105 | Ayman Hussein | — | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent | No |
-| B108 | Balendu Sharma Dadhich | AILGO | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent | No |
 | B124 | Sven Bliedung Von Der Heide | Volucap | Germany | 2026-06-09 | Wrong ICP — volumetric camera capture studio; proprietary AI stack, not Runway/Kling/Sora; does not produce AI video for clients | No |
-| B132 | Mikhail Gulkov | Volna vision | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent | No |
-| B133 | Mohamed Samir | Emerald Group | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent | No |
-| B137 | Akbar Shaikh | Dept of Culture – Abu Dhabi | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent | No |
-| B140 | Stephane Jacob | Atlantic Venture Group | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent | No |
+
+---
+
+## 9. Closed Won (0)
+
+*Deal closed — Creator Record ($29) / SI8 Certified ($499) submission, or B2B Rights Verified agency submission. Merges the old separate "7a Creator Submitted" and "7b Rights Verified Submitted" sections (SE's list has one Closed Won, not two) — Deal Type column preserves which kind of close it was.*
+
+| B-ID | Lead | Company | Geo | Deal Type | Submitted | Revenue |
+|------|------|---------|-----|-----------|-----------|---------|
+| — | — | — | — | — | — | — |
+
+---
+
+## 10. Closed Lost (13)
+
+*Was a real opportunity; explicitly declined or went cold after real engagement — or an operational failure killed it before it had a fair chance.*
+
+| B-ID | Lead | Company | Geo | Lost Date | Reason | Reactivate? |
+|------|------|---------|-----|-----------|--------|-------------|
+| B018 | Carlos Cortiñas | Transmission | — | 2026-04-06 | "No thanks Vanessa" | No |
+| B021 | Vignesh Ilangovan | Triken Studios | — | 2026-04-05 | Soft no | Q3 2026 |
+| B029 | Ron David Ben Ishay | Liquidity Group | — | 2026-04-07 | "Uhno thnx" | No |
+| B030 | Matthieu Fernandes | Sensai | — | 2026-04-07 | "No needs atm" — counter-pitched | No |
+| B032 | Simon Lee | Vantage Branding | — | 2026-04-10 | "No thanks" after msg 3 | No |
+| B039 | Chee Wong | Opus Artz Ltd | — | 2026-04-07 | "Not within our remit" | No |
+| B097 | James Larkin | Saatchi & Saatchi | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent (operational failure, not a decline) | No |
+| B105 | Ayman Hussein | — | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent (operational failure, not a decline) | No |
+| B108 | Balendu Sharma Dadhich | AILGO | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent (operational failure, not a decline) | No |
+| B132 | Mikhail Gulkov | Volna vision | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent (operational failure, not a decline) | No |
+| B133 | Mohamed Samir | Emerald Group | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent (operational failure, not a decline) | No |
+| B137 | Akbar Shaikh | Dept of Culture – Abu Dhabi | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent (operational failure, not a decline) | No |
+| B140 | Stephane Jacob | Atlantic Venture Group | Dubai/UAE | 2026-06-09 | VOID — Lilly alias inaccessible; reply never sent (operational failure, not a decline) | No |
 
 <!-- sales-pipeline:end -->
