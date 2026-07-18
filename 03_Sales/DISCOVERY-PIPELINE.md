@@ -27,12 +27,31 @@ A lead can appear in BOTH this pipeline and `03_Sales/CRM.md` if they are also a
 
 <!-- discovery-pipeline:start -->
 
-## Signal (258)
+## Signal (269)
 
 *Leads flagged from discovery report, pending outreach decision.*
 
 | Lead | Title | Company | Geo | Sales Class | Campaign | Key insight excerpt | Added |
 |------|-------|---------|-----|-------------|----------|---------------------|-------|
+| Jason Pryce-Kennedy | Director | Raayne Creative | London/UK | [WARM] | — | "Okay" — thin excerpt; EU Act cited (framing not yet confirmed) | 2026-07-18 |
+| Brian Grant | Creative Director | Anisometric | London/UK | [MINIMAL] | — | Thin excerpt — regulated-sector hint | 2026-07-18 |
+| Thomas J. Vosper | Historic Pub Crawls® - Best Selling Author and Content Creator (400k+ Followers) | Historic Pub Crawls | London/UK | [WARM] | — | "No one should be making AI generated content IMO" — likely NAF sentiment despite WARM class | 2026-07-18 |
+| Ioana Diana Costea | AI content creator | PinkyD Studio | London/UK | [MINIMAL] | — | Thin excerpt — regulated-sector hint | 2026-07-18 |
+| Kasra Mirzarezaie | Creative Director \| AI Video & Performance Advertising | Case Connect LLC | Other | [MINIMAL] | — | "Outside CA we dont need any approval." — geo-specific nuance | 2026-07-18 |
+| Alon Bendory | Agent | Forest Hills Financial Group | Other | [WARM] | — | "I'm new to my firm, so I don't have a great answer yet on our compliance requirements around AI-generated video." — Test A regulated-sector (finserv) confirmation | 2026-07-18 |
+| Azize Touma, GRCP | Legal Affairs Manager | Brightline Trains | Other | [PASS] | — | "Thanks for reaching out, not interested at this time." — NY Law-adjacent title, polite decline | 2026-07-18 |
+| Mohammed Magdy Alzahran | Prompt Engineer | Dybaja - ديباجة \| AI Creative Studio | UAE/Dubai | [MINIMAL] | — | "some of clients ask for NDA first, and sometimes ask for Transfer of ownership rights" | 2026-07-18 |
+| MICHELE HILL | Commercial Line Producer/ Bidding Producer | Freelance Video Professional | USA | [MINIMAL] | — | "production has slowed down immensely. I have not seen any brand clients starting to add any [requirements]" — Test B/9 BA-ops ICP, but soft/negative signal | 2026-07-18 |
+| Alina Baimatova | Design Expert | Honest Art | USA | [WARM] | — | Thin excerpt — Test A + NY Law hints | 2026-07-18 |
+| Gianmarco Vairo | Manager, Legal Affairs Program | American Express | USA | [NAF] | — | "I'm not sure about AI video documentation. It's not something I've been handling" — wrong desk despite Legal Affairs title | 2026-07-18 |
+| Aaron Henley Tai | Managing Director / Executive Creative Director | Grid Private Limited | Singapore | [PASS] | — | Thin excerpt — polite close | 2026-07-18 |
+| Matthew Owyong | Director | — | Singapore | [MINIMAL] | — | "there is a move toward implementing measures to accommodate these checks and processes; for instance, maintaining a complete log of prompts, edits..." — concrete workflow detail, real discovery value | 2026-07-18 |
+| Yung Ting Huang | Art Director | Ellie Motion (Elevate Future Labs) | Singapore | [MINIMAL] | — | Thin excerpt | 2026-07-18 |
+| Simon Tan | Vice President of Sales and Partnerships, Asia Pacific | Reka AI | Singapore | [MINIMAL] | — | "Reka AI is a multimodal agentic AI company, we have agents to automate most of our workflows and processes." — T3 competitive/AI-native signal | 2026-07-18 |
+| Darius Shah | Creative Director \| Managing Partner | Meta Hive | Singapore | [WARM] | — | "Sure, send over the sample. Not something that has been relevant to us or our current roster of clients. But curious to know..." | 2026-07-18 |
+| Social Rebels | Creative Director \| Art-Based & Gen-AI Creative | — | Singapore | [MINIMAL] | — | "No, they don't. As we ensure that contents are original created." | 2026-07-18 |
+| Max Penk | Tech Strategy + Creative Innovation | TEKTITE | Germany | [WARM] | — | "so far nobody asked for this, as we do it internally. Yes, please share an example document :)" — T3 internal process + T2 curiosity | 2026-07-18 |
+| MD CHHAFRUL ALAM KHAN | Owner | Md Chhafrul Alam Khan | Germany | [WARM] | — | Thin excerpt | 2026-07-18 |
 | Katherine Kerridge | Creative Director | Adsocial Media | London/UK | [WARM] | — | "we're in the process of finalising our own systems." — Trigger 3: building their own compliance solution | 2026-06-11 |
 | Alba Ruiz | Founder & Creative Director | closet albita | London/UK | [WARM] | EU AI Act | "Not yet, it's food content using our original content" — minimal signal, food content ICP | 2026-06-11 |
 | Christos Savvides | Creative Director | Pablo London | London/UK | [MINIMAL] | — | "I'm leaving my current contract in a few days" — NAF for now, re-engage when settled | 2026-06-11 |

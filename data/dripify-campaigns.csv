@@ -1,10 +1,10 @@
 campaign_name,alias,geo,target_segment,sequence,launch_date,leads_sent,accepted,responded,in_cost_analysis,status
 SI8_RV_R4LI_CreaDir_AI Video_Dubai_0426A_LH,Lilly,Dubai,Creative Dir — AI Video,Legal Friction,Apr 26 2026,388,209,63,true,
 SI8_RV_R4LI_CreaDir_AI Video_England_0426B_IL,Ivy,England,Creative Dir — AI Video,Legal Friction,Apr 25 2026,678,177,75,true,
-SI8_RV_R4LI_CreaDir_AI Video_LA_0426A_VP,Vanessa,Los Angeles,Creative Dir — AI Video,Legal Friction,Apr 26 2026,650,173,72,true,
+SI8_RV_R4LI_CreaDir_AI Video_LA_0426A_VP,Vanessa,Los Angeles,Creative Dir — AI Video,Legal Friction,Apr 26 2026,650,175,73,true,
 SI8_RV_R4LI_CreaDir_AI Video_England_0426A_IL,Ivy,England,Creative Dir — AI Video,Legal Friction,Apr 13 2026,300,73,44,true,
-SI8_RV_R4LI_CreaDir_AI Video_AmsDm_0426A_VP,Vanessa,Amsterdam,Creative Dir — AI Video,Legal Friction,Apr 13 2026,300,79,35,true,
-SI8_RV_R4LI_CreaDir_AI Video_Berlin_0626A_AL,Angel,Berlin,Creative Dir — AI Video,Legal Friction,May 4 2026,364,122,43,true,
+SI8_RV_R4LI_CreaDir_AI Video_AmsDm_0426A_VP,Vanessa,Amsterdam,Creative Dir — AI Video,Legal Friction,Apr 13 2026,300,79,36,true,
+SI8_RV_R4LI_CreaDir_AI Video_Berlin_0626A_AL,Angel,Berlin,Creative Dir — AI Video,Legal Friction,May 4 2026,364,124,45,true,
 SI8_RV_R4LI_VP+_Creative_London_0426B_IL,Ivy,London,VP+ Creative,Hitting a Wall,Apr 3 2026,299,91,13,false,
 SI8_RV_R4LI_NA_MetaV_Agency_Gbl_0326A_IL,Ivy,Global,NA MetaVerse Agency,Hitting a Wall,Mar 27 2026,200,60,13,false,
 SI8_RV_R4LI_Mgr+_Mktg_London_0326G_VP,Vanessa,London,Manager+ Marketing,Legal Friction,Mar 27 2026,199,55,15,false,
@@ -13,7 +13,7 @@ SI8_RV_R4LI_VP+_Creative_SPG_0426A_LH,Lilly,Singapore,VP+ Creative,Hitting a Wal
 SI8_RV_R4LI_Mgr+_Mktg_London_0326A_LH,Lilly,London,Manager+ Marketing,Vetting Takes Weeks,Mar 11 2026,99,22,13,false,
 SI8_RV_R4LI_Mgr+_Mktg_London_0326C_IL,Ivy,London,Manager+ Marketing,Trusted AI Supplier,Mar 11 2026,101,26,8,false,
 SI8_RV_R4LI_Mgr+_Mktg_London_0326B_VP,Vanessa,London,Manager+ Marketing,Vetting Takes Weeks,Mar 11 2026,101,26,9,false,
-"SI8_RV_R4LI_Owner+_BizCons,Mktg_SGP_0326A_VP",Vanessa,Singapore,Owner+ Biz/Mktg,Trusted AI Supplier,Mar 3 2026,299,86,22,false,
+"SI8_RV_R4LI_Owner+_BizCons,Mktg_SGP_0326A_VP",Vanessa,Singapore,Owner+ Biz/Mktg,Trusted AI Supplier,Mar 3 2026,299,86,26,false,
 SI8_RV_R4LI_Mgr+_Mktg_London_0326D_IL,Ivy,London,Manager+ Marketing,Vetting Takes Weeks,Mar 14 2026,299,40,6,false,
 SI8_RV_R4LI_Mgr+_Mktg_London_0326F_VP,Vanessa,London,Manager+ Marketing,Documented Provenance,Mar 16 2026,299,45,5,false,
 SI8_RV_R4LI_Mgr+_Mktg_London_0326E_LH,Lilly,London,Manager+ Marketing,Documented Provenance,Mar 15 2026,299,46,4,false,
@@ -22,19 +22,19 @@ SI8_RV_R4LI_VP+_Creative_London_0426C_LH,Lilly,London,VP+ Creative,Blocks AI Cam
 SI8_RV_R4LI_Mgr+_Adv_SPG_0326A_LH,Lilly,Singapore,Manager+ Advertising,Vetting Takes Weeks,Mar 8 2026,97,37,9,false,
 SI8_RV_R4LI_CMO_SPG_0326A_LH,Lilly,Singapore,CMO,Early Days,Mar 27 2026,149,31,3,false,
 "SI8_RV_R4LI_Owner+_BizCons,Mktg_Sydney_0326B_LH",Lilly,Sydney,Owner+ Biz/Mktg,Vetting Takes Weeks,Mar 5 2026,298,23,3,false,
-SI8_RV_R4LI_CreaDir_AI Video_Paris_0526A_AL,Angel,France,Creative Dir — AI Video,Legal Friction,May 20 2026,61,27,11,true,
-SI8_RV_R4LI_CreaDir_AI Video_SPG_0526A_IL,Ivy,Singapore,Creative Dir — AI Video,Legal Friction,May 20 2026,232,85,32,true,
-SI8_RV_R4LI_CreaDir_AI Video_STHM_0526A_VP,Vanessa,Stockholm,Creative Dir — AI Video,Legal Friction,May 20 2026,341,85,28,true,
+SI8_RV_R4LI_CreaDir_AI Video_Paris_0526A_AL,Angel,France,Creative Dir — AI Video,Legal Friction,May 20 2026,61,28,11,true,
+SI8_RV_R4LI_CreaDir_AI Video_SPG_0526A_IL,Ivy,Singapore,Creative Dir — AI Video,Legal Friction,May 20 2026,232,91,33,true,
+SI8_RV_R4LI_CreaDir_AI Video_STHM_0526A_VP,Vanessa,Stockholm,Creative Dir — AI Video,Legal Friction,May 20 2026,341,86,32,true,
 SI8_RV_R4LI_CreaDir_AI Video_Paris_0526A_JC,JD,France,Creative Dir — AI Video,EU AI Act,May 30 2026,240,31,4,true,
-SI8_RV_R4LI_CreaDir_AI_Posted_LI_Eng_0626A_IL,Ivy,England,Creative Dir — AI (Posted on LinkedIn),EU AI Act,Jun 1 2026,171,68,17,true,
+SI8_RV_R4LI_CreaDir_AI_Posted_LI_Eng_0626A_IL,Ivy,England,Creative Dir — AI (Posted on LinkedIn),EU AI Act,Jun 1 2026,171,71,17,true,
 SI8_RV_R4LI_CreaDir_AI Video_Eng_0626B_IL,Ivy,England,Creative Dir — AI Video,EU AI Act,TBD,0,0,0,true,
 SI8_RV_R4LI_CreaDir_AI Video_BerlinMet_0626B_AL,Angel,Berlin,Creative Dir — AI Video,EU AI Act,TBD,0,0,0,true,
-SI8_RV_R4LI_CreaDir_Finserv_England_0626A_IL,Ivy,England,Creative Dir — Financial Services,Legal Friction — FinServ,Jun 21 2026,143,10,1,true,active
+SI8_RV_R4LI_CreaDir_Finserv_England_0626A_IL,Ivy,England,Creative Dir — Financial Services,Legal Friction — FinServ,Jun 21 2026,143,15,3,true,active
 SI8_RV_R4LI_CreaDir_AI Video_Spain_0626A_VP,Vanessa,Spain,Creative Dir — AI Video,EU AI Act,Jun 6 2026,514,10,1,true,paused
-SI8_Who's Asking_ASA (4 Msg),Ivy,England,IP Legal — Brand,Who's Asking,Jun 8 2026,74,14,2,false,active
-SI8_RV_R4LI_IP_Legal_Brand_UK_0626B_IL,Ivy,UK/London,IP Legal — Brand,Who's Asking (NY Law),Jun 10 2026,74,12,3,false,active
+SI8_Who's Asking_ASA (4 Msg),Ivy,England,IP Legal — Brand,Who's Asking,Jun 8 2026,74,17,2,false,active
+SI8_RV_R4LI_IP_Legal_Brand_UK_0626B_IL,Ivy,UK/London,IP Legal — Brand,Who's Asking (NY Law),Jun 10 2026,74,15,4,false,active
 SI8_RV_R4LI_IP_Legal_Brand_NY_0626A_VP,Vanessa,New York,IP Legal — Brand,NY 1st Law,Jun 10 2026,196,1,0,false,paused
-SI8_RV_R4LI_LegalA_BLA_US_0626A_JC,JD,US,Legal Affairs — BLA,Who's Asking (NY Law),Jun 11 2026,108,15,5,false,active
-SI8_RV_R4LI_Line_Prod_LA_0626A_IL,Ivy,Los Angeles,Line Producer — Commercial Production,Clearance Pro v1,Jun 14 2026,122,11,2,false,active
+SI8_RV_R4LI_LegalA_BLA_US_0626A_JC,JD,US,Legal Affairs — BLA,Who's Asking (NY Law),Jun 11 2026,108,18,7,false,active
+SI8_RV_R4LI_Line_Prod_LA_0626A_IL,Ivy,Los Angeles,Line Producer — Commercial Production,Clearance Pro v1,Jun 14 2026,122,18,2,false,active
 SI8_RV_R4LI_Line_Prod_LA_0626B_VP,Vanessa,Los Angeles,Line Producer — Commercial Production,Clearance Pro v2 (LA/LP),Jun 19 2026,136,2,1,false,active
-SI8_RV_R4LI_CreaDir_Finserv_NY_0626A_JC,JD,New York,Creative Dir — Financial Services,Legal Friction — FinServ (NY),Jun 21 2026,298,8,3,false,active
+SI8_RV_R4LI_CreaDir_Finserv_NY_0626A_JC,JD,New York,Creative Dir — Financial Services,Legal Friction — FinServ (NY),Jun 21 2026,298,21,4,false,active
