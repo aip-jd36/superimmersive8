@@ -75,7 +75,9 @@ export default function LoginPage() {
         <CardHeader>
           <CardTitle>Welcome back</CardTitle>
           <CardDescription>
-            Sign in to your SI8 Creator Portal account
+            {nextPath === '/certify'
+              ? 'Sign in to your SI8 Independent Commercial Assurance account'
+              : 'Sign in to your SI8 Creator Portal account'}
           </CardDescription>
         </CardHeader>
         <CardContent>
