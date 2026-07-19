@@ -9,6 +9,57 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of July 19, 2026
+*Run: 2026-07-19 · 25 high · 11 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [New York’s AI Disclosure Law Is a Reckoning for Lazy Brands](https://marcommnews.com/new-yorks-ai-disclosure-law-is-a-reckoning-for-lazy-brands/) | Marketing Communication News | Wed, 15 Jul 2026 | ☐ |
+| 9 | post+update | [Google Faces Fresh Copyright Lawsuit Over Gemini AI Training](https://www.bwmarketingworld.com/article/google-faces-fresh-copyright-lawsuit-over-gemini-ai-training-614846) | BW Marketing World | Wed, 15 Jul 2026 | ☐ |
+| 9 | post+update | [Google shifts AI ad labeling liability entirely to advertisers](https://ppc.land/google-shifts-ai-ad-labeling-liability-entirely-to-advertisers/) | PPC Land | Tue, 14 Jul 2026 | ☐ |
+| 9 | post+update | [EU AI Act Article 50 Transparency Rules Force Financial Firms To Act Before August Deadline](https://londoninsider.co.uk/eu-ai-act-article-50-transparency-rules-force-financial-firms-to-act-before-august-deadline/) | londoninsider.co.uk | Sun, 12 Jul 2026 | ☐ |
+| 8 | post+update | [The EU’s AI Act starts requiring chatbot and deepfake labels on August 2 — while its tougher rules on hiring, biometrics and migration are pushed back to December 2027](https://siliconcanals.com/the-eus-ai-act-starts-requiring-chatbot-and-deepfake-labels-on-august-2-while-its-tougher-rules-on-hiring-biometrics-and-migration-are-pushed-back-to-december-2027/) | Silicon Canals | Sat, 18 Jul 2026 | ☐ |
+| 8 | post+update | [EU AI Act: What Actually Applies on 2 August 2026](https://www.technology.org/2026/07/17/eu-ai-act-what-actually-applies-on-2-august-2026/) | Technology Org | Fri, 17 Jul 2026 | ☐ |
+| 8 | post+update | [When The Lawsuit Fails, You License: Getty’s Forced Pivot To OpenAI](https://tvnewscheck.com/ai/article/when-the-lawsuit-fails-you-license-gettys-forced-pivot-to-openai/) | TV News Check | Fri, 17 Jul 2026 | ☐ |
+| 8 | post+update | [Australia Rejects AI Copyright Carve-Out: PM Calls Unlicensed Training Theft](https://www.techtimes.com/articles/320755/20260716/australia-rejects-ai-copyright-carve-out-pm-calls-unlicensed-training-theft.htm) | Tech Times | Thu, 16 Jul 2026 | ☐ |
+| 8 | post+update | [Seedance 2.5 API Is Live: ByteDance's 30-Second AI Video Carries Unresolved Copyright Risk](https://www.techtimes.com/articles/320683/20260716/seedance-25-api-live-bytedances-30-second-ai-video-carries-unresolved-copyright-risk.htm) | Tech Times | Thu, 16 Jul 2026 | ☐ |
+| 8 | post+update | [Puerto Rico bill would require labels on AI-generated ads](https://newsismybusiness.com/puerto-rico-bill-would-require-labels-on-ai-generated-ads/) | News is My Business | Thu, 16 Jul 2026 | ☐ |
+| 8 | post+update | [Part 2 - AI Replica Rights and Entertainment Contracts: What Entertainment Companies Should Be Doing Now](https://www.jdsupra.com/legalnews/part-2-ai-replica-rights-and-6313743/) | JD Supra | Wed, 15 Jul 2026 | ☐ |
+| 8 | post+update | [How Deep is Your Fake? A 3-Minute-Guide on Labelling Obligations under the EU AI Act](https://natlawreview.com/article/how-deep-your-fake-3-minute-guide-labelling-obligations-under-eu-ai-act) | The National Law Review | Wed, 15 Jul 2026 | ☐ |
+| 8 | post+update | [TikTok Has Labeled 3 Billion AI Videos: Here Is What the Research Says They Miss](https://www.techtimes.com/articles/320282/20260713/tiktok-has-labeled-3-billion-ai-videos-here-what-research-says-they-miss.htm) | Tech Times | Mon, 13 Jul 2026 | ☐ |
+| 8 | post+update | [Advertisers face mandatory AI ad labels across Google's five platforms](https://ppc.land/advertisers-face-mandatory-ai-ad-labels-across-googles-five-platforms/) | PPC Land | Sun, 12 Jul 2026 | ☐ |
+| 7 | post | [AI Disclosure Is Now a Brand Trust Decision](https://www.contentgrip.com/ai-disclosure-brand-trust/) | ContentGrip | Sat, 18 Jul 2026 | ☐ |
+| 7 | post | [TikTok Is Testing A Way For Creators To Protect Their Likeness](https://wersm.com/tiktok-testing-creators-find-ai-doubles/) | WeRSM | Fri, 17 Jul 2026 | ☐ |
+| 7 | monitor | [YouTube Content Certification Market May See a Big Move \| Major](https://www.openpr.com/news/4580287/youtube-content-certification-market-may-see-a-big-move-major) | openPR.com | Fri, 17 Jul 2026 | ☐ |
+| 7 | post | [Rebecca Roby Discusses How Global Brands Can Prepare for Rapidly Evolving Marketing Laws](https://www.lawyerherald.com/articles/64080/20260717/rebecca-roby-discusses-how-global-brands-can-prepare-rapidly-evolving-marketing-laws.htm) | Lawyer Herald | Fri, 17 Jul 2026 | ☐ |
+| 7 | post | [Preparing Enterprise Video Teams for the Arrival of Seedance 2.5](https://aijourn.com/preparing-enterprise-video-teams-for-the-arrival-of-seedance-2-5/) | The AI Journal | Thu, 16 Jul 2026 | ☐ |
+| 7 | update | [Three Publishers And Scott Turow Sue Google Over Gemini AI Copyright Infringement: 13 Sources (Local Western: 5)](https://newscord.org/article/three-publishers-and-scott-turow-sue-google-over-gemini-ai-copyright-infringemen--Story_20260714_GooglefacesanotherAI21655d10) | NewsCord | Tue, 14 Jul 2026 | ☐ |
+| 7 | update | [Session Musicians’ AI Pay Clause Cannot Function, Warner Music Tells Court](https://www.techtimes.com/articles/320485/20260714/session-musicians-ai-pay-clause-cannot-function-warner-music-tells-court.htm) | Tech Times | Tue, 14 Jul 2026 | ☐ |
+| 7 | update | [Book publishers sue Google for copyright infringement over Gemini AI training](https://www.theguardian.com/books/2026/jul/14/publishers-sue-google-gemini-ai-training) | The Guardian | Tue, 14 Jul 2026 | ☐ |
+| 7 | post+update | [U.S. Publishers Sue Google, Alleging Massive Copyright Infringement Behind Its Gemini AI Service](https://publishingperspectives.com/2026/07/u-s-publishers-sue-google-alleging-massive-copyright-infringement-behind-its-gemini-ai-service/) | Publishing Perspectives | Tue, 14 Jul 2026 | ☐ |
+| 7 | post+update | [New Summit to Explore How AI Video Is Reshaping the Future of Media and Advertising Set to Launch in Sydney ~ Campaign Brief readers save 10%](https://campaignbrief.com/new-summit-to-explore-how-ai-video-is-reshaping-the-future-of-media-and-advertising-set-to-launch-in-sydney-campaign-brief-readers-save-10/) | Campaign Brief | Tue, 14 Jul 2026 | ☐ |
+| 7 | post+update | [Japan mulls "voice rights" to protect against unauthorized AI use](https://english.kyodonews.net/articles/-/79833) | Japan Wire by Kyodo News | Mon, 13 Jul 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Indonesia's AI Copyright Law: Protecting Works, Regulating Tech](https://www.storyboard18.com/brand-makers/indonesias-proposed-ai-copyright-law-could-require-google-big-tech-to-compensate-publishers-ws-l-104669.htm) | Storyboard18 | Fri, 17 Jul 2026 | ☐ |
+| 6 | monitor | [Google Faces Fresh Copyright Lawsuit](https://www.techrepublic.com/article/news-google-gemini-ai-training-publishers-lawsuit/) | TechRepublic | Thu, 16 Jul 2026 | ☐ |
+| 6 | monitor | [Insurers face hidden AI liability as agent risks multiply](https://www.insurancebusinessmag.com/us/news/technology/insurers-face-hidden-ai-liability-as-agent-risks-multiply-582433.aspx) | Insurance Business | Wed, 15 Jul 2026 | ☐ |
+| 6 | monitor | [Content Authenticity Market Size, Share \| Growth Forecast [2034]](https://www.fortunebusinessinsights.com/content-authenticity-market-118158) | Fortune Business Insights | Tue, 14 Jul 2026 | ☐ |
+| 5 | monitor | [Indonesia's copyright rewrite puts Google, AI platforms on notice](https://legal.economictimes.indiatimes.com/amp/news/international/indonesias-copyright-reform-tech-giants-and-ai-platforms-brace-for-changes/132459552) | ETLegalWorld.com | Fri, 17 Jul 2026 | ☐ |
+| 5 | monitor | [AI agents expose insurance blind spots, report says](https://pressinsider.com/news/ai-agents-expose-insurance-blind-spots-report-says/) | PRESS Insider | Wed, 15 Jul 2026 | ☐ |
+| 5 | monitor | [AI-Generated Short Dramas: Why Do All Characters Have Identical Faces?](https://eu.36kr.com/en/p/3895056449141768) | 36Kr | Tue, 14 Jul 2026 | ☐ |
+| 5 | monitor | [Digest: EU Says Meta Failed to Protect Users; Google Adds AI Labels to Search & YouTube Ads](https://www.exchangewire.com/blog/2026/07/13/digest-eu-says-meta-failed-to-protect-users-google-adds-ai-labels-to-search-youtube-ads/) | exchangewire.com | Mon, 13 Jul 2026 | ☐ |
+| 4 | monitor | [Kuaishou’s AI Video Unit Valued At $18B As Spin-Off Nears](https://www.sahmcapital.com/news/content/kuaishous-ai-video-unit-valued-at-18b-as-spin-off-nears-2026-07-15) | Sahm | Thu, 16 Jul 2026 | ☐ |
+| 4 | monitor | [The AI Kids Cartoon Gold Rush Has a Hidden Tax: COPPA Cuts Revenue by Up to 80%](https://www.techtimes.com/articles/320340/20260713/ai-kids-cartoon-gold-rush-has-hidden-tax-coppa-cuts-revenue-80.htm) | Tech Times | Mon, 13 Jul 2026 | ☐ |
+| 4 | monitor | [GoEnhance AI Releases New Analysis of Grok Imagine, Veo, Runway, and Kling Video Workflows](https://www.einpresswire.com/article/925249588/goenhance-ai-releases-new-analysis-of-grok-imagine-veo-runway-and-kling-video-workflows) | EIN Presswire | Mon, 13 Jul 2026 | ☐ |
+
+---
+
 ## Week of July 16, 2026
 *Run: 2026-07-16 · 24 high · 15 monitor · lookback 7 days*
 
