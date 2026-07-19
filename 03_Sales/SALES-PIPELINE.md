@@ -8,7 +8,9 @@
 
 **Stage alignment (2026-07-18):** Stages below now match the SE engineering team's `lead_responses.pipeline_stage` database enum exactly (`supabase/migrations/20260715_pipeline_stage_rename.sql`), so SI8 and SE describe the same pipeline the same way. This replaced the prior 7-stage SI8-only list. See "Reclassification notes" below for how the old stages map to the new ones — nothing was dropped, only relabeled or regrouped.
 
-**Last updated:** 2026-07-18 (stage vocabulary aligned to SE's DB enum; all 118 active + lost leads reclassified, no lead data changed)
+**Last updated:** 2026-07-19 (Steve Bannerman B157 + Justin Lufair Brown B094 moved to Nurturing — ICP 3/Line Producer-Film segment formally HELD per 2026-07-19 strategy decision; see `ICP-DEFINITIONS.md`)
+
+**Previous update:** 2026-07-18 (stage vocabulary aligned to SE's DB enum; all 118 active + lost leads reclassified, no lead data changed)
 
 ---
 
@@ -40,7 +42,7 @@
 
 <!-- sales-pipeline:start -->
 
-## 1. Lead Responded (95)
+## 1. Lead Responded (93)
 
 *Substantive reply received. Grouped below by how far along they are — Call Requested is the hottest, then Warm, then general Replied.*
 
@@ -57,7 +59,7 @@
 | B045 | Mike Harris | Seenit | London/UK | "Thanks, booked!" via Calendly — no-show | Follow-up sent Jun 8; await reply | 2026-06-13 |
 | B096 | Ankita Biswas | HTCreaTec | Dubai/UAE | "I'd love to know more and talk over a chat!" | Follow-up sent Jun 8; await reply | 2026-06-13 |
 
-### 1b. Warm (27)
+### 1b. Warm (26)
 
 *Clear ICP signal or acknowledged pain. Moving toward a call or sample.*
 
@@ -85,13 +87,12 @@
 | B087 | Ibrahim Badi | IKM Marketing | London/UK | "Yes especially in regulated sectors" — answered 9 intake Qs inline; Creator Record makes sense as next step | COMP-B2 code sent Jun 8; await reply or form fill | — |
 | B088 | Matthew Sergison-Main | OLIVER / Brandtech | London/UK | "Yes I am being asked this 100%" — strongest pain signal; works at OLIVER (Brandtech holdco) | B2B2B probe sent Jun 8: is requirement from brand legal or creative? If legal confirmed → Test 8 | — |
 | B090 | Saira Macleod | Magnific | London/UK | Asked what the checker looks for — product question | Await reply — confirm JD call | — |
-| B158 | Dan Lantry | Sonova Group | USA | "Would like to better understand the issue." VP Legal Affairs (North America), regulated healthcare brand. ICP 3 — brand legal officer whose requirement cascades to agencies. | Brief NY Law education + call ask Jun 18 [JD alias] | 2026-06-18 |
-| B094 | Justin Lufair Brown | Amazon | LA | "Contract language tightened a lot in last 12 months... happy to go deeper if useful." Creative Producer AI Video Production. | Send call invite Jun 17 [Vanessa]: "Still open to that deeper conversation — would a 20-min call this week or next work?" | 2026-06-17 |
+| B158 | Dan Lantry | Sonova Group | USA | "Would like to better understand the issue." VP Legal Affairs (North America), regulated healthcare brand. ICP 2 (Legal) — brand legal officer whose requirement cascades to agencies. | Brief NY Law education + call ask Jun 18 [JD alias] | 2026-06-18 |
 | B095 | Florent Delavous | Xtendency | Dubai/UAE | "Already working on something in this space" — CEO | Probe collab/competitor + book call | — |
 | B099 | Sultan Alsuwaidi | Video tube | Dubai/UAE | "Yes — becoming standard now" — sample sent | Await reply | — |
 | B126 | Phil Langer | Jung von Matt SPREE | Germany | Major holdco (JvM) — pitch + sample sent | Await reply | — |
 
-### 1c. Replied (62)
+### 1c. Replied (61)
 
 *Substantive reply received. Assessing fit and next move.*
 
@@ -134,7 +135,6 @@
 | B092 | Lina De Groot | Stealth AI Startup | Amsterdam | Answered her Q on hardening areas | Await reply | — |
 | B098 | Michelle Ponto | Blue Gecko Communications | Dubai/UAE | "Yes, asking about prompts and sequence" | Await reply | — |
 | B103 | Ahmed Samy Amin | GTCFX | Dubai/UAE | "Would love to compare notes" — navigating finserv + brand client documentation a lot lately | Send compare-notes call invite Jun 17 [JD personal] | 2026-06-17 |
-| B157 | Steve Bannerman | Prime Video & Amazon MGM Studios | LA / APAC | "Provenance of the video is HUGELY important" in feature film. Head of Post-production, International Originals APAC. Film/TV E&O track — Test 12 validation. | Send film-ICP pivot + compare-notes call invite Jun 17 [Vanessa] | 2026-06-17 |
 | B104 | Ashraf Selo | MultiBank Group | Dubai/UAE | Connection accepted Jun 16; JD sent format-structure probe — "formal document or informal sign-off? how structured is the ask?" | Await reply | 2026-06-19 |
 | B106 | Mohammed Magdy Alzahran | Dybaja AI Creative Studio | Dubai/UAE | NDA + Transfer of ownership rights | Await reply | — |
 | B109 | Shahin Sha | Rafaz Properties | Dubai/UAE | Risk/ownership/disclosure framing | Await reply | — |
@@ -217,13 +217,14 @@
 
 ---
 
-## 7. Nurturing (0)
+## 7. Nurturing (2)
 
 *Explicitly deferred, not declined — worth revisiting on a schedule. New formal stage; CRM.md's own informal Nurture bucket is separate and not yet migrated here.*
 
 | B-ID | Lead | Company | Geo | Revisit Date | Why Deferred | Trigger to Re-engage |
 |------|------|---------|-----|--------------|--------------|----------------------|
-| — | — | — | — | — | — | — |
+| B157 | Steve Bannerman | Prime Video & Amazon MGM Studios | LA / APAC | Market feedback change (no date set) | **ICP 3 (Line Producer/EP — Film), HELD 2026-07-19.** Strongest quote in the segment — "provenance of the video is HUGELY important" — but ICP 3 is deliberately shelved: wrong channel (LinkedIn doesn't reach line producers/EPs), wrong product shape (current assessment framework reviews a finished/whole asset; film needs isolating AI-touched elements within a blended live-action production — a different evidence chain). Do not contact. Supersedes an earlier "call this week" recommendation. | Revisit once Agency/Legal (ICP 1/2) is producing revenue and a dedicated film-track product + channel exists. Candidate re-entry idea (unvalidated): target E&O underwriters as the ICP-2-equivalent demand generator for this vertical, rather than line producers directly. |
+| B094 | Justin Lufair Brown | Amazon | LA | Market feedback change (no date set) | Same ICP 3 hold as B157 — grouped with the Amazon LA / film-adjacent cluster in `ICP-DEFINITIONS.md`. "Contract language tightened a lot in last 12 months" is a real signal but belongs to the deferred segment. | Same as B157. |
 
 ---
 
