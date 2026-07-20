@@ -2,7 +2,7 @@
 
 A running log of decisions, insights, and lessons learned while building an AI film distribution company.
 
-*Last updated: June 24, 2026*
+*Last updated: July 20, 2026*
 
 ---
 
@@ -4641,6 +4641,510 @@ The difference between disclosure (what most players are building) and clearance
 > But we wrote it down — because a hypothesis you don't document gets re-discovered expensively.
 >
 > The question for next year: 'When you're running a regulated AI campaign, where do you wish you had started the documentation process?' That's the evidence we'd need before the first line of code."
+
+---
+
+### #92: We Took the Price Off the Website
+
+**Date:** July 2026
+
+**The insight:**
+For four months, the SI8 homepage had a price on it. $499. Right there, above the fold. "Get your AI video cleared for commercial use."
+
+We took it down.
+
+The new homepage doesn't mention a number anywhere. One CTA: book a call. The positioning shifted from "get your video cleared, fast and cheap" to "SI8 is the independent third party that reviews the evidence and issues a commercial assurance opinion both sides can rely on."
+
+This is a real bet, not a rebrand. A visible price is a self-serve signal — it says "you can transact without talking to us." Removing it says the opposite: this is a relationship, not a checkout flow. For a $499 self-attested PDF, that's the wrong signal. For an independent opinion a brand's legal team is going to rely on before approving a campaign, it might be the only correct one.
+
+The uncomfortable part: we don't know yet if this trades volume for quality, or just trades volume for less volume. The old self-serve funnel converted a real (if thin) segment of individual creators who wanted something cheap and fast — freelancers, small shops, people who'd never have booked a call. That segment may simply be gone now. We made the call anyway, because the buyers who actually confirmed real pain in six months of outreach were never that segment.
+
+**Why it matters:**
+Every pricing-page decision is also a positioning decision, whether you mean it to be or not. A visible price answers "can I transact alone?" before anyone reads a word of your copy.
+
+**LinkedIn-ready excerpt:**
+> "We had a price on our homepage for four months. $499, above the fold.
+>
+> We took it down.
+>
+> New homepage: no price anywhere. One CTA. Book a call.
+>
+> This isn't a rebrand. It's a bet.
+>
+> A visible price says 'you can transact without talking to us.' That's the right signal for a cheap, fast, self-serve product.
+>
+> It's the wrong signal for an independent opinion a brand's legal team has to actually rely on before they'll approve a campaign.
+>
+> We don't know yet if this trades volume for quality, or just trades volume for less volume. The segment that converted on the old cheap self-serve pitch may simply be gone now.
+>
+> We made the call anyway — because the buyers who confirmed real pain over six months of outreach were never that segment."
+
+---
+
+### #93: Enterprise Isn't 'Agency Plus Features'
+
+**Date:** July 2026
+
+**The insight:**
+Our first instinct, pricing an enterprise tier, was to add things: more support, a dashboard, faster turnaround, a bigger number.
+
+That's the wrong model, and it took an outside review to say it plainly: an agency buys a single assessment. An enterprise buyer — brand legal, AI governance, procurement — isn't buying a bigger version of that. They're buying a different thing entirely: a standard they can require every agency on their roster to meet.
+
+An agency asks: "can you assess this campaign?"
+Enterprise asks: "what do we require every agency to do?"
+
+That second question is policy, not a transaction. And it changes what you're allowed to sell. If the enterprise tier is "the same assessment, but more expensive," you've just told your best customer that money buys a more favorable opinion — which is the one thing an independent assessor can never sell, at any price. The methodology has to be identical no matter who's paying. What's different is everything around it: procurement paperwork, a named point of contact, a rollout plan across their agency network.
+
+We also caught ourselves nearly overselling the enterprise tier before we'd delivered anything at that scale — promising rapid turnaround guarantees and live dashboards a two-person team can't actually staff yet. Pulled that back. Sell the relationship. Scope the first delivery as a pilot. Build the infrastructure once it's real.
+
+**Why it matters:**
+The moment a buyer can pay for a "more favorable" opinion, the opinion stops being worth anything — to anyone, including the buyer who paid extra for it.
+
+**LinkedIn-ready excerpt:**
+> "Our first instinct pricing an enterprise tier: add things. More support, a dashboard, faster turnaround, a bigger invoice.
+>
+> Wrong model.
+>
+> An agency asks: 'can you assess this campaign?'
+> Enterprise asks: 'what do we require every agency to do?'
+>
+> That second question is policy, not a bigger transaction. And it changes what you're allowed to sell.
+>
+> If enterprise pricing buys a 'better' opinion, you've just told your buyer that money changes the verdict — which is the one thing an independent assessor can never sell, at any price.
+>
+> The assessment has to be identical no matter who's paying. What's different is everything around it — procurement, a named contact, a rollout plan.
+>
+> We also caught ourselves about to promise turnaround guarantees and dashboards a two-person team can't actually staff yet. Pulled it back. Sell the relationship. Scope the first delivery as a pilot. Build the infrastructure once it's real."
+
+---
+
+### #94: The Homepage Wrote Our Own Thesis Back to Us
+
+**Date:** July 2026
+
+**The insight:**
+Before we rewrote the homepage, we'd already built a hypothesis from months of outreach data: the highest-leverage buyer isn't the agency doing the work, it's the brand's legal team that creates the requirement in the first place — because one legal team saying "we require this documentation" cascades into demand from every agency on their roster, without us selling each one individually.
+
+When the new homepage got written — for completely separate reasons, about tone and positioning — its core line ended up being almost word for word that same idea: "The demand starts with legal. The work lands on the agency. We serve both ends of that handoff."
+
+Nobody set out to encode the hypothesis into the copy. It just turned out that once you're honest about who the business actually serves, you end up writing the same sentence the data already suggested.
+
+We caught ourselves getting excited about that and had to sit with an uncomfortable correction: a homepage agreeing with your own hypothesis is not evidence the hypothesis is right. It's evidence the hypothesis is *consistent* — with itself, and with our own thinking. No external buyer has confirmed anything by reading a homepage. That confirmation only comes from a real deal closing.
+
+**Why it matters:**
+It's easy to mistake internal consistency for external validation. They're different things, and only one of them pays the bills.
+
+**LinkedIn-ready excerpt:**
+> "We built a hypothesis from months of sales conversations: the highest-leverage buyer isn't the agency doing the work — it's the brand legal team that creates the requirement, because one 'we require this' cascades to every agency on their roster.
+>
+> Weeks later, for unrelated reasons, we rewrote our homepage. Its core line: 'The demand starts with legal. The work lands on the agency. We serve both ends of that handoff.'
+>
+> Almost the same sentence. Nobody planned that.
+>
+> It was tempting to read that as proof. It isn't.
+>
+> A homepage agreeing with your own hypothesis tells you the hypothesis is internally consistent. It doesn't tell you a single buyer has confirmed it.
+>
+> Only a closed deal does that."
+
+---
+
+### #95: Redrawing the Map After the Pivot
+
+**Date:** July 2026
+
+**The insight:**
+We'd spent months building a numbered list of ideal customer profiles from real reply data. When the positioning pivoted from self-serve pricing to an institutional model, that list needed rebuilding — not because the customers changed, but because the buyer-behavior assumptions baked into every profile ("self-authorizes at $499," "price-visible decision") no longer matched how the business actually sells now.
+
+We renumbered on purpose. The segment that used to be our third priority — brand legal and governance buyers — is now our second, right behind the agencies doing the actual work, because it turned out to be the segment the whole new positioning was built around. What used to be priority two — a clearance-and-insurance niche in film and TV production — dropped to third, and got marked as deliberately paused rather than quietly deprioritized.
+
+The distinction matters. A deprioritized segment that nobody decided to deprioritize just rots — leads go stale, nobody remembers why nobody's calling them, and eventually someone reactivates it for the wrong reasons. A segment you explicitly paused, with the reasoning written down, can be picked back up on purpose when the timing is right.
+
+**Why it matters:**
+An ICP list isn't just a targeting document. It's a record of what you believe about your buyers at a point in time — and it goes stale the moment your business model changes underneath it, whether you notice or not.
+
+**LinkedIn-ready excerpt:**
+> "We rebuilt our ideal-customer-profile list this month. Not because the customers changed — because our pricing model did, and half our old assumptions ('self-authorizes at a fixed price,' 'price-visible decision') stopped being true.
+>
+> We also renumbered on purpose. Our old #3 priority is now #2 — it turned out to be the segment our entire new positioning was quietly built around. Our old #2 dropped to #3, explicitly paused rather than quietly ignored.
+>
+> That distinction matters more than it sounds. A segment nobody decided to deprioritize just rots — leads go stale, and eventually someone reactivates it for the wrong reasons.
+>
+> A segment you paused on purpose, with the reasoning written down, you can pick back up on purpose too."
+
+---
+
+### #96: The Segment We Decided Not to Touch — Not Even to Learn
+
+**Date:** July 2026
+
+**The insight:**
+We have a real, warm, unusually strong signal sitting in a film/TV-adjacent segment — someone at a major studio told us, unprompted, that provenance tracking is "hugely important" in their world. That's the kind of quote you'd normally chase immediately, even just as a research conversation, no pitch attached.
+
+We decided not to.
+
+The reasoning: it's not one problem, it's three. Wrong channel — the way we reach buyers doesn't reach this segment at all; it needs an entirely different network. Wrong product shape — our assessment reviews one finished asset start to finish; this segment needs something narrower, identifying which specific elements of a much larger production are AI-touched and assessing just those, which is a different evidence problem, not a smaller version of the same one. Wrong buyer ecosystem — the people, relationships, and sales motion are simply a different world.
+
+Three separate mismatches stacked on top of each other. Reaching out "just for research" with the wrong channel and the wrong lens would still teach us the wrong lessons, and it risks spending the goodwill of the best lead in that segment on a conversation we're not ready to have well.
+
+So the lead stays warm, untouched, on file — not because the opportunity isn't real, but because chasing it now would answer questions we're not ready to ask correctly yet.
+
+**Why it matters:**
+Not every strong signal is a signal to act on now. Sometimes the discipline is writing down exactly why you're waiting, so "later" stays a real plan and not just a nicer way of saying "never."
+
+**LinkedIn-ready excerpt:**
+> "We have one of the strongest quotes in our entire pipeline sitting in a segment we've decided not to touch. Not even for a no-pitch research conversation.
+>
+> Why: it's not one mismatch, it's three. Wrong channel to reach them. Wrong shape of product for what they'd actually need. Wrong buyer ecosystem entirely.
+>
+> Reaching out 'just to learn' with the wrong channel and the wrong lens doesn't actually teach you the right lessons — it just spends the goodwill of your best lead in a market you're not ready to serve.
+>
+> So the lead stays on file, untouched, on purpose. Not because the opportunity isn't real. Because chasing it now would answer the wrong questions."
+
+---
+
+### #97: Asking Three AIs the Same Question on Purpose
+
+**Date:** July 2026
+
+**The insight:**
+For a decision with real stakes — how to price and position after the pivot — we ran the same strategic question through three different AI assistants independently, then sat down to synthesize the answers.
+
+The easy failure mode here is treating agreement as proof. Three models converging on the same recommendation feels like validation. It isn't. It's evidence the reasoning is coherent, not evidence a real buyer agrees with it.
+
+The more useful thing we found wasn't the overlap — it was the disagreement. Two of the three explicitly recommended reaching back out to our strongest paused lead "just for research." The third had, independently, argued for exactly the opposite: leave it alone entirely, for the reasons above. A naive synthesis would have quietly picked whichever recommendation came last, or split the difference. Instead we treated the disagreement itself as the finding — surfaced it explicitly, and made a real decision on it, rather than letting three AI opinions vote on our behalf.
+
+**Why it matters:**
+When you're synthesizing multiple independent opinions, the disagreements carry more information than the agreements. Consensus that gets silently smoothed over is a decision made by accident.
+
+**LinkedIn-ready excerpt:**
+> "For a real pricing decision, we ran the same question through three separate AI assistants and compared notes.
+>
+> Two agreed. One flatly disagreed with both — on a specific, consequential call about a specific lead.
+>
+> The easy mistake here is picking a side quietly, or averaging the three into mush. We did neither. We wrote the disagreement down explicitly and made the call ourselves.
+>
+> Three models agreeing with each other is evidence the reasoning is internally coherent. It is not evidence a real buyer would agree with any of it.
+>
+> The disagreement was the useful part. It's usually the part people are tempted to smooth over."
+
+---
+
+### #98: We Ran Our Own Product on Ourselves First
+
+**Date:** July 2026
+
+**The insight:**
+Before any real customer submitted anything, we ran our own founder-shot video through the full production pipeline — submission form, human review, report generation, signing, the public verification record. Same steps a paying customer's video will go through, start to finish.
+
+Officially, the point was to test the plumbing: does the form work, does the review tool work, does the PDF render correctly, does the signature and public page actually go live. It did.
+
+Unofficially, it exposed something the plumbing test wasn't designed to catch: because we were reviewing our own submission, the review came back with the highest possible confidence rating — on evidence that, if a stranger had submitted it, we'd have scored as thin. Nobody was cutting corners on purpose. It's just what happens when the same person plays both roles in a system built to assume they're different people.
+
+Better to find that out grading our own work than to find it out when a paying customer's legal team asks how confident we really are.
+
+**Why it matters:**
+Testing your own pipeline on your own content proves the pipeline runs. It doesn't prove the judgment inside it is sound — and those are two different kinds of "it works."
+
+**LinkedIn-ready excerpt:**
+> "Before any real customer used our review product, we ran our own footage through the entire pipeline ourselves — form, human review, report, signature, public record.
+>
+> It confirmed the plumbing worked.
+>
+> It also exposed something the plumbing test wasn't designed to catch: reviewing your own submission is a fundamentally different exercise than reviewing a stranger's, even when you're trying to be rigorous. The result came back rated at the highest possible confidence — on evidence that, from anyone else, we'd have called thin.
+>
+> Nobody cut a corner on purpose. It's just what happens when the same person plays both roles in a system built to assume they're different people.
+>
+> Better to catch that grading our own work than to have a paying customer's legal team catch it for us."
+
+---
+
+### #99: The Bug Was in Our Judgment, Not Our Code
+
+**Date:** July 2026
+
+**The insight:**
+Following on from testing our own review on ourselves: the root cause wasn't a technical bug. It was a gap in how our own review method scored a specific, very common situation — someone describing, in detail and in their own words, how they made something, with nothing else backing that description up. No supporting file, no log, no independent evidence. Just a well-written account.
+
+Our method was treating a sufficiently detailed written account as good enough evidence on its own. It isn't. A detailed story is still just a story until something independent corroborates it — and most people submitting real work will, at first, only have the story to offer. That's not a rare edge case. It's probably the median submission.
+
+We rewrote the rule: a written account alone caps at a lower confidence tier, no matter how specific or convincing it reads. Something has to independently back it up to earn the higher rating. Sincerity isn't evidence. Specificity isn't evidence. Only corroboration is evidence.
+
+**Why it matters:**
+The easiest evidence to over-trust is a good story, well told — precisely because it doesn't feel like a gap. It feels like confidence. The discipline is asking "what would back this up if the person telling it were wrong," not "does this sound credible."
+
+**LinkedIn-ready excerpt:**
+> "We found a real gap in how our own review methodology worked — not a code bug, a judgment bug.
+>
+> The situation: someone describes, in detail and in their own words, exactly how they made something. Nothing else backs it up. No file, no log, no independent evidence. Just a well-written account.
+>
+> Our rule was treating that as good enough on its own. It isn't — and it's not a rare case. It's probably the median submission, because most people, at first, only have the story to offer.
+>
+> New rule: a written account alone caps the confidence rating, no matter how specific or convincing it reads. Something independent has to back it up to earn the higher tier.
+>
+> Sincerity isn't evidence. Specificity isn't evidence. Only corroboration is evidence."
+
+---
+
+### #100: Versioning a Judgment Call Like It's Code
+
+**Date:** July 2026
+
+**The insight:**
+When we fixed the evidence-scoring gap above, the tempting shortcut was to just edit the existing rulebook in place — find the wrong sentence, fix it, move on. We didn't do that.
+
+Instead: the old version gets frozen exactly as it was, relabeled as historical, never edited again — because a real assessment was already produced under those old rules, and that assessment should always be explainable by pointing at the exact rulebook that governed it at the time. A new version gets written separately, and every future assessment points at the new one going forward. The old assessment doesn't get silently re-graded just because we got smarter a week later — it stays tied to the rules that existed when it was made, permanently.
+
+We also found, in the process of doing this properly, that a hardcoded label deep in the application code hadn't been updated in step with the rulebook before — meaning it was technically possible for the labeled version to quietly drift out of sync with the actual rules being applied. Fixed that too, and wrote down a standing rule: any real change to the judgment logic bumps the version number and updates that label together, in the same change, every time.
+
+**Why it matters:**
+If you can silently improve your own rubric without a version trail, you eventually can't answer a simple, important question: which rules actually produced this specific opinion? For an independent review business, that question has to always have a clean answer.
+
+**LinkedIn-ready excerpt:**
+> "When we fixed a real gap in our own review rulebook, we didn't just edit it in place.
+>
+> The old version is frozen exactly as it was, relabeled historical, never touched again — because a real assessment was already produced under those old rules, and it has to stay explainable by pointing at the exact rulebook that governed it. The new version is a separate, new document. Every future assessment points at that one.
+>
+> Nothing gets quietly re-graded just because we got smarter a week later.
+>
+> We also found a label deep in the application code that could technically drift out of sync with the actual rulebook version — fixed that, and wrote down a standing rule: any real change to the judgment logic bumps the version number and updates that label together, always, in the same change.
+>
+> If you can't point at exactly which rules produced a specific opinion, 'independent review' is just a marketing phrase."
+
+---
+
+### #101: The Word 'Independent' Has to Be True on the Page That Says It
+
+**Date:** July 2026
+
+**The insight:**
+We have a public page where anyone can look up a completed review and verify it's real. Right now, exactly one record lives there — our own founder-shot test video, reviewed by us, about us.
+
+That's fine internally. It's a real problem the moment a skeptical buyer clicks the link before trusting us with anything, which is exactly the audience most likely to click it. They'd find a page confidently using the word "independent" with zero evidence, anywhere, that an independent review of someone else's work has ever actually happened.
+
+The fix wasn't to hide the record — we want to show the mechanism actually works. It was to label it honestly: one quiet, plainly worded line noting this specific record is an internal demonstration, not a client engagement. Not a warning banner. Not buried in fine print. Just true, right there, in the same understated tone as the rest of the page.
+
+**Why it matters:**
+A claim of independence is only as strong as the evidence a skeptic can find in thirty seconds of checking it themselves. If that evidence doesn't exist yet, say so plainly — don't let silence imply something you can't back up yet.
+
+**LinkedIn-ready excerpt:**
+> "We have a public page where anyone can verify a completed review is real. Right now exactly one record lives there — our own test video, reviewed by us, about us.
+>
+> Fine internally. A real problem the moment a skeptical buyer clicks that link before trusting us with anything real — which is exactly who's most likely to click it.
+>
+> They'd find a page using the word 'independent,' with zero evidence anywhere that an independent review of someone else's work has ever happened.
+>
+> We didn't hide the record — we want people to see the mechanism actually works. We labeled it honestly instead: one quiet line noting this specific record is an internal demonstration, not a client engagement. Not a banner. Not fine print. Just true, in the same plain tone as everything else on the page.
+>
+> A claim of independence is only as strong as what a skeptic finds when they check it themselves."
+
+---
+
+### #102: The Same Piece of Work Had Two Different ID Numbers
+
+**Date:** July 2026
+
+**The insight:**
+We discovered our own internal test assessment had somehow been issued two different reference numbers by two different parts of our own system — an old, informal numbering field left over from before we built the real record-keeping system, and the actual, permanent, official number the new system generates. Both were technically "real," pointing at the exact same piece of work, and nothing had ever reconciled them.
+
+The old field wasn't malicious or even really a mistake at the time — it was a reasonable stopgap built before the permanent system existed, and it simply never got retired once the real thing shipped. That's a familiar shape of bug: not one bad decision, but two good decisions made months apart that were never introduced to each other.
+
+We removed the old numbering field entirely, wrote up exactly how the mismatch happened and which number is the one that actually counts, and made sure every document, every internal file, and the code itself all point at a single source of truth going forward.
+
+**Why it matters:**
+Temporary systems that work are the most dangerous kind — they don't fail loudly enough to force anyone to retire them before the permanent replacement quietly starts disagreeing with them.
+
+**LinkedIn-ready excerpt:**
+> "We found our own test assessment had two different reference numbers — issued by two different parts of our own system, both pointing at the same piece of work, never reconciled.
+>
+> One was an informal stopgap built before we had a real record-keeping system. The other was the actual permanent number the real system generates.
+>
+> Nobody did anything wrong. Two reasonable decisions, made months apart, that were never introduced to each other.
+>
+> We killed the old field entirely, documented exactly how the mismatch happened, and made sure everything — every document, every file, the code itself — points at one single source of truth now.
+>
+> Temporary systems that quietly work are the most dangerous kind. They don't fail loudly enough to force anyone to retire them."
+
+---
+
+### #103: A Page That Remembered the Wrong Answer
+
+**Date:** July 2026
+
+**The insight:**
+While fixing the two-ID issue above, we found a second, unrelated bug hiding behind it: our public verification page had, at some point, cached its very first-ever answer for a specific record and then kept serving that same frozen answer forever after — even once the real status behind it had genuinely changed. The page technically "worked." It just permanently remembered the state of the world from the moment it first loaded, and never checked again.
+
+This is a specific and sneaky category of bug: the page isn't broken, isn't erroring, isn't down. It's confidently, correctly displaying an answer that used to be true. We only caught it because we changed a record's status and then noticed the public page never reflected the change — and even that took checking the actual database query logs to notice the page had stopped asking the question at all.
+
+Fixed by making that specific page always ask fresh, every time, rather than trusting a stale first answer. Then audited every other page in the same category to confirm nothing else had the same quiet problem. Nothing did.
+
+**Why it matters:**
+A page that's wrong loudly gets fixed fast. A page that's confidently, quietly wrong can sit that way for a long time — because everything about it looks like it's working.
+
+**LinkedIn-ready excerpt:**
+> "Found a second bug while fixing the first one: our public verification page had cached its very first answer for a specific record — and kept serving that frozen answer forever, even after the real status genuinely changed.
+>
+> The page wasn't broken. Wasn't erroring. Wasn't down. It was confidently, correctly displaying an answer that used to be true.
+>
+> We only caught it because we changed a record's status and noticed the public page never moved — and confirming that took checking actual database query logs, not just clicking around.
+>
+> The scariest bugs aren't the loud ones. They're the ones that look completely fine."
+
+---
+
+### #104: We Shipped a Broken Build, and the Test Suite Said Everything Was Fine
+
+**Date:** July 2026
+
+**The insight:**
+Pushed a code change, watched the production deploy fail. The cause: we'd added a new required field to a data type but never updated the one place that actually creates new records with it — so the code no longer matched its own rules, and the production build's type-checking step correctly refused to ship it.
+
+Our automated test suite had passed cleanly right before that push. It just wasn't the right kind of test — it doesn't run the same full type-checking step the production build does, so it had no way to catch this particular category of mistake. Green tests and a broken build, at the same time, for completely legitimate reasons.
+
+Fixed the actual bug in minutes. The slower fix was updating how we verify changes are safe: run the exact same build step production runs, not just the test suite, before calling something ready to ship. "Tests pass" and "it builds" turned out to be two different claims, and we'd been treating them as one.
+
+**Why it matters:**
+A passing test suite tells you the tests you wrote pass. It doesn't tell you nothing is broken — only that nothing you thought to check is broken. Verify with the exact tool that would actually catch the failure, not the nearest one.
+
+**LinkedIn-ready excerpt:**
+> "Pushed a change. Production build failed.
+>
+> Cause: added a new required field to a data type, forgot to update the one place that actually creates new records with it. Reasonable, boring mistake.
+>
+> Our test suite had just passed cleanly. Green tests, broken build, at the same time — because the tests don't run the same full check the production build does. They were never going to catch this particular mistake.
+>
+> Fixed the bug in minutes. The real fix was slower: now we run the exact build step production runs before calling anything ready to ship, not just the test suite.
+>
+> 'Tests pass' and 'it builds' are two different claims. We'd been treating them as one."
+
+---
+
+### #105: The Second Time We Confirmed the Same Thing, That Was the Real Finding
+
+**Date:** July 2026
+
+**The insight:**
+We run a monthly deep-dive on outreach data — who's replying, what they're saying, which segment is converting. This cycle, after a full month of additional volume, the answer came back essentially identical to last cycle's: same top segment, same buyer profile, zero new names in the highest-conviction group.
+
+The instinct is to read "nothing new" as a boring cycle. It's the opposite. A full month of fresh outreach that fails to surface a single counter-example to last month's hypothesis is stronger evidence than the original hypothesis was — because now it's survived a real attempt to break it, not just a first pass that happened to look promising.
+
+What the cycle also surfaced: five separate action items flagged as priorities last cycle were still sitting untouched a month later — unanswered replies from our own best leads, unlaunched experiments, unfixed messaging gaps. The analysis engine is doing its job. The bottleneck isn't finding what to do next. It's actually doing it.
+
+**Why it matters:**
+Repetition without decay is one of the strongest signals available at small scale — and it's easy to mistake for "no news" instead of recognizing it as a hypothesis that just passed a real test.
+
+**LinkedIn-ready excerpt:**
+> "Ran our monthly outreach deep-dive. After a full month of new volume, the answer came back almost identical to last month's: same top segment, same buyer profile, zero new names in the strongest tier.
+>
+> Easy to read that as a boring cycle. It's the opposite.
+>
+> A month of fresh outreach that fails to surface a single counter-example is stronger evidence than the original finding was — it just survived a real attempt to break it.
+>
+> The less comfortable finding: five action items flagged as priorities last cycle were still untouched a month later. The analysis is doing its job. The bottleneck is follow-through, not insight."
+
+---
+
+### #106: The Six-Week Silence
+
+**Date:** July 2026
+
+**The insight:**
+Went back through our own pipeline and found something uncomfortable: our strongest lead — the one whose exact words are now literally quoted on our homepage as the proof point for our entire new positioning — asked us a direct, simple question six weeks ago. Still no reply.
+
+Not because it fell through the cracks unnoticed. It showed up on our own priority list, twice, across two separate review cycles. Flagged both times. Still unanswered.
+
+There's a specific kind of failure this represents that's different from "we don't know what to do." We knew exactly what to do. It's the gap between identifying the right next action and actually taking it — and it's a much less forgivable gap, because nothing external was blocking it. Just time, and the fact that flagged-but-not-done doesn't feel urgent the way a red error message does.
+
+**Why it matters:**
+An analysis system that correctly identifies the same overdue action twice and still doesn't get it done isn't an analysis problem. It's an execution discipline problem, and it deserves to be named as one, not quietly re-flagged a third time.
+
+**LinkedIn-ready excerpt:**
+> "Went back through our pipeline and found something uncomfortable.
+>
+> Our strongest lead — whose exact words are now the literal proof point quoted on our homepage — asked us a simple, direct question six weeks ago.
+>
+> Still no reply.
+>
+> Not because it fell through the cracks. It showed up on our own priority list twice, across two review cycles. Flagged both times.
+>
+> This isn't a 'we didn't know what to do' problem. We knew exactly what to do. It's the gap between identifying the right action and actually taking it — and that gap is less forgivable, because nothing external was in the way. Just time, and the fact that 'flagged' doesn't feel as urgent as it should."
+
+---
+
+### #107: Every Outreach Campaign Now Has to Answer a Specific Question
+
+**Date:** July 2026
+
+**The insight:**
+We reframed how we think about our own outreach engine. It used to exist to generate replies — more messages, more responses, higher reply rate, next campaign. Reasonable, and also a metric that can go up while telling you nothing useful about the actual business.
+
+New rule: every campaign we run has to be designed around one specific question we don't yet know the answer to, with a specific decision already written down for each possible outcome, before a single message goes out. Not "let's see what happens." "If X, we do this. If not-X, we do that." The campaign becomes an experiment with a pre-committed decision attached, not a numbers exercise.
+
+This also forced a harder, more useful metric than reply rate: how far a reply actually travels — into a real conversation, a real meeting, a real request. Two campaigns with identical reply rates can produce completely different businesses if one of them converts three times better past the first reply. Reply rate alone would never have shown us that.
+
+**Why it matters:**
+"More replies" is an easy number to chase and a genuinely bad proxy for "more business." The question isn't whether people are responding. It's whether responding is leading anywhere.
+
+**LinkedIn-ready excerpt:**
+> "We reframed our own outreach engine. It used to exist to generate replies — more messages, more responses, next campaign. Reasonable-sounding metric that can climb while telling you nothing real.
+>
+> New rule: every campaign has to answer one specific question we don't know the answer to yet, with a decision already written down for each outcome, before a single message goes out.
+>
+> Not 'let's see what happens.' 'If X, we do this. If not, we do that.'
+>
+> It also forced a better metric than reply rate: how far a reply actually travels — into a real conversation, a real meeting, a real ask. Two campaigns with identical reply rates can be completely different businesses if one converts three times better past the first message. Reply rate alone would never show you that."
+
+---
+
+### #108: A Price List That Only Exists If You Ask For It
+
+**Date:** July 2026
+
+**The insight:**
+After taking pricing off the homepage (see #92), the follow-up question was where the number actually lives now. Two bad options on either extreme: put it back on the homepage (undoes the whole positioning shift), or make it genuinely secret and only revealed thirty minutes into a sales call (adds friction for the buyer who just wants a straight answer before booking anything).
+
+Landed on a middle path: a real pricing page exists. It's simply not linked from anywhere on the site. If someone asks before booking a call, they get sent the link directly and get an instant, honest answer. If they never ask, they never see a number before talking to us, and the homepage stays entirely focused on the actual value being sold.
+
+This means we're deliberately not running a controlled experiment on whether hiding the price actually helps — we're using judgment call by call instead, with discount flexibility as the lever rather than a fixed public number. That's a real trade-off: slower to learn from, faster to act on. We wrote that trade-off down explicitly rather than pretending we have a clean answer either way.
+
+**Why it matters:**
+Not every decision needs a formal experiment behind it. Sometimes the honest move is writing down that you're using judgment, on purpose, instead of dressing up a gut call as more rigorous than it is.
+
+**LinkedIn-ready excerpt:**
+> "After we took pricing off our homepage, the next question was: where does the number actually live now?
+>
+> Two bad extremes: put it back on the homepage (undoes the whole point), or make it genuinely secret until thirty minutes into a call (annoys the buyer who just wants a straight answer).
+>
+> We landed in between. A real pricing page exists. It's just not linked anywhere. Ask before booking a call, we send you the link and you get an instant honest number. Never ask, you never see one before talking to us.
+>
+> That means we're not running a clean experiment on whether hiding the price actually helps — we're using judgment, call by call, instead. Slower to learn from. Faster to act on.
+>
+> We wrote that trade-off down honestly instead of pretending we have a clean answer either way."
+
+---
+
+### #109: A Promise We Wrote Into Our Own Rulebook
+
+**Date:** July 2026
+
+**The insight:**
+While fixing the evidence-scoring gap in our review methodology (#98-100), we added one sentence to our own internal rulebook that has nothing to do with scoring logic: work we've already delivered stays tied to the rules that existed when we delivered it, permanently. Publishing a smarter version of our own methodology later does not, on its own, trigger us going back and re-grading anything we already handed a customer.
+
+It would have been easy to leave this implicit — "obviously we wouldn't do that." We wrote it down explicitly instead, as a real governance rule, not an assumption. The difference matters because the incentive to quietly revisit an old, less-flattering result is real once you're capable of scoring it better. Writing the boundary down before you need it removes the temptation to make an exception "just this once."
+
+**Why it matters:**
+A rule you'd honor anyway costs nothing to write down, and it's the writing down — not the intention — that a customer can actually check you against later.
+
+**LinkedIn-ready excerpt:**
+> "While fixing a real gap in our own review methodology, we added one sentence to our rulebook that has nothing to do with scoring logic:
+>
+> Work we've already delivered stays tied to the rules that existed when we delivered it. Publishing a smarter version of our methodology later doesn't, on its own, trigger us re-grading anything we already handed a customer.
+>
+> We could have left that implicit — 'obviously we wouldn't do that.'
+>
+> We wrote it down explicitly instead, as a real rule, not an assumption. Because the temptation to quietly revisit an old, less-flattering result is real, the moment you're capable of scoring it better than you used to.
+>
+> A rule you'd honor anyway costs nothing to write down. It's the writing down a customer can actually check you against later — not the intention."
 
 ---
 
