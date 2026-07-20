@@ -97,6 +97,12 @@ export async function createAssessmentFromWorkbook(
     institutional_status: 'ACTIVE',
     status_reason:        null,
     processing_status:    'DRAFT',
+    // Every assessment is created as a real (non-test) record by default,
+    // matching the DB column's own DEFAULT false. A record is only ever
+    // marked a system test by an explicit, separate admin action after
+    // creation — see the verification checklist step for the internal test
+    // run this deploy is meant to support (never auto-detected).
+    is_system_test:       false,
     failure_diagnostic:   null,
     verification_url:     verificationUrl,
     numbers_asset_id:     null,
