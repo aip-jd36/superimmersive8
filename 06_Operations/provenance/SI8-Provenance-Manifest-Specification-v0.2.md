@@ -83,7 +83,7 @@ Embedded as custom assertions under namespace `si8.commercial-assurance/v1`:
 | `si8:assessment_number` | ASSESS-NNN-YYYY-MM-DD | ASSESS-001-2026-07-10 | Primary link between manifest and SI8 Registry |
 | `si8:assessment_date` | ISO 8601 | 2026-07-10 | Establishes when the assessment was performed |
 | `si8:reviewer_organization` | String | PMF Strategy Inc. d/b/a SuperImmersive 8 | Establishes who performed the review |
-| `si8:methodology_version` | String | SI8 Reviewer Manual v0.1 | Tells a future auditor which framework was used |
+| `si8:methodology_version` | String | SI8 Reviewer Manual v0.2 | Tells a future auditor which framework was used |
 | `si8:outcome_code` | Enum | EVIDENCE_SUPPORTS | Machine-readable verdict |
 | `si8:verification_url` | URL | https://app.superimmersive8.com/assessment/ASSESS-001-2026-07-10 | Primary access path to the authoritative record |
 

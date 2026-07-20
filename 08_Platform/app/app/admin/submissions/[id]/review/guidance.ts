@@ -1,5 +1,5 @@
 // Static guidance content per active section / domain.
-// Sourced from SI8 Reviewer Manual v0.1 Part 4.
+// Sourced from SI8 Reviewer Manual v0.2 Part 4.
 // Updates here require a code deploy — no CMS needed for Year 1.
 
 export const GUIDANCE: Record<string, string> = {
@@ -84,7 +84,9 @@ Level of contribution:
 - Moderate: Prompt writing with limited iteration, basic editing
 - Minimal: Running a model with minimal direction, accepting first output
 
-H02 — Authorship claim assessment: If the submitter is not claiming copyright, H02 may be Not Applicable. If they are claiming copyright in human-authored elements, the documented contribution must plausibly support that claim. Note: AI-generated output alone cannot be copyrighted in most jurisdictions — the human contribution to any claimed element is what matters.`,
+H02 — Authorship claim assessment: If the submitter is not claiming copyright, H02 may be Not Applicable. If they are claiming copyright in human-authored elements, the documented contribution must plausibly support that claim. Note: AI-generated output alone cannot be copyrighted in most jurisdictions — the human contribution to any claimed element is what matters.
+
+Corroboration requirement (v0.2): A detailed, well-written account from the submitter is a claim, not evidence, until something else backs it up — a prompt log, a project/editing file, a storyboard, a brief, a timeline export. If the submitter's narrative is the ONLY thing in front of you, no matter how specific or credible it reads, mark this Partially Verified, not Verified. This caps the overall outcome at "Evidence Supports with Conditions" and confidence at Medium — see Part 5 of the Manual.`,
 
   'I': `DOMAIN I — THIRD-PARTY IP
 

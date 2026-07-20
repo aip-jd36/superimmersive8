@@ -466,7 +466,7 @@ ${evidenceList}
 
 *Assessment date:* ${reportDate}
 
-*Methodology:* SI8 Reviewer Workbook v0.1 | SI8 Reviewer Manual v0.1
+*Methodology:* SI8 Reviewer Workbook v0.1 | SI8 Reviewer Manual v0.2
 
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -489,7 +489,7 @@ ${domainBlocks}
 #assurance-box[
   *Scope of Assessment*
 
-  This assessment was conducted by PMF Strategy Inc. d/b/a SuperImmersive 8 ("SI8") in accordance with the SI8 Reviewer Manual v0.1 and Reviewer Workbook Schema v0.1. The assessment covers the specific content and evidence submitted and is limited to the scope described in Section 2.
+  This assessment was conducted by PMF Strategy Inc. d/b/a SuperImmersive 8 ("SI8") in accordance with the SI8 Reviewer Manual v0.2 and Reviewer Workbook Schema v0.1. The assessment covers the specific content and evidence submitted and is limited to the scope described in Section 2.
 
   *Nature of Opinion*
 
@@ -784,7 +784,7 @@ export function Section7Brief({
         value={data.executive_summary}
         onChange={v => onChange({ executive_summary: v })}
         rows={5}
-        placeholder={`e.g. "SI8 independently reviewed the submitted video content, AI tool disclosures, and commercial licensing documentation for [Title]. The evidence reviewed supports the intended commercial use of this content as [intended use]. No material IP, likeness, or rights conflicts were identified during the review period. This assessment was conducted in accordance with the SI8 Reviewer Manual v0.1." — institutional tone, not colloquial.`}
+        placeholder={`e.g. "SI8 independently reviewed the submitted video content, AI tool disclosures, and commercial licensing documentation for [Title]. The evidence reviewed supports the intended commercial use of this content as [intended use]. No material IP, likeness, or rights conflicts were identified during the review period. This assessment was conducted in accordance with the SI8 Reviewer Manual v0.2." — institutional tone, not colloquial.`}
         hint="Write for a brand GC, agency EP, or E&O underwriter. SOC 2 / Deloitte style: what was reviewed, outcome, evidential basis, commercial conclusion. Seeded from § 6 rationale — expand into client-facing language."
       />
 

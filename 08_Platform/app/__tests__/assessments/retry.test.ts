@@ -210,7 +210,7 @@ describe('FailOnceMockProvider — self-test (no Supabase required)', () => {
     assessmentNumber:     'ASSESS-099-2026-07-12',
     assessmentDate:       '2026-07-12',
     reviewerOrganization: 'PMF Strategy Inc. d/b/a SuperImmersive 8',
-    methodologyVersion:   'SI8 Reviewer Manual v0.1',
+    methodologyVersion:   'SI8 Reviewer Manual v0.2',
     outcomeCode:          'EVIDENCE_SUPPORTS',
     verificationUrl:      'https://app.superimmersive8.com/assessment/ASSESS-099-2026-07-12',
   }

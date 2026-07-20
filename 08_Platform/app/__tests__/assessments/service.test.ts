@@ -8,14 +8,26 @@
  * We test the pure functions (buildC2PAManifest) and the transition logic.
  */
 
-import { buildC2PAManifest } from '../../lib/assessments/service'
+import { buildC2PAManifest, METHODOLOGY_VERSION } from '../../lib/assessments/service'
+
+// New assessments must be stamped with the currently active Manual version.
+// This is the failure mode the Reviewer Manual v0.2 Version Bump Requirement
+// (Part 7) exists to prevent: a substantive methodology change lands, but the
+// application constant is left pointing at a superseded version, so new
+// assessments are silently reviewed under different rules than what their
+// own stored methodology_version claims.
+describe('METHODOLOGY_VERSION', () => {
+  test('points at the currently active Manual version', () => {
+    expect(METHODOLOGY_VERSION).toBe('SI8 Reviewer Manual v0.2')
+  })
+})
 
 describe('buildC2PAManifest', () => {
   const base = {
     assessment_number:    'ASSESS-001-2026-07-12',
     assessment_date:      '2026-07-12',
     reviewer_organization: 'PMF Strategy Inc. d/b/a SuperImmersive 8',
-    methodology_version:  'SI8 Reviewer Manual v0.1',
+    methodology_version:  'SI8 Reviewer Manual v0.2',
     outcome:              'EVIDENCE_SUPPORTS' as const,
     verification_url:     'https://app.superimmersive8.com/assessment/ASSESS-001-2026-07-12',
   }
@@ -36,7 +48,7 @@ describe('buildC2PAManifest', () => {
     expect(manifest['si8:assessment_number']).toBe('ASSESS-001-2026-07-12')
     expect(manifest['si8:assessment_date']).toBe('2026-07-12')
     expect(manifest['si8:reviewer_organization']).toBe('PMF Strategy Inc. d/b/a SuperImmersive 8')
-    expect(manifest['si8:methodology_version']).toBe('SI8 Reviewer Manual v0.1')
+    expect(manifest['si8:methodology_version']).toBe('SI8 Reviewer Manual v0.2')
     expect(manifest['si8:outcome_code']).toBe('EVIDENCE_SUPPORTS')
     expect(manifest['si8:verification_url']).toBe(
       'https://app.superimmersive8.com/assessment/ASSESS-001-2026-07-12',

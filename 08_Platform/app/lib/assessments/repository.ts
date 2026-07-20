@@ -113,7 +113,7 @@ export async function findAssessmentForVerification(
   const { data, error } = await supabaseAdmin
     .from('assessments')
     .select(
-      `assessment_number, institutional_status, status_reason, outcome, assessment_date, methodology_version, reviewer_organization, numbers_asset_id, processing_status,
+      `assessment_number, institutional_status, status_reason, outcome, assessment_date, methodology_version, reviewer_organization, numbers_asset_id, processing_status, is_system_test,
        submission:submissions!submission_id ( title, runtime )`,
     )
     .eq('assessment_number', assessmentNumber)
@@ -169,6 +169,7 @@ export async function findAssessmentForVerification(
     reviewer_organization: data.reviewer_organization,
     numbers_asset_id:   data.numbers_asset_id,
     processing_status:  data.processing_status,
+    is_system_test:     data.is_system_test,
     // Asset section — sourced from submissions join.
     // asset_media_type is hardcoded "Video" for all v1 assessments.
     asset_title:      sub?.title ?? '',

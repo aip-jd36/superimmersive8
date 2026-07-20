@@ -208,6 +208,12 @@ export default async function VerificationPage({ params }: PageProps) {
             This assessment represents SI8&apos;s independent commercial assurance opinion
             based on the evidence submitted at the assessment date. It is not legal advice.
           </p>
+          {assessment.is_system_test && (
+            <p style={{ margin: '0 0 0.5rem', fontStyle: 'italic' }}>
+              This is an internal SI8 demonstration assessment and does not represent an
+              external client engagement.
+            </p>
+          )}
           <p style={{ margin: 0 }}>
             SuperImmersive 8 is operated by PMF Strategy Inc. &middot;{' '}
             <a

@@ -1,13 +1,10 @@
 # SI8 Reviewer Manual — Volume I: Core Review Principles
-**Version:** 0.1
-**Effective date:** July 5, 2026
-**Status:** SUPERSEDED
-**Superseded by:** SI8 Reviewer Manual v0.2, effective July 20, 2026 — see `SI8-Reviewer-Manual-v0.2.md`
+**Version:** 0.2
+**Effective date:** July 20, 2026
+**Status:** ACTIVE
 **Audience:** SI8 reviewers — internal only. Do not share with customers or third parties.
 **Owner:** Chief of Staff
 **Companion documents:** Reviewer Workbook Schema v0.1 · Assessment Report Template v0.2 · Post-Assessment Review Template v0.1
-
-**Historical record — do not use for new assessments.** This version governed SI8's methodology from July 5, 2026 to July 19, 2026, and is preserved unmodified below because it is the methodology under which prior assessments (e.g. `ASSESS-005-2026-07-12`) were issued. Assessments reference the specific manual version they were reviewed under (`assessments.methodology_version`); that reference is never retroactively changed when the Manual is updated. For current guidance, use `SI8-Reviewer-Manual-v0.2.md`.
 
 ---
 
@@ -189,7 +186,7 @@ Step 6 — Report Brief              (10 min)
 Total target                       ~95 min
 ```
 
-These targets are design estimates for v0.1. The first several real assessments will calibrate actual timing. Record time per section in every Post-Assessment Review.
+These targets are design estimates carried forward from v0.1. The first several real assessments will calibrate actual timing. Record time per section in every Post-Assessment Review.
 
 ---
 
@@ -329,7 +326,7 @@ The Report Brief is a working draft — not polished prose yet. The reviewer the
 
 *This is the core of the Manual. Each domain chapter follows the same structure. Read the full chapter for a domain before assessing that domain's controls.*
 
-*All guidance in Part 4 is v0.1 — designed before real assessments. Decision thresholds will be refined as operational experience accumulates. If a judgment call isn't covered here, document your reasoning in the Findings Log and flag it in the Post-Assessment Review.*
+*Guidance in Part 4 remains pre-validated design, refined by operational evidence as it accumulates (Domain H was revised for v0.2 — see below). Decision thresholds will continue to be refined as real assessments accumulate. If a judgment call isn't covered here, document your reasoning in the Findings Log and flag it in the Post-Assessment Review.*
 
 ---
 
@@ -435,10 +432,13 @@ Unverified commercial licensing is the most direct source of commercial liabilit
 
 | Evidence state | Judgment |
 |---------------|----------|
-| Clear workflow description with specific creative decisions documented | **Verified** |
+| Clear workflow description with specific creative decisions documented, **corroborated by at least one artifact** (prompt log, project/editing file, storyboard, brief) | **Verified** |
+| Clear, detailed workflow description, **but no corroborating artifact — the submitter's written account is the only evidence** | **Partially Verified** — see note below |
 | Some workflow description but gaps (e.g., generation described, editing not mentioned) | **Partially Verified** |
 | Tool name provided but no description of creative involvement | **Not Provided** |
 | Submitter explicitly states AI generated the content with no human direction | **Not Provided** — and flag as a material finding |
+
+**Note on uncorroborated self-attestation (v0.2):** A detailed, well-written workflow description is not, by itself, evidence — it is a claim. If the submitter's account is the *only* thing in front of the reviewer (no prompt log, no project file, no brief, no timeline export), that is self-attestation, not corroboration, no matter how specific or plausible it reads. Score it **Partially Verified**, never **Verified**. Reviewers should never assign "Verified" for Domain H based solely on a detailed narrative from the submitter without a corroborating artifact — narrative detail and evidentiary corroboration are not the same thing, and it is an easy mistake to make precisely when a submission reads as sincere and thorough (see Part 5, Outcome Decision Logic and Common Synthesis Errors, for how this connects to the overall outcome).
 
 **Note on fully automated content:** If the submitter indicates that no human creative direction was involved — the tool was run without meaningful human input — this should be flagged as a material finding. The commercial implications of fully automated content (no copyright protection, no chain of creative authorship) are significant. SI8 does not refuse to assess such content, but the finding must appear clearly in the report.
 
@@ -640,6 +640,7 @@ The distinction between "Evidence Supports with Conditions" and "Evidence Indica
 Use when:
 - Domains R and L are Verified
 - Domain A is Verified
+- **Domain H is Verified — i.e., corroborated by an artifact, not just the submitter's written account (v0.2; see Part 4, Domain H)**
 - Domain D shows no material inconsistencies
 - Any Not Provided controls are Low commercial impact
 - No material adverse findings
@@ -709,8 +710,8 @@ Document specifically why the assessment cannot proceed. Contact JD before selec
 
 | Confidence | Conditions |
 |-----------|-----------|
-| **High** | Domain R Verified. Domain L Verified or N/A. Domain A Verified. Domain D no material inconsistencies. All Not Provided controls are Low commercial impact. |
-| **Medium** | Core domains largely verified but 1-2 Partially Verified in commercially significant areas. Or one addressable gap with Medium commercial impact. Or Domain T is Not Provided (workflow undocumented). |
+| **High** | Domain R Verified. Domain L Verified or N/A. Domain A Verified. **Domain H Verified — corroborated, not self-attested only.** Domain D no material inconsistencies. All Not Provided controls are Low commercial impact. |
+| **Medium** | Core domains largely verified but 1-2 Partially Verified in commercially significant areas. Or one addressable gap with Medium commercial impact. Or Domain T is Not Provided (workflow undocumented). **Or Domain H is Partially Verified because the only authorship evidence is the submitter's uncorroborated written account (v0.2).** |
 | **Low** | Domain R is Not Provided or Partially Verified with High impact. Or Domain L is Not Provided with High impact. Or multiple domains Not Provided. Or material inconsistency in Domain D affecting core findings. |
 
 ---
@@ -719,6 +720,7 @@ Document specifically why the assessment cannot proceed. Contact JD before selec
 
 - **Assigning positive outcome when Domain R is Partially Verified with a missing receipt.** This should be "with Conditions" at minimum — the receipt is a specific addressable gap.
 - **Assigning High confidence when Domain T is Not Provided.** If the workflow is undocumented, findings in other domains rely on submitter assertion. Confidence should be Medium.
+- **Assigning "Evidence Supports" or High confidence when Domain H's only evidence is the submitter's own written account, with no corroborating artifact (v0.2).** A detailed, specific, plausible-sounding description of creative involvement is still just a claim if nothing else backs it up — no prompt log, no project file, no brief, no timeline export. Score Domain H Partially Verified in this case and cap the outcome at "Evidence Supports with Conditions" / Medium confidence, never higher.
 - **Writing conditions that are not actionable.** "Ensure the content is compliant" is not a condition. "Retain the AI tool subscription receipt confirming active paid plan at time of generation" is a condition.
 - **Conflating findings with residual risks.** A finding is evidence-based and specific to this submission. A residual risk is a structural uncertainty that applies across all AI-generated content (training data liability, evolving regulations). Both belong in the report, but they are different things.
 - **Including more than 5 items in Key Findings in the Dashboard.** The Dashboard is for commercial decision-makers with limited time. Lead with the 3-5 most commercially significant findings.
@@ -860,6 +862,18 @@ Changes do not take effect between versions. When a meaningful number of approve
 
 ---
 
+### Version Bump Requirement (added v0.2)
+
+Any substantive change to **Part 4 (Domain Guidance)** or **Part 5 (Outcome and Synthesis Logic)** requires a methodology version bump and a corresponding update to the application's methodology-version constant (`METHODOLOGY_VERSION` in `08_Platform/app/lib/assessments/service.ts`), in the same change set.
+
+"Substantive" means a change to decision logic, evidence sufficiency, or outcome/confidence gating — not a wording clarification, typo fix, or formatting change. When in doubt, treat it as substantive: the cost of an unnecessary version bump is a slightly longer Version History table; the cost of a missed one is new assessments being silently reviewed under different rules than the ones their stored `methodology_version` claims.
+
+A version bump means: previous version's file is preserved unmodified except for its header (Status → SUPERSEDED, a pointer to the new version), a new version file is created, and both the Manual's own header and the code constant are updated together. Prior assessments' stored `methodology_version` values are never retroactively changed — an assessment always reflects the methodology in effect when it was reviewed.
+
+**Issued assessments are not retroactively re-evaluated.** An assessment remains tied to the methodology version under which it was issued; publishing a later Manual version governs future assessments and does not, by itself, trigger a re-review or re-scoring of assessments already delivered.
+
+---
+
 ### Case Library Relationship
 
 The Case Library (future artifact) will provide precedent entries that inform Part 4 (Domain Guidance). The Case Library flag on the Post-Assessment Review is the mechanism for identifying which assessments become Case Library entries.
@@ -873,6 +887,7 @@ A Case Library entry does not automatically update the Manual. It provides a ref
 | Version | Date | Summary of Changes |
 |---------|------|-------------------|
 | 0.1 | 2026-07-05 | Initial version — all 7 parts. Pre-operational; domain decision thresholds are design estimates. |
+| 0.2 | 2026-07-20 | Domain H (Human Creative Contribution) now requires a corroborating artifact — not just a detailed submitter narrative — to reach "Verified"; uncorroborated self-attestation caps at "Partially Verified." Domain H added as a required-Verified gate for the top outcome ("Evidence Supports Intended Commercial Use") and for High confidence. Added the Version Bump Requirement to Part 7, formalizing that substantive Part 4/Part 5 changes require a version bump plus a matching update to the application's methodology-version constant in the same change set. |
 
 ---
 

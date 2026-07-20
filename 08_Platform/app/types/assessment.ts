@@ -92,7 +92,7 @@ export interface Assessment {
   submission_id: string
   assessment_number: string       // format: ASSESS-NNN-YYYY-MM-DD
   assessment_date: string         // ISO 8601 date, e.g. "2026-07-12"
-  methodology_version: string     // e.g. "SI8 Reviewer Manual v0.1"
+  methodology_version: string     // e.g. "SI8 Reviewer Manual v0.2" — set once at creation, never changed retroactively
   reviewer_organization: string   // "PMF Strategy Inc. d/b/a SuperImmersive 8"
   outcome: AssessmentOutcome
   institutional_status: InstitutionalStatus
@@ -103,6 +103,7 @@ export interface Assessment {
   numbers_asset_id: string | null     // populated after SIGNED
   signed_asset_path: string | null    // Supabase storage path; populated after SIGNED
   pdf_hash_sha256: string | null      // internal only; not displayed or embedded in v1
+  is_system_test: boolean             // true when submitter and reviewer are the same person
   created_at: string
   updated_at: string
 }
@@ -200,6 +201,7 @@ export interface VerificationPageData {
   reviewer_organization: string
   numbers_asset_id: string | null   // used to construct Numbers verification link
   processing_status: ProcessingStatus
+  is_system_test: boolean           // shown as a quiet footer disclaimer, never a banner
   // Asset section — publicly safe media description (no creator identity, no paths)
   asset_title: string
   asset_runtime: number | null      // runtime in seconds; null = not provided; format as M:SS for display
