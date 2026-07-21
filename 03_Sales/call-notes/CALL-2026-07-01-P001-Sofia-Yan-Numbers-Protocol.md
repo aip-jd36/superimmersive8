@@ -412,15 +412,148 @@ CEO | SuperImmersive 8
 
 ---
 
+## Follow-up Email — Sofia Reply Received (20 July 2026)
+
+**Subject:** Re: C2PA signing for AI-generated commercial video
+
+**Key points from Sofia's email:**
+
+1. **Manifest design validated (FACT):** the six proposed public fields (Assessment Number, Assessment Date, Reviewer Organization, Methodology Version, Outcome Code, Verification URL) confirmed as the right level of public information. Findings/confidence/evidence/residual risks/Assessment Report correctly stay private, outside the manifest.
+2. **`digitalSourceType` correction:** should sit in the content-origin layer, reflecting how the asset was actually generated/edited — independent of SI8's assessment outcome. Matches SI8's own existing framing (digitalSourceType = interoperability, not compliance).
+3. **Walk-back on scope (material change):** her earlier description of "Content Credentials applied to the final delivery file" was too generic. C2PA conformance is getting stricter — a real manifest has to reflect the actual production workflow (how the file was created, what editing happened, which assertions are true for that flow), not a one-size-fits-all signing step. Cited their own experience refining the manifest for ProofSnap (a simpler, fully-controlled capture workflow) as the reason they're now cautious about applying a generic flow to SI8's (review happens after the fact, from a third party).
+4. **No self-serve sandbox — this is now a paid annual partnership decision:**
+   - **Numbers Verification path:** NT$100,000–200,000/yr. Faster. Public claims limited to "Numbers/ERC-7053 verified," **not** C2PA conformance. Her recommended starting point if either path is pursued.
+   - **Full C2PA Conformance path:** NT$300,000/yr. Heavier workstream, external review, timeline not fully controlled by either side.
+   - Either path requires a scoping session before a formal proposal with exact terms.
+5. **Technical answers:** custom assertions are possible at the standard level, but the real gate is whether the assertion/signing path honestly represents the workflow, not JSON support per se. Recommended namespace: `com.superimmersive8.assessment.v1` (domain-controlled, versioned) instead of `si8.commercial-assurance/v1` (path-like). Size limits depend on integration path chosen — declined to quote numbers yet. Assessment Number should be a stable public pointer bound by hash/reference, not the full payload embedded. Current framing (C2PA + Numbers/ERC-7053, no Trust List claims) confirmed still correct.
+6. Reiterated the offer to keep the design conversation going even if SI8 doesn't take either paid path right now.
+
+**Raw email (Sofia → JD, Jul 20, 2026, 1:14 PM):**
+
+```
+Hi JD,
+
+Sorry for taking a while to get back to you, and thanks for the nudge this morning.
+I wanted to get everything aligned internally before writing back, so this one covers both your technical questions and the sandbox question.
+
+First off, congrats on the progress with the Assessment Service. I went through the MP4 sample and the Public Assessment Record, and the way you separated the commercial assurance layer from the provenance layer is exactly the right structure.
+
+On the manifest design, I agree with keeping it minimal and using it as a durable pointer back to the SI8 assessment. Once we define the signing workflow together, the fields you listed (Assessment Number, Assessment Date, Reviewer Organization, Methodology Version, Outcome Code, and the Verification URL pointing to your Public Assessment Record) are the right level of public, machine-readable information. Reviewer findings, confidence, evidence, residual risks and the private Assessment Report should stay outside the manifest, in your own system. One small note: I would treat digitalSourceType as part of the content-origin layer rather than the SI8 assurance layer. Its value should reflect how the asset was actually generated and edited, independent of the assessment outcome.
+
+I also want to update something from my last email. I previously described the workflow as Content Credentials applied to the final delivery file. After a deeper review with our engineering team, I want to be more precise about that. C2PA conformance is getting stricter, and a proper manifest needs to reflect the real workflow: how the file was created, what meaningful processing or editing happened, and which actions and assertions are accurate for that flow. It cannot just be a generic post-production step where a final MP4 goes in and a signed file comes out. We learned this firsthand with ProofSnap. Even though it is a controlled capture workflow, we still had to refine the manifest to represent things like watermark editing and the right created assertions. That experience made us careful about applying a generic signing flow to a different workflow like yours.
+
+Which is also my honest answer to the sandbox question. I know your integration is already sitting behind a provider abstraction and ready to switch off the mock provider, and that is solid engineering on your side. But instead of a self-serve sandbox, the way we support a workflow like SI8's is through an annual partnership program, because the integration has to be scoped around your real workflow before credentials make sense. We have now worked out how to support this commercially, and there are two paths:
+
+Numbers Verification path. Signing goes through Numbers' infrastructure, with the Numbers verification URL and the ERC-7053 provenance record as the public verification surface. The indicative annual program fee is NT$100,000 to 200,000. This is the faster way to get to a working signed assessment, and the one I would recommend starting with. One thing to be clear about for messaging: under this path, SI8's public claims would reference Numbers/ERC-7053 verification, not formal C2PA conformance.
+
+Official C2PA conformance path. This works toward formal C2PA conformance for the SI8 workflow. The indicative annual program fee is NT$300,000. As I mentioned before, this is a much heavier workstream, with external review and timelines that nobody fully controls.
+
+For either path, the exact scope and what is included would be confirmed in a formal proposal after a scoping session. And to be equally honest, if neither fits where SI8 is right now, that is completely fine. I would be glad to keep the design conversation going and revisit when the timing is right.
+
+Quick answers to your remaining technical questions. Custom third-party assertions are possible at the C2PA standard level, but the real question for Capture is not arbitrary JSON support, it is whether the assertion and signing path accurately represent the workflow. For the namespace, I would go with a domain-controlled, versioned label like com.superimmersive8.assessment.v1 instead of a path-like string like si8.commercial-assurance/v1. On size limits, the practical limits depend on the integration path, so I would rather not quote numbers before that is defined. For referencing the Assessment Number in the Numbers provenance record, my suggestion is to keep it as a stable public identifier tied to the Verification URL, and bind to the public record or evidence package by hash or reference instead of embedding the full assessment payload. And your current framing of embedded C2PA metadata plus the Numbers/ERC-7053 record, with no Trust List claims, is still exactly right.
+
+If either path sounds workable, let's set up a scoping session. Happy to do a video call, or meet in person since we are both in Taipei. We can use the sample you sent to map the actual workflow: how the asset is generated, what editing happens in between, when SI8 does the assessment, what gets publicly attested versus kept private, and what C2PA should truthfully represent. From there we can put together the formal proposal with the exact scope.
+
+I still see a strong fit here. Numbers/Capture handles the technical provenance and verification infrastructure, and SI8 provides the independent commercial assurance layer. The annual program is really just how we make sure the C2PA layer reflects your real workflow, which is what will make SI8's messaging defensible with brands and agencies.
+
+Cheers,
+Sofia Yan | Co-founder & CGO
+```
+
+---
+
+## JD → Sofia: Jul 20, 2026 (sent) — declining both paths for now
+
+**Reasoning (internal, not stated to Sofia in these terms):** Beyond budget timing, confirmed separately that neither path would have solved a live product gap anyway — C2PA/Numbers signing does not satisfy the deployer's EU AI Act Art. 50(4) disclosure obligation (that requires an actual visible label, not embedded metadata) and doesn't touch Art. 50(2) either (that's the AI tool provider's statutory obligation, not something downstream signing discharges). Consistent with SI8's own existing position of never pitching itself as an Art. 50 compliance solution.
+
+```
+Hi Sofia,
+
+Also getting back to you on this. Thanks for the detailed response and explanation. That makes sense that C2PA standards are getting stricter.
+
+Right now, I'm still trying to build up the client base for SI8 so I don't think either partner track is a fit for the next quarter.
+
+However, I do see us doing this in the (near) future. I just need to justify the demand and budget first.
+
+I would love to keep the conversation going, though. So, perhaps we can meet up for coffee again at TTA; or discuss further at the 7/30 event.
+
+Thanks!
+
+JD
+```
+
+---
+
+## AI Wave Panel Invitation — Separate Thread (Jul 21, 2026)
+
+Unrelated to the C2PA/partnership track — a speaking invitation, explicitly framed by Sofia as "no strings attached" regardless of where the Numbers partnership conversation lands.
+
+**Event:** "AI Wave 微醺夜: Trustworthy AI Starry Salon" — private after-hours salon, first evening of the AI Wave Show exhibition. Numbers-hosted, GumGum Beer & Wings (Xinyi flagship), ~30-40 guests (SME owners + media partners). Thu, **July 30, 2026**.
+
+**Format:** 3-person panel on a sofa, Sofia moderating, no slides/no jargon, ~90 sec per answer. Co-panelists: James (Business Next / 數位時代), Astro (Blocktrend / 區塊勢). Runs mostly in Mandarin.
+
+**Proposed discussion topics:** a real story of AI content nearly causing legal trouble; JD's "rule #1" for brands using AI in marketing; whether SI8 clients are paying for AI's efficiency or the risk mitigation.
+
+**JD's reply (sent):** confirmed interest, pending a calendar-conflict check to be resolved "by this evening." Comfortable with Mandarin format (may mix in English technical terms). Set an explicit boundary: will discuss market landscape / value proposition / general AI-creator-and-agency pain points, but **not** specific SI8 client stories, since the client base is still being built. Also flagged the event as a possible informal touchpoint for the C2PA scoping conversation, per the note above.
+
+**Raw email (Sofia → JD, Jul 21, 2026, 2:04 PM):**
+
+```
+Hi JD,
+
+Taking a quick detour from our C2PA thread, this one is an invitation, not more manifest homework. :)
+
+On July 30 (Thursday), the first evening of AI Wave Show exhibition, Numbers is hosting a private after-hours salon "AI Wave 微醺夜: Trustworthy AI Starry Salon" at GumGum Beer & Wings (Xinyi flagship), booked out for the night. Around 30-40 guests, mostly SME owners and media partners, craft beer and chicken wings in hand. The theme: how AI actually lands in business — safety and monetization, strictly no slides, no jargon.
+
+I'd love to have you join a panel conversation. Three speakers on a sofa, drinks in hand, and I'll moderate. The other two are James from Business Next (數位時代) and Astro from Blocktrend (區塊勢).
+
+Here's why I thought of you: "independent commercial assurance for AI video" is exactly the question this room is quietly worrying about — can I use AI content without getting into trouble? What we may share on stage:
+- A real story where AI-generated content almost got a client into legal trouble, and what happened
+- Your rule #1 for brands that want to use AI for marketing content
+- When clients pay SI8, are they buying AI's efficiency or the risk you help them avoid?
+
+The format is genuinely relaxed: no slides, no script, ~90 seconds per answer (I'll keep time), just real stories. And frankly, the room will be full of exactly the kind of companies SI8 serves — a much better intro than any pitch deck. One practical note: the panel will run mostly in Mandarin, but I'm guessing that's no problem given your TTA workshop days, but tell me if not.
+
+To be clear, this invite stands on its own, completely separate from wherever we land on the integration paths in the other thread, no strings attached. Though if you're coming anyway, we could also use that week to grab the scoping session we talked about, or you can just corner me at the bar. Event page (in Chinese, but you'll get the vibe): https://edge.omniai.one/aiwave/
+
+Would this work for you? If yes, I'll send over the full run-of-show :)
+
+Cheers,
+Sofia
+```
+
+**Raw email (JD → Sofia, Jul 21, 2026, 4:21 PM, sent):**
+
+```
+Hi Sofia,
+
+Thanks for thinking of me! I would love to attend this --- I just need to make sure I'm not needed at another commitment (I'm currently confirming).
+
+But, the format sounds great. Mandarin is fine, although I may sprinkle some english keywords in there (like C2PA, lol).
+
+Also, just want to be up front that SI8 is still in product discovery mode and I can definitely share stories from the current AI/agency market landscape. But, I won't be sharing any specific SI8 client stories (as we are still building our client base :-), but I can definitely discuss the value proposition and the market pain that AI creators / agencies / enterprises are facing when thinking about AI content commercial usage and provenance.
+
+If that's good with you, I'd love to join (and will confirm availability by this evening).
+
+Thanks!
+
+JD
+```
+
+---
+
 ## Next Steps
 
 - [x] Email Sofia with initial ideas / partnership framing
 - [x] Send follow-up question on Trust List / API credentials — **answered in her July 6 reply**
 - [x] Send sample MP4 + Chain of Title fields to Sofia for manifest mapping — **sent Jul 13, 2026**
-- [ ] Await Sofia's feedback on manifest field structure + technical questions (custom namespaces, ERC-7053 calldata, namespace convention)
-- [ ] Wait for sandbox API credentials (coming separately — she's finding the right internal path)
-- [ ] Once credentials arrive: sign real test video → open in Adobe Content Authenticity viewer → document exact Trust List display behavior before using any Trust List claims in product copy
+- [x] Await Sofia's feedback on manifest field structure + technical questions — **answered in her July 20 reply**; manifest design validated, `digitalSourceType` correction noted, namespace renamed to `com.superimmersive8.assessment.v1`
+- [x] Sandbox credentials question resolved — **no self-serve sandbox exists; replaced by a paid annual partnership decision (NT$100-200K Numbers Verification path, or NT$300K full C2PA Conformance path)**
+- [x] Decision: **declined both partnership tracks for this quarter (Jul 20)** — reasoning: still building client base, need to justify budget/demand first; separately confirmed neither path would satisfy the deployer's EU Act Art. 50(4) disclosure requirement anyway, so there's no urgent product gap being left unsolved by waiting
+- [ ] Confirm final availability for the Jul 30 AI Wave panel invite — JD said he'd confirm "by this evening" (Jul 21); verify this was actually sent
+- [ ] If attending Jul 30: use the week as an informal touchpoint to keep the C2PA scoping conversation warm, per JD's own suggestion in his Jul 20 reply
+- [ ] Revisit the Numbers partnership decision next quarter once SI8's client base and budget can justify it
 - [x] Audio file filed: `03_Sales/transcripts/Sofia Yan_070126.m4a` (local only, not in git)
 - [x] Transcript filed: `03_Sales/transcripts/sofia-yan-070126-transcript.txt` (Whisper whisper-1, bilingual EN/ZH-TW, Jul 13, 2026)
-- [ ] Revisit pilot pricing conversation on next call (not discussed)
+- [ ] Revisit pilot pricing conversation on next call (not discussed — moot for now given partnership tracks declined)
 - [ ] Track Capture's Trust List workaround progress — check again in Q4 2026
