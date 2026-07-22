@@ -9,6 +9,57 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of July 22, 2026
+*Run: 2026-07-22 · 21 high · 15 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Runtime Authority Control Is Live in Production as EU AI Act Article 50 Transparency Obligations Take Effect August 2](https://www.issuewire.com/runtime-authority-control-is-live-in-production-as-eu-ai-act-article-50-transparency-obligations-take-effect-august-2-1871201290966729) | Issuewire | Tue, 21 Jul 2026 | ☐ |
+| 9 | post+update | [EU AI content rules force publishers to label or risk 3% of turnover](https://ppc.land/eu-ai-content-rules-force-publishers-to-label-or-risk-3-of-turnover/) | PPC Land | Mon, 20 Jul 2026 | ☐ |
+| 9 | post+update | [Keeping It Real: New York’s 'Synthetic Performer' Law Takes The Stage](https://www.law.com/newyorklawjournal/2026/07/20/keeping-it-real-new-yorks-synthetic-performer-law-takes-the-stage/) | Law.com | Mon, 20 Jul 2026 | ☐ |
+| 9 | post+update | [Getty Images shares soar 200% after OpenAI strikes licensing deal](https://www.msn.com/en-in/money/general/getty-images-shares-soar-200-after-openai-strikes-licensing-deal/ar-AA26gzom) | MSN | Sat, 18 Jul 2026 | ☐ |
+| 9 | post+update | [EU AI Act: What Actually Applies on 2 August 2026](https://www.technology.org/2026/07/17/eu-ai-act-what-actually-applies-on-2-august-2026/) | Technology Org | Fri, 17 Jul 2026 | ☐ |
+| 9 | post+update | [When The Lawsuit Fails, You License: Getty’s Forced Pivot To OpenAI](https://tvnewscheck.com/ai/article/when-the-lawsuit-fails-you-license-gettys-forced-pivot-to-openai/) | TV News Check | Fri, 17 Jul 2026 | ☐ |
+| 9 | post+update | [Seedance 2.5 API Is Live: ByteDance's 30-Second AI Video Carries Unresolved Copyright Risk](https://www.techtimes.com/articles/320683/20260716/seedance-25-api-live-bytedances-30-second-ai-video-carries-unresolved-copyright-risk.htm) | Tech Times | Thu, 16 Jul 2026 | ☐ |
+| 9 | post+update | [New York’s AI Disclosure Law Is a Reckoning for Lazy Brands](https://marcommnews.com/new-yorks-ai-disclosure-law-is-a-reckoning-for-lazy-brands/) | Marketing Communication News | Wed, 15 Jul 2026 | ☐ |
+| 8 | post+update | [Anthropic pays $1.5B to settle contentious copyright case](https://www.computerworld.com/article/4199581/anthropic-pays-billion-dollar-settlement-in-copyright-case.html) | Computerworld | Tue, 21 Jul 2026 | ☐ |
+| 8 | post+update | [EU Finalizes AI Disclosure Rules as Watermarking Mandate Outpaces Technology](https://www.techtimes.com/articles/321174/20260721/eu-finalizes-ai-disclosure-rules-watermarking-mandate-outpaces-technology.htm) | Tech Times | Tue, 21 Jul 2026 | ☐ |
+| 8 | post+update | [Anthropic USD 1.5 Billion Copyright Settlement Approved by US Judge; Check Details](https://www.latestly.com/business/anthropic-usd-1-5-billion-copyright-settlement-approved-by-us-judge-check-details-7526246.html) | LatestLY | Tue, 21 Jul 2026 | ☐ |
+| 8 | post+update | [Anthropic's $1.5 Billion Copyright Settlement Approved — But the Fair Use Ruling May Cost Authors More](https://easternherald.com/2026/07/21/anthropic-copyright-settlement-fair-use-ai-training/) | The Eastern Herald | Tue, 21 Jul 2026 | ☐ |
+| 8 | update | [Anthropic’s $1.5B copyright deal leaves AI fair use unresolved](https://www.cryptopolitan.com/anthropics-1-5b-copyright-deal-leaves-ai-fair-use-unresolved/) | Cryptopolitan | Tue, 21 Jul 2026 | ☐ |
+| 8 | update | [Anthropic settles $2B copyright lawsuit over AI training data](https://cryptobriefing.com/anthropic-settles-2b-copyright-lawsuit-over-ai-training-data/) | Crypto Briefing | Tue, 21 Jul 2026 | ☐ |
+| 8 | post+update | [Beyond Celebrities: Can Ordinary Citizens Claim Personality Rights?](https://www.livelaw.in/amp/lawschool/articles/beyond-celebrities-ordinary-citizens-personality-rights-541883) | Live Law | Mon, 20 Jul 2026 | ☐ |
+| 8 | post+update | [Australia Rejects AI Copyright Carve-Out: PM Calls Unlicensed Training Theft](https://www.techtimes.com/articles/320755/20260716/australia-rejects-ai-copyright-carve-out-pm-calls-unlicensed-training-theft.htm) | Tech Times | Thu, 16 Jul 2026 | ☐ |
+| 8 | post+update | [Part 2 - AI Replica Rights and Entertainment Contracts: What Entertainment Companies Should Be Doing Now](https://www.jdsupra.com/legalnews/part-2-ai-replica-rights-and-6313743/) | JD Supra | Wed, 15 Jul 2026 | ☐ |
+| 7 | post | [AI Disclosure Is Now a Brand Trust Decision](https://www.contentgrip.com/ai-disclosure-brand-trust/) | ContentGrip | Sat, 18 Jul 2026 | ☐ |
+| 7 | update | [EXCLUSIVE: Indonesia's copyright rewrite puts Google, AI platforms on notice](https://www.reuters.com/legal/litigation/indonesias-copyright-rewrite-puts-google-ai-platforms-notice-2026-07-17/) | Reuters | Fri, 17 Jul 2026 | ☐ |
+| 7 | post+update | [Edelman Creates First Global Chief Creator Officer as AI Floods Influencer Feeds](https://www.techtimes.com/articles/320655/20260715/edelman-creates-first-global-chief-creator-officer-ai-floods-influencer-feeds.htm) | Tech Times | Wed, 15 Jul 2026 | ☐ |
+| 7 | post+update | [How Deep is Your Fake? A 3-Minute-Guide on Labelling Obligations under the EU AI Act](https://natlawreview.com/article/how-deep-your-fake-3-minute-guide-labelling-obligations-under-eu-ai-act) | The National Law Review | Wed, 15 Jul 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [EU’s AI Labeling Mandate Kicks In Next Year — But Text Gets a Pass](https://www.ad-hoc-news.de/boerse/news/ueberblick/eu-s-ai-labeling-mandate-kicks-in-next-year-but-text-gets-a-pass/69828555) | Ad-hoc-news.de | Tue, 21 Jul 2026 | ☐ |
+| 6 | monitor | [Bria aims to make enterprise AI content creation both safe and scalable](https://www.ynetnews.com/tech-and-digital/article/rjrpnkubml) | Ynetnews | Tue, 21 Jul 2026 | ☐ |
+| 6 | monitor | [Why AI risk management starts with a written policy](https://www.insurancebusinessmag.com/us/news/risk-management/why-ai-risk-management-starts-with-a-written-policy-582884.aspx) | Insurance Business | Mon, 20 Jul 2026 | ☐ |
+| 6 | monitor | [Indonesia's AI Copyright Law Rewrite: Impact on Google, Tech Platforms](https://www.globalbankingandfinance.com/indonesias-copyright-rewrite-puts-google-ai-platforms-notice/) | Global Banking & Finance Review | Fri, 17 Jul 2026 | ☐ |
+| 6 | monitor | [Google Faces Fresh Copyright Lawsuit](https://www.techrepublic.com/article/news-google-gemini-ai-training-publishers-lawsuit/) | TechRepublic | Thu, 16 Jul 2026 | ☐ |
+| 6 | monitor | [Puerto Rico bill would require labels on AI-generated ads](https://newsismybusiness.com/puerto-rico-bill-would-require-labels-on-ai-generated-ads/) | News is My Business | Thu, 16 Jul 2026 | ☐ |
+| 6 | monitor | [Insurers face hidden AI liability as agent risks multiply](https://www.insurancebusinessmag.com/us/news/technology/insurers-face-hidden-ai-liability-as-agent-risks-multiply-582433.aspx) | Insurance Business | Wed, 15 Jul 2026 | ☐ |
+| 5 | monitor | [Anthropic Faces $1.5 Billion Copyright Settlement Over Use of Books in AI Training](https://www.hokanews.com/2026/07/anthropic-faces-15-billion-copyright.html) | HOKANEWS.COM | Tue, 21 Jul 2026 | ☐ |
+| 5 | monitor | [Anthropic Copyright Settlement Gets Final Approval: $3,000 Per Book, No Binding Precedent](https://www.techtimes.com/articles/321156/20260721/anthropic-copyright-settlement-gets-final-approval-3000-per-book-no-binding-precedent.htm) | Tech Times | Tue, 21 Jul 2026 | ☐ |
+| 5 | monitor | [US Court Approves Historic $1.5 Billion Anthropic Copyright Settlement Over AI Training](https://streamlinefeed.co.ke/news/us-court-approves-historic-1-5-billion-anthropic-copyright-settlement-ai-training) | streamlinefeed.co.ke | Tue, 21 Jul 2026 | ☐ |
+| 5 | monitor | [U.S. court approves Anthropic’s $1.5 billion settlement in AI copyright lawsuit](https://nairametrics.com/2026/07/21/u-s-court-approves-anthropics-1-5-billion-settlement-in-ai-copyright-lawsuit/) | Nairametrics | Tue, 21 Jul 2026 | ☐ |
+| 5 | monitor | [Kuaishou’s AI Video Unit Valued At $18B As Spin-Off Nears](https://www.sahmcapital.com/news/content/kuaishous-ai-video-unit-valued-at-18b-as-spin-off-nears-2026-07-15) | Sahm | Thu, 16 Jul 2026 | ☐ |
+| 5 | monitor | [AI agents expose insurance blind spots, report says](https://pressinsider.com/news/ai-agents-expose-insurance-blind-spots-report-says/) | PRESS Insider | Wed, 15 Jul 2026 | ☐ |
+| 4 | monitor | [Top 5 AI Video Generation Models in 2026: A Business-Focused Guide for Creators, Brands, and Startups](https://techbullion.com/top-5-ai-video-generation-models-in-2026-a-business-focused-guide-for-creators-brands-and-startups/) | TechBullion | Sun, 19 Jul 2026 | ☐ |
+| 4 | monitor | [YouTube Wiped 35M Subscribers Over AI Slop: Now It’s Judging Your Taste](https://www.techtimes.com/articles/320629/20260715/youtube-wiped-35m-subscribers-over-ai-slop-now-its-judging-your-taste.htm) | Tech Times | Wed, 15 Jul 2026 | ☐ |
+
+---
+
 ## Week of July 19, 2026
 *Run: 2026-07-19 · 25 high · 11 monitor · lookback 7 days*
 
