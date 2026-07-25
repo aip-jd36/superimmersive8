@@ -9,6 +9,56 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of July 25, 2026
+*Run: 2026-07-25 · 19 high · 16 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [New EU Guidance on AI Transparency: What Should Companies Be Doing From 2 August 2026](https://www.pymnts.com/cpi-posts/new-eu-guidance-on-ai-transparency-what-should-companies-be-doing-from-2-august-2026/) | PYMNTS.com | Fri, 24 Jul 2026 | ☐ |
+| 9 | post+update | [Advertisers face $5,000 New York fines and 3% EU penalties over AI labels](https://ppc.land/advertisers-face-5-000-new-york-fines-and-3-eu-penalties-over-ai-labels/) | PPC Land | Fri, 24 Jul 2026 | ☐ |
+| 9 | post+update | [EU Finalizes AI Disclosure Rules as Watermarking Mandate Outpaces Technology](https://www.techtimes.com/articles/321174/20260721/eu-finalizes-ai-disclosure-rules-watermarking-mandate-outpaces-technology.htm) | Tech Times | Tue, 21 Jul 2026 | ☐ |
+| 9 | post+update | [Runtime Authority Control Is Live in Production as EU AI Act Article 50 Transparency Obligations Take Effect August 2](https://www.issuewire.com/runtime-authority-control-is-live-in-production-as-eu-ai-act-article-50-transparency-obligations-take-effect-august-2-1871201290966729) | Issuewire | Tue, 21 Jul 2026 | ☐ |
+| 9 | post+update | [EU AI content rules force publishers to label or risk 3% of turnover](https://ppc.land/eu-ai-content-rules-force-publishers-to-label-or-risk-3-of-turnover/) | PPC Land | Mon, 20 Jul 2026 | ☐ |
+| 9 | post+update | [Insurer Interest in AI Exclusions Growing as Risk Becomes Omnipresent](https://www.claimsjournal.com/news/national/2026/07/20/338950.htm) | Claims Journal | Mon, 20 Jul 2026 | ☐ |
+| 9 | post+update | [Keeping It Real: New York’s 'Synthetic Performer' Law Takes The Stage](https://www.law.com/newyorklawjournal/2026/07/20/keeping-it-real-new-yorks-synthetic-performer-law-takes-the-stage/) | Law.com | Mon, 20 Jul 2026 | ☐ |
+| 8 | post+update | [Amazon Cracks Down on AI-Generated People in Product Listings After New York Law](https://finance.biggo.com/news/1f24f4bf-4fe7-42d4-b8d7-b46565f7f365) | finance.biggo.com | Fri, 24 Jul 2026 | ☐ |
+| 8 | post+update | [Higgsfield AI tells creators they own their videos but quietly claims a perpetual worldwide license to train on them](https://startupfortune.com/higgsfield-ai-tells-creators-they-own-their-videos-but-quietly-claims-a-perpetual-worldwide-license-to-train-on-them/) | Startup Fortune | Fri, 24 Jul 2026 | ☐ |
+| 8 | post+update | [Compliance boundaries on AI-generated product testimonials](https://law.asia/ai-generated-product-testimonials/) | Law.asia | Thu, 23 Jul 2026 | ☐ |
+| 8 | update | [Critics accuse Netanyahu of mocking Eisenkot’s slain son in AI-generated ad](https://www.timesofisrael.com/critics-accuse-netanyahu-of-mocking-eisenkots-slain-son-in-ai-generated-ad/) | The Times of Israel | Tue, 21 Jul 2026 | ☐ |
+| 8 | post+update | [Time Running Out as AI Transparency Guidelines Published](https://www.williamfry.com/knowledge/time-running-out-as-ai-transparency-guidelines-published/) | William Fry | Tue, 21 Jul 2026 | ☐ |
+| 8 | post+update | [Brussels sets AI labeling rules as data errors quietly drain ad budgets](https://ppc.land/brussels-sets-ai-labeling-rules-as-data-errors-quietly-drain-ad-budgets/) | PPC Land | Tue, 21 Jul 2026 | ☐ |
+| 8 | post+update | [Getty Images shares soar 200% after OpenAI strikes licensing deal](https://www.msn.com/en-in/money/general/getty-images-shares-soar-200-after-openai-strikes-licensing-deal/ar-AA26gzom) | MSN | Sat, 18 Jul 2026 | ☐ |
+| 7 | update | [Amazon orders sellers to label AI-generated people in product images after New York law](https://startupfortune.com/amazon-orders-sellers-to-label-ai-generated-people-in-product-images-after-new-york-law/) | Startup Fortune | Fri, 24 Jul 2026 | ☐ |
+| 7 | update | [Amazon cracks down on use of AI images by sellers after New York law](https://www.cnbc.com/2026/07/23/amazon-makes-sellers-label-ai-generated-people-in-images-after-ny-law.html) | CNBC | Fri, 24 Jul 2026 | ☐ |
+| 7 | post+update | [2026 Marks Banner Year For AI Changes To Insurance Industry](https://www.law360.com/insurance-authority/specialty-lines/articles/2502060/2026-marks-banner-year-for-ai-changes-to-insurance-industry) | Law360 | Thu, 23 Jul 2026 | ☐ |
+| 7 | post+update | [Google Adds New AI Disclosure Tools for Ads](https://almcorp.com/news/google-ai-disclosure-labels-ads/) | ALM Corp | Wed, 22 Jul 2026 | ☐ |
+| 7 | post+update | [AI Disclosure Is Now a Brand Trust Decision](https://www.contentgrip.com/ai-disclosure-brand-trust/) | ContentGrip | Sat, 18 Jul 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [AB 2013: New California AI Law Mandates Disclosure of GenAI Training Data](https://perkinscoie.com/en/insights/ab-2013-new-california-ai-law-mandates-disclosure-of-genai-training-data/) | Ashurst Perkins Coie | Fri, 24 Jul 2026 | ☐ |
+| 6 | monitor | [The AI omnibus moved every deadline except the ones due next month](https://www.techi.com/eu-ai-act-omnibus-deadline-map/) | techi.com | Thu, 23 Jul 2026 | ☐ |
+| 6 | monitor | [The UAE has drawn a line on social media. AI should be next](https://www.agbi.com/opinion/media/2026/07/the-uae-has-drawn-a-line-on-social-media-ai-should-be-next/) | Arabian Gulf Business Insight \| AGBI | Thu, 23 Jul 2026 | ☐ |
+| 6 | monitor | [Anthropic pays $1.5B to settle contentious copyright case](https://www.computerworld.com/article/4199581/anthropic-pays-billion-dollar-settlement-in-copyright-case.html) | Computerworld | Tue, 21 Jul 2026 | ☐ |
+| 6 | monitor | [Anthropic settles $1,5 billion copyright infringement case, broadening the debate on AI training](https://tiinside.com.br/en/21/07/2026/Anthropic-closes-%2415-billion-settlement-in-copyright-infringement-case-and-broadens-debate-on-AI-training./) | TI INSIDE Online | Tue, 21 Jul 2026 | ☐ |
+| 5 | monitor | [India drafts ASCI guidelines for SGC in advertising \| India](https://law.asia/india-ai-advertising-guidelines/) | Law.asia | Fri, 24 Jul 2026 | ☐ |
+| 5 | monitor | [Emotion, craft and AI: how Purga Studios created an award-winning formula for Lorem Ipsum with Kling AI](https://www.campaignlive.co.uk/article/emotion-craft-ai-purga-studios-created-award-winning-formula-lorem-ipsum-kling-ai/1965421) | Campaign | Thu, 23 Jul 2026 | ☐ |
+| 5 | update | [Bria aims to make enterprise AI content creation both safe and scalable](https://www.ynetnews.com/tech-and-digital/article/rjrpnkubml) | Ynetnews | Tue, 21 Jul 2026 | ☐ |
+| 5 | monitor | [AI-Generated Content and Copyright Law: What We Know](https://builtin.com/artificial-intelligence/ai-copyright) | Built In | Tue, 21 Jul 2026 | ☐ |
+| 5 | monitor | [Top 5 AI Video Generation Models in 2026: A Business-Focused Guide for Creators, Brands, and Startups](https://techbullion.com/top-5-ai-video-generation-models-in-2026-a-business-focused-guide-for-creators-brands-and-startups/) | TechBullion | Sun, 19 Jul 2026 | ☐ |
+| 4 | monitor | [Amazon Introduces Strict AI Labelling Rules For Third-Party Sellers](https://www.latestly.com/technology/amazon-introduces-strict-ai-labelling-rules-for-third-party-sellers-7530275.html) | LatestLY | Fri, 24 Jul 2026 | ☐ |
+| 4 | monitor | [AI Bills of Materials (AI-BOMs) and Model Provenance: Contracting for Cybersecurity in AI-Enabled Manufacturing Supply Chains](https://natlawreview.com/article/ai-bills-materials-ai-boms-and-model-provenance-contracting-cybersecurity-ai?amp) | The National Law Review | Wed, 22 Jul 2026 | ☐ |
+| 4 | monitor | [Anthropic Copyright Settlement Gets Final Approval: $3,000 Per Book, No Binding Precedent](https://www.techtimes.com/articles/321156/20260721/anthropic-copyright-settlement-gets-final-approval-3000-per-book-no-binding-precedent.htm) | Tech Times | Tue, 21 Jul 2026 | ☐ |
+| 4 | monitor | [U.S. court approves Anthropic’s $1.5 billion settlement in AI copyright lawsuit](https://nairametrics.com/2026/07/21/u-s-court-approves-anthropics-1-5-billion-settlement-in-ai-copyright-lawsuit/) | Nairametrics | Tue, 21 Jul 2026 | ☐ |
+| 4 | monitor | [Why AI risk management starts with a written policy](https://www.insurancebusinessmag.com/us/news/risk-management/why-ai-risk-management-starts-with-a-written-policy-582884.aspx) | Insurance Business | Mon, 20 Jul 2026 | ☐ |
+| 4 | monitor | [Enterprise AI Companies: Landscape Breakdown in 2026](https://aimultiple.com/enterprise-ai-companies) | AIMultiple | Mon, 20 Jul 2026 | ☐ |
+
+---
+
 ## Week of July 22, 2026
 *Run: 2026-07-22 · 21 high · 15 monitor · lookback 7 days*
 
