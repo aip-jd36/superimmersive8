@@ -1,13 +1,34 @@
 # Reply Draft — B100 Ramez Tabshi
 
-**Status:** Pending send
-**Draft date:** 2026-06-28
+**Status:** Pending send (superseded draft below — this is no longer research, it's execution)
+**Draft date:** 2026-07-25 (supersedes 2026-06-28 draft, preserved below for reference)
 **Send via:** Email (jd@superimmersive8.com → t.ramez@gmail.com)
-**Context:** Ramez confirmed Jun 26 that IP ownership and commercial clearance is "exactly what they are looking for" once client legal teams get involved. This is the send-sample + call-offer reply.
+**Context:** Ramez already confirmed the product fit directly — "this is exactly what clients want." Per JD + Opus product-strategy review (Jul 2026): no further questions needed here, the move is reducing friction to an actual first assessment. Framed as validating SI8's own workflow, not as a "free trial" — a meaningfully different ask.
 
 ---
 
-## Draft
+## Current Draft (2026-07-25)
+
+Hi Ramez,
+
+I've been thinking about your comment that clients initially ask about data governance, but legal almost immediately shifts the conversation toward IP ownership and commercial clearance.
+
+That insight has had a big influence on how we've developed SI8.
+
+I'd love to test something with a real project.
+
+If you've got an upcoming campaign that will go through enterprise legal review, we'd be happy to run a full SI8 assessment at no cost. My goal isn't simply to demonstrate the product—it's to see whether the report genuinely reduces the follow-up questions you described.
+
+If it saves time, that's a win. If it doesn't, that's equally valuable feedback for us while we're refining the workflow.
+
+Would you have a project in the next few weeks that might be a good fit?
+
+Best,
+JD
+
+---
+
+## Superseded Draft (2026-06-28) — not sent, kept for reference
 
 Hi Ramez,
 
