@@ -2,7 +2,7 @@
 
 A running log of decisions, insights, and lessons learned while building an AI film distribution company.
 
-*Last updated: July 20, 2026*
+*Last updated: July 30, 2026*
 
 ---
 
@@ -5145,6 +5145,145 @@ A rule you'd honor anyway costs nothing to write down, and it's the writing down
 > We wrote it down explicitly instead, as a real rule, not an assumption. Because the temptation to quietly revisit an old, less-flattering result is real, the moment you're capable of scoring it better than you used to.
 >
 > A rule you'd honor anyway costs nothing to write down. It's the writing down a customer can actually check you against later — not the intention."
+
+---
+
+### #110: We Said No to a Partnership Because It Wouldn't Have Solved the Problem We Thought It Would
+
+**Date:** July 2026
+
+**The insight:**
+We'd been in discussion with a technical infrastructure partner about signing our reports with a durable, tamper-evident provenance record — the kind of thing that sounds obviously worth paying for. When the actual proposal came back, it wasn't a quick API integration. It was a real annual commitment, mid-five-figures to six-figures depending on which tier, plus a scoping process before we'd even get working credentials.
+
+The easy failure here would have been justifying the cost because the capability sounded important in the abstract. Instead we asked a sharper question first: would this actually solve the specific regulatory problem we were worried about?
+
+It wouldn't have. The provenance signature we'd be paying for helps prove a file's technical history — but the actual disclosure obligation we were trying to satisfy requires something visible to a human, not something embedded in metadata. Embedded proof and visible disclosure are two different things, and paying for the first doesn't get you the second. Once we'd separated those two questions cleanly, the decision made itself: not now, revisit once there's a client base and budget that actually justifies it.
+
+**Why it matters:**
+A capability can be genuinely valuable and still not be the thing solving your specific problem. The question isn't "is this good infrastructure" — it's "does this specific gap close because of this specific spend." Those are easy to conflate when a vendor's pitch is compelling.
+
+**LinkedIn-ready excerpt:**
+> "We almost signed a real annual partnership commitment — mid-five-figures to six-figures — for a technical capability that sounded obviously worth having: durable, tamper-evident proof of a file's history.
+>
+> Before signing anything, we asked one sharper question: would this actually solve the regulatory problem we thought it would?
+>
+> It wouldn't have. What we needed was a visible disclosure a human can see. What we'd have been paying for was proof embedded in metadata a human never looks at. Two different things — and paying for one doesn't get you the other.
+>
+> Once we separated those two questions cleanly, the decision made itself. Not now. Revisit once the client base justifies it.
+>
+> The capability was real. It just wasn't the answer to the question we were actually asking."
+
+---
+
+### #111: The Question We Stopped Asking About Every Lead
+
+**Date:** July 2026
+
+**The insight:**
+For months, every warm conversation got evaluated the same way: will this person buy SI8? It's the natural sales question, and it's not wrong, exactly. It's just the wrong question to lead with when you're still figuring out what the business actually is.
+
+The better question, reframing every one of our strongest conversations this month: what unique capability does SI8 provide that this person cannot easily build themselves?
+
+That reframe changes everything about how you read a reply. A sophisticated enterprise buyer can build their own documentation schema, their own internal workflow, their own required-fields checklist — they're good at process. Asking "would you buy this" gets a polite non-answer. Asking "what can't you build yourself" gets a real answer, because it's a question about their actual constraints, not about your product.
+
+We went further: every warm lead in the pipeline right now is quietly testing a different strategic question, not the same sales question with different names swapped in. One is testing whether independent judgment matters when the internal team is already excellent. One is testing which specific legal risk actually drives urgency, not just "does AI governance matter" in the abstract. One is testing whether a channel partner would risk their own credibility on a referral, and why. If we treat all of these as "close the deal," we lose the more valuable thing each conversation could actually tell us.
+
+**Why it matters:**
+"Will they buy it" is a yes/no question that ends the conversation. "What can't they build themselves" is a question about their world that keeps it going — and it's the one that actually tells you what your moat is.
+
+**LinkedIn-ready excerpt:**
+> "We stopped asking 'will this person buy SI8' about our warm leads.
+>
+> New question: what unique capability do we provide that this person cannot easily build themselves?
+>
+> It sounds like a small rewording. It changes everything about how you read a reply.
+>
+> A sophisticated buyer can build their own schema, their own workflow, their own checklist — they're good at process. Ask 'would you buy this' and you get a polite non-answer. Ask 'what can't you build yourself' and you get a real answer, because now it's a question about their constraints, not your pitch.
+>
+> We realized every warm conversation in our pipeline right now is quietly testing a different strategic question — not the same sales pitch with a different name swapped in. Treat them all as 'close the deal' and you lose the more valuable thing each one could actually tell you."
+
+---
+
+### #112: Six Conversations, Six Different Questions — and One We Chose Not to Have
+
+**Date:** July 2026
+
+**The insight:**
+Following directly from the reframe above, we rewrote our outreach to six warm leads this month — and deliberately did not write a seventh.
+
+Each of the six messages tests something different: whether an enterprise buyer sees value in an outside opinion beyond their own internal review; which specific legal risk actually worries a brand's counsel, asked as a direct multiple-choice rather than an abstract "is this important"; whether an advisor would risk referring us to his own clients, and what would actually make that worth his while; where independent assessment adds anything for someone already doing near-perfect documentation on their own; and — for the one relationship that's already past the research stage — removing friction instead of asking another question at all, by offering to run a real assessment at no cost just to see if it actually helps.
+
+The seventh conversation we didn't have: a lead we'd previously told, explicitly, that we wouldn't message again unless they replied first. It would have been easy to make an exception — he's sitting on the strongest single endorsement in our entire pipeline. We didn't. A promise you'll break under enough pressure was never really a promise, and this one wasn't under enough pressure to justify breaking it.
+
+**Why it matters:**
+Treating six similar-looking conversations as six different experiments gets you six different answers instead of one repeated guess. And a commitment you keep specifically when it's inconvenient is the only kind that actually means anything to the person you made it to.
+
+**LinkedIn-ready excerpt:**
+> "Rewrote our outreach to six warm leads this month. Each one tests something different: does an outside opinion add value over internal review, which specific legal risk actually worries counsel, would an advisor risk his own credibility on a referral and why, where does independent assessment help someone already documenting near-perfectly on their own.
+>
+> We also deliberately didn't write a seventh message.
+>
+> We'd told that lead, explicitly, no more messages unless he replies first. He also happens to be sitting on the strongest single endorsement in our whole pipeline — which made the exception tempting.
+>
+> We didn't make it.
+>
+> A promise you'll break under enough pressure was never really a promise. This one wasn't under enough pressure to justify breaking it."
+
+---
+
+### #113: Invited to the Room Before We Had a Single Customer
+
+**Date:** July 2026
+
+**The insight:**
+A partner invited us onto a panel at an industry after-hours event — 30-40 people, mostly exactly the kind of companies we're trying to reach, casual format, real stories instead of slides. The invitation was explicit that it stood on its own, unrelated to any commercial conversation happening separately.
+
+The instinct when someone offers you a stage in front of your target market is to say yes immediately and figure out what to say later. We said yes — but we also said, upfront, what we wouldn't do: share specific customer stories, because we don't have a paying customer base yet to responsibly draw stories from. We can talk about the market pain, the landscape, the pattern we're seeing across creators and agencies and enterprises. We can't manufacture war stories we haven't lived yet.
+
+That felt like a smaller, more honest offer than what we could have promised. It's also the only offer we could actually keep on stage, in front of a room, live, without slides to hide behind.
+
+**Why it matters:**
+An invitation to speak in front of your exact market is a real asset. What you say yes to should still be bounded by what's actually true right now — an audience can tell the difference between a founder describing real market pattern and one performing case studies they don't have yet.
+
+**LinkedIn-ready excerpt:**
+> "Got invited onto a panel at an industry event — 30-40 people, mostly exactly the companies we're trying to reach. No slides, no script, just real conversation.
+>
+> Easy instinct: say yes immediately, figure out what to say later.
+>
+> We said yes — but set a boundary upfront. We'll talk market pain, the pattern we're seeing across the industry, the landscape. We won't share specific customer stories, because we don't have a paying customer base yet to responsibly draw them from.
+>
+> Smaller offer than we could have made. Also the only one we could actually keep, live, in a room, with no slides to hide behind."
+
+---
+
+### #114: The Evidence We Found Validated the Market We're Actually In
+
+**Date:** July 2026
+
+**The insight:**
+We went looking for outside proof that the risks our product addresses are real — not invented by us, documented independently by lawyers and insurers. We found two bodies of evidence: one for feature film and one for commercial advertising.
+
+The film evidence was excellent and slightly deflating: it strongly validates a market segment we'd already decided to set aside for later. The advertising evidence was better news, in an unexpected way — it validates the segment we're actually pursuing right now, and it turned out to describe *more* acute pain than the film evidence did, not less. One law firm's plain finding did more work than anything we'd written ourselves: when an agency's AI-generated ad creates a legal problem, the liability lands on the brand that ran it — not the agency, not the AI tool. That's not our positioning. That's a documented legal fact, and it's the entire reason a brand's legal team has a self-interested reason to demand proof from an agency before approving anything.
+
+Before filing either document, we went back to the actual original sources rather than trusting the summarized version we'd been handed, and checked the load-bearing quotes word for word. One was accurate; the other still needs full verification before any of it gets used publicly. Small step, but the wrong quote attributed to a law firm is exactly the kind of thing that quietly undermines credibility with the sophisticated buyers we're trying to reach.
+
+**Why it matters:**
+External validation is only as good as its accuracy. And when you go looking for evidence to support your business, pay attention to which segment it actually validates — it might not be the one you expected, and that's useful information, not an inconvenience.
+
+**LinkedIn-ready excerpt:**
+> "Went looking for outside proof that the risks we help with are real — documented by lawyers and insurers, not invented by us.
+>
+> Found two bodies of evidence: one for film, one for advertising.
+>
+> The film evidence was excellent — and validated a market we'd already set aside for later. The advertising evidence validated the market we're actually in right now, and it turned out to describe more acute pain, not less.
+>
+> One finding did more work than anything we'd written ourselves: when an agency's AI-generated ad causes a legal problem, the liability lands on the brand that ran it. Not the agency. Not the AI tool.
+>
+> That's not our positioning. That's a documented legal fact — and it's the whole reason a brand's legal team has a real, self-interested reason to demand proof before approving anything.
+>
+> Before we filed any of it, we went back to the original sources instead of trusting the summary we'd been handed, and checked the load-bearing quotes word for word. One held up exactly. The other still needs checking.
+>
+> The wrong quote attributed to a law firm is exactly the kind of thing that quietly costs you credibility with the buyers you're trying to reach."
 
 ---
 
