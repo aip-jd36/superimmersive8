@@ -9,6 +9,51 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of July 31, 2026
+*Run: 2026-07-31 · 20 high · 10 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Two AI Laws Take Effect August 2. Most Ad Campaigns Fall Under Neither](https://www.totallicensing.com/two-ai-laws-take-effect-august-2-most-ad-campaigns-fall-under-neither/) | Total Licensing | Thu, 30 Jul 2026 | ☐ |
+| 9 | post+update | [CFC adds affirmative AI cover to media insurance policy](https://www.insurancetimes.co.uk/news/cfc-adds-affirmative-ai-cover-to-media-insurance-policy/1459246.article) | Insurance Times | Wed, 29 Jul 2026 | ☐ |
+| 9 | post+update | [EU AI Act Omnibus Is Law: Six Days to Transparency Deadline, Nudifier Apps Banned by December](https://www.techtimes.com/articles/321681/20260727/eu-ai-act-omnibus-law-six-days-transparency-deadline-nudifier-apps-banned-december.htm) | Tech Times | Mon, 27 Jul 2026 | ☐ |
+| 9 | update | [The Digital Omnibus on AI enters into force today](https://www.lewissilkin.com/insights/2026/07/27/the-digital-omnibus-on-ai-enters-into-force-today-102nedo) | Lewis Silkin LLP | Mon, 27 Jul 2026 | ☐ |
+| 9 | update | [The AI Act’s Transparency Obligations: Rules, Scope and Timeline](https://www.stibbe.com/publications-and-insights/the-ai-acts-transparency-obligations-rules-scope-and-timeline) | Stibbe | Mon, 27 Jul 2026 | ☐ |
+| 9 | update | [EU Digital Omnibus on AI Enters Into Force](https://www.hunton.com/privacy-and-cybersecurity-law-blog/eu-digital-omnibus-on-ai-enters-into-force) | Hunton Andrews Kurth LLP | Mon, 27 Jul 2026 | ☐ |
+| 9 | post+update | [Advertisers face $5,000 New York fines and 3% EU penalties over AI labels](https://ppc.land/advertisers-face-5-000-new-york-fines-and-3-eu-penalties-over-ai-labels/) | PPC Land | Fri, 24 Jul 2026 | ☐ |
+| 8 | post+update | [Client Alert: The New AI Coverage Fight: Exclusions, Endorsements, and Denied Claims](https://natlawreview.com/article/client-alert-new-ai-coverage-fight-exclusions-endorsements-and-denied-claims?amp) | The National Law Review | Thu, 30 Jul 2026 | ☐ |
+| 8 | post+update | [CFC Launches Affirmative AI Coverage -](https://insurance-edge.net/2026/07/30/cfc-launches-affirmative-ai-coverage/) | Insurance Edge | Thu, 30 Jul 2026 | ☐ |
+| 8 | post+update | [CFC extends affirmative AI cover to media policy, completing wider portfolio rollout](https://www.insurancebusinessmag.com/uk/news/breaking-news/cfc-extends-affirmative-ai-cover-to-media-policy-completing-wider-portfolio-rollout-584268.aspx) | Insurance Business | Thu, 30 Jul 2026 | ☐ |
+| 8 | post+update | [EU AI Act transparency deadline raises enterprise governance stakes](https://www.techerati.com/news-hub/eu-ai-act-transparency-deadline-raises-enterprise-governance-stakes/) | Techerati | Wed, 29 Jul 2026 | ☐ |
+| 8 | update | [CopySight Raises $3 Million to Build the Intellectual Property Clearance Layer for Generative AI](https://www.streetinsider.com/PRNewswire/CopySight+Raises+%243+Million+to+Build+the+Intellectual+Property+Clearance+Layer+for+Generative+AI/26831695.html) | StreetInsider | Wed, 29 Jul 2026 | ☐ |
+| 8 | post+update | [European Commission Issues EU AI Act Transparency Guidelines](https://www.hunton.com/privacy-and-cybersecurity-law-blog/european-commission-issues-eu-ai-act-transparency-guidelines) | Hunton Andrews Kurth LLP | Tue, 28 Jul 2026 | ☐ |
+| 8 | post+update | [Hawaii Enacts a ​“Synthetic Performer” Law](https://www.jdsupra.com/legalnews/hawaii-enacts-a-synthetic-performer-law-5223334/) | JD Supra | Mon, 27 Jul 2026 | ☐ |
+| 8 | update | [Generative AI – Intellectual property cases and policy tracker](https://www.mishcon.com/generative-ai-intellectual-property-cases-and-policy-tracker) | Mishcon de Reya LLP | Mon, 27 Jul 2026 | ☐ |
+| 8 | update | [Generative AI Copyright: Law, Litigation & Best Practices in 2026](https://aimultiple.com/generative-ai-copyright) | AIMultiple | Fri, 24 Jul 2026 | ☐ |
+| 7 | post+update | [YouTube Expands Likeness Detection To Celebrities, Talent Agencies 04/22/2026](https://www.mediapost.com/publications/article/414476/youtube-expands-likeness-detection-to-celebrities.html) | MediaPost | Thu, 30 Jul 2026 | ☐ |
+| 7 | post+update | [EU’s AI Act ‘Teeth Pulled’ by Digital Omnibus Deferring High-Risk Obligations 16 Months](https://forkast.news/eus-ai-act-teeth-pulled-by-digital-omnibus-deferring-high-risk-obligations-16-months/) | forkast.news | Wed, 29 Jul 2026 | ☐ |
+| 7 | post+update | [EU Triggers Massive AI Law: How New Deepfake Labels Affect Global Tech](https://streamlinefeed.co.ke/news/eu-triggers-massive-ai-law-how-new-deepfake-labels-affect-global-tech) | streamlinefeed.co.ke | Wed, 29 Jul 2026 | ☐ |
+| 7 | monitor | [Could Australian Businesses Be Next? The Potential Impact Of New York’s AI Ad Disclosure Laws](https://smbtech.au/blog/could-australian-businesses-be-next-the-potential-impact-of-new-yorks-ai-ad-disclosure-laws/) | SMBtech | Mon, 27 Jul 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [EU AI Act — Commission Confirms Transparency Code of Practice as Adequate and Publishes Final Version of Its Guidelines on Transparency Obligations](https://www.faegredrinker.com/en/insights/publications/2026/7/eu-ai-act-commission-confirms-transparency-code-of-practice-as-adequate-and-publishes-final-version-of-its-guidelines-on-transparency-obligations) | Faegre Drinker Biddle & Reath LLP | Thu, 30 Jul 2026 | ☐ |
+| 6 | monitor | [Nitin Gadkari's deepfake suit puts spotlight on social media platforms' AI obligations and safe harbour protections](https://www.storyboard18.com/amp/digital/gadkaris-deepfake-suit-puts-spotlight-on-platforms-ai-obligations-and-safe-harbour-protections-106015.htm) | Storyboard18 | Thu, 30 Jul 2026 | ☐ |
+| 6 | update | [CopySight Raises $3 Million Seed Round to Expand AI Copyright Risk Platform](https://www.citybiz.co/article/881122/copysight-raises-3-million-seed-round-to-expand-ai-copyright-risk-platform/) | citybiz | Wed, 29 Jul 2026 | ☐ |
+| 6 | monitor | [Google Ads Adds AI Content Labels to Its Asset Studio](https://www.thekeyword.co/news/google-ads-ai-content-labels) | thekeyword.co | Wed, 29 Jul 2026 | ☐ |
+| 6 | monitor | [New Law Requires AI Disclosure on Israeli Election Campaign Ads](https://www.haaretz.com/israel-news/israel-politics/2026-07-27/ty-article/.premium/campaign-ads-must-disclose-ai-use-under-new-election-rules/0000019f-a0a9-dcf3-a9df-a7bb647a0000) | Haaretz | Mon, 27 Jul 2026 | ☐ |
+| 6 | monitor | [Artificial Intelligence and law: What legal teams need to know](https://legal.thomsonreuters.com/blog/artificial-intelligence-and-law-guide/) | Thomson Reuters Legal Solutions | Fri, 24 Jul 2026 | ☐ |
+| 5 | monitor | [EU AI Act Update: Digital Omnibus Finalizes 8 Compliance Changes](https://www.jdsupra.com/legalnews/eu-ai-act-update-digital-omnibus-4840169/) | JD Supra | Thu, 30 Jul 2026 | ☐ |
+| 5 | monitor | [Stichtag 2. August: Neues KI-Gesetz tritt in Kraft – Warum fast jedes Unternehmen jetzt seine KI-Texte kennzeichnen muss - Xpert.Digital](https://xpert.digital/en/new-ai-law-comes-into-force/) | Konrad Wolfenstein | Wed, 29 Jul 2026 | ☐ |
+| 5 | monitor | [FACTBOX – Major fines, lawsuits against Big Tech over AI and data practices](https://www.usmuslims.com/service/amp/factbox-major-fines-lawsuits-against-big-tech-over-ai-and-data-practices-362702h.htm) | usmuslims.com | Fri, 24 Jul 2026 | ☐ |
+| 4 | monitor | [Adobe is building an AI content empire through Firefly Foundry, Topaz Labs, and a string of capability acquisitions](https://www.marketscale.com/industries/software-and-technology/adobe-is-building-an-ai-content-empire-through-firefly-foundry-topaz-labs-and-a-string-of-capability-acquisitions) | MarketScale | Thu, 30 Jul 2026 | ☐ |
+
+---
+
 ## Week of July 28, 2026
 *Run: 2026-07-28 · 27 high · 10 monitor · lookback 7 days*
 
