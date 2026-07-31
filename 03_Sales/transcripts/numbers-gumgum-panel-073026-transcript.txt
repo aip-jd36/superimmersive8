@@ -1919,7 +1919,11 @@
 [44:27] 來
 [44:28] 我們請毛點音
 
---- [CORRECTION, added 2026-07-31] "毛點音" is a Whisper mis-transcription, most likely of "SI8" spoken aloud in a Mandarin-accented sentence. The speaker in this Open Mic Q&A segment is JD Chang, describing SI8 to a banker in the audience — not a third-party company. Confirmed directly by JD. Do not read this section as evidence of a competitor. ---
+--- [CORRECTION v2, added 2026-07-31 — supersedes the v1 correction below it in this file's edit history] Business cards collected at the event confirm the self-introduction at [44:42]-[44:43] ("我是[Anchor Film]的共同創辦人" — "I am the co-founder of [Anchor Film]") matches Alice Feng (馮鈺婷), co-founder of Anchor Film (錨點影音股份有限公司) — a Taiwan video company. "毛點音" is Whisper mis-hearing "Anchor Film" / 錨點影音, not "SI8" as the first correction pass assumed.
+
+However: JD separately recalls having a simultaneous side conversation with an investor/banker about SI8 during this same window, and the transcript shows real signs of blending. The "公司是在美國...但主要我們是跟歐洲的Agency去跟他們互動" (company is in the US... mainly working with European agencies) language at [46:32]-[46:53] fits SI8 far better than Anchor Film — SI8/PMF Strategy Inc. is US-registered with active European outreach; Anchor Film is Taiwan-registered per its own card. The $500/video pricing and "AI + human review → report, flag risky sections" description at [45:57]-[46:31] sits between Alice's clear self-intro and this SI8-sounding stretch, and cannot be reliably attributed to either speaker from text alone — Whisper does not separate overlapping speakers. Treat this specific stretch as an unresolved blend of two simultaneous conversations, not confirmed information about either company. Do not cite the $500 figure or the Chunghwa Telecom/European-agency client claims as confirmed facts about Anchor Film without independent confirmation from Alice directly. ---
+
+--- [CORRECTION v1, added 2026-07-31, SUPERSEDED by v2 above — kept for edit-history transparency] "毛點音" is a Whisper mis-transcription, most likely of "SI8" spoken aloud in a Mandarin-accented sentence. The speaker in this Open Mic Q&A segment is JD Chang, describing SI8 to a banker in the audience — not a third-party company. Confirmed directly by JD. Do not read this section as evidence of a competitor. ---
 
 [44:40] 喂喂
 [44:41] 哈囉大家好
