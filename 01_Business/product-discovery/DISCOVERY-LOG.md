@@ -13,6 +13,21 @@
 
 ## Log
 
+### 2026-08-04 — The Enterprise Trigger (T4/T5) Is Almost Never Observed
+**Insight:** Tested whether "Commercial Assurance is too early" (Possibility A) vs. "the trigger exists but is uninstrumented" (Possibility B) by searching every available source — CRM notes, call notes, discovery logs, not just the 642-reply LinkedIn set — for actual observed enterprise-approval events (T4) or post-delivery risk events (T5), classified on a T0–T5 taxonomy. T5 (dispute/claim/litigation/insurance denial/audit) is a clean zero across every source. T4 (an actual external review/approval event) was found exactly 6 times against several hundred contacts (~1% base rate) — but all 6 cluster inside large/institutional/regulated-adjacent buyers (State Street, government/health-board clients, Amazon, Sony Pictures, an enterprise-clients Dubai agency), none from small agencies or general consumer brands. The one campaign explicitly labeled/targeted for finserv (Legal Friction — FinServ) produced a clean null result — zero T3+ signal — while every real T4 example came from unfiltered outreach that happened to land on a large buyer.
+
+**Source:** Full re-investigation across `CRM.md`, `DISCOVERY-PIPELINE.md`, `DISCOVERY-PERFORMANCE-LOG.md`, all 4 call-notes files, and the previously-analyzed LinkedIn dataset re-classified under the new taxonomy. August 4, 2026.
+
+**Product implication:** Verdict is closer to Possibility B than A, but weakly — 6 data points can't rule out that the trigger is simply rare everywhere, including inside a deliberately-built HGE population. Don't build messaging or roadmap around "the trigger is common." Don't treat the E&O/insurance angle as validated — zero supporting evidence, not weak evidence. The FinServ-label null result is a real caution for Standing Encore's HGE/SCE design: institutional buyer scale may matter more than industry-sector labeling. Recommend tracking T4 mentions as an explicit Standing Encore metric, separate from reply rate.
+
+**Status:** Hypothesis-testing complete, conclusion inconclusive by design — insufficient volume to fully resolve Possibility A vs. B. Feeds directly into the Standing Encore HGE/SCE experiment design.
+
+**Deep-dive:** [`insights/2026-08-04-t4-t5-trigger-investigation.md`](insights/2026-08-04-t4-t5-trigger-investigation.md)
+
+**Version impact:** None yet — informs GTM/Standing Encore design, not product architecture
+
+---
+
 ### 2026-06-25 — Capture Integration Confirmed: MP4, Custom Assertions, Workflow Aligned
 
 **Insight:** Sofia Yan (Co-founder & CGO, Numbers Protocol) replied to JD's outreach same day. Three critical unknowns resolved in one email: (1) MP4/MOV/WebM video signing confirmed; (2) custom C2PA assertions confirmed — she specifically named "mapping your review documentation into structured C2PA assertions"; (3) the "sign final delivered MP4 before client handoff" workflow is confirmed as something Capture supports. Meeting being arranged in Taipei.

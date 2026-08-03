@@ -1,6 +1,6 @@
 # SI8 Split Test Log
 **Purpose:** Track active split tests — hypothesis, lead assignments, results, learnings
-**Updated:** 2026-06-16
+**Updated:** 2026-08-03 (Open Questions — Test A/Standing Encore entry added)
 **Framework shift:** Format tests (1, 2, 3, 6) retired 2026-06-11. Pain-discovery tests (A–E) replace them. Tests 4, 5, 7, 8, 9 ongoing.
 
 ---
@@ -526,7 +526,10 @@ US hook: "NY just passed the first US law creating direct advertiser liability f
 
 ## Open Questions
 
-- [ ] **Test A**: Identify 3–5 more leads with confirmed regulated-sector client exposure for v-A cohort. Cross-reference CRM for finance, pharma, legal, healthcare sector mentions in conversation notes.
+- [ ] **Test A**: Identify 3–5 more leads with confirmed regulated-sector client exposure for v-A cohort. Cross-reference CRM for finance, pharma, legal, healthcare sector mentions in conversation notes. **Superseded in practice by the entry below** — retroactive cohort-building alone was never going to satisfy the 5+/arm threshold (v-B has never had a single lead assigned), so this is being replaced by a real prospective experiment rather than continued patching.
+- [ ] **Test A / Standing Encore — design a true controlled experiment (opened 2026-08-03):** Confirmed on review that Test A has never actually been run as a prospective, single-variable audience split. Variant A (regulated-sector exposure) has only 2 leads, both retroactively tagged from replies to unrelated campaigns (Legal Friction, EU Act) — not sourced from a purpose-built list. Variant B (general-agency control) has zero leads assigned, ever. The evidence for the hypothesis is real (100% T1 on the finserv/holdco cluster, 2 consecutive monthly cycles, zero counter-examples) but entirely observational, not experimental.
+  Compounding blocker: LinkedIn Sales Navigator has no filter for "who this company's clients are," only for the lead's own company's industry. The obvious workaround — filtering by "Financial Services" company industry — was already tried and confirmed to fail (see `ICP-DEFINITIONS.md` ICP 1b: "pulls financial advisors/analysts and off-target profiles, not Art Directors... do not launch another campaign using this filter"). Current workarounds (named-account targeting at known finserv-serving agency networks, geographic proxy via Dubai/Singapore, Apollo bio-keyword search, warm referrals) are all partial and none scale cleanly to a 500-name prospective list.
+  **Status:** externally consulting ChatGPT + Opus (2026-08-02/03) to design a real Standing Encore Signal Test (500 sends, single variable, controlled) that isolates regulated-sector client exposure as the discriminant, using one or more of the above proxies in place of a direct Sales Nav filter — and to get a second opinion on whether the resulting targeting noise is tolerable for a valid single-variable test. Awaiting their revised experiment design before this moves to `standing-encore/SIGNAL-TEST-LOG.md` as SE-002 (or folded into SE-001's design, TBD).
 - [ ] **Test C**: Send direct follow-up to Alex Jenkins (B146) — "has it held anything up yet?" One message, no re-pitch.
 - [ ] **Test D**: Design v-D1 message (pre-production framing) and identify warm leads to assign. First candidates: leads who described workflow/process concerns, not just post-delivery approval.
 - [ ] **Test E**: Send direct nudge to James Hilditch (B139, BearJam) using v-E1 probe format. No structural excuse for his silence.
