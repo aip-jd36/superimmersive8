@@ -143,10 +143,11 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | 2026-08-05, via direct fetch of official Midjourney ToS (GitHub-hosted primary source) |
 | Source | Midjourney Terms of Service — https://github.com/midjourney/docs/blob/main/terms-of-service-discord.md (primary source, directly fetched and quoted; Midjourney's own GitHub org). A separate `docs.midjourney.com` help-center article specifically on commercial use was found but returned HTTP 403 (blocked) — the GitHub-hosted ToS was used instead and is itself the primary legal document, not a secondary summary. |
 | Status | **Verified** |
-| CRC-Eligible | **Pending** |
-| CRC Publication Scope | — |
-| CRC Decision Date | — |
-| CRC Approver | — |
+| CRC-Eligible | **Yes** |
+| CRC Publication Scope | CRC may state only that Midjourney's commercial-use permissions differ by subscription under the current Terms: free users are limited to non-commercial use, while paid members may use generated assets commercially. CRC may also state that Midjourney's Terms require a corporate membership plan when the Service is used for the benefit of a company with more than US$1 million in annual gross revenue. This publication scope does not extend to Midjourney's ownership language, copyright analysis, training-data licensing, downstream IP clearance, or broader commercial-readiness conclusions. |
+| CRC Candidate Statement (reference only, not yet a user-facing Knowledge Card) | Midjourney's commercial-use permissions depend on your subscription. Under the current Terms, free users are limited to non-commercial use, while paid members may use generated assets commercially. If the Service is being used for the benefit of a company with more than US$1 million in annual gross revenue, Midjourney's Terms also require a corporate membership plan. |
+| CRC Decision Date | 2026-08-05 |
+| CRC Approver | JD |
 
 ### ElevenLabs
 
