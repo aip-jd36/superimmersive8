@@ -95,6 +95,8 @@ This sits alongside, not inside, `06_Operations/reviewer-workbook/` — the Manu
 
 Added when CRC's Knowledge Projection Layer design surfaced a conflation: `Status = Verified` measures confidence in the underlying fact, not confidence in releasing that fact through an unsupervised channel with no human review at time of use. Those are different judgments, and the Matrix now tracks them separately rather than letting a Projection Layer infer publication approval from verification status alone.
 
+**The judgment behind each Yes/No decision — not just the mechanical field states below — is governed by `notebook/CRC-PUBLICATION-POLICY.md`.** This section defines what `CRC-Eligible` *is*; that document defines the principles for deciding it.
+
 **Definitions:**
 - **Yes** — Status = Verified, and JD has separately approved the row for release through the unsupervised CRC channel.
 - **No** — the row may be Verified, but its content is not appropriate for CRC publication.
