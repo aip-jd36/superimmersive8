@@ -166,13 +166,14 @@
 
 ---
 
-## 2. 1st Mtg Scheduled (1)
+## 2. 1st Mtg Scheduled (2)
 
 *Call confirmed on calendar.*
 
 | B-ID | Lead | Company | Geo | Call Date | Format | Prep Notes |
 |------|------|---------|-----|-----------|--------|------------|
 | B101 | Anas Bakal | Monoud Trading | Dubai/UAE | TBD (Calendly self-scheduled) | Calendly (JD leads) | 3-point structured reply Jun 22: (1) licensing AI tools for specific commercial use; (2) prompt logs/generation settings for provenance; (3) digital labeling/signature requirements from platform regulations. Title: AI Creative Director | Luxury Brand Experience Architect. Gate Qs: is documentation requirement written/contractual or conversational? AI campaign volume per month? Direct brand relationships or through agency? |
+| B166 | Damien Barron-Tan | Carbon Moves (unconfirmed, inferred from email domain) | Unknown (invitee timezone: Hong Kong) | Aug 13, 2026, 10:00 AM Taipei | Zoom (Calendly self-scheduled) | Booked directly, no prior outreach campaign on file — first contact, not a Dripify sequence conversion. Booking note reads "please use this time slot for a networking & learning call" signed JD — suggests possible existing personal/warm connection not yet reflected here; confirm before the call. No title/role known. |
 
 ---
 
