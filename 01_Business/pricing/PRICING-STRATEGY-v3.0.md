@@ -8,6 +8,20 @@
 
 ---
 
+## Update — 2026-08-05: Legacy Self-Serve Narrative Retired (Superseded by CRC)
+
+**Decision:** Motion 1 (Legacy Self-Serve, $29 Creator Record) is no longer part of SI8's forward-looking product narrative. Going forward the story is: **free AI-assisted Commercial Readiness Check (CRC) → paid, human-reviewed Assessment** (Agency/Enterprise motions, unchanged below).
+
+**What changes:** the free-tier narrative. CRC (`08_Platform/prds/PRD_CRC_v1.0.md`, frozen 2026-08-05) replaces Motion 1 as the thing SI8 leads with ahead of a paid engagement. CRC is free with no payment step at all — this is not a repriced or repositioned version of the $29 product, it's a different mechanism entirely (AI-assisted interview, not self-attested submission).
+
+**What does not change:** Motion 2 (Agency, $499 floor hypothesis) and Motion 3 (Enterprise, custom-scoped) are untouched by this decision — same pricing philosophy, same "identical methodology across every motion" principle stated in the Executive Summary below.
+
+**Infrastructure disposition (decided 2026-08-05):** the existing $29 RecordForm infrastructure (Stripe product, `/record` route, auto-approval webhook, self-attested PDF generator) is **left dormant, not deprecated.** No code changes triggered by this decision — JD explicitly chose not to touch it. It simply stops being part of the narrative or funnel going forward: same "unmarketed, no sales effort" posture Motion 1 already had since 2026-07-19, now permanent rather than provisional.
+
+**Effect on the Motion 1 open question below:** the "inbound-handling process for freelancers who reach out anyway" question (under Open Questions) is superseded, not resolved — there's no active narrative pointing anyone toward the $29 product anymore to trigger that inbound in the first place. Left in place rather than deleted, consistent with this document's practice of preserving prior reasoning rather than silently editing it out.
+
+---
+
 ## Executive Summary
 
 Three motions, not one product with tiers:
@@ -81,7 +95,7 @@ Three motions, not one product with tiers:
 
 ## Open Questions Carried Into This Version
 
-- Legacy self-serve inbound handling — automated router or manual reply? Script not finalized.
+- Legacy self-serve inbound handling — automated router or manual reply? Script not finalized. **Superseded 2026-08-05** — see Update section above; moot now that CRC is the active free-tier narrative.
 - No price-publication trigger threshold defined — deliberately left open.
 - No formal price-ceiling test protocol — ad hoc/discount-lever approach chosen instead; this means learning will be anecdotal (per-call judgment) rather than structured data. Worth revisiting if/when enough calls accumulate to look for a pattern.
 
