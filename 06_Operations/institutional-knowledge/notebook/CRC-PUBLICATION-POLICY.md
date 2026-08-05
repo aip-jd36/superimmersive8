@@ -27,7 +27,7 @@
 3. Is the verification's scope narrower than the tool's full offering, and does the card say so?
 4. If a user acted on this fact alone, would they be reasonably informed, or quietly under-informed?
 5. Is the underlying platform term itself new enough that SI8 hasn't yet seen how it holds up?
-6. For a compound row (mixed-confidence claims within one Tool): does `CRC Publication Note` name the exact claim being approved, and confirm the weaker sub-claim is excluded — not just that the row overall is Verified?
+6. For a compound row (mixed-confidence claims within one Tool): does `CRC Publication Scope` name the exact claim CRC is permitted to state, and confirm the weaker sub-claim is excluded — not just that the row overall is Verified?
 
 A No on any of these is a real reason to narrow, rewrite, or withhold — not just note and proceed.
 

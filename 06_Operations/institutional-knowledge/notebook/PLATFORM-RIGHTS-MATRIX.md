@@ -19,7 +19,7 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Source | Runway Terms of Use, §4.4 and §5 — https://runway.com/terms-of-use (primary source, directly fetched and quoted) |
 | Status | **Verified** — ownership, commercial-use grant, and training-data collection basics confirmed directly against primary source text. Enterprise training opt-out claim remains unconfirmed (see Training Data Disclosure). |
 | CRC-Eligible | **Pending** |
-| CRC Publication Note | — |
+| CRC Publication Scope | — |
 | CRC Decision Date | — |
 | CRC Approver | — |
 
@@ -36,7 +36,7 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Source | Direct automated fetch still not achieved by this tool across four domain variants (`kling.ai`, `klingai.com`, `app.klingai.com` — all HTTP 446; `home.kling.ai` as referenced by JD does not resolve via DNS from this environment — **worth JD double-checking that exact hostname**, since it may be a typo, a VPN/region-gated address, or an internal-only mirror). Verification for this row rests on convergent evidence: three independently-run search queries returning mutually consistent, increasingly specific legalese-quality excerpts, plus JD's own direct browser read. Treated as primary-source verification performed by JD directly, not by this tool's automated fetch — a distinct but equally legitimate verification modality (see MATRIX-LEARNINGS.md). |
 | Status | **Verified** — on the strength of JD's direct primary-source read, corroborated independently (not merely accepted) by three convergent secondary excerpts this pass gathered separately. Automated re-fetch by this tool remains blocked; if that ever becomes necessary to reproduce independently of JD's own access, it hasn't been solved, only worked around. |
 | CRC-Eligible | **Pending** — Verified unlocks eligibility for review; it does not itself grant CRC-Eligible = Yes, per the Matrix's own governance rule. |
-| CRC Publication Note | — |
+| CRC Publication Scope | — |
 | CRC Decision Date | — |
 | CRC Approver | — |
 
@@ -53,7 +53,7 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Source | Direct fetch not achieved across `pika.art/terms-of-service` (JS-rendered), `launch.pika.art/terms-of-service` (TLS error, prior pass), `early-access.pika.art/terms-of-service` (401 auth-gated, this pass). Verification for this row rests on a specific, independently-located search-indexed excerpt matching JD's direct browser read — same convergent-evidence modality as Kling. Note: non-official lookalike domains (pikalabsai.net, pika-video.com, pika-art.net, pika.group, pikalabs.io) remain unused as sourcing. |
 | Status | **Verified** — on the same convergent-evidence basis as Kling: JD's direct primary-source read, independently corroborated by a specific quoted excerpt this pass located separately rather than simply accepting JD's report at face value. |
 | CRC-Eligible | **Pending** |
-| CRC Publication Note | — |
+| CRC Publication Scope | — |
 | CRC Decision Date | — |
 | CRC Approver | — |
 
@@ -72,7 +72,7 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Source | Attempted: `cloud.google.com/terms/generative-ai-indemnified-services` (truncated before relevant content). Secondary sourcing only otherwise. Note: search results also surfaced non-official lookalike domains (veo3-1.me, veo3o1.com, veo3ai.io) — none used as sourcing here. |
 | Status | **Needs Reverification** — treat as "likely similar to Nano Banana's confirmed pattern, not yet independently checked," not as verified. |
 | CRC-Eligible | **Pending** — Status is Needs Reverification, not Verified, so CRC-Eligible is Pending by definition |
-| CRC Publication Note | — |
+| CRC Publication Scope | — |
 | CRC Decision Date | — |
 | CRC Approver | — |
 
@@ -89,7 +89,7 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Source | Attempted: `business.adobe.com/products/firefly-business/firefly-ai-approach.html` (timeout), `helpx.adobe.com/firefly/web/get-started/learn-the-basics/adobe-firefly-faq.html` (timeout), `wwwimages2.adobe.com/.../adobe-generative-ai-product-specific-terms-...pdf` (unparseable binary PDF). Obtained: Computerworld, "Adobe offers copyright indemnification for Firefly AI-based image app users" — journalism quoting an Adobe spokesperson directly, but dated to the 2023 beta announcement (historical corroboration, not current-terms confirmation). |
 | Status | **Needs Reverification** — unchanged from before this pass, but now for a more precise reason: a genuine attempt was made and partially succeeded (historical claim origin confirmed) without reaching current primary-source terms. Effort spent does not equal verification achieved — see MATRIX-LEARNINGS.md. |
 | CRC-Eligible | **Pending** — Status is Needs Reverification, not Verified, so CRC-Eligible is Pending by definition; Yes and No are not meaningful until Status resolves to Verified |
-| CRC Publication Note | — |
+| CRC Publication Scope | — |
 | CRC Decision Date | — |
 | CRC Approver | — |
 
@@ -106,7 +106,7 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Source | OpenAI Help Center (primary source) — corrects an earlier version of this row that cited only `CLAUDE.md`'s internal marketing-copy note ("OpenAI shut down Sora, Mar 2026"), which was accurate as to the announcement timing but imprecise as to the actual discontinuation dates. Kept here as a reminder: an internal doc citing a fact is not the same as a primary-source verification of that fact — this row was corrected exactly because the distinction wasn't being enforced. |
 | Status | **Verified — discontinuation dates.** Historical commercial ToS terms (what Sora's paid-tier commercial rights actually were while live) remain **Unconfirmed**. Kept as a tool option in RecordForm/CertForm so creators with pre-shutdown Sora footage can still submit it. |
 | CRC-Eligible | **Pending** — Status is a compound value (Verified for discontinuation dates only, Unconfirmed for historical ToS terms), not a clean Verified, so CRC-Eligible is Pending by definition until Status resolves to a single unambiguous value |
-| CRC Publication Note | — |
+| CRC Publication Scope | — |
 | CRC Decision Date | — |
 | CRC Approver | — |
 
@@ -125,7 +125,7 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Source | Gemini API Additional Terms of Service — https://ai.google.dev/gemini-api/terms (primary source, directly fetched and quoted). Does **not** cover the free consumer Gemini app's own terms (`policies.google.com/terms/generative-ai`), which were identified but not fetched separately — flagged as a gap, not silently assumed identical. |
 | Status | **Verified** — for the Gemini API access path specifically. Consumer-app terms and Vertex AI enterprise terms are separate surfaces not covered by this row; do not assume this row's findings apply to those paths without checking. |
 | CRC-Eligible | **Pending** |
-| CRC Publication Note | — |
+| CRC Publication Scope | — |
 | CRC Decision Date | — |
 | CRC Approver | — |
 
@@ -142,7 +142,7 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Source | Midjourney Terms of Service — https://github.com/midjourney/docs/blob/main/terms-of-service-discord.md (primary source, directly fetched and quoted; Midjourney's own GitHub org). A separate `docs.midjourney.com` help-center article specifically on commercial use was found but returned HTTP 403 (blocked) — the GitHub-hosted ToS was used instead and is itself the primary legal document, not a secondary summary. |
 | Status | **Verified** |
 | CRC-Eligible | **Pending** |
-| CRC Publication Note | — |
+| CRC Publication Scope | — |
 | CRC Decision Date | — |
 | CRC Approver | — |
 
@@ -161,7 +161,7 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Source | ElevenLabs Terms of Use — https://elevenlabs.io/terms-of-use (primary source, directly fetched and quoted); ElevenLabs Safety page — https://elevenlabs.io/safety (primary source, directly fetched and quoted). Prohibited Content & Uses Policy referenced but not independently fetched this pass. |
 | Status | **Verified** — for commercial-use tiering and ownership. Celebrity/consent-specific restrictions confirmed at the product-feature level; the underlying detailed policy document remains unread, so treat the consent-mechanism specifics as **Needs Reverification** even though the row's overall Status is Verified for the core commercial terms. |
 | CRC-Eligible | **Pending** — per claim-level approval (see `PRD_LIVING_NOTEBOOK.md` § CRC-Eligible Governance), a Yes on this row can only ever scope to the confirmed commercial-tiering/ownership statement — the consent-specific sub-claim cannot become CRC-Eligible until it independently resolves to Verified, regardless of what the rest of the row decides. |
-| CRC Publication Note | — |
+| CRC Publication Scope | — |
 | CRC Decision Date | — |
 | CRC Approver | — |
 
@@ -172,4 +172,4 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 - Every row except Sora's discontinuation dates is currently `Unconfirmed` or `Needs Reverification` — that's an honest starting state, not an oversight. This matrix has not yet been populated by a deliberate ToS review pass; it's been populated by what naturally surfaced in marketing and positioning work.
 - The highest-value next step for this file specifically (not committed, just the obvious candidate) would be a single focused pass verifying Runway, Kling, and Pika's current commercial terms directly against their own ToS pages, since those are the three tools actually named in live marketing copy — and since the Sora row above is a live example of why a secondary/internal citation isn't sufficient sourcing for a `Verified` status.
 - **CRC-Eligible (added 2026-08-05):** every row is currently `Pending` — nothing is grandfathered in as eligible for the unsupervised CRC channel, including rows with a `Verified` Status. `CRC-Eligible` is a separate, JD-owned publication-approval decision, distinct from `Status` (which measures confidence in the underlying fact, not confidence in releasing it through an automated channel with no human review at time of use). Schema, governance, and reset rules: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platform Rights Matrix § CRC-Eligible Governance.
-- **CRC Publication Note / CRC Decision Date / CRC Approver (added 2026-08-05):** accompany `CRC-Eligible` on every row, all currently `—` since no publication decisions have been made yet. Approval is claim-level, not row-level — `CRC Publication Note` must record the exact statement being approved (and, for compound rows like ElevenLabs, exactly which sub-claim is excluded), not just restate that the row is generally trustworthy. Judgment for filling these in: `notebook/CRC-PUBLICATION-POLICY.md`.
+- **CRC Publication Scope / CRC Decision Date / CRC Approver (added 2026-08-05; field renamed from "CRC Publication Note" 2026-08-05 after the Runway review surfaced a wording risk — "approved" read as SI8 approving the platform, not JD scoping a statement for release):** accompany `CRC-Eligible` on every row, all currently `—` since no publication decisions have been made yet. Approval is claim-level, not row-level — `CRC Publication Scope` must record the exact statement CRC is permitted to make (and, for compound rows like ElevenLabs, exactly which sub-claim is excluded), not just restate that the row is generally trustworthy. **For a `No` decision, write `None — withheld because...` rather than the reason alone** — the field should still read as a scope (zero, stated explicitly) even when nothing is approved, not drift into a generic notes field. Judgment for filling these in: `notebook/CRC-PUBLICATION-POLICY.md`.
