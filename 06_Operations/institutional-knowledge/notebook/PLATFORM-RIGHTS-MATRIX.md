@@ -18,6 +18,7 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | Never |
 | Source | — |
 | Status | **Unconfirmed** |
+| CRC-Eligible | **Pending** |
 
 ### Kling
 
@@ -31,6 +32,7 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | Never |
 | Source | — |
 | Status | **Unconfirmed** |
+| CRC-Eligible | **Pending** |
 
 ### Pika
 
@@ -44,6 +46,7 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | Never |
 | Source | — |
 | Status | **Unconfirmed** |
+| CRC-Eligible | **Pending** |
 
 ### Google Veo
 
@@ -57,6 +60,7 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | Never |
 | Source | — |
 | Status | **Unconfirmed** |
+| CRC-Eligible | **Pending** |
 
 ### Adobe Firefly
 
@@ -70,6 +74,7 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | Never (positioning claim only, not a reviewed ToS) |
 | Source | `CLAUDE.md` competitive differentiation language (secondary/internal source, not Adobe's own documentation) |
 | Status | **Needs Reverification** — the competitive claim depends on this being accurate; do a direct ToS/indemnification-terms check before this is repeated somewhere it could be challenged |
+| CRC-Eligible | **Pending** — Status is Needs Reverification, not Verified, so CRC-Eligible is Pending by definition; Yes and No are not meaningful until Status resolves to Verified |
 
 ### OpenAI Sora — DISCONTINUED
 
@@ -83,6 +88,7 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | 2026-08-01, via direct web search against OpenAI's official Help Center article ("What to know about the Sora discontinuation," help.openai.com/en/articles/20001152) |
 | Source | OpenAI Help Center (primary source) — corrects an earlier version of this row that cited only `CLAUDE.md`'s internal marketing-copy note ("OpenAI shut down Sora, Mar 2026"), which was accurate as to the announcement timing but imprecise as to the actual discontinuation dates. Kept here as a reminder: an internal doc citing a fact is not the same as a primary-source verification of that fact — this row was corrected exactly because the distinction wasn't being enforced. |
 | Status | **Verified — discontinuation dates.** Historical commercial ToS terms (what Sora's paid-tier commercial rights actually were while live) remain **Unconfirmed**. Kept as a tool option in RecordForm/CertForm so creators with pre-shutdown Sora footage can still submit it. |
+| CRC-Eligible | **Pending** — Status is a compound value (Verified for discontinuation dates only, Unconfirmed for historical ToS terms), not a clean Verified, so CRC-Eligible is Pending by definition until Status resolves to a single unambiguous value |
 
 ---
 
@@ -90,3 +96,4 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 
 - Every row except Sora's discontinuation dates is currently `Unconfirmed` or `Needs Reverification` — that's an honest starting state, not an oversight. This matrix has not yet been populated by a deliberate ToS review pass; it's been populated by what naturally surfaced in marketing and positioning work.
 - The highest-value next step for this file specifically (not committed, just the obvious candidate) would be a single focused pass verifying Runway, Kling, and Pika's current commercial terms directly against their own ToS pages, since those are the three tools actually named in live marketing copy — and since the Sora row above is a live example of why a secondary/internal citation isn't sufficient sourcing for a `Verified` status.
+- **CRC-Eligible (added 2026-08-05):** every row is currently `Pending` — nothing is grandfathered in as eligible for the unsupervised CRC channel, including rows with a `Verified` Status. `CRC-Eligible` is a separate, JD-owned publication-approval decision, distinct from `Status` (which measures confidence in the underlying fact, not confidence in releasing it through an automated channel with no human review at time of use). Schema, governance, and reset rules: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platform Rights Matrix § CRC-Eligible Governance.

@@ -81,12 +81,34 @@ This sits alongside, not inside, `06_Operations/reviewer-workbook/` — the Manu
 | Last Verified | Date this row was last checked against a primary source |
 | Source | Link or citation — platform ToS page, a specific assessment finding, direct platform correspondence. An internal SI8 document (e.g. `CLAUDE.md`, a marketing page) citing a fact is **not** primary-source verification of that fact — cite the internal doc as what prompted the row, but don't mark `Verified` until the primary source has actually been checked |
 | Status | `Verified` / `Needs Reverification` / `Unconfirmed` |
+| CRC-Eligible | `Yes` / `No` / `Pending` — governs release through the unsupervised CRC channel specifically. Distinct from Status; see § CRC-Eligible Governance below |
 
-**Update triggers:** platform changes its terms; an assessment surfaces something not yet in the matrix; a row hasn't been checked in 6+ months (mark `Needs Reverification`, don't delete).
+**Update triggers:** platform changes its terms; an assessment surfaces something not yet in the matrix; a row hasn't been checked in 6+ months (mark `Needs Reverification`, don't delete); anything that changes a row's factual correctness or CRC publication suitability resets `CRC-Eligible` to `Pending`, including Status itself moving away from Verified for any reason — see § CRC-Eligible Governance for the full principle and examples.
 
 **Discipline:** rows for tools SI8 hasn't independently verified go in as `Unconfirmed` with whatever partial information exists — a placeholder with an honest status beats silence, but must never be read as a legal opinion. This matrix is a research aid for reviewers, not a substitute for Domain R evidence review on any given submission.
 
 **Fact vs. interpretation, split deliberately (added 2026-08-01):** the Matrix's own seed content originally blended "what the platform says" and "what SI8 thinks that means" into a single field, which made it easy to accidentally state SI8's reading as though it were the platform's own claim. Keep them apart — see `notebook/PLATFORM-RIGHTS-MATRIX.md`'s Sora and Adobe Firefly rows for a worked example of the split, including a real case where an internal-doc citation for Sora's shutdown date turned out to be imprecise once checked against OpenAI's actual Help Center article.
+
+#### CRC-Eligible Governance (added 2026-08-05, tightened 2026-08-05)
+
+Added when CRC's Knowledge Projection Layer design surfaced a conflation: `Status = Verified` measures confidence in the underlying fact, not confidence in releasing that fact through an unsupervised channel with no human review at time of use. Those are different judgments, and the Matrix now tracks them separately rather than letting a Projection Layer infer publication approval from verification status alone.
+
+**Definitions:**
+- **Yes** — Status = Verified, and JD has separately approved the row for release through the unsupervised CRC channel.
+- **No** — the row may be Verified, but its content is not appropriate for CRC publication.
+- **Pending** — publication suitability has not yet been reviewed.
+
+**Lifecycle rule:** `Yes` and `No` are meaningful only for rows where `Status = Verified`. Whenever Status is anything other than Verified — `Needs Reverification`, `Unconfirmed`, or a compound/non-clean status — `CRC-Eligible` is `Pending`, by definition, not by convention. There is no state where a not-yet-verified row is marked `No`: rejecting a fact for publication presupposes the fact has first been confirmed true. This closes an edge case the original rule left open — an unverified row being pre-emptively marked `No` before there was anything settled to reject.
+
+**Reset principle:** `CRC-Eligible` resets to `Pending` whenever anything changes that could affect either the row's factual correctness or its suitability for unsupervised publication. Stated as a principle rather than a fixed checklist, because a closed list invites exactly the kind of gap already found once here: the first version of this rule enumerated content fields but missed Status itself moving away from Verified via the routine 6-month staleness trigger. Fields most likely to trigger it today include Source Wording/Confirmed Fact, Known Restrictions, Source, Last Verified, and SI8 Interpretation — and, per the Lifecycle rule above, any change to Status away from Verified, for any reason, always triggers it. Treat this as illustrative, not exhaustive: if a future edit changes what a row means without matching one of these examples, the reset still applies.
+
+**New rows default to `Pending`.**
+
+**The Knowledge Projection Layer (CRC's Matrix → Knowledge Card transform) reads this field; it does not decide eligibility.** Eligibility is a governance decision recorded as data on the canonical row, not logic inside a rendering step.
+
+**`CRC-Eligible` remains internal and must never appear in a CRC Knowledge Card or any user-facing output.**
+
+**General architectural rule:** audience-specific eligibility fields are required only for channels that publish without a human review step at the time of use. Reviewers reading the Matrix directly and Assessment Report generation both already have a human in the loop at the point of use — that person is the existing gate, so no separate eligibility field is needed for those paths today. Do not add `Reviewer-Eligible`, `Report-Eligible`, or a hypothetical `Public-Eligible` field until a real consumer exists that publishes without review — consistent with this document's existing Freeze Notice and Non-Goals discipline against building structure ahead of a demonstrated need.
 
 ### 2. SI8 Positions
 
