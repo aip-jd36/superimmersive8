@@ -18,10 +18,11 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | 2026-08-05, via direct fetch of `runway.com/terms-of-use` |
 | Source | Runway Terms of Use, §4.4 and §5 — https://runway.com/terms-of-use (primary source, directly fetched and quoted) |
 | Status | **Verified** — ownership, commercial-use grant, and training-data collection basics confirmed directly against primary source text. Enterprise training opt-out claim remains unconfirmed (see Training Data Disclosure). |
-| CRC-Eligible | **Pending** |
-| CRC Publication Scope | — |
-| CRC Decision Date | — |
-| CRC Approver | — |
+| CRC-Eligible | **Yes** |
+| CRC Publication Scope | CRC may state only that Runway's current Terms permit commercial use across subscription tiers when the Terms of Service are followed, and that the Free plan differs primarily by watermarking rather than commercial-use rights. This publication scope does not extend to ownership analysis, enterprise training provisions, downstream IP clearance, platform suitability for a particular commercial project, or broader commercial-readiness conclusions. |
+| CRC Candidate Statement (reference only, not yet a user-facing Knowledge Card) | Runway's current Terms allow commercial use across all subscription tiers, provided you comply with the Terms of Service. The Free plan mainly differs by watermarking rather than commercial-use permissions. |
+| CRC Decision Date | 2026-08-05 |
+| CRC Approver | JD |
 
 ### Kling
 
