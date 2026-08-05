@@ -1,6 +1,6 @@
 # CRC Publication Policy
 
-**Purpose:** SI8's institutional model has three distinct layers. **Knowledge** — what do we know? (Living Notebook, Platform Rights Matrix). **Judgment** — what is SI8's institutional opinion? (human reviewer, Assessment Report). **Publication** — what institutional knowledge can be published automatically, without human judgment at the time of publication? (this document, `CRC-Eligible`). CRC publishes educational guidance — not institutional opinions. `CRC-Eligible` is not a content approval; it's a publication approval. A row being true (`Status = Verified`) is a Knowledge-layer fact, confirmed with a human doing the checking. Whether SI8 is willing to let that fact go out through a channel with no human reviewing the specific moment it's said is a separate, Publication-layer decision — this document is the judgment applied at that layer.
+**Purpose:** SI8's institutional model has three distinct layers. **Knowledge** — what do we know? (Living Notebook, Platform Rights Matrix). **Judgment** — what is SI8's institutional opinion? (human reviewer, Assessment Report). **Publication** — what institutional knowledge can be published automatically, without human judgment at the time of publication? (this document, `CRC-Eligible`). CRC publishes educational guidance — not institutional opinions. `CRC-Eligible` is not a content approval; it's a publication approval, and it attaches to a specific claim, not a whole platform row. A claim being true (`Status = Verified`) is a Knowledge-layer fact, confirmed with a human doing the checking. Whether SI8 is willing to let that exact claim go out through a channel with no human reviewing the specific moment it's said is a separate, Publication-layer decision — this document is the judgment applied at that layer. A row can carry more than one claim at different confidence levels; approving one does not approve the rest.
 
 **Scope:** Governs `CRC-Eligible` decisions only. Does not touch Matrix verification, Knowledge Card rendering, or retrieval. Not one of the Living Notebook's four canonical documents — an adjacent policy doc, same status as `MATRIX-LEARNINGS.md`.
 
@@ -8,7 +8,7 @@
 
 ## Principles
 
-**1. Verified is necessary, not sufficient.** Every `CRC-Eligible` decision is a second, independent judgment — never inferred from Status, never defaulted to Yes because verification was thorough.
+**1. Verified is necessary, not sufficient.** Every `CRC-Eligible` decision is a second, independent judgment, made about a specific claim — never inferred from Status, never defaulted to Yes because verification was thorough, and never extended to a sub-claim just because a neighboring claim in the same row was approved.
 
 **2. Preserve meaning, don't just minimize caveats.** A statement should be as plain as it can be without losing what actually makes it true. If simplifying a fact for plain publication would change its meaning, the fact isn't ready to publish as-is — narrow or rewrite it rather than stripping caveats that are load-bearing. Plainness serves accuracy; it isn't a goal on its own.
 
@@ -27,6 +27,7 @@
 3. Is the verification's scope narrower than the tool's full offering, and does the card say so?
 4. If a user acted on this fact alone, would they be reasonably informed, or quietly under-informed?
 5. Is the underlying platform term itself new enough that SI8 hasn't yet seen how it holds up?
+6. For a compound row (mixed-confidence claims within one Tool): does `CRC Publication Note` name the exact claim being approved, and confirm the weaker sub-claim is excluded — not just that the row overall is Verified?
 
 A No on any of these is a real reason to narrow, rewrite, or withhold — not just note and proceed.
 

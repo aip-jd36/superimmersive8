@@ -81,7 +81,10 @@ This sits alongside, not inside, `06_Operations/reviewer-workbook/` — the Manu
 | Last Verified | Date this row was last checked against a primary source |
 | Source | Link or citation — platform ToS page, a specific assessment finding, direct platform correspondence. An internal SI8 document (e.g. `CLAUDE.md`, a marketing page) citing a fact is **not** primary-source verification of that fact — cite the internal doc as what prompted the row, but don't mark `Verified` until the primary source has actually been checked |
 | Status | `Verified` / `Needs Reverification` / `Unconfirmed` |
-| CRC-Eligible | `Yes` / `No` / `Pending` — governs release through the unsupervised CRC channel specifically. Distinct from Status; see § CRC-Eligible Governance below |
+| CRC-Eligible | `Yes` / `No` / `Pending` — governs release of a specific claim through the unsupervised CRC channel. Distinct from Status; approval is claim-level, not row-level; see § CRC-Eligible Governance below |
+| CRC Publication Note | The exact claim approved or withheld, and why. See § CRC-Eligible Governance |
+| CRC Decision Date | When the `CRC-Eligible` decision was made |
+| CRC Approver | Who made the decision (currently always JD) |
 
 **Update triggers:** platform changes its terms; an assessment surfaces something not yet in the matrix; a row hasn't been checked in 6+ months (mark `Needs Reverification`, don't delete); anything that changes a row's factual correctness or CRC publication suitability resets `CRC-Eligible` to `Pending`, including Status itself moving away from Verified for any reason — see § CRC-Eligible Governance for the full principle and examples.
 
@@ -98,19 +101,26 @@ Added when CRC's Knowledge Projection Layer design surfaced a conflation: `Statu
 **The judgment behind each Yes/No decision — not just the mechanical field states below — is governed by `notebook/CRC-PUBLICATION-POLICY.md`.** This section defines what `CRC-Eligible` *is*; that document defines the principles for deciding it.
 
 **Definitions:**
-- **Yes** — Status = Verified, and JD has separately approved the row for release through the unsupervised CRC channel.
-- **No** — the row may be Verified, but its content is not appropriate for CRC publication.
+- **Yes** — a specific, precisely-scoped claim within the row is Verified, and JD has separately approved *that claim* for release through the unsupervised CRC channel.
+- **No** — a claim may be Verified, but its content is not appropriate for CRC publication.
 - **Pending** — publication suitability has not yet been reviewed.
 
-**Lifecycle rule:** `Yes` and `No` are meaningful only for rows where `Status = Verified`. Whenever Status is anything other than Verified — `Needs Reverification`, `Unconfirmed`, or a compound/non-clean status — `CRC-Eligible` is `Pending`, by definition, not by convention. There is no state where a not-yet-verified row is marked `No`: rejecting a fact for publication presupposes the fact has first been confirmed true. This closes an edge case the original rule left open — an unverified row being pre-emptively marked `No` before there was anything settled to reject.
+**Claim-level approval (added 2026-08-05):** `CRC-Eligible` approves a specific statement, not the entire row. This matters most for compound rows — a row can carry both a cleanly Verified claim and a separate Needs-Reverification sub-claim (ElevenLabs is the worked example: commercial-tiering terms Verified, consent-specific provisions not). `CRC-Eligible = Yes` on such a row can only ever scope to the Verified claim; the unverified sub-claim stays excluded regardless of what the rest of the row decides, and never becomes eligible by association. The Matrix stays row-based — this isn't a redesign into sub-records — but `CRC Publication Note` (below) must state exactly which claim was approved, so the row itself never has to be read as "fully cleared" just because `CRC-Eligible` reads `Yes`.
 
-**Reset principle:** `CRC-Eligible` resets to `Pending` whenever anything changes that could affect either the row's factual correctness or its suitability for unsupervised publication. Stated as a principle rather than a fixed checklist, because a closed list invites exactly the kind of gap already found once here: the first version of this rule enumerated content fields but missed Status itself moving away from Verified via the routine 6-month staleness trigger. Fields most likely to trigger it today include Source Wording/Confirmed Fact, Known Restrictions, Source, Last Verified, and SI8 Interpretation — and, per the Lifecycle rule above, any change to Status away from Verified, for any reason, always triggers it. Treat this as illustrative, not exhaustive: if a future edit changes what a row means without matching one of these examples, the reset still applies.
+**Additional fields, added alongside `CRC-Eligible` (added 2026-08-05):**
+- **CRC Publication Note** — the exact statement approved (or, for a No, the reason it was withheld). For a compound row, states explicitly which sub-claim is in scope and which is excluded. This is the field that actually satisfies the Publication Policy's traceability requirement — `CRC-Eligible` alone is not enough of a record.
+- **CRC Decision Date** — when the decision was made. Resets alongside `CRC-Eligible` per the Reset principle below.
+- **CRC Approver** — who made the decision. Currently always JD, per the existing "standards committee of one" model — kept as its own field rather than assumed, in case that ever changes.
+
+**Lifecycle rule:** `Yes` and `No` are meaningful only for a claim that is itself `Verified`. A row whose overall Status reads anything other than a clean Verified for the claim in question — `Needs Reverification`, `Unconfirmed`, or a compound/non-clean value — cannot have that claim marked `Yes` or `No`; it stays `Pending` by definition, not by convention. There is no state where a not-yet-verified claim is marked `No`: rejecting a fact for publication presupposes the fact has first been confirmed true. This closes an edge case the original rule left open — an unverified row being pre-emptively marked `No` before there was anything settled to reject.
+
+**Reset principle:** `CRC-Eligible` resets to `Pending` whenever anything changes that could affect either the row's factual correctness or its suitability for unsupervised publication. Stated as a principle rather than a fixed checklist, because a closed list invites exactly the kind of gap already found once here: the first version of this rule enumerated content fields but missed Status itself moving away from Verified via the routine 6-month staleness trigger. Fields most likely to trigger it today include Source Wording/Confirmed Fact, Known Restrictions, Source, Last Verified, and SI8 Interpretation — and, per the Lifecycle rule above, any change to Status away from Verified, for any reason, always triggers it. Treat this as illustrative, not exhaustive: if a future edit changes what a row means without matching one of these examples, the reset still applies. `CRC Publication Note` and `CRC Decision Date` reset alongside `CRC-Eligible` — a stale note describing a claim that no longer matches the row's current content is worse than a blank one.
 
 **New rows default to `Pending`.**
 
 **The Knowledge Projection Layer (CRC's Matrix → Knowledge Card transform) reads this field; it does not decide eligibility.** Eligibility is a governance decision recorded as data on the canonical row, not logic inside a rendering step.
 
-**`CRC-Eligible` remains internal and must never appear in a CRC Knowledge Card or any user-facing output.**
+**`CRC-Eligible`, `CRC Publication Note`, `CRC Decision Date`, and `CRC Approver` all remain internal and must never appear in a CRC Knowledge Card or any user-facing output.** `CRC Publication Note` is an input to what the Projection Layer is allowed to build a Card from — it is not itself Card content.
 
 **General architectural rule:** audience-specific eligibility fields are required only for channels that publish without a human review step at the time of use. Reviewers reading the Matrix directly and Assessment Report generation both already have a human in the loop at the point of use — that person is the existing gate, so no separate eligibility field is needed for those paths today. Do not add `Reviewer-Eligible`, `Report-Eligible`, or a hypothetical `Public-Eligible` field until a real consumer exists that publishes without review — consistent with this document's existing Freeze Notice and Non-Goals discipline against building structure ahead of a demonstrated need.
 
