@@ -35,10 +35,11 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | 2026-08-05 — independent re-verification attempted via 3 additional domains (`kling.ai`, `klingai.com`, `app.klingai.com`, all blocked HTTP 446) and a new targeted search query; JD separately reports direct browser access to the live page. See Status for how this is being treated. |
 | Source | Direct automated fetch still not achieved by this tool across four domain variants (`kling.ai`, `klingai.com`, `app.klingai.com` — all HTTP 446; `home.kling.ai` as referenced by JD does not resolve via DNS from this environment — **worth JD double-checking that exact hostname**, since it may be a typo, a VPN/region-gated address, or an internal-only mirror). Verification for this row rests on convergent evidence: three independently-run search queries returning mutually consistent, increasingly specific legalese-quality excerpts, plus JD's own direct browser read. Treated as primary-source verification performed by JD directly, not by this tool's automated fetch — a distinct but equally legitimate verification modality (see MATRIX-LEARNINGS.md). |
 | Status | **Verified** — on the strength of JD's direct primary-source read, corroborated independently (not merely accepted) by three convergent secondary excerpts this pass gathered separately. Automated re-fetch by this tool remains blocked; if that ever becomes necessary to reproduce independently of JD's own access, it hasn't been solved, only worked around. |
-| CRC-Eligible | **Pending** — Verified unlocks eligibility for review; it does not itself grant CRC-Eligible = Yes, per the Matrix's own governance rule. |
-| CRC Publication Scope | — |
-| CRC Decision Date | — |
-| CRC Approver | — |
+| CRC-Eligible | **Yes** |
+| CRC Publication Scope | CRC may state only that Kling's commercial-use permissions differ by account type under the current Terms: paid members may use generated output commercially, while free users require Kling's written permission for commercial use. This publication scope does not extend to branding requirements, training-data provisions, downstream IP clearance, ownership analysis, or broader commercial-readiness conclusions. |
+| CRC Candidate Statement (reference only, not yet a user-facing Knowledge Card) | Kling's commercial-use permissions depend on your account type. Under the current Terms, paid members may use generated output commercially, while free users require Kling's written permission for commercial use. |
+| CRC Decision Date | 2026-08-05 |
+| CRC Approver | JD |
 
 ### Pika
 
