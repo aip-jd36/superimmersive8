@@ -11,7 +11,7 @@
  * ever added) has exactly one place to go in.
  */
 
-import type { StructuredUnderstanding } from '@/types/interview-engine'
+import type { RetrievalHandoff, StructuredUnderstanding } from '@/types/interview-engine'
 import type { BoundaryState } from './boundaries'
 
 export function serializeStructuredUnderstanding(su: StructuredUnderstanding): string {
@@ -35,4 +35,16 @@ export function serializeBoundaryState(state: BoundaryState): string {
 
 export function deserializeBoundaryState(json: string): BoundaryState {
   return JSON.parse(json) as BoundaryState
+}
+
+/**
+ * RetrievalHandoff (Phase 5) is equally plain JSON-safe data. Same named
+ * round-trip entry point, same reasoning as the two pairs above.
+ */
+export function serializeRetrievalHandoff(handoff: RetrievalHandoff): string {
+  return JSON.stringify(handoff)
+}
+
+export function deserializeRetrievalHandoff(json: string): RetrievalHandoff {
+  return JSON.parse(json) as RetrievalHandoff
 }
