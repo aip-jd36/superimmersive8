@@ -1,0 +1,22 @@
+/**
+ * Serialization for StructuredUnderstanding — Alpha 0 checkpoint
+ * (CRC_PROTOTYPE_ALPHA_ROADMAP.md Phase 1a).
+ *
+ * The domain model is plain JSON-safe data (string/number/null literals,
+ * arrays, discriminated unions tagged by a string field) — no Date, Map, Set,
+ * or class instances anywhere in it — so a direct JSON.stringify/parse round
+ * trip is lossless. These wrappers exist as the single named entry point for
+ * that round trip, not because the underlying operation is non-trivial: any
+ * future need for a custom reviver/replacer (e.g. if a non-JSON-safe field is
+ * ever added) has exactly one place to go in.
+ */
+
+import type { StructuredUnderstanding } from '@/types/interview-engine'
+
+export function serializeStructuredUnderstanding(su: StructuredUnderstanding): string {
+  return JSON.stringify(su)
+}
+
+export function deserializeStructuredUnderstanding(json: string): StructuredUnderstanding {
+  return JSON.parse(json) as StructuredUnderstanding
+}
