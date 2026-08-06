@@ -177,6 +177,14 @@ No case was found where the frozen architecture made a Gate 1 or Gate 2 decision
 **Explicitly deferred:** consumption by a real Retrieval system — this phase only proves the object is assembled correctly, never that anything downstream can use it.
 **Main risks:** low, deterministic. Main risk is an incomplete exclusion list — mitigated by treating each exclusion as its own explicit test rather than a single generic "no bad fields" check.
 
+**Status: complete (2026-08-07).** 3 commits (type correction + implementation + tests) on `prototype/interview-engine-alpha`. 80/80 interview-engine tests passing (17 new in `handoff.test.ts`), clean `tsc --noEmit`.
+
+**Type adjustment made (pre-check confirmed a real mismatch):** `RetrievalHandoff` still matched the pre-Phase-3 shape — `canonical_tool_identifiers: string[]` paired with singular top-level `access_surface`/`plan_tier`, written before those facts moved onto `ToolMention`. Replaced with `tools: RetrievalHandoffTool[]`, each carrying its own `identifier`/`access_surface`/`plan_tier`. The singular top-level fields were removed rather than kept as a "summary" — a summarized value across two disagreeing tools would itself be an invented fact, which this object must never contain. `unresolved_aliases` was unchanged.
+
+**Independence confirmed by import graph, not just convention:** `handoff.ts` imports only `@/types/interview-engine`. No `gates.ts`, `boundaries.ts`, Matrix, or Retrieval reference anywhere. `certainty_state` is read directly from `understanding.gate_1_state` (already stored on the object per architecture doc §3) rather than recomputed via `evaluateGate1` — avoids both a forbidden import and a second, driftable reimplementation of Gate 1's logic.
+
+**No frozen-PRD/architecture rule was found undeterminable.** Partial and opt-out states produced no ambiguity: both are handled by the same field-mapping logic as any other state (no special-casing), since "unresolved"/"unclear"/"declined" are already valid, complete sentinel values in the handoff schema, not gaps requiring extra logic to paper over.
+
 ---
 
 ## Phase 6a — Extraction (isolated)
