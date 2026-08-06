@@ -109,9 +109,23 @@ export type ToolResolution =
   | { kind: 'canonical'; identifier: string }
   | { kind: 'unresolved_alias'; raw_name: string }
 
+/**
+ * access_surface and plan_tier are attested per-tool, not project-wide: a
+ * project can use several tools with different surfaces and plans (e.g.
+ * Runway API team plan + ElevenLabs personal plan in the same project), and
+ * "which surface" is sometimes the entire content of a tool's canonical
+ * identity (Gemini Consumer App vs. Gemini API are different Platform Rights
+ * Matrix rows). Phase 1 originally modeled these as singular ProjectFacts
+ * fields; moved here in Phase 3 per explicit correction after the Phase 1
+ * post-completion review flagged the mismatch (mixed_multi_signal could only
+ * represent two tools' plans by mashing them into one prose string). See
+ * CRC_PROTOTYPE_ALPHA_ROADMAP.md Phase 1 section for the original finding.
+ */
 export interface ToolMention {
   mention_id: string
   resolution: ToolResolution
+  access_surface: Attested<string>
+  plan_tier: Attested<string>
   confidence: ConfidenceState
   source_turn: number
   source_statement: string
@@ -121,15 +135,14 @@ export interface ToolMention {
 // ── Project facts ────────────────────────────────────────────────────────────
 
 /**
- * Single-value project facts, each independently attested. access_surface,
- * plan_tier, intended_use, workflow_role are the four named in the roadmap's
- * Phase 1 requirement list; each needs the same confirmed/absent/unresolved/
- * unknown/declined distinction as scoped observations, hence Attested<T>
- * rather than plain optional strings.
+ * Single-value project facts that are genuinely project-wide, not per-tool:
+ * intended_use (what the output is for) and workflow_role (the user's own
+ * role) don't fork per tool the way access surface and plan tier do. Each is
+ * independently attested via Attested<T> so the confirmed/absent/unresolved/
+ * unknown/declined distinction is never collapsed into a plain optional
+ * string.
  */
 export interface ProjectFacts {
-  access_surface: Attested<string>
-  plan_tier: Attested<string>
   intended_use: Attested<string>
   workflow_role: Attested<string>
 }

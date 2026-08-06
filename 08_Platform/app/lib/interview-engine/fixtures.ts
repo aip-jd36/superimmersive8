@@ -50,8 +50,6 @@ const richSignal: DialogueFixture = {
   description: 'User volunteers full project facts in one or two turns; both gates clear normally.',
   structured_understanding: {
     project_facts: {
-      access_surface: { state: 'confirmed', value: 'Runway API, team plan' },
-      plan_tier: { state: 'confirmed', value: 'Team' },
       intended_use: { state: 'confirmed', value: 'Paid social ad campaign, 30s cutdown' },
       workflow_role: { state: 'confirmed', value: 'Producer' },
     },
@@ -59,6 +57,8 @@ const richSignal: DialogueFixture = {
       {
         mention_id: 'tm-1',
         resolution: { kind: 'canonical', identifier: 'runway-gen3' },
+        access_surface: { state: 'confirmed', value: 'API' },
+        plan_tier: { state: 'confirmed', value: 'Team' },
         confidence: 'confirmed',
         source_turn: 1,
         source_statement: 'We shot the whole thing in Runway Gen-3, team API plan.',
@@ -97,8 +97,6 @@ const noSignal: DialogueFixture = {
   description: 'User gives minimal, unresponsive answers; Gate 1 unmet after normal flow exhausts.',
   structured_understanding: {
     project_facts: {
-      access_surface: unattested(),
-      plan_tier: unattested(),
       intended_use: unattested(),
       workflow_role: unattested(),
     },
@@ -135,8 +133,6 @@ const currentVsHistorical: DialogueFixture = {
   description: 'User distinguishes "this project" from "a past project" on the same topic.',
   structured_understanding: {
     project_facts: {
-      access_surface: { state: 'confirmed', value: 'Kling personal plan' },
-      plan_tier: { state: 'confirmed', value: 'Personal' },
       intended_use: unattested(),
       workflow_role: { state: 'confirmed', value: 'Editor' },
     },
@@ -144,6 +140,8 @@ const currentVsHistorical: DialogueFixture = {
       {
         mention_id: 'tm-1',
         resolution: { kind: 'canonical', identifier: 'kling' },
+        access_surface: { state: 'confirmed', value: 'Web app' },
+        plan_tier: { state: 'confirmed', value: 'Personal' },
         confidence: 'confirmed',
         source_turn: 1,
         source_statement: 'This one was Kling, personal plan.',
@@ -193,8 +191,6 @@ const ambiguousUncertain: DialogueFixture = {
   description: 'Distinguishes "I can\'t see that" (unresolved_no_visibility) from genuine "nobody knows" (unknown).',
   structured_understanding: {
     project_facts: {
-      access_surface: { state: 'confirmed', value: 'Kling, exact plan unclear' },
-      plan_tier: { state: 'unresolved_no_visibility' },
       intended_use: { state: 'unknown' },
       workflow_role: { state: 'confirmed', value: 'Motion designer' },
     },
@@ -202,6 +198,8 @@ const ambiguousUncertain: DialogueFixture = {
       {
         mention_id: 'tm-1',
         resolution: { kind: 'canonical', identifier: 'kling' },
+        access_surface: { state: 'confirmed', value: 'Web app' },
+        plan_tier: { state: 'unresolved_no_visibility' },
         confidence: 'confirmed',
         source_turn: 1,
         source_statement: 'We used Kling.',
@@ -251,8 +249,6 @@ const fullOptOut: DialogueFixture = {
   description: 'User declines to continue the interview entirely.',
   structured_understanding: {
     project_facts: {
-      access_surface: { state: 'declined' },
-      plan_tier: { state: 'declined' },
       intended_use: { state: 'declined' },
       workflow_role: { state: 'declined' },
     },
@@ -289,8 +285,6 @@ const mixedMultiSignal: DialogueFixture = {
   description: 'A single bundled answer yields multiple distinct scoped observations and tool mentions.',
   structured_understanding: {
     project_facts: {
-      access_surface: { state: 'confirmed', value: 'Runway + ElevenLabs, both team plans' },
-      plan_tier: { state: 'confirmed', value: 'Team' },
       intended_use: { state: 'confirmed', value: 'Client-facing pitch deck video' },
       workflow_role: { state: 'confirmed', value: 'Creative director' },
     },
@@ -298,6 +292,12 @@ const mixedMultiSignal: DialogueFixture = {
       {
         mention_id: 'tm-1',
         resolution: { kind: 'canonical', identifier: 'runway-gen3' },
+        // Each tool now carries its own access_surface/plan_tier -- previously
+        // this fixture could only represent both tools' plans as one prose
+        // sentence on a single project-level field. See the type-level note
+        // on ToolMention.access_surface for why this moved.
+        access_surface: { state: 'confirmed', value: 'API' },
+        plan_tier: { state: 'confirmed', value: 'Team' },
         confidence: 'confirmed',
         source_turn: 1,
         source_statement:
@@ -307,6 +307,8 @@ const mixedMultiSignal: DialogueFixture = {
       {
         mention_id: 'tm-2',
         resolution: { kind: 'canonical', identifier: 'elevenlabs' },
+        access_surface: { state: 'confirmed', value: 'Web app' },
+        plan_tier: { state: 'confirmed', value: 'Team' },
         confidence: 'confirmed',
         source_turn: 1,
         source_statement:
@@ -375,8 +377,6 @@ const ambiguousMultiSurfaceTool: DialogueFixture = {
     'User names a tool with multiple product surfaces ("Nano Banana"); engine must hold it unresolved, then disambiguate.',
   structured_understanding: {
     project_facts: {
-      access_surface: { state: 'unresolved_no_visibility' },
-      plan_tier: { state: 'unknown' },
       intended_use: { state: 'confirmed', value: 'Internal concept test' },
       workflow_role: { state: 'confirmed', value: 'Designer' },
     },
@@ -384,6 +384,10 @@ const ambiguousMultiSurfaceTool: DialogueFixture = {
       {
         mention_id: 'tm-1',
         resolution: { kind: 'unresolved_alias', raw_name: 'Nano Banana' },
+        // Access surface is itself what's unresolved pre-disambiguation --
+        // the ambiguity IS the surface question, not a separate fact to track.
+        access_surface: { state: 'unresolved_no_visibility' },
+        plan_tier: { state: 'unknown' },
         confidence: 'unresolved_no_visibility',
         source_turn: 1,
         source_statement: 'I used Nano Banana for this one.',
@@ -392,6 +396,15 @@ const ambiguousMultiSurfaceTool: DialogueFixture = {
       {
         mention_id: 'tm-2',
         resolution: { kind: 'canonical', identifier: 'gemini-api' },
+        // access_surface now lives on the SAME object being resolved, so
+        // there's no cross-object propagation step needed -- resolving the
+        // tool and confirming its surface happen together. Previously (when
+        // access_surface lived on ProjectFacts) this fixture left the
+        // project-level field stuck at unresolved_no_visibility even after
+        // this resolution -- flagged in the Phase 1 review, fixed by this
+        // Phase 3 type migration.
+        access_surface: { state: 'confirmed', value: 'API (developer key)' },
+        plan_tier: { state: 'unknown' },
         confidence: 'confirmed',
         source_turn: 2,
         source_statement: "Oh, through the API — I have a developer key, it's not the app on my phone.",
@@ -431,8 +444,6 @@ const fullPhase1To4Trace: DialogueFixture = {
   description: 'Clean run through Phases 1-4 ending in Gate 1 met, Gate 2 stable, and an assembled handoff.',
   structured_understanding: {
     project_facts: {
-      access_surface: { state: 'confirmed', value: 'Runway API, team plan' },
-      plan_tier: { state: 'confirmed', value: 'Team' },
       intended_use: { state: 'confirmed', value: 'Paid social ad campaign' },
       workflow_role: { state: 'confirmed', value: 'Producer' },
     },
@@ -440,6 +451,8 @@ const fullPhase1To4Trace: DialogueFixture = {
       {
         mention_id: 'tm-1',
         resolution: { kind: 'canonical', identifier: 'runway-gen3' },
+        access_surface: { state: 'confirmed', value: 'API' },
+        plan_tier: { state: 'confirmed', value: 'Team' },
         confidence: 'confirmed',
         source_turn: 1,
         source_statement: 'Runway Gen-3, team API plan.',

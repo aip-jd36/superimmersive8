@@ -45,8 +45,6 @@ function correctObservation(
 function buildBaseStructuredUnderstanding(): StructuredUnderstanding {
   return {
     project_facts: {
-      access_surface: { state: 'confirmed', value: 'Runway API, team plan' },
-      plan_tier: { state: 'unresolved_no_visibility' },
       intended_use: { state: 'unknown' },
       workflow_role: { state: 'declined' },
     },
@@ -54,6 +52,8 @@ function buildBaseStructuredUnderstanding(): StructuredUnderstanding {
       {
         mention_id: 'tm-1',
         resolution: { kind: 'canonical', identifier: 'runway-gen3' },
+        access_surface: { state: 'confirmed', value: 'API, team plan' },
+        plan_tier: { state: 'unresolved_no_visibility' },
         confidence: 'confirmed',
         source_turn: 1,
         source_statement: 'We used Runway.',

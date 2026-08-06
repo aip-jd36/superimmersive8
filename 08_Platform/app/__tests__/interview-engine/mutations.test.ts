@@ -28,8 +28,6 @@ import {
 function emptyStructuredUnderstanding(): StructuredUnderstanding {
   return {
     project_facts: {
-      access_surface: { state: 'unknown' },
-      plan_tier: { state: 'unknown' },
       intended_use: { state: 'unknown' },
       workflow_role: { state: 'unknown' },
     },
@@ -59,6 +57,8 @@ function observation(overrides: Partial<ScopedObservation> & Pick<ScopedObservat
 
 function toolMention(overrides: Partial<ToolMention> & Pick<ToolMention, 'mention_id' | 'resolution'>): ToolMention {
   return {
+    access_surface: { state: 'unknown' },
+    plan_tier: { state: 'unknown' },
     confidence: 'confirmed',
     source_turn: 1,
     source_statement: 'placeholder statement',
