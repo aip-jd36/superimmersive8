@@ -80,6 +80,17 @@ Tests serialization round-trip integrity specifically — including whether `sup
 **Explicitly deferred:** persistence beyond in-memory serialize/deserialize round-trip; any real database.
 **Main risks:** low — this is the deterministic foundation. Risk is mostly schema-completeness (missing a field some dialogue needs), caught early by requiring all 8 dialogues to instantiate now, not discovered in Phase 7.
 
+**Status: complete (2026-08-06).** 4 commits on `prototype/interview-engine-alpha`. 17/17 tests passing (`__tests__/interview-engine/`), clean `tsc --noEmit`.
+
+**Post-completion review findings (2026-08-06), not yet acted on — flagged for Phase 2:**
+- `access_surface` and `plan_tier` live on `ProjectFacts` as single project-wide `Attested<string>` values, not per-`ToolMention`. This repo's own domain model treats access surface as per-tool (Platform Rights Matrix splits Gemini into separate API/Consumer App rows), so a project using two tools with different plans can't be represented structurally — `mixed_multi_signal` papers over this with one free-text sentence covering both tools. Open question for Phase 2: should `ToolMention` carry its own access-surface/plan fact, or should `ProjectFacts` become per-tool-keyed?
+- The `ambiguous_multi_surface_tool` fixture is internally inconsistent: `tool_mentions` resolves to `gemini-api` confirmed at turn 2, but `project_facts.access_surface` is left at `unresolved_no_visibility` — nothing propagates a tool-level resolution up to the project-level fact. Not a failed Phase 1 criterion (the state itself is validly represented), but exposes an undecided design question for Phase 2's mutation engine: should tool resolution ever auto-update related `ProjectFacts`, or should these remain two independently-tracked facts by design? Recommend deciding this explicitly in Phase 2 rather than inheriting the current fixture's inconsistency by accident.
+- Non-destructive supersession and `superseded_by` link integrity are round-trip tested (Alpha 0) for `ScopedObservation` only. `ToolMention` has the identical `superseded_by: string | null` shape and is demonstrated (non-round-trip) in `ambiguous_multi_surface_tool`, but no test exercises a `ToolMention` supersession chain through serialize/deserialize the way `ScopedObservation` gets in Alpha 0.
+- "Multiple observations from one turn" is demonstrated (`mixed_multi_signal`: three observations share `source_turn: 1`) but not independently asserted by any test — existing tests check confidence validity and scope distinctness, not per-turn multiplicity.
+- `ScopedObservation.note` is unconstrained free text on every confidence state, including `declined`/`unknown`. The type system stops an inferred *value* leaking through `Attested<T>` (no `value` field exists on non-`confirmed` variants), but nothing stops prose in `note` from narrating an inferred conclusion regardless of confidence. Content discipline, not enforceable at the type level.
+
+**Known unrelated test failure:** `__tests__/assessments/mock-provider.test.ts` has 2 pre-existing failures (`provenanceAssetId` mock returning empty). Confirmed via `git stash` that these reproduce identically on the base branch with all Phase 1 changes removed — unrelated to this work, not investigated further here.
+
 ---
 
 ## Phase 2 — Mutation and supersession engine
