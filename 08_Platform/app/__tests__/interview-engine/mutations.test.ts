@@ -21,6 +21,8 @@ import {
   addObservations,
   addToolMention,
   retractObservation,
+  setIntendedUse,
+  setWorkflowRole,
   supersedeObservation,
   supersedeToolMention,
 } from '../../lib/interview-engine/mutations'
@@ -222,5 +224,59 @@ describe('ToolMention supersession (closes Phase 1 review gap)', () => {
         toolMention({ mention_id: 'tm-3', resolution: { kind: 'canonical', identifier: 'gemini-consumer-app' } }),
       ),
     ).toThrow(/already superseded/)
+  })
+})
+
+describe('setIntendedUse / setWorkflowRole', () => {
+  test('setIntendedUse replaces the attestation and preserves source_turn/source_statement', () => {
+    const su = emptyStructuredUnderstanding()
+    const updated = setIntendedUse(
+      su,
+      { state: 'confirmed', value: 'Paid social ad campaign' },
+      3,
+      "It's for a paid social campaign.",
+    )
+    expect(updated.project_facts.intended_use).toEqual({
+      attestation: { state: 'confirmed', value: 'Paid social ad campaign' },
+      source_turn: 3,
+      source_statement: "It's for a paid social campaign.",
+    })
+  })
+
+  test('setWorkflowRole replaces the attestation and preserves source_turn/source_statement', () => {
+    const su = emptyStructuredUnderstanding()
+    const updated = setWorkflowRole(su, { state: 'confirmed', value: 'Producer' }, 2, "I'm the producer.")
+    expect(updated.project_facts.workflow_role).toEqual({
+      attestation: { state: 'confirmed', value: 'Producer' },
+      source_turn: 2,
+      source_statement: "I'm the producer.",
+    })
+  })
+
+  test('setIntendedUse does not mutate the source object', () => {
+    const su = emptyStructuredUnderstanding()
+    const before = JSON.parse(JSON.stringify(su))
+    setIntendedUse(su, { state: 'confirmed', value: 'Paid social ad campaign' }, 1, 'placeholder')
+    expect(su).toEqual(before)
+  })
+
+  test('setWorkflowRole does not mutate the source object', () => {
+    const su = emptyStructuredUnderstanding()
+    const before = JSON.parse(JSON.stringify(su))
+    setWorkflowRole(su, { state: 'confirmed', value: 'Producer' }, 1, 'placeholder')
+    expect(su).toEqual(before)
+  })
+
+  test('setIntendedUse leaves workflow_role and all other fields untouched', () => {
+    const su = setWorkflowRole(emptyStructuredUnderstanding(), { state: 'confirmed', value: 'Editor' }, 1, "I'm the editor.")
+    const updated = setIntendedUse(su, { state: 'confirmed', value: 'Internal test' }, 2, 'Just a test.')
+    expect(updated.project_facts.workflow_role).toEqual(su.project_facts.workflow_role)
+  })
+
+  test('a subsequent call replaces the previous attestation entirely -- no history array, latest call wins', () => {
+    const first = setIntendedUse(emptyStructuredUnderstanding(), { state: 'unknown' }, 1, "Not sure yet.")
+    const second = setIntendedUse(first, { state: 'confirmed', value: 'Paid campaign' }, 2, "Actually, it's a paid campaign.")
+    expect(second.project_facts.intended_use.attestation).toEqual({ state: 'confirmed', value: 'Paid campaign' })
+    expect(second.project_facts.intended_use.source_turn).toBe(2)
   })
 })

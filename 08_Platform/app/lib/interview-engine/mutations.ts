@@ -21,6 +21,7 @@
  */
 
 import type {
+  Attested,
   ScopedObservation,
   StructuredUnderstanding,
   ToolMention,
@@ -210,5 +211,52 @@ export function supersedeToolMention(
       ),
       replacement,
     ],
+  }
+}
+
+// ── Project facts ────────────────────────────────────────────────────────────
+
+/**
+ * Plain immutable replacement, not supersede-and-mark: ProjectFacts fields
+ * were never modeled with history/supersession semantics (a single live
+ * attested value, not an array of observations), so there is no prior
+ * fact to mark superseded -- only to replace with a new AttestedFact that
+ * carries its own attestation, source_turn, and source_statement. The
+ * caller (Extraction, Phase 6a) supplies all three explicitly; nothing here
+ * defaults or infers them. su is not mutated -- a new StructuredUnderstanding
+ * is returned, same discipline as every other function in this module. A
+ * full supersession chain for these fields is not implemented for Prototype
+ * Alpha, since the existing domain model doesn't provide one for
+ * single-value project facts and none of the eight dialogue fixtures need
+ * one -- if that changes, ProjectFacts would need its own array-of-history
+ * shape, not a bolt-on to this function.
+ */
+export function setIntendedUse(
+  su: StructuredUnderstanding,
+  value: Attested<string>,
+  sourceTurn: number,
+  sourceStatement: string,
+): StructuredUnderstanding {
+  return {
+    ...su,
+    project_facts: {
+      ...su.project_facts,
+      intended_use: { attestation: value, source_turn: sourceTurn, source_statement: sourceStatement },
+    },
+  }
+}
+
+export function setWorkflowRole(
+  su: StructuredUnderstanding,
+  value: Attested<string>,
+  sourceTurn: number,
+  sourceStatement: string,
+): StructuredUnderstanding {
+  return {
+    ...su,
+    project_facts: {
+      ...su.project_facts,
+      workflow_role: { attestation: value, source_turn: sourceTurn, source_statement: sourceStatement },
+    },
   }
 }
