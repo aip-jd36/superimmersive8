@@ -156,6 +156,12 @@ No case was found where the frozen architecture made a Gate 1 or Gate 2 decision
 **Explicitly deferred:** integration with real candidate questions — this phase tests the state machine against scripted/fixture inputs, not live generation (that's Phase 6b, which also adds adversarial candidate testing).
 **Main risks:** low, deterministic. Note: this phase has no dependency on Phase 3 — can be built in parallel with it if useful.
 
+**Status: complete (2026-08-07).** 2 commits (implementation + tests) on `prototype/interview-engine-alpha`. 63/63 interview-engine tests passing (18 new in `boundaries.test.ts`), clean `tsc --noEmit`. No new type migrations — `boundaries.ts` reuses `OptOutScope`/`Phase` from Phase 1's types; `BoundaryState` is a new but entirely self-contained type, never nested into `StructuredUnderstanding`.
+
+**Deliberate, flagged omission:** PRD §8 Rule 5 (one disentangling question for bundled answers) exists in the frozen PRD but was not part of the Phase 4 kickoff's requested rule set (follow-up cap, uncertainty clarification, historical-experience cap, incident-investigation prohibition, decline scoping) and is **not implemented**. Not an oversight — noted in `boundaries.ts`'s own module comment so it isn't mistaken for full §8 coverage later.
+
+**No frozen-PRD rule was found that couldn't be represented deterministically.** The phase-vs-interview Gate 2 approximation from Phase 3 did not affect Phase 4 — `boundaries.ts` never imports `gates.ts` or references Gate 1/Gate 2 results at all, by design (the independence invariant is enforced at the import level, not just by convention).
+
 ---
 
 ## Phase 5 — Interview → Retrieval handoff assembly
