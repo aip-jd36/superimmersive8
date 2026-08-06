@@ -185,10 +185,11 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | 2026-08-05, via direct fetch of `elevenlabs.io/terms-of-use` and `elevenlabs.io/safety` |
 | Source | ElevenLabs Terms of Use — https://elevenlabs.io/terms-of-use (primary source, directly fetched and quoted); ElevenLabs Safety page — https://elevenlabs.io/safety (primary source, directly fetched and quoted). Prohibited Content & Uses Policy referenced but not independently fetched this pass. |
 | Status | **Verified** — for commercial-use tiering and ownership. Celebrity/consent-specific restrictions confirmed at the product-feature level; the underlying detailed policy document remains unread, so treat the consent-mechanism specifics as **Needs Reverification** even though the row's overall Status is Verified for the core commercial terms. |
-| CRC-Eligible | **Pending** — per claim-level approval (see `PRD_LIVING_NOTEBOOK.md` § CRC-Eligible Governance), a Yes on this row can only ever scope to the confirmed commercial-tiering/ownership statement — the consent-specific sub-claim cannot become CRC-Eligible until it independently resolves to Verified, regardless of what the rest of the row decides. |
-| CRC Publication Scope | — |
-| CRC Decision Date | — |
-| CRC Approver | — |
+| CRC-Eligible | **Two independent claim-level dispositions — do not read as one row-level value.** **Claim A (Commercial rights): Yes.** **Claim B (Voice, likeness, and consent): No.** |
+| CRC Publication Scope | **Claim A (Commercial rights):** CRC may state only that ElevenLabs' Free tier is limited to non-commercial use, that paid tiers permit commercial use, and that users retain rights to their generated output under the current Terms. This publication scope does not extend to training-data licensing, voice-cloning, consent, likeness-related provisions, downstream IP clearance, or broader commercial-readiness conclusions. **Claim B (Voice, likeness, and consent):** Withheld under CRC Publication Policy Principle 3. Voice-cloning, consent, and likeness-related provisions are withheld regardless of verification status — describing platform-level safeguards could imply that uses not blocked by the platform are acceptable; those questions require contextual human review. **This is a substantive publication-policy decision, not Pending pending additional verification.** The unread detailed Prohibited Content & Uses Policy remains a real evidence gap, but closing it would not by itself resolve the publication concern — see SI8 Interpretation and the Status field above for why. |
+| CRC Candidate Statement (reference only, not yet a user-facing Knowledge Card) | **Claim A only** — Claim B has no candidate statement; it is withheld, not pending a draft. ElevenLabs' current Terms restrict the Free tier to non-commercial use, while paid tiers permit commercial use of generated audio. Users retain rights to their output under those Terms. |
+| CRC Decision Date | 2026-08-06 |
+| CRC Approver | JD |
 
 ---
 
