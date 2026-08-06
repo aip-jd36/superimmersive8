@@ -177,6 +177,26 @@ describe('evaluateGate1', () => {
     expect(result.state).not.toBe('met')
   })
 
+  test('decline coexisting with a specific unresolved alias still preserves the mention id for diagnostics, not just a generic placeholder', () => {
+    const su = baseSU({
+      tool_mentions: [
+        toolMention({
+          mention_id: 'tm-1',
+          resolution: { kind: 'unresolved_alias', raw_name: 'Nano Banana' },
+          confidence: 'unresolved_no_visibility',
+        }),
+      ],
+      opt_out_scope: 'question',
+    })
+    const result = evaluateGate1(su)
+    expect(result.state).toBe('not_applicable_declined')
+    expect(result.reason_code).toBe('DECLINED_BEFORE_MINIMUM_UNDERSTANDING')
+    // The specific blocking mention must survive even though the reason_code
+    // is decline-driven -- this is the exact case that was previously
+    // collapsed into a generic 'tool_identity_or_production_step' placeholder.
+    expect(result.unresolved_fields).toEqual(['tool_mentions.tm-1'])
+  })
+
   test('a decline that happens AFTER minimum understanding was already reached does not retroactively unmet Gate 1', () => {
     const su = baseSU({
       tool_mentions: [toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'runway-gen3' } })],

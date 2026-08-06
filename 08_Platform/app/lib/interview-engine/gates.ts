@@ -114,14 +114,24 @@ export function evaluateGate1(su: StructuredUnderstanding): Gate1Result {
   // established) does not retroactively unmet Gate 1 -- this evaluator only
   // reads current state, consistent with architecture doc §11 ("a
   // correction... does not force a phase transition backward").
+  // Computed once, shared by every branch below (including the decline
+  // branch) -- a decline must never cause specific diagnostic detail (e.g.
+  // which mention is ambiguous) to be discarded in favor of a generic
+  // placeholder. The reason_code says WHY the gate isn't met; unresolved_fields
+  // says WHAT is still unresolved, independently.
+  const unresolvedFields: string[] = []
+  if (unresolvedAliases.length > 0) {
+    unresolvedFields.push(...unresolvedAliases.map((m) => `tool_mentions.${m.mention_id}`))
+  } else if (!whatWasUsedUnderstood) {
+    unresolvedFields.push('tool_mentions', 'scoped_observations.workflow_stage')
+  }
+  if (!useUnderstood) unresolvedFields.push('project_facts.intended_use')
+
   if (su.opt_out_scope !== null && !minimumUnderstandingMet) {
-    const unresolved: string[] = []
-    if (!whatWasUsedUnderstood) unresolved.push('tool_identity_or_production_step')
-    if (!useUnderstood) unresolved.push('project_facts.intended_use')
     return {
       state: 'not_applicable_declined',
       reason_code: 'DECLINED_BEFORE_MINIMUM_UNDERSTANDING',
-      unresolved_fields: unresolved,
+      unresolved_fields: unresolvedFields,
     }
   }
 
@@ -129,7 +139,7 @@ export function evaluateGate1(su: StructuredUnderstanding): Gate1Result {
     return {
       state: 'not_met',
       reason_code: 'AMBIGUOUS_TOOL_SURFACE_UNRESOLVED',
-      unresolved_fields: unresolvedAliases.map((m) => `tool_mentions.${m.mention_id}`),
+      unresolved_fields: unresolvedFields,
     }
   }
 
@@ -137,7 +147,7 @@ export function evaluateGate1(su: StructuredUnderstanding): Gate1Result {
     return {
       state: 'not_met',
       reason_code: 'NO_TOOL_OR_PRODUCTION_STEP_IDENTIFIED',
-      unresolved_fields: ['tool_mentions', 'scoped_observations.workflow_stage'],
+      unresolved_fields: unresolvedFields,
     }
   }
 
@@ -145,7 +155,7 @@ export function evaluateGate1(su: StructuredUnderstanding): Gate1Result {
     return {
       state: 'not_met',
       reason_code: 'INTENDED_USE_MISSING',
-      unresolved_fields: ['project_facts.intended_use'],
+      unresolved_fields: unresolvedFields,
     }
   }
 
