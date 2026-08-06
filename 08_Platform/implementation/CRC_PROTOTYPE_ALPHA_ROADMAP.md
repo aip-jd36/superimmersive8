@@ -202,6 +202,14 @@ No case was found where the frozen architecture made a Gate 1 or Gate 2 decision
 **Explicitly deferred:** live multi-turn conversation (Phase 6b/6c/7 territory); resolving whether an extracted fact was *correctly interpreted* versus merely *present* — that's the confidence-vs-completeness open question from Phase 3/architecture doc §10, not closed here.
 **Main risks:** first LLM contact point in the roadmap. Highest uncertainty alongside Phase 6c.
 
+**Substage 1 (deterministic extraction-contract) status: complete (2026-08-07).** 5 commits (ProjectFacts provenance wrapper + mutation functions + pipeline + mock extractor + tests) on `prototype/interview-engine-alpha`. 104/104 interview-engine tests passing (18 new in `extraction.test.ts`), clean `tsc --noEmit`. `extraction.ts` implements the full four-stage pipeline (candidates → normalize → attest → mutate) behind a pluggable `CandidateExtractor` interface; `mock-extractor.ts` supplies a deliberately non-NLU constant extractor for these tests only. The mock proves the architecture and plumbing — it is explicitly not evidence that natural-language extraction works.
+
+**Type additions made during substage 1:** `AttestedFact<T>` wrapper added to `ProjectFacts.intended_use`/`workflow_role` (source_turn/source_statement provenance, the same discipline `ScopedObservation`/`ToolMention` already had) — a real ripple across `gates.ts`, `handoff.ts`, `fixtures.ts` (all 8 fixtures), and 4 existing test files, all still passing after. `mutations.ts` gained `setIntendedUse`/`setWorkflowRole` — plain immutable replacements, not supersede-and-mark, since ProjectFacts fields were never modeled with history semantics.
+
+**Substage 2 (real-model extraction evaluation): BLOCKED, not attempted.** No LLM SDK dependency in `package.json` (no `@anthropic-ai/sdk`, no `openai`), no API key anywhere in `.env.local.example` or elsewhere in this repo's env configuration. `CandidateExtractor` is deliberately pluggable specifically so a real implementation can be wired in without touching `extraction.ts` itself — but actually running one requires a provider/model choice, credentials, and (per this repo's own risk-taking discipline) explicit authorization before making live, potentially-billed external API calls from this codebase. Awaiting direction before proceeding.
+
+**Rule 5 status:** still not implemented — bundled-answer splitting itself (multiple `CandidateObservation`s from one turn) is structurally supported by `runExtractionPipeline`'s per-candidate loop (proven in substage 1's "multiple candidates in one turn" test), but the Rule 5 *cap* ("one disentangling question... never resolved by guessing") is a boundary-type behavior, not an extraction behavior — remains tracked for Phase 6b, not implemented here.
+
 ---
 
 ## Phase 6b — Candidate-question generation + boundary enforcement
