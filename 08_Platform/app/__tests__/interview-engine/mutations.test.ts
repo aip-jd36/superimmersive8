@@ -28,8 +28,8 @@ import {
 function emptyStructuredUnderstanding(): StructuredUnderstanding {
   return {
     project_facts: {
-      intended_use: { state: 'unknown' },
-      workflow_role: { state: 'unknown' },
+      intended_use: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'placeholder' },
+      workflow_role: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'placeholder' },
     },
     tool_mentions: [],
     scoped_observations: [],

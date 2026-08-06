@@ -5,15 +5,22 @@
  * Run: npx jest __tests__/interview-engine/handoff.test.ts
  */
 
-import type { ProjectFacts, ScopedObservation, StructuredUnderstanding, ToolMention } from '../../types/interview-engine'
+import type { Attested, ProjectFacts, ScopedObservation, StructuredUnderstanding, ToolMention } from '../../types/interview-engine'
 import { buildRetrievalHandoff } from '../../lib/interview-engine/handoff'
 import { serializeRetrievalHandoff, deserializeRetrievalHandoff } from '../../lib/interview-engine/serialization'
 
-function projectFacts(overrides: Partial<ProjectFacts> = {}): ProjectFacts {
+function projectFacts(overrides: { intended_use?: Attested<string>; workflow_role?: Attested<string> } = {}): ProjectFacts {
   return {
-    intended_use: { state: 'confirmed', value: 'Paid social ad campaign' },
-    workflow_role: { state: 'confirmed', value: 'Producer' },
-    ...overrides,
+    intended_use: {
+      attestation: overrides.intended_use ?? { state: 'confirmed', value: 'Paid social ad campaign' },
+      source_turn: 1,
+      source_statement: 'placeholder',
+    },
+    workflow_role: {
+      attestation: overrides.workflow_role ?? { state: 'confirmed', value: 'Producer' },
+      source_turn: 1,
+      source_statement: 'placeholder',
+    },
   }
 }
 

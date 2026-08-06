@@ -38,7 +38,11 @@ export interface DialogueFixture {
   retrieval_handoff: RetrievalHandoff | null
 }
 
-const unattested = <T>(): { state: 'unknown' } => ({ state: 'unknown' })
+function fact(attestation: StructuredUnderstanding['project_facts']['intended_use']['attestation'], sourceTurn: number, sourceStatement: string) {
+  return { attestation, source_turn: sourceTurn, source_statement: sourceStatement }
+}
+
+const unattestedFact = (sourceTurn: number, sourceStatement: string) => fact({ state: 'unknown' }, sourceTurn, sourceStatement)
 
 /**
  * Rich signal — user volunteers tool, workflow role, access surface, plan
@@ -50,8 +54,8 @@ const richSignal: DialogueFixture = {
   description: 'User volunteers full project facts in one or two turns; both gates clear normally.',
   structured_understanding: {
     project_facts: {
-      intended_use: { state: 'confirmed', value: 'Paid social ad campaign, 30s cutdown' },
-      workflow_role: { state: 'confirmed', value: 'Producer' },
+      intended_use: fact({ state: 'confirmed', value: 'Paid social ad campaign, 30s cutdown' }, 1, "It's for a paid social campaign, a 30-second cutdown."),
+      workflow_role: fact({ state: 'confirmed', value: 'Producer' }, 1, "I'm the producer on this one."),
     },
     tool_mentions: [
       {
@@ -97,8 +101,8 @@ const noSignal: DialogueFixture = {
   description: 'User gives minimal, unresponsive answers; Gate 1 unmet after normal flow exhausts.',
   structured_understanding: {
     project_facts: {
-      intended_use: unattested(),
-      workflow_role: unattested(),
+      intended_use: unattestedFact(1, "I'm not really sure, I'd have to check."),
+      workflow_role: unattestedFact(1, "I'm not really sure, I'd have to check."),
     },
     tool_mentions: [],
     scoped_observations: [
@@ -133,8 +137,8 @@ const currentVsHistorical: DialogueFixture = {
   description: 'User distinguishes "this project" from "a past project" on the same topic.',
   structured_understanding: {
     project_facts: {
-      intended_use: unattested(),
-      workflow_role: { state: 'confirmed', value: 'Editor' },
+      intended_use: unattestedFact(1, "This one was Kling, personal plan."),
+      workflow_role: fact({ state: 'confirmed', value: 'Editor' }, 1, "I'm the editor on it."),
     },
     tool_mentions: [
       {
@@ -191,8 +195,8 @@ const ambiguousUncertain: DialogueFixture = {
   description: 'Distinguishes "I can\'t see that" (unresolved_no_visibility) from genuine "nobody knows" (unknown).',
   structured_understanding: {
     project_facts: {
-      intended_use: { state: 'unknown' },
-      workflow_role: { state: 'confirmed', value: 'Motion designer' },
+      intended_use: fact({ state: 'unknown' }, 3, "Nobody's decided yet where this is actually going to run."),
+      workflow_role: fact({ state: 'confirmed', value: 'Motion designer' }, 1, "I did the motion work on this."),
     },
     tool_mentions: [
       {
@@ -249,8 +253,8 @@ const fullOptOut: DialogueFixture = {
   description: 'User declines to continue the interview entirely.',
   structured_understanding: {
     project_facts: {
-      intended_use: { state: 'declined' },
-      workflow_role: { state: 'declined' },
+      intended_use: fact({ state: 'declined' }, 1, "I'd rather not go through this right now, can we stop?"),
+      workflow_role: fact({ state: 'declined' }, 1, "I'd rather not go through this right now, can we stop?"),
     },
     tool_mentions: [],
     scoped_observations: [
@@ -285,8 +289,8 @@ const mixedMultiSignal: DialogueFixture = {
   description: 'A single bundled answer yields multiple distinct scoped observations and tool mentions.',
   structured_understanding: {
     project_facts: {
-      intended_use: { state: 'confirmed', value: 'Client-facing pitch deck video' },
-      workflow_role: { state: 'confirmed', value: 'Creative director' },
+      intended_use: fact({ state: 'confirmed', value: 'Client-facing pitch deck video' }, 1, "It's for a pitch, not a paid campaign."),
+      workflow_role: fact({ state: 'confirmed', value: 'Creative director' }, 1, "I'm the creative director on this."),
     },
     tool_mentions: [
       {
@@ -377,8 +381,8 @@ const ambiguousMultiSurfaceTool: DialogueFixture = {
     'User names a tool with multiple product surfaces ("Nano Banana"); engine must hold it unresolved, then disambiguate.',
   structured_understanding: {
     project_facts: {
-      intended_use: { state: 'confirmed', value: 'Internal concept test' },
-      workflow_role: { state: 'confirmed', value: 'Designer' },
+      intended_use: fact({ state: 'confirmed', value: 'Internal concept test' }, 1, "It's just an internal concept test."),
+      workflow_role: fact({ state: 'confirmed', value: 'Designer' }, 1, "I'm the designer on it."),
     },
     tool_mentions: [
       {
@@ -444,8 +448,8 @@ const fullPhase1To4Trace: DialogueFixture = {
   description: 'Clean run through Phases 1-4 ending in Gate 1 met, Gate 2 stable, and an assembled handoff.',
   structured_understanding: {
     project_facts: {
-      intended_use: { state: 'confirmed', value: 'Paid social ad campaign' },
-      workflow_role: { state: 'confirmed', value: 'Producer' },
+      intended_use: fact({ state: 'confirmed', value: 'Paid social ad campaign' }, 1, "It's for a paid social ad campaign."),
+      workflow_role: fact({ state: 'confirmed', value: 'Producer' }, 1, "I'm the producer."),
     },
     tool_mentions: [
       {

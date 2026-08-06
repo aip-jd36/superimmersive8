@@ -135,16 +135,34 @@ export interface ToolMention {
 // ── Project facts ────────────────────────────────────────────────────────────
 
 /**
+ * An attested value plus the provenance it came from. ScopedObservation and
+ * ToolMention have carried source_turn/source_statement since Phase 1;
+ * ProjectFacts fields never did, because nothing wrote to them
+ * programmatically until Phase 6a's extraction pipeline needed to justify
+ * and audit its own writes, not just read a value. Added here rather than
+ * folded into Attested<T> itself: ToolMention.access_surface/plan_tier also
+ * use bare Attested<T>, and those are attested via the SAME turn/statement
+ * as the enclosing mention already carries -- adding provenance to
+ * Attested<T> itself would make it redundant there. This wrapper is scoped
+ * to exactly the fields that need independent provenance of their own.
+ */
+export interface AttestedFact<T> {
+  attestation: Attested<T>
+  source_turn: number
+  source_statement: string
+}
+
+/**
  * Single-value project facts that are genuinely project-wide, not per-tool:
  * intended_use (what the output is for) and workflow_role (the user's own
  * role) don't fork per tool the way access surface and plan tier do. Each is
- * independently attested via Attested<T> so the confirmed/absent/unresolved/
- * unknown/declined distinction is never collapsed into a plain optional
- * string.
+ * independently attested via Attested<T> (wrapped in AttestedFact for
+ * provenance) so the confirmed/absent/unresolved/unknown/declined
+ * distinction is never collapsed into a plain optional string.
  */
 export interface ProjectFacts {
-  intended_use: Attested<string>
-  workflow_role: Attested<string>
+  intended_use: AttestedFact<string>
+  workflow_role: AttestedFact<string>
 }
 
 // ── Phase state, gates, completion (architecture doc §3, §11) ──────────────

@@ -87,7 +87,7 @@ function productionStepUnderstood(activeObservations: ScopedObservation[]): bool
 }
 
 function intendedUseUnderstood(projectFacts: ProjectFacts): boolean {
-  return projectFacts.intended_use.state === 'confirmed'
+  return projectFacts.intended_use.attestation.state === 'confirmed'
 }
 
 export function evaluateGate1(su: StructuredUnderstanding): Gate1Result {
@@ -271,12 +271,22 @@ function diffToolMentions(previous: ToolMention[], current: ToolMention[], inclu
   return changed
 }
 
+/**
+ * Compares only the .attestation portion of each AttestedFact, not
+ * source_turn/source_statement -- consistent with diffScopedObservations
+ * only diffing confidence/workflow_stage/scope, never note/source_statement.
+ * A restated intended_use in different wording, same attestation, is not
+ * material; a genuinely changed attestation is.
+ */
 function diffProjectFacts(previous: ProjectFacts, current: ProjectFacts, includeWorkflowRole: boolean): string[] {
   const changed: string[] = []
-  if (JSON.stringify(previous.intended_use) !== JSON.stringify(current.intended_use)) {
+  if (JSON.stringify(previous.intended_use.attestation) !== JSON.stringify(current.intended_use.attestation)) {
     changed.push('project_facts.intended_use')
   }
-  if (includeWorkflowRole && JSON.stringify(previous.workflow_role) !== JSON.stringify(current.workflow_role)) {
+  if (
+    includeWorkflowRole &&
+    JSON.stringify(previous.workflow_role.attestation) !== JSON.stringify(current.workflow_role.attestation)
+  ) {
     changed.push('project_facts.workflow_role')
   }
   return changed

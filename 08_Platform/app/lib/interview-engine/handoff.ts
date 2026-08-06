@@ -79,8 +79,8 @@ export function buildRetrievalHandoff(understanding: StructuredUnderstanding): R
   }
 
   const exclusions: string[] = []
-  if (understanding.project_facts.intended_use.state === 'declined') exclusions.push('project_facts.intended_use')
-  if (understanding.project_facts.workflow_role.state === 'declined') exclusions.push('project_facts.workflow_role')
+  if (understanding.project_facts.intended_use.attestation.state === 'declined') exclusions.push('project_facts.intended_use')
+  if (understanding.project_facts.workflow_role.attestation.state === 'declined') exclusions.push('project_facts.workflow_role')
   for (const m of activeTools) {
     if (m.access_surface.state === 'declined') exclusions.push(`tool_mentions.${m.mention_id}.access_surface`)
     if (m.plan_tier.state === 'declined') exclusions.push(`tool_mentions.${m.mention_id}.plan_tier`)
@@ -92,8 +92,8 @@ export function buildRetrievalHandoff(understanding: StructuredUnderstanding): R
   return {
     tools,
     unresolved_aliases: unresolvedAliases,
-    workflow_role: attestedToHandoffValue(understanding.project_facts.workflow_role, 'unresolved'),
-    intended_use: attestedToHandoffValue(understanding.project_facts.intended_use, 'unclear'),
+    workflow_role: attestedToHandoffValue(understanding.project_facts.workflow_role.attestation, 'unresolved'),
+    intended_use: attestedToHandoffValue(understanding.project_facts.intended_use.attestation, 'unclear'),
     // Active (non-superseded) observations only, in whatever scope they
     // actually carry -- current_project and historical_project entries are
     // passed through untouched and unmerged, never collapsed together.

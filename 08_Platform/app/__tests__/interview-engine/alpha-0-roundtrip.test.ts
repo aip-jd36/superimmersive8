@@ -45,8 +45,8 @@ function correctObservation(
 function buildBaseStructuredUnderstanding(): StructuredUnderstanding {
   return {
     project_facts: {
-      intended_use: { state: 'unknown' },
-      workflow_role: { state: 'declined' },
+      intended_use: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'Not sure yet.' },
+      workflow_role: { attestation: { state: 'declined' }, source_turn: 1, source_statement: "I'd rather not say." },
     },
     tool_mentions: [
       {
