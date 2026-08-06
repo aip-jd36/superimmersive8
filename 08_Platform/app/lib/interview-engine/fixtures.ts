@@ -490,10 +490,8 @@ const fullPhase1To4Trace: DialogueFixture = {
     opt_out_scope: null,
   },
   retrieval_handoff: {
-    canonical_tool_identifiers: ['runway-gen3'],
+    tools: [{ identifier: 'runway-gen3', access_surface: 'API', plan_tier: 'Team' }],
     unresolved_aliases: [],
-    access_surface: 'Runway API, team plan',
-    plan_tier: 'Team',
     workflow_role: 'Producer',
     intended_use: 'Paid social ad campaign',
     scoped_observations: [

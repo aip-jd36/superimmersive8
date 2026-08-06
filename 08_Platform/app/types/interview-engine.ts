@@ -198,15 +198,34 @@ export interface StructuredUnderstanding {
 // ── Interview → Retrieval handoff (architecture doc §12) ───────────────────
 
 /**
+ * One resolved tool's identity plus its own attested access surface/plan
+ * tier. Phase 5 type correction (2026-08-07): the architecture doc's §12
+ * schema originally paired a flat `canonical_tool_identifiers: string[]`
+ * with singular top-level `access_surface`/`plan_tier` fields — written
+ * before the Phase 3 correction moved these facts onto ToolMention. A
+ * project with two tools on different plans (Runway API team plan +
+ * ElevenLabs personal plan) cannot be represented by one project-wide
+ * access_surface/plan_tier pair. Replaced `canonical_tool_identifiers` with
+ * this per-tool array; the singular top-level fields are removed rather than
+ * kept as an ambiguous "summary" — a summarized value for multiple
+ * disagreeing tools would itself be an invented fact, which this object must
+ * never contain. `unresolved_aliases` is unchanged: an unresolved alias by
+ * definition has no resolved surface/tier to attach.
+ */
+export interface RetrievalHandoffTool {
+  identifier: string
+  access_surface: string | 'unresolved'
+  plan_tier: string | 'unknown'
+}
+
+/**
  * Facts only — never publication conclusions, risk scores, or a fabricated
  * resolution to something unresolved. An "unresolved" or "unknown" value is a
  * valid, complete answer here, not a gap to fill before handoff.
  */
 export interface RetrievalHandoff {
-  canonical_tool_identifiers: string[]
+  tools: RetrievalHandoffTool[]
   unresolved_aliases: string[]
-  access_surface: string | 'unresolved'
-  plan_tier: string | 'unknown'
   workflow_role: string
   intended_use: string | 'unclear'
   scoped_observations: ScopedObservation[]
