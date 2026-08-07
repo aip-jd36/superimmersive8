@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "eval:extraction": "tsx lib/interview-engine/eval/run-real-model-eval.ts"
+    "eval:extraction": "tsx lib/interview-engine/eval/run-real-model-eval.ts",
+    "eval:candidate-question": "tsx lib/interview-engine/eval/run-real-model-candidate-question-eval.ts",
+    "eval:candidate-question-integration": "tsx lib/interview-engine/eval/run-real-model-integration-eval.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
