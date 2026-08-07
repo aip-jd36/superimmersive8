@@ -11,7 +11,7 @@
  */
 
 import type { StructuredUnderstanding } from '../../types/interview-engine'
-import type { CandidateObservation } from '../../lib/interview-engine/extraction'
+import type { CandidateObservation, ExtractionDiagnostic } from '../../lib/interview-engine/extraction'
 import { normalizeCandidate, runExtractionPipeline } from '../../lib/interview-engine/extraction'
 import { constantExtractor } from '../../lib/interview-engine/mock-extractor'
 
@@ -77,8 +77,8 @@ describe('normalizeCandidate: conservative alias disambiguation', () => {
 })
 
 describe('runExtractionPipeline: accepted proposals', () => {
-  test('resolved tool is accepted, applied_identifier is the mention_id', () => {
-    const { updated, diagnostics } = runExtractionPipeline(
+  test('resolved tool is accepted, applied_identifier is the mention_id', async () => {
+    const { updated, diagnostics } = await runExtractionPipeline(
       emptySU(),
       { turn: 1, text: 'We used Runway.' },
       constantExtractor([toolCandidate()]),
@@ -89,8 +89,8 @@ describe('runExtractionPipeline: accepted proposals', () => {
     expect(diagnostics[0].normalization).toEqual({ status: 'resolved', canonical_identifier: 'runway-gen3' })
   })
 
-  test('known-ambiguous tool is accepted AS an unresolved_alias -- recording ambiguity is a valid accepted proposal, not a rejection', () => {
-    const { updated, diagnostics } = runExtractionPipeline(
+  test('known-ambiguous tool is accepted AS an unresolved_alias -- recording ambiguity is a valid accepted proposal, not a rejection', async () => {
+    const { updated, diagnostics } = await runExtractionPipeline(
       emptySU(),
       { turn: 1, text: 'I used Nano Banana.' },
       constantExtractor([toolCandidate({ raw_tool_name: 'Nano Banana', raw_text: 'I used Nano Banana.' })]),
@@ -101,7 +101,7 @@ describe('runExtractionPipeline: accepted proposals', () => {
     expect(diagnostics[0].normalization.status).toBe('known_ambiguous')
   })
 
-  test('scoped_observation candidate is accepted, applied_identifier is the observation_id', () => {
+  test('scoped_observation candidate is accepted, applied_identifier is the observation_id', async () => {
     const candidate: CandidateObservation = {
       proposal_id: 'c1',
       turn: 2,
@@ -111,13 +111,17 @@ describe('runExtractionPipeline: accepted proposals', () => {
       workflow_stage: 'T2',
       observation_confidence_hint: 'confirmed',
     }
-    const { updated, diagnostics } = runExtractionPipeline(emptySU(), { turn: 2, text: candidate.raw_text }, constantExtractor([candidate]))
+    const { updated, diagnostics } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 2, text: candidate.raw_text },
+      constantExtractor([candidate]),
+    )
     expect(updated.scoped_observations).toHaveLength(1)
     expect(updated.scoped_observations[0].workflow_stage).toBe('T2')
     expect(diagnostics[0].decision).toEqual({ outcome: 'accepted', applied_identifier: 'c1' })
   })
 
-  test('project_fact candidate is accepted via setIntendedUse, applied_identifier names the field', () => {
+  test('project_fact candidate is accepted via setIntendedUse, applied_identifier names the field', async () => {
     const candidate: CandidateObservation = {
       proposal_id: 'c1',
       turn: 1,
@@ -127,7 +131,11 @@ describe('runExtractionPipeline: accepted proposals', () => {
       fact_confidence_hint: 'confirmed',
       fact_value_hint: 'Paid social ad campaign',
     }
-    const { updated, diagnostics } = runExtractionPipeline(emptySU(), { turn: 1, text: candidate.raw_text }, constantExtractor([candidate]))
+    const { updated, diagnostics } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: candidate.raw_text },
+      constantExtractor([candidate]),
+    )
     expect(updated.project_facts.intended_use).toEqual({
       attestation: { state: 'confirmed', value: 'Paid social ad campaign' },
       source_turn: 1,
@@ -136,12 +144,13 @@ describe('runExtractionPipeline: accepted proposals', () => {
     expect(diagnostics[0].decision).toEqual({ outcome: 'accepted', applied_identifier: 'project_facts.intended_use' })
   })
 
-  test('a corrected tool mention supersedes the prior one and is accepted', () => {
-    const su = runExtractionPipeline(
+  test('a corrected tool mention supersedes the prior one and is accepted', async () => {
+    const first = await runExtractionPipeline(
       emptySU(),
       { turn: 1, text: 'I used Nano Banana.' },
       constantExtractor([toolCandidate({ raw_tool_name: 'Nano Banana', raw_text: 'I used Nano Banana.' })]),
-    ).updated
+    )
+    const su = first.updated
 
     const correction = toolCandidate({
       proposal_id: 'c2',
@@ -150,7 +159,11 @@ describe('runExtractionPipeline: accepted proposals', () => {
       raw_text: 'Oh, through the API, developer key.',
       supersedes_tool_mention_id: 'c1',
     })
-    const { updated, diagnostics } = runExtractionPipeline(su, { turn: 2, text: correction.raw_text }, constantExtractor([correction]))
+    const { updated, diagnostics } = await runExtractionPipeline(
+      su,
+      { turn: 2, text: correction.raw_text },
+      constantExtractor([correction]),
+    )
 
     const prior = updated.tool_mentions.find((m) => m.mention_id === 'c1')
     const resolved = updated.tool_mentions.find((m) => m.mention_id === 'c2-resolved')
@@ -159,7 +172,7 @@ describe('runExtractionPipeline: accepted proposals', () => {
     expect(diagnostics[0].decision.outcome).toBe('accepted')
   })
 
-  test('multiple candidates in one turn accumulate correctly across the loop', () => {
+  test('multiple candidates in one turn accumulate correctly across the loop', async () => {
     const candidates: CandidateObservation[] = [
       toolCandidate({ proposal_id: 'c1' }),
       {
@@ -172,24 +185,28 @@ describe('runExtractionPipeline: accepted proposals', () => {
         fact_value_hint: 'Client-facing pitch deck video',
       },
     ]
-    const { updated, diagnostics } = runExtractionPipeline(emptySU(), { turn: 1, text: 'combined' }, constantExtractor(candidates))
+    const { updated, diagnostics } = await runExtractionPipeline(emptySU(), { turn: 1, text: 'combined' }, constantExtractor(candidates))
     expect(updated.tool_mentions).toHaveLength(1)
     expect(updated.project_facts.intended_use.attestation).toEqual({ state: 'confirmed', value: 'Client-facing pitch deck video' })
     expect(diagnostics).toHaveLength(2)
-    expect(diagnostics.every((d) => d.decision.outcome === 'accepted')).toBe(true)
+    expect(diagnostics.every((d: ExtractionDiagnostic) => d.decision.outcome === 'accepted')).toBe(true)
   })
 })
 
 describe('runExtractionPipeline: rejected proposals', () => {
-  test('a correction targeting a nonexistent tool mention is rejected with a stable reason_code', () => {
+  test('a correction targeting a nonexistent tool mention is rejected with a stable reason_code', async () => {
     const candidate = toolCandidate({ supersedes_tool_mention_id: 'does-not-exist' })
-    const { updated, diagnostics } = runExtractionPipeline(emptySU(), { turn: 1, text: candidate.raw_text }, constantExtractor([candidate]))
+    const { updated, diagnostics } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: candidate.raw_text },
+      constantExtractor([candidate]),
+    )
     expect(updated.tool_mentions).toHaveLength(0)
     expect(diagnostics[0].decision).toMatchObject({ outcome: 'rejected', reason_code: 'MUTATION_TARGET_NOT_FOUND' })
   })
 
-  test('a correction targeting an already-superseded observation is rejected with a stable reason_code', () => {
-    let su = runExtractionPipeline(
+  test('a correction targeting an already-superseded observation is rejected with a stable reason_code', async () => {
+    const step1 = await runExtractionPipeline(
       emptySU(),
       { turn: 1, text: 'Legal reviewed it.' },
       constantExtractor([
@@ -201,10 +218,10 @@ describe('runExtractionPipeline: rejected proposals', () => {
           observation_confidence_hint: 'confirmed',
         },
       ]),
-    ).updated
+    )
 
-    su = runExtractionPipeline(
-      su,
+    const step2 = await runExtractionPipeline(
+      step1.updated,
       { turn: 2, text: 'Actually, no one reviewed it.' },
       constantExtractor([
         {
@@ -216,11 +233,11 @@ describe('runExtractionPipeline: rejected proposals', () => {
           supersedes_observation_id: 'c1',
         },
       ]),
-    ).updated
+    )
 
     // A second, independent attempt to correct the now-superseded original must be rejected.
-    const { diagnostics } = runExtractionPipeline(
-      su,
+    const { diagnostics } = await runExtractionPipeline(
+      step2.updated,
       { turn: 3, text: 'Wait, someone did glance at it.' },
       constantExtractor([
         {
@@ -238,15 +255,19 @@ describe('runExtractionPipeline: rejected proposals', () => {
 })
 
 describe('runExtractionPipeline: deferred proposals', () => {
-  test('a low_confidence candidate is deferred, never proposed as a fact', () => {
+  test('a low_confidence candidate is deferred, never proposed as a fact', async () => {
     const candidate = toolCandidate({ low_confidence: true })
-    const { updated, diagnostics } = runExtractionPipeline(emptySU(), { turn: 1, text: candidate.raw_text }, constantExtractor([candidate]))
+    const { updated, diagnostics } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: candidate.raw_text },
+      constantExtractor([candidate]),
+    )
     expect(updated.tool_mentions).toHaveLength(0)
     expect(diagnostics[0].proposed_fact).toEqual({ kind: 'undetermined' })
     expect(diagnostics[0].decision).toMatchObject({ outcome: 'deferred', reason_code: 'CANDIDATE_TOO_LOW_CONFIDENCE' })
   })
 
-  test('a scoped_observation candidate missing its confidence hint is deferred as unclassifiable', () => {
+  test('a scoped_observation candidate missing its confidence hint is deferred as unclassifiable', async () => {
     const candidate: CandidateObservation = {
       proposal_id: 'c1',
       turn: 1,
@@ -254,15 +275,15 @@ describe('runExtractionPipeline: deferred proposals', () => {
       kind: 'scoped_observation',
       // observation_confidence_hint intentionally omitted
     }
-    const { diagnostics } = runExtractionPipeline(emptySU(), { turn: 1, text: candidate.raw_text }, constantExtractor([candidate]))
+    const { diagnostics } = await runExtractionPipeline(emptySU(), { turn: 1, text: candidate.raw_text }, constantExtractor([candidate]))
     expect(diagnostics[0].decision).toMatchObject({ outcome: 'deferred', reason_code: 'CANDIDATE_UNCLASSIFIABLE' })
   })
 })
 
 describe('diagnostics answer all five required questions', () => {
-  test('a single accepted proposal carries candidate, normalization, and decision together', () => {
+  test('a single accepted proposal carries candidate, normalization, and decision together', async () => {
     const candidate = toolCandidate()
-    const { diagnostics } = runExtractionPipeline(emptySU(), { turn: 1, text: candidate.raw_text }, constantExtractor([candidate]))
+    const { diagnostics } = await runExtractionPipeline(emptySU(), { turn: 1, text: candidate.raw_text }, constantExtractor([candidate]))
     const d = diagnostics[0]
     expect(d.candidate).toEqual(candidate) // what the model proposed
     expect(d.normalization).toEqual({ status: 'resolved', canonical_identifier: 'runway-gen3' }) // what normalization produced
@@ -271,9 +292,9 @@ describe('diagnostics answer all five required questions', () => {
     expect((d.decision as { applied_identifier: string }).applied_identifier).toBe('c1')
   })
 
-  test('a rejected proposal carries a human-readable reason alongside its stable reason_code', () => {
+  test('a rejected proposal carries a human-readable reason alongside its stable reason_code', async () => {
     const candidate = toolCandidate({ supersedes_tool_mention_id: 'does-not-exist' })
-    const { diagnostics } = runExtractionPipeline(emptySU(), { turn: 1, text: candidate.raw_text }, constantExtractor([candidate]))
+    const { diagnostics } = await runExtractionPipeline(emptySU(), { turn: 1, text: candidate.raw_text }, constantExtractor([candidate]))
     const decision = diagnostics[0].decision as { outcome: string; reason_code: string; reason: string }
     expect(decision.reason_code).toBe('MUTATION_TARGET_NOT_FOUND') // why (machine-readable)
     expect(decision.reason.length).toBeGreaterThan(0) // why (human-readable)
@@ -281,10 +302,10 @@ describe('diagnostics answer all five required questions', () => {
 })
 
 describe('immutability', () => {
-  test('the source StructuredUnderstanding is never mutated', () => {
+  test('the source StructuredUnderstanding is never mutated', async () => {
     const su = emptySU()
     const before = JSON.parse(JSON.stringify(su))
-    runExtractionPipeline(su, { turn: 1, text: 'We used Runway.' }, constantExtractor([toolCandidate()]))
+    await runExtractionPipeline(su, { turn: 1, text: 'We used Runway.' }, constantExtractor([toolCandidate()]))
     expect(su).toEqual(before)
   })
 })

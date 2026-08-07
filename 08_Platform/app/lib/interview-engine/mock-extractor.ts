@@ -22,5 +22,5 @@
 import type { CandidateExtractor, CandidateObservation, RawUserTurn } from './extraction'
 
 export function constantExtractor(candidates: CandidateObservation[]): CandidateExtractor {
-  return (_turn: RawUserTurn) => candidates
+  return async (_turn: RawUserTurn) => candidates
 }

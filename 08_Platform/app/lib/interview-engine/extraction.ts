@@ -101,9 +101,24 @@ export interface CandidateObservation {
    * proposal). A low_confidence candidate is deferred, not proposed.
    */
   low_confidence?: boolean
+
+  /**
+   * Whether this candidate appears to correct/contradict an earlier
+   * statement -- a property of the extracted candidate itself, not anything
+   * provider-specific, so it lives on the canonical type rather than an
+   * adapter-only shape. Deliberately NOT the same thing as
+   * supersedes_tool_mention_id/supersedes_observation_id: an extractor
+   * (mock or real model) has no visibility into this pipeline's internal
+   * mention_id/observation_id scheme, so it can only flag "this looks like
+   * a correction," never resolve it to a specific internal target -- that
+   * resolution is out of scope for Phase 6a (see Phase 6b/6c). Used for the
+   * correction-detection-rate evaluation metric.
+   */
+  is_correction?: boolean
+  correction_of_raw_text?: string
 }
 
-export type CandidateExtractor = (turn: RawUserTurn) => CandidateObservation[]
+export type CandidateExtractor = (turn: RawUserTurn) => Promise<CandidateObservation[]>
 
 // ── Normalization (stage 2) ─────────────────────────────────────────────────
 
@@ -309,13 +324,18 @@ function classifyMutationError(err: unknown): { reason_code: RejectedReasonCode;
  * per candidate -- diagnostics are Prototype Alpha evaluation data, not
  * part of the production RetrievalHandoff (Phase 5's handoff.ts is
  * untouched by this module).
+ *
+ * Async because CandidateExtractor is: a live-model-backed extractor
+ * (Phase 6a substage 2) is inherently IO-bound, and this pipeline uses the
+ * same interface for both the mock and the real adapter -- normalize,
+ * attest, and mutate remain synchronous/deterministic underneath.
  */
-export function runExtractionPipeline(
+export async function runExtractionPipeline(
   su: StructuredUnderstanding,
   turn: RawUserTurn,
   extractCandidates: CandidateExtractor,
-): { updated: StructuredUnderstanding; diagnostics: ExtractionDiagnostic[] } {
-  const candidates = extractCandidates(turn)
+): Promise<{ updated: StructuredUnderstanding; diagnostics: ExtractionDiagnostic[] }> {
+  const candidates = await extractCandidates(turn)
   const diagnostics: ExtractionDiagnostic[] = []
   let current = su
 
