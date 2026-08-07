@@ -238,6 +238,25 @@ Reran the full 14-scenario corpus, 3 trials each (42 live calls), `eval-reports/
 
 **Per the stated completion criteria, "no new material failures" is not literally satisfied** — scenario pass rate held steady only because one failure was traded for a different one. **Phase 6a is NOT marked complete.** No further prompt/schema changes made — not chasing this single trial without review, consistent with the standing instruction. Latency and token usage continue to be recorded, not optimized. **Not proceeding to Phase 6b** pending review of this comparison.
 
+**Targeted diagnostic of `uncertainty_no_visibility` (2026-08-07).** No prompt/schema changes; `corpus.ts` untouched. Standalone script (`diagnose-uncertainty-no-visibility.ts`), semantic scoring (any candidate matching the visibility-clause trigger phrase, regardless of `kind`, counted correct if its confidence is acceptable) rather than exact-shape matching. Original scenario × 20 + 5 semantically-equivalent paraphrases × 5 each = 45 trials, run twice (90 total).
+
+**Run 1 exposed a bug in the diagnostic's own scoring, not the model**: when the model emitted two candidates with identical `raw_text` (one `project_fact` framing, one `scoped_observation` framing), the `.find()`-based scorer picked whichever came first — which could be the less-informative duplicate even when a correct `unresolved_no_visibility` candidate sat right beside it (confirmed by manually re-reading `paraphrase_1` trial 4's raw JSON). Fixed to check all matching candidates, not just the first; reran clean.
+
+**Run 2 (fixed scorer), against the provisional acceptance standard:**
+| Standard | Result |
+|---|---|
+| ≥90% no-visibility preservation | **MET** — 93.3% (42/45) |
+| 0% conversion into confirmed absence | **NOT MET** — 6.7% (3/45) |
+| 0 invented facts | **MET** — 0/71 |
+
+**Combined across both correctly-scored runs (90 trials, the statistically meaningful view): failures are concentrated, not uniform.** The `original` phrasing: 3/40 (7.5%). One ambiguously-worded paraphrase (no named alternate knower — "I'm not involved... so I don't know"): 1/10 (10%), explicitly flagged in the diagnostic as lenient-scored for this reason. **The other 4 paraphrases: a clean 0% across 20 total trials each.**
+
+**Classification: prompt/schema weakness, not sampling variance.** 3 of the 4 genuine failures share an identical two-candidate shape: `project_fact`/`workflow_role` at `confirmed_absent` for "I don't have access to that," paired with a correctly-`confirmed` `scoped_observation` for the secondary "someone else manages it" fact — the respondent's own lack-of-visibility never appears anywhere in the output. This is the exact repeated pattern the review instructions named as the trigger for a prompt/schema-weakness classification, not a one-off. It is narrowly scoped, though: specific to phrasing that pairs "I don't have access to X" with an explicit named alternate owner, not a general breakdown of the confidence taxonomy — 4 of 6 tested phrasings never produce it.
+
+**Fixture-rigidity finding, confirmed but not acted on**: the original `corpus.ts` `check()` for this scenario required `kind === 'scoped_observation'` exclusively. The semantic-scoring data shows correct preservation legitimately occurs via `project_fact` framing too, not just `scoped_observation` — the rigid kind-lock would have false-failed some semantically-correct outputs. Not modified — flagged for review, per "do not modify the fixture until after showing whether alternative outputs are semantically valid," which this diagnostic now does.
+
+Full reports: `eval-reports/DIAGNOSTIC-UNCERTAINTY-NO-VISIBILITY-2026-08-07T06-40-21-160Z.md` (run 1, scoring-bug-affected) and `...T07-29-11-765Z.md` (run 2, authoritative). **No further prompt changes made. Not proceeding to Phase 6b** pending review.
+
 **Rule 5 status:** still not implemented — bundled-answer splitting itself (multiple `CandidateObservation`s from one turn) is structurally supported by `runExtractionPipeline`'s per-candidate loop (proven in substage 1's "multiple candidates in one turn" test), but the Rule 5 *cap* ("one disentangling question... never resolved by guessing") is a boundary-type behavior, not an extraction behavior — remains tracked for Phase 6b, not implemented here.
 
 ---
