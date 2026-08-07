@@ -9,6 +9,71 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of August 07, 2026
+*Run: 2026-08-07 · 35 high · 15 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 10 | post+update | [EU AI Act: Next level applies as of 2 August 2026](https://www.reedsmith.com/our-insights/blogs/technology-law-dispatch/102nfi5/eu-ai-act-next-level-applies-as-of-2-august-2026/) | Reed Smith LLP | Fri, 31 Jul 2026 | ☐ |
+| 9 | post+update | [EU AI Act Enforcement: The Real Deadlines Now](https://thezeronet.com/eu-ai-act-enforcement/) | The Zero Net | Wed, 05 Aug 2026 | ☐ |
+| 9 | post+update | [EU AI Act: Transparency and Enforcement Rules Take Effect as High-Risk Regime Is Deferred](https://www.jdsupra.com/legalnews/eu-ai-act-transparency-and-enforcement-6041958/) | jdsupra.com | Tue, 04 Aug 2026 | ☐ |
+| 9 | post+update | [The EU AI Act’s Big August 2 Deadline Isn’t the One Most Headlines Are Describing](https://timestabloid.com/the-eu-ai-acts-big-august-2-deadline-isnt-the-one-most/) | Times Tabloid | Tue, 04 Aug 2026 | ☐ |
+| 9 | post+update | [The Advertiser Gave Us an AI Commercial… Isn’t that Enough?](https://talkers.com/2026/08/03/the-advertiser-gave-us-an-ai-commercial-isnt-that-enough/) | TALKERS magazine | Mon, 03 Aug 2026 | ☐ |
+| 9 | post+update | [Celebrating the AI Act delay? The EU AI Act’s chatbot and content rules apply this week](https://www.inkl.com/news/celebrating-the-ai-act-delay-the-eu-ai-acts-chatbot-and-content-rules-apply-this-week) | inkl | Sun, 02 Aug 2026 | ☐ |
+| 9 | post+update | [EU AI Act enforcement begins today with new transparency rules](https://eciks.org/17942-ai-act-enforcement-transparency-rules) | eciks.org | Sun, 02 Aug 2026 | ☐ |
+| 9 | post+update | [Article 50 fines hit 3% turnover as Cinchy CEO says disclosure isn't enough](https://ppc.land/article-50-fines-hit-3-turnover-as-cinchy-ceo-says-disclosure-isnt-enough/) | PPC Land | Sat, 01 Aug 2026 | ☐ |
+| 9 | post+update | [EU AI Act Enforcement Starts August 2 — Fines, Transparency &](https://www.machinebrief.com/news/eu-ai-act-enforcement-starts-august-2-2026-fines-transparency-gpai) | machinebrief.com | Sat, 01 Aug 2026 | ☐ |
+| 9 | post+update | [GEMA notches a second transatlantic AI copyright win in Germany](https://www.reedsmith.com/our-insights/blogs/viewpoints/102nfis/gema-notches-a-second-transatlantic-ai-copyright-win-in-germany/) | Reed Smith LLP | Fri, 31 Jul 2026 | ☐ |
+| 9 | post+update | [EU AI Act article 50 takes effect August 2: European Commission issues clear guidelines for enforcement](https://identityweek.net/eu-ai-act-article-50-takes-effect-august-2-european-commission-issues-clear-guidelines-for-enforcement/) | identityweek.net | Fri, 31 Jul 2026 | ☐ |
+| 9 | post+update | [Enforcement Day Is Here. The Art. 50 Code Still Doesn’t Cover Agent Disclosure.](https://forkast.news/enforcement-day-is-here-the-art-50-code-still-doesnt-cover-agent-disclosure/) | forkast.news | Fri, 31 Jul 2026 | ☐ |
+| 9 | post+update | [Client Alert: The New AI Coverage Fight: Exclusions, Endorsements, and Denied Claims](https://www.jdsupra.com/legalnews/client-alert-the-new-ai-coverage-fight-4781774/) | jdsupra.com | Fri, 31 Jul 2026 | ☐ |
+| 8 | post+update | [California’s AI Transparency Act Arrives Alongside Europe’s Article 50 \| EDRM - Electronic Discovery Reference Model](https://www.jdsupra.com/legalnews/california-s-ai-transparency-act-4817035/) | jdsupra.com | Fri, 07 Aug 2026 | ☐ |
+| 8 | post+update | [Government tightens AI rules, mandates deepfake labelling and 3-hour takedown timeline](https://www.storyboard18.com/digital/india-tightens-ai-deepfake-rules-speeds-content-removal-ws-l-106906.htm) | Storyboard18 | Thu, 06 Aug 2026 | ☐ |
+| 8 | post+update | [Can Government Contractors Use AI? A Legal Guide to AI Compliance and Disclosure Requirements](https://natlawreview.com/article/can-government-contractors-use-ai-legal-guide-ai-compliance-and-disclosure?amp) | The National Law Review | Tue, 04 Aug 2026 | ☐ |
+| 8 | post+update | [What Startups Need to Do Before the EU AI Act’s August 2 Deadline?](https://techbullion.com/what-startups-need-to-do-before-the-eu-ai-acts-august-2-deadline/) | TechBullion | Tue, 04 Aug 2026 | ☐ |
+| 8 | post+update | [Mrunal Thakur warns against AI deepfakes, threatens legal action over misuse of identity](https://www.storyboard18.com/brand-makers/mrunal-thakur-warns-against-ai-deepfakes-threatens-legal-action-over-misuse-of-identity-ws-l-106582.htm) | Storyboard18 | Tue, 04 Aug 2026 | ☐ |
+| 8 | post+update | [EU AI Act Enforcement Phase Begins](https://www.wsgr.com/en/insights/eu-ai-act-enforcement-phase-begins.html) | Wilson Sonsini | Tue, 04 Aug 2026 | ☐ |
+| 8 | post+update | [EU AI act enforcement begins for AI model makers](https://news.outsourceaccelerator.com/eu-ai-act-enforcement/) | Outsource Accelerator | Tue, 04 Aug 2026 | ☐ |
+| 8 | post+update | [EU begins enforcing AI Act, putting AI models under the microscope](https://www.helpnetsecurity.com/2026/08/04/eu-ai-act-enforcement-ai-models/) | Help Net Security | Tue, 04 Aug 2026 | ☐ |
+| 8 | post+update | [New California AI Disclosure Rules Become Operative](https://www.morganlewis.com/pubs/2026/08/new-california-ai-disclosure-rules-become-operative) | Morgan Lewis | Mon, 03 Aug 2026 | ☐ |
+| 8 | post+update | [AI Act: Enforcement begins now](https://table.media/en/europe/feature/ai-act-enforcement-begins-now) | table.media | Mon, 03 Aug 2026 | ☐ |
+| 8 | post+update | [EU AI Act Transparency Rules Take Effect Today Despite the 2027 Delay](https://startupfortune.com/eu-ai-act-transparency-rules-take-effect-today-despite-the-2027-delay/) | Startup Fortune | Mon, 03 Aug 2026 | ☐ |
+| 8 | post+update | [EU AI Act labelling rules are now in force: What Indian creators and AI firms need to know](https://www.gizmotimes.com/ai/eu-ai-act-labelling-rules/51087) | Gizmo Times | Sun, 02 Aug 2026 | ☐ |
+| 8 | post+update | [EU begins enforcing new AI Act transparency rules](https://www.dqindia.com/government-policy/eu-ai-act-transparency-rules-2026-12221220) | dqindia.com | Sun, 02 Aug 2026 | ☐ |
+| 8 | update | [Safer and more transparent AI](https://commission.europa.eu/news-and-media/news/safer-and-more-transparent-ai-2026-08-02_en) | European Commission | Sun, 02 Aug 2026 | ☐ |
+| 8 | update | [Compliance Signals 27 July-1 August 2026: AI Act, health data privacy and UK employment reform](https://www.lexology.com/pro/content/compliance-signals-27-july-1-august-2026-ai-act-health-data-privacy-and-uk-employment-reform) | Lexology | Sat, 01 Aug 2026 | ☐ |
+| 8 | post+update | [MiniMax H3 Opens AI Video to Developers: Copyright Lawsuit Clouds Every Clip](https://www.techtimes.com/articles/322521/20260731/minimax-h3-opens-ai-video-developers-copyright-lawsuit-clouds-every-clip.htm) | Tech Times | Fri, 31 Jul 2026 | ☐ |
+| 8 | post+update | [The new AI labelling rules for “deployers” in the advertising supply chain](https://www.lewissilkin.com/insights/2026/07/31/the-new-ai-labelling-rules-for-deployers-in-the-advertising-supply-chain) | Lewis Silkin LLP | Fri, 31 Jul 2026 | ☐ |
+| 8 | post+update | [AI transparency under the AI Act: what businesses need to know before 2 August 2026](https://www.lexology.com/library/detail.aspx?g=009c81cf-2768-427d-a326-03bb6faa1c37) | Lexology | Fri, 31 Jul 2026 | ☐ |
+| 7 | update | [Digital AI Omnibus Delays Key Deadlines, Introduces New Rules](https://www.jdsupra.com/legalnews/digital-ai-omnibus-delays-key-deadlines-1900131/) | jdsupra.com | Wed, 05 Aug 2026 | ☐ |
+| 7 | update | [Announcing a partnership with Cashmere for copyright-compliant AI platform licensing](https://press.princeton.edu/news/cashmere) | Princeton University Press | Mon, 03 Aug 2026 | ☐ |
+| 7 | post+update | [EU AI Act Transparency Rules Put Financial Institutions on Compliance Front Line](https://www.pymnts.com/news/artificial-intelligence/2026/eu-ai-act-transparency-rules-put-financial-institutions-on-compliance-front-line/) | PYMNTS.com | Mon, 03 Aug 2026 | ☐ |
+| 7 | update | [AI training, fair dealing and copyright infringement by AI platforms: Analysing Delhi High Court's order in ANI Media v. OpenAI](https://www.barandbench.com/view-point/ai-training-fair-dealing-and-copyright-infringement-by-ai-platforms-analysing-delhi-high-courts-order-in-ani-media-v-openai) | Bar and Bench | Sat, 01 Aug 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [‘The Mummy’ Poster Ads Banned From London Underground After Advertising Watchdog Cites ‘Distressing’ Imagery](https://variety.com/2026/film/news/the-mummy-poster-ads-banned-london-underground-1236828159/) | Variety | Wed, 05 Aug 2026 | ☐ |
+| 6 | monitor | [ShareChat’s $10.5M AI Micro-Drama Bet Hinges on Closing One Critical Quality Gap](https://www.techtimes.com/articles/322926/20260804/sharechats-105m-ai-micro-drama-bet-hinges-closing-one-critical-quality-gap.htm) | Tech Times | Tue, 04 Aug 2026 | ☐ |
+| 6 | monitor | [Advertisers face irreversible AI label field across 2 Google ad APIs](https://ppc.land/advertisers-face-irreversible-ai-label-field-across-2-google-ad-apis/) | PPC Land | Tue, 04 Aug 2026 | ☐ |
+| 6 | monitor | [AI Office gains 5% daily penalty power over Google and Meta AI systems](https://ppc.land/ai-office-gains-5-daily-penalty-power-over-google-and-meta-ai-systems/) | PPC Land | Mon, 03 Aug 2026 | ☐ |
+| 6 | monitor | [Every chatbot in Europe must now say it’s an AI — or its maker pays €15 million](https://www.martincid.com/technology-sv/eu-ai-act-article-50-chatbot-disclosure-fine/) | Martin Cid Magazine | Mon, 03 Aug 2026 | ☐ |
+| 6 | monitor | [GPT-Live Voice Gets SynthID Watermarks One Day Before EU AI Act Enforcement](https://www.techtimes.com/articles/322592/20260801/gpt-live-voice-gets-synthid-watermarks-one-day-before-eu-ai-act-enforcement.htm) | Tech Times | Sat, 01 Aug 2026 | ☐ |
+| 6 | monitor | [Regulators unleash AI as ad complaints become obsolete](https://fintech.global/2026/07/31/regulators-unleash-ai-as-ad-complaints-become-obsolete/) | FinTech Global | Fri, 31 Jul 2026 | ☐ |
+| 5 | monitor | [Is your enterprise data ready for custom AI model training?](https://business.adobe.com/blog/training-data-for-ai-custom-models) | Adobe for Business | Wed, 05 Aug 2026 | ☐ |
+| 5 | monitor | [Colorado narrows its AI law as the FTC signals a new federal approach](https://www.jdsupra.com/legalnews/colorado-narrows-its-ai-law-as-the-ftc-7702545/) | jdsupra.com | Wed, 05 Aug 2026 | ☐ |
+| 5 | monitor | [The Copyright Battle Over AI-Generated Images: Where Things Stand in 2026](https://www.analyticsinsight.net/amp/story/news/the-copyright-battle-over-ai-generated-images-where-things-stand-in-2026) | Analytics Insight | Tue, 04 Aug 2026 | ☐ |
+| 5 | monitor | [Evolving risks and legal challenges relating to online harm - reflections from a global liability defence panel](https://www.kennedyslaw.com/en/thought-leadership/article/2026/evolving-risks-and-legal-challenges-relating-to-online-harm-reflections-from-a-global-liability-defence-panel/) | Kennedys Law LLP | Mon, 03 Aug 2026 | ☐ |
+| 4 | monitor | [SCCA’s student chapter debate spotlights AI copyright](https://law.asia/scca-gena2z-ai-copyright-debate-singapore/) | Law.asia | Thu, 06 Aug 2026 | ☐ |
+| 4 | monitor | [California AI Transparency Act Operative: Midjourney Has No Watermark, Fines Start Today](https://www.techtimes.com/articles/322713/20260802/california-ai-transparency-act-operative-midjourney-has-no-watermark-fines-start-today.htm) | Tech Times | Sun, 02 Aug 2026 | ☐ |
+| 4 | monitor | [Artificial Intelligence - AI Update, July 31, 2026: AI News and Views From the Past Week](https://www.marketingprofs.com/opinions/2026/55433/ai-update-july-31-2026-ai-news-and-views-from-the-past-week) | marketingprofs.com | Fri, 31 Jul 2026 | ☐ |
+| 4 | monitor | [Scale Social AI Secures New Financing to Scale the Enterprise Infrastructure for Authentic Content](https://www.businesswire.com/news/home/20260727829685/en/Scale-Social-AI-Secures-New-Financing-to-Scale-the-Enterprise-Infrastructure-for-Authentic-Content) | Business Wire | Fri, 31 Jul 2026 | ☐ |
+
+---
+
 ## Week of August 04, 2026
 *Run: 2026-08-04 · 32 high · 20 monitor · lookback 7 days*
 
