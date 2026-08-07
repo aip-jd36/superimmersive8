@@ -18,13 +18,16 @@
  *
  * PRD §8 scope note: this implements normative rules 2 (one follow-up per
  * signal, never an incident investigation), 3 (one historical-experience
- * question), 4 (one uncertainty clarification), and 6 (user boundaries
- * override completeness, scoped to question/phase/interview) -- the exact
- * set the Phase 4 kickoff specified. Rule 5 (one disentangling question for
- * bundled answers) exists in the frozen PRD but was NOT requested for this
- * phase and is NOT implemented here -- a known, deliberate omission, not an
- * oversight. See Phase 4 completion report for confirmation this was
- * flagged, not missed silently.
+ * question), 4 (one uncertainty clarification), 6 (user boundaries override
+ * completeness, scoped to question/phase/interview), and, added in Phase 6b,
+ * 5 (one disentangling question for bundled answers, never resolved by
+ * guessing, never repeated drill-down). Rule 5 was deliberately deferred out
+ * of Phase 4's original scope -- see CRC_PROTOTYPE_ALPHA_ROADMAP.md Phase 6b
+ * section for the reconciled requirement and its explicit prototype-scoping
+ * caveat: the disentangling-question cap below is scoped once-per-interview,
+ * a prototype assumption arising from ambiguity in the PRD's own wording
+ * (once-per-interview vs. once-per-bundling-event), not settled product
+ * meaning. Flagged for a dedicated future evaluation case, not resolved here.
  */
 
 import type { Phase, OptOutScope } from '@/types/interview-engine'
@@ -36,6 +39,7 @@ export const CANDIDATE_QUESTION_KINDS = [
   'uncertainty_clarification',
   'historical_experience',
   'incident_investigation',
+  'disentangling_question',
   'other',
 ] as const
 
@@ -74,6 +78,15 @@ export interface BoundaryState {
   /** signal_id -> number of uncertainty clarifications already asked for that signal */
   uncertainty_clarifications_used: Record<string, number>
   historical_experience_asked: boolean
+  /**
+   * Rule 5 (PRD §8): true once a disentangling question has been asked.
+   * Scoped once-per-interview, same mechanism as historical_experience_asked
+   * -- a PROTOTYPE ASSUMPTION (see module header), not settled product
+   * meaning. A second, independent bundled ambiguity later in the same
+   * interview will be suppressed under this scope, not asked -- documented,
+   * not silently accepted as correct.
+   */
+  disentangling_question_asked: boolean
   /** True once an interview-scoped decline has occurred; persists across all future evaluations. */
   interview_ended: boolean
   /** Phases closed by a phase-scoped decline. A phase not in this list is unaffected, even after another phase closes -- closing one phase must not automatically end unrelated future questioning in a different phase. */
@@ -85,6 +98,7 @@ export function createInitialBoundaryState(): BoundaryState {
     follow_ups_used: {},
     uncertainty_clarifications_used: {},
     historical_experience_asked: false,
+    disentangling_question_asked: false,
     interview_ended: false,
     phases_ended: [],
   }
@@ -126,6 +140,7 @@ export const BOUNDARY_REASON_CODES = [
   'FOLLOW_UP_CAP_REACHED',
   'UNCERTAINTY_CLARIFICATION_CAP_REACHED',
   'HISTORICAL_EXPERIENCE_ALREADY_ASKED',
+  'DISENTANGLING_QUESTION_ALREADY_ASKED',
   'INCIDENT_INVESTIGATION_PROHIBITED',
   'USER_DECLINED_QUESTION',
   'USER_DECLINED_PHASE',
@@ -305,6 +320,30 @@ export function evaluateBoundary(
       reason_code: 'ALLOWED',
       action_scope: 'ask',
       next_state: { ...state, historical_experience_asked: true },
+      debug: { fired_boundary: 'none', candidate_kind: candidate.kind },
+    }
+  }
+
+  if (candidate.kind === 'disentangling_question') {
+    // Rule 5 (PRD §8): at most one, ever suppress repeated drill-down.
+    // target_signal_id is deliberately not required here -- a disentangling
+    // question is about the relationship BETWEEN multiple signals, not a
+    // follow-up on one, so candidate.signal_id is expected to be absent for
+    // this kind (see candidate-question.ts's validateCandidateReference).
+    if (state.disentangling_question_asked) {
+      return {
+        allowed: false,
+        reason_code: 'DISENTANGLING_QUESTION_ALREADY_ASKED',
+        action_scope: 'suppress_current_question',
+        next_state: state,
+        debug: { fired_boundary: 'disentangling_question_cap (once per interview -- prototype assumption)', candidate_kind: candidate.kind },
+      }
+    }
+    return {
+      allowed: true,
+      reason_code: 'ALLOWED',
+      action_scope: 'ask',
+      next_state: { ...state, disentangling_question_asked: true },
       debug: { fired_boundary: 'none', candidate_kind: candidate.kind },
     }
   }
