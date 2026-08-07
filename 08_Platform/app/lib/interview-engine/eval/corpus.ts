@@ -181,9 +181,26 @@ export const EVAL_CORPUS: EvalScenario[] = [
     description: 'The user genuinely lacks visibility into the fact, distinct from not knowing at all.',
     turns: [{ turn: 1, text: "Honestly, I don't have access to that -- someone else on the team manages billing and approvals." }],
     check(diagnosticsByTurn) {
-      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'scoped_observation')
-      const passed = d?.candidate.observation_confidence_hint === 'unresolved_no_visibility'
-      return { passed, notes: `confidence hint: ${d?.candidate.observation_confidence_hint}` }
+      // Semantic scoring: a correct answer may represent the visibility fact
+      // as either project_fact or scoped_observation -- the original check()
+      // here required scoped_observation exclusively, which the Phase 6a
+      // targeted diagnostic (2026-08-07) showed was too rigid against real
+      // model output; both kinds are valid under the current schema, so
+      // neither is required over the other.
+      const candidates = diagnosticsByTurn.flat().map((d) => d.candidate)
+      const confidenceOf = (c: (typeof candidates)[number]) => c.observation_confidence_hint ?? c.fact_confidence_hint
+      const visibilityCandidate = candidates.find((c) => confidenceOf(c) === 'unresolved_no_visibility')
+      // Guards against the specific failure mode the diagnostic found: the
+      // "I don't have access" clause getting confidently misclassified as
+      // confirmed_absent instead of (or alongside) the correct candidate.
+      const confirmedAbsentForAccessClause = candidates.some(
+        (c) => confidenceOf(c) === 'confirmed_absent' && /don't have access/i.test(c.raw_text),
+      )
+      const passed = !!visibilityCandidate && !confirmedAbsentForAccessClause
+      return {
+        passed,
+        notes: `visibility candidate: ${JSON.stringify(visibilityCandidate)}; confirmed_absent misclassification present: ${confirmedAbsentForAccessClause}`,
+      }
     },
   },
 

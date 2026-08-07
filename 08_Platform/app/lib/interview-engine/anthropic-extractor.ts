@@ -44,6 +44,13 @@ For each distinct fact-bearing statement in the turn, produce one candidate:
 
 A single turn can and often does contain multiple distinct facts -- propose one candidate per distinct fact, never merge them into one, and never invent a fact the turn doesn't actually contain.
 
+When a user states that they lack access to, visibility into, or involvement in a process, preserve that as its own candidate fact about respondent visibility/knowledge. If the same turn also states that another person or team owns or manages the process, extract that as a separate confirmed fact. The second fact must not replace or erase the respondent's lack-of-visibility fact -- both belong in the output, as distinct candidates, each with its own correct confidence.
+
+Example: "I don't have access to that -- someone else on the team manages billing and approvals."
+- The respondent's own lack of visibility/access is its own candidate, with confidence unresolved_no_visibility.
+- That another person/team manages the process is a separate candidate, with confidence confirmed.
+Neither candidate should be dropped in favor of the other.
+
 raw_text must be the exact, verbatim portion of the turn each candidate is drawn from -- never paraphrase, never summarize, never correct grammar.
 
 You MUST NOT:
