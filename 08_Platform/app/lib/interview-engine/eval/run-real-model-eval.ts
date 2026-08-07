@@ -21,7 +21,7 @@ import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import type { CandidateObservation, ExtractionDiagnostic, RawUserTurn } from '../extraction'
 import { runExtractionPipeline } from '../extraction'
-import { createAnthropicExtractor, DEFAULT_MODEL } from '../anthropic-extractor'
+import { extractWithDiagnostics, DEFAULT_MODEL } from '../anthropic-extractor'
 import { EVAL_CORPUS, type EvalScenario } from './corpus'
 import { emptyStructuredUnderstanding } from './empty-structured-understanding'
 
@@ -64,7 +64,17 @@ interface TrialResult {
   candidatesByTurn: CandidateObservation[][]
 }
 
-const KNOWN_CANONICAL_IDENTIFIERS = ['runway-gen3', 'kling', 'elevenlabs', 'gemini-api', 'gemini-consumer-app']
+/**
+ * Only genuinely slug-shaped canonical identifiers -- multi-word, hyphenated,
+ * something no one would naturally SAY out loud ("runway-gen3", "gemini-api",
+ * "gemini-consumer-app"). Deliberately excludes single natural words like
+ * "kling"/"elevenlabs" whose canonical id happens to equal their own spoken
+ * name lowercased -- flagging those would punish the model for correctly
+ * reporting what the user said, not for illegally canonicalizing anything.
+ * (First real run of this harness caught exactly this false-positive bug --
+ * see eval-reports/ for the report that exposed it.)
+ */
+const SLUG_SHAPED_IDENTIFIERS = ['runway-gen3', 'gemini-api', 'gemini-consumer-app']
 
 function normalizeForSubstringCheck(s: string): string {
   return s.toLowerCase().replace(/\s+/g, ' ').trim()
@@ -79,12 +89,11 @@ function checkInventedFacts(candidates: CandidateObservation[], turnText: string
 
 function checkFalseResolutions(candidates: CandidateObservation[]): string[] {
   return candidates
-    .filter((c) => c.kind === 'tool_mention' && c.raw_tool_name && KNOWN_CANONICAL_IDENTIFIERS.includes(c.raw_tool_name.toLowerCase()))
+    .filter((c) => c.kind === 'tool_mention' && c.raw_tool_name && SLUG_SHAPED_IDENTIFIERS.includes(c.raw_tool_name.toLowerCase()))
     .map((c) => c.raw_tool_name!)
 }
 
 async function runScenarioTrial(scenario: EvalScenario, trial: number, model: string): Promise<TrialResult> {
-  const extractor = createAnthropicExtractor({ model })
   let su = emptyStructuredUnderstanding()
   const diagnosticsByTurn: ExtractionDiagnostic[][] = []
   const candidatesByTurn: CandidateObservation[][] = []
@@ -96,9 +105,11 @@ async function runScenarioTrial(scenario: EvalScenario, trial: number, model: st
 
   try {
     for (const turn of scenario.turns) {
-      const start = Date.now()
-      const candidates = await extractor(turn)
-      latencyMs += Date.now() - start
+      const { candidates, inputTokens: turnInputTokens, outputTokens: turnOutputTokens, latencyMs: turnLatencyMs } =
+        await extractWithDiagnostics(turn, { model })
+      inputTokens += turnInputTokens
+      outputTokens += turnOutputTokens
+      latencyMs += turnLatencyMs
       candidatesByTurn.push(candidates)
       inventedFactCandidates.push(...checkInventedFacts(candidates, turn.text))
       falseResolutionCandidates.push(...checkFalseResolutions(candidates))
@@ -253,7 +264,31 @@ async function main() {
       if (f.falseResolutionCandidates.length > 0) log(`Possible false resolutions: ${JSON.stringify(f.falseResolutionCandidates)}`)
     }
   } else {
-    log('\nNo material failures.')
+    log('\nNo material failures (scenario checks).')
+  }
+
+  // Invented-fact / false-resolution hits are printed here even when their
+  // scenario otherwise PASSED -- these counts feed the top-line rates above
+  // and must be individually inspectable, not just implied by the aggregate.
+  const inventedHits = results.filter((r) => r.inventedFactCandidates.length > 0)
+  const falseResolutionHits = results.filter((r) => r.falseResolutionCandidates.length > 0)
+
+  if (inventedHits.length > 0) {
+    log(`\n=== Invented-Fact Hits (${inventedHits.reduce((s, r) => s + r.inventedFactCandidates.length, 0)}) ===`)
+    for (const r of inventedHits) {
+      log(`${r.scenarioId} (trial ${r.trial}): ${JSON.stringify(r.inventedFactCandidates)}`)
+    }
+  } else {
+    log('\nNo invented-fact hits.')
+  }
+
+  if (falseResolutionHits.length > 0) {
+    log(`\n=== False-Resolution Hits (${falseResolutionHits.reduce((s, r) => s + r.falseResolutionCandidates.length, 0)}) ===`)
+    for (const r of falseResolutionHits) {
+      log(`${r.scenarioId} (trial ${r.trial}): ${JSON.stringify(r.falseResolutionCandidates)}`)
+    }
+  } else {
+    log('\nNo false-resolution hits.')
   }
 
   const reportDir = join(__dirname, '..', '..', '..', '..', 'implementation', 'eval-reports')
