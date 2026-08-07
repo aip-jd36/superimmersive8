@@ -450,27 +450,31 @@ Deterministic: 137/137 still passing. Real-model rerun, same prompt/model, 45 tr
 
 ---
 
-## Phase 7 — Eight-dialogue evaluation suite
+## Phase 7 — Nine-scenario evaluation suite (eight dialogues + one targeted probe)
 
-**Objective:** run the six normative PRD dialogues plus two implementation fixtures (ambiguous multi-surface tool — "I used Nano Banana," must disambiguate Consumer App vs. API naturally; full Phase 1→4 end-to-end trace) through the complete, now fully-assembled pipeline.
+**Objective:** run the six normative PRD dialogues, two implementation fixtures (ambiguous multi-surface tool — "I used Nano Banana," must disambiguate Consumer App vs. API naturally; full Phase 1→4 end-to-end trace), and one targeted Rule 5 implementation probe through the complete, now fully-assembled pipeline.
+
+**Full design review:** `08_Platform/implementation/PHASE_7_PLANNING.md`. Reviewed and approved by JD 2026-08-08. Both decisions below recorded here verbatim since they change what "Phase 7 complete" means.
 
 **Dependencies:** Phases 1–6c.
-**Files/modules:** none new — integration test suite over everything above.
-**Deliverables:** per-dialogue actual-vs-expected comparison (phase path, questions asked/suppressed, mutations, scoped observations, confidence state, Gate 1/2 results, termination reason, handoff object).
+**Files/modules:** two new eval-only files (`run-dialogue.ts` orchestrator, trace/diff reporter) — no frozen module touched. Not "none new" as originally scoped; the planning pass found no per-turn orchestrator has ever existed (every phase through 6c tested one subsystem in isolation).
+**Deliverables:** per-scenario actual-vs-expected comparison (phase path, questions asked/suppressed, mutations, scoped observations, confidence state, Gate 1/2 results — both phase and interview scope, termination reason, handoff object).
 
-**Test strategy:** every deviation documented and categorized, not silently patched:
-- domain-model failure
-- mutation failure
-- gate failure
-- boundary failure
-- handoff-assembly failure
-- **extraction failure** (wrong facts pulled from correct text)
-- **decision failure** (correct facts, wrong ask/suppress choice) — split from a single "model-behavior failure" bucket, since these have different fixes (prompt tuning vs. Constraint A logic/threshold)
-- test-fixture ambiguity (the expected value itself was wrong, not the implementation)
+**Decision 1 (JD, 2026-08-08) — script-supplied phase and decline scope, Prototype Alpha harness assumption only, not production architecture.** No phase-transition or decline-scope inference exists anywhere in the codebase (verified by full grep of `lib/interview-engine/`) — every module that needs either (`decision.ts`, `candidate-question.ts`, `boundaries.ts`) already takes them as external input. Phase 7 does **not** build inference for either. Each dialogue turn script explicitly declares the CRC phase expected at that turn and any decline scope the user expressed. Building real inference now would introduce two new, untested classifiers into an evaluation whose purpose is to validate the already-built pipeline under controlled state transitions — it would make an end-to-end failure harder to attribute, not easier. This is a deliberate scoping choice for Prototype Alpha, revisit explicitly before any production build.
 
-**Completion criteria:** all 8 dialogues run to completion; every deviation is categorized under one of the buckets above; no architecture change is made merely to force a test to pass without understanding which bucket the failure belongs to.
+**Decision 2 (JD, 2026-08-08) — add a ninth scenario, the Rule 5 disentangling probe, explicitly labeled an implementation probe, not a normative PRD dialogue.** None of the 8 fixture-defined dialogues exercises a live disentangling-question decision — `mixed_multi_signal`'s bundled turn resolves cleanly via extraction alone, a different thing from genuine bundled ambiguity. The probe tests, narrowly: bundled observations remain separate and unresolved before clarification; the real generator proposes a `disentangling_question` when warranted; Constraint A says it would materially improve understanding; Constraint B permits the first one; after one clarification, no second disentangling question is permitted under the prototype's current global (once-per-interview) cap; the ambiguity is never resolved by guessing. **Explicitly not evidence that the once-per-interview cap is the final product interpretation** — it remains the Phase 6b prototype assumption, unchanged by this probe's outcome either way.
+
+**Gate 1 consistency finding (deterministic check, zero API cost, run before any authoring began):** ran `evaluateGate1` against all 8 existing `fixtures.ts` end-states. Two mismatches: `current_vs_historical` and `ambiguous_uncertain` both store `gate_1_state: 'met'` while their own `intended_use` is `unknown` — `evaluateGate1` actually computes `not_met` / `INTENDED_USE_MISSING` for both. Root cause: `fixtures.ts` predates `gates.ts` (Phase 1 vs. Phase 3); its hand-set gate fields were authored to prove the type model could hold that value, never checked against the real evaluator once it existed. Not a `gates.ts` bug — `gates.ts` is behaving correctly against the data it's given. **Not fixing `fixtures.ts`** (frozen Phase 1 module, and the two dialogues' actual purpose — scope-tagging and the 5-state confidence taxonomy, respectively — is orthogonal to intended_use resolution). Phase 7's own expected traces for these two scenarios use what `evaluateGate1` actually computes (`not_met`), not the stale stored field, and this divergence is recorded here rather than silently carried forward.
+
+**Test strategy:** every deviation documented and categorized under the eleven-category taxonomy from the planning doc (supersedes the shorter list originally sketched here): domain-model, extraction, normalization, mutation, gate, candidate-generation, Constraint A decision, Constraint B/boundary, handoff, fixture ambiguity, transient provider/schema.
+
+**Completion criteria:** all 9 scenarios run to completion; every deviation is categorized; no architecture change is made without meeting all four evidence bars (reproducible; not explainable by extraction/prompting/fixture/variance/determinism; appears across >1 scenario or is a direct impossibility; a local fix would violate another frozen principle).
 **Explicitly deferred:** everything on the global defer list below.
+**Watch case, not a dedicated scenario (per JD instruction — flag rather than add automatically):** boundary-cap-vs-mid-conversation-supersession interaction (planning doc §8) — the strongest concrete mechanism by which Phase 7 could expose a real architecture flaw, since no unit-level phase could have tested it. Observed opportunistically if any of the 9 scripted scenarios happens to supersede a signal that already carries a boundary cap; not forced into a scenario that doesn't already need one. If none of the 9 exercises it, that will be reported as a gap requiring a dedicated scenario, not silently dropped.
+**Reporting requirement (JD, 2026-08-08):** Phase 8's language must state explicitly that this evaluation establishes internal behavioral coherence against the frozen normative dialogues and targeted implementation probes, and does **not** establish generalization to arbitrary real-world conversations — carried forward from the planning doc's own false-confidence critique.
 **Main risks:** inherits Phase 6a/6c's risk directly — this is where it becomes visible and diagnosable, not where it's introduced.
+
+**Implementation order (per JD, 2026-08-08):** mock-stack dry run first → orchestrator wiring → structured actual-vs-expected trace → live-model runs only after the dry run is clean → preserve all raw traces and failures → no frozen module changed merely to make the suite pass. **Stop after the first complete mock-stack dry-run report; do not launch the live battery without explicit go-ahead.**
 
 ---
 
