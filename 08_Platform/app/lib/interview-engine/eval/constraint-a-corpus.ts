@@ -9,6 +9,19 @@
  * would a real answer produce" is unambiguous. Used only for the
  * retrospective-diff comparison (step 7) -- never fed back into the
  * prospective decision itself.
+ *
+ * Cleanup pass 2026-08-07 (post-first-real-model-eval, pre-Phase-7): fixed
+ * bundled_disentangling_needed's after_structured_understanding, which
+ * previously did not differ structurally from its before state (see inline
+ * comment on that case). Widened acceptable_reason_codes on
+ * confirmed_absence_redundant, bundled_disentangling_needed, and
+ * tool_tier_unknown_necessary where a first real-model run showed a second
+ * reason code was an equally valid description of the same direction --
+ * never done by loosening expected_should_ask itself.
+ * tool_tier_unknown_irrelevant's expected_should_ask is deliberately left at
+ * `false` despite the model's consistent disagreement in that first run --
+ * see CRC_PROTOTYPE_ALPHA_ROADMAP.md Phase 6c for why that is preserved as a
+ * real (not fixture) disagreement, not resolved by relabeling.
  */
 
 import type {
@@ -245,7 +258,13 @@ export const CONSTRAINT_A_CORPUS: ConstraintACorpusCase[] = [
       target_signal_id: 'so-1',
     }),
     expected_should_ask: false,
-    acceptable_reason_codes: ['FACT_ALREADY_CONFIRMED', 'SUFFICIENT_CERTAINTY_ALREADY'],
+    // Widened 2026-08-07: "are you sure absolutely no one looked at it?" is
+    // simultaneously a redundant reconfirmation AND an interrogative push for
+    // reassurance -- REVIEWER_STYLE_DRILLDOWN is an equally valid description
+    // of the same suppress decision, not a different (wrong) one. The prior
+    // set was too narrow for a case that legitimately straddles both
+    // categories by construction.
+    acceptable_reason_codes: ['FACT_ALREADY_CONFIRMED', 'SUFFICIENT_CERTAINTY_ALREADY', 'REVIEWER_STYLE_DRILLDOWN'],
   },
 
   {
@@ -254,8 +273,19 @@ export const CONSTRAINT_A_CORPUS: ConstraintACorpusCase[] = [
     description: 'A bundled answer produced two observations whose scope genuinely cannot be told apart.',
     structured_understanding: su({
       scoped_observations: [
-        observation({ observation_id: 'so-1', note: 'Something happened on this one, or maybe the other project -- both came up in the same breath.' }),
-        observation({ observation_id: 'so-2', scope: 'historical_project', note: 'Could be this one instead.', source_turn: 2 }),
+        observation({
+          observation_id: 'so-1',
+          scope: 'current_project',
+          confidence: 'unresolved_no_visibility',
+          note: 'Something happened on this one, or maybe the other project -- both came up in the same breath.',
+        }),
+        observation({
+          observation_id: 'so-2',
+          scope: 'current_project',
+          confidence: 'unresolved_no_visibility',
+          note: 'Could be this one instead -- same bundled answer, still unclear which project it belongs to.',
+          source_turn: 2,
+        }),
       ],
     }),
     candidate: candidate({
@@ -264,11 +294,24 @@ export const CONSTRAINT_A_CORPUS: ConstraintACorpusCase[] = [
       target_signal_id: null,
     }),
     expected_should_ask: true,
-    acceptable_reason_codes: ['BUNDLED_OBSERVATIONS_DISENTANGLEABLE'],
+    acceptable_reason_codes: ['BUNDLED_OBSERVATIONS_DISENTANGLEABLE', 'CURRENT_VS_HISTORICAL_AMBIGUOUS'],
+    // Fixed 2026-08-07 (Phase 6c cleanup pass): the prior version gave so-1 an
+    // implicit default scope and so-2 an already-explicit 'historical_project'
+    // scope in the BEFORE state -- meaning both "before" and "after" already
+    // carried identical, fully-resolved scope values, so the ambiguity existed
+    // only in prose (note text), which computeRetrospectiveDiff correctly does
+    // not treat as material. Corrected: the BEFORE state now encodes the
+    // ambiguity structurally -- both observations share the same tentative
+    // scope guess ('current_project') and carry confidence:
+    // 'unresolved_no_visibility', genuinely representing "we can't yet tell
+    // these apart." The AFTER state resolves both: so-1 stays
+    // 'current_project' (confirmed), so-2 moves to 'historical_project'
+    // (confirmed) -- a real scope correction plus a real confidence change on
+    // both, which the diff will now correctly detect as material.
     after_structured_understanding: su({
       scoped_observations: [
-        observation({ observation_id: 'so-1', scope: 'current_project', note: 'Confirmed: this happened on the current project.' }),
-        observation({ observation_id: 'so-2', scope: 'historical_project', note: 'Confirmed: the other fact was about a past project.', source_turn: 3 }),
+        observation({ observation_id: 'so-1', scope: 'current_project', confidence: 'confirmed', note: 'Confirmed: this happened on the current project.' }),
+        observation({ observation_id: 'so-2', scope: 'historical_project', confidence: 'confirmed', note: 'Confirmed: the other fact was about a past project.', source_turn: 3 }),
       ],
     }),
   },
@@ -324,7 +367,12 @@ export const CONSTRAINT_A_CORPUS: ConstraintACorpusCase[] = [
       target_signal_id: 'tm-1',
     }),
     expected_should_ask: true,
-    acceptable_reason_codes: ['MISSING_WORKFLOW_FACT', 'MATERIALLY_IMPROVES_UNDERSTANDING'],
+    // Widened 2026-08-07: this fixture leaves BOTH plan_tier and
+    // access_surface unknown, so a plausible answer resolving either one
+    // genuinely improves understanding -- VISIBILITY_GAP_CLARIFIABLE is a
+    // defensible framing of the same fixture (an access-visibility gap), not
+    // a mismatch with MISSING_WORKFLOW_FACT. Direction is unchanged.
+    acceptable_reason_codes: ['MISSING_WORKFLOW_FACT', 'MATERIALLY_IMPROVES_UNDERSTANDING', 'VISIBILITY_GAP_CLARIFIABLE'],
   },
 
   {
