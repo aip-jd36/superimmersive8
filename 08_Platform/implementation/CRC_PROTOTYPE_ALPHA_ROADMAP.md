@@ -201,7 +201,7 @@ No further improvements, optimizations, refactors, or prompt tweaks to `extracti
 
 **Test strategy:** fixed, single-turn (or short scripted-sequence) inputs, each asserting two things separately: (1) the extraction proposal itself is correct — right facts, right normalization, right scope, right certainty state, right source-turn attribution; (2) feeding that proposal through Phase 2's mutation engine produces the correct final Structured Understanding state. Covers: tool/access-surface normalization (the Nano Banana ambiguity case); bundled-answer splitting (Dialogue F shape); correction/supersession detection ("Actually, we also used Runway"); current-vs-historical scope (Dialogue C shape); absent vs. unknown vs. unresolved vs. declined, kept distinct.
 
-**TRACKED REQUIREMENT — carried forward from Phase 4 (2026-08-07), not yet implemented:** PRD §8 Rule 5 ("one disentangling question for bundled answers, scoped to which fact applies to which project/time period, never resolved by guessing") is explicitly **not** covered by Phase 4's generic `boundaries.ts` state machine — confirmed as a deliberate omission, not an oversight, when Phase 4 was accepted. Bundled-answer disentangling belongs here, in Extraction/candidate-question integration (bundled-answer splitting is already this phase's own scope, per the test strategy above) — implement Rule 5 as part of that work, not as a Phase 4 retrofit. Do not consider Phase 6a/6b complete without it.
+**TRACKED REQUIREMENT — carried forward from Phase 4 (2026-08-07), reconciled 2026-08-08:** PRD §8 Rule 5 ("one disentangling question for bundled answers, scoped to which fact applies to which project/time period, never resolved by guessing") is explicitly **not** covered by Phase 4's generic `boundaries.ts` state machine — confirmed as a deliberate omission, not an oversight, when Phase 4 was accepted. Confirmed again on review (2026-08-08): Rule 5 is normative product behavior belonging to Phase 6b specifically, not a Phase 6a retrofit — it concerns what happens *after* Extraction identifies a bundled answer, which Phase 6a's own scope (raw-turn-to-facts) does not reach. See the Phase 6b section below for the precise, reconciled requirement and its required test.
 **Completion criteria:** extraction proposals are correct for all fixed test turns; extraction never writes to Structured Understanding directly (verified, not assumed); routing a correct proposal through Phase 2 produces the correct mutated state.
 **Explicitly deferred:** live multi-turn conversation (Phase 6b/6c/7 territory); resolving whether an extracted fact was *correctly interpreted* versus merely *present* — that's the confidence-vs-completeness open question from Phase 3/architecture doc §10, not closed here.
 **Main risks:** first LLM contact point in the roadmap. Highest uncertainty alongside Phase 6c.
@@ -283,7 +283,7 @@ Full reports: `eval-reports/DIAGNOSTIC-UNCERTAINTY-NO-VISIBILITY-2026-08-07T06-4
 
 **PHASE 6a SUBSTAGE 2: COMPLETE (2026-08-07).**
 
-**Rule 5 status:** still not implemented — bundled-answer splitting itself (multiple `CandidateObservation`s from one turn) is structurally supported by `runExtractionPipeline`'s per-candidate loop (proven in substage 1's "multiple candidates in one turn" test), but the Rule 5 *cap* ("one disentangling question... never resolved by guessing") is a boundary-type behavior, not an extraction behavior — remains tracked for Phase 6b, not implemented here.
+**Rule 5 status:** still not implemented — bundled-answer splitting itself (multiple `CandidateObservation`s from one turn) is structurally supported by `runExtractionPipeline`'s per-candidate loop (proven in substage 1's "multiple candidates in one turn" test), but the Rule 5 *cap* ("one disentangling question... never resolved by guessing") is a boundary-type behavior, not an extraction behavior. Reconciled 2026-08-08: Rule 5 belongs to Phase 6b, explicitly, not deferred further — see the Phase 6b section for the precise requirement and its required test. This does not reopen Phase 6a or its freeze.
 
 ---
 
@@ -292,18 +292,47 @@ Full reports: `eval-reports/DIAGNOSTIC-UNCERTAINTY-NO-VISIBILITY-2026-08-07T06-4
 **Objective:** wire a real model to generate candidate questions from current structured understanding — now sourced from Phase 6a's extraction, not fixture-scripted history — and validate Phase 4's boundary machinery against it, deliberately without yet trusting Constraint A's harder judgment.
 
 **Dependencies:** Phases 1–6a.
-**Files/modules:** `candidate-question.ts` (generation only), integration with `boundaries.ts`.
-**Deliverables:** candidate-question generator; boundary enforcement proven across two distinct, separately-run test tracks.
+**Files/modules:** `candidate-question.ts` (generation, deterministic derivation, and validation), integration with `boundaries.ts` (extended, not modified in its existing logic — see Rule 5 below).
+**Deliverables:** deterministic `deriveEligibleSignals()`; candidate-question generator (model-facing); deterministic `validateCandidateReference()`; boundary enforcement proven across two distinct, separately-run test tracks; Rule 5's disentangling-question cap.
+
+**Deterministic signal-reference design (resolved 2026-08-08, pre-code review — see chat record for full critique):**
+
+```
+StructuredUnderstanding
+        |
+deriveEligibleSignals()        // deterministic, no LLM
+        |
+LLM proposes (Structured Outputs):
+  question_text
+  question_kind
+  target_signal_id             // must come from the eligible set, or null
+        |
+validateCandidateReference()   // deterministic, rejects hallucinated/invalid references
+        |
+Constraint B (boundaries.ts, unchanged internal logic)
+```
+
+The model is never responsible for creating or maintaining signal identity across turns — that would put a deterministic identity problem inside the least deterministic component. It may only *select* from a supplied eligible set, or explicitly decline to target one (`null`). `EligibleSignal` is `{ signal_id: string, kind: 'scoped_observation' | 'tool_mention' | 'project_fact' }` — no new topic ontology, no summary/description field (the model already receives the full `StructuredUnderstanding` to interpret what a `signal_id` refers to). `signal_id` values are the already-existing stable runtime identifiers (`ScopedObservation.observation_id`, `ToolMention.mention_id`) for array-backed facts, or the fixed, always-present two-string convention `project:intended_use` / `project:workflow_role` for the two singular project facts, which have no per-instance identity to reuse. `boundaries.ts`'s existing `CandidateQuestion` type is unchanged (`signal_id?: string` already supported this); the model-facing proposal shape is a new, separate type.
+
+**Candidate-generator input boundary:** current `StructuredUnderstanding`, the eligible signal set, current phase, and no more than that. It must **not** receive Retrieval results, Knowledge Cards, Matrix contents, or commercial-readiness conclusions, and it must **not** re-run Extraction over the transcript — `StructuredUnderstanding` is its only factual input, consistent with the Extraction/Retrieval independence principle (architecture doc §1, §6).
+
+**PRD §8 Rule 5 — reconciled requirement, not reinterpreted beyond its existing language:**
+
+> When a bundled answer contains multiple potentially applicable signals and one clarification is needed to determine how they apply, CRC may ask at most one disentangling question. It must not resolve the ambiguity by guessing and must not continue into repeated drill-down.
+
+Implemented as an extension to `boundaries.ts`'s existing cap pattern (new `CandidateQuestionKind: 'disentangling_question'`, new `BoundaryState.disentangling_question_asked: boolean`, capped once — see pre-code design report for the explicit scoping judgment call this required, since the PRD's own wording doesn't specify once-per-interview vs. once-per-bundling-event). **Phase 6b is not complete without a test proving this specific behavior** — first disentangling question allowed, a second suppressed, and the underlying ambiguous facts remaining un-guessed (not silently merged into a single resolved value) in `StructuredUnderstanding` itself, not just at the boundary layer.
 
 **Test strategy — two tracks, both required:**
-1. **Controlled/mocked understanding states** — reproducible, deterministic inputs, for regression-safety and fast iteration.
+1. **Controlled/mocked understanding states** — reproducible, deterministic inputs, for regression-safety and fast iteration. Kept thin: this track is largely redundant with Phase 4's existing 18 boundary tests and serves as regression insurance, not primary evidence.
 2. **Real understanding produced by Phase 6a's extraction** — validates actual integration between extraction and candidate generation, not just the isolated boundary logic against fixtures.
 
-Within **both** tracks: real model-generated candidates, **and** deliberately injected adversarial candidates explicitly constructed to violate every depth cap (one-follow-up-per-signal, one-uncertainty-clarification, historical-experience-question cap) and every termination scope (question-level, phase-level, interview-level). This is necessary to distinguish generator restraint — the model simply never happening to misbehave — from actual boundary enforcement, which only adversarial injection can prove is doing anything at all.
+Within **both** tracks: real model-generated candidates, **and** deliberately injected adversarial candidates explicitly constructed to violate every depth cap (one-follow-up-per-signal, one-uncertainty-clarification, historical-experience-question cap, the new disentangling-question cap) and every termination scope (question-level, phase-level, interview-level). This is necessary to distinguish generator restraint — the model simply never happening to misbehave — from actual boundary enforcement, which only adversarial injection can prove is doing anything at all.
 
-**Completion criteria:** boundary enforcement holds across all four combinations (mocked × real-candidate, mocked × adversarial, real-understanding × real-candidate, real-understanding × adversarial); scope-of-suppression is correct in every case.
+**Completion criteria:** boundary enforcement holds across all four combinations (mocked × real-candidate, mocked × adversarial, real-understanding × real-candidate, real-understanding × adversarial); scope-of-suppression is correct in every case; hallucinated/invalid `target_signal_id` references are deterministically rejected before ever reaching Constraint B; Rule 5's cap is proven, not just implemented.
 **Explicitly deferred:** Constraint A entirely — every generated candidate is checked against Constraint B only, regardless of whether it would have been a good question to ask (that's Phase 6c).
-**Main risks:** first point of real model unpredictability for candidate generation itself. Boundary-enforcement risk specifically is now well-isolated by the adversarial track, so a failure here is attributable to generation, not enforcement.
+**Main risks:** the model's ability to self-classify a generated question into the `CandidateQuestion` taxonomy (`kind` + a valid-or-null `target_signal_id`) is new, unproven risk that Phase 6a's evidence does not bear on — Phase 6a tested extracting facts from human text, not classifying model-generated content against an enforcement taxonomy. Boundary-enforcement risk itself remains well-isolated by the adversarial track and the deterministic validation step, so a failure is attributable to generation/classification, not enforcement.
+
+**Smallest implementation sequence (proposed, not yet started):** (1) deterministic `deriveEligibleSignals()`; (2) candidate-question structured-output schema; (3) deterministic `validateCandidateReference()`; (4) thin mocked/regression tests; (5) real-model candidate generation; (6) Constraint B enforcement over generated candidates; (7) deliberately injected adversarial candidates; (8) Rule 5 bundled-answer test; (9) real-understanding integration using Phase 6a output. No implementation started as of this entry — pending design review.
 
 ---
 
