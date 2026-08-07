@@ -93,6 +93,33 @@ export interface CandidateQuestionProposal {
   phase: Phase
 }
 
+// ── Generator interface ─────────────────────────────────────────────────────
+
+/**
+ * Input the generator receives -- current StructuredUnderstanding, the
+ * deterministically-derived eligible signal set, and current phase, and
+ * nothing more. Deliberately excludes Retrieval results, Knowledge Cards,
+ * Matrix contents, and commercial-readiness conclusions (architecture doc
+ * §1, §6 -- Extraction/Retrieval independence). The generator must not
+ * re-run Extraction over the transcript; StructuredUnderstanding is its only
+ * factual input.
+ */
+export interface CandidateQuestionGeneratorInput {
+  structured_understanding: StructuredUnderstanding
+  eligible_signals: EligibleSignal[]
+  phase: Phase
+}
+
+/**
+ * Returns null when there's no natural next question to propose -- a valid,
+ * complete answer, not an error. One proposal per call, not a batch:
+ * generating the next candidate question is a single-question decision,
+ * unlike Extraction's per-turn multi-fact extraction.
+ */
+export type CandidateQuestionGenerator = (
+  input: CandidateQuestionGeneratorInput,
+) => Promise<CandidateQuestionProposal | null>
+
 // ── Deterministic validation ────────────────────────────────────────────────
 
 export const CANDIDATE_QUESTION_REJECTION_REASON_CODES = [
