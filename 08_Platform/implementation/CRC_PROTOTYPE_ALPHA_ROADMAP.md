@@ -361,6 +361,63 @@ Within **both** tracks: real model-generated candidates, **and** deliberately in
 **Explicitly deferred:** Retrieval connection of any kind — the handoff object was already assembled and unit-tested in Phase 5; Phase 7 re-checks its shape in an integrated context, but nothing here or there feeds a real Retrieval system.
 **Main risks:** the highest-risk phase in the whole roadmap, alongside Phase 6a. This is where the central architectural bet either holds or doesn't.
 
+**Status: COMPLETE (2026-08-07). Report reviewed with JD before proceeding — see chat record. 7 commits on `prototype/interview-engine-alpha`. `main` untouched throughout. No frozen system modified (verified: `decision.ts` does not import `boundaries.ts`; `retrospective-diff.ts` does not import `gates.ts` — both confirmed via grep after implementation).**
+
+**Contract shipped, matching the requested shape exactly:**
+```ts
+interface ConstraintADecision { should_ask: boolean; reason_code: ConstraintAReasonCode; rationale: string }
+interface ConstraintAInput {
+  structured_understanding: StructuredUnderstanding
+  candidate: CandidateQuestionProposal   // full text-bearing shape, not boundaries.ts's stripped CandidateQuestion
+  phase: Phase
+}
+```
+16 reason codes (`CONSTRAINT_A_REASON_CODES`), partitioned into 8 `ASK_REASON_CODES` / 8 `SUPPRESS_REASON_CODES` — the 7+7 requested categories each, plus one generic fallback per direction. Categorical judgment only (architecture doc §7's plausible-answer-space diff), no numerical scoring model introduced. `decision.ts` has zero notion of Constraint B, caps, or decline state — genuinely independent, proven by both the system prompt's explicit exclusion and the type signature carrying no boundary state.
+
+**Deterministic results:** 137/137 interview-engine tests passing (129 carried from Phase 6b + 8 new in `decision.test.ts`): reason-code partition sanity, mock-decider correctness, and — critically — every one of the 15 corpus cases' `signal_id` values re-validated through the real `deriveEligibleSignals()`/`validateCandidateReference()` pipeline rather than merely asserted, plus structural validation of all 3 `after_structured_understanding` fixtures.
+
+**Real-model evaluation** (45 trials: 15 corpus cases × 3 trials, `eval-reports/CONSTRAINT-A-EVAL-2026-08-07T09-37-30-318Z.md`):
+
+| Metric | Result |
+|---|---|
+| Schema/output failure rate | 0.0% (0/45) |
+| Ask/suppress accuracy | 91.1% (41/45) |
+| False-positive ask rate | 12.5% (3/24 suppress-expected trials) |
+| False-negative suppress rate | 4.8% (1/21 ask-expected trials) |
+| Reason-code accuracy | 84.4% (38/45) |
+| Avg. per-case consistency | 97.8% |
+| Retrieval-motivated case correctly suppressed | 100% (3/3), 0 misapplications elsewhere |
+| Over-questioning check (incident-level-detail case) | 100% correctly suppressed (3/3) |
+| Tokens / latency | 104,760 in / 10,462 out across 45 calls; 5,747ms avg |
+
+12 of 15 cases scored 3/3 correct with 100% consistency. Two cases did not:
+- `correction_signal_prior_state_may_be_wrong`: 2/3 correct, 66.7% consistency — genuine trial-to-trial disagreement, not a schema issue.
+- `tool_tier_unknown_irrelevant`: 0/3 correct, 100% consistency — the one **systematic** (not noisy) disagreement in the run.
+
+**Failure classification (all 7 disagreements + the 1 retrospective misalignment, sorted into the four required buckets):**
+
+- **Schema/output failures: 0.** No parse failures, no missing fields, across all 45 calls.
+- **Genuine architecture problems: 0.** Nothing found required touching Extraction, normalization, mutation, Gate 1/2, boundaries, handoff, Retrieval, or Publication Policy. No contradiction was hit that required stopping per the frozen-systems instruction.
+- **Evaluation-fixture ambiguity (the largest bucket, 5 of 8 findings):**
+  1. `confirmed_absence_redundant` trial 3 — model returned `REVIEWER_STYLE_DRILLDOWN` instead of the corpus's narrower `FACT_ALREADY_CONFIRMED`/`SUFFICIENT_CERTAINTY_ALREADY` set, but "are you sure absolutely no one looked at it?" genuinely reads as both at once (redundant AND interrogative). Direction was correct; the corpus's `acceptable_reason_codes` was too narrow for a case that legitimately straddles two categories.
+  2. `bundled_disentangling_needed` trial 1 — model returned `CURRENT_VS_HISTORICAL_AMBIGUOUS` instead of `BUNDLED_OBSERVATIONS_DISENTANGLEABLE`. On inspection this is my own fixture-construction choice: I built the bundled ambiguity's actual content to BE a current-vs-historical split, so both labels are simultaneously true of the same fixture. Direction correct; corpus over-narrow.
+  3. `tool_tier_unknown_necessary` trial 2 — model returned `VISIBILITY_GAP_CLARIFIABLE` instead of `MISSING_WORKFLOW_FACT`/`MATERIALLY_IMPROVES_UNDERSTANDING`; the fixture also left `access_surface` unknown alongside plan tier, so a visibility-gap framing is a defensible near-miss, not an error. Direction correct.
+  4. `correction_signal_prior_state_may_be_wrong` trial 2 — the only case with a genuinely wrong direction (`should_ask: false`, expected `true`). The model's own rationale is sharp: the `StructuredUnderstanding` I constructed has only one, confirmed, uncontested tool mention (`kling`) — the "correction signal" I intended lives *only* in the candidate question's own free text ("it sounded like it might have actually been Runway"), never in any structural field. A skeptical reading of "only trust structural facts, not the candidate's own framing" is internally consistent, and this is exactly the posture Constraint A's own system prompt encourages elsewhere. This is a fixture-encoding gap (I should have represented the correction signal as a structural fact — e.g. a second, lower-confidence tool mention — not only as prose in the candidate's question text), not proof the model can't recognize correction signals. Flagged, not fixed.
+  5. `bundled_disentangling_needed`'s retrospective misalignment (step 7) — **a confirmed bug in my own corpus construction**, not a model or architecture finding. Its `after_structured_understanding` was meant to show the ambiguity resolving, but the `observation()` fixture helper defaults `scope: 'current_project'`, and so-1's "before" state already carried that default while so-2 was already explicitly `historical_project` — meaning both observations' `scope` fields were already fully resolved *before* the "after" state, with the intended ambiguity expressed only in prose (`note` text), which `computeRetrospectiveDiff` correctly and by design does not treat as material. `computeRetrospectiveDiff` is working as specified; the fixture never actually encoded the ambiguity in a field the diff tracks. Not corrected in this pass — flagged for a follow-up fixture fix, per "classify before changing."
+- **Model decision failures (1 of 8, the most substantive finding): `tool_tier_unknown_irrelevant`, all 3 trials.** The model consistently (100% consistency, not noise) said `should_ask: true, reason_code: MISSING_WORKFLOW_FACT`, reasoning each time that plan tier "could materially affect the tool's licensing/commercial-use terms" — despite the fixture's `intended_use` being explicitly confirmed as internal/non-commercial specifically to signal tier shouldn't matter *in this context*. This is genuinely ambiguous to characterize rather than a clean model bug: the model's position (tier terms can carry restrictions independent of currently-stated intent, so it's never fully irrelevant) is coherent and arguably more thorough than my hand-label assumed. I am flagging this as the one finding requiring a judgment call rather than unilaterally resolving it — it may indicate the model over-applies a "could matter under some future scenario" standard that's broader than what "materially improves *CRC's current* understanding" was meant to mean, or it may indicate my own ground-truth label was too confident. Not classified as a schema, fixture, or architecture issue — it sits squarely in "does the model apply the categorical standard correctly," which is what this bucket is for.
+
+**Prospective vs. retrospective comparison (step 7, 3 cases carrying `after_structured_understanding`):** 2 of 3 aligned (`unresolved_nano_banana`, `missing_intended_use` — both showed real structural change matching a 100% prospective ask rate). The third (`bundled_disentangling_needed`) is the fixture bug described above, not a genuine misalignment between the prospective and retrospective mechanisms.
+
+**Rule 5 carry-forward note, preserved verbatim per instruction, not resolved by this phase:** *"Real-model recognition of when a disentangling question is warranted remains not fully validated."* `bundled_disentangling_needed`'s clean 3/3 direction-correct result in this phase shows Constraint A would correctly say "ask" **given an already-well-formed disentangling candidate** — this is not equivalent to evidence that Phase 6b's candidate-generation will reliably *produce* one in the first place (Phase 6b's own Scenario B remained inconclusive on exactly that point). This open question is carried forward unresolved into Phase 7.
+
+**Did the categorical "plausible answer materially changes understanding" model hold up?** Broadly yes. 0% schema failures, 91.1% direction accuracy, no architecture-level problem surfaced, and the two checks specifically designed to catch category drift (Retrieval-motivation, over-questioning) both scored 100%. The softer finding is that reason-code granularity (84.4%) trails direction accuracy, and most of that gap traces to legitimately overlapping categories in my own corpus rather than model confusion — a prompt/corpus refinement opportunity, not evidence the categorical approach itself needs replacing with a numerical one.
+
+**Was any architectural change warranted?** No. Nothing found in this phase requires modifying Extraction, normalization, mutation, Gate 1/2, boundaries, handoff, Retrieval, or Publication Policy.
+
+**Not yet done, flagged for a future pass, not blocking:** correcting the `bundled_disentangling_needed` fixture's `after_structured_understanding` so it actually differs structurally from its "before" state; deciding whether `tool_tier_unknown_irrelevant`'s expected label or the model's broader materiality reading is the one to design the prompt around; widening a few corpus cases' `acceptable_reason_codes` sets where two categories legitimately overlap by construction.
+
+**Explicitly not proceeding to Phase 7.** Per instruction: this review must be completed with JD before Phase 7 begins.
+
 ---
 
 ## Phase 7 — Eight-dialogue evaluation suite
