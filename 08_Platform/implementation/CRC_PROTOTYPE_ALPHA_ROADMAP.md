@@ -418,6 +418,36 @@ interface ConstraintAInput {
 
 **Explicitly not proceeding to Phase 7.** Per instruction: this review must be completed with JD before Phase 7 begins.
 
+**JD review (2026-08-07): accepted architecturally — no frozen-system change warranted. Directed a corpus cleanup pass (fixture-only, no prompt/model changes) before Phase 7, then re-run and re-report; explicitly directed `tool_tier_unknown_irrelevant` be kept at `expected_should_ask: false` and preserved as a real Constraint A miss, not reinterpreted from the model's rationale.**
+
+**Cleanup pass + rerun (2026-08-07), commit `76649f6`:**
+- Fixed `bundled_disentangling_needed`'s before/after states — the before state previously carried the same, already-resolved `scope` values as the after state (the ambiguity existed only in `note` prose), so no real answer was ever encoded. Corrected: before now gives both observations a shared tentative scope guess (`current_project`) and `confidence: 'unresolved_no_visibility'`, genuinely representing "can't yet tell these apart"; after resolves both (`so-2` moves to `historical_project`, both `confirmed`). `computeRetrospectiveDiff` itself was not touched — it was already correct against the old, badly-constructed fixture.
+- Widened `acceptable_reason_codes` on 3 cases (`confirmed_absence_redundant` +`REVIEWER_STYLE_DRILLDOWN`, `bundled_disentangling_needed` +`CURRENT_VS_HISTORICAL_AMBIGUOUS`, `tool_tier_unknown_necessary` +`VISIBILITY_GAP_CLARIFIABLE`) where the first run showed a second code was an equally valid description of the same direction. No `expected_should_ask` value was changed anywhere in the corpus.
+- `tool_tier_unknown_irrelevant` left unchanged, per instruction.
+
+Deterministic: 137/137 still passing. Real-model rerun, same prompt/model, 45 trials (`eval-reports/CONSTRAINT-A-EVAL-2026-08-07T09-57-09-324Z.md`, prior report preserved unmodified):
+
+| Metric | First run | Rerun (post-cleanup) |
+|---|---|---|
+| Schema/output failure rate | 0.0% | 2.2% (1/45 — malformed JSON, `correction_signal...` trial 2; not seen in the first 45 calls, treated as a one-off, not investigated further per instruction not to touch the model/prompt) |
+| Ask/suppress accuracy | 91.1% | 93.2% (41/44 valid) |
+| False-positive ask rate | 12.5% | 12.5% (unchanged — entirely `tool_tier_unknown_irrelevant`, preserved by design) |
+| False-negative suppress rate | 4.8% | 0.0% |
+| Reason-code accuracy | 84.4% | 88.6% (39/44 valid) |
+| Avg. per-case consistency | 97.8% | 100.0% |
+| Retrieval-motivated / over-questioning checks | 100% / 100% | 100% / 100% |
+
+**Remaining disagreements after cleanup, classified:**
+- **Schema/output failure (1):** `correction_signal_prior_state_may_be_wrong` trial 2 — malformed/truncated JSON from the model. Not reproduced elsewhere in either run; treated as a transient generation issue, not investigated further (no prompt/model changes authorized this pass).
+- **Model decision failure, preserved by explicit instruction (1 case, 3/3 trials):** `tool_tier_unknown_irrelevant` — unchanged from the first run. The model consistently argues plan tier could carry commercial-use restrictions regardless of stated internal use; JD's explicit position is that this is too close to "ask because it might matter downstream" and does not meet the bar of materially improving *current* structured understanding. Recorded as a real Constraint A miss, not relabeled, not tuned around.
+- **Genuine architecture problems: 0.**
+- **Evaluation-fixture ambiguity: 0 remaining** — the one confirmed fixture bug (`bundled_disentangling_needed`) is fixed and verified: retrospective vs. prospective alignment is now `true` for all 3 cases carrying an `after` state, with a real structural diff (`scoped_observations.so-1.confidence`, `scoped_observations.so-2.confidence`, `scoped_observations.so-2.scope`) driving it.
+- **Noted but not acted on (2 new reason-code near-misses, both direction-correct):** `tool_tier_unknown_necessary` trial 1 and `correction_signal_prior_state_may_be_wrong` trial 3 both selected `AMBIGUOUS_TOOL_SURFACE_RESOLVABLE` for cases about an unknown (not ambiguous-between-named-options) tool attribute — a mild generalization of that code beyond its intended "multi-surface naming" scope. Per instruction not to chase reason-code drift or tune the prompt before integrated testing, this is logged as a pattern to watch in Phase 7, not corrected in this pass.
+
+**Phase 6c closure conditions (all met):** no architecture-level issue found in either run; the one confirmed fixture defect is fixed and verified; every remaining disagreement is classified; the categorical plausible-answer-space model held up (93.2% direction accuracy, 0 architecture problems); no Retrieval-driven drift beyond the one documented, intentionally-preserved model miss.
+
+**PHASE 6c: COMPLETE (2026-08-07).** Proceeding to Phase 7 **planning only** — no implementation — pending JD's review of this cleaned report.
+
 ---
 
 ## Phase 7 — Eight-dialogue evaluation suite
