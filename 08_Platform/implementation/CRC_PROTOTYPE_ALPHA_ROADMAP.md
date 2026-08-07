@@ -187,7 +187,7 @@ No case was found where the frozen architecture made a Gate 1 or Gate 2 decision
 
 ---
 
-## Phase 6a — Extraction (isolated)
+## Phase 6a — Extraction (isolated) — COMPLETE (2026-08-07)
 
 **Objective:** raw user turn → structured facts: tool and access-surface normalization, bundled-answer splitting, correction/supersession detection, current-vs-historical scope, absent/unknown/unresolved/declined disambiguation, source-turn attribution. Tested in isolation against fixed user turns — not live multi-turn conversation.
 
@@ -256,6 +256,28 @@ Reran the full 14-scenario corpus, 3 trials each (42 live calls), `eval-reports/
 **Fixture-rigidity finding, confirmed but not acted on**: the original `corpus.ts` `check()` for this scenario required `kind === 'scoped_observation'` exclusively. The semantic-scoring data shows correct preservation legitimately occurs via `project_fact` framing too, not just `scoped_observation` — the rigid kind-lock would have false-failed some semantically-correct outputs. Not modified — flagged for review, per "do not modify the fixture until after showing whether alternative outputs are semantically valid," which this diagnostic now does.
 
 Full reports: `eval-reports/DIAGNOSTIC-UNCERTAINTY-NO-VISIBILITY-2026-08-07T06-40-21-160Z.md` (run 1, scoring-bug-affected) and `...T07-29-11-765Z.md` (run 2, authoritative). **No further prompt changes made. Not proceeding to Phase 6b** pending review.
+
+**Targeted refinement, applied (2026-08-07).** Two changes, both narrow:
+1. System prompt gains one new general rule (no wording-specific hacks, no new domain fields): when a user states they lack access/visibility/involvement, preserve it as its own candidate at `unresolved_no_visibility`; if the turn also names another person/team who owns the process, extract that as a *separate* confirmed candidate — the second must never replace the first. One worked example included, using the exact turn that originally failed.
+2. `corpus.ts`'s `uncertainty_no_visibility` `check()` made kind-agnostic (accepts `project_fact` or `scoped_observation`) and now specifically guards against the exact failure mode found (a `confirmed_absent` misclassification of the "don't have access" clause), rather than only checking for a correct candidate's bare presence.
+
+**Post-refinement reruns, both clean:**
+
+| | Diagnostic (45 trials) | Corpus (42 trials) |
+|---|---|---|
+| No-visibility preservation | **100%** (45/45), up from 93.3% | — |
+| Confirmed-absence misclassification | **0%** (0/45), down from 6.7% | — |
+| Multi-candidate decomposition | **100%** (30/30), up from 63.3%/53.3% across the two prior runs | — |
+| Invented facts | 0/76 | 0/64 |
+| Scenario pass rate | — | **100%** (42/42), up from 97.6% |
+| Schema-valid | — | 100% |
+| False-resolution | — | 0% |
+| Ambiguity preservation | — | 100% (6/6) |
+| Correction detection / scope accuracy / classification accuracy / bundled splitting | — | 100% each |
+
+**All six Phase 6a closing criteria met**: no-visibility preservation ≥90% (100%), confirmed-absence misclassification = 0% (0%), invented facts = 0% (0 both runs), false resolution = 0% (0%), ambiguity preservation = 100% (100%), no new material regression elsewhere (42/42 scenario pass, zero failures). Reports: `eval-reports/DIAGNOSTIC-UNCERTAINTY-NO-VISIBILITY-2026-08-07T07-55-06-446Z.md` and `eval-reports/EXTRACTION-EVAL-2026-08-07T07-59-25-252Z.md`. All five prior reports (2 corpus runs, 2 diagnostic runs, plus the very first corpus run) preserved unmodified.
+
+**PHASE 6a SUBSTAGE 2: COMPLETE (2026-08-07).**
 
 **Rule 5 status:** still not implemented — bundled-answer splitting itself (multiple `CandidateObservation`s from one turn) is structurally supported by `runExtractionPipeline`'s per-candidate loop (proven in substage 1's "multiple candidates in one turn" test), but the Rule 5 *cap* ("one disentangling question... never resolved by guessing") is a boundary-type behavior, not an extraction behavior — remains tracked for Phase 6b, not implemented here.
 
