@@ -89,7 +89,10 @@ const CANDIDATE_RESPONSE_SCHEMA = {
           raw_tool_name: {
             type: ['string', 'null'],
             description:
-              'When kind is tool_mention: the tool name exactly as the user said it. Never map it to a canonical product id or pick between similarly-named products yourself. Null otherwise.',
+              'When kind is tool_mention: return ONLY the tool or platform name itself, preserving the user\'s wording. Do not include surrounding explanation, access-method phrases, punctuation, plan details, or qualifiers -- the complete user wording belongs in raw_text separately, not here. Never map it to a canonical product id or pick between similarly-named products yourself. ' +
+              'Valid: "Nano Banana", "Kling", "ElevenLabs". ' +
+              'Invalid: "Nano Banana — just the app on my phone" (includes an access-method phrase), "Kling on the paid plan" (includes a plan detail), "ElevenLabs, but only for a temporary voice" (includes a qualifier). ' +
+              'Null otherwise.',
           },
           is_correction: {
             type: 'boolean',
