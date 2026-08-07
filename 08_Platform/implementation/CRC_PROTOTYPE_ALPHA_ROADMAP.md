@@ -189,6 +189,10 @@ No case was found where the frozen architecture made a Gate 1 or Gate 2 decision
 
 ## Phase 6a — Extraction (isolated) — COMPLETE (2026-08-07)
 
+**🔒 FREEZE NOTICE (2026-08-07).** Extraction v1.0 (Prototype Alpha) is frozen. Full retrospective: `PHASE_6A_RETROSPECTIVE.md`.
+
+No further improvements, optimizations, refactors, or prompt tweaks to `extraction.ts`, `anthropic-extractor.ts`, `mock-extractor.ts`, `eval/corpus.ts`, or `eval/diagnose-uncertainty-no-visibility.ts` are authorized unless a **later** prototype phase (6b, 6c, or beyond) demonstrates an **actual architectural defect** in this subsystem — not a preference, not a minor improvement opportunity, not a stylistic inconsistency, not "this could be cleaner." An architectural defect means: the frozen design cannot represent something a later phase genuinely needs, or produces demonstrably incorrect behavior a later phase's own evidence surfaces — not that a different approach seems nicer in hindsight. If that bar is met, reopen this file's own decision explicitly (new dated entry, not a silent edit) before touching the frozen code.
+
 **Objective:** raw user turn → structured facts: tool and access-surface normalization, bundled-answer splitting, correction/supersession detection, current-vs-historical scope, absent/unknown/unresolved/declined disambiguation, source-turn attribution. Tested in isolation against fixed user turns — not live multi-turn conversation.
 
 **Dependencies:** Phases 1–5 complete (practically: needs Phase 1's types to produce proposals against, and Phase 2's mutation engine to validate proposals through — Phases 3–5 aren't strict technical dependencies but are complete first per this sequence).
