@@ -214,7 +214,29 @@ No case was found where the frozen architecture made a Gate 1 or Gate 2 decision
 - **Run 2 (authoritative)**, `eval-reports/EXTRACTION-EVAL-2026-08-07T03-27-09-657Z.md`: 100% schema-valid (42/42), 97.6% scenario pass rate (41/42), 0% false-resolution, 0% invented-fact, 100% ambiguity-preservation/correction-detection/current-vs-historical-scope-accuracy/absent-unknown-unresolved-declined-classification-accuracy/bundled-splitting-accuracy. 107,904 input / 19,815 output tokens across 42 trials; ~6.8s average latency per call.
 - **One material failure**, classified per the "prompting vs. schema vs. normalization vs. architecture" instruction: `nano_banana_consumer` trial 3 — the model's `raw_tool_name` captured the entire clause ("Nano Banana -- just the app on my phone, not anything technical") instead of isolating just the tool name, which broke `normalizeCandidate`'s exact-match registry lookup and produced `unrecognized` instead of `resolved: gemini-consumer-app`. **Classified as prompting/schema** — the `raw_tool_name` field description said "the tool name exactly as the user said it" without explicitly scoping it to *only* the tool name, not the surrounding sentence. Normalization itself behaved correctly (conservatively rejected an unrecognized string rather than guessing) — not a normalization or architecture defect. **Not fixed here** — flagged for review, per the explicit instruction not to change architecture (or, by the same logic, the prompt) to chase one result without review first.
 
-**Not proceeding to Phase 6b** until this report has been reviewed.
+**Targeted refinement + rerun (2026-08-07).** Single-field change to `raw_tool_name`'s schema description only (exact diff in commit `6f9ea62`): explicitly "return ONLY the tool or platform name itself... do not include surrounding explanation, access-method phrases, punctuation, plan details, or qualifiers," plus 3 valid / 3 invalid examples. No change to the alias registry, `normalizeCandidate`, the system prompt's other instructions, or any deterministic pipeline file.
+
+Reran the full 14-scenario corpus, 3 trials each (42 live calls), `eval-reports/EXTRACTION-EVAL-2026-08-07T03-57-04-657Z.md`:
+
+| Metric | Run 2 (before) | Run 3 (after) |
+|---|---|---|
+| Schema-valid | 100% (42/42) | 100% (42/42) |
+| Scenario pass rate | 97.6% (41/42) | 97.6% (41/42) |
+| False-resolution | 0% (0/66) | 0% (0/63) |
+| Invented-fact | 0% (0/66) | 0% (0/63) |
+| Ambiguity preservation | 100% (6/6) | 100% (6/6) |
+| Correction detection | 100% (3/3) | 100% (3/3) |
+| Current-vs-historical scope | 100% (3/3) | 100% (3/3) |
+| Absent/unknown/unresolved/declined classification | 100% (9/9) | **88.9% (8/9)** |
+| Bundled-answer splitting | 100% (3/3) | 100% (3/3) |
+| Tokens | 107,904 in / 19,815 out | 116,409 in / 18,526 out |
+| Avg latency | ~6.8s | ~5.2s |
+
+**The targeted fix worked as intended**: `nano_banana_consumer`, the scenario that failed on this exact issue in run 2, passed 3/3 in run 3 — the original failure mode did not recur.
+
+**But a new, unrelated failure appeared**: `uncertainty_no_visibility` trial 2. The model split "I don't have access to that -- someone else on the team manages billing and approvals" into a `project_fact`/`workflow_role` candidate (`confirmed_absent`) plus a `scoped_observation` candidate (`confirmed`) — neither candidate carried the expected `unresolved_no_visibility` confidence hint. This is in a completely different field (confidence-hint classification, not `raw_tool_name`) and a completely different scenario than the change touched, which points to natural sampling variance rather than a regression caused by the edit — but it was not present in run 2's three clean trials of this same scenario.
+
+**Per the stated completion criteria, "no new material failures" is not literally satisfied** — scenario pass rate held steady only because one failure was traded for a different one. **Phase 6a is NOT marked complete.** No further prompt/schema changes made — not chasing this single trial without review, consistent with the standing instruction. Latency and token usage continue to be recorded, not optimized. **Not proceeding to Phase 6b** pending review of this comparison.
 
 **Rule 5 status:** still not implemented — bundled-answer splitting itself (multiple `CandidateObservation`s from one turn) is structurally supported by `runExtractionPipeline`'s per-candidate loop (proven in substage 1's "multiple candidates in one turn" test), but the Rule 5 *cap* ("one disentangling question... never resolved by guessing") is a boundary-type behavior, not an extraction behavior — remains tracked for Phase 6b, not implemented here.
 
