@@ -57,7 +57,10 @@ describe('normalizeCandidate: conservative alias disambiguation', () => {
     const result = normalizeCandidate(
       toolCandidate({ raw_tool_name: 'Nano Banana', raw_text: 'I used Nano Banana through the API, developer key.' }),
     )
-    expect(result).toEqual({ status: 'resolved', canonical_identifier: 'gemini-api' })
+    // access_surface added 2026-08-08 (JD instruction): the same match that
+    // resolves the canonical identifier also deterministically tells us the
+    // surface -- see extraction.ts's resolveAttestedToolField.
+    expect(result).toEqual({ status: 'resolved', canonical_identifier: 'gemini-api', access_surface: 'API' })
   })
 
   test('a contradictory turn (both surfaces implied) stays known_ambiguous rather than guessing', () => {

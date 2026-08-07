@@ -81,6 +81,20 @@ export interface CandidateObservation {
   raw_tool_name?: string
   /** kind === 'tool_mention'; set when this candidate corrects an existing mention */
   supersedes_tool_mention_id?: string
+  /**
+   * kind === 'tool_mention'; set ONLY when the user directly stated the
+   * access surface or plan tier in this turn (e.g. "the Gemini app," "team
+   * API plan," "Kling Pro") -- never inferred from weak/generic context. A
+   * bare tool mention with no such statement leaves both hints unset, and
+   * attestCandidate falls back to whatever normalizeCandidate's own
+   * disambiguation match deterministically established (for access_surface
+   * only -- there is no equivalent deterministic channel for plan_tier), or
+   * 'unknown' if neither channel has anything (JD instruction, 2026-08-08).
+   */
+  access_surface_confidence_hint?: ConfidenceState
+  access_surface_value_hint?: string
+  plan_tier_confidence_hint?: ConfidenceState
+  plan_tier_value_hint?: string
 
   /** kind === 'scoped_observation' */
   scope?: ObservationScope
@@ -124,7 +138,7 @@ export type CandidateExtractor = (turn: RawUserTurn) => Promise<CandidateObserva
 
 export type NormalizationResult =
   | { status: 'not_applicable' }
-  | { status: 'resolved'; canonical_identifier: string }
+  | { status: 'resolved'; canonical_identifier: string; access_surface?: string }
   | { status: 'known_ambiguous'; candidate_identifiers: string[] }
   | { status: 'unrecognized' }
 
@@ -136,16 +150,26 @@ interface AmbiguousToolEntry {
    * that tool," per the conservative-resolution requirement. Kept as a
    * short, curated list rather than broad keyword matching to minimize
    * false positives.
+   *
+   * `accessSurfaceLabel` (added per JD instruction, 2026-08-08): the exact
+   * same regex match that already, deterministically, decides WHICH
+   * canonical identifier to resolve to also deterministically tells us
+   * which surface that identifier corresponds to -- attestCandidate reads
+   * this back as one of two channels for populating ToolMention.access_surface
+   * (the other being a direct-statement hint on the candidate itself; see
+   * CandidateObservation below). Not a new inference: this is the existing
+   * disambiguation match's own result, surfaced as a field instead of only
+   * an identifier.
    */
-  disambiguationRules: { pattern: RegExp; identifier: string }[]
+  disambiguationRules: { pattern: RegExp; identifier: string; accessSurfaceLabel: string }[]
 }
 
 const KNOWN_AMBIGUOUS_TOOLS: Record<string, AmbiguousToolEntry> = {
   'nano banana': {
     candidateIdentifiers: ['gemini-api', 'gemini-consumer-app'],
     disambiguationRules: [
-      { pattern: /\b(api|developer key|api key)\b/i, identifier: 'gemini-api' },
-      { pattern: /\b(the app|website|web app|on my phone|consumer)\b/i, identifier: 'gemini-consumer-app' },
+      { pattern: /\b(api|developer key|api key)\b/i, identifier: 'gemini-api', accessSurfaceLabel: 'API' },
+      { pattern: /\b(the app|website|web app|on my phone|consumer)\b/i, identifier: 'gemini-consumer-app', accessSurfaceLabel: 'Consumer App' },
     ],
   },
 }
@@ -173,7 +197,7 @@ export function normalizeCandidate(candidate: CandidateObservation): Normalizati
     // specific phrase. Zero matches -> no evidence yet. More than one match
     // -> contradictory/unclear signal in the same turn -- never guessed.
     if (matches.length === 1) {
-      return { status: 'resolved', canonical_identifier: matches[0].identifier }
+      return { status: 'resolved', canonical_identifier: matches[0].identifier, access_surface: matches[0].accessSurfaceLabel }
     }
     return { status: 'known_ambiguous', candidate_identifiers: ambiguous.candidateIdentifiers }
   }
@@ -191,6 +215,31 @@ export type ProposedFact =
   | { kind: 'scoped_observation'; observation: ScopedObservation }
   | { kind: 'project_fact'; field: 'intended_use' | 'workflow_role'; value: Attested<string> }
   | { kind: 'undetermined' }
+
+/**
+ * Resolves one of ToolMention's access_surface/plan_tier fields from two
+ * possible channels, in priority order (JD instruction, 2026-08-08):
+ *   1. A direct-statement hint on the candidate itself (the extractor
+ *      observed the user actually say it -- "team API plan," "Kling Pro").
+ *   2. A deterministic value already established by normalizeCandidate's own
+ *      disambiguation match (access_surface only -- there is no equivalent
+ *      deterministic channel for plan_tier in the current KNOWN_AMBIGUOUS_TOOLS
+ *      registry).
+ * Neither channel present -> 'unknown'. Never infers from weak/generic
+ * context -- both channels are either an explicit extractor observation or
+ * an already-deterministic code-level match, never a guess.
+ */
+function resolveAttestedToolField(
+  confidenceHint: ConfidenceState | undefined,
+  valueHint: string | undefined,
+  deterministicValue: string | undefined,
+): Attested<string> {
+  if (confidenceHint) {
+    return confidenceHint === 'confirmed' && valueHint ? { state: 'confirmed', value: valueHint } : ({ state: confidenceHint } as Attested<string>)
+  }
+  if (deterministicValue) return { state: 'confirmed', value: deterministicValue }
+  return { state: 'unknown' }
+}
 
 /**
  * Returns null when the candidate should be deferred rather than proposed
@@ -225,13 +274,17 @@ export function attestCandidate(
       confidence = 'unresolved_no_visibility'
     }
 
+    const deterministicAccessSurface = normalization.status === 'resolved' ? normalization.access_surface : undefined
+
     return {
       kind: 'tool_mention',
       mention: {
         mention_id: mentionId,
         resolution,
-        access_surface: { state: 'unknown' },
-        plan_tier: { state: 'unknown' },
+        access_surface: resolveAttestedToolField(candidate.access_surface_confidence_hint, candidate.access_surface_value_hint, deterministicAccessSurface),
+        // No deterministic-normalization channel exists for plan_tier in the
+        // current registry -- only the direct-statement hint channel applies.
+        plan_tier: resolveAttestedToolField(candidate.plan_tier_confidence_hint, candidate.plan_tier_value_hint, undefined),
         confidence,
         source_turn: candidate.turn,
         source_statement: candidate.raw_text,

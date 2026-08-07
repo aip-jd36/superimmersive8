@@ -52,6 +52,15 @@ export function diffScenario(scenario: DialogueScenario, run: DialogueRunResult)
     mismatches.push(`final_completion_reason: expected ${JSON.stringify(exp.final_completion_reason)}, got ${JSON.stringify(run.completion_reason)}`)
   }
 
+  // Verifies Finding 1's access_surface/plan_tier fix explicitly (JD
+  // instruction, 2026-08-08 item 5) -- not just eyeballed from raw JSON.
+  const sortById = (a: { identifier: string }, b: { identifier: string }) => a.identifier.localeCompare(b.identifier)
+  const actualHandoffTools = [...run.final_handoff.tools].sort(sortById)
+  const expectedHandoffTools = [...exp.final_handoff_tools].sort(sortById)
+  if (JSON.stringify(actualHandoffTools) !== JSON.stringify(expectedHandoffTools)) {
+    mismatches.push(`final_handoff.tools: expected ${JSON.stringify(expectedHandoffTools)}, got ${JSON.stringify(actualHandoffTools)}`)
+  }
+
   return { scenario_id: scenario.id, passed: mismatches.length === 0, mismatches }
 }
 

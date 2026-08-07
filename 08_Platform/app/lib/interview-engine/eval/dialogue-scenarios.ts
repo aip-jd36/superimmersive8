@@ -26,24 +26,27 @@
  * what the later live-model battery is for.
  *
  * ── Findings made while authoring this file (all before any code ran,  ──
- * ── except the two verified by direct execution, noted below) ──────────
+ * ── except the ones verified by direct execution, noted below) ─────────
  *
- * FINDING 1 (systemic, affects nearly every scenario): CandidateObservation
- * has no field for a ToolMention's access_surface/plan_tier, and
- * attestCandidate's tool_mention branch unconditionally hardcodes both to
- * `{ state: 'unknown' }` regardless of any hint -- including on a
- * *superseding* candidate that successfully resolves an unresolved alias.
- * fixtures.ts's own end-states (rich_signal, mixed_multi_signal,
- * ambiguous_multi_surface_tool, full_phase_1_to_4_trace) all declare
- * confirmed access_surface/plan_tier values that the current extraction
- * pipeline has no code path to ever produce. This does not affect Gate 1
- * (evaluateGate1 only reads `resolution.kind`, never access_surface/
- * plan_tier) but does affect Gate 2's interview-scope diff and every
- * scenario's final handoff, which will show 'unresolved'/'unknown' for
- * these fields where the original fixtures declared confirmed values. Not
- * fixed here -- extraction.ts is frozen (Phase 6a), and this is a real
- * capability gap for JD to weigh, not a bug in gates.ts/handoff.ts, both of
- * which behave correctly against the data they're actually given.
+ * FINDING 1 -- FIXED (2026-08-08, JD instruction item 1): CandidateObservation
+ * originally had no field for a ToolMention's access_surface/plan_tier, and
+ * attestCandidate's tool_mention branch unconditionally hardcoded both to
+ * `{ state: 'unknown' }`. Closed via two channels, both deterministic, never
+ * inferred from weak context: (1) explicit access_surface_confidence_hint/
+ * value_hint and plan_tier_confidence_hint/value_hint fields on
+ * CandidateObservation, populated only when the user directly stated the
+ * value in that turn; (2) normalizeCandidate's own disambiguation match now
+ * also returns the surface it deterministically implies (extended
+ * NormalizationResult/AmbiguousToolEntry), read by attestCandidate as a
+ * fallback when the candidate itself carries no direct-statement hint. See
+ * extraction.ts's resolveAttestedToolField for the exact priority order.
+ * Scenarios below now populate these hints wherever the scripted turn text
+ * directly states a surface/tier (rich_signal, mixed_multi_signal,
+ * current_vs_historical, full_phase_1_to_4_trace via channel 1;
+ * ambiguous_multi_surface_tool via channel 2, the disambiguation match
+ * itself) -- and deliberately do NOT for a bare mention like ambiguous_
+ * uncertain's "We used Kling," matching JD's own example that tier must stay
+ * unknown there.
  *
  * FINDING 2 (deterministic self-consistency check, gates.ts vs fixtures.ts,
  * recorded in the roadmap Phase 7 section): current_vs_historical and
@@ -53,32 +56,37 @@
  * checked against it. This file's expected traces for those two scenarios
  * use the real evaluator's output, not the stale stored field.
  *
- * FINDING 3 (verified by direct execution against the exact original
- * fixture wording -- see chat record): ambiguous_multi_surface_tool's own
- * turn-2 source_statement, "Oh, through the API — I have a developer key,
- * it's not the app on my phone," does NOT disambiguate when run through the
- * real normalizeCandidate -- the negation ("it's not the app...") still
- * matches the consumer-app pattern (/\b(the app|...)\b/i has no negation
- * awareness), so both disambiguation rules fire and the tool stays
- * known_ambiguous. The original Phase 1 fixture's own documented "success"
- * sentence has never actually been run through the real disambiguation
- * logic until this scenario was authored. Kept as-is (not reworded to dodge
- * it) -- this scenario's turn 2 deliberately preserves the original wording
- * so the dry run surfaces this as a real, reproducible normalization
- * finding, with a turn 3 added to reach eventual (correct) disambiguation
- * via cleaner phrasing.
+ * FINDING 3 -- FIXED (2026-08-08, JD instruction item 2): ambiguous_multi_
+ * surface_tool's original turn-2 wording, reused verbatim from fixtures.ts's
+ * own "successful disambiguation" source_statement, was verified by direct
+ * execution (see chat record) to NOT actually disambiguate against the real
+ * normalizeCandidate -- the negation "it's not the app on my phone" still
+ * matched the consumer-app pattern (no negation awareness), so both
+ * disambiguation rules fired and the tool stayed known_ambiguous. Per
+ * explicit instruction, the NORMALIZER was not touched (a bad test sentence
+ * is not a normalizer defect) -- only this fixture's turn-2 text was
+ * rewritten to unambiguously state the API surface with no negation-driven
+ * language, re-verified by direct execution to resolve cleanly. The
+ * now-unnecessary third turn (previously needed to eventually reach
+ * disambiguation via cleaner phrasing) was removed; the scenario is back to
+ * 2 turns, matching the original fixture's own turn count.
  *
- * FINDING 4 (the JD-flagged watch case, naturally exercised, no dedicated
- * scenario needed): ambiguous_multi_surface_tool's turn 3 asks a SECOND
- * follow_up_on_signal about what is conceptually the same ongoing tool
- * ambiguity -- but because turn 2's supersession gave the tool mention a new
- * signal_id (tm-1 -> tm-2), boundaries.ts's per-signal follow-up cap is keyed
- * to the new id and is therefore fresh, not exhausted. evaluateBoundary
- * allows it. This is the exact interaction PHASE_7_PLANNING.md §8 named as
- * the strongest concrete mechanism by which integration testing could
- * surface something no unit-level phase could see. Observed here as
- * designed evidence, not treated as a failure to fix -- Phase 8 is where
- * JD's four-bar architecture-change threshold gets applied to it.
+ * FINDING 4 -- FIXED (2026-08-08, JD instruction item 3): a second
+ * follow_up_on_signal about what is conceptually the same ongoing
+ * ambiguity, after a supersession changed its signal_id, was previously
+ * allowed by evaluateBoundary because its per-signal cap is keyed by
+ * whichever id currently represents the thing being asked about. Fixed via
+ * signal-lineage.ts's resolveLineageRoot, called by the orchestrator
+ * (run-dialogue.ts) to resolve a candidate's signal_id to its lineage root
+ * BEFORE constructing the object passed to evaluateBoundary -- boundaries.ts
+ * itself is completely unmodified; see signal-lineage.ts for the full
+ * rationale and __tests__/interview-engine/signal-lineage.test.ts for the
+ * 5 required cases. This fixture's own turn-2 rewrite (Finding 3) means the
+ * ambiguity now resolves in a single exchange, so this scenario no longer
+ * naturally exercises a same-lineage second follow-up -- that behavior is
+ * now covered directly and more precisely by the dedicated lineage tests,
+ * which was JD's own instruction (explicit test cases, not merely a
+ * live-battery observation), rather than reworked back into this dialogue.
  */
 
 import type { CandidateObservation } from '../extraction'
@@ -86,7 +94,7 @@ import type { CandidateQuestionProposal } from '../candidate-question'
 import type { ConstraintADecision } from '../decision'
 import type { DialogueTurnScript } from './run-dialogue'
 import { emptyStructuredUnderstanding } from './empty-structured-understanding'
-import type { StructuredUnderstanding } from '@/types/interview-engine'
+import type { RetrievalHandoffTool, StructuredUnderstanding } from '@/types/interview-engine'
 
 export interface ScenarioExpected {
   assistant_actions: string[]
@@ -95,6 +103,8 @@ export interface ScenarioExpected {
   final_gate_1_state: StructuredUnderstanding['gate_1_state']
   final_gate_2_state: StructuredUnderstanding['gate_2_state']
   final_completion_reason: StructuredUnderstanding['completion_reason']
+  /** Verifies Finding 1's fix explicitly (JD instruction item 5) -- not just eyeballed from the raw handoff JSON. */
+  final_handoff_tools: RetrievalHandoffTool[]
   notes: string
 }
 
@@ -137,7 +147,12 @@ const richSignal: DialogueScenario = {
   ],
   turn_candidates: [
     [
-      tool({ proposal_id: 'tm-1', turn: 1, raw_text: 'We shot the whole thing in Runway Gen-3, team API plan.', raw_tool_name: 'Runway Gen-3' }),
+      tool({
+        proposal_id: 'tm-1', turn: 1, raw_text: 'We shot the whole thing in Runway Gen-3, team API plan.', raw_tool_name: 'Runway Gen-3',
+        // Channel 1 (Finding 1 fix): "team API plan" is a direct statement of both surface and tier.
+        access_surface_confidence_hint: 'confirmed', access_surface_value_hint: 'API',
+        plan_tier_confidence_hint: 'confirmed', plan_tier_value_hint: 'Team',
+      }),
       obs({ proposal_id: 'so-1', turn: 1, raw_text: 'Generation done entirely in Runway, no other tools involved.', observation_confidence_hint: 'confirmed', scope: 'current_project', workflow_stage: 'T1' }),
       fact({ proposal_id: 'pf-1a', turn: 1, raw_text: 'It’s for a paid social campaign, a 30-second cutdown.', raw_fact_field: 'intended_use', fact_confidence_hint: 'confirmed', fact_value_hint: 'Paid social ad campaign, 30s cutdown' }),
       fact({ proposal_id: 'pf-1b', turn: 1, raw_text: 'I’m the producer on this one.', raw_fact_field: 'workflow_role', fact_confidence_hint: 'confirmed', fact_value_hint: 'Producer' }),
@@ -153,7 +168,8 @@ const richSignal: DialogueScenario = {
     final_gate_1_state: 'met',
     final_gate_2_state: 'stable',
     final_completion_reason: 'gate_1_gate_2_met',
-    notes: 'tm-1 resolves to runway-gen3 (canonical). access_surface/plan_tier stay unknown -- Finding 1 -- diverging from the original fixture’s confirmed ‘API’/’Team’.',
+    final_handoff_tools: [{ identifier: 'runway-gen3', access_surface: 'API', plan_tier: 'Team' }],
+    notes: 'tm-1 resolves to runway-gen3 (canonical). access_surface/plan_tier now confirmed ‘API’/’Team’ via the Finding 1 fix (channel 1: direct-statement hint), matching the original fixture’s declared values.',
   },
 }
 
@@ -184,6 +200,7 @@ const noSignal: DialogueScenario = {
     final_gate_1_state: 'not_met',
     final_gate_2_state: 'not_yet_stable',
     final_completion_reason: 'gate_1_unmet_exhausted',
+    final_handoff_tools: [],
     notes: 'Turn 1’s low_confidence candidate (so-1a) is deferred by attestCandidate and never applied -- only turn 2’s explicit unknown-confidence observation (so-1) is actually recorded. Matches original fixture’s single so-1.',
   },
 }
@@ -202,7 +219,8 @@ const currentVsHistorical: DialogueScenario = {
   turn_candidates: [
     [
       fact({ proposal_id: 'pf-1', turn: 1, raw_text: "I'm the editor on it.", raw_fact_field: 'workflow_role', fact_confidence_hint: 'confirmed', fact_value_hint: 'Editor' }),
-      tool({ proposal_id: 'tm-1', turn: 1, raw_text: 'This one was Kling, personal plan.', raw_tool_name: 'Kling' }),
+      // Channel 1: "personal plan" directly states tier; no surface stated.
+      tool({ proposal_id: 'tm-1', turn: 1, raw_text: 'This one was Kling, personal plan.', raw_tool_name: 'Kling', plan_tier_confidence_hint: 'confirmed', plan_tier_value_hint: 'Personal' }),
     ],
     [
       obs({ proposal_id: 'so-1', turn: 2, raw_text: 'No one reviewed this project before delivery.', observation_confidence_hint: 'confirmed_absent', scope: 'current_project', workflow_stage: 'T2' }),
@@ -221,7 +239,8 @@ const currentVsHistorical: DialogueScenario = {
     final_gate_1_state: 'not_met',
     final_gate_2_state: 'not_yet_stable',
     final_completion_reason: 'gate_1_unmet_exhausted',
-    notes: 'Finding 2: gate_1_state corrected to not_met/INTENDED_USE_MISSING (original fixture stored ‘met’ while intended_use was unknown -- a Phase1/Phase3 cross-inconsistency, not reproduced here). so-1/so-2 correctly stay separately scoped, never merged.',
+    final_handoff_tools: [{ identifier: 'kling', access_surface: 'unresolved', plan_tier: 'Personal' }],
+    notes: 'Finding 2: gate_1_state corrected to not_met/INTENDED_USE_MISSING (original fixture stored ‘met’ while intended_use was unknown -- a Phase1/Phase3 cross-inconsistency, not reproduced here). so-1/so-2 correctly stay separately scoped, never merged. plan_tier now confirmed ‘Personal’ via Finding 1’s fix; access_surface stays unresolved since no surface was ever stated.',
   },
 }
 
@@ -264,7 +283,8 @@ const ambiguousUncertain: DialogueScenario = {
     final_gate_1_state: 'not_met',
     final_gate_2_state: 'not_yet_stable',
     final_completion_reason: 'gate_1_unmet_exhausted',
-    notes: 'Finding 2 again (same intended_use-unknown/gate_1 correction as current_vs_historical). tm-1.plan_tier stays ‘unknown’ (Finding 1) rather than the more specific ‘unresolved_no_visibility’ the original fixture declared -- the extraction gap also collapses this finer distinction.',
+    final_handoff_tools: [{ identifier: 'kling', access_surface: 'unresolved', plan_tier: 'unknown' }],
+    notes: 'Finding 2 again (same intended_use-unknown/gate_1 correction as current_vs_historical). "We used Kling" is a bare mention -- no hint set on tm-1, so plan_tier correctly stays ‘unknown’ post-Finding-1-fix, matching JD’s own bare-Kling example exactly (deliberately NOT the original fixture’s more specific ‘unresolved_no_visibility’, since nothing in this turn directly states a tier at all -- that finer distinction was never something Finding 1’s fix was meant to produce).',
   },
 }
 
@@ -292,6 +312,7 @@ const fullOptOut: DialogueScenario = {
     final_gate_1_state: 'not_applicable_declined',
     final_gate_2_state: 'not_yet_stable',
     final_completion_reason: 'declined',
+    final_handoff_tools: [],
     notes: 'Requires the opt_out_scope threading fix made to run-dialogue.ts before this scenario was authored -- see the orchestrator’s module-level comment. Without it, evaluateGate1’s decline branch could never fire mid-run.',
   },
 }
@@ -311,8 +332,9 @@ const mixedMultiSignal: DialogueScenario = {
     [
       fact({ proposal_id: 'pf-1a', turn: 1, raw_text: 'It’s for a pitch, not a paid campaign.', raw_fact_field: 'intended_use', fact_confidence_hint: 'confirmed', fact_value_hint: 'Client-facing pitch deck video' }),
       fact({ proposal_id: 'pf-1b', turn: 1, raw_text: 'I’m the creative director on this.', raw_fact_field: 'workflow_role', fact_confidence_hint: 'confirmed', fact_value_hint: 'Creative director' }),
-      tool({ proposal_id: 'tm-1', turn: 1, raw_text: 'We used Runway for the visuals.', raw_tool_name: 'Runway' }),
-      tool({ proposal_id: 'tm-2', turn: 1, raw_text: 'ElevenLabs for voiceover.', raw_tool_name: 'ElevenLabs' }),
+      // Channel 1: "both on team plans" directly states tier for both tools; no surface stated for either.
+      tool({ proposal_id: 'tm-1', turn: 1, raw_text: 'We used Runway for the visuals, both on team plans.', raw_tool_name: 'Runway', plan_tier_confidence_hint: 'confirmed', plan_tier_value_hint: 'Team' }),
+      tool({ proposal_id: 'tm-2', turn: 1, raw_text: 'ElevenLabs for voiceover, both on team plans.', raw_tool_name: 'ElevenLabs', plan_tier_confidence_hint: 'confirmed', plan_tier_value_hint: 'Team' }),
       obs({ proposal_id: 'so-1', turn: 1, raw_text: 'Visuals generated in Runway.', observation_confidence_hint: 'confirmed', scope: 'current_project', workflow_stage: 'T1' }),
       obs({ proposal_id: 'so-2', turn: 1, raw_text: 'Voiceover generated in ElevenLabs.', observation_confidence_hint: 'confirmed', scope: 'current_project', workflow_stage: 'T1' }),
       obs({ proposal_id: 'so-3', turn: 1, raw_text: 'Internal legal already reviewed and approved this piece.', observation_confidence_hint: 'confirmed', scope: 'current_project', workflow_stage: 'T2' }),
@@ -328,7 +350,11 @@ const mixedMultiSignal: DialogueScenario = {
     final_gate_1_state: 'met',
     final_gate_2_state: 'stable',
     final_completion_reason: 'gate_1_gate_2_met',
-    notes: 'Seven candidates from one turn, proving runExtractionPipeline’s per-candidate loop stays correctly split, not just in Phase 6a’s isolated tests. Both tools’ access_surface/plan_tier stay unknown (Finding 1).',
+    final_handoff_tools: [
+      { identifier: 'runway-gen3', access_surface: 'unresolved', plan_tier: 'Team' },
+      { identifier: 'elevenlabs', access_surface: 'unresolved', plan_tier: 'Team' },
+    ],
+    notes: 'Seven candidates from one turn, proving runExtractionPipeline’s per-candidate loop stays correctly split, not just in Phase 6a’s isolated tests. Both tools’ plan_tier now confirmed ‘Team’ via Finding 1’s fix; access_surface stays unresolved since no surface was directly stated for either.',
   },
 }
 
@@ -337,12 +363,17 @@ const mixedMultiSignal: DialogueScenario = {
 const ambiguousMultiSurfaceTool: DialogueScenario = {
   id: 'ambiguous_multi_surface_tool',
   is_normative_probe: false,
-  description: 'User names a multi-surface tool ("Nano Banana"); engine must hold it unresolved, then disambiguate. Exercises Finding 3 and Finding 4 directly.',
+  description: 'User names a multi-surface tool ("Nano Banana"); engine must hold it unresolved, then disambiguate. Turn 2 corrected 2026-08-08 per JD instruction item 2 -- see Finding 3 in the file header.',
   initial_su: emptyStructuredUnderstanding(),
   turns: [
     { turn: 1, phase: 2, user_text: 'I used Nano Banana for this one. I’m the designer on it. It’s just an internal concept test.' },
-    { turn: 2, phase: 2, user_text: "Oh, through the API — I have a developer key, it's not the app on my phone." },
-    { turn: 3, phase: 2, user_text: 'Sorry, to be clear: it was the developer API key I used, called directly.' },
+    // Rewritten 2026-08-08 (Finding 3 fix): the original wording's negation
+    // ("it's not the app on my phone") tripped the consumer-app pattern even
+    // while denying it. This version states the API surface with no
+    // negation-driven language at all -- re-verified by direct execution to
+    // resolve cleanly (see chat record). The normalizer itself was not
+    // touched, per explicit instruction.
+    { turn: 2, phase: 2, user_text: 'Through the API — I called it directly with my own developer key.' },
   ],
   turn_candidates: [
     [
@@ -353,35 +384,34 @@ const ambiguousMultiSurfaceTool: DialogueScenario = {
     // attestCandidate suffixes a superseding tool_mention's id with
     // '-resolved' whenever supersedes_tool_mention_id is set -- tm-2 (which
     // supersedes tm-1) actually becomes 'tm-2-resolved' at mutation time.
-    // Turn 3's own supersedes_tool_mention_id must therefore reference
-    // 'tm-2-resolved', the real active id after turn 2, not the naive 'tm-2'
-    // -- mutations.ts's supersedeToolMention correctly rejects a reference
-    // to a nonexistent id ('tm-2' was never actually written). Found by the
-    // mock dry run itself (see chat record); fixed here, not in
+    // Found by the mock dry run itself (see chat record); fixed here, not in
     // extraction.ts or mutations.ts, both behaving exactly as designed.
-    [tool({ proposal_id: 'tm-2', turn: 2, raw_text: "Oh, through the API — I have a developer key, it's not the app on my phone.", raw_tool_name: 'Nano Banana', supersedes_tool_mention_id: 'tm-1' })],
+    // access_surface is populated via channel 2 (Finding 1 fix): the same
+    // disambiguation match that resolves 'gemini-api' also deterministically
+    // returns access_surface: 'API' -- no candidate-level hint needed here,
+    // deliberately exercising that channel (channels 1 is exercised by other
+    // scenarios' direct-statement hints).
     [
-      tool({ proposal_id: 'tm-3', turn: 3, raw_text: 'Sorry, to be clear: it was the developer API key I used, called directly.', raw_tool_name: 'Nano Banana', supersedes_tool_mention_id: 'tm-2-resolved' }),
-      obs({ proposal_id: 'so-1', turn: 3, raw_text: 'Generation via Gemini API (developer key), not the Gemini consumer app.', observation_confidence_hint: 'confirmed', scope: 'current_project', workflow_stage: 'T1' }),
+      tool({ proposal_id: 'tm-2', turn: 2, raw_text: 'Through the API — I called it directly with my own developer key.', raw_tool_name: 'Nano Banana', supersedes_tool_mention_id: 'tm-1' }),
+      obs({ proposal_id: 'so-1', turn: 2, raw_text: 'Generation via Gemini API (developer key), not the Gemini consumer app.', observation_confidence_hint: 'confirmed', scope: 'current_project', workflow_stage: 'T1' }),
     ],
   ],
   generator_queue: [
     { question_text: 'When you used Nano Banana, was that the app on your phone, or did you go through the API with a developer key?', question_kind: 'follow_up_on_signal', target_signal_id: 'tm-1', phase: 2 },
-    { question_text: 'Sorry, to make sure I have it right — was that through the API, or the phone app?', question_kind: 'follow_up_on_signal', target_signal_id: 'tm-2-resolved', phase: 2 },
     null,
   ],
   decider_queue: [
     { should_ask: true, reason_code: 'AMBIGUOUS_TOOL_SURFACE_RESOLVABLE', rationale: 'Tool surface is unresolved and a plausible answer would resolve it.' },
-    { should_ask: true, reason_code: 'AMBIGUOUS_TOOL_SURFACE_RESOLVABLE', rationale: 'Still unresolved after the first attempt; a plausible answer would resolve it.' },
   ],
   expected: {
-    assistant_actions: ['ASK', 'ASK', 'NONE_PROPOSED'],
+    assistant_actions: ['ASK', 'NONE_PROPOSED'],
     final_active_observation_ids: ['so-1'],
-    final_active_tool_mention_ids: ['tm-3-resolved'],
+    final_active_tool_mention_ids: ['tm-2-resolved'],
     final_gate_1_state: 'met',
     final_gate_2_state: 'not_yet_stable',
     final_completion_reason: null,
-    notes: 'Finding 3: turn 2’s exact original-fixture wording does NOT disambiguate (verified by direct execution) -- tm-1 supersedes to tm-2-resolved, still unresolved_alias. Finding 4: turn 2’s follow-up is ALLOWED by Constraint B despite tm-1 already having used its one follow-up, because supersession gave the ambiguity a new signal_id (tm-2-resolved) with a fresh cap -- the JD-flagged watch case, naturally exercised, no dedicated scenario needed. Turn 3 (cleaner phrasing) finally resolves to tm-3-resolved/gemini-api, canonical. access_surface stays unknown even on the successful resolution (Finding 1) -- the gap is separate from, and does not block, the tool-identity resolution itself.',
+    final_handoff_tools: [{ identifier: 'gemini-api', access_surface: 'API', plan_tier: 'unknown' }],
+    notes: 'Finding 3 (fixed): turn 2 now unambiguously resolves to tm-2-resolved/gemini-api, canonical, in a single exchange -- re-verified by direct execution before this scenario was finalized. access_surface is now confirmed ‘API’ via Finding 1’s channel 2 (the disambiguation match itself), demonstrating that channel independent of the direct-statement channel used elsewhere. Finding 4’s watch case (a same-lineage second follow-up) no longer arises naturally here since the ambiguity resolves in one step -- it is now covered directly by __tests__/interview-engine/signal-lineage.test.ts instead, per JD’s own instruction to add dedicated tests rather than rely on a dialogue observation.',
   },
 }
 
@@ -401,7 +431,12 @@ const fullPhase1To4Trace: DialogueScenario = {
   ],
   turn_candidates: [
     [
-      tool({ proposal_id: 'tm-1', turn: 1, raw_text: 'Runway Gen-3, team API plan.', raw_tool_name: 'Runway Gen-3' }),
+      // Channel 1: "team API plan" directly states both surface and tier.
+      tool({
+        proposal_id: 'tm-1', turn: 1, raw_text: 'Runway Gen-3, team API plan.', raw_tool_name: 'Runway Gen-3',
+        access_surface_confidence_hint: 'confirmed', access_surface_value_hint: 'API',
+        plan_tier_confidence_hint: 'confirmed', plan_tier_value_hint: 'Team',
+      }),
       fact({ proposal_id: 'pf-1a', turn: 1, raw_text: 'It’s for a paid social ad campaign.', raw_fact_field: 'intended_use', fact_confidence_hint: 'confirmed', fact_value_hint: 'Paid social ad campaign' }),
       fact({ proposal_id: 'pf-1b', turn: 1, raw_text: 'I’m the producer.', raw_fact_field: 'workflow_role', fact_confidence_hint: 'confirmed', fact_value_hint: 'Producer' }),
       obs({ proposal_id: 'so-1', turn: 1, raw_text: 'Generation done entirely in Runway.', observation_confidence_hint: 'confirmed', scope: 'current_project', workflow_stage: 'T1' }),
@@ -420,7 +455,8 @@ const fullPhase1To4Trace: DialogueScenario = {
     final_gate_1_state: 'met',
     final_gate_2_state: 'stable',
     final_completion_reason: 'gate_1_gate_2_met',
-    notes: 'Only scenario spanning all 4 phases end to end. Turns 2-3 deliberately extract nothing (Phase 3/4 bridge, no new fact) so Gate 2 briefly stabilizes before turn 4’s legal-review fact re-opens it, then turn 5 restabilizes -- directly exercises Gate 2 flipping stable -> not_yet_stable -> stable within one run. tm-1.access_surface/plan_tier stay unknown (Finding 1); final handoff will show ‘unresolved’/’unknown’ where the original fixture declared confirmed ‘API’/’Team’.',
+    final_handoff_tools: [{ identifier: 'runway-gen3', access_surface: 'API', plan_tier: 'Team' }],
+    notes: 'Only scenario spanning all 4 phases end to end. Turns 2-3 deliberately extract nothing (Phase 3/4 bridge, no new fact) so Gate 2 briefly stabilizes before turn 4’s legal-review fact re-opens it, then turn 5 restabilizes -- directly exercises Gate 2 flipping stable -> not_yet_stable -> stable within one run. tm-1.access_surface/plan_tier now confirmed ‘API’/’Team’ via Finding 1’s fix, matching the original fixture’s declared values.',
   },
 }
 
@@ -469,6 +505,7 @@ const rule5DisentanglingProbe: DialogueScenario = {
     final_gate_1_state: 'not_met',
     final_gate_2_state: 'not_yet_stable',
     final_completion_reason: 'gate_1_unmet_exhausted',
+    final_handoff_tools: [],
     notes: 'Turn 1: both observations remain distinctly unresolved before clarification (never guessed/merged). Turn 1 disentangling_question: generated, Constraint A approves, Constraint B allows (first). Turn 3: Constraint A independently approves a second, unrelated bundled ambiguity (tm-1 stays unresolved_alias, never guessed) but Constraint B suppresses it -- DISENTANGLING_QUESTION_ALREADY_ASKED, the once-per-interview cap firing exactly as designed. This result is evidence about the prototype’s current cap behavior only, not a claim about final product scope (JD, 2026-08-08).',
   },
 }

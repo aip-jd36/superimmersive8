@@ -55,7 +55,12 @@ describe('dialogue orchestrator (Phase 7)', () => {
     expect(run.turns[0].gate_1.state).toBe('not_applicable_declined')
   })
 
-  test('ambiguous_multi_surface_tool: a supersession gives the new signal a fresh Constraint B cap (Finding 4 watch case)', async () => {
+  test('ambiguous_multi_surface_tool: resolves cleanly in turn 2 (Finding 3 fix), access_surface confirmed via the deterministic disambiguation channel (Finding 1 fix)', async () => {
+    // Finding 4 (a same-lineage second follow-up) previously arose naturally
+    // here before the Finding 3 wording fix; it is now covered directly by
+    // __tests__/interview-engine/signal-lineage.test.ts instead, per JD's
+    // 2026-08-08 instruction to add dedicated boundary-cap-lineage tests
+    // rather than rely on this dialogue continuing to reproduce it.
     const scenario = DIALOGUE_SCENARIOS.find((s) => s.id === 'ambiguous_multi_surface_tool')!
     const deps = {
       extractor: sequencedExtractor(scenario.turn_candidates),
@@ -65,8 +70,10 @@ describe('dialogue orchestrator (Phase 7)', () => {
     const run = await runDialogue(scenario.initial_su, scenario.turns, deps)
     expect(run.turns[0].assistant_action).toBe('ASK')
     expect(run.turns[0].asked_question?.target_signal_id).toBe('tm-1')
-    expect(run.turns[1].assistant_action).toBe('ASK')
-    expect(run.turns[1].asked_question?.target_signal_id).toBe('tm-2-resolved')
+    expect(run.turns[1].assistant_action).toBe('NONE_PROPOSED')
+    const tm2 = run.final_su.tool_mentions.find((m) => m.mention_id === 'tm-2-resolved')
+    expect(tm2?.resolution).toEqual({ kind: 'canonical', identifier: 'gemini-api' })
+    expect(tm2?.access_surface).toEqual({ state: 'confirmed', value: 'API' })
   })
 
   test('rule5_disentangling_probe: first disentangling question allowed, second suppressed by the once-per-interview cap', async () => {

@@ -28,6 +28,7 @@ import type { CandidateExtractor, ExtractionDiagnostic, RawUserTurn } from '../e
 import { runExtractionPipeline } from '../extraction'
 import { evaluateGate1, evaluateGate2, type Gate1Result, type Gate2Result } from '../gates'
 import { buildRetrievalHandoff } from '../handoff'
+import { resolveLineageRoot } from '../signal-lineage'
 import type { CompletionReason, OptOutScope, Phase, RetrievalHandoff, StructuredUnderstanding } from '@/types/interview-engine'
 
 // ── Script input ─────────────────────────────────────────────────────────────
@@ -100,6 +101,17 @@ interface DialogueRunnerState {
  * consumes budget for a candidate that actually reached evaluateBoundary, so
  * a candidate Constraint A itself suppressed must never silently consume a
  * Constraint-B-administered cap.
+ *
+ * Before any evaluateBoundary call for an approved candidate, its signal_id
+ * (when present) is resolved to its lineage root via resolveLineageRoot
+ * (JD instruction, 2026-08-08) -- so a follow-up/uncertainty-clarification
+ * cap tracks the semantic thing being asked about across supersession, not
+ * whichever id currently happens to represent it. boundaries.ts itself is
+ * unchanged; see signal-lineage.ts for the full rationale. The trace's own
+ * `asked_question.target_signal_id` still reports the proposal's ORIGINAL
+ * (unresolved) target, since that is what was actually asked about --
+ * lineage resolution is purely an input to cap bookkeeping, never surfaced
+ * as if it were the question's real subject.
  */
 export async function runDialogueTurn(
   state: DialogueRunnerState,
@@ -159,7 +171,10 @@ export async function runDialogueTurn(
     } else {
       constraintADecision = await deps.decider({ structured_understanding: suAfter, candidate: proposal, phase: script.phase })
       if (constraintADecision.should_ask) {
-        const boundaryResult = evaluateBoundary(state.boundaryState, validation.candidate, script.decline)
+        const lineageResolvedCandidate = validation.candidate.signal_id
+          ? { ...validation.candidate, signal_id: resolveLineageRoot(suAfter, validation.candidate.signal_id) }
+          : validation.candidate
+        const boundaryResult = evaluateBoundary(state.boundaryState, lineageResolvedCandidate, script.decline)
         nextBoundaryState = boundaryResult.next_state
         boundaryReasonCode = boundaryResult.reason_code
         boundaryActionScope = boundaryResult.action_scope
