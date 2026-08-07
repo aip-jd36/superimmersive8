@@ -12,7 +12,8 @@
     "eval:candidate-question": "tsx lib/interview-engine/eval/run-real-model-candidate-question-eval.ts",
     "eval:candidate-question-integration": "tsx lib/interview-engine/eval/run-real-model-integration-eval.ts",
     "eval:decision": "tsx lib/interview-engine/eval/run-real-model-decision-eval.ts",
-    "eval:dialogue-mock-dryrun": "tsx lib/interview-engine/eval/run-mock-dialogue-eval.ts"
+    "eval:dialogue-mock-dryrun": "tsx lib/interview-engine/eval/run-mock-dialogue-eval.ts",
+    "eval:dialogue-live": "tsx lib/interview-engine/eval/run-real-model-dialogue-eval.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

@@ -73,6 +73,14 @@ export interface DialogueTurnResult {
   gate_2_interview_scope: Gate2Result
   assistant_action: AssistantAction
   asked_question: { question_kind: CandidateQuestionKind; target_signal_id: string | null } | null
+  /**
+   * Pure observability, added 2026-08-08 as harness-side prep before the
+   * live-model battery (JD instruction: not a change to boundary logic
+   * itself, which computes this value unmodified -- only exposing it in the
+   * per-turn trace, which the required reporting list asks for and which
+   * DialogueRunResult's turns array previously discarded after each turn).
+   */
+  boundary_state_after: BoundaryState
 }
 
 export interface DialogueRunnerDeps {
@@ -230,6 +238,7 @@ export async function runDialogueTurn(
     gate_2_interview_scope: gate2Interview,
     assistant_action: assistantAction,
     asked_question: askedQuestion,
+    boundary_state_after: nextBoundaryState,
   }
 
   return { state: { su: suAfter, boundaryState: nextBoundaryState }, result }
