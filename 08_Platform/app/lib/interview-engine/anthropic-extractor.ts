@@ -231,6 +231,24 @@ function resolveModel(options?: AnthropicExtractorOptions): string {
 }
 
 /**
+ * Extraction context wiring (Live Interview Runtime milestone,
+ * PROTOTYPE_ALPHA_RETROSPECTIVE.md Option D3): when a clarification is
+ * pending, prepend a short, deterministic prefix built entirely from
+ * `unresolved_summary` (itself deterministic templating, per
+ * pending-clarification.ts's own header) -- never the candidate-question
+ * generator's own live `question_text`, which is exactly the coupling D3
+ * was chosen over D2 to avoid (see Alpha's own D1/D2/D3 comparison). This
+ * is the type-level channel added in extraction.ts's own `RawUserTurn`
+ * actually being read; every prior call site that never sets
+ * `pending_clarification` gets byte-identical prompt content to before
+ * this change.
+ */
+export function buildUserMessageContent(turn: RawUserTurn): string {
+  if (!turn.pending_clarification) return turn.text
+  return `[Context: your immediately preceding question was about ${turn.pending_clarification.unresolved_summary}. Interpret the following reply in light of that context if it applies.]\n\n${turn.text}`
+}
+
+/**
  * Returns a plain CandidateExtractor -- interchangeable with
  * constantExtractor() from mock-extractor.ts wherever a CandidateExtractor
  * is expected. Throws immediately (does not fall back to the mock) if no
@@ -246,7 +264,7 @@ export function createAnthropicExtractor(options?: AnthropicExtractorOptions): C
       model,
       max_tokens: 2048,
       system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: turn.text }],
+      messages: [{ role: 'user', content: buildUserMessageContent(turn) }],
       output_config: { format: jsonSchemaOutputFormat(CANDIDATE_RESPONSE_SCHEMA) },
       // No `thinking` param: disabled by omission, per Phase 6a substage 2
       // instructions -- this is a bounded extraction task.
@@ -286,7 +304,7 @@ export async function extractWithDiagnostics(
     model,
     max_tokens: 2048,
     system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: turn.text }],
+    messages: [{ role: 'user', content: buildUserMessageContent(turn) }],
     output_config: { format: jsonSchemaOutputFormat(CANDIDATE_RESPONSE_SCHEMA) },
   })
   const latencyMs = Date.now() - start

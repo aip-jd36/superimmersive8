@@ -56,9 +56,23 @@ import {
 
 // ── Raw input ────────────────────────────────────────────────────────────────
 
+/**
+ * `pending_clarification` (added for the Live Interview Runtime milestone,
+ * PROTOTYPE_ALPHA_RETROSPECTIVE.md's Option D3): optional context about
+ * which specific record the immediately-preceding assistant question was
+ * asking about, so this turn's extraction can correctly interpret a reply
+ * that only makes sense as an answer to that question (e.g. "the API one"
+ * answering a tool-mention follow-up). Deliberately additive, not a
+ * `CandidateExtractor` signature change -- every existing implementation
+ * (mock-extractor.ts, and any test double) needs no change at all; only
+ * an implementation that wants to actually use this context (e.g.
+ * anthropic-extractor.ts) reads it. `null`/absent means no clarification
+ * was pending -- the normal case for most turns.
+ */
 export interface RawUserTurn {
   turn: number
   text: string
+  pending_clarification?: import('./pending-clarification').PendingClarification | null
 }
 
 // ── Candidate observations (stage 1) ────────────────────────────────────────
