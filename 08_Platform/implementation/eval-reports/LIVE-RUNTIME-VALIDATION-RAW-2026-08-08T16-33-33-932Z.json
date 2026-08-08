@@ -1,0 +1,238 @@
+[
+  {
+    "scenario_id": "rich_first_turn",
+    "trial": 1,
+    "turns": [
+      {
+        "scenario_id": "rich_first_turn",
+        "trial": 1,
+        "turn_number": 1,
+        "user_text": "We shot the whole thing in Runway Gen-3, team API plan. I'm the producer on this one, and it's for a paid social campaign, a 30-second cutdown.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "c1",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'runway-gen3'"
+        },
+        "generated_candidate_question": {
+          "question_text": "You mentioned Runway Gen-3 on a team API plan \\u2014 can you tell me more about that plan, like whether it's a business or enterprise tier, and how you're accessing it (API directly, or through some other interface)?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 3
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "Access_surface and plan_tier for Runway Gen-3 are both currently unknown, and these details materially affect commercial-use terms; a plausible answer would fill this genuine gap rather than restate known facts."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "You mentioned Runway Gen-3 on a team API plan \\u2014 can you tell me more about that plan, like whether it's a business or enterprise tier, and how you're accessing it (API directly, or through some other interface)?",
+        "error": null
+      },
+      {
+        "scenario_id": "rich_first_turn",
+        "trial": 1,
+        "turn_number": 2,
+        "user_text": "Once this was finished, it went straight to the client -- no internal review, they just wanted it fast.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "You mentioned it was Runway Gen-3 on a team API plan — can you tell me a bit more about how that access was set up, like whether it's a business/enterprise API arrangement or something more general?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 3
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "Access_surface and plan_tier are both currently unknown despite the tool being confirmed; clarifying whether the 'team API plan' is a business/enterprise arrangement directly affects understanding of commercial licensing terms, which is central to CRC's purpose."
+        },
+        "constraint_b_verdict": "blocked",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "+scoped_observation c1 (current_project, confirmed)",
+          "+scoped_observation c2 (current_project, confirmed_absent)"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "acknowledgment",
+        "outcome_message": "Got it — thanks for sharing that.",
+        "error": null
+      },
+      {
+        "scenario_id": "rich_first_turn",
+        "trial": 1,
+        "turn_number": 3,
+        "user_text": "Nothing else has come up about it since. Pretty standard project for us.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_gate_2_met"
+        },
+        "su_diff": [
+          "gate_2_state not_yet_stable -> stable",
+          "completion_reason null -> gate_1_gate_2_met"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "rich_first_turn",
+    "trial": 2,
+    "turns": [
+      {
+        "scenario_id": "rich_first_turn",
+        "trial": 2,
+        "turn_number": 1,
+        "user_text": "We shot the whole thing in Runway Gen-3, team API plan. I'm the producer on this one, and it's for a paid social campaign, a 30-second cutdown.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "c1",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'runway-gen3'"
+        },
+        "generated_candidate_question": {
+          "question_text": "You mentioned Runway Gen-3 on a team API plan — was the whole video generated through that API access, or did anyone also use the standard web app to create or tweak footage?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 3
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "Access_surface is still unknown despite the 'team API plan' mention, and clarifying whether all footage came through API access or partly via the web app could materially change the licensing analysis since these surfaces often carry different commercial terms."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "You mentioned Runway Gen-3 on a team API plan — was the whole video generated through that API access, or did anyone also use the standard web app to create or tweak footage?",
+        "error": null
+      },
+      {
+        "scenario_id": "rich_first_turn",
+        "trial": 2,
+        "turn_number": 2,
+        "user_text": "Once this was finished, it went straight to the client -- no internal review, they just wanted it fast.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "When you say it went straight to the client, who actually made the call to send it out — was that you, or did someone else on the team push it through?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 3
+        },
+        "constraint_a_decision": {
+          "should_ask": false,
+          "reason_code": "REVIEWER_STYLE_DRILLDOWN",
+          "rationale": "The workflow fact (no internal review, went straight to client) is already confirmed; identifying which specific person authorized the send is forensic detail that doesn't change CRC's understanding of the commercial-use review gap."
+        },
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "+scoped_observation c1 (current_project, confirmed)",
+          "+scoped_observation c2 (current_project, confirmed_absent)"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "acknowledgment",
+        "outcome_message": "Got it — thanks for sharing that.",
+        "error": null
+      },
+      {
+        "scenario_id": "rich_first_turn",
+        "trial": 2,
+        "turn_number": 3,
+        "user_text": "Nothing else has come up about it since. Pretty standard project for us.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_gate_2_met"
+        },
+        "su_diff": [
+          "gate_2_state not_yet_stable -> stable",
+          "completion_reason null -> gate_1_gate_2_met"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  }
+]

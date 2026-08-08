@@ -1,0 +1,248 @@
+[
+  {
+    "scenario_id": "unresolved_ambiguity_across_turns",
+    "trial": 1,
+    "turns": [
+      {
+        "scenario_id": "unresolved_ambiguity_across_turns",
+        "trial": 1,
+        "turn_number": 1,
+        "user_text": "I used Nano Banana for this one.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "c1",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'Nano Banana', not yet resolved to a specific platform"
+        },
+        "generated_candidate_question": {
+          "question_text": "Just to make sure I understand the tool side of things - when you say you used Nano Banana, do you know if that was through an official app or website, or was it more like a plugin or integration inside another tool?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "The tool 'Nano Banana' is an unresolved alias with unknown access surface, and clarifying whether it was used via official app/website versus a plugin/integration would materially disambiguate the tool surface for CRC's understanding."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "Just to make sure I understand the tool side of things - when you say you used Nano Banana, do you know if that was through an official app or website, or was it more like a plugin or integration inside another tool?",
+        "error": null
+      },
+      {
+        "scenario_id": "unresolved_ambiguity_across_turns",
+        "trial": 1,
+        "turn_number": 2,
+        "user_text": "Oh, through the API -- I have a developer key, it's not the app on my phone.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Quick one on the tool itself — when you say \"Nano Banana,\" do you know if that's accessed through a specific app, website, or platform? Just trying to get a clearer picture of what it actually is.",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "The tool 'Nano Banana' is an unresolved alias with unknown access surface; asking how it's accessed could clarify which platform/service is involved, directly filling a missing structural fact.and resolving the alias.## Answer"
+        },
+        "constraint_b_verdict": "blocked",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "gate_2_state not_yet_stable -> stable"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "acknowledgment",
+        "outcome_message": "Got it — thanks for sharing that.",
+        "error": null
+      },
+      {
+        "scenario_id": "unresolved_ambiguity_across_turns",
+        "trial": 1,
+        "turn_number": 3,
+        "user_text": "I'm the designer on it, and it's just an internal concept test.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Just to clarify on the Nano Banana tool - do you know if you were using a free tier or a paid/subscription plan when you generated this?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_WORKFLOW_FACT",
+          "rationale": "Plan tier for the unresolved 'Nano Banana' tool is currently unknown, and free vs paid tier often carries different commercial-use terms, so a plausible answer would fill a genuinely missing fact material to assessing commercial-use status."
+        },
+        "constraint_b_verdict": "blocked",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "intended_use unknown -> confirmed",
+          "workflow_role unknown -> confirmed",
+          "gate_2_state stable -> not_yet_stable"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "acknowledgment",
+        "outcome_message": "Got it — thanks for sharing that.",
+        "error": null
+      }
+    ],
+    "completed": false,
+    "final_phase": null,
+    "projection_check": null,
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "unresolved_ambiguity_across_turns",
+    "trial": 2,
+    "turns": [
+      {
+        "scenario_id": "unresolved_ambiguity_across_turns",
+        "trial": 2,
+        "turn_number": 1,
+        "user_text": "I used Nano Banana for this one.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "c1",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'Nano Banana', not yet resolved to a specific platform"
+        },
+        "generated_candidate_question": {
+          "question_text": "Just so I understand the tool side of things—when you say you used Nano Banana, do you know if that was through a specific app, plugin, or platform, or was it more of a standalone tool you accessed directly?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "The tool 'Nano Banana' is currently an unresolved alias with unknown access surface; clarifying whether it was used via a specific app/plugin/platform versus standalone would meaningfully narrow down licensing/commercial-use implications tied to that surface."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "Just so I understand the tool side of things—when you say you used Nano Banana, do you know if that was through a specific app, plugin, or platform, or was it more of a standalone tool you accessed directly?",
+        "error": null
+      },
+      {
+        "scenario_id": "unresolved_ambiguity_across_turns",
+        "trial": 2,
+        "turn_number": 2,
+        "user_text": "Oh, through the API -- I have a developer key, it's not the app on my phone.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Just to make sure I understand the tool side of things — when you say you used Nano Banana, do you know if that was through a specific plan or access tier, like a free tier, paid subscription, or API access?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "VISIBILITY_GAP_CLARIFIABLE",
+          "rationale": "The access_surface and plan_tier for the 'Nano Banana' tool are both unknown, and knowing whether it was used via free tier, paid subscription, or API could materially affect commercial-use status, so a plausible answer would fill a genuine gap."
+        },
+        "constraint_b_verdict": "blocked",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "gate_2_state not_yet_stable -> stable"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "acknowledgment",
+        "outcome_message": "Got it — thanks for sharing that.",
+        "error": null
+      },
+      {
+        "scenario_id": "unresolved_ambiguity_across_turns",
+        "trial": 2,
+        "turn_number": 3,
+        "user_text": "I'm the designer on it, and it's just an internal concept test.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Just so I understand the tool side better — do you know if \"Nano Banana\" is accessed through a specific app, plugin, or platform, or is it more of a nickname for something else?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "The tool mention 'Nano Banana' is an unresolved alias with unknown access surface and plan tier, and a plausible answer would identify how it's accessed, directly filling a missing fact relevant to commercial-use assessment."
+        },
+        "constraint_b_verdict": "blocked",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "intended_use unknown -> confirmed",
+          "workflow_role unknown -> confirmed",
+          "gate_2_state stable -> not_yet_stable"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "acknowledgment",
+        "outcome_message": "Got it — thanks for sharing that.",
+        "error": null
+      }
+    ],
+    "completed": false,
+    "final_phase": null,
+    "projection_check": null,
+    "aborted_error": null
+  }
+]
