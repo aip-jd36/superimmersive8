@@ -1,0 +1,1827 @@
+[
+  {
+    "scenario_id": "rich_first_turn",
+    "trial": 1,
+    "turns": [
+      {
+        "scenario_id": "rich_first_turn",
+        "trial": 1,
+        "turn_number": 1,
+        "user_text": "We shot the whole thing in Runway Gen-3, team API plan. I'm the producer on this one, and it's for a paid social campaign, a 30-second cutdown.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "c1",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'runway-gen3'"
+        },
+        "generated_candidate_question": {
+          "question_text": "You mentioned Runway Gen-3 on a team API plan — can you tell me a bit more about how you accessed it? Was that through the API directly, or via a web interface tied to that team plan?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 3
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "The access_surface field is explicitly unknown despite the tool mention naming a 'team API plan'; clarifying whether output was generated via direct API calls or a web interface under that plan would resolve a real ambiguity relevant to commercial terms."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "You mentioned Runway Gen-3 on a team API plan — can you tell me a bit more about how you accessed it? Was that through the API directly, or via a web interface tied to that team plan?",
+        "error": null
+      },
+      {
+        "scenario_id": "rich_first_turn",
+        "trial": 1,
+        "turn_number": 2,
+        "user_text": "Once this was finished, it went straight to the client -- no internal review, they just wanted it fast.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "You mentioned it was a team API plan for Runway Gen-3 — can you tell me more about how that access is set up, like whether it's a shared team seat or an individual API key?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 3
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "Access_surface and plan_tier are still marked unknown despite the mention of a 'team API plan,' and clarifying whether it's a shared team seat or individual API key would resolve a genuinely ambiguous tool-access detail relevant to commercial licensing status."
+        },
+        "constraint_b_verdict": "blocked",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "+scoped_observation c1 (current_project, confirmed_absent)",
+          "+scoped_observation c2 (current_project, confirmed)"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "acknowledgment",
+        "outcome_message": "Got it — thanks for sharing that.",
+        "error": null
+      },
+      {
+        "scenario_id": "rich_first_turn",
+        "trial": 1,
+        "turn_number": 3,
+        "user_text": "Nothing else has come up about it since. Pretty standard project for us.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_gate_2_met"
+        },
+        "su_diff": [
+          "gate_2_state not_yet_stable -> stable",
+          "completion_reason null -> gate_1_gate_2_met"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "rich_first_turn",
+    "trial": 2,
+    "turns": [
+      {
+        "scenario_id": "rich_first_turn",
+        "trial": 2,
+        "turn_number": 1,
+        "user_text": "We shot the whole thing in Runway Gen-3, team API plan. I'm the producer on this one, and it's for a paid social campaign, a 30-second cutdown.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "You mentioned you used the team API plan for Runway Gen-3 - can you tell me more about how that access was set up, like whether it was a paid team/enterprise account or something else?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 3
+        },
+        "constraint_a_decision": {
+          "should_ask": false,
+          "reason_code": "FACT_ALREADY_CONFIRMED",
+          "rationale": "The source statement already confirms a 'team API plan' for Runway Gen-3, which is generally sufficient to establish a paid/commercial access tier; probing further into exact account setup would only add forensic detail without changing CRC's understanding of the commercial-use status."
+        },
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "acknowledgment",
+        "outcome_message": "Got it — thanks for sharing that.",
+        "error": null
+      },
+      {
+        "scenario_id": "rich_first_turn",
+        "trial": 2,
+        "turn_number": 2,
+        "user_text": "Once this was finished, it went straight to the client -- no internal review, they just wanted it fast.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "c1",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'runway-gen3'"
+        },
+        "generated_candidate_question": {
+          "question_text": "When you say it went straight to the client, do you know if they published it as-is, or did they run their own review before it went live?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 3
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_WORKFLOW_FACT",
+          "rationale": "Whether the client published the AI-generated cutdown as-is or conducted their own review is a workflow fact not yet captured, and a plausible answer would clarify whether any further oversight occurred after handoff, materially affecting the commercial-use risk picture."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "+scoped_observation c1 (current_project, confirmed)",
+          "+scoped_observation c2 (current_project, confirmed_absent)"
+        ],
+        "boundary_state_diff": [
+          "follow_ups_used[c1] 0 -> 1"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "When you say it went straight to the client, do you know if they published it as-is, or did they run their own review before it went live?",
+        "error": null
+      },
+      {
+        "scenario_id": "rich_first_turn",
+        "trial": 2,
+        "turn_number": 3,
+        "user_text": "Nothing else has come up about it since. Pretty standard project for us.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_gate_2_met"
+        },
+        "su_diff": [
+          "gate_2_state not_yet_stable -> stable",
+          "completion_reason null -> gate_1_gate_2_met"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "gradual_discovery",
+    "trial": 1,
+    "turns": [
+      {
+        "scenario_id": "gradual_discovery",
+        "trial": 1,
+        "turn_number": 1,
+        "user_text": "We used Kling for this one.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "c1",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'kling'"
+        },
+        "generated_candidate_question": {
+          "question_text": "You mentioned you used Kling for this project — what's the plan you're on, like a free plan, a paid subscription, or something through an enterprise/API arrangement?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_WORKFLOW_FACT",
+          "rationale": "Plan tier is currently unknown and directly relevant to commercial-use status determination for Kling, so a plausible answer (free/paid/enterprise) would fill a genuinely missing fact needed for the assessment.ed"
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "You mentioned you used Kling for this project — what's the plan you're on, like a free plan, a paid subscription, or something through an enterprise/API arrangement?",
+        "error": null
+      },
+      {
+        "scenario_id": "gradual_discovery",
+        "trial": 1,
+        "turn_number": 2,
+        "user_text": "I'm the editor on it.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_unmet_exhausted"
+        },
+        "su_diff": [
+          "workflow_role unknown -> confirmed",
+          "current_phase 2 -> 3",
+          "completion_reason null -> gate_1_unmet_exhausted"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "gradual_discovery",
+    "trial": 2,
+    "turns": [
+      {
+        "scenario_id": "gradual_discovery",
+        "trial": 2,
+        "turn_number": 1,
+        "user_text": "We used Kling for this one.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "What's the intended use for this project — is it something you're planning to use commercially, or more for personal/experimental purposes?",
+          "question_kind": "other",
+          "target_signal_id": "project:intended_use",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently unknown and is a core project fact CRC needs; a plausible answer would directly establish this missing fact and affect gate evaluation."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "What's the intended use for this project — is it something you're planning to use commercially, or more for personal/experimental purposes?",
+        "error": null
+      },
+      {
+        "scenario_id": "gradual_discovery",
+        "trial": 2,
+        "turn_number": 2,
+        "user_text": "I'm the editor on it.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_unmet_exhausted"
+        },
+        "su_diff": [
+          "workflow_role unknown -> confirmed",
+          "current_phase 2 -> 3",
+          "completion_reason null -> gate_1_unmet_exhausted"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "decline_mid_conversation",
+    "trial": 1,
+    "turns": [
+      {
+        "scenario_id": "decline_mid_conversation",
+        "trial": 1,
+        "turn_number": 1,
+        "user_text": "We used ElevenLabs for the voiceover, team plan.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_unmet_exhausted"
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "decline_mid_conversation",
+    "trial": 2,
+    "turns": [
+      {
+        "scenario_id": "decline_mid_conversation",
+        "trial": 2,
+        "turn_number": 1,
+        "user_text": "We used ElevenLabs for the voiceover, team plan.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "You mentioned using ElevenLabs on a team plan for the voiceover — what's the overall project this voiceover is for, and how are you planning to use or distribute it?",
+          "question_kind": "other",
+          "target_signal_id": null,
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use and workflow role are both currently unknown, and asking about the project's purpose and distribution plan would fill this genuinely missing fact needed to assess commercial-use status."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "You mentioned using ElevenLabs on a team plan for the voiceover — what's the overall project this voiceover is for, and how are you planning to use or distribute it?",
+        "error": null
+      },
+      {
+        "scenario_id": "decline_mid_conversation",
+        "trial": 2,
+        "turn_number": 2,
+        "user_text": "I'm the creative director on this.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_unmet_exhausted"
+        },
+        "su_diff": [
+          "workflow_role unknown -> confirmed",
+          "current_phase 2 -> 3",
+          "completion_reason null -> gate_1_unmet_exhausted"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "correction_after_supersession",
+    "trial": 1,
+    "turns": [
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 1,
+        "turn_number": 1,
+        "user_text": "We used Midjourney for the visuals.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Could you tell me a bit more about how you're planning to use this project — is it for something commercial, or more personal/experimental?",
+          "question_kind": "other",
+          "target_signal_id": null,
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently unknown and is a core project fact; a plausible answer (commercial vs personal) would directly fill this gap and materially advance gate progress.}]}}"
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "Could you tell me a bit more about how you're planning to use this project — is it for something commercial, or more personal/experimental?",
+        "error": null
+      },
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 1,
+        "turn_number": 2,
+        "user_text": "Actually, sorry -- that was wrong, we used Runway for the visuals, not Midjourney.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "What are you hoping to use this project for—like, is this for a client, for sale, or more personal/portfolio use?",
+          "question_kind": "other",
+          "target_signal_id": "project:intended_use",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently unknown, and a plausible answer (client, sale, personal/portfolio) would fill a core missing fact needed to assess commercial-use status.dummy"
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "gate_2_state not_yet_stable -> stable"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "question",
+        "outcome_message": "What are you hoping to use this project for—like, is this for a client, for sale, or more personal/portfolio use?",
+        "error": null
+      },
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 1,
+        "turn_number": 3,
+        "user_text": "I'm the motion designer on it.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "What's this project ultimately for — is it something being made for a client or business, or more of a personal/experimental piece?",
+          "question_kind": "other",
+          "target_signal_id": "project:intended_use",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently unknown and gate_1 is not met; a plausible answer would establish whether this is commercial or personal/experimental, directly filling a missing structural fact."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "workflow_role unknown -> confirmed",
+          "gate_2_state stable -> not_yet_stable"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "question",
+        "outcome_message": "What's this project ultimately for — is it something being made for a client or business, or more of a personal/experimental piece?",
+        "error": null
+      }
+    ],
+    "completed": false,
+    "final_phase": null,
+    "projection_check": null,
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "correction_after_supersession",
+    "trial": 2,
+    "turns": [
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 2,
+        "turn_number": 1,
+        "user_text": "We used Midjourney for the visuals.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "What are you hoping to use this video for—like, is it for a personal project, client work, or something you plan to sell or publish commercially?",
+          "question_kind": "other",
+          "target_signal_id": "project:intended_use",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently unknown and is a core project fact CRC needs; a plausible answer (personal, client, or commercial) would directly establish this missing fact."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "What are you hoping to use this video for—like, is it for a personal project, client work, or something you plan to sell or publish commercially?",
+        "error": null
+      },
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 2,
+        "turn_number": 2,
+        "user_text": "Actually, sorry -- that was wrong, we used Runway for the visuals, not Midjourney.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "stable",
+        "pending_clarification": {
+          "signal_id": "c1",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'Midjourney', not yet resolved to a specific platform"
+        },
+        "generated_candidate_question": {
+          "question_text": "You mentioned using Midjourney for the visuals — do you know what plan or subscription tier you were on when you generated those images?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_WORKFLOW_FACT",
+          "rationale": "Midjourney's commercial-use terms differ significantly by plan tier, and this fact is currently entirely unknown, so a plausible answer would materially inform the commercial-status assessment."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "gate_2_state not_yet_stable -> stable"
+        ],
+        "boundary_state_diff": [
+          "follow_ups_used[c1] 0 -> 1"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "You mentioned using Midjourney for the visuals — do you know what plan or subscription tier you were on when you generated those images?",
+        "error": null
+      },
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 2,
+        "turn_number": 3,
+        "user_text": "I'm the motion designer on it.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "What's the end goal for this project — is it something you're planning to use commercially, or is it more of a personal/experimental piece?",
+          "question_kind": "other",
+          "target_signal_id": "project:intended_use",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently unknown, and gate_1 depends on it; a plausible answer would establish a key missing fact needed for commercial-use assessment."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "workflow_role unknown -> confirmed",
+          "gate_2_state stable -> not_yet_stable"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "question",
+        "outcome_message": "What's the end goal for this project — is it something you're planning to use commercially, or is it more of a personal/experimental piece?",
+        "error": null
+      }
+    ],
+    "completed": false,
+    "final_phase": null,
+    "projection_check": null,
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "bundled_answer_requiring_rule5",
+    "trial": 1,
+    "turns": [
+      {
+        "scenario_id": "bundled_answer_requiring_rule5",
+        "trial": 1,
+        "turn_number": 1,
+        "user_text": "This one went straight out, no review. But on a project last year, a client asked for our full prompt log before they'd sign off.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Before we go further—what's the intended use for this video project? Is it for commercial release, internal use, a pitch, something else?",
+          "question_kind": "other",
+          "target_signal_id": null,
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently unknown and is a core fact needed for CRC's understanding; a plausible answer would establish this missing fact directly."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "Before we go further—what's the intended use for this video project? Is it for commercial release, internal use, a pitch, something else?",
+        "error": null
+      },
+      {
+        "scenario_id": "bundled_answer_requiring_rule5",
+        "trial": 1,
+        "turn_number": 2,
+        "user_text": "For the one last year -- we put together a doc listing every tool and prompt we used, and they accepted it.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Before we go further—what's this particular project actually being made for? Is it for a client, internal use, something you're publishing yourself?",
+          "question_kind": "other",
+          "target_signal_id": null,
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently unknown and is a foundational fact for assessing commercial-use status; a plausible answer (client work, internal, self-publish) would materially fill this gap..."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "gate_2_state not_yet_stable -> stable"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "question",
+        "outcome_message": "Before we go further—what's this particular project actually being made for? Is it for a client, internal use, something you're publishing yourself?",
+        "error": null
+      }
+    ],
+    "completed": false,
+    "final_phase": null,
+    "projection_check": null,
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "bundled_answer_requiring_rule5",
+    "trial": 2,
+    "turns": [
+      {
+        "scenario_id": "bundled_answer_requiring_rule5",
+        "trial": 2,
+        "turn_number": 1,
+        "user_text": "This one went straight out, no review. But on a project last year, a client asked for our full prompt log before they'd sign off.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Before we go further—what's this particular video project actually for? Like, is it going out for a client, internal use, something you're publishing yourself?",
+          "question_kind": "other",
+          "target_signal_id": null,
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently unknown and is a core fact needed to assess commercial-use status; a plausible answer (client work, internal, self-published) would materially fill this gap."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "Before we go further—what's this particular video project actually for? Like, is it going out for a client, internal use, something you're publishing yourself?",
+        "error": null
+      },
+      {
+        "scenario_id": "bundled_answer_requiring_rule5",
+        "trial": 2,
+        "turn_number": 2,
+        "user_text": "For the one last year -- we put together a doc listing every tool and prompt we used, and they accepted it.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Before we go further, what's this particular video project actually for — is it something you're planning to use commercially, or is it more exploratory at this stage?",
+          "question_kind": "other",
+          "target_signal_id": null,
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently unknown, and establishing whether the project is commercial or exploratory is a core missing fact that materially shapes CRC's understanding.ed"
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "gate_2_state not_yet_stable -> stable"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "question",
+        "outcome_message": "Before we go further, what's this particular video project actually for — is it something you're planning to use commercially, or is it more exploratory at this stage?",
+        "error": null
+      }
+    ],
+    "completed": false,
+    "final_phase": null,
+    "projection_check": null,
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "unresolved_ambiguity_across_turns",
+    "trial": 1,
+    "turns": [
+      {
+        "scenario_id": "unresolved_ambiguity_across_turns",
+        "trial": 1,
+        "turn_number": 1,
+        "user_text": "I used Nano Banana for this one.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "c1",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'Nano Banana', not yet resolved to a specific platform"
+        },
+        "generated_candidate_question": {
+          "question_text": "Just to clarify, what exactly is 'Nano Banana' - is it a specific app, model, or platform you used, and do you recall which version or plan (like free vs paid) you were on?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "\"Nano Banana\" is an unresolved alias with no access surface or plan tier known; a plausible answer would identify the actual tool/platform and plan, which materially fills gaps needed for gate assessment."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "Just to clarify, what exactly is 'Nano Banana' - is it a specific app, model, or platform you used, and do you recall which version or plan (like free vs paid) you were on?",
+        "error": null
+      },
+      {
+        "scenario_id": "unresolved_ambiguity_across_turns",
+        "trial": 1,
+        "turn_number": 2,
+        "user_text": "Oh, through the API -- I have a developer key, it's not the app on my phone.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "You mentioned using Nano Banana for this project — could you tell me a bit more about how you accessed it? For example, was it through a website, an app, or an API, and do you know if it was a free or paid tier?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "Nano Banana's access surface and plan tier are both unknown, and a plausible answer would resolve which platform/tier was used, directly filling missing structured facts needed to assess commercial-use status."
+        },
+        "constraint_b_verdict": "blocked",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "gate_2_state not_yet_stable -> stable"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "acknowledgment",
+        "outcome_message": "Got it — thanks for sharing that.",
+        "error": null
+      },
+      {
+        "scenario_id": "unresolved_ambiguity_across_turns",
+        "trial": 1,
+        "turn_number": 3,
+        "user_text": "I'm the designer on it, and it's just an internal concept test.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "You mentioned using Nano Banana for this one — do you know how you accessed it, like through a website, an app, or maybe an API, and whether it was a free or paid plan?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "The tool 'Nano Banana' is unresolved with unknown access surface and plan tier; a plausible answer specifying website/app/API and free/paid would fill genuinely missing facts needed to assess commercial-use status.”"
+        },
+        "constraint_b_verdict": "blocked",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "intended_use unknown -> confirmed",
+          "workflow_role unknown -> confirmed",
+          "gate_2_state stable -> not_yet_stable"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "acknowledgment",
+        "outcome_message": "Got it — thanks for sharing that.",
+        "error": null
+      }
+    ],
+    "completed": false,
+    "final_phase": null,
+    "projection_check": null,
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "unresolved_ambiguity_across_turns",
+    "trial": 2,
+    "turns": [
+      {
+        "scenario_id": "unresolved_ambiguity_across_turns",
+        "trial": 2,
+        "turn_number": 1,
+        "user_text": "I used Nano Banana for this one.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "c1",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'Nano Banana', not yet resolved to a specific platform"
+        },
+        "generated_candidate_question": {
+          "question_text": "Just to make sure I understand the tool side of things - is Nano Banana something you're accessing directly through its own app or website, or is it built into another platform you're using?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "The tool 'Nano Banana' is an unresolved alias with unknown access surface, and clarifying whether it's accessed directly or via another platform would resolve genuine ambiguity needed to understand the workflow.'"
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "Just to make sure I understand the tool side of things - is Nano Banana something you're accessing directly through its own app or website, or is it built into another platform you're using?",
+        "error": null
+      },
+      {
+        "scenario_id": "unresolved_ambiguity_across_turns",
+        "trial": 2,
+        "turn_number": 2,
+        "user_text": "Oh, through the API -- I have a developer key, it's not the app on my phone.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "What exactly is Nano Banana doing in your workflow — like, is it generating video, images, audio, or something else that feeds into the project?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_WORKFLOW_FACT",
+          "rationale": "The workflow role of Nano Banana is currently unknown, and learning whether it generates images/video/audio would meaningfully clarify its role in the project's pipeline.​"
+        },
+        "constraint_b_verdict": "blocked",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "gate_2_state not_yet_stable -> stable"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "acknowledgment",
+        "outcome_message": "Got it — thanks for sharing that.",
+        "error": null
+      },
+      {
+        "scenario_id": "unresolved_ambiguity_across_turns",
+        "trial": 2,
+        "turn_number": 3,
+        "user_text": "I'm the designer on it, and it's just an internal concept test.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "When you say you used Nano Banana, do you know if that was accessed through a specific app, plugin, or platform, or was it a standalone tool?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "The tool 'Nano Banana' is an unresolved alias with unknown access surface, and asking how it was accessed could resolve which platform/licensing terms apply, materially aiding understanding of commercial-use status."
+        },
+        "constraint_b_verdict": "blocked",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "intended_use unknown -> confirmed",
+          "workflow_role unknown -> confirmed",
+          "gate_2_state stable -> not_yet_stable"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "acknowledgment",
+        "outcome_message": "Got it — thanks for sharing that.",
+        "error": null
+      }
+    ],
+    "completed": false,
+    "final_phase": null,
+    "projection_check": null,
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "gate2_stabilization",
+    "trial": 1,
+    "turns": [
+      {
+        "scenario_id": "gate2_stabilization",
+        "trial": 1,
+        "turn_number": 1,
+        "user_text": "We used Runway Gen-3, team API plan, for a paid social ad campaign.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Where did Runway Gen-3 fit into your workflow for this ad — was it generating footage that ended up in the final cut, or was it used more for early concepting, storyboards, or drafts?",
+          "question_kind": "other",
+          "target_signal_id": null,
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_WORKFLOW_FACT",
+          "rationale": "Workflow_role is currently unknown, and distinguishing whether Runway output made it into the final ad versus was only used for concepting/drafts materially changes the commercial-use assessment."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "Where did Runway Gen-3 fit into your workflow for this ad — was it generating footage that ended up in the final cut, or was it used more for early concepting, storyboards, or drafts?",
+        "error": null
+      },
+      {
+        "scenario_id": "gate2_stabilization",
+        "trial": 1,
+        "turn_number": 2,
+        "user_text": "I'm the producer.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "c1",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'runway-gen3'"
+        },
+        "generated_candidate_question": {
+          "question_text": "When you used Runway Gen-3 on the team API plan, was that accessed directly through Runway's own platform, or through some other integration or reseller?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 3
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "Access_surface is currently unknown, and whether Runway Gen-3 was used directly versus through a reseller/integration could materially affect the commercial licensing terms that apply, so a plausible answer would fill a genuine gap."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "workflow_role unknown -> confirmed",
+          "current_phase 2 -> 3"
+        ],
+        "boundary_state_diff": [
+          "follow_ups_used[c1] 0 -> 1"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "When you used Runway Gen-3 on the team API plan, was that accessed directly through Runway's own platform, or through some other integration or reseller?",
+        "error": null
+      },
+      {
+        "scenario_id": "gate2_stabilization",
+        "trial": 1,
+        "turn_number": 3,
+        "user_text": "Once this was finished, our internal legal team reviewed it before it went out.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "You mentioned you used Runway Gen-3 on a team API plan — just to make sure I've got the setup right, was that accessed directly through the API, or through some other interface layered on top of it?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 3
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "Access_surface is explicitly unknown despite the tool mention citing a 'team API plan,' and clarifying whether access was direct API vs. a layered third-party interface would resolve a genuine ambiguity relevant to licensing terms."
+        },
+        "constraint_b_verdict": "blocked",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "+scoped_observation c1 (current_project, confirmed)"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "acknowledgment",
+        "outcome_message": "Got it — thanks for sharing that.",
+        "error": null
+      },
+      {
+        "scenario_id": "gate2_stabilization",
+        "trial": 1,
+        "turn_number": 4,
+        "user_text": "That's pretty much it -- nothing else notable happened with this one.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_gate_2_met"
+        },
+        "su_diff": [
+          "gate_2_state not_yet_stable -> stable",
+          "completion_reason null -> gate_1_gate_2_met"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "gate2_stabilization",
+    "trial": 2,
+    "turns": [
+      {
+        "scenario_id": "gate2_stabilization",
+        "trial": 2,
+        "turn_number": 1,
+        "user_text": "We used Runway Gen-3, team API plan, for a paid social ad campaign.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Could you walk me through how Runway Gen-3 fit into your production workflow—was it generating the whole video, or just certain shots or elements within a larger edit?",
+          "question_kind": "other",
+          "target_signal_id": "project:workflow_role",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_WORKFLOW_FACT",
+          "rationale": "Workflow_role is currently unknown, and knowing whether Runway Gen-3 generated the entire video versus just certain shots is a genuinely missing fact material to assessing commercial-use status."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "Could you walk me through how Runway Gen-3 fit into your production workflow—was it generating the whole video, or just certain shots or elements within a larger edit?",
+        "error": null
+      },
+      {
+        "scenario_id": "gate2_stabilization",
+        "trial": 2,
+        "turn_number": 2,
+        "user_text": "I'm the producer.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "c1",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'runway-gen3'"
+        },
+        "generated_candidate_question": {
+          "question_text": "You mentioned Runway Gen-3 was used on a team API plan — can you tell me a bit more about how you accessed it? For example, was it through an enterprise or business-tier account, or a standard individual/team subscription?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 3
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "Although the user mentioned a 'team API plan,' the access_surface and plan_tier fields remain unknown, and clarifying whether this is an enterprise/business tier versus a standard subscription could materially affect the commercial licensing assessment."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "workflow_role unknown -> confirmed",
+          "current_phase 2 -> 3"
+        ],
+        "boundary_state_diff": [
+          "follow_ups_used[c1] 0 -> 1"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "You mentioned Runway Gen-3 was used on a team API plan — can you tell me a bit more about how you accessed it? For example, was it through an enterprise or business-tier account, or a standard individual/team subscription?",
+        "error": null
+      },
+      {
+        "scenario_id": "gate2_stabilization",
+        "trial": 2,
+        "turn_number": 3,
+        "user_text": "Once this was finished, our internal legal team reviewed it before it went out.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "You mentioned Runway Gen-3 on a team API plan — was the video actually generated through the API directly, or through the standard web app interface under that team plan?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 3
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "Access_surface is currently unknown despite the plan being 'team API plan', and API vs web-app usage can carry different commercial licensing terms, so resolving this would materially inform the commercial-use assessment."
+        },
+        "constraint_b_verdict": "blocked",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "+scoped_observation c1 (current_project, confirmed)"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "acknowledgment",
+        "outcome_message": "Got it — thanks for sharing that.",
+        "error": null
+      },
+      {
+        "scenario_id": "gate2_stabilization",
+        "trial": 2,
+        "turn_number": 4,
+        "user_text": "That's pretty much it -- nothing else notable happened with this one.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_gate_2_met"
+        },
+        "su_diff": [
+          "gate_2_state not_yet_stable -> stable",
+          "completion_reason null -> gate_1_gate_2_met"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "conversation_ending_through_decline",
+    "trial": 1,
+    "turns": [
+      {
+        "scenario_id": "conversation_ending_through_decline",
+        "trial": 1,
+        "turn_number": 1,
+        "user_text": "We used Pika for this one.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "c1",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'Pika', not yet resolved to a specific platform"
+        },
+        "generated_candidate_question": {
+          "question_text": "You mentioned you used Pika for this project — do you know what plan or tier you're on with it, like a free plan, a paid subscription, or something else?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_WORKFLOW_FACT",
+          "rationale": "Plan tier for Pika is currently completely unknown, and different tiers (free vs paid) typically carry different commercial-use terms, so a plausible answer would materially advance the commercial-use determination."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "You mentioned you used Pika for this project — do you know what plan or tier you're on with it, like a free plan, a paid subscription, or something else?",
+        "error": null
+      },
+      {
+        "scenario_id": "conversation_ending_through_decline",
+        "trial": 1,
+        "turn_number": 2,
+        "user_text": "stop",
+        "decline_action": "stop_interview",
+        "decline_state": {
+          "scope": "interview"
+        },
+        "phase": 2,
+        "gate_1_state": "not_applicable_declined",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "declined"
+        },
+        "su_diff": [
+          "gate_1_state not_met -> not_applicable_declined",
+          "completion_reason null -> declined",
+          "opt_out_scope null -> interview"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 2,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "conversation_ending_through_decline",
+    "trial": 2,
+    "turns": [
+      {
+        "scenario_id": "conversation_ending_through_decline",
+        "trial": 2,
+        "turn_number": 1,
+        "user_text": "We used Pika for this one.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "c1",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'Pika', not yet resolved to a specific platform"
+        },
+        "generated_candidate_question": {
+          "question_text": "You mentioned using Pika for this project — do you know what specific plan or tier you were on when you used it (like a free trial, personal, or a business/commercial plan)?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_WORKFLOW_FACT",
+          "rationale": "Plan tier is currently unknown and directly bears on commercial-use status; a plausible answer (free/personal vs business plan) would materially change CRC's understanding of licensing exposure."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "You mentioned using Pika for this project — do you know what specific plan or tier you were on when you used it (like a free trial, personal, or a business/commercial plan)?",
+        "error": null
+      },
+      {
+        "scenario_id": "conversation_ending_through_decline",
+        "trial": 2,
+        "turn_number": 2,
+        "user_text": "stop",
+        "decline_action": "stop_interview",
+        "decline_state": {
+          "scope": "interview"
+        },
+        "phase": 2,
+        "gate_1_state": "not_applicable_declined",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "declined"
+        },
+        "su_diff": [
+          "gate_1_state not_met -> not_applicable_declined",
+          "completion_reason null -> declined",
+          "opt_out_scope null -> interview"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 2,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "full_opt_out",
+    "trial": 1,
+    "turns": [
+      {
+        "scenario_id": "full_opt_out",
+        "trial": 1,
+        "turn_number": 1,
+        "user_text": "I'd rather not go through this right now, can we stop?",
+        "decline_action": "stop_interview",
+        "decline_state": {
+          "scope": "interview"
+        },
+        "phase": 1,
+        "gate_1_state": "not_applicable_declined",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "declined"
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 1,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "full_opt_out",
+    "trial": 2,
+    "turns": [
+      {
+        "scenario_id": "full_opt_out",
+        "trial": 2,
+        "turn_number": 1,
+        "user_text": "I'd rather not go through this right now, can we stop?",
+        "decline_action": "stop_interview",
+        "decline_state": {
+          "scope": "interview"
+        },
+        "phase": 1,
+        "gate_1_state": "not_applicable_declined",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "declined"
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 1,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "phase_advances_within_bundled_turn",
+    "trial": 1,
+    "turns": [
+      {
+        "scenario_id": "phase_advances_within_bundled_turn",
+        "trial": 1,
+        "turn_number": 1,
+        "user_text": "We used ElevenLabs, and I'm the sound designer on it.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_unmet_exhausted"
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "phase_advances_within_bundled_turn",
+    "trial": 2,
+    "turns": [
+      {
+        "scenario_id": "phase_advances_within_bundled_turn",
+        "trial": 2,
+        "turn_number": 1,
+        "user_text": "We used ElevenLabs, and I'm the sound designer on it.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_unmet_exhausted"
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  }
+]
