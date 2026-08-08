@@ -250,3 +250,32 @@ export interface RetrievalHandoff {
   certainty_state: 'gate_1_met' | 'gate_1_unmet' | 'declined'
   exclusions: string[]
 }
+
+/**
+ * The full set of non-affirmative string values any handoff-level scalar
+ * field derived from `Attested<T>` can carry, across every field
+ * `attestedToHandoffValue()` (lib/interview-engine/handoff.ts) is applied
+ * to: `workflow_role`, `intended_use`, `RetrievalHandoffTool.access_surface`,
+ * `RetrievalHandoffTool.plan_tier`. Not the same list as `CONFIDENCE_STATES`
+ * above: `unresolved_no_visibility` and `unknown` both collapse into the
+ * field's own designated fallback word at the string level ('unresolved'
+ * for tools/workflow_role, 'unknown' for plan_tier, 'unclear' for
+ * intended_use), while `confirmed_absent` and `declined` pass through as
+ * their own literal strings unchanged, regardless of which field produced
+ * them. This is the union of every string a downstream consumer of any of
+ * those four fields must treat as "not an affirmative value" -- not
+ * something to match against, not something to render as a fact.
+ *
+ * Canonical, single source of truth (added 2026-08-08) after Retrieval's
+ * own sentinel handling (lib/retrieval-engine/extract-matchable-facts.ts)
+ * and Projection's own sentinel handling (lib/projection-layer/
+ * understood-summary.ts) were found to have independently drifted:
+ * Retrieval's own local list omitted `'confirmed_absent'` -- a latent gap
+ * with no live behavioral impact at the time (project-wide non-tool-keyed
+ * matching isn't wired to anything downstream yet), but a genuine
+ * correctness gap once it is, since `'confirmed_absent'` was previously
+ * being treated as if it were a real matchable `intended_use`/
+ * `workflow_role` value. Both modules now import this one constant rather
+ * than maintaining their own copy, so this specific drift cannot recur.
+ */
+export const NON_AFFIRMATIVE_HANDOFF_SENTINELS = ['unresolved', 'unknown', 'unclear', 'confirmed_absent', 'declined'] as const

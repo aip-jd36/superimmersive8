@@ -58,6 +58,14 @@ describe('extractMatchableFacts', () => {
     expect(extractMatchableFacts(handoff({ intended_use: 'declined' })).intended_use).toBeNull()
   })
 
+  test('intended_use: confirmed_absent does not enter the matchable set (taxonomy-drift fix, 2026-08-08 -- this module previously omitted confirmed_absent from its own sentinel list and would have treated it as a real matchable value)', () => {
+    expect(extractMatchableFacts(handoff({ intended_use: 'confirmed_absent' })).intended_use).toBeNull()
+  })
+
+  test('workflow_role: confirmed_absent does not enter the matchable set (same taxonomy-drift fix, now shared with understood-summary.ts via NON_AFFIRMATIVE_HANDOFF_SENTINELS)', () => {
+    expect(extractMatchableFacts(handoff({ workflow_role: 'confirmed_absent' })).workflow_role).toBeNull()
+  })
+
   test('a confirmed intended_use value is preserved verbatim', () => {
     expect(extractMatchableFacts(handoff({ intended_use: 'Paid social ad campaign' })).intended_use).toBe('Paid social ad campaign')
   })

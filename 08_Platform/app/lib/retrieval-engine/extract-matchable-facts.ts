@@ -22,16 +22,28 @@
  * works for tools, since RetrievalHandoffTool exposes no id exclusions[]
  * entries could be correlated back to.
  *
- * Also checks for the literal 'declined' sentinel on intended_use/
- * workflow_role even though RetrievalHandoff's own type only declares
- * 'unclear'/'unresolved' as the non-confirmed literal -- attestedToHandoffValue
- * (handoff.ts) can return 'declined' for any field it's applied to, a real
- * reachable runtime value the type doesn't state. Not an Interview Engine
- * defect (the value is correct, just under-declared) and not something
- * this module needs Interview Engine changed to handle correctly.
+ * Also checks for the literal 'declined' and 'confirmed_absent' sentinels
+ * on intended_use/workflow_role even though RetrievalHandoff's own type
+ * only declares 'unclear'/'unresolved' as the non-confirmed literal --
+ * attestedToHandoffValue (handoff.ts) can return either for any field it's
+ * applied to, a real reachable runtime value the type doesn't state. Not
+ * an Interview Engine defect (the value is correct, just under-declared)
+ * and not something this module needs Interview Engine changed to handle
+ * correctly.
+ *
+ * Sentinel list fixed 2026-08-08: this module's own local sentinel list
+ * previously omitted 'confirmed_absent', a genuine taxonomy-drift gap
+ * found when Projection's own (correct) sentinel list was compared
+ * against this one -- a 'confirmed_absent' intended_use/workflow_role
+ * value was being treated as if it were a real matchable string, which it
+ * is not. Now imports the shared, canonical NON_AFFIRMATIVE_HANDOFF_SENTINELS
+ * constant (types/interview-engine.ts) instead of maintaining a local
+ * copy, so this specific drift cannot recur. No live matching behavior
+ * changes today (non-tool-keyed matching isn't wired to anything
+ * downstream yet), but the extracted value is now correct regardless.
  */
 
-import type { ObservationScope, RetrievalHandoff, ScopedObservation } from '@/types/interview-engine'
+import { NON_AFFIRMATIVE_HANDOFF_SENTINELS, type ObservationScope, type RetrievalHandoff, type ScopedObservation } from '@/types/interview-engine'
 
 export interface MatchableObservation {
   observation_id: string
@@ -48,10 +60,8 @@ export interface MatchableFacts {
   workflow_role: string | null
 }
 
-const NON_MATCHABLE_SENTINELS: readonly string[] = ['unclear', 'unresolved', 'unknown', 'declined']
-
 function matchableScalar(value: string): string | null {
-  return NON_MATCHABLE_SENTINELS.includes(value) ? null : value
+  return (NON_AFFIRMATIVE_HANDOFF_SENTINELS as readonly string[]).includes(value) ? null : value
 }
 
 function isMatchableObservation(o: ScopedObservation): o is ScopedObservation & { confidence: 'confirmed' | 'confirmed_absent' } {

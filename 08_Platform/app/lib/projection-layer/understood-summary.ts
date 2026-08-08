@@ -42,35 +42,46 @@
  * exist anywhere in RetrievalHandoff, so there is nothing to accidentally
  * carry forward, but no fixed phrase below introduces any either.
  *
- * Non-affirmative sentinel handling -- decided here, and more defensive
- * than lib/retrieval-engine/extract-matchable-facts.ts's own
- * NON_MATCHABLE_SENTINELS list, worth flagging explicitly rather than
- * silently diverging: `attestedToHandoffValue()`
+ * Non-affirmative sentinel handling: `attestedToHandoffValue()`
  * (lib/interview-engine/handoff.ts) can return `'confirmed_absent'` or
  * `'declined'` for ANY `Attested<string>` field it is applied to -- not
  * just the field-specific `'unresolved'`/`'unknown'`/`'unclear'` fallback
- * each field's own type comment documents. This is already known for
- * `workflow_role`/`intended_use` (extract-matchable-facts.ts's own header
- * comment names it) and, confirmed by inspection for this module, is
- * equally true for `RetrievalHandoffTool.access_surface`/`plan_tier`:
- * handoff.ts applies the exact same `attestedToHandoffValue()` function to
- * those two fields (lines 71-72). extract-matchable-facts.ts's own
- * sentinel list omits `'confirmed_absent'` -- it never needed to include
- * it, since Retrieval's `MatchableFacts.tools` never carries
- * access_surface/plan_tier at all, so the gap never had a code path to
- * matter through. Not fixed here (Retrieval's own code is out of this
- * slice's scope), but flagged in the Slice 2 report. This module's own
- * sentinel set includes `'confirmed_absent'`, checked uniformly against
- * all four scalar-valued fields (workflow_role, intended_use,
- * access_surface, plan_tier).
+ * each field's own type comment documents. This is true for
+ * `workflow_role`/`intended_use` and, confirmed by inspection for this
+ * module, equally true for `RetrievalHandoffTool.access_surface`/
+ * `plan_tier` (handoff.ts applies the exact same `attestedToHandoffValue()`
+ * function to those two fields). This module imports the shared, canonical
+ * `NON_AFFIRMATIVE_HANDOFF_SENTINELS` constant (types/interview-engine.ts)
+ * rather than maintaining its own local list -- as of 2026-08-08,
+ * lib/retrieval-engine/extract-matchable-facts.ts imports the exact same
+ * constant, closing a taxonomy-drift gap where Retrieval's own local list
+ * omitted `'confirmed_absent'`. Both modules are now structurally
+ * incapable of drifting on this again, rather than merely disciplined not
+ * to.
+ *
+ * `[PROTOTYPE ASSUMPTION -- TO VALIDATE]` Non-affirmative tool metadata is
+ * omitted from the "What we understood" summary rather than rendered as
+ * an explicit statement about absence, uncertainty, or decline. Concretely:
+ * a tool whose `access_surface`/`plan_tier` was never asked about, a tool
+ * whose surface/tier was asked about and confirmed absent, and a tool
+ * whose surface/tier the user declined to answer all render identically
+ * -- as if that detail were simply never mentioned. This is a deliberate
+ * v1 presentation decision (JD review, 2026-08-08), not a data-integrity
+ * defect: `buildUnderstoodFacts` still distinguishes these cases
+ * internally via the sentinel value it collapsed (recoverable from the
+ * raw `RetrievalHandoffTool` if ever needed), the distinction is simply
+ * not surfaced in the rendered prose today. To validate with real output
+ * before assuming this is the permanent behavior, not to change now.
  *
  * Observation filtering: only `'confirmed'`/`'confirmed_absent'`
  * observations are rendered -- `'unresolved_no_visibility'`/`'unknown'`/
  * `'declined'` observations are silently omitted, never acknowledged as a
  * gap. This mirrors extract-matchable-facts.ts's own
  * `isMatchableObservation` discipline (reimplemented independently here,
- * per the import-boundary note above). "Do not pad" (explicit
- * instruction): a sparse handoff produces a sparse summary by
+ * since importing that function itself would cross this module's
+ * no-Retrieval-logic boundary -- only the shared sentinel *constant*,
+ * which lives in the shared types module, is imported). "Do not pad"
+ * (explicit instruction): a sparse handoff produces a sparse summary by
  * construction, not by a special-cased branch -- every clause function
  * below simply returns null when it has nothing confirmed to say, and
  * `renderUnderstoodSummary` filters nulls out before joining. When
@@ -80,7 +91,7 @@
  * assembly-layer decision, deliberately out of scope for this slice.
  */
 
-import type { ObservationScope, RetrievalHandoff } from '@/types/interview-engine'
+import { NON_AFFIRMATIVE_HANDOFF_SENTINELS, type ObservationScope, type RetrievalHandoff } from '@/types/interview-engine'
 
 // ── Stage 1: structured extraction ──────────────────────────────────────
 
@@ -105,15 +116,16 @@ export interface UnderstoodFacts {
   observations: UnderstoodObservation[]
 }
 
-const NON_AFFIRMATIVE_SENTINELS: readonly string[] = ['unresolved', 'unknown', 'unclear', 'confirmed_absent', 'declined']
-
 /** Collapses any of the sentinel strings a scalar Attested<string> field can produce to null; passes a real value through unchanged. */
 function affirmativeScalar(value: string): string | null {
-  return NON_AFFIRMATIVE_SENTINELS.includes(value) ? null : value
+  return (NON_AFFIRMATIVE_HANDOFF_SENTINELS as readonly string[]).includes(value) ? null : value
 }
 
 export function buildUnderstoodFacts(handoff: RetrievalHandoff): UnderstoodFacts {
   return {
+    // [PROTOTYPE ASSUMPTION -- TO VALIDATE], see module header: never-asked,
+    // confirmed-absent, and declined access_surface/plan_tier all collapse
+    // to null here and render identically (omitted) downstream.
     tools: handoff.tools.map((t) => ({
       identifier: t.identifier,
       access_surface: affirmativeScalar(t.access_surface),
@@ -137,9 +149,24 @@ function joinNaturally(items: string[]): string {
   return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`
 }
 
+/**
+ * Nested-parentheses fix (JD review, 2026-08-08): an access_surface value
+ * can itself already contain parenthetical detail authored upstream (e.g.
+ * "API (developer key)", ambiguous_multi_surface_tool fixture) -- wrapping
+ * it in this function's own parens unconditionally produced
+ * "gemini-api (API (developer key))". Smallest deterministic fix: detect
+ * a part that already contains a paren and switch the whole tool's
+ * connective from wrapping parens to a plain em-dash separator, rather
+ * than trying to selectively re-parenthesize individual parts (which
+ * would still risk a similar collision for values no fixture has
+ * exercised yet). No prose formatter, no LLM -- one conditional on a
+ * literal character check.
+ */
 function describeTool(tool: UnderstoodTool): string {
   const parts = [tool.access_surface, tool.plan_tier].filter((p): p is string => p !== null)
-  return parts.length > 0 ? `${tool.identifier} (${parts.join(', ')})` : tool.identifier
+  if (parts.length === 0) return tool.identifier
+  const hasParenAlready = parts.some((p) => p.includes('(') || p.includes(')'))
+  return hasParenAlready ? `${tool.identifier} — ${parts.join(', ')}` : `${tool.identifier} (${parts.join(', ')})`
 }
 
 function toolsClause(tools: UnderstoodTool[]): string | null {

@@ -166,6 +166,23 @@ describe('renderUnderstoodSummary -- required cases', () => {
     expect(renderUnderstoodSummary(facts)).toBe('You mentioned "Nano Banana", which I wasn\'t able to match to a specific platform yet.')
   })
 
+  test('regression: an access_surface value that already contains parenthetical detail is not double-wrapped in a second set of parens', () => {
+    const facts = buildUnderstoodFacts(handoff({ tools: [tool('gemini-api', { access_surface: 'API (developer key)', plan_tier: 'unknown' })] }))
+    const out = renderUnderstoodSummary(facts)
+    expect(out).toBe('You mentioned using gemini-api — API (developer key).')
+    expect((out.match(/\(/g) ?? []).length).toBe(1)
+    expect((out.match(/\)/g) ?? []).length).toBe(1)
+  })
+
+  test('regression: nested-parens fix also applies when the OTHER part (plan_tier) is the one carrying parens, and when both parts are present', () => {
+    const facts = buildUnderstoodFacts(
+      handoff({ tools: [tool('runway-gen3', { access_surface: 'API', plan_tier: 'Enterprise (custom terms)' })] }),
+    )
+    const out = renderUnderstoodSummary(facts)
+    expect(out).toBe('You mentioned using runway-gen3 — API, Enterprise (custom terms).')
+    expect((out.match(/\(/g) ?? []).length).toBe(1)
+  })
+
   test('8: unknown tier -- omitted from tool description entirely, never rendered as the literal word "unknown"', () => {
     const facts = buildUnderstoodFacts(handoff({ tools: [tool('kling', { access_surface: 'Web app', plan_tier: 'unknown' })] }))
     const out = renderUnderstoodSummary(facts)
