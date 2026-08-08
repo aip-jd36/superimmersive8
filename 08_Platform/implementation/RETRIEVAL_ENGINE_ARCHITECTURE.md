@@ -108,8 +108,11 @@ This step is where "preserve uncertainty" (below) actually happens — as a prop
 {
   source_fact: <the specific handoff field/observation that triggered this match>,
   claim_id: <the matched Claim ID from the Matrix's CRC Claims sub-table>,
-  publication_scope_text: <the CRC Publication Scope text, verbatim — the only Matrix
-                            prose Retrieval is permitted to pass forward>,
+  publication_scope: <the CRC Publication Scope text, verbatim — governance-boundary
+                       prose written for audit, not directly renderable to a user>,
+  candidate_statement: <the CRC Candidate Statement text, verbatim, or null — the
+                        already publication-ready render source Projection needs;
+                        see the contract-extension note below>,
   source_confidence: <the underlying fact's own existing ConfidenceState — passed
                       through, never invented>,
   source_metadata: <last-verified/updated date, needed for the "content last
@@ -118,6 +121,8 @@ This step is where "preserve uncertainty" (below) actually happens — as a prop
 ```
 
 `[IMPLEMENTATION GUIDANCE]` No invented confidence or relevance score. `source_confidence` passes through state that already exists on the handoff (e.g. `'confirmed'` vs. `'confirmed_absent'`) — it is traceability, not a new judgment Retrieval is manufacturing. This is deliberate: PRD §14 explicitly bans "worth verifying" labels and scores in the *final* output, and inventing a Retrieval-level score now would just relocate that violation one layer upstream rather than avoid it.
+
+`[IMPLEMENTATION GUIDANCE]` **`candidate_statement` — contract extension, 2026-08-08 (JD review of the Projection Layer design).** Projection's architecture was originally going to give Projection its own narrow, claim-ID-keyed side-lookup against the Matrix to obtain `CRC Candidate Statement` directly — rejected on review as a third data dependency for a layer meant to have exactly two canonical inputs (`RetrievalHandoff`, `RetrievalResult[]`) and no direct access to the Matrix, CRC Claims registry, Living Notebook, or any other governance source. The resolution: extend `RetrievalResult` itself with `candidate_statement`, copied verbatim from the same already-matched, already-eligible claim that supplies `publication_scope`. This is a narrow, consumer-driven, additive extension — it does not reopen §3 Step 3's matching logic or §5's own eligibility-filtering behavior. Two properties distinguish this field's handling from `publication_scope`'s: (1) Retrieval performs zero interpretation, rewriting, or rendering of this text — it is a pure passthrough of governed, publication-ready source prose, never parsed for meaning any more than `publication_scope` is; (2) unlike `publication_scope` (whose absence on a `Yes` claim blocks the result entirely — the `yes_claim_missing_scope` diagnostic in §6), a null `candidate_statement` does **not** gate or skip a result. Whether to render, omit, or otherwise handle a missing Candidate Statement is a Projection-time decision, not a Retrieval-time eligibility one — Retrieval's only obligation is to carry forward whatever value the claim actually has, including null.
 
 **What belongs to Projection instead:** rendering voice/tone (§14's rules), choosing between the "knowledge item" and "presence-triggered question" output categories, ordering/selection for display, and final template assembly (the "Thanks — here's what I picked up..." structure). Retrieval's contract ends at "here is what matched, why, and what SI8 is permitted to say about it" — never at how it's said to the user.
 
@@ -169,7 +174,8 @@ If Retrieval is genuinely 100% deterministic (per §7), its validation path is s
 - Eligibility filtering — `Yes`/`No`/`Pending`, including the compound-row, claim-level case.
 - Multi-tool and multi-observation array preservation (never merged).
 - Current-vs-historical scope preservation through to output.
-- **A full negative-assertion suite**, mirroring Phase 5's handoff tests exactly: Retrieval's output must never contain `CRC-Eligible`, `CRC Candidate Statement`, `CRC Decision Date`, `CRC Approver`, `SI8 Interpretation`, or any other internal Matrix field — tested as explicit assertions that fail loudly, not assumed correct by omission. (`CRC Publication Scope`'s text is the one field Retrieval *does* carry forward, verbatim, per §5 — deliberately not in this negative list, since excluding it would contradict §5's own output contract.)
+- **A full negative-assertion suite**, mirroring Phase 5's handoff tests exactly: Retrieval's output must never contain `CRC-Eligible`, `CRC Decision Date`, `CRC Approver`, `SI8 Interpretation`, or any other internal Matrix field — tested as explicit assertions that fail loudly, not assumed correct by omission. (`CRC Publication Scope` and `CRC Candidate Statement` are the two fields Retrieval *does* carry forward, verbatim, per §5 — deliberately not in this negative list, since excluding either would contradict §5's own output contract. `CRC Candidate Statement` moved out of this list 2026-08-08 when the `candidate_statement` contract extension was added — see §5's implementation-guidance note.)
+- **A passthrough-integrity assertion for `candidate_statement`**, distinct in kind from the negative-assertion suite above: not "this field must be absent," but "this field, when present, must be byte-for-byte identical to the source claim's `CRC Candidate Statement` text" — proving Retrieval copies without interpreting, rewriting, or rendering it.
 
 **What requires live evaluation:** nothing, under the §7 recommendation. If a semantic-matching component is ever added for non-tool-keyed knowledge, that component graduates using the exact methodology already validated for Extraction/candidate-generation/Constraint A — isolated contract, real-model evaluation corpus, preserved reports, never folded into the deterministic path's own test suite.
 

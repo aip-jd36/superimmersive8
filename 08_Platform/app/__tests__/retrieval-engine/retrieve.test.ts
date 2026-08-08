@@ -153,11 +153,19 @@ describe('retrieve — required Phase 7 cases', () => {
     expect(out.results[0].publication_scope).toBe(expectedText)
   })
 
-  test('16: CRC Candidate Statement never becomes Retrieval output', () => {
+  test('16: CRC Candidate Statement passes through to Retrieval output verbatim, byte-for-byte (contract extension, JD review 2026-08-08)', () => {
     const out = retrieve(handoff({ tools: [tool('runway-gen3')] }), MATRIX_FIXTURE)
-    expect(Object.keys(out.results[0])).not.toContain('crc_candidate_statement')
-    expect(Object.keys(out.results[0])).not.toContain('candidate_statement')
-    expect(JSON.stringify(out.results[0])).not.toMatch(/mainly differs by watermarking/) // Runway's own candidate-statement text, must never leak in
+    const sourceClaim = MATRIX_FIXTURE.find((r) => r.identifier === 'runway-gen3')!.claims[0]
+    expect(out.results[0].candidate_statement).toBe(sourceClaim.crc_candidate_statement)
+  })
+
+  test('16b: Retrieval does not modify Candidate Statement text -- passthrough only, no interpretation/rewriting/rendering', () => {
+    const out = retrieve(handoff({ tools: [tool('runway-gen3'), tool('elevenlabs')] }), MATRIX_FIXTURE)
+    for (const result of out.results) {
+      const row = MATRIX_FIXTURE.find((r) => r.identifier === result.matrix_identifier)!
+      const claim = row.claims.find((c) => c.claim_id === result.claim_id)!
+      expect(result.candidate_statement).toBe(claim.crc_candidate_statement)
+    }
   })
 
   test('17 (defensive): a Yes claim with no publication scope is skipped, never fabricated', () => {
@@ -181,7 +189,7 @@ describe('retrieve — negative assertions, forbidden fields (Phase 6)', () => {
       expect(keys).not.toContain('crc_decision_date')
       expect(keys).not.toContain('crc_approver')
       expect(keys).not.toContain('crc_eligible')
-      expect(keys.sort()).toEqual(['claim_id', 'last_verified', 'matrix_identifier', 'publication_scope', 'source_fact'])
+      expect(keys.sort()).toEqual(['candidate_statement', 'claim_id', 'last_verified', 'matrix_identifier', 'publication_scope', 'source_fact'])
     }
   })
 

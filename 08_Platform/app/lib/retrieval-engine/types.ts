@@ -10,13 +10,17 @@
  * every CRC-Eligible: Yes claim under a matched row is retrievable, full
  * stop -- no applicability schema exists yet, and none is invented here.
  *
- * CRC Candidate Statement exists on the canonical MatrixClaim (it's part of
- * the committed Matrix schema, PRD_LIVING_NOTEBOOK.md § CRC Claims
- * sub-table) but is deliberately absent from RetrievalResult -- the
- * architecture doc's Phase 6 instruction is explicit that Candidate
- * Statement does not become Retrieval output unless the architecture says
- * so, and it doesn't say so. RetrievalResult carries only what §5 of the
- * architecture doc actually specifies.
+ * CRC Candidate Statement (added to RetrievalResult 2026-08-08, per JD
+ * review of PROJECTION_LAYER_ARCHITECTURE.md's original claim_id
+ * side-lookup design): carried on RetrievalResult as an opaque passthrough
+ * field, copied verbatim from the same already-matched, already-eligible
+ * claim that supplies `publication_scope`. This is a narrow,
+ * consumer-driven contract extension, not a reopening of Phase 5/6's own
+ * logic -- Retrieval still performs zero rendering, zero interpretation,
+ * and makes no decision based on this field's content or presence (in
+ * particular: unlike `publication_scope`, a null `candidate_statement`
+ * does NOT cause a result to be skipped -- that is a Projection-time
+ * concern, not a Retrieval-time one; see assemble-result.ts).
  */
 
 export const CRC_ELIGIBLE_VALUES = ['Yes', 'No', 'Pending'] as const
@@ -35,7 +39,7 @@ export interface MatrixClaim {
   crc_eligible: CrcEligible
   /** null only for a claim with no scope authored yet (typically CRC-Eligible: Pending). */
   crc_publication_scope: string | null
-  /** Canonical-source field only. Never copied into RetrievalResult -- see module header. */
+  /** Copied verbatim into RetrievalResult.candidate_statement -- see module header. */
   crc_candidate_statement: string | null
 }
 
@@ -78,19 +82,21 @@ export interface RetrievalSourceFact {
 /**
  * One eligible, traceable knowledge reference. Not a rendered Knowledge
  * Card (RETRIEVAL_ENGINE_ARCHITECTURE.md §5) -- Projection remains deferred.
- * `publication_scope` is the one piece of Matrix prose Retrieval is
- * permitted to pass forward, verbatim, per the architecture doc's explicit
- * correction of its own earlier draft (the negative-assertion contradiction
- * fixed 2026-08-08). Everything else the Matrix records for human reviewers
- * -- SI8 Interpretation, CRC Decision Date, CRC Approver, CRC Candidate
- * Statement, any risk conclusion -- is absent by construction, not by
- * omission: this type simply has no field for any of them.
+ * `publication_scope` and `candidate_statement` are the two pieces of
+ * Matrix prose Retrieval is permitted to pass forward, both verbatim, both
+ * never parsed or interpreted for meaning anywhere in this module.
+ * Everything else the Matrix records for human reviewers -- SI8
+ * Interpretation, CRC Decision Date, CRC Approver, Status, any risk
+ * conclusion -- is absent by construction, not by omission: this type
+ * simply has no field for any of them.
  */
 export interface RetrievalResult {
   source_fact: RetrievalSourceFact
   claim_id: string
   matrix_identifier: string
   publication_scope: string
+  /** Opaque passthrough -- see the module-header note on MatrixClaim.crc_candidate_statement above. */
+  candidate_statement: string | null
   last_verified: string | null
 }
 
