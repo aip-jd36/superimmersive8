@@ -68,7 +68,11 @@ describe('DIALOGUE_FIXTURES', () => {
 
   test('full_phase_1_to_4_trace fixture ends with a populated retrieval handoff', () => {
     const fixture = DIALOGUE_FIXTURES.full_phase_1_to_4_trace
-    expect(fixture.structured_understanding.current_phase).toBe(4)
+    // current_phase: 3, not 4 -- calibrated to the Live Interview Runtime's
+    // adopted model (Phase 1 -> 2 -> 3 -> Completion Check -> Finalization,
+    // see fixtures.ts's own comment on this fixture). "Phase 4" is never a
+    // stored current_phase value under that model.
+    expect(fixture.structured_understanding.current_phase).toBe(3)
     expect(fixture.structured_understanding.completion_reason).toBe('gate_1_gate_2_met')
     expect(fixture.retrieval_handoff).not.toBeNull()
     expect(fixture.retrieval_handoff?.certainty_state).toBe('gate_1_met')
