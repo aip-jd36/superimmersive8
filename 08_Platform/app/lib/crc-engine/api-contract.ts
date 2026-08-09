@@ -62,3 +62,38 @@ export type SessionStatusResponseBody =
   | { status: 'session_not_found' }
   | { status: 'active'; transcript: TranscriptEntry[] }
   | { status: 'complete'; transcript: TranscriptEntry[]; projection: ProjectionOutput }
+
+/**
+ * POST /api/crc/feedback's own request-parsing logic and response body
+ * types (CRC Limited Pilot, Part 3). Lives here for the same reason as the
+ * turn contract above -- kept out of route.ts so Next.js's route-shape
+ * typechecking doesn't reject the extra exports.
+ */
+export const FEEDBACK_RATINGS = ['yes', 'somewhat', 'no'] as const
+export type FeedbackRating = (typeof FEEDBACK_RATINGS)[number]
+
+export interface FeedbackRequestBody {
+  rating?: unknown
+  text?: unknown
+}
+
+export type ParsedFeedbackRequest = { rating: FeedbackRating; text: string | null }
+
+export function parseFeedbackRequest(body: FeedbackRequestBody): ParsedFeedbackRequest | { error: string } {
+  if (typeof body.rating !== 'string' || !FEEDBACK_RATINGS.includes(body.rating as FeedbackRating)) {
+    return { error: `rating must be one of: ${FEEDBACK_RATINGS.join(', ')}.` }
+  }
+  if (body.text !== undefined && typeof body.text !== 'string') {
+    return { error: 'text must be a string if provided.' }
+  }
+  const trimmed = typeof body.text === 'string' ? body.text.trim() : ''
+  return { rating: body.rating as FeedbackRating, text: trimmed.length > 0 ? trimmed : null }
+}
+
+/** Only browser-safe fields. `not_complete` covers a feedback attempt before the interview has actually finished. */
+export type FeedbackResponseBody =
+  | { status: 'ok' }
+  | { status: 'session_not_found' }
+  | { status: 'not_complete' }
+  | { status: 'retry' }
+  | { status: 'invalid_request'; error: string }

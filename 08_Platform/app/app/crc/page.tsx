@@ -39,11 +39,17 @@ type Phase = 'loading' | 'idle' | 'sending' | 'retry' | 'complete' | 'session_no
 /** What to resend on Retry -- exactly the body of the last POST attempt. */
 type PendingRequestBody = { message: string } | { declineAction: keyof typeof DECLINE_LABEL }
 
+type FeedbackRating = 'yes' | 'somewhat' | 'no'
+type FeedbackStatus = 'idle' | 'submitting' | 'submitted' | 'error'
+
 export default function CrcPage() {
   const [phase, setPhase] = useState<Phase>('loading')
   const [messages, setMessages] = useState<Message[]>([])
   const [projection, setProjection] = useState<ProjectionOutput | null>(null)
   const [inputText, setInputText] = useState('')
+  const [feedbackRating, setFeedbackRating] = useState<FeedbackRating | null>(null)
+  const [feedbackText, setFeedbackText] = useState('')
+  const [feedbackStatus, setFeedbackStatus] = useState<FeedbackStatus>('idle')
   const pendingRequestRef = useRef<PendingRequestBody | null>(null)
   const scrollAnchorRef = useRef<HTMLDivElement | null>(null)
 
@@ -140,7 +146,25 @@ export default function CrcPage() {
     setProjection(null)
     setInputText('')
     pendingRequestRef.current = null
+    setFeedbackRating(null)
+    setFeedbackText('')
+    setFeedbackStatus('idle')
     setPhase('idle')
+  }
+
+  async function handleSubmitFeedback() {
+    if (!feedbackRating || feedbackStatus === 'submitting') return
+    setFeedbackStatus('submitting')
+    try {
+      const res = await fetch('/api/crc/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating: feedbackRating, text: feedbackText.trim() || undefined }),
+      })
+      setFeedbackStatus(res.ok ? 'submitted' : 'error')
+    } catch {
+      setFeedbackStatus('error')
+    }
   }
 
   return (
@@ -151,7 +175,8 @@ export default function CrcPage() {
             <CardTitle>Commercial Readiness Check</CardTitle>
             <CardDescription>
               A short conversation about how your AI video was made. There&apos;s no wrong answer, and you can skip anything you&apos;d rather not
-              cover.
+              cover. This is educational workflow guidance, not an SI8 Commercial Assurance Assessment -- it doesn&apos;t provide legal advice or
+              certify commercial use.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -203,6 +228,41 @@ export default function CrcPage() {
               {phase === 'complete' && projection && (
                 <div className="border-t pt-4">
                   <CrcProjectionOutput output={projection} />
+
+                  {feedbackStatus === 'submitted' ? (
+                    <p className="mt-6 border-t pt-4 text-sm text-muted-foreground">Thanks for the feedback.</p>
+                  ) : (
+                    <div className="mt-6 space-y-3 border-t pt-4">
+                      <p className="text-sm font-medium">Was this helpful?</p>
+                      <div className="flex gap-2">
+                        {(['yes', 'somewhat', 'no'] as const).map((rating) => (
+                          <Button
+                            key={rating}
+                            type="button"
+                            variant={feedbackRating === rating ? 'default' : 'outline'}
+                            size="sm"
+                            disabled={feedbackStatus === 'submitting'}
+                            onClick={() => setFeedbackRating(rating)}
+                          >
+                            {rating === 'yes' ? 'Yes' : rating === 'somewhat' ? 'Somewhat' : 'No'}
+                          </Button>
+                        ))}
+                      </div>
+                      <Textarea
+                        value={feedbackText}
+                        onChange={(e) => setFeedbackText(e.target.value)}
+                        placeholder="Anything you'd add? (optional)"
+                        disabled={feedbackStatus === 'submitting'}
+                      />
+                      {feedbackStatus === 'error' && (
+                        <p className="text-sm text-red-600">Something went wrong submitting your feedback. You can try again.</p>
+                      )}
+                      <Button type="button" size="sm" disabled={!feedbackRating || feedbackStatus === 'submitting'} onClick={handleSubmitFeedback}>
+                        Submit feedback
+                      </Button>
+                    </div>
+                  )}
+
                   <Button variant="outline" size="sm" className="mt-4" onClick={handleStartOver}>
                     Start a New Conversation
                   </Button>

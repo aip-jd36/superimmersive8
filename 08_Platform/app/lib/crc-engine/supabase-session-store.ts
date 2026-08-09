@@ -157,3 +157,26 @@ export async function saveCrcSessionProductState(client: SupabaseClient, token: 
     throw new Error('[SupabaseSessionStore] saveCrcSessionProductState failed: no row found for token -- expected the row to already exist from a prior runTurn() save')
   }
 }
+
+export interface CrcSessionFeedback {
+  rating: 'yes' | 'somewhat' | 'no'
+  text: string | null
+}
+
+/**
+ * CRC Limited Pilot, Part 3. Same plain-.update()-only shape as
+ * saveCrcSessionProductState above, and the same precondition: only ever
+ * called for a token whose row already exists (the feedback route itself
+ * verifies the session is resolvable and complete before calling this).
+ * Only sets feedback_rating/feedback_text, leaving every other column
+ * (including turn_count/transcript) untouched.
+ */
+export async function saveCrcSessionFeedback(client: SupabaseClient, token: string, feedback: CrcSessionFeedback): Promise<void> {
+  const { data, error } = await client.from(TABLE).update({ feedback_rating: feedback.rating, feedback_text: feedback.text }).eq('id', token).select('id')
+  if (error) {
+    throw new Error(`[SupabaseSessionStore] saveCrcSessionFeedback failed: ${error.message}`)
+  }
+  if (!data || data.length === 0) {
+    throw new Error('[SupabaseSessionStore] saveCrcSessionFeedback failed: no row found for token -- expected the row to already exist')
+  }
+}
