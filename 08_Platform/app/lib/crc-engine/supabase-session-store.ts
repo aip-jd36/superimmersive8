@@ -72,14 +72,31 @@ export function createSupabaseSessionStore(client: SupabaseClient): SessionStore
     },
 
     async save(token: string, state: CRCSessionState): Promise<void> {
-      const { error } = await client.from(TABLE).upsert({
-        id: token,
+      // Manual update-then-insert-if-no-row, not .upsert() -- confirmed
+      // live (2026-08-09, isolated diagnostic against the real project)
+      // that .upsert() reliably fails to recognize an existing row as a
+      // conflict regardless of an explicit onConflict option, always
+      // attempting a plain INSERT and failing NOT NULL constraints on any
+      // column outside the payload. .update() and .insert() were each
+      // independently verified to behave correctly and predictably
+      // (.update() against a non-matching id returns an empty data array
+      // with no error, never a false "success"), so this composes them
+      // directly rather than depending on .upsert()'s own conflict
+      // detection at all.
+      const payload = {
         structured_understanding: JSON.parse(serializeStructuredUnderstanding(state.structured_understanding)),
         boundary_state: JSON.parse(serializeBoundaryState(state.boundary_state)),
         pending_clarification: state.pending_clarification,
-      })
-      if (error) {
-        throw new Error(`[SupabaseSessionStore] save failed: ${error.message}`)
+      }
+      const { data: updated, error: updateError } = await client.from(TABLE).update(payload).eq('id', token).select('id')
+      if (updateError) {
+        throw new Error(`[SupabaseSessionStore] save failed: ${updateError.message}`)
+      }
+      if (updated && updated.length > 0) return
+
+      const { error: insertError } = await client.from(TABLE).insert({ id: token, ...payload })
+      if (insertError) {
+        throw new Error(`[SupabaseSessionStore] save failed: ${insertError.message}`)
       }
     },
   }
@@ -117,20 +134,26 @@ export async function loadCrcSessionProductState(client: SupabaseClient, token: 
 }
 
 /**
- * Partial-column upsert -- only sets turn_count/transcript, leaving
- * structured_understanding/boundary_state/pending_clarification untouched
- * (Supabase's generated ON CONFLICT DO UPDATE only assigns columns present
- * in the payload). Must only be called AFTER a successful runTurn() call,
- * whose own SessionStore.save() has already upserted the row for a
- * brand-new token -- see route.ts for the ordering this depends on.
+ * Plain .update() -- deliberately never .upsert() (see save()'s own
+ * comment for the confirmed-live reason) and deliberately never an
+ * insert-fallback either, unlike save() above: this function's own
+ * contract is that it is ONLY ever called after a successful runTurn()
+ * call, whose own SessionStore.save() has already created the row for a
+ * brand-new token -- see route.ts for the ordering this depends on. A
+ * zero-row update here means that invariant was violated, so it's
+ * surfaced as an error rather than silently doing nothing.
+ *
+ * Only sets turn_count/transcript, leaving
+ * structured_understanding/boundary_state/pending_clarification
+ * untouched -- .update() only ever assigns columns present in its own
+ * payload.
  */
 export async function saveCrcSessionProductState(client: SupabaseClient, token: string, state: CrcSessionProductState): Promise<void> {
-  const { error } = await client.from(TABLE).upsert({
-    id: token,
-    turn_count: state.turn_count,
-    transcript: state.transcript,
-  })
+  const { data, error } = await client.from(TABLE).update({ turn_count: state.turn_count, transcript: state.transcript }).eq('id', token).select('id')
   if (error) {
     throw new Error(`[SupabaseSessionStore] saveCrcSessionProductState failed: ${error.message}`)
+  }
+  if (!data || data.length === 0) {
+    throw new Error('[SupabaseSessionStore] saveCrcSessionProductState failed: no row found for token -- expected the row to already exist from a prior runTurn() save')
   }
 }

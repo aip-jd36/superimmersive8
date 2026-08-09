@@ -36,10 +36,10 @@ import {
 import { createAnthropicExtractor } from '@/lib/interview-engine/anthropic-extractor'
 import { createAnthropicCandidateQuestionGenerator } from '@/lib/interview-engine/anthropic-candidate-question'
 import { createAnthropicConstraintADecider } from '@/lib/interview-engine/anthropic-decision'
-import { DECLINE_ACTIONS, type DeclineAction } from '@/lib/crc-engine/decline'
+import type { DeclineAction } from '@/lib/crc-engine/decline'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import type { ProjectionOutput } from '@/lib/projection-layer/types'
+import { parseRequest, type TurnRequestBody, type TurnResponseBody, type SessionStatusResponseBody } from '@/lib/crc-engine/api-contract'
 
 const COOKIE_NAME = 'crc_session'
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 7 // 7 days
@@ -56,52 +56,6 @@ const DECLINE_LABEL: Record<DeclineAction, string> = {
   skip_phase: "Let's skip this section.",
   stop_interview: "I'd like to stop here.",
 }
-
-interface TurnRequestBody {
-  message?: unknown
-  declineAction?: unknown
-  restart?: unknown
-}
-
-export type ParsedRequest =
-  | { kind: 'message'; text: string; restart: boolean }
-  | { kind: 'decline'; action: DeclineAction; restart: boolean }
-
-export function parseRequest(body: TurnRequestBody): ParsedRequest | { error: string } {
-  const restart = body.restart === true
-
-  const hasMessage = typeof body.message === 'string' && body.message.trim().length > 0
-  const hasDecline = typeof body.declineAction === 'string'
-
-  if (hasMessage && hasDecline) {
-    return { error: 'Provide either message or declineAction, not both.' }
-  }
-  if (hasDecline) {
-    if (!DECLINE_ACTIONS.includes(body.declineAction as DeclineAction)) {
-      return { error: `declineAction must be one of: ${DECLINE_ACTIONS.join(', ')}.` }
-    }
-    return { kind: 'decline', action: body.declineAction as DeclineAction, restart }
-  }
-  if (hasMessage) {
-    return { kind: 'message', text: (body.message as string).trim(), restart }
-  }
-  return { error: 'Request must include a non-empty message or a valid declineAction.' }
-}
-
-/** Only browser-safe fields -- see the module header and Phase 4's own exclusion list. */
-export type TurnResponseBody =
-  | { status: 'question' | 'acknowledgment'; message: string }
-  | { status: 'complete'; projection: ProjectionOutput }
-  | { status: 'session_not_found' }
-  | { status: 'retry' }
-  | { status: 'invalid_request'; error: string }
-
-/** Only browser-safe fields, same discipline as TurnResponseBody. */
-export type SessionStatusResponseBody =
-  | { status: 'new' }
-  | { status: 'session_not_found' }
-  | { status: 'active'; transcript: TranscriptEntry[] }
-  | { status: 'complete'; transcript: TranscriptEntry[]; projection: ProjectionOutput }
 
 /**
  * GET /api/crc/turn -- read-only session rehydration for page load and

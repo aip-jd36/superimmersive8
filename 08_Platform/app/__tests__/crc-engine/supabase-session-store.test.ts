@@ -5,6 +5,14 @@
  * exactly what a query resolves to -- dependency injection (this module
  * accepts a client, never imports supabaseAdmin itself) makes this
  * possible without any jest.mock() wiring.
+ *
+ * Covers update()/insert() (not upsert()) call shapes -- .upsert() was
+ * replaced after a confirmed live failure (2026-08-09): against the real
+ * project, .upsert() reliably failed to recognize an existing row as a
+ * conflict (with or without an explicit onConflict option), always
+ * attempting a plain INSERT and failing NOT NULL constraints on any
+ * column outside the payload. .update() and .insert() were independently
+ * verified to behave correctly and predictably instead.
  */
 
 import {
@@ -34,13 +42,19 @@ function emptySU(): StructuredUnderstanding {
 }
 
 /** Minimal fake Supabase client covering only the chain shapes this module calls. */
-function fakeClient(overrides: {
-  selectResult?: { data: unknown; error: unknown }
-  upsertResult?: { error: unknown }
-} = {}) {
+function fakeClient(
+  overrides: {
+    selectResult?: { data: unknown; error: unknown }
+    /** What .update(...).eq(...).select(...) resolves to -- data.length > 0 means "row existed, updated". */
+    updateResult?: { data: unknown[] | null; error: unknown }
+    insertResult?: { error: unknown }
+  } = {},
+) {
   const selectResult = overrides.selectResult ?? { data: null, error: null }
-  const upsertResult = overrides.upsertResult ?? { error: null }
-  const upsertCalls: unknown[] = []
+  const updateResult = overrides.updateResult ?? { data: [{ id: 'x' }], error: null }
+  const insertResult = overrides.insertResult ?? { error: null }
+  const updateCalls: unknown[] = []
+  const insertCalls: unknown[] = []
 
   const client = {
     from: jest.fn(() => ({
@@ -49,13 +63,21 @@ function fakeClient(overrides: {
           maybeSingle: jest.fn(async () => selectResult),
         })),
       })),
-      upsert: jest.fn(async (payload: unknown) => {
-        upsertCalls.push(payload)
-        return upsertResult
+      update: jest.fn((payload: unknown) => {
+        updateCalls.push(payload)
+        return {
+          eq: jest.fn(() => ({
+            select: jest.fn(async () => updateResult),
+          })),
+        }
+      }),
+      insert: jest.fn(async (payload: unknown) => {
+        insertCalls.push(payload)
+        return insertResult
       }),
     })),
   }
-  return { client: client as any, upsertCalls }
+  return { client: client as any, updateCalls, insertCalls }
 }
 
 describe('createSupabaseSessionStore: load', () => {
@@ -126,8 +148,8 @@ describe('createSupabaseSessionStore: load', () => {
 })
 
 describe('createSupabaseSessionStore: save', () => {
-  test('writes exactly the three CRCSessionState fields, keyed by token as id', async () => {
-    const { client, upsertCalls } = fakeClient()
+  test('an existing row (update matches) is updated, never falls through to insert', async () => {
+    const { client, updateCalls, insertCalls } = fakeClient({ updateResult: { data: [{ id: 'my-token' }], error: null } })
     const store = createSupabaseSessionStore(client)
     const state: CRCSessionState = {
       structured_understanding: emptySU(),
@@ -135,19 +157,39 @@ describe('createSupabaseSessionStore: save', () => {
       pending_clarification: { signal_id: 'x', kind: 'follow_up_on_signal', unresolved_summary: 'test' },
     }
     await store.save('my-token', state)
-    expect(upsertCalls).toHaveLength(1)
-    const payload = upsertCalls[0] as Record<string, unknown>
-    expect(payload.id).toBe('my-token')
+    expect(updateCalls).toHaveLength(1)
+    expect(insertCalls).toHaveLength(0)
+    const payload = updateCalls[0] as Record<string, unknown>
     expect(payload.pending_clarification).toEqual(state.pending_clarification)
+    expect(Object.keys(payload).sort()).toEqual(['boundary_state', 'pending_clarification', 'structured_understanding'])
+  })
+
+  test('a brand-new token (update matches zero rows) falls through to insert, keyed by token as id', async () => {
+    const { client, updateCalls, insertCalls } = fakeClient({ updateResult: { data: [], error: null } })
+    const store = createSupabaseSessionStore(client)
+    const state: CRCSessionState = { structured_understanding: emptySU(), boundary_state: createInitialBoundaryState(), pending_clarification: null }
+    await store.save('new-token', state)
+    expect(updateCalls).toHaveLength(1)
+    expect(insertCalls).toHaveLength(1)
+    const payload = insertCalls[0] as Record<string, unknown>
+    expect(payload.id).toBe('new-token')
     expect(Object.keys(payload).sort()).toEqual(['boundary_state', 'id', 'pending_clarification', 'structured_understanding'])
   })
 
-  test('a Supabase error on save throws, rather than silently succeeding', async () => {
-    const { client } = fakeClient({ upsertResult: { error: { message: 'unique violation' } } })
+  test('a Supabase error on update throws, rather than silently succeeding', async () => {
+    const { client } = fakeClient({ updateResult: { data: null, error: { message: 'connection failed' } } })
     const store = createSupabaseSessionStore(client)
     await expect(
       store.save('token', { structured_understanding: emptySU(), boundary_state: createInitialBoundaryState(), pending_clarification: null }),
-    ).rejects.toThrow('unique violation')
+    ).rejects.toThrow('connection failed')
+  })
+
+  test('a Supabase error on the insert fallback throws, rather than silently succeeding', async () => {
+    const { client } = fakeClient({ updateResult: { data: [], error: null }, insertResult: { error: { message: 'insert failed' } } })
+    const store = createSupabaseSessionStore(client)
+    await expect(
+      store.save('token', { structured_understanding: emptySU(), boundary_state: createInitialBoundaryState(), pending_clarification: null }),
+    ).rejects.toThrow('insert failed')
   })
 })
 
@@ -162,15 +204,20 @@ describe('product-layer helpers (turn_count/transcript, not part of SessionStore
     await expect(loadCrcSessionProductState(client, 'token')).resolves.toEqual({ turn_count: 2, transcript: [] })
   })
 
-  test('saveCrcSessionProductState writes only turn_count/transcript, never the engine-state columns', async () => {
-    const { client, upsertCalls } = fakeClient()
+  test('saveCrcSessionProductState writes only turn_count/transcript via update(), never the engine-state columns', async () => {
+    const { client, updateCalls } = fakeClient({ updateResult: { data: [{ id: 'token' }], error: null } })
     await saveCrcSessionProductState(client, 'token', { turn_count: 3, transcript: [{ role: 'user', text: 'hi' }] })
-    const payload = upsertCalls[0] as Record<string, unknown>
-    expect(Object.keys(payload).sort()).toEqual(['id', 'transcript', 'turn_count'])
+    const payload = updateCalls[0] as Record<string, unknown>
+    expect(Object.keys(payload).sort()).toEqual(['transcript', 'turn_count'])
   })
 
   test('saveCrcSessionProductState throws on a Supabase error', async () => {
-    const { client } = fakeClient({ upsertResult: { error: { message: 'write failed' } } })
+    const { client } = fakeClient({ updateResult: { data: null, error: { message: 'write failed' } } })
     await expect(saveCrcSessionProductState(client, 'token', { turn_count: 1, transcript: [] })).rejects.toThrow('write failed')
+  })
+
+  test('saveCrcSessionProductState throws if zero rows matched -- the documented precondition (row already exists) was violated', async () => {
+    const { client } = fakeClient({ updateResult: { data: [], error: null } })
+    await expect(saveCrcSessionProductState(client, 'nonexistent-token', { turn_count: 1, transcript: [] })).rejects.toThrow('no row found for token')
   })
 })

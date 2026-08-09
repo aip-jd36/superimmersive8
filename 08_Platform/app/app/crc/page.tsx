@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { CrcProjectionOutput } from '@/components/CrcProjectionOutput'
-import type { TurnResponseBody, SessionStatusResponseBody } from '@/app/api/crc/turn/route'
+import type { TurnResponseBody, SessionStatusResponseBody } from '@/lib/crc-engine/api-contract'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
 
 interface Message {

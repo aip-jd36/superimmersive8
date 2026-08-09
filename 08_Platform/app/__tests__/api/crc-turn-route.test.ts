@@ -8,7 +8,7 @@
  * function: parseRequest.
  */
 
-import { parseRequest } from '../../app/api/crc/turn/route'
+import { parseRequest } from '../../lib/crc-engine/api-contract'
 
 describe('parseRequest', () => {
   test('a non-empty message is parsed as kind: message', () => {
