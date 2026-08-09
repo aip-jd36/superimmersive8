@@ -69,9 +69,10 @@ describe('dialogue orchestrator (Phase 7)', () => {
     }
     const run = await runDialogue(scenario.initial_su, scenario.turns, deps)
     expect(run.turns[0].assistant_action).toBe('ASK')
-    expect(run.turns[0].asked_question?.target_signal_id).toBe('tm-1')
+    // Turn-qualified mention_id (t{turn}-{proposal_id}), not the old bare-proposal_id/'-resolved' scheme -- see extraction.ts's own mentionId minting comment.
+    expect(run.turns[0].asked_question?.target_signal_id).toBe('t1-tm-1')
     expect(run.turns[1].assistant_action).toBe('NONE_PROPOSED')
-    const tm2 = run.final_su.tool_mentions.find((m) => m.mention_id === 'tm-2-resolved')
+    const tm2 = run.final_su.tool_mentions.find((m) => m.mention_id === 't2-tm-2')
     expect(tm2?.resolution).toEqual({ kind: 'canonical', identifier: 'gemini-api' })
     expect(tm2?.access_surface).toEqual({ state: 'confirmed', value: 'API' })
   })
@@ -88,7 +89,8 @@ describe('dialogue orchestrator (Phase 7)', () => {
     expect(run.turns[2].assistant_action).toBe('SUPPRESSED_BY_CONSTRAINT_B')
     expect(run.turns[2].boundary_result_reason_code).toBe('DISENTANGLING_QUESTION_ALREADY_ASKED')
     // Never resolved by guessing: the second ambiguity's tool mention stays an unresolved_alias.
-    const tm1 = run.final_su.tool_mentions.find((m) => m.mention_id === 'tm-1')
+    // Turn-qualified mention_id (this candidate is at turn 3) -- see extraction.ts's own mentionId minting comment.
+    const tm1 = run.final_su.tool_mentions.find((m) => m.mention_id === 't3-tm-1')
     expect(tm1?.resolution.kind).toBe('unresolved_alias')
   })
 })

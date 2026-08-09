@@ -1,0 +1,233 @@
+[
+  {
+    "scenario_id": "rich_first_turn",
+    "trial": 1,
+    "turns": [
+      {
+        "scenario_id": "rich_first_turn",
+        "trial": 1,
+        "turn_number": 1,
+        "user_text": "We shot the whole thing in Runway Gen-3, team API plan. I'm the producer on this one, and it's for a paid social campaign, a 30-second cutdown.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "t1-c1",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'runway-gen3'"
+        },
+        "generated_candidate_question": {
+          "question_text": "You mentioned Runway Gen-3 on a team API plan — can you tell me more about how that access was set up, like whether it's a business or enterprise tier subscription?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "t1-c1",
+          "phase": 3
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_WORKFLOW_FACT",
+          "rationale": "Plan_tier and access_surface are both currently unknown despite the tool being confirmed, and the specific tier (business vs enterprise) materially affects the commercial-use terms under Runway's policies, so a plausible answer would fill a genuinely missing fact.speech."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "You mentioned Runway Gen-3 on a team API plan — can you tell me more about how that access was set up, like whether it's a business or enterprise tier subscription?",
+        "error": null
+      },
+      {
+        "scenario_id": "rich_first_turn",
+        "trial": 1,
+        "turn_number": 2,
+        "user_text": "Once this was finished, it went straight to the client -- no internal review, they just wanted it fast.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "You mentioned it's on a team API plan for Runway Gen-3 -- do you know if that plan includes commercial usage rights, or is that something you'd need to check with whoever manages the account?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "t1-c1",
+          "phase": 3
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "VISIBILITY_GAP_CLARIFIABLE",
+          "rationale": "Plan_tier and access_surface are still unknown, and whether the team API plan includes commercial usage rights is central to assessing commercial-use status; the question also appropriately accounts for the possibility the producer lacks direct visibility into licensing terms."
+        },
+        "constraint_b_verdict": "blocked",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "+scoped_observation c1 (current_project, confirmed_absent)"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "acknowledgment",
+        "outcome_message": "Got it — thanks for sharing that.",
+        "error": null
+      },
+      {
+        "scenario_id": "rich_first_turn",
+        "trial": 1,
+        "turn_number": 3,
+        "user_text": "Nothing else has come up about it since. Pretty standard project for us.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_gate_2_met"
+        },
+        "su_diff": [
+          "gate_2_state not_yet_stable -> stable",
+          "completion_reason null -> gate_1_gate_2_met"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "rich_first_turn",
+    "trial": 2,
+    "turns": [
+      {
+        "scenario_id": "rich_first_turn",
+        "trial": 2,
+        "turn_number": 1,
+        "user_text": "We shot the whole thing in Runway Gen-3, team API plan. I'm the producer on this one, and it's for a paid social campaign, a 30-second cutdown.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "You mentioned Runway Gen-3 on a team API plan — can you tell me more about how you're accessing it, like whether it's through the API directly or the standard web app?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "t1-c1",
+          "phase": 3
+        },
+        "constraint_a_decision": {
+          "should_ask": false,
+          "reason_code": "FACT_ALREADY_CONFIRMED",
+          "rationale": "The source statement already specifies 'team API plan,' which strongly implies API-based access rather than the standard web app, so a plausible answer would mostly restate what's already been said rather than add new structural information."
+        },
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "acknowledgment",
+        "outcome_message": "Got it — thanks for sharing that.",
+        "error": null
+      },
+      {
+        "scenario_id": "rich_first_turn",
+        "trial": 2,
+        "turn_number": 2,
+        "user_text": "Once this was finished, it went straight to the client -- no internal review, they just wanted it fast.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "You mentioned it was a team API plan on Runway Gen-3 — can you tell me more about how you all access it, like whether it's through an enterprise or team seat versus an individual account?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "t1-c1",
+          "phase": 3
+        },
+        "constraint_a_decision": {
+          "should_ask": false,
+          "reason_code": "FACT_ALREADY_CONFIRMED",
+          "rationale": "The user already stated it was a 'team API plan' in turn 1, which already establishes a business-tier access surface; asking to distinguish enterprise vs team seat vs individual is finer-grained detail than CRC's licensing-status purpose requires."
+        },
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "+scoped_observation c1 (current_project, confirmed)",
+          "+scoped_observation c2 (current_project, confirmed_absent)"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "acknowledgment",
+        "outcome_message": "Got it — thanks for sharing that.",
+        "error": null
+      },
+      {
+        "scenario_id": "rich_first_turn",
+        "trial": 2,
+        "turn_number": 3,
+        "user_text": "Nothing else has come up about it since. Pretty standard project for us.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_gate_2_met"
+        },
+        "su_diff": [
+          "gate_2_state not_yet_stable -> stable",
+          "completion_reason null -> gate_1_gate_2_met"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  }
+]

@@ -269,9 +269,15 @@ export function attestCandidate(
   if (candidate.kind === 'tool_mention') {
     if (!candidate.raw_tool_name) return null
 
-    const mentionId = candidate.supersedes_tool_mention_id
-      ? `${candidate.proposal_id}-resolved`
-      : candidate.proposal_id
+    // Turn-qualified, not the bare model-assigned proposal_id -- proposal_id
+    // is a turn-local transport identifier only (the model restarts
+    // numbering at "c1" every call); mention_id must be persistent and
+    // collision-free across the whole conversation. Applies uniformly
+    // whether or not this candidate also supersedes an existing mention --
+    // one minting rule, not two, since turn-qualification alone already
+    // guarantees uniqueness (turn numbers are monotonic and never repeat
+    // within one conversation; proposal_ids are unique within one turn).
+    const mentionId = `t${candidate.turn}-${candidate.proposal_id}`
 
     let resolution: ToolMention['resolution']
     let confidence: ConfidenceState
@@ -340,57 +346,96 @@ export function attestCandidate(
   return null
 }
 
-// ── Correction resolution (stage 3.5) ───────────────────────────────────────
+// ── Tool mention identity resolution (stage 3.5) ────────────────────────────
 
 /**
- * Resolves `is_correction`/`correction_of_raw_text` -- the ONLY correction
- * signal an LLM extractor can produce, since it has no visibility into this
- * pipeline's internal mention_ids (anthropic-extractor.ts's own comment) --
- * into a concrete `supersedes_tool_mention_id`, deterministically, against
- * the CURRENT StructuredUnderstanding. Without this step, a tool_mention
- * candidate with is_correction: true still has no `supersedes_tool_mention_id`
- * (no extractor sets it, by design), so it falls through to `addToolMention`
- * with a bare, turn-local proposal_id ("c1", "c2", ...) that collides with
- * an earlier turn's own mention_id of the same name -- addToolMention
- * throws `MUTATION_DUPLICATE_ID`, and the correction is silently dropped
- * with zero structural change (LIVE-RUNTIME-VALIDATION-REPORT-2026-08-08,
- * Finding F1; confirmed live 4/4 in a targeted follow-up diagnostic before
- * this fix -- see diagnose-correction-pipeline.ts).
+ * Resolves whether a NEW tool_mention candidate should attach to (supersede)
+ * an existing active tool mention, or become a brand-new one -- the
+ * deterministic step this pipeline was always missing between what
+ * Extraction can structurally propose and what mutation needs
+ * (`supersedes_tool_mention_id`). The LLM extractor has no visibility into
+ * this pipeline's internal mention_ids (anthropic-extractor.ts's own
+ * comment) and is never asked to invent or track them -- it only ever
+ * reports `raw_tool_name`, and, for statements that read like a correction,
+ * `is_correction`/`correction_of_raw_text`. Resolving those into a concrete
+ * target id is entirely this function's job, against the CURRENT
+ * StructuredUnderstanding, never the model's.
  *
- * Never invents a correction the model didn't flag (only runs when
- * candidate.is_correction is true) and never overrides an id the candidate
- * already carries. Conservative like normalizeCandidate's own matching: an
- * exact textual match against exactly one active (non-superseded) tool
- * mention's own resolved label; zero or multiple matches resolve nothing
- * here (falls through to today's addToolMention path unchanged) rather
- * than guess. The single-other-active-mention fallback covers the common
- * case where correction_of_raw_text is a vague back-reference ("that was
- * wrong") rather than naming the prior tool outright.
+ * Two independent match strategies, tried in order, neither one pushing any
+ * new reasoning onto the model -- both work from fields the schema already
+ * carries:
  *
- * `retractedThisTurn` guards a real failure mode found while validating
- * this fix live: a single correction sentence sometimes yields TWO
+ * STEP 1 -- same-tool identity match (ordinary re-mention / repeated
+ * mention / workflow-switch phrasing the model does not flag as a
+ * correction at all). A later candidate names the SAME real-world tool as
+ * an already-active mention when either (a) both resolve to the same
+ * canonical identifier via normalizeCandidate's own existing, deterministic
+ * registry lookup, or (b) the candidate's own raw_tool_name text matches an
+ * existing UNRESOLVED mention's own raw alias name -- the latter is what
+ * lets an ambiguous alias mentioned again, now with disambiguating text,
+ * correctly consolidate onto its own prior (still-ambiguous) record instead
+ * of spawning a parallel duplicate (closes the same gap Finding F2,
+ * LIVE-RUNTIME-VALIDATION-REPORT-2026-08-08, described for
+ * unresolved_ambiguity_across_turns, as a direct consequence of fixing
+ * identity generally, not a separately-targeted fix). Zero or multiple
+ * matches resolve nothing here -- never guessed -- and fall through to
+ * Step 2.
+ *
+ * STEP 2 -- is_correction-flagged retraction of a DIFFERENT existing tool
+ * (the correction fix this generalizes, LIVE-RUNTIME-FOLLOWUP-REPORT-
+ * 2026-08-08's own Follow-up 1, unchanged in its own logic): an exact
+ * textual match of `correction_of_raw_text` against exactly one active
+ * mention's own resolved label, falling back to "the one other active
+ * mention" when the text is a vague back-reference ("that was wrong").
+ * Only runs when Step 1 found no same-tool match and the model itself
+ * flagged is_correction -- never invents a correction the model didn't
+ * flag, never overrides an id the candidate already carries via an explicit
+ * `supersedes_tool_mention_id`.
+ *
+ * `retractedThisTurn` guards a failure mode found validating the original
+ * correction fix live: a single correction sentence sometimes yields TWO
  * is_correction candidates from the model (one for the new tool, one
- * re-stating the old tool's own name, e.g. raw_text "not Midjourney") --
- * both flagged as corrections of the same event, not two independent
- * corrections. Without this guard, the second candidate's fallback branch
- * would find the just-added new mention as the lone "other active" one and
- * supersede it right back to the old tool, silently reverting the
- * correction it was supposed to preserve. Once a label has been superseded
- * THIS turn, the fallback (never the direct text-match branch, which is
- * unaffected) refuses to target its replacement again this same turn --
- * worst case the redundant candidate lands as an inert, non-superseding
- * duplicate via the existing addToolMention path, never a silent revert.
+ * re-stating the old tool's own name). Without this guard, the second
+ * candidate's Step-2 fallback would find the just-added new mention as the
+ * lone "other active" one and supersede it right back to the old tool,
+ * silently reverting the correction. Once a label has been superseded THIS
+ * turn, the fallback (never Step 1, never Step 2's own direct text-match
+ * branch) refuses to target its replacement again this same turn -- worst
+ * case the redundant candidate lands as an inert, non-superseding
+ * duplicate, never a silent revert.
+ *
+ * Returns undefined for CREATE (no matching existing tool -- a genuinely
+ * new one, or an ambiguous alias that stays unresolved, exactly as
+ * normalizeCandidate already decides) or ATTACH/CORRECT (the mention_id to
+ * supersede). The caller mints the actual replacement id; this function
+ * never does, and never relies on proposal_id uniqueness to make its own
+ * decision -- it only reads existing, already-persistent mention_ids.
  */
-function resolveToolMentionSupersessionTarget(
+function resolveToolMentionTarget(
   candidate: CandidateObservation,
   su: StructuredUnderstanding,
   retractedThisTurn: ReadonlySet<string>,
 ): string | undefined {
-  if (candidate.kind !== 'tool_mention' || !candidate.is_correction) return undefined
+  if (candidate.kind !== 'tool_mention') return undefined
   if (candidate.supersedes_tool_mention_id) return candidate.supersedes_tool_mention_id
 
   const active = su.tool_mentions.filter((m) => m.superseded_by === null)
   const label = (m: ToolMention) => (m.resolution.kind === 'canonical' ? m.resolution.identifier : m.resolution.raw_name).toLowerCase()
+  const rawToolName = (candidate.raw_tool_name ?? '').trim().toLowerCase()
+
+  // Step 1: same-tool identity match.
+  const thisNormalization = normalizeCandidate(candidate)
+  const thisCanonicalKey = thisNormalization.status === 'resolved' ? thisNormalization.canonical_identifier.toLowerCase() : null
+  const identityMatches = active.filter((m) => {
+    if (thisCanonicalKey && m.resolution.kind === 'canonical' && m.resolution.identifier.toLowerCase() === thisCanonicalKey) return true
+    if (rawToolName && m.resolution.kind === 'unresolved_alias' && m.resolution.raw_name.trim().toLowerCase() === rawToolName) return true
+    return false
+  })
+  if (identityMatches.length === 1) return identityMatches[0].mention_id
+  if (identityMatches.length > 1) return undefined // ambiguous -- never guess, fall through to create
+
+  // Step 2: is_correction-flagged retraction of a different tool.
+  if (!candidate.is_correction) return undefined
 
   const needle = (candidate.correction_of_raw_text ?? '').toLowerCase()
   if (needle) {
@@ -398,7 +443,6 @@ function resolveToolMentionSupersessionTarget(
     if (textMatches.length === 1) return textMatches[0].mention_id
   }
 
-  const rawToolName = (candidate.raw_tool_name ?? '').toLowerCase()
   if (retractedThisTurn.has(rawToolName)) return undefined
 
   const otherActive = active.filter((m) => label(m) !== rawToolName)
@@ -472,11 +516,11 @@ export async function runExtractionPipeline(
   const candidates = await extractCandidates(turn)
   const diagnostics: ExtractionDiagnostic[] = []
   let current = su
-  /** Labels of tool mentions actually superseded so far this turn -- see resolveToolMentionSupersessionTarget's own docs for why this guard exists. */
+  /** Labels of tool mentions actually superseded so far this turn -- see resolveToolMentionTarget's own docs for why this guard exists. */
   const retractedThisTurn = new Set<string>()
 
   for (const rawCandidate of candidates) {
-    const supersedesId = resolveToolMentionSupersessionTarget(rawCandidate, current, retractedThisTurn)
+    const supersedesId = resolveToolMentionTarget(rawCandidate, current, retractedThisTurn)
     const candidate = supersedesId ? { ...rawCandidate, supersedes_tool_mention_id: supersedesId } : rawCandidate
 
     const normalization = normalizeCandidate(candidate)

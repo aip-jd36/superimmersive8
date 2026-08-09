@@ -164,7 +164,7 @@ const richSignal: DialogueScenario = {
   expected: {
     assistant_actions: ['NONE_PROPOSED', 'NONE_PROPOSED'],
     final_active_observation_ids: ['so-1'],
-    final_active_tool_mention_ids: ['tm-1'],
+    final_active_tool_mention_ids: ['t1-tm-1'],
     final_gate_1_state: 'met',
     final_gate_2_state: 'stable',
     final_completion_reason: 'gate_1_gate_2_met',
@@ -235,7 +235,7 @@ const currentVsHistorical: DialogueScenario = {
   expected: {
     assistant_actions: ['ASK', 'NONE_PROPOSED'],
     final_active_observation_ids: ['so-1', 'so-2'],
-    final_active_tool_mention_ids: ['tm-1'],
+    final_active_tool_mention_ids: ['t1-tm-1'],
     final_gate_1_state: 'not_met',
     final_gate_2_state: 'not_yet_stable',
     final_completion_reason: 'gate_1_unmet_exhausted',
@@ -279,7 +279,7 @@ const ambiguousUncertain: DialogueScenario = {
   expected: {
     assistant_actions: ['ASK', 'ASK', 'NONE_PROPOSED'],
     final_active_observation_ids: ['so-1', 'so-2'],
-    final_active_tool_mention_ids: ['tm-1'],
+    final_active_tool_mention_ids: ['t1-tm-1'],
     final_gate_1_state: 'not_met',
     final_gate_2_state: 'not_yet_stable',
     final_completion_reason: 'gate_1_unmet_exhausted',
@@ -346,7 +346,7 @@ const mixedMultiSignal: DialogueScenario = {
   expected: {
     assistant_actions: ['NONE_PROPOSED', 'NONE_PROPOSED'],
     final_active_observation_ids: ['so-1', 'so-2', 'so-3'],
-    final_active_tool_mention_ids: ['tm-1', 'tm-2'],
+    final_active_tool_mention_ids: ['t1-tm-1', 't1-tm-2'],
     final_gate_1_state: 'met',
     final_gate_2_state: 'stable',
     final_completion_reason: 'gate_1_gate_2_met',
@@ -381,23 +381,23 @@ const ambiguousMultiSurfaceTool: DialogueScenario = {
       fact({ proposal_id: 'pf-1a', turn: 1, raw_text: 'I’m the designer on it.', raw_fact_field: 'workflow_role', fact_confidence_hint: 'confirmed', fact_value_hint: 'Designer' }),
       fact({ proposal_id: 'pf-1b', turn: 1, raw_text: 'It’s just an internal concept test.', raw_fact_field: 'intended_use', fact_confidence_hint: 'confirmed', fact_value_hint: 'Internal concept test' }),
     ],
-    // attestCandidate suffixes a superseding tool_mention's id with
-    // '-resolved' whenever supersedes_tool_mention_id is set -- tm-2 (which
-    // supersedes tm-1) actually becomes 'tm-2-resolved' at mutation time.
-    // Found by the mock dry run itself (see chat record); fixed here, not in
-    // extraction.ts or mutations.ts, both behaving exactly as designed.
-    // access_surface is populated via channel 2 (Finding 1 fix): the same
-    // disambiguation match that resolves 'gemini-api' also deterministically
-    // returns access_surface: 'API' -- no candidate-level hint needed here,
-    // deliberately exercising that channel (channels 1 is exercised by other
-    // scenarios' direct-statement hints).
+    // mention_id is now turn-qualified (t{turn}-{proposal_id}), not the bare
+    // proposal_id/'-resolved'-suffix scheme (2026-08-09, proposal-ID
+    // collision-class fix, LIVE-RUNTIME-FOLLOWUP-REPORT-2026-08-09) -- tm-1
+    // (turn 1) persists as 't1-tm-1', and tm-2 (which supersedes it)
+    // persists as 't2-tm-2'. access_surface is populated via channel 2
+    // (Finding 1 fix): the same disambiguation match that resolves
+    // 'gemini-api' also deterministically returns access_surface: 'API' --
+    // no candidate-level hint needed here, deliberately exercising that
+    // channel (channels 1 is exercised by other scenarios' direct-statement
+    // hints).
     [
-      tool({ proposal_id: 'tm-2', turn: 2, raw_text: 'Through the API — I called it directly with my own developer key.', raw_tool_name: 'Nano Banana', supersedes_tool_mention_id: 'tm-1' }),
+      tool({ proposal_id: 'tm-2', turn: 2, raw_text: 'Through the API — I called it directly with my own developer key.', raw_tool_name: 'Nano Banana', supersedes_tool_mention_id: 't1-tm-1' }),
       obs({ proposal_id: 'so-1', turn: 2, raw_text: 'Generation via Gemini API (developer key), not the Gemini consumer app.', observation_confidence_hint: 'confirmed', scope: 'current_project', workflow_stage: 'T1' }),
     ],
   ],
   generator_queue: [
-    { question_text: 'When you used Nano Banana, was that the app on your phone, or did you go through the API with a developer key?', question_kind: 'follow_up_on_signal', target_signal_id: 'tm-1', phase: 2 },
+    { question_text: 'When you used Nano Banana, was that the app on your phone, or did you go through the API with a developer key?', question_kind: 'follow_up_on_signal', target_signal_id: 't1-tm-1', phase: 2 },
     null,
   ],
   decider_queue: [
@@ -406,12 +406,12 @@ const ambiguousMultiSurfaceTool: DialogueScenario = {
   expected: {
     assistant_actions: ['ASK', 'NONE_PROPOSED'],
     final_active_observation_ids: ['so-1'],
-    final_active_tool_mention_ids: ['tm-2-resolved'],
+    final_active_tool_mention_ids: ['t2-tm-2'],
     final_gate_1_state: 'met',
     final_gate_2_state: 'not_yet_stable',
     final_completion_reason: null,
     final_handoff_tools: [{ identifier: 'gemini-api', access_surface: 'API', plan_tier: 'unknown' }],
-    notes: 'Finding 3 (fixed): turn 2 now unambiguously resolves to tm-2-resolved/gemini-api, canonical, in a single exchange -- re-verified by direct execution before this scenario was finalized. access_surface is now confirmed ‘API’ via Finding 1’s channel 2 (the disambiguation match itself), demonstrating that channel independent of the direct-statement channel used elsewhere. Finding 4’s watch case (a same-lineage second follow-up) no longer arises naturally here since the ambiguity resolves in one step -- it is now covered directly by __tests__/interview-engine/signal-lineage.test.ts instead, per JD’s own instruction to add dedicated tests rather than rely on a dialogue observation.',
+    notes: 'Finding 3 (fixed): turn 2 now unambiguously resolves to t2-tm-2/gemini-api, canonical, in a single exchange -- re-verified by direct execution before this scenario was finalized. access_surface is now confirmed ‘API’ via Finding 1’s channel 2 (the disambiguation match itself), demonstrating that channel independent of the direct-statement channel used elsewhere. Finding 4’s watch case (a same-lineage second follow-up) no longer arises naturally here since the ambiguity resolves in one step -- it is now covered directly by __tests__/interview-engine/signal-lineage.test.ts instead, per JD’s own instruction to add dedicated tests rather than rely on a dialogue observation.',
   },
 }
 
@@ -451,7 +451,7 @@ const fullPhase1To4Trace: DialogueScenario = {
   expected: {
     assistant_actions: ['NONE_PROPOSED', 'NONE_PROPOSED', 'NONE_PROPOSED', 'NONE_PROPOSED', 'NONE_PROPOSED'],
     final_active_observation_ids: ['so-1', 'so-2'],
-    final_active_tool_mention_ids: ['tm-1'],
+    final_active_tool_mention_ids: ['t1-tm-1'],
     final_gate_1_state: 'met',
     final_gate_2_state: 'stable',
     final_completion_reason: 'gate_1_gate_2_met',
@@ -501,7 +501,7 @@ const rule5DisentanglingProbe: DialogueScenario = {
     // itself (see chat record); fixed here, not in extraction.ts, which is
     // behaving exactly as designed.
     final_active_observation_ids: ['so-1c-corrected', 'so-2c-corrected'],
-    final_active_tool_mention_ids: ['tm-1'],
+    final_active_tool_mention_ids: ['t3-tm-1'],
     final_gate_1_state: 'not_met',
     final_gate_2_state: 'not_yet_stable',
     final_completion_reason: 'gate_1_unmet_exhausted',

@@ -88,7 +88,8 @@ describe('runExtractionPipeline: accepted proposals', () => {
     )
     expect(updated.tool_mentions).toHaveLength(1)
     expect(updated.tool_mentions[0].resolution).toEqual({ kind: 'canonical', identifier: 'runway-gen3' })
-    expect(diagnostics[0].decision).toEqual({ outcome: 'accepted', applied_identifier: 'c1' })
+    // Turn-qualified, not the bare model-assigned proposal_id -- see extraction.ts's own mentionId minting comment.
+    expect(diagnostics[0].decision).toEqual({ outcome: 'accepted', applied_identifier: 't1-c1' })
     expect(diagnostics[0].normalization).toEqual({ status: 'resolved', canonical_identifier: 'runway-gen3' })
   })
 
@@ -160,7 +161,8 @@ describe('runExtractionPipeline: accepted proposals', () => {
       turn: 2,
       raw_tool_name: 'Nano Banana',
       raw_text: 'Oh, through the API, developer key.',
-      supersedes_tool_mention_id: 'c1',
+      // Turn-qualified target, matching the first candidate's actual persisted mention_id (t1-c1).
+      supersedes_tool_mention_id: 't1-c1',
     })
     const { updated, diagnostics } = await runExtractionPipeline(
       su,
@@ -168,9 +170,10 @@ describe('runExtractionPipeline: accepted proposals', () => {
       constantExtractor([correction]),
     )
 
-    const prior = updated.tool_mentions.find((m) => m.mention_id === 'c1')
-    const resolved = updated.tool_mentions.find((m) => m.mention_id === 'c2-resolved')
-    expect(prior?.superseded_by).toBe('c2-resolved')
+    // Turn-qualified, not the old '-resolved' suffix scheme -- see extraction.ts's own mentionId minting comment.
+    const prior = updated.tool_mentions.find((m) => m.mention_id === 't1-c1')
+    const resolved = updated.tool_mentions.find((m) => m.mention_id === 't2-c2')
+    expect(prior?.superseded_by).toBe('t2-c2')
     expect(resolved?.resolution).toEqual({ kind: 'canonical', identifier: 'gemini-api' })
     expect(diagnostics[0].decision.outcome).toBe('accepted')
   })
@@ -292,7 +295,8 @@ describe('diagnostics answer all five required questions', () => {
     expect(d.normalization).toEqual({ status: 'resolved', canonical_identifier: 'runway-gen3' }) // what normalization produced
     expect(d.decision.outcome).toBe('accepted') // whether mutation accepted it
     expect(d.decision).not.toHaveProperty('reason_code') // (accepted proposals carry no rejection/deferral reason)
-    expect((d.decision as { applied_identifier: string }).applied_identifier).toBe('c1')
+    // Turn-qualified, not the bare model-assigned proposal_id -- see extraction.ts's own mentionId minting comment.
+    expect((d.decision as { applied_identifier: string }).applied_identifier).toBe('t1-c1')
   })
 
   test('a rejected proposal carries a human-readable reason alongside its stable reason_code', async () => {

@@ -1,0 +1,251 @@
+[
+  {
+    "scenario_id": "unresolved_ambiguity_across_turns",
+    "trial": 1,
+    "turns": [
+      {
+        "scenario_id": "unresolved_ambiguity_across_turns",
+        "trial": 1,
+        "turn_number": 1,
+        "user_text": "I used Nano Banana for this one.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Can you tell me a bit more about what you're planning to use this video for — like is it for a personal project, client work, or something you intend to sell or monetize?",
+          "question_kind": "other",
+          "target_signal_id": null,
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently unknown and directly gates commercial-use assessment; a plausible answer (personal, client, monetized) would fill this missing and material fact.:"
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "Can you tell me a bit more about what you're planning to use this video for — like is it for a personal project, client work, or something you intend to sell or monetize?",
+        "error": null
+      },
+      {
+        "scenario_id": "unresolved_ambiguity_across_turns",
+        "trial": 1,
+        "turn_number": 2,
+        "user_text": "Oh, through the API -- I have a developer key, it's not the app on my phone.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Can you tell me a bit more about how you're planning to use this video project — is it for something commercial, or more personal/experimental?",
+          "question_kind": "other",
+          "target_signal_id": "project:intended_use",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently unknown and gate_1 is not met; a plausible answer (commercial vs personal) would establish a foundational fact CRC currently lacks."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "gate_2_state not_yet_stable -> stable"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "question",
+        "outcome_message": "Can you tell me a bit more about how you're planning to use this video project — is it for something commercial, or more personal/experimental?",
+        "error": null
+      },
+      {
+        "scenario_id": "unresolved_ambiguity_across_turns",
+        "trial": 1,
+        "turn_number": 3,
+        "user_text": "I'm the designer on it, and it's just an internal concept test.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "t1-c1",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'Nano Banana', not yet resolved to a specific platform"
+        },
+        "generated_candidate_question": {
+          "question_text": "You mentioned using Nano Banana for this project — is that a specific app or platform you're accessing directly, or is it a feature/model within some other tool?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "t1-c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "The tool 'Nano Banana' is an unresolved alias with unknown access surface, and clarifying whether it's accessed directly or through another platform would resolve genuine ambiguity needed to assess licensing/commercial-use terms."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "intended_use unknown -> confirmed",
+          "workflow_role unknown -> confirmed",
+          "gate_2_state stable -> not_yet_stable"
+        ],
+        "boundary_state_diff": [
+          "follow_ups_used[t1-c1] 0 -> 1"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "You mentioned using Nano Banana for this project — is that a specific app or platform you're accessing directly, or is it a feature/model within some other tool?",
+        "error": null
+      }
+    ],
+    "completed": false,
+    "final_phase": null,
+    "projection_check": null,
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "unresolved_ambiguity_across_turns",
+    "trial": 2,
+    "turns": [
+      {
+        "scenario_id": "unresolved_ambiguity_across_turns",
+        "trial": 2,
+        "turn_number": 1,
+        "user_text": "I used Nano Banana for this one.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Just to get oriented — how are you planning to use this video once it's finished? For example, is it for a client, for your own business, something you intend to sell, or more of a personal/experimental project?",
+          "question_kind": "other",
+          "target_signal_id": "project:intended_use",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently unknown, and a plausible answer (client work, personal business, sale, or experimentation) would establish a foundational fact needed to assess commercial-use status."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "Just to get oriented — how are you planning to use this video once it's finished? For example, is it for a client, for your own business, something you intend to sell, or more of a personal/experimental project?",
+        "error": null
+      },
+      {
+        "scenario_id": "unresolved_ambiguity_across_turns",
+        "trial": 2,
+        "turn_number": 2,
+        "user_text": "Oh, through the API -- I have a developer key, it's not the app on my phone.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Just so I understand the bigger picture -- what are you planning to use this video for? Is it for a client project, something you're publishing commercially, or more personal/experimental?",
+          "question_kind": "other",
+          "target_signal_id": null,
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently unknown, and this fact is foundational to assessing commercial-use status; a plausible answer would fill a genuinely missing and material fact.》"
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "+scoped_observation c1 (current_project, confirmed)"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "question",
+        "outcome_message": "Just so I understand the bigger picture -- what are you planning to use this video for? Is it for a client project, something you're publishing commercially, or more personal/experimental?",
+        "error": null
+      },
+      {
+        "scenario_id": "unresolved_ambiguity_across_turns",
+        "trial": 2,
+        "turn_number": 3,
+        "user_text": "I'm the designer on it, and it's just an internal concept test.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "t1-c1",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'Nano Banana', not yet resolved to a specific platform"
+        },
+        "generated_candidate_question": {
+          "question_text": "When you say you used Nano Banana through the API with your developer key, do you know if that's tied to a paid API plan, or is it more of a free/trial developer tier?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "t1-c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_WORKFLOW_FACT",
+          "rationale": "Plan tier is currently unknown, and whether the API access is paid vs free/trial could materially affect commercial-use terms, so a plausible answer would fill a genuinely missing fact."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "intended_use unknown -> confirmed",
+          "workflow_role unknown -> confirmed"
+        ],
+        "boundary_state_diff": [
+          "follow_ups_used[t1-c1] 0 -> 1"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "When you say you used Nano Banana through the API with your developer key, do you know if that's tied to a paid API plan, or is it more of a free/trial developer tier?",
+        "error": null
+      }
+    ],
+    "completed": false,
+    "final_phase": null,
+    "projection_check": null,
+    "aborted_error": null
+  }
+]

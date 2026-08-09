@@ -1,0 +1,237 @@
+[
+  {
+    "scenario_id": "correction_after_supersession",
+    "trial": 1,
+    "turns": [
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 1,
+        "turn_number": 1,
+        "user_text": "We used Midjourney for the visuals.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "t1-c1",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'Midjourney', not yet resolved to a specific platform"
+        },
+        "generated_candidate_question": {
+          "question_text": "Can you tell me a bit more about what you're using Midjourney for in this project — like which part of the workflow it's handling?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "t1-c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_WORKFLOW_FACT",
+          "rationale": "The workflow_role fact is currently unknown, and asking how Midjourney is used would fill this genuinely missing fact needed to understand the project pipeline.​"
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "Can you tell me a bit more about what you're using Midjourney for in this project — like which part of the workflow it's handling?",
+        "error": null
+      },
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 1,
+        "turn_number": 2,
+        "user_text": "Actually, sorry -- that was wrong, we used Runway for the visuals, not Midjourney.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Now that we've confirmed Runway Gen-3 was the tool used for the visuals, what plan or account tier are you using with it — like a free tier, or one of the paid subscription plans?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "t2-c1",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_WORKFLOW_FACT",
+          "rationale": "Plan tier for the confirmed tool Runway Gen-3 is currently unknown, and knowing whether it's free or paid could materially affect commercial-use status assessment.}"
+        },
+        "constraint_b_verdict": "blocked",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "tool_mention t1-c1 superseded_by null -> t2-c1",
+          "+tool_mention t2-c1 (runway-gen3)"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "acknowledgment",
+        "outcome_message": "Got it — thanks for sharing that.",
+        "error": null
+      },
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 1,
+        "turn_number": 3,
+        "user_text": "I'm the motion designer on it.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_unmet_exhausted"
+        },
+        "su_diff": [
+          "workflow_role unknown -> confirmed",
+          "current_phase 2 -> 3",
+          "completion_reason null -> gate_1_unmet_exhausted"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "correction_after_supersession",
+    "trial": 2,
+    "turns": [
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 2,
+        "turn_number": 1,
+        "user_text": "We used Midjourney for the visuals.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Can you tell me more about how you're planning to use this project — is it for a client, your own business, or something else?",
+          "question_kind": "other",
+          "target_signal_id": "project:intended_use",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently unknown and directly gates commercial-use assessment; a plausible answer (client work, own business, personal, etc.) would fill this missing core fact."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "Can you tell me more about how you're planning to use this project — is it for a client, your own business, or something else?",
+        "error": null
+      },
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 2,
+        "turn_number": 2,
+        "user_text": "Actually, sorry -- that was wrong, we used Runway for the visuals, not Midjourney.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "What's this video project ultimately for — is it something you're planning to use commercially, or is it more personal/experimental at this stage?",
+          "question_kind": "other",
+          "target_signal_id": null,
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently unknown and is a core project fact; a plausible answer (commercial vs. personal/experimental) would directly fill this gap and materially advance understanding."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "tool_mention t1-c1 superseded_by null -> t2-c1",
+          "+tool_mention t2-c1 (runway-gen3)",
+          "+tool_mention t2-c2 (unresolved:Midjourney)"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "question",
+        "outcome_message": "What's this video project ultimately for — is it something you're planning to use commercially, or is it more personal/experimental at this stage?",
+        "error": null
+      },
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 2,
+        "turn_number": 3,
+        "user_text": "I'm the motion designer on it.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_unmet_exhausted"
+        },
+        "su_diff": [
+          "workflow_role unknown -> confirmed",
+          "current_phase 2 -> 3",
+          "completion_reason null -> gate_1_unmet_exhausted"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  }
+]
