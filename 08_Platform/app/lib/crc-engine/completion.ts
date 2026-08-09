@@ -12,12 +12,29 @@
  * own (post-hoc, scripted-loop) completion computation already produces,
  * just evaluated live, per turn, instead of once after a script finishes.
  *
- * Decline always short-circuits, at any phase: `gate1.state ===
- * 'not_applicable_declined'` already reflects an interview-scope decline
- * (evaluateGate1's own decline branch reads `su.opt_out_scope` directly,
- * and the accepted per-turn loop orders decline pre-processing before
- * gate evaluation -- Phase 7's own shipped bugfix -- so this state is
- * always live and current for the turn it's checked on). Per
+ * `[FIXED 2026-08-10]` An interview-scope decline (`stop_interview`) is
+ * checked directly against `optOutScope === 'interview'` -- passed in as
+ * its own parameter, never inferred from `gate1.state`. This module
+ * previously keyed off `gate1.state === 'not_applicable_declined'`, which
+ * is a Gate 1 (understanding) outcome, not a termination decision: per
+ * `evaluateGate1`'s own logic that state is only reachable when a decline
+ * occurred AND minimum understanding was still unmet, so a user who
+ * declined *after* already satisfying Gate 1 was silently left in an
+ * active, unfinished session -- a confirmed engine defect (found live
+ * against Production, 2026-08-10), and a direct contradiction of
+ * `PRD_CRC_v1.0.md` §9's User Override rule below. The same stale
+ * dependency also meant a `skip_question`/`skip_phase` decline issued
+ * before minimum understanding was met could trigger this same
+ * `not_applicable_declined` state and incorrectly end the *whole*
+ * interview -- not just the one component -- a second, more severe latent
+ * defect this fix resolves as a direct consequence, not a separate patch.
+ * Gates evaluate understanding; they do not, and now structurally cannot,
+ * determine whether an explicit user stop is honored -- that separation is
+ * the fix, not an implementation detail of it. `evaluateGate1`/`gates.ts`
+ * are unchanged; `not_applicable_declined` remains a meaningful, correct
+ * description of Gate 1's own state, just no longer completion's signal.
+ *
+ * Decline always short-circuits, at any phase, any gate state: per
  * `PRD_CRC_v1.0.md` §9's User Override rule, a decline ends things
  * "immediately... regardless of either gate's status" -- and, by the same
  * logic, regardless of phase too.
@@ -42,15 +59,22 @@
  */
 
 import type { Gate1Result, Gate2Result } from '@/lib/interview-engine/gates'
-import type { CompletionReason } from '@/types/interview-engine'
+import type { CompletionReason, OptOutScope } from '@/types/interview-engine'
 
 export interface CompletionResult {
   is_complete: boolean
   reason: CompletionReason
 }
 
-export function checkCompletion(gate1: Gate1Result, gate2: Gate2Result, phase: 1 | 2 | 3): CompletionResult {
-  if (gate1.state === 'not_applicable_declined') {
+export function checkCompletion(gate1: Gate1Result, gate2: Gate2Result, phase: 1 | 2 | 3, optOutScope: OptOutScope): CompletionResult {
+  // Interview-scope decline is an independent, higher-priority completion
+  // condition -- checked first, and never derived from gate1.state (see
+  // this module's own [FIXED 2026-08-10] header note for why). A single
+  // completion reason ('declined') covers both "declined before minimum
+  // understanding" and "declined after" -- that distinction is already
+  // fully derivable from gate_1_state/StructuredUnderstanding downstream
+  // and does not need its own completion-reason taxonomy entry.
+  if (optOutScope === 'interview') {
     return { is_complete: true, reason: 'declined' }
   }
 

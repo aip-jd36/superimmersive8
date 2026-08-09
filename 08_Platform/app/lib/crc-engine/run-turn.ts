@@ -37,10 +37,12 @@
  * still asks nothing further this turn regardless (Constraint B's own
  * suppression handles that immediately), and completion is never gated on
  * a phase-scope decline (only an interview-scope one is, via
- * `gate1.state === 'not_applicable_declined'`) -- so nothing is silently
- * wrong, only a one-turn delay in an internal bookkeeping value nothing
- * user-facing depends on this turn. Flagged for whoever validates this
- * against live scenarios next, not fixed speculatively now.
+ * `suForGates.opt_out_scope === 'interview'`, checked directly by
+ * `checkCompletion` -- see completion.ts's own `[FIXED 2026-08-10]` note;
+ * this was previously, and incorrectly, read off `gate1.state ===
+ * 'not_applicable_declined'` instead) -- so nothing is silently wrong,
+ * only a one-turn delay in an internal bookkeeping value nothing
+ * user-facing depends on this turn.
  *
  * `gate_2_state` (and the value fed to `checkCompletion`) uses the
  * `'interview'` evaluation scope, not `'phase'` -- matching
@@ -156,7 +158,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   const gate2Interview = evaluateGate2(suLoaded, suForGates, 'interview')
 
   const phase = computePhase(suForGates, boundaryStateLoaded)
-  const completion = checkCompletion(gate1, gate2Interview, phase)
+  const completion = checkCompletion(gate1, gate2Interview, phase, suForGates.opt_out_scope)
 
   const suAfter: StructuredUnderstanding = {
     ...suForGates,

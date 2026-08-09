@@ -45,6 +45,20 @@ function proposal(overrides: Partial<CandidateQuestionProposal> = {}): Candidate
   return { question_text: 'Which access surface did you use?', question_kind: 'follow_up_on_signal', target_signal_id: null, phase: 2, ...overrides }
 }
 
+/** kind: 'project_fact' candidate that attests intended_use as confirmed -- combined with toolCandidate(), satisfies Gate 1's minimumUnderstandingMet. */
+function intendedUseCandidate(overrides: Partial<CandidateObservation> = {}): CandidateObservation {
+  return {
+    proposal_id: 'p-use-1',
+    turn: 1,
+    raw_text: 'It is for an agency client ad campaign.',
+    kind: 'project_fact',
+    raw_fact_field: 'intended_use',
+    fact_confidence_hint: 'confirmed',
+    fact_value_hint: 'Paid ad campaign for an agency client',
+    ...overrides,
+  }
+}
+
 describe('runTurn -- single-turn cases', () => {
   test('a turn that extracts a fact but proposes no question -> acknowledgment, never an error', async () => {
     const outcome = await runTurn({ token: 't1', turnNumber: 1, userText: 'We used Runway.' }, deps({ extractor: constantExtractor([toolCandidate()]) }))
@@ -112,6 +126,90 @@ describe('runTurn -- decline handling', () => {
     await expect(runTurn({ token: 't5', turnNumber: 1, userText: 'skip', declineAction: 'stop_interview' }, throwingDeps)).resolves.toEqual(
       expect.objectContaining({ kind: 'complete' }),
     )
+  })
+})
+
+describe('runTurn -- stop_interview regression matrix (confirmed engine defect fix, 2026-08-10)', () => {
+  // The pure gate1/gate2/phase x optOutScope matrix lives in
+  // completion.test.ts (checkCompletion is where the fix actually is, and
+  // where it can be tested exhaustively and cheaply). These are the
+  // integration-level cases that can only be exercised through runTurn --
+  // the exact scenario the production bug was found in, and the
+  // pending_clarification interaction JD's regression matrix also required.
+
+  test('Gate 1 already met (tool identity + intended use both established) -> stop_interview still completes immediately, not left active', async () => {
+    const store = createInMemorySessionStore()
+    await runTurn(
+      { token: 't8', turnNumber: 1, userText: 'We made a short ad using Runway for an agency client.' },
+      deps({ extractor: constantExtractor([toolCandidate(), intendedUseCandidate()]) }, store),
+    )
+    const afterTurn1 = await store.load('t8')
+    // Sanity check the fixture actually reaches the exact precondition that
+    // exposed the bug -- Gate 1 genuinely met, not merely close.
+    expect(afterTurn1!.structured_understanding.gate_1_state).toBe('met')
+
+    const outcome = await runTurn({ token: 't8', turnNumber: 2, userText: 'skip', declineAction: 'stop_interview' }, deps({}, store))
+    expect(outcome.kind).toBe('complete')
+
+    const afterTurn2 = await store.load('t8')
+    expect(afterTurn2!.structured_understanding.completion_reason).toBe('declined')
+    expect(afterTurn2!.pending_clarification).toBeNull()
+  })
+
+  test('the exact production scenario: Gate 1 met on turn 1 (tool + intended use in one message), a real follow-up question left pending on turn 2, Stop on turn 3 -> turn 3 returns complete, and a fresh load (refresh) shows the completed session, never active', async () => {
+    const store = createInMemorySessionStore()
+    // Turn 1: both facts land in one message, exactly as in production
+    // ("We made a short ad using Runway for an agency client.") -- no
+    // question proposed this turn (default deps), just establishing Gate 1.
+    await runTurn(
+      { token: 't9', turnNumber: 1, userText: 'We made a short ad using Runway for an agency client.' },
+      deps({ extractor: constantExtractor([toolCandidate(), intendedUseCandidate()]) }, store),
+    )
+    const afterTurn1 = await store.load('t9')
+    expect(afterTurn1!.structured_understanding.gate_1_state).toBe('met')
+    const toolSignalId = afterTurn1!.structured_understanding.tool_mentions[0].mention_id
+
+    // Turn 2: a real follow_up_on_signal question (the actual kind that
+    // sets pending_clarification -- mirrors the live model's real
+    // "Which access tier or plan..." question before Stop was pressed).
+    const clarifyingProposal = proposal({ question_kind: 'follow_up_on_signal', target_signal_id: toolSignalId, question_text: 'Which access tier?' })
+    await runTurn(
+      { token: 't9', turnNumber: 2, userText: 'Not sure yet.' },
+      deps({ generator: constantCandidateQuestionGenerator(clarifyingProposal), decider: constantConstraintADecider({ should_ask: true, reason_code: 'MATERIALLY_IMPROVES_UNDERSTANDING', rationale: 'x' }) }, store),
+    )
+    const afterTurn2 = await store.load('t9')
+    expect(afterTurn2!.pending_clarification).not.toBeNull()
+
+    const outcome = await runTurn({ token: 't9', turnNumber: 3, userText: "I'd like to stop here.", declineAction: 'stop_interview' }, deps({}, store))
+    expect(outcome.kind).toBe('complete')
+
+    // "Refresh" is a fresh load of persisted state -- the same field
+    // (completion_reason) GET /api/crc/turn reads to decide 'active' vs
+    // 'complete'. Must never still read as active.
+    const refreshed = await store.load('t9')
+    expect(refreshed!.structured_understanding.completion_reason).not.toBeNull()
+    expect(refreshed!.pending_clarification).toBeNull()
+  })
+
+  test('an active pending_clarification at the moment of stop_interview does not block or delay completion', async () => {
+    const store = createInMemorySessionStore()
+    await runTurn({ token: 't10', turnNumber: 1, userText: 'We used Runway.' }, deps({ extractor: constantExtractor([toolCandidate()]) }, store))
+    const afterTurn1 = await store.load('t10')
+    const toolSignalId = afterTurn1!.structured_understanding.tool_mentions[0].mention_id
+
+    const clarifyingProposal = proposal({ question_kind: 'follow_up_on_signal', target_signal_id: toolSignalId, question_text: 'Which plan?' })
+    await runTurn(
+      { token: 't10', turnNumber: 2, userText: 'Not sure.' },
+      deps({ generator: constantCandidateQuestionGenerator(clarifyingProposal), decider: constantConstraintADecider({ should_ask: true, reason_code: 'MATERIALLY_IMPROVES_UNDERSTANDING', rationale: 'x' }) }, store),
+    )
+    const afterTurn2 = await store.load('t10')
+    // Precondition: a clarification is genuinely pending when Stop is pressed next.
+    expect(afterTurn2!.pending_clarification).not.toBeNull()
+
+    const outcome = await runTurn({ token: 't10', turnNumber: 3, userText: 'stop', declineAction: 'stop_interview' }, deps({}, store))
+    expect(outcome.kind).toBe('complete')
+    const afterTurn3 = await store.load('t10')
+    expect(afterTurn3!.pending_clarification).toBeNull()
   })
 })
 
