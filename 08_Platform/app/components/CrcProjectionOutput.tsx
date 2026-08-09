@@ -37,7 +37,8 @@ export function CrcProjectionOutput({ output }: { output: ProjectionOutput }) {
   if (isFullyEmpty) {
     return (
       <div className="text-sm text-muted-foreground">
-        No summary was generated for this conversation.
+        The interview is complete. There wasn&apos;t enough information shared to generate a summary this time -- nothing was lost, and you&apos;re
+        welcome to start a new conversation whenever you&apos;d like to share more.
       </div>
     )
   }
