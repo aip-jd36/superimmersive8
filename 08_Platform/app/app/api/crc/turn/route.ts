@@ -89,7 +89,7 @@ export function parseRequest(body: TurnRequestBody): ParsedRequest | { error: st
 }
 
 /** Only browser-safe fields -- see the module header and Phase 4's own exclusion list. */
-type TurnResponseBody =
+export type TurnResponseBody =
   | { status: 'question' | 'acknowledgment'; message: string }
   | { status: 'complete'; projection: ProjectionOutput }
   | { status: 'session_not_found' }
@@ -97,7 +97,7 @@ type TurnResponseBody =
   | { status: 'invalid_request'; error: string }
 
 /** Only browser-safe fields, same discipline as TurnResponseBody. */
-type SessionStatusResponseBody =
+export type SessionStatusResponseBody =
   | { status: 'new' }
   | { status: 'session_not_found' }
   | { status: 'active'; transcript: TranscriptEntry[] }
@@ -111,8 +111,21 @@ type SessionStatusResponseBody =
  * "already complete" short-circuit -- not a parallel reimplementation, the
  * same function, called the same way, for the same reason.
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   const cookieStore = cookies()
+
+  if (request.nextUrl.searchParams.get('restart') === 'true') {
+    // "Start Over" -- the cookie is httpOnly, so client JS cannot clear it
+    // itself; this is the one path that discards a session by explicit
+    // user action rather than resolving one. Does not touch the DB row
+    // (an orphaned row with no cookie pointing to it is harmless, same as
+    // any abandoned conversation) -- just stops the browser from
+    // presenting it.
+    const response = NextResponse.json<SessionStatusResponseBody>({ status: 'new' })
+    response.cookies.set(COOKIE_NAME, '', { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', path: '/', maxAge: 0 })
+    return response
+  }
+
   const token = cookieStore.get(COOKIE_NAME)?.value
   if (!token) {
     return NextResponse.json<SessionStatusResponseBody>({ status: 'new' })
