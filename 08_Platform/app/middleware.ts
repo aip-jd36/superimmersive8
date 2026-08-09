@@ -1,7 +1,30 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { PILOT_ACCESS_COOKIE_NAME, PILOT_ACCESS_COOKIE_VALUE } from '@/lib/crc-engine/pilot-access'
 
 export async function middleware(request: NextRequest) {
+  // CRC Limited Pilot, Part 6 -- shared-code gate, checked before the
+  // Supabase auth setup below since it doesn't need it at all. Exempts the
+  // access page itself and its own validation route, or no one could ever
+  // pass the gate.
+  const pathname = request.nextUrl.pathname
+  const isCrcPath = pathname.startsWith('/crc')
+  const isCrcApiPath = pathname.startsWith('/api/crc')
+  const isPilotAccessExempt = pathname === '/crc/access' || pathname === '/api/crc/pilot-access'
+
+  if ((isCrcPath || isCrcApiPath) && !isPilotAccessExempt) {
+    const pilotCookie = request.cookies.get(PILOT_ACCESS_COOKIE_NAME)?.value
+    if (pilotCookie !== PILOT_ACCESS_COOKIE_VALUE) {
+      if (isCrcApiPath) {
+        return NextResponse.json({ status: 'pilot_access_required' }, { status: 401 })
+      }
+      const redirectUrl = request.nextUrl.clone()
+      redirectUrl.pathname = '/crc/access'
+      redirectUrl.searchParams.set('redirectedFrom', pathname)
+      return NextResponse.redirect(redirectUrl)
+    }
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -76,5 +99,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/submit/:path*', '/record/:path*', '/certify/:path*'],
+  matcher: ['/dashboard/:path*', '/submit/:path*', '/record/:path*', '/certify/:path*', '/crc/:path*', '/api/crc/:path*'],
 }
