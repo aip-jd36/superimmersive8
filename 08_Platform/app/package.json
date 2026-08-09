@@ -7,9 +7,18 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "eval:extraction": "tsx lib/interview-engine/eval/run-real-model-eval.ts",
+    "eval:candidate-question": "tsx lib/interview-engine/eval/run-real-model-candidate-question-eval.ts",
+    "eval:candidate-question-integration": "tsx lib/interview-engine/eval/run-real-model-integration-eval.ts",
+    "eval:decision": "tsx lib/interview-engine/eval/run-real-model-decision-eval.ts",
+    "eval:dialogue-mock-dryrun": "tsx lib/interview-engine/eval/run-mock-dialogue-eval.ts",
+    "eval:dialogue-live": "tsx lib/interview-engine/eval/run-real-model-dialogue-eval.ts",
+    "gallery:understood-summary": "tsx lib/projection-layer/gallery/render-understood-summary-gallery.ts",
+    "eval:crc-runtime-live": "tsx --env-file=.env.local lib/crc-engine/eval/run-live-turn-eval.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
     "@hookform/resolvers": "^3.3.4",
     "@marsidev/react-turnstile": "^1.5.2",
     "@myriaddreamin/typst-ts-node-compiler": "^0.7.0",
@@ -45,6 +54,7 @@
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
     "ts-jest": "^29.4.11",
+    "tsx": "^4.23.9",
     "typescript": "^5.3.3"
   }
 }

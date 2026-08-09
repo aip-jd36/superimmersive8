@@ -1,0 +1,77 @@
+[
+  {
+    "scenario_id": "gate2_stabilization",
+    "trial": 1,
+    "turns": [
+      {
+        "scenario_id": "gate2_stabilization",
+        "trial": 1,
+        "turn_number": 1,
+        "user_text": "We used Runway Gen-3, team API plan, for a paid social ad campaign.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "project:workflow_role",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "project fact workflow_role, currently unknown"
+        },
+        "generated_candidate_question": {
+          "question_text": "Can you walk me through how Runway Gen-3 fits into your workflow for this project — like, what role is it playing in producing the final video?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "project:workflow_role",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_WORKFLOW_FACT",
+          "rationale": "The workflow_role fact is currently unknown, and understanding how Runway Gen-3 is used in producing the final video (e.g., generating full video vs. just assisting) is a genuinely missing fact needed to assess commercial-use status."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "Can you walk me through how Runway Gen-3 fits into your workflow for this project — like, what role is it playing in producing the final video?",
+        "error": null
+      },
+      {
+        "scenario_id": "gate2_stabilization",
+        "trial": 1,
+        "turn_number": 2,
+        "user_text": "I'm the producer.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": null,
+        "gate_1_state": null,
+        "gate_2_state": null,
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [],
+        "boundary_state_diff": [],
+        "outcome_kind": "error",
+        "outcome_message": null,
+        "error": "Failed to parse structured output: Error: Failed to parse structured output: Unterminated string in JSON at position 92 (line 1 column 93)"
+      }
+    ],
+    "completed": false,
+    "final_phase": null,
+    "projection_check": null,
+    "aborted_error": "Failed to parse structured output: Error: Failed to parse structured output: Unterminated string in JSON at position 92 (line 1 column 93)"
+  }
+]

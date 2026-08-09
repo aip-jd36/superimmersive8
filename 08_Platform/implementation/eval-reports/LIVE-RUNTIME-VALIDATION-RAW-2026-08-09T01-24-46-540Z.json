@@ -1,0 +1,86 @@
+[
+  {
+    "scenario_id": "phase_advances_within_bundled_turn",
+    "trial": 1,
+    "turns": [
+      {
+        "scenario_id": "phase_advances_within_bundled_turn",
+        "trial": 1,
+        "turn_number": 1,
+        "user_text": "We used ElevenLabs, and I'm the sound designer on it.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_unmet_exhausted"
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "phase_advances_within_bundled_turn",
+    "trial": 2,
+    "turns": [
+      {
+        "scenario_id": "phase_advances_within_bundled_turn",
+        "trial": 2,
+        "turn_number": 1,
+        "user_text": "We used ElevenLabs, and I'm the sound designer on it.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_unmet_exhausted"
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  }
+]

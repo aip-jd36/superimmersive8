@@ -18,11 +18,12 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | 2026-08-05, via direct fetch of `runway.com/terms-of-use` |
 | Source | Runway Terms of Use, §4.4 and §5 — https://runway.com/terms-of-use (primary source, directly fetched and quoted) |
 | Status | **Verified** — ownership, commercial-use grant, and training-data collection basics confirmed directly against primary source text. Enterprise training opt-out claim remains unconfirmed (see Training Data Disclosure). |
-| CRC-Eligible | **Yes** |
-| CRC Publication Scope | CRC may state only that Runway's current Terms permit commercial use across subscription tiers when the Terms of Service are followed, and that the Free plan differs primarily by watermarking rather than commercial-use rights. This publication scope does not extend to ownership analysis, enterprise training provisions, downstream IP clearance, platform suitability for a particular commercial project, or broader commercial-readiness conclusions. |
-| CRC Candidate Statement (reference only, not yet a user-facing Knowledge Card) | Runway's current Terms allow commercial use across all subscription tiers, provided you comply with the Terms of Service. The Free plan mainly differs by watermarking rather than commercial-use permissions. |
-| CRC Decision Date | 2026-08-05 |
-| CRC Approver | JD |
+
+#### CRC Claims
+
+| Claim ID | CRC-Eligible | CRC Publication Scope | CRC Candidate Statement (reference only, not yet a user-facing Knowledge Card) | CRC Decision Date | CRC Approver |
+|---|---|---|---|---|---|
+| `runway-gen3` | **Yes** | CRC may state only that Runway's current Terms permit commercial use across subscription tiers when the Terms of Service are followed, and that the Free plan differs primarily by watermarking rather than commercial-use rights. This publication scope does not extend to ownership analysis, enterprise training provisions, downstream IP clearance, platform suitability for a particular commercial project, or broader commercial-readiness conclusions. | Runway's current Terms allow commercial use across all subscription tiers, provided you comply with the Terms of Service. The Free plan mainly differs by watermarking rather than commercial-use permissions. | 2026-08-05 | JD |
 
 ### Kling
 
@@ -36,11 +37,12 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | 2026-08-05 — independent re-verification attempted via 3 additional domains (`kling.ai`, `klingai.com`, `app.klingai.com`, all blocked HTTP 446) and a new targeted search query; JD separately reports direct browser access to the live page. See Status for how this is being treated. |
 | Source | Direct automated fetch still not achieved by this tool across four domain variants (`kling.ai`, `klingai.com`, `app.klingai.com` — all HTTP 446; `home.kling.ai` as referenced by JD does not resolve via DNS from this environment — **worth JD double-checking that exact hostname**, since it may be a typo, a VPN/region-gated address, or an internal-only mirror). Verification for this row rests on convergent evidence: three independently-run search queries returning mutually consistent, increasingly specific legalese-quality excerpts, plus JD's own direct browser read. Treated as primary-source verification performed by JD directly, not by this tool's automated fetch — a distinct but equally legitimate verification modality (see MATRIX-LEARNINGS.md). |
 | Status | **Verified** — on the strength of JD's direct primary-source read, corroborated independently (not merely accepted) by three convergent secondary excerpts this pass gathered separately. Automated re-fetch by this tool remains blocked; if that ever becomes necessary to reproduce independently of JD's own access, it hasn't been solved, only worked around. |
-| CRC-Eligible | **Yes** |
-| CRC Publication Scope | CRC may state only that Kling's commercial-use permissions differ by account type under the current Terms: paid members may use generated output commercially, while free users require Kling's written permission for commercial use. This publication scope does not extend to branding requirements, training-data provisions, downstream IP clearance, ownership analysis, or broader commercial-readiness conclusions. |
-| CRC Candidate Statement (reference only, not yet a user-facing Knowledge Card) | Kling's commercial-use permissions depend on your account type. Under the current Terms, paid members may use generated output commercially, while free users require Kling's written permission for commercial use. |
-| CRC Decision Date | 2026-08-05 |
-| CRC Approver | JD |
+
+#### CRC Claims
+
+| Claim ID | CRC-Eligible | CRC Publication Scope | CRC Candidate Statement (reference only, not yet a user-facing Knowledge Card) | CRC Decision Date | CRC Approver |
+|---|---|---|---|---|---|
+| `kling` | **Yes** | CRC may state only that Kling's commercial-use permissions differ by account type under the current Terms: paid members may use generated output commercially, while free users require Kling's written permission for commercial use. This publication scope does not extend to branding requirements, training-data provisions, downstream IP clearance, ownership analysis, or broader commercial-readiness conclusions. | Kling's commercial-use permissions depend on your account type. Under the current Terms, paid members may use generated output commercially, while free users require Kling's written permission for commercial use. | 2026-08-05 | JD |
 
 ### Pika
 
@@ -54,11 +56,12 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | 2026-08-06 — direct fetch of `pika.art/pricing` succeeded (unlike prior JS-rendering blocks on `/terms-of-service` and `/acceptable-use-policy` from the same domain). First fetch attempt returned an internally implausible result (commercial use "listed" identically across all four tiers including Free, contradicting the already-confirmed ToS language) and was not trusted; re-run with a stricter literal-quote-only prompt produced a consistent, plausible result instead. Treat the first fetch as a discarded artifact, not corroborating evidence. |
 | Source | Pika pricing page — https://pika.art/pricing (primary source, directly fetched and quoted, literal-quote-only prompt on the second, trusted attempt). ToS quote per prior pass, still not independently fetched directly — see prior Source note for `/terms-of-service` and `/acceptable-use-policy` access failures. |
 | Status | **Verified** — tier-to-commercial-use mapping now confirmed via direct primary-source fetch of Pika's own pricing page, in addition to the prior convergent-evidence basis (JD's direct read + independently-located ToS excerpt). Feature-level granularity beyond tier remains an open, explicitly-flagged gap, not folded into this Status. |
-| CRC-Eligible | **Yes** |
-| CRC Publication Scope | CRC may state that Pika's Free tier is limited to personal, non-commercial use, and that current paid plans include commercial-use rights. CRC must not imply that every feature within every paid plan is commercially licensed beyond what Pika's published documentation explicitly confirms. |
-| CRC Candidate Statement (reference only, not yet a user-facing Knowledge Card) | Pika's current Terms restrict the Free tier to personal, non-commercial use. Current paid plans include commercial-use rights, so if you're using Pika professionally it's worth confirming which subscription you're on. |
-| CRC Decision Date | 2026-08-06 |
-| CRC Approver | JD |
+
+#### CRC Claims
+
+| Claim ID | CRC-Eligible | CRC Publication Scope | CRC Candidate Statement (reference only, not yet a user-facing Knowledge Card) | CRC Decision Date | CRC Approver |
+|---|---|---|---|---|---|
+| `pika` | **Yes** | CRC may state that Pika's Free tier is limited to personal, non-commercial use, and that current paid plans include commercial-use rights. CRC must not imply that every feature within every paid plan is commercially licensed beyond what Pika's published documentation explicitly confirms. | Pika's current Terms restrict the Free tier to personal, non-commercial use. Current paid plans include commercial-use rights, so if you're using Pika professionally it's worth confirming which subscription you're on. | 2026-08-06 | JD |
 
 ### Google Veo
 
@@ -74,10 +77,12 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | 2026-08-05 — attempted, not achieved (page truncation). |
 | Source | Attempted: `cloud.google.com/terms/generative-ai-indemnified-services` (truncated before relevant content). Secondary sourcing only otherwise. Note: search results also surfaced non-official lookalike domains (veo3-1.me, veo3o1.com, veo3ai.io) — none used as sourcing here. |
 | Status | **Needs Reverification** — treat as "likely similar to the Gemini API row's confirmed pattern, not yet independently checked," not as verified. |
-| CRC-Eligible | **Pending** — Status is Needs Reverification, not Verified, so CRC-Eligible is Pending by definition |
-| CRC Publication Scope | — |
-| CRC Decision Date | — |
-| CRC Approver | — |
+
+#### CRC Claims
+
+| Claim ID | CRC-Eligible | CRC Publication Scope | CRC Candidate Statement (reference only, not yet a user-facing Knowledge Card) | CRC Decision Date | CRC Approver |
+|---|---|---|---|---|---|
+| `google-veo` | **Pending** — Status is Needs Reverification, not Verified, so CRC-Eligible is Pending by definition | — | — | — | — |
 
 ### Adobe Firefly
 
@@ -91,10 +96,12 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | 2026-08-05 — **reverification attempted, not achieved.** See Status. |
 | Source | Attempted: `business.adobe.com/products/firefly-business/firefly-ai-approach.html` (timeout), `helpx.adobe.com/firefly/web/get-started/learn-the-basics/adobe-firefly-faq.html` (timeout), `wwwimages2.adobe.com/.../adobe-generative-ai-product-specific-terms-...pdf` (unparseable binary PDF). Obtained: Computerworld, "Adobe offers copyright indemnification for Firefly AI-based image app users" — journalism quoting an Adobe spokesperson directly, but dated to the 2023 beta announcement (historical corroboration, not current-terms confirmation). |
 | Status | **Needs Reverification** — unchanged from before this pass, but now for a more precise reason: a genuine attempt was made and partially succeeded (historical claim origin confirmed) without reaching current primary-source terms. Effort spent does not equal verification achieved — see MATRIX-LEARNINGS.md. |
-| CRC-Eligible | **Pending** — Status is Needs Reverification, not Verified, so CRC-Eligible is Pending by definition; Yes and No are not meaningful until Status resolves to Verified |
-| CRC Publication Scope | — |
-| CRC Decision Date | — |
-| CRC Approver | — |
+
+#### CRC Claims
+
+| Claim ID | CRC-Eligible | CRC Publication Scope | CRC Candidate Statement (reference only, not yet a user-facing Knowledge Card) | CRC Decision Date | CRC Approver |
+|---|---|---|---|---|---|
+| `adobe-firefly` | **Pending** — Status is Needs Reverification, not Verified, so CRC-Eligible is Pending by definition; Yes and No are not meaningful until Status resolves to Verified | — | — | — | — |
 
 ### OpenAI Sora — DISCONTINUED
 
@@ -108,10 +115,12 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | 2026-08-01, via direct web search against OpenAI's official Help Center article ("What to know about the Sora discontinuation," help.openai.com/en/articles/20001152) |
 | Source | OpenAI Help Center (primary source) — corrects an earlier version of this row that cited only `CLAUDE.md`'s internal marketing-copy note ("OpenAI shut down Sora, Mar 2026"), which was accurate as to the announcement timing but imprecise as to the actual discontinuation dates. Kept here as a reminder: an internal doc citing a fact is not the same as a primary-source verification of that fact — this row was corrected exactly because the distinction wasn't being enforced. |
 | Status | **Verified — discontinuation dates.** Historical commercial ToS terms (what Sora's paid-tier commercial rights actually were while live) remain **Unconfirmed**. Kept as a tool option in RecordForm/CertForm so creators with pre-shutdown Sora footage can still submit it. |
-| CRC-Eligible | **Pending** — Status is a compound value (Verified for discontinuation dates only, Unconfirmed for historical ToS terms), not a clean Verified, so CRC-Eligible is Pending by definition until Status resolves to a single unambiguous value |
-| CRC Publication Scope | — |
-| CRC Decision Date | — |
-| CRC Approver | — |
+
+#### CRC Claims
+
+| Claim ID | CRC-Eligible | CRC Publication Scope | CRC Candidate Statement (reference only, not yet a user-facing Knowledge Card) | CRC Decision Date | CRC Approver |
+|---|---|---|---|---|---|
+| `openai-sora` | **Pending** — Status is a compound value (Verified for discontinuation dates only, Unconfirmed for historical ToS terms), not a clean Verified, so CRC-Eligible is Pending by definition until Status resolves to a single unambiguous value | — | — | — | — |
 
 ### Gemini API (Nano Banana image generation)
 
@@ -127,10 +136,12 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | 2026-08-05, via direct fetch of `ai.google.dev/gemini-api/terms` |
 | Source | Gemini API Additional Terms of Service — https://ai.google.dev/gemini-api/terms (primary source, directly fetched and quoted). Does **not** cover the consumer Gemini app — see its own row below, now independently verified (not inferred from this row). |
 | Status | **Verified** — for the Gemini API access path specifically. Consumer-app terms and Vertex AI/Gemini Business terms are separate surfaces governed by different documents; do not assume this row's findings apply to those paths without independent verification. |
-| CRC-Eligible | **Pending** |
-| CRC Publication Scope | — |
-| CRC Decision Date | — |
-| CRC Approver | — |
+
+#### CRC Claims
+
+| Claim ID | CRC-Eligible | CRC Publication Scope | CRC Candidate Statement (reference only, not yet a user-facing Knowledge Card) | CRC Decision Date | CRC Approver |
+|---|---|---|---|---|---|
+| `gemini-api` | **Pending** | — | — | — | — |
 
 ### Gemini Consumer App (Nano Banana image generation)
 
@@ -148,10 +159,12 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | 2026-08-06, via direct fetch of `policies.google.com/terms` and `policies.google.com/terms/generative-ai/use-policy` |
 | Source | Google Terms of Service — https://policies.google.com/terms (primary source, directly fetched and quoted); Generative AI Prohibited Use Policy — https://policies.google.com/terms/generative-ai/use-policy (primary source, directly fetched and quoted); service mapping confirmed via https://policies.google.com/terms/service-specific. |
 | Status | **Verified** — for the ownership disclaimer and the prohibited-use content policy specifically. Commercial-use-rights-by-tier is an unresolved gap, not a confirmed absence — stated explicitly per the Status convention, not left implicit in the Status label. |
-| CRC-Eligible | **Pending** |
-| CRC Publication Scope | — |
-| CRC Decision Date | — |
-| CRC Approver | — |
+
+#### CRC Claims
+
+| Claim ID | CRC-Eligible | CRC Publication Scope | CRC Candidate Statement (reference only, not yet a user-facing Knowledge Card) | CRC Decision Date | CRC Approver |
+|---|---|---|---|---|---|
+| `gemini-consumer-app` | **Pending** | — | — | — | — |
 
 ### Midjourney
 
@@ -165,11 +178,12 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | 2026-08-05, via direct fetch of official Midjourney ToS (GitHub-hosted primary source) |
 | Source | Midjourney Terms of Service — https://github.com/midjourney/docs/blob/main/terms-of-service-discord.md (primary source, directly fetched and quoted; Midjourney's own GitHub org). A separate `docs.midjourney.com` help-center article specifically on commercial use was found but returned HTTP 403 (blocked) — the GitHub-hosted ToS was used instead and is itself the primary legal document, not a secondary summary. |
 | Status | **Verified** |
-| CRC-Eligible | **Yes** |
-| CRC Publication Scope | CRC may state only that Midjourney's commercial-use permissions differ by subscription under the current Terms: free users are limited to non-commercial use, while paid members may use generated assets commercially. CRC may also state that Midjourney's Terms require a corporate membership plan when the Service is used for the benefit of a company with more than US$1 million in annual gross revenue. This publication scope does not extend to Midjourney's ownership language, copyright analysis, training-data licensing, downstream IP clearance, or broader commercial-readiness conclusions. |
-| CRC Candidate Statement (reference only, not yet a user-facing Knowledge Card) | Midjourney's commercial-use permissions depend on your subscription. Under the current Terms, free users are limited to non-commercial use, while paid members may use generated assets commercially. If the Service is being used for the benefit of a company with more than US$1 million in annual gross revenue, Midjourney's Terms also require a corporate membership plan. |
-| CRC Decision Date | 2026-08-05 |
-| CRC Approver | JD |
+
+#### CRC Claims
+
+| Claim ID | CRC-Eligible | CRC Publication Scope | CRC Candidate Statement (reference only, not yet a user-facing Knowledge Card) | CRC Decision Date | CRC Approver |
+|---|---|---|---|---|---|
+| `midjourney` | **Yes** | CRC may state only that Midjourney's commercial-use permissions differ by subscription under the current Terms: free users are limited to non-commercial use, while paid members may use generated assets commercially. CRC may also state that Midjourney's Terms require a corporate membership plan when the Service is used for the benefit of a company with more than US$1 million in annual gross revenue. This publication scope does not extend to Midjourney's ownership language, copyright analysis, training-data licensing, downstream IP clearance, or broader commercial-readiness conclusions. | Midjourney's commercial-use permissions depend on your subscription. Under the current Terms, free users are limited to non-commercial use, while paid members may use generated assets commercially. If the Service is being used for the benefit of a company with more than US$1 million in annual gross revenue, Midjourney's Terms also require a corporate membership plan. | 2026-08-05 | JD |
 
 ### ElevenLabs
 
@@ -185,11 +199,15 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 | Last Verified | 2026-08-05, via direct fetch of `elevenlabs.io/terms-of-use` and `elevenlabs.io/safety` |
 | Source | ElevenLabs Terms of Use — https://elevenlabs.io/terms-of-use (primary source, directly fetched and quoted); ElevenLabs Safety page — https://elevenlabs.io/safety (primary source, directly fetched and quoted). Prohibited Content & Uses Policy referenced but not independently fetched this pass. |
 | Status | **Verified** — for commercial-use tiering and ownership. Celebrity/consent-specific restrictions confirmed at the product-feature level; the underlying detailed policy document remains unread, so treat the consent-mechanism specifics as **Needs Reverification** even though the row's overall Status is Verified for the core commercial terms. |
-| CRC-Eligible | **Two independent claim-level dispositions — do not read as one row-level value.** **Claim A (Commercial rights): Yes.** **Claim B (Voice, likeness, and consent): No.** |
-| CRC Publication Scope | **Claim A (Commercial rights):** CRC may state only that ElevenLabs' Free tier is limited to non-commercial use, that paid tiers permit commercial use, and that users retain rights to their generated output under the current Terms. This publication scope does not extend to training-data licensing, voice-cloning, consent, likeness-related provisions, downstream IP clearance, or broader commercial-readiness conclusions. **Claim B (Voice, likeness, and consent):** Withheld under CRC Publication Policy Principle 3. Voice-cloning, consent, and likeness-related provisions are withheld regardless of verification status — describing platform-level safeguards could imply that uses not blocked by the platform are acceptable; those questions require contextual human review. **This is a substantive publication-policy decision, not Pending pending additional verification.** The unread detailed Prohibited Content & Uses Policy remains a real evidence gap, but closing it would not by itself resolve the publication concern — see SI8 Interpretation and the Status field above for why. |
-| CRC Candidate Statement (reference only, not yet a user-facing Knowledge Card) | **Claim A only** — Claim B has no candidate statement; it is withheld, not pending a draft. ElevenLabs' current Terms restrict the Free tier to non-commercial use, while paid tiers permit commercial use of generated audio. Users retain rights to their output under those Terms. |
-| CRC Decision Date | 2026-08-06 |
-| CRC Approver | JD |
+
+#### CRC Claims
+
+**Two independent claim-level dispositions — do not read this row as one combined value.** See `PRD_LIVING_NOTEBOOK.md` § CRC-Eligible Governance § CRC Claims sub-table for the general convention this row is the worked example for.
+
+| Claim ID | CRC-Eligible | CRC Publication Scope | CRC Candidate Statement (reference only, not yet a user-facing Knowledge Card) | CRC Decision Date | CRC Approver |
+|---|---|---|---|---|---|
+| `elevenlabs-commercial-tiering` | **Yes** | CRC may state only that ElevenLabs' Free tier is limited to non-commercial use, that paid tiers permit commercial use, and that users retain rights to their generated output under the current Terms. This publication scope does not extend to training-data licensing, voice-cloning, consent, likeness-related provisions, downstream IP clearance, or broader commercial-readiness conclusions. | ElevenLabs' current Terms restrict the Free tier to non-commercial use, while paid tiers permit commercial use of generated audio. Users retain rights to their output under those Terms. | 2026-08-06 | JD |
+| `elevenlabs-voice-consent` | **No** | None — withheld under CRC Publication Policy Principle 3. Voice-cloning, consent, and likeness-related provisions are withheld regardless of verification status — describing platform-level safeguards could imply that uses not blocked by the platform are acceptable; those questions require contextual human review. **This is a substantive publication-policy decision, not Pending pending additional verification.** The unread detailed Prohibited Content & Uses Policy remains a real evidence gap, but closing it would not by itself resolve the publication concern — see SI8 Interpretation and the Status field above for why. | — (withheld, not pending a draft) | 2026-08-06 | JD |
 
 ---
 
@@ -197,6 +215,7 @@ Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platf
 
 - Every row except Sora's discontinuation dates is currently `Unconfirmed` or `Needs Reverification` — that's an honest starting state, not an oversight. This matrix has not yet been populated by a deliberate ToS review pass; it's been populated by what naturally surfaced in marketing and positioning work.
 - The highest-value next step for this file specifically (not committed, just the obvious candidate) would be a single focused pass verifying Runway, Kling, and Pika's current commercial terms directly against their own ToS pages, since those are the three tools actually named in live marketing copy — and since the Sora row above is a live example of why a secondary/internal citation isn't sufficient sourcing for a `Verified` status.
-- **CRC-Eligible (added 2026-08-05):** every row is currently `Pending` — nothing is grandfathered in as eligible for the unsupervised CRC channel, including rows with a `Verified` Status. `CRC-Eligible` is a separate, JD-owned publication-approval decision, distinct from `Status` (which measures confidence in the underlying fact, not confidence in releasing it through an automated channel with no human review at time of use). Schema, governance, and reset rules: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platform Rights Matrix § CRC-Eligible Governance.
-- **CRC Publication Scope / CRC Decision Date / CRC Approver (added 2026-08-05; field renamed from "CRC Publication Note" 2026-08-05 after the Runway review surfaced a wording risk — "approved" read as SI8 approving the platform, not JD scoping a statement for release):** accompany `CRC-Eligible` on every row, all currently `—` since no publication decisions have been made yet. Approval is claim-level, not row-level — `CRC Publication Scope` must record the exact statement CRC is permitted to make (and, for compound rows like ElevenLabs, exactly which sub-claim is excluded), not just restate that the row is generally trustworthy. **For a `No` decision, write `None — withheld because...` rather than the reason alone** — the field should still read as a scope (zero, stated explicitly) even when nothing is approved, not drift into a generic notes field. Judgment for filling these in: `notebook/CRC-PUBLICATION-POLICY.md`.
+- **CRC-Eligible (added 2026-08-05):** nothing is grandfathered in as eligible for the unsupervised CRC channel, including rows with a `Verified` Status — new rows and new claims both default to `Pending`. `CRC-Eligible` is a separate, JD-owned publication-approval decision, distinct from `Status` (which measures confidence in the underlying fact, not confidence in releasing it through an automated channel with no human review at time of use). Schema, governance, and reset rules: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platform Rights Matrix § CRC-Eligible Governance.
+- **CRC Publication Scope / CRC Candidate Statement / CRC Decision Date / CRC Approver (added 2026-08-05; field renamed from "CRC Publication Note" 2026-08-05 after the Runway review surfaced a wording risk — "approved" read as SI8 approving the platform, not JD scoping a statement for release):** accompany `CRC-Eligible` on every claim. Approval is claim-level, not row-level. **For a `No` decision, write `None — withheld because...` rather than the reason alone** — the field should still read as a scope (zero, stated explicitly) even when nothing is approved, not drift into a generic notes field. Judgment for filling these in: `notebook/CRC-PUBLICATION-POLICY.md`.
+- **CRC Claims sub-table, added 2026-08-08:** every row now carries its `CRC-Eligible`/`CRC Publication Scope`/`CRC Candidate Statement`/`CRC Decision Date`/`CRC Approver` fields in a `#### CRC Claims` sub-table beneath the row's main field-value table, one sub-table row per claim, keyed by a stable `Claim ID` — not interleaved as prose inside a single cell. A single-claim row (the common case: Runway, Kling, Pika, Veo, Firefly, Sora, Gemini API, Gemini Consumer App, Midjourney) has exactly one claims-sub-table row, and its `Claim ID` is simply the platform's existing canonical tool identifier, unchanged (`runway-gen3`, `kling`, etc.) — no renaming, no new judgment, a mechanical restructuring of values that were already there. A compound row (ElevenLabs is the only current example) has one claims-sub-table row per independently-decided claim, `Claim ID` namespaced as `<canonical-identifier>-<claim-slug>` (`elevenlabs-commercial-tiering`, `elevenlabs-voice-consent`). This is a **storage-shape normalization of already-existing claim-level decisions, not a new kind of decision or a re-review of any existing `Yes`/`No`/`Pending` disposition or scope text** — every value migrated here is copied verbatim from what this row already stated before 2026-08-08. Full schema convention and rationale: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § CRC-Eligible Governance § CRC Claims sub-table. This is also the structure `RETRIEVAL_ENGINE_ARCHITECTURE.md` §3 Step 3 keys its deterministic eligibility lookup on — `Claim ID` is the field the Retrieval Engine actually matches against; `CRC Publication Scope` and `CRC Candidate Statement` remain human-readable governance/audit prose that Retrieval passes through verbatim and never parses.
 - **Multi-surface row splitting, resolved 2026-08-06:** the "one Tool, multiple access paths" gap flagged during the original verification pass (see `MATRIX-LEARNINGS.md`, "Fields that were missing") is now resolved for the Gemini image models — split into "Gemini API" and "Gemini Consumer App" as separate rows, since they're governed by different Terms of Service documents, not different tiers of one relationship. This is the applied precedent for any future multi-surface tool: split by governing document, don't add an `Access Path` field to one row. Veo has the identical unresolved problem and has not yet had the same split applied.

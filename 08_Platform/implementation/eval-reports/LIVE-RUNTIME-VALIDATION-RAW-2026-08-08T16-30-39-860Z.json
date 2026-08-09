@@ -1,0 +1,359 @@
+[
+  {
+    "scenario_id": "correction_after_supersession",
+    "trial": 1,
+    "turns": [
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 1,
+        "turn_number": 1,
+        "user_text": "We used Midjourney for the visuals.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "What's the intended use for this project—are you looking to use it commercially, or is this more exploratory?",
+          "question_kind": "other",
+          "target_signal_id": "project:intended_use",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently unknown, and this is a core fact needed to assess commercial-use status; any plausible answer would fill this gap."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "What's the intended use for this project—are you looking to use it commercially, or is this more exploratory?",
+        "error": null
+      },
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 1,
+        "turn_number": 2,
+        "user_text": "Actually, sorry -- that was wrong, we used Runway for the visuals, not Midjourney.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "c1-resolved",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'runway-gen3'"
+        },
+        "generated_candidate_question": {
+          "question_text": "Now that we know it was Runway Gen-3, how did you actually access it — like through a paid plan, a free trial, or maybe a team/enterprise account?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1-resolved",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "VISIBILITY_GAP_CLARIFIABLE",
+          "rationale": "Access surface and plan tier for the resolved tool (Runway Gen-3) are both currently unknown, and this is material for determining commercial-use status; a plausible answer would fill this genuine gap.rialize."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "tool_mention c1 superseded_by null -> c1-resolved",
+          "+tool_mention c1-resolved (runway-gen3)"
+        ],
+        "boundary_state_diff": [
+          "follow_ups_used[c1] 0 -> 1"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "Now that we know it was Runway Gen-3, how did you actually access it — like through a paid plan, a free trial, or maybe a team/enterprise account?",
+        "error": null
+      },
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 1,
+        "turn_number": 3,
+        "user_text": "I'm the motion designer on it.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_unmet_exhausted"
+        },
+        "su_diff": [
+          "workflow_role unknown -> confirmed",
+          "current_phase 2 -> 3",
+          "completion_reason null -> gate_1_unmet_exhausted"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "correction_after_supersession",
+    "trial": 2,
+    "turns": [
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 2,
+        "turn_number": 1,
+        "user_text": "We used Midjourney for the visuals.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Can you tell me a bit more about how you're planning to use this project — is it for something commercial, or more personal/experimental?",
+          "question_kind": "other",
+          "target_signal_id": null,
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently unknown and is a core project fact; a plausible answer would establish whether this is commercial or personal/experimental use, directly filling a missing gate-relevant fact."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "Can you tell me a bit more about how you're planning to use this project — is it for something commercial, or more personal/experimental?",
+        "error": null
+      },
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 2,
+        "turn_number": 2,
+        "user_text": "Actually, sorry -- that was wrong, we used Runway for the visuals, not Midjourney.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "c1-resolved",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'runway-gen3'"
+        },
+        "generated_candidate_question": {
+          "question_text": "Now that we've confirmed it's Runway Gen-3 for the visuals, what plan or tier are you using with it — like a free trial, personal subscription, or a team/enterprise plan?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1-resolved",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "VISIBILITY_GAP_CLARIFIABLE",
+          "rationale": "Plan tier for the confirmed tool (Runway Gen-3) is currently unknown and directly bears on commercial-use status, so a plausible answer would fill a genuine gap in structured understanding.4"
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "tool_mention c1 superseded_by null -> c1-resolved",
+          "+tool_mention c1-resolved (runway-gen3)"
+        ],
+        "boundary_state_diff": [
+          "follow_ups_used[c1] 0 -> 1"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "Now that we've confirmed it's Runway Gen-3 for the visuals, what plan or tier are you using with it — like a free trial, personal subscription, or a team/enterprise plan?",
+        "error": null
+      },
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 2,
+        "turn_number": 3,
+        "user_text": "I'm the motion designer on it.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_unmet_exhausted"
+        },
+        "su_diff": [
+          "workflow_role unknown -> confirmed",
+          "current_phase 2 -> 3",
+          "completion_reason null -> gate_1_unmet_exhausted"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  },
+  {
+    "scenario_id": "correction_after_supersession",
+    "trial": 3,
+    "turns": [
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 3,
+        "turn_number": 1,
+        "user_text": "We used Midjourney for the visuals.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "What do you plan to use this project for—like, is it heading toward commercial release, or is it more personal/experimental at this point?",
+          "question_kind": "other",
+          "target_signal_id": "project:intended_use",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently unknown and is a core project fact; a plausible answer would establish whether the project is commercial, personal, or experimental, materially advancing gate progression."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "What do you plan to use this project for—like, is it heading toward commercial release, or is it more personal/experimental at this point?",
+        "error": null
+      },
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 3,
+        "turn_number": 2,
+        "user_text": "Actually, sorry -- that was wrong, we used Runway for the visuals, not Midjourney.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Thanks for the correction on the tool. So, what's the intended use for this project — is it for a client, a personal portfolio piece, or something else?",
+          "question_kind": "other",
+          "target_signal_id": "project:intended_use",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_INTENDED_USE",
+          "rationale": "Intended use is currently completely unknown and is a core project fact; a plausible answer (client work, portfolio, personal) would materially fill this gap.4"
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "tool_mention c1 superseded_by null -> c1-resolved",
+          "+tool_mention c1-resolved (runway-gen3)"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "question",
+        "outcome_message": "Thanks for the correction on the tool. So, what's the intended use for this project — is it for a client, a personal portfolio piece, or something else?",
+        "error": null
+      },
+      {
+        "scenario_id": "correction_after_supersession",
+        "trial": 3,
+        "turn_number": 3,
+        "user_text": "I'm the motion designer on it.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "not_met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_unmet_exhausted"
+        },
+        "su_diff": [
+          "workflow_role unknown -> confirmed",
+          "current_phase 2 -> 3",
+          "completion_reason null -> gate_1_unmet_exhausted"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  }
+]

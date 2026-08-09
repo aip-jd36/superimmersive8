@@ -1,0 +1,157 @@
+[
+  {
+    "scenario_id": "gate2_stabilization",
+    "trial": 1,
+    "turns": [
+      {
+        "scenario_id": "gate2_stabilization",
+        "trial": 1,
+        "turn_number": 1,
+        "user_text": "We used Runway Gen-3, team API plan, for a paid social ad campaign.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 2,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "Can you walk me through how Runway Gen-3 fit into your workflow for this ad—was it generating the core footage, or more for a specific part like backgrounds, effects, or transitions?",
+          "question_kind": "other",
+          "target_signal_id": "project:workflow_role",
+          "phase": 2
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "MISSING_WORKFLOW_FACT",
+          "rationale": "Workflow_role is currently unknown, and knowing whether Runway Gen-3 produced core footage versus discrete effects would materially clarify the scope of AI-generated content in the ad, which matters for assessing commercial-use status."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "boundary_state_diff": [
+          "(no prior state -- first turn)"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "Can you walk me through how Runway Gen-3 fit into your workflow for this ad—was it generating the core footage, or more for a specific part like backgrounds, effects, or transitions?",
+        "error": null
+      },
+      {
+        "scenario_id": "gate2_stabilization",
+        "trial": 1,
+        "turn_number": 2,
+        "user_text": "I'm the producer.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": null,
+        "generated_candidate_question": {
+          "question_text": "You mentioned Runway Gen-3 on a team API plan — can you tell me more about how you accessed it? For example, was it through the API directly, a web app, or something else, and was it under an enterprise or team-tier license?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 3
+        },
+        "constraint_a_decision": {
+          "should_ask": false,
+          "reason_code": "FACT_ALREADY_CONFIRMED",
+          "rationale": "The source statement already specifies 'team API plan', meaning access was via API under a team-tier license; asking again would only restate what the user already stated rather than surface new information."
+        },
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "workflow_role unknown -> confirmed",
+          "current_phase 2 -> 3"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "acknowledgment",
+        "outcome_message": "Got it — thanks for sharing that.",
+        "error": null
+      },
+      {
+        "scenario_id": "gate2_stabilization",
+        "trial": 1,
+        "turn_number": 3,
+        "user_text": "Once this was finished, our internal legal team reviewed it before it went out.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "not_yet_stable",
+        "pending_clarification": {
+          "signal_id": "c1",
+          "kind": "follow_up_on_signal",
+          "unresolved_summary": "tool mention 'runway-gen3'"
+        },
+        "generated_candidate_question": {
+          "question_text": "You mentioned Runway Gen-3 on a team API plan — was that accessed directly through the API, or through some other interface or integration for this project?",
+          "question_kind": "follow_up_on_signal",
+          "target_signal_id": "c1",
+          "phase": 3
+        },
+        "constraint_a_decision": {
+          "should_ask": true,
+          "reason_code": "AMBIGUOUS_TOOL_SURFACE_RESOLVABLE",
+          "rationale": "The access_surface for Runway Gen-3 is marked unknown despite mention of a 'team API plan', and clarifying whether it was accessed directly via API or through another integration could materially affect understanding of licensing/commercial terms."
+        },
+        "constraint_b_verdict": "allowed",
+        "completion_state": {
+          "is_complete": false,
+          "reason": null
+        },
+        "su_diff": [
+          "+scoped_observation c1 (current_project, confirmed)"
+        ],
+        "boundary_state_diff": [
+          "follow_ups_used[c1] 0 -> 1"
+        ],
+        "outcome_kind": "question",
+        "outcome_message": "You mentioned Runway Gen-3 on a team API plan — was that accessed directly through the API, or through some other interface or integration for this project?",
+        "error": null
+      },
+      {
+        "scenario_id": "gate2_stabilization",
+        "trial": 1,
+        "turn_number": 4,
+        "user_text": "That's pretty much it -- nothing else notable happened with this one.",
+        "decline_action": null,
+        "decline_state": null,
+        "phase": 3,
+        "gate_1_state": "met",
+        "gate_2_state": "stable",
+        "pending_clarification": null,
+        "generated_candidate_question": null,
+        "constraint_a_decision": null,
+        "constraint_b_verdict": "not_reached",
+        "completion_state": {
+          "is_complete": true,
+          "reason": "gate_1_gate_2_met"
+        },
+        "su_diff": [
+          "gate_2_state not_yet_stable -> stable",
+          "completion_reason null -> gate_1_gate_2_met"
+        ],
+        "boundary_state_diff": [],
+        "outcome_kind": "complete",
+        "outcome_message": null,
+        "error": null
+      }
+    ],
+    "completed": true,
+    "final_phase": 3,
+    "projection_check": {
+      "ran": true,
+      "structurally_valid": true,
+      "notes": []
+    },
+    "aborted_error": null
+  }
+]
