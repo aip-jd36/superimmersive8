@@ -40,6 +40,7 @@ import type { DeclineAction } from '@/lib/crc-engine/decline'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { parseRequest, type TurnRequestBody, type TurnResponseBody, type SessionStatusResponseBody } from '@/lib/crc-engine/api-contract'
+import { logPilotEvent } from '@/lib/crc-engine/pilot-events'
 
 const COOKIE_NAME = 'crc_session'
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 7 // 7 days
@@ -55,6 +56,22 @@ const DECLINE_LABEL: Record<DeclineAction, string> = {
   skip_question: "Let's skip this question.",
   skip_phase: "Let's skip this section.",
   stop_interview: "I'd like to stop here.",
+}
+
+const DECLINE_EVENT_TYPE: Record<DeclineAction, 'skip_question' | 'skip_phase' | 'stop_interview'> = {
+  skip_question: 'skip_question',
+  skip_phase: 'skip_phase',
+  stop_interview: 'stop_interview',
+}
+
+function setSessionCookie(response: NextResponse, token: string) {
+  response.cookies.set(COOKIE_NAME, token, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: COOKIE_MAX_AGE_SECONDS,
+  })
 }
 
 /**
@@ -88,6 +105,7 @@ export async function GET(request: NextRequest) {
   const sessionStore = createSupabaseSessionStore(supabaseAdmin)
   const [engineState, productState] = await Promise.all([sessionStore.load(token), loadCrcSessionProductState(supabaseAdmin, token)])
   if (!engineState) {
+    await logPilotEvent(supabaseAdmin, { session_id: token, event_type: 'missing_session' })
     return NextResponse.json<SessionStatusResponseBody>({ status: 'session_not_found' }, { status: 404 })
   }
   const transcript = productState?.transcript ?? []
@@ -141,6 +159,7 @@ export async function POST(request: NextRequest) {
       loadCrcSessionProductState(supabaseAdmin, existingToken),
     ])
     if (!engineState) {
+      await logPilotEvent(supabaseAdmin, { session_id: existingToken, event_type: 'missing_session' })
       return NextResponse.json<TurnResponseBody>({ status: 'session_not_found' }, { status: 404 })
     }
     token = existingToken
@@ -166,29 +185,56 @@ export async function POST(request: NextRequest) {
     // runTurn() has not persisted anything at this point on any failure
     // path (its own sessionStore.save() calls are always the last step,
     // after every upstream step has already succeeded in memory) -- safe
-    // to tell the client to retry the exact same action.
+    // to tell the client to retry the exact same action. No cookie is set
+    // on this response: for an existing session the browser already has
+    // the right one from a prior turn; for a brand-new session nothing
+    // was ever created (runTurn() never reached its own save()), so a
+    // retry correctly re-enters the "mint a new token" path rather than
+    // pointing at a row that doesn't exist.
     console.error('[api/crc/turn] runTurn failed', err)
+    await logPilotEvent(supabaseAdmin, { session_id: token, event_type: 'retryable_failure', detail: err instanceof Error ? err.message : String(err) })
     return NextResponse.json<TurnResponseBody>({ status: 'retry' }, { status: 503 })
+  }
+
+  if (declineAction) {
+    // Logged only once runTurn() has actually succeeded -- a failed
+    // attempt (caught above) never reaches here, so a retried decline
+    // isn't double-counted, and this only ever reflects a decline that
+    // genuinely took effect.
+    await logPilotEvent(supabaseAdmin, { session_id: token, event_type: DECLINE_EVENT_TYPE[declineAction] })
   }
 
   const updatedTranscript: TranscriptEntry[] = [...transcript, { role: 'user', text: userText }]
   if (outcome.kind !== 'complete') {
     updatedTranscript.push({ role: 'assistant', text: outcome.message })
   }
-  await saveCrcSessionProductState(supabaseAdmin, token, { turn_count: turnNumber, transcript: updatedTranscript })
+
+  try {
+    await saveCrcSessionProductState(supabaseAdmin, token, { turn_count: turnNumber, transcript: updatedTranscript })
+  } catch (err) {
+    // Part 1 hardening: this call sits after runTurn() has already
+    // committed engine state (structured_understanding/boundary_state)
+    // successfully -- a failure here is scoped to turn_count/transcript
+    // only, never a partial engine-state commit (each DB call is its own
+    // atomic statement; runTurn()'s own save() already fully succeeded
+    // before this line is ever reached). The cookie IS set on this
+    // failure response, unlike the runTurn() catch above: by this point
+    // the row is guaranteed to exist (runTurn() created it if this was a
+    // brand-new session), so a retry must target that same token, not
+    // mint a new one and orphan it.
+    console.error('[api/crc/turn] saveCrcSessionProductState failed', err)
+    await logPilotEvent(supabaseAdmin, { session_id: token, event_type: 'persistence_error', detail: err instanceof Error ? err.message : String(err) })
+    const retryResponse = NextResponse.json<TurnResponseBody>({ status: 'retry' }, { status: 503 })
+    setSessionCookie(retryResponse, token)
+    return retryResponse
+  }
 
   const response =
     outcome.kind === 'complete'
       ? NextResponse.json<TurnResponseBody>({ status: 'complete', projection: outcome.result.output })
       : NextResponse.json<TurnResponseBody>({ status: outcome.kind, message: outcome.message })
 
-  response.cookies.set(COOKIE_NAME, token, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    maxAge: COOKIE_MAX_AGE_SECONDS,
-  })
+  setSessionCookie(response, token)
 
   return response
 }
