@@ -170,16 +170,25 @@ export async function POST(request: NextRequest) {
   const userText = parsed.kind === 'message' ? parsed.text : DECLINE_LABEL[parsed.action]
   const declineAction = parsed.kind === 'decline' ? parsed.action : undefined
 
-  const deps: RunTurnDeps = {
-    extractor: createAnthropicExtractor(),
-    generator: createAnthropicCandidateQuestionGenerator(),
-    decider: createAnthropicConstraintADecider(),
-    sessionStore,
-    matrix: MATRIX_FIXTURE,
-  }
-
   let outcome: Awaited<ReturnType<typeof runTurn>>
   try {
+    // createAnthropicExtractor()/createAnthropicCandidateQuestionGenerator()/
+    // createAnthropicConstraintADecider() each throw synchronously and
+    // immediately if ANTHROPIC_API_KEY is unavailable (deliberate, documented
+    // fail-loud behavior in each adapter -- never a silent mock fallback).
+    // That throw must land inside this try, not before it: constructed
+    // outside, a missing/misconfigured key produces an unhandled exception
+    // (bare 500, no JSON body) instead of the same clean retryable response
+    // every other failure in this route gets. Nothing has been persisted at
+    // this point either way, so the catch below's own safety reasoning
+    // still holds unchanged.
+    const deps: RunTurnDeps = {
+      extractor: createAnthropicExtractor(),
+      generator: createAnthropicCandidateQuestionGenerator(),
+      decider: createAnthropicConstraintADecider(),
+      sessionStore,
+      matrix: MATRIX_FIXTURE,
+    }
     outcome = await runTurn({ token, turnNumber, userText, declineAction }, deps)
   } catch (err) {
     // runTurn() has not persisted anything at this point on any failure
