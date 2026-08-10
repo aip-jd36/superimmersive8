@@ -161,6 +161,12 @@ export default function CrcPage() {
     setPhase('idle')
   }
 
+  function handleStartOverClick() {
+    const hasUnfinishedProgress = messages.length > 0 && phase !== 'complete'
+    if (hasUnfinishedProgress && !window.confirm('Start over? This will clear the current conversation.')) return
+    handleStartOver()
+  }
+
   async function handleSubmitFeedback() {
     if (!feedbackRating || feedbackStatus === 'submitting') return
     setFeedbackStatus('submitting')
@@ -180,13 +186,20 @@ export default function CrcPage() {
     <div className="min-h-screen bg-gray-50 px-4 py-8">
       <div className="mx-auto max-w-2xl space-y-6">
         <Card>
-          <CardHeader>
-            <CardTitle>Commercial Readiness Check</CardTitle>
-            <CardDescription>
-              A short conversation about how your AI video was made. There&apos;s no wrong answer, and you can skip anything you&apos;d rather not
-              cover. This is educational workflow guidance, not an SI8 Commercial Assurance Assessment -- it doesn&apos;t provide legal advice or
-              certify commercial use.
-            </CardDescription>
+          <CardHeader className="flex flex-row items-start justify-between gap-4">
+            <div>
+              <CardTitle>Commercial Readiness Check</CardTitle>
+              <CardDescription>
+                A short conversation about how your AI video was made. There&apos;s no wrong answer, and you can skip anything you&apos;d rather not
+                cover. This is educational workflow guidance, not an SI8 Commercial Assurance Assessment -- it doesn&apos;t provide legal advice or
+                certify commercial use.
+              </CardDescription>
+            </div>
+            {phase !== 'loading' && (
+              <Button variant="ghost" size="sm" className="shrink-0" onClick={handleStartOverClick}>
+                Start Over
+              </Button>
+            )}
           </CardHeader>
         </Card>
 
