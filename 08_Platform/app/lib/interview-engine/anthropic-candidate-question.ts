@@ -26,6 +26,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { jsonSchemaOutputFormat } from '@anthropic-ai/sdk/helpers/json-schema'
 import type {
+  CandidateExclusion,
   CandidateQuestionGenerator,
   CandidateQuestionGeneratorInput,
   CandidateQuestionProposal,
@@ -53,6 +54,22 @@ You MUST NOT:
 - Propose a question about something already fully resolved with no remaining ambiguity, unless there is a genuine natural next thing to ask elsewhere in the understanding.
 
 If there is no natural next question to propose -- understanding is already complete, or nothing further makes sense to ask right now -- set has_candidate to false and leave the other fields null.`
+
+/**
+ * CRC Limited Pilot -- Model 4 (bounded alternative-question search),
+ * 2026-08-10. Deterministic templating only -- structured (kind,
+ * signal_id) facts, never Constraint A/B's own rationale prose. This is
+ * the entire content boundary: the model is told WHAT was already tried,
+ * never WHY it was rejected, keeping generation decoupled from
+ * Constraint A/B's own judgment exactly as candidate-question.ts's own
+ * header requires ("the model must not decide whether its proposal is
+ * allowed, wise, or worth asking").
+ */
+function buildExclusionInstruction(excluded: CandidateExclusion[] | undefined): string {
+  if (!excluded || excluded.length === 0) return ''
+  const lines = excluded.map((e) => (e.signal_id ? `- kind "${e.kind}" targeting signal_id "${e.signal_id}"` : `- kind "${e.kind}" (no specific signal)`))
+  return `\n\nThis is a second attempt. The following question(s) were already tried this turn and are not permitted again -- propose something genuinely different, either a different signal or a different kind of question, not a reworded repeat of any of these:\n${lines.join('\n')}`
+}
 
 const CANDIDATE_QUESTION_RESPONSE_SCHEMA = {
   type: 'object',
@@ -109,14 +126,16 @@ function resolveModel(options?: AnthropicCandidateQuestionOptions): string {
 }
 
 function buildUserMessage(input: CandidateQuestionGeneratorInput): string {
-  return JSON.stringify(
-    {
-      structured_understanding: input.structured_understanding,
-      eligible_signals: input.eligible_signals,
-      current_phase: input.phase,
-    },
-    null,
-    2,
+  return (
+    JSON.stringify(
+      {
+        structured_understanding: input.structured_understanding,
+        eligible_signals: input.eligible_signals,
+        current_phase: input.phase,
+      },
+      null,
+      2,
+    ) + buildExclusionInstruction(input.excluded)
   )
 }
 

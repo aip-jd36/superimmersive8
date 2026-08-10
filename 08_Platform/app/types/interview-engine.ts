@@ -183,6 +183,21 @@ export const COMPLETION_REASONS = [
   'gate_1_gate_2_met',
   'declined',
   'gate_1_unmet_exhausted',
+  /**
+   * CRC Limited Pilot -- Model 4 (bounded alternative-question search),
+   * 2026-08-10. The bounded per-turn candidate search (at most one
+   * alternative attempt) found no permissible question to ask -- not
+   * because Gate 1/2 judge understanding complete (that's
+   * 'gate_1_gate_2_met'), and not because the user declined
+   * ('declined'). Deliberately distinct from both: this reason means the
+   * runtime tried twice and both attempts were rejected, timed out, or
+   * came back null/invalid -- Gate 2 may still be 'not_yet_stable' when
+   * this fires. Constructed directly by run-turn.ts's own bounded-search
+   * logic, never by checkCompletion() -- completion.ts remains unaware
+   * of Constraint B/BoundaryState by design (see run-turn.ts's own
+   * header for the full reasoning).
+   */
+  'questioning_exhausted',
 ] as const
 
 export type CompletionReason = (typeof COMPLETION_REASONS)[number] | null

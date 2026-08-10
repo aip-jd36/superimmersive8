@@ -96,6 +96,25 @@ export interface CandidateQuestionProposal {
 // ── Generator interface ─────────────────────────────────────────────────────
 
 /**
+ * CRC Limited Pilot -- Model 4 (bounded alternative-question search),
+ * 2026-08-10. Identifies a specific (question_kind, target_signal_id)
+ * pair the first attempt already tried and had rejected, for the second,
+ * bounded attempt to avoid repeating. Deliberately the SAME granularity
+ * Constraint B's own caps already use (per-signal for
+ * follow_up_on_signal/uncertainty_clarification; global, so signal_id is
+ * null, for historical_experience/disentangling_question) -- excluding a
+ * whole signal would discard other, still-open question kinds about it;
+ * excluding only exact question text would leave the second attempt free
+ * to re-trigger the identical Constraint B cap with different wording.
+ * Structured data only, never Constraint A/B's own rationale prose --
+ * see anthropic-candidate-question.ts's own prompt templating for why.
+ */
+export interface CandidateExclusion {
+  kind: CandidateQuestionKind
+  signal_id: string | null
+}
+
+/**
  * Input the generator receives -- current StructuredUnderstanding, the
  * deterministically-derived eligible signal set, and current phase, and
  * nothing more. Deliberately excludes Retrieval results, Knowledge Cards,
@@ -108,6 +127,27 @@ export interface CandidateQuestionGeneratorInput {
   structured_understanding: StructuredUnderstanding
   eligible_signals: EligibleSignal[]
   phase: Phase
+  /**
+   * CRC Limited Pilot -- Model 4. Present only on the bounded second
+   * attempt after the first candidate was rejected by Constraint A or B;
+   * absent (or empty) on every first attempt, and absent on a second
+   * attempt following a null first candidate (per the approved
+   * correction: a null first candidate invents nothing to exclude).
+   */
+  excluded?: CandidateExclusion[]
+}
+
+/**
+ * CRC Limited Pilot -- Model 4. Deterministic, pure: true when a proposal
+ * targets exactly the (kind, signal_id) pair already excluded. Used as a
+ * defensive check on the bounded second attempt's own output -- if the
+ * model's proposal violates the exclusion it was given (imperfect
+ * instruction-following, not assumed reliable), this is caught without
+ * spending a live Constraint A/B call re-confirming what's already known
+ * deterministically.
+ */
+export function matchesExclusion(proposal: CandidateQuestionProposal, excluded: CandidateExclusion[]): boolean {
+  return excluded.some((e) => e.kind === proposal.question_kind && e.signal_id === proposal.target_signal_id)
 }
 
 /**
