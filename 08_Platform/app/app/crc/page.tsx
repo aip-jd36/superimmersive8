@@ -21,6 +21,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { CrcProjectionOutput } from '@/components/CrcProjectionOutput'
 import type { TurnResponseBody, SessionStatusResponseBody } from '@/lib/crc-engine/api-contract'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
+import { shouldShowAcknowledgmentGuidance, ACKNOWLEDGMENT_GUIDANCE_COPY, type CrcPagePhase as Phase } from '@/lib/crc-engine/acknowledgment-guidance'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -33,8 +34,6 @@ const DECLINE_LABEL = {
   skip_phase: "Let's skip this section.",
   stop_interview: "I'd like to stop here.",
 } as const
-
-type Phase = 'loading' | 'idle' | 'sending' | 'retry' | 'complete' | 'session_not_found'
 
 /** What to resend on Retry -- exactly the body of the last POST attempt. */
 type PendingRequestBody = { message: string } | { declineAction: keyof typeof DECLINE_LABEL }
@@ -50,6 +49,7 @@ export default function CrcPage() {
   const [feedbackRating, setFeedbackRating] = useState<FeedbackRating | null>(null)
   const [feedbackText, setFeedbackText] = useState('')
   const [feedbackStatus, setFeedbackStatus] = useState<FeedbackStatus>('idle')
+  const [lastOutcomeWasAcknowledgment, setLastOutcomeWasAcknowledgment] = useState(false)
   const pendingRequestRef = useRef<PendingRequestBody | null>(null)
   const scrollAnchorRef = useRef<HTMLDivElement | null>(null)
 
@@ -65,6 +65,11 @@ export default function CrcPage() {
         setPhase('session_not_found')
       } else if (data.status === 'active') {
         setMessages(data.transcript)
+        // SessionStatusResponseBody doesn't carry whether the last turn
+        // was a question or an acknowledgment -- deliberately not shown on
+        // a fresh page load/refresh (only on a live transition within this
+        // same session), keeping this fix presentation-only and small.
+        setLastOutcomeWasAcknowledgment(false)
         setPhase('idle')
       } else if (data.status === 'complete') {
         setMessages(data.transcript)
@@ -102,13 +107,16 @@ export default function CrcPage() {
       setMessages((prev) => [...prev, { role: 'assistant', text: data.message }])
       pendingRequestRef.current = null
       setInputText('')
+      setLastOutcomeWasAcknowledgment(data.status === 'acknowledgment')
       setPhase('idle')
     } else if (data.status === 'complete') {
       setProjection(data.projection)
       pendingRequestRef.current = null
       setInputText('')
+      setLastOutcomeWasAcknowledgment(false)
       setPhase('complete')
     } else if (data.status === 'session_not_found') {
+      setLastOutcomeWasAcknowledgment(false)
       setPhase('session_not_found')
     } else if (data.status === 'retry') {
       setPhase('retry')
@@ -149,6 +157,7 @@ export default function CrcPage() {
     setFeedbackRating(null)
     setFeedbackText('')
     setFeedbackStatus('idle')
+    setLastOutcomeWasAcknowledgment(false)
     setPhase('idle')
   }
 
@@ -267,6 +276,10 @@ export default function CrcPage() {
                     Start a New Conversation
                   </Button>
                 </div>
+              )}
+
+              {shouldShowAcknowledgmentGuidance(phase, lastOutcomeWasAcknowledgment) && (
+                <p className="text-sm text-muted-foreground">{ACKNOWLEDGMENT_GUIDANCE_COPY}</p>
               )}
 
               {(phase === 'idle' || phase === 'sending') && (

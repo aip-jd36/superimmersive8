@@ -191,6 +191,32 @@ describe('runTurn -- stop_interview regression matrix (confirmed engine defect f
     expect(refreshed!.pending_clarification).toBeNull()
   })
 
+  test('Stop pressed immediately after an acknowledgment turn (not a question) still completes on the same turn with a valid final Projection (CRC Limited Pilot UX finding, 2026-08-10 -- product-flow fix companion coverage, engine behavior unchanged)', async () => {
+    const store = createInMemorySessionStore()
+    // Default deps() generator returns null -> this lands as an
+    // acknowledgment, not a question, exactly the state the pilot UX
+    // guidance targets. Gate 1 becomes met via this turn regardless.
+    const outcome1 = await runTurn(
+      { token: 't11', turnNumber: 1, userText: 'We made a short ad using Runway for an agency client.' },
+      deps({ extractor: constantExtractor([toolCandidate(), intendedUseCandidate()]) }, store),
+    )
+    expect(outcome1.kind).toBe('acknowledgment')
+    const afterTurn1 = await store.load('t11')
+    expect(afterTurn1!.structured_understanding.gate_1_state).toBe('met')
+
+    const outcome2 = await runTurn({ token: 't11', turnNumber: 2, userText: "I'd like to stop here.", declineAction: 'stop_interview' }, deps({}, store))
+    expect(outcome2.kind).toBe('complete')
+    if (outcome2.kind === 'complete') {
+      // A valid ProjectionOutput -- the exact shape, not sparse/empty this
+      // time since real facts were gathered before Stop.
+      expect(outcome2.result.output.opening_line).not.toBe('')
+      expect(outcome2.result.output.understood_summary).not.toBe('')
+    }
+
+    const refreshed = await store.load('t11')
+    expect(refreshed!.structured_understanding.completion_reason).toBe('declined')
+  })
+
   test('an active pending_clarification at the moment of stop_interview does not block or delay completion', async () => {
     const store = createInMemorySessionStore()
     await runTurn({ token: 't10', turnNumber: 1, userText: 'We used Runway.' }, deps({ extractor: constantExtractor([toolCandidate()]) }, store))
