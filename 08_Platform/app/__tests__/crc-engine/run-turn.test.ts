@@ -60,15 +60,27 @@ function intendedUseCandidate(overrides: Partial<CandidateObservation> = {}): Ca
 }
 
 describe('runTurn -- single-turn cases', () => {
-  test('a turn that extracts a fact but proposes no question -> acknowledgment, never an error', async () => {
+  test('a turn that extracts a fact but has no candidate on either bounded attempt -> finalizes with questioning_exhausted (Model 4, 2026-08-10 -- superseded pre-Model-4 acknowledgment behavior)', async () => {
+    // Pre-Model-4, a null candidate fell through to a plain, non-complete
+    // acknowledgment. Under Model 4's bounded search, a constant mock
+    // returning null gives the SAME null answer on both attempts by
+    // construction, and two failed attempts finalize -- this is the
+    // correct, intended behavior change, not a regression.
     const outcome = await runTurn({ token: 't1', turnNumber: 1, userText: 'We used Runway.' }, deps({ extractor: constantExtractor([toolCandidate()]) }))
-    expect(outcome).toEqual({ kind: 'acknowledgment', message: expect.any(String) })
+    expect(outcome.kind).toBe('complete')
+    if (outcome.kind === 'complete') {
+      expect(outcome.result.output).toBeDefined()
+    }
   })
 
   test('a turn that proposes an eligible, approved question -> question outcome with the proposal\'s own exact text', async () => {
     const store = createInMemorySessionStore()
-    // Turn 1 establishes the tool so a signal_id exists to target.
-    await runTurn({ token: 't2', turnNumber: 1, userText: 'We used Runway.' }, deps({ extractor: constantExtractor([toolCandidate()]) }, store))
+    // Turn 1 establishes the tool so a signal_id exists to target. Uses
+    // an explicit decline so this setup turn resolves via the unchanged
+    // decline path -- a plain null-generator organic turn would now
+    // (correctly) finalize via Model 4's own bounded search instead of
+    // leaving the session active for turn 2 to build on.
+    await runTurn({ token: 't2', turnNumber: 1, userText: 'We used Runway.', declineAction: 'skip_question' }, deps({ extractor: constantExtractor([toolCandidate()]) }, store))
 
     const questionProposal = proposal({ question_kind: 'other', target_signal_id: null, question_text: 'What was this project for?' })
     const outcome = await runTurn(
@@ -80,7 +92,7 @@ describe('runTurn -- single-turn cases', () => {
 
   test('a follow_up_on_signal question sets pending_clarification on the persisted session, consumed by the next turn', async () => {
     const store = createInMemorySessionStore()
-    await runTurn({ token: 't3', turnNumber: 1, userText: 'We used Runway.' }, deps({ extractor: constantExtractor([toolCandidate()]) }, store))
+    await runTurn({ token: 't3', turnNumber: 1, userText: 'We used Runway.', declineAction: 'skip_question' }, deps({ extractor: constantExtractor([toolCandidate()]) }, store))
     const loadedAfterTurn1 = await store.load('t3')
     const toolSignalId = loadedAfterTurn1!.structured_understanding.tool_mentions[0].mention_id
 
@@ -139,8 +151,13 @@ describe('runTurn -- stop_interview regression matrix (confirmed engine defect f
 
   test('Gate 1 already met (tool identity + intended use both established) -> stop_interview still completes immediately, not left active', async () => {
     const store = createInMemorySessionStore()
+    // declineAction on turn 1 resolves via the unchanged decline path,
+    // keeping this a pure "establish Gate 1, session stays active" setup
+    // step -- an organic null-generator turn would now (correctly)
+    // finalize via Model 4's own bounded search before this test ever
+    // gets to exercise the stop_interview scenario it's actually about.
     await runTurn(
-      { token: 't8', turnNumber: 1, userText: 'We made a short ad using Runway for an agency client.' },
+      { token: 't8', turnNumber: 1, userText: 'We made a short ad using Runway for an agency client.', declineAction: 'skip_question' },
       deps({ extractor: constantExtractor([toolCandidate(), intendedUseCandidate()]) }, store),
     )
     const afterTurn1 = await store.load('t8')
@@ -159,10 +176,12 @@ describe('runTurn -- stop_interview regression matrix (confirmed engine defect f
   test('the exact production scenario: Gate 1 met on turn 1 (tool + intended use in one message), a real follow-up question left pending on turn 2, Stop on turn 3 -> turn 3 returns complete, and a fresh load (refresh) shows the completed session, never active', async () => {
     const store = createInMemorySessionStore()
     // Turn 1: both facts land in one message, exactly as in production
-    // ("We made a short ad using Runway for an agency client.") -- no
-    // question proposed this turn (default deps), just establishing Gate 1.
+    // ("We made a short ad using Runway for an agency client.") -- an
+    // explicit decline keeps this a pure Gate-1-establishing setup step
+    // via the unchanged decline path (a null-generator organic turn would
+    // now correctly finalize via Model 4 instead of staying active).
     await runTurn(
-      { token: 't9', turnNumber: 1, userText: 'We made a short ad using Runway for an agency client.' },
+      { token: 't9', turnNumber: 1, userText: 'We made a short ad using Runway for an agency client.', declineAction: 'skip_question' },
       deps({ extractor: constantExtractor([toolCandidate(), intendedUseCandidate()]) }, store),
     )
     const afterTurn1 = await store.load('t9')
@@ -193,11 +212,18 @@ describe('runTurn -- stop_interview regression matrix (confirmed engine defect f
 
   test('Stop pressed immediately after an acknowledgment turn (not a question) still completes on the same turn with a valid final Projection (CRC Limited Pilot UX finding, 2026-08-10 -- product-flow fix companion coverage, engine behavior unchanged)', async () => {
     const store = createInMemorySessionStore()
-    // Default deps() generator returns null -> this lands as an
-    // acknowledgment, not a question, exactly the state the pilot UX
-    // guidance targets. Gate 1 becomes met via this turn regardless.
+    // Model 4 (2026-08-10) removed the organic (no-decline) path to a
+    // non-complete acknowledgment entirely -- a rejected/null candidate
+    // now gets one bounded retry and finalizes if that also fails,
+    // rather than falling back to acknowledgment. The ONLY remaining way
+    // to reach a genuine non-complete acknowledgment is the explicit
+    // skip_question/skip_phase decline path, which Model 4 deliberately
+    // does not touch (see run-turn.ts's own Model 4 header note). This
+    // test's actual purpose -- stop_interview completing correctly from
+    // a real, established-facts, non-complete acknowledgment state --
+    // still needs exactly that state, so it's constructed via decline.
     const outcome1 = await runTurn(
-      { token: 't11', turnNumber: 1, userText: 'We made a short ad using Runway for an agency client.' },
+      { token: 't11', turnNumber: 1, userText: 'We made a short ad using Runway for an agency client.', declineAction: 'skip_question' },
       deps({ extractor: constantExtractor([toolCandidate(), intendedUseCandidate()]) }, store),
     )
     expect(outcome1.kind).toBe('acknowledgment')
@@ -219,7 +245,7 @@ describe('runTurn -- stop_interview regression matrix (confirmed engine defect f
 
   test('an active pending_clarification at the moment of stop_interview does not block or delay completion', async () => {
     const store = createInMemorySessionStore()
-    await runTurn({ token: 't10', turnNumber: 1, userText: 'We used Runway.' }, deps({ extractor: constantExtractor([toolCandidate()]) }, store))
+    await runTurn({ token: 't10', turnNumber: 1, userText: 'We used Runway.', declineAction: 'skip_question' }, deps({ extractor: constantExtractor([toolCandidate()]) }, store))
     const afterTurn1 = await store.load('t10')
     const toolSignalId = afterTurn1!.structured_understanding.tool_mentions[0].mention_id
 
@@ -264,8 +290,8 @@ describe('runTurn -- session recovery', () => {
 
   test('facts accumulate across turns via the session store -- turn 2 sees turn 1\'s tool mention', async () => {
     const store = createInMemorySessionStore()
-    await runTurn({ token: 't7', turnNumber: 1, userText: 'We used Runway.' }, deps({ extractor: constantExtractor([toolCandidate()]) }, store))
-    await runTurn({ token: 't7', turnNumber: 2, userText: 'Also used Kling.' }, deps({ extractor: constantExtractor([toolCandidate({ proposal_id: 'p-2', raw_tool_name: 'Kling' })]) }, store))
+    await runTurn({ token: 't7', turnNumber: 1, userText: 'We used Runway.', declineAction: 'skip_question' }, deps({ extractor: constantExtractor([toolCandidate()]) }, store))
+    await runTurn({ token: 't7', turnNumber: 2, userText: 'Also used Kling.', declineAction: 'skip_question' }, deps({ extractor: constantExtractor([toolCandidate({ proposal_id: 'p-2', raw_tool_name: 'Kling' })]) }, store))
 
     const loaded = await store.load('t7')
     const identifiers = loaded!.structured_understanding.tool_mentions.filter((m) => m.superseded_by === null).map((m) => m.resolution.kind === 'canonical' ? m.resolution.identifier : null)
