@@ -8,13 +8,26 @@
  * `key`, never rendered as visible text.
  *
  * Emptiness rules (each field independently, per the frozen contract):
- * opening_line / understood_summary / knowledge_items / closing_cta each
- * render only when non-empty. If ALL FOUR are empty (the deliberate
- * "fully-empty" case assembleProjectionOutput itself already produces --
- * see that module's own header comment, JD decision 2026-08-08, for full
- * opt-out / zero-signal conversations), this component shows one honest,
- * neutral line rather than either a blank screen or inventing framing the
- * engine deliberately declined to produce.
+ * opening_line / understood_summary / knowledge_items each render only
+ * when non-empty. If all three are empty (the deliberate "fully-empty"
+ * case assembleProjectionOutput itself already produces -- see that
+ * module's own header comment, JD decision 2026-08-08, for full opt-out /
+ * zero-signal conversations), this component shows one honest, neutral
+ * line rather than either a blank screen or inventing framing the engine
+ * deliberately declined to produce.
+ *
+ * `[ENDING REDESIGN -- 2026-08-12]` closing_cta is a real ProjectionOutput
+ * field (lib/projection-layer/types.ts, still computed by
+ * assembleProjectionOutput -- Projection's own contract is unchanged) but
+ * is deliberately no longer rendered here. It is retired at the product
+ * layer only: the CommercialAssuranceBridge component (rendered by the
+ * page, immediately after this one) replaces its role with a fuller,
+ * fixed section. This is a display decision by this component, not a
+ * change to what Projection computes or returns -- see that component's
+ * own header for the full reasoning. isFullyEmpty below was updated to
+ * match: closing_cta's value no longer affects what this component shows,
+ * so it no longer participates in the "is there anything to show at all"
+ * check.
  *
  * last_verified is wrapped into "Content last updated [date]" (not "last
  * reviewed" -- PRD_CRC_v1.0.md's own wording, PROJECTION_LAYER_ARCHITECTURE.md
@@ -32,7 +45,7 @@ function formatLastVerified(value: string | null): string | null {
 }
 
 export function CrcProjectionOutput({ output }: { output: ProjectionOutput }) {
-  const isFullyEmpty = output.opening_line === '' && output.understood_summary === '' && output.knowledge_items.length === 0 && output.closing_cta === ''
+  const isFullyEmpty = output.opening_line === '' && output.understood_summary === '' && output.knowledge_items.length === 0
 
   if (isFullyEmpty) {
     return (
@@ -62,8 +75,6 @@ export function CrcProjectionOutput({ output }: { output: ProjectionOutput }) {
           })}
         </div>
       )}
-
-      {output.closing_cta !== '' && <p className="text-sm text-muted-foreground">{output.closing_cta}</p>}
     </div>
   )
 }

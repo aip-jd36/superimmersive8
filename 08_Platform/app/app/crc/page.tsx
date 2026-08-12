@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { CrcProjectionOutput } from '@/components/CrcProjectionOutput'
+import { CommercialAssuranceBridge } from '@/components/CommercialAssuranceBridge'
 import type { TurnResponseBody, SessionStatusResponseBody } from '@/lib/crc-engine/api-contract'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
 import { shouldShowAcknowledgmentGuidance, ACKNOWLEDGMENT_GUIDANCE_COPY, type CrcPagePhase as Phase } from '@/lib/crc-engine/acknowledgment-guidance'
@@ -250,6 +251,10 @@ export default function CrcPage() {
               {phase === 'complete' && projection && (
                 <div className="border-t pt-4">
                   <CrcProjectionOutput output={projection} />
+
+                  <div className="mt-6">
+                    <CommercialAssuranceBridge />
+                  </div>
 
                   {feedbackStatus === 'submitted' ? (
                     <p className="mt-6 border-t pt-4 text-sm text-muted-foreground">Thanks for the feedback.</p>
