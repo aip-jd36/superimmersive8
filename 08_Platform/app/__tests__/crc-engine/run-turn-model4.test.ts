@@ -115,7 +115,11 @@ describe('Model 4 -- attempt 1 rejected, attempt 2 approved', () => {
       deps({ generator: sequencedGenerator([blockedCandidate, validCandidate]), decider: sequencedDecider([askDecision(), askDecision()]) }, store),
     )
 
-    expect(outcome).toEqual({ kind: 'question', message: 'What was your role on this project?' })
+    expect(outcome).toEqual({
+      kind: 'question',
+      message: 'What was your role on this project?',
+      discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+    })
   })
 
   test('attempt 1 rejected by Constraint A (redundant), attempt 2 approved -> question asked', async () => {
@@ -137,7 +141,11 @@ describe('Model 4 -- attempt 1 rejected, attempt 2 approved', () => {
       deps({ generator: sequencedGenerator([redundant, useful]), decider: sequencedDecider([suppressDecision({ reason_code: 'FACT_ALREADY_CONFIRMED' }), askDecision()]) }, store),
     )
 
-    expect(outcome).toEqual({ kind: 'question', message: 'What was this project for?' })
+    expect(outcome).toEqual({
+      kind: 'question',
+      message: 'What was this project for?',
+      discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+    })
   })
 
   test('attempt 2 targets a DIFFERENT question kind on the SAME signal Constraint B just capped -> allowed to proceed (exclusion is (kind, signal_id), not signal-alone)', async () => {
@@ -171,7 +179,11 @@ describe('Model 4 -- attempt 1 rejected, attempt 2 approved', () => {
 
     // uncertainty_clarifications_used has no entry for t1-c1 yet -- a
     // different cap entirely, so this must be ALLOWED, not excluded.
-    expect(outcome).toEqual({ kind: 'question', message: 'Are you sure it was you who used Runway directly?' })
+    expect(outcome).toEqual({
+      kind: 'question',
+      message: 'Are you sure it was you who used Runway directly?',
+      discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+    })
   })
 })
 
@@ -338,7 +350,11 @@ describe('Model 4 -- decline path untouched (recovery pattern, trial 12)', () =>
       { token: 'm4-decline', turnNumber: 2, userText: 'Actually, more info.' },
       deps({ generator: constantCandidateQuestionGenerator(realProposal), decider: constantConstraintADecider(askDecision()) }, store),
     )
-    expect(recovered).toEqual({ kind: 'question', message: 'Would have asked this.' })
+    expect(recovered).toEqual({
+      kind: 'question',
+      message: 'Would have asked this.',
+      discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+    })
   })
 })
 
@@ -371,6 +387,10 @@ describe('Model 4 -- multiple uncapped eligible signals', () => {
       { token: 'm4-multi', turnNumber: 2, userText: 'anything' },
       deps({ generator: sequencedGenerator([rejectedFirst, secondOnDifferentSignal]), decider: sequencedDecider([suppressDecision(), askDecision()]) }, store),
     )
-    expect(outcome).toEqual({ kind: 'question', message: 'About your role.' })
+    expect(outcome).toEqual({
+      kind: 'question',
+      message: 'About your role.',
+      discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+    })
   })
 })

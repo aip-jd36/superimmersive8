@@ -133,8 +133,10 @@ import { runCRCConversation, type CRCPipelineResult } from './run-crc-conversati
 import { deriveCommercialReadinessIndicators } from './commercial-readiness-indicators'
 import {
   buildCommercialReadinessDiscoveryProposal,
+  evaluateCategoryEligibility,
   getCommercialReadinessTakeaway,
   selectEligibleCommercialReadinessCategory,
+  COMMERCIAL_READINESS_CATEGORIES,
   type CommercialReadinessCategory,
 } from './commercial-readiness-catalog'
 import type { SessionStore } from './session-store'
@@ -192,6 +194,26 @@ export type TurnOutcome = (
    * through Constraint A/B.
    */
   precedingTakeaway?: string
+  /**
+   * CRC Identity + Abuse Prevention + Analytics milestone -- discovery
+   * analytics instrumentation (design report §11). Surfaces the SAME
+   * eligibility evaluation this turn already computed deterministically
+   * (no extra LLM call), for route.ts to log as a discovery_signal
+   * analytics event. Organic (non-decline) path only -- undefined on the
+   * decline branch and on the top-of-turn natural-completion short-circuit,
+   * where discovery selection never runs at all.
+   *
+   * `rejected_by_constraint_b` is deliberately not a possible outcome
+   * value: selectEligibleCommercialReadinessCategory already checks the
+   * same global cap Constraint B enforces, so by the time a discovery
+   * proposal reaches Constraint B the cap is guaranteed unused -- it can
+   * only ever be rejected by Constraint A or approved.
+   */
+  discoverySignal?: {
+    eligible_categories: CommercialReadinessCategory[]
+    selected_category: CommercialReadinessCategory | null
+    outcome: 'never_eligible' | 'rejected_by_a' | 'asked'
+  }
 }
 
 export interface RunTurnDeps {
@@ -373,6 +395,11 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   // eligible but rejected, and always on the decline branch below, which
   // never attempts one.
   let nextPendingTakeawayCategory: CommercialReadinessCategory | null = null
+  // CRC Identity + Abuse Prevention + Analytics milestone -- discovery
+  // analytics instrumentation. Set only on the organic (non-decline)
+  // branch below; stays undefined on the decline branch, matching
+  // TurnOutcome.discoverySignal's own documented scope.
+  let discoverySignal: TurnOutcome['discoverySignal']
 
   if (declineSignal) {
     // Explicit skip_question/skip_phase decline -- unchanged by Model 4.
@@ -437,6 +464,22 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
       ? await tryCandidate(suAfter, eligible, phase, boundaryStateLoaded, deps, undefined, discoveryProposal)
       : await tryCandidate(suAfter, eligible, phase, boundaryStateLoaded, deps)
 
+    // Discovery analytics instrumentation: computed from the SAME inputs
+    // discoveryCategory already used (pure, no extra I/O). eligible_categories
+    // is every category the fixed-priority selector would have accepted,
+    // not just the one it picked -- selectEligibleCommercialReadinessCategory
+    // only returns the winner, so this evaluates all three directly.
+    // Fully determined by discoveryCategory + attempt1 alone: attempt2
+    // (below) is always the ordinary generator, never a second discovery
+    // category, so it cannot change this outcome either way.
+    discoverySignal = {
+      eligible_categories: COMMERCIAL_READINESS_CATEGORIES.filter(
+        (c) => evaluateCategoryEligibility(c, discoveryIndicators, boundaryStateLoaded.commercial_readiness_discovery_asked, gate1.state === 'met', phase).eligible,
+      ),
+      selected_category: discoveryCategory,
+      outcome: discoveryCategory === null ? 'never_eligible' : attempt1.status === 'approved' ? 'asked' : 'rejected_by_a',
+    }
+
     if (attempt1.status === 'approved') {
       outcome = attempt1.outcome
       nextBoundaryState = attempt1.nextBoundaryState
@@ -483,7 +526,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
           pending_clarification: null,
           pending_commercial_readiness_takeaway: null,
         })
-        const exhaustedOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suExhausted, deps.matrix) }
+        const exhaustedOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suExhausted, deps.matrix), discoverySignal }
         return precedingTakeaway ? { ...exhaustedOutcome, precedingTakeaway } : exhaustedOutcome
       }
     }
@@ -497,5 +540,6 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   }
   await deps.sessionStore.save(input.token, sessionState)
 
-  return precedingTakeaway ? { ...outcome, precedingTakeaway } : outcome
+  const finalOutcome: TurnOutcome = discoverySignal ? { ...outcome, discoverySignal } : outcome
+  return precedingTakeaway ? { ...finalOutcome, precedingTakeaway } : finalOutcome
 }

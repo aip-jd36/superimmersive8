@@ -87,7 +87,11 @@ describe('runTurn -- single-turn cases', () => {
       { token: 't2', turnNumber: 2, userText: 'A social campaign.' },
       deps({ generator: constantCandidateQuestionGenerator(questionProposal), decider: constantConstraintADecider({ should_ask: true, reason_code: 'MATERIALLY_IMPROVES_UNDERSTANDING', rationale: 'x' }) }, store),
     )
-    expect(outcome).toEqual({ kind: 'question', message: 'What was this project for?' })
+    expect(outcome).toEqual({
+      kind: 'question',
+      message: 'What was this project for?',
+      discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+    })
   })
 
   test('a follow_up_on_signal question sets pending_clarification on the persisted session, consumed by the next turn', async () => {
@@ -101,7 +105,11 @@ describe('runTurn -- single-turn cases', () => {
       { token: 't3', turnNumber: 2, userText: 'Not sure yet.' },
       deps({ generator: constantCandidateQuestionGenerator(clarifyingProposal), decider: constantConstraintADecider({ should_ask: true, reason_code: 'MATERIALLY_IMPROVES_UNDERSTANDING', rationale: 'x' }) }, store),
     )
-    expect(outcome).toEqual({ kind: 'question', message: 'Which specific plan?' })
+    expect(outcome).toEqual({
+      kind: 'question',
+      message: 'Which specific plan?',
+      discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+    })
 
     const loadedAfterTurn2 = await store.load('t3')
     expect(loadedAfterTurn2!.pending_clarification).toEqual({

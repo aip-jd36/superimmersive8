@@ -23,7 +23,12 @@
  * separate, explicit flag rather than derived from phase alone.
  */
 
-export type CrcPagePhase = 'loading' | 'idle' | 'sending' | 'retry' | 'complete' | 'session_not_found'
+/**
+ * 'email_gate'/'rate_limited' (CRC Identity + Abuse Prevention + Analytics
+ * milestone) are additive -- shouldShowAcknowledgmentGuidance below only
+ * ever checks phase === 'idle', so neither new value changes its behavior.
+ */
+export type CrcPagePhase = 'loading' | 'idle' | 'sending' | 'retry' | 'complete' | 'session_not_found' | 'email_gate' | 'rate_limited'
 
 export function shouldShowAcknowledgmentGuidance(phase: CrcPagePhase, lastOutcomeWasAcknowledgment: boolean): boolean {
   return phase === 'idle' && lastOutcomeWasAcknowledgment

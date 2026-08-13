@@ -103,7 +103,11 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
         store,
       ),
     )
-    expect(outcome).toEqual({ kind: 'question', message: 'Ordinary question.' })
+    expect(outcome).toEqual({
+      kind: 'question',
+      message: 'Ordinary question.',
+      discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+    })
   })
 
   test('Gate 1 met but Phase 2 exit condition not yet met (workflow_role never confirmed) -> discovery never attempted even though applicability is affirmative', async () => {
@@ -120,7 +124,11 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
         store,
       ),
     )
-    expect(outcome).toEqual({ kind: 'question', message: 'Ordinary question.' })
+    expect(outcome).toEqual({
+      kind: 'question',
+      message: 'Ordinary question.',
+      discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+    })
   })
 
   test('Phase 3 + client_involvement affirmative -> Client-Provided Source Assets asked as attempt 1; ordinary generator never called', async () => {
@@ -132,7 +140,11 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
       { token: 'crd-client', turnNumber: 1, userText: 'x' },
       eligibleTurnDeps('made the video for a client', { generator: throwingGenerator, decider: sequencedDecider([askDecision()]) }, store),
     )
-    expect(outcome).toEqual({ kind: 'question', message: COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.client_provided_source_assets })
+    expect(outcome).toEqual({
+      kind: 'question',
+      message: COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.client_provided_source_assets,
+      discoverySignal: { eligible_categories: ['client_provided_source_assets'], selected_category: 'client_provided_source_assets', outcome: 'asked' },
+    })
     const loaded = await loadState(store, 'crd-client')
     expect(loaded.boundary_state.commercial_readiness_discovery_asked).toBe(true)
     expect(loaded.pending_commercial_readiness_takeaway).toBe('client_provided_source_assets')
@@ -144,7 +156,11 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
       { token: 'crd-person', turnNumber: 1, userText: 'x' },
       eligibleTurnDeps('the video shows my face talking to the camera', { decider: sequencedDecider([askDecision()]) }, store),
     )
-    expect(outcome).toEqual({ kind: 'question', message: COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.likeness_publicity_rights })
+    expect(outcome).toEqual({
+      kind: 'question',
+      message: COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.likeness_publicity_rights,
+      discoverySignal: { eligible_categories: ['likeness_publicity_rights'], selected_category: 'likeness_publicity_rights', outcome: 'asked' },
+    })
   })
 
   test('Phase 3 + reference_material_used affirmative -> Third-Party Visual Assets asked', async () => {
@@ -153,7 +169,11 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
       { token: 'crd-ref', turnNumber: 1, userText: 'x' },
       eligibleTurnDeps('I used a reference image to guide the generation', { decider: sequencedDecider([askDecision()]) }, store),
     )
-    expect(outcome).toEqual({ kind: 'question', message: COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.third_party_visual_assets })
+    expect(outcome).toEqual({
+      kind: 'question',
+      message: COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.third_party_visual_assets,
+      discoverySignal: { eligible_categories: ['third_party_visual_assets'], selected_category: 'third_party_visual_assets', outcome: 'asked' },
+    })
   })
 
   test('multiple categories eligible -> fixed pilot priority order picks client_provided_source_assets over likeness_publicity_rights', async () => {
@@ -162,7 +182,15 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
       { token: 'crd-multi', turnNumber: 1, userText: 'x' },
       eligibleTurnDeps('I made this for a client and it shows my face on camera.', { decider: sequencedDecider([askDecision()]) }, store),
     )
-    expect(outcome).toEqual({ kind: 'question', message: COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.client_provided_source_assets })
+    expect(outcome).toEqual({
+      kind: 'question',
+      message: COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.client_provided_source_assets,
+      discoverySignal: {
+        eligible_categories: ['client_provided_source_assets', 'likeness_publicity_rights'],
+        selected_category: 'client_provided_source_assets',
+        outcome: 'asked',
+      },
+    })
   })
 
   test('no indicator language present -> Applicability unknown for all three categories, ordinary candidate flow used instead', async () => {
@@ -172,7 +200,11 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
       { token: 'crd-unknown', turnNumber: 1, userText: 'x' },
       eligibleTurnDeps('a short promotional video', { generator: sequencedGenerator([ordinary]), decider: sequencedDecider([askDecision()]) }, store),
     )
-    expect(outcome).toEqual({ kind: 'question', message: 'What platform did you use?' })
+    expect(outcome).toEqual({
+      kind: 'question',
+      message: 'What platform did you use?',
+      discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+    })
   })
 
   test('cap already used (from an earlier turn) -> category not eligible despite affirmative applicability; ordinary candidate flow used instead', async () => {
@@ -214,7 +246,11 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
         store,
       ),
     )
-    expect(outcome).toEqual({ kind: 'question', message: 'Anything else about the workflow?' })
+    expect(outcome).toEqual({
+      kind: 'question',
+      message: 'Anything else about the workflow?',
+      discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+    })
   })
 })
 
@@ -234,7 +270,11 @@ describe('Commercial Readiness Discovery -- Constraint A / Constraint B interact
         store,
       ),
     )
-    expect(outcome).toEqual({ kind: 'question', message: 'Ordinary fallback question.' })
+    expect(outcome).toEqual({
+      kind: 'question',
+      message: 'Ordinary fallback question.',
+      discoverySignal: { eligible_categories: ['client_provided_source_assets'], selected_category: 'client_provided_source_assets', outcome: 'rejected_by_a' },
+    })
     const loaded = await loadState(store, 'crd-constraint-a')
     expect(loaded.boundary_state.commercial_readiness_discovery_asked).toBe(false)
     expect(loaded.pending_commercial_readiness_takeaway).toBeNull()
@@ -266,7 +306,15 @@ describe('Commercial Readiness Discovery -- Model 4 interaction', () => {
         store,
       ),
     )
-    expect(outcome).toEqual({ kind: 'question', message: 'Ordinary fallback question.' })
+    expect(outcome).toEqual({
+      kind: 'question',
+      message: 'Ordinary fallback question.',
+      discoverySignal: {
+        eligible_categories: ['client_provided_source_assets', 'likeness_publicity_rights'],
+        selected_category: 'client_provided_source_assets',
+        outcome: 'rejected_by_a',
+      },
+    })
   })
 
   test('questioning_exhausted still fires correctly when discovery is not eligible and both ordinary attempts fail (regression check against the pre-integration Model 4 baseline)', async () => {
@@ -291,7 +339,11 @@ describe('Commercial Readiness Discovery -- cap persistence + Educational Takeaw
       { token: 'crd-persist', turnNumber: 1, userText: 'x' },
       eligibleTurnDeps('made the video for a client', { decider: sequencedDecider([askDecision()]) }, store),
     )
-    expect(turn1).toEqual({ kind: 'question', message: COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.client_provided_source_assets })
+    expect(turn1).toEqual({
+      kind: 'question',
+      message: COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.client_provided_source_assets,
+      discoverySignal: { eligible_categories: ['client_provided_source_assets'], selected_category: 'client_provided_source_assets', outcome: 'asked' },
+    })
 
     // Turn 2: user answers. Extracts a fresh scoped_observation so Gate 2
     // registers a real change (MATERIAL_CHANGE_DETECTED) instead of
@@ -322,6 +374,7 @@ describe('Commercial Readiness Discovery -- cap persistence + Educational Takeaw
       kind: 'question',
       message: 'Anything else?',
       precedingTakeaway: COMMERCIAL_READINESS_TAKEAWAYS.client_provided_source_assets,
+      discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
     })
 
     // Turn 3: takeaway was already consumed on turn 2 -- must not repeat,
@@ -342,7 +395,11 @@ describe('Commercial Readiness Discovery -- cap persistence + Educational Takeaw
         store,
       ),
     )
-    expect(turn3).toEqual({ kind: 'question', message: 'One more thing.' })
+    expect(turn3).toEqual({
+      kind: 'question',
+      message: 'One more thing.',
+      discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+    })
     expect((turn3 as TurnOutcome).precedingTakeaway).toBeUndefined()
   })
 
