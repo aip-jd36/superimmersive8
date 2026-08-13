@@ -9,6 +9,46 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of August 13, 2026
+*Run: 2026-08-13 · 15 high · 10 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 10 | post+update | [Brussels Takes the Reins on AI Disclosure as August Deadline Bites](https://www.ad-hoc-news.de/boerse/news/unternehmensnachrichten/brussels-takes-the-reins-on-ai-disclosure-as-august-deadline-bites/69928948) | AD HOC NEWS | Sun, 09 Aug 2026 | ☐ |
+| 9 | post+update | [Europe's AI watermarking rules are now live, but visible labels, hidden machine-readable marks and editorial review apply to different companies, content and moments under Article 50](https://siliconcanals.com/t-europes-ai-watermarking-rules-are-now-live-but-visible-labels-hidden-machine-readable-marks-and-editorial-review-apply-to-different-companies-content-and-moments-under-article-50/) | Silicon Canals | Wed, 12 Aug 2026 | ☐ |
+| 9 | post+update | [The End of Quiet AI: Adland Responds to Europe’s Article 50 Calling for More AI Transparency](https://lbbonline.com/news/adland-eu-article-50) | Little Black Book \| LBBOnline | Tue, 11 Aug 2026 | ☐ |
+| 9 | post+update | [Europe's AI Transparency Rules Now Enforceable — With Fines That Bite](https://www.ad-hoc-news.de/boerse/news/unternehmensnachrichten/europe-s-ai-transparency-rules-now-enforceable-with-fines-that-bite/69930890) | AD HOC NEWS | Sun, 09 Aug 2026 | ☐ |
+| 9 | post+update | [EU's New AI Transparency Rules Now in Force: What Gets Labeled, Who Pays, and When](https://www.ad-hoc-news.de/boerse/news/unternehmensnachrichten/eu-s-new-ai-transparency-rules-now-in-force-what-gets-labeled-who-pays/69928530) | AD HOC NEWS | Sat, 08 Aug 2026 | ☐ |
+| 9 | post+update | [EU Transparency Rules Force Companies to Label AI-Generated Content From August](https://www.ad-hoc-news.de/boerse/news/unternehmensnachrichten/eu-transparency-rules-force-companies-to-label-ai-generated-content-from/69927516) | AD HOC NEWS | Sat, 08 Aug 2026 | ☐ |
+| 9 | post+update | [The AI Content Wars: Copyright, Fair Use, Training Data and the Future of Human Creation](https://ipwatchdog.com/sessions/ai-content-wars-copyright-fair-use-training/) | IPWatchdog.com | Fri, 07 Aug 2026 | ☐ |
+| 9 | post+update | [What came into force with the EU’s AI Act this week – and what didn’t](https://www.aljazeera.com/news/2026/8/6/what-came-into-force-with-the-eus-ai-act-this-week-and-what-didnt) | Al Jazeera | Thu, 06 Aug 2026 | ☐ |
+| 8 | post+update | [Belitsoft Highlights EU AI Act Compliance Requirements Taking Effect on 2 August 2026](https://www.openpr.com/news/4601521/belitsoft-highlights-eu-ai-act-compliance-requirements-taking) | openPR.com | Tue, 11 Aug 2026 | ☐ |
+| 8 | post+update | [Japan Rules AI Voice Cloning Requires Consent: Developers Face Civil Liability](https://www.techtimes.com/articles/323616/20260808/japan-rules-ai-voice-cloning-requires-consent-developers-face-civil-liability.htm) | Tech Times | Sat, 08 Aug 2026 | ☐ |
+| 8 | post+update | [What the first year of EU AI Act transparency enforcement could look like](https://www.helpnetsecurity.com/2026/08/07/edwin-weijdema-veeam-eu-ai-act-transparency/) | Help Net Security | Fri, 07 Aug 2026 | ☐ |
+| 8 | post+update | [California’s AI Transparency Act Arrives Alongside Europe’s Article 50 \| EDRM - Electronic Discovery Reference Model](https://www.jdsupra.com/legalnews/california-s-ai-transparency-act-4817035/) | JD Supra | Fri, 07 Aug 2026 | ☐ |
+| 7 | update | [Voice Actors Push for Consent as AI Cloning Creates Audio Without New Recordings](https://www.qoo10.co.id/en/tech/139275/ai-voice-cloning-consent-voice-actors/) | Qoo Media | Sun, 09 Aug 2026 | ☐ |
+| 7 | update | [The EU Now Fines Companies Up To 3% Of Revenue For Unlabeled AI Chatbots](https://startupfortune.com/the-eu-now-fines-companies-up-to-3-of-revenue-for-unlabeled-ai-chatbots/) | Startup Fortune | Fri, 07 Aug 2026 | ☐ |
+| 7 | post+update | [Protect yourself at all times: the UK’s legal gap on AI digital twins](https://www.macfarlanes.com/insights/102ngfq/protect-yourself-at-all-times-the-uks-legal-gap-on-ai-digital-twins) | Macfarlanes | Fri, 07 Aug 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [2026 State AG Enforcement: Key Focus Areas for the Remainder of the Year](https://www.regulatoryoversight.com/2026/08/2026-state-ag-enforcement-key-focus-areas-for-the-remainder-of-the-year/) | regulatoryoversight.com | Wed, 12 Aug 2026 | ☐ |
+| 6 | monitor | [Google's visible watermark on Veo 3 videos is practically invisible](https://mashable.com/article/google-visible-watermark-veo3) | Mashable | Wed, 12 Aug 2026 | ☐ |
+| 6 | monitor | [EU AI Act Explained](https://www.diplomacyandlaw.com/post/eu-ai-act-explained) | Diplomacy and Law | Sat, 08 Aug 2026 | ☐ |
+| 5 | monitor | [AI deepfake video of NY-21 congressional candidate sparks debate over NY election law](https://www.wcax.com/2026/08/12/ai-deepfake-video-ny-21-congressional-candidate-sparks-debate-over-ny-election-law/) | WCAX | Wed, 12 Aug 2026 | ☐ |
+| 5 | monitor | [An Infamous Attack Ad Just Got an AI Resurrection](https://www.motherjones.com/politics/2026/08/an-infamous-attack-ad-just-got-an-ai-resurrection/) | Mother Jones | Sun, 09 Aug 2026 | ☐ |
+| 5 | monitor | [Europe Published Agent Disclosure Rules. The Industry Code That Covers Everything Else Doesn’t Mention Them.](https://forkast.news/europe-published-agent-disclosure-rules-the-industry-code-that-covers-everything-else-doesnt-mention-them/) | forkast.news | Fri, 07 Aug 2026 | ☐ |
+| 4 | monitor | [How to Copyright an AI-Generated Image?](https://www.jdsupra.com/legalnews/how-to-copyright-an-ai-generated-image-7658022/) | JD Supra | Wed, 12 Aug 2026 | ☐ |
+| 4 | monitor | [What Are AI Video Generation Models Competing For? Key Drivers, Core Objectives & Industry Race Insights](https://eu.36kr.com/en/p/3930236944596099) | 36 Kr | Mon, 10 Aug 2026 | ☐ |
+| 4 | monitor | [SCCA’s student chapter debate spotlights AI copyright](https://law.asia/scca-gena2z-ai-copyright-debate-singapore/) | Law.asia | Thu, 06 Aug 2026 | ☐ |
+| 4 | monitor | [The latest AI-powered martech news and releases](https://martech.org/the-latest-ai-powered-martech-news-and-releases/) | MarTech | Thu, 06 Aug 2026 | ☐ |
+
+---
+
 ## Week of August 07, 2026
 *Run: 2026-08-07 · 35 high · 15 monitor · lookback 7 days*
 
