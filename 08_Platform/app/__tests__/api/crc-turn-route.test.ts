@@ -59,4 +59,45 @@ describe('parseRequest', () => {
     const result = parseRequest({ message: 12345 })
     expect(result).toHaveProperty('error')
   })
+
+  // CRC Identity + Abuse Prevention + Analytics milestone -- email/declineEmail branches.
+
+  test('a valid email is parsed as kind: email, trimmed and lowercased', () => {
+    expect(parseRequest({ email: '  JD@Example.com  ' })).toEqual({ kind: 'email', email: 'jd@example.com', restart: false })
+  })
+
+  test('a malformed email is rejected with a specific error, not silently accepted', () => {
+    const result = parseRequest({ email: 'not-an-email' })
+    expect(result).toHaveProperty('error')
+    expect((result as { error: string }).error).toContain('email')
+  })
+
+  test('declineEmail: true is parsed as kind: decline_email', () => {
+    expect(parseRequest({ declineEmail: true })).toEqual({ kind: 'decline_email', restart: false })
+  })
+
+  test('declineEmail: false is not treated as a decline_email request', () => {
+    const result = parseRequest({ declineEmail: false })
+    expect(result).toHaveProperty('error')
+  })
+
+  test('email combined with message is rejected -- exactly one of the four kinds is allowed', () => {
+    const result = parseRequest({ email: 'jd@example.com', message: 'hi' })
+    expect(result).toHaveProperty('error')
+  })
+
+  test('email combined with declineAction is rejected', () => {
+    const result = parseRequest({ email: 'jd@example.com', declineAction: 'skip_question' })
+    expect(result).toHaveProperty('error')
+  })
+
+  test('declineEmail combined with email is rejected', () => {
+    const result = parseRequest({ declineEmail: true, email: 'jd@example.com' })
+    expect(result).toHaveProperty('error')
+  })
+
+  test('an empty-string email is rejected the same as no email at all, not treated as a valid empty request', () => {
+    const result = parseRequest({ email: '   ' })
+    expect(result).toHaveProperty('error')
+  })
 })
