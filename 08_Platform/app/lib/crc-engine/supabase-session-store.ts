@@ -107,14 +107,52 @@ export function createSupabaseSessionStore(client: SupabaseClient): SessionStore
 
 // ── Product-layer helpers (NOT part of SessionStore -- see module header) ──
 
+/**
+ * Transcript v2 (CRC Identity + Abuse Prevention + Analytics milestone,
+ * design report §6). `timestamp`/`message_kind` are additive and OPTIONAL
+ * at the individual-entry level -- JSONB doesn't enforce a schema per
+ * array element, so historical rows saved before this milestone (plain
+ * {role, text}) remain valid as stored and are never rewritten. Any code
+ * reading a transcript entry must treat a missing timestamp/message_kind
+ * as unknown, never crash, never guess/backfill.
+ *
+ * message_kind values map 1:1 to real, existing outcome shapes (nothing
+ * invented): 'user' for every user turn; 'ordinary_question' for a
+ * regular candidate-generator question; 'acknowledgment' for the fixed
+ * ACKNOWLEDGMENT_COPY (decline path); 'commercial_readiness_discovery_question'
+ * for a Discovery Catalog question; 'educational_takeaway' for the fixed
+ * Educational Takeaway delivered the turn after. Deliberately excludes a
+ * completion/opening/summary kind (ProjectionOutput is never persisted,
+ * for the same reason as always -- cheap to recompute) and an error/retry
+ * kind (a failed turn is never saved at all; crc_pilot_events.retryable_failure
+ * already captures the operationally relevant signal) -- see design report
+ * §6 for the full reasoning on both declined additions.
+ */
+export type MessageKind = 'user' | 'ordinary_question' | 'acknowledgment' | 'commercial_readiness_discovery_question' | 'educational_takeaway'
+
 export interface TranscriptEntry {
   role: 'user' | 'assistant'
   text: string
+  timestamp?: string
+  message_kind?: MessageKind
 }
 
 export interface CrcSessionProductState {
   turn_count: number
   transcript: TranscriptEntry[]
+  /**
+   * Session-meta fields added by the CRC Identity + Abuse Prevention +
+   * Analytics milestone. Selected alongside turn_count/transcript (one
+   * query, not two) since every call site that needs turn_count also needs
+   * these for the email-gate/abuse checks in route.ts.
+   */
+  updated_at: string
+  email: string | null
+  traffic_type: string
+  abuse_key: string | null
+  attribution_token: string | null
+  /** 'email_declined' | 'conversation_limit_reached' | null -- see types.ts-adjacent note in route.ts for why this is not a completion_reason value. */
+  product_stop_reason: string | null
 }
 
 /**
@@ -124,7 +162,11 @@ export interface CrcSessionProductState {
  * existing, client-supplied token.
  */
 export async function loadCrcSessionProductState(client: SupabaseClient, token: string): Promise<CrcSessionProductState | null> {
-  const { data, error } = await client.from(TABLE).select('turn_count, transcript').eq('id', token).maybeSingle()
+  const { data, error } = await client
+    .from(TABLE)
+    .select('turn_count, transcript, updated_at, email, traffic_type, abuse_key, attribution_token, product_stop_reason')
+    .eq('id', token)
+    .maybeSingle()
   if (error) {
     console.error('[SupabaseSessionStore] loadCrcSessionProductState query error', error)
     return null
@@ -133,6 +175,65 @@ export async function loadCrcSessionProductState(client: SupabaseClient, token: 
   return {
     turn_count: data.turn_count as number,
     transcript: (data.transcript as TranscriptEntry[] | null) ?? [],
+    updated_at: data.updated_at as string,
+    email: (data.email as string | null) ?? null,
+    traffic_type: data.traffic_type as string,
+    abuse_key: (data.abuse_key as string | null) ?? null,
+    attribution_token: (data.attribution_token as string | null) ?? null,
+    product_stop_reason: (data.product_stop_reason as string | null) ?? null,
+  }
+}
+
+/**
+ * Session-creation-time facts (CRC Identity + Abuse Prevention + Analytics
+ * milestone) -- traffic_type, abuse_key, runtime_commit, model_config,
+ * attribution_token. NOT part of CRCSessionState (SessionStore.save()'s
+ * insert-fallback only ever writes the four CRCSessionState columns), so
+ * for a brand-new token these would otherwise silently take their DB
+ * defaults (traffic_type='pilot', everything else null) forever. Called
+ * exactly once, only on the branch that mints a new token, AFTER runTurn()
+ * has already created the row via its own save() -- same ordering
+ * dependency saveCrcSessionProductState already has on runTurn(), see
+ * route.ts.
+ */
+export interface CrcSessionCreationMeta {
+  traffic_type: string
+  abuse_key: string | null
+  runtime_commit: string
+  model_config: Record<string, unknown>
+  attribution_token: string
+}
+
+export async function saveCrcSessionCreationMeta(client: SupabaseClient, token: string, meta: CrcSessionCreationMeta): Promise<void> {
+  const { error } = await client.from(TABLE).update(meta).eq('id', token)
+  if (error) {
+    throw new Error(`[SupabaseSessionStore] saveCrcSessionCreationMeta failed: ${error.message}`)
+  }
+}
+
+/**
+ * Persists a captured email (the gate's own write). identity_source is
+ * currently always 'email_gate' -- the only capture mechanism that exists.
+ */
+export async function saveCrcSessionEmail(client: SupabaseClient, token: string, email: string): Promise<void> {
+  const { error } = await client
+    .from(TABLE)
+    .update({ email, email_captured_at: new Date().toISOString(), identity_source: 'email_gate' })
+    .eq('id', token)
+  if (error) {
+    throw new Error(`[SupabaseSessionStore] saveCrcSessionEmail failed: ${error.message}`)
+  }
+}
+
+/**
+ * Sets the product-layer stop reason -- see route.ts's own note on why
+ * this is deliberately separate from structured_understanding.completion_reason
+ * (an Interview-Engine-owned field this milestone never touches).
+ */
+export async function saveCrcSessionProductStop(client: SupabaseClient, token: string, reason: 'email_declined' | 'conversation_limit_reached'): Promise<void> {
+  const { error } = await client.from(TABLE).update({ product_stop_reason: reason }).eq('id', token)
+  if (error) {
+    throw new Error(`[SupabaseSessionStore] saveCrcSessionProductStop failed: ${error.message}`)
   }
 }
 
@@ -151,7 +252,20 @@ export async function loadCrcSessionProductState(client: SupabaseClient, token: 
  * untouched -- .update() only ever assigns columns present in its own
  * payload.
  */
-export async function saveCrcSessionProductState(client: SupabaseClient, token: string, state: CrcSessionProductState): Promise<void> {
+/**
+ * Deliberately narrower than CrcSessionProductState (the full read shape) --
+ * this write only ever sets turn_count/transcript, so its own parameter
+ * type should say exactly that, not the broader interface loadCrcSessionProductState
+ * returns. Keeps callers (and tests) from having to fabricate the read-only
+ * session-meta fields (email, traffic_type, etc.) just to call a function
+ * that never touches them.
+ */
+export interface CrcSessionProductStateUpdate {
+  turn_count: number
+  transcript: TranscriptEntry[]
+}
+
+export async function saveCrcSessionProductState(client: SupabaseClient, token: string, state: CrcSessionProductStateUpdate): Promise<void> {
   const { data, error } = await client.from(TABLE).update({ turn_count: state.turn_count, transcript: state.transcript }).eq('id', token).select('id')
   if (error) {
     throw new Error(`[SupabaseSessionStore] saveCrcSessionProductState failed: ${error.message}`)

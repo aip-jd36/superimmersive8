@@ -252,8 +252,22 @@ describe('product-layer helpers (turn_count/transcript, not part of SessionStore
   })
 
   test('loadCrcSessionProductState defaults transcript to [] when the column is null', async () => {
-    const { client } = fakeClient({ selectResult: { data: { turn_count: 2, transcript: null }, error: null } })
-    await expect(loadCrcSessionProductState(client, 'token')).resolves.toEqual({ turn_count: 2, transcript: [] })
+    const { client } = fakeClient({
+      selectResult: {
+        data: { turn_count: 2, transcript: null, updated_at: '2026-08-14T00:00:00.000Z', email: null, traffic_type: 'pilot', abuse_key: null, attribution_token: null, product_stop_reason: null },
+        error: null,
+      },
+    })
+    await expect(loadCrcSessionProductState(client, 'token')).resolves.toEqual({
+      turn_count: 2,
+      transcript: [],
+      updated_at: '2026-08-14T00:00:00.000Z',
+      email: null,
+      traffic_type: 'pilot',
+      abuse_key: null,
+      attribution_token: null,
+      product_stop_reason: null,
+    })
   })
 
   test('saveCrcSessionProductState writes only turn_count/transcript via update(), never the engine-state columns', async () => {
