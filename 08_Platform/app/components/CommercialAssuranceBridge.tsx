@@ -19,11 +19,63 @@
  * seconds.
  */
 
+'use client'
+
+import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 
 const COMMERCIAL_ASSURANCE_CALENDLY_URL = 'https://calendly.com/aipenguins/superimmersive8'
 
-export function CommercialAssuranceBridge() {
+/**
+ * CRC Identity + Abuse Prevention + Analytics milestone -- Calendly
+ * attribution (design report §9) and impression/click tracking (JD's
+ * approved additions). `attributionToken`/`email` are optional: a session
+ * that finalized before ever reaching the email gate (declined, or hit
+ * the turn ceiling before turn 4) may have neither -- the bridge still
+ * renders and the CTA still works, just without attribution params.
+ *
+ * attributionToken is passed as a UTM-style tracking param, not the real
+ * session id -- see the migration's own header for why the actual
+ * internal row identifier is deliberately kept out of a third-party
+ * URL/referrer chain. UTM params are used (rather than a proprietary
+ * Calendly param) because they're documented and supported without any
+ * Calendly-side configuration -- see design report §9 for the honest
+ * caveat that exact non-UTM Calendly param names were not independently
+ * verified.
+ */
+interface CommercialAssuranceBridgeProps {
+  attributionToken?: string
+  email?: string | null
+}
+
+function buildCalendlyUrl(attributionToken?: string, email?: string | null): string {
+  const params = new URLSearchParams()
+  if (attributionToken) {
+    params.set('utm_source', 'crc')
+    params.set('utm_content', attributionToken)
+  }
+  if (email) {
+    params.set('email', email)
+  }
+  const query = params.toString()
+  return query ? `${COMMERCIAL_ASSURANCE_CALENDLY_URL}?${query}` : COMMERCIAL_ASSURANCE_CALENDLY_URL
+}
+
+export function CommercialAssuranceBridge({ attributionToken, email }: CommercialAssuranceBridgeProps) {
+  useEffect(() => {
+    // Fire-and-forget, best-effort -- see /api/crc/bridge-shown's own
+    // header for why this is safe to call on every mount (server-side
+    // idempotent, exactly one impression row per session regardless of
+    // how many times this component mounts).
+    fetch('/api/crc/bridge-shown', { method: 'POST' }).catch(() => {})
+  }, [])
+
+  function handleCtaClick() {
+    // Fire-and-forget -- target="_blank" below keeps this tab alive, so an
+    // ordinary fetch is sufficient (no navigator.sendBeacon needed).
+    fetch('/api/crc/cta-click', { method: 'POST' }).catch(() => {})
+  }
+
   return (
     <div className="space-y-3 border-t pt-4">
       <p className="text-sm font-medium">How this understanding was built</p>
@@ -38,7 +90,7 @@ export function CommercialAssuranceBridge() {
       </p>
 
       <Button asChild variant="outline" size="sm">
-        <a href={COMMERCIAL_ASSURANCE_CALENDLY_URL} target="_blank" rel="noopener noreferrer">
+        <a href={buildCalendlyUrl(attributionToken, email)} target="_blank" rel="noopener noreferrer" onClick={handleCtaClick}>
           Talk with SI8 about a Commercial Assurance Assessment
         </a>
       </Button>

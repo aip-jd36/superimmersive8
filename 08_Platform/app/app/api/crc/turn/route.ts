@@ -31,7 +31,11 @@ import {
   createSupabaseSessionStore,
   loadCrcSessionProductState,
   saveCrcSessionProductState,
+  saveCrcSessionCreationMeta,
+  saveCrcSessionEmail,
+  saveCrcSessionProductStop,
   type TranscriptEntry,
+  type MessageKind,
 } from '@/lib/crc-engine/supabase-session-store'
 import { createAnthropicExtractor } from '@/lib/interview-engine/anthropic-extractor'
 import { createAnthropicCandidateQuestionGenerator } from '@/lib/interview-engine/anthropic-candidate-question'
@@ -41,6 +45,12 @@ import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { parseRequest, type TurnRequestBody, type TurnResponseBody, type SessionStatusResponseBody } from '@/lib/crc-engine/api-contract'
 import { logPilotEvent } from '@/lib/crc-engine/pilot-events'
+import { logAnalyticsEvent } from '@/lib/crc-engine/analytics-events'
+import { resolveClientIp, normalizeIp, deriveAbuseKey } from '@/lib/crc-engine/abuse-key'
+import { classifyTraffic } from '@/lib/crc-engine/traffic-classification'
+import { checkSessionCreationRate, checkBurst, checkTurnCeiling, logRateLimitedEvent } from '@/lib/crc-engine/abuse-prevention'
+import { getRuntimeCommit, getModelConfig } from '@/lib/crc-engine/runtime-metadata'
+import { CRC_CONFIG } from '@/lib/crc-engine/config'
 
 const COOKIE_NAME = 'crc_session'
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 7 // 7 days
@@ -110,9 +120,24 @@ export async function GET(request: NextRequest) {
   }
   const transcript = productState?.transcript ?? []
 
-  if (engineState.structured_understanding.completion_reason !== null) {
+  // CRC Identity + Abuse Prevention + Analytics milestone: a session can now
+  // also be "done" at the PRODUCT layer (email declined, or the hard turn
+  // ceiling was hit) without the Interview Engine's own completion_reason
+  // ever being set -- see route.ts's own module-level note near
+  // product_stop_reason handling below for why that's deliberate. Both
+  // conditions render the exact same finalized view, so a page refresh
+  // after either one correctly re-shows the ProjectionOutput/bridge
+  // instead of falling back to an active chat input.
+  const isDone = engineState.structured_understanding.completion_reason !== null || productState?.product_stop_reason != null
+  if (isDone) {
     const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE)
-    return NextResponse.json<SessionStatusResponseBody>({ status: 'complete', transcript, projection: result.output })
+    return NextResponse.json<SessionStatusResponseBody>({
+      status: 'complete',
+      transcript,
+      projection: result.output,
+      attribution_token: productState?.attribution_token ?? undefined,
+      email: productState?.email ?? undefined,
+    })
   }
 
   return NextResponse.json<SessionStatusResponseBody>({ status: 'active', transcript })
@@ -136,11 +161,58 @@ export async function POST(request: NextRequest) {
 
   const sessionStore = createSupabaseSessionStore(supabaseAdmin)
 
+  // ── Abuse key + traffic classification (design report §4/§5/§15) ───────
+  // Cheap, pure computation -- no I/O, runs before any Supabase or model
+  // call. abuseKey stays null (and every rate-limit check below is
+  // skipped, fail-open, per the approved failure model) if the HMAC secret
+  // is missing/misconfigured -- a deploy-time bug, not a live condition
+  // worth taking the whole pilot down over.
+  const rawIp = resolveClientIp(request)
+  const normalizedIp = normalizeIp(rawIp)
+  let abuseKey: string | null = null
+  try {
+    abuseKey = deriveAbuseKey(normalizedIp)
+  } catch (err) {
+    console.error('[api/crc/turn] abuse-key derivation unavailable, skipping abuse checks for this request', err)
+  }
+  const trafficType = classifyTraffic({
+    nodeEnv: process.env.NODE_ENV,
+    evalKeyHeader: request.headers.get('x-crc-eval-key'),
+    normalizedIp,
+  })
+  // Only real pilot traffic is ever rate-limited -- development/
+  // internal_test/automated_eval all need to run repeatedly without
+  // tripping the same limits real anonymous users are bounded by.
+  const rateLimitingApplies = trafficType === 'pilot' && abuseKey !== null
+
+  const isNewSession = !existingToken || parsed.restart
+
+  // email/decline_email only make sense against an existing session -- a
+  // brand-new session has no gate to respond to yet.
+  if (isNewSession && (parsed.kind === 'email' || parsed.kind === 'decline_email')) {
+    return NextResponse.json<TurnResponseBody>({ status: 'invalid_request', error: 'Cannot submit email before starting a conversation.' }, { status: 400 })
+  }
+
+  if (isNewSession && rateLimitingApplies) {
+    const rateCheck = await checkSessionCreationRate(supabaseAdmin, abuseKey!)
+    if (rateCheck.limited) {
+      await logRateLimitedEvent(supabaseAdmin, null, rateCheck.reason, rawIp)
+      return NextResponse.json<TurnResponseBody>({ status: 'rate_limited', retryAfterSeconds: rateCheck.retryAfterSeconds }, { status: 429 })
+    }
+  }
+
   let token: string
   let turnNumber: number
   let transcript: TranscriptEntry[]
+  // Set only on the existing-session branch, from that session's own
+  // already-persisted values -- used to fill attribution_token/email on a
+  // 'complete' response for a session that finishes THIS turn but was not
+  // newly created this turn (a brand-new session gets a freshly-generated
+  // attributionToken further down instead, see isNewSession handling).
+  let existingAttributionToken: string | undefined
+  let existingEmail: string | null | undefined
 
-  if (!existingToken || parsed.restart) {
+  if (isNewSession) {
     // No token supplied at all, or the user explicitly asked to restart --
     // both are legitimately "begin a new conversation," never confused
     // with an unresolvable existing one (see the else branch).
@@ -155,19 +227,128 @@ export async function POST(request: NextRequest) {
     // productState defaults defensively only once engineState has
     // already proven the session is real.
     const [engineState, productState] = await Promise.all([
-      sessionStore.load(existingToken),
-      loadCrcSessionProductState(supabaseAdmin, existingToken),
+      sessionStore.load(existingToken!),
+      loadCrcSessionProductState(supabaseAdmin, existingToken!),
     ])
     if (!engineState) {
-      await logPilotEvent(supabaseAdmin, { session_id: existingToken, event_type: 'missing_session' })
+      await logPilotEvent(supabaseAdmin, { session_id: existingToken!, event_type: 'missing_session' })
       return NextResponse.json<TurnResponseBody>({ status: 'session_not_found' }, { status: 404 })
     }
-    token = existingToken
+    token = existingToken!
     turnNumber = (productState?.turn_count ?? 0) + 1
     transcript = productState?.transcript ?? []
+    existingAttributionToken = productState?.attribution_token ?? undefined
+    existingEmail = productState?.email ?? undefined
+
+    // Already finalized at the PRODUCT layer (email declined, or the hard
+    // turn ceiling was already hit on a prior request) -- deliberately
+    // kept separate from structured_understanding.completion_reason (see
+    // the migration's own header and the design report §14/§B item 6):
+    // this is a business decision to stop spending on this session, not
+    // the Interview Engine deciding it's naturally finished, and keeping
+    // it out of completion_reason means this milestone never touches
+    // types/interview-engine.ts or any Interview Engine completion logic.
+    // Re-checked fresh on every request (not a one-time redirect), so it
+    // correctly re-blocks even if the client somehow retries after either
+    // stop.
+    if (productState?.product_stop_reason) {
+      const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE)
+      return NextResponse.json<TurnResponseBody>({
+        status: 'complete',
+        projection: result.output,
+        attribution_token: productState.attribution_token ?? undefined,
+        email: productState.email ?? undefined,
+      })
+    }
+
+    if (rateLimitingApplies) {
+      const burstCheck = checkBurst(productState?.updated_at ?? null)
+      if (burstCheck.limited) {
+        await logRateLimitedEvent(supabaseAdmin, token, burstCheck.reason, rawIp)
+        return NextResponse.json<TurnResponseBody>({ status: 'rate_limited', retryAfterSeconds: burstCheck.retryAfterSeconds }, { status: 429 })
+      }
+    }
+
+    // ── Email gate: handle a direct email/decline_email submission ───────
+    // Both are their own lightweight round-trip -- no runTurn() call, no
+    // model cost, no turn_count increment. The client is expected to
+    // resubmit its original pending message/decline once it receives
+    // email_accepted.
+    if (parsed.kind === 'email') {
+      try {
+        await saveCrcSessionEmail(supabaseAdmin, token, parsed.email)
+      } catch (err) {
+        console.error('[api/crc/turn] saveCrcSessionEmail failed', err)
+        await logPilotEvent(supabaseAdmin, { session_id: token, event_type: 'persistence_error', detail: err instanceof Error ? err.message : String(err) })
+        return NextResponse.json<TurnResponseBody>({ status: 'retry' }, { status: 503 })
+      }
+      const acceptedResponse = NextResponse.json<TurnResponseBody>({ status: 'email_accepted' })
+      setSessionCookie(acceptedResponse, token)
+      return acceptedResponse
+    }
+    if (parsed.kind === 'decline_email') {
+      try {
+        await saveCrcSessionProductStop(supabaseAdmin, token, 'email_declined')
+      } catch (err) {
+        console.error('[api/crc/turn] saveCrcSessionProductStop (email_declined) failed', err)
+        await logPilotEvent(supabaseAdmin, { session_id: token, event_type: 'persistence_error', detail: err instanceof Error ? err.message : String(err) })
+        return NextResponse.json<TurnResponseBody>({ status: 'retry' }, { status: 503 })
+      }
+      const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE)
+      const declinedResponse = NextResponse.json<TurnResponseBody>({
+        status: 'complete',
+        projection: result.output,
+        attribution_token: productState?.attribution_token ?? undefined,
+        email: productState?.email ?? undefined,
+      })
+      setSessionCookie(declinedResponse, token)
+      return declinedResponse
+    }
+
+    // ── Email gate: is it required before this message/decline proceeds? ─
+    // Preferred trigger: the first Commercial Readiness Discovery
+    // takeaway has already been delivered somewhere in this transcript --
+    // determined by scanning for message_kind === 'educational_takeaway'
+    // (transcript v2), so the user has already received genuine CRC value
+    // before ever being asked for email. Fallback: no Discovery has fired
+    // by the time 3 assistant turns have already happened (config-driven,
+    // not hard-coded) -- bounds anonymous turns even for a conversation
+    // that never becomes Discovery-eligible.
+    // parsed.kind is already narrowed to 'message' | 'decline' here -- both
+    // 'email' and 'decline_email' kinds returned early above.
+    if (!productState?.email) {
+      const hasDeliveredTakeaway = transcript.some((entry) => entry.message_kind === 'educational_takeaway')
+      if (hasDeliveredTakeaway || turnNumber > CRC_CONFIG.emailGateFallbackTurn) {
+        return NextResponse.json<TurnResponseBody>({ status: 'email_required' })
+      }
+    }
+
+    if (rateLimitingApplies) {
+      const ceilingCheck = checkTurnCeiling(turnNumber)
+      if (ceilingCheck.limited) {
+        await logRateLimitedEvent(supabaseAdmin, token, ceilingCheck.reason, rawIp)
+        try {
+          await saveCrcSessionProductStop(supabaseAdmin, token, 'conversation_limit_reached')
+        } catch (err) {
+          console.error('[api/crc/turn] saveCrcSessionProductStop (conversation_limit_reached) failed', err)
+        }
+        const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE)
+        const ceilingResponse = NextResponse.json<TurnResponseBody>({
+          status: 'complete',
+          projection: result.output,
+          attribution_token: productState?.attribution_token ?? undefined,
+          email: productState?.email ?? undefined,
+        })
+        setSessionCookie(ceilingResponse, token)
+        return ceilingResponse
+      }
+    }
   }
 
-  const userText = parsed.kind === 'message' ? parsed.text : DECLINE_LABEL[parsed.action]
+  // parsed.kind is guaranteed 'message' | 'decline' by this point -- both
+  // 'email' and 'decline_email' are handled with their own early return
+  // above, in both the new-session guard and the existing-session branch.
+  const userText = parsed.kind === 'message' ? parsed.text : parsed.kind === 'decline' ? DECLINE_LABEL[parsed.action] : ''
   const declineAction = parsed.kind === 'decline' ? parsed.action : undefined
 
   let outcome: Awaited<ReturnType<typeof runTurn>>
@@ -213,17 +394,50 @@ export async function POST(request: NextRequest) {
     await logPilotEvent(supabaseAdmin, { session_id: token, event_type: DECLINE_EVENT_TYPE[declineAction] })
   }
 
-  const updatedTranscript: TranscriptEntry[] = [...transcript, { role: 'user', text: userText }]
+  let attributionToken: string | undefined
+  if (isNewSession) {
+    // Session-creation-time facts (design report §7/§14) -- NOT part of
+    // CRCSessionState, so runTurn()'s own save() never writes these for a
+    // brand-new token. Written here, once, now that runTurn() has
+    // succeeded and the row is guaranteed to exist -- same ordering
+    // dependency saveCrcSessionProductState already has below.
+    attributionToken = randomUUID()
+    try {
+      await saveCrcSessionCreationMeta(supabaseAdmin, token, {
+        traffic_type: trafficType,
+        abuse_key: abuseKey,
+        runtime_commit: getRuntimeCommit(),
+        model_config: getModelConfig(),
+        attribution_token: attributionToken,
+      })
+    } catch (err) {
+      // Best-effort, not fatal -- a failure here means this session is
+      // missing identity/analytics metadata, never a broken user-facing
+      // turn (the engine-state save this depends on has already fully
+      // succeeded). Matches the fail-open discipline for analytics
+      // failures throughout this milestone.
+      console.error('[api/crc/turn] saveCrcSessionCreationMeta failed', err)
+    }
+  }
+
+  // Transcript v2 (design report §6): timestamp + message_kind on every
+  // entry going forward. message_kind maps 1:1 to the real outcome shape
+  // already computed above -- nothing inferred beyond what runTurn()
+  // itself already decided this turn.
+  const now = new Date().toISOString()
+  const updatedTranscript: TranscriptEntry[] = [...transcript, { role: 'user', text: userText, timestamp: now, message_kind: 'user' }]
   // Commercial Readiness Discovery Catalog integration, 2026-08-12: shown
   // as its own transcript entry, ahead of this turn's own message -- so a
   // page refresh redisplays it correctly with zero extra client logic,
   // and so it reads as a distinct conversational beat, not appended prose
   // onto whatever else this turn says.
   if (outcome.precedingTakeaway) {
-    updatedTranscript.push({ role: 'assistant', text: outcome.precedingTakeaway })
+    updatedTranscript.push({ role: 'assistant', text: outcome.precedingTakeaway, timestamp: now, message_kind: 'educational_takeaway' })
   }
   if (outcome.kind !== 'complete') {
-    updatedTranscript.push({ role: 'assistant', text: outcome.message })
+    const messageKind: MessageKind =
+      outcome.kind === 'acknowledgment' ? 'acknowledgment' : outcome.discoverySignal?.outcome === 'asked' ? 'commercial_readiness_discovery_question' : 'ordinary_question'
+    updatedTranscript.push({ role: 'assistant', text: outcome.message, timestamp: now, message_kind: messageKind })
   }
 
   try {
@@ -246,9 +460,23 @@ export async function POST(request: NextRequest) {
     return retryResponse
   }
 
+  // Discovery analytics instrumentation (design report §11) -- logged
+  // best-effort, after the turn's own persistence has already succeeded.
+  // Only present on the organic (non-decline) path; undefined otherwise,
+  // in which case there is nothing to log.
+  if (outcome.discoverySignal) {
+    await logAnalyticsEvent(supabaseAdmin, { session_id: token, event_type: 'discovery_signal', event_data: outcome.discoverySignal })
+  }
+
   const response =
     outcome.kind === 'complete'
-      ? NextResponse.json<TurnResponseBody>({ status: 'complete', projection: outcome.result.output, precedingTakeaway: outcome.precedingTakeaway })
+      ? NextResponse.json<TurnResponseBody>({
+          status: 'complete',
+          projection: outcome.result.output,
+          precedingTakeaway: outcome.precedingTakeaway,
+          attribution_token: attributionToken ?? existingAttributionToken,
+          email: existingEmail,
+        })
       : NextResponse.json<TurnResponseBody>({ status: outcome.kind, message: outcome.message, precedingTakeaway: outcome.precedingTakeaway })
 
   setSessionCookie(response, token)

@@ -51,6 +51,11 @@ export default function CrcPage() {
   const [feedbackText, setFeedbackText] = useState('')
   const [feedbackStatus, setFeedbackStatus] = useState<FeedbackStatus>('idle')
   const [lastOutcomeWasAcknowledgment, setLastOutcomeWasAcknowledgment] = useState(false)
+  // CRC Identity + Abuse Prevention + Analytics milestone.
+  const [attributionToken, setAttributionToken] = useState<string | undefined>(undefined)
+  const [email, setEmail] = useState<string | null | undefined>(undefined)
+  const [emailInput, setEmailInput] = useState('')
+  const [emailSubmitStatus, setEmailSubmitStatus] = useState<'idle' | 'submitting' | 'error'>('idle')
   const pendingRequestRef = useRef<PendingRequestBody | null>(null)
   const scrollAnchorRef = useRef<HTMLDivElement | null>(null)
 
@@ -75,6 +80,8 @@ export default function CrcPage() {
       } else if (data.status === 'complete') {
         setMessages(data.transcript)
         setProjection(data.projection)
+        setAttributionToken(data.attribution_token)
+        setEmail(data.email)
         setPhase('complete')
       }
     })()
@@ -125,10 +132,23 @@ export default function CrcPage() {
         setMessages((prev) => [...prev, { role: 'assistant', text: takeaway }])
       }
       setProjection(data.projection)
+      setAttributionToken(data.attribution_token)
+      setEmail(data.email)
       pendingRequestRef.current = null
       setInputText('')
       setLastOutcomeWasAcknowledgment(false)
       setPhase('complete')
+    } else if (data.status === 'email_required') {
+      // The server never processed this turn (no side effects at all) --
+      // remove the optimistic bubble this attempt added, same pattern
+      // handleRetry already uses for a failed 'retry' response.
+      // pendingRequestRef stays set: handleEmailSubmit resubmits it once
+      // email is accepted.
+      setMessages((prev) => prev.slice(0, -1))
+      setPhase('email_gate')
+    } else if (data.status === 'rate_limited') {
+      setMessages((prev) => prev.slice(0, -1))
+      setPhase('rate_limited')
     } else if (data.status === 'session_not_found') {
       setLastOutcomeWasAcknowledgment(false)
       setPhase('session_not_found')
@@ -138,6 +158,54 @@ export default function CrcPage() {
       // Client-side validation below already prevents an empty send, so
       // this should be unreachable in normal use -- fall back to retry
       // state rather than a silent no-op if it somehow occurs.
+      setPhase('retry')
+    }
+  }
+
+  async function handleEmailSubmit() {
+    const trimmed = emailInput.trim()
+    if (!trimmed || emailSubmitStatus === 'submitting') return
+    setEmailSubmitStatus('submitting')
+    let res: Response
+    try {
+      res = await fetch('/api/crc/turn', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: trimmed }) })
+    } catch {
+      setEmailSubmitStatus('error')
+      return
+    }
+    const data: TurnResponseBody = await res.json()
+    if (data.status === 'email_accepted') {
+      setEmailSubmitStatus('idle')
+      setEmailInput('')
+      const pending = pendingRequestRef.current
+      if (pending) {
+        submit(pending)
+      } else {
+        setPhase('idle')
+      }
+    } else {
+      setEmailSubmitStatus('error')
+    }
+  }
+
+  async function handleEmailDecline() {
+    setPhase('sending')
+    let res: Response
+    try {
+      res = await fetch('/api/crc/turn', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ declineEmail: true }) })
+    } catch {
+      setPhase('retry')
+      return
+    }
+    const data: TurnResponseBody = await res.json()
+    if (data.status === 'complete') {
+      setProjection(data.projection)
+      setAttributionToken(data.attribution_token)
+      setEmail(data.email)
+      pendingRequestRef.current = null
+      setInputText('')
+      setPhase('complete')
+    } else {
       setPhase('retry')
     }
   }
@@ -172,6 +240,10 @@ export default function CrcPage() {
     setFeedbackText('')
     setFeedbackStatus('idle')
     setLastOutcomeWasAcknowledgment(false)
+    setAttributionToken(undefined)
+    setEmail(undefined)
+    setEmailInput('')
+    setEmailSubmitStatus('idle')
     setPhase('idle')
   }
 
@@ -232,7 +304,7 @@ export default function CrcPage() {
           </Card>
         )}
 
-        {(phase === 'idle' || phase === 'sending' || phase === 'retry' || phase === 'complete') && (
+        {(phase === 'idle' || phase === 'sending' || phase === 'retry' || phase === 'complete' || phase === 'email_gate' || phase === 'rate_limited') && (
           <Card>
             <CardContent className="space-y-4 p-6">
               {messages.length === 0 && phase === 'idle' && (
@@ -261,12 +333,48 @@ export default function CrcPage() {
                 </div>
               )}
 
+              {phase === 'email_gate' && (
+                <div className="space-y-3 border-t pt-4">
+                  <p className="text-sm font-medium">Before we continue -- what&apos;s your email?</p>
+                  <p className="text-sm text-muted-foreground">
+                    So we can save your progress and follow up if useful. You can also skip this and see what we&apos;ve learned so far.
+                  </p>
+                  <Textarea
+                    value={emailInput}
+                    onChange={(e) => setEmailInput(e.target.value)}
+                    placeholder="you@example.com"
+                    disabled={emailSubmitStatus === 'submitting'}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault()
+                        handleEmailSubmit()
+                      }
+                    }}
+                  />
+                  {emailSubmitStatus === 'error' && <p className="text-sm text-red-600">That didn&apos;t go through. You can try again.</p>}
+                  <div className="flex gap-2">
+                    <Button type="button" size="sm" disabled={!emailInput.trim() || emailSubmitStatus === 'submitting'} onClick={handleEmailSubmit}>
+                      Continue
+                    </Button>
+                    <Button type="button" variant="ghost" size="sm" disabled={emailSubmitStatus === 'submitting'} onClick={handleEmailDecline}>
+                      Skip and see what we&apos;ve learned
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {phase === 'rate_limited' && (
+                <div className="space-y-2 rounded border border-amber-200 bg-amber-50 p-3">
+                  <p className="text-sm text-amber-800">You&apos;ve reached the limit for this session right now -- try again in a bit.</p>
+                </div>
+              )}
+
               {phase === 'complete' && projection && (
                 <div className="border-t pt-4">
                   <CrcProjectionOutput output={projection} />
 
                   <div className="mt-6">
-                    <CommercialAssuranceBridge />
+                    <CommercialAssuranceBridge attributionToken={attributionToken} email={email} />
                   </div>
 
                   {feedbackStatus === 'submitted' ? (
