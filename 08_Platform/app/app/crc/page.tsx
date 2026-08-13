@@ -105,12 +105,25 @@ export default function CrcPage() {
     const data: TurnResponseBody = await res.json()
 
     if (data.status === 'question' || data.status === 'acknowledgment') {
-      setMessages((prev) => [...prev, { role: 'assistant', text: data.message }])
+      // Commercial Readiness Discovery Catalog integration, 2026-08-12:
+      // when present, the fixed Educational Takeaway from the PREVIOUS
+      // discovery question renders as its own message, immediately ahead
+      // of this turn's own -- two distinct conversational beats from one
+      // response, never a separate interview question.
+      setMessages((prev) => [
+        ...prev,
+        ...(data.precedingTakeaway ? [{ role: 'assistant' as const, text: data.precedingTakeaway }] : []),
+        { role: 'assistant', text: data.message },
+      ])
       pendingRequestRef.current = null
       setInputText('')
       setLastOutcomeWasAcknowledgment(data.status === 'acknowledgment')
       setPhase('idle')
     } else if (data.status === 'complete') {
+      if (data.precedingTakeaway) {
+        const takeaway = data.precedingTakeaway
+        setMessages((prev) => [...prev, { role: 'assistant', text: takeaway }])
+      }
       setProjection(data.projection)
       pendingRequestRef.current = null
       setInputText('')

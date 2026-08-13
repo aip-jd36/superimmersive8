@@ -120,13 +120,38 @@ describe('createSupabaseSessionStore: load', () => {
           structured_understanding: JSON.parse(serializeStructuredUnderstanding(su)),
           boundary_state: JSON.parse(serializeBoundaryState(boundaryState)),
           pending_clarification: null,
+          pending_commercial_readiness_takeaway: null,
         },
         error: null,
       },
     })
     const store = createSupabaseSessionStore(client)
     const loaded = await store.load('valid-token')
-    expect(loaded).toEqual({ structured_understanding: su, boundary_state: boundaryState, pending_clarification: null })
+    expect(loaded).toEqual({
+      structured_understanding: su,
+      boundary_state: boundaryState,
+      pending_clarification: null,
+      pending_commercial_readiness_takeaway: null,
+    })
+  })
+
+  test('an old row missing pending_commercial_readiness_takeaway (pre-migration) defaults to null, not undefined -- backward compatible', async () => {
+    const su = emptySU()
+    const boundaryState = createInitialBoundaryState()
+    const { client } = fakeClient({
+      selectResult: {
+        data: {
+          structured_understanding: JSON.parse(serializeStructuredUnderstanding(su)),
+          boundary_state: JSON.parse(serializeBoundaryState(boundaryState)),
+          pending_clarification: null,
+          // pending_commercial_readiness_takeaway deliberately absent.
+        },
+        error: null,
+      },
+    })
+    const store = createSupabaseSessionStore(client)
+    const loaded = await store.load('old-token')
+    expect(loaded?.pending_commercial_readiness_takeaway).toBeNull()
   })
 
   test('a completed session (completion_reason set) round-trips its completion state correctly', async () => {
@@ -155,32 +180,54 @@ describe('createSupabaseSessionStore: save', () => {
       structured_understanding: emptySU(),
       boundary_state: createInitialBoundaryState(),
       pending_clarification: { signal_id: 'x', kind: 'follow_up_on_signal', unresolved_summary: 'test' },
+      pending_commercial_readiness_takeaway: null,
     }
     await store.save('my-token', state)
     expect(updateCalls).toHaveLength(1)
     expect(insertCalls).toHaveLength(0)
     const payload = updateCalls[0] as Record<string, unknown>
     expect(payload.pending_clarification).toEqual(state.pending_clarification)
-    expect(Object.keys(payload).sort()).toEqual(['boundary_state', 'pending_clarification', 'structured_understanding'])
+    expect(Object.keys(payload).sort()).toEqual([
+      'boundary_state',
+      'pending_clarification',
+      'pending_commercial_readiness_takeaway',
+      'structured_understanding',
+    ])
   })
 
   test('a brand-new token (update matches zero rows) falls through to insert, keyed by token as id', async () => {
     const { client, updateCalls, insertCalls } = fakeClient({ updateResult: { data: [], error: null } })
     const store = createSupabaseSessionStore(client)
-    const state: CRCSessionState = { structured_understanding: emptySU(), boundary_state: createInitialBoundaryState(), pending_clarification: null }
+    const state: CRCSessionState = {
+      structured_understanding: emptySU(),
+      boundary_state: createInitialBoundaryState(),
+      pending_clarification: null,
+      pending_commercial_readiness_takeaway: null,
+    }
     await store.save('new-token', state)
     expect(updateCalls).toHaveLength(1)
     expect(insertCalls).toHaveLength(1)
     const payload = insertCalls[0] as Record<string, unknown>
     expect(payload.id).toBe('new-token')
-    expect(Object.keys(payload).sort()).toEqual(['boundary_state', 'id', 'pending_clarification', 'structured_understanding'])
+    expect(Object.keys(payload).sort()).toEqual([
+      'boundary_state',
+      'id',
+      'pending_clarification',
+      'pending_commercial_readiness_takeaway',
+      'structured_understanding',
+    ])
   })
 
   test('a Supabase error on update throws, rather than silently succeeding', async () => {
     const { client } = fakeClient({ updateResult: { data: null, error: { message: 'connection failed' } } })
     const store = createSupabaseSessionStore(client)
     await expect(
-      store.save('token', { structured_understanding: emptySU(), boundary_state: createInitialBoundaryState(), pending_clarification: null }),
+      store.save('token', {
+        structured_understanding: emptySU(),
+        boundary_state: createInitialBoundaryState(),
+        pending_clarification: null,
+        pending_commercial_readiness_takeaway: null,
+      }),
     ).rejects.toThrow('connection failed')
   })
 
@@ -188,7 +235,12 @@ describe('createSupabaseSessionStore: save', () => {
     const { client } = fakeClient({ updateResult: { data: [], error: null }, insertResult: { error: { message: 'insert failed' } } })
     const store = createSupabaseSessionStore(client)
     await expect(
-      store.save('token', { structured_understanding: emptySU(), boundary_state: createInitialBoundaryState(), pending_clarification: null }),
+      store.save('token', {
+        structured_understanding: emptySU(),
+        boundary_state: createInitialBoundaryState(),
+        pending_clarification: null,
+        pending_commercial_readiness_takeaway: null,
+      }),
     ).rejects.toThrow('insert failed')
   })
 })

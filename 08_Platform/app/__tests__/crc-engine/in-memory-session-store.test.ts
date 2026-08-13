@@ -30,6 +30,7 @@ function state(overrides: Partial<CRCSessionState> = {}): CRCSessionState {
     structured_understanding: emptySU(),
     boundary_state: createInitialBoundaryState(),
     pending_clarification: null,
+    pending_commercial_readiness_takeaway: null,
     ...overrides,
   }
 }

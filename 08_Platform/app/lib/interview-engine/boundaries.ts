@@ -41,6 +41,19 @@ export const CANDIDATE_QUESTION_KINDS = [
   'incident_investigation',
   'disentangling_question',
   'other',
+  /**
+   * CRC Limited Pilot -- Commercial Readiness Discovery Catalog
+   * integration, 2026-08-12. Deterministically constructed by
+   * lib/crc-engine/commercial-readiness-catalog.ts, never proposed by the
+   * ordinary candidate-question generator (excluded from that adapter's
+   * own LLM-facing schema enum -- see anthropic-candidate-question.ts's
+   * ORDINARY_GENERATOR_QUESTION_KINDS). Always carries target_signal_id:
+   * null -- a discovery question is not a follow-up on any existing
+   * signal, so it is never in SIGNAL_REQUIRED_KINDS (candidate-question.ts).
+   * Capped globally, once per interview -- see
+   * commercial_readiness_discovery_asked below.
+   */
+  'commercial_readiness_discovery',
 ] as const
 
 export type CandidateQuestionKind = (typeof CANDIDATE_QUESTION_KINDS)[number]
@@ -87,6 +100,20 @@ export interface BoundaryState {
    * not silently accepted as correct.
    */
   disentangling_question_asked: boolean
+  /**
+   * CRC Limited Pilot -- Commercial Readiness Discovery Catalog
+   * integration, 2026-08-12. True once a commercial_readiness_discovery
+   * question has been asked. Global, not per-category and not per-signal
+   * -- the pilot rule is one discovery question per CONVERSATION, not one
+   * per category (mirrors historical_experience_asked's own global-cap
+   * shape, not follow_ups_used's per-signal shape). A missing value on an
+   * old, pre-migration session deserializes as `undefined`, which is
+   * falsy and therefore behaves identically to `false` everywhere this
+   * field is read -- safe by construction, no defensive `?? false` needed
+   * (same reasoning already applied to historical_experience_asked and
+   * disentangling_question_asked when each was added).
+   */
+  commercial_readiness_discovery_asked: boolean
   /** True once an interview-scoped decline has occurred; persists across all future evaluations. */
   interview_ended: boolean
   /** Phases closed by a phase-scoped decline. A phase not in this list is unaffected, even after another phase closes -- closing one phase must not automatically end unrelated future questioning in a different phase. */
@@ -99,6 +126,7 @@ export function createInitialBoundaryState(): BoundaryState {
     uncertainty_clarifications_used: {},
     historical_experience_asked: false,
     disentangling_question_asked: false,
+    commercial_readiness_discovery_asked: false,
     interview_ended: false,
     phases_ended: [],
   }
@@ -141,6 +169,7 @@ export const BOUNDARY_REASON_CODES = [
   'UNCERTAINTY_CLARIFICATION_CAP_REACHED',
   'HISTORICAL_EXPERIENCE_ALREADY_ASKED',
   'DISENTANGLING_QUESTION_ALREADY_ASKED',
+  'COMMERCIAL_READINESS_DISCOVERY_ALREADY_ASKED',
   'INCIDENT_INVESTIGATION_PROHIBITED',
   'USER_DECLINED_QUESTION',
   'USER_DECLINED_PHASE',
@@ -344,6 +373,33 @@ export function evaluateBoundary(
       reason_code: 'ALLOWED',
       action_scope: 'ask',
       next_state: { ...state, disentangling_question_asked: true },
+      debug: { fired_boundary: 'none', candidate_kind: candidate.kind },
+    }
+  }
+
+  if (candidate.kind === 'commercial_readiness_discovery') {
+    // CRC Limited Pilot -- Commercial Readiness Discovery Catalog
+    // integration, 2026-08-12. Global cap, at most one ever, same shape as
+    // historical_experience above (never per-signal -- candidate.signal_id
+    // is expected to be absent for this kind, same reasoning as
+    // disentangling_question: the catalog's own eligibility/priority logic
+    // in commercial-readiness-catalog.ts already picks a single category,
+    // this is only the enforcement layer, and it has no opinion on WHICH
+    // category was asked, only THAT one was).
+    if (state.commercial_readiness_discovery_asked) {
+      return {
+        allowed: false,
+        reason_code: 'COMMERCIAL_READINESS_DISCOVERY_ALREADY_ASKED',
+        action_scope: 'suppress_current_question',
+        next_state: state,
+        debug: { fired_boundary: 'commercial_readiness_discovery_cap (once per interview)', candidate_kind: candidate.kind },
+      }
+    }
+    return {
+      allowed: true,
+      reason_code: 'ALLOWED',
+      action_scope: 'ask',
+      next_state: { ...state, commercial_readiness_discovery_asked: true },
       debug: { fired_boundary: 'none', candidate_kind: candidate.kind },
     }
   }

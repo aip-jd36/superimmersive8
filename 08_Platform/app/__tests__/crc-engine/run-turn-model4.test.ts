@@ -65,6 +65,7 @@ const CAPPED_BOUNDARY_STATE: BoundaryState = {
   uncertainty_clarifications_used: {},
   historical_experience_asked: false,
   disentangling_question_asked: false,
+  commercial_readiness_discovery_asked: false,
   interview_ended: false,
   phases_ended: [],
 }
@@ -96,6 +97,7 @@ describe('Model 4 -- attempt 1 rejected, attempt 2 approved', () => {
       },
       boundary_state: CAPPED_BOUNDARY_STATE,
       pending_clarification: null,
+      pending_commercial_readiness_takeaway: null,
     })
 
     const blockedCandidate = proposal({ question_kind: 'follow_up_on_signal', target_signal_id: 't1-c1', question_text: 'Which plan for Runway?' })
@@ -153,6 +155,7 @@ describe('Model 4 -- attempt 1 rejected, attempt 2 approved', () => {
       },
       boundary_state: CAPPED_BOUNDARY_STATE,
       pending_clarification: null,
+      pending_commercial_readiness_takeaway: null,
     })
 
     const blockedFollowUp = proposal({ question_kind: 'follow_up_on_signal', target_signal_id: 't1-c1', question_text: 'Which plan?' })
@@ -209,6 +212,7 @@ describe('Model 4 -- both attempts fail -> finalize with questioning_exhausted',
       },
       boundary_state: CAPPED_BOUNDARY_STATE,
       pending_clarification: null,
+      pending_commercial_readiness_takeaway: null,
     })
     const cappedCandidate = proposal({ question_kind: 'follow_up_on_signal', target_signal_id: 't1-c1', question_text: 'Which plan?' })
     const outcome = await runTurn(
@@ -357,8 +361,9 @@ describe('Model 4 -- multiple uncapped eligible signals', () => {
         completion_reason: null,
         opt_out_scope: null,
       },
-      boundary_state: { follow_ups_used: {}, uncertainty_clarifications_used: {}, historical_experience_asked: false, disentangling_question_asked: false, interview_ended: false, phases_ended: [] },
+      boundary_state: { follow_ups_used: {}, uncertainty_clarifications_used: {}, historical_experience_asked: false, disentangling_question_asked: false, commercial_readiness_discovery_asked: false, interview_ended: false, phases_ended: [] },
       pending_clarification: null,
+      pending_commercial_readiness_takeaway: null,
     })
     const rejectedFirst = proposal({ question_kind: 'other', target_signal_id: null, question_text: 'Rejected one.' })
     const secondOnDifferentSignal = proposal({ question_kind: 'follow_up_on_signal', target_signal_id: 'project:workflow_role', question_text: 'About your role.' })

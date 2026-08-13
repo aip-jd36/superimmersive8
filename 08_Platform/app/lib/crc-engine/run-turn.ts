@@ -61,6 +61,45 @@
  * only a one-turn delay in an internal bookkeeping value nothing
  * user-facing depends on this turn.
  *
+ * `[COMMERCIAL READINESS DISCOVERY -- 2026-08-12]` CRC Limited Pilot,
+ * Commercial Readiness Discovery Catalog integration. Organic (no-decline)
+ * path only, same scope boundary as Model 4 itself. When Gate 1 is met,
+ * phase === 3, and the global discovery cap
+ * (BoundaryState.commercial_readiness_discovery_asked) is unused,
+ * `selectEligibleCommercialReadinessCategory` (deterministic, from the
+ * already-approved Indicators + Catalog layers) may select a category.
+ * If it does, that category's fixed CandidateQuestionProposal becomes
+ * attempt #1 -- via `tryCandidate`'s new `proposalOverride` parameter,
+ * skipping the ordinary generator call for that one attempt only, but
+ * still flowing through the exact same validate -> Constraint A ->
+ * Constraint B -> boundary-cap pipeline every other candidate does. No
+ * privileged pass: Constraint A can suppress it, Constraint B enforces the
+ * new global cap exactly like historical_experience's own cap.
+ *
+ * Per the approved integration spec, the discovery cap means one
+ * discovery question per CONVERSATION, not one per Model 4 attempt: if
+ * attempt #1 is a discovery candidate and it is rejected, attempt #2 NEVER
+ * retries a second discovery category -- it always falls back to the
+ * ordinary generator/candidate pool. No exclusion is threaded from a
+ * rejected discovery attempt into attempt #2's ordinary generator call
+ * either: a rejected discovery candidate says nothing about the ordinary
+ * generator's own search space (different proposal source entirely), so
+ * there is nothing meaningful to exclude there.
+ *
+ * Delivering the fixed Educational Takeaway is entirely Runtime's own
+ * concern, not the catalog's: this module reads
+ * `pending_commercial_readiness_takeaway` (CRCSessionState) at the START
+ * of a turn -- the category asked on the PREVIOUS turn, if any -- attaches
+ * that category's fixed takeaway text to whatever outcome THIS turn
+ * produces (via the additive `precedingTakeaway` field on TurnOutcome),
+ * and clears the persisted field on every save this turn, whether or not
+ * this turn also approves a NEW discovery candidate (structurally it never
+ * can do both at once: the global cap is already set the moment a
+ * discovery candidate is approved, so a pending takeaway from turn N and a
+ * freshly-approved discovery candidate on turn N+1 can never coexist). The
+ * takeaway is never routed through checkCompletion(), Retrieval, or
+ * Projection -- ProjectionOutput is untouched by this feature entirely.
+ *
  * `gate_2_state` (and the value fed to `checkCompletion`) uses the
  * `'interview'` evaluation scope, not `'phase'` -- matching
  * `run-dialogue.ts`'s own established precedent (it stores `gate_2_state`
@@ -82,6 +121,7 @@ import {
   validateCandidateReference,
   type CandidateExclusion,
   type CandidateQuestionGenerator,
+  type CandidateQuestionProposal,
   type EligibleSignal,
 } from '@/lib/interview-engine/candidate-question'
 import type { ConstraintADecider } from '@/lib/interview-engine/decision'
@@ -90,6 +130,13 @@ import { buildPendingClarification, type PendingClarification } from '@/lib/inte
 import { checkCompletion } from './completion'
 import { resolveDeclineSignal, type DeclineAction } from './decline'
 import { runCRCConversation, type CRCPipelineResult } from './run-crc-conversation'
+import { deriveCommercialReadinessIndicators } from './commercial-readiness-indicators'
+import {
+  buildCommercialReadinessDiscoveryProposal,
+  getCommercialReadinessTakeaway,
+  selectEligibleCommercialReadinessCategory,
+  type CommercialReadinessCategory,
+} from './commercial-readiness-catalog'
 import type { SessionStore } from './session-store'
 import type { CRCSessionState } from './types'
 import type { MatrixRow } from '@/lib/retrieval-engine/types'
@@ -128,10 +175,24 @@ function emptyStructuredUnderstanding(): StructuredUnderstanding {
   }
 }
 
-export type TurnOutcome =
+export type TurnOutcome = (
   | { kind: 'question'; message: string }
   | { kind: 'acknowledgment'; message: string }
   | { kind: 'complete'; result: CRCPipelineResult }
+) & {
+  /**
+   * CRC Limited Pilot -- Commercial Readiness Discovery Catalog
+   * integration, 2026-08-12. Present only on the turn immediately
+   * following an asked commercial_readiness_discovery question -- the
+   * fixed, verbatim Educational Takeaway for that category. Additive:
+   * every existing TurnOutcome consumer that does not check this field is
+   * unaffected. Never counts as a question of its own -- it rides along
+   * with whatever this turn's own outcome already is (a question, or
+   * finalization), never consumes a Model 4 attempt, and never goes
+   * through Constraint A/B.
+   */
+  precedingTakeaway?: string
+}
 
 export interface RunTurnDeps {
   extractor: CandidateExtractor
@@ -180,6 +241,19 @@ type CandidateAttemptResult =
  * below), and a lineage-root id wouldn't appear in eligible_signals at
  * all, so it would be meaningless to hand back to the next generation
  * call.
+ *
+ * `proposalOverride` (Commercial Readiness Discovery Catalog integration,
+ * 2026-08-12): when supplied, this attempt uses that proposal directly
+ * instead of calling `deps.generator` -- the ONLY way a deterministically-
+ * constructed catalog candidate enters the pipeline. Every step after
+ * generation (exclusion check, validation, Constraint A, Constraint B) is
+ * identical either way; a discovery candidate gets no privileged pass. The
+ * exclusion check is a no-op for an override in practice (callers never
+ * pass both `excluded` and `proposalOverride` -- see run-turn.ts's own
+ * organic-branch logic, which only ever uses `proposalOverride` for
+ * attempt #1, and `excluded` only for attempt #2's ordinary generator
+ * call), left unconditional here rather than special-cased, since it is
+ * already harmless when `excluded` is absent.
  */
 async function tryCandidate(
   suAfter: StructuredUnderstanding,
@@ -188,8 +262,9 @@ async function tryCandidate(
   boundaryStateLoaded: BoundaryState,
   deps: RunTurnDeps,
   excluded?: CandidateExclusion[],
+  proposalOverride?: CandidateQuestionProposal,
 ): Promise<CandidateAttemptResult> {
-  const proposal = await deps.generator({ structured_understanding: suAfter, eligible_signals: eligible, phase, excluded })
+  const proposal = proposalOverride ?? (await deps.generator({ structured_understanding: suAfter, eligible_signals: eligible, phase, excluded }))
   if (!proposal) {
     return { status: 'rejected', exclusion: null }
   }
@@ -232,9 +307,17 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   const loaded = await deps.sessionStore.load(input.token)
   const suLoaded = loaded?.structured_understanding ?? emptyStructuredUnderstanding()
   const boundaryStateLoaded = loaded?.boundary_state ?? createInitialBoundaryState()
+  // Commercial Readiness Discovery Catalog integration, 2026-08-12: the
+  // category asked on the PREVIOUS turn, if any -- consumed this turn (see
+  // this module's own [COMMERCIAL READINESS DISCOVERY] header note).
+  const pendingTakeawayCategory = loaded?.pending_commercial_readiness_takeaway ?? null
+  const precedingTakeaway = pendingTakeawayCategory ? getCommercialReadinessTakeaway(pendingTakeawayCategory) : undefined
 
   // §7 recovery: a completed session never re-enters the loop -- recompute
-  // (cheap, pure, safe) rather than accept a new turn against it.
+  // (cheap, pure, safe) rather than accept a new turn against it. No
+  // precedingTakeaway attached here -- this is a defensive replay of an
+  // already-finished session, not a live turn; any takeaway was already
+  // delivered and cleared on the turn that actually completed it.
   if (suLoaded.completion_reason !== null) {
     return { kind: 'complete', result: runCRCConversation(suLoaded, deps.matrix) }
   }
@@ -273,8 +356,10 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
       structured_understanding: suAfter,
       boundary_state: boundaryStateLoaded,
       pending_clarification: null,
+      pending_commercial_readiness_takeaway: null,
     })
-    return { kind: 'complete', result: runCRCConversation(suAfter, deps.matrix) }
+    const completeOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suAfter, deps.matrix) }
+    return precedingTakeaway ? { ...completeOutcome, precedingTakeaway } : completeOutcome
   }
 
   const eligible = deriveEligibleSignals(suAfter)
@@ -282,6 +367,12 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   let nextBoundaryState = boundaryStateLoaded
   let pendingClarification: PendingClarification | null = null
   let outcome: TurnOutcome = { kind: 'acknowledgment', message: ACKNOWLEDGMENT_COPY }
+  // Commercial Readiness Discovery Catalog integration, 2026-08-12: set
+  // only when THIS turn approves a FRESH discovery candidate; null
+  // (consumed) otherwise -- including when a discovery candidate was
+  // eligible but rejected, and always on the decline branch below, which
+  // never attempts one.
+  let nextPendingTakeawayCategory: CommercialReadinessCategory | null = null
 
   if (declineSignal) {
     // Explicit skip_question/skip_phase decline -- unchanged by Model 4.
@@ -324,18 +415,56 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     // different runs, so a null first attempt still gets the one bounded
     // retry, with no exclusion invented for it (approved correction,
     // 2026-08-10).
-    const attempt1 = await tryCandidate(suAfter, eligible, phase, boundaryStateLoaded, deps)
+    // Commercial Readiness Discovery Catalog integration, 2026-08-12.
+    // Deterministic, no LLM call: derive indicators from the SAME suAfter
+    // every other candidate-generation step this turn already uses, then
+    // ask the catalog's own fixed-priority selection rule whether a
+    // category is eligible right now. discoveryCategory is null whenever
+    // Gate 1 isn't met, phase !== 3, the global cap is already used, or no
+    // category's Applicability is currently affirmative -- in every one of
+    // those cases attempt #1 below falls back to the ordinary generator,
+    // identical to pre-integration Model 4 behavior.
+    const discoveryIndicators = deriveCommercialReadinessIndicators(suAfter)
+    const discoveryCategory = selectEligibleCommercialReadinessCategory(
+      discoveryIndicators,
+      boundaryStateLoaded.commercial_readiness_discovery_asked,
+      gate1.state === 'met',
+      phase,
+    )
+    const discoveryProposal = discoveryCategory ? buildCommercialReadinessDiscoveryProposal(discoveryCategory, phase) : undefined
+
+    const attempt1 = discoveryProposal
+      ? await tryCandidate(suAfter, eligible, phase, boundaryStateLoaded, deps, undefined, discoveryProposal)
+      : await tryCandidate(suAfter, eligible, phase, boundaryStateLoaded, deps)
+
     if (attempt1.status === 'approved') {
       outcome = attempt1.outcome
       nextBoundaryState = attempt1.nextBoundaryState
       pendingClarification = attempt1.pendingClarification
+      if (discoveryProposal) {
+        // discoveryCategory is guaranteed non-null here (discoveryProposal
+        // was only built from a non-null category).
+        nextPendingTakeawayCategory = discoveryCategory
+      }
     } else {
-      const excluded = attempt1.exclusion ? [attempt1.exclusion] : undefined
+      // The ONE bounded alternative attempt (Model 4) is ALWAYS the
+      // ordinary candidate pool -- never a second discovery category, per
+      // the approved integration spec ("If Model 4 attempt #1 proposes a
+      // commercial-readiness discovery question and it is rejected, do
+      // not use attempt #2 to try a second commercial-readiness
+      // category"). No exclusion is threaded from a rejected discovery
+      // attempt into this call either: exclusion only means something
+      // within the SAME generator's own search space, and the ordinary
+      // generator was never even called on attempt #1 when attempt #1 was
+      // a discovery candidate.
+      const excluded = !discoveryProposal && attempt1.exclusion ? [attempt1.exclusion] : undefined
       const attempt2 = await tryCandidate(suAfter, eligible, phase, boundaryStateLoaded, deps, excluded)
       if (attempt2.status === 'approved') {
         outcome = attempt2.outcome
         nextBoundaryState = attempt2.nextBoundaryState
         pendingClarification = attempt2.pendingClarification
+        // attempt2 is always the ordinary generator -- never sets
+        // nextPendingTakeawayCategory.
       } else {
         // Bounded search exhausted (no third attempt) -- finalize.
         // Constructed directly here, never via checkCompletion(), which
@@ -352,8 +481,10 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
           structured_understanding: suExhausted,
           boundary_state: nextBoundaryState,
           pending_clarification: null,
+          pending_commercial_readiness_takeaway: null,
         })
-        return { kind: 'complete', result: runCRCConversation(suExhausted, deps.matrix) }
+        const exhaustedOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suExhausted, deps.matrix) }
+        return precedingTakeaway ? { ...exhaustedOutcome, precedingTakeaway } : exhaustedOutcome
       }
     }
   }
@@ -362,8 +493,9 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     structured_understanding: suAfter,
     boundary_state: nextBoundaryState,
     pending_clarification: pendingClarification,
+    pending_commercial_readiness_takeaway: nextPendingTakeawayCategory,
   }
   await deps.sessionStore.save(input.token, sessionState)
 
-  return outcome
+  return precedingTakeaway ? { ...outcome, precedingTakeaway } : outcome
 }

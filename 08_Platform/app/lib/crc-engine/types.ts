@@ -23,9 +23,23 @@
 import type { BoundaryState } from '@/lib/interview-engine/boundaries'
 import type { PendingClarification } from '@/lib/interview-engine/pending-clarification'
 import type { StructuredUnderstanding } from '@/types/interview-engine'
+import type { CommercialReadinessCategory } from './commercial-readiness-catalog'
 
 export interface CRCSessionState {
   structured_understanding: StructuredUnderstanding
   boundary_state: BoundaryState
   pending_clarification: PendingClarification | null
+  /**
+   * CRC Limited Pilot -- Commercial Readiness Discovery Catalog
+   * integration, 2026-08-12. Set the turn a commercial_readiness_discovery
+   * question is approved and asked; consumed (read, then cleared to null)
+   * on the very next turn, which is when run-turn.ts attaches that
+   * category's fixed Educational Takeaway to whatever outcome that next
+   * turn produces (a question, or finalization). Not part of
+   * BoundaryState -- BoundaryState only needs to know THAT a discovery
+   * question was asked (the enforcement cap); this field is Runtime's own,
+   * separate bookkeeping of WHICH category, needed only for one turn of
+   * delivery, unrelated to any interview-boundary enforcement decision.
+   */
+  pending_commercial_readiness_takeaway: CommercialReadinessCategory | null
 }

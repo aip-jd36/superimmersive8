@@ -87,6 +87,30 @@ describe('historical-experience question (PRD §8 Rule 3)', () => {
   })
 })
 
+describe('commercial-readiness discovery cap (CRC Limited Pilot, 2026-08-12)', () => {
+  test('allowed once', () => {
+    const result = evaluateBoundary(createInitialBoundaryState(), candidate({ kind: 'commercial_readiness_discovery' }))
+    expect(result.allowed).toBe(true)
+    expect(result.next_state.commercial_readiness_discovery_asked).toBe(true)
+  })
+
+  test('blocked thereafter -- global, not per-category, not per-signal', () => {
+    const after = evaluateBoundary(createInitialBoundaryState(), candidate({ kind: 'commercial_readiness_discovery' }))
+    const second = evaluateBoundary(after.next_state, candidate({ kind: 'commercial_readiness_discovery' }))
+    expect(second.allowed).toBe(false)
+    expect(second.reason_code).toBe('COMMERCIAL_READINESS_DISCOVERY_ALREADY_ASKED')
+    expect(second.action_scope).toBe('suppress_current_question')
+  })
+
+  test('does not consume or interact with any other cap (follow-up, uncertainty, historical, disentangling all remain independently available)', () => {
+    const afterDiscovery = evaluateBoundary(createInitialBoundaryState(), candidate({ kind: 'commercial_readiness_discovery' }))
+    const followUp = evaluateBoundary(afterDiscovery.next_state, candidate({ kind: 'follow_up_on_signal', signal_id: 'legal-review' }))
+    const historical = evaluateBoundary(followUp.next_state, candidate({ kind: 'historical_experience' }))
+    expect(followUp.allowed).toBe(true)
+    expect(historical.allowed).toBe(true)
+  })
+})
+
 describe('incident investigation (PRD §8 Rule 2, absolute prohibition)', () => {
   test('suppressed even though nothing has been asked yet -- not a depth cap', () => {
     const result = evaluateBoundary(createInitialBoundaryState(), candidate({ kind: 'incident_investigation' }))

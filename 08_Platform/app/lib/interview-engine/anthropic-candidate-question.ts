@@ -35,6 +35,22 @@ import { CANDIDATE_QUESTION_KINDS, type CandidateQuestionKind } from './boundari
 
 export const DEFAULT_MODEL = 'claude-sonnet-5'
 
+/**
+ * CRC Limited Pilot -- Commercial Readiness Discovery Catalog integration,
+ * 2026-08-12. `commercial_readiness_discovery` is deliberately excluded
+ * from the LLM-facing schema enum below, even though it is a real,
+ * additive CandidateQuestionKind (boundaries.ts). That kind is ONLY ever
+ * constructed deterministically by lib/crc-engine/commercial-readiness-
+ * catalog.ts, from a fixed per-category question text, never freely
+ * generated -- this adapter's own system prompt (unchanged, below) has no
+ * instructions describing when to use it, and giving the model the option
+ * anyway would let it emit an ungoverned "discovery" question with no
+ * known category, meaning no fixed Educational Takeaway to pair it with.
+ * Removing it from the enum makes that structurally unreachable rather
+ * than relying on the model simply never choosing an undocumented value.
+ */
+const ORDINARY_GENERATOR_QUESTION_KINDS = CANDIDATE_QUESTION_KINDS.filter((k) => k !== 'commercial_readiness_discovery')
+
 const SYSTEM_PROMPT = `You are the candidate-question generation stage of a larger, deterministic pipeline for CRC, a conversational tool that helps someone understand the commercial-use status of an AI-generated video project. Your only job is to propose ONE next question CRC might ask, given its current structured understanding of the project. You are not the only stage: everything you produce is a PROPOSAL, checked by deterministic code downstream that decides whether it is actually permitted to ask. You never see or affect whether your proposal gets used.
 
 You will be given the current structured understanding of the project (as JSON) and a list of "eligible signals" -- the only identifiers you are allowed to reference if your question follows up on something specific.
@@ -84,7 +100,7 @@ const CANDIDATE_QUESTION_RESPONSE_SCHEMA = {
     },
     question_kind: {
       type: ['string', 'null'],
-      enum: [...CANDIDATE_QUESTION_KINDS, null],
+      enum: [...ORDINARY_GENERATOR_QUESTION_KINDS, null],
       description: 'Which of the defined kinds this question is. Null when has_candidate is false.',
     },
     target_signal_id: {

@@ -48,10 +48,18 @@ export function parseRequest(body: TurnRequestBody): ParsedRequest | { error: st
   return { error: 'Request must include a non-empty message or a valid declineAction.' }
 }
 
-/** Only browser-safe fields -- see route.ts's own module header and Phase 4's exclusion list. */
+/**
+ * Only browser-safe fields -- see route.ts's own module header and Phase
+ * 4's exclusion list. `precedingTakeaway` (CRC Limited Pilot -- Commercial
+ * Readiness Discovery Catalog integration, 2026-08-12): present only on
+ * the turn immediately following an asked commercial_readiness_discovery
+ * question -- fixed, catalog-owned Educational Takeaway text, rendered as
+ * its own message ahead of this response's own message/projection. Never
+ * a verdict, never routed through ProjectionOutput.
+ */
 export type TurnResponseBody =
-  | { status: 'question' | 'acknowledgment'; message: string }
-  | { status: 'complete'; projection: ProjectionOutput }
+  | { status: 'question' | 'acknowledgment'; message: string; precedingTakeaway?: string }
+  | { status: 'complete'; projection: ProjectionOutput; precedingTakeaway?: string }
   | { status: 'session_not_found' }
   | { status: 'retry' }
   | { status: 'invalid_request'; error: string }

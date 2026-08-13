@@ -31,6 +31,7 @@ import {
 } from '@/lib/interview-engine/serialization'
 import type { PendingClarification } from '@/lib/interview-engine/pending-clarification'
 import type { CRCSessionState } from './types'
+import type { CommercialReadinessCategory } from './commercial-readiness-catalog'
 import type { SessionStore } from './session-store'
 
 const TABLE = 'crc_sessions'
@@ -40,7 +41,7 @@ export function createSupabaseSessionStore(client: SupabaseClient): SessionStore
     async load(token: string): Promise<CRCSessionState | null> {
       const { data, error } = await client
         .from(TABLE)
-        .select('structured_understanding, boundary_state, pending_clarification')
+        .select('structured_understanding, boundary_state, pending_clarification, pending_commercial_readiness_takeaway')
         .eq('id', token)
         .maybeSingle()
 
@@ -62,6 +63,7 @@ export function createSupabaseSessionStore(client: SupabaseClient): SessionStore
           structured_understanding: deserializeStructuredUnderstanding(JSON.stringify(data.structured_understanding)),
           boundary_state: deserializeBoundaryState(JSON.stringify(data.boundary_state)),
           pending_clarification: (data.pending_clarification as PendingClarification | null) ?? null,
+          pending_commercial_readiness_takeaway: (data.pending_commercial_readiness_takeaway as CommercialReadinessCategory | null) ?? null,
         }
       } catch (err) {
         // Corrupt/malformed stored JSON -- same "unresolvable" outcome as
@@ -87,6 +89,7 @@ export function createSupabaseSessionStore(client: SupabaseClient): SessionStore
         structured_understanding: JSON.parse(serializeStructuredUnderstanding(state.structured_understanding)),
         boundary_state: JSON.parse(serializeBoundaryState(state.boundary_state)),
         pending_clarification: state.pending_clarification,
+        pending_commercial_readiness_takeaway: state.pending_commercial_readiness_takeaway,
       }
       const { data: updated, error: updateError } = await client.from(TABLE).update(payload).eq('id', token).select('id')
       if (updateError) {

@@ -214,6 +214,14 @@ export async function POST(request: NextRequest) {
   }
 
   const updatedTranscript: TranscriptEntry[] = [...transcript, { role: 'user', text: userText }]
+  // Commercial Readiness Discovery Catalog integration, 2026-08-12: shown
+  // as its own transcript entry, ahead of this turn's own message -- so a
+  // page refresh redisplays it correctly with zero extra client logic,
+  // and so it reads as a distinct conversational beat, not appended prose
+  // onto whatever else this turn says.
+  if (outcome.precedingTakeaway) {
+    updatedTranscript.push({ role: 'assistant', text: outcome.precedingTakeaway })
+  }
   if (outcome.kind !== 'complete') {
     updatedTranscript.push({ role: 'assistant', text: outcome.message })
   }
@@ -240,8 +248,8 @@ export async function POST(request: NextRequest) {
 
   const response =
     outcome.kind === 'complete'
-      ? NextResponse.json<TurnResponseBody>({ status: 'complete', projection: outcome.result.output })
-      : NextResponse.json<TurnResponseBody>({ status: outcome.kind, message: outcome.message })
+      ? NextResponse.json<TurnResponseBody>({ status: 'complete', projection: outcome.result.output, precedingTakeaway: outcome.precedingTakeaway })
+      : NextResponse.json<TurnResponseBody>({ status: outcome.kind, message: outcome.message, precedingTakeaway: outcome.precedingTakeaway })
 
   setSessionCookie(response, token)
 
