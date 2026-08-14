@@ -20,7 +20,13 @@
  * chronological order per distinct normalized email -- this naturally
  * reconstructs accurate created_at (first session) / last_seen_at (latest
  * session) timestamps via the RPC's own ON CONFLICT DO UPDATE, rather than
- * defaulting everything to "now".
+ * defaulting everything to "now". Uses email_captured_at, NOT created_at --
+ * found live (2026-08-14): a session's created_at is when the SESSION
+ * began, not necessarily when THIS email was associated with it (e.g. a
+ * session whose email was corrected/changed after creation) -- using
+ * created_at let the replay push a lead's last_seen_at to a timestamp
+ * earlier than the lead's own created_at. email_captured_at is the actual
+ * moment this specific email was captured for this specific session.
  *
  * Idempotent: re-running is safe -- upsert_crc_lead is itself idempotent,
  * and re-linking a session to the same lead_id it already points to is a
@@ -38,7 +44,7 @@ function normalizeEmail(email: string): string {
 async function main() {
   const { data: sessions, error } = await client
     .from('crc_sessions')
-    .select('id, email, created_at')
+    .select('id, email, email_captured_at, created_at')
     .not('email', 'is', null)
     .order('created_at', { ascending: true })
 
@@ -51,12 +57,12 @@ async function main() {
     return
   }
 
-  const groups = new Map<string, { rawEmail: string; sessionIds: string[]; createdAts: string[] }>()
+  const groups = new Map<string, { rawEmail: string; sessionIds: string[]; capturedAts: string[] }>()
   for (const row of sessions) {
     const normalized = normalizeEmail(row.email as string)
-    const group = groups.get(normalized) ?? { rawEmail: row.email as string, sessionIds: [], createdAts: [] }
+    const group = groups.get(normalized) ?? { rawEmail: row.email as string, sessionIds: [], capturedAts: [] }
     group.sessionIds.push(row.id as string)
-    group.createdAts.push(row.created_at as string)
+    group.capturedAts.push((row.email_captured_at as string | null) ?? (row.created_at as string))
     groups.set(normalized, group)
   }
 
@@ -67,14 +73,16 @@ async function main() {
 
   for (const [normalized, group] of groups) {
     let leadId: string | null = null
-    // Chronological replay -- first call creates the lead at the earliest
-    // session's timestamp, each subsequent call bumps last_seen_at to that
-    // session's own timestamp (all via the live upsert_crc_lead RPC).
-    for (const createdAt of group.createdAts) {
+    // Chronological replay by the moment THIS email was actually captured
+    // (not session creation) -- first call creates the lead at the
+    // earliest capture, each subsequent call bumps last_seen_at to that
+    // capture's own timestamp (all via the live upsert_crc_lead RPC).
+    const sortedCapturedAts = [...group.capturedAts].sort()
+    for (const capturedAt of sortedCapturedAts) {
       const { data, error: rpcError } = await client.rpc('upsert_crc_lead', {
         p_email: group.rawEmail,
         p_email_normalized: normalized,
-        p_now: createdAt,
+        p_now: capturedAt,
       })
       if (rpcError) {
         console.error(`upsert_crc_lead failed for ${normalized}:`, rpcError)
