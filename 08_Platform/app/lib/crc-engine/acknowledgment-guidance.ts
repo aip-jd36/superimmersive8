@@ -24,11 +24,25 @@
  */
 
 /**
- * 'email_gate'/'rate_limited' (CRC Identity + Abuse Prevention + Analytics
- * milestone) are additive -- shouldShowAcknowledgmentGuidance below only
- * ever checks phase === 'idle', so neither new value changes its behavior.
+ * 'rate_limited' (CRC Identity + Abuse Prevention + Analytics milestone),
+ * 'results_gate'/'results_confirmation' (CRC Results Gate milestone,
+ * 2026-08-14 -- replaced the retired 'email_gate') are all additive --
+ * shouldShowAcknowledgmentGuidance below only ever checks phase === 'idle',
+ * so none of these change its behavior. 'complete' now means specifically
+ * "grandfathered session, full result shown in-browser" -- a
+ * non-grandfathered completed session uses 'results_gate'/
+ * 'results_confirmation' instead, never 'complete'.
  */
-export type CrcPagePhase = 'loading' | 'idle' | 'sending' | 'retry' | 'complete' | 'session_not_found' | 'email_gate' | 'rate_limited'
+export type CrcPagePhase =
+  | 'loading'
+  | 'idle'
+  | 'sending'
+  | 'retry'
+  | 'complete'
+  | 'session_not_found'
+  | 'rate_limited'
+  | 'results_gate'
+  | 'results_confirmation'
 
 export function shouldShowAcknowledgmentGuidance(phase: CrcPagePhase, lastOutcomeWasAcknowledgment: boolean): boolean {
   return phase === 'idle' && lastOutcomeWasAcknowledgment

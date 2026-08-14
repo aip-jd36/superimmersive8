@@ -34,28 +34,32 @@ export interface TurnRequestBody {
   declineAction?: unknown
   restart?: unknown
   /**
-   * Email gate (CRC Identity + Abuse Prevention + Analytics milestone).
-   * `email` and `declineEmail` are their own round-trip, separate from an
-   * ordinary message/decline turn -- sent only in response to a prior
-   * `{status: 'email_required'}`, never combined with message/declineAction
-   * in the same request.
+   * Results Gate (CRC Results Gate milestone, 2026-08-14, PM-revised).
+   * `email` now only makes sense against an ALREADY-COMPLETE session --
+   * the mid-conversation email gate is retired, there is no more "pending
+   * message" to resume. Submitting `email` again with a different address
+   * is how the user corrects a typo; submitting the same address again is
+   * an idempotent no-op (see claim_crc_result_send). `resendResultEmail`
+   * is a distinct, explicit action -- bounded separately (cooldown + max
+   * count) from an ordinary email submission, and never carries an email
+   * field of its own (it always targets the session's current recipient).
    */
   email?: unknown
-  declineEmail?: unknown
+  resendResultEmail?: unknown
 }
 
 /**
- * `restart` is carried on every variant, always false for email/decline_email
+ * `restart` is carried on every variant, always false for email/resendResultEmail
  * (a restart concept doesn't apply to them -- they only ever target an
- * existing session) -- keeps `parsed.restart` uniformly accessible without
- * narrowing gymnastics at every call site that only cares about the
- * message/decline branches.
+ * existing, completed session) -- keeps `parsed.restart` uniformly
+ * accessible without narrowing gymnastics at every call site that only
+ * cares about the message/decline branches.
  */
 export type ParsedRequest =
   | { kind: 'message'; text: string; restart: boolean }
   | { kind: 'decline'; action: DeclineAction; restart: boolean }
   | { kind: 'email'; email: string; restart: false }
-  | { kind: 'decline_email'; restart: false }
+  | { kind: 'resend_result_email'; restart: false }
 
 /** Deliberately simple format validation, not verification -- see design report §1 ("not for v1"). */
 const EMAIL_FORMAT = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -66,11 +70,11 @@ export function parseRequest(body: TurnRequestBody): ParsedRequest | { error: st
   const hasMessage = typeof body.message === 'string' && body.message.trim().length > 0
   const hasDecline = typeof body.declineAction === 'string'
   const hasEmail = typeof body.email === 'string' && body.email.trim().length > 0
-  const hasDeclineEmail = body.declineEmail === true
+  const hasResend = body.resendResultEmail === true
 
-  const providedCount = [hasMessage, hasDecline, hasEmail, hasDeclineEmail].filter(Boolean).length
+  const providedCount = [hasMessage, hasDecline, hasEmail, hasResend].filter(Boolean).length
   if (providedCount > 1) {
-    return { error: 'Provide exactly one of message, declineAction, email, or declineEmail.' }
+    return { error: 'Provide exactly one of message, declineAction, email, or resendResultEmail.' }
   }
 
   if (hasEmail) {
@@ -80,8 +84,8 @@ export function parseRequest(body: TurnRequestBody): ParsedRequest | { error: st
     }
     return { kind: 'email', email: trimmed, restart: false }
   }
-  if (hasDeclineEmail) {
-    return { kind: 'decline_email', restart: false }
+  if (hasResend) {
+    return { kind: 'resend_result_email', restart: false }
   }
   if (hasDecline) {
     if (!DECLINE_ACTIONS.includes(body.declineAction as DeclineAction)) {
@@ -92,7 +96,7 @@ export function parseRequest(body: TurnRequestBody): ParsedRequest | { error: st
   if (hasMessage) {
     return { kind: 'message', text: (body.message as string).trim(), restart }
   }
-  return { error: 'Request must include a non-empty message, a valid declineAction, an email, or declineEmail.' }
+  return { error: 'Request must include a non-empty message, a valid declineAction, an email, or resendResultEmail.' }
 }
 
 /**
@@ -104,28 +108,54 @@ export function parseRequest(body: TurnRequestBody): ParsedRequest | { error: st
  * its own message ahead of this response's own message/projection. Never
  * a verdict, never routed through ProjectionOutput.
  */
+
 /**
- * `attribution_token`/`email` (CRC Identity + Abuse Prevention + Analytics
- * milestone) ride along on a `complete` response so the client can build
- * the Calendly attribution URL (design report §9) -- attribution_token is
- * a deliberately opaque, non-reversible public token, never the real
- * session id, so exposing it to the client and to Calendly's own
- * referrer/URL is not a sensitive-data concern.
+ * Results Gate `complete` response shape (CRC Results Gate milestone,
+ * 2026-08-14, PM-revised). Completion and result-visibility are
+ * deliberately orthogonal: `status: 'complete'` means exactly what it
+ * always has (the interview is done), for BOTH grandfathered and
+ * newly-gated sessions -- `completion_reason` is never overloaded with
+ * email/delivery semantics.
  *
- * `email_required` (design report §1): returned BEFORE runTurn() is ever
- * called, with no side effects -- the client's pending message is not
- * consumed, and must be resubmitted once email is provided or declined.
- * `email_accepted` acknowledges a successful email submission; the client
- * is expected to immediately resubmit its original pending request.
+ * `grandfathered` (sessions created before CRC_CONFIG.resultsGateLaunchedAt):
+ * behaves exactly as this product did before this milestone -- `projection`
+ * is present unconditionally, `teaser`/`results_email` are absent (there is
+ * no gate to describe). This is the ONLY case `projection` is ever present.
+ *
+ * Non-grandfathered sessions NEVER receive `projection` in this response,
+ * at any point -- not before email, not after a successful send. The full
+ * result is delivered by email, never by the browser (the core invariant
+ * of this milestone). `teaser` and `results_email` describe the gate's
+ * current state instead; `results_email.masked_email` is computed
+ * server-side (see results-gate-copy.ts's maskEmail) -- the raw address is
+ * never sent back to the client after submission.
  */
+export interface CrcTeaser {
+  consideration_count: number
+}
+
+export interface CrcResultsEmailState {
+  status: 'not_sent' | 'pending' | 'accepted' | 'failed' | 'unknown'
+  masked_email?: string
+  blocked_reason?: string
+  error_message?: string
+}
+
 export type TurnResponseBody =
   | { status: 'question' | 'acknowledgment'; message: string; precedingTakeaway?: string }
-  | { status: 'complete'; projection: ProjectionOutput; precedingTakeaway?: string; attribution_token?: string; email?: string | null }
-  | { status: 'email_required' }
-  | { status: 'email_accepted' }
+  | {
+      status: 'complete'
+      grandfathered: boolean
+      teaser?: CrcTeaser
+      results_email?: CrcResultsEmailState
+      projection?: ProjectionOutput
+      precedingTakeaway?: string
+      attribution_token?: string
+      email?: string | null
+    }
   | { status: 'session_not_found' }
   | { status: 'rate_limited'; reason?: RateLimitReason; retryAfterSeconds?: number }
-  | { status: 'retry' }
+  | { status: 'retry'; message?: string }
   | { status: 'invalid_request'; error: string }
 
 /** Only browser-safe fields, same discipline as TurnResponseBody. */
@@ -133,7 +163,16 @@ export type SessionStatusResponseBody =
   | { status: 'new' }
   | { status: 'session_not_found' }
   | { status: 'active'; transcript: TranscriptEntry[] }
-  | { status: 'complete'; transcript: TranscriptEntry[]; projection: ProjectionOutput; attribution_token?: string; email?: string | null }
+  | {
+      status: 'complete'
+      transcript: TranscriptEntry[]
+      grandfathered: boolean
+      teaser?: CrcTeaser
+      results_email?: CrcResultsEmailState
+      projection?: ProjectionOutput
+      attribution_token?: string
+      email?: string | null
+    }
 
 /**
  * POST /api/crc/feedback's own request-parsing logic and response body

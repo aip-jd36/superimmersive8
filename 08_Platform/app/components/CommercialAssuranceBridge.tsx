@@ -23,8 +23,7 @@
 
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-
-const COMMERCIAL_ASSURANCE_CALENDLY_URL = 'https://calendly.com/aipenguins/superimmersive8'
+import { buildCalendlyUrl } from '@/lib/crc-engine/calendly-attribution'
 
 /**
  * CRC Identity + Abuse Prevention + Analytics milestone -- Calendly
@@ -46,19 +45,6 @@ const COMMERCIAL_ASSURANCE_CALENDLY_URL = 'https://calendly.com/aipenguins/super
 interface CommercialAssuranceBridgeProps {
   attributionToken?: string
   email?: string | null
-}
-
-function buildCalendlyUrl(attributionToken?: string, email?: string | null): string {
-  const params = new URLSearchParams()
-  if (attributionToken) {
-    params.set('utm_source', 'crc')
-    params.set('utm_content', attributionToken)
-  }
-  if (email) {
-    params.set('email', email)
-  }
-  const query = params.toString()
-  return query ? `${COMMERCIAL_ASSURANCE_CALENDLY_URL}?${query}` : COMMERCIAL_ASSURANCE_CALENDLY_URL
 }
 
 export function CommercialAssuranceBridge({ attributionToken, email }: CommercialAssuranceBridgeProps) {

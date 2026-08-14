@@ -22,14 +22,6 @@ function envInt(name: string, fallback: number): number {
 
 export const CRC_CONFIG = {
   /**
-   * Email gate fallback trigger (design report §1): if no Commercial
-   * Readiness Discovery takeaway has been delivered by the time this many
-   * assistant turns have already happened, gate before the next one.
-   * Default 3, per the approved design's explicit fallback rule.
-   */
-  emailGateFallbackTurn: envInt('CRC_EMAIL_GATE_FALLBACK_TURN', 3),
-
-  /**
    * Hard ceiling on turns for a single session, regardless of rate.
    * Default 15 -- 3x the highest turn_count ever observed in real pilot
    * data (5), generous headroom for a verbose real user while still
@@ -65,4 +57,34 @@ export const CRC_CONFIG = {
    */
   maxCompletedPerEmailPerWindow: envInt('CRC_MAX_COMPLETED_PER_EMAIL', 3),
   completedPerEmailWindowDays: envInt('CRC_COMPLETED_PER_EMAIL_WINDOW_DAYS', 7),
+
+  /**
+   * Results Gate (email delivery model, 2026-08-14). Minimum seconds
+   * between two EXPLICIT resend attempts to the same recipient. Does not
+   * gate an ordinary retry after a failed send -- see
+   * claim_crc_result_send()'s own comments.
+   */
+  resultsEmailResendCooldownSeconds: envInt('CRC_RESULTS_EMAIL_RESEND_COOLDOWN_SECONDS', 60),
+
+  /** Max explicit resends per recipient -- original + this many = total sends to one address. PM-approved: 2. */
+  resultsEmailMaxExplicitResends: envInt('CRC_RESULTS_EMAIL_MAX_EXPLICIT_RESENDS', 2),
+
+  /** Max distinct recipient addresses one session may ever target (original + corrections). PM-approved: 3. */
+  resultsEmailMaxDistinctRecipients: envInt('CRC_RESULTS_EMAIL_MAX_DISTINCT_RECIPIENTS', 3),
+
+  /**
+   * Sessions created before this instant use the pre-Results-Gate behavior
+   * (full result visible in-browser, unconditionally) -- grandfathering, so
+   * a real pilot user who already saw their result live never finds it
+   * retroactively gated on a later revisit. Fixed at deploy time, not
+   * env-overridable after the fact (changing it would un-grandfather
+   * already-launched sessions).
+   */
+  resultsGateLaunchedAt: '2026-08-14T00:00:00.000Z',
+
+  /** Bumped whenever the results-gate copy (teaser/gate/confirmation text) changes. */
+  captureNoticeVersion: 'results-gate-v1',
+
+  /** Bumped whenever the emailed-results template structure/copy changes. */
+  resultsEmailTemplateVersion: 'results-email-v1',
 } as const

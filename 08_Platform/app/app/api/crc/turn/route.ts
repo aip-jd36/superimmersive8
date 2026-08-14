@@ -1,7 +1,8 @@
 /**
  * POST /api/crc/turn -- the one live-turn Route Handler for the CRC
  * conversation (CRC Product Integration -- First Usable Live Slice,
- * Phase 4).
+ * Phase 4; Results Gate milestone, 2026-08-14, restructured the
+ * email-related branches -- see that migration's own header).
  *
  * Responsibilities only: resolve/create the session, load server-side
  * state, validate the incoming request, invoke runTurn(), persist the
@@ -20,6 +21,17 @@
  * candidate generation, Constraint A/B -- has already succeeded in
  * memory). This route's own product-state write (turn_count/transcript)
  * is placed after a successful runTurn() call for the same reason.
+ *
+ * Results Gate (2026-08-14): every `status: 'complete'` response, from
+ * every branch in this file, is now built by the single shared
+ * buildCompleteResponseFields() helper (complete-response.ts) -- the same
+ * function GET uses. This is what guarantees `projection` can never be
+ * returned to a non-grandfathered session through ANY code path here,
+ * including retry/ceiling/product-stop branches, not just the "happy
+ * path" completion. The mid-conversation email gate (email_required,
+ * the turn-4 fallback threshold, pending-message resume, decline_email)
+ * is fully retired -- see complete-response.ts and api-contract.ts for
+ * what replaced it.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -32,10 +44,10 @@ import {
   loadCrcSessionProductState,
   saveCrcSessionProductState,
   saveCrcSessionCreationMeta,
-  saveCrcSessionEmail,
   saveCrcSessionProductStop,
   type TranscriptEntry,
   type MessageKind,
+  type CrcSessionProductState,
 } from '@/lib/crc-engine/supabase-session-store'
 import { createAnthropicExtractor } from '@/lib/interview-engine/anthropic-extractor'
 import { createAnthropicCandidateQuestionGenerator } from '@/lib/interview-engine/anthropic-candidate-question'
@@ -50,7 +62,10 @@ import { resolveClientIp, normalizeIp, deriveAbuseKey } from '@/lib/crc-engine/a
 import { classifyTraffic, shouldApplyRateLimiting } from '@/lib/crc-engine/traffic-classification'
 import { checkSessionCreationRate, checkBurst, checkTurnCeiling, logRateLimitedEvent } from '@/lib/crc-engine/abuse-prevention'
 import { getRuntimeCommit, getModelConfig } from '@/lib/crc-engine/runtime-metadata'
-import { CRC_CONFIG } from '@/lib/crc-engine/config'
+import { buildCompleteResponseFields } from '@/lib/crc-engine/complete-response'
+import { deliverCrcResultsEmail } from '@/lib/crc-engine/results-email-delivery'
+import { getResultsEmailErrorMessage, type ResultsEmailClaimReason } from '@/lib/crc-engine/results-gate-copy'
+import type { ProjectionOutput } from '@/lib/projection-layer/types'
 
 const COOKIE_NAME = 'crc_session'
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 7 // 7 days
@@ -84,13 +99,38 @@ function setSessionCookie(response: NextResponse, token: string) {
   })
 }
 
+/** Builds the full `status: 'complete'` TurnResponseBody, applying a pending results-email error/blocked overlay if provided. */
+function buildCompleteTurnResponse(
+  productState: Pick<
+    CrcSessionProductState,
+    'created_at' | 'attribution_token' | 'email' | 'results_email_status' | 'results_email_last_recipient'
+  >,
+  output: ProjectionOutput,
+  overlay?: { blockedReason?: string; errorMessage?: string },
+): Extract<TurnResponseBody, { status: 'complete' }> {
+  const fields = buildCompleteResponseFields({
+    sessionCreatedAt: productState.created_at,
+    output,
+    attributionToken: productState.attribution_token,
+    email: productState.email,
+    resultsEmailStatus: productState.results_email_status,
+    resultsEmailLastRecipient: productState.results_email_last_recipient,
+  })
+  if (overlay && fields.results_email) {
+    fields.results_email = { ...fields.results_email, blocked_reason: overlay.blockedReason, error_message: overlay.errorMessage }
+  }
+  return { status: 'complete', ...fields }
+}
+
 /**
  * GET /api/crc/turn -- read-only session rehydration for page load and
  * refresh. No engine decision logic here: for a completed session this
- * calls runCRCConversation() directly, the exact same pure, deterministic,
- * side-effect-free function runTurn() itself calls internally for its own
- * "already complete" short-circuit -- not a parallel reimplementation, the
- * same function, called the same way, for the same reason.
+ * calls the same shared buildCompleteResponseFields() helper POST uses,
+ * via runCRCConversation() internally -- the exact same pure,
+ * deterministic, side-effect-free function runTurn() itself calls
+ * internally for its own "already complete" short-circuit -- not a
+ * parallel reimplementation, the same function, called the same way, for
+ * the same reason.
  */
 export async function GET(request: NextRequest) {
   const cookieStore = cookies()
@@ -121,23 +161,25 @@ export async function GET(request: NextRequest) {
   const transcript = productState?.transcript ?? []
 
   // CRC Identity + Abuse Prevention + Analytics milestone: a session can now
-  // also be "done" at the PRODUCT layer (email declined, or the hard turn
-  // ceiling was hit) without the Interview Engine's own completion_reason
-  // ever being set -- see route.ts's own module-level note near
-  // product_stop_reason handling below for why that's deliberate. Both
-  // conditions render the exact same finalized view, so a page refresh
-  // after either one correctly re-shows the ProjectionOutput/bridge
-  // instead of falling back to an active chat input.
+  // also be "done" at the PRODUCT layer (the hard turn ceiling) without the
+  // Interview Engine's own completion_reason ever being set -- see
+  // route.ts's own module-level note near product_stop_reason handling
+  // below for why that's deliberate. Both conditions render the exact
+  // same finalized view, so a page refresh after either one correctly
+  // re-shows the gated/grandfathered result instead of falling back to an
+  // active chat input.
   const isDone = engineState.structured_understanding.completion_reason !== null || productState?.product_stop_reason != null
   if (isDone) {
     const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE)
-    return NextResponse.json<SessionStatusResponseBody>({
-      status: 'complete',
-      transcript,
-      projection: result.output,
-      attribution_token: productState?.attribution_token ?? undefined,
-      email: productState?.email ?? undefined,
+    const fields = buildCompleteResponseFields({
+      sessionCreatedAt: productState?.created_at ?? new Date(0).toISOString(),
+      output: result.output,
+      attributionToken: productState?.attribution_token,
+      email: productState?.email ?? null,
+      resultsEmailStatus: productState?.results_email_status ?? null,
+      resultsEmailLastRecipient: productState?.results_email_last_recipient ?? null,
     })
+    return NextResponse.json<SessionStatusResponseBody>({ status: 'complete', transcript, ...fields })
   }
 
   return NextResponse.json<SessionStatusResponseBody>({ status: 'active', transcript })
@@ -187,10 +229,10 @@ export async function POST(request: NextRequest) {
 
   const isNewSession = !existingToken || parsed.restart
 
-  // email/decline_email only make sense against an existing session -- a
-  // brand-new session has no gate to respond to yet.
-  if (isNewSession && (parsed.kind === 'email' || parsed.kind === 'decline_email')) {
-    return NextResponse.json<TurnResponseBody>({ status: 'invalid_request', error: 'Cannot submit email before starting a conversation.' }, { status: 400 })
+  // email/resendResultEmail only make sense against an existing, completed
+  // session -- a brand-new session has no result to send yet.
+  if (isNewSession && (parsed.kind === 'email' || parsed.kind === 'resend_result_email')) {
+    return NextResponse.json<TurnResponseBody>({ status: 'invalid_request', error: 'Cannot request results email before completing the Commercial Readiness Check.' }, { status: 400 })
   }
 
   if (isNewSession && rateLimitingApplies) {
@@ -211,6 +253,7 @@ export async function POST(request: NextRequest) {
   // attributionToken further down instead, see isNewSession handling).
   let existingAttributionToken: string | undefined
   let existingEmail: string | null | undefined
+  let existingCreatedAt: string | undefined
 
   if (isNewSession) {
     // No token supplied at all, or the user explicitly asked to restart --
@@ -239,26 +282,26 @@ export async function POST(request: NextRequest) {
     transcript = productState?.transcript ?? []
     existingAttributionToken = productState?.attribution_token ?? undefined
     existingEmail = productState?.email ?? undefined
+    existingCreatedAt = productState?.created_at
 
-    // Already finalized at the PRODUCT layer (email declined, or the hard
-    // turn ceiling was already hit on a prior request) -- deliberately
-    // kept separate from structured_understanding.completion_reason (see
-    // the migration's own header and the design report §14/§B item 6):
-    // this is a business decision to stop spending on this session, not
-    // the Interview Engine deciding it's naturally finished, and keeping
-    // it out of completion_reason means this milestone never touches
+    // Already finalized at the PRODUCT layer (the hard turn ceiling was
+    // already hit on a prior request) -- deliberately kept separate from
+    // structured_understanding.completion_reason (see the migration's own
+    // header and the design report §14/§B item 6): this is a business
+    // decision to stop spending on this session, not the Interview Engine
+    // deciding it's naturally finished, and keeping it out of
+    // completion_reason means this milestone never touches
     // types/interview-engine.ts or any Interview Engine completion logic.
     // Re-checked fresh on every request (not a one-time redirect), so it
-    // correctly re-blocks even if the client somehow retries after either
-    // stop.
-    if (productState?.product_stop_reason) {
+    // correctly re-blocks even if the client somehow retries after the
+    // stop. Deliberately does NOT short-circuit an email/resendResultEmail
+    // request -- a ceiling-stopped session still has a real completed
+    // result the user should be able to have emailed.
+    if (productState?.product_stop_reason && parsed.kind !== 'email' && parsed.kind !== 'resend_result_email') {
       const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE)
-      return NextResponse.json<TurnResponseBody>({
-        status: 'complete',
-        projection: result.output,
-        attribution_token: productState.attribution_token ?? undefined,
-        email: productState.email ?? undefined,
-      })
+      const response = NextResponse.json<TurnResponseBody>(buildCompleteTurnResponse(productState, result.output))
+      setSessionCookie(response, token)
+      return response
     }
 
     if (rateLimitingApplies) {
@@ -269,58 +312,53 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── Email gate: handle a direct email/decline_email submission ───────
-    // Both are their own lightweight round-trip -- no runTurn() call, no
-    // model cost, no turn_count increment. The client is expected to
-    // resubmit its original pending message/decline once it receives
-    // email_accepted.
-    if (parsed.kind === 'email') {
-      try {
-        await saveCrcSessionEmail(supabaseAdmin, token, parsed.email)
-      } catch (err) {
-        console.error('[api/crc/turn] saveCrcSessionEmail failed', err)
-        await logPilotEvent(supabaseAdmin, { session_id: token, event_type: 'persistence_error', detail: err instanceof Error ? err.message : String(err) })
-        return NextResponse.json<TurnResponseBody>({ status: 'retry' }, { status: 503 })
+    // ── Results Gate: email submission / explicit resend ──────────────────
+    // Only reachable once the session is genuinely complete (natural
+    // Interview Engine completion OR the turn-ceiling product stop) --
+    // there is no "pending message" concept anymore, so this is the whole
+    // handler for both request kinds. No runTurn() call on this path, no
+    // model cost, no turn_count increment.
+    if (parsed.kind === 'email' || parsed.kind === 'resend_result_email') {
+      const isComplete = engineState.structured_understanding.completion_reason !== null || productState?.product_stop_reason != null
+      if (!isComplete) {
+        return NextResponse.json<TurnResponseBody>(
+          { status: 'invalid_request', error: 'Results email is only available once the Commercial Readiness Check is complete.' },
+          { status: 400 },
+        )
       }
-      const acceptedResponse = NextResponse.json<TurnResponseBody>({ status: 'email_accepted' })
-      setSessionCookie(acceptedResponse, token)
-      return acceptedResponse
-    }
-    if (parsed.kind === 'decline_email') {
-      try {
-        await saveCrcSessionProductStop(supabaseAdmin, token, 'email_declined')
-      } catch (err) {
-        console.error('[api/crc/turn] saveCrcSessionProductStop (email_declined) failed', err)
-        await logPilotEvent(supabaseAdmin, { session_id: token, event_type: 'persistence_error', detail: err instanceof Error ? err.message : String(err) })
-        return NextResponse.json<TurnResponseBody>({ status: 'retry' }, { status: 503 })
-      }
-      const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE)
-      const declinedResponse = NextResponse.json<TurnResponseBody>({
-        status: 'complete',
-        projection: result.output,
-        attribution_token: productState?.attribution_token ?? undefined,
-        email: productState?.email ?? undefined,
-      })
-      setSessionCookie(declinedResponse, token)
-      return declinedResponse
-    }
 
-    // ── Email gate: is it required before this message/decline proceeds? ─
-    // Preferred trigger: the first Commercial Readiness Discovery
-    // takeaway has already been delivered somewhere in this transcript --
-    // determined by scanning for message_kind === 'educational_takeaway'
-    // (transcript v2), so the user has already received genuine CRC value
-    // before ever being asked for email. Fallback: no Discovery has fired
-    // by the time 3 assistant turns have already happened (config-driven,
-    // not hard-coded) -- bounds anonymous turns even for a conversation
-    // that never becomes Discovery-eligible.
-    // parsed.kind is already narrowed to 'message' | 'decline' here -- both
-    // 'email' and 'decline_email' kinds returned early above.
-    if (!productState?.email) {
-      const hasDeliveredTakeaway = transcript.some((entry) => entry.message_kind === 'educational_takeaway')
-      if (hasDeliveredTakeaway || turnNumber > CRC_CONFIG.emailGateFallbackTurn) {
-        return NextResponse.json<TurnResponseBody>({ status: 'email_required' })
+      const targetEmail = parsed.kind === 'email' ? parsed.email : productState?.results_email_last_recipient ?? null
+      if (!targetEmail) {
+        return NextResponse.json<TurnResponseBody>({ status: 'invalid_request', error: 'No recipient to resend to yet.' }, { status: 400 })
       }
+
+      const delivery = await deliverCrcResultsEmail(supabaseAdmin, {
+        sessionId: token,
+        email: targetEmail,
+        isExplicitResend: parsed.kind === 'resend_result_email',
+        structuredUnderstanding: engineState.structured_understanding,
+        matrix: MATRIX_FIXTURE,
+        attributionToken: productState?.attribution_token,
+      })
+
+      if (delivery.kind === 'lead_persistence_failed') {
+        return NextResponse.json<TurnResponseBody>({ status: 'retry', message: "We couldn't save your email right now. Please try again." }, { status: 503 })
+      }
+
+      // Re-read -- delivery may have mutated email/crc_lead_id/results_email_*.
+      const refreshed = await loadCrcSessionProductState(supabaseAdmin, token)
+      const overlay =
+        delivery.kind === 'blocked'
+          ? { blockedReason: delivery.reason, errorMessage: getResultsEmailErrorMessage(delivery.reason as ResultsEmailClaimReason) }
+          : delivery.kind === 'send_failed' || delivery.kind === 'send_unknown'
+            ? { errorMessage: "That didn't go through. You can try again." }
+            : undefined
+
+      const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE)
+      const responseBody = buildCompleteTurnResponse(refreshed ?? productState!, result.output, overlay)
+      const response = NextResponse.json<TurnResponseBody>(responseBody)
+      setSessionCookie(response, token)
+      return response
     }
 
     if (rateLimitingApplies) {
@@ -333,12 +371,7 @@ export async function POST(request: NextRequest) {
           console.error('[api/crc/turn] saveCrcSessionProductStop (conversation_limit_reached) failed', err)
         }
         const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE)
-        const ceilingResponse = NextResponse.json<TurnResponseBody>({
-          status: 'complete',
-          projection: result.output,
-          attribution_token: productState?.attribution_token ?? undefined,
-          email: productState?.email ?? undefined,
-        })
+        const ceilingResponse = NextResponse.json<TurnResponseBody>(buildCompleteTurnResponse(productState ?? ({} as CrcSessionProductState), result.output))
         setSessionCookie(ceilingResponse, token)
         return ceilingResponse
       }
@@ -346,8 +379,8 @@ export async function POST(request: NextRequest) {
   }
 
   // parsed.kind is guaranteed 'message' | 'decline' by this point -- both
-  // 'email' and 'decline_email' are handled with their own early return
-  // above, in both the new-session guard and the existing-session branch.
+  // 'email' and 'resend_result_email' kinds returned early above, in both
+  // the new-session guard and the existing-session branch.
   const userText = parsed.kind === 'message' ? parsed.text : parsed.kind === 'decline' ? DECLINE_LABEL[parsed.action] : ''
   const declineAction = parsed.kind === 'decline' ? parsed.action : undefined
 
@@ -471,11 +504,20 @@ export async function POST(request: NextRequest) {
   const response =
     outcome.kind === 'complete'
       ? NextResponse.json<TurnResponseBody>({
-          status: 'complete',
-          projection: outcome.result.output,
+          ...buildCompleteTurnResponse(
+            {
+              created_at: isNewSession ? now : (existingCreatedAt ?? now),
+              attribution_token: attributionToken ?? existingAttributionToken ?? null,
+              email: existingEmail ?? null,
+              // A session completing on THIS turn cannot yet have any
+              // results-email state -- the gate is only ever reachable
+              // after completion, on a subsequent request.
+              results_email_status: null,
+              results_email_last_recipient: null,
+            },
+            outcome.result.output,
+          ),
           precedingTakeaway: outcome.precedingTakeaway,
-          attribution_token: attributionToken ?? existingAttributionToken,
-          email: existingEmail,
         })
       : NextResponse.json<TurnResponseBody>({ status: outcome.kind, message: outcome.message, precedingTakeaway: outcome.precedingTakeaway })
 

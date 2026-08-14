@@ -60,7 +60,9 @@ describe('parseRequest', () => {
     expect(result).toHaveProperty('error')
   })
 
-  // CRC Identity + Abuse Prevention + Analytics milestone -- email/declineEmail branches.
+  // Results Gate milestone, 2026-08-14 -- email/resendResultEmail branches.
+  // decline_email is retired along with the mid-conversation gate it
+  // belonged to -- there is no more "pending message" to decline.
 
   test('a valid email is parsed as kind: email, trimmed and lowercased', () => {
     expect(parseRequest({ email: '  JD@Example.com  ' })).toEqual({ kind: 'email', email: 'jd@example.com', restart: false })
@@ -72,12 +74,12 @@ describe('parseRequest', () => {
     expect((result as { error: string }).error).toContain('email')
   })
 
-  test('declineEmail: true is parsed as kind: decline_email', () => {
-    expect(parseRequest({ declineEmail: true })).toEqual({ kind: 'decline_email', restart: false })
+  test('resendResultEmail: true is parsed as kind: resend_result_email', () => {
+    expect(parseRequest({ resendResultEmail: true })).toEqual({ kind: 'resend_result_email', restart: false })
   })
 
-  test('declineEmail: false is not treated as a decline_email request', () => {
-    const result = parseRequest({ declineEmail: false })
+  test('resendResultEmail: false is not treated as a resend request', () => {
+    const result = parseRequest({ resendResultEmail: false })
     expect(result).toHaveProperty('error')
   })
 
@@ -91,8 +93,8 @@ describe('parseRequest', () => {
     expect(result).toHaveProperty('error')
   })
 
-  test('declineEmail combined with email is rejected', () => {
-    const result = parseRequest({ declineEmail: true, email: 'jd@example.com' })
+  test('resendResultEmail combined with email is rejected', () => {
+    const result = parseRequest({ resendResultEmail: true, email: 'jd@example.com' })
     expect(result).toHaveProperty('error')
   })
 

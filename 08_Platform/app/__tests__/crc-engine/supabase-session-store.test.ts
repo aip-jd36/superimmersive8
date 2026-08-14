@@ -254,7 +254,21 @@ describe('product-layer helpers (turn_count/transcript, not part of SessionStore
   test('loadCrcSessionProductState defaults transcript to [] when the column is null', async () => {
     const { client } = fakeClient({
       selectResult: {
-        data: { turn_count: 2, transcript: null, updated_at: '2026-08-14T00:00:00.000Z', email: null, traffic_type: 'pilot', abuse_key: null, attribution_token: null, product_stop_reason: null },
+        data: {
+          turn_count: 2,
+          transcript: null,
+          updated_at: '2026-08-14T00:00:00.000Z',
+          email: null,
+          traffic_type: 'pilot',
+          abuse_key: null,
+          attribution_token: null,
+          product_stop_reason: null,
+          created_at: '2026-08-13T00:00:00.000Z',
+          crc_lead_id: null,
+          capture_notice_version: null,
+          results_email_status: null,
+          results_email_last_recipient: null,
+        },
         error: null,
       },
     })
@@ -267,6 +281,11 @@ describe('product-layer helpers (turn_count/transcript, not part of SessionStore
       abuse_key: null,
       attribution_token: null,
       product_stop_reason: null,
+      created_at: '2026-08-13T00:00:00.000Z',
+      crc_lead_id: null,
+      capture_notice_version: null,
+      results_email_status: null,
+      results_email_last_recipient: null,
     })
   })
 

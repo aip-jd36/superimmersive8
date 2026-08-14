@@ -20,7 +20,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-export const ANALYTICS_EVENT_TYPES = ['cta_click', 'discovery_signal', 'commercial_assurance_bridge_shown'] as const
+export const ANALYTICS_EVENT_TYPES = ['cta_click', 'discovery_signal', 'commercial_assurance_bridge_shown', 'results_gate_shown'] as const
 export type AnalyticsEventType = (typeof ANALYTICS_EVENT_TYPES)[number]
 
 export interface AnalyticsEvent {
@@ -53,26 +53,36 @@ export async function logAnalyticsEvent(client: SupabaseClient, event: Analytics
  * flow.
  */
 export async function logBridgeShownEventOnce(client: SupabaseClient, sessionId: string): Promise<void> {
+  await logImpressionEventOnce(client, sessionId, 'commercial_assurance_bridge_shown')
+}
+
+/**
+ * results_gate_shown (CRC Results Gate milestone, 2026-08-14, PM-approved,
+ * §15). Same idempotent-per-session discipline as
+ * commercial_assurance_bridge_shown -- the teaser/gate screen can
+ * legitimately re-render on refresh, but the funnel metric needs exactly
+ * one impression per session. event_data is always null: no email, no
+ * transcript, no Projection content -- nothing here beyond "this
+ * happened."
+ */
+export async function logResultsGateShownEventOnce(client: SupabaseClient, sessionId: string): Promise<void> {
+  await logImpressionEventOnce(client, sessionId, 'results_gate_shown')
+}
+
+async function logImpressionEventOnce(client: SupabaseClient, sessionId: string, eventType: AnalyticsEventType): Promise<void> {
   try {
-    const { data, error: selectError } = await client
-      .from('crc_analytics_events')
-      .select('id')
-      .eq('session_id', sessionId)
-      .eq('event_type', 'commercial_assurance_bridge_shown')
-      .limit(1)
+    const { data, error: selectError } = await client.from('crc_analytics_events').select('id').eq('session_id', sessionId).eq('event_type', eventType).limit(1)
     if (selectError) {
-      console.error('[logBridgeShownEventOnce] existence check failed', selectError)
+      console.error(`[logImpressionEventOnce:${eventType}] existence check failed`, selectError)
       return
     }
     if (data && data.length > 0) return
 
-    const { error: insertError } = await client
-      .from('crc_analytics_events')
-      .insert({ session_id: sessionId, event_type: 'commercial_assurance_bridge_shown', event_data: null })
+    const { error: insertError } = await client.from('crc_analytics_events').insert({ session_id: sessionId, event_type: eventType, event_data: null })
     if (insertError) {
-      console.error('[logBridgeShownEventOnce] insert error', insertError)
+      console.error(`[logImpressionEventOnce:${eventType}] insert error`, insertError)
     }
   } catch (err) {
-    console.error('[logBridgeShownEventOnce] unexpected failure', err)
+    console.error(`[logImpressionEventOnce:${eventType}] unexpected failure`, err)
   }
 }

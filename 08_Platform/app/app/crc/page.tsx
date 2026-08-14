@@ -2,7 +2,8 @@
 
 /**
  * /crc -- the smallest usable live CRC conversation experience (CRC
- * Product Integration -- First Usable Live Slice, Phase 6).
+ * Product Integration -- First Usable Live Slice, Phase 6; Results Gate
+ * milestone, 2026-08-14, PM-revised -- see that migration's own header).
  *
  * All conversation state (session token, StructuredUnderstanding,
  * BoundaryState, pending_clarification) lives server-side, addressed by
@@ -12,6 +13,17 @@
  * ever surfaced here -- there is nothing in either response type that
  * could leak them (see route.ts's own TurnResponseBody/
  * SessionStatusResponseBody types).
+ *
+ * Results Gate: the mid-conversation email interrupt is retired. A
+ * completed, non-grandfathered session shows a teaser + results-email
+ * gate ('results_gate' phase) instead of the full result -- the server
+ * never sends `projection` for these sessions, at any point, so there is
+ * structurally nothing here to leak even before this component's own
+ * render logic runs. Once the results email is accepted by the provider,
+ * this shows a confirmation state ('results_confirmation'), never the
+ * full result. 'complete' is unchanged from before this milestone --
+ * still the grandfathered, full-in-browser-result phase for sessions
+ * created before the launch marker.
  */
 
 import { useEffect, useRef, useState } from 'react'
@@ -20,10 +32,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Textarea } from '@/components/ui/textarea'
 import { CrcProjectionOutput } from '@/components/CrcProjectionOutput'
 import { CommercialAssuranceBridge } from '@/components/CommercialAssuranceBridge'
-import type { TurnResponseBody, SessionStatusResponseBody } from '@/lib/crc-engine/api-contract'
+import type { CrcResultsEmailState, CrcTeaser, TurnResponseBody, SessionStatusResponseBody } from '@/lib/crc-engine/api-contract'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
 import { shouldShowAcknowledgmentGuidance, ACKNOWLEDGMENT_GUIDANCE_COPY, type CrcPagePhase as Phase } from '@/lib/crc-engine/acknowledgment-guidance'
 import { getRateLimitMessage } from '@/lib/crc-engine/rate-limit-copy'
+import { RESULTS_GATE_COPY, buildConfirmationCopy, buildTeaserCopy } from '@/lib/crc-engine/results-gate-copy'
+import { buildCalendlyUrl } from '@/lib/crc-engine/calendly-attribution'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -55,14 +69,31 @@ export default function CrcPage() {
   // CRC Identity + Abuse Prevention + Analytics milestone.
   const [attributionToken, setAttributionToken] = useState<string | undefined>(undefined)
   const [email, setEmail] = useState<string | null | undefined>(undefined)
-  const [emailInput, setEmailInput] = useState('')
-  const [emailSubmitStatus, setEmailSubmitStatus] = useState<'idle' | 'submitting' | 'error'>('idle')
-  // CRC Rate-Limit UX refinement, 2026-08-14: computed once when the
-  // rate_limited response arrives (reason + retryAfterSeconds are only
-  // needed transiently to build the display string).
+  // CRC Rate-Limit UX refinement, 2026-08-14.
   const [rateLimitMessage, setRateLimitMessage] = useState('')
+  // CRC Results Gate milestone, 2026-08-14.
+  const [teaser, setTeaser] = useState<CrcTeaser | undefined>(undefined)
+  const [resultsEmail, setResultsEmail] = useState<CrcResultsEmailState | undefined>(undefined)
+  const [resultsEmailInput, setResultsEmailInput] = useState('')
+  const [resultsEmailSubmitting, setResultsEmailSubmitting] = useState(false)
+  const [resultsEmailError, setResultsEmailError] = useState('')
+  const gateShownLoggedRef = useRef(false)
   const pendingRequestRef = useRef<PendingRequestBody | null>(null)
   const scrollAnchorRef = useRef<HTMLDivElement | null>(null)
+
+  /** Applies a `status: 'complete'` response's shared fields to state -- used by every branch that receives one (initial load, message/decline turns, results-email actions). */
+  function applyCompleteResponse(data: Extract<TurnResponseBody, { status: 'complete' }> | Extract<SessionStatusResponseBody, { status: 'complete' }>) {
+    setAttributionToken(data.attribution_token)
+    if (data.grandfathered) {
+      setProjection(data.projection ?? null)
+      setEmail(data.email)
+      setPhase('complete')
+    } else {
+      setTeaser(data.teaser)
+      setResultsEmail(data.results_email)
+      setPhase(data.results_email?.status === 'accepted' ? 'results_confirmation' : 'results_gate')
+    }
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -84,10 +115,7 @@ export default function CrcPage() {
         setPhase('idle')
       } else if (data.status === 'complete') {
         setMessages(data.transcript)
-        setProjection(data.projection)
-        setAttributionToken(data.attribution_token)
-        setEmail(data.email)
-        setPhase('complete')
+        applyCompleteResponse(data)
       }
     })()
     return () => {
@@ -98,6 +126,16 @@ export default function CrcPage() {
   useEffect(() => {
     scrollAnchorRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, phase])
+
+  // Results Gate impression tracking (PM-approved §15/§22) -- fires once
+  // the teaser+gate screen is actually shown, not merely on completion.
+  // Idempotent server-side (logResultsGateShownEventOnce), and guarded
+  // client-side too so a re-render of the same mount doesn't refire.
+  useEffect(() => {
+    if (phase !== 'results_gate' || gateShownLoggedRef.current) return
+    gateShownLoggedRef.current = true
+    fetch('/api/crc/results-gate-shown', { method: 'POST' }).catch(() => {})
+  }, [phase])
 
   async function submit(body: PendingRequestBody) {
     pendingRequestRef.current = body
@@ -136,21 +174,10 @@ export default function CrcPage() {
         const takeaway = data.precedingTakeaway
         setMessages((prev) => [...prev, { role: 'assistant', text: takeaway }])
       }
-      setProjection(data.projection)
-      setAttributionToken(data.attribution_token)
-      setEmail(data.email)
       pendingRequestRef.current = null
       setInputText('')
       setLastOutcomeWasAcknowledgment(false)
-      setPhase('complete')
-    } else if (data.status === 'email_required') {
-      // The server never processed this turn (no side effects at all) --
-      // remove the optimistic bubble this attempt added, same pattern
-      // handleRetry already uses for a failed 'retry' response.
-      // pendingRequestRef stays set: handleEmailSubmit resubmits it once
-      // email is accepted.
-      setMessages((prev) => prev.slice(0, -1))
-      setPhase('email_gate')
+      applyCompleteResponse(data)
     } else if (data.status === 'rate_limited') {
       setMessages((prev) => prev.slice(0, -1))
       setRateLimitMessage(getRateLimitMessage(data.reason, data.retryAfterSeconds))
@@ -168,52 +195,56 @@ export default function CrcPage() {
     }
   }
 
-  async function handleEmailSubmit() {
-    const trimmed = emailInput.trim()
-    if (!trimmed || emailSubmitStatus === 'submitting') return
-    setEmailSubmitStatus('submitting')
+  /** Shared by both an ordinary gate submission and a corrected email -- the server distinguishes them by whether the address differs from the session's current target, not by request shape. */
+  async function submitResultsEmail(requestBody: { email: string } | { resendResultEmail: true }) {
+    setResultsEmailSubmitting(true)
+    setResultsEmailError('')
     let res: Response
     try {
-      res = await fetch('/api/crc/turn', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: trimmed }) })
+      res = await fetch('/api/crc/turn', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) })
     } catch {
-      setEmailSubmitStatus('error')
+      setResultsEmailSubmitting(false)
+      setResultsEmailError('That didn’t go through. You can try again.')
       return
     }
     const data: TurnResponseBody = await res.json()
-    if (data.status === 'email_accepted') {
-      setEmailSubmitStatus('idle')
-      setEmailInput('')
-      const pending = pendingRequestRef.current
-      if (pending) {
-        submit(pending)
+    setResultsEmailSubmitting(false)
+
+    if (data.status === 'complete') {
+      applyCompleteResponse(data)
+      if (data.grandfathered === false && data.results_email?.status !== 'accepted') {
+        setResultsEmailError(data.results_email?.error_message ?? '')
       } else {
-        setPhase('idle')
+        setResultsEmailInput('')
       }
-    } else {
-      setEmailSubmitStatus('error')
+    } else if (data.status === 'retry') {
+      setResultsEmailError(data.message ?? "We couldn't save that right now. Please try again.")
+    } else if (data.status === 'rate_limited') {
+      setResultsEmailError(getRateLimitMessage(data.reason, data.retryAfterSeconds))
+    } else if (data.status === 'invalid_request') {
+      setResultsEmailError(data.error)
     }
   }
 
-  async function handleEmailDecline() {
-    setPhase('sending')
-    let res: Response
-    try {
-      res = await fetch('/api/crc/turn', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ declineEmail: true }) })
-    } catch {
-      setPhase('retry')
-      return
-    }
-    const data: TurnResponseBody = await res.json()
-    if (data.status === 'complete') {
-      setProjection(data.projection)
-      setAttributionToken(data.attribution_token)
-      setEmail(data.email)
-      pendingRequestRef.current = null
-      setInputText('')
-      setPhase('complete')
-    } else {
-      setPhase('retry')
-    }
+  function handleResultsEmailSubmit() {
+    const trimmed = resultsEmailInput.trim()
+    if (!trimmed || resultsEmailSubmitting) return
+    submitResultsEmail({ email: trimmed })
+  }
+
+  function handleResendResultEmail() {
+    if (resultsEmailSubmitting) return
+    submitResultsEmail({ resendResultEmail: true })
+  }
+
+  function handleChangeEmailClick() {
+    setResultsEmailInput('')
+    setResultsEmailError('')
+    setPhase('results_gate')
+  }
+
+  function handleCommercialAssuranceCtaClick() {
+    fetch('/api/crc/cta-click', { method: 'POST' }).catch(() => {})
   }
 
   function handleSend() {
@@ -248,14 +279,18 @@ export default function CrcPage() {
     setLastOutcomeWasAcknowledgment(false)
     setAttributionToken(undefined)
     setEmail(undefined)
-    setEmailInput('')
-    setEmailSubmitStatus('idle')
     setRateLimitMessage('')
+    setTeaser(undefined)
+    setResultsEmail(undefined)
+    setResultsEmailInput('')
+    setResultsEmailSubmitting(false)
+    setResultsEmailError('')
+    gateShownLoggedRef.current = false
     setPhase('idle')
   }
 
   function handleStartOverClick() {
-    const hasUnfinishedProgress = messages.length > 0 && phase !== 'complete'
+    const hasUnfinishedProgress = messages.length > 0 && phase !== 'complete' && phase !== 'results_confirmation'
     if (hasUnfinishedProgress && !window.confirm('Start over? This will clear the current conversation.')) return
     handleStartOver()
   }
@@ -274,6 +309,8 @@ export default function CrcPage() {
       setFeedbackStatus('error')
     }
   }
+
+  const confirmationCopy = resultsEmail?.masked_email ? buildConfirmationCopy(resultsEmail.masked_email) : null
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-8">
@@ -311,7 +348,13 @@ export default function CrcPage() {
           </Card>
         )}
 
-        {(phase === 'idle' || phase === 'sending' || phase === 'retry' || phase === 'complete' || phase === 'email_gate' || phase === 'rate_limited') && (
+        {(phase === 'idle' ||
+          phase === 'sending' ||
+          phase === 'retry' ||
+          phase === 'complete' ||
+          phase === 'rate_limited' ||
+          phase === 'results_gate' ||
+          phase === 'results_confirmation') && (
           <Card>
             <CardContent className="space-y-4 p-6">
               {messages.length === 0 && phase === 'idle' && (
@@ -340,39 +383,69 @@ export default function CrcPage() {
                 </div>
               )}
 
-              {phase === 'email_gate' && (
-                <div className="space-y-3 border-t pt-4">
-                  <p className="text-sm font-medium">Before we continue -- what&apos;s your email?</p>
-                  <p className="text-sm text-muted-foreground">
-                    So we can save your progress and follow up if useful. You can also skip this and see what we&apos;ve learned so far.
-                  </p>
-                  <Textarea
-                    value={emailInput}
-                    onChange={(e) => setEmailInput(e.target.value)}
-                    placeholder="you@example.com"
-                    disabled={emailSubmitStatus === 'submitting'}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault()
-                        handleEmailSubmit()
-                      }
-                    }}
-                  />
-                  {emailSubmitStatus === 'error' && <p className="text-sm text-red-600">That didn&apos;t go through. You can try again.</p>}
-                  <div className="flex gap-2">
-                    <Button type="button" size="sm" disabled={!emailInput.trim() || emailSubmitStatus === 'submitting'} onClick={handleEmailSubmit}>
-                      Continue
+              {phase === 'rate_limited' && (
+                <div className="space-y-2 rounded border border-amber-200 bg-amber-50 p-3">
+                  <p className="text-sm text-amber-800">{rateLimitMessage}</p>
+                </div>
+              )}
+
+              {phase === 'results_gate' && (
+                <div className="space-y-4 border-t pt-4">
+                  {teaser &&
+                    (() => {
+                      const teaserCopy = buildTeaserCopy(teaser.consideration_count)
+                      return (
+                        <div>
+                          <p className="text-base font-semibold">{teaserCopy.heading}</p>
+                          <p className="mt-1 text-sm text-muted-foreground">{teaserCopy.body}</p>
+                        </div>
+                      )
+                    })()}
+                  <div className="space-y-3 border-t pt-4">
+                    <p className="text-sm font-medium">{RESULTS_GATE_COPY.heading}</p>
+                    <p className="text-sm text-muted-foreground">{RESULTS_GATE_COPY.valueProp}</p>
+                    <Textarea
+                      value={resultsEmailInput}
+                      onChange={(e) => setResultsEmailInput(e.target.value)}
+                      placeholder={RESULTS_GATE_COPY.fieldLabel}
+                      disabled={resultsEmailSubmitting}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault()
+                          handleResultsEmailSubmit()
+                        }
+                      }}
+                    />
+                    {resultsEmailError && <p className="text-sm text-red-600">{resultsEmailError}</p>}
+                    <Button type="button" size="sm" disabled={!resultsEmailInput.trim() || resultsEmailSubmitting} onClick={handleResultsEmailSubmit}>
+                      {RESULTS_GATE_COPY.buttonText}
                     </Button>
-                    <Button type="button" variant="ghost" size="sm" disabled={emailSubmitStatus === 'submitting'} onClick={handleEmailDecline}>
-                      Skip and see what we&apos;ve learned
-                    </Button>
+                    <p className="text-xs text-muted-foreground">{RESULTS_GATE_COPY.disclosure}</p>
                   </div>
                 </div>
               )}
 
-              {phase === 'rate_limited' && (
-                <div className="space-y-2 rounded border border-amber-200 bg-amber-50 p-3">
-                  <p className="text-sm text-amber-800">{rateLimitMessage}</p>
+              {phase === 'results_confirmation' && confirmationCopy && (
+                <div className="space-y-4 border-t pt-4">
+                  <p className="text-base font-semibold">{confirmationCopy.heading}</p>
+                  <p className="text-sm text-muted-foreground">{confirmationCopy.body}</p>
+                  <p className="text-sm text-muted-foreground">{confirmationCopy.body2}</p>
+
+                  <Button asChild variant="outline" size="sm">
+                    <a href={buildCalendlyUrl(attributionToken)} target="_blank" rel="noopener noreferrer" onClick={handleCommercialAssuranceCtaClick}>
+                      Talk with SI8 about a Commercial Assurance Assessment
+                    </a>
+                  </Button>
+
+                  <div className="flex gap-4 text-sm text-muted-foreground">
+                    <button type="button" className="underline" onClick={handleChangeEmailClick} disabled={resultsEmailSubmitting}>
+                      Wrong email? Change it
+                    </button>
+                    <button type="button" className="underline" onClick={handleResendResultEmail} disabled={resultsEmailSubmitting}>
+                      Didn&apos;t get it? Resend
+                    </button>
+                  </div>
+                  {resultsEmailError && <p className="text-sm text-red-600">{resultsEmailError}</p>}
                 </div>
               )}
 
@@ -422,6 +495,12 @@ export default function CrcPage() {
                     Start a New Conversation
                   </Button>
                 </div>
+              )}
+
+              {phase === 'results_confirmation' && (
+                <Button variant="outline" size="sm" className="mt-4" onClick={handleStartOver}>
+                  Start a New Conversation
+                </Button>
               )}
 
               {shouldShowAcknowledgmentGuidance(phase, lastOutcomeWasAcknowledgment) && (

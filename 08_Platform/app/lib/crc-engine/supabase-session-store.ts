@@ -151,8 +151,14 @@ export interface CrcSessionProductState {
   traffic_type: string
   abuse_key: string | null
   attribution_token: string | null
-  /** 'email_declined' | 'conversation_limit_reached' | null -- see types.ts-adjacent note in route.ts for why this is not a completion_reason value. */
+  /** 'conversation_limit_reached' | null -- see types.ts-adjacent note in route.ts for why this is not a completion_reason value. 'email_declined' retired with the mid-conversation gate (Results Gate milestone, 2026-08-14) -- no new code path ever writes it, but the CHECK constraint still permits it for historical rows. */
   product_stop_reason: string | null
+  /** Results Gate milestone (2026-08-14) additions -- see that migration's own header. */
+  created_at: string
+  crc_lead_id: string | null
+  capture_notice_version: string | null
+  results_email_status: string | null
+  results_email_last_recipient: string | null
 }
 
 /**
@@ -164,7 +170,9 @@ export interface CrcSessionProductState {
 export async function loadCrcSessionProductState(client: SupabaseClient, token: string): Promise<CrcSessionProductState | null> {
   const { data, error } = await client
     .from(TABLE)
-    .select('turn_count, transcript, updated_at, email, traffic_type, abuse_key, attribution_token, product_stop_reason')
+    .select(
+      'turn_count, transcript, updated_at, email, traffic_type, abuse_key, attribution_token, product_stop_reason, created_at, crc_lead_id, capture_notice_version, results_email_status, results_email_last_recipient',
+    )
     .eq('id', token)
     .maybeSingle()
   if (error) {
@@ -181,6 +189,11 @@ export async function loadCrcSessionProductState(client: SupabaseClient, token: 
     abuse_key: (data.abuse_key as string | null) ?? null,
     attribution_token: (data.attribution_token as string | null) ?? null,
     product_stop_reason: (data.product_stop_reason as string | null) ?? null,
+    created_at: data.created_at as string,
+    crc_lead_id: (data.crc_lead_id as string | null) ?? null,
+    capture_notice_version: (data.capture_notice_version as string | null) ?? null,
+    results_email_status: (data.results_email_status as string | null) ?? null,
+    results_email_last_recipient: (data.results_email_last_recipient as string | null) ?? null,
   }
 }
 
@@ -229,8 +242,12 @@ export async function saveCrcSessionEmail(client: SupabaseClient, token: string,
  * Sets the product-layer stop reason -- see route.ts's own note on why
  * this is deliberately separate from structured_understanding.completion_reason
  * (an Interview-Engine-owned field this milestone never touches).
+ * 'email_declined' retired from this function's own type (Results Gate
+ * milestone, 2026-08-14) -- no code path writes it anymore, since there is
+ * no more mid-conversation gate to decline. The DB CHECK constraint still
+ * permits the value for historical rows; not removed, per migration safety.
  */
-export async function saveCrcSessionProductStop(client: SupabaseClient, token: string, reason: 'email_declined' | 'conversation_limit_reached'): Promise<void> {
+export async function saveCrcSessionProductStop(client: SupabaseClient, token: string, reason: 'conversation_limit_reached'): Promise<void> {
   const { error } = await client.from(TABLE).update({ product_stop_reason: reason }).eq('id', token)
   if (error) {
     throw new Error(`[SupabaseSessionStore] saveCrcSessionProductStop failed: ${error.message}`)

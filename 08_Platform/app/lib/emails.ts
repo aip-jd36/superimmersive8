@@ -5,6 +5,11 @@ const resend = new Resend(process.env.RESEND_API_KEY!)
 const FROM_EMAIL = 'SI8 Creator Portal <noreply@superimmersive8.com>'
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'jd@superimmersive8.com'
 
+// CRC Results Gate milestone, 2026-08-14. Same verified domain as FROM_EMAIL
+// above -- deliberately not a new subdomain/address, since only
+// superimmersive8.com has SPF/DKIM/DMARC already configured with Resend.
+const CRC_RESULTS_FROM_EMAIL = 'SI8 Commercial Readiness Check <noreply@superimmersive8.com>'
+
 export async function sendNewUserSignupEmail(
   fullName: string,
   email: string,
@@ -219,6 +224,44 @@ export async function sendOptInConfirmationEmail(
     })
   } catch (error) {
     console.error('Error sending opt-in confirmation email:', error)
+  }
+}
+
+/**
+ * CRC results-email send (CRC Results Gate milestone, 2026-08-14).
+ * Deliberately NOT fire-and-forget like every other function in this file
+ * -- the caller's response to the browser must reflect what actually
+ * happened, so this returns a typed outcome instead of swallowing errors
+ * into a console.error. A timeout/network error is reported as 'unknown',
+ * never 'failed' -- Resend may have accepted the request before the
+ * response was lost in transit, and this function must never claim more
+ * certainty than it has (see results-email-delivery.ts for how the caller
+ * uses this distinction).
+ */
+export type CrcResultsEmailOutcome = { status: 'accepted'; providerId: string } | { status: 'failed'; error: string } | { status: 'unknown'; error: string }
+
+export async function sendCrcResultsEmail(to: string, subject: string, html: string, text: string): Promise<CrcResultsEmailOutcome> {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: CRC_RESULTS_FROM_EMAIL,
+      to,
+      reply_to: ADMIN_EMAIL,
+      subject,
+      html,
+      text,
+    })
+    if (error) {
+      // Resend's own API returned a definitive rejection (invalid address,
+      // domain issue, rate limit, etc.) -- a real, confirmed failure, safe
+      // to tell the user "that didn't go through."
+      return { status: 'failed', error: error.message }
+    }
+    return { status: 'accepted', providerId: data!.id }
+  } catch (err) {
+    // Network error, timeout, or any other exception BEFORE a definitive
+    // response was received -- Resend may have already accepted the
+    // request. Must not be reported as 'failed'.
+    return { status: 'unknown', error: err instanceof Error ? err.message : String(err) }
   }
 }
 
