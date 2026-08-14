@@ -16,6 +16,18 @@ import type { DeclineAction } from './decline'
 import { DECLINE_ACTIONS } from './decline'
 import type { TranscriptEntry } from './supabase-session-store'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
+import type { SessionCreationRateResult, BurstResult } from './abuse-prevention'
+
+/**
+ * The two rate-limit reasons a client can ever actually receive (CRC
+ * Rate-Limit UX refinement, 2026-08-14). Sourced from abuse-prevention.ts's
+ * own per-check result types rather than redeclared here, so the two stay
+ * in sync automatically. `turn_ceiling` is deliberately excluded: route.ts
+ * never returns `status: 'rate_limited'` for it -- a hard ceiling finalizes
+ * the conversation gracefully via `status: 'complete'` instead, so there is
+ * no reason value for it to carry here.
+ */
+export type RateLimitReason = Extract<SessionCreationRateResult, { limited: true }>['reason'] | Extract<BurstResult, { limited: true }>['reason']
 
 export interface TurnRequestBody {
   message?: unknown
@@ -112,7 +124,7 @@ export type TurnResponseBody =
   | { status: 'email_required' }
   | { status: 'email_accepted' }
   | { status: 'session_not_found' }
-  | { status: 'rate_limited'; retryAfterSeconds?: number }
+  | { status: 'rate_limited'; reason?: RateLimitReason; retryAfterSeconds?: number }
   | { status: 'retry' }
   | { status: 'invalid_request'; error: string }
 

@@ -19,9 +19,21 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { CRC_CONFIG } from './config'
 
-export type AbuseCheckResult =
-  | { limited: false }
-  | { limited: true; reason: 'session_creation_rate' | 'burst' | 'turn_ceiling'; retryAfterSeconds?: number }
+/**
+ * Per-check result types (CRC Rate-Limit UX refinement, 2026-08-14) -- each
+ * check function's `limited: true` reason is now its own literal, not the
+ * shared 3-way union, so a caller reading e.g. checkBurst()'s result gets
+ * `reason: 'burst'` statically, not `'session_creation_rate' | 'burst' |
+ * 'turn_ceiling'` requiring a cast to pass through to an API response.
+ * AbuseCheckResult is kept as the union of all three for call sites (like
+ * logRateLimitedEvent) that genuinely accept any of them. Pure type
+ * precision -- no behavior, threshold, or return-value change; every
+ * function still returns exactly the same runtime shape it always did.
+ */
+export type SessionCreationRateResult = { limited: false } | { limited: true; reason: 'session_creation_rate'; retryAfterSeconds: number }
+export type BurstResult = { limited: false } | { limited: true; reason: 'burst'; retryAfterSeconds: number }
+export type TurnCeilingResult = { limited: false } | { limited: true; reason: 'turn_ceiling' }
+export type AbuseCheckResult = SessionCreationRateResult | BurstResult | TurnCeilingResult
 
 /**
  * Only relevant when this request is about to CREATE a new crc_sessions
@@ -29,7 +41,7 @@ export type AbuseCheckResult =
  * continuing-conversation turn never calls this, so no extra DB load is
  * added to the common case.
  */
-export async function checkSessionCreationRate(client: SupabaseClient, abuseKey: string): Promise<AbuseCheckResult> {
+export async function checkSessionCreationRate(client: SupabaseClient, abuseKey: string): Promise<SessionCreationRateResult> {
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
   const { count, error } = await client
     .from('crc_sessions')
@@ -55,7 +67,7 @@ export async function checkSessionCreationRate(client: SupabaseClient, abuseKey:
  * within the configured window; this only ever catches a script hammering
  * one session.
  */
-export function checkBurst(lastUpdatedAt: string | null): AbuseCheckResult {
+export function checkBurst(lastUpdatedAt: string | null): BurstResult {
   if (!lastUpdatedAt) return { limited: false }
   const elapsedSeconds = (Date.now() - new Date(lastUpdatedAt).getTime()) / 1000
   if (elapsedSeconds < CRC_CONFIG.minSecondsBetweenTurns) {
@@ -69,7 +81,7 @@ export function checkBurst(lastUpdatedAt: string | null): AbuseCheckResult {
  * comparison against the turn number this request would become -- no DB
  * call needed, turnNumber is already known to the caller.
  */
-export function checkTurnCeiling(turnNumber: number): AbuseCheckResult {
+export function checkTurnCeiling(turnNumber: number): TurnCeilingResult {
   if (turnNumber > CRC_CONFIG.maxTurnsPerSession) {
     return { limited: true, reason: 'turn_ceiling' }
   }

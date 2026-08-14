@@ -23,6 +23,7 @@ import { CommercialAssuranceBridge } from '@/components/CommercialAssuranceBridg
 import type { TurnResponseBody, SessionStatusResponseBody } from '@/lib/crc-engine/api-contract'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
 import { shouldShowAcknowledgmentGuidance, ACKNOWLEDGMENT_GUIDANCE_COPY, type CrcPagePhase as Phase } from '@/lib/crc-engine/acknowledgment-guidance'
+import { getRateLimitMessage } from '@/lib/crc-engine/rate-limit-copy'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -56,6 +57,10 @@ export default function CrcPage() {
   const [email, setEmail] = useState<string | null | undefined>(undefined)
   const [emailInput, setEmailInput] = useState('')
   const [emailSubmitStatus, setEmailSubmitStatus] = useState<'idle' | 'submitting' | 'error'>('idle')
+  // CRC Rate-Limit UX refinement, 2026-08-14: computed once when the
+  // rate_limited response arrives (reason + retryAfterSeconds are only
+  // needed transiently to build the display string).
+  const [rateLimitMessage, setRateLimitMessage] = useState('')
   const pendingRequestRef = useRef<PendingRequestBody | null>(null)
   const scrollAnchorRef = useRef<HTMLDivElement | null>(null)
 
@@ -148,6 +153,7 @@ export default function CrcPage() {
       setPhase('email_gate')
     } else if (data.status === 'rate_limited') {
       setMessages((prev) => prev.slice(0, -1))
+      setRateLimitMessage(getRateLimitMessage(data.reason, data.retryAfterSeconds))
       setPhase('rate_limited')
     } else if (data.status === 'session_not_found') {
       setLastOutcomeWasAcknowledgment(false)
@@ -244,6 +250,7 @@ export default function CrcPage() {
     setEmail(undefined)
     setEmailInput('')
     setEmailSubmitStatus('idle')
+    setRateLimitMessage('')
     setPhase('idle')
   }
 
@@ -365,7 +372,7 @@ export default function CrcPage() {
 
               {phase === 'rate_limited' && (
                 <div className="space-y-2 rounded border border-amber-200 bg-amber-50 p-3">
-                  <p className="text-sm text-amber-800">You&apos;ve reached the limit for this session right now -- try again in a bit.</p>
+                  <p className="text-sm text-amber-800">{rateLimitMessage}</p>
                 </div>
               )}
 

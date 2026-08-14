@@ -46,3 +46,19 @@ export function classifyTraffic(input: ClassifyTrafficInput): TrafficType {
 
   return 'pilot'
 }
+
+/**
+ * Whether abuse-prevention checks (burst / session_creation_rate /
+ * turn_ceiling) apply to this request at all (CRC Rate-Limit UX +
+ * Internal-Test Classification refinement, 2026-08-14). Extracted out of
+ * route.ts's own inline boolean so it's independently testable -- this is
+ * the exact gate that makes internal_test/automated_eval/development
+ * traffic exempt from the limits real pilot users are bounded by, and it's
+ * worth being able to assert that directly rather than only indirectly via
+ * a full route-level test. Only `pilot` traffic with a resolvable abuseKey
+ * is ever rate-limited; a null abuseKey (HMAC secret missing/misconfigured)
+ * fails OPEN for every traffic type, per the approved failure model.
+ */
+export function shouldApplyRateLimiting(trafficType: TrafficType, abuseKey: string | null): boolean {
+  return trafficType === 'pilot' && abuseKey !== null
+}

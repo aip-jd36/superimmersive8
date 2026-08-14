@@ -47,7 +47,7 @@ import { parseRequest, type TurnRequestBody, type TurnResponseBody, type Session
 import { logPilotEvent } from '@/lib/crc-engine/pilot-events'
 import { logAnalyticsEvent } from '@/lib/crc-engine/analytics-events'
 import { resolveClientIp, normalizeIp, deriveAbuseKey } from '@/lib/crc-engine/abuse-key'
-import { classifyTraffic } from '@/lib/crc-engine/traffic-classification'
+import { classifyTraffic, shouldApplyRateLimiting } from '@/lib/crc-engine/traffic-classification'
 import { checkSessionCreationRate, checkBurst, checkTurnCeiling, logRateLimitedEvent } from '@/lib/crc-engine/abuse-prevention'
 import { getRuntimeCommit, getModelConfig } from '@/lib/crc-engine/runtime-metadata'
 import { CRC_CONFIG } from '@/lib/crc-engine/config'
@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
   // Only real pilot traffic is ever rate-limited -- development/
   // internal_test/automated_eval all need to run repeatedly without
   // tripping the same limits real anonymous users are bounded by.
-  const rateLimitingApplies = trafficType === 'pilot' && abuseKey !== null
+  const rateLimitingApplies = shouldApplyRateLimiting(trafficType, abuseKey)
 
   const isNewSession = !existingToken || parsed.restart
 
@@ -197,7 +197,7 @@ export async function POST(request: NextRequest) {
     const rateCheck = await checkSessionCreationRate(supabaseAdmin, abuseKey!)
     if (rateCheck.limited) {
       await logRateLimitedEvent(supabaseAdmin, null, rateCheck.reason, rawIp)
-      return NextResponse.json<TurnResponseBody>({ status: 'rate_limited', retryAfterSeconds: rateCheck.retryAfterSeconds }, { status: 429 })
+      return NextResponse.json<TurnResponseBody>({ status: 'rate_limited', reason: rateCheck.reason, retryAfterSeconds: rateCheck.retryAfterSeconds }, { status: 429 })
     }
   }
 
@@ -265,7 +265,7 @@ export async function POST(request: NextRequest) {
       const burstCheck = checkBurst(productState?.updated_at ?? null)
       if (burstCheck.limited) {
         await logRateLimitedEvent(supabaseAdmin, token, burstCheck.reason, rawIp)
-        return NextResponse.json<TurnResponseBody>({ status: 'rate_limited', retryAfterSeconds: burstCheck.retryAfterSeconds }, { status: 429 })
+        return NextResponse.json<TurnResponseBody>({ status: 'rate_limited', reason: burstCheck.reason, retryAfterSeconds: burstCheck.retryAfterSeconds }, { status: 429 })
       }
     }
 
