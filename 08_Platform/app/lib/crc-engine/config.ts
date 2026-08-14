@@ -80,7 +80,7 @@ export const CRC_CONFIG = {
    * env-overridable after the fact (changing it would un-grandfather
    * already-launched sessions).
    */
-  resultsGateLaunchedAt: '2026-08-14T00:00:00.000Z',
+  resultsGateLaunchedAt: '2026-08-14T15:15:00.000Z',
 
   /** Bumped whenever the results-gate copy (teaser/gate/confirmation text) changes. */
   captureNoticeVersion: 'results-gate-v1',
