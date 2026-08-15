@@ -55,7 +55,17 @@ This overlaps with ground SI8 has already covered via Dripify (Legal Friction is
 
 Not yet drafted — depends on which question above we're actually pointing SE-001 at.
 
-### Steps 4–6 — List, launch, scoring
+### Step 4 — List (built 2026-08-15, UK pilot)
+
+**HGE-100 and SCE-100 built for the UK pilot** (the documented UK-specific sub-target — see `AGENCY-INTELLIGENCE-DATABASE.md` line 81, "clean 100-person SCE target for a UK-only pilot" — distinct from the full multi-region ~500-person/250-250 Standing Encore target). Files: `send-lists/SE-001-HGE-100-2026-08-15.csv`, `send-lists/SE-001-SCE-100-2026-08-15.csv`.
+
+**HGE-100:** 10 people from each of the 10 vetted UK HGE agencies present in the Sales Navigator export (OLIVER, VCCP, Grey London, Saatchi & Saatchi London, Ogilvy UK, BBH London, McCann London, Adam & Eve\TBWA, Publicis London, AMV BBDO) — cap raised from the Sampling Methodology v1.1 default of ~8 to 10 specifically to close the exact remaining gap to 100 (JD approval, 2026-08-15), rather than waiting on a re-pull of the 3 agencies the export missed (Havas London, Wunderman Thompson UK, Iris Worldwide — known gap, see line 6 of the database file: "prior export.csv only caught their non-UK offices"). Those 3 remain available as a swap-in option if any of the 100 bounce.
+
+**SCE-100:** Sourced from SI8's own existing Dripify contact pool (`SI8 Rights Verified-Grid View.csv`, the "Rights Verified"-era campaign export) rather than fresh Sales Navigator extraction against the 18-agency vetted SCE list — JD attempted the Sales Navigator company-name search against those 18 agencies directly and found no Creative Director/Head of Production titles returned (consistent with the database file's own finding that the UK boutique creative-production tier is genuinely thin at scale). Per JD's framing, SCE is the control arm and doesn't need HGE's level of per-agency vetting. Construction: filtered to England/London, Creative-Director/VP+-Creative-tier campaigns (490 candidates) → excluded 5 already showing a logged response, 10 at an HGE-arm agency (cross-arm contamination), Mother (known independent agency, pending a client-roster spot-check before any future inclusion), and rows whose Industry reads as brand/retail/institution rather than agency-side (Retail, Fashion, Museums, Education, Government, Healthcare, Banking, Insurance, Non-profit — the RSE/IAE framework is client-roster-based and doesn't map to an in-house Creative Director) → 440 qualified, deduped by LinkedIn URL, randomly sampled to 100 (63 England / 37 London).
+
+**Open question, not yet resolved:** whether the SCE-100 contacts have already received a Rights Verified-era touch (connection/message sent, no reply logged) vs. never been sent to at all — the export has no "last action" timestamp to distinguish the two. Doesn't block using the list, but matters for read cleanliness if SE-001's arms assume a naive population.
+
+### Steps 5–6 — Launch, scoring
 
 Not started.
 
