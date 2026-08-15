@@ -1,0 +1,3 @@
+[submodule "tools/crm-core"]
+	path = tools/crm-core
+	url = https://github.com/aip-jd36/pmf-crm-core.git
