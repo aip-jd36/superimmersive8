@@ -275,6 +275,100 @@ describe('renderUnderstoodSummary -- required cases', () => {
   })
 })
 
+describe('observationClauses -- same-scope sentence separation (A2 fix, 2026-08-15)', () => {
+  test('one observation, no punctuation, lowercase start -- capitalized and terminated, no content loss', () => {
+    const facts = buildUnderstoodFacts(
+      handoff({ scoped_observations: [observation({ observation_id: 'so-1', scope: 'current_project', confidence: 'confirmed', note: 'the client gave me some images and their logo for me to use' })] }),
+    )
+    expect(renderUnderstoodSummary(facts)).toBe('On the current project: The client gave me some images and their logo for me to use.')
+  })
+
+  test('two same-scope observations, real production shape -- rendered as two separate sentences, not a run-on', () => {
+    const facts = buildUnderstoodFacts(
+      handoff({
+        scoped_observations: [
+          observation({ observation_id: 'c2', scope: 'current_project', confidence: 'confirmed', note: 'My agency has an executive producer that reviews and verifies my work.' }),
+          observation({ observation_id: 'c1', scope: 'current_project', confidence: 'confirmed', note: 'the client gave me some images and their logo for me to use' }),
+        ],
+      }),
+    )
+    expect(renderUnderstoodSummary(facts)).toBe(
+      'On the current project: My agency has an executive producer that reviews and verifies my work. The client gave me some images and their logo for me to use.',
+    )
+  })
+
+  test('three same-scope observations -- each its own sentence, single scope label, no content loss', () => {
+    const facts = buildUnderstoodFacts(
+      handoff({
+        scoped_observations: [
+          observation({ observation_id: 'so-1', scope: 'current_project', confidence: 'confirmed', note: 'the executive producer reviews all work' }),
+          observation({ observation_id: 'so-2', scope: 'current_project', confidence: 'confirmed', note: 'the client provided images and a logo' }),
+          observation({ observation_id: 'so-3', scope: 'current_project', confidence: 'confirmed', note: 'delivery is scheduled for next week' }),
+        ],
+      }),
+    )
+    const out = renderUnderstoodSummary(facts)
+    expect(out).toBe(
+      'On the current project: The executive producer reviews all work. The client provided images and a logo. Delivery is scheduled for next week.',
+    )
+    expect(out.match(/On the current project:/g)?.length).toBe(1)
+  })
+
+  test('punctuation already present -- never double-punctuated', () => {
+    const facts = buildUnderstoodFacts(
+      handoff({
+        scoped_observations: [
+          observation({ observation_id: 'so-1', scope: 'current_project', confidence: 'confirmed', note: 'Is this ready for review?' }),
+          observation({ observation_id: 'so-2', scope: 'current_project', confidence: 'confirmed', note: 'Great news!' }),
+        ],
+      }),
+    )
+    const out = renderUnderstoodSummary(facts)
+    expect(out).toBe('On the current project: Is this ready for review? Great news!')
+    expect(out).not.toContain('?.')
+    expect(out).not.toContain('!.')
+  })
+
+  test('capitalization already present -- never double-capitalized or altered', () => {
+    const facts = buildUnderstoodFacts(
+      handoff({ scoped_observations: [observation({ observation_id: 'so-1', scope: 'current_project', confidence: 'confirmed', note: 'ElevenLabs was used for the voiceover.' })] }),
+    )
+    expect(renderUnderstoodSummary(facts)).toBe('On the current project: ElevenLabs was used for the voiceover.')
+  })
+
+  test('no content loss -- every word from every note survives, only capitalization/terminal punctuation added', () => {
+    const notes = ['the client gave me some images and their logo for me to use', 'my agency has an executive producer that reviews my work']
+    const facts = buildUnderstoodFacts(
+      handoff({
+        scoped_observations: notes.map((note, i) => observation({ observation_id: `so-${i}`, scope: 'current_project', confidence: 'confirmed', note })),
+      }),
+    )
+    const out = renderUnderstoodSummary(facts)
+    for (const note of notes) {
+      const words = note.split(' ')
+      // First word's capitalization may differ (sentence-start); every other word must survive verbatim.
+      for (const word of words.slice(1)) {
+        expect(out).toContain(word)
+      }
+    }
+  })
+
+  test('existing well-formed-sentence fixtures are unaffected (already capitalized, already punctuated -- toSentence is a no-op)', () => {
+    const facts = buildUnderstoodFacts(
+      handoff({
+        scoped_observations: [
+          observation({ observation_id: 'so-1', scope: 'current_project', confidence: 'confirmed', note: 'Visuals generated in Runway.' }),
+          observation({ observation_id: 'so-2', scope: 'current_project', confidence: 'confirmed', note: 'Voiceover generated in ElevenLabs.' }),
+          observation({ observation_id: 'so-3', scope: 'current_project', confidence: 'confirmed', note: 'Internal legal already reviewed and approved this piece.' }),
+        ],
+      }),
+    )
+    expect(renderUnderstoodSummary(facts)).toBe(
+      'On the current project: Visuals generated in Runway. Voiceover generated in ElevenLabs. Internal legal already reviewed and approved this piece.',
+    )
+  })
+})
+
 describe('renderUnderstoodSummary -- negative assertions', () => {
   const forbiddenWords = ['safe', 'compliant', 'approved', 'cleared', 'low risk', 'high risk', 'you should', 'you can use this commercially', 'risk']
 

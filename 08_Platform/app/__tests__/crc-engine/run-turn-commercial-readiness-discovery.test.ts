@@ -417,10 +417,10 @@ describe('Commercial Readiness Discovery -- cap persistence + Educational Takeaw
     expect(outcome.precedingTakeaway).toBe(COMMERCIAL_READINESS_TAKEAWAYS.client_provided_source_assets)
     if (outcome.kind === 'complete') {
       const serialized = JSON.stringify(outcome.result.output)
-      // "clearance responsibility" is a distinctive phrase from the
-      // client_provided_source_assets takeaway text -- absent from every
-      // other fixed string this pipeline produces.
-      expect(serialized).not.toContain('clearance responsibility')
+      // "rights and documentation question" is a distinctive phrase from
+      // the client_provided_source_assets takeaway text -- absent from
+      // every other fixed string this pipeline produces.
+      expect(serialized).not.toContain('rights and documentation question')
     }
   })
 

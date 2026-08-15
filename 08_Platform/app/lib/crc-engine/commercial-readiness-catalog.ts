@@ -146,7 +146,7 @@ export const COMMERCIAL_READINESS_DISCOVERY_QUESTIONS: Record<CommercialReadines
  */
 export const COMMERCIAL_READINESS_TAKEAWAYS: Record<CommercialReadinessCategory, string> = {
   client_provided_source_assets:
-    "Worth knowing: when a client supplies their own source material -- photos, footage, logos, brand assets -- the clearance responsibility for those specific assets generally sits with the client, not with the AI tool you used to generate the video. That's a separate question from whether the AI platform's own terms allow commercial use.",
+    "Worth knowing: client-supplied photos, footage, logos, or brand assets create a separate rights and documentation question from the AI platform's own terms. For commercial work, it's useful to document what the client supplied and what permissions or representations accompanied those assets.",
   likeness_publicity_rights:
     "Worth knowing: showing a real person's face, voice, or likeness in commercial content is typically governed by publicity and likeness rights, which are separate from -- and not covered by -- an AI tool's own commercial-use terms. Getting a platform's permission to generate something is not the same as getting that person's permission to be shown.",
   third_party_visual_assets:

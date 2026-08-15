@@ -6,7 +6,7 @@
  * comment for why).
  */
 
-import { evaluateCategoryEligibility, selectEligibleCommercialReadinessCategory } from '@/lib/crc-engine/commercial-readiness-catalog'
+import { evaluateCategoryEligibility, getCommercialReadinessTakeaway, selectEligibleCommercialReadinessCategory } from '@/lib/crc-engine/commercial-readiness-catalog'
 import type { CommercialReadinessIndicators, IndicatorState } from '@/lib/crc-engine/commercial-readiness-indicators'
 
 function indicators(overrides: Partial<CommercialReadinessIndicators> = {}): CommercialReadinessIndicators {
@@ -149,5 +149,20 @@ describe('selectEligibleCommercialReadinessCategory', () => {
   test('phase !== 3 -> null regardless of applicability', () => {
     const result = selectEligibleCommercialReadinessCategory(indicators({ client_involvement: 'affirmative' }), false, true, 2)
     expect(result).toBeNull()
+  })
+})
+
+describe('client_provided_source_assets takeaway copy (PM-approved revision, 2026-08-15)', () => {
+  test('exact copy -- softened, no liability-allocation clause', () => {
+    expect(getCommercialReadinessTakeaway('client_provided_source_assets')).toBe(
+      "Worth knowing: client-supplied photos, footage, logos, or brand assets create a separate rights and documentation question from the AI platform's own terms. For commercial work, it's useful to document what the client supplied and what permissions or representations accompanied those assets.",
+    )
+  })
+
+  test('never reintroduces liability-allocation language the investigation found unsupported', () => {
+    const text = getCommercialReadinessTakeaway('client_provided_source_assets').toLowerCase()
+    expect(text).not.toContain('responsibility sits with')
+    expect(text).not.toContain('generally sits with the client')
+    expect(text).not.toContain('clearance responsibility')
   })
 })

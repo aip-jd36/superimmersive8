@@ -228,4 +228,103 @@ export const EVAL_CORPUS: EvalScenario[] = [
       return { passed, notes: `project_fact fields: ${JSON.stringify([...fields])}` }
     },
   },
+
+  // ── Plan-tier extraction reliability (A3 fix, CRC Pilot Findings, 2026-08-15) ──
+  // Regression coverage for a confirmed real-pilot defect: the live extractor's
+  // schema previously had no fields at all for access_surface/plan_tier hints
+  // (anthropic-extractor.ts), so an explicit "paid tier on Kling" / "free plan
+  // via the website" statement could never be preserved, regardless of how the
+  // deterministic pipeline (extraction.ts's own resolveAttestedToolField, which
+  // was already correct) would have consumed it. These cases exercise the real
+  // model's ability to populate the new hint fields the schema now carries.
+
+  {
+    id: 'plan_tier_kling_paid',
+    category: 'plan tier -- explicit paid statement',
+    description: "User states a paid tier for a named tool, matching the real pilot session's own wording.",
+    turns: [{ turn: 1, text: "I'm using the paid tier on Kling." }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'tool_mention')
+      const passed = d?.candidate.plan_tier_confidence_hint === 'confirmed' && /paid/i.test(d.candidate.plan_tier_value_hint ?? '')
+      return { passed, notes: `plan_tier hint: ${JSON.stringify({ confidence: d?.candidate.plan_tier_confidence_hint, value: d?.candidate.plan_tier_value_hint })}` }
+    },
+  },
+
+  {
+    id: 'plan_tier_elevenlabs_free_via_website',
+    category: 'plan tier -- explicit free statement plus access surface',
+    description: "User states a free tier AND an access surface in one statement, matching the real pilot session's own wording.",
+    turns: [{ turn: 1, text: 'For ElevenLabs, I used their free plan via the website.' }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'tool_mention')
+      const planOk = d?.candidate.plan_tier_confidence_hint === 'confirmed' && /free/i.test(d.candidate.plan_tier_value_hint ?? '')
+      const surfaceOk = d?.candidate.access_surface_confidence_hint === 'confirmed' && /website/i.test(d.candidate.access_surface_value_hint ?? '')
+      const passed = planOk && surfaceOk
+      return {
+        passed,
+        notes: `plan_tier: ${JSON.stringify({ confidence: d?.candidate.plan_tier_confidence_hint, value: d?.candidate.plan_tier_value_hint })}; access_surface: ${JSON.stringify({ confidence: d?.candidate.access_surface_confidence_hint, value: d?.candidate.access_surface_value_hint })}`,
+      }
+    },
+  },
+
+  {
+    id: 'plan_tier_veo_personal_paid',
+    category: 'plan tier -- personal paid plan (compound wording)',
+    description: 'User states a compound personal+paid tier for a tool, matching the earlier Veo pilot finding.',
+    turns: [{ turn: 1, text: "I'm on Google Veo's personal paid plan." }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'tool_mention')
+      const passed = d?.candidate.plan_tier_confidence_hint === 'confirmed' && /personal/i.test(d.candidate.plan_tier_value_hint ?? '') && /paid/i.test(d.candidate.plan_tier_value_hint ?? '')
+      return { passed, notes: `plan_tier hint: ${JSON.stringify({ confidence: d?.candidate.plan_tier_confidence_hint, value: d?.candidate.plan_tier_value_hint })}` }
+    },
+  },
+
+  {
+    id: 'plan_tier_business',
+    category: 'plan tier -- business plan',
+    description: 'User states a business-tier plan for a named tool.',
+    turns: [{ turn: 1, text: "We're on Runway's business plan." }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'tool_mention')
+      const passed = d?.candidate.plan_tier_confidence_hint === 'confirmed' && /business/i.test(d.candidate.plan_tier_value_hint ?? '')
+      return { passed, notes: `plan_tier hint: ${JSON.stringify({ confidence: d?.candidate.plan_tier_confidence_hint, value: d?.candidate.plan_tier_value_hint })}` }
+    },
+  },
+
+  {
+    id: 'plan_tier_enterprise',
+    category: 'plan tier -- enterprise plan',
+    description: 'User states an enterprise-tier plan for a named tool.',
+    turns: [{ turn: 1, text: 'Our team has the enterprise plan for Midjourney.' }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'tool_mention')
+      const passed = d?.candidate.plan_tier_confidence_hint === 'confirmed' && /enterprise/i.test(d.candidate.plan_tier_value_hint ?? '')
+      return { passed, notes: `plan_tier hint: ${JSON.stringify({ confidence: d?.candidate.plan_tier_confidence_hint, value: d?.candidate.plan_tier_value_hint })}` }
+    },
+  },
+
+  {
+    id: 'plan_tier_ambiguous_uncertain',
+    category: 'plan tier -- expressed uncertainty, must not be reported as confirmed',
+    description: 'User is unsure which tier they have -- must preserve uncertainty, never guess a branded tier name.',
+    turns: [{ turn: 1, text: 'I think it might be Pro on Kling, but I honestly forget.' }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'tool_mention')
+      // Must NOT be reported as confidently confirmed -- either omitted (null/undefined) or explicitly 'unknown'.
+      const passed = d?.candidate.plan_tier_confidence_hint !== 'confirmed'
+      return { passed, notes: `plan_tier hint: ${JSON.stringify({ confidence: d?.candidate.plan_tier_confidence_hint, value: d?.candidate.plan_tier_value_hint })}` }
+    },
+  },
+
+  {
+    id: 'plan_tier_absent',
+    category: 'plan tier -- no plan information stated at all',
+    description: 'Tool named with zero plan/tier information -- must not fabricate a hint from nothing.',
+    turns: [{ turn: 1, text: 'We used Pika for the b-roll.' }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'tool_mention')
+      const passed = d?.candidate.plan_tier_confidence_hint !== 'confirmed'
+      return { passed, notes: `plan_tier hint: ${JSON.stringify({ confidence: d?.candidate.plan_tier_confidence_hint, value: d?.candidate.plan_tier_value_hint })}` }
+    },
+  },
 ]

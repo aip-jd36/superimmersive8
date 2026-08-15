@@ -59,6 +59,13 @@ You MUST NOT:
 - Decide whether a statement should override or replace an earlier one -- only flag with is_correction whether it reads like a correction, never resolve what it corrects.
 - Apply any judgment about commercial risk, legal risk, or readiness. You are not evaluating the project, only transcribing what was said about it.
 
+When kind is "tool_mention" and the user DIRECTLY states which specific plan/tier or access surface they used for that tool in THIS turn, also report it via plan_tier_confidence_hint/plan_tier_value_hint and access_surface_confidence_hint/access_surface_value_hint:
+- plan_tier_value_hint: the user's own wording for their subscription/account tier (e.g. "paid", "free", "the free plan", "personal paid plan", "business plan", "enterprise plan"). Report their words as stated -- never translate to a specific branded tier name (e.g. "Pro", "Team") they did not themselves say.
+- access_surface_value_hint: the user's own wording for HOW they accessed the tool (e.g. "the website", "the app", "the API", "a developer key") -- distinct from plan_tier, which is about their tier of subscription, not the surface they used it through.
+- Set the paired confidence_hint to "confirmed" only when the user stated the plan/tier or access surface as a clear, direct fact this turn. If they expressed genuine uncertainty (e.g. "I think it might be Pro"), set confidence_hint to "unknown" instead of "confirmed", and leave the value_hint null.
+- Leave both pairs null/unset when the turn says nothing about plan tier or access surface for that tool -- never infer either from generic enthusiasm, unrelated context, or a different tool's plan.
+- These two hints are independent: a turn can state one, both, or neither for the same tool mention.
+
 If a turn contains nothing you can classify as one of the three kinds -- small talk, an incomplete thought, pure filler -- return no candidates for it, or set low_confidence: true on a best-effort candidate if you're genuinely unsure whether something is a real signal.`
 
 const CANDIDATE_KIND_VALUES = ['tool_mention', 'scoped_observation', 'project_fact'] as const
@@ -100,6 +107,28 @@ const CANDIDATE_RESPONSE_SCHEMA = {
               'Valid: "Nano Banana", "Kling", "ElevenLabs". ' +
               'Invalid: "Nano Banana — just the app on my phone" (includes an access-method phrase), "Kling on the paid plan" (includes a plan detail), "ElevenLabs, but only for a temporary voice" (includes a qualifier). ' +
               'Null otherwise.',
+          },
+          access_surface_confidence_hint: {
+            type: ['string', 'null'],
+            enum: [...CONFIDENCE_HINT_VALUES, null],
+            description:
+              "When kind is tool_mention and the user directly stated HOW they accessed the tool this turn (e.g. \"the website\", \"the app\", \"the API\"): confirmed. If they expressed genuine uncertainty about it: unknown. Null when the turn says nothing about access surface for this tool -- never inferred from generic context.",
+          },
+          access_surface_value_hint: {
+            type: ['string', 'null'],
+            description:
+              "When access_surface_confidence_hint is confirmed: the user's own wording for how they accessed the tool. Null otherwise.",
+          },
+          plan_tier_confidence_hint: {
+            type: ['string', 'null'],
+            enum: [...CONFIDENCE_HINT_VALUES, null],
+            description:
+              "When kind is tool_mention and the user directly stated their plan/subscription/account tier for this tool this turn (e.g. \"free\", \"paid\", \"personal paid plan\", \"business plan\", \"enterprise plan\"): confirmed. If they expressed genuine uncertainty about it (e.g. \"I think it might be Pro\"): unknown. Null when the turn says nothing about plan tier for this tool -- never inferred from generic context, and never a guessed branded tier name.",
+          },
+          plan_tier_value_hint: {
+            type: ['string', 'null'],
+            description:
+              "When plan_tier_confidence_hint is confirmed: the user's own wording for their plan/tier, preserved as stated -- never translated to a specific branded tier name (e.g. \"Pro\", \"Team\") they did not themselves say. Null otherwise.",
           },
           is_correction: {
             type: 'boolean',
@@ -155,6 +184,10 @@ const CANDIDATE_RESPONSE_SCHEMA = {
           'raw_text',
           'kind',
           'raw_tool_name',
+          'access_surface_confidence_hint',
+          'access_surface_value_hint',
+          'plan_tier_confidence_hint',
+          'plan_tier_value_hint',
           'is_correction',
           'correction_of_raw_text',
           'scope',
@@ -178,6 +211,10 @@ interface ParsedCandidate {
   raw_text: string
   kind: (typeof CANDIDATE_KIND_VALUES)[number]
   raw_tool_name: string | null
+  access_surface_confidence_hint: (typeof CONFIDENCE_HINT_VALUES)[number] | null
+  access_surface_value_hint: string | null
+  plan_tier_confidence_hint: (typeof CONFIDENCE_HINT_VALUES)[number] | null
+  plan_tier_value_hint: string | null
   is_correction: boolean
   correction_of_raw_text: string | null
   scope: (typeof OBSERVATION_SCOPE_VALUES)[number] | null
@@ -189,13 +226,17 @@ interface ParsedCandidate {
   low_confidence: boolean
 }
 
-function toCandidateObservation(parsed: ParsedCandidate, turn: number): CandidateObservation {
+export function toCandidateObservation(parsed: ParsedCandidate, turn: number): CandidateObservation {
   return {
     proposal_id: parsed.proposal_id,
     turn,
     raw_text: parsed.raw_text,
     kind: parsed.kind,
     raw_tool_name: parsed.raw_tool_name ?? undefined,
+    access_surface_confidence_hint: parsed.access_surface_confidence_hint ?? undefined,
+    access_surface_value_hint: parsed.access_surface_value_hint ?? undefined,
+    plan_tier_confidence_hint: parsed.plan_tier_confidence_hint ?? undefined,
+    plan_tier_value_hint: parsed.plan_tier_value_hint ?? undefined,
     is_correction: parsed.is_correction || undefined,
     correction_of_raw_text: parsed.correction_of_raw_text ?? undefined,
     scope: parsed.scope ?? undefined,

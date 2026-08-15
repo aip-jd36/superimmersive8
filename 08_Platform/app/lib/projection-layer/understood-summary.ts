@@ -200,13 +200,34 @@ const SCOPE_LABELS: Record<ObservationScope, string> = {
 /** Fixed, not input-order -- keeps current/historical/general readable and stable across runs regardless of the order observations happen to appear in the handoff. */
 const SCOPE_ORDER: readonly ObservationScope[] = ['current_project', 'historical_project', 'general_practice']
 
-/** One clause per scope that has at least one observation -- never one clause spanning multiple scopes, which is exactly the collapse the architecture doc's "important distinction" forbids. Multiple notes within the SAME scope are joined into that one scope's clause (required case: "multiple observations in one workflow"). */
+/**
+ * Renders one note as a grammatically complete sentence, without altering
+ * its content: capitalizes the first letter if not already capitalized, and
+ * appends a period if the note doesn't already end with terminal
+ * punctuation (., !, or ?). A no-op for a note that already reads as a
+ * sentence (already capitalized, already punctuated) -- existing fixtures
+ * with well-formed notes render byte-identically to before this change.
+ * This is the fix for a real production run-on: two source_statement notes
+ * sharing one scope (e.g. "My agency has an executive producer..." and "the
+ * client gave me some images...") were previously joined with a bare space,
+ * producing one mid-sentence-lowercase run-on rather than two sentences.
+ * Deterministic string formatting only -- no rewording, no LLM, no
+ * synthesis of new meaning across notes.
+ */
+function toSentence(note: string): string {
+  const trimmed = note.trim()
+  if (trimmed === '') return trimmed
+  const capitalized = trimmed[0].toUpperCase() + trimmed.slice(1)
+  return /[.!?]$/.test(capitalized) ? capitalized : `${capitalized}.`
+}
+
+/** One clause per scope that has at least one observation -- never one clause spanning multiple scopes, which is exactly the collapse the architecture doc's "important distinction" forbids. Multiple notes within the SAME scope are joined into that one scope's clause (required case: "multiple observations in one workflow"), each rendered as its own sentence via toSentence() rather than concatenated verbatim -- see toSentence's own comment for why. */
 function observationClauses(observations: UnderstoodObservation[]): string[] {
   const clauses: string[] = []
   for (const scope of SCOPE_ORDER) {
     const notes = observations.filter((o) => o.scope === scope).map((o) => o.note)
     if (notes.length === 0) continue
-    clauses.push(`${SCOPE_LABELS[scope]}: ${notes.join(' ')}`)
+    clauses.push(`${SCOPE_LABELS[scope]}: ${notes.map(toSentence).join(' ')}`)
   }
   return clauses
 }
