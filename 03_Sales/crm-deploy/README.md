@@ -17,8 +17,11 @@ the CRM deployment).
 - **Root Directory**: `03_Sales/crm-deploy`
 - **Install Command**:
   ```
-  cd ../.. && REPO_ROOT="$(pwd)" && bash scripts/fetch-crm-core.sh && cd tools/crm-core/dashboard && npm install && cd "$REPO_ROOT/03_Sales/crm-deploy" && mkdir -p node_modules && ln -sfn "$REPO_ROOT/tools/crm-core/dashboard/node_modules/next" node_modules/next
+  bash ../../scripts/install-crm-core.sh
   ```
+  (Kept as a script rather than one long inline command because Vercel's Install Command field
+  has a 256-character limit, which the full fetch + install + symlink sequence exceeds. The
+  script itself is `scripts/install-crm-core.sh` at this repo's root.)
 - **Build Command**:
   ```
   cd ../../tools/crm-core/dashboard && npm run build
