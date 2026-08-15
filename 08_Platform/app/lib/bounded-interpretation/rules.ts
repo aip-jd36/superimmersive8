@@ -37,13 +37,27 @@ const CATEGORY_LABELS: Record<GoalCategory, string> = {
   unknown: 'what you asked',
 }
 
+/**
+ * `copyright_ownership` and `copyrightability` (2026-08-16 correction, PM
+ * boundary review): deliberately NEUTRAL, pattern-A "no coverage" language
+ * only -- "CRC's current governed knowledge doesn't establish an answer to
+ * <neutral topic label>." An earlier version of this file asserted
+ * substantive legal characterization ("unsettled, fact-specific legal
+ * question") that was never derived from any governed Matrix/LK claim --
+ * this module has zero governed coverage for either category today, so it
+ * has no basis to say anything about the STATE of the law, only that CRC
+ * itself doesn't have an answer. The two entries are kept textually
+ * distinct from each other (satisfying PM revision 1's "worded distinctly"
+ * requirement) by plugging in CATEGORY_LABELS' own already-neutral topic
+ * description -- not by adding doctrine to either one.
+ */
 const OUTSIDE_COVERAGE_BY_CATEGORY: Record<GoalCategory, string> = {
   commercial_use:
     `CRC doesn't currently have governed guidance covering this specific question for the tools you mentioned. ${BRIDGE_SENTENCE}`,
   copyright_ownership:
-    `Copyright ownership of AI-generated video is an unsettled, fact-specific legal question, and CRC's current governed knowledge doesn't establish an answer to it. ${BRIDGE_SENTENCE}`,
+    `CRC's current governed knowledge doesn't establish an answer to ${CATEGORY_LABELS.copyright_ownership}. ${BRIDGE_SENTENCE}`,
   copyrightability:
-    `Whether AI-generated video is copyrightable at all is a separate, unsettled legal question from who owns it, and CRC's current governed knowledge doesn't establish an answer to that either. ${BRIDGE_SENTENCE}`,
+    `CRC's current governed knowledge doesn't establish an answer to ${CATEGORY_LABELS.copyrightability}. ${BRIDGE_SENTENCE}`,
   likeness:
     `CRC doesn't currently have governed guidance covering likeness, voice, or consent questions. ${BRIDGE_SENTENCE}`,
   unknown:

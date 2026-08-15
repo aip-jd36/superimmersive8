@@ -119,7 +119,7 @@ describe('buildBoundedInterpretations -- outside_current_coverage', () => {
     const g = goal({ goal_id: 'g-1', raw_text: 'Do I own the copyright for this video?', category: 'copyright_ownership' })
     const interpretations = buildBoundedInterpretations([g], out.results)
     expect(interpretations[0].status).toBe('outside_current_coverage')
-    expect(interpretations[0].summary).toMatch(/unsettled/i)
+    expect(interpretations[0].summary).toMatch(/doesn't establish an answer/i)
     expect(interpretations[0].summary).not.toMatch(/you own|you do not own|yes,|no,/i)
     expect(interpretations[0].supporting_claim_ids).toEqual([])
   })
@@ -128,10 +128,39 @@ describe('buildBoundedInterpretations -- outside_current_coverage', () => {
     const g = goal({ goal_id: 'g-1', raw_text: 'Is AI video even copyrightable?', category: 'copyrightability' })
     const interpretations = buildBoundedInterpretations([g], [])
     expect(interpretations[0].status).toBe('outside_current_coverage')
-    expect(interpretations[0].summary).toMatch(/copyrightable/i)
+    expect(interpretations[0].summary).toMatch(/copyrighted/i)
     expect(interpretations[0].summary).not.toEqual(
       buildBoundedInterpretations([{ ...g, category: 'copyright_ownership' }], [])[0].summary,
     )
+  })
+
+  // 2026-08-16, PM boundary review: an earlier version of rules.ts's
+  // outside_current_coverage copy for copyright_ownership/copyrightability
+  // asserted substantive legal doctrine ("Copyright ownership of
+  // AI-generated video is an unsettled, fact-specific legal question")
+  // that was never derived from any governed Matrix/LK claim -- this
+  // module has zero governed coverage for either category, so it has no
+  // basis to characterize the STATE of the law, only that CRC itself
+  // lacks an answer. These tests pin the corrected, neutral pattern-A
+  // language and guard against the doctrine creeping back in, for every
+  // category this function can produce outside_current_coverage for --
+  // not just the two categories where it was actually found.
+  test('outside_current_coverage never asserts a substantive legal characterization (e.g. "unsettled," "fact-specific," "settled," "public domain," "protected by copyright") for ANY category -- neutral no-coverage language only', () => {
+    const doctrineSmell = /\bunsettled\b|\bfact-specific\b|\bsettled\b|public domain|protected by copyright|automatically (owned|copyrighted)|is not copyrightable|is copyrightable/i
+    for (const category of ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'unknown'] as const) {
+      const g = goal({ goal_id: 'g-1', raw_text: 'placeholder question', category })
+      const [interp] = buildBoundedInterpretations([g], [])
+      expect(interp.summary).not.toMatch(doctrineSmell)
+    }
+  })
+
+  test('outside_current_coverage for copyright_ownership and copyrightability follows the exact neutral pattern "CRC\'s current governed knowledge doesn\'t establish an answer to <topic>" -- no additional substantive clause attached', () => {
+    const ownershipGoal = goal({ goal_id: 'g-1', raw_text: 'Do I own this?', category: 'copyright_ownership' })
+    const copyrightabilityGoal = goal({ goal_id: 'g-2', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
+    const [ownershipInterp] = buildBoundedInterpretations([ownershipGoal], [])
+    const [copyrightabilityInterp] = buildBoundedInterpretations([copyrightabilityGoal], [])
+    expect(ownershipInterp.summary).toMatch(/^CRC's current governed knowledge doesn't establish an answer to who owns the copyright\. /)
+    expect(copyrightabilityInterp.summary).toMatch(/^CRC's current governed knowledge doesn't establish an answer to whether this kind of output can be copyrighted at all\. /)
   })
 
   test('commercial_use with no matched tool -> outside_current_coverage, not a fabricated answer', () => {
