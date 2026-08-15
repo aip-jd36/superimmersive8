@@ -133,7 +133,7 @@ async function runScenarioTrial(scenario: Scenario, trial: number): Promise<Scen
         let structurallyValid = true
         const output = outcome.result.output
         const keys = Object.keys(output).sort()
-        if (JSON.stringify(keys) !== JSON.stringify(['closing_cta', 'knowledge_items', 'opening_line', 'understood_summary'])) {
+        if (JSON.stringify(keys) !== JSON.stringify(['closing_cta', 'goal_interpretations', 'knowledge_items', 'opening_line', 'understood_summary'])) {
           structurallyValid = false
           notes.push(`unexpected ProjectionOutput keys: ${keys.join(', ')}`)
         }

@@ -77,6 +77,8 @@ function userGoal(overrides: Partial<UserGoal> & Pick<UserGoal, 'goal_id'>): Use
   return {
     state: 'confirmed',
     raw_text: 'placeholder goal',
+    category: 'unknown',
+    scope: 'informational',
     superseded_by: null,
     source_turn: 1,
     source_statement: 'placeholder goal',

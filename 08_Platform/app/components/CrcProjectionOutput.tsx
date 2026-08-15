@@ -45,7 +45,8 @@ function formatLastVerified(value: string | null): string | null {
 }
 
 export function CrcProjectionOutput({ output }: { output: ProjectionOutput }) {
-  const isFullyEmpty = output.opening_line === '' && output.understood_summary === '' && output.knowledge_items.length === 0
+  const isFullyEmpty =
+    output.opening_line === '' && output.understood_summary === '' && output.knowledge_items.length === 0 && output.goal_interpretations.length === 0
 
   if (isFullyEmpty) {
     return (
@@ -73,6 +74,18 @@ export function CrcProjectionOutput({ output }: { output: ProjectionOutput }) {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {output.goal_interpretations.length > 0 && (
+        <div className="space-y-4">
+          <p className="text-sm font-semibold">What this means for what you asked</p>
+          {output.goal_interpretations.map((item, i) => (
+            <div key={i} className="rounded-md border p-4">
+              <p className="text-xs italic text-muted-foreground">You asked: &ldquo;{item.goal_text}&rdquo;</p>
+              <p className="mt-2 text-sm whitespace-pre-line">{item.summary}</p>
+            </div>
+          ))}
         </div>
       )}
     </div>

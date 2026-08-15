@@ -35,6 +35,7 @@ function retrievalResult(overrides: Partial<RetrievalResult> = {}): RetrievalRes
     publication_scope: 'CRC may state only that Runway permits commercial use across tiers.',
     candidate_statement: "Runway's current Terms allow commercial use across all subscription tiers.",
     last_verified: '2026-07-01',
+    topic: 'commercial_use',
     ...overrides,
   }
 }
@@ -42,7 +43,7 @@ function retrievalResult(overrides: Partial<RetrievalResult> = {}): RetrievalRes
 describe('assembleProjectionOutput', () => {
   test('1: fully empty -> valid all-empty ProjectionOutput, never null, never an optional wrapper', () => {
     const { output, diagnostics } = assembleProjectionOutput(handoff(), [])
-    expect(output).toEqual({ opening_line: '', understood_summary: '', knowledge_items: [], closing_cta: '' })
+    expect(output).toEqual({ opening_line: '', understood_summary: '', knowledge_items: [], goal_interpretations: [], closing_cta: '' })
     expect(diagnostics).toEqual([])
   })
 
@@ -122,7 +123,7 @@ describe('assembleProjectionOutput', () => {
       }),
       [],
     )
-    expect(output).toEqual({ opening_line: '', understood_summary: '', knowledge_items: [], closing_cta: '' })
+    expect(output).toEqual({ opening_line: '', understood_summary: '', knowledge_items: [], goal_interpretations: [], closing_cta: '' })
   })
 
   test('10: opening/CTA are both empty on an all-empty result -- the system must not manufacture framing or a CTA with nothing to project', () => {
@@ -172,10 +173,70 @@ describe('assembleProjectionOutput', () => {
     }
 
     // Only permitted imports: RetrievalHandoff's type module, RetrievalResult's type module
-    // (an already-established exception, per project-knowledge-items.ts), and this module's
-    // own sibling files within lib/projection-layer/.
+    // (an already-established exception, per project-knowledge-items.ts),
+    // BoundedInterpretation's type module (the same exception extended to
+    // Milestone 2's fourth subsystem, 2026-08-15 -- types only, never
+    // lib/bounded-interpretation/rules or build-bounded-interpretation), and
+    // this module's own sibling files within lib/projection-layer/.
     for (const line of importLines) {
-      expect(line).toMatch(/@\/types\/interview-engine|@\/lib\/retrieval-engine\/types|\.\/understood-summary|\.\/project-knowledge-items|\.\/types/)
+      expect(line).toMatch(/@\/types\/interview-engine|@\/lib\/retrieval-engine\/types|@\/lib\/bounded-interpretation\/types|\.\/understood-summary|\.\/project-knowledge-items|\.\/types/)
     }
+  })
+
+  test('module never imports Bounded Interpretation LOGIC (rules.ts / build-bounded-interpretation.ts) -- types only, mirroring the RetrievalResult exception', () => {
+    const source = fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'projection-layer', 'assemble-projection-output.ts'), 'utf-8')
+    const importText = (source.match(/^import .+$/gm) ?? []).join('\n')
+    expect(importText).not.toMatch(/lib\/bounded-interpretation\/(rules|build-bounded-interpretation)/i)
+  })
+})
+
+describe('assembleProjectionOutput -- interpretations parameter (CRC Milestone 2, 2026-08-15)', () => {
+  function interpretation(overrides: Partial<import('@/lib/bounded-interpretation/types').BoundedInterpretation> = {}) {
+    return {
+      goal_id: 'g-1',
+      goal_text: 'Can I use this commercially?',
+      category: 'commercial_use' as const,
+      status: 'directly_relevant' as const,
+      summary: 'Fixed template summary text.',
+      supporting_claim_ids: ['runway-gen3'],
+      ...overrides,
+    }
+  }
+
+  test('interpretations defaults to [] -- an existing caller that never passes the third argument is unaffected', () => {
+    const { output } = assembleProjectionOutput(handoff({ tools: [tool('runway-gen3')] }), [retrievalResult()])
+    expect(output.goal_interpretations).toEqual([])
+  })
+
+  test('a passed interpretation is narrowed to {goal_text, summary} only -- goal_id, category, status, supporting_claim_ids never leak into ProjectionOutput', () => {
+    const { output } = assembleProjectionOutput(handoff({ tools: [tool('runway-gen3')] }), [retrievalResult()], [interpretation()])
+    expect(output.goal_interpretations).toEqual([{ goal_text: 'Can I use this commercially?', summary: 'Fixed template summary text.' }])
+    const keys = Object.keys(output.goal_interpretations[0]).sort()
+    expect(keys).toEqual(['goal_text', 'summary'])
+  })
+
+  test('multiple interpretations are all rendered, in order, none dropped', () => {
+    const { output } = assembleProjectionOutput(handoff(), [], [
+      interpretation({ goal_id: 'g-1', goal_text: 'first goal', summary: 'first summary' }),
+      interpretation({ goal_id: 'g-2', goal_text: 'second goal', summary: 'second summary' }),
+    ])
+    expect(output.goal_interpretations).toEqual([
+      { goal_text: 'first goal', summary: 'first summary' },
+      { goal_text: 'second goal', summary: 'second summary' },
+    ])
+  })
+
+  test('a non-empty interpretations array alone (no facts, no knowledge_items) is substantive enough to escape the fully-empty branch -- opening_line/closing_cta still render', () => {
+    const { output } = assembleProjectionOutput(handoff(), [], [interpretation()])
+    expect(output.opening_line).not.toBe('')
+    expect(output.closing_cta).not.toBe('')
+    expect(output.understood_summary).toBe('')
+    expect(output.knowledge_items).toEqual([])
+    expect(output.goal_interpretations).toHaveLength(1)
+  })
+
+  test('fully empty still requires goal_interpretations empty too -- zero facts, zero knowledge, zero interpretations triggers the all-empty branch exactly as before Milestone 2', () => {
+    const { output } = assembleProjectionOutput(handoff(), [], [])
+    expect(output).toEqual({ opening_line: '', understood_summary: '', knowledge_items: [], goal_interpretations: [], closing_cta: '' })
   })
 })

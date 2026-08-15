@@ -16,7 +16,7 @@ jest.mock('@/lib/emails', () => ({
   sendCrcResultsEmail: jest.fn(),
 }))
 jest.mock('../../lib/crc-engine/run-crc-conversation', () => ({
-  runCRCConversation: jest.fn(() => ({ output: { opening_line: '', understood_summary: '', knowledge_items: [], closing_cta: '' } })),
+  runCRCConversation: jest.fn(() => ({ output: { opening_line: '', understood_summary: '', knowledge_items: [], goal_interpretations: [], closing_cta: '' } })),
 }))
 
 import { sendCrcResultsEmail } from '@/lib/emails'

@@ -62,6 +62,26 @@ export interface ProjectionDiagnostic {
 }
 
 /**
+ * One user goal's rendered, user-facing interpretation (CRC Milestone 2,
+ * User Goal + Bounded Interpretation, 2026-08-15). Deliberately narrow --
+ * mirrors ProjectionKnowledgeItem's own "internal diagnostic vs. rendered
+ * output" split: the internal `BoundedInterpretation` type
+ * (lib/bounded-interpretation/types.ts) additionally carries `goal_id` and
+ * `status` for traceability/tests, neither of which belongs in user-facing
+ * output -- `goal_id` per this codebase's existing "never expose internal
+ * ids" discipline, `status` because it is an internal routing label, not
+ * copy meant to be read (the boundary-respecting language already lives
+ * entirely inside `summary`, per rules.ts). `goal_text` is the user's own
+ * verbatim words (UserGoal.raw_text) -- rendered as stated, never
+ * transformed into a stronger or different proposition (PM revision 6,
+ * 2026-08-15).
+ */
+export interface ProjectionGoalInterpretation {
+  goal_text: string
+  summary: string
+}
+
+/**
  * Final CRC output, per PRD_CRC_v1.0.md §14's template structure exactly
  * (architecture doc §5 Output Contract). `opening_line` and `closing_cta`
  * are fixed copy, owned entirely by Projection (architecture doc §4/§5) —
@@ -78,5 +98,15 @@ export interface ProjectionOutput {
   opening_line: string
   understood_summary: string
   knowledge_items: ProjectionKnowledgeItem[]
+  /**
+   * Milestone 2 addition (2026-08-15). Additive to the frozen v1 contract,
+   * same "always an array, never absent" discipline as `knowledge_items` --
+   * empty, not omitted, when the user stated no goal this conversation
+   * (the ordinary case today, since goal capture remains incidental, never
+   * asked for). A consumer renders "no goal interpretations" (omits the
+   * section) rather than treating `[]` as exceptional, exactly mirroring
+   * `knowledge_items`' own architecture-doc guidance.
+   */
+  goal_interpretations: ProjectionGoalInterpretation[]
   closing_cta: string
 }

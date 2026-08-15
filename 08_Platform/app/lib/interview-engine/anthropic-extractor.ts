@@ -54,6 +54,21 @@ Do NOT propose a user_goal candidate for:
 - A plain workflow statement with no accompanying question or stated need -- e.g. "I'm using Kling for a client ad." is a tool_mention (and possibly a project_fact), never also a user_goal, unless the user separately states something they want to know or achieve.
 - Anything not explicitly stated by the user this turn. Never infer a goal from unrelated workflow facts -- e.g. never propose "the user wants copyright assurance" just because they mentioned a client, a paid campaign, or any other fact that merely sounds adjacent to a commercial-readiness question.
 
+For every user_goal candidate, also propose two independent classification hints. Neither hint is itself an answer to the user -- both exist only so downstream code knows which governed information (if any) might be relevant, and whether the user is asking a question versus asking for a determination.
+
+goal_category_hint -- the goal's coarse subject matter:
+- "commercial_use": whether/how the output can be used commercially (e.g. "Can I use this in a paid campaign?", "Is this okay for a client ad?").
+- "copyright_ownership": who owns the copyright in the output (e.g. "Do I own this?", "Does my client own the rights?").
+- "copyrightability": whether the output can be copyrighted at all, as a category (e.g. "Is AI-generated video even copyrightable?"). Distinct from copyright_ownership -- ownership presupposes something ownable exists; copyrightability asks whether it exists at all. Only use this when the user is asking about the concept in general, not who specifically owns a specific piece.
+- "likeness": questions about a real person's face, voice, or likeness appearing in or being cloned by the output.
+- "unknown": the goal doesn't clearly fit any of the above, or you're not confident enough to classify it.
+Never guess a specific category from adjacent context the user didn't actually state -- e.g. never "copyright_ownership" merely because a client or a paid campaign was mentioned elsewhere in the turn. When genuinely unsure, use "unknown" rather than guessing.
+
+goal_scope_hint -- whether the goal reads as an ordinary informational question/need, or as an explicit request for CRC itself to issue a determination:
+- "informational": an ordinary question or stated need about commercial readiness (e.g. "Can I use this commercially?", "My client needs proof this is cleared." -- stating a NEED for proof is still informational, not itself a request that CRC produce that proof right now).
+- "determination_request": the user is explicitly asking CRC (this conversation, this tool) to certify, clear, guarantee, or officially determine something right now (e.g. "Can you certify this is safe to use?", "Is this officially cleared?", "Can you confirm this passes?").
+Default to "informational" when uncertain -- only use "determination_request" when the user is clearly asking THIS conversation to issue a determination, not merely asking a question about their own commercial readiness.
+
 A single turn can and often does contain multiple distinct facts -- propose one candidate per distinct fact, never merge them into one, and never invent a fact the turn doesn't actually contain.
 
 When a user states that they lack access to, visibility into, or involvement in a process, preserve that as its own candidate fact about respondent visibility/knowledge. If the same turn also states that another person or team owns or manages the process, extract that as a separate confirmed fact. The second fact must not replace or erase the respondent's lack-of-visibility fact -- both belong in the output, as distinct candidates, each with its own correct confidence.
@@ -85,6 +100,9 @@ const OBSERVATION_SCOPE_VALUES = ['current_project', 'historical_project', 'gene
 const WORKFLOW_STAGE_VALUES = ['T0', 'T1', 'T2', 'T3', 'T4', 'T5'] as const
 const CONFIDENCE_HINT_VALUES = ['confirmed', 'confirmed_absent', 'unresolved_no_visibility', 'unknown', 'declined'] as const
 const PROJECT_FACT_FIELD_VALUES = ['intended_use', 'workflow_role'] as const
+/** Milestone 2 (2026-08-15). Mirrors GOAL_CATEGORIES / GOAL_SCOPES in types/interview-engine.ts -- kept as separate local consts here, same pattern as every other *_VALUES const in this file, rather than importing the runtime const array across the adapter boundary. */
+const GOAL_CATEGORY_VALUES = ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'unknown'] as const
+const GOAL_SCOPE_VALUES = ['informational', 'determination_request'] as const
 
 /**
  * The model-facing schema. All fields are required (nullable rather than
@@ -191,6 +209,18 @@ const CANDIDATE_RESPONSE_SCHEMA = {
             description:
               'When kind is user_goal: confirmed (the user clearly stated a specific goal or question about commercial readiness), confirmed_absent (the user explicitly said they have no particular goal, e.g. "I\'m just experimenting"), declined (the user explicitly declined to say why they\'re here). Null otherwise. The goal\'s own content belongs in raw_text, not here -- this field carries only the confidence state.',
           },
+          goal_category_hint: {
+            type: ['string', 'null'],
+            enum: [...GOAL_CATEGORY_VALUES, null],
+            description:
+              'When kind is user_goal and goal_confidence_hint is confirmed: the goal\'s coarse subject matter -- commercial_use, copyright_ownership, copyrightability, likeness, or unknown if you cannot confidently classify it. Never guessed from adjacent context the user did not actually state. Null otherwise.',
+          },
+          goal_scope_hint: {
+            type: ['string', 'null'],
+            enum: [...GOAL_SCOPE_VALUES, null],
+            description:
+              'When kind is user_goal and goal_confidence_hint is confirmed: informational (an ordinary question or stated need) or determination_request (the user is explicitly asking CRC itself to certify/clear/determine something right now). Default to informational when uncertain. Null otherwise.',
+          },
           low_confidence: {
             type: 'boolean',
             description:
@@ -215,6 +245,8 @@ const CANDIDATE_RESPONSE_SCHEMA = {
           'fact_confidence_hint',
           'fact_value_hint',
           'goal_confidence_hint',
+          'goal_category_hint',
+          'goal_scope_hint',
           'low_confidence',
         ],
         additionalProperties: false,
@@ -243,6 +275,8 @@ interface ParsedCandidate {
   fact_confidence_hint: (typeof CONFIDENCE_HINT_VALUES)[number] | null
   fact_value_hint: string | null
   goal_confidence_hint: (typeof CONFIDENCE_HINT_VALUES)[number] | null
+  goal_category_hint: (typeof GOAL_CATEGORY_VALUES)[number] | null
+  goal_scope_hint: (typeof GOAL_SCOPE_VALUES)[number] | null
   low_confidence: boolean
 }
 
@@ -266,6 +300,8 @@ export function toCandidateObservation(parsed: ParsedCandidate, turn: number): C
     fact_confidence_hint: parsed.fact_confidence_hint ?? undefined,
     fact_value_hint: parsed.fact_value_hint ?? undefined,
     goal_confidence_hint: parsed.goal_confidence_hint ?? undefined,
+    goal_category_hint: parsed.goal_category_hint ?? undefined,
+    goal_scope_hint: parsed.goal_scope_hint ?? undefined,
     low_confidence: parsed.low_confidence || undefined,
   }
 }

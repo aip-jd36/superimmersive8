@@ -51,6 +51,7 @@ const INTERVIEW_ENGINE_FILES = listTsFiles('lib/interview-engine')
 const RETRIEVAL_ENGINE_FILES = listTsFiles('lib/retrieval-engine')
 const PROJECTION_LAYER_FILES = listTsFiles('lib/projection-layer').filter((f) => !f.includes(`${path.sep}gallery${path.sep}`))
 const CRC_ENGINE_FILES = listTsFiles('lib/crc-engine')
+const BOUNDED_INTERPRETATION_FILES = listTsFiles('lib/bounded-interpretation')
 
 describe('subsystem boundaries -- Interview Engine', () => {
   test('no file under lib/interview-engine/ (including eval/) imports retrieval-engine or projection-layer', () => {
@@ -107,6 +108,49 @@ describe('subsystem boundaries -- Projection Layer', () => {
       expect(importText).not.toMatch(/platform-rights-matrix/i)
       expect(importText).not.toMatch(/living-notebook/i)
       expect(importText).not.toMatch(/matrix-fixture/i)
+    }
+  })
+
+  test('no file under lib/projection-layer/ imports Bounded Interpretation LOGIC (only @/lib/bounded-interpretation/types is permitted, mirroring the existing RetrievalResult exception)', () => {
+    for (const file of PROJECTION_LAYER_FILES) {
+      const importText = importLinesOf(file).join('\n')
+      expect(importText).not.toMatch(/lib\/bounded-interpretation\/(rules|build-bounded-interpretation)/i)
+    }
+  })
+})
+
+describe('subsystem boundaries -- Bounded Interpretation', () => {
+  const INTERVIEW_LOGIC_PATTERN = /lib\/interview-engine\/(gates|boundaries|extraction|mutations|handoff|candidate-question|decision|signal-lineage|serialization|anthropic-|mock-)/i
+  const RETRIEVAL_LOGIC_PATTERN = /lib\/retrieval-engine\/(retrieve|lookup-rows|enumerate-eligible-claims|extract-matchable-facts|assemble-result|matrix-fixture)/i
+
+  test('no file under lib/bounded-interpretation/ imports Interview Engine LOGIC (only the shared @/types/interview-engine contract module is permitted)', () => {
+    expect(BOUNDED_INTERPRETATION_FILES.length).toBeGreaterThan(0)
+    for (const file of BOUNDED_INTERPRETATION_FILES) {
+      const importText = importLinesOf(file).join('\n')
+      expect(importText).not.toMatch(INTERVIEW_LOGIC_PATTERN)
+    }
+  })
+
+  test('no file under lib/bounded-interpretation/ imports Retrieval Engine LOGIC or its Matrix fixture (only @/lib/retrieval-engine/types is permitted)', () => {
+    for (const file of BOUNDED_INTERPRETATION_FILES) {
+      const importText = importLinesOf(file).join('\n')
+      expect(importText).not.toMatch(RETRIEVAL_LOGIC_PATTERN)
+    }
+  })
+
+  test('no file under lib/bounded-interpretation/ imports Projection Layer -- this module is upstream of Projection, never a consumer of it', () => {
+    for (const file of BOUNDED_INTERPRETATION_FILES) {
+      const importText = importLinesOf(file).join('\n')
+      expect(importText).not.toMatch(/projection-layer/i)
+    }
+  })
+
+  test('no file under lib/bounded-interpretation/ imports the Platform Rights Matrix, Living Notebook, or any LLM/adapter module', () => {
+    for (const file of BOUNDED_INTERPRETATION_FILES) {
+      const importText = importLinesOf(file).join('\n')
+      expect(importText).not.toMatch(/platform-rights-matrix/i)
+      expect(importText).not.toMatch(/living-notebook/i)
+      expect(importText).not.toMatch(/anthropic/i)
     }
   })
 })

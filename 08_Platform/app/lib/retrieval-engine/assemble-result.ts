@@ -34,5 +34,6 @@ export function assembleResult(sourceFact: RetrievalSourceFact, row: MatrixRow, 
     publication_scope: claim.crc_publication_scope,
     candidate_statement: claim.crc_candidate_statement,
     last_verified: row.last_verified,
+    topic: claim.topic ?? 'unknown',
   }
 }

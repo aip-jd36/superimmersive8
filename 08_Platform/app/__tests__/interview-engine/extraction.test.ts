@@ -341,6 +341,43 @@ describe('user_goal extraction pipeline (Milestone 1, 2026-08-15)', () => {
     expect(diagnostics[0].decision.outcome).toBe('accepted')
   })
 
+  test('goal_category_hint/goal_scope_hint are carried through onto the applied UserGoal (Milestone 2, 2026-08-15)', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'Do I own the copyright for this?' },
+      constantExtractor([goalCandidate({ raw_text: 'Do I own the copyright for this?', goal_category_hint: 'copyright_ownership', goal_scope_hint: 'informational' })]),
+    )
+    expect(updated.user_goals[0].category).toBe('copyright_ownership')
+    expect(updated.user_goals[0].scope).toBe('informational')
+  })
+
+  test('goal_category_hint omitted -> UserGoal.category defaults to "unknown" (Milestone 2 conservative fallback, never guessed)', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'Can I use this commercially?' },
+      constantExtractor([goalCandidate({ goal_category_hint: undefined })]),
+    )
+    expect(updated.user_goals[0].category).toBe('unknown')
+  })
+
+  test('goal_scope_hint omitted -> UserGoal.scope defaults to "informational" (Milestone 2 conservative fallback -- never assume a determination request)', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'Can I use this commercially?' },
+      constantExtractor([goalCandidate({ goal_scope_hint: undefined })]),
+    )
+    expect(updated.user_goals[0].scope).toBe('informational')
+  })
+
+  test('goal_scope_hint "determination_request" is carried through onto the applied UserGoal', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'Can you certify this is cleared for commercial use?' },
+      constantExtractor([goalCandidate({ raw_text: 'Can you certify this is cleared for commercial use?', goal_scope_hint: 'determination_request' })]),
+    )
+    expect(updated.user_goals[0].scope).toBe('determination_request')
+  })
+
   test('a declarative-need goal (not phrased as a question) is accepted identically to a question-phrased one', async () => {
     const { updated } = await runExtractionPipeline(
       emptySU(),

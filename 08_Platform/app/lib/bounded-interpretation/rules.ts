@@ -1,0 +1,69 @@
+/**
+ * Fixed, deterministic template copy for Bounded Interpretation (CRC
+ * Milestone 2, 2026-08-15). Every string here is `[PRINCIPLE]` fixed v1
+ * copy, mirroring assemble-projection-output.ts's own opening_line/
+ * closing_cta discipline — no LLM generation, no per-conversation
+ * variation beyond substituting a category label or a verbatim, already-
+ * governed candidate_statement. Nothing in this file authors new legal
+ * doctrine, a risk conclusion, or a clearance/certification determination
+ * — see build-bounded-interpretation.ts for the (also deterministic)
+ * decision of WHICH template applies.
+ *
+ * Every template obeys PM revision 3/10 (2026-08-15 review): a
+ * `directly_relevant` result is framed strictly as "relevant to," never
+ * "answers" or "therefore cleared" — CRC may not have evaluated copyright,
+ * likeness, trademark, or jurisdiction even when a commercial-use tier
+ * claim matched. The shared Commercial Assurance CTA
+ * (assemble-projection-output.ts's own closing_cta) is untouched by this
+ * module and remains unconditional; the `outside_current_coverage` and
+ * `determination_declined` templates below add their OWN short,
+ * self-contained bridge sentence (PM revision 3's explicit allowance for
+ * context-sensitive copy on an unresolved/withheld/uncovered goal) rather
+ * than modifying the shared CTA.
+ */
+
+import type { GoalCategory } from '@/types/interview-engine'
+
+const BRIDGE_SENTENCE = 'A human-reviewed Commercial Assurance Assessment can address this directly.'
+
+export const DETERMINATION_DECLINED_TEMPLATE =
+  `CRC doesn't issue certifications, clearances, or commercial determinations — it shares governed platform information and surfaces relevant considerations from what you described. ${BRIDGE_SENTENCE}`
+
+const CATEGORY_LABELS: Record<GoalCategory, string> = {
+  commercial_use: 'whether this can be used commercially',
+  copyright_ownership: 'who owns the copyright',
+  copyrightability: 'whether this kind of output can be copyrighted at all',
+  likeness: 'likeness, voice, or consent',
+  unknown: 'what you asked',
+}
+
+const OUTSIDE_COVERAGE_BY_CATEGORY: Record<GoalCategory, string> = {
+  commercial_use:
+    `CRC doesn't currently have governed guidance covering this specific question for the tools you mentioned. ${BRIDGE_SENTENCE}`,
+  copyright_ownership:
+    `Copyright ownership of AI-generated video is an unsettled, fact-specific legal question, and CRC's current governed knowledge doesn't establish an answer to it. ${BRIDGE_SENTENCE}`,
+  copyrightability:
+    `Whether AI-generated video is copyrightable at all is a separate, unsettled legal question from who owns it, and CRC's current governed knowledge doesn't establish an answer to that either. ${BRIDGE_SENTENCE}`,
+  likeness:
+    `CRC doesn't currently have governed guidance covering likeness, voice, or consent questions. ${BRIDGE_SENTENCE}`,
+  unknown:
+    `CRC's current governed knowledge doesn't cover this specific question yet. ${BRIDGE_SENTENCE}`,
+}
+
+export function outsideCoverageSummary(category: GoalCategory): string {
+  return OUTSIDE_COVERAGE_BY_CATEGORY[category]
+}
+
+/**
+ * `claimStatement` is the already-governed, already-eligible
+ * `RetrievalResult.candidate_statement`, quoted verbatim — never
+ * paraphrased, matching every other consumer of this field in this
+ * codebase (ProjectionKnowledgeItem, the results-email renderer). The
+ * closing sentence is the load-bearing boundary line: it must always be
+ * present, never trimmed for brevity, since it is what keeps a matched,
+ * relevant claim from reading as a full answer to the user's broader
+ * question.
+ */
+export function directlyRelevantSummary(category: GoalCategory, claimStatement: string): string {
+  return `${claimStatement} This is relevant to ${CATEGORY_LABELS[category]}, though it reflects the platform's own terms, not a full determination of your specific project's commercial readiness.`
+}

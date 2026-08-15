@@ -440,4 +440,97 @@ export const EVAL_CORPUS: EvalScenario[] = [
       return { passed, notes: `turn 2 user_goal candidates: ${JSON.stringify(turn2Goals.map((g) => ({ raw_text: g.candidate.raw_text, is_correction: g.candidate.is_correction, correction_of_raw_text: g.candidate.correction_of_raw_text })))}` }
     },
   },
+
+  // ── User goal category/scope classification (Milestone 2, Bounded
+  // Interpretation, 2026-08-15). Regression coverage for the two new
+  // classification hints (goal_category_hint/goal_scope_hint) the live
+  // extractor now proposes alongside a user_goal candidate. These hints are
+  // routing metadata only (they decide which governed knowledge, if any, a
+  // goal is even a candidate for) -- these scenarios test classification
+  // accuracy only, not anything about the resulting Bounded Interpretation
+  // (covered deterministically by __tests__/bounded-interpretation/).
+
+  {
+    id: 'user_goal_category_commercial_use',
+    category: 'user goal -- category classification: commercial_use',
+    description: 'An ordinary commercial-use question must classify as category commercial_use.',
+    turns: [{ turn: 1, text: 'Can I use this in a paid ad campaign for my client?' }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'user_goal')
+      const passed = d?.candidate.goal_category_hint === 'commercial_use'
+      return { passed, notes: `goal_category_hint: ${d?.candidate.goal_category_hint}` }
+    },
+  },
+
+  {
+    id: 'user_goal_category_copyright_ownership',
+    category: 'user goal -- category classification: copyright_ownership',
+    description: 'A question about who owns the output must classify as copyright_ownership, distinct from copyrightability.',
+    turns: [{ turn: 1, text: 'Do I own the copyright on this video, or does the AI tool?' }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'user_goal')
+      const passed = d?.candidate.goal_category_hint === 'copyright_ownership'
+      return { passed, notes: `goal_category_hint: ${d?.candidate.goal_category_hint}` }
+    },
+  },
+
+  {
+    id: 'user_goal_category_copyrightability',
+    category: 'user goal -- category classification: copyrightability',
+    description: 'A question about whether AI video is copyrightable AT ALL (not who owns it) must classify as copyrightability.',
+    turns: [{ turn: 1, text: 'Is AI-generated video even copyrightable as a category, or is it automatically public domain?' }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'user_goal')
+      const passed = d?.candidate.goal_category_hint === 'copyrightability'
+      return { passed, notes: `goal_category_hint: ${d?.candidate.goal_category_hint}` }
+    },
+  },
+
+  {
+    id: 'user_goal_category_likeness',
+    category: 'user goal -- category classification: likeness',
+    description: "A question about a real person's voice/likeness must classify as likeness.",
+    turns: [{ turn: 1, text: "This uses a cloned voice of a real narrator we hired -- is that okay to use commercially?" }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'user_goal')
+      const passed = d?.candidate.goal_category_hint === 'likeness'
+      return { passed, notes: `goal_category_hint: ${d?.candidate.goal_category_hint}` }
+    },
+  },
+
+  {
+    id: 'user_goal_scope_informational_default',
+    category: 'user goal -- scope classification: ordinary question is informational',
+    description: 'An ordinary commercial-readiness question, not addressed to CRC itself as a certifier, must classify as scope informational.',
+    turns: [{ turn: 1, text: 'Can I use this commercially?' }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'user_goal')
+      const passed = d?.candidate.goal_scope_hint === 'informational' || d?.candidate.goal_scope_hint === undefined
+      return { passed, notes: `goal_scope_hint: ${d?.candidate.goal_scope_hint}` }
+    },
+  },
+
+  {
+    id: 'user_goal_scope_determination_request',
+    category: 'user goal -- scope classification: explicit request for CRC to certify/clear',
+    description: 'A statement explicitly asking CRC/this conversation to certify or clear the video must classify as scope determination_request.',
+    turns: [{ turn: 1, text: 'Can you certify that this video is officially cleared for commercial use?' }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'user_goal')
+      const passed = d?.candidate.goal_scope_hint === 'determination_request'
+      return { passed, notes: `goal_scope_hint: ${d?.candidate.goal_scope_hint}` }
+    },
+  },
+
+  {
+    id: 'user_goal_scope_stated_need_still_informational',
+    category: 'user goal -- scope classification: a stated NEED for proof is still informational, not a determination_request',
+    description: "Stating that a client needs proof is a need, not itself asking CRC to issue a determination right now -- must classify as informational.",
+    turns: [{ turn: 1, text: 'My client needs proof this is cleared before they will pay the invoice.' }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'user_goal')
+      const passed = d?.candidate.goal_scope_hint === 'informational' || d?.candidate.goal_scope_hint === undefined
+      return { passed, notes: `goal_scope_hint: ${d?.candidate.goal_scope_hint}` }
+    },
+  },
 ]

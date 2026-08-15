@@ -203,10 +203,58 @@ export interface ProjectFacts {
  * ToolMention.confidence's full state space is never artificially narrowed
  * even though only a subset is realistically ever produced in practice.
  */
+/**
+ * Coarse topic classification of a user goal's subject matter (Milestone 2
+ * -- User Goal + Bounded Interpretation, 2026-08-15, PM-revised). Routing
+ * metadata only: decides which governed Matrix claims (if any) are even
+ * candidates for a Bounded Interpretation, never itself an answer or a
+ * legal conclusion. `copyright_ownership` and `copyrightability` are kept
+ * as two DISTINCT categories per explicit PM instruction (2026-08-15 review)
+ * even though both currently resolve to zero governed coverage -- they are
+ * materially different legal questions (who owns it vs. whether it can be
+ * owned at all), and a parallel Living Knowledge workstream is expected to
+ * add coverage for one or both independently. `unknown` is the safe
+ * fallback when the extractor cannot confidently classify -- never guessed
+ * from adjacent context, mirroring every other `_hint` field's own
+ * conservative-default discipline in this codebase.
+ */
+export const GOAL_CATEGORIES = ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'unknown'] as const
+
+export type GoalCategory = (typeof GOAL_CATEGORIES)[number]
+
+/**
+ * Whether the user is asking an ordinary informational question, or
+ * explicitly asking CRC ITSELF to certify, clear, or determine something
+ * (Milestone 2, PM revision 2, 2026-08-15 -- replaces an earlier
+ * keyword-matcher design that PM rejected as brittle). Extracted the same
+ * way `goal_category` is: a model-proposed hint on the SAME extraction
+ * call that captures the goal, never a second model call, never inferred
+ * from anything the user didn't actually say. `informational` is the safe
+ * default -- assuming someone wants a certification when they only asked a
+ * question would be the more consequential misclassification (it would
+ * suppress a real, answerable governed claim behind the fixed
+ * determination-declined template).
+ */
+export const GOAL_SCOPES = ['informational', 'determination_request'] as const
+
+export type GoalScope = (typeof GOAL_SCOPES)[number]
+
 export interface UserGoal {
   goal_id: string
   state: ConfidenceState
   raw_text: string
+  /**
+   * Milestone 2 additions (2026-08-15). Additive to the Milestone 1 shape:
+   * a goal persisted before this milestone deserializes with both defaulted
+   * (`category: 'unknown'`, `scope: 'informational'`) -- see
+   * serialization.ts's deserializeStructuredUnderstanding -- never
+   * `undefined` at runtime, no backfill/migration rewrite of historical
+   * rows performed or required. Stored inside the existing, already-
+   * unconstrained `structured_understanding` JSONB column: no DB migration
+   * needed for either field.
+   */
+  category: GoalCategory
+  scope: GoalScope
   /** id of the goal that replaced this one, or null if still active */
   superseded_by: string | null
   source_turn: number

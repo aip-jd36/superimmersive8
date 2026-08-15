@@ -40,6 +40,8 @@ function baseParsed(overrides: Record<string, unknown> = {}) {
     fact_confidence_hint: null,
     fact_value_hint: null,
     goal_confidence_hint: null,
+    goal_category_hint: null,
+    goal_scope_hint: null,
     low_confidence: false,
     ...overrides,
   }

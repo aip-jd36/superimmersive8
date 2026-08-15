@@ -20,6 +20,18 @@
  * Feedback is deliberately NOT included here in this milestone (PM
  * revision, 2026-08-14) -- the underlying feedback system is untouched,
  * just not wired into this new flow yet.
+ *
+ * "What this means for what you asked" section (CRC Milestone 2, User
+ * Goal + Bounded Interpretation, 2026-08-15): renders
+ * `output.goal_interpretations`, only when non-empty (the ordinary case
+ * today, since goal capture remains incidental). Each item quotes the
+ * user's own words verbatim ("You asked: ...") -- this "You asked:"
+ * framing is composed HERE, at render time, not baked into
+ * ProjectionOutput's own data (PM revision 6: preserve the user's wording,
+ * never transform it into a stronger proposition) -- followed by the
+ * fixed, bounded `summary` text lib/bounded-interpretation already
+ * produced. No new content is invented here; this section only formats
+ * two already-computed strings per item.
  */
 
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
@@ -51,7 +63,8 @@ const EDUCATIONAL_DISCLAIMER =
 const CTA_LABEL = 'Talk with SI8 about a Commercial Assurance Assessment'
 
 export function buildResultsEmailContent(output: ProjectionOutput, attributionToken: string | null | undefined, email: string): ResultsEmailContent {
-  const isFullyEmpty = output.opening_line === '' && output.understood_summary === '' && output.knowledge_items.length === 0
+  const isFullyEmpty =
+    output.opening_line === '' && output.understood_summary === '' && output.knowledge_items.length === 0 && output.goal_interpretations.length === 0
   const ctaUrl = buildCalendlyUrl(attributionToken, email)
 
   const htmlParts: string[] = []
@@ -84,6 +97,19 @@ export function buildResultsEmailContent(output: ProjectionOutput, attributionTo
             `</div>`,
         )
         textParts.push(`- ${item.statement}${lastUpdated ? ` (Content last updated ${lastUpdated})` : ''}\n`)
+      }
+    }
+    if (output.goal_interpretations.length > 0) {
+      htmlParts.push('<p style="font-size:14px;font-weight:600;margin:20px 0 8px;color:#111;">What this means for what you asked</p>')
+      textParts.push('\nWHAT THIS MEANS FOR WHAT YOU ASKED\n')
+      for (const item of output.goal_interpretations) {
+        htmlParts.push(
+          `<div style="border:1px solid #e0e0e0;border-radius:6px;padding:14px 16px;margin:0 0 12px;">` +
+            `<p style="font-size:13px;font-style:italic;color:#555;margin:0 0 8px;">You asked: &ldquo;${escapeHtml(item.goal_text)}&rdquo;</p>` +
+            `<p style="font-size:14px;color:#222;white-space:pre-line;margin:0;">${escapeHtml(item.summary)}</p>` +
+            `</div>`,
+        )
+        textParts.push(`You asked: "${item.goal_text}"\n${item.summary}\n\n`)
       }
     }
   }

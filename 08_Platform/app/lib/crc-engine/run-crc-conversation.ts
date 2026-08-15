@@ -9,7 +9,7 @@
  * type-only (see the subsystem-boundaries test suite, which verifies this
  * as a structural property, not a discipline).
  *
- * Glue only: three already-published pure function calls, in order, each
+ * Glue only: four already-published pure function calls, in order, each
  * one's full output passed to the next unmodified. No reinterpretation of
  * any value, no duplicated business logic, no re-implementation of
  * Retrieval's matching or Projection's rendering. If this function ever
@@ -17,6 +17,16 @@
  * output (beyond simply passing it forward), that is a sign business logic
  * is leaking into the orchestrator and belongs in the owning subsystem
  * instead.
+ *
+ * Milestone 2 addition (2026-08-15, User Goal + Bounded Interpretation):
+ * `buildBoundedInterpretations` is the fourth pure call, reading
+ * `understanding.user_goals` directly (Interview Engine's true terminal
+ * state this module already has in hand) alongside the already-computed
+ * `results` from Retrieval -- never re-entering Interview or Retrieval,
+ * never a second RetrievalHandoff. Its output is passed to
+ * `assembleProjectionOutput`'s new third parameter unmodified, same
+ * "full output passed to the next unmodified" discipline as every other
+ * step here.
  *
  * Input boundary (architecture decision, Phase 1 review, 2026-08-08):
  * `StructuredUnderstanding`, NOT raw conversation turns. JD's own
@@ -48,6 +58,7 @@ import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import type { MatrixRow, RetrievalDiagnostic, RetrievalResult } from '@/lib/retrieval-engine/types'
 import { assembleProjectionOutput } from '@/lib/projection-layer/assemble-projection-output'
 import type { ProjectionDiagnostic, ProjectionOutput } from '@/lib/projection-layer/types'
+import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
 import type { RetrievalHandoff, StructuredUnderstanding } from '@/types/interview-engine'
 
 export interface CRCPipelineDiagnostics {
@@ -78,7 +89,8 @@ export interface CRCPipelineResult {
 export function runCRCConversation(understanding: StructuredUnderstanding, matrix: MatrixRow[]): CRCPipelineResult {
   const handoff = buildRetrievalHandoff(understanding)
   const { results, diagnostics: retrievalDiagnostics } = retrieve(handoff, matrix)
-  const { output, diagnostics: projectionDiagnostics } = assembleProjectionOutput(handoff, results)
+  const interpretations = buildBoundedInterpretations(understanding.user_goals, results)
+  const { output, diagnostics: projectionDiagnostics } = assembleProjectionOutput(handoff, results, interpretations)
 
   return {
     output,

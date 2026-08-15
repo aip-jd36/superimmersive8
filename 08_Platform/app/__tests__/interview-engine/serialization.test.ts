@@ -18,7 +18,7 @@ function currentSU(): StructuredUnderstanding {
     },
     tool_mentions: [],
     scoped_observations: [],
-    user_goals: [{ goal_id: 'g-1', state: 'confirmed', raw_text: 'Can I use this commercially?', superseded_by: null, source_turn: 1, source_statement: 'placeholder' }],
+    user_goals: [{ goal_id: 'g-1', state: 'confirmed', raw_text: 'Can I use this commercially?', category: 'unknown', scope: 'informational', superseded_by: null, source_turn: 1, source_statement: 'placeholder' }],
     current_phase: 1,
     gate_1_state: 'not_met',
     gate_2_state: 'not_yet_stable',
@@ -59,5 +59,32 @@ describe('serializeStructuredUnderstanding / deserializeStructuredUnderstanding'
     const deserialized = deserializeStructuredUnderstanding(JSON.stringify(withoutUserGoals))
     expect(() => deserialized.user_goals.filter((g) => g.superseded_by === null)).not.toThrow()
     expect(() => deserialized.user_goals.some((g) => g.state === 'confirmed')).not.toThrow()
+  })
+
+  test('a Milestone-1-era goal (user_goals array present, but individual goals lack category/scope) backfills category to "unknown" and scope to "informational" (Milestone 2, 2026-08-15)', () => {
+    // Simulate a real row persisted between Milestone 1's launch and
+    // Milestone 2's deploy: user_goals exists, but its elements predate the
+    // category/scope fields, exactly as `as any` bypasses the current type
+    // to construct (the real historical JSON in the database has no such
+    // type to bypass -- it simply never had these keys).
+    const historicalGoal = { goal_id: 'g-1', state: 'confirmed', raw_text: 'Can I use this commercially?', superseded_by: null, source_turn: 1, source_statement: 'placeholder' }
+    const historicalJson = JSON.stringify({ ...currentSU(), user_goals: [historicalGoal] })
+    expect(historicalJson).not.toContain('"category"')
+    expect(historicalJson).not.toContain('"scope"')
+
+    const deserialized = deserializeStructuredUnderstanding(historicalJson)
+    expect(deserialized.user_goals[0].category).toBe('unknown')
+    expect(deserialized.user_goals[0].scope).toBe('informational')
+    // Every other field on the goal survives unchanged.
+    expect(deserialized.user_goals[0].raw_text).toBe('Can I use this commercially?')
+  })
+
+  test('a current-shape goal with category/scope already set round-trips those values unchanged, never overwritten by the backfill default', () => {
+    const su = currentSU()
+    su.user_goals[0].category = 'likeness'
+    su.user_goals[0].scope = 'determination_request'
+    const roundTripped = deserializeStructuredUnderstanding(serializeStructuredUnderstanding(su))
+    expect(roundTripped.user_goals[0].category).toBe('likeness')
+    expect(roundTripped.user_goals[0].scope).toBe('determination_request')
   })
 })

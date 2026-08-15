@@ -30,10 +30,25 @@ export function serializeStructuredUnderstanding(su: StructuredUnderstanding): s
  * here once rather than at each call site. No other field needs the same
  * treatment: every other array/object field on this type has existed since
  * before any session currently in the database was created.
+ *
+ * Per-goal `category`/`scope` backfill (Milestone 2, 2026-08-15): a goal
+ * persisted between Milestone 1's launch and Milestone 2's deploy has a
+ * `user_goals` array but no `category`/`scope` keys on its individual
+ * elements (those fields didn't exist yet). Same reasoning as the
+ * array-level default above -- defaulted here once, to the same
+ * conservative fallbacks attestCandidate itself uses for a newly-extracted
+ * goal (`'unknown'` / `'informational'`), so a historical goal and a goal
+ * the extractor genuinely couldn't classify are indistinguishable at read
+ * time, which is correct: both mean "no confident classification exists."
  */
 export function deserializeStructuredUnderstanding(json: string): StructuredUnderstanding {
   const parsed = JSON.parse(json) as StructuredUnderstanding
-  return { ...parsed, user_goals: parsed.user_goals ?? [] }
+  const user_goals = (parsed.user_goals ?? []).map((g) => ({
+    ...g,
+    category: g.category ?? 'unknown',
+    scope: g.scope ?? 'informational',
+  }))
+  return { ...parsed, user_goals }
 }
 
 /**

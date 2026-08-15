@@ -22,7 +22,7 @@ import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { runCRCConversation } from '@/lib/crc-engine/run-crc-conversation'
 import type { StructuredUnderstanding } from '@/types/interview-engine'
 
-const EMPTY_PROJECTION_OUTPUT = { opening_line: '', understood_summary: '', knowledge_items: [], closing_cta: '' }
+const EMPTY_PROJECTION_OUTPUT = { opening_line: '', understood_summary: '', knowledge_items: [], goal_interpretations: [], closing_cta: '' }
 
 /** Case 8 (required): a tool resolved to a canonical identifier the Matrix has no row for at all. */
 const unknownToolSU: StructuredUnderstanding = {
@@ -232,16 +232,31 @@ describe('runCRCConversation -- negative assertions', () => {
 
   test('ProjectionOutput never contains a "topics that often come up" field -- structurally absent, not just empty', () => {
     const { output } = runCRCConversation(DIALOGUE_FIXTURES.rich_signal.structured_understanding, MATRIX_FIXTURE)
-    expect(Object.keys(output).sort()).toEqual(['closing_cta', 'knowledge_items', 'opening_line', 'understood_summary'])
+    expect(Object.keys(output).sort()).toEqual(['closing_cta', 'goal_interpretations', 'knowledge_items', 'opening_line', 'understood_summary'])
   })
 
-  test('user_goals has zero effect on final ProjectionOutput (Milestone 1 hard scope boundary, 2026-08-15) -- byte-identical output whether populated or empty', () => {
-    const goal = { goal_id: 'g-1', state: 'confirmed' as const, raw_text: 'Can I use this commercially and do I own the copyright?', superseded_by: null, source_turn: 1, source_statement: 'placeholder' }
+  test('a goal with category "unknown" (Milestone 2 default, e.g. a real historical Milestone-1-era goal) has zero effect on final ProjectionOutput beyond its own goal_interpretations entry -- byte-identical output otherwise whether populated or empty', () => {
+    const goal = {
+      goal_id: 'g-1',
+      state: 'confirmed' as const,
+      raw_text: 'Can I use this commercially and do I own the copyright?',
+      category: 'unknown' as const,
+      scope: 'informational' as const,
+      superseded_by: null,
+      source_turn: 1,
+      source_statement: 'placeholder',
+    }
     for (const fixture of Object.values(DIALOGUE_FIXTURES)) {
       const withoutGoals = runCRCConversation({ ...fixture.structured_understanding, user_goals: [] }, MATRIX_FIXTURE)
       const withGoals = runCRCConversation({ ...fixture.structured_understanding, user_goals: [goal] }, MATRIX_FIXTURE)
-      expect(withGoals.output).toEqual(withoutGoals.output)
-      expect(JSON.stringify(withGoals.output)).not.toContain('Can I use this commercially')
+      // understood_summary and knowledge_items are derived purely from facts/tools -- goal-independent, always byte-identical.
+      expect(withGoals.output.understood_summary).toEqual(withoutGoals.output.understood_summary)
+      expect(withGoals.output.knowledge_items).toEqual(withoutGoals.output.knowledge_items)
+      // opening_line/closing_cta are NOT asserted identical here: for a fixture with zero other facts/knowledge (e.g. no_signal, full_opt_out), a stated goal is now itself substantive enough to escape the all-empty branch (2026-08-15 fully-empty extension) -- so these two fields legitimately flip from '' to the fixed copy purely because a goal exists. That is the intended new behavior, covered directly by assemble-projection-output.test.ts's own "substantive enough to escape the fully-empty branch" case.
+      // The goal itself DOES surface -- Milestone 2's whole point -- but only in its own dedicated field, and only as its own verbatim words plus a fixed template, never leaking into or altering understood_summary/knowledge_items.
+      expect(withGoals.output.goal_interpretations).toHaveLength(1)
+      expect(JSON.stringify(withGoals.output.goal_interpretations[0])).toContain('Can I use this commercially')
+      expect(JSON.stringify({ understood_summary: withGoals.output.understood_summary, knowledge_items: withGoals.output.knowledge_items })).not.toContain('Can I use this commercially')
     }
   })
 })

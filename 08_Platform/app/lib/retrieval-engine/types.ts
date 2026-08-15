@@ -21,7 +21,26 @@
  * particular: unlike `publication_scope`, a null `candidate_statement`
  * does NOT cause a result to be skipped -- that is a Projection-time
  * concern, not a Retrieval-time one; see assemble-result.ts).
+ *
+ * Topic tagging (added to MatrixClaim/RetrievalResult 2026-08-15, CRC
+ * Milestone 2 -- User Goal + Bounded Interpretation, PM revision 5:
+ * "approve the minimal Matrix topic-tagging approach... do not build full
+ * topic-based Retrieval in M2"). `MatrixClaim.topic` is OPTIONAL and
+ * purely descriptive metadata -- it plays no role in Retrieval's own
+ * matching logic (lookup-rows.ts, enumerate-eligible-claims.ts are
+ * unchanged; a claim's eligibility and whether it surfaces at all is
+ * decided exactly as before, tool-identifier-keyed only). It exists solely
+ * so a downstream, Retrieval-external consumer (lib/bounded-interpretation/)
+ * can ask "is there an already-eligible, already-retrieved result whose
+ * subject matter matches this user goal's category" without Retrieval
+ * itself growing any topic-based matching, ranking, or filtering
+ * capability. `RetrievalResult.topic` is REQUIRED (never left undefined
+ * for a consumer to guess about) -- assembleResult defaults an untagged
+ * claim's topic to 'unknown', the same conservative fallback GoalCategory
+ * uses everywhere else in this codebase.
  */
+
+import type { GoalCategory } from '@/types/interview-engine'
 
 export const CRC_ELIGIBLE_VALUES = ['Yes', 'No', 'Pending'] as const
 export type CrcEligible = (typeof CRC_ELIGIBLE_VALUES)[number]
@@ -41,6 +60,8 @@ export interface MatrixClaim {
   crc_publication_scope: string | null
   /** Copied verbatim into RetrievalResult.candidate_statement -- see module header. */
   crc_candidate_statement: string | null
+  /** Optional descriptive tag -- see module header's "Topic tagging" note. Absent on a claim means "not yet classified," not "no subject matter." */
+  topic?: GoalCategory
 }
 
 /**
@@ -98,6 +119,8 @@ export interface RetrievalResult {
   /** Opaque passthrough -- see the module-header note on MatrixClaim.crc_candidate_statement above. */
   candidate_statement: string | null
   last_verified: string | null
+  /** Required, always resolved (defaults to 'unknown' for an untagged claim) -- see module header's "Topic tagging" note. Descriptive only; never influenced how this result was matched or whether it was included. */
+  topic: GoalCategory
 }
 
 /**

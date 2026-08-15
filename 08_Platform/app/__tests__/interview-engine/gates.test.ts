@@ -376,7 +376,7 @@ describe('evaluateGate2', () => {
 })
 
 describe('user_goals has zero effect on Gate 1 or Gate 2 (Milestone 1 hard scope boundary, 2026-08-15)', () => {
-  const goal = { goal_id: 'g-1', state: 'confirmed' as const, raw_text: 'Can I use this commercially?', superseded_by: null, source_turn: 1, source_statement: 'placeholder' }
+  const goal = { goal_id: 'g-1', state: 'confirmed' as const, raw_text: 'Can I use this commercially?', category: 'unknown' as const, scope: 'informational' as const, superseded_by: null, source_turn: 1, source_statement: 'placeholder' }
 
   test('Gate 1 result is byte-identical whether user_goals is empty or populated, understanding otherwise unmet', () => {
     const withoutGoals = baseSU({ user_goals: [] })

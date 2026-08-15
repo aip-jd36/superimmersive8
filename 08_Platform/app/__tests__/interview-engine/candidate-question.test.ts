@@ -198,14 +198,14 @@ describe('validateCandidateReference', () => {
 
 describe('user_goals never enter the eligible-signal set (Milestone 1 hard scope boundary, 2026-08-15)', () => {
   test('deriveEligibleSignals output is byte-identical whether user_goals is empty or populated -- Model 4/Constraint A/B candidate pool never grows from a stated goal', () => {
-    const goal = { goal_id: 'g-1', state: 'confirmed' as const, raw_text: 'Can I use this commercially?', superseded_by: null, source_turn: 1, source_statement: 'placeholder' }
+    const goal = { goal_id: 'g-1', state: 'confirmed' as const, raw_text: 'Can I use this commercially?', category: 'unknown' as const, scope: 'informational' as const, superseded_by: null, source_turn: 1, source_statement: 'placeholder' }
     const withoutGoals = baseSU({ user_goals: [] })
     const withGoals = baseSU({ user_goals: [goal] })
     expect(deriveEligibleSignals(withoutGoals)).toEqual(deriveEligibleSignals(withGoals))
   })
 
   test('no eligible signal ever carries kind "user_goal" -- the type itself has no such member, confirmed structurally', () => {
-    const goal = { goal_id: 'g-1', state: 'confirmed' as const, raw_text: 'Can I use this commercially?', superseded_by: null, source_turn: 1, source_statement: 'placeholder' }
+    const goal = { goal_id: 'g-1', state: 'confirmed' as const, raw_text: 'Can I use this commercially?', category: 'unknown' as const, scope: 'informational' as const, superseded_by: null, source_turn: 1, source_statement: 'placeholder' }
     const su = baseSU({ user_goals: [goal] })
     const signals = deriveEligibleSignals(su)
     expect(signals.every((s) => s.kind !== ('user_goal' as never))).toBe(true)

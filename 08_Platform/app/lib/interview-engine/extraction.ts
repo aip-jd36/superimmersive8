@@ -39,6 +39,8 @@
 import type {
   Attested,
   ConfidenceState,
+  GoalCategory,
+  GoalScope,
   ObservationScope,
   ScopedObservation,
   StructuredUnderstanding,
@@ -144,6 +146,35 @@ export interface CandidateObservation {
   goal_confidence_hint?: ConfidenceState
   /** kind === 'user_goal'; set when this candidate corrects or retracts an existing goal */
   supersedes_goal_id?: string
+
+  /**
+   * kind === 'user_goal' (Milestone 2 -- User Goal + Bounded Interpretation,
+   * 2026-08-15 PM revision). Two independent classification hints,
+   * proposed on the SAME extraction call that captures the goal itself --
+   * never a second model call, never inferred from anything outside this
+   * turn's own wording. Both are routing/boundary metadata only: they
+   * decide which governed knowledge (if any) is even a candidate for a
+   * Bounded Interpretation, and whether the goal reads as a request for a
+   * determination CRC does not issue -- neither hint, nor anything derived
+   * from it, is itself rendered as an answer or a legal conclusion.
+   *
+   * goal_category_hint: coarse subject-matter classification (see
+   * GoalCategory). Unset/omitted -> attestCandidate defaults to 'unknown',
+   * the conservative fallback -- never guessed from adjacent workflow facts
+   * (e.g. never 'copyright_ownership' merely because a client was
+   * mentioned).
+   *
+   * goal_scope_hint: whether this reads as an ordinary informational
+   * question/need, or as an explicit request for CRC itself to certify,
+   * clear, or determine something (see GoalScope). Unset/omitted ->
+   * attestCandidate defaults to 'informational', the conservative
+   * fallback -- assuming a determination request when the user only asked
+   * a question would be the more consequential misclassification (it
+   * would suppress a real, answerable governed claim behind the fixed
+   * determination-declined template instead of surfacing it).
+   */
+  goal_category_hint?: GoalCategory
+  goal_scope_hint?: GoalScope
 
   /**
    * Set by the extractor when the signal itself is too weak/unclear to
@@ -385,6 +416,8 @@ export function attestCandidate(
         goal_id: goalId,
         state: candidate.goal_confidence_hint,
         raw_text: candidate.raw_text,
+        category: candidate.goal_category_hint ?? 'unknown',
+        scope: candidate.goal_scope_hint ?? 'informational',
         superseded_by: null,
         source_turn: candidate.turn,
         source_statement: candidate.raw_text,

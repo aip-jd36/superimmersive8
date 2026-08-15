@@ -130,7 +130,7 @@ describe('runTurn -- decline handling', () => {
     const outcome = await runTurn({ token: 't4', turnNumber: 1, userText: 'skip', declineAction: 'stop_interview' }, deps())
     expect(outcome.kind).toBe('complete')
     if (outcome.kind === 'complete') {
-      expect(outcome.result.output).toEqual({ opening_line: '', understood_summary: '', knowledge_items: [], closing_cta: '' })
+      expect(outcome.result.output).toEqual({ opening_line: '', understood_summary: '', knowledge_items: [], goal_interpretations: [], closing_cta: '' })
     }
   })
 

@@ -13,18 +13,22 @@
  * module has no mechanism to change that copy per-conversation and must
  * not grow one without an explicit future decision.
  *
- * `[PRINCIPLE]` Fully-empty handling (JD decision, 2026-08-08): when
- * BOTH `understood_summary === ''` AND `knowledge_items.length === 0`,
+ * `[PRINCIPLE]` Fully-empty handling (JD decision, 2026-08-08; extended
+ * 2026-08-15 for Milestone 2): when `understood_summary === ''` AND
+ * `knowledge_items.length === 0` AND `goal_interpretations.length === 0`,
  * this function returns an all-empty ProjectionOutput -- including empty
  * opening_line and closing_cta -- rather than the fixed copy. This is a
  * deliberate exception to "opening/closing are always fixed": the system
  * must never manufacture framing ("Here's what I understood...") or a
  * commercial CTA when there is genuinely nothing substantive to project
  * (e.g. a full opt-out, or a conversation that produced zero confirmed
- * facts and zero eligible knowledge). `assembleProjectionOutput` always
- * returns a valid `ProjectionOutput` object either way -- never `null`,
- * never an optional wrapper -- callers branch on field emptiness, not on
- * presence/absence of the object itself.
+ * facts and zero eligible knowledge). A stated, confirmed user goal is
+ * substantive on its own -- a conversation with no facts/knowledge but one
+ * confirmed goal still has something real to project (the interpretation
+ * itself), so it must not trigger the all-empty branch.
+ * `assembleProjectionOutput` always returns a valid `ProjectionOutput`
+ * object either way -- never `null`, never an optional wrapper -- callers
+ * branch on field emptiness, not on presence/absence of the object itself.
  *
  * Diagnostics from `projectKnowledgeItems` are returned as a sibling of
  * `output`, never folded into `ProjectionOutput` itself -- `ProjectionOutput`
@@ -52,9 +56,10 @@
 
 import type { RetrievalHandoff } from '@/types/interview-engine'
 import type { RetrievalResult } from '@/lib/retrieval-engine/types'
+import type { BoundedInterpretation } from '@/lib/bounded-interpretation/types'
 import { buildUnderstoodFacts, renderUnderstoodSummary } from './understood-summary'
 import { projectKnowledgeItems } from './project-knowledge-items'
-import type { ProjectionDiagnostic, ProjectionOutput } from './types'
+import type { ProjectionDiagnostic, ProjectionGoalInterpretation, ProjectionOutput } from './types'
 
 const OPENING_LINE = "Here's what I understood about your workflow."
 const CLOSING_CTA = 'If you need a human-reviewed commercial assurance assessment of the full workflow, SI8 can review it.'
@@ -64,13 +69,37 @@ export interface AssembleProjectionOutputResult {
   diagnostics: ProjectionDiagnostic[]
 }
 
-export function assembleProjectionOutput(handoff: RetrievalHandoff, results: RetrievalResult[]): AssembleProjectionOutputResult {
+/**
+ * Narrows the internal BoundedInterpretation shape (goal_id, status,
+ * supporting_claim_ids -- all internal-only) down to the rendering-safe
+ * ProjectionGoalInterpretation shape, mirroring projectKnowledgeItems'
+ * own RetrievalResult -> ProjectionKnowledgeItem narrowing one function
+ * over. Pure, no branching on content -- every interpretation the caller
+ * hands in is rendered; deciding WHICH interpretations exist is
+ * lib/bounded-interpretation's job, not this one's.
+ */
+function renderGoalInterpretations(interpretations: BoundedInterpretation[]): ProjectionGoalInterpretation[] {
+  return interpretations.map((i) => ({ goal_text: i.goal_text, summary: i.summary }))
+}
+
+/**
+ * `interpretations` defaults to `[]` (Milestone 2, 2026-08-15) -- additive,
+ * backward-compatible third parameter. Every existing caller that predates
+ * Milestone 2 (in particular this module's own test suite) continues to
+ * compile and behave identically without passing it.
+ */
+export function assembleProjectionOutput(
+  handoff: RetrievalHandoff,
+  results: RetrievalResult[],
+  interpretations: BoundedInterpretation[] = [],
+): AssembleProjectionOutputResult {
   const understood_summary = renderUnderstoodSummary(buildUnderstoodFacts(handoff))
   const { knowledge_items, diagnostics } = projectKnowledgeItems(results)
+  const goal_interpretations = renderGoalInterpretations(interpretations)
 
-  if (understood_summary === '' && knowledge_items.length === 0) {
+  if (understood_summary === '' && knowledge_items.length === 0 && goal_interpretations.length === 0) {
     return {
-      output: { opening_line: '', understood_summary: '', knowledge_items: [], closing_cta: '' },
+      output: { opening_line: '', understood_summary: '', knowledge_items: [], goal_interpretations: [], closing_cta: '' },
       diagnostics,
     }
   }
@@ -80,6 +109,7 @@ export function assembleProjectionOutput(handoff: RetrievalHandoff, results: Ret
       opening_line: OPENING_LINE,
       understood_summary,
       knowledge_items,
+      goal_interpretations,
       closing_cta: CLOSING_CTA,
     },
     diagnostics,

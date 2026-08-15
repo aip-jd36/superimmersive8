@@ -16,6 +16,7 @@ const SAMPLE_OUTPUT: ProjectionOutput = {
     { claim_id: 'c1', statement: 'Real finding one.', last_verified: null },
     { claim_id: 'c2', statement: 'Real finding two.', last_verified: null },
   ],
+  goal_interpretations: [],
   closing_cta: '',
 }
 

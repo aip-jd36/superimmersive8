@@ -18,6 +18,7 @@ function retrievalResult(overrides: Partial<RetrievalResult> = {}): RetrievalRes
     publication_scope: 'CRC may state only that Runway permits commercial use across tiers.',
     candidate_statement: "Runway's current Terms allow commercial use across all subscription tiers.",
     last_verified: '2026-07-01',
+    topic: 'commercial_use',
     ...overrides,
   }
 }
