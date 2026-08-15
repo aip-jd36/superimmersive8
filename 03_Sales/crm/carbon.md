@@ -28,9 +28,13 @@ Carbon is an independent creative/production agency, HK-headquartered with a Sin
 
 ## Interaction log (reverse-chronological)
 
-**2026-08-12 — Damien canceled the Aug 13 call via Calendly.** Reason given: "busy." No reschedule booked yet. (Canceled by Damien Barron-Tan, per Calendly's own cancellation notice.)
+### 2026-08-12 — Damien canceled the Aug 13 call via Calendly
 
-**2026-08-08 — pre-call warm-up email sent** to Damien + Matthew — complimented Carbon's creative-strategy/APAC work (research on this is Damien-only and still unverified independently as of the Aug 8 prep pass — do not repeat as confirmed fact), asked about their AI workflows and what prompted the booking, framed as a two-way conversation rather than a pitch.
+Reason given: "busy." No reschedule booked yet. (Canceled by Damien Barron-Tan, per Calendly's own cancellation notice.)
+
+### 2026-08-08 — pre-call warm-up email sent
+
+Sent to Damien + Matthew — complimented Carbon's creative-strategy/APAC work (research on this is Damien-only and still unverified independently as of the Aug 8 prep pass — do not repeat as confirmed fact), asked about their AI workflows and what prompted the booking, framed as a two-way conversation rather than a pitch.
 
 **Booking itself:** self-booked directly via Calendly ("SuperImmersive 8 - Commercial Assurance for AI Video" event type), no prior outreach campaign on file. The booking note field read "please use this time slot for a networking & learning call," signed JD — phrasing suggests this may be a warm/personal contact rather than a cold inbound booking, not confirmed either way. JD-supplied background (Tencent/HKEX/Hyatt/HYROX as clients, UK office, public AI-workflow commentary) could **not** be independently corroborated via search as of the Aug 8 prep pass — treat as unconfirmed, not repeated as fact.
 

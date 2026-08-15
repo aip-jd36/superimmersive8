@@ -24,4 +24,6 @@ Graduated from `03_Sales/CRM.md` (row B045) on 2026-08-15 — a confirmed Calend
 
 ## Interaction log (reverse-chronological)
 
-**2026-05-17 — booking confirmed.** "Thanks, - booked!" via Calendly. Prior to that: replied "please send a calendar link" (Apr 27) after Ivy's SI8_Legal Friction outreach. No call notes filed since; current status unconfirmed.
+### 2026-05-17 — booking confirmed
+
+"Thanks, - booked!" via Calendly. Prior to that: replied "please send a calendar link" (Apr 27) after Ivy's SI8_Legal Friction outreach. No call notes filed since; current status unconfirmed.
