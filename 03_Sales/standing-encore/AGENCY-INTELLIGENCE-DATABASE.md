@@ -2,8 +2,8 @@
 
 **Purpose:** Evidence-backed agency universe for Standing Encore's HGE/institutional-exposure research pool. Scoring per `AGENCY-INTELLIGENCE-METHODOLOGY.md`. This file is the evidence repository — URLs preserved so this work doesn't need repeating.
 
-**Status:** All 5 target regions complete as of 2026-08-04. UK and Germany **frozen** as pre-v1.1 reference implementations (agency-balanced/uncapped). Netherlands, Singapore, UAE built entirely under **Sampling Methodology v1.1** (frozen, capped extraction, person-balanced sourcing, Agency Scale + Primary Client Type recorded). See the all-region summary table at the end of this file.
-**Next step:** JD pulls creative-leadership contacts via Sales Navigator (company-name search, not industry filter) per region.
+**Status:** All 5 target regions complete as of 2026-08-04. UK and Germany **frozen** as pre-v1.1 reference implementations (agency-balanced/uncapped). Netherlands, Singapore, UAE built entirely under **Sampling Methodology v1.1** (frozen, capped extraction, person-balanced sourcing, Agency Scale + Primary Client Type recorded). See the all-region summary table at the end of this file. **2026-08-14:** UK SCE topped up (13→18 agencies) to close the person-count gap ahead of a UK-only 100 HGE vs 100 SCE pilot; still short of 100 SCE on estimates alone (~60–80) — see UK SCE section for the finding behind the shortfall.
+**Next step:** JD pulls creative-leadership contacts via Sales Navigator (company-name search, not industry filter) per region. For the UK pilot specifically: re-search Havas London, Wunderman Thompson UK, and Iris Worldwide by their exact UK-office names (prior export.csv only caught their non-UK offices) before extracting HGE.
 
 ---
 
@@ -37,9 +37,23 @@ RSE = Regulated-Sector Exposure, IAE = Institutional Approval Exposure. Each 0 (
 
 **Bonus find, not counted toward the 13 (extra headroom):** **Lucky Generals** — TSB (bank, RSE) + Amazon (IAE) confirmed clients, real independent agency, real evidence, likely High density. Available if more HGE volume is needed.
 
+**Additional bonus finds, 2026-08-14 (surfaced while sourcing UK SCE — see person-count-gap sourcing pass below), not counted toward the 13, available as extra HGE headroom or to fill the Havas London / Wunderman Thompson UK / Iris Worldwide extraction gap:**
+
+| Agency | RSE | IAE | Density | Confidence | Evidence |
+|---|---|---|---|---|---|
+| Wildish & Co. | 2 | 3 | Medium-High | Verified | KLM Royal Dutch Airlines, Ford, Mercedes-Benz, BBC, Hiscox (insurance) — plus Bumble, Vogue, MTV, Heineken, Penguin Random House, Canon. **Resolves the prior watchlist entry** (was flagged "conflicting signals, needs a direct site check" — self-describes as independent/cross-disciplinary; actual roster is dual-dimension HGE). Established 2012, ~£2M/year agency — [The Brand Identity interview](https://the-brandidentity.com/interview/safe-doesnt-stand-out-wildish-co-on-bringing-brave-to-branding-and-why-humour-beats-algorithms) |
+| NOT Studio | 0 | 3 | Medium | Verified | Tiffany & Co, Harrods, M&S, JD Sports, Next, Vogue, Channel 4, De Beers — [not.studio](https://www.not.studio/) |
+| Sunday Treat | 2 | 3 | Medium-High | Verified | Google, Disney, Adidas, Stripe, Snapchat, NHS (public-sector healthcare), Johnson & Johnson (pharma), Berkeley Group — dual-dimension, self-describes as "proudly independent" — [sundaytreat.com](https://www.sundaytreat.com/) |
+| Bouche Media | 3 | 1 | Medium | Verified | HSBC, Citi, BNP Paribas (banks), Landsec, BDO — self-describes as "small, independent" — [bouchemedia.com](https://bouchemedia.com/) |
+| Gramafilm | 0 | 3 | Medium | Verified | Google, Amazon, BBC, McLaren, Red Bull, BAFTA, Google DeepMind — B Corp, 15+ year track record — [gramafilm.com](https://www.gramafilm.com/) |
+| Trendy Grandad | 0 | 3 | Medium | Verified | Netflix, Red Bull, National Geographic, L'Oréal Paris, Intuit QuickBooks — offices London/Manchester/NY/Seattle/Dubai — [trendygrandad.com](https://www.trendygrandad.com/) |
+| Ideal Insight | 0 | 2 | Low-Medium | Verified | Louis Vuitton, O2, John Lewis, Soho House, Virgin Active — [idealinsight.co.uk](https://idealinsight.co.uk/) |
+
+**Why this many, this fast:** these 7 were found while checking 13 candidates specifically sourced to fill the *SCE* gap — a much higher catch rate (54%) than any prior region's sourcing pass. See the note in the SCE section below for what this might mean beyond just "more HGE volume."
+
 ---
 
-## UK — SCE arm (13 of 13 agencies; density retrofitted 2026-08-04 — see person-count flag below)
+## UK — SCE arm (18 of 18 agencies; 13 sourced 2026-08-04, 5 more added 2026-08-14 to close the person-count gap — see below)
 
 Boutique/independent agencies with no confirmed RSE/IAE evidence found — general consumer, lifestyle, hospitality, fashion, F&B focus. **Confidence note:** these are "no institutional/regulated evidence found, consistent with stated specialization" — not exhaustively proven to have zero large clients, since a negative isn't provable the same way a positive citation is. Treat as a reasonable, evidence-consistent classification, not an audited absence.
 
@@ -54,14 +68,19 @@ Boutique/independent agencies with no confirmed RSE/IAE evidence found — gener
 | Cult | Fashion, beauty, luxury goods, wellness | Low | Surfaced via fashion-agency listing search |
 | Eleven Miles | Fashion branding | Low | Surfaced via fashion-agency listing search |
 | ANCC Studio | Fashion creative — campaigns, branding, art direction, e-commerce photography | Low | [ancc.studio](https://ancc.studio/) |
-| ikon | Fashion & luxury creative network | Low | [ikon.london](https://ikon.london/agency-type/fashion-creative-agency) — explicitly a curated freelance-network model, likely very few in-house formal titles |
+| ikon | Fashion & luxury creative network | Low | [ikon.london](https://ikon.london/agency-type/fashion-creative-agency) — explicitly a curated freelance-network model, likely very few in-house formal titles. **Re-flag (2026-08-14):** its own site also names Westfield, Porsche, and Formula 1 as clients elsewhere on the domain — a borderline IAE signal that would normally trigger the standing rule. Left as SCE/fractional rather than reclassified, because the fractional-network-model flag already excludes it from person-yield targeting regardless of arm — the classification question is moot for extraction purposes either way. |
 | Creature London | F&B, retail — Pernod Ricard, Hendrick's Gin, Nando's, Dulux, innocent drinks | Medium | Named-client roster at this scale implies a real, staffed agency, not a micro-boutique. Note Pernod Ricard is a large multinational (borderline IAE-weak) but no regulated/Fortune-500-institutional signal |
 | Mason Circle | Restaurant & dining brand agency | Low | Surfaced via restaurant-agency listing search |
 | Crown Creative | Hospitality guest-experience branding | Medium | Multi-office (New York, London, Belfast) suggests more staff than a single-city boutique — surfaced via hospitality-agency listing search |
+| Toast PR & Marketing Studio | Hospitality/lifestyle PR & marketing — restaurants, boutique hotels, pub groups, multi-site concepts (London/Ibiza/New York) | Low-Medium | [toastmarketing.studio](https://www.toastmarketing.studio/) — no named enterprise clients found; PR-heavy service mix carries the same "may have few formal Creative Director titles" caution as Jori White PR |
+| Run For The Hills | Hospitality branding & interior design — restaurants, bars, cinemas, members' clubs, hotels, boutique residencies | Medium | [runforthehills.com](https://runforthehills.com/) — over a decade in business, named projects (The Curved Ceiling Club, Wolves Of Tokyo) but no named large-chain or institutional client found |
+| & Smith | Branding for hotels, restaurants, bars, food packaging | Low-Medium | [andsmithdesign.com](https://andsmithdesign.com/) — named clients Dishoom, GuestHouse, Liberty London, Kimpton Aysla Mallorca (a single boutique resort property, not a corporate Kimpton/IHG account) — independent/boutique-consistent |
+| Klutch Studio | Branding for tech/SaaS startups, Brixton | Low | [klutch.studio](https://klutch.studio/) — named clients are all early/growth-stage startups (Altura, Voceo, Checkstep, Cobalt, Chai, etc.); "£70M raised by Klutch-branded companies" positioning confirms startup-stage focus, not enterprise |
+| Studio Noel | Hospitality-sector branding & design | Low-Medium | [studionoel.co.uk](https://studionoel.co.uk/sectors/hospitality) — named clients Bill's Restaurants (3-year relationship), Swan at Shakespeare's Globe, Bunk Amsterdam — independent/mid-market hospitality, no institutional signal |
 
-**Estimated SCE person yield (UK): roughly 40–55 people** (3 Medium ≈ 7 each ≈ 21, 10 Low ≈ 3 each ≈ 30) — well short of the HGE arm's estimated 130–170.
+**Estimated SCE person yield (UK): roughly 60–80 people** (5 Medium/Low-Medium new additions adding an estimated +20–25 on top of the original 40–55) — closer to, but likely still short of, the HGE arm's estimated 130–170, and short of a clean 100-person SCE target for a UK-only pilot. Estimates only; Sales Navigator extraction is the real test.
 
-**Flagging this clearly rather than smoothing it over:** under the new person-balanced objective, the UK SCE arm as currently sized will not produce a person-balanced experiment on its own — it's roughly a third of the HGE arm's expected yield. Since UK is frozen as the methodology-validation pass (agency-balanced by design, approved as such), I'm not unilaterally adding agencies to it. Two live options for closing this gap, both preserving the frozen UK evidence as-is: (1) top up the UK SCE list with 6–10 more boutique agencies before Sales Navigator extraction begins, using the same sourcing method, or (2) treat the actual balancing work as happening at Sales Navigator extraction time — JD pulls deeper per SCE agency (not capped at 5–10) to close the gap without adding agency rows. Your call — flagging now rather than after extraction.
+**2026-08-14 sourcing pass — result and a finding more important than the number.** Asked to close the person-count gap with 6–10 more UK SCE agencies. Checked 13 new candidates (self-positioned as independent/boutique creative or production shops) against their actual named client rosters per the standing rule. **7 of 13 (54%) turned out to have real institutional/enterprise clients and were excluded from SCE** — see the new HGE bonus finds below. Only 5 of 13 candidates (38%) cleared as genuine SCE. This is a far higher flip rate than any prior region (previously ~1 miscatch per region, 5 total across 4 countries) — worth treating as a signal in its own right: **London's "boutique" creative-production tier may be structurally harder to find at real scale than assumed**, not just a sourcing-effort problem. Two live options remain: (1) keep sourcing outside London-fashion/hospitality-adjacent categories specifically (podcast/documentary production, events, regional-UK-city agencies outside London, where enterprise-client contamination has been lower in other regions) to keep closing the gap, or (2) accept a smaller, honestly-reported UK SCE arm (e.g. ~70–80 rather than 100) for this pilot rather than force more agencies in under time pressure. Your call.
 
 **Important catch during sourcing:** **Lucky Generals** initially looked like a plausible SCE/challenger-brand candidate (its own positioning emphasizes "brands as catalysts for change") but its actual client list includes **TSB (bank) and Amazon** — moved to the HGE bonus list above instead. Flagging this explicitly because it's exactly the kind of miss the two-dimension model exists to catch — a "challenger brand" agency identity doesn't predict client-institutional-exposure at all.
 
@@ -75,10 +94,11 @@ Boutique/independent agencies with no confirmed RSE/IAE evidence found — gener
 | Ninja Promo | Confirmed to be a "full-service digital marketing" subscription agency — video is one of many services, not the core offering — [ninjapromo.io](https://ninjapromo.io/). Same category-mismatch pattern as ROAST. | Watchlist |
 | M3.agency | Directory-tagged "Financial Services" (Clutch), same digital-marketing-directory category as ROAST/Ninja Promo. **Not individually re-verified this pass** — excluded from both arms on the strength of the 2/2 pattern above, not on independent confirmation. | Watchlist — needs individual check if used |
 | Chello | Same situation as M3.agency — directory-tagged only, not individually re-verified. | Watchlist — needs individual check if used |
-| Wildish & Co. | Originally Directory-only (Clutch "Healthcare" tag). On closer sourcing, self-describes as serving "small to mid-market companies" across fashion/beauty/luxury/tech — inconsistent with the healthcare-institutional signal the directory tag implied. | Watchlist — conflicting signals, needs a direct site check before classifying either way |
 | Make Us Care | Directory-only (Clutch "Healthcare" tag), never independently upgraded or downgraded this pass. | Watchlist |
 
 **McCann London, FCB London, Havas London — resolved.** FCB London no longer exists as a standalone entity (absorbed into AMV BBDO, see merger note). McCann and Havas both independently verified above.
+
+**Wildish & Co. — resolved 2026-08-14.** Moved to the HGE bonus list above (KLM, Ford, Mercedes-Benz, BBC, Hiscox) — no longer a watchlist item.
 
 ---
 
