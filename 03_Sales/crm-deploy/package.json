@@ -1,0 +1,7 @@
+{
+  "name": "si8-crm-deploy",
+  "private": true,
+  "devDependencies": {
+    "next": "^15.0.0"
+  }
+}
