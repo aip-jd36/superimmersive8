@@ -33,6 +33,7 @@ function emptySU(): StructuredUnderstanding {
     },
     tool_mentions: [],
     scoped_observations: [],
+    user_goals: [],
     current_phase: 1,
     gate_1_state: 'not_met',
     gate_2_state: 'not_yet_stable',
@@ -155,7 +156,8 @@ describe('createSupabaseSessionStore: load', () => {
   })
 
   test('a completed session (completion_reason set) round-trips its completion state correctly', async () => {
-    const su: StructuredUnderstanding = { ...emptySU(), gate_1_state: 'not_met', current_phase: 3, completion_reason: 'gate_1_unmet_exhausted' }
+    const su: StructuredUnderstanding = { ...emptySU(), gate_1_state: 'not_met', user_goals: [],
+    current_phase: 3, completion_reason: 'gate_1_unmet_exhausted' }
     const { client } = fakeClient({
       selectResult: {
         data: {

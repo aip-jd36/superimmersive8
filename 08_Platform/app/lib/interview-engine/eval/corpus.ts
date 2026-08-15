@@ -211,8 +211,20 @@ export const EVAL_CORPUS: EvalScenario[] = [
     turns: [{ turn: 1, text: "I'd honestly rather not get into that." }],
     check(diagnosticsByTurn) {
       const cands = allCandidates(diagnosticsByTurn)
-      const passed = cands.some((c) => c.observation_confidence_hint === 'declined' || c.fact_confidence_hint === 'declined')
-      return { passed, notes: `candidates: ${JSON.stringify(cands.map((c) => ({ kind: c.kind, obs: c.observation_confidence_hint, fact: c.fact_confidence_hint })))}` }
+      // goal_confidence_hint added to this check (Milestone 1, 2026-08-15):
+      // this turn is genuinely context-free about WHAT is being declined --
+      // before user_goal existed, "declined" could only land on
+      // observation_confidence_hint/fact_confidence_hint; now that a
+      // user_goal classification legitimately exists too, a live-model run
+      // classifying this exact ambiguous refusal as a declined goal instead
+      // of a declined observation/fact is not a regression to reject, it's
+      // the same "explicitly declined" fact landing on a newly-real third
+      // possible kind. Widening this check is a direct, honest consequence
+      // of user_goal's own addition, not a weakening of what this scenario
+      // verifies (an explicit decline must still be captured as declined,
+      // under SOME kind -- that invariant is unchanged).
+      const passed = cands.some((c) => c.observation_confidence_hint === 'declined' || c.fact_confidence_hint === 'declined' || c.goal_confidence_hint === 'declined')
+      return { passed, notes: `candidates: ${JSON.stringify(cands.map((c) => ({ kind: c.kind, obs: c.observation_confidence_hint, fact: c.fact_confidence_hint, goal: c.goal_confidence_hint })))}` }
     },
   },
 
@@ -325,6 +337,107 @@ export const EVAL_CORPUS: EvalScenario[] = [
       const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'tool_mention')
       const passed = d?.candidate.plan_tier_confidence_hint !== 'confirmed'
       return { passed, notes: `plan_tier hint: ${JSON.stringify({ confidence: d?.candidate.plan_tier_confidence_hint, value: d?.candidate.plan_tier_value_hint })}` }
+    },
+  },
+
+  // ── User goal capture (Milestone 1, CRC User Goal, 2026-08-15) ─────────────
+  // Regression coverage for the live extractor's new "user_goal" candidate
+  // kind (anthropic-extractor.ts): capture-only, no downstream effect on
+  // Interview Engine/Retrieval/Projection (enforced structurally elsewhere,
+  // not by these scenarios) -- these seven cases test only whether the live
+  // model correctly identifies WHICH statements are a stated goal at all.
+
+  {
+    id: 'user_goal_question_form',
+    category: 'user goal -- question-phrased',
+    description: 'A goal stated as a direct question.',
+    turns: [{ turn: 1, text: 'Can I use this commercially?' }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'user_goal')
+      const passed = d?.candidate.goal_confidence_hint === 'confirmed'
+      return { passed, notes: `user_goal candidate: ${JSON.stringify(d?.candidate)}` }
+    },
+  },
+
+  {
+    id: 'user_goal_declarative_form',
+    category: 'user goal -- declarative need, not phrased as a question',
+    description: "A goal stated as a declarative need rather than a question -- must be captured identically to a question-phrased goal.",
+    turns: [{ turn: 1, text: 'My client needs proof this is cleared.' }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'user_goal')
+      const passed = d?.candidate.goal_confidence_hint === 'confirmed'
+      return { passed, notes: `user_goal candidate: ${JSON.stringify(d?.candidate)}` }
+    },
+  },
+
+  {
+    id: 'user_goal_two_in_one_turn',
+    category: 'user goal -- two distinct goals in one message',
+    description: 'A single turn stating two distinct goals -- both must be proposed as separate candidates, never merged into one.',
+    turns: [{ turn: 1, text: 'Can I use this commercially and do I own the copyright?' }],
+    check(diagnosticsByTurn) {
+      const goals = diagnosticsByTurn.flat().filter((x) => x.candidate.kind === 'user_goal' && x.candidate.goal_confidence_hint === 'confirmed')
+      const passed = goals.length === 2
+      return { passed, notes: `user_goal candidates: ${JSON.stringify(goals.map((g) => g.candidate.raw_text))}` }
+    },
+  },
+
+  {
+    id: 'user_goal_incidental_product_question_not_captured',
+    category: 'user goal -- incidental CRC-product question must NOT be captured',
+    description: 'A question about CRC itself/the process, not about commercial readiness -- must never be proposed as a user_goal.',
+    turns: [{ turn: 1, text: 'What does CRC do?' }],
+    check(diagnosticsByTurn) {
+      const goals = diagnosticsByTurn.flat().filter((x) => x.candidate.kind === 'user_goal')
+      const passed = goals.length === 0
+      return { passed, notes: `user_goal candidates (expected none): ${JSON.stringify(goals.map((g) => g.candidate.raw_text))}` }
+    },
+  },
+
+  {
+    id: 'user_goal_plain_workflow_statement_not_captured',
+    category: 'user goal -- plain workflow statement with no stated goal must NOT be captured',
+    description: 'A tool_mention-bearing statement with no accompanying question or stated need -- must not also produce a user_goal candidate.',
+    turns: [{ turn: 1, text: "I'm using Kling for a client ad." }],
+    check(diagnosticsByTurn) {
+      const goals = diagnosticsByTurn.flat().filter((x) => x.candidate.kind === 'user_goal')
+      const tools = diagnosticsByTurn.flat().filter((x) => x.candidate.kind === 'tool_mention')
+      const passed = goals.length === 0 && tools.length >= 1
+      return { passed, notes: `user_goal candidates (expected none): ${JSON.stringify(goals.map((g) => g.candidate.raw_text))}; tool candidates: ${tools.length}` }
+    },
+  },
+
+  {
+    id: 'user_goal_introduced_on_turn_3',
+    category: 'user goal -- introduced on a later turn, not the opening message',
+    description: 'No goal stated on turns 1-2; a goal is introduced on turn 3 -- must still be captured.',
+    turns: [
+      { turn: 1, text: "I'm using Kling for a commercial." },
+      { turn: 2, text: "I'm the one directly creating the content." },
+      { turn: 3, text: 'Actually, can I ask -- will my client own the finished video?' },
+    ],
+    check(diagnosticsByTurn) {
+      const turn1And2Goals = [...diagnosticsByTurn[0], ...diagnosticsByTurn[1]].filter((x) => x.candidate.kind === 'user_goal')
+      const turn3Goals = diagnosticsByTurn[2].filter((x) => x.candidate.kind === 'user_goal' && x.candidate.goal_confidence_hint === 'confirmed')
+      const passed = turn1And2Goals.length === 0 && turn3Goals.length === 1
+      return { passed, notes: `turn 1-2 goal candidates (expected none): ${turn1And2Goals.length}; turn 3 goal candidates (expected 1): ${JSON.stringify(turn3Goals.map((g) => g.candidate.raw_text))}` }
+    },
+  },
+
+  {
+    id: 'user_goal_correction_retraction',
+    category: 'user goal -- correction/retraction of an earlier stated goal',
+    description: 'Turn 1 states a goal; turn 2 explicitly retracts/replaces it -- must be flagged is_correction with an identifiable correction_of_raw_text.',
+    turns: [
+      { turn: 1, text: 'Do I own the copyright on this video?' },
+      { turn: 2, text: "Actually, I don't care about copyright -- I just need to know if my client can use it for their campaign." },
+    ],
+    check(diagnosticsByTurn) {
+      const turn2Goals = diagnosticsByTurn[1].filter((x) => x.candidate.kind === 'user_goal')
+      const correctionCandidate = turn2Goals.find((x) => x.candidate.is_correction === true)
+      const passed = !!correctionCandidate
+      return { passed, notes: `turn 2 user_goal candidates: ${JSON.stringify(turn2Goals.map((g) => ({ raw_text: g.candidate.raw_text, is_correction: g.candidate.is_correction, correction_of_raw_text: g.candidate.correction_of_raw_text })))}` }
     },
   },
 ]

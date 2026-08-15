@@ -165,6 +165,54 @@ export interface ProjectFacts {
   workflow_role: AttestedFact<string>
 }
 
+// ── User goals (CRC User Goal — Milestone 1, capture + persistence only) ───
+
+/**
+ * What the user explicitly stated they came to CRC wanting to know or
+ * achieve about this workflow's commercial readiness — a question ("Can I
+ * use this commercially?") or a declarative need ("My client needs proof
+ * this is cleared.") are equally valid; the concept is deliberately named
+ * `user_goals`, not `user_questions`, for exactly this reason (2026-08-15
+ * approval). Milestone 1 is capture + persistence only: this type has no
+ * consumer anywhere outside StructuredUnderstanding itself yet — no Gate,
+ * no candidate generation, no Retrieval, no Projection reads it (see
+ * handoff.ts, deliberately unmodified: RetrievalHandoff enumerates specific
+ * fields explicitly rather than spreading StructuredUnderstanding, so
+ * user_goals cannot leak downstream by construction, not merely by
+ * discipline).
+ *
+ * Shape mirrors ScopedObservation's own attested-content-plus-lineage
+ * pattern (the closest existing precedent for "a bounded, independently
+ * superseded list of attested facts") rather than inventing a parallel
+ * shape, per the approved instruction to prefer existing conventions.
+ * `scope`/`workflow_stage`/`status` are deliberately absent — those are
+ * observation-specific concepts with no goal analogue.
+ *
+ * `state` reuses the existing five-state `ConfidenceState` taxonomy as-is
+ * (no new parallel confidence model) — approved after concluding it is not
+ * genuinely incompatible: `confirmed` (a specific goal was clearly stated)
+ * and `confirmed_absent` (the user explicitly said they have no particular
+ * goal, e.g. "I'm just experimenting") are the two states extraction is
+ * expected to actually produce; `declined` (an explicit refusal to say why
+ * they're here) is a real, if rare, third. `unresolved_no_visibility` has
+ * no natural trigger for this field — a user always has visibility into
+ * their own goal by definition — and `unknown` has none either, since
+ * Milestone 1 never asks about a goal in the first place (see §5's
+ * Interview Engine boundary below); both remain structurally available on
+ * the shared type without being artificially excluded, the same way
+ * ToolMention.confidence's full state space is never artificially narrowed
+ * even though only a subset is realistically ever produced in practice.
+ */
+export interface UserGoal {
+  goal_id: string
+  state: ConfidenceState
+  raw_text: string
+  /** id of the goal that replaced this one, or null if still active */
+  superseded_by: string | null
+  source_turn: number
+  source_statement: string
+}
+
 // ── Phase state, gates, completion (architecture doc §3, §11) ──────────────
 
 export const PHASES = [1, 2, 3, 4] as const
@@ -221,6 +269,15 @@ export interface StructuredUnderstanding {
   project_facts: ProjectFacts
   tool_mentions: ToolMention[]
   scoped_observations: ScopedObservation[]
+  /**
+   * Milestone 1 addition (2026-08-15). Additive and backward-compatible:
+   * a historical session's stored JSON predating this field deserializes
+   * with it defaulted to `[]` (see serialization.ts's
+   * deserializeStructuredUnderstanding), never `undefined` at runtime, and
+   * no backfill/migration rewrite of historical rows is performed or
+   * required.
+   */
+  user_goals: UserGoal[]
   current_phase: Phase
   gate_1_state: Gate1State
   gate_2_state: Gate2State

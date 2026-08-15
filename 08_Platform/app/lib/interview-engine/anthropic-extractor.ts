@@ -41,6 +41,18 @@ For each distinct fact-bearing statement in the turn, produce one candidate:
 - kind "tool_mention": the user names a tool/platform/app they used.
 - kind "scoped_observation": a fact about the project's process, review, or workflow (e.g. who reviewed it, what stage it's at, whether something happened).
 - kind "project_fact": a fact about the overall project's intended use, or the user's own role.
+- kind "user_goal": the user explicitly states what they came here wanting to know or achieve about THIS workflow's commercial readiness -- a question ("Can I use this commercially?", "Will my client own this?") and a declarative need ("My client needs proof this is cleared.", "I'm trying to figure out whether this is okay for a paid campaign.") are equally valid; capture either. This is distinct from project_fact's intended_use: intended_use describes what the OUTPUT is for (e.g. "an AI commercial for my client"); user_goal is what the USER wants to know or achieve regarding commercial readiness. A turn can and often does contain both at once -- propose both candidates when it does, never merge them into one.
+
+A turn stating two distinct goals joined by "and" is still TWO candidates, never one merged candidate, even though they appear in a single sentence.
+Example: "Can I use this commercially and do I own the copyright?"
+- One user_goal candidate for the commercial-use question, raw_text covering only that part of the sentence.
+- One user_goal candidate for the copyright-ownership question, raw_text covering only that part of the sentence.
+Do not produce a single candidate whose raw_text is the entire combined sentence -- that discards the fact that two distinct things were asked.
+
+Do NOT propose a user_goal candidate for:
+- An incidental question about CRC itself, this conversation, or how the process works -- e.g. "What does CRC do?", "Can I skip this question?", "Why are you asking me that?", "How long will this take?" are never user_goal candidates, regardless of how they're phrased.
+- A plain workflow statement with no accompanying question or stated need -- e.g. "I'm using Kling for a client ad." is a tool_mention (and possibly a project_fact), never also a user_goal, unless the user separately states something they want to know or achieve.
+- Anything not explicitly stated by the user this turn. Never infer a goal from unrelated workflow facts -- e.g. never propose "the user wants copyright assurance" just because they mentioned a client, a paid campaign, or any other fact that merely sounds adjacent to a commercial-readiness question.
 
 A single turn can and often does contain multiple distinct facts -- propose one candidate per distinct fact, never merge them into one, and never invent a fact the turn doesn't actually contain.
 
@@ -66,9 +78,9 @@ When kind is "tool_mention" and the user DIRECTLY states which specific plan/tie
 - Leave both pairs null/unset when the turn says nothing about plan tier or access surface for that tool -- never infer either from generic enthusiasm, unrelated context, or a different tool's plan.
 - These two hints are independent: a turn can state one, both, or neither for the same tool mention.
 
-If a turn contains nothing you can classify as one of the three kinds -- small talk, an incomplete thought, pure filler -- return no candidates for it, or set low_confidence: true on a best-effort candidate if you're genuinely unsure whether something is a real signal.`
+If a turn contains nothing you can classify as one of the four kinds -- small talk, an incomplete thought, pure filler -- return no candidates for it, or set low_confidence: true on a best-effort candidate if you're genuinely unsure whether something is a real signal.`
 
-const CANDIDATE_KIND_VALUES = ['tool_mention', 'scoped_observation', 'project_fact'] as const
+const CANDIDATE_KIND_VALUES = ['tool_mention', 'scoped_observation', 'project_fact', 'user_goal'] as const
 const OBSERVATION_SCOPE_VALUES = ['current_project', 'historical_project', 'general_practice'] as const
 const WORKFLOW_STAGE_VALUES = ['T0', 'T1', 'T2', 'T3', 'T4', 'T5'] as const
 const CONFIDENCE_HINT_VALUES = ['confirmed', 'confirmed_absent', 'unresolved_no_visibility', 'unknown', 'declined'] as const
@@ -173,6 +185,12 @@ const CANDIDATE_RESPONSE_SCHEMA = {
             description:
               "When kind is project_fact and fact_confidence_hint is confirmed: the value in the user's own words. Null otherwise.",
           },
+          goal_confidence_hint: {
+            type: ['string', 'null'],
+            enum: [...CONFIDENCE_HINT_VALUES, null],
+            description:
+              'When kind is user_goal: confirmed (the user clearly stated a specific goal or question about commercial readiness), confirmed_absent (the user explicitly said they have no particular goal, e.g. "I\'m just experimenting"), declined (the user explicitly declined to say why they\'re here). Null otherwise. The goal\'s own content belongs in raw_text, not here -- this field carries only the confidence state.',
+          },
           low_confidence: {
             type: 'boolean',
             description:
@@ -196,6 +214,7 @@ const CANDIDATE_RESPONSE_SCHEMA = {
           'raw_fact_field',
           'fact_confidence_hint',
           'fact_value_hint',
+          'goal_confidence_hint',
           'low_confidence',
         ],
         additionalProperties: false,
@@ -223,6 +242,7 @@ interface ParsedCandidate {
   raw_fact_field: (typeof PROJECT_FACT_FIELD_VALUES)[number] | null
   fact_confidence_hint: (typeof CONFIDENCE_HINT_VALUES)[number] | null
   fact_value_hint: string | null
+  goal_confidence_hint: (typeof CONFIDENCE_HINT_VALUES)[number] | null
   low_confidence: boolean
 }
 
@@ -245,6 +265,7 @@ export function toCandidateObservation(parsed: ParsedCandidate, turn: number): C
     raw_fact_field: parsed.raw_fact_field ?? undefined,
     fact_confidence_hint: parsed.fact_confidence_hint ?? undefined,
     fact_value_hint: parsed.fact_value_hint ?? undefined,
+    goal_confidence_hint: parsed.goal_confidence_hint ?? undefined,
     low_confidence: parsed.low_confidence || undefined,
   }
 }

@@ -43,15 +43,18 @@ import type {
   ScopedObservation,
   StructuredUnderstanding,
   ToolMention,
+  UserGoal,
   WorkflowStage,
 } from '@/types/interview-engine'
 import {
   addObservation,
   addToolMention,
+  addUserGoal,
   setIntendedUse,
   setWorkflowRole,
   supersedeObservation,
   supersedeToolMention,
+  supersedeUserGoal,
 } from './mutations'
 
 // ── Raw input ────────────────────────────────────────────────────────────────
@@ -89,7 +92,7 @@ export interface CandidateObservation {
   proposal_id: string
   turn: number
   raw_text: string
-  kind: 'tool_mention' | 'scoped_observation' | 'project_fact'
+  kind: 'tool_mention' | 'scoped_observation' | 'project_fact' | 'user_goal'
 
   /** kind === 'tool_mention' */
   raw_tool_name?: string
@@ -121,6 +124,26 @@ export interface CandidateObservation {
   raw_fact_field?: 'intended_use' | 'workflow_role'
   fact_confidence_hint?: ConfidenceState
   fact_value_hint?: string
+
+  /**
+   * kind === 'user_goal' (Milestone 1, 2026-08-15). The goal's own content
+   * lives in raw_text (already required, already verbatim) -- this hint
+   * carries only the confidence state, mirroring how observation_confidence_hint
+   * pairs with raw_text for scoped_observation rather than duplicating the
+   * content into a second field the way plan_tier_value_hint had to (plan
+   * tier needed its own value field because raw_tool_name already carries a
+   * different meaning; a user_goal candidate has no such competing use for
+   * raw_text). Set ONLY when the user explicitly stated a goal this turn --
+   * never inferred from unrelated workflow facts (e.g. never "the user
+   * wants copyright assurance" merely because a client was mentioned).
+   * `is_correction`/`correction_of_raw_text` (already generic fields above)
+   * are reused for goal corrections/retractions -- the same "the model
+   * flags it looks like a correction, deterministic code resolves which
+   * existing goal it targets" split already used for tool mentions.
+   */
+  goal_confidence_hint?: ConfidenceState
+  /** kind === 'user_goal'; set when this candidate corrects or retracts an existing goal */
+  supersedes_goal_id?: string
 
   /**
    * Set by the extractor when the signal itself is too weak/unclear to
@@ -228,6 +251,7 @@ export type ProposedFact =
   | { kind: 'tool_mention'; mention: ToolMention }
   | { kind: 'scoped_observation'; observation: ScopedObservation }
   | { kind: 'project_fact'; field: 'intended_use' | 'workflow_role'; value: Attested<string> }
+  | { kind: 'user_goal'; goal: UserGoal }
   | { kind: 'undetermined' }
 
 /**
@@ -343,7 +367,70 @@ export function attestCandidate(
     return { kind: 'project_fact', field: candidate.raw_fact_field, value }
   }
 
+  if (candidate.kind === 'user_goal') {
+    if (!candidate.goal_confidence_hint) return null
+    // Turn-qualified unconditionally, mirroring tool_mention's own minting
+    // rule exactly (not scoped_observation's bare-proposal_id-plus
+    // "-corrected"-suffix scheme): proposal_id is only a turn-LOCAL
+    // transport id the model restarts numbering from ("c1", "c2") every
+    // call, so two different turns can legitimately both propose "c1" --
+    // colliding under a bare id whether or not either is a correction.
+    // Turn-qualification alone already guarantees uniqueness, so this is
+    // one minting rule, not two, for the same reason tool_mention's own
+    // mentionId comment gives.
+    const goalId = `t${candidate.turn}-${candidate.proposal_id}`
+    return {
+      kind: 'user_goal',
+      goal: {
+        goal_id: goalId,
+        state: candidate.goal_confidence_hint,
+        raw_text: candidate.raw_text,
+        superseded_by: null,
+        source_turn: candidate.turn,
+        source_statement: candidate.raw_text,
+      },
+    }
+  }
+
   return null
+}
+
+// ── User goal identity resolution (mirrors resolveToolMentionTarget's own
+// is_correction-flagged-retraction step, simplified: user goals have no
+// normalization/canonicalization concept the way tool aliases do, so there
+// is no equivalent to that function's "Step 1 same-identity match" -- every
+// goal is already its own distinct statement, never re-resolved to a
+// canonical form. Deliberately does not implement the same-turn
+// retractedThisTurn double-supersede guard resolveToolMentionTarget carries
+// -- that guards a specific failure mode found live for tool corrections
+// (one sentence yielding two is_correction candidates that could ping-pong);
+// user goals are capped at MAX_ACTIVE_USER_GOALS (3) and this narrower
+// failure mode is accepted as an out-of-scope edge case for Milestone 1. ──
+
+/**
+ * Returns undefined for CREATE (no matching existing goal to target -- a
+ * genuinely new one) or the goal_id to supersede for a correction/
+ * retraction. The caller mints the actual replacement id; this function
+ * never does.
+ */
+function resolveUserGoalTarget(candidate: CandidateObservation, su: StructuredUnderstanding): string | undefined {
+  if (candidate.kind !== 'user_goal') return undefined
+  if (candidate.supersedes_goal_id) return candidate.supersedes_goal_id
+  if (!candidate.is_correction) return undefined
+
+  const active = su.user_goals.filter((g) => g.superseded_by === null)
+  const needle = (candidate.correction_of_raw_text ?? '').toLowerCase()
+  if (needle) {
+    const textMatches = active.filter((g) => needle.includes(g.raw_text.toLowerCase()))
+    if (textMatches.length === 1) return textMatches[0].goal_id
+  }
+
+  // Vague back-reference ("never mind that") with only one other active
+  // goal to plausibly mean -- same fallback shape resolveToolMentionTarget
+  // uses for its own Step 2. Never guessed when more than one is active.
+  if (active.length === 1) return active[0].goal_id
+
+  return undefined
 }
 
 // ── Tool mention identity resolution (stage 3.5) ────────────────────────────
@@ -489,7 +576,7 @@ export interface ExtractionDiagnostic {
 function classifyMutationError(err: unknown): { reason_code: RejectedReasonCode; reason: string } {
   const reason = err instanceof Error ? err.message : String(err)
   if (/already superseded/.test(reason)) return { reason_code: 'MUTATION_TARGET_ALREADY_SUPERSEDED', reason }
-  if (/unknown (observation|tool mention)/.test(reason)) return { reason_code: 'MUTATION_TARGET_NOT_FOUND', reason }
+  if (/unknown (observation|tool mention|user goal)/.test(reason)) return { reason_code: 'MUTATION_TARGET_NOT_FOUND', reason }
   if (/already exists/.test(reason)) return { reason_code: 'MUTATION_DUPLICATE_ID', reason }
   return { reason_code: 'MUTATION_ERROR_OTHER', reason }
 }
@@ -520,8 +607,18 @@ export async function runExtractionPipeline(
   const retractedThisTurn = new Set<string>()
 
   for (const rawCandidate of candidates) {
-    const supersedesId = resolveToolMentionTarget(rawCandidate, current, retractedThisTurn)
-    const candidate = supersedesId ? { ...rawCandidate, supersedes_tool_mention_id: supersedesId } : rawCandidate
+    // Exactly one of these two resolvers can ever return a value for a
+    // given candidate -- resolveToolMentionTarget short-circuits on
+    // candidate.kind !== 'tool_mention', resolveUserGoalTarget on
+    // candidate.kind !== 'user_goal' -- mirroring the existing
+    // single-resolver call shape rather than branching on kind here.
+    const supersedesToolId = resolveToolMentionTarget(rawCandidate, current, retractedThisTurn)
+    const supersedesGoalId = resolveUserGoalTarget(rawCandidate, current)
+    const candidate = supersedesToolId
+      ? { ...rawCandidate, supersedes_tool_mention_id: supersedesToolId }
+      : supersedesGoalId
+        ? { ...rawCandidate, supersedes_goal_id: supersedesGoalId }
+        : rawCandidate
 
     const normalization = normalizeCandidate(candidate)
     const proposedFact = attestCandidate(candidate, normalization)
@@ -567,6 +664,11 @@ export async function runExtractionPipeline(
             ? setIntendedUse(current, proposedFact.value, candidate.turn, candidate.raw_text)
             : setWorkflowRole(current, proposedFact.value, candidate.turn, candidate.raw_text)
         appliedIdentifier = `project_facts.${proposedFact.field}`
+      } else if (proposedFact.kind === 'user_goal') {
+        current = candidate.supersedes_goal_id
+          ? supersedeUserGoal(current, candidate.supersedes_goal_id, proposedFact.goal)
+          : addUserGoal(current, proposedFact.goal)
+        appliedIdentifier = proposedFact.goal.goal_id
       } else {
         // attestCandidate never actually returns {kind: 'undetermined'} (it
         // returns null instead, handled above) -- this branch exists only

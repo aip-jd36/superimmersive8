@@ -25,6 +25,7 @@ import type {
   ScopedObservation,
   StructuredUnderstanding,
   ToolMention,
+  UserGoal,
 } from '@/types/interview-engine'
 
 // ── Scoped observations ─────────────────────────────────────────────────────
@@ -209,6 +210,97 @@ export function supersedeToolMention(
       ...su.tool_mentions.map((m) =>
         m.mention_id === targetId ? { ...m, superseded_by: replacement.mention_id } : m,
       ),
+      replacement,
+    ],
+  }
+}
+
+// ── User goals (Milestone 1, 2026-08-15) ────────────────────────────────────
+
+/**
+ * Max concurrent ACTIVE (non-superseded) user goals a session may hold --
+ * PM-approved cap, 2026-08-15. Superseding an existing goal never grows the
+ * active count (one active entry is replaced by another), so the cap is
+ * enforced only here, in addUserGoal, never in supersedeUserGoal -- the
+ * same "cap growth vs. supersession" distinction every other bounded list
+ * in this codebase already respects (e.g. boundaries.ts's per-signal caps
+ * are untouched by ordinary correction/supersession elsewhere).
+ */
+export const MAX_ACTIVE_USER_GOALS = 3
+
+/**
+ * Add one new user goal. Mirrors addObservation's own invariants exactly
+ * (duplicate-id / already-superseded-on-add rejection), plus the
+ * PM-approved active-goal cap: a 4th concurrent active goal is rejected
+ * rather than silently accepted or silently dropped -- Extraction's own
+ * pipeline (extraction.ts) classifies this rejection the same way it
+ * already classifies every other mutation-invariant violation (via
+ * classifyMutationError's MUTATION_ERROR_OTHER fallback), so a 4th stated
+ * goal surfaces as a visible, diagnosable rejection, never a silent no-op.
+ */
+export function addUserGoal(su: StructuredUnderstanding, goal: UserGoal): StructuredUnderstanding {
+  if (su.user_goals.some((g) => g.goal_id === goal.goal_id)) {
+    throw new Error(`User goal id already exists: ${goal.goal_id}`)
+  }
+  if (goal.superseded_by !== null) {
+    throw new Error(`A newly added user goal cannot already be superseded (goal_id: ${goal.goal_id})`)
+  }
+  const activeCount = su.user_goals.filter((g) => g.superseded_by === null).length
+  if (activeCount >= MAX_ACTIVE_USER_GOALS) {
+    throw new Error(
+      `Cannot add user goal ${goal.goal_id}: maximum of ${MAX_ACTIVE_USER_GOALS} active user goals already reached. ` +
+        `A correction to an existing goal must supersede it (supersedeUserGoal), not add a new one.`,
+    )
+  }
+  return {
+    ...su,
+    user_goals: [...su.user_goals, goal],
+  }
+}
+
+/**
+ * Supersede the current active user goal identified by targetId with a
+ * new one -- same supersede-and-mark, never-delete-or-edit discipline as
+ * supersedeObservation/supersedeToolMention, same invariants (target must
+ * exist and must currently be the active head of its own chain). Used for
+ * BOTH a content correction ("actually I just need to know if my client
+ * can use it") and a retraction/decline (a replacement carrying
+ * state: 'declined' or 'confirmed_absent') -- there is no separate retract
+ * function, mirroring ToolMention's own precedent (which also has no
+ * dedicated retract function; correction and retraction are the same
+ * supersede-with-a-new-attested-value mechanism, differing only in what
+ * state that value carries), not ScopedObservation's separate
+ * retractObservation convenience wrapper.
+ */
+export function supersedeUserGoal(
+  su: StructuredUnderstanding,
+  targetId: string,
+  replacement: UserGoal,
+): StructuredUnderstanding {
+  const target = su.user_goals.find((g) => g.goal_id === targetId)
+  if (!target) {
+    throw new Error(`Cannot supersede unknown user goal: ${targetId}`)
+  }
+  if (target.superseded_by !== null) {
+    throw new Error(
+      `Cannot supersede user goal ${targetId}: it is already superseded by ${target.superseded_by}. ` +
+      `Corrections must target the current head of the chain, not a historical snapshot.`,
+    )
+  }
+  if (replacement.goal_id === targetId) {
+    throw new Error(`Replacement user goal must have a different id than the goal it supersedes: ${targetId}`)
+  }
+  if (su.user_goals.some((g) => g.goal_id === replacement.goal_id)) {
+    throw new Error(`Replacement user goal id already exists: ${replacement.goal_id}`)
+  }
+  if (replacement.superseded_by !== null) {
+    throw new Error(`A newly added replacement user goal cannot already be superseded (goal_id: ${replacement.goal_id})`)
+  }
+
+  return {
+    ...su,
+    user_goals: [
+      ...su.user_goals.map((g) => (g.goal_id === targetId ? { ...g, superseded_by: replacement.goal_id } : g)),
       replacement,
     ],
   }

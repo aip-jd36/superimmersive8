@@ -43,7 +43,8 @@ const unknownToolSU: StructuredUnderstanding = {
     },
   ],
   scoped_observations: [],
-  current_phase: 2,
+  user_goals: [],
+    current_phase: 2,
   gate_1_state: 'met',
   gate_2_state: 'not_yet_stable',
   completion_reason: null,
@@ -69,7 +70,8 @@ const unresolvedAliasSU: StructuredUnderstanding = {
     },
   ],
   scoped_observations: [],
-  current_phase: 2,
+  user_goals: [],
+    current_phase: 2,
   gate_1_state: 'met',
   gate_2_state: 'not_yet_stable',
   completion_reason: null,
@@ -95,7 +97,8 @@ const sparseSingleToolSU: StructuredUnderstanding = {
     },
   ],
   scoped_observations: [],
-  current_phase: 1,
+  user_goals: [],
+    current_phase: 1,
   gate_1_state: 'not_met',
   gate_2_state: 'not_yet_stable',
   completion_reason: null,
@@ -230,5 +233,15 @@ describe('runCRCConversation -- negative assertions', () => {
   test('ProjectionOutput never contains a "topics that often come up" field -- structurally absent, not just empty', () => {
     const { output } = runCRCConversation(DIALOGUE_FIXTURES.rich_signal.structured_understanding, MATRIX_FIXTURE)
     expect(Object.keys(output).sort()).toEqual(['closing_cta', 'knowledge_items', 'opening_line', 'understood_summary'])
+  })
+
+  test('user_goals has zero effect on final ProjectionOutput (Milestone 1 hard scope boundary, 2026-08-15) -- byte-identical output whether populated or empty', () => {
+    const goal = { goal_id: 'g-1', state: 'confirmed' as const, raw_text: 'Can I use this commercially and do I own the copyright?', superseded_by: null, source_turn: 1, source_statement: 'placeholder' }
+    for (const fixture of Object.values(DIALOGUE_FIXTURES)) {
+      const withoutGoals = runCRCConversation({ ...fixture.structured_understanding, user_goals: [] }, MATRIX_FIXTURE)
+      const withGoals = runCRCConversation({ ...fixture.structured_understanding, user_goals: [goal] }, MATRIX_FIXTURE)
+      expect(withGoals.output).toEqual(withoutGoals.output)
+      expect(JSON.stringify(withGoals.output)).not.toContain('Can I use this commercially')
+    }
   })
 })

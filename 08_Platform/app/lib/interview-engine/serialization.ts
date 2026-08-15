@@ -18,8 +18,22 @@ export function serializeStructuredUnderstanding(su: StructuredUnderstanding): s
   return JSON.stringify(su)
 }
 
+/**
+ * `user_goals` defaulted to `[]` when absent (CRC User Goal — Milestone 1,
+ * 2026-08-15): a session persisted before this field existed round-trips
+ * through a plain JSON.parse with no `user_goals` key at all, which would
+ * otherwise leave it `undefined` at runtime despite the type claiming
+ * `UserGoal[]` -- any code that reads `su.user_goals` as an array (e.g.
+ * `.filter()`) would throw on such a session. This is the single funnel
+ * every StructuredUnderstanding load path (in particular
+ * supabase-session-store.ts) already goes through, so the default lives
+ * here once rather than at each call site. No other field needs the same
+ * treatment: every other array/object field on this type has existed since
+ * before any session currently in the database was created.
+ */
 export function deserializeStructuredUnderstanding(json: string): StructuredUnderstanding {
-  return JSON.parse(json) as StructuredUnderstanding
+  const parsed = JSON.parse(json) as StructuredUnderstanding
+  return { ...parsed, user_goals: parsed.user_goals ?? [] }
 }
 
 /**

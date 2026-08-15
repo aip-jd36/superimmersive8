@@ -17,6 +17,7 @@ function emptySU(): StructuredUnderstanding {
     },
     tool_mentions: [],
     scoped_observations: [],
+    user_goals: [],
     current_phase: 1,
     gate_1_state: 'not_met',
     gate_2_state: 'not_yet_stable',

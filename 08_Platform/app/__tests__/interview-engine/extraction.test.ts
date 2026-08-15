@@ -23,6 +23,7 @@ function emptySU(): StructuredUnderstanding {
     },
     tool_mentions: [],
     scoped_observations: [],
+    user_goals: [],
     current_phase: 1,
     gate_1_state: 'not_met',
     gate_2_state: 'not_yet_stable',
@@ -38,6 +39,17 @@ function toolCandidate(overrides: Partial<CandidateObservation> = {}): Candidate
     raw_text: 'We used Runway.',
     kind: 'tool_mention',
     raw_tool_name: 'Runway',
+    ...overrides,
+  }
+}
+
+function goalCandidate(overrides: Partial<CandidateObservation> = {}): CandidateObservation {
+  return {
+    proposal_id: 'c1',
+    turn: 1,
+    raw_text: 'Can I use this commercially?',
+    kind: 'user_goal',
+    goal_confidence_hint: 'confirmed',
     ...overrides,
   }
 }
@@ -314,5 +326,182 @@ describe('immutability', () => {
     const before = JSON.parse(JSON.stringify(su))
     await runExtractionPipeline(su, { turn: 1, text: 'We used Runway.' }, constantExtractor([toolCandidate()]))
     expect(su).toEqual(before)
+  })
+})
+
+describe('user_goal extraction pipeline (Milestone 1, 2026-08-15)', () => {
+  test('one goal candidate is accepted and applied', async () => {
+    const { updated, diagnostics } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'Can I use this commercially?' },
+      constantExtractor([goalCandidate()]),
+    )
+    expect(updated.user_goals).toHaveLength(1)
+    expect(updated.user_goals[0]).toMatchObject({ raw_text: 'Can I use this commercially?', state: 'confirmed', superseded_by: null })
+    expect(diagnostics[0].decision.outcome).toBe('accepted')
+  })
+
+  test('a declarative-need goal (not phrased as a question) is accepted identically to a question-phrased one', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'My client needs proof this is cleared.' },
+      constantExtractor([goalCandidate({ raw_text: 'My client needs proof this is cleared.' })]),
+    )
+    expect(updated.user_goals[0].raw_text).toBe('My client needs proof this is cleared.')
+    expect(updated.user_goals[0].state).toBe('confirmed')
+  })
+
+  test('two goals proposed in one turn are both applied as distinct, independent goals -- never merged', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'Can I use this commercially and do I own the copyright?' },
+      constantExtractor([
+        goalCandidate({ proposal_id: 'c1', raw_text: 'Can I use this commercially' }),
+        goalCandidate({ proposal_id: 'c2', raw_text: 'do I own the copyright' }),
+      ]),
+    )
+    const active = updated.user_goals.filter((g) => g.superseded_by === null)
+    expect(active).toHaveLength(2)
+    expect(active.map((g) => g.raw_text).sort()).toEqual(['Can I use this commercially', 'do I own the copyright'])
+  })
+
+  test('a goal introduced on a later turn is appended alongside an earlier unrelated goal', async () => {
+    const turn1 = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'Can I use this commercially?' },
+      constantExtractor([goalCandidate({ proposal_id: 'c1', turn: 1, raw_text: 'Can I use this commercially?' })]),
+    )
+    const turn2 = await runExtractionPipeline(
+      turn1.updated,
+      { turn: 3, text: 'Can I also post this on YouTube?' },
+      constantExtractor([goalCandidate({ proposal_id: 'c1', turn: 3, raw_text: 'Can I also post this on YouTube?' })]),
+    )
+    expect(turn2.updated.user_goals.filter((g) => g.superseded_by === null)).toHaveLength(2)
+  })
+
+  test('a correction (is_correction + correction_of_raw_text matching an existing goal) supersedes that specific goal, not a fresh add', async () => {
+    const turn1 = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'Do I own the copyright?' },
+      constantExtractor([goalCandidate({ proposal_id: 'c1', turn: 1, raw_text: 'Do I own the copyright?' })]),
+    )
+    const turn2 = await runExtractionPipeline(
+      turn1.updated,
+      { turn: 2, text: "Actually, I don't care about copyright -- I just need to know if my client can use it." },
+      constantExtractor([
+        goalCandidate({
+          proposal_id: 'c1',
+          turn: 2,
+          raw_text: 'I just need to know if my client can use it',
+          is_correction: true,
+          correction_of_raw_text: 'copyright',
+        }),
+      ]),
+    )
+    const active = turn2.updated.user_goals.filter((g) => g.superseded_by === null)
+    expect(active).toHaveLength(1)
+    expect(active[0].raw_text).toBe('I just need to know if my client can use it')
+    const superseded = turn2.updated.user_goals.find((g) => g.raw_text === 'Do I own the copyright?')
+    expect(superseded?.superseded_by).not.toBeNull()
+  })
+
+  test('retraction/decline (is_correction targeting the only active goal, declined state) supersedes with a declined replacement, not a delete', async () => {
+    const turn1 = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'Do I own the copyright?' },
+      constantExtractor([goalCandidate({ proposal_id: 'c1', turn: 1, raw_text: 'Do I own the copyright?' })]),
+    )
+    const turn2 = await runExtractionPipeline(
+      turn1.updated,
+      { turn: 2, text: "Never mind, forget I asked." },
+      constantExtractor([
+        goalCandidate({
+          proposal_id: 'c1',
+          turn: 2,
+          raw_text: 'Never mind, forget I asked.',
+          goal_confidence_hint: 'declined',
+          is_correction: true,
+          correction_of_raw_text: 'that was wrong',
+        }),
+      ]),
+    )
+    const active = turn2.updated.user_goals.filter((g) => g.superseded_by === null)
+    expect(active).toHaveLength(1)
+    expect(active[0].state).toBe('declined')
+    const prior = turn2.updated.user_goals.find((g) => g.raw_text === 'Do I own the copyright?')
+    expect(prior?.superseded_by).not.toBeNull()
+  })
+
+  test('a confirmed_absent goal ("I am just experimenting") is a valid, distinct attested state, not dropped', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: "I'm just experimenting, no particular question." },
+      constantExtractor([goalCandidate({ goal_confidence_hint: 'confirmed_absent', raw_text: "I'm just experimenting, no particular question." })]),
+    )
+    expect(updated.user_goals[0].state).toBe('confirmed_absent')
+  })
+
+  test('a 4th concurrent active goal is rejected with a diagnosable reason, not silently dropped or accepted', async () => {
+    let su = emptySU()
+    for (let i = 1; i <= 3; i++) {
+      const result = await runExtractionPipeline(
+        su,
+        { turn: i, text: `Goal ${i}` },
+        constantExtractor([goalCandidate({ proposal_id: `c${i}`, turn: i, raw_text: `Goal ${i}` })]),
+      )
+      su = result.updated
+    }
+    const { updated, diagnostics } = await runExtractionPipeline(
+      su,
+      { turn: 4, text: 'Goal 4' },
+      constantExtractor([goalCandidate({ proposal_id: 'c4', turn: 4, raw_text: 'Goal 4' })]),
+    )
+    expect(updated.user_goals.filter((g) => g.superseded_by === null)).toHaveLength(3)
+    const decision = diagnostics[0].decision as { outcome: string; reason_code: string }
+    expect(decision.outcome).toBe('rejected')
+    expect(decision.reason_code).toBe('MUTATION_ERROR_OTHER')
+  })
+
+  test('no incidental-question candidate proposed -- the extractor simply never emits one, and nothing is captured', async () => {
+    // Mirrors how "What does CRC do?" is meant to be handled: the extractor
+    // (schema/prompt-guided, see anthropic-extractor.ts) proposes NO
+    // user_goal candidate at all for it. This test proves the pipeline side
+    // of that contract: when zero user_goal candidates are proposed for a
+    // turn, user_goals stays exactly as it was -- no candidate, no goal,
+    // ever, by construction.
+    const { updated } = await runExtractionPipeline(emptySU(), { turn: 1, text: 'What does CRC do?' }, constantExtractor([]))
+    expect(updated.user_goals).toEqual([])
+  })
+
+  test('an ordinary workflow statement with no accompanying goal produces zero user_goal candidates alongside its tool_mention', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I am using Kling for a client ad.' },
+      constantExtractor([toolCandidate({ raw_tool_name: 'Kling', raw_text: 'Kling' })]),
+    )
+    expect(updated.tool_mentions).toHaveLength(1)
+    expect(updated.user_goals).toEqual([])
+  })
+
+  test('no silent inference -- a low_confidence goal candidate is deferred, never applied as a fact', async () => {
+    const { updated, diagnostics } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'hmm, not sure what I want to know' },
+      constantExtractor([goalCandidate({ low_confidence: true, goal_confidence_hint: undefined })]),
+    )
+    expect(updated.user_goals).toEqual([])
+    expect(diagnostics[0].decision.outcome).toBe('deferred')
+  })
+
+  test('a goal candidate missing goal_confidence_hint is deferred as unclassifiable, never applied', async () => {
+    const { updated, diagnostics } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'something ambiguous' },
+      constantExtractor([goalCandidate({ goal_confidence_hint: undefined })]),
+    )
+    expect(updated.user_goals).toEqual([])
+    const decision = diagnostics[0].decision as { outcome: string; reason_code: string }
+    expect(decision.outcome).toBe('deferred')
+    expect(decision.reason_code).toBe('CANDIDATE_UNCLASSIFIABLE')
   })
 })

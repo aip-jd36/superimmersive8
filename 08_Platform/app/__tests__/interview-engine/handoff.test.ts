@@ -55,6 +55,7 @@ function baseSU(overrides: Partial<StructuredUnderstanding> = {}): StructuredUnd
     project_facts: projectFacts(),
     tool_mentions: [],
     scoped_observations: [],
+    user_goals: [],
     current_phase: 2,
     gate_1_state: 'met',
     gate_2_state: 'stable',
@@ -315,5 +316,21 @@ describe('serialization', () => {
     const handoff = buildRetrievalHandoff(su)
     const restored = deserializeRetrievalHandoff(serializeRetrievalHandoff(handoff))
     expect(restored).toEqual(handoff)
+  })
+})
+
+describe('user_goals never reach RetrievalHandoff (Milestone 1 hard scope boundary, 2026-08-15 -- Retrieval and Projection unaffected by construction)', () => {
+  test('RetrievalHandoff output is byte-identical whether user_goals is empty or populated', () => {
+    const goal = { goal_id: 'g-1', state: 'confirmed' as const, raw_text: 'Can I use this commercially?', superseded_by: null, source_turn: 1, source_statement: 'placeholder' }
+    const withoutGoals = baseSU({ user_goals: [] })
+    const withGoals = baseSU({ user_goals: [goal] })
+    expect(buildRetrievalHandoff(withoutGoals)).toEqual(buildRetrievalHandoff(withGoals))
+  })
+
+  test('RetrievalHandoff has no user_goals key at all -- this module enumerates specific fields, never spreads StructuredUnderstanding', () => {
+    const goal = { goal_id: 'g-1', state: 'confirmed' as const, raw_text: 'Can I use this commercially?', superseded_by: null, source_turn: 1, source_statement: 'placeholder' }
+    const handoff = buildRetrievalHandoff(baseSU({ user_goals: [goal] }))
+    expect(Object.keys(handoff)).not.toContain('user_goals')
+    expect(JSON.stringify(handoff)).not.toContain('Can I use this commercially')
   })
 })

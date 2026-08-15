@@ -54,6 +54,7 @@ function baseSU(overrides: Partial<StructuredUnderstanding> = {}): StructuredUnd
     project_facts: projectFacts(),
     tool_mentions: [],
     scoped_observations: [],
+    user_goals: [],
     current_phase: 2,
     gate_1_state: 'not_met',
     gate_2_state: 'not_yet_stable',
@@ -371,5 +372,44 @@ describe('evaluateGate2', () => {
     expect(result.state).toBe('not_yet_stable')
     expect(result.reason_code).toBe('DECLINE_BLOCKS_STABILITY')
     expect(result.state).not.toBe('stable')
+  })
+})
+
+describe('user_goals has zero effect on Gate 1 or Gate 2 (Milestone 1 hard scope boundary, 2026-08-15)', () => {
+  const goal = { goal_id: 'g-1', state: 'confirmed' as const, raw_text: 'Can I use this commercially?', superseded_by: null, source_turn: 1, source_statement: 'placeholder' }
+
+  test('Gate 1 result is byte-identical whether user_goals is empty or populated, understanding otherwise unmet', () => {
+    const withoutGoals = baseSU({ user_goals: [] })
+    const withGoals = baseSU({ user_goals: [goal] })
+    expect(evaluateGate1(withoutGoals)).toEqual(evaluateGate1(withGoals))
+  })
+
+  test('Gate 1 result is byte-identical whether user_goals is empty or populated, understanding met', () => {
+    const met = {
+      tool_mentions: [toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'runway-gen3' } })],
+    }
+    const withoutGoals = baseSU({ ...met, user_goals: [] })
+    const withGoals = baseSU({ ...met, user_goals: [goal] })
+    const result = evaluateGate1(withGoals)
+    expect(result.state).toBe('met') // sanity check this scenario is actually the "met" case
+    expect(evaluateGate1(withoutGoals)).toEqual(evaluateGate1(withGoals))
+  })
+
+  test('Gate 2 result is byte-identical whether user_goals changed between snapshots or not -- goals are not a tracked field', () => {
+    const previous = baseSU({ user_goals: [] })
+    const currentNoGoalChange = baseSU({ user_goals: [] })
+    const currentWithNewGoal = baseSU({ user_goals: [goal] })
+    const resultA = evaluateGate2(previous, currentNoGoalChange)
+    const resultB = evaluateGate2(previous, currentWithNewGoal)
+    expect(resultA).toEqual(resultB)
+    expect(resultB.changed_fields).not.toContain(expect.stringContaining('user_goal'))
+  })
+
+  test('Gate 2 changed_fields never mentions user_goals, even when every other field is also held identical', () => {
+    const su = baseSU({ user_goals: [] })
+    const suWithGoal = { ...su, user_goals: [goal] }
+    const result = evaluateGate2(su, suWithGoal)
+    expect(result.state).toBe('stable')
+    expect(result.changed_fields).toEqual([])
   })
 })

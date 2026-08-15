@@ -117,6 +117,7 @@ function buildBaseStructuredUnderstanding(): StructuredUnderstanding {
         source_statement: "I'd rather not get into that one.",
       },
     ],
+    user_goals: [],
     current_phase: 2,
     gate_1_state: 'met',
     gate_2_state: 'not_yet_stable',

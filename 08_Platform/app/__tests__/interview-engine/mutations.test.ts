@@ -15,16 +15,19 @@
  * Run: npx jest __tests__/interview-engine/mutations.test.ts
  */
 
-import type { ScopedObservation, StructuredUnderstanding, ToolMention } from '../../types/interview-engine'
+import type { ScopedObservation, StructuredUnderstanding, ToolMention, UserGoal } from '../../types/interview-engine'
 import {
   addObservation,
   addObservations,
   addToolMention,
+  addUserGoal,
+  MAX_ACTIVE_USER_GOALS,
   retractObservation,
   setIntendedUse,
   setWorkflowRole,
   supersedeObservation,
   supersedeToolMention,
+  supersedeUserGoal,
 } from '../../lib/interview-engine/mutations'
 
 function emptyStructuredUnderstanding(): StructuredUnderstanding {
@@ -35,6 +38,7 @@ function emptyStructuredUnderstanding(): StructuredUnderstanding {
     },
     tool_mentions: [],
     scoped_observations: [],
+    user_goals: [],
     current_phase: 1,
     gate_1_state: 'not_met',
     gate_2_state: 'not_yet_stable',
@@ -65,6 +69,17 @@ function toolMention(overrides: Partial<ToolMention> & Pick<ToolMention, 'mentio
     source_turn: 1,
     source_statement: 'placeholder statement',
     superseded_by: null,
+    ...overrides,
+  }
+}
+
+function userGoal(overrides: Partial<UserGoal> & Pick<UserGoal, 'goal_id'>): UserGoal {
+  return {
+    state: 'confirmed',
+    raw_text: 'placeholder goal',
+    superseded_by: null,
+    source_turn: 1,
+    source_statement: 'placeholder goal',
     ...overrides,
   }
 }
@@ -278,5 +293,122 @@ describe('setIntendedUse / setWorkflowRole', () => {
     const second = setIntendedUse(first, { state: 'confirmed', value: 'Paid campaign' }, 2, "Actually, it's a paid campaign.")
     expect(second.project_facts.intended_use.attestation).toEqual({ state: 'confirmed', value: 'Paid campaign' })
     expect(second.project_facts.intended_use.source_turn).toBe(2)
+  })
+})
+
+describe('user goals (Milestone 1, 2026-08-15)', () => {
+  test('addUserGoal adds one new goal', () => {
+    const su = addUserGoal(emptyStructuredUnderstanding(), userGoal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?' }))
+    expect(su.user_goals).toHaveLength(1)
+    expect(su.user_goals[0]).toMatchObject({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', superseded_by: null })
+  })
+
+  test('addUserGoal rejects a duplicate goal_id, mirroring addObservation', () => {
+    const su = addUserGoal(emptyStructuredUnderstanding(), userGoal({ goal_id: 'g-1' }))
+    expect(() => addUserGoal(su, userGoal({ goal_id: 'g-1' }))).toThrow(/already exists/)
+  })
+
+  test('addUserGoal rejects a goal that is already superseded on add, mirroring addObservation', () => {
+    expect(() => addUserGoal(emptyStructuredUnderstanding(), userGoal({ goal_id: 'g-1', superseded_by: 'g-2' }))).toThrow(
+      /cannot already be superseded/,
+    )
+  })
+
+  test('supersedeUserGoal adds the replacement and marks the prior, without deleting it -- correction case', () => {
+    const su = addUserGoal(emptyStructuredUnderstanding(), userGoal({ goal_id: 'g-1', raw_text: 'Do I own the copyright?' }))
+    const corrected = supersedeUserGoal(
+      su,
+      'g-1',
+      userGoal({ goal_id: 'g-2', raw_text: 'Actually, I just need to know if my client can use it.' }),
+    )
+    expect(corrected.user_goals).toHaveLength(2)
+    const prior = corrected.user_goals.find((g) => g.goal_id === 'g-1')
+    const replacement = corrected.user_goals.find((g) => g.goal_id === 'g-2')
+    expect(prior?.superseded_by).toBe('g-2')
+    expect(prior?.raw_text).toBe('Do I own the copyright?')
+    expect(replacement?.superseded_by).toBeNull()
+  })
+
+  test('supersedeUserGoal with a declined-state replacement is the retraction/decline mechanism -- no separate retract function', () => {
+    const su = addUserGoal(emptyStructuredUnderstanding(), userGoal({ goal_id: 'g-1', raw_text: 'Do I own the copyright?' }))
+    const retracted = supersedeUserGoal(su, 'g-1', userGoal({ goal_id: 'g-2', state: 'declined', raw_text: "I'd rather not say." }))
+    const prior = retracted.user_goals.find((g) => g.goal_id === 'g-1')
+    const replacement = retracted.user_goals.find((g) => g.goal_id === 'g-2')
+    expect(prior?.superseded_by).toBe('g-2')
+    expect(replacement?.state).toBe('declined')
+  })
+
+  test('supersedeUserGoal rejects targeting an unknown goal_id', () => {
+    expect(() => supersedeUserGoal(emptyStructuredUnderstanding(), 'nonexistent', userGoal({ goal_id: 'g-2' }))).toThrow(
+      /unknown user goal/,
+    )
+  })
+
+  test('supersedeUserGoal rejects targeting an already-superseded goal -- must extend the chain from its current head', () => {
+    const su = addUserGoal(emptyStructuredUnderstanding(), userGoal({ goal_id: 'g-1' }))
+    const once = supersedeUserGoal(su, 'g-1', userGoal({ goal_id: 'g-2' }))
+    expect(() => supersedeUserGoal(once, 'g-1', userGoal({ goal_id: 'g-3' }))).toThrow(/already superseded/)
+  })
+
+  test('two goals stated in one turn -- both independently represented, neither collapsed or ranked', () => {
+    let su = emptyStructuredUnderstanding()
+    su = addUserGoal(su, userGoal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?' }))
+    su = addUserGoal(su, userGoal({ goal_id: 'g-2', raw_text: 'Do I own the copyright?' }))
+    const active = su.user_goals.filter((g) => g.superseded_by === null)
+    expect(active).toHaveLength(2)
+    expect(active.map((g) => g.raw_text).sort()).toEqual(['Can I use this commercially?', 'Do I own the copyright?'])
+  })
+
+  test('a goal introduced on a later turn is appended, not merged with an earlier unrelated goal', () => {
+    let su = emptyStructuredUnderstanding()
+    su = addUserGoal(su, userGoal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', source_turn: 1 }))
+    su = addUserGoal(su, userGoal({ goal_id: 'g-2', raw_text: 'Can I post this on YouTube?', source_turn: 3 }))
+    expect(su.user_goals.filter((g) => g.superseded_by === null)).toHaveLength(2)
+    expect(su.user_goals.find((g) => g.goal_id === 'g-2')?.source_turn).toBe(3)
+  })
+
+  test('declarative-need goal (not phrased as a question) is represented identically to a question-phrased goal', () => {
+    const su = addUserGoal(
+      emptyStructuredUnderstanding(),
+      userGoal({ goal_id: 'g-1', raw_text: 'My client needs proof this is cleared.' }),
+    )
+    expect(su.user_goals[0].state).toBe('confirmed')
+    expect(su.user_goals[0].raw_text).toBe('My client needs proof this is cleared.')
+  })
+
+  test(`addUserGoal allows exactly ${MAX_ACTIVE_USER_GOALS} concurrent active goals`, () => {
+    let su = emptyStructuredUnderstanding()
+    for (let i = 1; i <= MAX_ACTIVE_USER_GOALS; i++) {
+      su = addUserGoal(su, userGoal({ goal_id: `g-${i}`, raw_text: `Goal ${i}` }))
+    }
+    expect(su.user_goals.filter((g) => g.superseded_by === null)).toHaveLength(MAX_ACTIVE_USER_GOALS)
+  })
+
+  test('a 4th concurrent active goal is rejected, not silently dropped or silently accepted', () => {
+    let su = emptyStructuredUnderstanding()
+    for (let i = 1; i <= MAX_ACTIVE_USER_GOALS; i++) {
+      su = addUserGoal(su, userGoal({ goal_id: `g-${i}`, raw_text: `Goal ${i}` }))
+    }
+    expect(() => addUserGoal(su, userGoal({ goal_id: 'g-4', raw_text: 'Goal 4' }))).toThrow(/maximum of 3 active user goals/)
+    // Rejected, not silently applied -- the caller (extraction.ts) sees the
+    // thrown error and classifies it as a diagnosable rejection; the
+    // in-memory su itself is never mutated by the failed attempt (same
+    // "return a new object or throw, never partially mutate" discipline as
+    // every other mutation in this module).
+    expect(su.user_goals.filter((g) => g.superseded_by === null)).toHaveLength(MAX_ACTIVE_USER_GOALS)
+  })
+
+  test('superseding an existing goal never counts against the active-goal cap -- a correction is not a new goal', () => {
+    let su = emptyStructuredUnderstanding()
+    for (let i = 1; i <= MAX_ACTIVE_USER_GOALS; i++) {
+      su = addUserGoal(su, userGoal({ goal_id: `g-${i}`, raw_text: `Goal ${i}` }))
+    }
+    // At the cap -- a correction to one of the existing 3 must still succeed.
+    const corrected = supersedeUserGoal(su, 'g-1', userGoal({ goal_id: 'g-1-corrected', raw_text: 'Corrected goal 1' }))
+    expect(corrected.user_goals.filter((g) => g.superseded_by === null)).toHaveLength(MAX_ACTIVE_USER_GOALS)
+  })
+
+  test('no goal is ever fabricated by the mutation layer itself -- an empty StructuredUnderstanding has zero user_goals', () => {
+    expect(emptyStructuredUnderstanding().user_goals).toEqual([])
   })
 })
