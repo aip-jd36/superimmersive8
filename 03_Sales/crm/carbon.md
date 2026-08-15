@@ -8,9 +8,9 @@ contacts:
 slug: carbon
 stage: meeting_scheduled
 source: inbound
-next_action: "Confirm relationship/context with Damien before the call (still unresolved); identify who Matthew Crescenzo is before the call"
-next_action_date: 2026-08-13
-last_contacted: 2026-08-08
+next_action: "Send a rebook ask — Damien canceled Aug 13 (reason given: \"busy\"), no reschedule booked yet"
+next_action_date: 2026-08-22
+last_contacted: 2026-08-12
 blocked: false
 blocked_reason: null
 review_date: null
@@ -22,11 +22,13 @@ created: 2026-08-15
 
 Graduated from `03_Sales/CRM.md` (row B166) on 2026-08-15 — a directly self-booked call via Calendly, no prior outreach campaign.
 
-**Confirmed 2026-08-15 (JD): the Aug 13 call did not happen — still at `meeting_scheduled`, not yet taken.** `next_action_date` (2026-08-13) is now in the past and needs a real reschedule date from JD; preserved as-is rather than guessed forward.
+**Confirmed 2026-08-15 (JD): the Aug 13 call was canceled by Damien** (see interaction log below) — never held. JD elected to keep `stage: meeting_scheduled` rather than move it back, with a rebook-ask follow-up set for one week out.
 
 Carbon is an independent creative/production agency, HK-headquartered with a Singapore office (carbonmoves.com is the site domain, not the company's legal name); founded 2004 or 2005 (sources differ), ~34 employees per Tracxn (May 2026).
 
 ## Interaction log (reverse-chronological)
+
+**2026-08-12 — Damien canceled the Aug 13 call via Calendly.** Reason given: "busy." No reschedule booked yet. (Canceled by Damien Barron-Tan, per Calendly's own cancellation notice.)
 
 **2026-08-08 — pre-call warm-up email sent** to Damien + Matthew — complimented Carbon's creative-strategy/APAC work (research on this is Damien-only and still unverified independently as of the Aug 8 prep pass — do not repeat as confirmed fact), asked about their AI workflows and what prompted the booking, framed as a two-way conversation rather than a pitch.
 
