@@ -32,9 +32,10 @@ import type { RetrievalHandoff, UserGoal } from '@/types/interview-engine'
 import { extractMatchableFacts } from './extract-matchable-facts'
 import { lookupRows } from './lookup-rows'
 import { enumerateEligibleClaims } from './enumerate-eligible-claims'
-import { assembleResult, assembleTopicResult } from './assemble-result'
+import { assembleResult, assembleTopicResult, assembleRelatedTopicResult } from './assemble-result'
 import { lookupTopicClaims, type ApplicabilityFacts } from './lookup-topic-claims'
-import type { MatrixRow, RetrievalDiagnostic, RetrievalResult, TopicClaim } from './types'
+import { lookupRelatedTopicClaims } from './lookup-topic-relationships'
+import type { MatrixRow, RetrievalDiagnostic, RetrievalResult, TopicClaim, TopicRelationship } from './types'
 
 export interface RetrieveOutput {
   results: RetrievalResult[]
@@ -54,6 +55,17 @@ const UNKNOWN_APPLICABILITY_FACTS: ApplicabilityFacts = { jurisdiction: { state:
  * `RetrievalResult[]` -- preserving the single "Governed Applicable Claim
  * Set" output PRD v0.2 §14 requires; lib/bounded-interpretation/ receives
  * one list and does not need to know which path produced which entry.
+ *
+ * `relationships` (additive, Governed Topic Relationships milestone,
+ * 2026-08-16, same defaults-preserve-existing-behavior discipline): a
+ * third, independent lookup -- lookupRelatedTopicClaims -- runs after Topic
+ * Retrieval and merges into the same `RetrievalResult[]`. Empty array
+ * default means every pre-existing call site is completely unaffected.
+ * With the real, single, CRC-Pending REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1
+ * relationship, `lookupRelatedTopicClaims` returns zero matches by
+ * construction (its own relationship-eligibility filter excludes any
+ * non-CRC-eligible relationship before any claim is even considered) --
+ * this is the mechanism the zero-behavior-change requirement rests on.
  */
 export function retrieve(
   handoff: RetrievalHandoff,
@@ -61,6 +73,7 @@ export function retrieve(
   goals: UserGoal[] = [],
   topicClaims: TopicClaim[] = [],
   applicabilityFacts: ApplicabilityFacts = UNKNOWN_APPLICABILITY_FACTS,
+  relationships: TopicRelationship[] = [],
 ): RetrieveOutput {
   const matchable = extractMatchableFacts(handoff)
   const diagnostics: RetrievalDiagnostic[] = []
@@ -90,7 +103,12 @@ export function retrieve(
         diagnostics.push({ identifier: claim.claim_id, reason: 'yes_claim_missing_scope' })
         continue
       }
-      const dedupeKey = `${assembled.matrix_identifier}:${assembled.claim_id}`
+      // Dedupe key includes matched_goal_category (Governed Topic
+      // Relationships milestone, 2026-08-16) -- purely additive for this
+      // path: matched_goal_category is always a deterministic function of
+      // the claim already (assembleResult sets it to the claim's own
+      // topic), so no previously-deduped pair becomes un-deduped here.
+      const dedupeKey = `${assembled.matrix_identifier}:${assembled.claim_id}:${assembled.matched_goal_category}`
       if (seen.has(dedupeKey)) continue
       seen.add(dedupeKey)
       results.push(assembled)
@@ -105,7 +123,30 @@ export function retrieve(
       diagnostics.push({ identifier: claim.claim_id, reason: 'yes_claim_missing_scope' })
       continue
     }
-    const dedupeKey = `${assembled.matrix_identifier}:${assembled.claim_id}`
+    const dedupeKey = `${assembled.matrix_identifier}:${assembled.claim_id}:${assembled.matched_goal_category}`
+    if (seen.has(dedupeKey)) continue
+    seen.add(dedupeKey)
+    results.push(assembled)
+  }
+
+  // Related-topic lookup (Governed Topic Relationships milestone,
+  // 2026-08-16) -- independent third path, merged into the SAME
+  // RetrievalResult[]. Dedupe key deliberately includes
+  // matched_goal_category (the relationship's own source_topic here, not
+  // the claim's intrinsic topic): the same claim_id may legitimately
+  // produce two distinct, both-kept results -- once exact_topic for a goal
+  // whose category equals the claim's own topic, and once related_topic for
+  // a DIFFERENT goal that reaches it only through a governed relationship
+  // (PM decision, approved 2026-08-16 -- "neither should erase the other").
+  const relatedLookup = lookupRelatedTopicClaims(goals, relationships, topicClaims, applicabilityFacts)
+  diagnostics.push(...relatedLookup.diagnostics)
+  for (const { claim, relationship, sourceGoalCategory } of relatedLookup.matches) {
+    const assembled = assembleRelatedTopicResult(claim, relationship.relationship_id, sourceGoalCategory)
+    if (!assembled) {
+      diagnostics.push({ identifier: claim.claim_id, reason: 'yes_claim_missing_scope' })
+      continue
+    }
+    const dedupeKey = `${assembled.matrix_identifier}:${assembled.claim_id}:${assembled.matched_goal_category}`
     if (seen.has(dedupeKey)) continue
     seen.add(dedupeKey)
     results.push(assembled)

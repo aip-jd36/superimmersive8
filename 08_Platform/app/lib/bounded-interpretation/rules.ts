@@ -26,6 +26,23 @@ import type { GoalCategory } from '@/types/interview-engine'
 
 const BRIDGE_SENTENCE = 'A human-reviewed Commercial Assurance Assessment can address this directly.'
 
+/**
+ * Generic epistemic-boundary clause for related-topic content (Governed
+ * Topic Relationships milestone, 2026-08-16, PM decision explicitly
+ * overriding the design report's original topic-interpolated proposal --
+ * "This includes information about a related consideration (${targetTopic
+ * Label})..."). Fixed, generic, non-domain-specific copy: no topic-label
+ * interpolation, no relationship rationale, no relationship_id, no internal
+ * topic identifiers -- appended verbatim, once, whenever a goal's combined
+ * statement includes ANY related_topic-sourced content (mixed exact+related
+ * appends this once, not once per related claim). CRC must never expose
+ * internal ontology language or dynamically generate substantive
+ * relationship explanations from topic labels; this sentence says only that
+ * something relevant-but-non-determinative was included, never what it is
+ * or why it's related.
+ */
+const RELATED_TOPIC_BOUNDARY_CLAUSE = 'This information is relevant to what you asked, but does not by itself determine the answer.'
+
 export const DETERMINATION_DECLINED_TEMPLATE =
   `CRC doesn't issue certifications, clearances, or commercial determinations — it shares governed platform information and surfaces relevant considerations from what you described. ${BRIDGE_SENTENCE}`
 
@@ -111,8 +128,14 @@ function boundaryClause(allToolSourced: boolean): string {
  * it isn't updated; build-bounded-interpretation.ts's own call site always
  * passes the real computed value explicitly.
  */
-export function directlyRelevantSummary(category: GoalCategory, claimStatement: string, allToolSourced: boolean = true): string {
-  return `${claimStatement} This is relevant to ${CATEGORY_LABELS[category]}, ${boundaryClause(allToolSourced)}`
+export function directlyRelevantSummary(
+  category: GoalCategory,
+  claimStatement: string,
+  allToolSourced: boolean = true,
+  includesRelatedTopicContent: boolean = false,
+): string {
+  const relatedClause = includesRelatedTopicContent ? ` ${RELATED_TOPIC_BOUNDARY_CLAUSE}` : ''
+  return `${claimStatement}${relatedClause} This is relevant to ${CATEGORY_LABELS[category]}, ${boundaryClause(allToolSourced)}`
 }
 
 /**
@@ -163,6 +186,11 @@ export function relevantApplicabilityUnresolvedNoContentSummary(category: GoalCa
  * passage collectively either way, so one template covers both cases
  * without a count parameter or branching.
  */
-export function relevantApplicabilityUnresolvedWithContentSummary(category: GoalCategory, claimStatement: string): string {
-  return `${claimStatement} This is relevant to ${CATEGORY_LABELS[category]}, but based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project. ${BRIDGE_SENTENCE}`
+export function relevantApplicabilityUnresolvedWithContentSummary(
+  category: GoalCategory,
+  claimStatement: string,
+  includesRelatedTopicContent: boolean = false,
+): string {
+  const relatedClause = includesRelatedTopicContent ? ` ${RELATED_TOPIC_BOUNDARY_CLAUSE}` : ''
+  return `${claimStatement}${relatedClause} This is relevant to ${CATEGORY_LABELS[category]}, but based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project. ${BRIDGE_SENTENCE}`
 }

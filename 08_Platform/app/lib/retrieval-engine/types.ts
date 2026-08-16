@@ -225,6 +225,114 @@ export interface RetrievalSourceFact {
   identifier: string
 }
 
+// ── Governed topic relationships (CRC + Living Knowledge, Governed Topic
+// Relationships implementation milestone, 2026-08-16) ──────────────────────
+//
+// A governed, directional, one-hop-only routing link between two
+// GoalCategory topics -- e.g. copyright_ownership -> copyrightability.
+// Canonical source is
+// `06_Operations/institutional-knowledge/notebook/TOPIC-RELATIONSHIPS.md`,
+// mirrored (same hand-synced, no-live-parser discipline as
+// TOPIC_CLAIMS_FIXTURE/topic-claims-fixture.ts) into
+// topic-relationships-fixture.ts.
+//
+// Deliberately NOT a claim: a relationship is routing metadata only ("may
+// target_topic knowledge be relevant to a source_topic goal"), never a
+// substantive proposition. `rationale` is structural governance prose for
+// human reviewers -- see its own doc comment below -- and is never rendered
+// to a CRC user. Reuses `Lifecycle`/`CrcEligible` verbatim (the same
+// two-stage governance philosophy TopicClaim already uses) rather than
+// inventing a parallel taxonomy.
+
+/**
+ * Phase 1 has exactly ONE relationship type (PM decision, approved
+ * 2026-08-16): `relevant_consideration` -- "claims under target_topic may
+ * provide relevant governed information for interpreting a goal in
+ * source_topic, but do not themselves answer source_topic." Do not add
+ * `prerequisite_consideration`/`distinguish_from`/`depends_on`/etc. without
+ * a real future use case requiring the distinction -- adding an unused
+ * relationship type is exactly the kind of speculative generality this
+ * milestone's own governance discipline exists to prevent.
+ */
+export const RELATIONSHIP_TYPES = ['relevant_consideration'] as const
+export type RelationshipType = (typeof RELATIONSHIP_TYPES)[number]
+
+/**
+ * The four-value governance-stage vocabulary GOVERNED-CLAIMS.md's own entry
+ * template already uses informally for claims ("Publication scope:
+ * Internal/research | Reviewer/Commercial Assurance | CRC eligible | Public
+ * SI8 position") but which was never ported into TopicClaim as a typed
+ * field (TopicClaim only carries `crc_publication_scope`, the free-text
+ * scope description, and `crc_eligible`, the Yes/No/Pending gate). Defined
+ * here, once, because TopicRelationship's governance record explicitly
+ * requires it -- this is surfacing existing markdown vocabulary as a
+ * reusable type, not inventing a new taxonomy.
+ */
+export const PUBLICATION_SCOPES = ['Internal/research', 'Reviewer/Commercial Assurance', 'CRC eligible', 'Public SI8 position'] as const
+export type PublicationScope = (typeof PUBLICATION_SCOPES)[number]
+
+/**
+ * One governed, directional, one-hop routing link between two GoalCategory
+ * topics. `relationship_id` carries its own version suffix (e.g.
+ * "REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1"), mirroring TopicClaim's own
+ * `claim_id` versioning convention exactly.
+ *
+ * Governance is two-stage, exactly like TopicClaim: `lifecycle` +
+ * `adoption_approver`/`adoption_decision_date` govern whether this is valid
+ * INSTITUTIONAL knowledge (a relationship can be `Adopted` for
+ * reviewer/internal use while remaining `crc_eligible: 'Pending'`
+ * indefinitely -- the expected, intentional state, not a gap); `crc_eligible`
+ * + `crc_approver`/`crc_decision_date` separately govern whether it may
+ * expand CRC's own unsupervised retrieval. Both gates are load-bearing: see
+ * `lookupRelatedTopicClaims` in lookup-topic-relationships.ts for where they
+ * are enforced (the relationship's own gate AND the target claim's own gate
+ * must BOTH pass -- neither alone is sufficient).
+ */
+export interface TopicRelationship {
+  relationship_id: string
+  source_topic: GoalCategory
+  target_topic: GoalCategory
+  relationship_type: RelationshipType
+  /**
+   * STRUCTURAL GOVERNANCE METADATA ONLY (PM decision, approved 2026-08-16)
+   * -- describes, for a human reviewer, why this routing edge exists
+   * ("claims under the target topic may provide relevant governed
+   * information for interpreting the source-topic goal, but do not
+   * themselves determine the source-topic answer"). Must never contain or
+   * re-author substantive legal doctrine (that belongs exclusively to
+   * TopicClaim.crc_candidate_statement, e.g. CLAIM-COPY-004's own framing
+   * content) and must NEVER be rendered to a CRC user -- see rules.ts's own
+   * related-topic boundary clause, which is fixed, generic, non-domain-
+   * specific copy and reads nothing from this field. Enforced structurally,
+   * not just by convention: no module under lib/bounded-interpretation/ or
+   * lib/projection-layer/ ever imports or reads `rationale`.
+   */
+  rationale: string
+  lifecycle: Lifecycle
+  adoption_approver: string
+  adoption_decision_date: string
+  publication_scope: PublicationScope
+  crc_eligible: CrcEligible
+  crc_approver: string
+  crc_decision_date: string
+  last_reviewed: string
+  /** id of the relationship version that replaced this one, or null if current. Mirrors TopicClaim.superseded_by's own convention. */
+  superseded_by: string | null
+}
+
+/**
+ * Whether a `RetrievalResult` was matched directly (its own `topic` equals
+ * the goal's category -- the pre-existing behavior for every tool result
+ * and every Topic Retrieval result before this milestone) or reached via a
+ * governed `TopicRelationship` (its own `topic` is the RELATED topic, not
+ * the originating goal's category). Added so `topic` can keep meaning
+ * exactly what it always meant -- "what this claim is actually about" --
+ * while a separate field carries "which goal caused this result to
+ * surface." See `matched_goal_category` below.
+ */
+export const MATCH_ORIGIN_VALUES = ['exact_topic', 'related_topic'] as const
+export type MatchOrigin = (typeof MATCH_ORIGIN_VALUES)[number]
+
 /**
  * One eligible, traceable knowledge reference. Not a rendered Knowledge
  * Card (RETRIEVAL_ENGINE_ARCHITECTURE.md §5) -- Projection remains deferred.
@@ -244,7 +352,7 @@ export interface RetrievalResult {
   /** Opaque passthrough -- see the module-header note on MatrixClaim.crc_candidate_statement above. */
   candidate_statement: string | null
   last_verified: string | null
-  /** Required, always resolved (defaults to 'unknown' for an untagged claim) -- see module header's "Topic tagging" note. Descriptive only; never influenced how this result was matched or whether it was included. */
+  /** Required, always resolved (defaults to 'unknown' for an untagged claim) -- see module header's "Topic tagging" note. Descriptive only; never influenced how this result was matched or whether it was included. Always the claim's OWN intrinsic subject -- never overwritten to make a related-topic result appear exact (see MatchOrigin above). */
   topic: GoalCategory
   /**
    * Passthrough of `TopicClaim.unresolved_project_dependencies` (Living
@@ -257,6 +365,26 @@ export interface RetrievalResult {
    * branches on it.
    */
   unresolved_project_dependencies: string[]
+  /**
+   * Governed Topic Relationships provenance (2026-08-16). `exact_topic` for
+   * every tool result and every direct Topic Retrieval result (unchanged
+   * meaning, unchanged default -- `assembleResult`/`assembleTopicResult`
+   * always set this). `related_topic` only for a result reached via
+   * `lookupRelatedTopicClaims`.
+   */
+  match_origin: MatchOrigin
+  /**
+   * Which goal category CAUSED this result to be retrieved -- this, not
+   * `topic`, is what `lib/bounded-interpretation/` now matches a goal
+   * against (see build-bounded-interpretation.ts). Equals `topic` for every
+   * `exact_topic` result (tool or direct topic match, unchanged behavior).
+   * For a `related_topic` result, equals the relationship's own
+   * `source_topic` -- e.g. `topic: 'copyrightability'`,
+   * `matched_goal_category: 'copyright_ownership'`.
+   */
+  matched_goal_category: GoalCategory
+  /** Provenance for a related_topic result -- the TopicRelationship.relationship_id that produced it. Always null for exact_topic results. */
+  relationship_id: string | null
 }
 
 /**

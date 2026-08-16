@@ -37,6 +37,12 @@ function retrievalResult(overrides: Partial<RetrievalResult> = {}): RetrievalRes
     last_verified: '2026-07-01',
     topic: 'commercial_use',
     unresolved_project_dependencies: [],
+    // Governed Topic Relationships milestone (2026-08-16) defaults --
+    // matches assembleResult's own exact_topic default for every
+    // pre-existing tool-sourced fixture in this file.
+    match_origin: 'exact_topic',
+    matched_goal_category: 'commercial_use',
+    relationship_id: null,
     ...overrides,
   }
 }

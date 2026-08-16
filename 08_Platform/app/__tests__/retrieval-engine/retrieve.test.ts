@@ -8,7 +8,7 @@
 
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
-import type { MatrixRow, TopicClaim } from '@/lib/retrieval-engine/types'
+import type { MatrixRow, TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
 import type { RetrievalHandoff, UserGoal } from '@/types/interview-engine'
 
 function handoff(overrides: Partial<RetrievalHandoff> = {}): RetrievalHandoff {
@@ -189,7 +189,22 @@ describe('retrieve — negative assertions, forbidden fields (Phase 6)', () => {
       expect(keys).not.toContain('crc_decision_date')
       expect(keys).not.toContain('crc_approver')
       expect(keys).not.toContain('crc_eligible')
-      expect(keys.sort()).toEqual(['candidate_statement', 'claim_id', 'last_verified', 'matrix_identifier', 'publication_scope', 'source_fact', 'topic', 'unresolved_project_dependencies'])
+      // match_origin/matched_goal_category/relationship_id (Governed Topic
+      // Relationships milestone, 2026-08-16) are provenance, not forbidden
+      // reviewer-only content -- added to this whitelist deliberately.
+      expect(keys.sort()).toEqual([
+        'candidate_statement',
+        'claim_id',
+        'last_verified',
+        'match_origin',
+        'matched_goal_category',
+        'matrix_identifier',
+        'publication_scope',
+        'relationship_id',
+        'source_fact',
+        'topic',
+        'unresolved_project_dependencies',
+      ])
     }
   })
 
@@ -278,5 +293,119 @@ describe('retrieve -- Topic Retrieval integration (CRC Living Knowledge Phase 1,
     const withoutTopics = retrieve(handoff({ tools: [tool('kling')] }), MATRIX_FIXTURE)
     const withEmptyTopics = retrieve(handoff({ tools: [tool('kling')] }), MATRIX_FIXTURE, [], [])
     expect(withEmptyTopics.results).toEqual(withoutTopics.results)
+  })
+})
+
+describe('retrieve -- Governed Topic Relationships integration (2026-08-16)', () => {
+  function goal(overrides: Partial<UserGoal> & Pick<UserGoal, 'goal_id' | 'category'>): UserGoal {
+    return {
+      state: 'confirmed',
+      raw_text: 'placeholder',
+      scope: 'informational',
+      superseded_by: null,
+      source_turn: 1,
+      source_statement: 'placeholder',
+      ...overrides,
+    }
+  }
+
+  function topicClaim(overrides: Partial<TopicClaim> & Pick<TopicClaim, 'claim_id' | 'topic'>): TopicClaim {
+    return {
+      claim_character: 'established',
+      jurisdiction: 'Global',
+      lifecycle: 'Adopted',
+      crc_eligible: 'Yes',
+      crc_publication_scope: 'Scope text.',
+      crc_candidate_statement: 'Candidate statement.',
+      applicability_requirements: [],
+      unresolved_project_dependencies: [],
+      last_verified: '2026-08-16',
+      superseded_by: null,
+      ...overrides,
+    }
+  }
+
+  function topicRelationship(overrides: Partial<TopicRelationship> & Pick<TopicRelationship, 'relationship_id' | 'source_topic' | 'target_topic'>): TopicRelationship {
+    return {
+      relationship_type: 'relevant_consideration',
+      rationale: 'Structural rationale placeholder.',
+      lifecycle: 'Adopted',
+      adoption_approver: 'JD (PM)',
+      adoption_decision_date: '2026-08-16',
+      publication_scope: 'Reviewer/Commercial Assurance',
+      crc_eligible: 'Yes',
+      crc_approver: 'JD (PM)',
+      crc_decision_date: '2026-08-16',
+      last_reviewed: '2026-08-16',
+      superseded_by: null,
+      ...overrides,
+    }
+  }
+
+  test('omitting relationships entirely (pre-milestone call shape) behaves exactly as before -- backward compatible default', () => {
+    const g = goal({ goal_id: 'g-1', category: 'copyright_ownership' })
+    const c = topicClaim({ claim_id: 'CLAIM-COPY-004-v1', topic: 'copyright_ownership' })
+    const withoutParam = retrieve(handoff(), MATRIX_FIXTURE, [g], [c], { jurisdiction: { state: 'unknown' }, toolMentions: [] })
+    const withEmptyRelationships = retrieve(handoff(), MATRIX_FIXTURE, [g], [c], { jurisdiction: { state: 'unknown' }, toolMentions: [] }, [])
+    expect(withEmptyRelationships.results).toEqual(withoutParam.results)
+  })
+
+  test('a related-topic result carries correct provenance: topic stays the claim\'s own subject, matched_goal_category is the originating goal, relationship_id traces back', () => {
+    const g = goal({ goal_id: 'g-1', category: 'copyright_ownership' })
+    const rel = topicRelationship({ relationship_id: 'REL-TEST-1', source_topic: 'copyright_ownership', target_topic: 'copyrightability' })
+    const c = topicClaim({ claim_id: 'C-1', topic: 'copyrightability' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], [c], undefined, [rel])
+    expect(out.results).toHaveLength(1)
+    expect(out.results[0].topic).toBe('copyrightability')
+    expect(out.results[0].matched_goal_category).toBe('copyright_ownership')
+    expect(out.results[0].match_origin).toBe('related_topic')
+    expect(out.results[0].relationship_id).toBe('REL-TEST-1')
+  })
+
+  test('exact-topic and tool results are stamped exact_topic with relationship_id null', () => {
+    const g = goal({ goal_id: 'g-1', category: 'copyright_ownership' })
+    const c = topicClaim({ claim_id: 'CLAIM-COPY-004-v1', topic: 'copyright_ownership' })
+    const out = retrieve(handoff({ tools: [tool('kling')] }), MATRIX_FIXTURE, [g], [c])
+    for (const result of out.results) {
+      expect(result.match_origin).toBe('exact_topic')
+      expect(result.relationship_id).toBeNull()
+      expect(result.matched_goal_category).toBe(result.topic)
+    }
+  })
+
+  test('canonical cross-goal dedup scenario (PM decision, approved 2026-08-16): the SAME claim (COPY-002) legitimately produces two distinct, both-kept results -- exact_topic for a copyrightability goal, related_topic for a copyright_ownership goal -- neither erases the other', () => {
+    const copyrightabilityGoal = goal({ goal_id: 'g-1', category: 'copyrightability' })
+    const ownershipGoal = goal({ goal_id: 'g-2', category: 'copyright_ownership' })
+    const rel = topicRelationship({ relationship_id: 'REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1', source_topic: 'copyright_ownership', target_topic: 'copyrightability' })
+    const copy002 = topicClaim({ claim_id: 'CLAIM-COPY-002-v1', topic: 'copyrightability' })
+
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [copyrightabilityGoal, ownershipGoal], [copy002], undefined, [rel])
+
+    const forCopyrightability = out.results.filter((r) => r.matched_goal_category === 'copyrightability')
+    const forOwnership = out.results.filter((r) => r.matched_goal_category === 'copyright_ownership')
+
+    expect(forCopyrightability).toHaveLength(1)
+    expect(forCopyrightability[0]).toMatchObject({ claim_id: 'CLAIM-COPY-002-v1', topic: 'copyrightability', match_origin: 'exact_topic', relationship_id: null })
+
+    expect(forOwnership).toHaveLength(1)
+    expect(forOwnership[0]).toMatchObject({
+      claim_id: 'CLAIM-COPY-002-v1',
+      topic: 'copyrightability',
+      match_origin: 'related_topic',
+      relationship_id: 'REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1',
+    })
+
+    // Both results present simultaneously -- total count is 2, not 1.
+    expect(out.results).toHaveLength(2)
+  })
+
+  test('within a single goal, a genuinely duplicate related result (same claim, same relationship) is still deduped', () => {
+    const g = goal({ goal_id: 'g-1', category: 'copyright_ownership' })
+    const rel = topicRelationship({ relationship_id: 'REL-1', source_topic: 'copyright_ownership', target_topic: 'copyrightability' })
+    const c = topicClaim({ claim_id: 'C-1', topic: 'copyrightability' })
+    // Same claim object passed twice -- simulates a hypothetical
+    // upstream-duplicated fixture entry.
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], [c, c], undefined, [rel])
+    expect(out.results).toHaveLength(1)
   })
 })

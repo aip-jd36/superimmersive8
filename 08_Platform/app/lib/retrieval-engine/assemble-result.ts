@@ -27,6 +27,7 @@ import type { MatrixClaim, MatrixRow, RetrievalResult, RetrievalSourceFact, Topi
 /** Returns null (never a fabricated scope) if the claim has no publication scope text -- see the 'yes_claim_missing_scope' diagnostic in retrieve.ts, which is where this case is actually surfaced. */
 export function assembleResult(sourceFact: RetrievalSourceFact, row: MatrixRow, claim: MatrixClaim): RetrievalResult | null {
   if (claim.crc_publication_scope === null) return null
+  const topic = claim.topic ?? 'unknown'
   return {
     source_fact: sourceFact,
     claim_id: claim.claim_id,
@@ -34,10 +35,16 @@ export function assembleResult(sourceFact: RetrievalSourceFact, row: MatrixRow, 
     publication_scope: claim.crc_publication_scope,
     candidate_statement: claim.crc_candidate_statement,
     last_verified: row.last_verified,
-    topic: claim.topic ?? 'unknown',
+    topic,
     // Always empty for a tool-sourced result -- see RetrievalResult's own
     // doc comment. Phase 1 does not model this concept for Matrix claims.
     unresolved_project_dependencies: [],
+    // A tool result is always exact-topic -- Governed Topic Relationships
+    // (2026-08-16) only ever expand non-tool-scoped Topic Retrieval. See
+    // RetrievalResult's own doc comment for match_origin/matched_goal_category.
+    match_origin: 'exact_topic',
+    matched_goal_category: topic,
+    relationship_id: null,
   }
 }
 
@@ -65,5 +72,39 @@ export function assembleTopicResult(claim: TopicClaim): RetrievalResult | null {
     last_verified: claim.last_verified,
     topic: claim.topic,
     unresolved_project_dependencies: claim.unresolved_project_dependencies,
+    // A direct Topic Retrieval match is exact-topic by definition -- the
+    // claim's own topic already equals the goal's category (lookupTopicClaims'
+    // own matching rule). See RetrievalResult's own doc comment.
+    match_origin: 'exact_topic',
+    matched_goal_category: claim.topic,
+    relationship_id: null,
+  }
+}
+
+/**
+ * Related-topic counterpart (Governed Topic Relationships milestone,
+ * 2026-08-16). Produced only by `lookupRelatedTopicClaims` for a
+ * `TopicClaim` reached via a governed `TopicRelationship`, never directly by
+ * `retrieve()`. `sourceGoalCategory` is the relationship's own
+ * `source_topic` -- the ORIGINATING goal category, not the claim's own
+ * topic -- becomes `matched_goal_category`; `claim.topic` is preserved
+ * unchanged as the claim's own intrinsic subject (never overwritten to look
+ * exact -- see RetrievalResult.topic's own doc comment). Same
+ * never-fabricate-scope discipline as assembleResult/assembleTopicResult.
+ */
+export function assembleRelatedTopicResult(claim: TopicClaim, relationshipId: string, sourceGoalCategory: TopicClaim['topic']): RetrievalResult | null {
+  if (claim.crc_publication_scope === null) return null
+  return {
+    source_fact: { kind: 'topic', identifier: claim.topic },
+    claim_id: claim.claim_id,
+    matrix_identifier: claim.topic,
+    publication_scope: claim.crc_publication_scope,
+    candidate_statement: claim.crc_candidate_statement,
+    last_verified: claim.last_verified,
+    topic: claim.topic,
+    unresolved_project_dependencies: claim.unresolved_project_dependencies,
+    match_origin: 'related_topic',
+    matched_goal_category: sourceGoalCategory,
+    relationship_id: relationshipId,
   }
 }

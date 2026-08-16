@@ -49,7 +49,16 @@ export function buildBoundedInterpretations(goals: UserGoal[], results: Retrieva
       return buildInterpretation(goal, 'determination_declined', DETERMINATION_DECLINED_TEMPLATE, [])
     }
 
-    const matches = results.filter((r) => r.topic === goal.category)
+    // matched_goal_category, not topic (Governed Topic Relationships
+    // milestone, 2026-08-16): topic is the claim's OWN intrinsic subject
+    // and stays unchanged for a related_topic result (e.g.
+    // 'copyrightability'), so matching on it would silently exclude every
+    // related-topic result from ever reaching a goal. matched_goal_category
+    // is the field Retrieval sets specifically to answer "which goal caused
+    // this result to surface" -- equals topic for every pre-existing
+    // exact_topic result (tool or direct topic match), so this is a
+    // behavior-preserving generalization, not a new matching concept.
+    const matches = results.filter((r) => r.matched_goal_category === goal.category)
     if (matches.length > 0) {
       // Multiple matches are possible (e.g. two mentioned tools both tagged
       // 'commercial_use') -- join every matched claim's own governed
@@ -58,6 +67,13 @@ export function buildBoundedInterpretations(goals: UserGoal[], results: Retrieva
       // omission this pipeline otherwise avoids everywhere else.
       const combinedStatement = matches.map((m) => m.candidate_statement).filter((s): s is string => s !== null).join(' ')
       const claimIds = matches.map((m) => m.claim_id)
+      // Whether ANY matched claim was reached via a governed relationship
+      // rather than directly -- drives the generic, fixed epistemic-
+      // boundary clause in rules.ts (never a topic-interpolated sentence,
+      // per PM's explicit override of the design report's original
+      // proposal). M2 never reads relationship_id, rationale, or any
+      // internal topic name beyond this boolean.
+      const includesRelatedTopicContent = matches.some((m) => m.match_origin === 'related_topic')
       if (combinedStatement === '') {
         // Defensive: every 'directly_relevant'-eligible RetrievalResult in
         // practice carries a non-null candidate_statement (assembleResult
@@ -83,7 +99,7 @@ export function buildBoundedInterpretations(goals: UserGoal[], results: Retrieva
         return buildInterpretation(
           goal,
           'relevant_applicability_unresolved',
-          relevantApplicabilityUnresolvedWithContentSummary(goal.category, combinedStatement),
+          relevantApplicabilityUnresolvedWithContentSummary(goal.category, combinedStatement, includesRelatedTopicContent),
           claimIds,
         )
       }
@@ -94,7 +110,12 @@ export function buildBoundedInterpretations(goals: UserGoal[], results: Retrieva
       // this is a read of existing data, not a new fact or new matching
       // logic.
       const allToolSourced = matches.every((m) => m.source_fact.kind === 'tool')
-      return buildInterpretation(goal, 'directly_relevant', directlyRelevantSummary(goal.category, combinedStatement, allToolSourced), claimIds)
+      return buildInterpretation(
+        goal,
+        'directly_relevant',
+        directlyRelevantSummary(goal.category, combinedStatement, allToolSourced, includesRelatedTopicContent),
+        claimIds,
+      )
     }
 
     // Case 3A (Living Knowledge governance review, 2026-08-16): no result
