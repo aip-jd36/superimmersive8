@@ -155,6 +155,36 @@ describe('subsystem boundaries -- Bounded Interpretation', () => {
   })
 })
 
+describe('subsystem boundaries -- jurisdiction capture is user-attested only (CRC Living Knowledge Phase 1, 2026-08-16)', () => {
+  const JURISDICTION_SIGNAL_FILES = ['lib/crc-engine/jurisdiction-clarification.ts', 'lib/interview-engine/extraction.ts', 'lib/interview-engine/mutations.ts']
+  const NON_ATTESTATION_SIGNAL_PATTERN = /traffic-classification|abuse-prevention|abuse-key|geoip|x-forwarded|request\.headers|NextRequest/i
+
+  test('none of the three files that can set project_facts.jurisdiction import traffic-classification, abuse-prevention, or any IP/header/geolocation module', () => {
+    for (const file of JURISDICTION_SIGNAL_FILES) {
+      const importText = importLinesOf(file).join('\n')
+      expect(importText).not.toMatch(NON_ATTESTATION_SIGNAL_PATTERN)
+    }
+  })
+
+  test('traffic-classification.ts and abuse-prevention.ts (the actual IP/header-signal modules) never mention jurisdiction -- proves the exclusion holds from the other direction too, not just by absence of an import', () => {
+    const trafficClassificationSource = fs.readFileSync(path.join(APP_ROOT, 'lib/crc-engine/traffic-classification.ts'), 'utf-8')
+    const abusePreventionSource = fs.readFileSync(path.join(APP_ROOT, 'lib/crc-engine/abuse-prevention.ts'), 'utf-8')
+    expect(trafficClassificationSource).not.toMatch(/jurisdiction/i)
+    expect(abusePreventionSource).not.toMatch(/jurisdiction/i)
+  })
+
+  test('setJurisdiction has exactly one call site in production code: extraction.ts, the LLM-extraction pipeline that parses user-supplied conversational text -- not any traffic-classification, abuse-prevention, or API-route file', () => {
+    const allProductionFiles = [...INTERVIEW_ENGINE_FILES, ...CRC_ENGINE_FILES, ...RETRIEVAL_ENGINE_FILES, ...PROJECTION_LAYER_FILES]
+    const callSites = allProductionFiles
+      .filter((file) => {
+        const source = fs.readFileSync(path.join(APP_ROOT, file), 'utf-8')
+        return /setJurisdiction\(/.test(source) && !file.endsWith('mutations.ts')
+      })
+      .map((file) => file.split(path.sep).join('/'))
+    expect(callSites).toEqual(['lib/interview-engine/extraction.ts'])
+  })
+})
+
 describe('subsystem boundaries -- crc-engine orchestrator', () => {
   test('the orchestrator IS the one module that imports actual logic from all three subsystems (positive assertion -- proves it is doing the coordination job, not just re-exporting types)', () => {
     expect(CRC_ENGINE_FILES.length).toBeGreaterThan(0)

@@ -46,11 +46,19 @@ export function serializeStructuredUnderstanding(su: StructuredUnderstanding): s
  * Phase 1, 2026-08-16): a session persisted before this field existed has
  * a `project_facts` object but no `jurisdiction` key on it. Same funnel,
  * same reasoning as the `user_goals` default above -- defaulted here once
- * to `{state: 'unknown'}`, the same conservative fallback every other
- * unconfirmed attested field in this codebase uses, so a historical
- * session and a session where jurisdiction genuinely hasn't been asked
- * about yet are indistinguishable at read time (both correctly mean "not
- * confirmed").
+ * to the full `AttestedFact<string>` shape (NOT a bare `Attested<string>` --
+ * an earlier version of this function defaulted to `{state: 'unknown'}`
+ * alone, which `??`'s union-typed inference let past `tsc --noEmit`
+ * silently (the mismatch only surfaced at the two call sites that read
+ * `.state` directly instead of `.attestation.state`, not here) but would
+ * have crashed at runtime the moment any real code -- in particular
+ * jurisdiction-clarification.ts's own `.jurisdiction.attestation.state`
+ * read -- touched a historical session's deserialized jurisdiction. Caught
+ * and fixed before this reached production; see the dedicated regression
+ * tests below), so a historical session and a session where jurisdiction
+ * genuinely hasn't been asked about yet are indistinguishable at read
+ * time (both correctly mean "not confirmed") AND structurally match the
+ * type every other project fact in this codebase already uses.
  */
 export function deserializeStructuredUnderstanding(json: string): StructuredUnderstanding {
   const parsed = JSON.parse(json) as StructuredUnderstanding
@@ -59,9 +67,9 @@ export function deserializeStructuredUnderstanding(json: string): StructuredUnde
     category: g.category ?? 'unknown',
     scope: g.scope ?? 'informational',
   }))
-  const project_facts = {
+  const project_facts: StructuredUnderstanding['project_facts'] = {
     ...parsed.project_facts,
-    jurisdiction: parsed.project_facts?.jurisdiction ?? { state: 'unknown' as const },
+    jurisdiction: parsed.project_facts?.jurisdiction ?? { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
   }
   return { ...parsed, user_goals, project_facts }
 }

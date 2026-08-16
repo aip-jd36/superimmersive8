@@ -88,4 +88,31 @@ describe('serializeStructuredUnderstanding / deserializeStructuredUnderstanding'
     expect(roundTripped.user_goals[0].category).toBe('likeness')
     expect(roundTripped.user_goals[0].scope).toBe('determination_request')
   })
+
+  test('a historical session predating project_facts.jurisdiction (CRC Living Knowledge Phase 1, 2026-08-16) deserializes with jurisdiction defaulted to the full AttestedFact<string> shape (unknown state, source_turn 0, empty source_statement), not undefined -- and every other project_facts field survives unchanged', () => {
+    const historicalShape = currentSU()
+    const { jurisdiction: _omittedJurisdiction, ...projectFactsWithoutJurisdiction } = historicalShape.project_facts
+    const historicalJson = JSON.stringify({ ...historicalShape, project_facts: projectFactsWithoutJurisdiction })
+    expect(historicalJson).not.toContain('jurisdiction')
+
+    const deserialized = deserializeStructuredUnderstanding(historicalJson)
+    expect(deserialized.project_facts.jurisdiction).toEqual({ attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' })
+    expect(deserialized.project_facts.intended_use).toEqual(historicalShape.project_facts.intended_use)
+    expect(deserialized.project_facts.workflow_role).toEqual(historicalShape.project_facts.workflow_role)
+  })
+
+  test('a historical session missing jurisdiction does not throw when the applicability evaluator reads project_facts.jurisdiction.attestation.state', () => {
+    const historicalShape = currentSU()
+    const { jurisdiction: _omittedJurisdiction, ...projectFactsWithoutJurisdiction } = historicalShape.project_facts
+    const deserialized = deserializeStructuredUnderstanding(JSON.stringify({ ...historicalShape, project_facts: projectFactsWithoutJurisdiction }))
+    expect(() => deserialized.project_facts.jurisdiction.attestation.state).not.toThrow()
+    expect(deserialized.project_facts.jurisdiction.attestation.state).toBe('unknown')
+  })
+
+  test('a current-shape session with jurisdiction already confirmed round-trips that value unchanged, never overwritten by the backfill default', () => {
+    const su = currentSU()
+    su.project_facts.jurisdiction = { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 3, source_statement: 'US' }
+    const roundTripped = deserializeStructuredUnderstanding(serializeStructuredUnderstanding(su))
+    expect(roundTripped.project_facts.jurisdiction).toEqual({ attestation: { state: 'confirmed', value: 'United States' }, source_turn: 3, source_statement: 'US' })
+  })
 })
