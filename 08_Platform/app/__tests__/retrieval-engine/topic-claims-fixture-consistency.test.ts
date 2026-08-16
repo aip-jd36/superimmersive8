@@ -30,7 +30,7 @@ function extractMarkdownClaims(markdown: string): { claim_id: string; lifecycle:
   const outsideFences = stripFencedCodeBlocks(markdown)
   const sections = outsideFences.split(/(?=^### CLAIM-)/m).filter((s) => s.startsWith('### CLAIM-'))
   return sections.map((section) => {
-    const idMatch = section.match(/^### (CLAIM-[A-Z0-9-]+)/)
+    const idMatch = section.match(/^### (CLAIM-[A-Za-z0-9-]+)/)
     const lifecycleMatch = section.match(/^Lifecycle:\s*(.+)$/m)
     const scopeMatch = section.match(/^Publication scope:\s*(.+)$/m)
     return {
@@ -49,7 +49,7 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
   test('the entry template inside the fenced code block is never counted as a real claim', () => {
     const markdown = fs.readFileSync(GOVERNED_CLAIMS_PATH, 'utf-8')
     const claims = extractMarkdownClaims(markdown)
-    expect(claims.find((c) => c.claim_id === 'CLAIM-XXX-NNN')).toBeUndefined()
+    expect(claims.find((c) => c.claim_id.startsWith('CLAIM-XXX-NNN'))).toBeUndefined()
   })
 
   test('every real claim ID in the markdown has a matching entry in the runtime fixture', () => {
@@ -90,9 +90,8 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
     }
   })
 
-  test('Phase A skeleton: zero claims active in either the markdown or the fixture', () => {
-    const markdown = fs.readFileSync(GOVERNED_CLAIMS_PATH, 'utf-8')
-    expect(extractMarkdownClaims(markdown)).toEqual([])
-    expect(TOPIC_CLAIMS_FIXTURE).toEqual([])
+  test('no claim in the runtime fixture is Adopted + CRC-eligible yet -- Phase 1 has not published anything to CRC (update only once a real PM adoption/publication decision is recorded)', () => {
+    const liveClaims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.lifecycle === 'Adopted' && c.crc_eligible === 'Yes')
+    expect(liveClaims).toEqual([])
   })
 })
