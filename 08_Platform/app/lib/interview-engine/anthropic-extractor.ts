@@ -306,6 +306,96 @@ export function toCandidateObservation(parsed: ParsedCandidate, turn: number): C
   }
 }
 
+/**
+ * CRC extraction robustness follow-up (2026-08-16, confirmed unrelated to
+ * the same-day Living Knowledge deployment -- see the incident's own root-
+ * cause trail: `anthropic-extractor.ts` was last touched several commits
+ * before that work, in Phase B). Live production failure: a dense real
+ * user turn (a tool mention with plan tier, two distinct user_goal
+ * candidates, plus prompting/editing detail) produced a structured-output
+ * response that got cut off mid-generation, and the Anthropic SDK's own
+ * JSON.parse of the truncated text threw "Unterminated string in JSON at
+ * position 2728" -- the canonical signature of output truncation, not a
+ * parser bug (confirmed by reading the SDK's own source,
+ * helpers/json-schema.ts and lib/parser.ts: `JSON.parse` is called
+ * directly on the raw response text, and both of the SDK's own two
+ * wrapping layers use the literal phrase "Failed to parse structured
+ * output" for exactly this failure class, with no internal retry of its
+ * own).
+ *
+ * Two contributing factors, both evidence-based, not assumed:
+ *   1. `max_tokens: 2048` (the pre-existing ceiling) is genuinely marginal
+ *      for a realistically dense turn under this schema -- every candidate
+ *      object requires all 20 schema fields present (nullable-required,
+ *      not optional, a deliberate prior design choice for structured-
+ *      output reliability -- see CANDIDATE_RESPONSE_SCHEMA's own header),
+ *      so even a handful of real candidates carries substantial fixed
+ *      per-object overhead before any actual content is counted.
+ *   2. The schema's own verbosity (many long field names, all required)
+ *      inflates every candidate's size regardless of how much it actually
+ *      has to say -- evaluated and deliberately NOT changed here: it's a
+ *      documented, working design choice this pipeline already depends on
+ *      for structured-output reliability across every other live turn;
+ *      shrinking it now would be a larger, independently risky change for
+ *      uncertain token savings, not "obvious unnecessary inflation."
+ *
+ * Fix: (a) a modest, evidence-based max_tokens increase (2048 -> 3072,
+ * +50%, sized against the schema's own per-candidate field count above,
+ * not a round-number guess), and (b) exactly ONE bounded recovery retry,
+ * only when the first call fails with this specific, precisely-matched
+ * failure class -- never for a network error, auth failure, rate limit,
+ * or any other exception, which all propagate immediately unretried,
+ * exactly as before this fix. The retry uses a still-higher ceiling
+ * (4096) rather than repeating the same one, since retrying identically
+ * would likely reproduce the same truncation for an equally dense turn.
+ *
+ * `isStructuredOutputParseFailure` matches on message text ("Failed to
+ * parse structured output"), not `instanceof Anthropic.AnthropicError` --
+ * deliberately: `APIError` (auth failures, rate limits, etc.) also
+ * extends `AnthropicError` in the SDK's own class hierarchy, so an
+ * `instanceof` check alone would be far too broad and would incorrectly
+ * retry failures that have nothing to do with output truncation.
+ *
+ * `callWithOneRecoveryRetry` is exported and takes an injected call
+ * function specifically so the retry/no-retry DECISION LOGIC is unit-
+ * testable without a live Anthropic client or network call -- same "test
+ * the pure parts, keep the live-model boundary itself thin and untested"
+ * discipline this file's own `buildUserMessageContent` already
+ * established (see this file's module header and
+ * anthropic-extractor-context.test.ts).
+ */
+export function isStructuredOutputParseFailure(err: unknown): boolean {
+  return err instanceof Error && err.message.includes('Failed to parse structured output')
+}
+
+const BASE_EXTRACTION_MAX_TOKENS = 3072
+const RETRY_EXTRACTION_MAX_TOKENS = 4096
+
+export async function callWithOneRecoveryRetry<T>(
+  callOnce: (maxTokens: number) => Promise<T>,
+  baseMaxTokens: number = BASE_EXTRACTION_MAX_TOKENS,
+  retryMaxTokens: number = RETRY_EXTRACTION_MAX_TOKENS,
+): Promise<T> {
+  try {
+    return await callOnce(baseMaxTokens)
+  } catch (err) {
+    if (!isStructuredOutputParseFailure(err)) throw err
+    try {
+      return await callOnce(retryMaxTokens)
+    } catch (retryErr) {
+      if (isStructuredOutputParseFailure(retryErr)) {
+        // Classifiable in the existing retryable_failure pilot-event
+        // `detail` column (route.ts) without any new DB column, migration,
+        // or analytics event -- the raw message text already carries the
+        // classification.
+        const message = retryErr instanceof Error ? retryErr.message : String(retryErr)
+        throw new Error(`structured_output_truncated: extraction failed after 1 recovery retry -- ${message}`)
+      }
+      throw retryErr
+    }
+  }
+}
+
 export interface AnthropicExtractorOptions {
   apiKey?: string
   model?: string
@@ -358,16 +448,18 @@ export function createAnthropicExtractor(options?: AnthropicExtractorOptions): C
   const client = new Anthropic({ apiKey })
 
   return async (turn: RawUserTurn): Promise<CandidateObservation[]> => {
-    const response = await client.messages.parse({
-      model,
-      max_tokens: 2048,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: buildUserMessageContent(turn) }],
-      output_config: { format: jsonSchemaOutputFormat(CANDIDATE_RESPONSE_SCHEMA) },
-      // No `thinking` param: disabled by omission, per Phase 6a substage 2
-      // instructions -- this is a bounded extraction task.
-      // No temperature/top_p/top_k: API defaults only, per instructions.
-    })
+    const response = await callWithOneRecoveryRetry((maxTokens) =>
+      client.messages.parse({
+        model,
+        max_tokens: maxTokens,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: buildUserMessageContent(turn) }],
+        output_config: { format: jsonSchemaOutputFormat(CANDIDATE_RESPONSE_SCHEMA) },
+        // No `thinking` param: disabled by omission, per Phase 6a substage 2
+        // instructions -- this is a bounded extraction task.
+        // No temperature/top_p/top_k: API defaults only, per instructions.
+      }),
+    )
 
     const parsed = response.parsed_output
     if (!parsed) {
@@ -398,13 +490,19 @@ export async function extractWithDiagnostics(
   const client = new Anthropic({ apiKey })
 
   const start = Date.now()
-  const response = await client.messages.parse({
-    model,
-    max_tokens: 2048,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: buildUserMessageContent(turn) }],
-    output_config: { format: jsonSchemaOutputFormat(CANDIDATE_RESPONSE_SCHEMA) },
-  })
+  const response = await callWithOneRecoveryRetry((maxTokens) =>
+    client.messages.parse({
+      model,
+      max_tokens: maxTokens,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: buildUserMessageContent(turn) }],
+      output_config: { format: jsonSchemaOutputFormat(CANDIDATE_RESPONSE_SCHEMA) },
+    }),
+  )
+  // Measures the FULL operation including a recovery retry if one
+  // happened, not just the final call -- an honest latency figure for the
+  // eval harness rather than one that looks deceptively fast on a retried
+  // turn.
   const latencyMs = Date.now() - start
 
   const parsed = response.parsed_output
