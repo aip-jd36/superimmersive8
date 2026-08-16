@@ -47,7 +47,13 @@ export function buildBoundedInterpretations(goals: UserGoal[], results: Retrieva
         // sentence, never fabricating claim text to fill the gap.
         return buildInterpretation(goal, 'outside_current_coverage', outsideCoverageSummary(goal.category), [])
       }
-      return buildInterpretation(goal, 'directly_relevant', directlyRelevantSummary(goal.category, combinedStatement), claimIds)
+      // Source-aware boundary clause (LK Phase 1 governance refinement,
+      // 2026-08-16) -- see rules.ts's own boundaryClause doc comment. Every
+      // matched RetrievalResult already carries its own source_fact.kind;
+      // this is a read of existing data, not a new fact or new matching
+      // logic.
+      const allToolSourced = matches.every((m) => m.source_fact.kind === 'tool')
+      return buildInterpretation(goal, 'directly_relevant', directlyRelevantSummary(goal.category, combinedStatement, allToolSourced), claimIds)
     }
 
     return buildInterpretation(goal, 'outside_current_coverage', outsideCoverageSummary(goal.category), [])

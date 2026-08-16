@@ -44,6 +44,29 @@ function copyrightGoal(overrides: Partial<UserGoal> = {}): UserGoal {
   }
 }
 
+/**
+ * Added 2026-08-16, LK Phase 1 governance review (taxonomy decision item
+ * 5): CLAIM-COPY-001/002/003 were retagged from Topic: copyright_ownership
+ * to Topic: copyrightability; CLAIM-COPY-004 stayed copyright_ownership.
+ * copyrightGoal() above only exercises the copyright_ownership category
+ * (now only matching 004) -- this helper exercises copyrightability
+ * (matching 001/002/003), so the exclusion proof below still directly
+ * covers all four claims post-retag, not just one of them by coincidence.
+ */
+function copyrightabilityGoal(overrides: Partial<UserGoal> = {}): UserGoal {
+  return {
+    goal_id: 'g-1',
+    state: 'confirmed',
+    raw_text: 'Is this even copyrightable?',
+    category: 'copyrightability',
+    scope: 'informational',
+    superseded_by: null,
+    source_turn: 1,
+    source_statement: 'Is this even copyrightable?',
+    ...overrides,
+  }
+}
+
 describe('Wave 1 real candidate claims -- confirmed still Candidate/Pending, never CRC-eligible', () => {
   test('all four Wave 1 claims are present in the fixture', () => {
     expect(TOPIC_CLAIMS_FIXTURE.map((c) => c.claim_id).sort()).toEqual([
@@ -68,15 +91,34 @@ describe('Wave 1 real candidate claims -- confirmed still Candidate/Pending, nev
 })
 
 describe('Wave 1 real candidate claims -- structurally excluded from Topic Retrieval', () => {
-  test('lookupTopicClaims returns zero matches even with a directly-applicable goal + confirmed US jurisdiction', () => {
+  test('lookupTopicClaims returns zero matches for a copyright_ownership goal (CLAIM-COPY-004) even with a directly-applicable goal + confirmed US jurisdiction', () => {
     const goal = copyrightGoal()
     const result = lookupTopicClaims([goal], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] })
     expect(result.matches).toEqual([])
     expect(result.diagnostics).toContainEqual({ identifier: 'copyright_ownership', reason: 'not_adopted_or_eligible' })
   })
 
-  test('retrieve() produces zero results from these claims even with a directly-applicable goal + confirmed jurisdiction', () => {
+  test('lookupTopicClaims returns zero matches for a copyrightability goal (CLAIM-COPY-001/002/003, post-retag) even with a directly-applicable goal + confirmed US jurisdiction', () => {
+    const goal = copyrightabilityGoal()
+    const result = lookupTopicClaims([goal], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] })
+    expect(result.matches).toEqual([])
+    expect(result.diagnostics).toContainEqual({ identifier: 'copyrightability', reason: 'not_adopted_or_eligible' })
+  })
+
+  test('retrieve() produces zero results for a copyright_ownership goal even with a directly-applicable goal + confirmed jurisdiction', () => {
     const goal = copyrightGoal()
+    const out = retrieve(
+      handoff(),
+      MATRIX_FIXTURE,
+      [goal],
+      TOPIC_CLAIMS_FIXTURE,
+      { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] },
+    )
+    expect(out.results).toEqual([])
+  })
+
+  test('retrieve() produces zero results for a copyrightability goal (post-retag) even with a directly-applicable goal + confirmed jurisdiction', () => {
+    const goal = copyrightabilityGoal()
     const out = retrieve(
       handoff(),
       MATRIX_FIXTURE,
@@ -89,7 +131,7 @@ describe('Wave 1 real candidate claims -- structurally excluded from Topic Retri
 })
 
 describe('Wave 1 real candidate claims -- structurally excluded end-to-end through the full CRC pipeline', () => {
-  test('a real copyright_ownership goal against the real Wave 1 fixture produces outside_current_coverage, never the draft claim content, never even with jurisdiction confirmed', () => {
+  test('a real copyright_ownership goal (CLAIM-COPY-004) against the real Wave 1 fixture produces outside_current_coverage, never the draft claim content, never even with jurisdiction confirmed', () => {
     const goal = copyrightGoal()
     const su: StructuredUnderstanding = {
       ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
@@ -109,5 +151,29 @@ describe('Wave 1 real candidate claims -- structurally excluded end-to-end throu
     expect(serialized).not.toContain('Thaler')
     expect(serialized).not.toContain('sufficient human creative contribution')
     expect(serialized).not.toContain('DRAFT')
+  })
+
+  test('a real copyrightability goal (CLAIM-COPY-001/002/003, post-retag) against the real Wave 1 fixture produces outside_current_coverage, never the draft claim content, never even with jurisdiction confirmed', () => {
+    const goal = copyrightabilityGoal()
+    const su: StructuredUnderstanding = {
+      ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
+      user_goals: [goal],
+      project_facts: {
+        ...DIALOGUE_FIXTURES.no_signal.structured_understanding.project_facts,
+        jurisdiction: { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 2, source_statement: 'US' },
+      },
+    }
+    const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
+
+    expect(output.goal_interpretations).toHaveLength(1)
+    expect(output.goal_interpretations[0].summary).toContain("doesn't establish an answer")
+    const serialized = JSON.stringify(output)
+    expect(serialized).not.toContain('bedrock')
+    expect(serialized).not.toContain('Thaler')
+    expect(serialized).not.toContain('sweat of the brow')
+    expect(serialized).not.toContain('sufficient human creative contribution')
+    expect(serialized).not.toContain('perceptible portion')
+    expect(serialized).not.toContain('DRAFT')
+    expect(serialized).not.toContain('RE-VERIFIED')
   })
 })

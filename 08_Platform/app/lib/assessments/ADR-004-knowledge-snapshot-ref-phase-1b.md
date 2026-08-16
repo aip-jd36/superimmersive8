@@ -1,8 +1,8 @@
 # ADR-004: `assessments.knowledge_snapshot_ref` (Living Knowledge Phase 1B)
 
-**Status:** Designed, not applied. Migration file written; not run against any environment. Not wired to any application code. Explicitly off the LK Phase 1 critical path per PM's final approval ("If a DB migration becomes necessary: STOP before dependent production deployment and report exactly what must be applied").
-**Date:** 2026-08-16
-**Context:** LK Phase 1 implementation, Phase G
+**Status:** Design documentation only. The migration file this ADR originally accompanied (`20260816010000_add_assessments_knowledge_snapshot_ref.sql`) was written, never applied to any environment, and has now been **removed** from the Phase 1A commit set per PM's 2026-08-16 governance-review decision (item 9): a generic `TEXT` snapshot reference is a premature abstraction to bake into `main` before Phase 1B is actually designed, especially since this ADR's own "Open questions" section already flagged a per-assessment `{claim_id, version}` list as the likely better format (see Question 1) -- committing the simpler `TEXT` column first risked anchoring the eventual design on the wrong shape. This document is kept as design documentation for whenever Phase 1B is scoped; no migration currently exists in the repo for it.
+**Date:** 2026-08-16 (migration removed 2026-08-16, same-day governance review)
+**Context:** LK Phase 1 implementation, Phase G; migration removal, LK Phase 1 governance review item 9
 
 ---
 
@@ -45,8 +45,8 @@ The CHECK constraint (`knowledge_snapshot_ref IS NULL OR length(trim(knowledge_s
 
 ## Related files
 
-- `08_Platform/app/supabase/migrations/20260816010000_add_assessments_knowledge_snapshot_ref.sql` — the migration itself (written, not applied)
 - `08_Platform/app/supabase/migrations/20260712000000_create_assessments_table.sql` — the table this extends; `methodology_version` is the closest existing precedent for the question this column answers
+- No migration file currently exists in the repo for this column — the original `20260816010000_add_assessments_knowledge_snapshot_ref.sql` was removed 2026-08-16 (see Status above); a future migration should be written fresh once Phase 1B's format (see Question 1) is actually decided, not restored from git history unmodified
 - `06_Operations/institutional-knowledge/notebook/GOVERNED-CLAIMS.md` — the governed-knowledge layer this column would eventually reference
 - `08_Platform/app/lib/assessments/ADR-001-provenance-provider-persistence.md`, `ADR-002-lifecycle-audit-log.md`, `ADR-003-manual-pdf-upload-provenance.md` — prior ADRs for this table, same format
 

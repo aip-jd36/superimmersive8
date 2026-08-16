@@ -69,6 +69,35 @@ export function outsideCoverageSummary(category: GoalCategory): string {
 }
 
 /**
+ * Source-aware boundary clause (LK Phase 1 governance refinement,
+ * 2026-08-16, PM decision item 7): the ORIGINAL single closing sentence
+ * ("though it reflects the platform's own terms...") is only true when
+ * every matched result came from a tool/platform Matrix claim -- it is
+ * factually wrong when applied to a Topic/LK governed-knowledge claim
+ * (US copyright law is not "the platform's own terms"), a gap surfaced
+ * during the LK Phase 1 human-governance review before any Topic claim
+ * went live. Two clauses, chosen by a single boolean the caller already
+ * has for free (every matched RetrievalResult's own `source_fact.kind`),
+ * not a new fact, new LLM call, or new doctrine:
+ *   - allToolSourced === true: EXACT original wording, byte-for-byte --
+ *     tool behavior is unchanged, per the explicit hard requirement.
+ *   - allToolSourced === false (topic-only OR mixed tool+topic): neutral
+ *     wording that makes no claim about "platform terms" at all. Chosen
+ *     deliberately over a third, mixed-specific clause -- splitting a
+ *     combined, already-joined claimStatement back out by source per
+ *     sentence would be a bigger structural change than this bug needs,
+ *     and the neutral clause is not FALSE for a tool-sourced statement,
+ *     only less specific than the tool-only wording -- so using it
+ *     whenever even one topic-sourced result is present keeps every
+ *     word of the output true, which is the actual requirement.
+ */
+function boundaryClause(allToolSourced: boolean): string {
+  return allToolSourced
+    ? "though it reflects the platform's own terms, not a full determination of your specific project's commercial readiness."
+    : "though it doesn't by itself determine the answer for your specific project."
+}
+
+/**
  * `claimStatement` is the already-governed, already-eligible
  * `RetrievalResult.candidate_statement`, quoted verbatim — never
  * paraphrased, matching every other consumer of this field in this
@@ -76,8 +105,12 @@ export function outsideCoverageSummary(category: GoalCategory): string {
  * closing sentence is the load-bearing boundary line: it must always be
  * present, never trimmed for brevity, since it is what keeps a matched,
  * relevant claim from reading as a full answer to the user's broader
- * question.
+ * question. `allToolSourced` -- see boundaryClause above -- defaults to
+ * `true` so every pre-existing call site (all of which only ever passed
+ * tool-sourced matches before Topic Retrieval existed) is unaffected if
+ * it isn't updated; build-bounded-interpretation.ts's own call site always
+ * passes the real computed value explicitly.
  */
-export function directlyRelevantSummary(category: GoalCategory, claimStatement: string): string {
-  return `${claimStatement} This is relevant to ${CATEGORY_LABELS[category]}, though it reflects the platform's own terms, not a full determination of your specific project's commercial readiness.`
+export function directlyRelevantSummary(category: GoalCategory, claimStatement: string, allToolSourced: boolean = true): string {
+  return `${claimStatement} This is relevant to ${CATEGORY_LABELS[category]}, ${boundaryClause(allToolSourced)}`
 }

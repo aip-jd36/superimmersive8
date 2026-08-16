@@ -25,16 +25,18 @@ function stripFencedCodeBlocks(markdown: string): string {
   return markdown.replace(/```[\s\S]*?```/g, '')
 }
 
-/** Extracts every real `### CLAIM-...` heading (outside code fences) and its own Lifecycle/Publication scope lines. */
-function extractMarkdownClaims(markdown: string): { claim_id: string; lifecycle: string | null; publication_scope: string | null }[] {
+/** Extracts every real `### CLAIM-...` heading (outside code fences) and its own Topic/Lifecycle/Publication scope lines. */
+function extractMarkdownClaims(markdown: string): { claim_id: string; topic: string | null; lifecycle: string | null; publication_scope: string | null }[] {
   const outsideFences = stripFencedCodeBlocks(markdown)
   const sections = outsideFences.split(/(?=^### CLAIM-)/m).filter((s) => s.startsWith('### CLAIM-'))
   return sections.map((section) => {
     const idMatch = section.match(/^### (CLAIM-[A-Za-z0-9-]+)/)
+    const topicMatch = section.match(/^Topic:\s*(.+)$/m)
     const lifecycleMatch = section.match(/^Lifecycle:\s*(.+)$/m)
     const scopeMatch = section.match(/^Publication scope:\s*(.+)$/m)
     return {
       claim_id: idMatch ? idMatch[1].trim() : '',
+      topic: topicMatch ? topicMatch[1].trim() : null,
       lifecycle: lifecycleMatch ? lifecycleMatch[1].trim() : null,
       publication_scope: scopeMatch ? scopeMatch[1].trim() : null,
     }
@@ -87,6 +89,27 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
       const fixtureIsCrcEligible = fixtureClaim.crc_eligible === 'Yes'
       const markdownSaysCrcEligible = (markdownClaim.publication_scope ?? '').toLowerCase().includes('crc eligible')
       expect(fixtureIsCrcEligible).toBe(markdownSaysCrcEligible)
+    }
+  })
+
+  /**
+   * Topic drift detection (added 2026-08-16, LK Phase 1 governance
+   * refinement) -- the exact gap that let CLAIM-COPY-001/002/003 sit at
+   * `Topic: copyright_ownership` in the fixture for one review cycle after
+   * the markdown's own field name was corrected to `copyrightability`
+   * during the taxonomy decision in this same refinement. Lifecycle and
+   * Publication scope already had drift detection; Topic didn't. Closing
+   * that gap now rather than leaving the next taxonomy correction to rely
+   * on a human re-reading both files side by side again.
+   */
+  test("a fixture claim's Topic agrees with the markdown (drift detection)", () => {
+    const markdown = fs.readFileSync(GOVERNED_CLAIMS_PATH, 'utf-8')
+    const markdownById = new Map(extractMarkdownClaims(markdown).map((c) => [c.claim_id, c]))
+
+    for (const fixtureClaim of TOPIC_CLAIMS_FIXTURE) {
+      const markdownClaim = markdownById.get(fixtureClaim.claim_id)
+      if (!markdownClaim) continue // already caught by the "missing from markdown" test above
+      expect(markdownClaim.topic).toBe(fixtureClaim.topic)
     }
   })
 

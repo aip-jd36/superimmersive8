@@ -32,7 +32,7 @@ import type { TopicClaim } from './types'
 export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
   {
     claim_id: 'CLAIM-COPY-001-v1',
-    topic: 'copyright_ownership',
+    topic: 'copyrightability',
     claim_character: 'established',
     jurisdiction: 'United States (federal)',
     lifecycle: 'Candidate',
@@ -47,7 +47,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
   },
   {
     claim_id: 'CLAIM-COPY-002-v1',
-    topic: 'copyright_ownership',
+    topic: 'copyrightability',
     claim_character: 'established',
     jurisdiction: 'United States (federal)',
     lifecycle: 'Candidate',
@@ -62,7 +62,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
   },
   {
     claim_id: 'CLAIM-COPY-003-v1',
-    topic: 'copyright_ownership',
+    topic: 'copyrightability',
     claim_character: 'established',
     jurisdiction: 'United States (federal)',
     lifecycle: 'Candidate',
