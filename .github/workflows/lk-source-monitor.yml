@@ -1,0 +1,59 @@
+name: SI8 Living Knowledge Source Monitor
+
+on:
+  schedule:
+    # Every 3 days at 02:00 UTC = 10:00 Taipei time (UTC+8) -- offset an hour
+    # from the news digest's own 3-day schedule so they don't compete for
+    # the same runner minute.
+    - cron: '0 2 */3 * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (print review package, skip email/state persistence)'
+        required: false
+        default: 'false'
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: tools/lk-source-monitor/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r tools/lk-source-monitor/requirements.txt
+
+      - name: Prove no-mutation invariant before running
+        working-directory: tools/lk-source-monitor
+        run: python verify_no_mutation.py
+
+      - name: Run source monitor
+        working-directory: tools/lk-source-monitor
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          LK_MONITOR_TO_EMAIL: jd@superimmersive8.com
+          LK_MONITOR_FROM_EMAIL: digest@superimmersive8.com
+        run: |
+          DRY_RUN_FLAG=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+          fi
+          python monitor.py $DRY_RUN_FLAG
+
+      - name: Commit archive, review packages, and state to repository
+        run: |
+          git config user.name "SI8 LK Monitor Bot"
+          git config user.email "digest@superimmersive8.com"
+          git add 06_Operations/institutional-knowledge/lk-automation/
+          git diff --staged --quiet || git commit -m "lk-monitor: source check $(date +%Y-%m-%d)"
+          git push
