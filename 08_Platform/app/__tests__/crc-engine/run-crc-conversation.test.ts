@@ -20,7 +20,8 @@
 import { DIALOGUE_FIXTURES } from '@/lib/interview-engine/fixtures'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { runCRCConversation } from '@/lib/crc-engine/run-crc-conversation'
-import type { StructuredUnderstanding } from '@/types/interview-engine'
+import type { StructuredUnderstanding, UserGoal } from '@/types/interview-engine'
+import type { TopicClaim } from '@/lib/retrieval-engine/types'
 
 const EMPTY_PROJECTION_OUTPUT = { opening_line: '', understood_summary: '', knowledge_items: [], goal_interpretations: [], closing_cta: '' }
 
@@ -258,5 +259,44 @@ describe('runCRCConversation -- negative assertions', () => {
       expect(JSON.stringify(withGoals.output.goal_interpretations[0])).toContain('Can I use this commercially')
       expect(JSON.stringify({ understood_summary: withGoals.output.understood_summary, knowledge_items: withGoals.output.knowledge_items })).not.toContain('Can I use this commercially')
     }
+  })
+})
+
+describe('runCRCConversation -- Topic Retrieval end-to-end (CRC Living Knowledge Phase 1, 2026-08-16)', () => {
+  test('a topic claim flows all the way through Retrieval -> M2 -> goal_interpretations, exactly like a tool claim does', () => {
+    const goal: UserGoal = {
+      goal_id: 'g-1',
+      state: 'confirmed',
+      raw_text: 'Do I own the copyright?',
+      category: 'copyright_ownership',
+      scope: 'informational',
+      superseded_by: null,
+      source_turn: 1,
+      source_statement: 'Do I own the copyright?',
+    }
+    const topicClaim: TopicClaim = {
+      claim_id: 'CLAIM-COPY-TEST-v1',
+      topic: 'copyright_ownership',
+      claim_character: 'established',
+      jurisdiction: 'Global',
+      lifecycle: 'Adopted',
+      crc_eligible: 'Yes',
+      crc_publication_scope: 'Test scope.',
+      crc_candidate_statement: 'Test candidate statement for end-to-end proof.',
+      applicability_requirements: [],
+      last_verified: '2026-08-16',
+      superseded_by: null,
+    }
+    const su: StructuredUnderstanding = { ...DIALOGUE_FIXTURES.no_signal.structured_understanding, user_goals: [goal] }
+    const { output } = runCRCConversation(su, MATRIX_FIXTURE, [topicClaim])
+
+    expect(output.goal_interpretations).toHaveLength(1)
+    expect(output.goal_interpretations[0].goal_text).toBe('Do I own the copyright?')
+    expect(output.goal_interpretations[0].summary).toContain('Test candidate statement for end-to-end proof.')
+  })
+
+  test('omitting topicClaims entirely (pre-Phase-1 call shape) still works -- backward-compatible default', () => {
+    const { output } = runCRCConversation(DIALOGUE_FIXTURES.rich_signal.structured_understanding, MATRIX_FIXTURE)
+    expect(output).toBeDefined()
   })
 })

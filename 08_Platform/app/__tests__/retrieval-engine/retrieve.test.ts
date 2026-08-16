@@ -8,8 +8,8 @@
 
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
-import type { MatrixRow } from '@/lib/retrieval-engine/types'
-import type { RetrievalHandoff } from '@/types/interview-engine'
+import type { MatrixRow, TopicClaim } from '@/lib/retrieval-engine/types'
+import type { RetrievalHandoff, UserGoal } from '@/types/interview-engine'
 
 function handoff(overrides: Partial<RetrievalHandoff> = {}): RetrievalHandoff {
   return {
@@ -196,5 +196,86 @@ describe('retrieve — negative assertions, forbidden fields (Phase 6)', () => {
   test('CRC Publication Scope IS allowed to pass forward -- must not be treated as a forbidden field', () => {
     const out = retrieve(handoff({ tools: [tool('runway-gen3')] }), MATRIX_FIXTURE)
     expect(out.results[0].publication_scope.length).toBeGreaterThan(0)
+  })
+})
+
+describe('retrieve -- Topic Retrieval integration (CRC Living Knowledge Phase 1, 2026-08-16)', () => {
+  function goal(overrides: Partial<UserGoal> & Pick<UserGoal, 'goal_id' | 'category'>): UserGoal {
+    return {
+      state: 'confirmed',
+      raw_text: 'placeholder',
+      scope: 'informational',
+      superseded_by: null,
+      source_turn: 1,
+      source_statement: 'placeholder',
+      ...overrides,
+    }
+  }
+
+  function topicClaim(overrides: Partial<TopicClaim> & Pick<TopicClaim, 'claim_id' | 'topic'>): TopicClaim {
+    return {
+      claim_character: 'established',
+      jurisdiction: 'Global',
+      lifecycle: 'Adopted',
+      crc_eligible: 'Yes',
+      crc_publication_scope: 'Scope text.',
+      crc_candidate_statement: 'Candidate statement.',
+      applicability_requirements: [],
+      last_verified: '2026-08-16',
+      superseded_by: null,
+      ...overrides,
+    }
+  }
+
+  test('omitting goals/topicClaims entirely (pre-Phase-1 call shape) behaves exactly as before -- backward compatible default', () => {
+    const out = retrieve(handoff({ tools: [tool('runway-gen3')] }), MATRIX_FIXTURE)
+    expect(out.results).toHaveLength(1)
+    expect(out.results[0].source_fact.kind).toBe('tool')
+  })
+
+  test('a topic claim surfaces via source_fact.kind "topic", independent of any tool match', () => {
+    const g = goal({ goal_id: 'g-1', category: 'copyright_ownership' })
+    const c = topicClaim({ claim_id: 'CLAIM-COPY-001-v1', topic: 'copyright_ownership' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], [c])
+    expect(out.results).toHaveLength(1)
+    expect(out.results[0].source_fact).toEqual({ kind: 'topic', identifier: 'copyright_ownership' })
+    expect(out.results[0].claim_id).toBe('CLAIM-COPY-001-v1')
+  })
+
+  test('tool results and topic results merge into ONE list -- both present simultaneously, neither suppresses the other', () => {
+    const g = goal({ goal_id: 'g-1', category: 'copyright_ownership' })
+    const c = topicClaim({ claim_id: 'CLAIM-COPY-001-v1', topic: 'copyright_ownership' })
+    const out = retrieve(handoff({ tools: [tool('kling')] }), MATRIX_FIXTURE, [g], [c])
+    const kinds = out.results.map((r) => r.source_fact.kind).sort()
+    expect(kinds).toEqual(['tool', 'topic'])
+  })
+
+  test('an applicability-gated topic claim with jurisdiction confirmed correctly surfaces', () => {
+    const g = goal({ goal_id: 'g-1', category: 'copyright_ownership' })
+    const c = topicClaim({
+      claim_id: 'CLAIM-COPY-001-v1',
+      topic: 'copyright_ownership',
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+    })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], [c], { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] })
+    expect(out.results).toHaveLength(1)
+  })
+
+  test('the same applicability-gated topic claim does NOT surface when jurisdiction is unknown -- default applicabilityFacts', () => {
+    const g = goal({ goal_id: 'g-1', category: 'copyright_ownership' })
+    const c = topicClaim({
+      claim_id: 'CLAIM-COPY-001-v1',
+      topic: 'copyright_ownership',
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+    })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], [c])
+    expect(out.results).toEqual([])
+    expect(out.diagnostics).toContainEqual({ identifier: 'copyright_ownership', reason: 'applicability_unmet' })
+  })
+
+  test('Phase A: TOPIC_CLAIMS_FIXTURE is empty, so passing zero real topic claims produces byte-identical results to the pre-Phase-1 call shape', () => {
+    const withoutTopics = retrieve(handoff({ tools: [tool('kling')] }), MATRIX_FIXTURE)
+    const withEmptyTopics = retrieve(handoff({ tools: [tool('kling')] }), MATRIX_FIXTURE, [], [])
+    expect(withEmptyTopics.results).toEqual(withoutTopics.results)
   })
 })

@@ -55,7 +55,7 @@
 
 import { buildRetrievalHandoff } from '@/lib/interview-engine/handoff'
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
-import type { MatrixRow, RetrievalDiagnostic, RetrievalResult } from '@/lib/retrieval-engine/types'
+import type { MatrixRow, RetrievalDiagnostic, RetrievalResult, TopicClaim } from '@/lib/retrieval-engine/types'
 import { assembleProjectionOutput } from '@/lib/projection-layer/assemble-projection-output'
 import type { ProjectionDiagnostic, ProjectionOutput } from '@/lib/projection-layer/types'
 import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
@@ -86,9 +86,21 @@ export interface CRCPipelineResult {
   trace: CRCPipelineTrace
 }
 
-export function runCRCConversation(understanding: StructuredUnderstanding, matrix: MatrixRow[]): CRCPipelineResult {
+/**
+ * `topicClaims` (CRC Living Knowledge Phase 1, 2026-08-16): additive,
+ * defaults to `[]` -- every pre-existing call site continues to compile
+ * and behave identically without passing it, same discipline as
+ * `assembleProjectionOutput`'s own `interpretations` parameter. Real
+ * callers pass `TOPIC_CLAIMS_FIXTURE` explicitly (mirroring how `matrix`
+ * is never defaulted to `MATRIX_FIXTURE` here) once Wave 1 claims exist.
+ * Applicability facts (jurisdiction, tool plan tiers) are read straight
+ * off `understanding` and passed to `retrieve()` unmodified -- never
+ * routed through `RetrievalHandoff`, per the same "user_goals cannot leak
+ * downstream by construction" principle Milestone 1 already established.
+ */
+export function runCRCConversation(understanding: StructuredUnderstanding, matrix: MatrixRow[], topicClaims: TopicClaim[] = []): CRCPipelineResult {
   const handoff = buildRetrievalHandoff(understanding)
-  const { results, diagnostics: retrievalDiagnostics } = retrieve(handoff, matrix)
+  const { results, diagnostics: retrievalDiagnostics } = retrieve(handoff, matrix, understanding.user_goals, topicClaims)
   const interpretations = buildBoundedInterpretations(understanding.user_goals, results)
   const { output, diagnostics: projectionDiagnostics } = assembleProjectionOutput(handoff, results, interpretations)
 

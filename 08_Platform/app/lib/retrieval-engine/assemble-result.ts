@@ -22,7 +22,7 @@
  * consumer-driven contract extension instead).
  */
 
-import type { MatrixClaim, MatrixRow, RetrievalResult, RetrievalSourceFact } from './types'
+import type { MatrixClaim, MatrixRow, RetrievalResult, RetrievalSourceFact, TopicClaim } from './types'
 
 /** Returns null (never a fabricated scope) if the claim has no publication scope text -- see the 'yes_claim_missing_scope' diagnostic in retrieve.ts, which is where this case is actually surfaced. */
 export function assembleResult(sourceFact: RetrievalSourceFact, row: MatrixRow, claim: MatrixClaim): RetrievalResult | null {
@@ -35,5 +35,31 @@ export function assembleResult(sourceFact: RetrievalSourceFact, row: MatrixRow, 
     candidate_statement: claim.crc_candidate_statement,
     last_verified: row.last_verified,
     topic: claim.topic ?? 'unknown',
+  }
+}
+
+/**
+ * Topic-claim counterpart (CRC Living Knowledge Phase 1, 2026-08-16). No
+ * MatrixRow exists for a non-tool-scoped claim, so `matrix_identifier`
+ * carries the claim's own `topic` instead of a row identifier -- the
+ * closest analogous "which group does this belong to" value. Same
+ * never-fabricate-scope discipline as assembleResult: a topic claim only
+ * ever reaches this function after lookupTopicClaims has already confirmed
+ * Adopted + CRC-eligible + applicable (see lookup-topic-claims.ts), so the
+ * null-scope guard here is defensive, not a real Phase 1 code path -- a
+ * Yes-eligible topic claim with no scope text would be an authoring
+ * inconsistency, exactly mirroring the Matrix's own 'yes_claim_missing_scope'
+ * case.
+ */
+export function assembleTopicResult(claim: TopicClaim): RetrievalResult | null {
+  if (claim.crc_publication_scope === null) return null
+  return {
+    source_fact: { kind: 'topic', identifier: claim.topic },
+    claim_id: claim.claim_id,
+    matrix_identifier: claim.topic,
+    publication_scope: claim.crc_publication_scope,
+    candidate_statement: claim.crc_candidate_statement,
+    last_verified: claim.last_verified,
+    topic: claim.topic,
   }
 }

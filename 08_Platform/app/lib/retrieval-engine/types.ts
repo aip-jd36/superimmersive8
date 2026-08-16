@@ -82,16 +82,107 @@ export interface MatrixRow {
   claims: MatrixClaim[]
 }
 
+// ── Topic claims (CRC Living Knowledge Phase 1, 2026-08-16) ────────────────
+//
+// Non-tool-scoped governed knowledge -- e.g. copyright/human-authorship
+// claims that apply regardless of which AI platform was used, so they have
+// no MatrixRow to attach to. Canonical source is
+// `06_Operations/institutional-knowledge/notebook/GOVERNED-CLAIMS.md`,
+// mirrored (same discipline as MATRIX_FIXTURE/matrix-fixture.ts, hand-synced,
+// no live markdown parser -- no precedent for one exists in this repo) into
+// `topic-claims-fixture.ts`.
+//
+// Reuses the Matrix's own CRC-Eligible vocabulary (`crc_eligible`) exactly
+// -- extended to a second document, not a new publication concept.
+// `lifecycle` is a SEPARATE enum from the Matrix's `Status` (which is a
+// factual-freshness concept, e.g. "Needs Reverification") -- `lifecycle` is
+// a governance-stage concept (Candidate -> Under Review -> Adopted ->
+// Deprecated). Conflating the two was flagged as a live risk in
+// MATRIX-LEARNINGS.md; kept structurally distinct here on purpose.
+
+export const LIFECYCLE_VALUES = ['Candidate', 'Under Review', 'Adopted', 'Deprecated'] as const
+export type Lifecycle = (typeof LIFECYCLE_VALUES)[number]
+
 /**
- * Which handoff fact triggered a match. Only 'tool' is reachable in this
- * milestone -- the current Matrix is tool-row-keyed only; non-tool-keyed
- * indexing (scoped observations, intended_use, workflow_role) is an
- * explicitly deferred open question in RETRIEVAL_ENGINE_ARCHITECTURE.md,
- * not designed here. The type still names the other kinds so a future
- * indexing design has a natural place to extend this union, rather than
- * inventing a new type at that point.
+ * `established` / `conditional` / `unsettled` -- PRD v0.2 §12's uncertainty
+ * model. "No governed coverage" is deliberately NOT a fourth value here: it
+ * is a retrieval outcome (no matching/applicable claim), never a stored
+ * claim state -- see LK_PHASE1_TECHNICAL_DESIGN.md §6 for the full
+ * reasoning. `conditional`'s condition lives in `applicability_requirements`
+ * below, not a separate free-text field.
  */
-export const RETRIEVAL_SOURCE_FACT_KINDS = ['tool'] as const
+export const CLAIM_CHARACTER_VALUES = ['established', 'conditional', 'unsettled'] as const
+export type ClaimCharacter = (typeof CLAIM_CHARACTER_VALUES)[number]
+
+/**
+ * Phase 1 IMPLEMENTED applicability fact types only -- `jurisdiction`
+ * (StructuredUnderstanding.project_facts.jurisdiction, added CRC Living
+ * Knowledge Phase 1) and `tool_plan_tier` (ToolMention.plan_tier, already
+ * exists). `client_supplied_asset`, `creator_relationship`, and
+ * `distribution_context` were explicitly reviewed and REJECTED for Phase 1
+ * (PM decision, 2026-08-16 final approval, §8): no reliable keyed
+ * structured fact exists for any of them today (the closest is a free-text
+ * ScopedObservation.note, and text-matching it to manufacture a boolean is
+ * explicitly the "pretending a predicate is supported when the underlying
+ * fact isn't" failure mode PM's own review warned against). Do not add a
+ * claim referencing any fact outside this two-value union in Phase 1 -- it
+ * would author a claim that can never become applicable, silently.
+ */
+export const APPLICABILITY_FACTS = ['jurisdiction', 'tool_plan_tier'] as const
+export type ApplicabilityFact = (typeof APPLICABILITY_FACTS)[number]
+
+/**
+ * `tool` is only meaningful (and only read) when `fact === 'tool_plan_tier'`
+ * -- scopes the plan-tier check to one specific canonical tool identifier,
+ * since plan_tier is attested per-tool, not project-wide (ToolMention's own
+ * existing design). Deterministic `.every()` evaluation only -- no scoring,
+ * no partial credit, no LLM judgment call at match time (PRD v0.2 §9/§10's
+ * explicit "not a rules engine" instruction).
+ */
+export interface ApplicabilityRequirement {
+  fact: ApplicabilityFact
+  tool?: string
+  operator: 'equals' | 'not_equals'
+  value: string
+}
+
+/**
+ * One non-tool-scoped governed claim, mirroring MatrixClaim's shape plus
+ * the fields PRD v0.2 §7 requires that tool-scoped claims don't need
+ * (jurisdiction, applicability, lifecycle, character, version lineage).
+ * `claim_id` carries its own version suffix (e.g. "CLAIM-COPY-001-v1") --
+ * a claim and a specific version of that claim share the same identity
+ * concept here, distinguished by the suffix, per
+ * LK_PHASE1_TECHNICAL_DESIGN.md §10's versioning design.
+ */
+export interface TopicClaim {
+  claim_id: string
+  /** Matches UserGoal.category exactly -- this is the field Topic Retrieval actually matches on. */
+  topic: GoalCategory
+  claim_character: ClaimCharacter
+  /** Free text (e.g. "United States (federal)", "Global") -- not an enum. Wave 1 needs exactly one value; richer values are representable without a schema change. */
+  jurisdiction: string
+  lifecycle: Lifecycle
+  crc_eligible: CrcEligible
+  crc_publication_scope: string | null
+  crc_candidate_statement: string | null
+  applicability_requirements: ApplicabilityRequirement[]
+  last_verified: string | null
+  /** id of the claim version that replaced this one, or null if this is the current version. Mirrors UserGoal.superseded_by's own convention. */
+  superseded_by: string | null
+}
+
+/**
+ * Which handoff fact triggered a match. `'tool'` is the original,
+ * Matrix-row-keyed match. `'topic'` (added CRC Living Knowledge Phase 1,
+ * 2026-08-16, per PM-approved technical design) is a claim matched by
+ * `UserGoal.category` against a non-tool-scoped `TopicClaim` rather than a
+ * `MatrixRow` -- see the "Topic claims" section below. Both kinds produce
+ * the same `RetrievalResult` shape; `lib/bounded-interpretation/` already
+ * consumes results by `topic` alone and does not need to know which
+ * `source_fact.kind` produced a given result.
+ */
+export const RETRIEVAL_SOURCE_FACT_KINDS = ['tool', 'topic'] as const
 export type RetrievalSourceFactKind = (typeof RETRIEVAL_SOURCE_FACT_KINDS)[number]
 
 export interface RetrievalSourceFact {
@@ -146,6 +237,10 @@ export const NON_MATCH_REASONS = [
    * one" discipline as the rest of this module.
    */
   'yes_claim_missing_scope',
+  /** Topic Retrieval reasons (CRC Living Knowledge Phase 1, 2026-08-16) -- see lookup-topic-claims.ts for exactly when each fires. One shared diagnostic type rather than a second parallel one, since both retrieval paths feed the same trace/reporting surface. */
+  'no_topic_claim',
+  'not_adopted_or_eligible',
+  'applicability_unmet',
 ] as const
 export type NonMatchReason = (typeof NON_MATCH_REASONS)[number]
 

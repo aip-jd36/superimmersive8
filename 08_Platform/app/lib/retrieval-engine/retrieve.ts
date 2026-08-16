@@ -28,19 +28,40 @@
  * the same claim twice.
  */
 
-import type { RetrievalHandoff } from '@/types/interview-engine'
+import type { RetrievalHandoff, UserGoal } from '@/types/interview-engine'
 import { extractMatchableFacts } from './extract-matchable-facts'
 import { lookupRows } from './lookup-rows'
 import { enumerateEligibleClaims } from './enumerate-eligible-claims'
-import { assembleResult } from './assemble-result'
-import type { MatrixRow, RetrievalDiagnostic, RetrievalResult } from './types'
+import { assembleResult, assembleTopicResult } from './assemble-result'
+import { lookupTopicClaims, type ApplicabilityFacts } from './lookup-topic-claims'
+import type { MatrixRow, RetrievalDiagnostic, RetrievalResult, TopicClaim } from './types'
 
 export interface RetrieveOutput {
   results: RetrievalResult[]
   diagnostics: RetrievalDiagnostic[]
 }
 
-export function retrieve(handoff: RetrievalHandoff, matrix: MatrixRow[]): RetrieveOutput {
+const UNKNOWN_APPLICABILITY_FACTS: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+
+/**
+ * `goals`/`topicClaims`/`applicabilityFacts` are additive parameters (CRC
+ * Living Knowledge Phase 1, 2026-08-16) -- every existing call site
+ * continues to work unmodified (empty goals/claims list, unknown
+ * jurisdiction default), same "defaults preserve existing behavior"
+ * discipline already used for assembleProjectionOutput's own
+ * `interpretations` parameter (CRC Milestone 2). Tool Retrieval and Topic
+ * Retrieval run independently and their results are merged into ONE
+ * `RetrievalResult[]` -- preserving the single "Governed Applicable Claim
+ * Set" output PRD v0.2 §14 requires; lib/bounded-interpretation/ receives
+ * one list and does not need to know which path produced which entry.
+ */
+export function retrieve(
+  handoff: RetrievalHandoff,
+  matrix: MatrixRow[],
+  goals: UserGoal[] = [],
+  topicClaims: TopicClaim[] = [],
+  applicabilityFacts: ApplicabilityFacts = UNKNOWN_APPLICABILITY_FACTS,
+): RetrieveOutput {
   const matchable = extractMatchableFacts(handoff)
   const diagnostics: RetrievalDiagnostic[] = []
   const seen = new Set<string>()
@@ -74,6 +95,20 @@ export function retrieve(handoff: RetrievalHandoff, matrix: MatrixRow[]): Retrie
       seen.add(dedupeKey)
       results.push(assembled)
     }
+  }
+
+  const topicLookup = lookupTopicClaims(goals, topicClaims, applicabilityFacts)
+  diagnostics.push(...topicLookup.diagnostics)
+  for (const claim of topicLookup.matches) {
+    const assembled = assembleTopicResult(claim)
+    if (!assembled) {
+      diagnostics.push({ identifier: claim.claim_id, reason: 'yes_claim_missing_scope' })
+      continue
+    }
+    const dedupeKey = `${assembled.matrix_identifier}:${assembled.claim_id}`
+    if (seen.has(dedupeKey)) continue
+    seen.add(dedupeKey)
+    results.push(assembled)
   }
 
   return { results, diagnostics }
