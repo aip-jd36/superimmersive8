@@ -135,7 +135,11 @@ describe('runExtractionPipeline: accepted proposals', () => {
     )
     expect(updated.scoped_observations).toHaveLength(1)
     expect(updated.scoped_observations[0].workflow_stage).toBe('T2')
-    expect(diagnostics[0].decision).toEqual({ outcome: 'accepted', applied_identifier: 'c1' })
+    // Turn-qualified (CRC production hygiene fix, 2026-08-16): observation_id
+    // is now `t${turn}-${proposal_id}`, matching mention_id/goal_id's own
+    // established minting pattern -- see attestCandidate's scoped_observation
+    // branch.
+    expect(diagnostics[0].decision).toEqual({ outcome: 'accepted', applied_identifier: 't2-c1' })
   })
 
   test('project_fact candidate is accepted via setIntendedUse, applied_identifier names the field', async () => {
@@ -249,7 +253,10 @@ describe('runExtractionPipeline: rejected proposals', () => {
           raw_text: 'Actually, no one reviewed it.',
           kind: 'scoped_observation',
           observation_confidence_hint: 'confirmed_absent',
-          supersedes_observation_id: 'c1',
+          // Turn-qualified (CRC production hygiene fix, 2026-08-16): the
+          // turn-1 candidate above mints observation_id 't1-c1', not the
+          // bare 'c1' -- see attestCandidate's scoped_observation branch.
+          supersedes_observation_id: 't1-c1',
         },
       ]),
     )
@@ -265,7 +272,10 @@ describe('runExtractionPipeline: rejected proposals', () => {
           raw_text: 'Wait, someone did glance at it.',
           kind: 'scoped_observation',
           observation_confidence_hint: 'confirmed',
-          supersedes_observation_id: 'c1',
+          // Turn-qualified (CRC production hygiene fix, 2026-08-16): the
+          // turn-1 candidate above mints observation_id 't1-c1', not the
+          // bare 'c1' -- see attestCandidate's scoped_observation branch.
+          supersedes_observation_id: 't1-c1',
         },
       ]),
     )
@@ -541,5 +551,249 @@ describe('user_goal extraction pipeline (Milestone 1, 2026-08-15)', () => {
     const decision = diagnostics[0].decision as { outcome: string; reason_code: string }
     expect(decision.outcome).toBe('deferred')
     expect(decision.reason_code).toBe('CANDIDATE_UNCLASSIFIABLE')
+  })
+})
+
+/**
+ * Part B regression cases (CRC production hygiene fix, 2026-08-16, canonical
+ * session fd92b4aa-072f-4d45-918f-ea520231b0d0). Root cause: scoped_observation
+ * was the one candidate kind still minting observation_id from the bare,
+ * turn-local model proposal_id (see attestCandidate's scoped_observation
+ * branch). Two unrelated observations proposed with the same bare
+ * proposal_id on different turns collided; addObservation() threw, and
+ * runExtractionPipeline's own per-candidate try/catch silently converted
+ * that throw into an internal-only 'rejected' diagnostic -- the user's
+ * turn-4 answer was correctly extracted and then silently dropped by
+ * mutation, never a defect in extraction itself.
+ */
+function observationCandidate(overrides: Partial<CandidateObservation> = {}): CandidateObservation {
+  return {
+    proposal_id: 'c1',
+    turn: 1,
+    raw_text: 'They gave me their logo.',
+    kind: 'scoped_observation',
+    observation_confidence_hint: 'confirmed',
+    ...overrides,
+  }
+}
+
+describe('Part B: scoped_observation id-collision fix + regression cases (CRC production hygiene, 2026-08-16, canonical session fd92b4aa-072f-4d45-918f-ea520231b0d0)', () => {
+  test('canonical incident reproduction: two unrelated observations proposed under the SAME bare proposal_id on different turns (turn 2 "c1", turn 4 "c1") both survive as distinct active observations', async () => {
+    const turn2 = await runExtractionPipeline(
+      emptySU(),
+      { turn: 2, text: 'They gave me their logo.' },
+      constantExtractor([observationCandidate({ proposal_id: 'c1', turn: 2, raw_text: 'They gave me their logo.' })]),
+    )
+    const turn4 = await runExtractionPipeline(
+      turn2.updated,
+      { turn: 4, text: 'They said I could only use it for this commercial.' },
+      constantExtractor([
+        observationCandidate({ proposal_id: 'c1', turn: 4, raw_text: 'They said I could only use it for this commercial.' }),
+      ]),
+    )
+    expect(turn4.diagnostics[0].decision.outcome).toBe('accepted')
+    const active = turn4.updated.scoped_observations.filter((o) => o.superseded_by === null)
+    expect(active).toHaveLength(2)
+    expect(active.map((o) => o.note).sort()).toEqual([
+      'They gave me their logo.',
+      'They said I could only use it for this commercial.',
+    ])
+  })
+
+  test('regression case 1: a distinct new fact (permission limitation) survives alongside an existing fact (logo supplied) -- both remain active, neither overwrites the other', async () => {
+    const step1 = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'They gave me their logo.' },
+      constantExtractor([observationCandidate({ proposal_id: 'c1', turn: 1, raw_text: 'They gave me their logo.' })]),
+    )
+    const step2 = await runExtractionPipeline(
+      step1.updated,
+      { turn: 2, text: 'They said I could use it only in this commercial.' },
+      constantExtractor([observationCandidate({ proposal_id: 'c1', turn: 2, raw_text: 'They said I could use it only in this commercial.' })]),
+    )
+    const active = step2.updated.scoped_observations.filter((o) => o.superseded_by === null)
+    expect(active).toHaveLength(2)
+    expect(active.some((o) => o.note === 'They gave me their logo.')).toBe(true)
+    expect(active.some((o) => o.note === 'They said I could use it only in this commercial.')).toBe(true)
+  })
+
+  test('regression case 2: a near-duplicate restatement does not crash or silently drop the original -- KNOWN GAP: no semantic-deduplication layer exists (out of this task\'s two approved fixes), so a restated candidate is currently added as a second active observation rather than recognized as redundant', async () => {
+    const step1 = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'They gave me their logo.' },
+      constantExtractor([observationCandidate({ proposal_id: 'c1', turn: 1, raw_text: 'They gave me their logo.' })]),
+    )
+    const step2 = await runExtractionPipeline(
+      step1.updated,
+      { turn: 2, text: 'Yes, they gave me their logo.' },
+      constantExtractor([observationCandidate({ proposal_id: 'c1', turn: 2, raw_text: 'Yes, they gave me their logo.' })]),
+    )
+    // What matters for THIS fix: no id collision, no thrown/rejected
+    // candidate, no loss of the original fact.
+    expect(step2.diagnostics[0].decision.outcome).toBe('accepted')
+    const active = step2.updated.scoped_observations.filter((o) => o.superseded_by === null)
+    expect(active.some((o) => o.note === 'They gave me their logo.')).toBe(true)
+  })
+
+  test('regression case 3: a stated correction of a permission scope does not silently accumulate as a contradictory unrelated fact -- KNOWN GAP: no resolveObservationTarget() exists (unlike resolveToolMentionTarget/resolveUserGoalTarget), so is_correction/correction_of_raw_text alone cannot resolve a scoped_observation supersession target; a real supersession requires supersedes_observation_id to be set directly', async () => {
+    const step1 = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'They said I could use the logo for this commercial.' },
+      constantExtractor([observationCandidate({ proposal_id: 'c1', turn: 1, raw_text: 'They said I could use the logo for this commercial.' })]),
+    )
+    const firstId = step1.updated.scoped_observations[0].observation_id
+
+    // The deterministic path THIS fix touches: an explicit supersession
+    // target (as tool_mention/user_goal corrections already require)
+    // correctly supersedes, never duplicates.
+    const step2 = await runExtractionPipeline(
+      step1.updated,
+      { turn: 2, text: 'Actually, they said I could use it for all of our campaign materials.' },
+      constantExtractor([
+        observationCandidate({
+          proposal_id: 'c1',
+          turn: 2,
+          raw_text: 'Actually, they said I could use it for all of our campaign materials.',
+          is_correction: true,
+          correction_of_raw_text: 'this commercial',
+          supersedes_observation_id: firstId,
+        }),
+      ]),
+    )
+    const active = step2.updated.scoped_observations.filter((o) => o.superseded_by === null)
+    expect(active).toHaveLength(1)
+    expect(active[0].note).toBe('Actually, they said I could use it for all of our campaign materials.')
+    const prior = step2.updated.scoped_observations.find((o) => o.observation_id === firstId)
+    expect(prior?.superseded_by).not.toBeNull()
+  })
+
+  test('regression case 4: expressed uncertainty about permission is preserved as its own distinct fact -- does not overwrite or fabricate a permission grant onto the existing "logo supplied" fact', async () => {
+    const step1 = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'They gave me their logo.' },
+      constantExtractor([observationCandidate({ proposal_id: 'c1', turn: 1, raw_text: 'They gave me their logo.' })]),
+    )
+    const step2 = await runExtractionPipeline(
+      step1.updated,
+      { turn: 2, text: "I don't know what permission they gave us." },
+      constantExtractor([
+        observationCandidate({
+          proposal_id: 'c1',
+          turn: 2,
+          raw_text: "I don't know what permission they gave us.",
+          observation_confidence_hint: 'unknown',
+        }),
+      ]),
+    )
+    const active = step2.updated.scoped_observations.filter((o) => o.superseded_by === null)
+    // The original supply-of-logo fact is untouched -- still confirmed, still active.
+    const logoFact = active.find((o) => o.note === 'They gave me their logo.')
+    expect(logoFact?.confidence).toBe('confirmed')
+    // The uncertainty is its own separate, honestly-labeled fact -- never
+    // fabricated into a confirmed permission grant.
+    const uncertainty = active.find((o) => o.note === "I don't know what permission they gave us.")
+    expect(uncertainty?.confidence).toBe('unknown')
+  })
+
+  test('decline is preserved distinctly from unknown -- a user who explicitly declines to answer is not recorded the same way as one who genuinely does not know', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: "I'd rather not say." },
+      constantExtractor([
+        observationCandidate({ proposal_id: 'c1', turn: 1, raw_text: "I'd rather not say.", observation_confidence_hint: 'declined' }),
+      ]),
+    )
+    expect(updated.scoped_observations[0].confidence).toBe('declined')
+  })
+})
+
+/**
+ * Canonical end-to-end regression test, based on the real production session
+ * (fd92b4aa-072f-4d45-918f-ea520231b0d0) this task's two fixes were diagnosed
+ * from. Reconstructs the same candidate shapes across the same turn numbers
+ * the live model actually produced, run through the real, now-fixed
+ * pipeline -- not a synthetic minimal repro.
+ */
+describe('canonical regression: full session reconstruction (fd92b4aa-072f-4d45-918f-ea520231b0d0)', () => {
+  test('client-supplied logo, permission limitation, workflow role, tool mention, and user goals all survive together with no cross-contamination', async () => {
+    let su = emptySU()
+
+    const turn1 = await runExtractionPipeline(
+      su,
+      { turn: 1, text: 'I used Kling to make a commercial, paid plan.' },
+      constantExtractor([
+        toolCandidate({ proposal_id: 'c1', turn: 1, raw_tool_name: 'Kling', raw_text: 'I used Kling to make a commercial, paid plan.' }),
+        goalCandidate({
+          proposal_id: 'c2',
+          turn: 1,
+          raw_text: 'Can I use this commercially?',
+          goal_category_hint: 'commercial_use',
+        }),
+      ]),
+    )
+    su = turn1.updated
+
+    const turn2 = await runExtractionPipeline(
+      su,
+      { turn: 2, text: 'They gave me their logo.' },
+      constantExtractor([observationCandidate({ proposal_id: 'c1', turn: 2, raw_text: 'They gave me their logo.' })]),
+    )
+    su = turn2.updated
+
+    const turn3 = await runExtractionPipeline(
+      su,
+      { turn: 3, text: "I'm the person directly creating the AI content." },
+      constantExtractor([
+        {
+          proposal_id: 'c1',
+          turn: 3,
+          raw_text: "I'm the person directly creating the AI content.",
+          kind: 'project_fact',
+          raw_fact_field: 'workflow_role',
+          fact_confidence_hint: 'confirmed',
+          fact_value_hint: "I'm the person directly creating the AI content.",
+        },
+        goalCandidate({
+          proposal_id: 'c2',
+          turn: 3,
+          raw_text: 'Do I own the copyright for this?',
+          goal_category_hint: 'copyright_ownership',
+        }),
+      ]),
+    )
+    su = turn3.updated
+
+    // Turn 4: the previously-lost answer. Same bare proposal_id ("c1") as
+    // turn 2's logo observation -- this is the exact collision that used to
+    // silently drop this candidate.
+    const turn4 = await runExtractionPipeline(
+      su,
+      { turn: 4, text: 'They said I could only use it for this commercial.' },
+      constantExtractor([
+        observationCandidate({ proposal_id: 'c1', turn: 4, raw_text: 'They said I could only use it for this commercial.' }),
+      ]),
+    )
+    su = turn4.updated
+
+    // 1. Client-supplied logo retained.
+    const active = su.scoped_observations.filter((o) => o.superseded_by === null)
+    expect(active.some((o) => o.note === 'They gave me their logo.')).toBe(true)
+    // 2. Permission limitation retained separately (not merged, not lost).
+    expect(active.some((o) => o.note === 'They said I could only use it for this commercial.')).toBe(true)
+    // 3. No meaningless duplication.
+    expect(active).toHaveLength(2)
+    // 4. workflow_role captured verbatim (renders separately -- see
+    // understood-summary.test.ts's roleClause suite for the rendering half).
+    expect(su.project_facts.workflow_role.attestation).toMatchObject({
+      state: 'confirmed',
+      value: "I'm the person directly creating the AI content.",
+    })
+    // 5. Exactly two user goals remain, no duplicates.
+    const activeGoals = su.user_goals.filter((g) => g.superseded_by === null)
+    expect(activeGoals).toHaveLength(2)
+    expect(activeGoals.map((g) => g.category).sort()).toEqual(['commercial_use', 'copyright_ownership'])
+    // 6. Kling paid-plan tool mention remains intact.
+    expect(su.tool_mentions).toHaveLength(1)
+    expect(su.tool_mentions[0].resolution).toMatchObject({ kind: 'canonical', identifier: 'kling' })
   })
 })

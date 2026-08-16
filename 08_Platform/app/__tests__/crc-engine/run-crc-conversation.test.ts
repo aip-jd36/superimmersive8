@@ -114,7 +114,10 @@ describe('runCRCConversation -- end-to-end, required cases', () => {
     const { output } = runCRCConversation(DIALOGUE_FIXTURES.rich_signal.structured_understanding, MATRIX_FIXTURE)
     expect(output.opening_line).toBe("Here's what I understood about your workflow.")
     expect(output.understood_summary).toContain('You mentioned using runway-gen3')
-    expect(output.understood_summary).toContain('You said your role on this is Producer.')
+    // Rendering-contract fix (CRC production hygiene, 2026-08-16): the
+    // role clause is now grammatically shape-agnostic ("Your role on
+    // this: X."), not the old predicate-copula form.
+    expect(output.understood_summary).toContain('Your role on this: Producer.')
     expect(output.knowledge_items).toHaveLength(1)
     expect(output.knowledge_items[0].claim_id).toBe('runway-gen3')
     expect(output.closing_cta).toContain('SI8 can review it.')

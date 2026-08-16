@@ -377,9 +377,37 @@ export function attestCandidate(
 
   if (candidate.kind === 'scoped_observation') {
     if (!candidate.observation_confidence_hint) return null
+    // Turn-qualified, not the bare model-assigned proposal_id -- CRC
+    // production incident fix, 2026-08-16 (canonical session
+    // fd92b4aa-072f-4d45-918f-ea520231b0d0): proposal_id is a turn-local
+    // transport identifier only (the model restarts numbering at "c1"
+    // every call, confirmed live -- turn 2's logo observation and turn 4's
+    // unrelated permission-limitation observation both arrived as
+    // proposal_id "c1"). observation_id must be persistent and
+    // collision-free across the whole conversation, exactly the same
+    // requirement mention_id/goal_id already satisfy via this identical
+    // `t${turn}-${proposal_id}` pattern (see attestCandidate's own
+    // tool_mention branch, a few lines above, for the original statement
+    // of this rule) -- scoped_observation was the one candidate kind still
+    // minting from the bare, collision-prone proposal_id. The mismatch was
+    // silent: addObservation() throws on an id collision, and
+    // runExtractionPipeline's own per-candidate try/catch (below) converts
+    // that throw into an internal-only 'rejected' diagnostic -- the
+    // candidate was correctly proposed by extraction, then silently
+    // dropped by mutation, never a extraction-quality problem. Turn-
+    // qualification alone already guarantees uniqueness (turn numbers are
+    // monotonic and never repeat within one conversation; proposal_ids are
+    // unique within one turn), so this one change closes the whole
+    // collision class -- applied to BOTH branches below (not just the
+    // reachable one) since `supersedes_observation_id` is a real declared
+    // capability on this candidate kind, even though nothing currently
+    // populates it (no scoped-observation-specific resolver exists, unlike
+    // tool_mention/user_goal's own dedicated resolvers) -- leaving its
+    // suffix on the same bare, collision-prone pattern would just move
+    // this exact bug to whenever that resolver is eventually added.
     const observationId = candidate.supersedes_observation_id
-      ? `${candidate.proposal_id}-corrected`
-      : candidate.proposal_id
+      ? `t${candidate.turn}-${candidate.proposal_id}-corrected`
+      : `t${candidate.turn}-${candidate.proposal_id}`
     return {
       kind: 'scoped_observation',
       observation: {

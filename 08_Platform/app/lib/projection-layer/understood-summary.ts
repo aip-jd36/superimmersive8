@@ -181,9 +181,34 @@ function unresolvedMentionsClause(mentions: string[], precededByToolsClause: boo
   return `${lead} ${joinNaturally(quoted)}, which I wasn't able to match to a specific platform yet.`
 }
 
+/**
+ * Rendering-contract fix (CRC production hygiene, 2026-08-16, canonical
+ * session fd92b4aa-072f-4d45-918f-ea520231b0d0): `workflow_role`'s data
+ * contract has never guaranteed a short noun phrase -- extraction stores
+ * the user's own wording verbatim (anthropic-extractor.ts's own schema:
+ * "the value in the user's own words"), which can legitimately be a full
+ * sentence ("I created all the images and brand assets"), not just a
+ * label-shaped answer ("a solo freelancer"). The prior template
+ * (`You said your role on this is ${role}.`) is a predicate-copula
+ * construction that grammatically demands a noun/adjective phrase on the
+ * right, and breaks for a sentence-shaped value ("...is I created all the
+ * images and brand assets.").
+ *
+ * Fix is structural, not semantic: a colon-led appositive ("Your role on
+ * this: ${role}.") is grammatically agnostic to the shape of what follows
+ * -- it reads naturally whether `role` is a noun phrase or a full
+ * sentence, with zero shape-detection, zero rewriting, and zero risk of
+ * altering the user's own meaning (still the exact same verbatim value,
+ * still zero LLM involvement, same as before). Deliberately NOT: (a)
+ * normalizing/truncating the value to force a noun-phrase shape (would
+ * lose information the user actually stated), (b) detecting "does this
+ * look like a sentence" and branching (adds a heuristic that itself needs
+ * maintaining and can misfire, for a problem the connective-phrase change
+ * already solves for every shape at once).
+ */
 function roleClause(role: string | null): string | null {
   if (role === null) return null
-  return `You said your role on this is ${role}.`
+  return `Your role on this: ${role}.`
 }
 
 function intendedUseClause(use: string | null): string | null {

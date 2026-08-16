@@ -163,7 +163,7 @@ const richSignal: DialogueScenario = {
   decider_queue: [],
   expected: {
     assistant_actions: ['NONE_PROPOSED', 'NONE_PROPOSED'],
-    final_active_observation_ids: ['so-1'],
+    final_active_observation_ids: ['t1-so-1'],
     final_active_tool_mention_ids: ['t1-tm-1'],
     final_gate_1_state: 'met',
     final_gate_2_state: 'stable',
@@ -195,7 +195,7 @@ const noSignal: DialogueScenario = {
   decider_queue: [{ should_ask: true, reason_code: 'MISSING_INTENDED_USE', rationale: 'Intended use has never been established.' }],
   expected: {
     assistant_actions: ['ASK', 'NONE_PROPOSED'],
-    final_active_observation_ids: ['so-1'],
+    final_active_observation_ids: ['t2-so-1'],
     final_active_tool_mention_ids: [],
     final_gate_1_state: 'not_met',
     final_gate_2_state: 'not_yet_stable',
@@ -234,7 +234,7 @@ const currentVsHistorical: DialogueScenario = {
   decider_queue: [{ should_ask: true, reason_code: 'MISSING_INTENDED_USE', rationale: 'Intended use has never been established.' }],
   expected: {
     assistant_actions: ['ASK', 'NONE_PROPOSED'],
-    final_active_observation_ids: ['so-1', 'so-2'],
+    final_active_observation_ids: ['t2-so-1', 't2-so-2'],
     final_active_tool_mention_ids: ['t1-tm-1'],
     final_gate_1_state: 'not_met',
     final_gate_2_state: 'not_yet_stable',
@@ -269,7 +269,7 @@ const ambiguousUncertain: DialogueScenario = {
   ],
   generator_queue: [
     { question_text: "What's this video for?", question_kind: 'other', target_signal_id: 'project:intended_use', phase: 2 },
-    { question_text: 'Is that something a colleague on your team would know?', question_kind: 'uncertainty_clarification', target_signal_id: 'so-1', phase: 2 },
+    { question_text: 'Is that something a colleague on your team would know?', question_kind: 'uncertainty_clarification', target_signal_id: 't2-so-1', phase: 2 },
     null,
   ],
   decider_queue: [
@@ -278,7 +278,7 @@ const ambiguousUncertain: DialogueScenario = {
   ],
   expected: {
     assistant_actions: ['ASK', 'ASK', 'NONE_PROPOSED'],
-    final_active_observation_ids: ['so-1', 'so-2'],
+    final_active_observation_ids: ['t2-so-1', 't3-so-2'],
     final_active_tool_mention_ids: ['t1-tm-1'],
     final_gate_1_state: 'not_met',
     final_gate_2_state: 'not_yet_stable',
@@ -307,7 +307,7 @@ const fullOptOut: DialogueScenario = {
   decider_queue: [],
   expected: {
     assistant_actions: ['INTERVIEW_ENDED_BY_DECLINE'],
-    final_active_observation_ids: ['so-1'],
+    final_active_observation_ids: ['t1-so-1'],
     final_active_tool_mention_ids: [],
     final_gate_1_state: 'not_applicable_declined',
     final_gate_2_state: 'not_yet_stable',
@@ -345,7 +345,7 @@ const mixedMultiSignal: DialogueScenario = {
   decider_queue: [],
   expected: {
     assistant_actions: ['NONE_PROPOSED', 'NONE_PROPOSED'],
-    final_active_observation_ids: ['so-1', 'so-2', 'so-3'],
+    final_active_observation_ids: ['t1-so-1', 't1-so-2', 't1-so-3'],
     final_active_tool_mention_ids: ['t1-tm-1', 't1-tm-2'],
     final_gate_1_state: 'met',
     final_gate_2_state: 'stable',
@@ -405,7 +405,7 @@ const ambiguousMultiSurfaceTool: DialogueScenario = {
   ],
   expected: {
     assistant_actions: ['ASK', 'NONE_PROPOSED'],
-    final_active_observation_ids: ['so-1'],
+    final_active_observation_ids: ['t2-so-1'],
     final_active_tool_mention_ids: ['t2-tm-2'],
     final_gate_1_state: 'met',
     final_gate_2_state: 'not_yet_stable',
@@ -450,7 +450,7 @@ const fullPhase1To4Trace: DialogueScenario = {
   decider_queue: [],
   expected: {
     assistant_actions: ['NONE_PROPOSED', 'NONE_PROPOSED', 'NONE_PROPOSED', 'NONE_PROPOSED', 'NONE_PROPOSED'],
-    final_active_observation_ids: ['so-1', 'so-2'],
+    final_active_observation_ids: ['t1-so-1', 't4-so-2'],
     final_active_tool_mention_ids: ['t1-tm-1'],
     final_gate_1_state: 'met',
     final_gate_2_state: 'stable',
@@ -479,8 +479,8 @@ const rule5DisentanglingProbe: DialogueScenario = {
       obs({ proposal_id: 'so-2', turn: 1, raw_text: 'Could be this one instead -- same bundled answer, still unclear which project it belongs to.', observation_confidence_hint: 'unresolved_no_visibility', scope: 'current_project' }),
     ],
     [
-      obs({ proposal_id: 'so-1c', turn: 2, raw_text: 'Confirmed: this happened on the current project.', observation_confidence_hint: 'confirmed', scope: 'current_project', supersedes_observation_id: 'so-1' }),
-      obs({ proposal_id: 'so-2c', turn: 2, raw_text: 'Confirmed: the other fact was about a past project.', observation_confidence_hint: 'confirmed', scope: 'historical_project', supersedes_observation_id: 'so-2' }),
+      obs({ proposal_id: 'so-1c', turn: 2, raw_text: 'Confirmed: this happened on the current project.', observation_confidence_hint: 'confirmed', scope: 'current_project', supersedes_observation_id: 't1-so-1' }),
+      obs({ proposal_id: 'so-2c', turn: 2, raw_text: 'Confirmed: the other fact was about a past project.', observation_confidence_hint: 'confirmed', scope: 'historical_project', supersedes_observation_id: 't1-so-2' }),
     ],
     [tool({ proposal_id: 'tm-1', turn: 3, raw_text: 'we used either Kling or Runway for this, I genuinely mix up which was which', raw_tool_name: 'Kling or Runway' })],
   ],
@@ -497,10 +497,17 @@ const rule5DisentanglingProbe: DialogueScenario = {
     assistant_actions: ['ASK', 'NONE_PROPOSED', 'SUPPRESSED_BY_CONSTRAINT_B'],
     // attestCandidate suffixes a correcting scoped_observation's id with
     // '-corrected' whenever supersedes_observation_id is set -- 'so-1c'
-    // becomes 'so-1c-corrected' at mutation time. Found by the mock dry run
-    // itself (see chat record); fixed here, not in extraction.ts, which is
-    // behaving exactly as designed.
-    final_active_observation_ids: ['so-1c-corrected', 'so-2c-corrected'],
+    // becomes 't2-so-1c-corrected' at mutation time (turn-qualified, CRC
+    // production hygiene fix 2026-08-16 -- see attestCandidate's own
+    // scoped_observation branch for why observation_id must be turn-
+    // qualified, same as mention_id/goal_id already are). This scenario's
+    // own supersedes_observation_id values above were updated from the
+    // stale bare 'so-1'/'so-2' to the real, now turn-qualified ids
+    // ('t1-so-1'/'t1-so-2') those turn-1 candidates actually mint --
+    // before this fix, this mock fixture only "worked" because production
+    // code shared the exact same bare-id bug this fixture was hand-authored
+    // to match, not because the reference was independently correct.
+    final_active_observation_ids: ['t2-so-1c-corrected', 't2-so-2c-corrected'],
     final_active_tool_mention_ids: ['t3-tm-1'],
     final_gate_1_state: 'not_met',
     final_gate_2_state: 'not_yet_stable',

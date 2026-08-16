@@ -369,6 +369,38 @@ describe('observationClauses -- same-scope sentence separation (A2 fix, 2026-08-
   })
 })
 
+describe('roleClause -- rendering-contract robustness fix (CRC production hygiene, 2026-08-16, canonical session fd92b4aa-072f-4d45-918f-ea520231b0d0)', () => {
+  test('1: noun-phrase role renders naturally', () => {
+    const facts = buildUnderstoodFacts(handoff({ workflow_role: 'a solo freelancer' }))
+    expect(renderUnderstoodSummary(facts)).toBe('Your role on this: a solo freelancer.')
+  })
+
+  test('2: sentence-shaped role (the real production value) renders grammatically, not as a predicate-copula collision', () => {
+    const facts = buildUnderstoodFacts(handoff({ workflow_role: 'I created all the images and brand assets' }))
+    const out = renderUnderstoodSummary(facts)
+    expect(out).toBe('Your role on this: I created all the images and brand assets.')
+    expect(out).not.toContain('is I created')
+  })
+
+  test('3: another sentence-shaped role renders grammatically', () => {
+    const facts = buildUnderstoodFacts(handoff({ workflow_role: "I'm the person directly creating the AI content" }))
+    expect(renderUnderstoodSummary(facts)).toBe("Your role on this: I'm the person directly creating the AI content.")
+  })
+
+  test('4: empty/unknown role -- no clause rendered at all, same as before this fix', () => {
+    for (const sentinel of ['unresolved', 'unknown', 'unclear', 'confirmed_absent', 'declined']) {
+      const facts = buildUnderstoodFacts(handoff({ workflow_role: sentinel }))
+      expect(renderUnderstoodSummary(facts)).not.toContain('Your role on this')
+    }
+  })
+
+  test('the value is preserved verbatim -- zero rewriting, zero shape detection, zero truncation', () => {
+    const sentenceValue = 'I created all the images and brand assets'
+    const facts = buildUnderstoodFacts(handoff({ workflow_role: sentenceValue }))
+    expect(renderUnderstoodSummary(facts)).toContain(sentenceValue)
+  })
+})
+
 describe('renderUnderstoodSummary -- negative assertions', () => {
   const forbiddenWords = ['safe', 'compliant', 'approved', 'cleared', 'low risk', 'high risk', 'you should', 'you can use this commercially', 'risk']
 
