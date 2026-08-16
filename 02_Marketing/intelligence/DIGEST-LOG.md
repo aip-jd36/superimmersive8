@@ -9,6 +9,37 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of August 16, 2026
+*Run: 2026-08-16 · 9 high · 7 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [In Europe, AI now has to tell you it is AI](https://www.wionews.com/world/in-europe-ai-now-has-to-tell-you-it-is-ai-1786631841175/amp) | WION | Thu, 13 Aug 2026 | ☐ |
+| 9 | post+update | [Europe's AI watermarking rules are now live, but visible labels, hidden machine-readable marks and editorial review apply to different companies, content and moments under Article 50](https://siliconcanals.com/t-europes-ai-watermarking-rules-are-now-live-but-visible-labels-hidden-machine-readable-marks-and-editorial-review-apply-to-different-companies-content-and-moments-under-article-50/) | Silicon Canals | Wed, 12 Aug 2026 | ☐ |
+| 8 | post+update | [EU's AI Transparency Rules Now Enforceable: Fines Reach €35 Million](https://www.ad-hoc-news.de/boerse/news/unternehmensnachrichten/eu-s-ai-transparency-rules-now-enforceable-fines-reach-35-million/69951113) | ad-hoc-news.de | Fri, 14 Aug 2026 | ☐ |
+| 8 | update | [Rezolve Ai Unveils Patent-Backed AI Provenance Platform as Watermarking Becomes Global Infrastructure](https://www.globenewswire.com/de/news-release/2026/08/13/3344460/0/en/rezolve-ai-unveils-patent-backed-ai-provenance-platform-as-watermarking-becomes-global-infrastructure.html) | GlobeNewswire | Thu, 13 Aug 2026 | ☐ |
+| 8 | post+update | [EU AI Act’s Transparency Rules: What Went Into Effect on 2 August?](https://www.morganlewis.com/blogs/sourcingatmorganlewis/2026/08/eu-ai-acts-transparency-rules-what-went-into-effect-on-2-august) | Morgan Lewis | Wed, 12 Aug 2026 | ☐ |
+| 8 | post+update | [EU AI Act Enters Enforcement Phase: What the New Rules Mean in Practice](https://eutoday.net/eu-ai-act-enforcement-transparency-rules/) | EU Today | Tue, 11 Aug 2026 | ☐ |
+| 7 | update | [Europe's regulatory double bind](https://cepr.org/voxeu/columns/europes-regulatory-double-bind) | CEPR | Fri, 14 Aug 2026 | ☐ |
+| 7 | update | [EU Artificial Intelligence Rulebook Now Fully Enforced — Works Councils Scramble to Keep Pace](https://www.ad-hoc-news.de/boerse/news/unternehmensnachrichten/eu-artificial-intelligence-rulebook-now-fully-enforced-works-councils/69946065) | ad-hoc-news.de | Thu, 13 Aug 2026 | ☐ |
+| 7 | post+update | [So You Want to Build an A.I. Star?](https://www.nytimes.com/2026/08/13/arts/ai-podcasts-fashion-pop-avatars.html) | The New York Times | Thu, 13 Aug 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Google now labels AI-generated ads across Search, YouTube, and Discover](https://www.marketscale.com/industries/marketing-tech/google-now-labels-ai-generated-ads-across-search-youtube-and-discover) | MarketScale | Fri, 14 Aug 2026 | ☐ |
+| 6 | monitor | [Can You Use AI-Generated Video Commercially? Here's the Checklist, Tool by Tool](https://hackernoon.com/can-you-use-ai-generated-video-commercially-heres-the-checklist-tool-by-tool) | HackerNoon | Fri, 14 Aug 2026 | ☐ |
+| 6 | monitor | [Getty Images Launches MCP Server to Connect Creative and Editorial Content to AI Workflows and Products](https://newsroom.gettyimages.com/en/getty-images/getty-images-launches-mcp-server-to-connect-creative-and-editorial-content-to-ai-workflows-and-products) | Getty Images Newsroom | Wed, 12 Aug 2026 | ☐ |
+| 6 | monitor | [Anthropic starts marking all of Claude’s output worldwide as EU transparency rules take effect](https://thenextweb.com/news/anthropic-watermarks-claude-output-eu-ai-act-article-50) | The Next Web | Wed, 12 Aug 2026 | ☐ |
+| 5 | monitor | [The EU AI Act Now Forces Every Chatbot to Admit It Is Not Human](https://startupfortune.com/the-eu-ai-act-now-forces-every-chatbot-to-admit-it-is-not-human/) | Startup Fortune | Thu, 13 Aug 2026 | ☐ |
+| 4 | monitor | [How to Copyright an AI-Generated Image?](https://www.jdsupra.com/legalnews/how-to-copyright-an-ai-generated-image-7658022/) | JD Supra | Wed, 12 Aug 2026 | ☐ |
+| 4 | monitor | [EU rules force Anthropic to expose AI writing worldwide](https://www.euronews.com/next/2026/08/11/eu-compliance-delivered-globally-anthropic-to-watermark-claudes-output-worldwide) | Euronews.com | Tue, 11 Aug 2026 | ☐ |
+
+---
+
 ## Week of August 13, 2026
 *Run: 2026-08-13 · 15 high · 10 monitor · lookback 7 days*
 
