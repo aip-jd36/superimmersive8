@@ -41,6 +41,17 @@ export function serializeStructuredUnderstanding(su: StructuredUnderstanding): s
  * the extractor genuinely couldn't classify are indistinguishable at read
  * time, which is correct: both mean "no confident classification exists."
  */
+/**
+ * `project_facts.jurisdiction` defaulted when absent (CRC Living Knowledge
+ * Phase 1, 2026-08-16): a session persisted before this field existed has
+ * a `project_facts` object but no `jurisdiction` key on it. Same funnel,
+ * same reasoning as the `user_goals` default above -- defaulted here once
+ * to `{state: 'unknown'}`, the same conservative fallback every other
+ * unconfirmed attested field in this codebase uses, so a historical
+ * session and a session where jurisdiction genuinely hasn't been asked
+ * about yet are indistinguishable at read time (both correctly mean "not
+ * confirmed").
+ */
 export function deserializeStructuredUnderstanding(json: string): StructuredUnderstanding {
   const parsed = JSON.parse(json) as StructuredUnderstanding
   const user_goals = (parsed.user_goals ?? []).map((g) => ({
@@ -48,7 +59,11 @@ export function deserializeStructuredUnderstanding(json: string): StructuredUnde
     category: g.category ?? 'unknown',
     scope: g.scope ?? 'informational',
   }))
-  return { ...parsed, user_goals }
+  const project_facts = {
+    ...parsed.project_facts,
+    jurisdiction: parsed.project_facts?.jurisdiction ?? { state: 'unknown' as const },
+  }
+  return { ...parsed, user_goals, project_facts }
 }
 
 /**

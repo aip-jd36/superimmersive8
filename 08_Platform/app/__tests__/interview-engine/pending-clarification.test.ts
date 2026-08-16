@@ -16,6 +16,7 @@ function su(overrides: Partial<{ tool_mentions: ToolMention[]; scoped_observatio
     project_facts: overrides.project_facts ?? {
       intended_use: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'x' },
       workflow_role: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'x' },
+      jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
     },
     tool_mentions: overrides.tool_mentions ?? [],
     scoped_observations: overrides.scoped_observations ?? [],
@@ -92,7 +93,7 @@ describe('buildPendingClarification -- eligible kinds', () => {
   test('targeting the intended_use project fact', () => {
     const result = buildPendingClarification(
       proposal({ target_signal_id: PROJECT_FACT_SIGNAL_IDS.intended_use }),
-      su({ project_facts: { intended_use: { attestation: { state: 'unresolved_no_visibility' }, source_turn: 1, source_statement: 'x' }, workflow_role: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'x' } } }),
+      su({ project_facts: { intended_use: { attestation: { state: 'unresolved_no_visibility' }, source_turn: 1, source_statement: 'x' }, workflow_role: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'x' }, jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' } } }),
     )
     expect(result).toEqual({ signal_id: PROJECT_FACT_SIGNAL_IDS.intended_use, kind: 'follow_up_on_signal', unresolved_summary: 'project fact intended_use, currently unresolved_no_visibility' })
   })

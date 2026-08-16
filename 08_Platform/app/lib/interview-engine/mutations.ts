@@ -352,3 +352,25 @@ export function setWorkflowRole(
     },
   }
 }
+
+/**
+ * `jurisdiction` (CRC Living Knowledge Phase 1, 2026-08-16). Same plain
+ * immutable-replacement discipline as setIntendedUse/setWorkflowRole
+ * above, verbatim -- no supersession chain, per ProjectFacts' own
+ * documented reasoning (types/interview-engine.ts). A later, corrected
+ * statement simply overwrites the current AttestedFact.
+ */
+export function setJurisdiction(
+  su: StructuredUnderstanding,
+  value: Attested<string>,
+  sourceTurn: number,
+  sourceStatement: string,
+): StructuredUnderstanding {
+  return {
+    ...su,
+    project_facts: {
+      ...su.project_facts,
+      jurisdiction: { attestation: value, source_turn: sourceTurn, source_statement: sourceStatement },
+    },
+  }
+}

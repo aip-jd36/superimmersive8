@@ -40,7 +40,7 @@ const SYSTEM_PROMPT = `You are the candidate-observation extraction stage of a l
 For each distinct fact-bearing statement in the turn, produce one candidate:
 - kind "tool_mention": the user names a tool/platform/app they used.
 - kind "scoped_observation": a fact about the project's process, review, or workflow (e.g. who reviewed it, what stage it's at, whether something happened).
-- kind "project_fact": a fact about the overall project's intended use, or the user's own role.
+- kind "project_fact": a fact about the overall project's intended use, the user's own role, or which country's laws they say are relevant (jurisdiction). For jurisdiction specifically: only propose this when the user DIRECTLY states a country/jurisdiction in answer to a question about applicable law -- e.g. "United States", "we're based in Taiwan", "US copyright rules apply here". NEVER infer it from where they mention working, filming, their client's location, or any other indirect signal -- those are separate facts (e.g. workflow details), not a jurisdiction statement. If the user names more than one country or gives an ambiguous answer (e.g. "the client is American but we're filming in Taiwan"), do NOT propose a single jurisdiction value -- either propose nothing for this fact, or propose it with fact_confidence_hint "unknown" to reflect the genuine ambiguity, never guess which one governs.
 - kind "user_goal": the user explicitly states what they came here wanting to know or achieve about THIS workflow's commercial readiness -- a question ("Can I use this commercially?", "Will my client own this?") and a declarative need ("My client needs proof this is cleared.", "I'm trying to figure out whether this is okay for a paid campaign.") are equally valid; capture either. This is distinct from project_fact's intended_use: intended_use describes what the OUTPUT is for (e.g. "an AI commercial for my client"); user_goal is what the USER wants to know or achieve regarding commercial readiness. A turn can and often does contain both at once -- propose both candidates when it does, never merge them into one.
 
 A turn stating two distinct goals joined by "and" is still TWO candidates, never one merged candidate, even though they appear in a single sentence.
@@ -99,7 +99,7 @@ const CANDIDATE_KIND_VALUES = ['tool_mention', 'scoped_observation', 'project_fa
 const OBSERVATION_SCOPE_VALUES = ['current_project', 'historical_project', 'general_practice'] as const
 const WORKFLOW_STAGE_VALUES = ['T0', 'T1', 'T2', 'T3', 'T4', 'T5'] as const
 const CONFIDENCE_HINT_VALUES = ['confirmed', 'confirmed_absent', 'unresolved_no_visibility', 'unknown', 'declined'] as const
-const PROJECT_FACT_FIELD_VALUES = ['intended_use', 'workflow_role'] as const
+const PROJECT_FACT_FIELD_VALUES = ['intended_use', 'workflow_role', 'jurisdiction'] as const
 /** Milestone 2 (2026-08-15). Mirrors GOAL_CATEGORIES / GOAL_SCOPES in types/interview-engine.ts -- kept as separate local consts here, same pattern as every other *_VALUES const in this file, rather than importing the runtime const array across the adapter boundary. */
 const GOAL_CATEGORY_VALUES = ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'unknown'] as const
 const GOAL_SCOPE_VALUES = ['informational', 'determination_request'] as const
@@ -191,7 +191,7 @@ const CANDIDATE_RESPONSE_SCHEMA = {
             type: ['string', 'null'],
             enum: [...PROJECT_FACT_FIELD_VALUES, null],
             description:
-              "When kind is project_fact: intended_use (what the output is for) or workflow_role (the user's own role). Null otherwise.",
+              "When kind is project_fact: intended_use (what the output is for), workflow_role (the user's own role), or jurisdiction (which country's laws the user says are relevant -- ONLY when they directly state one; never inferred from where they mention working, their company's location, or any other indirect signal). Null otherwise.",
           },
           fact_confidence_hint: {
             type: ['string', 'null'],

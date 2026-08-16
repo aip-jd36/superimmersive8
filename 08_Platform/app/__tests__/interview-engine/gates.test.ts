@@ -20,6 +20,11 @@ function projectFacts(overrides: { intended_use?: Attested<string>; workflow_rol
       source_turn: 1,
       source_statement: 'placeholder',
     },
+    jurisdiction: {
+      attestation: { state: 'unknown' },
+      source_turn: 0,
+      source_statement: '',
+    },
   }
 }
 

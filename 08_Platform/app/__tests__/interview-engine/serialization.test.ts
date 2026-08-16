@@ -15,6 +15,7 @@ function currentSU(): StructuredUnderstanding {
     project_facts: {
       intended_use: { attestation: { state: 'confirmed', value: 'AI commercial for my client' }, source_turn: 1, source_statement: 'placeholder' },
       workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
     },
     tool_mentions: [],
     scoped_observations: [],

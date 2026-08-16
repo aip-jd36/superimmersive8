@@ -6,11 +6,11 @@
  * The six PRD §8 dialogues (rich signal, no signal, current-vs-historical,
  * ambiguous/uncertain, full opt-out, mixed/multi-signal) plus the two
  * roadmap-added fixtures the architecture doc identified as untested gaps
- * (ambiguous multi-surface tool; full Phase 1→4 end-to-end trace).
+ * (ambiguous multi-surface tool; full Phase 1?? end-to-end trace).
  *
  * This is Phase 1 only: proof that the type model can represent every
  * required state, not the full dialogue-turn conversion (that's the Phase
- * 6b/7 fixture work — `{ turns, expected }` objects driving the LLM-based
+ * 6b/7 fixture work ??`{ turns, expected }` objects driving the LLM-based
  * pipeline). Lives in lib/ rather than __tests__/ because later phases
  * (mutation, gates, boundaries, handoff assembly) reuse these same base
  * states, not just Phase 1's own tests.
@@ -25,7 +25,7 @@
  * fixture's actual content represents per the frozen PRD's own phase
  * definitions (§7). Six of eight were found to be illustrative only, not
  * validated against any rule, and have been updated to match the
- * deterministic runtime — treated as authoritative per explicit
+ * deterministic runtime ??treated as authoritative per explicit
  * instruction, not modified to fit these fixtures. Each fixture's own
  * comment below records its individual finding. `phase.ts` itself was not
  * touched by this review.
@@ -60,7 +60,7 @@ function fact(attestation: StructuredUnderstanding['project_facts']['intended_us
 const unattestedFact = (sourceTurn: number, sourceStatement: string) => fact({ state: 'unknown' }, sourceTurn, sourceStatement)
 
 /**
- * Rich signal — user volunteers tool, workflow role, access surface, plan
+ * Rich signal ??user volunteers tool, workflow role, access surface, plan
  * tier, and intended use with no follow-up needed. Gate 1 met, Gate 2 stable,
  * normal completion.
  *
@@ -84,6 +84,7 @@ const richSignal: DialogueFixture = {
     project_facts: {
       intended_use: fact({ state: 'confirmed', value: 'Paid social ad campaign, 30s cutdown' }, 1, "It's for a paid social campaign, a 30-second cutdown."),
       workflow_role: fact({ state: 'confirmed', value: 'Producer' }, 1, "I'm the producer on this one."),
+      jurisdiction: fact({ state: 'unknown' }, 0, ''),
     },
     tool_mentions: [
       {
@@ -121,7 +122,7 @@ const richSignal: DialogueFixture = {
 }
 
 /**
- * No signal — user gives minimal/unresponsive answers across Phases 1-2.
+ * No signal ??user gives minimal/unresponsive answers across Phases 1-2.
  * Gate 1 never met; natural conversational flow runs out per §11 ("does not
  * loop back to force it").
  *
@@ -131,7 +132,7 @@ const richSignal: DialogueFixture = {
  * confirmed_absent) fact to leave phase 1; this fixture's only content is
  * one 'unknown'-confidence observation ("not sure" twice), so nothing
  * affirmative was ever established and `computePhase` returns 1.
- * `PRD_CRC_v1.0.md` §9's own fallback-table language -- "Phase 1–2
+ * `PRD_CRC_v1.0.md` §9's own fallback-table language -- "Phase 1??
  * completed but thin (no tool named, genuinely doesn't know)" -- could be
  * read as implying this scenario represents a LATER state (the interview
  * attempted and exhausted Phases 1-2). But Candidate B was deliberately
@@ -151,6 +152,7 @@ const noSignal: DialogueFixture = {
     project_facts: {
       intended_use: unattestedFact(1, "I'm not really sure, I'd have to check."),
       workflow_role: unattestedFact(1, "I'm not really sure, I'd have to check."),
+      jurisdiction: unattestedFact(0, ''),
     },
     tool_mentions: [],
     scoped_observations: [
@@ -177,7 +179,7 @@ const noSignal: DialogueFixture = {
 }
 
 /**
- * Current vs. historical — same underlying topic (tool review process)
+ * Current vs. historical ??same underlying topic (tool review process)
  * answered once for the current project and once for a past project; the two
  * must stay tagged distinctly, never collapsed onto one scope.
  *
@@ -194,6 +196,7 @@ const currentVsHistorical: DialogueFixture = {
     project_facts: {
       intended_use: unattestedFact(1, "This one was Kling, personal plan."),
       workflow_role: fact({ state: 'confirmed', value: 'Editor' }, 1, "I'm the editor on it."),
+      jurisdiction: fact({ state: 'unknown' }, 0, ''),
     },
     tool_mentions: [
       {
@@ -228,7 +231,7 @@ const currentVsHistorical: DialogueFixture = {
         note: 'A past project did go through internal legal review before delivery.',
         superseded_by: null,
         source_turn: 2,
-        source_statement: 'Different from a project we did last year — that one our legal team checked.',
+        source_statement: 'Different from a project we did last year ??that one our legal team checked.',
       },
     ],
     user_goals: [],
@@ -242,7 +245,7 @@ const currentVsHistorical: DialogueFixture = {
 }
 
 /**
- * Ambiguous/uncertain — contrasts unresolved_no_visibility (fact exists, but
+ * Ambiguous/uncertain ??contrasts unresolved_no_visibility (fact exists, but
  * this user can't see it) against unknown (genuinely not known by anyone
  * asked) within the same conversation.
  *
@@ -264,6 +267,7 @@ const ambiguousUncertain: DialogueFixture = {
     project_facts: {
       intended_use: fact({ state: 'unknown' }, 3, "Nobody's decided yet where this is actually going to run."),
       workflow_role: fact({ state: 'confirmed', value: 'Motion designer' }, 1, "I did the motion work on this."),
+      jurisdiction: fact({ state: 'unknown' }, 0, ''),
     },
     tool_mentions: [
       {
@@ -312,7 +316,7 @@ const ambiguousUncertain: DialogueFixture = {
 }
 
 /**
- * Full opt-out — user declines to continue at all. opt_out_scope 'interview'
+ * Full opt-out ??user declines to continue at all. opt_out_scope 'interview'
  * per §6/§11; Gate 1 recorded as not_applicable_declined, not not_met (a
  * decline is a consent boundary, not evidence understanding is unreachable).
  *
@@ -326,6 +330,7 @@ const fullOptOut: DialogueFixture = {
     project_facts: {
       intended_use: fact({ state: 'declined' }, 1, "I'd rather not go through this right now, can we stop?"),
       workflow_role: fact({ state: 'declined' }, 1, "I'd rather not go through this right now, can we stop?"),
+      jurisdiction: fact({ state: 'unknown' }, 0, ''),
     },
     tool_mentions: [],
     scoped_observations: [
@@ -352,7 +357,7 @@ const fullOptOut: DialogueFixture = {
 }
 
 /**
- * Mixed/multi-signal — one bundled turn (PRD Dialogue F shape) produces
+ * Mixed/multi-signal ??one bundled turn (PRD Dialogue F shape) produces
  * multiple distinct scoped observations and multiple tool mentions, correctly
  * separated rather than merged into one.
  *
@@ -374,6 +379,7 @@ const mixedMultiSignal: DialogueFixture = {
     project_facts: {
       intended_use: fact({ state: 'confirmed', value: 'Client-facing pitch deck video' }, 1, "It's for a pitch, not a paid campaign."),
       workflow_role: fact({ state: 'confirmed', value: 'Creative director' }, 1, "I'm the creative director on this."),
+      jurisdiction: fact({ state: 'unknown' }, 0, ''),
     },
     tool_mentions: [
       {
@@ -452,11 +458,11 @@ const mixedMultiSignal: DialogueFixture = {
 }
 
 /**
- * Ambiguous multi-surface tool — the risk area the architecture doc
+ * Ambiguous multi-surface tool ??the risk area the architecture doc
  * identified as previously untested (§8, §13b item 1). "Nano Banana" is named
  * but not yet resolved between the Gemini Consumer App and Gemini API rows;
  * the mention starts unresolved, then a later turn's correction supersedes it
- * once disambiguated — exercising both the unresolved_alias state and
+ * once disambiguated ??exercising both the unresolved_alias state and
  * tool-level supersession within one fixture.
  *
  * `current_phase` calibration: 2 -> 3. Once disambiguation resolves
@@ -476,6 +482,7 @@ const ambiguousMultiSurfaceTool: DialogueFixture = {
     project_facts: {
       intended_use: fact({ state: 'confirmed', value: 'Internal concept test' }, 1, "It's just an internal concept test."),
       workflow_role: fact({ state: 'confirmed', value: 'Designer' }, 1, "I'm the designer on it."),
+      jurisdiction: fact({ state: 'unknown' }, 0, ''),
     },
     tool_mentions: [
       {
@@ -504,7 +511,7 @@ const ambiguousMultiSurfaceTool: DialogueFixture = {
         plan_tier: { state: 'unknown' },
         confidence: 'confirmed',
         source_turn: 2,
-        source_statement: "Oh, through the API — I have a developer key, it's not the app on my phone.",
+        source_statement: "Oh, through the API ??I have a developer key, it's not the app on my phone.",
         superseded_by: null,
       },
     ],
@@ -518,7 +525,7 @@ const ambiguousMultiSurfaceTool: DialogueFixture = {
         note: 'Generation via Gemini API (developer key), not the Gemini consumer app.',
         superseded_by: null,
         source_turn: 2,
-        source_statement: "Oh, through the API — I have a developer key, it's not the app on my phone.",
+        source_statement: "Oh, through the API ??I have a developer key, it's not the app on my phone.",
       },
     ],
     user_goals: [],
@@ -532,7 +539,7 @@ const ambiguousMultiSurfaceTool: DialogueFixture = {
 }
 
 /**
- * Full Phase 1→4 end-to-end trace — the second roadmap-added fixture
+ * Full Phase 1?? end-to-end trace ??the second roadmap-added fixture
  * (§13b item 2): a clean run through all four phases ending in a populated
  * retrieval handoff, since the six PRD dialogues each start mid-Phase-3 and
  * never individually prove the whole pipeline connects.
@@ -546,7 +553,7 @@ const ambiguousMultiSurfaceTool: DialogueFixture = {
  * or traversed phase value under the adopted runtime, so no
  * `StructuredUnderstanding` this deterministic pipeline ever produces will
  * read `current_phase: 4` again. The fixture's own `id` and this
- * docstring's "Phase 1→4" framing are kept unchanged -- renaming would
+ * docstring's "Phase 1??" framing are kept unchanged -- renaming would
  * touch the `DIALOGUE_FIXTURE_IDS` union and its many consumers, well
  * beyond this review's own "annotations/comments/documentation only"
  * scope -- and remain accurate as a historical description of what this
@@ -560,6 +567,7 @@ const fullPhase1To4Trace: DialogueFixture = {
     project_facts: {
       intended_use: fact({ state: 'confirmed', value: 'Paid social ad campaign' }, 1, "It's for a paid social ad campaign."),
       workflow_role: fact({ state: 'confirmed', value: 'Producer' }, 1, "I'm the producer."),
+      jurisdiction: fact({ state: 'unknown' }, 0, ''),
     },
     tool_mentions: [
       {
@@ -640,7 +648,7 @@ const fullPhase1To4Trace: DialogueFixture = {
 
 /**
  * All 8 fixtures, keyed by id. Typed as Record<DialogueFixtureId, ...> so
- * TypeScript itself enforces every required fixture id is present — a
+ * TypeScript itself enforces every required fixture id is present ??a
  * missing entry is a compile error, not a runtime gap discovered later.
  */
 export const DIALOGUE_FIXTURES: Record<DialogueFixtureId, DialogueFixture> = {

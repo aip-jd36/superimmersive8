@@ -22,6 +22,7 @@ function projectFacts(overrides: Partial<{ workflow_role: Attested<string>; inte
   return {
     intended_use: { attestation: overrides.intended_use ?? { state: 'unknown' }, source_turn: 1, source_statement: 'x' },
     workflow_role: { attestation: overrides.workflow_role ?? { state: 'unknown' }, source_turn: 1, source_statement: 'x' },
+    jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
   }
 }
 

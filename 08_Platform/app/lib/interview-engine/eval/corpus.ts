@@ -533,4 +533,73 @@ export const EVAL_CORPUS: EvalScenario[] = [
       return { passed, notes: `goal_scope_hint: ${d?.candidate.goal_scope_hint}` }
     },
   },
+
+  // ── Jurisdiction extraction (CRC Living Knowledge Phase 1, 2026-08-16) ──
+  // Regression coverage for the live extractor's new 'jurisdiction'
+  // raw_fact_field value -- user-attested only, must never be guessed from
+  // indirect signals, must never collapse an ambiguous multi-country
+  // answer into a single fabricated value.
+
+  {
+    id: 'jurisdiction_direct_single_country',
+    category: 'jurisdiction -- direct, unambiguous single-country statement',
+    description: 'A direct statement of one country in answer to a jurisdiction question must be captured as a confirmed project_fact.',
+    turns: [{ turn: 1, text: 'United States.' }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'project_fact' && x.candidate.raw_fact_field === 'jurisdiction')
+      const passed = d?.candidate.fact_confidence_hint === 'confirmed' && d?.candidate.fact_value_hint === 'United States'
+      return { passed, notes: `project_fact(jurisdiction): ${JSON.stringify(d?.candidate)}` }
+    },
+  },
+
+  {
+    id: 'jurisdiction_direct_stated_in_sentence',
+    category: 'jurisdiction -- direct statement embedded in a fuller sentence',
+    description: 'A direct jurisdiction statement phrased as a full sentence must still be captured, not require a bare one-word answer.',
+    turns: [{ turn: 1, text: "We're based in Taiwan, so Taiwan copyright rules would be most relevant." }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'project_fact' && x.candidate.raw_fact_field === 'jurisdiction')
+      const passed = d?.candidate.fact_confidence_hint === 'confirmed' && !!d?.candidate.fact_value_hint?.toLowerCase().includes('taiwan')
+      return { passed, notes: `project_fact(jurisdiction): ${JSON.stringify(d?.candidate)}` }
+    },
+  },
+
+  {
+    id: 'jurisdiction_ambiguous_multi_country_not_guessed',
+    category: 'jurisdiction -- ambiguous multi-country statement must never collapse to a single guessed value',
+    description: 'Naming two countries with no clear single answer must never be proposed as a single confirmed jurisdiction value.',
+    turns: [{ turn: 1, text: 'My client is American but we filmed the whole thing in Taiwan.' }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'project_fact' && x.candidate.raw_fact_field === 'jurisdiction')
+      // Passing means EITHER no jurisdiction candidate was proposed at all,
+      // OR one was proposed but not as a single confirmed value -- never a
+      // fabricated single-country choice between the two named.
+      const passed = !d || d.candidate.fact_confidence_hint !== 'confirmed'
+      return { passed, notes: `project_fact(jurisdiction): ${JSON.stringify(d?.candidate)}` }
+    },
+  },
+
+  {
+    id: 'jurisdiction_incidental_location_mention_not_captured',
+    category: 'jurisdiction -- an incidental mention of a filming/working location (not a direct jurisdiction answer) must NOT be captured',
+    description: 'Mentioning a location in passing, unrelated to any jurisdiction question, must not be inferred as a jurisdiction statement.',
+    turns: [{ turn: 1, text: "I was using Kling from a cafe in Taipei to knock this out between meetings." }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'project_fact' && x.candidate.raw_fact_field === 'jurisdiction')
+      const passed = !d
+      return { passed, notes: `project_fact(jurisdiction) (expected none): ${JSON.stringify(d?.candidate)}` }
+    },
+  },
+
+  {
+    id: 'jurisdiction_not_mentioned_no_candidate',
+    category: 'jurisdiction -- ordinary turn with no jurisdiction content at all',
+    description: 'A turn about something else entirely must never produce a jurisdiction candidate.',
+    turns: [{ turn: 1, text: "I'm using Kling for a client ad." }],
+    check(diagnosticsByTurn) {
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'project_fact' && x.candidate.raw_fact_field === 'jurisdiction')
+      const passed = !d
+      return { passed, notes: `project_fact(jurisdiction) (expected none): ${JSON.stringify(d?.candidate)}` }
+    },
+  },
 ]

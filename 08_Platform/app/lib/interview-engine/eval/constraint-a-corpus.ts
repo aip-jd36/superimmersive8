@@ -51,6 +51,7 @@ function projectFacts(overrides: Partial<ProjectFacts> = {}): ProjectFacts {
   return {
     intended_use: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'placeholder' },
     workflow_role: { attestation: { state: 'confirmed', value: 'Producer' }, source_turn: 1, source_statement: 'placeholder' },
+    jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
     ...overrides,
   }
 }

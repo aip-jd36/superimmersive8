@@ -53,6 +53,7 @@ import {
   addToolMention,
   addUserGoal,
   setIntendedUse,
+  setJurisdiction,
   setWorkflowRole,
   supersedeObservation,
   supersedeToolMention,
@@ -122,8 +123,14 @@ export interface CandidateObservation {
   /** kind === 'scoped_observation'; set when this candidate corrects an existing observation */
   supersedes_observation_id?: string
 
-  /** kind === 'project_fact' */
-  raw_fact_field?: 'intended_use' | 'workflow_role'
+  /**
+   * kind === 'project_fact'. 'jurisdiction' (CRC Living Knowledge Phase 1,
+   * 2026-08-16) reuses this same generic project_fact candidate kind and
+   * attestCandidate branch as intended_use/workflow_role -- zero new
+   * attestation logic. User-attested only; never inferred from anything
+   * but a direct statement this turn.
+   */
+  raw_fact_field?: 'intended_use' | 'workflow_role' | 'jurisdiction'
   fact_confidence_hint?: ConfidenceState
   fact_value_hint?: string
 
@@ -281,7 +288,7 @@ export function normalizeCandidate(candidate: CandidateObservation): Normalizati
 export type ProposedFact =
   | { kind: 'tool_mention'; mention: ToolMention }
   | { kind: 'scoped_observation'; observation: ScopedObservation }
-  | { kind: 'project_fact'; field: 'intended_use' | 'workflow_role'; value: Attested<string> }
+  | { kind: 'project_fact'; field: 'intended_use' | 'workflow_role' | 'jurisdiction'; value: Attested<string> }
   | { kind: 'user_goal'; goal: UserGoal }
   | { kind: 'undetermined' }
 
@@ -695,7 +702,9 @@ export async function runExtractionPipeline(
         current =
           proposedFact.field === 'intended_use'
             ? setIntendedUse(current, proposedFact.value, candidate.turn, candidate.raw_text)
-            : setWorkflowRole(current, proposedFact.value, candidate.turn, candidate.raw_text)
+            : proposedFact.field === 'workflow_role'
+              ? setWorkflowRole(current, proposedFact.value, candidate.turn, candidate.raw_text)
+              : setJurisdiction(current, proposedFact.value, candidate.turn, candidate.raw_text)
         appliedIdentifier = `project_facts.${proposedFact.field}`
       } else if (proposedFact.kind === 'user_goal') {
         current = candidate.supersedes_goal_id

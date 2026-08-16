@@ -128,7 +128,7 @@ export function createSupabaseSessionStore(client: SupabaseClient): SessionStore
  * already captures the operationally relevant signal) -- see design report
  * §6 for the full reasoning on both declined additions.
  */
-export type MessageKind = 'user' | 'ordinary_question' | 'acknowledgment' | 'commercial_readiness_discovery_question' | 'educational_takeaway'
+export type MessageKind = 'user' | 'ordinary_question' | 'acknowledgment' | 'commercial_readiness_discovery_question' | 'educational_takeaway' | 'jurisdiction_clarification_question'
 
 export interface TranscriptEntry {
   role: 'user' | 'assistant'

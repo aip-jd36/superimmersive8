@@ -17,7 +17,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { runCRCConversation } from './run-crc-conversation'
-import type { MatrixRow } from '@/lib/retrieval-engine/types'
+import type { MatrixRow, TopicClaim } from '@/lib/retrieval-engine/types'
 import type { StructuredUnderstanding } from '@/types/interview-engine'
 import { buildResultsEmailContent } from './results-email-template'
 import { sendCrcResultsEmail } from '@/lib/emails'
@@ -41,6 +41,15 @@ export interface DeliverParams {
   isExplicitResend: boolean
   structuredUnderstanding: StructuredUnderstanding
   matrix: MatrixRow[]
+  /**
+   * CRC Living Knowledge Phase 1, 2026-08-16. Optional, defaulted to `[]`
+   * -- required so a session whose completed result included a topic-claim
+   * goal_interpretation still gets that same content in its results email
+   * (the email recomputes the result via the same runCRCConversation()
+   * call; omitting topicClaims here would silently produce an
+   * incomplete/wrong email, a real regression this parameter prevents).
+   */
+  topicClaims?: TopicClaim[]
   attributionToken: string | null | undefined
 }
 
@@ -90,7 +99,7 @@ export async function deliverCrcResultsEmail(client: SupabaseClient, params: Del
 
   // ── Recompute the already-completed result -- pure, no model call, same
   // function GET already uses for a completed session. ──
-  const result = runCRCConversation(params.structuredUnderstanding, params.matrix)
+  const result = runCRCConversation(params.structuredUnderstanding, params.matrix, params.topicClaims ?? [])
   const { html, text } = buildResultsEmailContent(result.output, params.attributionToken, params.email)
 
   const outcome = await sendCrcResultsEmail(params.email, 'Your Commercial Readiness Check results', html, text)

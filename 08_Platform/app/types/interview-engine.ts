@@ -159,10 +159,27 @@ export interface AttestedFact<T> {
  * independently attested via Attested<T> (wrapped in AttestedFact for
  * provenance) so the confirmed/absent/unresolved/unknown/declined
  * distinction is never collapsed into a plain optional string.
+ *
+ * `jurisdiction` (CRC Living Knowledge Phase 1, 2026-08-16, PM final
+ * approval §1/§2): user-attested only -- NEVER inferred from IP address,
+ * browser locale, company location, or traffic classification. Reuses
+ * `AttestedFact<string>` exactly, no parallel confidence model. Free text
+ * (e.g. "United States", "Taiwan"), not an enum -- Wave 1 needs exactly one
+ * jurisdiction to check equality against; a richer representation is
+ * addable later without a schema change. Single value only in Phase 1
+ * (PM §2: "do not build bounded-list jurisdiction support yet") -- an
+ * ambiguous multi-country statement ("US and EU") is represented by
+ * `state` staying non-`confirmed` (never a fabricated single choice, never
+ * a list), per the same "no guessing" discipline every other attested
+ * field in this file already follows. Plain-overwrite correction
+ * semantics, same as `intended_use`/`workflow_role` -- deliberately NOT
+ * given `UserGoal`-style supersession lineage, since ProjectFacts fields
+ * are singular current-state values by design, not a history to preserve.
  */
 export interface ProjectFacts {
   intended_use: AttestedFact<string>
   workflow_role: AttestedFact<string>
+  jurisdiction: AttestedFact<string>
 }
 
 // ── User goals (CRC User Goal — Milestone 1, capture + persistence only) ───

@@ -139,9 +139,10 @@ import {
   COMMERCIAL_READINESS_CATEGORIES,
   type CommercialReadinessCategory,
 } from './commercial-readiness-catalog'
+import { buildJurisdictionClarificationProposal, evaluateJurisdictionClarificationEligibility } from './jurisdiction-clarification'
 import type { SessionStore } from './session-store'
 import type { CRCSessionState } from './types'
-import type { MatrixRow } from '@/lib/retrieval-engine/types'
+import type { MatrixRow, TopicClaim } from '@/lib/retrieval-engine/types'
 import type { Phase, StructuredUnderstanding } from '@/types/interview-engine'
 
 /**
@@ -152,7 +153,7 @@ import type { Phase, StructuredUnderstanding } from '@/types/interview-engine'
  * exactly the same "fixed copy is Runtime's own job" pattern
  * `assemble-projection-output.ts`'s opening_line/closing_cta already are.
  */
-const ACKNOWLEDGMENT_COPY = 'Got it — thanks for sharing that.'
+const ACKNOWLEDGMENT_COPY = 'Got it ??thanks for sharing that.'
 
 /**
  * Not imported from lib/interview-engine/eval/empty-structured-understanding.ts
@@ -166,6 +167,7 @@ function emptyStructuredUnderstanding(): StructuredUnderstanding {
     project_facts: {
       intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
       workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
     },
     tool_mentions: [],
     scoped_observations: [],
@@ -213,6 +215,23 @@ export type TurnOutcome = (
   discoverySignal?: {
     eligible_categories: CommercialReadinessCategory[]
     selected_category: CommercialReadinessCategory | null
+    /**
+     * 'preempted_by_jurisdiction' (CRC Living Knowledge Phase 1,
+     * 2026-08-16): Discovery was eligible this turn but jurisdiction
+     * clarification won the shared attempt-#1 slot first (PM SS6's
+     * precedence rule) -- Discovery was never actually attempted, distinct
+     * from 'rejected_by_a' (Constraint A genuinely saw and rejected it).
+     */
+    outcome: 'never_eligible' | 'rejected_by_a' | 'asked' | 'preempted_by_jurisdiction'
+  }
+  /**
+   * CRC Living Knowledge Phase 1, 2026-08-16, PM final approval SS4/SS6.
+   * Same scope/shape discipline as discoverySignal above -- surfaces the
+   * same deterministic eligibility evaluation this turn already computed,
+   * for route.ts to log as an analytics event. Organic path only.
+   */
+  jurisdictionSignal?: {
+    eligible: boolean
     outcome: 'never_eligible' | 'rejected_by_a' | 'asked'
   }
 }
@@ -223,6 +242,13 @@ export interface RunTurnDeps {
   decider: ConstraintADecider
   sessionStore: SessionStore
   matrix: MatrixRow[]
+  /**
+   * CRC Living Knowledge Phase 1, 2026-08-16. Optional, defaulted to `[]`
+   * inside runTurn() itself (not here) -- every pre-existing caller that
+   * constructs RunTurnDeps without it continues to compile and behave
+   * identically, same discipline as retrieve()'s own additive parameters.
+   */
+  topicClaims?: TopicClaim[]
 }
 
 export interface RunTurnInput {
@@ -327,6 +353,11 @@ async function tryCandidate(
 }
 
 export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<TurnOutcome> {
+  // CRC Living Knowledge Phase 1, 2026-08-16: defaulted here, not on the
+  // RunTurnDeps type itself, so every pre-existing caller continues to
+  // compile unmodified. Threaded into runCRCConversation() at every
+  // completion call site and into jurisdiction-clarification eligibility.
+  const topicClaims = deps.topicClaims ?? []
   const loaded = await deps.sessionStore.load(input.token)
   const suLoaded = loaded?.structured_understanding ?? emptyStructuredUnderstanding()
   const boundaryStateLoaded = loaded?.boundary_state ?? createInitialBoundaryState()
@@ -342,7 +373,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   // already-finished session, not a live turn; any takeaway was already
   // delivered and cleared on the turn that actually completed it.
   if (suLoaded.completion_reason !== null) {
-    return { kind: 'complete', result: runCRCConversation(suLoaded, deps.matrix) }
+    return { kind: 'complete', result: runCRCConversation(suLoaded, deps.matrix, topicClaims) }
   }
 
   const declineSignal = input.declineAction ? resolveDeclineSignal(input.declineAction) : undefined
@@ -381,7 +412,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
       pending_clarification: null,
       pending_commercial_readiness_takeaway: null,
     })
-    const completeOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suAfter, deps.matrix) }
+    const completeOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suAfter, deps.matrix, topicClaims) }
     return precedingTakeaway ? { ...completeOutcome, precedingTakeaway } : completeOutcome
   }
 
@@ -401,6 +432,9 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   // branch below; stays undefined on the decline branch, matching
   // TurnOutcome.discoverySignal's own documented scope.
   let discoverySignal: TurnOutcome['discoverySignal']
+  // CRC Living Knowledge Phase 1, 2026-08-16 -- same scope discipline as
+  // discoverySignal above.
+  let jurisdictionSignal: TurnOutcome['jurisdictionSignal']
 
   if (declineSignal) {
     // Explicit skip_question/skip_phase decline -- unchanged by Model 4.
@@ -443,6 +477,21 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     // different runs, so a null first attempt still gets the one bounded
     // retry, with no exclusion invented for it (approved correction,
     // 2026-08-10).
+    // CRC Living Knowledge Phase 1, 2026-08-16, PM final approval SS4-SS7.
+    // Deterministic, no LLM call -- exact same pattern as Commercial
+    // Readiness Discovery below, computed FIRST so its result can take
+    // precedence over Discovery for the same attempt-#1 slot (PM SS6: an
+    // explicit, narrow precedence rule -- jurisdiction serves an
+    // already-stated user goal; Discovery is opportunistic education --
+    // never generalized into "jurisdiction always wins").
+    const jurisdictionEligibility = evaluateJurisdictionClarificationEligibility(
+      suAfter,
+      topicClaims,
+      boundaryStateLoaded.jurisdiction_clarification_asked,
+      gate1.state === 'met',
+    )
+    const jurisdictionProposal = jurisdictionEligibility.eligible ? buildJurisdictionClarificationProposal(phase) : undefined
+
     // Commercial Readiness Discovery Catalog integration, 2026-08-12.
     // Deterministic, no LLM call: derive indicators from the SAME suAfter
     // every other candidate-generation step this turn already uses, then
@@ -461,9 +510,32 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     )
     const discoveryProposal = discoveryCategory ? buildCommercialReadinessDiscoveryProposal(discoveryCategory, phase) : undefined
 
-    const attempt1 = discoveryProposal
-      ? await tryCandidate(suAfter, eligible, phase, boundaryStateLoaded, deps, undefined, discoveryProposal)
+    // jurisdiction always wins the slot when both are eligible this turn --
+    // see the precedence comment above.
+    const forcedProposal = jurisdictionProposal ?? discoveryProposal
+
+    const attempt1 = forcedProposal
+      ? await tryCandidate(suAfter, eligible, phase, boundaryStateLoaded, deps, undefined, forcedProposal)
       : await tryCandidate(suAfter, eligible, phase, boundaryStateLoaded, deps)
+
+    // Jurisdiction analytics instrumentation. Deliberately narrower than
+    // Discovery's own discoverySignal below: Discovery is unconditionally
+    // attached every organic turn because it feeds a live
+    // `discovery_signal` analytics event that needs the boring
+    // 'never_eligible' case for completeness. Jurisdiction demand is
+    // reported differently (PM SS15/SS22: "no new event migration unless
+    // genuinely required") -- recomputed on demand from
+    // project_facts.jurisdiction across historical sessions, not logged
+    // turn-by-turn -- so there is no real consumer for a
+    // 'never_eligible' value here, and attaching it unconditionally would
+    // only add noise to every existing Interview Engine test/outcome that
+    // has nothing to do with Living Knowledge. Left undefined (omitted
+    // entirely, same as precedingTakeaway's own optional-field discipline)
+    // in the ordinary case; only set when jurisdiction clarification was
+    // actually a real candidate this turn.
+    if (jurisdictionEligibility.eligible) {
+      jurisdictionSignal = { eligible: true, outcome: attempt1.status === 'approved' ? 'asked' : 'rejected_by_a' }
+    }
 
     // Discovery analytics instrumentation: computed from the SAME inputs
     // discoveryCategory already used (pure, no extra I/O). eligible_categories
@@ -473,35 +545,52 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     // Fully determined by discoveryCategory + attempt1 alone: attempt2
     // (below) is always the ordinary generator, never a second discovery
     // category, so it cannot change this outcome either way.
+    // 'preempted_by_jurisdiction' (new, 2026-08-16): Discovery was eligible
+    // but jurisdiction won the slot first -- Discovery was never actually
+    // attempted this turn, distinct from 'rejected_by_a' (which means
+    // Constraint A genuinely saw and rejected it).
     discoverySignal = {
       eligible_categories: COMMERCIAL_READINESS_CATEGORIES.filter(
         (c) => evaluateCategoryEligibility(c, discoveryIndicators, boundaryStateLoaded.commercial_readiness_discovery_asked, gate1.state === 'met', phase).eligible,
       ),
       selected_category: discoveryCategory,
-      outcome: discoveryCategory === null ? 'never_eligible' : attempt1.status === 'approved' ? 'asked' : 'rejected_by_a',
+      outcome:
+        discoveryCategory === null
+          ? 'never_eligible'
+          : jurisdictionProposal
+            ? 'preempted_by_jurisdiction'
+            : attempt1.status === 'approved'
+              ? 'asked'
+              : 'rejected_by_a',
     }
 
     if (attempt1.status === 'approved') {
       outcome = attempt1.outcome
       nextBoundaryState = attempt1.nextBoundaryState
       pendingClarification = attempt1.pendingClarification
-      if (discoveryProposal) {
+      if (forcedProposal === discoveryProposal && discoveryProposal) {
         // discoveryCategory is guaranteed non-null here (discoveryProposal
-        // was only built from a non-null category).
+        // was only built from a non-null category). Never set when
+        // jurisdiction won the slot -- jurisdiction has no takeaway
+        // concept, unlike Discovery.
         nextPendingTakeawayCategory = discoveryCategory
       }
     } else {
       // The ONE bounded alternative attempt (Model 4) is ALWAYS the
-      // ordinary candidate pool -- never a second discovery category, per
+      // ordinary candidate pool -- never a second forced/deterministic
+      // proposal (neither jurisdiction nor discovery), per
       // the approved integration spec ("If Model 4 attempt #1 proposes a
       // commercial-readiness discovery question and it is rejected, do
       // not use attempt #2 to try a second commercial-readiness
-      // category"). No exclusion is threaded from a rejected discovery
+      // category") -- extended identically to jurisdiction (PM SS6: "if
+      // the jurisdiction proposal fails Constraint A/B, do not
+      // automatically give it another attempt; follow existing Model 4
+      // behavior"). No exclusion is threaded from a rejected forced
       // attempt into this call either: exclusion only means something
       // within the SAME generator's own search space, and the ordinary
       // generator was never even called on attempt #1 when attempt #1 was
-      // a discovery candidate.
-      const excluded = !discoveryProposal && attempt1.exclusion ? [attempt1.exclusion] : undefined
+      // a forced (jurisdiction or discovery) candidate.
+      const excluded = !forcedProposal && attempt1.exclusion ? [attempt1.exclusion] : undefined
       const attempt2 = await tryCandidate(suAfter, eligible, phase, boundaryStateLoaded, deps, excluded)
       if (attempt2.status === 'approved') {
         outcome = attempt2.outcome
@@ -527,7 +616,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
           pending_clarification: null,
           pending_commercial_readiness_takeaway: null,
         })
-        const exhaustedOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suExhausted, deps.matrix), discoverySignal }
+        const exhaustedOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suExhausted, deps.matrix, topicClaims), discoverySignal, jurisdictionSignal }
         return precedingTakeaway ? { ...exhaustedOutcome, precedingTakeaway } : exhaustedOutcome
       }
     }
@@ -541,6 +630,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   }
   await deps.sessionStore.save(input.token, sessionState)
 
-  const finalOutcome: TurnOutcome = discoverySignal ? { ...outcome, discoverySignal } : outcome
+  let finalOutcome: TurnOutcome = discoverySignal ? { ...outcome, discoverySignal } : outcome
+  finalOutcome = jurisdictionSignal ? { ...finalOutcome, jurisdictionSignal } : finalOutcome
   return precedingTakeaway ? { ...finalOutcome, precedingTakeaway } : finalOutcome
 }

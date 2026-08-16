@@ -54,6 +54,21 @@ export const CANDIDATE_QUESTION_KINDS = [
    * commercial_readiness_discovery_asked below.
    */
   'commercial_readiness_discovery',
+  /**
+   * CRC Living Knowledge Phase 1, 2026-08-16, PM final approval SS5. Same
+   * shape/precedent as 'commercial_readiness_discovery' exactly:
+   * deterministically constructed by lib/crc-engine/jurisdiction-
+   * clarification.ts, never proposed by the ordinary LLM generator
+   * (excluded from anthropic-candidate-question.ts's own schema enum).
+   * Always carries target_signal_id: null -- a jurisdiction clarification
+   * is not a follow-up on any existing signal. Capped globally, once per
+   * interview -- see jurisdiction_clarification_asked below. Takes
+   * precedence over 'commercial_readiness_discovery' for the same Model 4
+   * attempt-#1 slot when both are eligible the same turn (run-turn.ts) --
+   * a narrow, PM-approved precedence rule, not a general "jurisdiction
+   * always wins" principle.
+   */
+  'jurisdiction_clarification',
 ] as const
 
 export type CandidateQuestionKind = (typeof CANDIDATE_QUESTION_KINDS)[number]
@@ -114,6 +129,20 @@ export interface BoundaryState {
    * disentangling_question_asked when each was added).
    */
   commercial_readiness_discovery_asked: boolean
+  /**
+   * CRC Living Knowledge Phase 1, 2026-08-16. True once a
+   * jurisdiction_clarification question has been asked. Global, once per
+   * conversation -- same shape as commercial_readiness_discovery_asked,
+   * deliberately a SEPARATE field/cap (PM SS7, "do NOT consume Discovery's
+   * own cap merely because a jurisdiction clarification occurred") --
+   * jurisdiction serves an already-stated user goal and Discovery is
+   * opportunistic education; conflating their budgets would incorrectly
+   * block one because the other fired. Same safe-default-on-missing-field
+   * reasoning as commercial_readiness_discovery_asked: a pre-Phase-1
+   * session deserializes this as `undefined`, which is falsy and behaves
+   * identically to `false` everywhere it's read.
+   */
+  jurisdiction_clarification_asked: boolean
   /** True once an interview-scoped decline has occurred; persists across all future evaluations. */
   interview_ended: boolean
   /** Phases closed by a phase-scoped decline. A phase not in this list is unaffected, even after another phase closes -- closing one phase must not automatically end unrelated future questioning in a different phase. */
@@ -127,6 +156,7 @@ export function createInitialBoundaryState(): BoundaryState {
     historical_experience_asked: false,
     disentangling_question_asked: false,
     commercial_readiness_discovery_asked: false,
+    jurisdiction_clarification_asked: false,
     interview_ended: false,
     phases_ended: [],
   }
@@ -170,6 +200,7 @@ export const BOUNDARY_REASON_CODES = [
   'HISTORICAL_EXPERIENCE_ALREADY_ASKED',
   'DISENTANGLING_QUESTION_ALREADY_ASKED',
   'COMMERCIAL_READINESS_DISCOVERY_ALREADY_ASKED',
+  'JURISDICTION_CLARIFICATION_ALREADY_ASKED',
   'INCIDENT_INVESTIGATION_PROHIBITED',
   'USER_DECLINED_QUESTION',
   'USER_DECLINED_PHASE',
@@ -400,6 +431,34 @@ export function evaluateBoundary(
       reason_code: 'ALLOWED',
       action_scope: 'ask',
       next_state: { ...state, commercial_readiness_discovery_asked: true },
+      debug: { fired_boundary: 'none', candidate_kind: candidate.kind },
+    }
+  }
+
+  if (candidate.kind === 'jurisdiction_clarification') {
+    // CRC Living Knowledge Phase 1, 2026-08-16. Same global-cap shape as
+    // commercial_readiness_discovery above -- see that branch's own
+    // comment for why candidate.signal_id is expected absent here too.
+    // The eligibility DECISION (is there an active goal that needs this,
+    // is jurisdiction still unconfirmed/undeclined) is made upstream in
+    // lib/crc-engine/jurisdiction-clarification.ts, exactly mirroring how
+    // commercial-readiness-catalog.ts owns Discovery's own eligibility --
+    // this evaluator has no opinion on WHY a jurisdiction_clarification
+    // candidate was proposed, only THAT the once-per-interview cap holds.
+    if (state.jurisdiction_clarification_asked) {
+      return {
+        allowed: false,
+        reason_code: 'JURISDICTION_CLARIFICATION_ALREADY_ASKED',
+        action_scope: 'suppress_current_question',
+        next_state: state,
+        debug: { fired_boundary: 'jurisdiction_clarification_cap (once per interview)', candidate_kind: candidate.kind },
+      }
+    }
+    return {
+      allowed: true,
+      reason_code: 'ALLOWED',
+      action_scope: 'ask',
+      next_state: { ...state, jurisdiction_clarification_asked: true },
       debug: { fired_boundary: 'none', candidate_kind: candidate.kind },
     }
   }
