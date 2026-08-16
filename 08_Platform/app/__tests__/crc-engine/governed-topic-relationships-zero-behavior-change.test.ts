@@ -1,22 +1,25 @@
 /**
- * Zero-behavior-change proof (Governed Topic Relationships implementation
- * milestone, 2026-08-16; orchestrator-wiring follow-up, 2026-08-16) -- uses
+ * Zero-UNAPPROVED-behavior-change proof (Governed Topic Relationships
+ * implementation milestone, 2026-08-16; orchestrator-wiring follow-up,
+ * 2026-08-16; CLAIM-COPY-004 CRC-publication decision, 2026-08-17) -- uses
  * the REAL governed fixtures (TOPIC_CLAIMS_FIXTURE,
  * TOPIC_RELATIONSHIPS_FIXTURE), never synthetic eligible ones by default,
  * through the REAL production entry point (runCRCConversation, the exact
  * function every live call site -- app/api/crc/turn/route.ts, run-turn.ts,
- * results-email-delivery.ts -- now threads TOPIC_RELATIONSHIPS_FIXTURE
- * into, mirroring exactly how each already threads TOPIC_CLAIMS_FIXTURE).
+ * results-email-delivery.ts -- threads TOPIC_RELATIONSHIPS_FIXTURE into,
+ * mirroring exactly how each already threads TOPIC_CLAIMS_FIXTURE).
  *
- * UPDATED for the orchestrator-wiring follow-up: the implementation-report
- * finding that motivated this follow-up ("runCRCConversation() has no
- * relationships parameter, so the machinery is connected in tests but not
- * in production") is now FIXED -- every real call site passes
- * TOPIC_RELATIONSHIPS_FIXTURE explicitly. The property this file now proves
- * is stronger and more specific than "the plumbing doesn't exist": it
- * proves the REAL relationship object genuinely reaches Retrieval and is
- * genuinely considered, and is excluded SOLELY because governance says
- * `crc_eligible: 'Pending'` -- not because it never arrived.
+ * UPDATED 2026-08-17 for the first real governance change this file has
+ * ever had to reflect: CLAIM-COPY-004-v1 is now `crc_eligible: 'Yes'` (CRC
+ * Approver: JD/PM, 2026-08-17) -- this is an INTENDED, approved behavior
+ * change, not a regression, and this file's assertions are updated to
+ * expect it. What remains proven unchanged, and is the file's continuing
+ * purpose: the governed RELATIONSHIP (REL-COPY-OWNERSHIP-COPYRIGHTABILITY-
+ * v1) and CLAIM-COPY-001/002/003 all remain `crc_eligible: 'Pending'`, and
+ * the real relationship object genuinely reaches Retrieval and is
+ * genuinely considered (not just present-but-unwired) yet still produces
+ * zero related-topic output -- excluded SOLELY because governance says
+ * Pending, not because it never arrived.
  */
 
 import * as fs from 'fs'
@@ -51,37 +54,40 @@ describe('governance state as of this milestone -- confirms the premise the rest
     expect(rel!.crc_eligible).toBe('Pending')
   })
 
-  test('all four real copyright claims remain Adopted but CRC-Eligible: Pending -- unchanged by this milestone', () => {
+  test('CLAIM-COPY-004 is CRC-Eligible: Yes (2026-08-17 publication decision); COPY-001/002/003 remain Pending, unchanged by that same decision', () => {
     const copyrightClaims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id.startsWith('CLAIM-COPY-'))
     expect(copyrightClaims).toHaveLength(4)
     for (const c of copyrightClaims) {
       expect(c.lifecycle).toBe('Adopted')
-      expect(c.crc_eligible).toBe('Pending')
+      expect(c.crc_eligible).toBe(c.claim_id === 'CLAIM-COPY-004-v1' ? 'Yes' : 'Pending')
     }
   })
 })
 
-describe('layer 1 -- the real orchestrator DOES thread the real relationship fixture through, and output is still unchanged (governance-blocked)', () => {
-  test('the canonical live scenario ("Do I own the copyright?") via runCRCConversation, called EXACTLY as every real call site now calls it (matrix, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE), produces outside_current_coverage, unchanged from pre-milestone behavior', () => {
+describe('layer 1 -- the real orchestrator DOES thread the real relationship fixture through; COPY-004 now surfaces (approved), everything else stays governance-blocked', () => {
+  test('the canonical live scenario ("Do I own the copyright?") via runCRCConversation, called EXACTLY as every real call site now calls it (matrix, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE), now produces CLAIM-COPY-004\'s real governed statement -- the intended, approved 2026-08-17 behavior change', () => {
     const su: StructuredUnderstanding = { ...DIALOGUE_FIXTURES.no_signal.structured_understanding, user_goals: [ownershipGoal()] }
     const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
 
     expect(output.goal_interpretations).toHaveLength(1)
     const interp = output.goal_interpretations[0]
+    const copy004 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-COPY-004-v1')!
     // ProjectionGoalInterpretation carries only goal_text/summary (status is
     // an internal-only BoundedInterpretation field, never exposed this far
-    // downstream) -- the fixed outside_current_coverage template text
-    // (rules.ts's own OUTSIDE_COVERAGE_BY_CATEGORY) is the observable proof
-    // of the same status at this layer.
-    expect(interp.summary).toBe("CRC's current governed knowledge doesn't establish an answer to who owns the copyright. A human-reviewed Commercial Assurance Assessment can address this directly.")
+    // downstream) -- the rendered text itself is the observable proof of
+    // directly_relevant status at this layer.
+    expect(interp.summary).toBe(`${copy004.crc_candidate_statement} This is relevant to who owns the copyright, though it doesn't by itself determine the answer for your specific project.`)
+    // Never the old (now-stale) "no coverage" template.
+    expect(interp.summary).not.toContain("doesn't establish an answer")
 
-    // None of the four real copyright claim statements ever appear.
+    // None of the still-Pending COPY-001/002/003 statements ever appear.
     for (const claim of TOPIC_CLAIMS_FIXTURE) {
+      if (claim.claim_id === 'CLAIM-COPY-004-v1') continue
       if (claim.crc_candidate_statement) {
         expect(interp.summary).not.toContain(claim.crc_candidate_statement)
       }
     }
-    // No related-topic boundary clause -- nothing related-topic-sourced ever reached this interpretation.
+    // No related-topic boundary clause -- the relationship never activated (still Pending).
     expect(interp.summary).not.toContain('This information is relevant to what you asked, but does not by itself determine the answer.')
     expect(JSON.stringify(output)).not.toContain('REL-COPY-OWNERSHIP-COPYRIGHTABILITY')
   })
@@ -94,8 +100,8 @@ describe('layer 1 -- the real orchestrator DOES thread the real relationship fix
   })
 })
 
-describe('layer 2 -- even with the real relationship fixture explicitly passed to retrieve() directly, Pending blocks it', () => {
-  test('retrieve() called directly with TOPIC_RELATIONSHIPS_FIXTURE + TOPIC_CLAIMS_FIXTURE produces zero related-topic results', () => {
+describe('layer 2 -- even with the real relationship fixture explicitly passed to retrieve() directly, Pending blocks RELATED-topic expansion (COPY-004 itself now correctly surfaces via its own exact-topic path)', () => {
+  test('retrieve() called directly with TOPIC_RELATIONSHIPS_FIXTURE + TOPIC_CLAIMS_FIXTURE produces exactly one exact-topic result (COPY-004) and zero related-topic results', () => {
     const handoff = { tools: [], unresolved_aliases: [], workflow_role: 'unresolved' as const, intended_use: 'unclear' as const, scoped_observations: [], certainty_state: 'gate_1_unmet' as const, exclusions: [] }
     const out = retrieve(
       handoff,
@@ -107,7 +113,8 @@ describe('layer 2 -- even with the real relationship fixture explicitly passed t
     )
     const relatedResults = out.results.filter((r) => r.match_origin === 'related_topic')
     expect(relatedResults).toEqual([])
-    expect(out.results).toEqual([]) // COPY-004 (exact-topic) is also still Pending -- zero results overall, exactly as before this milestone
+    expect(out.results).toHaveLength(1)
+    expect(out.results[0]).toMatchObject({ claim_id: 'CLAIM-COPY-004-v1', match_origin: 'exact_topic', relationship_id: null })
   })
 })
 

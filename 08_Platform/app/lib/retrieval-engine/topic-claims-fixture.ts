@@ -92,7 +92,15 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     claim_character: 'established',
     jurisdiction: 'Global',
     lifecycle: 'Adopted',
-    crc_eligible: 'Pending',
+    // CRC publication approved 2026-08-17 (CRC Approver: JD/PM), after
+    // source-hardening research (U.S. + comparative Global-scope pass
+    // across UK/EU/Taiwan/Japan) -- see GOVERNED-CLAIMS.md's own Source
+    // references for this claim and
+    // 01_Business/research/COPY-004-SOURCE-HARDENING-RESEARCH-2026.md.
+    // The first non-platform copyright claim published to CRC. COPY-001/
+    // 002/003 and REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1 remain Pending --
+    // deliberately not changed by this same decision.
+    crc_eligible: 'Yes',
     crc_publication_scope:
       "CRC may state that a platform's commercial-use permission and copyright ownership/copyrightability are two separate questions, without conflating one for the other.",
     crc_candidate_statement:

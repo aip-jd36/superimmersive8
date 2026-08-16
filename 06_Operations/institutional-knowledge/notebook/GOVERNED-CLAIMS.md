@@ -20,6 +20,7 @@ Mirrors the CRC Claims sub-table convention already used in `PLATFORM-RIGHTS-MAT
 - No claim may reference an `Applicability requirements` fact type outside the Phase 1 implemented set (`jurisdiction`, `tool_plan_tier`) — see `08_Platform/app/lib/retrieval-engine/types.ts`'s `APPLICABILITY_FACTS` for the enforced list. Referencing a reserved/future fact type would author a claim that can never become applicable, silently.
 - `CRC Approver` must always be a real, named human. No automated "legal reviewer" role exists or is permitted.
 - `Adoption Approver` (added 2026-08-16, first formal adoption decision) — the human governance approver of `Lifecycle: Adopted` itself, distinct from `CRC Approver` (which governs CRC-eligible publication specifically). Same discipline: always a real, named human, never automated. A claim can be `Adopted` with `Adoption Approver` recorded while `CRC Approver` remains `PENDING` indefinitely — this is the expected, intentional state for reviewer/internal-only knowledge, not a gap.
+- **`Jurisdiction: Global`** (governance meaning fixed 2026-08-17, PM approval, following CLAIM-COPY-004's comparative-law hardening pass — see `01_Business/research/COPY-004-SOURCE-HARDENING-RESEARCH-2026.md` Part 2): means the claim states a **jurisdiction-neutral structural relationship between legal concepts** — pressure-tested across materially different legal systems (the COPY-004 pass checked United States, United Kingdom, European Union, Taiwan, and Japan) — not that its detailed substantive rule has been verified in every jurisdiction worldwide. A claim stating a specific substantive legal outcome (e.g. a copyrightability determination, an ownership rule) must be jurisdiction-scoped (as CLAIM-COPY-001/002/003 already are, to `United States (federal)`), never labeled `Global`, no matter how confident the drafter is that the outcome likely generalizes.
 
 ## Entry template
 
@@ -393,6 +394,16 @@ Source references:
     evidenced by real CRC pilot conversations (a real user asked both
     "Can I use this commercially, AND do I own the copyright?" in the same
     breath -- confirmed live, this session, 2026-08-16).
+  - primary (CRC-publication source-hardening, 2026-08-16/17): the claim
+    proposition above is a HUMAN-GOVERNED SI8 SYNTHESIS -- not a single
+    directly-sourced proposition -- built from multiple independently
+    verified authoritative propositions, both U.S. and comparative. Full
+    provenance chain, live-verified statutory/contractual quotations, and
+    the comparative Global-scope pressure test are recorded in
+    01_Business/research/COPY-004-SOURCE-HARDENING-RESEARCH-2026.md (Part
+    1: U.S. -- 17 U.S.C. §§101/102/201/202/204, Runway and ElevenLabs
+    Terms of Use; Part 2: comparative Global-scope hardening across the
+    United States, United Kingdom, European Union, Taiwan, and Japan).
 Source authority/type: SI8 educational framework (explicitly not a purported externally-established legal proposition -- see Governance Treatment above)
 Source fact: >
   A platform granting a commercial-use license under its Terms of Service is
@@ -427,19 +438,16 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-16
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-16 as reviewer/internal
-  knowledge only; CRC eligibility is a separate, not-yet-made decision (see
-  CRC Approver/CRC Decision Date below). Text below is the scoping language
-  CRC MAY be authorized to state if/when CRC eligibility is separately
-  approved, preserved unchanged from the pre-adoption draft per governance
-  instruction not to reinterpret or rewrite substantive claim text when
-  changing lifecycle/publication status: CRC may state that a platform's
-  commercial-use permission and copyright ownership/copyrightability are two
-  separate questions, without conflating one for the other.
+  APPROVED FOR CRC PUBLICATION (2026-08-17, CRC Approver: JD (PM) -- see CRC
+  Approver/CRC Decision Date below; source-hardening research complete, see
+  Source references above). Text below is unchanged from the pre-approval
+  draft, per governance instruction not to reinterpret or rewrite
+  substantive claim text when changing CRC-eligibility status: CRC may state
+  that a platform's commercial-use permission and copyright
+  ownership/copyrightability are two separate questions, without conflating
+  one for the other.
 
 CRC Candidate Statement: >
-  NOT APPROVED FOR CRC PUBLICATION -- same status as CRC Publication Scope
-  above; text preserved unchanged, not yet authorized for CRC output:
   Whether a platform's terms allow commercial use of the output, and whether
   that output is copyrighted (and who owns it), are two separate questions
   -- a platform granting commercial-use permission doesn't by itself answer
@@ -448,6 +456,6 @@ CRC Candidate Statement: >
 Effective date: 2026-08-16
 Last reviewed: 2026-08-16
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING -- not yet approved
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-08-17
 Related: [[CLAIM-COPY-001-v1]]

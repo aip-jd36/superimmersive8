@@ -25,8 +25,8 @@ function stripFencedCodeBlocks(markdown: string): string {
   return markdown.replace(/```[\s\S]*?```/g, '')
 }
 
-/** Extracts every real `### CLAIM-...` heading (outside code fences) and its own Topic/Lifecycle/Publication scope lines. */
-function extractMarkdownClaims(markdown: string): { claim_id: string; topic: string | null; lifecycle: string | null; publication_scope: string | null }[] {
+/** Extracts every real `### CLAIM-...` heading (outside code fences) and its own Topic/Lifecycle/Publication scope/CRC Approver lines. */
+function extractMarkdownClaims(markdown: string): { claim_id: string; topic: string | null; lifecycle: string | null; publication_scope: string | null; crc_approver: string | null }[] {
   const outsideFences = stripFencedCodeBlocks(markdown)
   const sections = outsideFences.split(/(?=^### CLAIM-)/m).filter((s) => s.startsWith('### CLAIM-'))
   return sections.map((section) => {
@@ -34,11 +34,13 @@ function extractMarkdownClaims(markdown: string): { claim_id: string; topic: str
     const topicMatch = section.match(/^Topic:\s*(.+)$/m)
     const lifecycleMatch = section.match(/^Lifecycle:\s*(.+)$/m)
     const scopeMatch = section.match(/^Publication scope:\s*(.+)$/m)
+    const crcApproverMatch = section.match(/^CRC Approver:\s*(.+)$/m)
     return {
       claim_id: idMatch ? idMatch[1].trim() : '',
       topic: topicMatch ? topicMatch[1].trim() : null,
       lifecycle: lifecycleMatch ? lifecycleMatch[1].trim() : null,
       publication_scope: scopeMatch ? scopeMatch[1].trim() : null,
+      crc_approver: crcApproverMatch ? crcApproverMatch[1].trim() : null,
     }
   })
 }
@@ -75,7 +77,7 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
     expect(new Set(ids).size).toBe(ids.length)
   })
 
-  test("a fixture claim's Lifecycle/Publication-scope agrees with the markdown (drift detection)", () => {
+  test("a fixture claim's Lifecycle/CRC-eligibility agrees with the markdown (drift detection)", () => {
     const markdown = fs.readFileSync(GOVERNED_CLAIMS_PATH, 'utf-8')
     const markdownById = new Map(extractMarkdownClaims(markdown).map((c) => [c.claim_id, c]))
 
@@ -86,8 +88,25 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
       if (markdownClaim.lifecycle) {
         expect(markdownClaim.lifecycle.toLowerCase()).toContain(fixtureClaim.lifecycle.toLowerCase())
       }
+      // BUG FIX (2026-08-17, exposed by the CLAIM-COPY-004 CRC-publication
+      // decision, the first time these two signals ever diverged): this
+      // heuristic previously derived markdown-side CRC eligibility from
+      // whether `Publication scope` contained the literal string "CRC
+      // eligible" -- but `Publication scope` and CRC eligibility are two
+      // independent fields in this document's own entry template (see
+      // GOVERNED-CLAIMS.md's own governance-discipline bullet: "Publication
+      // scope: CRC eligible is a SEPARATE decision from Adoption"), and
+      // `Publication scope` isn't even a field on the runtime TopicClaim
+      // type at all -- nothing in production code ever reads it. PM's
+      // approved COPY-004 decision keeps `Publication scope: Reviewer/
+      // Commercial Assurance` unchanged while separately flipping CRC
+      // eligibility via `CRC Approver`/`CRC Decision Date` -- exposing that
+      // this test was checking the wrong field. The real governance signal,
+      // matching what `CRC Approver` has always meant in this document (a
+      // real, named human vs. the literal placeholder "PENDING"), is now
+      // checked directly instead.
       const fixtureIsCrcEligible = fixtureClaim.crc_eligible === 'Yes'
-      const markdownSaysCrcEligible = (markdownClaim.publication_scope ?? '').toLowerCase().includes('crc eligible')
+      const markdownSaysCrcEligible = !!markdownClaim.crc_approver && !markdownClaim.crc_approver.toUpperCase().startsWith('PENDING')
       expect(fixtureIsCrcEligible).toBe(markdownSaysCrcEligible)
     }
   })
@@ -113,8 +132,8 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
     }
   })
 
-  test('no claim in the runtime fixture is Adopted + CRC-eligible yet -- Phase 1 has not published anything to CRC (update only once a real PM adoption/publication decision is recorded)', () => {
+  test('exactly one claim in the runtime fixture is Adopted + CRC-eligible as of 2026-08-17 -- CLAIM-COPY-004-v1, the first real PM CRC-publication decision (update only when a further real decision is recorded)', () => {
     const liveClaims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.lifecycle === 'Adopted' && c.crc_eligible === 'Yes')
-    expect(liveClaims).toEqual([])
+    expect(liveClaims.map((c) => c.claim_id)).toEqual(['CLAIM-COPY-004-v1'])
   })
 })
