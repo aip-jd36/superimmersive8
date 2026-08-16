@@ -19,6 +19,7 @@ Mirrors the CRC Claims sub-table convention already used in `PLATFORM-RIGHTS-MAT
 - `Publication scope: CRC eligible` is a **separate decision** from Adoption — an Adopted claim may remain reviewer/internal-only indefinitely.
 - No claim may reference an `Applicability requirements` fact type outside the Phase 1 implemented set (`jurisdiction`, `tool_plan_tier`) — see `08_Platform/app/lib/retrieval-engine/types.ts`'s `APPLICABILITY_FACTS` for the enforced list. Referencing a reserved/future fact type would author a claim that can never become applicable, silently.
 - `CRC Approver` must always be a real, named human. No automated "legal reviewer" role exists or is permitted.
+- `Adoption Approver` (added 2026-08-16, first formal adoption decision) — the human governance approver of `Lifecycle: Adopted` itself, distinct from `CRC Approver` (which governs CRC-eligible publication specifically). Same discipline: always a real, named human, never automated. A claim can be `Adopted` with `Adoption Approver` recorded while `CRC Approver` remains `PENDING` indefinitely — this is the expected, intentional state for reviewer/internal-only knowledge, not a gap.
 
 ## Entry template
 
@@ -47,6 +48,8 @@ Unresolved project dependencies: []   <!-- free-form identifiers (snake_case, on
 Prohibited conclusions: >
 
 Lifecycle: Candidate            <!-- Candidate | Under Review | Adopted | Deprecated -->
+Adoption Approver:              <!-- required once Lifecycle: Adopted; must be a real, named human -->
+Adoption Decision Date:         <!-- required once Lifecycle: Adopted -->
 Publication scope: Internal/research   <!-- Internal/research | Reviewer/Commercial Assurance | CRC eligible | Public SI8 position -->
 CRC Publication Scope: >
 
@@ -62,7 +65,7 @@ Related: [[POS-XXX]], [[EC-XXX]], [[PQ-XXX]]
 
 ## Claims
 
-**Wave 1 candidates below — Lifecycle: Candidate, Publication scope: Internal/research. None are Adopted. None are CRC-eligible. Awaiting explicit PM review per the governance discipline above.** Primary sources independently re-verified via live web search on 2026-08-16 (not reused from repo research without re-checking) — see each claim's Source references.
+**Wave 1 claims below — Lifecycle: Adopted (Adoption Approver: JD, 2026-08-16), Publication scope: Reviewer/Commercial Assurance. SI8 institutional/reviewer knowledge as of this date. None are CRC-eligible — `CRC Approver`/`CRC Decision Date` remain PENDING on all four, and CRC Topic Retrieval continues to exclude them entirely (Lifecycle: Adopted alone does not satisfy `crc_eligible: 'Yes'`, which nothing in this adoption decision changed).** Primary sources independently re-verified via live web search on 2026-08-16 (not reused from repo research without re-checking) — see each claim's Source references.
 
 ### CLAIM-COPY-001-v1
 Domain: Copyright & Human Authorship
@@ -116,21 +119,31 @@ Prohibited conclusions: >
   work -- that remains a Commercial Assurance Assessment / legal-review
   question, never a CRC output.
 
-Lifecycle: Candidate
-Publication scope: Internal/research
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-16
+Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  DRAFT, pending approval: CRC may state that, under current U.S. law,
-  AI-generated video with no meaningful human creative contribution generally
-  does not qualify for copyright protection, and that this is a distinct
-  question from whether the video is safe to use commercially (see
+  NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-16 as reviewer/internal
+  knowledge only; CRC eligibility is a separate, not-yet-made decision (see
+  CRC Approver/CRC Decision Date below). Text below is the scoping language
+  CRC MAY be authorized to state if/when CRC eligibility is separately
+  approved, preserved unchanged from the pre-adoption draft per governance
+  instruction not to reinterpret or rewrite substantive claim text when
+  changing lifecycle/publication status: CRC may state that, under current
+  U.S. law, AI-generated video with no meaningful human creative contribution
+  generally does not qualify for copyright protection, and that this is a
+  distinct question from whether the video is safe to use commercially (see
   CLAIM-COPY-004). CRC must not state whether the user's own specific video
   qualifies.
 
 CRC Candidate Statement: >
-  DRAFT, pending approval: Under current U.S. copyright law, AI-generated
-  video without meaningful human creative contribution generally isn't
-  eligible for copyright protection. This is a different question from
-  whether you're clear to use the video commercially.
+  NOT APPROVED FOR CRC PUBLICATION -- same status as CRC Publication Scope
+  above; text preserved unchanged, not yet authorized for CRC output: Under
+  current U.S. copyright law, AI-generated video without meaningful human
+  creative contribution generally isn't eligible for copyright protection.
+  This is a different question from whether you're clear to use the video
+  commercially.
 
 Effective date: 2026-08-16
 Last reviewed: 2026-08-16
@@ -207,21 +220,31 @@ Prohibited conclusions: >
   facts about their actual process (a Commercial Assurance Assessment
   question, not a CRC one in Phase 1).
 
-Lifecycle: Candidate
-Publication scope: Internal/research
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-16
+Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  DRAFT, pending approval: CRC may state that, under current U.S. law,
-  writing prompts alone -- even detailed or iterative ones -- generally does
-  not establish sufficient human authorship for copyright purposes. CRC must
-  not state a conclusion about whether the user's own workflow, specifically,
-  meets or fails this bar.
+  NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-16 as reviewer/internal
+  knowledge only; CRC eligibility is a separate, not-yet-made decision (see
+  CRC Approver/CRC Decision Date below). Text below is the scoping language
+  CRC MAY be authorized to state if/when CRC eligibility is separately
+  approved, preserved unchanged from the pre-adoption draft per governance
+  instruction not to reinterpret or rewrite substantive claim text when
+  changing lifecycle/publication status: CRC may state that, under current
+  U.S. law, writing prompts alone -- even detailed or iterative ones --
+  generally does not establish sufficient human authorship for copyright
+  purposes. CRC must not state a conclusion about whether the user's own
+  workflow, specifically, meets or fails this bar.
 
 CRC Candidate Statement: >
-  DRAFT, pending approval: Under current U.S. copyright law, writing prompts
-  alone -- even detailed or iterative ones -- generally doesn't establish
-  sufficient human authorship on its own. Additional human creative
-  involvement, such as selecting, arranging, or editing the output, is
-  generally what supports a copyright claim.
+  NOT APPROVED FOR CRC PUBLICATION -- same status as CRC Publication Scope
+  above; text preserved unchanged, not yet authorized for CRC output: Under
+  current U.S. copyright law, writing prompts alone -- even detailed or
+  iterative ones -- generally doesn't establish sufficient human authorship
+  on its own. Additional human creative involvement, such as selecting,
+  arranging, or editing the output, is generally what supports a copyright
+  claim.
 
 Effective date: 2026-08-16
 Last reviewed: 2026-08-16
@@ -297,22 +320,31 @@ Prohibited conclusions: >
   Must not be presented as "your editing makes this copyrighted" -- only as
   "this is a recognized path, evaluated case by case."
 
-Lifecycle: Candidate
-Publication scope: Internal/research
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-16
+Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  DRAFT, pending approval: CRC may state that, under current U.S. law, human
-  selection, arrangement, or creative editing of AI-generated material can
-  independently support a copyright claim even when the underlying
-  AI-generated elements do not, while being explicit that this is evaluated
-  case by case and CRC cannot determine whether it applies to the user's own
-  project.
+  NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-16 as reviewer/internal
+  knowledge only; CRC eligibility is a separate, not-yet-made decision (see
+  CRC Approver/CRC Decision Date below). Text below is the scoping language
+  CRC MAY be authorized to state if/when CRC eligibility is separately
+  approved, preserved unchanged from the pre-adoption draft per governance
+  instruction not to reinterpret or rewrite substantive claim text when
+  changing lifecycle/publication status: CRC may state that, under current
+  U.S. law, human selection, arrangement, or creative editing of AI-generated
+  material can independently support a copyright claim even when the
+  underlying AI-generated elements do not, while being explicit that this is
+  evaluated case by case and CRC cannot determine whether it applies to the
+  user's own project.
 
 CRC Candidate Statement: >
-  DRAFT, pending approval: Under current U.S. copyright law, meaningfully
-  selecting, arranging, or editing AI-generated material can support a
-  copyright claim on its own, separate from whether the underlying
-  AI-generated footage itself is protected. Whether this applies to a
-  specific project is evaluated case by case.
+  NOT APPROVED FOR CRC PUBLICATION -- same status as CRC Publication Scope
+  above; text preserved unchanged, not yet authorized for CRC output: Under
+  current U.S. copyright law, meaningfully selecting, arranging, or editing
+  AI-generated material can support a copyright claim on its own, separate
+  from whether the underlying AI-generated footage itself is protected.
+  Whether this applies to a specific project is evaluated case by case.
 
 Effective date: 2026-08-16
 Last reviewed: 2026-08-16
@@ -390,18 +422,28 @@ Prohibited conclusions: >
   combined with a tool's commercial-use claim to imply a copyright
   conclusion, or vice versa.
 
-Lifecycle: Candidate
-Publication scope: Internal/research
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-16
+Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  DRAFT, pending approval: CRC may state that a platform's commercial-use
-  permission and copyright ownership/copyrightability are two separate
-  questions, without conflating one for the other.
+  NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-16 as reviewer/internal
+  knowledge only; CRC eligibility is a separate, not-yet-made decision (see
+  CRC Approver/CRC Decision Date below). Text below is the scoping language
+  CRC MAY be authorized to state if/when CRC eligibility is separately
+  approved, preserved unchanged from the pre-adoption draft per governance
+  instruction not to reinterpret or rewrite substantive claim text when
+  changing lifecycle/publication status: CRC may state that a platform's
+  commercial-use permission and copyright ownership/copyrightability are two
+  separate questions, without conflating one for the other.
 
 CRC Candidate Statement: >
-  DRAFT, pending approval: Whether a platform's terms allow commercial use
-  of the output, and whether that output is copyrighted (and who owns it),
-  are two separate questions -- a platform granting commercial-use
-  permission doesn't by itself answer either.
+  NOT APPROVED FOR CRC PUBLICATION -- same status as CRC Publication Scope
+  above; text preserved unchanged, not yet authorized for CRC output:
+  Whether a platform's terms allow commercial use of the output, and whether
+  that output is copyrighted (and who owns it), are two separate questions
+  -- a platform granting commercial-use permission doesn't by itself answer
+  either.
 
 Effective date: 2026-08-16
 Last reviewed: 2026-08-16

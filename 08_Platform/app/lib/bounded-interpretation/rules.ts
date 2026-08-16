@@ -150,7 +150,19 @@ export function relevantApplicabilityUnresolvedNoContentSummary(category: GoalCa
  * already joined by the caller exactly as directlyRelevantSummary's own
  * caller joins multiple matches (same "never drop an eligible, retrieved
  * claim silently" discipline). Quoted verbatim, never paraphrased.
+ *
+ * Singular/plural (governance-review fix, 2026-08-16, PM item 5): uses
+ * "This is relevant to... how it applies," a singular collective
+ * reference, regardless of whether one or several claims were joined into
+ * `claimStatement` -- mirrors directlyRelevantSummary's own established
+ * "This is relevant to" pattern exactly, which already handles its own
+ * multi-claim joins (e.g. two commercial_use tool claims) the same way
+ * and has never needed a plural variant. Deliberately not "These are...
+ * which apply" (grammatically correct for 2+ claims but awkward/wrong for
+ * exactly 1) -- "This" reads naturally as referring to the whole quoted
+ * passage collectively either way, so one template covers both cases
+ * without a count parameter or branching.
  */
 export function relevantApplicabilityUnresolvedWithContentSummary(category: GoalCategory, claimStatement: string): string {
-  return `${claimStatement} These are relevant to ${CATEGORY_LABELS[category]}, but based on what's been described here, there isn't enough project-specific information to determine which apply to your specific project. ${BRIDGE_SENTENCE}`
+  return `${claimStatement} This is relevant to ${CATEGORY_LABELS[category]}, but based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project. ${BRIDGE_SENTENCE}`
 }

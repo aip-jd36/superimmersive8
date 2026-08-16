@@ -8,19 +8,27 @@
  * catches claim-ID/Lifecycle/Publication-scope drift between this file
  * and the real markdown.
  *
- * Wave 1 candidates (2026-08-16): four U.S. copyright/human-authorship
- * claims, mirrored verbatim from GOVERNED-CLAIMS.md, all at
- * `lifecycle: 'Candidate'` / `crc_eligible: 'Pending'` -- NONE are
- * Adopted, NONE are CRC-eligible. Primary sources independently
+ * Wave 1 claims (2026-08-16): four U.S. copyright/human-authorship claims,
+ * mirrored verbatim from GOVERNED-CLAIMS.md. Primary sources independently
  * re-verified via live web search on 2026-08-16 (USCO Part 2 Report,
  * Thaler v. Perlmutter, Zarya of the Dawn), not reused from existing repo
  * research without re-checking, per the explicit PM governance guardrail
  * ("existing repo research is candidate source material only").
  *
- * Deliberately included at Candidate lifecycle rather than omitted
- * entirely: this is the concrete Phase 1 acceptance-test proof that
- * lookupTopicClaims() correctly excludes non-Adopted/non-eligible claims
- * from ever reaching CRC output, using REAL Wave 1 content rather than a
+ * ADOPTED 2026-08-16 (first formal Living Knowledge governance decision,
+ * Adoption Approver: JD/PM) as SI8 institutional/reviewer knowledge --
+ * `lifecycle: 'Adopted'` on all four. Still `crc_eligible: 'Pending'` on
+ * all four, deliberately: CRC-eligible publication is an explicitly
+ * SEPARATE decision from Adoption (per this document's own governance
+ * discipline, and PM's explicit NO-GO on CRC publication for all four at
+ * this time). `lookupTopicClaims()` requires BOTH `lifecycle === 'Adopted'
+ * && crc_eligible === 'Yes'` before a claim can ever reach `matches[]` --
+ * `crc_eligible: 'Pending'` alone is sufficient to keep all four
+ * completely excluded from CRC Topic Retrieval, unchanged from their
+ * pre-adoption behavior. This is the concrete Phase 1 acceptance-test
+ * proof that lookupTopicClaims() correctly excludes non-CRC-eligible
+ * claims (now specifically reviewer-only, not merely un-adopted) from
+ * ever reaching CRC output, using REAL Wave 1 content rather than a
  * synthetic test fixture -- see
  * __tests__/retrieval-engine/lookup-topic-claims.test.ts and the
  * dedicated Wave-1-specific exclusion test in
@@ -35,7 +43,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     topic: 'copyrightability',
     claim_character: 'established',
     jurisdiction: 'United States (federal)',
-    lifecycle: 'Candidate',
+    lifecycle: 'Adopted',
     crc_eligible: 'Pending',
     crc_publication_scope:
       "CRC may state that, under current U.S. law, AI-generated video with no meaningful human creative contribution generally does not qualify for copyright protection, and that this is a distinct question from whether the video is safe to use commercially (see CLAIM-COPY-004). CRC must not state whether the user's own specific video qualifies.",
@@ -51,7 +59,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     topic: 'copyrightability',
     claim_character: 'established',
     jurisdiction: 'United States (federal)',
-    lifecycle: 'Candidate',
+    lifecycle: 'Adopted',
     crc_eligible: 'Pending',
     crc_publication_scope:
       "CRC may state that, under current U.S. law, writing prompts alone -- even detailed or iterative ones -- generally does not establish sufficient human authorship for copyright purposes. CRC must not state a conclusion about whether the user's own workflow, specifically, meets or fails this bar.",
@@ -67,7 +75,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     topic: 'copyrightability',
     claim_character: 'established',
     jurisdiction: 'United States (federal)',
-    lifecycle: 'Candidate',
+    lifecycle: 'Adopted',
     crc_eligible: 'Pending',
     crc_publication_scope:
       "CRC may state that, under current U.S. law, human selection, arrangement, or creative editing of AI-generated material can independently support a copyright claim even when the underlying AI-generated elements do not, while being explicit that this is evaluated case by case and CRC cannot determine whether it applies to the user's own project.",
@@ -83,7 +91,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     topic: 'copyright_ownership',
     claim_character: 'established',
     jurisdiction: 'Global',
-    lifecycle: 'Candidate',
+    lifecycle: 'Adopted',
     crc_eligible: 'Pending',
     crc_publication_scope:
       "CRC may state that a platform's commercial-use permission and copyright ownership/copyrightability are two separate questions, without conflating one for the other.",

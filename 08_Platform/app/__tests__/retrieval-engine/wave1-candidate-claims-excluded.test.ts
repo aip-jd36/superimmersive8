@@ -1,12 +1,22 @@
 /**
- * Wave 1 candidate-claim exclusion proof (CRC Living Knowledge Phase 1,
- * 2026-08-16). Uses the REAL TOPIC_CLAIMS_FIXTURE content (four real
- * Candidate-lifecycle U.S. copyright claims, drafted 2026-08-16, pending
- * PM review) rather than a synthetic test double -- direct proof that
- * `Lifecycle: Candidate` + `Publication scope: Internal/research` claims
- * cannot reach CRC output even though they exist, are well-formed, and
- * have real, independently-verified content ready to go the moment they
- * are approved.
+ * Wave 1 reviewer-only-claim exclusion proof (CRC Living Knowledge Phase 1,
+ * 2026-08-16; updated same day for the first formal adoption decision).
+ * Uses the REAL TOPIC_CLAIMS_FIXTURE content -- four real U.S. copyright
+ * claims, formally ADOPTED 2026-08-16 (Adoption Approver: JD/PM) as SI8
+ * institutional/reviewer knowledge, but explicitly held at
+ * `Publication scope: Reviewer/Commercial Assurance` / `crc_eligible:
+ * 'Pending'` -- CRC publication is a separate, not-yet-made decision
+ * (PM: "NO-GO for all four at this time") -- rather than a synthetic test
+ * double. Direct proof that an Adopted-but-not-CRC-eligible claim cannot
+ * reach CRC output even though it exists, is well-formed, is genuine SI8
+ * institutional knowledge, and has real, independently-verified content
+ * ready to go the moment CRC-eligibility is separately approved. Before
+ * this adoption decision, these same claims were excluded for a
+ * DIFFERENT combined reason (`Lifecycle: Candidate` as well as
+ * `crc_eligible: Pending`); this file was updated, not left stale, to
+ * assert the now-accurate state (`Lifecycle: Adopted`, still
+ * `crc_eligible: Pending`) rather than silently keep asserting a fact
+ * that stopped being true.
  */
 
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
@@ -67,7 +77,7 @@ function copyrightabilityGoal(overrides: Partial<UserGoal> = {}): UserGoal {
   }
 }
 
-describe('Wave 1 real candidate claims -- confirmed still Candidate/Pending, never CRC-eligible', () => {
+describe('Wave 1 real claims -- confirmed Adopted (institutional knowledge) but still CRC-Eligible: Pending (2026-08-16 adoption decision)', () => {
   test('all four Wave 1 claims are present in the fixture', () => {
     expect(TOPIC_CLAIMS_FIXTURE.map((c) => c.claim_id).sort()).toEqual([
       'CLAIM-COPY-001-v1',
@@ -77,32 +87,54 @@ describe('Wave 1 real candidate claims -- confirmed still Candidate/Pending, nev
     ])
   })
 
-  test('none of them are Lifecycle: Adopted', () => {
+  test('all four ARE now Lifecycle: Adopted -- item A of the technical validation list: visible as Adopted institutional knowledge in the canonical Governed Claims source', () => {
     for (const claim of TOPIC_CLAIMS_FIXTURE) {
-      expect(claim.lifecycle).toBe('Candidate')
+      expect(claim.lifecycle).toBe('Adopted')
     }
   })
 
-  test('none of them are CRC-Eligible: Yes', () => {
+  test('none of them are CRC-Eligible: Yes -- Adoption alone never implies CRC eligibility, which remains a separate, not-yet-made decision', () => {
     for (const claim of TOPIC_CLAIMS_FIXTURE) {
       expect(claim.crc_eligible).toBe('Pending')
     }
   })
 })
 
-describe('Wave 1 real candidate claims -- structurally excluded from Topic Retrieval', () => {
-  test('lookupTopicClaims returns zero matches for a copyright_ownership goal (CLAIM-COPY-004) even with a directly-applicable goal + confirmed US jurisdiction', () => {
+describe('Wave 1 real claims -- structurally excluded from Topic Retrieval (item D: reviewer-only / non-CRC-eligible exclusion explicitly tested)', () => {
+  test('lookupTopicClaims returns zero matches for a copyright_ownership goal (CLAIM-COPY-004) even with a directly-applicable goal + confirmed US jurisdiction -- Adopted does not bypass the crc_eligible gate', () => {
     const goal = copyrightGoal()
+    expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-COPY-004-v1')?.lifecycle).toBe('Adopted')
     const result = lookupTopicClaims([goal], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] })
     expect(result.matches).toEqual([])
+    // Same combined diagnostic reason as before adoption -- lookupTopicClaims
+    // does not distinguish "not adopted" from "adopted but not CRC-eligible"
+    // in its reason string; both collapse to not_adopted_or_eligible. The
+    // claim IS now Adopted (asserted above) -- what's still failing is
+    // specifically crc_eligible !== 'Yes'.
     expect(result.diagnostics).toContainEqual({ identifier: 'copyright_ownership', reason: 'not_adopted_or_eligible' })
   })
 
-  test('lookupTopicClaims returns zero matches for a copyrightability goal (CLAIM-COPY-001/002/003, post-retag) even with a directly-applicable goal + confirmed US jurisdiction', () => {
+  test('lookupTopicClaims returns zero matches for a copyrightability goal (CLAIM-COPY-001/002/003, post-retag) even with a directly-applicable goal + confirmed US jurisdiction -- Adopted does not bypass the crc_eligible gate', () => {
     const goal = copyrightabilityGoal()
+    for (const id of ['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1']) {
+      expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === id)?.lifecycle).toBe('Adopted')
+    }
     const result = lookupTopicClaims([goal], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] })
     expect(result.matches).toEqual([])
     expect(result.diagnostics).toContainEqual({ identifier: 'copyrightability', reason: 'not_adopted_or_eligible' })
+  })
+
+  test('item F: relevant_applicability_unresolved cannot create a backdoor around CRC eligibility -- even though these Adopted claims carry non-empty unresolved_project_dependencies (Case 3B territory), crc_eligible: Pending excludes them before Case 3B logic is ever reached', () => {
+    const claim001 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-COPY-001-v1')!
+    expect(claim001.unresolved_project_dependencies).toEqual(['human_creative_contribution_level'])
+    expect(claim001.lifecycle).toBe('Adopted')
+    expect(claim001.crc_eligible).toBe('Pending')
+    // The claim never becomes a RetrievalResult at all -- unresolved_project_dependencies
+    // is only ever read from an ALREADY-eligible RetrievalResult (see
+    // build-bounded-interpretation.ts); a claim that never reaches
+    // matches[] can't trigger Case 3B by having that field set.
+    const result = lookupTopicClaims([copyrightabilityGoal()], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] })
+    expect(result.matches).toEqual([])
   })
 
   test('retrieve() produces zero results for a copyright_ownership goal even with a directly-applicable goal + confirmed jurisdiction', () => {
@@ -130,7 +162,7 @@ describe('Wave 1 real candidate claims -- structurally excluded from Topic Retri
   })
 })
 
-describe('Wave 1 real candidate claims -- structurally excluded end-to-end through the full CRC pipeline', () => {
+describe('Wave 1 real claims -- structurally excluded end-to-end through the full CRC pipeline (item E: CRC output unchanged, item G: no claim text in browser/email output)', () => {
   test('a real copyright_ownership goal (CLAIM-COPY-004) against the real Wave 1 fixture produces outside_current_coverage, never the draft claim content, never even with jurisdiction confirmed', () => {
     const goal = copyrightGoal()
     const su: StructuredUnderstanding = {

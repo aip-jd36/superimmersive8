@@ -73,7 +73,7 @@ describe('buildResultsEmailContent', () => {
       ...FULL_OUTPUT,
       goal_interpretations: [{
         goal_text: 'Is this copyrightable?',
-        summary: "Prompting alone generally doesn't establish sufficient human authorship. These are relevant to whether this kind of output can be copyrighted at all, but based on what's been described here, there isn't enough project-specific information to determine which apply to your specific project. A human-reviewed Commercial Assurance Assessment can address this directly.",
+        summary: "Prompting alone generally doesn't establish sufficient human authorship. This is relevant to whether this kind of output can be copyrighted at all, but based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project. A human-reviewed Commercial Assurance Assessment can address this directly.",
       }],
     }
     const { html, text } = buildResultsEmailContent(withUnresolvedApplicability, 'attr-1', 'jd@example.com')
