@@ -20,8 +20,10 @@ jest.mock('../../lib/crc-engine/run-crc-conversation', () => ({
 }))
 
 import { sendCrcResultsEmail } from '@/lib/emails'
+import { runCRCConversation } from '../../lib/crc-engine/run-crc-conversation'
 
 const mockSend = sendCrcResultsEmail as jest.Mock
+const mockRunCRCConversation = runCRCConversation as jest.Mock
 
 function fakeClient(opts: {
   upsertLeadError?: unknown
@@ -67,6 +69,7 @@ const BASE_PARAMS = {
 
 beforeEach(() => {
   mockSend.mockReset()
+  mockRunCRCConversation.mockClear()
 })
 
 describe('deliverCrcResultsEmail', () => {
@@ -144,5 +147,26 @@ describe('deliverCrcResultsEmail', () => {
     await deliverCrcResultsEmail(client, { ...BASE_PARAMS, isExplicitResend: true })
     const claimCall = rpcCalls.find((c) => c.fn === 'claim_crc_result_send')
     expect((claimCall!.args as any).p_is_explicit_resend).toBe(true)
+  })
+
+  // Governed Topic Relationships orchestrator-wiring follow-up, 2026-08-16:
+  // proves the email recompute path is relationship-aware, mirroring
+  // exactly how topicClaims has always been threaded (module header's own
+  // "the email recomputes the result via the same runCRCConversation()
+  // call" reasoning, extended to relationships).
+  test('params.relationships is threaded through to runCRCConversation, mirroring topicClaims', async () => {
+    mockSend.mockResolvedValue({ status: 'accepted', providerId: 'resend-123' })
+    const { client } = fakeClient({ claim: { claimed: true, reason: null } })
+    const relationships = [{ relationship_id: 'REL-TEST' } as any]
+    const topicClaims = [{ claim_id: 'TEST-CLAIM' } as any]
+    await deliverCrcResultsEmail(client, { ...BASE_PARAMS, topicClaims, relationships })
+    expect(mockRunCRCConversation).toHaveBeenCalledWith(BASE_PARAMS.structuredUnderstanding, BASE_PARAMS.matrix, topicClaims, relationships)
+  })
+
+  test('omitting params.relationships defaults to [] -- backward compatible, matches topicClaims\' own default behavior', async () => {
+    mockSend.mockResolvedValue({ status: 'accepted', providerId: 'resend-123' })
+    const { client } = fakeClient({ claim: { claimed: true, reason: null } })
+    await deliverCrcResultsEmail(client, BASE_PARAMS)
+    expect(mockRunCRCConversation).toHaveBeenCalledWith(BASE_PARAMS.structuredUnderstanding, BASE_PARAMS.matrix, [], [])
   })
 })

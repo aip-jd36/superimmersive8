@@ -17,6 +17,7 @@ import type { CandidateObservation } from '@/lib/interview-engine/extraction'
 import type { CandidateQuestionProposal } from '@/lib/interview-engine/candidate-question'
 import type { ConstraintADecision } from '@/lib/interview-engine/decision'
 import type { SessionStore } from '@/lib/crc-engine/session-store'
+import type { TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
 
 const MATRIX = [
   {
@@ -309,5 +310,103 @@ describe('runTurn -- session recovery', () => {
   test('a brand-new token with no prior session starts from an empty StructuredUnderstanding, never errors', async () => {
     const outcome = await runTurn({ token: 'brand-new-token', turnNumber: 1, userText: 'Hello.' }, deps())
     expect(['question', 'acknowledgment', 'complete']).toContain(outcome.kind)
+  })
+})
+
+describe('runTurn -- Governed Topic Relationships orchestrator wiring (2026-08-16 follow-up)', () => {
+  function goalCandidate(overrides: Partial<CandidateObservation> = {}): CandidateObservation {
+    return {
+      proposal_id: 'c1',
+      turn: 1,
+      raw_text: 'Do I own the copyright?',
+      kind: 'user_goal',
+      goal_confidence_hint: 'confirmed',
+      goal_category_hint: 'copyright_ownership',
+      ...overrides,
+    }
+  }
+
+  function testTopicClaim(overrides: Partial<TopicClaim> & Pick<TopicClaim, 'claim_id' | 'topic'>): TopicClaim {
+    return {
+      claim_character: 'established',
+      jurisdiction: 'Global',
+      lifecycle: 'Adopted',
+      crc_eligible: 'Yes',
+      crc_publication_scope: 'Test scope.',
+      crc_candidate_statement: 'Test statement.',
+      applicability_requirements: [],
+      unresolved_project_dependencies: [],
+      last_verified: '2026-08-16',
+      superseded_by: null,
+      ...overrides,
+    }
+  }
+
+  function testRelationship(
+    overrides: Partial<TopicRelationship> & Pick<TopicRelationship, 'relationship_id' | 'source_topic' | 'target_topic'>,
+  ): TopicRelationship {
+    return {
+      relationship_type: 'relevant_consideration',
+      rationale: 'Structural rationale placeholder.',
+      lifecycle: 'Adopted',
+      adoption_approver: 'JD (PM)',
+      adoption_decision_date: '2026-08-16',
+      publication_scope: 'Reviewer/Commercial Assurance',
+      crc_eligible: 'Yes',
+      crc_approver: 'JD (PM)',
+      crc_decision_date: '2026-08-16',
+      last_reviewed: '2026-08-16',
+      superseded_by: null,
+      ...overrides,
+    }
+  }
+
+  test('deps.relationships flows all the way through runTurn -> runCRCConversation -> retrieve() on the interactive completion path, producing a related-topic result', async () => {
+    // stop_interview immediately completes the interview regardless of
+    // extraction content (see the decline-handling describe block above) --
+    // the simplest reliable way to reach `kind: 'complete'` on turn 1 while
+    // still exercising the real extraction -> user_goals -> retrieve() chain
+    // (extraction always runs before decline preprocessing; see run-turn.ts's
+    // own comment on that ordering).
+    const rel = testRelationship({ relationship_id: 'REL-TEST', source_topic: 'copyright_ownership', target_topic: 'copyrightability' })
+    const relatedClaim = testTopicClaim({ claim_id: 'TEST-RELATED', topic: 'copyrightability', crc_candidate_statement: 'Related statement flowed through runTurn.' })
+    const outcome = await runTurn(
+      { token: 'rel-t1', turnNumber: 1, userText: 'Do I own the copyright?', declineAction: 'stop_interview' },
+      deps({ extractor: constantExtractor([goalCandidate()]), topicClaims: [relatedClaim], relationships: [rel] }),
+    )
+    expect(outcome.kind).toBe('complete')
+    if (outcome.kind === 'complete') {
+      expect(JSON.stringify(outcome.result.output)).toContain('Related statement flowed through runTurn.')
+      const relatedResults = outcome.result.trace.retrieval_results.filter((r) => r.match_origin === 'related_topic')
+      expect(relatedResults).toHaveLength(1)
+      expect(relatedResults[0].relationship_id).toBe('REL-TEST')
+      expect(relatedResults[0].matched_goal_category).toBe('copyright_ownership')
+    }
+  })
+
+  test('omitting deps.relationships entirely defaults to [] on the interactive path -- backward compatible, no crash, no related content', async () => {
+    const outcome = await runTurn(
+      { token: 'rel-t2', turnNumber: 1, userText: 'Do I own the copyright?', declineAction: 'stop_interview' },
+      deps({ extractor: constantExtractor([goalCandidate()]) }),
+    )
+    expect(outcome.kind).toBe('complete')
+    if (outcome.kind === 'complete') {
+      const relatedResults = outcome.result.trace.retrieval_results.filter((r) => r.match_origin === 'related_topic')
+      expect(relatedResults).toEqual([])
+    }
+  })
+
+  test('a Pending relationship (mirroring the real REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1 governance state) reaches retrieve() but produces zero related-topic content -- governance-blocked, not plumbing-blocked', async () => {
+    const pendingRel = testRelationship({ relationship_id: 'REL-TEST-PENDING', source_topic: 'copyright_ownership', target_topic: 'copyrightability', crc_eligible: 'Pending' })
+    const relatedClaim = testTopicClaim({ claim_id: 'TEST-RELATED', topic: 'copyrightability', crc_candidate_statement: 'Must never appear -- relationship is Pending.' })
+    const outcome = await runTurn(
+      { token: 'rel-t3', turnNumber: 1, userText: 'Do I own the copyright?', declineAction: 'stop_interview' },
+      deps({ extractor: constantExtractor([goalCandidate()]), topicClaims: [relatedClaim], relationships: [pendingRel] }),
+    )
+    expect(outcome.kind).toBe('complete')
+    if (outcome.kind === 'complete') {
+      expect(JSON.stringify(outcome.result.output)).not.toContain('Must never appear')
+      expect(outcome.result.trace.retrieval_results.filter((r) => r.match_origin === 'related_topic')).toEqual([])
+    }
   })
 })

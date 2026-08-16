@@ -55,7 +55,7 @@
 
 import { buildRetrievalHandoff } from '@/lib/interview-engine/handoff'
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
-import type { MatrixRow, RetrievalDiagnostic, RetrievalResult, TopicClaim } from '@/lib/retrieval-engine/types'
+import type { MatrixRow, RetrievalDiagnostic, RetrievalResult, TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
 import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
 import { assembleProjectionOutput } from '@/lib/projection-layer/assemble-projection-output'
 import type { ProjectionDiagnostic, ProjectionOutput } from '@/lib/projection-layer/types'
@@ -117,14 +117,33 @@ export interface CRCPipelineResult {
  * anywhere upstream of this read); tool plan tiers come from
  * `understanding.tool_mentions` unmodified, the exact same array
  * `buildRetrievalHandoff` itself reads for its own tool matching.
+ *
+ * `relationships` (Governed Topic Relationships orchestrator-wiring
+ * follow-up, 2026-08-16): additive, defaults to `[]`, same discipline as
+ * `topicClaims` immediately above it -- every pre-existing call site
+ * continues to compile and behave identically without passing it. Real
+ * callers pass `TOPIC_RELATIONSHIPS_FIXTURE` explicitly (mirroring exactly
+ * how `topicClaims` callers pass `TOPIC_CLAIMS_FIXTURE`), threaded straight
+ * through to `retrieve()`'s own 6th parameter, unmodified. Passing the real
+ * fixture here produces zero behavior change today: the one real
+ * relationship record is `crc_eligible: 'Pending'`, so
+ * `lookupRelatedTopicClaims()` excludes it before any target claim is even
+ * considered -- see the load-bearing governance test in
+ * __tests__/crc-engine/run-crc-conversation.test.ts proving this is
+ * because governance says Pending, not because the plumbing is missing.
  */
-export function runCRCConversation(understanding: StructuredUnderstanding, matrix: MatrixRow[], topicClaims: TopicClaim[] = []): CRCPipelineResult {
+export function runCRCConversation(
+  understanding: StructuredUnderstanding,
+  matrix: MatrixRow[],
+  topicClaims: TopicClaim[] = [],
+  relationships: TopicRelationship[] = [],
+): CRCPipelineResult {
   const handoff = buildRetrievalHandoff(understanding)
   const applicabilityFacts: ApplicabilityFacts = {
     jurisdiction: understanding.project_facts.jurisdiction.attestation,
     toolMentions: understanding.tool_mentions,
   }
-  const { results, diagnostics: retrievalDiagnostics } = retrieve(handoff, matrix, understanding.user_goals, topicClaims, applicabilityFacts)
+  const { results, diagnostics: retrievalDiagnostics } = retrieve(handoff, matrix, understanding.user_goals, topicClaims, applicabilityFacts, relationships)
   const interpretations = buildBoundedInterpretations(understanding.user_goals, results, retrievalDiagnostics)
   const { output, diagnostics: projectionDiagnostics } = assembleProjectionOutput(handoff, results, interpretations)
 

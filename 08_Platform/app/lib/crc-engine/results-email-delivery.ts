@@ -17,7 +17,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { runCRCConversation } from './run-crc-conversation'
-import type { MatrixRow, TopicClaim } from '@/lib/retrieval-engine/types'
+import type { MatrixRow, TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
 import type { StructuredUnderstanding } from '@/types/interview-engine'
 import { buildResultsEmailContent } from './results-email-template'
 import { sendCrcResultsEmail } from '@/lib/emails'
@@ -50,6 +50,15 @@ export interface DeliverParams {
    * incomplete/wrong email, a real regression this parameter prevents).
    */
   topicClaims?: TopicClaim[]
+  /**
+   * Governed Topic Relationships orchestrator-wiring follow-up,
+   * 2026-08-16. Same discipline and same reasoning as `topicClaims`
+   * immediately above -- required so the email recomputation stays in sync
+   * with whatever the interactive/finalization path produced, never
+   * relationship-unaware while the browser path is relationship-aware (or
+   * vice versa).
+   */
+  relationships?: TopicRelationship[]
   attributionToken: string | null | undefined
 }
 
@@ -99,7 +108,7 @@ export async function deliverCrcResultsEmail(client: SupabaseClient, params: Del
 
   // ── Recompute the already-completed result -- pure, no model call, same
   // function GET already uses for a completed session. ──
-  const result = runCRCConversation(params.structuredUnderstanding, params.matrix, params.topicClaims ?? [])
+  const result = runCRCConversation(params.structuredUnderstanding, params.matrix, params.topicClaims ?? [], params.relationships ?? [])
   const { html, text } = buildResultsEmailContent(result.output, params.attributionToken, params.email)
 
   const outcome = await sendCrcResultsEmail(params.email, 'Your Commercial Readiness Check results', html, text)

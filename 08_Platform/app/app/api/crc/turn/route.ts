@@ -55,6 +55,7 @@ import { createAnthropicConstraintADecider } from '@/lib/interview-engine/anthro
 import type { DeclineAction } from '@/lib/crc-engine/decline'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
+import { TOPIC_RELATIONSHIPS_FIXTURE } from '@/lib/retrieval-engine/topic-relationships-fixture'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { parseRequest, type TurnRequestBody, type TurnResponseBody, type SessionStatusResponseBody } from '@/lib/crc-engine/api-contract'
 import { logPilotEvent } from '@/lib/crc-engine/pilot-events'
@@ -171,7 +172,7 @@ export async function GET(request: NextRequest) {
   // active chat input.
   const isDone = engineState.structured_understanding.completion_reason !== null || productState?.product_stop_reason != null
   if (isDone) {
-    const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
+    const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
     const fields = buildCompleteResponseFields({
       sessionCreatedAt: productState?.created_at ?? new Date(0).toISOString(),
       output: result.output,
@@ -299,7 +300,7 @@ export async function POST(request: NextRequest) {
     // request -- a ceiling-stopped session still has a real completed
     // result the user should be able to have emailed.
     if (productState?.product_stop_reason && parsed.kind !== 'email' && parsed.kind !== 'resend_result_email') {
-      const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
+      const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
       const response = NextResponse.json<TurnResponseBody>(buildCompleteTurnResponse(productState, result.output))
       setSessionCookie(response, token)
       return response
@@ -340,6 +341,7 @@ export async function POST(request: NextRequest) {
         structuredUnderstanding: engineState.structured_understanding,
         matrix: MATRIX_FIXTURE,
         topicClaims: TOPIC_CLAIMS_FIXTURE,
+        relationships: TOPIC_RELATIONSHIPS_FIXTURE,
         attributionToken: productState?.attribution_token,
       })
 
@@ -356,7 +358,7 @@ export async function POST(request: NextRequest) {
             ? { errorMessage: "That didn't go through. You can try again." }
             : undefined
 
-      const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
+      const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
       const responseBody = buildCompleteTurnResponse(refreshed ?? productState!, result.output, overlay)
       const response = NextResponse.json<TurnResponseBody>(responseBody)
       setSessionCookie(response, token)
@@ -372,7 +374,7 @@ export async function POST(request: NextRequest) {
         } catch (err) {
           console.error('[api/crc/turn] saveCrcSessionProductStop (conversation_limit_reached) failed', err)
         }
-        const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
+        const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
         const ceilingResponse = NextResponse.json<TurnResponseBody>(buildCompleteTurnResponse(productState ?? ({} as CrcSessionProductState), result.output))
         setSessionCookie(ceilingResponse, token)
         return ceilingResponse
@@ -405,6 +407,7 @@ export async function POST(request: NextRequest) {
       sessionStore,
       matrix: MATRIX_FIXTURE,
       topicClaims: TOPIC_CLAIMS_FIXTURE,
+      relationships: TOPIC_RELATIONSHIPS_FIXTURE,
     }
     outcome = await runTurn({ token, turnNumber, userText, declineAction }, deps)
   } catch (err) {

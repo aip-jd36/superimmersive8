@@ -142,7 +142,7 @@ import {
 import { buildJurisdictionClarificationProposal, evaluateJurisdictionClarificationEligibility } from './jurisdiction-clarification'
 import type { SessionStore } from './session-store'
 import type { CRCSessionState } from './types'
-import type { MatrixRow, TopicClaim } from '@/lib/retrieval-engine/types'
+import type { MatrixRow, TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
 import type { Phase, StructuredUnderstanding } from '@/types/interview-engine'
 
 /**
@@ -249,6 +249,12 @@ export interface RunTurnDeps {
    * identically, same discipline as retrieve()'s own additive parameters.
    */
   topicClaims?: TopicClaim[]
+  /**
+   * Governed Topic Relationships orchestrator-wiring follow-up,
+   * 2026-08-16. Same additive, defaulted-to-`[]`-inside-runTurn() discipline
+   * as `topicClaims` immediately above.
+   */
+  relationships?: TopicRelationship[]
 }
 
 export interface RunTurnInput {
@@ -358,6 +364,14 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   // compile unmodified. Threaded into runCRCConversation() at every
   // completion call site and into jurisdiction-clarification eligibility.
   const topicClaims = deps.topicClaims ?? []
+  // Governed Topic Relationships orchestrator-wiring follow-up,
+  // 2026-08-16: same defaulted-here discipline as topicClaims immediately
+  // above. Threaded into runCRCConversation() at every completion call
+  // site ONLY -- deliberately NOT into evaluateJurisdictionClarificationEligibility
+  // (jurisdiction-clarification eligibility has never taken a relationships
+  // argument and must not gain one here; a Reviewer-only, CRC-Pending
+  // relationship must never trigger a jurisdiction question).
+  const relationships = deps.relationships ?? []
   const loaded = await deps.sessionStore.load(input.token)
   const suLoaded = loaded?.structured_understanding ?? emptyStructuredUnderstanding()
   const boundaryStateLoaded = loaded?.boundary_state ?? createInitialBoundaryState()
@@ -373,7 +387,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   // already-finished session, not a live turn; any takeaway was already
   // delivered and cleared on the turn that actually completed it.
   if (suLoaded.completion_reason !== null) {
-    return { kind: 'complete', result: runCRCConversation(suLoaded, deps.matrix, topicClaims) }
+    return { kind: 'complete', result: runCRCConversation(suLoaded, deps.matrix, topicClaims, relationships) }
   }
 
   const declineSignal = input.declineAction ? resolveDeclineSignal(input.declineAction) : undefined
@@ -412,7 +426,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
       pending_clarification: null,
       pending_commercial_readiness_takeaway: null,
     })
-    const completeOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suAfter, deps.matrix, topicClaims) }
+    const completeOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suAfter, deps.matrix, topicClaims, relationships) }
     return precedingTakeaway ? { ...completeOutcome, precedingTakeaway } : completeOutcome
   }
 
@@ -616,7 +630,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
           pending_clarification: null,
           pending_commercial_readiness_takeaway: null,
         })
-        const exhaustedOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suExhausted, deps.matrix, topicClaims), discoverySignal, jurisdictionSignal }
+        const exhaustedOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suExhausted, deps.matrix, topicClaims, relationships), discoverySignal, jurisdictionSignal }
         return precedingTakeaway ? { ...exhaustedOutcome, precedingTakeaway } : exhaustedOutcome
       }
     }
