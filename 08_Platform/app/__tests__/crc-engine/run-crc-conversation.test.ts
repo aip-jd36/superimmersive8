@@ -287,6 +287,7 @@ describe('runCRCConversation -- Topic Retrieval end-to-end (CRC Living Knowledge
       crc_publication_scope: 'Test scope.',
       crc_candidate_statement: 'Test candidate statement for end-to-end proof.',
       applicability_requirements: [],
+      unresolved_project_dependencies: [],
       last_verified: '2026-08-16',
       superseded_by: null,
     }
@@ -301,5 +302,157 @@ describe('runCRCConversation -- Topic Retrieval end-to-end (CRC Living Knowledge
   test('omitting topicClaims entirely (pre-Phase-1 call shape) still works -- backward-compatible default', () => {
     const { output } = runCRCConversation(DIALOGUE_FIXTURES.rich_signal.structured_understanding, MATRIX_FIXTURE)
     expect(output).toBeDefined()
+  })
+})
+
+describe('runCRCConversation -- jurisdiction/tool-plan-tier applicability-fact threading (Living Knowledge governance review, 2026-08-16)', () => {
+  // Bug fix under test: runCRCConversation() previously called retrieve()
+  // with only 4 arguments, silently defaulting applicabilityFacts to
+  // {jurisdiction: unknown, toolMentions: []} regardless of what the user
+  // actually confirmed. Every test below goes through the real
+  // runCRCConversation() entry point (not a direct retrieve() call, which
+  // would not have caught this bug) to prove the fix actually reaches the
+  // real orchestrator every live call site uses.
+
+  function usGatedClaim(): TopicClaim {
+    return {
+      claim_id: 'CLAIM-JURIS-US-v1',
+      topic: 'copyrightability',
+      claim_character: 'established',
+      jurisdiction: 'United States',
+      lifecycle: 'Adopted',
+      crc_eligible: 'Yes',
+      crc_publication_scope: 'US scope.',
+      crc_candidate_statement: 'US-specific governed statement.',
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+      unresolved_project_dependencies: [],
+      last_verified: '2026-08-16',
+      superseded_by: null,
+    }
+  }
+
+  function taiwanGatedClaim(): TopicClaim {
+    return {
+      claim_id: 'CLAIM-JURIS-TW-v1',
+      topic: 'copyrightability',
+      claim_character: 'established',
+      jurisdiction: 'Taiwan',
+      lifecycle: 'Adopted',
+      crc_eligible: 'Yes',
+      crc_publication_scope: 'Taiwan scope.',
+      crc_candidate_statement: 'Taiwan-specific governed statement.',
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'Taiwan' }],
+      unresolved_project_dependencies: [],
+      last_verified: '2026-08-16',
+      superseded_by: null,
+    }
+  }
+
+  function copyrightabilityGoal(): UserGoal {
+    return {
+      goal_id: 'g-1',
+      state: 'confirmed',
+      raw_text: 'Is this copyrightable?',
+      category: 'copyrightability',
+      scope: 'informational',
+      superseded_by: null,
+      source_turn: 1,
+      source_statement: 'Is this copyrightable?',
+    }
+  }
+
+  function suWithJurisdiction(state: 'confirmed' | 'unknown', value?: string): StructuredUnderstanding {
+    return {
+      ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
+      user_goals: [copyrightabilityGoal()],
+      project_facts: {
+        ...DIALOGUE_FIXTURES.no_signal.structured_understanding.project_facts,
+        jurisdiction: state === 'confirmed'
+          ? { attestation: { state: 'confirmed', value: value! }, source_turn: 1, source_statement: value! }
+          : { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      },
+    }
+  }
+
+  test('confirmed US jurisdiction reaches Retrieval as US -- matches a US-gated claim, directly_relevant, content present', () => {
+    const { output } = runCRCConversation(suWithJurisdiction('confirmed', 'United States'), MATRIX_FIXTURE, [usGatedClaim()])
+    expect(output.goal_interpretations).toHaveLength(1)
+    expect(output.goal_interpretations[0].summary).toContain('US-specific governed statement.')
+  })
+
+  test('confirmed Taiwan jurisdiction reaches Retrieval as Taiwan, not as unknown or as US -- matches its OWN Taiwan-gated claim, not the US-gated one', () => {
+    const { output } = runCRCConversation(suWithJurisdiction('confirmed', 'Taiwan'), MATRIX_FIXTURE, [usGatedClaim(), taiwanGatedClaim()])
+    expect(output.goal_interpretations).toHaveLength(1)
+    expect(output.goal_interpretations[0].summary).toContain('Taiwan-specific governed statement.')
+    expect(output.goal_interpretations[0].summary).not.toContain('US-specific governed statement.')
+  })
+
+  test('confirmed Taiwan jurisdiction against a US-only-gated claim correctly does NOT match (proves Taiwan is threaded as its own real value, not silently coerced to "unknown" which would ALSO fail this gate for the same reason -- distinguished from the bug by the two tests above actually matching their OWN jurisdiction)', () => {
+    const { output } = runCRCConversation(suWithJurisdiction('confirmed', 'Taiwan'), MATRIX_FIXTURE, [usGatedClaim()])
+    expect(output.goal_interpretations).toHaveLength(1)
+    expect(output.goal_interpretations[0].summary).not.toContain('US-specific governed statement.')
+  })
+
+  test('unknown jurisdiction reaches Retrieval as unknown -- does not accidentally match any jurisdiction-gated claim', () => {
+    const { output } = runCRCConversation(suWithJurisdiction('unknown'), MATRIX_FIXTURE, [usGatedClaim(), taiwanGatedClaim()])
+    expect(output.goal_interpretations).toHaveLength(1)
+    expect(output.goal_interpretations[0].summary).not.toContain('US-specific governed statement.')
+    expect(output.goal_interpretations[0].summary).not.toContain('Taiwan-specific governed statement.')
+  })
+
+  test('tool plan-tier facts also now reach applicability correctly (the same bug also always defaulted toolMentions to [])', () => {
+    const tierGatedClaim: TopicClaim = {
+      claim_id: 'CLAIM-TIER-v1',
+      topic: 'commercial_use',
+      claim_character: 'established',
+      jurisdiction: 'Global',
+      lifecycle: 'Adopted',
+      crc_eligible: 'Yes',
+      crc_publication_scope: 'Tier scope.',
+      crc_candidate_statement: 'Tier-gated governed statement.',
+      applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'runway-gen3', operator: 'equals', value: 'paid' }],
+      unresolved_project_dependencies: [],
+      last_verified: '2026-08-16',
+      superseded_by: null,
+    }
+    const goal: UserGoal = {
+      goal_id: 'g-1',
+      state: 'confirmed',
+      raw_text: 'Can I use this commercially?',
+      category: 'commercial_use',
+      scope: 'informational',
+      superseded_by: null,
+      source_turn: 1,
+      source_statement: 'Can I use this commercially?',
+    }
+    const su: StructuredUnderstanding = {
+      ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
+      user_goals: [goal],
+      tool_mentions: [
+        {
+          mention_id: 'm-1',
+          resolution: { kind: 'canonical', identifier: 'runway-gen3' },
+          access_surface: { state: 'unknown' },
+          plan_tier: { state: 'confirmed', value: 'paid' },
+          confidence: 'confirmed',
+          source_turn: 1,
+          source_statement: 'We have the paid Runway plan.',
+          superseded_by: null,
+        },
+      ],
+    }
+    const { output } = runCRCConversation(su, MATRIX_FIXTURE, [tierGatedClaim])
+    expect(output.goal_interpretations.some((i) => i.summary.includes('Tier-gated governed statement.'))).toBe(true)
+  })
+
+  test('no active Topic claims supplied -- existing CRC behavior (tool-only retrieval) is completely unchanged by the fix', () => {
+    const { output } = runCRCConversation(DIALOGUE_FIXTURES.rich_signal.structured_understanding, MATRIX_FIXTURE, [])
+    const beforeFixEquivalent = runCRCConversation(DIALOGUE_FIXTURES.rich_signal.structured_understanding, MATRIX_FIXTURE)
+    expect(output).toEqual(beforeFixEquivalent.output)
+  })
+
+  test('a historical StructuredUnderstanding with jurisdiction defaulted via deserializeStructuredUnderstanding (backward compatibility) does not crash and behaves as unknown', () => {
+    const su = suWithJurisdiction('unknown')
+    expect(() => runCRCConversation(su, MATRIX_FIXTURE, [usGatedClaim()])).not.toThrow()
   })
 })

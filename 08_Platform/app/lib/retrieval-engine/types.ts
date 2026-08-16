@@ -155,6 +155,38 @@ export interface ApplicabilityRequirement {
  * concept here, distinguished by the suffix, per
  * LK_PHASE1_TECHNICAL_DESIGN.md §10's versioning design.
  */
+/**
+ * `unresolved_project_dependencies` (Living Knowledge governance review,
+ * 2026-08-16, "relevant applicability" refinement) -- see the pressure-test
+ * this field name is the outcome of, documented at
+ * lib/bounded-interpretation/build-bounded-interpretation.ts's own header
+ * comment. Deliberately NOT `fact_dependent: boolean`: a static boolean
+ * (a) can't say WHAT is unresolved, which matters for governance review and
+ * future LK research prioritization, and (b) has no natural graduation
+ * path -- the day CRC models a real structured fact for one of these
+ * dependencies (e.g. a future `human_creative_contribution_level`
+ * ApplicabilityFact), a human simply removes that string from this list
+ * (and, separately, decides whether to add a matching entry to
+ * `applicability_requirements` above) rather than having to reinterpret a
+ * stale `true`/`false`. This is INFORMATIONAL governance metadata only --
+ * unlike `applicability_requirements`, nothing in this codebase evaluates
+ * these strings against any `StructuredUnderstanding` field or gates a
+ * claim's inclusion in `matches[]` on them; a claim reaches this field's
+ * check only AFTER it has already passed every formal
+ * `applicability_requirements` gate (Retrieval's existing, unchanged
+ * mechanism) and every Lifecycle/CRC-eligible governance gate. Empty array
+ * (the default expectation for most claims, e.g. CLAIM-COPY-004) means
+ * "fully resolvable from what CRC already formally models" -- no new
+ * interpretation-state behavior triggers. Free-form strings, not a closed
+ * enum: Phase 1 deliberately does not attempt to enumerate every possible
+ * future unmodeled-dependency kind across copyrightability, likeness,
+ * trademark, disclosure, etc. up front -- that would be exactly the
+ * "large new Structured Understanding ontology" this refinement was
+ * explicitly asked not to build. A light naming convention
+ * (snake_case, one identifier per distinct missing concept, e.g.
+ * `human_creative_contribution_level`) is documented in
+ * GOVERNED-CLAIMS.md's entry template, not enforced by a type.
+ */
 export interface TopicClaim {
   claim_id: string
   /** Matches UserGoal.category exactly -- this is the field Topic Retrieval actually matches on. */
@@ -167,6 +199,8 @@ export interface TopicClaim {
   crc_publication_scope: string | null
   crc_candidate_statement: string | null
   applicability_requirements: ApplicabilityRequirement[]
+  /** See the doc comment immediately above this interface. */
+  unresolved_project_dependencies: string[]
   last_verified: string | null
   /** id of the claim version that replaced this one, or null if this is the current version. Mirrors UserGoal.superseded_by's own convention. */
   superseded_by: string | null
@@ -212,6 +246,17 @@ export interface RetrievalResult {
   last_verified: string | null
   /** Required, always resolved (defaults to 'unknown' for an untagged claim) -- see module header's "Topic tagging" note. Descriptive only; never influenced how this result was matched or whether it was included. */
   topic: GoalCategory
+  /**
+   * Passthrough of `TopicClaim.unresolved_project_dependencies` (Living
+   * Knowledge governance review, 2026-08-16) -- always `[]` for a
+   * tool-sourced result (`assembleResult()`; Phase 1 does not model this
+   * concept for Matrix/tool claims). Descriptive only, exactly like
+   * `topic` -- never influenced whether this result was matched or
+   * included; Bounded Interpretation reads it to decide `directly_relevant`
+   * vs `relevant_applicability_unresolved`, nothing upstream of assembly
+   * branches on it.
+   */
+  unresolved_project_dependencies: string[]
 }
 
 /**

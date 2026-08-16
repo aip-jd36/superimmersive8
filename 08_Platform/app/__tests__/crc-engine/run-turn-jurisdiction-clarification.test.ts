@@ -36,6 +36,7 @@ const COPYRIGHT_CLAIM: TopicClaim = {
   crc_publication_scope: 'scope',
   crc_candidate_statement: 'Test statement.',
   applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+  unresolved_project_dependencies: [],
   last_verified: '2026-08-16',
   superseded_by: null,
 }

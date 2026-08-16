@@ -114,3 +114,43 @@ function boundaryClause(allToolSourced: boolean): string {
 export function directlyRelevantSummary(category: GoalCategory, claimStatement: string, allToolSourced: boolean = true): string {
   return `${claimStatement} This is relevant to ${CATEGORY_LABELS[category]}, ${boundaryClause(allToolSourced)}`
 }
+
+/**
+ * `relevant_applicability_unresolved` templates (Living Knowledge
+ * governance review, 2026-08-16, "relevant applicability" refinement,
+ * PM-approved design). See INTERPRETATION_STATUSES's own doc comment
+ * (bounded-interpretation/types.ts) for the full Case 3A/3B distinction --
+ * summarized here only as it bears on these two templates' wording:
+ *
+ *   - Case 3A (no content available -- a formal applicability gate, e.g.
+ *     jurisdiction, is unmet): CONTENT-FREE. Never names which specific
+ *     fact is missing (Retrieval's diagnostic only says a category-level
+ *     gate failed, not which one, and this module must not guess) and
+ *     never quotes any claim text, since the whole reason this branch
+ *     exists is that quoting a gated claim's substance without a
+ *     confirmed applicable jurisdiction/tier could misrepresent which
+ *     law/terms actually apply.
+ *   - Case 3B (content available -- every formal gate passed, but the
+ *     claim's own governance metadata says real-world application still
+ *     depends on unmodeled project facts): quotes the already-governed
+ *     claimStatement(s) verbatim, identically to directlyRelevantSummary's
+ *     own quoting discipline, differing only in the closing sentence.
+ *
+ * Neither template invents a missing fact, asserts a legal conclusion, or
+ * says which principle (if either) actually governs the user's specific
+ * project -- both explicitly say the opposite: that CRC cannot determine
+ * this from what it currently knows.
+ */
+export function relevantApplicabilityUnresolvedNoContentSummary(category: GoalCategory): string {
+  return `SI8 has governed knowledge relevant to ${CATEGORY_LABELS[category]}, but it depends on project-specific information that hasn't been confirmed in this conversation. ${BRIDGE_SENTENCE}`
+}
+
+/**
+ * `claimStatement` -- one or more already-governed `candidate_statement`s,
+ * already joined by the caller exactly as directlyRelevantSummary's own
+ * caller joins multiple matches (same "never drop an eligible, retrieved
+ * claim silently" discipline). Quoted verbatim, never paraphrased.
+ */
+export function relevantApplicabilityUnresolvedWithContentSummary(category: GoalCategory, claimStatement: string): string {
+  return `${claimStatement} These are relevant to ${CATEGORY_LABELS[category]}, but based on what's been described here, there isn't enough project-specific information to determine which apply to your specific project. ${BRIDGE_SENTENCE}`
+}

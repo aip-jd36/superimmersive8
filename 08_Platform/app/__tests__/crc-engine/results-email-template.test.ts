@@ -68,6 +68,26 @@ describe('buildResultsEmailContent', () => {
     }
   })
 
+  test('a relevant_applicability_unresolved interpretation (Living Knowledge governance review, 2026-08-16) renders through the email exactly like any other goal_interpretations entry -- only goal_text/summary reach the email, no status/claim_id/supporting_claim_ids leak', () => {
+    const withUnresolvedApplicability: ProjectionOutput = {
+      ...FULL_OUTPUT,
+      goal_interpretations: [{
+        goal_text: 'Is this copyrightable?',
+        summary: "Prompting alone generally doesn't establish sufficient human authorship. These are relevant to whether this kind of output can be copyrighted at all, but based on what's been described here, there isn't enough project-specific information to determine which apply to your specific project. A human-reviewed Commercial Assurance Assessment can address this directly.",
+      }],
+    }
+    const { html, text } = buildResultsEmailContent(withUnresolvedApplicability, 'attr-1', 'jd@example.com')
+    for (const target of [html, text]) {
+      expect(target).toContain('Is this copyrightable?')
+      expect(target).toContain('there isn')
+      expect(target).toContain('enough project-specific information to determine')
+      // Internal-only fields (never part of ProjectionGoalInterpretation's shape) must not appear.
+      expect(target).not.toContain('relevant_applicability_unresolved')
+      expect(target).not.toContain('goal_id')
+      expect(target).not.toContain('supporting_claim_ids')
+    }
+  })
+
   test('omits the "What this means for what you asked" section entirely when goal_interpretations is empty', () => {
     const { html, text } = buildResultsEmailContent(FULL_OUTPUT, 'attr-1', 'jd@example.com')
     expect(html).not.toContain('What this means for what you asked')

@@ -189,7 +189,7 @@ describe('retrieve — negative assertions, forbidden fields (Phase 6)', () => {
       expect(keys).not.toContain('crc_decision_date')
       expect(keys).not.toContain('crc_approver')
       expect(keys).not.toContain('crc_eligible')
-      expect(keys.sort()).toEqual(['candidate_statement', 'claim_id', 'last_verified', 'matrix_identifier', 'publication_scope', 'source_fact', 'topic'])
+      expect(keys.sort()).toEqual(['candidate_statement', 'claim_id', 'last_verified', 'matrix_identifier', 'publication_scope', 'source_fact', 'topic', 'unresolved_project_dependencies'])
     }
   })
 
@@ -221,6 +221,7 @@ describe('retrieve -- Topic Retrieval integration (CRC Living Knowledge Phase 1,
       crc_publication_scope: 'Scope text.',
       crc_candidate_statement: 'Candidate statement.',
       applicability_requirements: [],
+      unresolved_project_dependencies: [],
       last_verified: '2026-08-16',
       superseded_by: null,
       ...overrides,

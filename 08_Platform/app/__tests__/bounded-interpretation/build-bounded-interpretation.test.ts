@@ -196,6 +196,7 @@ describe('buildBoundedInterpretations -- source-aware boundary clause (LK Phase 
       crc_publication_scope: 'Test scope text.',
       crc_candidate_statement: 'Test governed statement.',
       applicability_requirements: [],
+      unresolved_project_dependencies: [],
       last_verified: '2026-08-16',
       superseded_by: null,
       ...overrides,
@@ -248,6 +249,193 @@ describe('buildBoundedInterpretations -- source-aware boundary clause (LK Phase 
 
   test('directlyRelevantSummary defaults allToolSourced to true when omitted -- pre-existing call sites (if any exist elsewhere) are unaffected', () => {
     expect(directlyRelevantSummary('commercial_use', 'X.')).toBe(directlyRelevantSummary('commercial_use', 'X.', true))
+  })
+})
+
+describe('buildBoundedInterpretations -- Case 3A / Case 3B relevant_applicability_unresolved (Living Knowledge governance review, 2026-08-16, PM-approved "relevant applicability" refinement)', () => {
+  function testTopicClaim(overrides: Partial<TopicClaim> & Pick<TopicClaim, 'claim_id' | 'topic'>): TopicClaim {
+    return {
+      claim_character: 'established',
+      jurisdiction: 'Global',
+      lifecycle: 'Adopted',
+      crc_eligible: 'Yes',
+      crc_publication_scope: 'Test scope text.',
+      crc_candidate_statement: 'Test governed statement.',
+      applicability_requirements: [],
+      unresolved_project_dependencies: [],
+      last_verified: '2026-08-16',
+      superseded_by: null,
+      ...overrides,
+    }
+  }
+
+  const usFacts: ApplicabilityFacts = { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] }
+  const unknownFacts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+
+  test('Case 3A -- eligible claim exists, jurisdiction unknown -> relevant_applicability_unresolved, substantive claim text NOT exposed', () => {
+    const topicClaims = [
+      testTopicClaim({
+        claim_id: 'TEST-3A',
+        topic: 'copyrightability',
+        crc_candidate_statement: 'US-only substantive claim text that must never leak.',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], topicClaims, unknownFacts)
+    expect(out.results).toEqual([]) // Retrieval withholds the claim entirely -- by design
+    expect(out.diagnostics).toContainEqual({ identifier: 'copyrightability', reason: 'applicability_unmet' })
+
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('relevant_applicability_unresolved')
+    expect(interp.summary).not.toContain('US-only substantive claim text that must never leak.')
+    expect(interp.supporting_claim_ids).toEqual([])
+  })
+
+  test('Case 3B -- claim passed its formal applicability gate, but its own governance metadata says application still depends on unmodeled project facts -> relevant_applicability_unresolved, content MAY be exposed, unresolved closing present', () => {
+    const topicClaims = [
+      testTopicClaim({
+        claim_id: 'TEST-3B',
+        topic: 'copyrightability',
+        crc_candidate_statement: 'Formally-applicable substantive claim text.',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+        unresolved_project_dependencies: ['human_creative_contribution_level'],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], topicClaims, usFacts)
+    expect(out.results).toHaveLength(1) // formal gate passed -- the claim DOES reach matches[]
+
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('relevant_applicability_unresolved')
+    expect(interp.summary).toContain('Formally-applicable substantive claim text.')
+    expect(interp.summary).toContain("there isn't enough project-specific information to determine")
+    expect(interp.supporting_claim_ids).toEqual(['TEST-3B'])
+  })
+
+  test('a claim with empty unresolved_project_dependencies (ordinary Case 2) still resolves to directly_relevant, unaffected by the new logic', () => {
+    const topicClaims = [testTopicClaim({ claim_id: 'TEST-2', topic: 'copyrightability', crc_candidate_statement: 'Fully resolvable claim.', unresolved_project_dependencies: [] })]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], topicClaims, unknownFacts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('directly_relevant')
+  })
+
+  test('Case 3B with multiple complementary claims -- both are quoted together, no conclusion is invented, no claim is picked as "the answer" (worked COPY-002 + COPY-003 shape)', () => {
+    const topicClaims = [
+      testTopicClaim({
+        claim_id: 'TEST-002-LIKE',
+        topic: 'copyrightability',
+        crc_candidate_statement: 'Prompting alone generally does not establish sufficient human authorship.',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+        unresolved_project_dependencies: ['human_creative_contribution_level'],
+      }),
+      testTopicClaim({
+        claim_id: 'TEST-003-LIKE',
+        topic: 'copyrightability',
+        crc_candidate_statement: 'Qualifying selection, arrangement, or editing may support copyright protection.',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+        unresolved_project_dependencies: ['human_creative_contribution_level'],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], topicClaims, usFacts)
+    expect(out.results).toHaveLength(2)
+
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('relevant_applicability_unresolved')
+    expect(interp.summary).toContain('Prompting alone generally does not establish sufficient human authorship.')
+    expect(interp.summary).toContain('Qualifying selection, arrangement, or editing may support copyright protection.')
+    expect(interp.supporting_claim_ids.sort()).toEqual(['TEST-002-LIKE', 'TEST-003-LIKE'])
+    // No invented project-specific conclusion -- neither claim is singled out as "the answer," and no determination language appears.
+    expect(interp.summary).not.toMatch(/therefore|this means your|your video is|your work is|is copyrighted\.|is not copyrighted\./i)
+  })
+
+  test('governance boundary: a Candidate-lifecycle claim with non-empty unresolved_project_dependencies still NEVER reaches M2 by any path -- excluded before the new logic even runs', () => {
+    const topicClaims = [
+      testTopicClaim({
+        claim_id: 'TEST-CANDIDATE',
+        topic: 'copyrightability',
+        lifecycle: 'Candidate',
+        crc_eligible: 'Pending',
+        applicability_requirements: [],
+        unresolved_project_dependencies: ['human_creative_contribution_level'],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], topicClaims, usFacts)
+    expect(out.results).toEqual([])
+    expect(out.diagnostics).toContainEqual({ identifier: 'copyrightability', reason: 'not_adopted_or_eligible' })
+
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    // NOT relevant_applicability_unresolved -- that status is reserved for a
+    // real applicability_unmet diagnostic, never for a governance exclusion.
+    expect(interp.status).toBe('outside_current_coverage')
+  })
+
+  test('governance boundary: an Adopted-but-reviewer-only claim (CRC-Eligible: Pending) with non-empty unresolved_project_dependencies still NEVER reaches M2', () => {
+    const topicClaims = [
+      testTopicClaim({
+        claim_id: 'TEST-REVIEWER-ONLY',
+        topic: 'copyrightability',
+        lifecycle: 'Adopted',
+        crc_eligible: 'Pending',
+        applicability_requirements: [],
+        unresolved_project_dependencies: ['human_creative_contribution_level'],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], topicClaims, usFacts)
+    expect(out.results).toEqual([])
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('outside_current_coverage')
+  })
+
+  test('governance boundary: a non-CRC-eligible claim (CRC-Eligible: No) with non-empty unresolved_project_dependencies still NEVER reaches M2', () => {
+    const topicClaims = [
+      testTopicClaim({
+        claim_id: 'TEST-NOT-ELIGIBLE',
+        topic: 'copyrightability',
+        lifecycle: 'Adopted',
+        crc_eligible: 'No',
+        applicability_requirements: [],
+        unresolved_project_dependencies: ['human_creative_contribution_level'],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], topicClaims, usFacts)
+    expect(out.results).toEqual([])
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('outside_current_coverage')
+  })
+
+  test('determination_request is checked before Case 3A/3B and is completely unaffected -- no conflict found', () => {
+    const topicClaims = [
+      testTopicClaim({
+        claim_id: 'TEST-DETERMINATION',
+        topic: 'copyrightability',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+        unresolved_project_dependencies: ['human_creative_contribution_level'],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can you certify this is copyrighted?', category: 'copyrightability', scope: 'determination_request' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], topicClaims, usFacts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('determination_declined')
+  })
+
+  test('omitting the new diagnostics parameter defaults to [] -- pre-existing call sites are unaffected (Case 3A never fires without it, Case 3B still works since it only depends on results)', () => {
+    const topicClaims = [
+      testTopicClaim({
+        claim_id: 'TEST-NO-DIAGNOSTICS',
+        topic: 'copyrightability',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], topicClaims, unknownFacts)
+    const [interp] = buildBoundedInterpretations([g], out.results) // no 3rd argument
+    expect(interp.status).toBe('outside_current_coverage') // not relevant_applicability_unresolved, since diagnostics defaulted to []
   })
 })
 

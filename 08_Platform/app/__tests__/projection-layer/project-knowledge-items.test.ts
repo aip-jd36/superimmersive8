@@ -19,6 +19,7 @@ function retrievalResult(overrides: Partial<RetrievalResult> = {}): RetrievalRes
     candidate_statement: "Runway's current Terms allow commercial use across all subscription tiers.",
     last_verified: '2026-07-01',
     topic: 'commercial_use',
+    unresolved_project_dependencies: [],
     ...overrides,
   }
 }

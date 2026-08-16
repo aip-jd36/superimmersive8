@@ -56,6 +56,7 @@
 import { buildRetrievalHandoff } from '@/lib/interview-engine/handoff'
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import type { MatrixRow, RetrievalDiagnostic, RetrievalResult, TopicClaim } from '@/lib/retrieval-engine/types'
+import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
 import { assembleProjectionOutput } from '@/lib/projection-layer/assemble-projection-output'
 import type { ProjectionDiagnostic, ProjectionOutput } from '@/lib/projection-layer/types'
 import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
@@ -93,15 +94,38 @@ export interface CRCPipelineResult {
  * `assembleProjectionOutput`'s own `interpretations` parameter. Real
  * callers pass `TOPIC_CLAIMS_FIXTURE` explicitly (mirroring how `matrix`
  * is never defaulted to `MATRIX_FIXTURE` here) once Wave 1 claims exist.
+ *
  * Applicability facts (jurisdiction, tool plan tiers) are read straight
  * off `understanding` and passed to `retrieve()` unmodified -- never
  * routed through `RetrievalHandoff`, per the same "user_goals cannot leak
  * downstream by construction" principle Milestone 1 already established.
+ * BUG FIX (Living Knowledge governance review, 2026-08-16): this doc
+ * comment described that behavior since Phase 1 shipped, but the function
+ * body never actually built or passed `applicabilityFacts` -- every real
+ * call site (run-turn.ts x3, results-email-delivery.ts) called this
+ * function with only 3 arguments, so `retrieve()`'s 5th parameter silently
+ * defaulted to `{jurisdiction: {state: 'unknown'}, toolMentions: []}`
+ * regardless of what the user actually confirmed. Harmless while every
+ * Topic claim is Lifecycle: Candidate (nothing could ever have surfaced
+ * either way), but would have silently broken jurisdiction- and
+ * tool-plan-tier-gated applicability the moment any claim went live.
+ * Fixed here to match what the comment always claimed: jurisdiction comes
+ * from `understanding.project_facts.jurisdiction.attestation` exactly as
+ * captured (confirmed/unknown/declined, never guessed, never inferred
+ * from IP/locale/traffic signals -- see jurisdiction-clarification.ts and
+ * its own subsystem-boundary proof for why no such inference path exists
+ * anywhere upstream of this read); tool plan tiers come from
+ * `understanding.tool_mentions` unmodified, the exact same array
+ * `buildRetrievalHandoff` itself reads for its own tool matching.
  */
 export function runCRCConversation(understanding: StructuredUnderstanding, matrix: MatrixRow[], topicClaims: TopicClaim[] = []): CRCPipelineResult {
   const handoff = buildRetrievalHandoff(understanding)
-  const { results, diagnostics: retrievalDiagnostics } = retrieve(handoff, matrix, understanding.user_goals, topicClaims)
-  const interpretations = buildBoundedInterpretations(understanding.user_goals, results)
+  const applicabilityFacts: ApplicabilityFacts = {
+    jurisdiction: understanding.project_facts.jurisdiction.attestation,
+    toolMentions: understanding.tool_mentions,
+  }
+  const { results, diagnostics: retrievalDiagnostics } = retrieve(handoff, matrix, understanding.user_goals, topicClaims, applicabilityFacts)
+  const interpretations = buildBoundedInterpretations(understanding.user_goals, results, retrievalDiagnostics)
   const { output, diagnostics: projectionDiagnostics } = assembleProjectionOutput(handoff, results, interpretations)
 
   return {

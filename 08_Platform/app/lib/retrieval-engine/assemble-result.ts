@@ -35,6 +35,9 @@ export function assembleResult(sourceFact: RetrievalSourceFact, row: MatrixRow, 
     candidate_statement: claim.crc_candidate_statement,
     last_verified: row.last_verified,
     topic: claim.topic ?? 'unknown',
+    // Always empty for a tool-sourced result -- see RetrievalResult's own
+    // doc comment. Phase 1 does not model this concept for Matrix claims.
+    unresolved_project_dependencies: [],
   }
 }
 
@@ -61,5 +64,6 @@ export function assembleTopicResult(claim: TopicClaim): RetrievalResult | null {
     candidate_statement: claim.crc_candidate_statement,
     last_verified: claim.last_verified,
     topic: claim.topic,
+    unresolved_project_dependencies: claim.unresolved_project_dependencies,
   }
 }

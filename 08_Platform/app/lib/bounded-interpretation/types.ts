@@ -68,8 +68,47 @@ import type { GoalCategory } from '@/types/interview-engine'
  * under-specific, answer ("no coverage available to share" is still
  * strictly true), not a misleading one. Documented as a known scoping
  * decision in the Milestone 2 report, not a silent gap.
+ *
+ * `relevant_applicability_unresolved` (Living Knowledge governance review,
+ * 2026-08-16, "relevant applicability" refinement, PM-approved): governed
+ * knowledge relevant to the goal's category exists, but CRC cannot
+ * responsibly resolve how it applies to THIS project from the
+ * applicability/project information CRC currently has. Two sub-cases,
+ * deliberately rendered differently (see build-bounded-interpretation.ts
+ * and rules.ts for exactly where each branches) because they have
+ * different safety properties, not because they're different states:
+ *
+ *   - Case 3A (a formal `applicability_requirements` gate is unmet -- e.g.
+ *     jurisdiction unconfirmed): Retrieval withholds the claim's content
+ *     entirely, by design -- it never reaches `matches[]` at all, only a
+ *     `RetrievalDiagnostic` with reason `applicability_unmet` does.
+ *     `supporting_claim_ids` is `[]` for this sub-case (there is nothing
+ *     to cite -- quoting a jurisdiction-specific claim to a user whose
+ *     jurisdiction isn't confirmed could misrepresent the applicable law).
+ *     Detected from the `diagnostics` parameter now accepted by
+ *     `buildBoundedInterpretations`, never by re-deriving applicability
+ *     here.
+ *
+ *   - Case 3B (every formal gate passed, but the claim's own governance
+ *     metadata says its real-world application still depends on project
+ *     facts CRC doesn't model -- `RetrievalResult.
+ *     unresolved_project_dependencies.length > 0`): the claim already
+ *     reached `matches[]` exactly as a `directly_relevant` claim would;
+ *     its already-governed `candidate_statement` IS quoted, same as
+ *     `directly_relevant`, verbatim, never paraphrased. Multiple
+ *     complementary claims may be quoted together (mirrors
+ *     `directly_relevant`'s own existing multi-claim join). What differs
+ *     is only the closing sentence (rules.ts) -- it says CRC cannot
+ *     determine from what's known which principle(s) actually govern this
+ *     project, instead of `directly_relevant`'s tool/topic boundary
+ *     clause. `supporting_claim_ids` IS populated for this sub-case,
+ *     mirroring `directly_relevant`.
+ *
+ * Neither sub-case ever infers a missing fact, invents doctrine, or turns
+ * unresolved applicability into a project-specific conclusion -- see
+ * rules.ts's own template functions for the exact fixed copy.
  */
-export const INTERPRETATION_STATUSES = ['directly_relevant', 'outside_current_coverage', 'determination_declined'] as const
+export const INTERPRETATION_STATUSES = ['directly_relevant', 'outside_current_coverage', 'determination_declined', 'relevant_applicability_unresolved'] as const
 export type InterpretationStatus = (typeof INTERPRETATION_STATUSES)[number]
 
 /**
@@ -78,7 +117,9 @@ export type InterpretationStatus = (typeof INTERPRETATION_STATUSES)[number]
  * matched claim beyond quoting its already-governed `candidate_statement`
  * verbatim. `supporting_claim_ids` is traceability only (mirrors
  * ProjectionKnowledgeItem.claim_id's own "never itself rendered" discipline)
- * — empty unless status is `directly_relevant`.
+ * — empty unless status is `directly_relevant`, or `relevant_applicability_
+ * unresolved` Case 3B specifically (Case 3A has nothing to cite — see the
+ * status doc comment above).
  */
 export interface BoundedInterpretation {
   /** Internal only — never rendered. See module header. */

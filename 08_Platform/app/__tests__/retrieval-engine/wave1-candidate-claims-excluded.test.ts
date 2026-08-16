@@ -145,6 +145,11 @@ describe('Wave 1 real candidate claims -- structurally excluded end-to-end throu
 
     expect(output.goal_interpretations).toHaveLength(1)
     expect(output.goal_interpretations[0].summary).toContain("doesn't establish an answer")
+    // Not the new relevant_applicability_unresolved status either -- a
+    // Candidate/Pending governance exclusion must never be confused with a
+    // real applicability_unmet signal (Living Knowledge governance review,
+    // 2026-08-16). Its templates never contain this phrase.
+    expect(output.goal_interpretations[0].summary).not.toContain("there isn't enough project-specific information")
     // None of the draft claim text can possibly leak, since it never even reaches Retrieval's output.
     const serialized = JSON.stringify(output)
     expect(serialized).not.toContain('bedrock')
@@ -153,7 +158,7 @@ describe('Wave 1 real candidate claims -- structurally excluded end-to-end throu
     expect(serialized).not.toContain('DRAFT')
   })
 
-  test('a real copyrightability goal (CLAIM-COPY-001/002/003, post-retag) against the real Wave 1 fixture produces outside_current_coverage, never the draft claim content, never even with jurisdiction confirmed', () => {
+  test('a real copyrightability goal (CLAIM-COPY-001/002/003, post-retag) against the real Wave 1 fixture produces outside_current_coverage, never the draft claim content, never even with jurisdiction confirmed -- including now that the jurisdiction-threading fix means "confirmed United States" genuinely reaches Retrieval as United States (previously it never did)', () => {
     const goal = copyrightabilityGoal()
     const su: StructuredUnderstanding = {
       ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
@@ -167,6 +172,7 @@ describe('Wave 1 real candidate claims -- structurally excluded end-to-end throu
 
     expect(output.goal_interpretations).toHaveLength(1)
     expect(output.goal_interpretations[0].summary).toContain("doesn't establish an answer")
+    expect(output.goal_interpretations[0].summary).not.toContain("there isn't enough project-specific information")
     const serialized = JSON.stringify(output)
     expect(serialized).not.toContain('bedrock')
     expect(serialized).not.toContain('Thaler')
