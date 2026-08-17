@@ -95,6 +95,23 @@
  * a reason to withhold Adoption, per Formal Governance Review #4's own
  * reasoning. See `CLAIMS_WITHOUT_FIXTURE_REPRESENTATION` in the
  * consistency test for all four IDs.
+ *
+ * CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1 (Adopted 2026-08-17, PM/JD,
+ * following Formal Governance Review #5) is DELIBERATELY NOT mirrored
+ * here either -- the SAME `GoalCategory` gap as the four claims
+ * immediately above, a fifth instance of one blocker, not a fifth
+ * independent one. Carries the same provider-narrowing future dependency
+ * as CLAIM-STOCK-GETTY-EDITORIAL-001-v1 and
+ * CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1 (confirmed, not a new
+ * requirement -- Formal Governance Review #5's own finding). Unlike
+ * those two, this claim's provenance is classified DIRECTLY
+ * SOURCE-BACKED with no evidence-tier caveat at all -- its single load-
+ * bearing source (iStock's own license agreement) was directly,
+ * consistently fetched three times across the whole research program,
+ * and the claim asserts no exception mechanism whose sourcing could be
+ * questioned in the first place. See
+ * `CLAIMS_WITHOUT_FIXTURE_REPRESENTATION` in the consistency test for
+ * all five IDs.
  */
 
 import type { TopicClaim } from './types'

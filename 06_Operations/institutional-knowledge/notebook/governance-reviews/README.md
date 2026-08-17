@@ -20,6 +20,6 @@ Each file wraps the original report in a minimal metadata header (title, reviewe
 | 2 | [`FGR_002_CAND-STOCK-EDITORIAL-002_2026-08-17.md`](FGR_002_CAND-STOCK-EDITORIAL-002_2026-08-17.md) | `CAND-STOCK-EDITORIAL-002` | Adopted → `CLAIM-STOCK-EDITORIAL-002-v1` |
 | 3 | [`FGR_003_CAND-STOCK-GETTY-EDITORIAL-001_2026-08-17.md`](FGR_003_CAND-STOCK-GETTY-EDITORIAL-001_2026-08-17.md) | `CAND-STOCK-GETTY-EDITORIAL-001` | Adopted → `CLAIM-STOCK-GETTY-EDITORIAL-001-v1` |
 | 4 | [`FGR_004_CAND-STOCK-SHUTTERSTOCK-EDITORIAL-001_2026-08-17.md`](FGR_004_CAND-STOCK-SHUTTERSTOCK-EDITORIAL-001_2026-08-17.md) | `CAND-STOCK-SHUTTERSTOCK-EDITORIAL-001` | Adopted (material rewrite) → `CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1` |
-| 5 | [`FGR_005_CAND-STOCK-ISTOCK-EDITORIAL-001_2026-08-17.md`](FGR_005_CAND-STOCK-ISTOCK-EDITORIAL-001_2026-08-17.md) | `CAND-STOCK-ISTOCK-EDITORIAL-001` | **NOT YET ADOPTED** |
+| 5 | [`FGR_005_CAND-STOCK-ISTOCK-EDITORIAL-001_2026-08-17.md`](FGR_005_CAND-STOCK-ISTOCK-EDITORIAL-001_2026-08-17.md) | `CAND-STOCK-ISTOCK-EDITORIAL-001` | Adopted (2026-08-17, subsequent to this file's original creation) → `CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1` |
 
 Archived 2026-08-17, as part of the governance-artifact-preservation milestone that established this folder and its process requirement. Reviews #1–#4 were reconstructed verbatim from this session's own conversation transcript, the source of truth at time of archival — not from memory, not from the condensed summaries already in `GOVERNED-CLAIMS.md`.

@@ -1081,3 +1081,152 @@ Review #4 confirmed Shutterstock introduces no new routing requirement
 beyond that one.
 
 Full review artifact: `governance-reviews/FGR_004_CAND-STOCK-SHUTTERSTOCK-EDITORIAL-001_2026-08-17.md`
+
+### CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1
+Domain: Third-Party Source Assets / Stock Media Licensing
+Topic: iStock-specific Editorial license scope and negative clearance-mechanism finding — **no corresponding `GoalCategory` value exists yet; see GOVERNANCE TREATMENT below (the same architecture gap as the four prior stock claims, not a new or fifth instance of it).**
+Subtopic: istock-editorial-use-only-restriction-no-evidenced-exception
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — governed by iStock's current License Agreement / Terms of Use, not a legal jurisdiction.
+Context: Commercial Assurance evidence review of any AI-generated commercial video workflow that incorporates iStock source assets designated "editorial use only"
+
+GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #5): same runtime-representation gap as CLAIM-STOCK-EDITORIAL-001-v1, CLAIM-STOCK-EDITORIAL-002-v1, CLAIM-STOCK-GETTY-EDITORIAL-001-v1, and CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1, not a new, independent one -- this claim's actual subject also has no corresponding implemented `GoalCategory` value, for the identical reason recorded on those four claims' own entries above. **This claim is Adopted governed knowledge, available to Reviewer/Commercial Assurance via this canonical document, but has NO current runtime Topic Retrieval representation whatsoever** -- not mirrored into `topic-claims-fixture.ts`, not queryable, not matchable, not reachable by any code path. Update this entry's `Topic` field and add the corresponding `topic-claims-fixture.ts` entry only when a real `GoalCategory` value for this domain is deliberately, separately implemented -- together with the other four stock claims' own entries, in the same change, not independently.
+
+Additional future dependency, specific to this claim (same shape as CLAIM-STOCK-GETTY-EDITORIAL-001-v1's and CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1's own, not a new category): even once `third_party_source_rights` exists and Path A is implemented, this claim would ALSO need the same not-yet-scoped **provider-narrowing capability** identified for Getty and Shutterstock to be safely CRC-reachable. Formal Governance Review #5 confirmed iStock introduces no new routing requirement beyond the one already identified. Not designed, scoped, or implemented by this adoption decision. The claim remains immediately useful to a human reviewer today, independent of any of this, for the same reason already recorded on the Getty and Shutterstock claims' own entries.
+
+Provenance note: this claim is classified **DIRECTLY SOURCE-BACKED** -- the cleanest classification of the three provider-specific claims to date, per Formal Governance Review #5. Unlike CLAIM-STOCK-GETTY-EDITORIAL-001-v1 (needed a disclosed inferential link between two Getty pages) or CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1 (needed an explicit mixed Tier-1/Official-Secondary evidence-tier disclosure), this claim asserts no exception mechanism at all, so there is no analogous inferential step or mixed-sourcing complication to reconcile. All load-bearing propositions derive from iStock's own single official source, directly and consistently fetched three times across the whole research program.
+
+Negative-finding discipline (non-negotiable, preserved exactly as Formal Governance Review #5 approved it): the research established **NO EVIDENCE FOUND** of an iStock-run mechanism to authorize Editorial-use-only content for commercial/promotional/advertising-type use -- this is explicitly and permanently distinct from **SUPPORTED NO** ("iStock has no such mechanism"). The claim's own text uses the "negative finding, not a confirmed absence" framing precisely for this reason. This claim must never be read, cited, or paraphrased as establishing that iStock categorically lacks any clearance path -- only that none was found across two independent research passes against iStock's own primary agreement text and independent web search.
+
+Relationship to CLAIM-STOCK-EDITORIAL-001-v1 (governance note, not part of the governed statement itself): provider-specific concrete instance / complementary precision. This claim adds iStock's own exact seven-item enumerated list (commercial, promotional, advertorial, endorsement, advertising, gambling/betting/gaming, merchandising -- differing from CLAIM-STOCK-GETTY-EDITORIAL-001-v1's own list by exactly one term: iStock uses "merchandising," not "marketing") and the well-hedged negative clearance-mechanism finding, neither of which CLAIM-STOCK-EDITORIAL-001-v1's generalized cross-provider synthesis states. CLAIM-STOCK-EDITORIAL-001-v1 is unmodified by this adoption.
+
+Relationship to CLAIM-STOCK-EDITORIAL-002-v1 (governance note): **COMPLEMENTARY.** This claim's own "editorial use only" definition necessarily mentions release-lack as contractual context for what the term means under iStock's agreement -- this is definitional context, not a separately-asserted governed proposition about release status, which remains CLAIM-STOCK-EDITORIAL-002-v1's own, separate territory (see Prohibited conclusions below, added per Formal Governance Review #5's own recommendation to formalize this boundary explicitly at adoption rather than leave it implicit). CLAIM-STOCK-EDITORIAL-002-v1 is unmodified by this adoption.
+
+Relationship to CLAIM-STOCK-GETTY-EDITORIAL-001-v1 and CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1 (governance note): sibling provider-specific claims, each evaluated and evidenced independently; no direct relationship record required. Formal Governance Review #5 specifically confirmed that Getty's and iStock's near-identical enumerated-list drafting style does not weaken the case for iStock's own separate governance -- the two are separate, independently-versioned legal contracts, and Getty's real, evidenced Rights and Clearance mechanism has no iStock counterpart, a material difference a combined claim would either misrepresent or awkwardly branch around. Neither Getty's nor Shutterstock's claim is modified by this adoption. No `TopicRelationship` is created for any of these pairings.
+
+Claim proposition: >
+  iStock's standard license restricts content marked "editorial use
+  only" (defined as lacking model/property releases and intended for
+  descriptive/newsworthy/human-interest purposes) from commercial,
+  promotional, advertorial, endorsement, advertising, gambling/betting/
+  gaming, or merchandising use. No evidence was found, across two
+  independent research passes, of an iStock-run mechanism to authorize
+  such use for a specific asset -- this is a negative finding, not a
+  confirmed absence.
+
+Source references:
+  - primary (governed record): `01_Business/research/STOCK-MEDIA-EDITORIAL-USE-CANDIDATE-RESEARCH-2026.md` (Part 1 §20 CAND-STOCK-ISTOCK-EDITORIAL-001, and Part 2 §14 re-confirmation, both 2026-08-17) -- full proposition map and Formal Governance Review #5 (2026-08-17) this claim is adopted from; verbatim archive at `governance-reviews/FGR_005_CAND-STOCK-ISTOCK-EDITORIAL-001_2026-08-17.md`.
+  - primary (Official platform authority, Tier 1, directly fetched, 3 independent fetches across this research program -- Phase 0, Phase 1A, Phase 1B -- consistent substance and consistent "Last Updated: July 2026" date every time, the most stable source of any provider researched in this domain): iStock Content License Agreement (`istockphoto.com/legal/license-agreement`) -- the "editorial use only" definition (descriptive/newsworthy/human-interest purpose, lacking model/property releases); the exact enumerated prohibited-use clause (commercial, promotional, advertorial, endorsement, advertising, gambling/betting/gaming, merchandising).
+  - NOT independently verified as present: any iStock-run clearance/authorization mechanism. Checked directly against the primary agreement text (no such clause found, unlike Getty's explicit written-authorization carve-out) and via two independent `WebSearch` passes (Phase 1A, Phase 1B) targeting this specific question -- neither surfaced one. This is recorded as an absence-of-evidence finding, epistemically distinct from a sourced claim that no mechanism exists, and is never cited as though it were the latter.
+Source authority/type: Official platform authority (directly source-backed; no cross-provider synthesis)
+Source fact: >
+  iStock's own Content License Agreement defines "editorial use only"
+  content as lacking model or property releases and intended for
+  descriptive, newsworthy, or human-interest purposes, and restricts
+  such content from commercial, promotional, advertorial, endorsement,
+  advertising, gambling/betting/gaming, or merchandising use. Unlike
+  Getty's parallel clause, iStock's own agreement text contains no
+  "unless expressly authorized" carve-out or reference to any separate
+  authorization process. No named mechanism analogous to Getty's Rights
+  and Clearance or Shutterstock's Rights and Clearance was found anywhere
+  in iStock's own materials, nor via independent web search across two
+  separate research passes -- a negative finding, correctly not asserted
+  as a positive fact that no such mechanism exists.
+
+SI8 interpretation: >
+  A reviewer evaluating an iStock-sourced Editorial asset should apply
+  iStock's own exact seven-item list directly, and should treat any
+  user claim of having obtained "special permission" or "separate
+  authorization" from iStock with heightened scrutiny -- unlike a Getty
+  or Shutterstock asset, where a reviewer would naturally check for
+  Rights and Clearance engagement as a first step, no equivalent
+  provider-run channel is known to exist for iStock. This claim's
+  negative finding is reviewer-protective: it exists specifically to
+  prevent a reviewer from assuming iStock behaves like Getty by
+  unwarranted analogy, or from accepting an unverified "iStock cleared
+  this" representation at face value. This claim does not itself confirm
+  or deny that some other, currently unknown authorization path might
+  exist for a specific case.
+
+Applicability requirements: []
+Unresolved project dependencies: [asset_confirmed_istock, editorial_designation_confirmed]
+Prohibited conclusions: >
+  Does not establish that any specific asset is actually from iStock.
+  Does not establish that iStock actually designates a specific asset
+  "editorial use only" (vs. another classification). Does not establish
+  that the user holds a valid iStock license, or which license/version
+  governed the transaction. Does not establish that model or property
+  releases exist for the asset -- that remains CLAIM-STOCK-EDITORIAL-002
+  -v1's own, separate territory; this claim's own definitional mention of
+  release-lack is contractual context for what "editorial use only"
+  means under iStock's agreement, not an independent assertion about
+  release status. Does not establish that no authorization or clearance
+  path exists for iStock in any circumstance -- only that none was found
+  across the research performed; this is a negative finding, never to be
+  restated as a confirmed absence. Does not establish that a specific
+  advertisement or campaign is commercially or legally cleared. Is not a
+  substitute for Commercial Assurance evidence review.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-17
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-17 as reviewer/internal
+  knowledge only; CRC eligibility is a separate, not-yet-made decision (see
+  CRC Approver/CRC Decision Date below). Additionally and independently of
+  that separate decision, this claim currently has NO runtime Topic
+  Retrieval representation at all (see GOVERNANCE TREATMENT above), and
+  would additionally require a not-yet-scoped provider-narrowing capability
+  even once that gap and Path A are both closed (see the Additional future
+  dependency note above). Text below is the scoping language CRC MAY be
+  authorized to state if/when all of these are separately resolved,
+  preserved unchanged from the adopted draft per governance instruction not
+  to reinterpret or rewrite substantive claim text when changing
+  lifecycle/publication status: CRC may state that iStock's standard
+  license excludes commercial, promotional, advertorial, endorsement,
+  advertising, gambling/betting/gaming, and merchandising use of content
+  marked "editorial use only," and that no provider-run authorization
+  mechanism for such use was found during CRC's underlying research --
+  stated as an absence of evidence, never as a confirmed fact that none
+  exists. CRC must not state whether the user's own specific iStock asset
+  is Editorial-designated, or whether their use is therefore permitted.
+
+CRC Candidate Statement: >
+  NOT APPROVED FOR CRC PUBLICATION -- same status as CRC Publication Scope
+  above; text preserved unchanged, not yet authorized for CRC output:
+  iStock's standard license doesn't cover commercial, promotional,
+  advertorial, endorsement, advertising, gambling/betting/gaming, or
+  merchandising use of content marked "editorial use only." No
+  provider-run process for authorizing that kind of use was found during
+  this research -- that means none was found, not that none exists.
+
+Effective date: 2026-08-17
+Last reviewed: 2026-08-17
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING -- not yet approved
+CRC Decision Date: PENDING
+Related: [[CLAIM-STOCK-EDITORIAL-001-v1]] (provider-specific concrete instance, complementary), [[CLAIM-STOCK-EDITORIAL-002-v1]] (complementary, does not govern release status), [[CLAIM-STOCK-GETTY-EDITORIAL-001-v1]] (sibling provider-specific claim, no direct relationship), [[CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1]] (sibling provider-specific claim, no direct relationship). See also `01_Business/research/STOCK-MEDIA-EDITORIAL-USE-CANDIDATE-RESEARCH-2026.md` (Phase 1A/1B) for full domain context.
+
+Formal Governance Review #5 (2026-08-17): PASS / GO AS-IS -- claim wording
+unchanged from the hardened research artifact's own recommended text.
+Source hierarchy confirmed the strongest and most stable of any provider
+in this domain (single Tier 1 source, consistent "Last Updated: July
+2026" across three independent fetches). Negative-finding discipline
+(NO EVIDENCE FOUND, never SUPPORTED NO) independently verified as
+correctly preserved in the candidate's own text, not merely asserted.
+Atomicity found acceptably compound, mirroring CLAIM-STOCK-GETTY-
+EDITORIAL-001-v1's own precedent. unresolved_project_dependencies
+independently re-derived (not copied from Getty or Shutterstock) --
+deliberately two items only, omitting an authorization-status dependency
+since none is evidenced to exist. Provenance classified DIRECTLY
+SOURCE-BACKED, the cleanest of the three provider-specific claims to
+date, on the merits (no cross-provider synthesis, no inferential
+same-provider linkage needed, unlike Getty or Shutterstock). `CRC
+Eligible` deliberately KEPT Pending -- same product-completeness
+deferral (Path A) plus the same second, larger gap (provider narrowing)
+already identified for Getty and Shutterstock; Formal Governance Review
+#5 confirmed iStock introduces no new routing requirement beyond that
+one.
+
+Full review artifact: `governance-reviews/FGR_005_CAND-STOCK-ISTOCK-EDITORIAL-001_2026-08-17.md`

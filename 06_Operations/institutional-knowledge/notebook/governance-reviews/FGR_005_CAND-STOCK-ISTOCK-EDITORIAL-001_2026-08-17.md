@@ -8,7 +8,7 @@ Artifact type: Governance Review / Decision Analysis
 
 Historical status: VERBATIM ARCHIVE — DO NOT EDIT HISTORICAL BODY. Future amendments should be appended outside the body below, or captured in a new review artifact — never inserted into the verbatim body.
 
-PM adoption status: NOT YET ADOPTED. No `CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1` exists in `GOVERNED-CLAIMS.md` as of this preservation milestone (2026-08-17). No PM adoption decision has been recorded for this review as of the time this archive file was created. This status must not be treated as implying adoption occurred — update this wrapper note (not the verbatim body) if and when a PM adoption decision is later recorded.
+PM adoption status: ADOPTED (updated 2026-08-17, subsequent to this archive's original creation). Recorded as `CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1` in `GOVERNED-CLAIMS.md` (Adoption Approver: JD (PM), Adoption Decision Date: 2026-08-17), adopted exactly as reviewed (wording recommendation was A — AS-IS, item 32 below), via a bounded governance-recording task following this review. This wrapper note is the only part of this file changed to reflect that later event — the verbatim review body below (originally archived while the status was still "NOT YET ADOPTED") was not modified.
 
 Research artifact this review draws on: `01_Business/research/STOCK-MEDIA-EDITORIAL-USE-CANDIDATE-RESEARCH-2026.md` (Part 1 §20, Part 2 §14).
 
