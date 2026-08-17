@@ -17,8 +17,24 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
+import { GOAL_CATEGORIES } from '@/types/interview-engine'
 
 const GOVERNED_CLAIMS_PATH = path.join(__dirname, '..', '..', '..', '..', '06_Operations', 'institutional-knowledge', 'notebook', 'GOVERNED-CLAIMS.md')
+
+/**
+ * Claims that are real, Adopted governed knowledge in GOVERNED-CLAIMS.md but
+ * have NO entry in TOPIC_CLAIMS_FIXTURE, because their actual subject has no
+ * corresponding `GoalCategory` value yet -- see each claim's own "GOVERNANCE
+ * TREATMENT" note in the markdown, and topic-claims-fixture.ts's own
+ * matching comment. This is a deliberate, reviewed, documented exception,
+ * not a sync gap -- never add an ID here to silence a failing test; only add
+ * one when a real governance decision (mirroring CLAIM-STOCK-EDITORIAL-001's
+ * own Formal Governance Review #1, 2026-08-17) has been recorded for it.
+ * Remove an ID once its claim gains a real `GoalCategory` and a real
+ * TOPIC_CLAIMS_FIXTURE entry -- this set should shrink over time, not grow
+ * casually.
+ */
+const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set(['CLAIM-STOCK-EDITORIAL-001-v1'])
 
 /** Strips fenced code blocks (```...```) before scanning -- the entry template lives inside one and must never be counted as a real claim. */
 function stripFencedCodeBlocks(markdown: string): string {
@@ -56,12 +72,30 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
     expect(claims.find((c) => c.claim_id.startsWith('CLAIM-XXX-NNN'))).toBeUndefined()
   })
 
-  test('every real claim ID in the markdown has a matching entry in the runtime fixture', () => {
+  test('every real claim ID in the markdown has a matching entry in the runtime fixture, except claims explicitly documented as unrepresentable (CLAIMS_WITHOUT_FIXTURE_REPRESENTATION)', () => {
     const markdown = fs.readFileSync(GOVERNED_CLAIMS_PATH, 'utf-8')
     const markdownIds = new Set(extractMarkdownClaims(markdown).map((c) => c.claim_id))
     const fixtureIds = new Set(TOPIC_CLAIMS_FIXTURE.map((c) => c.claim_id))
-    const missingFromFixture = [...markdownIds].filter((id) => !fixtureIds.has(id))
+    const missingFromFixture = [...markdownIds].filter((id) => !fixtureIds.has(id) && !CLAIMS_WITHOUT_FIXTURE_REPRESENTATION.has(id))
     expect(missingFromFixture).toEqual([])
+  })
+
+  describe('CLAIM-STOCK-EDITORIAL-001-v1 -- documented fixture-representation exception', () => {
+    test('exists in the markdown as real, Adopted governed knowledge', () => {
+      const markdown = fs.readFileSync(GOVERNED_CLAIMS_PATH, 'utf-8')
+      const claim = extractMarkdownClaims(markdown).find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-001-v1')
+      expect(claim).toBeDefined()
+      expect(claim?.lifecycle?.toLowerCase()).toContain('adopted')
+      expect(claim?.publication_scope?.toLowerCase()).toContain('reviewer/commercial assurance')
+    })
+
+    test('is intentionally absent from TOPIC_CLAIMS_FIXTURE -- not a sync gap', () => {
+      expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-001-v1')).toBeUndefined()
+    })
+
+    test("the reason still holds: 'third_party_source_rights' is not (yet) an implemented GoalCategory value -- update this test, add the claim's real Topic in the markdown, and add its TOPIC_CLAIMS_FIXTURE entry together, in the same change, when it is", () => {
+      expect((GOAL_CATEGORIES as readonly string[]).includes('third_party_source_rights')).toBe(false)
+    })
   })
 
   test('every claim ID in the runtime fixture has a matching entry in the markdown (no orphaned/stale fixture entries)', () => {

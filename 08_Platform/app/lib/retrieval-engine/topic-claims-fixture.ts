@@ -33,6 +33,30 @@
  * __tests__/retrieval-engine/lookup-topic-claims.test.ts and the
  * dedicated Wave-1-specific exclusion test in
  * __tests__/retrieval-engine/wave1-candidate-claims-excluded.test.ts.
+ *
+ * CLAIM-STOCK-EDITORIAL-001-v1 (Adopted 2026-08-17, PM/JD, following Formal
+ * Governance Review #1) is DELIBERATELY NOT mirrored here. Its actual
+ * subject (Third-Party Source Assets / Stock Media Licensing) has no
+ * corresponding `GoalCategory` value in `types/interview-engine.ts`'s
+ * current set (`commercial_use`, `copyright_ownership`, `copyrightability`,
+ * `likeness`, `unknown`) -- `THIRD_PARTY_SOURCE_ASSETS_ROUTING_ARCHITECTURE.md`
+ * approved a future `third_party_source_rights` category as architectural
+ * direction only, not implemented. Tagging this claim under an existing,
+ * unrelated category (most temptingly `commercial_use`) was considered
+ * during governance review and rejected: `TopicClaim.topic` is "the field
+ * Topic Retrieval actually matches on" (see this claim's own doc comment
+ * above), so a wrong value would make it an unintended topic-candidate for
+ * every goal in that category, independent of whether the user ever
+ * mentioned a stock-media provider -- exactly the silent-misclassification
+ * failure mode `GOVERNED-CLAIMS.md`'s own governance discipline exists to
+ * prevent for `Applicability requirements`, extended here to `Topic`. See
+ * the claim's own "GOVERNANCE TREATMENT" note in `GOVERNED-CLAIMS.md` for
+ * the full reasoning, and
+ * `__tests__/retrieval-engine/topic-claims-fixture-consistency.test.ts`
+ * (`CLAIMS_WITHOUT_FIXTURE_REPRESENTATION`) for the consistency-guard
+ * accommodation this omission required. Add this claim here, with its real
+ * topic, only when that `GoalCategory` value is deliberately, separately
+ * implemented -- never as a side effect of an unrelated change.
  */
 
 import type { TopicClaim } from './types'
