@@ -914,3 +914,161 @@ a product-completeness deferral now compounded by a second, larger gap
 specific to provider-specific claims (the not-yet-scoped provider-
 narrowing capability, see the Additional future dependency note above),
 neither solved by this adoption decision.
+
+### CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1
+Domain: Third-Party Source Assets / Stock Media Licensing
+Topic: Shutterstock-specific Editorial/Commercial classification and Rights and Clearance mechanism — **no corresponding `GoalCategory` value exists yet; see GOVERNANCE TREATMENT below (the same architecture gap as the three prior stock claims, not a new or fourth instance of it).**
+Subtopic: shutterstock-editorial-commercial-distinction-rights-and-clearance
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — governed by Shutterstock's current Terms of Service / License Agreement (the Commercial/Editorial definitional distinction independently verified; certain mechanism details rest on Shutterstock's own public/investor disclosures rather than the license agreement text itself), not a legal jurisdiction.
+Context: Commercial Assurance evidence review of any AI-generated commercial video workflow that incorporates Shutterstock source assets designated "Editorial"
+
+GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #4): same runtime-representation gap as CLAIM-STOCK-EDITORIAL-001-v1, CLAIM-STOCK-EDITORIAL-002-v1, and CLAIM-STOCK-GETTY-EDITORIAL-001-v1, not a new, independent one -- this claim's actual subject also has no corresponding implemented `GoalCategory` value, for the identical reason recorded on those three claims' own entries above. **This claim is Adopted governed knowledge, available to Reviewer/Commercial Assurance via this canonical document, but has NO current runtime Topic Retrieval representation whatsoever** -- not mirrored into `topic-claims-fixture.ts`, not queryable, not matchable, not reachable by any code path. Update this entry's `Topic` field and add the corresponding `topic-claims-fixture.ts` entry only when a real `GoalCategory` value for this domain is deliberately, separately implemented -- together with the other three stock claims' own entries, in the same change, not independently.
+
+Additional future dependency, specific to this claim (same shape as CLAIM-STOCK-GETTY-EDITORIAL-001-v1's own, not a new category): even once `third_party_source_rights` exists and Path A is implemented, this claim would ALSO need the same not-yet-scoped **provider-narrowing capability** identified for Getty to be safely CRC-reachable -- ensuring Shutterstock-specific knowledge surfaces only when Shutterstock is actually the relevant provider. Formal Governance Review #4 confirmed Shutterstock introduces no new routing requirement beyond the one already identified through Getty. Not designed, scoped, or implemented by this adoption decision. The claim remains immediately useful to a human reviewer today, independent of any of this, for the same reason already recorded on the Getty claim's own entry.
+
+Evidence-tier disclosure (Formal Governance Review #4, non-negotiable, preserved exactly, not smoothed over): this claim's propositions do NOT share one evidence tier. The Commercial/Editorial functional distinction is Tier 1, directly verified against an official Shutterstock source. The Rights and Clearance description is Official Secondary -- sourced from Shutterstock's own investor-relations press release and blog, not from Shutterstock's customer-facing License Agreement / Terms of Service, which remained inaccessible throughout this research despite eight independent access attempts across three research sessions (Phase 1A, Phase 1B, and Formal Governance Review #4's own bounded verification attempt on a previously-untried URL, also unsuccessful -- HTTP 403, the same block pattern observed on every other `www.shutterstock.com` legal/help path tried). **This claim's provenance is classified DIRECTLY SOURCE-BACKED** (no cross-provider synthesis occurs, matching CLAIM-STOCK-GETTY-EDITORIAL-001-v1's own classification basis) **rather than Governed Synthesis, but is explicitly NOT held to the same full evidentiary bar the Getty claim met** -- Getty's own four proposition-map entries were each independently Tier 1; this claim's Rights and Clearance clause is not, and is stated with wording calibrated to that weaker tier (see Claim proposition below, which explicitly states its own mechanics were not independently verified, rather than asserting them with Getty-claim-level confidence). **Taxonomy-precision anomaly, flagged not solved:** "Directly Source-Backed" does not itself distinguish an all-Tier-1 claim (Getty) from a Tier-1-plus-Official-Secondary claim (this one) -- noted here as context for a future governance-format refinement, not resolved by inventing a new provenance category for this single claim.
+
+Asset Assurance (governance note, deliberately outside this claim's own governed proposition): Shutterstock separately offers a product publicly described as "Asset Assurance," which adds indemnification once permission or clearance for a use has already been secured elsewhere. Formal Governance Review #4 determined Asset Assurance does not itself answer what Shutterstock's Editorial license permits -- it is a downstream risk/indemnity layer, not a permission-granting mechanism -- and excluded it from this claim's own proposition, dependency list, and reviewer-evidence checklist accordingly. It is recorded here only as adjacent, non-governed context, exactly as it was in the governance review itself: Asset Assurance is a separate indemnity/risk layer and does not itself determine what Shutterstock's Editorial license permits. No separate Asset Assurance claim is created by this adoption decision.
+
+Relationship to CLAIM-STOCK-EDITORIAL-001-v1 (governance note, not part of the governed statement itself): provider-specific concrete instance / complementary precision. This claim adds Shutterstock's own functional Commercial-vs-Editorial terminology (structurally different from Getty/iStock's enumerated-list drafting approach, which CLAIM-STOCK-EDITORIAL-001-v1's cross-provider synthesis necessarily abstracts away) and names Rights and Clearance specifically. CLAIM-STOCK-EDITORIAL-001-v1 is unmodified by this adoption.
+
+Relationship to CLAIM-STOCK-EDITORIAL-002-v1 (governance note): **COMPLEMENTARY.** This claim does not govern, restate, or imply anything about model or property release status. CLAIM-STOCK-EDITORIAL-002-v1 is unmodified by this adoption.
+
+Relationship to CLAIM-STOCK-GETTY-EDITORIAL-001-v1 (governance note): no direct relationship record required -- Getty remains a separate provider-specific concrete instance of CLAIM-STOCK-EDITORIAL-001-v1, evaluated and evidenced independently of Shutterstock. CLAIM-STOCK-GETTY-EDITORIAL-001-v1 is unmodified by this adoption. No `TopicRelationship` is created for any of these pairings.
+
+Claim proposition: >
+  Shutterstock distinguishes "Commercial" content (usable to
+  commercialize, monetize, sell, promote, or advertise a product,
+  business, or service) from "Editorial" content (which cannot be used
+  for those purposes, being intended for public-interest/news use).
+  Shutterstock has publicly described a "Rights and Clearance" service,
+  separate from its standard licenses, through which a customer may
+  seek third-party permissions for promotional use of Editorial assets.
+  The exact contractual mechanics of this service have not been
+  independently verified against Shutterstock's own customer-facing
+  license agreement text, which was not directly accessible during this
+  research.
+
+Source references:
+  - primary (governed record): `01_Business/research/STOCK-MEDIA-EDITORIAL-USE-CANDIDATE-RESEARCH-2026.md` (Part 1 §20 CAND-STOCK-SHUTTERSTOCK-EDITORIAL-001, and Part 2 §7/§9/§14 re-evaluation, both 2026-08-17) -- full proposition map and Formal Governance Review #4 (2026-08-17) this claim is adopted from, including the review's own bounded fresh-verification attempt.
+  - primary (Official platform authority, Tier 1, directly fetched): Shutterstock, official contributor-help domain (`submit.shutterstock.com`) -- "The simple answer to the difference between commercial and editorial content is how that content is permitted to be used." Commercial content "can be used to commercialize, monetize, sell, promote, and advertise a product, business or service." Editorial content "cannot be used to sell, promote, or monetize a business, product or service."
+  - secondary (Official Secondary, NOT Verified Primary, disclosed explicitly): Shutterstock's own investor-relations press release (republished via `stocktitan.net`) and Shutterstock's own blog -- describe a "Rights and Clearance" service that "obtains third party permissions across the entire portfolio of assets for promotional use in advertisements, social campaigns, marketing materials and more," and, separately, an "Asset Assurance™" indemnity product (excluded from this claim's own proposition -- see Asset Assurance note above).
+  - NOT independently verified: Shutterstock's customer-facing License Agreement / Terms of Service. `shutterstock.com/license`, `shutterstock.com/license-history`, `shutterstock.com/terms`, three `shutterstock.com/help/en/articles/...` pages, and `shutterstock.com/developers/documentation/licensing-and-downloading` were all attempted across Phase 1A, Phase 1B, and Formal Governance Review #4 -- eight distinct URLs, zero successes, uniformly HTTP 403. This is treated as a confirmed structural access limitation, not a research-effort gap, and is NOT cited as though it were verified.
+Source authority/type: Official platform authority (directly source-backed for the Commercial/Editorial functional definition; Official Secondary, explicitly not upgraded to primary, for the Rights and Clearance description -- see Evidence-tier disclosure above)
+Source fact: >
+  Shutterstock's own official contributor-help material defines the
+  Commercial/Editorial distinction functionally rather than via an
+  enumerated prohibited-use list (the drafting approach Getty and iStock
+  each use instead) -- content is Commercial if usable to commercialize,
+  monetize, sell, promote, or advertise a product, business, or service,
+  and Editorial if it cannot be used for those purposes, being intended
+  for public-interest/news use. Separately, Shutterstock's own
+  investor-relations and blog material describes a named "Rights and
+  Clearance" service for obtaining third-party permissions for
+  promotional use of Editorial assets -- this description is accepted as
+  Official Secondary evidence of the service's existence and general
+  purpose, not as Verified Primary evidence of its exact contractual
+  mechanics, which remain unconfirmed against Shutterstock's own license
+  agreement text.
+
+SI8 interpretation: >
+  A reviewer evaluating a Shutterstock-sourced Editorial asset should
+  apply Shutterstock's own functional test directly -- does the proposed
+  use commercialize, monetize, sell, promote, or advertise a product,
+  business, or service -- rather than assuming Shutterstock's rule takes
+  the same enumerated-list shape as CLAIM-STOCK-GETTY-EDITORIAL-001-v1's
+  own Getty-specific rule. Where a reviewer identifies that a customer
+  sought or obtained Shutterstock's Rights and Clearance service, this
+  claim tells them the service's general purpose but does not itself
+  confirm what documentation would prove it was successfully engaged for
+  a specific asset -- that remains a Commercial Assurance evidence
+  question. This claim does not address, and should not be read as
+  addressing, Shutterstock's separate Asset Assurance product, which is
+  indemnity/risk protection rather than a permission-granting mechanism
+  (see Asset Assurance note above).
+
+Applicability requirements: []
+Unresolved project dependencies: [asset_confirmed_shutterstock, editorial_designation_confirmed, rights_and_clearance_status]
+Prohibited conclusions: >
+  Does not establish that any specific asset is actually from
+  Shutterstock. Does not establish that Shutterstock actually designates
+  a specific asset Editorial (vs. Commercial or another classification).
+  Does not establish that the user holds a valid Shutterstock license,
+  or which license/version governed the transaction. Does not establish
+  that Rights and Clearance was actually engaged for any specific asset,
+  or that permission was successfully obtained through it. Does not
+  establish that model or property releases exist for the asset -- that
+  remains CLAIM-STOCK-EDITORIAL-002-v1's own, separate territory. Does
+  not establish that Asset Assurance applies to any specific asset --
+  Asset Assurance is explicitly outside this claim's own scope. Does not
+  establish that third-party rights are cleared. Does not establish that
+  a specific advertisement or campaign is commercially or legally
+  cleared. Is not a substitute for Commercial Assurance evidence review.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-17
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-17 as reviewer/internal
+  knowledge only; CRC eligibility is a separate, not-yet-made decision (see
+  CRC Approver/CRC Decision Date below). Additionally and independently of
+  that separate decision, this claim currently has NO runtime Topic
+  Retrieval representation at all (see GOVERNANCE TREATMENT above), and
+  would additionally require a not-yet-scoped provider-narrowing capability
+  even once that gap and Path A are both closed (see the Additional future
+  dependency note above). Text below is the scoping language CRC MAY be
+  authorized to state if/when all of these are separately resolved,
+  preserved unchanged from the adopted draft per governance instruction not
+  to reinterpret or rewrite substantive claim text when changing
+  lifecycle/publication status: CRC may state that Shutterstock
+  distinguishes Commercial content (usable to commercialize, monetize,
+  sell, promote, or advertise) from Editorial content (which cannot be
+  used for those purposes), and that Shutterstock has publicly described a
+  Rights and Clearance service for seeking third-party permissions for
+  promotional use of Editorial assets, whose exact mechanics CRC has not
+  independently verified. CRC must not state whether the user's own
+  specific Shutterstock asset is Editorial-designated, whether Rights and
+  Clearance was engaged for it, or whether their use is therefore
+  permitted.
+
+CRC Candidate Statement: >
+  NOT APPROVED FOR CRC PUBLICATION -- same status as CRC Publication Scope
+  above; text preserved unchanged, not yet authorized for CRC output:
+  Shutterstock treats content as Commercial if it can be used to
+  commercialize, monetize, sell, promote, or advertise a product,
+  business, or service, and as Editorial if it can't be used for those
+  purposes. Shutterstock has publicly described a "Rights and Clearance"
+  service for seeking permission to use Editorial content this way,
+  though the exact details of that process haven't been independently
+  confirmed.
+
+Effective date: 2026-08-17
+Last reviewed: 2026-08-17
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING -- not yet approved
+CRC Decision Date: PENDING
+Related: [[CLAIM-STOCK-EDITORIAL-001-v1]] (provider-specific concrete instance, complementary), [[CLAIM-STOCK-EDITORIAL-002-v1]] (complementary, does not govern release status), [[CLAIM-STOCK-GETTY-EDITORIAL-001-v1]] (sibling provider-specific claim, no direct relationship). See also `01_Business/research/STOCK-MEDIA-EDITORIAL-USE-CANDIDATE-RESEARCH-2026.md` (Phase 1A/1B) for full domain context.
+
+Formal Governance Review #4 (2026-08-17): PASS / GO WITH MATERIAL REWRITE
+-- original research-stage wording asserted Asset Assurance's mechanics
+alongside Rights and Clearance's; rewritten to exclude Asset Assurance
+entirely (it does not answer what Shutterstock's Editorial license
+permits -- it presupposes permission was already obtained elsewhere) and
+to explicitly state, within the governed proposition itself rather than
+only in Source references, that Rights and Clearance's exact mechanics
+were not independently verified against Shutterstock's own license
+agreement text. One bounded fresh-verification attempt was made during
+the review (a previously-untried Shutterstock developer-documentation
+URL) and failed identically to all seven prior attempts -- strengthening,
+not changing, the conclusion that the primary-source gap is structural.
+Provenance classified DIRECTLY SOURCE-BACKED on the same basis as
+CLAIM-STOCK-GETTY-EDITORIAL-001-v1 (no cross-provider synthesis), but
+explicitly NOT held to that claim's full evidentiary bar -- disclosed as
+a genuine, unresolved taxonomy-precision anomaly rather than smoothed
+into false symmetry. `CRC Eligible` deliberately KEPT Pending -- same
+product-completeness deferral (Path A) plus the same second, larger gap
+(provider narrowing) already identified for Getty; Formal Governance
+Review #4 confirmed Shutterstock introduces no new routing requirement
+beyond that one.

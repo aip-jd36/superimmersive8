@@ -79,6 +79,22 @@
  * dependency" note in `GOVERNED-CLAIMS.md`. Not designed or implemented
  * here. See `CLAIMS_WITHOUT_FIXTURE_REPRESENTATION` in the consistency
  * test for all three IDs.
+ *
+ * CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1 (Adopted 2026-08-17, PM/JD,
+ * following Formal Governance Review #4) is DELIBERATELY NOT mirrored here
+ * either -- the SAME `GoalCategory` gap as the three claims immediately
+ * above, a fourth instance of one blocker, not a fourth independent one.
+ * Carries the same provider-narrowing future dependency as
+ * CLAIM-STOCK-GETTY-EDITORIAL-001-v1 (confirmed, not a new requirement --
+ * Formal Governance Review #4's own finding). Additionally: this claim's
+ * own provenance is explicitly weaker than Getty's on one clause (Rights
+ * and Clearance rests on Official Secondary sourcing, not Verified
+ * Primary -- Shutterstock's customer-facing license agreement remained
+ * inaccessible across eight independent attempts over three research
+ * sessions) -- disclosed in the claim's own text and governance notes, not
+ * a reason to withhold Adoption, per Formal Governance Review #4's own
+ * reasoning. See `CLAIMS_WITHOUT_FIXTURE_REPRESENTATION` in the
+ * consistency test for all four IDs.
  */
 
 import type { TopicClaim } from './types'
