@@ -1,4 +1,8 @@
-# Stock-Media "Editorial Use" — Candidate-Claim Research (Phase 1A)
+# Stock-Media "Editorial Use" — Candidate-Claim Research (Phase 1A + 1B)
+
+**This document has two parts.** Part 1 (below, unchanged from its original 2026-08-17 Phase 1A form except where explicitly noted) is the initial candidate research. **Part 2** (appended at the end of this file, added 2026-08-17 in the same research program, Phase 1B) closes Part 1's identified source gaps and drafts provider-specific candidates. Where Phase 1B's harder evidence changed a Part 1 disposition (notably `CAND-STOCK-EDITORIAL-003`), **Part 1's original text is preserved unedited** — the revision is recorded in Part 2 with an explicit cross-reference, never silently rewritten into history.
+
+## Part 1 — Phase 1A original research (2026-08-17, unmodified)
 
 **Status: RESEARCH ARTIFACT, NOT GOVERNED KNOWLEDGE.** Candidate source material only, per `GOVERNED-CLAIMS.md`'s own governance discipline. Produced 2026-08-17. **Does not create, adopt, or modify any `GOVERNED-CLAIMS.md` entry, `TopicRelationship`, Matrix row, or runtime fixture.** No claim in this document exists outside this file. Candidate IDs below use a deliberately non-governed prefix (`CAND-STOCK-EDITORIAL-NNN`), never `CLAIM-`, so they can never be mistaken for an Adopted entry by a future search.
 
@@ -280,3 +284,264 @@ A general, evidence-supported structural proposition exists and is genuinely use
 ---
 
 **Research conducted:** 2026-08-17. **Status:** Complete for Phase 1A scope (Editorial-use restriction only; AI-input boundary explicitly not reopened per task instruction). **Next step:** Return to PM for review — no candidate in this document proceeds toward `Under Review`/`Adopted` without an explicit separate governance decision.
+
+---
+
+# PART 2 — Source-Gap Closure + Provider-Specific Candidates (Phase 1B, 2026-08-17)
+
+**Status: RESEARCH ARTIFACT, NOT GOVERNED KNOWLEDGE — same discipline as Part 1.** Fresh live research this session, independent of both Phase 0 and Phase 1A's own fetches. **No Part 1 statement required a factual correction** — Phase 1B hardened, narrowed, and in one case reversed a *disposition* (`CAND-STOCK-EDITORIAL-003`), but found no instance where Part 1 asserted something the new evidence contradicts. Candidate IDs continue the `CAND-STOCK-*` (never `CLAIM-`) discipline.
+
+## 1. Gap-closure matrix
+
+| Gap (from Part 1) | Targeted | Closed? | Result |
+|---|---|---|---|
+| A. Getty section-number instability | Yes | **Partially — resolved via citation-strategy change, not via achieving a stable number** | See §2 below. |
+| B. iStock clearance negative-finding | Yes | **Rechecked, same result, correct epistemic status now explicit** | See §3. |
+| C. Adobe release-relatedness + exception mechanism | Yes | **Partially — stronger corroboration found, but still no successful direct fetch of Adobe's own page this session (3 attempts, all failed)** | See §4. |
+| D. Shutterstock primary document | Yes — highest priority per task | **Not closed — confirmed structural limitation, not a one-off.** Strong Official-Secondary corroboration obtained instead. | See §5. |
+| E. Brand-blog ambiguity | Yes | **Closed to the extent evidence allows — dividing line identified, genuine cases-differ residual ambiguity preserved, not forced.** | See §6. |
+
+## 2. Getty — canonical source hardening
+
+Two more direct fetches this session (`gettyimages.hk/eula`, `gettyimages.hk/rights-and-clearance`) plus one search pass for a stable PDF citation, joining the two Phase 1A fetches and one Phase 0 fetch — **five independent fetches of Getty's own materials across this research program.**
+
+**Result: the section-number instability is confirmed, not a fluke.** Five fetches have now produced citations of "§3.7," "§3(g)," "§3(k)," and "§3.11" for materially the same or adjacent clauses. A `pressreleasefinder.com`-hosted PDF surfaced dated **April 2019** — clearly stale (predates even Phase 0's April-2026-dated fetch) and **not used as evidence**, cited here only to show that even third-party-archived "official" PDFs are not a shortcut to stability.
+
+**Recommended citation strategy (per task §4 instruction to document one rather than keep chasing a stable number):** cite Getty provisions by **document title + exact clause language**, e.g. *"Getty Images Content License Agreement, the clause defining 'Editorial Content' as intended for descriptive/newsworthy purposes"* and *"...the clause prohibiting commercial, promotional, advertorial, endorsement, advertising, gambling/betting/gaming, or marketing use of Editorial Content absent express written authorization"* — never a bare section number as the sole identifier. Any future formal claim drafted from this research should carry this instruction forward explicitly in its own `Source references` field.
+
+**Exact rule (re-confirmed, unchanged in substance across all five fetches):** Editorial Content is licensed for descriptive/newsworthy/current-events purposes; commercial, promotional, advertorial, endorsement, advertising, gambling/betting/gaming, and marketing uses are prohibited absent express written authorization.
+
+**Exception/clearance finding (re-confirmed, Tier 1):** Getty's own "Rights and Clearance" function is real and explicitly scoped to include "advertising" and "promotional use" clearance — directly, not by inference.
+
+## 3. iStock — clearance negative-finding recheck
+
+One fresh direct fetch (`istockphoto.com/legal/license-agreement`, this session) plus one dedicated `WebSearch` pass targeted specifically at the clearance question (distinct from Phase 1A's search).
+
+**Epistemic classification: NO EVIDENCE FOUND** (not `SUPPORTED NO`). Two independent research passes (Phase 1A, Phase 1B) targeting this specific question have not surfaced any iStock-run clearance/authorization mechanism analogous to Getty's Rights & Clearance or Shutterstock's Asset Assurance. This is meaningfully stronger than a single miss, but **still does not meet the bar for `SUPPORTED NO`**, which would require iStock's own materials to affirmatively state no such path exists. No such affirmative disclaimer was found either. The correct status, honestly stated, is: *iStock's own license agreement is silent on any provider-run conversion path, and no independent search surfaced one — silence is evidence of likely absence, not proof of absence.*
+
+**Editorial restriction itself: remains well-supported**, Tier 1, stable effective date ("Last Updated: July 2026"), consistent across two independent direct fetches (Phase 1A, Phase 1B) plus the original Phase 0 fetch — the single most consistently-sourced provider in this entire research program.
+
+## 4. Adobe Stock — release-relatedness
+
+**Three fetch attempts this session, all failed** (`helpx.adobe.com/stock/help/usage-licensing.html` — timeout; `helpx.adobe.com/il_en/stock/contributor/help/illustrative-editorial-content.html` — timeout; the Additional Terms PDF, re-attempted, still binary-unreadable). **No successful direct official fetch was obtained for Adobe this session** — a genuine, disclosed limitation, not silently worked around.
+
+Two independent `WebSearch` passes (Phase 1A's original + one fresh pass this session) both surface consistent language attributed to Adobe's own help documentation: *"All assets intended for commercial use and containing recognizable people are uploaded with a signed model release... editorial images don't have model releases and are therefore not cleared for commercial use."* Consistent phrasing across two independently-timed searches is modestly reassuring but **remains Tier 3** per this document's own discipline (§4/§9 governance) — a search-engine synthesis, however consistent, is not a substitute for a direct official fetch that Adobe's own servers declined to complete three times.
+
+**Finding: release-relatedness is plausible and consistently reported for Adobe, but not elevated to Tier 1 or Tier 2 by this session's work.** Recommendation unchanged from Part 1: do not assert Adobe-specific release-relatedness with the same confidence as Getty/iStock/Shutterstock.
+
+## 5. Adobe Stock — exception/authorization mechanism
+
+**A specific, checkable, but Tier-3 (community forum) finding surfaced this session, not present in Part 1:** an Adobe Community discussion thread states that although Adobe's license text theoretically permits "written consent from copyright owner" as a path to commercial use of Editorial content, **Adobe Stock provides no mechanism for a customer to contact the original contributor to request that consent** — meaning the theoretical exception clause may be functionally inoperative in practice, a materially different situation from Getty's or Shutterstock's own actively-offered, provider-run clearance services.
+
+**Classification: CUSTOMER INDEPENDENTLY OBTAINING THIRD-PARTY PERMISSION, and even that path appears to lack a working contact mechanism** — not PROVIDER-RUN CLEARANCE, and not confirmed to be workable at all as customer-self-directed either. This is the most negative (weakest exception access) finding of any of the four providers, but rests on a single community-forum source, Tier 3, and is flagged as such — worth a reviewer's attention, not worth asserting as settled fact.
+
+## 6. Adobe Stock — primary source hardening
+
+**Not achieved this session.** The Additional Terms PDF (`wwwimages2.adobe.com/.../Stock-Additional-Terms_en_US_20240510.pdf`, and a second, older `20180605` version surfaced by search but not fetched) remains FlateDecode-compressed and unreadable by the available fetch/summarize tool in both Phase 1A and Phase 1B. **This is a tooling limitation of this research environment, not evidence about Adobe's actual terms** — flagged distinctly so a future pass with a proper PDF-text-extraction capability is not discouraged from trying again. Per task instruction, this PDF inconvenience is **not** treated as a reason to downgrade Adobe's underlying (Tier 2, Phase 0-sourced) `stock.adobe.com/license-terms` evidence for the core commercial/editorial distinction itself — only the two narrower propositions (release-relatedness, exception mechanism) remain under-verified.
+
+## 7. Shutterstock — primary document (highest-priority gap)
+
+**Not closed. Confirmed as a stable, repeated, structural access limitation — not a one-off failure.** Four distinct official Shutterstock URLs have now been attempted across Phase 1A and Phase 1B, all returning HTTP 403: `shutterstock.com/license`, `shutterstock.com/license-history`, `shutterstock.com/terms`, and three `shutterstock.com/help/en/articles/...` pages. **Zero of seven attempted fetches of Shutterstock's own customer-facing legal/help pages (across two research sessions) succeeded.** The one Shutterstock official page that *did* fetch successfully in both sessions is on a *different* subdomain (`submit.shutterstock.com`, the contributor-facing help center) — this asymmetry (contributor pages accessible, customer/legal pages blocked) is itself worth recording as a pattern for future LK source-monitoring design.
+
+**What was obtained instead, correctly tiered (per task §9's explicit instruction not to falsely upgrade a help article into primary authority):**
+- **Tier 1 (direct official fetch):** `submit.shutterstock.com`'s contributor-facing "What is the difference between Commercial and Editorial content?" page — the functional definition itself.
+- **Official Secondary (direct fetch of an official Shutterstock-issued document, but not the contractual license text itself):** the Shutterstock/`stocktitan.net` financial-news republication of Shutterstock's own press release characterizing Rights and Clearance and Asset Assurance™.
+- **Official Secondary, located via search, from Shutterstock's own domains (`investor.shutterstock.com`, Shutterstock's own blog):** corroborating detail on Asset Assurance's 2020 launch and scope.
+
+**None of this constitutes Verified Primary contractual text.** The load-bearing proposition — the exact wording of the customer-facing prohibited-use clause for Editorial content — rests on **Tier 1 for the definitional distinction** and **Official Secondary, not Verified Primary, for the exact restriction language and the exception mechanism's precise legal effect.** This is disclosed prominently, per task instruction, rather than smoothed over.
+
+## 8. Shutterstock — Asset Assurance, precisely characterized
+
+Directly fetched this session (Official Secondary, Shutterstock's own press materials via `stocktitan.net`), resolving Part 1's own hedge:
+
+- **Rights and Clearance** is the service that actually **obtains third-party permissions** ("obtains third party permissions across the entire portfolio of assets for promotional use in advertisements, social campaigns, marketing materials and more") — this is the piece that functions like a genuine clearance/authorization mechanism (task's option B).
+- **Asset Assurance™** (launched 2020) is a **separate, complementary indemnity product** — "adds indemnification on top of the commercial license already obtained." It does **not** itself change what use is permitted; it insures against claims once permission/clearance has independently been secured (task's option C, not B).
+
+**Corrected characterization (refines, does not contradict, Part 1's own more general "exceptions exist" framing):** Shutterstock's actual mechanism is **two-layered** — a genuine provider-run clearance service (Rights and Clearance) plus a separate indemnity layer (Asset Assurance) — not a single undifferentiated "exception." This precision is exactly why the disposition of `CAND-STOCK-EDITORIAL-003` changes below (§13).
+
+## 9. Brand-blog ambiguity — resolved to the extent evidence allows
+
+**Dividing line identified: purpose/character of the specific page's content, not identity or commercial status of the publisher.** This is directly evidenced, not inferred: Adobe's own definitional language explicitly includes "blog post... that comments on, reports on, or educates about a topic" as within-scope editorial use, while separately and explicitly naming "**commercial blogs**" among prohibited uses. Since both phrases describe *blog content generally*, the only coherent reading is that Adobe itself draws the line on **what the specific post does** (report/discuss/educate about a topic, vs. promote the company's own product/service/brand), not on who is hosting it. A corporate website is capable of hosting genuinely editorial content (an unbiased industry-news roundup) exactly as a newspaper is capable of hosting advertorial content — the evidence supports content-character as the test, publisher-identity as not the test. **Residual, evidence-supported ambiguity preserved, not forced:** where a specific piece of brand content sits on that spectrum (a company blog post that reports on an industry trend while incidentally mentioning its own product) is a genuinely contextual, reviewer-level judgment call — this research narrows the question to the right axis without claiming to resolve every instance of it.
+
+## 10. Recheck: "commercial use"
+
+**Falsification attempt failed — Part 1's conclusion is reaffirmed, not weakened, by this session's evidence.** Every new source obtained this session (Getty's rights-and-clearance page, iStock's re-fetch, Shutterstock's definitional page, the Adobe community thread) continued to use or reduce to the same narrower vocabulary — advertising, promotional, endorsement, merchandising, advertorial, commercial blogs — never resting the restriction on the bare word "commercial" alone. **Explicit reaffirmation: do not use "commercial use" as the primary governed boundary.** Best cross-provider vocabulary, evidence-grounded: *"advertising, promotional, endorsement, or merchandising use"* as the core phrase, with the understanding (per §6/§9) that exact enumerated lists differ slightly by provider and a provider-specific claim should use that provider's own exact terms rather than the generalized phrase.
+
+---
+
+## 11. CAND-STOCK-EDITORIAL-001 — re-evaluated
+
+1. **Survives.**
+2. **Wording refined** — see below.
+3. **Genuinely atomic** — one proposition (license scope excludes advertising/promotional/endorsement/merchandising use); does not merge in releases (-002) or exceptions (which no longer has a standalone cross-provider claim — see §13).
+4. **Every material clause has support across all four providers** — Getty/iStock Tier 1, Adobe Tier 2/3 (hedged), Shutterstock Tier 1 (definition)/Official Secondary (exact restriction wording).
+5. **Does not improperly imply no exceptions** — refined wording explicitly flags that some providers offer a separate authorization path, without naming which, avoiding both overclaiming universality and underclaiming Getty/Shutterstock's real mechanisms.
+6. **Does not improperly imply every paid/commercial context is prohibited** — refined wording uses the narrow enumerated-use vocabulary (§10), not "commercial project."
+7. **Distinguishes general rule from project determination** — explicit closing clause.
+
+**Recommended final research-stage wording:**
+
+> "A stock-media provider's standard license for content it designates 'Editorial' (or an equivalent editorial-use-only classification) authorizes use for descriptive, newsworthy, or public-interest purposes. Under that standard license, this does not include advertising, promotional, endorsement, or merchandising use. Some providers offer a separate, provider-specific process to authorize such use for a given asset — this proposition does not itself confirm whether such authorization exists for any particular asset or project."
+
+## 12. CAND-STOCK-EDITORIAL-002 — re-evaluated
+
+**Outcome: A — survives cross-provider, with an explicit, carried-forward confidence asymmetry (Getty/iStock/Shutterstock: Tier 1; Adobe: Tier 3, unresolved despite a dedicated hardening attempt this session).** Not preserved merely because Part 1 drafted it — actively re-tested (§4 above) and the Adobe gap did not close; recommend a governance reviewer explicitly decide whether to (a) adopt with Adobe flagged as a lower-confidence leg, or (b) narrow the claim's provider scope to exclude Adobe until independently confirmed. Wording unchanged from Part 1's own synthesis (already appropriately hedged):
+
+> "Stock-media content marked 'Editorial' is typically licensed without the model or property releases that would otherwise support broader commercial use — a separate consideration from, though often related to, the provider's own license-scope restriction."
+
+## 13. CAND-STOCK-EDITORIAL-003 — re-evaluated (disposition changed)
+
+**Outcome: REJECTED as a standalone cross-provider TopicClaim.** This is a genuine reversal of Part 1's drafted candidate, made possible by, and directly because of, this session's more precise Shutterstock finding (§8).
+
+**Reasoning:** Part 1's -003 proposition ("some providers offer separate clearance mechanisms") is **true**, but on closer inspection is not itself an atomic, actionable proposition — it is a *comparative observation about the domain*, not a fact a user or reviewer could be told and act on. Worse, stating it generically risks the exact failure the task's own §15 warned against: a user reading "some providers offer clearance mechanisms" has no way to know whether *their* provider is one of them, and — now that Shutterstock's mechanism is known to be **two functionally different things** (a real clearance service, Rights and Clearance, plus a separate indemnity product, Asset Assurance) — a single cross-provider sentence cannot honestly compress that nuance without either oversimplifying Shutterstock's actual structure or omitting it.
+
+**Resolution: the substance is not discarded, it is redistributed** — each provider-specific candidate (§14 below) that has a real, evidenced exception mechanism (Getty, Shutterstock) states its own mechanism directly, precisely, and by name; providers without one (iStock) or with an unresolved one (Adobe) say so in their own candidate's "known exceptions" field with the correct epistemic hedge. This is a **structural finding recorded in this research document (§6/§8 above, and the comparative table), not a governed claim** — exactly matching the task's own suggested possible outcome that -003 "may be factually true but too operational/provider-variable to deserve a cross-provider governed claim."
+
+---
+
+## 14. Provider-specific candidates
+
+### CAND-STOCK-GETTY-EDITORIAL-001
+**Proposition:** Getty Images' standard license prohibits using content it marks "Editorial Content" for commercial, promotional, advertorial, endorsement, advertising, gambling/betting/gaming, or marketing purposes, absent express written authorization on the applicable invoice, sales order confirmation, or licensing agreement. Getty separately offers a "Rights and Clearance" function through which a customer may seek such authorization, including specifically for advertising and promotional use.
+
+**Proposition map:**
+- P1 — Getty's Editorial Content definition (descriptive/newsworthy purpose). **SOURCE →** direct fetch, `gettyimages.hk/eula` (×3 across this research program). **SUPPORTED.**
+- P2 — Getty's exact enumerated prohibited-use list. **SOURCE →** same. **SUPPORTED**, exact section number unstable (§2), clause text stable.
+- P3 — Getty's written-authorization override language. **SOURCE →** same. **SUPPORTED.**
+- P4 — Getty's Rights and Clearance function, scoped to include advertising/promotional clearance. **SOURCE →** direct fetch, `gettyimages.hk/rights-and-clearance`. **SUPPORTED.**
+
+**Adds value beyond the structural claim (per §17's test):** names Getty's exact enumerated list and, critically, names and confirms the real, provider-run clearance mechanism the structural claim deliberately declines to name.
+
+**Why it exists (not a restatement):** the structural claim (§11) can only say "some providers offer a path"; this claim can honestly say Getty specifically does, and roughly what that path is for.
+
+**Jurisdiction:** Not a legal jurisdiction — see §21 below; recommend `"Provider contract terms (not a legal jurisdiction) — Getty Images Content License Agreement"`.
+**Applicability requirements:** `[]` — see §16's engineering-prerequisite finding.
+**Unresolved project dependencies:** `[asset_confirmed_getty, editorial_designation_confirmed, separate_authorization_obtained]`.
+**Preliminary CRC/reviewer classification:** **C** — potentially CRC-safe only with additional routing/applicability capability beyond Path A (see §16).
+**Readiness grade: R2 — governance-ready.**
+
+### CAND-STOCK-ISTOCK-EDITORIAL-001
+**Proposition:** iStock's standard license restricts content marked "editorial use only" (defined as lacking model/property releases and intended for descriptive/newsworthy/human-interest purposes) from commercial, promotional, advertorial, endorsement, advertising, gambling/betting/gaming, or merchandising use. No evidence was found, across two independent research passes, of an iStock-run mechanism to authorize such use for a specific asset — this is a negative finding, not a confirmed absence.
+
+**Proposition map:**
+- P1 — iStock's editorial-use-only definition (Section 3(2), same section-label-stability caveat as Getty applies, though only one alternate label was ever observed for iStock across three fetches — materially more stable than Getty's numbering). **SOURCE →** direct fetch, `istockphoto.com/legal/license-agreement` (×2 this research program, both this session's re-fetch and Phase 1A's). **SUPPORTED.**
+- P2 — Prohibited-use clause, near-verbatim match to Getty's own list. **SOURCE →** same. **SUPPORTED.**
+- P3 — No provider-run clearance mechanism found. **SOURCE →** absence across the primary agreement text and two independent `WebSearch` passes. **Status: NO EVIDENCE FOUND — explicitly not `CONTRADICTED` or `UNSUPPORTED`; this is its own epistemic category, not a weaker version of "supported."**
+
+**Adds value:** the specific enumerated list (near-identical to but not byte-identical with Getty's), the stable effective date, and — genuinely useful to a reviewer — the explicit, correctly-hedged statement that no clearance path is known to exist for this specific provider, which shapes what a reviewer should expect to find (or not find) when evaluating an iStock Editorial asset.
+
+**Jurisdiction:** Same recommendation as Getty's candidate, substituting iStock's own agreement name.
+**Applicability requirements:** `[]`.
+**Unresolved project dependencies:** `[asset_confirmed_istock, editorial_designation_confirmed]` — deliberately omits `separate_authorization_obtained`, since no mechanism to obtain one is evidenced; a future submission that somehow demonstrates one would itself be new information requiring this candidate's own revision, not something CRC/Reviewer should expect to resolve via a dependency prompt.
+**Preliminary CRC/reviewer classification:** **C**, same reasoning as Getty's.
+**Readiness grade: R2 — governance-ready.** (The core rule is R2-strength Tier 1 evidence; the negative finding is correctly epistemically hedged rather than overclaimed, which is itself what makes it governance-ready rather than blocked.)
+
+### CAND-STOCK-SHUTTERSTOCK-EDITORIAL-001
+**Proposition:** Shutterstock distinguishes "Commercial" content (usable to commercialize, monetize, sell, promote, or advertise a product, business, or service) from "Editorial" content (which cannot be used for those purposes, being intended for public-interest/news use). Shutterstock separately offers a "Rights and Clearance" service to obtain third-party permissions for promotional use of Editorial assets, and a related "Asset Assurance™" product that adds indemnification once such permission/clearance has been secured — the two are functionally distinct (clearance vs. insurance), not one undifferentiated exception.
+
+**Proposition map:**
+- P1 — Shutterstock's Commercial/Editorial functional definition. **SOURCE →** direct fetch, `submit.shutterstock.com` (official domain). **SUPPORTED**, Tier 1.
+- P2 — Exact prohibited-use characterization (direct/indirect advertising, including the "social media post promoting a holiday" example). **SOURCE →** `WebSearch` synthesis, Tier 3, not independently primary-verified — the license-agreement text itself remains inaccessible (§7). **PARTIALLY SUPPORTED.**
+- P3 — Rights and Clearance obtains third-party permissions for promotional use. **SOURCE →** direct fetch of Shutterstock's own press release via `stocktitan.net` republication — Official Secondary. **SUPPORTED**, not Verified Primary.
+- P4 — Asset Assurance adds indemnification on top of an already-obtained commercial license, distinct from Rights and Clearance itself. **SOURCE →** same. **SUPPORTED**, same tier caveat.
+
+**Adds value:** the precise two-layer mechanism characterization (§8) that neither Part 1 nor a generic cross-provider claim could honestly state, and the functional (rather than enumerated-list) definitional structure that distinguishes Shutterstock's drafting approach from the other three providers.
+
+**Jurisdiction:** Same pattern, substituting Shutterstock's own Terms of Service name.
+**Applicability requirements:** `[]`.
+**Unresolved project dependencies:** `[asset_confirmed_shutterstock, editorial_designation_confirmed, clearance_or_assurance_obtained]`.
+**Preliminary CRC/reviewer classification:** **C**, same reasoning.
+**Readiness grade: R2 — governance-ready, with an explicit caveat carried into governance review: the exact prohibited-use wording and the precise legal mechanics of Rights and Clearance/Asset Assurance rest on Official Secondary, not Verified Primary, sourcing.** A governance reviewer may reasonably want the raw license-agreement text before final Adoption even if not before proceeding to review — this grade reflects "ready to be reviewed," not "ready to be adopted without further inquiry."
+
+### Adobe Stock — no dedicated provider-specific candidate drafted
+
+**Deliberately not drafted**, per the task's own instruction that a provider may need zero candidates and per §17's "should not merely restate the cross-provider claim" test. Three independent direct-fetch attempts this session (helpx page ×2, PDF ×1, on top of Phase 1A's own failed PDF attempt) produced no Tier 1/2 evidence beyond what Phase 0/Phase 1A already captured (a single Tier 2 fetch, zh-TW-rendered, from `stock.adobe.com/license-terms`). Drafting a dedicated Adobe candidate now would either (a) restate the already-captured Tier 2 general restriction with no new information, or (b) rest the release-relatedness and exception-mechanism findings (§4/§5, both Tier 3) on evidence this document's own discipline says should not be treated as load-bearing. **Readiness grade for a hypothetical Adobe-specific candidate: R3 — BLOCKED.** Adobe remains covered only at the cross-provider level (§11/§12), each explicitly hedged for Adobe.
+
+## 15. Cross-provider / provider-specific layering and duplication analysis
+
+**Layering (confirmed, refined from Part 1's own tentative example):** the structural claim (§11) is *conceptual framing* — it tells a user or reviewer that this shape of rule generally exists and that exceptions may exist without naming which. Each provider-specific claim (§14) is the *concrete current instance* — naming the exact prohibited-use list and, where evidenced, the exact mechanism and its real legal effect. This mirrors the task's own illustrative structure and survived contact with the actual evidence, including the one place (Shutterstock) where the concrete instance turned out to be genuinely more nuanced (two-layered) than a flat "has an exception" fact would have suggested.
+
+**Duplication test:** if both the structural claim and, say, `CAND-STOCK-GETTY-EDITORIAL-001` were retrieved together for the same user, the structural claim's own final sentence ("some providers offer a separate... process... this proposition does not itself confirm whether such authorization exists") and the Getty claim's specific naming of Rights and Clearance are **complementary, not redundant** — the general sentence sets expectation, the specific sentence delivers on it. No composition/Projection logic is designed here (per task instruction) — this is a description of how the two *could* coexist conceptually, not an implementation.
+
+## 16. Path A engineering prerequisite exposed (report only, not solved)
+
+**A precise, load-bearing finding, directly requested by task §22.** Path A's approved architecture gates retrieval on an explicit `third_party_source_rights` goal existing — but nothing in that architecture, as approved, lets Retrieval distinguish *which provider* the user meant. A user asking "Can I use my Adobe Stock image commercially?" would, under Path A alone, become a topic-candidate for **every** claim tagged `third_party_source_rights` — including `CAND-STOCK-GETTY-EDITORIAL-001`, which has nothing to do with their actual question. Because `AssetProviderMention` is not implemented (Phase 0.5, deliberately deferred pending exactly this kind of demonstrated need), **there is currently no applicability mechanism to narrow a provider-specific claim to users who actually mentioned that provider** — and PM's standing decision is zero new `ApplicabilityFact`s, so this cannot be solved by adding one either, even once `AssetProviderMention` exists, without a corresponding new fact type.
+
+**This is why every provider-specific candidate above is classified C, not B, in §14's CRC/reviewer classification** — they require not just Path A (already NO-GO pending governed knowledge) but a **second, currently-unscoped capability**: either `AssetProviderMention`-driven applicability (which would need a new `ApplicabilityFact`, itself requiring a fresh PM decision reversing or extending the current zero-new-facts posture) or some other narrowing mechanism not yet designed. **Reported, not solved, per task instruction.**
+
+## 17. Jurisdiction metadata — recommendation
+
+Re-examined per task §21's five options, using only currently-valid representations:
+
+- **(A) `Global`** — rejected, unchanged from Part 1's own conclusion: these are contract terms, not jurisdiction-neutral legal doctrine in COPY-004's specific defined sense.
+- **(B) provider-contract-specific text in the `jurisdiction` field** — closest fit given the field is free text.
+- **(C) `"Not jurisdiction-specific"`** — accurate but under-informative on its own (doesn't say *why*, or what governs instead).
+- **(D)** another currently-valid representation — none found that improves on a combination of B+C.
+- **(E) the field is semantically inadequate** — true as a structural observation, but not itself an answer to "what do we write today."
+
+**Recommendation: combine B and C.** Least-misleading current representation: `"Not a legal jurisdiction — governed by [Provider]'s own Terms of Service / License Agreement, independent of user or asset geography."` — descriptive, accurate, uses only the field's existing free-text flexibility, requires no schema change.
+
+**Separately, per task's explicit request (not implemented, only stated):** a future schema evolution should probably introduce a distinct concept — something like a `governing_source_type` or `claim_basis` field (`statutory_law` | `contractual_terms` | ...) — so `jurisdiction` can keep meaning exactly what it means today for legal-doctrine claims (COPY-001/002/003/004) without being asked to also carry an unrelated "which contract governs" concept for domains like this one. This would let a future engineer stop having to choose between an honest-but-verbose free-text jurisdiction value (as recommended above) and a schema that actually models the distinction. **Not authorized or scoped here — reported as the task requested.**
+
+## 18. Applicability & unresolved-dependency summary (all candidates)
+
+| Candidate | `applicability_requirements` | Why safe | `unresolved_project_dependencies` |
+|---|---|---|---|
+| -001 (structural) | `[]` | Path A gate already required before topic lookup occurs | `[which_provider]` |
+| -002 (release-relatedness) | `[]` | Same | `[which_provider]` |
+| GETTY-001 | `[]` | Same, **but see §16 — provider-narrowing gap remains unsolved beyond Path A** | `[asset_confirmed_getty, editorial_designation_confirmed, separate_authorization_obtained]` |
+| ISTOCK-001 | `[]` | Same, same caveat | `[asset_confirmed_istock, editorial_designation_confirmed]` |
+| SHUTTERSTOCK-001 | `[]` | Same, same caveat | `[asset_confirmed_shutterstock, editorial_designation_confirmed, clearance_or_assurance_obtained]` |
+
+No candidate reuses Part 1's original three-string dependency list uniformly — each set was re-derived from what that specific candidate's own proposition map actually requires, per task instruction.
+
+## 19. Reviewer evidence, refined per provider
+
+Building on Part 1 §27, provider-specific nuance added:
+
+- **Getty:** proof of Rights and Clearance approval (if commercial use is claimed), not merely the underlying asset license.
+- **iStock:** absent any known mechanism, a reviewer should treat an Editorial-designated iStock asset used commercially as presumptively non-conforming unless independent evidence of authorization is produced — there is no known provider-side approval record to check for.
+- **Adobe Stock:** given the Tier 3 finding that contributors may not be contactable through official channels (§5), a reviewer should treat a claimed "I got written consent from the copyright owner" representation with real scrutiny — ask *how*, specifically, given the apparent absence of an official contact path.
+- **Shutterstock:** proof of Rights and Clearance approval (for the underlying permission) is the load-bearing evidence; a stated Asset Assurance enrollment alone is not sufficient, since Asset Assurance is indemnity, not permission (§8) — these are two different pieces of evidence a reviewer must not conflate.
+
+## 20. Source-versioning / maintenance findings
+
+| Provider | New finding this session |
+|---|---|
+| Getty | Confirmed unstable section numbering across 5 fetches — monitoring should track clause *text*, not section numbers, or it will silently break. |
+| iStock | Most stable of the four — consistent "July 2026" date across 3 fetches total this program. |
+| Adobe | No new date evidence; PDF format remains a real monitoring obstacle, independently confirmed a second time this session. |
+| Shutterstock | New finding: the primary legal pages and the contributor-help pages sit on different subdomains with different bot-access postures (blocked vs. accessible) — a future monitor should plan for this asymmetry explicitly rather than assuming one working fetch path covers both. |
+
+## 21. Candidate readiness grades — summary
+
+| Candidate | Grade | Basis |
+|---|---|---|
+| CAND-STOCK-EDITORIAL-001 (structural) | **R2** | Tier 1/2 across all four providers, refined wording avoids overclaiming |
+| CAND-STOCK-EDITORIAL-002 (release-relatedness) | **R2**, Adobe leg flagged | Tier 1 for 3 of 4 providers; Adobe remains Tier 3 despite a dedicated hardening attempt |
+| CAND-STOCK-EDITORIAL-003 (exceptions exist) | **R4 — REJECTED** as a standalone claim | Substance redistributed into provider-specific candidates (§13) |
+| CAND-STOCK-GETTY-EDITORIAL-001 | **R2** | Strong Tier 1 across all four proposition-map entries |
+| CAND-STOCK-ISTOCK-EDITORIAL-001 | **R2** | Strong Tier 1 for the rule; negative finding correctly epistemically hedged |
+| CAND-STOCK-SHUTTERSTOCK-EDITORIAL-001 | **R2, with an explicit Verified-Primary-outstanding caveat** | Tier 1 definition; Official Secondary (not primary) for exact restriction text and mechanism mechanics |
+| Adobe-specific candidate | **R3 — not drafted, BLOCKED** | Insufficient direct-fetch evidence across two full research sessions |
+
+## 22. Unresolved gaps carried forward
+
+1. Adobe Stock: no successful direct fetch of any official Adobe page achieved across two full research sessions (5 attempts total) — the single most persistent evidence gap in this research program.
+2. Shutterstock's primary license-agreement text: 0/7 attempted fetches succeeded across two sessions — confirmed structural, not incidental.
+3. Getty's section-number instability: resolved via citation strategy, not via achieving an actual stable number — a future PDF-level check remains recommended before formal Adoption.
+4. iStock's negative clearance finding remains "no evidence found," not "confirmed absent" — a third research pass would not likely change this without an iStock-side disclosure the company has no reason to volunteer.
+5. The Path A provider-narrowing engineering prerequisite (§16) is unresolved and unscoped — a real, load-bearing gap between "Path A exists" and "provider-specific claims can be safely retrieved."
+6. The jurisdiction-field semantic gap (§17) remains unresolved at the schema level, by design (not authorized here).
+
+## 23. Out-of-scope future research signals
+
+None newly encountered this session requiring flagging beyond what Phase 0 already recorded — no AI-input-restriction language was newly surfaced in any source fetched or searched during this specific Phase 1B pass (the Editorial-focused queries did not incidentally surface AI/ML clauses the way some of Phase 0's own broader queries did).
+
+## 24. Part 2 recommendation
+
+**Bring `CAND-STOCK-EDITORIAL-001`, `-002` (with its Adobe caveat), `CAND-STOCK-GETTY-EDITORIAL-001`, `CAND-STOCK-ISTOCK-EDITORIAL-001`, and `CAND-STOCK-SHUTTERSTOCK-EDITORIAL-001` (with its Verified-Primary caveat) to PM for formal governance review as a package.** Do not bring a standalone `-003` (rejected, §13) or an Adobe-specific candidate (not drafted, R3). Flag the Path A provider-narrowing gap (§16) and the jurisdiction-field semantic gap (§17) to PM alongside the candidates themselves, since both materially affect what "governance-ready" can practically deliver even after Adoption.
+
+---
+
+**Part 2 research conducted:** 2026-08-17. **Status:** Complete for Phase 1B scope. **Next step:** PM decision on whether to convene formal governance review for the R2-graded candidates above — this document does not convene that review itself.
