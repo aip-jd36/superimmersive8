@@ -906,3 +906,39 @@ The next milestone should determine how CRC can use governed U.S. copyrightabili
 without collapsing copyright ownership into copyrightability, and without turning CRC into a project-specific legal determination engine.
 
 That work remains separate from this PRD.
+
+---
+
+## 27. Project-Fact-Aware Bounded Composition (Deferred Capability, recorded 2026-08-17)
+
+**Status: Future direction / backlog. Not authorized for design or implementation by this PRD or by its recording here.**
+
+This section documents a real product-completeness gap surfaced by the Phase 1 individual CRC-publication governance reviews of CLAIM-COPY-001-v1 / CLAIM-COPY-002-v1 / CLAIM-COPY-003-v1 (2026-08-17), so a future engineering/design milestone understands *why* the capability exists rather than starting from nothing.
+
+**The gap, precisely:** CRC can retrieve a governed principle and correctly identify that the claim carries `unresolved_project_dependencies`. It does not yet use the conversational observations it already has (e.g. `workflow_role`, scoped observations) to determine *which* of several overlapping governed principles are actually relevant to what the user described, or to compose them differently as a result. Empirically confirmed during the Phase 1 reviews: a user who explicitly states "I only entered prompts and used the output as-is," a user who states "I spent hours iterating on detailed prompts," and a user who states "I generated clips, then substantially re-edited, composited, and restructured them" all currently receive byte-identical CRC output for the same `copyrightability` goal — whether one claim is eligible or all three are eligible together.
+
+**Working name:** Project-Fact-Aware Bounded Composition.
+
+**Purpose:** Allow CRC to use project facts and conversational observations to determine which governed principles are relevant to the evidence the user actually described, and to compose overlapping governed claims into a clearer, more targeted answer than simple concatenation produces.
+
+**The critical boundary (non-negotiable, carried forward from every governance review in this milestone):** the system may recognize *"the user described evidence relevant to this governed principle."* It must **never** conclude *"the evidence satisfies the legal threshold."* Recognizing relevance is a retrieval-adjacent, bounded operation; declaring sufficiency is exactly the kind of project-specific legal determination CRC is not authorized to make (SI8 Principle 4).
+
+Illustrative (not a spec — the exact wording is future design work):
+
+- **Allowed:** "You described substantial selection, arrangement, and editing. Current U.S. guidance says meaningful human creative contribution of that kind can be relevant to copyrightability. CRC can't determine from this conversation whether your contribution satisfies the legal threshold."
+- **Not allowed:** "Your substantial editing establishes copyright."
+
+**Explicit non-goals for this future capability:**
+- autonomous legal adjudication;
+- automatic copyrightability determination;
+- automatic ownership determination;
+- free-form LLM legal reasoning;
+- an implicit replacement for Commercial Assurance;
+- a way around governed LK claims;
+- a mechanism for inventing doctrine.
+
+The eventual design must preserve the same three-layer discipline every other part of this PRD assumes: **governed knowledge + bounded interpretation + explicit unresolved thresholds.** Relevance-matching is new; the underlying governance/publication/applicability machinery is not renegotiated by adding it.
+
+**Relationship to governed topic relationships:** this capability is distinct from, and must not be confused with, a `TopicRelationship` (§9 above generalizes this from CLAIM-COPY-004-v1; also see `TOPIC-RELATIONSHIPS.md`). A relationship answers *"what governed knowledge domains may be relevant to this goal category?"* — a retrieval-time, claim-independent question. Project-Fact-Aware Bounded Composition would answer a narrower, project-specific question one layer downstream: *"given what the user described, how should the already-retrieved, already-eligible governed principles be selected and presented?"* A relationship must never be asked to solve this; this capability must never be asked to decide CRC eligibility or invent a relationship.
+
+**Not authorized by this recording:** any data model, dependency-resolution logic, mapping from observations to legal thresholds, changes to Retrieval, Bounded Interpretation, Interview Engine, claim composition, new LLM calls, new prompts, new schemas, claim ranking, deduplication, or migrations. This section exists to preserve institutional memory of the gap and its boundary, not to scope an implementation.

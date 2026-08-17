@@ -153,6 +153,19 @@ CRC Approver: PENDING -- not yet approved
 CRC Decision Date: PENDING
 Related: [[POS-001]], [[EC-001]], [[PQ-004]], [[PQ-005]]
 
+Phase 1 CRC-publication governance review (2026-08-17): PASS / GO AS-IS --
+claim wording, sources, jurisdiction, applicability, and unresolved-
+dependency metadata are all sound and safe for automated CRC surfacing.
+CRC Eligible deliberately KEPT Pending -- not a safety/adequacy finding.
+Reason: CRC can retrieve this governed principle and correctly flag it as
+`relevant_applicability_unresolved`, but does not yet compose overlapping
+copyrightability principles (this claim, COPY-002, COPY-003) differently
+based on what the user actually described -- see the deferred "Project-
+Fact-Aware Bounded Composition" capability, `PRD_LIVING_KNOWLEDGE_
+SOURCE_INPUTS_v0.1.md` §27. PM decision: hold publication timing until
+that capability (or an equivalent decision) is ready. COPY-004 is
+unaffected and remains CRC Eligible: Yes.
+
 ### CLAIM-COPY-002-v1
 Domain: Copyright & Human Authorship
 Topic: copyrightability
@@ -254,6 +267,12 @@ CRC Approver: PENDING -- not yet approved
 CRC Decision Date: PENDING
 Related: [[POS-001]], [[EC-001]], [[CLAIM-COPY-001-v1]], [[CLAIM-COPY-003-v1]]
 
+Phase 1 CRC-publication governance review (2026-08-17): PASS / GO AS-IS.
+CRC Eligible deliberately KEPT Pending for the same product-completeness
+reason as CLAIM-COPY-001-v1 above -- see that claim's own Phase 1 note and
+`PRD_LIVING_KNOWLEDGE_SOURCE_INPUTS_v0.1.md` §27 (deferred "Project-Fact-
+Aware Bounded Composition" capability). Not a safety/adequacy finding.
+
 ### CLAIM-COPY-003-v1
 Domain: Copyright & Human Authorship
 Topic: copyrightability
@@ -353,6 +372,20 @@ Version lineage: v1 (initial) — supersedes: none — superseded by: none
 CRC Approver: PENDING -- not yet approved
 CRC Decision Date: PENDING
 Related: [[CLAIM-COPY-001-v1]], [[CLAIM-COPY-002-v1]]
+
+Phase 1 CRC-publication governance review (2026-08-17): PASS / GO AS-IS,
+same product-completeness deferral as CLAIM-COPY-001-v1/CLAIM-COPY-002-v1
+above -- see `PRD_LIVING_KNOWLEDGE_SOURCE_INPUTS_v0.1.md` §27. Closest
+individual call of the three copyrightability claims reviewed in Phase 1:
+this claim's own affirmative framing ("selecting, arranging, or editing...
+can support a copyright claim") currently renders identically whether the
+user described substantial creative editing or only trivial/technical
+editing (e.g. resolution/format conversion), since CRC does not yet
+evaluate `human_creative_contribution_level` against what the user actually
+described. Never produces a false or determinative statement in any tested
+scenario (the "meaningfully"/"case by case" qualifiers and the standard
+unresolved-applicability hedge hold in every case) -- flagged for PM
+awareness, not treated as a governance blocker.
 
 ### CLAIM-COPY-004-v1
 Domain: Copyright & Human Authorship
