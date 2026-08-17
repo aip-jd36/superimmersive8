@@ -102,7 +102,7 @@ describe('layer 1 -- the real orchestrator DOES thread the real relationship fix
 
 describe('layer 2 -- even with the real relationship fixture explicitly passed to retrieve() directly, Pending blocks RELATED-topic expansion (COPY-004 itself now correctly surfaces via its own exact-topic path)', () => {
   test('retrieve() called directly with TOPIC_RELATIONSHIPS_FIXTURE + TOPIC_CLAIMS_FIXTURE produces exactly one exact-topic result (COPY-004) and zero related-topic results', () => {
-    const handoff = { tools: [], unresolved_aliases: [], workflow_role: 'unresolved' as const, intended_use: 'unclear' as const, scoped_observations: [], certainty_state: 'gate_1_unmet' as const, exclusions: [] }
+    const handoff = { tools: [], unresolved_aliases: [], asset_providers: [], unresolved_asset_provider_mentions: [], workflow_role: 'unresolved' as const, intended_use: 'unclear' as const, scoped_observations: [], certainty_state: 'gate_1_unmet' as const, exclusions: [] }
     const out = retrieve(
       handoff,
       MATRIX_FIXTURE,

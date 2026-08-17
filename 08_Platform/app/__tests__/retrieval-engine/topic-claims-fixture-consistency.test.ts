@@ -99,8 +99,8 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
       expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-001-v1')).toBeUndefined()
     })
 
-    test("the reason still holds: 'third_party_source_rights' is not (yet) an implemented GoalCategory value -- update this test, add the claim's real Topic in the markdown, and add its TOPIC_CLAIMS_FIXTURE entry together, in the same change, when it is", () => {
-      expect((GOAL_CATEGORIES as readonly string[]).includes('third_party_source_rights')).toBe(false)
+    test("'third_party_source_rights' IS now an implemented GoalCategory value (M1, 2026-08-18) -- the original blocker for this generic claim is closed; it remains unrepresented only because runtime-fixture representation (M4) is a separate, not-yet-authorized governance decision, never an automatic consequence of the category existing", () => {
+      expect((GOAL_CATEGORIES as readonly string[]).includes('third_party_source_rights')).toBe(true)
     })
   })
 
@@ -117,8 +117,8 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
       expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-002-v1')).toBeUndefined()
     })
 
-    test("the reason still holds (shared with CLAIM-STOCK-EDITORIAL-001-v1): 'third_party_source_rights' is not (yet) an implemented GoalCategory value -- when it is, update both claims' Topic fields and add both TOPIC_CLAIMS_FIXTURE entries together, in the same change", () => {
-      expect((GOAL_CATEGORIES as readonly string[]).includes('third_party_source_rights')).toBe(false)
+    test("'third_party_source_rights' IS now an implemented GoalCategory value (M1, 2026-08-18, shared with CLAIM-STOCK-EDITORIAL-001-v1) -- the original blocker is closed; this claim remains unrepresented only because runtime-fixture representation (M4) is a separate, not-yet-authorized governance decision", () => {
+      expect((GOAL_CATEGORIES as readonly string[]).includes('third_party_source_rights')).toBe(true)
     })
   })
 
@@ -135,8 +135,8 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
       expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1')).toBeUndefined()
     })
 
-    test("the reason still holds (shared with CLAIM-STOCK-EDITORIAL-001-v1/-002-v1): 'third_party_source_rights' is not (yet) an implemented GoalCategory value -- when it is, update all three claims' Topic fields and add all three TOPIC_CLAIMS_FIXTURE entries together, in the same change", () => {
-      expect((GOAL_CATEGORIES as readonly string[]).includes('third_party_source_rights')).toBe(false)
+    test("'third_party_source_rights' IS now an implemented GoalCategory value (M1, 2026-08-18) -- but this provider-specific claim has a SECOND, still-unresolved blocker: provider-scoped retrieval (M3) is not implemented, so it remains unrepresented in TOPIC_CLAIMS_FIXTURE regardless of the GoalCategory gap closing (THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md §17, §19)", () => {
+      expect((GOAL_CATEGORIES as readonly string[]).includes('third_party_source_rights')).toBe(true)
     })
   })
 
@@ -153,8 +153,8 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
       expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1')).toBeUndefined()
     })
 
-    test("the reason still holds (shared with the other three stock claims): 'third_party_source_rights' is not (yet) an implemented GoalCategory value -- when it is, update all four claims' Topic fields and add all four TOPIC_CLAIMS_FIXTURE entries together, in the same change", () => {
-      expect((GOAL_CATEGORIES as readonly string[]).includes('third_party_source_rights')).toBe(false)
+    test("'third_party_source_rights' IS now an implemented GoalCategory value (M1, 2026-08-18) -- but this provider-specific claim has a SECOND, still-unresolved blocker: provider-scoped retrieval (M3) is not implemented, so it remains unrepresented in TOPIC_CLAIMS_FIXTURE regardless of the GoalCategory gap closing (same M3 blocker as CLAIM-STOCK-GETTY-EDITORIAL-001-v1, not a second independent one)", () => {
+      expect((GOAL_CATEGORIES as readonly string[]).includes('third_party_source_rights')).toBe(true)
     })
   })
 
@@ -171,8 +171,8 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
       expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')).toBeUndefined()
     })
 
-    test("the reason still holds (shared with the other four stock claims): 'third_party_source_rights' is not (yet) an implemented GoalCategory value -- when it is, update all five claims' Topic fields and add all five TOPIC_CLAIMS_FIXTURE entries together, in the same change", () => {
-      expect((GOAL_CATEGORIES as readonly string[]).includes('third_party_source_rights')).toBe(false)
+    test("'third_party_source_rights' IS now an implemented GoalCategory value (M1, 2026-08-18) -- but this provider-specific claim has a SECOND, still-unresolved blocker: provider-scoped retrieval (M3) is not implemented, so it remains unrepresented in TOPIC_CLAIMS_FIXTURE regardless of the GoalCategory gap closing (same M3 blocker as the other two provider-specific stock claims, not a third independent one)", () => {
+      expect((GOAL_CATEGORIES as readonly string[]).includes('third_party_source_rights')).toBe(true)
     })
   })
 

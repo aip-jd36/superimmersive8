@@ -61,6 +61,7 @@ const CERTAINTY_STATE_BY_GATE_1: Record<StructuredUnderstanding['gate_1_state'],
 export function buildRetrievalHandoff(understanding: StructuredUnderstanding): RetrievalHandoff {
   const activeTools = understanding.tool_mentions.filter((m) => m.superseded_by === null)
   const activeObservations = understanding.scoped_observations.filter((o) => o.superseded_by === null)
+  const activeAssetProviders = understanding.asset_provider_mentions.filter((m) => m.superseded_by === null)
 
   const tools: RetrievalHandoffTool[] = []
   const unresolvedAliases: string[] = []
@@ -78,6 +79,25 @@ export function buildRetrievalHandoff(understanding: StructuredUnderstanding): R
     }
   }
 
+  /**
+   * Living Knowledge — Third-Party Source Rights, M1+M2 (2026-08-18). Mirrors
+   * the tools/unresolvedAliases block immediately above exactly, simplified
+   * (no access_surface/plan_tier dimension). Deliberately NOT merged into
+   * `tools`/`unresolved_aliases` -- an asset provider is not a tool, and
+   * conflating the two arrays would make it impossible for Projection to
+   * distinguish "an AI generation platform I don't recognize" from "a source
+   * material provider I don't recognize" (see understood-summary.ts).
+   */
+  const assetProviders: string[] = []
+  const unresolvedAssetProviderMentions: string[] = []
+  for (const m of activeAssetProviders) {
+    if (m.resolution.kind === 'canonical') {
+      assetProviders.push(m.resolution.identifier)
+    } else {
+      unresolvedAssetProviderMentions.push(m.resolution.raw_name)
+    }
+  }
+
   const exclusions: string[] = []
   if (understanding.project_facts.intended_use.attestation.state === 'declined') exclusions.push('project_facts.intended_use')
   if (understanding.project_facts.workflow_role.attestation.state === 'declined') exclusions.push('project_facts.workflow_role')
@@ -92,6 +112,8 @@ export function buildRetrievalHandoff(understanding: StructuredUnderstanding): R
   return {
     tools,
     unresolved_aliases: unresolvedAliases,
+    asset_providers: assetProviders,
+    unresolved_asset_provider_mentions: unresolvedAssetProviderMentions,
     workflow_role: attestedToHandoffValue(understanding.project_facts.workflow_role.attestation, 'unresolved'),
     intended_use: attestedToHandoffValue(understanding.project_facts.intended_use.attestation, 'unclear'),
     // Active (non-superseded) observations only, in whatever scope they

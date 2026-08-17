@@ -32,6 +32,7 @@ function su(overrides: Partial<{ tool_mentions: ToolMention[]; scoped_observatio
     tool_mentions: overrides.tool_mentions ?? [],
     scoped_observations: overrides.scoped_observations ?? [],
     user_goals: [],
+    asset_provider_mentions: [],
     current_phase: 1,
     gate_1_state: 'not_met',
     gate_2_state: 'not_yet_stable',

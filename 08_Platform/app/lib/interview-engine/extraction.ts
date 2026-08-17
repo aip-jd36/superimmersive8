@@ -37,6 +37,7 @@
  */
 
 import type {
+  AssetProviderMention,
   Attested,
   ConfidenceState,
   GoalCategory,
@@ -49,12 +50,14 @@ import type {
   WorkflowStage,
 } from '@/types/interview-engine'
 import {
+  addAssetProviderMention,
   addObservation,
   addToolMention,
   addUserGoal,
   setIntendedUse,
   setJurisdiction,
   setWorkflowRole,
+  supersedeAssetProviderMention,
   supersedeObservation,
   supersedeToolMention,
   supersedeUserGoal,
@@ -95,12 +98,28 @@ export interface CandidateObservation {
   proposal_id: string
   turn: number
   raw_text: string
-  kind: 'tool_mention' | 'scoped_observation' | 'project_fact' | 'user_goal'
+  kind: 'tool_mention' | 'scoped_observation' | 'project_fact' | 'user_goal' | 'asset_provider_mention'
 
   /** kind === 'tool_mention' */
   raw_tool_name?: string
   /** kind === 'tool_mention'; set when this candidate corrects an existing mention */
   supersedes_tool_mention_id?: string
+
+  /**
+   * kind === 'asset_provider_mention' (Living Knowledge — Third-Party Source
+   * Rights, M1+M2, 2026-08-18). The user named an external source/asset
+   * provider (e.g. "Getty", "iStock") -- distinct from raw_tool_name, which
+   * is reserved for AI generation tools/platforms. Set independently of
+   * whether the turn also states a third_party_source_rights goal --
+   * provider recognition may occur on any turn that names one, regardless of
+   * whether a goal is also present this turn (see SYSTEM_PROMPT in
+   * anthropic-extractor.ts for the full explicit-question-vs-incidental-
+   * disclosure distinction that governs GOAL creation, which this field does
+   * not itself gate).
+   */
+  raw_provider_name?: string
+  /** kind === 'asset_provider_mention'; set when this candidate corrects an existing mention */
+  supersedes_asset_provider_mention_id?: string
   /**
    * kind === 'tool_mention'; set ONLY when the user directly stated the
    * access surface or plan tier in this turn (e.g. "the Gemini app," "team
@@ -258,7 +277,50 @@ const KNOWN_TOOLS: Record<string, string> = {
   'eleven labs': 'elevenlabs',
 }
 
+/**
+ * Bounded initial canonical asset-provider registry (Living Knowledge —
+ * Third-Party Source Rights, M1+M2, 2026-08-18, PM-approved scope per
+ * THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md §9): exactly the
+ * four providers with an already-governed relationship (Getty, iStock,
+ * Shutterstock have adopted claims; Adobe Stock has none yet but recognition
+ * is still useful, per the approved design). Deliberately NOT expanded to
+ * Unsplash/Pexels/Pond5/Storyblocks/Envato/etc. in this milestone. No
+ * ambiguous-alias sub-registry is needed, unlike KNOWN_AMBIGUOUS_TOOLS above
+ * -- none of these names are textually confusable with each other the way
+ * "Nano Banana" is confusable across two Gemini access surfaces. Getty and
+ * iStock are kept as DISTINCT canonical identifiers even though they are
+ * corporately related -- their governed claims differ materially (see
+ * GOVERNED-CLAIMS.md's CLAIM-STOCK-GETTY-EDITORIAL-001-v1 vs. CLAIM-STOCK-
+ * ISTOCK-EDITORIAL-001-v1), so collapsing them would make correct future
+ * routing architecturally impossible, not merely imprecise.
+ */
+const KNOWN_ASSET_PROVIDERS: Record<string, string> = {
+  getty: 'getty',
+  'getty images': 'getty',
+  gettyimages: 'getty',
+  istock: 'istock',
+  istockphoto: 'istock',
+  'istock by getty images': 'istock',
+  shutterstock: 'shutterstock',
+  'adobe stock': 'adobe-stock',
+  adobestock: 'adobe-stock',
+}
+
 export function normalizeCandidate(candidate: CandidateObservation): NormalizationResult {
+  if (candidate.kind === 'asset_provider_mention') {
+    if (!candidate.raw_provider_name) return { status: 'not_applicable' }
+    const providerKey = candidate.raw_provider_name.trim().toLowerCase()
+    const knownProvider = KNOWN_ASSET_PROVIDERS[providerKey]
+    // No ambiguous-provider registry exists (see KNOWN_ASSET_PROVIDERS'
+    // own comment) -- a provider name is either a known alias (resolved) or
+    // not (unrecognized), never known_ambiguous. "Getty or iStock, I don't
+    // remember which" is handled upstream: the extractor is expected to
+    // flag such a candidate low_confidence (attestCandidate defers it
+    // before normalization's result is ever used to assert an identity),
+    // never resolved here to either provider by guessing.
+    return knownProvider ? { status: 'resolved', canonical_identifier: knownProvider } : { status: 'unrecognized' }
+  }
+
   if (candidate.kind !== 'tool_mention' || !candidate.raw_tool_name) {
     return { status: 'not_applicable' }
   }
@@ -290,6 +352,7 @@ export type ProposedFact =
   | { kind: 'scoped_observation'; observation: ScopedObservation }
   | { kind: 'project_fact'; field: 'intended_use' | 'workflow_role' | 'jurisdiction'; value: Attested<string> }
   | { kind: 'user_goal'; goal: UserGoal }
+  | { kind: 'asset_provider_mention'; mention: AssetProviderMention }
   | { kind: 'undetermined' }
 
 /**
@@ -431,6 +494,46 @@ export function attestCandidate(
         ? { state: 'confirmed', value: candidate.fact_value_hint }
         : ({ state: candidate.fact_confidence_hint } as Attested<string>)
     return { kind: 'project_fact', field: candidate.raw_fact_field, value }
+  }
+
+  if (candidate.kind === 'asset_provider_mention') {
+    if (!candidate.raw_provider_name) return null
+
+    // Turn-qualified, same minting rule as tool_mention/user_goal/
+    // scoped_observation above -- proposal_id is a turn-LOCAL transport id
+    // the model restarts numbering from every call, so mention_id must be
+    // persistent and collision-free across the whole conversation. See the
+    // tool_mention branch's own comment (and the 2026-08-16 scoped_observation
+    // production-incident fix it documents) for the full reasoning; applied
+    // here from the start rather than retrofitted later.
+    const mentionId = `t${candidate.turn}-${candidate.proposal_id}`
+
+    let resolution: AssetProviderMention['resolution']
+    let confidence: ConfidenceState
+    if (normalization.status === 'resolved') {
+      resolution = { kind: 'canonical', identifier: normalization.canonical_identifier }
+      confidence = 'confirmed'
+    } else {
+      // unrecognized (or, defensively, not_applicable/known_ambiguous --
+      // neither reachable for this kind, see normalizeCandidate) stays an
+      // unresolved_alias -- normalization's resolution status is the
+      // authoritative signal, never overridden by a candidate's own
+      // confidence hint, mirroring tool_mention's own discipline exactly.
+      resolution = { kind: 'unresolved_alias', raw_name: candidate.raw_provider_name }
+      confidence = 'unresolved_no_visibility'
+    }
+
+    return {
+      kind: 'asset_provider_mention',
+      mention: {
+        mention_id: mentionId,
+        resolution,
+        confidence,
+        source_turn: candidate.turn,
+        source_statement: candidate.raw_text,
+        superseded_by: null,
+      },
+    }
   }
 
   if (candidate.kind === 'user_goal') {
@@ -606,6 +709,64 @@ function resolveToolMentionTarget(
   return undefined
 }
 
+// ── Asset provider mention identity resolution (stage 3.5, Living Knowledge
+// — Third-Party Source Rights, M1+M2, 2026-08-18) ───────────────────────────
+
+/**
+ * Mirrors resolveToolMentionTarget's own two-step design exactly (same-
+ * identity match, then is_correction-flagged retraction of a different
+ * mention, with the same same-turn double-supersede guard) -- per explicit
+ * instruction to reuse ToolMention's existing correction pattern rather than
+ * inventing a stock-specific correction engine. The one simplification:
+ * Step 1's identity match has no "unresolved-alias raw-name" sub-case to
+ * consider beyond the direct comparison below, since KNOWN_ASSET_PROVIDERS
+ * has no ambiguous-alias concept (see that registry's own comment) --
+ * structurally simpler than the tool case, not a different algorithm.
+ *
+ * Returns undefined for CREATE (no matching existing mention -- a genuinely
+ * new one) or the mention_id to supersede for a correction. The caller mints
+ * the actual replacement id; this function never does.
+ */
+function resolveAssetProviderMentionTarget(
+  candidate: CandidateObservation,
+  su: StructuredUnderstanding,
+  retractedThisTurn: ReadonlySet<string>,
+): string | undefined {
+  if (candidate.kind !== 'asset_provider_mention') return undefined
+  if (candidate.supersedes_asset_provider_mention_id) return candidate.supersedes_asset_provider_mention_id
+
+  const active = su.asset_provider_mentions.filter((m) => m.superseded_by === null)
+  const label = (m: AssetProviderMention) => (m.resolution.kind === 'canonical' ? m.resolution.identifier : m.resolution.raw_name).toLowerCase()
+  const rawProviderName = (candidate.raw_provider_name ?? '').trim().toLowerCase()
+
+  // Step 1: same-provider identity match.
+  const thisNormalization = normalizeCandidate(candidate)
+  const thisCanonicalKey = thisNormalization.status === 'resolved' ? thisNormalization.canonical_identifier.toLowerCase() : null
+  const identityMatches = active.filter((m) => {
+    if (thisCanonicalKey && m.resolution.kind === 'canonical' && m.resolution.identifier.toLowerCase() === thisCanonicalKey) return true
+    if (rawProviderName && m.resolution.kind === 'unresolved_alias' && m.resolution.raw_name.trim().toLowerCase() === rawProviderName) return true
+    return false
+  })
+  if (identityMatches.length === 1) return identityMatches[0].mention_id
+  if (identityMatches.length > 1) return undefined // ambiguous -- never guess, fall through to create
+
+  // Step 2: is_correction-flagged retraction of a different provider.
+  if (!candidate.is_correction) return undefined
+
+  const needle = (candidate.correction_of_raw_text ?? '').toLowerCase()
+  if (needle) {
+    const textMatches = active.filter((m) => needle.includes(label(m)))
+    if (textMatches.length === 1) return textMatches[0].mention_id
+  }
+
+  if (retractedThisTurn.has(rawProviderName)) return undefined
+
+  const otherActive = active.filter((m) => label(m) !== rawProviderName)
+  if (otherActive.length === 1) return otherActive[0].mention_id
+
+  return undefined
+}
+
 // ── Deterministic mutation + diagnostics (stage 4) ──────────────────────────
 
 export const REJECTED_REASON_CODES = [
@@ -673,20 +834,24 @@ export async function runExtractionPipeline(
   let current = su
   /** Labels of tool mentions actually superseded so far this turn -- see resolveToolMentionTarget's own docs for why this guard exists. */
   const retractedThisTurn = new Set<string>()
+  /** Same guard, own Set, for asset provider mentions -- kept separate from retractedThisTurn (not merged) so a coincidental name collision between a tool and a provider can never cross-suppress the other kind's own guard. */
+  const retractedProvidersThisTurn = new Set<string>()
 
   for (const rawCandidate of candidates) {
-    // Exactly one of these two resolvers can ever return a value for a
-    // given candidate -- resolveToolMentionTarget short-circuits on
-    // candidate.kind !== 'tool_mention', resolveUserGoalTarget on
-    // candidate.kind !== 'user_goal' -- mirroring the existing
-    // single-resolver call shape rather than branching on kind here.
+    // Exactly one of these three resolvers can ever return a value for a
+    // given candidate -- each short-circuits on candidate.kind not matching
+    // its own concern -- mirroring the existing single-resolver call shape
+    // rather than branching on kind here.
     const supersedesToolId = resolveToolMentionTarget(rawCandidate, current, retractedThisTurn)
     const supersedesGoalId = resolveUserGoalTarget(rawCandidate, current)
+    const supersedesProviderId = resolveAssetProviderMentionTarget(rawCandidate, current, retractedProvidersThisTurn)
     const candidate = supersedesToolId
       ? { ...rawCandidate, supersedes_tool_mention_id: supersedesToolId }
       : supersedesGoalId
         ? { ...rawCandidate, supersedes_goal_id: supersedesGoalId }
-        : rawCandidate
+        : supersedesProviderId
+          ? { ...rawCandidate, supersedes_asset_provider_mention_id: supersedesProviderId }
+          : rawCandidate
 
     const normalization = normalizeCandidate(candidate)
     const proposedFact = attestCandidate(candidate, normalization)
@@ -739,6 +904,17 @@ export async function runExtractionPipeline(
           ? supersedeUserGoal(current, candidate.supersedes_goal_id, proposedFact.goal)
           : addUserGoal(current, proposedFact.goal)
         appliedIdentifier = proposedFact.goal.goal_id
+      } else if (proposedFact.kind === 'asset_provider_mention') {
+        if (candidate.supersedes_asset_provider_mention_id) {
+          const target = current.asset_provider_mentions.find((m) => m.mention_id === candidate.supersedes_asset_provider_mention_id)
+          if (target) {
+            retractedProvidersThisTurn.add((target.resolution.kind === 'canonical' ? target.resolution.identifier : target.resolution.raw_name).toLowerCase())
+          }
+          current = supersedeAssetProviderMention(current, candidate.supersedes_asset_provider_mention_id, proposedFact.mention)
+        } else {
+          current = addAssetProviderMention(current, proposedFact.mention)
+        }
+        appliedIdentifier = proposedFact.mention.mention_id
       } else {
         // attestCandidate never actually returns {kind: 'undetermined'} (it
         // returns null instead, handled above) -- this branch exists only

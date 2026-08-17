@@ -37,6 +37,8 @@ const synthetic: GalleryCase[] = [
     handoff: {
       tools: [{ identifier: 'Kling', access_surface: 'unresolved', plan_tier: 'unknown' }],
       unresolved_aliases: [],
+      asset_providers: [],
+      unresolved_asset_provider_mentions: [],
       workflow_role: 'unresolved',
       intended_use: 'unclear',
       scoped_observations: [],
@@ -49,6 +51,8 @@ const synthetic: GalleryCase[] = [
     handoff: {
       tools: [],
       unresolved_aliases: ['Nano Banana'],
+      asset_providers: [],
+      unresolved_asset_provider_mentions: [],
       workflow_role: 'unresolved',
       intended_use: 'unclear',
       scoped_observations: [],
@@ -61,6 +65,8 @@ const synthetic: GalleryCase[] = [
     handoff: {
       tools: [{ identifier: 'kling', access_surface: 'Web app', plan_tier: 'Pro' }],
       unresolved_aliases: ['Nano Banana'],
+      asset_providers: [],
+      unresolved_asset_provider_mentions: [],
       workflow_role: 'Producer',
       intended_use: 'Agency deliverable',
       scoped_observations: [],
@@ -73,6 +79,8 @@ const synthetic: GalleryCase[] = [
     handoff: {
       tools: [{ identifier: 'elevenlabs', access_surface: 'confirmed_absent', plan_tier: 'declined' }],
       unresolved_aliases: [],
+      asset_providers: [],
+      unresolved_asset_provider_mentions: [],
       workflow_role: 'unresolved',
       intended_use: 'unclear',
       scoped_observations: [],
@@ -85,6 +93,8 @@ const synthetic: GalleryCase[] = [
     handoff: {
       tools: [{ identifier: 'runway-gen3', access_surface: 'API', plan_tier: 'Team' }],
       unresolved_aliases: [],
+      asset_providers: [],
+      unresolved_asset_provider_mentions: [],
       workflow_role: 'Producer',
       intended_use: 'Paid social ad campaign',
       scoped_observations: [
@@ -120,6 +130,8 @@ const synthetic: GalleryCase[] = [
     handoff: {
       tools: [],
       unresolved_aliases: [],
+      asset_providers: [],
+      unresolved_asset_provider_mentions: [],
       workflow_role: 'unresolved',
       intended_use: 'unclear',
       scoped_observations: [],

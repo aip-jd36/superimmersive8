@@ -60,6 +60,7 @@ function baseSU(overrides: Partial<StructuredUnderstanding> = {}): StructuredUnd
     tool_mentions: [],
     scoped_observations: [],
     user_goals: [],
+    asset_provider_mentions: [],
     current_phase: 2,
     gate_1_state: 'not_met',
     gate_2_state: 'not_yet_stable',
@@ -416,5 +417,28 @@ describe('user_goals has zero effect on Gate 1 or Gate 2 (Milestone 1 hard scope
     const result = evaluateGate2(su, suWithGoal)
     expect(result.state).toBe('stable')
     expect(result.changed_fields).toEqual([])
+  })
+})
+
+describe('third_party_source_rights goal never blocks or stalls completion (Living Knowledge — Third-Party Source Rights, M1+M2, 2026-08-18)', () => {
+  test('a conversation whose ONLY goal is third_party_source_rights, with an otherwise-complete project fact set, still reaches Gate 1 met and Gate 2 stable -- completion is entirely goal-category-independent, not blocked by the absence of a runtime claim for the new category', () => {
+    const sourceRightsGoal = {
+      goal_id: 'g-1',
+      state: 'confirmed' as const,
+      raw_text: 'Can I use this Getty image in an ad?',
+      category: 'third_party_source_rights' as const,
+      scope: 'informational' as const,
+      superseded_by: null,
+      source_turn: 1,
+      source_statement: 'Can I use this Getty image in an ad?',
+    }
+    const su = baseSU({
+      tool_mentions: [toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'runway-gen3' } })],
+      user_goals: [sourceRightsGoal],
+    })
+    const gate1 = evaluateGate1(su)
+    expect(gate1.state).toBe('met')
+    const gate2 = evaluateGate2(su, su)
+    expect(gate2.state).toBe('stable')
   })
 })

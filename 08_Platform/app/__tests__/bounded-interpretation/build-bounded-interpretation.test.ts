@@ -18,6 +18,8 @@ function handoff(overrides: Partial<RetrievalHandoff> = {}): RetrievalHandoff {
   return {
     tools: [],
     unresolved_aliases: [],
+    asset_providers: [],
+    unresolved_asset_provider_mentions: [],
     workflow_role: 'unresolved',
     intended_use: 'unclear',
     scoped_observations: [],
@@ -179,6 +181,13 @@ describe('buildBoundedInterpretations -- outside_current_coverage', () => {
     const g = goal({ goal_id: 'g-1', raw_text: 'Is voice cloning of a real person okay here?', category: 'likeness' })
     const interpretations = buildBoundedInterpretations([g], out.results)
     expect(interpretations[0].status).toBe('outside_current_coverage')
+  })
+
+  test("third_party_source_rights (Living Knowledge — Third-Party Source Rights, M1+M2, 2026-08-18) resolves to outside_current_coverage -- the category exists so CRC can recognize the question, but no TOPIC_CLAIMS_FIXTURE entry is reachable for it yet (M3/M4 not authorized), and the fixed copy never asserts a substantive answer", () => {
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this Getty image in an ad?', category: 'third_party_source_rights' })
+    const interpretations = buildBoundedInterpretations([g], [])
+    expect(interpretations[0].status).toBe('outside_current_coverage')
+    expect(interpretations[0].summary.toLowerCase()).not.toMatch(/safe|compliant|approved|cleared|low risk|high risk/)
   })
 })
 

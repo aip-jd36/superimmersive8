@@ -61,6 +61,7 @@ function baseSU(overrides: Partial<StructuredUnderstanding> = {}): StructuredUnd
     tool_mentions: [],
     scoped_observations: [],
     user_goals: [],
+    asset_provider_mentions: [],
     current_phase: 2,
     gate_1_state: 'met',
     gate_2_state: 'stable',
@@ -337,5 +338,68 @@ describe('user_goals never reach RetrievalHandoff (Milestone 1 hard scope bounda
     const handoff = buildRetrievalHandoff(baseSU({ user_goals: [goal] }))
     expect(Object.keys(handoff)).not.toContain('user_goals')
     expect(JSON.stringify(handoff)).not.toContain('Can I use this commercially')
+  })
+})
+
+describe('asset provider identity (Living Knowledge — Third-Party Source Rights, M1+M2, 2026-08-18)', () => {
+  test('a single resolved provider populates asset_providers, not tools/unresolved_aliases', () => {
+    const handoff = buildRetrievalHandoff(
+      baseSU({
+        asset_provider_mentions: [
+          { mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'I used Getty.', superseded_by: null },
+        ],
+      }),
+    )
+    expect(handoff.asset_providers).toEqual(['getty'])
+    expect(handoff.unresolved_asset_provider_mentions).toEqual([])
+    expect(handoff.tools).toEqual([])
+    expect(handoff.unresolved_aliases).toEqual([])
+  })
+
+  test('an unresolved provider alias populates unresolved_asset_provider_mentions with the raw name, never a fabricated canonical id', () => {
+    const handoff = buildRetrievalHandoff(
+      baseSU({
+        asset_provider_mentions: [
+          { mention_id: 'm1', resolution: { kind: 'unresolved_alias', raw_name: 'PhotoMega' }, confidence: 'unresolved_no_visibility', source_turn: 1, source_statement: 'I used PhotoMega.', superseded_by: null },
+        ],
+      }),
+    )
+    expect(handoff.asset_providers).toEqual([])
+    expect(handoff.unresolved_asset_provider_mentions).toEqual(['PhotoMega'])
+  })
+
+  test('a superseded provider mention is excluded from both arrays -- only the active replacement counts', () => {
+    const handoff = buildRetrievalHandoff(
+      baseSU({
+        asset_provider_mentions: [
+          { mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'I used Getty.', superseded_by: 'm2' },
+          { mention_id: 'm2', resolution: { kind: 'canonical', identifier: 'istock' }, confidence: 'confirmed', source_turn: 2, source_statement: 'Sorry, iStock.', superseded_by: null },
+        ],
+      }),
+    )
+    expect(handoff.asset_providers).toEqual(['istock'])
+  })
+
+  test('two distinct providers (Getty + Shutterstock) both appear in asset_providers', () => {
+    const handoff = buildRetrievalHandoff(
+      baseSU({
+        asset_provider_mentions: [
+          { mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Getty.', superseded_by: null },
+          { mention_id: 'm2', resolution: { kind: 'canonical', identifier: 'shutterstock' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Shutterstock.', superseded_by: null },
+        ],
+      }),
+    )
+    expect(handoff.asset_providers.sort()).toEqual(['getty', 'shutterstock'])
+  })
+
+  test('asset_provider_mentions never reaches RetrievalHandoff verbatim -- only the derived identifier/raw-name arrays do (no source_statement leakage)', () => {
+    const handoff = buildRetrievalHandoff(
+      baseSU({
+        asset_provider_mentions: [
+          { mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'a very specific client detail about Getty', superseded_by: null },
+        ],
+      }),
+    )
+    expect(JSON.stringify(handoff)).not.toContain('a very specific client detail')
   })
 })

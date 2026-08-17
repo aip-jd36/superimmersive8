@@ -38,10 +38,16 @@ export const DEFAULT_MODEL = 'claude-sonnet-5'
 const SYSTEM_PROMPT = `You are the candidate-observation extraction stage of a larger, deterministic pipeline. Your only job is to read one user turn from a conversation about an AI-generated video project and propose a list of CandidateObservation objects describing what was said. You are not the only stage: everything you produce is a PROPOSAL, reviewed and possibly rejected by deterministic code downstream. You never see or affect the final state.
 
 For each distinct fact-bearing statement in the turn, produce one candidate:
-- kind "tool_mention": the user names a tool/platform/app they used.
+- kind "tool_mention": the user names an AI generation tool/platform/app they used to CREATE something (e.g. Runway, Kling, ElevenLabs). Never use this for a third-party source/stock media provider -- see "asset_provider_mention" below for that distinct concept.
 - kind "scoped_observation": a fact about the project's process, review, or workflow (e.g. who reviewed it, what stage it's at, whether something happened).
 - kind "project_fact": a fact about the overall project's intended use, the user's own role, or which country's laws they say are relevant (jurisdiction). For jurisdiction specifically: only propose this when the user DIRECTLY states a country/jurisdiction in answer to a question about applicable law -- e.g. "United States", "we're based in Taiwan", "US copyright rules apply here". NEVER infer it from where they mention working, filming, their client's location, or any other indirect signal -- those are separate facts (e.g. workflow details), not a jurisdiction statement. If the user names more than one country or gives an ambiguous answer (e.g. "the client is American but we're filming in Taiwan"), do NOT propose a single jurisdiction value -- either propose nothing for this fact, or propose it with fact_confidence_hint "unknown" to reflect the genuine ambiguity, never guess which one governs.
 - kind "user_goal": the user explicitly states what they came here wanting to know or achieve about THIS workflow's commercial readiness -- a question ("Can I use this commercially?", "Will my client own this?") and a declarative need ("My client needs proof this is cleared.", "I'm trying to figure out whether this is okay for a paid campaign.") are equally valid; capture either. This is distinct from project_fact's intended_use: intended_use describes what the OUTPUT is for (e.g. "an AI commercial for my client"); user_goal is what the USER wants to know or achieve regarding commercial readiness. A turn can and often does contain both at once -- propose both candidates when it does, never merge them into one.
+- kind "asset_provider_mention": the user names a third-party source/stock media provider that supplied material used IN the project (e.g. "Getty", "Getty Images", "iStock", "Shutterstock", "Adobe Stock") -- report the name via raw_provider_name, never raw_tool_name. This is a source of material, not a tool used to generate anything. Propose this candidate whenever a provider is named, REGARDLESS of whether the turn also contains a user_goal -- recognizing that a provider was mentioned is independent of whether the user is asking a rights question about it right now. If the user names a provider but is genuinely unsure which one ("I got it from Getty or iStock, I don't remember which"), set low_confidence: true rather than guessing between them.
+
+Third-party source rights is its own user_goal category (see goal_category_hint below) for whether the user has the RIGHTS to use third-party source material (e.g. a stock image) in the project -- a materially different question from commercial_use (whether the AI-generated OUTPUT can be used commercially). This category is EXPLICIT-QUESTION-GATED ONLY, exactly like every other goal category: propose it only when the user asks a direct question or states a direct need about permission/rights to use the source material.
+Examples that SHOULD produce a third_party_source_rights user_goal: "Can I use this Getty image in an ad?", "Can I use these iStock images in my client commercial?", "Do I have the rights to use this stock image?", "Can I use a Shutterstock Editorial photo in this campaign?", "Am I allowed to use this licensed stock footage in the video?".
+Examples that must NOT produce a third_party_source_rights user_goal (an asset_provider_mention candidate may still be proposed for the provider name itself, but no goal): "I used Getty.", "The client gave me a Shutterstock image.", "One of the reference images came from iStock.", "I downloaded the image from Getty.", "Getty was one of the sources." -- these are plain workflow disclosures with no accompanying question or stated need, exactly the same "disclosure is not itself a goal" discipline that already applies to every other category.
+A single turn can state both a source-rights question AND a commercial-use question about the finished piece -- propose both as separate user_goal candidates, never merged: "Can I use this Getty image in the video, and can I use the finished video commercially?" is one third_party_source_rights candidate and one commercial_use candidate.
 
 A turn stating two distinct goals joined by "and" is still TWO candidates, never one merged candidate, even though they appear in a single sentence.
 Example: "Can I use this commercially and do I own the copyright?"
@@ -61,6 +67,7 @@ goal_category_hint -- the goal's coarse subject matter:
 - "copyright_ownership": who owns the copyright in the output (e.g. "Do I own this?", "Does my client own the rights?").
 - "copyrightability": whether the output can be copyrighted at all, as a category (e.g. "Is AI-generated video even copyrightable?"). Distinct from copyright_ownership -- ownership presupposes something ownable exists; copyrightability asks whether it exists at all. Only use this when the user is asking about the concept in general, not who specifically owns a specific piece.
 - "likeness": questions about a real person's face, voice, or likeness appearing in or being cloned by the output.
+- "third_party_source_rights": whether the user has sufficient rights or permission to use third-party source material (e.g. a stock image, licensed footage) in the project -- distinct from commercial_use, which is about the AI-generated OUTPUT, not an input source. See the asset_provider_mention guidance above for the full explicit-question-vs-incidental-disclosure distinction that governs this category specifically.
 - "unknown": the goal doesn't clearly fit any of the above, or you're not confident enough to classify it.
 Never guess a specific category from adjacent context the user didn't actually state -- e.g. never "copyright_ownership" merely because a client or a paid campaign was mentioned elsewhere in the turn. When genuinely unsure, use "unknown" rather than guessing.
 
@@ -95,13 +102,13 @@ When kind is "tool_mention" and the user DIRECTLY states which specific plan/tie
 
 If a turn contains nothing you can classify as one of the four kinds -- small talk, an incomplete thought, pure filler -- return no candidates for it, or set low_confidence: true on a best-effort candidate if you're genuinely unsure whether something is a real signal.`
 
-const CANDIDATE_KIND_VALUES = ['tool_mention', 'scoped_observation', 'project_fact', 'user_goal'] as const
+const CANDIDATE_KIND_VALUES = ['tool_mention', 'scoped_observation', 'project_fact', 'user_goal', 'asset_provider_mention'] as const
 const OBSERVATION_SCOPE_VALUES = ['current_project', 'historical_project', 'general_practice'] as const
 const WORKFLOW_STAGE_VALUES = ['T0', 'T1', 'T2', 'T3', 'T4', 'T5'] as const
 const CONFIDENCE_HINT_VALUES = ['confirmed', 'confirmed_absent', 'unresolved_no_visibility', 'unknown', 'declined'] as const
 const PROJECT_FACT_FIELD_VALUES = ['intended_use', 'workflow_role', 'jurisdiction'] as const
-/** Milestone 2 (2026-08-15). Mirrors GOAL_CATEGORIES / GOAL_SCOPES in types/interview-engine.ts -- kept as separate local consts here, same pattern as every other *_VALUES const in this file, rather than importing the runtime const array across the adapter boundary. */
-const GOAL_CATEGORY_VALUES = ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'unknown'] as const
+/** Milestone 2 (2026-08-15); extended with 'third_party_source_rights' (Living Knowledge — Third-Party Source Rights, M1+M2, 2026-08-18). Mirrors GOAL_CATEGORIES / GOAL_SCOPES in types/interview-engine.ts -- kept as separate local consts here, same pattern as every other *_VALUES const in this file, rather than importing the runtime const array across the adapter boundary. */
+const GOAL_CATEGORY_VALUES = ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'third_party_source_rights', 'unknown'] as const
 const GOAL_SCOPE_VALUES = ['informational', 'determination_request'] as const
 
 /**
@@ -137,6 +144,11 @@ const CANDIDATE_RESPONSE_SCHEMA = {
               'Valid: "Nano Banana", "Kling", "ElevenLabs". ' +
               'Invalid: "Nano Banana — just the app on my phone" (includes an access-method phrase), "Kling on the paid plan" (includes a plan detail), "ElevenLabs, but only for a temporary voice" (includes a qualifier). ' +
               'Null otherwise.',
+          },
+          raw_provider_name: {
+            type: ['string', 'null'],
+            description:
+              'When kind is asset_provider_mention: return ONLY the third-party source/stock media provider name itself (e.g. "Getty", "Getty Images", "iStock", "Shutterstock", "Adobe Stock"), preserving the user\'s wording. Never a tool/platform used to generate content -- see raw_tool_name for that. Never map it to a canonical id yourself. Null otherwise.',
           },
           access_surface_confidence_hint: {
             type: ['string', 'null'],
@@ -232,6 +244,7 @@ const CANDIDATE_RESPONSE_SCHEMA = {
           'raw_text',
           'kind',
           'raw_tool_name',
+          'raw_provider_name',
           'access_surface_confidence_hint',
           'access_surface_value_hint',
           'plan_tier_confidence_hint',
@@ -262,6 +275,7 @@ interface ParsedCandidate {
   raw_text: string
   kind: (typeof CANDIDATE_KIND_VALUES)[number]
   raw_tool_name: string | null
+  raw_provider_name: string | null
   access_surface_confidence_hint: (typeof CONFIDENCE_HINT_VALUES)[number] | null
   access_surface_value_hint: string | null
   plan_tier_confidence_hint: (typeof CONFIDENCE_HINT_VALUES)[number] | null
@@ -287,6 +301,7 @@ export function toCandidateObservation(parsed: ParsedCandidate, turn: number): C
     raw_text: parsed.raw_text,
     kind: parsed.kind,
     raw_tool_name: parsed.raw_tool_name ?? undefined,
+    raw_provider_name: parsed.raw_provider_name ?? undefined,
     access_surface_confidence_hint: parsed.access_surface_confidence_hint ?? undefined,
     access_surface_value_hint: parsed.access_surface_value_hint ?? undefined,
     plan_tier_confidence_hint: parsed.plan_tier_confidence_hint ?? undefined,

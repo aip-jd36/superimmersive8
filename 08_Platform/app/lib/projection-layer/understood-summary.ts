@@ -111,9 +111,40 @@ export interface UnderstoodObservation {
 export interface UnderstoodFacts {
   tools: UnderstoodTool[]
   unresolved_tool_mentions: string[]
+  /**
+   * Living Knowledge — Third-Party Source Rights, M1+M2 (2026-08-18).
+   * Canonical asset-provider identifiers, kept structurally separate from
+   * `tools`/`unresolved_tool_mentions` -- an asset provider (a source of
+   * material, e.g. Getty) is not an AI generation tool, and merging the two
+   * would recreate exactly the bug this milestone fixes: Getty rendering as
+   * "a platform I wasn't able to match."
+   */
+  asset_providers: string[]
+  unresolved_asset_provider_mentions: string[]
   workflow_role: string | null
   intended_use: string | null
   observations: UnderstoodObservation[]
+}
+
+/**
+ * Display labels for canonical asset-provider identifiers (Living Knowledge
+ * — Third-Party Source Rights, M1+M2, 2026-08-18). Projection-owned display
+ * copy, deliberately separate from the canonical identifier registry
+ * (extraction.ts's KNOWN_ASSET_PROVIDERS) -- the canonical id is a stable
+ * internal key, this is user-facing wording, mirroring the existing
+ * separation of concerns between normalization (extraction.ts) and rendering
+ * (this file) used everywhere else in this pipeline. Not final legal-review
+ * copy -- neutral labeling only, per instruction.
+ */
+const ASSET_PROVIDER_DISPLAY_LABELS: Record<string, string> = {
+  getty: 'Getty Images',
+  istock: 'iStock',
+  shutterstock: 'Shutterstock',
+  'adobe-stock': 'Adobe Stock',
+}
+
+function assetProviderDisplayLabel(identifier: string): string {
+  return ASSET_PROVIDER_DISPLAY_LABELS[identifier] ?? identifier
 }
 
 /** Collapses any of the sentinel strings a scalar Attested<string> field can produce to null; passes a real value through unchanged. */
@@ -132,6 +163,8 @@ export function buildUnderstoodFacts(handoff: RetrievalHandoff): UnderstoodFacts
       plan_tier: affirmativeScalar(t.plan_tier),
     })),
     unresolved_tool_mentions: [...handoff.unresolved_aliases],
+    asset_providers: [...handoff.asset_providers],
+    unresolved_asset_provider_mentions: [...handoff.unresolved_asset_provider_mentions],
     workflow_role: affirmativeScalar(handoff.workflow_role),
     intended_use: affirmativeScalar(handoff.intended_use),
     observations: handoff.scoped_observations
@@ -179,6 +212,40 @@ function unresolvedMentionsClause(mentions: string[], precededByToolsClause: boo
   const lead = precededByToolsClause ? 'You also mentioned' : 'You mentioned'
   const quoted = mentions.map((m) => `"${m}"`)
   return `${lead} ${joinNaturally(quoted)}, which I wasn't able to match to a specific platform yet.`
+}
+
+/**
+ * Living Knowledge — Third-Party Source Rights, M1+M2 (2026-08-18). Fixes
+ * the production bug this milestone exists to close: a recognized asset
+ * provider (e.g. Getty) previously had no candidate kind of its own, so it
+ * extracted as an unresolved tool_mention and rendered via
+ * unresolvedMentionsClause above -- "which I wasn't able to match to a
+ * specific platform yet" -- a materially misleading sentence for a
+ * correctly-recognized source provider. This clause is deliberately worded
+ * distinctly from toolsClause ("You mentioned using...") -- "as a source
+ * provider" keeps the AI-generation-tool vs. asset/source-provider
+ * distinction visible in the rendered text itself, not just internally.
+ * Neutral labeling only (see ASSET_PROVIDER_DISPLAY_LABELS' own comment) --
+ * not final legal-review copy.
+ */
+function assetProvidersClause(providers: string[], precededByToolsClause: boolean): string | null {
+  if (providers.length === 0) return null
+  const lead = precededByToolsClause ? 'You also mentioned using' : 'You mentioned using'
+  const labels = providers.map(assetProviderDisplayLabel)
+  return `${lead} ${joinNaturally(labels)} as a source provider.`
+}
+
+/**
+ * Unresolved-provider counterpart to assetProvidersClause -- deliberately
+ * NOT unresolvedMentionsClause's own "platform" wording (per instruction: an
+ * unresolved provider-like name must not be called an unresolved AI
+ * platform, and must not overstate recognition it doesn't have).
+ */
+function unresolvedAssetProviderMentionsClause(mentions: string[], precededByAssetProvidersClause: boolean): string | null {
+  if (mentions.length === 0) return null
+  const lead = precededByAssetProvidersClause ? 'You also mentioned' : 'You mentioned'
+  const quoted = mentions.map((m) => `"${m}"`)
+  return `${lead} ${joinNaturally(quoted)} as a possible source provider, which I wasn't able to match yet.`
 }
 
 /**
@@ -259,9 +326,12 @@ function observationClauses(observations: UnderstoodObservation[]): string[] {
 
 export function renderUnderstoodSummary(facts: UnderstoodFacts): string {
   const tools = toolsClause(facts.tools)
+  const assetProviders = assetProvidersClause(facts.asset_providers, tools !== null)
   const clauses = [
     tools,
     unresolvedMentionsClause(facts.unresolved_tool_mentions, tools !== null),
+    assetProviders,
+    unresolvedAssetProviderMentionsClause(facts.unresolved_asset_provider_mentions, assetProviders !== null),
     roleClause(facts.workflow_role),
     intendedUseClause(facts.intended_use),
     ...observationClauses(facts.observations),

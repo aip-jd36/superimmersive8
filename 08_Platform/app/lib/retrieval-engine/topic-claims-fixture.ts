@@ -34,84 +34,50 @@
  * dedicated Wave-1-specific exclusion test in
  * __tests__/retrieval-engine/wave1-candidate-claims-excluded.test.ts.
  *
- * CLAIM-STOCK-EDITORIAL-001-v1 (Adopted 2026-08-17, PM/JD, following Formal
- * Governance Review #1) is DELIBERATELY NOT mirrored here. Its actual
- * subject (Third-Party Source Assets / Stock Media Licensing) has no
- * corresponding `GoalCategory` value in `types/interview-engine.ts`'s
- * current set (`commercial_use`, `copyright_ownership`, `copyrightability`,
- * `likeness`, `unknown`) -- `THIRD_PARTY_SOURCE_ASSETS_ROUTING_ARCHITECTURE.md`
- * approved a future `third_party_source_rights` category as architectural
- * direction only, not implemented. Tagging this claim under an existing,
- * unrelated category (most temptingly `commercial_use`) was considered
- * during governance review and rejected: `TopicClaim.topic` is "the field
- * Topic Retrieval actually matches on" (see this claim's own doc comment
- * above), so a wrong value would make it an unintended topic-candidate for
- * every goal in that category, independent of whether the user ever
- * mentioned a stock-media provider -- exactly the silent-misclassification
- * failure mode `GOVERNED-CLAIMS.md`'s own governance discipline exists to
- * prevent for `Applicability requirements`, extended here to `Topic`. See
- * the claim's own "GOVERNANCE TREATMENT" note in `GOVERNED-CLAIMS.md` for
- * the full reasoning, and
+ * UPDATE (Living Knowledge -- Third-Party Source Rights, M1+M2, 2026-08-18):
+ * `third_party_source_rights` is now a real, implemented `GoalCategory`
+ * value (see `types/interview-engine.ts`'s `GOAL_CATEGORIES`) and
+ * `AssetProviderMention` capture/persistence now exists -- the gap described
+ * for each claim below as "no corresponding GoalCategory value" is CLOSED.
+ * All five stock claims remain DELIBERATELY absent from this fixture
+ * anyway: M1+M2 was explicitly scoped (PM authorization,
+ * `THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md` §22-23) to
+ * GoalCategory + AssetProviderMention capture ONLY -- provider-scoped
+ * retrieval (M3) and runtime-fixture/CRC-eligibility representation (M4)
+ * are separate, not-yet-authorized milestones. Adding a real
+ * `TOPIC_CLAIMS_FIXTURE` entry is never an automatic consequence of a
+ * GoalCategory shipping; it is its own deliberate governance/engineering
+ * decision, made together with (never ahead of) the provider-narrowing
+ * mechanism these three provider-specific claims specifically require. See
  * `__tests__/retrieval-engine/topic-claims-fixture-consistency.test.ts`
  * (`CLAIMS_WITHOUT_FIXTURE_REPRESENTATION`) for the consistency-guard
- * accommodation this omission required. Add this claim here, with its real
- * topic, only when that `GoalCategory` value is deliberately, separately
- * implemented -- never as a side effect of an unrelated change.
+ * accommodation, updated in the same change as this comment.
  *
- * CLAIM-STOCK-EDITORIAL-002-v1 (Adopted 2026-08-17, PM/JD, following Formal
- * Governance Review #2) is DELIBERATELY NOT mirrored here either, for the
- * SAME reason as CLAIM-STOCK-EDITORIAL-001-v1 immediately above -- not a
- * second, independent architecture gap, the identical one. Both claims
- * share one `GoalCategory` blocker and will gain their real
- * `TOPIC_CLAIMS_FIXTURE` entries together, in the same future change, when
- * that value is implemented. See `CLAIMS_WITHOUT_FIXTURE_REPRESENTATION` in
- * the consistency test for both IDs.
+ * CLAIM-STOCK-EDITORIAL-001-v1 (Adopted 2026-08-17, Formal Governance
+ * Review #1) and CLAIM-STOCK-EDITORIAL-002-v1 (Adopted 2026-08-17, Formal
+ * Governance Review #2) are generic (provider-agnostic) claims -- unlike the
+ * three provider-specific claims below, they have NO remaining architecture
+ * blocker beyond M4's own governance decision now that GoalCategory exists.
+ * Add both here, with `topic: 'third_party_source_rights'`, together in the
+ * same future change that authorizes M4 -- never as a side effect of an
+ * unrelated change, and never ahead of that explicit authorization.
  *
- * CLAIM-STOCK-GETTY-EDITORIAL-001-v1 (Adopted 2026-08-17, PM/JD, following
- * Formal Governance Review #3) is DELIBERATELY NOT mirrored here either --
- * the SAME `GoalCategory` gap as the two claims immediately above, a third
- * instance of one blocker, not a third independent one. This provider-
- * specific claim additionally has a SECOND future dependency beyond that
- * shared gap: even once `third_party_source_rights` exists, it would need
- * a not-yet-scoped provider-narrowing capability (something that can tell
- * Retrieval "this conversation is actually about Getty") before it could
- * safely become CRC-eligible -- see this claim's own "Additional future
- * dependency" note in `GOVERNED-CLAIMS.md`. Not designed or implemented
- * here. See `CLAIMS_WITHOUT_FIXTURE_REPRESENTATION` in the consistency
- * test for all three IDs.
- *
- * CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1 (Adopted 2026-08-17, PM/JD,
- * following Formal Governance Review #4) is DELIBERATELY NOT mirrored here
- * either -- the SAME `GoalCategory` gap as the three claims immediately
- * above, a fourth instance of one blocker, not a fourth independent one.
- * Carries the same provider-narrowing future dependency as
- * CLAIM-STOCK-GETTY-EDITORIAL-001-v1 (confirmed, not a new requirement --
- * Formal Governance Review #4's own finding). Additionally: this claim's
- * own provenance is explicitly weaker than Getty's on one clause (Rights
- * and Clearance rests on Official Secondary sourcing, not Verified
- * Primary -- Shutterstock's customer-facing license agreement remained
- * inaccessible across eight independent attempts over three research
- * sessions) -- disclosed in the claim's own text and governance notes, not
- * a reason to withhold Adoption, per Formal Governance Review #4's own
- * reasoning. See `CLAIMS_WITHOUT_FIXTURE_REPRESENTATION` in the
- * consistency test for all four IDs.
- *
- * CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1 (Adopted 2026-08-17, PM/JD,
- * following Formal Governance Review #5) is DELIBERATELY NOT mirrored
- * here either -- the SAME `GoalCategory` gap as the four claims
- * immediately above, a fifth instance of one blocker, not a fifth
- * independent one. Carries the same provider-narrowing future dependency
- * as CLAIM-STOCK-GETTY-EDITORIAL-001-v1 and
- * CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1 (confirmed, not a new
- * requirement -- Formal Governance Review #5's own finding). Unlike
- * those two, this claim's provenance is classified DIRECTLY
- * SOURCE-BACKED with no evidence-tier caveat at all -- its single load-
- * bearing source (iStock's own license agreement) was directly,
- * consistently fetched three times across the whole research program,
- * and the claim asserts no exception mechanism whose sourcing could be
- * questioned in the first place. See
- * `CLAIMS_WITHOUT_FIXTURE_REPRESENTATION` in the consistency test for
- * all five IDs.
+ * CLAIM-STOCK-GETTY-EDITORIAL-001-v1 (Adopted 2026-08-17, Formal Governance
+ * Review #3), CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1 (Adopted 2026-08-17,
+ * Formal Governance Review #4, provenance note: Rights and Clearance rests
+ * on Official Secondary sourcing, not Verified Primary -- disclosed, not a
+ * reason to withhold Adoption), and CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1
+ * (Adopted 2026-08-17, Formal Governance Review #5, DIRECTLY SOURCE-BACKED
+ * provenance, no evidence-tier caveat) are provider-specific claims. Each
+ * still has a real, unresolved architecture blocker: provider-scoped
+ * retrieval (M3 -- a governed `provider_scope` join on `TopicClaim`, per
+ * `THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md` §7-§11) is NOT
+ * implemented as of M1+M2. Without it, adding these three to the fixture
+ * would surface Getty/Shutterstock/iStock-specific content to any user who
+ * asked a generic third-party-source-rights question, regardless of which
+ * provider (if any) they named -- exactly the false-positive this whole
+ * design exists to prevent. Add these three, with `provider_scope` set,
+ * only once M3 ships and M4 separately authorizes it.
  */
 
 import type { TopicClaim } from './types'

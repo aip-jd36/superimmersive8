@@ -27,6 +27,7 @@ function baseParsed(overrides: Record<string, unknown> = {}) {
     raw_text: 'Kling',
     kind: 'tool_mention' as const,
     raw_tool_name: 'Kling',
+    raw_provider_name: null,
     access_surface_confidence_hint: null,
     access_surface_value_hint: null,
     plan_tier_confidence_hint: null,

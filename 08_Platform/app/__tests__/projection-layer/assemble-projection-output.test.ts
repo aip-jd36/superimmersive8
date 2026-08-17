@@ -14,6 +14,8 @@ function handoff(overrides: Partial<RetrievalHandoff> = {}): RetrievalHandoff {
   return {
     tools: [],
     unresolved_aliases: [],
+    asset_providers: [],
+    unresolved_asset_provider_mentions: [],
     workflow_role: 'unresolved',
     intended_use: 'unclear',
     scoped_observations: [],

@@ -95,7 +95,7 @@ async function main() {
     return
   }
 
-  const categoryCounts: Record<GoalCategory, number> = { commercial_use: 0, copyright_ownership: 0, copyrightability: 0, likeness: 0, unknown: 0 }
+  const categoryCounts: Record<GoalCategory, number> = { commercial_use: 0, copyright_ownership: 0, copyrightability: 0, likeness: 0, third_party_source_rights: 0, unknown: 0 }
   const scopeCounts: Record<GoalScope, number> = { informational: 0, determination_request: 0 }
   const statusCounts: Record<InterpretationStatus, number> = { directly_relevant: 0, outside_current_coverage: 0, determination_declined: 0, relevant_applicability_unresolved: 0 }
   let sessionsWithGoals = 0

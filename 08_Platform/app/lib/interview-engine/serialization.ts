@@ -60,6 +60,14 @@ export function serializeStructuredUnderstanding(su: StructuredUnderstanding): s
  * time (both correctly mean "not confirmed") AND structurally match the
  * type every other project fact in this codebase already uses.
  */
+/**
+ * `asset_provider_mentions` defaulted to `[]` when absent (Living Knowledge
+ * — Third-Party Source Rights, M1+M2, 2026-08-18): same reasoning and same
+ * funnel as the `user_goals` default above -- a session persisted before
+ * this field existed round-trips through JSON.parse with no
+ * `asset_provider_mentions` key at all, which would otherwise leave it
+ * `undefined` at runtime despite the type claiming `AssetProviderMention[]`.
+ */
 export function deserializeStructuredUnderstanding(json: string): StructuredUnderstanding {
   const parsed = JSON.parse(json) as StructuredUnderstanding
   const user_goals = (parsed.user_goals ?? []).map((g) => ({
@@ -71,7 +79,8 @@ export function deserializeStructuredUnderstanding(json: string): StructuredUnde
     ...parsed.project_facts,
     jurisdiction: parsed.project_facts?.jurisdiction ?? { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
   }
-  return { ...parsed, user_goals, project_facts }
+  const asset_provider_mentions = parsed.asset_provider_mentions ?? []
+  return { ...parsed, user_goals, project_facts, asset_provider_mentions }
 }
 
 /**

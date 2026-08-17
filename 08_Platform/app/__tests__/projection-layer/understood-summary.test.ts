@@ -15,6 +15,8 @@ function handoff(overrides: Partial<RetrievalHandoff> = {}): RetrievalHandoff {
   return {
     tools: [],
     unresolved_aliases: [],
+    asset_providers: [],
+    unresolved_asset_provider_mentions: [],
     workflow_role: 'unresolved',
     intended_use: 'unclear',
     scoped_observations: [],
@@ -398,6 +400,54 @@ describe('roleClause -- rendering-contract robustness fix (CRC production hygien
     const sentenceValue = 'I created all the images and brand assets'
     const facts = buildUnderstoodFacts(handoff({ workflow_role: sentenceValue }))
     expect(renderUnderstoodSummary(facts)).toContain(sentenceValue)
+  })
+})
+
+describe('asset provider rendering (Living Knowledge — Third-Party Source Rights, M1+M2, 2026-08-18)', () => {
+  test('a recognized provider renders as a source-provider mention, never as an unresolved AI platform', () => {
+    const facts = buildUnderstoodFacts(handoff({ asset_providers: ['getty'] }))
+    const out = renderUnderstoodSummary(facts)
+    expect(out).toBe('You mentioned using Getty Images as a source provider.')
+    expect(out).not.toContain("wasn't able to match")
+    expect(out).not.toContain('platform')
+  })
+
+  test('multiple recognized providers are joined naturally', () => {
+    const facts = buildUnderstoodFacts(handoff({ asset_providers: ['getty', 'shutterstock'] }))
+    const out = renderUnderstoodSummary(facts)
+    expect(out).toBe('You mentioned using Getty Images and Shutterstock as a source provider.')
+  })
+
+  test('an unresolved provider-like name renders neutrally -- never called an unresolved AI platform, never overstating recognition', () => {
+    const facts = buildUnderstoodFacts(handoff({ unresolved_asset_provider_mentions: ['PhotoMega'] }))
+    const out = renderUnderstoodSummary(facts)
+    expect(out).toBe('You mentioned "PhotoMega" as a possible source provider, which I wasn\'t able to match yet.')
+    expect(out).not.toContain('platform')
+  })
+
+  test('a resolved provider and an unresolved AI tool alias coexist without conflation -- distinct clauses, distinct wording', () => {
+    const facts = buildUnderstoodFacts(handoff({ asset_providers: ['getty'], unresolved_aliases: ['Nano Banana'] }))
+    const out = renderUnderstoodSummary(facts)
+    expect(out).toContain('You mentioned using Getty Images as a source provider.')
+    expect(out).toContain('"Nano Banana", which I wasn\'t able to match to a specific platform yet.')
+  })
+
+  test('an AI tool and a source provider both present render as two structurally distinct clauses, never merged into one', () => {
+    const facts = buildUnderstoodFacts(handoff({ tools: [tool('kling')], asset_providers: ['getty'] }))
+    const out = renderUnderstoodSummary(facts)
+    expect(out).toContain('You mentioned using kling.')
+    expect(out).toContain('You also mentioned using Getty Images as a source provider.')
+  })
+
+  test('an unknown canonical identifier (not in the display-label map) falls back to the raw identifier, never throws', () => {
+    const facts = buildUnderstoodFacts(handoff({ asset_providers: ['some-future-provider'] }))
+    expect(() => renderUnderstoodSummary(facts)).not.toThrow()
+    expect(renderUnderstoodSummary(facts)).toContain('some-future-provider')
+  })
+
+  test('no asset providers and no unresolved provider mentions -- clause is entirely absent, not an empty placeholder', () => {
+    const facts = buildUnderstoodFacts(handoff())
+    expect(renderUnderstoodSummary(facts)).toBe('')
   })
 })
 

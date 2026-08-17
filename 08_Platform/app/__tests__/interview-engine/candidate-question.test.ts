@@ -55,6 +55,7 @@ function baseSU(overrides: Partial<StructuredUnderstanding> = {}): StructuredUnd
     tool_mentions: [],
     scoped_observations: [],
     user_goals: [],
+    asset_provider_mentions: [],
     current_phase: 2,
     gate_1_state: 'met',
     gate_2_state: 'stable',

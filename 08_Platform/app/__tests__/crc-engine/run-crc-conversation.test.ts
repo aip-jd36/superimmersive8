@@ -20,6 +20,7 @@
 import { DIALOGUE_FIXTURES } from '@/lib/interview-engine/fixtures'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { runCRCConversation } from '@/lib/crc-engine/run-crc-conversation'
+import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import type { StructuredUnderstanding, UserGoal } from '@/types/interview-engine'
 import type { TopicClaim } from '@/lib/retrieval-engine/types'
 
@@ -46,6 +47,7 @@ const unknownToolSU: StructuredUnderstanding = {
   ],
   scoped_observations: [],
   user_goals: [],
+  asset_provider_mentions: [],
     current_phase: 2,
   gate_1_state: 'met',
   gate_2_state: 'not_yet_stable',
@@ -74,6 +76,7 @@ const unresolvedAliasSU: StructuredUnderstanding = {
   ],
   scoped_observations: [],
   user_goals: [],
+  asset_provider_mentions: [],
     current_phase: 2,
   gate_1_state: 'met',
   gate_2_state: 'not_yet_stable',
@@ -102,6 +105,7 @@ const sparseSingleToolSU: StructuredUnderstanding = {
   ],
   scoped_observations: [],
   user_goals: [],
+  asset_provider_mentions: [],
     current_phase: 1,
   gate_1_state: 'not_met',
   gate_2_state: 'not_yet_stable',
@@ -457,5 +461,50 @@ describe('runCRCConversation -- jurisdiction/tool-plan-tier applicability-fact t
   test('a historical StructuredUnderstanding with jurisdiction defaulted via deserializeStructuredUnderstanding (backward compatibility) does not crash and behaves as unknown', () => {
     const su = suWithJurisdiction('unknown')
     expect(() => runCRCConversation(su, MATRIX_FIXTURE, [usGatedClaim()])).not.toThrow()
+  })
+})
+
+describe('third_party_source_rights + AssetProviderMention full pipeline (Living Knowledge — Third-Party Source Rights, M1+M2, 2026-08-18)', () => {
+  const sourceRightsGoal: UserGoal = {
+    goal_id: 'g-1',
+    state: 'confirmed',
+    raw_text: 'Can I use this Getty image in an ad?',
+    category: 'third_party_source_rights',
+    scope: 'informational',
+    superseded_by: null,
+    source_turn: 1,
+    source_statement: 'Can I use this Getty image in an ad?',
+  }
+
+  const suWithGettyGoal: StructuredUnderstanding = {
+    ...DIALOGUE_FIXTURES.rich_signal.structured_understanding,
+    user_goals: [sourceRightsGoal],
+    asset_provider_mentions: [
+      { mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Can I use this Getty image in an ad?', superseded_by: null },
+    ],
+  }
+
+  test('the full pipeline (extraction-independent, from an already-built StructuredUnderstanding) renders the recognized provider in understood_summary and an outside_current_coverage interpretation for the goal -- no stock claim is reachable, no throw, no dead end', () => {
+    const { output } = runCRCConversation(suWithGettyGoal, MATRIX_FIXTURE, [])
+    expect(output.understood_summary).toContain('Getty Images as a source provider')
+    expect(output.goal_interpretations).toHaveLength(1)
+    expect(output.goal_interpretations[0].summary).not.toMatch(/safe|compliant|approved|cleared/i)
+  })
+
+  test('passing TOPIC_CLAIMS_FIXTURE (the real, current fixture) produces the identical outcome -- the five adopted stock claims are confirmed unreachable through the real pipeline, not just the empty-array test double', () => {
+    const { output } = runCRCConversation(suWithGettyGoal, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
+    expect(output.goal_interpretations[0].summary).not.toContain('Editorial')
+    expect(output.goal_interpretations[0].summary).not.toContain('Getty')
+  })
+
+  test('an AssetProviderMention with no accompanying goal (Path B) produces zero goal_interpretations and a provider-only understood_summary clause', () => {
+    const suProviderOnly: StructuredUnderstanding = {
+      ...DIALOGUE_FIXTURES.rich_signal.structured_understanding,
+      user_goals: [],
+      asset_provider_mentions: suWithGettyGoal.asset_provider_mentions,
+    }
+    const { output } = runCRCConversation(suProviderOnly, MATRIX_FIXTURE, [])
+    expect(output.goal_interpretations).toEqual([])
+    expect(output.understood_summary).toContain('Getty Images as a source provider')
   })
 })

@@ -132,6 +132,46 @@ export interface ToolMention {
   superseded_by: string | null
 }
 
+// ── Asset provider mentions (Living Knowledge — Third-Party Source Rights,
+// M1+M2, 2026-08-18) ─────────────────────────────────────────────────────────
+
+/**
+ * A third-party source/asset provider named by the user (e.g. "Getty",
+ * "iStock"), either already resolved to a canonical identifier or named but
+ * not yet resolved — sibling concept to ToolMention (THIRD_PARTY_SOURCE_
+ * ASSETS_ROUTING_ARCHITECTURE.md's PM decision record, restated in
+ * THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md §3.D), deliberately
+ * its OWN type rather than a variant of ToolMention or a shared resolution
+ * type import — a tool (an AI generation platform) and an asset provider (an
+ * external source of material) are different kinds of thing, and this
+ * codebase's own established discipline is to duplicate small shapes to keep
+ * concepts decoupled rather than force an accidental shared dependency (see
+ * AssetProviderResolution's own mirroring of ToolResolution below).
+ *
+ * Semantic meaning (fixed by PM decision, unchanged by this milestone):
+ * records recognition of the named provider only. It does NOT mean SI8
+ * verified a license, that a valid license exists, that commercial use is
+ * permitted, that Editorial/Creative status is known, that the asset appears
+ * in or was used in the final output, that AI-input rights exist, that
+ * release status is known, or that the user owns anything. No asset-level
+ * inventory is modeled — "I got three images from Getty and two from
+ * Shutterstock" produces exactly one Getty mention and one Shutterstock
+ * mention, never five, matching THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_
+ * NARROWING.md §9's explicit non-goal.
+ */
+export type AssetProviderResolution =
+  | { kind: 'canonical'; identifier: string }
+  | { kind: 'unresolved_alias'; raw_name: string }
+
+export interface AssetProviderMention {
+  mention_id: string
+  resolution: AssetProviderResolution
+  confidence: ConfidenceState
+  source_turn: number
+  source_statement: string
+  superseded_by: string | null
+}
+
 // ── Project facts ────────────────────────────────────────────────────────────
 
 /**
@@ -235,7 +275,25 @@ export interface ProjectFacts {
  * from adjacent context, mirroring every other `_hint` field's own
  * conservative-default discipline in this codebase.
  */
-export const GOAL_CATEGORIES = ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'unknown'] as const
+/**
+ * `third_party_source_rights` (Living Knowledge — Third-Party Source Rights,
+ * M1+M2, 2026-08-18, PM-approved per THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_
+ * NARROWING.md §22/§23): whether the user has sufficient rights or permission
+ * to use third-party source material (e.g. a licensed stock image or clip)
+ * in the project — a materially different question from `commercial_use`
+ * (whether the AI-generated OUTPUT can be used commercially). Explicit-
+ * question-gated only, mirroring every other category's own extraction
+ * discipline: an incidental disclosure that a provider was used ("I used
+ * Getty.") must never by itself create a goal in this category — only an
+ * explicit question or stated need about rights/permission does (see
+ * anthropic-extractor.ts's own SYSTEM_PROMPT for the extraction-time
+ * enforcement). No governed claim is reachable under this category yet —
+ * see GOVERNED-CLAIMS.md's five Adopted, CRC-Eligible: Pending stock-media
+ * claims and topic-claims-fixture.ts's own GOVERNANCE TREATMENT notes for
+ * why (provider-scoped retrieval, M3, is a separate, not-yet-authorized
+ * milestone).
+ */
+export const GOAL_CATEGORIES = ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'third_party_source_rights', 'unknown'] as const
 
 export type GoalCategory = (typeof GOAL_CATEGORIES)[number]
 
@@ -343,6 +401,20 @@ export interface StructuredUnderstanding {
    * required.
    */
   user_goals: UserGoal[]
+  /**
+   * Living Knowledge — Third-Party Source Rights, M1+M2 (2026-08-18).
+   * Additive and backward-compatible, same discipline as `user_goals`
+   * (Milestone 1) and `project_facts.jurisdiction` (LK Phase 1) before it: a
+   * historical session's stored JSON predating this field deserializes with
+   * it defaulted to `[]` (see serialization.ts's
+   * deserializeStructuredUnderstanding), never `undefined` at runtime, no
+   * backfill/migration rewrite of historical rows performed or required.
+   * Captured independently of `user_goals` — a provider may be recognized
+   * on a turn that states no goal at all, and recognizing one never itself
+   * creates a goal or triggers retrieval (Path B preservation; see
+   * THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md §9, §15).
+   */
+  asset_provider_mentions: AssetProviderMention[]
   current_phase: Phase
   gate_1_state: Gate1State
   gate_2_state: Gate2State
@@ -381,6 +453,20 @@ export interface RetrievalHandoffTool {
 export interface RetrievalHandoff {
   tools: RetrievalHandoffTool[]
   unresolved_aliases: string[]
+  /**
+   * Living Knowledge — Third-Party Source Rights, M1+M2 (2026-08-18). Mirrors
+   * `tools`/`unresolved_aliases` exactly, simplified for asset providers'
+   * narrower shape (no access_surface/plan_tier dimension exists for a
+   * provider): canonical identifiers only (`resolution.kind === 'canonical'`)
+   * in `asset_providers`, raw unresolved names in
+   * `unresolved_asset_provider_mentions`. M3 (provider-scoped retrieval) is
+   * NOT authorized as of this milestone — these fields exist so Projection
+   * can render recognized providers correctly (see understood-summary.ts);
+   * they are deliberately not yet threaded into `retrieve()` or any
+   * Retrieval-internal matching logic.
+   */
+  asset_providers: string[]
+  unresolved_asset_provider_mentions: string[]
   workflow_role: string
   intended_use: string | 'unclear'
   scoped_observations: ScopedObservation[]

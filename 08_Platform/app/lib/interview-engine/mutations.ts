@@ -21,6 +21,7 @@
  */
 
 import type {
+  AssetProviderMention,
   Attested,
   ScopedObservation,
   StructuredUnderstanding,
@@ -208,6 +209,75 @@ export function supersedeToolMention(
     ...su,
     tool_mentions: [
       ...su.tool_mentions.map((m) =>
+        m.mention_id === targetId ? { ...m, superseded_by: replacement.mention_id } : m,
+      ),
+      replacement,
+    ],
+  }
+}
+
+// ── Asset provider mentions (Living Knowledge — Third-Party Source Rights,
+// M1+M2, 2026-08-18) ─────────────────────────────────────────────────────────
+
+/**
+ * Mirrors addToolMention exactly — same duplicate-id / already-superseded-
+ * on-add invariants, no additional cap (unlike user_goals' MAX_ACTIVE_
+ * USER_GOALS, no PM-approved cap was requested for asset provider mentions;
+ * a project may legitimately name several distinct providers).
+ */
+export function addAssetProviderMention(
+  su: StructuredUnderstanding,
+  mention: AssetProviderMention,
+): StructuredUnderstanding {
+  if (su.asset_provider_mentions.some((m) => m.mention_id === mention.mention_id)) {
+    throw new Error(`Asset provider mention id already exists: ${mention.mention_id}`)
+  }
+  if (mention.superseded_by !== null) {
+    throw new Error(
+      `A newly added asset provider mention cannot already be superseded (mention_id: ${mention.mention_id})`,
+    )
+  }
+  return {
+    ...su,
+    asset_provider_mentions: [...su.asset_provider_mentions, mention],
+  }
+}
+
+/**
+ * Mirrors supersedeToolMention exactly — same invariants (target must exist
+ * and must currently be the active/non-superseded head of its chain).
+ */
+export function supersedeAssetProviderMention(
+  su: StructuredUnderstanding,
+  targetId: string,
+  replacement: AssetProviderMention,
+): StructuredUnderstanding {
+  const target = su.asset_provider_mentions.find((m) => m.mention_id === targetId)
+  if (!target) {
+    throw new Error(`Cannot supersede unknown asset provider mention: ${targetId}`)
+  }
+  if (target.superseded_by !== null) {
+    throw new Error(
+      `Cannot supersede asset provider mention ${targetId}: it is already superseded by ${target.superseded_by}. ` +
+      `Corrections must target the current head of the chain, not a historical snapshot.`,
+    )
+  }
+  if (replacement.mention_id === targetId) {
+    throw new Error(`Replacement asset provider mention must have a different id than the mention it supersedes: ${targetId}`)
+  }
+  if (su.asset_provider_mentions.some((m) => m.mention_id === replacement.mention_id)) {
+    throw new Error(`Replacement asset provider mention id already exists: ${replacement.mention_id}`)
+  }
+  if (replacement.superseded_by !== null) {
+    throw new Error(
+      `A newly added replacement asset provider mention cannot already be superseded (mention_id: ${replacement.mention_id})`,
+    )
+  }
+
+  return {
+    ...su,
+    asset_provider_mentions: [
+      ...su.asset_provider_mentions.map((m) =>
         m.mention_id === targetId ? { ...m, superseded_by: replacement.mention_id } : m,
       ),
       replacement,

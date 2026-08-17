@@ -76,6 +76,7 @@ function mockedSU(overrides: Partial<StructuredUnderstanding> = {}): StructuredU
     tool_mentions: [toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'runway-gen3' } })],
     scoped_observations: [observation({ observation_id: 'so-1' })],
     user_goals: [],
+    asset_provider_mentions: [],
     current_phase: 3,
     gate_1_state: 'met',
     gate_2_state: 'stable',

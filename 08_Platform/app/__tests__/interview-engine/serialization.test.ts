@@ -20,6 +20,7 @@ function currentSU(): StructuredUnderstanding {
     tool_mentions: [],
     scoped_observations: [],
     user_goals: [{ goal_id: 'g-1', state: 'confirmed', raw_text: 'Can I use this commercially?', category: 'unknown', scope: 'informational', superseded_by: null, source_turn: 1, source_statement: 'placeholder' }],
+    asset_provider_mentions: [],
     current_phase: 1,
     gate_1_state: 'not_met',
     gate_2_state: 'not_yet_stable',
@@ -114,5 +115,34 @@ describe('serializeStructuredUnderstanding / deserializeStructuredUnderstanding'
     su.project_facts.jurisdiction = { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 3, source_statement: 'US' }
     const roundTripped = deserializeStructuredUnderstanding(serializeStructuredUnderstanding(su))
     expect(roundTripped.project_facts.jurisdiction).toEqual({ attestation: { state: 'confirmed', value: 'United States' }, source_turn: 3, source_statement: 'US' })
+  })
+
+  test('a historical session predating asset_provider_mentions (Living Knowledge — Third-Party Source Rights, M1+M2, 2026-08-18) deserializes with it defaulted to [], not undefined -- and every other field survives unchanged', () => {
+    const historicalShape = currentSU()
+    const { asset_provider_mentions: _omitted, ...withoutAssetProviderMentions } = historicalShape
+    const historicalJson = JSON.stringify(withoutAssetProviderMentions)
+    expect(historicalJson).not.toContain('asset_provider_mentions')
+
+    const deserialized = deserializeStructuredUnderstanding(historicalJson)
+    expect(deserialized.asset_provider_mentions).toEqual([])
+    expect(Array.isArray(deserialized.asset_provider_mentions)).toBe(true)
+    expect(deserialized.project_facts).toEqual(historicalShape.project_facts)
+    expect(deserialized.user_goals).toEqual(historicalShape.user_goals)
+  })
+
+  test('a historical session missing asset_provider_mentions does not throw when the result is used as an array (.filter, .some)', () => {
+    const historicalShape = currentSU()
+    const { asset_provider_mentions: _omitted, ...withoutAssetProviderMentions } = historicalShape
+    const deserialized = deserializeStructuredUnderstanding(JSON.stringify(withoutAssetProviderMentions))
+    expect(() => deserialized.asset_provider_mentions.filter((m) => m.superseded_by === null)).not.toThrow()
+  })
+
+  test('a current-shape session with asset_provider_mentions already populated round-trips those values unchanged', () => {
+    const su = currentSU()
+    su.asset_provider_mentions = [
+      { mention_id: 't1-c1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'I used Getty.', superseded_by: null },
+    ]
+    const roundTripped = deserializeStructuredUnderstanding(serializeStructuredUnderstanding(su))
+    expect(roundTripped.asset_provider_mentions).toEqual(su.asset_provider_mentions)
   })
 })

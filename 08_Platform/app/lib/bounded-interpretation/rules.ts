@@ -51,6 +51,7 @@ const CATEGORY_LABELS: Record<GoalCategory, string> = {
   copyright_ownership: 'who owns the copyright',
   copyrightability: 'whether this kind of output can be copyrighted at all',
   likeness: 'likeness, voice, or consent',
+  third_party_source_rights: 'whether you have the rights to use third-party source material',
   unknown: 'what you asked',
 }
 
@@ -77,6 +78,19 @@ const OUTSIDE_COVERAGE_BY_CATEGORY: Record<GoalCategory, string> = {
     `CRC's current governed knowledge doesn't establish an answer to ${CATEGORY_LABELS.copyrightability}. ${BRIDGE_SENTENCE}`,
   likeness:
     `CRC doesn't currently have governed guidance covering likeness, voice, or consent questions. ${BRIDGE_SENTENCE}`,
+  /**
+   * `third_party_source_rights` (Living Knowledge — Third-Party Source
+   * Rights, M1+M2, 2026-08-18): the goal category exists so CRC can
+   * recognize the question at all -- no governed claim is reachable under it
+   * yet (provider-scoped retrieval, M3, is a separate, not-yet-authorized
+   * milestone; see THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md
+   * §17, §19). Every such goal renders this same neutral "no coverage yet"
+   * template today, regardless of which provider (if any) was also
+   * recognized -- CATEGORY_LABELS' own already-neutral phrasing, same
+   * pattern as every other entry in this map.
+   */
+  third_party_source_rights:
+    `CRC doesn't currently have governed guidance covering ${CATEGORY_LABELS.third_party_source_rights}. ${BRIDGE_SENTENCE}`,
   unknown:
     `CRC's current governed knowledge doesn't cover this specific question yet. ${BRIDGE_SENTENCE}`,
 }
