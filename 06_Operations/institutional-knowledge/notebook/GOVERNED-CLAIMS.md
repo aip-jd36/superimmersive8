@@ -21,6 +21,7 @@ Mirrors the CRC Claims sub-table convention already used in `PLATFORM-RIGHTS-MAT
 - `CRC Approver` must always be a real, named human. No automated "legal reviewer" role exists or is permitted.
 - `Adoption Approver` (added 2026-08-16, first formal adoption decision) — the human governance approver of `Lifecycle: Adopted` itself, distinct from `CRC Approver` (which governs CRC-eligible publication specifically). Same discipline: always a real, named human, never automated. A claim can be `Adopted` with `Adoption Approver` recorded while `CRC Approver` remains `PENDING` indefinitely — this is the expected, intentional state for reviewer/internal-only knowledge, not a gap.
 - **`Jurisdiction: Global`** (governance meaning fixed 2026-08-17, PM approval, following CLAIM-COPY-004's comparative-law hardening pass — see `01_Business/research/COPY-004-SOURCE-HARDENING-RESEARCH-2026.md` Part 2): means the claim states a **jurisdiction-neutral structural relationship between legal concepts** — pressure-tested across materially different legal systems (the COPY-004 pass checked United States, United Kingdom, European Union, Taiwan, and Japan) — not that its detailed substantive rule has been verified in every jurisdiction worldwide. A claim stating a specific substantive legal outcome (e.g. a copyrightability determination, an ownership rule) must be jurisdiction-scoped (as CLAIM-COPY-001/002/003 already are, to `United States (federal)`), never labeled `Global`, no matter how confident the drafter is that the outcome likely generalizes.
+- **Every Formal Governance Review must be preserved as a durable, verbatim repository artifact** (process rule established 2026-08-17, governance-artifact-preservation milestone, following the discovery that Formal Governance Reviews #1–#5 existed only in session/conversation output, not as files) — before or as part of the subsequent PM governance-recording step that adopts (or declines) the reviewed candidate. The full review artifact, archived under `06_Operations/institutional-knowledge/notebook/governance-reviews/` (see that folder's own `README.md` for naming convention and verbatim discipline), is the decision-analysis record — clause-by-clause accuracy, source-tier assessment, atomicity/boundary tests, the complete reasoning a PASS/HOLD/REJECT recommendation rested on. This document remains the canonical current-state ledger and may contain only a condensed review summary (as every claim entry below already does) plus a reference to the full review artifact — it must never be the only place a review's full reasoning survives.
 
 ## Entry template
 
@@ -637,6 +638,8 @@ runtime representation at all yet (see GOVERNANCE TREATMENT above), an
 architecture gap independent of and in addition to Path A's own absence.
 Neither gap is solved by this adoption decision.
 
+Full review artifact: `governance-reviews/FGR_001_CAND-STOCK-EDITORIAL-001_2026-08-17.md`
+
 ### CLAIM-STOCK-EDITORIAL-002-v1
 Domain: Third-Party Source Assets / Stock Media Licensing
 Topic: Third-party source-asset editorial designation / release-relatedness — **no corresponding `GoalCategory` value exists yet; see GOVERNANCE TREATMENT below (same architecture gap as CLAIM-STOCK-EDITORIAL-001-v1, not a new one).**
@@ -778,6 +781,8 @@ proposed governed-statement text -- the relationship is instead recorded
 in this entry's own Relationship note above, never inside the reusable
 governed statement itself.
 
+Full review artifact: `governance-reviews/FGR_002_CAND-STOCK-EDITORIAL-002_2026-08-17.md`
+
 ### CLAIM-STOCK-GETTY-EDITORIAL-001-v1
 Domain: Third-Party Source Assets / Stock Media Licensing
 Topic: Getty-specific Editorial license scope and authorization mechanism — **no corresponding `GoalCategory` value exists yet; see GOVERNANCE TREATMENT below (the same architecture gap as CLAIM-STOCK-EDITORIAL-001-v1 and CLAIM-STOCK-EDITORIAL-002-v1, not a new or third instance of it).**
@@ -914,6 +919,8 @@ a product-completeness deferral now compounded by a second, larger gap
 specific to provider-specific claims (the not-yet-scoped provider-
 narrowing capability, see the Additional future dependency note above),
 neither solved by this adoption decision.
+
+Full review artifact: `governance-reviews/FGR_003_CAND-STOCK-GETTY-EDITORIAL-001_2026-08-17.md`
 
 ### CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1
 Domain: Third-Party Source Assets / Stock Media Licensing
@@ -1072,3 +1079,5 @@ product-completeness deferral (Path A) plus the same second, larger gap
 (provider narrowing) already identified for Getty; Formal Governance
 Review #4 confirmed Shutterstock introduces no new routing requirement
 beyond that one.
+
+Full review artifact: `governance-reviews/FGR_004_CAND-STOCK-SHUTTERSTOCK-EDITORIAL-001_2026-08-17.md`
