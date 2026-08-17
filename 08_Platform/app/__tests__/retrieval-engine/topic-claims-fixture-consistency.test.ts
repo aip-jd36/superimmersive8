@@ -34,7 +34,7 @@ const GOVERNED_CLAIMS_PATH = path.join(__dirname, '..', '..', '..', '..', '06_Op
  * TOPIC_CLAIMS_FIXTURE entry -- this set should shrink over time, not grow
  * casually.
  */
-const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set(['CLAIM-STOCK-EDITORIAL-001-v1'])
+const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set(['CLAIM-STOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-EDITORIAL-002-v1'])
 
 /** Strips fenced code blocks (```...```) before scanning -- the entry template lives inside one and must never be counted as a real claim. */
 function stripFencedCodeBlocks(markdown: string): string {
@@ -94,6 +94,24 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
     })
 
     test("the reason still holds: 'third_party_source_rights' is not (yet) an implemented GoalCategory value -- update this test, add the claim's real Topic in the markdown, and add its TOPIC_CLAIMS_FIXTURE entry together, in the same change, when it is", () => {
+      expect((GOAL_CATEGORIES as readonly string[]).includes('third_party_source_rights')).toBe(false)
+    })
+  })
+
+  describe('CLAIM-STOCK-EDITORIAL-002-v1 -- documented fixture-representation exception (same architecture gap as -001, not a second one)', () => {
+    test('exists in the markdown as real, Adopted governed knowledge', () => {
+      const markdown = fs.readFileSync(GOVERNED_CLAIMS_PATH, 'utf-8')
+      const claim = extractMarkdownClaims(markdown).find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-002-v1')
+      expect(claim).toBeDefined()
+      expect(claim?.lifecycle?.toLowerCase()).toContain('adopted')
+      expect(claim?.publication_scope?.toLowerCase()).toContain('reviewer/commercial assurance')
+    })
+
+    test('is intentionally absent from TOPIC_CLAIMS_FIXTURE -- not a sync gap', () => {
+      expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-002-v1')).toBeUndefined()
+    })
+
+    test("the reason still holds (shared with CLAIM-STOCK-EDITORIAL-001-v1): 'third_party_source_rights' is not (yet) an implemented GoalCategory value -- when it is, update both claims' Topic fields and add both TOPIC_CLAIMS_FIXTURE entries together, in the same change", () => {
       expect((GOAL_CATEGORIES as readonly string[]).includes('third_party_source_rights')).toBe(false)
     })
   })

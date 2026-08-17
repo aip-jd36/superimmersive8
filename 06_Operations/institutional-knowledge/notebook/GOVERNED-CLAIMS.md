@@ -636,3 +636,144 @@ unimplemented, and -- specific to this claim -- its Topic field has no
 runtime representation at all yet (see GOVERNANCE TREATMENT above), an
 architecture gap independent of and in addition to Path A's own absence.
 Neither gap is solved by this adoption decision.
+
+### CLAIM-STOCK-EDITORIAL-002-v1
+Domain: Third-Party Source Assets / Stock Media Licensing
+Topic: Third-party source-asset editorial designation / release-relatedness — **no corresponding `GoalCategory` value exists yet; see GOVERNANCE TREATMENT below (same architecture gap as CLAIM-STOCK-EDITORIAL-001-v1, not a new one).**
+Subtopic: editorial-designation-release-relatedness
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — governed collectively by each cited provider's current Terms of Service/License Agreement (Getty Images, iStock, Shutterstock — the three providers this claim's evidence confirms; not independently confirmed for Adobe Stock), not a single contract or legal jurisdiction.
+Context: Commercial Assurance evidence review of any AI-generated commercial video workflow that incorporates third-party stock-media source assets designated "Editorial"
+
+GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #2): same runtime-representation gap as CLAIM-STOCK-EDITORIAL-001-v1, not a second, independent instance requiring separate reasoning — this claim's actual subject also has no corresponding implemented `GoalCategory` value, for the identical reason recorded on that claim's own entry above. **This claim is Adopted governed knowledge, available to Reviewer/Commercial Assurance via this canonical document, but has NO current runtime Topic Retrieval representation whatsoever** — not mirrored into `topic-claims-fixture.ts`, not queryable, not matchable, not reachable by any code path. Update this entry's `Topic` field and add the corresponding `topic-claims-fixture.ts` entry only when a real `GoalCategory` value for this domain is deliberately, separately implemented — together with CLAIM-STOCK-EDITORIAL-001-v1's own entry, in the same change, not independently.
+
+Relationship to CLAIM-STOCK-EDITORIAL-001-v1 (governance note, not part of the governed statement itself — Formal Governance Review #2 §1's explicit instruction that internal claim IDs must not appear inside reusable governed-knowledge text): CLAIM-STOCK-EDITORIAL-001-v1 governs the standard license-scope restriction associated with Editorial content (what uses are/are not permitted). CLAIM-STOCK-EDITORIAL-002-v1 governs a distinct but commonly associated tendency — that Editorial-designated content is typically supplied without model/property releases. The relationship between the two claims is **COMPLEMENTARY**: a reviewer applying both gets a fuller picture (a use may exceed the standard license, per -001, and, separately, the content likely lacks releases that would otherwise support broader use even where license scope is satisfied, per -002) without either claim restating or depending on the other's own text. No `TopicRelationship` is created for this pairing, and none is implied by this note.
+
+Claim proposition: >
+  Stock-media content that a provider designates "Editorial" is
+  typically supplied without the model or property releases that would
+  otherwise support broader commercial use -- a separate consideration
+  from, though often associated with, that provider's own license-scope
+  restriction on such use. This has been independently confirmed for
+  Getty, iStock, and Shutterstock; it has not been independently
+  confirmed for every stock-media provider, including Adobe Stock.
+
+Source references:
+  - primary (governed synthesis record): `01_Business/research/STOCK-MEDIA-EDITORIAL-USE-CANDIDATE-RESEARCH-2026.md` (Part 1 §20 CAND-STOCK-EDITORIAL-002, and Part 2 §4/§12 re-evaluation, both 2026-08-17) -- full proposition map and the governance-review analysis (Formal Governance Review #2, 2026-08-17) this claim is adopted from.
+  - primary (Official platform authority, Tier 1, directly fetched): Getty Images "Rights and Clearance" (`gettyimages.com/rights-and-clearance`) -- "Editorial content generally has real people, in real locations doing real activities, and did not provide model releases or property releases."
+  - primary (Official platform authority, Tier 1, directly fetched): Getty Images Content License Agreement (`gettyimages.com/eula`) -- Editorial content "generally is not licensed" for model/property releases, framed as a content-type characteristic distinct from license-scope restriction. **Disclosed, not smoothed over:** Getty's own two pages are not fully reconciled with each other on whether release-absence explains or merely correlates with the license-scope restriction -- exactly why this claim's own "separate... though often associated with" hedge is necessary, not decorative.
+  - primary (Official platform authority, Tier 1, directly fetched): iStock Content License Agreement (`istockphoto.com/legal/license-agreement`) -- a separate warranty-disclaimer clause, textually distinct from the prohibited-use clause, stating no releases are "generally obtained" for editorial-use-only content. The structurally cleanest evidence of the four providers for treating release status and license scope as two independent provisions.
+  - primary (Official platform authority, Tier 1, directly fetched): Shutterstock, official contributor-help domain (`submit.shutterstock.com`) -- Editorial content "doesn't have a model or property release on file." **A stronger evidence tier for THIS specific proposition than Shutterstock received for CLAIM-STOCK-EDITORIAL-001-v1** (STRONG here vs. QUALIFIED there) -- this proposition doesn't depend on the exact-restriction-wording or clearance-mechanism detail that kept -001's Shutterstock evidence at QUALIFIED.
+  - Adobe Stock: **explicitly NOT a confirmed supporting leg of this synthesis.** Five direct-fetch attempts against Adobe's own official pages, across two independent research sessions (Phase 1A, Phase 1B), all failed (HTTP 403, timeout, or unreadable binary PDF encoding). Only Tier 3 `WebSearch` corroboration exists, consistent across two independently-timed passes but never independently primary-verified. Not upgraded to primary evidence and not incorporated into the claim's own text as a fourth confirmed provider -- the claim's own proposition explicitly names Adobe as unconfirmed rather than remaining silent about it.
+Source authority/type: Official platform authority (synthesized across three independently-verified providers -- Getty, iStock, Shutterstock, each Tier 1 for this specific proposition; Adobe Stock explicitly excluded from the synthesis, disclosed above, not incorporated)
+Source fact: >
+  Getty, iStock, and Shutterstock each independently state, on official
+  pages, that content they classify "Editorial" is typically supplied
+  without model or property releases. iStock's own agreement presents
+  this as a textually separate provision from its prohibited-use clause
+  (the cleanest structural evidence for treating release status and
+  license scope as related but distinct facts). Getty's own two official
+  pages are not fully reconciled with each other on whether release
+  absence explains or merely correlates with the license-scope
+  restriction -- neither reading is asserted as the governed conclusion;
+  the claim's own hedge ("separate... though often associated with")
+  reflects this genuine, disclosed uncertainty rather than resolving it
+  artificially. No equivalent official evidence was found for Adobe Stock
+  despite five direct-fetch attempts across two research sessions -- a
+  negative finding correctly treated as absence of evidence, not evidence
+  of a contrary fact, and explicitly named as such in the claim's own
+  proposition text rather than left as a silent gap.
+
+SI8 interpretation: >
+  This claim gives a Commercial Assurance reviewer a concrete reasoning
+  step distinct from CLAIM-STOCK-EDITORIAL-001-v1's own: Editorial
+  classification is a signal that release/rights evidence may warrant
+  closer inspection, separately from whatever the applicable license-scope
+  restriction requires. A reviewer encountering an Editorial-designated
+  asset should treat this as prompting a check of the provider's own
+  asset record for model-release status, property-release status, any
+  provider release notes, the intended use, subject identity, and
+  trademark/property visibility in the depicted content -- not as itself
+  establishing that any specific asset lacks a release, that a release
+  was legally required, or that any specific use is therefore
+  impermissible. The relationship this claim states is common
+  association, never causation: it does not assert that an asset is
+  classified Editorial BECAUSE it lacks releases, that every Editorial
+  asset lacks releases, or that obtaining a release removes the separate
+  license-scope restriction governed by CLAIM-STOCK-EDITORIAL-001-v1.
+
+Applicability requirements: []
+Unresolved project dependencies: [which_provider, editorial_designation_confirmed, release_status_confirmed]
+Prohibited conclusions: >
+  Does not establish that any specific asset actually has or lacks a
+  model release. Does not establish that any specific asset actually has
+  or lacks a property release. Does not establish that a release is
+  legally required for any specific use. Does not establish that a
+  particular person or property is protected. Does not establish that a
+  specific use violates any right. Does not establish that separate
+  permission (e.g. a Getty Rights and Clearance-style authorization, per
+  CLAIM-STOCK-EDITORIAL-001-v1's own text) cures a release-status gap --
+  authorization and release status are distinct project facts, not
+  substitutes for each other. Does not establish whether an asset may be
+  used commercially -- that remains governed exclusively by
+  CLAIM-STOCK-EDITORIAL-001-v1 and by project-specific Commercial
+  Assurance review, never by this claim.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-17
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-17 as reviewer/internal
+  knowledge only; CRC eligibility is a separate, not-yet-made decision (see
+  CRC Approver/CRC Decision Date below). Additionally and independently of
+  that separate decision, this claim currently has NO runtime Topic
+  Retrieval representation at all (see GOVERNANCE TREATMENT above). Text
+  below is the scoping language CRC MAY be authorized to state if/when
+  both CRC eligibility is separately approved AND the architecture gap is
+  closed, preserved unchanged from the adopted draft per governance
+  instruction not to reinterpret or rewrite substantive claim text when
+  changing lifecycle/publication status: CRC may state that stock-media
+  content a provider designates "Editorial" is typically supplied without
+  the model or property releases that would otherwise support broader
+  commercial use, as a separate consideration from whether the applicable
+  license permits a given use. CRC must not state whether the user's own
+  specific asset has or lacks a release, or draw any conclusion from that
+  about whether their use is permitted.
+
+CRC Candidate Statement: >
+  NOT APPROVED FOR CRC PUBLICATION -- same status as CRC Publication Scope
+  above; text preserved unchanged, not yet authorized for CRC output:
+  Content a stock-media provider marks "Editorial" is typically supplied
+  without the model or property releases that would otherwise support
+  broader commercial use -- a separate question from whether the
+  applicable license itself permits your intended use.
+
+Effective date: 2026-08-17
+Last reviewed: 2026-08-17
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING -- not yet approved
+CRC Decision Date: PENDING
+Related: [[CLAIM-STOCK-EDITORIAL-001-v1]] (complementary, not dependent -- see the Relationship note above). See also `01_Business/research/STOCK-MEDIA-EDITORIAL-USE-CANDIDATE-RESEARCH-2026.md` (Phase 1A/1B) for full domain context.
+
+Formal Governance Review #2 (2026-08-17): PASS / GO WITH MINOR WORDING
+REVISION -- original research-stage wording ("Stock-media content marked
+'Editorial' is typically licensed without...") was narrowed to explicitly
+name the three providers this claim's evidence actually confirms (Getty,
+iStock, Shutterstock) and to explicitly disclaim Adobe Stock rather than
+leaving its status ambiguous by omission. Causation-vs-association,
+release-category scope (deliberately kept to "model or property releases,"
+not broadened to iStock's own wider trademark/trade-dress language despite
+that being evidenced, since Getty/Shutterstock weren't independently
+confirmed at that broader scope), the general-rule/project-specific
+boundary, and the relationship to CLAIM-STOCK-EDITORIAL-001-v1 were each
+independently reviewed and found sound. `CRC Eligible` deliberately KEPT
+Pending -- same product-completeness deferral as CLAIM-STOCK-EDITORIAL-001
+-v1: Path A remains unimplemented, and this claim's Topic field has no
+runtime representation at all yet, independent of and in addition to
+Path A's own absence. PM adoption decision (2026-08-17) additionally
+removed a parenthetical internal claim-ID cross-reference
+("(see CLAIM-STOCK-EDITORIAL-001-v1)") from the governance review's
+proposed governed-statement text -- the relationship is instead recorded
+in this entry's own Relationship note above, never inside the reusable
+governed statement itself.

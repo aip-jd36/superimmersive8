@@ -57,6 +57,15 @@
  * accommodation this omission required. Add this claim here, with its real
  * topic, only when that `GoalCategory` value is deliberately, separately
  * implemented -- never as a side effect of an unrelated change.
+ *
+ * CLAIM-STOCK-EDITORIAL-002-v1 (Adopted 2026-08-17, PM/JD, following Formal
+ * Governance Review #2) is DELIBERATELY NOT mirrored here either, for the
+ * SAME reason as CLAIM-STOCK-EDITORIAL-001-v1 immediately above -- not a
+ * second, independent architecture gap, the identical one. Both claims
+ * share one `GoalCategory` blocker and will gain their real
+ * `TOPIC_CLAIMS_FIXTURE` entries together, in the same future change, when
+ * that value is implemented. See `CLAIMS_WITHOUT_FIXTURE_REPRESENTATION` in
+ * the consistency test for both IDs.
  */
 
 import type { TopicClaim } from './types'
