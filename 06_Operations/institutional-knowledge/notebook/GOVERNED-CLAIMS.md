@@ -777,3 +777,140 @@ removed a parenthetical internal claim-ID cross-reference
 proposed governed-statement text -- the relationship is instead recorded
 in this entry's own Relationship note above, never inside the reusable
 governed statement itself.
+
+### CLAIM-STOCK-GETTY-EDITORIAL-001-v1
+Domain: Third-Party Source Assets / Stock Media Licensing
+Topic: Getty-specific Editorial license scope and authorization mechanism — **no corresponding `GoalCategory` value exists yet; see GOVERNANCE TREATMENT below (the same architecture gap as CLAIM-STOCK-EDITORIAL-001-v1 and CLAIM-STOCK-EDITORIAL-002-v1, not a new or third instance of it).**
+Subtopic: getty-editorial-license-scope-and-rights-clearance
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — governed by Getty Images' current Content License Agreement / Terms of Service, not a legal jurisdiction.
+Context: Commercial Assurance evidence review of any AI-generated commercial video workflow that incorporates Getty Images source assets designated "Editorial Content"
+
+GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #3): same runtime-representation gap as CLAIM-STOCK-EDITORIAL-001-v1 and CLAIM-STOCK-EDITORIAL-002-v1, not a new, independent one -- this claim's actual subject also has no corresponding implemented `GoalCategory` value, for the identical reason recorded on those two claims' own entries above. **This claim is Adopted governed knowledge, available to Reviewer/Commercial Assurance via this canonical document, but has NO current runtime Topic Retrieval representation whatsoever** -- not mirrored into `topic-claims-fixture.ts`, not queryable, not matchable, not reachable by any code path. Update this entry's `Topic` field and add the corresponding `topic-claims-fixture.ts` entry only when a real `GoalCategory` value for this domain is deliberately, separately implemented -- together with the other two stock claims' own entries, in the same change, not independently.
+
+Additional future dependency, specific to this claim (Formal Governance Review #3): even once `third_party_source_rights` exists and Path A is implemented, this claim would ALSO need a not-yet-scoped **provider-narrowing capability** to be safely CRC-reachable -- something capable of ensuring Getty-specific knowledge surfaces only when Getty is actually the relevant provider for a given conversation, distinct from and in addition to Path A's own goal-category gate. This is a strictly larger product dependency than CLAIM-STOCK-EDITORIAL-001-v1/-002-v1 carry (those need Path A alone). Not designed, scoped, or implemented by this adoption decision. The claim remains immediately useful to a human reviewer today, independent of any of this -- reviewer access to this canonical document does not depend on CRC's own retrieval mechanism at all (`PRD_LIVING_KNOWLEDGE_SOURCE_INPUTS_v0.1.md` §9: "Reviewer access may legitimately expose knowledge that is Adopted but not CRC Eligible").
+
+Provenance note: this claim is classified **DIRECTLY SOURCE-BACKED**, not Governed Synthesis -- unlike CLAIM-STOCK-EDITORIAL-001-v1/-002-v1 (which each combine independently-verified language across three or four providers into one cross-provider synthesis), every load-bearing proposition here derives from Getty's own two official sources with no cross-provider combination involved. One small interpretive step is disclosed, not hidden: the connection between the EULA's written-authorization clause and the separate Rights & Clearance page is a same-provider inferential link this document draws between two official Getty sources -- neither Getty page explicitly cross-references the other; this document does not claim they do.
+
+Relationship to CLAIM-STOCK-EDITORIAL-001-v1 (governance note, not part of the governed statement itself): provider-specific concrete instance / complementary precision. CLAIM-STOCK-EDITORIAL-001-v1 states the cross-provider structural rule in generalized terms (advertising, promotional, endorsement, or merchandising use excluded, some providers offer an authorization path). This claim adds what that generalized statement deliberately omits for a single named provider: Getty's own exact seven-item enumerated list (which differs in specific wording from -001's four-item cross-provider synthesis -- notably includes "commercial," "advertorial," and "gambling/betting/gaming," and does not literally include "merchandising"), the exact named authorization documents (invoice, sales order confirmation, licensing agreement), and the name of Getty's own mechanism (Rights and Clearance). CLAIM-STOCK-EDITORIAL-001-v1 is unmodified by this adoption.
+
+Relationship to CLAIM-STOCK-EDITORIAL-002-v1 (governance note): **COMPLEMENTARY.** This claim does not govern, restate, or imply anything about model or property release status -- that remains CLAIM-STOCK-EDITORIAL-002-v1's own, separate territory, deliberately not duplicated here even though Getty's own Rights and Clearance page touches adjacent ground (it describes obtaining IP/publicity rights more broadly than pure license authorization). CLAIM-STOCK-EDITORIAL-002-v1 is unmodified by this adoption. No `TopicRelationship` is created for either pairing.
+
+Claim proposition: >
+  Getty Images' standard license prohibits using content it marks
+  "Editorial Content" for commercial, promotional, advertorial,
+  endorsement, advertising, gambling/betting/gaming, or marketing
+  purposes, absent express written authorization on the applicable
+  invoice, sales order confirmation, or licensing agreement. Getty
+  separately offers a "Rights and Clearance" function through which a
+  customer may seek such authorization, including specifically for
+  advertising and promotional use.
+
+Source references:
+  - primary (governed record): `01_Business/research/STOCK-MEDIA-EDITORIAL-USE-CANDIDATE-RESEARCH-2026.md` (Part 1 §20 CAND-STOCK-GETTY-EDITORIAL-001, and Part 2 §14 re-confirmation, both 2026-08-17) -- full proposition map and Formal Governance Review #3 (2026-08-17) this claim is adopted from.
+  - primary (Official platform authority, Tier 1, directly fetched, 3 independent fetches across this research program, substance consistent though section-number labeling was not -- cite by clause text/heading, not section number): Getty Images Content License Agreement (`gettyimages.com/eula`) -- Editorial Content definition (descriptive/newsworthy/public-interest purpose); the exact enumerated prohibited-use clause (commercial, promotional, advertorial, endorsement, advertising, gambling/betting/gaming, marketing); the written-authorization override clause ("unless expressly authorized on the Getty Images invoice, sales order confirmation, or licensing agreement").
+  - primary (Official platform authority, Tier 1, directly fetched): Getty Images "Rights and Clearance" (`gettyimages.com/rights-and-clearance`) -- confirms a real, named, provider-run authorization function, explicitly scoped to include advertising and promotional use clearance.
+Source authority/type: Official platform authority (directly source-backed -- see Provenance note above; not a cross-provider synthesis)
+Source fact: >
+  Getty's own Content License Agreement defines "Editorial Content" as
+  primarily intended for descriptive, newsworthy, or public-interest
+  purposes, and states that such content must not be used for commercial,
+  promotional, advertorial, endorsement, advertising, gambling/betting/
+  gaming, or marketing purposes unless expressly authorized on the
+  applicable invoice, sales order confirmation, or licensing agreement.
+  Getty's separate "Rights and Clearance" page describes a function
+  through which a customer may be authorized to use Editorial content in
+  commercial projects by obtaining additional permissions, with the
+  Rights and Clearances team's stated role including advertising and
+  promotional use clearance specifically. Both propositions independently
+  re-verified via direct fetch across this research program (5 total
+  fetches across Phase 0/1A/1B); substance consistent every time, section
+  numbering not.
+
+SI8 interpretation: >
+  A reviewer evaluating a Getty-sourced Editorial asset should treat this
+  claim as the concrete, provider-specific instance of
+  CLAIM-STOCK-EDITORIAL-001-v1's own generalized rule: check the asset's
+  actual Getty classification, then look specifically for documentary
+  evidence of written authorization (an invoice, sales order confirmation,
+  or licensing agreement showing an authorization clause) or evidence that
+  Getty's Rights and Clearance function was engaged, before concluding the
+  asset's intended use is consistent with its Getty license. This claim
+  does not itself supply that evidence for any specific project -- it
+  states what Getty's own terms and mechanism are, not whether they were
+  satisfied here.
+
+Applicability requirements: []
+Unresolved project dependencies: [asset_confirmed_getty, editorial_designation_confirmed, separate_authorization_obtained]
+Prohibited conclusions: >
+  Does not establish that any specific asset is actually Getty content.
+  Does not establish that a specific asset is designated Editorial
+  Content (vs. Creative or another classification). Does not establish
+  that the user holds a valid Getty license for the asset. Does not
+  establish that express written authorization was obtained for any
+  specific asset or project. Does not establish that Getty's Rights and
+  Clearance function was engaged for any specific asset. Does not
+  establish that model or property releases exist for the asset -- that
+  remains CLAIM-STOCK-EDITORIAL-002-v1's own, separate territory. Does
+  not establish that third-party rights are cleared. Does not establish
+  that a campaign is commercially or legally cleared. Is not a substitute
+  for Commercial Assurance evidence review.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-17
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-17 as reviewer/internal
+  knowledge only; CRC eligibility is a separate, not-yet-made decision (see
+  CRC Approver/CRC Decision Date below). Additionally and independently of
+  that separate decision, this claim currently has NO runtime Topic
+  Retrieval representation at all (see GOVERNANCE TREATMENT above), and
+  would additionally require a not-yet-scoped provider-narrowing capability
+  even once that gap and Path A are both closed (see the Additional future
+  dependency note above). Text below is the scoping language CRC MAY be
+  authorized to state if/when all of these are separately resolved,
+  preserved unchanged from the adopted draft per governance instruction not
+  to reinterpret or rewrite substantive claim text when changing
+  lifecycle/publication status: CRC may state that Getty's standard
+  Editorial-content license excludes commercial, promotional, advertorial,
+  endorsement, advertising, gambling/betting/gaming, and marketing use
+  absent express written authorization, and that Getty separately offers a
+  Rights and Clearance function through which such authorization may be
+  sought. CRC must not state whether the user's own specific Getty asset
+  is Editorial-designated, whether authorization was obtained for it, or
+  whether their use is therefore permitted.
+
+CRC Candidate Statement: >
+  NOT APPROVED FOR CRC PUBLICATION -- same status as CRC Publication Scope
+  above; text preserved unchanged, not yet authorized for CRC output:
+  Getty's standard Editorial Content license doesn't cover commercial,
+  promotional, advertorial, endorsement, advertising, gambling/betting/
+  gaming, or marketing use unless Getty has expressly authorized it in
+  writing -- Getty offers a separate "Rights and Clearance" process for
+  seeking that authorization, including for advertising and promotional
+  use specifically.
+
+Effective date: 2026-08-17
+Last reviewed: 2026-08-17
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING -- not yet approved
+CRC Decision Date: PENDING
+Related: [[CLAIM-STOCK-EDITORIAL-001-v1]] (provider-specific concrete instance, complementary), [[CLAIM-STOCK-EDITORIAL-002-v1]] (complementary, does not govern release status). See also `01_Business/research/STOCK-MEDIA-EDITORIAL-USE-CANDIDATE-RESEARCH-2026.md` (Phase 1A/1B) for full domain context.
+
+Formal Governance Review #3 (2026-08-17): PASS / GO AS-IS -- claim wording
+unchanged from the hardened research artifact's own recommended text. All
+four load-bearing proposition-map clauses independently confirmed Tier 1
+across 3-5 fetches each over the whole research program -- the
+strongest-evidenced claim in the domain to date. Classified DIRECTLY
+SOURCE-BACKED rather than Governed Synthesis on the merits (no
+cross-provider combination occurs), not for consistency with the other
+two stock claims. Atomicity found acceptably compound, mirroring
+CLAIM-STOCK-EDITORIAL-001-v1's own precedent: separating the license-scope
+clause from the Rights and Clearance clause would leave the license-scope
+half reading as more absolute than Getty's own terms actually state.
+`CRC Eligible` deliberately KEPT Pending -- not a safety/adequacy finding,
+a product-completeness deferral now compounded by a second, larger gap
+specific to provider-specific claims (the not-yet-scoped provider-
+narrowing capability, see the Additional future dependency note above),
+neither solved by this adoption decision.

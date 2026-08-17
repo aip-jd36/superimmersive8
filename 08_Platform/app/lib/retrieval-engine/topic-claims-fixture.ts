@@ -66,6 +66,19 @@
  * `TOPIC_CLAIMS_FIXTURE` entries together, in the same future change, when
  * that value is implemented. See `CLAIMS_WITHOUT_FIXTURE_REPRESENTATION` in
  * the consistency test for both IDs.
+ *
+ * CLAIM-STOCK-GETTY-EDITORIAL-001-v1 (Adopted 2026-08-17, PM/JD, following
+ * Formal Governance Review #3) is DELIBERATELY NOT mirrored here either --
+ * the SAME `GoalCategory` gap as the two claims immediately above, a third
+ * instance of one blocker, not a third independent one. This provider-
+ * specific claim additionally has a SECOND future dependency beyond that
+ * shared gap: even once `third_party_source_rights` exists, it would need
+ * a not-yet-scoped provider-narrowing capability (something that can tell
+ * Retrieval "this conversation is actually about Getty") before it could
+ * safely become CRC-eligible -- see this claim's own "Additional future
+ * dependency" note in `GOVERNED-CLAIMS.md`. Not designed or implemented
+ * here. See `CLAIMS_WITHOUT_FIXTURE_REPRESENTATION` in the consistency
+ * test for all three IDs.
  */
 
 import type { TopicClaim } from './types'
