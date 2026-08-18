@@ -316,7 +316,17 @@ describe('synthetic-eligible stock claims: proves future provider-narrowing beha
 // ── BOUNDARIES: no leak, no Bounded Interpretation change, email consistency (test plan 31-35) ──
 
 describe('boundary proofs (test plan 31-35)', () => {
-  test('31: no provider-mismatch diagnostic or language leaks into a real end-to-end ProjectionOutput', () => {
+  // NOTE (updated 2026-08-18, following CRC-Publication Review #2 + PM
+  // approval): CLAIM-STOCK-EDITORIAL-002-v1's own now-live, approved
+  // CRC-facing text legitimately NAMES Getty/iStock/Shutterstock as
+  // confirmed providers (and Adobe Stock as unconfirmed) -- this is the
+  // authorized bounded copy adjustment, not a leak. "istock"/"shutterstock"
+  // are therefore no longer blanket-forbidden strings; this test instead
+  // checks for GETTY/ISTOCK/SHUTTERSTOCK-SPECIFIC CLAIM mechanism content
+  // (their own still-Pending governed statements -- "Rights and Clearance",
+  // "gambling/betting/gaming", "editorial use only"), which must never leak
+  // regardless of what -002's own generic text says.
+  test('31: no provider-mismatch diagnostic, and no provider-SPECIFIC claim content, leaks into a real end-to-end ProjectionOutput', () => {
     const su: StructuredUnderstanding = {
       ...DIALOGUE_FIXTURES.rich_signal.structured_understanding,
       user_goals: [sourceRightsGoal()],
@@ -324,7 +334,7 @@ describe('boundary proofs (test plan 31-35)', () => {
     }
     const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
     const serialized = JSON.stringify(output).toLowerCase()
-    for (const forbidden of ['provider_scope', 'provider mismatch', 'provider unknown', 'need provider', 'need more information about provider', 'istock', 'shutterstock']) {
+    for (const forbidden of ['provider_scope', 'provider mismatch', 'provider unknown', 'need provider', 'need more information about provider', 'rights and clearance', 'gambling/betting/gaming', 'editorial use only']) {
       expect(serialized).not.toContain(forbidden)
     }
   })

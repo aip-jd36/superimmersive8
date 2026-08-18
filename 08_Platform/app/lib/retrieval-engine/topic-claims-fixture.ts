@@ -48,13 +48,21 @@
  * Getty/Shutterstock/iStock-specific content to any user who asked a
  * generic question, regardless of which provider they named).
  *
- * UPDATE (2026-08-18, M4 -- first CRC-publication decision in this domain):
+ * UPDATE (2026-08-18, M4 -- CRC-publication decisions in this domain):
  * `CLAIM-STOCK-EDITORIAL-001-v1` is now `crc_eligible: 'Yes'`, following
  * Formal CRC-Publication Review #1 (recommendation A -- PASS/GO AS-IS) and
  * PM approval -- see `governance-reviews/CPR_001_CLAIM-STOCK-EDITORIAL-001
- * -v1_2026-08-18.md`. The other four stock claims (`-002` and the three
- * provider-specific claims) remain `crc_eligible: 'Pending'` -- M3 is
- * retrieval infrastructure only and does not itself authorize CRC
+ * -v1_2026-08-18.md`. `CLAIM-STOCK-EDITORIAL-002-v1` is ALSO now
+ * `crc_eligible: 'Yes'`, following Formal CRC-Publication Review #2
+ * (recommendation B -- PASS/GO WITH BOUNDED CRC COPY ADJUSTMENT: the
+ * governed Claim proposition was left byte-identical, but the derived
+ * `crc_publication_scope`/`crc_candidate_statement` text below was
+ * corrected to restore a provider-evidence caveat -- Getty/iStock/
+ * Shutterstock confirmed, Adobe Stock explicitly not -- that the
+ * pre-correction CRC-facing text had omitted) and PM approval -- see
+ * `governance-reviews/CPR_002_CLAIM-STOCK-EDITORIAL-002-v1_2026-08-18.md`.
+ * The three provider-specific claims remain `crc_eligible: 'Pending'` --
+ * M3 is retrieval infrastructure only and does not itself authorize CRC
  * publication for any claim; each claim's CRC eligibility is its own
  * separate, individually-made governance decision (M4). Until a given
  * claim's own decision is made, `lookupTopicClaims()`'s own existing
@@ -210,11 +218,23 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     claim_character: 'established',
     jurisdiction: 'Global',
     lifecycle: 'Adopted',
-    crc_eligible: 'Pending',
+    // CRC publication approved 2026-08-18 (CRC Approver: JD/PM), following
+    // Formal CRC-Publication Review #2 (recommendation B -- PASS/GO WITH
+    // BOUNDED CRC COPY ADJUSTMENT; see governance-reviews/CPR_002_CLAIM-
+    // STOCK-EDITORIAL-002-v1_2026-08-18.md) and the bounded text correction
+    // below (restores the provider-evidence caveat already present in the
+    // governed Claim proposition -- Getty/iStock/Shutterstock confirmed,
+    // Adobe Stock explicitly not -- which the pre-correction CRC-facing
+    // text had omitted). The third claim overall, and second Third-Party
+    // Source Assets claim, to reach CRC (after CLAIM-COPY-004-v1 and
+    // CLAIM-STOCK-EDITORIAL-001-v1). Getty/iStock/Shutterstock provider-
+    // specific claims remain Pending -- deliberately not changed by this
+    // same decision.
+    crc_eligible: 'Yes',
     crc_publication_scope:
-      'CRC may state that stock-media content a provider designates "Editorial" is typically supplied without the model or property releases that would otherwise support broader commercial use, as a separate consideration from whether the applicable license permits a given use. CRC must not state whether the user\'s own specific asset has or lacks a release, or draw any conclusion from that about whether their use is permitted.',
+      'CRC may state that content Getty, iStock, or Shutterstock designate "Editorial" is typically supplied without the model or property releases that would otherwise support broader commercial use, as a separate consideration from whether the applicable license permits a given use, and that this hasn\'t been independently confirmed for every stock-media provider, including Adobe Stock. CRC must not state whether the user\'s own specific asset has or lacks a release, or draw any conclusion from that about whether their use is permitted.',
     crc_candidate_statement:
-      'Content a stock-media provider marks "Editorial" is typically supplied without the model or property releases that would otherwise support broader commercial use -- a separate question from whether the applicable license itself permits your intended use.',
+      'Content that Getty, iStock, or Shutterstock mark "Editorial" is typically supplied without the model or property releases that would otherwise support broader commercial use -- a separate question from whether the applicable license itself permits your intended use. This hasn\'t been independently confirmed for every stock-media provider, including Adobe Stock.',
     applicability_requirements: [],
     unresolved_project_dependencies: ['which_provider', 'editorial_designation_confirmed', 'release_status_confirmed'],
     provider_scope: null,
