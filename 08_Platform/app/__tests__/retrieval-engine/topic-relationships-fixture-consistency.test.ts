@@ -119,8 +119,8 @@ describe('TOPIC-RELATIONSHIPS.md <-> topic-relationships-fixture.ts consistency'
     }
   })
 
-  test('no relationship in the runtime fixture is Adopted + CRC-eligible yet -- this milestone adopts the relationship for reviewer/institutional use only, does NOT publish it to CRC (update only once a real, separate PM CRC-publication decision is recorded)', () => {
+  test('exactly one relationship in the runtime fixture is Adopted + CRC-eligible as of 2026-08-19 -- REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1, published atomically alongside its three target claims (CLAIM-COPY-001-v1/-002-v1/-003-v1) following a bounded Copyright CRC Publication-Readiness Review (recommendation A -- PASS/GO AS-IS, no rationale change); see governance-reviews/CPR_006_COPYRIGHT_PUBLICATION_PACKAGE_2026-08-19.md -- update only when a further real decision is recorded', () => {
     const liveRelationships = TOPIC_RELATIONSHIPS_FIXTURE.filter((r) => r.lifecycle === 'Adopted' && r.crc_eligible === 'Yes')
-    expect(liveRelationships).toEqual([])
+    expect(liveRelationships.map((r) => r.relationship_id)).toEqual(['REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1'])
   })
 })

@@ -1,22 +1,33 @@
 /**
  * Wave 1 governance-boundary proof (CRC Living Knowledge Phase 1,
  * 2026-08-16; updated 2026-08-16 for the first formal adoption decision;
- * updated again 2026-08-17 for the first formal CRC-publication decision).
+ * updated again 2026-08-17 for the first formal CRC-publication decision;
+ * updated again 2026-08-19 for the atomic copyright publication package).
  * Uses the REAL TOPIC_CLAIMS_FIXTURE content -- four real U.S. copyright
  * claims, formally ADOPTED 2026-08-16 (Adoption Approver: JD/PM) as SI8
  * institutional/reviewer knowledge.
  *
  * As of 2026-08-17, this file's own premise changed for the first time:
- * CLAIM-COPY-004-v1 is now `crc_eligible: 'Yes'` (CRC Approver: JD/PM,
+ * CLAIM-COPY-004-v1 became `crc_eligible: 'Yes'` (CRC Approver: JD/PM,
  * 2026-08-17, after source-hardening research -- see
  * 01_Business/research/COPY-004-SOURCE-HARDENING-RESEARCH-2026.md) -- the
  * first non-platform copyright claim ever published to CRC.
- * CLAIM-COPY-001/002/003-v1 remain `crc_eligible: 'Pending'`, unchanged by
- * that same decision. This file was updated, not left stale, to assert the
- * now-accurate mixed state (one live, three still excluded) rather than
- * silently keep asserting a fact that stopped being true for one of the
- * four claims -- same discipline the 2026-08-16 update already established
- * as precedent for this file.
+ *
+ * As of 2026-08-19, this file's premise changed a second time: following a
+ * bounded Copyright CRC Publication-Readiness Review (recommendation A --
+ * PASS/GO AS-IS for all four objects, no text change to any of them) and PM
+ * approval, CLAIM-COPY-001-v1/-002-v1/-003-v1 and
+ * REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1 are now ALSO `crc_eligible: 'Yes'`
+ * -- published together in a single atomic governance decision, not
+ * sequentially. See
+ * `governance-reviews/CPR_006_COPYRIGHT_PUBLICATION_PACKAGE_2026-08-19.md`.
+ * This file's own title ("...claims-excluded") now describes its ORIGINAL
+ * scope, not its current one -- updated, not left stale or renamed, per
+ * this file's own established precedent (see prior header updates above):
+ * it now proves the POSITIVE reachability behavior for all four objects,
+ * plus the one remaining real applicability boundary (unconfirmed U.S.
+ * jurisdiction), which is expected, disclosed, non-blocking behavior, not
+ * a routing defect.
  */
 
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
@@ -61,10 +72,10 @@ function copyrightGoal(overrides: Partial<UserGoal> = {}): UserGoal {
 /**
  * CLAIM-COPY-001/002/003 are tagged Topic: copyrightability;
  * CLAIM-COPY-004 is tagged Topic: copyright_ownership. copyrightGoal()
- * above only exercises copyright_ownership (now matching only 004); this
- * helper exercises copyrightability (matching 001/002/003, all three still
- * Pending), so the exclusion proof below still directly covers those three
- * claims, not just the one live claim by coincidence.
+ * above only exercises copyright_ownership (directly matches only 004;
+ * reaches 001/002/003 ONLY via REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1, now
+ * also live); this helper exercises copyrightability directly (matching
+ * 001/002/003 via exact topic match, no relationship needed).
  */
 function copyrightabilityGoal(overrides: Partial<UserGoal> = {}): UserGoal {
   return {
@@ -80,18 +91,17 @@ function copyrightabilityGoal(overrides: Partial<UserGoal> = {}): UserGoal {
   }
 }
 
-describe('Wave 1 real claims -- governance state as of 2026-08-17 (COPY-004 published, COPY-001/002/003 still Pending)', () => {
+describe('Wave 1 real claims -- governance state as of 2026-08-19 (all four COPY claims + REL-COPY now CRC-eligible)', () => {
   /**
    * Updated 2026-08-18 (Living Knowledge — Third-Party Source Rights, M3):
    * the fixture now also carries the five real, Adopted stock-media claims
    * (M1 GoalCategory + M2 AssetProviderMention + M3 provider-scoped
    * retrieval together closed their prior no-runtime-representation
    * blocker) -- updated, not left stale, per this file's own established
-   * precedent (see module header). Their own crc_eligible: Pending
-   * exclusion behavior is proven separately, not by this file (which is
-   * scoped to Wave 1's copyright claims) -- see
-   * topic-claims-fixture-consistency.test.ts and the M3 provider-narrowing
-   * test suite.
+   * precedent (see module header). Their own crc_eligible state is proven
+   * separately, not by this file (which is scoped to Wave 1's copyright
+   * claims) -- see topic-claims-fixture-consistency.test.ts and the M3
+   * provider-narrowing test suite.
    */
   test('all four Wave 1 claims plus the five stock-media claims are present in the fixture', () => {
     expect(TOPIC_CLAIMS_FIXTURE.map((c) => c.claim_id).sort()).toEqual([
@@ -113,82 +123,83 @@ describe('Wave 1 real claims -- governance state as of 2026-08-17 (COPY-004 publ
     }
   })
 
-  test('CLAIM-COPY-004 is the ONLY claim that is CRC-Eligible: Yes; the other three remain Pending -- Adoption alone never implies CRC eligibility, which is a separate, per-claim decision', () => {
-    const copy004 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-COPY-004-v1')!
-    expect(copy004.crc_eligible).toBe('Yes')
-    for (const id of ['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1']) {
-      expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === id)?.crc_eligible).toBe('Pending')
+  test('all four Wave 1 claims (CLAIM-COPY-001/002/003/004) are now CRC-Eligible: Yes -- published atomically 2026-08-19 (001/002/003 + REL-COPY together), 004 independently on 2026-08-17', () => {
+    for (const id of ['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPY-004-v1']) {
+      expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === id)?.crc_eligible).toBe('Yes')
     }
   })
 
-  test('the governed relationship REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1 remains CRC-Eligible: Pending -- COPY-004 publication is deliberately NOT bundled with related-topic activation', () => {
+  test('the governed relationship REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1 is now CRC-Eligible: Yes -- published atomically alongside its three target claims 2026-08-19', () => {
     const rel = TOPIC_RELATIONSHIPS_FIXTURE.find((r) => r.relationship_id === 'REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1')!
     expect(rel.lifecycle).toBe('Adopted')
-    expect(rel.crc_eligible).toBe('Pending')
+    expect(rel.crc_eligible).toBe('Yes')
   })
 })
 
-describe('CLAIM-COPY-004 -- now reachable through exact Topic Retrieval (published 2026-08-17)', () => {
-  test('lookupTopicClaims returns CLAIM-COPY-004 for a copyright_ownership goal, jurisdiction unconfirmed -- Global + empty applicability requirements means no gate to clear', () => {
+describe('CLAIM-COPY-004 -- reachable through exact Topic Retrieval (published 2026-08-17, unaffected by the 2026-08-19 package)', () => {
+  test('lookupTopicClaims returns CLAIM-COPY-004 for a copyright_ownership goal, jurisdiction unconfirmed -- Global + empty applicability requirements means no gate to clear; COPY-001/002/003 never enter this result because lookupTopicClaims only ever exact-matches Topic, and their own Topic is copyrightability, not copyright_ownership', () => {
     const result = lookupTopicClaims([copyrightGoal()], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'unknown' }, toolMentions: [] })
     expect(result.matches).toHaveLength(1)
     expect(result.matches[0].claim_id).toBe('CLAIM-COPY-004-v1')
   })
 
-  test('retrieve() produces exactly one result for a copyright_ownership goal, correctly tagged exact_topic', () => {
+  test('retrieve() produces exactly one result for a copyright_ownership goal when jurisdiction is unconfirmed, correctly tagged exact_topic -- COPY-001/002/003 are now relationship-reachable in principle, but their own applicability_requirements (confirmed US jurisdiction) are unmet with unknown jurisdiction, so they never enter matches[] via the related-topic path either', () => {
     const out = retrieve(handoff(), MATRIX_FIXTURE, [copyrightGoal()], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'unknown' }, toolMentions: [] }, TOPIC_RELATIONSHIPS_FIXTURE)
     expect(out.results).toHaveLength(1)
     expect(out.results[0]).toMatchObject({ claim_id: 'CLAIM-COPY-004-v1', match_origin: 'exact_topic', matched_goal_category: 'copyright_ownership', relationship_id: null })
   })
 
-  test('the relationship stays Pending -> passing TOPIC_RELATIONSHIPS_FIXTURE alongside COPY-004 does NOT additionally surface COPY-001/002/003 as related-topic content', () => {
-    const out = retrieve(handoff(), MATRIX_FIXTURE, [copyrightGoal()], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] }, TOPIC_RELATIONSHIPS_FIXTURE)
-    expect(out.results.filter((r) => r.match_origin === 'related_topic')).toEqual([])
-    expect(out.results).toHaveLength(1) // COPY-004 only
-  })
-
-  test('InterpretationStatus is directly_relevant, not a stronger claim -- COPY-004 has empty unresolved_project_dependencies, so Case 3B never fires', () => {
+  test('InterpretationStatus is directly_relevant, not a stronger claim -- COPY-004 has empty unresolved_project_dependencies, so Case 3B never fires (no relationships passed here, so this is COPY-004 in isolation, unaffected by the copyright publication package)', () => {
     const out = retrieve(handoff(), MATRIX_FIXTURE, [copyrightGoal()], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'unknown' }, toolMentions: [] })
     const [interp] = buildBoundedInterpretations([copyrightGoal()], out.results, out.diagnostics)
     expect(interp.status).toBe('directly_relevant')
   })
 })
 
-describe('Wave 1 real claims -- CLAIM-COPY-001/002/003 remain structurally excluded from Topic Retrieval (still Pending, unaffected by COPY-004\'s publication)', () => {
-  test('lookupTopicClaims returns zero matches for a copyrightability goal (CLAIM-COPY-001/002/003) even with a directly-applicable goal + confirmed US jurisdiction -- Adopted does not bypass the crc_eligible gate', () => {
+describe('CLAIM-COPY-001/002/003 -- reachable through exact Topic Retrieval for a direct copyrightability goal (published 2026-08-19)', () => {
+  test('lookupTopicClaims returns all three for a copyrightability goal with confirmed US jurisdiction -- Adopted + CRC Eligible: Yes + applicability met', () => {
     const goal = copyrightabilityGoal()
     for (const id of ['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1']) {
       expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === id)?.lifecycle).toBe('Adopted')
+      expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === id)?.crc_eligible).toBe('Yes')
     }
     const result = lookupTopicClaims([goal], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] })
-    expect(result.matches).toEqual([])
-    expect(result.diagnostics).toContainEqual({ identifier: 'copyrightability', reason: 'not_adopted_or_eligible' })
+    expect(result.matches.map((m) => m.claim_id).sort()).toEqual(['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1'])
   })
 
-  test('item F: relevant_applicability_unresolved cannot create a backdoor around CRC eligibility -- even though these Adopted claims carry non-empty unresolved_project_dependencies (Case 3B territory), crc_eligible: Pending excludes them before Case 3B logic is ever reached', () => {
+  test('lookupTopicClaims returns zero matches for a copyrightability goal when jurisdiction is unconfirmed -- the one remaining real applicability boundary, expected and disclosed, not a routing defect', () => {
+    const goal = copyrightabilityGoal()
+    const result = lookupTopicClaims([goal], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'unknown' }, toolMentions: [] })
+    expect(result.matches).toEqual([])
+    expect(result.diagnostics).toContainEqual({ identifier: 'copyrightability', reason: 'applicability_unmet' })
+  })
+
+  test("item F, now proven positively: relevant_applicability_unresolved (Case 3B) correctly fires for all three claims -- each carries non-empty unresolved_project_dependencies (['human_creative_contribution_level']), so the combined statement renders under the unresolved-applicability template, never directly_relevant", () => {
     const claim001 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-COPY-001-v1')!
     expect(claim001.unresolved_project_dependencies).toEqual(['human_creative_contribution_level'])
     expect(claim001.lifecycle).toBe('Adopted')
-    expect(claim001.crc_eligible).toBe('Pending')
-    const result = lookupTopicClaims([copyrightabilityGoal()], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] })
-    expect(result.matches).toEqual([])
+    expect(claim001.crc_eligible).toBe('Yes')
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [copyrightabilityGoal()], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] })
+    const [interp] = buildBoundedInterpretations([copyrightabilityGoal()], out.results, out.diagnostics)
+    expect(interp.status).toBe('relevant_applicability_unresolved')
+    expect(interp.summary).toContain("there isn't enough project-specific information")
   })
 
-  test('retrieve() produces zero results for a copyrightability goal (post-retag) even with a directly-applicable goal + confirmed jurisdiction', () => {
+  test('retrieve() produces zero results for a copyrightability goal when jurisdiction is unconfirmed, even though the claims are now CRC-eligible', () => {
     const goal = copyrightabilityGoal()
     const out = retrieve(
       handoff(),
       MATRIX_FIXTURE,
       [goal],
       TOPIC_CLAIMS_FIXTURE,
-      { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] },
+      { jurisdiction: { state: 'unknown' }, toolMentions: [] },
     )
     expect(out.results).toEqual([])
   })
 })
 
-describe('Wave 1 real claims -- end-to-end through the full CRC pipeline (2026-08-17 governance state: COPY-004 live, COPY-001/002/003 still withheld)', () => {
-  test('a real copyright_ownership goal (CLAIM-COPY-004) against the real Wave 1 fixture now surfaces COPY-004\'s real governed statement -- directly_relevant, never a copyright/ownership conclusion, and COPY-001/002/003 content never leaks alongside it', () => {
+describe('Wave 1 real claims -- end-to-end through the full CRC pipeline (2026-08-19 governance state: all four COPY claims + REL-COPY live)', () => {
+  test('a real copyright_ownership goal, confirmed US jurisdiction, surfaces the full four-claim composition (COPY-004 direct + COPY-001/002/003 via REL-COPY) -- directly_relevant text quoted, never a copyright/ownership conclusion, no internal metadata rendered', () => {
     const goal = copyrightGoal()
     const su: StructuredUnderstanding = {
       ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
@@ -201,28 +212,55 @@ describe('Wave 1 real claims -- end-to-end through the full CRC pipeline (2026-0
     const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
 
     expect(output.goal_interpretations).toHaveLength(1)
-    expect(output.goal_interpretations[0].summary).toBe(
+    const summary = output.goal_interpretations[0].summary
+    // COPY-004's own framing statement.
+    expect(summary).toContain("are two separate questions")
+    // COPY-001/002/003's own governed text, now legitimately reachable via REL-COPY.
+    expect(summary).toContain('generally isn\'t eligible for copyright protection')
+    expect(summary).toContain('writing prompts alone')
+    expect(summary).toContain('meaningfully selecting, arranging, or editing')
+    // The related-topic boundary clause, appended once for the relationship-sourced content.
+    expect(summary).toContain('This information is relevant to what you asked, but does not by itself determine the answer.')
+    // Case 3B's own closing hedge -- fires because COPY-001/002/003 all carry unresolved_project_dependencies.
+    expect(summary).toContain("there isn't enough project-specific information")
+    // Never the old "no coverage" template -- that would mean the publication decision silently didn't take effect.
+    expect(summary).not.toContain("doesn't establish an answer")
+    // Never a copyright/ownership conclusion in either direction, and never an assertion the user's own contribution satisfies/fails the legal threshold.
+    expect(summary).not.toMatch(/\byou own\b|\byou do not own\b|\byour video is copyrighted\b|\byour video is not copyrighted\b|\byour editing is enough\b|\byour prompts establish authorship\b/i)
+    // No internal relationship/claim-id metadata rendered to the user.
+    const serialized = JSON.stringify(output)
+    expect(serialized).not.toContain('REL-COPY-OWNERSHIP-COPYRIGHTABILITY')
+    expect(serialized).not.toContain('relevant_consideration')
+    expect(serialized).not.toContain('DRAFT')
+    expect(serialized).not.toContain('bedrock') // internal Source fact prose, never rendered verbatim to CRC users
+    expect(serialized).not.toContain('Thaler')
+    expect(serialized).not.toContain('sweat of the brow')
+  })
+
+  test('a real copyright_ownership goal, jurisdiction UNCONFIRMED, still surfaces only COPY-004 -- COPY-001/002/003 remain silently unreachable (their own applicability_requirements unmet), never asserted as though jurisdiction were confirmed', () => {
+    const goal = copyrightGoal()
+    const su: StructuredUnderstanding = {
+      ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
+      user_goals: [goal],
+      // jurisdiction left at DIALOGUE_FIXTURES.no_signal's own default (unattested/unknown) -- deliberately not confirmed here.
+    }
+    const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+
+    expect(output.goal_interpretations).toHaveLength(1)
+    const summary = output.goal_interpretations[0].summary
+    expect(summary).toBe(
       "Whether a platform's terms allow commercial use of the output, and whether that output is copyrighted (and who owns it), are two separate questions -- a platform granting commercial-use permission doesn't by itself answer either. This is relevant to who owns the copyright, though it doesn't by itself determine the answer for your specific project.",
     )
-    // Never the old "no coverage" template -- that would mean the
-    // publication decision silently didn't take effect.
-    expect(output.goal_interpretations[0].summary).not.toContain("doesn't establish an answer")
-    // Never a copyright/ownership conclusion in either direction.
-    expect(output.goal_interpretations[0].summary).not.toMatch(/\byou own\b|\byou do not own\b|\bis copyrightable\b|\bis not copyrightable\b/i)
-    // COPY-001/002/003's own still-withheld content never leaks in alongside COPY-004's.
     const serialized = JSON.stringify(output)
     expect(serialized).not.toContain('bedrock')
     expect(serialized).not.toContain('Thaler')
     expect(serialized).not.toContain('sweat of the brow')
     expect(serialized).not.toContain('sufficient human creative contribution')
     expect(serialized).not.toContain('perceptible portion')
-    expect(serialized).not.toContain('DRAFT')
-    // No internal relationship/claim-id metadata rendered to the user.
     expect(serialized).not.toContain('REL-COPY-OWNERSHIP-COPYRIGHTABILITY')
-    expect(serialized).not.toContain('relevant_consideration')
   })
 
-  test('a real copyrightability goal (CLAIM-COPY-001/002/003, post-retag) against the real Wave 1 fixture still produces outside_current_coverage, never the draft claim content -- unaffected by COPY-004\'s own publication', () => {
+  test('a real copyrightability goal, confirmed US jurisdiction, now surfaces COPY-001/002/003\'s combined governed statement directly -- never the old outside_current_coverage template', () => {
     const goal = copyrightabilityGoal()
     const su: StructuredUnderstanding = {
       ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
@@ -235,7 +273,33 @@ describe('Wave 1 real claims -- end-to-end through the full CRC pipeline (2026-0
     const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
 
     expect(output.goal_interpretations).toHaveLength(1)
-    expect(output.goal_interpretations[0].summary).toContain("doesn't establish an answer")
+    const summary = output.goal_interpretations[0].summary
+    expect(summary).not.toContain("doesn't establish an answer")
+    expect(summary).toContain("there isn't enough project-specific information")
+    expect(summary).toContain('generally isn\'t eligible for copyright protection')
+    expect(summary).toContain('writing prompts alone')
+    expect(summary).toContain('meaningfully selecting, arranging, or editing')
+    const serialized = JSON.stringify(output)
+    expect(serialized).not.toContain('DRAFT')
+    expect(serialized).not.toContain('RE-VERIFIED')
+  })
+
+  test('a real copyrightability goal, jurisdiction UNCONFIRMED, now produces Case 3A (relevant_applicability_unresolved, content-free) rather than outside_current_coverage -- a genuine, correct behavior change from pre-publication: previously COPY-001/002/003 were excluded via not_adopted_or_eligible (never reaching the applicability check at all), which does not trigger Case 3A; now that they are Adopted + CRC Eligible: Yes, the SAME unconfirmed jurisdiction instead produces an applicability_unmet diagnostic, which DOES trigger Case 3A -- still zero claim content quoted, still safe, but more informative than the old flat "no coverage" message', () => {
+    const goal = copyrightabilityGoal()
+    const su: StructuredUnderstanding = {
+      ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
+      user_goals: [goal],
+    }
+    const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+
+    expect(output.goal_interpretations).toHaveLength(1)
+    // Case 3A, content-free: "SI8 has governed knowledge relevant to ...,
+    // but it depends on project-specific information that hasn't been
+    // confirmed in this conversation." -- never quotes claim text, never
+    // asserts a U.S.-specific proposition without confirmed U.S. jurisdiction.
+    expect(output.goal_interpretations[0].summary).toContain('SI8 has governed knowledge relevant to')
+    expect(output.goal_interpretations[0].summary).toContain("hasn't been confirmed in this conversation")
+    expect(output.goal_interpretations[0].summary).not.toContain("doesn't establish an answer")
     expect(output.goal_interpretations[0].summary).not.toContain("there isn't enough project-specific information")
     const serialized = JSON.stringify(output)
     expect(serialized).not.toContain('bedrock')
@@ -247,7 +311,7 @@ describe('Wave 1 real claims -- end-to-end through the full CRC pipeline (2026-0
     expect(serialized).not.toContain('RE-VERIFIED')
   })
 
-  test('commercial_use goal isolation: COPY-004 never appears for an unrelated goal category in the same conversation', () => {
+  test('commercial_use goal isolation: no copyright content appears for an unrelated goal category in the same conversation', () => {
     const commercialGoal: UserGoal = {
       goal_id: 'g-2',
       state: 'confirmed',
@@ -265,6 +329,9 @@ describe('Wave 1 real claims -- end-to-end through the full CRC pipeline (2026-0
     const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
     const serialized = JSON.stringify(output)
     expect(serialized).not.toContain('CLAIM-COPY-004')
+    expect(serialized).not.toContain('CLAIM-COPY-001')
+    expect(serialized).not.toContain('CLAIM-COPY-002')
+    expect(serialized).not.toContain('CLAIM-COPY-003')
     expect(serialized).not.toContain("doesn't by itself answer either")
   })
 })

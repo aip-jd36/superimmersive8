@@ -1,25 +1,36 @@
 /**
- * Zero-UNAPPROVED-behavior-change proof (Governed Topic Relationships
- * implementation milestone, 2026-08-16; orchestrator-wiring follow-up,
- * 2026-08-16; CLAIM-COPY-004 CRC-publication decision, 2026-08-17) -- uses
+ * Governed Topic Relationships real-fixture proof (Governed Topic
+ * Relationships implementation milestone, 2026-08-16; orchestrator-wiring
+ * follow-up, 2026-08-16; CLAIM-COPY-004 CRC-publication decision,
+ * 2026-08-17; atomic copyright publication package, 2026-08-19) -- uses
  * the REAL governed fixtures (TOPIC_CLAIMS_FIXTURE,
- * TOPIC_RELATIONSHIPS_FIXTURE), never synthetic eligible ones by default,
- * through the REAL production entry point (runCRCConversation, the exact
- * function every live call site -- app/api/crc/turn/route.ts, run-turn.ts,
+ * TOPIC_RELATIONSHIPS_FIXTURE), never synthetic eligible ones, through the
+ * REAL production entry point (runCRCConversation, the exact function
+ * every live call site -- app/api/crc/turn/route.ts, run-turn.ts,
  * results-email-delivery.ts -- threads TOPIC_RELATIONSHIPS_FIXTURE into,
  * mirroring exactly how each already threads TOPIC_CLAIMS_FIXTURE).
  *
- * UPDATED 2026-08-17 for the first real governance change this file has
- * ever had to reflect: CLAIM-COPY-004-v1 is now `crc_eligible: 'Yes'` (CRC
- * Approver: JD/PM, 2026-08-17) -- this is an INTENDED, approved behavior
- * change, not a regression, and this file's assertions are updated to
- * expect it. What remains proven unchanged, and is the file's continuing
- * purpose: the governed RELATIONSHIP (REL-COPY-OWNERSHIP-COPYRIGHTABILITY-
- * v1) and CLAIM-COPY-001/002/003 all remain `crc_eligible: 'Pending'`, and
- * the real relationship object genuinely reaches Retrieval and is
- * genuinely considered (not just present-but-unwired) yet still produces
- * zero related-topic output -- excluded SOLELY because governance says
- * Pending, not because it never arrived.
+ * ORIGINAL PURPOSE (2026-08-16, "zero-behavior-change"): prove the
+ * relationship genuinely reached Retrieval and was genuinely considered
+ * (not just present-but-unwired) while still producing zero related-topic
+ * output -- excluded SOLELY by governance (`CRC Eligible: Pending`), not by
+ * missing plumbing. That original "layer 3" proof used test-only clones
+ * (crc_eligible flipped to 'Yes') of the real fixture entries to
+ * demonstrate what WOULD happen once published, without mutating real
+ * governance state.
+ *
+ * UPDATE (2026-08-19, atomic copyright publication package): following a
+ * bounded Copyright CRC Publication-Readiness Review (recommendation A --
+ * PASS/GO AS-IS for REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1 and its three
+ * target claims CLAIM-COPY-001-v1/-002-v1/-003-v1, no text/rationale
+ * change) and PM approval, that "layer 3" future-behavior proof is now the
+ * REAL, live behavior -- published atomically, not sequentially. See
+ * `governance-reviews/CPR_006_COPYRIGHT_PUBLICATION_PACKAGE_2026-08-19.md`.
+ * This file is updated, not left stale, to assert the now-real related-
+ * topic composition directly against the real, unmodified fixtures --
+ * exactly the "prove it once published" moment the original synthetic
+ * clone tests existed to anticipate. The clone helpers are removed;
+ * nothing left to synthesize once the real state matches what they proved.
  */
 
 import * as fs from 'fs'
@@ -31,7 +42,6 @@ import { TOPIC_RELATIONSHIPS_FIXTURE } from '@/lib/retrieval-engine/topic-relati
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import { runCRCConversation } from '@/lib/crc-engine/run-crc-conversation'
 import type { StructuredUnderstanding, UserGoal } from '@/types/interview-engine'
-import type { TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
 
 function ownershipGoal(): UserGoal {
   return {
@@ -47,61 +57,98 @@ function ownershipGoal(): UserGoal {
 }
 
 describe('governance state as of this milestone -- confirms the premise the rest of this file relies on', () => {
-  test('the real relationship record is Adopted but CRC-Eligible: Pending', () => {
+  test('the real relationship record is Adopted and CRC-Eligible: Yes (published 2026-08-19)', () => {
     const rel = TOPIC_RELATIONSHIPS_FIXTURE.find((r) => r.relationship_id === 'REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1')
     expect(rel).toBeDefined()
     expect(rel!.lifecycle).toBe('Adopted')
-    expect(rel!.crc_eligible).toBe('Pending')
+    expect(rel!.crc_eligible).toBe('Yes')
   })
 
-  test('CLAIM-COPY-004 is CRC-Eligible: Yes (2026-08-17 publication decision); COPY-001/002/003 remain Pending, unchanged by that same decision', () => {
+  test('all four CLAIM-COPY claims are Adopted and CRC-Eligible: Yes (004 independently 2026-08-17; 001/002/003 atomically 2026-08-19)', () => {
     const copyrightClaims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id.startsWith('CLAIM-COPY-'))
     expect(copyrightClaims).toHaveLength(4)
     for (const c of copyrightClaims) {
       expect(c.lifecycle).toBe('Adopted')
-      expect(c.crc_eligible).toBe(c.claim_id === 'CLAIM-COPY-004-v1' ? 'Yes' : 'Pending')
+      expect(c.crc_eligible).toBe('Yes')
     }
   })
 })
 
-describe('layer 1 -- the real orchestrator DOES thread the real relationship fixture through; COPY-004 now surfaces (approved), everything else stays governance-blocked', () => {
-  test('the canonical live scenario ("Do I own the copyright?") via runCRCConversation, called EXACTLY as every real call site now calls it (matrix, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE), now produces CLAIM-COPY-004\'s real governed statement -- the intended, approved 2026-08-17 behavior change', () => {
+describe('layer 1 -- the real orchestrator threads the real relationship fixture through; the full four-claim composition now surfaces for a real copyright_ownership question', () => {
+  test('the canonical live scenario ("Do I own the copyright?"), confirmed US jurisdiction, via runCRCConversation called EXACTLY as every real call site now calls it (matrix, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE), now produces the full COPY-004 + COPY-001/002/003 composition -- the intended, approved 2026-08-19 behavior change', () => {
+    const su: StructuredUnderstanding = {
+      ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
+      user_goals: [ownershipGoal()],
+      project_facts: {
+        ...DIALOGUE_FIXTURES.no_signal.structured_understanding.project_facts,
+        jurisdiction: { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 1, source_statement: 'US' },
+      },
+    }
+    const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+
+    expect(output.goal_interpretations).toHaveLength(1)
+    const interp = output.goal_interpretations[0]
+    const copy001 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-COPY-001-v1')!
+    const copy002 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-COPY-002-v1')!
+    const copy003 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-COPY-003-v1')!
+    const copy004 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-COPY-004-v1')!
+
+    // All four claims' own governed text present, verbatim.
+    expect(interp.summary).toContain(copy004.crc_candidate_statement!)
+    expect(interp.summary).toContain(copy001.crc_candidate_statement!)
+    expect(interp.summary).toContain(copy002.crc_candidate_statement!)
+    expect(interp.summary).toContain(copy003.crc_candidate_statement!)
+
+    // Never the old (now-stale) "no coverage" template.
+    expect(interp.summary).not.toContain("doesn't establish an answer")
+    // Related-topic boundary clause present exactly once (relationship-sourced content).
+    expect(interp.summary).toContain('This information is relevant to what you asked, but does not by itself determine the answer.')
+    // Case 3B's own closing hedge -- fires because COPY-001/002/003 all carry unresolved_project_dependencies.
+    expect(interp.summary).toContain("there isn't enough project-specific information")
+    // No internal relationship/claim-id metadata rendered to the user.
+    expect(JSON.stringify(output)).not.toContain('REL-COPY-OWNERSHIP-COPYRIGHTABILITY')
+    expect(JSON.stringify(output)).not.toContain('relevant_consideration')
+  })
+
+  test('with jurisdiction unconfirmed, only COPY-004 surfaces -- COPY-001/002/003 remain silently unreachable via their own applicability_requirements, not via the relationship gate (which is now open)', () => {
     const su: StructuredUnderstanding = { ...DIALOGUE_FIXTURES.no_signal.structured_understanding, user_goals: [ownershipGoal()] }
     const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
 
     expect(output.goal_interpretations).toHaveLength(1)
     const interp = output.goal_interpretations[0]
     const copy004 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-COPY-004-v1')!
-    // ProjectionGoalInterpretation carries only goal_text/summary (status is
-    // an internal-only BoundedInterpretation field, never exposed this far
-    // downstream) -- the rendered text itself is the observable proof of
-    // directly_relevant status at this layer.
     expect(interp.summary).toBe(`${copy004.crc_candidate_statement} This is relevant to who owns the copyright, though it doesn't by itself determine the answer for your specific project.`)
-    // Never the old (now-stale) "no coverage" template.
-    expect(interp.summary).not.toContain("doesn't establish an answer")
-
-    // None of the still-Pending COPY-001/002/003 statements ever appear.
     for (const claim of TOPIC_CLAIMS_FIXTURE) {
       if (claim.claim_id === 'CLAIM-COPY-004-v1') continue
       if (claim.crc_candidate_statement) {
         expect(interp.summary).not.toContain(claim.crc_candidate_statement)
       }
     }
-    // No related-topic boundary clause -- the relationship never activated (still Pending).
     expect(interp.summary).not.toContain('This information is relevant to what you asked, but does not by itself determine the answer.')
-    expect(JSON.stringify(output)).not.toContain('REL-COPY-OWNERSHIP-COPYRIGHTABILITY')
   })
 
-  test('omitting relationships entirely still defaults to [] -- backward-compatible, identical output to passing the real fixture explicitly (since the real fixture is inert while Pending)', () => {
-    const su: StructuredUnderstanding = { ...DIALOGUE_FIXTURES.no_signal.structured_understanding, user_goals: [ownershipGoal()] }
+  test('omitting relationships entirely still defaults to [] -- backward-compatible, and now materially DIFFERENT from passing the real (now-live) fixture explicitly, since the real fixture is no longer inert', () => {
+    const su: StructuredUnderstanding = {
+      ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
+      user_goals: [ownershipGoal()],
+      project_facts: {
+        ...DIALOGUE_FIXTURES.no_signal.structured_understanding.project_facts,
+        jurisdiction: { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 1, source_statement: 'US' },
+      },
+    }
     const withoutRelationships = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
     const withRealRelationships = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
-    expect(withRealRelationships.output).toEqual(withoutRelationships.output)
+    // Omitting relationships (defaults to []) means lookupRelatedTopicClaims finds no eligible relationship
+    // regardless of the real fixture's own state -- COPY-001/002/003 never surface without it.
+    expect(withoutRelationships.output.goal_interpretations[0].summary).not.toContain(
+      TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-COPY-001-v1')!.crc_candidate_statement!,
+    )
+    expect(withRealRelationships.output).not.toEqual(withoutRelationships.output)
   })
 })
 
-describe('layer 2 -- even with the real relationship fixture explicitly passed to retrieve() directly, Pending blocks RELATED-topic expansion (COPY-004 itself now correctly surfaces via its own exact-topic path)', () => {
-  test('retrieve() called directly with TOPIC_RELATIONSHIPS_FIXTURE + TOPIC_CLAIMS_FIXTURE produces exactly one exact-topic result (COPY-004) and zero related-topic results', () => {
+describe('layer 2 -- the real relationship fixture explicitly passed to retrieve() directly now produces related-topic results (COPY-004 via exact-topic, COPY-001/002/003 via the now-live relationship)', () => {
+  test('retrieve() called directly with TOPIC_RELATIONSHIPS_FIXTURE + TOPIC_CLAIMS_FIXTURE, confirmed US jurisdiction, produces one exact-topic result (COPY-004) and three related-topic results (COPY-001/002/003)', () => {
     const handoff = { tools: [], unresolved_aliases: [], asset_providers: [], unresolved_asset_provider_mentions: [], workflow_role: 'unresolved' as const, intended_use: 'unclear' as const, scoped_observations: [], certainty_state: 'gate_1_unmet' as const, exclusions: [] }
     const out = retrieve(
       handoff,
@@ -111,6 +158,24 @@ describe('layer 2 -- even with the real relationship fixture explicitly passed t
       { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] },
       TOPIC_RELATIONSHIPS_FIXTURE,
     )
+    const exactResults = out.results.filter((r) => r.match_origin === 'exact_topic')
+    const relatedResults = out.results.filter((r) => r.match_origin === 'related_topic')
+    expect(exactResults.map((r) => r.claim_id)).toEqual(['CLAIM-COPY-004-v1'])
+    expect(relatedResults.map((r) => r.claim_id).sort()).toEqual(['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1'])
+    expect(relatedResults.every((r) => r.relationship_id === 'REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1')).toBe(true)
+    expect(out.results).toHaveLength(4)
+  })
+
+  test('retrieve() called directly with jurisdiction unconfirmed still produces only the one exact-topic result (COPY-004) -- COPY-001/002/003 fail their own applicability_requirements regardless of the now-live relationship', () => {
+    const handoff = { tools: [], unresolved_aliases: [], asset_providers: [], unresolved_asset_provider_mentions: [], workflow_role: 'unresolved' as const, intended_use: 'unclear' as const, scoped_observations: [], certainty_state: 'gate_1_unmet' as const, exclusions: [] }
+    const out = retrieve(
+      handoff,
+      MATRIX_FIXTURE,
+      [ownershipGoal()],
+      TOPIC_CLAIMS_FIXTURE,
+      { jurisdiction: { state: 'unknown' }, toolMentions: [] },
+      TOPIC_RELATIONSHIPS_FIXTURE,
+    )
     const relatedResults = out.results.filter((r) => r.match_origin === 'related_topic')
     expect(relatedResults).toEqual([])
     expect(out.results).toHaveLength(1)
@@ -118,79 +183,7 @@ describe('layer 2 -- even with the real relationship fixture explicitly passed t
   })
 })
 
-describe('layer 3 -- LOAD-BEARING: the real relationship IS considered, blocked SOLELY by governance, not by missing plumbing (PM-required proof, 2026-08-16 follow-up)', () => {
-  /**
-   * Test-only clones of the REAL fixture entries, with ONLY crc_eligible
-   * flipped to 'Yes' -- everything else (relationship_id, source_topic,
-   * target_topic, rationale, claim_id, crc_candidate_statement, etc.)
-   * stays byte-identical to the real governed record. The real fixtures
-   * themselves (TOPIC_RELATIONSHIPS_FIXTURE, TOPIC_CLAIMS_FIXTURE) are
-   * never mutated -- these are separate, new objects.
-   */
-  function cloneEligible(rel: TopicRelationship): TopicRelationship {
-    return { ...rel, crc_eligible: 'Yes' }
-  }
-  function cloneEligibleClaim(claim: TopicClaim): TopicClaim {
-    return { ...claim, crc_eligible: 'Yes' }
-  }
-
-  test('with the REAL relationship record (only crc_eligible cloned to Yes) + REAL target claims (only crc_eligible cloned to Yes), the real orchestration path produces the real, governed related-topic content', () => {
-    const realRel = TOPIC_RELATIONSHIPS_FIXTURE.find((r) => r.relationship_id === 'REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1')!
-    const realCopy002 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-COPY-002-v1')!
-    const realCopy003 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-COPY-003-v1')!
-    const realCopy004 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-COPY-004-v1')!
-
-    const testOnlyEligibleRel = cloneEligible(realRel)
-    const testOnlyEligibleClaims = TOPIC_CLAIMS_FIXTURE.map((c) => (c.claim_id.startsWith('CLAIM-COPY-') ? cloneEligibleClaim(c) : c))
-
-    const su: StructuredUnderstanding = {
-      ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
-      user_goals: [ownershipGoal()],
-      project_facts: {
-        ...DIALOGUE_FIXTURES.no_signal.structured_understanding.project_facts,
-        jurisdiction: { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 1, source_statement: 'US' },
-      },
-    }
-
-    const { output, trace } = runCRCConversation(su, MATRIX_FIXTURE, testOnlyEligibleClaims, [testOnlyEligibleRel])
-
-    // The real relationship_id and real claim_ids are genuinely present --
-    // this is the real governed record, not a synthetic stand-in. All
-    // three claims tagged topic: 'copyrightability' (COPY-001/002/003)
-    // correctly surface as related-topic -- not just the two used in the
-    // design report's own illustrative worked scenario.
-    const realCopy001 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-COPY-001-v1')!
-    const relatedResults = trace.retrieval_results.filter((r) => r.match_origin === 'related_topic')
-    expect(relatedResults.map((r) => r.claim_id).sort()).toEqual(['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1'])
-    expect(relatedResults.every((r) => r.relationship_id === 'REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1')).toBe(true)
-    expect(relatedResults.every((r) => r.matched_goal_category === 'copyright_ownership')).toBe(true)
-
-    const interp = output.goal_interpretations[0]
-    expect(interp.summary).toContain(realCopy004.crc_candidate_statement!)
-    expect(interp.summary).toContain(realCopy001.crc_candidate_statement!)
-    expect(interp.summary).toContain(realCopy002.crc_candidate_statement!)
-    expect(interp.summary).toContain(realCopy003.crc_candidate_statement!)
-
-    // The REAL fixtures were never mutated -- still Pending, still excluded on their own.
-    expect(TOPIC_RELATIONSHIPS_FIXTURE.find((r) => r.relationship_id === 'REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1')!.crc_eligible).toBe('Pending')
-    expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-COPY-002-v1')!.crc_eligible).toBe('Pending')
-  })
-
-  test('the SAME real relationship + real claims, unmodified (crc_eligible left at the real Pending value), produce zero related-topic content through the identical code path -- proving the difference is governance, not plumbing', () => {
-    const su: StructuredUnderstanding = {
-      ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
-      user_goals: [ownershipGoal()],
-      project_facts: {
-        ...DIALOGUE_FIXTURES.no_signal.structured_understanding.project_facts,
-        jurisdiction: { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 1, source_statement: 'US' },
-      },
-    }
-    const { trace } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
-    expect(trace.retrieval_results.filter((r) => r.match_origin === 'related_topic')).toEqual([])
-  })
-})
-
-describe('production call-site consistency -- structural proof route.ts wires TOPIC_RELATIONSHIPS_FIXTURE everywhere it wires TOPIC_CLAIMS_FIXTURE (2026-08-16 follow-up)', () => {
+describe('production call-site consistency -- structural proof route.ts wires TOPIC_RELATIONSHIPS_FIXTURE everywhere it wires TOPIC_CLAIMS_FIXTURE (2026-08-16 follow-up, unaffected by the 2026-08-19 governance decision)', () => {
   // Regex-over-source-text, same discipline as subsystem-boundaries.test.ts
   // -- app/api/crc/turn/route.ts is a Next.js Route Handler (cookies(),
   // NextRequest, Supabase admin client) with no established pattern in this

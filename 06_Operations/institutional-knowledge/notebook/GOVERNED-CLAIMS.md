@@ -127,11 +127,11 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-16
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-16 as reviewer/internal
-  knowledge only; CRC eligibility is a separate, not-yet-made decision (see
-  CRC Approver/CRC Decision Date below). Text below is the scoping language
-  CRC MAY be authorized to state if/when CRC eligibility is separately
-  approved, preserved unchanged from the pre-adoption draft per governance
+  APPROVED FOR CRC PUBLICATION (2026-08-19, CRC Approver: JD (PM) -- see CRC
+  Approver/CRC Decision Date below; atomic copyright publication package
+  complete, recommendation A — PASS/GO AS-IS, archived at
+  `governance-reviews/CPR_006_COPYRIGHT_PUBLICATION_PACKAGE_2026-08-19.md`).
+  Text below is unchanged from the pre-approval draft, per governance
   instruction not to reinterpret or rewrite substantive claim text when
   changing lifecycle/publication status: CRC may state that, under current
   U.S. law, AI-generated video with no meaningful human creative contribution
@@ -141,18 +141,16 @@ CRC Publication Scope: >
   qualifies.
 
 CRC Candidate Statement: >
-  NOT APPROVED FOR CRC PUBLICATION -- same status as CRC Publication Scope
-  above; text preserved unchanged, not yet authorized for CRC output: Under
-  current U.S. copyright law, AI-generated video without meaningful human
-  creative contribution generally isn't eligible for copyright protection.
-  This is a different question from whether you're clear to use the video
-  commercially.
+  Under current U.S. copyright law, AI-generated video without meaningful
+  human creative contribution generally isn't eligible for copyright
+  protection. This is a different question from whether you're clear to
+  use the video commercially.
 
 Effective date: 2026-08-16
 Last reviewed: 2026-08-16
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING -- not yet approved
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-08-19
 Related: [[POS-001]], [[EC-001]], [[PQ-004]], [[PQ-005]]
 
 Phase 1 CRC-publication governance review (2026-08-17): PASS / GO AS-IS --
@@ -167,6 +165,24 @@ Fact-Aware Bounded Composition" capability, `PRD_LIVING_KNOWLEDGE_
 SOURCE_INPUTS_v0.1.md` §27. PM decision: hold publication timing until
 that capability (or an equivalent decision) is ready. COPY-004 is
 unaffected and remains CRC Eligible: Yes.
+
+**Atomic copyright publication package (2026-08-19):** following a bounded
+Copyright CRC Publication-Readiness Review (2026-08-19, recommendation A —
+PASS/GO AS-IS for this claim and its three sibling objects jointly) and PM
+approval, this claim is now `CRC Eligible: Yes` below, published together
+with CLAIM-COPY-002-v1, CLAIM-COPY-003-v1, and
+REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1 in a single atomic governance
+decision -- not sequentially -- because the relationship has no live effect
+without at least one eligible target claim, and a partial claim subset
+would leave the review's own motivating acceptance-test question ("do I
+own the copyright?", prompts + editing) meaningfully unanswered. The
+review's own load-bearing finding, preserved here rather than solved: this
+claim's `applicability_requirements` (confirmed U.S. jurisdiction) means it
+will not surface at all for any conversation where jurisdiction remains
+unconfirmed -- expected, correct applicability behavior, not a routing
+defect, and explicitly not addressed by this publication decision.
+
+Full CRC Publication Review artifact: `governance-reviews/CPR_006_COPYRIGHT_PUBLICATION_PACKAGE_2026-08-19.md`
 
 ### CLAIM-COPY-002-v1
 Domain: Copyright & Human Authorship
@@ -241,11 +257,11 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-16
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-16 as reviewer/internal
-  knowledge only; CRC eligibility is a separate, not-yet-made decision (see
-  CRC Approver/CRC Decision Date below). Text below is the scoping language
-  CRC MAY be authorized to state if/when CRC eligibility is separately
-  approved, preserved unchanged from the pre-adoption draft per governance
+  APPROVED FOR CRC PUBLICATION (2026-08-19, CRC Approver: JD (PM) -- see CRC
+  Approver/CRC Decision Date below; atomic copyright publication package
+  complete, recommendation A — PASS/GO AS-IS, archived at
+  `governance-reviews/CPR_006_COPYRIGHT_PUBLICATION_PACKAGE_2026-08-19.md`).
+  Text below is unchanged from the pre-approval draft, per governance
   instruction not to reinterpret or rewrite substantive claim text when
   changing lifecycle/publication status: CRC may state that, under current
   U.S. law, writing prompts alone -- even detailed or iterative ones --
@@ -254,19 +270,17 @@ CRC Publication Scope: >
   workflow, specifically, meets or fails this bar.
 
 CRC Candidate Statement: >
-  NOT APPROVED FOR CRC PUBLICATION -- same status as CRC Publication Scope
-  above; text preserved unchanged, not yet authorized for CRC output: Under
-  current U.S. copyright law, writing prompts alone -- even detailed or
-  iterative ones -- generally doesn't establish sufficient human authorship
-  on its own. Additional human creative involvement, such as selecting,
-  arranging, or editing the output, is generally what supports a copyright
-  claim.
+  Under current U.S. copyright law, writing prompts alone -- even detailed
+  or iterative ones -- generally doesn't establish sufficient human
+  authorship on its own. Additional human creative involvement, such as
+  selecting, arranging, or editing the output, is generally what supports
+  a copyright claim.
 
 Effective date: 2026-08-16
 Last reviewed: 2026-08-16
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING -- not yet approved
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-08-19
 Related: [[POS-001]], [[EC-001]], [[CLAIM-COPY-001-v1]], [[CLAIM-COPY-003-v1]]
 
 Phase 1 CRC-publication governance review (2026-08-17): PASS / GO AS-IS.
@@ -274,6 +288,17 @@ CRC Eligible deliberately KEPT Pending for the same product-completeness
 reason as CLAIM-COPY-001-v1 above -- see that claim's own Phase 1 note and
 `PRD_LIVING_KNOWLEDGE_SOURCE_INPUTS_v0.1.md` §27 (deferred "Project-Fact-
 Aware Bounded Composition" capability). Not a safety/adequacy finding.
+
+**Atomic copyright publication package (2026-08-19):** published together
+with CLAIM-COPY-001-v1, CLAIM-COPY-003-v1, and
+REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1 in a single atomic governance
+decision, for the same reasons recorded on CLAIM-COPY-001-v1's own entry
+above -- not repeated verbatim here to avoid duplicating the same
+paragraph four times; see that entry for the full rationale and the
+preserved jurisdiction-applicability finding, which applies identically to
+this claim.
+
+Full CRC Publication Review artifact: `governance-reviews/CPR_006_COPYRIGHT_PUBLICATION_PACKAGE_2026-08-19.md`
 
 ### CLAIM-COPY-003-v1
 Domain: Copyright & Human Authorship
@@ -347,11 +372,11 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-16
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-16 as reviewer/internal
-  knowledge only; CRC eligibility is a separate, not-yet-made decision (see
-  CRC Approver/CRC Decision Date below). Text below is the scoping language
-  CRC MAY be authorized to state if/when CRC eligibility is separately
-  approved, preserved unchanged from the pre-adoption draft per governance
+  APPROVED FOR CRC PUBLICATION (2026-08-19, CRC Approver: JD (PM) -- see CRC
+  Approver/CRC Decision Date below; atomic copyright publication package
+  complete, recommendation A — PASS/GO AS-IS, archived at
+  `governance-reviews/CPR_006_COPYRIGHT_PUBLICATION_PACKAGE_2026-08-19.md`).
+  Text below is unchanged from the pre-approval draft, per governance
   instruction not to reinterpret or rewrite substantive claim text when
   changing lifecycle/publication status: CRC may state that, under current
   U.S. law, human selection, arrangement, or creative editing of AI-generated
@@ -361,18 +386,17 @@ CRC Publication Scope: >
   user's own project.
 
 CRC Candidate Statement: >
-  NOT APPROVED FOR CRC PUBLICATION -- same status as CRC Publication Scope
-  above; text preserved unchanged, not yet authorized for CRC output: Under
-  current U.S. copyright law, meaningfully selecting, arranging, or editing
-  AI-generated material can support a copyright claim on its own, separate
-  from whether the underlying AI-generated footage itself is protected.
-  Whether this applies to a specific project is evaluated case by case.
+  Under current U.S. copyright law, meaningfully selecting, arranging, or
+  editing AI-generated material can support a copyright claim on its own,
+  separate from whether the underlying AI-generated footage itself is
+  protected. Whether this applies to a specific project is evaluated case
+  by case.
 
 Effective date: 2026-08-16
 Last reviewed: 2026-08-16
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING -- not yet approved
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-08-19
 Related: [[CLAIM-COPY-001-v1]], [[CLAIM-COPY-002-v1]]
 
 Phase 1 CRC-publication governance review (2026-08-17): PASS / GO AS-IS,
@@ -388,6 +412,20 @@ described. Never produces a false or determinative statement in any tested
 scenario (the "meaningfully"/"case by case" qualifiers and the standard
 unresolved-applicability hedge hold in every case) -- flagged for PM
 awareness, not treated as a governance blocker.
+
+**Atomic copyright publication package (2026-08-19):** published together
+with CLAIM-COPY-001-v1, CLAIM-COPY-002-v1, and
+REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1 in a single atomic governance
+decision, for the same reasons recorded on CLAIM-COPY-001-v1's own entry
+above -- see that entry for the full rationale and the preserved
+jurisdiction-applicability finding, which applies identically to this
+claim. The bounded Copyright CRC Publication-Readiness Review additionally
+confirmed this claim's own render-identically-regardless-of-editing-degree
+limitation (noted in the Phase 1 review immediately above) is safe, not a
+publication blocker -- Case 3B's unconditional hedge holds in every tested
+human-contribution scenario.
+
+Full CRC Publication Review artifact: `governance-reviews/CPR_006_COPYRIGHT_PUBLICATION_PACKAGE_2026-08-19.md`
 
 ### CLAIM-COPY-004-v1
 Domain: Copyright & Human Authorship

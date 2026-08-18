@@ -2,14 +2,23 @@
  * M2 (Bounded Interpretation) behavior for Governed Topic Relationships
  * (implementation milestone, 2026-08-16). Mirrors
  * build-bounded-interpretation.test.ts's own established pattern -- real
- * `retrieve()` end-to-end, test-only Adopted+CRC-eligible fixtures
- * (deliberately NOT TOPIC_CLAIMS_FIXTURE/TOPIC_RELATIONSHIPS_FIXTURE, both
- * of which stay Pending in real governance -- see
- * zero-behavior-change.test.ts for the proof that uses the REAL fixtures).
+ * `retrieve()` end-to-end, test-only Adopted+CRC-eligible fixtures,
+ * deliberately isolated from TOPIC_CLAIMS_FIXTURE/TOPIC_RELATIONSHIPS_FIXTURE
+ * so this file's own assertions about M2's composition mechanism never
+ * depend on real governance timing -- see
+ * governed-topic-relationships-zero-behavior-change.test.ts for the
+ * equivalent proof against the REAL fixtures.
  *
- * These tests exercise the FUTURE runtime path (what happens once a
- * relationship and its target claims are separately made CRC-eligible) --
- * synthetic fixtures only, never mutating real governance records.
+ * UPDATE (2026-08-19): CLAIM-COPY-002-v1/-003-v1 and
+ * REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1 are now ALSO real
+ * `crc_eligible: 'Yes'` (atomic copyright publication package -- see
+ * governance-reviews/CPR_006_COPYRIGHT_PUBLICATION_PACKAGE_2026-08-19.md).
+ * This file's own synthetic fixtures below were originally built to
+ * exercise that future state ahead of publication; they remain valid,
+ * still-isolated regression coverage of M2's composition mechanism now
+ * that the state they modeled is real -- kept as test-only objects
+ * (not switched to importing the real fixture) so this file continues to
+ * prove M2's behavior independent of any future governance change.
  */
 
 import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
@@ -50,10 +59,10 @@ function goal(overrides: Partial<UserGoal> & Pick<UserGoal, 'goal_id' | 'raw_tex
   }
 }
 
-// Test-only Adopted + CRC-eligible fixtures -- deliberately NOT the real
-// TOPIC_CLAIMS_FIXTURE/TOPIC_RELATIONSHIPS_FIXTURE (both stay Pending in
-// real governance). Mirrors lookup-topic-claims.test.ts's own claim()
-// helper shape.
+// Test-only Adopted + CRC-eligible fixtures -- deliberately isolated from
+// TOPIC_CLAIMS_FIXTURE/TOPIC_RELATIONSHIPS_FIXTURE regardless of their real
+// governance state (see module header). Mirrors lookup-topic-claims.test.ts's
+// own claim() helper shape.
 function testTopicClaim(overrides: Partial<TopicClaim> & Pick<TopicClaim, 'claim_id' | 'topic'>): TopicClaim {
   return {
     claim_character: 'established',

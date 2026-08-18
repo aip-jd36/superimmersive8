@@ -17,22 +17,30 @@
  *
  * ADOPTED 2026-08-16 (first formal Living Knowledge governance decision,
  * Adoption Approver: JD/PM) as SI8 institutional/reviewer knowledge --
- * `lifecycle: 'Adopted'` on all four. Still `crc_eligible: 'Pending'` on
- * all four, deliberately: CRC-eligible publication is an explicitly
+ * `lifecycle: 'Adopted'` on all four. Originally `crc_eligible: 'Pending'`
+ * on all four, deliberately: CRC-eligible publication is an explicitly
  * SEPARATE decision from Adoption (per this document's own governance
- * discipline, and PM's explicit NO-GO on CRC publication for all four at
- * this time). `lookupTopicClaims()` requires BOTH `lifecycle === 'Adopted'
+ * discipline). `lookupTopicClaims()` requires BOTH `lifecycle === 'Adopted'
  * && crc_eligible === 'Yes'` before a claim can ever reach `matches[]` --
- * `crc_eligible: 'Pending'` alone is sufficient to keep all four
- * completely excluded from CRC Topic Retrieval, unchanged from their
- * pre-adoption behavior. This is the concrete Phase 1 acceptance-test
- * proof that lookupTopicClaims() correctly excludes non-CRC-eligible
- * claims (now specifically reviewer-only, not merely un-adopted) from
+ * `crc_eligible: 'Pending'` alone was sufficient to keep all four
+ * completely excluded from CRC Topic Retrieval at adoption time, unchanged
+ * from their pre-adoption behavior. This was the concrete Phase 1
+ * acceptance-test proof that lookupTopicClaims() correctly excludes
+ * non-CRC-eligible claims (reviewer-only, not merely un-adopted) from
  * ever reaching CRC output, using REAL Wave 1 content rather than a
  * synthetic test fixture -- see
  * __tests__/retrieval-engine/lookup-topic-claims.test.ts and the
  * dedicated Wave-1-specific exclusion test in
  * __tests__/retrieval-engine/wave1-candidate-claims-excluded.test.ts.
+ * UPDATE (2026-08-17/2026-08-19): all four Wave 1 claims are now
+ * `crc_eligible: 'Yes'` -- CLAIM-COPY-004-v1 published 2026-08-17
+ * (independent decision, see its own inline comment below);
+ * CLAIM-COPY-001-v1/-002-v1/-003-v1 published together 2026-08-19 as one
+ * atomic decision alongside REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1 -- see
+ * `governance-reviews/CPR_006_COPYRIGHT_PUBLICATION_PACKAGE_2026-08-19.md`.
+ * The Wave-1-exclusion tests above now assert the CURRENT `crc_eligible`
+ * values are read correctly, not that Wave 1 is universally excluded --
+ * see that test file's own updated assertions.
  *
  * UPDATE (Living Knowledge -- Third-Party Source Rights, M3, 2026-08-18):
  * all five Adopted stock-media claims (CLAIM-STOCK-EDITORIAL-001-v1/-002-v1,
@@ -89,11 +97,29 @@
  * separate, individually-made governance decision (M4). Until a given
  * claim's own decision is made, `lookupTopicClaims()`'s own existing
  * `lifecycle === 'Adopted' && crc_eligible === 'Yes'` gate excludes it from
- * `matches[]` exactly as it already does for COPY-001/002/003 below --
- * confirmed structurally, not by convention: provider narrowing is
- * evaluated as a candidate PRE-filter (before this gate is ever reached),
- * so a real, unmodified `crc_eligible: 'Pending'` claim is excluded
- * REGARDLESS of whether its provider_scope would otherwise match.
+ * `matches[]` -- confirmed structurally, not by convention: provider
+ * narrowing is evaluated as a candidate PRE-filter (before this gate is
+ * ever reached), so a real, unmodified `crc_eligible: 'Pending'` claim is
+ * excluded REGARDLESS of whether its provider_scope would otherwise match.
+ *
+ * UPDATE (2026-08-19, atomic copyright publication package):
+ * `CLAIM-COPY-001-v1`/`-002-v1`/`-003-v1` are now ALSO `crc_eligible:
+ * 'Yes'`, published together with `REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1`
+ * (see `topic-relationships-fixture.ts`) in a single atomic governance
+ * decision -- not sequentially -- following a bounded Copyright CRC
+ * Publication-Readiness Review (recommendation A -- PASS/GO AS-IS for all
+ * four, no text change to any of them) and PM approval. See
+ * `governance-reviews/CPR_006_COPYRIGHT_PUBLICATION_PACKAGE_2026-08-19.md`.
+ * These three claims' own `topic: 'copyrightability'` means they are
+ * unreachable by a `copyright_ownership` goal (e.g. "do I own the
+ * copyright?") except via that now-also-live relationship -- confirmed
+ * empirically during the review that the relationship is a genuine
+ * prerequisite, not a redundant safeguard, for that goal category. All
+ * three retain `applicability_requirements: [{jurisdiction: 'United
+ * States'}]` unchanged -- they will not surface for any conversation where
+ * U.S. jurisdiction is not confirmed, a known, disclosed, non-blocking
+ * operational characteristic (not a routing defect), explicitly not
+ * addressed by this publication decision.
  *
  * `CLAIM-STOCK-EDITORIAL-001-v1`/`-002-v1`: generic (`provider_scope:
  * null`) -- a topic candidate for ANY third_party_source_rights goal,
@@ -109,12 +135,11 @@
  *
  * `crc_publication_scope`/`crc_candidate_statement` below are copied
  * verbatim from each claim's own "CRC Candidate Statement"/scoping
- * sentence in GOVERNED-CLAIMS.md, exactly mirroring how COPY-001/002/003
- * already store this text while still `Pending` -- the field always holds
- * the real governed text; `crc_eligible` alone controls whether it can
- * ever reach a result. `applicability_requirements`/`unresolved_project_
- * dependencies` are copied unmodified from the markdown, not broadened or
- * narrowed by this milestone.
+ * sentence in GOVERNED-CLAIMS.md -- the field always holds the real
+ * governed text regardless of `crc_eligible` state; `crc_eligible` alone
+ * controls whether it can ever reach a result. `applicability_requirements`/
+ * `unresolved_project_dependencies` are copied unmodified from the
+ * markdown, not broadened or narrowed by this milestone.
  *
  * See `__tests__/retrieval-engine/topic-claims-fixture-consistency.test.ts`
  * for the drift-detection guard between this file and the markdown (now
@@ -133,7 +158,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     claim_character: 'established',
     jurisdiction: 'United States (federal)',
     lifecycle: 'Adopted',
-    crc_eligible: 'Pending',
+    crc_eligible: 'Yes',
     crc_publication_scope:
       "CRC may state that, under current U.S. law, AI-generated video with no meaningful human creative contribution generally does not qualify for copyright protection, and that this is a distinct question from whether the video is safe to use commercially (see CLAIM-COPY-004). CRC must not state whether the user's own specific video qualifies.",
     crc_candidate_statement:
@@ -150,7 +175,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     claim_character: 'established',
     jurisdiction: 'United States (federal)',
     lifecycle: 'Adopted',
-    crc_eligible: 'Pending',
+    crc_eligible: 'Yes',
     crc_publication_scope:
       "CRC may state that, under current U.S. law, writing prompts alone -- even detailed or iterative ones -- generally does not establish sufficient human authorship for copyright purposes. CRC must not state a conclusion about whether the user's own workflow, specifically, meets or fails this bar.",
     crc_candidate_statement:
@@ -167,7 +192,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     claim_character: 'established',
     jurisdiction: 'United States (federal)',
     lifecycle: 'Adopted',
-    crc_eligible: 'Pending',
+    crc_eligible: 'Yes',
     crc_publication_scope:
       "CRC may state that, under current U.S. law, human selection, arrangement, or creative editing of AI-generated material can independently support a copyright claim even when the underlying AI-generated elements do not, while being explicit that this is evaluated case by case and CRC cannot determine whether it applies to the user's own project.",
     crc_candidate_statement:

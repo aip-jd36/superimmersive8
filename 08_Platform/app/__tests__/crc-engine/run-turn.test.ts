@@ -397,7 +397,7 @@ describe('runTurn -- Governed Topic Relationships orchestrator wiring (2026-08-1
     }
   })
 
-  test('a Pending relationship (mirroring the real REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1 governance state) reaches retrieve() but produces zero related-topic content -- governance-blocked, not plumbing-blocked', async () => {
+  test('a Pending relationship (a synthetic, test-only object -- REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1 itself is real crc_eligible: "Yes" as of 2026-08-19) reaches retrieve() but produces zero related-topic content -- governance-blocked, not plumbing-blocked', async () => {
     const pendingRel = testRelationship({ relationship_id: 'REL-TEST-PENDING', source_topic: 'copyright_ownership', target_topic: 'copyrightability', crc_eligible: 'Pending' })
     const relatedClaim = testTopicClaim({ claim_id: 'TEST-RELATED', topic: 'copyrightability', crc_candidate_statement: 'Must never appear -- relationship is Pending.' })
     const outcome = await runTurn(
