@@ -23,24 +23,26 @@ const GOVERNED_CLAIMS_PATH = path.join(__dirname, '..', '..', '..', '..', '06_Op
 
 /**
  * Claims that are real, Adopted governed knowledge in GOVERNED-CLAIMS.md but
- * have NO entry in TOPIC_CLAIMS_FIXTURE, because their actual subject has no
- * corresponding `GoalCategory` value yet -- see each claim's own "GOVERNANCE
- * TREATMENT" note in the markdown, and topic-claims-fixture.ts's own
- * matching comment. This is a deliberate, reviewed, documented exception,
- * not a sync gap -- never add an ID here to silence a failing test; only add
- * one when a real governance decision (mirroring CLAIM-STOCK-EDITORIAL-001's
- * own Formal Governance Review #1, 2026-08-17) has been recorded for it.
- * Remove an ID once its claim gains a real `GoalCategory` and a real
- * TOPIC_CLAIMS_FIXTURE entry -- this set should shrink over time, not grow
+ * have NO entry in TOPIC_CLAIMS_FIXTURE. This is a deliberate, reviewed,
+ * documented exception, not a sync gap -- never add an ID here to silence a
+ * failing test; only add one when a real governance/architecture decision
+ * has been recorded for it. Remove an ID once its claim gains a real
+ * runtime representation -- this set should shrink over time, not grow
  * casually.
+ *
+ * EMPTY as of M3 (Living Knowledge — Third-Party Source Rights, 2026-08-18):
+ * the five stock-media claims that previously lived here (CLAIM-STOCK-
+ * EDITORIAL-001-v1/-002-v1, CLAIM-STOCK-GETTY-EDITORIAL-001-v1, CLAIM-STOCK-
+ * SHUTTERSTOCK-EDITORIAL-001-v1, CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1) now
+ * have real TOPIC_CLAIMS_FIXTURE entries (M1 GoalCategory + M2
+ * AssetProviderMention + M3 provider-scoped retrieval together closed every
+ * architecture blocker that previously made them unrepresentable). They
+ * remain excluded from CRC output for a SEPARATE reason -- `crc_eligible:
+ * 'Pending'` -- which is a governance gate `lookupTopicClaims()` already
+ * enforces for every claim in this fixture, not a fixture-representation
+ * exception; see the dedicated tests below for each of the five.
  */
-const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set([
-  'CLAIM-STOCK-EDITORIAL-001-v1',
-  'CLAIM-STOCK-EDITORIAL-002-v1',
-  'CLAIM-STOCK-GETTY-EDITORIAL-001-v1',
-  'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1',
-  'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1',
-])
+const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set<string>([])
 
 /** Strips fenced code blocks (```...```) before scanning -- the entry template lives inside one and must never be counted as a real claim. */
 function stripFencedCodeBlocks(markdown: string): string {
@@ -86,94 +88,59 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
     expect(missingFromFixture).toEqual([])
   })
 
-  describe('CLAIM-STOCK-EDITORIAL-001-v1 -- documented fixture-representation exception', () => {
+  describe.each([
+    ['CLAIM-STOCK-EDITORIAL-001-v1', null],
+    ['CLAIM-STOCK-EDITORIAL-002-v1', null],
+    ['CLAIM-STOCK-GETTY-EDITORIAL-001-v1', ['getty']],
+    ['CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1', ['shutterstock']],
+    ['CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1', ['istock']],
+  ] as const)('%s -- real runtime representation as of M3 (Living Knowledge — Third-Party Source Rights, 2026-08-18)', (claimId, expectedProviderScope) => {
     test('exists in the markdown as real, Adopted governed knowledge', () => {
       const markdown = fs.readFileSync(GOVERNED_CLAIMS_PATH, 'utf-8')
-      const claim = extractMarkdownClaims(markdown).find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-001-v1')
+      const claim = extractMarkdownClaims(markdown).find((c) => c.claim_id === claimId)
       expect(claim).toBeDefined()
       expect(claim?.lifecycle?.toLowerCase()).toContain('adopted')
       expect(claim?.publication_scope?.toLowerCase()).toContain('reviewer/commercial assurance')
     })
 
-    test('is intentionally absent from TOPIC_CLAIMS_FIXTURE -- not a sync gap', () => {
-      expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-001-v1')).toBeUndefined()
+    test('now HAS a real entry in TOPIC_CLAIMS_FIXTURE -- M1 (GoalCategory) + M2 (AssetProviderMention) + M3 (provider-scoped retrieval) together closed every architecture blocker', () => {
+      const claim = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === claimId)
+      expect(claim).toBeDefined()
+      expect(claim?.topic).toBe('third_party_source_rights')
     })
 
-    test("'third_party_source_rights' IS now an implemented GoalCategory value (M1, 2026-08-18) -- the original blocker for this generic claim is closed; it remains unrepresented only because runtime-fixture representation (M4) is a separate, not-yet-authorized governance decision, never an automatic consequence of the category existing", () => {
+    test('provider_scope matches the exact governed scope for this claim -- generic claims null, provider-specific claims exactly one canonical id, never multiple, never drifted from the M2 registry', () => {
+      const claim = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === claimId)
+      expect(claim?.provider_scope).toEqual(expectedProviderScope)
+    })
+
+    test('remains crc_eligible: Pending -- M3 is retrieval infrastructure only and does not authorize CRC publication; this is the SEPARATE governance gate (not a fixture-representation exception) that keeps this claim excluded from CRC output', () => {
+      const claim = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === claimId)
+      expect(claim?.lifecycle).toBe('Adopted')
+      expect(claim?.crc_eligible).toBe('Pending')
+    })
+
+    test("'third_party_source_rights' is an implemented GoalCategory value (M1, 2026-08-18)", () => {
       expect((GOAL_CATEGORIES as readonly string[]).includes('third_party_source_rights')).toBe(true)
     })
   })
 
-  describe('CLAIM-STOCK-EDITORIAL-002-v1 -- documented fixture-representation exception (same architecture gap as -001, not a second one)', () => {
-    test('exists in the markdown as real, Adopted governed knowledge', () => {
-      const markdown = fs.readFileSync(GOVERNED_CLAIMS_PATH, 'utf-8')
-      const claim = extractMarkdownClaims(markdown).find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-002-v1')
-      expect(claim).toBeDefined()
-      expect(claim?.lifecycle?.toLowerCase()).toContain('adopted')
-      expect(claim?.publication_scope?.toLowerCase()).toContain('reviewer/commercial assurance')
-    })
-
-    test('is intentionally absent from TOPIC_CLAIMS_FIXTURE -- not a sync gap', () => {
-      expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-002-v1')).toBeUndefined()
-    })
-
-    test("'third_party_source_rights' IS now an implemented GoalCategory value (M1, 2026-08-18, shared with CLAIM-STOCK-EDITORIAL-001-v1) -- the original blocker is closed; this claim remains unrepresented only because runtime-fixture representation (M4) is a separate, not-yet-authorized governance decision", () => {
-      expect((GOAL_CATEGORIES as readonly string[]).includes('third_party_source_rights')).toBe(true)
-    })
+  test('provider_scope values used across the whole fixture are all valid canonical AssetProviderId values recognized by the M2 provider registry -- catches drift (e.g. a fixture claim silently using \'getty-images\' while extraction canonicalizes \'getty\')', () => {
+    const VALID_PROVIDER_IDS = new Set(['getty', 'istock', 'shutterstock', 'adobe-stock'])
+    for (const claim of TOPIC_CLAIMS_FIXTURE) {
+      if (claim.provider_scope === null) continue
+      for (const providerId of claim.provider_scope) {
+        expect(VALID_PROVIDER_IDS.has(providerId)).toBe(true)
+      }
+    }
   })
 
-  describe('CLAIM-STOCK-GETTY-EDITORIAL-001-v1 -- documented fixture-representation exception (same architecture gap as -001/-002, not a third independent one)', () => {
-    test('exists in the markdown as real, Adopted governed knowledge', () => {
-      const markdown = fs.readFileSync(GOVERNED_CLAIMS_PATH, 'utf-8')
-      const claim = extractMarkdownClaims(markdown).find((c) => c.claim_id === 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1')
-      expect(claim).toBeDefined()
-      expect(claim?.lifecycle?.toLowerCase()).toContain('adopted')
-      expect(claim?.publication_scope?.toLowerCase()).toContain('reviewer/commercial assurance')
-    })
-
-    test('is intentionally absent from TOPIC_CLAIMS_FIXTURE -- not a sync gap', () => {
-      expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1')).toBeUndefined()
-    })
-
-    test("'third_party_source_rights' IS now an implemented GoalCategory value (M1, 2026-08-18) -- but this provider-specific claim has a SECOND, still-unresolved blocker: provider-scoped retrieval (M3) is not implemented, so it remains unrepresented in TOPIC_CLAIMS_FIXTURE regardless of the GoalCategory gap closing (THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md §17, §19)", () => {
-      expect((GOAL_CATEGORIES as readonly string[]).includes('third_party_source_rights')).toBe(true)
-    })
-  })
-
-  describe('CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1 -- documented fixture-representation exception (same architecture gap as the other three stock claims, not a fourth independent one)', () => {
-    test('exists in the markdown as real, Adopted governed knowledge', () => {
-      const markdown = fs.readFileSync(GOVERNED_CLAIMS_PATH, 'utf-8')
-      const claim = extractMarkdownClaims(markdown).find((c) => c.claim_id === 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1')
-      expect(claim).toBeDefined()
-      expect(claim?.lifecycle?.toLowerCase()).toContain('adopted')
-      expect(claim?.publication_scope?.toLowerCase()).toContain('reviewer/commercial assurance')
-    })
-
-    test('is intentionally absent from TOPIC_CLAIMS_FIXTURE -- not a sync gap', () => {
-      expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1')).toBeUndefined()
-    })
-
-    test("'third_party_source_rights' IS now an implemented GoalCategory value (M1, 2026-08-18) -- but this provider-specific claim has a SECOND, still-unresolved blocker: provider-scoped retrieval (M3) is not implemented, so it remains unrepresented in TOPIC_CLAIMS_FIXTURE regardless of the GoalCategory gap closing (same M3 blocker as CLAIM-STOCK-GETTY-EDITORIAL-001-v1, not a second independent one)", () => {
-      expect((GOAL_CATEGORIES as readonly string[]).includes('third_party_source_rights')).toBe(true)
-    })
-  })
-
-  describe('CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1 -- documented fixture-representation exception (same architecture gap as the other four stock claims, not a fifth independent one)', () => {
-    test('exists in the markdown as real, Adopted governed knowledge', () => {
-      const markdown = fs.readFileSync(GOVERNED_CLAIMS_PATH, 'utf-8')
-      const claim = extractMarkdownClaims(markdown).find((c) => c.claim_id === 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')
-      expect(claim).toBeDefined()
-      expect(claim?.lifecycle?.toLowerCase()).toContain('adopted')
-      expect(claim?.publication_scope?.toLowerCase()).toContain('reviewer/commercial assurance')
-    })
-
-    test('is intentionally absent from TOPIC_CLAIMS_FIXTURE -- not a sync gap', () => {
-      expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')).toBeUndefined()
-    })
-
-    test("'third_party_source_rights' IS now an implemented GoalCategory value (M1, 2026-08-18) -- but this provider-specific claim has a SECOND, still-unresolved blocker: provider-scoped retrieval (M3) is not implemented, so it remains unrepresented in TOPIC_CLAIMS_FIXTURE regardless of the GoalCategory gap closing (same M3 blocker as the other two provider-specific stock claims, not a third independent one)", () => {
-      expect((GOAL_CATEGORIES as readonly string[]).includes('third_party_source_rights')).toBe(true)
-    })
+  test('no stock-media claim has an empty-array provider_scope -- an authoring error state, per TopicClaim.provider_scope\'s own doc comment (meaningfully either null or a non-empty array, never [])', () => {
+    for (const claim of TOPIC_CLAIMS_FIXTURE) {
+      if (claim.provider_scope !== null) {
+        expect(claim.provider_scope.length).toBeGreaterThan(0)
+      }
+    }
   })
 
   test('every claim ID in the runtime fixture has a matching entry in the markdown (no orphaned/stale fixture entries)', () => {

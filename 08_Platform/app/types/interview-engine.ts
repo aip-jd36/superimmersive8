@@ -163,6 +163,24 @@ export type AssetProviderResolution =
   | { kind: 'canonical'; identifier: string }
   | { kind: 'unresolved_alias'; raw_name: string }
 
+/**
+ * Canonical asset-provider identifiers (Living Knowledge — Third-Party
+ * Source Rights, M3 provider-scoped retrieval, 2026-08-18). Single source
+ * of truth for the four providers M2's own `KNOWN_ASSET_PROVIDERS` alias
+ * registry (lib/interview-engine/extraction.ts) already resolves to --
+ * defined here, in the shared types module, rather than in extraction.ts
+ * itself, specifically so `TopicClaim.provider_scope`
+ * (lib/retrieval-engine/types.ts) can reference the identical type without
+ * Retrieval importing an Interview Engine LOGIC module (subsystem-
+ * boundaries.test.ts permits only type-only imports from this module across
+ * that boundary). `KNOWN_ASSET_PROVIDERS`'s own value type now references
+ * this type too, so the two can never independently drift -- a typo'd
+ * provider id in either place is a compile error, not a silent runtime gap.
+ */
+export const ASSET_PROVIDER_IDS = ['getty', 'istock', 'shutterstock', 'adobe-stock'] as const
+
+export type AssetProviderId = (typeof ASSET_PROVIDER_IDS)[number]
+
 export interface AssetProviderMention {
   mention_id: string
   resolution: AssetProviderResolution

@@ -34,50 +34,58 @@
  * dedicated Wave-1-specific exclusion test in
  * __tests__/retrieval-engine/wave1-candidate-claims-excluded.test.ts.
  *
- * UPDATE (Living Knowledge -- Third-Party Source Rights, M1+M2, 2026-08-18):
- * `third_party_source_rights` is now a real, implemented `GoalCategory`
- * value (see `types/interview-engine.ts`'s `GOAL_CATEGORIES`) and
- * `AssetProviderMention` capture/persistence now exists -- the gap described
- * for each claim below as "no corresponding GoalCategory value" is CLOSED.
- * All five stock claims remain DELIBERATELY absent from this fixture
- * anyway: M1+M2 was explicitly scoped (PM authorization,
- * `THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md` §22-23) to
- * GoalCategory + AssetProviderMention capture ONLY -- provider-scoped
- * retrieval (M3) and runtime-fixture/CRC-eligibility representation (M4)
- * are separate, not-yet-authorized milestones. Adding a real
- * `TOPIC_CLAIMS_FIXTURE` entry is never an automatic consequence of a
- * GoalCategory shipping; it is its own deliberate governance/engineering
- * decision, made together with (never ahead of) the provider-narrowing
- * mechanism these three provider-specific claims specifically require. See
- * `__tests__/retrieval-engine/topic-claims-fixture-consistency.test.ts`
- * (`CLAIMS_WITHOUT_FIXTURE_REPRESENTATION`) for the consistency-guard
- * accommodation, updated in the same change as this comment.
+ * UPDATE (Living Knowledge -- Third-Party Source Rights, M3, 2026-08-18):
+ * all five Adopted stock-media claims (CLAIM-STOCK-EDITORIAL-001-v1/-002-v1,
+ * CLAIM-STOCK-GETTY-EDITORIAL-001-v1, CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-
+ * 001-v1, CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1) NOW HAVE real entries below,
+ * `topic: 'third_party_source_rights'`. M1 (GoalCategory) closed the
+ * category gap; M2 (AssetProviderMention) closed the provider-recognition
+ * gap; M3 (this milestone -- `provider_scope` on TopicClaim, a silent
+ * pre-filter in `lookupTopicClaims()`, per THIRD_PARTY_SOURCE_RIGHTS_PATH_A_
+ * PROVIDER_NARROWING.md §7-§11) closes the provider-narrowing gap that
+ * previously made the three provider-specific claims unsafe to represent at
+ * all (adding them without a narrowing mechanism would have surfaced
+ * Getty/Shutterstock/iStock-specific content to any user who asked a
+ * generic question, regardless of which provider they named).
  *
- * CLAIM-STOCK-EDITORIAL-001-v1 (Adopted 2026-08-17, Formal Governance
- * Review #1) and CLAIM-STOCK-EDITORIAL-002-v1 (Adopted 2026-08-17, Formal
- * Governance Review #2) are generic (provider-agnostic) claims -- unlike the
- * three provider-specific claims below, they have NO remaining architecture
- * blocker beyond M4's own governance decision now that GoalCategory exists.
- * Add both here, with `topic: 'third_party_source_rights'`, together in the
- * same future change that authorizes M4 -- never as a side effect of an
- * unrelated change, and never ahead of that explicit authorization.
+ * All five remain `crc_eligible: 'Pending'` -- M3 is retrieval
+ * infrastructure only and does NOT authorize CRC publication. A
+ * CRC-publication decision (M4) is a separate, not-yet-made governance
+ * review; until then, `lookupTopicClaims()`'s own existing `lifecycle ===
+ * 'Adopted' && crc_eligible === 'Yes'` gate excludes all five from
+ * `matches[]` exactly as it already does for COPY-001/002/003 below --
+ * confirmed structurally, not by convention: provider narrowing is
+ * evaluated as a candidate PRE-filter (before this gate is ever reached),
+ * so a real, unmodified `crc_eligible: 'Pending'` claim is excluded
+ * REGARDLESS of whether its provider_scope would otherwise match.
  *
- * CLAIM-STOCK-GETTY-EDITORIAL-001-v1 (Adopted 2026-08-17, Formal Governance
- * Review #3), CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1 (Adopted 2026-08-17,
- * Formal Governance Review #4, provenance note: Rights and Clearance rests
- * on Official Secondary sourcing, not Verified Primary -- disclosed, not a
- * reason to withhold Adoption), and CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1
- * (Adopted 2026-08-17, Formal Governance Review #5, DIRECTLY SOURCE-BACKED
- * provenance, no evidence-tier caveat) are provider-specific claims. Each
- * still has a real, unresolved architecture blocker: provider-scoped
- * retrieval (M3 -- a governed `provider_scope` join on `TopicClaim`, per
- * `THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md` §7-§11) is NOT
- * implemented as of M1+M2. Without it, adding these three to the fixture
- * would surface Getty/Shutterstock/iStock-specific content to any user who
- * asked a generic third-party-source-rights question, regardless of which
- * provider (if any) they named -- exactly the false-positive this whole
- * design exists to prevent. Add these three, with `provider_scope` set,
- * only once M3 ships and M4 separately authorizes it.
+ * `CLAIM-STOCK-EDITORIAL-001-v1`/`-002-v1`: generic (`provider_scope:
+ * null`) -- a topic candidate for ANY third_party_source_rights goal,
+ * independent of which (if any) provider was named.
+ * `CLAIM-STOCK-GETTY-EDITORIAL-001-v1`: `provider_scope: ['getty']`.
+ * `CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1`: `provider_scope:
+ * ['shutterstock']`. `CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1`: `provider_scope:
+ * ['istock']`. No Adobe Stock provider-specific entry exists -- no Adobe
+ * claim has been adopted (M2's `AssetProviderMention` recognizes
+ * `adobe-stock` as a canonical identifier, but recognition and governed
+ * knowledge are deliberately separate concepts; recognizing a provider
+ * never implies a claim exists for it).
+ *
+ * `crc_publication_scope`/`crc_candidate_statement` below are copied
+ * verbatim from each claim's own "CRC Candidate Statement"/scoping
+ * sentence in GOVERNED-CLAIMS.md, exactly mirroring how COPY-001/002/003
+ * already store this text while still `Pending` -- the field always holds
+ * the real governed text; `crc_eligible` alone controls whether it can
+ * ever reach a result. `applicability_requirements`/`unresolved_project_
+ * dependencies` are copied unmodified from the markdown, not broadened or
+ * narrowed by this milestone.
+ *
+ * See `__tests__/retrieval-engine/topic-claims-fixture-consistency.test.ts`
+ * for the drift-detection guard between this file and the markdown (now
+ * exercised for all nine claims, not four), and
+ * `06_Operations/institutional-knowledge/notebook/GOVERNED-CLAIMS.md`'s own
+ * updated GOVERNANCE TREATMENT notes on each of the five stock entries for
+ * the parallel current-state documentation update.
  */
 
 import type { TopicClaim } from './types'
@@ -96,6 +104,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
       "Under current U.S. copyright law, AI-generated video without meaningful human creative contribution generally isn't eligible for copyright protection. This is a different question from whether you're clear to use the video commercially.",
     applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     unresolved_project_dependencies: ['human_creative_contribution_level'],
+    provider_scope: null,
     last_verified: '2026-08-16',
     superseded_by: null,
   },
@@ -112,6 +121,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
       "Under current U.S. copyright law, writing prompts alone -- even detailed or iterative ones -- generally doesn't establish sufficient human authorship on its own. Additional human creative involvement, such as selecting, arranging, or editing the output, is generally what supports a copyright claim.",
     applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     unresolved_project_dependencies: ['human_creative_contribution_level'],
+    provider_scope: null,
     last_verified: '2026-08-16',
     superseded_by: null,
   },
@@ -128,6 +138,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
       "Under current U.S. copyright law, meaningfully selecting, arranging, or editing AI-generated material can support a copyright claim on its own, separate from whether the underlying AI-generated footage itself is protected. Whether this applies to a specific project is evaluated case by case.",
     applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     unresolved_project_dependencies: ['human_creative_contribution_level'],
+    provider_scope: null,
     last_verified: '2026-08-16',
     superseded_by: null,
   },
@@ -154,7 +165,100 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     // Unconditionally true regardless of case facts -- a framing/conceptual
     // claim, not one whose application depends on the specific project.
     unresolved_project_dependencies: [],
+    provider_scope: null,
     last_verified: '2026-08-16',
+    superseded_by: null,
+  },
+
+  // ── Third-Party Source Assets / Stock Media Licensing (M3, 2026-08-18) ──
+
+  {
+    claim_id: 'CLAIM-STOCK-EDITORIAL-001-v1',
+    topic: 'third_party_source_rights',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Pending',
+    crc_publication_scope:
+      'CRC may state that stock-media content a provider designates "Editorial" is generally licensed for descriptive/newsworthy use rather than advertising, promotional, endorsement, or merchandising use, and that some providers offer a separate authorization path CRC cannot confirm was used for the user\'s specific asset. CRC must not state whether the user\'s own specific asset is Editorial-designated, whether their use violates any license, or whether separate authorization exists for it.',
+    crc_candidate_statement:
+      'A stock-media provider\'s standard license for content marked "Editorial" generally covers descriptive, newsworthy, or public-interest use -- not advertising, promotional, endorsement, or merchandising use. Some providers offer a separate process to authorize commercial use of Editorial content for a specific asset, though this doesn\'t confirm whether that was obtained for yours.',
+    applicability_requirements: [],
+    unresolved_project_dependencies: ['which_provider', 'editorial_designation_confirmed', 'separate_authorization_obtained'],
+    // Generic (provider-agnostic) claim -- a topic candidate regardless of
+    // which provider (if any) the user named. See module header.
+    provider_scope: null,
+    last_verified: '2026-08-17',
+    superseded_by: null,
+  },
+  {
+    claim_id: 'CLAIM-STOCK-EDITORIAL-002-v1',
+    topic: 'third_party_source_rights',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Pending',
+    crc_publication_scope:
+      'CRC may state that stock-media content a provider designates "Editorial" is typically supplied without the model or property releases that would otherwise support broader commercial use, as a separate consideration from whether the applicable license permits a given use. CRC must not state whether the user\'s own specific asset has or lacks a release, or draw any conclusion from that about whether their use is permitted.',
+    crc_candidate_statement:
+      'Content a stock-media provider marks "Editorial" is typically supplied without the model or property releases that would otherwise support broader commercial use -- a separate question from whether the applicable license itself permits your intended use.',
+    applicability_requirements: [],
+    unresolved_project_dependencies: ['which_provider', 'editorial_designation_confirmed', 'release_status_confirmed'],
+    provider_scope: null,
+    last_verified: '2026-08-17',
+    superseded_by: null,
+  },
+  {
+    claim_id: 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1',
+    topic: 'third_party_source_rights',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Pending',
+    crc_publication_scope:
+      'CRC may state that Getty\'s standard Editorial-content license excludes commercial, promotional, advertorial, endorsement, advertising, gambling/betting/gaming, and marketing use absent express written authorization, and that Getty separately offers a Rights and Clearance function through which such authorization may be sought. CRC must not state whether the user\'s own specific Getty asset is Editorial-designated, whether authorization was obtained for it, or whether their use is therefore permitted.',
+    crc_candidate_statement:
+      'Getty\'s standard Editorial Content license doesn\'t cover commercial, promotional, advertorial, endorsement, advertising, gambling/betting/gaming, or marketing use unless Getty has expressly authorized it in writing -- Getty offers a separate "Rights and Clearance" process for seeking that authorization, including for advertising and promotional use specifically.',
+    applicability_requirements: [],
+    unresolved_project_dependencies: ['asset_confirmed_getty', 'editorial_designation_confirmed', 'separate_authorization_obtained'],
+    // Provider-specific -- a topic candidate ONLY when 'getty' is among the
+    // conversation's active, canonically-resolved asset providers.
+    provider_scope: ['getty'],
+    last_verified: '2026-08-17',
+    superseded_by: null,
+  },
+  {
+    claim_id: 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1',
+    topic: 'third_party_source_rights',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Pending',
+    crc_publication_scope:
+      'CRC may state that Shutterstock distinguishes Commercial content (usable to commercialize, monetize, sell, promote, or advertise) from Editorial content (which cannot be used for those purposes), and that Shutterstock has publicly described a Rights and Clearance service for seeking third-party permissions for promotional use of Editorial assets, whose exact mechanics CRC has not independently verified. CRC must not state whether the user\'s own specific Shutterstock asset is Editorial-designated, whether Rights and Clearance was engaged for it, or whether their use is therefore permitted.',
+    crc_candidate_statement:
+      'Shutterstock treats content as Commercial if it can be used to commercialize, monetize, sell, promote, or advertise a product, business, or service, and as Editorial if it can\'t be used for those purposes. Shutterstock has publicly described a "Rights and Clearance" service for seeking permission to use Editorial content this way, though the exact details of that process haven\'t been independently confirmed.',
+    applicability_requirements: [],
+    unresolved_project_dependencies: ['asset_confirmed_shutterstock', 'editorial_designation_confirmed', 'rights_and_clearance_status'],
+    provider_scope: ['shutterstock'],
+    last_verified: '2026-08-17',
+    superseded_by: null,
+  },
+  {
+    claim_id: 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1',
+    topic: 'third_party_source_rights',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Pending',
+    crc_publication_scope:
+      'CRC may state that iStock\'s standard license excludes commercial, promotional, advertorial, endorsement, advertising, gambling/betting/gaming, and merchandising use of content marked "editorial use only," and that no provider-run authorization mechanism for such use was found during CRC\'s underlying research -- stated as an absence of evidence, never as a confirmed fact that none exists. CRC must not state whether the user\'s own specific iStock asset is Editorial-designated, or whether their use is therefore permitted.',
+    crc_candidate_statement:
+      'iStock\'s standard license doesn\'t cover commercial, promotional, advertorial, endorsement, advertising, gambling/betting/gaming, or merchandising use of content marked "editorial use only." No provider-run process for authorizing that kind of use was found during this research -- that means none was found, not that none exists.',
+    applicability_requirements: [],
+    unresolved_project_dependencies: ['asset_confirmed_istock', 'editorial_designation_confirmed'],
+    provider_scope: ['istock'],
+    last_verified: '2026-08-17',
     superseded_by: null,
   },
 ]

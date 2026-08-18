@@ -336,6 +336,7 @@ describe('runTurn -- Governed Topic Relationships orchestrator wiring (2026-08-1
       crc_candidate_statement: 'Test statement.',
       applicability_requirements: [],
       unresolved_project_dependencies: [],
+      provider_scope: null,
       last_verified: '2026-08-16',
       superseded_by: null,
       ...overrides,

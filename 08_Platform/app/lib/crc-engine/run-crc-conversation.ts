@@ -143,7 +143,15 @@ export function runCRCConversation(
     jurisdiction: understanding.project_facts.jurisdiction.attestation,
     toolMentions: understanding.tool_mentions,
   }
-  const { results, diagnostics: retrievalDiagnostics } = retrieve(handoff, matrix, understanding.user_goals, topicClaims, applicabilityFacts, relationships)
+  // assetProviders (Living Knowledge — Third-Party Source Rights, M3,
+  // 2026-08-18): sourced from `handoff.asset_providers`, already computed
+  // above by `buildRetrievalHandoff` -- not re-derived independently from
+  // `understanding.asset_provider_mentions`, so there is exactly one place
+  // canonical/unresolved provider resolution happens. Every one of this
+  // function's 8 real call sites (run-turn.ts x3, results-email-delivery.ts,
+  // app/api/crc/turn/route.ts x4) already passes the full StructuredUnderstanding
+  // and needs zero changes -- provider data flows through automatically.
+  const { results, diagnostics: retrievalDiagnostics } = retrieve(handoff, matrix, understanding.user_goals, topicClaims, applicabilityFacts, relationships, handoff.asset_providers)
   const interpretations = buildBoundedInterpretations(understanding.user_goals, results, retrievalDiagnostics)
   const { output, diagnostics: projectionDiagnostics } = assembleProjectionOutput(handoff, results, interpretations)
 

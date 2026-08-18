@@ -37,6 +37,7 @@
  */
 
 import type {
+  AssetProviderId,
   AssetProviderMention,
   Attested,
   ConfidenceState,
@@ -294,7 +295,7 @@ const KNOWN_TOOLS: Record<string, string> = {
  * ISTOCK-EDITORIAL-001-v1), so collapsing them would make correct future
  * routing architecturally impossible, not merely imprecise.
  */
-const KNOWN_ASSET_PROVIDERS: Record<string, string> = {
+const KNOWN_ASSET_PROVIDERS: Record<string, AssetProviderId> = {
   getty: 'getty',
   'getty images': 'getty',
   gettyimages: 'getty',

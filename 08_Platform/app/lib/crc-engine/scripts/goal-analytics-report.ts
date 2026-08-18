@@ -134,7 +134,7 @@ async function main() {
     // Recompute against TODAY's Matrix + Governed Claims -- see module header.
     const handoff = buildRetrievalHandoff(su)
     const applicabilityFacts: ApplicabilityFacts = { jurisdiction: su.project_facts.jurisdiction.attestation, toolMentions: su.tool_mentions }
-    const { results, diagnostics } = retrieve(handoff, MATRIX_FIXTURE, su.user_goals, TOPIC_CLAIMS_FIXTURE, applicabilityFacts)
+    const { results, diagnostics } = retrieve(handoff, MATRIX_FIXTURE, su.user_goals, TOPIC_CLAIMS_FIXTURE, applicabilityFacts, [], handoff.asset_providers)
     const interpretations = buildBoundedInterpretations(su.user_goals, results)
     for (const interp of interpretations) {
       tally(statusCounts, interp.status)

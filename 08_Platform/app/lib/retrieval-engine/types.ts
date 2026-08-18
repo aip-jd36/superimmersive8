@@ -40,7 +40,7 @@
  * uses everywhere else in this codebase.
  */
 
-import type { GoalCategory } from '@/types/interview-engine'
+import type { AssetProviderId, GoalCategory } from '@/types/interview-engine'
 
 export const CRC_ELIGIBLE_VALUES = ['Yes', 'No', 'Pending'] as const
 export type CrcEligible = (typeof CRC_ELIGIBLE_VALUES)[number]
@@ -187,6 +187,39 @@ export interface ApplicabilityRequirement {
  * `human_creative_contribution_level`) is documented in
  * GOVERNED-CLAIMS.md's entry template, not enforced by a type.
  */
+/**
+ * `provider_scope` (Living Knowledge — Third-Party Source Rights, M3
+ * provider-scoped retrieval, 2026-08-18, per THIRD_PARTY_SOURCE_RIGHTS_
+ * PATH_A_PROVIDER_NARROWING.md §7-§12, PM-approved). Governed runtime
+ * metadata -- NOT a ProjectFact, ApplicabilityFact, unresolved dependency,
+ * user-generated content, analytics signal, or diagnostic. Answers exactly
+ * one question: for which recognized asset provider(s), if any, is this
+ * claim a valid topic candidate at all.
+ *
+ *   - `null` -- provider-independent (generic) claim. Always a topic
+ *     candidate for a matching goal category, regardless of which provider
+ *     (if any) the user named. Every claim that existed before this field
+ *     was added is `null` -- see topic-claims-fixture.ts's own COPY entries.
+ *   - `string[]` (non-empty) -- provider-specific claim. A topic candidate
+ *     ONLY when at least one of the listed canonical `AssetProviderId`
+ *     values is among the current conversation's ACTIVE, CANONICALLY
+ *     RESOLVED asset-provider identifiers (never an unresolved alias, raw
+ *     text, ToolMention, or inferred/fuzzy match -- see lookup-topic-
+ *     claims.ts's own `providerScopeMatches`). An empty array is not a
+ *     meaningful state and must never be authored -- it would mean
+ *     "provider-specific but scoped to nothing," an authoring error, not a
+ *     real claim state.
+ *
+ * REQUIRED, not optional: this codebase's own established discipline (every
+ * other TopicClaim field is required; StructuredUnderstanding's own fields
+ * are never left silently `undefined`) applies here too -- an author must
+ * make an explicit, reviewed choice for every claim, never fall through an
+ * implicit "forgot to set it, so it's generic" default. A provider-mismatch
+ * evaluates to exclusion from candidacy entirely (see lookupTopicClaims) --
+ * it never produces a diagnostic, a "need more information" signal, or any
+ * other user-visible state; a mismatched claim is structurally
+ * indistinguishable from a claim that was never a candidate at all.
+ */
 export interface TopicClaim {
   claim_id: string
   /** Matches UserGoal.category exactly -- this is the field Topic Retrieval actually matches on. */
@@ -201,6 +234,8 @@ export interface TopicClaim {
   applicability_requirements: ApplicabilityRequirement[]
   /** See the doc comment immediately above this interface. */
   unresolved_project_dependencies: string[]
+  /** See this interface's own header comment, immediately above. */
+  provider_scope: AssetProviderId[] | null
   last_verified: string | null
   /** id of the claim version that replaced this one, or null if this is the current version. Mirrors UserGoal.superseded_by's own convention. */
   superseded_by: string | null

@@ -498,13 +498,13 @@ Related: [[CLAIM-COPY-001-v1]]
 
 ### CLAIM-STOCK-EDITORIAL-001-v1
 Domain: Third-Party Source Assets / Stock Media Licensing
-Topic: Third-party source-asset license scope (Editorial-use restriction) — **no corresponding `GoalCategory` value exists yet; see GOVERNANCE TREATMENT below.**
+Topic: third_party_source_rights
 Subtopic: cross-provider-editorial-license-scope
 Claim character: established
 Jurisdiction: Not a legal jurisdiction — governed collectively by each cited provider's current Terms of Service/License Agreement (Getty Images, iStock, Adobe Stock, Shutterstock), not a single contract or legal jurisdiction.
 Context: any AI-generated commercial video workflow that incorporates third-party stock-media source assets
 
-GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #1): this is the first claim in a non-tool-scoped, non-Copyright domain (Third-Party Source Assets) and the first Adopted claim whose actual subject matter has **no corresponding implemented `GoalCategory` value** (`08_Platform/app/types/interview-engine.ts`'s current set: `commercial_use`, `copyright_ownership`, `copyrightability`, `likeness`, `unknown`). `THIRD_PARTY_SOURCE_ASSETS_ROUTING_ARCHITECTURE.md` approved a future `third_party_source_rights` category as architectural *direction* but explicitly did not implement it, and this adoption decision does not implement it either. Tagging this claim under an existing, unrelated category (e.g. `commercial_use`) was considered and rejected during governance review: it would misclassify the claim's actual subject matter and would make it an unintended `lookupTopicClaims()` topic-candidate for every goal in that category, independent of whether the user ever mentioned a stock-media provider at all. **Consequence, stated plainly: this claim is Adopted governed knowledge, available to Reviewer/Commercial Assurance via this canonical document, but has NO current runtime Topic Retrieval representation whatsoever** — it is not mirrored into `topic-claims-fixture.ts` (see that file's own governance-treatment comment, added alongside this entry) and cannot be looked up, matched, or reached by any code path, CRC or otherwise. This is a stronger exclusion guarantee than `crc_eligible: 'Pending'` provides for every other claim in this document (which are queryable but withheld) — this claim is not queryable at all. Update this entry's `Topic` field to the real category value, and add the corresponding entry to `topic-claims-fixture.ts`, only when that `GoalCategory` value (or an equivalent) is deliberately, separately implemented — never as a side effect of an unrelated change.
+GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #1; updated 2026-08-18 following M1/M2/M3 implementation): this was the first claim in a non-tool-scoped, non-Copyright domain (Third-Party Source Assets) and, at adoption time, had no corresponding implemented `GoalCategory` value. That gap is now closed: `third_party_source_rights` is a real, implemented `GoalCategory` (M1), `AssetProviderMention` recognition/persistence exists (M2), and this claim now has a real runtime entry in `topic-claims-fixture.ts` — `topic: 'third_party_source_rights'`, `provider_scope: null` (generic — a topic candidate regardless of which provider, if any, is named). **This claim remains excluded from CRC output today, but for a SEPARATE, ordinary reason: `CRC Eligible: Pending` below** — the same governance gate every other claim in this document is subject to, not a special fixture-representation exception anymore. `lookupTopicClaims()` requires `lifecycle === 'Adopted' && crc_eligible === 'Yes'` before any claim reaches a result; this one is Adopted but not yet CRC-eligible. See `THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md` (design) and the M1/M2/M3 implementation commits for the architecture that closed this gap. A CRC-publication decision for this claim is a separate, not-yet-made governance review (M4).
 
 Claim proposition: >
   A stock-media provider's standard license for content it designates
@@ -589,15 +589,14 @@ Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
   NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-17 as reviewer/internal
   knowledge only; CRC eligibility is a separate, not-yet-made decision (see
-  CRC Approver/CRC Decision Date below). Additionally and independently of
-  that separate decision, this claim currently has NO runtime Topic
-  Retrieval representation at all (see GOVERNANCE TREATMENT above) --
-  CRC eligibility could not take effect even if separately approved until
-  that architecture gap is closed. Text below is the scoping language CRC
-  MAY be authorized to state if/when both CRC eligibility is separately
-  approved AND the architecture gap is closed, preserved unchanged from the
-  adopted draft per governance instruction not to reinterpret or rewrite
-  substantive claim text when changing lifecycle/publication status: CRC
+  CRC Approver/CRC Decision Date below). UPDATE (2026-08-18): the runtime
+  Topic Retrieval architecture gap noted here at adoption time is now
+  closed (M1/M2/M3 — see GOVERNANCE TREATMENT above); CRC eligibility is
+  now the ONLY remaining gate. Text below is the scoping language CRC MAY
+  be authorized to state if/when CRC eligibility is separately approved,
+  preserved unchanged from the adopted draft per governance instruction not
+  to reinterpret or rewrite substantive claim text when changing
+  lifecycle/publication status: CRC
   may state that stock-media content a provider designates "Editorial"
   is generally licensed for descriptive/newsworthy use rather than
   advertising, promotional, endorsement, or merchandising use, and that
@@ -642,13 +641,13 @@ Full review artifact: `governance-reviews/FGR_001_CAND-STOCK-EDITORIAL-001_2026-
 
 ### CLAIM-STOCK-EDITORIAL-002-v1
 Domain: Third-Party Source Assets / Stock Media Licensing
-Topic: Third-party source-asset editorial designation / release-relatedness — **no corresponding `GoalCategory` value exists yet; see GOVERNANCE TREATMENT below (same architecture gap as CLAIM-STOCK-EDITORIAL-001-v1, not a new one).**
+Topic: third_party_source_rights
 Subtopic: editorial-designation-release-relatedness
 Claim character: established
 Jurisdiction: Not a legal jurisdiction — governed collectively by each cited provider's current Terms of Service/License Agreement (Getty Images, iStock, Shutterstock — the three providers this claim's evidence confirms; not independently confirmed for Adobe Stock), not a single contract or legal jurisdiction.
 Context: Commercial Assurance evidence review of any AI-generated commercial video workflow that incorporates third-party stock-media source assets designated "Editorial"
 
-GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #2): same runtime-representation gap as CLAIM-STOCK-EDITORIAL-001-v1, not a second, independent instance requiring separate reasoning — this claim's actual subject also has no corresponding implemented `GoalCategory` value, for the identical reason recorded on that claim's own entry above. **This claim is Adopted governed knowledge, available to Reviewer/Commercial Assurance via this canonical document, but has NO current runtime Topic Retrieval representation whatsoever** — not mirrored into `topic-claims-fixture.ts`, not queryable, not matchable, not reachable by any code path. Update this entry's `Topic` field and add the corresponding `topic-claims-fixture.ts` entry only when a real `GoalCategory` value for this domain is deliberately, separately implemented — together with CLAIM-STOCK-EDITORIAL-001-v1's own entry, in the same change, not independently.
+GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #2; updated 2026-08-18 following M1/M2/M3 implementation): same runtime-representation gap as CLAIM-STOCK-EDITORIAL-001-v1 at adoption time, now closed the same way and together with it (M1 GoalCategory + M2 AssetProviderMention + M3 provider-scoped retrieval). This claim now has a real runtime entry — `topic: 'third_party_source_rights'`, `provider_scope: null` (generic). **Remains excluded from CRC output only via the ordinary `CRC Eligible: Pending` gate below**, not a fixture-representation exception. See CLAIM-STOCK-EDITORIAL-001-v1's own entry for the full architecture-closure reasoning, not repeated here.
 
 Relationship to CLAIM-STOCK-EDITORIAL-001-v1 (governance note, not part of the governed statement itself — Formal Governance Review #2 §1's explicit instruction that internal claim IDs must not appear inside reusable governed-knowledge text): CLAIM-STOCK-EDITORIAL-001-v1 governs the standard license-scope restriction associated with Editorial content (what uses are/are not permitted). CLAIM-STOCK-EDITORIAL-002-v1 governs a distinct but commonly associated tendency — that Editorial-designated content is typically supplied without model/property releases. The relationship between the two claims is **COMPLEMENTARY**: a reviewer applying both gets a fuller picture (a use may exceed the standard license, per -001, and, separately, the content likely lacks releases that would otherwise support broader use even where license scope is satisfied, per -002) without either claim restating or depending on the other's own text. No `TopicRelationship` is created for this pairing, and none is implied by this note.
 
@@ -729,12 +728,12 @@ Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
   NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-17 as reviewer/internal
   knowledge only; CRC eligibility is a separate, not-yet-made decision (see
-  CRC Approver/CRC Decision Date below). Additionally and independently of
-  that separate decision, this claim currently has NO runtime Topic
-  Retrieval representation at all (see GOVERNANCE TREATMENT above). Text
-  below is the scoping language CRC MAY be authorized to state if/when
-  both CRC eligibility is separately approved AND the architecture gap is
-  closed, preserved unchanged from the adopted draft per governance
+  CRC Approver/CRC Decision Date below). UPDATE (2026-08-18): the runtime
+  Topic Retrieval architecture gap noted here at adoption time is now
+  closed (M1/M2/M3); CRC eligibility is now the ONLY remaining gate. Text
+  below is the scoping language CRC MAY be authorized to state if/when CRC
+  eligibility is separately approved,
+  preserved unchanged from the adopted draft per governance
   instruction not to reinterpret or rewrite substantive claim text when
   changing lifecycle/publication status: CRC may state that stock-media
   content a provider designates "Editorial" is typically supplied without
@@ -785,15 +784,15 @@ Full review artifact: `governance-reviews/FGR_002_CAND-STOCK-EDITORIAL-002_2026-
 
 ### CLAIM-STOCK-GETTY-EDITORIAL-001-v1
 Domain: Third-Party Source Assets / Stock Media Licensing
-Topic: Getty-specific Editorial license scope and authorization mechanism — **no corresponding `GoalCategory` value exists yet; see GOVERNANCE TREATMENT below (the same architecture gap as CLAIM-STOCK-EDITORIAL-001-v1 and CLAIM-STOCK-EDITORIAL-002-v1, not a new or third instance of it).**
+Topic: third_party_source_rights
 Subtopic: getty-editorial-license-scope-and-rights-clearance
 Claim character: established
 Jurisdiction: Not a legal jurisdiction — governed by Getty Images' current Content License Agreement / Terms of Service, not a legal jurisdiction.
 Context: Commercial Assurance evidence review of any AI-generated commercial video workflow that incorporates Getty Images source assets designated "Editorial Content"
 
-GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #3): same runtime-representation gap as CLAIM-STOCK-EDITORIAL-001-v1 and CLAIM-STOCK-EDITORIAL-002-v1, not a new, independent one -- this claim's actual subject also has no corresponding implemented `GoalCategory` value, for the identical reason recorded on those two claims' own entries above. **This claim is Adopted governed knowledge, available to Reviewer/Commercial Assurance via this canonical document, but has NO current runtime Topic Retrieval representation whatsoever** -- not mirrored into `topic-claims-fixture.ts`, not queryable, not matchable, not reachable by any code path. Update this entry's `Topic` field and add the corresponding `topic-claims-fixture.ts` entry only when a real `GoalCategory` value for this domain is deliberately, separately implemented -- together with the other two stock claims' own entries, in the same change, not independently.
+GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #3; updated 2026-08-18 following M1/M2/M3 implementation): same runtime-representation gap as CLAIM-STOCK-EDITORIAL-001-v1/-002-v1 at adoption time, now closed the same way and together with them (M1 GoalCategory + M2 AssetProviderMention). **This claim additionally required a provider-narrowing capability the two generic claims did not** (see the Additional future dependency note immediately below, updated in the same pass) -- that capability now exists too (M3: `provider_scope` on `TopicClaim`, a silent pre-filter in `lookupTopicClaims()`). This claim now has a real runtime entry — `topic: 'third_party_source_rights'`, `provider_scope: ['getty']` (a topic candidate ONLY when the conversation's active, canonically-resolved asset providers include `getty`). **Remains excluded from CRC output only via the ordinary `CRC Eligible: Pending` gate below**, not a fixture-representation or provider-narrowing exception anymore.
 
-Additional future dependency, specific to this claim (Formal Governance Review #3): even once `third_party_source_rights` exists and Path A is implemented, this claim would ALSO need a not-yet-scoped **provider-narrowing capability** to be safely CRC-reachable -- something capable of ensuring Getty-specific knowledge surfaces only when Getty is actually the relevant provider for a given conversation, distinct from and in addition to Path A's own goal-category gate. This is a strictly larger product dependency than CLAIM-STOCK-EDITORIAL-001-v1/-002-v1 carry (those need Path A alone). Not designed, scoped, or implemented by this adoption decision. The claim remains immediately useful to a human reviewer today, independent of any of this -- reviewer access to this canonical document does not depend on CRC's own retrieval mechanism at all (`PRD_LIVING_KNOWLEDGE_SOURCE_INPUTS_v0.1.md` §9: "Reviewer access may legitimately expose knowledge that is Adopted but not CRC Eligible").
+Additional future dependency, specific to this claim (Formal Governance Review #3; RESOLVED 2026-08-18): at adoption time, this claim additionally needed a not-yet-scoped **provider-narrowing capability** to be safely CRC-reachable -- something capable of ensuring Getty-specific knowledge surfaces only when Getty is actually the relevant provider for a given conversation. That capability is now implemented (M3, per `THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md`) -- `provider_scope: ['getty']` on this claim's runtime entry, evaluated as a silent candidate pre-filter before any governance gate. This paragraph is preserved (not deleted) as the historical record of what was once a real, larger dependency than CLAIM-STOCK-EDITORIAL-001-v1/-002-v1 carried. The claim remains immediately useful to a human reviewer regardless of any of this -- reviewer access to this canonical document does not depend on CRC's own retrieval mechanism at all (`PRD_LIVING_KNOWLEDGE_SOURCE_INPUTS_v0.1.md` §9: "Reviewer access may legitimately expose knowledge that is Adopted but not CRC Eligible").
 
 Provenance note: this claim is classified **DIRECTLY SOURCE-BACKED**, not Governed Synthesis -- unlike CLAIM-STOCK-EDITORIAL-001-v1/-002-v1 (which each combine independently-verified language across three or four providers into one cross-provider synthesis), every load-bearing proposition here derives from Getty's own two official sources with no cross-provider combination involved. One small interpretive step is disclosed, not hidden: the connection between the EULA's written-authorization clause and the separate Rights & Clearance page is a same-provider inferential link this document draws between two official Getty sources -- neither Getty page explicitly cross-references the other; this document does not claim they do.
 
@@ -868,13 +867,12 @@ Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
   NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-17 as reviewer/internal
   knowledge only; CRC eligibility is a separate, not-yet-made decision (see
-  CRC Approver/CRC Decision Date below). Additionally and independently of
-  that separate decision, this claim currently has NO runtime Topic
-  Retrieval representation at all (see GOVERNANCE TREATMENT above), and
-  would additionally require a not-yet-scoped provider-narrowing capability
-  even once that gap and Path A are both closed (see the Additional future
-  dependency note above). Text below is the scoping language CRC MAY be
-  authorized to state if/when all of these are separately resolved,
+  CRC Approver/CRC Decision Date below). UPDATE (2026-08-18): both the
+  runtime Topic Retrieval architecture gap and the provider-narrowing
+  capability gap noted here at adoption time are now closed (M1/M2/M3 --
+  see GOVERNANCE TREATMENT above); CRC eligibility is now the ONLY
+  remaining gate. Text below is the scoping language CRC MAY be
+  authorized to state if/when CRC eligibility is separately resolved,
   preserved unchanged from the adopted draft per governance instruction not
   to reinterpret or rewrite substantive claim text when changing
   lifecycle/publication status: CRC may state that Getty's standard
@@ -924,15 +922,15 @@ Full review artifact: `governance-reviews/FGR_003_CAND-STOCK-GETTY-EDITORIAL-001
 
 ### CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1
 Domain: Third-Party Source Assets / Stock Media Licensing
-Topic: Shutterstock-specific Editorial/Commercial classification and Rights and Clearance mechanism — **no corresponding `GoalCategory` value exists yet; see GOVERNANCE TREATMENT below (the same architecture gap as the three prior stock claims, not a new or fourth instance of it).**
+Topic: third_party_source_rights
 Subtopic: shutterstock-editorial-commercial-distinction-rights-and-clearance
 Claim character: established
 Jurisdiction: Not a legal jurisdiction — governed by Shutterstock's current Terms of Service / License Agreement (the Commercial/Editorial definitional distinction independently verified; certain mechanism details rest on Shutterstock's own public/investor disclosures rather than the license agreement text itself), not a legal jurisdiction.
 Context: Commercial Assurance evidence review of any AI-generated commercial video workflow that incorporates Shutterstock source assets designated "Editorial"
 
-GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #4): same runtime-representation gap as CLAIM-STOCK-EDITORIAL-001-v1, CLAIM-STOCK-EDITORIAL-002-v1, and CLAIM-STOCK-GETTY-EDITORIAL-001-v1, not a new, independent one -- this claim's actual subject also has no corresponding implemented `GoalCategory` value, for the identical reason recorded on those three claims' own entries above. **This claim is Adopted governed knowledge, available to Reviewer/Commercial Assurance via this canonical document, but has NO current runtime Topic Retrieval representation whatsoever** -- not mirrored into `topic-claims-fixture.ts`, not queryable, not matchable, not reachable by any code path. Update this entry's `Topic` field and add the corresponding `topic-claims-fixture.ts` entry only when a real `GoalCategory` value for this domain is deliberately, separately implemented -- together with the other three stock claims' own entries, in the same change, not independently.
+GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #4; updated 2026-08-18 following M1/M2/M3 implementation): same runtime-representation and provider-narrowing gaps as CLAIM-STOCK-GETTY-EDITORIAL-001-v1 at adoption time, now closed the same way and together with the other stock claims (M1 GoalCategory + M2 AssetProviderMention + M3 provider-scoped retrieval). This claim now has a real runtime entry — `topic: 'third_party_source_rights'`, `provider_scope: ['shutterstock']`. **Remains excluded from CRC output only via the ordinary `CRC Eligible: Pending` gate below**, not a fixture-representation or provider-narrowing exception anymore.
 
-Additional future dependency, specific to this claim (same shape as CLAIM-STOCK-GETTY-EDITORIAL-001-v1's own, not a new category): even once `third_party_source_rights` exists and Path A is implemented, this claim would ALSO need the same not-yet-scoped **provider-narrowing capability** identified for Getty to be safely CRC-reachable -- ensuring Shutterstock-specific knowledge surfaces only when Shutterstock is actually the relevant provider. Formal Governance Review #4 confirmed Shutterstock introduces no new routing requirement beyond the one already identified through Getty. Not designed, scoped, or implemented by this adoption decision. The claim remains immediately useful to a human reviewer today, independent of any of this, for the same reason already recorded on the Getty claim's own entry.
+Additional future dependency, specific to this claim (same shape as CLAIM-STOCK-GETTY-EDITORIAL-001-v1's own; RESOLVED 2026-08-18): at adoption time, this claim additionally needed the same not-yet-scoped **provider-narrowing capability** identified for Getty. Formal Governance Review #4 confirmed Shutterstock introduced no new routing requirement beyond the one already identified through Getty -- confirmed again at implementation: the same M3 mechanism (`provider_scope: ['shutterstock']`) closes it, with no Shutterstock-specific engineering required. This paragraph is preserved as the historical record of that dependency. The claim remains immediately useful to a human reviewer regardless of any of this, for the same reason already recorded on the Getty claim's own entry.
 
 Evidence-tier disclosure (Formal Governance Review #4, non-negotiable, preserved exactly, not smoothed over): this claim's propositions do NOT share one evidence tier. The Commercial/Editorial functional distinction is Tier 1, directly verified against an official Shutterstock source. The Rights and Clearance description is Official Secondary -- sourced from Shutterstock's own investor-relations press release and blog, not from Shutterstock's customer-facing License Agreement / Terms of Service, which remained inaccessible throughout this research despite eight independent access attempts across three research sessions (Phase 1A, Phase 1B, and Formal Governance Review #4's own bounded verification attempt on a previously-untried URL, also unsuccessful -- HTTP 403, the same block pattern observed on every other `www.shutterstock.com` legal/help path tried). **This claim's provenance is classified DIRECTLY SOURCE-BACKED** (no cross-provider synthesis occurs, matching CLAIM-STOCK-GETTY-EDITORIAL-001-v1's own classification basis) **rather than Governed Synthesis, but is explicitly NOT held to the same full evidentiary bar the Getty claim met** -- Getty's own four proposition-map entries were each independently Tier 1; this claim's Rights and Clearance clause is not, and is stated with wording calibrated to that weaker tier (see Claim proposition below, which explicitly states its own mechanics were not independently verified, rather than asserting them with Getty-claim-level confidence). **Taxonomy-precision anomaly, flagged not solved:** "Directly Source-Backed" does not itself distinguish an all-Tier-1 claim (Getty) from a Tier-1-plus-Official-Secondary claim (this one) -- noted here as context for a future governance-format refinement, not resolved by inventing a new provenance category for this single claim.
 
@@ -1020,13 +1018,12 @@ Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
   NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-17 as reviewer/internal
   knowledge only; CRC eligibility is a separate, not-yet-made decision (see
-  CRC Approver/CRC Decision Date below). Additionally and independently of
-  that separate decision, this claim currently has NO runtime Topic
-  Retrieval representation at all (see GOVERNANCE TREATMENT above), and
-  would additionally require a not-yet-scoped provider-narrowing capability
-  even once that gap and Path A are both closed (see the Additional future
-  dependency note above). Text below is the scoping language CRC MAY be
-  authorized to state if/when all of these are separately resolved,
+  CRC Approver/CRC Decision Date below). UPDATE (2026-08-18): both the
+  runtime Topic Retrieval architecture gap and the provider-narrowing
+  capability gap noted here at adoption time are now closed (M1/M2/M3);
+  CRC eligibility is now the ONLY remaining gate. Text below is the
+  scoping language CRC MAY be authorized to state if/when CRC eligibility
+  is separately resolved,
   preserved unchanged from the adopted draft per governance instruction not
   to reinterpret or rewrite substantive claim text when changing
   lifecycle/publication status: CRC may state that Shutterstock
@@ -1084,15 +1081,15 @@ Full review artifact: `governance-reviews/FGR_004_CAND-STOCK-SHUTTERSTOCK-EDITOR
 
 ### CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1
 Domain: Third-Party Source Assets / Stock Media Licensing
-Topic: iStock-specific Editorial license scope and negative clearance-mechanism finding — **no corresponding `GoalCategory` value exists yet; see GOVERNANCE TREATMENT below (the same architecture gap as the four prior stock claims, not a new or fifth instance of it).**
+Topic: third_party_source_rights
 Subtopic: istock-editorial-use-only-restriction-no-evidenced-exception
 Claim character: established
 Jurisdiction: Not a legal jurisdiction — governed by iStock's current License Agreement / Terms of Use, not a legal jurisdiction.
 Context: Commercial Assurance evidence review of any AI-generated commercial video workflow that incorporates iStock source assets designated "editorial use only"
 
-GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #5): same runtime-representation gap as CLAIM-STOCK-EDITORIAL-001-v1, CLAIM-STOCK-EDITORIAL-002-v1, CLAIM-STOCK-GETTY-EDITORIAL-001-v1, and CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1, not a new, independent one -- this claim's actual subject also has no corresponding implemented `GoalCategory` value, for the identical reason recorded on those four claims' own entries above. **This claim is Adopted governed knowledge, available to Reviewer/Commercial Assurance via this canonical document, but has NO current runtime Topic Retrieval representation whatsoever** -- not mirrored into `topic-claims-fixture.ts`, not queryable, not matchable, not reachable by any code path. Update this entry's `Topic` field and add the corresponding `topic-claims-fixture.ts` entry only when a real `GoalCategory` value for this domain is deliberately, separately implemented -- together with the other four stock claims' own entries, in the same change, not independently.
+GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #5; updated 2026-08-18 following M1/M2/M3 implementation): same runtime-representation and provider-narrowing gaps as CLAIM-STOCK-GETTY-EDITORIAL-001-v1 and CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1 at adoption time, now closed the same way and together with the other stock claims (M1 GoalCategory + M2 AssetProviderMention + M3 provider-scoped retrieval). This claim now has a real runtime entry — `topic: 'third_party_source_rights'`, `provider_scope: ['istock']`. **Remains excluded from CRC output only via the ordinary `CRC Eligible: Pending` gate below**, not a fixture-representation or provider-narrowing exception anymore.
 
-Additional future dependency, specific to this claim (same shape as CLAIM-STOCK-GETTY-EDITORIAL-001-v1's and CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1's own, not a new category): even once `third_party_source_rights` exists and Path A is implemented, this claim would ALSO need the same not-yet-scoped **provider-narrowing capability** identified for Getty and Shutterstock to be safely CRC-reachable. Formal Governance Review #5 confirmed iStock introduces no new routing requirement beyond the one already identified. Not designed, scoped, or implemented by this adoption decision. The claim remains immediately useful to a human reviewer today, independent of any of this, for the same reason already recorded on the Getty and Shutterstock claims' own entries.
+Additional future dependency, specific to this claim (same shape as CLAIM-STOCK-GETTY-EDITORIAL-001-v1's and CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1's own; RESOLVED 2026-08-18): at adoption time, this claim additionally needed the same not-yet-scoped **provider-narrowing capability** identified for Getty and Shutterstock. Formal Governance Review #5 confirmed iStock introduced no new routing requirement beyond the one already identified -- confirmed again at implementation: the same M3 mechanism (`provider_scope: ['istock']`) closes it, with no iStock-specific engineering required. This paragraph is preserved as the historical record of that dependency. The claim remains immediately useful to a human reviewer regardless of any of this, for the same reason already recorded on the Getty and Shutterstock claims' own entries.
 
 Provenance note: this claim is classified **DIRECTLY SOURCE-BACKED** -- the cleanest classification of the three provider-specific claims to date, per Formal Governance Review #5. Unlike CLAIM-STOCK-GETTY-EDITORIAL-001-v1 (needed a disclosed inferential link between two Getty pages) or CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1 (needed an explicit mixed Tier-1/Official-Secondary evidence-tier disclosure), this claim asserts no exception mechanism at all, so there is no analogous inferential step or mixed-sourcing complication to reconcile. All load-bearing propositions derive from iStock's own single official source, directly and consistently fetched three times across the whole research program.
 
@@ -1174,13 +1171,12 @@ Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
   NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-17 as reviewer/internal
   knowledge only; CRC eligibility is a separate, not-yet-made decision (see
-  CRC Approver/CRC Decision Date below). Additionally and independently of
-  that separate decision, this claim currently has NO runtime Topic
-  Retrieval representation at all (see GOVERNANCE TREATMENT above), and
-  would additionally require a not-yet-scoped provider-narrowing capability
-  even once that gap and Path A are both closed (see the Additional future
-  dependency note above). Text below is the scoping language CRC MAY be
-  authorized to state if/when all of these are separately resolved,
+  CRC Approver/CRC Decision Date below). UPDATE (2026-08-18): both the
+  runtime Topic Retrieval architecture gap and the provider-narrowing
+  capability gap noted here at adoption time are now closed (M1/M2/M3);
+  CRC eligibility is now the ONLY remaining gate. Text below is the
+  scoping language CRC MAY be authorized to state if/when CRC eligibility
+  is separately resolved,
   preserved unchanged from the adopted draft per governance instruction not
   to reinterpret or rewrite substantive claim text when changing
   lifecycle/publication status: CRC may state that iStock's standard

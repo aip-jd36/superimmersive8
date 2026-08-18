@@ -32,6 +32,7 @@ function claim(overrides: Partial<TopicClaim> & Pick<TopicClaim, 'claim_id' | 't
     crc_candidate_statement: 'Candidate statement.',
     applicability_requirements: [],
     unresolved_project_dependencies: [],
+    provider_scope: null,
     last_verified: '2026-08-16',
     superseded_by: null,
     ...overrides,

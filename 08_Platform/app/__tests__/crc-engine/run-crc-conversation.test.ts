@@ -295,6 +295,7 @@ describe('runCRCConversation -- Topic Retrieval end-to-end (CRC Living Knowledge
       crc_candidate_statement: 'Test candidate statement for end-to-end proof.',
       applicability_requirements: [],
       unresolved_project_dependencies: [],
+      provider_scope: null,
       last_verified: '2026-08-16',
       superseded_by: null,
     }
@@ -333,6 +334,7 @@ describe('runCRCConversation -- jurisdiction/tool-plan-tier applicability-fact t
       crc_candidate_statement: 'US-specific governed statement.',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
       unresolved_project_dependencies: [],
+      provider_scope: null,
       last_verified: '2026-08-16',
       superseded_by: null,
     }
@@ -350,6 +352,7 @@ describe('runCRCConversation -- jurisdiction/tool-plan-tier applicability-fact t
       crc_candidate_statement: 'Taiwan-specific governed statement.',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'Taiwan' }],
       unresolved_project_dependencies: [],
+      provider_scope: null,
       last_verified: '2026-08-16',
       superseded_by: null,
     }
@@ -419,6 +422,7 @@ describe('runCRCConversation -- jurisdiction/tool-plan-tier applicability-fact t
       crc_candidate_statement: 'Tier-gated governed statement.',
       applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'runway-gen3', operator: 'equals', value: 'paid' }],
       unresolved_project_dependencies: [],
+      provider_scope: null,
       last_verified: '2026-08-16',
       superseded_by: null,
     }

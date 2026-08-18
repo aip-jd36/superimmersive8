@@ -57,6 +57,32 @@ export function isApplicable(requirements: ApplicabilityRequirement[], facts: Ap
   return requirements.every((req) => evaluateRequirement(req, facts))
 }
 
+/**
+ * Provider pre-filter (Living Knowledge — Third-Party Source Rights, M3,
+ * 2026-08-18, per THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md
+ * §7-§11, PM-approved). `null` provider_scope (generic claim) always
+ * passes -- unconditionally, regardless of `assetProviders`. A non-null
+ * provider_scope passes only when at least one of its values is present in
+ * `assetProviders` -- canonical, active, resolved identifiers only (see
+ * `lookupTopicClaims`'s own call site: `assetProviders` is sourced from
+ * `RetrievalHandoff.asset_providers`, which by construction (handoff.ts)
+ * never contains an unresolved alias, raw text, or anything derived from a
+ * ToolMention). This function is intentionally the ONLY place provider
+ * matching happens -- it runs BEFORE Lifecycle/CRC-eligible/applicability
+ * evaluation (see `lookupTopicClaims` below), so a provider mismatch never
+ * contributes to `anyEligible`/`anyApplicable` bookkeeping and never
+ * produces a diagnostic of its own. A mismatched claim is excluded from
+ * `candidates` before the rest of the loop ever sees it -- structurally
+ * indistinguishable from a claim that was never a candidate at all. No
+ * `provider_scope_unmet` diagnostic exists anywhere in this codebase, per
+ * explicit PM instruction -- filtering happens silently, by construction,
+ * not by a diagnostic a downstream consumer must remember to suppress.
+ */
+function providerScopeMatches(claim: TopicClaim, assetProviders: readonly string[]): boolean {
+  if (claim.provider_scope === null) return true
+  return claim.provider_scope.some((p) => assetProviders.includes(p))
+}
+
 export interface TopicLookupResult {
   matches: TopicClaim[]
   diagnostics: RetrievalDiagnostic[]
@@ -66,8 +92,22 @@ export interface TopicLookupResult {
  * Only ACTIVE (superseded_by === null), CONFIRMED goals are considered --
  * mirrors buildBoundedInterpretations' own filter exactly (a declined or
  * superseded goal has nothing to look up knowledge for).
+ *
+ * `assetProviders` (Living Knowledge — Third-Party Source Rights, M3,
+ * 2026-08-18): additive, defaults to `[]` -- every pre-existing call site
+ * continues to compile and behave identically without passing it (a
+ * provider-scoped claim simply never matches when no providers are
+ * supplied, which is exactly correct: no provider information means no
+ * provider-specific claim can be a candidate). Canonical identifiers only
+ * -- see `providerScopeMatches`'s own doc comment above for the exact
+ * contract.
  */
-export function lookupTopicClaims(goals: UserGoal[], topicClaims: TopicClaim[], facts: ApplicabilityFacts): TopicLookupResult {
+export function lookupTopicClaims(
+  goals: UserGoal[],
+  topicClaims: TopicClaim[],
+  facts: ApplicabilityFacts,
+  assetProviders: string[] = [],
+): TopicLookupResult {
   const diagnostics: RetrievalDiagnostic[] = []
   const matches: TopicClaim[] = []
   const seen = new Set<string>()
@@ -77,7 +117,13 @@ export function lookupTopicClaims(goals: UserGoal[], topicClaims: TopicClaim[], 
   )
 
   for (const category of activeGoalCategories) {
-    const candidates = topicClaims.filter((c) => c.topic === category && c.superseded_by === null)
+    // Provider pre-filter runs as part of computing `candidates` itself --
+    // BEFORE Lifecycle/CRC-eligible/applicability evaluation below. A
+    // provider-mismatched claim never enters this array at all, so it can
+    // never affect `anyEligible`/`anyApplicable` or produce a diagnostic.
+    const candidates = topicClaims
+      .filter((c) => c.topic === category && c.superseded_by === null)
+      .filter((c) => providerScopeMatches(c, assetProviders))
 
     if (candidates.length === 0) {
       diagnostics.push({ identifier: category, reason: 'no_topic_claim' })

@@ -81,16 +81,33 @@ function copyrightabilityGoal(overrides: Partial<UserGoal> = {}): UserGoal {
 }
 
 describe('Wave 1 real claims -- governance state as of 2026-08-17 (COPY-004 published, COPY-001/002/003 still Pending)', () => {
-  test('all four Wave 1 claims are present in the fixture', () => {
+  /**
+   * Updated 2026-08-18 (Living Knowledge — Third-Party Source Rights, M3):
+   * the fixture now also carries the five real, Adopted stock-media claims
+   * (M1 GoalCategory + M2 AssetProviderMention + M3 provider-scoped
+   * retrieval together closed their prior no-runtime-representation
+   * blocker) -- updated, not left stale, per this file's own established
+   * precedent (see module header). Their own crc_eligible: Pending
+   * exclusion behavior is proven separately, not by this file (which is
+   * scoped to Wave 1's copyright claims) -- see
+   * topic-claims-fixture-consistency.test.ts and the M3 provider-narrowing
+   * test suite.
+   */
+  test('all four Wave 1 claims plus the five stock-media claims are present in the fixture', () => {
     expect(TOPIC_CLAIMS_FIXTURE.map((c) => c.claim_id).sort()).toEqual([
       'CLAIM-COPY-001-v1',
       'CLAIM-COPY-002-v1',
       'CLAIM-COPY-003-v1',
       'CLAIM-COPY-004-v1',
+      'CLAIM-STOCK-EDITORIAL-001-v1',
+      'CLAIM-STOCK-EDITORIAL-002-v1',
+      'CLAIM-STOCK-GETTY-EDITORIAL-001-v1',
+      'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1',
+      'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1',
     ])
   })
 
-  test('all four ARE Lifecycle: Adopted -- visible as Adopted institutional knowledge in the canonical Governed Claims source', () => {
+  test('all nine (four Wave 1 + five stock-media) ARE Lifecycle: Adopted -- visible as Adopted institutional knowledge in the canonical Governed Claims source', () => {
     for (const claim of TOPIC_CLAIMS_FIXTURE) {
       expect(claim.lifecycle).toBe('Adopted')
     }

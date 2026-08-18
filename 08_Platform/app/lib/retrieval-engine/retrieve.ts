@@ -66,6 +66,20 @@ const UNKNOWN_APPLICABILITY_FACTS: ApplicabilityFacts = { jurisdiction: { state:
  * construction (its own relationship-eligibility filter excludes any
  * non-CRC-eligible relationship before any claim is even considered) --
  * this is the mechanism the zero-behavior-change requirement rests on.
+ *
+ * `assetProviders` (additive, Living Knowledge — Third-Party Source Rights,
+ * M3, 2026-08-18, same defaults-preserve-existing-behavior discipline as
+ * every parameter above it): threaded straight through to
+ * `lookupTopicClaims`'s own provider pre-filter, unmodified. Deliberately
+ * NOT sourced from `StructuredUnderstanding` directly by this module --
+ * `handoff.asset_providers` (already computed by `buildRetrievalHandoff`,
+ * Interview Engine's own boundary) is the correct, smallest-existing-route
+ * source; `run-crc-conversation.ts` passes it explicitly. Never threaded
+ * into `lookupRelatedTopicClaims` -- no `third_party_source_rights`
+ * `TopicRelationship` is approved, so provider-scoped claims cannot
+ * currently be reached via the related-topic path at all; see that
+ * module's own architecture note if a future relationship ever targets or
+ * sources this topic.
  */
 export function retrieve(
   handoff: RetrievalHandoff,
@@ -74,6 +88,7 @@ export function retrieve(
   topicClaims: TopicClaim[] = [],
   applicabilityFacts: ApplicabilityFacts = UNKNOWN_APPLICABILITY_FACTS,
   relationships: TopicRelationship[] = [],
+  assetProviders: string[] = [],
 ): RetrieveOutput {
   const matchable = extractMatchableFacts(handoff)
   const diagnostics: RetrievalDiagnostic[] = []
@@ -115,7 +130,7 @@ export function retrieve(
     }
   }
 
-  const topicLookup = lookupTopicClaims(goals, topicClaims, applicabilityFacts)
+  const topicLookup = lookupTopicClaims(goals, topicClaims, applicabilityFacts, assetProviders)
   diagnostics.push(...topicLookup.diagnostics)
   for (const claim of topicLookup.matches) {
     const assembled = assembleTopicResult(claim)
