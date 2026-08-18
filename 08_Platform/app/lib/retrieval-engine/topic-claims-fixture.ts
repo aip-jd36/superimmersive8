@@ -74,9 +74,17 @@
  * _2026-08-18.md`. That review's load-bearing test confirmed the claim's
  * "no evidence found, not a confirmed absence" negative-finding framing
  * survives real pipeline execution, including two targeted adversarial
- * pressure-test scenarios. `CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1`
- * remains `crc_eligible: 'Pending'` -- M3 is retrieval infrastructure only
- * and does not itself authorize CRC
+ * pressure-test scenarios. `CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1` is
+ * ALSO now `crc_eligible: 'Yes'`, following a bounded CRC-Publication
+ * Review #5 (recommendation A -- PASS/GO AS-IS, no text change) and PM
+ * approval -- see `governance-reviews/CPR_005_CLAIM-STOCK-SHUTTERSTOCK
+ * -EDITORIAL-001-v1_2026-08-18.md`. That review's load-bearing test
+ * confirmed the claim's intentionally mixed evidence-tier disclosure
+ * (Tier 1 functional distinction, Official Secondary Rights and Clearance
+ * description) survives real pipeline execution without being flattened
+ * into Getty-level certainty. All five stock claims researched to date are
+ * now `crc_eligible: 'Yes'` -- M3 is retrieval infrastructure only and
+ * does not itself authorize CRC
  * publication for any claim; each claim's CRC eligibility is its own
  * separate, individually-made governance decision (M4). Until a given
  * claim's own decision is made, `lookupTopicClaims()`'s own existing
@@ -280,7 +288,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     claim_character: 'established',
     jurisdiction: 'Global',
     lifecycle: 'Adopted',
-    crc_eligible: 'Pending',
+    crc_eligible: 'Yes',
     crc_publication_scope:
       'CRC may state that Shutterstock distinguishes Commercial content (usable to commercialize, monetize, sell, promote, or advertise) from Editorial content (which cannot be used for those purposes), and that Shutterstock has publicly described a Rights and Clearance service for seeking third-party permissions for promotional use of Editorial assets, whose exact mechanics CRC has not independently verified. CRC must not state whether the user\'s own specific Shutterstock asset is Editorial-designated, whether Rights and Clearance was engaged for it, or whether their use is therefore permitted.',
     crc_candidate_statement:

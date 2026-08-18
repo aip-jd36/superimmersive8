@@ -509,19 +509,22 @@ describe('third_party_source_rights + AssetProviderMention full pipeline (Living
   // crc_eligible: 'Yes' -- the first provider-specific claim to go live.
   // "Rights and Clearance" and "gambling/betting/gaming" are now Getty's
   // own live, legitimate governed text for a Getty-named conversation, not
-  // a leak. iStock/Shutterstock remain Pending and provider-scope-excluded
-  // regardless -- this test checks for their own still-Pending,
-  // iStock/Shutterstock-EXCLUSIVE mechanism phrasing instead ("editorial
-  // use only" is iStock-exclusive; "monetize, sell, promote" is
-  // Shutterstock-exclusive).
-  test('passing TOPIC_CLAIMS_FIXTURE (the real, current fixture) now surfaces generic claims -001/-002 AND the Getty-specific claim (all real CRC-publication decisions, 2026-08-18) -- iStock/Shutterstock-specific claims remain unreachable, still Pending', () => {
+  // a leak. iStock and Shutterstock are ALSO now real crc_eligible: 'Yes'
+  // (CRC-Publication Reviews #4 and #5), but this scenario names ONLY
+  // Getty -- both remain excluded here by provider_scope MISMATCH, not by
+  // eligibility, so this test still proves the same routing boundary. It
+  // checks for their own EXCLUSIVE mechanism phrasing ("editorial use
+  // only" is iStock-exclusive; "monetize, sell, promote" is
+  // Shutterstock-exclusive) to prove that boundary regardless of either
+  // claim's own real eligibility state.
+  test('passing TOPIC_CLAIMS_FIXTURE (the real, current fixture) now surfaces generic claims -001/-002 AND the Getty-specific claim (all real CRC-publication decisions, 2026-08-18) -- iStock/Shutterstock-specific claims remain unreachable in a Getty-only conversation, by provider mismatch', () => {
     const { output } = runCRCConversation(suWithGettyGoal, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
     expect(output.goal_interpretations[0].summary).toContain('Editorial')
     expect(output.goal_interpretations[0].summary).toContain('Adobe Stock') // -002's own approved evidence caveat
     expect(output.goal_interpretations[0].summary).toContain('Rights and Clearance') // Getty's own live mechanism content
     expect(output.goal_interpretations[0].summary).toContain('gambling/betting/gaming') // Getty's own live enumerated list
-    expect(output.goal_interpretations[0].summary).not.toContain('editorial use only') // iStock-exclusive phrasing, still Pending
-    expect(output.goal_interpretations[0].summary).not.toContain('monetize, sell, promote') // Shutterstock-exclusive phrasing, still Pending
+    expect(output.goal_interpretations[0].summary).not.toContain('editorial use only') // iStock-exclusive phrasing, excluded by provider mismatch
+    expect(output.goal_interpretations[0].summary).not.toContain('monetize, sell, promote') // Shutterstock-exclusive phrasing, excluded by provider mismatch
   })
 
   test('an AssetProviderMention with no accompanying goal (Path B) produces zero goal_interpretations and a provider-only understood_summary clause', () => {
