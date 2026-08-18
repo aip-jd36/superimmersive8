@@ -160,9 +160,21 @@ describe('lookupTopicClaims: provider pre-filter (synthetic Adopted+eligible cla
 describe('governance and provider-scope are independent gates (test plan 16-18, critical three-way proof)', () => {
   const facts = { jurisdiction: { state: 'unknown' as const }, toolMentions: [] }
 
-  test('16: real fixture, Getty named -- provider matches, but crc_eligible: Pending still excludes it', () => {
+  // NOTE (updated 2026-08-18, following CRC-Publication Review #3 + PM
+  // approval): CLAIM-STOCK-GETTY-EDITORIAL-001-v1 is now real
+  // crc_eligible: 'Yes' -- the first provider-specific claim in the domain
+  // to go live. This test now uses CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1
+  // (still real crc_eligible: 'Pending') to prove the same "provider match
+  // is necessary but not sufficient" gate; a dedicated real-Getty
+  // "provider match + Yes = candidate" proof sits alongside it below.
+  test('16: real fixture, iStock named -- provider matches, but crc_eligible: Pending still excludes it', () => {
+    const result = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, facts, ['istock'])
+    expect(result.matches.find((m) => m.claim_id === 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')).toBeUndefined()
+  })
+
+  test('16b: real fixture, Getty named -- provider matches AND crc_eligible: Yes (real, post-CPR_003) -> genuinely a candidate', () => {
     const result = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, facts, ['getty'])
-    expect(result.matches.find((m) => m.claim_id === 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1')).toBeUndefined()
+    expect(result.matches.find((m) => m.claim_id === 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1')).toBeDefined()
   })
 
   test('17: synthetic eligible copy, provider matches -> candidate', () => {
@@ -175,14 +187,21 @@ describe('governance and provider-scope are independent gates (test plan 16-18, 
     expect(result.matches.map((m) => m.claim_id)).not.toContain('CLAIM-STOCK-GETTY-EDITORIAL-001-v1')
   })
 
+  // NOTE (updated 2026-08-18, following CRC-Publication Review #3 + PM
+  // approval): the "provider match + Pending = excluded" leg now uses
+  // CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1 (still real Pending) since
+  // CLAIM-STOCK-GETTY-EDITORIAL-001-v1 is real crc_eligible: 'Yes' as of
+  // this milestone -- its own "provider match + Yes = candidate" leg is
+  // now provable directly against the real, unmodified fixture (no
+  // synthetic clone needed), which is a strictly stronger proof than before.
   test('40: three-way proof -- (provider match + Pending = excluded), (provider match + Yes = candidate), (provider mismatch + Yes = excluded)', () => {
-    const pendingMatch = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, facts, ['getty'])
-    expect(pendingMatch.matches.find((m) => m.claim_id === 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1')).toBeUndefined()
+    const pendingMatch = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, facts, ['istock'])
+    expect(pendingMatch.matches.find((m) => m.claim_id === 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')).toBeUndefined()
 
-    const eligibleMatch = lookupTopicClaims([sourceRightsGoal()], eligibleStockFixture(), facts, ['getty'])
+    const eligibleMatch = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, facts, ['getty'])
     expect(eligibleMatch.matches.find((m) => m.claim_id === 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1')).toBeDefined()
 
-    const eligibleMismatch = lookupTopicClaims([sourceRightsGoal()], eligibleStockFixture(), facts, ['istock'])
+    const eligibleMismatch = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, facts, ['istock'])
     expect(eligibleMismatch.matches.find((m) => m.claim_id === 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1')).toBeUndefined()
   })
 })
@@ -209,16 +228,27 @@ describe('end-to-end through runCRCConversation, real unmodified TOPIC_CLAIMS_FI
   // NOTE (updated 2026-08-18, following CRC-Publication Review #1 + PM
   // approval): CLAIM-STOCK-EDITORIAL-001-v1 is now real crc_eligible: 'Yes'
   // -- a Getty question legitimately surfaces its own GENERIC content
-  // (provider_scope: null matches any provider). This test now checks for
-  // the absence of GETTY-SPECIFIC governed content specifically (the real
-  // provider-narrowing proof this suite exists for), not a blanket absence
-  // of the word "Editorial", which -001's own now-live generic text legitimately contains.
-  test('19: real Getty question -> generic -001 content may surface, but Getty-SPECIFIC claim content never does, no throw', () => {
+  // (provider_scope: null matches any provider).
+  // NOTE (updated again 2026-08-18, following CRC-Publication Review #3 +
+  // PM approval): CLAIM-STOCK-GETTY-EDITORIAL-001-v1 is ALSO now real
+  // crc_eligible: 'Yes' -- the first provider-specific claim to go live.
+  // A real Getty question now legitimately surfaces Getty-SPECIFIC content
+  // too ("Rights and Clearance", "gambling/betting/gaming" are Getty's own
+  // governed text, not a leak). This test now checks the positive case
+  // (Getty content DOES surface for a Getty question) plus continued
+  // absence of iStock/Shutterstock-SPECIFIC mechanism text (still Pending,
+  // and provider-scope-excluded regardless), which remains the real
+  // provider-narrowing proof this suite exists for.
+  test('19: real Getty question -> generic -001/-002 AND Getty-specific claim all surface; iStock/Shutterstock-specific content never does, no throw', () => {
     const { output } = runCRCConversation(suWithProvider('getty'), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
     expect(output.knowledge_items.map((k) => k.claim_id)).toContain('CLAIM-STOCK-EDITORIAL-001-v1')
-    expect(output.knowledge_items.map((k) => k.claim_id)).not.toContain('CLAIM-STOCK-GETTY-EDITORIAL-001-v1')
-    expect(output.goal_interpretations[0].summary).not.toContain('Rights and Clearance')
-    expect(output.goal_interpretations[0].summary).not.toContain('gambling/betting/gaming')
+    expect(output.knowledge_items.map((k) => k.claim_id)).toContain('CLAIM-STOCK-GETTY-EDITORIAL-001-v1')
+    expect(output.knowledge_items.map((k) => k.claim_id)).not.toContain('CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')
+    expect(output.knowledge_items.map((k) => k.claim_id)).not.toContain('CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1')
+    expect(output.goal_interpretations[0].summary).toContain('Rights and Clearance')
+    expect(output.goal_interpretations[0].summary).toContain('gambling/betting/gaming')
+    expect(output.goal_interpretations[0].summary).not.toContain('editorial use only')
+    expect(output.goal_interpretations[0].summary).not.toContain('monetize, sell, promote')
   })
 
   test('20: real iStock question -> no stock claim content in knowledge_items or goal_interpretations', () => {
@@ -233,6 +263,12 @@ describe('end-to-end through runCRCConversation, real unmodified TOPIC_CLAIMS_FI
     expect(output.goal_interpretations[0].summary).not.toContain('Rights and Clearance')
   })
 
+  // NOTE (updated 2026-08-18, following CRC-Publication Review #3 + PM
+  // approval): CLAIM-STOCK-GETTY-EDITORIAL-001-v1 is now real
+  // crc_eligible: 'Yes' -- it legitimately surfaces in withStock's
+  // knowledge_items now. The point of this test is unchanged: the
+  // commercial_use interpretation must be byte-identical with or without
+  // the stock topic present, proving no cross-category contamination.
   test('22: mixed commercial_use (Kling) + Getty stock question -- Kling guidance unaffected, stock topic never suppresses or contaminates it', () => {
     const su: StructuredUnderstanding = {
       ...DIALOGUE_FIXTURES.rich_signal.structured_understanding,
@@ -251,7 +287,7 @@ describe('end-to-end through runCRCConversation, real unmodified TOPIC_CLAIMS_FI
     const commercialInterpWith = withStock.output.goal_interpretations.find((i) => i.goal_text.includes('commercially'))
     const commercialInterpWithout = withoutStock.output.goal_interpretations.find((i) => i.goal_text.includes('commercially'))
     expect(commercialInterpWith?.summary).toEqual(commercialInterpWithout?.summary)
-    expect(withStock.output.knowledge_items.map((k) => k.claim_id)).not.toContain('CLAIM-STOCK-GETTY-EDITORIAL-001-v1')
+    expect(withStock.output.knowledge_items.map((k) => k.claim_id)).toContain('CLAIM-STOCK-GETTY-EDITORIAL-001-v1')
   })
 
   test('23: incidental Getty disclosure (no goal) still produces no stock goal/output -- Path A explicit-question gate, unaffected by M3', () => {
@@ -320,13 +356,18 @@ describe('boundary proofs (test plan 31-35)', () => {
   // approval): CLAIM-STOCK-EDITORIAL-002-v1's own now-live, approved
   // CRC-facing text legitimately NAMES Getty/iStock/Shutterstock as
   // confirmed providers (and Adobe Stock as unconfirmed) -- this is the
-  // authorized bounded copy adjustment, not a leak. "istock"/"shutterstock"
-  // are therefore no longer blanket-forbidden strings; this test instead
-  // checks for GETTY/ISTOCK/SHUTTERSTOCK-SPECIFIC CLAIM mechanism content
-  // (their own still-Pending governed statements -- "Rights and Clearance",
-  // "gambling/betting/gaming", "editorial use only"), which must never leak
-  // regardless of what -002's own generic text says.
-  test('31: no provider-mismatch diagnostic, and no provider-SPECIFIC claim content, leaks into a real end-to-end ProjectionOutput', () => {
+  // authorized bounded copy adjustment, not a leak.
+  // NOTE (updated again 2026-08-18, following CRC-Publication Review #3 +
+  // PM approval): CLAIM-STOCK-GETTY-EDITORIAL-001-v1 is now real
+  // crc_eligible: 'Yes' too -- for a Getty-named conversation, "rights and
+  // clearance" and "gambling/betting/gaming" are now GETTY's own live,
+  // legitimate governed text, not a leak. This test's forbidden list is
+  // narrowed to markers unique to iStock's/Shutterstock's OWN still-Pending
+  // mechanism text ("editorial use only" is iStock-exclusive phrasing;
+  // "monetize, sell, promote" is Shutterstock-exclusive phrasing) --
+  // neither of which any live claim's text contains, so their presence
+  // would still prove a real leak.
+  test('31: no provider-mismatch diagnostic, and no iStock/Shutterstock-SPECIFIC (still-Pending) claim content, leaks into a real end-to-end ProjectionOutput', () => {
     const su: StructuredUnderstanding = {
       ...DIALOGUE_FIXTURES.rich_signal.structured_understanding,
       user_goals: [sourceRightsGoal()],
@@ -334,7 +375,7 @@ describe('boundary proofs (test plan 31-35)', () => {
     }
     const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
     const serialized = JSON.stringify(output).toLowerCase()
-    for (const forbidden of ['provider_scope', 'provider mismatch', 'provider unknown', 'need provider', 'need more information about provider', 'rights and clearance', 'gambling/betting/gaming', 'editorial use only']) {
+    for (const forbidden of ['provider_scope', 'provider mismatch', 'provider unknown', 'need provider', 'need more information about provider', 'editorial use only', 'monetize, sell, promote']) {
       expect(serialized).not.toContain(forbidden)
     }
   })

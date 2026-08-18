@@ -97,11 +97,17 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
     // 2026-08-18 following Formal CRC-Publication Review #2 (recommendation
     // B -- PASS/GO WITH BOUNDED CRC COPY ADJUSTMENT) and PM approval; see
     // governance-reviews/CPR_002_CLAIM-STOCK-EDITORIAL-002-v1_2026-08-18.md.
-    // The three provider-specific claims remain 'Pending' -- each claim's
-    // CRC eligibility is its own separate, individually-made decision.
+    // CLAIM-STOCK-GETTY-EDITORIAL-001-v1 ALSO updated to 'Yes' 2026-08-18 --
+    // the first provider-specific claim in the domain to reach CRC --
+    // following a bounded CRC-Publication Review #3 (recommendation A --
+    // PASS/GO AS-IS, no text change) and PM approval; see
+    // governance-reviews/CPR_003_CLAIM-STOCK-GETTY-EDITORIAL-001-v1
+    // _2026-08-18.md. The two remaining provider-specific claims stay
+    // 'Pending' -- each claim's CRC eligibility is its own separate,
+    // individually-made decision.
     ['CLAIM-STOCK-EDITORIAL-001-v1', null, 'Yes'],
     ['CLAIM-STOCK-EDITORIAL-002-v1', null, 'Yes'],
-    ['CLAIM-STOCK-GETTY-EDITORIAL-001-v1', ['getty'], 'Pending'],
+    ['CLAIM-STOCK-GETTY-EDITORIAL-001-v1', ['getty'], 'Yes'],
     ['CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1', ['shutterstock'], 'Pending'],
     ['CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1', ['istock'], 'Pending'],
   ] as const)('%s -- real runtime representation as of M3 (Living Knowledge — Third-Party Source Rights, 2026-08-18)', (claimId, expectedProviderScope, expectedCrcEligible) => {
@@ -221,8 +227,8 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
     }
   })
 
-  test('exactly three claims in the runtime fixture are Adopted + CRC-eligible as of 2026-08-18 -- CLAIM-COPY-004-v1 (first PM CRC-publication decision, 2026-08-17), CLAIM-STOCK-EDITORIAL-001-v1 (second, 2026-08-18), and CLAIM-STOCK-EDITORIAL-002-v1 (third, 2026-08-18, published with a bounded CRC-facing copy adjustment) -- update only when a further real decision is recorded', () => {
+  test('exactly four claims in the runtime fixture are Adopted + CRC-eligible as of 2026-08-18 -- CLAIM-COPY-004-v1 (first PM CRC-publication decision, 2026-08-17), CLAIM-STOCK-EDITORIAL-001-v1 (second, 2026-08-18), CLAIM-STOCK-EDITORIAL-002-v1 (third, 2026-08-18, published with a bounded CRC-facing copy adjustment), and CLAIM-STOCK-GETTY-EDITORIAL-001-v1 (fourth, 2026-08-18, first provider-specific claim published, no text change) -- update only when a further real decision is recorded', () => {
     const liveClaims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.lifecycle === 'Adopted' && c.crc_eligible === 'Yes')
-    expect(liveClaims.map((c) => c.claim_id).sort()).toEqual(['CLAIM-COPY-004-v1', 'CLAIM-STOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-EDITORIAL-002-v1'])
+    expect(liveClaims.map((c) => c.claim_id).sort()).toEqual(['CLAIM-COPY-004-v1', 'CLAIM-STOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-EDITORIAL-002-v1', 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1'])
   })
 })

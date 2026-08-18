@@ -61,7 +61,14 @@
  * Shutterstock confirmed, Adobe Stock explicitly not -- that the
  * pre-correction CRC-facing text had omitted) and PM approval -- see
  * `governance-reviews/CPR_002_CLAIM-STOCK-EDITORIAL-002-v1_2026-08-18.md`.
- * The three provider-specific claims remain `crc_eligible: 'Pending'` --
+ * `CLAIM-STOCK-GETTY-EDITORIAL-001-v1` is ALSO now `crc_eligible: 'Yes'`,
+ * following a bounded CRC-Publication Review #3 (recommendation A --
+ * PASS/GO AS-IS, no text change) and PM approval -- see
+ * `governance-reviews/CPR_003_CLAIM-STOCK-GETTY-EDITORIAL-001-v1_2026-08-18
+ * .md`. This was the first live proof that `provider_scope` (M3) correctly
+ * gates a provider-specific claim under real pipeline execution, not just
+ * architecturally. `CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1` and
+ * `CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1` remain `crc_eligible: 'Pending'` --
  * M3 is retrieval infrastructure only and does not itself authorize CRC
  * publication for any claim; each claim's CRC eligibility is its own
  * separate, individually-made governance decision (M4). Until a given
@@ -247,7 +254,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     claim_character: 'established',
     jurisdiction: 'Global',
     lifecycle: 'Adopted',
-    crc_eligible: 'Pending',
+    crc_eligible: 'Yes',
     crc_publication_scope:
       'CRC may state that Getty\'s standard Editorial-content license excludes commercial, promotional, advertorial, endorsement, advertising, gambling/betting/gaming, and marketing use absent express written authorization, and that Getty separately offers a Rights and Clearance function through which such authorization may be sought. CRC must not state whether the user\'s own specific Getty asset is Editorial-designated, whether authorization was obtained for it, or whether their use is therefore permitted.',
     crc_candidate_statement:

@@ -789,7 +789,7 @@ Claim character: established
 Jurisdiction: Not a legal jurisdiction — governed by Getty Images' current Content License Agreement / Terms of Service, not a legal jurisdiction.
 Context: Commercial Assurance evidence review of any AI-generated commercial video workflow that incorporates Getty Images source assets designated "Editorial Content"
 
-GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #3; updated 2026-08-18 following M1/M2/M3 implementation): same runtime-representation gap as CLAIM-STOCK-EDITORIAL-001-v1/-002-v1 at adoption time, now closed the same way and together with them (M1 GoalCategory + M2 AssetProviderMention). **This claim additionally required a provider-narrowing capability the two generic claims did not** (see the Additional future dependency note immediately below, updated in the same pass) -- that capability now exists too (M3: `provider_scope` on `TopicClaim`, a silent pre-filter in `lookupTopicClaims()`). This claim now has a real runtime entry — `topic: 'third_party_source_rights'`, `provider_scope: ['getty']` (a topic candidate ONLY when the conversation's active, canonically-resolved asset providers include `getty`). **Remains excluded from CRC output only via the ordinary `CRC Eligible: Pending` gate below**, not a fixture-representation or provider-narrowing exception anymore.
+GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #3; updated 2026-08-18 following M1/M2/M3 implementation; updated again 2026-08-18 following CRC-publication approval): same runtime-representation gap as CLAIM-STOCK-EDITORIAL-001-v1/-002-v1 at adoption time, now closed the same way and together with them (M1 GoalCategory + M2 AssetProviderMention). **This claim additionally required a provider-narrowing capability the two generic claims did not** (see the Additional future dependency note immediately below, updated in the same pass) -- that capability now exists too (M3: `provider_scope` on `TopicClaim`, a silent pre-filter in `lookupTopicClaims()`). This claim now has a real runtime entry — `topic: 'third_party_source_rights'`, `provider_scope: ['getty']` (a topic candidate ONLY when the conversation's active, canonically-resolved asset providers include `getty`). **Following a bounded CRC-Publication Review (2026-08-18, recommendation A — PASS/GO AS-IS; full review archived at `governance-reviews/CPR_003_CLAIM-STOCK-GETTY-EDITORIAL-001-v1_2026-08-18.md`) and PM approval, this claim is now `CRC Eligible: Yes` below** — the first provider-specific Third-Party Source Assets claim to reach CRC, following the two generic claims (CLAIM-STOCK-EDITORIAL-001-v1, CLAIM-STOCK-EDITORIAL-002-v1). `Publication scope: Reviewer/Commercial Assurance` is UNCHANGED (CLAIM-COPY-004 precedent: Publication scope and CRC Eligibility are independent governance dimensions) and `provider_scope: ['getty']` is UNCHANGED -- the review confirmed provider-scoped routing behaves correctly and required no adjustment.
 
 Additional future dependency, specific to this claim (Formal Governance Review #3; RESOLVED 2026-08-18): at adoption time, this claim additionally needed a not-yet-scoped **provider-narrowing capability** to be safely CRC-reachable -- something capable of ensuring Getty-specific knowledge surfaces only when Getty is actually the relevant provider for a given conversation. That capability is now implemented (M3, per `THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md`) -- `provider_scope: ['getty']` on this claim's runtime entry, evaluated as a silent candidate pre-filter before any governance gate. This paragraph is preserved (not deleted) as the historical record of what was once a real, larger dependency than CLAIM-STOCK-EDITORIAL-001-v1/-002-v1 carried. The claim remains immediately useful to a human reviewer regardless of any of this -- reviewer access to this canonical document does not depend on CRC's own retrieval mechanism at all (`PRD_LIVING_KNOWLEDGE_SOURCE_INPUTS_v0.1.md` §9: "Reviewer access may legitimately expose knowledge that is Adopted but not CRC Eligible").
 
@@ -864,17 +864,13 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-17
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-17 as reviewer/internal
-  knowledge only; CRC eligibility is a separate, not-yet-made decision (see
-  CRC Approver/CRC Decision Date below). UPDATE (2026-08-18): both the
-  runtime Topic Retrieval architecture gap and the provider-narrowing
-  capability gap noted here at adoption time are now closed (M1/M2/M3 --
-  see GOVERNANCE TREATMENT above); CRC eligibility is now the ONLY
-  remaining gate. Text below is the scoping language CRC MAY be
-  authorized to state if/when CRC eligibility is separately resolved,
-  preserved unchanged from the adopted draft per governance instruction not
-  to reinterpret or rewrite substantive claim text when changing
-  lifecycle/publication status: CRC may state that Getty's standard
+  APPROVED FOR CRC PUBLICATION (2026-08-18, CRC Approver: JD (PM) -- see CRC
+  Approver/CRC Decision Date below; bounded CRC Publication Review complete,
+  recommendation A — PASS/GO AS-IS, archived at
+  `governance-reviews/CPR_003_CLAIM-STOCK-GETTY-EDITORIAL-001-v1_2026-08-18.md`).
+  Text below is unchanged from the pre-approval draft, per governance
+  instruction not to reinterpret or rewrite substantive claim text when
+  changing CRC-eligibility status: CRC may state that Getty's standard
   Editorial-content license excludes commercial, promotional, advertorial,
   endorsement, advertising, gambling/betting/gaming, and marketing use
   absent express written authorization, and that Getty separately offers a
@@ -884,8 +880,6 @@ CRC Publication Scope: >
   whether their use is therefore permitted.
 
 CRC Candidate Statement: >
-  NOT APPROVED FOR CRC PUBLICATION -- same status as CRC Publication Scope
-  above; text preserved unchanged, not yet authorized for CRC output:
   Getty's standard Editorial Content license doesn't cover commercial,
   promotional, advertorial, endorsement, advertising, gambling/betting/
   gaming, or marketing use unless Getty has expressly authorized it in
@@ -896,8 +890,8 @@ CRC Candidate Statement: >
 Effective date: 2026-08-17
 Last reviewed: 2026-08-17
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING -- not yet approved
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-08-18
 Related: [[CLAIM-STOCK-EDITORIAL-001-v1]] (provider-specific concrete instance, complementary), [[CLAIM-STOCK-EDITORIAL-002-v1]] (complementary, does not govern release status). See also `01_Business/research/STOCK-MEDIA-EDITORIAL-USE-CANDIDATE-RESEARCH-2026.md` (Phase 1A/1B) for full domain context.
 
 Formal Governance Review #3 (2026-08-17): PASS / GO AS-IS -- claim wording
@@ -918,6 +912,7 @@ narrowing capability, see the Additional future dependency note above),
 neither solved by this adoption decision.
 
 Full review artifact: `governance-reviews/FGR_003_CAND-STOCK-GETTY-EDITORIAL-001_2026-08-17.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_003_CLAIM-STOCK-GETTY-EDITORIAL-001-v1_2026-08-18.md`
 
 ### CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1
 Domain: Third-Party Source Assets / Stock Media Licensing

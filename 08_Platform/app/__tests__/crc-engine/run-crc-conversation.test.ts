@@ -500,21 +500,28 @@ describe('third_party_source_rights + AssetProviderMention full pipeline (Living
   // following Formal CRC-Publication Review #1 (recommendation A) and
   // Review #2 (recommendation B -- bounded CRC copy adjustment) + PM
   // approval (governance-reviews/CPR_001.../CPR_002...). Both legitimately
-  // surface now. The three PROVIDER-SPECIFIC/still-Pending claims (Getty/
-  // iStock/Shutterstock) remain unreachable. -001's own generic text never
-  // names any provider; -002's own approved bounded text DOES now
-  // legitimately name "Getty, iStock, or Shutterstock" (as confirmed
-  // providers) and "Adobe Stock" (as unconfirmed) -- that is the authorized
-  // copy adjustment, not a leak. This test therefore checks for the
-  // Getty-SPECIFIC claim's own still-Pending mechanism content ("Rights and
-  // Clearance"), not for the bare word "Getty", which -002 now legitimately
-  // contains.
-  test('passing TOPIC_CLAIMS_FIXTURE (the real, current fixture) now surfaces both generic claims -001/-002 (real CRC-publication decisions, 2026-08-18) -- but the Getty-specific claim remains unreachable, still Pending', () => {
+  // surface now. -001's own generic text never names any provider; -002's
+  // own approved bounded text DOES now legitimately name "Getty, iStock,
+  // or Shutterstock" (as confirmed providers) and "Adobe Stock" (as
+  // unconfirmed) -- that is the authorized copy adjustment, not a leak.
+  // UPDATED AGAIN 2026-08-18, following CRC-Publication Review #3 + PM
+  // approval: CLAIM-STOCK-GETTY-EDITORIAL-001-v1 is now ALSO real
+  // crc_eligible: 'Yes' -- the first provider-specific claim to go live.
+  // "Rights and Clearance" and "gambling/betting/gaming" are now Getty's
+  // own live, legitimate governed text for a Getty-named conversation, not
+  // a leak. iStock/Shutterstock remain Pending and provider-scope-excluded
+  // regardless -- this test checks for their own still-Pending,
+  // iStock/Shutterstock-EXCLUSIVE mechanism phrasing instead ("editorial
+  // use only" is iStock-exclusive; "monetize, sell, promote" is
+  // Shutterstock-exclusive).
+  test('passing TOPIC_CLAIMS_FIXTURE (the real, current fixture) now surfaces generic claims -001/-002 AND the Getty-specific claim (all real CRC-publication decisions, 2026-08-18) -- iStock/Shutterstock-specific claims remain unreachable, still Pending', () => {
     const { output } = runCRCConversation(suWithGettyGoal, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
     expect(output.goal_interpretations[0].summary).toContain('Editorial')
     expect(output.goal_interpretations[0].summary).toContain('Adobe Stock') // -002's own approved evidence caveat
-    expect(output.goal_interpretations[0].summary).not.toContain('Rights and Clearance') // Getty/Shutterstock-specific mechanism, still Pending
-    expect(output.goal_interpretations[0].summary).not.toContain('gambling/betting/gaming') // Getty/iStock-specific enumerated list, still Pending
+    expect(output.goal_interpretations[0].summary).toContain('Rights and Clearance') // Getty's own live mechanism content
+    expect(output.goal_interpretations[0].summary).toContain('gambling/betting/gaming') // Getty's own live enumerated list
+    expect(output.goal_interpretations[0].summary).not.toContain('editorial use only') // iStock-exclusive phrasing, still Pending
+    expect(output.goal_interpretations[0].summary).not.toContain('monetize, sell, promote') // Shutterstock-exclusive phrasing, still Pending
   })
 
   test('an AssetProviderMention with no accompanying goal (Path B) produces zero goal_interpretations and a provider-only understood_summary clause', () => {
