@@ -89,12 +89,18 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
   })
 
   describe.each([
-    ['CLAIM-STOCK-EDITORIAL-001-v1', null],
-    ['CLAIM-STOCK-EDITORIAL-002-v1', null],
-    ['CLAIM-STOCK-GETTY-EDITORIAL-001-v1', ['getty']],
-    ['CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1', ['shutterstock']],
-    ['CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1', ['istock']],
-  ] as const)('%s -- real runtime representation as of M3 (Living Knowledge — Third-Party Source Rights, 2026-08-18)', (claimId, expectedProviderScope) => {
+    // [claimId, expectedProviderScope, expectedCrcEligible] -- CLAIM-STOCK-
+    // EDITORIAL-001-v1 updated to 'Yes' 2026-08-18 following Formal
+    // CRC-Publication Review #1 (recommendation A -- PASS/GO AS-IS) and PM
+    // approval; see governance-reviews/CPR_001_CLAIM-STOCK-EDITORIAL-001-v1
+    // _2026-08-18.md. The other four remain 'Pending' -- each claim's CRC
+    // eligibility is its own separate, individually-made decision.
+    ['CLAIM-STOCK-EDITORIAL-001-v1', null, 'Yes'],
+    ['CLAIM-STOCK-EDITORIAL-002-v1', null, 'Pending'],
+    ['CLAIM-STOCK-GETTY-EDITORIAL-001-v1', ['getty'], 'Pending'],
+    ['CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1', ['shutterstock'], 'Pending'],
+    ['CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1', ['istock'], 'Pending'],
+  ] as const)('%s -- real runtime representation as of M3 (Living Knowledge — Third-Party Source Rights, 2026-08-18)', (claimId, expectedProviderScope, expectedCrcEligible) => {
     test('exists in the markdown as real, Adopted governed knowledge', () => {
       const markdown = fs.readFileSync(GOVERNED_CLAIMS_PATH, 'utf-8')
       const claim = extractMarkdownClaims(markdown).find((c) => c.claim_id === claimId)
@@ -114,10 +120,10 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
       expect(claim?.provider_scope).toEqual(expectedProviderScope)
     })
 
-    test('remains crc_eligible: Pending -- M3 is retrieval infrastructure only and does not authorize CRC publication; this is the SEPARATE governance gate (not a fixture-representation exception) that keeps this claim excluded from CRC output', () => {
+    test('crc_eligible matches the real, per-claim governance decision -- M3 (provider-scoped retrieval) is infrastructure only and never itself authorizes publication; each claim reaches CRC eligibility (or not) via its own separate M4 decision', () => {
       const claim = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === claimId)
       expect(claim?.lifecycle).toBe('Adopted')
-      expect(claim?.crc_eligible).toBe('Pending')
+      expect(claim?.crc_eligible).toBe(expectedCrcEligible)
     })
 
     test("'third_party_source_rights' is an implemented GoalCategory value (M1, 2026-08-18)", () => {
@@ -211,8 +217,8 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
     }
   })
 
-  test('exactly one claim in the runtime fixture is Adopted + CRC-eligible as of 2026-08-17 -- CLAIM-COPY-004-v1, the first real PM CRC-publication decision (update only when a further real decision is recorded)', () => {
+  test('exactly two claims in the runtime fixture are Adopted + CRC-eligible as of 2026-08-18 -- CLAIM-COPY-004-v1 (first PM CRC-publication decision, 2026-08-17) and CLAIM-STOCK-EDITORIAL-001-v1 (second, 2026-08-18, first in the Third-Party Source Assets domain) -- update only when a further real decision is recorded', () => {
     const liveClaims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.lifecycle === 'Adopted' && c.crc_eligible === 'Yes')
-    expect(liveClaims.map((c) => c.claim_id)).toEqual(['CLAIM-COPY-004-v1'])
+    expect(liveClaims.map((c) => c.claim_id).sort()).toEqual(['CLAIM-COPY-004-v1', 'CLAIM-STOCK-EDITORIAL-001-v1'])
   })
 })

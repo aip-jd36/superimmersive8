@@ -22,6 +22,7 @@ Mirrors the CRC Claims sub-table convention already used in `PLATFORM-RIGHTS-MAT
 - `Adoption Approver` (added 2026-08-16, first formal adoption decision) — the human governance approver of `Lifecycle: Adopted` itself, distinct from `CRC Approver` (which governs CRC-eligible publication specifically). Same discipline: always a real, named human, never automated. A claim can be `Adopted` with `Adoption Approver` recorded while `CRC Approver` remains `PENDING` indefinitely — this is the expected, intentional state for reviewer/internal-only knowledge, not a gap.
 - **`Jurisdiction: Global`** (governance meaning fixed 2026-08-17, PM approval, following CLAIM-COPY-004's comparative-law hardening pass — see `01_Business/research/COPY-004-SOURCE-HARDENING-RESEARCH-2026.md` Part 2): means the claim states a **jurisdiction-neutral structural relationship between legal concepts** — pressure-tested across materially different legal systems (the COPY-004 pass checked United States, United Kingdom, European Union, Taiwan, and Japan) — not that its detailed substantive rule has been verified in every jurisdiction worldwide. A claim stating a specific substantive legal outcome (e.g. a copyrightability determination, an ownership rule) must be jurisdiction-scoped (as CLAIM-COPY-001/002/003 already are, to `United States (federal)`), never labeled `Global`, no matter how confident the drafter is that the outcome likely generalizes.
 - **Every Formal Governance Review must be preserved as a durable, verbatim repository artifact** (process rule established 2026-08-17, governance-artifact-preservation milestone, following the discovery that Formal Governance Reviews #1–#5 existed only in session/conversation output, not as files) — before or as part of the subsequent PM governance-recording step that adopts (or declines) the reviewed candidate. The full review artifact, archived under `06_Operations/institutional-knowledge/notebook/governance-reviews/` (see that folder's own `README.md` for naming convention and verbatim discipline), is the decision-analysis record — clause-by-clause accuracy, source-tier assessment, atomicity/boundary tests, the complete reasoning a PASS/HOLD/REJECT recommendation rested on. This document remains the canonical current-state ledger and may contain only a condensed review summary (as every claim entry below already does) plus a reference to the full review artifact — it must never be the only place a review's full reasoning survives.
+- **Every formal CRC Publication Review must be preserved as a durable, verbatim repository artifact** (process rule established 2026-08-18, extending the identical discipline above from the adoption stage to the separate CRC-publication stage — same folder, same verbatim boundary convention, distinct `CPR_NNN_<claim-id>_<review-date>.md` naming so a Formal Governance Review and a CRC Publication Review for the same claim are never confused as one artifact) — before or as part of the subsequent PM publication-recording step that sets `CRC Eligible: Yes` (or declines to). This document remains the canonical current-state ledger and may contain only a condensed publication-review summary plus a reference to the full review artifact — it must never be the only place a publication review's full reasoning survives.
 
 ## Entry template
 
@@ -504,7 +505,7 @@ Claim character: established
 Jurisdiction: Not a legal jurisdiction — governed collectively by each cited provider's current Terms of Service/License Agreement (Getty Images, iStock, Adobe Stock, Shutterstock), not a single contract or legal jurisdiction.
 Context: any AI-generated commercial video workflow that incorporates third-party stock-media source assets
 
-GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #1; updated 2026-08-18 following M1/M2/M3 implementation): this was the first claim in a non-tool-scoped, non-Copyright domain (Third-Party Source Assets) and, at adoption time, had no corresponding implemented `GoalCategory` value. That gap is now closed: `third_party_source_rights` is a real, implemented `GoalCategory` (M1), `AssetProviderMention` recognition/persistence exists (M2), and this claim now has a real runtime entry in `topic-claims-fixture.ts` — `topic: 'third_party_source_rights'`, `provider_scope: null` (generic — a topic candidate regardless of which provider, if any, is named). **This claim remains excluded from CRC output today, but for a SEPARATE, ordinary reason: `CRC Eligible: Pending` below** — the same governance gate every other claim in this document is subject to, not a special fixture-representation exception anymore. `lookupTopicClaims()` requires `lifecycle === 'Adopted' && crc_eligible === 'Yes'` before any claim reaches a result; this one is Adopted but not yet CRC-eligible. See `THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md` (design) and the M1/M2/M3 implementation commits for the architecture that closed this gap. A CRC-publication decision for this claim is a separate, not-yet-made governance review (M4).
+GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #1; updated 2026-08-18 following M1/M2/M3 implementation; updated again 2026-08-18 following CRC-publication approval): this was the first claim in a non-tool-scoped, non-Copyright domain (Third-Party Source Assets) and, at adoption time, had no corresponding implemented `GoalCategory` value. That gap is now closed: `third_party_source_rights` is a real, implemented `GoalCategory` (M1), `AssetProviderMention` recognition/persistence exists (M2), and this claim now has a real runtime entry in `topic-claims-fixture.ts` — `topic: 'third_party_source_rights'`, `provider_scope: null` (generic — a topic candidate regardless of which provider, if any, is named). **Following a Formal CRC-Publication Review (2026-08-18, recommendation A — PASS/GO AS-IS; full review archived at `governance-reviews/CPR_001_CLAIM-STOCK-EDITORIAL-001-v1_2026-08-18.md`) and PM approval, this claim is now `CRC Eligible: Yes` below** — the first Third-Party Source Assets claim, and the second claim overall (after `CLAIM-COPY-004-v1`), to reach CRC. `Publication scope: Reviewer/Commercial Assurance` is UNCHANGED — per the CLAIM-COPY-004 precedent, Publication scope and CRC Eligibility are independent governance dimensions; CRC eligibility does not require or imply a Publication-scope change. See `THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md` (M3 design) for the architecture that made this reachable, and the CRC Publication Review artifact above for the full publication-safety analysis.
 
 Claim proposition: >
   A stock-media provider's standard license for content it designates
@@ -587,16 +588,13 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-17
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-17 as reviewer/internal
-  knowledge only; CRC eligibility is a separate, not-yet-made decision (see
-  CRC Approver/CRC Decision Date below). UPDATE (2026-08-18): the runtime
-  Topic Retrieval architecture gap noted here at adoption time is now
-  closed (M1/M2/M3 — see GOVERNANCE TREATMENT above); CRC eligibility is
-  now the ONLY remaining gate. Text below is the scoping language CRC MAY
-  be authorized to state if/when CRC eligibility is separately approved,
-  preserved unchanged from the adopted draft per governance instruction not
-  to reinterpret or rewrite substantive claim text when changing
-  lifecycle/publication status: CRC
+  APPROVED FOR CRC PUBLICATION (2026-08-18, CRC Approver: JD (PM) -- see CRC
+  Approver/CRC Decision Date below; Formal CRC-Publication Review #1
+  complete, recommendation A — PASS/GO AS-IS, archived at
+  `governance-reviews/CPR_001_CLAIM-STOCK-EDITORIAL-001-v1_2026-08-18.md`).
+  Text below is unchanged from the pre-approval draft, per governance
+  instruction not to reinterpret or rewrite substantive claim text when
+  changing CRC-eligibility status: CRC
   may state that stock-media content a provider designates "Editorial"
   is generally licensed for descriptive/newsworthy use rather than
   advertising, promotional, endorsement, or merchandising use, and that
@@ -606,9 +604,7 @@ CRC Publication Scope: >
   violates any license, or whether separate authorization exists for it.
 
 CRC Candidate Statement: >
-  NOT APPROVED FOR CRC PUBLICATION -- same status as CRC Publication Scope
-  above; text preserved unchanged, not yet authorized for CRC output: A
-  stock-media provider's standard license for content marked "Editorial"
+  A stock-media provider's standard license for content marked "Editorial"
   generally covers descriptive, newsworthy, or public-interest use -- not
   advertising, promotional, endorsement, or merchandising use. Some
   providers offer a separate process to authorize commercial use of
@@ -618,8 +614,8 @@ CRC Candidate Statement: >
 Effective date: 2026-08-17
 Last reviewed: 2026-08-17
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING -- not yet approved
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-08-18
 Related: none — first governed claim in the Third-Party Source Assets domain. See `01_Business/research/LIVING-KNOWLEDGE-THIRD-PARTY-STOCK-MEDIA-DOMAIN-DISCOVERY-2026.md` (Phase 0), `THIRD_PARTY_SOURCE_ASSETS_ROUTING_ARCHITECTURE.md` (Phase 0.5), and `01_Business/research/STOCK-MEDIA-EDITORIAL-USE-CANDIDATE-RESEARCH-2026.md` (Phase 1A/1B) for full domain context.
 
 Formal Governance Review #1 (2026-08-17): PASS / GO AS-IS -- claim wording
@@ -638,6 +634,7 @@ architecture gap independent of and in addition to Path A's own absence.
 Neither gap is solved by this adoption decision.
 
 Full review artifact: `governance-reviews/FGR_001_CAND-STOCK-EDITORIAL-001_2026-08-17.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_001_CLAIM-STOCK-EDITORIAL-001-v1_2026-08-18.md`
 
 ### CLAIM-STOCK-EDITORIAL-002-v1
 Domain: Third-Party Source Assets / Stock Media Licensing

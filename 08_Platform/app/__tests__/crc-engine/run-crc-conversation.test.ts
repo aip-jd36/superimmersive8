@@ -495,10 +495,19 @@ describe('third_party_source_rights + AssetProviderMention full pipeline (Living
     expect(output.goal_interpretations[0].summary).not.toMatch(/safe|compliant|approved|cleared/i)
   })
 
-  test('passing TOPIC_CLAIMS_FIXTURE (the real, current fixture) produces the identical outcome -- the five adopted stock claims are confirmed unreachable through the real pipeline, not just the empty-array test double', () => {
+  // UPDATED 2026-08-18: CLAIM-STOCK-EDITORIAL-001-v1 (the generic claim) is
+  // now real crc_eligible: 'Yes' following Formal CRC-Publication Review #1
+  // + PM approval (governance-reviews/CPR_001_CLAIM-STOCK-EDITORIAL-001-v1
+  // _2026-08-18.md) -- it legitimately surfaces now. The four PROVIDER-
+  // SPECIFIC/still-Pending claims (Getty/iStock/Shutterstock/-002) remain
+  // unreachable; -001's own generic text never names "Getty" at all (it is
+  // provider-agnostic by design, provider_scope: null), so that specific
+  // assertion still correctly proves no Getty-specific claim leaked in.
+  test('passing TOPIC_CLAIMS_FIXTURE (the real, current fixture) now surfaces the generic -001 claim (real CRC-publication decision, 2026-08-18) -- but the Getty-specific claim remains unreachable, still Pending', () => {
     const { output } = runCRCConversation(suWithGettyGoal, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
-    expect(output.goal_interpretations[0].summary).not.toContain('Editorial')
+    expect(output.goal_interpretations[0].summary).toContain('Editorial')
     expect(output.goal_interpretations[0].summary).not.toContain('Getty')
+    expect(output.goal_interpretations[0].summary).not.toContain('Rights and Clearance')
   })
 
   test('an AssetProviderMention with no accompanying goal (Path B) produces zero goal_interpretations and a provider-only understood_summary clause', () => {

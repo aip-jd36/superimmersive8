@@ -206,11 +206,19 @@ describe('end-to-end through runCRCConversation, real unmodified TOPIC_CLAIMS_FI
   // (Editorial license text, Rights and Clearance mechanics) in
   // knowledge_items/goal_interpretations specifically -- not a blanket
   // absence of the provider's name anywhere in the output.
-  test('19: real Getty question -> no stock claim content in knowledge_items or goal_interpretations, no throw', () => {
+  // NOTE (updated 2026-08-18, following CRC-Publication Review #1 + PM
+  // approval): CLAIM-STOCK-EDITORIAL-001-v1 is now real crc_eligible: 'Yes'
+  // -- a Getty question legitimately surfaces its own GENERIC content
+  // (provider_scope: null matches any provider). This test now checks for
+  // the absence of GETTY-SPECIFIC governed content specifically (the real
+  // provider-narrowing proof this suite exists for), not a blanket absence
+  // of the word "Editorial", which -001's own now-live generic text legitimately contains.
+  test('19: real Getty question -> generic -001 content may surface, but Getty-SPECIFIC claim content never does, no throw', () => {
     const { output } = runCRCConversation(suWithProvider('getty'), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
+    expect(output.knowledge_items.map((k) => k.claim_id)).toContain('CLAIM-STOCK-EDITORIAL-001-v1')
     expect(output.knowledge_items.map((k) => k.claim_id)).not.toContain('CLAIM-STOCK-GETTY-EDITORIAL-001-v1')
-    expect(output.goal_interpretations[0].summary).not.toContain('Editorial')
     expect(output.goal_interpretations[0].summary).not.toContain('Rights and Clearance')
+    expect(output.goal_interpretations[0].summary).not.toContain('gambling/betting/gaming')
   })
 
   test('20: real iStock question -> no stock claim content in knowledge_items or goal_interpretations', () => {

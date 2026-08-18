@@ -48,11 +48,17 @@
  * Getty/Shutterstock/iStock-specific content to any user who asked a
  * generic question, regardless of which provider they named).
  *
- * All five remain `crc_eligible: 'Pending'` -- M3 is retrieval
- * infrastructure only and does NOT authorize CRC publication. A
- * CRC-publication decision (M4) is a separate, not-yet-made governance
- * review; until then, `lookupTopicClaims()`'s own existing `lifecycle ===
- * 'Adopted' && crc_eligible === 'Yes'` gate excludes all five from
+ * UPDATE (2026-08-18, M4 -- first CRC-publication decision in this domain):
+ * `CLAIM-STOCK-EDITORIAL-001-v1` is now `crc_eligible: 'Yes'`, following
+ * Formal CRC-Publication Review #1 (recommendation A -- PASS/GO AS-IS) and
+ * PM approval -- see `governance-reviews/CPR_001_CLAIM-STOCK-EDITORIAL-001
+ * -v1_2026-08-18.md`. The other four stock claims (`-002` and the three
+ * provider-specific claims) remain `crc_eligible: 'Pending'` -- M3 is
+ * retrieval infrastructure only and does not itself authorize CRC
+ * publication for any claim; each claim's CRC eligibility is its own
+ * separate, individually-made governance decision (M4). Until a given
+ * claim's own decision is made, `lookupTopicClaims()`'s own existing
+ * `lifecycle === 'Adopted' && crc_eligible === 'Yes'` gate excludes it from
  * `matches[]` exactly as it already does for COPY-001/002/003 below --
  * confirmed structurally, not by convention: provider narrowing is
  * evaluated as a candidate PRE-filter (before this gate is ever reached),
@@ -178,7 +184,14 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     claim_character: 'established',
     jurisdiction: 'Global',
     lifecycle: 'Adopted',
-    crc_eligible: 'Pending',
+    // CRC publication approved 2026-08-18 (CRC Approver: JD/PM), following
+    // Formal CRC-Publication Review #1 (recommendation A -- PASS/GO AS-IS;
+    // see governance-reviews/CPR_001_CLAIM-STOCK-EDITORIAL-001-v1_2026-08-18.md).
+    // The first Third-Party Source Assets claim, and the second claim
+    // overall (after CLAIM-COPY-004-v1), to reach CRC. The other four stock
+    // claims (-002 and the three provider-specific claims) remain Pending --
+    // deliberately not changed by this same decision.
+    crc_eligible: 'Yes',
     crc_publication_scope:
       'CRC may state that stock-media content a provider designates "Editorial" is generally licensed for descriptive/newsworthy use rather than advertising, promotional, endorsement, or merchandising use, and that some providers offer a separate authorization path CRC cannot confirm was used for the user\'s specific asset. CRC must not state whether the user\'s own specific asset is Editorial-designated, whether their use violates any license, or whether separate authorization exists for it.',
     crc_candidate_statement:
