@@ -67,9 +67,16 @@
  * `governance-reviews/CPR_003_CLAIM-STOCK-GETTY-EDITORIAL-001-v1_2026-08-18
  * .md`. This was the first live proof that `provider_scope` (M3) correctly
  * gates a provider-specific claim under real pipeline execution, not just
- * architecturally. `CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1` and
- * `CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1` remain `crc_eligible: 'Pending'` --
- * M3 is retrieval infrastructure only and does not itself authorize CRC
+ * architecturally. `CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1` is ALSO now
+ * `crc_eligible: 'Yes'`, following a bounded CRC-Publication Review #4
+ * (recommendation A -- PASS/GO AS-IS, no text change) and PM approval --
+ * see `governance-reviews/CPR_004_CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1
+ * _2026-08-18.md`. That review's load-bearing test confirmed the claim's
+ * "no evidence found, not a confirmed absence" negative-finding framing
+ * survives real pipeline execution, including two targeted adversarial
+ * pressure-test scenarios. `CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1`
+ * remains `crc_eligible: 'Pending'` -- M3 is retrieval infrastructure only
+ * and does not itself authorize CRC
  * publication for any claim; each claim's CRC eligibility is its own
  * separate, individually-made governance decision (M4). Until a given
  * claim's own decision is made, `lookupTopicClaims()`'s own existing
@@ -290,7 +297,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     claim_character: 'established',
     jurisdiction: 'Global',
     lifecycle: 'Adopted',
-    crc_eligible: 'Pending',
+    crc_eligible: 'Yes',
     crc_publication_scope:
       'CRC may state that iStock\'s standard license excludes commercial, promotional, advertorial, endorsement, advertising, gambling/betting/gaming, and merchandising use of content marked "editorial use only," and that no provider-run authorization mechanism for such use was found during CRC\'s underlying research -- stated as an absence of evidence, never as a confirmed fact that none exists. CRC must not state whether the user\'s own specific iStock asset is Editorial-designated, or whether their use is therefore permitted.',
     crc_candidate_statement:

@@ -1081,7 +1081,7 @@ Claim character: established
 Jurisdiction: Not a legal jurisdiction — governed by iStock's current License Agreement / Terms of Use, not a legal jurisdiction.
 Context: Commercial Assurance evidence review of any AI-generated commercial video workflow that incorporates iStock source assets designated "editorial use only"
 
-GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #5; updated 2026-08-18 following M1/M2/M3 implementation): same runtime-representation and provider-narrowing gaps as CLAIM-STOCK-GETTY-EDITORIAL-001-v1 and CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1 at adoption time, now closed the same way and together with the other stock claims (M1 GoalCategory + M2 AssetProviderMention + M3 provider-scoped retrieval). This claim now has a real runtime entry — `topic: 'third_party_source_rights'`, `provider_scope: ['istock']`. **Remains excluded from CRC output only via the ordinary `CRC Eligible: Pending` gate below**, not a fixture-representation or provider-narrowing exception anymore.
+GOVERNANCE TREATMENT (2026-08-17, PM adoption decision, following Formal Governance Review #5; updated 2026-08-18 following M1/M2/M3 implementation; updated again 2026-08-18 following CRC-publication approval): same runtime-representation and provider-narrowing gaps as CLAIM-STOCK-GETTY-EDITORIAL-001-v1 and CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1 at adoption time, now closed the same way and together with the other stock claims (M1 GoalCategory + M2 AssetProviderMention + M3 provider-scoped retrieval). This claim now has a real runtime entry — `topic: 'third_party_source_rights'`, `provider_scope: ['istock']`. **Following a bounded CRC-Publication Review (2026-08-18, recommendation A — PASS/GO AS-IS; full review archived at `governance-reviews/CPR_004_CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1_2026-08-18.md`) and PM approval, this claim is now `CRC Eligible: Yes` below** — the second provider-specific Third-Party Source Assets claim to reach CRC, after CLAIM-STOCK-GETTY-EDITORIAL-001-v1. The review's own load-bearing test confirmed the claim's negative-finding framing ("no evidence found," never "confirmed absence") survives intact under real pipeline execution, including two targeted adversarial pressure-tests. `Publication scope: Reviewer/Commercial Assurance` is UNCHANGED (CLAIM-COPY-004 precedent: Publication scope and CRC Eligibility are independent governance dimensions) and `provider_scope: ['istock']` is UNCHANGED -- the review confirmed provider-scoped routing behaves correctly and required no adjustment.
 
 Additional future dependency, specific to this claim (same shape as CLAIM-STOCK-GETTY-EDITORIAL-001-v1's and CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1's own; RESOLVED 2026-08-18): at adoption time, this claim additionally needed the same not-yet-scoped **provider-narrowing capability** identified for Getty and Shutterstock. Formal Governance Review #5 confirmed iStock introduced no new routing requirement beyond the one already identified -- confirmed again at implementation: the same M3 mechanism (`provider_scope: ['istock']`) closes it, with no iStock-specific engineering required. This paragraph is preserved as the historical record of that dependency. The claim remains immediately useful to a human reviewer regardless of any of this, for the same reason already recorded on the Getty and Shutterstock claims' own entries.
 
@@ -1163,17 +1163,13 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-17
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  NOT APPROVED FOR CRC PUBLICATION -- Adopted 2026-08-17 as reviewer/internal
-  knowledge only; CRC eligibility is a separate, not-yet-made decision (see
-  CRC Approver/CRC Decision Date below). UPDATE (2026-08-18): both the
-  runtime Topic Retrieval architecture gap and the provider-narrowing
-  capability gap noted here at adoption time are now closed (M1/M2/M3);
-  CRC eligibility is now the ONLY remaining gate. Text below is the
-  scoping language CRC MAY be authorized to state if/when CRC eligibility
-  is separately resolved,
-  preserved unchanged from the adopted draft per governance instruction not
-  to reinterpret or rewrite substantive claim text when changing
-  lifecycle/publication status: CRC may state that iStock's standard
+  APPROVED FOR CRC PUBLICATION (2026-08-18, CRC Approver: JD (PM) -- see CRC
+  Approver/CRC Decision Date below; bounded CRC Publication Review complete,
+  recommendation A — PASS/GO AS-IS, archived at
+  `governance-reviews/CPR_004_CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1_2026-08-18.md`).
+  Text below is unchanged from the pre-approval draft, per governance
+  instruction not to reinterpret or rewrite substantive claim text when
+  changing CRC-eligibility status: CRC may state that iStock's standard
   license excludes commercial, promotional, advertorial, endorsement,
   advertising, gambling/betting/gaming, and merchandising use of content
   marked "editorial use only," and that no provider-run authorization
@@ -1183,8 +1179,6 @@ CRC Publication Scope: >
   is Editorial-designated, or whether their use is therefore permitted.
 
 CRC Candidate Statement: >
-  NOT APPROVED FOR CRC PUBLICATION -- same status as CRC Publication Scope
-  above; text preserved unchanged, not yet authorized for CRC output:
   iStock's standard license doesn't cover commercial, promotional,
   advertorial, endorsement, advertising, gambling/betting/gaming, or
   merchandising use of content marked "editorial use only." No
@@ -1194,8 +1188,8 @@ CRC Candidate Statement: >
 Effective date: 2026-08-17
 Last reviewed: 2026-08-17
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING -- not yet approved
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-08-18
 Related: [[CLAIM-STOCK-EDITORIAL-001-v1]] (provider-specific concrete instance, complementary), [[CLAIM-STOCK-EDITORIAL-002-v1]] (complementary, does not govern release status), [[CLAIM-STOCK-GETTY-EDITORIAL-001-v1]] (sibling provider-specific claim, no direct relationship), [[CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1]] (sibling provider-specific claim, no direct relationship). See also `01_Business/research/STOCK-MEDIA-EDITORIAL-USE-CANDIDATE-RESEARCH-2026.md` (Phase 1A/1B) for full domain context.
 
 Formal Governance Review #5 (2026-08-17): PASS / GO AS-IS -- claim wording
@@ -1220,3 +1214,4 @@ already identified for Getty and Shutterstock; Formal Governance Review
 one.
 
 Full review artifact: `governance-reviews/FGR_005_CAND-STOCK-ISTOCK-EDITORIAL-001_2026-08-17.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_004_CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1_2026-08-18.md`

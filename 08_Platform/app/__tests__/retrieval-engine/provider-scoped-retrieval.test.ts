@@ -163,18 +163,28 @@ describe('governance and provider-scope are independent gates (test plan 16-18, 
   // NOTE (updated 2026-08-18, following CRC-Publication Review #3 + PM
   // approval): CLAIM-STOCK-GETTY-EDITORIAL-001-v1 is now real
   // crc_eligible: 'Yes' -- the first provider-specific claim in the domain
-  // to go live. This test now uses CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1
-  // (still real crc_eligible: 'Pending') to prove the same "provider match
-  // is necessary but not sufficient" gate; a dedicated real-Getty
-  // "provider match + Yes = candidate" proof sits alongside it below.
-  test('16: real fixture, iStock named -- provider matches, but crc_eligible: Pending still excludes it', () => {
-    const result = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, facts, ['istock'])
-    expect(result.matches.find((m) => m.claim_id === 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')).toBeUndefined()
+  // to go live.
+  // NOTE (updated again 2026-08-18, following CRC-Publication Review #4 +
+  // PM approval): CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1 is ALSO now real
+  // crc_eligible: 'Yes' -- the second. This test now uses
+  // CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1 (the one remaining real
+  // crc_eligible: 'Pending' provider-specific claim) to prove the same
+  // "provider match is necessary but not sufficient" gate; dedicated
+  // real-Getty and real-iStock "provider match + Yes = candidate" proofs
+  // sit alongside it below.
+  test('16: real fixture, Shutterstock named -- provider matches, but crc_eligible: Pending still excludes it', () => {
+    const result = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, facts, ['shutterstock'])
+    expect(result.matches.find((m) => m.claim_id === 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1')).toBeUndefined()
   })
 
   test('16b: real fixture, Getty named -- provider matches AND crc_eligible: Yes (real, post-CPR_003) -> genuinely a candidate', () => {
     const result = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, facts, ['getty'])
     expect(result.matches.find((m) => m.claim_id === 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1')).toBeDefined()
+  })
+
+  test('16c: real fixture, iStock named -- provider matches AND crc_eligible: Yes (real, post-CPR_004) -> genuinely a candidate', () => {
+    const result = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, facts, ['istock'])
+    expect(result.matches.find((m) => m.claim_id === 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')).toBeDefined()
   })
 
   test('17: synthetic eligible copy, provider matches -> candidate', () => {
@@ -189,20 +199,28 @@ describe('governance and provider-scope are independent gates (test plan 16-18, 
 
   // NOTE (updated 2026-08-18, following CRC-Publication Review #3 + PM
   // approval): the "provider match + Pending = excluded" leg now uses
-  // CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1 (still real Pending) since
-  // CLAIM-STOCK-GETTY-EDITORIAL-001-v1 is real crc_eligible: 'Yes' as of
-  // this milestone -- its own "provider match + Yes = candidate" leg is
-  // now provable directly against the real, unmodified fixture (no
+  // CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1 (the one remaining real
+  // Pending provider-specific claim, following CRC-Publication Review #4 +
+  // PM approval for iStock) since both CLAIM-STOCK-GETTY-EDITORIAL-001-v1
+  // and CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1 are real crc_eligible: 'Yes' as
+  // of this milestone -- both their own "provider match + Yes = candidate"
+  // legs are now provable directly against the real, unmodified fixture (no
   // synthetic clone needed), which is a strictly stronger proof than before.
   test('40: three-way proof -- (provider match + Pending = excluded), (provider match + Yes = candidate), (provider mismatch + Yes = excluded)', () => {
-    const pendingMatch = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, facts, ['istock'])
-    expect(pendingMatch.matches.find((m) => m.claim_id === 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')).toBeUndefined()
+    const pendingMatch = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, facts, ['shutterstock'])
+    expect(pendingMatch.matches.find((m) => m.claim_id === 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1')).toBeUndefined()
 
     const eligibleMatch = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, facts, ['getty'])
     expect(eligibleMatch.matches.find((m) => m.claim_id === 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1')).toBeDefined()
 
+    const eligibleMatchIstock = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, facts, ['istock'])
+    expect(eligibleMatchIstock.matches.find((m) => m.claim_id === 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')).toBeDefined()
+
     const eligibleMismatch = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, facts, ['istock'])
     expect(eligibleMismatch.matches.find((m) => m.claim_id === 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1')).toBeUndefined()
+
+    const eligibleMismatchGettyForIstock = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, facts, ['getty'])
+    expect(eligibleMismatchGettyForIstock.matches.find((m) => m.claim_id === 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')).toBeUndefined()
   })
 })
 
@@ -251,10 +269,26 @@ describe('end-to-end through runCRCConversation, real unmodified TOPIC_CLAIMS_FI
     expect(output.goal_interpretations[0].summary).not.toContain('monetize, sell, promote')
   })
 
-  test('20: real iStock question -> no stock claim content in knowledge_items or goal_interpretations', () => {
+  // NOTE (updated 2026-08-18, following CRC-Publication Review #4 + PM
+  // approval): CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1 is now real
+  // crc_eligible: 'Yes' -- an iStock question legitimately surfaces its own
+  // content, including "editorial use only" (iStock's own governed term)
+  // and its negative-finding text ("not that none exists"). This test now
+  // checks the positive case (iStock content DOES surface, with its own
+  // exclusive markers) plus continued absence of Getty/Shutterstock-
+  // SPECIFIC mechanism text ("Rights and Clearance", Shutterstock's
+  // "monetize, sell, promote" phrasing).
+  test('20: real iStock question -> generic -001/-002 AND iStock-specific claim all surface; Getty/Shutterstock-specific content never does', () => {
     const { output } = runCRCConversation(suWithProvider('istock'), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
-    expect(output.knowledge_items.map((k) => k.claim_id)).not.toContain('CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')
-    expect(output.goal_interpretations[0].summary).not.toContain('editorial use only')
+    const ids = output.knowledge_items.map((k) => k.claim_id)
+    expect(ids).toContain('CLAIM-STOCK-EDITORIAL-001-v1')
+    expect(ids).toContain('CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')
+    expect(ids).not.toContain('CLAIM-STOCK-GETTY-EDITORIAL-001-v1')
+    expect(ids).not.toContain('CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1')
+    expect(output.goal_interpretations[0].summary).toContain('merchandising')
+    expect(output.goal_interpretations[0].summary).toContain('not that none exists')
+    expect(output.goal_interpretations[0].summary).not.toContain('Rights and Clearance')
+    expect(output.goal_interpretations[0].summary).not.toContain('monetize, sell, promote')
   })
 
   test('21: real Shutterstock question -> no stock claim content in knowledge_items or goal_interpretations', () => {
