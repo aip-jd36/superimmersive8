@@ -9,6 +9,48 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of August 19, 2026
+*Run: 2026-08-19 · 18 high · 9 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [What Article 50 of the EU AI Act Means for European Marketing and Sales Leaders](https://www.cxtoday.com/marketing-sales-technology/article-50-eu-ai-act-sales-marketing-transparency/) | CX Today | Tue, 18 Aug 2026 | ☐ |
+| 9 | post+update | [Digital ads are flooded with ‘synthetic’ AI models. How one state is calling them out](https://san.com/cc/digital-ads-are-flooded-with-synthetic-ai-models-how-one-state-is-calling-them-out/) | san.com | Mon, 17 Aug 2026 | ☐ |
+| 9 | post+update | [EU's AI Transparency Rules Now Enforceable: Fines Reach €35 Million](https://www.ad-hoc-news.de/boerse/news/unternehmensnachrichten/eu-s-ai-transparency-rules-now-enforceable-fines-reach-35-million/69951113) | AD HOC NEWS | Fri, 14 Aug 2026 | ☐ |
+| 9 | update | [Rezolve Ai Unveils Patent-Backed AI Provenance Platform as Watermarking Becomes Global Infrastructure](https://www.globenewswire.com/news-release/2026/08/13/3344460/0/en/rezolve-ai-unveils-patent-backed-ai-provenance-platform-as-watermarking-becomes-global-infrastructure.html) | GlobeNewswire | Thu, 13 Aug 2026 | ☐ |
+| 9 | post+update | [Europe's AI watermarking rules are now live, but visible labels, hidden machine-readable marks and editorial review apply to different companies, content and moments under Article 50](https://siliconcanals.com/t-europes-ai-watermarking-rules-are-now-live-but-visible-labels-hidden-machine-readable-marks-and-editorial-review-apply-to-different-companies-content-and-moments-under-article-50/) | siliconcanals.com | Wed, 12 Aug 2026 | ☐ |
+| 8 | post+update | ["Operation AI Comply" 2 Years Later: Continued Enforcement Against Misleading](https://www.hklaw.com/en/insights/publications/2026/08/operation-ai-comply-2-years-later-continued-enforcement) | Holland & Knight | Tue, 18 Aug 2026 | ☐ |
+| 8 | post+update | [IAB updates standard for disclosing AI in ads](https://martech.org/iab-updates-standard-for-disclosing-ai-in-ads/) | MarTech | Tue, 18 Aug 2026 | ☐ |
+| 8 | post+update | [Hollywood Trade Group Strikes First AI Copyright Agreement With ByteDance](https://www.tekedia.com/hollywood-trade-group-strikes-first-ai-copyright-agreement-with-bytedance/) | Tekedia | Tue, 18 Aug 2026 | ☐ |
+| 8 | post+update | [New Guide: AI Disclosures Around the World](https://www.lewissilkin.com/insights/2026/08/17/new-guide-ai-disclosures-around-the-world-102nhy7) | Lewis Silkin | Mon, 17 Aug 2026 | ☐ |
+| 8 | post+update | [Can You Use AI-Generated Video Commercially? Here's the Checklist, Tool by Tool](https://hackernoon.com/can-you-use-ai-generated-video-commercially-heres-the-checklist-tool-by-tool) | HackerNoon | Fri, 14 Aug 2026 | ☐ |
+| 8 | post+update | [In Europe, AI now has to tell you it is AI](https://www.wionews.com/world/in-europe-ai-now-has-to-tell-you-it-is-ai-1786631841175) | WION | Thu, 13 Aug 2026 | ☐ |
+| 8 | post+update | [Insurers building AI governance frameworks ahead of regulators, says Relm's Christian Davies](https://techobserver.in/news/interviews/insurers-ai-governance-frameworks-ahead-of-regulators-relm-christian-davies-327810/) | Tech Observer Magazine | Thu, 13 Aug 2026 | ☐ |
+| 8 | post+update | [EU AI Act’s Transparency Rules: What Went Into Effect on 2 August?](https://www.morganlewis.com/blogs/sourcingatmorganlewis/2026/08/eu-ai-acts-transparency-rules-what-went-into-effect-on-2-august) | Morgan Lewis | Wed, 12 Aug 2026 | ☐ |
+| 7 | update | [CineLot and SonicOrigin Launch AI-Era Content Protection and Global Film Identity Tools for Independent Filmmakers](https://hollywoodtimes.net/cinelot-and-sonicorigin-launch-ai-era-content-protection-and-global-film-identity-tools-for-independent-filmmakers/) | Hollywood Times | Tue, 18 Aug 2026 | ☐ |
+| 7 | monitor | [IAB Updates Industry Framework for Consistent AI Transparency & Disclosure in Advertising](https://www.prnewswire.com/news-releases/iab-updates-industry-framework-for-consistent-ai-transparency--disclosure-in-advertising-302853571.html) | PR Newswire | Tue, 18 Aug 2026 | ☐ |
+| 7 | post+update | [Google now labels AI-generated ads across Search, YouTube, and Discover](https://www.marketscale.com/industries/marketing-tech/google-now-labels-ai-generated-ads-across-search-youtube-and-discover) | MarketScale | Fri, 14 Aug 2026 | ☐ |
+| 7 | update | [EU Artificial Intelligence Rulebook Now Fully Enforced — Works Councils Scramble to Keep Pace](https://www.ad-hoc-news.de/boerse/news/unternehmensnachrichten/eu-artificial-intelligence-rulebook-now-fully-enforced-works-councils/69946065) | AD HOC NEWS | Thu, 13 Aug 2026 | ☐ |
+| 7 | update | [Anthropic starts marking all of Claude’s output worldwide as EU transparency rules take effect](https://thenextweb.com/news/anthropic-watermarks-claude-output-eu-ai-act-article-50) | The Next Web | Wed, 12 Aug 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Google's AI ad labels and content access tensions signal a new compliance reality for enterprise marketers](https://www.marketscale.com/industries/marketing-tech/googles-ai-ad-labels-and-content-access-tensions-signal-a-new-compliance-reality-for-enterprise-marketers) | MarketScale | Wed, 19 Aug 2026 | ☐ |
+| 6 | monitor | [Social media platforms must verify advertisers’ identities under new Singapore code](https://www.straitstimes.com/tech/social-media-platforms-must-verify-advertisers-identities-under-new-singapore-code) | straitstimes.com | Tue, 18 Aug 2026 | ☐ |
+| 6 | monitor | [Round Hill Music Sues Anthropic, Suno, Seeks $1 Billion in AI Copyright Case](https://www.whalesbook.com/news/English/media-and-entertainment/Round-Hill-Music-Sues-Anthropic-Suno-Seeks-dollar1-Billion-in-AI-Copyright-Case/6a83d1ac041a929216053dbb) | Whalesbook | Tue, 18 Aug 2026 | ☐ |
+| 6 | monitor | [ASA pulls the covers back on Nectar Sleep's "Save up to 65%" ad](https://www.lewissilkin.com/insights/2026/08/17/asa-pulls-the-covers-back-on-nectar-sleeps-save-up-to-65-ad-102nhte) | Lewis Silkin | Mon, 17 Aug 2026 | ☐ |
+| 6 | monitor | [TikTok Rolls Out Longer-Form AI Video Ads 08/05/2026](https://www.mediapost.com/publications/article/417017/tiktok-rolls-out-longer-form-ai-video-ads.htmlBlack) | MediaPost | Sat, 15 Aug 2026 | ☐ |
+| 6 | monitor | [Getty Images Launches MCP Server to Connect Creative and Editorial Content to AI Workflows and Products](https://newsroom.gettyimages.com/en/getty-images/getty-images-launches-mcp-server-to-connect-creative-and-editorial-content-to-ai-workflows-and-products) | Getty Images Newsroom | Wed, 12 Aug 2026 | ☐ |
+| 5 | monitor | [Adobe Firefly AI Video Generator: Top Models, Precision Controls, and a Production Workflow All in One Place](https://www.macworld.com/article/3209211/adobe-firefly-ai-video-generator-top-models-precision-controls-and-a-production-workflow-all-in-one-place.html) | macworld.com | Tue, 18 Aug 2026 | ☐ |
+| 5 | monitor | [Zero trust, rights-aware access and safe AI at scale: Governing your content intelligence platform](https://www.streamtvinsider.com/sponsored/zero-trust-rights-aware-access-and-safe-ai-scale-governing-your-content-intelligence) | StreamTV Insider | Mon, 17 Aug 2026 | ☐ |
+| 5 | monitor | [Europe's regulatory double bind](https://cepr.org/voxeu/columns/europes-regulatory-double-bind) | CEPR | Fri, 14 Aug 2026 | ☐ |
+
+---
+
 ## Week of August 16, 2026
 *Run: 2026-08-16 · 9 high · 7 monitor · lookback 7 days*
 
