@@ -4,7 +4,7 @@
  * functions, same discipline as retrieve.test.ts.
  */
 
-import { isApplicable, lookupTopicClaims, type ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
+import { canonicalizeJurisdictionValue, isApplicable, lookupTopicClaims, type ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
 import type { ApplicabilityRequirement, TopicClaim } from '@/lib/retrieval-engine/types'
 import type { ToolMention, UserGoal } from '@/types/interview-engine'
 
@@ -53,6 +53,31 @@ function toolMention(overrides: Partial<ToolMention> & Pick<ToolMention, 'mentio
   }
 }
 
+describe('canonicalizeJurisdictionValue (Copyright UAT Output-Path Diagnostic P0 fix, 2026-08-19)', () => {
+  test('positive: recognized United States aliases all canonicalize to "United States"', () => {
+    for (const value of ['United States', 'US', 'USA', 'U.S.', 'U.S.A.', 'the US']) {
+      expect(canonicalizeJurisdictionValue(value)).toBe('United States')
+    }
+  })
+
+  test('positive: case/whitespace robustness', () => {
+    expect(canonicalizeJurisdictionValue('us')).toBe('United States')
+    expect(canonicalizeJurisdictionValue('  US  ')).toBe('United States')
+    expect(canonicalizeJurisdictionValue('united states')).toBe('United States')
+    expect(canonicalizeJurisdictionValue('United States of America')).toBe('United States')
+  })
+
+  test('negative: unrecognized/unrelated strings are returned unchanged, never coerced -- fail-closed by construction', () => {
+    for (const value of ['United Kingdom', 'Canada', 'North America', 'California', 'New York', 'America-ish', 'US market maybe', '']) {
+      expect(canonicalizeJurisdictionValue(value)).toBe(value)
+    }
+  })
+
+  test('negative: no substring/startsWith matching -- "US market maybe" is not coerced merely because it contains "US"', () => {
+    expect(canonicalizeJurisdictionValue('US market maybe')).not.toBe('United States')
+  })
+})
+
 describe('isApplicable', () => {
   test('empty requirements list is vacuously applicable', () => {
     expect(isApplicable([], facts())).toBe(true)
@@ -99,6 +124,33 @@ describe('isApplicable', () => {
   test('tool_plan_tier requirement unmet when a superseded mention is the only match', () => {
     const req: ApplicabilityRequirement[] = [{ fact: 'tool_plan_tier', tool: 'elevenlabs', operator: 'equals', value: 'free' }]
     const tm = toolMention({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'elevenlabs' }, plan_tier: { state: 'confirmed', value: 'free' }, superseded_by: 'm2' })
+    expect(isApplicable(req, facts({ toolMentions: [tm] }))).toBe(false)
+  })
+
+  test('jurisdiction requirement met for every recognized United States alias (Copyright UAT Output-Path Diagnostic P0 fix, 2026-08-19)', () => {
+    const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }]
+    for (const alias of ['US', 'USA', 'U.S.', 'U.S.A.', 'the US', 'United States', 'united states']) {
+      expect(isApplicable(req, facts({ jurisdiction: { state: 'confirmed', value: alias } }))).toBe(true)
+    }
+  })
+
+  test('jurisdiction requirement still unmet for an unrecognized value -- normalization does not weaken the gate (fail-closed regression)', () => {
+    const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }]
+    for (const value of ['United Kingdom', 'Canada', 'North America', 'California']) {
+      expect(isApplicable(req, facts({ jurisdiction: { state: 'confirmed', value } }))).toBe(false)
+    }
+  })
+
+  test('not_equals operator also benefits from canonicalization -- a US alias correctly excludes a US-scoped not_equals requirement', () => {
+    const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'not_equals', value: 'United States' }]
+    expect(isApplicable(req, facts({ jurisdiction: { state: 'confirmed', value: 'USA' } }))).toBe(false)
+    expect(isApplicable(req, facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' } }))).toBe(true)
+  })
+
+  test('tool_plan_tier requirement is NOT canonicalized -- normalization is scoped strictly to jurisdiction, per the exact opposite value used verbatim', () => {
+    const req: ApplicabilityRequirement[] = [{ fact: 'tool_plan_tier', tool: 'elevenlabs', operator: 'equals', value: 'FREE' }]
+    const tm = toolMention({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'elevenlabs' }, plan_tier: { state: 'confirmed', value: 'free' } })
+    // Deliberately case-sensitive still -- proves the jurisdiction canonicalization added by this fix was not accidentally applied globally.
     expect(isApplicable(req, facts({ toolMentions: [tm] }))).toBe(false)
   })
 
@@ -191,6 +243,18 @@ describe('lookupTopicClaims -- topic matching + eligibility gates', () => {
     })
     const result = lookupTopicClaims([g], [c], facts({ jurisdiction: { state: 'confirmed', value: 'United States' } }))
     expect(result.matches).toEqual([c])
+  })
+
+  test('a US alias ("US") satisfies a "United States" jurisdiction requirement at the lookupTopicClaims level (Copyright UAT Output-Path Diagnostic P0 fix, 2026-08-19)', () => {
+    const g = goal({ goal_id: 'g-1', category: 'copyright_ownership' })
+    const c = claim({
+      claim_id: 'C-1',
+      topic: 'copyright_ownership',
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+    })
+    const result = lookupTopicClaims([g], [c], facts({ jurisdiction: { state: 'confirmed', value: 'US' } }))
+    expect(result.matches).toEqual([c])
+    expect(result.diagnostics).toEqual([])
   })
 
   test('wrong jurisdiction -> unmet, not a fabricated match (US-only claim, Taiwan confirmed)', () => {

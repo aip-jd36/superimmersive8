@@ -337,3 +337,111 @@ describe('Wave 1 real claims -- end-to-end through the full CRC pipeline (2026-0
     expect(serialized).not.toContain("doesn't by itself answer either")
   })
 })
+
+describe('Copyright UAT Output-Path Diagnostic P0 fix -- jurisdiction value normalization regression (2026-08-19)', () => {
+  function fullCopyrightState(jurisdictionValue: string, contributionText: string | null): StructuredUnderstanding {
+    const goal = copyrightGoal()
+    return {
+      ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
+      user_goals: [goal],
+      tool_mentions: [
+        {
+          mention_id: 'tm-1',
+          resolution: { kind: 'canonical', identifier: 'kling' },
+          access_surface: { state: 'unknown' },
+          plan_tier: { state: 'unknown' },
+          confidence: 'confirmed',
+          source_turn: 1,
+          source_statement: 'Kling AI',
+          superseded_by: null,
+        },
+      ],
+      project_facts: {
+        ...DIALOGUE_FIXTURES.no_signal.structured_understanding.project_facts,
+        jurisdiction: { attestation: { state: 'confirmed', value: jurisdictionValue }, source_turn: 2, source_statement: jurisdictionValue },
+        human_contribution_description:
+          contributionText === null
+            ? { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }
+            : { attestation: { state: 'confirmed', value: contributionText }, source_turn: 3, source_statement: contributionText },
+      },
+    }
+  }
+
+  const RICH_CONTRIBUTION_TEXT = 'I selected the videos, uploaded the reference images, designed the soundtrack, and edited/arranged the sequence.'
+
+  test('Section 9/10: real Retrieval + full runCRCConversation regression -- jurisdiction confirmed as "US" (the real failing UAT value), REL-COPY remains the routing mechanism, all four COPY claims + H5 surface', () => {
+    const su = fullCopyrightState('US', RICH_CONTRIBUTION_TEXT)
+
+    // Retrieval-level proof first: REL-COPY is the actual mechanism, not bypassed.
+    const handoffResult = retrieve(handoff({ tools: [{ identifier: 'kling', access_surface: 'unresolved', plan_tier: 'unknown' }] }), MATRIX_FIXTURE, su.user_goals, TOPIC_CLAIMS_FIXTURE, { jurisdiction: su.project_facts.jurisdiction.attestation, toolMentions: su.tool_mentions }, TOPIC_RELATIONSHIPS_FIXTURE)
+    const relatedResults = handoffResult.results.filter((r) => r.match_origin === 'related_topic')
+    expect(relatedResults.map((r) => r.claim_id).sort()).toEqual(['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1'])
+    expect(handoffResult.diagnostics).not.toContainEqual({ identifier: 'copyright_ownership', reason: 'applicability_unmet' })
+
+    // Full pipeline.
+    const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    expect(output.knowledge_items.map((k) => k.claim_id).sort()).toEqual(['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPY-004-v1', 'kling'])
+    const summary = output.goal_interpretations[0].summary
+    // COPY-001/002/003 consultative content present.
+    expect(summary).toContain("generally isn't eligible for copyright protection")
+    expect(summary).toContain('writing prompts alone')
+    expect(summary).toContain('meaningfully selecting, arranging, or editing')
+    // H5 contribution-aware sentence present.
+    expect(summary).toContain(`You described your own contribution as: "${RICH_CONTRIBUTION_TEXT}"`)
+    // Existing hedge preserved.
+    expect(summary).toContain("there isn't enough project-specific information")
+    // No forbidden legal conclusions (same discipline as this file's own pre-existing assertions above).
+    expect(summary).not.toMatch(/\byou own\b|\byou do not own\b|\byour video is copyrighted\b|\byour video is not copyrighted\b/i)
+    expect(summary).not.toMatch(/all ai-generated (material|output|content) is copyrightable/i)
+    expect(summary).not.toMatch(/human contribution automatically (creates|establishes) copyright/i)
+  })
+
+  test('Section 11: canonical-value equivalence -- "US" and "United States" produce BYTE-IDENTICAL knowledge_items and goal_interpretations, everything else held constant', () => {
+    const suA = fullCopyrightState('US', RICH_CONTRIBUTION_TEXT)
+    const suB = fullCopyrightState('United States', RICH_CONTRIBUTION_TEXT)
+    const resultA = runCRCConversation(suA, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    const resultB = runCRCConversation(suB, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    expect(resultA.output.knowledge_items).toEqual(resultB.output.knowledge_items)
+    expect(resultA.output.goal_interpretations).toEqual(resultB.output.goal_interpretations)
+  })
+
+  test('Section 12: fail-closed regression -- jurisdiction confirmed as "United Kingdom" still yields COPY-004 only; normalization has not weakened the gate', () => {
+    const su = fullCopyrightState('United Kingdom', RICH_CONTRIBUTION_TEXT)
+    const { output, diagnostics } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    // "kling" also surfaces -- the tool-matrix commercial-use claim is reached independently
+    // via the mentioned tool, regardless of goal category; the regression proof here is that
+    // COPY-001/002/003 (the jurisdiction-gated copyrightability claims) do NOT appear.
+    expect(output.knowledge_items.map((k) => k.claim_id).sort()).toEqual(['CLAIM-COPY-004-v1', 'kling'])
+    expect(diagnostics.retrieval).toContainEqual({ identifier: 'copyright_ownership', reason: 'applicability_unmet' })
+    const summary = output.goal_interpretations[0].summary
+    expect(summary).not.toContain("generally isn't eligible for copyright protection")
+    expect(summary).not.toContain('You described your own contribution as')
+  })
+
+  test('Section 13: stock-rights regression -- jurisdiction normalization does not alter third_party_source_rights / provider_scope retrieval for iStock, Getty, or Shutterstock', () => {
+    const providerGoal: UserGoal = {
+      goal_id: 'g-stock', state: 'confirmed', raw_text: 'Can I use this stock image?', category: 'third_party_source_rights',
+      scope: 'informational', superseded_by: null, source_turn: 1, source_statement: 'x',
+    }
+    for (const provider of ['istock', 'getty', 'shutterstock'] as const) {
+      const su: StructuredUnderstanding = {
+        ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
+        user_goals: [providerGoal],
+        asset_provider_mentions: [{ mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: provider }, confidence: 'confirmed', source_turn: 1, source_statement: provider, superseded_by: null }],
+        project_facts: {
+          ...DIALOGUE_FIXTURES.no_signal.structured_understanding.project_facts,
+          jurisdiction: { attestation: { state: 'confirmed', value: 'US' }, source_turn: 2, source_statement: 'US' },
+        },
+      }
+      const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+      const claimIds = output.knowledge_items.map((k) => k.claim_id)
+      // Generic editorial claims (no provider_scope) plus the provider-specific one -- exact expected set is provider-dependent,
+      // but the key regression proof is that provider_scope routing still discriminates correctly and copyright claims never leak in.
+      expect(claimIds.some((id) => id.startsWith('CLAIM-STOCK'))).toBe(true)
+      expect(claimIds).not.toContain('CLAIM-COPY-001-v1')
+      expect(claimIds).not.toContain('CLAIM-COPY-002-v1')
+      expect(claimIds).not.toContain('CLAIM-COPY-003-v1')
+      expect(claimIds).not.toContain('CLAIM-COPY-004-v1')
+    }
+  })
+})

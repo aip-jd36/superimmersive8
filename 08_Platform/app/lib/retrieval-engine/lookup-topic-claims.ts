@@ -31,6 +31,64 @@ export interface ApplicabilityFacts {
   toolMentions: ToolMention[]
 }
 
+/**
+ * Jurisdiction value canonicalization (Copyright UAT Output-Path
+ * Diagnostic P0 fix, 2026-08-19). Confirmed root cause: a real live UAT
+ * user answered the deterministic jurisdiction question with "It's in the
+ * US" -- correctly extracted and attested as `confirmed, value: "US"` --
+ * but COPY-001/002/003's own governed `applicability_requirements` are
+ * authored as the literal string `"United States"`. Strict equality
+ * (`actual === req.value`) then failed even though the user's jurisdiction
+ * was genuinely, unambiguously known, silently withholding all three
+ * claims and leaving only CLAIM-COPY-004-v1 (which has no jurisdiction
+ * requirement at all) visible.
+ *
+ * Same narrow, curated-alias-table pattern as `KNOWN_TOOLS`/
+ * `KNOWN_ASSET_PROVIDERS` in extraction.ts -- exact-string lookup after
+ * trim+lowercase, NOT fuzzy/substring/startsWith matching, and NOT an
+ * LLM call. An unrecognized string (e.g. "United Kingdom", "California",
+ * "North America", "US market maybe") is returned unchanged and therefore
+ * still fails a `"United States"` requirement exactly as before --
+ * fail-closed by construction: this table can only ever make MORE strings
+ * resolve to a KNOWN canonical value, never fewer, and never guesses.
+ *
+ * Scoped to `fact === 'jurisdiction'` only (see the one call site below) --
+ * `tool_plan_tier` requirements are deliberately NOT canonicalized here;
+ * that is a different fact type with its own (currently exact-match)
+ * semantics, out of this fix's scope.
+ *
+ * Only one canonical jurisdiction is governed today -- every real
+ * `applicability_requirements` entry across the current
+ * `TOPIC_CLAIMS_FIXTURE` uses the literal value `"United States"`
+ * (confirmed by direct inspection before this fix was written; COPY-001/
+ * 002/003 are the only claims with a jurisdiction requirement at all).
+ * This registry is therefore intentionally small -- not a world-country
+ * database -- and should only grow when a real governed claim actually
+ * requires a second jurisdiction value.
+ *
+ * Applied at the APPLICABILITY COMPARISON BOUNDARY, never at attestation/
+ * capture time: `ProjectFacts.jurisdiction.attestation.value` (the user's
+ * own raw words, e.g. "US") is never rewritten -- only the transient
+ * comparison inside `evaluateRequirement` canonicalizes both sides before
+ * comparing. This preserves the raw attested fact untouched, requires no
+ * persistence/schema change, and keeps the fix exactly where the semantic
+ * mismatch actually occurs.
+ */
+const JURISDICTION_VALUE_ALIASES: Record<string, string> = {
+  'united states': 'United States',
+  'united states of america': 'United States',
+  us: 'United States',
+  usa: 'United States',
+  'u.s.': 'United States',
+  'u.s.a.': 'United States',
+  'the us': 'United States',
+}
+
+export function canonicalizeJurisdictionValue(value: string): string {
+  const key = value.trim().toLowerCase()
+  return JURISDICTION_VALUE_ALIASES[key] ?? value
+}
+
 function evaluateRequirement(req: ApplicabilityRequirement, facts: ApplicabilityFacts): boolean {
   let actual: string | undefined
 
@@ -48,6 +106,12 @@ function evaluateRequirement(req: ApplicabilityRequirement, facts: Applicability
   // jurisdiction" behave identically from the claim's own point of view --
   // both simply fail this check, never a fabricated match.
   if (actual === undefined) return false
+
+  if (req.fact === 'jurisdiction') {
+    const canonicalActual = canonicalizeJurisdictionValue(actual)
+    const canonicalRequired = canonicalizeJurisdictionValue(req.value)
+    return req.operator === 'equals' ? canonicalActual === canonicalRequired : canonicalActual !== canonicalRequired
+  }
 
   return req.operator === 'equals' ? actual === req.value : actual !== req.value
 }
