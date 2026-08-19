@@ -79,11 +79,30 @@ import {
  * an implementation that wants to actually use this context (e.g.
  * anthropic-extractor.ts) reads it. `null`/absent means no clarification
  * was pending -- the normal case for most turns.
+ *
+ * `current_human_contribution_description` (Copyright UAT Cumulative-
+ * Restatement Fix, 2026-08-19, root-cause-confirmed P1): same additive,
+ * "narrow deterministic slice of existing state" discipline as
+ * `pending_clarification` above, added for the identical underlying reason
+ * -- `createAnthropicExtractor()`'s own call is genuinely stateless per
+ * turn (confirmed by direct inspection: one fresh `messages.parse()` call,
+ * a single `{role: 'user', content}` message, no prior turns, no
+ * `StructuredUnderstanding` visibility at all). Without this field, the
+ * extractor has no way to know a `human_contribution_description` was
+ * already confirmed, so it cannot possibly "restate the complete
+ * cumulative picture" when the user later adds or corrects detail --
+ * the instruction to do so (added when this fact was first introduced)
+ * was, on inspection, unfulfillable without this. `null`/absent/empty
+ * means nothing is confirmed yet -- the normal case before the dedicated
+ * clarification question has been answered. Deliberately just the one
+ * string value, not the full `StructuredUnderstanding` -- "the entire
+ * conversation" was explicitly ruled out as unnecessary for this fix.
  */
 export interface RawUserTurn {
   turn: number
   text: string
   pending_clarification?: import('./pending-clarification').PendingClarification | null
+  current_human_contribution_description?: string | null
 }
 
 // ── Candidate observations (stage 1) ────────────────────────────────────────
@@ -786,6 +805,22 @@ export const REJECTED_REASON_CODES = [
   'MUTATION_TARGET_ALREADY_SUPERSEDED',
   'MUTATION_DUPLICATE_ID',
   'MUTATION_ERROR_OTHER',
+  /**
+   * Copyright UAT Cumulative-Restatement Fix, 2026-08-19 (P1). Fires when a
+   * `human_contribution_description` project_fact candidate arrives while a
+   * value is already confirmed AND the candidate is not flagged
+   * `is_correction` -- reuses the SAME generic, already-established
+   * "extractor flags it looks like a correction, deterministic code
+   * enforces/resolves it" split `resolveToolMentionTarget`/
+   * `resolveUserGoalTarget`/`resolveAssetProviderMentionTarget` already use,
+   * applied here as a hard reject rather than a supersession-target lookup
+   * (this fact has no lineage/id to resolve against -- it is a single
+   * current-state value). This is the deterministic backstop behind the
+   * extractor's own (necessarily probabilistic) prompt discipline -- see
+   * `runExtractionPipeline`'s own call site and anthropic-extractor.ts's
+   * `buildUserMessageContent`/system-prompt guidance.
+   */
+  'HUMAN_CONTRIBUTION_ALREADY_CONFIRMED_NOT_A_CORRECTION',
 ] as const
 
 export type RejectedReasonCode = (typeof REJECTED_REASON_CODES)[number]
@@ -880,6 +915,39 @@ export async function runExtractionPipeline(
           reason: candidate.low_confidence
             ? 'Extractor flagged this candidate as too low-confidence to propose.'
             : 'Candidate lacked the fields attestation needs to form a well-formed fact for its kind.',
+        },
+      })
+      continue
+    }
+
+    // Copyright UAT Cumulative-Restatement Fix, 2026-08-19 (P1 deterministic
+    // backstop). A confirmed human_contribution_description is never
+    // silently replaced by a fresh candidate the extractor did not itself
+    // flag as `is_correction` -- this is checked BEFORE the try/mutation
+    // block below, exactly like the `!proposedFact` deferral immediately
+    // above, so an incidental contribution-adjacent disclosure (e.g. "I
+    // sourced everything else on my end") that arrives after a rich answer
+    // is already confirmed is rejected outright, never applied. Reads
+    // `current` (the StructuredUnderstanding accumulated so far THIS turn),
+    // not the pre-turn `su` -- correctly honors an earlier candidate in the
+    // SAME turn that already confirmed the fact for the first time. Scoped
+    // to this one field only -- intended_use/workflow_role/jurisdiction
+    // mutation behavior is completely untouched by this guard.
+    if (
+      proposedFact.kind === 'project_fact' &&
+      proposedFact.field === 'human_contribution_description' &&
+      current.project_facts.human_contribution_description.attestation.state === 'confirmed' &&
+      !candidate.is_correction
+    ) {
+      diagnostics.push({
+        proposal_id: candidate.proposal_id,
+        candidate,
+        normalization,
+        proposed_fact: proposedFact,
+        decision: {
+          outcome: 'rejected',
+          reason_code: 'HUMAN_CONTRIBUTION_ALREADY_CONFIRMED_NOT_A_CORRECTION',
+          reason: 'human_contribution_description is already confirmed and this candidate was not flagged as a correction/extension of it -- the existing value is preserved.',
         },
       })
       continue

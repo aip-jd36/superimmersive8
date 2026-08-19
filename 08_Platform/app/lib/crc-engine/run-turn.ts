@@ -427,10 +427,22 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
 
   const declineSignal = input.declineAction ? resolveDeclineSignal(input.declineAction) : undefined
 
+  // Copyright UAT Cumulative-Restatement Fix, 2026-08-19 (P1): the current
+  // confirmed value (if any), from BEFORE this turn's own extraction runs
+  // -- gives the (genuinely stateless-per-turn) extractor something real to
+  // extend/correct FROM, and doubles as the "something is already
+  // confirmed, be conservative" signal. See extraction.ts's own
+  // RawUserTurn header and anthropic-extractor.ts's buildUserMessageContent
+  // for how this is used.
+  const currentHumanContributionDescription =
+    suLoaded.project_facts.human_contribution_description.attestation.state === 'confirmed'
+      ? suLoaded.project_facts.human_contribution_description.attestation.value
+      : null
   const rawTurn: RawUserTurn = {
     turn: input.turnNumber,
     text: input.userText,
     pending_clarification: loaded?.pending_clarification ?? null,
+    current_human_contribution_description: currentHumanContributionDescription,
   }
   const { updated: extracted } = await runExtractionPipeline(suLoaded, rawTurn, deps.extractor)
 

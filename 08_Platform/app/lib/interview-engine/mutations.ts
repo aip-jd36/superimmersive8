@@ -447,14 +447,39 @@ export function setJurisdiction(
 
 /**
  * `human_contribution_description` (Copyright UAT Correction Milestone,
- * 2026-08-19, PM-approved H2). Same plain immutable-replacement discipline
- * as setIntendedUse/setWorkflowRole/setJurisdiction above, verbatim -- no
- * supersession chain. A later, ADDITIVE clarification ("actually, I also
- * did a lot of compositing") is expected to arrive as a `value` that
- * already restates the complete, cumulative description -- the extractor's
- * own guidance (anthropic-extractor.ts) is responsible for folding new
- * detail into a full updated statement, not this function, which simply
- * overwrites, exactly like a jurisdiction correction overwrites.
+ * 2026-08-19, PM-approved H2; invariant clarified and now actually
+ * enforced upstream, Copyright UAT Cumulative-Restatement Fix, 2026-08-19,
+ * P1). Same plain immutable-replacement discipline as
+ * setIntendedUse/setWorkflowRole/setJurisdiction above, verbatim -- no
+ * supersession chain, no change to this function's own body.
+ *
+ * Exact invariant this function TRUSTS its caller to have already
+ * guaranteed (it does not, and cannot, re-check any of this itself --
+ * it has no access to the candidate that produced `value`, only the
+ * value): a `value` reaching this function while a confirmed description
+ * already exists must be a COMPLETE CURRENT-STATE RESTATEMENT -- either
+ * the full cumulative picture (an additive extension folds prior detail
+ * IN, never drops it) or the full corrected picture (a genuine correction
+ * replaces the specific corrected detail, not merely appends a
+ * contradiction) -- never just the new sentence fragment alone. Before
+ * this fix, that invariant was documented but unenforceable (the
+ * extractor had no way to see the current value at all, so "restate the
+ * cumulative picture" was an unfulfillable instruction) and had no
+ * upstream guard, which is exactly how a real live UAT's incidental,
+ * unrelated disclosure ("I sourced everything else on my end") silently
+ * overwrote a rich, already-confirmed answer. Both gaps are now closed
+ * one layer up, in extraction.ts's own `runExtractionPipeline`: (a) the
+ * extractor is given the current confirmed value via
+ * `RawUserTurn.current_human_contribution_description` (see anthropic-
+ * extractor.ts's `buildUserMessageContent`), so it has something real to
+ * extend/correct FROM, and (b) a candidate proposing to replace an
+ * already-confirmed value is deterministically REJECTED before ever
+ * reaching this function unless the extractor flagged it `is_correction`
+ * (the same generic, already-established "extractor flags it, code
+ * enforces it" split tool_mention/user_goal/asset_provider_mention
+ * corrections already use). This function's own contract is therefore
+ * unchanged -- it has always been, and remains, an unconditional trust-the-
+ * caller overwrite -- only the caller's own reliability improved.
  */
 export function setHumanContributionDescription(
   su: StructuredUnderstanding,

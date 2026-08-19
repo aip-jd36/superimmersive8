@@ -145,7 +145,7 @@ describe('human-contribution clarification -- eligibility gating', () => {
     })
   })
 
-  test('cumulative correction: a later turn restating the full combined description overwrites (plain replacement), never silently drops the earlier detail because the extractor is expected to restate the complete picture', async () => {
+  test('cumulative correction: a later turn EXPLICITLY FLAGGED is_correction, restating the full combined description, updates the fact -- never silently drops the earlier detail (Copyright UAT Cumulative-Restatement Fix, 2026-08-19: is_correction is now required for any update once a value is already confirmed -- see the sibling "incidental disclosure" test below for the un-flagged, correctly-rejected case)', async () => {
     const store = createInMemorySessionStore()
     const jurisdictionAnswer: CandidateObservation = {
       proposal_id: 'p-jur', turn: 1, raw_text: 'United States', kind: 'project_fact',
@@ -175,6 +175,8 @@ describe('human-contribution clarification -- eligibility gating', () => {
       proposal_id: 'p-hc2', turn: 3, raw_text: 'Actually, I also did a lot of compositing.', kind: 'project_fact',
       raw_fact_field: 'human_contribution_description', fact_confidence_hint: 'confirmed',
       fact_value_hint: 'I wrote prompts, and I also did a lot of compositing.',
+      is_correction: true,
+      correction_of_raw_text: 'I only wrote prompts.',
     }
     await runTurn({ token: 't4', turnNumber: 3, userText: 'Actually, I also did a lot of compositing.' }, eligibleDeps({ extractor: constantExtractor([cumulativeAnswer]) }, store))
 
@@ -182,6 +184,50 @@ describe('human-contribution clarification -- eligibility gating', () => {
     expect(state.structured_understanding.project_facts.human_contribution_description.attestation).toEqual({
       state: 'confirmed',
       value: 'I wrote prompts, and I also did a lot of compositing.',
+    })
+  })
+
+  test('Copyright UAT Cumulative-Restatement Fix, 2026-08-19 (P1) -- primary real-UAT regression: an unrelated later disclosure ("I sourced everything else on my end") does NOT overwrite an already-confirmed rich human_contribution_description, even when the extractor over-proposes a fresh (un-flagged) candidate for it', async () => {
+    const store = createInMemorySessionStore()
+    const jurisdictionAnswer: CandidateObservation = {
+      proposal_id: 'p-jur', turn: 1, raw_text: 'United States', kind: 'project_fact',
+      raw_fact_field: 'jurisdiction', fact_confidence_hint: 'confirmed', fact_value_hint: 'United States',
+    }
+    await runTurn({ token: 't9', turnNumber: 1, userText: 'x' }, eligibleDeps({ extractor: constantExtractor([toolCandidate(), goalCandidate(), jurisdictionAnswer]) }, store))
+
+    const richAnswer: CandidateObservation = {
+      proposal_id: 'p-hc1', turn: 2, raw_text: 'I selected the takes and arranged the sequence. I also edited it as well.', kind: 'project_fact',
+      raw_fact_field: 'human_contribution_description', fact_confidence_hint: 'confirmed',
+      fact_value_hint: 'I selected the takes and arranged the sequence. I also edited it as well.',
+    }
+    const ordinaryProposal = { question_text: 'Did the client give you any of their own assets to use?', question_kind: 'other' as const, target_signal_id: null, phase: 2 as const }
+    await runTurn(
+      { token: 't9', turnNumber: 2, userText: 'I selected the takes and arranged the sequence. I also edited it as well.' },
+      eligibleDeps({ extractor: constantExtractor([richAnswer]), generator: constantCandidateQuestionGenerator(ordinaryProposal) }, store),
+    )
+    expect((await loadState(store, 't9')).structured_understanding.project_facts.human_contribution_description.attestation).toEqual({
+      state: 'confirmed',
+      value: 'I selected the takes and arranged the sequence. I also edited it as well.',
+    })
+
+    // Real live UAT shape: an unrelated client-assets disclosure that the
+    // extractor (over-eagerly, exactly as the real live model did) proposes
+    // as a fresh human_contribution_description candidate -- deliberately
+    // NOT flagged is_correction, reproducing the exact defect shape.
+    const incidentalDisclosure: CandidateObservation = {
+      proposal_id: 'p-hc2', turn: 3, raw_text: 'The client gave me their logo to use. I sourced everything else on my end.', kind: 'project_fact',
+      raw_fact_field: 'human_contribution_description', fact_confidence_hint: 'confirmed',
+      fact_value_hint: 'I sourced everything else on my end.',
+    }
+    await runTurn(
+      { token: 't9', turnNumber: 3, userText: 'The client gave me their logo to use. I sourced everything else on my end.' },
+      eligibleDeps({ extractor: constantExtractor([incidentalDisclosure]) }, store),
+    )
+
+    const finalState = await loadState(store, 't9')
+    expect(finalState.structured_understanding.project_facts.human_contribution_description.attestation).toEqual({
+      state: 'confirmed',
+      value: 'I selected the takes and arranged the sequence. I also edited it as well.',
     })
   })
 

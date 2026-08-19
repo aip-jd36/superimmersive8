@@ -33,4 +33,34 @@ describe('buildUserMessageContent', () => {
     const turn: RawUserTurn = { turn: 1, text: 'Kling.', pending_clarification: null }
     expect(buildUserMessageContent(turn)).toBe('Kling.')
   })
+
+  test('current_human_contribution_description present -> prepends a deterministic context prefix quoting the confirmed value verbatim (Copyright UAT Cumulative-Restatement Fix, 2026-08-19)', () => {
+    const turn: RawUserTurn = {
+      turn: 5,
+      text: 'I sourced everything else on my end.',
+      current_human_contribution_description: 'I selected the takes and arranged the sequence. I also edited it as well.',
+    }
+    const content = buildUserMessageContent(turn)
+    expect(content).toContain('I selected the takes and arranged the sequence. I also edited it as well.')
+    expect(content).toContain('I sourced everything else on my end.')
+    expect(content.endsWith('I sourced everything else on my end.')).toBe(true)
+  })
+
+  test('current_human_contribution_description null/absent -> no context line added, same as before this fix', () => {
+    const turn: RawUserTurn = { turn: 1, text: 'Kling.', current_human_contribution_description: null }
+    expect(buildUserMessageContent(turn)).toBe('Kling.')
+  })
+
+  test('both pending_clarification and current_human_contribution_description present -> both context lines composed, each independently, text last', () => {
+    const turn: RawUserTurn = {
+      turn: 6,
+      text: 'The API one.',
+      pending_clarification: { signal_id: 'tm-1', kind: 'follow_up_on_signal', unresolved_summary: "tool mention 'Nano Banana', not yet resolved to a specific platform" },
+      current_human_contribution_description: 'I selected the takes and arranged the sequence.',
+    }
+    const content = buildUserMessageContent(turn)
+    expect(content).toContain("tool mention 'Nano Banana'")
+    expect(content).toContain('I selected the takes and arranged the sequence.')
+    expect(content.endsWith('The API one.')).toBe(true)
+  })
 })

@@ -858,3 +858,223 @@ describe('canonical regression: full session reconstruction (fd92b4aa-072f-4d45-
     expect(su.tool_mentions[0].resolution).toMatchObject({ kind: 'canonical', identifier: 'kling' })
   })
 })
+
+// ── Copyright UAT Cumulative-Restatement Fix (P1, 2026-08-19) ──────────────
+// The real live UAT defect: an already-confirmed, rich human_contribution_description
+// was silently overwritten by a later, unrelated turn ("I sourced everything else on
+// my end") that merely used contribution-adjacent first-person language. Root cause,
+// confirmed by direct inspection: createAnthropicExtractor()'s own call is genuinely
+// stateless per turn -- no prior-turn memory, no StructuredUnderstanding visibility --
+// so the pre-existing "restate the cumulative picture" instruction was unfulfillable.
+// Fixed with two layers: (1) the extractor is now given the current confirmed value
+// via RawUserTurn.current_human_contribution_description (probabilistic, prompt-level),
+// and (2) runExtractionPipeline() deterministically REJECTS any human_contribution_
+// description candidate that arrives once a value is already confirmed unless the
+// candidate is flagged is_correction: true (the same generic, already-established
+// "extractor flags it, code enforces it" split tool_mention/user_goal/asset_provider_
+// mention corrections already use). These tests exercise layer (2) directly --
+// deterministic, no live model needed.
+
+function humanContributionCandidate(overrides: Partial<CandidateObservation> = {}): CandidateObservation {
+  return {
+    proposal_id: 'c1',
+    turn: 1,
+    raw_text: 'I selected the takes and arranged the sequence. I also edited it as well.',
+    kind: 'project_fact',
+    raw_fact_field: 'human_contribution_description',
+    fact_confidence_hint: 'confirmed',
+    fact_value_hint: 'I selected the takes and arranged the sequence. I also edited it as well.',
+    ...overrides,
+  }
+}
+
+function suWithConfirmedContribution(value: string): StructuredUnderstanding {
+  const su = emptySU()
+  return {
+    ...su,
+    project_facts: {
+      ...su.project_facts,
+      human_contribution_description: { attestation: { state: 'confirmed', value }, source_turn: 1, source_statement: value },
+    },
+  }
+}
+
+const RICH_VALUE = 'I selected the takes and arranged the sequence. I also edited it as well.'
+
+describe('human_contribution_description: dedicated-question / organic capture (must still work)', () => {
+  test('A. dedicated-question-style answer, nothing confirmed yet -> captured and confirmed exactly', async () => {
+    const { updated, diagnostics } = await runExtractionPipeline(emptySU(), { turn: 1, text: RICH_VALUE }, constantExtractor([humanContributionCandidate()]))
+    expect(updated.project_facts.human_contribution_description.attestation).toEqual({ state: 'confirmed', value: RICH_VALUE })
+    expect(diagnostics[0].decision.outcome).toBe('accepted')
+  })
+
+  test('B. organic, unprompted direct contribution disclosure, nothing confirmed yet -> still captured (acquisition must not depend exclusively on the dedicated question)', async () => {
+    const value = 'I made it with Kling, then I selected the best clips and edited the final sequence.'
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: value },
+      constantExtractor([humanContributionCandidate({ raw_text: value, fact_value_hint: value })]),
+    )
+    expect(updated.project_facts.human_contribution_description.attestation).toEqual({ state: 'confirmed', value })
+  })
+})
+
+describe('human_contribution_description: additive extension / explicit correction (must still work, now requires is_correction)', () => {
+  test('C. additive extension, flagged is_correction -> cumulative current fact preserving both the earlier and new detail', async () => {
+    const su = suWithConfirmedContribution('I selected the takes and arranged the sequence.')
+    const cumulative = 'I selected the takes and arranged the sequence. Actually, I also did the compositing and added transitions.'
+    const { updated, diagnostics } = await runExtractionPipeline(
+      su,
+      { turn: 2, text: 'Actually, I also did the compositing and added transitions.', current_human_contribution_description: 'I selected the takes and arranged the sequence.' },
+      constantExtractor([
+        humanContributionCandidate({
+          turn: 2,
+          raw_text: 'Actually, I also did the compositing and added transitions.',
+          fact_value_hint: cumulative,
+          is_correction: true,
+          correction_of_raw_text: 'I selected the takes and arranged the sequence.',
+        }),
+      ]),
+    )
+    expect(updated.project_facts.human_contribution_description.attestation).toEqual({ state: 'confirmed', value: cumulative })
+    expect(cumulative).toContain('selected the takes')
+    expect(cumulative).toContain('compositing')
+    expect(diagnostics[0].decision.outcome).toBe('accepted')
+  })
+
+  test('D. explicit correction, flagged is_correction -> corrected current fact, not a concatenated contradiction', async () => {
+    const su = suWithConfirmedContribution('I selected and edited the clips.')
+    const corrected = "I selected the clips. My editor did the editing, not me."
+    const { updated } = await runExtractionPipeline(
+      su,
+      { turn: 2, text: "Correction -- I didn't do the editing myself; my editor did.", current_human_contribution_description: 'I selected and edited the clips.' },
+      constantExtractor([
+        humanContributionCandidate({
+          turn: 2,
+          raw_text: "Correction -- I didn't do the editing myself; my editor did.",
+          fact_value_hint: corrected,
+          is_correction: true,
+          correction_of_raw_text: 'I selected and edited the clips.',
+        }),
+      ]),
+    )
+    expect(updated.project_facts.human_contribution_description.attestation).toEqual({ state: 'confirmed', value: corrected })
+  })
+})
+
+describe('human_contribution_description: incidental disclosure regression (P1 -- the real UAT defect)', () => {
+  test('E/primary UAT regression: unrelated source disclosure NOT flagged is_correction -> rejected, existing rich value preserved untouched', async () => {
+    const su = suWithConfirmedContribution(RICH_VALUE)
+    const { updated, diagnostics } = await runExtractionPipeline(
+      su,
+      { turn: 5, text: 'The client gave me their logo to use. I sourced everything else on my end.', current_human_contribution_description: RICH_VALUE },
+      constantExtractor([
+        humanContributionCandidate({
+          turn: 5,
+          raw_text: 'I sourced everything else on my end.',
+          fact_value_hint: 'I sourced everything else on my end.',
+          // Deliberately NOT flagged is_correction -- this is exactly the
+          // over-proposal shape the real live UAT produced.
+        }),
+      ]),
+    )
+    expect(updated.project_facts.human_contribution_description.attestation).toEqual({ state: 'confirmed', value: RICH_VALUE })
+    expect(diagnostics[0].decision).toEqual({
+      outcome: 'rejected',
+      reason_code: 'HUMAN_CONTRIBUTION_ALREADY_CONFIRMED_NOT_A_CORRECTION',
+      reason: expect.stringContaining('already confirmed'),
+    })
+  })
+
+  test('F. unrelated asset disclosure NOT flagged is_correction -> rejected, existing value preserved', async () => {
+    const su = suWithConfirmedContribution(RICH_VALUE)
+    const { updated } = await runExtractionPipeline(
+      su,
+      { turn: 4, text: 'I uploaded all the reference images myself.', current_human_contribution_description: RICH_VALUE },
+      constantExtractor([humanContributionCandidate({ turn: 4, raw_text: 'I uploaded all the reference images myself.', fact_value_hint: 'I uploaded all the reference images myself.' })]),
+    )
+    expect(updated.project_facts.human_contribution_description.attestation).toEqual({ state: 'confirmed', value: RICH_VALUE })
+  })
+
+  test('G. unrelated role/client statement NOT flagged is_correction -> rejected, existing value preserved', async () => {
+    const su = suWithConfirmedContribution(RICH_VALUE)
+    const { updated } = await runExtractionPipeline(
+      su,
+      { turn: 6, text: 'I handled the client relationship for this project.', current_human_contribution_description: RICH_VALUE },
+      constantExtractor([humanContributionCandidate({ turn: 6, raw_text: 'I handled the client relationship for this project.', fact_value_hint: 'I handled the client relationship for this project.' })]),
+    )
+    expect(updated.project_facts.human_contribution_description.attestation).toEqual({ state: 'confirmed', value: RICH_VALUE })
+  })
+
+  test('H. vague later creation statement, NOT flagged is_correction -> rejected, existing value preserved (a vague statement is not automatically a correction)', async () => {
+    const su = suWithConfirmedContribution(RICH_VALUE)
+    const { updated } = await runExtractionPipeline(
+      su,
+      { turn: 7, text: 'I made the logo card.', current_human_contribution_description: RICH_VALUE },
+      constantExtractor([humanContributionCandidate({ turn: 7, raw_text: 'I made the logo card.', fact_value_hint: 'I made the logo card.' })]),
+    )
+    expect(updated.project_facts.human_contribution_description.attestation).toEqual({ state: 'confirmed', value: RICH_VALUE })
+  })
+
+  test('other incidental phrases (mood board, music sourcing, campaign production) -> all rejected, existing value preserved', async () => {
+    const incidentalPhrases = ['I created the mood board.', 'I sourced the music.', 'I produced the campaign.']
+    for (const phrase of incidentalPhrases) {
+      const su = suWithConfirmedContribution(RICH_VALUE)
+      const { updated, diagnostics } = await runExtractionPipeline(
+        su,
+        { turn: 8, text: phrase, current_human_contribution_description: RICH_VALUE },
+        constantExtractor([humanContributionCandidate({ turn: 8, raw_text: phrase, fact_value_hint: phrase })]),
+      )
+      expect(updated.project_facts.human_contribution_description.attestation).toEqual({ state: 'confirmed', value: RICH_VALUE })
+      expect(diagnostics[0].decision.outcome).toBe('rejected')
+    }
+  })
+})
+
+describe('human_contribution_description: provenance (source_turn / source_statement) correctness', () => {
+  test('I. an accepted correction updates source_turn/source_statement to the CORRECTING turn, not the original', async () => {
+    const su = suWithConfirmedContribution('I selected the takes.')
+    const { updated } = await runExtractionPipeline(
+      su,
+      { turn: 9, text: 'Actually, I also edited it.', current_human_contribution_description: 'I selected the takes.' },
+      constantExtractor([
+        humanContributionCandidate({
+          turn: 9,
+          raw_text: 'Actually, I also edited it.',
+          fact_value_hint: 'I selected the takes. I also edited it.',
+          is_correction: true,
+          correction_of_raw_text: 'I selected the takes.',
+        }),
+      ]),
+    )
+    expect(updated.project_facts.human_contribution_description.source_turn).toBe(9)
+    expect(updated.project_facts.human_contribution_description.source_statement).toBe('Actually, I also edited it.')
+  })
+
+  test('a rejected incidental disclosure does NOT alter source_turn/source_statement -- provenance stays pointed at the original answer', async () => {
+    const su = suWithConfirmedContribution(RICH_VALUE)
+    const { updated } = await runExtractionPipeline(
+      su,
+      { turn: 10, text: 'I sourced everything else on my end.', current_human_contribution_description: RICH_VALUE },
+      constantExtractor([humanContributionCandidate({ turn: 10, raw_text: 'I sourced everything else on my end.', fact_value_hint: 'I sourced everything else on my end.' })]),
+    )
+    expect(updated.project_facts.human_contribution_description.source_turn).toBe(1)
+    expect(updated.project_facts.human_contribution_description.source_statement).toBe(RICH_VALUE)
+  })
+})
+
+describe('human_contribution_description: unaffected fields (guard is scoped strictly to this one field)', () => {
+  test('the guard never blocks intended_use/workflow_role/jurisdiction candidates, even in the same turn', async () => {
+    const su = suWithConfirmedContribution(RICH_VALUE)
+    const intendedUse: CandidateObservation = { proposal_id: 'c1', turn: 11, raw_text: 'for a client', kind: 'project_fact', raw_fact_field: 'intended_use', fact_confidence_hint: 'confirmed', fact_value_hint: 'for a client' }
+    const { updated, diagnostics } = await runExtractionPipeline(su, { turn: 11, text: 'for a client' }, constantExtractor([intendedUse]))
+    expect(updated.project_facts.intended_use.attestation).toEqual({ state: 'confirmed', value: 'for a client' })
+    expect(diagnostics[0].decision.outcome).toBe('accepted')
+  })
+
+  test('a human_contribution_description candidate is accepted normally when nothing is confirmed yet, even without is_correction', async () => {
+    const { updated, diagnostics } = await runExtractionPipeline(emptySU(), { turn: 1, text: RICH_VALUE }, constantExtractor([humanContributionCandidate()]))
+    expect(diagnostics[0].decision.outcome).toBe('accepted')
+    expect(updated.project_facts.human_contribution_description.attestation.state).toBe('confirmed')
+  })
+})

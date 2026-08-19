@@ -445,3 +445,92 @@ describe('Copyright UAT Output-Path Diagnostic P0 fix -- jurisdiction value norm
     }
   })
 })
+
+describe('Copyright UAT Cumulative-Restatement Fix -- H5 + full pipeline regression (P1, 2026-08-19)', () => {
+  const RICH_CONTRIBUTION_TEXT = 'I selected the takes and arranged the sequence. I also edited it as well.'
+  const INCIDENTAL_TEXT = 'I sourced everything else on my end.'
+
+  function copyrightStateWith(jurisdictionValue: string, contributionText: string): StructuredUnderstanding {
+    const goal = copyrightGoal()
+    return {
+      ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
+      user_goals: [goal],
+      tool_mentions: [
+        {
+          mention_id: 'tm-1',
+          resolution: { kind: 'canonical', identifier: 'kling' },
+          access_surface: { state: 'unknown' },
+          plan_tier: { state: 'unknown' },
+          confidence: 'confirmed',
+          source_turn: 1,
+          source_statement: 'Kling AI',
+          superseded_by: null,
+        },
+      ],
+      project_facts: {
+        ...DIALOGUE_FIXTURES.no_signal.structured_understanding.project_facts,
+        jurisdiction: { attestation: { state: 'confirmed', value: jurisdictionValue }, source_turn: 2, source_statement: jurisdictionValue },
+        human_contribution_description: { attestation: { state: 'confirmed', value: contributionText }, source_turn: 4, source_statement: contributionText },
+      },
+    }
+  }
+
+  test('Section 16/17: real runCRCConversation, simulating the fixed post-P1 final state (rich contribution preserved through a later incidental disclosure) -- COPY-001/002/003/004 all surface, H5 uses the RICH value, never the incidental one', () => {
+    // This state represents what the fix guarantees the FINAL persisted state
+    // looks like after the real UAT sequence -- the incidental "I sourced
+    // everything else on my end" turn is deterministically rejected upstream
+    // (proven directly in extraction.test.ts and run-turn-human-contribution-
+    // clarification.test.ts), so the rich value is what actually reaches here.
+    const su = copyrightStateWith('US', RICH_CONTRIBUTION_TEXT)
+    const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+
+    expect(output.knowledge_items.map((k) => k.claim_id).sort()).toEqual(['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPY-004-v1', 'kling'])
+    const summary = output.goal_interpretations[0].summary
+    // COPY-001/002/003 consultative content present.
+    expect(summary).toContain("generally isn't eligible for copyright protection")
+    expect(summary).toContain('writing prompts alone')
+    expect(summary).toContain('meaningfully selecting, arranging, or editing')
+    // H5 uses the RICH value.
+    expect(summary).toContain(`You described your own contribution as: "${RICH_CONTRIBUTION_TEXT}"`)
+    // H5 must NEVER use the incidental, unrelated disclosure text.
+    expect(summary).not.toContain(INCIDENTAL_TEXT)
+    // Existing hedge preserved; no forbidden legal conclusions.
+    expect(summary).toContain("there isn't enough project-specific information")
+    expect(summary).not.toMatch(/\byou own\b|\byou do not own\b|\byour video is copyrighted\b|\byour video is not copyrighted\b|\byour editing (is|qualifies)\b|\byour contribution (is sufficient|fails)\b/i)
+  })
+
+  test('Section 18: P0 jurisdiction normalization regression -- "US" and "United States" still produce byte-identical output with the P1 fix in place', () => {
+    const suA = copyrightStateWith('US', RICH_CONTRIBUTION_TEXT)
+    const suB = copyrightStateWith('United States', RICH_CONTRIBUTION_TEXT)
+    const resultA = runCRCConversation(suA, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    const resultB = runCRCConversation(suB, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    expect(resultA.output.knowledge_items).toEqual(resultB.output.knowledge_items)
+    expect(resultA.output.goal_interpretations).toEqual(resultB.output.goal_interpretations)
+  })
+
+  test('commercial_use goal isolation unaffected by the P1 fix -- no copyright content leaks in', () => {
+    const commercialGoal: UserGoal = {
+      goal_id: 'g-2', state: 'confirmed', raw_text: 'Can I use this commercially?', category: 'commercial_use',
+      scope: 'informational', superseded_by: null, source_turn: 1, source_statement: 'x',
+    }
+    const su: StructuredUnderstanding = { ...copyrightStateWith('US', RICH_CONTRIBUTION_TEXT), user_goals: [commercialGoal] }
+    const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    const serialized = JSON.stringify(output)
+    expect(serialized).not.toContain('CLAIM-COPY-001')
+    expect(serialized).not.toContain('CLAIM-COPY-002')
+    expect(serialized).not.toContain('CLAIM-COPY-003')
+    expect(serialized).not.toContain('CLAIM-COPY-004')
+    expect(serialized).not.toContain(RICH_CONTRIBUTION_TEXT)
+  })
+
+  test('Path B remains off -- an asset_provider_mention alongside a confirmed human_contribution_description never triggers a stock/editorial claim or question', () => {
+    const su: StructuredUnderstanding = {
+      ...copyrightStateWith('US', RICH_CONTRIBUTION_TEXT),
+      asset_provider_mentions: [{ mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 3, source_statement: 'Getty', superseded_by: null }],
+    }
+    const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    const serialized = JSON.stringify(output)
+    expect(serialized).not.toContain('CLAIM-STOCK')
+    expect(serialized).not.toContain('editorial')
+  })
+})
