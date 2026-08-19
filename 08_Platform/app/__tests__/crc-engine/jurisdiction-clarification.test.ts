@@ -1,7 +1,9 @@
 /**
  * Jurisdiction clarification eligibility deterministic tests (CRC Living
- * Knowledge Phase 1, 2026-08-16). No live model needed -- pure functions,
- * same discipline as commercial-readiness-catalog.test.ts.
+ * Knowledge Phase 1, 2026-08-16; relationship-aware, Interview Engine
+ * Diagnostic Slice 1, 2026-08-19; Gate-1 requirement removed, Copyright
+ * UAT Correction Milestone T1, 2026-08-19). No live model needed -- pure
+ * functions, same discipline as commercial-readiness-catalog.test.ts.
  */
 
 import { evaluateJurisdictionClarificationEligibility, buildJurisdictionClarificationProposal, JURISDICTION_CLARIFICATION_QUESTION } from '@/lib/crc-engine/jurisdiction-clarification'
@@ -60,15 +62,25 @@ function jurisdictionGatedClaim(overrides: Partial<TopicClaim> & Pick<TopicClaim
 }
 
 describe('evaluateJurisdictionClarificationEligibility', () => {
-  test('not eligible when Gate 1 is not met, even if everything else lines up', () => {
-    const su = baseSU({ user_goals: [goal({ goal_id: 'g-1', category: 'copyright_ownership' })] })
-    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false, false)
-    expect(result.eligible).toBe(false)
+  // Copyright UAT Correction Milestone T1, 2026-08-19: replaces the old
+  // "not eligible when Gate 1 is not met" test, whose premise no longer
+  // exists -- the function no longer accepts a gate1Met parameter at all.
+  // This is the direct, positive proof of the T1 behavior change: the
+  // exact same governed-relevance state that used to be blocked is now
+  // eligible, with `gate_1_state: 'not_met'` explicitly set on the input
+  // SU to make the intent unambiguous even though the function itself
+  // never reads that field.
+  test('T1: eligible when a relevant goal + governed knowledge requires jurisdiction, even though Gate 1 is not met', () => {
+    const su = baseSU({ user_goals: [goal({ goal_id: 'g-1', category: 'copyright_ownership' })], gate_1_state: 'not_met' })
+    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false)
+    expect(result.needs_jurisdiction).toBe(true)
+    expect(result.jurisdiction_unresolved).toBe(true)
+    expect(result.eligible).toBe(true)
   })
 
   test('not eligible when no active goal needs jurisdiction-scoped knowledge', () => {
     const su = baseSU({ user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })] })
-    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim({ claim_id: 'C-1', topic: 'copyright_ownership' })], false, true)
+    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim({ claim_id: 'C-1', topic: 'copyright_ownership' })], false)
     expect(result.needs_jurisdiction).toBe(false)
     expect(result.eligible).toBe(false)
   })
@@ -76,7 +88,7 @@ describe('evaluateJurisdictionClarificationEligibility', () => {
   test('not eligible when NO governed claim contains a jurisdiction applicability requirement -- claim existing alone is never the trigger', () => {
     const su = baseSU({ user_goals: [goal({ goal_id: 'g-1', category: 'copyright_ownership' })] })
     const claimWithoutJurisdictionGate: TopicClaim = { ...jurisdictionGatedClaim(), applicability_requirements: [] }
-    const result = evaluateJurisdictionClarificationEligibility(su, [claimWithoutJurisdictionGate], false, true)
+    const result = evaluateJurisdictionClarificationEligibility(su, [claimWithoutJurisdictionGate], false)
     expect(result.needs_jurisdiction).toBe(false)
     expect(result.eligible).toBe(false)
   })
@@ -97,13 +109,13 @@ describe('evaluateJurisdictionClarificationEligibility', () => {
         },
       ],
     })
-    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false, true)
+    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false)
     expect(result.eligible).toBe(false)
   })
 
-  test('eligible when Gate 1 met, an active goal needs jurisdiction-scoped knowledge, and jurisdiction is unconfirmed', () => {
+  test('eligible when an active goal needs jurisdiction-scoped knowledge and jurisdiction is unconfirmed', () => {
     const su = baseSU({ user_goals: [goal({ goal_id: 'g-1', category: 'copyright_ownership' })] })
-    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false, true)
+    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false)
     expect(result.needs_jurisdiction).toBe(true)
     expect(result.jurisdiction_unresolved).toBe(true)
     expect(result.eligible).toBe(true)
@@ -118,7 +130,7 @@ describe('evaluateJurisdictionClarificationEligibility', () => {
         jurisdiction: { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 2, source_statement: 'US' },
       },
     })
-    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false, true)
+    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false)
     expect(result.jurisdiction_unresolved).toBe(false)
     expect(result.eligible).toBe(false)
   })
@@ -132,7 +144,7 @@ describe('evaluateJurisdictionClarificationEligibility', () => {
         jurisdiction: { attestation: { state: 'declined' }, source_turn: 2, source_statement: 'skip' },
       },
     })
-    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false, true)
+    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false)
     expect(result.jurisdiction_unresolved).toBe(false)
     expect(result.eligible).toBe(false)
   })
@@ -147,14 +159,14 @@ describe('evaluateJurisdictionClarificationEligibility', () => {
           jurisdiction: { attestation: { state }, source_turn: 2, source_statement: 'x' },
         },
       })
-      const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false, true)
+      const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false)
       expect(result.eligible).toBe(true)
     }
   })
 
-  test('not eligible when already asked this conversation', () => {
+  test('not eligible when already asked this conversation -- once-per-interview cap unchanged by T1', () => {
     const su = baseSU({ user_goals: [goal({ goal_id: 'g-1', category: 'copyright_ownership' })] })
-    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], true, true)
+    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], true)
     expect(result.eligible).toBe(false)
   })
 
@@ -162,7 +174,7 @@ describe('evaluateJurisdictionClarificationEligibility', () => {
     const superseded = goal({ goal_id: 'g-1', category: 'copyright_ownership', superseded_by: 'g-2' })
     const declined = goal({ goal_id: 'g-2', category: 'copyright_ownership', state: 'declined' })
     const su = baseSU({ user_goals: [superseded, declined] })
-    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false, true)
+    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false)
     expect(result.eligible).toBe(false)
   })
 
@@ -170,20 +182,24 @@ describe('evaluateJurisdictionClarificationEligibility', () => {
     const su = baseSU({ user_goals: [goal({ goal_id: 'g-1', category: 'copyright_ownership' })] })
     const overridesList: Partial<TopicClaim>[] = [{ lifecycle: 'Candidate' }, { crc_eligible: 'No' }, { superseded_by: 'C-2' }]
     for (const overrides of overridesList) {
-      const result = evaluateJurisdictionClarificationEligibility(su, [{ ...jurisdictionGatedClaim(), ...overrides }], false, true)
+      const result = evaluateJurisdictionClarificationEligibility(su, [{ ...jurisdictionGatedClaim(), ...overrides }], false)
       expect(result.eligible).toBe(false)
     }
   })
 
   test('omitting the relationships argument entirely (pre-Slice-1 call shape) behaves identically to passing [] -- backward-compatible default', () => {
     const su = baseSU({ user_goals: [goal({ goal_id: 'g-1', category: 'copyright_ownership' })] })
-    const withDefault = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false, true)
-    const withExplicitEmpty = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false, true, [])
+    const withDefault = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false)
+    const withExplicitEmpty = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false, [])
     expect(withDefault).toEqual(withExplicitEmpty)
   })
 })
 
 // ── Relationship-aware eligibility (Interview Engine Diagnostic Slice 1, 2026-08-19) ──
+// Governance gates (relationship Lifecycle/CRC-eligible/supersession, target-claim
+// Lifecycle/CRC-eligible/supersession, one-hop-only traversal) are UNCHANGED by T1 --
+// T1 only removed gate1Met from the top-level eligibility formula. Every test in this
+// block still proves the full governance-gate matrix exactly as Slice 1 left it.
 
 function relationship(overrides: Partial<TopicRelationship> & Pick<TopicRelationship, 'relationship_id' | 'source_topic' | 'target_topic'>): TopicRelationship {
   return {
@@ -216,7 +232,7 @@ describe('evaluateJurisdictionClarificationEligibility -- relationship-aware (on
     const su = baseSU({ user_goals: [goalCopyOwnership] })
     // Direct-topic claim (copyright_ownership) with NO jurisdiction requirement -- mirrors the real CLAIM-COPY-004-v1 shape.
     const directClaimNoJurisdiction: TopicClaim = { ...jurisdictionGatedClaim(), applicability_requirements: [] }
-    const result = evaluateJurisdictionClarificationEligibility(su, [directClaimNoJurisdiction, relatedJurisdictionGatedClaim()], false, true, [rel])
+    const result = evaluateJurisdictionClarificationEligibility(su, [directClaimNoJurisdiction, relatedJurisdictionGatedClaim()], false, [rel])
     expect(result.needs_jurisdiction).toBe(true)
     expect(result.eligible).toBe(true)
   })
@@ -225,7 +241,7 @@ describe('evaluateJurisdictionClarificationEligibility -- relationship-aware (on
   test('B: relationship Adopted but CRC-Eligible: Pending -> not eligible', () => {
     const su = baseSU({ user_goals: [goalCopyOwnership] })
     const pendingRel = relationship({ relationship_id: 'REL-TEST-1', source_topic: 'copyright_ownership', target_topic: 'copyrightability', crc_eligible: 'Pending' })
-    const result = evaluateJurisdictionClarificationEligibility(su, [relatedJurisdictionGatedClaim()], false, true, [pendingRel])
+    const result = evaluateJurisdictionClarificationEligibility(su, [relatedJurisdictionGatedClaim()], false, [pendingRel])
     expect(result.needs_jurisdiction).toBe(false)
     expect(result.eligible).toBe(false)
   })
@@ -234,7 +250,7 @@ describe('evaluateJurisdictionClarificationEligibility -- relationship-aware (on
   test('C: relationship CRC-Eligible: Yes but Lifecycle: Candidate (not Adopted) -> not eligible', () => {
     const su = baseSU({ user_goals: [goalCopyOwnership] })
     const notAdoptedRel = relationship({ relationship_id: 'REL-TEST-1', source_topic: 'copyright_ownership', target_topic: 'copyrightability', lifecycle: 'Candidate' })
-    const result = evaluateJurisdictionClarificationEligibility(su, [relatedJurisdictionGatedClaim()], false, true, [notAdoptedRel])
+    const result = evaluateJurisdictionClarificationEligibility(su, [relatedJurisdictionGatedClaim()], false, [notAdoptedRel])
     expect(result.needs_jurisdiction).toBe(false)
     expect(result.eligible).toBe(false)
   })
@@ -243,7 +259,7 @@ describe('evaluateJurisdictionClarificationEligibility -- relationship-aware (on
   test('D: target claim CRC-Eligible: Pending -> not eligible, even with a live relationship', () => {
     const su = baseSU({ user_goals: [goalCopyOwnership] })
     const pendingTarget: TopicClaim = { ...relatedJurisdictionGatedClaim(), crc_eligible: 'Pending' }
-    const result = evaluateJurisdictionClarificationEligibility(su, [pendingTarget], false, true, [rel])
+    const result = evaluateJurisdictionClarificationEligibility(su, [pendingTarget], false, [rel])
     expect(result.needs_jurisdiction).toBe(false)
     expect(result.eligible).toBe(false)
   })
@@ -252,7 +268,7 @@ describe('evaluateJurisdictionClarificationEligibility -- relationship-aware (on
   test('E: target claim Lifecycle: Candidate (not Adopted) -> not eligible, even with a live relationship', () => {
     const su = baseSU({ user_goals: [goalCopyOwnership] })
     const notAdoptedTarget: TopicClaim = { ...relatedJurisdictionGatedClaim(), lifecycle: 'Candidate' }
-    const result = evaluateJurisdictionClarificationEligibility(su, [notAdoptedTarget], false, true, [rel])
+    const result = evaluateJurisdictionClarificationEligibility(su, [notAdoptedTarget], false, [rel])
     expect(result.needs_jurisdiction).toBe(false)
     expect(result.eligible).toBe(false)
   })
@@ -261,7 +277,7 @@ describe('evaluateJurisdictionClarificationEligibility -- relationship-aware (on
   test('F: target claim is Adopted + CRC-Eligible: Yes but carries no jurisdiction applicability requirement -> not eligible', () => {
     const su = baseSU({ user_goals: [goalCopyOwnership] })
     const noJurisdictionTarget: TopicClaim = { ...relatedJurisdictionGatedClaim(), applicability_requirements: [] }
-    const result = evaluateJurisdictionClarificationEligibility(su, [noJurisdictionTarget], false, true, [rel])
+    const result = evaluateJurisdictionClarificationEligibility(su, [noJurisdictionTarget], false, [rel])
     expect(result.needs_jurisdiction).toBe(false)
     expect(result.eligible).toBe(false)
   })
@@ -270,7 +286,7 @@ describe('evaluateJurisdictionClarificationEligibility -- relationship-aware (on
   test('G: an unrelated relationship (different source_topic than the active goal) never contributes -> not eligible', () => {
     const su = baseSU({ user_goals: [goalCopyOwnership] })
     const unrelatedRel = relationship({ relationship_id: 'REL-UNRELATED', source_topic: 'commercial_use', target_topic: 'copyrightability' })
-    const result = evaluateJurisdictionClarificationEligibility(su, [relatedJurisdictionGatedClaim()], false, true, [unrelatedRel])
+    const result = evaluateJurisdictionClarificationEligibility(su, [relatedJurisdictionGatedClaim()], false, [unrelatedRel])
     expect(result.needs_jurisdiction).toBe(false)
     expect(result.eligible).toBe(false)
   })
@@ -287,17 +303,16 @@ describe('evaluateJurisdictionClarificationEligibility -- relationship-aware (on
       su,
       [firstHopClaimNoJurisdiction, secondHopClaim],
       false,
-      true,
       [rel, secondHopRel],
     )
     expect(result.needs_jurisdiction).toBe(false)
     expect(result.eligible).toBe(false)
   })
 
-  test('direct-topic behavior is unaffected when a relationship also exists for the same goal category -- both B1 and B2 can independently make a goal need jurisdiction', () => {
+  test('direct-topic behavior is unaffected when a relationship also exists for the same goal category -- both direct and relationship paths can independently make a goal need jurisdiction', () => {
     const su = baseSU({ user_goals: [goalCopyOwnership] })
-    // Direct-topic claim DOES need jurisdiction (B1) -- relationship is irrelevant here, but passing one must not break anything.
-    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false, true, [rel])
+    // Direct-topic claim DOES need jurisdiction -- relationship is irrelevant here, but passing one must not break anything.
+    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false, [rel])
     expect(result.needs_jurisdiction).toBe(true)
     expect(result.eligible).toBe(true)
   })
@@ -312,15 +327,17 @@ describe('evaluateJurisdictionClarificationEligibility -- relationship-aware (on
       },
     })
     const directClaimNoJurisdiction: TopicClaim = { ...jurisdictionGatedClaim(), applicability_requirements: [] }
-    const result = evaluateJurisdictionClarificationEligibility(su, [directClaimNoJurisdiction, relatedJurisdictionGatedClaim()], false, true, [rel])
+    const result = evaluateJurisdictionClarificationEligibility(su, [directClaimNoJurisdiction, relatedJurisdictionGatedClaim()], false, [rel])
     expect(result.eligible).toBe(false)
   })
 })
 
-// ── Copyright ownership UAT regression (Interview Engine Diagnostic Slice 1, 2026-08-19) ──
-// Real fixtures, not synthetic clones -- proves the fix against the actual, currently-live
-// governance state (COPY-004/-001/-002/-003 and REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1
-// are all real CRC Eligible: Yes as of 2026-08-19).
+// ── Copyright ownership UAT-state regression (Interview Engine Diagnostic Slice 1,
+// 2026-08-19; Gate-1 requirement removed, Copyright UAT Correction Milestone T1,
+// 2026-08-19) ── Real fixtures, not synthetic clones -- proves the fix against the
+// actual, currently-live governance state (COPY-004/-001/-002/-003 and
+// REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1 are all real CRC Eligible: Yes as of
+// 2026-08-19).
 
 describe('copyright ownership UAT regression: "Do I own the copyright?" now becomes jurisdiction-clarification-eligible', () => {
   const ownershipGoal: UserGoal = {
@@ -330,14 +347,19 @@ describe('copyright ownership UAT regression: "Do I own the copyright?" now beco
 
   test('BEFORE-style check (relationships omitted): the real fixture alone, without relationships threaded in, is NOT eligible -- proves the fix is additive, not a fixture-content change', () => {
     const su = baseSU({ user_goals: [ownershipGoal] })
-    const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, true)
+    const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false)
     expect(result.needs_jurisdiction).toBe(false)
     expect(result.eligible).toBe(false)
   })
 
-  test('AFTER fix: with relationships threaded in and jurisdiction unknown, the real copyright_ownership goal becomes eligible', () => {
-    const su = baseSU({ user_goals: [ownershipGoal] })
-    const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, true, TOPIC_RELATIONSHIPS_FIXTURE)
+  // T1: proves the exact live-UAT critical state -- goal confirmed, real governed
+  // relationship + target claims requiring jurisdiction, jurisdiction unknown, AND
+  // Gate 1 explicitly not_met -- is eligible. This is the state that stalled the
+  // real live UAT before T1 (Gate 1 never became 'met' due to the Kling-alias gap
+  // fixed by T2 below); it must be eligible on its own, independent of Gate 1.
+  test('T1: with relationships threaded in, jurisdiction unknown, and Gate 1 explicitly not_met, the real copyright_ownership goal is eligible before full Gate 1 is required', () => {
+    const su = baseSU({ user_goals: [ownershipGoal], gate_1_state: 'not_met' })
+    const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, TOPIC_RELATIONSHIPS_FIXTURE)
     expect(result.needs_jurisdiction).toBe(true)
     expect(result.jurisdiction_unresolved).toBe(true)
     expect(result.eligible).toBe(true)
@@ -352,7 +374,7 @@ describe('copyright ownership UAT regression: "Do I own the copyright?" now beco
         jurisdiction: { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 2, source_statement: 'United States' },
       },
     })
-    const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, true, TOPIC_RELATIONSHIPS_FIXTURE)
+    const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, TOPIC_RELATIONSHIPS_FIXTURE)
     expect(result.jurisdiction_unresolved).toBe(false)
     expect(result.eligible).toBe(false)
   })
@@ -365,7 +387,7 @@ describe('other-goal regression: unrelated categories, stock claims, and provide
     const su = baseSU({
       user_goals: [{ goal_id: 'g-1', state: 'confirmed', raw_text: 'Can I use this commercially?', category: 'commercial_use', scope: 'informational', superseded_by: null, source_turn: 1, source_statement: 'x' }],
     })
-    const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, true, TOPIC_RELATIONSHIPS_FIXTURE)
+    const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, TOPIC_RELATIONSHIPS_FIXTURE)
     expect(result.needs_jurisdiction).toBe(false)
     expect(result.eligible).toBe(false)
   })
@@ -374,7 +396,7 @@ describe('other-goal regression: unrelated categories, stock claims, and provide
     const su = baseSU({
       user_goals: [{ goal_id: 'g-1', state: 'confirmed', raw_text: 'Can I use this Getty image?', category: 'third_party_source_rights', scope: 'informational', superseded_by: null, source_turn: 1, source_statement: 'x' }],
     })
-    const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, true, TOPIC_RELATIONSHIPS_FIXTURE)
+    const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, TOPIC_RELATIONSHIPS_FIXTURE)
     expect(result.needs_jurisdiction).toBe(false)
     expect(result.eligible).toBe(false)
   })
@@ -384,7 +406,7 @@ describe('other-goal regression: unrelated categories, stock claims, and provide
       user_goals: [],
       asset_provider_mentions: [{ mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Getty', superseded_by: null }],
     })
-    const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, true, TOPIC_RELATIONSHIPS_FIXTURE)
+    const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, TOPIC_RELATIONSHIPS_FIXTURE)
     expect(result.needs_jurisdiction).toBe(false)
     expect(result.eligible).toBe(false)
   })
@@ -396,7 +418,7 @@ describe('other-goal regression: unrelated categories, stock claims, and provide
         { goal_id: 'g-2', state: 'confirmed', raw_text: 'Do I own the copyright?', category: 'copyright_ownership', scope: 'informational', superseded_by: null, source_turn: 1, source_statement: 'x' },
       ],
     })
-    const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, true, TOPIC_RELATIONSHIPS_FIXTURE)
+    const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, TOPIC_RELATIONSHIPS_FIXTURE)
     expect(result.needs_jurisdiction).toBe(true)
     expect(result.eligible).toBe(true)
   })
@@ -413,7 +435,7 @@ describe('buildJurisdictionClarificationProposal', () => {
     })
   })
 
-  test('the approved copy is exactly "Which country\'s copyright rules are most relevant to this project?"', () => {
+  test('the approved copy is exactly "Which country\'s copyright rules are most relevant to this project?" -- unchanged by T1', () => {
     expect(JURISDICTION_CLARIFICATION_QUESTION).toBe("Which country's copyright rules are most relevant to this project?")
   })
 })

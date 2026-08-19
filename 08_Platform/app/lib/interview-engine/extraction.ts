@@ -274,6 +274,15 @@ const KNOWN_TOOLS: Record<string, string> = {
   'runway gen-3': 'runway-gen3',
   'runway gen 3': 'runway-gen3',
   kling: 'kling',
+  // 'kling ai' added 2026-08-19 (Copyright UAT Correction Milestone T2):
+  // a real live UAT showed a user naming the tool exactly this way --
+  // "Kling AI" is the product's own natural, correctly-branded name, not
+  // an ambiguous or invented alias -- and the missing exact-string entry
+  // left the mention permanently `unresolved_alias` for the rest of that
+  // conversation (no later turn can repair it; see attestCandidate's own
+  // "never silently canonicalize an ambiguous tool name" discipline).
+  // Narrow, single alias only -- no fuzzy/generic matching added.
+  'kling ai': 'kling',
   elevenlabs: 'elevenlabs',
   'eleven labs': 'elevenlabs',
 }

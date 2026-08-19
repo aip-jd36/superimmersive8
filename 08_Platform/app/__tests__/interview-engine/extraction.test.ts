@@ -93,6 +93,65 @@ describe('normalizeCandidate: conservative alias disambiguation', () => {
   })
 })
 
+// ── Kling alias normalization (Copyright UAT Correction Milestone T2,
+// 2026-08-19): a real live UAT showed a user naming the tool exactly
+// "Kling AI" -- the product's own natural name -- and KNOWN_TOOLS only had
+// the bare "kling" key, so the mention stayed unresolved_alias for the
+// rest of that conversation, which in turn permanently blocked Gate 1
+// (AMBIGUOUS_TOOL_SURFACE_UNRESOLVED). Narrow, single alias added; no
+// fuzzy/generic matching introduced.
+describe('normalizeCandidate: Kling AI alias (Copyright UAT Correction Milestone T2, 2026-08-19)', () => {
+  test('A: "Kling" resolves to the existing canonical Kling identifier', () => {
+    const result = normalizeCandidate(toolCandidate({ raw_tool_name: 'Kling', raw_text: 'I used Kling.' }))
+    expect(result).toEqual({ status: 'resolved', canonical_identifier: 'kling' })
+  })
+
+  test('B: "Kling AI" resolves to the SAME canonical Kling identifier', () => {
+    const result = normalizeCandidate(toolCandidate({ raw_tool_name: 'Kling AI', raw_text: 'I generated it myself using Kling AI.' }))
+    expect(result).toEqual({ status: 'resolved', canonical_identifier: 'kling' })
+  })
+
+  test('C: "Kling" and "Kling AI" never produce two different canonical tools', () => {
+    const kling = normalizeCandidate(toolCandidate({ raw_tool_name: 'Kling', raw_text: 'Kling' }))
+    const klingAi = normalizeCandidate(toolCandidate({ raw_tool_name: 'Kling AI', raw_text: 'Kling AI' }))
+    expect(kling.status).toBe('resolved')
+    expect(klingAi.status).toBe('resolved')
+    if (kling.status === 'resolved' && klingAi.status === 'resolved') {
+      expect(klingAi.canonical_identifier).toBe(kling.canonical_identifier)
+    }
+  })
+
+  test('D: end-to-end -- "Kling AI" no longer produces an unresolved_alias ToolMention through the real pipeline', async () => {
+    const su = emptySU()
+    const result = await runExtractionPipeline(
+      su,
+      { turn: 1, text: 'I generated it myself using Kling AI.' },
+      constantExtractor([toolCandidate({ raw_tool_name: 'Kling AI', raw_text: 'I generated it myself using Kling AI.' })]),
+    )
+    expect(result.updated.tool_mentions).toHaveLength(1)
+    expect(result.updated.tool_mentions[0].resolution).toEqual({ kind: 'canonical', identifier: 'kling' })
+  })
+
+  test('E: existing unrelated tool aliases still behave identically (Runway, Nano Banana disambiguation, unrecognized)', () => {
+    expect(normalizeCandidate(toolCandidate({ raw_tool_name: 'Runway', raw_text: 'We used Runway.' }))).toEqual({
+      status: 'resolved',
+      canonical_identifier: 'runway-gen3',
+    })
+    expect(normalizeCandidate(toolCandidate({ raw_tool_name: 'Nano Banana', raw_text: 'I used Nano Banana for this one.' }))).toEqual({
+      status: 'known_ambiguous',
+      candidate_identifiers: ['gemini-api', 'gemini-consumer-app'],
+    })
+    expect(normalizeCandidate(toolCandidate({ raw_tool_name: 'SuperCoolTool9000', raw_text: 'We used SuperCoolTool9000.' }))).toEqual({
+      status: 'unrecognized',
+    })
+  })
+
+  test('F: a superficially similar but genuinely different/unknown tool name is NOT guessed via fuzzy matching -- stays unrecognized', () => {
+    const result = normalizeCandidate(toolCandidate({ raw_tool_name: 'Kling Pro', raw_text: 'I used Kling Pro.' }))
+    expect(result).toEqual({ status: 'unrecognized' })
+  })
+})
+
 describe('runExtractionPipeline: accepted proposals', () => {
   test('resolved tool is accepted, applied_identifier is the mention_id', async () => {
     const { updated, diagnostics } = await runExtractionPipeline(

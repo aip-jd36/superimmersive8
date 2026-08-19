@@ -508,11 +508,22 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     // explicit, narrow precedence rule -- jurisdiction serves an
     // already-stated user goal; Discovery is opportunistic education --
     // never generalized into "jurisdiction always wins").
+    //
+    // `[CHANGED 2026-08-19]` Copyright UAT Correction Milestone T1: no
+    // longer passed `gate1.state === 'met'`. The Gate-1/Knowledge-Question-
+    // Timing Diagnostic found this requirement inherited from
+    // commercial-readiness-catalog.ts's own formula shape, never
+    // independently justified, and empirically starved the deterministic
+    // question in a real live UAT (Gate 1 stalled on an unrelated
+    // tool-alias-normalization gap, so the governed jurisdiction question
+    // never got a turn while the conversation ran to exhaustion). Discovery
+    // immediately below is UNCHANGED -- it still requires
+    // `gate1.state === 'met'` -- this removal is scoped to jurisdiction
+    // only, per its own module header's rationale.
     const jurisdictionEligibility = evaluateJurisdictionClarificationEligibility(
       suAfter,
       topicClaims,
       boundaryStateLoaded.jurisdiction_clarification_asked,
-      gate1.state === 'met',
       relationships,
     )
     const jurisdictionProposal = jurisdictionEligibility.eligible ? buildJurisdictionClarificationProposal(phase) : undefined

@@ -1,8 +1,9 @@
 /**
  * Jurisdiction clarification eligibility (CRC Living Knowledge Phase 1,
  * 2026-08-16, PM final approval SS4/SS5; made relationship-aware, Interview
- * Engine Diagnostic Slice 1, 2026-08-19). Deterministic sibling to
- * commercial-readiness-catalog.ts, using the exact same architectural
+ * Engine Diagnostic Slice 1, 2026-08-19; Gate-1 requirement removed,
+ * Copyright UAT Correction Milestone T1, 2026-08-19). Deterministic sibling
+ * to commercial-readiness-catalog.ts, using the exact same architectural
  * pattern: this module decides WHETHER a jurisdiction-clarification
  * candidate is eligible to be proposed this turn; run-turn.ts's own Model
  * 4 attempt-#1 slot (the same slot Commercial Readiness Discovery already
@@ -11,12 +12,32 @@
  * A/B pipeline evaluates -- "eligibility only creates a candidate," same
  * hard rule the Discovery catalog's own header states.
  *
- * Exact PM-approved eligibility rule (SS4), all five must hold:
- *   A. Gate 1 is met.
- *   B. At least one active, confirmed UserGoal exists whose category EITHER
- *      (B1) directly equals the `topic` of an Adopted + CRC-eligible,
+ * `[REMOVED 2026-08-19]` Gate 1 is NO LONGER part of this rule. The
+ * Gate-1/Knowledge-Question-Timing Diagnostic (same date) found, via a real
+ * live copyright UAT, that `gate1Met` was inherited from
+ * commercial-readiness-catalog.ts's own eligibility formula purely by
+ * mirroring its shape (LK_PHASE1_TECHNICAL_DESIGN_v2.md's own design
+ * record says so directly, and explicitly flagged the interaction as
+ * untested) -- never independently justified for jurisdiction. The
+ * diagnostic's own Scenario Pressure-Test (A-F) found no case where a
+ * pre-Gate-1 jurisdiction question is unsafe, because `needsJurisdiction`
+ * below is already the real, narrow relevance gate: it requires an
+ * explicit, active, CONFIRMED user goal (never merely a tool mention, an
+ * IP address, or GOVERNED-CLAIMS.md containing jurisdictional knowledge in
+ * the abstract) whose category resolves -- directly or through one
+ * governed relationship hop -- to a claim that itself requires
+ * jurisdiction. Gate 1's own purpose (tool/workflow context) has no
+ * bearing on whether asking the user's own location is safe or relevant.
+ * Removing it also closes a real product gap the diagnostic's live UAT
+ * demonstrated concretely: `questioning_exhausted` can end an interview
+ * before Gate 1 ever becomes met, silently starving the deterministic,
+ * governed question of any turn to ever fire.
+ *
+ * Exact eligibility rule now, all four must hold:
+ *   A. At least one active, confirmed UserGoal exists whose category EITHER
+ *      (A1) directly equals the `topic` of an Adopted + CRC-eligible,
  *      non-superseded TopicClaim carrying a 'jurisdiction' applicability
- *      requirement, OR (B2, added Slice 1, 2026-08-19) is the `source_topic`
+ *      requirement, OR (A2, Slice 1, 2026-08-19) is the `source_topic`
  *      of an Adopted + CRC-eligible, non-superseded TopicRelationship whose
  *      `target_topic` has such a claim. One hop only -- this module never
  *      traverses a resolved `target_topic`'s own outgoing relationships,
@@ -26,16 +47,16 @@
  *      AND target claim Adopted+Yes, neither alone sufficient) is
  *      reproduced here independently, not imported -- see this module's own
  *      "No Retrieval call" note below for why.
- *   C. (folded into B -- a claim with no jurisdiction requirement can
+ *   B. (folded into A -- a claim with no jurisdiction requirement can
  *      never make jurisdiction clarification eligible on its own account,
  *      whether reached directly or via a relationship.)
- *   D. ProjectFacts.jurisdiction is NEITHER confirmed NOR declined.
- *   E. jurisdiction_clarification_asked is false (enforced in
+ *   C. ProjectFacts.jurisdiction is NEITHER confirmed NOR declined.
+ *   D. jurisdiction_clarification_asked is false (enforced in
  *      boundaries.ts, not duplicated here -- this module's own
  *      `alreadyAskedThisConversation` parameter is the same shape
  *      commercial-readiness-catalog.ts already uses for the identical
  *      reason: testable in isolation before boundary wiring exists).
- *   F. Existing candidate/Constraint rules permit asking -- decided by the
+ *   E. Existing candidate/Constraint rules permit asking -- decided by the
  *      ordinary Constraint A/B pipeline this candidate still goes
  *      through, never bypassed here.
  *
@@ -46,18 +67,19 @@
  * one-hop relationship-mediated) (never from IP/locale/traffic-
  * classification -- this module imports none of those).
  *
- * No Retrieval call (Slice 1 scope boundary, load-bearing): this module
- * does NOT call `retrieve()` or import `lookupRelatedTopicClaims`/
- * `lookupTopicClaims`/anything under `lib/bounded-interpretation/`. It
- * reproduces only the narrow governance-gate SHAPE those modules already
- * enforce (Adopted + CRC-eligible, non-superseded, one hop), as a small,
- * self-contained pure helper over `TopicClaim[]`/`TopicRelationship[]` --
- * the same "type-only, no cross-boundary LOGIC import" discipline this
- * module already used for `TopicClaim` before this change. Retrieval's own
- * `isApplicable()`/applicability-fact evaluation is deliberately NOT
- * reused or reproduced here -- this module only asks "does a relevant claim
- * REQUIRE jurisdiction at all," never "is it otherwise applicable," which
- * stays exactly Retrieval's own, single-owner concern.
+ * No Retrieval call (Slice 1 scope boundary, load-bearing, unchanged by
+ * this removal): this module does NOT call `retrieve()` or import
+ * `lookupRelatedTopicClaims`/`lookupTopicClaims`/anything under
+ * `lib/bounded-interpretation/`. It reproduces only the narrow
+ * governance-gate SHAPE those modules already enforce (Adopted +
+ * CRC-eligible, non-superseded, one hop), as a small, self-contained pure
+ * helper over `TopicClaim[]`/`TopicRelationship[]` -- the same "type-only,
+ * no cross-boundary LOGIC import" discipline this module already used for
+ * `TopicClaim` before this change. Retrieval's own `isApplicable()`/
+ * applicability-fact evaluation is deliberately NOT reused or reproduced
+ * here -- this module only asks "does a relevant claim REQUIRE jurisdiction
+ * at all," never "is it otherwise applicable," which stays exactly
+ * Retrieval's own, single-owner concern.
  */
 
 import type { GoalCategory, Phase, StructuredUnderstanding } from '@/types/interview-engine'
@@ -124,7 +146,6 @@ export function evaluateJurisdictionClarificationEligibility(
   understanding: StructuredUnderstanding,
   topicClaims: TopicClaim[],
   alreadyAskedThisConversation: boolean,
-  gate1Met: boolean,
   relationships: TopicRelationship[] = [],
 ): JurisdictionClarificationEligibilityResult {
   const activeConfirmedGoals = understanding.user_goals.filter((g) => g.superseded_by === null && g.state === 'confirmed')
@@ -133,7 +154,7 @@ export function evaluateJurisdictionClarificationEligibility(
   const jurisdictionState = understanding.project_facts.jurisdiction.attestation.state
   const jurisdictionUnresolved = jurisdictionState !== 'confirmed' && jurisdictionState !== 'declined'
 
-  const eligible = gate1Met && needsJurisdiction && jurisdictionUnresolved && !alreadyAskedThisConversation
+  const eligible = needsJurisdiction && jurisdictionUnresolved && !alreadyAskedThisConversation
 
   return { needs_jurisdiction: needsJurisdiction, jurisdiction_unresolved: jurisdictionUnresolved, eligible }
 }

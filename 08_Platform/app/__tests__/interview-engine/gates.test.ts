@@ -97,6 +97,46 @@ describe('evaluateGate1', () => {
     expect(result.unresolved_fields).toEqual(['tool_mentions.tm-1'])
   })
 
+  // Copyright UAT Correction Milestone T2, 2026-08-19: the real live UAT's
+  // proximate Gate-1 stall was "Kling AI" normalizing to unresolved_alias
+  // (KNOWN_TOOLS only had the bare "kling" key). T2 fixed the alias
+  // registry in extraction.ts, NOT this module -- evaluateGate1() and its
+  // unresolved-alias-vetoes-Gate-1 precedence are explicitly unchanged
+  // (out of scope per this milestone). This test proves the fix's downstream
+  // effect at the Gate 1 boundary: once "Kling AI" normalizes to the
+  // canonical `kling` identifier (attestCandidate's own job, exercised
+  // directly in extraction.test.ts), a ToolMention carrying that resolution
+  // no longer trips AMBIGUOUS_TOOL_SURFACE_UNRESOLVED.
+  test('T2 regression: a "Kling AI" mention that has normalized to canonical `kling` no longer blocks Gate 1 via AMBIGUOUS_TOOL_SURFACE_UNRESOLVED', () => {
+    const su = baseSU({
+      tool_mentions: [toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'kling' }, source_statement: 'I generated it myself using Kling AI.' })],
+    })
+    const result = evaluateGate1(su)
+    expect(result.state).toBe('met')
+    expect(result.reason_code).toBe('MINIMUM_UNDERSTANDING_MET')
+    expect(result.unresolved_fields).toEqual([])
+  })
+
+  // Explicit negative control for T2: a genuinely unresolved tool alias
+  // (unrelated to the Kling fix) must STILL block Gate 1 under current,
+  // unmodified Gate 1 semantics -- T2 narrowly fixed one missing alias
+  // entry, it did not loosen the unresolved-alias veto itself.
+  test('T2 negative control: a genuinely unresolved (non-Kling) tool alias still blocks Gate 1', () => {
+    const su = baseSU({
+      tool_mentions: [
+        toolMention({
+          mention_id: 'tm-1',
+          resolution: { kind: 'unresolved_alias', raw_name: 'SuperCoolTool9000' },
+          confidence: 'unresolved_no_visibility',
+        }),
+      ],
+    })
+    const result = evaluateGate1(su)
+    expect(result.state).toBe('not_met')
+    expect(result.reason_code).toBe('AMBIGUOUS_TOOL_SURFACE_UNRESOLVED')
+    expect(result.unresolved_fields).toEqual(['tool_mentions.tm-1'])
+  })
+
   test('multiple tools, only one unresolved surface: not_met, names only the unresolved one', () => {
     const su = baseSU({
       tool_mentions: [

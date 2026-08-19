@@ -202,6 +202,42 @@ describe('jurisdiction clarification -- eligibility gating', () => {
   })
 })
 
+describe('jurisdiction clarification -- fires before Gate 1 is met (Copyright UAT Correction Milestone T1, 2026-08-19)', () => {
+  test('real orchestration: jurisdiction occupies attempt-1 and is asked even when Gate 1 is not_met -- the ordinary organic generator is never even called', async () => {
+    const store = createInMemorySessionStore()
+    let generatorCalled = false
+    const generator = async () => {
+      generatorCalled = true
+      return null
+    }
+    // Deliberately NO tool mention and NO intended_use/workflow_role candidates --
+    // only the copyright_ownership goal. Gate 1 therefore cannot be met
+    // (NO_TOOL_OR_PRODUCTION_STEP_IDENTIFIED + INTENDED_USE_MISSING), reproducing
+    // the exact pre-T1 blocking condition from the real live UAT.
+    const d = deps(
+      {
+        extractor: constantExtractor([goalCandidate()]),
+        decider: constantConstraintADecider(askDecision()),
+        generator,
+      },
+      store,
+    )
+    const outcome = await runTurn({ token: 't9', turnNumber: 1, userText: 'Do I own the copyright to it?' }, d)
+
+    const state = await loadState(store, 't9')
+    // Verifies the precondition, not just asserts it: Gate 1 genuinely did not become met this turn.
+    expect(state.structured_understanding.gate_1_state).toBe('not_met')
+
+    expect(outcome.kind).toBe('question')
+    if (outcome.kind === 'question') {
+      expect(outcome.message).toBe(JURISDICTION_CLARIFICATION_QUESTION)
+    }
+    expect(outcome.jurisdictionSignal).toEqual({ eligible: true, outcome: 'asked' })
+    expect(generatorCalled).toBe(false)
+    expect(state.boundary_state.jurisdiction_clarification_asked).toBe(true)
+  })
+})
+
 describe('jurisdiction clarification -- precedence over Commercial Readiness Discovery (PM SS6)', () => {
   test('when both jurisdiction and Discovery are eligible the same turn, jurisdiction wins the attempt-1 slot', async () => {
     const store = createInMemorySessionStore()
