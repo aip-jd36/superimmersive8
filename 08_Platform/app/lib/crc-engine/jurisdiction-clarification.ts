@@ -1,6 +1,7 @@
 /**
  * Jurisdiction clarification eligibility (CRC Living Knowledge Phase 1,
- * 2026-08-16, PM final approval SS4/SS5). Deterministic sibling to
+ * 2026-08-16, PM final approval SS4/SS5; made relationship-aware, Interview
+ * Engine Diagnostic Slice 1, 2026-08-19). Deterministic sibling to
  * commercial-readiness-catalog.ts, using the exact same architectural
  * pattern: this module decides WHETHER a jurisdiction-clarification
  * candidate is eligible to be proposed this turn; run-turn.ts's own Model
@@ -12,11 +13,22 @@
  *
  * Exact PM-approved eligibility rule (SS4), all five must hold:
  *   A. Gate 1 is met.
- *   B. At least one active, confirmed UserGoal exists whose category has
- *      an Adopted + CRC-eligible, non-superseded TopicClaim carrying a
- *      'jurisdiction' applicability requirement.
+ *   B. At least one active, confirmed UserGoal exists whose category EITHER
+ *      (B1) directly equals the `topic` of an Adopted + CRC-eligible,
+ *      non-superseded TopicClaim carrying a 'jurisdiction' applicability
+ *      requirement, OR (B2, added Slice 1, 2026-08-19) is the `source_topic`
+ *      of an Adopted + CRC-eligible, non-superseded TopicRelationship whose
+ *      `target_topic` has such a claim. One hop only -- this module never
+ *      traverses a resolved `target_topic`'s own outgoing relationships,
+ *      mirroring `lookupRelatedTopicClaims`'s own "one hop is the entire
+ *      shape of the loop" discipline exactly (lookup-topic-relationships.ts).
+ *      The double CRC gate that module documents (relationship Adopted+Yes
+ *      AND target claim Adopted+Yes, neither alone sufficient) is
+ *      reproduced here independently, not imported -- see this module's own
+ *      "No Retrieval call" note below for why.
  *   C. (folded into B -- a claim with no jurisdiction requirement can
- *      never make jurisdiction clarification eligible on its own account.)
+ *      never make jurisdiction clarification eligible on its own account,
+ *      whether reached directly or via a relationship.)
  *   D. ProjectFacts.jurisdiction is NEITHER confirmed NOR declined.
  *   E. jurisdiction_clarification_asked is false (enforced in
  *      boundaries.ts, not duplicated here -- this module's own
@@ -30,13 +42,27 @@
  * Deliberately does NOT fire merely because GOVERNED-CLAIMS.md contains
  * jurisdictional knowledge, a tool was mentioned, or a session has an IP
  * address -- the trigger is `needsJurisdiction`, computed strictly from an
- * ACTIVE USER GOAL's own category against real topic claims (never from
- * IP/locale/traffic-classification -- this module imports none of those).
+ * ACTIVE USER GOAL's own category against real topic claims (direct or
+ * one-hop relationship-mediated) (never from IP/locale/traffic-
+ * classification -- this module imports none of those).
+ *
+ * No Retrieval call (Slice 1 scope boundary, load-bearing): this module
+ * does NOT call `retrieve()` or import `lookupRelatedTopicClaims`/
+ * `lookupTopicClaims`/anything under `lib/bounded-interpretation/`. It
+ * reproduces only the narrow governance-gate SHAPE those modules already
+ * enforce (Adopted + CRC-eligible, non-superseded, one hop), as a small,
+ * self-contained pure helper over `TopicClaim[]`/`TopicRelationship[]` --
+ * the same "type-only, no cross-boundary LOGIC import" discipline this
+ * module already used for `TopicClaim` before this change. Retrieval's own
+ * `isApplicable()`/applicability-fact evaluation is deliberately NOT
+ * reused or reproduced here -- this module only asks "does a relevant claim
+ * REQUIRE jurisdiction at all," never "is it otherwise applicable," which
+ * stays exactly Retrieval's own, single-owner concern.
  */
 
-import type { Phase, StructuredUnderstanding } from '@/types/interview-engine'
+import type { GoalCategory, Phase, StructuredUnderstanding } from '@/types/interview-engine'
 import type { CandidateQuestionProposal } from '@/lib/interview-engine/candidate-question'
-import type { TopicClaim } from '@/lib/retrieval-engine/types'
+import type { TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
 
 /**
  * PM-approved exact copy (SS3): "Which country's copyright rules are most
@@ -61,14 +87,48 @@ function claimNeedsJurisdiction(claim: TopicClaim): boolean {
   )
 }
 
+/**
+ * One-hop relationship gate, reproducing `lookupRelatedTopicClaims`'s own
+ * relationship-eligibility filter (lookup-topic-relationships.ts) exactly,
+ * independently -- see this module's own header "No Retrieval call" note
+ * for why it is not imported instead. A relationship that is Adopted-but-
+ * Pending (e.g. a not-yet-CRC-published relationship) never passes this
+ * gate, matching Retrieval's own "zero behavior change" guarantee for the
+ * exact same governance state.
+ */
+function eligibleRelationshipsFor(category: GoalCategory, relationships: TopicRelationship[]): TopicRelationship[] {
+  return relationships.filter(
+    (r) => r.source_topic === category && r.superseded_by === null && r.lifecycle === 'Adopted' && r.crc_eligible === 'Yes',
+  )
+}
+
+/**
+ * Whether an active goal's category needs jurisdiction clarification --
+ * true when EITHER a direct-topic claim (B1) OR a one-hop relationship-
+ * mediated claim (B2) requires it. `relationships` defaults to `[]` so
+ * every pre-existing call site (direct-topic-only) is completely
+ * unaffected -- the additive-parameter, defaults-preserve-existing-
+ * behavior discipline already used throughout this codebase for
+ * `retrieve()`'s own `relationships`/`assetProviders` parameters.
+ */
+function goalNeedsJurisdiction(category: GoalCategory, topicClaims: TopicClaim[], relationships: TopicRelationship[]): boolean {
+  const directlyNeeds = topicClaims.some((c) => c.topic === category && claimNeedsJurisdiction(c))
+  if (directlyNeeds) return true
+
+  return eligibleRelationshipsFor(category, relationships).some((r) =>
+    topicClaims.some((c) => c.topic === r.target_topic && c.superseded_by === null && claimNeedsJurisdiction(c)),
+  )
+}
+
 export function evaluateJurisdictionClarificationEligibility(
   understanding: StructuredUnderstanding,
   topicClaims: TopicClaim[],
   alreadyAskedThisConversation: boolean,
   gate1Met: boolean,
+  relationships: TopicRelationship[] = [],
 ): JurisdictionClarificationEligibilityResult {
   const activeConfirmedGoals = understanding.user_goals.filter((g) => g.superseded_by === null && g.state === 'confirmed')
-  const needsJurisdiction = activeConfirmedGoals.some((g) => topicClaims.some((c) => c.topic === g.category && claimNeedsJurisdiction(c)))
+  const needsJurisdiction = activeConfirmedGoals.some((g) => goalNeedsJurisdiction(g.category, topicClaims, relationships))
 
   const jurisdictionState = understanding.project_facts.jurisdiction.attestation.state
   const jurisdictionUnresolved = jurisdictionState !== 'confirmed' && jurisdictionState !== 'declined'

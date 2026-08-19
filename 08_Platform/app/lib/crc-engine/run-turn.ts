@@ -368,10 +368,19 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   // Governed Topic Relationships orchestrator-wiring follow-up,
   // 2026-08-16: same defaulted-here discipline as topicClaims immediately
   // above. Threaded into runCRCConversation() at every completion call
-  // site ONLY -- deliberately NOT into evaluateJurisdictionClarificationEligibility
-  // (jurisdiction-clarification eligibility has never taken a relationships
-  // argument and must not gain one here; a Reviewer-only, CRC-Pending
-  // relationship must never trigger a jurisdiction question).
+  // site.
+  //
+  // UPDATE (Interview Engine Diagnostic Slice 1, 2026-08-19): also now
+  // threaded into evaluateJurisdictionClarificationEligibility below --
+  // that module's own governance gate (relationship Adopted + CRC Eligible:
+  // Yes, reproduced independently there, never imported from Retrieval)
+  // still means a Reviewer-only or CRC-Pending relationship can never
+  // trigger a jurisdiction question; only a relationship that ALREADY
+  // passes the identical bar Retrieval itself requires can. This closes the
+  // gap where a `copyright_ownership` goal could not see that its own
+  // relationship-mediated `copyrightability` claims (reachable once
+  // REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1 went CRC-eligible) require
+  // jurisdiction -- see the Interview Engine Diagnostic's own finding.
   const relationships = deps.relationships ?? []
   const loaded = await deps.sessionStore.load(input.token)
   const suLoaded = loaded?.structured_understanding ?? emptyStructuredUnderstanding()
@@ -504,6 +513,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
       topicClaims,
       boundaryStateLoaded.jurisdiction_clarification_asked,
       gate1.state === 'met',
+      relationships,
     )
     const jurisdictionProposal = jurisdictionEligibility.eligible ? buildJurisdictionClarificationProposal(phase) : undefined
 
