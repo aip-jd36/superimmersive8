@@ -85,6 +85,7 @@ const richSignal: DialogueFixture = {
       intended_use: fact({ state: 'confirmed', value: 'Paid social ad campaign, 30s cutdown' }, 1, "It's for a paid social campaign, a 30-second cutdown."),
       workflow_role: fact({ state: 'confirmed', value: 'Producer' }, 1, "I'm the producer on this one."),
       jurisdiction: fact({ state: 'unknown' }, 0, ''),
+      human_contribution_description: fact({ state: 'unknown' }, 0, ''),
     },
     tool_mentions: [
       {
@@ -154,6 +155,7 @@ const noSignal: DialogueFixture = {
       intended_use: unattestedFact(1, "I'm not really sure, I'd have to check."),
       workflow_role: unattestedFact(1, "I'm not really sure, I'd have to check."),
       jurisdiction: unattestedFact(0, ''),
+      human_contribution_description: unattestedFact(0, ''),
     },
     tool_mentions: [],
     scoped_observations: [
@@ -199,6 +201,7 @@ const currentVsHistorical: DialogueFixture = {
       intended_use: unattestedFact(1, "This one was Kling, personal plan."),
       workflow_role: fact({ state: 'confirmed', value: 'Editor' }, 1, "I'm the editor on it."),
       jurisdiction: fact({ state: 'unknown' }, 0, ''),
+      human_contribution_description: fact({ state: 'unknown' }, 0, ''),
     },
     tool_mentions: [
       {
@@ -271,6 +274,7 @@ const ambiguousUncertain: DialogueFixture = {
       intended_use: fact({ state: 'unknown' }, 3, "Nobody's decided yet where this is actually going to run."),
       workflow_role: fact({ state: 'confirmed', value: 'Motion designer' }, 1, "I did the motion work on this."),
       jurisdiction: fact({ state: 'unknown' }, 0, ''),
+      human_contribution_description: fact({ state: 'unknown' }, 0, ''),
     },
     tool_mentions: [
       {
@@ -335,6 +339,7 @@ const fullOptOut: DialogueFixture = {
       intended_use: fact({ state: 'declined' }, 1, "I'd rather not go through this right now, can we stop?"),
       workflow_role: fact({ state: 'declined' }, 1, "I'd rather not go through this right now, can we stop?"),
       jurisdiction: fact({ state: 'unknown' }, 0, ''),
+      human_contribution_description: fact({ state: 'unknown' }, 0, ''),
     },
     tool_mentions: [],
     scoped_observations: [
@@ -385,6 +390,7 @@ const mixedMultiSignal: DialogueFixture = {
       intended_use: fact({ state: 'confirmed', value: 'Client-facing pitch deck video' }, 1, "It's for a pitch, not a paid campaign."),
       workflow_role: fact({ state: 'confirmed', value: 'Creative director' }, 1, "I'm the creative director on this."),
       jurisdiction: fact({ state: 'unknown' }, 0, ''),
+      human_contribution_description: fact({ state: 'unknown' }, 0, ''),
     },
     tool_mentions: [
       {
@@ -489,6 +495,7 @@ const ambiguousMultiSurfaceTool: DialogueFixture = {
       intended_use: fact({ state: 'confirmed', value: 'Internal concept test' }, 1, "It's just an internal concept test."),
       workflow_role: fact({ state: 'confirmed', value: 'Designer' }, 1, "I'm the designer on it."),
       jurisdiction: fact({ state: 'unknown' }, 0, ''),
+      human_contribution_description: fact({ state: 'unknown' }, 0, ''),
     },
     tool_mentions: [
       {
@@ -575,6 +582,7 @@ const fullPhase1To4Trace: DialogueFixture = {
       intended_use: fact({ state: 'confirmed', value: 'Paid social ad campaign' }, 1, "It's for a paid social ad campaign."),
       workflow_role: fact({ state: 'confirmed', value: 'Producer' }, 1, "I'm the producer."),
       jurisdiction: fact({ state: 'unknown' }, 0, ''),
+      human_contribution_description: fact({ state: 'unknown' }, 0, ''),
     },
     tool_mentions: [
       {

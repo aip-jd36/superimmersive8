@@ -49,7 +49,9 @@ export const DEFAULT_MODEL = 'claude-sonnet-5'
  * Removing it from the enum makes that structurally unreachable rather
  * than relying on the model simply never choosing an undocumented value.
  */
-const ORDINARY_GENERATOR_QUESTION_KINDS = CANDIDATE_QUESTION_KINDS.filter((k) => k !== 'commercial_readiness_discovery' && k !== 'jurisdiction_clarification')
+const ORDINARY_GENERATOR_QUESTION_KINDS = CANDIDATE_QUESTION_KINDS.filter(
+  (k) => k !== 'commercial_readiness_discovery' && k !== 'jurisdiction_clarification' && k !== 'human_contribution_clarification',
+)
 
 const SYSTEM_PROMPT = `You are the candidate-question generation stage of a larger, deterministic pipeline for CRC, a conversational tool that helps someone understand the commercial-use status of an AI-generated video project. Your only job is to propose ONE next question CRC might ask, given its current structured understanding of the project. You are not the only stage: everything you produce is a PROPOSAL, checked by deterministic code downstream that decides whether it is actually permitted to ask. You never see or affect whether your proposal gets used.
 

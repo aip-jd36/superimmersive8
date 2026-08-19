@@ -15,6 +15,7 @@ function emptySU(): StructuredUnderstanding {
       intended_use: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'x' },
       workflow_role: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'x' },
       jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
     },
     tool_mentions: [],
     scoped_observations: [],

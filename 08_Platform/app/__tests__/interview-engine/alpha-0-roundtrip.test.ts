@@ -48,6 +48,7 @@ function buildBaseStructuredUnderstanding(): StructuredUnderstanding {
       intended_use: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'Not sure yet.' },
       workflow_role: { attestation: { state: 'declined' }, source_turn: 1, source_statement: "I'd rather not say." },
       jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
     },
     tool_mentions: [
       {

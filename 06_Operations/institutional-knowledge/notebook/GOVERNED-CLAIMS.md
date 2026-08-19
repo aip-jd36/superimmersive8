@@ -47,7 +47,7 @@ Applicability requirements:
   - fact: jurisdiction | tool_plan_tier
     operator: equals | not_equals
     value:
-Unresolved project dependencies: []   <!-- free-form identifiers (snake_case, one per distinct missing concept, e.g. human_creative_contribution_level) naming project-specific facts CRC does not currently model that this claim's real-world application depends on, even after all Applicability requirements above are met. Informational governance metadata only -- never evaluated against any fact, never gates whether this claim reaches CRC. Empty list is the default: means this claim is fully resolvable once its formal Applicability requirements are met. Non-empty triggers relevant_applicability_unresolved (Case 3B) instead of directly_relevant once this claim is Adopted + CRC-eligible -- see lib/bounded-interpretation/types.ts. -->
+Unresolved project dependencies: []   <!-- free-form identifiers (snake_case, one per distinct missing concept, e.g. human_contribution_description) naming project-specific facts CRC does not currently model that this claim's real-world application depends on, even after all Applicability requirements above are met. Informational governance metadata only -- never evaluated against any fact, never gates whether this claim reaches CRC. Empty list is the default: means this claim is fully resolvable once its formal Applicability requirements are met. Non-empty triggers relevant_applicability_unresolved (Case 3B) instead of directly_relevant once this claim is Adopted + CRC-eligible -- see lib/bounded-interpretation/types.ts. -->
 Prohibited conclusions: >
 
 Lifecycle: Candidate            <!-- Candidate | Under Review | Adopted | Deprecated -->
@@ -113,7 +113,7 @@ Applicability requirements:
   - fact: jurisdiction
     operator: equals
     value: United States
-Unresolved project dependencies: [human_creative_contribution_level]
+Unresolved project dependencies: [human_contribution_description]   <!-- renamed 2026-08-19 from human_creative_contribution_level (Copyright UAT Correction Milestone, PM-approved pure naming-consistency change -- no proposition/statement/scope/lifecycle/CRC-eligibility change) -->
 Prohibited conclusions: >
   Does not establish whether a SPECIFIC video has sufficient human
   contribution to qualify -- see CLAIM-COPY-003 for the fractional-authorship
@@ -242,7 +242,7 @@ Applicability requirements:
   - fact: jurisdiction
     operator: equals
     value: United States
-Unresolved project dependencies: [human_creative_contribution_level]
+Unresolved project dependencies: [human_contribution_description]   <!-- renamed 2026-08-19 from human_creative_contribution_level (Copyright UAT Correction Milestone, PM-approved pure naming-consistency change -- no proposition/statement/scope/lifecycle/CRC-eligibility change) -->
 Prohibited conclusions: >
   Does not mean NO human involvement can ever establish authorship -- see
   CLAIM-COPY-003. Does not evaluate any specific user's actual workflow;
@@ -359,7 +359,7 @@ Applicability requirements:
   - fact: jurisdiction
     operator: equals
     value: United States
-Unresolved project dependencies: [human_creative_contribution_level]
+Unresolved project dependencies: [human_contribution_description]   <!-- renamed 2026-08-19 from human_creative_contribution_level (Copyright UAT Correction Milestone, PM-approved pure naming-consistency change -- no proposition/statement/scope/lifecycle/CRC-eligibility change) -->
 Prohibited conclusions: >
   Does not establish that ANY editing automatically qualifies -- the source
   material's own "case-by-case" and "perceptible and distinguishable"
@@ -407,7 +407,7 @@ this claim's own affirmative framing ("selecting, arranging, or editing...
 can support a copyright claim") currently renders identically whether the
 user described substantial creative editing or only trivial/technical
 editing (e.g. resolution/format conversion), since CRC does not yet
-evaluate `human_creative_contribution_level` against what the user actually
+evaluate `human_contribution_description` against what the user actually
 described. Never produces a false or determinative statement in any tested
 scenario (the "meaningfully"/"case by case" qualifiers and the standard
 unresolved-applicability hedge hold in every case) -- flagged for PM

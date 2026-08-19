@@ -27,17 +27,58 @@
  */
 
 import type { RetrievalDiagnostic, RetrievalResult } from '@/lib/retrieval-engine/types'
-import type { UserGoal } from '@/types/interview-engine'
+import type { Attested, UserGoal } from '@/types/interview-engine'
 import type { BoundedInterpretation } from './types'
 import {
   DETERMINATION_DECLINED_TEMPLATE,
   directlyRelevantSummary,
+  humanContributionRelevanceSentence,
   outsideCoverageSummary,
   relevantApplicabilityUnresolvedNoContentSummary,
   relevantApplicabilityUnresolvedWithContentSummary,
 } from './rules'
 
-export function buildBoundedInterpretations(goals: UserGoal[], results: RetrievalResult[], diagnostics: RetrievalDiagnostic[] = []): BoundedInterpretation[] {
+const HUMAN_CONTRIBUTION_DEPENDENCY = 'human_contribution_description'
+
+/**
+ * H5 -- minimal echo-only relevance composition (Copyright UAT Correction
+ * Milestone, 2026-08-19, PM-approved narrow scope, exact conditions A/B/C
+ * from the milestone task). NOT full Project-Fact-Aware Bounded Composition
+ * (still deferred, still unauthorized) -- this decides only WHETHER to
+ * additionally echo the user's own self-reported contribution alongside
+ * the existing, unchanged Case 3B hedge; it does not select claims
+ * differently, rank contribution, or mark any dependency resolved.
+ *
+ * A. the goal this interpretation is for is copyright_ownership or
+ *    copyrightability;
+ * B. at least one matched claim carries 'human_contribution_description'
+ *    in its unresolved_project_dependencies (a read of existing governance
+ *    metadata Retrieval already passed through -- see RetrievalResult's
+ *    own `unresolved_project_dependencies` field, a passthrough of
+ *    TopicClaim's own field);
+ * C. ProjectFacts.human_contribution_description is confirmed.
+ *
+ * All three must hold. This function makes no claim-selection or wording
+ * decision beyond that boolean -- rules.ts's own humanContributionRelevanceSentence
+ * owns the actual fixed, deterministic sentence.
+ */
+function shouldIncludeHumanContributionSentence(
+  category: UserGoal['category'],
+  matches: RetrievalResult[],
+  humanContributionDescription: Attested<string>,
+): boolean {
+  const concernsHumanContributionGoal = category === 'copyright_ownership' || category === 'copyrightability'
+  const matchedClaimCarriesDependency = matches.some((m) => m.unresolved_project_dependencies.includes(HUMAN_CONTRIBUTION_DEPENDENCY))
+  const contributionConfirmed = humanContributionDescription.state === 'confirmed'
+  return concernsHumanContributionGoal && matchedClaimCarriesDependency && contributionConfirmed
+}
+
+export function buildBoundedInterpretations(
+  goals: UserGoal[],
+  results: RetrievalResult[],
+  diagnostics: RetrievalDiagnostic[] = [],
+  humanContributionDescription: Attested<string> = { state: 'unknown' },
+): BoundedInterpretation[] {
   const activeConfirmedGoals = goals.filter((g) => g.superseded_by === null && g.state === 'confirmed')
 
   return activeConfirmedGoals.map((goal) => {
@@ -96,10 +137,18 @@ export function buildBoundedInterpretations(goals: UserGoal[], results: Retrieva
       // still quoted (matches directly_relevant's own quoting discipline),
       // only the closing sentence and status differ.
       if (matches.some((m) => m.unresolved_project_dependencies.length > 0)) {
+        // H5 (Copyright UAT Correction Milestone, 2026-08-19): additive
+        // only -- when all three conditions hold, a bounded, deterministic
+        // sentence echoing the user's own self-reported contribution is
+        // inserted BEFORE the unchanged closing hedge below; otherwise this
+        // renders byte-identical to before H5 existed.
+        const humanContributionSentence = shouldIncludeHumanContributionSentence(goal.category, matches, humanContributionDescription)
+          ? humanContributionRelevanceSentence(humanContributionDescription.state === 'confirmed' ? humanContributionDescription.value : '')
+          : null
         return buildInterpretation(
           goal,
           'relevant_applicability_unresolved',
-          relevantApplicabilityUnresolvedWithContentSummary(goal.category, combinedStatement, includesRelatedTopicContent),
+          relevantApplicabilityUnresolvedWithContentSummary(goal.category, combinedStatement, includesRelatedTopicContent, humanContributionSentence),
           claimIds,
         )
       }

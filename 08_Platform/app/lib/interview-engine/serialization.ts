@@ -68,6 +68,16 @@ export function serializeStructuredUnderstanding(su: StructuredUnderstanding): s
  * `asset_provider_mentions` key at all, which would otherwise leave it
  * `undefined` at runtime despite the type claiming `AssetProviderMention[]`.
  */
+/**
+ * `project_facts.human_contribution_description` defaulted when absent
+ * (Copyright UAT Correction Milestone, 2026-08-19): same reasoning, same
+ * funnel, same full-`AttestedFact<string>` shape as the `jurisdiction`
+ * default immediately above (added 2026-08-16) -- a session persisted
+ * before this field existed has a `project_facts` object but no
+ * `human_contribution_description` key on it. No database migration
+ * needed: `StructuredUnderstanding` is stored as JSONB and this funnel is
+ * the single normalization point every load path already goes through.
+ */
 export function deserializeStructuredUnderstanding(json: string): StructuredUnderstanding {
   const parsed = JSON.parse(json) as StructuredUnderstanding
   const user_goals = (parsed.user_goals ?? []).map((g) => ({
@@ -78,6 +88,11 @@ export function deserializeStructuredUnderstanding(json: string): StructuredUnde
   const project_facts: StructuredUnderstanding['project_facts'] = {
     ...parsed.project_facts,
     jurisdiction: parsed.project_facts?.jurisdiction ?? { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+    human_contribution_description: parsed.project_facts?.human_contribution_description ?? {
+      attestation: { state: 'unknown' },
+      source_turn: 0,
+      source_statement: '',
+    },
   }
   const asset_provider_mentions = parsed.asset_provider_mentions ?? []
   return { ...parsed, user_goals, project_facts, asset_provider_mentions }

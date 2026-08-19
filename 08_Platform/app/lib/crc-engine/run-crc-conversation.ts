@@ -152,7 +152,17 @@ export function runCRCConversation(
   // app/api/crc/turn/route.ts x4) already passes the full StructuredUnderstanding
   // and needs zero changes -- provider data flows through automatically.
   const { results, diagnostics: retrievalDiagnostics } = retrieve(handoff, matrix, understanding.user_goals, topicClaims, applicabilityFacts, relationships, handoff.asset_providers)
-  const interpretations = buildBoundedInterpretations(understanding.user_goals, results, retrievalDiagnostics)
+  // H5 -- minimal echo-only relevance composition (Copyright UAT Correction
+  // Milestone, 2026-08-19): threading the confirmed/unconfirmed contribution
+  // fact through is additive-only -- see build-bounded-interpretation.ts's
+  // own shouldIncludeHumanContributionSentence for the exact narrow
+  // conditions under which this changes rendered output at all.
+  const interpretations = buildBoundedInterpretations(
+    understanding.user_goals,
+    results,
+    retrievalDiagnostics,
+    understanding.project_facts.human_contribution_description.attestation,
+  )
   const { output, diagnostics: projectionDiagnostics } = assembleProjectionOutput(handoff, results, interpretations)
 
   return {

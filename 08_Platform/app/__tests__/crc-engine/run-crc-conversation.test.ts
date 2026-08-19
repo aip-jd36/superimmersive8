@@ -32,6 +32,7 @@ const unknownToolSU: StructuredUnderstanding = {
     intended_use: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'x' },
     workflow_role: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'x' },
     jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+    human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
   },
   tool_mentions: [
     {
@@ -61,6 +62,7 @@ const unresolvedAliasSU: StructuredUnderstanding = {
     intended_use: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'x' },
     workflow_role: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'x' },
     jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+    human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
   },
   tool_mentions: [
     {
@@ -90,6 +92,7 @@ const sparseSingleToolSU: StructuredUnderstanding = {
     intended_use: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'x' },
     workflow_role: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'x' },
     jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+    human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
   },
   tool_mentions: [
     {

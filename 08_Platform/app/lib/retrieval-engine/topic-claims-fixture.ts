@@ -164,7 +164,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     crc_candidate_statement:
       "Under current U.S. copyright law, AI-generated video without meaningful human creative contribution generally isn't eligible for copyright protection. This is a different question from whether you're clear to use the video commercially.",
     applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
-    unresolved_project_dependencies: ['human_creative_contribution_level'],
+    unresolved_project_dependencies: ['human_contribution_description'],
     provider_scope: null,
     last_verified: '2026-08-16',
     superseded_by: null,
@@ -181,7 +181,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     crc_candidate_statement:
       "Under current U.S. copyright law, writing prompts alone -- even detailed or iterative ones -- generally doesn't establish sufficient human authorship on its own. Additional human creative involvement, such as selecting, arranging, or editing the output, is generally what supports a copyright claim.",
     applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
-    unresolved_project_dependencies: ['human_creative_contribution_level'],
+    unresolved_project_dependencies: ['human_contribution_description'],
     provider_scope: null,
     last_verified: '2026-08-16',
     superseded_by: null,
@@ -198,7 +198,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     crc_candidate_statement:
       "Under current U.S. copyright law, meaningfully selecting, arranging, or editing AI-generated material can support a copyright claim on its own, separate from whether the underlying AI-generated footage itself is protected. Whether this applies to a specific project is evaluated case by case.",
     applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
-    unresolved_project_dependencies: ['human_creative_contribution_level'],
+    unresolved_project_dependencies: ['human_contribution_description'],
     provider_scope: null,
     last_verified: '2026-08-16',
     superseded_by: null,

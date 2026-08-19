@@ -82,6 +82,7 @@ describe('layer 1 -- the real orchestrator threads the real relationship fixture
       project_facts: {
         ...DIALOGUE_FIXTURES.no_signal.structured_understanding.project_facts,
         jurisdiction: { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 1, source_statement: 'US' },
+        human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
       },
     }
     const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
@@ -134,6 +135,7 @@ describe('layer 1 -- the real orchestrator threads the real relationship fixture
       project_facts: {
         ...DIALOGUE_FIXTURES.no_signal.structured_understanding.project_facts,
         jurisdiction: { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 1, source_statement: 'US' },
+        human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
       },
     }
     const withoutRelationships = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)

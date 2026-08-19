@@ -140,6 +140,7 @@ import {
   type CommercialReadinessCategory,
 } from './commercial-readiness-catalog'
 import { buildJurisdictionClarificationProposal, evaluateJurisdictionClarificationEligibility } from './jurisdiction-clarification'
+import { buildHumanContributionClarificationProposal, evaluateHumanContributionClarificationEligibility } from './human-contribution-clarification'
 import type { SessionStore } from './session-store'
 import type { CRCSessionState } from './types'
 import type { MatrixRow, TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
@@ -168,6 +169,7 @@ function emptyStructuredUnderstanding(): StructuredUnderstanding {
       intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
       workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
       jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
     },
     tool_mentions: [],
     scoped_observations: [],
@@ -222,8 +224,13 @@ export type TurnOutcome = (
      * clarification won the shared attempt-#1 slot first (PM SS6's
      * precedence rule) -- Discovery was never actually attempted, distinct
      * from 'rejected_by_a' (Constraint A genuinely saw and rejected it).
+     * 'preempted_by_human_contribution' (Copyright UAT Correction
+     * Milestone, 2026-08-19): same concept, one rung lower in the
+     * precedence chain -- Discovery was eligible but human-contribution
+     * clarification won the slot instead (jurisdiction was not itself
+     * eligible this turn).
      */
-    outcome: 'never_eligible' | 'rejected_by_a' | 'asked' | 'preempted_by_jurisdiction'
+    outcome: 'never_eligible' | 'rejected_by_a' | 'asked' | 'preempted_by_jurisdiction' | 'preempted_by_human_contribution'
   }
   /**
    * CRC Living Knowledge Phase 1, 2026-08-16, PM final approval SS4/SS6.
@@ -234,6 +241,24 @@ export type TurnOutcome = (
   jurisdictionSignal?: {
     eligible: boolean
     outcome: 'never_eligible' | 'rejected_by_a' | 'asked'
+  }
+  /**
+   * Copyright UAT Correction Milestone, 2026-08-19, PM-approved H4. Same
+   * scope/shape discipline as jurisdictionSignal above -- surfaces the
+   * same deterministic eligibility evaluation this turn already computed,
+   * for route.ts to log as an analytics event if/when wired up. Organic
+   * path only.
+   */
+  humanContributionSignal?: {
+    eligible: boolean
+    /**
+     * 'preempted_by_jurisdiction': human-contribution clarification was
+     * eligible this turn but jurisdiction clarification won the shared
+     * attempt-#1 slot first (jurisdiction > human-contribution precedence)
+     * -- human-contribution was never actually attempted, distinct from
+     * 'rejected_by_a' (Constraint A genuinely saw and rejected it).
+     */
+    outcome: 'never_eligible' | 'rejected_by_a' | 'asked' | 'preempted_by_jurisdiction'
   }
 }
 
@@ -459,6 +484,9 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   // CRC Living Knowledge Phase 1, 2026-08-16 -- same scope discipline as
   // discoverySignal above.
   let jurisdictionSignal: TurnOutcome['jurisdictionSignal']
+  // Copyright UAT Correction Milestone, 2026-08-19 -- same scope discipline
+  // as jurisdictionSignal above.
+  let humanContributionSignal: TurnOutcome['humanContributionSignal']
 
   if (declineSignal) {
     // Explicit skip_question/skip_phase decline -- unchanged by Model 4.
@@ -528,6 +556,23 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     )
     const jurisdictionProposal = jurisdictionEligibility.eligible ? buildJurisdictionClarificationProposal(phase) : undefined
 
+    // Copyright UAT Correction Milestone, 2026-08-19, PM-approved H3/H4.
+    // Deterministic, no LLM call -- same pattern as jurisdiction
+    // immediately above, computed SECOND so it can take the shared
+    // attempt-#1 slot when jurisdiction is not itself eligible this turn
+    // (PM-approved precedence: jurisdiction > human-contribution > Discovery
+    // > ordinary organic). No Gate 1 requirement (same reasoning as
+    // jurisdiction -- see human-contribution-clarification.ts's own
+    // header), but does require its own minimal-workflow-anchor condition,
+    // computed inside that module.
+    const humanContributionEligibility = evaluateHumanContributionClarificationEligibility(
+      suAfter,
+      topicClaims,
+      boundaryStateLoaded.human_contribution_clarification_asked,
+      relationships,
+    )
+    const humanContributionProposal = humanContributionEligibility.eligible ? buildHumanContributionClarificationProposal(phase) : undefined
+
     // Commercial Readiness Discovery Catalog integration, 2026-08-12.
     // Deterministic, no LLM call: derive indicators from the SAME suAfter
     // every other candidate-generation step this turn already uses, then
@@ -546,9 +591,9 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     )
     const discoveryProposal = discoveryCategory ? buildCommercialReadinessDiscoveryProposal(discoveryCategory, phase) : undefined
 
-    // jurisdiction always wins the slot when both are eligible this turn --
-    // see the precedence comment above.
-    const forcedProposal = jurisdictionProposal ?? discoveryProposal
+    // jurisdiction > human-contribution > Discovery when more than one is
+    // eligible this turn -- see the precedence comments above.
+    const forcedProposal = jurisdictionProposal ?? humanContributionProposal ?? discoveryProposal
 
     const attempt1 = forcedProposal
       ? await tryCandidate(suAfter, eligible, phase, boundaryStateLoaded, deps, undefined, forcedProposal)
@@ -573,6 +618,20 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
       jurisdictionSignal = { eligible: true, outcome: attempt1.status === 'approved' ? 'asked' : 'rejected_by_a' }
     }
 
+    // Human-contribution analytics instrumentation. Same scope discipline
+    // as jurisdictionSignal above: undefined unless human-contribution
+    // clarification was actually eligible this turn. Mirrors discoverySignal's
+    // own three-way outcome shape (preempted / asked / rejected_by_a): when
+    // jurisdiction was ALSO eligible this turn, it wins the slot and
+    // human-contribution was never actually attempted -- distinct from a
+    // genuine Constraint A rejection.
+    if (humanContributionEligibility.eligible) {
+      humanContributionSignal = {
+        eligible: true,
+        outcome: jurisdictionProposal ? 'preempted_by_jurisdiction' : attempt1.status === 'approved' ? 'asked' : 'rejected_by_a',
+      }
+    }
+
     // Discovery analytics instrumentation: computed from the SAME inputs
     // discoveryCategory already used (pure, no extra I/O). eligible_categories
     // is every category the fixed-priority selector would have accepted,
@@ -584,7 +643,10 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     // 'preempted_by_jurisdiction' (new, 2026-08-16): Discovery was eligible
     // but jurisdiction won the slot first -- Discovery was never actually
     // attempted this turn, distinct from 'rejected_by_a' (which means
-    // Constraint A genuinely saw and rejected it).
+    // Constraint A genuinely saw and rejected it). 'preempted_by_human_
+    // contribution' (Copyright UAT Correction Milestone, 2026-08-19): same
+    // concept, one rung lower -- jurisdiction was not itself eligible, but
+    // human-contribution clarification won the slot instead.
     discoverySignal = {
       eligible_categories: COMMERCIAL_READINESS_CATEGORIES.filter(
         (c) => evaluateCategoryEligibility(c, discoveryIndicators, boundaryStateLoaded.commercial_readiness_discovery_asked, gate1.state === 'met', phase).eligible,
@@ -595,6 +657,8 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
           ? 'never_eligible'
           : jurisdictionProposal
             ? 'preempted_by_jurisdiction'
+            : humanContributionProposal
+              ? 'preempted_by_human_contribution'
             : attempt1.status === 'approved'
               ? 'asked'
               : 'rejected_by_a',
@@ -652,7 +716,13 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
           pending_clarification: null,
           pending_commercial_readiness_takeaway: null,
         })
-        const exhaustedOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suExhausted, deps.matrix, topicClaims, relationships), discoverySignal, jurisdictionSignal }
+        const exhaustedOutcome: TurnOutcome = {
+          kind: 'complete',
+          result: runCRCConversation(suExhausted, deps.matrix, topicClaims, relationships),
+          discoverySignal,
+          jurisdictionSignal,
+          humanContributionSignal,
+        }
         return precedingTakeaway ? { ...exhaustedOutcome, precedingTakeaway } : exhaustedOutcome
       }
     }
@@ -668,5 +738,6 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
 
   let finalOutcome: TurnOutcome = discoverySignal ? { ...outcome, discoverySignal } : outcome
   finalOutcome = jurisdictionSignal ? { ...finalOutcome, jurisdictionSignal } : finalOutcome
+  finalOutcome = humanContributionSignal ? { ...finalOutcome, humanContributionSignal } : finalOutcome
   return precedingTakeaway ? { ...finalOutcome, precedingTakeaway } : finalOutcome
 }

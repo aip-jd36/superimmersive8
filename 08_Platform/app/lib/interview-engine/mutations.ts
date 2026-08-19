@@ -444,3 +444,29 @@ export function setJurisdiction(
     },
   }
 }
+
+/**
+ * `human_contribution_description` (Copyright UAT Correction Milestone,
+ * 2026-08-19, PM-approved H2). Same plain immutable-replacement discipline
+ * as setIntendedUse/setWorkflowRole/setJurisdiction above, verbatim -- no
+ * supersession chain. A later, ADDITIVE clarification ("actually, I also
+ * did a lot of compositing") is expected to arrive as a `value` that
+ * already restates the complete, cumulative description -- the extractor's
+ * own guidance (anthropic-extractor.ts) is responsible for folding new
+ * detail into a full updated statement, not this function, which simply
+ * overwrites, exactly like a jurisdiction correction overwrites.
+ */
+export function setHumanContributionDescription(
+  su: StructuredUnderstanding,
+  value: Attested<string>,
+  sourceTurn: number,
+  sourceStatement: string,
+): StructuredUnderstanding {
+  return {
+    ...su,
+    project_facts: {
+      ...su.project_facts,
+      human_contribution_description: { attestation: value, source_turn: sourceTurn, source_statement: sourceStatement },
+    },
+  }
+}

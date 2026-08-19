@@ -174,9 +174,9 @@ describe('CLAIM-COPY-001/002/003 -- reachable through exact Topic Retrieval for 
     expect(result.diagnostics).toContainEqual({ identifier: 'copyrightability', reason: 'applicability_unmet' })
   })
 
-  test("item F, now proven positively: relevant_applicability_unresolved (Case 3B) correctly fires for all three claims -- each carries non-empty unresolved_project_dependencies (['human_creative_contribution_level']), so the combined statement renders under the unresolved-applicability template, never directly_relevant", () => {
+  test("item F, now proven positively: relevant_applicability_unresolved (Case 3B) correctly fires for all three claims -- each carries non-empty unresolved_project_dependencies (['human_contribution_description']), so the combined statement renders under the unresolved-applicability template, never directly_relevant", () => {
     const claim001 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-COPY-001-v1')!
-    expect(claim001.unresolved_project_dependencies).toEqual(['human_creative_contribution_level'])
+    expect(claim001.unresolved_project_dependencies).toEqual(['human_contribution_description'])
     expect(claim001.lifecycle).toBe('Adopted')
     expect(claim001.crc_eligible).toBe('Yes')
     const out = retrieve(handoff(), MATRIX_FIXTURE, [copyrightabilityGoal()], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] })
@@ -207,6 +207,7 @@ describe('Wave 1 real claims -- end-to-end through the full CRC pipeline (2026-0
       project_facts: {
         ...DIALOGUE_FIXTURES.no_signal.structured_understanding.project_facts,
         jurisdiction: { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 2, source_statement: 'US' },
+        human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
       },
     }
     const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
@@ -268,6 +269,7 @@ describe('Wave 1 real claims -- end-to-end through the full CRC pipeline (2026-0
       project_facts: {
         ...DIALOGUE_FIXTURES.no_signal.structured_understanding.project_facts,
         jurisdiction: { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 2, source_statement: 'US' },
+        human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
       },
     }
     const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)

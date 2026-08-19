@@ -7,7 +7,7 @@
  */
 
 import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
-import { directlyRelevantSummary } from '@/lib/bounded-interpretation/rules'
+import { directlyRelevantSummary, humanContributionRelevanceSentence } from '@/lib/bounded-interpretation/rules'
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
@@ -310,7 +310,7 @@ describe('buildBoundedInterpretations -- Case 3A / Case 3B relevant_applicabilit
         topic: 'copyrightability',
         crc_candidate_statement: 'Formally-applicable substantive claim text.',
         applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
-        unresolved_project_dependencies: ['human_creative_contribution_level'],
+        unresolved_project_dependencies: ['human_contribution_description'],
       }),
     ]
     const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
@@ -339,14 +339,14 @@ describe('buildBoundedInterpretations -- Case 3A / Case 3B relevant_applicabilit
         topic: 'copyrightability',
         crc_candidate_statement: 'Prompting alone generally does not establish sufficient human authorship.',
         applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
-        unresolved_project_dependencies: ['human_creative_contribution_level'],
+        unresolved_project_dependencies: ['human_contribution_description'],
       }),
       testTopicClaim({
         claim_id: 'TEST-003-LIKE',
         topic: 'copyrightability',
         crc_candidate_statement: 'Qualifying selection, arrangement, or editing may support copyright protection.',
         applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
-        unresolved_project_dependencies: ['human_creative_contribution_level'],
+        unresolved_project_dependencies: ['human_contribution_description'],
       }),
     ]
     const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
@@ -370,7 +370,7 @@ describe('buildBoundedInterpretations -- Case 3A / Case 3B relevant_applicabilit
         lifecycle: 'Candidate',
         crc_eligible: 'Pending',
         applicability_requirements: [],
-        unresolved_project_dependencies: ['human_creative_contribution_level'],
+        unresolved_project_dependencies: ['human_contribution_description'],
       }),
     ]
     const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
@@ -392,7 +392,7 @@ describe('buildBoundedInterpretations -- Case 3A / Case 3B relevant_applicabilit
         lifecycle: 'Adopted',
         crc_eligible: 'Pending',
         applicability_requirements: [],
-        unresolved_project_dependencies: ['human_creative_contribution_level'],
+        unresolved_project_dependencies: ['human_contribution_description'],
       }),
     ]
     const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
@@ -410,7 +410,7 @@ describe('buildBoundedInterpretations -- Case 3A / Case 3B relevant_applicabilit
         lifecycle: 'Adopted',
         crc_eligible: 'No',
         applicability_requirements: [],
-        unresolved_project_dependencies: ['human_creative_contribution_level'],
+        unresolved_project_dependencies: ['human_contribution_description'],
       }),
     ]
     const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
@@ -426,7 +426,7 @@ describe('buildBoundedInterpretations -- Case 3A / Case 3B relevant_applicabilit
         claim_id: 'TEST-DETERMINATION',
         topic: 'copyrightability',
         applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
-        unresolved_project_dependencies: ['human_creative_contribution_level'],
+        unresolved_project_dependencies: ['human_contribution_description'],
       }),
     ]
     const g = goal({ goal_id: 'g-1', raw_text: 'Can you certify this is copyrighted?', category: 'copyrightability', scope: 'determination_request' })
@@ -447,6 +447,139 @@ describe('buildBoundedInterpretations -- Case 3A / Case 3B relevant_applicabilit
     const out = retrieve(handoff(), MATRIX_FIXTURE, [g], topicClaims, unknownFacts)
     const [interp] = buildBoundedInterpretations([g], out.results) // no 3rd argument
     expect(interp.status).toBe('outside_current_coverage') // not relevant_applicability_unresolved, since diagnostics defaulted to []
+  })
+
+  describe('humanContributionRelevanceSentence -- deterministic rendering', () => {
+    test('a description with no trailing punctuation gets exactly one period added', () => {
+      expect(humanContributionRelevanceSentence('I only wrote prompts')).toContain('"I only wrote prompts."')
+    })
+
+    test('a description already ending in a period is never double-punctuated', () => {
+      const sentence = humanContributionRelevanceSentence('I only wrote prompts.')
+      expect(sentence).toContain('"I only wrote prompts."')
+      expect(sentence).not.toContain('prompts..')
+    })
+
+    test('a description ending in ! or ? is preserved as-is, not overwritten with a period', () => {
+      expect(humanContributionRelevanceSentence('I just typed prompts!')).toContain('"I just typed prompts!"')
+      expect(humanContributionRelevanceSentence('Does prompting even count?')).toContain('"Does prompting even count?"')
+    })
+
+    test('leading/trailing whitespace is trimmed', () => {
+      expect(humanContributionRelevanceSentence('  I only wrote prompts.  ')).toContain('"I only wrote prompts."')
+    })
+  })
+
+  // ── H5 -- minimal echo-only relevance composition (Copyright UAT Correction
+  // Milestone, 2026-08-19, PM-approved narrow scope) ──────────────────────
+  describe('H5 -- minimal echo-only relevance composition', () => {
+    const copyrightOwnershipGoal = goal({ goal_id: 'g-1', raw_text: 'Do I own the copyright to it?', category: 'copyright_ownership' })
+    const contributionClaim = () =>
+      testTopicClaim({
+        claim_id: 'TEST-3B-H5',
+        topic: 'copyright_ownership',
+        crc_candidate_statement: 'Formally-applicable substantive claim text.',
+        applicability_requirements: [],
+        unresolved_project_dependencies: ['human_contribution_description'],
+      })
+
+    function scenarioOutput(description: string) {
+      const out = retrieve(handoff(), MATRIX_FIXTURE, [copyrightOwnershipGoal], [contributionClaim()], usFacts)
+      return buildBoundedInterpretations([copyrightOwnershipGoal], out.results, out.diagnostics, { state: 'confirmed', value: description })[0]
+    }
+
+    const PROHIBITED_CONCLUSIONS = /\byou own\b|\bis copyrighted\b|\bis not copyrighted\b|\bsatisfies\b|\bsufficient\b(?! creative)|\bthis (establishes|proves)\b|\bnot eligible for copyright\b(?!.{0,40}generally)/i
+
+    test('Scenario A ("I only wrote prompts.") -- description echoed, existing hedge remains, no prohibited conclusion', () => {
+      const interp = scenarioOutput('I only wrote prompts.')
+      expect(interp.status).toBe('relevant_applicability_unresolved')
+      expect(interp.summary).toContain('You described your own contribution as: "I only wrote prompts."')
+      expect(interp.summary).toContain("there isn't enough project-specific information to determine")
+      expect(interp.summary).not.toMatch(PROHIBITED_CONCLUSIONS)
+    })
+
+    test('Scenario B ("I wrote prompts and trimmed the output.") -- echoed, no ranking language ("trimming is/is not enough")', () => {
+      const interp = scenarioOutput('I wrote prompts and trimmed the output.')
+      expect(interp.summary).toContain('You described your own contribution as: "I wrote prompts and trimmed the output."')
+      expect(interp.summary).not.toMatch(/trimming is (enough|not enough)/i)
+      expect(interp.summary).not.toMatch(PROHIBITED_CONCLUSIONS)
+    })
+
+    test('Scenario C (selection/arrangement/compositing) -- echoed, relevance grounded in COPY-002/003 language, no sufficiency conclusion', () => {
+      const description = 'I selected the best generations, reordered the sequence, changed timing, and composited several elements.'
+      const interp = scenarioOutput(description)
+      expect(interp.summary).toContain(`You described your own contribution as: "${description}"`)
+      expect(interp.summary).toMatch(/selecting, arranging, or editing/i)
+      expect(interp.summary).not.toMatch(/this satisfies the copyright threshold|your video is copyrighted|you own it/i)
+      expect(interp.summary).not.toMatch(PROHIBITED_CONCLUSIONS)
+    })
+
+    test('Scenario D (manual structure, AI for shots) -- echoed, still no legal sufficiency or ownership conclusion', () => {
+      const description = 'I used AI for individual clips but manually created the overall sequence and story structure.'
+      const interp = scenarioOutput(description)
+      expect(interp.summary).toContain(`You described your own contribution as: "${description}"`)
+      expect(interp.summary).not.toMatch(PROHIBITED_CONCLUSIONS)
+    })
+
+    test('condition A: does NOT fire for an unrelated goal category, even with a confirmed description and a carrying claim', () => {
+      const commercialUseGoal = goal({ goal_id: 'g-2', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+      const claim = testTopicClaim({
+        claim_id: 'TEST-COMMERCIAL',
+        topic: 'commercial_use',
+        applicability_requirements: [],
+        unresolved_project_dependencies: ['human_contribution_description'],
+      })
+      const out = retrieve(handoff(), MATRIX_FIXTURE, [commercialUseGoal], [claim], usFacts)
+      const [interp] = buildBoundedInterpretations([commercialUseGoal], out.results, out.diagnostics, { state: 'confirmed', value: 'I only wrote prompts.' })
+      expect(interp.summary).not.toContain('You described your own contribution as')
+    })
+
+    test('condition B: does NOT fire when the matched claim does not carry the human_contribution_description dependency', () => {
+      const claimWithoutDependency = testTopicClaim({
+        claim_id: 'TEST-NO-DEP',
+        topic: 'copyright_ownership',
+        applicability_requirements: [],
+        unresolved_project_dependencies: [],
+      })
+      const out = retrieve(handoff(), MATRIX_FIXTURE, [copyrightOwnershipGoal], [claimWithoutDependency], usFacts)
+      const [interp] = buildBoundedInterpretations([copyrightOwnershipGoal], out.results, out.diagnostics, { state: 'confirmed', value: 'I only wrote prompts.' })
+      expect(interp.status).toBe('directly_relevant') // no dependency -> Case 3B never fires at all, H5 moot
+      expect(interp.summary).not.toContain('You described your own contribution as')
+    })
+
+    test('condition C: does NOT fire when human_contribution_description is not confirmed (unknown, declined, unresolved_no_visibility)', () => {
+      for (const state of [{ state: 'unknown' as const }, { state: 'declined' as const }, { state: 'unresolved_no_visibility' as const }]) {
+        const out = retrieve(handoff(), MATRIX_FIXTURE, [copyrightOwnershipGoal], [contributionClaim()], usFacts)
+        const [interp] = buildBoundedInterpretations([copyrightOwnershipGoal], out.results, out.diagnostics, state)
+        expect(interp.summary).not.toContain('You described your own contribution as')
+      }
+    })
+
+    test('omitting the 4th parameter entirely defaults to unconfirmed -- pre-existing call sites (jurisdiction milestone, Slice 1, etc.) render byte-identically to before H5 existed', () => {
+      const out = retrieve(handoff(), MATRIX_FIXTURE, [copyrightOwnershipGoal], [contributionClaim()], usFacts)
+      const withoutParam = buildBoundedInterpretations([copyrightOwnershipGoal], out.results, out.diagnostics)[0]
+      const withExplicitUnknown = buildBoundedInterpretations([copyrightOwnershipGoal], out.results, out.diagnostics, { state: 'unknown' })[0]
+      expect(withoutParam).toEqual(withExplicitUnknown)
+      expect(withoutParam.summary).not.toContain('You described your own contribution as')
+    })
+
+    test('the dependency itself is never removed/marked resolved by H5 -- the underlying claim data (matched, not this module\'s output) still carries the dependency regardless of what H5 renders', () => {
+      const out = retrieve(handoff(), MATRIX_FIXTURE, [copyrightOwnershipGoal], [contributionClaim()], usFacts)
+      expect(out.results[0].unresolved_project_dependencies).toEqual(['human_contribution_description'])
+      buildBoundedInterpretations([copyrightOwnershipGoal], out.results, out.diagnostics, { state: 'confirmed', value: 'I only wrote prompts.' })
+      // Re-running retrieve() independently after composition proves nothing was mutated -- the dependency is claim-level governance metadata, never touched by this module.
+      const outAgain = retrieve(handoff(), MATRIX_FIXTURE, [copyrightOwnershipGoal], [contributionClaim()], usFacts)
+      expect(outAgain.results[0].unresolved_project_dependencies).toEqual(['human_contribution_description'])
+    })
+
+    test('raw user text is never dumped unbounded -- always wrapped by the fixed "You described your own contribution as:" prefix, never interpolated as if CRC were asserting it', () => {
+      const interp = scenarioOutput("it's complicated, I did some stuff")
+      // No trailing punctuation in the input -- a period is added exactly once, never doubled.
+      expect(interp.summary).toContain('You described your own contribution as: "it\'s complicated, I did some stuff."')
+      // The description never appears OUTSIDE the bounded quoted prefix.
+      const withoutPrefix = interp.summary.replace('You described your own contribution as: "it\'s complicated, I did some stuff."', '')
+      expect(withoutPrefix).not.toContain('it\'s complicated, I did some stuff')
+    })
   })
 })
 

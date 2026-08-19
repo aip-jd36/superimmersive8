@@ -233,11 +233,37 @@ export interface AttestedFact<T> {
  * semantics, same as `intended_use`/`workflow_role` -- deliberately NOT
  * given `UserGoal`-style supersession lineage, since ProjectFacts fields
  * are singular current-state values by design, not a history to preserve.
+ *
+ * `human_contribution_description` (Copyright UAT Correction Milestone,
+ * 2026-08-19, PM-approved H2): free-text, user-reported description of
+ * what the user personally did to shape the final output (e.g. "I only
+ * wrote prompts," "I selected clips and reordered them"). Deliberately
+ * named `_description`, not `_level` -- the rejected `human_creative_
+ * contribution_level` framing (the governed dependency string's original
+ * name) reads as an ordinal/graded judgment, which is exactly the kind of
+ * legal-sufficiency conclusion this field must never encode. This stores
+ * ONLY what the user says they did -- never whether it satisfies any
+ * copyright threshold, never a ranking, never a normalized category (no
+ * `none`/`low`/`medium`/`high`/`meaningful`/`substantial`/`sufficient`
+ * values -- see mutations.ts/anthropic-extractor.ts's own guidance). Same
+ * plain-overwrite correction semantics as `intended_use`/`workflow_role`/
+ * `jurisdiction` above -- a later, additive clarification ("actually, I
+ * also did a lot of compositing") is captured by the extractor restating
+ * the complete, cumulative description as the new value, not by inventing
+ * a supersession chain for this field alone. Scoped to what the USER
+ * personally did, mirroring `workflow_role`'s own existing scope -- this
+ * project deliberately does NOT model multi-person/team contribution
+ * allocation (contributor graphs, work-made-for-hire, employment
+ * analysis); if a user mentions someone else's involvement, it is simply
+ * part of the free-text description, informationally present, never
+ * structurally attributed. Ownership allocation across people remains
+ * Commercial Assurance territory, never CRC's.
  */
 export interface ProjectFacts {
   intended_use: AttestedFact<string>
   workflow_role: AttestedFact<string>
   jurisdiction: AttestedFact<string>
+  human_contribution_description: AttestedFact<string>
 }
 
 // ── User goals (CRC User Goal — Milestone 1, capture + persistence only) ───

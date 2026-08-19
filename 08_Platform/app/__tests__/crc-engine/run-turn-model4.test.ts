@@ -67,6 +67,7 @@ const CAPPED_BOUNDARY_STATE: BoundaryState = {
   disentangling_question_asked: false,
   commercial_readiness_discovery_asked: false,
   jurisdiction_clarification_asked: false,
+  human_contribution_clarification_asked: false,
   interview_ended: false,
   phases_ended: [],
 }
@@ -87,7 +88,7 @@ describe('Model 4 -- attempt 1 rejected, attempt 2 approved', () => {
     // reached, which is not what this test is exercising.
     await store.save('m4-b1', {
       structured_understanding: {
-        project_facts: { intended_use: { attestation: { state: 'confirmed', value: 'ad' }, source_turn: 1, source_statement: 'x' }, workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' } },
+        project_facts: { intended_use: { attestation: { state: 'confirmed', value: 'ad' }, source_turn: 1, source_statement: 'x' }, workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' } },
         tool_mentions: [{ mention_id: 't1-c1', resolution: { kind: 'canonical', identifier: 'runway-gen3' }, access_surface: { state: 'unknown' }, plan_tier: { state: 'unknown' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Runway', superseded_by: null }],
         scoped_observations: [],
         user_goals: [],
@@ -155,7 +156,7 @@ describe('Model 4 -- attempt 1 rejected, attempt 2 approved', () => {
     const store = createInMemorySessionStore()
     await store.save('m4-kind', {
       structured_understanding: {
-        project_facts: { intended_use: { attestation: { state: 'confirmed', value: 'ad' }, source_turn: 1, source_statement: 'x' }, workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' } },
+        project_facts: { intended_use: { attestation: { state: 'confirmed', value: 'ad' }, source_turn: 1, source_statement: 'x' }, workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' } },
         tool_mentions: [{ mention_id: 't1-c1', resolution: { kind: 'canonical', identifier: 'runway-gen3' }, access_surface: { state: 'unknown' }, plan_tier: { state: 'unknown' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Runway', superseded_by: null }],
         scoped_observations: [],
         user_goals: [],
@@ -218,7 +219,7 @@ describe('Model 4 -- both attempts fail -> finalize with questioning_exhausted',
     const store = createInMemorySessionStore()
     await store.save('m4-null-b', {
       structured_understanding: {
-        project_facts: { intended_use: { attestation: { state: 'confirmed', value: 'ad' }, source_turn: 1, source_statement: 'x' }, workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' } },
+        project_facts: { intended_use: { attestation: { state: 'confirmed', value: 'ad' }, source_turn: 1, source_statement: 'x' }, workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' } },
         tool_mentions: [{ mention_id: 't1-c1', resolution: { kind: 'canonical', identifier: 'runway-gen3' }, access_surface: { state: 'unknown' }, plan_tier: { state: 'unknown' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Runway', superseded_by: null }],
         scoped_observations: [],
         user_goals: [],
@@ -375,7 +376,7 @@ describe('Model 4 -- multiple uncapped eligible signals', () => {
     // reasoning as the earlier seeded tests in this file).
     await store.save('m4-multi', {
       structured_understanding: {
-        project_facts: { intended_use: { attestation: { state: 'confirmed', value: 'ad' }, source_turn: 1, source_statement: 'x' }, workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' } },
+        project_facts: { intended_use: { attestation: { state: 'confirmed', value: 'ad' }, source_turn: 1, source_statement: 'x' }, workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' } },
         tool_mentions: [{ mention_id: 't1-c1', resolution: { kind: 'canonical', identifier: 'runway-gen3' }, access_surface: { state: 'unknown' }, plan_tier: { state: 'unknown' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Runway', superseded_by: null }],
         scoped_observations: [],
         user_goals: [],
@@ -386,7 +387,7 @@ describe('Model 4 -- multiple uncapped eligible signals', () => {
         completion_reason: null,
         opt_out_scope: null,
       },
-      boundary_state: { follow_ups_used: {}, uncertainty_clarifications_used: {}, historical_experience_asked: false, disentangling_question_asked: false, commercial_readiness_discovery_asked: false, jurisdiction_clarification_asked: false, interview_ended: false, phases_ended: [] },
+      boundary_state: { follow_ups_used: {}, uncertainty_clarifications_used: {}, historical_experience_asked: false, disentangling_question_asked: false, commercial_readiness_discovery_asked: false, jurisdiction_clarification_asked: false, human_contribution_clarification_asked: false, interview_ended: false, phases_ended: [] },
       pending_clarification: null,
       pending_commercial_readiness_takeaway: null,
     })

@@ -23,6 +23,7 @@ import {
   addUserGoal,
   MAX_ACTIVE_USER_GOALS,
   retractObservation,
+  setHumanContributionDescription,
   setIntendedUse,
   setWorkflowRole,
   supersedeObservation,
@@ -36,6 +37,7 @@ function emptyStructuredUnderstanding(): StructuredUnderstanding {
       intended_use: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'placeholder' },
       workflow_role: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'placeholder' },
       jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
     },
     tool_mentions: [],
     scoped_observations: [],
@@ -297,6 +299,56 @@ describe('setIntendedUse / setWorkflowRole', () => {
     const second = setIntendedUse(first, { state: 'confirmed', value: 'Paid campaign' }, 2, "Actually, it's a paid campaign.")
     expect(second.project_facts.intended_use.attestation).toEqual({ state: 'confirmed', value: 'Paid campaign' })
     expect(second.project_facts.intended_use.source_turn).toBe(2)
+  })
+})
+
+describe('setHumanContributionDescription (Copyright UAT Correction Milestone, 2026-08-19)', () => {
+  test('replaces the attestation and preserves source_turn/source_statement', () => {
+    const su = emptyStructuredUnderstanding()
+    const updated = setHumanContributionDescription(su, { state: 'confirmed', value: 'I only wrote prompts.' }, 3, 'I only wrote prompts.')
+    expect(updated.project_facts.human_contribution_description).toEqual({
+      attestation: { state: 'confirmed', value: 'I only wrote prompts.' },
+      source_turn: 3,
+      source_statement: 'I only wrote prompts.',
+    })
+  })
+
+  test('does not mutate the source object', () => {
+    const su = emptyStructuredUnderstanding()
+    const before = JSON.parse(JSON.stringify(su))
+    setHumanContributionDescription(su, { state: 'confirmed', value: 'I only wrote prompts.' }, 1, 'placeholder')
+    expect(su).toEqual(before)
+  })
+
+  test('leaves jurisdiction, intended_use, and workflow_role untouched', () => {
+    const su = setWorkflowRole(setIntendedUse(emptyStructuredUnderstanding(), { state: 'confirmed', value: 'Paid campaign' }, 1, 'x'), { state: 'confirmed', value: 'Editor' }, 1, 'y')
+    const updated = setHumanContributionDescription(su, { state: 'confirmed', value: 'I only wrote prompts.' }, 2, 'z')
+    expect(updated.project_facts.intended_use).toEqual(su.project_facts.intended_use)
+    expect(updated.project_facts.workflow_role).toEqual(su.project_facts.workflow_role)
+    expect(updated.project_facts.jurisdiction).toEqual(su.project_facts.jurisdiction)
+  })
+
+  test('a subsequent call replaces the previous attestation entirely -- plain overwrite, no supersession chain -- this is the mechanism a cumulative/additive clarification relies on (the extractor restates the full value, this function just overwrites with it)', () => {
+    const first = setHumanContributionDescription(emptyStructuredUnderstanding(), { state: 'confirmed', value: 'I only wrote prompts.' }, 1, 'I only wrote prompts.')
+    const second = setHumanContributionDescription(
+      first,
+      { state: 'confirmed', value: 'I wrote prompts, and I also did a lot of compositing.' },
+      2,
+      'Actually, I also did a lot of compositing.',
+    )
+    expect(second.project_facts.human_contribution_description.attestation).toEqual({
+      state: 'confirmed',
+      value: 'I wrote prompts, and I also did a lot of compositing.',
+    })
+    expect(second.project_facts.human_contribution_description.source_turn).toBe(2)
+  })
+
+  test('never normalizes or ranks the value -- whatever free text is passed in is stored verbatim, no "level"/"sufficient"/"meaningful" coercion happens in this layer', () => {
+    const su = setHumanContributionDescription(emptyStructuredUnderstanding(), { state: 'confirmed', value: 'I selected clips, reordered them, and composited several elements.' }, 1, 'x')
+    expect(su.project_facts.human_contribution_description.attestation).toEqual({
+      state: 'confirmed',
+      value: 'I selected clips, reordered them, and composited several elements.',
+    })
   })
 })
 

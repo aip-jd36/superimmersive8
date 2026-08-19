@@ -164,11 +164,27 @@ export interface ApplicabilityRequirement {
  * (a) can't say WHAT is unresolved, which matters for governance review and
  * future LK research prioritization, and (b) has no natural graduation
  * path -- the day CRC models a real structured fact for one of these
- * dependencies (e.g. a future `human_creative_contribution_level`
+ * dependencies (e.g. a future `human_contribution_description`
  * ApplicabilityFact), a human simply removes that string from this list
  * (and, separately, decides whether to add a matching entry to
  * `applicability_requirements` above) rather than having to reinterpret a
- * stale `true`/`false`. This is INFORMATIONAL governance metadata only --
+ * stale `true`/`false`.
+ *
+ * `[UPDATE, Copyright UAT Correction Milestone, 2026-08-19]` That day
+ * arrived for `human_contribution_description` (renamed from the original
+ * `human_creative_contribution_level`, a PM-approved pure naming
+ * consistency change -- no proposition/statement/scope/lifecycle/CRC-
+ * eligibility change) -- CRC now models this as a real
+ * `ProjectFacts.human_contribution_description` fact. The string was
+ * DELIBERATELY NOT removed from this list: capturing a self-reported
+ * description resolves the CONVERSATIONAL information gap enough to tailor
+ * the explanation (see build-bounded-interpretation.ts's own H5 addition),
+ * but does not, and must never, resolve the underlying LEGAL dependency --
+ * whether the described contribution actually satisfies the copyright
+ * threshold remains exactly as unresolved as before. This is a deliberate
+ * exception to this comment's own original "the day CRC models a fact, a
+ * human removes the string" expectation, preserved here as institutional
+ * memory of why. This is INFORMATIONAL governance metadata only --
  * unlike `applicability_requirements`, nothing in this codebase evaluates
  * these strings against any `StructuredUnderstanding` field or gates a
  * claim's inclusion in `matches[]` on them; a claim reaches this field's
@@ -184,7 +200,7 @@ export interface ApplicabilityRequirement {
  * "large new Structured Understanding ontology" this refinement was
  * explicitly asked not to build. A light naming convention
  * (snake_case, one identifier per distinct missing concept, e.g.
- * `human_creative_contribution_level`) is documented in
+ * `human_contribution_description`) is documented in
  * GOVERNED-CLAIMS.md's entry template, not enforced by a type.
  */
 /**

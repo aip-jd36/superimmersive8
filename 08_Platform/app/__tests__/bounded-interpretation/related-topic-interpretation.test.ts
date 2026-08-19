@@ -138,7 +138,7 @@ describe('M2 -- related-topic content with unresolved_project_dependencies -> ex
       claim_id: 'TEST-DEP',
       topic: 'copyrightability',
       crc_candidate_statement: 'Statement with unresolved dependency.',
-      unresolved_project_dependencies: ['human_creative_contribution_level'],
+      unresolved_project_dependencies: ['human_contribution_description'],
     })
     const g = goal({ goal_id: 'g-1', raw_text: 'Do I own the copyright?', category: 'copyright_ownership' })
     const out = retrieve(handoff(), MATRIX_FIXTURE, [g], [relatedClaim], usFacts, [rel])
@@ -291,14 +291,14 @@ describe('M2 -- canonical worked future scenario (PM task §23)', () => {
       topic: 'copyrightability',
       crc_candidate_statement: 'Writing prompts alone generally does not establish sufficient human authorship on its own.',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
-      unresolved_project_dependencies: ['human_creative_contribution_level'],
+      unresolved_project_dependencies: ['human_contribution_description'],
     })
     const copy003 = testTopicClaim({
       claim_id: 'CLAIM-COPY-003-v1',
       topic: 'copyrightability',
       crc_candidate_statement: 'Meaningfully selecting, arranging, or editing AI-generated material can support a copyright claim on its own.',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
-      unresolved_project_dependencies: ['human_creative_contribution_level'],
+      unresolved_project_dependencies: ['human_contribution_description'],
     })
 
     const commercialUseGoal = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially, and do I own the copyright?', category: 'commercial_use' })
@@ -330,7 +330,7 @@ describe('M2 -- canonical worked future scenario (PM task §23)', () => {
     expect(ownershipMatches.find((r) => r.claim_id === 'CLAIM-COPY-002-v1')?.match_origin).toBe('related_topic')
     expect(ownershipMatches.find((r) => r.claim_id === 'CLAIM-COPY-003-v1')?.match_origin).toBe('related_topic')
 
-    // human_creative_contribution_level correctly identified as unresolved -> Case 3B.
+    // human_contribution_description correctly identified as unresolved -> Case 3B.
     expect(ownershipInterp.status).toBe('relevant_applicability_unresolved')
 
     // Never a prohibited conclusion.

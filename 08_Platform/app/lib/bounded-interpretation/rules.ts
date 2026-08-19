@@ -183,6 +183,37 @@ export function relevantApplicabilityUnresolvedNoContentSummary(category: GoalCa
 }
 
 /**
+ * H5 -- minimal echo-only relevance composition (Copyright UAT Correction
+ * Milestone, 2026-08-19, PM-approved narrow scope). This is NOT full
+ * Project-Fact-Aware Bounded Composition (PRD_LIVING_KNOWLEDGE_SOURCE_
+ * INPUTS_v0.1.md §27, still deferred, still not authorized by this
+ * milestone) -- it does not rank contribution, select claims differently
+ * based on it, mark any dependency resolved, or infer copyrightability/
+ * ownership. It only (a) echoes the user's own self-reported description
+ * back via a fixed, bounded prefix -- never interpolated in a way that
+ * could read as CRC endorsing or characterizing its content -- and (b)
+ * states, in language grounded specifically in COPY-002-v1/COPY-003-v1's
+ * own actual governed statements ("selecting, arranging, or editing...
+ * additional human creative involvement... is generally what supports a
+ * copyright claim"), that this general category of contribution is
+ * relevant, followed immediately by the same never-omitted "CRC can't
+ * determine... legal threshold" boundary every other Bounded Interpretation
+ * template already carries in some form. Deliberately generic across which
+ * specific COPY claim(s) actually matched this turn -- this function has no
+ * visibility into that (build-bounded-interpretation.ts decides whether to
+ * call it at all), so the wording names the general grounded category
+ * (selecting/arranging/editing) rather than any one claim's exact text.
+ */
+export function humanContributionRelevanceSentence(description: string): string {
+  // Avoid a double-punctuation artifact ("...prompts..") when the user's own
+  // free-text description already ends in terminal punctuation -- the
+  // description is quoted verbatim otherwise, never semantically altered.
+  const trimmed = description.trim()
+  const quoted = /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`
+  return `You described your own contribution as: "${quoted}" Selecting, arranging, or editing AI-generated material is the kind of additional human creative involvement current guidance treats as relevant to whether a copyright claim can be supported -- but CRC can't determine from this conversation whether your described contribution meets that legal threshold.`
+}
+
+/**
  * `claimStatement` -- one or more already-governed `candidate_statement`s,
  * already joined by the caller exactly as directlyRelevantSummary's own
  * caller joins multiple matches (same "never drop an eligible, retrieved
@@ -204,7 +235,12 @@ export function relevantApplicabilityUnresolvedWithContentSummary(
   category: GoalCategory,
   claimStatement: string,
   includesRelatedTopicContent: boolean = false,
+  humanContributionSentence: string | null = null,
 ): string {
   const relatedClause = includesRelatedTopicContent ? ` ${RELATED_TOPIC_BOUNDARY_CLAUSE}` : ''
-  return `${claimStatement}${relatedClause} This is relevant to ${CATEGORY_LABELS[category]}, but based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project. ${BRIDGE_SENTENCE}`
+  // H5 -- minimal echo-only relevance composition (Copyright UAT Correction
+  // Milestone, 2026-08-19): inserted BEFORE the closing uncertainty hedge
+  // below, additively -- the hedge itself is never removed or replaced.
+  const contributionClause = humanContributionSentence ? ` ${humanContributionSentence}` : ''
+  return `${claimStatement}${relatedClause}${contributionClause} This is relevant to ${CATEGORY_LABELS[category]}, but based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project. ${BRIDGE_SENTENCE}`
 }

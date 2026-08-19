@@ -18,6 +18,7 @@ function baseSU(overrides: Partial<StructuredUnderstanding> = {}): StructuredUnd
       intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
       workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
       jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
     },
     tool_mentions: [],
     scoped_observations: [],
@@ -128,6 +129,7 @@ describe('evaluateJurisdictionClarificationEligibility', () => {
         intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
         workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
         jurisdiction: { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 2, source_statement: 'US' },
+        human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
       },
     })
     const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false)
@@ -142,6 +144,7 @@ describe('evaluateJurisdictionClarificationEligibility', () => {
         intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
         workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
         jurisdiction: { attestation: { state: 'declined' }, source_turn: 2, source_statement: 'skip' },
+        human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
       },
     })
     const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false)
@@ -157,6 +160,7 @@ describe('evaluateJurisdictionClarificationEligibility', () => {
           intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
           workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
           jurisdiction: { attestation: { state }, source_turn: 2, source_statement: 'x' },
+          human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
         },
       })
       const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false)
@@ -324,6 +328,7 @@ describe('evaluateJurisdictionClarificationEligibility -- relationship-aware (on
         intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
         workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
         jurisdiction: { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 2, source_statement: 'US' },
+        human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
       },
     })
     const directClaimNoJurisdiction: TopicClaim = { ...jurisdictionGatedClaim(), applicability_requirements: [] }
@@ -372,6 +377,7 @@ describe('copyright ownership UAT regression: "Do I own the copyright?" now beco
         intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
         workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
         jurisdiction: { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 2, source_statement: 'United States' },
+        human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
       },
     })
     const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, TOPIC_RELATIONSHIPS_FIXTURE)

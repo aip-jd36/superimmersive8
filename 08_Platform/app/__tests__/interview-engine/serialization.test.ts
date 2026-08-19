@@ -16,6 +16,7 @@ function currentSU(): StructuredUnderstanding {
       intended_use: { attestation: { state: 'confirmed', value: 'AI commercial for my client' }, source_turn: 1, source_statement: 'placeholder' },
       workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
       jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
     },
     tool_mentions: [],
     scoped_observations: [],
@@ -115,6 +116,34 @@ describe('serializeStructuredUnderstanding / deserializeStructuredUnderstanding'
     su.project_facts.jurisdiction = { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 3, source_statement: 'US' }
     const roundTripped = deserializeStructuredUnderstanding(serializeStructuredUnderstanding(su))
     expect(roundTripped.project_facts.jurisdiction).toEqual({ attestation: { state: 'confirmed', value: 'United States' }, source_turn: 3, source_statement: 'US' })
+  })
+
+  test('a historical session predating project_facts.human_contribution_description (Copyright UAT Correction Milestone, 2026-08-19) deserializes with it defaulted to the full AttestedFact<string> shape (unknown state, source_turn 0, empty source_statement), not undefined -- and every other project_facts field survives unchanged. No database migration required -- this is the same JSONB-storage/deserialize-funnel backfill discipline as the jurisdiction test immediately above.', () => {
+    const historicalShape = currentSU()
+    const { human_contribution_description: _omitted, ...projectFactsWithoutHumanContribution } = historicalShape.project_facts
+    const historicalJson = JSON.stringify({ ...historicalShape, project_facts: projectFactsWithoutHumanContribution })
+    expect(historicalJson).not.toContain('human_contribution_description')
+
+    const deserialized = deserializeStructuredUnderstanding(historicalJson)
+    expect(deserialized.project_facts.human_contribution_description).toEqual({ attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' })
+    expect(deserialized.project_facts.intended_use).toEqual(historicalShape.project_facts.intended_use)
+    expect(deserialized.project_facts.workflow_role).toEqual(historicalShape.project_facts.workflow_role)
+    expect(deserialized.project_facts.jurisdiction).toEqual(historicalShape.project_facts.jurisdiction)
+  })
+
+  test('a historical session missing human_contribution_description does not throw when eligibility code reads project_facts.human_contribution_description.attestation.state', () => {
+    const historicalShape = currentSU()
+    const { human_contribution_description: _omitted, ...projectFactsWithoutHumanContribution } = historicalShape.project_facts
+    const deserialized = deserializeStructuredUnderstanding(JSON.stringify({ ...historicalShape, project_facts: projectFactsWithoutHumanContribution }))
+    expect(() => deserialized.project_facts.human_contribution_description.attestation.state).not.toThrow()
+    expect(deserialized.project_facts.human_contribution_description.attestation.state).toBe('unknown')
+  })
+
+  test('a current-shape session with human_contribution_description already confirmed round-trips that value unchanged, never overwritten by the backfill default', () => {
+    const su = currentSU()
+    su.project_facts.human_contribution_description = { attestation: { state: 'confirmed', value: 'I only wrote prompts.' }, source_turn: 3, source_statement: 'I only wrote prompts.' }
+    const roundTripped = deserializeStructuredUnderstanding(serializeStructuredUnderstanding(su))
+    expect(roundTripped.project_facts.human_contribution_description).toEqual({ attestation: { state: 'confirmed', value: 'I only wrote prompts.' }, source_turn: 3, source_statement: 'I only wrote prompts.' })
   })
 
   test('a historical session predating asset_provider_mentions (Living Knowledge — Third-Party Source Rights, M1+M2, 2026-08-18) deserializes with it defaulted to [], not undefined -- and every other field survives unchanged', () => {
