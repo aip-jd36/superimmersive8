@@ -23,11 +23,22 @@
  */
 
 import type { Phase, StructuredUnderstanding } from '@/types/interview-engine'
-import type { CandidateQuestion, CandidateQuestionKind } from './boundaries'
+import type { BoundaryState, CandidateQuestion, CandidateQuestionKind, FollowUpNeed } from './boundaries'
 
 // ── Eligible signals (deterministic derivation) ─────────────────────────────
 
-export const ELIGIBLE_SIGNAL_KINDS = ['scoped_observation', 'tool_mention', 'project_fact'] as const
+/**
+ * 'asset_provider_mention' added Duplicate-Question Prevention milestone
+ * (2026-08-19). Diagnostic finding: AssetProviderMention was the one active
+ * StructuredUnderstanding record kind never derived as an eligible signal,
+ * so a follow-up naming a specific provider (e.g. "how was the iStock image
+ * used?") could never be asked as a capped follow_up_on_signal at all -- it
+ * was structurally forced toward kind 'other', which boundaries.ts never
+ * caps. This addition alone does not fix duplicate questioning (see
+ * FollowUpNeed in boundaries.ts for the actual cap); it only makes the
+ * signal reachable in the first place.
+ */
+export const ELIGIBLE_SIGNAL_KINDS = ['scoped_observation', 'tool_mention', 'project_fact', 'asset_provider_mention'] as const
 
 export type EligibleSignalKind = (typeof ELIGIBLE_SIGNAL_KINDS)[number]
 
@@ -56,10 +67,10 @@ export const PROJECT_FACT_SIGNAL_IDS = {
 
 /**
  * Enumerates every signal currently addressable by a candidate question:
- * every ACTIVE (non-superseded) ScopedObservation and ToolMention by their
- * own existing stable runtime id, plus the two project facts unconditionally
- * (including when unresolved/declined -- a follow-up about an unresolved
- * fact is still a valid thing to eventually ask).
+ * every ACTIVE (non-superseded) ScopedObservation, ToolMention, and (2026-08-19)
+ * AssetProviderMention by their own existing stable runtime id, plus the two
+ * project facts unconditionally (including when unresolved/declined -- a
+ * follow-up about an unresolved fact is still a valid thing to eventually ask).
  */
 export function deriveEligibleSignals(su: StructuredUnderstanding): EligibleSignal[] {
   const signals: EligibleSignal[] = []
@@ -70,10 +81,55 @@ export function deriveEligibleSignals(su: StructuredUnderstanding): EligibleSign
   for (const m of su.tool_mentions) {
     if (m.superseded_by === null) signals.push({ signal_id: m.mention_id, kind: 'tool_mention' })
   }
+  for (const p of su.asset_provider_mentions) {
+    if (p.superseded_by === null) signals.push({ signal_id: p.mention_id, kind: 'asset_provider_mention' })
+  }
   signals.push({ signal_id: PROJECT_FACT_SIGNAL_IDS.intended_use, kind: 'project_fact' })
   signals.push({ signal_id: PROJECT_FACT_SIGNAL_IDS.workflow_role, kind: 'project_fact' })
 
   return signals
+}
+
+/**
+ * Duplicate-Question Prevention milestone (2026-08-19). Structural
+ * presatisfaction: 'tool_plan_tier' can become confirmed via a channel OTHER
+ * than an asked-and-answered follow-up candidate -- the user may simply
+ * state "Kling Pro plan" directly, in the same turn as naming the tool (see
+ * anthropic-extractor.ts's plan_tier_value_hint). boundaries.ts's own
+ * compound-key cap (FollowUpNeed, evaluateBoundary) only tracks needs that
+ * were actually ASKED as a candidate; it has, and must keep, zero
+ * StructuredUnderstanding awareness by design (see boundaries.ts's own
+ * header: "does not import ... StructuredUnderstanding"). This function
+ * closes that gap from the outside: called once per turn, before any
+ * candidate is generated, it returns a BoundaryState with follow_ups_used
+ * pre-seeded (idempotently, additively -- never lowers an existing count)
+ * for every (signal_id, 'tool_plan_tier') pair already structurally
+ * confirmed, so evaluateBoundary rejects a later attempt to re-ask it even
+ * though it was never itself asked as a capped candidate before.
+ *
+ * Deliberately scoped to ONLY 'tool_plan_tier': it is the sole FollowUpNeed
+ * with an existing Attested<T> field to check. The two asset_provider_*
+ * needs have no such field at all (AssetProviderMention records identity
+ * only -- Duplicate-Question Diagnostic §7/§25), so they are NOT
+ * presatisfied here; their only "already answered" signal is the compound
+ * cap key itself, set the first time a candidate carrying that need is
+ * actually asked (see evaluateBoundary). Extending presatisfaction to a
+ * free-text-only need would require inventing exactly the kind of
+ * text-similarity inference this milestone's diagnostic identified as
+ * unsafe -- out of scope by design, not an oversight.
+ */
+export function presatisfyStructuralFollowUpNeeds(su: StructuredUnderstanding, boundaryState: BoundaryState): BoundaryState {
+  let followUpsUsed = boundaryState.follow_ups_used
+  let changed = false
+  for (const m of su.tool_mentions) {
+    if (m.superseded_by !== null) continue
+    if (m.plan_tier.state !== 'confirmed') continue
+    const key = `${m.mention_id}::tool_plan_tier`
+    if ((followUpsUsed[key] ?? 0) >= 1) continue
+    followUpsUsed = { ...followUpsUsed, [key]: 1 }
+    changed = true
+  }
+  return changed ? { ...boundaryState, follow_ups_used: followUpsUsed } : boundaryState
 }
 
 // ── Model-facing proposal ───────────────────────────────────────────────────
@@ -91,6 +147,17 @@ export interface CandidateQuestionProposal {
   /** Must be a signal_id from the eligible set, or null. Never minted by the model. */
   target_signal_id: string | null
   phase: Phase
+  /**
+   * Duplicate-Question Prevention milestone (2026-08-19). Optional,
+   * best-effort classification: which narrow FollowUpNeed (boundaries.ts)
+   * this question addresses, if any of the small closed set applies.
+   * Deliberately NOT required on every proposal -- an omitted/null value
+   * falls through to the pre-existing per-signal-id cap unchanged (see
+   * validateCandidateReference below), so imperfect model instruction-
+   * following degrades to prior behavior rather than rejecting the
+   * candidate outright.
+   */
+  target_follow_up_need?: FollowUpNeed | null
 }
 
 // ── Generator interface ─────────────────────────────────────────────────────
@@ -165,7 +232,23 @@ export type CandidateQuestionGenerator = (
 export const CANDIDATE_QUESTION_REJECTION_REASON_CODES = [
   'SIGNAL_ID_NOT_ELIGIBLE',
   'MISSING_REQUIRED_SIGNAL_ID',
+  /**
+   * Duplicate-Question Prevention milestone (2026-08-19). Fires when
+   * target_follow_up_need is set but target_signal_id is missing, or does
+   * not resolve to an eligible signal of the kind that need requires
+   * ('asset_provider_mention' for the two asset_provider_* needs,
+   * 'tool_mention' for tool_plan_tier) -- a defensive check against a
+   * hallucinated/mismatched need tag, same shape as SIGNAL_ID_NOT_ELIGIBLE.
+   */
+  'FOLLOW_UP_NEED_TARGET_MISMATCH',
 ] as const
+
+/** Which EligibleSignalKind a given FollowUpNeed must target, if the need is set at all. */
+const FOLLOW_UP_NEED_REQUIRED_SIGNAL_KIND: Record<FollowUpNeed, EligibleSignalKind> = {
+  asset_provider_usage: 'asset_provider_mention',
+  asset_provider_license: 'asset_provider_mention',
+  tool_plan_tier: 'tool_mention',
+}
 
 export type CandidateQuestionRejectionReasonCode = (typeof CANDIDATE_QUESTION_REJECTION_REASON_CODES)[number]
 
@@ -208,12 +291,30 @@ export function validateCandidateReference(
     }
   }
 
+  // ── Duplicate-Question Prevention milestone (2026-08-19). Only runs when
+  // the model actually set a need; absent/null is untouched, existing
+  // behavior. See FOLLOW_UP_NEED_REQUIRED_SIGNAL_KIND above.
+  if (proposal.target_follow_up_need) {
+    const requiredKind = FOLLOW_UP_NEED_REQUIRED_SIGNAL_KIND[proposal.target_follow_up_need]
+    const target = proposal.target_signal_id === null
+      ? undefined
+      : eligibleSignals.find((s) => s.signal_id === proposal.target_signal_id)
+    if (!target || target.kind !== requiredKind) {
+      return {
+        outcome: 'rejected',
+        reason_code: 'FOLLOW_UP_NEED_TARGET_MISMATCH',
+        reason: `target_follow_up_need '${proposal.target_follow_up_need}' requires target_signal_id to resolve to an eligible '${requiredKind}' signal, but got '${proposal.target_signal_id}'.`,
+      }
+    }
+  }
+
   return {
     outcome: 'accepted',
     candidate: {
       kind: proposal.question_kind,
       signal_id: proposal.target_signal_id ?? undefined,
       phase: proposal.phase,
+      follow_up_need: proposal.target_follow_up_need ?? undefined,
     },
   }
 }

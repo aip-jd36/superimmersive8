@@ -31,7 +31,7 @@ import type {
   CandidateQuestionGeneratorInput,
   CandidateQuestionProposal,
 } from './candidate-question'
-import { CANDIDATE_QUESTION_KINDS, type CandidateQuestionKind } from './boundaries'
+import { CANDIDATE_QUESTION_KINDS, FOLLOW_UP_NEEDS, type CandidateQuestionKind, type FollowUpNeed } from './boundaries'
 
 export const DEFAULT_MODEL = 'claude-sonnet-5'
 
@@ -71,7 +71,15 @@ You MUST NOT:
 - Reference or reason about Retrieval results, Knowledge Cards, Matrix contents, or commercial-readiness conclusions -- you were not given any of these, and must not assume or invent them.
 - Propose a question about something already fully resolved with no remaining ambiguity, unless there is a genuine natural next thing to ask elsewhere in the understanding.
 
-If there is no natural next question to propose -- understanding is already complete, or nothing further makes sense to ask right now -- set has_candidate to false and leave the other fields null.`
+If there is no natural next question to propose -- understanding is already complete, or nothing further makes sense to ask right now -- set has_candidate to false and leave the other fields null.
+
+Duplicate-Question Prevention (2026-08-19): if your target_signal_id refers to an asset-provider mention -- a named third-party source like iStock, Getty, or Shutterstock -- you MUST set target_follow_up_need to whichever of these two this specific question is about:
+- "asset_provider_usage": how the asset was used in the workflow (e.g. uploaded as a reference image, used directly as a generation input, or some other use).
+- "asset_provider_license": what license, purchase, or permission the user has for that asset.
+These are DIFFERENT questions about the same provider and are tracked independently -- do not assume one is answered just because the other is.
+If your target_signal_id refers to a tool mention and your question specifically asks which plan or access tier the user used (not anything else about the tool), set target_follow_up_need to "tool_plan_tier".
+For every other question, leave target_follow_up_need null. Never guess a value here merely because a question happens to mention an asset provider or a tool -- only set it when the question IS specifically about one of these three narrow things.
+Deterministic code downstream uses target_follow_up_need to avoid re-asking something already answered -- it does not affect whether your question is otherwise permitted.`
 
 /**
  * CRC Limited Pilot -- Model 4 (bounded alternative-question search),
@@ -110,8 +118,14 @@ const CANDIDATE_QUESTION_RESPONSE_SCHEMA = {
       description:
         'Must be exactly one of the eligible signal ids supplied to you, or null if the question is general or spans multiple signals. Never invented.',
     },
+    target_follow_up_need: {
+      type: ['string', 'null'],
+      enum: [...FOLLOW_UP_NEEDS, null],
+      description:
+        'Set ONLY when this question is specifically about one of these narrow, known needs (see system prompt for exact definitions); null otherwise. Never guessed.',
+    },
   },
-  required: ['has_candidate', 'question_text', 'question_kind', 'target_signal_id'],
+  required: ['has_candidate', 'question_text', 'question_kind', 'target_signal_id', 'target_follow_up_need'],
   additionalProperties: false,
 } as const
 
@@ -120,6 +134,7 @@ interface ParsedCandidateQuestionResponse {
   question_text: string | null
   question_kind: CandidateQuestionKind | null
   target_signal_id: string | null
+  target_follow_up_need: FollowUpNeed | null
 }
 
 export interface AnthropicCandidateQuestionOptions {
@@ -187,6 +202,7 @@ export function createAnthropicCandidateQuestionGenerator(
       question_kind: parsed.question_kind,
       target_signal_id: parsed.target_signal_id,
       phase: input.phase,
+      target_follow_up_need: parsed.target_follow_up_need,
     }
   }
 }
@@ -232,6 +248,7 @@ export async function generateWithDiagnostics(
           question_kind: parsed.question_kind,
           target_signal_id: parsed.target_signal_id,
           phase: input.phase,
+          target_follow_up_need: parsed.target_follow_up_need,
         }
 
   return {

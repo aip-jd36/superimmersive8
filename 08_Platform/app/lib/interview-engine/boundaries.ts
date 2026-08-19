@@ -90,6 +90,32 @@ export const CANDIDATE_QUESTION_KINDS = [
 export type CandidateQuestionKind = (typeof CANDIDATE_QUESTION_KINDS)[number]
 
 /**
+ * Duplicate-Question Prevention milestone (2026-08-19). A small, CLOSED set
+ * of narrow follow-up "needs" -- deliberately NOT a generic InformationNeed
+ * taxonomy (see the completed Duplicate-Question Diagnostic's own T3
+ * assessment: two Class-A cases is not yet evidence a generic framework is
+ * warranted). Each value names one specific, already-known question shape
+ * this milestone targets:
+ * - 'asset_provider_usage' / 'asset_provider_license': the two DISTINCT
+ *   follow-up needs a named third-party asset provider (iStock, Getty,
+ *   Shutterstock, ...) can raise -- "how was it used in the workflow" vs.
+ *   "what license/permission exists for it." Deliberately kept as two
+ *   separate values, never collapsed into one "asset provider follow-up" --
+ *   the diagnostic's own false-positive guard requires that answering one
+ *   must never suppress the other (Duplicate-Question Diagnostic §3/§14).
+ * - 'tool_plan_tier': the one tool-mention follow-up need with an existing
+ *   structured field (ToolMention.plan_tier) that can be duplicate-asked via
+ *   the SAME loophole -- included because it reuses the identical mechanism
+ *   at near-zero extra cost, not because tool-mention follow-ups in general
+ *   are in scope.
+ * This list is expected to grow only when a concrete, reproduced duplicate
+ * case justifies a new value -- never speculatively.
+ */
+export const FOLLOW_UP_NEEDS = ['asset_provider_usage', 'asset_provider_license', 'tool_plan_tier'] as const
+
+export type FollowUpNeed = (typeof FOLLOW_UP_NEEDS)[number]
+
+/**
  * Deliberately carries no question text. "Rephrasing the same prohibited
  * follow-up must not evade the cap" is satisfied structurally, not just by
  * test coverage: the evaluator has no wording to be fooled by in the first
@@ -102,6 +128,21 @@ export interface CandidateQuestion {
   /** Required for 'follow_up_on_signal' and 'uncertainty_clarification'; ignored otherwise. */
   signal_id?: string
   phase: Phase
+  /**
+   * Duplicate-Question Prevention milestone (2026-08-19). Optional, additive.
+   * When present, evaluateBoundary keys its cap to (signal_id, follow_up_need)
+   * INSTEAD OF bare signal_id -- this is what lets "asset usage confirmed,
+   * license still unresolved" ask the license question even though both
+   * target the same signal_id (Duplicate-Question Diagnostic §3/§14's
+   * explicit false-positive guard), and what closes the fresh-observation-ID
+   * loophole (Diagnostic §13): the need is anchored to the STABLE
+   * tool_mention/asset_provider_mention signal_id, never to an ephemeral
+   * scoped_observation id that gets freshly minted on every restatement.
+   * Absent (undefined) -> zero behavior change from before this milestone;
+   * every existing candidate (no caller sets this field yet outside the new
+   * code paths) falls through to the untouched per-signal-id logic below.
+   */
+  follow_up_need?: FollowUpNeed
 }
 
 // ── Boundary state ───────────────────────────────────────────────────────────
@@ -233,6 +274,15 @@ export const BOUNDARY_REASON_CODES = [
   'JURISDICTION_CLARIFICATION_ALREADY_ASKED',
   'HUMAN_CONTRIBUTION_CLARIFICATION_ALREADY_ASKED',
   'INCIDENT_INVESTIGATION_PROHIBITED',
+  /**
+   * Duplicate-Question Prevention milestone (2026-08-19). Fires whenever
+   * candidate.follow_up_need is present and its (signal_id, follow_up_need)
+   * compound key has already been asked once -- same "1 ask, ever" shape as
+   * FOLLOW_UP_CAP_REACHED, generalized to a need-scoped key so two distinct
+   * needs about the same signal (e.g. asset usage vs. asset license) are
+   * capped independently rather than sharing one budget.
+   */
+  'FOLLOW_UP_NEED_ALREADY_ASKED',
   'USER_DECLINED_QUESTION',
   'USER_DECLINED_PHASE',
   'USER_DECLINED_INTERVIEW',
@@ -351,6 +401,33 @@ export function evaluateBoundary(
       action_scope: 'suppress_current_question',
       next_state: state,
       debug: { fired_boundary: 'incident_investigation (absolute prohibition)', candidate_kind: candidate.kind },
+    }
+  }
+
+  // ── Duplicate-Question Prevention milestone (2026-08-19). Checked BEFORE
+  // the per-kind switch below, and REGARDLESS of candidate.kind (covers both
+  // 'follow_up_on_signal' and 'other' -- Diagnostic §8's own finding that
+  // 'other' is exactly where the uncapped duplicate risk lives). When
+  // absent, every candidate falls straight through to the unchanged
+  // per-kind logic below -- zero behavior change for any existing caller.
+  if (candidate.follow_up_need) {
+    const capKey = `${candidate.signal_id ?? 'none'}::${candidate.follow_up_need}`
+    const used = state.follow_ups_used[capKey] ?? 0
+    if (used >= 1) {
+      return {
+        allowed: false,
+        reason_code: 'FOLLOW_UP_NEED_ALREADY_ASKED',
+        action_scope: 'suppress_current_question',
+        next_state: state,
+        debug: { fired_boundary: `follow_up_need_cap:${capKey}`, candidate_kind: candidate.kind, signal_id: candidate.signal_id },
+      }
+    }
+    return {
+      allowed: true,
+      reason_code: 'ALLOWED',
+      action_scope: 'ask',
+      next_state: { ...state, follow_ups_used: { ...state.follow_ups_used, [capKey]: used + 1 } },
+      debug: { fired_boundary: 'none', candidate_kind: candidate.kind, signal_id: candidate.signal_id },
     }
   }
 

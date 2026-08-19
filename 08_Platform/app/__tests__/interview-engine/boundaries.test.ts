@@ -235,3 +235,93 @@ describe('boundary state serialization', () => {
     expect(fromRestored.next_state).toEqual(fromOriginal.next_state)
   })
 })
+
+describe('follow-up need cap (Duplicate-Question Prevention milestone, 2026-08-19)', () => {
+  test('A. exact duplicate: first ask of a need is allowed; the identical candidate again is blocked', () => {
+    const first = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'follow_up_on_signal', signal_id: 'istock-1', follow_up_need: 'asset_provider_usage' }),
+    )
+    expect(first.allowed).toBe(true)
+    expect(first.next_state.follow_ups_used['istock-1::asset_provider_usage']).toBe(1)
+
+    const repeat = evaluateBoundary(
+      first.next_state,
+      candidate({ kind: 'follow_up_on_signal', signal_id: 'istock-1', follow_up_need: 'asset_provider_usage' }),
+    )
+    expect(repeat.allowed).toBe(false)
+    expect(repeat.reason_code).toBe('FOLLOW_UP_NEED_ALREADY_ASKED')
+    expect(repeat.action_scope).toBe('suppress_current_question')
+  })
+
+  test("B. paraphrase evades cap the same way follow_up_on_signal's own cap does -- the type carries no text, so a differently-worded proposal that resolves to the SAME (signal_id, need) is indistinguishable from a repeat, by construction", () => {
+    const first = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'other', signal_id: 'istock-1', follow_up_need: 'asset_provider_usage' }),
+    )
+    const paraphrased = evaluateBoundary(
+      first.next_state,
+      candidate({ kind: 'other', signal_id: 'istock-1', follow_up_need: 'asset_provider_usage' }),
+    )
+    expect(paraphrased.allowed).toBe(false)
+    expect(paraphrased.reason_code).toBe('FOLLOW_UP_NEED_ALREADY_ASKED')
+  })
+
+  test('C. same signal, DIFFERENT need: usage capped does not block license -- the primary false-positive guard', () => {
+    const usageAsked = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'follow_up_on_signal', signal_id: 'istock-1', follow_up_need: 'asset_provider_usage' }),
+    )
+    const usageRepeat = evaluateBoundary(
+      usageAsked.next_state,
+      candidate({ kind: 'follow_up_on_signal', signal_id: 'istock-1', follow_up_need: 'asset_provider_usage' }),
+    )
+    const license = evaluateBoundary(
+      usageAsked.next_state,
+      candidate({ kind: 'follow_up_on_signal', signal_id: 'istock-1', follow_up_need: 'asset_provider_license' }),
+    )
+    expect(usageRepeat.allowed).toBe(false)
+    expect(license.allowed).toBe(true)
+    expect(license.reason_code).toBe('ALLOWED')
+  })
+
+  test('a DIFFERENT signal_id with the same need is independently eligible (unrelated provider, unrelated tool)', () => {
+    const istockUsage = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'follow_up_on_signal', signal_id: 'istock-1', follow_up_need: 'asset_provider_usage' }),
+    )
+    const gettyUsage = evaluateBoundary(
+      istockUsage.next_state,
+      candidate({ kind: 'follow_up_on_signal', signal_id: 'getty-1', follow_up_need: 'asset_provider_usage' }),
+    )
+    expect(gettyUsage.allowed).toBe(true)
+  })
+
+  test('absent follow_up_need falls through to the unchanged, pre-existing bare-signal_id cap -- zero behavior change for every existing caller', () => {
+    const first = evaluateBoundary(createInitialBoundaryState(), candidate({ kind: 'follow_up_on_signal', signal_id: 'istock-1' }))
+    expect(first.next_state.follow_ups_used['istock-1']).toBe(1)
+    expect(first.next_state.follow_ups_used['istock-1::asset_provider_usage']).toBeUndefined()
+
+    const second = evaluateBoundary(first.next_state, candidate({ kind: 'follow_up_on_signal', signal_id: 'istock-1' }))
+    expect(second.allowed).toBe(false)
+    expect(second.reason_code).toBe('FOLLOW_UP_CAP_REACHED')
+  })
+
+  test('an incident_investigation candidate is still absolutely prohibited even if (hypothetically) tagged with a follow_up_need', () => {
+    const result = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'incident_investigation', signal_id: 'istock-1', follow_up_need: 'asset_provider_usage' }),
+    )
+    expect(result.allowed).toBe(false)
+    expect(result.reason_code).toBe('INCIDENT_INVESTIGATION_PROHIBITED')
+  })
+
+  test('J. multi-goal: an unrelated candidate with no follow_up_need is unaffected by a capped need on a different signal', () => {
+    const usageAsked = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'follow_up_on_signal', signal_id: 'istock-1', follow_up_need: 'asset_provider_usage' }),
+    )
+    const unrelated = evaluateBoundary(usageAsked.next_state, candidate({ kind: 'follow_up_on_signal', signal_id: 'workflow-role' }))
+    expect(unrelated.allowed).toBe(true)
+  })
+})

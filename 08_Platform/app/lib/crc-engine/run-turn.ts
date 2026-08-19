@@ -117,6 +117,7 @@ import { computePhase } from '@/lib/interview-engine/phase'
 import { createInitialBoundaryState, evaluateBoundary, type BoundaryState, type CandidateQuestion } from '@/lib/interview-engine/boundaries'
 import {
   deriveEligibleSignals,
+  presatisfyStructuralFollowUpNeeds,
   matchesExclusion,
   validateCandidateReference,
   type CandidateExclusion,
@@ -479,7 +480,17 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
 
   const eligible = deriveEligibleSignals(suAfter)
 
-  let nextBoundaryState = boundaryStateLoaded
+  // Duplicate-Question Prevention milestone (2026-08-19). Pre-seeds the
+  // tool_plan_tier compound cap key for any tool whose plan_tier is ALREADY
+  // structurally confirmed (e.g. stated directly, never asked as a
+  // candidate) -- see presatisfyStructuralFollowUpNeeds's own header for why
+  // this must live here (StructuredUnderstanding-aware) rather than inside
+  // boundaries.ts (deliberately StructuredUnderstanding-free). Idempotent,
+  // pure, recomputed fresh every turn from current state -- everything
+  // below this point uses this value in place of the bare loaded state.
+  const boundaryStateForTurn = presatisfyStructuralFollowUpNeeds(suAfter, boundaryStateLoaded)
+
+  let nextBoundaryState = boundaryStateForTurn
   let pendingClarification: PendingClarification | null = null
   let outcome: TurnOutcome = { kind: 'acknowledgment', message: ACKNOWLEDGMENT_COPY }
   // Commercial Readiness Discovery Catalog integration, 2026-08-12: set
@@ -516,19 +527,19 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
           const lineageResolvedCandidate: CandidateQuestion = validation.candidate.signal_id
             ? { ...validation.candidate, signal_id: resolveLineageRoot(suAfter, validation.candidate.signal_id) }
             : validation.candidate
-          const boundaryResult = evaluateBoundary(boundaryStateLoaded, lineageResolvedCandidate, declineSignal)
+          const boundaryResult = evaluateBoundary(boundaryStateForTurn, lineageResolvedCandidate, declineSignal)
           nextBoundaryState = boundaryResult.next_state
           if (boundaryResult.allowed) {
             outcome = { kind: 'question', message: proposal.question_text }
             pendingClarification = buildPendingClarification(proposal, suAfter)
           }
         } else {
-          const boundaryResult = evaluateBoundary(boundaryStateLoaded, { kind: 'other', phase }, declineSignal)
+          const boundaryResult = evaluateBoundary(boundaryStateForTurn, { kind: 'other', phase }, declineSignal)
           nextBoundaryState = boundaryResult.next_state
         }
       }
     } else {
-      const boundaryResult = evaluateBoundary(boundaryStateLoaded, { kind: 'other', phase }, declineSignal)
+      const boundaryResult = evaluateBoundary(boundaryStateForTurn, { kind: 'other', phase }, declineSignal)
       nextBoundaryState = boundaryResult.next_state
     }
   } else {
@@ -563,7 +574,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     const jurisdictionEligibility = evaluateJurisdictionClarificationEligibility(
       suAfter,
       topicClaims,
-      boundaryStateLoaded.jurisdiction_clarification_asked,
+      boundaryStateForTurn.jurisdiction_clarification_asked,
       relationships,
     )
     const jurisdictionProposal = jurisdictionEligibility.eligible ? buildJurisdictionClarificationProposal(phase) : undefined
@@ -580,7 +591,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     const humanContributionEligibility = evaluateHumanContributionClarificationEligibility(
       suAfter,
       topicClaims,
-      boundaryStateLoaded.human_contribution_clarification_asked,
+      boundaryStateForTurn.human_contribution_clarification_asked,
       relationships,
     )
     const humanContributionProposal = humanContributionEligibility.eligible ? buildHumanContributionClarificationProposal(phase) : undefined
@@ -597,7 +608,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     const discoveryIndicators = deriveCommercialReadinessIndicators(suAfter)
     const discoveryCategory = selectEligibleCommercialReadinessCategory(
       discoveryIndicators,
-      boundaryStateLoaded.commercial_readiness_discovery_asked,
+      boundaryStateForTurn.commercial_readiness_discovery_asked,
       gate1.state === 'met',
       phase,
     )
@@ -608,8 +619,8 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     const forcedProposal = jurisdictionProposal ?? humanContributionProposal ?? discoveryProposal
 
     const attempt1 = forcedProposal
-      ? await tryCandidate(suAfter, eligible, phase, boundaryStateLoaded, deps, undefined, forcedProposal)
-      : await tryCandidate(suAfter, eligible, phase, boundaryStateLoaded, deps)
+      ? await tryCandidate(suAfter, eligible, phase, boundaryStateForTurn, deps, undefined, forcedProposal)
+      : await tryCandidate(suAfter, eligible, phase, boundaryStateForTurn, deps)
 
     // Jurisdiction analytics instrumentation. Deliberately narrower than
     // Discovery's own discoverySignal below: Discovery is unconditionally
@@ -661,7 +672,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     // human-contribution clarification won the slot instead.
     discoverySignal = {
       eligible_categories: COMMERCIAL_READINESS_CATEGORIES.filter(
-        (c) => evaluateCategoryEligibility(c, discoveryIndicators, boundaryStateLoaded.commercial_readiness_discovery_asked, gate1.state === 'met', phase).eligible,
+        (c) => evaluateCategoryEligibility(c, discoveryIndicators, boundaryStateForTurn.commercial_readiness_discovery_asked, gate1.state === 'met', phase).eligible,
       ),
       selected_category: discoveryCategory,
       outcome:
@@ -703,7 +714,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
       // generator was never even called on attempt #1 when attempt #1 was
       // a forced (jurisdiction or discovery) candidate.
       const excluded = !forcedProposal && attempt1.exclusion ? [attempt1.exclusion] : undefined
-      const attempt2 = await tryCandidate(suAfter, eligible, phase, boundaryStateLoaded, deps, excluded)
+      const attempt2 = await tryCandidate(suAfter, eligible, phase, boundaryStateForTurn, deps, excluded)
       if (attempt2.status === 'approved') {
         outcome = attempt2.outcome
         nextBoundaryState = attempt2.nextBoundaryState
@@ -716,7 +727,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
         // remains entirely unaware of Constraint B/BoundaryState by
         // design (see COMPLETION_REASONS' own doc in
         // types/interview-engine.ts and this module's own header).
-        // nextBoundaryState is still boundaryStateLoaded here: neither
+        // nextBoundaryState is still boundaryStateForTurn here: neither
         // rejected attempt ever reaches evaluateBoundary's "allowed"
         // branch (the only branch that mutates boundary state), so
         // there is nothing to carry forward beyond what was already

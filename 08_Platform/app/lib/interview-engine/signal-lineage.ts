@@ -35,8 +35,20 @@
  * project:intended_use / project:workflow_role signal ids never supersede
  * (mutations.ts's setIntendedUse/setWorkflowRole are plain immutable
  * replacement, not supersede-and-mark -- see that module's own header) --
- * resolveLineageRoot correctly returns them unchanged, since neither array
- * this function walks will ever contain a record pointing to them.
+ * resolveLineageRoot correctly returns them unchanged, since none of the
+ * arrays this function walks will ever contain a record pointing to them.
+ *
+ * asset_provider_mentions added to the walk (Duplicate-Question Prevention
+ * milestone, 2026-08-19): AssetProviderMention was never an eligible
+ * candidate-question signal before this milestone, so this branch was
+ * previously unreachable dead capacity, not a behavior change -- no
+ * existing caller could ever have produced a signal_id pointing into this
+ * array. Now that it IS eligible (candidate-question.ts), the exact same
+ * fresh-id-reopens-a-capped-need loophole this module was built to close
+ * for tool_mentions/scoped_observations applies identically to a
+ * superseded asset-provider mention (confirmed to occur in production --
+ * e.g. a restated/corrected provider mention supersedes the original), so
+ * it must be walked the same way.
  */
 
 import type { StructuredUnderstanding } from '@/types/interview-engine'
@@ -55,6 +67,11 @@ export function resolveLineageRoot(su: StructuredUnderstanding, signalId: string
     const priorObservation = su.scoped_observations.find((o) => o.superseded_by === current)
     if (priorObservation) {
       current = priorObservation.observation_id
+      continue
+    }
+    const priorAssetProvider = su.asset_provider_mentions.find((p) => p.superseded_by === current)
+    if (priorAssetProvider) {
+      current = priorAssetProvider.mention_id
       continue
     }
     break

@@ -94,6 +94,47 @@ describe('resolveLineageRoot (pure function)', () => {
     const state = su({ tool_mentions: [toolMention({ mention_id: 'tm-1' })] })
     expect(resolveLineageRoot(state, 'tm-99')).toBe('tm-99')
   })
+
+  // Duplicate-Question Prevention milestone (2026-08-19). AssetProviderMention
+  // became an eligible candidate-question signal this milestone -- proves the
+  // exact same lineage-walk now applies to it, closing the "fresh id reopens
+  // a capped need" loophole (implementation task §13) for asset providers
+  // specifically, not just tool_mentions/scoped_observations.
+  test('an asset_provider_mention lineage resolves the same way as a tool_mention lineage', () => {
+    const state = su({
+      asset_provider_mentions: [
+        { mention_id: 'ap-1', resolution: { kind: 'unresolved_alias', raw_name: 'some stock site' }, confidence: 'unresolved_no_visibility', superseded_by: 'ap-2', source_turn: 1, source_statement: '' },
+        { mention_id: 'ap-2', resolution: { kind: 'canonical', identifier: 'istock' }, confidence: 'confirmed', superseded_by: null, source_turn: 3, source_statement: '' },
+      ],
+    })
+    expect(resolveLineageRoot(state, 'ap-2')).toBe('ap-1')
+  })
+
+  test('a follow_up_need cap keyed to the ORIGINAL asset_provider_mention id is still enforced after the mention is superseded and restated -- the actual signal-ID-restatement regression (§13)', () => {
+    let state = createInitialBoundaryState()
+    const first = evaluateBoundary(state, { kind: 'follow_up_on_signal', signal_id: 'ap-1', follow_up_need: 'asset_provider_usage', phase: 2 })
+    expect(first.allowed).toBe(true)
+    state = first.next_state
+
+    // ap-1 (the mention the first follow-up was asked against) gets
+    // superseded by ap-2 -- the extractor minted a fresh id when the user
+    // restated/added detail, exactly the Diagnostic §13 scenario.
+    const suAfterRestatement = su({
+      asset_provider_mentions: [
+        { mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: 'istock' }, confidence: 'confirmed', superseded_by: 'ap-2', source_turn: 1, source_statement: '' },
+        { mention_id: 'ap-2', resolution: { kind: 'canonical', identifier: 'istock' }, confidence: 'confirmed', superseded_by: null, source_turn: 3, source_statement: '' },
+      ],
+    })
+    const resolvedRoot = resolveLineageRoot(suAfterRestatement, 'ap-2')
+    expect(resolvedRoot).toBe('ap-1')
+
+    // A new candidate targeting the FRESH id, lineage-resolved back to the
+    // original root, is still blocked -- the fresh id does NOT reopen the
+    // already-satisfied need.
+    const second = evaluateBoundary(state, { kind: 'follow_up_on_signal', signal_id: resolvedRoot, follow_up_need: 'asset_provider_usage', phase: 2 })
+    expect(second.allowed).toBe(false)
+    expect(second.reason_code).toBe('FOLLOW_UP_NEED_ALREADY_ASKED')
+  })
 })
 
 describe('boundary caps follow lineage, not record id (JD 5-case requirement, 2026-08-08)', () => {
