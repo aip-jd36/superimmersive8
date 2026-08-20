@@ -111,7 +111,7 @@ describe('renderUnderstoodSummary -- required cases', () => {
   test('1: one tool, known intended use', () => {
     const facts = buildUnderstoodFacts(handoff({ tools: [tool('kling')], intended_use: 'Paid social ad campaign' }))
     const out = renderUnderstoodSummary(facts)
-    expect(out).toBe('You mentioned using kling. You mentioned this is for Paid social ad campaign.')
+    expect(out).toBe('You mentioned using kling. The intended use: Paid social ad campaign.')
   })
 
   test('2: multiple tools', () => {
@@ -492,5 +492,91 @@ describe('renderUnderstoodSummary -- negative assertions', () => {
     for (const line of importLines) {
       expect(line).toMatch(/@\/types\/interview-engine/)
     }
+  })
+})
+
+// ── P2 Summary/Role-Copy Diagnostic + Implementation, 2026-08-20 ──
+// intendedUseClause grammar hardening: ProjectFacts.intended_use carries no
+// shape guarantee (a bare fragment, a noun phrase, or a full sentence are
+// all equally valid extractor output), so the renderer must produce
+// grammatical, deterministic prose for any of those shapes without ever
+// requiring extraction to change. Mirrors roleClause's own 2026-08-16 fix
+// exactly (colon-appositive + toSentence()), confirmed live to close both
+// real production defects: the "for for a client" double-preposition bug
+// and the "...for They're going to use it in paid ads.." broken-framing +
+// duplicated-period bug.
+
+describe('intendedUseClause grammar hardening (P2, 2026-08-20)', () => {
+  test('A. "for a client" -- no "for for", grammatical', () => {
+    const facts = buildUnderstoodFacts(handoff({ intended_use: 'for a client' }))
+    const out = renderUnderstoodSummary(facts)
+    expect(out).not.toContain('for for')
+    expect(out).toBe('The intended use: For a client.')
+  })
+
+  test('B. "paid ads" -- grammatical', () => {
+    const facts = buildUnderstoodFacts(handoff({ intended_use: 'paid ads' }))
+    const out = renderUnderstoodSummary(facts)
+    expect(out).toBe('The intended use: Paid ads.')
+  })
+
+  test('C. "They\'re going to use it in paid ads." -- grammatical, no duplicated period, no broken preposition framing (the exact real second observed UAT defect)', () => {
+    const facts = buildUnderstoodFacts(handoff({ intended_use: "They're going to use it in paid ads." }))
+    const out = renderUnderstoodSummary(facts)
+    expect(out).not.toContain('..')
+    expect(out).not.toContain('for They')
+    expect(out).toBe("The intended use: They're going to use it in paid ads.")
+  })
+
+  test('D. "commercially" -- grammatical', () => {
+    const facts = buildUnderstoodFacts(handoff({ intended_use: 'commercially' }))
+    const out = renderUnderstoodSummary(facts)
+    expect(out).toBe('The intended use: Commercially.')
+  })
+
+  test('E. "for internal review" -- grammatical, no "for for"', () => {
+    const facts = buildUnderstoodFacts(handoff({ intended_use: 'for internal review' }))
+    const out = renderUnderstoodSummary(facts)
+    expect(out).not.toContain('for for')
+    expect(out).toBe('The intended use: For internal review.')
+  })
+
+  test('F. empty/unknown intended_use -- clause omitted entirely, unchanged existing behavior', () => {
+    for (const sentinel of ['unresolved', 'unknown', 'unclear', 'confirmed_absent', 'declined']) {
+      const facts = buildUnderstoodFacts(handoff({ intended_use: sentinel }))
+      expect(renderUnderstoodSummary(facts)).toBe('')
+    }
+  })
+
+  test('G. workflow_role rendering is completely byte-identical -- roleClause untouched by this fix', () => {
+    const facts = buildUnderstoodFacts(handoff({ workflow_role: 'Producer' }))
+    expect(renderUnderstoodSummary(facts)).toBe('Your role on this: Producer.')
+
+    const sentenceRoleFacts = buildUnderstoodFacts(handoff({ workflow_role: 'I created all the images and brand assets' }))
+    expect(renderUnderstoodSummary(sentenceRoleFacts)).toBe('Your role on this: I created all the images and brand assets.')
+  })
+
+  test('H. UI and email consistency -- understood_summary remains single-source, no separate email-only rendering branch', () => {
+    const source = fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'crc-engine', 'results-email-template.ts'), 'utf-8')
+    // The email template must reference the shared output.understood_summary
+    // field directly, never call renderUnderstoodSummary or reconstruct the
+    // intended_use clause itself.
+    expect(source).toContain('output.understood_summary')
+    expect(source).not.toContain('renderUnderstoodSummary')
+    expect(source).not.toContain('intendedUseClause')
+  })
+
+  test('Case 1 regression: real live-UAT stored value "for a client" no longer produces "for for a client" anywhere in the full rendered summary', () => {
+    const facts = buildUnderstoodFacts(handoff({ tools: [tool('kling')], intended_use: 'for a client' }))
+    const out = renderUnderstoodSummary(facts)
+    expect(out).not.toContain('for for a client')
+    expect(out).toBe('You mentioned using kling. The intended use: For a client.')
+  })
+
+  test('Case 2 regression: real live-UAT stored value "They\'re going to use it in paid ads." no longer produces the broken/double-punctuated sentence', () => {
+    const facts = buildUnderstoodFacts(handoff({ tools: [tool('kling')], intended_use: "They're going to use it in paid ads." }))
+    const out = renderUnderstoodSummary(facts)
+    expect(out).not.toContain("You mentioned this is for They're going to use it in paid ads..")
+    expect(out).toBe("You mentioned using kling. The intended use: They're going to use it in paid ads.")
   })
 })

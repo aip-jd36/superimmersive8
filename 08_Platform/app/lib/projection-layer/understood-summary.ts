@@ -278,9 +278,45 @@ function roleClause(role: string | null): string | null {
   return `Your role on this: ${role}.`
 }
 
+/**
+ * Rendering-contract fix (P2 Summary/Role-Copy Diagnostic + Implementation,
+ * 2026-08-20): same defect class, same fix shape, as roleClause's own
+ * 2026-08-16 fix immediately above -- `intended_use`'s data contract has
+ * never guaranteed a short (prepositional-object-shaped) phrase either;
+ * extraction stores the user's own wording verbatim (anthropic-extractor.ts's
+ * own schema: "what the output is for"), which can legitimately be a bare
+ * fragment ("for a client"), a noun phrase ("paid ads"), or a full sentence
+ * ("They're going to use it in paid ads."). The prior template
+ * (`You mentioned this is for ${use}.`) unconditionally prepended a literal
+ * "for " -- confirmed live to produce "You mentioned this is for for a
+ * client." when the stored value already began with its own "for", and
+ * "You mentioned this is for They're going to use it in paid ads.." (broken
+ * preposition framing + a duplicated terminal period) when the value was
+ * already a punctuated sentence.
+ *
+ * Fix is structural, not semantic, and deliberately mirrors roleClause's own
+ * colon-appositive shape exactly, plus toSentence() (already used by
+ * observationClauses below) for safe capitalization and non-duplicating
+ * terminal punctuation -- both already-proven, already-tested primitives in
+ * this same file, not new mechanism. A colon-led appositive is grammatically
+ * agnostic to whatever shape follows it, so it never collides with a
+ * value's own leading preposition the way the old predicate-phrase template
+ * did, and toSentence() closes the double-punctuation gap the same way it
+ * already does for observation notes. Deliberately NOT: (a) stripping/
+ * normalizing the value to force a noun-phrase shape (would lose
+ * information the user actually stated -- ProjectFacts.intended_use remains
+ * untouched, raw interview state), (b) detecting "does this look like a
+ * sentence" and branching (adds a heuristic that itself needs maintaining
+ * and can misfire, for a problem the connective-phrase change already
+ * solves for every shape at once -- identical reasoning to roleClause's own
+ * comment). Extraction (anthropic-extractor.ts), mutations.ts, and
+ * ProjectFacts' schema are all completely unchanged by this fix -- this is
+ * render-time-only, exactly as the completed diagnostic concluded was
+ * sufficient.
+ */
 function intendedUseClause(use: string | null): string | null {
   if (use === null) return null
-  return `You mentioned this is for ${use}.`
+  return `The intended use: ${toSentence(use)}`
 }
 
 const SCOPE_LABELS: Record<ObservationScope, string> = {
