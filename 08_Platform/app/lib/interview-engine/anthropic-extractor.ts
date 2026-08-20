@@ -39,6 +39,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { jsonSchemaOutputFormat } from '@anthropic-ai/sdk/helpers/json-schema'
 import type { CandidateExtractor, CandidateObservation, RawUserTurn } from './extraction'
+import { ASSET_PROVIDER_USAGE_VALUES } from '@/types/interview-engine'
 import { classifyMissingParsedOutput, type MinimalParsedAnthropicResponse, type StructuredOutputFailureClass } from './anthropic-structured-output-retry'
 
 export const DEFAULT_MODEL = 'claude-sonnet-5'
@@ -56,6 +57,12 @@ For each distinct fact-bearing statement in the turn, produce one candidate:
   If no such context line is present (nothing confirmed yet) and the user gives a vague or uncertain answer ("I don't know", "mostly AI", "I edited it a bit"), still propose the candidate with their own words as stated and fact_confidence_hint "confirmed" -- an imprecise self-report is still a real, confirmed answer, exactly like an imprecise intended_use answer is.
 - kind "user_goal": the user explicitly states what they came here wanting to know or achieve about THIS workflow's commercial readiness -- a question ("Can I use this commercially?", "Will my client own this?") and a declarative need ("My client needs proof this is cleared.", "I'm trying to figure out whether this is okay for a paid campaign.") are equally valid; capture either. This is distinct from project_fact's intended_use: intended_use describes what the OUTPUT is for (e.g. "an AI commercial for my client"); user_goal is what the USER wants to know or achieve regarding commercial readiness. A turn can and often does contain both at once -- propose both candidates when it does, never merge them into one.
 - kind "asset_provider_mention": the user names a third-party source/stock media provider that supplied material used IN the project (e.g. "Getty", "Getty Images", "iStock", "Shutterstock", "Adobe Stock") -- report the name via raw_provider_name, never raw_tool_name. This is a source of material, not a tool used to generate anything. Propose this candidate whenever a provider is named, REGARDLESS of whether the turn also contains a user_goal -- recognizing that a provider was mentioned is independent of whether the user is asking a rights question about it right now. If the user names a provider but is genuinely unsure which one ("I got it from Getty or iStock, I don't remember which"), set low_confidence: true rather than guessing between them.
+  When kind is "asset_provider_mention" and the user DIRECTLY states, in THIS turn, how that provider's material was used in the workflow or what license/subscription covers it, also report it via usage_confidence_hint/usage_value_hint and license_confidence_hint/license_value_hint:
+  - usage_value_hint: exactly one of "reference_material" (used only as a visual/creative reference, not fed into generation), "direct_generation_input" (uploaded/fed directly into the AI generation process), or "other" (a workflow use that is neither of those, described in their own words in raw_text). Choose based on what they actually described -- never guess between "reference_material" and "direct_generation_input" if the turn is genuinely ambiguous about which applies; in that case leave usage_confidence_hint unset.
+  - license_value_hint: the user's own wording for their license/subscription/permission for that provider's material (e.g. "standard license", "the extended license", "Editorial use only", "a royalty-free subscription"). Report their words as stated -- never translate to a category you infer, never assume a license TYPE from a subscription TIER they did not themselves connect.
+  - Set the paired confidence_hint to "confirmed" only when the user stated it as a clear, direct fact this turn. Leave both hints in a pair null/unset when the turn says nothing about that provider's usage or license -- never inferred from generic context.
+  - CRITICAL multi-provider safety: only set a usage/license hint on a candidate when it is clear which SPECIFIC provider the statement refers to. If more than one provider is active in the conversation and the turn's usage/license statement does not clearly attach to one of them (e.g. "I have the standard license" with both Getty and iStock already mentioned and no other cue), leave usage_confidence_hint/license_confidence_hint unset entirely on every candidate this turn -- do NOT guess which provider it belongs to, and do NOT attach it to whichever provider happens to be mentioned first.
+  - These hints can also appear on a candidate that corrects/restates the SAME provider already mentioned earlier (e.g. "Actually, those were Editorial-use iStock images.") -- propose it the same way any other asset_provider_mention correction is proposed, with the corrected usage/license hint set.
 
 Third-party source rights is its own user_goal category (see goal_category_hint below) for whether the user has the RIGHTS to use third-party source material (e.g. a stock image) in the project -- a materially different question from commercial_use (whether the AI-generated OUTPUT can be used commercially). This category is EXPLICIT-QUESTION-GATED ONLY, exactly like every other goal category: propose it only when the user asks a direct question or states a direct need about permission/rights to use the source material.
 Examples that SHOULD produce a third_party_source_rights user_goal: "Can I use this Getty image in an ad?", "Can I use these iStock images in my client commercial?", "Do I have the rights to use this stock image?", "Can I use a Shutterstock Editorial photo in this campaign?", "Am I allowed to use this licensed stock footage in the video?".
@@ -163,6 +170,29 @@ const CANDIDATE_RESPONSE_SCHEMA = {
             description:
               'When kind is asset_provider_mention: return ONLY the third-party source/stock media provider name itself (e.g. "Getty", "Getty Images", "iStock", "Shutterstock", "Adobe Stock"), preserving the user\'s wording. Never a tool/platform used to generate content -- see raw_tool_name for that. Never map it to a canonical id yourself. Null otherwise.',
           },
+          usage_confidence_hint: {
+            type: ['string', 'null'],
+            enum: [...CONFIDENCE_HINT_VALUES, null],
+            description:
+              "When kind is asset_provider_mention and the user directly stated, this turn, how that provider's material was used in the workflow: confirmed. Null when the turn says nothing about usage for this provider, or when it is unclear which of several active providers a usage statement refers to -- never inferred, never guessed between providers.",
+          },
+          usage_value_hint: {
+            type: ['string', 'null'],
+            enum: [...ASSET_PROVIDER_USAGE_VALUES, null],
+            description:
+              "When usage_confidence_hint is confirmed: exactly one of 'reference_material', 'direct_generation_input', or 'other'. Null otherwise.",
+          },
+          license_confidence_hint: {
+            type: ['string', 'null'],
+            enum: [...CONFIDENCE_HINT_VALUES, null],
+            description:
+              "When kind is asset_provider_mention and the user directly stated, this turn, their license/subscription/permission for that provider's material: confirmed. Null when the turn says nothing about license for this provider, or when it is unclear which of several active providers a license statement refers to -- never inferred, never guessed between providers.",
+          },
+          license_value_hint: {
+            type: ['string', 'null'],
+            description:
+              "When license_confidence_hint is confirmed: the user's own wording for their license/subscription/permission, preserved as stated -- never translated to a category you infer. Null otherwise.",
+          },
           access_surface_confidence_hint: {
             type: ['string', 'null'],
             enum: [...CONFIDENCE_HINT_VALUES, null],
@@ -258,6 +288,10 @@ const CANDIDATE_RESPONSE_SCHEMA = {
           'kind',
           'raw_tool_name',
           'raw_provider_name',
+          'usage_confidence_hint',
+          'usage_value_hint',
+          'license_confidence_hint',
+          'license_value_hint',
           'access_surface_confidence_hint',
           'access_surface_value_hint',
           'plan_tier_confidence_hint',
@@ -289,6 +323,10 @@ interface ParsedCandidate {
   kind: (typeof CANDIDATE_KIND_VALUES)[number]
   raw_tool_name: string | null
   raw_provider_name: string | null
+  usage_confidence_hint: (typeof CONFIDENCE_HINT_VALUES)[number] | null
+  usage_value_hint: (typeof ASSET_PROVIDER_USAGE_VALUES)[number] | null
+  license_confidence_hint: (typeof CONFIDENCE_HINT_VALUES)[number] | null
+  license_value_hint: string | null
   access_surface_confidence_hint: (typeof CONFIDENCE_HINT_VALUES)[number] | null
   access_surface_value_hint: string | null
   plan_tier_confidence_hint: (typeof CONFIDENCE_HINT_VALUES)[number] | null
@@ -315,6 +353,10 @@ export function toCandidateObservation(parsed: ParsedCandidate, turn: number): C
     kind: parsed.kind,
     raw_tool_name: parsed.raw_tool_name ?? undefined,
     raw_provider_name: parsed.raw_provider_name ?? undefined,
+    usage_confidence_hint: parsed.usage_confidence_hint ?? undefined,
+    usage_value_hint: parsed.usage_value_hint ?? undefined,
+    license_confidence_hint: parsed.license_confidence_hint ?? undefined,
+    license_value_hint: parsed.license_value_hint ?? undefined,
     access_surface_confidence_hint: parsed.access_surface_confidence_hint ?? undefined,
     access_surface_value_hint: parsed.access_surface_value_hint ?? undefined,
     plan_tier_confidence_hint: parsed.plan_tier_confidence_hint ?? undefined,

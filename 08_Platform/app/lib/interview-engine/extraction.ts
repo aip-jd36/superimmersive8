@@ -39,6 +39,7 @@
 import type {
   AssetProviderId,
   AssetProviderMention,
+  AssetProviderUsageValue,
   Attested,
   ConfidenceState,
   GoalCategory,
@@ -158,6 +159,33 @@ export interface CandidateObservation {
   raw_provider_name?: string
   /** kind === 'asset_provider_mention'; set when this candidate corrects an existing mention */
   supersedes_asset_provider_mention_id?: string
+  /**
+   * kind === 'asset_provider_mention' (Track B — Generic Living-Knowledge
+   * Readiness/Askability milestone, 2026-08-20). Set ONLY when the user
+   * directly stated, in THIS turn, how the named provider's material was
+   * used in the workflow (usage_*) or what license/subscription covers it
+   * (license_*) -- never inferred from weak/generic context, mirroring
+   * plan_tier_confidence_hint/plan_tier_value_hint's own discipline exactly.
+   * A bare provider mention with no such statement leaves all four hints
+   * unset; attestCandidate then falls back to 'unknown', or (for a
+   * correction candidate) the previously-confirmed value is carried
+   * forward by runExtractionPipeline's own call site -- see that module's
+   * own comment for why the carry-forward lives there, not here.
+   *
+   * Multi-provider safety (fail-closed, per this milestone's own explicit
+   * requirement): each hint pair lives on the SAME candidate object that
+   * names the specific provider (raw_provider_name) it describes, so there
+   * is no cross-provider ambiguity at the data level -- the only ambiguity
+   * risk is the model's own judgment about WHICH provider a statement
+   * refers to when several are active. See SYSTEM_PROMPT in
+   * anthropic-extractor.ts for the explicit instruction: when it is
+   * unclear which of several active providers a usage/license statement
+   * refers to, leave both hints unset rather than guessing.
+   */
+  usage_confidence_hint?: ConfidenceState
+  usage_value_hint?: AssetProviderUsageValue
+  license_confidence_hint?: ConfidenceState
+  license_value_hint?: string
   /**
    * kind === 'tool_mention'; set ONLY when the user directly stated the
    * access surface or plan tier in this turn (e.g. "the Gemini app," "team
@@ -571,6 +599,26 @@ export function attestCandidate(
       confidence = 'unresolved_no_visibility'
     }
 
+    // Track B milestone (2026-08-20). Same "direct-statement hint only,
+    // never inferred, unknown when absent" discipline as
+    // resolveAttestedToolField -- no deterministic-normalization channel
+    // exists for either field (unlike access_surface), so only the hint
+    // channel applies. Inlined rather than routed through
+    // resolveAttestedToolField itself: that function's signature returns
+    // Attested<string>, and usage needs Attested<AssetProviderUsageValue>
+    // -- widening it generically was judged a larger, unrelated-risk change
+    // for two 3-line call sites; left untouched.
+    const usage: Attested<AssetProviderUsageValue> = candidate.usage_confidence_hint
+      ? candidate.usage_confidence_hint === 'confirmed' && candidate.usage_value_hint
+        ? { state: 'confirmed', value: candidate.usage_value_hint }
+        : ({ state: candidate.usage_confidence_hint } as Attested<AssetProviderUsageValue>)
+      : { state: 'unknown' }
+    const license: Attested<string> = candidate.license_confidence_hint
+      ? candidate.license_confidence_hint === 'confirmed' && candidate.license_value_hint
+        ? { state: 'confirmed', value: candidate.license_value_hint }
+        : ({ state: candidate.license_confidence_hint } as Attested<string>)
+      : { state: 'unknown' }
+
     return {
       kind: 'asset_provider_mention',
       mention: {
@@ -580,6 +628,8 @@ export function attestCandidate(
         source_turn: candidate.turn,
         source_statement: candidate.raw_text,
         superseded_by: null,
+        usage,
+        license,
       },
     }
   }
@@ -1009,7 +1059,23 @@ export async function runExtractionPipeline(
           if (target) {
             retractedProvidersThisTurn.add((target.resolution.kind === 'canonical' ? target.resolution.identifier : target.resolution.raw_name).toLowerCase())
           }
-          current = supersedeAssetProviderMention(current, candidate.supersedes_asset_provider_mention_id, proposedFact.mention)
+          // Track B milestone (2026-08-20). attestCandidate is correctly
+          // stateless per-candidate (same as every other kind) and has no
+          // access to the target's prior usage/license -- a correction
+          // candidate that only restates provider identity (e.g. naming the
+          // same provider again while answering an unrelated question) must
+          // not silently reset an already-confirmed usage/license back to
+          // unknown. Carried forward ONLY when this candidate's own hint
+          // left the field unknown -- a candidate that DOES state/correct
+          // usage or license always wins, never overridden.
+          const mentionWithCarriedForwardFields: AssetProviderMention = target
+            ? {
+                ...proposedFact.mention,
+                usage: proposedFact.mention.usage.state === 'unknown' ? target.usage : proposedFact.mention.usage,
+                license: proposedFact.mention.license.state === 'unknown' ? target.license : proposedFact.mention.license,
+              }
+            : proposedFact.mention
+          current = supersedeAssetProviderMention(current, candidate.supersedes_asset_provider_mention_id, mentionWithCarriedForwardFields)
         } else {
           current = addAssetProviderMention(current, proposedFact.mention)
         }

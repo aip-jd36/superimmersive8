@@ -49,6 +49,176 @@ function providerCandidate(overrides: Partial<CandidateObservation> = {}): Candi
   }
 }
 
+// ── Track B — Generic Living-Knowledge Readiness/Askability milestone
+// (2026-08-20): usage/license hint capture, multi-provider fail-closed
+// safety, and correction/carry-forward semantics. ─────────────────────────
+
+describe('usage/license hint capture', () => {
+  test('A: a candidate with usage_confidence_hint confirmed populates AssetProviderMention.usage', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I uploaded the iStock images directly into Kling.' },
+      constantExtractor([
+        providerCandidate({
+          raw_text: 'I uploaded the iStock images directly into Kling.',
+          raw_provider_name: 'iStock',
+          usage_confidence_hint: 'confirmed',
+          usage_value_hint: 'direct_generation_input',
+        }),
+      ]),
+    )
+    expect(updated.asset_provider_mentions[0].usage).toEqual({ state: 'confirmed', value: 'direct_generation_input' })
+    expect(updated.asset_provider_mentions[0].license).toEqual({ state: 'unknown' })
+  })
+
+  test('B: a candidate with license_confidence_hint confirmed populates AssetProviderMention.license', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I have the standard iStock license.' },
+      constantExtractor([
+        providerCandidate({
+          raw_text: 'I have the standard iStock license.',
+          raw_provider_name: 'iStock',
+          license_confidence_hint: 'confirmed',
+          license_value_hint: 'standard license',
+        }),
+      ]),
+    )
+    expect(updated.asset_provider_mentions[0].license).toEqual({ state: 'confirmed', value: 'standard license' })
+    expect(updated.asset_provider_mentions[0].usage).toEqual({ state: 'unknown' })
+  })
+
+  test('a bare provider mention with no usage/license hint defaults both to unknown', async () => {
+    const { updated } = await runExtractionPipeline(emptySU(), { turn: 1, text: 'I used Getty.' }, constantExtractor([providerCandidate()]))
+    expect(updated.asset_provider_mentions[0].usage).toEqual({ state: 'unknown' })
+    expect(updated.asset_provider_mentions[0].license).toEqual({ state: 'unknown' })
+  })
+
+  test('C: Getty and iStock both mentioned in the same turn -- a license hint on the iStock candidate only ever attaches to the iStock mention, never Getty', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I used a Getty logo and I have the standard iStock license for the rest.' },
+      constantExtractor([
+        providerCandidate({ proposal_id: 'c1', raw_text: 'a Getty logo', raw_provider_name: 'Getty' }),
+        providerCandidate({
+          proposal_id: 'c2',
+          raw_text: 'the standard iStock license',
+          raw_provider_name: 'iStock',
+          license_confidence_hint: 'confirmed',
+          license_value_hint: 'standard license',
+        }),
+      ]),
+    )
+    const getty = updated.asset_provider_mentions.find((m) => m.resolution.kind === 'canonical' && m.resolution.identifier === 'getty')!
+    const istock = updated.asset_provider_mentions.find((m) => m.resolution.kind === 'canonical' && m.resolution.identifier === 'istock')!
+    expect(getty.license).toEqual({ state: 'unknown' })
+    expect(istock.license).toEqual({ state: 'confirmed', value: 'standard license' })
+  })
+
+  test('D: fail-closed -- if the extractor itself leaves the hint unset (genuinely ambiguous which provider), no license is attached to either provider', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I have the standard license.' },
+      constantExtractor([
+        providerCandidate({ proposal_id: 'c1', raw_text: 'Getty and iStock', raw_provider_name: 'Getty' }),
+        providerCandidate({ proposal_id: 'c2', raw_text: 'Getty and iStock', raw_provider_name: 'iStock' }),
+        // Neither candidate carries a license hint -- the extractor's own
+        // job (per SYSTEM_PROMPT) is to leave both unset when ambiguous;
+        // this test proves the pipeline doesn't guess on its own even if
+        // asked to process both providers in the same turn.
+      ]),
+    )
+    for (const mention of updated.asset_provider_mentions) {
+      expect(mention.license).toEqual({ state: 'unknown' })
+    }
+  })
+})
+
+describe('usage/license correction/carry-forward semantics', () => {
+  test('E: a correction restating the same provider with a NEW license value overwrites the old one', async () => {
+    const turn1 = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I have the standard iStock license.' },
+      constantExtractor([providerCandidate({ raw_text: 'I have the standard iStock license.', raw_provider_name: 'iStock', license_confidence_hint: 'confirmed', license_value_hint: 'standard license' })]),
+    )
+    const turn2 = await runExtractionPipeline(
+      turn1.updated,
+      { turn: 2, text: 'Actually, those were Editorial-use iStock images.' },
+      constantExtractor([
+        providerCandidate({
+          proposal_id: 'c1',
+          turn: 2,
+          raw_text: 'Actually, those were Editorial-use iStock images.',
+          raw_provider_name: 'iStock',
+          license_confidence_hint: 'confirmed',
+          license_value_hint: 'Editorial use only',
+          is_correction: true,
+        }),
+      ]),
+    )
+    const active = turn2.updated.asset_provider_mentions.filter((m) => m.superseded_by === null)
+    expect(active).toHaveLength(1)
+    expect(active[0].license).toEqual({ state: 'confirmed', value: 'Editorial use only' })
+  })
+
+  test('a correction candidate that restates provider identity but says nothing new about usage carries the PREVIOUSLY confirmed usage forward, never resetting it to unknown', async () => {
+    const turn1 = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I fed the iStock images directly into Kling.' },
+      constantExtractor([providerCandidate({ raw_text: 'I fed the iStock images directly into Kling.', raw_provider_name: 'iStock', usage_confidence_hint: 'confirmed', usage_value_hint: 'direct_generation_input' })]),
+    )
+    expect(turn1.updated.asset_provider_mentions[0].usage).toEqual({ state: 'confirmed', value: 'direct_generation_input' })
+
+    // Turn 2 restates iStock (e.g. answering an unrelated license question)
+    // without any usage hint at all -- usage must be carried forward, not
+    // reset to unknown.
+    const turn2 = await runExtractionPipeline(
+      turn1.updated,
+      { turn: 2, text: 'I have the standard iStock license.' },
+      constantExtractor([
+        providerCandidate({
+          proposal_id: 'c1',
+          turn: 2,
+          raw_text: 'I have the standard iStock license.',
+          raw_provider_name: 'iStock',
+          license_confidence_hint: 'confirmed',
+          license_value_hint: 'standard license',
+        }),
+      ]),
+    )
+    const active = turn2.updated.asset_provider_mentions.filter((m) => m.superseded_by === null)
+    expect(active).toHaveLength(1)
+    expect(active[0].usage).toEqual({ state: 'confirmed', value: 'direct_generation_input' })
+    expect(active[0].license).toEqual({ state: 'confirmed', value: 'standard license' })
+  })
+
+  test('N: correction supersedes the provider mention chain correctly -- exactly one active mention remains, carrying the latest values', async () => {
+    const turn1 = await runExtractionPipeline(emptySU(), { turn: 1, text: 'I used iStock.' }, constantExtractor([providerCandidate({ raw_text: 'I used iStock.', raw_provider_name: 'iStock' })]))
+    const turn2 = await runExtractionPipeline(
+      turn1.updated,
+      { turn: 2, text: 'Actually I have the extended iStock license.' },
+      constantExtractor([
+        providerCandidate({
+          proposal_id: 'c1',
+          turn: 2,
+          raw_text: 'Actually I have the extended iStock license.',
+          raw_provider_name: 'iStock',
+          license_confidence_hint: 'confirmed',
+          license_value_hint: 'extended license',
+          is_correction: true,
+        }),
+      ]),
+    )
+    const all = turn2.updated.asset_provider_mentions
+    expect(all).toHaveLength(2)
+    const active = all.filter((m) => m.superseded_by === null)
+    const superseded = all.filter((m) => m.superseded_by !== null)
+    expect(active).toHaveLength(1)
+    expect(superseded).toHaveLength(1)
+    expect(active[0].license).toEqual({ state: 'confirmed', value: 'extended license' })
+  })
+})
+
 function goalCandidate(overrides: Partial<CandidateObservation> = {}): CandidateObservation {
   return {
     proposal_id: 'c1',

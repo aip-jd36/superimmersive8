@@ -101,6 +101,26 @@ export const CANDIDATE_QUESTION_KINDS = [
    * function requires the initial question to have already been asked).
    */
   'jurisdiction_clarification_retry',
+  /**
+   * Track B — Generic Living-Knowledge Readiness/Askability milestone
+   * (2026-08-20). Deterministically constructed by
+   * lib/crc-engine/knowledge-readiness.ts, never proposed by the ordinary
+   * LLM generator (excluded from anthropic-candidate-question.ts's own
+   * schema enum, same as every other deterministic kind above). Unlike
+   * jurisdiction_clarification/human_contribution_clarification/
+   * commercial_readiness_discovery (all global-cap, target_signal_id:
+   * null), this kind is CAPPED PER TARGET, not globally -- a readiness
+   * need may be scoped to a specific AssetProviderMention (target_signal_id
+   * set to that mention's own id, an already-eligible signal) or to a
+   * project-wide dependency (target_signal_id: null). See
+   * `readiness_dependency_id` below and `knowledge_readiness_used` in
+   * BoundaryState for the compound cap key this kind uses instead of a
+   * single boolean -- deliberately a SEPARATE cap namespace from
+   * `follow_ups_used`/FollowUpNeed (see knowledge-readiness.ts's own
+   * header for why the two governed-dependency and interview-FollowUpNeed
+   * vocabularies are kept independent, never aliased into each other).
+   */
+  'knowledge_readiness_acquisition',
 ] as const
 
 export type CandidateQuestionKind = (typeof CANDIDATE_QUESTION_KINDS)[number]
@@ -174,6 +194,22 @@ export interface CandidateQuestion {
    * already established). Absent/false -> zero behavior change.
    */
   targets_confirmed_jurisdiction?: boolean
+  /**
+   * Track B — Generic Living-Knowledge Readiness/Askability milestone
+   * (2026-08-20). Required (in practice, per knowledge-readiness.ts's own
+   * construction) when kind === 'knowledge_readiness_acquisition' -- the
+   * governed `TopicClaim.unresolved_project_dependencies` string this
+   * candidate is trying to acquire, e.g. a synthetic test-only dependency
+   * id (no real governed dependency is registered askable via the generic
+   * path yet -- see dependency-askability.ts's own header). Combined with
+   * `signal_id` to form the compound cap key
+   * (`${signal_id ?? 'project'}::${readiness_dependency_id}`), mirroring
+   * `follow_up_need`'s own compound-key shape immediately above, but kept
+   * in its own field/namespace rather than reusing FollowUpNeed's closed
+   * union -- see knowledge-readiness.ts's own header for the exact
+   * relationship between the two.
+   */
+  readiness_dependency_id?: string
 }
 
 // ── Boundary state ───────────────────────────────────────────────────────────
@@ -258,6 +294,22 @@ export interface BoundaryState {
    */
   jurisdiction_clarification_retry_asked: boolean
   /**
+   * Track B — Generic Living-Knowledge Readiness/Askability milestone
+   * (2026-08-20). Compound-key cap for `knowledge_readiness_acquisition`
+   * candidates -- key format `${signal_id ?? 'project'}::${readiness_dependency_id}`,
+   * mirroring `follow_ups_used`'s own compound-key shape (Duplicate-Question
+   * Prevention milestone) but a SEPARATE record: this milestone's own
+   * governed-dependency vocabulary is deliberately kept independent from
+   * the interview-side FollowUpNeed vocabulary that record already tracks
+   * -- see knowledge-readiness.ts's own header for the full reasoning. A
+   * missing value on a pre-this-milestone session deserializes as
+   * `undefined` -- unlike the boolean `_asked` fields above, this is a
+   * Record, so `serialization.ts`'s `deserializeBoundaryState` explicitly
+   * defaults it to `{}` (an `undefined[key]` read would throw, unlike a
+   * falsy boolean).
+   */
+  knowledge_readiness_used: Record<string, number>
+  /**
    * Second-Jurisdiction UX milestone (2026-08-20), J1. True for exactly one
    * turn: the turn immediately AFTER either jurisdiction_clarification or
    * jurisdiction_clarification_retry was approved and asked. Consumed
@@ -293,6 +345,7 @@ export function createInitialBoundaryState(): BoundaryState {
     human_contribution_clarification_asked: false,
     jurisdiction_clarification_retry_asked: false,
     jurisdiction_clarification_pending_answer: false,
+    knowledge_readiness_used: {},
     interview_ended: false,
     phases_ended: [],
   }
@@ -364,6 +417,13 @@ export const BOUNDARY_REASON_CODES = [
    * Constraint A decided.
    */
   'JURISDICTION_ALREADY_CONFIRMED',
+  /**
+   * Track B — Generic Living-Knowledge Readiness/Askability milestone
+   * (2026-08-20). Same "1 ask, ever, per compound key" shape as
+   * FOLLOW_UP_NEED_ALREADY_ASKED, for the separate
+   * `knowledge_readiness_used` cap.
+   */
+  'KNOWLEDGE_READINESS_ALREADY_ASKED',
   'USER_DECLINED_QUESTION',
   'USER_DECLINED_PHASE',
   'USER_DECLINED_INTERVIEW',
@@ -721,6 +781,36 @@ export function evaluateBoundary(
       action_scope: 'ask',
       next_state: { ...state, human_contribution_clarification_asked: true },
       debug: { fired_boundary: 'none', candidate_kind: candidate.kind },
+    }
+  }
+
+  if (candidate.kind === 'knowledge_readiness_acquisition') {
+    // Track B — Generic Living-Knowledge Readiness/Askability milestone
+    // (2026-08-20). Compound key, mirroring the follow_up_need branch
+    // above exactly, but in its own record/namespace -- see this
+    // interface's own field header for why. The eligibility DECISION
+    // (which claim/dependency is relevant and askable) is made upstream in
+    // lib/crc-engine/knowledge-readiness.ts, exactly mirroring how every
+    // other deterministic-kind branch above owns its own eligibility --
+    // this evaluator has no opinion on WHY a readiness candidate was
+    // proposed, only THAT the per-target cap holds.
+    const capKey = `${candidate.signal_id ?? 'project'}::${candidate.readiness_dependency_id ?? 'unknown'}`
+    const used = state.knowledge_readiness_used[capKey] ?? 0
+    if (used >= 1) {
+      return {
+        allowed: false,
+        reason_code: 'KNOWLEDGE_READINESS_ALREADY_ASKED',
+        action_scope: 'suppress_current_question',
+        next_state: state,
+        debug: { fired_boundary: `knowledge_readiness_cap:${capKey}`, candidate_kind: candidate.kind, signal_id: candidate.signal_id },
+      }
+    }
+    return {
+      allowed: true,
+      reason_code: 'ALLOWED',
+      action_scope: 'ask',
+      next_state: { ...state, knowledge_readiness_used: { ...state.knowledge_readiness_used, [capKey]: used + 1 } },
+      debug: { fired_boundary: 'none', candidate_kind: candidate.kind, signal_id: candidate.signal_id },
     }
   }
 

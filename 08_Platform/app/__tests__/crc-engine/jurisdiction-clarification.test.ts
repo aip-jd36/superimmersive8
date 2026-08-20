@@ -417,7 +417,7 @@ describe('other-goal regression: unrelated categories, stock claims, and provide
   test('an asset_provider_mention alone (no goal at all) never triggers jurisdiction clarification -- the trigger is strictly an active goal category, never a provider mention (Path B remains off)', () => {
     const su = baseSU({
       user_goals: [],
-      asset_provider_mentions: [{ mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Getty', superseded_by: null }],
+      asset_provider_mentions: [{ mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Getty', superseded_by: null, usage: { state: 'unknown' }, license: { state: 'unknown' } }],
     })
     const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, TOPIC_RELATIONSHIPS_FIXTURE)
     expect(result.needs_jurisdiction).toBe(false)

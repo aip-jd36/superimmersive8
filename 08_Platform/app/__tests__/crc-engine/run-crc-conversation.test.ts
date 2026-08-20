@@ -487,7 +487,7 @@ describe('third_party_source_rights + AssetProviderMention full pipeline (Living
     ...DIALOGUE_FIXTURES.rich_signal.structured_understanding,
     user_goals: [sourceRightsGoal],
     asset_provider_mentions: [
-      { mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Can I use this Getty image in an ad?', superseded_by: null },
+      { mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Can I use this Getty image in an ad?', superseded_by: null, usage: { state: 'unknown' }, license: { state: 'unknown' } },
     ],
   }
 

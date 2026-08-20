@@ -94,7 +94,21 @@ export function deserializeStructuredUnderstanding(json: string): StructuredUnde
       source_statement: '',
     },
   }
-  const asset_provider_mentions = parsed.asset_provider_mentions ?? []
+  /**
+   * `usage`/`license` per-element defaulting (Track B — Generic
+   * Living-Knowledge Readiness/Askability milestone, 2026-08-20): a session
+   * persisted before these two AssetProviderMention fields existed has an
+   * `asset_provider_mentions` array, but individual elements lack
+   * `usage`/`license` keys. Same reasoning and same funnel as the
+   * per-goal `category`/`scope` backfill above -- defaulted here once, to
+   * the same conservative `{state: 'unknown'}` fallback every other
+   * newly-added Attested<T> field in this codebase defaults to.
+   */
+  const asset_provider_mentions = (parsed.asset_provider_mentions ?? []).map((m) => ({
+    ...m,
+    usage: m.usage ?? { state: 'unknown' as const },
+    license: m.license ?? { state: 'unknown' as const },
+  }))
   return { ...parsed, user_goals, project_facts, asset_provider_mentions }
 }
 
@@ -109,8 +123,21 @@ export function serializeBoundaryState(state: BoundaryState): string {
   return JSON.stringify(state)
 }
 
+/**
+ * `knowledge_readiness_used` defaulted to `{}` when absent (Track B —
+ * Generic Living-Knowledge Readiness/Askability milestone, 2026-08-20):
+ * same reasoning as the Record<string, number> fields this mirrors
+ * (`follow_ups_used`/`uncertainty_clarifications_used`, both foundational
+ * since Phase 4 and therefore never needing this treatment) -- a session
+ * persisted before this field existed has no `knowledge_readiness_used`
+ * key at all, which would otherwise leave it `undefined` at runtime
+ * despite the type claiming `Record<string, number>`; any code that reads
+ * `state.knowledge_readiness_used[key]` would throw on such a session
+ * without this default.
+ */
 export function deserializeBoundaryState(json: string): BoundaryState {
-  return JSON.parse(json) as BoundaryState
+  const parsed = JSON.parse(json) as BoundaryState
+  return { ...parsed, knowledge_readiness_used: parsed.knowledge_readiness_used ?? {} }
 }
 
 /**

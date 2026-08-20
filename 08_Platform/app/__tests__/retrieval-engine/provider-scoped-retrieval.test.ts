@@ -60,6 +60,8 @@ function providerMention(identifier: string, overrides: Partial<AssetProviderMen
     source_turn: 1,
     source_statement: `I used ${identifier}.`,
     superseded_by: null,
+    usage: { state: 'unknown' },
+    license: { state: 'unknown' },
     ...overrides,
   }
 }

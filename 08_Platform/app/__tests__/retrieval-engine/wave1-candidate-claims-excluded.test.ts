@@ -427,7 +427,7 @@ describe('Copyright UAT Output-Path Diagnostic P0 fix -- jurisdiction value norm
       const su: StructuredUnderstanding = {
         ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
         user_goals: [providerGoal],
-        asset_provider_mentions: [{ mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: provider }, confidence: 'confirmed', source_turn: 1, source_statement: provider, superseded_by: null }],
+        asset_provider_mentions: [{ mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: provider }, confidence: 'confirmed', source_turn: 1, source_statement: provider, superseded_by: null, usage: { state: 'unknown' }, license: { state: 'unknown' } }],
         project_facts: {
           ...DIALOGUE_FIXTURES.no_signal.structured_understanding.project_facts,
           jurisdiction: { attestation: { state: 'confirmed', value: 'US' }, source_turn: 2, source_statement: 'US' },
@@ -526,7 +526,7 @@ describe('Copyright UAT Cumulative-Restatement Fix -- H5 + full pipeline regress
   test('Path B remains off -- an asset_provider_mention alongside a confirmed human_contribution_description never triggers a stock/editorial claim or question', () => {
     const su: StructuredUnderstanding = {
       ...copyrightStateWith('US', RICH_CONTRIBUTION_TEXT),
-      asset_provider_mentions: [{ mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 3, source_statement: 'Getty', superseded_by: null }],
+      asset_provider_mentions: [{ mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 3, source_statement: 'Getty', superseded_by: null, usage: { state: 'unknown' }, license: { state: 'unknown' } }],
     }
     const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
     const serialized = JSON.stringify(output)

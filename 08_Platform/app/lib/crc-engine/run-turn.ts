@@ -150,6 +150,7 @@ import {
   JURISDICTION_CLARIFICATION_RETRY_QUESTION,
 } from './jurisdiction-clarification'
 import { buildHumanContributionClarificationProposal, evaluateHumanContributionClarificationEligibility } from './human-contribution-clarification'
+import { deriveKnowledgeReadinessNeeds, buildKnowledgeReadinessProposal } from './knowledge-readiness'
 import type { SessionStore } from './session-store'
 import type { CRCSessionState } from './types'
 import type { MatrixRow, TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
@@ -782,31 +783,62 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
         // attempt2 is always the ordinary generator -- never sets
         // nextPendingTakeawayCategory.
       } else {
-        // Bounded search exhausted (no third attempt) -- finalize.
-        // Constructed directly here, never via checkCompletion(), which
-        // remains entirely unaware of Constraint B/BoundaryState by
-        // design (see COMPLETION_REASONS' own doc in
-        // types/interview-engine.ts and this module's own header).
-        // nextBoundaryState is still boundaryStateForTurn here: neither
-        // rejected attempt ever reaches evaluateBoundary's "allowed"
-        // branch (the only branch that mutates boundary state), so
-        // there is nothing to carry forward beyond what was already
-        // loaded.
-        const suExhausted: StructuredUnderstanding = { ...suAfter, completion_reason: 'questioning_exhausted' }
-        await deps.sessionStore.save(input.token, {
-          structured_understanding: suExhausted,
-          boundary_state: nextBoundaryState,
-          pending_clarification: null,
-          pending_commercial_readiness_takeaway: null,
-        })
-        const exhaustedOutcome: TurnOutcome = {
-          kind: 'complete',
-          result: runCRCConversation(suExhausted, deps.matrix, topicClaims, relationships),
-          discoverySignal,
-          jurisdictionSignal,
-          humanContributionSignal,
+        // Track B — Generic Living-Knowledge Readiness/Askability
+        // milestone (2026-08-20). LAST-RESORT check, right at the exact
+        // point bounded candidate search (attempt1+attempt2) would
+        // otherwise declare questioning_exhausted -- never earlier, never
+        // stealing a turn from jurisdiction/human-contribution/Discovery/
+        // ordinary organic generation above, all of which are entirely
+        // unchanged. If an already-relevant, already-candidate governed
+        // claim (mirroring lookupTopicClaims's own eligibility gate, never
+        // Retrieval itself -- see knowledge-readiness.ts's own header) has
+        // an unresolved dependency CRC is registered to proactively ask
+        // about, and hasn't exhausted its own bounded attempt budget, this
+        // is attempt #3: one more forced, deterministic candidate, through
+        // the exact same validate -> Constraint A -> Constraint B pipeline
+        // as every other candidate (no privileged pass). If it is also
+        // rejected -- or no readiness need exists at all -- exhaustion
+        // proceeds exactly as before this milestone.
+        const readinessNeeds = deriveKnowledgeReadinessNeeds(suAfter, topicClaims, boundaryStateForTurn)
+        const readinessProposal = readinessNeeds[0] ? buildKnowledgeReadinessProposal(readinessNeeds[0], phase) : undefined
+        const attempt3 = readinessProposal ? await tryCandidate(suAfter, eligible, phase, boundaryStateForTurn, deps, undefined, readinessProposal) : undefined
+
+        if (attempt3 && attempt3.status === 'approved') {
+          outcome = attempt3.outcome
+          nextBoundaryState = attempt3.nextBoundaryState
+          pendingClarification = attempt3.pendingClarification
+        } else {
+          // Bounded search exhausted (including the readiness check above,
+          // if one was even eligible) -- finalize. Constructed directly
+          // here, never via checkCompletion(), which remains entirely
+          // unaware of Constraint B/BoundaryState by design (see
+          // COMPLETION_REASONS' own doc in types/interview-engine.ts and
+          // this module's own header). Per the approved Track B
+          // architecture, gates.ts/checkCompletion() are deliberately left
+          // byte-identical -- this readiness check lives entirely in this
+          // orchestration layer, the same layer that already constructs
+          // this exact completion_reason value directly. nextBoundaryState
+          // is still boundaryStateForTurn here: neither rejected attempt
+          // (including a rejected attempt3, if one was tried) ever reaches
+          // evaluateBoundary's "allowed" branch (the only branch that
+          // mutates boundary state), so there is nothing to carry forward
+          // beyond what was already loaded.
+          const suExhausted: StructuredUnderstanding = { ...suAfter, completion_reason: 'questioning_exhausted' }
+          await deps.sessionStore.save(input.token, {
+            structured_understanding: suExhausted,
+            boundary_state: nextBoundaryState,
+            pending_clarification: null,
+            pending_commercial_readiness_takeaway: null,
+          })
+          const exhaustedOutcome: TurnOutcome = {
+            kind: 'complete',
+            result: runCRCConversation(suExhausted, deps.matrix, topicClaims, relationships),
+            discoverySignal,
+            jurisdictionSignal,
+            humanContributionSignal,
+          }
+          return precedingTakeaway ? { ...exhaustedOutcome, precedingTakeaway } : exhaustedOutcome
         }
-        return precedingTakeaway ? { ...exhaustedOutcome, precedingTakeaway } : exhaustedOutcome
       }
     }
   }

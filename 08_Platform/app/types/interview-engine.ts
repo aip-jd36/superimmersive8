@@ -181,6 +181,24 @@ export const ASSET_PROVIDER_IDS = ['getty', 'istock', 'shutterstock', 'adobe-sto
 
 export type AssetProviderId = (typeof ASSET_PROVIDER_IDS)[number]
 
+/**
+ * Track B — Generic Living-Knowledge Readiness/Askability milestone
+ * (2026-08-20). Production evidence (the confirmed iStock UAT session)
+ * proved usage and license had nowhere to live structurally -- usage was
+ * only indirectly evidenced through `BoundaryState.follow_ups_used`
+ * bookkeeping (an interview-side "was this asked" flag, not a fact), and
+ * license had no representation at all. A single value, not a set: no real
+ * production or governance example currently requires representing
+ * simultaneous multiple usages for one provider mention (checked, not
+ * assumed -- see the milestone's own final report, item 26); should a real
+ * case ever require it, this is an additive, non-breaking widening
+ * (`Attested<AssetProviderUsageValue>` -> `Attested<AssetProviderUsageValue[]>`),
+ * not a redesign.
+ */
+export const ASSET_PROVIDER_USAGE_VALUES = ['reference_material', 'direct_generation_input', 'other'] as const
+
+export type AssetProviderUsageValue = (typeof ASSET_PROVIDER_USAGE_VALUES)[number]
+
 export interface AssetProviderMention {
   mention_id: string
   resolution: AssetProviderResolution
@@ -188,6 +206,25 @@ export interface AssetProviderMention {
   source_turn: number
   source_statement: string
   superseded_by: string | null
+  /**
+   * How the asset was used in the workflow (reference material vs. fed
+   * directly into AI generation vs. other) -- plain-overwrite correction
+   * semantics, same as ToolMention.access_surface/plan_tier (a still-active
+   * mention's own sub-fact, not a new supersession chain). Free-form
+   * `other` deliberately has no further sub-classification -- Phase 1 of
+   * this milestone does not attempt to enumerate every possible usage
+   * shape, mirroring `unresolved_project_dependencies`'s own "don't build
+   * the large ontology up front" discipline.
+   */
+  usage: Attested<AssetProviderUsageValue>
+  /**
+   * Free text (e.g. "standard license", "Editorial use only"), not a
+   * closed enum -- mirrors `ProjectFacts.jurisdiction`'s own "Wave 1 needs
+   * exactly one representable value; a richer representation is addable
+   * later without a schema change" reasoning. Same plain-overwrite
+   * correction semantics as `usage` above.
+   */
+  license: Attested<string>
 }
 
 // ── Project facts ────────────────────────────────────────────────────────────

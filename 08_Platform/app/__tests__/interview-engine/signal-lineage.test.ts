@@ -103,8 +103,8 @@ describe('resolveLineageRoot (pure function)', () => {
   test('an asset_provider_mention lineage resolves the same way as a tool_mention lineage', () => {
     const state = su({
       asset_provider_mentions: [
-        { mention_id: 'ap-1', resolution: { kind: 'unresolved_alias', raw_name: 'some stock site' }, confidence: 'unresolved_no_visibility', superseded_by: 'ap-2', source_turn: 1, source_statement: '' },
-        { mention_id: 'ap-2', resolution: { kind: 'canonical', identifier: 'istock' }, confidence: 'confirmed', superseded_by: null, source_turn: 3, source_statement: '' },
+        { mention_id: 'ap-1', resolution: { kind: 'unresolved_alias', raw_name: 'some stock site' }, confidence: 'unresolved_no_visibility', superseded_by: 'ap-2', source_turn: 1, source_statement: '', usage: { state: 'unknown' }, license: { state: 'unknown' } },
+        { mention_id: 'ap-2', resolution: { kind: 'canonical', identifier: 'istock' }, confidence: 'confirmed', superseded_by: null, source_turn: 3, source_statement: '', usage: { state: 'unknown' }, license: { state: 'unknown' } },
       ],
     })
     expect(resolveLineageRoot(state, 'ap-2')).toBe('ap-1')
@@ -121,8 +121,8 @@ describe('resolveLineageRoot (pure function)', () => {
     // restated/added detail, exactly the Diagnostic §13 scenario.
     const suAfterRestatement = su({
       asset_provider_mentions: [
-        { mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: 'istock' }, confidence: 'confirmed', superseded_by: 'ap-2', source_turn: 1, source_statement: '' },
-        { mention_id: 'ap-2', resolution: { kind: 'canonical', identifier: 'istock' }, confidence: 'confirmed', superseded_by: null, source_turn: 3, source_statement: '' },
+        { mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: 'istock' }, confidence: 'confirmed', superseded_by: 'ap-2', source_turn: 1, source_statement: '', usage: { state: 'unknown' }, license: { state: 'unknown' } },
+        { mention_id: 'ap-2', resolution: { kind: 'canonical', identifier: 'istock' }, confidence: 'confirmed', superseded_by: null, source_turn: 3, source_statement: '', usage: { state: 'unknown' }, license: { state: 'unknown' } },
       ],
     })
     const resolvedRoot = resolveLineageRoot(suAfterRestatement, 'ap-2')

@@ -169,9 +169,32 @@ describe('serializeStructuredUnderstanding / deserializeStructuredUnderstanding'
   test('a current-shape session with asset_provider_mentions already populated round-trips those values unchanged', () => {
     const su = currentSU()
     su.asset_provider_mentions = [
-      { mention_id: 't1-c1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'I used Getty.', superseded_by: null },
+      { mention_id: 't1-c1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'I used Getty.', superseded_by: null, usage: { state: 'unknown' }, license: { state: 'unknown' } },
     ]
     const roundTripped = deserializeStructuredUnderstanding(serializeStructuredUnderstanding(su))
     expect(roundTripped.asset_provider_mentions).toEqual(su.asset_provider_mentions)
+  })
+
+  // W. old persisted session compatibility (Track B — Generic Living-Knowledge
+  // Readiness/Askability milestone, 2026-08-20): a session persisted with a
+  // populated asset_provider_mentions ARRAY, but before usage/license existed
+  // as per-element fields -- distinct from the "array itself missing"
+  // historical case above.
+  test('a historical asset_provider_mention lacking usage/license keys entirely deserializes with both defaulted to {state: "unknown"}, not undefined', () => {
+    const historicalJson = JSON.stringify({
+      ...currentSU(),
+      asset_provider_mentions: [
+        { mention_id: 't1-c1', resolution: { kind: 'canonical', identifier: 'istock' }, confidence: 'confirmed', source_turn: 1, source_statement: 'I used iStock.', superseded_by: null },
+      ],
+    })
+    expect(historicalJson).not.toContain('"usage"')
+    expect(historicalJson).not.toContain('"license"')
+
+    const deserialized = deserializeStructuredUnderstanding(historicalJson)
+    expect(deserialized.asset_provider_mentions[0].usage).toEqual({ state: 'unknown' })
+    expect(deserialized.asset_provider_mentions[0].license).toEqual({ state: 'unknown' })
+    // Everything else on the mention survives unchanged.
+    expect(deserialized.asset_provider_mentions[0].mention_id).toBe('t1-c1')
+    expect(deserialized.asset_provider_mentions[0].resolution).toEqual({ kind: 'canonical', identifier: 'istock' })
   })
 })

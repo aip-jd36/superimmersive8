@@ -351,7 +351,7 @@ describe('asset provider identity (Living Knowledge — Third-Party Source Right
     const handoff = buildRetrievalHandoff(
       baseSU({
         asset_provider_mentions: [
-          { mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'I used Getty.', superseded_by: null },
+          { mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'I used Getty.', superseded_by: null, usage: { state: 'unknown' }, license: { state: 'unknown' } },
         ],
       }),
     )
@@ -365,7 +365,7 @@ describe('asset provider identity (Living Knowledge — Third-Party Source Right
     const handoff = buildRetrievalHandoff(
       baseSU({
         asset_provider_mentions: [
-          { mention_id: 'm1', resolution: { kind: 'unresolved_alias', raw_name: 'PhotoMega' }, confidence: 'unresolved_no_visibility', source_turn: 1, source_statement: 'I used PhotoMega.', superseded_by: null },
+          { mention_id: 'm1', resolution: { kind: 'unresolved_alias', raw_name: 'PhotoMega' }, confidence: 'unresolved_no_visibility', source_turn: 1, source_statement: 'I used PhotoMega.', superseded_by: null, usage: { state: 'unknown' }, license: { state: 'unknown' } },
         ],
       }),
     )
@@ -377,8 +377,8 @@ describe('asset provider identity (Living Knowledge — Third-Party Source Right
     const handoff = buildRetrievalHandoff(
       baseSU({
         asset_provider_mentions: [
-          { mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'I used Getty.', superseded_by: 'm2' },
-          { mention_id: 'm2', resolution: { kind: 'canonical', identifier: 'istock' }, confidence: 'confirmed', source_turn: 2, source_statement: 'Sorry, iStock.', superseded_by: null },
+          { mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'I used Getty.', superseded_by: 'm2', usage: { state: 'unknown' }, license: { state: 'unknown' } },
+          { mention_id: 'm2', resolution: { kind: 'canonical', identifier: 'istock' }, confidence: 'confirmed', source_turn: 2, source_statement: 'Sorry, iStock.', superseded_by: null, usage: { state: 'unknown' }, license: { state: 'unknown' } },
         ],
       }),
     )
@@ -389,8 +389,8 @@ describe('asset provider identity (Living Knowledge — Third-Party Source Right
     const handoff = buildRetrievalHandoff(
       baseSU({
         asset_provider_mentions: [
-          { mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Getty.', superseded_by: null },
-          { mention_id: 'm2', resolution: { kind: 'canonical', identifier: 'shutterstock' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Shutterstock.', superseded_by: null },
+          { mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Getty.', superseded_by: null, usage: { state: 'unknown' }, license: { state: 'unknown' } },
+          { mention_id: 'm2', resolution: { kind: 'canonical', identifier: 'shutterstock' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Shutterstock.', superseded_by: null, usage: { state: 'unknown' }, license: { state: 'unknown' } },
         ],
       }),
     )
@@ -401,7 +401,7 @@ describe('asset provider identity (Living Knowledge — Third-Party Source Right
     const handoff = buildRetrievalHandoff(
       baseSU({
         asset_provider_mentions: [
-          { mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'a very specific client detail about Getty', superseded_by: null },
+          { mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'getty' }, confidence: 'confirmed', source_turn: 1, source_statement: 'a very specific client detail about Getty', superseded_by: null, usage: { state: 'unknown' }, license: { state: 'unknown' } },
         ],
       }),
     )

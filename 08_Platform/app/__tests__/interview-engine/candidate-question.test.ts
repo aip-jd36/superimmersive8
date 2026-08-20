@@ -44,6 +44,8 @@ function assetProviderMention(overrides: Partial<AssetProviderMention> & Pick<As
     source_turn: 1,
     source_statement: 'placeholder',
     superseded_by: null,
+    usage: { state: 'unknown' },
+    license: { state: 'unknown' },
     ...overrides,
   }
 }

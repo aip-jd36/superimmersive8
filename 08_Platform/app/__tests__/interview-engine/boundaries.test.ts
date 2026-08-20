@@ -234,6 +234,31 @@ describe('boundary state serialization', () => {
     const fromOriginal = evaluateBoundary(afterPhaseDecline.next_state, candidate({ kind: 'follow_up_on_signal', signal_id: 'client-signoff' }))
     expect(fromRestored.next_state).toEqual(fromOriginal.next_state)
   })
+
+  // W. old persisted session compatibility (Track B — Generic Living-Knowledge
+  // Readiness/Askability milestone, 2026-08-20): a session persisted before
+  // knowledge_readiness_used existed has no such key in its stored JSON at
+  // all.
+  test('a historical BoundaryState JSON with no knowledge_readiness_used key deserializes safely, defaulted to {}, and a readiness candidate can be evaluated against it without throwing', () => {
+    const historicalJson = JSON.stringify({
+      follow_ups_used: {},
+      uncertainty_clarifications_used: {},
+      historical_experience_asked: false,
+      disentangling_question_asked: false,
+      commercial_readiness_discovery_asked: false,
+      jurisdiction_clarification_asked: false,
+      human_contribution_clarification_asked: false,
+      jurisdiction_clarification_retry_asked: false,
+      jurisdiction_clarification_pending_answer: false,
+      interview_ended: false,
+      phases_ended: [],
+    })
+    const restored = deserializeBoundaryState(historicalJson)
+    expect(restored.knowledge_readiness_used).toEqual({})
+    expect(() =>
+      evaluateBoundary(restored, candidate({ kind: 'knowledge_readiness_acquisition', signal_id: 'ap-1', readiness_dependency_id: 'test_provider_license_confirmed' })),
+    ).not.toThrow()
+  })
 })
 
 describe('follow-up need cap (Duplicate-Question Prevention milestone, 2026-08-19)', () => {
@@ -403,4 +428,77 @@ describe('jurisdiction_clarification_retry cap (Second-Jurisdiction UX milestone
     expect(discovery.allowed).toBe(true)
     expect(humanContribution.allowed).toBe(true)
   })
+})
+
+describe('knowledge_readiness_acquisition cap (Track B — Generic Living-Knowledge Readiness/Askability milestone, 2026-08-20)', () => {
+  test('K/J: first ask of a (signal_id, readiness_dependency_id) pair is allowed and increments knowledge_readiness_used, never follow_ups_used', () => {
+    const result = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'knowledge_readiness_acquisition', signal_id: 'ap-1', readiness_dependency_id: 'test_provider_license_confirmed' }),
+    )
+    expect(result.allowed).toBe(true)
+    expect(result.next_state.knowledge_readiness_used['ap-1::test_provider_license_confirmed']).toBe(1)
+    expect(result.next_state.follow_ups_used).toEqual({})
+  })
+
+  test('J: exact repeat of the same (signal_id, readiness_dependency_id) pair is blocked', () => {
+    const first = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'knowledge_readiness_acquisition', signal_id: 'ap-1', readiness_dependency_id: 'test_provider_license_confirmed' }),
+    )
+    const repeat = evaluateBoundary(
+      first.next_state,
+      candidate({ kind: 'knowledge_readiness_acquisition', signal_id: 'ap-1', readiness_dependency_id: 'test_provider_license_confirmed' }),
+    )
+    expect(repeat.allowed).toBe(false)
+    expect(repeat.reason_code).toBe('KNOWLEDGE_READINESS_ALREADY_ASKED')
+    expect(repeat.action_scope).toBe('suppress_current_question')
+  })
+
+  test('a different provider (different signal_id) with the same dependency id is independently eligible -- iStock license cap never blocks Getty license', () => {
+    const istock = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'knowledge_readiness_acquisition', signal_id: 'ap-istock', readiness_dependency_id: 'test_provider_license_confirmed' }),
+    )
+    const getty = evaluateBoundary(
+      istock.next_state,
+      candidate({ kind: 'knowledge_readiness_acquisition', signal_id: 'ap-getty', readiness_dependency_id: 'test_provider_license_confirmed' }),
+    )
+    expect(getty.allowed).toBe(true)
+  })
+
+  test('a project-scoped need (signal_id undefined) caps under the "project" key, independent of any provider-scoped need', () => {
+    const projectNeed = evaluateBoundary(createInitialBoundaryState(), candidate({ kind: 'knowledge_readiness_acquisition', readiness_dependency_id: 'test_dependency' }))
+    expect(projectNeed.next_state.knowledge_readiness_used['project::test_dependency']).toBe(1)
+    const providerNeed = evaluateBoundary(projectNeed.next_state, candidate({ kind: 'knowledge_readiness_acquisition', signal_id: 'ap-1', readiness_dependency_id: 'test_dependency' }))
+    expect(providerNeed.allowed).toBe(true)
+  })
+
+  test('L: this cap never touches or is touched by follow_ups_used -- the two vocabularies stay in separate records', () => {
+    const followUpUsed = evaluateBoundary(createInitialBoundaryState(), candidate({ kind: 'follow_up_on_signal', signal_id: 'ap-1', follow_up_need: 'asset_provider_usage' }))
+    const readiness = evaluateBoundary(
+      followUpUsed.next_state,
+      candidate({ kind: 'knowledge_readiness_acquisition', signal_id: 'ap-1', readiness_dependency_id: 'test_provider_license_confirmed' }),
+    )
+    expect(readiness.allowed).toBe(true)
+    expect(readiness.next_state.follow_ups_used['ap-1::asset_provider_usage']).toBe(1)
+    expect(readiness.next_state.knowledge_readiness_used['ap-1::test_provider_license_confirmed']).toBe(1)
+  })
+
+  test('an incident_investigation candidate is still absolutely prohibited even if (hypothetically) tagged with a readiness_dependency_id', () => {
+    const result = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'incident_investigation', readiness_dependency_id: 'test_provider_license_confirmed' }),
+    )
+    expect(result.allowed).toBe(false)
+    expect(result.reason_code).toBe('INCIDENT_INVESTIGATION_PROHIBITED')
+  })
+
+  // Note: like follow_ups_used/uncertainty_clarifications_used, evaluateBoundary
+  // itself relies entirely on the caller (createInitialBoundaryState/
+  // deserializeBoundaryState) to guarantee this Record exists -- it does not
+  // independently guard against a wholly-missing top-level field, matching
+  // this file's own established precedent for every other Record-typed cap.
+  // The real safety net for a historical session is deserializeBoundaryState's
+  // explicit `?? {}` default -- see serialization.test.ts's own W-item coverage.
 })

@@ -178,6 +178,19 @@ export interface CandidateQuestionProposal {
    * candidate outright.
    */
   target_follow_up_need?: FollowUpNeed | null
+  /**
+   * Track B — Generic Living-Knowledge Readiness/Askability milestone
+   * (2026-08-20). Set ONLY by knowledge-readiness.ts's own
+   * buildKnowledgeReadinessProposal, never by the ordinary LLM generator
+   * (question_kind 'knowledge_readiness_acquisition' is excluded from that
+   * adapter's schema enum entirely -- see anthropic-candidate-question.ts).
+   * The governed dependency id this proposal is trying to acquire, threaded
+   * straight through to CandidateQuestion.readiness_dependency_id
+   * (boundaries.ts) for Constraint B's own compound-key cap. Deliberately
+   * a separate field from target_follow_up_need -- see boundaries.ts's own
+   * field header for why the two vocabularies are kept independent.
+   */
+  target_readiness_dependency_id?: string | null
 }
 
 // ── Generator interface ─────────────────────────────────────────────────────
@@ -335,6 +348,7 @@ export function validateCandidateReference(
       signal_id: proposal.target_signal_id ?? undefined,
       phase: proposal.phase,
       follow_up_need: proposal.target_follow_up_need ?? undefined,
+      readiness_dependency_id: proposal.target_readiness_dependency_id ?? undefined,
     },
   }
 }
