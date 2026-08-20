@@ -604,7 +604,7 @@ SI8 interpretation: >
   -- research-stage only, not governed by this entry).
 
 Applicability requirements: []
-Unresolved project dependencies: [which_provider, editorial_designation_confirmed, separate_authorization_obtained]
+Unresolved project dependencies: [which_provider, editorial_designation_confirmed, separate_authorization_obtained]   <!-- askability governance (2026-08-21, DAR_001, PM: JD): which_provider = resolved via existing provider extraction, no dedicated CRC question; editorial_designation_confirmed = evidence-only, no CRC question approved; separate_authorization_obtained = evidence-only, no CRC question approved. List itself UNCHANGED -- no claim proposition/lifecycle/CRC-eligibility effect. Full review: governance-reviews/DAR_001_STOCK_DEPENDENCY_ASKABILITY_2026-08-21.md -->
 Prohibited conclusions: >
   Does not establish that any specific user's asset is actually
   Editorial-designated (vs. Creative/other classification) -- that is a
@@ -673,6 +673,7 @@ Neither gap is solved by this adoption decision.
 
 Full review artifact: `governance-reviews/FGR_001_CAND-STOCK-EDITORIAL-001_2026-08-17.md`
 Full CRC Publication Review artifact: `governance-reviews/CPR_001_CLAIM-STOCK-EDITORIAL-001-v1_2026-08-18.md`
+Full Dependency Askability Review artifact: `governance-reviews/DAR_001_STOCK_DEPENDENCY_ASKABILITY_2026-08-21.md`
 
 ### CLAIM-STOCK-EDITORIAL-002-v1
 Domain: Third-Party Source Assets / Stock Media Licensing
@@ -740,7 +741,7 @@ SI8 interpretation: >
   license-scope restriction governed by CLAIM-STOCK-EDITORIAL-001-v1.
 
 Applicability requirements: []
-Unresolved project dependencies: [which_provider, editorial_designation_confirmed, release_status_confirmed]
+Unresolved project dependencies: [which_provider, editorial_designation_confirmed, release_status_confirmed]   <!-- askability governance (2026-08-21, DAR_001, PM: JD): which_provider = resolved via existing provider extraction, no dedicated CRC question; editorial_designation_confirmed = evidence-only, no CRC question approved; release_status_confirmed = evidence-only, no CRC question approved. List itself UNCHANGED -- no claim proposition/lifecycle/CRC-eligibility effect. Full review: governance-reviews/DAR_001_STOCK_DEPENDENCY_ASKABILITY_2026-08-21.md -->
 Prohibited conclusions: >
   Does not establish that any specific asset actually has or lacks a
   model release. Does not establish that any specific asset actually has
@@ -818,6 +819,7 @@ governed statement itself.
 
 Full review artifact: `governance-reviews/FGR_002_CAND-STOCK-EDITORIAL-002_2026-08-17.md`
 Full CRC Publication Review artifact: `governance-reviews/CPR_002_CLAIM-STOCK-EDITORIAL-002-v1_2026-08-18.md`
+Full Dependency Askability Review artifact: `governance-reviews/DAR_001_STOCK_DEPENDENCY_ASKABILITY_2026-08-21.md`
 
 ### CLAIM-STOCK-GETTY-EDITORIAL-001-v1
 Domain: Third-Party Source Assets / Stock Media Licensing
@@ -882,7 +884,7 @@ SI8 interpretation: >
   satisfied here.
 
 Applicability requirements: []
-Unresolved project dependencies: [asset_confirmed_getty, editorial_designation_confirmed, separate_authorization_obtained]
+Unresolved project dependencies: [asset_confirmed_getty, editorial_designation_confirmed, separate_authorization_obtained]   <!-- askability governance (2026-08-21, DAR_001, PM: JD): asset_confirmed_getty = auto-satisfied (structurally true whenever this provider-scoped claim is reachable at all), no CRC question; editorial_designation_confirmed = evidence-only, no CRC question approved; separate_authorization_obtained = evidence-only, no CRC question approved. List itself UNCHANGED -- no claim proposition/lifecycle/CRC-eligibility effect. Full review: governance-reviews/DAR_001_STOCK_DEPENDENCY_ASKABILITY_2026-08-21.md -->
 Prohibited conclusions: >
   Does not establish that any specific asset is actually Getty content.
   Does not establish that a specific asset is designated Editorial
@@ -951,6 +953,7 @@ neither solved by this adoption decision.
 
 Full review artifact: `governance-reviews/FGR_003_CAND-STOCK-GETTY-EDITORIAL-001_2026-08-17.md`
 Full CRC Publication Review artifact: `governance-reviews/CPR_003_CLAIM-STOCK-GETTY-EDITORIAL-001-v1_2026-08-18.md`
+Full Dependency Askability Review artifact: `governance-reviews/DAR_001_STOCK_DEPENDENCY_ASKABILITY_2026-08-21.md`
 
 ### CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1
 Domain: Third-Party Source Assets / Stock Media Licensing
@@ -1026,7 +1029,7 @@ SI8 interpretation: >
   (see Asset Assurance note above).
 
 Applicability requirements: []
-Unresolved project dependencies: [asset_confirmed_shutterstock, editorial_designation_confirmed, rights_and_clearance_status]
+Unresolved project dependencies: [asset_confirmed_shutterstock, editorial_designation_confirmed, rights_and_clearance_status]   <!-- askability governance (2026-08-21, DAR_001, PM: JD): asset_confirmed_shutterstock = auto-satisfied (structurally true whenever this provider-scoped claim is reachable at all), no CRC question; editorial_designation_confirmed = evidence-only, no CRC question approved; rights_and_clearance_status = evidence-only, no CRC question approved. List itself UNCHANGED -- no claim proposition/lifecycle/CRC-eligibility effect. Full review: governance-reviews/DAR_001_STOCK_DEPENDENCY_ASKABILITY_2026-08-21.md -->
 Prohibited conclusions: >
   Does not establish that any specific asset is actually from
   Shutterstock. Does not establish that Shutterstock actually designates
@@ -1105,6 +1108,7 @@ beyond that one.
 
 Full review artifact: `governance-reviews/FGR_004_CAND-STOCK-SHUTTERSTOCK-EDITORIAL-001_2026-08-17.md`
 Full CRC Publication Review artifact: `governance-reviews/CPR_005_CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1_2026-08-18.md`
+Full Dependency Askability Review artifact: `governance-reviews/DAR_001_STOCK_DEPENDENCY_ASKABILITY_2026-08-21.md`
 
 ### CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1
 Domain: Third-Party Source Assets / Stock Media Licensing
@@ -1173,7 +1177,7 @@ SI8 interpretation: >
   exist for a specific case.
 
 Applicability requirements: []
-Unresolved project dependencies: [asset_confirmed_istock, editorial_designation_confirmed]
+Unresolved project dependencies: [asset_confirmed_istock, editorial_designation_confirmed]   <!-- askability governance (2026-08-21, DAR_001, PM: JD): asset_confirmed_istock = auto-satisfied (structurally true whenever this provider-scoped claim is reachable at all), no CRC question; editorial_designation_confirmed = evidence-only, no CRC question approved. List itself UNCHANGED -- no claim proposition/lifecycle/CRC-eligibility effect. Full review: governance-reviews/DAR_001_STOCK_DEPENDENCY_ASKABILITY_2026-08-21.md -->
 Prohibited conclusions: >
   Does not establish that any specific asset is actually from iStock.
   Does not establish that iStock actually designates a specific asset
@@ -1248,3 +1252,4 @@ one.
 
 Full review artifact: `governance-reviews/FGR_005_CAND-STOCK-ISTOCK-EDITORIAL-001_2026-08-17.md`
 Full CRC Publication Review artifact: `governance-reviews/CPR_004_CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1_2026-08-18.md`
+Full Dependency Askability Review artifact: `governance-reviews/DAR_001_STOCK_DEPENDENCY_ASKABILITY_2026-08-21.md`

@@ -25,6 +25,14 @@ Not an architecture problem — a content-coverage problem. The Living Notebook 
 
 ---
 
+## Risk 4 — `unresolved_project_dependencies` resolution has no runtime effect (confirmed real, 2026-08-21)
+
+Confirmed by direct code trace during the Stock-Media Dependency Askability Review (`governance-reviews/DAR_001_STOCK_DEPENDENCY_ASKABILITY_2026-08-21.md`), not hypothetical. `unresolved_project_dependencies` is read in exactly one place in Bounded Interpretation — the Case 3B hedge trigger (`matches.some((m) => m.unresolved_project_dependencies.length > 0)`) — which checks only whether the array is non-empty, never whether a specific dependency has actually been resolved or what value it resolved to. The array is static claim metadata; nothing in the codebase mutates it based on conversation state. `applicability_requirements` (the one mechanism that genuinely gates retrieval) is empty for every stock claim today, so resolution has zero effect there either.
+
+**Practical consequence:** if a future `askable_in_crc` registration ever resolved a dependency to a definite value (e.g., a confirmed "not Editorial"), the governed claim would still render with its full hedge language, identically to an unresolved or "unknown" answer. The only existing precedent for a resolved dependency having any visible effect at all is `shouldIncludeHumanContributionSentence` in `build-bounded-interpretation.ts` — and that is purely additive (inserts one clarifying sentence), never suppressive of the claim or its hedge.
+
+**Before registering any future dependency as `askable_in_crc` where the resolved value should change claim framing:** build an H5-style additive-sentence composition mechanism for that dependency first (mirroring `shouldIncludeHumanContributionSentence`). Registering a question whose answer currently has no visible effect would be misleading — the user would reasonably expect their answer to matter. Not a blocker for DAR_001's own `evidence_only`/`auto_satisfied` decisions, which introduce no new askable dependency and are therefore unaffected by this gap; recorded here purely as a standing follow-up for any *future* stock or other-domain dependency review.
+
 ## Empirical questions only a prototype can answer
 
 1. Does the Interview Engine actually behave the way Section 8 specifies, at volume?

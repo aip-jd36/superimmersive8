@@ -244,8 +244,11 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     // see governance-reviews/CPR_001_CLAIM-STOCK-EDITORIAL-001-v1_2026-08-18.md).
     // The first Third-Party Source Assets claim, and the second claim
     // overall (after CLAIM-COPY-004-v1), to reach CRC. The other four stock
-    // claims (-002 and the three provider-specific claims) remain Pending --
-    // deliberately not changed by this same decision.
+    // claims (-002 and the three provider-specific claims) were separately
+    // reviewed and approved for CRC eligibility later the same day (CPR_002-
+    // CPR_005) -- this comment previously read "remain Pending," which had
+    // gone stale; corrected 2026-08-21 (governance-recording milestone,
+    // documentation-only -- no field value below changed).
     crc_eligible: 'Yes',
     crc_publication_scope:
       'CRC may state that stock-media content a provider designates "Editorial" is generally licensed for descriptive/newsworthy use rather than advertising, promotional, endorsement, or merchandising use, and that some providers offer a separate authorization path CRC cannot confirm was used for the user\'s specific asset. CRC must not state whether the user\'s own specific asset is Editorial-designated, whether their use violates any license, or whether separate authorization exists for it.',
