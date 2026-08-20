@@ -17,10 +17,20 @@
  * the prompt, or be null.
  *
  * Same discipline as anthropic-extractor.ts: GA Structured Outputs, no
- * `thinking`, no non-default sampling parameters. Model configurable via
- * INTERVIEW_CANDIDATE_QUESTION_MODEL (deliberately separate from
- * INTERVIEW_EXTRACTOR_MODEL -- two independently-tunable model configs, not
- * one shared setting for two different jobs), defaulting to claude-sonnet-5.
+ * non-default sampling parameters. No `thinking` param is set -- but per
+ * the CRC 503 Reliability Diagnostic (2026-08-20), the currently-resolved
+ * model has been directly observed (against the sibling decider adapter,
+ * same model, structurally identical call shape) emitting an un-requested
+ * `thinking` content block anyway, sharing the same max_tokens budget as
+ * the `text` block that carries the actual structured output -- the
+ * confirmed mechanism behind this adapter's own latent, structurally
+ * identical failure class (parsed_output missing, no text block, budget
+ * exhausted during thinking). See anthropic-structured-output-retry.ts
+ * for the bounded recovery retry this file now uses to recover from it.
+ * Model configurable via INTERVIEW_CANDIDATE_QUESTION_MODEL (deliberately
+ * separate from INTERVIEW_EXTRACTOR_MODEL -- two independently-tunable
+ * model configs, not one shared setting for two different jobs),
+ * defaulting to claude-sonnet-5.
  */
 
 import Anthropic from '@anthropic-ai/sdk'
@@ -32,8 +42,13 @@ import type {
   CandidateQuestionProposal,
 } from './candidate-question'
 import { CANDIDATE_QUESTION_KINDS, FOLLOW_UP_NEEDS, type CandidateQuestionKind, type FollowUpNeed } from './boundaries'
+import { callWithOneRecoveryRetry } from './anthropic-structured-output-retry'
 
 export const DEFAULT_MODEL = 'claude-sonnet-5'
+
+/** Same sizing rationale as the decider -- see anthropic-decision.ts. */
+const BASE_CANDIDATE_QUESTION_MAX_TOKENS = 1024
+const RETRY_CANDIDATE_QUESTION_MAX_TOKENS = 2048
 
 /**
  * CRC Limited Pilot -- Commercial Readiness Discovery Catalog integration,
@@ -188,18 +203,25 @@ export function createAnthropicCandidateQuestionGenerator(
   const client = new Anthropic({ apiKey })
 
   return async (input: CandidateQuestionGeneratorInput): Promise<CandidateQuestionProposal | null> => {
-    const response = await client.messages.parse({
-      model,
-      max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: buildUserMessage(input) }],
-      output_config: { format: jsonSchemaOutputFormat(CANDIDATE_QUESTION_RESPONSE_SCHEMA) },
-      // No `thinking`, no temperature/top_p/top_k -- same discipline as anthropic-extractor.ts.
-    })
+    const response = await callWithOneRecoveryRetry(
+      'candidate_generator',
+      (maxTokens) =>
+        client.messages.parse({
+          model,
+          max_tokens: maxTokens,
+          system: SYSTEM_PROMPT,
+          messages: [{ role: 'user', content: buildUserMessage(input) }],
+          output_config: { format: jsonSchemaOutputFormat(CANDIDATE_QUESTION_RESPONSE_SCHEMA) },
+          // No temperature/top_p/top_k -- API defaults only, unchanged.
+        }),
+      BASE_CANDIDATE_QUESTION_MAX_TOKENS,
+      RETRY_CANDIDATE_QUESTION_MAX_TOKENS,
+    )
 
     const parsed = response.parsed_output as ParsedCandidateQuestionResponse | null
     if (!parsed) {
-      throw new Error('Anthropic response did not include parsed_output -- schema validation may have failed.')
+      // Should be unreachable -- see anthropic-decision.ts's identical guard.
+      throw new Error('anthropic_structured_output_missing: candidate generator response had no parsed output after a successful recovery-retry resolution -- this should be unreachable.')
     }
     if (!parsed.has_candidate || !parsed.question_text || !parsed.question_kind) {
       return null
@@ -234,18 +256,28 @@ export async function generateWithDiagnostics(
   const client = new Anthropic({ apiKey })
 
   const start = Date.now()
-  const response = await client.messages.parse({
-    model,
-    max_tokens: 1024,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: buildUserMessage(input) }],
-    output_config: { format: jsonSchemaOutputFormat(CANDIDATE_QUESTION_RESPONSE_SCHEMA) },
-  })
+  const response = await callWithOneRecoveryRetry(
+    'candidate_generator',
+    (maxTokens) =>
+      client.messages.parse({
+        model,
+        max_tokens: maxTokens,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: buildUserMessage(input) }],
+        output_config: { format: jsonSchemaOutputFormat(CANDIDATE_QUESTION_RESPONSE_SCHEMA) },
+      }),
+    BASE_CANDIDATE_QUESTION_MAX_TOKENS,
+    RETRY_CANDIDATE_QUESTION_MAX_TOKENS,
+  )
+  // Measures the FULL operation including a recovery retry if one
+  // happened -- same discipline as anthropic-extractor.ts's own
+  // extractWithDiagnostics.
   const latencyMs = Date.now() - start
 
   const parsed = response.parsed_output as ParsedCandidateQuestionResponse | null
   if (!parsed) {
-    throw new Error('Anthropic response did not include parsed_output -- schema validation may have failed.')
+    // Should be unreachable -- see the production path's identical guard above.
+    throw new Error('anthropic_structured_output_missing: candidate generator response had no parsed output after a successful recovery-retry resolution -- this should be unreachable.')
   }
 
   const proposal =

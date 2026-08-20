@@ -14,15 +14,41 @@
  * decision genuinely independent of both.
  *
  * Same discipline as the other two adapters: GA Structured Outputs, no
- * `thinking`, no non-default sampling parameters. Model configurable via
- * INTERVIEW_CONSTRAINT_A_MODEL, defaulting to claude-sonnet-5.
+ * non-default sampling parameters. No `thinking` param is set -- but per
+ * the CRC 503 Reliability Diagnostic (2026-08-20), the currently-resolved
+ * model has been directly observed emitting an un-requested `thinking`
+ * content block anyway, sharing the same max_tokens budget as the `text`
+ * block that carries the actual structured output. That is the confirmed
+ * mechanism behind an intermittent production failure (parsed_output
+ * missing, no text block, budget exhausted during thinking) -- see
+ * anthropic-structured-output-retry.ts for the bounded recovery retry
+ * this file now uses to recover from it. Disabling thinking outright was
+ * considered and explicitly deferred (reported, not implemented, in that
+ * diagnostic's follow-up implementation task) in favor of this narrower
+ * retry-based mitigation.
+ *
+ * Model configurable via INTERVIEW_CONSTRAINT_A_MODEL, defaulting to
+ * claude-sonnet-5.
  */
 
 import Anthropic from '@anthropic-ai/sdk'
 import { jsonSchemaOutputFormat } from '@anthropic-ai/sdk/helpers/json-schema'
 import { CONSTRAINT_A_REASON_CODES, type ConstraintADecider, type ConstraintADecision, type ConstraintAInput, type ConstraintAReasonCode } from './decision'
+import { callWithOneRecoveryRetry } from './anthropic-structured-output-retry'
 
 export const DEFAULT_MODEL = 'claude-sonnet-5'
+
+/**
+ * First attempt unchanged (1024 -- task section 8, "do not change the
+ * first-attempt behavior unless technically necessary"). Recovery attempt
+ * doubled to give the un-requested thinking block more shared headroom
+ * before the text block's own budget is exhausted -- the diagnostic's own
+ * preferred starting design, not chosen from evidence of the recovery
+ * ceiling itself ever being exceeded (13 live calls all stayed well under
+ * even the base 1024).
+ */
+const BASE_DECISION_MAX_TOKENS = 1024
+const RETRY_DECISION_MAX_TOKENS = 2048
 
 const SYSTEM_PROMPT = `You are the Constraint A evaluator for CRC, a conversational tool that helps someone understand the commercial-use status of an AI-generated video project. You answer exactly one question: given CRC's current structured understanding of the project and one candidate question it might ask next, would a PLAUSIBLE answer to that question materially improve CRC's own understanding enough to justify asking it?
 
@@ -125,18 +151,29 @@ export function createAnthropicConstraintADecider(options?: AnthropicDecisionOpt
   const client = new Anthropic({ apiKey })
 
   return async (input: ConstraintAInput): Promise<ConstraintADecision> => {
-    const response = await client.messages.parse({
-      model,
-      max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: buildUserMessage(input) }],
-      output_config: { format: jsonSchemaOutputFormat(DECISION_RESPONSE_SCHEMA) },
-      // No `thinking`, no temperature/top_p/top_k -- same discipline as the other two adapters.
-    })
+    const response = await callWithOneRecoveryRetry(
+      'decider',
+      (maxTokens) =>
+        client.messages.parse({
+          model,
+          max_tokens: maxTokens,
+          system: SYSTEM_PROMPT,
+          messages: [{ role: 'user', content: buildUserMessage(input) }],
+          output_config: { format: jsonSchemaOutputFormat(DECISION_RESPONSE_SCHEMA) },
+          // No temperature/top_p/top_k -- API defaults only, unchanged.
+        }),
+      BASE_DECISION_MAX_TOKENS,
+      RETRY_DECISION_MAX_TOKENS,
+    )
 
     const parsed = response.parsed_output as ParsedDecisionResponse | null
     if (!parsed) {
-      throw new Error('Anthropic response did not include parsed_output -- schema validation may have failed.')
+      // Should be unreachable: callWithOneRecoveryRetry only returns
+      // successfully when parsed_output has already been confirmed
+      // non-null. Kept only for TypeScript null-narrowing, with accurate
+      // wording -- not a confirmed schema-validation failure, just a
+      // missing structured output (see task section 10).
+      throw new Error('anthropic_structured_output_missing: decider response had no parsed output after a successful recovery-retry resolution -- this should be unreachable.')
     }
 
     return {
@@ -157,18 +194,29 @@ export async function decideWithDiagnostics(
   const client = new Anthropic({ apiKey })
 
   const start = Date.now()
-  const response = await client.messages.parse({
-    model,
-    max_tokens: 1024,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: buildUserMessage(input) }],
-    output_config: { format: jsonSchemaOutputFormat(DECISION_RESPONSE_SCHEMA) },
-  })
+  const response = await callWithOneRecoveryRetry(
+    'decider',
+    (maxTokens) =>
+      client.messages.parse({
+        model,
+        max_tokens: maxTokens,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: buildUserMessage(input) }],
+        output_config: { format: jsonSchemaOutputFormat(DECISION_RESPONSE_SCHEMA) },
+      }),
+    BASE_DECISION_MAX_TOKENS,
+    RETRY_DECISION_MAX_TOKENS,
+  )
+  // Measures the FULL operation including a recovery retry if one
+  // happened -- same discipline as anthropic-extractor.ts's
+  // extractWithDiagnostics, an honest latency figure rather than one that
+  // looks deceptively fast on a retried turn.
   const latencyMs = Date.now() - start
 
   const parsed = response.parsed_output as ParsedDecisionResponse | null
   if (!parsed) {
-    throw new Error('Anthropic response did not include parsed_output -- schema validation may have failed.')
+    // Should be unreachable -- see the production path's identical guard above.
+    throw new Error('anthropic_structured_output_missing: decider response had no parsed output after a successful recovery-retry resolution -- this should be unreachable.')
   }
 
   return {
