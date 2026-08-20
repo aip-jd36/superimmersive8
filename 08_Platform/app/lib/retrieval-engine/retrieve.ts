@@ -28,7 +28,7 @@
  * the same claim twice.
  */
 
-import type { RetrievalHandoff, UserGoal } from '@/types/interview-engine'
+import type { GoalCategory, RetrievalHandoff, UserGoal } from '@/types/interview-engine'
 import { extractMatchableFacts } from './extract-matchable-facts'
 import { lookupRows } from './lookup-rows'
 import { enumerateEligibleClaims } from './enumerate-eligible-claims'
@@ -80,6 +80,17 @@ const UNKNOWN_APPLICABILITY_FACTS: ApplicabilityFacts = { jurisdiction: { state:
  * currently be reached via the related-topic path at all; see that
  * module's own architecture note if a future relationship ever targets or
  * sources this topic.
+ *
+ * `discoveredTopics` (Track A — Generic Discovered Relevance milestone,
+ * 2026-08-21): additive, same defaults-preserve-existing-behavior
+ * discipline as every parameter above it. Threaded straight through to
+ * `lookupTopicClaims`'s own union of active goal categories, unmodified.
+ * Deliberately NOT threaded into `lookupRelatedTopicClaims` -- no
+ * discovered-relevance-sourced `TopicRelationship` traversal is in scope
+ * for this milestone (see discovered-relevance.ts's own one-hop-boundary
+ * note); a future relationship reachable only from a discovered topic
+ * would need that extension made deliberately, not silently inherited
+ * here.
  */
 export function retrieve(
   handoff: RetrievalHandoff,
@@ -89,6 +100,7 @@ export function retrieve(
   applicabilityFacts: ApplicabilityFacts = UNKNOWN_APPLICABILITY_FACTS,
   relationships: TopicRelationship[] = [],
   assetProviders: string[] = [],
+  discoveredTopics: GoalCategory[] = [],
 ): RetrieveOutput {
   const matchable = extractMatchableFacts(handoff)
   const diagnostics: RetrievalDiagnostic[] = []
@@ -130,7 +142,7 @@ export function retrieve(
     }
   }
 
-  const topicLookup = lookupTopicClaims(goals, topicClaims, applicabilityFacts, assetProviders)
+  const topicLookup = lookupTopicClaims(goals, topicClaims, applicabilityFacts, assetProviders, discoveredTopics)
   diagnostics.push(...topicLookup.diagnostics)
   for (const claim of topicLookup.matches) {
     const assembled = assembleTopicResult(claim)

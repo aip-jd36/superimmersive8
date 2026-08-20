@@ -165,20 +165,35 @@ export interface TopicLookupResult {
  * provider-specific claim can be a candidate). Canonical identifiers only
  * -- see `providerScopeMatches`'s own doc comment above for the exact
  * contract.
+ *
+ * `discoveredTopics` (Track A — Generic Discovered Relevance milestone,
+ * 2026-08-21): additive, defaults to `[]`, same zero-behavior-change
+ * discipline as every parameter above it. Unioned into
+ * `activeGoalCategories` alongside the explicit-goal-derived categories --
+ * a category present here is treated identically to one an explicit,
+ * confirmed UserGoal already supplies for every purpose downstream of this
+ * one union point (provider_scope/lifecycle/CRC-eligible/applicability
+ * gating is completely unchanged, still runs exactly as before). Never a
+ * UserGoal itself, never persisted, never fabricated -- see
+ * lib/crc-engine/discovered-relevance.ts for how this list is derived
+ * from structured evidence via an engineering-owned, fail-closed trigger
+ * registry.
  */
 export function lookupTopicClaims(
   goals: UserGoal[],
   topicClaims: TopicClaim[],
   facts: ApplicabilityFacts,
   assetProviders: string[] = [],
+  discoveredTopics: GoalCategory[] = [],
 ): TopicLookupResult {
   const diagnostics: RetrievalDiagnostic[] = []
   const matches: TopicClaim[] = []
   const seen = new Set<string>()
 
-  const activeGoalCategories = new Set<GoalCategory>(
-    goals.filter((g) => g.superseded_by === null && g.state === 'confirmed').map((g) => g.category),
-  )
+  const activeGoalCategories = new Set<GoalCategory>([
+    ...goals.filter((g) => g.superseded_by === null && g.state === 'confirmed').map((g) => g.category),
+    ...discoveredTopics,
+  ])
 
   for (const category of activeGoalCategories) {
     // Provider pre-filter runs as part of computing `candidates` itself --

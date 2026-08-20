@@ -151,6 +151,7 @@ import {
 } from './jurisdiction-clarification'
 import { buildHumanContributionClarificationProposal, evaluateHumanContributionClarificationEligibility } from './human-contribution-clarification'
 import { deriveKnowledgeReadinessNeeds, buildKnowledgeReadinessProposal } from './knowledge-readiness'
+import { deriveDiscoveredTopicOccurrences, discoveredTopicCategories } from './discovered-relevance'
 import type { SessionStore } from './session-store'
 import type { CRCSessionState } from './types'
 import type { MatrixRow, TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
@@ -799,7 +800,16 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
         // as every other candidate (no privileged pass). If it is also
         // rejected -- or no readiness need exists at all -- exhaustion
         // proceeds exactly as before this milestone.
-        const readinessNeeds = deriveKnowledgeReadinessNeeds(suAfter, topicClaims, boundaryStateForTurn)
+        //
+        // Track A — Generic Discovered Relevance milestone (2026-08-21):
+        // the already-relevant claim universe Track B inspects now also
+        // includes any topic discovered from structured evidence this turn
+        // (e.g. a confirmed iStock mention alongside a commercial_use
+        // goal) -- derived fresh, same as every other call site, never
+        // persisted. This widens WHICH claims Track B can see; it changes
+        // nothing about Track B's own readiness/askability/cap semantics.
+        const discoveredTopics = discoveredTopicCategories(deriveDiscoveredTopicOccurrences(suAfter, topicClaims))
+        const readinessNeeds = deriveKnowledgeReadinessNeeds(suAfter, topicClaims, boundaryStateForTurn, discoveredTopics)
         const readinessProposal = readinessNeeds[0] ? buildKnowledgeReadinessProposal(readinessNeeds[0], phase) : undefined
         const attempt3 = readinessProposal ? await tryCandidate(suAfter, eligible, phase, boundaryStateForTurn, deps, undefined, readinessProposal) : undefined
 

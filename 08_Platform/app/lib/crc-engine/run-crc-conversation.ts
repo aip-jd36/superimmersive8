@@ -60,6 +60,7 @@ import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-cla
 import { assembleProjectionOutput } from '@/lib/projection-layer/assemble-projection-output'
 import type { ProjectionDiagnostic, ProjectionOutput } from '@/lib/projection-layer/types'
 import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
+import { deriveDiscoveredTopicOccurrences, discoveredTopicCategories } from './discovered-relevance'
 import type { RetrievalHandoff, StructuredUnderstanding } from '@/types/interview-engine'
 
 export interface CRCPipelineDiagnostics {
@@ -151,7 +152,15 @@ export function runCRCConversation(
   // function's 8 real call sites (run-turn.ts x3, results-email-delivery.ts,
   // app/api/crc/turn/route.ts x4) already passes the full StructuredUnderstanding
   // and needs zero changes -- provider data flows through automatically.
-  const { results, diagnostics: retrievalDiagnostics } = retrieve(handoff, matrix, understanding.user_goals, topicClaims, applicabilityFacts, relationships, handoff.asset_providers)
+  // Track A — Generic Discovered Relevance milestone (2026-08-21): derived
+  // fresh from the same `understanding`/`topicClaims` this function already
+  // has in hand -- no new state, no new call site category. Glue only,
+  // matching this module's own header discipline: `deriveDiscoveredTopicOccurrences`/
+  // `discoveredTopicCategories` are owned entirely by discovered-relevance.ts,
+  // their full output passed to `retrieve()`'s own additive parameter
+  // unmodified.
+  const discoveredTopics = discoveredTopicCategories(deriveDiscoveredTopicOccurrences(understanding, topicClaims))
+  const { results, diagnostics: retrievalDiagnostics } = retrieve(handoff, matrix, understanding.user_goals, topicClaims, applicabilityFacts, relationships, handoff.asset_providers, discoveredTopics)
   // H5 -- minimal echo-only relevance composition (Copyright UAT Correction
   // Milestone, 2026-08-19): threading the confirmed/unconfirmed contribution
   // fact through is additive-only -- see build-bounded-interpretation.ts's

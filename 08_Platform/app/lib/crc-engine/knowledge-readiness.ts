@@ -80,7 +80,7 @@
  * intention.
  */
 
-import type { StructuredUnderstanding } from '@/types/interview-engine'
+import type { GoalCategory, StructuredUnderstanding } from '@/types/interview-engine'
 import type { Phase } from '@/types/interview-engine'
 import type { CandidateQuestionProposal } from '@/lib/interview-engine/candidate-question'
 import type { BoundaryState } from '@/lib/interview-engine/boundaries'
@@ -169,9 +169,32 @@ function relevantProviderMentions(understanding: StructuredUnderstanding, claim:
  * human_contribution_description is excluded -- see this module's own
  * header -- but the dedupe logic is exercised by synthetic tests using a
  * dependency that IS registered for the generic path).
+ *
+ * `discoveredTopics` (Track A — Generic Discovered Relevance milestone,
+ * 2026-08-21): additive, defaults to `[]`, same zero-behavior-change
+ * discipline as every additive parameter elsewhere in this codebase
+ * (`assetProviders` on lookupTopicClaims/retrieve, this exact pattern).
+ * Unioned into this function's own `activeGoalCategories` set exactly the
+ * same way `lookupTopicClaims` unions it -- Track A's discovered topics
+ * feed the SAME already-relevant claim universe Track B already
+ * inspects, without any special-cased "if discovered" branching anywhere
+ * in this file: a topic present via discovery is, from this point
+ * forward, indistinguishable from one an explicit goal supplied. No
+ * other Track B semantics change: the readiness eligibility gate
+ * (lifecycle/crc_eligible/supersession/provider_scope), the askability
+ * registry lookup, the attempt-cap check, and the dedupe-by-target-key
+ * logic below are all completely untouched by this milestone.
  */
-export function deriveKnowledgeReadinessNeeds(understanding: StructuredUnderstanding, topicClaims: TopicClaim[], boundaryState: BoundaryState): KnowledgeReadinessNeed[] {
-  const activeGoalCategories = new Set(understanding.user_goals.filter((g) => g.superseded_by === null && g.state === 'confirmed').map((g) => g.category))
+export function deriveKnowledgeReadinessNeeds(
+  understanding: StructuredUnderstanding,
+  topicClaims: TopicClaim[],
+  boundaryState: BoundaryState,
+  discoveredTopics: GoalCategory[] = [],
+): KnowledgeReadinessNeed[] {
+  const activeGoalCategories = new Set([
+    ...understanding.user_goals.filter((g) => g.superseded_by === null && g.state === 'confirmed').map((g) => g.category),
+    ...discoveredTopics,
+  ])
   const activeProviderIds = understanding.asset_provider_mentions.filter((m) => m.superseded_by === null && m.resolution.kind === 'canonical').map((m) => (m.resolution as { kind: 'canonical'; identifier: string }).identifier)
 
   const needsByKey = new Map<string, KnowledgeReadinessNeed>()
