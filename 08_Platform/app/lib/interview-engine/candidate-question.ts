@@ -55,20 +55,39 @@ export interface EligibleSignal {
 }
 
 /**
- * Fixed, deterministic references for the two singular project facts, which
+ * Fixed, deterministic references for the singular project facts, which
  * have no per-instance identity to reuse (unlike ScopedObservation/
  * ToolMention, which already carry stable runtime ids). Always exactly
- * these two strings -- never minted, never per-instance.
+ * these strings -- never minted, never per-instance.
+ *
+ * `jurisdiction` added Second-Jurisdiction UX milestone (2026-08-20), J2.
+ * Diagnostic finding: jurisdiction was the one ProjectFacts field excluded
+ * from this map, so an organic candidate could never structurally target
+ * it at all -- any jurisdiction-adjacent organic question was forced toward
+ * kind 'other'/target_signal_id: null, leaving confirmed-jurisdiction
+ * suppression entirely to Constraint A's own prompt/LLM judgment (no
+ * deterministic backstop). Eligibility here does NOT bypass or weaken the
+ * existing deterministic jurisdiction_clarification/jurisdiction_
+ * clarification_retry catalog questions (lib/crc-engine/jurisdiction-
+ * clarification.ts) -- those remain fully independent, capped separately
+ * in BoundaryState, and unaffected by this addition. This only makes
+ * project:jurisdiction a legitimate follow_up_on_signal/other target for
+ * the ORDINARY generator, exactly like intended_use/workflow_role already
+ * are (eligible unconditionally, INCLUDING when confirmed -- suppression
+ * of an already-confirmed target is Constraint B's job via
+ * targets_confirmed_jurisdiction, not an eligibility-time exclusion; see
+ * boundaries.ts).
  */
 export const PROJECT_FACT_SIGNAL_IDS = {
   intended_use: 'project:intended_use',
   workflow_role: 'project:workflow_role',
+  jurisdiction: 'project:jurisdiction',
 } as const
 
 /**
  * Enumerates every signal currently addressable by a candidate question:
  * every ACTIVE (non-superseded) ScopedObservation, ToolMention, and (2026-08-19)
- * AssetProviderMention by their own existing stable runtime id, plus the two
+ * AssetProviderMention by their own existing stable runtime id, plus the
  * project facts unconditionally (including when unresolved/declined -- a
  * follow-up about an unresolved fact is still a valid thing to eventually ask).
  */
@@ -86,6 +105,7 @@ export function deriveEligibleSignals(su: StructuredUnderstanding): EligibleSign
   }
   signals.push({ signal_id: PROJECT_FACT_SIGNAL_IDS.intended_use, kind: 'project_fact' })
   signals.push({ signal_id: PROJECT_FACT_SIGNAL_IDS.workflow_role, kind: 'project_fact' })
+  signals.push({ signal_id: PROJECT_FACT_SIGNAL_IDS.jurisdiction, kind: 'project_fact' })
 
   return signals
 }

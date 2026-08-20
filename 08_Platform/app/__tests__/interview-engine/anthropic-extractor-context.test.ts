@@ -63,4 +63,38 @@ describe('buildUserMessageContent', () => {
     expect(content).toContain('I selected the takes and arranged the sequence.')
     expect(content.endsWith('The API one.')).toBe(true)
   })
+
+  // Second-Jurisdiction UX milestone (2026-08-20), J1.
+  test('answering_jurisdiction_question: true -> prepends a deterministic, fixed context line', () => {
+    const turn: RawUserTurn = { turn: 2, text: 'My client is in the US.', answering_jurisdiction_question: true }
+    const content = buildUserMessageContent(turn)
+    expect(content).toContain('directly asked the user which country')
+    expect(content).toContain('My client is in the US.')
+    expect(content.endsWith('My client is in the US.')).toBe(true)
+  })
+
+  test('answering_jurisdiction_question: false -> no context line added, byte-identical to turn.text', () => {
+    const turn: RawUserTurn = { turn: 1, text: 'My client is in the US.', answering_jurisdiction_question: false }
+    expect(buildUserMessageContent(turn)).toBe('My client is in the US.')
+  })
+
+  test('answering_jurisdiction_question absent -> same as false, no context line', () => {
+    const turn: RawUserTurn = { turn: 1, text: 'My client is in the US.' }
+    expect(buildUserMessageContent(turn)).toBe('My client is in the US.')
+  })
+
+  test('all three context lines can compose together, independently, text always last', () => {
+    const turn: RawUserTurn = {
+      turn: 7,
+      text: 'United States.',
+      pending_clarification: { signal_id: 'tm-1', kind: 'follow_up_on_signal', unresolved_summary: "tool mention 'Nano Banana'" },
+      current_human_contribution_description: 'I selected the takes.',
+      answering_jurisdiction_question: true,
+    }
+    const content = buildUserMessageContent(turn)
+    expect(content).toContain("tool mention 'Nano Banana'")
+    expect(content).toContain('I selected the takes.')
+    expect(content).toContain('directly asked the user which country')
+    expect(content.endsWith('United States.')).toBe(true)
+  })
 })

@@ -325,3 +325,82 @@ describe('follow-up need cap (Duplicate-Question Prevention milestone, 2026-08-1
     expect(unrelated.allowed).toBe(true)
   })
 })
+
+describe('confirmed-jurisdiction suppression (Second-Jurisdiction UX milestone, 2026-08-20, J2)', () => {
+  test('G. targets_confirmed_jurisdiction: true -> BLOCK, deterministic, no counter touched', () => {
+    const state = createInitialBoundaryState()
+    const result = evaluateBoundary(state, candidate({ kind: 'follow_up_on_signal', signal_id: 'project:jurisdiction', targets_confirmed_jurisdiction: true }))
+    expect(result.allowed).toBe(false)
+    expect(result.reason_code).toBe('JURISDICTION_ALREADY_CONFIRMED')
+    expect(result.action_scope).toBe('suppress_current_question')
+    expect(result.next_state).toEqual(state)
+  })
+
+  test('H. targets_confirmed_jurisdiction: false (or absent) -> falls through to ordinary per-kind logic unaffected -- e.g. a first follow_up_on_signal is still allowed', () => {
+    const result = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'follow_up_on_signal', signal_id: 'project:jurisdiction', targets_confirmed_jurisdiction: false }),
+    )
+    expect(result.allowed).toBe(true)
+    expect(result.reason_code).toBe('ALLOWED')
+  })
+
+  test('fires for kind "other" too, not just follow_up_on_signal -- an organic candidate structurally targeting jurisdiction is blocked regardless of how it classified itself', () => {
+    const result = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'other', signal_id: 'project:jurisdiction', targets_confirmed_jurisdiction: true }),
+    )
+    expect(result.allowed).toBe(false)
+    expect(result.reason_code).toBe('JURISDICTION_ALREADY_CONFIRMED')
+  })
+
+  test('J. jurisdiction suppression never affects an unrelated project fact (intended_use) -- flag is candidate-specific, not global', () => {
+    const jurisdictionBlocked = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'follow_up_on_signal', signal_id: 'project:jurisdiction', targets_confirmed_jurisdiction: true }),
+    )
+    const intendedUseAllowed = evaluateBoundary(
+      jurisdictionBlocked.next_state,
+      candidate({ kind: 'follow_up_on_signal', signal_id: 'project:intended_use' }),
+    )
+    expect(intendedUseAllowed.allowed).toBe(true)
+    expect(intendedUseAllowed.reason_code).toBe('ALLOWED')
+  })
+
+  test('takes precedence over incident_investigation ordering is irrelevant here -- confirms the check sits before the per-kind switch by verifying it fires even for a kind that would otherwise be ALLOWED unconditionally ("other")', () => {
+    const result = evaluateBoundary(createInitialBoundaryState(), candidate({ kind: 'other', targets_confirmed_jurisdiction: true }))
+    expect(result.allowed).toBe(false)
+    expect(result.reason_code).toBe('JURISDICTION_ALREADY_CONFIRMED')
+  })
+})
+
+describe('jurisdiction_clarification_retry cap (Second-Jurisdiction UX milestone, 2026-08-20, J3)', () => {
+  test('first retry ask is allowed, cap consumed', () => {
+    const result = evaluateBoundary(createInitialBoundaryState(), candidate({ kind: 'jurisdiction_clarification_retry' }))
+    expect(result.allowed).toBe(true)
+    expect(result.next_state.jurisdiction_clarification_retry_asked).toBe(true)
+  })
+
+  test('L. second retry ask (no third deterministic attempt) is blocked', () => {
+    const after = evaluateBoundary(createInitialBoundaryState(), candidate({ kind: 'jurisdiction_clarification_retry' }))
+    const second = evaluateBoundary(after.next_state, candidate({ kind: 'jurisdiction_clarification_retry' }))
+    expect(second.allowed).toBe(false)
+    expect(second.reason_code).toBe('JURISDICTION_CLARIFICATION_RETRY_ALREADY_ASKED')
+    expect(second.action_scope).toBe('suppress_current_question')
+  })
+
+  test('retry cap is independent of the initial jurisdiction_clarification cap -- capping one never consumes the other', () => {
+    const initialCapped = evaluateBoundary(createInitialBoundaryState(), candidate({ kind: 'jurisdiction_clarification' }))
+    expect(initialCapped.next_state.jurisdiction_clarification_retry_asked).toBe(false)
+    const retryStillAllowed = evaluateBoundary(initialCapped.next_state, candidate({ kind: 'jurisdiction_clarification_retry' }))
+    expect(retryStillAllowed.allowed).toBe(true)
+  })
+
+  test('retry cap does not consume or interact with Discovery or human-contribution caps', () => {
+    const retryAsked = evaluateBoundary(createInitialBoundaryState(), candidate({ kind: 'jurisdiction_clarification_retry' }))
+    const discovery = evaluateBoundary(retryAsked.next_state, candidate({ kind: 'commercial_readiness_discovery' }))
+    const humanContribution = evaluateBoundary(discovery.next_state, candidate({ kind: 'human_contribution_clarification' }))
+    expect(discovery.allowed).toBe(true)
+    expect(humanContribution.allowed).toBe(true)
+  })
+})

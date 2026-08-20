@@ -97,12 +97,29 @@ import {
  * clarification question has been answered. Deliberately just the one
  * string value, not the full `StructuredUnderstanding` -- "the entire
  * conversation" was explicitly ruled out as unnecessary for this fix.
+ *
+ * `answering_jurisdiction_question` (Second-Jurisdiction UX milestone,
+ * 2026-08-20, J1): same additive, narrow-deterministic-signal discipline as
+ * the two fields above, for the identical underlying reason -- the
+ * extractor has no visibility into which question CRC's own PREVIOUS turn
+ * asked. `true` ONLY when run-turn.ts has confirmed, deterministically (via
+ * `BoundaryState.jurisdiction_clarification_pending_answer`, never inferred
+ * from this turn's own text), that the immediately preceding assistant turn
+ * asked either the deterministic jurisdiction_clarification question or its
+ * one bounded retry. Lets the extractor treat a concise, otherwise-
+ * indirect-looking location reply (client location, project location, a
+ * bare country name/abbreviation) as the user's intended jurisdiction
+ * answer -- see anthropic-extractor.ts's SYSTEM_PROMPT for the exact
+ * exception this unlocks. `false`/absent -- the normal case for every other
+ * turn -- leaves the existing, stricter rule (never infer jurisdiction from
+ * client/company location) completely unchanged.
  */
 export interface RawUserTurn {
   turn: number
   text: string
   pending_clarification?: import('./pending-clarification').PendingClarification | null
   current_human_contribution_description?: string | null
+  answering_jurisdiction_question?: boolean
 }
 
 // ── Candidate observations (stage 1) ────────────────────────────────────────

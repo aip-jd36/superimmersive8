@@ -6,7 +6,14 @@
  * functions, same discipline as commercial-readiness-catalog.test.ts.
  */
 
-import { evaluateJurisdictionClarificationEligibility, buildJurisdictionClarificationProposal, JURISDICTION_CLARIFICATION_QUESTION } from '@/lib/crc-engine/jurisdiction-clarification'
+import {
+  evaluateJurisdictionClarificationEligibility,
+  evaluateJurisdictionClarificationRetryEligibility,
+  buildJurisdictionClarificationProposal,
+  buildJurisdictionClarificationRetryProposal,
+  JURISDICTION_CLARIFICATION_QUESTION,
+  JURISDICTION_CLARIFICATION_RETRY_QUESTION,
+} from '@/lib/crc-engine/jurisdiction-clarification'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { TOPIC_RELATIONSHIPS_FIXTURE } from '@/lib/retrieval-engine/topic-relationships-fixture'
 import type { StructuredUnderstanding, UserGoal } from '@/types/interview-engine'
@@ -442,6 +449,106 @@ describe('buildJurisdictionClarificationProposal', () => {
   })
 
   test('the approved copy is exactly "Which country\'s copyright rules are most relevant to this project?" -- unchanged by T1', () => {
+    expect(JURISDICTION_CLARIFICATION_QUESTION).toBe("Which country's copyright rules are most relevant to this project?")
+  })
+})
+
+// ── Second-Jurisdiction UX milestone (2026-08-20), J3 -- one bounded
+// deterministic retry ──
+
+describe('evaluateJurisdictionClarificationRetryEligibility', () => {
+  const goalCopyOwnership = goal({ goal_id: 'g-1', category: 'copyright_ownership' })
+
+  test('K: initial already asked, jurisdiction still unresolved, retry not yet used -> eligible', () => {
+    const su = baseSU({ user_goals: [goalCopyOwnership] })
+    const result = evaluateJurisdictionClarificationRetryEligibility(su, [jurisdictionGatedClaim()], true, false)
+    expect(result.needs_jurisdiction).toBe(true)
+    expect(result.jurisdiction_unresolved).toBe(true)
+    expect(result.eligible).toBe(true)
+  })
+
+  test('not eligible before the initial question has ever been asked -- retry is never a substitute first attempt', () => {
+    const su = baseSU({ user_goals: [goalCopyOwnership] })
+    const result = evaluateJurisdictionClarificationRetryEligibility(su, [jurisdictionGatedClaim()], false, false)
+    expect(result.eligible).toBe(false)
+  })
+
+  test('L: retry already used -> not eligible, even though jurisdiction remains unresolved and the initial question was asked (no third deterministic attempt)', () => {
+    const su = baseSU({ user_goals: [goalCopyOwnership] })
+    const result = evaluateJurisdictionClarificationRetryEligibility(su, [jurisdictionGatedClaim()], true, true)
+    expect(result.eligible).toBe(false)
+  })
+
+  test('M: jurisdiction already confirmed by the FIRST answer -> retry never becomes eligible', () => {
+    const su = baseSU({
+      user_goals: [goalCopyOwnership],
+      project_facts: {
+        intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        jurisdiction: { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 2, source_statement: 'United States' },
+        human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      },
+    })
+    const result = evaluateJurisdictionClarificationRetryEligibility(su, [jurisdictionGatedClaim()], true, false)
+    expect(result.jurisdiction_unresolved).toBe(false)
+    expect(result.eligible).toBe(false)
+  })
+
+  test('N: jurisdiction declined -> retry never becomes eligible (no forced repeat after a decline)', () => {
+    const su = baseSU({
+      user_goals: [goalCopyOwnership],
+      project_facts: {
+        intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        jurisdiction: { attestation: { state: 'declined' }, source_turn: 2, source_statement: 'skip' },
+        human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      },
+    })
+    const result = evaluateJurisdictionClarificationRetryEligibility(su, [jurisdictionGatedClaim()], true, false)
+    expect(result.eligible).toBe(false)
+  })
+
+  test('not eligible when no active goal needs jurisdiction-scoped knowledge -- same governance gate as the initial question', () => {
+    const su = baseSU({ user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })] })
+    const result = evaluateJurisdictionClarificationRetryEligibility(su, [jurisdictionGatedClaim({ claim_id: 'C-1', topic: 'copyright_ownership' })], true, false)
+    expect(result.needs_jurisdiction).toBe(false)
+    expect(result.eligible).toBe(false)
+  })
+
+  test('relationship-mediated need is exactly as retry-worthy as a direct one (shared computeJurisdictionNeedState with the initial question)', () => {
+    const su = baseSU({ user_goals: [goalCopyOwnership] })
+    const rel = relationship({ relationship_id: 'REL-TEST-1', source_topic: 'copyright_ownership', target_topic: 'copyrightability' })
+    const directClaimNoJurisdiction: TopicClaim = { ...jurisdictionGatedClaim(), applicability_requirements: [] }
+    const result = evaluateJurisdictionClarificationRetryEligibility(su, [directClaimNoJurisdiction, relatedJurisdictionGatedClaim()], true, false, [rel])
+    expect(result.needs_jurisdiction).toBe(true)
+    expect(result.eligible).toBe(true)
+  })
+
+  test('omitting the relationships argument behaves identically to passing [] -- same backward-compatible default as the initial question', () => {
+    const su = baseSU({ user_goals: [goalCopyOwnership] })
+    const withDefault = evaluateJurisdictionClarificationRetryEligibility(su, [jurisdictionGatedClaim()], true, false)
+    const withExplicitEmpty = evaluateJurisdictionClarificationRetryEligibility(su, [jurisdictionGatedClaim()], true, false, [])
+    expect(withDefault).toEqual(withExplicitEmpty)
+  })
+})
+
+describe('buildJurisdictionClarificationRetryProposal', () => {
+  test('produces the exact PM-suggested retry text, its own dedicated kind, and null signal id', () => {
+    const proposal = buildJurisdictionClarificationRetryProposal(2)
+    expect(proposal).toEqual({
+      question_text: JURISDICTION_CLARIFICATION_RETRY_QUESTION,
+      question_kind: 'jurisdiction_clarification_retry',
+      target_signal_id: null,
+      phase: 2,
+    })
+  })
+
+  test('retry text is distinct from the initial question -- never the same string, never LLM-generated', () => {
+    expect(JURISDICTION_CLARIFICATION_RETRY_QUESTION).not.toBe(JURISDICTION_CLARIFICATION_QUESTION)
+    expect(JURISDICTION_CLARIFICATION_RETRY_QUESTION.length).toBeGreaterThan(0)
+  })
+
+  test('the primary jurisdiction question itself is untouched by this milestone -- wording non-goal', () => {
     expect(JURISDICTION_CLARIFICATION_QUESTION).toBe("Which country's copyright rules are most relevant to this project?")
   })
 })

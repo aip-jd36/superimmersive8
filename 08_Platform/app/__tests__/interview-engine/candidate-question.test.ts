@@ -127,12 +127,23 @@ describe('deriveEligibleSignals', () => {
     expect(signals).toContainEqual({ signal_id: 'tm-2', kind: 'tool_mention' })
   })
 
-  test('total eligible count is exactly active observations + active mentions + 2 project facts', () => {
+  test('total eligible count is exactly active observations + active mentions + 3 project facts', () => {
     const su = baseSU({
       scoped_observations: [observation({ observation_id: 'so-1' }), observation({ observation_id: 'so-2', source_turn: 2 })],
       tool_mentions: [toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'runway-gen3' } })],
     })
-    expect(deriveEligibleSignals(su)).toHaveLength(2 + 1 + 2)
+    expect(deriveEligibleSignals(su)).toHaveLength(2 + 1 + 3)
+  })
+
+  // Second-Jurisdiction UX milestone (2026-08-20), J2.
+  test('project:jurisdiction is unconditionally eligible, same as intended_use/workflow_role -- including when unresolved AND when confirmed', () => {
+    const unresolved = deriveEligibleSignals(baseSU())
+    expect(unresolved).toContainEqual({ signal_id: PROJECT_FACT_SIGNAL_IDS.jurisdiction, kind: 'project_fact' })
+
+    const confirmed = deriveEligibleSignals(
+      baseSU({ project_facts: { ...projectFacts(), jurisdiction: { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 2, source_statement: 'United States' } } }),
+    )
+    expect(confirmed).toContainEqual({ signal_id: PROJECT_FACT_SIGNAL_IDS.jurisdiction, kind: 'project_fact' })
   })
 
   // Duplicate-Question Prevention milestone (2026-08-19). Diagnostic finding:
@@ -181,7 +192,7 @@ describe('deriveEligibleSignals', () => {
           assetProviderMention({ mention_id: 'ap-2', resolution: { kind: 'canonical', identifier: 'getty' } }),
         ],
       })
-      expect(deriveEligibleSignals(su)).toHaveLength(0 + 0 + 2 + 2)
+      expect(deriveEligibleSignals(su)).toHaveLength(0 + 0 + 2 + 3)
     })
   })
 })

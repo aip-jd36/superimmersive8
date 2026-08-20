@@ -17,7 +17,7 @@ import { createInMemorySessionStore } from '@/lib/crc-engine/in-memory-session-s
 import { constantExtractor } from '@/lib/interview-engine/mock-extractor'
 import { constantCandidateQuestionGenerator } from '@/lib/interview-engine/mock-candidate-question'
 import { constantConstraintADecider } from '@/lib/interview-engine/mock-decision'
-import { JURISDICTION_CLARIFICATION_QUESTION } from '@/lib/crc-engine/jurisdiction-clarification'
+import { JURISDICTION_CLARIFICATION_QUESTION, JURISDICTION_CLARIFICATION_RETRY_QUESTION } from '@/lib/crc-engine/jurisdiction-clarification'
 import type { CandidateObservation } from '@/lib/interview-engine/extraction'
 import type { ConstraintADecision } from '@/lib/interview-engine/decision'
 import type { SessionStore } from '@/lib/crc-engine/session-store'
@@ -162,7 +162,7 @@ describe('jurisdiction clarification -- eligibility gating', () => {
     })
   })
 
-  test('capped: once asked, a later turn never asks again even though the goal is still active and jurisdiction still unconfirmed', async () => {
+  test('capped: once the INITIAL question is asked, the next turn gets the one bounded deterministic retry -- not the ordinary generator, and not silently dropped (Second-Jurisdiction UX milestone, 2026-08-20, J3; supersedes the pre-J3 "falls back to the ordinary generator" behavior)', async () => {
     const store = createInMemorySessionStore()
     await runTurn({ token: 't5', turnNumber: 1, userText: 'x' }, eligibleDeps({}, store))
 
@@ -186,8 +186,49 @@ describe('jurisdiction clarification -- eligibility gating', () => {
       { token: 't5', turnNumber: 2, userText: 'more info' },
       eligibleDeps({ generator, extractor: constantExtractor([newObservation]) }, store),
     )
+    // jurisdictionSignal analytics remain scoped to the INITIAL eligibility
+    // check only (unchanged, deliberate scope decision) -- undefined here
+    // does not mean "nothing jurisdiction-related happened this turn."
     expect(outcome2.jurisdictionSignal).toBeUndefined()
-    expect(generatorCalled).toBe(true) // falls back to the ordinary generator, exactly like Discovery's own cap behavior
+    expect(outcome2.kind).toBe('question')
+    if (outcome2.kind === 'question') {
+      expect(outcome2.message).toBe(JURISDICTION_CLARIFICATION_RETRY_QUESTION)
+    }
+    // The deterministic retry occupies the slot -- the ordinary generator
+    // is never even called this turn.
+    expect(generatorCalled).toBe(false)
+
+    const state = await loadState(store, 't5')
+    expect(state.boundary_state.jurisdiction_clarification_retry_asked).toBe(true)
+  })
+
+  test('after the retry is also capped, a THIRD turn finally falls back to the ordinary generator', async () => {
+    const store = createInMemorySessionStore()
+    await runTurn({ token: 't5b', turnNumber: 1, userText: 'x' }, eligibleDeps({}, store))
+    await runTurn(
+      { token: 't5b', turnNumber: 2, userText: 'more info' },
+      eligibleDeps({ extractor: constantExtractor([{ proposal_id: 'p-obs2', turn: 2, raw_text: 'detail', kind: 'scoped_observation', scope: 'current_project', observation_confidence_hint: 'confirmed' }]) }, store),
+    )
+    expect((await loadState(store, 't5b')).boundary_state.jurisdiction_clarification_retry_asked).toBe(true)
+
+    let generatorCalled = false
+    const generator = async () => {
+      generatorCalled = true
+      return null
+    }
+    const newObservation: CandidateObservation = {
+      proposal_id: 'p-obs3',
+      turn: 3,
+      raw_text: 'Still not sure about the country.',
+      kind: 'scoped_observation',
+      scope: 'current_project',
+      observation_confidence_hint: 'confirmed',
+    }
+    await runTurn(
+      { token: 't5b', turnNumber: 3, userText: 'still not sure' },
+      eligibleDeps({ generator, extractor: constantExtractor([newObservation]) }, store),
+    )
+    expect(generatorCalled).toBe(true)
   })
 
   test('declining the question means jurisdiction stays unconfirmed but the cap still prevents re-asking (no guess, no pestering)', async () => {
@@ -268,7 +309,7 @@ describe('jurisdiction clarification -- precedence over Commercial Readiness Dis
     expect(state.boundary_state.jurisdiction_clarification_asked).toBe(true)
   })
 
-  test('jurisdiction already asked/capped -> Discovery is free to fire on a later turn (independent caps, PM SS7)', async () => {
+  test('jurisdiction initial asked/capped -> the retry (still independently eligible) preempts Discovery for the SAME slot (Second-Jurisdiction UX milestone, 2026-08-20 -- supersedes the pre-J3 "Discovery is free the very next turn" behavior: the retry now sits between the initial question and Discovery in the precedence chain)', async () => {
     const store = createInMemorySessionStore()
     await runTurn({ token: 't8', turnNumber: 1, userText: 'x' }, eligibleDeps({}, store))
     expect((await loadState(store, 't8')).boundary_state.jurisdiction_clarification_asked).toBe(true)
@@ -281,7 +322,32 @@ describe('jurisdiction clarification -- precedence over Commercial Readiness Dis
       store,
     )
     const outcome2 = await runTurn({ token: 't8', turnNumber: 2, userText: 'more info' }, d2)
-    // jurisdiction is capped now, so Discovery (still independently eligible) gets the slot.
-    expect(outcome2.discoverySignal?.outcome).toBe('asked')
+    expect(outcome2.kind).toBe('question')
+    if (outcome2.kind === 'question') {
+      expect(outcome2.message).toBe(JURISDICTION_CLARIFICATION_RETRY_QUESTION)
+    }
+    expect(outcome2.discoverySignal?.outcome).toBe('preempted_by_jurisdiction')
+    expect((await loadState(store, 't8')).boundary_state.commercial_readiness_discovery_asked).toBe(false)
+  })
+
+  test('jurisdiction initial AND retry both capped -> Discovery is finally free to fire (independent caps, PM SS7)', async () => {
+    const store = createInMemorySessionStore()
+    await runTurn({ token: 't8b', turnNumber: 1, userText: 'x' }, eligibleDeps({}, store))
+    await runTurn(
+      { token: 't8b', turnNumber: 2, userText: 'more info' },
+      eligibleDeps({ extractor: constantExtractor([{ proposal_id: 'p-obs2', turn: 2, raw_text: 'detail', kind: 'scoped_observation', scope: 'current_project', observation_confidence_hint: 'confirmed' }]) }, store),
+    )
+    expect((await loadState(store, 't8b')).boundary_state.jurisdiction_clarification_retry_asked).toBe(true)
+    expect((await loadState(store, 't8b')).boundary_state.commercial_readiness_discovery_asked).toBe(false)
+
+    const d3 = eligibleDeps(
+      {
+        extractor: constantExtractor([intendedUseCandidate('made the video for a client'), workflowRoleCandidate('solo operator')]),
+      },
+      store,
+    )
+    const outcome3 = await runTurn({ token: 't8b', turnNumber: 3, userText: 'even more info' }, d3)
+    // both jurisdiction slots are capped now, so Discovery (still independently eligible) gets the slot.
+    expect(outcome3.discoverySignal?.outcome).toBe('asked')
   })
 })

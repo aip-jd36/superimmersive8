@@ -120,6 +120,7 @@ import {
   presatisfyStructuralFollowUpNeeds,
   matchesExclusion,
   validateCandidateReference,
+  PROJECT_FACT_SIGNAL_IDS,
   type CandidateExclusion,
   type CandidateQuestionGenerator,
   type CandidateQuestionProposal,
@@ -140,7 +141,14 @@ import {
   COMMERCIAL_READINESS_CATEGORIES,
   type CommercialReadinessCategory,
 } from './commercial-readiness-catalog'
-import { buildJurisdictionClarificationProposal, evaluateJurisdictionClarificationEligibility } from './jurisdiction-clarification'
+import {
+  buildJurisdictionClarificationProposal,
+  buildJurisdictionClarificationRetryProposal,
+  evaluateJurisdictionClarificationEligibility,
+  evaluateJurisdictionClarificationRetryEligibility,
+  JURISDICTION_CLARIFICATION_QUESTION,
+  JURISDICTION_CLARIFICATION_RETRY_QUESTION,
+} from './jurisdiction-clarification'
 import { buildHumanContributionClarificationProposal, evaluateHumanContributionClarificationEligibility } from './human-contribution-clarification'
 import type { SessionStore } from './session-store'
 import type { CRCSessionState } from './types'
@@ -337,6 +345,19 @@ type CandidateAttemptResult =
  * call), left unconditional here rather than special-cased, since it is
  * already harmless when `excluded` is absent.
  */
+/**
+ * Second-Jurisdiction UX milestone (2026-08-20), J2. Pure, deterministic:
+ * true only when a candidate's own target_signal_id literally equals
+ * project:jurisdiction AND the jurisdiction ProjectFact is currently
+ * confirmed. Never routed through Constraint A -- see boundaries.ts's own
+ * targets_confirmed_jurisdiction field header for why this lives here
+ * (StructuredUnderstanding-aware orchestration layer) rather than inside
+ * boundaries.ts (deliberately StructuredUnderstanding-free).
+ */
+function targetsConfirmedJurisdiction(signalId: string | undefined, su: StructuredUnderstanding): boolean {
+  return signalId === PROJECT_FACT_SIGNAL_IDS.jurisdiction && su.project_facts.jurisdiction.attestation.state === 'confirmed'
+}
+
 async function tryCandidate(
   suAfter: StructuredUnderstanding,
   eligible: EligibleSignal[],
@@ -368,9 +389,12 @@ async function tryCandidate(
     return { status: 'rejected', exclusion: { kind: proposal.question_kind, signal_id: proposal.target_signal_id } }
   }
 
-  const lineageResolvedCandidate: CandidateQuestion = validation.candidate.signal_id
-    ? { ...validation.candidate, signal_id: resolveLineageRoot(suAfter, validation.candidate.signal_id) }
-    : validation.candidate
+  const lineageResolvedCandidate: CandidateQuestion = {
+    ...(validation.candidate.signal_id
+      ? { ...validation.candidate, signal_id: resolveLineageRoot(suAfter, validation.candidate.signal_id) }
+      : validation.candidate),
+    targets_confirmed_jurisdiction: targetsConfirmedJurisdiction(validation.candidate.signal_id, suAfter),
+  }
   // declineSignal is always undefined here -- organic path only.
   const boundaryResult = evaluateBoundary(boundaryStateLoaded, lineageResolvedCandidate, undefined)
   if (!boundaryResult.allowed) {
@@ -439,11 +463,21 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     suLoaded.project_facts.human_contribution_description.attestation.state === 'confirmed'
       ? suLoaded.project_facts.human_contribution_description.attestation.value
       : null
+  // Second-Jurisdiction UX milestone (2026-08-20), J1: true ONLY when the
+  // immediately preceding assistant turn asked the deterministic
+  // jurisdiction_clarification question or its one bounded retry -- read
+  // from BoundaryState (set at the end of THIS function whenever that
+  // happens, consumed here, then reset for the state that gets saved this
+  // turn), never inferred from this turn's own text. See boundaries.ts's
+  // own field header for why this lives in BoundaryState rather than a new
+  // CRCSessionState field (zero DB migration).
+  const answeringJurisdictionQuestion = boundaryStateLoaded.jurisdiction_clarification_pending_answer === true
   const rawTurn: RawUserTurn = {
     turn: input.turnNumber,
     text: input.userText,
     pending_clarification: loaded?.pending_clarification ?? null,
     current_human_contribution_description: currentHumanContributionDescription,
+    answering_jurisdiction_question: answeringJurisdictionQuestion,
   }
   const { updated: extracted } = await runExtractionPipeline(suLoaded, rawTurn, deps.extractor)
 
@@ -524,9 +558,12 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
       if (validation.outcome === 'accepted') {
         const decision = await deps.decider({ structured_understanding: suAfter, candidate: proposal, phase })
         if (decision.should_ask) {
-          const lineageResolvedCandidate: CandidateQuestion = validation.candidate.signal_id
-            ? { ...validation.candidate, signal_id: resolveLineageRoot(suAfter, validation.candidate.signal_id) }
-            : validation.candidate
+          const lineageResolvedCandidate: CandidateQuestion = {
+            ...(validation.candidate.signal_id
+              ? { ...validation.candidate, signal_id: resolveLineageRoot(suAfter, validation.candidate.signal_id) }
+              : validation.candidate),
+            targets_confirmed_jurisdiction: targetsConfirmedJurisdiction(validation.candidate.signal_id, suAfter),
+          }
           const boundaryResult = evaluateBoundary(boundaryStateForTurn, lineageResolvedCandidate, declineSignal)
           nextBoundaryState = boundaryResult.next_state
           if (boundaryResult.allowed) {
@@ -577,7 +614,30 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
       boundaryStateForTurn.jurisdiction_clarification_asked,
       relationships,
     )
-    const jurisdictionProposal = jurisdictionEligibility.eligible ? buildJurisdictionClarificationProposal(phase) : undefined
+    // Second-Jurisdiction UX milestone (2026-08-20), J3. Computed
+    // regardless of jurisdictionEligibility's own result -- the two are
+    // mutually exclusive by construction (retry requires the initial
+    // question to have already been asked, which is exactly the condition
+    // that makes the initial question itself no longer eligible), so at
+    // most one of jurisdictionEligibility/jurisdictionRetryEligibility is
+    // ever true the same turn. Occupies the SAME jurisdictionProposal slot
+    // as the initial question -- never a separate, additional precedence
+    // tier -- so every downstream consumer of `jurisdictionProposal` (the
+    // forcedProposal chain, the [COMMERCIAL READINESS DISCOVERY] precedence
+    // note, the final-save jurisdiction-question detection below) needs no
+    // additional branching to account for it.
+    const jurisdictionRetryEligibility = evaluateJurisdictionClarificationRetryEligibility(
+      suAfter,
+      topicClaims,
+      boundaryStateForTurn.jurisdiction_clarification_asked,
+      boundaryStateForTurn.jurisdiction_clarification_retry_asked,
+      relationships,
+    )
+    const jurisdictionProposal = jurisdictionEligibility.eligible
+      ? buildJurisdictionClarificationProposal(phase)
+      : jurisdictionRetryEligibility.eligible
+        ? buildJurisdictionClarificationRetryProposal(phase)
+        : undefined
 
     // Copyright UAT Correction Milestone, 2026-08-19, PM-approved H3/H4.
     // Deterministic, no LLM call -- same pattern as jurisdiction
@@ -751,9 +811,22 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     }
   }
 
+  // Second-Jurisdiction UX milestone (2026-08-20), J1. Computed directly
+  // from the FINAL outcome/text -- exact-string comparison against the two
+  // fixed, catalog-owned question constants (never LLM-rewritten, per their
+  // own module header), never text similarity/fuzzy matching. Explicitly
+  // overwrites whatever nextBoundaryState's own value happened to be
+  // (evaluateBoundary has no opinion on this field at all, so it always
+  // just carries forward whatever boundaryStateForTurn already had) -- this
+  // is the one deliberate place that field is allowed to change, consumed
+  // by the very next turn's `answeringJurisdictionQuestion` read above.
+  const jurisdictionQuestionJustAsked =
+    outcome.kind === 'question' &&
+    (outcome.message === JURISDICTION_CLARIFICATION_QUESTION || outcome.message === JURISDICTION_CLARIFICATION_RETRY_QUESTION)
+
   const sessionState: CRCSessionState = {
     structured_understanding: suAfter,
-    boundary_state: nextBoundaryState,
+    boundary_state: { ...nextBoundaryState, jurisdiction_clarification_pending_answer: jurisdictionQuestionJustAsked },
     pending_clarification: pendingClarification,
     pending_commercial_readiness_takeaway: nextPendingTakeawayCategory,
   }

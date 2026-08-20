@@ -50,7 +50,15 @@ export const DEFAULT_MODEL = 'claude-sonnet-5'
  * than relying on the model simply never choosing an undocumented value.
  */
 const ORDINARY_GENERATOR_QUESTION_KINDS = CANDIDATE_QUESTION_KINDS.filter(
-  (k) => k !== 'commercial_readiness_discovery' && k !== 'jurisdiction_clarification' && k !== 'human_contribution_clarification',
+  (k) =>
+    k !== 'commercial_readiness_discovery' &&
+    k !== 'jurisdiction_clarification' &&
+    k !== 'human_contribution_clarification' &&
+    // Second-Jurisdiction UX milestone (2026-08-20), J3: same reasoning as
+    // the three exclusions above -- deterministically constructed by
+    // jurisdiction-clarification.ts's buildJurisdictionClarificationRetryProposal
+    // from fixed copy, never freely generated.
+    k !== 'jurisdiction_clarification_retry',
 )
 
 const SYSTEM_PROMPT = `You are the candidate-question generation stage of a larger, deterministic pipeline for CRC, a conversational tool that helps someone understand the commercial-use status of an AI-generated video project. Your only job is to propose ONE next question CRC might ask, given its current structured understanding of the project. You are not the only stage: everything you produce is a PROPOSAL, checked by deterministic code downstream that decides whether it is actually permitted to ask. You never see or affect whether your proposal gets used.

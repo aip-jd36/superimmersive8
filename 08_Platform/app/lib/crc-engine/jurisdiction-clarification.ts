@@ -90,11 +90,32 @@ import type { TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types
  * PM-approved exact copy (SS3): "Which country's copyright rules are most
  * relevant to this project?" Fixed, catalog-owned, never LLM-generated --
  * same "trivial verbatim lookup" discipline as
- * COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.
+ * COMMERCIAL_READINESS_DISCOVERY_QUESTIONS. Deliberately left UNCHANGED by
+ * the Second-Jurisdiction UX milestone (2026-08-20) -- the completed
+ * diagnostic flagged this wording as a plausible contributing factor, but
+ * rewording it was explicitly out of scope for that milestone, to isolate
+ * architecture behavior from copy behavior.
  */
 export const JURISDICTION_CLARIFICATION_QUESTION = "Which country's copyright rules are most relevant to this project?"
 
+/**
+ * Second-Jurisdiction UX milestone (2026-08-20), J3. Fixed, catalog-owned,
+ * never LLM-generated -- same discipline as JURISDICTION_CLARIFICATION_QUESTION
+ * above. Asked at most once, and only after the initial question above has
+ * already been asked and left jurisdiction unresolved (see
+ * evaluateJurisdictionClarificationRetryEligibility below). PM-suggested
+ * copy, used verbatim.
+ */
+export const JURISDICTION_CLARIFICATION_RETRY_QUESTION =
+  "Just to clarify for this check, which country's copyright law should we use — for example, United States, United Kingdom, or another country?"
+
 export interface JurisdictionClarificationEligibilityResult {
+  needs_jurisdiction: boolean
+  jurisdiction_unresolved: boolean
+  eligible: boolean
+}
+
+export interface JurisdictionClarificationRetryEligibilityResult {
   needs_jurisdiction: boolean
   jurisdiction_unresolved: boolean
   eligible: boolean
@@ -142,20 +163,73 @@ function goalNeedsJurisdiction(category: GoalCategory, topicClaims: TopicClaim[]
   )
 }
 
-export function evaluateJurisdictionClarificationEligibility(
+/**
+ * Shared need-state computation (Second-Jurisdiction UX milestone,
+ * 2026-08-20) -- factored out so evaluateJurisdictionClarificationEligibility
+ * and evaluateJurisdictionClarificationRetryEligibility below can never
+ * drift apart on what "needs jurisdiction" or "jurisdiction unresolved"
+ * means; both the initial question and the one bounded retry must agree on
+ * these two facts exactly, differing only in what else they additionally
+ * require (already-asked state).
+ */
+function computeJurisdictionNeedState(
   understanding: StructuredUnderstanding,
   topicClaims: TopicClaim[],
-  alreadyAskedThisConversation: boolean,
-  relationships: TopicRelationship[] = [],
-): JurisdictionClarificationEligibilityResult {
+  relationships: TopicRelationship[],
+): { needsJurisdiction: boolean; jurisdictionUnresolved: boolean } {
   const activeConfirmedGoals = understanding.user_goals.filter((g) => g.superseded_by === null && g.state === 'confirmed')
   const needsJurisdiction = activeConfirmedGoals.some((g) => goalNeedsJurisdiction(g.category, topicClaims, relationships))
 
   const jurisdictionState = understanding.project_facts.jurisdiction.attestation.state
   const jurisdictionUnresolved = jurisdictionState !== 'confirmed' && jurisdictionState !== 'declined'
 
-  const eligible = needsJurisdiction && jurisdictionUnresolved && !alreadyAskedThisConversation
+  return { needsJurisdiction, jurisdictionUnresolved }
+}
 
+export function evaluateJurisdictionClarificationEligibility(
+  understanding: StructuredUnderstanding,
+  topicClaims: TopicClaim[],
+  alreadyAskedThisConversation: boolean,
+  relationships: TopicRelationship[] = [],
+): JurisdictionClarificationEligibilityResult {
+  const { needsJurisdiction, jurisdictionUnresolved } = computeJurisdictionNeedState(understanding, topicClaims, relationships)
+  const eligible = needsJurisdiction && jurisdictionUnresolved && !alreadyAskedThisConversation
+  return { needs_jurisdiction: needsJurisdiction, jurisdiction_unresolved: jurisdictionUnresolved, eligible }
+}
+
+/**
+ * Second-Jurisdiction UX milestone (2026-08-20), J3. Exact eligibility rule,
+ * all four must hold:
+ *   A/B. Same needsJurisdiction/jurisdictionUnresolved computation as the
+ *        initial question above (computeJurisdictionNeedState) -- a
+ *        relationship-mediated need is exactly as retry-worthy as a direct
+ *        one; a jurisdiction that has since been confirmed or declined
+ *        (e.g. by a later unprompted statement) closes retry eligibility
+ *        the same way it closes the initial question's own eligibility.
+ *   C. The INITIAL jurisdiction_clarification question has already been
+ *      asked this conversation (retry only ever follows the initial
+ *      question; it is never a substitute first attempt).
+ *   D. The retry itself has not already been used (once-per-interview,
+ *      enforced in boundaries.ts via jurisdiction_clarification_retry_asked
+ *      -- this parameter mirrors the exact same "testable in isolation
+ *      before boundary wiring exists" precedent alreadyAskedThisConversation
+ *      already established for the initial question).
+ * No Gate 1 requirement -- same reasoning as the initial question (Copyright
+ * UAT Correction Milestone T1, 2026-08-19): the retry serves the identical
+ * already-stated user goal the initial question does, and Gate 1's own
+ * purpose (tool/workflow context) has no bearing on whether a second,
+ * differently-worded attempt at the user's own jurisdiction is safe.
+ */
+export function evaluateJurisdictionClarificationRetryEligibility(
+  understanding: StructuredUnderstanding,
+  topicClaims: TopicClaim[],
+  initialAlreadyAskedThisConversation: boolean,
+  retryAlreadyAskedThisConversation: boolean,
+  relationships: TopicRelationship[] = [],
+): JurisdictionClarificationRetryEligibilityResult {
+  const { needsJurisdiction, jurisdictionUnresolved } = computeJurisdictionNeedState(understanding, topicClaims, relationships)
+  const eligible =
+    needsJurisdiction && jurisdictionUnresolved && initialAlreadyAskedThisConversation && !retryAlreadyAskedThisConversation
   return { needs_jurisdiction: needsJurisdiction, jurisdiction_unresolved: jurisdictionUnresolved, eligible }
 }
 
@@ -170,6 +244,20 @@ export function buildJurisdictionClarificationProposal(phase: Phase): CandidateQ
   return {
     question_text: JURISDICTION_CLARIFICATION_QUESTION,
     question_kind: 'jurisdiction_clarification',
+    target_signal_id: null,
+    phase,
+  }
+}
+
+/**
+ * Second-Jurisdiction UX milestone (2026-08-20), J3. Same construction
+ * discipline as buildJurisdictionClarificationProposal above -- target_signal_id
+ * always null, fixed text never LLM-rewritten.
+ */
+export function buildJurisdictionClarificationRetryProposal(phase: Phase): CandidateQuestionProposal {
+  return {
+    question_text: JURISDICTION_CLARIFICATION_RETRY_QUESTION,
+    question_kind: 'jurisdiction_clarification_retry',
     target_signal_id: null,
     phase,
   }

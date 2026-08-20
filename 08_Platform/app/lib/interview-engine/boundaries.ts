@@ -85,6 +85,22 @@ export const CANDIDATE_QUESTION_KINDS = [
    * jurisdiction is confirmed.
    */
   'human_contribution_clarification',
+  /**
+   * Second-Jurisdiction UX milestone (2026-08-20), J3. Exactly one
+   * deterministic, fixed-copy retry when the initial jurisdiction_clarification
+   * question left jurisdiction unresolved -- same shape/precedent as
+   * 'jurisdiction_clarification' exactly: deterministically constructed by
+   * lib/crc-engine/jurisdiction-clarification.ts's own
+   * buildJurisdictionClarificationRetryProposal, never proposed by the
+   * ordinary LLM generator (excluded from anthropic-candidate-question.ts's
+   * own schema enum). Always carries target_signal_id: null. Capped
+   * globally, once per interview -- see
+   * jurisdiction_clarification_retry_asked below. Occupies the SAME
+   * deterministic attempt-#1 slot as 'jurisdiction_clarification' in
+   * run-turn.ts (never both eligible at once -- the retry's own eligibility
+   * function requires the initial question to have already been asked).
+   */
+  'jurisdiction_clarification_retry',
 ] as const
 
 export type CandidateQuestionKind = (typeof CANDIDATE_QUESTION_KINDS)[number]
@@ -143,6 +159,21 @@ export interface CandidateQuestion {
    * code paths) falls through to the untouched per-signal-id logic below.
    */
   follow_up_need?: FollowUpNeed
+  /**
+   * Second-Jurisdiction UX milestone (2026-08-20), J2. Optional, additive,
+   * computed by run-turn.ts (which has StructuredUnderstanding access this
+   * module deliberately does not -- see module header) from
+   * `target_signal_id === 'project:jurisdiction' && jurisdiction.attestation.state
+   * === 'confirmed'`. Deliberately a plain boolean flag, NOT folded into
+   * FollowUpNeed (jurisdiction has its own dedicated once-per-interview cap
+   * shape via jurisdiction_clarification_asked/jurisdiction_clarification_
+   * retry_asked already; this flag exists only to give evaluateBoundary a
+   * deterministic, LLM-independent veto over an organic candidate that
+   * structurally targets an already-confirmed jurisdiction, mirroring the
+   * exact "external flag, boundaries.ts just enforces it" split follow_up_need
+   * already established). Absent/false -> zero behavior change.
+   */
+  targets_confirmed_jurisdiction?: boolean
 }
 
 // ── Boundary state ───────────────────────────────────────────────────────────
@@ -213,6 +244,38 @@ export interface BoundaryState {
    * which is falsy and behaves identically to `false` everywhere it's read.
    */
   human_contribution_clarification_asked: boolean
+  /**
+   * Second-Jurisdiction UX milestone (2026-08-20), J3. True once the
+   * deterministic jurisdiction_clarification_retry question has been asked.
+   * Global, once per conversation -- deliberately a SEPARATE cap from
+   * jurisdiction_clarification_asked (never conflated: a boolean cannot
+   * distinguish "never asked" / "initial asked" / "retry asked" on its
+   * own -- see jurisdiction-clarification.ts's own retry-eligibility
+   * function for how both are read together). Same safe-default-on-missing-
+   * field reasoning as every other `_asked` field above: a pre-this-
+   * milestone session deserializes this as `undefined`, falsy, behaves
+   * identically to `false`.
+   */
+  jurisdiction_clarification_retry_asked: boolean
+  /**
+   * Second-Jurisdiction UX milestone (2026-08-20), J1. True for exactly one
+   * turn: the turn immediately AFTER either jurisdiction_clarification or
+   * jurisdiction_clarification_retry was approved and asked. Consumed
+   * (read, then explicitly reset) by run-turn.ts at the start of that next
+   * turn to set RawUserTurn.answering_jurisdiction_question -- the narrow
+   * question-context signal extraction needs to distinguish a direct
+   * response to CRC's own explicit jurisdiction question from an unprompted
+   * mention of the same words. Deliberately lives HERE (inside
+   * BoundaryState, which already round-trips generically through
+   * serialization.ts and the Supabase `boundary_state` JSONB column) rather
+   * than as a new top-level CRCSessionState field, specifically so this
+   * milestone requires zero DB migration -- mirrors
+   * pending_commercial_readiness_takeaway's own role/lifecycle exactly,
+   * just addressed at the BoundaryState layer instead of CRCSessionState's,
+   * since BoundaryState's persistence path needs no new column at all. Same
+   * safe-default-on-missing-field reasoning as every `_asked` field above.
+   */
+  jurisdiction_clarification_pending_answer: boolean
   /** True once an interview-scoped decline has occurred; persists across all future evaluations. */
   interview_ended: boolean
   /** Phases closed by a phase-scoped decline. A phase not in this list is unaffected, even after another phase closes -- closing one phase must not automatically end unrelated future questioning in a different phase. */
@@ -228,6 +291,8 @@ export function createInitialBoundaryState(): BoundaryState {
     commercial_readiness_discovery_asked: false,
     jurisdiction_clarification_asked: false,
     human_contribution_clarification_asked: false,
+    jurisdiction_clarification_retry_asked: false,
+    jurisdiction_clarification_pending_answer: false,
     interview_ended: false,
     phases_ended: [],
   }
@@ -283,6 +348,22 @@ export const BOUNDARY_REASON_CODES = [
    * capped independently rather than sharing one budget.
    */
   'FOLLOW_UP_NEED_ALREADY_ASKED',
+  /**
+   * Second-Jurisdiction UX milestone (2026-08-20), J3. Same "1 ask, ever"
+   * global-cap shape as JURISDICTION_CLARIFICATION_ALREADY_ASKED, for the
+   * separate jurisdiction_clarification_retry_asked cap.
+   */
+  'JURISDICTION_CLARIFICATION_RETRY_ALREADY_ASKED',
+  /**
+   * Second-Jurisdiction UX milestone (2026-08-20), J2. Fires whenever
+   * candidate.targets_confirmed_jurisdiction is true -- a deterministic,
+   * LLM-independent veto, checked before the per-kind switch below (same
+   * placement discipline as the follow_up_need check), so an organic
+   * candidate that structurally targets project:jurisdiction can never
+   * reach the user once jurisdiction is confirmed, regardless of what
+   * Constraint A decided.
+   */
+  'JURISDICTION_ALREADY_CONFIRMED',
   'USER_DECLINED_QUESTION',
   'USER_DECLINED_PHASE',
   'USER_DECLINED_INTERVIEW',
@@ -401,6 +482,21 @@ export function evaluateBoundary(
       action_scope: 'suppress_current_question',
       next_state: state,
       debug: { fired_boundary: 'incident_investigation (absolute prohibition)', candidate_kind: candidate.kind },
+    }
+  }
+
+  // ── Second-Jurisdiction UX milestone (2026-08-20), J2. Checked BEFORE the
+  // per-kind switch below, REGARDLESS of candidate.kind (covers 'other' and
+  // any signal-bearing kind an organic candidate might use to target
+  // project:jurisdiction). Deterministic, LLM-independent -- Constraint A is
+  // never consulted for this veto. When absent/false, zero behavior change.
+  if (candidate.targets_confirmed_jurisdiction) {
+    return {
+      allowed: false,
+      reason_code: 'JURISDICTION_ALREADY_CONFIRMED',
+      action_scope: 'suppress_current_question',
+      next_state: state,
+      debug: { fired_boundary: 'jurisdiction_already_confirmed', candidate_kind: candidate.kind, signal_id: candidate.signal_id },
     }
   }
 
@@ -567,6 +663,35 @@ export function evaluateBoundary(
       reason_code: 'ALLOWED',
       action_scope: 'ask',
       next_state: { ...state, jurisdiction_clarification_asked: true },
+      debug: { fired_boundary: 'none', candidate_kind: candidate.kind },
+    }
+  }
+
+  if (candidate.kind === 'jurisdiction_clarification_retry') {
+    // Second-Jurisdiction UX milestone (2026-08-20), J3. Same global-cap
+    // shape as jurisdiction_clarification above, deliberately a SEPARATE
+    // field (jurisdiction_clarification_retry_asked) -- a bare boolean
+    // cannot distinguish "never asked" / "initial asked" / "retry asked" on
+    // its own. The eligibility DECISION (retry only after the initial
+    // question was already asked, jurisdiction still unresolved, retry not
+    // yet used) is made upstream in jurisdiction-clarification.ts's own
+    // evaluateJurisdictionClarificationRetryEligibility -- this evaluator
+    // has no opinion on WHY a retry candidate was proposed, only THAT the
+    // once-per-interview cap holds.
+    if (state.jurisdiction_clarification_retry_asked) {
+      return {
+        allowed: false,
+        reason_code: 'JURISDICTION_CLARIFICATION_RETRY_ALREADY_ASKED',
+        action_scope: 'suppress_current_question',
+        next_state: state,
+        debug: { fired_boundary: 'jurisdiction_clarification_retry_cap (once per interview)', candidate_kind: candidate.kind },
+      }
+    }
+    return {
+      allowed: true,
+      reason_code: 'ALLOWED',
+      action_scope: 'ask',
+      next_state: { ...state, jurisdiction_clarification_retry_asked: true },
       debug: { fired_boundary: 'none', candidate_kind: candidate.kind },
     }
   }

@@ -68,6 +68,8 @@ const CAPPED_BOUNDARY_STATE: BoundaryState = {
   commercial_readiness_discovery_asked: false,
   jurisdiction_clarification_asked: false,
   human_contribution_clarification_asked: false,
+  jurisdiction_clarification_retry_asked: false,
+  jurisdiction_clarification_pending_answer: false,
   interview_ended: false,
   phases_ended: [],
 }
@@ -387,7 +389,7 @@ describe('Model 4 -- multiple uncapped eligible signals', () => {
         completion_reason: null,
         opt_out_scope: null,
       },
-      boundary_state: { follow_ups_used: {}, uncertainty_clarifications_used: {}, historical_experience_asked: false, disentangling_question_asked: false, commercial_readiness_discovery_asked: false, jurisdiction_clarification_asked: false, human_contribution_clarification_asked: false, interview_ended: false, phases_ended: [] },
+      boundary_state: { follow_ups_used: {}, uncertainty_clarifications_used: {}, historical_experience_asked: false, disentangling_question_asked: false, commercial_readiness_discovery_asked: false, jurisdiction_clarification_asked: false, human_contribution_clarification_asked: false, jurisdiction_clarification_retry_asked: false, jurisdiction_clarification_pending_answer: false, interview_ended: false, phases_ended: [] },
       pending_clarification: null,
       pending_commercial_readiness_takeaway: null,
     })
