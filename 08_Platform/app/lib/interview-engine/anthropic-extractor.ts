@@ -23,15 +23,23 @@
  * json_schema) rather than parsing prose or loosely-prompted JSON -- the
  * response is guaranteed schema-conformant by the API itself.
  *
- * Extended thinking is not enabled (no `thinking` param) -- this is a
- * bounded, single-turn extraction task, not a task calling for deliberation.
- * No sampling parameters (temperature/top_p/top_k) are set -- SDK/API
- * defaults only.
+ * No `thinking` param is set -- but per the CRC 503 Reliability
+ * Diagnostic (2026-08-20), the currently-resolved model has been directly
+ * observed (against the sibling decider/candidate-generator adapters,
+ * same model) emitting an un-requested `thinking` content block anyway,
+ * sharing the same max_tokens budget as the `text` block carrying actual
+ * structured output. See callWithStructuredOutputRecoveryRetry below
+ * (Extractor Structured-Output Recovery Extension, 2026-08-20) for the
+ * bounded recovery retry this file now uses to recover from that
+ * condition, in addition to this file's original SDK-parse-failure
+ * recovery (callWithOneRecoveryRetry). No sampling parameters
+ * (temperature/top_p/top_k) are set -- SDK/API defaults only.
  */
 
 import Anthropic from '@anthropic-ai/sdk'
 import { jsonSchemaOutputFormat } from '@anthropic-ai/sdk/helpers/json-schema'
 import type { CandidateExtractor, CandidateObservation, RawUserTurn } from './extraction'
+import { classifyMissingParsedOutput, type MinimalParsedAnthropicResponse, type StructuredOutputFailureClass } from './anthropic-structured-output-retry'
 
 export const DEFAULT_MODEL = 'claude-sonnet-5'
 
@@ -416,6 +424,143 @@ export async function callWithOneRecoveryRetry<T>(
   }
 }
 
+/**
+ * Extractor Structured-Output Recovery Extension (CRC Reliability
+ * Implementation follow-up, 2026-08-20).
+ *
+ * `callWithOneRecoveryRetry` above only ever retries when `callOnce`
+ * THROWS the SDK's own `AnthropicError('Failed to parse structured
+ * output...')` -- it never inspects a response that resolved normally but
+ * carried `parsed_output: null` with no text content block, which is
+ * exactly the confirmed failure mode fixed for the sibling decider/
+ * candidate-generator adapters (CRC 503 Reliability Diagnostic,
+ * 2026-08-20; see anthropic-structured-output-retry.ts's own header for
+ * the full evidence trail: an un-requested `thinking` content block
+ * shares this file's max_tokens budget too, and a sufficiently dense turn
+ * can exhaust it before any text block is ever emitted).
+ *
+ * This function is the ONE retry mechanism actually invoked at both live
+ * call sites below (createAnthropicExtractor, extractWithDiagnostics),
+ * REPLACING their previous call to `callWithOneRecoveryRetry` above --
+ * not stacking on top of it. `callWithOneRecoveryRetry` itself is left
+ * completely unchanged, still exported, and still exercised exactly as
+ * before by anthropic-extractor-retry.test.ts -- this avoids any
+ * outer-retry x inner-retry double-retry risk (max 4 calls) by
+ * construction: only one retry loop ever runs per live invocation, and
+ * that loop makes at most 2 calls to `callOnce`, same as before this
+ * extension.
+ *
+ * Reuses `classifyMissingParsedOutput` (pure, adapter-agnostic) from
+ * anthropic-structured-output-retry.ts rather than inventing a second
+ * parallel missing-output classifier, and reuses this file's own already-
+ * existing `isStructuredOutputParseFailure` for the SDK-thrown case --
+ * zero changes to anthropic-structured-output-retry.ts were needed.
+ *
+ * Base/recovery token budgets are unchanged from this file's existing
+ * strategy (3072 / 4096, passed in by each call site below) -- this
+ * extension changes WHEN a retry fires, never the extractor's token
+ * schedule itself.
+ */
+export type ExtractorStructuredOutputTelemetryEvent = {
+  adapter: 'extractor'
+  attempt: 1 | 2
+  anthropic_response_id: string | null
+  stop_reason: string | null
+  content_block_types: string[] | null
+  parsed_output_present: boolean
+  thinking_tokens: number | null
+  output_tokens: number | null
+  input_tokens: number | null
+  failure_class: StructuredOutputFailureClass
+  retrying: boolean
+}
+
+export type ExtractorTelemetrySink = (event: ExtractorStructuredOutputTelemetryEvent) => void
+
+/** Same observability mechanism as anthropic-structured-output-retry.ts's defaultTelemetrySink -- console.warn, no new telemetry system. Metadata only: never a prompt, transcript, email, extracted candidate text, or raw source_statement. */
+export const defaultExtractorTelemetrySink: ExtractorTelemetrySink = (event) => {
+  console.warn('[anthropic-structured-output]', JSON.stringify(event))
+}
+
+interface ExtractorAttemptSuccess<T> {
+  ok: true
+  response: T
+}
+interface ExtractorAttemptFailure {
+  ok: false
+  failureClass: StructuredOutputFailureClass
+  response?: MinimalParsedAnthropicResponse
+}
+
+function extractorTelemetryEvent(attempt: 1 | 2, outcome: ExtractorAttemptFailure, retrying: boolean): ExtractorStructuredOutputTelemetryEvent {
+  const response = outcome.response
+  return {
+    adapter: 'extractor',
+    attempt,
+    anthropic_response_id: response?.id ?? null,
+    stop_reason: response?.stop_reason ?? null,
+    content_block_types: response ? response.content.map((b) => b.type) : null,
+    parsed_output_present: response ? response.parsed_output != null : false,
+    thinking_tokens: response?.usage.output_tokens_details?.thinking_tokens ?? null,
+    output_tokens: response?.usage.output_tokens ?? null,
+    input_tokens: response?.usage.input_tokens ?? null,
+    failure_class: outcome.failureClass,
+    retrying,
+  }
+}
+
+async function attemptExtractionOnceCatching<T extends MinimalParsedAnthropicResponse>(
+  callOnce: (maxTokens: number) => Promise<T>,
+  maxTokens: number,
+): Promise<ExtractorAttemptSuccess<T> | ExtractorAttemptFailure> {
+  let response: T
+  try {
+    response = await callOnce(maxTokens)
+  } catch (err) {
+    // Non-structured-output-shaped errors (auth, network, rate limit,
+    // malformed request, unknown) are never classified as recoverable
+    // here -- they propagate immediately, on either attempt, exactly as
+    // before this extension existed.
+    if (!isStructuredOutputParseFailure(err)) throw err
+    return { ok: false, failureClass: 'sdk_parse_failure' }
+  }
+  const failureClass = classifyMissingParsedOutput(response)
+  if (failureClass === null) return { ok: true, response }
+  return { ok: false, failureClass, response }
+}
+
+/**
+ * Exactly one recovery retry -- a maximum of 2 Anthropic calls total per
+ * invocation, never more, never recursive. Retries on either a
+ * classifiable structural missing-output condition (no text block, any
+ * stop_reason -- see classifyMissingParsedOutput) or the SDK's own thrown
+ * parse failure. Any other exception propagates immediately, unmodified.
+ *
+ * On final failure, throws a single error with accurate wording -- never
+ * "schema validation may have failed" (the SDK performs no such
+ * validation) -- and never returns a synthesized/fallback result.
+ */
+export async function callWithStructuredOutputRecoveryRetry<T extends MinimalParsedAnthropicResponse>(
+  callOnce: (maxTokens: number) => Promise<T>,
+  baseMaxTokens: number = BASE_EXTRACTION_MAX_TOKENS,
+  retryMaxTokens: number = RETRY_EXTRACTION_MAX_TOKENS,
+  telemetrySink: ExtractorTelemetrySink = defaultExtractorTelemetrySink,
+): Promise<T> {
+  const first = await attemptExtractionOnceCatching(callOnce, baseMaxTokens)
+  if (first.ok) return first.response
+  telemetrySink(extractorTelemetryEvent(1, first, true))
+
+  const second = await attemptExtractionOnceCatching(callOnce, retryMaxTokens)
+  if (second.ok) return second.response
+  telemetrySink(extractorTelemetryEvent(2, second, false))
+
+  throw new Error(
+    `anthropic_structured_output_missing: extractor did not produce a usable structured-output response after 1 ` +
+      `recovery retry (first attempt: ${first.failureClass}, retry attempt: ${second.failureClass}). The response ` +
+      `contained no output to parse -- this is not a confirmed schema-validation failure.`,
+  )
+}
+
 export interface AnthropicExtractorOptions {
   apiKey?: string
   model?: string
@@ -501,22 +646,24 @@ export function createAnthropicExtractor(options?: AnthropicExtractorOptions): C
   const client = new Anthropic({ apiKey })
 
   return async (turn: RawUserTurn): Promise<CandidateObservation[]> => {
-    const response = await callWithOneRecoveryRetry((maxTokens) =>
+    const response = await callWithStructuredOutputRecoveryRetry((maxTokens) =>
       client.messages.parse({
         model,
         max_tokens: maxTokens,
         system: SYSTEM_PROMPT,
         messages: [{ role: 'user', content: buildUserMessageContent(turn) }],
         output_config: { format: jsonSchemaOutputFormat(CANDIDATE_RESPONSE_SCHEMA) },
-        // No `thinking` param: disabled by omission, per Phase 6a substage 2
-        // instructions -- this is a bounded extraction task.
-        // No temperature/top_p/top_k: API defaults only, per instructions.
+        // No temperature/top_p/top_k -- API defaults only, unchanged.
       }),
     )
 
     const parsed = response.parsed_output
     if (!parsed) {
-      throw new Error('Anthropic response did not include parsed_output -- schema validation may have failed.')
+      // Should be unreachable: callWithStructuredOutputRecoveryRetry only
+      // returns successfully when parsed_output has already been
+      // confirmed non-null. Kept only for TypeScript null-narrowing, with
+      // accurate wording -- not a confirmed schema-validation failure.
+      throw new Error('anthropic_structured_output_missing: extractor response had no parsed output after a successful recovery-retry resolution -- this should be unreachable.')
     }
 
     return parsed.candidates.map((c) => toCandidateObservation(c as ParsedCandidate, turn.turn))
@@ -543,7 +690,7 @@ export async function extractWithDiagnostics(
   const client = new Anthropic({ apiKey })
 
   const start = Date.now()
-  const response = await callWithOneRecoveryRetry((maxTokens) =>
+  const response = await callWithStructuredOutputRecoveryRetry((maxTokens) =>
     client.messages.parse({
       model,
       max_tokens: maxTokens,
@@ -555,12 +702,13 @@ export async function extractWithDiagnostics(
   // Measures the FULL operation including a recovery retry if one
   // happened, not just the final call -- an honest latency figure for the
   // eval harness rather than one that looks deceptively fast on a retried
-  // turn.
+  // turn. Unchanged by this extension.
   const latencyMs = Date.now() - start
 
   const parsed = response.parsed_output
   if (!parsed) {
-    throw new Error('Anthropic response did not include parsed_output -- schema validation may have failed.')
+    // Should be unreachable -- see the production path's identical guard above.
+    throw new Error('anthropic_structured_output_missing: extractor response had no parsed output after a successful recovery-retry resolution -- this should be unreachable.')
   }
 
   return {
