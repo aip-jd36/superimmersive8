@@ -737,6 +737,152 @@ describe('buildBoundedInterpretations -- CC-1 Claim-Level Bounded Grouping', () 
   })
 })
 
+// ── CC-2 -- Semantics-Preserving Rhetorical Composition (2026-08-21,
+// PM/Architecture-authorized) ───────────────────────────────────────────
+describe('buildBoundedInterpretations -- CC-2 Semantics-Preserving Rhetorical Composition', () => {
+  function testTopicClaim(overrides: Partial<TopicClaim> & Pick<TopicClaim, 'claim_id' | 'topic'>): TopicClaim {
+    return {
+      claim_character: 'established',
+      jurisdiction: 'Global',
+      lifecycle: 'Adopted',
+      crc_eligible: 'Yes',
+      crc_publication_scope: 'Test scope text.',
+      crc_candidate_statement: 'Test governed statement.',
+      applicability_requirements: [],
+      unresolved_project_dependencies: [],
+      provider_scope: null,
+      last_verified: '2026-08-16',
+      superseded_by: null,
+      ...overrides,
+    }
+  }
+
+  const noConclusionLanguage =
+    /\bresolved\b|\bappears resolved\b|\bsatisfied\b|\bverified\b|\bchecked\b|\bcleared\b|\bsafe\b|\bapproved\b|commercially usable|not a blocker|\bblocker\b|main concern|material issue|material unresolved issue|most important issue|only remaining issue|not the issue|no longer an issue|primary blocker|because of this|therefore/i
+
+  const facts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+
+  test('mixed-group repetition reduction: "This is relevant to" is asserted exactly once, not twice, in a mixed dependency-free + dependency-bearing answer', () => {
+    const claims = [
+      testTopicClaim({ claim_id: 'NO-DEP', topic: 'third_party_source_rights', crc_candidate_statement: 'Dependency-free statement.' }),
+      testTopicClaim({ claim_id: 'DEP', topic: 'third_party_source_rights', crc_candidate_statement: 'Dependency-bearing statement.', unresolved_project_dependencies: ['editorial_designation_confirmed'] }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use these third-party images commercially?', category: 'third_party_source_rights' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], claims, facts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.summary.match(/This is relevant to/g)).toHaveLength(1)
+    // The single occurrence is still the dependency-free clause's own lead-in.
+    expect(interp.summary).toContain('Dependency-free statement. This is relevant to')
+    // The closing hedge substance is fully preserved, just without a repeated lead-in.
+    expect(interp.summary).toContain('But based on what\'s been described here, there isn\'t enough project-specific information to determine how it applies to your specific project.')
+  })
+
+  test('single-group (all dependency-bearing) case renders byte-identical to pre-CC-2/pre-CC-1 -- no repetition existed here, nothing to remove', () => {
+    const claims = [testTopicClaim({ claim_id: 'DEP-ONLY', topic: 'copyrightability', crc_candidate_statement: 'A dependency-bearing governed statement.', unresolved_project_dependencies: ['human_contribution_description'] })]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], claims, facts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.summary).toBe(
+      "A dependency-bearing governed statement. This is relevant to whether this kind of output can be copyrighted at all, but based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project. A human-reviewed Commercial Assurance Assessment can address this directly.",
+    )
+    expect(interp.summary.match(/This is relevant to/g)).toHaveLength(1)
+  })
+
+  test('genericity: the same repetition reduction applies to the copyright/related-topic domain, not just third_party_source_rights -- no domain-specific branching', () => {
+    const copyOwnershipDirect = testTopicClaim({ claim_id: 'COPY-004-LIKE', topic: 'copyright_ownership', crc_candidate_statement: 'Framing statement, no dependency.' })
+    const copyrightabilityDep = testTopicClaim({
+      claim_id: 'COPY-001-LIKE',
+      topic: 'copyrightability',
+      crc_candidate_statement: 'Copyrightability statement with a dependency.',
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+      unresolved_project_dependencies: ['human_contribution_description'],
+    })
+    const relationship = {
+      relationship_id: 'REL-TEST-v1',
+      source_topic: 'copyright_ownership' as const,
+      target_topic: 'copyrightability' as const,
+      relationship_type: 'relevant_consideration' as const,
+      rationale: 'Test rationale.',
+      lifecycle: 'Adopted' as const,
+      adoption_approver: 'test',
+      adoption_decision_date: '2026-08-16',
+      publication_scope: 'CRC eligible' as const,
+      crc_eligible: 'Yes' as const,
+      crc_approver: 'test',
+      crc_decision_date: '2026-08-16',
+      last_reviewed: '2026-08-16',
+      superseded_by: null,
+    }
+    const g = goal({ goal_id: 'g-1', raw_text: 'Do I own the copyright?', category: 'copyright_ownership' })
+    const usFacts: ApplicabilityFacts = { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] }
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], [copyOwnershipDirect, copyrightabilityDep], usFacts, [relationship])
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.summary.match(/This is relevant to/g)).toHaveLength(1)
+    expect(interp.summary).toContain('Framing statement, no dependency.')
+    expect(interp.summary).toContain('Copyrightability statement with a dependency.')
+    expect(interp.summary).not.toMatch(noConclusionLanguage)
+  })
+
+  test('H5 co-occurring with the dependency-free clause: repetition still reduced to one lead-in, H5 sentence still appears exactly once, unaffected', () => {
+    const noDep = testTopicClaim({ claim_id: 'NO-DEP-COPY', topic: 'copyright_ownership', crc_candidate_statement: 'Copyright framing statement.' })
+    const h5Claim = testTopicClaim({
+      claim_id: 'H5-CLAIM',
+      topic: 'copyright_ownership',
+      crc_candidate_statement: 'H5-eligible statement.',
+      unresolved_project_dependencies: ['human_contribution_description'],
+    })
+    const g = goal({ goal_id: 'g-1', raw_text: 'Do I own the copyright?', category: 'copyright_ownership' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], [noDep, h5Claim], facts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics, { state: 'confirmed', value: 'I only wrote prompts.' })
+    expect(interp.summary.match(/This is relevant to/g)).toHaveLength(1)
+    expect(interp.summary.match(/You described your own contribution as:/g)).toHaveLength(1)
+    expect(interp.summary).toContain('You described your own contribution as: "I only wrote prompts."')
+  })
+
+  test('multiple dependency-bearing claims (no dependency-free claim) -- single-group path unaffected, still one lead-in, all statements preserved', () => {
+    const claims = [
+      testTopicClaim({ claim_id: 'DEP-A', topic: 'third_party_source_rights', crc_candidate_statement: 'First dependency-bearing statement.', unresolved_project_dependencies: ['editorial_designation_confirmed'] }),
+      testTopicClaim({ claim_id: 'DEP-B', topic: 'third_party_source_rights', crc_candidate_statement: 'Second dependency-bearing statement.', unresolved_project_dependencies: ['release_status_confirmed'] }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use these third-party images commercially?', category: 'third_party_source_rights' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], claims, facts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.summary.match(/This is relevant to/g)).toHaveLength(1)
+    expect(interp.summary).toContain('First dependency-bearing statement.')
+    expect(interp.summary).toContain('Second dependency-bearing statement.')
+  })
+
+  test('no prohibited stronger semantic language appears anywhere in a mixed-group answer, including the reworded closing transition', () => {
+    const claims = [
+      testTopicClaim({ claim_id: 'NO-DEP', topic: 'commercial_use', crc_candidate_statement: 'Platform permits commercial use for paid members.' }),
+      testTopicClaim({ claim_id: 'DEP', topic: 'commercial_use', crc_candidate_statement: 'Editorial restriction statement.', unresolved_project_dependencies: ['editorial_designation_confirmed'] }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], claims, facts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.summary).not.toMatch(noConclusionLanguage)
+  })
+
+  test('Case 3A (content-free, no matches at all) is completely unaffected by the CC-2 template change', () => {
+    const topicClaims = [
+      testTopicClaim({
+        claim_id: 'TEST-3A',
+        topic: 'copyrightability',
+        crc_candidate_statement: 'US-only substantive claim text that must never leak.',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
+    const unknownFacts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], topicClaims, unknownFacts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('relevant_applicability_unresolved')
+    expect(interp.summary).toBe(
+      "SI8 has governed knowledge relevant to whether this kind of output can be copyrighted at all, but it depends on project-specific information that hasn't been confirmed in this conversation. A human-reviewed Commercial Assurance Assessment can address this directly.",
+    )
+  })
+})
+
 describe('buildBoundedInterpretations -- never fabricates, never invents claim content', () => {
   test('summary text is always either fixed template copy or a verbatim RetrievalResult.candidate_statement -- never contains text absent from both sources', () => {
     const out = retrieve(handoff({ tools: [tool('midjourney')] }), MATRIX_FIXTURE)

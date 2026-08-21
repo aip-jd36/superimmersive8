@@ -256,6 +256,39 @@ export function humanContributionRelevanceSentence(description: string): string 
  * redesigning it (PM instruction: preserve it literally or stop and
  * report -- it remains literally preservable, so it is preserved).
  */
+/**
+ * CC-2 -- Semantics-Preserving Rhetorical Composition (2026-08-21,
+ * PM/Architecture-authorized, narrowly scoped). Addresses exactly one
+ * observed defect (flagged as CC-2 evidence by the CC-1 bounded UAT): in
+ * the mixed-group case, "This is relevant to `<category>`," was asserted
+ * TWICE in one answer, verbatim, identical label both times -- once via
+ * `noDependencyClause` below (unchanged by this milestone), once as the
+ * lead-in to this closing sentence.
+ *
+ * This is pure repetition, not two distinct propositions: EVERY matched
+ * claim in EITHER group -- dependency-free or dependency-bearing -- is
+ * relevant to the SAME goal `category` by construction, guaranteed before
+ * either group is ever assembled (build-bounded-interpretation.ts's own
+ * `matches = results.filter(r => r.matched_goal_category === goal.category)`
+ * filter, unchanged by CC-1 or CC-2). Restating the identical label a
+ * second time adds no new proposition; it only re-asserts something already
+ * said. Removing it here removes ONLY that repeated lead-in -- every
+ * substantive word of the hedge itself ("there isn't enough
+ * project-specific information...") and the bridge sentence are
+ * byte-identical to before, and `boundaryClause`'s own returned text
+ * (attached to `noDependencyClause` above, never touched here) is
+ * completely unaffected, preserving its own tool/topic source-accuracy
+ * property exactly as LK Phase 1 established it.
+ *
+ * Conditioned strictly on whether `noDependencyStatement` is present: when
+ * it is (mixed-group case), the category label was already stated moments
+ * earlier in `noDependencyClause`, so this sentence opens with "But based
+ * on..." instead. When it is absent (the pre-CC-1, single-group case --
+ * every matched claim is dependency-bearing), the category label has not
+ * been stated anywhere yet in this summary, so the full original lead-in
+ * is preserved byte-for-byte, unchanged -- every pre-CC-2 caller/test for
+ * this case renders identically.
+ */
 export function relevantApplicabilityUnresolvedWithContentSummary(
   category: GoalCategory,
   claimStatement: string,
@@ -272,5 +305,8 @@ export function relevantApplicabilityUnresolvedWithContentSummary(
   const noDependencyClause = noDependencyStatement
     ? `${noDependencyStatement} This is relevant to ${CATEGORY_LABELS[category]}, ${boundaryClause(noDependencyAllToolSourced)} `
     : ''
-  return `${noDependencyClause}${claimStatement}${relatedClause}${contributionClause} This is relevant to ${CATEGORY_LABELS[category]}, but based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project. ${BRIDGE_SENTENCE}`
+  const closingSentence = noDependencyStatement
+    ? `But based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project.`
+    : `This is relevant to ${CATEGORY_LABELS[category]}, but based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project.`
+  return `${noDependencyClause}${claimStatement}${relatedClause}${contributionClause} ${closingSentence} ${BRIDGE_SENTENCE}`
 }

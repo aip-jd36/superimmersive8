@@ -182,6 +182,40 @@ describe('canonical production acceptance test (Section 24)', () => {
     }
     expect(interp.summary).not.toMatch(/primary|material issue|main (issue|blocker)/i)
   })
+
+  // CC-2 -- Semantics-Preserving Rhetorical Composition (2026-08-21): the
+  // canonical Kling + generic-stock + iStock case, at the full
+  // runCRCConversation() level. Locks in the repetition reduction this
+  // milestone exists to make: before CC-2, "This is relevant to whether
+  // this can be used commercially," was asserted twice, verbatim, in this
+  // exact answer (once for Kling's own dependency-free clause, once as the
+  // closing hedge's lead-in). CC-2 removes only the second, redundant
+  // occurrence -- every governed statement, the boundary clause, the
+  // closing hedge substance, and the bridge sentence all remain unchanged.
+  test('6. CC-2: canonical Kling + iStock -- "This is relevant to" appears exactly once, not twice, with all governed content and authority boundaries unchanged', () => {
+    const { output } = runCRCConversation(productionIstockSessionState(), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    const interp = output.goal_interpretations[0]
+
+    expect(interp.summary.match(/This is relevant to/g)).toHaveLength(1)
+
+    // Every governed statement still survives, verbatim.
+    expect(interp.summary).toContain("Kling's commercial-use permissions depend on your account type")
+    expect(interp.summary).toContain('A stock-media provider\'s standard license for content marked "Editorial"')
+    expect(interp.summary).toContain('iStock\'s standard license doesn\'t cover commercial')
+
+    // Kling's own boundary clause is unchanged, byte-for-byte.
+    expect(interp.summary).toContain("though it reflects the platform's own terms, not a full determination of your specific project's commercial readiness.")
+
+    // The closing hedge's SUBSTANCE is unchanged -- only its redundant
+    // lead-in was removed.
+    expect(interp.summary).toContain("But based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project.")
+    expect(interp.summary.match(/A human-reviewed Commercial Assurance Assessment can address this directly\./g)).toHaveLength(1)
+
+    // No stronger conclusion introduced by the reworded transition.
+    const noConclusionLanguage =
+      /\bresolved\b|\bsatisfied\b|\bverified\b|\bchecked\b|\bcleared\b|\bsafe\b|\bapproved\b|commercially usable|not a blocker|\bblocker\b|main concern|material issue|only remaining issue|commercially cleared|because of this|\btherefore\b/i
+    expect(interp.summary).not.toMatch(noConclusionLanguage)
+  })
 })
 
 // O. Multi-goal isolation (Track C — Discovered-Topic Goal Provenance,
