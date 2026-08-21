@@ -28,14 +28,15 @@
  * the same claim twice.
  */
 
-import type { GoalCategory, RetrievalHandoff, UserGoal } from '@/types/interview-engine'
+import type { RetrievalHandoff, UserGoal } from '@/types/interview-engine'
 import { extractMatchableFacts } from './extract-matchable-facts'
 import { lookupRows } from './lookup-rows'
 import { enumerateEligibleClaims } from './enumerate-eligible-claims'
-import { assembleResult, assembleTopicResult, assembleRelatedTopicResult } from './assemble-result'
+import { assembleResult, assembleTopicResult, assembleRelatedTopicResult, assembleDiscoveredTopicResult } from './assemble-result'
 import { lookupTopicClaims, type ApplicabilityFacts } from './lookup-topic-claims'
 import { lookupRelatedTopicClaims } from './lookup-topic-relationships'
-import type { MatrixRow, RetrievalDiagnostic, RetrievalResult, TopicClaim, TopicRelationship } from './types'
+import { lookupDiscoveredTopicClaims } from './lookup-discovered-topic-claims'
+import type { DiscoveredTopicOccurrence, MatrixRow, RetrievalDiagnostic, RetrievalResult, TopicClaim, TopicRelationship } from './types'
 
 export interface RetrieveOutput {
   results: RetrievalResult[]
@@ -81,11 +82,23 @@ const UNKNOWN_APPLICABILITY_FACTS: ApplicabilityFacts = { jurisdiction: { state:
  * module's own architecture note if a future relationship ever targets or
  * sources this topic.
  *
- * `discoveredTopics` (Track A — Generic Discovered Relevance milestone,
- * 2026-08-21): additive, same defaults-preserve-existing-behavior
- * discipline as every parameter above it. Threaded straight through to
- * `lookupTopicClaims`'s own union of active goal categories, unmodified.
- * Deliberately NOT threaded into `lookupRelatedTopicClaims` -- no
+ * `discoveredTopicOccurrences` (Track A — Generic Discovered Relevance
+ * milestone, 2026-08-21; changed from a flat `GoalCategory[]` to this
+ * provenance-preserving shape by Track C — Discovered-Topic Goal
+ * Provenance, 2026-08-21): additive, same defaults-preserve-existing-
+ * behavior discipline as every parameter above it. No longer threaded into
+ * `lookupTopicClaims` at all (that function's own `discoveredTopics`
+ * parameter remains fully intact and independently correct for
+ * explicit-topic-only lookups -- this call site simply stops feeding it
+ * discovered topics). Instead routed through the parallel, independent
+ * `lookupDiscoveredTopicClaims` -> `assembleDiscoveredTopicResult` path,
+ * which stamps `matched_goal_category` with the ORIGINATING explicit goal
+ * category (`DiscoveredTopicOccurrence.source_goal_category`) rather than
+ * the claim's own intrinsic topic -- see that module's own header for why:
+ * `buildBoundedInterpretations`'s existing, unmodified
+ * `matched_goal_category === goal.category` filter needs this to associate
+ * discovered knowledge with the explicit goal that caused it to become
+ * relevant. Deliberately NOT threaded into `lookupRelatedTopicClaims` -- no
  * discovered-relevance-sourced `TopicRelationship` traversal is in scope
  * for this milestone (see discovered-relevance.ts's own one-hop-boundary
  * note); a future relationship reachable only from a discovered topic
@@ -100,7 +113,7 @@ export function retrieve(
   applicabilityFacts: ApplicabilityFacts = UNKNOWN_APPLICABILITY_FACTS,
   relationships: TopicRelationship[] = [],
   assetProviders: string[] = [],
-  discoveredTopics: GoalCategory[] = [],
+  discoveredTopicOccurrences: DiscoveredTopicOccurrence[] = [],
 ): RetrieveOutput {
   const matchable = extractMatchableFacts(handoff)
   const diagnostics: RetrievalDiagnostic[] = []
@@ -142,10 +155,40 @@ export function retrieve(
     }
   }
 
-  const topicLookup = lookupTopicClaims(goals, topicClaims, applicabilityFacts, assetProviders, discoveredTopics)
+  const topicLookup = lookupTopicClaims(goals, topicClaims, applicabilityFacts, assetProviders)
   diagnostics.push(...topicLookup.diagnostics)
   for (const claim of topicLookup.matches) {
     const assembled = assembleTopicResult(claim)
+    if (!assembled) {
+      diagnostics.push({ identifier: claim.claim_id, reason: 'yes_claim_missing_scope' })
+      continue
+    }
+    const dedupeKey = `${assembled.matrix_identifier}:${assembled.claim_id}:${assembled.matched_goal_category}`
+    if (seen.has(dedupeKey)) continue
+    seen.add(dedupeKey)
+    results.push(assembled)
+  }
+
+  // Discovered-topic lookup (Track C — Discovered-Topic Goal Provenance,
+  // 2026-08-21) -- independent fourth path, merged into the SAME
+  // RetrievalResult[]. Dedupe key deliberately includes matched_goal_category
+  // (the discovery's own originating goal category here, not the claim's
+  // intrinsic topic): the same claim_id may legitimately produce two
+  // distinct, both-kept results -- once exact_topic for an explicit goal
+  // whose category equals the claim's own topic, and once discovered_topic
+  // for a DIFFERENT goal that reaches it only through Track A structural-
+  // evidence discovery (same "neither should erase the other" precedent the
+  // related-topic path above already established). In practice this specific
+  // overlap cannot occur for the one live trigger today:
+  // deriveDiscoveredTopicOccurrences already suppresses discovering a topic
+  // that is simultaneously an active explicit goal category, so a claim
+  // reached via both paths for the SAME topic does not happen -- this merge
+  // is written generically regardless, matching the related-topic path's own
+  // discipline rather than relying on that upstream suppression alone.
+  const discoveredLookup = lookupDiscoveredTopicClaims(discoveredTopicOccurrences, topicClaims, applicabilityFacts, assetProviders)
+  diagnostics.push(...discoveredLookup.diagnostics)
+  for (const { claim, sourceGoalCategory } of discoveredLookup.matches) {
+    const assembled = assembleDiscoveredTopicResult(claim, sourceGoalCategory)
     if (!assembled) {
       diagnostics.push({ identifier: claim.claim_id, reason: 'yes_claim_missing_scope' })
       continue

@@ -339,11 +339,45 @@ describe('end-to-end through runCRCConversation, real unmodified TOPIC_CLAIMS_FI
 
   // NOTE (updated 2026-08-18, following CRC-Publication Review #3 + PM
   // approval): CLAIM-STOCK-GETTY-EDITORIAL-001-v1 is now real
-  // crc_eligible: 'Yes' -- it legitimately surfaces in withStock's
-  // knowledge_items now. The point of this test is unchanged: the
-  // commercial_use interpretation must be byte-identical with or without
-  // the stock topic present, proving no cross-category contamination.
-  test('22: mixed commercial_use (Kling) + Getty stock question -- Kling guidance unaffected, stock topic never suppresses or contaminates it', () => {
+  // crc_eligible: 'Yes' -- it legitimately surfaces in knowledge_items.
+  // NOTE (rewritten 2026-08-21, Track C — Discovered-Topic Goal Provenance):
+  // this test's original premise -- that the commercial_use interpretation
+  // must be BYTE-IDENTICAL regardless of whether Getty stock evidence is
+  // present -- was itself the exact defect the Track C diagnostic and fix
+  // address (a discovered-topic RetrievalResult never attributed to the
+  // explicit goal that caused its own discovery, so it could never
+  // "contaminate" commercial_use even when it legitimately should). The
+  // corrected, intended behavior is the opposite: when structural evidence
+  // (a confirmed canonical AssetProviderMention) makes third_party_source_
+  // rights relevant to an active commercial_use goal, and there is no
+  // SEPARATE explicit third_party_source_rights goal already covering it,
+  // that discovered guidance SHOULD now legitimately contribute to the
+  // commercial_use interpretation -- via the existing, unmodified
+  // relevant_applicability_unresolved template, never a fabricated
+  // determination. This test now proves three distinct, correct properties
+  // instead of one now-incorrect one.
+  test('22a: commercial_use + Getty evidence, NO explicit third_party_source_rights goal -- Getty guidance now legitimately attaches to the commercial_use interpretation (the Track C fix)', () => {
+    const su: StructuredUnderstanding = {
+      ...DIALOGUE_FIXTURES.rich_signal.structured_understanding,
+      user_goals: [sourceRightsGoal({ goal_id: 'g-1', category: 'commercial_use', raw_text: 'Can I use the finished video commercially?' })],
+      asset_provider_mentions: [providerMention('getty')],
+    }
+    const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
+    const commercialInterp = output.goal_interpretations.find((i) => i.goal_text.includes('commercially'))
+    expect(commercialInterp).toBeDefined()
+    expect(commercialInterp?.summary).toMatch(/Rights and Clearance/) // Getty-specific content
+    expect(commercialInterp?.summary).not.toMatch(/doesn't currently have governed guidance/)
+    expect(output.knowledge_items.map((k) => k.claim_id)).toContain('CLAIM-STOCK-GETTY-EDITORIAL-001-v1')
+  })
+
+  // 22b. When an EXPLICIT third_party_source_rights goal ALSO exists for
+  // the same evidence, discovery is suppressed (deriveDiscoveredTopicOccurrences's
+  // explicit-precedence rule) -- the commercial_use interpretation reverts
+  // to Kling/Runway-only content (no duplicate attribution of the same
+  // Getty guidance across two interpretations), matching a true no-Getty-
+  // evidence control exactly. The Getty guidance still surfaces, just under
+  // its own explicit third_party_source_rights interpretation, unchanged.
+  test('22b: commercial_use + Getty evidence + an EXPLICIT third_party_source_rights goal -- commercial_use interpretation is unaffected (explicit goal already owns the Getty content, no duplicate attribution)', () => {
     const su: StructuredUnderstanding = {
       ...DIALOGUE_FIXTURES.rich_signal.structured_understanding,
       user_goals: [
@@ -352,16 +386,21 @@ describe('end-to-end through runCRCConversation, real unmodified TOPIC_CLAIMS_FI
       ],
       asset_provider_mentions: [providerMention('getty')],
     }
-    const withStock = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
-    const withoutStock = runCRCConversation(
-      { ...su, user_goals: su.user_goals.filter((g) => g.category === 'commercial_use') },
+    const withGettyGoal = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
+    const noGettyEvidenceAtAll = runCRCConversation(
+      { ...su, user_goals: su.user_goals.filter((g) => g.category === 'commercial_use'), asset_provider_mentions: [] },
       MATRIX_FIXTURE,
       TOPIC_CLAIMS_FIXTURE,
     )
-    const commercialInterpWith = withStock.output.goal_interpretations.find((i) => i.goal_text.includes('commercially'))
-    const commercialInterpWithout = withoutStock.output.goal_interpretations.find((i) => i.goal_text.includes('commercially'))
-    expect(commercialInterpWith?.summary).toEqual(commercialInterpWithout?.summary)
-    expect(withStock.output.knowledge_items.map((k) => k.claim_id)).toContain('CLAIM-STOCK-GETTY-EDITORIAL-001-v1')
+    const commercialWithGettyGoal = withGettyGoal.output.goal_interpretations.find((i) => i.goal_text.includes('commercially'))
+    const commercialNoGettyAtAll = noGettyEvidenceAtAll.output.goal_interpretations.find((i) => i.goal_text.includes('commercially'))
+    expect(commercialWithGettyGoal?.summary).toEqual(commercialNoGettyAtAll?.summary)
+    // The Getty content still surfaces overall -- just under its own
+    // explicit third_party_source_rights interpretation, not duplicated
+    // into commercial_use.
+    expect(withGettyGoal.output.knowledge_items.map((k) => k.claim_id)).toContain('CLAIM-STOCK-GETTY-EDITORIAL-001-v1')
+    const sourceRightsInterp = withGettyGoal.output.goal_interpretations.find((i) => i.goal_text.includes('Getty image'))
+    expect(sourceRightsInterp?.summary).toMatch(/Rights and Clearance/)
   })
 
   test('23: incidental Getty disclosure (no goal) still produces no stock goal/output -- Path A explicit-question gate, unaffected by M3', () => {

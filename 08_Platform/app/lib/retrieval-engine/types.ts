@@ -374,14 +374,18 @@ export interface TopicRelationship {
 /**
  * Whether a `RetrievalResult` was matched directly (its own `topic` equals
  * the goal's category -- the pre-existing behavior for every tool result
- * and every Topic Retrieval result before this milestone) or reached via a
+ * and every Topic Retrieval result before this milestone), reached via a
  * governed `TopicRelationship` (its own `topic` is the RELATED topic, not
- * the originating goal's category). Added so `topic` can keep meaning
- * exactly what it always meant -- "what this claim is actually about" --
- * while a separate field carries "which goal caused this result to
- * surface." See `matched_goal_category` below.
+ * the originating goal's category), or reached via Track A discovered
+ * relevance (`discovered_topic`, Track C — Discovered-Topic Goal Provenance,
+ * 2026-08-21 -- structural evidence, e.g. a confirmed AssetProviderMention,
+ * made the topic relevant without the user explicitly asking about it; see
+ * `lib/crc-engine/discovered-relevance.ts`). Added so `topic` can keep
+ * meaning exactly what it always meant -- "what this claim is actually
+ * about" -- while a separate field carries "which goal caused this result
+ * to surface." See `matched_goal_category` below.
  */
-export const MATCH_ORIGIN_VALUES = ['exact_topic', 'related_topic'] as const
+export const MATCH_ORIGIN_VALUES = ['exact_topic', 'related_topic', 'discovered_topic'] as const
 export type MatchOrigin = (typeof MATCH_ORIGIN_VALUES)[number]
 
 /**
@@ -417,11 +421,14 @@ export interface RetrievalResult {
    */
   unresolved_project_dependencies: string[]
   /**
-   * Governed Topic Relationships provenance (2026-08-16). `exact_topic` for
-   * every tool result and every direct Topic Retrieval result (unchanged
-   * meaning, unchanged default -- `assembleResult`/`assembleTopicResult`
-   * always set this). `related_topic` only for a result reached via
-   * `lookupRelatedTopicClaims`.
+   * Governed Topic Relationships provenance (2026-08-16), extended for Track
+   * A discovered relevance (2026-08-21). `exact_topic` for every tool result
+   * and every direct Topic Retrieval result (unchanged meaning, unchanged
+   * default -- `assembleResult`/`assembleTopicResult` always set this).
+   * `related_topic` only for a result reached via `lookupRelatedTopicClaims`.
+   * `discovered_topic` only for a result reached via
+   * `lookupDiscoveredTopicClaims` (Track A structural-evidence discovery,
+   * never a `TopicRelationship`, never an explicit UserGoal).
    */
   match_origin: MatchOrigin
   /**
@@ -431,11 +438,46 @@ export interface RetrievalResult {
    * `exact_topic` result (tool or direct topic match, unchanged behavior).
    * For a `related_topic` result, equals the relationship's own
    * `source_topic` -- e.g. `topic: 'copyrightability'`,
-   * `matched_goal_category: 'copyright_ownership'`.
+   * `matched_goal_category: 'copyright_ownership'`. For a `discovered_topic`
+   * result, equals `DiscoveredTopicOccurrence.source_goal_category` -- the
+   * explicit parent goal that authorized the discovery, e.g.
+   * `topic: 'third_party_source_rights'`, `matched_goal_category:
+   * 'commercial_use'`.
    */
   matched_goal_category: GoalCategory
-  /** Provenance for a related_topic result -- the TopicRelationship.relationship_id that produced it. Always null for exact_topic results. */
+  /** Provenance for a related_topic result -- the TopicRelationship.relationship_id that produced it. Always null for exact_topic and discovered_topic results. */
   relationship_id: string | null
+}
+
+/**
+ * Track A discovered-relevance occurrence shape (Track C — Discovered-Topic
+ * Goal Provenance, 2026-08-21). Defined here, in Retrieval's own shared
+ * types module, rather than in `lib/crc-engine/discovered-relevance.ts`
+ * (which produces values of this type but does not own the type itself) --
+ * mirrors the existing `TopicClaim`/`RetrievalResult` precedent: this file
+ * is the established cross-subsystem contract surface `lib/crc-engine/`
+ * already imports from one-way (never the reverse), so Retrieval's own
+ * `lookup-discovered-topic-claims.ts` can consume this shape without
+ * introducing a new reverse dependency from lib/retrieval-engine/ onto
+ * lib/crc-engine/.
+ */
+export interface DiscoveredTopicOccurrence {
+  topic: GoalCategory
+  trigger_id: string
+  source_kind: string
+  /** The specific structured-fact id that satisfied the trigger (e.g. an AssetProviderMention.mention_id). */
+  source_id: string
+  /**
+   * The single explicit, active, confirmed UserGoal category that actually
+   * satisfied the trigger's own `allowed_parent_goals` for THIS occurrence
+   * -- never inferred, never a free-text join, always one of the trigger's
+   * own governed `allowed_parent_goals` values. This is the field
+   * `lookupDiscoveredTopicClaims` consumes to stamp
+   * `RetrievalResult.matched_goal_category` -- mirroring exactly how
+   * `lookupRelatedTopicClaims`'s own `sourceGoalCategory` already does this
+   * for TopicRelationship-sourced results.
+   */
+  source_goal_category: GoalCategory
 }
 
 /**

@@ -142,7 +142,7 @@ export function isApplicable(requirements: ApplicabilityRequirement[], facts: Ap
  * explicit PM instruction -- filtering happens silently, by construction,
  * not by a diagnostic a downstream consumer must remember to suppress.
  */
-function providerScopeMatches(claim: TopicClaim, assetProviders: readonly string[]): boolean {
+export function providerScopeMatches(claim: TopicClaim, assetProviders: readonly string[]): boolean {
   if (claim.provider_scope === null) return true
   return claim.provider_scope.some((p) => assetProviders.includes(p))
 }

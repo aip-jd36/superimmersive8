@@ -22,6 +22,7 @@
  * consumer-driven contract extension instead).
  */
 
+import type { GoalCategory } from '@/types/interview-engine'
 import type { MatrixClaim, MatrixRow, RetrievalResult, RetrievalSourceFact, TopicClaim } from './types'
 
 /** Returns null (never a fabricated scope) if the claim has no publication scope text -- see the 'yes_claim_missing_scope' diagnostic in retrieve.ts, which is where this case is actually surfaced. */
@@ -106,5 +107,35 @@ export function assembleRelatedTopicResult(claim: TopicClaim, relationshipId: st
     match_origin: 'related_topic',
     matched_goal_category: sourceGoalCategory,
     relationship_id: relationshipId,
+  }
+}
+
+/**
+ * Discovered-topic counterpart (Track C — Discovered-Topic Goal Provenance,
+ * 2026-08-21). Produced only by `lookupDiscoveredTopicClaims` for a
+ * `TopicClaim` reached via Track A structural-evidence discovery, never
+ * directly by `retrieve()`. `sourceGoalCategory` -- the explicit parent
+ * goal category that authorized the discovery (`DiscoveredTopicOccurrence.
+ * source_goal_category`), never the claim's own topic -- becomes
+ * `matched_goal_category`, mirroring `assembleRelatedTopicResult` exactly;
+ * `claim.topic` is preserved unchanged as the claim's own intrinsic
+ * subject. `relationship_id` is always null -- no `TopicRelationship` is
+ * involved in a discovered-topic result. Same never-fabricate-scope
+ * discipline as assembleResult/assembleTopicResult/assembleRelatedTopicResult.
+ */
+export function assembleDiscoveredTopicResult(claim: TopicClaim, sourceGoalCategory: GoalCategory): RetrievalResult | null {
+  if (claim.crc_publication_scope === null) return null
+  return {
+    source_fact: { kind: 'topic', identifier: claim.topic },
+    claim_id: claim.claim_id,
+    matrix_identifier: claim.topic,
+    publication_scope: claim.crc_publication_scope,
+    candidate_statement: claim.crc_candidate_statement,
+    last_verified: claim.last_verified,
+    topic: claim.topic,
+    unresolved_project_dependencies: claim.unresolved_project_dependencies,
+    match_origin: 'discovered_topic',
+    matched_goal_category: sourceGoalCategory,
+    relationship_id: null,
   }
 }

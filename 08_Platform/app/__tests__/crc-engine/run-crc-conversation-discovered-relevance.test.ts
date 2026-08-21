@@ -50,14 +50,47 @@ function productionIstockSessionState(): StructuredUnderstanding {
 }
 
 describe('canonical production acceptance test (Section 24)', () => {
+  // A/B, Track C — Discovered-Topic Goal Provenance (2026-08-21): the
+  // discovered stock result now carries the ORIGINATING explicit goal
+  // category (commercial_use) as matched_goal_category, not the claim's own
+  // intrinsic topic (third_party_source_rights) -- this is the exact fix
+  // this milestone implements. `topic` still correctly names the claim's
+  // own subject, unchanged.
   test('A/B: effective relevance includes commercial_use (explicit) and Retrieval considers stock claims for the discovered third_party_source_rights topic', () => {
     const { output, trace } = runCRCConversation(productionIstockSessionState(), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
     const stockResult = trace.retrieval_results.find((r) => r.claim_id === 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')
     expect(stockResult).toBeDefined()
-    expect(stockResult?.matched_goal_category).toBe('third_party_source_rights')
-    // Generic stock claims also surface.
-    expect(trace.retrieval_results.some((r) => r.claim_id === 'CLAIM-STOCK-EDITORIAL-001-v1')).toBe(true)
+    expect(stockResult?.matched_goal_category).toBe('commercial_use')
+    expect(stockResult?.topic).toBe('third_party_source_rights')
+    expect(stockResult?.match_origin).toBe('discovered_topic')
+    // Generic stock claims also surface, also attributed to commercial_use.
+    const genericStockResult = trace.retrieval_results.find((r) => r.claim_id === 'CLAIM-STOCK-EDITORIAL-001-v1')
+    expect(genericStockResult).toBeDefined()
+    expect(genericStockResult?.matched_goal_category).toBe('commercial_use')
     expect(output).toBeDefined()
+  })
+
+  // The actual defect this milestone closes (Track C diagnostic Section 2/4):
+  // the commercial_use goal_interpretation must no longer be
+  // outside_current_coverage now that discovered stock knowledge correctly
+  // attributes to it -- it reaches the SAME relevant_applicability_unresolved
+  // template copyright's own H5 already uses, with the governed stock
+  // statements quoted, using EXISTING template machinery only (no new
+  // final-answer copy authored by this milestone).
+  test('the commercial_use interpretation is no longer outside_current_coverage -- its rendered summary quotes the discovered stock guidance instead of the "no governed guidance" fallback', () => {
+    const { output } = runCRCConversation(productionIstockSessionState(), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    expect(output.goal_interpretations).toHaveLength(1)
+    const interp = output.goal_interpretations[0]
+    expect(interp.goal_text).toBe('Can I use that commercially?')
+    expect(interp.summary).not.toMatch(/doesn't currently have governed guidance/)
+    // Quotes the real governed stock statements verbatim (H5-shaped:
+    // relevant, but project-specific evidence unresolved) -- not a
+    // fabricated determination that the project IS or ISN'T cleared. See
+    // build-bounded-interpretation-discovered-topic.test.ts for the
+    // unit-level proof of the exact `status`/`supporting_claim_ids` this
+    // rendered summary comes from.
+    expect(interp.summary).toMatch(/Editorial/)
+    expect(interp.summary).toMatch(/there isn't enough project-specific information to determine how it applies/)
   })
 
   // C. provider_scope: generic claims pass, iStock claim passes, Getty/Shutterstock fail
@@ -92,6 +125,42 @@ describe('canonical production acceptance test (Section 24)', () => {
   test('discovered stock knowledge is NOT silently discarded -- it appears in knowledge_items even without its own goal_interpretation', () => {
     const { output } = runCRCConversation(productionIstockSessionState(), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
     expect(output.knowledge_items.some((k) => k.claim_id === 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')).toBe(true)
+  })
+})
+
+// O. Multi-goal isolation (Track C — Discovered-Topic Goal Provenance,
+// 2026-08-21): discovered knowledge must attribute ONLY to parent goals the
+// trigger's own allowed_parent_goals actually authorizes -- never to every
+// active explicit goal simply because it happens to be active this turn.
+describe('O: multi-goal isolation -- discovered stock knowledge supports commercial_use only, never an unrelated active goal', () => {
+  function multiGoalIstockSessionState(): StructuredUnderstanding {
+    const base = productionIstockSessionState()
+    return {
+      ...base,
+      user_goals: [
+        ...base.user_goals,
+        { goal_id: 't1-c4', state: 'confirmed', raw_text: 'Do I own the copyright?', category: 'copyright_ownership', scope: 'informational', superseded_by: null, source_turn: 1, source_statement: 'Do I own the copyright?' },
+      ],
+    }
+  }
+
+  test('with commercial_use AND copyright_ownership both active, the discovered stock RetrievalResult is attributed ONLY to commercial_use (the trigger\'s own allowed_parent_goals), never copyright_ownership', () => {
+    const { trace } = runCRCConversation(multiGoalIstockSessionState(), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    const discoveredStockResults = trace.retrieval_results.filter((r) => r.match_origin === 'discovered_topic')
+    expect(discoveredStockResults.length).toBeGreaterThan(0)
+    for (const r of discoveredStockResults) {
+      expect(r.matched_goal_category).toBe('commercial_use')
+      expect(r.matched_goal_category).not.toBe('copyright_ownership')
+    }
+  })
+
+  test('the copyright_ownership interpretation is unaffected by the stock discovery -- no stock content leaks into it', () => {
+    const { output } = runCRCConversation(multiGoalIstockSessionState(), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    expect(output.goal_interpretations).toHaveLength(2)
+    const copyrightInterp = output.goal_interpretations.find((i) => i.goal_text === 'Do I own the copyright?')
+    expect(copyrightInterp).toBeDefined()
+    expect(copyrightInterp?.summary).not.toMatch(/Editorial/)
+    expect(copyrightInterp?.summary).not.toMatch(/iStock/)
   })
 })
 

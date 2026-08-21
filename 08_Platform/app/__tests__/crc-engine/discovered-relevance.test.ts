@@ -82,7 +82,15 @@ describe('deriveDiscoveredTopicOccurrences', () => {
     const su = emptySU({ user_goals: [goal()], asset_provider_mentions: [providerMention({ mention_id: 'ap-1' })] })
     const occurrences = deriveDiscoveredTopicOccurrences(su, [genericStockClaim()])
     expect(occurrences).toHaveLength(1)
-    expect(occurrences[0]).toEqual({ topic: 'third_party_source_rights', trigger_id: 'asset_provider_mention_to_third_party_source_rights', source_kind: 'asset_provider_mention', source_id: 'ap-1' })
+    expect(occurrences[0]).toEqual({
+      topic: 'third_party_source_rights',
+      trigger_id: 'asset_provider_mention_to_third_party_source_rights',
+      source_kind: 'asset_provider_mention',
+      source_id: 'ap-1',
+      // Track C — Discovered-Topic Goal Provenance (2026-08-21): the
+      // explicit parent goal that actually satisfied allowed_parent_goals.
+      source_goal_category: 'commercial_use',
+    })
   })
 
   // B/C: same topic for Getty/Shutterstock -- generic trigger, no provider-specific branching
@@ -199,11 +207,21 @@ describe('one-hop / no recursive discovery (Section 21, Y)', () => {
     const first = deriveDiscoveredTopicOccurrences(su, [genericStockClaim()])
     expect(first).toHaveLength(1)
     // Simulate feeding the discovered topic back in as if it were an
-    // active goal category (the one-hop boundary this module itself never
-    // performs) -- even then, no chained trigger exists to fire from it.
+    // active EXPLICIT goal category (the one-hop boundary this module
+    // itself never performs). Track C — Discovered-Topic Goal Provenance
+    // (2026-08-21): this now ALSO exercises the explicit-precedence
+    // suppression -- once third_party_source_rights is itself an active,
+    // explicit, confirmed goal category, deriveDiscoveredTopicOccurrences
+    // suppresses discovering it a second time (the explicit exact-topic
+    // path already covers it; a redundant discovered occurrence would
+    // produce a duplicate RetrievalResult/knowledge_item for the same
+    // claim). The result is therefore EMPTY, not a same-length "no new
+    // occurrence type" -- a stronger, more directly correct proof of
+    // "no recursive/redundant discovery" than the pre-Track-C version of
+    // this test asserted.
     const suWithDiscoveredAsGoal = emptySU({ user_goals: [goal(), goal({ goal_id: 'g-2', category: 'third_party_source_rights' })], asset_provider_mentions: [providerMention({ mention_id: 'ap-1' })] })
     const second = deriveDiscoveredTopicOccurrences(suWithDiscoveredAsGoal, [genericStockClaim()])
-    expect(second.map((o) => o.topic)).toEqual(['third_party_source_rights'])
+    expect(second).toEqual([])
   })
 })
 

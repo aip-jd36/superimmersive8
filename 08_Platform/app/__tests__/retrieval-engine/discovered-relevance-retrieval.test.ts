@@ -1,6 +1,6 @@
 /**
  * Track A — Generic Discovered Relevance milestone (2026-08-21). Retrieval
- * integration tests: proves `lookupTopicClaims`/`retrieve`'s new additive
+ * integration tests: proves `lookupTopicClaims`'s existing, UNCHANGED
  * `discoveredTopics` parameter correctly widens the active-topic universe
  * while leaving every existing gate (provider_scope, lifecycle,
  * crc_eligible, supersession, applicability) fully authoritative and
@@ -11,6 +11,17 @@
  *
  * Test IDs below (K-Q) map to this milestone's own required test matrix,
  * Section 33.
+ *
+ * Track C — Discovered-Topic Goal Provenance (2026-08-21) update: the
+ * `lookupTopicClaims`-direct tests (K-Q) above are UNCHANGED -- that
+ * function's own `discoveredTopics: GoalCategory[]` parameter and behavior
+ * remain fully intact; the real production `retrieve()` pipeline simply
+ * stopped feeding it discovered topics, routing them through the new,
+ * separate, goal-provenance-preserving `lookupDiscoveredTopicClaims` path
+ * instead. The `retrieve()`-level describe block below (previously named
+ * for the now-removed flat `discoveredTopics: GoalCategory[]` parameter)
+ * was updated to construct real `DiscoveredTopicOccurrence` values and
+ * assert the corrected `matched_goal_category`/`match_origin` provenance.
  */
 
 import { lookupTopicClaims, type ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
@@ -18,6 +29,7 @@ import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { buildRetrievalHandoff } from '@/lib/interview-engine/handoff'
+import type { DiscoveredTopicOccurrence } from '@/lib/retrieval-engine/types'
 import type { RetrievalHandoff, StructuredUnderstanding, UserGoal } from '@/types/interview-engine'
 
 const UNKNOWN_FACTS: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
@@ -115,7 +127,7 @@ describe('lookupTopicClaims — discoveredTopics additive parameter', () => {
   })
 })
 
-describe('retrieve() — discoveredTopics additive parameter, end-to-end', () => {
+describe('retrieve() — discoveredTopicOccurrences additive parameter, end-to-end (Track C — Discovered-Topic Goal Provenance, 2026-08-21)', () => {
   function handoffFor(): RetrievalHandoff {
     return buildRetrievalHandoff({
       project_facts: {
@@ -136,16 +148,59 @@ describe('retrieve() — discoveredTopics additive parameter, end-to-end', () =>
     } as StructuredUnderstanding)
   }
 
-  test('retrieve() with discoveredTopics returns the iStock stock claim as a real RetrievalResult, matched_goal_category third_party_source_rights', () => {
-    const { results } = retrieve(handoffFor(), MATRIX_FIXTURE, NO_GOALS, TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, [], ['istock'], ['third_party_source_rights'])
+  const ISTOCK_DISCOVERY_OCCURRENCE: DiscoveredTopicOccurrence = {
+    topic: 'third_party_source_rights',
+    trigger_id: 'asset_provider_mention_to_third_party_source_rights',
+    source_kind: 'asset_provider_mention',
+    source_id: 'ap-1',
+    source_goal_category: 'commercial_use',
+  }
+
+  // B/D. discovered stock result carries the ORIGINATING explicit goal
+  // category (commercial_use), not the claim's own intrinsic topic
+  // (third_party_source_rights) -- this is the Track C fix itself, proven
+  // at the Retrieval layer directly (independent of discovered-relevance.ts's
+  // own derivation, which has its own dedicated tests).
+  test('retrieve() with discoveredTopicOccurrences returns the iStock stock claim as a real RetrievalResult, matched_goal_category is the ORIGINATING explicit goal (commercial_use), match_origin discovered_topic', () => {
+    const { results } = retrieve(handoffFor(), MATRIX_FIXTURE, NO_GOALS, TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, [], ['istock'], [ISTOCK_DISCOVERY_OCCURRENCE])
+    const stockResult = results.find((r) => r.claim_id === 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')
+    expect(stockResult).toBeDefined()
+    expect(stockResult?.matched_goal_category).toBe('commercial_use')
+    expect(stockResult?.topic).toBe('third_party_source_rights')
+    expect(stockResult?.match_origin).toBe('discovered_topic')
+    expect(stockResult?.relationship_id).toBeNull()
+  })
+
+  test('retrieve() without discoveredTopicOccurrences (existing call sites) is unaffected -- zero results for stock claims', () => {
+    const { results } = retrieve(handoffFor(), MATRIX_FIXTURE, NO_GOALS, TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, [], ['istock'])
+    expect(results.find((r) => r.claim_id === 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')).toBeUndefined()
+  })
+
+  // I/J. generic + iStock-specific claims both surface via the discovered
+  // path; G/H (Getty/Shutterstock) still excluded by the unchanged provider
+  // pre-filter.
+  test('generic stock claims and the iStock-specific claim all surface via discoveredTopicOccurrences; Getty/Shutterstock do not (provider_scope unchanged)', () => {
+    const { results } = retrieve(handoffFor(), MATRIX_FIXTURE, NO_GOALS, TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, [], ['istock'], [ISTOCK_DISCOVERY_OCCURRENCE])
+    const ids = results.map((r) => r.claim_id)
+    expect(ids).toContain('CLAIM-STOCK-EDITORIAL-001-v1')
+    expect(ids).toContain('CLAIM-STOCK-EDITORIAL-002-v1')
+    expect(ids).toContain('CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')
+    expect(ids).not.toContain('CLAIM-STOCK-GETTY-EDITORIAL-001-v1')
+    expect(ids).not.toContain('CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1')
+    // Every discovered result carries the originating goal category, never
+    // the claim's own intrinsic topic.
+    for (const r of results.filter((r) => r.match_origin === 'discovered_topic')) {
+      expect(r.matched_goal_category).toBe('commercial_use')
+    }
+  })
+
+  // P. explicit Path A retrieval remains unchanged when discoveredTopicOccurrences is empty/omitted.
+  test('P: explicit third_party_source_rights goal (Path A) still works exactly as before, unaffected by discoveredTopicOccurrences', () => {
+    const explicitGoal: UserGoal[] = [{ goal_id: 'g-1', state: 'confirmed', raw_text: 'x', category: 'third_party_source_rights', scope: 'informational', superseded_by: null, source_turn: 1, source_statement: 'x' }]
+    const { results } = retrieve(handoffFor(), MATRIX_FIXTURE, explicitGoal, TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, [], ['istock'])
     const stockResult = results.find((r) => r.claim_id === 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')
     expect(stockResult).toBeDefined()
     expect(stockResult?.matched_goal_category).toBe('third_party_source_rights')
     expect(stockResult?.match_origin).toBe('exact_topic')
-  })
-
-  test('retrieve() without discoveredTopics (existing call sites) is unaffected -- zero results for stock claims', () => {
-    const { results } = retrieve(handoffFor(), MATRIX_FIXTURE, NO_GOALS, TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, [], ['istock'])
-    expect(results.find((r) => r.claim_id === 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')).toBeUndefined()
   })
 })

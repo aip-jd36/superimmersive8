@@ -81,7 +81,7 @@
  */
 
 import type { GoalCategory, StructuredUnderstanding } from '@/types/interview-engine'
-import type { TopicClaim } from '@/lib/retrieval-engine/types'
+import type { DiscoveredTopicOccurrence, TopicClaim } from '@/lib/retrieval-engine/types'
 
 /**
  * Closed today to the one structurally-supported evidence type. Adding a
@@ -131,13 +131,16 @@ const DISCOVERED_RELEVANCE_TRIGGERS: readonly DiscoveredRelevanceTrigger[] = [
   },
 ]
 
-export interface DiscoveredTopicOccurrence {
-  topic: GoalCategory
-  trigger_id: string
-  source_kind: DiscoveredRelevanceSourceKind
-  /** The specific structured-fact id that satisfied the trigger (e.g. an AssetProviderMention.mention_id). */
-  source_id: string
-}
+/**
+ * The shape produced here (`DiscoveredTopicOccurrence`) is defined in
+ * `lib/retrieval-engine/types.ts`, not this file -- mirrors this file's own
+ * existing precedent of consuming `TopicClaim` from that same module
+ * one-way, rather than Retrieval ever importing this file. See that type's
+ * own doc comment for the full field-by-field rationale, in particular
+ * `source_goal_category` and why a trigger with more than one
+ * simultaneously-satisfied `allowed_parent_goals` entry produces one
+ * occurrence per satisfied goal rather than collapsing them.
+ */
 
 /**
  * Option B (task Section 6): the topic must have at least one Adopted +
@@ -173,15 +176,48 @@ export function deriveDiscoveredTopicOccurrences(understanding: StructuredUnders
   const occurrences: DiscoveredTopicOccurrence[] = []
 
   for (const trigger of DISCOVERED_RELEVANCE_TRIGGERS) {
-    if (!trigger.allowed_parent_goals.some((g) => activeGoals.has(g))) continue
+    // Explicit-precedence suppression (Track C — Discovered-Topic Goal
+    // Provenance, 2026-08-21): when the trigger's OWN topic is already an
+    // active, explicit, confirmed goal category, the user already asked
+    // about this topic directly -- Retrieval's existing exact-topic path
+    // already covers it. Discovering it a second time here would produce a
+    // second, redundant RetrievalResult for the same claim (once exact_topic,
+    // once discovered_topic) and, before this fix, a redundant readiness
+    // topic. Mirrors `computeRelevantTopics`'s own pre-existing "explicit
+    // always wins over discovered for the SAME topic" precedence (see that
+    // function's own doc comment) -- applied here, at the source, so every
+    // consumer of this function's output (discoveredTopicCategories for
+    // Track B, and the richer occurrence list for Retrieval) inherits it
+    // for free, rather than each needing its own copy of this rule.
+    if (activeGoals.has(trigger.topic)) continue
     if (!hasGovernedClaimForTopic(trigger.topic, topicClaims)) continue
+
+    // Satisfied parent goals, not just "is at least one active" (Track C):
+    // one occurrence is emitted per (satisfied parent goal x qualifying
+    // mention), preserving which SPECIFIC explicit goal authorized each
+    // occurrence rather than a single collapsed boolean. For the current
+    // single-entry `commercial_use` trigger this is always at most one
+    // category; a future trigger with more than one allowed parent goal
+    // that are simultaneously active correctly produces one occurrence per
+    // satisfied goal, never an occurrence that ambiguously "belongs to"
+    // more than one category at once.
+    const satisfiedParentGoals = trigger.allowed_parent_goals.filter((g) => activeGoals.has(g))
+    if (satisfiedParentGoals.length === 0) continue
 
     if (trigger.source_kind === 'asset_provider_mention') {
       for (const mention of understanding.asset_provider_mentions) {
         if (mention.superseded_by !== null) continue
         if (mention.resolution.kind !== 'canonical') continue
         if (mention.confidence !== 'confirmed') continue
-        occurrences.push({ topic: trigger.topic, trigger_id: trigger.trigger_id, source_kind: trigger.source_kind, source_id: mention.mention_id })
+        for (const sourceGoalCategory of satisfiedParentGoals) {
+          occurrences.push({
+            topic: trigger.topic,
+            trigger_id: trigger.trigger_id,
+            source_kind: trigger.source_kind,
+            source_id: mention.mention_id,
+            source_goal_category: sourceGoalCategory,
+          })
+        }
       }
     }
   }
