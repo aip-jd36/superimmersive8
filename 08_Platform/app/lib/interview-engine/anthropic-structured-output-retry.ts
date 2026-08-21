@@ -37,7 +37,27 @@
  * adapters here share the identical small-schema, low-max_tokens shape
  * that makes this worth covering too, so the predicate is duplicated
  * (not imported) rather than coupling this file to the extractor's.
+ *
+ * Per-call SUCCESS timing telemetry (P0 timeout diagnostic follow-up,
+ * 2026-08-21): the failure/retry telemetry above only ever fires on a
+ * classifiable miss, so a slow-but-successful Anthropic call -- exactly the
+ * kind of call that could push a turn's total wall-clock time toward a
+ * platform timeout -- was previously invisible. `successTelemetrySink`
+ * (new, optional, additive parameter on `callWithOneRecoveryRetry`) is a
+ * SEPARATE sink from `telemetrySink` above -- deliberately, so every
+ * existing test asserting `telemetrySink` is never called on a clean
+ * single-attempt success remains valid unmodified; the two channels are
+ * independent by construction, not merged into one. Elapsed time is
+ * measured with `performance.now()` (monotonic, `node:perf_hooks`) wrapped
+ * tightly around the single `callOnce()` invocation inside
+ * `attemptOnceCatching` only -- never around classification, telemetry
+ * construction, or anything upstream/downstream of the actual SDK call, so
+ * `elapsed_ms` reflects Anthropic network/model latency for that ONE HTTP
+ * call, not the logical adapter invocation as a whole. This changes no
+ * retry decision, no failure classification, no max_tokens schedule, and no
+ * existing telemetry event's field shape.
  */
+import { performance } from 'node:perf_hooks'
 
 export type StructuredOutputFailureClass = 'missing_output_max_tokens' | 'missing_output_other' | 'sdk_parse_failure'
 
@@ -112,9 +132,37 @@ export const defaultTelemetrySink: StructuredOutputTelemetrySink = (event) => {
   console.warn('[anthropic-structured-output]', JSON.stringify(event))
 }
 
+/**
+ * Success-path timing event -- see this file's own header. Fixed,
+ * allowlisted fields only, same discipline as StructuredOutputTelemetryEvent
+ * above: never a spread of the response object, never prompt/candidate/
+ * transcript/user content of any kind.
+ */
+export interface StructuredOutputSuccessTelemetryEvent {
+  adapter: StructuredOutputAdapterName
+  attempt: 1 | 2
+  outcome: 'success'
+  elapsed_ms: number
+  anthropic_response_id: string | null
+  stop_reason: string | null
+  content_block_types: string[] | null
+  parsed_output_present: boolean
+  thinking_tokens: number | null
+  output_tokens: number | null
+  input_tokens: number | null
+}
+
+export type StructuredOutputSuccessTelemetrySink = (event: StructuredOutputSuccessTelemetryEvent) => void
+
+/** Same observability mechanism as defaultTelemetrySink above -- console, no new logging system. Distinct log tag so success timing is trivially greppable/filterable separately from failure/retry events. */
+export const defaultSuccessTelemetrySink: StructuredOutputSuccessTelemetrySink = (event) => {
+  console.log('[anthropic-structured-output-timing]', JSON.stringify(event))
+}
+
 interface AttemptSuccess<T> {
   ok: true
   response: T
+  elapsedMs: number
 }
 interface AttemptFailure {
   ok: false
@@ -148,6 +196,10 @@ async function attemptOnceCatching<T extends MinimalParsedAnthropicResponse>(
   callOnce: (maxTokens: number) => Promise<T>,
   maxTokens: number,
 ): Promise<AttemptSuccess<T> | AttemptFailure> {
+  // Timing wraps ONLY this single awaited SDK call -- not classification
+  // below, not anything the caller does before/after. See this file's own
+  // header for why this is the correct boundary for elapsed_ms.
+  const startedAt = performance.now()
   let response: T
   try {
     response = await callOnce(maxTokens)
@@ -159,9 +211,31 @@ async function attemptOnceCatching<T extends MinimalParsedAnthropicResponse>(
     if (!isStructuredOutputParseFailure(err)) throw err
     return { ok: false, failureClass: 'sdk_parse_failure' }
   }
+  const elapsedMs = performance.now() - startedAt
   const failureClass = classifyMissingParsedOutput(response)
-  if (failureClass === null) return { ok: true, response }
+  if (failureClass === null) return { ok: true, response, elapsedMs }
   return { ok: false, failureClass, response }
+}
+
+function successTelemetryEvent<T extends MinimalParsedAnthropicResponse>(
+  adapter: StructuredOutputAdapterName,
+  attempt: 1 | 2,
+  outcome: AttemptSuccess<T>,
+): StructuredOutputSuccessTelemetryEvent {
+  const response = outcome.response
+  return {
+    adapter,
+    attempt,
+    outcome: 'success',
+    elapsed_ms: Math.round(outcome.elapsedMs),
+    anthropic_response_id: response.id,
+    stop_reason: response.stop_reason,
+    content_block_types: response.content.map((b) => b.type),
+    parsed_output_present: response.parsed_output != null,
+    thinking_tokens: response.usage.output_tokens_details?.thinking_tokens ?? null,
+    output_tokens: response.usage.output_tokens,
+    input_tokens: response.usage.input_tokens,
+  }
 }
 
 /**
@@ -187,13 +261,20 @@ export async function callWithOneRecoveryRetry<T extends MinimalParsedAnthropicR
   baseMaxTokens: number,
   retryMaxTokens: number,
   telemetrySink: StructuredOutputTelemetrySink = defaultTelemetrySink,
+  successTelemetrySink: StructuredOutputSuccessTelemetrySink = defaultSuccessTelemetrySink,
 ): Promise<T> {
   const first = await attemptOnceCatching(callOnce, baseMaxTokens)
-  if (first.ok) return first.response
+  if (first.ok) {
+    successTelemetrySink(successTelemetryEvent(adapter, 1, first))
+    return first.response
+  }
   telemetrySink(telemetryEvent(adapter, 1, first, true))
 
   const second = await attemptOnceCatching(callOnce, retryMaxTokens)
-  if (second.ok) return second.response
+  if (second.ok) {
+    successTelemetrySink(successTelemetryEvent(adapter, 2, second))
+    return second.response
+  }
   telemetrySink(telemetryEvent(adapter, 2, second, false))
 
   throw new Error(

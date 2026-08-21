@@ -19,8 +19,10 @@ import {
   callWithOneRecoveryRetry,
   classifyMissingParsedOutput,
   isStructuredOutputParseFailure,
+  defaultSuccessTelemetrySink,
   type MinimalParsedAnthropicResponse,
   type StructuredOutputTelemetryEvent,
+  type StructuredOutputSuccessTelemetryEvent,
 } from '@/lib/interview-engine/anthropic-structured-output-retry'
 
 function response(overrides: Partial<MinimalParsedAnthropicResponse> = {}): MinimalParsedAnthropicResponse {
@@ -272,5 +274,151 @@ describe('L: telemetry privacy', () => {
     expect(warnSpy.mock.calls[0][0]).toBe('[anthropic-structured-output]')
     expect(warnSpy.mock.calls[0][1]).not.toContain('SENSITIVE')
     warnSpy.mockRestore()
+  })
+})
+
+/**
+ * P0 timeout diagnostic follow-up (2026-08-21) -- per-call SUCCESS timing
+ * telemetry. Test IDs below map to the milestone's own required test
+ * matrix (A-P, applied here to callWithOneRecoveryRetry; the extractor's
+ * identical, deliberately-uncoupled mechanism is covered separately in
+ * anthropic-extractor-structured-output-recovery.test.ts).
+ */
+describe('callWithOneRecoveryRetry -- success timing telemetry', () => {
+  // A/B/C. First-attempt success emits exactly one success event, correct
+  // adapter, attempt 1 -- via a SEPARATE sink from the existing failure
+  // telemetrySink, which must remain uncalled (proves the two channels
+  // are independent, and that test A/F above are still exactly correct).
+  test('A/B/C: first-attempt success -> exactly one success event, correct adapter, attempt 1; failure sink untouched', async () => {
+    const callOnce = jest.fn().mockResolvedValue(SUCCESS)
+    const telemetrySink = jest.fn()
+    const successTelemetrySink = jest.fn()
+    const result = await callWithOneRecoveryRetry('decider', callOnce, 1024, 2048, telemetrySink, successTelemetrySink)
+    expect(result).toBe(SUCCESS)
+    expect(telemetrySink).not.toHaveBeenCalled()
+    expect(successTelemetrySink).toHaveBeenCalledTimes(1)
+    const event: StructuredOutputSuccessTelemetryEvent = successTelemetrySink.mock.calls[0][0]
+    expect(event.adapter).toBe('decider')
+    expect(event.attempt).toBe(1)
+    expect(event.outcome).toBe('success')
+  })
+
+  // D. elapsed_ms present and non-negative.
+  test('D: elapsed_ms is present and non-negative', async () => {
+    const callOnce = jest.fn().mockResolvedValue(SUCCESS)
+    const successTelemetrySink = jest.fn()
+    await callWithOneRecoveryRetry('candidate_generator', callOnce, 1024, 2048, undefined, successTelemetrySink)
+    const event: StructuredOutputSuccessTelemetryEvent = successTelemetrySink.mock.calls[0][0]
+    expect(typeof event.elapsed_ms).toBe('number')
+    expect(event.elapsed_ms).toBeGreaterThanOrEqual(0)
+  })
+
+  // E. Recovery success identifies attempt = 2.
+  test('E: first missing, second valid -> success event has attempt 2', async () => {
+    const callOnce = jest.fn().mockResolvedValueOnce(MISSING_MAX_TOKENS).mockResolvedValueOnce(SUCCESS)
+    const successTelemetrySink = jest.fn()
+    const result = await callWithOneRecoveryRetry('decider', callOnce, 1024, 2048, undefined, successTelemetrySink)
+    expect(result).toBe(SUCCESS)
+    expect(successTelemetrySink).toHaveBeenCalledTimes(1)
+    expect(successTelemetrySink.mock.calls[0][0].attempt).toBe(2)
+  })
+
+  // F. First failure + second success preserves the EXISTING failure event
+  // (attempt 1, retrying:true) AND emits exactly one success event for the
+  // recovery attempt (attempt 2) -- both distinguishable, neither merged.
+  test('F: first failure + second success -> existing failure telemetry preserved AND one success event emitted for attempt 2', async () => {
+    const callOnce = jest.fn().mockResolvedValueOnce(MISSING_MAX_TOKENS).mockResolvedValueOnce(SUCCESS)
+    const telemetrySink = jest.fn()
+    const successTelemetrySink = jest.fn()
+    await callWithOneRecoveryRetry('decider', callOnce, 1024, 2048, telemetrySink, successTelemetrySink)
+
+    expect(telemetrySink).toHaveBeenCalledTimes(1)
+    const failureEvent: StructuredOutputTelemetryEvent = telemetrySink.mock.calls[0][0]
+    expect(failureEvent.attempt).toBe(1)
+    expect(failureEvent.retrying).toBe(true)
+    expect(failureEvent.failure_class).toBe('missing_output_max_tokens')
+
+    expect(successTelemetrySink).toHaveBeenCalledTimes(1)
+    const successEvent: StructuredOutputSuccessTelemetryEvent = successTelemetrySink.mock.calls[0][0]
+    expect(successEvent.attempt).toBe(2)
+  })
+
+  // G/H/I. response ID, stop_reason, token usage included when available.
+  test('G/H/I: success event includes anthropic_response_id, stop_reason, and token usage', async () => {
+    const callOnce = jest.fn().mockResolvedValue(SUCCESS)
+    const successTelemetrySink = jest.fn()
+    await callWithOneRecoveryRetry('decider', callOnce, 1024, 2048, undefined, successTelemetrySink)
+    const event: StructuredOutputSuccessTelemetryEvent = successTelemetrySink.mock.calls[0][0]
+    expect(event.anthropic_response_id).toBe(SUCCESS.id)
+    expect(event.stop_reason).toBe(SUCCESS.stop_reason)
+    expect(event.input_tokens).toBe(SUCCESS.usage.input_tokens)
+    expect(event.output_tokens).toBe(SUCCESS.usage.output_tokens)
+  })
+
+  // J/K/L. Privacy: fixed allowlist only, no prompt/user/transcript content,
+  // no leakage even when the response object carries unexpected extra
+  // fields -- same discipline test L already proves for the failure event.
+  describe('success telemetry privacy', () => {
+    const SENSITIVE_MARKER = 'SENSITIVE_USER_PROMPT_CONTENT_MUST_NEVER_APPEAR_IN_SUCCESS_TELEMETRY'
+
+    test('success event contains only the documented fixed field set', async () => {
+      const callOnce = jest.fn().mockResolvedValue(SUCCESS)
+      const successTelemetrySink = jest.fn()
+      await callWithOneRecoveryRetry('decider', callOnce, 1024, 2048, undefined, successTelemetrySink)
+      const event: StructuredOutputSuccessTelemetryEvent = successTelemetrySink.mock.calls[0][0]
+      expect(Object.keys(event).sort()).toEqual(
+        [
+          'adapter',
+          'attempt',
+          'outcome',
+          'elapsed_ms',
+          'anthropic_response_id',
+          'stop_reason',
+          'content_block_types',
+          'parsed_output_present',
+          'thinking_tokens',
+          'output_tokens',
+          'input_tokens',
+        ].sort(),
+      )
+    })
+
+    test('success event never leaks an unexpected extra field on the response object (no spreading)', async () => {
+      const contaminated: any = response()
+      contaminated.candidate_question_text_DO_NOT_LOG = SENSITIVE_MARKER
+      contaminated.raw_prompt_DO_NOT_LOG = SENSITIVE_MARKER
+      const callOnce = jest.fn().mockResolvedValue(contaminated)
+      const successTelemetrySink = jest.fn()
+      await callWithOneRecoveryRetry('candidate_generator', callOnce, 1024, 2048, undefined, successTelemetrySink)
+      const event = successTelemetrySink.mock.calls[0][0]
+      expect(JSON.stringify(event)).not.toContain(SENSITIVE_MARKER)
+    })
+
+    test('defaultSuccessTelemetrySink logs via console.log with a distinct tag, no sensitive content', async () => {
+      const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
+      const callOnce = jest.fn().mockResolvedValue(SUCCESS)
+      await callWithOneRecoveryRetry('decider', callOnce, 1024, 2048, undefined, defaultSuccessTelemetrySink)
+      expect(logSpy).toHaveBeenCalledTimes(1)
+      expect(logSpy.mock.calls[0][0]).toBe('[anthropic-structured-output-timing]')
+      logSpy.mockRestore()
+    })
+  })
+
+  // M/N. No change to max call count or recovery token budgets.
+  test('M/N: adding success telemetry does not change call count or token budgets', async () => {
+    const callOnce = jest.fn().mockResolvedValueOnce(MISSING_MAX_TOKENS).mockResolvedValueOnce(SUCCESS)
+    const successTelemetrySink = jest.fn()
+    await callWithOneRecoveryRetry('decider', callOnce, 1024, 2048, undefined, successTelemetrySink)
+    expect(callOnce).toHaveBeenCalledTimes(2)
+    expect(callOnce).toHaveBeenNthCalledWith(1, 1024)
+    expect(callOnce).toHaveBeenNthCalledWith(2, 2048)
+  })
+
+  // O. No success event for a call that ultimately fails (both attempts miss).
+  test('O: both attempts fail -> zero success events emitted', async () => {
+    const callOnce = jest.fn().mockResolvedValue(MISSING_OTHER)
+    const successTelemetrySink = jest.fn()
+    await expect(callWithOneRecoveryRetry('decider', callOnce, 1024, 2048, undefined, successTelemetrySink)).rejects.toThrow()
+    expect(successTelemetrySink).not.toHaveBeenCalled()
   })
 })

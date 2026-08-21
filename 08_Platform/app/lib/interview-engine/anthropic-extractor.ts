@@ -38,6 +38,7 @@
 
 import Anthropic from '@anthropic-ai/sdk'
 import { jsonSchemaOutputFormat } from '@anthropic-ai/sdk/helpers/json-schema'
+import { performance } from 'node:perf_hooks'
 import type { CandidateExtractor, CandidateObservation, RawUserTurn } from './extraction'
 import { ASSET_PROVIDER_USAGE_VALUES } from '@/types/interview-engine'
 import { classifyMissingParsedOutput, type MinimalParsedAnthropicResponse, type StructuredOutputFailureClass } from './anthropic-structured-output-retry'
@@ -524,14 +525,63 @@ export const defaultExtractorTelemetrySink: ExtractorTelemetrySink = (event) => 
   console.warn('[anthropic-structured-output]', JSON.stringify(event))
 }
 
+/**
+ * Per-call SUCCESS timing telemetry (P0 timeout diagnostic follow-up,
+ * 2026-08-21) -- same reasoning and same deliberate non-coupling from
+ * anthropic-structured-output-retry.ts's own identical addition as the rest
+ * of this file's retry logic (see this file's own module header on why the
+ * extractor's retry mechanism is duplicated here, not imported). A
+ * SEPARATE sink from `telemetrySink`, so every existing test asserting
+ * `telemetrySink` is never called on a clean single-attempt success remains
+ * valid unmodified.
+ */
+export type ExtractorSuccessTelemetryEvent = {
+  adapter: 'extractor'
+  attempt: 1 | 2
+  outcome: 'success'
+  elapsed_ms: number
+  anthropic_response_id: string | null
+  stop_reason: string | null
+  content_block_types: string[] | null
+  parsed_output_present: boolean
+  thinking_tokens: number | null
+  output_tokens: number | null
+  input_tokens: number | null
+}
+
+export type ExtractorSuccessTelemetrySink = (event: ExtractorSuccessTelemetryEvent) => void
+
+/** Same observability mechanism as defaultExtractorTelemetrySink above -- console, no new logging system. Distinct log tag so success timing is trivially greppable/filterable separately from failure/retry events. */
+export const defaultExtractorSuccessTelemetrySink: ExtractorSuccessTelemetrySink = (event) => {
+  console.log('[anthropic-structured-output-timing]', JSON.stringify(event))
+}
+
 interface ExtractorAttemptSuccess<T> {
   ok: true
   response: T
+  elapsedMs: number
 }
 interface ExtractorAttemptFailure {
   ok: false
   failureClass: StructuredOutputFailureClass
   response?: MinimalParsedAnthropicResponse
+}
+
+function extractorSuccessTelemetryEvent<T extends MinimalParsedAnthropicResponse>(attempt: 1 | 2, outcome: ExtractorAttemptSuccess<T>): ExtractorSuccessTelemetryEvent {
+  const response = outcome.response
+  return {
+    adapter: 'extractor',
+    attempt,
+    outcome: 'success',
+    elapsed_ms: Math.round(outcome.elapsedMs),
+    anthropic_response_id: response.id,
+    stop_reason: response.stop_reason,
+    content_block_types: response.content.map((b) => b.type),
+    parsed_output_present: response.parsed_output != null,
+    thinking_tokens: response.usage.output_tokens_details?.thinking_tokens ?? null,
+    output_tokens: response.usage.output_tokens,
+    input_tokens: response.usage.input_tokens,
+  }
 }
 
 function extractorTelemetryEvent(attempt: 1 | 2, outcome: ExtractorAttemptFailure, retrying: boolean): ExtractorStructuredOutputTelemetryEvent {
@@ -555,6 +605,10 @@ async function attemptExtractionOnceCatching<T extends MinimalParsedAnthropicRes
   callOnce: (maxTokens: number) => Promise<T>,
   maxTokens: number,
 ): Promise<ExtractorAttemptSuccess<T> | ExtractorAttemptFailure> {
+  // Timing wraps ONLY this single awaited SDK call -- see
+  // anthropic-structured-output-retry.ts's identical addition for the
+  // reasoning on this boundary.
+  const startedAt = performance.now()
   let response: T
   try {
     response = await callOnce(maxTokens)
@@ -566,8 +620,9 @@ async function attemptExtractionOnceCatching<T extends MinimalParsedAnthropicRes
     if (!isStructuredOutputParseFailure(err)) throw err
     return { ok: false, failureClass: 'sdk_parse_failure' }
   }
+  const elapsedMs = performance.now() - startedAt
   const failureClass = classifyMissingParsedOutput(response)
-  if (failureClass === null) return { ok: true, response }
+  if (failureClass === null) return { ok: true, response, elapsedMs }
   return { ok: false, failureClass, response }
 }
 
@@ -587,13 +642,20 @@ export async function callWithStructuredOutputRecoveryRetry<T extends MinimalPar
   baseMaxTokens: number = BASE_EXTRACTION_MAX_TOKENS,
   retryMaxTokens: number = RETRY_EXTRACTION_MAX_TOKENS,
   telemetrySink: ExtractorTelemetrySink = defaultExtractorTelemetrySink,
+  successTelemetrySink: ExtractorSuccessTelemetrySink = defaultExtractorSuccessTelemetrySink,
 ): Promise<T> {
   const first = await attemptExtractionOnceCatching(callOnce, baseMaxTokens)
-  if (first.ok) return first.response
+  if (first.ok) {
+    successTelemetrySink(extractorSuccessTelemetryEvent(1, first))
+    return first.response
+  }
   telemetrySink(extractorTelemetryEvent(1, first, true))
 
   const second = await attemptExtractionOnceCatching(callOnce, retryMaxTokens)
-  if (second.ok) return second.response
+  if (second.ok) {
+    successTelemetrySink(extractorSuccessTelemetryEvent(2, second))
+    return second.response
+  }
   telemetrySink(extractorTelemetryEvent(2, second, false))
 
   throw new Error(

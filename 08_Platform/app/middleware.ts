@@ -25,6 +25,24 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // CRC API namespace bypass (P0 timeout diagnostic, 2026-08-21): reached
+  // only once the pilot-access gate above has already been fully evaluated
+  // -- either this path was exempt from it, or the pilot cookie matched.
+  // Every /api/crc/* route reads/writes through supabaseAdmin (the
+  // service-role client) exclusively; none constructs a Supabase user
+  // session or depends on one. The Supabase server-client construction and
+  // supabase.auth.getSession() call below exist only for the authenticated
+  // application paths (/dashboard, /submit, /record, /certify) and were
+  // running unconditionally for /api/crc/* too, at the cost of a real
+  // network call (a session-refresh request) on an expired/near-expiry
+  // Supabase cookie -- diagnosed as the likely cause of a production
+  // MIDDLEWARE_INVOCATION_TIMEOUT. This short-circuit removes that
+  // unnecessary work for the CRC API namespace only; /crc/:path* page
+  // requests and the four protected app namespaces are untouched below.
+  if (isCrcApiPath) {
+    return NextResponse.next()
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,

@@ -21,7 +21,9 @@
 
 import {
   callWithStructuredOutputRecoveryRetry,
+  defaultExtractorSuccessTelemetrySink,
   type ExtractorStructuredOutputTelemetryEvent,
+  type ExtractorSuccessTelemetryEvent,
 } from '@/lib/interview-engine/anthropic-extractor'
 import type { MinimalParsedAnthropicResponse } from '@/lib/interview-engine/anthropic-structured-output-retry'
 
@@ -202,5 +204,92 @@ describe('J: telemetry privacy', () => {
     expect(warnSpy).toHaveBeenCalledTimes(1)
     expect(warnSpy.mock.calls[0][0]).toBe('[anthropic-structured-output]')
     warnSpy.mockRestore()
+  })
+})
+
+/**
+ * P0 timeout diagnostic follow-up (2026-08-21) -- per-call SUCCESS timing
+ * telemetry for the extractor's own, deliberately-uncoupled retry
+ * mechanism. Item P of the milestone's own test matrix: proves the
+ * extractor uses the identical timing discipline as the decider/
+ * candidate-generator (covered in anthropic-structured-output-retry.test.ts).
+ */
+describe('callWithStructuredOutputRecoveryRetry -- success timing telemetry', () => {
+  test('first-attempt success -> exactly one success event, adapter "extractor", attempt 1, failure sink untouched', async () => {
+    const callOnce = jest.fn().mockResolvedValue(SUCCESS)
+    const telemetrySink = jest.fn()
+    const successTelemetrySink = jest.fn()
+    const result = await callWithStructuredOutputRecoveryRetry(callOnce, 3072, 4096, telemetrySink, successTelemetrySink)
+    expect(result).toBe(SUCCESS)
+    expect(telemetrySink).not.toHaveBeenCalled()
+    expect(successTelemetrySink).toHaveBeenCalledTimes(1)
+    const event: ExtractorSuccessTelemetryEvent = successTelemetrySink.mock.calls[0][0]
+    expect(event.adapter).toBe('extractor')
+    expect(event.attempt).toBe(1)
+    expect(event.outcome).toBe('success')
+  })
+
+  test('elapsed_ms is present and non-negative', async () => {
+    const callOnce = jest.fn().mockResolvedValue(SUCCESS)
+    const successTelemetrySink = jest.fn()
+    await callWithStructuredOutputRecoveryRetry(callOnce, 3072, 4096, undefined, successTelemetrySink)
+    const event: ExtractorSuccessTelemetryEvent = successTelemetrySink.mock.calls[0][0]
+    expect(typeof event.elapsed_ms).toBe('number')
+    expect(event.elapsed_ms).toBeGreaterThanOrEqual(0)
+  })
+
+  test('recovery success identifies attempt 2; existing failure telemetry for attempt 1 preserved unmodified', async () => {
+    const callOnce = jest.fn().mockResolvedValueOnce(MISSING_MAX_TOKENS).mockResolvedValueOnce(SUCCESS)
+    const telemetrySink = jest.fn()
+    const successTelemetrySink = jest.fn()
+    const result = await callWithStructuredOutputRecoveryRetry(callOnce, 3072, 4096, telemetrySink, successTelemetrySink)
+    expect(result).toBe(SUCCESS)
+    expect(telemetrySink).toHaveBeenCalledTimes(1)
+    expect(telemetrySink.mock.calls[0][0].attempt).toBe(1)
+    expect(telemetrySink.mock.calls[0][0].retrying).toBe(true)
+    expect(successTelemetrySink).toHaveBeenCalledTimes(1)
+    expect(successTelemetrySink.mock.calls[0][0].attempt).toBe(2)
+  })
+
+  test('success event includes anthropic_response_id, stop_reason, and token usage', async () => {
+    const callOnce = jest.fn().mockResolvedValue(SUCCESS)
+    const successTelemetrySink = jest.fn()
+    await callWithStructuredOutputRecoveryRetry(callOnce, 3072, 4096, undefined, successTelemetrySink)
+    const event: ExtractorSuccessTelemetryEvent = successTelemetrySink.mock.calls[0][0]
+    expect(event.anthropic_response_id).toBe(SUCCESS.id)
+    expect(event.stop_reason).toBe(SUCCESS.stop_reason)
+    expect(event.input_tokens).toBe(SUCCESS.usage.input_tokens)
+    expect(event.output_tokens).toBe(SUCCESS.usage.output_tokens)
+  })
+
+  test('success event contains only the documented fixed field set, and never leaks an unexpected response field', async () => {
+    const SENSITIVE_MARKER = 'SENSITIVE_USER_TRANSCRIPT_CONTENT_MUST_NEVER_APPEAR_IN_SUCCESS_TELEMETRY'
+    const contaminated: any = response()
+    contaminated.raw_text_DO_NOT_LOG = SENSITIVE_MARKER
+    const callOnce = jest.fn().mockResolvedValue(contaminated)
+    const successTelemetrySink = jest.fn()
+    await callWithStructuredOutputRecoveryRetry(callOnce, 3072, 4096, undefined, successTelemetrySink)
+    const event = successTelemetrySink.mock.calls[0][0]
+    expect(Object.keys(event).sort()).toEqual(
+      ['adapter', 'attempt', 'outcome', 'elapsed_ms', 'anthropic_response_id', 'stop_reason', 'content_block_types', 'parsed_output_present', 'thinking_tokens', 'output_tokens', 'input_tokens'].sort(),
+    )
+    expect(JSON.stringify(event)).not.toContain(SENSITIVE_MARKER)
+  })
+
+  test('defaultExtractorSuccessTelemetrySink logs via console.log with a distinct tag', async () => {
+    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
+    const callOnce = jest.fn().mockResolvedValue(SUCCESS)
+    await callWithStructuredOutputRecoveryRetry(callOnce, 3072, 4096, undefined, defaultExtractorSuccessTelemetrySink)
+    expect(logSpy).toHaveBeenCalledTimes(1)
+    expect(logSpy.mock.calls[0][0]).toBe('[anthropic-structured-output-timing]')
+    logSpy.mockRestore()
+  })
+
+  test('no change to call count or token budgets, and no success event when both attempts fail', async () => {
+    const callOnce = jest.fn().mockResolvedValue(MISSING_OTHER)
+    const successTelemetrySink = jest.fn()
+    await expect(callWithStructuredOutputRecoveryRetry(callOnce, 3072, 4096, undefined, successTelemetrySink)).rejects.toThrow()
+    expect(callOnce).toHaveBeenCalledTimes(2)
+    expect(successTelemetrySink).not.toHaveBeenCalled()
   })
 })
