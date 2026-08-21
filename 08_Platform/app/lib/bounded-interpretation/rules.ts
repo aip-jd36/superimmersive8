@@ -231,16 +231,46 @@ export function humanContributionRelevanceSentence(description: string): string 
  * passage collectively either way, so one template covers both cases
  * without a count parameter or branching.
  */
+/**
+ * `noDependencyStatement`/`noDependencyAllToolSourced` (CC-1 — Claim-Level
+ * Bounded Grouping, 2026-08-21): additive, default `null`/`true` -- every
+ * pre-existing call site (including every pre-CC-1 test) continues to
+ * compile and render byte-identical output without passing them. When the
+ * caller DOES pass a non-null `noDependencyStatement` (build-bounded-
+ * interpretation.ts, only when the Case 3B `matches[]` for a goal contains
+ * BOTH at least one claim with `unresolved_project_dependencies.length > 0`
+ * and at least one with `length === 0`), it is rendered as its OWN leading
+ * clause, reusing `boundaryClause` -- the exact same fixed, already-approved
+ * sentence `directlyRelevantSummary` already uses for a claim with no
+ * governed project dependency at all. This is not new prose: it is the
+ * identical wording this codebase already produces whenever every matched
+ * claim for a goal is dependency-free (the `directly_relevant` branch in
+ * build-bounded-interpretation.ts). Reusing it here means a dependency-free
+ * claim is described identically regardless of whether it happens to share
+ * a goal with a dependency-bearing claim -- no new conclusion, no
+ * "resolved"/"cleared"/"safe" language, ever. The closing hedge/bridge
+ * sentence below is untouched and still appears exactly once, scoped to the
+ * (still full, still verbatim) dependency-bearing `claimStatement` --
+ * doubling the "This is relevant to..." lead-in is the accepted, minimal
+ * cost of keeping the closing hedge/bridge byte-identical rather than
+ * redesigning it (PM instruction: preserve it literally or stop and
+ * report -- it remains literally preservable, so it is preserved).
+ */
 export function relevantApplicabilityUnresolvedWithContentSummary(
   category: GoalCategory,
   claimStatement: string,
   includesRelatedTopicContent: boolean = false,
   humanContributionSentence: string | null = null,
+  noDependencyStatement: string | null = null,
+  noDependencyAllToolSourced: boolean = true,
 ): string {
   const relatedClause = includesRelatedTopicContent ? ` ${RELATED_TOPIC_BOUNDARY_CLAUSE}` : ''
   // H5 -- minimal echo-only relevance composition (Copyright UAT Correction
   // Milestone, 2026-08-19): inserted BEFORE the closing uncertainty hedge
   // below, additively -- the hedge itself is never removed or replaced.
   const contributionClause = humanContributionSentence ? ` ${humanContributionSentence}` : ''
-  return `${claimStatement}${relatedClause}${contributionClause} This is relevant to ${CATEGORY_LABELS[category]}, but based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project. ${BRIDGE_SENTENCE}`
+  const noDependencyClause = noDependencyStatement
+    ? `${noDependencyStatement} This is relevant to ${CATEGORY_LABELS[category]}, ${boundaryClause(noDependencyAllToolSourced)} `
+    : ''
+  return `${noDependencyClause}${claimStatement}${relatedClause}${contributionClause} This is relevant to ${CATEGORY_LABELS[category]}, but based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project. ${BRIDGE_SENTENCE}`
 }

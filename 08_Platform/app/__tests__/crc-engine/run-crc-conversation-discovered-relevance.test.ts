@@ -126,6 +126,62 @@ describe('canonical production acceptance test (Section 24)', () => {
     const { output } = runCRCConversation(productionIstockSessionState(), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
     expect(output.knowledge_items.some((k) => k.claim_id === 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')).toBe(true)
   })
+
+  // CC-1 -- Claim-Level Bounded Grouping (2026-08-21): the canonical
+  // Kling + generic-stock + iStock case, at the full runCRCConversation()
+  // level. Before CC-1, Kling's own dependency-free claim was flattened
+  // into the same undifferentiated join as the two dependency-bearing stock
+  // claims. This proves: Kling guidance survives, generic stock guidance
+  // survives, iStock guidance survives, the dependency-free (Kling) content
+  // is grouped into its own distinguishable clause ahead of the
+  // dependency-bearing content, the overall status/hedge is unchanged, and
+  // no stronger conclusion (about Kling OR about the stock claims) is
+  // generated.
+  test('4. canonical Kling + iStock -- Kling guidance is grouped distinguishably from dependency-bearing stock/iStock guidance, overall bounded treatment preserved, no stronger conclusion', () => {
+    const { output } = runCRCConversation(productionIstockSessionState(), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    const interp = output.goal_interpretations[0]
+
+    // All three governed statements survive, verbatim.
+    expect(interp.summary).toContain("Kling's commercial-use permissions depend on your account type")
+    expect(interp.summary).toContain('A stock-media provider\'s standard license for content marked "Editorial"')
+    expect(interp.summary).toContain('iStock\'s standard license doesn\'t cover commercial')
+
+    // Kling (the only dependency-free match) is grouped into its own
+    // clause, using the EXISTING directly_relevant-style boundary sentence,
+    // ordered before the dependency-bearing stock/iStock content.
+    expect(interp.summary).toContain("though it reflects the platform's own terms, not a full determination of your specific project's commercial readiness.")
+    expect(interp.summary.indexOf("Kling's commercial-use permissions")).toBeLessThan(interp.summary.indexOf('A stock-media provider'))
+
+    // The single, unchanged unresolved-applicability hedge still governs
+    // the overall goal -- exactly once, not duplicated per group.
+    expect(interp.summary).toContain("there isn't enough project-specific information to determine how it applies")
+    expect(interp.summary.match(/A human-reviewed Commercial Assurance Assessment can address this directly\./g)).toHaveLength(1)
+
+    // Bounded status unchanged -- CC-1 does not create a stronger or a
+    // weaker overall conclusion for the goal.
+    expect(output.goal_interpretations).toHaveLength(1)
+
+    // No stronger conclusion about EITHER Kling or the stock/iStock claims.
+    const noConclusionLanguage =
+      /\bresolved\b|\bappears resolved\b|\bsatisfied\b|\bverified\b|\bchecked\b|\bcleared\b|\bsafe\b|\bapproved\b|commercially usable|not a blocker|not the issue|no longer an issue|primary blocker|material issue|only remaining issue|commercially cleared/i
+    expect(interp.summary).not.toMatch(noConclusionLanguage)
+  })
+
+  // 5. Multiple dependency-bearing stock claims (generic-001 + istock) --
+  // both governed statements survive; neither is singled out as primary.
+  test('5. multiple dependency-bearing stock claims -- all governed statements survive, none arbitrarily selected as the primary/material issue', () => {
+    const { output, trace } = runCRCConversation(productionIstockSessionState(), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    const dependencyBearingResults = trace.retrieval_results.filter((r) => r.matched_goal_category === 'commercial_use' && r.unresolved_project_dependencies.length > 0)
+    const dependencyBearingIds = dependencyBearingResults.map((r) => r.claim_id)
+    expect(dependencyBearingIds).toEqual(expect.arrayContaining(['CLAIM-STOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1']))
+    const interp = output.goal_interpretations[0]
+    // Every dependency-bearing claim's own governed statement is quoted --
+    // none dropped, none singled out as "the" answer.
+    for (const r of dependencyBearingResults) {
+      expect(interp.summary).toContain(r.candidate_statement)
+    }
+    expect(interp.summary).not.toMatch(/primary|material issue|main (issue|blocker)/i)
+  })
 })
 
 // O. Multi-goal isolation (Track C — Discovered-Topic Goal Provenance,

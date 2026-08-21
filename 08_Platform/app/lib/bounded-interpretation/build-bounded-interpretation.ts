@@ -41,6 +41,25 @@ import {
 const HUMAN_CONTRIBUTION_DEPENDENCY = 'human_contribution_description'
 
 /**
+ * CC-1 — Claim-Level Bounded Grouping (2026-08-21, PM/Architecture-
+ * authorized, narrowly scoped). Mechanical, representation-neutral read of
+ * existing governance metadata Retrieval already passed through -- not a
+ * new fact, not an inference. Deliberately named for what the array
+ * literally contains ("has a governed project dependency"), never
+ * "resolved"/"unresolved_issue_resolved"/"cleared"/"safe" -- per the
+ * follow-up diagnostic (2026-08-21), a `length === 0` result never means
+ * the underlying project fact was checked, confirmed, or resolved; it only
+ * means this mechanism represents no governed project dependency for that
+ * claim. See build-bounded-interpretation.ts's own module header and
+ * rules.ts's own doc comment on relevantApplicabilityUnresolvedWithContentSummary
+ * for how this boolean is used -- to GROUP already-selected, already-quoted
+ * claim statements, never to rank, explain, or strengthen them.
+ */
+function hasGovernedProjectDependencies(match: RetrievalResult): boolean {
+  return match.unresolved_project_dependencies.length > 0
+}
+
+/**
  * H5 -- minimal echo-only relevance composition (Copyright UAT Correction
  * Milestone, 2026-08-19, PM-approved narrow scope, exact conditions A/B/C
  * from the milestone task). NOT full Project-Fact-Aware Bounded Composition
@@ -136,19 +155,61 @@ export function buildBoundedInterpretations(
       // applicability template instead of directly_relevant -- content is
       // still quoted (matches directly_relevant's own quoting discipline),
       // only the closing sentence and status differ.
-      if (matches.some((m) => m.unresolved_project_dependencies.length > 0)) {
+      if (matches.some(hasGovernedProjectDependencies)) {
+        // CC-1 -- Claim-Level Bounded Grouping (2026-08-21): the prior
+        // single `combinedStatement` flattened every matched claim
+        // (dependency-bearing and dependency-free alike) into one join,
+        // then applied the SAME unresolved-applicability hedge to all of
+        // it -- including a claim (e.g. a tool-sourced commercial-use
+        // claim) that carries no governed project dependency at all. This
+        // preserves both claim-level groups as distinguishable, still-
+        // verbatim `candidate_statement` clauses instead: dependency-
+        // bearing matches keep the existing hedge/status exactly as
+        // before; dependency-free matches (if any are ALSO present for
+        // this goal) are rendered via the same fixed boundary language
+        // `directly_relevant` already uses for a dependency-free claim --
+        // no new wording, no positive project-state conclusion. The
+        // overall goal `status` remains 'relevant_applicability_unresolved'
+        // unchanged (still triggered by the same `.some()` check above,
+        // just now backed by the named helper instead of an inline
+        // expression -- behavior-identical refactor).
+        const dependencyBearingMatches = matches.filter(hasGovernedProjectDependencies)
+        const noDependencyMatches = matches.filter((m) => !hasGovernedProjectDependencies(m))
+
+        const dependencyBearingStatement = dependencyBearingMatches
+          .map((m) => m.candidate_statement)
+          .filter((s): s is string => s !== null)
+          .join(' ')
+        const noDependencyStatement =
+          noDependencyMatches.length > 0
+            ? noDependencyMatches
+                .map((m) => m.candidate_statement)
+                .filter((s): s is string => s !== null)
+                .join(' ') || null
+            : null
+        const noDependencyAllToolSourced = noDependencyMatches.every((m) => m.source_fact.kind === 'tool')
+
         // H5 (Copyright UAT Correction Milestone, 2026-08-19): additive
         // only -- when all three conditions hold, a bounded, deterministic
         // sentence echoing the user's own self-reported contribution is
         // inserted BEFORE the unchanged closing hedge below; otherwise this
-        // renders byte-identical to before H5 existed.
+        // renders byte-identical to before H5 existed. Still evaluated
+        // against ALL matches (unchanged) -- H5's own gating is untouched
+        // by this milestone.
         const humanContributionSentence = shouldIncludeHumanContributionSentence(goal.category, matches, humanContributionDescription)
           ? humanContributionRelevanceSentence(humanContributionDescription.state === 'confirmed' ? humanContributionDescription.value : '')
           : null
         return buildInterpretation(
           goal,
           'relevant_applicability_unresolved',
-          relevantApplicabilityUnresolvedWithContentSummary(goal.category, combinedStatement, includesRelatedTopicContent, humanContributionSentence),
+          relevantApplicabilityUnresolvedWithContentSummary(
+            goal.category,
+            dependencyBearingStatement,
+            includesRelatedTopicContent,
+            humanContributionSentence,
+            noDependencyStatement,
+            noDependencyAllToolSourced,
+          ),
           claimIds,
         )
       }

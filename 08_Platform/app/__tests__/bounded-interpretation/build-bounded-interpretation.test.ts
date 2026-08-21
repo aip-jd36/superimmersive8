@@ -583,6 +583,160 @@ describe('buildBoundedInterpretations -- Case 3A / Case 3B relevant_applicabilit
   })
 })
 
+// ── CC-1 -- Claim-Level Bounded Grouping (2026-08-21, PM/Architecture-
+// authorized) ────────────────────────────────────────────────────────────
+describe('buildBoundedInterpretations -- CC-1 Claim-Level Bounded Grouping', () => {
+  function testTopicClaim(overrides: Partial<TopicClaim> & Pick<TopicClaim, 'claim_id' | 'topic'>): TopicClaim {
+    return {
+      claim_character: 'established',
+      jurisdiction: 'Global',
+      lifecycle: 'Adopted',
+      crc_eligible: 'Yes',
+      crc_publication_scope: 'Test scope text.',
+      crc_candidate_statement: 'Test governed statement.',
+      applicability_requirements: [],
+      unresolved_project_dependencies: [],
+      provider_scope: null,
+      last_verified: '2026-08-16',
+      superseded_by: null,
+      ...overrides,
+    }
+  }
+
+  const noConclusionLanguage =
+    /\bresolved\b|\bunresolved_issue_resolved\b|\bappears resolved\b|\bsatisfied\b|\bverified\b|\bchecked\b|\bcleared\b|\bsafe\b|\bapproved\b|commercially usable|not a blocker|not the issue|no longer an issue/i
+
+  const facts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+
+  test('1. single claim, empty dependency array -- unaffected by CC-1, no generated conclusion language', () => {
+    const claims = [testTopicClaim({ claim_id: 'NO-DEP', topic: 'copyrightability', crc_candidate_statement: 'A dependency-free governed statement.' })]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], claims, facts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('directly_relevant')
+    expect(interp.summary).not.toMatch(noConclusionLanguage)
+  })
+
+  test('2. single dependency-bearing claim -- existing unresolved-applicability behavior and hedge unchanged', () => {
+    const claims = [testTopicClaim({ claim_id: 'DEP-ONLY', topic: 'copyrightability', crc_candidate_statement: 'A dependency-bearing governed statement.', unresolved_project_dependencies: ['human_contribution_description'] })]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], claims, facts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('relevant_applicability_unresolved')
+    expect(interp.summary).toBe(
+      "A dependency-bearing governed statement. This is relevant to whether this kind of output can be copyrighted at all, but based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project. A human-reviewed Commercial Assurance Assessment can address this directly.",
+    )
+  })
+
+  test('3. mixed claims under one explicit goal -- no longer one undifferentiated block: the dependency-free claim gets its own boundary clause, ordered before the dependency-bearing claim, single hedge preserved', () => {
+    const claims = [
+      testTopicClaim({ claim_id: 'NO-DEP', topic: 'third_party_source_rights', crc_candidate_statement: 'Dependency-free statement.' }),
+      testTopicClaim({ claim_id: 'DEP', topic: 'third_party_source_rights', crc_candidate_statement: 'Dependency-bearing statement.', unresolved_project_dependencies: ['editorial_designation_confirmed'] }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use these third-party images commercially?', category: 'third_party_source_rights' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], claims, facts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('relevant_applicability_unresolved')
+    // Both governed statements survive verbatim.
+    expect(interp.summary).toContain('Dependency-free statement.')
+    expect(interp.summary).toContain('Dependency-bearing statement.')
+    // Ordered as two distinguishable clauses, not interleaved -- the
+    // dependency-free clause (with its own boundary sentence) precedes the
+    // dependency-bearing clause (with the unresolved-applicability hedge).
+    expect(interp.summary.indexOf('Dependency-free statement.')).toBeLessThan(interp.summary.indexOf('Dependency-bearing statement.'))
+    expect(interp.summary).toContain("though it doesn't by itself determine the answer for your specific project.")
+    expect(interp.summary).toContain("there isn't enough project-specific information to determine how it applies")
+    // Exactly one bridge sentence -- not duplicated.
+    expect(interp.summary.match(/A human-reviewed Commercial Assurance Assessment can address this directly\./g)).toHaveLength(1)
+    expect(interp.supporting_claim_ids.sort()).toEqual(['DEP', 'NO-DEP'])
+    expect(interp.summary).not.toMatch(noConclusionLanguage)
+  })
+
+  test('4. multiple dependency-bearing claims, no dependency-free claim present -- all survive, none singled out, byte-identical to pre-CC-1 template shape', () => {
+    const claims = [
+      testTopicClaim({ claim_id: 'DEP-A', topic: 'third_party_source_rights', crc_candidate_statement: 'First dependency-bearing statement.', unresolved_project_dependencies: ['editorial_designation_confirmed'] }),
+      testTopicClaim({ claim_id: 'DEP-B', topic: 'third_party_source_rights', crc_candidate_statement: 'Second dependency-bearing statement.', unresolved_project_dependencies: ['release_status_confirmed'] }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use these third-party images commercially?', category: 'third_party_source_rights' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], claims, facts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.summary).toContain('First dependency-bearing statement.')
+    expect(interp.summary).toContain('Second dependency-bearing statement.')
+    expect(interp.summary.match(/A human-reviewed Commercial Assurance Assessment can address this directly\./g)).toHaveLength(1)
+    expect(interp.supporting_claim_ids.sort()).toEqual(['DEP-A', 'DEP-B'])
+  })
+
+  test('6. explicit third_party_source_rights goal -- grouping is generic, not dependent on discovered-topic origin (identical mechanics to a discovered case)', () => {
+    const claims = [
+      testTopicClaim({ claim_id: 'EXPLICIT-NO-DEP', topic: 'third_party_source_rights', crc_candidate_statement: 'Explicit-goal dependency-free statement.' }),
+      testTopicClaim({ claim_id: 'EXPLICIT-DEP', topic: 'third_party_source_rights', crc_candidate_statement: 'Explicit-goal dependency-bearing statement.', unresolved_project_dependencies: ['which_provider'] }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use these third-party images commercially?', category: 'third_party_source_rights' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], claims, facts)
+    expect(out.results.every((r) => r.match_origin === 'exact_topic')).toBe(true) // explicit path, not discovered
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.summary.indexOf('Explicit-goal dependency-free statement.')).toBeLessThan(interp.summary.indexOf('Explicit-goal dependency-bearing statement.'))
+    expect(interp.summary).toContain("though it doesn't by itself determine the answer for your specific project.")
+  })
+
+  test('9. dependency identity opacity -- no raw dependency identifier string is ever introduced into the rendered summary', () => {
+    const claims = [
+      testTopicClaim({ claim_id: 'NO-DEP', topic: 'third_party_source_rights', crc_candidate_statement: 'Dependency-free statement.' }),
+      testTopicClaim({
+        claim_id: 'DEP',
+        topic: 'third_party_source_rights',
+        crc_candidate_statement: 'Dependency-bearing statement.',
+        unresolved_project_dependencies: ['asset_confirmed_istock', 'editorial_designation_confirmed'],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use these third-party images commercially?', category: 'third_party_source_rights' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], claims, facts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.summary).not.toMatch(/asset_confirmed_istock|editorial_designation_confirmed|unresolved_project_dependencies/)
+  })
+
+  test('10. evidence-only-shaped dependencies remain unresolved -- never rendered as self-attestation or inferred resolution', () => {
+    const claims = [testTopicClaim({ claim_id: 'DEP', topic: 'third_party_source_rights', crc_candidate_statement: 'Editorial-restriction statement.', unresolved_project_dependencies: ['editorial_designation_confirmed'] })]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use these third-party images commercially?', category: 'third_party_source_rights' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], claims, facts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('relevant_applicability_unresolved')
+    expect(interp.summary).not.toMatch(noConclusionLanguage)
+  })
+
+  test('16. semantic asymmetry -- an empty unresolved_project_dependencies array generates no project-state conclusion beyond the governed claim statement + existing directly_relevant boundary clause', () => {
+    const claims = [testTopicClaim({ claim_id: 'NO-DEP', topic: 'copyrightability', crc_candidate_statement: 'Dependency-free statement.' })]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], claims, facts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    // Exactly the pre-existing directly_relevant template -- nothing stronger.
+    expect(interp.summary).toBe(directlyRelevantSummary('copyrightability', 'Dependency-free statement.', false, false))
+    expect(interp.summary).not.toMatch(noConclusionLanguage)
+  })
+
+  test('17. claim preservation / traceability -- every grouped statement (both the dependency-free clause and the dependency-bearing clause) remains a verbatim substring of the summary, traceable to its own candidate_statement', () => {
+    const noDep = testTopicClaim({ claim_id: 'NO-DEP', topic: 'third_party_source_rights', crc_candidate_statement: 'Traceable dependency-free statement.' })
+    const dep = testTopicClaim({ claim_id: 'DEP', topic: 'third_party_source_rights', crc_candidate_statement: 'Traceable dependency-bearing statement.', unresolved_project_dependencies: ['editorial_designation_confirmed'] })
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use these third-party images commercially?', category: 'third_party_source_rights' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], [noDep, dep], facts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.summary).toContain(noDep.crc_candidate_statement)
+    expect(interp.summary).toContain(dep.crc_candidate_statement)
+  })
+
+  test('all-tool-sourced vs mixed-source boundary clause is computed independently per group -- a tool-sourced dependency-free match still gets the platform-terms clause even when grouped alongside a topic-sourced dependency-bearing match', () => {
+    const stockClaim = testTopicClaim({ claim_id: 'STOCK-DEP', topic: 'commercial_use', crc_candidate_statement: 'Stock dependency-bearing statement.', unresolved_project_dependencies: ['editorial_designation_confirmed'] })
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const out = retrieve(handoff({ tools: [tool('kling')] }), MATRIX_FIXTURE, [g], [stockClaim], facts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.summary).toContain("Kling's commercial-use permissions depend on your account type")
+    // Kling (tool-sourced, dependency-free) keeps the EXACT existing tool boundary clause, byte-for-byte.
+    expect(interp.summary).toContain("though it reflects the platform's own terms, not a full determination of your specific project's commercial readiness.")
+    expect(interp.summary).toContain('Stock dependency-bearing statement.')
+    expect(interp.summary).not.toMatch(noConclusionLanguage)
+  })
+})
+
 describe('buildBoundedInterpretations -- never fabricates, never invents claim content', () => {
   test('summary text is always either fixed template copy or a verbatim RetrievalResult.candidate_statement -- never contains text absent from both sources', () => {
     const out = retrieve(handoff({ tools: [tool('midjourney')] }), MATRIX_FIXTURE)
