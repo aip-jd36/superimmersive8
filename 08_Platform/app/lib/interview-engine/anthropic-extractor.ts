@@ -40,7 +40,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { jsonSchemaOutputFormat } from '@anthropic-ai/sdk/helpers/json-schema'
 import { performance } from 'node:perf_hooks'
 import type { CandidateExtractor, CandidateObservation, RawUserTurn } from './extraction'
-import { ASSET_PROVIDER_USAGE_VALUES } from '@/types/interview-engine'
+import { ASSET_PROVIDER_USAGE_VALUES, type AssetProviderUsageValue } from '@/types/interview-engine'
 import { classifyMissingParsedOutput, type MinimalParsedAnthropicResponse, type StructuredOutputFailureClass } from './anthropic-structured-output-retry'
 
 export const DEFAULT_MODEL = 'claude-sonnet-5'
@@ -58,12 +58,12 @@ For each distinct fact-bearing statement in the turn, produce one candidate:
   If no such context line is present (nothing confirmed yet) and the user gives a vague or uncertain answer ("I don't know", "mostly AI", "I edited it a bit"), still propose the candidate with their own words as stated and fact_confidence_hint "confirmed" -- an imprecise self-report is still a real, confirmed answer, exactly like an imprecise intended_use answer is.
 - kind "user_goal": the user explicitly states what they came here wanting to know or achieve about THIS workflow's commercial readiness -- a question ("Can I use this commercially?", "Will my client own this?") and a declarative need ("My client needs proof this is cleared.", "I'm trying to figure out whether this is okay for a paid campaign.") are equally valid; capture either. This is distinct from project_fact's intended_use: intended_use describes what the OUTPUT is for (e.g. "an AI commercial for my client"); user_goal is what the USER wants to know or achieve regarding commercial readiness. A turn can and often does contain both at once -- propose both candidates when it does, never merge them into one.
 - kind "asset_provider_mention": the user names a third-party source/stock media provider that supplied material used IN the project (e.g. "Getty", "Getty Images", "iStock", "Shutterstock", "Adobe Stock") -- report the name via raw_provider_name, never raw_tool_name. This is a source of material, not a tool used to generate anything. Propose this candidate whenever a provider is named, REGARDLESS of whether the turn also contains a user_goal -- recognizing that a provider was mentioned is independent of whether the user is asking a rights question about it right now. If the user names a provider but is genuinely unsure which one ("I got it from Getty or iStock, I don't remember which"), set low_confidence: true rather than guessing between them.
-  When kind is "asset_provider_mention" and the user DIRECTLY states, in THIS turn, how that provider's material was used in the workflow or what license/subscription covers it, also report it via usage_confidence_hint/usage_value_hint and license_confidence_hint/license_value_hint:
-  - usage_value_hint: exactly one of "reference_material" (used only as a visual/creative reference, not fed into generation), "direct_generation_input" (uploaded/fed directly into the AI generation process), or "other" (a workflow use that is neither of those, described in their own words in raw_text). Choose based on what they actually described -- never guess between "reference_material" and "direct_generation_input" if the turn is genuinely ambiguous about which applies; in that case leave usage_confidence_hint unset.
-  - license_value_hint: the user's own wording for their license/subscription/permission for that provider's material (e.g. "standard license", "the extended license", "Editorial use only", "a royalty-free subscription"). Report their words as stated -- never translate to a category you infer, never assume a license TYPE from a subscription TIER they did not themselves connect.
-  - Set the paired confidence_hint to "confirmed" only when the user stated it as a clear, direct fact this turn. Leave both hints in a pair null/unset when the turn says nothing about that provider's usage or license -- never inferred from generic context.
-  - CRITICAL multi-provider safety: only set a usage/license hint on a candidate when it is clear which SPECIFIC provider the statement refers to. If more than one provider is active in the conversation and the turn's usage/license statement does not clearly attach to one of them (e.g. "I have the standard license" with both Getty and iStock already mentioned and no other cue), leave usage_confidence_hint/license_confidence_hint unset entirely on every candidate this turn -- do NOT guess which provider it belongs to, and do NOT attach it to whichever provider happens to be mentioned first.
-  - These hints can also appear on a candidate that corrects/restates the SAME provider already mentioned earlier (e.g. "Actually, those were Editorial-use iStock images.") -- propose it the same way any other asset_provider_mention correction is proposed, with the corrected usage/license hint set.
+  When kind is "asset_provider_mention" and the user DIRECTLY states, in THIS turn, how that provider's material was used in the workflow or what license/subscription covers it, also report it as an entry in this candidate's attributes array (key "usage" and/or key "license" -- see the attributes field description for the exact shape):
+  - key "usage": value is exactly one of "reference_material" (used only as a visual/creative reference, not fed into generation), "direct_generation_input" (uploaded/fed directly into the AI generation process), or "other" (a workflow use that is neither of those, described in their own words in raw_text). Choose based on what they actually described -- never guess between "reference_material" and "direct_generation_input" if the turn is genuinely ambiguous about which applies; in that case omit the "usage" entry entirely.
+  - key "license": value is the user's own wording for their license/subscription/permission for that provider's material (e.g. "standard license", "the extended license", "Editorial use only", "a royalty-free subscription"). Report their words as stated -- never translate to a category you infer, never assume a license TYPE from a subscription TIER they did not themselves connect.
+  - Set confidence to "confirmed" only when the user stated it as a clear, direct fact this turn. Omit the entry entirely (do not include a "usage"/"license" entry at all) when the turn says nothing about that provider's usage or license -- never inferred from generic context.
+  - CRITICAL multi-provider safety: only add a usage/license entry on a candidate when it is clear which SPECIFIC provider the statement refers to. If more than one provider is active in the conversation and the turn's usage/license statement does not clearly attach to one of them (e.g. "I have the standard license" with both Getty and iStock already mentioned and no other cue), omit the usage/license entry entirely on every candidate this turn -- do NOT guess which provider it belongs to, and do NOT attach it to whichever provider happens to be mentioned first.
+  - These entries can also appear on a candidate that corrects/restates the SAME provider already mentioned earlier (e.g. "Actually, those were Editorial-use iStock images.") -- propose it the same way any other asset_provider_mention correction is proposed, with the corrected usage/license entry included.
 
 Third-party source rights is its own user_goal category (see goal_category_hint below) for whether the user has the RIGHTS to use third-party source material (e.g. a stock image) in the project -- a materially different question from commercial_use (whether the AI-generated OUTPUT can be used commercially). This category is EXPLICIT-QUESTION-GATED ONLY, exactly like every other goal category: propose it only when the user asks a direct question or states a direct need about permission/rights to use the source material.
 Examples that SHOULD produce a third_party_source_rights user_goal: "Can I use this Getty image in an ad?", "Can I use these iStock images in my client commercial?", "Do I have the rights to use this stock image?", "Can I use a Shutterstock Editorial photo in this campaign?", "Am I allowed to use this licensed stock footage in the video?".
@@ -114,12 +114,12 @@ You MUST NOT:
 - Decide whether a statement should override or replace an earlier one -- only flag with is_correction whether it reads like a correction, never resolve what it corrects.
 - Apply any judgment about commercial risk, legal risk, or readiness. You are not evaluating the project, only transcribing what was said about it.
 
-When kind is "tool_mention" and the user DIRECTLY states which specific plan/tier or access surface they used for that tool in THIS turn, also report it via plan_tier_confidence_hint/plan_tier_value_hint and access_surface_confidence_hint/access_surface_value_hint:
-- plan_tier_value_hint: the user's own wording for their subscription/account tier (e.g. "paid", "free", "the free plan", "personal paid plan", "business plan", "enterprise plan"). Report their words as stated -- never translate to a specific branded tier name (e.g. "Pro", "Team") they did not themselves say.
-- access_surface_value_hint: the user's own wording for HOW they accessed the tool (e.g. "the website", "the app", "the API", "a developer key") -- distinct from plan_tier, which is about their tier of subscription, not the surface they used it through.
-- Set the paired confidence_hint to "confirmed" only when the user stated the plan/tier or access surface as a clear, direct fact this turn. If they expressed genuine uncertainty (e.g. "I think it might be Pro"), set confidence_hint to "unknown" instead of "confirmed", and leave the value_hint null.
-- Leave both pairs null/unset when the turn says nothing about plan tier or access surface for that tool -- never infer either from generic enthusiasm, unrelated context, or a different tool's plan.
-- These two hints are independent: a turn can state one, both, or neither for the same tool mention.
+When kind is "tool_mention" and the user DIRECTLY states which specific plan/tier or access surface they used for that tool in THIS turn, also report it as an entry in this candidate's attributes array (key "plan_tier" and/or key "access_surface" -- see the attributes field description for the exact shape):
+- key "plan_tier": value is the user's own wording for their subscription/account tier (e.g. "paid", "free", "the free plan", "personal paid plan", "business plan", "enterprise plan"). Report their words as stated -- never translate to a specific branded tier name (e.g. "Pro", "Team") they did not themselves say.
+- key "access_surface": value is the user's own wording for HOW they accessed the tool (e.g. "the website", "the app", "the API", "a developer key") -- distinct from plan_tier, which is about their tier of subscription, not the surface they used it through.
+- Set confidence to "confirmed" only when the user stated the plan/tier or access surface as a clear, direct fact this turn. If they expressed genuine uncertainty (e.g. "I think it might be Pro"), set confidence to "unknown" instead of "confirmed", and leave value as an empty string.
+- Omit the entry entirely (do not include a "plan_tier"/"access_surface" entry at all) when the turn says nothing about plan tier or access surface for that tool -- never infer either from generic enthusiasm, unrelated context, or a different tool's plan.
+- These two entries are independent: a turn can include one, both, or neither for the same tool mention.
 
 If a turn contains nothing you can classify as one of the four kinds -- small talk, an incomplete thought, pure filler -- return no candidates for it, or set low_confidence: true on a best-effort candidate if you're genuinely unsure whether something is a real signal.`
 
@@ -131,6 +131,19 @@ const PROJECT_FACT_FIELD_VALUES = ['intended_use', 'workflow_role', 'jurisdictio
 /** Milestone 2 (2026-08-15); extended with 'third_party_source_rights' (Living Knowledge — Third-Party Source Rights, M1+M2, 2026-08-18). Mirrors GOAL_CATEGORIES / GOAL_SCOPES in types/interview-engine.ts -- kept as separate local consts here, same pattern as every other *_VALUES const in this file, rather than importing the runtime const array across the adapter boundary. */
 const GOAL_CATEGORY_VALUES = ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'third_party_source_rights', 'unknown'] as const
 const GOAL_SCOPE_VALUES = ['informational', 'determination_request'] as const
+/**
+ * P0 Anthropic schema-union-limit fix (2026-08-21). Generic wire-level
+ * attribute vocabulary replacing eight formerly-dedicated flat nullable
+ * schema fields (access_surface_confidence_hint/value_hint,
+ * plan_tier_confidence_hint/value_hint, usage_confidence_hint/value_hint,
+ * license_confidence_hint/value_hint) with one `attributes: ExtractedAttribute[]`
+ * array on CANDIDATE_RESPONSE_SCHEMA -- see that schema's own header for
+ * the full architectural rationale. A closed, deliberately small key
+ * vocabulary: growing it (a future LK fact attribute) adds one enum value
+ * here, never a new top-level nullable Anthropic schema parameter.
+ */
+const EXTRACTED_ATTRIBUTE_KEY_VALUES = ['access_surface', 'plan_tier', 'usage', 'license'] as const
+type ExtractedAttributeKey = (typeof EXTRACTED_ATTRIBUTE_KEY_VALUES)[number]
 
 /**
  * The model-facing schema. All fields are required (nullable rather than
@@ -141,7 +154,8 @@ const GOAL_SCOPE_VALUES = ['informational', 'determination_request'] as const
  * cannot know this pipeline's internal ids), no `turn` (the adapter stamps
  * it from the RawUserTurn it was given, not from anything the model reports).
  */
-const CANDIDATE_RESPONSE_SCHEMA = {
+/** Exported (2026-08-21, P0 union-limit guardrail) solely so a deterministic, no-network test can inspect the ACTUAL production schema object -- export-only, zero runtime behavior change. */
+export const CANDIDATE_RESPONSE_SCHEMA = {
   type: 'object',
   properties: {
     candidates: {
@@ -171,50 +185,34 @@ const CANDIDATE_RESPONSE_SCHEMA = {
             description:
               'When kind is asset_provider_mention: return ONLY the third-party source/stock media provider name itself (e.g. "Getty", "Getty Images", "iStock", "Shutterstock", "Adobe Stock"), preserving the user\'s wording. Never a tool/platform used to generate content -- see raw_tool_name for that. Never map it to a canonical id yourself. Null otherwise.',
           },
-          usage_confidence_hint: {
-            type: ['string', 'null'],
-            enum: [...CONFIDENCE_HINT_VALUES, null],
+          attributes: {
+            type: 'array',
             description:
-              "When kind is asset_provider_mention and the user directly stated, this turn, how that provider's material was used in the workflow: confirmed. Null when the turn says nothing about usage for this provider, or when it is unclear which of several active providers a usage statement refers to -- never inferred, never guessed between providers.",
-          },
-          usage_value_hint: {
-            type: ['string', 'null'],
-            enum: [...ASSET_PROVIDER_USAGE_VALUES, null],
-            description:
-              "When usage_confidence_hint is confirmed: exactly one of 'reference_material', 'direct_generation_input', or 'other'. Null otherwise.",
-          },
-          license_confidence_hint: {
-            type: ['string', 'null'],
-            enum: [...CONFIDENCE_HINT_VALUES, null],
-            description:
-              "When kind is asset_provider_mention and the user directly stated, this turn, their license/subscription/permission for that provider's material: confirmed. Null when the turn says nothing about license for this provider, or when it is unclear which of several active providers a license statement refers to -- never inferred, never guessed between providers.",
-          },
-          license_value_hint: {
-            type: ['string', 'null'],
-            description:
-              "When license_confidence_hint is confirmed: the user's own wording for their license/subscription/permission, preserved as stated -- never translated to a category you infer. Null otherwise.",
-          },
-          access_surface_confidence_hint: {
-            type: ['string', 'null'],
-            enum: [...CONFIDENCE_HINT_VALUES, null],
-            description:
-              "When kind is tool_mention and the user directly stated HOW they accessed the tool this turn (e.g. \"the website\", \"the app\", \"the API\"): confirmed. If they expressed genuine uncertainty about it: unknown. Null when the turn says nothing about access surface for this tool -- never inferred from generic context.",
-          },
-          access_surface_value_hint: {
-            type: ['string', 'null'],
-            description:
-              "When access_surface_confidence_hint is confirmed: the user's own wording for how they accessed the tool. Null otherwise.",
-          },
-          plan_tier_confidence_hint: {
-            type: ['string', 'null'],
-            enum: [...CONFIDENCE_HINT_VALUES, null],
-            description:
-              "When kind is tool_mention and the user directly stated their plan/subscription/account tier for this tool this turn (e.g. \"free\", \"paid\", \"personal paid plan\", \"business plan\", \"enterprise plan\"): confirmed. If they expressed genuine uncertainty about it (e.g. \"I think it might be Pro\"): unknown. Null when the turn says nothing about plan tier for this tool -- never inferred from generic context, and never a guessed branded tier name.",
-          },
-          plan_tier_value_hint: {
-            type: ['string', 'null'],
-            description:
-              "When plan_tier_confidence_hint is confirmed: the user's own wording for their plan/tier, preserved as stated -- never translated to a specific branded tier name (e.g. \"Pro\", \"Team\") they did not themselves say. Null otherwise.",
+              'P0 schema-union-limit fix (2026-08-21): a generic, closed-vocabulary list of secondary attributes about this candidate\'s own named target (a tool or a third-party source provider), replacing four formerly-separate dedicated field pairs. Include ONE entry per attribute the user directly stated this turn -- never one entry per possible attribute padded with placeholders. Omit an attribute ENTIRELY (do not add an entry for it) when the turn says nothing about it, exactly as the old null/unset representation meant -- an empty attributes array is the normal case for most candidates. See each entry\'s own property descriptions for the exact evidentiary rules per key ("usage"/"license" apply only to asset_provider_mention; "plan_tier"/"access_surface" apply only to tool_mention -- never add an entry whose key does not match this candidate\'s own kind).',
+            items: {
+              type: 'object',
+              properties: {
+                key: {
+                  type: 'string',
+                  enum: [...EXTRACTED_ATTRIBUTE_KEY_VALUES],
+                  description:
+                    '"access_surface" and "plan_tier" apply only when kind is tool_mention. "usage" and "license" apply only when kind is asset_provider_mention. Never add an entry with a key that does not match this candidate\'s own kind.',
+                },
+                confidence: {
+                  type: 'string',
+                  enum: [...CONFIDENCE_HINT_VALUES],
+                  description:
+                    '"confirmed" when the user stated it as a clear, direct fact this turn. For "plan_tier"/"access_surface" only, "unknown" is valid when the user expressed genuine uncertainty (e.g. "I think it might be Pro") -- "usage"/"license" are only ever reported as "confirmed" (per their own evidentiary rules above); never fabricate a "confirmed_absent"/"unresolved_no_visibility"/"declined" state for any of these four keys unless the user\'s own words genuinely support it.',
+                },
+                value: {
+                  type: 'string',
+                  description:
+                    'The user\'s own wording for this attribute, preserved as stated -- never translated to a category or canonical label you infer (see each key\'s own evidentiary rules above for exactly what belongs here). Empty string when confidence is not "confirmed".',
+                },
+              },
+              required: ['key', 'confidence', 'value'],
+              additionalProperties: false,
+            },
           },
           is_correction: {
             type: 'boolean',
@@ -289,14 +287,7 @@ const CANDIDATE_RESPONSE_SCHEMA = {
           'kind',
           'raw_tool_name',
           'raw_provider_name',
-          'usage_confidence_hint',
-          'usage_value_hint',
-          'license_confidence_hint',
-          'license_value_hint',
-          'access_surface_confidence_hint',
-          'access_surface_value_hint',
-          'plan_tier_confidence_hint',
-          'plan_tier_value_hint',
+          'attributes',
           'is_correction',
           'correction_of_raw_text',
           'scope',
@@ -318,20 +309,20 @@ const CANDIDATE_RESPONSE_SCHEMA = {
   additionalProperties: false,
 } as const
 
+/** Wire shape of one attributes[] entry -- see CANDIDATE_RESPONSE_SCHEMA's own attributes property for the full description. */
+interface ParsedExtractedAttribute {
+  key: ExtractedAttributeKey
+  confidence: (typeof CONFIDENCE_HINT_VALUES)[number]
+  value: string
+}
+
 interface ParsedCandidate {
   proposal_id: string
   raw_text: string
   kind: (typeof CANDIDATE_KIND_VALUES)[number]
   raw_tool_name: string | null
   raw_provider_name: string | null
-  usage_confidence_hint: (typeof CONFIDENCE_HINT_VALUES)[number] | null
-  usage_value_hint: (typeof ASSET_PROVIDER_USAGE_VALUES)[number] | null
-  license_confidence_hint: (typeof CONFIDENCE_HINT_VALUES)[number] | null
-  license_value_hint: string | null
-  access_surface_confidence_hint: (typeof CONFIDENCE_HINT_VALUES)[number] | null
-  access_surface_value_hint: string | null
-  plan_tier_confidence_hint: (typeof CONFIDENCE_HINT_VALUES)[number] | null
-  plan_tier_value_hint: string | null
+  attributes: ParsedExtractedAttribute[]
   is_correction: boolean
   correction_of_raw_text: string | null
   scope: (typeof OBSERVATION_SCOPE_VALUES)[number] | null
@@ -346,7 +337,60 @@ interface ParsedCandidate {
   low_confidence: boolean
 }
 
+function isAssetProviderUsageValue(value: string): value is AssetProviderUsageValue {
+  return (ASSET_PROVIDER_USAGE_VALUES as readonly string[]).includes(value)
+}
+
+/**
+ * Deterministic translation from the generic attributes[] wire array back
+ * into the single confidence/value hint pair CandidateObservation already
+ * expects for one key -- see this file's own P0 schema-union-limit fix
+ * header (near EXTRACTED_ATTRIBUTE_KEY_VALUES) for the full architectural
+ * rationale. Structural translation only, no semantic inference.
+ *
+ * Fail-closed on ambiguity, never guessing, matching this pipeline's
+ * existing "leave unset rather than guess" discipline (see SYSTEM_PROMPT's
+ * own multi-provider usage/license instruction, which this mirrors): a key
+ * that appears more than once in the same candidate's attributes array is
+ * treated identically to a key that never appears at all -- both return
+ * undefined, never "pick the first/last one."
+ */
+function extractAttributeHint(
+  attributes: ParsedExtractedAttribute[],
+  key: ExtractedAttributeKey,
+): { confidence: (typeof CONFIDENCE_HINT_VALUES)[number]; value: string } | undefined {
+  const matches = attributes.filter((a) => a.key === key)
+  if (matches.length !== 1) return undefined
+  return matches[0]
+}
+
 export function toCandidateObservation(parsed: ParsedCandidate, turn: number): CandidateObservation {
+  // Attribute keys are only ever meaningful for the matching candidate kind
+  // -- mirrors attestCandidate's own existing kind-branch dispatch in
+  // extraction.ts, which already only ever reads the CandidateObservation
+  // fields relevant to its own branch (an attribute belonging to a
+  // different kind was always silently unread, before and after this
+  // milestone -- see this function's own P0 header). Restricting the
+  // lookup here, structurally, means a mismatched attribute (e.g. an
+  // asset_provider_mention candidate carrying a "plan_tier" entry) is
+  // never even translated into a CandidateObservation field, so it cannot
+  // mutate unrelated state -- belt-and-suspenders with attestCandidate's
+  // own dispatch, not a substitute for it.
+  const toolAttributes = parsed.kind === 'tool_mention' ? parsed.attributes : []
+  const providerAttributes = parsed.kind === 'asset_provider_mention' ? parsed.attributes : []
+
+  const accessSurface = extractAttributeHint(toolAttributes, 'access_surface')
+  const planTier = extractAttributeHint(toolAttributes, 'plan_tier')
+  const usage = extractAttributeHint(providerAttributes, 'usage')
+  const license = extractAttributeHint(providerAttributes, 'license')
+
+  // usage's value used to be wire-enum-constrained to ASSET_PROVIDER_USAGE_VALUES;
+  // the generic attributes[].value field is free text shared across all four
+  // keys, so that constraint is now enforced here instead -- an out-of-set
+  // value is treated as absent (undefined), exactly as if the model had
+  // left it unset, never passed through as a fabricated AssetProviderUsageValue.
+  const usageValue = usage && isAssetProviderUsageValue(usage.value) ? usage.value : undefined
+
   return {
     proposal_id: parsed.proposal_id,
     turn,
@@ -354,14 +398,14 @@ export function toCandidateObservation(parsed: ParsedCandidate, turn: number): C
     kind: parsed.kind,
     raw_tool_name: parsed.raw_tool_name ?? undefined,
     raw_provider_name: parsed.raw_provider_name ?? undefined,
-    usage_confidence_hint: parsed.usage_confidence_hint ?? undefined,
-    usage_value_hint: parsed.usage_value_hint ?? undefined,
-    license_confidence_hint: parsed.license_confidence_hint ?? undefined,
-    license_value_hint: parsed.license_value_hint ?? undefined,
-    access_surface_confidence_hint: parsed.access_surface_confidence_hint ?? undefined,
-    access_surface_value_hint: parsed.access_surface_value_hint ?? undefined,
-    plan_tier_confidence_hint: parsed.plan_tier_confidence_hint ?? undefined,
-    plan_tier_value_hint: parsed.plan_tier_value_hint ?? undefined,
+    usage_confidence_hint: usage?.confidence,
+    usage_value_hint: usageValue,
+    license_confidence_hint: license?.confidence,
+    license_value_hint: license?.value || undefined,
+    access_surface_confidence_hint: accessSurface?.confidence,
+    access_surface_value_hint: accessSurface?.value || undefined,
+    plan_tier_confidence_hint: planTier?.confidence,
+    plan_tier_value_hint: planTier?.value || undefined,
     is_correction: parsed.is_correction || undefined,
     correction_of_raw_text: parsed.correction_of_raw_text ?? undefined,
     scope: parsed.scope ?? undefined,

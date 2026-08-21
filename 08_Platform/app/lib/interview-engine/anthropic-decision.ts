@@ -81,7 +81,8 @@ You MUST NOT:
 
 Choose exactly one reason_code from the fixed list you're given, matching the closest category. If a case does not fit one of the named categories, use MATERIALLY_IMPROVES_UNDERSTANDING (for should_ask: true) or NO_MATERIAL_IMPROVEMENT (for should_ask: false) instead of forcing a mismatched category.`
 
-const DECISION_RESPONSE_SCHEMA = {
+/** Exported (2026-08-21, P0 union-limit guardrail) solely so a deterministic, no-network test can inspect the ACTUAL production schema object -- export-only, zero runtime behavior change. */
+export const DECISION_RESPONSE_SCHEMA = {
   type: 'object',
   properties: {
     should_ask: {

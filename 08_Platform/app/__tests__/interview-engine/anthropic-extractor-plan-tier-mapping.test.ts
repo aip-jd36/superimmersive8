@@ -1,22 +1,19 @@
 /**
- * Deterministic unit test for toCandidateObservation's new
- * access_surface_confidence_hint/access_surface_value_hint/
- * plan_tier_confidence_hint/plan_tier_value_hint mapping (A3 fix, CRC Pilot
- * Findings, 2026-08-15). Pure field-mapping logic, no live model call --
- * consistent with this project's standing discipline of never exercising a
- * live model inside a deterministic test suite (see
- * anthropic-extractor-context.test.ts's own header). Live-model extraction
- * accuracy for these hints is covered separately by
- * lib/interview-engine/eval/corpus.ts's plan_tier_* scenarios, run via
- * `npm run eval:extraction`, per this codebase's established split between
- * deterministic unit tests and live-model eval scenarios.
- *
- * Root cause this fix addresses: the live extractor's JSON schema
- * (CANDIDATE_RESPONSE_SCHEMA) previously had no properties at all for these
- * four fields, so no matter what the user said about their plan/tier, the
- * live model was structurally incapable of ever populating them --
- * extraction.ts's own resolveAttestedToolField (which consumes these hints)
- * was already correct and unchanged by this fix.
+ * Deterministic unit test for toCandidateObservation's plan_tier/
+ * access_surface mapping (originally A3 fix, CRC Pilot Findings,
+ * 2026-08-15; rewritten for the P0 Anthropic schema-union-limit fix,
+ * 2026-08-21, which replaced the eight flat wire fields
+ * access_surface_confidence_hint/value_hint and
+ * plan_tier_confidence_hint/value_hint with one generic
+ * `attributes: ExtractedAttribute[]` array -- see anthropic-extractor.ts's
+ * own header near EXTRACTED_ATTRIBUTE_KEY_VALUES for the full rationale).
+ * Pure field-mapping logic, no live model call -- consistent with this
+ * project's standing discipline of never exercising a live model inside a
+ * deterministic test suite (see anthropic-extractor-context.test.ts's own
+ * header). The OUTPUT shape asserted here (CandidateObservation's own
+ * plan_tier_confidence_hint/plan_tier_value_hint/access_surface_*_hint
+ * fields) is UNCHANGED by the P0 fix -- only the wire INPUT shape changed;
+ * this file proves that translation is still correct.
  */
 
 import { toCandidateObservation } from '@/lib/interview-engine/anthropic-extractor'
@@ -28,14 +25,7 @@ function baseParsed(overrides: Record<string, unknown> = {}) {
     kind: 'tool_mention' as const,
     raw_tool_name: 'Kling',
     raw_provider_name: null,
-    usage_confidence_hint: null,
-    usage_value_hint: null,
-    license_confidence_hint: null,
-    license_value_hint: null,
-    access_surface_confidence_hint: null,
-    access_surface_value_hint: null,
-    plan_tier_confidence_hint: null,
-    plan_tier_value_hint: null,
+    attributes: [] as { key: string; confidence: string; value: string }[],
     is_correction: false,
     correction_of_raw_text: null,
     scope: null,
@@ -52,47 +42,41 @@ function baseParsed(overrides: Record<string, unknown> = {}) {
   }
 }
 
-describe('toCandidateObservation -- plan_tier/access_surface hint mapping', () => {
-  test('confirmed plan_tier hint is forwarded verbatim, never a branded-tier substitution', () => {
-    const out = toCandidateObservation(
-      baseParsed({ plan_tier_confidence_hint: 'confirmed', plan_tier_value_hint: 'paid' }),
-      1,
-    )
+describe('toCandidateObservation -- plan_tier/access_surface hint mapping (via generic attributes[])', () => {
+  test('confirmed plan_tier attribute is forwarded verbatim, never a branded-tier substitution', () => {
+    const out = toCandidateObservation(baseParsed({ attributes: [{ key: 'plan_tier', confidence: 'confirmed', value: 'paid' }] }) as any, 1)
     expect(out.plan_tier_confidence_hint).toBe('confirmed')
     expect(out.plan_tier_value_hint).toBe('paid')
   })
 
-  test('confirmed access_surface hint is forwarded verbatim', () => {
-    const out = toCandidateObservation(
-      baseParsed({ access_surface_confidence_hint: 'confirmed', access_surface_value_hint: 'the website' }),
-      1,
-    )
+  test('confirmed access_surface attribute is forwarded verbatim', () => {
+    const out = toCandidateObservation(baseParsed({ attributes: [{ key: 'access_surface', confidence: 'confirmed', value: 'the website' }] }) as any, 1)
     expect(out.access_surface_confidence_hint).toBe('confirmed')
     expect(out.access_surface_value_hint).toBe('the website')
   })
 
-  test('both hints present in the same candidate are independent and both forwarded', () => {
+  test('both attributes present in the same candidate are independent and both forwarded (test L)', () => {
     const out = toCandidateObservation(
       baseParsed({
-        plan_tier_confidence_hint: 'confirmed',
-        plan_tier_value_hint: 'free',
-        access_surface_confidence_hint: 'confirmed',
-        access_surface_value_hint: 'via the website',
-      }),
+        attributes: [
+          { key: 'plan_tier', confidence: 'confirmed', value: 'free' },
+          { key: 'access_surface', confidence: 'confirmed', value: 'via the website' },
+        ],
+      }) as any,
       1,
     )
     expect(out.plan_tier_value_hint).toBe('free')
     expect(out.access_surface_value_hint).toBe('via the website')
   })
 
-  test('unknown confidence hint (expressed uncertainty) is preserved, not upgraded to confirmed', () => {
-    const out = toCandidateObservation(baseParsed({ plan_tier_confidence_hint: 'unknown', plan_tier_value_hint: null }), 1)
+  test('unknown confidence (expressed uncertainty) is preserved, not upgraded to confirmed, and value is undefined for an empty-string wire value', () => {
+    const out = toCandidateObservation(baseParsed({ attributes: [{ key: 'plan_tier', confidence: 'unknown', value: '' }] }) as any, 1)
     expect(out.plan_tier_confidence_hint).toBe('unknown')
     expect(out.plan_tier_value_hint).toBeUndefined()
   })
 
-  test('null hints (nothing stated) collapse to undefined, never a fabricated fact', () => {
-    const out = toCandidateObservation(baseParsed(), 1)
+  test('empty attributes array (nothing stated) collapses to undefined for both hints, never a fabricated fact (test F/R)', () => {
+    const out = toCandidateObservation(baseParsed() as any, 1)
     expect(out.plan_tier_confidence_hint).toBeUndefined()
     expect(out.plan_tier_value_hint).toBeUndefined()
     expect(out.access_surface_confidence_hint).toBeUndefined()
@@ -101,7 +85,7 @@ describe('toCandidateObservation -- plan_tier/access_surface hint mapping', () =
 
   test('every other existing field mapping is unaffected by this change', () => {
     const out = toCandidateObservation(
-      baseParsed({ raw_text: 'We used Kling.', raw_tool_name: 'Kling', is_correction: true, correction_of_raw_text: 'Runway' }),
+      baseParsed({ raw_text: 'We used Kling.', raw_tool_name: 'Kling', is_correction: true, correction_of_raw_text: 'Runway' }) as any,
       3,
     )
     expect(out.turn).toBe(3)

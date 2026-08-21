@@ -129,7 +129,8 @@ function buildExclusionInstruction(excluded: CandidateExclusion[] | undefined): 
   return `\n\nThis is a second attempt. The following question(s) were already tried this turn and are not permitted again -- propose something genuinely different, either a different signal or a different kind of question, not a reworded repeat of any of these:\n${lines.join('\n')}`
 }
 
-const CANDIDATE_QUESTION_RESPONSE_SCHEMA = {
+/** Exported (2026-08-21, P0 union-limit guardrail) solely so a deterministic, no-network test can inspect the ACTUAL production schema object -- export-only, zero runtime behavior change. */
+export const CANDIDATE_QUESTION_RESPONSE_SCHEMA = {
   type: 'object',
   properties: {
     has_candidate: {
