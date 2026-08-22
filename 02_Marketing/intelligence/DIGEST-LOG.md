@@ -9,6 +9,50 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of August 22, 2026
+*Run: 2026-08-22 · 22 high · 7 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [EU AI Act turns agency AI review into a legal issue](https://www.contentgrip.com/eu-ai-act-agency-review/) | ContentGrip | Fri, 21 Aug 2026 | ☐ |
+| 9 | post+update | [The EU’s AI Act Now Requires Disclosure — Or a €15M Fine](https://sociable.co/government-and-policy/eu-ai-act-disclosure-15m-fine/) | sociable.co | Thu, 20 Aug 2026 | ☐ |
+| 9 | post+update | [IAB revisits AI disclosure in ads as legal requirements multiply](https://www.marketingdive.com/news/iab-revisits-ai-disclosure-in-ads-as-legal-requirements-multiply/828182/) | Marketing Dive | Wed, 19 Aug 2026 | ☐ |
+| 9 | post+update | [GPAI obligations under the EU AI Act: Enforcement has started 2 August 2026](https://www.taylorwessing.com/en/insights-and-events/insights/2026/08/gpai-obligations-under-the-eu-ai-act) | Taylor Wessing | Wed, 19 Aug 2026 | ☐ |
+| 9 | post+update | [IAB updates standard for disclosing AI in ads](https://martech.org/iab-updates-standard-for-disclosing-ai-in-ads/) | MarTech | Tue, 18 Aug 2026 | ☐ |
+| 9 | post+update | [Digital ads are flooded with ‘synthetic’ AI models. How one state is calling them out](https://san.com/cc/digital-ads-are-flooded-with-synthetic-ai-models-how-one-state-is-calling-them-out/) | Straight Arrow | Mon, 17 Aug 2026 | ☐ |
+| 8 | post+update | [IAB updates AI disclosure rules for advertisers](https://www.contentgrip.com/iab-ai-disclosure-framework/) | ContentGrip | Fri, 21 Aug 2026 | ☐ |
+| 8 | post+update | [IAB: AI Labeling Cuts Clickthroughs By A Third 08/20/2026](https://www.mediapost.com/publications/article/417340/iab-ai-labeling-cuts-clickthroughs-by-a-third.html?edition=143608) | MediaPost | Fri, 21 Aug 2026 | ☐ |
+| 8 | post+update | [Jeen: EU AI Act Compliance Isn't a Policy Problem, It's an Evidence Problem, New Analysis Finds](https://www.einnews.com/pr_news/935655218/jeen-eu-ai-act-compliance-isn-t-a-policy-problem-it-s-an-evidence-problem-new-analysis-finds) | EIN News | Thu, 20 Aug 2026 | ☐ |
+| 8 | post+update | [IAB revamps AI labeling in advertising as regulation expands globally](https://www.mlex.com/mlex/artificial-intelligence/articles/2515275/iab-revamps-ai-labeling-in-advertising-as-regulation-expands-globally) | MLex | Wed, 19 Aug 2026 | ☐ |
+| 8 | post+update | [EU AI transparency rules: what they mean for your advertising (and why UK brands should care too)](https://www.mishcon.com/news/eu-ai-transparency-rules-what-they-mean-for-your-advertising-and-why-uk-brands-should-care-too) | Mishcon de Reya LLP | Wed, 19 Aug 2026 | ☐ |
+| 8 | post+update | [IAB updates AI disclosure guidance as regulators tighten rules](https://thedesk.net/2026/08/iab-updates-ai-disclosure-guidance-as-regulators-tighten-rules/) | TheDesk.net | Wed, 19 Aug 2026 | ☐ |
+| 8 | post+update | [AI ad labels cut click-through 31.5%, IAB framework cites NYU study](https://ppc.land/ai-ad-labels-cut-click-through-31-5-iab-framework-cites-nyu-study/) | PPC Land | Wed, 19 Aug 2026 | ☐ |
+| 8 | post+update | [Google's AI ad labels and content access tensions signal a new compliance reality for enterprise marketers](https://www.marketscale.com/industries/marketing-tech/googles-ai-ad-labels-and-content-access-tensions-signal-a-new-compliance-reality-for-enterprise-marketers) | MarketScale | Wed, 19 Aug 2026 | ☐ |
+| 8 | post+update | [The EU AI Act: where we are now, and what happens next, and what for in-house teams should do](https://www.burges-salmon.com/articles/102nqb1/the-eu-ai-act-where-we-are-now-and-what-happens-next-and-what-for-in-house-tea) | Burges Salmon | Tue, 18 Aug 2026 | ☐ |
+| 8 | post+update | [ByteDance Inks Pact With Hollywood Studios to Rein In AI Copyright Infringement](https://finance.biggo.com/news/aa8fb9e8-f2e3-4cf7-b453-10fc35de073a) | finance.biggo.com | Mon, 17 Aug 2026 | ☐ |
+| 7 | post+update | [AI ad labels cut clicks 31.5% as IAB issues disclosure framework](https://ppc.land/ai-ad-labels-cut-clicks-31-5-as-iab-issues-disclosure-framework/) | PPC Land | Thu, 20 Aug 2026 | ☐ |
+| 7 | post+update | [What is AI insurance?](https://www.itpro.com/technology/artificial-intelligence/what-is-ai-insurance) | IT Pro | Wed, 19 Aug 2026 | ☐ |
+| 7 | update | [TikTok Parent ByteDance Agrees to AI Copyright Guardrails After Hollywood Dispute](https://www.lawcommentary.com/articles/tiktok-parent-bytedance-agrees-to-ai-copyright-guardrails-after-hollywood-dispute) | Law Commentary | Tue, 18 Aug 2026 | ☐ |
+| 7 | update | [Adobe Firefly AI Video Generator: Top Models, Precision Controls, and a Production Workflow All in One Place](https://www.macworld.com/article/3209211/adobe-firefly-ai-video-generator-top-models-precision-controls-and-a-production-workflow-all-in-one-place.html) | Macworld | Tue, 18 Aug 2026 | ☐ |
+| 7 | post | [Updated Industry Framework for Consistent AI Transparency & Disclosure in Advertising](https://www.iab.com/news/updates-industry-framework-ai-transparency-disclosure-advertising/) | Interactive Advertising Bureau | Tue, 18 Aug 2026 | ☐ |
+| 7 | update | [New Guide: AI Disclosures Around the World](https://www.lewissilkin.com/insights/2026/08/17/new-guide-ai-disclosures-around-the-world-102nhy7) | Lewis Silkin | Mon, 17 Aug 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Could Australian businesses be next? The potential impact of New York’s AI Ad Disclosure Laws](https://itwire.com/guest-articles/company-news/could-australian-businesses-be-next-the-potential-impact-of-new-york-s-ai-ad-disclosure-laws) | iTWire | Thu, 20 Aug 2026 | ☐ |
+| 6 | monitor | ["Operation AI Comply" 2 Years Later: Continued Enforcement Against Misleading Claims](https://www.hklaw.com/en/insights/publications/2026/08/operation-ai-comply-2-years-later-continued-enforcement) | Holland & Knight | Tue, 18 Aug 2026 | ☐ |
+| 6 | monitor | [ASA pulls the covers back on Nectar Sleep's "Save up to 65%" ad](https://www.lewissilkin.com/insights/2026/08/17/asa-pulls-the-covers-back-on-nectar-sleeps-save-up-to-65-ad-102nhte) | Lewis Silkin | Mon, 17 Aug 2026 | ☐ |
+| 5 | monitor | [Bata puts 45% of spends on digital, exits retainer creative agencies as AI takes over production](https://www.storyboard18.com/brand-marketing/bata-puts-45-of-spends-on-digital-exits-retainer-creative-agencies-as-ai-takes-over-production-108373.htm) | Storyboard18 | Fri, 21 Aug 2026 | ☐ |
+| 5 | monitor | [10-Step EU AI Act Compliance Checklist for AI Companies in 2026](https://www.resemble.ai/resources/eu-ai-act-compliance-checklist-ai-companies) | Resemble AI | Mon, 17 Aug 2026 | ☐ |
+| 4 | monitor | [Adobe Firefly brings AI-powered music, speech and sound effects to creators](https://www.socialsamosa.com/industry-updates/adobe-firefly-brings-ai-powered-music-speech-and-sound-effects-to-creators-12404952) | Social Samosa | Fri, 21 Aug 2026 | ☐ |
+| 4 | monitor | [Top AI Ad Generator Tools Compared: Real Tests, Strengths, and Trade-Offs](https://techbullion.com/top-ai-ad-generator-tools-compared-real-tests-strengths-and-trade-offs/) | TechBullion | Thu, 20 Aug 2026 | ☐ |
+
+---
+
 ## Week of August 19, 2026
 *Run: 2026-08-19 · 18 high · 9 monitor · lookback 7 days*
 
