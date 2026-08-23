@@ -35,6 +35,7 @@ import {
   humanContributionRelevanceSentence,
   outsideCoverageSummary,
   relevantApplicabilityUnresolvedNoContentSummary,
+  relevantApplicabilityUnresolvedWithContentBlocks,
   relevantApplicabilityUnresolvedWithContentSummary,
 } from './rules'
 
@@ -106,7 +107,7 @@ export function buildBoundedInterpretations(
     // claim exists, per PM revision 2/3: answering the category question
     // at all would still be issuing something CRC doesn't issue.
     if (goal.scope === 'determination_request') {
-      return buildInterpretation(goal, 'determination_declined', DETERMINATION_DECLINED_TEMPLATE, [])
+      return buildInterpretation(goal, 'determination_declined', DETERMINATION_DECLINED_TEMPLATE, [DETERMINATION_DECLINED_TEMPLATE], [])
     }
 
     // matched_goal_category, not topic (Governed Topic Relationships
@@ -142,7 +143,7 @@ export function buildBoundedInterpretations(
         // reachable with the current Matrix. Falls back to
         // outside_current_coverage rather than rendering an empty
         // sentence, never fabricating claim text to fill the gap.
-        return buildInterpretation(goal, 'outside_current_coverage', outsideCoverageSummary(goal.category), [])
+        return buildInterpretation(goal, 'outside_current_coverage', outsideCoverageSummary(goal.category), [outsideCoverageSummary(goal.category)], [])
       }
 
       // Case 3B (Living Knowledge governance review, 2026-08-16): every
@@ -210,6 +211,19 @@ export function buildBoundedInterpretations(
             noDependencyStatement,
             noDependencyAllToolSourced,
           ),
+          // CRC Email/UI Structural Readability -- Phase 1 (2026-08-23):
+          // the ordered-blocks sibling of the summary call directly above,
+          // same inputs, same authority, same words -- see rules.ts's own
+          // doc comment for why `blocks.join(' ')` reconstructs the
+          // `summary` string above byte-for-byte.
+          relevantApplicabilityUnresolvedWithContentBlocks(
+            goal.category,
+            dependencyBearingStatement,
+            includesRelatedTopicContent,
+            humanContributionSentence,
+            noDependencyStatement,
+            noDependencyAllToolSourced,
+          ),
           claimIds,
         )
       }
@@ -220,12 +234,12 @@ export function buildBoundedInterpretations(
       // this is a read of existing data, not a new fact or new matching
       // logic.
       const allToolSourced = matches.every((m) => m.source_fact.kind === 'tool')
-      return buildInterpretation(
-        goal,
-        'directly_relevant',
-        directlyRelevantSummary(goal.category, combinedStatement, allToolSourced, includesRelatedTopicContent),
-        claimIds,
-      )
+      const directlyRelevantResult = directlyRelevantSummary(goal.category, combinedStatement, allToolSourced, includesRelatedTopicContent)
+      // Single-group shape (every matched claim dependency-free) has no
+      // internal boundary CC-1 ever computed -- one block, not artificially
+      // split, per this milestone's own "if a case naturally yields one
+      // block, render one block" scope.
+      return buildInterpretation(goal, 'directly_relevant', directlyRelevantResult, [directlyRelevantResult], claimIds)
     }
 
     // Case 3A (Living Knowledge governance review, 2026-08-16): no result
@@ -237,10 +251,12 @@ export function buildBoundedInterpretations(
     // doc comment for why nothing is quoted here.
     const hasUnmetApplicability = diagnostics.some((d) => d.identifier === goal.category && d.reason === 'applicability_unmet')
     if (hasUnmetApplicability) {
-      return buildInterpretation(goal, 'relevant_applicability_unresolved', relevantApplicabilityUnresolvedNoContentSummary(goal.category), [])
+      const noContentSummary = relevantApplicabilityUnresolvedNoContentSummary(goal.category)
+      return buildInterpretation(goal, 'relevant_applicability_unresolved', noContentSummary, [noContentSummary], [])
     }
 
-    return buildInterpretation(goal, 'outside_current_coverage', outsideCoverageSummary(goal.category), [])
+    const outsideCoverage = outsideCoverageSummary(goal.category)
+    return buildInterpretation(goal, 'outside_current_coverage', outsideCoverage, [outsideCoverage], [])
   })
 }
 
@@ -248,6 +264,7 @@ function buildInterpretation(
   goal: UserGoal,
   status: BoundedInterpretation['status'],
   summary: string,
+  summary_blocks: string[],
   supporting_claim_ids: string[],
 ): BoundedInterpretation {
   return {
@@ -256,6 +273,7 @@ function buildInterpretation(
     category: goal.category,
     status,
     summary,
+    summary_blocks,
     supporting_claim_ids,
   }
 }

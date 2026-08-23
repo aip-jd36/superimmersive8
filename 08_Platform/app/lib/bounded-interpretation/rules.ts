@@ -289,6 +289,48 @@ export function humanContributionRelevanceSentence(description: string): string 
  * is preserved byte-for-byte, unchanged -- every pre-CC-2 caller/test for
  * this case renders identically.
  */
+/**
+ * CRC Email/UI Structural Readability -- Phase 1 (2026-08-23, PM/
+ * Architecture-authorized). Shared internal builder for both the legacy
+ * flat-string entry point (`relevantApplicabilityUnresolvedWithContentSummary`,
+ * unchanged behavior) and the new additive block-list entry point
+ * (`relevantApplicabilityUnresolvedWithContentBlocks`). Produces the exact
+ * same two candidate segments CC-1/CC-2 already compute -- the
+ * dependency-free clause (if any) and the dependency-bearing clause plus
+ * its unchanged hedge/bridge -- as an ordered array instead of a
+ * pre-joined string. No new text, no new clause, no reordering: this is
+ * the identical composition CC-1/CC-2 already authored, expressed as
+ * `string[]` instead of `string`. `blocks.join(' ')` reconstructs the
+ * legacy string byte-for-byte (see the sibling function below and its own
+ * test coverage) -- the trailing space CC-1 originally baked into
+ * `noDependencyClause` is deliberately omitted here and supplied by the
+ * join instead, so the two representations stay provably equivalent
+ * rather than independently maintained.
+ */
+function buildRelevantApplicabilityUnresolvedContentBlocks(
+  category: GoalCategory,
+  claimStatement: string,
+  includesRelatedTopicContent: boolean,
+  humanContributionSentence: string | null,
+  noDependencyStatement: string | null,
+  noDependencyAllToolSourced: boolean,
+): string[] {
+  const relatedClause = includesRelatedTopicContent ? ` ${RELATED_TOPIC_BOUNDARY_CLAUSE}` : ''
+  // H5 -- minimal echo-only relevance composition (Copyright UAT Correction
+  // Milestone, 2026-08-19): inserted BEFORE the closing uncertainty hedge
+  // below, additively -- the hedge itself is never removed or replaced.
+  const contributionClause = humanContributionSentence ? ` ${humanContributionSentence}` : ''
+  const blocks: string[] = []
+  if (noDependencyStatement) {
+    blocks.push(`${noDependencyStatement} This is relevant to ${CATEGORY_LABELS[category]}, ${boundaryClause(noDependencyAllToolSourced)}`)
+  }
+  const closingSentence = noDependencyStatement
+    ? `But based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project.`
+    : `This is relevant to ${CATEGORY_LABELS[category]}, but based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project.`
+  blocks.push(`${claimStatement}${relatedClause}${contributionClause} ${closingSentence} ${BRIDGE_SENTENCE}`)
+  return blocks
+}
+
 export function relevantApplicabilityUnresolvedWithContentSummary(
   category: GoalCategory,
   claimStatement: string,
@@ -297,16 +339,41 @@ export function relevantApplicabilityUnresolvedWithContentSummary(
   noDependencyStatement: string | null = null,
   noDependencyAllToolSourced: boolean = true,
 ): string {
-  const relatedClause = includesRelatedTopicContent ? ` ${RELATED_TOPIC_BOUNDARY_CLAUSE}` : ''
-  // H5 -- minimal echo-only relevance composition (Copyright UAT Correction
-  // Milestone, 2026-08-19): inserted BEFORE the closing uncertainty hedge
-  // below, additively -- the hedge itself is never removed or replaced.
-  const contributionClause = humanContributionSentence ? ` ${humanContributionSentence}` : ''
-  const noDependencyClause = noDependencyStatement
-    ? `${noDependencyStatement} This is relevant to ${CATEGORY_LABELS[category]}, ${boundaryClause(noDependencyAllToolSourced)} `
-    : ''
-  const closingSentence = noDependencyStatement
-    ? `But based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project.`
-    : `This is relevant to ${CATEGORY_LABELS[category]}, but based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project.`
-  return `${noDependencyClause}${claimStatement}${relatedClause}${contributionClause} ${closingSentence} ${BRIDGE_SENTENCE}`
+  return buildRelevantApplicabilityUnresolvedContentBlocks(
+    category,
+    claimStatement,
+    includesRelatedTopicContent,
+    humanContributionSentence,
+    noDependencyStatement,
+    noDependencyAllToolSourced,
+  ).join(' ')
+}
+
+/**
+ * Additive, Phase-1-only entry point: same inputs, same composition
+ * authority, same words, same order as
+ * `relevantApplicabilityUnresolvedWithContentSummary` above -- returns the
+ * ordered presentation blocks instead of one joined string, so a renderer
+ * can display the dependency-free clause and the dependency-bearing/hedge
+ * clause as separate, visually equivalent paragraphs without either layer
+ * inferring where the boundary is. Exactly one block when no
+ * dependency-free clause exists (the pre-CC-1 single-group shape) --
+ * never artificially split.
+ */
+export function relevantApplicabilityUnresolvedWithContentBlocks(
+  category: GoalCategory,
+  claimStatement: string,
+  includesRelatedTopicContent: boolean = false,
+  humanContributionSentence: string | null = null,
+  noDependencyStatement: string | null = null,
+  noDependencyAllToolSourced: boolean = true,
+): string[] {
+  return buildRelevantApplicabilityUnresolvedContentBlocks(
+    category,
+    claimStatement,
+    includesRelatedTopicContent,
+    humanContributionSentence,
+    noDependencyStatement,
+    noDependencyAllToolSourced,
+  )
 }

@@ -1,11 +1,12 @@
 /**
  * Final ProjectionOutput renderer (CRC Product Integration -- First
- * Usable Live Slice, Phase 7). Renders exactly what the deterministic
- * ProjectionOutput contract provides -- no field this component doesn't
- * receive can appear here, since ProjectionOutput itself
- * (lib/projection-layer/types.ts) has no claim_id/confidence/publication_scope/
- * governance fields on it at all. `claim_id` is used only as a React
- * `key`, never rendered as visible text.
+ * Usable Live Slice, Phase 7; paragraphing/readability updated CRC
+ * Email/UI Structural Readability -- Phase 1, 2026-08-23). Renders exactly
+ * what the deterministic ProjectionOutput contract provides -- no field
+ * this component doesn't receive can appear here, since ProjectionOutput
+ * itself (lib/projection-layer/types.ts) has no claim_id/confidence/
+ * publication_scope/governance fields on it at all. `claim_id` is used
+ * only as a React `key`, never rendered as visible text.
  *
  * Emptiness rules (each field independently, per the frozen contract):
  * opening_line / understood_summary / knowledge_items each render only
@@ -33,6 +34,16 @@
  * reviewed" -- PRD_CRC_v1.0.md's own wording, PROJECTION_LAYER_ARCHITECTURE.md
  * §4/§8), formatted for readability when it parses as a date, falling
  * back to the raw stored string otherwise -- never reinterpreted beyond that.
+ *
+ * Phase 1 (2026-08-23): each goal interpretation now maps `item.summary_blocks`
+ * to one `<p>` per already-authorized block (additive field, same shared
+ * `lib/bounded-interpretation`/`lib/projection-layer` contract the email
+ * renderer consumes -- see `results-email-template.ts`'s own header for
+ * the full authority contract). No separate business logic: this
+ * component and the email renderer read the identical field, computed
+ * once, upstream of both. Every block receives IDENTICAL styling -- no
+ * asymmetric emphasis between a dependency-free clause and a
+ * dependency-bearing one.
  */
 
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
@@ -61,29 +72,45 @@ export function CrcProjectionOutput({ output }: { output: ProjectionOutput }) {
     <div className="space-y-6">
       {output.opening_line !== '' && <p className="text-base font-medium">{output.opening_line}</p>}
 
-      {output.understood_summary !== '' && <p className="text-sm text-muted-foreground whitespace-pre-line">{output.understood_summary}</p>}
+      {output.understood_summary !== '' && (
+        <div>
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Your workflow</p>
+          <p className="text-sm text-muted-foreground whitespace-pre-line">{output.understood_summary}</p>
+        </div>
+      )}
 
       {output.knowledge_items.length > 0 && (
-        <div className="space-y-4">
-          {output.knowledge_items.map((item) => {
-            const lastUpdated = formatLastVerified(item.last_verified)
-            return (
-              <div key={item.claim_id} className="rounded-md border p-4">
-                <p className="text-sm whitespace-pre-line">{item.statement}</p>
-                {lastUpdated && <p className="mt-2 text-xs text-muted-foreground">Content last updated {lastUpdated}</p>}
-              </div>
-            )
-          })}
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Current guidance</p>
+          <div className="space-y-4">
+            {output.knowledge_items.map((item) => {
+              const lastUpdated = formatLastVerified(item.last_verified)
+              return (
+                <div key={item.claim_id} className="rounded-md border p-4">
+                  <p className="text-sm whitespace-pre-line">{item.statement}</p>
+                  {lastUpdated && <p className="mt-2 text-xs text-muted-foreground">Content last updated {lastUpdated}</p>}
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
 
       {output.goal_interpretations.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-4 border-t pt-6">
           <p className="text-sm font-semibold">What this means for what you asked</p>
           {output.goal_interpretations.map((item, i) => (
             <div key={i} className="rounded-md border p-4">
               <p className="text-xs italic text-muted-foreground">You asked: &ldquo;{item.goal_text}&rdquo;</p>
-              <p className="mt-2 text-sm whitespace-pre-line">{item.summary}</p>
+              {/* Phase 1: one paragraph per already-authorized block, all
+                  blocks styled identically -- see this file's own header. */}
+              <div className="mt-2 space-y-2">
+                {item.summary_blocks.map((block, blockIndex) => (
+                  <p key={blockIndex} className="text-sm whitespace-pre-line">
+                    {block}
+                  </p>
+                ))}
+              </div>
             </div>
           ))}
         </div>

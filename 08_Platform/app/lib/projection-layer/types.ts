@@ -79,6 +79,17 @@ export interface ProjectionDiagnostic {
 export interface ProjectionGoalInterpretation {
   goal_text: string
   summary: string
+  /**
+   * CRC Email/UI Structural Readability -- Phase 1 (2026-08-23,
+   * PM/Architecture-authorized). Additive companion to `summary`, narrowed
+   * straight through from `BoundedInterpretation.summary_blocks` (see that
+   * field's own doc comment for the full authority contract) -- same
+   * words, same order, zero new content, always at least one entry. `summary`
+   * remains the frozen v1 field and is unchanged by this addition; a
+   * renderer may use either, and `summary_blocks.join(' ')` always
+   * reconstructs `summary` exactly.
+   */
+  summary_blocks: string[]
 }
 
 /**
