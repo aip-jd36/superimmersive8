@@ -52,6 +52,7 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
         crc_candidate_statement:
           "Runway's current Terms allow commercial use across all subscription tiers, provided you comply with the Terms of Service. The Free plan mainly differs by watermarking rather than commercial-use permissions.",
         topic: 'commercial_use',
+        applicability_requirements: [],
       },
     ],
   },
@@ -67,6 +68,7 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
         crc_candidate_statement:
           "Kling's commercial-use permissions depend on your account type. Under the current Terms, paid members may use generated output commercially, while free users require Kling's written permission for commercial use.",
         topic: 'commercial_use',
+        applicability_requirements: [],
       },
     ],
   },
@@ -82,6 +84,7 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
         crc_candidate_statement:
           "Pika's current Terms restrict the Free tier to personal, non-commercial use. Current paid plans include commercial-use rights, so if you're using Pika professionally it's worth confirming which subscription you're on.",
         topic: 'commercial_use',
+        applicability_requirements: [],
       },
     ],
   },
@@ -89,35 +92,35 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
     identifier: 'google-veo',
     last_verified: '2026-08-05',
     claims: [
-      { claim_id: 'google-veo', crc_eligible: 'Pending', crc_publication_scope: null, crc_candidate_statement: null, topic: 'commercial_use' },
+      { claim_id: 'google-veo', crc_eligible: 'Pending', crc_publication_scope: null, crc_candidate_statement: null, topic: 'commercial_use', applicability_requirements: [] },
     ],
   },
   {
     identifier: 'adobe-firefly',
     last_verified: '2026-08-05',
     claims: [
-      { claim_id: 'adobe-firefly', crc_eligible: 'Pending', crc_publication_scope: null, crc_candidate_statement: null, topic: 'commercial_use' },
+      { claim_id: 'adobe-firefly', crc_eligible: 'Pending', crc_publication_scope: null, crc_candidate_statement: null, topic: 'commercial_use', applicability_requirements: [] },
     ],
   },
   {
     identifier: 'openai-sora',
     last_verified: '2026-08-01',
     claims: [
-      { claim_id: 'openai-sora', crc_eligible: 'Pending', crc_publication_scope: null, crc_candidate_statement: null, topic: 'commercial_use' },
+      { claim_id: 'openai-sora', crc_eligible: 'Pending', crc_publication_scope: null, crc_candidate_statement: null, topic: 'commercial_use', applicability_requirements: [] },
     ],
   },
   {
     identifier: 'gemini-api',
     last_verified: '2026-08-05',
     claims: [
-      { claim_id: 'gemini-api', crc_eligible: 'Pending', crc_publication_scope: null, crc_candidate_statement: null, topic: 'commercial_use' },
+      { claim_id: 'gemini-api', crc_eligible: 'Pending', crc_publication_scope: null, crc_candidate_statement: null, topic: 'commercial_use', applicability_requirements: [] },
     ],
   },
   {
     identifier: 'gemini-consumer-app',
     last_verified: '2026-08-06',
     claims: [
-      { claim_id: 'gemini-consumer-app', crc_eligible: 'Pending', crc_publication_scope: null, crc_candidate_statement: null, topic: 'commercial_use' },
+      { claim_id: 'gemini-consumer-app', crc_eligible: 'Pending', crc_publication_scope: null, crc_candidate_statement: null, topic: 'commercial_use', applicability_requirements: [] },
     ],
   },
   {
@@ -132,6 +135,7 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
         crc_candidate_statement:
           "Midjourney's commercial-use permissions depend on your subscription. Under the current Terms, free users are limited to non-commercial use, while paid members may use generated assets commercially. If the Service is being used for the benefit of a company with more than US$1 million in annual gross revenue, Midjourney's Terms also require a corporate membership plan.",
         topic: 'commercial_use',
+        applicability_requirements: [],
       },
     ],
   },
@@ -147,6 +151,7 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
         crc_candidate_statement:
           "ElevenLabs' current Terms restrict the Free tier to non-commercial use, while paid tiers permit commercial use of generated audio. Users retain rights to their output under those Terms.",
         topic: 'commercial_use',
+        applicability_requirements: [],
       },
       {
         claim_id: 'elevenlabs-voice-consent',
@@ -155,6 +160,7 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
           'None — withheld under CRC Publication Policy Principle 3. Voice-cloning, consent, and likeness-related provisions are withheld regardless of verification status — describing platform-level safeguards could imply that uses not blocked by the platform are acceptable; those questions require contextual human review.',
         crc_candidate_statement: null,
         topic: 'likeness',
+        applicability_requirements: [],
       },
     ],
   },

@@ -14,7 +14,7 @@ import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixtur
 import { TOPIC_RELATIONSHIPS_FIXTURE } from '@/lib/retrieval-engine/topic-relationships-fixture'
 import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
 import type { RetrievalHandoff, UserGoal } from '@/types/interview-engine'
-import type { TopicClaim } from '@/lib/retrieval-engine/types'
+import type { MatrixRow, TopicClaim } from '@/lib/retrieval-engine/types'
 
 function handoff(overrides: Partial<RetrievalHandoff> = {}): RetrievalHandoff {
   return {
@@ -1066,5 +1066,63 @@ describe('buildBoundedInterpretations -- never fabricates, never invents claim c
     const g = goal({ goal_id: 'g-1', raw_text: raw, category: 'commercial_use' })
     const [interp] = buildBoundedInterpretations([g], [])
     expect(interp.goal_text).toBe(raw)
+  })
+})
+
+describe('buildBoundedInterpretations -- Case 3A reuse for a Matrix-origin applicability_unmet diagnostic (CRC Narrow Matrix Applicability milestone, 2026-08-23)', () => {
+  const usFacts: ApplicabilityFacts = { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] }
+  const unknownFacts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+
+  test('a gated Matrix claim with jurisdiction unknown -> relevant_applicability_unresolved, exactly as an equivalent TopicClaim diagnostic already does -- no Matrix-specific BI branch exists or is needed', () => {
+    const gatedRow: MatrixRow = {
+      identifier: 'test-matrix-gated',
+      last_verified: '2026-08-23',
+      claims: [
+        {
+          claim_id: 'test-matrix-gated',
+          crc_eligible: 'Yes',
+          crc_publication_scope: 'Test scope text.',
+          crc_candidate_statement: 'Matrix-origin substantive claim text that must never leak while unresolved.',
+          topic: 'commercial_use',
+          applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+        },
+      ],
+    }
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const out = retrieve(handoff({ tools: [tool('test-matrix-gated')] }), [gatedRow], [], [], unknownFacts)
+    expect(out.results).toEqual([]) // withheld entirely, same as a TopicClaim's own Case 3A
+    // identifier is the claim's topic (goal.category), not claim_id -- BI's
+    // existing, unmodified Case 3A detection matches on category, exactly
+    // like the topic path's own applicability_unmet diagnostic already does.
+    expect(out.diagnostics).toContainEqual({ identifier: 'commercial_use', reason: 'applicability_unmet' })
+
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('relevant_applicability_unresolved')
+    expect(interp.summary).not.toContain('Matrix-origin substantive claim text that must never leak while unresolved.')
+    expect(interp.supporting_claim_ids).toEqual([])
+  })
+
+  test('the same gated Matrix claim correctly surfaces once jurisdiction is confirmed -- known-selector path reaches BI as an ordinary directly_relevant claim', () => {
+    const gatedRow: MatrixRow = {
+      identifier: 'test-matrix-gated-2',
+      last_verified: '2026-08-23',
+      claims: [
+        {
+          claim_id: 'test-matrix-gated-2',
+          crc_eligible: 'Yes',
+          crc_publication_scope: 'Test scope text.',
+          crc_candidate_statement: 'Matrix-origin substantive claim text, now correctly applicable.',
+          topic: 'commercial_use',
+          applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+        },
+      ],
+    }
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const out = retrieve(handoff({ tools: [tool('test-matrix-gated-2')] }), [gatedRow], [], [], usFacts)
+    expect(out.results).toHaveLength(1)
+
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('directly_relevant')
+    expect(interp.summary).toContain('Matrix-origin substantive claim text, now correctly applicable.')
   })
 })

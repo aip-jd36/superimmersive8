@@ -29,7 +29,7 @@ jest.mock('@/lib/crc-engine/dependency-askability', () => ({
 
 const mockedGetAskabilityEntry = getAskabilityEntry as jest.Mock
 
-const MATRIX = [{ identifier: 'kling', last_verified: '2026-08-05', claims: [{ claim_id: 'kling', crc_eligible: 'Yes' as const, crc_publication_scope: 'x', crc_candidate_statement: 'Kling statement.' }] }]
+const MATRIX = [{ identifier: 'kling', last_verified: '2026-08-05', claims: [{ claim_id: 'kling', crc_eligible: 'Yes' as const, crc_publication_scope: 'x', crc_candidate_statement: 'Kling statement.', applicability_requirements: [] }] }]
 
 function deps(overrides: Partial<RunTurnDeps> = {}, store?: SessionStore): RunTurnDeps {
   return {

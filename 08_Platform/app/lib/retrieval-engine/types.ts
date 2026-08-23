@@ -62,6 +62,31 @@ export interface MatrixClaim {
   crc_candidate_statement: string | null
   /** Optional descriptive tag -- see module header's "Topic tagging" note. Absent on a claim means "not yet classified," not "no subject matter." */
   topic?: GoalCategory
+  /**
+   * CRC Narrow Matrix Applicability milestone (2026-08-23, PM/Architecture-
+   * approved, following the Governed Conditional/Variant Knowledge design
+   * diagnostic of the same date). Reuses `ApplicabilityRequirement` --
+   * TopicClaim's own type, unmodified -- rather than a Matrix-specific
+   * equivalent; evaluated by the exact same `isApplicable()` used for
+   * TopicClaim (lookup-topic-claims.ts), at the exact point `retrieve()`
+   * already has `ApplicabilityFacts` in scope for the tool/Matrix path. This
+   * gives tool-native governed claims the same deterministic, fail-closed
+   * conditional-applicability capability TopicClaim already has -- resolving
+   * the `[PROTOTYPE ASSUMPTION -- TO VALIDATE]` left open in
+   * enumerate-eligible-claims.ts's own header ("If a future row ever has
+   * multiple Yes claims where only some should apply depending on additional
+   * structured facts, that is evidence for a future deterministic
+   * applicability schema").
+   *
+   * REQUIRED, not optional -- matches this codebase's own established
+   * discipline (see `provider_scope`'s doc comment below: "an author must
+   * make an explicit, reviewed choice... never fall through an implicit
+   * default"). Every existing Matrix claim is authored with `[]`, which is
+   * vacuously applicable under `isApplicable`'s `.every()` semantics --
+   * behaviorally identical to having no gate at all, so this addition
+   * changes zero existing retrieval behavior.
+   */
+  applicability_requirements: ApplicabilityRequirement[]
 }
 
 /**

@@ -33,7 +33,7 @@ import { extractMatchableFacts } from './extract-matchable-facts'
 import { lookupRows } from './lookup-rows'
 import { enumerateEligibleClaims } from './enumerate-eligible-claims'
 import { assembleResult, assembleTopicResult, assembleRelatedTopicResult, assembleDiscoveredTopicResult } from './assemble-result'
-import { lookupTopicClaims, type ApplicabilityFacts } from './lookup-topic-claims'
+import { isApplicable, lookupTopicClaims, type ApplicabilityFacts } from './lookup-topic-claims'
 import { lookupRelatedTopicClaims } from './lookup-topic-relationships'
 import { lookupDiscoveredTopicClaims } from './lookup-discovered-topic-claims'
 import type { DiscoveredTopicOccurrence, MatrixRow, RetrievalDiagnostic, RetrievalResult, TopicClaim, TopicRelationship } from './types'
@@ -138,6 +138,26 @@ export function retrieve(
     }
 
     for (const claim of eligibleClaims) {
+      // CRC Narrow Matrix Applicability milestone (2026-08-23): reuses
+      // isApplicable() unmodified, the exact evaluator lookupTopicClaims
+      // already uses below -- an eligible claim with an unmet requirement is
+      // withheld before assembly, never guessed. Empty (the migrated
+      // default for every existing claim) is vacuously applicable, so this
+      // check is a no-op for every claim that doesn't opt into a real gate.
+      // `identifier` is the claim's own topic (falling back to 'unknown',
+      // mirroring assembleResult's own `claim.topic ?? 'unknown'` below),
+      // NOT claim_id -- Bounded Interpretation's existing, unmodified Case
+      // 3A detection (build-bounded-interpretation.ts) matches an
+      // `applicability_unmet` diagnostic by `identifier === goal.category`,
+      // exactly the same identifier semantics lookupTopicClaims already uses
+      // for the topic path (`diagnostics.push({ identifier: category, ... })`
+      // below) -- this is "the appropriate existing identifier semantics"
+      // for this diagnostic reason specifically, distinct from
+      // `yes_claim_missing_scope`'s own claim-level identifier convention.
+      if (!isApplicable(claim.applicability_requirements, applicabilityFacts)) {
+        diagnostics.push({ identifier: claim.topic ?? 'unknown', reason: 'applicability_unmet' })
+        continue
+      }
       const assembled = assembleResult({ kind: 'tool', identifier }, row, claim)
       if (!assembled) {
         diagnostics.push({ identifier: claim.claim_id, reason: 'yes_claim_missing_scope' })

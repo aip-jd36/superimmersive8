@@ -29,7 +29,7 @@ const MATRIX = [
   {
     identifier: 'runway-gen3',
     last_verified: '2026-08-05',
-    claims: [{ claim_id: 'runway-gen3', crc_eligible: 'Yes' as const, crc_publication_scope: 'scope text', crc_candidate_statement: 'Runway statement.' }],
+    claims: [{ claim_id: 'runway-gen3', crc_eligible: 'Yes' as const, crc_publication_scope: 'scope text', crc_candidate_statement: 'Runway statement.', applicability_requirements: [] }],
   },
 ]
 

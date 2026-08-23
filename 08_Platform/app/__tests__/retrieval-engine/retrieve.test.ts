@@ -8,8 +8,9 @@
 
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
-import type { MatrixRow, TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
-import type { RetrievalHandoff, UserGoal } from '@/types/interview-engine'
+import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
+import type { ApplicabilityRequirement, MatrixRow, TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
+import type { RetrievalHandoff, ToolMention, UserGoal } from '@/types/interview-engine'
 
 function handoff(overrides: Partial<RetrievalHandoff> = {}): RetrievalHandoff {
   return {
@@ -55,7 +56,7 @@ describe('retrieve — required Phase 7 cases', () => {
     const noRow: MatrixRow = {
       identifier: 'test-tool-no',
       last_verified: '2026-08-08',
-      claims: [{ claim_id: 'test-tool-no', crc_eligible: 'No', crc_publication_scope: 'None — withheld for testing.', crc_candidate_statement: null }],
+      claims: [{ claim_id: 'test-tool-no', crc_eligible: 'No', crc_publication_scope: 'None — withheld for testing.', crc_candidate_statement: null, applicability_requirements: [] }],
     }
     const out = retrieve(handoff({ tools: [tool('test-tool-no')] }), [noRow])
     expect(out.results).toEqual([])
@@ -174,7 +175,7 @@ describe('retrieve — required Phase 7 cases', () => {
     const brokenRow: MatrixRow = {
       identifier: 'test-tool-broken',
       last_verified: null,
-      claims: [{ claim_id: 'test-tool-broken', crc_eligible: 'Yes', crc_publication_scope: null, crc_candidate_statement: null }],
+      claims: [{ claim_id: 'test-tool-broken', crc_eligible: 'Yes', crc_publication_scope: null, crc_candidate_statement: null, applicability_requirements: [] }],
     }
     const out = retrieve(handoff({ tools: [tool('test-tool-broken')] }), [brokenRow])
     expect(out.results).toEqual([])
@@ -411,5 +412,199 @@ describe('retrieve -- Governed Topic Relationships integration (2026-08-16)', ()
     // upstream-duplicated fixture entry.
     const out = retrieve(handoff(), MATRIX_FIXTURE, [g], [c, c], undefined, [rel])
     expect(out.results).toHaveLength(1)
+  })
+})
+
+describe('retrieve -- Matrix applicability (CRC Narrow Matrix Applicability milestone, 2026-08-23)', () => {
+  function toolMention(overrides: Partial<ToolMention> & Pick<ToolMention, 'mention_id' | 'resolution'>): ToolMention {
+    return {
+      access_surface: { state: 'unknown' },
+      plan_tier: { state: 'unknown' },
+      confidence: 'confirmed',
+      source_turn: 1,
+      source_statement: 'placeholder',
+      superseded_by: null,
+      ...overrides,
+    }
+  }
+
+  function facts(overrides: Partial<ApplicabilityFacts> = {}): ApplicabilityFacts {
+    return { jurisdiction: { state: 'unknown' }, toolMentions: [], ...overrides }
+  }
+
+  // Test A: every existing (unconditional, applicability_requirements: [])
+  // Matrix claim retrieves exactly as before -- the migration is provably
+  // behavior-preserving, not merely asserted. Every other test in this file
+  // that already exercises MATRIX_FIXTURE (Tests 1-17 above) is itself
+  // additional, broader evidence of the same invariant; this is the one
+  // narrow, explicit regression check for it.
+  test('A: an existing unconditional Matrix claim (applicability_requirements: []) is unaffected by the new gate', () => {
+    const out = retrieve(handoff({ tools: [{ identifier: 'kling', access_surface: 'unresolved', plan_tier: 'unknown' }] }), MATRIX_FIXTURE)
+    expect(out.results).toHaveLength(1)
+    expect(out.results[0].claim_id).toBe('kling')
+    expect(out.results[0].candidate_statement).toBe(MATRIX_FIXTURE.find((r) => r.identifier === 'kling')!.claims[0].crc_candidate_statement)
+    expect(out.diagnostics).toEqual([])
+  })
+
+  // Test B: matching applicability, using jurisdiction -- an already
+  // well-normalized applicability fact -- to test the generic capability
+  // without coupling to tool_plan_tier's own separately-tracked, unrelated
+  // normalization debt (see Final Report §O).
+  test('B: a gated Matrix claim retrieves when its applicability requirement is met', () => {
+    const gatedRow: MatrixRow = {
+      identifier: 'test-matrix-jurisdiction',
+      last_verified: '2026-08-23',
+      claims: [
+        {
+          claim_id: 'test-matrix-jurisdiction',
+          crc_eligible: 'Yes',
+          crc_publication_scope: 'Test scope text.',
+          crc_candidate_statement: 'Test candidate statement.',
+          topic: 'commercial_use',
+          applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+        },
+      ],
+    }
+    const out = retrieve(
+      handoff({ tools: [{ identifier: 'test-matrix-jurisdiction', access_surface: 'unresolved', plan_tier: 'unknown' }] }),
+      [gatedRow],
+      [],
+      [],
+      facts({ jurisdiction: { state: 'confirmed', value: 'United States' } }),
+    )
+    expect(out.results).toHaveLength(1)
+    expect(out.results[0].claim_id).toBe('test-matrix-jurisdiction')
+    expect(out.diagnostics).toEqual([])
+  })
+
+  // Test C: known, nonmatching applicability.
+  test('C: a gated Matrix claim is withheld, with applicability_unmet, when its requirement is known but not met', () => {
+    const gatedRow: MatrixRow = {
+      identifier: 'test-matrix-jurisdiction',
+      last_verified: '2026-08-23',
+      claims: [
+        {
+          claim_id: 'test-matrix-jurisdiction',
+          crc_eligible: 'Yes',
+          crc_publication_scope: 'Test scope text.',
+          crc_candidate_statement: 'Test candidate statement.',
+          topic: 'commercial_use',
+          applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+        },
+      ],
+    }
+    const out = retrieve(
+      handoff({ tools: [{ identifier: 'test-matrix-jurisdiction', access_surface: 'unresolved', plan_tier: 'unknown' }] }),
+      [gatedRow],
+      [],
+      [],
+      facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' } }),
+    )
+    expect(out.results).toEqual([])
+    // identifier is the claim's topic (commercial_use), not claim_id -- see
+    // retrieve.ts's own comment at this exact call site for why.
+    expect(out.diagnostics).toEqual([{ identifier: 'commercial_use', reason: 'applicability_unmet' }])
+  })
+
+  // Test D: unknown applicability fails closed identically to a known-wrong
+  // value -- never guessed, never both branches exposed. Deliberately omits
+  // `topic` (untagged claim) to also exercise the `claim.topic ?? 'unknown'`
+  // diagnostic fallback -- Test C already covers the tagged-claim case.
+  test('D: a gated Matrix claim fails closed -- unconfirmed applicability fact behaves identically to a nonmatching one', () => {
+    const gatedRow: MatrixRow = {
+      identifier: 'test-matrix-jurisdiction',
+      last_verified: '2026-08-23',
+      claims: [
+        {
+          claim_id: 'test-matrix-jurisdiction',
+          crc_eligible: 'Yes',
+          crc_publication_scope: 'Test scope text.',
+          crc_candidate_statement: 'Test candidate statement that must never leak while unresolved.',
+          applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+        },
+      ],
+    }
+    const out = retrieve(handoff({ tools: [{ identifier: 'test-matrix-jurisdiction', access_surface: 'unresolved', plan_tier: 'unknown' }] }), [gatedRow])
+    expect(out.results).toEqual([])
+    expect(out.diagnostics).toEqual([{ identifier: 'unknown', reason: 'applicability_unmet' }])
+  })
+
+  // Test E: two independently-governed conditional claims under one row
+  // (mirrors the existing live elevenlabs two-claim precedent), gated on
+  // tool_plan_tier specifically -- proves per-claim, not per-row,
+  // evaluation, and sibling suppression without any variant-family concept.
+  test('E: two mutually exclusive conditional claims under one row -- only the applicable one retrieves, the sibling is withheld with its own diagnostic', () => {
+    const twoClaimRow: MatrixRow = {
+      identifier: 'test-tool-tiered',
+      last_verified: '2026-08-23',
+      claims: [
+        {
+          claim_id: 'test-tool-tiered-paid',
+          crc_eligible: 'Yes',
+          crc_publication_scope: 'Paid scope text.',
+          crc_candidate_statement: 'Paid candidate statement.',
+          topic: 'commercial_use',
+          applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'test-tool-tiered', operator: 'equals', value: 'paid' }],
+        },
+        {
+          claim_id: 'test-tool-tiered-free',
+          crc_eligible: 'Yes',
+          crc_publication_scope: 'Free scope text.',
+          crc_candidate_statement: 'Free candidate statement.',
+          topic: 'commercial_use',
+          applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'test-tool-tiered', operator: 'equals', value: 'free' }],
+        },
+      ],
+    }
+    const tm = toolMention({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'test-tool-tiered' }, plan_tier: { state: 'confirmed', value: 'paid' } })
+    const out = retrieve(
+      handoff({ tools: [{ identifier: 'test-tool-tiered', access_surface: 'unresolved', plan_tier: 'paid' }] }),
+      [twoClaimRow],
+      [],
+      [],
+      facts({ toolMentions: [tm] }),
+    )
+    expect(out.results).toHaveLength(1)
+    expect(out.results[0].claim_id).toBe('test-tool-tiered-paid')
+    expect(out.results.some((r) => r.claim_id === 'test-tool-tiered-free')).toBe(false)
+    // identifier is the (shared) topic, not the failing claim's own claim_id.
+    expect(out.diagnostics).toEqual([{ identifier: 'commercial_use', reason: 'applicability_unmet' }])
+  })
+
+  // Correction semantics: retrieve() is a pure function re-run fresh from
+  // current state every turn (no caching in this module) -- a plan-tier
+  // correction simply changes which claim's requirement evaluates true on
+  // the NEXT call, exactly as it already does for jurisdiction. No new
+  // mechanism exists or is needed to "re-evaluate" a stale conclusion.
+  test('correction: the same two-claim row selects the other variant when plan_tier changes between calls', () => {
+    const twoClaimRow: MatrixRow = {
+      identifier: 'test-tool-tiered',
+      last_verified: '2026-08-23',
+      claims: [
+        {
+          claim_id: 'test-tool-tiered-paid',
+          crc_eligible: 'Yes',
+          crc_publication_scope: 'Paid scope text.',
+          crc_candidate_statement: 'Paid candidate statement.',
+          applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'test-tool-tiered', operator: 'equals', value: 'paid' }],
+        },
+        {
+          claim_id: 'test-tool-tiered-free',
+          crc_eligible: 'Yes',
+          crc_publication_scope: 'Free scope text.',
+          crc_candidate_statement: 'Free candidate statement.',
+          applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'test-tool-tiered', operator: 'equals', value: 'free' }],
+        },
+      ],
+    }
+    const h = handoff({ tools: [{ identifier: 'test-tool-tiered', access_surface: 'unresolved', plan_tier: 'unknown' }] })
+
+    const paidTm = toolMention({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'test-tool-tiered' }, plan_tier: { state: 'confirmed', value: 'paid' } })
+    const paidOut = retrieve(h, [twoClaimRow], [], [], facts({ toolMentions: [paidTm] }))
+    expect(paidOut.results.map((r) => r.claim_id)).toEqual(['test-tool-tiered-paid'])
+
+    const freeTm = toolMention({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'test-tool-tiered' }, plan_tier: { state: 'confirmed', value: 'free' } })
+    const freeOut = retrieve(h, [twoClaimRow], [], [], facts({ toolMentions: [freeTm] }))
+    expect(freeOut.results.map((r) => r.claim_id)).toEqual(['test-tool-tiered-free'])
   })
 })
