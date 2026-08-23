@@ -10,6 +10,8 @@ import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-
 import { directlyRelevantSummary, humanContributionRelevanceSentence } from '@/lib/bounded-interpretation/rules'
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
+import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
+import { TOPIC_RELATIONSHIPS_FIXTURE } from '@/lib/retrieval-engine/topic-relationships-fixture'
 import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
 import type { RetrievalHandoff, UserGoal } from '@/types/interview-engine'
 import type { TopicClaim } from '@/lib/retrieval-engine/types'
@@ -880,6 +882,173 @@ describe('buildBoundedInterpretations -- CC-2 Semantics-Preserving Rhetorical Co
     expect(interp.summary).toBe(
       "SI8 has governed knowledge relevant to whether this kind of output can be copyrighted at all, but it depends on project-specific information that hasn't been confirmed in this conversation. A human-reviewed Commercial Assurance Assessment can address this directly.",
     )
+  })
+})
+
+// ── CRC Email/UI Structural Readability -- Phase 1 (2026-08-23,
+// PM/Architecture-authorized) ───────────────────────────────────────────
+describe('buildBoundedInterpretations -- Phase 1 summary_blocks structural equivalence', () => {
+  function testTopicClaim(overrides: Partial<TopicClaim> & Pick<TopicClaim, 'claim_id' | 'topic'>): TopicClaim {
+    return {
+      claim_character: 'established',
+      jurisdiction: 'Global',
+      lifecycle: 'Adopted',
+      crc_eligible: 'Yes',
+      crc_publication_scope: 'Test scope text.',
+      crc_candidate_statement: 'Test governed statement.',
+      applicability_requirements: [],
+      unresolved_project_dependencies: [],
+      provider_scope: null,
+      last_verified: '2026-08-16',
+      superseded_by: null,
+      ...overrides,
+    }
+  }
+
+  const facts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+
+  test('structural equivalence: summary_blocks.join(\' \') reconstructs summary byte-for-byte, for every status', () => {
+    const cases: Array<{ label: string; goals: ReturnType<typeof goal>[]; claims: TopicClaim[] }> = [
+      { label: 'directly_relevant', goals: [goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })], claims: [] },
+      {
+        label: 'relevant_applicability_unresolved (single-group)',
+        goals: [goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })],
+        claims: [testTopicClaim({ claim_id: 'DEP', topic: 'copyrightability', crc_candidate_statement: 'Dep statement.', unresolved_project_dependencies: ['human_contribution_description'] })],
+      },
+      {
+        label: 'relevant_applicability_unresolved (mixed)',
+        goals: [goal({ goal_id: 'g-1', raw_text: 'Can I use these third-party images commercially?', category: 'third_party_source_rights' })],
+        claims: [
+          testTopicClaim({ claim_id: 'NO-DEP', topic: 'third_party_source_rights', crc_candidate_statement: 'No-dep statement.' }),
+          testTopicClaim({ claim_id: 'DEP', topic: 'third_party_source_rights', crc_candidate_statement: 'Dep statement.', unresolved_project_dependencies: ['editorial_designation_confirmed'] }),
+        ],
+      },
+      { label: 'outside_current_coverage', goals: [goal({ goal_id: 'g-1', raw_text: 'Do I own the copyright?', category: 'copyright_ownership' })], claims: [] },
+      {
+        label: 'determination_declined',
+        goals: [goal({ goal_id: 'g-1', raw_text: 'Certify this.', category: 'commercial_use', scope: 'determination_request' })],
+        claims: [],
+      },
+    ]
+    for (const c of cases) {
+      const out = retrieve(handoff({ tools: c.label === 'directly_relevant' ? [tool('runway-gen3')] : [] }), MATRIX_FIXTURE, c.goals, c.claims, facts)
+      const [interp] = buildBoundedInterpretations(c.goals, out.results, out.diagnostics)
+      expect(interp.summary_blocks.join(' ')).toBe(interp.summary)
+      expect(interp.summary_blocks.length).toBeGreaterThan(0)
+    }
+  })
+
+  test('Case 3A (content-free) produces exactly one block, equal to summary', () => {
+    const topicClaims = [
+      testTopicClaim({
+        claim_id: 'TEST-3A',
+        topic: 'copyrightability',
+        crc_candidate_statement: 'US-only substantive claim text that must never leak.',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
+    const unknownFacts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], topicClaims, unknownFacts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.summary_blocks).toEqual([interp.summary])
+    expect(interp.summary_blocks).toHaveLength(1)
+  })
+
+  test('mixed Case-3B produces exactly two blocks -- one dependency-free, one dependency-bearing (canonical Kling+iStock shape)', () => {
+    const noDep = testTopicClaim({ claim_id: 'NO-DEP', topic: 'third_party_source_rights', crc_candidate_statement: 'Dependency-free statement.' })
+    const dep = testTopicClaim({ claim_id: 'DEP', topic: 'third_party_source_rights', crc_candidate_statement: 'Dependency-bearing statement.', unresolved_project_dependencies: ['editorial_designation_confirmed'] })
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use these third-party images commercially?', category: 'third_party_source_rights' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], [noDep, dep], facts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.summary_blocks).toHaveLength(2)
+    expect(interp.summary_blocks[0]).toContain('Dependency-free statement.')
+    expect(interp.summary_blocks[0]).toContain("though it doesn't by itself determine the answer for your specific project.")
+    expect(interp.summary_blocks[1]).toContain('Dependency-bearing statement.')
+    expect(interp.summary_blocks[1]).toContain("there isn't enough project-specific information to determine how it applies")
+    expect(interp.summary_blocks[1]).toContain('A human-reviewed Commercial Assurance Assessment can address this directly.')
+    // No block is a substring artifact of the other, and nothing new appears.
+    expect(interp.summary_blocks.join(' ')).toBe(interp.summary)
+  })
+
+  test('single dependency-bearing-only group produces exactly one block (no artificial segmentation)', () => {
+    const claims = [testTopicClaim({ claim_id: 'DEP-ONLY', topic: 'copyrightability', crc_candidate_statement: 'A dependency-bearing governed statement.', unresolved_project_dependencies: ['human_contribution_description'] })]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], claims, facts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.summary_blocks).toHaveLength(1)
+    expect(interp.summary_blocks[0]).toBe(interp.summary)
+  })
+
+  test('directly_relevant (tool-only) produces exactly one block', () => {
+    const out = retrieve(handoff({ tools: [tool('runway-gen3')] }), MATRIX_FIXTURE)
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const [interp] = buildBoundedInterpretations([g], out.results)
+    expect(interp.summary_blocks).toHaveLength(1)
+    expect(interp.summary_blocks[0]).toBe(interp.summary)
+  })
+
+  test('copyright H5 + related-topic mixed shape: blocks preserve H5 exactly once and related-topic boundary clause, join reconstructs summary', () => {
+    const noDep = testTopicClaim({ claim_id: 'COPY-004-LIKE', topic: 'copyright_ownership', crc_candidate_statement: 'Framing statement, no dependency.' })
+    const copyrightabilityDep = testTopicClaim({
+      claim_id: 'COPY-001-LIKE',
+      topic: 'copyrightability',
+      crc_candidate_statement: 'Copyrightability statement with a dependency.',
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+      unresolved_project_dependencies: ['human_contribution_description'],
+    })
+    const relationship = {
+      relationship_id: 'REL-TEST-v1',
+      source_topic: 'copyright_ownership' as const,
+      target_topic: 'copyrightability' as const,
+      relationship_type: 'relevant_consideration' as const,
+      rationale: 'Test rationale.',
+      lifecycle: 'Adopted' as const,
+      adoption_approver: 'test',
+      adoption_decision_date: '2026-08-16',
+      publication_scope: 'CRC eligible' as const,
+      crc_eligible: 'Yes' as const,
+      crc_approver: 'test',
+      crc_decision_date: '2026-08-16',
+      last_reviewed: '2026-08-16',
+      superseded_by: null,
+    }
+    const g = goal({ goal_id: 'g-1', raw_text: 'Do I own the copyright?', category: 'copyright_ownership' })
+    const usFacts: ApplicabilityFacts = { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] }
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], [noDep, copyrightabilityDep], usFacts, [relationship])
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics, { state: 'confirmed', value: 'I only wrote prompts.' })
+    expect(interp.summary_blocks).toHaveLength(2)
+    expect(interp.summary_blocks[0]).toContain('Framing statement, no dependency.')
+    expect(interp.summary_blocks[1]).toContain('Copyrightability statement with a dependency.')
+    expect(interp.summary_blocks[1]).toContain('This information is relevant to what you asked, but does not by itself determine the answer.')
+    expect(interp.summary_blocks[1].match(/You described your own contribution as:/g)).toHaveLength(1)
+    expect(interp.summary_blocks.join(' ')).toBe(interp.summary)
+  })
+
+  test('Track C / discovered-topic: canonical Kling+iStock via full retrieve() -- blocks preserve discovered attribution to the real explicit goal, provider isolation intact', () => {
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use that commercially?', category: 'commercial_use' })
+    const out = retrieve(
+      handoff({ tools: [tool('kling')] }),
+      MATRIX_FIXTURE,
+      [g],
+      TOPIC_CLAIMS_FIXTURE,
+      facts,
+      TOPIC_RELATIONSHIPS_FIXTURE,
+      ['istock'],
+      [{ topic: 'third_party_source_rights', trigger_id: 'test', source_kind: 'asset_provider_mention', source_id: 'ap-1', source_goal_category: 'commercial_use' }],
+    )
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.summary_blocks).toHaveLength(2)
+    expect(interp.summary_blocks[0]).toContain("Kling's commercial-use permissions depend on your account type")
+    expect(interp.summary_blocks[1]).toContain('iStock')
+    // Provider isolation: no Getty/Shutterstock-SPECIFIC claim was retrieved
+    // (the generic stock claim's own already-governed text legitimately
+    // names multiple providers as context -- isolation is about which
+    // CLAIMS retrieve, not whether a provider name ever appears in prose).
+    const claimIds = out.results.map((r) => r.claim_id)
+    expect(claimIds).not.toContain('CLAIM-STOCK-GETTY-EDITORIAL-001-v1')
+    expect(claimIds).not.toContain('CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1')
+    expect(interp.summary_blocks.join(' ')).toBe(interp.summary)
   })
 })
 

@@ -79,7 +79,7 @@ export interface AssembleProjectionOutputResult {
  * lib/bounded-interpretation's job, not this one's.
  */
 function renderGoalInterpretations(interpretations: BoundedInterpretation[]): ProjectionGoalInterpretation[] {
-  return interpretations.map((i) => ({ goal_text: i.goal_text, summary: i.summary }))
+  return interpretations.map((i) => ({ goal_text: i.goal_text, summary: i.summary, summary_blocks: i.summary_blocks }))
 }
 
 /**

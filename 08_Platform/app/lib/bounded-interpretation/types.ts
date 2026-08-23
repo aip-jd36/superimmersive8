@@ -130,5 +130,23 @@ export interface BoundedInterpretation {
   status: InterpretationStatus
   /** Fixed, templated explanation text — see rules.ts. Never invented per-conversation. */
   summary: string
+  /**
+   * CRC Email/UI Structural Readability -- Phase 1 (2026-08-23,
+   * PM/Architecture-authorized). Additive presentation-only companion to
+   * `summary` -- carries the exact same words, in the exact same order, as
+   * separate ordered blocks instead of one pre-joined string, so a
+   * renderer can display already-authorized clause boundaries (e.g. CC-1's
+   * dependency-free vs. dependency-bearing split) without inferring or
+   * inventing new structure. `summary` remains the authoritative flat
+   * string and is never removed or altered by this field's existence;
+   * `summary_blocks.join(' ')` reconstructs `summary` byte-for-byte for
+   * every status (see rules.ts and this module's own test coverage).
+   * Always exactly one block for a goal whose composition has no genuine
+   * internal boundary (every status except Case-3B's mixed-group shape) --
+   * never artificially split. Contains no new proposition, no status, no
+   * priority, no valence -- purely a different container for content
+   * `summary` already carries.
+   */
+  summary_blocks: string[]
   supporting_claim_ids: string[]
 }

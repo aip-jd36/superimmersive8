@@ -58,7 +58,7 @@ describe('buildResultsEmailContent', () => {
   test('renders "What this means for what you asked" with the goal quoted verbatim, only when goal_interpretations is non-empty (CRC Milestone 2, 2026-08-15)', () => {
     const withGoal: ProjectionOutput = {
       ...FULL_OUTPUT,
-      goal_interpretations: [{ goal_text: 'Do I own the copyright for this?', summary: 'Fixed bounded summary text.' }],
+      goal_interpretations: [{ goal_text: 'Do I own the copyright for this?', summary: 'Fixed bounded summary text.', summary_blocks: ['Fixed bounded summary text.'] }],
     }
     const { html, text } = buildResultsEmailContent(withGoal, 'attr-1', 'jd@example.com')
     for (const target of [html, text]) {
@@ -74,6 +74,9 @@ describe('buildResultsEmailContent', () => {
       goal_interpretations: [{
         goal_text: 'Is this copyrightable?',
         summary: "Prompting alone generally doesn't establish sufficient human authorship. This is relevant to whether this kind of output can be copyrighted at all, but based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project. A human-reviewed Commercial Assurance Assessment can address this directly.",
+        summary_blocks: [
+          "Prompting alone generally doesn't establish sufficient human authorship. This is relevant to whether this kind of output can be copyrighted at all, but based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project. A human-reviewed Commercial Assurance Assessment can address this directly.",
+        ],
       }],
     }
     const { html, text } = buildResultsEmailContent(withUnresolvedApplicability, 'attr-1', 'jd@example.com')
@@ -98,8 +101,8 @@ describe('buildResultsEmailContent', () => {
     const withTwoGoals: ProjectionOutput = {
       ...EMPTY_OUTPUT,
       goal_interpretations: [
-        { goal_text: 'first goal text', summary: 'first summary text' },
-        { goal_text: 'second goal text', summary: 'second summary text' },
+        { goal_text: 'first goal text', summary: 'first summary text', summary_blocks: ['first summary text'] },
+        { goal_text: 'second goal text', summary: 'second summary text', summary_blocks: ['second summary text'] },
       ],
     }
     const { html } = buildResultsEmailContent(withTwoGoals, 'attr-1', 'jd@example.com')
@@ -110,7 +113,7 @@ describe('buildResultsEmailContent', () => {
   test('a non-empty goal_interpretations alone (opening_line/understood_summary/knowledge_items all empty) does not trigger the empty-state fallback', () => {
     const goalOnly: ProjectionOutput = {
       ...EMPTY_OUTPUT,
-      goal_interpretations: [{ goal_text: 'a goal', summary: 'a summary' }],
+      goal_interpretations: [{ goal_text: 'a goal', summary: 'a summary', summary_blocks: ['a summary'] }],
     }
     const { html } = buildResultsEmailContent(goalOnly, 'attr-1', 'jd@example.com')
     expect(html).not.toContain('enough information shared')
@@ -131,5 +134,65 @@ describe('buildResultsEmailContent', () => {
     const { html, text } = buildResultsEmailContent(FULL_OUTPUT, 'attr-1', 'jd@example.com')
     expect(html.toLowerCase()).not.toContain('pdf')
     expect(text.toLowerCase()).not.toContain('pdf')
+  })
+
+  describe('Phase 1 -- structural block paragraphing (2026-08-23)', () => {
+    test('a single-block goal interpretation renders exactly one <p> for its content, same as before this milestone', () => {
+      const withGoal: ProjectionOutput = {
+        ...EMPTY_OUTPUT,
+        goal_interpretations: [{ goal_text: 'Can I use this commercially?', summary: 'Only one block here.', summary_blocks: ['Only one block here.'] }],
+      }
+      const { html, text } = buildResultsEmailContent(withGoal, 'attr-1', 'jd@example.com')
+      const pTagCount = (html.match(/<p style="font-size:14px;color:#222;white-space:pre-line/g) || []).length
+      expect(pTagCount).toBe(1)
+      expect(html).toContain('Only one block here.')
+      expect(text).toContain('Only one block here.')
+    })
+
+    test('a mixed two-block goal interpretation renders as two separate, identically-styled <p> tags, in order, with all content present', () => {
+      const withMixedGoal: ProjectionOutput = {
+        ...EMPTY_OUTPUT,
+        goal_interpretations: [
+          {
+            goal_text: 'Can I use that commercially?',
+            summary: 'Dependency-free block. Dependency-bearing block with hedge.',
+            summary_blocks: ['Dependency-free block.', 'Dependency-bearing block with hedge.'],
+          },
+        ],
+      }
+      const { html, text } = buildResultsEmailContent(withMixedGoal, 'attr-1', 'jd@example.com')
+      const pTagCount = (html.match(/<p style="font-size:14px;color:#222;white-space:pre-line/g) || []).length
+      expect(pTagCount).toBe(2)
+      expect(html.indexOf('Dependency-free block.')).toBeLessThan(html.indexOf('Dependency-bearing block with hedge.'))
+      // Both <p> tags share the identical style attribute prefix -- no
+      // asymmetric emphasis between the dependency-free and
+      // dependency-bearing blocks.
+      const firstStyle = html.match(/<p style="([^"]*)">Dependency-free block\./)?.[1]
+      const secondStyle = html.match(/<p style="([^"]*)">Dependency-bearing block with hedge\./)?.[1]
+      expect(firstStyle).toBeDefined()
+      expect(secondStyle).toBeDefined()
+      expect(firstStyle?.replace(/margin:[^;]+;/, '')).toBe(secondStyle?.replace(/margin:[^;]+;/, ''))
+      expect(text).toContain('Dependency-free block.')
+      expect(text).toContain('Dependency-bearing block with hedge.')
+      // Plain-text fallback separates blocks with a blank line.
+      expect(text).toContain('Dependency-free block.\n\nDependency-bearing block with hedge.')
+    })
+
+    test('no color implies risk/status -- the full email never uses red/amber/green status-coded values', () => {
+      const withMixedGoal: ProjectionOutput = {
+        ...FULL_OUTPUT,
+        goal_interpretations: [{ goal_text: 'Q', summary: 'A. B.', summary_blocks: ['A.', 'B.'] }],
+      }
+      const { html } = buildResultsEmailContent(withMixedGoal, 'attr-1', 'jd@example.com')
+      expect(html.toLowerCase()).not.toMatch(/color:\s*(red|green|orange|#f00\b|#0f0\b|#ff0000|#00ff00|#ffa500)/)
+    })
+
+    test('new structural headings are purely presentational -- "Your workflow" and "Current guidance" appear only as section labels, not new substantive claims', () => {
+      const { html, text } = buildResultsEmailContent(FULL_OUTPUT, 'attr-1', 'jd@example.com')
+      expect(html).toContain('Your workflow')
+      expect(html).toContain('Current guidance')
+      expect(text).toContain('YOUR WORKFLOW')
+      expect(text).toContain('CURRENT GUIDANCE')
+    })
   })
 })

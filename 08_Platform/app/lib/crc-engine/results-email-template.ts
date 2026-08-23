@@ -1,13 +1,15 @@
 /**
  * Results-email HTML + plain-text renderer (CRC Results Gate milestone,
- * 2026-08-14). Uses ONLY existing, already-computed ProjectionOutput
- * fields plus fixed product copy already approved elsewhere in this
- * product (the "How this understanding was built" paragraphs are copied
- * verbatim from CommercialAssuranceBridge.tsx, not rewritten) -- no new
- * content is invented, no risk score, no verdict language, no second
- * analysis. This module never calls a model and never touches Retrieval or
- * Projection itself; it only renders a ProjectionOutput the caller already
- * computed via the same pure runCRCConversation() GET uses.
+ * 2026-08-14; paragraphing/readability updated CRC Email/UI Structural
+ * Readability -- Phase 1, 2026-08-23). Uses ONLY existing, already-computed
+ * ProjectionOutput fields plus fixed product copy already approved
+ * elsewhere in this product (the "How this understanding was built"
+ * paragraphs are copied verbatim from CommercialAssuranceBridge.tsx, not
+ * rewritten) -- no new content is invented, no risk score, no verdict
+ * language, no second analysis. This module never calls a model and never
+ * touches Retrieval or Projection itself; it only renders a
+ * ProjectionOutput the caller already computed via the same pure
+ * runCRCConversation() GET uses.
  *
  * Deliberately excludes the Commercial Readiness Discovery educational
  * takeaway even when one occurred during the conversation -- it was
@@ -28,10 +30,20 @@
  * user's own words verbatim ("You asked: ...") -- this "You asked:"
  * framing is composed HERE, at render time, not baked into
  * ProjectionOutput's own data (PM revision 6: preserve the user's wording,
- * never transform it into a stronger proposition) -- followed by the
- * fixed, bounded `summary` text lib/bounded-interpretation already
- * produced. No new content is invented here; this section only formats
- * two already-computed strings per item.
+ * never transform it into a stronger proposition).
+ *
+ * Phase 1 (2026-08-23): the fixed, bounded content per item now renders
+ * from `item.summary_blocks` (additive, `lib/bounded-interpretation` /
+ * `lib/projection-layer`) -- one `<p>` per already-authorized block instead
+ * of one `<p>` around the whole pre-joined `summary` string. This is
+ * presentation only: `summary_blocks` carries exactly the same words, in
+ * exactly the same order, as `summary` (see that field's own doc comment);
+ * this module does not decide where a boundary exists, only how to lay out
+ * boundaries lib/bounded-interpretation already decided. Every block
+ * receives IDENTICAL styling -- no block is emphasized, highlighted, or
+ * colored differently from another; visual symmetry is a hard requirement,
+ * not a default that happened to be convenient (PM instruction: dependency-
+ * free and dependency-bearing content must carry equal visual weight).
  */
 
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
@@ -70,7 +82,7 @@ export function buildResultsEmailContent(output: ProjectionOutput, attributionTo
   const htmlParts: string[] = []
   const textParts: string[] = []
 
-  htmlParts.push('<h1 style="font-size:20px;margin:0 0 16px;color:#111;">Your Commercial Readiness Check</h1>')
+  htmlParts.push('<h1 style="font-size:20px;margin:0 0 20px;padding-bottom:14px;color:#111;border-bottom:2px solid #233f66;">Your Commercial Readiness Check</h1>')
   textParts.push('YOUR COMMERCIAL READINESS CHECK\n')
 
   if (isFullyEmpty) {
@@ -84,10 +96,14 @@ export function buildResultsEmailContent(output: ProjectionOutput, attributionTo
       textParts.push(`${output.opening_line}\n`)
     }
     if (output.understood_summary !== '') {
+      htmlParts.push('<p style="font-size:13px;font-weight:600;margin:0 0 6px;color:#111;">Your workflow</p>')
+      textParts.push('YOUR WORKFLOW\n')
       htmlParts.push(`<p style="font-size:14px;color:#444;white-space:pre-line;margin:0 0 20px;">${escapeHtml(output.understood_summary)}</p>`)
       textParts.push(`${output.understood_summary}\n`)
     }
     if (output.knowledge_items.length > 0) {
+      htmlParts.push('<p style="font-size:13px;font-weight:600;margin:0 0 10px;color:#111;">Current guidance</p>')
+      textParts.push('\nCURRENT GUIDANCE\n')
       for (const item of output.knowledge_items) {
         const lastUpdated = formatLastVerified(item.last_verified)
         htmlParts.push(
@@ -100,21 +116,33 @@ export function buildResultsEmailContent(output: ProjectionOutput, attributionTo
       }
     }
     if (output.goal_interpretations.length > 0) {
-      htmlParts.push('<p style="font-size:14px;font-weight:600;margin:20px 0 8px;color:#111;">What this means for what you asked</p>')
+      htmlParts.push('<p style="font-size:14px;font-weight:600;margin:24px 0 10px;color:#111;border-top:1px solid #eee;padding-top:20px;">What this means for what you asked</p>')
       textParts.push('\nWHAT THIS MEANS FOR WHAT YOU ASKED\n')
       for (const item of output.goal_interpretations) {
+        // Phase 1: one <p> per already-authorized block instead of one <p>
+        // around the whole joined string -- every block gets IDENTICAL
+        // styling (no emphasis differences between blocks), and a block
+        // gets its own bottom margin only when another block follows it,
+        // so a single-block item (the ordinary case outside CC-1's mixed
+        // Case-3B shape) renders exactly as before, byte-for-byte spacing.
+        const blockParagraphsHtml = item.summary_blocks
+          .map((block, i) => {
+            const isLast = i === item.summary_blocks.length - 1
+            return `<p style="font-size:14px;color:#222;white-space:pre-line;margin:0${isLast ? '' : ' 0 10px'};">${escapeHtml(block)}</p>`
+          })
+          .join('')
         htmlParts.push(
           `<div style="border:1px solid #e0e0e0;border-radius:6px;padding:14px 16px;margin:0 0 12px;">` +
-            `<p style="font-size:13px;font-style:italic;color:#555;margin:0 0 8px;">You asked: &ldquo;${escapeHtml(item.goal_text)}&rdquo;</p>` +
-            `<p style="font-size:14px;color:#222;white-space:pre-line;margin:0;">${escapeHtml(item.summary)}</p>` +
+            `<p style="font-size:13px;font-style:italic;color:#555;margin:0 0 10px;">You asked: &ldquo;${escapeHtml(item.goal_text)}&rdquo;</p>` +
+            blockParagraphsHtml +
             `</div>`,
         )
-        textParts.push(`You asked: "${item.goal_text}"\n${item.summary}\n\n`)
+        textParts.push(`You asked: "${item.goal_text}"\n\n${item.summary_blocks.join('\n\n')}\n\n`)
       }
     }
   }
 
-  htmlParts.push('<hr style="border:none;border-top:1px solid #e0e0e0;margin:24px 0;" />')
+  htmlParts.push('<hr style="border:none;border-top:1px solid #e0e0e0;margin:28px 0 24px;" />')
   htmlParts.push('<p style="font-size:14px;font-weight:600;margin:0 0 8px;color:#111;">How this understanding was built</p>')
   htmlParts.push(`<p style="font-size:13px;color:#555;margin:0 0 10px;">${escapeHtml(HOW_BUILT_PARAGRAPH_1)}</p>`)
   htmlParts.push(`<p style="font-size:13px;color:#555;margin:0 0 20px;">${escapeHtml(HOW_BUILT_PARAGRAPH_2)}</p>`)

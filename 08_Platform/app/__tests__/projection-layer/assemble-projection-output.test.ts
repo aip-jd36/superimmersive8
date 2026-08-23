@@ -201,12 +201,14 @@ describe('assembleProjectionOutput', () => {
 
 describe('assembleProjectionOutput -- interpretations parameter (CRC Milestone 2, 2026-08-15)', () => {
   function interpretation(overrides: Partial<import('@/lib/bounded-interpretation/types').BoundedInterpretation> = {}) {
+    const summary = overrides.summary ?? 'Fixed template summary text.'
     return {
       goal_id: 'g-1',
       goal_text: 'Can I use this commercially?',
       category: 'commercial_use' as const,
       status: 'directly_relevant' as const,
-      summary: 'Fixed template summary text.',
+      summary,
+      summary_blocks: [summary],
       supporting_claim_ids: ['runway-gen3'],
       ...overrides,
     }
@@ -217,21 +219,23 @@ describe('assembleProjectionOutput -- interpretations parameter (CRC Milestone 2
     expect(output.goal_interpretations).toEqual([])
   })
 
-  test('a passed interpretation is narrowed to {goal_text, summary} only -- goal_id, category, status, supporting_claim_ids never leak into ProjectionOutput', () => {
+  test('a passed interpretation is narrowed to {goal_text, summary, summary_blocks} only -- goal_id, category, status, supporting_claim_ids never leak into ProjectionOutput', () => {
     const { output } = assembleProjectionOutput(handoff({ tools: [tool('runway-gen3')] }), [retrievalResult()], [interpretation()])
-    expect(output.goal_interpretations).toEqual([{ goal_text: 'Can I use this commercially?', summary: 'Fixed template summary text.' }])
+    expect(output.goal_interpretations).toEqual([
+      { goal_text: 'Can I use this commercially?', summary: 'Fixed template summary text.', summary_blocks: ['Fixed template summary text.'] },
+    ])
     const keys = Object.keys(output.goal_interpretations[0]).sort()
-    expect(keys).toEqual(['goal_text', 'summary'])
+    expect(keys).toEqual(['goal_text', 'summary', 'summary_blocks'])
   })
 
   test('multiple interpretations are all rendered, in order, none dropped', () => {
     const { output } = assembleProjectionOutput(handoff(), [], [
-      interpretation({ goal_id: 'g-1', goal_text: 'first goal', summary: 'first summary' }),
-      interpretation({ goal_id: 'g-2', goal_text: 'second goal', summary: 'second summary' }),
+      interpretation({ goal_id: 'g-1', goal_text: 'first goal', summary: 'first summary', summary_blocks: ['first summary'] }),
+      interpretation({ goal_id: 'g-2', goal_text: 'second goal', summary: 'second summary', summary_blocks: ['second summary'] }),
     ])
     expect(output.goal_interpretations).toEqual([
-      { goal_text: 'first goal', summary: 'first summary' },
-      { goal_text: 'second goal', summary: 'second summary' },
+      { goal_text: 'first goal', summary: 'first summary', summary_blocks: ['first summary'] },
+      { goal_text: 'second goal', summary: 'second summary', summary_blocks: ['second summary'] },
     ])
   })
 
