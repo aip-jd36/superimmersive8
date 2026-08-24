@@ -110,9 +110,9 @@ describe('Anthropic structured-output schema union-type limit guardrail', () => 
     }
   })
 
-  test('the attribute key enum is exactly the closed four-value set', () => {
+  test('the attribute key enum is exactly the closed five-value set (account_status added, Minimal Generic tool_account_status Capture milestone, 2026-08-24)', () => {
     const entrySchema = (CANDIDATE_RESPONSE_SCHEMA.properties.candidates.items as any).properties.attributes.items
-    expect(entrySchema.properties.key.enum.slice().sort()).toEqual(['access_surface', 'license', 'plan_tier', 'usage'].sort())
+    expect(entrySchema.properties.key.enum.slice().sort()).toEqual(['access_surface', 'account_status', 'license', 'plan_tier', 'usage'].sort())
   })
 })
 

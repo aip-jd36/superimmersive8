@@ -200,6 +200,20 @@ export interface CandidateObservation {
   access_surface_value_hint?: string
   plan_tier_confidence_hint?: ConfidenceState
   plan_tier_value_hint?: string
+  /**
+   * kind === 'tool_mention' (Minimal Generic tool_account_status Capture
+   * milestone, 2026-08-24). Mirrors plan_tier_confidence_hint/value_hint
+   * exactly -- same resolveAttestedToolField call, same fallback to
+   * 'unknown' when unset, no deterministic channel (a bare tool mention or
+   * an ambiguous/indirect statement always leaves both hints unset). Set
+   * ONLY when the user directly and unambiguously stated the tool's own
+   * governed account/membership status this turn -- never inferred from
+   * payment wording, a plan/grade name, or a credits purchase. See
+   * anthropic-extractor.ts's SYSTEM_PROMPT for the exact capture rule and
+   * fail-closed examples.
+   */
+  account_status_confidence_hint?: ConfidenceState
+  account_status_value_hint?: string
 
   /** kind === 'scoped_observation' */
   scope?: ObservationScope
@@ -506,14 +520,14 @@ export function attestCandidate(
         // No deterministic-normalization channel exists for plan_tier in the
         // current registry -- only the direct-statement hint channel applies.
         plan_tier: resolveAttestedToolField(candidate.plan_tier_confidence_hint, candidate.plan_tier_value_hint, undefined),
-        // account_status (CRC Kling Governed Knowledge Correction +
-        // Decomposition milestone, 2026-08-24): fixed `{state: 'unknown'}` --
-        // no extraction hint channel exists for this field in this milestone
-        // (deliberately; this task authors governed knowledge and
-        // applicability semantics, not an acquisition path). Every newly
-        // extracted ToolMention starts with this fact unresolved, exactly
-        // like a historical session backfilled via serialization.ts.
-        account_status: { state: 'unknown' },
+        // account_status (Minimal Generic tool_account_status Capture
+        // milestone, 2026-08-24): mirrors plan_tier exactly -- no
+        // deterministic-normalization channel, only the direct-statement
+        // hint channel. A bare tool mention or an ambiguous/indirect
+        // statement leaves both hints unset, which resolveAttestedToolField
+        // falls back to 'unknown' for, exactly like a historical session
+        // backfilled via serialization.ts.
+        account_status: resolveAttestedToolField(candidate.account_status_confidence_hint, candidate.account_status_value_hint, undefined),
         confidence,
         source_turn: candidate.turn,
         source_statement: candidate.raw_text,

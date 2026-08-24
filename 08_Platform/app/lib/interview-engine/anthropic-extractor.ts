@@ -114,12 +114,14 @@ You MUST NOT:
 - Decide whether a statement should override or replace an earlier one -- only flag with is_correction whether it reads like a correction, never resolve what it corrects.
 - Apply any judgment about commercial risk, legal risk, or readiness. You are not evaluating the project, only transcribing what was said about it.
 
-When kind is "tool_mention" and the user DIRECTLY states which specific plan/tier or access surface they used for that tool in THIS turn, also report it as an entry in this candidate's attributes array (key "plan_tier" and/or key "access_surface" -- see the attributes field description for the exact shape):
+When kind is "tool_mention" and the user DIRECTLY states which specific plan/tier, access surface, or governed account status they used for that tool in THIS turn, also report it as an entry in this candidate's attributes array (key "plan_tier" and/or "access_surface" and/or "account_status" -- see the attributes field description for the exact shape):
 - key "plan_tier": value is the user's own wording for their subscription/account tier (e.g. "paid", "free", "the free plan", "personal paid plan", "business plan", "enterprise plan"). Report their words as stated -- never translate to a specific branded tier name (e.g. "Pro", "Team") they did not themselves say.
 - key "access_surface": value is the user's own wording for HOW they accessed the tool (e.g. "the website", "the app", "the API", "a developer key") -- distinct from plan_tier, which is about their tier of subscription, not the surface they used it through.
-- Set confidence to "confirmed" only when the user stated the plan/tier or access surface as a clear, direct fact this turn. If they expressed genuine uncertainty (e.g. "I think it might be Pro"), set confidence to "unknown" instead of "confirmed", and leave value as an empty string.
-- Omit the entry entirely (do not include a "plan_tier"/"access_surface" entry at all) when the turn says nothing about plan tier or access surface for that tool -- never infer either from generic enthusiasm, unrelated context, or a different tool's plan.
-- These two entries are independent: a turn can include one, both, or neither for the same tool mention.
+- key "account_status": value is the SPECIFIC governed account/membership status term for that tool (e.g. "Member Account", "Regular Account"), reported ONLY when the user's own statement directly and unambiguously establishes it -- e.g. "I have a Kling Member Account." -> "Member Account"; "I have a Kling Regular Account." -> "Regular Account"; "I'm a Kling member." -> "Member Account" (a direct synonym for the same governed status, still safe to translate because "member" unambiguously names the governed status itself). This is DIFFERENT from plan_tier and access_surface above: for this key only, report the governed status term the statement establishes, not the user's raw wording, because downstream code matches this value exactly against the tool's own governed vocabulary.
+  You MUST NOT add an "account_status" entry -- leave it out entirely -- for any statement that only indicates PAYMENT ("I pay for Kling.", "I pay monthly.", "I subscribe to Kling."), a PLAN OR GRADE NAME that is not itself the governed status term ("Kling Pro.", "I'm on Pro."), a CREDITS PURCHASE ("I bought credits." -- buying credits does not by itself establish or rule out membership, so this must stay unresolved), or generic FREE/PAID wording that does not name the specific governed term ("I'm on the free version."). All of these are genuinely ambiguous about the governed account status -- never guess, and never treat "paid" or a plan/grade name as equivalent to any specific governed membership status.
+- Set confidence to "confirmed" only when the user stated the plan/tier, access surface, or account status as a clear, direct fact this turn. If they expressed genuine uncertainty (e.g. "I think it might be Pro", "I might have a member account, not sure"), set confidence to "unknown" instead of "confirmed", and leave value as an empty string.
+- Omit the entry entirely (do not include a "plan_tier"/"access_surface"/"account_status" entry at all) when the turn says nothing about that attribute for that tool -- never infer any of the three from generic enthusiasm, unrelated context, or a different tool's plan.
+- These three entries are independent: a turn can include any combination of them, or none, for the same tool mention.
 
 If a turn contains nothing you can classify as one of the four kinds -- small talk, an incomplete thought, pure filler -- return no candidates for it, or set low_confidence: true on a best-effort candidate if you're genuinely unsure whether something is a real signal.`
 
@@ -141,8 +143,14 @@ const GOAL_SCOPE_VALUES = ['informational', 'determination_request'] as const
  * the full architectural rationale. A closed, deliberately small key
  * vocabulary: growing it (a future LK fact attribute) adds one enum value
  * here, never a new top-level nullable Anthropic schema parameter.
+ *
+ * 'account_status' added (Minimal Generic tool_account_status Capture
+ * milestone, 2026-08-24) -- exactly this kind of growth. Unlike the other
+ * three keys, its value is the tool's own governed account/membership
+ * status term (not the user's raw wording) -- see the tool_mention
+ * attributes guidance below for the full evidentiary rule.
  */
-const EXTRACTED_ATTRIBUTE_KEY_VALUES = ['access_surface', 'plan_tier', 'usage', 'license'] as const
+const EXTRACTED_ATTRIBUTE_KEY_VALUES = ['access_surface', 'plan_tier', 'account_status', 'usage', 'license'] as const
 type ExtractedAttributeKey = (typeof EXTRACTED_ATTRIBUTE_KEY_VALUES)[number]
 
 /**
@@ -188,7 +196,7 @@ export const CANDIDATE_RESPONSE_SCHEMA = {
           attributes: {
             type: 'array',
             description:
-              'P0 schema-union-limit fix (2026-08-21): a generic, closed-vocabulary list of secondary attributes about this candidate\'s own named target (a tool or a third-party source provider), replacing four formerly-separate dedicated field pairs. Include ONE entry per attribute the user directly stated this turn -- never one entry per possible attribute padded with placeholders. Omit an attribute ENTIRELY (do not add an entry for it) when the turn says nothing about it, exactly as the old null/unset representation meant -- an empty attributes array is the normal case for most candidates. See each entry\'s own property descriptions for the exact evidentiary rules per key ("usage"/"license" apply only to asset_provider_mention; "plan_tier"/"access_surface" apply only to tool_mention -- never add an entry whose key does not match this candidate\'s own kind).',
+              'P0 schema-union-limit fix (2026-08-21): a generic, closed-vocabulary list of secondary attributes about this candidate\'s own named target (a tool or a third-party source provider), replacing four formerly-separate dedicated field pairs. Include ONE entry per attribute the user directly stated this turn -- never one entry per possible attribute padded with placeholders. Omit an attribute ENTIRELY (do not add an entry for it) when the turn says nothing about it, exactly as the old null/unset representation meant -- an empty attributes array is the normal case for most candidates. See each entry\'s own property descriptions for the exact evidentiary rules per key ("usage"/"license" apply only to asset_provider_mention; "plan_tier"/"access_surface"/"account_status" apply only to tool_mention -- never add an entry whose key does not match this candidate\'s own kind).',
             items: {
               type: 'object',
               properties: {
@@ -196,18 +204,18 @@ export const CANDIDATE_RESPONSE_SCHEMA = {
                   type: 'string',
                   enum: [...EXTRACTED_ATTRIBUTE_KEY_VALUES],
                   description:
-                    '"access_surface" and "plan_tier" apply only when kind is tool_mention. "usage" and "license" apply only when kind is asset_provider_mention. Never add an entry with a key that does not match this candidate\'s own kind.',
+                    '"access_surface", "plan_tier", and "account_status" apply only when kind is tool_mention. "usage" and "license" apply only when kind is asset_provider_mention. Never add an entry with a key that does not match this candidate\'s own kind.',
                 },
                 confidence: {
                   type: 'string',
                   enum: [...CONFIDENCE_HINT_VALUES],
                   description:
-                    '"confirmed" when the user stated it as a clear, direct fact this turn. For "plan_tier"/"access_surface" only, "unknown" is valid when the user expressed genuine uncertainty (e.g. "I think it might be Pro") -- "usage"/"license" are only ever reported as "confirmed" (per their own evidentiary rules above); never fabricate a "confirmed_absent"/"unresolved_no_visibility"/"declined" state for any of these four keys unless the user\'s own words genuinely support it.',
+                    '"confirmed" when the user stated it as a clear, direct fact this turn. For "plan_tier"/"access_surface"/"account_status" only, "unknown" is valid when the user expressed genuine uncertainty (e.g. "I think it might be Pro", "I might have a member account, not sure") -- "usage"/"license" are only ever reported as "confirmed" (per their own evidentiary rules above); never fabricate a "confirmed_absent"/"unresolved_no_visibility"/"declined" state for any of these five keys unless the user\'s own words genuinely support it.',
                 },
                 value: {
                   type: 'string',
                   description:
-                    'The user\'s own wording for this attribute, preserved as stated -- never translated to a category or canonical label you infer (see each key\'s own evidentiary rules above for exactly what belongs here). Empty string when confidence is not "confirmed".',
+                    'For "access_surface"/"plan_tier"/"usage"/"license": the user\'s own wording for this attribute, preserved as stated -- never translated to a category or canonical label you infer. For "account_status" ONLY: the tool\'s own governed account/membership status term the statement directly and unambiguously establishes (e.g. "Member Account", "Regular Account") -- this is the one key where you DO translate, but ONLY when the statement itself directly supports that specific governed term; see the tool_mention attributes guidance above for the full evidentiary rule and fail-closed examples. Empty string when confidence is not "confirmed".',
                 },
               },
               required: ['key', 'confidence', 'value'],
@@ -381,6 +389,7 @@ export function toCandidateObservation(parsed: ParsedCandidate, turn: number): C
 
   const accessSurface = extractAttributeHint(toolAttributes, 'access_surface')
   const planTier = extractAttributeHint(toolAttributes, 'plan_tier')
+  const accountStatus = extractAttributeHint(toolAttributes, 'account_status')
   const usage = extractAttributeHint(providerAttributes, 'usage')
   const license = extractAttributeHint(providerAttributes, 'license')
 
@@ -406,6 +415,8 @@ export function toCandidateObservation(parsed: ParsedCandidate, turn: number): C
     access_surface_value_hint: accessSurface?.value || undefined,
     plan_tier_confidence_hint: planTier?.confidence,
     plan_tier_value_hint: planTier?.value || undefined,
+    account_status_confidence_hint: accountStatus?.confidence,
+    account_status_value_hint: accountStatus?.value || undefined,
     is_correction: parsed.is_correction || undefined,
     correction_of_raw_text: parsed.correction_of_raw_text ?? undefined,
     scope: parsed.scope ?? undefined,

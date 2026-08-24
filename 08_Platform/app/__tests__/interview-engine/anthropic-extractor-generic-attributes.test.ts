@@ -236,8 +236,10 @@ describe('schema-level closure (tests P/Q -- malformed key/confidence impossible
     // itself as the source of truth the mapping layer (extractAttributeHint)
     // switches on -- an out-of-set string is a TypeScript type error at the
     // call site, not a runtime possibility once structured output has parsed.
-    const ALLOWED_KEYS = ['access_surface', 'plan_tier', 'usage', 'license']
-    expect(ALLOWED_KEYS).toHaveLength(4)
+    // 'account_status' added (Minimal Generic tool_account_status Capture
+    // milestone, 2026-08-24).
+    const ALLOWED_KEYS = ['access_surface', 'plan_tier', 'account_status', 'usage', 'license']
+    expect(ALLOWED_KEYS).toHaveLength(5)
   })
 })
 
