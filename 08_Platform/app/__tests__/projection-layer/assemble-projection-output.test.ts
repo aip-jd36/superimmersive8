@@ -210,6 +210,7 @@ describe('assembleProjectionOutput -- interpretations parameter (CRC Milestone 2
       summary,
       summary_blocks: [summary],
       supporting_claim_ids: ['runway-gen3'],
+      unresolved_relevant_claims: [],
       ...overrides,
     }
   }

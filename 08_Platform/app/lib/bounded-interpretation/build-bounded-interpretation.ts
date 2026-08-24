@@ -28,7 +28,7 @@
 
 import type { RetrievalDiagnostic, RetrievalResult } from '@/lib/retrieval-engine/types'
 import type { Attested, UserGoal } from '@/types/interview-engine'
-import type { BoundedInterpretation } from './types'
+import type { BoundedInterpretation, UnresolvedRelevantClaim } from './types'
 import {
   DETERMINATION_DECLINED_TEMPLATE,
   directlyRelevantSummary,
@@ -93,6 +93,57 @@ function shouldIncludeHumanContributionSentence(
   return concernsHumanContributionGoal && matchedClaimCarriesDependency && contributionConfirmed
 }
 
+/**
+ * Generic Mixed-Resolution Bounded Interpretation milestone (2026-08-24,
+ * following the CRC Generic Mixed-Resolution Bounded Interpretation Design
+ * Diagnostic of the same date). Confirmed gap this closes: when at least one
+ * claim already matched a goal's category, this module previously returned
+ * immediately from the `matches.length > 0` branch below without ever
+ * consulting `diagnostics` again -- so a DIFFERENT, also-relevant,
+ * CRC-eligible governed claim for the SAME category that Retrieval withheld
+ * only because its `applicability_requirements` gate is `'unresolved'`
+ * (never `'not_met'`) was silently dropped before Projection/Composition
+ * could ever know it existed. This is the exact case Case 3A (below, in
+ * `buildBoundedInterpretations` itself) already handles correctly for "no
+ * resolved claim + relevant applicability unresolved" -- but Case 3A's own
+ * diagnostic check is reachable only when `matches.length === 0`, so it
+ * never ran for this case either. This function does not replace or modify
+ * Case 3A; it fills the gap Case 3A structurally cannot reach.
+ *
+ * Reads ONLY already-computed `RetrievalDiagnostic`/`UnmetApplicabilityDetail`
+ * data (lib/retrieval-engine/types.ts) -- never re-runs `isApplicable`/
+ * `evaluateApplicabilityDetailed` itself, mirroring this module's own
+ * existing "lookup, not inference" discipline for `results` and Case 3A's
+ * own diagnostic-reading discipline exactly.
+ *
+ * `status === 'unresolved'` only -- `'not_met'` entries are a settled
+ * exclusion (the claim genuinely does not apply to the current project
+ * state) and must never appear here; collapsing the two would misrepresent
+ * a known-false fact as an open question. `matchedClaimIds` is a defensive
+ * exclusion, not a load-bearing one: a single `evaluateApplicabilityDetailed`
+ * pass per claim means a claim_id can never simultaneously appear in both
+ * `matches[]` and an `applicability_unmet` diagnostic for the same category
+ * today, but excluding it here costs nothing and keeps the invariant
+ * explicit rather than assumed.
+ *
+ * Source-blind across TopicClaim/MatrixClaim/discovered-topic origin --
+ * this function only ever reads `RetrievalDiagnostic.identifier`/`reason`/
+ * `unmet_applicability`, the same uniform shape every Retrieval path already
+ * produces; there is no `if (source === ...)` branch anywhere in this file.
+ */
+function collectUnresolvedRelevantClaimIds(category: UserGoal['category'], diagnostics: RetrievalDiagnostic[], matchedClaimIds: Set<string>): UnresolvedRelevantClaim[] {
+  const ids = new Set<string>()
+  for (const diagnostic of diagnostics) {
+    if (diagnostic.identifier !== category || diagnostic.reason !== 'applicability_unmet' || !diagnostic.unmet_applicability) continue
+    for (const detail of diagnostic.unmet_applicability) {
+      if (detail.status !== 'unresolved') continue
+      if (matchedClaimIds.has(detail.claim_id)) continue
+      ids.add(detail.claim_id)
+    }
+  }
+  return Array.from(ids, (claim_id) => ({ claim_id }))
+}
+
 export function buildBoundedInterpretations(
   goals: UserGoal[],
   results: RetrievalResult[],
@@ -121,6 +172,17 @@ export function buildBoundedInterpretations(
     // behavior-preserving generalization, not a new matching concept.
     const matches = results.filter((r) => r.matched_goal_category === goal.category)
     if (matches.length > 0) {
+      // Generic Mixed-Resolution Bounded Interpretation milestone
+      // (2026-08-24): computed once per goal, used by BOTH return paths
+      // below (Case 3B/CC-1 and plain directly_relevant) -- never by the
+      // defensive `combinedStatement === ''` fallback a few lines down,
+      // which renders as `outside_current_coverage` and keeps that status's
+      // existing (empty) representation unchanged.
+      const unresolvedRelevantClaims = collectUnresolvedRelevantClaimIds(
+        goal.category,
+        diagnostics,
+        new Set(matches.map((m) => m.claim_id)),
+      )
       // Multiple matches are possible (e.g. two mentioned tools both tagged
       // 'commercial_use') -- join every matched claim's own governed
       // statement rather than picking just one, since dropping a
@@ -225,6 +287,7 @@ export function buildBoundedInterpretations(
             noDependencyAllToolSourced,
           ),
           claimIds,
+          unresolvedRelevantClaims,
         )
       }
 
@@ -239,7 +302,7 @@ export function buildBoundedInterpretations(
       // internal boundary CC-1 ever computed -- one block, not artificially
       // split, per this milestone's own "if a case naturally yields one
       // block, render one block" scope.
-      return buildInterpretation(goal, 'directly_relevant', directlyRelevantResult, [directlyRelevantResult], claimIds)
+      return buildInterpretation(goal, 'directly_relevant', directlyRelevantResult, [directlyRelevantResult], claimIds, unresolvedRelevantClaims)
     }
 
     // Case 3A (Living Knowledge governance review, 2026-08-16): no result
@@ -266,6 +329,12 @@ function buildInterpretation(
   summary: string,
   summary_blocks: string[],
   supporting_claim_ids: string[],
+  // Generic Mixed-Resolution Bounded Interpretation milestone (2026-08-24):
+  // additive, defaults to [] -- every pre-existing call site (Case 3A,
+  // determination_declined, outside_current_coverage, the defensive
+  // combinedStatement==='' fallback) is unaffected and renders byte-identical
+  // output without passing it.
+  unresolved_relevant_claims: UnresolvedRelevantClaim[] = [],
 ): BoundedInterpretation {
   return {
     goal_id: goal.goal_id,
@@ -275,5 +344,6 @@ function buildInterpretation(
     summary,
     summary_blocks,
     supporting_claim_ids,
+    unresolved_relevant_claims,
   }
 }

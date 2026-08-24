@@ -13,8 +13,8 @@ import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { TOPIC_RELATIONSHIPS_FIXTURE } from '@/lib/retrieval-engine/topic-relationships-fixture'
 import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
-import type { RetrievalHandoff, UserGoal } from '@/types/interview-engine'
-import type { MatrixRow, TopicClaim } from '@/lib/retrieval-engine/types'
+import type { RetrievalHandoff, ToolMention, UserGoal } from '@/types/interview-engine'
+import type { DiscoveredTopicOccurrence, MatrixRow, TopicClaim } from '@/lib/retrieval-engine/types'
 
 function handoff(overrides: Partial<RetrievalHandoff> = {}): RetrievalHandoff {
   return {
@@ -1132,5 +1132,446 @@ describe('buildBoundedInterpretations -- Case 3A reuse for a Matrix-origin appli
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
     expect(interp.status).toBe('directly_relevant')
     expect(interp.summary).toContain('Matrix-origin substantive claim text, now correctly applicable.')
+  })
+})
+
+// ── Generic Mixed-Resolution Bounded Interpretation milestone (2026-08-24,
+// following the CRC Generic Mixed-Resolution Bounded Interpretation Design
+// Diagnostic of the same date) ──────────────────────────────────────────
+describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mixed-Resolution)', () => {
+  function testTopicClaim(overrides: Partial<TopicClaim> & Pick<TopicClaim, 'claim_id' | 'topic'>): TopicClaim {
+    return {
+      claim_character: 'established',
+      jurisdiction: 'Global',
+      lifecycle: 'Adopted',
+      crc_eligible: 'Yes',
+      crc_publication_scope: 'Test scope text.',
+      crc_candidate_statement: 'Test governed statement.',
+      applicability_requirements: [],
+      unresolved_project_dependencies: [],
+      provider_scope: null,
+      last_verified: '2026-08-16',
+      superseded_by: null,
+      ...overrides,
+    }
+  }
+
+  function toolMention(overrides: Partial<ToolMention> & Pick<ToolMention, 'mention_id' | 'resolution'>): ToolMention {
+    return {
+      access_surface: { state: 'unknown' },
+      plan_tier: { state: 'unknown' },
+      confidence: 'confirmed',
+      source_turn: 1,
+      source_statement: 'placeholder',
+      superseded_by: null,
+      ...overrides,
+    }
+  }
+
+  const unknownFacts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+  const usFacts: ApplicabilityFacts = { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] }
+  const mismatchedFacts: ApplicabilityFacts = { jurisdiction: { state: 'confirmed', value: 'Canada' }, toolMentions: [] }
+
+  /**
+   * Freshly-discovered during this milestone's own test execution (not
+   * assumed from the prior design diagnostic, which had not exercised this
+   * exact combination): `lookupTopicClaims` (lib/retrieval-engine/lookup-
+   * topic-claims.ts) only pushes an `applicability_unmet` diagnostic for a
+   * category when EVERY eligible candidate TopicClaim in that category is
+   * inapplicable (`else if (!anyApplicable)`) -- if even one TopicClaim in
+   * the same category IS applicable, the `unmetDetail` array built during
+   * the loop is silently discarded, never reaching `diagnostics[]` at all.
+   * This is a SECOND, independent, pre-existing Retrieval-side gap, scoped
+   * specifically to two-or-more-TopicClaims-sharing-one-category, distinct
+   * from the BI-level gap this milestone fixes (see the milestone's own
+   * Final Report §C2 for the full account). The MatrixClaim path
+   * (retrieve.ts's own loop) has no equivalent suppression -- it evaluates
+   * and diagnoses every claim independently, per-claim, regardless of
+   * sibling outcomes -- so every test below uses synthetic MatrixRows
+   * (mirroring the existing "test-matrix-gated" pattern already established
+   * earlier in this file) to exercise this milestone's own BI logic without
+   * tripping the separate, out-of-scope TopicClaim gap. A dedicated test
+   * documenting that second gap directly (using pure TopicClaims) follows
+   * this describe block's main sequence.
+   */
+  function matrixRow(overrides: Partial<MatrixRow['claims'][number]> & Pick<MatrixRow['claims'][number], 'claim_id' | 'topic'>): MatrixRow {
+    return {
+      identifier: overrides.claim_id,
+      last_verified: '2026-08-24',
+      claims: [
+        {
+          crc_eligible: 'Yes',
+          crc_publication_scope: 'Test scope text.',
+          crc_candidate_statement: 'Test governed statement.',
+          applicability_requirements: [],
+          ...overrides,
+        },
+      ],
+    }
+  }
+
+  // A. matched + unresolved
+  test('A: a matched claim + a same-category unresolved-applicability claim -- existing conclusion unchanged, unresolved claim preserved as orthogonal metadata', () => {
+    const matrix = [
+      matrixRow({ claim_id: 'MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Matched governed statement.' }),
+      matrixRow({
+        claim_id: 'UNRESOLVED',
+        topic: 'commercial_use',
+        crc_candidate_statement: 'Unresolved substantive text that must never leak.',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const out = retrieve(handoff({ tools: [tool('MATCHED'), tool('UNRESOLVED')] }), matrix, [g], [], unknownFacts)
+    expect(out.results.map((r) => r.claim_id)).toEqual(['MATCHED']) // UNRESOLVED withheld, exactly as before this milestone
+
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    // Existing conclusion is completely unchanged.
+    expect(interp.status).toBe('directly_relevant')
+    expect(interp.summary).toContain('Matched governed statement.')
+    expect(interp.supporting_claim_ids).toEqual(['MATCHED'])
+    // The withheld claim's own substantive text is never exposed -- only its identity.
+    expect(interp.summary).not.toContain('Unresolved substantive text that must never leak.')
+    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'UNRESOLVED' }])
+  })
+
+  // B. matched + known-not-applicable
+  test('B: a matched claim + a same-category known-not-applicable (not_met) claim -- metadata stays empty, not_met is never treated as unresolved', () => {
+    const matrix = [
+      matrixRow({ claim_id: 'MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Matched governed statement.' }),
+      matrixRow({
+        claim_id: 'NOT-APPLICABLE',
+        topic: 'commercial_use',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const out = retrieve(handoff({ tools: [tool('MATCHED'), tool('NOT-APPLICABLE')] }), matrix, [g], [], mismatchedFacts)
+    expect(out.diagnostics).toContainEqual({
+      identifier: 'commercial_use',
+      reason: 'applicability_unmet',
+      unmet_applicability: [{ claim_id: 'NOT-APPLICABLE', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'not_met' }],
+    })
+
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('directly_relevant')
+    expect(interp.unresolved_relevant_claims).toEqual([])
+  })
+
+  // C. two matched claims + one unresolved
+  test('C: two matched claims + one unresolved sibling -- existing multi-match join behavior unchanged, unresolved sibling additionally preserved', () => {
+    const matrix = [
+      matrixRow({ claim_id: 'MATCHED-A', topic: 'commercial_use', crc_candidate_statement: 'First matched statement.' }),
+      matrixRow({ claim_id: 'MATCHED-B', topic: 'commercial_use', crc_candidate_statement: 'Second matched statement.' }),
+      matrixRow({
+        claim_id: 'UNRESOLVED',
+        topic: 'commercial_use',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const out = retrieve(handoff({ tools: [tool('MATCHED-A'), tool('MATCHED-B'), tool('UNRESOLVED')] }), matrix, [g], [], unknownFacts)
+
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('directly_relevant')
+    expect(interp.summary).toContain('First matched statement.')
+    expect(interp.summary).toContain('Second matched statement.')
+    expect(interp.supporting_claim_ids.sort()).toEqual(['MATCHED-A', 'MATCHED-B'])
+    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'UNRESOLVED' }])
+  })
+
+  // D. zero matches + unresolved applicability -- existing Case 3A must remain unchanged
+  test('D: zero matched claims + unresolved applicability -- existing Case 3A representation is completely unchanged, and unresolved_relevant_claims stays empty (Case 3A is not converted into the mixed-resolution representation)', () => {
+    const claims = [
+      testTopicClaim({
+        claim_id: 'ONLY-UNRESOLVED',
+        topic: 'commercial_use',
+        crc_candidate_statement: 'Substantive text that Case 3A must never expose.',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], claims, unknownFacts)
+    expect(out.results).toEqual([])
+
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('relevant_applicability_unresolved') // unchanged Case 3A status
+    expect(interp.summary).not.toContain('Substantive text that Case 3A must never expose.') // unchanged Case 3A content-free discipline
+    expect(interp.supporting_claim_ids).toEqual([]) // unchanged
+    expect(interp.unresolved_relevant_claims).toEqual([]) // new field never populated for Case 3A -- it exists to solve a different case
+  })
+
+  // E. unresolved-only metadata excludes not_met, even when both coexist alongside a match
+  test('E: matched + unresolved + not_met all coexist for one goal -- only the genuinely unresolved sibling is preserved, the known-not-applicable one is excluded', () => {
+    const matrix = [
+      matrixRow({ claim_id: 'MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Matched governed statement.' }),
+      matrixRow({
+        claim_id: 'UNRESOLVED',
+        topic: 'commercial_use',
+        applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'test-tool', operator: 'equals', value: 'pro' }],
+      }),
+      matrixRow({
+        claim_id: 'NOT-APPLICABLE',
+        topic: 'commercial_use',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+      }),
+    ]
+    const facts: ApplicabilityFacts = {
+      jurisdiction: { state: 'confirmed', value: 'Canada' }, // mismatched -> not_met for NOT-APPLICABLE
+      toolMentions: [toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'test-tool' } })], // plan_tier unknown -> unresolved for UNRESOLVED
+    }
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const out = retrieve(handoff({ tools: [tool('MATCHED'), tool('UNRESOLVED'), tool('NOT-APPLICABLE')] }), matrix, [g], [], facts)
+
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('directly_relevant')
+    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'UNRESOLVED' }])
+  })
+
+  // F. multiple unresolved claims -> deterministic, deduplicated identities
+  test('F: a single claim gated on two independently-unresolved requirements contributes exactly one deduplicated entry, and a second distinct unresolved claim also appears', () => {
+    const matrix = [
+      matrixRow({ claim_id: 'MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Matched governed statement.' }),
+      matrixRow({
+        claim_id: 'UNRESOLVED-MULTI-REQ',
+        topic: 'commercial_use',
+        applicability_requirements: [
+          { fact: 'jurisdiction', operator: 'equals', value: 'United States' },
+          { fact: 'tool_plan_tier', tool: 'test-tool', operator: 'equals', value: 'pro' },
+        ],
+      }),
+      matrixRow({
+        claim_id: 'UNRESOLVED-OTHER',
+        topic: 'commercial_use',
+        applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'test-tool-2', operator: 'equals', value: 'pro' }],
+      }),
+    ]
+    const facts: ApplicabilityFacts = {
+      jurisdiction: { state: 'unknown' },
+      toolMentions: [
+        toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'test-tool' } }),
+        toolMention({ mention_id: 'tm-2', resolution: { kind: 'canonical', identifier: 'test-tool-2' } }),
+      ],
+    }
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const out = retrieve(handoff({ tools: [tool('MATCHED'), tool('UNRESOLVED-MULTI-REQ'), tool('UNRESOLVED-OTHER')] }), matrix, [g], [], facts)
+
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    // UNRESOLVED-MULTI-REQ has TWO unresolved requirement entries in unmet_applicability
+    // but must contribute exactly ONE UnresolvedRelevantClaim -- proves dedup.
+    expect(interp.unresolved_relevant_claims.map((c) => c.claim_id).sort()).toEqual(['UNRESOLVED-MULTI-REQ', 'UNRESOLVED-OTHER'])
+    expect(interp.unresolved_relevant_claims).toHaveLength(2)
+  })
+
+  // G. Topic matched + Matrix unresolved
+  test('G: an explicit-goal Topic claim matches while a same-category Matrix claim remains applicability-unresolved -- source-blind, both directions covered', () => {
+    const gatedRow: MatrixRow = {
+      identifier: 'test-matrix-unresolved',
+      last_verified: '2026-08-24',
+      claims: [
+        {
+          claim_id: 'MATRIX-UNRESOLVED',
+          crc_eligible: 'Yes',
+          crc_publication_scope: 'Test scope text.',
+          crc_candidate_statement: 'Matrix substantive text that must never leak while unresolved.',
+          topic: 'commercial_use',
+          applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+        },
+      ],
+    }
+    const matrix = [...MATRIX_FIXTURE, gatedRow]
+    const topicClaims = [testTopicClaim({ claim_id: 'TOPIC-MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Topic-matched governed statement.' })]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const out = retrieve(handoff({ tools: [tool('test-matrix-unresolved')] }), matrix, [g], topicClaims, unknownFacts)
+    expect(out.results.map((r) => r.claim_id)).toEqual(['TOPIC-MATCHED'])
+
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('directly_relevant')
+    expect(interp.summary).toContain('Topic-matched governed statement.')
+    expect(interp.summary).not.toContain('Matrix substantive text that must never leak while unresolved.')
+    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'MATRIX-UNRESOLVED' }])
+  })
+
+  // H. Matrix matched + Topic unresolved
+  test('H: a real Matrix claim (Runway, unconditionally applicable) matches while a same-category Topic claim remains applicability-unresolved', () => {
+    const topicClaims = [
+      testTopicClaim({
+        claim_id: 'TOPIC-UNRESOLVED',
+        topic: 'commercial_use',
+        crc_candidate_statement: 'Topic substantive text that must never leak while unresolved.',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const out = retrieve(handoff({ tools: [tool('runway-gen3')] }), MATRIX_FIXTURE, [g], topicClaims, unknownFacts)
+    expect(out.results.map((r) => r.claim_id)).toEqual(['runway-gen3'])
+
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('directly_relevant')
+    expect(interp.summary).toContain("Runway's current Terms allow commercial use across all subscription tiers, provided you comply with the Terms of Service.")
+    expect(interp.summary).not.toContain('Topic substantive text that must never leak while unresolved.')
+    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'TOPIC-UNRESOLVED' }])
+  })
+
+  // I. Discovered-origin unresolved case -- NOT authorized as a full pass per
+  // the milestone's own §2 verification: lookupDiscoveredTopicClaims emits a
+  // bare {identifier, reason} applicability_unmet diagnostic today, with NO
+  // unmet_applicability detail (unlike the explicit TopicClaim/MatrixClaim
+  // paths, which both populate it via evaluateApplicabilityDetailed). This
+  // is a genuine Retrieval-side diagnostic-parity gap, out of scope for this
+  // milestone (see the milestone's own Final Report §C) -- documented here,
+  // not silently passed over, so a future Retrieval-side parity fix has a
+  // regression test to flip once it lands.
+  test('I (documents a known, separate limitation): a discovered-topic-origin unresolved claim is currently invisible to unresolved_relevant_claims, because its diagnostic carries no unmet_applicability detail to read -- NOT a defect in this milestone, a pre-existing Retrieval-side gap this milestone does not close', () => {
+    const discoveredClaims = [
+      testTopicClaim({
+        claim_id: 'DISCOVERED-UNRESOLVED',
+        topic: 'third_party_source_rights',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+      }),
+    ]
+    const matchedClaims = [testTopicClaim({ claim_id: 'MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Matched governed statement.' })]
+    const occurrence: DiscoveredTopicOccurrence = {
+      topic: 'third_party_source_rights',
+      trigger_id: 'test-trigger',
+      source_kind: 'test',
+      source_id: 'test-source-1',
+      source_goal_category: 'commercial_use',
+    }
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], [...matchedClaims, ...discoveredClaims], unknownFacts, [], [], [occurrence])
+
+    // The bare, detail-less diagnostic this milestone's §2 verification found:
+    expect(out.diagnostics).toContainEqual({ identifier: 'commercial_use', reason: 'applicability_unmet' })
+
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('directly_relevant')
+    // Honest current behavior: the discovered-origin gap is NOT surfaced, for lack of claim-level detail to read -- not a fabricated result.
+    expect(interp.unresolved_relevant_claims).toEqual([])
+  })
+
+  // M (documents a second, newly-discovered, separate limitation -- see this
+  // describe block's own header comment above for the full account): two
+  // TopicClaims sharing one category, one applicable and one unresolved --
+  // lookupTopicClaims's own pre-existing `else if (!anyApplicable)` gate
+  // silently drops the unresolved claim's detail before it ever reaches
+  // `diagnostics[]`. This is a Retrieval-side gap, not a BI-side one -- BI
+  // correctly returns [] here because Retrieval genuinely never handed it
+  // anything to preserve. Not fixed in this milestone (no Retrieval
+  // production changes are authorized); documented as a regression test so
+  // a future, separately-scoped Retrieval parity fix has something to flip.
+  test('M (documents a second, separate limitation): two TopicClaims sharing one category, one matched and one unresolved -- unresolved_relevant_claims stays empty because lookupTopicClaims itself never emits the diagnostic in this configuration, not because of anything in this milestone\'s own BI logic', () => {
+    const claims = [
+      testTopicClaim({ claim_id: 'TOPIC-MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Topic-matched governed statement.' }),
+      testTopicClaim({
+        claim_id: 'TOPIC-UNRESOLVED',
+        topic: 'commercial_use',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], claims, unknownFacts)
+    expect(out.results.map((r) => r.claim_id)).toEqual(['TOPIC-MATCHED'])
+    // The gap, made explicit: no applicability_unmet diagnostic for 'commercial_use' exists at all here.
+    expect(out.diagnostics.some((d) => d.identifier === 'commercial_use' && d.reason === 'applicability_unmet')).toBe(false)
+
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.status).toBe('directly_relevant')
+    expect(interp.unresolved_relevant_claims).toEqual([]) // honest current behavior, not a fabricated result
+  })
+
+  // J. unresolved, evidence-only-shaped -- askability must never be consulted
+  test('J: an unresolved claim is preserved identically regardless of whether the underlying fact is registered askable -- BI never imports or consults selector-askability.ts/dependency-askability.ts', () => {
+    // This claim's applicability requirement is structurally indistinguishable,
+    // from BI's point of view, from an evidence-only-shaped condition CRC is
+    // never permitted to ask about -- selector-askability.ts's own registry is
+    // empty/fail-closed today regardless, so this proves the epistemic state
+    // ("relevant, unresolved") is representable without ANY reference to
+    // whether a follow-up question could ever be proposed for it.
+    const matrix = [
+      matrixRow({ claim_id: 'MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Matched governed statement.' }),
+      matrixRow({
+        claim_id: 'EVIDENCE-ONLY-SHAPED',
+        topic: 'commercial_use',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const out = retrieve(handoff({ tools: [tool('MATCHED'), tool('EVIDENCE-ONLY-SHAPED')] }), matrix, [g], [], unknownFacts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'EVIDENCE-ONLY-SHAPED' }])
+  })
+
+  // K. correction-style recomputation: unresolved -> met
+  test('K: correcting the underlying fact from unknown to a matching value moves the claim into matches[] and out of unresolved_relevant_claims, purely by recomputation (no persisted state)', () => {
+    const matrix = [
+      matrixRow({ claim_id: 'MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Matched governed statement.' }),
+      matrixRow({
+        claim_id: 'CORRECTABLE',
+        topic: 'commercial_use',
+        crc_candidate_statement: 'Now-applicable governed statement.',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const h = handoff({ tools: [tool('MATCHED'), tool('CORRECTABLE')] })
+
+    const turnN = retrieve(h, matrix, [g], [], unknownFacts)
+    const interpN = buildBoundedInterpretations([g], turnN.results, turnN.diagnostics)[0]
+    expect(interpN.supporting_claim_ids).toEqual(['MATCHED'])
+    expect(interpN.unresolved_relevant_claims).toEqual([{ claim_id: 'CORRECTABLE' }])
+
+    const turnNPlus1 = retrieve(h, matrix, [g], [], usFacts)
+    const interpNPlus1 = buildBoundedInterpretations([g], turnNPlus1.results, turnNPlus1.diagnostics)[0]
+    expect(interpNPlus1.supporting_claim_ids.sort()).toEqual(['CORRECTABLE', 'MATCHED'])
+    expect(interpNPlus1.summary).toContain('Now-applicable governed statement.')
+    expect(interpNPlus1.unresolved_relevant_claims).toEqual([])
+  })
+
+  // L. correction-style recomputation: unresolved -> not_met
+  test('L: correcting the underlying fact from unknown to a mismatching value removes the claim from unresolved_relevant_claims without it ever entering matches[]', () => {
+    const matrix = [
+      matrixRow({ claim_id: 'MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Matched governed statement.' }),
+      matrixRow({
+        claim_id: 'CORRECTABLE',
+        topic: 'commercial_use',
+        crc_candidate_statement: 'Substantive text that must never leak once known not to apply.',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+      }),
+    ]
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const h = handoff({ tools: [tool('MATCHED'), tool('CORRECTABLE')] })
+
+    const turnN = retrieve(h, matrix, [g], [], unknownFacts)
+    const interpN = buildBoundedInterpretations([g], turnN.results, turnN.diagnostics)[0]
+    expect(interpN.unresolved_relevant_claims).toEqual([{ claim_id: 'CORRECTABLE' }])
+
+    const turnNPlus1 = retrieve(h, matrix, [g], [], mismatchedFacts)
+    const interpNPlus1 = buildBoundedInterpretations([g], turnNPlus1.results, turnNPlus1.diagnostics)[0]
+    expect(interpNPlus1.supporting_claim_ids).toEqual(['MATCHED'])
+    expect(interpNPlus1.summary).not.toContain('Substantive text that must never leak once known not to apply.')
+    expect(interpNPlus1.unresolved_relevant_claims).toEqual([])
+  })
+
+  // Backward compatibility: no applicability requirements anywhere -> field always empty
+  test('backward compatibility: a goal with no applicability-gated claims at all never populates unresolved_relevant_claims', () => {
+    const out = retrieve(handoff({ tools: [tool('runway-gen3')] }), MATRIX_FIXTURE)
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.unresolved_relevant_claims).toEqual([])
+  })
+
+  // Backward compatibility: determination_declined / outside_current_coverage never populate the field
+  test('backward compatibility: determination_declined and outside_current_coverage never populate unresolved_relevant_claims', () => {
+    const determinationGoal = goal({ goal_id: 'g-1', raw_text: 'Certify this.', category: 'commercial_use', scope: 'determination_request' })
+    const out = retrieve(handoff({ tools: [tool('runway-gen3')] }), MATRIX_FIXTURE)
+    const [determinationInterp] = buildBoundedInterpretations([determinationGoal], out.results, out.diagnostics)
+    expect(determinationInterp.status).toBe('determination_declined')
+    expect(determinationInterp.unresolved_relevant_claims).toEqual([])
+
+    const coverageGoal = goal({ goal_id: 'g-2', raw_text: 'Do I own the copyright?', category: 'copyright_ownership' })
+    const [coverageInterp] = buildBoundedInterpretations([coverageGoal], [])
+    expect(coverageInterp.status).toBe('outside_current_coverage')
+    expect(coverageInterp.unresolved_relevant_claims).toEqual([])
   })
 })

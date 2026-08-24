@@ -121,6 +121,26 @@ export type InterpretationStatus = (typeof INTERPRETATION_STATUSES)[number]
  * unresolved` Case 3B specifically (Case 3A has nothing to cite — see the
  * status doc comment above).
  */
+/**
+ * Generic Mixed-Resolution Bounded Interpretation milestone (2026-08-24).
+ * One governed claim that is relevant to a goal's category (would have
+ * contributed to this same interpretation) but is currently withheld by
+ * Retrieval because a formal `applicability_requirements` gate is
+ * `'unresolved'` — never `'not_met'` (see `UnmetApplicabilityDetail`'s own
+ * status union, lib/retrieval-engine/types.ts): a known-false requirement
+ * means the claim genuinely does not apply and carries no place here,
+ * exactly as before this milestone. Deliberately minimal — `claim_id` only,
+ * for traceability, mirroring `supporting_claim_ids`' own "id only, never
+ * itself rendered" discipline. No `ApplicabilityRequirement` (fact/tool/
+ * operator/value), no `RetrievalDiagnostic`, no askability information is
+ * ever carried here — see build-bounded-interpretation.ts's own header for
+ * the full authority argument for why this boundary is load-bearing, not
+ * incidental.
+ */
+export interface UnresolvedRelevantClaim {
+  claim_id: string
+}
+
 export interface BoundedInterpretation {
   /** Internal only — never rendered. See module header. */
   goal_id: string
@@ -149,4 +169,30 @@ export interface BoundedInterpretation {
    */
   summary_blocks: string[]
   supporting_claim_ids: string[]
+  /**
+   * Generic Mixed-Resolution Bounded Interpretation milestone (2026-08-24):
+   * orthogonal, additive structured metadata — never changes `status`,
+   * `summary`, `summary_blocks`, or `supporting_claim_ids`; a resolved
+   * conclusion is never weakened or strengthened by this field's presence.
+   * Always `[]` by default — populated only when `matches.length > 0` for
+   * this goal AND at least one other relevant, CRC-eligible governed claim
+   * for the SAME category remains withheld solely because its applicability
+   * is unresolved (never `not_met` — see `UnresolvedRelevantClaim`'s own
+   * header). Deliberately does NOT change the pre-existing Case 3A
+   * representation (`matches.length === 0`, `relevant_applicability_
+   * unresolved` with empty `supporting_claim_ids`) — that remains the sole
+   * representation for "no resolved claim + relevant applicability
+   * unresolved"; this field exists only for the previously-unrepresentable
+   * "resolved claim(s) + relevant applicability ALSO unresolved" case.
+   * Deliberately does NOT depend on `selector-askability.ts`/
+   * `dependency-askability.ts` in any way — this represents epistemic
+   * state only (something relevant remains unresolved), never whether CRC
+   * may proactively ask about it; that is a separate authority, consulted
+   * (if at all) only by `lib/crc-engine/selector-questioning.ts`. Internal
+   * to Bounded Interpretation for now — not yet propagated to
+   * `ProjectionGoalInterpretation` (lib/projection-layer/types.ts); a
+   * future Consultative Composition milestone decides whether/how to
+   * expose it.
+   */
+  unresolved_relevant_claims: UnresolvedRelevantClaim[]
 }
