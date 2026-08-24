@@ -1413,16 +1413,15 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
     expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'TOPIC-UNRESOLVED' }])
   })
 
-  // I. Discovered-origin unresolved case -- NOT authorized as a full pass per
-  // the milestone's own §2 verification: lookupDiscoveredTopicClaims emits a
-  // bare {identifier, reason} applicability_unmet diagnostic today, with NO
-  // unmet_applicability detail (unlike the explicit TopicClaim/MatrixClaim
-  // paths, which both populate it via evaluateApplicabilityDetailed). This
-  // is a genuine Retrieval-side diagnostic-parity gap, out of scope for this
-  // milestone (see the milestone's own Final Report §C) -- documented here,
-  // not silently passed over, so a future Retrieval-side parity fix has a
-  // regression test to flip once it lands.
-  test('I (documents a known, separate limitation): a discovered-topic-origin unresolved claim is currently invisible to unresolved_relevant_claims, because its diagnostic carries no unmet_applicability detail to read -- NOT a defect in this milestone, a pre-existing Retrieval-side gap this milestone does not close', () => {
+  // I. Discovered-origin unresolved case -- CRC Generic Applicability
+  // Diagnostic Parity milestone (2026-08-24): previously NOT a full pass
+  // (lookupDiscoveredTopicClaims emitted a bare {identifier, reason}
+  // diagnostic with no unmet_applicability detail). Now fixed at the
+  // Retrieval layer (evaluateApplicabilityDetailed replaces isApplicable in
+  // that module) -- this test is updated, not the BI code, to prove BI
+  // already correctly consumes the now-complete diagnostic end-to-end,
+  // exactly as the milestone's own §17 requires.
+  test('I: a discovered-topic-origin unresolved claim IS preserved by unresolved_relevant_claims, now that its diagnostic carries claim-level detail (CRC Generic Applicability Diagnostic Parity milestone)', () => {
     const discoveredClaims = [
       testTopicClaim({
         claim_id: 'DISCOVERED-UNRESOLVED',
@@ -1441,26 +1440,29 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
     const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
     const out = retrieve(handoff(), MATRIX_FIXTURE, [g], [...matchedClaims, ...discoveredClaims], unknownFacts, [], [], [occurrence])
 
-    // The bare, detail-less diagnostic this milestone's §2 verification found:
-    expect(out.diagnostics).toContainEqual({ identifier: 'commercial_use', reason: 'applicability_unmet' })
+    // Now carries claim-level detail -- the fix.
+    expect(out.diagnostics).toContainEqual({
+      identifier: 'commercial_use',
+      reason: 'applicability_unmet',
+      unmet_applicability: [{ claim_id: 'DISCOVERED-UNRESOLVED', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+    })
 
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
-    expect(interp.status).toBe('directly_relevant')
-    // Honest current behavior: the discovered-origin gap is NOT surfaced, for lack of claim-level detail to read -- not a fabricated result.
-    expect(interp.unresolved_relevant_claims).toEqual([])
+    expect(interp.status).toBe('directly_relevant') // resolved conclusion unchanged
+    expect(interp.summary).toContain('Matched governed statement.')
+    expect(interp.supporting_claim_ids).toEqual(['MATCHED'])
+    // BI's own, unmodified logic now correctly preserves the discovered-origin unresolved claim, with zero BI code change.
+    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'DISCOVERED-UNRESOLVED' }])
   })
 
-  // M (documents a second, newly-discovered, separate limitation -- see this
-  // describe block's own header comment above for the full account): two
-  // TopicClaims sharing one category, one applicable and one unresolved --
-  // lookupTopicClaims's own pre-existing `else if (!anyApplicable)` gate
-  // silently drops the unresolved claim's detail before it ever reaches
-  // `diagnostics[]`. This is a Retrieval-side gap, not a BI-side one -- BI
-  // correctly returns [] here because Retrieval genuinely never handed it
-  // anything to preserve. Not fixed in this milestone (no Retrieval
-  // production changes are authorized); documented as a regression test so
-  // a future, separately-scoped Retrieval parity fix has something to flip.
-  test('M (documents a second, separate limitation): two TopicClaims sharing one category, one matched and one unresolved -- unresolved_relevant_claims stays empty because lookupTopicClaims itself never emits the diagnostic in this configuration, not because of anything in this milestone\'s own BI logic', () => {
+  // M. CRC Generic Applicability Diagnostic Parity milestone (2026-08-24):
+  // previously documented a second, independent gap -- lookupTopicClaims's
+  // own `else if (!anyApplicable)` category-level gate silently dropped an
+  // unresolved sibling's detail whenever another claim in the same category
+  // was applicable. Now fixed (gated on `unmetDetail.length > 0` instead) --
+  // this test is updated, not the BI code, to prove BI already correctly
+  // consumes the now-complete diagnostic end-to-end.
+  test('M: two TopicClaims sharing one category, one matched and one unresolved -- unresolved_relevant_claims now correctly preserves the unresolved sibling (CRC Generic Applicability Diagnostic Parity milestone)', () => {
     const claims = [
       testTopicClaim({ claim_id: 'TOPIC-MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Topic-matched governed statement.' }),
       testTopicClaim({
@@ -1472,12 +1474,17 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
     const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
     const out = retrieve(handoff(), MATRIX_FIXTURE, [g], claims, unknownFacts)
     expect(out.results.map((r) => r.claim_id)).toEqual(['TOPIC-MATCHED'])
-    // The gap, made explicit: no applicability_unmet diagnostic for 'commercial_use' exists at all here.
-    expect(out.diagnostics.some((d) => d.identifier === 'commercial_use' && d.reason === 'applicability_unmet')).toBe(false)
+    // The fix, made explicit: the diagnostic now exists, with claim-level detail.
+    expect(out.diagnostics).toContainEqual({
+      identifier: 'commercial_use',
+      reason: 'applicability_unmet',
+      unmet_applicability: [{ claim_id: 'TOPIC-UNRESOLVED', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+    })
 
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
     expect(interp.status).toBe('directly_relevant')
-    expect(interp.unresolved_relevant_claims).toEqual([]) // honest current behavior, not a fabricated result
+    expect(interp.summary).toContain('Topic-matched governed statement.')
+    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'TOPIC-UNRESOLVED' }])
   })
 
   // J. unresolved, evidence-only-shaped -- askability must never be consulted

@@ -370,3 +370,179 @@ describe('lookupTopicClaims -- topic matching + eligibility gates', () => {
     expect(result.matches).toHaveLength(1)
   })
 })
+
+// ── CRC Generic Applicability Diagnostic Parity milestone (2026-08-24) --
+// Gap A fix: the category-level diagnostic used to be gated on
+// `!anyApplicable`, so a fully-computed `unmetDetail` array for an unresolved
+// (or not_met) sibling was silently discarded whenever ANY other claim in the
+// same category was applicable. Now gated on `unmetDetail.length > 0`. ────
+describe('lookupTopicClaims -- mixed-resolution diagnostic parity (CRC Generic Applicability Diagnostic Parity milestone, 2026-08-24)', () => {
+  // A. one met + one unresolved
+  test('A: one met claim + one unresolved claim in the same category -- the met claim retrieves, the unresolved one is withheld WITH a diagnostic (previously silently dropped)', () => {
+    const g = goal({ goal_id: 'g-1', category: 'commercial_use' })
+    const met = claim({ claim_id: 'MET', topic: 'commercial_use' })
+    const unresolved = claim({
+      claim_id: 'UNRESOLVED',
+      topic: 'commercial_use',
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+    })
+    const result = lookupTopicClaims([g], [met, unresolved], facts({ jurisdiction: { state: 'unknown' } }))
+    expect(result.matches).toEqual([met])
+    expect(result.diagnostics).toEqual([
+      {
+        identifier: 'commercial_use',
+        reason: 'applicability_unmet',
+        unmet_applicability: [{ claim_id: 'UNRESOLVED', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+      },
+    ])
+  })
+
+  // B. one met + one not_met
+  test('B: one met claim + one known-not-applicable claim -- the met claim retrieves, the not_met one is withheld with a not_met (never unresolved) diagnostic', () => {
+    const g = goal({ goal_id: 'g-1', category: 'commercial_use' })
+    const met = claim({ claim_id: 'MET', topic: 'commercial_use' })
+    const notMet = claim({
+      claim_id: 'NOT-MET',
+      topic: 'commercial_use',
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+    })
+    const result = lookupTopicClaims([g], [met, notMet], facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' } }))
+    expect(result.matches).toEqual([met])
+    expect(result.diagnostics).toEqual([
+      {
+        identifier: 'commercial_use',
+        reason: 'applicability_unmet',
+        unmet_applicability: [{ claim_id: 'NOT-MET', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'not_met' }],
+      },
+    ])
+  })
+
+  // C. one met + one unresolved + one not_met
+  test('C: one met + one unresolved + one not_met, all in the same category -- correct per-claim distinction preserved', () => {
+    const g = goal({ goal_id: 'g-1', category: 'commercial_use' })
+    const met = claim({ claim_id: 'MET', topic: 'commercial_use' })
+    const unresolved = claim({
+      claim_id: 'UNRESOLVED',
+      topic: 'commercial_use',
+      applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'test-tool', operator: 'equals', value: 'pro' }],
+    })
+    const notMet = claim({
+      claim_id: 'NOT-MET',
+      topic: 'commercial_use',
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+    })
+    const result = lookupTopicClaims(
+      [g],
+      [met, unresolved, notMet],
+      facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' }, toolMentions: [toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'test-tool' } })] }),
+    )
+    expect(result.matches).toEqual([met])
+    expect(result.diagnostics).toHaveLength(1)
+    const detail = result.diagnostics[0].unmet_applicability
+    expect(detail).toContainEqual({ claim_id: 'UNRESOLVED', requirement: { fact: 'tool_plan_tier', tool: 'test-tool', operator: 'equals', value: 'pro' }, status: 'unresolved' })
+    expect(detail).toContainEqual({ claim_id: 'NOT-MET', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'not_met' })
+    expect(detail).toHaveLength(2)
+  })
+
+  // D. two met + one unresolved
+  test('D: two met claims + one unresolved claim -- both met claims retrieve, unresolved one preserved via diagnostic', () => {
+    const g = goal({ goal_id: 'g-1', category: 'commercial_use' })
+    const metA = claim({ claim_id: 'MET-A', topic: 'commercial_use' })
+    const metB = claim({ claim_id: 'MET-B', topic: 'commercial_use' })
+    const unresolved = claim({
+      claim_id: 'UNRESOLVED',
+      topic: 'commercial_use',
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+    })
+    const result = lookupTopicClaims([g], [metA, metB, unresolved], facts({ jurisdiction: { state: 'unknown' } }))
+    expect(result.matches.map((m) => m.claim_id).sort()).toEqual(['MET-A', 'MET-B'])
+    expect(result.diagnostics).toEqual([
+      {
+        identifier: 'commercial_use',
+        reason: 'applicability_unmet',
+        unmet_applicability: [{ claim_id: 'UNRESOLVED', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+      },
+    ])
+  })
+
+  // E. zero met + one unresolved -- existing Case 3A-compatible behavior unchanged
+  test('E: zero met claims + one unresolved claim -- identical shape to the pre-existing Case-3A-compatible diagnostic (no behavior change for this pre-existing case)', () => {
+    const g = goal({ goal_id: 'g-1', category: 'commercial_use' })
+    const unresolved = claim({
+      claim_id: 'UNRESOLVED',
+      topic: 'commercial_use',
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+    })
+    const result = lookupTopicClaims([g], [unresolved], facts({ jurisdiction: { state: 'unknown' } }))
+    expect(result.matches).toEqual([])
+    expect(result.diagnostics).toEqual([
+      {
+        identifier: 'commercial_use',
+        reason: 'applicability_unmet',
+        unmet_applicability: [{ claim_id: 'UNRESOLVED', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+      },
+    ])
+  })
+
+  // F. zero met + all not_met
+  test('F: zero met claims, all not_met -- diagnostic preserved with not_met detail for every claim, matches stay empty', () => {
+    const g = goal({ goal_id: 'g-1', category: 'commercial_use' })
+    const notMetA = claim({ claim_id: 'NOT-MET-A', topic: 'commercial_use', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] })
+    const notMetB = claim({ claim_id: 'NOT-MET-B', topic: 'commercial_use', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] })
+    const result = lookupTopicClaims([g], [notMetA, notMetB], facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' } }))
+    expect(result.matches).toEqual([])
+    expect(result.diagnostics).toHaveLength(1)
+    expect(result.diagnostics[0].unmet_applicability?.every((d) => d.status === 'not_met')).toBe(true)
+    expect(result.diagnostics[0].unmet_applicability?.map((d) => d.claim_id).sort()).toEqual(['NOT-MET-A', 'NOT-MET-B'])
+  })
+
+  // G. multiple unresolved claims -> deterministic claim identities, no accidental loss
+  test('G: multiple distinct unresolved claims in the same category -- all preserved, no accidental loss or collapsing', () => {
+    const g = goal({ goal_id: 'g-1', category: 'commercial_use' })
+    const met = claim({ claim_id: 'MET', topic: 'commercial_use' })
+    const unresolvedA = claim({ claim_id: 'UNRESOLVED-A', topic: 'commercial_use', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] })
+    const unresolvedB = claim({
+      claim_id: 'UNRESOLVED-B',
+      topic: 'commercial_use',
+      applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'test-tool', operator: 'equals', value: 'pro' }],
+    })
+    const result = lookupTopicClaims(
+      [g],
+      [met, unresolvedA, unresolvedB],
+      facts({ jurisdiction: { state: 'unknown' }, toolMentions: [toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'test-tool' } })] }),
+    )
+    expect(result.matches).toEqual([met])
+    expect(result.diagnostics[0].unmet_applicability?.map((d) => d.claim_id).sort()).toEqual(['UNRESOLVED-A', 'UNRESOLVED-B'])
+  })
+
+  // Provider-scope protection (§12): a provider-mismatched claim must never contribute to the diagnostic.
+  test('provider-scope protection: a provider-mismatched sibling never contributes unmet_applicability detail -- it was never a candidate in the first place', () => {
+    const g = goal({ goal_id: 'g-1', category: 'third_party_source_rights' })
+    const met = claim({ claim_id: 'MET', topic: 'third_party_source_rights' })
+    const otherProvider = claim({
+      claim_id: 'OTHER-PROVIDER',
+      topic: 'third_party_source_rights',
+      provider_scope: ['getty'],
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+    })
+    // 'istock' supplied -- OTHER-PROVIDER (scoped to 'getty') never becomes a candidate at all.
+    const result = lookupTopicClaims([g], [met, otherProvider], facts({ jurisdiction: { state: 'unknown' } }), ['istock'])
+    expect(result.matches).toEqual([met])
+    expect(result.diagnostics).toEqual([])
+  })
+
+  // Lifecycle/eligibility protection (§13): an ineligible sibling must never contribute unmet_applicability detail.
+  test('lifecycle/eligibility protection: a CRC-Eligible: No sibling never contributes unmet_applicability detail, even though it is applicability-gated', () => {
+    const g = goal({ goal_id: 'g-1', category: 'commercial_use' })
+    const met = claim({ claim_id: 'MET', topic: 'commercial_use' })
+    const ineligible = claim({
+      claim_id: 'INELIGIBLE',
+      topic: 'commercial_use',
+      crc_eligible: 'No',
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+    })
+    const result = lookupTopicClaims([g], [met, ineligible], facts({ jurisdiction: { state: 'unknown' } }))
+    expect(result.matches).toEqual([met])
+    expect(result.diagnostics).toEqual([])
+  })
+})

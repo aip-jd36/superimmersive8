@@ -36,13 +36,25 @@
  *
  * Provider_scope, Lifecycle, CRC-eligibility, and applicability gating are
  * reused verbatim from `lookup-topic-claims.ts` (`providerScopeMatches`,
- * `isApplicable`) -- this module adds zero new gating logic, only
- * provenance-correct result shaping.
+ * `evaluateApplicabilityDetailed`) -- this module adds zero new gating
+ * logic, only provenance-correct result shaping.
+ *
+ * CRC Generic Applicability Diagnostic Parity milestone (2026-08-24):
+ * switched from the boolean-only `isApplicable()` to
+ * `evaluateApplicabilityDetailed()` -- the same single three-state
+ * applicability authority every other Retrieval path already uses (Matrix,
+ * explicit TopicClaim) -- so a discovered-topic-origin claim's diagnostic
+ * can carry the same `unmet_applicability` claim-level detail (met/
+ * unresolved/not_met) the other two paths already produce. `isApplicable()`
+ * itself is unchanged and remains this module's sibling functions' shared
+ * authority elsewhere in the codebase; this file simply stopped calling it,
+ * in favor of the strictly more informative function it is already derived
+ * from.
  */
 
 import type { GoalCategory } from '@/types/interview-engine'
-import type { DiscoveredTopicOccurrence, RetrievalDiagnostic, TopicClaim } from './types'
-import { isApplicable, providerScopeMatches, type ApplicabilityFacts } from './lookup-topic-claims'
+import type { DiscoveredTopicOccurrence, RetrievalDiagnostic, TopicClaim, UnmetApplicabilityDetail } from './types'
+import { evaluateApplicabilityDetailed, providerScopeMatches, type ApplicabilityFacts } from './lookup-topic-claims'
 
 /**
  * One discovered-topic-eligible claim, still paired with the originating
@@ -101,14 +113,26 @@ export function lookupDiscoveredTopicClaims(
     }
 
     let anyEligible = false
-    let anyApplicable = false
+    // CRC Generic Applicability Diagnostic Parity milestone (2026-08-24):
+    // mirrors lookup-topic-claims.ts's own `unmetDetail` aggregation
+    // exactly -- built per-claim during this loop regardless of whether a
+    // sibling candidate is applicable, and emitted below whenever non-empty
+    // (never gated on "every candidate is inapplicable," which is what
+    // silently dropped this detail before this milestone).
+    const unmetDetail: UnmetApplicabilityDetail[] = []
 
     for (const claim of candidates) {
       if (claim.lifecycle !== 'Adopted' || claim.crc_eligible !== 'Yes') continue
       anyEligible = true
 
-      if (!isApplicable(claim.applicability_requirements, facts)) continue
-      anyApplicable = true
+      const outcomes = evaluateApplicabilityDetailed(claim.applicability_requirements, facts)
+      const isClaimApplicable = outcomes.every((o) => o.status === 'met')
+      if (!isClaimApplicable) {
+        for (const o of outcomes) {
+          if (o.status !== 'met') unmetDetail.push({ claim_id: claim.claim_id, requirement: o.requirement, status: o.status })
+        }
+        continue
+      }
 
       // Goal-scoped dedup, identical discipline to lookupRelatedTopicClaims's
       // own `${category}:${claim.claim_id}` key -- the same claim may
@@ -124,8 +148,14 @@ export function lookupDiscoveredTopicClaims(
 
     if (!anyEligible) {
       diagnostics.push({ identifier: sourceGoalCategory, reason: 'not_adopted_or_eligible' })
-    } else if (!anyApplicable) {
-      diagnostics.push({ identifier: sourceGoalCategory, reason: 'applicability_unmet' })
+    } else if (unmetDetail.length > 0) {
+      // `identifier: sourceGoalCategory` (the ORIGINATING explicit goal
+      // category), never `topic` -- unchanged Track C provenance discipline,
+      // identical to every other diagnostic this loop already emits (see
+      // this module's own header) and identical to how `matches` above are
+      // already stamped with `sourceGoalCategory`, not the claim's own
+      // intrinsic topic.
+      diagnostics.push({ identifier: sourceGoalCategory, reason: 'applicability_unmet', unmet_applicability: unmetDetail })
     }
   }
 

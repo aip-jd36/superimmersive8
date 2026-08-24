@@ -261,7 +261,6 @@ export function lookupTopicClaims(
     }
 
     let anyEligible = false
-    let anyApplicable = false
     // Piece 1: aggregated across every eligible-but-inapplicable claim in
     // this category -- the diagnostic below is still emitted once per
     // category (unchanged shape), but now carries enough detail for
@@ -281,7 +280,6 @@ export function lookupTopicClaims(
         }
         continue
       }
-      anyApplicable = true
 
       const dedupeKey = claim.claim_id
       if (seen.has(dedupeKey)) continue
@@ -289,9 +287,22 @@ export function lookupTopicClaims(
       matches.push(claim)
     }
 
+    // CRC Generic Applicability Diagnostic Parity milestone (2026-08-24):
+    // gated on `unmetDetail.length > 0`, NOT on `!anyApplicable` (the prior
+    // condition) -- the prior condition silently discarded a fully-computed
+    // `unmetDetail` array whenever ANY sibling claim in the same category
+    // was applicable, so a category with one matched claim and one
+    // genuinely unresolved/not_met sibling produced no diagnostic at all for
+    // the sibling. `unmetDetail.length > 0` is a strict generalization: when
+    // no claim in the category is applicable (the pre-existing Case 3A
+    // shape), every eligible candidate necessarily contributed to
+    // `unmetDetail`, so this branch fires identically to before -- zero
+    // behavior change for that case. It additionally fires in the
+    // previously-suppressed mixed case, without ever changing which claims
+    // reach `matches[]` above (that loop is completely untouched).
     if (!anyEligible) {
       diagnostics.push({ identifier: category, reason: 'not_adopted_or_eligible' })
-    } else if (!anyApplicable) {
+    } else if (unmetDetail.length > 0) {
       diagnostics.push({ identifier: category, reason: 'applicability_unmet', unmet_applicability: unmetDetail })
     }
   }

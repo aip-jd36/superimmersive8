@@ -108,7 +108,17 @@ describe('V: applicability gating, attributed to the originating goal category',
     })
     const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { state: 'unknown' } }))
     expect(result.matches).toEqual([])
-    expect(result.diagnostics).toEqual([{ identifier: 'commercial_use', reason: 'applicability_unmet' }])
+    // CRC Generic Applicability Diagnostic Parity milestone (2026-08-24):
+    // now carries unmet_applicability detail, matching the explicit
+    // TopicClaim and Matrix paths -- the diagnostic used to be a bare
+    // {identifier, reason} pair (Gap B, documented and fixed this milestone).
+    expect(result.diagnostics).toEqual([
+      {
+        identifier: 'commercial_use',
+        reason: 'applicability_unmet',
+        unmet_applicability: [{ claim_id: 'C-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+      },
+    ])
   })
 
   test('applicability satisfied -> the claim IS retrieved, proving the gate is a real pass/fail check, not a bypass', () => {
@@ -161,5 +171,120 @@ describe('goal-scoped dedup and multi-occurrence collapsing', () => {
     const result = lookupDiscoveredTopicClaims([occCommercial, occOther], [c], facts())
     expect(result.matches).toHaveLength(2)
     expect(result.matches.map((m) => m.sourceGoalCategory).sort()).toEqual(['commercial_use', 'copyright_ownership'])
+  })
+})
+
+// ── CRC Generic Applicability Diagnostic Parity milestone (2026-08-24) --
+// Gap B fix: this module previously used the boolean-only isApplicable(),
+// so its applicability_unmet diagnostic never carried unmet_applicability
+// detail, and (like lookupTopicClaims before its own Gap A fix) suppressed
+// the diagnostic entirely whenever any sibling candidate was applicable. ──
+describe('lookupDiscoveredTopicClaims -- applicability diagnostic parity (CRC Generic Applicability Diagnostic Parity milestone, 2026-08-24)', () => {
+  // H. discovered relevant claim + unresolved applicability
+  test('H: a discovered relevant claim with unresolved applicability -- withheld, with claim-level unresolved detail', () => {
+    const occ = occurrence({ topic: 'third_party_source_rights', source_goal_category: 'commercial_use' })
+    const c = claim({
+      claim_id: 'C-1',
+      topic: 'third_party_source_rights',
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+    })
+    const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { state: 'unknown' } }))
+    expect(result.matches).toEqual([])
+    expect(result.diagnostics).toEqual([
+      {
+        identifier: 'commercial_use',
+        reason: 'applicability_unmet',
+        unmet_applicability: [{ claim_id: 'C-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+      },
+    ])
+  })
+
+  // I. discovered relevant claim + known not_met
+  test('I: a discovered relevant claim with a known-not-applicable requirement -- withheld, correctly classified not_met, never unresolved', () => {
+    const occ = occurrence({ topic: 'third_party_source_rights', source_goal_category: 'commercial_use' })
+    const c = claim({
+      claim_id: 'C-1',
+      topic: 'third_party_source_rights',
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+    })
+    const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' } }))
+    expect(result.matches).toEqual([])
+    expect(result.diagnostics).toEqual([
+      {
+        identifier: 'commercial_use',
+        reason: 'applicability_unmet',
+        unmet_applicability: [{ claim_id: 'C-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'not_met' }],
+      },
+    ])
+  })
+
+  // J. discovered relevant claim + met -- retrieves exactly as before
+  test('J: a discovered relevant claim with met applicability -- retrieves exactly as before, no diagnostic', () => {
+    const occ = occurrence({ topic: 'third_party_source_rights', source_goal_category: 'commercial_use' })
+    const c = claim({
+      claim_id: 'C-1',
+      topic: 'third_party_source_rights',
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+    })
+    const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { state: 'confirmed', value: 'United States' } }))
+    expect(result.matches).toEqual([{ claim: c, sourceGoalCategory: 'commercial_use' }])
+    expect(result.diagnostics).toEqual([])
+  })
+
+  // Mixed sibling case, the direct discovered-topic analogue of TopicClaim's own Gap A -- proves the same category-level suppression bug is fixed here too.
+  test('mixed siblings: one discovered met claim + one discovered unresolved claim, same originating goal -- met claim retrieves, unresolved one preserved via diagnostic (previously silently dropped)', () => {
+    const occ = occurrence({ topic: 'third_party_source_rights', source_goal_category: 'commercial_use' })
+    const met = claim({ claim_id: 'MET', topic: 'third_party_source_rights' })
+    const unresolved = claim({
+      claim_id: 'UNRESOLVED',
+      topic: 'third_party_source_rights',
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+    })
+    const result = lookupDiscoveredTopicClaims([occ], [met, unresolved], facts({ jurisdiction: { state: 'unknown' } }))
+    expect(result.matches).toEqual([{ claim: met, sourceGoalCategory: 'commercial_use' }])
+    expect(result.diagnostics).toEqual([
+      {
+        identifier: 'commercial_use',
+        reason: 'applicability_unmet',
+        unmet_applicability: [{ claim_id: 'UNRESOLVED', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+      },
+    ])
+  })
+
+  // L. discovered relevance retains originating explicit-goal/category provenance
+  test('L: the diagnostic is attributed to the ORIGINATING explicit goal category (source_goal_category), never the claim\'s own intrinsic topic', () => {
+    const occ = occurrence({ topic: 'third_party_source_rights', source_goal_category: 'copyright_ownership' })
+    const c = claim({
+      claim_id: 'C-1',
+      topic: 'third_party_source_rights', // intrinsic topic differs from the originating goal category
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+    })
+    const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { state: 'unknown' } }))
+    expect(result.diagnostics[0].identifier).toBe('copyright_ownership') // the originating goal, not 'third_party_source_rights'
+  })
+
+  // M. discovered-only relevance still does NOT fabricate a UserGoal
+  test('M: no UserGoal is fabricated or referenced anywhere -- this function never takes a UserGoal[] parameter at all, only DiscoveredTopicOccurrence[]', () => {
+    // Structural proof, not merely behavioral: the function signature itself has no UserGoal parameter.
+    const occ = occurrence({ topic: 'third_party_source_rights', source_goal_category: 'commercial_use' })
+    const c = claim({ claim_id: 'C-1', topic: 'third_party_source_rights', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] })
+    const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { state: 'unknown' } }))
+    expect(Object.keys(result)).toEqual(['matches', 'diagnostics'])
+    expect(result.diagnostics[0]).not.toHaveProperty('goal_id')
+  })
+
+  // N. provider-mismatched discovered claim emits no inappropriate applicability diagnostic
+  test('N: a provider-mismatched discovered claim never contributes unmet_applicability detail -- it was never a candidate at all', () => {
+    const occ = occurrence({ topic: 'third_party_source_rights', source_goal_category: 'commercial_use' })
+    const met = claim({ claim_id: 'MET', topic: 'third_party_source_rights' })
+    const otherProvider = claim({
+      claim_id: 'OTHER-PROVIDER',
+      topic: 'third_party_source_rights',
+      provider_scope: ['getty'],
+      applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+    })
+    const result = lookupDiscoveredTopicClaims([occ], [met, otherProvider], facts({ jurisdiction: { state: 'unknown' } }), ['istock'])
+    expect(result.matches).toEqual([{ claim: met, sourceGoalCategory: 'commercial_use' }])
+    expect(result.diagnostics).toEqual([])
   })
 })
