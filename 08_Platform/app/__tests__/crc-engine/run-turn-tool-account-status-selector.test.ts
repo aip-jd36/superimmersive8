@@ -24,6 +24,10 @@ import type { CandidateObservation } from '@/lib/interview-engine/extraction'
 import type { ConstraintADecision } from '@/lib/interview-engine/decision'
 import type { SessionStore } from '@/lib/crc-engine/session-store'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
+import { buildRetrievalHandoff } from '@/lib/interview-engine/handoff'
+import { retrieve } from '@/lib/retrieval-engine/retrieve'
+import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
+import type { StructuredUnderstanding } from '@/types/interview-engine'
 
 const NO_TOPIC_CLAIMS: RunTurnDeps['topicClaims'] = []
 
@@ -138,6 +142,75 @@ describe('Member response -> account_status resolves, no repeat question', () =>
     if (third.kind === 'question') {
       expect(third.message).not.toBe('Do you know what kind of kling account or membership you currently have?')
     }
+  })
+})
+
+describe('ToolMention Supersession Fact Persistence -- product-consequence regression (2026-08-24)', () => {
+  test('Member Account survives a later, unrelated natural re-mention of Kling; selector never re-asks; Retrieval/BI see the Member claim as resolved, not unresolved', async () => {
+    const store = createInMemorySessionStore()
+    const first = await runTurn({ token: 't1', turnNumber: 1, userText: 'x' }, eligibleDeps({}, store))
+    expect(first.kind).toBe('question')
+
+    const loadedAfterFirst = (await store.load('t1')) as { structured_understanding: StructuredUnderstanding }
+    const priorId = loadedAfterFirst.structured_understanding.tool_mentions[0].mention_id
+
+    const memberCorrection = toolCandidate({
+      proposal_id: 'p-correction',
+      turn: 2,
+      raw_text: 'I have a Kling Member Account.',
+      supersedes_tool_mention_id: priorId,
+      account_status_confidence_hint: 'confirmed',
+      account_status_value_hint: 'Member Account',
+    })
+    await runTurn({ token: 't1', turnNumber: 2, userText: 'I have a Kling Member Account.' }, eligibleDeps({ extractor: constantExtractor([memberCorrection]) }, store))
+
+    const loadedAfterMember = (await store.load('t1')) as { structured_understanding: StructuredUnderstanding }
+    const memberMentionId = loadedAfterMember.structured_understanding.tool_mentions.find((m) => m.superseded_by === null)!.mention_id
+
+    // Turn 3: a LATER, unrelated natural re-mention of Kling (answering a
+    // workflow-role-style question) that says nothing about account status
+    // -- exactly the live-UAT-observed regression trigger. This candidate
+    // supersedes the just-confirmed Member Account mention via the SAME
+    // automatic same-tool identity match every ordinary re-mention uses.
+    const unrelatedReMention = toolCandidate({
+      proposal_id: 'p-workflow',
+      turn: 3,
+      raw_text: 'I generated it myself using text prompts in Kling.',
+      supersedes_tool_mention_id: memberMentionId,
+    })
+    const third = await runTurn(
+      { token: 't1', turnNumber: 3, userText: 'I generated it myself using text prompts in Kling.' },
+      eligibleDeps({ extractor: constantExtractor([unrelatedReMention]) }, store),
+    )
+    // The selector must never re-ask, on this or any later turn.
+    if (third.kind === 'question') {
+      expect(third.message).not.toBe('Do you know what kind of kling account or membership you currently have?')
+    }
+
+    const loadedAfterThird = (await store.load('t1')) as {
+      structured_understanding: StructuredUnderstanding
+      boundary_state: { selector_needs_used: Record<string, number> }
+    }
+    const finalActiveMention = loadedAfterThird.structured_understanding.tool_mentions.find((m) => m.superseded_by === null)!
+
+    // (6) the fact survives the unrelated re-mention.
+    expect(finalActiveMention.account_status).toEqual({ state: 'confirmed', value: 'Member Account' })
+    // (7) cap remains consumed, never reopened.
+    expect(loadedAfterThird.boundary_state.selector_needs_used['tool_account_status::kling']).toBe(1)
+
+    // (8)/(9) Retrieval sees the Member requirement as met; BI no longer
+    // represents the Member claim as unresolved -- both consumed exactly
+    // as-is, unmodified, proving no Retrieval/BI change was needed.
+    const su = loadedAfterThird.structured_understanding
+    const handoff = buildRetrievalHandoff(su)
+    const confirmedGoal = su.user_goals.find((g) => g.superseded_by === null && g.state === 'confirmed')!
+    const retrievalResult = retrieve(handoff, MATRIX_FIXTURE, [confirmedGoal], [], {
+      jurisdiction: su.project_facts.jurisdiction.attestation,
+      toolMentions: su.tool_mentions,
+    })
+    const [interpretation] = buildBoundedInterpretations([confirmedGoal], retrievalResult.results, retrievalResult.diagnostics)
+    expect(interpretation.supporting_claim_ids.sort()).toEqual(['kling-commercial-use-baseline', 'kling-commercial-use-member'])
+    expect(interpretation.unresolved_relevant_claims).toEqual([])
   })
 })
 

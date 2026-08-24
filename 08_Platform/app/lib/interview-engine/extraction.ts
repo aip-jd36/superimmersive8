@@ -471,6 +471,65 @@ function resolveAttestedToolField(
 }
 
 /**
+ * ToolMention Supersession Fact Persistence fix (2026-08-24). A live CRC
+ * UAT exposed the following: attestCandidate (above) builds
+ * access_surface/plan_tier/account_status entirely from THIS candidate's
+ * own turn-local hints, with zero visibility into the mention it may be
+ * superseding. Every one of those three fields is independently attested
+ * on every candidate, so a later, unrelated same-tool mention (e.g. the
+ * user re-mentioning the tool while answering an unrelated workflow-role
+ * question) silently reset every field the new candidate didn't itself
+ * address back to `{state: 'unknown'}`, discarding an already-confirmed
+ * answer -- observed for both account_status and plan_tier, not a
+ * provider- or field-specific defect.
+ *
+ * This merge runs ONLY here, at the existing supersession dispatch site in
+ * runExtractionPipeline below -- never inside attestCandidate itself.
+ * attestCandidate's pure "candidate -> fields" contract, and its own
+ * existing tests, are completely unchanged.
+ *
+ * Generic per-field rule, identical across all three fields (no field-
+ * specific, provider-specific, or Living-Knowledge-aware logic):
+ *   - the candidate carried its OWN hint for that field this turn (ANY
+ *     ConfidenceState -- 'confirmed', 'unknown', 'declined', etc., not just
+ *     'confirmed') -- the field was genuinely ADDRESSED this turn. Use the
+ *     freshly attested value as-is, even when it resolves to unknown:
+ *     explicit uncertainty/withdrawal must fail closed, never silently
+ *     re-inherit a stale confirmed value from before.
+ *   - no hint at all (undefined) -- the field was NOT addressed this turn.
+ *     Inherit the prior mention's own value/state verbatim, whatever state
+ *     it was actually in (confirmed, unknown, unresolved_no_visibility,
+ *     ...) -- never just "confirmed" values, and never a fabricated one.
+ * access_surface has one additional deterministic channel (normalizeCandidate's
+ * own disambiguation-rule match, e.g. resolving "the API" from THIS turn's
+ * own raw_text) -- also counts as addressed, since it reflects information
+ * genuinely present in this turn's own statement, not a stale carryover.
+ *
+ * Never crosses tools: only ever called once resolveToolMentionTarget has
+ * already identified a same-canonical-tool (or same-raw-alias) supersession
+ * target -- this function never decides identity itself, only merges
+ * fields for a target already established to be the same tool.
+ */
+function mergeToolMentionFieldsOnSupersession(
+  newMention: ToolMention,
+  priorMention: ToolMention,
+  candidate: CandidateObservation,
+  normalization: NormalizationResult,
+): ToolMention {
+  const accessSurfaceAddressed =
+    candidate.access_surface_confidence_hint !== undefined || (normalization.status === 'resolved' && normalization.access_surface !== undefined)
+  const planTierAddressed = candidate.plan_tier_confidence_hint !== undefined
+  const accountStatusAddressed = candidate.account_status_confidence_hint !== undefined
+
+  return {
+    ...newMention,
+    access_surface: accessSurfaceAddressed ? newMention.access_surface : priorMention.access_surface,
+    plan_tier: planTierAddressed ? newMention.plan_tier : priorMention.plan_tier,
+    account_status: accountStatusAddressed ? newMention.account_status : priorMention.account_status,
+  }
+}
+
+/**
  * Returns null when the candidate should be deferred rather than proposed
  * (see DEFERRED_REASON_CODES) -- attestCandidate itself decides this, not
  * mutation.
@@ -1050,7 +1109,13 @@ export async function runExtractionPipeline(
           if (target) {
             retractedThisTurn.add((target.resolution.kind === 'canonical' ? target.resolution.identifier : target.resolution.raw_name).toLowerCase())
           }
-          current = supersedeToolMention(current, candidate.supersedes_tool_mention_id, proposedFact.mention)
+          // ToolMention Supersession Fact Persistence fix (2026-08-24): see
+          // mergeToolMentionFieldsOnSupersession's own header. Only merges
+          // when `target` actually resolves (mirrors the retractedThisTurn
+          // guard immediately above) -- if it doesn't, supersedeToolMention's
+          // own lookup below throws exactly as it always has.
+          const mentionToApply = target ? mergeToolMentionFieldsOnSupersession(proposedFact.mention, target, candidate, normalization) : proposedFact.mention
+          current = supersedeToolMention(current, candidate.supersedes_tool_mention_id, mentionToApply)
         } else {
           current = addToolMention(current, proposedFact.mention)
         }
