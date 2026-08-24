@@ -677,23 +677,28 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     )
     const discoveryProposal = discoveryCategory ? buildCommercialReadinessDiscoveryProposal(discoveryCategory, phase) : undefined
 
-    // CRC Narrow Governed Selector Questioning milestone (2026-08-24).
-    // Deterministic, no LLM call, no retrieve() call -- see
-    // selector-questioning.ts's own header for why it calls
-    // lookupTopicClaims() directly rather than requiring a full Retrieval
-    // pass mid-turn. Computed LAST among the four forced-candidate sources
-    // (after jurisdiction/human-contribution/Discovery), so it cannot alter
-    // any existing precedence for those three, and so it can never fire for
-    // a fact that jurisdiction's own dedicated module already owns
-    // (selector-questioning.ts's own HANDLED_BY_DEDICATED_MODULE guard is
-    // the actual enforcement; this ordering is additionally the smallest,
+    // CRC Narrow Governed Selector Questioning milestone (2026-08-24),
+    // corrected by the CRC Generic Applicability Readiness milestone (same
+    // date). Deterministic, no LLM call, no FULL retrieve() call -- see
+    // selector-questioning.ts's and applicability-readiness.ts's own
+    // headers for why a genuine, generic, Retrieval-owned readiness
+    // primitive (covering both TopicClaim and MatrixClaim sources) is used
+    // instead of a full Retrieval pass mid-turn. `deps.matrix` is threaded
+    // through here so Matrix-origin applicability gaps are visible to
+    // selector-questioning -- the same `matrix` every other consumer of
+    // `deps` already receives. Computed LAST among the four forced-candidate
+    // sources (after jurisdiction/human-contribution/Discovery), so it
+    // cannot alter any existing precedence for those three, and so it can
+    // never fire for a fact that jurisdiction's own dedicated module already
+    // owns (selector-questioning.ts's own HANDLED_BY_DEDICATED_MODULE guard
+    // is the actual enforcement; this ordering is additionally the smallest,
     // most non-disruptive insertion point per the accepted design's own
     // §P). The production selector-askability registry ships empty this
     // milestone, so `selectorNeeds` is always `[]` and `selectorProposal`
     // is always `undefined` in current production behavior -- this is a
     // dormant capability, not a live one, until a future, separate
     // governance decision registers a real selector fact.
-    const selectorNeeds = deriveSelectorNeeds(suAfter, topicClaims, boundaryStateForTurn)
+    const selectorNeeds = deriveSelectorNeeds(suAfter, deps.matrix, topicClaims, boundaryStateForTurn)
     const selectorProposal = selectorNeeds.length > 0 ? buildSelectorNeedProposal(selectorNeeds[0], phase) : undefined
 
     // jurisdiction > human-contribution > Discovery > governed selector when

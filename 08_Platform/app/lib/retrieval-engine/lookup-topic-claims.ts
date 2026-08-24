@@ -213,6 +213,26 @@ export interface TopicLookupResult {
  * from structured evidence via an engineering-owned, fail-closed trigger
  * registry.
  */
+
+/**
+ * Extracted (CRC Generic Applicability Readiness milestone, 2026-08-24) from
+ * this function's own former inline computation -- byte-identical logic,
+ * now a small, shared, exported primitive so `applicability-readiness.ts`'s
+ * Matrix-path gap derivation can apply the exact same explicit-goal-
+ * relevance rule TopicClaim retrieval already enforces structurally via its
+ * own goal-driven lookup, rather than reproducing this one-line filter a
+ * second time. Deliberately excludes discovered-topic categories (unlike
+ * `lookupTopicClaims`'s own `activeGoalCategories`, which unions them in) --
+ * this helper answers only "which categories does an EXPLICIT, confirmed
+ * UserGoal currently supply," the exact question selector-readiness needs
+ * (explicit-goal-only policy) and the exact question this function's own
+ * inline computation always answered before Track A discovery was unioned
+ * in at the call site.
+ */
+export function activeConfirmedGoalCategories(goals: UserGoal[]): Set<GoalCategory> {
+  return new Set(goals.filter((g) => g.superseded_by === null && g.state === 'confirmed').map((g) => g.category))
+}
+
 export function lookupTopicClaims(
   goals: UserGoal[],
   topicClaims: TopicClaim[],
@@ -224,10 +244,7 @@ export function lookupTopicClaims(
   const matches: TopicClaim[] = []
   const seen = new Set<string>()
 
-  const activeGoalCategories = new Set<GoalCategory>([
-    ...goals.filter((g) => g.superseded_by === null && g.state === 'confirmed').map((g) => g.category),
-    ...discoveredTopics,
-  ])
+  const activeGoalCategories = new Set<GoalCategory>([...activeConfirmedGoalCategories(goals), ...discoveredTopics])
 
   for (const category of activeGoalCategories) {
     // Provider pre-filter runs as part of computing `candidates` itself --

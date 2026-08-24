@@ -1,15 +1,14 @@
 /**
  * Governed selector questioning -- deterministic need derivation + proposal
  * construction (CRC Narrow Governed Selector Questioning milestone,
- * 2026-08-24, implementing the accepted Governed Selector Questioning
- * architecture design of the same date). Deterministic sibling to
- * jurisdiction-clarification.ts/human-contribution-clarification.ts/
- * knowledge-readiness.ts, using the closest-fitting elements of each:
- * jurisdiction's own "reproduce the narrow gate shape, don't call retrieve()"
- * discipline (see below for why that discipline is mechanically required
- * here, not merely a style preference), and Track B's own compound-key
- * BoundaryState cap shape (a single boolean cannot represent "asked about
- * Kling's plan" separately from "asked about Runway's plan").
+ * 2026-08-24; corrected by the CRC Generic Applicability Readiness
+ * milestone, same date, following the Retrieval Ownership Diagnostic).
+ * Deterministic sibling to jurisdiction-clarification.ts/human-contribution-
+ * clarification.ts/knowledge-readiness.ts, but architecturally cleaner than
+ * either: it consumes a genuine Retrieval-owned primitive rather than
+ * reproducing a narrow gate shape independently (compare jurisdiction's own
+ * "reproduce the shape, don't call Retrieval" discipline, adopted there only
+ * because no shared per-requirement evaluator existed yet).
  *
  * Answers exactly one question: does an unresolved, askable, governed
  * applicability selector exist whose resolution could make a currently-
@@ -17,62 +16,52 @@
  * ONE deterministic candidate question run-turn.ts may use as a forced
  * attempt-#1 candidate, at the same shared slot jurisdiction/human-
  * contribution/discovery already occupy -- never a privileged bypass of
- * Constraint A/B (see run-turn.ts's own wiring: this proposal flows through
- * the unchanged validate -> Constraint A -> Constraint B pipeline exactly
- * like every other deterministic candidate in this codebase).
+ * Constraint A/B.
  *
- * No `retrieve()` call (load-bearing, mechanically required, not merely a
- * style choice): `retrieve()` is called ONLY inside `runCRCConversation()`,
- * itself called only once the interview has already completed (see
- * run-turn.ts's own `runCRCConversation(...)` call sites, all three gated
- * on `kind: 'complete'`) -- by the time a real `RetrievalDiagnostic[]`
- * would exist, it is too late to ask anything. This module instead calls
- * `lookupTopicClaims()` directly (Retrieval's own lighter-weight, already-
- * exported, already-pure topic-lookup function -- not the heavier
- * `retrieve()` orchestration, which also resolves Matrix rows/relationships/
- * discovered-topic lookups this module has no need for) to obtain real,
- * freshly-computed `RetrievalDiagnostic[]` mid-turn. This is still Retrieval
- * evaluating its own applicability logic -- `lookupTopicClaims` internally
- * calls the same `evaluateApplicabilityDetailed()` this whole milestone's
- * Piece 1 introduced, so there is exactly one applicability-evaluation code
- * path in the entire codebase, never a second, independently-reproduced one
- * (unlike jurisdiction/human-contribution, which each reproduce a narrow
- * gate SHAPE from scratch because no shared per-requirement evaluator
- * existed before this milestone).
+ * No full `retrieve()` call (load-bearing, mechanically required, not merely
+ * a style choice): `retrieve()` is called ONLY inside `runCRCConversation()`,
+ * itself called only once the interview has already completed -- by the
+ * time a real, final `RetrievalResult[]`/`RetrievalDiagnostic[]` would
+ * exist, it is too late to ask anything. This module instead consumes
+ * `deriveApplicabilityReadinessGaps()` (lib/retrieval-engine/applicability-
+ * readiness.ts) -- a genuine, generic, Retrieval-owned primitive covering
+ * BOTH TopicClaim and MatrixClaim sources, composed entirely from Retrieval's
+ * own already-exported, already-authoritative building blocks
+ * (`lookupTopicClaims`, `lookupRows`, `enumerateEligibleClaims`,
+ * `evaluateApplicabilityDetailed`) -- never a second, independently-
+ * reproduced applicability/eligibility/lifecycle/supersession/provider-scope
+ * implementation. See that module's own header for the full authority
+ * argument (Retrieval Ownership Diagnostic, 2026-08-24).
  *
- * Scoped to TopicClaim applicability only in this milestone (explicit,
- * documented limitation -- see this milestone's own Final Report §Q/§Y, not
- * silently absent): extending this to MatrixClaim applicability would
- * require reproducing `lookupRows`/`enumerateEligibleClaims`'s own
- * tool-row-resolution shape inside this module (no deterministic
- * clarification module does this today), and zero live Matrix-applicability-
- * gated claim exists to justify building it now. `topicClaims` passed to
- * this module's own `deriveSelectorNeeds` is exactly the same
- * `deps.topicClaims` every other deterministic clarification module in
- * run-turn.ts already receives.
+ * Source-blind by construction (§12/§14 of the correction task): this
+ * module never inspects, branches on, or knows whether a given
+ * `unmet_applicability` entry originated from a TopicClaim or a MatrixClaim
+ * -- it consumes one uniform `RetrievalDiagnostic[]` gap list and applies
+ * identical aggregation/suppression/dedupe logic regardless of source.
+ * There is no `if (source === 'matrix')` anywhere in this file.
  *
- * Explicit-goal-only (§L of the accepted design; §17/§18/§24 of the
- * originating diagnostics): `lookupTopicClaims` is called with
- * `understanding.user_goals` (its own internal filter already restricts to
- * active + confirmed) and WITHOUT a `discoveredTopics` argument (defaults to
- * `[]`) -- a category relevant only via Track A discovered relevance
- * therefore structurally cannot produce a selector need. This is the exact
- * mechanism, not a separate check layered on top.
+ * Explicit-goal-only (§L of the original design): enforced at the readiness
+ * layer, not here -- `deriveApplicabilityReadinessGaps` only ever considers
+ * claims relevant to an active, confirmed, EXPLICIT UserGoal (for both
+ * TopicClaim, via `lookupTopicClaims`'s own goal-driven lookup, and
+ * MatrixClaim, via the readiness module's own explicit-goal-relevance
+ * filter). This module inherits that boundary automatically; it does not
+ * re-implement or separately enforce it.
  *
  * Jurisdiction exclusion (defense in depth, mirroring Track B's own
- * `HANDLED_BY_DEDICATED_MODULE` pattern and reasoning exactly -- "even if a
- * future edit to that registry ever added an entry by mistake, this
- * exclusion is checked first and wins"): `fact === 'jurisdiction'` is
- * unconditionally skipped here, regardless of what selector-askability.ts
- * ever contains, so this module can never double-own or race jurisdiction's
- * own dedicated, unmigrated clarification module.
+ * `HANDLED_BY_DEDICATED_MODULE` pattern and reasoning exactly): `fact ===
+ * 'jurisdiction'` is unconditionally skipped here, regardless of what
+ * selector-askability.ts ever contains, so this module can never double-own
+ * or race jurisdiction's own dedicated, unmigrated clarification module.
  */
 
 import type { GoalCategory, Phase, StructuredUnderstanding } from '@/types/interview-engine'
 import type { CandidateQuestionProposal } from '@/lib/interview-engine/candidate-question'
 import type { BoundaryState } from '@/lib/interview-engine/boundaries'
-import { lookupTopicClaims, type ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
-import type { ApplicabilityFact, ApplicabilityRequirement, TopicClaim, UnmetApplicabilityDetail } from '@/lib/retrieval-engine/types'
+import { buildRetrievalHandoff } from '@/lib/interview-engine/handoff'
+import { deriveApplicabilityReadinessGaps } from '@/lib/retrieval-engine/applicability-readiness'
+import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
+import type { ApplicabilityFact, ApplicabilityRequirement, MatrixRow, TopicClaim, UnmetApplicabilityDetail } from '@/lib/retrieval-engine/types'
 import { getSelectorAskabilityEntry } from './selector-askability'
 
 /**
@@ -130,11 +119,16 @@ function unresolvedRequirementsIfClaimStillEligible(claimId: string, detail: Unm
  * conversation, mirroring `deriveKnowledgeReadinessNeeds`'s own exact
  * pattern (Track B) rather than requiring every caller to filter separately.
  */
-export function deriveSelectorNeeds(understanding: StructuredUnderstanding, topicClaims: TopicClaim[], boundaryState: BoundaryState): SelectorNeed[] {
+export function deriveSelectorNeeds(understanding: StructuredUnderstanding, matrix: MatrixRow[], topicClaims: TopicClaim[], boundaryState: BoundaryState): SelectorNeed[] {
   const facts = buildApplicabilityFacts(understanding)
-  // Explicit-goal-only: understanding.user_goals only, discoveredTopics
-  // omitted (defaults to []) -- see this module's own header.
-  const { diagnostics } = lookupTopicClaims(understanding.user_goals, topicClaims, facts)
+  // buildRetrievalHandoff is the SAME function runCRCConversation() itself
+  // uses to build the handoff passed into full retrieve() -- canonical tool
+  // and asset-provider identifiers here are guaranteed to match final
+  // Retrieval's own resolution exactly, by construction. See
+  // applicability-readiness.ts's own header for the full authority argument
+  // and why this module is now source-blind across TopicClaim/MatrixClaim.
+  const handoff = buildRetrievalHandoff(understanding)
+  const diagnostics = deriveApplicabilityReadinessGaps(handoff, matrix, understanding.user_goals, topicClaims, facts)
 
   const needsByKey = new Map<string, SelectorNeed>()
 

@@ -12,7 +12,7 @@
 import { deriveSelectorNeeds, buildSelectorNeedProposal } from '@/lib/crc-engine/selector-questioning'
 import { createInitialBoundaryState, type BoundaryState } from '@/lib/interview-engine/boundaries'
 import type { StructuredUnderstanding, ToolMention, UserGoal } from '@/types/interview-engine'
-import type { TopicClaim } from '@/lib/retrieval-engine/types'
+import type { MatrixRow, TopicClaim } from '@/lib/retrieval-engine/types'
 import { getSelectorAskabilityEntry } from '@/lib/crc-engine/selector-askability'
 
 jest.mock('@/lib/crc-engine/selector-askability', () => ({
@@ -20,6 +20,9 @@ jest.mock('@/lib/crc-engine/selector-askability', () => ({
 }))
 
 const mockedGetSelectorAskabilityEntry = getSelectorAskabilityEntry as jest.Mock
+
+/** No Matrix rows -- every existing test in this file exercises TopicClaim-origin readiness only; Matrix-origin coverage lives in its own describe block below. */
+const NO_MATRIX: MatrixRow[] = []
 
 function emptySU(overrides: Partial<StructuredUnderstanding> = {}): StructuredUnderstanding {
   return {
@@ -93,7 +96,7 @@ describe('deriveSelectorNeeds -- eligibility', () => {
   test('1: explicit confirmed goal + unresolved + registered-askable selector -> a need is derived', () => {
     mockedGetSelectorAskabilityEntry.mockImplementation((fact: string) => (fact === 'tool_plan_tier' ? { treatment: 'askable_in_crc', question_text: 'Which plan for {tool}?' } : undefined))
     const su = emptySU({ user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })] })
-    const needs = deriveSelectorNeeds(su, [planClaim({ claim_id: 'C-1' })], createInitialBoundaryState())
+    const needs = deriveSelectorNeeds(su, NO_MATRIX, [planClaim({ claim_id: 'C-1' })], createInitialBoundaryState())
     expect(needs).toHaveLength(1)
     expect(needs[0]).toMatchObject({ fact: 'tool_plan_tier', tool: 'kling', originating_goal_category: 'commercial_use', dedupe_key: 'tool_plan_tier::kling', unmet_claim_ids: ['C-1'] })
   })
@@ -101,21 +104,21 @@ describe('deriveSelectorNeeds -- eligibility', () => {
   test('2: registry missing an entry for the fact -> no need', () => {
     mockedGetSelectorAskabilityEntry.mockImplementation(() => undefined)
     const su = emptySU({ user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })] })
-    const needs = deriveSelectorNeeds(su, [planClaim({ claim_id: 'C-1' })], createInitialBoundaryState())
+    const needs = deriveSelectorNeeds(su, NO_MATRIX, [planClaim({ claim_id: 'C-1' })], createInitialBoundaryState())
     expect(needs).toEqual([])
   })
 
   test('3a: registry explicitly not_askable -> no need', () => {
     mockedGetSelectorAskabilityEntry.mockImplementation((fact: string) => (fact === 'tool_plan_tier' ? { treatment: 'not_askable' } : undefined))
     const su = emptySU({ user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })] })
-    const needs = deriveSelectorNeeds(su, [planClaim({ claim_id: 'C-1' })], createInitialBoundaryState())
+    const needs = deriveSelectorNeeds(su, NO_MATRIX, [planClaim({ claim_id: 'C-1' })], createInitialBoundaryState())
     expect(needs).toEqual([])
   })
 
   test('3b: registry explicitly evidence_only -> no need (fail-closed, same as not_askable)', () => {
     mockedGetSelectorAskabilityEntry.mockImplementation((fact: string) => (fact === 'tool_plan_tier' ? { treatment: 'evidence_only' } : undefined))
     const su = emptySU({ user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })] })
-    const needs = deriveSelectorNeeds(su, [planClaim({ claim_id: 'C-1' })], createInitialBoundaryState())
+    const needs = deriveSelectorNeeds(su, NO_MATRIX, [planClaim({ claim_id: 'C-1' })], createInitialBoundaryState())
     expect(needs).toEqual([])
   })
 
@@ -138,7 +141,7 @@ describe('deriveSelectorNeeds -- eligibility', () => {
         human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
       },
     })
-    const needs = deriveSelectorNeeds(su, [compoundClaim], createInitialBoundaryState())
+    const needs = deriveSelectorNeeds(su, NO_MATRIX, [compoundClaim], createInitialBoundaryState())
     expect(needs).toEqual([])
   })
 
@@ -157,7 +160,7 @@ describe('deriveSelectorNeeds -- eligibility', () => {
       ],
     })
     const su = emptySU({ user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })] })
-    const needs = deriveSelectorNeeds(su, [compoundClaim], createInitialBoundaryState())
+    const needs = deriveSelectorNeeds(su, NO_MATRIX, [compoundClaim], createInitialBoundaryState())
     expect(needs.map((n) => n.dedupe_key)).toEqual(['tool_plan_tier::kling', 'tool_plan_tier::runway-gen3'])
   })
 
@@ -180,7 +183,7 @@ describe('deriveSelectorNeeds -- eligibility', () => {
         human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
       },
     })
-    const needs = deriveSelectorNeeds(su, [claimA, claimB], createInitialBoundaryState())
+    const needs = deriveSelectorNeeds(su, NO_MATRIX, [claimA, claimB], createInitialBoundaryState())
     expect(needs).toHaveLength(1)
     expect(needs[0].dedupe_key).toBe('tool_plan_tier::kling')
     // Aggregated: only CLAIM-A contributes (CLAIM-B's own not_met jurisdiction suppresses its own contribution).
@@ -191,7 +194,7 @@ describe('deriveSelectorNeeds -- eligibility', () => {
     mockedGetSelectorAskabilityEntry.mockImplementation((fact: string) => (fact === 'tool_plan_tier' ? { treatment: 'askable_in_crc', question_text: 'x' } : undefined))
     // No user_goals at all -- the claim's own topic is never reached by lookupTopicClaims without an explicit goal.
     const su = emptySU({ user_goals: [] })
-    const needs = deriveSelectorNeeds(su, [planClaim({ claim_id: 'C-1' })], createInitialBoundaryState())
+    const needs = deriveSelectorNeeds(su, NO_MATRIX, [planClaim({ claim_id: 'C-1' })], createInitialBoundaryState())
     expect(needs).toEqual([])
   })
 
@@ -199,7 +202,7 @@ describe('deriveSelectorNeeds -- eligibility', () => {
     mockedGetSelectorAskabilityEntry.mockImplementation((fact: string) => (fact === 'jurisdiction' ? { treatment: 'askable_in_crc', question_text: 'x' } : undefined))
     const jurisdictionOnlyClaim = planClaim({ claim_id: 'C-1', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] })
     const su = emptySU({ user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })] })
-    const needs = deriveSelectorNeeds(su, [jurisdictionOnlyClaim], createInitialBoundaryState())
+    const needs = deriveSelectorNeeds(su, NO_MATRIX, [jurisdictionOnlyClaim], createInitialBoundaryState())
     expect(needs).toEqual([])
   })
 
@@ -212,7 +215,7 @@ describe('deriveSelectorNeeds -- eligibility', () => {
       applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'runway-gen3', operator: 'equals', value: 'paid' }],
     })
     const su = emptySU({ user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })] })
-    const needs = deriveSelectorNeeds(su, [klingClaim, runwayClaim], createInitialBoundaryState())
+    const needs = deriveSelectorNeeds(su, NO_MATRIX, [klingClaim, runwayClaim], createInitialBoundaryState())
     expect(needs.map((n) => n.dedupe_key).sort()).toEqual(['tool_plan_tier::kling', 'tool_plan_tier::runway-gen3'])
   })
 
@@ -220,7 +223,7 @@ describe('deriveSelectorNeeds -- eligibility', () => {
     mockedGetSelectorAskabilityEntry.mockImplementation((fact: string) => (fact === 'tool_plan_tier' ? { treatment: 'askable_in_crc', question_text: 'x' } : undefined))
     const su = emptySU({ user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })] })
     const usedBoundary: BoundaryState = { ...createInitialBoundaryState(), selector_needs_used: { 'tool_plan_tier::kling': 1 } }
-    const needs = deriveSelectorNeeds(su, [planClaim({ claim_id: 'C-1' })], usedBoundary)
+    const needs = deriveSelectorNeeds(su, NO_MATRIX, [planClaim({ claim_id: 'C-1' })], usedBoundary)
     expect(needs).toEqual([])
   })
 
@@ -230,7 +233,7 @@ describe('deriveSelectorNeeds -- eligibility', () => {
       user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })],
       tool_mentions: [toolMention({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'kling' } })],
     })
-    const needs1 = deriveSelectorNeeds(su1, [planClaim({ claim_id: 'C-1' })], createInitialBoundaryState())
+    const needs1 = deriveSelectorNeeds(su1, NO_MATRIX, [planClaim({ claim_id: 'C-1' })], createInitialBoundaryState())
     // Correction: m1 superseded by m2, still canonically 'kling'.
     const su2 = emptySU({
       user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })],
@@ -239,9 +242,84 @@ describe('deriveSelectorNeeds -- eligibility', () => {
         toolMention({ mention_id: 'm2', resolution: { kind: 'canonical', identifier: 'kling' } }),
       ],
     })
-    const needs2 = deriveSelectorNeeds(su2, [planClaim({ claim_id: 'C-1' })], createInitialBoundaryState())
+    const needs2 = deriveSelectorNeeds(su2, NO_MATRIX, [planClaim({ claim_id: 'C-1' })], createInitialBoundaryState())
     expect(needs1[0].dedupe_key).toBe(needs2[0].dedupe_key)
     expect(needs1[0].dedupe_key).toBe('tool_plan_tier::kling')
+  })
+})
+
+describe('deriveSelectorNeeds -- Matrix-origin genericity (CRC Generic Applicability Readiness correction, 2026-08-24)', () => {
+  function matrixRow(overrides: Partial<MatrixRow> & Pick<MatrixRow, 'identifier'>): MatrixRow {
+    return { last_verified: '2026-08-24', claims: [], ...overrides }
+  }
+
+  test('10: a Matrix-origin unresolved askable selector produces a SelectorNeed via the SAME consumer logic as a TopicClaim-origin one -- no source-specific branching', () => {
+    mockedGetSelectorAskabilityEntry.mockImplementation((fact: string) => (fact === 'tool_plan_tier' ? { treatment: 'askable_in_crc', question_text: 'Which plan for {tool}?' } : undefined))
+    const row = matrixRow({
+      identifier: 'kling',
+      claims: [
+        {
+          claim_id: 'kling',
+          crc_eligible: 'Yes',
+          crc_publication_scope: 'scope',
+          crc_candidate_statement: 'statement',
+          topic: 'commercial_use',
+          applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'kling', operator: 'equals', value: 'paid' }],
+        },
+      ],
+    })
+    const su = emptySU({
+      user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })],
+      tool_mentions: [toolMention({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'kling' } })],
+    })
+    const needs = deriveSelectorNeeds(su, [row], [], createInitialBoundaryState())
+    expect(needs).toHaveLength(1)
+    expect(needs[0]).toMatchObject({ fact: 'tool_plan_tier', tool: 'kling', originating_goal_category: 'commercial_use', dedupe_key: 'tool_plan_tier::kling', unmet_claim_ids: ['kling'] })
+  })
+
+  test('11: a Matrix-origin claim whose topic is NOT relevant to any explicit goal produces no need (explicit-goal-only policy applies identically to Matrix origin)', () => {
+    mockedGetSelectorAskabilityEntry.mockImplementation((fact: string) => (fact === 'tool_plan_tier' ? { treatment: 'askable_in_crc', question_text: 'x' } : undefined))
+    const row = matrixRow({
+      identifier: 'kling',
+      claims: [
+        {
+          claim_id: 'kling',
+          crc_eligible: 'Yes',
+          crc_publication_scope: 'scope',
+          crc_candidate_statement: 'statement',
+          topic: 'commercial_use',
+          applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'kling', operator: 'equals', value: 'paid' }],
+        },
+      ],
+    })
+    const su = emptySU({ user_goals: [], tool_mentions: [toolMention({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'kling' } })] })
+    const needs = deriveSelectorNeeds(su, [row], [], createInitialBoundaryState())
+    expect(needs).toEqual([])
+  })
+
+  test('12: a Matrix-origin gap and a Topic-origin gap aggregate together in one deriveSelectorNeeds call, both reachable through identical code', () => {
+    mockedGetSelectorAskabilityEntry.mockImplementation((fact: string) => (fact === 'tool_plan_tier' ? { treatment: 'askable_in_crc', question_text: 'x' } : undefined))
+    const row = matrixRow({
+      identifier: 'kling',
+      claims: [
+        {
+          claim_id: 'kling',
+          crc_eligible: 'Yes',
+          crc_publication_scope: 'scope',
+          crc_candidate_statement: 'statement',
+          topic: 'commercial_use',
+          applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'kling', operator: 'equals', value: 'paid' }],
+        },
+      ],
+    })
+    const su = emptySU({
+      user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })],
+      tool_mentions: [toolMention({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'kling' } })],
+    })
+    const needs = deriveSelectorNeeds(su, [row], [planClaim({ claim_id: 'C-1' })], createInitialBoundaryState())
+    expect(needs.map((n) => n.dedupe_key).sort()).toEqual(['tool_plan_tier::kling'])
+    // Both the Matrix claim ('kling') and the TopicClaim ('C-1') contribute to the SAME dedupe_key, since both gate on the same (fact, tool).
+    expect(needs[0].unmet_claim_ids.sort()).toEqual(['C-1', 'kling'])
   })
 })
 
@@ -249,7 +327,7 @@ describe('buildSelectorNeedProposal', () => {
   test('constructs the same downstream proposal shape as other deterministic clarification modules, with {tool} substituted for the canonical tool identifier', () => {
     mockedGetSelectorAskabilityEntry.mockImplementation((fact: string) => (fact === 'tool_plan_tier' ? { treatment: 'askable_in_crc', question_text: 'Which plan or account tier were you using for {tool}?' } : undefined))
     const su = emptySU({ user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })] })
-    const needs = deriveSelectorNeeds(su, [planClaim({ claim_id: 'C-1' })], createInitialBoundaryState())
+    const needs = deriveSelectorNeeds(su, NO_MATRIX, [planClaim({ claim_id: 'C-1' })], createInitialBoundaryState())
     const proposal = buildSelectorNeedProposal(needs[0], 3)
     expect(proposal).toEqual({
       question_text: 'Which plan or account tier were you using for kling?',

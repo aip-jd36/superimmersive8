@@ -30,6 +30,8 @@ jest.mock('@/lib/crc-engine/selector-askability', () => {
 })
 
 const mockedGetSelectorAskabilityEntry = getSelectorAskabilityEntry as jest.Mock
+/** The genuine, unmocked implementation -- kept for tests that need to explicitly restore real (empty-registry) behavior after an earlier test in this file has overridden it via mockImplementation. */
+const REAL_GET_SELECTOR_ASKABILITY_ENTRY = jest.requireActual('@/lib/crc-engine/selector-askability').getSelectorAskabilityEntry
 
 const MATRIX: RunTurnDeps['matrix'] = []
 
@@ -221,5 +223,59 @@ describe('governed selector questioning -- eligibility gating (mocked registry)'
     }
     const loadedAfterSecond = (await store.load('t1')) as { boundary_state: { selector_needs_used: Record<string, number> } }
     expect(loadedAfterSecond.boundary_state.selector_needs_used['tool_plan_tier::kling']).toBe(1)
+  })
+})
+
+describe('governed selector questioning -- Matrix-origin end-to-end (CRC Generic Applicability Readiness correction, 2026-08-24)', () => {
+  const MATRIX_WITH_GATED_KLING_CLAIM: RunTurnDeps['matrix'] = [
+    {
+      identifier: 'kling',
+      last_verified: '2026-08-24',
+      claims: [
+        {
+          claim_id: 'kling',
+          crc_eligible: 'Yes',
+          crc_publication_scope: 'scope',
+          crc_candidate_statement: 'Matrix test statement.',
+          topic: 'commercial_use',
+          applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'kling', operator: 'equals', value: 'paid' }],
+        },
+      ],
+    },
+  ]
+
+  test('a MatrixClaim-origin unresolved askable selector reaches the user through the full run-turn pipeline, identically to the TopicClaim case above -- proves deps.matrix threading, not just unit-level deriveSelectorNeeds', async () => {
+    mockedGetSelectorAskabilityEntry.mockImplementation((fact: string) => (fact === 'tool_plan_tier' ? { treatment: 'askable_in_crc', question_text: 'Which plan for {tool}?' } : undefined))
+    const store = createInMemorySessionStore()
+    let generatorCalled = false
+    const generator = async () => {
+      generatorCalled = true
+      return null
+    }
+    const outcome = await runTurn(
+      { token: 't1', turnNumber: 1, userText: 'x' },
+      eligibleDeps({ generator, matrix: MATRIX_WITH_GATED_KLING_CLAIM, topicClaims: [] }, store),
+    )
+    expect(outcome.kind).toBe('question')
+    if (outcome.kind === 'question') {
+      expect(outcome.message).toBe('Which plan for kling?')
+    }
+    expect(generatorCalled).toBe(false)
+  })
+
+  test('with the REAL, unmocked, empty production registry, the same Matrix-origin scenario produces no selector question -- dormant capability confirmed for Matrix origin too', async () => {
+    // Explicitly restore the real implementation -- an earlier test in this
+    // file overrides it via mockImplementation, and mockClear() (beforeEach)
+    // only clears call history, never the active implementation.
+    mockedGetSelectorAskabilityEntry.mockImplementation(REAL_GET_SELECTOR_ASKABILITY_ENTRY)
+    const store = createInMemorySessionStore()
+    let generatorCalled = false
+    const generator = async () => {
+      generatorCalled = true
+      return null
+    }
+    await runTurn({ token: 't1', turnNumber: 1, userText: 'x' }, eligibleDeps({ generator, matrix: MATRIX_WITH_GATED_KLING_CLAIM, topicClaims: [] }, store))
+    expect(mockedGetSelectorAskabilityEntry).toHaveBeenCalledWith('tool_plan_tier')
+    expect(generatorCalled).toBe(true)
   })
 })
