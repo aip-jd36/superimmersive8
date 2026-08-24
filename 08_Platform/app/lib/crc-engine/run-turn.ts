@@ -693,11 +693,14 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     // owns (selector-questioning.ts's own HANDLED_BY_DEDICATED_MODULE guard
     // is the actual enforcement; this ordering is additionally the smallest,
     // most non-disruptive insertion point per the accepted design's own
-    // §P). The production selector-askability registry ships empty this
-    // milestone, so `selectorNeeds` is always `[]` and `selectorProposal`
-    // is always `undefined` in current production behavior -- this is a
-    // dormant capability, not a live one, until a future, separate
-    // governance decision registers a real selector fact.
+    // §P). The production selector-askability registry shipped empty
+    // through the Narrow Governed Selector Questioning milestone -- a
+    // dormant capability until a future, separate governance decision
+    // registered a real selector fact. That decision has now been made
+    // (Activate tool_account_status Selector milestone, 2026-08-24):
+    // `selectorNeeds`/`selectorProposal` are live for `tool_account_status`
+    // whenever an unresolved, explicit-goal-relevant applicability gap for
+    // it exists -- no change to this file's own orchestration was required.
     const selectorNeeds = deriveSelectorNeeds(suAfter, deps.matrix, topicClaims, boundaryStateForTurn)
     const selectorProposal = selectorNeeds.length > 0 ? buildSelectorNeedProposal(selectorNeeds[0], phase) : undefined
 

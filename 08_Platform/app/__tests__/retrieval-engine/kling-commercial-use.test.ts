@@ -116,7 +116,7 @@ describe('B/C/D: unknown membership -- baseline retrieves, Member exception with
 })
 
 describe('E: BI preserves baseline + unresolved Member exception, without changing the resolved conclusion', () => {
-  test('State A (membership unknown): directly_relevant on the baseline alone, Member claim preserved as unresolved_relevant_claims, no question asked', () => {
+  test('State A (membership unknown): directly_relevant on the baseline alone, Member claim preserved as unresolved_relevant_claims -- BI/Retrieval output is unaffected by selector-askability regardless of registry state', () => {
     const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?' })
     const facts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
     const out = retrieve(handoff({ tools: [tool('kling')] }), MATRIX_FIXTURE, [g], [], facts)
@@ -135,7 +135,14 @@ describe('E: BI preserves baseline + unresolved Member exception, without changi
     expect(interp.summary_blocks[1]).not.toMatch(/kling|member|account/i)
     expect(interp.summary_blocks.join(' ')).toBe(interp.summary)
 
-    // No question generated solely from this state -- deriveSelectorNeeds returns no askable need (registry empty).
+    // deriveSelectorNeeds is a SEPARATE, deliberately-orthogonal mechanism
+    // from the BI/Retrieval assertions above -- registering tool_account_status
+    // askable (Activate tool_account_status Selector milestone, 2026-08-24)
+    // now produces a real governed selector need here, but this is proven
+    // in full detail (and end-to-end through run-turn.ts) in
+    // tool-account-status-selector.test.ts and
+    // run-turn-tool-account-status-selector.test.ts -- this assertion is
+    // kept only to confirm BI's own output above is unaffected by that fact.
     const su: StructuredUnderstanding = {
       project_facts: {
         intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
@@ -154,7 +161,15 @@ describe('E: BI preserves baseline + unresolved Member exception, without changi
       opt_out_scope: null,
     }
     const needs = deriveSelectorNeeds(su, MATRIX_FIXTURE, [], createInitialBoundaryState())
-    expect(needs).toEqual([])
+    expect(needs).toEqual([
+      {
+        fact: 'tool_account_status',
+        tool: 'kling',
+        originating_goal_category: 'commercial_use',
+        unmet_claim_ids: [MEMBER_ID],
+        dedupe_key: 'tool_account_status::kling',
+      },
+    ])
   })
 })
 
@@ -245,19 +260,34 @@ describe('J: provider isolation -- another tool having account_status confirmed 
 })
 
 // K. selector registry remains empty / non-askable
-describe('K: askability remains dormant -- tool_account_status is not registered askable', () => {
-  test('getSelectorAskabilityEntry returns undefined for tool_account_status', () => {
-    expect(getSelectorAskabilityEntry('tool_account_status')).toBeUndefined()
+describe('K: askability is now live -- tool_account_status is registered askable (Activate tool_account_status Selector milestone, 2026-08-24)', () => {
+  // Superseded the original "askability remains dormant" assertion this
+  // block carried through the Kling Governed Knowledge Correction +
+  // Decomposition milestone -- that milestone deliberately left
+  // selector-askability.ts empty pending a separate, explicit PM/
+  // Architecture governance decision (see selector-askability.ts's own
+  // header). That decision has now been made, following a bounded
+  // live-model UAT. This block now documents the opposite, current
+  // invariant rather than silently deleting the historical one.
+  test('getSelectorAskabilityEntry returns a real askable_in_crc entry for tool_account_status', () => {
+    const entry = getSelectorAskabilityEntry('tool_account_status')
+    expect(entry?.treatment).toBe('askable_in_crc')
+    expect(entry?.question_text).toContain('{tool}')
   })
 
-  test('isSelectorAskable returns false for tool_account_status', () => {
-    expect(isSelectorAskable('tool_account_status')).toBe(false)
+  test('isSelectorAskable returns true for tool_account_status', () => {
+    expect(isSelectorAskable('tool_account_status')).toBe(true)
+  })
+
+  test('tool_plan_tier remains dormant -- this milestone registered only tool_account_status', () => {
+    expect(getSelectorAskabilityEntry('tool_plan_tier')).toBeUndefined()
+    expect(isSelectorAskable('tool_plan_tier')).toBe(false)
   })
 })
 
-// L. no new question generated solely because membership is unresolved (also exercised inline in E above)
-describe('L: unresolved Kling membership status never produces a selector-need proposal, because the fact is not registered askable', () => {
-  test('deriveSelectorNeeds returns [] even though a real, currently-unresolved, explicit-goal-relevant applicability gap exists', () => {
+// L. a governed selector question is now proposed when membership is genuinely unresolved (also exercised inline in E above)
+describe('L: unresolved Kling membership status now produces a selector-need proposal, since the fact is registered askable', () => {
+  test('deriveSelectorNeeds returns the real tool_account_status::kling need for a real, currently-unresolved, explicit-goal-relevant applicability gap', () => {
     const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?' })
     const su: StructuredUnderstanding = {
       project_facts: {
@@ -287,7 +317,15 @@ describe('L: unresolved Kling membership status never produces a selector-need p
     expect(gaps.some((d) => d.unmet_applicability?.some((u) => u.claim_id === MEMBER_ID))).toBe(true)
 
     const needs = deriveSelectorNeeds(su, MATRIX_FIXTURE, [], createInitialBoundaryState())
-    expect(needs).toEqual([])
+    expect(needs).toEqual([
+      {
+        fact: 'tool_account_status',
+        tool: 'kling',
+        originating_goal_category: 'commercial_use',
+        unmet_claim_ids: [MEMBER_ID],
+        dedupe_key: 'tool_account_status::kling',
+      },
+    ])
   })
 })
 
