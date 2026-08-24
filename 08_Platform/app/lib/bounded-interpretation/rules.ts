@@ -183,6 +183,35 @@ export function relevantApplicabilityUnresolvedNoContentSummary(category: GoalCa
 }
 
 /**
+ * Mixed-Resolution Consultative Guidance (2026-08-24, following the CRC
+ * Mixed-Resolution Consultative Composition diagnostic of the same date).
+ * Appended AFTER an already-resolved `directly_relevant` or Case-3B summary,
+ * as an ADDITIONAL trailing block, whenever `BoundedInterpretation.
+ * unresolved_relevant_claims` is non-empty -- never in place of the existing
+ * resolved content, never reordering it. This is the mixed-state sibling of
+ * `relevantApplicabilityUnresolvedNoContentSummary` above (Case 3A's own
+ * content-free precedent): same content-free discipline, applied to a
+ * DIFFERENT state (some governed guidance already resolved, plus additional
+ * relevant guidance that remains unresolved) rather than Case 3A's "nothing
+ * resolved yet."
+ *
+ * Deliberately takes NO parameters and reads no claim/fact/tool/provider
+ * data -- the only fact this sentence is permitted to depend on is that
+ * `unresolved_relevant_claims.length > 0`, never which claim(s), how many,
+ * which applicability fact, or what the withheld proposition says. Never
+ * states or implies the unresolved guidance applies, probably applies, is
+ * inapplicable, is legally determinative, or that the resolved guidance
+ * above is commercially sufficient -- and deliberately does not reference
+ * Commercial Assurance (that CTA is Projection's own unconditional
+ * `closing_cta`, appended separately to every conversation regardless of
+ * this sentence's presence; duplicating or reshaping that reference here is
+ * explicitly out of this milestone's scope).
+ */
+export function mixedResolutionUnresolvedGuidanceSentence(): string {
+  return "There's additional governed guidance relevant to this topic that hasn't been confirmed as applicable based on what's been described here — it may or may not apply, and CRC can't determine that from this conversation."
+}
+
+/**
  * H5 -- minimal echo-only relevance composition (Copyright UAT Correction
  * Milestone, 2026-08-19, PM-approved narrow scope). This is NOT full
  * Project-Fact-Aware Bounded Composition (PRD_LIVING_KNOWLEDGE_SOURCE_

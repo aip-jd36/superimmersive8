@@ -125,6 +125,15 @@ describe('E: BI preserves baseline + unresolved Member exception, without changi
     expect(interp.summary).toContain("Under Kling's current Terms of Service, you may not use, reproduce, distribute, modify, or create derivative works from generated Output for commercial purposes without Kling's written permission.")
     expect(interp.supporting_claim_ids).toEqual([BASELINE_ID])
     expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: MEMBER_ID }])
+    // Mixed-Resolution Consultative Guidance milestone (2026-08-24): the
+    // generic, content-free block now appears, AFTER the baseline block,
+    // with no Kling-specific content anywhere in it.
+    expect(interp.summary_blocks).toHaveLength(2)
+    expect(interp.summary_blocks[1]).toBe(
+      "There's additional governed guidance relevant to this topic that hasn't been confirmed as applicable based on what's been described here — it may or may not apply, and CRC can't determine that from this conversation.",
+    )
+    expect(interp.summary_blocks[1]).not.toMatch(/kling|member|account/i)
+    expect(interp.summary_blocks.join(' ')).toBe(interp.summary)
 
     // No question generated solely from this state -- deriveSelectorNeeds returns no askable need (registry empty).
     const su: StructuredUnderstanding = {
@@ -170,6 +179,13 @@ describe('F/G: State B -- known Member Account', () => {
     expect(interp.summary).toContain('except for developing or offering products or services that compete with Kling AI')
     expect(interp.supporting_claim_ids.sort()).toEqual([BASELINE_ID, MEMBER_ID])
     expect(interp.unresolved_relevant_claims).toEqual([])
+    // Mixed-Resolution Consultative Guidance milestone (2026-08-24): no
+    // guidance block when nothing is unresolved -- both applicable claims
+    // are simply concatenated exactly as before this milestone (the
+    // remaining rhetorical abruptness is documented, unfixed, Consultative
+    // Composition debt, per this milestone's own explicit scope boundary).
+    expect(interp.summary_blocks).toHaveLength(1)
+    expect(interp.summary).not.toContain("There's additional governed guidance")
   })
 })
 
@@ -198,6 +214,10 @@ describe('H/I: State C -- known Regular Account (non-Member)', () => {
     expect(interp.supporting_claim_ids).toEqual([BASELINE_ID])
     expect(interp.summary).not.toContain('If you currently hold a Kling Member Account')
     expect(interp.unresolved_relevant_claims).toEqual([])
+    // Mixed-Resolution Consultative Guidance milestone (2026-08-24): a
+    // known not_met Member claim never triggers the guidance block.
+    expect(interp.summary_blocks).toHaveLength(1)
+    expect(interp.summary).not.toContain("There's additional governed guidance")
   })
 })
 

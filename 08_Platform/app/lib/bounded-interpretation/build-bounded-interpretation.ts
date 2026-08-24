@@ -33,6 +33,7 @@ import {
   DETERMINATION_DECLINED_TEMPLATE,
   directlyRelevantSummary,
   humanContributionRelevanceSentence,
+  mixedResolutionUnresolvedGuidanceSentence,
   outsideCoverageSummary,
   relevantApplicabilityUnresolvedNoContentSummary,
   relevantApplicabilityUnresolvedWithContentBlocks,
@@ -142,6 +143,30 @@ function collectUnresolvedRelevantClaimIds(category: UserGoal['category'], diagn
     }
   }
   return Array.from(ids, (claim_id) => ({ claim_id }))
+}
+
+/**
+ * Mixed-Resolution Consultative Guidance milestone (2026-08-24): appends the
+ * fixed, content-free `mixedResolutionUnresolvedGuidanceSentence()` as ONE
+ * additional trailing block whenever `unresolvedRelevantClaims.length > 0` --
+ * regardless of whether that's 1 or many (never exposes a count, never one
+ * block per unresolved claim, per the accepted design). When empty, `summary`
+ * and `summary_blocks` are returned completely unchanged (identity), so
+ * every pre-existing goal (no unresolved siblings) renders byte-identical to
+ * before this milestone. `summary`/`summaryBlocks` are appended together,
+ * preserving the existing `summary_blocks.join(' ') === summary` invariant
+ * (see BoundedInterpretation.summary_blocks's own doc comment) -- this
+ * function is the single place that invariant is maintained for the new
+ * sentence, so no call site can add it to one and forget the other.
+ */
+function appendMixedResolutionGuidance(
+  summary: string,
+  summaryBlocks: string[],
+  unresolvedRelevantClaims: UnresolvedRelevantClaim[],
+): { summary: string; summary_blocks: string[] } {
+  if (unresolvedRelevantClaims.length === 0) return { summary, summary_blocks: summaryBlocks }
+  const sentence = mixedResolutionUnresolvedGuidanceSentence()
+  return { summary: `${summary} ${sentence}`, summary_blocks: [...summaryBlocks, sentence] }
 }
 
 export function buildBoundedInterpretations(
@@ -262,9 +287,13 @@ export function buildBoundedInterpretations(
         const humanContributionSentence = shouldIncludeHumanContributionSentence(goal.category, matches, humanContributionDescription)
           ? humanContributionRelevanceSentence(humanContributionDescription.state === 'confirmed' ? humanContributionDescription.value : '')
           : null
-        return buildInterpretation(
-          goal,
-          'relevant_applicability_unresolved',
+        // Mixed-Resolution Consultative Guidance milestone (2026-08-24):
+        // appended AFTER the existing, unchanged Case 3B/CC-1 content
+        // (dependency-free clause first, dependency-bearing clause +
+        // unchanged hedge/bridge second, exactly as before) -- never merged
+        // into either group, never classified as a governed project
+        // dependency. Identity when unresolvedRelevantClaims is empty.
+        const case3bWithGuidance = appendMixedResolutionGuidance(
           relevantApplicabilityUnresolvedWithContentSummary(
             goal.category,
             dependencyBearingStatement,
@@ -286,6 +315,13 @@ export function buildBoundedInterpretations(
             noDependencyStatement,
             noDependencyAllToolSourced,
           ),
+          unresolvedRelevantClaims,
+        )
+        return buildInterpretation(
+          goal,
+          'relevant_applicability_unresolved',
+          case3bWithGuidance.summary,
+          case3bWithGuidance.summary_blocks,
           claimIds,
           unresolvedRelevantClaims,
         )
@@ -302,7 +338,21 @@ export function buildBoundedInterpretations(
       // internal boundary CC-1 ever computed -- one block, not artificially
       // split, per this milestone's own "if a case naturally yields one
       // block, render one block" scope.
-      return buildInterpretation(goal, 'directly_relevant', directlyRelevantResult, [directlyRelevantResult], claimIds, unresolvedRelevantClaims)
+      //
+      // Mixed-Resolution Consultative Guidance milestone (2026-08-24):
+      // appended AFTER the existing, unchanged directly_relevant content --
+      // status remains 'directly_relevant', the resolved conclusion is
+      // never weakened or strengthened. Identity when unresolvedRelevantClaims
+      // is empty (every pre-existing goal renders byte-identical).
+      const directlyRelevantWithGuidance = appendMixedResolutionGuidance(directlyRelevantResult, [directlyRelevantResult], unresolvedRelevantClaims)
+      return buildInterpretation(
+        goal,
+        'directly_relevant',
+        directlyRelevantWithGuidance.summary,
+        directlyRelevantWithGuidance.summary_blocks,
+        claimIds,
+        unresolvedRelevantClaims,
+      )
     }
 
     // Case 3A (Living Knowledge governance review, 2026-08-16): no result

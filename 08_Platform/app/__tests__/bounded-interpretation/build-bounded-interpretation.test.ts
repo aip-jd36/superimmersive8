@@ -1044,11 +1044,20 @@ describe('buildBoundedInterpretations -- Phase 1 summary_blocks structural equiv
       [{ topic: 'third_party_source_rights', trigger_id: 'test', source_kind: 'asset_provider_mention', source_id: 'ap-1', source_goal_category: 'commercial_use' }],
     )
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
-    expect(interp.summary_blocks).toHaveLength(2)
+    // Mixed-Resolution Consultative Guidance milestone (2026-08-24): Kling's
+    // own account status is unconfirmed in this scenario's `facts`, so
+    // kling-commercial-use-member is now correctly withheld as unresolved --
+    // a third, generic, content-free block is appended, in addition to the
+    // two pre-existing resolved blocks (unchanged themselves).
+    expect(interp.summary_blocks).toHaveLength(3)
     expect(interp.summary_blocks[0]).toContain(
       "Under Kling's current Terms of Service, you may not use, reproduce, distribute, modify, or create derivative works from generated Output for commercial purposes without Kling's written permission.",
     )
     expect(interp.summary_blocks[1]).toContain('iStock')
+    expect(interp.summary_blocks[2]).toBe(
+      "There's additional governed guidance relevant to this topic that hasn't been confirmed as applicable based on what's been described here — it may or may not apply, and CRC can't determine that from this conversation.",
+    )
+    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'kling-commercial-use-member' }])
     // Provider isolation: no Getty/Shutterstock-SPECIFIC claim was retrieved
     // (the generic stock claim's own already-governed text legitimately
     // names multiple providers as context -- isolation is about which
@@ -1585,5 +1594,187 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
     const [coverageInterp] = buildBoundedInterpretations([coverageGoal], [])
     expect(coverageInterp.status).toBe('outside_current_coverage')
     expect(coverageInterp.unresolved_relevant_claims).toEqual([])
+  })
+
+  // ── Mixed-Resolution Consultative Guidance milestone (2026-08-24) ────────
+  describe('mixed-resolution consultative guidance', () => {
+    const GUIDANCE_SENTENCE =
+      "There's additional governed guidance relevant to this topic that hasn't been confirmed as applicable based on what's been described here — it may or may not apply, and CRC can't determine that from this conversation."
+
+    // A. one matched + one unresolved
+    test('A: one matched + one unresolved -- resolved content unchanged, one generic block appended', () => {
+      const matrix = [
+        matrixRow({ claim_id: 'MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Matched governed statement.' }),
+        matrixRow({ claim_id: 'UNRESOLVED', topic: 'commercial_use', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] }),
+      ]
+      const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+      const out = retrieve(handoff({ tools: [tool('MATCHED'), tool('UNRESOLVED')] }), matrix, [g], [], unknownFacts)
+      const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+      expect(interp.status).toBe('directly_relevant')
+      expect(interp.summary_blocks).toEqual(['Matched governed statement. This is relevant to whether this can be used commercially, though it reflects the platform\'s own terms, not a full determination of your specific project\'s commercial readiness.', GUIDANCE_SENTENCE])
+      expect(interp.summary_blocks.join(' ')).toBe(interp.summary)
+      expect(interp.supporting_claim_ids).toEqual(['MATCHED'])
+    })
+
+    // B. two matched + one unresolved
+    test('B: two matched + one unresolved -- existing resolved content unchanged, exactly one generic block appended', () => {
+      const matrix = [
+        matrixRow({ claim_id: 'MATCHED-A', topic: 'commercial_use', crc_candidate_statement: 'First matched statement.' }),
+        matrixRow({ claim_id: 'MATCHED-B', topic: 'commercial_use', crc_candidate_statement: 'Second matched statement.' }),
+        matrixRow({ claim_id: 'UNRESOLVED', topic: 'commercial_use', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] }),
+      ]
+      const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+      const out = retrieve(handoff({ tools: [tool('MATCHED-A'), tool('MATCHED-B'), tool('UNRESOLVED')] }), matrix, [g], [], unknownFacts)
+      const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+      expect(interp.summary).toContain('First matched statement.')
+      expect(interp.summary).toContain('Second matched statement.')
+      expect(interp.summary_blocks).toHaveLength(2) // one combined resolved block (unchanged shape) + one guidance block
+      expect(interp.summary_blocks[1]).toBe(GUIDANCE_SENTENCE)
+      expect(interp.supporting_claim_ids.sort()).toEqual(['MATCHED-A', 'MATCHED-B'])
+    })
+
+    // C. one matched + multiple unresolved -> exactly one generic block, no count exposed
+    test('C: one matched + multiple unresolved claims -- exactly one generic block, never one per unresolved claim, never a count', () => {
+      const matrix = [
+        matrixRow({ claim_id: 'MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Matched governed statement.' }),
+        matrixRow({ claim_id: 'UNRESOLVED-A', topic: 'commercial_use', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] }),
+        matrixRow({ claim_id: 'UNRESOLVED-B', topic: 'commercial_use', applicability_requirements: [{ fact: 'tool_account_status', tool: 'UNRESOLVED-B', operator: 'equals', value: 'Member Account' }] }),
+      ]
+      const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+      const out = retrieve(handoff({ tools: [tool('MATCHED'), tool('UNRESOLVED-A'), tool('UNRESOLVED-B')] }), matrix, [g], [], unknownFacts)
+      const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+      expect(interp.unresolved_relevant_claims).toHaveLength(2) // BI's own internal field correctly has both
+      const guidanceBlocks = interp.summary_blocks.filter((b) => b === GUIDANCE_SENTENCE)
+      expect(guidanceBlocks).toHaveLength(1) // but exactly one rendered block regardless
+      expect(interp.summary).not.toMatch(/\b2\b|\btwo\b/i) // no count leaks into rendered text
+    })
+
+    // D. matched + not_met -> no generic block
+    test('D: matched + known-not-applicable (not_met) -- no generic block, never treated as unresolved', () => {
+      const matrix = [
+        matrixRow({ claim_id: 'MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Matched governed statement.' }),
+        matrixRow({ claim_id: 'NOT-MET', topic: 'commercial_use', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] }),
+      ]
+      const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+      const out = retrieve(handoff({ tools: [tool('MATCHED'), tool('NOT-MET')] }), matrix, [g], [], mismatchedFacts)
+      const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+      expect(interp.unresolved_relevant_claims).toEqual([])
+      expect(interp.summary_blocks).not.toContain(GUIDANCE_SENTENCE)
+      expect(interp.summary).not.toContain(GUIDANCE_SENTENCE)
+    })
+
+    // E. zero matches + unresolved -> Case 3A unchanged
+    test('E: zero matches + unresolved -- Case 3A representation completely unchanged, guidance sentence never used for this state', () => {
+      const matrix = [matrixRow({ claim_id: 'ONLY-UNRESOLVED', topic: 'commercial_use', crc_candidate_statement: 'Must never leak.', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] })]
+      const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+      const out = retrieve(handoff({ tools: [tool('ONLY-UNRESOLVED')] }), matrix, [g], [], unknownFacts)
+      const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+      expect(interp.status).toBe('relevant_applicability_unresolved')
+      expect(interp.summary).not.toContain('Must never leak.')
+      expect(interp.summary_blocks).not.toContain(GUIDANCE_SENTENCE)
+      expect(interp.summary).not.toContain(GUIDANCE_SENTENCE)
+      expect(interp.unresolved_relevant_claims).toEqual([])
+    })
+
+    // F. determination_declined -> no generic block
+    test('F: determination_declined -- no generic block, wording unweakened', () => {
+      const matrix = [
+        matrixRow({ claim_id: 'MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Matched governed statement.' }),
+        matrixRow({ claim_id: 'UNRESOLVED', topic: 'commercial_use', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] }),
+      ]
+      const g = goal({ goal_id: 'g-1', raw_text: 'Can you certify this is cleared?', category: 'commercial_use', scope: 'determination_request' })
+      const out = retrieve(handoff({ tools: [tool('MATCHED'), tool('UNRESOLVED')] }), matrix, [g], [], unknownFacts)
+      const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+      expect(interp.status).toBe('determination_declined')
+      expect(interp.summary).not.toContain(GUIDANCE_SENTENCE)
+      expect(interp.summary).toMatch(/doesn't issue certifications/i)
+      expect(interp.unresolved_relevant_claims).toEqual([])
+    })
+
+    // G. Case 3B/dependency-grouped resolved content + unresolved applicability
+    test('G: Case 3B/CC-1 dependency-grouped resolved content + unresolved applicability -- existing blocks unchanged and ordered first, guidance block appended last', () => {
+      const noDep = testTopicClaim({ claim_id: 'NO-DEP', topic: 'third_party_source_rights', crc_candidate_statement: 'Dependency-free statement.' })
+      const dep = testTopicClaim({ claim_id: 'DEP', topic: 'third_party_source_rights', crc_candidate_statement: 'Dependency-bearing statement.', unresolved_project_dependencies: ['editorial_designation_confirmed'] })
+      const matrix = [matrixRow({ claim_id: 'UNRESOLVED', topic: 'third_party_source_rights', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] })]
+      const g = goal({ goal_id: 'g-1', raw_text: 'Can I use these third-party images commercially?', category: 'third_party_source_rights' })
+      const out = retrieve(handoff({ tools: [tool('UNRESOLVED')] }), matrix, [g], [noDep, dep], unknownFacts)
+      const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+      expect(interp.status).toBe('relevant_applicability_unresolved')
+      expect(interp.summary_blocks).toHaveLength(3)
+      expect(interp.summary_blocks[0]).toContain('Dependency-free statement.')
+      expect(interp.summary_blocks[1]).toContain('Dependency-bearing statement.')
+      expect(interp.summary_blocks[2]).toBe(GUIDANCE_SENTENCE)
+      expect(interp.summary_blocks.join(' ')).toBe(interp.summary)
+      // Not merged into either dependency group -- applicability and dependency readiness remain distinct.
+      expect(interp.summary_blocks[0]).not.toContain(GUIDANCE_SENTENCE)
+      expect(interp.summary_blocks[1]).not.toContain(GUIDANCE_SENTENCE)
+    })
+
+    // H. content-free discipline
+    test('H: the generic block contains no claim ID, fact identifier, provider, tool, or raw selector value', () => {
+      expect(GUIDANCE_SENTENCE).not.toMatch(/claim|kling|runway|tool_account_status|tool_plan_tier|jurisdiction|Member Account|Regular Account/i)
+    })
+
+    // I. summary/summary_blocks alignment (also covered inline above, restated as its own explicit test)
+    test('I: summary and summary_blocks remain textually aligned for every mixed-resolution case', () => {
+      const matrix = [
+        matrixRow({ claim_id: 'MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Matched governed statement.' }),
+        matrixRow({ claim_id: 'UNRESOLVED', topic: 'commercial_use', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] }),
+      ]
+      const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+      const out = retrieve(handoff({ tools: [tool('MATCHED'), tool('UNRESOLVED')] }), matrix, [g], [], unknownFacts)
+      const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+      expect(interp.summary_blocks.join(' ')).toBe(interp.summary)
+    })
+
+    // J/K. correction semantics -- block naturally disappears on recomputation
+    test('J: correction unresolved -> met removes the guidance block', () => {
+      const matrix = [
+        matrixRow({ claim_id: 'MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Matched governed statement.' }),
+        matrixRow({ claim_id: 'CORRECTABLE', topic: 'commercial_use', crc_candidate_statement: 'Now-applicable statement.', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] }),
+      ]
+      const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+      const h = handoff({ tools: [tool('MATCHED'), tool('CORRECTABLE')] })
+
+      const turnN = retrieve(h, matrix, [g], [], unknownFacts)
+      const interpN = buildBoundedInterpretations([g], turnN.results, turnN.diagnostics)[0]
+      expect(interpN.summary_blocks).toContain(GUIDANCE_SENTENCE)
+
+      const turnNPlus1 = retrieve(h, matrix, [g], [], usFacts)
+      const interpNPlus1 = buildBoundedInterpretations([g], turnNPlus1.results, turnNPlus1.diagnostics)[0]
+      expect(interpNPlus1.summary_blocks).not.toContain(GUIDANCE_SENTENCE)
+      expect(interpNPlus1.summary).toContain('Now-applicable statement.')
+    })
+
+    test('K: correction unresolved -> not_met removes the guidance block without the claim ever entering matches[]', () => {
+      const matrix = [
+        matrixRow({ claim_id: 'MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Matched governed statement.' }),
+        matrixRow({ claim_id: 'CORRECTABLE', topic: 'commercial_use', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] }),
+      ]
+      const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+      const h = handoff({ tools: [tool('MATCHED'), tool('CORRECTABLE')] })
+
+      const turnN = retrieve(h, matrix, [g], [], unknownFacts)
+      const interpN = buildBoundedInterpretations([g], turnN.results, turnN.diagnostics)[0]
+      expect(interpN.summary_blocks).toContain(GUIDANCE_SENTENCE)
+
+      const turnNPlus1 = retrieve(h, matrix, [g], [], mismatchedFacts)
+      const interpNPlus1 = buildBoundedInterpretations([g], turnNPlus1.results, turnNPlus1.diagnostics)[0]
+      expect(interpNPlus1.summary_blocks).not.toContain(GUIDANCE_SENTENCE)
+      expect(interpNPlus1.supporting_claim_ids).toEqual(['MATCHED'])
+    })
+
+    // Backward compatibility: unchanged output when unresolved_relevant_claims is empty (the ordinary pre-existing case)
+    test('backward compatibility: a plain directly_relevant goal with no unresolved siblings never carries the new guidance block, and summary/summary_blocks remain a single unchanged resolved block', () => {
+      const out = retrieve(handoff({ tools: [tool('runway-gen3')] }), MATRIX_FIXTURE)
+      const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+      const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+      expect(interp.status).toBe('directly_relevant')
+      expect(interp.summary_blocks).toHaveLength(1) // no guidance block appended -- unchanged single-block shape
+      expect(interp.summary_blocks).not.toContain(GUIDANCE_SENTENCE)
+      expect(interp.summary).not.toContain(GUIDANCE_SENTENCE)
+      expect(interp.summary_blocks.join(' ')).toBe(interp.summary)
+      expect(interp.unresolved_relevant_claims).toEqual([])
+    })
   })
 })
