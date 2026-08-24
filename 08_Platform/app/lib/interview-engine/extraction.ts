@@ -506,6 +506,14 @@ export function attestCandidate(
         // No deterministic-normalization channel exists for plan_tier in the
         // current registry -- only the direct-statement hint channel applies.
         plan_tier: resolveAttestedToolField(candidate.plan_tier_confidence_hint, candidate.plan_tier_value_hint, undefined),
+        // account_status (CRC Kling Governed Knowledge Correction +
+        // Decomposition milestone, 2026-08-24): fixed `{state: 'unknown'}` --
+        // no extraction hint channel exists for this field in this milestone
+        // (deliberately; this task authors governed knowledge and
+        // applicability semantics, not an acquisition path). Every newly
+        // extracted ToolMention starts with this fact unresolved, exactly
+        // like a historical session backfilled via serialization.ts.
+        account_status: { state: 'unknown' },
         confidence,
         source_turn: candidate.turn,
         source_statement: candidate.raw_text,

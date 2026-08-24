@@ -93,7 +93,7 @@ describe('Model 4 -- attempt 1 rejected, attempt 2 approved', () => {
     await store.save('m4-b1', {
       structured_understanding: {
         project_facts: { intended_use: { attestation: { state: 'confirmed', value: 'ad' }, source_turn: 1, source_statement: 'x' }, workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' } },
-        tool_mentions: [{ mention_id: 't1-c1', resolution: { kind: 'canonical', identifier: 'runway-gen3' }, access_surface: { state: 'unknown' }, plan_tier: { state: 'unknown' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Runway', superseded_by: null }],
+        tool_mentions: [{ mention_id: 't1-c1', resolution: { kind: 'canonical', identifier: 'runway-gen3' }, access_surface: { state: 'unknown' }, plan_tier: { state: 'unknown' }, account_status: { state: 'unknown' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Runway', superseded_by: null }],
         scoped_observations: [],
         user_goals: [],
         asset_provider_mentions: [],
@@ -161,7 +161,7 @@ describe('Model 4 -- attempt 1 rejected, attempt 2 approved', () => {
     await store.save('m4-kind', {
       structured_understanding: {
         project_facts: { intended_use: { attestation: { state: 'confirmed', value: 'ad' }, source_turn: 1, source_statement: 'x' }, workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' } },
-        tool_mentions: [{ mention_id: 't1-c1', resolution: { kind: 'canonical', identifier: 'runway-gen3' }, access_surface: { state: 'unknown' }, plan_tier: { state: 'unknown' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Runway', superseded_by: null }],
+        tool_mentions: [{ mention_id: 't1-c1', resolution: { kind: 'canonical', identifier: 'runway-gen3' }, access_surface: { state: 'unknown' }, plan_tier: { state: 'unknown' }, account_status: { state: 'unknown' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Runway', superseded_by: null }],
         scoped_observations: [],
         user_goals: [],
         asset_provider_mentions: [],
@@ -224,7 +224,7 @@ describe('Model 4 -- both attempts fail -> finalize with questioning_exhausted',
     await store.save('m4-null-b', {
       structured_understanding: {
         project_facts: { intended_use: { attestation: { state: 'confirmed', value: 'ad' }, source_turn: 1, source_statement: 'x' }, workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' } },
-        tool_mentions: [{ mention_id: 't1-c1', resolution: { kind: 'canonical', identifier: 'runway-gen3' }, access_surface: { state: 'unknown' }, plan_tier: { state: 'unknown' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Runway', superseded_by: null }],
+        tool_mentions: [{ mention_id: 't1-c1', resolution: { kind: 'canonical', identifier: 'runway-gen3' }, access_surface: { state: 'unknown' }, plan_tier: { state: 'unknown' }, account_status: { state: 'unknown' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Runway', superseded_by: null }],
         scoped_observations: [],
         user_goals: [],
         asset_provider_mentions: [],
@@ -381,7 +381,7 @@ describe('Model 4 -- multiple uncapped eligible signals', () => {
     await store.save('m4-multi', {
       structured_understanding: {
         project_facts: { intended_use: { attestation: { state: 'confirmed', value: 'ad' }, source_turn: 1, source_statement: 'x' }, workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' }, human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' } },
-        tool_mentions: [{ mention_id: 't1-c1', resolution: { kind: 'canonical', identifier: 'runway-gen3' }, access_surface: { state: 'unknown' }, plan_tier: { state: 'unknown' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Runway', superseded_by: null }],
+        tool_mentions: [{ mention_id: 't1-c1', resolution: { kind: 'canonical', identifier: 'runway-gen3' }, access_surface: { state: 'unknown' }, plan_tier: { state: 'unknown' }, account_status: { state: 'unknown' }, confidence: 'confirmed', source_turn: 1, source_statement: 'Runway', superseded_by: null }],
         scoped_observations: [],
         user_goals: [],
         asset_provider_mentions: [],

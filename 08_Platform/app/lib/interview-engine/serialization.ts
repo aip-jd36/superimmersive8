@@ -109,7 +109,23 @@ export function deserializeStructuredUnderstanding(json: string): StructuredUnde
     usage: m.usage ?? { state: 'unknown' as const },
     license: m.license ?? { state: 'unknown' as const },
   }))
-  return { ...parsed, user_goals, project_facts, asset_provider_mentions }
+  /**
+   * `account_status` per-element defaulting (CRC Kling Governed Knowledge
+   * Correction + Decomposition milestone, 2026-08-24): same reasoning and
+   * same funnel as the `usage`/`license` backfill immediately above -- a
+   * session persisted before this ToolMention field existed has a
+   * `tool_mentions` array, but individual elements lack an `account_status`
+   * key. `plan_tier`/`access_surface` themselves never needed this
+   * treatment (both existed before any real session was persisted), but
+   * `account_status` is added after real production sessions exist, so the
+   * same conservative `{state: 'unknown'}` fallback applies here for the
+   * first time on this array.
+   */
+  const tool_mentions = (parsed.tool_mentions ?? []).map((m) => ({
+    ...m,
+    account_status: m.account_status ?? { state: 'unknown' as const },
+  }))
+  return { ...parsed, user_goals, project_facts, asset_provider_mentions, tool_mentions }
 }
 
 /**

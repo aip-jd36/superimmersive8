@@ -223,6 +223,7 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
             resolution: { kind: 'canonical', identifier: 'runway-gen3' },
             access_surface: { state: 'unknown' },
             plan_tier: { state: 'unknown' },
+            account_status: { state: 'unknown' },
             confidence: 'confirmed',
             source_turn: 1,
             source_statement: 'Runway',

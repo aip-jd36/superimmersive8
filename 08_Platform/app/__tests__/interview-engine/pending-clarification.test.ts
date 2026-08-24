@@ -47,6 +47,7 @@ function tool(overrides: Partial<ToolMention> = {}): ToolMention {
     resolution: { kind: 'unresolved_alias', raw_name: 'Nano Banana' },
     access_surface: { state: 'unresolved_no_visibility' },
     plan_tier: { state: 'unknown' },
+    account_status: { state: 'unknown' },
     confidence: 'unresolved_no_visibility',
     source_turn: 1,
     source_statement: 'x',

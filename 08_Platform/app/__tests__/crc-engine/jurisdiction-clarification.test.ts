@@ -110,6 +110,7 @@ describe('evaluateJurisdictionClarificationEligibility', () => {
           resolution: { kind: 'canonical', identifier: 'kling' },
           access_surface: { state: 'unknown' },
           plan_tier: { state: 'unknown' },
+          account_status: { state: 'unknown' },
           confidence: 'confirmed',
           source_turn: 1,
           source_statement: 'Kling',

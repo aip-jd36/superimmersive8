@@ -83,7 +83,7 @@ describe('retrieve — required Phase 7 cases', () => {
   test('7: multi-tool handoff -- each tool matched independently, never combined', () => {
     const out = retrieve(handoff({ tools: [tool('runway-gen3'), tool('kling')] }), MATRIX_FIXTURE)
     const claimIds = out.results.map((r) => r.claim_id).sort()
-    expect(claimIds).toEqual(['kling', 'runway-gen3'])
+    expect(claimIds).toEqual(['kling-commercial-use-baseline', 'runway-gen3'])
   })
 
   test('8: unresolved alias only -- never matched, diagnosed as unresolved_alias', () => {
@@ -138,7 +138,7 @@ describe('retrieve — required Phase 7 cases', () => {
   test('13: sparse gate_1_unmet handoff produces a valid partial result, never an error', () => {
     const out = retrieve(handoff({ certainty_state: 'gate_1_unmet', tools: [tool('kling')] }), MATRIX_FIXTURE)
     expect(out.results).toHaveLength(1)
-    expect(out.results[0].claim_id).toBe('kling')
+    expect(out.results[0].claim_id).toBe('kling-commercial-use-baseline')
   })
 
   test('14: full opt-out handoff -> empty result, no error', () => {
@@ -424,6 +424,7 @@ describe('retrieve -- Matrix applicability (CRC Narrow Matrix Applicability mile
     return {
       access_surface: { state: 'unknown' },
       plan_tier: { state: 'unknown' },
+      account_status: { state: 'unknown' },
       confidence: 'confirmed',
       source_turn: 1,
       source_statement: 'placeholder',
@@ -445,9 +446,20 @@ describe('retrieve -- Matrix applicability (CRC Narrow Matrix Applicability mile
   test('A: an existing unconditional Matrix claim (applicability_requirements: []) is unaffected by the new gate', () => {
     const out = retrieve(handoff({ tools: [{ identifier: 'kling', access_surface: 'unresolved', plan_tier: 'unknown' }] }), MATRIX_FIXTURE)
     expect(out.results).toHaveLength(1)
-    expect(out.results[0].claim_id).toBe('kling')
+    expect(out.results[0].claim_id).toBe('kling-commercial-use-baseline')
     expect(out.results[0].candidate_statement).toBe(MATRIX_FIXTURE.find((r) => r.identifier === 'kling')!.claims[0].crc_candidate_statement)
-    expect(out.diagnostics).toEqual([])
+    // CRC Kling Governed Knowledge Correction + Decomposition milestone
+    // (2026-08-24): Kling's row now has a SECOND, applicability-gated claim
+    // (kling-commercial-use-member) sharing this row -- its own unresolved
+    // diagnostic is expected here and does not indicate the unconditional
+    // baseline claim (asserted above) was affected by the gate in any way.
+    expect(out.diagnostics).toEqual([
+      {
+        identifier: 'commercial_use',
+        reason: 'applicability_unmet',
+        unmet_applicability: [{ claim_id: 'kling-commercial-use-member', requirement: { fact: 'tool_account_status', tool: 'kling', operator: 'equals', value: 'Member Account' }, status: 'unresolved' }],
+      },
+    ])
   })
 
   // Test B: matching applicability, using jurisdiction -- an already

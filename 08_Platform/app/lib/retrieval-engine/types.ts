@@ -140,7 +140,7 @@ export const CLAIM_CHARACTER_VALUES = ['established', 'conditional', 'unsettled'
 export type ClaimCharacter = (typeof CLAIM_CHARACTER_VALUES)[number]
 
 /**
- * Phase 1 IMPLEMENTED applicability fact types only -- `jurisdiction`
+ * Phase 1 IMPLEMENTED applicability fact types -- `jurisdiction`
  * (StructuredUnderstanding.project_facts.jurisdiction, added CRC Living
  * Knowledge Phase 1) and `tool_plan_tier` (ToolMention.plan_tier, already
  * exists). `client_supplied_asset`, `creator_relationship`, and
@@ -150,10 +150,22 @@ export type ClaimCharacter = (typeof CLAIM_CHARACTER_VALUES)[number]
  * ScopedObservation.note, and text-matching it to manufacture a boolean is
  * explicitly the "pretending a predicate is supported when the underlying
  * fact isn't" failure mode PM's own review warned against). Do not add a
- * claim referencing any fact outside this two-value union in Phase 1 -- it
- * would author a claim that can never become applicable, silently.
+ * claim referencing any fact outside this union -- it would author a claim
+ * that can never become applicable, silently.
+ *
+ * `tool_account_status` (CRC Kling Governed Knowledge Correction +
+ * Decomposition milestone, 2026-08-24) -- ToolMention.account_status
+ * (types/interview-engine.ts), evaluated identically to `tool_plan_tier`
+ * (per-tool, keyed on `ApplicabilityRequirement.tool`, read from
+ * `facts.toolMentions`). Deliberately generic across providers: represents
+ * "which governed account/membership state applies to this tool," never a
+ * provider-specific fact name -- see ToolMention.account_status's own doc
+ * comment for the full reasoning on why this is a distinct concept from
+ * `tool_plan_tier`, not a reuse of it. First real governed use: the Kling
+ * Member Account / Regular Account distinction (K2 §1.4-1.6), gating the
+ * Kling Member commercial-use exception claim -- see matrix-fixture.ts.
  */
-export const APPLICABILITY_FACTS = ['jurisdiction', 'tool_plan_tier'] as const
+export const APPLICABILITY_FACTS = ['jurisdiction', 'tool_plan_tier', 'tool_account_status'] as const
 export type ApplicabilityFact = (typeof APPLICABILITY_FACTS)[number]
 
 /**

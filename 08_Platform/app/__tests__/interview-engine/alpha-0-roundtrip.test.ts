@@ -56,6 +56,7 @@ function buildBaseStructuredUnderstanding(): StructuredUnderstanding {
         resolution: { kind: 'canonical', identifier: 'runway-gen3' },
         access_surface: { state: 'confirmed', value: 'API, team plan' },
         plan_tier: { state: 'unresolved_no_visibility' },
+        account_status: { state: 'unknown' },
         confidence: 'confirmed',
         source_turn: 1,
         source_statement: 'We used Runway.',

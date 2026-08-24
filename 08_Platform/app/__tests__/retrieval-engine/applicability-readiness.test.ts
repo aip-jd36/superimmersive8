@@ -125,7 +125,7 @@ describe('deriveApplicabilityReadinessGaps -- Matrix-origin gaps', () => {
     })
     const h = handoff({ tools: [{ identifier: 'kling', access_surface: 'unresolved', plan_tier: 'unknown' }] })
     function tm(overrides: Partial<ToolMention> & Pick<ToolMention, 'mention_id' | 'resolution'>): ToolMention {
-      return { access_surface: { state: 'unknown' }, plan_tier: { state: 'unknown' }, confidence: 'confirmed', source_turn: 1, source_statement: 'x', superseded_by: null, ...overrides }
+      return { access_surface: { state: 'unknown' }, plan_tier: { state: 'unknown' }, account_status: { state: 'unknown' }, confidence: 'confirmed', source_turn: 1, source_statement: 'x', superseded_by: null, ...overrides }
     }
     const mention = tm({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'kling' }, plan_tier: { state: 'confirmed', value: 'paid' } })
     const gaps = deriveApplicabilityReadinessGaps(h, [row], [goal({ category: 'commercial_use' })], [], facts({ toolMentions: [mention] }))

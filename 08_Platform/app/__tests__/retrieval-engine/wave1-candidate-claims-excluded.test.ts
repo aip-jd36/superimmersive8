@@ -364,6 +364,7 @@ describe('Copyright UAT Output-Path Diagnostic P0 fix -- jurisdiction value norm
           resolution: { kind: 'canonical', identifier: 'kling' },
           access_surface: { state: 'unknown' },
           plan_tier: { state: 'unknown' },
+          account_status: { state: 'unknown' },
           confidence: 'confirmed',
           source_turn: 1,
           source_statement: 'Kling AI',
@@ -394,7 +395,7 @@ describe('Copyright UAT Output-Path Diagnostic P0 fix -- jurisdiction value norm
 
     // Full pipeline.
     const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
-    expect(output.knowledge_items.map((k) => k.claim_id).sort()).toEqual(['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPY-004-v1', 'kling'])
+    expect(output.knowledge_items.map((k) => k.claim_id).sort()).toEqual(['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPY-004-v1', 'kling-commercial-use-baseline'])
     const summary = output.goal_interpretations[0].summary
     // COPY-001/002/003 consultative content present.
     expect(summary).toContain("generally isn't eligible for copyright protection")
@@ -425,7 +426,7 @@ describe('Copyright UAT Output-Path Diagnostic P0 fix -- jurisdiction value norm
     // "kling" also surfaces -- the tool-matrix commercial-use claim is reached independently
     // via the mentioned tool, regardless of goal category; the regression proof here is that
     // COPY-001/002/003 (the jurisdiction-gated copyrightability claims) do NOT appear.
-    expect(output.knowledge_items.map((k) => k.claim_id).sort()).toEqual(['CLAIM-COPY-004-v1', 'kling'])
+    expect(output.knowledge_items.map((k) => k.claim_id).sort()).toEqual(['CLAIM-COPY-004-v1', 'kling-commercial-use-baseline'])
     expect(diagnostics.retrieval).toContainEqual({ identifier: 'copyright_ownership', reason: 'applicability_unmet' })
     const summary = output.goal_interpretations[0].summary
     expect(summary).not.toContain("generally isn't eligible for copyright protection")
@@ -475,6 +476,7 @@ describe('Copyright UAT Cumulative-Restatement Fix -- H5 + full pipeline regress
           resolution: { kind: 'canonical', identifier: 'kling' },
           access_surface: { state: 'unknown' },
           plan_tier: { state: 'unknown' },
+          account_status: { state: 'unknown' },
           confidence: 'confirmed',
           source_turn: 1,
           source_statement: 'Kling AI',
@@ -498,7 +500,7 @@ describe('Copyright UAT Cumulative-Restatement Fix -- H5 + full pipeline regress
     const su = copyrightStateWith('US', RICH_CONTRIBUTION_TEXT)
     const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
 
-    expect(output.knowledge_items.map((k) => k.claim_id).sort()).toEqual(['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPY-004-v1', 'kling'])
+    expect(output.knowledge_items.map((k) => k.claim_id).sort()).toEqual(['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPY-004-v1', 'kling-commercial-use-baseline'])
     const summary = output.goal_interpretations[0].summary
     // COPY-001/002/003 consultative content present.
     expect(summary).toContain("generally isn't eligible for copyright protection")

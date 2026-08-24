@@ -30,6 +30,7 @@ function toolMention(overrides: Partial<ToolMention> & Pick<ToolMention, 'mentio
   return {
     access_surface: { state: 'unknown' },
     plan_tier: { state: 'unknown' },
+    account_status: { state: 'unknown' },
     confidence: 'confirmed',
     source_turn: 1,
     source_statement: 'placeholder',

@@ -93,6 +93,7 @@ const richSignal: DialogueFixture = {
         resolution: { kind: 'canonical', identifier: 'runway-gen3' },
         access_surface: { state: 'confirmed', value: 'API' },
         plan_tier: { state: 'confirmed', value: 'Team' },
+        account_status: { state: 'unknown' },
         confidence: 'confirmed',
         source_turn: 1,
         source_statement: 'We shot the whole thing in Runway Gen-3, team API plan.',
@@ -209,6 +210,7 @@ const currentVsHistorical: DialogueFixture = {
         resolution: { kind: 'canonical', identifier: 'kling' },
         access_surface: { state: 'confirmed', value: 'Web app' },
         plan_tier: { state: 'confirmed', value: 'Personal' },
+        account_status: { state: 'unknown' },
         confidence: 'confirmed',
         source_turn: 1,
         source_statement: 'This one was Kling, personal plan.',
@@ -282,6 +284,7 @@ const ambiguousUncertain: DialogueFixture = {
         resolution: { kind: 'canonical', identifier: 'kling' },
         access_surface: { state: 'confirmed', value: 'Web app' },
         plan_tier: { state: 'unresolved_no_visibility' },
+        account_status: { state: 'unknown' },
         confidence: 'confirmed',
         source_turn: 1,
         source_statement: 'We used Kling.',
@@ -402,6 +405,7 @@ const mixedMultiSignal: DialogueFixture = {
         // on ToolMention.access_surface for why this moved.
         access_surface: { state: 'confirmed', value: 'API' },
         plan_tier: { state: 'confirmed', value: 'Team' },
+        account_status: { state: 'unknown' },
         confidence: 'confirmed',
         source_turn: 1,
         source_statement:
@@ -413,6 +417,7 @@ const mixedMultiSignal: DialogueFixture = {
         resolution: { kind: 'canonical', identifier: 'elevenlabs' },
         access_surface: { state: 'confirmed', value: 'Web app' },
         plan_tier: { state: 'confirmed', value: 'Team' },
+        account_status: { state: 'unknown' },
         confidence: 'confirmed',
         source_turn: 1,
         source_statement:
@@ -505,6 +510,7 @@ const ambiguousMultiSurfaceTool: DialogueFixture = {
         // the ambiguity IS the surface question, not a separate fact to track.
         access_surface: { state: 'unresolved_no_visibility' },
         plan_tier: { state: 'unknown' },
+        account_status: { state: 'unknown' },
         confidence: 'unresolved_no_visibility',
         source_turn: 1,
         source_statement: 'I used Nano Banana for this one.',
@@ -522,6 +528,7 @@ const ambiguousMultiSurfaceTool: DialogueFixture = {
         // Phase 3 type migration.
         access_surface: { state: 'confirmed', value: 'API (developer key)' },
         plan_tier: { state: 'unknown' },
+        account_status: { state: 'unknown' },
         confidence: 'confirmed',
         source_turn: 2,
         source_statement: "Oh, through the API ??I have a developer key, it's not the app on my phone.",
@@ -590,6 +597,7 @@ const fullPhase1To4Trace: DialogueFixture = {
         resolution: { kind: 'canonical', identifier: 'runway-gen3' },
         access_surface: { state: 'confirmed', value: 'API' },
         plan_tier: { state: 'confirmed', value: 'Team' },
+        account_status: { state: 'unknown' },
         confidence: 'confirmed',
         source_turn: 1,
         source_statement: 'Runway Gen-3, team API plan.',

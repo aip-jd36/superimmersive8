@@ -116,7 +116,7 @@ describe('buildBoundedInterpretations -- directly_relevant', () => {
     const interpretations = buildBoundedInterpretations([g], out.results)
     expect(interpretations[0].summary).toContain('Runway')
     expect(interpretations[0].summary).toContain('Kling')
-    expect(interpretations[0].supporting_claim_ids.sort()).toEqual(['kling', 'runway-gen3'])
+    expect(interpretations[0].supporting_claim_ids.sort()).toEqual(['kling-commercial-use-baseline', 'runway-gen3'])
   })
 })
 
@@ -735,7 +735,9 @@ describe('buildBoundedInterpretations -- CC-1 Claim-Level Bounded Grouping', () 
     const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
     const out = retrieve(handoff({ tools: [tool('kling')] }), MATRIX_FIXTURE, [g], [stockClaim], facts)
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
-    expect(interp.summary).toContain("Kling's commercial-use permissions depend on your account type")
+    expect(interp.summary).toContain(
+      "Under Kling's current Terms of Service, you may not use, reproduce, distribute, modify, or create derivative works from generated Output for commercial purposes without Kling's written permission.",
+    )
     // Kling (tool-sourced, dependency-free) keeps the EXACT existing tool boundary clause, byte-for-byte.
     expect(interp.summary).toContain("though it reflects the platform's own terms, not a full determination of your specific project's commercial readiness.")
     expect(interp.summary).toContain('Stock dependency-bearing statement.')
@@ -1043,7 +1045,9 @@ describe('buildBoundedInterpretations -- Phase 1 summary_blocks structural equiv
     )
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
     expect(interp.summary_blocks).toHaveLength(2)
-    expect(interp.summary_blocks[0]).toContain("Kling's commercial-use permissions depend on your account type")
+    expect(interp.summary_blocks[0]).toContain(
+      "Under Kling's current Terms of Service, you may not use, reproduce, distribute, modify, or create derivative works from generated Output for commercial purposes without Kling's written permission.",
+    )
     expect(interp.summary_blocks[1]).toContain('iStock')
     // Provider isolation: no Getty/Shutterstock-SPECIFIC claim was retrieved
     // (the generic stock claim's own already-governed text legitimately
@@ -1160,6 +1164,7 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
     return {
       access_surface: { state: 'unknown' },
       plan_tier: { state: 'unknown' },
+      account_status: { state: 'unknown' },
       confidence: 'confirmed',
       source_turn: 1,
       source_statement: 'placeholder',

@@ -121,11 +121,34 @@ export type ToolResolution =
  * represent two tools' plans by mashing them into one prose string). See
  * CRC_PROTOTYPE_ALPHA_ROADMAP.md Phase 1 section for the original finding.
  */
+/**
+ * `account_status` (CRC Kling Governed Knowledge Correction + Decomposition
+ * milestone, 2026-08-24). Same per-tool, not project-wide, reasoning as
+ * `access_surface`/`plan_tier` immediately above -- but a structurally
+ * DIFFERENT concept from `plan_tier`, not a synonym for it: a governed
+ * account/membership-status distinction a provider's own terms draw
+ * independently of subscription grade (e.g. Kling's own Member Account vs.
+ * Regular Account, per K2 §1.4-1.6, is orthogonal to its separate
+ * Standard/Pro/Ultra/Team/Enterprise Membership Grade, K2 §3.1.1 -- a
+ * provider can vary BOTH independently, so cramming both into one field
+ * would either lose information or require inventing compound string
+ * values). Deliberately generic: represents the CLASS of condition "which
+ * governed account/membership state applies to this tool," not any single
+ * provider's own vocabulary -- a future provider with an analogous
+ * account-class distinction (e.g. "verified" vs. "unverified," "team" vs.
+ * "individual") reuses this same field, with its own governed canonical
+ * values, never a new field. No acquisition/attestation path exists for
+ * this field yet in this milestone (deliberately -- see the governed
+ * applicability_requirements' own header in retrieval-engine/types.ts):
+ * every ToolMention constructed today defaults it to `{state: 'unknown'}`
+ * and nothing currently sets it to `'confirmed'`.
+ */
 export interface ToolMention {
   mention_id: string
   resolution: ToolResolution
   access_surface: Attested<string>
   plan_tier: Attested<string>
+  account_status: Attested<string>
   confidence: ConfidenceState
   source_turn: number
   source_statement: string

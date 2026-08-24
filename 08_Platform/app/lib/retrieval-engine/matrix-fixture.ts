@@ -58,17 +58,70 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
   },
   {
     identifier: 'kling',
-    last_verified: '2026-08-05',
+    // CRC Kling Governed Knowledge Correction + Decomposition milestone
+    // (2026-08-24): re-verified directly against K1 (Kling AI Terms of
+    // Service, kling.ai/docs/user-policy) and K2 (Kling AI Terms of Paid
+    // Service, kling.ai/docs/payment-policy), both Release/Effective
+    // 2026/04/21, human-captured browser Print->PDF -- the first direct
+    // primary-source read this Matrix row has ever had (previously
+    // corroborated only by JD's own unverifiable browser read + three
+    // search-snippet excerpts). See PLATFORM-RIGHTS-MATRIX.md's own Kling
+    // section for the full source-wording quotation and reconciliation.
+    last_verified: '2026-08-24',
     claims: [
+      /**
+       * Model B decomposition (accepted design, following the Governed
+       * Conditional/Variant Knowledge and Kling Primary-Source Evidence
+       * Reconciliation diagnostics): the prior single claim compressed
+       * K1's universal default rule and K2's separate, membership-
+       * conditioned exception into one "paid members / free users"
+       * sentence -- terminology neither document uses ("Member Account" /
+       * "Regular Account" per K2 §1.4-1.6, never "paid"/"free"), and which
+       * silently dropped the competing-product/service carve-out. Two
+       * claims now represent this faithfully: an unconditional baseline
+       * (K1 §4.6, applies regardless of account status) and an
+       * applicability-gated Member exception (K2 §3.1.2/§1.4-1.6, applies
+       * only when the account currently holds a Member Account). Neither
+       * claim asserts anything about WHEN membership status must hold
+       * relative to generation/download/commercial-use -- K1/K2 establish
+       * only that the benefit is tied to Member Account status "during the
+       * Validity Period" (K2 §3.1.5), never a specific triggering moment
+       * for already-generated Output; that remains NOT ESTABLISHED and is
+       * deliberately not encoded here.
+       */
       {
-        claim_id: 'kling',
+        claim_id: 'kling-commercial-use-baseline',
         crc_eligible: 'Yes',
         crc_publication_scope:
-          "CRC may state only that Kling's commercial-use permissions differ by account type under the current Terms: paid members may use generated output commercially, while free users require Kling's written permission for commercial use. This publication scope does not extend to branding requirements, training-data provisions, downstream IP clearance, ownership analysis, or broader commercial-readiness conclusions.",
+          "CRC may state that, under Kling's current Terms of Service, using generated Output for commercial purposes without Kling's written permission is not permitted by default. This publication scope does not extend to branding requirements, training-data provisions, downstream IP clearance, ownership analysis, membership status, or broader commercial-readiness conclusions.",
         crc_candidate_statement:
-          "Kling's commercial-use permissions depend on your account type. Under the current Terms, paid members may use generated output commercially, while free users require Kling's written permission for commercial use.",
+          "Under Kling's current Terms of Service, you may not use, reproduce, distribute, modify, or create derivative works from generated Output for commercial purposes without Kling's written permission.",
         topic: 'commercial_use',
         applicability_requirements: [],
+      },
+      /**
+       * Applicability-gated on current Kling Member Account status (K2
+       * §1.4-1.6: a Member Account is bound to having subscribed to the
+       * Membership Service specifically -- NOT synonymous with "has paid
+       * Kling anything," since Credits/Separately Purchased Services are
+       * also Paid Services under K2 §1.1 without conferring Member status,
+       * K2 §4.3.3). Gated on the new generic `tool_account_status` fact
+       * (types/interview-engine.ts / retrieval-engine/types.ts), never a
+       * Kling-specific fact name, and never `tool_plan_tier` (K2 §3.1.1's
+       * Membership Grade -- Standard/Pro/Ultra/Team/Enterprise -- is a
+       * structurally separate concept this claim does not depend on).
+       * `value: 'Member Account'` uses K2's own exact term, not a
+       * re-abstracted synonym, per the accepted canonical-value design.
+       */
+      {
+        claim_id: 'kling-commercial-use-member',
+        crc_eligible: 'Yes',
+        crc_publication_scope:
+          "CRC may state that, if the account currently holds a Kling Member Account (i.e. is subscribed to Kling's Membership Service), Kling's current Terms of Paid Service permit commercial use of generated Output without additional written permission, except for developing or offering products or services that compete with Kling AI. This publication scope does not extend to branding requirements, training-data provisions, downstream IP clearance, ownership analysis, membership status at any time other than currently, or broader commercial-readiness conclusions.",
+        crc_candidate_statement:
+          "If you currently hold a Kling Member Account (i.e. you're subscribed to Kling's Membership Service), Kling's current Terms of Paid Service permit commercial use of generated Output without additional written permission, except for developing or offering products or services that compete with Kling AI.",
+        topic: 'commercial_use',
+        applicability_requirements: [{ fact: 'tool_account_status', tool: 'kling', operator: 'equals', value: 'Member Account' }],
       },
     ],
   },

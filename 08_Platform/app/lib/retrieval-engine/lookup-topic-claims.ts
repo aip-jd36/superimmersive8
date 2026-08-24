@@ -117,6 +117,17 @@ function evaluateRequirementStatus(req: ApplicabilityRequirement, facts: Applica
       (m) => m.superseded_by === null && m.resolution.kind === 'canonical' && m.resolution.identifier === req.tool,
     )
     actual = mention && mention.plan_tier.state === 'confirmed' ? mention.plan_tier.value : undefined
+  } else if (req.fact === 'tool_account_status') {
+    // CRC Kling Governed Knowledge Correction + Decomposition milestone
+    // (2026-08-24): identical lookup/scoping discipline to `tool_plan_tier`
+    // immediately above -- same per-tool find, same `superseded_by`/`canonical`
+    // filter, same "unconfirmed -> undefined -> unresolved" fallthrough below.
+    // Reads `ToolMention.account_status`, a structurally distinct field from
+    // `plan_tier` (see that field's own doc comment, types/interview-engine.ts).
+    const mention = facts.toolMentions.find(
+      (m) => m.superseded_by === null && m.resolution.kind === 'canonical' && m.resolution.identifier === req.tool,
+    )
+    actual = mention && mention.account_status.state === 'confirmed' ? mention.account_status.value : undefined
   }
 
   // Unconfirmed/unresolvable fact -> unresolved, never guessed. This is the

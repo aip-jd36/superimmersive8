@@ -32,7 +32,7 @@ function productionIstockSessionState(): StructuredUnderstanding {
       human_contribution_description: { attestation: { state: 'confirmed', value: 'generated the AI content myself' }, source_turn: 3, source_statement: 'I generated the AI content myself' },
     },
     tool_mentions: [
-      { mention_id: 't4-c2', resolution: { kind: 'canonical', identifier: 'kling' }, access_surface: { state: 'unknown' }, plan_tier: { state: 'confirmed', value: 'paid tier' }, confidence: 'confirmed', source_turn: 4, source_statement: 'I was on the paid tier.', superseded_by: null },
+      { mention_id: 't4-c2', resolution: { kind: 'canonical', identifier: 'kling' }, access_surface: { state: 'unknown' }, plan_tier: { state: 'confirmed', value: 'paid tier' }, account_status: { state: 'unknown' }, confidence: 'confirmed', source_turn: 4, source_statement: 'I was on the paid tier.', superseded_by: null },
     ],
     scoped_observations: [
       { observation_id: 't5-c1', scope: 'current_project', workflow_stage: 'T0', confidence: 'confirmed', status: null, note: 'the client gave me their logo to use', superseded_by: null, source_turn: 5, source_statement: 'the client gave me their logo to use' },
@@ -142,7 +142,9 @@ describe('canonical production acceptance test (Section 24)', () => {
     const interp = output.goal_interpretations[0]
 
     // All three governed statements survive, verbatim.
-    expect(interp.summary).toContain("Kling's commercial-use permissions depend on your account type")
+    expect(interp.summary).toContain(
+      "Under Kling's current Terms of Service, you may not use, reproduce, distribute, modify, or create derivative works from generated Output for commercial purposes without Kling's written permission.",
+    )
     expect(interp.summary).toContain('A stock-media provider\'s standard license for content marked "Editorial"')
     expect(interp.summary).toContain('iStock\'s standard license doesn\'t cover commercial')
 
@@ -199,7 +201,9 @@ describe('canonical production acceptance test (Section 24)', () => {
     expect(interp.summary.match(/This is relevant to/g)).toHaveLength(1)
 
     // Every governed statement still survives, verbatim.
-    expect(interp.summary).toContain("Kling's commercial-use permissions depend on your account type")
+    expect(interp.summary).toContain(
+      "Under Kling's current Terms of Service, you may not use, reproduce, distribute, modify, or create derivative works from generated Output for commercial purposes without Kling's written permission.",
+    )
     expect(interp.summary).toContain('A stock-media provider\'s standard license for content marked "Editorial"')
     expect(interp.summary).toContain('iStock\'s standard license doesn\'t cover commercial')
 
