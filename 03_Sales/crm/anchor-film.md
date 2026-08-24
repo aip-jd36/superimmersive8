@@ -6,9 +6,9 @@ contacts:
 slug: anchor-film
 stage: evaluating
 source: event
-next_action: null
-next_action_date: null
-last_contacted: 2026-08-13
+next_action: "Decide/confirm attendance at the Sept 3-4 Living Lab event (Alice's own session is Sept 4, 2:00-2:45pm; the AI film director's talk, where a face-to-face intro was offered, is Sept 3) -- JD said on the Aug 21 call he needed to check logistics, not yet confirmed"
+next_action_date: 2026-09-03
+last_contacted: 2026-08-21
 blocked: false
 blocked_reason: null
 review_date: null
@@ -20,9 +20,13 @@ created: 2026-08-15
 
 Graduated from `03_Sales/CRM.md` (row B164) on 2026-08-15 — an active, developing strategic-partnership discovery conversation, well past a reply-only signal.
 
-**Note on `next_action`:** left unset deliberately. CRM.md's own row describes a real pending ask ("propose a small pilot... schedule a structured discussion on pilot scope, grant timing, evidence fields, and division of responsibilities") but names no date — nothing here should be invented to satisfy the schema's pairing rule. Needs a real date from JD before this can carry a `next_action`.
-
 ## Interaction log (reverse-chronological)
+
+### 2026-08-21 — follow-up demo call (~91 min, recorded, transcribed + translated)
+
+First substantive follow-up since the Jul 30 panel conversation. Alice walked JD through her own in-progress prototype for the "creation record" (創作履歷) system — still pre-product, self-funded only by her own time, actively targeting at least 3 more 2026 Taiwan government grant programs (Ministry of Digital Affairs ~Sept, Economic Affairs SME cross-agency ~Oct) in addition to the still-pending Taipei Dept. of Cultural Affairs proposal. Hard grant mechanics disclosed: subsidy capped at ≤ registered capital (Anchor's NT$6M caps any project near NT$12M total, 50/50 self-funded split), foreign-registered entities categorically ineligible (cited a client, "Hearst," rejected on exactly this). JD live-demoed SI8's actual free-tier CRC-style lead-gen concept; Alice reacted very positively (called the incomplete-answer/email-gate mechanic "clever marketing"). Surfaced substantial new operational detail: named enterprise clients' prompt self-check requirements (Chunghwa Telecom, Uni-President Group — enterprise-tier tool licenses, no named-artist/celebrity references), a real anecdote (a Yahoo client asking how to guarantee generated faces don't resemble a wanted criminal), confirmation no dedicated AI-film insurance product exists in Taiwan, a named competitor ("Liquid Engine," spelling unverified via Whisper), and a second Anchor business line (AI footage-recognition/tagging + conversational editing, built by a named HKUST-trained technical partner, already used operationally on real footage). Concrete near-term item: Alice invited JD to a Sept 3-4 "Living Lab" (內湖) event — Sept 3 an AI film director presents an AI feature-film sizzle reel (prior traditional film "拔河"/Tug of War; now applying for Ministry of Culture funding + a Golden Horse Award submission) with a possible face-to-face intro to SI8; Sept 4, 2:00-2:45pm, is Alice's own session. Two partnership offers from Alice: (1) include SI8 in her Sept-cycle grant budget if awarded; (2) introduce JD to the director and to two Taiwanese-American AI-filmmaking investor contacts (Patrick Lee, Kevin). No commitment made by either side — exploratory/relationship-building call.
+
+Full call notes (FACTS/HYPOTHESES/OPEN QUESTIONS format): `03_Sales/call-notes/CALL-2026-08-21-B164-Alice-Feng-Anchor-Film.md`. Transcripts (ZH + EN, readable + raw): `03_Sales/transcripts/anchor-film-alice-feng-082126-transcript*.md`. External strategic analysis (ChatGPT review of this call, with Claude's corrections layered in — see that file for a correction to an initial misattribution around SI8's own "CRC" product name, which is unrelated to anything Alice called her own platform): `03_Sales/call-notes/CALL-2026-08-21-B164-Anchor-Film-ChatGPT-Analysis.md`. Headline framing from that analysis, worth carrying forward: Alice is strong evidence of a real, operational Commercial Assurance problem and a credible design-partner/referral channel, but not yet evidence of ordinary SaaS willingness-to-pay — her funding path remains grant-contingent, not an operating-budget purchase. Recommended next step (not yet actioned): a bounded pilot on one real Anchor project, not a broader discovery conversation and not building a full capture platform first.
 
 ### 2026-08-13 — Alice's public open-mic remarks (same panel, separately transcribed)
 

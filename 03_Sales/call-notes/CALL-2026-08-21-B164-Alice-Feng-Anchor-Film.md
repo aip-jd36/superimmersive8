@@ -5,7 +5,7 @@
 **Duration:** ~91 minutes
 **Format:** Video/voice call (Mandarin, with English technical terms throughout)
 **Participants:** JD Chang (SI8), Alice Feng (馮鈺婷, Co-founder, Anchor Film / 錨點影音股份有限公司)
-**Related:** Prior meeting — [[CALL-2026-07-30-B164-Alice-Feng-Anchor-Film]] (first substantive conversation, Jul 30, 2026, AI Wave 微醺夜 event)
+**Related:** Prior meeting — [[CALL-2026-07-30-B164-Alice-Feng-Anchor-Film]] (first substantive conversation, Jul 30, 2026, AI Wave 微醺夜 event); External analysis — [[CALL-2026-08-21-B164-Anchor-Film-ChatGPT-Analysis]] (ChatGPT strategic review of this call, with Claude's corrections, Aug 24, 2026)
 **Audio file:** `03_Sales/transcripts/Anchor Film_082126.m4a` (local only — gitignored, not committed)
 **Transcript (readable, ~45s paragraphs):** `03_Sales/transcripts/anchor-film-alice-feng-082126-transcript.md`
 **Transcript (raw, word-fragment timestamps):** `03_Sales/transcripts/anchor-film-alice-feng-082126-transcript-raw.md`
