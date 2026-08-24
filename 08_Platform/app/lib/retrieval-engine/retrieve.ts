@@ -33,10 +33,10 @@ import { extractMatchableFacts } from './extract-matchable-facts'
 import { lookupRows } from './lookup-rows'
 import { enumerateEligibleClaims } from './enumerate-eligible-claims'
 import { assembleResult, assembleTopicResult, assembleRelatedTopicResult, assembleDiscoveredTopicResult } from './assemble-result'
-import { isApplicable, lookupTopicClaims, type ApplicabilityFacts } from './lookup-topic-claims'
+import { evaluateApplicabilityDetailed, lookupTopicClaims, type ApplicabilityFacts } from './lookup-topic-claims'
 import { lookupRelatedTopicClaims } from './lookup-topic-relationships'
 import { lookupDiscoveredTopicClaims } from './lookup-discovered-topic-claims'
-import type { DiscoveredTopicOccurrence, MatrixRow, RetrievalDiagnostic, RetrievalResult, TopicClaim, TopicRelationship } from './types'
+import type { DiscoveredTopicOccurrence, MatrixRow, RetrievalDiagnostic, RetrievalResult, TopicClaim, TopicRelationship, UnmetApplicabilityDetail } from './types'
 
 export interface RetrieveOutput {
   results: RetrievalResult[]
@@ -154,8 +154,19 @@ export function retrieve(
       // below) -- this is "the appropriate existing identifier semantics"
       // for this diagnostic reason specifically, distinct from
       // `yes_claim_missing_scope`'s own claim-level identifier convention.
-      if (!isApplicable(claim.applicability_requirements, applicabilityFacts)) {
-        diagnostics.push({ identifier: claim.topic ?? 'unknown', reason: 'applicability_unmet' })
+      //
+      // Piece 1 (CRC Narrow Governed Selector Questioning milestone,
+      // 2026-08-24): uses evaluateApplicabilityDetailed (Matrix/Topic parity
+      // requirement) instead of isApplicable, so the same single evaluation
+      // pass both decides inclusion/exclusion AND populates unmet_applicability
+      // -- never a second, separately-invoked evaluation.
+      const outcomes = evaluateApplicabilityDetailed(claim.applicability_requirements, applicabilityFacts)
+      if (!outcomes.every((o) => o.status === 'met')) {
+        const unmetDetail: UnmetApplicabilityDetail[] = []
+        for (const o of outcomes) {
+          if (o.status !== 'met') unmetDetail.push({ claim_id: claim.claim_id, requirement: o.requirement, status: o.status })
+        }
+        diagnostics.push({ identifier: claim.topic ?? 'unknown', reason: 'applicability_unmet', unmet_applicability: unmetDetail })
         continue
       }
       const assembled = assembleResult({ kind: 'tool', identifier }, row, claim)

@@ -121,6 +121,25 @@ export const CANDIDATE_QUESTION_KINDS = [
    * vocabularies are kept independent, never aliased into each other).
    */
   'knowledge_readiness_acquisition',
+  /**
+   * CRC Narrow Governed Selector Questioning milestone (2026-08-24).
+   * Deterministically constructed by lib/crc-engine/selector-questioning.ts,
+   * never proposed by the ordinary LLM generator (excluded from
+   * anthropic-candidate-question.ts's own schema enum, same as every other
+   * deterministic kind above). Always carries target_signal_id: null -- a
+   * governed selector need is not a follow-up on any existing signal.
+   * Capped PER SELECTOR (not globally, not per-signal) -- see
+   * `selector_dedupe_key` below and `selector_needs_used` in BoundaryState
+   * for the compound cap key this kind uses, deliberately its own separate
+   * record/namespace, never aliased into `follow_ups_used` or
+   * `knowledge_readiness_used` (applicability and dependency-readiness
+   * remain distinct governance concepts -- see Track B's own header).
+   * Explicitly excludes `jurisdiction` at the derivation layer
+   * (selector-questioning.ts's own HANDLED_BY_DEDICATED_MODULE guard) so
+   * this kind can never double-own or race the existing, unmigrated
+   * jurisdiction_clarification kind for the same Model 4 attempt-#1 slot.
+   */
+  'governed_selector_clarification',
 ] as const
 
 export type CandidateQuestionKind = (typeof CANDIDATE_QUESTION_KINDS)[number]
@@ -210,6 +229,23 @@ export interface CandidateQuestion {
    * relationship between the two.
    */
   readiness_dependency_id?: string
+  /**
+   * CRC Narrow Governed Selector Questioning milestone (2026-08-24).
+   * Required (in practice, per selector-questioning.ts's own construction)
+   * when kind === 'governed_selector_clarification' -- the governed
+   * selector's own stable `dedupe_key` (SelectorNeed.dedupe_key in
+   * selector-questioning.ts: the bare ApplicabilityFact for an unscoped
+   * fact, or `` `${fact}::${tool}` `` for a tool-scoped one). This is the
+   * ENTIRE cap key on its own -- unlike `readiness_dependency_id`, which is
+   * combined with `signal_id`, a selector need's dedupe_key already fully
+   * encodes fact+tool identity, so no signal_id component is needed or used.
+   * Named `selector_dedupe_key` here (candidate side), mirroring
+   * `readiness_dependency_id`'s own naming -- the proposal-side field in
+   * candidate-question.ts is `target_selector_dedupe_key`, mapped across in
+   * `validateCandidateReference` exactly like
+   * `target_readiness_dependency_id` -> `readiness_dependency_id` already is.
+   */
+  selector_dedupe_key?: string
 }
 
 // ── Boundary state ───────────────────────────────────────────────────────────
@@ -310,6 +346,20 @@ export interface BoundaryState {
    */
   knowledge_readiness_used: Record<string, number>
   /**
+   * CRC Narrow Governed Selector Questioning milestone (2026-08-24).
+   * Compound-key cap for `governed_selector_clarification` candidates -- key
+   * is the selector's own `dedupe_key` alone (see
+   * `CandidateQuestion.selector_dedupe_key`'s own header for why no
+   * signal_id component is needed), mirroring `knowledge_readiness_used`'s
+   * own Record<string, number> shape but a SEPARATE record: applicability
+   * selectors and governed dependencies remain distinct governance concepts
+   * (see selector-questioning.ts's own header). A missing value on a
+   * pre-this-milestone session deserializes as `undefined` -- same Record
+   * treatment as `knowledge_readiness_used`, explicitly defaulted to `{}` in
+   * serialization.ts's `deserializeBoundaryState`.
+   */
+  selector_needs_used: Record<string, number>
+  /**
    * Second-Jurisdiction UX milestone (2026-08-20), J1. True for exactly one
    * turn: the turn immediately AFTER either jurisdiction_clarification or
    * jurisdiction_clarification_retry was approved and asked. Consumed
@@ -345,6 +395,7 @@ export function createInitialBoundaryState(): BoundaryState {
     human_contribution_clarification_asked: false,
     jurisdiction_clarification_retry_asked: false,
     jurisdiction_clarification_pending_answer: false,
+    selector_needs_used: {},
     knowledge_readiness_used: {},
     interview_ended: false,
     phases_ended: [],
@@ -424,6 +475,12 @@ export const BOUNDARY_REASON_CODES = [
    * `knowledge_readiness_used` cap.
    */
   'KNOWLEDGE_READINESS_ALREADY_ASKED',
+  /**
+   * CRC Narrow Governed Selector Questioning milestone (2026-08-24). Same
+   * "1 ask, ever, per compound key" shape as KNOWLEDGE_READINESS_ALREADY_ASKED,
+   * for the separate `selector_needs_used` cap.
+   */
+  'GOVERNED_SELECTOR_ALREADY_ASKED',
   'USER_DECLINED_QUESTION',
   'USER_DECLINED_PHASE',
   'USER_DECLINED_INTERVIEW',
@@ -810,6 +867,38 @@ export function evaluateBoundary(
       reason_code: 'ALLOWED',
       action_scope: 'ask',
       next_state: { ...state, knowledge_readiness_used: { ...state.knowledge_readiness_used, [capKey]: used + 1 } },
+      debug: { fired_boundary: 'none', candidate_kind: candidate.kind, signal_id: candidate.signal_id },
+    }
+  }
+
+  if (candidate.kind === 'governed_selector_clarification') {
+    // CRC Narrow Governed Selector Questioning milestone (2026-08-24).
+    // Compound key, mirroring the knowledge_readiness_acquisition branch
+    // immediately above, but in its own record/namespace (selector_needs_used)
+    // -- see this interface's own selector_dedupe_key field header for why.
+    // The eligibility DECISION (which claim/applicability requirement is
+    // relevant, unresolved, and askable) is made upstream in
+    // lib/crc-engine/selector-questioning.ts -- this evaluator has no
+    // opinion on WHY a selector candidate was proposed, only THAT the
+    // per-selector cap holds. No signal_id component: a selector need's own
+    // dedupe_key (fact, or fact::tool for a tool-scoped fact) is already a
+    // complete, stable identity on its own.
+    const capKey = candidate.selector_dedupe_key ?? 'unknown'
+    const used = state.selector_needs_used[capKey] ?? 0
+    if (used >= 1) {
+      return {
+        allowed: false,
+        reason_code: 'GOVERNED_SELECTOR_ALREADY_ASKED',
+        action_scope: 'suppress_current_question',
+        next_state: state,
+        debug: { fired_boundary: `governed_selector_cap:${capKey}`, candidate_kind: candidate.kind, signal_id: candidate.signal_id },
+      }
+    }
+    return {
+      allowed: true,
+      reason_code: 'ALLOWED',
+      action_scope: 'ask',
+      next_state: { ...state, selector_needs_used: { ...state.selector_needs_used, [capKey]: used + 1 } },
       debug: { fired_boundary: 'none', candidate_kind: candidate.kind, signal_id: candidate.signal_id },
     }
   }

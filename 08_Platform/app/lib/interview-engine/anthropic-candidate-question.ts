@@ -82,7 +82,16 @@ const ORDINARY_GENERATOR_QUESTION_KINDS = CANDIDATE_QUESTION_KINDS.filter(
     // readiness_dependency_id values exist, so leaving it in the enum would let
     // the model emit an ungoverned readiness-shaped question with no real
     // dependency behind it.
-    k !== 'knowledge_readiness_acquisition',
+    k !== 'knowledge_readiness_acquisition' &&
+    // CRC Narrow Governed Selector Questioning milestone (2026-08-24): same
+    // reasoning as every exclusion above -- deterministically constructed by
+    // lib/crc-engine/selector-questioning.ts from a registry-owned fixed
+    // question_text, never freely generated. This adapter's own system
+    // prompt has no instructions describing applicability selectors or what
+    // dedupe_key values exist, so leaving it in the enum would let the model
+    // emit an ungoverned selector-shaped question with no real governed
+    // requirement behind it.
+    k !== 'governed_selector_clarification',
 )
 
 const SYSTEM_PROMPT = `You are the candidate-question generation stage of a larger, deterministic pipeline for CRC, a conversational tool that helps someone understand the commercial-use status of an AI-generated video project. Your only job is to propose ONE next question CRC might ask, given its current structured understanding of the project. You are not the only stage: everything you produce is a PROPOSAL, checked by deterministic code downstream that decides whether it is actually permitted to ask. You never see or affect whether your proposal gets used.

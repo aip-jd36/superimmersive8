@@ -502,3 +502,52 @@ describe('knowledge_readiness_acquisition cap (Track B — Generic Living-Knowle
   // The real safety net for a historical session is deserializeBoundaryState's
   // explicit `?? {}` default -- see serialization.test.ts's own W-item coverage.
 })
+
+describe('governed_selector_clarification cap (CRC Narrow Governed Selector Questioning milestone, 2026-08-24)', () => {
+  test('first ask of a selector dedupe_key is allowed and increments selector_needs_used, never knowledge_readiness_used/follow_ups_used', () => {
+    const result = evaluateBoundary(createInitialBoundaryState(), candidate({ kind: 'governed_selector_clarification', selector_dedupe_key: 'tool_plan_tier::kling' }))
+    expect(result.allowed).toBe(true)
+    expect(result.next_state.selector_needs_used['tool_plan_tier::kling']).toBe(1)
+    expect(result.next_state.knowledge_readiness_used).toEqual({})
+    expect(result.next_state.follow_ups_used).toEqual({})
+  })
+
+  test('exact repeat of the same dedupe_key is blocked', () => {
+    const first = evaluateBoundary(createInitialBoundaryState(), candidate({ kind: 'governed_selector_clarification', selector_dedupe_key: 'tool_plan_tier::kling' }))
+    const repeat = evaluateBoundary(first.next_state, candidate({ kind: 'governed_selector_clarification', selector_dedupe_key: 'tool_plan_tier::kling' }))
+    expect(repeat.allowed).toBe(false)
+    expect(repeat.reason_code).toBe('GOVERNED_SELECTOR_ALREADY_ASKED')
+    expect(repeat.action_scope).toBe('suppress_current_question')
+  })
+
+  test('a different tool (different dedupe_key) for the same fact is independently eligible -- Kling plan cap never blocks Runway plan', () => {
+    const kling = evaluateBoundary(createInitialBoundaryState(), candidate({ kind: 'governed_selector_clarification', selector_dedupe_key: 'tool_plan_tier::kling' }))
+    const runway = evaluateBoundary(kling.next_state, candidate({ kind: 'governed_selector_clarification', selector_dedupe_key: 'tool_plan_tier::runway' }))
+    expect(runway.allowed).toBe(true)
+    expect(runway.next_state.selector_needs_used['tool_plan_tier::runway']).toBe(1)
+    expect(runway.next_state.selector_needs_used['tool_plan_tier::kling']).toBe(1)
+  })
+
+  test('an unscoped fact (e.g. a bare fact name, no tool) caps under its own bare key, independent of any tool-scoped need', () => {
+    const unscoped = evaluateBoundary(createInitialBoundaryState(), candidate({ kind: 'governed_selector_clarification', selector_dedupe_key: 'some_future_fact' }))
+    expect(unscoped.next_state.selector_needs_used['some_future_fact']).toBe(1)
+    const scoped = evaluateBoundary(unscoped.next_state, candidate({ kind: 'governed_selector_clarification', selector_dedupe_key: 'tool_plan_tier::kling' }))
+    expect(scoped.allowed).toBe(true)
+  })
+
+  test('this cap never touches or is touched by knowledge_readiness_used/follow_ups_used -- three vocabularies stay in separate records', () => {
+    const followUp = evaluateBoundary(createInitialBoundaryState(), candidate({ kind: 'follow_up_on_signal', signal_id: 'ap-1', follow_up_need: 'asset_provider_usage' }))
+    const readiness = evaluateBoundary(followUp.next_state, candidate({ kind: 'knowledge_readiness_acquisition', signal_id: 'ap-1', readiness_dependency_id: 'test_dependency' }))
+    const selector = evaluateBoundary(readiness.next_state, candidate({ kind: 'governed_selector_clarification', selector_dedupe_key: 'tool_plan_tier::kling' }))
+    expect(selector.allowed).toBe(true)
+    expect(selector.next_state.follow_ups_used['ap-1::asset_provider_usage']).toBe(1)
+    expect(selector.next_state.knowledge_readiness_used['ap-1::test_dependency']).toBe(1)
+    expect(selector.next_state.selector_needs_used['tool_plan_tier::kling']).toBe(1)
+  })
+
+  test('an incident_investigation candidate is still absolutely prohibited even if (hypothetically) tagged with a selector_dedupe_key', () => {
+    const result = evaluateBoundary(createInitialBoundaryState(), candidate({ kind: 'incident_investigation', selector_dedupe_key: 'tool_plan_tier::kling' }))
+    expect(result.allowed).toBe(false)
+    expect(result.reason_code).toBe('INCIDENT_INVESTIGATION_PROHIBITED')
+  })
+})

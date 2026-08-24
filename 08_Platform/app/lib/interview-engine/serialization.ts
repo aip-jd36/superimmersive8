@@ -137,7 +137,11 @@ export function serializeBoundaryState(state: BoundaryState): string {
  */
 export function deserializeBoundaryState(json: string): BoundaryState {
   const parsed = JSON.parse(json) as BoundaryState
-  return { ...parsed, knowledge_readiness_used: parsed.knowledge_readiness_used ?? {} }
+  // selector_needs_used (CRC Narrow Governed Selector Questioning milestone,
+  // 2026-08-24): same Record<string, number> default-on-missing treatment as
+  // knowledge_readiness_used immediately above, for the same reason -- a
+  // session persisted before this field existed has no key for it at all.
+  return { ...parsed, knowledge_readiness_used: parsed.knowledge_readiness_used ?? {}, selector_needs_used: parsed.selector_needs_used ?? {} }
 }
 
 /**

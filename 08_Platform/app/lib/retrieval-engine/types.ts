@@ -506,6 +506,28 @@ export interface DiscoveredTopicOccurrence {
 }
 
 /**
+ * Piece 1 (CRC Narrow Governed Selector Questioning milestone, 2026-08-24,
+ * following the Governed Selector Questioning architecture design of the
+ * same date). Additive per-requirement detail for a `reason:
+ * 'applicability_unmet'` diagnostic -- internal trace / question-eligibility
+ * information only, never new interpretive authority. Bounded Interpretation
+ * continues to read only `identifier`/`reason` on `RetrievalDiagnostic`,
+ * unchanged; this detail exists solely for `lib/crc-engine/selector-
+ * questioning.ts` to consume, without ever re-running applicability
+ * evaluation itself (see `evaluateApplicabilityDetailed` in
+ * lookup-topic-claims.ts, the single source of truth this detail is derived
+ * from). `'met'` outcomes are never included -- they carry no diagnostic
+ * value for a withheld claim.
+ */
+export interface UnmetApplicabilityDetail {
+  /** Which claim this outcome belongs to -- a category-level `applicability_unmet` diagnostic (TopicClaim path) may aggregate detail from multiple claims, so this is required to regroup per-claim. */
+  claim_id: string
+  requirement: ApplicabilityRequirement
+  /** `'met'` is deliberately excluded from this union -- see this field's own header. */
+  status: 'unresolved' | 'not_met'
+}
+
+/**
  * Why a candidate fact produced no result -- diagnostic only, never
  * surfaced to a user, never a risk/warning signal. Exists so tests (and
  * future engineering visibility into Matrix coverage gaps) can distinguish
@@ -538,4 +560,6 @@ export type NonMatchReason = (typeof NON_MATCH_REASONS)[number]
 export interface RetrievalDiagnostic {
   identifier: string
   reason: NonMatchReason
+  /** Additive, populated only for `reason === 'applicability_unmet'` -- see `UnmetApplicabilityDetail`'s own header. Absent for every other reason and for every pre-existing caller/test, which continue to construct/compare `{identifier, reason}` literals unchanged. */
+  unmet_applicability?: UnmetApplicabilityDetail[]
 }
