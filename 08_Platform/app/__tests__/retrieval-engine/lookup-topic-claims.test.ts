@@ -4,7 +4,7 @@
  * functions, same discipline as retrieve.test.ts.
  */
 
-import { canonicalizeJurisdictionValue, isApplicable, lookupTopicClaims, type ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
+import { canonicalizeJurisdictionValue, evaluateApplicabilityDetailed, isApplicable, lookupTopicClaims, type ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
 import type { ApplicabilityRequirement, TopicClaim } from '@/lib/retrieval-engine/types'
 import type { ToolMention, UserGoal } from '@/types/interview-engine'
 
@@ -165,6 +165,72 @@ describe('isApplicable', () => {
   })
 })
 
+describe('evaluateApplicabilityDetailed (Piece 1, CRC Narrow Governed Selector Questioning milestone, 2026-08-24)', () => {
+  test('all requirements met -> every outcome is "met"', () => {
+    const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }]
+    const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { state: 'confirmed', value: 'United States' } }))
+    expect(outcomes).toEqual([{ requirement: req[0], status: 'met' }])
+  })
+
+  test('unresolved requirement (unconfirmed fact) -> "unresolved", never "not_met"', () => {
+    const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }]
+    const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { state: 'unknown' } }))
+    expect(outcomes).toEqual([{ requirement: req[0], status: 'unresolved' }])
+  })
+
+  test('known nonmatching requirement -> "not_met", never "unresolved"', () => {
+    const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }]
+    const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' } }))
+    expect(outcomes).toEqual([{ requirement: req[0], status: 'not_met' }])
+  })
+
+  test('mixed unresolved + not_met -> each requirement keeps its own independent status', () => {
+    const req: ApplicabilityRequirement[] = [
+      { fact: 'jurisdiction', operator: 'equals', value: 'United States' },
+      { fact: 'tool_plan_tier', tool: 'kling', operator: 'equals', value: 'paid' },
+    ]
+    const tm = toolMention({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'kling' }, plan_tier: { state: 'confirmed', value: 'free' } })
+    const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { state: 'unknown' }, toolMentions: [tm] }))
+    expect(outcomes).toEqual([
+      { requirement: req[0], status: 'unresolved' },
+      { requirement: req[1], status: 'not_met' },
+    ])
+  })
+
+  test('multiple unresolved requirements -> both reported independently, in array order', () => {
+    const req: ApplicabilityRequirement[] = [
+      { fact: 'jurisdiction', operator: 'equals', value: 'United States' },
+      { fact: 'tool_plan_tier', tool: 'kling', operator: 'equals', value: 'paid' },
+    ]
+    const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { state: 'unknown' }, toolMentions: [] }))
+    expect(outcomes).toEqual([
+      { requirement: req[0], status: 'unresolved' },
+      { requirement: req[1], status: 'unresolved' },
+    ])
+  })
+
+  test('empty requirements list -> empty outcome array', () => {
+    expect(evaluateApplicabilityDetailed([], facts())).toEqual([])
+  })
+
+  test('isApplicable retains its old boolean semantics exactly, now derived from evaluateApplicabilityDetailed -- true only when every outcome is "met"', () => {
+    const req: ApplicabilityRequirement[] = [
+      { fact: 'jurisdiction', operator: 'equals', value: 'United States' },
+      { fact: 'tool_plan_tier', tool: 'kling', operator: 'equals', value: 'paid' },
+    ]
+    const tm = toolMention({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'kling' }, plan_tier: { state: 'confirmed', value: 'paid' } })
+    const allMet = facts({ jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [tm] })
+    expect(isApplicable(req, allMet)).toBe(true)
+    expect(evaluateApplicabilityDetailed(req, allMet).every((o) => o.status === 'met')).toBe(true)
+
+    const oneUnresolved = facts({ jurisdiction: { state: 'unknown' }, toolMentions: [tm] })
+    expect(isApplicable(req, oneUnresolved)).toBe(false)
+
+    const oneNotMet = facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' }, toolMentions: [tm] })
+    expect(isApplicable(req, oneNotMet)).toBe(false)
+  })
+})
+
 describe('lookupTopicClaims -- goal filtering', () => {
   test('empty goals -> empty matches', () => {
     expect(lookupTopicClaims([], [claim({ claim_id: 'C-1', topic: 'commercial_use' })], facts())).toEqual({ matches: [], diagnostics: [] })
@@ -231,7 +297,13 @@ describe('lookupTopicClaims -- topic matching + eligibility gates', () => {
     })
     const result = lookupTopicClaims([g], [c], facts({ jurisdiction: { state: 'unknown' } }))
     expect(result.matches).toEqual([])
-    expect(result.diagnostics).toEqual([{ identifier: 'copyright_ownership', reason: 'applicability_unmet' }])
+    expect(result.diagnostics).toEqual([
+      {
+        identifier: 'copyright_ownership',
+        reason: 'applicability_unmet',
+        unmet_applicability: [{ claim_id: 'C-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+      },
+    ])
   })
 
   test('applicability met -> the claim surfaces', () => {
@@ -266,7 +338,13 @@ describe('lookupTopicClaims -- topic matching + eligibility gates', () => {
     })
     const result = lookupTopicClaims([g], [c], facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' } }))
     expect(result.matches).toEqual([])
-    expect(result.diagnostics).toEqual([{ identifier: 'copyright_ownership', reason: 'applicability_unmet' }])
+    expect(result.diagnostics).toEqual([
+      {
+        identifier: 'copyright_ownership',
+        reason: 'applicability_unmet',
+        unmet_applicability: [{ claim_id: 'C-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'not_met' }],
+      },
+    ])
   })
 
   test('an unsettled + CRC-eligible + applicable claim surfaces just like an established one -- character is descriptive, not a gate', () => {

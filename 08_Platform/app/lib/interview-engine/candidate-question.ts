@@ -191,6 +191,20 @@ export interface CandidateQuestionProposal {
    * field header for why the two vocabularies are kept independent.
    */
   target_readiness_dependency_id?: string | null
+  /**
+   * CRC Narrow Governed Selector Questioning milestone (2026-08-24). Set
+   * ONLY by selector-questioning.ts's own buildSelectorNeedProposal, never
+   * by the ordinary LLM generator (question_kind
+   * 'governed_selector_clarification' is excluded from that adapter's
+   * schema enum entirely -- see anthropic-candidate-question.ts). The
+   * governed selector's own stable dedupe_key, threaded straight through to
+   * CandidateQuestion.selector_dedupe_key (boundaries.ts) for Constraint B's
+   * own per-selector cap. Deliberately a separate field from
+   * target_readiness_dependency_id/target_follow_up_need -- applicability
+   * selectors, governed dependencies, and interview-side follow-up needs
+   * remain three distinct governance vocabularies.
+   */
+  target_selector_dedupe_key?: string | null
 }
 
 // ── Generator interface ─────────────────────────────────────────────────────
@@ -349,6 +363,7 @@ export function validateCandidateReference(
       phase: proposal.phase,
       follow_up_need: proposal.target_follow_up_need ?? undefined,
       readiness_dependency_id: proposal.target_readiness_dependency_id ?? undefined,
+      selector_dedupe_key: proposal.target_selector_dedupe_key ?? undefined,
     },
   }
 }

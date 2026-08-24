@@ -102,6 +102,7 @@ async function seedRelevantSession(store: SessionStore, token: string) {
       jurisdiction_clarification_retry_asked: false,
       jurisdiction_clarification_pending_answer: false,
       knowledge_readiness_used: {},
+      selector_needs_used: {},
       interview_ended: false,
       phases_ended: [],
     },

@@ -171,7 +171,21 @@ describe('CLAIM-COPY-001/002/003 -- reachable through exact Topic Retrieval for 
     const goal = copyrightabilityGoal()
     const result = lookupTopicClaims([goal], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'unknown' }, toolMentions: [] })
     expect(result.matches).toEqual([])
-    expect(result.diagnostics).toContainEqual({ identifier: 'copyrightability', reason: 'applicability_unmet' })
+    const diagnostic = result.diagnostics.find((d) => d.identifier === 'copyrightability' && d.reason === 'applicability_unmet')
+    expect(diagnostic).toBeDefined()
+    // unmet_applicability aggregates one 'unresolved' jurisdiction entry per
+    // claim (COPY-001/002/003) -- order-independent, since fixture array
+    // order is not part of this test's own contract.
+    expect(diagnostic!.unmet_applicability).toEqual(
+      expect.arrayContaining(
+        ['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1'].map((claim_id) => ({
+          claim_id,
+          requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' },
+          status: 'unresolved',
+        })),
+      ),
+    )
+    expect(diagnostic!.unmet_applicability).toHaveLength(3)
   })
 
   test("item F, now proven positively: relevant_applicability_unresolved (Case 3B) correctly fires for all three claims -- each carries non-empty unresolved_project_dependencies (['human_contribution_description']), so the combined statement renders under the unresolved-applicability template, never directly_relevant", () => {

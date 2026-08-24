@@ -19,7 +19,7 @@
  */
 
 import type { Attested, GoalCategory, ToolMention, UserGoal } from '@/types/interview-engine'
-import type { ApplicabilityRequirement, RetrievalDiagnostic, TopicClaim } from './types'
+import type { ApplicabilityRequirement, RetrievalDiagnostic, TopicClaim, UnmetApplicabilityDetail } from './types'
 
 /**
  * Only the two Phase 1 IMPLEMENTED fact sources -- see APPLICABILITY_FACTS'
@@ -89,7 +89,25 @@ export function canonicalizeJurisdictionValue(value: string): string {
   return JURISDICTION_VALUE_ALIASES[key] ?? value
 }
 
-function evaluateRequirement(req: ApplicabilityRequirement, facts: ApplicabilityFacts): boolean {
+/**
+ * Piece 1 (CRC Narrow Governed Selector Questioning milestone, 2026-08-24).
+ * Per-requirement structured outcome -- the single semantic source of truth
+ * both `isApplicable()` below and Retrieval's own richer `applicability_unmet`
+ * diagnostic detail (assemble sites in this file and retrieve.ts) derive
+ * from. Exactly three states, mirroring the three branches already present
+ * in this evaluation logic before this milestone (never invented):
+ * `'unresolved'` when the relevant structured fact isn't confirmed (the
+ * existing `actual === undefined` branch), `'not_met'` when it's confirmed
+ * but the comparison fails, `'met'` when it's confirmed and matches.
+ */
+export type ApplicabilityRequirementStatus = 'met' | 'unresolved' | 'not_met'
+
+export interface ApplicabilityRequirementOutcome {
+  requirement: ApplicabilityRequirement
+  status: ApplicabilityRequirementStatus
+}
+
+function evaluateRequirementStatus(req: ApplicabilityRequirement, facts: ApplicabilityFacts): ApplicabilityRequirementStatus {
   let actual: string | undefined
 
   if (req.fact === 'jurisdiction') {
@@ -101,24 +119,40 @@ function evaluateRequirement(req: ApplicabilityRequirement, facts: Applicability
     actual = mention && mention.plan_tier.state === 'confirmed' ? mention.plan_tier.value : undefined
   }
 
-  // Unconfirmed/unresolvable fact -> requirement unmet, never guessed. This
-  // is the single mechanism that makes "jurisdiction unknown" and "wrong
-  // jurisdiction" behave identically from the claim's own point of view --
-  // both simply fail this check, never a fabricated match.
-  if (actual === undefined) return false
+  // Unconfirmed/unresolvable fact -> unresolved, never guessed. This is the
+  // single mechanism that makes "jurisdiction unknown" and "wrong
+  // jurisdiction" behave identically for isApplicable()'s own boolean
+  // purposes (both fail the overall gate) while still being distinguishable
+  // for selector-questioning purposes (one is worth asking about, the other
+  // never is).
+  if (actual === undefined) return 'unresolved'
 
   if (req.fact === 'jurisdiction') {
     const canonicalActual = canonicalizeJurisdictionValue(actual)
     const canonicalRequired = canonicalizeJurisdictionValue(req.value)
-    return req.operator === 'equals' ? canonicalActual === canonicalRequired : canonicalActual !== canonicalRequired
+    const matches = req.operator === 'equals' ? canonicalActual === canonicalRequired : canonicalActual !== canonicalRequired
+    return matches ? 'met' : 'not_met'
   }
 
-  return req.operator === 'equals' ? actual === req.value : actual !== req.value
+  const matches = req.operator === 'equals' ? actual === req.value : actual !== req.value
+  return matches ? 'met' : 'not_met'
 }
 
-/** True only when EVERY requirement evaluates true. An empty requirements list is vacuously applicable (no gate at all). */
+/** Piece 1: every requirement's outcome, in array order. Never filters -- callers needing only the unmet subset (e.g. diagnostic population below) filter this output themselves, so there is exactly one evaluation pass regardless of caller. */
+export function evaluateApplicabilityDetailed(requirements: ApplicabilityRequirement[], facts: ApplicabilityFacts): ApplicabilityRequirementOutcome[] {
+  return requirements.map((requirement) => ({ requirement, status: evaluateRequirementStatus(requirement, facts) }))
+}
+
+/**
+ * True only when EVERY requirement evaluates 'met'. An empty requirements
+ * list is vacuously applicable (no gate at all) -- unchanged public
+ * semantics, byte-identical to every existing caller/test, now derived from
+ * `evaluateApplicabilityDetailed` rather than its own separate boolean pass,
+ * so there is exactly one applicability-evaluation code path in this module
+ * (Piece 1's own "Retrieval remains the single source of truth" requirement).
+ */
 export function isApplicable(requirements: ApplicabilityRequirement[], facts: ApplicabilityFacts): boolean {
-  return requirements.every((req) => evaluateRequirement(req, facts))
+  return evaluateApplicabilityDetailed(requirements, facts).every((o) => o.status === 'met')
 }
 
 /**
@@ -179,6 +213,26 @@ export interface TopicLookupResult {
  * from structured evidence via an engineering-owned, fail-closed trigger
  * registry.
  */
+
+/**
+ * Extracted (CRC Generic Applicability Readiness milestone, 2026-08-24) from
+ * this function's own former inline computation -- byte-identical logic,
+ * now a small, shared, exported primitive so `applicability-readiness.ts`'s
+ * Matrix-path gap derivation can apply the exact same explicit-goal-
+ * relevance rule TopicClaim retrieval already enforces structurally via its
+ * own goal-driven lookup, rather than reproducing this one-line filter a
+ * second time. Deliberately excludes discovered-topic categories (unlike
+ * `lookupTopicClaims`'s own `activeGoalCategories`, which unions them in) --
+ * this helper answers only "which categories does an EXPLICIT, confirmed
+ * UserGoal currently supply," the exact question selector-readiness needs
+ * (explicit-goal-only policy) and the exact question this function's own
+ * inline computation always answered before Track A discovery was unioned
+ * in at the call site.
+ */
+export function activeConfirmedGoalCategories(goals: UserGoal[]): Set<GoalCategory> {
+  return new Set(goals.filter((g) => g.superseded_by === null && g.state === 'confirmed').map((g) => g.category))
+}
+
 export function lookupTopicClaims(
   goals: UserGoal[],
   topicClaims: TopicClaim[],
@@ -190,10 +244,7 @@ export function lookupTopicClaims(
   const matches: TopicClaim[] = []
   const seen = new Set<string>()
 
-  const activeGoalCategories = new Set<GoalCategory>([
-    ...goals.filter((g) => g.superseded_by === null && g.state === 'confirmed').map((g) => g.category),
-    ...discoveredTopics,
-  ])
+  const activeGoalCategories = new Set<GoalCategory>([...activeConfirmedGoalCategories(goals), ...discoveredTopics])
 
   for (const category of activeGoalCategories) {
     // Provider pre-filter runs as part of computing `candidates` itself --
@@ -211,12 +262,25 @@ export function lookupTopicClaims(
 
     let anyEligible = false
     let anyApplicable = false
+    // Piece 1: aggregated across every eligible-but-inapplicable claim in
+    // this category -- the diagnostic below is still emitted once per
+    // category (unchanged shape), but now carries enough detail for
+    // selector-questioning.ts to regroup by claim_id itself (§K of the
+    // accepted design: need aggregation happens downstream, not here).
+    const unmetDetail: UnmetApplicabilityDetail[] = []
 
     for (const claim of candidates) {
       if (claim.lifecycle !== 'Adopted' || claim.crc_eligible !== 'Yes') continue
       anyEligible = true
 
-      if (!isApplicable(claim.applicability_requirements, facts)) continue
+      const outcomes = evaluateApplicabilityDetailed(claim.applicability_requirements, facts)
+      const isClaimApplicable = outcomes.every((o) => o.status === 'met')
+      if (!isClaimApplicable) {
+        for (const o of outcomes) {
+          if (o.status !== 'met') unmetDetail.push({ claim_id: claim.claim_id, requirement: o.requirement, status: o.status })
+        }
+        continue
+      }
       anyApplicable = true
 
       const dedupeKey = claim.claim_id
@@ -228,7 +292,7 @@ export function lookupTopicClaims(
     if (!anyEligible) {
       diagnostics.push({ identifier: category, reason: 'not_adopted_or_eligible' })
     } else if (!anyApplicable) {
-      diagnostics.push({ identifier: category, reason: 'applicability_unmet' })
+      diagnostics.push({ identifier: category, reason: 'applicability_unmet', unmet_applicability: unmetDetail })
     }
   }
 

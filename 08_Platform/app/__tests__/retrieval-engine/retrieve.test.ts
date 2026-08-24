@@ -290,7 +290,11 @@ describe('retrieve -- Topic Retrieval integration (CRC Living Knowledge Phase 1,
     })
     const out = retrieve(handoff(), MATRIX_FIXTURE, [g], [c])
     expect(out.results).toEqual([])
-    expect(out.diagnostics).toContainEqual({ identifier: 'copyright_ownership', reason: 'applicability_unmet' })
+    expect(out.diagnostics).toContainEqual({
+      identifier: 'copyright_ownership',
+      reason: 'applicability_unmet',
+      unmet_applicability: [{ claim_id: 'CLAIM-COPY-001-v1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+    })
   })
 
   test('Phase A: TOPIC_CLAIMS_FIXTURE is empty, so passing zero real topic claims produces byte-identical results to the pre-Phase-1 call shape', () => {
@@ -503,7 +507,13 @@ describe('retrieve -- Matrix applicability (CRC Narrow Matrix Applicability mile
     expect(out.results).toEqual([])
     // identifier is the claim's topic (commercial_use), not claim_id -- see
     // retrieve.ts's own comment at this exact call site for why.
-    expect(out.diagnostics).toEqual([{ identifier: 'commercial_use', reason: 'applicability_unmet' }])
+    expect(out.diagnostics).toEqual([
+      {
+        identifier: 'commercial_use',
+        reason: 'applicability_unmet',
+        unmet_applicability: [{ claim_id: 'test-matrix-jurisdiction', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'not_met' }],
+      },
+    ])
   })
 
   // Test D: unknown applicability fails closed identically to a known-wrong
@@ -526,7 +536,13 @@ describe('retrieve -- Matrix applicability (CRC Narrow Matrix Applicability mile
     }
     const out = retrieve(handoff({ tools: [{ identifier: 'test-matrix-jurisdiction', access_surface: 'unresolved', plan_tier: 'unknown' }] }), [gatedRow])
     expect(out.results).toEqual([])
-    expect(out.diagnostics).toEqual([{ identifier: 'unknown', reason: 'applicability_unmet' }])
+    expect(out.diagnostics).toEqual([
+      {
+        identifier: 'unknown',
+        reason: 'applicability_unmet',
+        unmet_applicability: [{ claim_id: 'test-matrix-jurisdiction', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+      },
+    ])
   })
 
   // Test E: two independently-governed conditional claims under one row
@@ -568,7 +584,15 @@ describe('retrieve -- Matrix applicability (CRC Narrow Matrix Applicability mile
     expect(out.results[0].claim_id).toBe('test-tool-tiered-paid')
     expect(out.results.some((r) => r.claim_id === 'test-tool-tiered-free')).toBe(false)
     // identifier is the (shared) topic, not the failing claim's own claim_id.
-    expect(out.diagnostics).toEqual([{ identifier: 'commercial_use', reason: 'applicability_unmet' }])
+    expect(out.diagnostics).toEqual([
+      {
+        identifier: 'commercial_use',
+        reason: 'applicability_unmet',
+        unmet_applicability: [
+          { claim_id: 'test-tool-tiered-free', requirement: { fact: 'tool_plan_tier', tool: 'test-tool-tiered', operator: 'equals', value: 'free' }, status: 'not_met' },
+        ],
+      },
+    ])
   })
 
   // Correction semantics: retrieve() is a pure function re-run fresh from

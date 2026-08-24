@@ -297,7 +297,11 @@ describe('buildBoundedInterpretations -- Case 3A / Case 3B relevant_applicabilit
     const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
     const out = retrieve(handoff(), MATRIX_FIXTURE, [g], topicClaims, unknownFacts)
     expect(out.results).toEqual([]) // Retrieval withholds the claim entirely -- by design
-    expect(out.diagnostics).toContainEqual({ identifier: 'copyrightability', reason: 'applicability_unmet' })
+    expect(out.diagnostics).toContainEqual({
+      identifier: 'copyrightability',
+      reason: 'applicability_unmet',
+      unmet_applicability: [{ claim_id: 'TEST-3A', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+    })
 
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
     expect(interp.status).toBe('relevant_applicability_unresolved')
@@ -1094,7 +1098,11 @@ describe('buildBoundedInterpretations -- Case 3A reuse for a Matrix-origin appli
     // identifier is the claim's topic (goal.category), not claim_id -- BI's
     // existing, unmodified Case 3A detection matches on category, exactly
     // like the topic path's own applicability_unmet diagnostic already does.
-    expect(out.diagnostics).toContainEqual({ identifier: 'commercial_use', reason: 'applicability_unmet' })
+    expect(out.diagnostics).toContainEqual({
+      identifier: 'commercial_use',
+      reason: 'applicability_unmet',
+      unmet_applicability: [{ claim_id: 'test-matrix-gated', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+    })
 
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
     expect(interp.status).toBe('relevant_applicability_unresolved')
