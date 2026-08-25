@@ -46,9 +46,17 @@ import { callWithOneRecoveryRetry } from './anthropic-structured-output-retry'
 
 export const DEFAULT_MODEL = 'claude-sonnet-5'
 
-/** Same sizing rationale as the decider -- see anthropic-decision.ts. */
-const BASE_CANDIDATE_QUESTION_MAX_TOKENS = 1024
-const RETRY_CANDIDATE_QUESTION_MAX_TOKENS = 2048
+/**
+ * Sized independently for candidate_generator (Candidate-Generator
+ * Token-Budget milestone, 2026-08-25) -- no longer inherited by analogy
+ * from the decider's own 1024/2048. A bounded 60-call real-model eval
+ * (simple/medium/dense/UAT-#5-reconstruction scenarios) found 1024/2048
+ * empirically insufficient for the UAT #5-class case (2/3 failures at
+ * each), while 3072/4096 cleared 15/15 and 3/3 respectively with
+ * substantial headroom, across every scenario tested.
+ */
+const BASE_CANDIDATE_QUESTION_MAX_TOKENS = 3072
+const RETRY_CANDIDATE_QUESTION_MAX_TOKENS = 4096
 
 /**
  * CRC Limited Pilot -- Commercial Readiness Discovery Catalog integration,
