@@ -496,26 +496,13 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   const phase = computePhase(suForGates, boundaryStateLoaded)
   const completion = checkCompletion(gate1, gate2Interview, phase, suForGates.opt_out_scope)
 
-  const suAfter: StructuredUnderstanding = {
+  let suAfter: StructuredUnderstanding = {
     ...suForGates,
     current_phase: phase,
     gate_1_state: gate1.state,
     gate_2_state: gate2Interview.state,
     completion_reason: completion.reason,
   }
-
-  if (completion.is_complete) {
-    await deps.sessionStore.save(input.token, {
-      structured_understanding: suAfter,
-      boundary_state: boundaryStateLoaded,
-      pending_clarification: null,
-      pending_commercial_readiness_takeaway: null,
-    })
-    const completeOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suAfter, deps.matrix, topicClaims, relationships) }
-    return precedingTakeaway ? { ...completeOutcome, precedingTakeaway } : completeOutcome
-  }
-
-  const eligible = deriveEligibleSignals(suAfter)
 
   // Duplicate-Question Prevention milestone (2026-08-19). Pre-seeds the
   // tool_plan_tier compound cap key for any tool whose plan_tier is ALREADY
@@ -525,7 +512,75 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   // boundaries.ts (deliberately StructuredUnderstanding-free). Idempotent,
   // pure, recomputed fresh every turn from current state -- everything
   // below this point uses this value in place of the bare loaded state.
+  // Computed BEFORE the completion check below (moved up from its original
+  // position immediately following this comment, pre-Selector-Opportunity-
+  // Before-Natural-Completion milestone) so the completion guard and the
+  // organic candidate-generation path share this exact same value -- one
+  // computation, never duplicated.
   const boundaryStateForTurn = presatisfyStructuralFollowUpNeeds(suAfter, boundaryStateLoaded)
+
+  if (completion.is_complete) {
+    // Selector Opportunity Before Natural Completion milestone (2026-08-25).
+    // Real-UAT-found defect: natural completion (checkCompletion, gates.ts)
+    // was entirely independent of whether an already-eligible, un-consumed
+    // governed selector need existed -- CRC could finalize with reason
+    // gate_1_gate_2_met (or gate_1_unmet_exhausted) one turn before a live
+    // tool_account_status-style question ever got a chance to compete in
+    // candidate generation below, because natural completion short-circuits
+    // before candidate generation ever runs.
+    //
+    // Fix: reuse deriveSelectorNeeds -- the exact same, sole selector-
+    // eligibility authority selector-questioning.ts and the organic path
+    // below already use -- as a gate on finalizing. No new eligibility
+    // logic is introduced; every existing boundary (once-per-conversation
+    // cap, askable_in_crc registry, explicit-confirmed-goal-only relevance,
+    // tool scoping, jurisdiction's own dedicated-module exclusion) is
+    // inherited for free because this calls the identical function with the
+    // identical inputs the real ask-path uses.
+    //
+    // Never applied to an interview-scope decline (`completion.reason ===
+    // 'declined'`): PRD_CRC_v1.0.md §9's User Override rule is explicit --
+    // an explicit stop ends things immediately, "regardless of either
+    // gate's status" -- this milestone does not relitigate that, matching
+    // every other decline-first precedent already in this file (Model 4,
+    // jurisdiction, human-contribution all exclude the decline path the
+    // same way).
+    //
+    // Self-limiting, not a checklist: once a selector's own cap is
+    // consumed -- whether the user answered clearly, ambiguously, said
+    // they don't know, or skipped -- deriveSelectorNeeds stops returning it
+    // (see selector-questioning.ts's own `selector_needs_used` cap check),
+    // so this guard stops deferring for it. Natural completion is delayed
+    // by AT MOST one turn per distinct askable selector fact, ever, never
+    // indefinitely -- CRC still completes normally with unresolved
+    // governed knowledge exactly as before whenever no selector need is
+    // (or is no longer) eligible.
+    const pendingSelectorNeeds =
+      completion.reason === 'declined' ? [] : deriveSelectorNeeds(suAfter, deps.matrix, topicClaims, boundaryStateForTurn)
+
+    if (pendingSelectorNeeds.length === 0) {
+      await deps.sessionStore.save(input.token, {
+        structured_understanding: suAfter,
+        boundary_state: boundaryStateLoaded,
+        pending_clarification: null,
+        pending_commercial_readiness_takeaway: null,
+      })
+      const completeOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suAfter, deps.matrix, topicClaims, relationships) }
+      return precedingTakeaway ? { ...completeOutcome, precedingTakeaway } : completeOutcome
+    }
+    // Else: at least one governed selector need is still live and
+    // un-consumed -- fall through to the ordinary candidate-generation
+    // path below, exactly like any other not-yet-complete turn. That path
+    // (unchanged by this milestone) already computes this exact same
+    // deriveSelectorNeeds result again and forces it as the selector's
+    // normal attempt-#1 candidate when nothing higher-precedence competes.
+    // completion_reason must not persist as non-null on a turn that did
+    // NOT actually finalize -- it was set above from checkCompletion's own
+    // (now-deferred) verdict, before this guard had a chance to act on it.
+    suAfter = { ...suAfter, completion_reason: null }
+  }
+
+  const eligible = deriveEligibleSignals(suAfter)
 
   let nextBoundaryState = boundaryStateForTurn
   let pendingClarification: PendingClarification | null = null
