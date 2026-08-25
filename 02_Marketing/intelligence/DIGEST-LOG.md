@@ -9,6 +9,42 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of August 25, 2026
+*Run: 2026-08-25 · 15 high · 6 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [IAB updates AI disclosure rules for advertisers](https://www.contentgrip.com/iab-ai-disclosure-framework/) | ContentGrip | Fri, 21 Aug 2026 | ☐ |
+| 9 | post+update | [IAB: AI Labeling Cuts Clickthroughs By A Third 08/20/2026](https://www.mediapost.com/publications/article/417340/iab-ai-labeling-cuts-clickthroughs-by-a-third.html?edition=143608) | MediaPost | Thu, 20 Aug 2026 | ☐ |
+| 9 | post+update | [AI ad labels cut clicks 31.5% as IAB issues disclosure framework](https://ppc.land/ai-ad-labels-cut-clicks-31-5-as-iab-issues-disclosure-framework/) | PPC Land | Thu, 20 Aug 2026 | ☐ |
+| 9 | post+update | [EU AI transparency rules: what they mean for your advertising (and why UK brands should care too)](https://www.mishcon.com/news/eu-ai-transparency-rules-what-they-mean-for-your-advertising-and-why-uk-brands-should-care-too) | Mishcon de Reya LLP | Wed, 19 Aug 2026 | ☐ |
+| 9 | post+update | [IAB revisits AI disclosure in ads as legal requirements multiply](https://www.marketingdive.com/news/iab-revisits-ai-disclosure-in-ads-as-legal-requirements-multiply/828182/) | Marketing Dive | Wed, 19 Aug 2026 | ☐ |
+| 9 | post+update | [IAB updates AI disclosure guidance as regulators tighten rules](https://thedesk.net/2026/08/iab-updates-ai-disclosure-guidance-as-regulators-tighten-rules/) | TheDesk.net | Wed, 19 Aug 2026 | ☐ |
+| 8 | post+update | [Twitch Streamer Sues Amazon Over AI Training, Claims Creator Content Used Without Consent](https://www.lawcommentary.com/articles/twitch-streamer-sues-amazon-over-ai-training-claims-creator-content-used-without-consent) | Law Commentary | Mon, 24 Aug 2026 | ☐ |
+| 8 | post+update | [New York complaint says apparel brand used AI 'models' without telling shoppers](https://www.thecooldown.com/green-tech/athletifreak-new-york-ai-models-complaint/) | The Cool Down | Mon, 24 Aug 2026 | ☐ |
+| 8 | post+update | [Why AI content labeling could hurt human authors](https://forklog.com/en/why-ai-content-labeling-could-hurt-human-authors/) | ForkLog | Fri, 21 Aug 2026 | ☐ |
+| 8 | post+update | [Jeen: EU AI Act Compliance Isn't a Policy Problem, It's an Evidence Problem, New Analysis Finds](https://www.einpresswire.com/article/935655218/jeen-eu-ai-act-compliance-isn-t-a-policy-problem-it-s-an-evidence-problem-new-analysis-finds) | EIN Presswire | Thu, 20 Aug 2026 | ☐ |
+| 8 | update | [AI View: August 2026](https://www.simmons-simmons.com/en/publications/cmt09z0uq0056uzywe1qk2rmr/ai-view:august-2026) | Simmons & Simmons | Wed, 19 Aug 2026 | ☐ |
+| 8 | update | [TikTok Parent ByteDance Agrees to AI Copyright Guardrails After Hollywood Dispute](https://www.lawcommentary.com/articles/tiktok-parent-bytedance-agrees-to-ai-copyright-guardrails-after-hollywood-dispute) | Law Commentary | Tue, 18 Aug 2026 | ☐ |
+| 7 | update | [European Digital Compliance: Key Digital Regulation & Compliance Developments - August 2026](https://www.jdsupra.com/legalnews/european-digital-compliance-key-digital-5584006/) | JD Supra | Fri, 21 Aug 2026 | ☐ |
+| 7 | post+update | [ByteDance Delays AI Video Tool Amid Hollywood Pushback](https://www.techrepublic.com/es/article/news-bytedance-delays-seedance-2-global-launch/) | TechRepublic | Fri, 21 Aug 2026 | ☐ |
+| 7 | post | [IAB updates standard for disclosing AI in ads](https://martech.org/iab-updates-standard-for-disclosing-ai-in-ads/) | MarTech | Tue, 18 Aug 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [BMA Webinar: Intelligent Media Asset Management For The AI Era](https://news.broadcastmediaafrica.com/2026/08/24/bma-webinar-the-intelligent-media-asset-management-mam-hub-transforming-content-management-for-the-ai-era/) | Broadcast Media Africa | Mon, 24 Aug 2026 | ☐ |
+| 6 | monitor | [Could Australian businesses be next? The potential impact of New York’s AI Ad Disclosure Laws](https://itwire.com/guest-articles/company-news/could-australian-businesses-be-next-the-potential-impact-of-new-york-s-ai-ad-disclosure-laws) | iTWire | Thu, 20 Aug 2026 | ☐ |
+| 6 | monitor | ["Operation AI Comply" 2 Years Later: Continued Enforcement Against Misleading Claims](https://www.hklaw.com/en/insights/publications/2026/08/operation-ai-comply-2-years-later-continued-enforcement) | Holland & Knight | Tue, 18 Aug 2026 | ☐ |
+| 5 | monitor | [Seedance 2.5 vs. MiniMax H3: The Business Case for Multimodal Video](https://techbullion.com/seedance-2-5-vs-minimax-h3-the-business-case-for-multimodal-video/) | TechBullion | Mon, 24 Aug 2026 | ☐ |
+| 4 | monitor | [ADIB appoints first chief AI officer to drive Vision 2035](https://gulfbusiness.com/en/2026/appointments/adib-appoints-first-chief-ai-officer-to-drive-vision-2035) | Gulf Business | Mon, 24 Aug 2026 | ☐ |
+| 4 | monitor | [AI ad labels cut click-through 31.5%, IAB framework cites NYU study](https://ppc.land/ai-ad-labels-cut-click-through-31-5-iab-framework-cites-nyu-study/) | PPC Land | Wed, 19 Aug 2026 | ☐ |
+
+---
+
 ## Week of August 22, 2026
 *Run: 2026-08-22 · 22 high · 7 monitor · lookback 7 days*
 
