@@ -902,36 +902,78 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
           nextBoundaryState = attempt3.nextBoundaryState
           pendingClarification = attempt3.pendingClarification
         } else {
-          // Bounded search exhausted (including the readiness check above,
-          // if one was even eligible) -- finalize. Constructed directly
-          // here, never via checkCompletion(), which remains entirely
-          // unaware of Constraint B/BoundaryState by design (see
-          // COMPLETION_REASONS' own doc in types/interview-engine.ts and
-          // this module's own header). Per the approved Track B
-          // architecture, gates.ts/checkCompletion() are deliberately left
-          // byte-identical -- this readiness check lives entirely in this
-          // orchestration layer, the same layer that already constructs
-          // this exact completion_reason value directly. nextBoundaryState
-          // is still boundaryStateForTurn here: neither rejected attempt
-          // (including a rejected attempt3, if one was tried) ever reaches
-          // evaluateBoundary's "allowed" branch (the only branch that
-          // mutates boundary state), so there is nothing to carry forward
-          // beyond what was already loaded.
-          const suExhausted: StructuredUnderstanding = { ...suAfter, completion_reason: 'questioning_exhausted' }
-          await deps.sessionStore.save(input.token, {
-            structured_understanding: suExhausted,
-            boundary_state: nextBoundaryState,
-            pending_clarification: null,
-            pending_commercial_readiness_takeaway: null,
-          })
-          const exhaustedOutcome: TurnOutcome = {
-            kind: 'complete',
-            result: runCRCConversation(suExhausted, deps.matrix, topicClaims, relationships),
-            discoverySignal,
-            jurisdictionSignal,
-            humanContributionSignal,
+          // Selector Opportunity at questioning_exhausted milestone
+          // (2026-08-25), same slot/reasoning as the Track B readiness
+          // check immediately above (attempt3): a real UAT found that
+          // checkCompletion()'s own selector-completion guard (added by the
+          // prior milestone) correctly defers ordinary gate_1_gate_2_met
+          // completion when a governed selector need is still pending, but
+          // a HIGHER-precedence forced candidate (jurisdiction/human-
+          // contribution/Discovery) can still legitimately occupy attempt 1
+          // this same turn, get rejected, exhaust attempt 2 (always the
+          // ordinary pool, per Model 4's own unchanged rule), and fall
+          // through to questioning_exhausted -- a separate finalization
+          // path that never re-consults checkCompletion() and therefore
+          // never saw the still-pending selector at all. This is attempt
+          // #4 (or #3, if the Track B readiness check above never had a
+          // proposal to try), one more forced, deterministic candidate,
+          // through the exact same validate -> Constraint A -> Constraint
+          // B pipeline as every other candidate -- no privileged pass, and
+          // never earlier than this exact last-resort point, so it cannot
+          // steal a turn from jurisdiction/human-contribution/Discovery/
+          // ordinary organic generation, or from Track B's own readiness
+          // check, all of which remain entirely unchanged above. Reuses
+          // deriveSelectorNeeds/buildSelectorNeedProposal verbatim -- the
+          // exact same sole eligibility/cap/askability authority the
+          // ordinary selector path already uses -- so every existing
+          // boundary (once-per-conversation cap, askable_in_crc registry,
+          // explicit-confirmed-goal-only relevance, tool scoping,
+          // jurisdiction's own dedicated-module exclusion) is inherited for
+          // free. If rejected, or if no need is eligible at all (already
+          // consumed, non-askable, discovered-only, or genuinely none),
+          // exhaustion proceeds exactly as before this milestone -- no
+          // retry, no fallback to a second forced candidate, no loop.
+          const exhaustionSelectorNeeds = deriveSelectorNeeds(suAfter, deps.matrix, topicClaims, boundaryStateForTurn)
+          const exhaustionSelectorProposal = exhaustionSelectorNeeds[0] ? buildSelectorNeedProposal(exhaustionSelectorNeeds[0], phase) : undefined
+          const attempt4 = exhaustionSelectorProposal ? await tryCandidate(suAfter, eligible, phase, boundaryStateForTurn, deps, undefined, exhaustionSelectorProposal) : undefined
+
+          if (attempt4 && attempt4.status === 'approved') {
+            outcome = attempt4.outcome
+            nextBoundaryState = attempt4.nextBoundaryState
+            pendingClarification = attempt4.pendingClarification
+          } else {
+            // Bounded search exhausted (including the readiness and
+            // selector checks above, if either was even eligible) --
+            // finalize. Constructed directly here, never via
+            // checkCompletion(), which remains entirely unaware of
+            // Constraint B/BoundaryState by design (see COMPLETION_REASONS'
+            // own doc in types/interview-engine.ts and this module's own
+            // header). Per the approved Track B architecture, gates.ts/
+            // checkCompletion() are deliberately left byte-identical -- the
+            // readiness and selector checks both live entirely in this
+            // orchestration layer, the same layer that already constructs
+            // this exact completion_reason value directly. nextBoundaryState
+            // is still boundaryStateForTurn here: no rejected attempt
+            // (including a rejected attempt3 or attempt4, if either was
+            // tried) ever reaches evaluateBoundary's "allowed" branch (the
+            // only branch that mutates boundary state), so there is nothing
+            // to carry forward beyond what was already loaded.
+            const suExhausted: StructuredUnderstanding = { ...suAfter, completion_reason: 'questioning_exhausted' }
+            await deps.sessionStore.save(input.token, {
+              structured_understanding: suExhausted,
+              boundary_state: nextBoundaryState,
+              pending_clarification: null,
+              pending_commercial_readiness_takeaway: null,
+            })
+            const exhaustedOutcome: TurnOutcome = {
+              kind: 'complete',
+              result: runCRCConversation(suExhausted, deps.matrix, topicClaims, relationships),
+              discoverySignal,
+              jurisdictionSignal,
+              humanContributionSignal,
+            }
+            return precedingTakeaway ? { ...exhaustedOutcome, precedingTakeaway } : exhaustedOutcome
           }
-          return precedingTakeaway ? { ...exhaustedOutcome, precedingTakeaway } : exhaustedOutcome
         }
       }
     }
