@@ -810,6 +810,12 @@ export function createAnthropicExtractor(options?: AnthropicExtractorOptions): C
         model,
         max_tokens: maxTokens,
         system: SYSTEM_PROMPT,
+        // Explicitly disabled (Extractor Thinking Disable milestone,
+        // 2026-08-26): claude-sonnet-5 thinks by default, and that thinking
+        // shares this same max_tokens allowance with the structured output
+        // below -- disabling it keeps the full allowance available for the
+        // structured extraction result.
+        thinking: { type: 'disabled' },
         messages: [{ role: 'user', content: buildUserMessageContent(turn) }],
         output_config: { format: jsonSchemaOutputFormat(CANDIDATE_RESPONSE_SCHEMA) },
         // No temperature/top_p/top_k -- API defaults only, unchanged.
@@ -854,6 +860,9 @@ export async function extractWithDiagnostics(
       model,
       max_tokens: maxTokens,
       system: SYSTEM_PROMPT,
+      // Explicitly disabled -- see createAnthropicExtractor's identical
+      // setting above for the reason.
+      thinking: { type: 'disabled' },
       messages: [{ role: 'user', content: buildUserMessageContent(turn) }],
       output_config: { format: jsonSchemaOutputFormat(CANDIDATE_RESPONSE_SCHEMA) },
     }),
