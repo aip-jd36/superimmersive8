@@ -473,6 +473,19 @@ export const COMPLETION_REASONS = [
    * header for the full reasoning).
    */
   'questioning_exhausted',
+  /**
+   * CRC Global User-Facing Question Budget milestone (2026-08-26).
+   * Deliberately distinct from 'questioning_exhausted': that reason means
+   * the bounded candidate search found no further permissible question at
+   * all; this one means CRC deliberately stopped at its own product-level
+   * conversation ceiling (MAX_USER_FACING_QUESTIONS) while further
+   * candidate work may still have been possible -- a different provenance
+   * fact worth preserving even though no downstream consumer currently
+   * reads it differently. Constructed directly by run-turn.ts's own
+   * budget check, never by checkCompletion() -- same non-ownership
+   * discipline as questioning_exhausted above.
+   */
+  'question_budget_exhausted',
 ] as const
 
 export type CompletionReason = (typeof COMPLETION_REASONS)[number] | null

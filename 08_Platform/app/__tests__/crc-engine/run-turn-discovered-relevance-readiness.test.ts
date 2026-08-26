@@ -77,12 +77,12 @@ describe('V: Track B readiness sees discovered-topic eligibility (unit level)', 
     const syntheticClaim = { ...TOPIC_CLAIMS_FIXTURE[0], claim_id: 'CLAIM-TEST-DISCOVERED', topic: 'third_party_source_rights' as const, provider_scope: ['istock'] as ('istock' | 'getty' | 'shutterstock' | 'adobe-stock')[], unresolved_project_dependencies: ['test_provider_license_confirmed'], lifecycle: 'Adopted' as const, crc_eligible: 'Yes' as const, superseded_by: null, applicability_requirements: [] }
 
     // Without discoveredTopics: Track B cannot see the claim (no explicit goal).
-    const withoutDiscovery = deriveKnowledgeReadinessNeeds(su, [syntheticClaim], { follow_ups_used: {}, uncertainty_clarifications_used: {}, historical_experience_asked: false, disentangling_question_asked: false, commercial_readiness_discovery_asked: false, jurisdiction_clarification_asked: false, human_contribution_clarification_asked: false, jurisdiction_clarification_retry_asked: false, jurisdiction_clarification_pending_answer: false, knowledge_readiness_used: {}, selector_needs_used: {}, interview_ended: false, phases_ended: [] })
+    const withoutDiscovery = deriveKnowledgeReadinessNeeds(su, [syntheticClaim], { follow_ups_used: {}, uncertainty_clarifications_used: {}, historical_experience_asked: false, disentangling_question_asked: false, commercial_readiness_discovery_asked: false, jurisdiction_clarification_asked: false, human_contribution_clarification_asked: false, jurisdiction_clarification_retry_asked: false, jurisdiction_clarification_pending_answer: false, knowledge_readiness_used: {}, selector_needs_used: {}, interview_ended: false, phases_ended: [], user_facing_questions_asked: 0 })
     expect(withoutDiscovery).toHaveLength(0)
 
     // With discoveredTopics: Track B now sees it.
     const discoveredTopics = discoveredTopicCategories(deriveDiscoveredTopicOccurrences(su, [syntheticClaim]))
-    const withDiscovery = deriveKnowledgeReadinessNeeds(su, [syntheticClaim], { follow_ups_used: {}, uncertainty_clarifications_used: {}, historical_experience_asked: false, disentangling_question_asked: false, commercial_readiness_discovery_asked: false, jurisdiction_clarification_asked: false, human_contribution_clarification_asked: false, jurisdiction_clarification_retry_asked: false, jurisdiction_clarification_pending_answer: false, knowledge_readiness_used: {}, selector_needs_used: {}, interview_ended: false, phases_ended: [] }, discoveredTopics)
+    const withDiscovery = deriveKnowledgeReadinessNeeds(su, [syntheticClaim], { follow_ups_used: {}, uncertainty_clarifications_used: {}, historical_experience_asked: false, disentangling_question_asked: false, commercial_readiness_discovery_asked: false, jurisdiction_clarification_asked: false, human_contribution_clarification_asked: false, jurisdiction_clarification_retry_asked: false, jurisdiction_clarification_pending_answer: false, knowledge_readiness_used: {}, selector_needs_used: {}, interview_ended: false, phases_ended: [], user_facing_questions_asked: 0 }, discoveredTopics)
     expect(withDiscovery).toHaveLength(1)
     expect(withDiscovery[0].provider_mention_id).toBe('ap-1')
   })
@@ -114,7 +114,7 @@ describe('run-turn.ts end-to-end: discovered relevance feeds Track B without any
         knowledge_readiness_used: {},
         selector_needs_used: {},
         interview_ended: false,
-        phases_ended: [],
+        phases_ended: [], user_facing_questions_asked: 0,
       },
       pending_clarification: null,
       pending_commercial_readiness_takeaway: null,
@@ -157,7 +157,7 @@ describe('run-turn.ts end-to-end: discovered relevance feeds Track B without any
         knowledge_readiness_used: {},
         selector_needs_used: {},
         interview_ended: false,
-        phases_ended: [],
+        phases_ended: [], user_facing_questions_asked: 0,
       },
       pending_clarification: null,
       pending_commercial_readiness_takeaway: null,

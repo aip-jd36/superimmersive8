@@ -169,6 +169,18 @@ import type { Phase, StructuredUnderstanding } from '@/types/interview-engine'
 const ACKNOWLEDGMENT_COPY = 'Got it ??thanks for sharing that.'
 
 /**
+ * CRC Global User-Facing Question Budget milestone (2026-08-26). A ceiling,
+ * not a target -- natural completion (checkCompletion) and the interview-
+ * scope decline path are both checked before this ever applies, and this
+ * bounded-eval-supported value (see CRC-GLOBAL-QUESTION-BUDGET eval,
+ * 2026-08-26) only ever stops the organic candidate-precedence chain from
+ * proposing question #7, never adds a question that wouldn't otherwise have
+ * been asked. Sized from evidence, not intuition -- see that eval's own
+ * report for the full reasoning.
+ */
+const MAX_USER_FACING_QUESTIONS = 6
+
+/**
  * Not imported from lib/interview-engine/eval/empty-structured-understanding.ts
  * deliberately -- that module lives under eval/, and production code must
  * never depend on eval-only code (the same directionality the subsystem-
@@ -638,6 +650,30 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
       nextBoundaryState = boundaryResult.next_state
     }
   } else {
+    // CRC Global User-Facing Question Budget milestone (2026-08-26). Checked
+    // BEFORE any of the existing candidate-precedence chain below --
+    // jurisdiction/human-contribution/Discovery/selector/ordinary/Track B
+    // readiness are all downstream of this check, so once the ceiling is
+    // reached, attempt #1 never even begins. A ceiling, not a target: this
+    // only ever fires when checkCompletion() and the interview-scope
+    // decline path (both above) have already found the conversation not yet
+    // complete -- natural completion always wins first. discoverySignal/
+    // jurisdictionSignal/humanContributionSignal stay unset here (never
+    // became eligible this turn -- correctly matches their own "only set
+    // when actually eligible" scoping), the same way they stay unset on the
+    // decline branch above.
+    if (boundaryStateForTurn.user_facing_questions_asked >= MAX_USER_FACING_QUESTIONS) {
+      const suBudgetExhausted: StructuredUnderstanding = { ...suAfter, completion_reason: 'question_budget_exhausted' }
+      await deps.sessionStore.save(input.token, {
+        structured_understanding: suBudgetExhausted,
+        boundary_state: boundaryStateForTurn,
+        pending_clarification: null,
+        pending_commercial_readiness_takeaway: null,
+      })
+      const budgetExhaustedOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suBudgetExhausted, deps.matrix, topicClaims, relationships) }
+      return precedingTakeaway ? { ...budgetExhaustedOutcome, precedingTakeaway } : budgetExhaustedOutcome
+    }
+
     // CRC Limited Pilot -- Model 4 (bounded alternative-question search),
     // 2026-08-10. Organic path only. At most one alternative attempt
     // after a rejected OR null first candidate -- a null result is not
@@ -992,9 +1028,26 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     outcome.kind === 'question' &&
     (outcome.message === JURISDICTION_CLARIFICATION_QUESTION || outcome.message === JURISDICTION_CLARIFICATION_RETRY_QUESTION)
 
+  // CRC Global User-Facing Question Budget milestone (2026-08-26). Computed
+  // directly from the FINAL outcome, same discipline as
+  // jurisdictionQuestionJustAsked immediately above -- the single choke
+  // point every path that can produce a real, persisted, user-facing
+  // question already funnels through, so this covers every source
+  // (jurisdiction, human-contribution, Discovery, selector, Track B
+  // readiness, ordinary, and the decline path's own substitute question)
+  // uniformly, with no per-source wiring needed. Never incremented for a
+  // rejected/internal candidate attempt, a failed model/API call, an
+  // educational_takeaway, or an acknowledgment -- those never reach this
+  // line as outcome.kind === 'question' in the first place.
+  const userFacingQuestionsAsked = nextBoundaryState.user_facing_questions_asked + (outcome.kind === 'question' ? 1 : 0)
+
   const sessionState: CRCSessionState = {
     structured_understanding: suAfter,
-    boundary_state: { ...nextBoundaryState, jurisdiction_clarification_pending_answer: jurisdictionQuestionJustAsked },
+    boundary_state: {
+      ...nextBoundaryState,
+      jurisdiction_clarification_pending_answer: jurisdictionQuestionJustAsked,
+      user_facing_questions_asked: userFacingQuestionsAsked,
+    },
     pending_clarification: pendingClarification,
     pending_commercial_readiness_takeaway: nextPendingTakeawayCategory,
   }

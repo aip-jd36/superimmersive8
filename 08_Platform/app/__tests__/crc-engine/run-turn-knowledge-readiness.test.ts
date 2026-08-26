@@ -104,7 +104,7 @@ async function seedRelevantSession(store: SessionStore, token: string) {
       knowledge_readiness_used: {},
       selector_needs_used: {},
       interview_ended: false,
-      phases_ended: [],
+      phases_ended: [], user_facing_questions_asked: 0,
     },
     pending_clarification: null,
     pending_commercial_readiness_takeaway: null,

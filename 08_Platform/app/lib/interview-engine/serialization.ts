@@ -157,7 +157,17 @@ export function deserializeBoundaryState(json: string): BoundaryState {
   // 2026-08-24): same Record<string, number> default-on-missing treatment as
   // knowledge_readiness_used immediately above, for the same reason -- a
   // session persisted before this field existed has no key for it at all.
-  return { ...parsed, knowledge_readiness_used: parsed.knowledge_readiness_used ?? {}, selector_needs_used: parsed.selector_needs_used ?? {} }
+  // user_facing_questions_asked (CRC Global User-Facing Question Budget
+  // milestone, 2026-08-26): defaulted to 0, not left to fall back on falsy-
+  // undefined like the boolean `_asked` fields -- this field is
+  // incremented (`+ 1`), and `undefined + 1` is `NaN`, so it needs the same
+  // explicit-default treatment as the Record fields, not the booleans'.
+  return {
+    ...parsed,
+    knowledge_readiness_used: parsed.knowledge_readiness_used ?? {},
+    selector_needs_used: parsed.selector_needs_used ?? {},
+    user_facing_questions_asked: parsed.user_facing_questions_asked ?? 0,
+  }
 }
 
 /**

@@ -382,6 +382,24 @@ export interface BoundaryState {
   interview_ended: boolean
   /** Phases closed by a phase-scoped decline. A phase not in this list is unaffected, even after another phase closes -- closing one phase must not automatically end unrelated future questioning in a different phase. */
   phases_ended: Phase[]
+  /**
+   * CRC Global User-Facing Question Budget milestone (2026-08-26). Global,
+   * once-per-conversation counter -- every other cap in this file is a
+   * per-signal or per-kind eligibility boundary; this is the one generic
+   * count of how many questions the user has actually been shown, checked
+   * against MAX_USER_FACING_QUESTIONS in run-turn.ts, above its existing
+   * candidate precedence chain, never inside it. Incremented exactly once,
+   * only when a question is the turn's actual, persisted, user-facing
+   * outcome -- never for a rejected/internal candidate attempt, a failed
+   * model/API call, an educational_takeaway, or an acknowledgment. A
+   * missing value on a pre-this-milestone session deserializes as
+   * `undefined` -- unlike the boolean `_asked` fields, this field is
+   * incremented (`+ 1`), and `undefined + 1` is `NaN`, so
+   * `serialization.ts`'s `deserializeBoundaryState` explicitly defaults it
+   * to `0`, the same discipline already used for the Record-shaped fields
+   * above.
+   */
+  user_facing_questions_asked: number
 }
 
 export function createInitialBoundaryState(): BoundaryState {
@@ -399,6 +417,7 @@ export function createInitialBoundaryState(): BoundaryState {
     knowledge_readiness_used: {},
     interview_ended: false,
     phases_ended: [],
+    user_facing_questions_asked: 0,
   }
 }
 
