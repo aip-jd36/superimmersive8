@@ -163,10 +163,20 @@ export type CandidateQuestionKind = (typeof CANDIDATE_QUESTION_KINDS)[number]
  *   the SAME loophole -- included because it reuses the identical mechanism
  *   at near-zero extra cost, not because tool-mention follow-ups in general
  *   are in scope.
+ * - 'jurisdiction' (Jurisdiction Organic Follow-Up Need milestone,
+ *   2026-08-26): concrete, reproduced Class-D evidence (real production data
+ *   + the accepted question-budget eval) showed an organic `kind: 'other'`
+ *   candidate can ask a jurisdiction-shaped question with `target_signal_id:
+ *   null`, carrying no cap at all -- distinct from the dedicated
+ *   `jurisdiction_clarification`/`_retry` catalog questions
+ *   (jurisdiction-clarification.ts), which remain separately capped and
+ *   unaffected. This closes that one specific, evidenced gap; it does not
+ *   generalize to any other project fact without its own equally concrete
+ *   evidence.
  * This list is expected to grow only when a concrete, reproduced duplicate
  * case justifies a new value -- never speculatively.
  */
-export const FOLLOW_UP_NEEDS = ['asset_provider_usage', 'asset_provider_license', 'tool_plan_tier'] as const
+export const FOLLOW_UP_NEEDS = ['asset_provider_usage', 'asset_provider_license', 'tool_plan_tier', 'jurisdiction'] as const
 
 export type FollowUpNeed = (typeof FOLLOW_UP_NEEDS)[number]
 

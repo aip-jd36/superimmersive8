@@ -351,6 +351,95 @@ describe('follow-up need cap (Duplicate-Question Prevention milestone, 2026-08-1
   })
 })
 
+describe('jurisdiction follow_up_need cap (Jurisdiction Organic Follow-Up Need milestone, 2026-08-26)', () => {
+  test('A. "jurisdiction" is an accepted FOLLOW_UP_NEEDS value -- a candidate carrying it evaluates through the same compound-key path as every other need, not a fallback/unknown branch', () => {
+    const result = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'other', signal_id: 'project:jurisdiction', follow_up_need: 'jurisdiction' }),
+    )
+    expect(result.allowed).toBe(true)
+    expect(result.reason_code).toBe('ALLOWED')
+  })
+
+  test('B. first eligible organic jurisdiction need passes when unused, and consumes the compound key', () => {
+    const result = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'other', signal_id: 'project:jurisdiction', follow_up_need: 'jurisdiction' }),
+    )
+    expect(result.allowed).toBe(true)
+    expect(result.next_state.follow_ups_used['project:jurisdiction::jurisdiction']).toBe(1)
+  })
+
+  test('C. after that need is consumed, another organic candidate carrying the same jurisdiction follow_up_need is deterministically rejected by Constraint B', () => {
+    const first = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'other', signal_id: 'project:jurisdiction', follow_up_need: 'jurisdiction' }),
+    )
+    const repeat = evaluateBoundary(
+      first.next_state,
+      candidate({ kind: 'other', signal_id: 'project:jurisdiction', follow_up_need: 'jurisdiction' }),
+    )
+    expect(repeat.allowed).toBe(false)
+    expect(repeat.reason_code).toBe('FOLLOW_UP_NEED_ALREADY_ASKED')
+    expect(repeat.action_scope).toBe('suppress_current_question')
+  })
+
+  test('D. rewording does not bypass the cap -- enforcement is structural (signal_id + follow_up_need), not question text, so a differently-classified-but-same-need candidate (follow_up_on_signal instead of other) is indistinguishable from a repeat', () => {
+    const first = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'other', signal_id: 'project:jurisdiction', follow_up_need: 'jurisdiction' }),
+    )
+    const reworded = evaluateBoundary(
+      first.next_state,
+      candidate({ kind: 'follow_up_on_signal', signal_id: 'project:jurisdiction', follow_up_need: 'jurisdiction' }),
+    )
+    expect(reworded.allowed).toBe(false)
+    expect(reworded.reason_code).toBe('FOLLOW_UP_NEED_ALREADY_ASKED')
+  })
+
+  test('E. a different follow_up_need (tool_plan_tier) remains eligible after jurisdiction is consumed -- the compound key keeps the two vocabularies independent', () => {
+    const jurisdictionAsked = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'other', signal_id: 'project:jurisdiction', follow_up_need: 'jurisdiction' }),
+    )
+    const toolPlanTier = evaluateBoundary(
+      jurisdictionAsked.next_state,
+      candidate({ kind: 'follow_up_on_signal', signal_id: 'tm-1', follow_up_need: 'tool_plan_tier' }),
+    )
+    expect(toolPlanTier.allowed).toBe(true)
+    expect(toolPlanTier.reason_code).toBe('ALLOWED')
+  })
+
+  test('the jurisdiction follow_up_need cap and the separate targets_confirmed_jurisdiction suppression are two independent, uncollapsed routes -- consuming one never touches the other\'s state', () => {
+    const jurisdictionNeedAsked = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'other', signal_id: 'project:jurisdiction', follow_up_need: 'jurisdiction' }),
+    )
+    // targets_confirmed_jurisdiction is a stateless, precomputed-flag check
+    // (boundaries.ts never sets it -- the caller derives it from
+    // StructuredUnderstanding before calling evaluateBoundary), so it still
+    // fires deterministically on the very next call even though a jurisdiction
+    // follow_up_need was just consumed above -- the two mechanisms don't share
+    // a counter or a code path.
+    const confirmedBlock = evaluateBoundary(
+      jurisdictionNeedAsked.next_state,
+      candidate({ kind: 'follow_up_on_signal', signal_id: 'project:jurisdiction', targets_confirmed_jurisdiction: true }),
+    )
+    expect(confirmedBlock.allowed).toBe(false)
+    expect(confirmedBlock.reason_code).toBe('JURISDICTION_ALREADY_CONFIRMED')
+  })
+
+  test('the jurisdiction follow_up_need cap and the dedicated jurisdiction_clarification/_retry catalog caps are two independent, uncollapsed routes -- consuming the organic need cap never consumes the dedicated module\'s own cap', () => {
+    const jurisdictionNeedAsked = evaluateBoundary(
+      createInitialBoundaryState(),
+      candidate({ kind: 'other', signal_id: 'project:jurisdiction', follow_up_need: 'jurisdiction' }),
+    )
+    const dedicatedStillAllowed = evaluateBoundary(jurisdictionNeedAsked.next_state, candidate({ kind: 'jurisdiction_clarification' }))
+    expect(dedicatedStillAllowed.allowed).toBe(true)
+    expect(jurisdictionNeedAsked.next_state.jurisdiction_clarification_asked).toBe(false)
+  })
+})
+
 describe('confirmed-jurisdiction suppression (Second-Jurisdiction UX milestone, 2026-08-20, J2)', () => {
   test('G. targets_confirmed_jurisdiction: true -> BLOCK, deterministic, no counter touched', () => {
     const state = createInitialBoundaryState()

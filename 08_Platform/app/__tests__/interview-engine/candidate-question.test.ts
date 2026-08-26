@@ -356,6 +356,26 @@ describe('validateCandidateReference', () => {
         candidate: { kind: 'other', signal_id: 'ap-1', phase: 3, follow_up_need: 'asset_provider_usage' },
       })
     })
+
+    // Jurisdiction Organic Follow-Up Need milestone (2026-08-26).
+    test('A. accepts jurisdiction when target_signal_id resolves to the always-eligible project:jurisdiction project_fact, even on kind "other" -- the organic generator classifies this without a target_signal_id: null escape hatch', () => {
+      const result = validateCandidateReference(
+        proposal({ question_kind: 'other', target_signal_id: 'project:jurisdiction', target_follow_up_need: 'jurisdiction' }),
+        eligibleWithProvider,
+      )
+      expect(result).toEqual({
+        outcome: 'accepted',
+        candidate: { kind: 'other', signal_id: 'project:jurisdiction', phase: 3, follow_up_need: 'jurisdiction' },
+      })
+    })
+
+    test('rejects jurisdiction targeting a tool_mention (wrong signal kind for this need) -- same FOLLOW_UP_NEED_TARGET_MISMATCH precedent as tool_plan_tier/asset_provider_*', () => {
+      const result = validateCandidateReference(
+        proposal({ target_signal_id: 'tm-1', target_follow_up_need: 'jurisdiction' }),
+        eligibleWithProvider,
+      )
+      expect(result).toMatchObject({ outcome: 'rejected', reason_code: 'FOLLOW_UP_NEED_TARGET_MISMATCH' })
+    })
   })
 })
 

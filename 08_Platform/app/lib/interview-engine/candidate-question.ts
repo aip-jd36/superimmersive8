@@ -290,11 +290,21 @@ export const CANDIDATE_QUESTION_REJECTION_REASON_CODES = [
   'FOLLOW_UP_NEED_TARGET_MISMATCH',
 ] as const
 
-/** Which EligibleSignalKind a given FollowUpNeed must target, if the need is set at all. */
+/**
+ * Which EligibleSignalKind a given FollowUpNeed must target, if the need is
+ * set at all. 'jurisdiction' maps to 'project_fact', the same kind
+ * 'project:workflow_role'/'project:intended_use' also carry -- this is a
+ * kind-level check only, same precision as every other entry here (e.g.
+ * 'tool_plan_tier' accepts ANY tool_mention, not a specific one); the actual
+ * jurisdiction cap's precision comes from the compound
+ * `${signal_id}::${follow_up_need}` key in evaluateBoundary, which requires
+ * the exact 'project:jurisdiction' signal_id, not merely a project_fact.
+ */
 const FOLLOW_UP_NEED_REQUIRED_SIGNAL_KIND: Record<FollowUpNeed, EligibleSignalKind> = {
   asset_provider_usage: 'asset_provider_mention',
   asset_provider_license: 'asset_provider_mention',
   tool_plan_tier: 'tool_mention',
+  jurisdiction: 'project_fact',
 }
 
 export type CandidateQuestionRejectionReasonCode = (typeof CANDIDATE_QUESTION_REJECTION_REASON_CODES)[number]
