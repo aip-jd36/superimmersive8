@@ -319,3 +319,13 @@ Neither correction changes this review's substantive conclusions (§4, §9) — 
 **Excluded, unchanged:** A-7b (seat/member mechanics) remains DEFERRED, not drafted. G-1 (generic access≠license) remains REJECTED. Neither is a proposed Adoption candidate.
 
 PM adoption status (updated): still **PENDING HUMAN APPROVAL** — this addendum corrects wording and closes a traceability gap; it does not constitute or infer approval.
+
+---
+
+## Human Adoption decision recorded (2026-08-27)
+
+**PM adoption status: APPROVED — ADOPTED.** CRC PM / Architecture explicitly reviewed the corrected Human Adoption Decision packet (§ above, all 10 exact final propositions) and selected **APPROVE ALL PROPOSED ADOPTIONS**. Adoption Approver: **JD (PM)**. Adoption Decision Date: **2026-08-27**.
+
+The 10 approved propositions are now recorded as `Lifecycle: Adopted` in `GOVERNED-CLAIMS.md` (Wave 3, Third-Party Source Assets / Music Licensing — the claim IDs are unchanged from those listed in this addendum, with A-7a recorded under its full ID `CLAIM-MUSIC-ARTLIST-ENTERPRISE-THRESHOLD-001-v1`). This Adoption did **not** grant CRC eligibility to any claim (`CRC Approver`/`CRC Decision Date` remain `PENDING` on all 10 in `GOVERNED-CLAIMS.md`, exactly matching this review's own §9 recommendations, which remain recommendations only pending a separate CRC Publication Review) — Adoption and CRC Publication remain the two distinct governance stages this document's own §1 always held them to be. A-7b (seat/member mechanics) remains deferred, undrafted, not adopted. G-1 (`CLAIM-MUSIC-ACCESS-NOT-LICENSE-001-v1`) remains rejected, not adopted.
+
+Adoption recording commit: see `governance-reviews/README.md`'s own index for the exact SHA once integrated.

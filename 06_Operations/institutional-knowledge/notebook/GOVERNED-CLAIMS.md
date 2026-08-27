@@ -1254,3 +1254,665 @@ one.
 Full review artifact: `governance-reviews/FGR_005_CAND-STOCK-ISTOCK-EDITORIAL-001_2026-08-17.md`
 Full CRC Publication Review artifact: `governance-reviews/CPR_004_CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1_2026-08-18.md`
 Full Dependency Askability Review artifact: `governance-reviews/DAR_001_STOCK_DEPENDENCY_ASKABILITY_2026-08-21.md`
+
+**Wave 3 claims below (2026-08-27) — the first claims outside Copyright & Human Authorship and Third-Party Source Assets / Stock Media Licensing, and the first in the Third-Party Source Assets / Music Licensing domain. All ten `Lifecycle: Adopted` (Adoption Approver: JD (PM), Adoption Decision Date: 2026-08-27, following explicit human review and approval of the corrected Human Adoption Decision packet — "APPROVE ALL PROPOSED ADOPTIONS"), `Publication scope: Reviewer/Commercial Assurance`. None are CRC-eligible — `CRC Approver`/`CRC Decision Date` PENDING on all ten, same discipline as every prior wave; a separate CRC Publication Review is required per claim before any becomes `CRC Eligible: Yes`. Formal Governance Review: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md` (combined-package review, 11 candidates reviewed, 10 accepted/narrowed for Adoption as recorded below, 1 deferred without drafting — FGR_006's own "A-7b," Artlist seat/member mechanics, was never assigned a claim ID and is NOT adopted — and 1 rejected — `CLAIM-MUSIC-ACCESS-NOT-LICENSE-001-v1` (FGR_006's "G-1") is NOT adopted). Source candidate package: `MUSIC-SCENARIO-A-FGR-PACKAGE.md` (this folder). Runtime note, same shape as Wave 2's own: none of these ten claims has any `TOPIC_CLAIMS_FIXTURE` (`08_Platform/app/lib/retrieval-engine/topic-claims-fixture.ts`) representation, and every one of their `provider_scope` values (`envato-elements`, `epidemic-sound`, `artlist`) is not yet a registered `AssetProviderId` in `ASSET_PROVIDER_IDS` (`08_Platform/app/types/interview-engine.ts`, currently `getty`/`istock`/`shutterstock`/`adobe-stock` only) — confirmed directly against current code as part of this Adoption recording, not assumed from the FGR. This is Adoption as pure governance documentation, with zero runtime effect: these ten claims are governed Living Knowledge, immediately useful to a human reviewer per `PRD_LIVING_KNOWLEDGE_SOURCE_INPUTS_v0.1.md` §9 (same principle already established for Getty at adoption time), but structurally unreachable by CRC Retrieval until a separate, deliberately unperformed engineering task registers the three music providers and adds fixture entries.**
+
+### CLAIM-MUSIC-ENVATO-SYNC-001-v1
+Domain: Third-Party Source Assets / Music Licensing
+Topic: third_party_source_rights
+Subtopic: envato-sync-license-scope-and-broadcast-standalone-exclusions
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — governed by Envato Elements' current License Terms, not a legal jurisdiction.
+Context: Commercial Assurance evidence review of any commercial video workflow that incorporates a pre-existing licensed Envato Elements music track
+
+GOVERNANCE TREATMENT (2026-08-27, PM adoption decision, following Formal Governance Review #6 — combined package, `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`): `provider_scope: ['envato-elements']` — NOT YET a valid runtime `AssetProviderId` (see Wave 3 header note above); this claim is Adopted governed knowledge but not CRC-reachable via Retrieval until `ASSET_PROVIDER_IDS` and its alias-resolution table (`extraction.ts`'s `KNOWN_ASSET_PROVIDERS`) are extended — a generic registry extension, not a music-specific one, deliberately not performed by this or any prior task in this domain. FGR_006 evidence status: SUPPORTED AS WRITTEN, independently re-fetched live (`elements.envato.com/learn/how-envato-licensing-works`) during both the FGR and this Adoption recording's own governance chain. FGR disposition: ACCEPT (no wording change).
+
+Claim proposition: >
+  Under Envato Elements' standard subscription, music items are licensed
+  for use synchronized with other media (e.g. as part of a video), and
+  may not be resold or redistributed as standalone audio files; the
+  standard license excludes "Broadcast" use specifically.
+
+Source references:
+  - primary (Official platform authority, Class A, independently retrieved and directly fetched): Envato Elements, "How Envato Licensing Works" (`elements.envato.com/learn/how-envato-licensing-works`) — verbatim: "you can't...use music items in broadcast presentations"; "you can't...resell them as standalone audio files."
+Source authority/type: Official platform authority (directly source-backed, single-provider, no cross-provider synthesis)
+Source fact: >
+  Envato Elements' own licensing-explainer page states that standard-
+  subscription music items may not be used in broadcast presentations and
+  may not be resold or redistributed as standalone audio files. Retrieved
+  2026-08-27; no on-page effective/last-updated date captured.
+
+SI8 interpretation: >
+  A reviewer evaluating an Envato-sourced music track should confirm the
+  intended use is synchronized with other media (not standalone
+  distribution) and does not constitute "Broadcast" use under Envato's
+  own terms, before treating the track as covered by a standard Envato
+  Elements subscription. This claim does not itself determine whether any
+  specific project's use qualifies.
+
+Applicability requirements: []
+Unresolved project dependencies: [which_music_provider]   <!-- fail-closed default: absent from dependency-askability.ts's registry (one live entry, human_contribution_description), therefore evidence-only. No Dependency Askability Review has been performed for this domain. Informational governance metadata only -- never evaluated against any fact, never gates CRC reachability. -->
+Prohibited conclusions: >
+  Does not establish whether a specific project's use qualifies as
+  "Broadcast" under Envato's own terms. Does not establish whether a
+  specific track is being used in a standalone/resale manner. Does not
+  establish that the user holds a valid Envato Elements subscription for
+  the track. Does not establish that third-party rights are otherwise
+  cleared. Is not a substitute for Commercial Assurance evidence review.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-27
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  PENDING — not yet reviewed for CRC Publication. FGR_006 recommends CRC
+  eligibility (§9), but this is a directional recommendation only, not a
+  Publication-stage decision; a separate CRC Publication Review is
+  required.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  Envato's standard license ties music use to synchronization with other
+  media and excludes standalone resale and broadcast use, as a general
+  framing.
+
+Effective date: 2026-08-27
+Last reviewed: 2026-08-27
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: [[CLAIM-MUSIC-ENVATO-CANCELLATION-001-v1]] (same provider, same license, distinct fact)
+
+Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+
+### CLAIM-MUSIC-ENVATO-CANCELLATION-001-v1
+Domain: Third-Party Source Assets / Music Licensing
+Topic: third_party_source_rights
+Subtopic: envato-post-cancellation-license-continuity
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — governed by Envato Elements' current License Terms, not a legal jurisdiction.
+Context: Commercial Assurance evidence review of a commercial video workflow whose Envato Elements subscription has since lapsed or been cancelled
+
+GOVERNANCE TREATMENT (2026-08-27, PM adoption decision, FGR #6): `provider_scope: ['envato-elements']`, same registry-gap note as CLAIM-MUSIC-ENVATO-SYNC-001-v1 above. **Wording corrected 2026-08-27, before this Adoption, per the FGR_006 integration review**: the proposition previously read "remains valid permanently, even if the subscription is later cancelled" — the cited evidence states indefinite continuation but never uses "permanently"; narrowed to "remains licensed even if the subscription later ends" to track the source exactly. The correction did not change evidence, provider_scope, dependencies, or FGR disposition (ACCEPT, unchanged). Adopted below in its corrected form only.
+
+Claim proposition: >
+  Per Envato Elements' own stated policy, a music license for a project
+  completed and published while the subscription was active remains
+  licensed even if the subscription later ends; new projects/uses after
+  cancellation are not covered.
+
+Source references:
+  - primary (Official platform authority, Class A, independently retrieved and directly fetched): Envato Elements, "How Envato Licensing Works" (`elements.envato.com/learn/how-envato-licensing-works`) — verbatim: "Assets you've used in completed projects during your active subscription remain licensed even if your subscription ends"; "You won't be able to download new items or use assets in new or incomplete projects after unsubscribing, but existing work stays covered."
+Source authority/type: Official platform authority (directly source-backed, single-provider)
+Source fact: >
+  Envato Elements' own licensing-explainer page states that assets used
+  in completed, published projects remain licensed after subscription
+  cancellation, while new or incomplete projects are not covered once
+  unsubscribed. Retrieved and independently re-fetched twice (FGR, then
+  this Adoption recording's own governance chain), substance unchanged
+  both times.
+
+SI8 interpretation: >
+  A reviewer should confirm the specific project was actually completed
+  and published while the Envato subscription was active before relying
+  on this continuity rule — this claim states Envato's policy, not a
+  determination for any specific project's timeline.
+
+Applicability requirements: []
+Unresolved project dependencies: [music_subscription_active_at_publication_confirmed]   <!-- evidence-only: account-history/documentary fact, not registered in dependency-askability.ts. No DAR performed. -->
+Prohibited conclusions: >
+  Does not establish that the user's specific project was actually
+  completed and published while their Envato subscription was active —
+  that is a documentary, project-specific fact. Does not establish that
+  the user's subscription is or was ever actually active. Is not a
+  substitute for Commercial Assurance evidence review.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-27
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  PENDING — not yet reviewed for CRC Publication. FGR_006 recommends CRC
+  eligibility (§9); separate CRC Publication Review required.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  Envato's stated policy is that already-completed, already-published
+  work stays licensed after cancellation, while new use does not.
+
+Effective date: 2026-08-27
+Last reviewed: 2026-08-27
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: [[CLAIM-MUSIC-ENVATO-SYNC-001-v1]] (same provider, same license, distinct fact)
+
+Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+
+### CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1
+Domain: Third-Party Source Assets / Music Licensing
+Topic: third_party_source_rights
+Subtopic: epidemic-sound-tier-advertising-paid-media-distinction
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — governed by Epidemic Sound's current Single-Track License terms, not a legal jurisdiction.
+Context: Commercial Assurance evidence review of any commercial/advertising video workflow that incorporates a pre-existing licensed Epidemic Sound single-track music license
+
+GOVERNANCE TREATMENT (2026-08-27, PM adoption decision, FGR #6): `provider_scope: ['epidemic-sound']` — same registry-gap note as the Envato claims above. Compound proposition (Private-tier restriction + Commercial-tier's narrower restriction + Commercial-tier Monetization right) found ACCEPTABLY COMPOUND by FGR_006 — splitting would leave the Private-tier restriction reading as applying regardless of tier, which is false and is the entire point the evidence establishes. Evidence independently re-verified twice: once during the original FGR-prep milestone (initial `pypdf` extraction after an automated-summarization failure), once during FGR_006 itself (fresh download + fresh extraction, tier-section boundaries confirmed directly by text search — the paid-media restriction occurs only within the Private Tier section, zero occurrences after the Commercial Tier section header). FGR disposition: ACCEPT (no wording change). **CRC-eligibility lean: DEFER TO CRC PUBLICATION REVIEW** (FGR_006 §4 — the tier-conditional compound shape needs bespoke bounded-copy drafting before plain CRC publication; this does not affect Adoption, which is a separate, prior decision).
+
+Claim proposition: >
+  Epidemic Sound's Single-Track Private Tier license excludes use in
+  advertisements and other paid-media productions (including online
+  pre/mid/post-roll placements); the separate Commercial Tier license
+  does not carry this same exclusion (it excludes only "TV ads"/
+  broadcast-type content specifically), and separately grants a right to
+  monetize via third-party ads displayed on the subscriber's own
+  published Productions.
+
+Source references:
+  - primary (Official platform authority, Class A, independently retrieved and directly extracted): Epidemic Sound, Single Track Licenses v8 (`epidemicsound.com/staticfiles/legacy/20/documents/SingleTrackLicensesV8.pdf`) — Private Tier verbatim: "No boosted or branded content, ads or third party exploitation. You may not use the Licensed Work(s) in advertisements or other commercial productions (including productions that are boosted or that are published within paid media space, such as, but not limited to, online pre/mid/post-rolls)..."; Commercial Tier verbatim: "No broadcast type content... feature films and TV shows or TV ads..."; Commercial Tier Monetization verbatim: "you may allow, and receive remuneration from, the display of third-party ads in connection with making available your Productions on social media or other platforms."
+Source authority/type: Official platform authority (directly source-backed, single-provider)
+Source fact: >
+  Epidemic Sound's own Single Track Licenses v8 document contains two
+  separate license-tier sections (Private, Commercial) with materially
+  different advertising/paid-media rules — the paid-media exclusion is
+  Private-tier-only; Commercial tier carries only a narrower TV/broadcast
+  exclusion and a separate Monetization right. Independently confirmed
+  via fresh document download and text extraction on two separate
+  occasions (FGR-prep milestone; FGR_006 itself).
+
+SI8 interpretation: >
+  A reviewer should confirm which license tier (Private or Commercial)
+  the subscriber actually holds before assessing whether a specific
+  advertising/paid-media placement is covered — this claim states both
+  tiers' rules, not which one applies to any specific account.
+
+Applicability requirements: []
+Unresolved project dependencies: [which_music_provider, epidemic_license_tier_confirmed]   <!-- both evidence-only: account/subscription facts, not registered in dependency-askability.ts. No DAR performed. -->
+Prohibited conclusions: >
+  Does not establish which tier the user's account actually holds. Does
+  not establish whether a specific placement is a covered use under
+  whichever tier applies. Is not a substitute for Commercial Assurance
+  evidence review.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-27
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  PENDING — FGR_006 explicitly recommends DEFER TO CRC PUBLICATION REVIEW
+  for this claim specifically (tier-conditional compound shape requires
+  bespoke bounded-copy drafting before plain publication). Not yet
+  reviewed.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  Epidemic Sound's own license documents distinguish tiers by
+  advertising/paid-media permission, with materially different rules
+  between Private and Commercial tiers.
+
+Effective date: 2026-08-27
+Last reviewed: 2026-08-27
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: none
+
+Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+
+### CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1
+Domain: Third-Party Source Assets / Music Licensing
+Topic: third_party_source_rights
+Subtopic: artlist-social-vs-pro-business-license-scope
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — governed by Artlist's current License, not a legal jurisdiction.
+Context: Commercial Assurance evidence review of any commercial/client/brand video workflow that incorporates a pre-existing licensed Artlist music track
+
+GOVERNANCE TREATMENT (2026-08-27, PM adoption decision, FGR #6): `provider_scope: ['artlist']` — same registry-gap note as above. Evidence: Class B (human-captured, full-document visual read), corroborated across both preserved Artlist sources (`evidence-captures/artlist/MANIFEST.md`). **Wording corrected 2026-08-27, before this Adoption, per the FGR_006 integration review**: the proposition previously ended "...permits broadcasting (subject to §D2 below for agency/broadcaster/large-company cases)" — "§D2" was never a valid heading anywhere in the source candidate package (the Enterprise-threshold content is section C's own A-7a, not section D). Corrected to a stable claim-ID cross-reference: "...permits broadcasting, subject to Artlist's separate Enterprise/Max Business plan requirement for agencies, broadcasters, and larger companies (see CLAIM-MUSIC-ARTLIST-ENTERPRISE-THRESHOLD-001-v1)." Does not merge this claim with CLAIM-MUSIC-ARTLIST-ENTERPRISE-THRESHOLD-001-v1 — both are separately governed, separately Adopted below. The correction did not change evidence, provider_scope, dependencies, or FGR disposition (ACCEPT, unchanged). Adopted below in its corrected form only.
+
+Claim proposition: >
+  Artlist's Social license is exclusively for personal content creators
+  (hobbyists, vloggers, independent creators) and does not cover projects
+  made for clients or brands, paid/promoted videos, or broadcast use; the
+  Pro/Business license is for professional creators, covers client and
+  brand work, paid/promoted videos, and commercials/advertisements, and
+  permits broadcasting, subject to Artlist's separate Enterprise/Max
+  Business plan requirement for agencies, broadcasters, and larger
+  companies (see CLAIM-MUSIC-ARTLIST-ENTERPRISE-THRESHOLD-001-v1).
+
+Source references:
+  - primary (Official platform authority, Class B, human-captured full-document visual read, durably preserved): Artlist License page (`artlist.io/help-center/privacy-terms/artlist-license/`), captured `evidence-captures/artlist/artlist-formal-license_20260827T134509+0800_a18f3aa6.pdf`, SHA-256 `a18f3aa69e64557fe599d6900578e87f89861c8ddbaaa85c4333147bb9ef426b` — comparison-table and narrative sections.
+  - primary (Official platform authority, Class B, human-captured, durably preserved): Artlist Help Center, "Understanding Artlist's license" (`help.artlist.io/hc/en-us/articles/29490991524253-...`), captured `evidence-captures/artlist/artlist-help-center-understanding-license_20260827T134526+0800_b4df3eaa.pdf`, SHA-256 `b4df3eaac6a1fca67f06932d4b621712c4eb2ed928f86c62aacc665487b4fa79` — "What does the Social license cover?"/"What does the Pro license cover?" sections. Corroborates Source 1.
+Source authority/type: Official platform authority (two-source corroborated, single-provider)
+Source fact: >
+  Both Artlist sources independently state the same Social-vs-Pro/Business
+  license-scope distinction: Social license restricted to personal,
+  non-client, non-broadcast use; Pro/Business license covers client,
+  brand, advertising, and broadcast use. Effective date 2026-02-15 stated
+  on Source 1.
+
+SI8 interpretation: >
+  A reviewer should confirm which license type the subscriber actually
+  holds before treating a client/brand/broadcast use as covered — this
+  claim states Artlist's own two license shapes, not which one applies to
+  any specific account, and does not itself resolve the separately
+  governed Enterprise/Max Business threshold question (see the related
+  claim).
+
+Applicability requirements: []
+Unresolved project dependencies: [which_music_provider, artlist_license_type_confirmed]   <!-- both evidence-only: account/license facts, not registered in dependency-askability.ts. No DAR performed. -->
+Prohibited conclusions: >
+  Does not establish which license type the user's account actually
+  holds. Does not establish whether the user's specific entity type/size
+  triggers the separately governed Enterprise/Max Business requirement.
+  Is not a substitute for Commercial Assurance evidence review.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-27
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  PENDING — not yet reviewed for CRC Publication. FGR_006 recommends CRC
+  eligibility (§9); separate CRC Publication Review required.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  Artlist distinguishes a personal-only Social license from a Pro/Business
+  license covering client, brand, and advertising use.
+
+Effective date: 2026-02-15
+Last reviewed: 2026-08-27
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: [[CLAIM-MUSIC-ARTLIST-ENTERPRISE-THRESHOLD-001-v1]] (Pro/Business broadcasting qualified by this separately governed threshold), [[CLAIM-MUSIC-ARTLIST-CLIENT-LICENSE-RETENTION-001-v1]], [[CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1]], [[CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1]], [[CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1]], [[CLAIM-MUSIC-ARTLIST-PRO-ROYALTIES-001-v1]] (same provider, same license family, distinct facts)
+
+Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+
+### CLAIM-MUSIC-ARTLIST-CLIENT-LICENSE-RETENTION-001-v1
+Domain: Third-Party Source Assets / Music Licensing
+Topic: third_party_source_rights
+Subtopic: artlist-client-project-license-retention
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — governed by Artlist's current License, not a legal jurisdiction.
+Context: Commercial Assurance evidence review of an Artlist-scored Project delivered to a client under Artlist's Pro/Business license
+
+GOVERNANCE TREATMENT (2026-08-27, PM adoption decision, FGR #6): `provider_scope: ['artlist']`, same registry-gap note. Evidence: Class B, single-source (formal License only — disclosed, not a defect; the Help Center source simply does not cover this specific point). FGR disposition: ACCEPT (no wording change).
+
+Claim proposition: >
+  Under Artlist's Pro/Business license, a Project incorporating a
+  licensed Asset may be transferred to a client (or any other party) for
+  their use, but the underlying Asset license is held by the subscriber
+  only, not transferred to the client — the subscriber must ensure any
+  client/collaborator complies with the license.
+
+Source references:
+  - primary (Official platform authority, Class B, human-captured, durably preserved): Artlist License page, `evidence-captures/artlist/artlist-formal-license_20260827T134509+0800_a18f3aa6.pdf`, SHA-256 `a18f3aa69e64557fe599d6900578e87f89861c8ddbaaa85c4333147bb9ef426b` — verbatim: "If you create a Project incorporating an Asset, you can transfer this Project to your clients and to anyone else, so they can use the Project (but the License is only yours)... if you collaborate with any third party in a Project or if you create a Project for your clients, you must make sure your collaborator and/or client complies with this License."
+Source authority/type: Official platform authority (single-source, formal-License-only)
+Source fact: >
+  Artlist's formal License states that a Project may be transferred to a
+  client while the underlying Asset license remains with the subscriber,
+  and that the subscriber is responsible for their client/collaborator's
+  compliance.
+
+SI8 interpretation: >
+  A reviewer delivering finished work to a client should note that the
+  client does not thereby acquire an independent Artlist license — the
+  subscriber (typically the agency/creator) remains the license holder
+  and remains responsible for the client's compliant use.
+
+Applicability requirements: []
+Unresolved project dependencies: []
+Prohibited conclusions: >
+  Does not establish whether a specific client/collaborator is actually
+  complying with the license. Is not a substitute for Commercial
+  Assurance evidence review.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-27
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  PENDING — not yet reviewed for CRC Publication. FGR_006 recommends CRC
+  eligibility (§9); separate CRC Publication Review required.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  Under Artlist's Pro/Business license, delivering a finished Project to
+  a client does not transfer the underlying music license to that client
+  — the subscriber remains the license holder and remains responsible
+  for the client's compliant use.
+
+Effective date: 2026-02-15
+Last reviewed: 2026-08-27
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: [[CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1]] (same provider, same license family, distinct fact)
+
+Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+
+### CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1
+Domain: Third-Party Source Assets / Music Licensing
+Topic: third_party_source_rights
+Subtopic: artlist-post-cancellation-project-license-duration
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — governed by Artlist's current License, not a legal jurisdiction.
+Context: Commercial Assurance evidence review of a commercial video workflow whose Artlist subscription has since lapsed or been cancelled
+
+GOVERNANCE TREATMENT (2026-08-27, PM adoption decision, FGR #6): `provider_scope: ['artlist']`, same registry-gap note. Evidence: Class B, two-source corroborated — the strongest-evidenced Artlist claim in this domain. FGR disposition: ACCEPT (no wording change).
+
+Claim proposition: >
+  A Project created and published while an Artlist subscription is
+  active remains licensed (including for continued monetization)
+  indefinitely, even after the subscription is cancelled; downloaded
+  Assets may not be used in new projects once the subscription has
+  expired.
+
+Source references:
+  - primary (Official platform authority, Class B, human-captured, durably preserved): Artlist License page, `evidence-captures/artlist/artlist-formal-license_20260827T134509+0800_a18f3aa6.pdf`, SHA-256 `a18f3aa69e64557fe599d6900578e87f89861c8ddbaaa85c4333147bb9ef426b` — verbatim: "You're covered to create and publish your Projects while your account is active. When your subscription expires, those Projects can remain published in any media, but any new projects will not be covered"; §2 heading: "Your Projects are yours to use Forever... For now and for all future time. Eternally."
+  - primary (Official platform authority, Class B, human-captured, durably preserved): Artlist Help Center, `evidence-captures/artlist/artlist-help-center-understanding-license_20260827T134526+0800_b4df3eaa.pdf`, SHA-256 `b4df3eaac6a1fca67f06932d4b621712c4eb2ed928f86c62aacc665487b4fa79` — verbatim: "If a project is completed and published while your subscription is active, you maintain the right to use the assets in that published project even if you later cancel your subscription. Once your subscription expires, these assets cannot be used in new projects." Corroborates Source 1 independently.
+Source authority/type: Official platform authority (two-source corroborated, single-provider)
+Source fact: >
+  Both Artlist sources independently and consistently state that
+  already-published Projects remain licensed indefinitely after
+  cancellation, while new projects are not covered post-cancellation.
+
+SI8 interpretation: >
+  A reviewer should confirm the specific project was actually completed
+  and published while the Artlist subscription was active before relying
+  on this continuity rule — this claim states Artlist's policy, not a
+  determination for any specific project's timeline.
+
+Applicability requirements: []
+Unresolved project dependencies: [artlist_subscription_active_at_publication_confirmed]   <!-- evidence-only: account-history/documentary fact, not registered in dependency-askability.ts. No DAR performed. -->
+Prohibited conclusions: >
+  Does not establish that the user's specific project was actually
+  completed and published while their Artlist subscription was active —
+  that is a documentary, project-specific fact. Is not a substitute for
+  Commercial Assurance evidence review.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-27
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  PENDING — not yet reviewed for CRC Publication. FGR_006 recommends CRC
+  eligibility (§9); separate CRC Publication Review required.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  Artlist's stated policy is that already-completed, already-published
+  work stays licensed after cancellation, while new use does not.
+
+Effective date: 2026-02-15
+Last reviewed: 2026-08-27
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: [[CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1]] (same provider, same license family, distinct fact), [[CLAIM-MUSIC-ENVATO-CANCELLATION-001-v1]] (structurally analogous rule, different provider)
+
+Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+
+### CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1
+Domain: Third-Party Source Assets / Music Licensing
+Topic: third_party_source_rights
+Subtopic: artlist-standalone-exploitation-restriction
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — governed by Artlist's current License, not a legal jurisdiction.
+Context: Commercial Assurance evidence review of any workflow that might distribute or exploit an Artlist Asset separately from the Project it was licensed for
+
+GOVERNANCE TREATMENT (2026-08-27, PM adoption decision, FGR #6): `provider_scope: ['artlist']`, same registry-gap note. Evidence: Class B, single-source, disclosed. Correctly kept separate from CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1 (different restriction category — standalone distribution vs. AI-training/derivative-work input — sourced from the same source paragraph but evidencing two distinct rules). FGR disposition: ACCEPT (no wording change).
+
+Claim proposition: >
+  Artlist Assets may only be used as integrated elements within a
+  broader Project, and may not be copied, distributed, sold, shared, or
+  otherwise exploited as standalone content (e.g. the music track on its
+  own).
+
+Source references:
+  - primary (Official platform authority, Class B, human-captured, durably preserved): Artlist License page, `evidence-captures/artlist/artlist-formal-license_20260827T134509+0800_a18f3aa6.pdf`, SHA-256 `a18f3aa69e64557fe599d6900578e87f89861c8ddbaaa85c4333147bb9ef426b` — verbatim: "Artlist Assets may only be used as integrated elements within broader Projects and may not be used, copied, distributed, performed, presented, sold, licensed, shared, or otherwise exploited as standalone content (such as music, footage, or images on their own)..."
+Source authority/type: Official platform authority (single-source)
+Source fact: >
+  Artlist's formal License restricts Assets to integrated use within a
+  Project and prohibits standalone exploitation.
+
+SI8 interpretation: >
+  A reviewer should confirm the licensed track is being used as part of
+  an integrated Project, not distributed or exploited on its own — this
+  claim states Artlist's own restriction, not a determination for any
+  specific project's actual configuration.
+
+Applicability requirements: []
+Unresolved project dependencies: []
+Prohibited conclusions: >
+  Does not establish whether a specific user's specific output
+  configuration constitutes "standalone" use under Artlist's own terms.
+  Is not a substitute for Commercial Assurance evidence review.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-27
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  PENDING — not yet reviewed for CRC Publication. FGR_006 recommends CRC
+  eligibility (§9); separate CRC Publication Review required.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  Artlist Assets may only be used as part of an integrated Project, not
+  distributed or exploited on their own.
+
+Effective date: 2026-02-15
+Last reviewed: 2026-08-27
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: [[CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1]] (same source paragraph, distinct restriction category), [[CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1]] (same provider, same license family)
+
+Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+
+### CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1
+Domain: Third-Party Source Assets / Music Licensing
+Topic: third_party_source_rights
+Subtopic: artlist-ai-training-derivative-work-exclusion
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — governed by Artlist's current License, not a legal jurisdiction.
+Context: Commercial Assurance evidence review of any AI-video workflow that might feed a licensed Artlist track into an AI tool as training/derivative-work input
+
+GOVERNANCE TREATMENT (2026-08-27, PM adoption decision, FGR #6): `provider_scope: ['artlist']`, same registry-gap note. Evidence: Class B, single-source (same source paragraph as CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1, but a distinct restriction category — kept separate per FGR_006's own atomicity finding: different real-world trigger scenarios, and a meaningfully higher commercial-relevance profile for SI8's own AI-filmmaker client base specifically). Refresh class MEDIUM, flagged HIGHER-VOLATILITY than most Artlist claims ("AI-related terms are an active area providers are actively revising"). FGR disposition: ACCEPT (no wording change). **CRC-eligibility lean: DEFER TO CRC PUBLICATION REVIEW** (FGR_006 §4 — Publication Policy Principle 6, stability over novelty; Adoption is warranted now, plain publication is a separate, later question given the term's volatility).
+
+Claim proposition: >
+  Artlist Assets may not be used to create derivative works such as
+  remixes or covers, or be included in datasets for machine learning, AI
+  training, or the development/improvement of AI technologies.
+
+Source references:
+  - primary (Official platform authority, Class B, human-captured, durably preserved): Artlist License page, `evidence-captures/artlist/artlist-formal-license_20260827T134509+0800_a18f3aa6.pdf`, SHA-256 `a18f3aa69e64557fe599d6900578e87f89861c8ddbaaa85c4333147bb9ef426b` — same paragraph as the standalone-exploitation clause above, covering derivative-work/AI-training restrictions as a distinct sub-clause.
+Source authority/type: Official platform authority (single-source)
+Source fact: >
+  Artlist's formal License restricts Assets from being used to create
+  derivative works (remixes, covers) or from being included in
+  machine-learning/AI-training datasets.
+  Note: this claim is about using a licensed, pre-existing Artlist track
+  as AI training/input material — it is not about Artlist's own AI
+  generation tools, which are out of Scenario A's scope entirely.
+
+SI8 interpretation: >
+  A reviewer should treat any workflow step that feeds a licensed Artlist
+  track into an AI model (training, fine-tuning, or derivative
+  remix/cover generation) as a potential license violation under this
+  clause, distinct from ordinary integrated-Project use.
+
+Applicability requirements: []
+Unresolved project dependencies: []
+Prohibited conclusions: >
+  Does not establish whether a specific user's specific AI workflow step
+  constitutes "training" or "derivative work" under Artlist's own terms.
+  Is not a substitute for Commercial Assurance evidence review.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-27
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  PENDING — FGR_006 explicitly recommends DEFER TO CRC PUBLICATION REVIEW
+  for this claim specifically (AI-related term volatility). Not yet
+  reviewed.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  Artlist Assets may not be used to create derivative works or be
+  included in AI-training datasets.
+
+Effective date: 2026-02-15
+Last reviewed: 2026-08-27
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: [[CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1]] (same source paragraph, distinct restriction category), [[CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1]] (same provider, same license family)
+
+Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+
+### CLAIM-MUSIC-ARTLIST-PRO-ROYALTIES-001-v1
+Domain: Third-Party Source Assets / Music Licensing
+Topic: third_party_source_rights
+Subtopic: artlist-pro-royalty-non-coverage
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — governed by Artlist's current License, not a legal jurisdiction. (PRO/collecting-society mechanics themselves vary by country; this claim states only Artlist's own contractual position, not a specific PRO's substantive rule.)
+Context: Commercial Assurance evidence review of any broadcast-bound or publicly-performed commercial video workflow incorporating a licensed Artlist track
+
+GOVERNANCE TREATMENT (2026-08-27, PM adoption decision, FGR #6): `provider_scope: ['artlist']`, same registry-gap note. Evidence: Class B, single-source, independently re-verified via direct page re-render during FGR_006 itself (not merely re-read from the prior manifest). Unconditional on license tier (unlike CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1). FGR disposition: ACCEPT (no wording change). **CRC-eligibility lean: DEFER TO CRC PUBLICATION REVIEW** (FGR_006 §4 — technical enough that plain CRC publication risks either overclaiming "you will owe money" or dangerously underclaiming "this is Artlist's problem, not mine"; Reviewer/Commercial-Assurance-only is the safer default pending a future CPR).
+
+Claim proposition: >
+  Artlist's public-performance/broadcast permission does not itself
+  cover payment of royalties to Performance Rights Organizations (PROs)
+  or other collecting societies; if a Project is reproduced or used for
+  broadcast/public performance, the subscriber (or their client) may
+  receive requests for mechanical-reproduction and/or public-performance
+  royalty payments, and is responsible for paying them (or ensuring the
+  relevant broadcaster/platform does).
+
+Source references:
+  - primary (Official platform authority, Class B, human-captured, durably preserved, independently re-verified twice): Artlist License page, `evidence-captures/artlist/artlist-formal-license_20260827T134509+0800_a18f3aa6.pdf`, SHA-256 `a18f3aa69e64557fe599d6900578e87f89861c8ddbaaa85c4333147bb9ef426b` — verbatim: "However, it does not cover payment of royalties to performance rights organizations (PROs) and other collecting societies. Accordingly, if you or your client reproduces a Project, or uses a Project for broadcast or other public performance, you may receive requests for payment of mechanical reproduction and/or public performance royalties... In such cases, you are responsible for paying those amounts (or ensuring the relevant broadcaster or platform pays them) to the applicable organization."
+Source authority/type: Official platform authority (single-source)
+Source fact: >
+  Artlist's formal License explicitly excludes PRO/collecting-society
+  royalty payment from its broadcast/public-performance permission and
+  allocates responsibility for such payments to the subscriber (or their
+  client/broadcaster).
+
+SI8 interpretation: >
+  A reviewer assessing a broadcast-bound or publicly-performed project
+  should flag potential PRO/collecting-society royalty exposure as a
+  real, non-obvious cost the Artlist license itself does not cover —
+  this claim states Artlist's contractual position, not whether any
+  specific broadcast/performance actually triggers a real PRO claim.
+
+Applicability requirements: []
+Unresolved project dependencies: []
+Prohibited conclusions: >
+  Does not establish whether a specific broadcast/performance event
+  actually triggers a real PRO claim, or which PRO/jurisdiction's
+  collecting society would be involved. Is not a substitute for
+  Commercial Assurance evidence review, and is not legal advice on PRO
+  mechanics in any specific jurisdiction.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-27
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  PENDING — FGR_006 explicitly recommends DEFER TO CRC PUBLICATION REVIEW
+  for this claim specifically (technical nuance risk). Not yet reviewed.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  Artlist's broadcast/public-performance permission does not itself
+  cover PRO/collecting-society royalties — the subscriber may still be
+  responsible for those separately.
+
+Effective date: 2026-02-15
+Last reviewed: 2026-08-27
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: [[CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1]] (same provider, same license family)
+
+Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+
+### CLAIM-MUSIC-ARTLIST-ENTERPRISE-THRESHOLD-001-v1
+Domain: Third-Party Source Assets / Music Licensing
+Topic: third_party_source_rights
+Subtopic: artlist-enterprise-max-business-plan-threshold
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — governed by Artlist's current License, not a legal jurisdiction.
+Context: Commercial Assurance evidence review of any Artlist-licensed workflow where the licensee is (or may be) an agency, broadcaster, or larger company
+
+GOVERNANCE TREATMENT (2026-08-27, PM adoption decision, FGR #6): `provider_scope: ['artlist']`, same registry-gap note. **NARROWED by FGR_006 (§4) from the original candidate package's own A-7, which bundled this threshold rule together with Artlist's seat/member mechanics (source §10).** FGR_006 split these into two distinct facts with different real-world trigger conditions and different commercial-readiness materiality — this claim retains only the threshold/coverage rule (source §11: does the licensee's entity type/size require a different plan to be validly licensed at all); the seat/member-mechanics half (how many people may share one account) was found lower-materiality to "is my use commercially licensed" and was **deliberately left DEFERRED, not drafted into any claim, and is NOT part of this Adoption**. Evidence independently re-verified twice: once during the original FGR-prep milestone, once during FGR_006 itself via a fresh page re-render and direct visual read of the committed evidence PDF (not merely re-read from the manifest). FGR disposition: ACCEPT WITH NARROWING.
+
+Claim proposition: >
+  Artlist requires a Max Business plan or a customized Enterprise
+  Agreement if the licensee works for an agency, a broadcaster, or a
+  company/legal entity (including an aggregated group of companies) with
+  more than 50 employees; this requirement does not apply to
+  subscription plans consisting solely of AI Services.
+
+Source references:
+  - primary (Official platform authority, Class B, human-captured, durably preserved, independently re-verified twice): Artlist License page, §11 ("Max Business Plan & Enterprise license"), `evidence-captures/artlist/artlist-formal-license_20260827T134509+0800_a18f3aa6.pdf`, SHA-256 `a18f3aa69e64557fe599d6900578e87f89861c8ddbaaa85c4333147bb9ef426b` — verbatim: "if you work for an agency, broadcaster, or for a company (or any other legal entity) that has more than 50 employees, you must have a Max Business plan to be covered by this License (or a customized Enterprise license). This also applies if your company is part of a group of companies that has more than 50 employees in total. This requirement does not apply to subscription plans consisting solely of AI Services."
+Source authority/type: Official platform authority (single-source, specific quantified threshold)
+Source fact: >
+  Artlist's formal License states a specific, quantified entity-type/size
+  threshold (agency, broadcaster, or >50-employee company/group) that
+  requires a Max Business or Enterprise plan rather than a standard
+  Pro/Business plan, with a carve-out for AI-Services-only subscriptions.
+
+SI8 interpretation: >
+  A reviewer should confirm the licensee's actual employer type and
+  headcount before treating a standard Artlist Pro/Business plan as
+  sufficient coverage — an agency, broadcaster, or larger company on the
+  wrong plan tier risks having no valid Artlist license at all for
+  commercial work. This claim does not resolve the seat/member-mechanics
+  question (how many individuals may share one account), which was
+  deliberately not drafted into a governed claim (see FGR_006 §4, A-7b).
+
+Applicability requirements: []
+Unresolved project dependencies: [artlist_licensee_employer_type_confirmed, artlist_licensee_employer_size_confirmed]   <!-- flagged by FGR_006 as a plausible future Dependency Askability Review candidate: unlike most other Music-domain dependencies (account/subscription-tier facts), a user's own employer type and headcount are facts a person can typically self-report reliably, structurally closer to human_contribution_description (the one live askable_in_crc entry) than to epidemic_license_tier_confirmed. This claim's Adoption does NOT perform that review or register anything in dependency-askability.ts -- both remain evidence-only under current fail-closed default (absent from the registry). DAR is a separate, later governance stage, chartered only after Adoption AND CRC eligibility both already exist, per DAR_001's own precedent. -->
+Prohibited conclusions: >
+  Does not establish the user's actual employer classification or size,
+  or whether their actual plan matches what this threshold requires. Is
+  not a substitute for Commercial Assurance evidence review.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-27
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  PENDING — not yet reviewed for CRC Publication. FGR_006 recommends CRC
+  eligibility (§9) — single, plain, provider-level rule, passes the CRC
+  Publication Policy's own Publication Test cleanly on FGR_006's own
+  assessment — but this remains a directional recommendation only, not a
+  Publication-stage decision; a separate CRC Publication Review is
+  required.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  Artlist's standard Pro/Business plans may not be sufficient for
+  agencies, broadcasters, or larger companies, who may need a Max
+  Business or Enterprise agreement instead.
+
+Effective date: 2026-02-15
+Last reviewed: 2026-08-27
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: [[CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1]] (Pro/Business broadcasting qualified by this threshold)
+
+Formal Governance Review #6 (2026-08-27, combined package): ACCEPT WITH
+NARROWING -- original candidate A-7 split into this narrowed threshold-only
+claim (adopted) and undrafted seat/member-mechanics background (A-7b,
+deferred, not adopted, not a claim). See full review for the split
+reasoning.
+
+Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+
+**Excluded from this Wave — not adopted, per FGR_006's own disposition, and not present anywhere above:** the undrafted Artlist seat/member-mechanics background (FGR_006's "A-7b" — DEFERRED, never assigned a claim ID, never drafted as a proposition) and `CLAIM-MUSIC-ACCESS-NOT-LICENSE-001-v1` (FGR_006's "G-1," the generic cross-provider "access ≠ specific licensed use" candidate — REJECTED by FGR_006 §5 as duplicative of boundary language every claim above already individually carries). Neither appears in this document and neither should be added without a new Formal Governance Review.
