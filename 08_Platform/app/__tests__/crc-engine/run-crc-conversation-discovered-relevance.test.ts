@@ -63,8 +63,13 @@ describe('canonical production acceptance test (Section 24)', () => {
     expect(stockResult?.matched_goal_category).toBe('commercial_use')
     expect(stockResult?.topic).toBe('third_party_source_rights')
     expect(stockResult?.match_origin).toBe('discovered_topic')
-    // Generic stock claims also surface, also attributed to commercial_use.
-    const genericStockResult = trace.retrieval_results.find((r) => r.claim_id === 'CLAIM-STOCK-EDITORIAL-001-v1')
+    // Stock-editorial claims also surface, also attributed to commercial_use.
+    // CLAIM-STOCK-EDITORIAL-001-v1 renamed to -v2 (2026-08-27, Governance
+    // Correction Review, governance-reviews/FGR_007_STOCK_EDITORIAL_
+    // PROVIDER_SCOPE_CORRECTION_2026-08-27.md) -- provider_scope corrected
+    // from null to an evidence-bounded set that still includes iStock, so
+    // this scenario's own outcome is unaffected in substance.
+    const genericStockResult = trace.retrieval_results.find((r) => r.claim_id === 'CLAIM-STOCK-EDITORIAL-001-v2')
     expect(genericStockResult).toBeDefined()
     expect(genericStockResult?.matched_goal_category).toBe('commercial_use')
     expect(output).toBeDefined()
@@ -175,7 +180,11 @@ describe('canonical production acceptance test (Section 24)', () => {
     const { output, trace } = runCRCConversation(productionIstockSessionState(), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
     const dependencyBearingResults = trace.retrieval_results.filter((r) => r.matched_goal_category === 'commercial_use' && r.unresolved_project_dependencies.length > 0)
     const dependencyBearingIds = dependencyBearingResults.map((r) => r.claim_id)
-    expect(dependencyBearingIds).toEqual(expect.arrayContaining(['CLAIM-STOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1']))
+    // CLAIM-STOCK-EDITORIAL-001-v1 renamed to -v2 (2026-08-27, Governance
+    // Correction Review) -- still matches iStock, so this scenario's own
+    // outcome is unaffected in substance. -002-v2 also now legitimately
+    // appears (arrayContaining does not require an exhaustive match).
+    expect(dependencyBearingIds).toEqual(expect.arrayContaining(['CLAIM-STOCK-EDITORIAL-001-v2', 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1']))
     const interp = output.goal_interpretations[0]
     // Every dependency-bearing claim's own governed statement is quoted --
     // none dropped, none singled out as "the" answer.

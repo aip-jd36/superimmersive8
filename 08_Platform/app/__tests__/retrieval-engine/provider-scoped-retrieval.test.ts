@@ -272,6 +272,14 @@ describe('end-to-end through runCRCConversation, real unmodified TOPIC_CLAIMS_FI
   // approval): CLAIM-STOCK-EDITORIAL-001-v1 is now real crc_eligible: 'Yes'
   // -- a Getty question legitimately surfaces its own GENERIC content
   // (provider_scope: null matches any provider).
+  // NOTE (updated 2026-08-27, Governance Correction Review,
+  // governance-reviews/FGR_007_STOCK_EDITORIAL_PROVIDER_SCOPE_CORRECTION_
+  // 2026-08-27.md): CLAIM-STOCK-EDITORIAL-001-v1 is now Deprecated/superseded
+  // -- CLAIM-STOCK-EDITORIAL-001-v2 is the live successor, provider_scope
+  // corrected from null to the four evidence-supported providers (Getty,
+  // iStock, Shutterstock, Adobe Stock). A Getty question still legitimately
+  // surfaces -v2's own content (Getty remains in scope) -- claim_id updated
+  // below, content/behavior unchanged.
   // NOTE (updated again 2026-08-18, following CRC-Publication Review #3 +
   // PM approval): CLAIM-STOCK-GETTY-EDITORIAL-001-v1 is ALSO now real
   // crc_eligible: 'Yes' -- the first provider-specific claim to go live.
@@ -284,7 +292,7 @@ describe('end-to-end through runCRCConversation, real unmodified TOPIC_CLAIMS_FI
   // provider-narrowing proof this suite exists for.
   test('19: real Getty question -> generic -001/-002 AND Getty-specific claim all surface; iStock/Shutterstock-specific content never does, no throw', () => {
     const { output } = runCRCConversation(suWithProvider('getty'), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
-    expect(output.knowledge_items.map((k) => k.claim_id)).toContain('CLAIM-STOCK-EDITORIAL-001-v1')
+    expect(output.knowledge_items.map((k) => k.claim_id)).toContain('CLAIM-STOCK-EDITORIAL-001-v2')
     expect(output.knowledge_items.map((k) => k.claim_id)).toContain('CLAIM-STOCK-GETTY-EDITORIAL-001-v1')
     expect(output.knowledge_items.map((k) => k.claim_id)).not.toContain('CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')
     expect(output.knowledge_items.map((k) => k.claim_id)).not.toContain('CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1')
@@ -306,7 +314,7 @@ describe('end-to-end through runCRCConversation, real unmodified TOPIC_CLAIMS_FI
   test('20: real iStock question -> generic -001/-002 AND iStock-specific claim all surface; Getty/Shutterstock-specific content never does', () => {
     const { output } = runCRCConversation(suWithProvider('istock'), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
     const ids = output.knowledge_items.map((k) => k.claim_id)
-    expect(ids).toContain('CLAIM-STOCK-EDITORIAL-001-v1')
+    expect(ids).toContain('CLAIM-STOCK-EDITORIAL-001-v2')
     expect(ids).toContain('CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')
     expect(ids).not.toContain('CLAIM-STOCK-GETTY-EDITORIAL-001-v1')
     expect(ids).not.toContain('CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1')
@@ -327,7 +335,7 @@ describe('end-to-end through runCRCConversation, real unmodified TOPIC_CLAIMS_FI
   test('21: real Shutterstock question -> generic -001/-002 AND Shutterstock-specific claim all surface; Getty/iStock-specific content never does', () => {
     const { output } = runCRCConversation(suWithProvider('shutterstock'), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
     const ids = output.knowledge_items.map((k) => k.claim_id)
-    expect(ids).toContain('CLAIM-STOCK-EDITORIAL-001-v1')
+    expect(ids).toContain('CLAIM-STOCK-EDITORIAL-001-v2')
     expect(ids).toContain('CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1')
     expect(ids).not.toContain('CLAIM-STOCK-GETTY-EDITORIAL-001-v1')
     expect(ids).not.toContain('CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')
@@ -419,46 +427,62 @@ describe('end-to-end through runCRCConversation, real unmodified TOPIC_CLAIMS_FI
 
 describe('synthetic-eligible stock claims: proves future provider-narrowing behavior without touching real governance', () => {
   const facts = { jurisdiction: { state: 'unknown' as const }, toolMentions: [] }
-  const genericIds = ['CLAIM-STOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-EDITORIAL-002-v1']
+  // RENAMED + REDEFINED 2026-08-27 (Governance Correction Review,
+  // governance-reviews/FGR_007_STOCK_EDITORIAL_PROVIDER_SCOPE_CORRECTION_
+  // 2026-08-27.md): these two claims are NO LONGER provider_scope: null
+  // ("generic," matching any provider unconditionally) -- CLAIM-STOCK-
+  // EDITORIAL-001-v1/-002-v1 were superseded by -v2 successors with
+  // corrected, EVIDENCE-BOUNDED provider_scope (-001-v2: getty/istock/
+  // shutterstock/adobe-stock; -002-v2: getty/istock/shutterstock only,
+  // Adobe Stock deliberately excluded -- see GOVERNED-CLAIMS.md for the
+  // per-claim evidence basis). `eligibleStockFixture()` still includes both
+  // v1 and v2 entries (it maps every CLAIM-STOCK-* claim's crc_eligible to
+  // 'Yes'), but v1's own `superseded_by` field (untouched by that map)
+  // still correctly excludes it from candidacy via lookupTopicClaims's own
+  // `c.superseded_by === null` filter -- only the v2 successors ever appear
+  // below. Tests 24-27 (a provider both -v2 claims cover) are unaffected in
+  // OUTCOME, only in claim_id. Tests 28-30 have REAL, evidence-driven
+  // behavioral changes, not just renames -- see each test's own comment.
+  const bothStockV2Ids = ['CLAIM-STOCK-EDITORIAL-001-v2', 'CLAIM-STOCK-EDITORIAL-002-v2']
 
-  test('24: Getty -> generic + Getty, never iStock/Shutterstock', () => {
+  test('24: Getty -> both stock-editorial v2 claims + Getty, never iStock/Shutterstock', () => {
     const result = lookupTopicClaims([sourceRightsGoal()], eligibleStockFixture(), facts, ['getty'])
-    expect(result.matches.map((m) => m.claim_id).sort()).toEqual([...genericIds, 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1'].sort())
+    expect(result.matches.map((m) => m.claim_id).sort()).toEqual([...bothStockV2Ids, 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1'].sort())
   })
 
-  test('25: iStock -> generic + iStock, never Getty/Shutterstock', () => {
+  test('25: iStock -> both stock-editorial v2 claims + iStock, never Getty/Shutterstock', () => {
     const result = lookupTopicClaims([sourceRightsGoal()], eligibleStockFixture(), facts, ['istock'])
-    expect(result.matches.map((m) => m.claim_id).sort()).toEqual([...genericIds, 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1'].sort())
+    expect(result.matches.map((m) => m.claim_id).sort()).toEqual([...bothStockV2Ids, 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1'].sort())
   })
 
-  test('26: Shutterstock -> generic + Shutterstock, never Getty/iStock', () => {
+  test('26: Shutterstock -> both stock-editorial v2 claims + Shutterstock, never Getty/iStock', () => {
     const result = lookupTopicClaims([sourceRightsGoal()], eligibleStockFixture(), facts, ['shutterstock'])
-    expect(result.matches.map((m) => m.claim_id).sort()).toEqual([...genericIds, 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1'].sort())
+    expect(result.matches.map((m) => m.claim_id).sort()).toEqual([...bothStockV2Ids, 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1'].sort())
   })
 
-  test('27: Getty + Shutterstock -> generic + both, never iStock; no duplicate generic claims', () => {
+  test('27: Getty + Shutterstock -> both stock-editorial v2 claims + both provider-specific, never iStock; no duplicates', () => {
     const result = lookupTopicClaims([sourceRightsGoal()], eligibleStockFixture(), facts, ['getty', 'shutterstock'])
     const ids = result.matches.map((m) => m.claim_id).sort()
-    expect(ids).toEqual([...genericIds, 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1', 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1'].sort())
+    expect(ids).toEqual([...bothStockV2Ids, 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1', 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1'].sort())
     expect(new Set(ids).size).toBe(ids.length) // no duplicates
   })
 
-  test('28: no provider named -> generic only', () => {
+  test('28: no provider named -> ZERO stock-editorial matches (behavior change, 2026-08-27) -- neither v2 claim is provider-independent anymore; a user who names no provider at all no longer receives stock-media-specific guidance, matching the corrected, evidence-bounded scope exactly', () => {
     const result = lookupTopicClaims([sourceRightsGoal()], eligibleStockFixture(), facts, [])
-    expect(result.matches.map((m) => m.claim_id).sort()).toEqual(genericIds.sort())
+    expect(result.matches.map((m) => m.claim_id)).toEqual([])
   })
 
-  test('29: unresolved provider only -> generic only, never inferred from text similarity', () => {
+  test('29: unresolved provider only -> ZERO stock-editorial matches (behavior change, 2026-08-27), never inferred from text similarity', () => {
     const result = lookupTopicClaims([sourceRightsGoal()], eligibleStockFixture(), facts, [])
     // Simulates: AssetProviderMention resolved to unresolved_alias("PhotoMega") ->
     // handoff.asset_providers stays [] (unresolved aliases never enter it, per handoff.ts) ->
     // this call already reflects that real contract.
-    expect(result.matches.map((m) => m.claim_id).sort()).toEqual(genericIds.sort())
+    expect(result.matches.map((m) => m.claim_id)).toEqual([])
   })
 
-  test('30: Adobe Stock recognized -> generic only, no Adobe-specific claim exists -- proves provider recognition and provider-specific knowledge are separate concepts', () => {
+  test('30: Adobe Stock recognized -> ONLY CLAIM-STOCK-EDITORIAL-001-v2 (behavior change, 2026-08-27) -- -002-v2 deliberately excludes Adobe Stock (its own evidence never confirmed it); this is the single clearest proof that provider_scope now tracks real, asymmetric, per-claim evidence rather than an unconditional "any provider" match -- still proves provider recognition and provider-specific knowledge are separate concepts, just no longer via a fully "generic" pair', () => {
     const result = lookupTopicClaims([sourceRightsGoal()], eligibleStockFixture(), facts, ['adobe-stock'])
-    expect(result.matches.map((m) => m.claim_id).sort()).toEqual(genericIds.sort())
+    expect(result.matches.map((m) => m.claim_id)).toEqual(['CLAIM-STOCK-EDITORIAL-001-v2'])
   })
 })
 

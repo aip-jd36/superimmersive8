@@ -238,7 +238,24 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     topic: 'third_party_source_rights',
     claim_character: 'established',
     jurisdiction: 'Global',
-    lifecycle: 'Adopted',
+    // SUPERSEDED 2026-08-27 (Governance Correction Review,
+    // governance-reviews/FGR_007_STOCK_EDITORIAL_PROVIDER_SCOPE_CORRECTION_
+    // 2026-08-27.md): provider_scope: null was broader than this claim's own
+    // evidenced, disclosed scope (its own comment below already named
+    // "four independently-researched providers" -- never an open-ended
+    // "any provider" set). `superseded_by` now points to
+    // CLAIM-STOCK-EDITORIAL-001-v2, which lookupTopicClaims()'s own
+    // `c.superseded_by === null` filter excludes this entry via before
+    // Lifecycle/crc_eligible are ever evaluated -- this entry can no longer
+    // become a Retrieval candidate regardless of the fields below. `lifecycle`
+    // updated to 'Deprecated' to match the now-corrected GOVERNED-CLAIMS.md
+    // record. `crc_eligible`/crc_publication_scope/crc_candidate_statement
+    // deliberately left UNCHANGED below -- they are preserved as the
+    // historical record of what was actually reviewed and CRC-approved on
+    // 2026-08-18, exactly mirroring GOVERNED-CLAIMS.md's own "CRC Approver:
+    // JD (PM)" line, which was likewise left untouched as historical fact,
+    // not retroactively edited.
+    lifecycle: 'Deprecated',
     // CRC publication approved 2026-08-18 (CRC Approver: JD/PM), following
     // Formal CRC-Publication Review #1 (recommendation A -- PASS/GO AS-IS;
     // see governance-reviews/CPR_001_CLAIM-STOCK-EDITORIAL-001-v1_2026-08-18.md).
@@ -258,8 +275,43 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     unresolved_project_dependencies: ['which_provider', 'editorial_designation_confirmed', 'separate_authorization_obtained'],
     // Generic (provider-agnostic) claim -- a topic candidate regardless of
     // which provider (if any) the user named. See module header.
+    // HISTORICAL VALUE, preserved unchanged -- see the SUPERSEDED comment
+    // above. The corrected scope lives on CLAIM-STOCK-EDITORIAL-001-v2 below.
     provider_scope: null,
     last_verified: '2026-08-17',
+    superseded_by: 'CLAIM-STOCK-EDITORIAL-001-v2',
+  },
+  {
+    claim_id: 'CLAIM-STOCK-EDITORIAL-001-v2',
+    topic: 'third_party_source_rights',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    // Supersedes CLAIM-STOCK-EDITORIAL-001-v1 (2026-08-27, Governance
+    // Correction Review, governance-reviews/FGR_007_STOCK_EDITORIAL_
+    // PROVIDER_SCOPE_CORRECTION_2026-08-27.md). Sole substantive change from
+    // v1: provider_scope corrected from null to the four evidence-supported
+    // providers below (see provider_scope comment). crc_eligible: 'Yes' here
+    // is a BOUNDED REAFFIRMATION per FGR_007 §6, not a new substantive CRC
+    // Publication Review -- the original CPR_001 text-safety/routing
+    // analysis remains valid unchanged; narrowing provider_scope strictly
+    // reduces reachability and introduces no new overclaiming risk.
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      'CRC may state that stock-media content a provider designates "Editorial" is generally licensed for descriptive/newsworthy use rather than advertising, promotional, endorsement, or merchandising use, and that some providers offer a separate authorization path CRC cannot confirm was used for the user\'s specific asset. CRC must not state whether the user\'s own specific asset is Editorial-designated, whether their use violates any license, or whether separate authorization exists for it.',
+    crc_candidate_statement:
+      'A stock-media provider\'s standard license for content marked "Editorial" generally covers descriptive, newsworthy, or public-interest use -- not advertising, promotional, endorsement, or merchandising use. Some providers offer a separate process to authorize commercial use of Editorial content for a specific asset, though this doesn\'t confirm whether that was obtained for yours.',
+    applicability_requirements: [],
+    unresolved_project_dependencies: ['which_provider', 'editorial_designation_confirmed', 'separate_authorization_obtained'],
+    // CORRECTED (2026-08-27): the four providers v1's own evidence already
+    // named as "independently-researched" (Getty/iStock Tier 1, Adobe
+    // Stock/Shutterstock disclosed-weaker tiers) -- a narrower, evidence-
+    // accurate replacement for v1's unconditional null match, not an
+    // expansion. Real, individually-evidenced provider identities only --
+    // never a media-domain filter; a future fifth stock provider does not
+    // inherit this claim without its own governance review.
+    provider_scope: ['getty', 'istock', 'shutterstock', 'adobe-stock'],
+    last_verified: '2026-08-27',
     superseded_by: null,
   },
   {
@@ -267,7 +319,12 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     topic: 'third_party_source_rights',
     claim_character: 'established',
     jurisdiction: 'Global',
-    lifecycle: 'Adopted',
+    // SUPERSEDED 2026-08-27 -- same defect/correction philosophy as
+    // CLAIM-STOCK-EDITORIAL-001-v1 above (see that entry's own SUPERSEDED
+    // comment). superseded_by now points to CLAIM-STOCK-EDITORIAL-002-v2.
+    // crc_eligible/crc_publication_scope/crc_candidate_statement below
+    // deliberately left UNCHANGED as the historical record.
+    lifecycle: 'Deprecated',
     // CRC publication approved 2026-08-18 (CRC Approver: JD/PM), following
     // Formal CRC-Publication Review #2 (recommendation B -- PASS/GO WITH
     // BOUNDED CRC COPY ADJUSTMENT; see governance-reviews/CPR_002_CLAIM-
@@ -287,8 +344,43 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
       'Content that Getty, iStock, or Shutterstock mark "Editorial" is typically supplied without the model or property releases that would otherwise support broader commercial use -- a separate question from whether the applicable license itself permits your intended use. This hasn\'t been independently confirmed for every stock-media provider, including Adobe Stock.',
     applicability_requirements: [],
     unresolved_project_dependencies: ['which_provider', 'editorial_designation_confirmed', 'release_status_confirmed'],
+    // HISTORICAL VALUE, preserved unchanged -- see the SUPERSEDED comment
+    // above. The corrected scope lives on CLAIM-STOCK-EDITORIAL-002-v2 below.
     provider_scope: null,
     last_verified: '2026-08-17',
+    superseded_by: 'CLAIM-STOCK-EDITORIAL-002-v2',
+  },
+  {
+    claim_id: 'CLAIM-STOCK-EDITORIAL-002-v2',
+    topic: 'third_party_source_rights',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    // Supersedes CLAIM-STOCK-EDITORIAL-002-v1 (2026-08-27, Governance
+    // Correction Review, governance-reviews/FGR_007_STOCK_EDITORIAL_
+    // PROVIDER_SCOPE_CORRECTION_2026-08-27.md). Sole substantive change from
+    // v1: provider_scope corrected from null to ['getty','istock',
+    // 'shutterstock'] -- Adobe Stock DELIBERATELY EXCLUDED, matching this
+    // claim's own crc_candidate_statement below, which already names only
+    // these three providers by name. This claim's corrected scope is
+    // narrower than CLAIM-STOCK-EDITORIAL-001-v2's -- a deliberate,
+    // evidence-driven difference, not a shared blanket correction.
+    // crc_eligible: 'Yes' here is a BOUNDED REAFFIRMATION per FGR_007 §6,
+    // not a new substantive CRC Publication Review -- the original CPR_002
+    // analysis remains valid unchanged.
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      'CRC may state that content Getty, iStock, or Shutterstock designate "Editorial" is typically supplied without the model or property releases that would otherwise support broader commercial use, as a separate consideration from whether the applicable license permits a given use, and that this hasn\'t been independently confirmed for every stock-media provider, including Adobe Stock. CRC must not state whether the user\'s own specific asset has or lacks a release, or draw any conclusion from that about whether their use is permitted.',
+    crc_candidate_statement:
+      'Content that Getty, iStock, or Shutterstock mark "Editorial" is typically supplied without the model or property releases that would otherwise support broader commercial use -- a separate question from whether the applicable license itself permits your intended use. This hasn\'t been independently confirmed for every stock-media provider, including Adobe Stock.',
+    applicability_requirements: [],
+    unresolved_project_dependencies: ['which_provider', 'editorial_designation_confirmed', 'release_status_confirmed'],
+    // CORRECTED (2026-08-27): Adobe Stock deliberately excluded -- this
+    // claim's own evidence explicitly and repeatedly excludes it (see the
+    // governed markdown entry's own Source references). Real,
+    // individually-evidenced provider identities only.
+    provider_scope: ['getty', 'istock', 'shutterstock'],
+    last_verified: '2026-08-27',
     superseded_by: null,
   },
   {

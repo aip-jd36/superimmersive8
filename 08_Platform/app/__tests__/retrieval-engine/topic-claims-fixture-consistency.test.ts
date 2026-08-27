@@ -18,6 +18,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { GOAL_CATEGORIES } from '@/types/interview-engine'
+import { providerScopeMatches } from '@/lib/retrieval-engine/lookup-topic-claims'
 
 const GOVERNED_CLAIMS_PATH = path.join(__dirname, '..', '..', '..', '..', '06_Operations', 'institutional-knowledge', 'notebook', 'GOVERNED-CLAIMS.md')
 
@@ -117,17 +118,10 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
 
   describe.each([
     // [claimId, expectedProviderScope, expectedCrcEligible] -- CLAIM-STOCK-
-    // EDITORIAL-001-v1 updated to 'Yes' 2026-08-18 following Formal
-    // CRC-Publication Review #1 (recommendation A -- PASS/GO AS-IS) and PM
-    // approval; see governance-reviews/CPR_001_CLAIM-STOCK-EDITORIAL-001-v1
-    // _2026-08-18.md. CLAIM-STOCK-EDITORIAL-002-v1 ALSO updated to 'Yes'
-    // 2026-08-18 following Formal CRC-Publication Review #2 (recommendation
-    // B -- PASS/GO WITH BOUNDED CRC COPY ADJUSTMENT) and PM approval; see
-    // governance-reviews/CPR_002_CLAIM-STOCK-EDITORIAL-002-v1_2026-08-18.md.
-    // CLAIM-STOCK-GETTY-EDITORIAL-001-v1 ALSO updated to 'Yes' 2026-08-18 --
-    // the first provider-specific claim in the domain to reach CRC --
-    // following a bounded CRC-Publication Review #3 (recommendation A --
-    // PASS/GO AS-IS, no text change) and PM approval; see
+    // GETTY-EDITORIAL-001-v1 updated to 'Yes' 2026-08-18 -- the first
+    // provider-specific claim in the domain to reach CRC -- following a
+    // bounded CRC-Publication Review #3 (recommendation A -- PASS/GO AS-IS,
+    // no text change) and PM approval; see
     // governance-reviews/CPR_003_CLAIM-STOCK-GETTY-EDITORIAL-001-v1
     // _2026-08-18.md. CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1 ALSO updated to
     // 'Yes' 2026-08-18 -- the second provider-specific claim to reach CRC,
@@ -145,15 +139,27 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
     // certainty -- following a bounded CRC-Publication Review #5
     // (recommendation A -- PASS/GO AS-IS, no text change) and PM approval;
     // see governance-reviews/CPR_005_CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001
-    // -v1_2026-08-18.md. All five stock claims researched to date are now
-    // 'Yes' -- each claim's CRC eligibility is its own separate,
-    // individually-made decision.
-    ['CLAIM-STOCK-EDITORIAL-001-v1', null, 'Yes'],
-    ['CLAIM-STOCK-EDITORIAL-002-v1', null, 'Yes'],
+    // -v1_2026-08-18.md.
+    //
+    // CLAIM-STOCK-EDITORIAL-001-v1/-002-v1 REPLACED in this table 2026-08-27
+    // (Governance Correction Review, governance-reviews/FGR_007_STOCK_
+    // EDITORIAL_PROVIDER_SCOPE_CORRECTION_2026-08-27.md) by their corrected
+    // -v2 successors -- provider_scope: null was found broader than each
+    // claim's own evidenced scope. -001-v2 -> the four providers -001-v1's
+    // own evidence already named ("independently-researched providers").
+    // -002-v2 -> only three providers -- Adobe Stock deliberately excluded,
+    // matching -002's own text, which already named only "Getty, iStock, or
+    // Shutterstock." crc_eligible: 'Yes' on both v2 rows is a bounded
+    // reaffirmation (FGR_007 §6), not a new substantive CRC Publication
+    // Review. See the dedicated "v1 superseded" test block below this one
+    // for explicit verification that the v1 predecessors no longer count as
+    // live/CRC-eligible.
+    ['CLAIM-STOCK-EDITORIAL-001-v2', ['getty', 'istock', 'shutterstock', 'adobe-stock'], 'Yes'],
+    ['CLAIM-STOCK-EDITORIAL-002-v2', ['getty', 'istock', 'shutterstock'], 'Yes'],
     ['CLAIM-STOCK-GETTY-EDITORIAL-001-v1', ['getty'], 'Yes'],
     ['CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1', ['shutterstock'], 'Yes'],
     ['CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1', ['istock'], 'Yes'],
-  ] as const)('%s -- real runtime representation as of M3 (Living Knowledge — Third-Party Source Rights, 2026-08-18)', (claimId, expectedProviderScope, expectedCrcEligible) => {
+  ] as const)('%s -- real runtime representation as of M3 (Living Knowledge — Third-Party Source Rights, 2026-08-18) / provider-scope correction (2026-08-27)', (claimId, expectedProviderScope, expectedCrcEligible) => {
     test('exists in the markdown as real, Adopted governed knowledge', () => {
       const markdown = fs.readFileSync(GOVERNED_CLAIMS_PATH, 'utf-8')
       const claim = extractMarkdownClaims(markdown).find((c) => c.claim_id === claimId)
@@ -181,6 +187,87 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
 
     test("'third_party_source_rights' is an implemented GoalCategory value (M1, 2026-08-18)", () => {
       expect((GOAL_CATEGORIES as readonly string[]).includes('third_party_source_rights')).toBe(true)
+    })
+  })
+
+  /**
+   * Provider-scope correction / supersession verification (2026-08-27,
+   * Governance Correction Review, governance-reviews/FGR_007_STOCK_EDITORIAL
+   * _PROVIDER_SCOPE_CORRECTION_2026-08-27.md). Explicit, dedicated
+   * verification that CLAIM-STOCK-EDITORIAL-001-v1/-002-v1 -- preserved in
+   * the fixture as historical records, never deleted -- no longer count as
+   * live/CRC-eligible after being marked superseded, and that their -v2
+   * successors correctly do. This is the first real exercise of the
+   * `superseded_by` mechanism in this fixture (present in the schema since
+   * Wave 1, never previously non-null).
+   */
+  describe('provider-scope correction: v1 -> v2 supersession (2026-08-27)', () => {
+    test('v1 predecessors are present in the fixture (preserved, not deleted) but marked superseded_by their v2 successor', () => {
+      const v1_001 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-001-v1')
+      const v1_002 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-002-v1')
+      expect(v1_001).toBeDefined()
+      expect(v1_002).toBeDefined()
+      expect(v1_001?.superseded_by).toBe('CLAIM-STOCK-EDITORIAL-001-v2')
+      expect(v1_002?.superseded_by).toBe('CLAIM-STOCK-EDITORIAL-002-v2')
+    })
+
+    test('v1 predecessors carry Lifecycle: Deprecated, matching the corrected markdown record', () => {
+      const v1_001 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-001-v1')
+      const v1_002 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-002-v1')
+      expect(v1_001?.lifecycle).toBe('Deprecated')
+      expect(v1_002?.lifecycle).toBe('Deprecated')
+    })
+
+    test('v1 predecessors retain their ORIGINAL provider_scope: null and original crc_eligible/CRC text as an unmodified historical record -- correction is via supersession, never retroactive edit', () => {
+      const v1_001 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-001-v1')
+      const v1_002 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-002-v1')
+      expect(v1_001?.provider_scope).toBeNull()
+      expect(v1_002?.provider_scope).toBeNull()
+      expect(v1_001?.crc_eligible).toBe('Yes')
+      expect(v1_002?.crc_eligible).toBe('Yes')
+    })
+
+    test('v2 successors carry the corrected, evidence-differentiated provider_scope -- -001-v2 four providers, -002-v2 three (Adobe Stock excluded)', () => {
+      const v2_001 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-001-v2')
+      const v2_002 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-002-v2')
+      expect(v2_001?.provider_scope).toEqual(['getty', 'istock', 'shutterstock', 'adobe-stock'])
+      expect(v2_002?.provider_scope).toEqual(['getty', 'istock', 'shutterstock'])
+      expect(v2_001?.superseded_by).toBeNull()
+      expect(v2_002?.superseded_by).toBeNull()
+    })
+
+    test('exactly one of each {v1, v2} pair is a live Retrieval candidate (superseded_by === null AND lifecycle === Adopted AND crc_eligible === Yes) -- v1 excluded by supersession, v2 the sole live representative', () => {
+      const isLiveCandidate = (c: (typeof TOPIC_CLAIMS_FIXTURE)[number]) => c.superseded_by === null && c.lifecycle === 'Adopted' && c.crc_eligible === 'Yes'
+      const v1_001 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-001-v1')!
+      const v2_001 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-001-v2')!
+      const v1_002 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-002-v1')!
+      const v2_002 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-002-v2')!
+      expect(isLiveCandidate(v1_001)).toBe(false)
+      expect(isLiveCandidate(v2_001)).toBe(true)
+      expect(isLiveCandidate(v1_002)).toBe(false)
+      expect(isLiveCandidate(v2_002)).toBe(true)
+    })
+
+    test('providerScopeMatches: an Artlist-only asset-provider context matches neither v2 successor -- confirms the correction alone resolves the confirmed cross-domain candidacy defect without any provider registration', () => {
+      const v2_001 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-001-v2')!
+      const v2_002 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-002-v2')!
+      expect(providerScopeMatches(v2_001, ['artlist'])).toBe(false)
+      expect(providerScopeMatches(v2_002, ['artlist'])).toBe(false)
+      expect(providerScopeMatches(v2_001, ['envato-elements'])).toBe(false)
+      expect(providerScopeMatches(v2_002, ['envato-elements'])).toBe(false)
+      expect(providerScopeMatches(v2_001, ['epidemic-sound'])).toBe(false)
+      expect(providerScopeMatches(v2_002, ['epidemic-sound'])).toBe(false)
+    })
+
+    test('providerScopeMatches: every legitimately in-scope stock provider still matches its evidenced claim(s), and the Adobe Stock asymmetry between -001-v2 and -002-v2 is preserved', () => {
+      const v2_001 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-001-v2')!
+      const v2_002 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-STOCK-EDITORIAL-002-v2')!
+      for (const provider of ['getty', 'istock', 'shutterstock']) {
+        expect(providerScopeMatches(v2_001, [provider])).toBe(true)
+        expect(providerScopeMatches(v2_002, [provider])).toBe(true)
+      }
+      expect(providerScopeMatches(v2_001, ['adobe-stock'])).toBe(true)
+      expect(providerScopeMatches(v2_002, ['adobe-stock'])).toBe(false)
     })
   })
 
@@ -270,8 +357,8 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
     }
   })
 
-  test('exactly nine claims in the runtime fixture are Adopted + CRC-eligible as of 2026-08-19 -- CLAIM-COPY-004-v1 (first PM CRC-publication decision, 2026-08-17), CLAIM-STOCK-EDITORIAL-001-v1 (second, 2026-08-18), CLAIM-STOCK-EDITORIAL-002-v1 (third, 2026-08-18, published with a bounded CRC-facing copy adjustment), CLAIM-STOCK-GETTY-EDITORIAL-001-v1 (fourth, 2026-08-18, first provider-specific claim published, no text change), CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1 (fifth, 2026-08-18, second provider-specific claim published, no text change), CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1 (sixth, 2026-08-18, third and final provider-specific claim published to date, no text change), and CLAIM-COPY-001-v1/CLAIM-COPY-002-v1/CLAIM-COPY-003-v1 (seventh-ninth, 2026-08-19, published together atomically alongside REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1, no text change to any of them; see governance-reviews/CPR_006_COPYRIGHT_PUBLICATION_PACKAGE_2026-08-19.md) -- update only when a further real decision is recorded', () => {
+  test('exactly nine claims in the runtime fixture are Adopted + CRC-eligible as of 2026-08-27 -- CLAIM-COPY-004-v1 (first PM CRC-publication decision, 2026-08-17), CLAIM-STOCK-EDITORIAL-001-v2 (second lineage slot, originally -v1 2026-08-18, superseded 2026-08-27 by a provider_scope correction -- see governance-reviews/FGR_007_STOCK_EDITORIAL_PROVIDER_SCOPE_CORRECTION_2026-08-27.md; the v1 predecessor is preserved in the fixture with Lifecycle: Deprecated and is correctly excluded from this filter), CLAIM-STOCK-EDITORIAL-002-v2 (third lineage slot, originally -v1 2026-08-18 with a bounded CRC-facing copy adjustment, superseded 2026-08-27 by the same correction with a narrower, Adobe-Stock-excluded scope), CLAIM-STOCK-GETTY-EDITORIAL-001-v1 (fourth, 2026-08-18, first provider-specific claim published, no text change, not affected by the 2026-08-27 correction), CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1 (fifth, 2026-08-18, second provider-specific claim published, no text change), CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1 (sixth, 2026-08-18, third and final provider-specific claim published to date, no text change), and CLAIM-COPY-001-v1/CLAIM-COPY-002-v1/CLAIM-COPY-003-v1 (seventh-ninth, 2026-08-19, published together atomically alongside REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1, no text change to any of them; see governance-reviews/CPR_006_COPYRIGHT_PUBLICATION_PACKAGE_2026-08-19.md) -- update only when a further real decision is recorded', () => {
     const liveClaims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.lifecycle === 'Adopted' && c.crc_eligible === 'Yes')
-    expect(liveClaims.map((c) => c.claim_id).sort()).toEqual(['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPY-004-v1', 'CLAIM-STOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-EDITORIAL-002-v1', 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1', 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1'])
+    expect(liveClaims.map((c) => c.claim_id).sort()).toEqual(['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPY-004-v1', 'CLAIM-STOCK-EDITORIAL-001-v2', 'CLAIM-STOCK-EDITORIAL-002-v2', 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1', 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1'])
   })
 })

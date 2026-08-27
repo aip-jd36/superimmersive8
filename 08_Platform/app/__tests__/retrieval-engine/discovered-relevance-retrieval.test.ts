@@ -42,23 +42,27 @@ function claimIds(matches: { claim_id: string }[]): string[] {
 
 describe('lookupTopicClaims — discoveredTopics additive parameter', () => {
   // K. generic stock claims retrieved under discovered topic
-  test('K: no explicit goals, discoveredTopics=[third_party_source_rights], no providers -> both generic stock claims retrieved, no provider-specific claim', () => {
+  // UPDATED 2026-08-27 (Governance Correction Review, governance-reviews/
+  // FGR_007_STOCK_EDITORIAL_PROVIDER_SCOPE_CORRECTION_2026-08-27.md):
+  // CLAIM-STOCK-EDITORIAL-001-v1/-002-v1 are no longer provider_scope: null
+  // -- their -v2 successors carry a corrected, evidence-bounded scope, so
+  // with NO provider named at all, neither claim matches anymore. This is a
+  // real behavioral change (not a rename): a user who names no provider no
+  // longer receives stock-media-specific guidance, matching the corrected
+  // scope exactly.
+  test('K: no explicit goals, discoveredTopics=[third_party_source_rights], no providers -> ZERO stock-editorial claims retrieved (behavior change, 2026-08-27)', () => {
     const result = lookupTopicClaims(NO_GOALS, TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, [], ['third_party_source_rights'])
     const ids = claimIds(result.matches)
-    expect(ids).toContain('CLAIM-STOCK-EDITORIAL-001-v1')
-    expect(ids).toContain('CLAIM-STOCK-EDITORIAL-002-v1')
-    expect(ids).not.toContain('CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')
-    expect(ids).not.toContain('CLAIM-STOCK-GETTY-EDITORIAL-001-v1')
-    expect(ids).not.toContain('CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1')
+    expect(ids).toEqual([])
   })
 
   // L. matching provider claim retrieved
-  test('L: discoveredTopics=[third_party_source_rights] + assetProviders=[istock] -> iStock-specific claim retrieved alongside the generics', () => {
+  test('L: discoveredTopics=[third_party_source_rights] + assetProviders=[istock] -> iStock-specific claim retrieved alongside the stock-editorial v2 successors', () => {
     const result = lookupTopicClaims(NO_GOALS, TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, ['istock'], ['third_party_source_rights'])
     const ids = claimIds(result.matches)
     expect(ids).toContain('CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')
-    expect(ids).toContain('CLAIM-STOCK-EDITORIAL-001-v1')
-    expect(ids).toContain('CLAIM-STOCK-EDITORIAL-002-v1')
+    expect(ids).toContain('CLAIM-STOCK-EDITORIAL-001-v2')
+    expect(ids).toContain('CLAIM-STOCK-EDITORIAL-002-v2')
   })
 
   // M. nonmatching provider claim excluded (Getty/Shutterstock leak check)
@@ -176,15 +180,20 @@ describe('retrieve() — discoveredTopicOccurrences additive parameter, end-to-e
     expect(results.find((r) => r.claim_id === 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')).toBeUndefined()
   })
 
-  // I/J. generic + iStock-specific claims both surface via the discovered
-  // path; G/H (Getty/Shutterstock) still excluded by the unchanged provider
-  // pre-filter.
-  test('generic stock claims and the iStock-specific claim all surface via discoveredTopicOccurrences; Getty/Shutterstock do not (provider_scope unchanged)', () => {
+  // I/J. corrected-scope claims (-001-v2, -002-v2) + the iStock-specific
+  // claim all surface via the discovered path, since all three list 'istock'
+  // in their provider_scope; G/H (Getty/Shutterstock) still excluded by the
+  // unchanged provider pre-filter. Updated 2026-08-27: the two stock-editorial
+  // IDs are the v2 successors (see FGR_007) -- v1 predecessors are Deprecated
+  // with superseded_by set, so they no longer surface at all, by design.
+  test('corrected-scope stock claims and the iStock-specific claim all surface via discoveredTopicOccurrences; Getty/Shutterstock do not (provider_scope unchanged)', () => {
     const { results } = retrieve(handoffFor(), MATRIX_FIXTURE, NO_GOALS, TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, [], ['istock'], [ISTOCK_DISCOVERY_OCCURRENCE])
     const ids = results.map((r) => r.claim_id)
-    expect(ids).toContain('CLAIM-STOCK-EDITORIAL-001-v1')
-    expect(ids).toContain('CLAIM-STOCK-EDITORIAL-002-v1')
+    expect(ids).toContain('CLAIM-STOCK-EDITORIAL-001-v2')
+    expect(ids).toContain('CLAIM-STOCK-EDITORIAL-002-v2')
     expect(ids).toContain('CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1')
+    expect(ids).not.toContain('CLAIM-STOCK-EDITORIAL-001-v1')
+    expect(ids).not.toContain('CLAIM-STOCK-EDITORIAL-002-v1')
     expect(ids).not.toContain('CLAIM-STOCK-GETTY-EDITORIAL-001-v1')
     expect(ids).not.toContain('CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1')
     // Every discovered result carries the originating goal category, never

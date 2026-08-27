@@ -102,23 +102,40 @@ describe('Wave 1 real claims -- governance state as of 2026-08-19 (all four COPY
    * separately, not by this file (which is scoped to Wave 1's copyright
    * claims) -- see topic-claims-fixture-consistency.test.ts and the M3
    * provider-narrowing test suite.
+   *
+   * Updated again 2026-08-27 (Governance Correction Review,
+   * governance-reviews/FGR_007_STOCK_EDITORIAL_PROVIDER_SCOPE_CORRECTION_
+   * 2026-08-27.md): CLAIM-STOCK-EDITORIAL-001-v1/-002-v1 gained corrected
+   * -v2 successors via supersession -- both v1 predecessors are PRESERVED
+   * in the fixture (never deleted, per this repository's own "never
+   * retroactively edit a historical decision record" discipline) with
+   * `superseded_by` now non-null, alongside their new -v2 successors. Count
+   * grows from nine to eleven; see the dedicated Lifecycle test immediately
+   * below for why not all eleven are still 'Adopted'.
    */
-  test('all four Wave 1 claims plus the five stock-media claims are present in the fixture', () => {
+  test('all four Wave 1 claims plus the seven stock-media claims (five original + two -v2 correction successors) are present in the fixture', () => {
     expect(TOPIC_CLAIMS_FIXTURE.map((c) => c.claim_id).sort()).toEqual([
       'CLAIM-COPY-001-v1',
       'CLAIM-COPY-002-v1',
       'CLAIM-COPY-003-v1',
       'CLAIM-COPY-004-v1',
       'CLAIM-STOCK-EDITORIAL-001-v1',
+      'CLAIM-STOCK-EDITORIAL-001-v2',
       'CLAIM-STOCK-EDITORIAL-002-v1',
+      'CLAIM-STOCK-EDITORIAL-002-v2',
       'CLAIM-STOCK-GETTY-EDITORIAL-001-v1',
       'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1',
       'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1',
     ])
   })
 
-  test('all nine (four Wave 1 + five stock-media) ARE Lifecycle: Adopted -- visible as Adopted institutional knowledge in the canonical Governed Claims source', () => {
+  test('all four Wave 1 claims plus the five CURRENTLY-GOVERNING stock-media claims (Getty/iStock/Shutterstock unaffected by the 2026-08-27 correction, plus the two -v2 successors) ARE Lifecycle: Adopted -- the two -v1 predecessors are correctly Deprecated, not Adopted, and are excluded from this assertion deliberately, not by oversight', () => {
+    const supersededPredecessors = new Set(['CLAIM-STOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-EDITORIAL-002-v1'])
     for (const claim of TOPIC_CLAIMS_FIXTURE) {
+      if (supersededPredecessors.has(claim.claim_id)) {
+        expect(claim.lifecycle).toBe('Deprecated')
+        continue
+      }
       expect(claim.lifecycle).toBe('Adopted')
     }
   })
