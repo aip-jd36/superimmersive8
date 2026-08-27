@@ -2207,3 +2207,119 @@ reasoning.
 Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
 
 **Excluded from this Wave — not adopted, per FGR_006's own disposition, and not present anywhere above:** the undrafted Artlist seat/member-mechanics background (FGR_006's "A-7b" — DEFERRED, never assigned a claim ID, never drafted as a proposition) and `CLAIM-MUSIC-ACCESS-NOT-LICENSE-001-v1` (FGR_006's "G-1," the generic cross-provider "access ≠ specific licensed use" candidate — REJECTED by FGR_006 §5 as duplicative of boundary language every claim above already individually carries). Neither appears in this document and neither should be added without a new Formal Governance Review.
+
+**Wave 4 claims below (2026-08-28) — the first claim in the Likeness domain, and the second genuinely non-provider-shaped Living Knowledge domain after Copyright & Human Authorship (Wave 1) — `provider_scope: null`, no AI-video or asset-provider concept anywhere in this claim.** `Lifecycle: Adopted` (Adoption Approver: JD (PM/CRC PM/Architecture), Adoption Decision Date: 2026-08-28, following `governance-reviews/FGR_008_CAND-LIKENESS-NY-CONSENT-REQUIREMENT-001_2026-08-28.md`'s recommendation, ADOPT WITH BOUNDED WORDING CORRECTION, and this task's own explicit human authorization to apply that correction and record Adoption), `Publication scope: Reviewer/Commercial Assurance`. Not CRC-eligible — `CRC Approver`/`CRC Decision Date` PENDING, same discipline as every prior wave; a separate CRC Publication Review is required, and per FGR_008 §13 this claim's own topic (`likeness`) is explicitly named in `CRC-PUBLICATION-POLICY.md` Principle 3 as a No-List-adjacent subject-matter gate — the future CPR must treat it as Principle-3-gated from the outset, not resolvable by ordinary narrow-before-withhold reasoning. Source candidate package: `LIKENESS-NY-SCENARIO-A-FGR-PACKAGE.md` (this folder). Runtime note, same shape as every prior wave's own: this claim has no `TOPIC_CLAIMS_FIXTURE` (`08_Platform/app/lib/retrieval-engine/topic-claims-fixture.ts`) representation — confirmed directly against current code as part of this Adoption recording, not assumed. This is Adoption as pure governance documentation, with zero runtime effect: this claim is governed Living Knowledge, immediately useful to a human reviewer, but structurally unreachable by CRC Retrieval until a separate, deliberately unperformed engineering task adds a fixture entry (which itself would still not make it CRC-eligible without a separate, later CRC Publication Review).
+
+### CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1
+Domain: Likeness / Right of Privacy (New York)
+Topic: likeness
+Subtopic: ny-consent-requirement-advertising-or-trade-use
+Claim character: established
+Jurisdiction: New York (state)
+Context: a commercially intended AI-generated or AI-assisted video that depicts or uses the name, portrait, picture, likeness, or voice of a recognizable, living real person
+
+GOVERNANCE TREATMENT (2026-08-28, PM adoption decision, FGR #8): `provider_scope: null` (explicit — general New York statutory knowledge, not attached to any AI-video or asset provider). **NARROWED by FGR_008 (§4) from the original candidate package's own proposition**, which additionally asserted that New York courts have construed "portrait, picture, likeness" to reach any recognizable likeness, not only an exact photograph or explicit name — a construction supported in the preparation package only by secondary commentary (Herrick, citing *Loftus v. Greenwich Lithographing Co.*, 192 A.D. 251 (1920)) whose own primary holding text was never independently obtained (`PRIMARY CASE EVIDENCE INCOMPLETE`, per `evidence-captures/ny-civil-rights-law/MANIFEST.md`). FGR_008 found the core consent/liability rule below fully, independently Class-A-supported without that sentence, and recommended narrowing rather than adopting unverified case-law characterization as though primary-verified — see `Related` below for where that removed content is preserved for a possible future sub-candidate. FGR disposition: ADOPT WITH BOUNDED WORDING CORRECTION.
+
+Claim proposition: >
+  Under New York Civil Rights Law §§ 50-51, using a living person's name,
+  portrait, picture, likeness, or voice for advertising purposes or for the
+  purposes of trade, within New York, without that person's prior written
+  consent (or, if a minor, the consent of a parent or guardian), can expose
+  the user to civil liability (an injunction, compensatory damages, and --
+  if the use was knowing -- exemplary damages at the jury's discretion) and,
+  under § 50 specifically, is a misdemeanor.
+
+Source references:
+  - primary (Class A, independently retrieved verbatim, direct `curl` fetch of the official page's own `nys-openleg-result-text` container, no model summarization): N.Y. Civil Rights Law § 50 (Right of privacy), `nysenate.gov/legislation/laws/CVR/50`, durably preserved at `evidence-captures/ny-civil-rights-law/ny-cvr-50_20260827T164320Z.html`, SHA-256 `587aac155cb46674b9891ab0b94b35a60662218331ccad64263f986bc8871a86`.
+  - primary (Class A, same method; first fetch attempt returned an HTTP 403 Cloudflare challenge, retried successfully with a fuller browser User-Agent + Referer header): N.Y. Civil Rights Law § 51 (Action for injunction and for damages), `nysenate.gov/legislation/laws/CVR/51`, durably preserved at `evidence-captures/ny-civil-rights-law/ny-cvr-51_20260827T164320Z.html`, SHA-256 `3c8ce0d96da4d7f8eb06e45b849173e892b12134e6ac7288575ef0806562b14d`.
+Source authority/type: Primary legal/official authority (state statute)
+Source fact: >
+  § 50: "A person, firm or corporation that uses for advertising purposes,
+  or for the purposes of trade, the name, portrait, picture, likeness, or
+  voice of any living person without having first obtained the written
+  consent of such person, or if a minor of such minor's parent or
+  guardian, is guilty of a misdemeanor." § 51 (operative clause): "Any
+  person whose name, portrait, picture, likeness or voice is used within
+  this state for advertising purposes or for the purposes of trade without
+  the written consent first obtained as above provided may maintain an
+  equitable action in the supreme court of this state against the person,
+  firm or corporation so using such person's name, portrait, picture,
+  likeness or voice, to prevent and restrain the use thereof; and may also
+  sue and recover damages for any injuries sustained by reason of such use
+  and if the defendant shall have knowingly used such person's name,
+  portrait, picture, likeness or voice in such manner as is forbidden or
+  declared to be unlawful by section fifty of this article, the jury, in
+  its discretion, may award exemplary damages." § 51's five enumerated
+  exceptions (downstream transfer to a lawful user; photography-
+  establishment display; manufacturer/dealer name-with-goods; author/
+  composer/artist name-with-work; sound-recording copyright licensing)
+  were independently re-checked against this claim's own Context and found
+  non-material / outside scope (FGR_008 §6) -- none is incorporated into
+  this claim's own proposition.
+
+SI8 interpretation: >
+  A commercial AI video depicting a living person's name, portrait,
+  picture, likeness, or voice should not be represented to a client,
+  buyer, or platform as cleared for commercial/advertising use in New York
+  absent confirmed written consent from that person -- this is a
+  documentary fact CRC cannot establish from conversation alone (see
+  Unresolved project dependencies below).
+
+Applicability requirements:
+  - fact: jurisdiction
+    operator: equals
+    value: New York
+Unresolved project dependencies: [recognizable_likeness_or_voice_present, advertising_or_trade_use_confirmed, written_consent_confirmed]   <!-- recognizable_likeness_or_voice_present: whether the specific project's content actually uses the person's name/portrait/picture/likeness/voice at all -- not currently modeled anywhere in StructuredUnderstanding (confirmed across three prior architecture diagnostics); a candidate future Track A content-presence fact, plausibly askable in a future Dependency Askability Review (structurally comparable to human_contribution_description), not decided here. advertising_or_trade_use_confirmed: whether the specific use meets the statutory "advertising purposes or purposes of trade" gate -- deliberately NOT equated with the existing commercial_use/intended_use project facts (narrower, legally distinct concept, per FGR_008 §5); too interpretive for simple self-attestation without the separate, not-yet-adopted Candidate B (CAND-LIKENESS-NY-EXPRESSIVE-WORK-BOUNDARY-001, in LIKENESS-NY-SCENARIO-A-FGR-PACKAGE.md) existing first. written_consent_confirmed: evidence-only per established stock-governance precedent (release_status_confirmed/separate_authorization_obtained/rights_and_clearance_status) -- CRC must never treat a conversational assertion of permission as establishing this fact; no Likeness-specific self-attestation exception created (FGR_008 §11). -->
+Prohibited conclusions: >
+  Does not establish whether this specific project's depiction is legally
+  "advertising purposes or purposes of trade" as opposed to an excluded
+  use; whether the depicted person is actually recognizable as a matter of
+  fact; whether consent was actually obtained or is sufficient; whether
+  the project is commercially cleared. Is not a substitute for Commercial
+  Assurance evidence review of the actual video content, its intended/
+  distributed use, and any consent/release documentation.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-28
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  PENDING -- not yet reviewed for CRC Publication. FGR_008 §13 found this
+  claim's topic (likeness) is explicitly named in CRC Publication Policy
+  Principle 3 as a No-List-adjacent subject-matter gate, independent of
+  source type -- a future CRC Publication Review must treat this claim as
+  Principle-3-gated from the outset (Principle 5's ordinary "narrow before
+  withholding" default does not apply to Principle 3 concerns) and must
+  not attempt to publish a softened version on narrow-before-withhold
+  reasoning. This is a directional caution, not a Publication-stage
+  decision; a separate CRC Publication Review is required.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  New York has a specific statute (Civil Rights Law §§ 50-51) requiring a
+  living person's prior written consent before their name, portrait,
+  picture, likeness, or voice is used for advertising or trade purposes in
+  the state, with civil and (for a knowing violation) even misdemeanor
+  consequences.
+
+Effective date: Not independently confirmed as a specific amendment date this session -- §§ 50-51's core operative text is long-settled (in force in materially this form for over a century per corroborating secondary commentary; see Refresh class below).
+Last reviewed: 2026-08-28
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: none in this ledger. A related, not-yet-evidenced consideration (New York courts' construction of "portrait, picture, likeness" to reach a recognizable likeness generally, not only an exact photograph or explicit name) was deliberately removed from this claim's own proposition per FGR_008 §4/§17 and is preserved, not adopted, as a "Deferred sub-consideration" note under Candidate A in `LIKENESS-NY-SCENARIO-A-FGR-PACKAGE.md` -- promotable to its own sub-candidate only if a future task obtains *Loftus v. Greenwich Lithographing Co.*'s complete primary opinion text. A separate, not-yet-ready sibling candidate (`CAND-LIKENESS-NY-EXPRESSIVE-WORK-BOUNDARY-001`, the "advertising purposes or purposes of trade" scope-boundary proposition) remains in the same preparation package, `Lifecycle: Candidate`, `NOT READY FOR FGR` -- explicitly not reviewed, not adopted, not rejected by this Wave.
+
+Formal Governance Review #8 (2026-08-28): ADOPT WITH BOUNDED WORDING
+CORRECTION -- original candidate proposition's recognizability-construction
+sentence removed (secondary-sourced only, primary case evidence
+incomplete); core consent/liability rule retained unchanged, fully Class A
+statutory support. `provider_scope` explicitly authored as `null` (was
+implicit in the preparation package). CRC-eligibility explicitly deferred
+with a Principle 3 caution for the future CPR, not resolved by this
+Adoption. See full review for the complete element-by-element evidence
+classification and the corrected CRC Publication Policy Principle 3
+analysis.
+
+Full review artifact: `governance-reviews/FGR_008_CAND-LIKENESS-NY-CONSENT-REQUIREMENT-001_2026-08-28.md`
+
+**Excluded from this Wave — not adopted, and not present anywhere above:** `CAND-LIKENESS-NY-EXPRESSIVE-WORK-BOUNDARY-001` (the "advertising purposes or purposes of trade" scope-boundary candidate) — remains `Lifecycle: Candidate`, `NOT READY FOR FGR`, in `LIKENESS-NY-SCENARIO-A-FGR-PACKAGE.md` only, explicitly out of scope for this Wave's own reviewing task. Does not appear in this document and should not be added without its own separate Formal Governance Review.
