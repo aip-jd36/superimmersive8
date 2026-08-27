@@ -30,19 +30,46 @@ const GOVERNED_CLAIMS_PATH = path.join(__dirname, '..', '..', '..', '..', '06_Op
  * runtime representation -- this set should shrink over time, not grow
  * casually.
  *
- * EMPTY as of M3 (Living Knowledge — Third-Party Source Rights, 2026-08-18):
- * the five stock-media claims that previously lived here (CLAIM-STOCK-
- * EDITORIAL-001-v1/-002-v1, CLAIM-STOCK-GETTY-EDITORIAL-001-v1, CLAIM-STOCK-
- * SHUTTERSTOCK-EDITORIAL-001-v1, CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1) now
- * have real TOPIC_CLAIMS_FIXTURE entries (M1 GoalCategory + M2
- * AssetProviderMention + M3 provider-scoped retrieval together closed every
- * architecture blocker that previously made them unrepresentable). They
- * remain excluded from CRC output for a SEPARATE reason -- `crc_eligible:
- * 'Pending'` -- which is a governance gate `lookupTopicClaims()` already
- * enforces for every claim in this fixture, not a fixture-representation
- * exception; see the dedicated tests below for each of the five.
+ * Was EMPTY from M3 (Living Knowledge — Third-Party Source Rights,
+ * 2026-08-18) until 2026-08-27: the five stock-media claims that previously
+ * lived here (CLAIM-STOCK-EDITORIAL-001-v1/-002-v1, CLAIM-STOCK-
+ * GETTY-EDITORIAL-001-v1, CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1,
+ * CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1) now have real TOPIC_CLAIMS_FIXTURE
+ * entries (M1 GoalCategory + M2 AssetProviderMention + M3 provider-scoped
+ * retrieval together closed every architecture blocker that previously made
+ * them unrepresentable). They remain excluded from CRC output for a
+ * SEPARATE reason -- `crc_eligible: 'Pending'` -- which is a governance gate
+ * `lookupTopicClaims()` already enforces for every claim in this fixture,
+ * not a fixture-representation exception; see the dedicated tests below for
+ * each of the five.
+ *
+ * Populated again 2026-08-27 with the ten Music Scenario A claims (Wave 3,
+ * Third-Party Source Assets / Music Licensing) Adopted this date following
+ * Formal Governance Review #6 (`governance-reviews/FGR_006_MUSIC_SCENARIO_A
+ * _PACKAGE_2026-08-27.md`) and explicit human Adoption approval (Adoption
+ * Approver: JD (PM)) -- a real, recorded governance decision, per this
+ * comment's own standing requirement. Unrepresentable for the same
+ * architectural reason M3 once solved for stock media, not yet solved here:
+ * their `provider_scope` values (`envato-elements`, `epidemic-sound`,
+ * `artlist`) are not yet registered in `ASSET_PROVIDER_IDS`, so no
+ * conforming `TopicClaim` can be authored for them without first extending
+ * that registry -- a generic extension, not a music-specific special case,
+ * deliberately not performed as part of this Adoption. Remove each ID once
+ * that registration work gives it a real runtime entry, mirroring exactly
+ * how the five stock-media IDs above were removed once M3 landed.
  */
-const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set<string>([])
+const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set<string>([
+  'CLAIM-MUSIC-ENVATO-SYNC-001-v1',
+  'CLAIM-MUSIC-ENVATO-CANCELLATION-001-v1',
+  'CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1',
+  'CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1',
+  'CLAIM-MUSIC-ARTLIST-CLIENT-LICENSE-RETENTION-001-v1',
+  'CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1',
+  'CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1',
+  'CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1',
+  'CLAIM-MUSIC-ARTLIST-PRO-ROYALTIES-001-v1',
+  'CLAIM-MUSIC-ARTLIST-ENTERPRISE-THRESHOLD-001-v1',
+])
 
 /** Strips fenced code blocks (```...```) before scanning -- the entry template lives inside one and must never be counted as a real claim. */
 function stripFencedCodeBlocks(markdown: string): string {
