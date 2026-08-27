@@ -283,6 +283,31 @@ describe('normalizeCandidate: asset provider canonicalization', () => {
     expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'PhotoMega' }))).toEqual({ status: 'unrecognized' })
   })
 
+  // Artlist registration (2026-08-27, Music Scenario A -- Artlist A-3
+  // synthetic runtime canary): pure generic registry extension, same
+  // mechanism/tests as Getty/iStock/Shutterstock/Adobe Stock above.
+  test('Artlist resolves to canonical "artlist"', () => {
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'Artlist' }))).toEqual({ status: 'resolved', canonical_identifier: 'artlist' })
+  })
+
+  test('"artlist" (lowercase) and "artlist.io" both resolve to "artlist"', () => {
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'artlist' }))).toEqual({ status: 'resolved', canonical_identifier: 'artlist' })
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'artlist.io' }))).toEqual({ status: 'resolved', canonical_identifier: 'artlist' })
+  })
+
+  test('Artlist is DISTINCT from every stock-media provider -- registering it introduces no collision', () => {
+    const artlist = normalizeCandidate(providerCandidate({ raw_provider_name: 'Artlist' }))
+    const getty = normalizeCandidate(providerCandidate({ raw_provider_name: 'Getty' }))
+    expect(artlist).toEqual({ status: 'resolved', canonical_identifier: 'artlist' })
+    expect(artlist).not.toEqual(getty)
+  })
+
+  test('Envato and Epidemic Sound remain unrecognized -- this milestone registers only Artlist, per its own one-provider scope', () => {
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'Envato' }))).toEqual({ status: 'unrecognized' })
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'Envato Elements' }))).toEqual({ status: 'unrecognized' })
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'Epidemic Sound' }))).toEqual({ status: 'unrecognized' })
+  })
+
   test('a tool_mention candidate is not_applicable to provider normalization (kind isolation)', () => {
     expect(normalizeCandidate(toolCandidate())).not.toEqual({ status: 'unrecognized' })
   })

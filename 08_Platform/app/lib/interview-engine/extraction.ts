@@ -370,19 +370,30 @@ const KNOWN_TOOLS: Record<string, string> = {
 /**
  * Bounded initial canonical asset-provider registry (Living Knowledge —
  * Third-Party Source Rights, M1+M2, 2026-08-18, PM-approved scope per
- * THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md §9): exactly the
- * four providers with an already-governed relationship (Getty, iStock,
- * Shutterstock have adopted claims; Adobe Stock has none yet but recognition
- * is still useful, per the approved design). Deliberately NOT expanded to
- * Unsplash/Pexels/Pond5/Storyblocks/Envato/etc. in this milestone. No
- * ambiguous-alias sub-registry is needed, unlike KNOWN_AMBIGUOUS_TOOLS above
- * -- none of these names are textually confusable with each other the way
- * "Nano Banana" is confusable across two Gemini access surfaces. Getty and
+ * THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md §9): originally
+ * exactly the four providers with an already-governed relationship (Getty,
+ * iStock, Shutterstock have adopted claims; Adobe Stock has none yet but
+ * recognition is still useful, per the approved design). No ambiguous-alias
+ * sub-registry is needed, unlike KNOWN_AMBIGUOUS_TOOLS above -- none of
+ * these names are textually confusable with each other the way "Nano
+ * Banana" is confusable across two Gemini access surfaces. Getty and
  * iStock are kept as DISTINCT canonical identifiers even though they are
  * corporately related -- their governed claims differ materially (see
  * GOVERNED-CLAIMS.md's CLAIM-STOCK-GETTY-EDITORIAL-001-v1 vs. CLAIM-STOCK-
  * ISTOCK-EDITORIAL-001-v1), so collapsing them would make correct future
  * routing architecturally impossible, not merely imprecise.
+ *
+ * `artlist` added 2026-08-27 (Music Scenario A -- Artlist A-3 synthetic
+ * runtime canary): same generic mechanism, no new sub-registry, no
+ * provider-category concept introduced. Ten Music-domain claims are
+ * Adopted (GOVERNED-CLAIMS.md, FGR_006) but every one remains `CRC
+ * Approver: PENDING` (CPR_007: WITHHOLD, PM decision PENDING) -- this
+ * registration makes the identifier resolvable and, downstream,
+ * provider-scope-matchable; it does not itself make any Music claim CRC-
+ * eligible or fixture-represented. Envato/Epidemic Sound remain
+ * deliberately unregistered, out of this milestone's one-provider scope --
+ * a name like "Envato" or "Epidemic Sound" still resolves `unrecognized`
+ * exactly as before.
  */
 const KNOWN_ASSET_PROVIDERS: Record<string, AssetProviderId> = {
   getty: 'getty',
@@ -394,6 +405,8 @@ const KNOWN_ASSET_PROVIDERS: Record<string, AssetProviderId> = {
   shutterstock: 'shutterstock',
   'adobe stock': 'adobe-stock',
   adobestock: 'adobe-stock',
+  artlist: 'artlist',
+  'artlist.io': 'artlist',
 }
 
 export function normalizeCandidate(candidate: CandidateObservation): NormalizationResult {

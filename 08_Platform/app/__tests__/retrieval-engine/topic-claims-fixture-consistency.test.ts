@@ -49,15 +49,40 @@ const GOVERNED_CLAIMS_PATH = path.join(__dirname, '..', '..', '..', '..', '06_Op
  * Formal Governance Review #6 (`governance-reviews/FGR_006_MUSIC_SCENARIO_A
  * _PACKAGE_2026-08-27.md`) and explicit human Adoption approval (Adoption
  * Approver: JD (PM)) -- a real, recorded governance decision, per this
- * comment's own standing requirement. Unrepresentable for the same
- * architectural reason M3 once solved for stock media, not yet solved here:
- * their `provider_scope` values (`envato-elements`, `epidemic-sound`,
- * `artlist`) are not yet registered in `ASSET_PROVIDER_IDS`, so no
- * conforming `TopicClaim` can be authored for them without first extending
- * that registry -- a generic extension, not a music-specific special case,
- * deliberately not performed as part of this Adoption. Remove each ID once
- * that registration work gives it a real runtime entry, mirroring exactly
- * how the five stock-media IDs above were removed once M3 landed.
+ * comment's own standing requirement.
+ *
+ * Split reason as of 2026-08-27 (Music Scenario A -- Artlist A-3 synthetic
+ * runtime canary; `governance-reviews/CPR_007_MUSIC_SCENARIO_A_PACKAGE_
+ * 2026-08-27.md`), same day, later same session -- do not conflate the two:
+ *   - A1, A2 (`CLAIM-MUSIC-ENVATO-*`) and EP1 (`CLAIM-MUSIC-EPIDEMIC-
+ *     TIER-ADVERTISING-001-v1`) remain unrepresentable for the ORIGINAL
+ *     architectural reason: `envato-elements`/`epidemic-sound` are still not
+ *     registered in `ASSET_PROVIDER_IDS` -- this milestone's own one-
+ *     provider scope deliberately left them unregistered.
+ *   - The seven `CLAIM-MUSIC-ARTLIST-*` claims are a DIFFERENT case now:
+ *     `artlist` WAS registered in `ASSET_PROVIDER_IDS` this milestone (a
+ *     generic registry extension, confirmed no Music-specific mechanism
+ *     added -- see `types/interview-engine.ts`), so the registry blocker is
+ *     gone for these seven specifically. They remain in this set for the
+ *     SAME kind of reason the five stock claims above are excluded from CRC
+ *     output -- CRC eligibility, not fixture-representability. Concretely:
+ *     `CPR_007` recommends WITHHOLD for all ten (PM decision on that review:
+ *     PENDING; every Music claim's own `CRC Approver` field in
+ *     GOVERNED-CLAIMS.md remains `PENDING`, unchanged by this milestone).
+ *     A permanent `TOPIC_CLAIMS_FIXTURE` entry was deliberately NOT added
+ *     for any of the seven -- unlike the five stock claims (which reached
+ *     real `crc_eligible: 'Pending'` fixture entries once M3 closed their
+ *     registry blocker), adding even a `crc_eligible: 'Pending'` Music
+ *     entry was judged unnecessary and was not required to prove the
+ *     canary's own retrieval/provider-scope questions (see the CPR_001/
+ *     CPR_003 "synthetic-eligible clone, never mutating the committed
+ *     fixture" precedent this canary followed instead, in
+ *     provider-scoped-retrieval.test.ts). Remove each ID from this set only
+ *     once its own claim receives a real, permanent fixture entry -- which
+ *     itself should follow, not precede, an explicit CRC Publication
+ *     decision for that claim, mirroring exactly how every stock claim
+ *     above already had `CRC Eligible: Yes` decided before M3 gave it a
+ *     fixture entry.
  */
 const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set<string>([
   'CLAIM-MUSIC-ENVATO-SYNC-001-v1',

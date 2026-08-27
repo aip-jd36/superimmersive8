@@ -189,7 +189,7 @@ export type AssetProviderResolution =
 /**
  * Canonical asset-provider identifiers (Living Knowledge — Third-Party
  * Source Rights, M3 provider-scoped retrieval, 2026-08-18). Single source
- * of truth for the four providers M2's own `KNOWN_ASSET_PROVIDERS` alias
+ * of truth for the providers M2's own `KNOWN_ASSET_PROVIDERS` alias
  * registry (lib/interview-engine/extraction.ts) already resolves to --
  * defined here, in the shared types module, rather than in extraction.ts
  * itself, specifically so `TopicClaim.provider_scope`
@@ -199,8 +199,17 @@ export type AssetProviderResolution =
  * that boundary). `KNOWN_ASSET_PROVIDERS`'s own value type now references
  * this type too, so the two can never independently drift -- a typo'd
  * provider id in either place is a compile error, not a silent runtime gap.
+ *
+ * `'artlist'` added 2026-08-27 (Music Scenario A -- Artlist A-3 synthetic
+ * runtime canary): pure generic registry extension, same mechanism as the
+ * original four -- no new provider category, no domain field, no Music-
+ * specific resolver. Registering the identifier is independent of any
+ * Music claim's own CRC-publication status; see GOVERNED-CLAIMS.md's
+ * CLAIM-MUSIC-* entries (Adopted, `CRC Approver: PENDING`, unaffected by
+ * this registration) and CPR_007's own confirmation that runtime
+ * reachability and CRC eligibility are separately governed.
  */
-export const ASSET_PROVIDER_IDS = ['getty', 'istock', 'shutterstock', 'adobe-stock'] as const
+export const ASSET_PROVIDER_IDS = ['getty', 'istock', 'shutterstock', 'adobe-stock', 'artlist'] as const
 
 export type AssetProviderId = (typeof ASSET_PROVIDER_IDS)[number]
 

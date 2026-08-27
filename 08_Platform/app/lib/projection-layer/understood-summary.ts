@@ -141,6 +141,7 @@ const ASSET_PROVIDER_DISPLAY_LABELS: Record<string, string> = {
   istock: 'iStock',
   shutterstock: 'Shutterstock',
   'adobe-stock': 'Adobe Stock',
+  artlist: 'Artlist',
 }
 
 function assetProviderDisplayLabel(identifier: string): string {
