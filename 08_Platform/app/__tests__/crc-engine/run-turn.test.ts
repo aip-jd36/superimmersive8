@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Canonical per-turn loop -- mock-stack integration tests
  * (LIVE_INTERVIEW_RUNTIME_ARCHITECTURE.md §5, Live Interview Runtime
  * milestone). Mock stack only (constantExtractor/constantCandidateQuestionGenerator/
@@ -92,6 +92,7 @@ describe('runTurn -- single-turn cases', () => {
       kind: 'question',
       message: 'What was this project for?',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
   })
 
@@ -110,6 +111,7 @@ describe('runTurn -- single-turn cases', () => {
       kind: 'question',
       message: 'Which specific plan?',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
 
     const loadedAfterTurn2 = await store.load('t3')

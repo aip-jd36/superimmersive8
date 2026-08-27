@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Model 4 -- bounded alternative-question search (CRC Limited Pilot,
  * 2026-08-10). Mock-stack only (deterministic, sequenced mocks) -- the
  * live-model integration case for the exact Runway + ElevenLabs pilot
@@ -127,6 +127,7 @@ describe('Model 4 -- attempt 1 rejected, attempt 2 approved', () => {
       kind: 'question',
       message: 'What was your role on this project?',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
   })
 
@@ -153,6 +154,7 @@ describe('Model 4 -- attempt 1 rejected, attempt 2 approved', () => {
       kind: 'question',
       message: 'What was this project for?',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
   })
 
@@ -193,6 +195,7 @@ describe('Model 4 -- attempt 1 rejected, attempt 2 approved', () => {
       kind: 'question',
       message: 'Are you sure it was you who used Runway directly?',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
   })
 })
@@ -366,6 +369,7 @@ describe('Model 4 -- decline path untouched (recovery pattern, trial 12)', () =>
       kind: 'question',
       message: 'Would have asked this.',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
   })
 })
@@ -405,6 +409,7 @@ describe('Model 4 -- multiple uncapped eligible signals', () => {
       kind: 'question',
       message: 'About your role.',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
   })
 })

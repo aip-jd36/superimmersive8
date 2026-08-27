@@ -1,4 +1,4 @@
-/**
+﻿/**
  * CRC Global User-Facing Question Budget milestone (2026-08-26). Mock-stack
  * only (deterministic, sequenced mocks), same conventions as
  * run-turn-model4.test.ts and run-turn-commercial-readiness-discovery.test.ts.
@@ -145,7 +145,12 @@ describe('B: exactly six', () => {
     const q = proposal({ question_text: 'The sixth question.' })
     const outcome = await runTurn({ token: 'budget-six', turnNumber: 2, userText: 'x' }, deps({ generator: sequencedGenerator([q]), decider: sequencedDecider([askDecision()]) }, store))
 
-    expect(outcome).toEqual({ kind: 'question', message: 'The sixth question.', discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' } })
+    expect(outcome).toEqual({
+      kind: 'question',
+      message: 'The sixth question.',
+      discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
+    })
     const loaded = await loadState(store, 'budget-six')
     expect(loaded.boundary_state.user_facing_questions_asked).toBe(6)
   })

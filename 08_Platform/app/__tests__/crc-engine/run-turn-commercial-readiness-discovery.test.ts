@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Commercial Readiness Discovery Catalog -- integration test suite (CRC
  * Limited Pilot, 2026-08-12). Mock-stack only (deterministic, sequenced
  * mocks) -- the live-model battery lives in its own eval report, not
@@ -107,6 +107,7 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
       kind: 'question',
       message: 'Ordinary question.',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
   })
 
@@ -128,6 +129,7 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
       kind: 'question',
       message: 'Ordinary question.',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
   })
 
@@ -144,6 +146,7 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
       kind: 'question',
       message: COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.client_provided_source_assets,
       discoverySignal: { eligible_categories: ['client_provided_source_assets'], selected_category: 'client_provided_source_assets', outcome: 'asked' },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
     const loaded = await loadState(store, 'crd-client')
     expect(loaded.boundary_state.commercial_readiness_discovery_asked).toBe(true)
@@ -160,6 +163,7 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
       kind: 'question',
       message: COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.likeness_publicity_rights,
       discoverySignal: { eligible_categories: ['likeness_publicity_rights'], selected_category: 'likeness_publicity_rights', outcome: 'asked' },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
   })
 
@@ -173,6 +177,7 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
       kind: 'question',
       message: COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.third_party_visual_assets,
       discoverySignal: { eligible_categories: ['third_party_visual_assets'], selected_category: 'third_party_visual_assets', outcome: 'asked' },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
   })
 
@@ -190,6 +195,7 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
         selected_category: 'client_provided_source_assets',
         outcome: 'asked',
       },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
   })
 
@@ -204,6 +210,7 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
       kind: 'question',
       message: 'What platform did you use?',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
   })
 
@@ -255,6 +262,7 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
       kind: 'question',
       message: 'Anything else about the workflow?',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
   })
 })
@@ -279,6 +287,7 @@ describe('Commercial Readiness Discovery -- Constraint A / Constraint B interact
       kind: 'question',
       message: 'Ordinary fallback question.',
       discoverySignal: { eligible_categories: ['client_provided_source_assets'], selected_category: 'client_provided_source_assets', outcome: 'rejected_by_a' },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
     const loaded = await loadState(store, 'crd-constraint-a')
     expect(loaded.boundary_state.commercial_readiness_discovery_asked).toBe(false)
@@ -319,6 +328,7 @@ describe('Commercial Readiness Discovery -- Model 4 interaction', () => {
         selected_category: 'client_provided_source_assets',
         outcome: 'rejected_by_a',
       },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
   })
 
@@ -348,6 +358,7 @@ describe('Commercial Readiness Discovery -- cap persistence + Educational Takeaw
       kind: 'question',
       message: COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.client_provided_source_assets,
       discoverySignal: { eligible_categories: ['client_provided_source_assets'], selected_category: 'client_provided_source_assets', outcome: 'asked' },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
 
     // Turn 2: user answers. Extracts a fresh scoped_observation so Gate 2
@@ -380,6 +391,7 @@ describe('Commercial Readiness Discovery -- cap persistence + Educational Takeaw
       message: 'Anything else?',
       precedingTakeaway: COMMERCIAL_READINESS_TAKEAWAYS.client_provided_source_assets,
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
 
     // Turn 3: takeaway was already consumed on turn 2 -- must not repeat,
@@ -404,6 +416,7 @@ describe('Commercial Readiness Discovery -- cap persistence + Educational Takeaw
       kind: 'question',
       message: 'One more thing.',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
+      selectorSignal: { eligible: false, outcome: 'never_eligible' },
     })
     expect((turn3 as TurnOutcome).precedingTakeaway).toBeUndefined()
   })

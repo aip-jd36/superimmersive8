@@ -284,6 +284,51 @@ export type TurnOutcome = (
      */
     outcome: 'never_eligible' | 'rejected_by_a' | 'asked' | 'preempted_by_jurisdiction'
   }
+  /**
+   * CRC Selector Attempt Observability milestone (2026-08-27). Purely
+   * additive, read-only telemetry -- surfaces the SAME deterministic
+   * `selectorNeeds`/`selectorProposal` eligibility this turn already
+   * computes (no extra I/O, no new eligibility logic) plus the ALREADY-
+   * EXISTING, now-labeled rejection stage `tryCandidate()` already produced
+   * internally for every candidate (validation / Constraint A / Constraint
+   * B) -- this milestone only names and surfaces those three pre-existing
+   * branches, it does not add a fourth. Scoped identically to
+   * jurisdictionSignal/humanContributionSignal above: describes ONLY the
+   * shared attempt-#1 forced slot, unconditionally emitted every organic
+   * turn (mirroring discoverySignal's own "always emit, never_eligible is a
+   * real value" convention, not jurisdiction/human-contribution's "omit
+   * entirely" convention) -- chosen because, like Discovery, the selector
+   * is a per-turn recurring candidate source with a real analytics
+   * consumer in mind (an eventual selector_signal event mirroring
+   * discovery_signal's own), not a once-ever governance fact.
+   *
+   * Deliberately does NOT cover the attempt-#3/#4 last-resort selector
+   * retry (Selector Opportunity at questioning_exhausted milestone,
+   * 2026-08-25) -- consistent with existing precedent: Track B's own
+   * knowledge-readiness attempt-#3 has never had ANY signal field either.
+   * Adding coverage for every last-resort attempt is a larger, separate
+   * observability decision this narrow milestone does not make.
+   *
+   * `dedupe_key` is the SAME structural identifier (`fact` or
+   * `` `${fact}::${tool}` ``) already persisted, unredacted, inside
+   * `boundary_state.selector_needs_used` -- never transcript text, prompts,
+   * license content, or free-text project content. `tool`, when present, is
+   * always the already-canonicalized identifier from `ToolMention.resolution`
+   * (e.g. "kling"), never raw user wording.
+   */
+  selectorSignal?: {
+    eligible: boolean
+    dedupe_key?: string
+    outcome:
+      | 'never_eligible'
+      | 'preempted_by_jurisdiction'
+      | 'preempted_by_human_contribution'
+      | 'preempted_by_discovery'
+      | 'asked'
+      | 'rejected_by_a'
+      | 'rejected_by_b'
+      | 'invalid'
+  }
 }
 
 export interface RunTurnDeps {
@@ -314,6 +359,21 @@ export interface RunTurnInput {
   declineAction?: DeclineAction
 }
 
+/**
+ * `reason` (CRC Selector Attempt Observability milestone, 2026-08-27):
+ * purely additive labeling of the FOUR rejection points `tryCandidate()`
+ * already had before this milestone -- no new branch, no new condition, no
+ * behavior change. Exists so a caller (selectorSignal, below) can
+ * distinguish WHICH of the three real gates actually rejected a candidate,
+ * something the pre-existing `exclusion` field cannot express (it carries
+ * WHAT was rejected, never WHY). `'no_proposal'` is retained for
+ * completeness/type-accuracy even though it is structurally unreachable
+ * for any `proposalOverride`-driven forced candidate (jurisdiction/human-
+ * contribution/Discovery/selector all always supply a non-null override) --
+ * it only ever occurs for the ordinary generator's own null return.
+ */
+type CandidateRejectionReason = 'no_proposal' | 'invalid' | 'rejected_by_a' | 'rejected_by_b'
+
 type CandidateAttemptResult =
   | { status: 'approved'; outcome: TurnOutcome; nextBoundaryState: BoundaryState; pendingClarification: PendingClarification | null }
   /**
@@ -325,7 +385,7 @@ type CandidateAttemptResult =
    * same reasoning the approved correction already applies to a null
    * first candidate.
    */
-  | { status: 'rejected'; exclusion: CandidateExclusion | null }
+  | { status: 'rejected'; exclusion: CandidateExclusion | null; reason: CandidateRejectionReason }
 
 /**
  * CRC Limited Pilot -- Model 4 (bounded alternative-question search),
@@ -384,24 +444,24 @@ async function tryCandidate(
 ): Promise<CandidateAttemptResult> {
   const proposal = proposalOverride ?? (await deps.generator({ structured_understanding: suAfter, eligible_signals: eligible, phase, excluded }))
   if (!proposal) {
-    return { status: 'rejected', exclusion: null }
+    return { status: 'rejected', exclusion: null, reason: 'no_proposal' }
   }
 
   // Defensive, deterministic check on the model's own compliance with the
   // exclusion it was given -- no live Constraint A/B call spent
   // re-confirming an answer already known from the first attempt.
   if (excluded && excluded.length > 0 && matchesExclusion(proposal, excluded)) {
-    return { status: 'rejected', exclusion: { kind: proposal.question_kind, signal_id: proposal.target_signal_id } }
+    return { status: 'rejected', exclusion: { kind: proposal.question_kind, signal_id: proposal.target_signal_id }, reason: 'invalid' }
   }
 
   const validation = validateCandidateReference(proposal, eligible)
   if (validation.outcome !== 'accepted') {
-    return { status: 'rejected', exclusion: null }
+    return { status: 'rejected', exclusion: null, reason: 'invalid' }
   }
 
   const decision = await deps.decider({ structured_understanding: suAfter, candidate: proposal, phase })
   if (!decision.should_ask) {
-    return { status: 'rejected', exclusion: { kind: proposal.question_kind, signal_id: proposal.target_signal_id } }
+    return { status: 'rejected', exclusion: { kind: proposal.question_kind, signal_id: proposal.target_signal_id }, reason: 'rejected_by_a' }
   }
 
   const lineageResolvedCandidate: CandidateQuestion = {
@@ -413,7 +473,7 @@ async function tryCandidate(
   // declineSignal is always undefined here -- organic path only.
   const boundaryResult = evaluateBoundary(boundaryStateLoaded, lineageResolvedCandidate, undefined)
   if (!boundaryResult.allowed) {
-    return { status: 'rejected', exclusion: { kind: proposal.question_kind, signal_id: proposal.target_signal_id } }
+    return { status: 'rejected', exclusion: { kind: proposal.question_kind, signal_id: proposal.target_signal_id }, reason: 'rejected_by_b' }
   }
 
   return {
@@ -614,6 +674,10 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   // Copyright UAT Correction Milestone, 2026-08-19 -- same scope discipline
   // as jurisdictionSignal above.
   let humanContributionSignal: TurnOutcome['humanContributionSignal']
+  // CRC Selector Attempt Observability milestone, 2026-08-27 -- same scope
+  // discipline as discoverySignal above (unconditionally emitted on the
+  // organic path, undefined on decline/short-circuit paths).
+  let selectorSignal: TurnOutcome['selectorSignal']
 
   if (declineSignal) {
     // Explicit skip_question/skip_phase decline -- unchanged by Model 4.
@@ -869,6 +933,41 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
               : 'rejected_by_a',
     }
 
+    // Selector analytics instrumentation (CRC Selector Attempt Observability
+    // milestone, 2026-08-27). Same scope/shape discipline as discoverySignal
+    // immediately above -- computed from the SAME `selectorNeeds[0]`/
+    // `selectorProposal` this turn already derived (pure, no extra I/O), and
+    // unconditionally emitted every organic turn (never_eligible is a real
+    // value here, matching discoverySignal's own convention rather than
+    // jurisdiction/human-contribution's "omit entirely" one -- see this
+    // field's own TurnOutcome doc comment for why). Precision improvement
+    // over discoverySignal/humanContributionSignal's own coarser
+    // 'rejected_by_a' catch-all: `attempt1.reason` (new this milestone, see
+    // CandidateRejectionReason) lets this field distinguish an actual
+    // Constraint A rejection from a Constraint B rejection or a structural
+    // validation failure, none of which discoverySignal/humanContribution
+    // Signal could ever tell apart. 'invalid' is included for completeness
+    // even though a deterministically-constructed selector proposal
+    // rejecting validation would indicate a real bug elsewhere, never an
+    // expected outcome in practice.
+    selectorSignal = {
+      eligible: selectorProposal !== undefined,
+      ...(selectorNeeds[0] ? { dedupe_key: selectorNeeds[0].dedupe_key } : {}),
+      outcome: !selectorProposal
+        ? 'never_eligible'
+        : jurisdictionProposal
+          ? 'preempted_by_jurisdiction'
+          : humanContributionProposal
+            ? 'preempted_by_human_contribution'
+            : discoveryProposal
+              ? 'preempted_by_discovery'
+              : attempt1.status === 'approved'
+                ? 'asked'
+                : attempt1.reason === 'no_proposal'
+                  ? 'invalid' // Unreachable in practice (see CandidateRejectionReason's own doc) -- mapped defensively rather than asserted impossible.
+                  : attempt1.reason,
+    }
+
     if (attempt1.status === 'approved') {
       outcome = attempt1.outcome
       nextBoundaryState = attempt1.nextBoundaryState
@@ -1007,6 +1106,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
               discoverySignal,
               jurisdictionSignal,
               humanContributionSignal,
+              selectorSignal,
             }
             return precedingTakeaway ? { ...exhaustedOutcome, precedingTakeaway } : exhaustedOutcome
           }
@@ -1056,5 +1156,6 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   let finalOutcome: TurnOutcome = discoverySignal ? { ...outcome, discoverySignal } : outcome
   finalOutcome = jurisdictionSignal ? { ...finalOutcome, jurisdictionSignal } : finalOutcome
   finalOutcome = humanContributionSignal ? { ...finalOutcome, humanContributionSignal } : finalOutcome
+  finalOutcome = selectorSignal ? { ...finalOutcome, selectorSignal } : finalOutcome
   return precedingTakeaway ? { ...finalOutcome, precedingTakeaway } : finalOutcome
 }
