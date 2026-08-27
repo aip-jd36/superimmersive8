@@ -1,7 +1,7 @@
 # CRC — Current Accepted State, Closed Milestones, Deferred Backlog, Next Workstream
 
 **Status:** ACTIVE — the living cross-cutting status doc for CRC/Living Knowledge engineering. Supersedes nothing — the layer-specific architecture docs below remain the normative design references; this doc tracks *which milestones against them are closed*, *what's deliberately deferred*, and *what's next*.
-**Last updated:** 2026-08-27
+**Last updated:** 2026-08-27 (created earlier this date during the original documentation-closeout pass, §5's "as of commit `18a308d`" reflects that original snapshot; §9 updated again later the same date, after that milestone's own §5 content, to record the Music/Artlist A-3 Living Knowledge domain-portability result — a documentation-only closeout, no further §5 milestones added by this later pass)
 **Why this file exists:** no single doc previously tracked rolling CRC engineering status — `CRC_PROTOTYPE_ALPHA_ROADMAP.md` is a closed, point-in-time execution plan (Aug 8, 2026, "Prototype Alpha" only); the various `*_ARCHITECTURE.md`/`LK_PHASE1_TECHNICAL_DESIGN*.md` docs each normatively define one layer's internal design, not cross-cutting status; `implementation/eval-reports/` holds dated, historical diagnostic reports (preserved as-is, never rewritten). This file is the missing "what's accepted, what's deferred, what's next" index — created 2026-08-27 during a documentation-closeout pass, not to replace any of the above.
 **Companion doc:** `CRC_IMPLEMENTATION_RISKS.md` — pre-prototype empirical risk list, narrower scope (kept separate deliberately, per its own header), not superseded by this file.
 **Product spec (frozen, not reopened by this file):** `08_Platform/prds/PRD_CRC_v1.0.md`
@@ -90,39 +90,78 @@ Consultative Composition remains an important product workstream but is **not** 
 | G | **Duplicate POST / session-state concurrency** | Existing duplicate-POST / unconditional-update persistence race — recorded here as technical debt. Not investigated or solved in this pass. |
 | H | **Gate-2 stability-diff coverage** | If incomplete stability tracking for fields such as `asset_provider_mentions`, `ToolMention.account_status`, or `user_goals` is already recorded elsewhere as debt, it remains outstanding — not reopened, not re-litigated, and not newly asserted from memory here (no repository evidence was reviewed for this specific item during this documentation pass; if a prior record of it exists, treat that record as authoritative, not this line). |
 
-## 9. Next active workstream: Living Knowledge Domain Portability / Extensibility
+## 9. Living Knowledge Domain Portability / Extensibility — Music / Artlist A-3 (first result, 2026-08-27)
 
-**Question:** not "can we add more claims?" but *how much of the generic Living Knowledge → Retrieval → Bounded Interpretation → questioning → Composition architecture carries over without domain-specific orchestration* when a genuinely new governed LK target domain is introduced?
+**Status: FIRST PORTABILITY EXPERIMENT COMPLETE.** The diagnostic this section originally called for (below, §9.9-§9.10, preserved) ran, selected Music/Audio Licensing & Rights as the target domain, and was carried all the way through implementation, integration, and production UAT for one claim — not left at the diagnostic-only stage originally planned.
 
-**No target domain is formally approved as of this writing.** Candidate-selection is the next PM decision, not made or presupposed by this documentation pass.
+**The supported conclusion is narrow, stated exactly:** `CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1` ("A-3") demonstrated end-to-end production portability through the existing generic CRC architecture. **This is not evidence that "Music is portable" as a domain**, and it does not change the governance status of the other 9 Music Scenario A claims, which remain exactly as before: `Lifecycle: Adopted`, `CRC Approver: PENDING` (`CPR_007`: WITHHOLD for all 10; PM decision on that combined review itself remains PENDING — A-3's own separate, later, narrower approval is recorded via an addendum on `CPR_007`'s index row in `governance-reviews/README.md`, never inside `CPR_007`'s own historical body).
 
-### Portability success standard
+Commits: FGR_006 adoption package `058c359`; Adoption `7367866`; CPR_007 (WITHHOLD) `f368612`; stock cross-domain-bleed correction (FGR_007 diagnosis `eabdd8f`, human approval + v1→v2 supersession `64fa6d1`); Artlist provider registration `76ad4be`; A-3 CRC publication + runtime fixture `054c625`; LK cross-domain bleed preflight tool `56e028f`. Production UAT: `crc_sessions` id `c0083c19-e206-4c5f-9fec-892a11fddfbd`, `runtime_commit: 054c625122c7`.
 
-**Good portability** — a new domain should primarily require: governed LK entries, applicability requirements, evidence boundaries, and possibly generic registry/config additions — while Retrieval, BI, Track A/B/C, the selector/readiness machinery, questioning caps, and Projection/Composition all continue working **without domain-specific branching**.
+### 9.1 Governance portability (established via the full Music Scenario A candidate set)
 
-**Architecture warning signs** — if a new domain instead requires: provider-specific `run-turn.ts` orchestration, domain-specific Retrieval logic, domain-specific BI logic, domain-specific completion rules, domain-specific composers, a duplicated selector system, fabricated `UserGoal`s, or weaker evidence boundaries — **stop** and determine whether the generic architecture is missing an abstraction, rather than patching the new domain in locally.
+Existing generic mechanisms carried the entire 10-claim Music candidate set with zero schema changes: evidence authority/provenance classification (`EVIDENCE-CAPTURE-SOP.md`), durable evidence preservation + checksum (`evidence-captures/artlist/`), governed-proposition structure, `provider_scope`, `applicability_requirements`, unresolved/evidence-only dependencies, `Lifecycle`, the FGR→CPR staging discipline, and — for the first time ever exercised in this repository — the `superseded_by` correction/supersession mechanism (used to fix the stock cross-domain-bleed defect Artlist's own onboarding surfaced, §9.3).
 
-The new-domain diagnostic should explicitly measure whether each of the following generalizes: `provider_scope`; `applicability_requirements`; Lifecycle/CRC-eligibility; explicit vs. discovered relevance; Track A/B/C; selector askability; evidence-only boundaries (representable generically, not just for AI-tool facts); Retrieval (any domain-specific logic needed?); BI (any domain-specific logic needed?); Projection/Composition (stays generic?); new provider/domain normalization; new extraction signal kinds; and whether the new domain exposes hidden assumptions baked into the current stock/AI-tool-only knowledge.
+### 9.2 Runtime portability (established specifically via A-3)
 
-### Handoff — next task
+A-3 alone additionally demonstrated the existing generic **runtime** mechanisms carry a governed claim through: provider resolution (`ASSET_PROVIDER_IDS`/`KNOWN_ASSET_PROVIDERS`, a pure registry-append), explicit Retrieval (`providerScopeMatches`/`lookupTopicClaims`, unmodified), Track A discovered relevance (`deriveDiscoveredTopicOccurrences`, unmodified — the topic-level gate opened because the corrected stock claims already satisfied it, not because of any A-3-specific code), Track C provenance (originating-goal category preserved on the discovered result), Bounded Interpretation (the existing `relevant_applicability_unresolved`/Case 3B hedge fired unmodified), and Projection (`candidate_statement` rendered verbatim, opaque pass-through). Zero Music-specific code exists anywhere in Retrieval, discovered relevance, Bounded Interpretation, or Projection — confirmed by `git diff --stat` scope audits at every integration step of this workstream.
 
-**NEXT: Living Knowledge New-Domain Portability Diagnostic**
+**Governance portability and runtime portability are deliberately not collapsed into one claim.** The 9 non-A-3 Music claims proved governance portability but have never been runtime-verified in production; only A-3 has both.
 
-**Objective:** select one genuinely new governed LK domain and trace what is required to add it end-to-end, *before* implementation.
+### 9.3 Cross-domain bleed lesson + preflight tool
 
-**Questions to answer:**
-1. What new governed proposition types/facts are required?
-2. Can the existing LK schema express them?
-3. What new extraction facts, if any, are genuinely required?
-4. Can existing Retrieval discover them?
-5. Can existing applicability-readiness machinery determine what is missing?
-6. Can existing selector/readiness mechanisms ask permissible questions?
-7. Which facts must remain evidence-only?
-8. Can BI bound conclusions without domain-specific branches?
-9. Can Composition present them generically?
-10. What code changes would actually be necessary?
+Registering a new provider can alter the reachability of **existing, unrelated** governed knowledge — confirmed the hard way: Artlist's own onboarding surfaced that two pre-existing stock-media claims (`CLAIM-STOCK-EDITORIAL-001/002-v1`, `provider_scope: null`) would have become newly, unintentionally reachable once Artlist was recognized, discovered by a diagnostic before registration and corrected via the existing `superseded_by` mechanism (v1→v2), not new architecture (`FGR_007`).
 
-**Expected first milestone: DIAGNOSTIC ONLY.** Do not implement the domain before that diagnostic runs and reports back.
+A generic, deterministic **provider-registration bleed preflight** is now available: `08_Platform/app/lib/crc-engine/cross-domain-bleed-preflight.ts` (commit `56e028f`). It checks, for a candidate provider ID + aliases, **before registration**: null-provider-scope claim exposure (mirroring Retrieval's own candidate filter); explicit provider-scope match/non-match effects; discovered-topic exposure (probed via the real, unmodified `deriveDiscoveredTopicOccurrences`, since Track A's topic-level gate is independent of provider_scope — the exact mechanism the original bleed depended on); provider/alias canonicalization collisions (via the real, unmodified `normalizeCandidate`); and a narrow, best-effort scan for the exact hardcoded-full-provider-list-duplication defect class already found once (`VALID_PROVIDER_IDS`). It reuses `providerScopeMatches`/`deriveDiscoveredTopicOccurrences`/`normalizeCandidate` directly — never reimplements their semantics — and lives in `lib/crc-engine/` specifically because `lib/retrieval-engine/`'s own subsystem boundary (`__tests__/crc-engine/subsystem-boundaries.test.ts`) correctly forbids importing Interview Engine logic; that boundary was not weakened to accommodate this tool.
+
+**What it does NOT do, stated explicitly:** it does not decide whether a reported match is substantively/governance-correct; it does not mutate `provider_scope`, any fixture, or any governed claim; it does not register providers; it does not replace FGR/CPR; it is a **provider-registration / provider-shaped LK preflight, not a universal LK-domain preflight** — its checks are all keyed on `AssetProviderMention`/`provider_scope`/`ASSET_PROVIDER_IDS`, concepts specific to asset-provider-shaped domains (stock media, music providers). A structurally different future domain not organized around provider identity would need an analogous, not identical, tool.
+
+### 9.4 Synthetic publication canary precedent
+
+A-3's own path established (following the pattern CPR_001/CPR_003 already used for stock claims) that a **synthetic-eligible clone/canary** may be used to obtain deterministic pipeline verification evidence *before* the real governed claim is granted CRC publication, when runtime verification is part of what a CPR decision needs. Bounded precedent, not new policy: such a canary must never mutate the authoritative governed claim's real `CRC Eligible` state; must never silently enter any committed/production fixture (confirmed at every step via `git status --porcelain` returning empty after each canary's own scratch files were deleted); must preserve the real governed proposition/candidate statement/applicability/dependencies/provider scope exactly (no paraphrase, no strengthening); must remain visibly synthetic (every scratch artifact and commit message in this workstream labels it as such); produces verification evidence only; and never substitutes for the separate, explicit, human CRC-publication decision (which for A-3 arrived only in a later, distinct task carrying its own explicit PM instruction). This is a documented methodological precedent, not automation — no canary-construction tooling has been built.
+
+### 9.5 Refresh — status and an explicitly unresolved policy question
+
+Refresh is part of the intended Living Knowledge lifecycle (`PRD_LIVING_KNOWLEDGE_SOURCE_INPUTS_v0.1.md` §14-16, directional). Existing fields already sufficient to support a future refresh pass without any schema change: `last_verified`, evidence provenance/checksum (`EVIDENCE-CAPTURE-SOP.md` §12), `Lifecycle`, `superseded_by`, and free-text evidence-limitation prose. `EVIDENCE-CAPTURE-SOP.md` §7 already distinguishes SOURCE CHANGED from GOVERNED PROPOSITION CHANGED for a refresh pass re-applying the same evidence-capture discipline (§1-§6 of that SOP, including the human-capture fallback, unchanged and domain-generic).
+
+**Explicitly unresolved, requiring a real PM/governance decision before any refresh scheduling or automation is implemented:** what CRC should do when governed knowledge passes its expected refresh point but successful re-verification has not yet occurred. Candidate treatments were discussed diagnostically (visible staleness metadata while still usable; CRC eligibility temporarily withheld; Reviewer-only fallback; fail closed from CRC entirely) — **none has been approved as policy.** This is recorded here as an open question, not resolved.
+
+### 9.6 Automation/tooling status
+
+The one accepted, implemented, integrated automation result from this workstream is the cross-domain bleed preflight (§9.3). Everything else discussed remains a **proposal**, not a commitment: evidence-manifest/checksum helper scripting, synthetic-canary construction scaffolding, deterministic Retrieval/Track-A/BI/Projection regression-test generation, an onboarding runbook (documentation, not a state machine or orchestrator — no onboarding engine exists or is authorized), refresh reacquisition/diffing tooling, and refresh scheduling. None of these has an implementation commitment attached.
+
+### 9.7 Deferred backlog — unaffected by this milestone, restated for clarity
+
+Unchanged by A-3's success: the other 9 Music Scenario A claims' own CRC-publication status (§9 above); Music Scenario B (not begun, not selected); the two production-UAT questioning/Composition observations from A-3's own real conversation (a candidate-generation wording overlap between a generic `asset_provider_license` follow-up and provider-general knowledge the model was never given visibility into — architecturally confirmed NOT a governed-knowledge leak; and a Consultative-Composition repetition pattern across multiple goals resolving to the same claim, already named and scoped as a deferred future capability in `PRD_LIVING_KNOWLEDGE_SOURCE_INPUTS_v0.1.md` §27, predating Music by ten days — confirmed not Music-specific) — neither investigated nor fixed here. Every item in §8 above remains exactly as stated, untouched by this milestone.
+
+### 9.8 Next portability experiment — recommended, not begun
+
+Stock media and Music are both organized substantially around asset providers and `provider_scope` — strong evidence for *provider-shaped* LK portability specifically, not yet evidence that the generic architecture carries over when `AssetProviderMention`/`provider_scope` are **not** the principal organizing concept of the domain. **Recommended next portability experiment:** a structurally different target domain, tested the same way (diagnostic first, per §9.9's success standard and §9.10's own original questions, still valid), rather than treating a second asset provider (Envato, Epidemic Sound) as proof of anything beyond provider-shaped portability, which is already well-evidenced. **No domain has been selected. No research has begun.** This is a recommendation for a future PM decision, not a commitment made here.
+
+### 9.9 Portability success standard / architecture warning signs (preserved, still the applicable criteria)
+
+Retained from the original diagnostic charter, domain-agnostic, not superseded by the Music/A-3 result — the next portability experiment (§9.8) should be judged against these same two definitions, not new ones:
+
+**Good portability** — a new domain should primarily require: governed LK entries, applicability requirements, evidence boundaries, and possibly generic registry/config additions — while Retrieval, BI, Track A/B/C, the selector/readiness machinery, questioning caps, and Projection/Composition all continue working **without domain-specific branching**. Music/A-3 met this standard (§9.1, §9.2).
+
+**Architecture warning signs** — if a new domain instead requires: provider-specific `run-turn.ts` orchestration, domain-specific Retrieval logic, domain-specific BI logic, domain-specific completion rules, domain-specific composers, a duplicated selector system, fabricated `UserGoal`s, or weaker evidence boundaries — **stop** and determine whether the generic architecture is missing an abstraction, rather than patching the new domain in locally. None of these were triggered by Music/A-3 (§9.2, §9.3's own "not new architecture" resolution of the one real defect found).
+
+### 9.10 Original diagnostic questions (preserved) — status against this experiment
+
+The diagnostic this section originally called for asked 10 questions before any implementation. Retained here, with each marked against what Music/A-3 actually answered:
+
+1. What new governed proposition types/facts are required? — **None; existing `TopicClaim` schema, unmodified.**
+2. Can the existing LK schema express them? — **Yes, confirmed by 10 real claims drafted with zero schema changes.**
+3. What new extraction facts, if any, are genuinely required? — **None; `AssetProviderMention` already existed from the stock-media milestone.**
+4. Can existing Retrieval discover them? — **Yes, for A-3 specifically, confirmed by real pipeline execution in production.**
+5. Can existing applicability-readiness machinery determine what is missing? — **Yes; A-3's evidence-only dependency correctly stayed non-askable throughout, unmodified.**
+6. Can existing selector/readiness mechanisms ask permissible questions? — **Yes; the generic `asset_provider_license` follow-up (pre-existing, used for iStock/Getty/Shutterstock) fired for Artlist unmodified.**
+7. Which facts must remain evidence-only? — **`artlist_subscription_active_at_publication_confirmed`, by the same fail-closed default every other evidence-only dependency uses — no registry entry required or added.**
+8. Can BI bound conclusions without domain-specific branches? — **Yes, confirmed live in production (§9.2); zero Music-specific BI code exists.**
+9. Can Composition present them generically? — **Yes, mechanically (opaque pass-through confirmed); the repetition pattern observed is a pre-existing, already-named generic characteristic (§9.7), not a Music-specific gap.**
+10. What code changes would actually be necessary? — **A provider-registry append + aliases (one commit, `76ad4be`) and one fixture entry (one commit, `054c625`). Nothing else in Retrieval/BI/Projection/Composition/questioning.**
+
+Not answered by this experiment, carried forward as the actual open question for the next one (§9.8): whether these same answers hold for a domain that is **not** provider-shaped.
 
 ---
 
@@ -133,3 +172,5 @@ The new-domain diagnostic should explicitly measure whether each of the followin
 - **Layer architecture (normative internal design, not reopened by this file):** `INTERVIEW_ENGINE_ARCHITECTURE.md`, `RETRIEVAL_ENGINE_ARCHITECTURE.md`, `LIVE_INTERVIEW_RUNTIME_ARCHITECTURE.md`, `LK_PHASE1_TECHNICAL_DESIGN.md` / `_v2.md`, `PROJECTION_LAYER_ARCHITECTURE.md`, `THIRD_PARTY_SOURCE_ASSETS_ROUTING_ARCHITECTURE.md`, `THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md`
 - **Historical, point-in-time execution plans/retrospectives (preserved as-is, not rolling status):** `CRC_PROTOTYPE_ALPHA_ROADMAP.md`, `PROTOTYPE_ALPHA_RETROSPECTIVE.md`, `PROTOTYPE_BETA_RETROSPECTIVE.md`, `PHASE_6A_RETROSPECTIVE.md`, `PHASE_7_PLANNING.md`
 - **Dated diagnostic/eval reports (historical, never rewritten):** `implementation/eval-reports/`
+- **Living Knowledge governance ledger, evidence process, publication policy, directional architecture (§9's own sources):** `06_Operations/institutional-knowledge/notebook/GOVERNED-CLAIMS.md`, `EVIDENCE-CAPTURE-SOP.md`, `CRC-PUBLICATION-POLICY.md`, `governance-reviews/README.md` (FGR/CPR/DAR index; carries the CPR_007 → A-3 subsequent-decision addendum), `08_Platform/prds/PRD_LIVING_KNOWLEDGE_SOURCE_INPUTS_v0.1.md` (directional/future, not authorized by this file)
+- **Cross-domain bleed preflight tool:** `08_Platform/app/lib/crc-engine/cross-domain-bleed-preflight.ts`
