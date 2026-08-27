@@ -112,13 +112,25 @@ describe('Wave 1 real claims -- governance state as of 2026-08-19 (all four COPY
    * `superseded_by` now non-null, alongside their new -v2 successors. Count
    * grows from nine to eleven; see the dedicated Lifecycle test immediately
    * below for why not all eleven are still 'Adopted'.
+   *
+   * Updated again 2026-08-27, later same session (A-3 CRC Publication
+   * Recording task): CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1
+   * (A-3) gained its first real runtime fixture entry, following explicit
+   * human CRC Publication approval (CPR_007 basis + the Artlist A-3
+   * Synthetic Runtime Canary + the Artlist Provider Registration Canary
+   * Integration Review). Count grows from eleven to twelve. This file
+   * remains scoped to Wave 1's own copyright claims plus incidental
+   * whole-fixture exhaustiveness -- A-3's own crc_eligible/routing
+   * behavior is proven separately, by topic-claims-fixture-consistency.
+   * test.ts and the provider-scoped retrieval/discovered-relevance suites.
    */
-  test('all four Wave 1 claims plus the seven stock-media claims (five original + two -v2 correction successors) are present in the fixture', () => {
+  test('all four Wave 1 claims plus the seven stock-media claims (five original + two -v2 correction successors) plus A-3 (the first published Music-domain claim) are present in the fixture', () => {
     expect(TOPIC_CLAIMS_FIXTURE.map((c) => c.claim_id).sort()).toEqual([
       'CLAIM-COPY-001-v1',
       'CLAIM-COPY-002-v1',
       'CLAIM-COPY-003-v1',
       'CLAIM-COPY-004-v1',
+      'CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1',
       'CLAIM-STOCK-EDITORIAL-001-v1',
       'CLAIM-STOCK-EDITORIAL-001-v2',
       'CLAIM-STOCK-EDITORIAL-002-v1',

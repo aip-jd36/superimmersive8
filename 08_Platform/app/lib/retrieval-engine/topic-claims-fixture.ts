@@ -436,4 +436,44 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     last_verified: '2026-08-17',
     superseded_by: null,
   },
+  {
+    // Music Scenario A -- Artlist A-3 (CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-
+    // DURATION-001-v1). First real Music-domain fixture entry (2026-08-27,
+    // A-3 CRC Publication Recording task). Adopted 2026-08-27 (FGR_006).
+    // CPR_007 recommended WITHHOLD for all 10 Music Scenario A claims,
+    // citing a shared runtime-verification prerequisite; A-3's own
+    // disposition within that combined review was "runtime prerequisite
+    // only... Substantively CONDITIONALLY READY, the strongest-evidenced
+    // candidate in the whole set" (CPR_007 §4). That prerequisite was
+    // cleared by the Artlist A-3 Synthetic Runtime Canary (throwaway,
+    // never-committed synthetic-eligible clone, CPR_001/CPR_003 precedent)
+    // and the Artlist Provider Registration Canary Integration Review
+    // (independently re-proved zero unintended reachability against the
+    // real fixture). CRC Publication approved 2026-08-27 (CRC Approver:
+    // JD (PM)) -- see GOVERNED-CLAIMS.md's own CRC PUBLICATION APPROVED
+    // note for the full evidence chain. This approval covers A-3 ONLY --
+    // the other 9 Music Scenario A claims remain unrepresented here (see
+    // CLAIMS_WITHOUT_FIXTURE_REPRESENTATION in
+    // topic-claims-fixture-consistency.test.ts) and CRC Approver: PENDING
+    // in GOVERNED-CLAIMS.md, unchanged.
+    claim_id: 'CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1',
+    topic: 'third_party_source_rights',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      'CRC may state that Artlist\'s own stated policy is that a Project created and published while a subscription was active remains licensed indefinitely after cancellation (including for continued monetization), while new use of downloaded Assets after cancellation is not covered, and that this claim does not itself confirm whether the user\'s own specific project was actually completed and published while their subscription was active. CRC must not state that the user\'s own project IS validly licensed, that their subscription was active at the relevant time, or that their project is commercially cleared.',
+    crc_candidate_statement:
+      'Artlist\'s stated policy is that already-completed, already-published work stays licensed after cancellation, while new use does not.',
+    applicability_requirements: [],
+    // Evidence-only: account-history/documentary fact, not registered in
+    // dependency-askability.ts -- fail-closed by default. No DAR
+    // performed or proposed by this milestone. Real CRC publication of
+    // A-3 must not, and does not, create any new user-facing question.
+    unresolved_project_dependencies: ['artlist_subscription_active_at_publication_confirmed'],
+    provider_scope: ['artlist'],
+    last_verified: '2026-08-27',
+    superseded_by: null,
+  },
 ]

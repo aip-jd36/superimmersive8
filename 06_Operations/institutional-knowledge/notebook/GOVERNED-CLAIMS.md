@@ -1875,6 +1875,8 @@ Context: Commercial Assurance evidence review of a commercial video workflow who
 
 GOVERNANCE TREATMENT (2026-08-27, PM adoption decision, FGR #6): `provider_scope: ['artlist']`, same registry-gap note. Evidence: Class B, two-source corroborated — the strongest-evidenced Artlist claim in this domain. FGR disposition: ACCEPT (no wording change).
 
+**CRC PUBLICATION APPROVED 2026-08-27** (later same session; PM: JD): `CPR_007` (`governance-reviews/CPR_007_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`) recommended WITHHOLD for all 10 Music Scenario A claims, but disposed A-3 specifically as "WITHHOLD — runtime prerequisite only... Substantively CONDITIONALLY READY, the strongest-evidenced candidate in the whole set" (§4) — the one real blocker being the established CPR-verification methodology's own dependency on a real runtime fixture entry, which did not yet exist for any Music claim (§3). That prerequisite was subsequently cleared in two further sessions: the Artlist A-3 Synthetic Runtime Canary (a throwaway, never-committed synthetic-eligible clone, following the CPR_001/CPR_003 precedent exactly, proved explicit-goal retrieval, Track A discovered relevance, stock-domain-bleed exclusion, evidence-only-dependency fail-closedness, and Bounded Interpretation/Projection containment all pass for A-3 under real, unmodified pipeline code), and the Artlist Provider Registration Canary Integration Review (independently re-proved, against the real committed fixture with zero Music entries, that Artlist's generic registration alone produces zero unintended claim reachability — registration and publication are empirically, not just architecturally, separate). **This approval applies to A-3 only** — the other 9 Music Scenario A claims (A1, A2, EP1, A-1, A-2, A-4, A-5, A-6, A-7a) are unaffected: still `Lifecycle: Adopted`, still `CRC Approver: PENDING`, still governed by CPR_007's own unmodified WITHHOLD disposition. `CPR_007` itself is left completely unedited by this approval, per this repository's own established convention — confirmed directly via `git log`, `FGR_007` (the stock-editorial provider-scope correction review) received zero commits after its own creation despite a full downstream human-approval-recording task; the actual decision is recorded here, in the governed claim entry itself, citing the review as basis rather than amending it.
+
 Claim proposition: >
   A Project created and published while an Artlist subscription is
   active remains licensed (including for continued monetization)
@@ -1910,22 +1912,37 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-27
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  PENDING — not yet reviewed for CRC Publication. FGR_006 recommends CRC
-  eligibility (§9); separate CRC Publication Review required.
+  APPROVED FOR CRC PUBLICATION (2026-08-27, CRC Approver: JD (PM) -- see
+  CRC Approver/CRC Decision Date below; basis: `governance-reviews/
+  CPR_007_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md` §4's own A-3 disposition
+  ("WITHHOLD -- runtime prerequisite only... Substantively CONDITIONALLY
+  READY, the strongest-evidenced candidate in the whole set"), resolved by
+  the subsequent Artlist A-3 Synthetic Runtime Canary and Artlist Provider
+  Registration Canary Integration Review -- see the GOVERNANCE TREATMENT
+  note above for the full evidence chain). CRC may state that Artlist's
+  own stated policy is that a Project created and published while a
+  subscription was active remains licensed indefinitely after
+  cancellation (including for continued monetization), while new use of
+  downloaded Assets after cancellation is not covered, and that this
+  claim does not itself confirm whether the user's own specific project
+  was actually completed and published while their subscription was
+  active. CRC must not state that the user's own project IS validly
+  licensed, that their subscription was active at the relevant time, or
+  that their project is commercially cleared.
 
 CRC Candidate Statement: >
-  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
   Artlist's stated policy is that already-completed, already-published
   work stays licensed after cancellation, while new use does not.
 
 Effective date: 2026-02-15
 Last reviewed: 2026-08-27
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-08-27
 Related: [[CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1]] (same provider, same license family, distinct fact), [[CLAIM-MUSIC-ENVATO-CANCELLATION-001-v1]] (structurally analogous rule, different provider)
 
 Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_007_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md` (combined review of all 10 Music Scenario A claims; recommended WITHHOLD for all 10 as a package -- A-3's own disposition within it was "runtime prerequisite only," resolved as described above; CPR_007 itself is unmodified by this approval, its own top-level "PM decision: PENDING" line describes concurrence with the review's blanket 10-claim recommendation, not this claim-specific approval)
 
 ### CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1
 Domain: Third-Party Source Assets / Music Licensing

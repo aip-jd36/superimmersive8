@@ -17,7 +17,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
-import { GOAL_CATEGORIES } from '@/types/interview-engine'
+import { GOAL_CATEGORIES, ASSET_PROVIDER_IDS } from '@/types/interview-engine'
 import { providerScopeMatches } from '@/lib/retrieval-engine/lookup-topic-claims'
 
 const GOVERNED_CLAIMS_PATH = path.join(__dirname, '..', '..', '..', '..', '06_Operations', 'institutional-knowledge', 'notebook', 'GOVERNED-CLAIMS.md')
@@ -59,30 +59,28 @@ const GOVERNED_CLAIMS_PATH = path.join(__dirname, '..', '..', '..', '..', '06_Op
  *     architectural reason: `envato-elements`/`epidemic-sound` are still not
  *     registered in `ASSET_PROVIDER_IDS` -- this milestone's own one-
  *     provider scope deliberately left them unregistered.
- *   - The seven `CLAIM-MUSIC-ARTLIST-*` claims are a DIFFERENT case now:
- *     `artlist` WAS registered in `ASSET_PROVIDER_IDS` this milestone (a
- *     generic registry extension, confirmed no Music-specific mechanism
- *     added -- see `types/interview-engine.ts`), so the registry blocker is
- *     gone for these seven specifically. They remain in this set for the
- *     SAME kind of reason the five stock claims above are excluded from CRC
- *     output -- CRC eligibility, not fixture-representability. Concretely:
- *     `CPR_007` recommends WITHHOLD for all ten (PM decision on that review:
- *     PENDING; every Music claim's own `CRC Approver` field in
- *     GOVERNED-CLAIMS.md remains `PENDING`, unchanged by this milestone).
- *     A permanent `TOPIC_CLAIMS_FIXTURE` entry was deliberately NOT added
- *     for any of the seven -- unlike the five stock claims (which reached
- *     real `crc_eligible: 'Pending'` fixture entries once M3 closed their
- *     registry blocker), adding even a `crc_eligible: 'Pending'` Music
- *     entry was judged unnecessary and was not required to prove the
- *     canary's own retrieval/provider-scope questions (see the CPR_001/
- *     CPR_003 "synthetic-eligible clone, never mutating the committed
- *     fixture" precedent this canary followed instead, in
- *     provider-scoped-retrieval.test.ts). Remove each ID from this set only
- *     once its own claim receives a real, permanent fixture entry -- which
- *     itself should follow, not precede, an explicit CRC Publication
- *     decision for that claim, mirroring exactly how every stock claim
- *     above already had `CRC Eligible: Yes` decided before M3 gave it a
- *     fixture entry.
+ *   - The remaining six `CLAIM-MUSIC-ARTLIST-*` claims (A-1, A-2, A-4, A-5,
+ *     A-6, A-7a) are a DIFFERENT case: `artlist` WAS registered in
+ *     `ASSET_PROVIDER_IDS` (a generic registry extension, confirmed no
+ *     Music-specific mechanism added -- see `types/interview-engine.ts`),
+ *     so the registry blocker is gone for these six specifically. They
+ *     remain in this set for the SAME kind of reason the five stock claims
+ *     above are excluded from CRC output -- CRC eligibility, not
+ *     fixture-representability. `CPR_007` recommends WITHHOLD for all of
+ *     them (PM decision on that combined review: PENDING; each one's own
+ *     `CRC Approver` field in GOVERNED-CLAIMS.md remains `PENDING`).
+ *
+ * REMOVED 2026-08-27 (later same session, A-3 CRC Publication Recording
+ * task): `CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1` (A-3) --
+ * this claim ONLY. CRC Publication was explicitly approved for A-3
+ * specifically (CRC Approver: JD (PM), CRC Decision Date: 2026-08-27, see
+ * GOVERNED-CLAIMS.md's own "CRC PUBLICATION APPROVED" note), following the
+ * Artlist A-3 Synthetic Runtime Canary and Artlist Provider Registration
+ * Canary Integration Review clearing the runtime-verification prerequisite
+ * CPR_007 §3 identified as the sole blocker. A-3 now has a real
+ * `TOPIC_CLAIMS_FIXTURE` entry (`crc_eligible: 'Yes'`) -- see the dedicated
+ * tests below. The other 9 Music Scenario A claims are UNAFFECTED by this
+ * removal and remain exactly as before, per the split above.
  */
 const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set<string>([
   'CLAIM-MUSIC-ENVATO-SYNC-001-v1',
@@ -90,7 +88,6 @@ const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set<string>([
   'CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1',
   'CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1',
   'CLAIM-MUSIC-ARTLIST-CLIENT-LICENSE-RETENTION-001-v1',
-  'CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1',
   'CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1',
   'CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1',
   'CLAIM-MUSIC-ARTLIST-PRO-ROYALTIES-001-v1',
@@ -297,7 +294,14 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
   })
 
   test('provider_scope values used across the whole fixture are all valid canonical AssetProviderId values recognized by the M2 provider registry -- catches drift (e.g. a fixture claim silently using \'getty-images\' while extraction canonicalizes \'getty\')', () => {
-    const VALID_PROVIDER_IDS = new Set(['getty', 'istock', 'shutterstock', 'adobe-stock'])
+    // Sourced directly from ASSET_PROVIDER_IDS (types/interview-engine.ts)
+    // rather than a hand-duplicated literal, so this test can never itself
+    // drift out of sync with the registry it's checking against -- a real
+    // gap the Artlist registration (2026-08-27) surfaced: a hardcoded
+    // ['getty','istock','shutterstock','adobe-stock'] literal here would
+    // have silently failed to recognize a newly-registered, legitimately
+    // valid provider ID as valid.
+    const VALID_PROVIDER_IDS = new Set<string>(ASSET_PROVIDER_IDS)
     for (const claim of TOPIC_CLAIMS_FIXTURE) {
       if (claim.provider_scope === null) continue
       for (const providerId of claim.provider_scope) {
@@ -382,8 +386,8 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
     }
   })
 
-  test('exactly nine claims in the runtime fixture are Adopted + CRC-eligible as of 2026-08-27 -- CLAIM-COPY-004-v1 (first PM CRC-publication decision, 2026-08-17), CLAIM-STOCK-EDITORIAL-001-v2 (second lineage slot, originally -v1 2026-08-18, superseded 2026-08-27 by a provider_scope correction -- see governance-reviews/FGR_007_STOCK_EDITORIAL_PROVIDER_SCOPE_CORRECTION_2026-08-27.md; the v1 predecessor is preserved in the fixture with Lifecycle: Deprecated and is correctly excluded from this filter), CLAIM-STOCK-EDITORIAL-002-v2 (third lineage slot, originally -v1 2026-08-18 with a bounded CRC-facing copy adjustment, superseded 2026-08-27 by the same correction with a narrower, Adobe-Stock-excluded scope), CLAIM-STOCK-GETTY-EDITORIAL-001-v1 (fourth, 2026-08-18, first provider-specific claim published, no text change, not affected by the 2026-08-27 correction), CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1 (fifth, 2026-08-18, second provider-specific claim published, no text change), CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1 (sixth, 2026-08-18, third and final provider-specific claim published to date, no text change), and CLAIM-COPY-001-v1/CLAIM-COPY-002-v1/CLAIM-COPY-003-v1 (seventh-ninth, 2026-08-19, published together atomically alongside REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1, no text change to any of them; see governance-reviews/CPR_006_COPYRIGHT_PUBLICATION_PACKAGE_2026-08-19.md) -- update only when a further real decision is recorded', () => {
+  test('exactly ten claims in the runtime fixture are Adopted + CRC-eligible as of 2026-08-27 -- the prior nine (CLAIM-COPY-004-v1, CLAIM-STOCK-EDITORIAL-001-v2/-002-v2, CLAIM-STOCK-GETTY/ISTOCK/SHUTTERSTOCK-EDITORIAL-001-v1, CLAIM-COPY-001-v1/-002-v1/-003-v1 -- see prior versions of this test/GOVERNED-CLAIMS.md for their own individual provenance) plus the tenth and newest: CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1 (A-3), CRC Publication approved 2026-08-27 (CRC Approver: JD (PM)) following CPR_007 + the Artlist A-3 Synthetic Runtime Canary + the Artlist Provider Registration Canary Integration Review -- the first, and so far only, Music-domain claim to reach CRC. The other 9 Music Scenario A claims remain WITHHELD/PENDING and are correctly absent from this list -- update only when a further real decision is recorded', () => {
     const liveClaims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.lifecycle === 'Adopted' && c.crc_eligible === 'Yes')
-    expect(liveClaims.map((c) => c.claim_id).sort()).toEqual(['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPY-004-v1', 'CLAIM-STOCK-EDITORIAL-001-v2', 'CLAIM-STOCK-EDITORIAL-002-v2', 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1', 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1'])
+    expect(liveClaims.map((c) => c.claim_id).sort()).toEqual(['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPY-004-v1', 'CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1', 'CLAIM-STOCK-EDITORIAL-001-v2', 'CLAIM-STOCK-EDITORIAL-002-v2', 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1', 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1'])
   })
 })
