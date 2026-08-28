@@ -8,7 +8,7 @@
  */
 
 import { deserializeStructuredUnderstanding, serializeStructuredUnderstanding } from '../../lib/interview-engine/serialization'
-import type { AssessmentJurisdictionMention, StructuredUnderstanding } from '../../types/interview-engine'
+import type { AssessmentJurisdictionMention, ContentPresenceMention, StructuredUnderstanding } from '../../types/interview-engine'
 
 function currentSU(): StructuredUnderstanding {
   return {
@@ -23,6 +23,7 @@ function currentSU(): StructuredUnderstanding {
     user_goals: [{ goal_id: 'g-1', state: 'confirmed', raw_text: 'Can I use this commercially?', category: 'unknown', scope: 'informational', superseded_by: null, source_turn: 1, source_statement: 'placeholder' }],
     asset_provider_mentions: [],
     assessment_jurisdiction_mentions: [],
+    content_presence_mentions: [],
     current_phase: 1,
     gate_1_state: 'not_met',
     gate_2_state: 'not_yet_stable',
@@ -276,5 +277,88 @@ describe('serializeStructuredUnderstanding / deserializeStructuredUnderstanding'
     // populated -- see Finding 1: current extraction cannot write it).
     expect(roundTripped.assessment_jurisdiction_mentions.length).toBeGreaterThan(0)
     expect(roundTripped.project_facts.jurisdiction.attestation.state).toBe('unknown')
+  })
+
+  // CRC Content-Presence Mention Model — Generic Implementation, 2026-08-28,
+  // §26: a direct, focused round-trip test for mixed content_presence_mentions
+  // state -- an active confirmed mention (with real_or_synthetic set), a
+  // superseded historical mention, and a current confirmed_absent mention --
+  // through the real, generic serialize/deserialize mechanism (no
+  // special-cased serializer; same discipline as the mixed
+  // assessment_jurisdiction_mentions test immediately above).
+  test('mixed content_presence_mentions state (active confirmed with real_or_synthetic + superseded historical mention + current confirmed_absent) round-trips losslessly, preserving provenance, supersession, and touched-state evidence', () => {
+    const su = currentSU()
+    const supersededUnqualified: ContentPresenceMention = {
+      mention_id: 't1-c1',
+      category: 'person_visual_presence',
+      real_or_synthetic: null,
+      confidence: 'confirmed',
+      source_turn: 1,
+      source_statement: 'A person appears.',
+      superseded_by: 't2-c1',
+    }
+    const correctedSynthetic: ContentPresenceMention = {
+      mention_id: 't2-c1',
+      category: 'person_visual_presence',
+      real_or_synthetic: 'synthetic',
+      confidence: 'confirmed',
+      source_turn: 2,
+      source_statement: "Actually that's a fully synthetic character.",
+      superseded_by: null,
+    }
+    const absentVoice: ContentPresenceMention = {
+      mention_id: 't3-c1',
+      category: 'person_voice_presence',
+      real_or_synthetic: null,
+      confidence: 'confirmed_absent',
+      source_turn: 3,
+      source_statement: "No person's voice is used.",
+      superseded_by: null,
+    }
+    su.content_presence_mentions = [supersededUnqualified, correctedSynthetic, absentVoice]
+
+    const roundTripped = deserializeStructuredUnderstanding(serializeStructuredUnderstanding(su))
+
+    // All entries present, current vs. superseded state unchanged.
+    expect(roundTripped.content_presence_mentions).toEqual(su.content_presence_mentions)
+    expect(roundTripped.content_presence_mentions).toHaveLength(3)
+
+    // real_or_synthetic survives where stored, and stays null where unset --
+    // never collapsed into a third asserted value by the round trip.
+    const active = roundTripped.content_presence_mentions.filter((m) => m.superseded_by === null)
+    expect(active.map((m) => ({ category: m.category, real_or_synthetic: m.real_or_synthetic, confidence: m.confidence })).sort((a, b) => a.category.localeCompare(b.category))).toEqual([
+      { category: 'person_visual_presence', real_or_synthetic: 'synthetic', confidence: 'confirmed' },
+      { category: 'person_voice_presence', real_or_synthetic: null, confidence: 'confirmed_absent' },
+    ])
+
+    // Provenance survives exactly (real source_turn/source_statement, not fabricated).
+    expect(roundTripped.content_presence_mentions[0].source_turn).toBe(1)
+    expect(roundTripped.content_presence_mentions[0].source_statement).toBe('A person appears.')
+    expect(roundTripped.content_presence_mentions[2].source_turn).toBe(3)
+    expect(roundTripped.content_presence_mentions[2].source_statement).toBe("No person's voice is used.")
+
+    // superseded_by linkage survives (the historical unqualified entry
+    // still correctly points at the mention that replaced it).
+    expect(roundTripped.content_presence_mentions[0].superseded_by).toBe('t2-c1')
+    expect(roundTripped.content_presence_mentions[1].superseded_by).toBeNull()
+
+    // Raw collection length (including the superseded entry) proves
+    // "touched" -- no migration fabricates content-presence facts, and an
+    // empty collection (tested separately below) always means "no recorded
+    // information," never "confirmed absence."
+    expect(roundTripped.content_presence_mentions.length).toBeGreaterThan(0)
+  })
+
+  test('a historical session predating content_presence_mentions deserializes with it defaulted to [], not undefined -- and every other field survives unchanged', () => {
+    const historicalShape = currentSU()
+    const { content_presence_mentions: _omitted, ...withoutContentPresenceMentions } = historicalShape
+    const historicalJson = JSON.stringify(withoutContentPresenceMentions)
+    expect(historicalJson).not.toContain('content_presence_mentions')
+
+    const deserialized = deserializeStructuredUnderstanding(historicalJson)
+    expect(deserialized.content_presence_mentions).toEqual([])
+    expect(Array.isArray(deserialized.content_presence_mentions)).toBe(true)
+    expect(deserialized.project_facts).toEqual(historicalShape.project_facts)
+    expect(deserialized.user_goals).toEqual(historicalShape.user_goals)
   })
 })

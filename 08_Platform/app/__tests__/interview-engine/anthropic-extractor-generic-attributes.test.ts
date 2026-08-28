@@ -154,6 +154,78 @@ describe('access_surface/plan_tier + usage/license kind compatibility (fail-clos
     expect(out.plan_tier_value_hint).toBeUndefined()
   })
 
+  // CRC Content-Presence Mention Model (2026-08-28), Section 25: verify the
+  // new 'real_or_synthetic' key does not leak into unrelated candidate
+  // kinds, in BOTH directions -- the same kind-gated toolAttributes/
+  // providerAttributes/contentPresenceAttributes filtering in
+  // toCandidateObservation that already protects usage/license/plan_tier/
+  // access_surface/account_status protects this new key automatically,
+  // structurally, with zero new per-key code.
+  test('a tool_mention candidate carrying a "real_or_synthetic" attribute does not populate real_or_synthetic_confidence_hint -- ignored, not mutated into unrelated state', () => {
+    const out = toCandidateObservation(
+      baseParsed('tool_mention', {
+        raw_tool_name: 'Kling',
+        attributes: [{ key: 'real_or_synthetic', confidence: 'confirmed', value: 'real' }],
+      }) as any,
+      1,
+    )
+    expect(out.real_or_synthetic_confidence_hint).toBeUndefined()
+    expect(out.real_or_synthetic_value_hint).toBeUndefined()
+  })
+
+  test('an asset_provider_mention candidate carrying a "real_or_synthetic" attribute does not populate real_or_synthetic_confidence_hint -- ignored, not mutated into unrelated state', () => {
+    const out = toCandidateObservation(
+      baseParsed('asset_provider_mention', {
+        raw_provider_name: 'iStock',
+        attributes: [{ key: 'real_or_synthetic', confidence: 'confirmed', value: 'synthetic' }],
+      }) as any,
+      1,
+    )
+    expect(out.real_or_synthetic_confidence_hint).toBeUndefined()
+    expect(out.real_or_synthetic_value_hint).toBeUndefined()
+  })
+
+  test('a content_presence_mention candidate carrying a "usage" or "plan_tier" attribute does not populate usage_confidence_hint or plan_tier_confidence_hint -- ignored, not mutated into unrelated state', () => {
+    const out = toCandidateObservation(
+      baseParsed('content_presence_mention', {
+        raw_content_presence_category: 'person_visual_presence',
+        attributes: [
+          { key: 'usage', confidence: 'confirmed', value: 'direct_generation_input' },
+          { key: 'plan_tier', confidence: 'confirmed', value: 'paid' },
+        ],
+      }) as any,
+      1,
+    )
+    expect(out.usage_confidence_hint).toBeUndefined()
+    expect(out.usage_value_hint).toBeUndefined()
+    expect(out.plan_tier_confidence_hint).toBeUndefined()
+    expect(out.plan_tier_value_hint).toBeUndefined()
+  })
+
+  test('a content_presence_mention candidate carrying a "real_or_synthetic" attribute correctly populates real_or_synthetic_confidence_hint/value_hint verbatim', () => {
+    const out = toCandidateObservation(
+      baseParsed('content_presence_mention', {
+        raw_content_presence_category: 'person_visual_presence',
+        attributes: [{ key: 'real_or_synthetic', confidence: 'confirmed', value: 'real' }],
+      }) as any,
+      1,
+    )
+    expect(out.real_or_synthetic_confidence_hint).toBe('confirmed')
+    expect(out.real_or_synthetic_value_hint).toBe('real')
+  })
+
+  test('a real_or_synthetic value outside the closed "real"/"synthetic" set is treated as absent (fail-closed, not fabricated)', () => {
+    const out = toCandidateObservation(
+      baseParsed('content_presence_mention', {
+        raw_content_presence_category: 'person_visual_presence',
+        attributes: [{ key: 'real_or_synthetic', confidence: 'confirmed', value: 'not_a_real_value' }],
+      }) as any,
+      1,
+    )
+    expect(out.real_or_synthetic_confidence_hint).toBe('confirmed')
+    expect(out.real_or_synthetic_value_hint).toBeUndefined()
+  })
+
   // S. unrelated candidate kind with [] behaves unchanged
   test('S: a scoped_observation candidate with an empty attributes array is unaffected -- its own fields map exactly as before', () => {
     const out = toCandidateObservation(

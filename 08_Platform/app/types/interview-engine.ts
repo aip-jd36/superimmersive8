@@ -301,6 +301,137 @@ export interface AssessmentJurisdictionMention {
   superseded_by: string | null
 }
 
+// ── Content presence mentions (CRC Content-Presence Mention Model,
+// 2026-08-28, following the accepted Representation Simplification Review)
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * Closed, minimal, evidence-only category vocabulary (Content-Presence
+ * Representation Simplification Review, 2026-08-28). Only the two values
+ * with real, adopted governed need today -- see
+ * CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1's own
+ * `recognizable_likeness_or_voice_present` unresolved project dependency
+ * (GOVERNED-CLAIMS.md). Deliberately NOT named after the governed
+ * dependency string, and deliberately NOT using the statutory term
+ * "likeness" (NY Civil Rights Law §§50-51's own literal vocabulary) --
+ * StructuredUnderstanding records what the user factually stated the
+ * project's output contains, never a legal term of art. Mirrors this
+ * project's own precedent for exactly this move:
+ * `human_creative_contribution_level` was renamed to
+ * `human_contribution_description` for the identical reason (avoiding a
+ * name that reads as a legal/graded judgment).
+ *
+ * Owned here, by the StructuredUnderstanding/extractor schema layer -- NOT
+ * by Living Knowledge (which owns dependency-string vocabulary,
+ * `unresolved_project_dependencies`) and NOT by a dependency-askability
+ * registry (which owns a third, separate askability vocabulary,
+ * `lib/crc-engine/dependency-askability.ts`). These three vocabularies are
+ * deliberately never merged, mirroring the established FollowUpNeed-vs.-
+ * governed-dependency-string precedent (`knowledge-readiness.ts`'s own
+ * header).
+ *
+ * Extended later, one evidenced value at a time -- same discipline as
+ * `ASSET_PROVIDER_IDS`/`EXTRACTED_ATTRIBUTE_KEY_VALUES` growth. Do not add
+ * a category speculatively (no logo/product/signage/location/music/stock
+ * value exists here, and none should be added without its own governed
+ * evidence).
+ */
+export const CONTENT_PRESENCE_CATEGORIES = ['person_visual_presence', 'person_voice_presence'] as const
+
+export type ContentPresenceCategory = (typeof CONTENT_PRESENCE_CATEGORIES)[number]
+
+/**
+ * One user-stated proposition that content of a bounded factual category
+ * (`category`) is present in, or explicitly absent from, the project's
+ * output. Sibling concept to `AssessmentJurisdictionMention`, same
+ * mention/supersession shape, same two-meaningful-states confidence
+ * discipline (`confirmed` / `confirmed_absent` -- `unknown`/`declined`/
+ * `unresolved_no_visibility` do not naturally attach to a stated category
+ * and are not produced here, mirroring `AssessmentJurisdictionMention`'s
+ * own doc comment exactly).
+ *
+ * This does NOT mean: CRC inspected the project's output; CRC verified the
+ * statement; CRC determined the depicted person is legally recognizable
+ * (see CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1's own Prohibited
+ * Conclusions text -- "whether the depicted person is actually recognizable
+ * as a matter of fact" is explicitly barred, and no field here attempts to
+ * establish it); CRC identified the person; CRC determined a legal right is
+ * implicated, that consent is required, or that any law applies.
+ *
+ * Deliberately excludes (Content-Presence Representation Simplification
+ * Review, 2026-08-28, after the fuller CRC Content-Presence Mention Model —
+ * Implementation Design's own first pass considered and rejected them):
+ *   - `count` -- the adopted governed dependency
+ *     (`recognizable_likeness_or_voice_present`) is a pure existence/OR
+ *     test; it never needed "how many." Retaining a numeric count would
+ *     also force an aggregate-correction case ("two real people" -> "one is
+ *     synthetic") to be resolved by ARITHMETIC DECOMPOSITION
+ *     (`real: 2 -> 1`, `synthetic: 0 -> 1`) -- an inference no existing
+ *     mention/supersession correction in this codebase ever performs (every
+ *     precedent -- AssetProviderMention, ToolMention,
+ *     AssessmentJurisdictionMention, scalar AttestedFact corrections -- is
+ *     strict 1:1 supersession, never a 1-to-many split). See
+ *     `resolveContentPresenceMentionTarget`'s own header (mutations
+ *     consumer, extraction.ts) for how this is instead handled as a plain
+ *     addition, never a fabricated decomposition. The literal count, if the
+ *     user states one, survives only in `source_statement`.
+ *   - `recognizability` -- the governed claim's own Prohibited Conclusions
+ *     text makes any structured recognizability value permanently unusable
+ *     for a downstream conclusion regardless of how it's captured; a
+ *     dedicated field would buy nothing a verbatim `source_statement`
+ *     doesn't already preserve, while inviting exactly the "user statement"
+ *     vs. "CRC fact" conflation that Prohibited Conclusions text exists to
+ *     prevent. The literal word "recognizable" (or its absence, or "I don't
+ *     know if identifiable") is fully recoverable from `source_statement`.
+ *   - person identity, names, a legal-likeness-status field, an
+ *     applicable-law field, or any consent/advertising/trade field -- none
+ *     of these fit the bounded self-report vocabulary this type records at
+ *     all; they belong, if ever modeled, to a different governance layer
+ *     entirely, never to this type.
+ *
+ * `real_or_synthetic` (bounded to `real`/`synthetic`, self-reported only,
+ * never inferred by extraction): a plain nullable field on this interface,
+ * `null` meaning unstated/unresolved, never a third asserted "unknown"
+ * value. Extracted via the existing generic `attributes[]` wire-level
+ * extraction mechanism (`EXTRACTED_ATTRIBUTE_KEY_VALUES`,
+ * lib/interview-engine/anthropic-extractor.ts), the same TRANSPORT
+ * mechanism `usage`/`license`/`account_status` already use -- but, exactly
+ * like those three, that mechanism governs only how the value crosses the
+ * wire from the model; the value is still stored as a real field on the
+ * StructuredUnderstanding-side type it belongs to (`AssetProviderMention.
+ * usage`/`.license` are the direct precedent: both are real fields, not
+ * merely transient extraction-time attributes). Required to be a genuine
+ * stored field, not a design-time simplification: an explicit,
+ * real-qualified absence ("no REAL person's image appears," as opposed to
+ * "no person's image appears" at all) is only expressible if this value
+ * persists on the mention itself. Genuinely required, not optional
+ * richness -- it is the one axis the governed proposition's own statutory
+ * scope ("any living person," NY Civil Rights Law §§50-51, Class-A-verified
+ * in GOVERNED-CLAIMS.md) cannot even be approximated without.
+ * `attestCandidate` (extraction.ts) is the single place this value is read
+ * out of the generic wire-level `attributes[]` array and attached here.
+ *
+ * `superseded_by` follows the same supersede-and-mark discipline as every
+ * other mention type in this file -- a correction never deletes or edits a
+ * prior mention in place. See `resolveContentPresenceMentionTarget`
+ * (extraction.ts) for the code-side, fail-closed-on-ambiguity target
+ * resolution this type's cardinality-many shape requires -- multiple active
+ * mentions represent multiple independently-stated (category ×
+ * real_or_synthetic) propositions, NEVER one mention per literal individual
+ * (no identity is ever tracked; "three people appear" produces exactly ONE
+ * mention, with "three" surviving only in `source_statement`).
+ */
+export interface ContentPresenceMention {
+  mention_id: string
+  category: ContentPresenceCategory
+  /** `null` means unstated/unresolved -- never a third asserted value alongside 'real'/'synthetic'. See this interface's own header comment. */
+  real_or_synthetic: 'real' | 'synthetic' | null
+  confidence: ConfidenceState
+  source_turn: number
+  source_statement: string
+  superseded_by: string | null
+}
+
 // ── Project facts ────────────────────────────────────────────────────────────
 
 /**
@@ -596,6 +727,21 @@ export interface StructuredUnderstanding {
    * marker-free authority rule and why no launch-timestamp gate is needed.
    */
   assessment_jurisdiction_mentions: AssessmentJurisdictionMention[]
+  /**
+   * CRC Content-Presence Mention Model (2026-08-28). Additive and
+   * backward-compatible, same discipline as `assessment_jurisdiction_mentions`
+   * before it: a historical session's stored JSON predating this field
+   * deserializes with it defaulted to `[]` (see serialization.ts's
+   * deserializeStructuredUnderstanding), never `undefined` at runtime. An
+   * empty array means no recorded information -- NEVER confirmed absence --
+   * for both a genuinely untouched new session and a historical session
+   * that predates this field entirely; no migration fabricates a
+   * content-presence fact for either case. Generic project state only: no
+   * dependency evaluation, no askability, no Track A discovery, no BI/
+   * Projection/Composition consumer exists for this field yet (deliberately
+   * -- each is its own, separately authorized future milestone).
+   */
+  content_presence_mentions: ContentPresenceMention[]
   current_phase: Phase
   gate_1_state: Gate1State
   gate_2_state: Gate2State

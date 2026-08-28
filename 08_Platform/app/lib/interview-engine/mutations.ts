@@ -24,6 +24,7 @@ import type {
   AssessmentJurisdictionMention,
   AssetProviderMention,
   Attested,
+  ContentPresenceMention,
   ScopedObservation,
   StructuredUnderstanding,
   ToolMention,
@@ -356,6 +357,81 @@ export function supersedeAssessmentJurisdictionMention(
     ...su,
     assessment_jurisdiction_mentions: [
       ...su.assessment_jurisdiction_mentions.map((m) =>
+        m.mention_id === targetId ? { ...m, superseded_by: replacement.mention_id } : m,
+      ),
+      replacement,
+    ],
+  }
+}
+
+// ── Content presence mentions (CRC Content-Presence Mention Model,
+// 2026-08-28) ─────────────────────────────────────────────────────────────
+
+/**
+ * Mirrors addAssessmentJurisdictionMention exactly -- same duplicate-id /
+ * already-superseded-on-add invariants, no cap. Pure and mechanical: WHETHER
+ * a candidate is a fresh addition or a correction target, and how a stated
+ * correction resolves to a specific target mention_id, are policy decisions
+ * made by the caller (lib/interview-engine/extraction.ts), never by this
+ * function.
+ */
+export function addContentPresenceMention(
+  su: StructuredUnderstanding,
+  mention: ContentPresenceMention,
+): StructuredUnderstanding {
+  if (su.content_presence_mentions.some((m) => m.mention_id === mention.mention_id)) {
+    throw new Error(`Content presence mention id already exists: ${mention.mention_id}`)
+  }
+  if (mention.superseded_by !== null) {
+    throw new Error(
+      `A newly added content presence mention cannot already be superseded (mention_id: ${mention.mention_id})`,
+    )
+  }
+  return {
+    ...su,
+    content_presence_mentions: [...su.content_presence_mentions, mention],
+  }
+}
+
+/**
+ * Mirrors supersedeAssessmentJurisdictionMention exactly -- same invariants
+ * (target must exist and must currently be the active/non-superseded head of
+ * its chain). Used for BOTH a correction (real -> synthetic) and an explicit
+ * exclusion (a replacement carrying confidence: 'confirmed_absent') -- there
+ * is no separate exclusion function, same precedent as
+ * supersedeAssessmentJurisdictionMention.
+ */
+export function supersedeContentPresenceMention(
+  su: StructuredUnderstanding,
+  targetId: string,
+  replacement: ContentPresenceMention,
+): StructuredUnderstanding {
+  const target = su.content_presence_mentions.find((m) => m.mention_id === targetId)
+  if (!target) {
+    throw new Error(`Cannot supersede unknown content presence mention: ${targetId}`)
+  }
+  if (target.superseded_by !== null) {
+    throw new Error(
+      `Cannot supersede content presence mention ${targetId}: it is already superseded by ${target.superseded_by}. ` +
+      `Corrections must target the current head of the chain, not a historical snapshot.`,
+    )
+  }
+  if (replacement.mention_id === targetId) {
+    throw new Error(`Replacement content presence mention must have a different id than the mention it supersedes: ${targetId}`)
+  }
+  if (su.content_presence_mentions.some((m) => m.mention_id === replacement.mention_id)) {
+    throw new Error(`Replacement content presence mention id already exists: ${replacement.mention_id}`)
+  }
+  if (replacement.superseded_by !== null) {
+    throw new Error(
+      `A newly added replacement content presence mention cannot already be superseded (mention_id: ${replacement.mention_id})`,
+    )
+  }
+
+  return {
+    ...su,
+    content_presence_mentions: [
+      ...su.content_presence_mentions.map((m) =>
         m.mention_id === targetId ? { ...m, superseded_by: replacement.mention_id } : m,
       ),
       replacement,

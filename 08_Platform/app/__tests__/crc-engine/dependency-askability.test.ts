@@ -27,6 +27,26 @@ describe('isDependencyAskableInCrc (preserved, pre-generalization behavior)', ()
     expect(isDependencyAskableInCrc('editorial_designation_confirmed')).toBe(false)
     expect(isDependencyAskableInCrc('asset_confirmed_istock')).toBe(false)
   })
+
+  // CRC Content-Presence Mention Model (2026-08-28), Section 19/22:
+  // representability is not askability -- modeling content presence in
+  // StructuredUnderstanding does not itself register anything here. Both
+  // remain, correctly, unregistered/non-askable: written_consent_confirmed
+  // is evidence-only per established stock-governance precedent (FGR_008
+  // §11, GOVERNED-CLAIMS.md), permanently, absent a separate governance
+  // reversal; recognizable_likeness_or_voice_present has no askability
+  // decision made by this milestone at all (no dependency evaluation, no
+  // acquisition strategy, no CRC question -- see ContentPresenceMention's
+  // own doc comment).
+  test('written_consent_confirmed remains non-askable -- unaffected by the Content-Presence Mention Model', () => {
+    expect(isDependencyAskableInCrc('written_consent_confirmed')).toBe(false)
+    expect(getAskabilityEntry('written_consent_confirmed')).toBeUndefined()
+  })
+
+  test('recognizable_likeness_or_voice_present remains non-askable -- this milestone creates project-state capability only, no askability decision', () => {
+    expect(isDependencyAskableInCrc('recognizable_likeness_or_voice_present')).toBe(false)
+    expect(getAskabilityEntry('recognizable_likeness_or_voice_present')).toBeUndefined()
+  })
 })
 
 describe('getAskabilityEntry (new in this milestone)', () => {

@@ -122,6 +122,16 @@ export function deserializeStructuredUnderstanding(json: string): StructuredUnde
    */
   const assessment_jurisdiction_mentions = parsed.assessment_jurisdiction_mentions ?? []
   /**
+   * `content_presence_mentions` defaulted to `[]` when absent (CRC
+   * Content-Presence Mention Model, 2026-08-28): same reasoning and same
+   * funnel as `assessment_jurisdiction_mentions` above -- a session
+   * persisted before this field existed round-trips through JSON.parse with
+   * no `content_presence_mentions` key at all. An empty array here means
+   * "no recorded information" -- for both a genuinely untouched session and
+   * a historical session predating this field -- NEVER "confirmed absence."
+   */
+  const content_presence_mentions = parsed.content_presence_mentions ?? []
+  /**
    * `account_status` per-element defaulting (CRC Kling Governed Knowledge
    * Correction + Decomposition milestone, 2026-08-24): same reasoning and
    * same funnel as the `usage`/`license` backfill immediately above -- a
@@ -137,7 +147,7 @@ export function deserializeStructuredUnderstanding(json: string): StructuredUnde
     ...m,
     account_status: m.account_status ?? { state: 'unknown' as const },
   }))
-  return { ...parsed, user_goals, project_facts, asset_provider_mentions, tool_mentions, assessment_jurisdiction_mentions }
+  return { ...parsed, user_goals, project_facts, asset_provider_mentions, tool_mentions, assessment_jurisdiction_mentions, content_presence_mentions }
 }
 
 /**

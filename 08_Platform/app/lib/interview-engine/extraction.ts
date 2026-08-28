@@ -43,6 +43,8 @@ import type {
   AssetProviderUsageValue,
   Attested,
   ConfidenceState,
+  ContentPresenceCategory,
+  ContentPresenceMention,
   GoalCategory,
   GoalScope,
   ObservationScope,
@@ -66,6 +68,8 @@ import {
   supersedeUserGoal,
   addAssessmentJurisdictionMention,
   supersedeAssessmentJurisdictionMention,
+  addContentPresenceMention,
+  supersedeContentPresenceMention,
 } from './mutations'
 
 // ── Raw input ────────────────────────────────────────────────────────────────
@@ -117,12 +121,32 @@ import {
  * turn -- leaves the existing, stricter rule (never infer jurisdiction from
  * client/company location) completely unchanged.
  */
+/**
+ * `answering_content_presence_question` (CRC Content-Presence Mention
+ * Model, 2026-08-28): same additive, narrow-deterministic-signal discipline
+ * as `answering_jurisdiction_question` immediately above, for the identical
+ * underlying reason -- the extractor has no visibility into which question
+ * (if any) CRC's own previous turn asked. Generic plumbing only: no
+ * production code sets this flag yet, because no content-presence question
+ * exists yet (no askability, no dependency acquisition strategy is
+ * authorized in this milestone -- see ContentPresenceMention's own doc
+ * comment). This field exists so a FUTURE, separately-authorized
+ * questioning milestone can thread a genuine context flag through an
+ * already-proven mechanism, not so this milestone can start asking
+ * anything. When a future caller does set it true, it lets the extractor
+ * treat a bare, otherwise-indirect-looking short reply ("Yes."/"No.") as
+ * the user's intended content-presence answer -- see anthropic-extractor.ts's
+ * SYSTEM_PROMPT for the exact exception this unlocks, and
+ * buildUserMessageContent's own doc comment for why `source_statement`
+ * itself is never rewritten to reflect the inferred meaning.
+ */
 export interface RawUserTurn {
   turn: number
   text: string
   pending_clarification?: import('./pending-clarification').PendingClarification | null
   current_human_contribution_description?: string | null
   answering_jurisdiction_question?: boolean
+  answering_content_presence_question?: boolean
 }
 
 // ── Candidate observations (stage 1) ────────────────────────────────────────
@@ -139,7 +163,7 @@ export interface CandidateObservation {
   proposal_id: string
   turn: number
   raw_text: string
-  kind: 'tool_mention' | 'scoped_observation' | 'project_fact' | 'user_goal' | 'asset_provider_mention' | 'assessment_jurisdiction_mention'
+  kind: 'tool_mention' | 'scoped_observation' | 'project_fact' | 'user_goal' | 'asset_provider_mention' | 'assessment_jurisdiction_mention' | 'content_presence_mention'
 
   /** kind === 'tool_mention' */
   raw_tool_name?: string
@@ -342,6 +366,46 @@ export interface CandidateObservation {
    * bare inclusion statement leaves this false/unset.
    */
   is_jurisdiction_exclusion?: boolean
+
+  /**
+   * kind === 'content_presence_mention' (CRC Content-Presence Mention
+   * Model, 2026-08-28). The user directly stated that content of this
+   * bounded factual category is present in (or, per
+   * is_content_presence_absent below, explicitly absent from) the
+   * project's output -- never inferred from a provider/tool/workflow/
+   * client-identity/location/commercial-use statement (see SYSTEM_PROMPT
+   * for the exact fail-closed discipline). Closed to
+   * ContentPresenceCategory -- 'person_visual_presence' /
+   * 'person_voice_presence' only.
+   */
+  raw_content_presence_category?: ContentPresenceCategory
+  /**
+   * kind === 'content_presence_mention'. True only when the user
+   * explicitly denied presence of this category (e.g. "no person's image
+   * appears," "no real person's image appears" -- the latter paired with
+   * real_or_synthetic_value_hint: 'real', qualifying the denial to real
+   * presence only, never collapsing into "no visual person content of any
+   * kind") -- never inferred from silence. A bare inclusion statement
+   * leaves this false/unset.
+   */
+  is_content_presence_absent?: boolean
+  /** kind === 'content_presence_mention'; set when this candidate corrects an existing mention (resolved by code, never the model -- see resolveContentPresenceMentionTarget) */
+  supersedes_content_presence_mention_id?: string
+  /**
+   * kind === 'content_presence_mention'. Bounded, self-reported-only
+   * classification -- 'real' or 'synthetic' -- read out of the generic
+   * attributes[] wire mechanism by toCandidateObservation (anthropic-
+   * extractor.ts), the same mechanism access_surface/plan_tier/usage/
+   * license already use, mirroring their exact confidence/value hint-pair
+   * shape. Set ONLY when the user's own words directly support a real or
+   * synthetic classification -- NEVER inferred (e.g. "it resembles a
+   * celebrity" must never populate this as 'real'). Absent means
+   * unstated/unresolved, never a third asserted value. Deliberately NOT a
+   * recognizability field -- see ContentPresenceMention's own doc comment
+   * for why no such field exists anywhere in this pipeline.
+   */
+  real_or_synthetic_confidence_hint?: ConfidenceState
+  real_or_synthetic_value_hint?: 'real' | 'synthetic'
 }
 
 export type CandidateExtractor = (turn: RawUserTurn) => Promise<CandidateObservation[]>
@@ -494,6 +558,7 @@ export type ProposedFact =
   | { kind: 'user_goal'; goal: UserGoal }
   | { kind: 'asset_provider_mention'; mention: AssetProviderMention }
   | { kind: 'assessment_jurisdiction_mention'; mention: AssessmentJurisdictionMention }
+  | { kind: 'content_presence_mention'; mention: ContentPresenceMention }
   | { kind: 'undetermined' }
 
 /**
@@ -791,6 +856,39 @@ export function attestCandidate(
     }
   }
 
+  if (candidate.kind === 'content_presence_mention') {
+    if (!candidate.raw_content_presence_category) return null
+
+    // Turn-qualified, same minting rule as every other mention kind above.
+    const mentionId = `t${candidate.turn}-${candidate.proposal_id}`
+
+    // real_or_synthetic is self-reported-only, never inferred -- absent when
+    // the extractor's own attributes[]-derived hint was never set (whether
+    // because the user said nothing about it, or said something ambiguous
+    // like "it resembles a celebrity" that must never populate this).
+    const realOrSynthetic =
+      candidate.real_or_synthetic_confidence_hint === 'confirmed' && candidate.real_or_synthetic_value_hint
+        ? candidate.real_or_synthetic_value_hint
+        : null
+
+    return {
+      kind: 'content_presence_mention',
+      mention: {
+        mention_id: mentionId,
+        category: candidate.raw_content_presence_category,
+        real_or_synthetic: realOrSynthetic,
+        // Direct-statement only -- there is no "unknown"/"declined" per-mention
+        // state (see ContentPresenceMention's own doc comment) because a
+        // candidate only exists here at all when the user directly named a
+        // category.
+        confidence: candidate.is_content_presence_absent ? 'confirmed_absent' : 'confirmed',
+        source_turn: candidate.turn,
+        source_statement: candidate.raw_text,
+        superseded_by: null,
+      },
+    }
+  }
+
   if (candidate.kind === 'user_goal') {
     if (!candidate.goal_confidence_hint) return null
     // Turn-qualified unconditionally, mirroring tool_mention's own minting
@@ -1064,6 +1162,68 @@ function resolveAssessmentJurisdictionMentionTarget(candidate: CandidateObservat
   return undefined // zero or multiple matches -- fail closed, never guess
 }
 
+// ── Content-presence mention identity resolution (stage 3.5, CRC
+// Content-Presence Mention Model, 2026-08-28) ──────────────────────────────
+
+/**
+ * Deliberately narrower guard than any other mention resolver in this file --
+ * required specifically because ContentPresenceMention carries no count and
+ * no individual identity (Content-Presence Representation Simplification
+ * Review, 2026-08-28): a category (e.g. `person_visual_presence`) can have
+ * at most ONE active mention at a time under normal singular-statement flow,
+ * so "exactly one active mention of the candidate's own stated category"
+ * would otherwise look like a safe, unambiguous correction target -- but
+ * that same shape is indistinguishable, by construction, from an AGGREGATE
+ * prior statement ("two real people appear") that was never decomposed into
+ * multiple mentions. A later "actually one is synthetic" correction
+ * targeting that same single mention would silently erase the real-presence
+ * fact it was never meant to retract (see the Implementation Design's own
+ * §15 test).
+ *
+ * Extraction guidance (SYSTEM_PROMPT) discourages the model from flagging
+ * `is_correction` for a plural/aggregate referent at all -- but per this
+ * task's own explicit requirement, code-side resolution must remain the
+ * real safety boundary EVEN IF the model gets this wrong. This function
+ * therefore rejects (fails closed, never supersedes) any correction whose
+ * `correction_of_raw_text` contains an explicit partitive/aggregate marker
+ * ("one of", "one is", "the other", "another", "both", a small number word,
+ * "several", "multiple", "some of") -- a small, closed, disclosed heuristic,
+ * not open-ended NLP. A rejected correction candidate still reaches
+ * attestCandidate as an ordinary CREATE (no `supersedes_...` target), so the
+ * newly-stated fact is still recorded -- as a plain addition alongside the
+ * untouched original mention, never as a fabricated decomposition of it.
+ */
+const AGGREGATE_CORRECTION_MARKERS = /\bone of\b|\bone is\b|\bthe other\b|\banother\b|\bboth\b|\btwo\b|\bthree\b|\bfour\b|\bfive\b|\bseveral\b|\bmultiple\b|\bsome of\b/i
+
+/**
+ * Matches by CATEGORY only (never by real_or_synthetic classification --
+ * the very fact being corrected in the singular case, e.g. real -> synthetic,
+ * so it cannot also be part of the match key). Mirrors
+ * resolveAssessmentJurisdictionMentionTarget's own "explicit-language path
+ * only, fail closed on zero or multiple matches" shape, with the additional
+ * aggregate-marker guard above as the load-bearing difference this mention
+ * type's own lack of count/identity requires.
+ *
+ * Returns undefined for CREATE (no correction signal, an aggregate-looking
+ * referent, or nothing to match -- a genuinely new mention) or the
+ * mention_id to supersede for a resolved correction/exclusion.
+ */
+function resolveContentPresenceMentionTarget(candidate: CandidateObservation, su: StructuredUnderstanding): string | undefined {
+  if (candidate.kind !== 'content_presence_mention') return undefined
+  if (!candidate.is_correction) return undefined
+
+  const needle = (candidate.correction_of_raw_text ?? '').trim()
+  if (!needle) return undefined
+  if (AGGREGATE_CORRECTION_MARKERS.test(needle)) return undefined // looks like a partial/aggregate reference -- never guess which instance
+
+  const category = candidate.raw_content_presence_category
+  if (!category) return undefined
+
+  const active = su.content_presence_mentions.filter((m) => m.superseded_by === null && m.category === category)
+  if (active.length === 1) return active[0].mention_id
+  return undefined // zero or multiple matches -- fail closed, never guess
+}
+
 /**
  * Whether this session's `assessment_jurisdiction_mentions` collection has
  * ever received any entry, active or superseded -- local reimplementation of
@@ -1209,7 +1369,7 @@ export async function runExtractionPipeline(
       current = seedAssessmentJurisdictionFromLegacyScalarIfNeeded(current)
     }
 
-    // Exactly one of these four resolvers can ever return a value for a
+    // Exactly one of these five resolvers can ever return a value for a
     // given candidate -- each short-circuits on candidate.kind not matching
     // its own concern -- mirroring the existing single-resolver call shape
     // rather than branching on kind here.
@@ -1217,6 +1377,7 @@ export async function runExtractionPipeline(
     const supersedesGoalId = resolveUserGoalTarget(rawCandidate, current)
     const supersedesProviderId = resolveAssetProviderMentionTarget(rawCandidate, current, retractedProvidersThisTurn)
     const supersedesJurisdictionId = resolveAssessmentJurisdictionMentionTarget(rawCandidate, current)
+    const supersedesContentPresenceId = resolveContentPresenceMentionTarget(rawCandidate, current)
     const candidate = supersedesToolId
       ? { ...rawCandidate, supersedes_tool_mention_id: supersedesToolId }
       : supersedesGoalId
@@ -1225,7 +1386,9 @@ export async function runExtractionPipeline(
           ? { ...rawCandidate, supersedes_asset_provider_mention_id: supersedesProviderId }
           : supersedesJurisdictionId
             ? { ...rawCandidate, supersedes_assessment_jurisdiction_mention_id: supersedesJurisdictionId }
-            : rawCandidate
+            : supersedesContentPresenceId
+              ? { ...rawCandidate, supersedes_content_presence_mention_id: supersedesContentPresenceId }
+              : rawCandidate
 
     const normalization = normalizeCandidate(candidate)
     const proposedFact = attestCandidate(candidate, normalization)
@@ -1348,6 +1511,11 @@ export async function runExtractionPipeline(
         current = candidate.supersedes_assessment_jurisdiction_mention_id
           ? supersedeAssessmentJurisdictionMention(current, candidate.supersedes_assessment_jurisdiction_mention_id, proposedFact.mention)
           : addAssessmentJurisdictionMention(current, proposedFact.mention)
+        appliedIdentifier = proposedFact.mention.mention_id
+      } else if (proposedFact.kind === 'content_presence_mention') {
+        current = candidate.supersedes_content_presence_mention_id
+          ? supersedeContentPresenceMention(current, candidate.supersedes_content_presence_mention_id, proposedFact.mention)
+          : addContentPresenceMention(current, proposedFact.mention)
         appliedIdentifier = proposedFact.mention.mention_id
       } else {
         // attestCandidate never actually returns {kind: 'undetermined'} (it

@@ -42,6 +42,7 @@ function productionIstockSessionState(): StructuredUnderstanding {
       { mention_id: 't1-c1', resolution: { kind: 'canonical', identifier: 'istock' }, confidence: 'confirmed', source_turn: 1, source_statement: 'iStock images', superseded_by: null, usage: { state: 'unknown' }, license: { state: 'unknown' } },
     ],
     assessment_jurisdiction_mentions: [],
+    content_presence_mentions: [],
     current_phase: 3,
     gate_1_state: 'met',
     gate_2_state: 'not_yet_stable',

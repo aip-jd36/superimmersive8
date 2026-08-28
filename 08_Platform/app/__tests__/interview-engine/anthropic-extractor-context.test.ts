@@ -99,4 +99,26 @@ describe('buildUserMessageContent', () => {
     expect(content).toContain('directly asked the user which jurisdiction(s) CRC should consider for this assessment')
     expect(content.endsWith('United States.')).toBe(true)
   })
+
+  // CRC Content-Presence Mention Model (2026-08-28). Generic plumbing only
+  // -- no production caller sets this flag in this milestone (see
+  // RawUserTurn's own doc comment); this proves the mechanism itself works
+  // correctly for a future caller, without rewriting the literal turn text.
+  test('answering_content_presence_question: true -> prepends a deterministic, fixed context line, without rewriting the literal reply', () => {
+    const turn: RawUserTurn = { turn: 2, text: 'Yes.', answering_content_presence_question: true }
+    const content = buildUserMessageContent(turn)
+    expect(content).toContain('directly asked the user whether the project\'s output contains a recognizable real person\'s image or voice')
+    expect(content).toContain('Yes.')
+    expect(content.endsWith('Yes.')).toBe(true)
+  })
+
+  test('answering_content_presence_question: false -> no context line added, byte-identical to turn.text', () => {
+    const turn: RawUserTurn = { turn: 1, text: 'Yes.', answering_content_presence_question: false }
+    expect(buildUserMessageContent(turn)).toBe('Yes.')
+  })
+
+  test('answering_content_presence_question absent -> same as false, no context line', () => {
+    const turn: RawUserTurn = { turn: 1, text: 'Yes.' }
+    expect(buildUserMessageContent(turn)).toBe('Yes.')
+  })
 })

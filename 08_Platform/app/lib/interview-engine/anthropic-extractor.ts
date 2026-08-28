@@ -69,6 +69,14 @@ For each distinct fact-bearing statement in the turn, produce one candidate:
   If the user names more than one jurisdiction in one statement (e.g. "New York and California"), propose one separate assessment_jurisdiction_mention candidate per jurisdiction named -- never merge them, never pick one, never guess which one "counts."
   Exclusion: if the user explicitly says CRC should NOT consider a jurisdiction (e.g. "don't assess New York", "US only, not New York"), propose the candidate exactly as above but set is_jurisdiction_exclusion: true. Never set this from silence or from the jurisdiction simply not being mentioned -- only from an explicit negative statement.
   Correction: if this statement reverses or replaces what was said earlier about a SPECIFIC jurisdiction already established this conversation (e.g. "Not New York -- California" when New York was previously included; "Actually, don't assess New York after all" when New York was previously included; "Include New York after all" when it was previously excluded), set is_correction: true and correction_of_raw_text to the EXACT jurisdiction value being replaced/reversed (e.g. "New York") -- deterministic code, never you, resolves which existing mention this refers to, and will leave the state unresolved/ambiguous rather than guess if it cannot find exactly one match. Do NOT set is_correction for a plain addition alongside still-valid earlier jurisdictions (e.g. "Also assess New York" when United States was already included and remains wanted) -- that is a fresh candidate with no correction fields set.
+- kind "content_presence_mention" (CRC Content-Presence Mention Model, 2026-08-28): the user directly states that a bounded, factual category of content is present in -- or explicitly absent from -- the project's OUTPUT (what the finished video actually shows or contains), not any input material, source, or production fact. Report the category via raw_content_presence_category, one of exactly two values: "person_visual_presence" (a person's face/image appears visually) or "person_voice_presence" (a person's voice is heard). This records ONLY that the user stated the project's output contains (or does not contain) that category of content -- it never means CRC inspected the output, verified the statement, determined anyone is legally recognizable, identified anyone, or determined any law applies.
+  Only propose this when the user DIRECTLY states what the OUTPUT itself contains -- e.g. "A real person appears in the video.", "The video has a synthetic person's voice.", "No person's face appears.", "There's a recognizable person visually." NEVER infer or propose this candidate from a statement about a third-party source/asset provider ("We used Getty."), a reference material ("We used a reference photo."), a tool ("We're using ElevenLabs."), workflow/logistics, a client's identity ("The client is an actor."), a filming/production location ("We filmed in New York."), or a commercial/intended-use statement ("The campaign features a celebrity brand.") -- none of these describe what the FINAL OUTPUT itself shows or contains, regardless of how confidently or specifically they're stated. When in doubt whether a statement is about the output itself versus an input/source/production fact, do NOT propose this candidate.
+  EXCEPTION -- only when the message includes a "[Context: your immediately preceding question directly asked the user whether the project's output contains a recognizable real person's image or voice...]" prefix: in that specific context, the user is directly answering CRC's own explicit content-presence question, so a bare "Yes."/"No." reply MAY be proposed as a content-presence answer (category taken from what the preceding question asked about). This exception applies ONLY to the turn carrying that exact context prefix.
+  Real/synthetic self-report ONLY when the user's own words directly support it -- report via this candidate's attributes array, key "real_or_synthetic", value exactly "real" or "synthetic". "A real person appears." -> "real". "It's fully synthetic."/"a generic synthetic person" -> "synthetic". "A person appears." (real/synthetic not stated) -> omit the attributes entry entirely, never guess. "It resembles a celebrity." -> DO NOT set "real" -- resemblance is not a statement that a real, living person is depicted; omit the attributes entry. Never fabricate a recognizability value of any kind -- there is no such attribute or field anywhere in this pipeline; the literal word "recognizable" (or "I don't know if identifiable," or any other qualifier) belongs only in this candidate's own raw_text, never translated into structured state.
+  Explicit absence: if the user explicitly denies presence of a category (e.g. "No person's image appears."), propose the candidate exactly as above but set is_content_presence_absent: true. If the denial is qualified to a specific real/synthetic classification (e.g. "No REAL person's image appears." -- leaving open whether a synthetic one might still appear), also set the attributes "real_or_synthetic" entry to "real" so the denial is recorded as qualified, not absolute. Never set is_content_presence_absent from silence or from a category simply not being mentioned -- only from an explicit negative statement.
+  Correction: if this statement reverses or replaces what was said earlier about a SINGLE, SPECIFIC, already-established content-presence fact (e.g. "Actually it's fully synthetic." directly after "A real person appears."; "Actually that's a fully synthetic character." directly after "A person appears."), set is_correction: true and correction_of_raw_text to a short quote naming what's being replaced (e.g. "the real person," "a person") -- deterministic code, never you, resolves which existing mention this refers to, and will leave the state unresolved/ambiguous rather than guess if it cannot find exactly one unambiguous match.
+  CRITICAL -- never set is_correction for a statement about only PART of a previously stated PLURAL/AGGREGATE fact. "Two real people appear." followed by "Actually one is synthetic." is NOT a correction of the first statement (this pipeline does not track how many people were stated, so it cannot safely determine which "one" changed) -- propose the second statement as a FRESH, uncorrelated content_presence_mention candidate (real_or_synthetic: "synthetic", no is_correction, no correction_of_raw_text), leaving the original real-presence statement completely alone. The same applies to any statement using "one of," "another," "both," "the other," or a specific count alongside a change in classification -- always propose a fresh candidate, never a correction, when the referent is anything other than a single, previously singular fact.
+  A recognizability-only follow-up (e.g. "Actually I don't know whether they're identifiable." after "A recognizable person appears.") is NEVER a content_presence_mention candidate at all, correction or otherwise -- recognizability has no structured representation anywhere in this pipeline, so there is nothing to correct; do not propose a candidate for it.
 
 Third-party source rights is its own user_goal category (see goal_category_hint below) for whether the user has the RIGHTS to use third-party source material (e.g. a stock image) in the project -- a materially different question from commercial_use (whether the AI-generated OUTPUT can be used commercially). This category is EXPLICIT-QUESTION-GATED ONLY, exactly like every other goal category: propose it only when the user asks a direct question or states a direct need about permission/rights to use the source material.
 Examples that SHOULD produce a third_party_source_rights user_goal: "Can I use this Getty image in an ad?", "Can I use these iStock images in my client commercial?", "Do I have the rights to use this stock image?", "Can I use a Shutterstock Editorial photo in this campaign?", "Am I allowed to use this licensed stock footage in the video?".
@@ -130,7 +138,9 @@ When kind is "tool_mention" and the user DIRECTLY states which specific plan/tie
 
 If a turn contains nothing you can classify as one of the four kinds -- small talk, an incomplete thought, pure filler -- return no candidates for it, or set low_confidence: true on a best-effort candidate if you're genuinely unsure whether something is a real signal.`
 
-const CANDIDATE_KIND_VALUES = ['tool_mention', 'scoped_observation', 'project_fact', 'user_goal', 'asset_provider_mention', 'assessment_jurisdiction_mention'] as const
+const CANDIDATE_KIND_VALUES = ['tool_mention', 'scoped_observation', 'project_fact', 'user_goal', 'asset_provider_mention', 'assessment_jurisdiction_mention', 'content_presence_mention'] as const
+/** Mirrors CONTENT_PRESENCE_CATEGORIES in types/interview-engine.ts -- kept as a separate local const here, same pattern as GOAL_CATEGORY_VALUES/GOAL_SCOPE_VALUES above, rather than importing the runtime const array across the adapter boundary. */
+const CONTENT_PRESENCE_CATEGORY_VALUES = ['person_visual_presence', 'person_voice_presence'] as const
 const OBSERVATION_SCOPE_VALUES = ['current_project', 'historical_project', 'general_practice'] as const
 const WORKFLOW_STAGE_VALUES = ['T0', 'T1', 'T2', 'T3', 'T4', 'T5'] as const
 const CONFIDENCE_HINT_VALUES = ['confirmed', 'confirmed_absent', 'unresolved_no_visibility', 'unknown', 'declined'] as const
@@ -174,8 +184,17 @@ const GOAL_SCOPE_VALUES = ['informational', 'determination_request'] as const
  * three keys, its value is the tool's own governed account/membership
  * status term (not the user's raw wording) -- see the tool_mention
  * attributes guidance below for the full evidentiary rule.
+ *
+ * 'real_or_synthetic' added (CRC Content-Presence Mention Model,
+ * 2026-08-28) -- another instance of exactly this kind of growth. Applies
+ * only when kind is content_presence_mention; value is exactly "real" or
+ * "synthetic", self-reported only, never inferred (see the
+ * content_presence_mention guidance above for the full evidentiary rule,
+ * including why "it resembles a celebrity" must never populate this as
+ * "real"). Deliberately the only attribute this candidate kind carries --
+ * there is no "recognizability" key and none should be added.
  */
-const EXTRACTED_ATTRIBUTE_KEY_VALUES = ['access_surface', 'plan_tier', 'account_status', 'usage', 'license'] as const
+const EXTRACTED_ATTRIBUTE_KEY_VALUES = ['access_surface', 'plan_tier', 'account_status', 'usage', 'license', 'real_or_synthetic'] as const
 type ExtractedAttributeKey = (typeof EXTRACTED_ATTRIBUTE_KEY_VALUES)[number]
 
 /**
@@ -228,10 +247,21 @@ export const CANDIDATE_RESPONSE_SCHEMA = {
             description:
               'When kind is assessment_jurisdiction_mention: true only when the user explicitly said CRC should NOT consider this jurisdiction (e.g. "don\'t assess New York"). Never true from silence or from a jurisdiction simply not being mentioned. False/unset for an ordinary inclusion.',
           },
+          raw_content_presence_category: {
+            type: ['string', 'null'],
+            enum: [...CONTENT_PRESENCE_CATEGORY_VALUES, null],
+            description:
+              'When kind is content_presence_mention: which bounded factual category of content the user directly stated the project\'s OUTPUT contains (or does not contain) -- "person_visual_presence" (a person\'s face/image appears visually) or "person_voice_presence" (a person\'s voice is heard). Null otherwise.',
+          },
+          is_content_presence_absent: {
+            type: 'boolean',
+            description:
+              'When kind is content_presence_mention: true only when the user explicitly denied presence of this category (e.g. "no person\'s image appears"). Never true from silence or from a category simply not being mentioned. False/unset for an ordinary presence statement.',
+          },
           attributes: {
             type: 'array',
             description:
-              'P0 schema-union-limit fix (2026-08-21): a generic, closed-vocabulary list of secondary attributes about this candidate\'s own named target (a tool or a third-party source provider), replacing four formerly-separate dedicated field pairs. Include ONE entry per attribute the user directly stated this turn -- never one entry per possible attribute padded with placeholders. Omit an attribute ENTIRELY (do not add an entry for it) when the turn says nothing about it, exactly as the old null/unset representation meant -- an empty attributes array is the normal case for most candidates. See each entry\'s own property descriptions for the exact evidentiary rules per key ("usage"/"license" apply only to asset_provider_mention; "plan_tier"/"access_surface"/"account_status" apply only to tool_mention -- never add an entry whose key does not match this candidate\'s own kind).',
+              'P0 schema-union-limit fix (2026-08-21): a generic, closed-vocabulary list of secondary attributes about this candidate\'s own named target (a tool, a third-party source provider, or a content-presence category), replacing four formerly-separate dedicated field pairs. Include ONE entry per attribute the user directly stated this turn -- never one entry per possible attribute padded with placeholders. Omit an attribute ENTIRELY (do not add an entry for it) when the turn says nothing about it, exactly as the old null/unset representation meant -- an empty attributes array is the normal case for most candidates. See each entry\'s own property descriptions for the exact evidentiary rules per key ("usage"/"license" apply only to asset_provider_mention; "plan_tier"/"access_surface"/"account_status" apply only to tool_mention; "real_or_synthetic" applies only to content_presence_mention -- never add an entry whose key does not match this candidate\'s own kind).',
             items: {
               type: 'object',
               properties: {
@@ -239,18 +269,18 @@ export const CANDIDATE_RESPONSE_SCHEMA = {
                   type: 'string',
                   enum: [...EXTRACTED_ATTRIBUTE_KEY_VALUES],
                   description:
-                    '"access_surface", "plan_tier", and "account_status" apply only when kind is tool_mention. "usage" and "license" apply only when kind is asset_provider_mention. Never add an entry with a key that does not match this candidate\'s own kind.',
+                    '"access_surface", "plan_tier", and "account_status" apply only when kind is tool_mention. "usage" and "license" apply only when kind is asset_provider_mention. "real_or_synthetic" applies only when kind is content_presence_mention. Never add an entry with a key that does not match this candidate\'s own kind.',
                 },
                 confidence: {
                   type: 'string',
                   enum: [...CONFIDENCE_HINT_VALUES],
                   description:
-                    '"confirmed" when the user stated it as a clear, direct fact this turn. For "plan_tier"/"access_surface"/"account_status" only, "unknown" is valid when the user expressed genuine uncertainty (e.g. "I think it might be Pro", "I might have a member account, not sure") -- "usage"/"license" are only ever reported as "confirmed" (per their own evidentiary rules above); never fabricate a "confirmed_absent"/"unresolved_no_visibility"/"declined" state for any of these five keys unless the user\'s own words genuinely support it.',
+                    '"confirmed" when the user stated it as a clear, direct fact this turn. For "plan_tier"/"access_surface"/"account_status" only, "unknown" is valid when the user expressed genuine uncertainty (e.g. "I think it might be Pro", "I might have a member account, not sure") -- "usage"/"license"/"real_or_synthetic" are only ever reported as "confirmed" (per their own evidentiary rules above); never fabricate a "confirmed_absent"/"unresolved_no_visibility"/"declined" state for any of these six keys unless the user\'s own words genuinely support it.',
                 },
                 value: {
                   type: 'string',
                   description:
-                    'For "access_surface"/"plan_tier"/"usage"/"license": the user\'s own wording for this attribute, preserved as stated -- never translated to a category or canonical label you infer. For "account_status" ONLY: the tool\'s own governed account/membership status term the statement directly and unambiguously establishes (e.g. "Member Account", "Regular Account") -- this is the one key where you DO translate, but ONLY when the statement itself directly supports that specific governed term; see the tool_mention attributes guidance above for the full evidentiary rule and fail-closed examples. Empty string when confidence is not "confirmed".',
+                    'For "access_surface"/"plan_tier"/"usage"/"license": the user\'s own wording for this attribute, preserved as stated -- never translated to a category or canonical label you infer. For "account_status" ONLY: the tool\'s own governed account/membership status term the statement directly and unambiguously establishes (e.g. "Member Account", "Regular Account") -- this is the one key where you DO translate, but ONLY when the statement itself directly supports that specific governed term; see the tool_mention attributes guidance above for the full evidentiary rule and fail-closed examples. For "real_or_synthetic": exactly "real" or "synthetic", self-reported only -- see the content_presence_mention guidance above for the full evidentiary rule (never infer from "resembles a celebrity" or similar). Empty string when confidence is not "confirmed".',
                 },
               },
               required: ['key', 'confidence', 'value'],
@@ -332,6 +362,8 @@ export const CANDIDATE_RESPONSE_SCHEMA = {
           'raw_provider_name',
           'raw_jurisdiction_value',
           'is_jurisdiction_exclusion',
+          'raw_content_presence_category',
+          'is_content_presence_absent',
           'attributes',
           'is_correction',
           'correction_of_raw_text',
@@ -369,6 +401,8 @@ interface ParsedCandidate {
   raw_provider_name: string | null
   raw_jurisdiction_value: string | null
   is_jurisdiction_exclusion: boolean
+  raw_content_presence_category: (typeof CONTENT_PRESENCE_CATEGORY_VALUES)[number] | null
+  is_content_presence_absent: boolean
   attributes: ParsedExtractedAttribute[]
   is_correction: boolean
   correction_of_raw_text: string | null
@@ -386,6 +420,11 @@ interface ParsedCandidate {
 
 function isAssetProviderUsageValue(value: string): value is AssetProviderUsageValue {
   return (ASSET_PROVIDER_USAGE_VALUES as readonly string[]).includes(value)
+}
+
+/** Mirrors isAssetProviderUsageValue exactly -- an out-of-set value is treated as absent (undefined), never passed through as a fabricated 'real'/'synthetic' value. */
+function isRealOrSyntheticValue(value: string): value is 'real' | 'synthetic' {
+  return value === 'real' || value === 'synthetic'
 }
 
 /**
@@ -425,12 +464,14 @@ export function toCandidateObservation(parsed: ParsedCandidate, turn: number): C
   // own dispatch, not a substitute for it.
   const toolAttributes = parsed.kind === 'tool_mention' ? parsed.attributes : []
   const providerAttributes = parsed.kind === 'asset_provider_mention' ? parsed.attributes : []
+  const contentPresenceAttributes = parsed.kind === 'content_presence_mention' ? parsed.attributes : []
 
   const accessSurface = extractAttributeHint(toolAttributes, 'access_surface')
   const planTier = extractAttributeHint(toolAttributes, 'plan_tier')
   const accountStatus = extractAttributeHint(toolAttributes, 'account_status')
   const usage = extractAttributeHint(providerAttributes, 'usage')
   const license = extractAttributeHint(providerAttributes, 'license')
+  const realOrSynthetic = extractAttributeHint(contentPresenceAttributes, 'real_or_synthetic')
 
   // usage's value used to be wire-enum-constrained to ASSET_PROVIDER_USAGE_VALUES;
   // the generic attributes[].value field is free text shared across all four
@@ -438,6 +479,11 @@ export function toCandidateObservation(parsed: ParsedCandidate, turn: number): C
   // value is treated as absent (undefined), exactly as if the model had
   // left it unset, never passed through as a fabricated AssetProviderUsageValue.
   const usageValue = usage && isAssetProviderUsageValue(usage.value) ? usage.value : undefined
+  // Same discipline for real_or_synthetic -- an out-of-set value (which the
+  // closed wire enum should already prevent, but this is the same
+  // belt-and-suspenders re-validation usage/license already get) is treated
+  // as absent, never fabricated.
+  const realOrSyntheticValue = realOrSynthetic && isRealOrSyntheticValue(realOrSynthetic.value) ? realOrSynthetic.value : undefined
 
   return {
     proposal_id: parsed.proposal_id,
@@ -448,6 +494,10 @@ export function toCandidateObservation(parsed: ParsedCandidate, turn: number): C
     raw_provider_name: parsed.raw_provider_name ?? undefined,
     raw_jurisdiction_value: parsed.raw_jurisdiction_value ?? undefined,
     is_jurisdiction_exclusion: parsed.is_jurisdiction_exclusion || undefined,
+    raw_content_presence_category: parsed.raw_content_presence_category ?? undefined,
+    is_content_presence_absent: parsed.is_content_presence_absent || undefined,
+    real_or_synthetic_confidence_hint: realOrSynthetic?.confidence,
+    real_or_synthetic_value_hint: realOrSyntheticValue,
     usage_confidence_hint: usage?.confidence,
     usage_value_hint: usageValue,
     license_confidence_hint: license?.confidence,
@@ -814,6 +864,17 @@ function resolveModel(options?: AnthropicExtractorOptions): string {
  * jurisdiction_clarification question or its one bounded retry -- never
  * inferred from this turn's own text. Composes independently with both
  * lines above, same as they compose with each other.
+ *
+ * `answering_content_presence_question` (CRC Content-Presence Mention
+ * Model, 2026-08-28): same discipline, a fourth independent prefix line --
+ * deterministic, a fixed template string, never any live-generated text.
+ * Generic plumbing only, currently unset by any production caller (no
+ * questioning/askability milestone exists yet for content presence) --
+ * proves the extraction pipeline is CAPABLE of correctly contextualizing a
+ * future direct answer without requiring the answer's literal
+ * `source_statement` to be rewritten (see attestCandidate's own content-
+ * presence branch, extraction.ts). Composes independently with every line
+ * above.
  */
 export function buildUserMessageContent(turn: RawUserTurn): string {
   const contextLines: string[] = []
@@ -834,6 +895,16 @@ export function buildUserMessageContent(turn: RawUserTurn): string {
     // clarification.ts's own generalized JURISDICTION_CLARIFICATION_QUESTION.
     contextLines.push(
       `[Context: your immediately preceding question directly asked the user which jurisdiction(s) CRC should consider for this assessment -- an explicit assessment-scope question, not a request for the user to determine which law governs. See the assessment_jurisdiction_mention guidance in your system prompt for how this changes what counts as a valid answer for this reply only.]`,
+    )
+  }
+  if (turn.answering_content_presence_question) {
+    // CRC Content-Presence Mention Model (2026-08-28). Same discipline as
+    // answering_jurisdiction_question immediately above -- generic plumbing
+    // only; no production code sets this flag in this milestone (see
+    // RawUserTurn's own doc comment). Fixed template string, never any
+    // live-generated text.
+    contextLines.push(
+      `[Context: your immediately preceding question directly asked the user whether the project's output contains a recognizable real person's image or voice -- report a direct "yes"/"no" reply as the answer to that specific content-presence question. See the content_presence_mention guidance in your system prompt for how this changes what counts as a valid answer for this reply only.]`,
     )
   }
   if (contextLines.length === 0) return turn.text

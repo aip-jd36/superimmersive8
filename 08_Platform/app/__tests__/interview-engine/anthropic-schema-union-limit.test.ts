@@ -65,10 +65,16 @@ describe('Anthropic structured-output schema union-type limit guardrail', () => 
   // D. extractor expected union count after redesign (12, per the diagnostic;
   // 13 as of the Assessment-Jurisdiction Mention Model, 2026-08-28, which
   // added exactly one new nullable-string union field, raw_jurisdiction_value
-  // -- is_jurisdiction_exclusion is a plain boolean and does not count).
-  test('D: extractor union count is exactly 13 after the generic attributes[] redesign (12) plus raw_jurisdiction_value (2026-08-28, +1 new union)', () => {
+  // -- is_jurisdiction_exclusion is a plain boolean and does not count;
+  // 14 as of the Content-Presence Mention Model, 2026-08-28, same shape --
+  // exactly one new nullable-string union field, raw_content_presence_category
+  // -- is_content_presence_absent is a plain boolean and does not count.
+  // real_or_synthetic travels entirely through the existing attributes[]
+  // bag, contributing zero new top-level unions -- see the dedicated
+  // attribute-key-enum test immediately below).
+  test('D: extractor union count is exactly 14 after the generic attributes[] redesign (12) plus raw_jurisdiction_value (13) plus raw_content_presence_category (2026-08-28, +1 new union)', () => {
     const paths = unionCountOnWire(CANDIDATE_RESPONSE_SCHEMA)
-    expect(paths.length).toBe(13)
+    expect(paths.length).toBe(14)
   })
 
   // B. candidate-generator schema union count <= 16
@@ -113,9 +119,12 @@ describe('Anthropic structured-output schema union-type limit guardrail', () => 
     }
   })
 
-  test('the attribute key enum is exactly the closed five-value set (account_status added, Minimal Generic tool_account_status Capture milestone, 2026-08-24)', () => {
+  // 'real_or_synthetic' added (CRC Content-Presence Mention Model,
+  // 2026-08-28) -- growth via the existing closed key vocabulary, exactly
+  // the mechanism this bag exists for; zero new top-level schema unions.
+  test('the attribute key enum is exactly the closed six-value set (real_or_synthetic added, CRC Content-Presence Mention Model, 2026-08-28)', () => {
     const entrySchema = (CANDIDATE_RESPONSE_SCHEMA.properties.candidates.items as any).properties.attributes.items
-    expect(entrySchema.properties.key.enum.slice().sort()).toEqual(['access_surface', 'account_status', 'license', 'plan_tier', 'usage'].sort())
+    expect(entrySchema.properties.key.enum.slice().sort()).toEqual(['access_surface', 'account_status', 'license', 'plan_tier', 'real_or_synthetic', 'usage'].sort())
   })
 })
 

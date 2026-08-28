@@ -80,6 +80,7 @@ function mockedSU(overrides: Partial<StructuredUnderstanding> = {}): StructuredU
     user_goals: [],
     asset_provider_mentions: [],
     assessment_jurisdiction_mentions: [],
+    content_presence_mentions: [],
     current_phase: 3,
     gate_1_state: 'met',
     gate_2_state: 'stable',
