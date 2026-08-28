@@ -2284,15 +2284,23 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-28
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  PENDING -- not yet reviewed for CRC Publication. FGR_008 §13 found this
-  claim's topic (likeness) is explicitly named in CRC Publication Policy
-  Principle 3 as a No-List-adjacent subject-matter gate, independent of
-  source type -- a future CRC Publication Review must treat this claim as
-  Principle-3-gated from the outset (Principle 5's ordinary "narrow before
-  withholding" default does not apply to Principle 3 concerns) and must
-  not attempt to publish a softened version on narrow-before-withhold
-  reasoning. This is a directional caution, not a Publication-stage
-  decision; a separate CRC Publication Review is required.
+  WITHHELD FROM CRC (2026-08-28, PM: JD -- see CRC Publication Review
+  #8, CPR_008). Not for evidence quality (Class A statutory support,
+  unchanged), not for dependency handling (already correctly hedged,
+  matching published Stock-claim precedent), and not for runtime safety
+  (independently proven safe under a Synthetic Eligibility Runtime
+  Canary) -- withheld solely because CRC Publication Policy Principle 3's
+  subject-matter gate applies to this claim's topic (likeness), "regardless
+  of verification strength," and Principle 5's narrow-before-withhold
+  default does not apply to Principle 3 concerns (per FGR_008 §13's own
+  prior caution, which this CPR concurred with rather than resolved
+  around). Not a permanent disposition -- future reconsideration remains
+  possible, triggered only by Candidate B's own separate adoption, a
+  deliberate PM-level Publication-Policy decision defining an acceptable
+  bounded category of likeness-adjacent regulatory-awareness content, or
+  an explicit future authorized human decision to reconsider this specific
+  disposition -- never by a runtime/engineering change alone. See CPR_008
+  for the complete publication-safety analysis.
 
 CRC Candidate Statement: >
   [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
@@ -2321,5 +2329,6 @@ classification and the corrected CRC Publication Policy Principle 3
 analysis.
 
 Full review artifact: `governance-reviews/FGR_008_CAND-LIKENESS-NY-CONSENT-REQUIREMENT-001_2026-08-28.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_008_CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1_2026-08-28.md`
 
 **Excluded from this Wave — not adopted, and not present anywhere above:** `CAND-LIKENESS-NY-EXPRESSIVE-WORK-BOUNDARY-001` (the "advertising purposes or purposes of trade" scope-boundary candidate) — remains `Lifecycle: Candidate`, `NOT READY FOR FGR`, in `LIKENESS-NY-SCENARIO-A-FGR-PACKAGE.md` only, explicitly out of scope for this Wave's own reviewing task. Does not appear in this document and should not be added without its own separate Formal Governance Review.
