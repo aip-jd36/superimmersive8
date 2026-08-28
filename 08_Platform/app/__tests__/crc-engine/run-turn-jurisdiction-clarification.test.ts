@@ -139,7 +139,19 @@ describe('jurisdiction clarification -- eligibility gating', () => {
     expect(outcome.jurisdictionSignal).toBeUndefined()
   })
 
-  test('the answer on the NEXT turn flows through completely ordinary, already-existing project_fact extraction -- no special-case answer handling needed', async () => {
+  // Updated (CRC Assessment-Jurisdiction Mention Model — Post-Integration
+  // Cleanup, 2026-08-28): jurisdiction is no longer a project_fact at all --
+  // this test originally proved the answer flowed through ordinary
+  // project_fact extraction (accurate for the 2026-08-16 architecture this
+  // file predates), but that pathway has since been replaced by the
+  // dedicated assessment_jurisdiction_mention candidate kind (Generic
+  // Implementation, 2026-08-28) and structurally closed off at the type
+  // level (Post-Integration Cleanup, Finding 1). Still proves the equivalent
+  // invariant for the current architecture: the answer on the next turn
+  // flows through completely ordinary, already-existing
+  // assessment_jurisdiction_mention extraction -- no special-case answer
+  // handling needed -- and, newly, that it never touches the legacy scalar.
+  test('the answer on the NEXT turn flows through completely ordinary, already-existing assessment_jurisdiction_mention extraction -- no special-case answer handling needed', async () => {
     const store = createInMemorySessionStore()
     await runTurn({ token: 't4', turnNumber: 1, userText: 'x' }, eligibleDeps({}, store))
 
@@ -147,18 +159,21 @@ describe('jurisdiction clarification -- eligibility gating', () => {
       proposal_id: 'p-jur',
       turn: 2,
       raw_text: 'United States',
-      kind: 'project_fact',
-      raw_fact_field: 'jurisdiction',
-      fact_confidence_hint: 'confirmed',
-      fact_value_hint: 'United States',
+      kind: 'assessment_jurisdiction_mention',
+      raw_jurisdiction_value: 'United States',
     }
     await runTurn({ token: 't4', turnNumber: 2, userText: 'United States' }, eligibleDeps({ extractor: constantExtractor([jurisdictionAnswer]) }, store))
 
     const state = await loadState(store, 't4')
+    const activeMentions = state.structured_understanding.assessment_jurisdiction_mentions.filter((m) => m.superseded_by === null)
+    expect(activeMentions).toEqual([
+      { mention_id: 't2-p-jur', value: 'United States', confidence: 'confirmed', source_turn: 2, source_statement: 'United States', superseded_by: null },
+    ])
+    // The legacy scalar is never touched by current extraction (Finding 1).
     expect(state.structured_understanding.project_facts.jurisdiction).toEqual({
-      attestation: { state: 'confirmed', value: 'United States' },
-      source_turn: 2,
-      source_statement: 'United States',
+      attestation: { state: 'unknown' },
+      source_turn: 0,
+      source_statement: '',
     })
   })
 

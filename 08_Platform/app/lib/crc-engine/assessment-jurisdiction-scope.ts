@@ -28,19 +28,36 @@
  * reason the results-gate case doesn't share: code deploys atomically, and
  * from the moment this module ships, EVERY turn for EVERY session (old or
  * new) is processed by code that never writes `project_facts.jurisdiction`
- * again (see extraction.ts's own assessment-jurisdiction candidate handling --
- * it only ever calls the new mutations, never `setJurisdiction`). This means
- * a CONFIRMED value in the legacy scalar can only ever reflect something a
- * user said BEFORE this code shipped, for any session, full stop -- there is
- * no scenario, old session or new, where reading it as a fallback when the
- * new collection is empty could resurrect anything a POST-deploy turn wrote,
- * because post-deploy code structurally cannot write it. The authority rule
- * therefore needs only one, purely structural check -- has the new collection
- * EVER received any entry, active or superseded (§L of the design report's
- * own compatibility matrix) -- with no timestamp comparison anywhere. This is
- * a deliberate, disclosed simplification of the design report's own proposal,
- * not a silent deviation -- see the Assessment-Jurisdiction Mention Model —
- * Generic Implementation Final Report §C for the full reasoning.
+ * again. This means a CONFIRMED value in the legacy scalar can only ever
+ * reflect something a user said BEFORE this code shipped, for any session,
+ * full stop -- there is no scenario, old session or new, where reading it as
+ * a fallback when the new collection is empty could resurrect anything a
+ * POST-deploy turn wrote, because post-deploy code structurally cannot write
+ * it. The authority rule therefore needs only one, purely structural check --
+ * has the new collection EVER received any entry, active or superseded (§L
+ * of the design report's own compatibility matrix) -- with no timestamp
+ * comparison anywhere. This is a deliberate, disclosed simplification of the
+ * design report's own proposal, not a silent deviation -- see the
+ * Assessment-Jurisdiction Mention Model — Generic Implementation Final
+ * Report §C for the full original reasoning.
+ *
+ * Strengthened (Post-Integration Cleanup, 2026-08-28, closing the Integration
+ * Review's Finding 1): the generic implementation left a SEPARATE, unrelated
+ * `project_fact`/`jurisdiction` candidate path wired in extraction.ts's own
+ * dispatch, still calling the legacy `setJurisdiction` mutation -- reachable
+ * only because the extractor's own wire-schema enum happened to exclude
+ * 'jurisdiction' as a valid `raw_fact_field` value, not because the TYPE
+ * SYSTEM made it impossible to construct such a candidate. That path has now
+ * been removed at the type level (`CandidateObservation.raw_fact_field` and
+ * `ProposedFact`'s own `project_fact` field union no longer include
+ * `'jurisdiction'` at all), and the dispatch branch calling `setJurisdiction`
+ * has been deleted. `setJurisdiction` itself remains in mutations.ts (a
+ * historical, still-well-formed StructuredUnderstanding operation, not
+ * deleted per this cleanup's own "smallest change" discipline), but no
+ * production code anywhere calls it any more -- confirmed by
+ * subsystem-boundaries.test.ts's own zero-call-site assertion. The "no
+ * timestamp needed" argument above is therefore now structurally complete,
+ * not just true for the assessment-jurisdiction candidate path specifically.
  *
  * ── What this module does NOT do ────────────────────────────────────────
  *

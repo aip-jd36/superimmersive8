@@ -59,7 +59,6 @@ import {
   addUserGoal,
   setHumanContributionDescription,
   setIntendedUse,
-  setJurisdiction,
   setWorkflowRole,
   supersedeAssetProviderMention,
   supersedeObservation,
@@ -226,14 +225,22 @@ export interface CandidateObservation {
   supersedes_observation_id?: string
 
   /**
-   * kind === 'project_fact'. 'jurisdiction' (CRC Living Knowledge Phase 1,
-   * 2026-08-16) and 'human_contribution_description' (Copyright UAT
-   * Correction Milestone, 2026-08-19) both reuse this same generic
+   * kind === 'project_fact'. 'human_contribution_description' (Copyright
+   * UAT Correction Milestone, 2026-08-19) reuses this same generic
    * project_fact candidate kind and attestCandidate branch as
    * intended_use/workflow_role -- zero new attestation logic. User-attested
    * only; never inferred from anything but a direct statement this turn.
+   *
+   * `'jurisdiction'` removed (CRC Assessment-Jurisdiction Mention Model —
+   * Post-Integration Cleanup, 2026-08-28): jurisdiction is no longer a
+   * project_fact at all -- see kind 'assessment_jurisdiction_mention'
+   * instead. This type-level removal is the structural closure the
+   * Integration Review's Finding 1 asked for: a CandidateObservation can no
+   * longer even EXPRESS a jurisdiction project_fact, so the legacy
+   * `setJurisdiction` write path is now unreachable by construction, not
+   * merely by the extractor's own wire-schema enum.
    */
-  raw_fact_field?: 'intended_use' | 'workflow_role' | 'jurisdiction' | 'human_contribution_description'
+  raw_fact_field?: 'intended_use' | 'workflow_role' | 'human_contribution_description'
   fact_confidence_hint?: ConfidenceState
   fact_value_hint?: string
 
@@ -483,7 +490,7 @@ export function normalizeCandidate(candidate: CandidateObservation): Normalizati
 export type ProposedFact =
   | { kind: 'tool_mention'; mention: ToolMention }
   | { kind: 'scoped_observation'; observation: ScopedObservation }
-  | { kind: 'project_fact'; field: 'intended_use' | 'workflow_role' | 'jurisdiction' | 'human_contribution_description'; value: Attested<string> }
+  | { kind: 'project_fact'; field: 'intended_use' | 'workflow_role' | 'human_contribution_description'; value: Attested<string> }
   | { kind: 'user_goal'; goal: UserGoal }
   | { kind: 'asset_provider_mention'; mention: AssetProviderMention }
   | { kind: 'assessment_jurisdiction_mention'; mention: AssessmentJurisdictionMention }
@@ -1303,9 +1310,7 @@ export async function runExtractionPipeline(
             ? setIntendedUse(current, proposedFact.value, candidate.turn, candidate.raw_text)
             : proposedFact.field === 'workflow_role'
               ? setWorkflowRole(current, proposedFact.value, candidate.turn, candidate.raw_text)
-              : proposedFact.field === 'jurisdiction'
-                ? setJurisdiction(current, proposedFact.value, candidate.turn, candidate.raw_text)
-                : setHumanContributionDescription(current, proposedFact.value, candidate.turn, candidate.raw_text)
+              : setHumanContributionDescription(current, proposedFact.value, candidate.turn, candidate.raw_text)
         appliedIdentifier = `project_facts.${proposedFact.field}`
       } else if (proposedFact.kind === 'user_goal') {
         current = candidate.supersedes_goal_id

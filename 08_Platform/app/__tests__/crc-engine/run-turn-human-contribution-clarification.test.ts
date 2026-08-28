@@ -99,8 +99,8 @@ describe('human-contribution clarification -- eligibility gating', () => {
     }
     // Jurisdiction already confirmed so it does not preempt this turn.
     const jurisdictionAnswer: CandidateObservation = {
-      proposal_id: 'p-jur', turn: 1, raw_text: 'United States', kind: 'project_fact',
-      raw_fact_field: 'jurisdiction', fact_confidence_hint: 'confirmed', fact_value_hint: 'United States',
+      proposal_id: 'p-jur', turn: 1, raw_text: 'United States', kind: 'assessment_jurisdiction_mention',
+      raw_jurisdiction_value: 'United States',
     }
     const d = eligibleDeps({ generator, extractor: constantExtractor([toolCandidate(), goalCandidate(), jurisdictionAnswer]) }, store)
     const outcome = await runTurn({ token: 't1', turnNumber: 1, userText: 'x' }, d)
@@ -126,8 +126,8 @@ describe('human-contribution clarification -- eligibility gating', () => {
   test('the answer on the NEXT turn flows through completely ordinary, already-existing project_fact extraction', async () => {
     const store = createInMemorySessionStore()
     const jurisdictionAnswer: CandidateObservation = {
-      proposal_id: 'p-jur', turn: 1, raw_text: 'United States', kind: 'project_fact',
-      raw_fact_field: 'jurisdiction', fact_confidence_hint: 'confirmed', fact_value_hint: 'United States',
+      proposal_id: 'p-jur', turn: 1, raw_text: 'United States', kind: 'assessment_jurisdiction_mention',
+      raw_jurisdiction_value: 'United States',
     }
     await runTurn({ token: 't3', turnNumber: 1, userText: 'x' }, eligibleDeps({ extractor: constantExtractor([toolCandidate(), goalCandidate(), jurisdictionAnswer]) }, store))
 
@@ -148,8 +148,8 @@ describe('human-contribution clarification -- eligibility gating', () => {
   test('cumulative correction: a later turn EXPLICITLY FLAGGED is_correction, restating the full combined description, updates the fact -- never silently drops the earlier detail (Copyright UAT Cumulative-Restatement Fix, 2026-08-19: is_correction is now required for any update once a value is already confirmed -- see the sibling "incidental disclosure" test below for the un-flagged, correctly-rejected case)', async () => {
     const store = createInMemorySessionStore()
     const jurisdictionAnswer: CandidateObservation = {
-      proposal_id: 'p-jur', turn: 1, raw_text: 'United States', kind: 'project_fact',
-      raw_fact_field: 'jurisdiction', fact_confidence_hint: 'confirmed', fact_value_hint: 'United States',
+      proposal_id: 'p-jur', turn: 1, raw_text: 'United States', kind: 'assessment_jurisdiction_mention',
+      raw_jurisdiction_value: 'United States',
     }
     await runTurn({ token: 't4', turnNumber: 1, userText: 'x' }, eligibleDeps({ extractor: constantExtractor([toolCandidate(), goalCandidate(), jurisdictionAnswer]) }, store))
 
@@ -190,8 +190,8 @@ describe('human-contribution clarification -- eligibility gating', () => {
   test('Copyright UAT Cumulative-Restatement Fix, 2026-08-19 (P1) -- primary real-UAT regression: an unrelated later disclosure ("I sourced everything else on my end") does NOT overwrite an already-confirmed rich human_contribution_description, even when the extractor over-proposes a fresh (un-flagged) candidate for it', async () => {
     const store = createInMemorySessionStore()
     const jurisdictionAnswer: CandidateObservation = {
-      proposal_id: 'p-jur', turn: 1, raw_text: 'United States', kind: 'project_fact',
-      raw_fact_field: 'jurisdiction', fact_confidence_hint: 'confirmed', fact_value_hint: 'United States',
+      proposal_id: 'p-jur', turn: 1, raw_text: 'United States', kind: 'assessment_jurisdiction_mention',
+      raw_jurisdiction_value: 'United States',
     }
     await runTurn({ token: 't9', turnNumber: 1, userText: 'x' }, eligibleDeps({ extractor: constantExtractor([toolCandidate(), goalCandidate(), jurisdictionAnswer]) }, store))
 
@@ -234,8 +234,8 @@ describe('human-contribution clarification -- eligibility gating', () => {
   test('capped: once asked, a later turn never asks again even though jurisdiction is known and the description is still unconfirmed', async () => {
     const store = createInMemorySessionStore()
     const jurisdictionAnswer: CandidateObservation = {
-      proposal_id: 'p-jur', turn: 1, raw_text: 'United States', kind: 'project_fact',
-      raw_fact_field: 'jurisdiction', fact_confidence_hint: 'confirmed', fact_value_hint: 'United States',
+      proposal_id: 'p-jur', turn: 1, raw_text: 'United States', kind: 'assessment_jurisdiction_mention',
+      raw_jurisdiction_value: 'United States',
     }
     await runTurn({ token: 't5', turnNumber: 1, userText: 'x' }, eligibleDeps({ extractor: constantExtractor([toolCandidate(), goalCandidate(), jurisdictionAnswer]) }, store))
 
@@ -264,8 +264,8 @@ describe('human-contribution clarification -- eligibility gating', () => {
   test('declining the question: description stays unresolved but the cap still prevents re-asking', async () => {
     const store = createInMemorySessionStore()
     const jurisdictionAnswer: CandidateObservation = {
-      proposal_id: 'p-jur', turn: 1, raw_text: 'United States', kind: 'project_fact',
-      raw_fact_field: 'jurisdiction', fact_confidence_hint: 'confirmed', fact_value_hint: 'United States',
+      proposal_id: 'p-jur', turn: 1, raw_text: 'United States', kind: 'assessment_jurisdiction_mention',
+      raw_jurisdiction_value: 'United States',
     }
     await runTurn({ token: 't6', turnNumber: 1, userText: 'x' }, eligibleDeps({ extractor: constantExtractor([toolCandidate(), goalCandidate(), jurisdictionAnswer]) }, store))
     await runTurn({ token: 't6', turnNumber: 2, userText: "Let's skip this question.", declineAction: 'skip_question' }, eligibleDeps({}, store))
@@ -300,8 +300,8 @@ describe('human-contribution clarification -- precedence (jurisdiction > human-c
     expect((await loadState(store, 't8')).boundary_state.jurisdiction_clarification_asked).toBe(true)
 
     const jurisdictionAnswer: CandidateObservation = {
-      proposal_id: 'p-jur', turn: 2, raw_text: 'United States', kind: 'project_fact',
-      raw_fact_field: 'jurisdiction', fact_confidence_hint: 'confirmed', fact_value_hint: 'United States',
+      proposal_id: 'p-jur', turn: 2, raw_text: 'United States', kind: 'assessment_jurisdiction_mention',
+      raw_jurisdiction_value: 'United States',
     }
     const outcome2 = await runTurn({ token: 't8', turnNumber: 2, userText: 'United States' }, eligibleDeps({ extractor: constantExtractor([jurisdictionAnswer]) }, store))
     expect(outcome2.kind).toBe('question')

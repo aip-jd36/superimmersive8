@@ -8,7 +8,7 @@
  */
 
 import { deserializeStructuredUnderstanding, serializeStructuredUnderstanding } from '../../lib/interview-engine/serialization'
-import type { StructuredUnderstanding } from '../../types/interview-engine'
+import type { AssessmentJurisdictionMention, StructuredUnderstanding } from '../../types/interview-engine'
 
 function currentSU(): StructuredUnderstanding {
   return {
@@ -201,5 +201,80 @@ describe('serializeStructuredUnderstanding / deserializeStructuredUnderstanding'
     // Everything else on the mention survives unchanged.
     expect(deserialized.asset_provider_mentions[0].mention_id).toBe('t1-c1')
     expect(deserialized.asset_provider_mentions[0].resolution).toEqual({ kind: 'canonical', identifier: 'istock' })
+  })
+
+  // Post-Integration Cleanup (CRC Assessment-Jurisdiction Mention Model —
+  // Post-Integration Cleanup, 2026-08-28), Finding 3: a direct, focused
+  // round-trip test for MIXED assessment_jurisdiction_mentions state --
+  // a current confirmed inclusion, a superseded historical mention, and a
+  // current confirmed_absent exclusion together -- through the real,
+  // generic serialize/deserialize mechanism (no special-cased serializer;
+  // serializeStructuredUnderstanding is a plain JSON.stringify, and
+  // deserializeStructuredUnderstanding's only special handling for this
+  // field is the backward-compatible `?? []` default tested elsewhere in
+  // this file). This is also the direct proof, previously only reasoned
+  // about structurally, that the legacy-scalar bridge's own "touched"
+  // evidence (assessment-jurisdiction-scope.ts) survives a real reload: the
+  // raw collection length (including the superseded entry) is what proves
+  // "touched," and that entry is neither dropped nor silently resurrected
+  // into the legacy scalar by this round trip.
+  test('mixed assessment_jurisdiction_mentions state (current inclusion + superseded historical mention + current exclusion) round-trips losslessly, preserving provenance, supersession, and touched-state evidence', () => {
+    const su = currentSU()
+    const supersededNewYork: AssessmentJurisdictionMention = {
+      mention_id: 't1-c1',
+      value: 'New York',
+      confidence: 'confirmed',
+      source_turn: 1,
+      source_statement: 'Also consider New York.',
+      superseded_by: 't2-c1',
+    }
+    const correctedCalifornia: AssessmentJurisdictionMention = {
+      mention_id: 't2-c1',
+      value: 'California',
+      confidence: 'confirmed',
+      source_turn: 2,
+      source_statement: 'Not New York -- California.',
+      superseded_by: null,
+    }
+    const excludedCanada: AssessmentJurisdictionMention = {
+      mention_id: 't3-c1',
+      value: 'Canada',
+      confidence: 'confirmed_absent',
+      source_turn: 3,
+      source_statement: "Don't assess Canada.",
+      superseded_by: null,
+    }
+    su.assessment_jurisdiction_mentions = [supersededNewYork, correctedCalifornia, excludedCanada]
+
+    const roundTripped = deserializeStructuredUnderstanding(serializeStructuredUnderstanding(su))
+
+    // All entries present, current vs. superseded state unchanged.
+    expect(roundTripped.assessment_jurisdiction_mentions).toEqual(su.assessment_jurisdiction_mentions)
+    expect(roundTripped.assessment_jurisdiction_mentions).toHaveLength(3)
+
+    // Exclusion survives distinctly from inclusion.
+    const active = roundTripped.assessment_jurisdiction_mentions.filter((m) => m.superseded_by === null)
+    expect(active.map((m) => ({ value: m.value, confidence: m.confidence })).sort((a, b) => a.value.localeCompare(b.value))).toEqual([
+      { value: 'California', confidence: 'confirmed' },
+      { value: 'Canada', confidence: 'confirmed_absent' },
+    ])
+
+    // Provenance survives exactly (real source_turn/source_statement, not fabricated).
+    expect(roundTripped.assessment_jurisdiction_mentions[0].source_turn).toBe(1)
+    expect(roundTripped.assessment_jurisdiction_mentions[0].source_statement).toBe('Also consider New York.')
+    expect(roundTripped.assessment_jurisdiction_mentions[2].source_turn).toBe(3)
+    expect(roundTripped.assessment_jurisdiction_mentions[2].source_statement).toBe("Don't assess Canada.")
+
+    // superseded_by linkage survives (the historical New York entry still
+    // correctly points at the mention that replaced it).
+    expect(roundTripped.assessment_jurisdiction_mentions[0].superseded_by).toBe('t2-c1')
+    expect(roundTripped.assessment_jurisdiction_mentions[1].superseded_by).toBeNull()
+
+    // Raw collection length (including the superseded entry) still proves
+    // "touched" -- the legacy scalar fallback therefore cannot resurrect,
+    // even though this session's legacy scalar itself is 'unknown' (never
+    // populated -- see Finding 1: current extraction cannot write it).
+    expect(roundTripped.assessment_jurisdiction_mentions.length).toBeGreaterThan(0)
+    expect(roundTripped.project_facts.jurisdiction.attestation.state).toBe('unknown')
   })
 })

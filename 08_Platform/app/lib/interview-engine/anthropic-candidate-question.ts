@@ -127,7 +127,7 @@ Duplicate-Question Prevention (2026-08-19): if your target_signal_id refers to a
 - "asset_provider_license": what license, purchase, or permission the user has for that asset.
 These are DIFFERENT questions about the same provider and are tracked independently -- do not assume one is answered just because the other is.
 If your target_signal_id refers to a tool mention and your question specifically asks which plan or access tier the user used (not anything else about the tool), set target_follow_up_need to "tool_plan_tier".
-If your question specifically asks which country's laws or jurisdiction applies to this project (not any other project fact), set target_signal_id to "project:jurisdiction" (from the eligible signal list) and target_follow_up_need to "jurisdiction".
+If your question specifically asks which jurisdiction(s) CRC should consider for this assessment (an assessment-scope question -- never a request for the user to determine which law governs or applies), set target_signal_id to "project:jurisdiction" (from the eligible signal list) and target_follow_up_need to "jurisdiction".
 For every other question, leave target_follow_up_need null. Never guess a value here merely because a question happens to mention an asset provider, a tool, or a location -- only set it when the question IS specifically about one of these four narrow things.
 Deterministic code downstream uses target_follow_up_need to avoid re-asking something already answered -- it does not affect whether your question is otherwise permitted.`
 

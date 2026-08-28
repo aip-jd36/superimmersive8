@@ -507,6 +507,20 @@ export function setWorkflowRole(
  * above, verbatim -- no supersession chain, per ProjectFacts' own
  * documented reasoning (types/interview-engine.ts). A later, corrected
  * statement simply overwrites the current AttestedFact.
+ *
+ * UNUSED in production as of the CRC Assessment-Jurisdiction Mention Model —
+ * Post-Integration Cleanup (2026-08-28): extraction.ts's own project_fact
+ * dispatch branch for 'jurisdiction' was removed (that candidate shape is no
+ * longer even constructible -- see CandidateObservation.raw_fact_field /
+ * ProposedFact's own project_fact field union in extraction.ts), closing the
+ * Integration Review's Finding 1. Kept rather than deleted, per that
+ * cleanup's own smallest-change discipline -- `project_facts.jurisdiction`
+ * itself is still a legitimate, still-read field (the legacy scalar
+ * compatibility bridge in lib/crc-engine/assessment-jurisdiction-scope.ts
+ * reads it directly), and this function remains a well-formed, historically
+ * accurate StructuredUnderstanding operation over that same field. Confirmed
+ * zero call sites anywhere in production code by
+ * subsystem-boundaries.test.ts's own dedicated assertion.
  */
 export function setJurisdiction(
   su: StructuredUnderstanding,

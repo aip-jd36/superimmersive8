@@ -138,13 +138,20 @@ const CONFIDENCE_HINT_VALUES = ['confirmed', 'confirmed_absent', 'unresolved_no_
  * `'jurisdiction'` removed from this wire-schema enum (CRC Assessment-
  * Jurisdiction Mention Model, 2026-08-28) -- the model may no longer
  * propose a jurisdiction project_fact candidate at all; see kind
- * "assessment_jurisdiction_mention" instead. `raw_fact_field`'s own
- * CandidateObservation type (extraction.ts) still accepts 'jurisdiction'
- * internally (setJurisdiction/the legacy scalar mutation still exist,
- * used only by the legacy-scalar compatibility bridge and any existing
- * test fixture), but this adapter's own live schema can never emit it
- * again -- this is the actual, enforced new-session cutover (see
- * assessment-jurisdiction-scope.ts's own header for why no separate
+ * "assessment_jurisdiction_mention" instead.
+ *
+ * Structurally closed, not just schema-level (Post-Integration Cleanup,
+ * 2026-08-28, closing the Integration Review's Finding 1): `raw_fact_field`'s
+ * own CandidateObservation type (extraction.ts) and ProposedFact's own
+ * project_fact field union no longer include `'jurisdiction'` at all, and
+ * the dispatch branch that used to call the legacy `setJurisdiction`
+ * mutation for it has been deleted -- a jurisdiction project_fact candidate
+ * is now impossible to construct or apply anywhere in the pipeline, not
+ * merely absent from this one adapter's own live schema. `setJurisdiction`
+ * itself remains in mutations.ts (unused, historical -- kept rather than
+ * deleted, per this cleanup's own smallest-change discipline); the legacy
+ * scalar it once wrote is now READ ONLY, by assessment-jurisdiction-scope.ts's
+ * own bounded compatibility bridge (see that module's own header for why no
  * launch-marker timestamp is needed).
  */
 const PROJECT_FACT_FIELD_VALUES = ['intended_use', 'workflow_role', 'human_contribution_description'] as const
@@ -281,7 +288,7 @@ export const CANDIDATE_RESPONSE_SCHEMA = {
             type: ['string', 'null'],
             enum: [...PROJECT_FACT_FIELD_VALUES, null],
             description:
-              "When kind is project_fact: intended_use (what the output is for), workflow_role (the user's own role), jurisdiction (which country's laws the user says are relevant -- ONLY when they directly state one; never inferred from where they mention working, their company's location, or any other indirect signal, except the narrow context-prefixed exception described in full above), or human_contribution_description (what the user personally did to shape the final output, beyond or instead of prompting -- their own free-text description, never normalized into a graded/legal-weight category). Null otherwise.",
+              "When kind is project_fact: intended_use (what the output is for), workflow_role (the user's own role), or human_contribution_description (what the user personally did to shape the final output, beyond or instead of prompting -- their own free-text description, never normalized into a graded/legal-weight category). Null otherwise. Jurisdiction/assessment-scope statements are NOT a project_fact -- see kind \"assessment_jurisdiction_mention\" instead.",
           },
           fact_confidence_hint: {
             type: ['string', 'null'],

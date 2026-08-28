@@ -534,21 +534,42 @@ export const EVAL_CORPUS: EvalScenario[] = [
     },
   },
 
-  // ── Jurisdiction extraction (CRC Living Knowledge Phase 1, 2026-08-16) ──
-  // Regression coverage for the live extractor's new 'jurisdiction'
-  // raw_fact_field value -- user-attested only, must never be guessed from
-  // indirect signals, must never collapse an ambiguous multi-country
-  // answer into a single fabricated value.
+  // ── Jurisdiction extraction (CRC Living Knowledge Phase 1, 2026-08-16;
+  // candidate shape updated -- CRC Assessment-Jurisdiction Mention Model —
+  // Post-Integration Cleanup, 2026-08-28) ────────────────────────────────
+  // Regression coverage for the live extractor's jurisdiction handling.
+  // Mechanically retargeted from the retired `project_fact`/
+  // `raw_fact_field: 'jurisdiction'` candidate shape (removed at the type
+  // level by this cleanup's own Finding 1) to the current
+  // `assessment_jurisdiction_mention` candidate kind -- field access only,
+  // each case's ORIGINAL pass/fail expectation is preserved unchanged here.
+  //
+  // NOT addressed by this cleanup (out of scope -- a live-model eval-corpus
+  // behavioral review, not a structural/type/prompt-text cleanup item): the
+  // first two cases' own pass EXPECTATIONS may now be stricter than what the
+  // current extractor prompt actually supports. The live prompt's own
+  // context-prefix EXCEPTION (anthropic-extractor.ts) only allows a bare,
+  // otherwise-indirect-looking answer (e.g. a lone "United States.") to be
+  // captured when the turn carries the
+  // `[Context: your immediately preceding question directly asked...]`
+  // prefix -- these two corpus turns carry no such prefix. Similarly, "We're
+  // based in Taiwan, so Taiwan copyright rules would be most relevant" is a
+  // location-derived-relevance statement, exactly the shape the current
+  // prompt says must NEVER be inferred as assessment scope, regardless of
+  // how confident the location detail is. Flagged here rather than silently
+  // redecided -- resolving what SHOULD pass for these two cases under the
+  // current architecture is a product/eval judgment call for a dedicated
+  // pass, not this bounded cleanup.
 
   {
     id: 'jurisdiction_direct_single_country',
     category: 'jurisdiction -- direct, unambiguous single-country statement',
-    description: 'A direct statement of one country in answer to a jurisdiction question must be captured as a confirmed project_fact.',
+    description: 'A direct statement of one country in answer to a jurisdiction question must be captured as a confirmed assessment_jurisdiction_mention.',
     turns: [{ turn: 1, text: 'United States.' }],
     check(diagnosticsByTurn) {
-      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'project_fact' && x.candidate.raw_fact_field === 'jurisdiction')
-      const passed = d?.candidate.fact_confidence_hint === 'confirmed' && d?.candidate.fact_value_hint === 'United States'
-      return { passed, notes: `project_fact(jurisdiction): ${JSON.stringify(d?.candidate)}` }
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'assessment_jurisdiction_mention')
+      const passed = !d?.candidate.is_jurisdiction_exclusion && d?.candidate.raw_jurisdiction_value === 'United States'
+      return { passed, notes: `assessment_jurisdiction_mention: ${JSON.stringify(d?.candidate)}` }
     },
   },
 
@@ -558,9 +579,9 @@ export const EVAL_CORPUS: EvalScenario[] = [
     description: 'A direct jurisdiction statement phrased as a full sentence must still be captured, not require a bare one-word answer.',
     turns: [{ turn: 1, text: "We're based in Taiwan, so Taiwan copyright rules would be most relevant." }],
     check(diagnosticsByTurn) {
-      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'project_fact' && x.candidate.raw_fact_field === 'jurisdiction')
-      const passed = d?.candidate.fact_confidence_hint === 'confirmed' && !!d?.candidate.fact_value_hint?.toLowerCase().includes('taiwan')
-      return { passed, notes: `project_fact(jurisdiction): ${JSON.stringify(d?.candidate)}` }
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'assessment_jurisdiction_mention')
+      const passed = !d?.candidate.is_jurisdiction_exclusion && !!d?.candidate.raw_jurisdiction_value?.toLowerCase().includes('taiwan')
+      return { passed, notes: `assessment_jurisdiction_mention: ${JSON.stringify(d?.candidate)}` }
     },
   },
 
@@ -570,12 +591,15 @@ export const EVAL_CORPUS: EvalScenario[] = [
     description: 'Naming two countries with no clear single answer must never be proposed as a single confirmed jurisdiction value.',
     turns: [{ turn: 1, text: 'My client is American but we filmed the whole thing in Taiwan.' }],
     check(diagnosticsByTurn) {
-      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'project_fact' && x.candidate.raw_fact_field === 'jurisdiction')
+      const ds = diagnosticsByTurn.flat().filter((x) => x.candidate.kind === 'assessment_jurisdiction_mention')
       // Passing means EITHER no jurisdiction candidate was proposed at all,
-      // OR one was proposed but not as a single confirmed value -- never a
-      // fabricated single-country choice between the two named.
-      const passed = !d || d.candidate.fact_confidence_hint !== 'confirmed'
-      return { passed, notes: `project_fact(jurisdiction): ${JSON.stringify(d?.candidate)}` }
+      // OR every one proposed is an explicit exclusion -- never a
+      // fabricated single-country inclusion choice between the two named
+      // (both are location statements, not an explicit assessment-scope
+      // request -- see this section's own header note on the current
+      // prompt's location-inference rule).
+      const passed = ds.length === 0 || ds.every((d) => d.candidate.is_jurisdiction_exclusion)
+      return { passed, notes: `assessment_jurisdiction_mention(s): ${JSON.stringify(ds.map((d) => d.candidate))}` }
     },
   },
 
@@ -585,9 +609,9 @@ export const EVAL_CORPUS: EvalScenario[] = [
     description: 'Mentioning a location in passing, unrelated to any jurisdiction question, must not be inferred as a jurisdiction statement.',
     turns: [{ turn: 1, text: "I was using Kling from a cafe in Taipei to knock this out between meetings." }],
     check(diagnosticsByTurn) {
-      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'project_fact' && x.candidate.raw_fact_field === 'jurisdiction')
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'assessment_jurisdiction_mention')
       const passed = !d
-      return { passed, notes: `project_fact(jurisdiction) (expected none): ${JSON.stringify(d?.candidate)}` }
+      return { passed, notes: `assessment_jurisdiction_mention (expected none): ${JSON.stringify(d?.candidate)}` }
     },
   },
 
@@ -597,9 +621,9 @@ export const EVAL_CORPUS: EvalScenario[] = [
     description: 'A turn about something else entirely must never produce a jurisdiction candidate.',
     turns: [{ turn: 1, text: "I'm using Kling for a client ad." }],
     check(diagnosticsByTurn) {
-      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'project_fact' && x.candidate.raw_fact_field === 'jurisdiction')
+      const d = diagnosticsByTurn.flat().find((x) => x.candidate.kind === 'assessment_jurisdiction_mention')
       const passed = !d
-      return { passed, notes: `project_fact(jurisdiction) (expected none): ${JSON.stringify(d?.candidate)}` }
+      return { passed, notes: `assessment_jurisdiction_mention (expected none): ${JSON.stringify(d?.candidate)}` }
     },
   },
 ]

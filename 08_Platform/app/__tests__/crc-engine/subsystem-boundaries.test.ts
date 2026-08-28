@@ -173,7 +173,19 @@ describe('subsystem boundaries -- jurisdiction capture is user-attested only (CR
     expect(abusePreventionSource).not.toMatch(/jurisdiction/i)
   })
 
-  test('setJurisdiction has exactly one call site in production code: extraction.ts, the LLM-extraction pipeline that parses user-supplied conversational text -- not any traffic-classification, abuse-prevention, or API-route file', () => {
+  test('setJurisdiction has ZERO call sites anywhere in production code -- not extraction.ts, not any traffic-classification, abuse-prevention, or API-route file (CRC Assessment-Jurisdiction Mention Model — Post-Integration Cleanup, 2026-08-28)', () => {
+    // Strengthened from "exactly one call site: extraction.ts" -- the
+    // Integration Review's Finding 1 identified that extraction.ts's own
+    // dispatch branch calling setJurisdiction was reachable only by the
+    // extractor's wire-schema enum happening to exclude 'jurisdiction' as a
+    // raw_fact_field value, not by any structural type guarantee. This
+    // cleanup removed 'jurisdiction' from CandidateObservation.raw_fact_field
+    // and ProposedFact's own project_fact field union, and deleted the now-
+    // impossible dispatch branch -- so setJurisdiction is now unreachable by
+    // construction, not merely by prompt/schema discipline. The function
+    // itself remains in mutations.ts (legacy scalar mutation, historically
+    // still a valid StructuredUnderstanding operation), but nothing in
+    // production code calls it any more.
     const allProductionFiles = [...INTERVIEW_ENGINE_FILES, ...CRC_ENGINE_FILES, ...RETRIEVAL_ENGINE_FILES, ...PROJECTION_LAYER_FILES]
     const callSites = allProductionFiles
       .filter((file) => {
@@ -181,7 +193,7 @@ describe('subsystem boundaries -- jurisdiction capture is user-attested only (CR
         return /setJurisdiction\(/.test(source) && !file.endsWith('mutations.ts')
       })
       .map((file) => file.split(path.sep).join('/'))
-    expect(callSites).toEqual(['lib/interview-engine/extraction.ts'])
+    expect(callSites).toEqual([])
   })
 })
 

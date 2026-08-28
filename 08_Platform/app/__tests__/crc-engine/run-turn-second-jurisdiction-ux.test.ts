@@ -82,8 +82,13 @@ function goalCandidate(overrides: Partial<CandidateObservation> = {}): Candidate
   }
 }
 
+// Updated (CRC Assessment-Jurisdiction Mention Model — Post-Integration
+// Cleanup, 2026-08-28): jurisdiction is no longer a project_fact -- see the
+// dedicated assessment_jurisdiction_mention candidate kind (Generic
+// Implementation, 2026-08-28), now structurally the only way to express a
+// jurisdiction answer (Post-Integration Cleanup, Finding 1).
 function jurisdictionCandidate(value: string, overrides: Partial<CandidateObservation> = {}): CandidateObservation {
-  return { proposal_id: 'p-jur', turn: 2, raw_text: value, kind: 'project_fact', raw_fact_field: 'jurisdiction', fact_confidence_hint: 'confirmed', fact_value_hint: value, ...overrides }
+  return { proposal_id: 'p-jur', turn: 2, raw_text: value, kind: 'assessment_jurisdiction_mention', raw_jurisdiction_value: value, ...overrides }
 }
 
 function humanContributionCandidate(overrides: Partial<CandidateObservation> = {}): CandidateObservation {
@@ -190,7 +195,8 @@ describe('Second-Jurisdiction UX -- J2 deterministic organic suppression (2026-0
       deps({ extractor: constantExtractor([toolCandidate(), goalCandidate(), intendedUseCandidate()]) }, store),
     )
     await runTurn({ token: 't5', turnNumber: 2, userText: 'United States.' }, deps({ extractor: constantExtractor([jurisdictionCandidate('United States')]) }, store))
-    expect((await loadState(store, 't5')).structured_understanding.project_facts.jurisdiction.attestation).toEqual({ state: 'confirmed', value: 'United States' })
+    const t5Mentions = (await loadState(store, 't5')).structured_understanding.assessment_jurisdiction_mentions.filter((m) => m.superseded_by === null)
+    expect(t5Mentions.map((m) => ({ value: m.value, confidence: m.confidence }))).toEqual([{ value: 'United States', confidence: 'confirmed' }])
     // Also confirm human-contribution so the deterministic human_contribution_
     // clarification slot is exhausted too -- otherwise it would legitimately
     // preempt the organic generator for the attempt-#1 slot this test needs
@@ -271,7 +277,8 @@ describe('Second-Jurisdiction UX -- J3 bounded retry + precedence (2026-08-20)',
     // real question -- what matters here is specifically that it is NOT a
     // jurisdiction question of either kind.
     const confirmTurn = await runTurn({ token: 't8', turnNumber: 3, userText: 'United States.' }, deps({ extractor: constantExtractor([jurisdictionCandidate('United States')]) }, store))
-    expect((await loadState(store, 't8')).structured_understanding.project_facts.jurisdiction.attestation).toEqual({ state: 'confirmed', value: 'United States' })
+    const t8Mentions = (await loadState(store, 't8')).structured_understanding.assessment_jurisdiction_mentions.filter((m) => m.superseded_by === null)
+    expect(t8Mentions.map((m) => ({ value: m.value, confidence: m.confidence }))).toEqual([{ value: 'United States', confidence: 'confirmed' }])
     if (confirmTurn.kind === 'question') {
       expect(confirmTurn.message).not.toBe(JURISDICTION_CLARIFICATION_QUESTION)
       expect(confirmTurn.message).not.toBe(JURISDICTION_CLARIFICATION_RETRY_QUESTION)
@@ -299,7 +306,7 @@ describe('Second-Jurisdiction UX -- J3 bounded retry + precedence (2026-08-20)',
     await runTurn({ token: 't9', turnNumber: 3, userText: 'Still not sure.' }, deps({ extractor: constantExtractor([]) }, store))
     expect((await loadState(store, 't9')).boundary_state.jurisdiction_clarification_asked).toBe(true)
     expect((await loadState(store, 't9')).boundary_state.jurisdiction_clarification_retry_asked).toBe(true)
-    expect((await loadState(store, 't9')).structured_understanding.project_facts.jurisdiction.attestation.state).toBe('unknown')
+    expect((await loadState(store, 't9')).structured_understanding.assessment_jurisdiction_mentions).toEqual([])
 
     const freshObs: CandidateObservation = { proposal_id: 'p-obs4', turn: 4, raw_text: 'detail', kind: 'scoped_observation', scope: 'current_project', observation_confidence_hint: 'confirmed' }
     const turn4 = await runTurn(
@@ -329,7 +336,7 @@ describe('Second-Jurisdiction UX -- J3 bounded retry + precedence (2026-08-20)',
       deps({ extractor: constantExtractor([toolCandidate(), goalCandidate(), intendedUseCandidate()]) }, store),
     )
     await runTurn({ token: 't11', turnNumber: 2, userText: "Let's skip this.", declineAction: 'skip_question' }, deps({}, store))
-    expect((await loadState(store, 't11')).structured_understanding.project_facts.jurisdiction.attestation.state).toBe('unknown')
+    expect((await loadState(store, 't11')).structured_understanding.assessment_jurisdiction_mentions).toEqual([])
     expect((await loadState(store, 't11')).boundary_state.jurisdiction_clarification_retry_asked).toBe(false)
   })
 })
@@ -348,7 +355,8 @@ describe('Second-Jurisdiction UX -- copyright UAT regression (Section 20, real f
       { token: 't12', turnNumber: 2, userText: 'My client is in the US.' },
       deps({ extractor: constantExtractor([jurisdictionCandidate('United States')]) }, store),
     )
-    expect((await loadState(store, 't12')).structured_understanding.project_facts.jurisdiction.attestation).toEqual({ state: 'confirmed', value: 'United States' })
+    const t12Mentions = (await loadState(store, 't12')).structured_understanding.assessment_jurisdiction_mentions.filter((m) => m.superseded_by === null)
+    expect(t12Mentions.map((m) => ({ value: m.value, confidence: m.confidence }))).toEqual([{ value: 'United States', confidence: 'confirmed' }])
     expect((await loadState(store, 't12')).boundary_state.jurisdiction_clarification_retry_asked).toBe(false)
     // Human-contribution clarification is next (deterministic, unaffected by this milestone).
     expect(turn2.kind).toBe('question')
