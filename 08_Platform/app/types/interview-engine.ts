@@ -259,6 +259,48 @@ export interface AssetProviderMention {
   license: Attested<string>
 }
 
+// ── Assessment jurisdiction mentions (CRC Assessment-Jurisdiction Mention
+// Model, 2026-08-28, following the accepted Jurisdiction Acquisition Contract
+// semantic diagnostic) ───────────────────────────────────────────────────────
+
+/**
+ * A jurisdiction the user has explicitly asked CRC to consider governed
+ * knowledge for -- deliberately NOT a factual-territory fact (distribution
+ * region, filming/client/subject location) and NOT a CRC-determined
+ * conclusion about which law actually governs. Sibling concept to
+ * `AssetProviderMention`, deliberately simpler: no `resolution` kind split
+ * (canonical vs. unresolved_alias) -- jurisdiction values are canonicalized
+ * via an open, additive alias table (`JURISDICTION_VALUE_ALIASES`,
+ * lib/retrieval-engine/lookup-topic-claims.ts) at comparison time only, never
+ * gated behind a closed provider-style registry the way asset providers are.
+ *
+ * `confidence` uses only two of the five `ConfidenceState` values
+ * meaningfully at the per-mention level: `confirmed` (an explicit inclusion
+ * -- "also assess New York") and `confirmed_absent` (an explicit exclusion
+ * -- "don't assess New York" / "US only, not New York"). `unknown`/
+ * `declined`/`unresolved_no_visibility` do not naturally attach to a stated
+ * value and are not produced here -- those remain conversation-level facts
+ * tracked by the existing jurisdiction-clarification boundary-state flags,
+ * never duplicated into this list.
+ *
+ * Values remain flat, ungraded labels -- deliberately no `level`, `parent`,
+ * `country`, or `subdivision` field. "United States", "New York", and
+ * "European Union" are all represented identically; no code anywhere
+ * classifies or infers a geographic hierarchy from a mention's value.
+ *
+ * `superseded_by` follows the same supersede-and-mark discipline as every
+ * other mention type in this file -- a correction never deletes or edits a
+ * prior mention in place.
+ */
+export interface AssessmentJurisdictionMention {
+  mention_id: string
+  value: string
+  confidence: ConfidenceState
+  source_turn: number
+  source_statement: string
+  superseded_by: string | null
+}
+
 // ── Project facts ────────────────────────────────────────────────────────────
 
 /**
@@ -541,6 +583,19 @@ export interface StructuredUnderstanding {
    * THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md §9, §15).
    */
   asset_provider_mentions: AssetProviderMention[]
+  /**
+   * CRC Assessment-Jurisdiction Mention Model (2026-08-28). Additive and
+   * backward-compatible, same discipline as `asset_provider_mentions` before
+   * it: a historical session's stored JSON predating this field
+   * deserializes with it defaulted to `[]` (see serialization.ts's
+   * deserializeStructuredUnderstanding), never `undefined` at runtime.
+   * `project_facts.jurisdiction` (the pre-existing scalar) becomes
+   * compatibility-only the moment this collection has ever received any
+   * entry (active or superseded) for a session -- see
+   * lib/crc-engine/assessment-jurisdiction-scope.ts for the exact,
+   * marker-free authority rule and why no launch-timestamp gate is needed.
+   */
+  assessment_jurisdiction_mentions: AssessmentJurisdictionMention[]
   current_phase: Phase
   gate_1_state: Gate1State
   gate_2_state: Gate2State

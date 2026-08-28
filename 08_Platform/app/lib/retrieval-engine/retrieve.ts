@@ -43,7 +43,7 @@ export interface RetrieveOutput {
   diagnostics: RetrievalDiagnostic[]
 }
 
-const UNKNOWN_APPLICABILITY_FACTS: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+const UNKNOWN_APPLICABILITY_FACTS: ApplicabilityFacts = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
 
 /**
  * `goals`/`topicClaims`/`applicabilityFacts` are additive parameters (CRC

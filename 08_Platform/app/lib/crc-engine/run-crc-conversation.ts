@@ -61,6 +61,7 @@ import { assembleProjectionOutput } from '@/lib/projection-layer/assemble-projec
 import type { ProjectionDiagnostic, ProjectionOutput } from '@/lib/projection-layer/types'
 import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
 import { deriveDiscoveredTopicOccurrences } from './discovered-relevance'
+import { deriveAssessmentJurisdictionFacts } from './assessment-jurisdiction-scope'
 import type { RetrievalHandoff, StructuredUnderstanding } from '@/types/interview-engine'
 
 export interface CRCPipelineDiagnostics {
@@ -110,14 +111,18 @@ export interface CRCPipelineResult {
  * Topic claim is Lifecycle: Candidate (nothing could ever have surfaced
  * either way), but would have silently broken jurisdiction- and
  * tool-plan-tier-gated applicability the moment any claim went live.
- * Fixed here to match what the comment always claimed: jurisdiction comes
- * from `understanding.project_facts.jurisdiction.attestation` exactly as
- * captured (confirmed/unknown/declined, never guessed, never inferred
- * from IP/locale/traffic signals -- see jurisdiction-clarification.ts and
- * its own subsystem-boundary proof for why no such inference path exists
- * anywhere upstream of this read); tool plan tiers come from
- * `understanding.tool_mentions` unmodified, the exact same array
- * `buildRetrievalHandoff` itself reads for its own tool matching.
+ * Fixed here to match what the comment always claimed. Tool plan tiers
+ * come from `understanding.tool_mentions` unmodified, the exact same
+ * array `buildRetrievalHandoff` itself reads for its own tool matching.
+ * `jurisdiction` (updated CRC Assessment-Jurisdiction Mention Model,
+ * 2026-08-28) no longer reads `understanding.project_facts.jurisdiction`
+ * directly here -- see `deriveAssessmentJurisdictionFacts` above, which
+ * owns the cardinality-many membership derivation and its own bounded
+ * legacy-scalar compatibility bridge. Never guessed, never inferred from
+ * IP/locale/traffic signals or factual territory/distribution facts either
+ * way -- see jurisdiction-clarification.ts and assessment-jurisdiction-
+ * scope.ts's own headers for why no such inference path exists anywhere
+ * upstream of this read.
  *
  * `relationships` (Governed Topic Relationships orchestrator-wiring
  * follow-up, 2026-08-16): additive, defaults to `[]`, same discipline as
@@ -141,7 +146,14 @@ export function runCRCConversation(
 ): CRCPipelineResult {
   const handoff = buildRetrievalHandoff(understanding)
   const applicabilityFacts: ApplicabilityFacts = {
-    jurisdiction: understanding.project_facts.jurisdiction.attestation,
+    // CRC Assessment-Jurisdiction Mention Model (2026-08-28): sourced from
+    // the single, generic derivation owned by assessment-jurisdiction-scope.ts
+    // (cardinality-many included/excluded membership, with its own bounded
+    // legacy-scalar compatibility bridge) -- this orchestrator never reads
+    // `understanding.project_facts.jurisdiction` directly any more, same
+    // "glue only, no business logic leaking into the orchestrator" discipline
+    // this module's own header already requires.
+    jurisdiction: deriveAssessmentJurisdictionFacts(understanding),
     toolMentions: understanding.tool_mentions,
   }
   // assetProviders (Living Knowledge — Third-Party Source Rights, M3,

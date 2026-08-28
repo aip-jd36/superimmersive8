@@ -32,7 +32,7 @@ import { buildRetrievalHandoff } from '@/lib/interview-engine/handoff'
 import type { DiscoveredTopicOccurrence } from '@/lib/retrieval-engine/types'
 import type { RetrievalHandoff, StructuredUnderstanding, UserGoal } from '@/types/interview-engine'
 
-const UNKNOWN_FACTS: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+const UNKNOWN_FACTS: ApplicabilityFacts = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
 
 const NO_GOALS: UserGoal[] = []
 
@@ -112,7 +112,7 @@ describe('lookupTopicClaims — discoveredTopics additive parameter', () => {
   })
 
   test('P2: applicability satisfied -> copyright claims DO pass when discovered, proving the gate is a real pass/fail check, not a bypass', () => {
-    const confirmedUSFacts: ApplicabilityFacts = { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] }
+    const confirmedUSFacts: ApplicabilityFacts = { jurisdiction: { included: ['United States'], excluded: [] }, toolMentions: [] }
     const result = lookupTopicClaims(NO_GOALS, TOPIC_CLAIMS_FIXTURE, confirmedUSFacts, [], ['copyrightability'])
     const ids = claimIds(result.matches)
     expect(ids).toContain('CLAIM-COPY-001-v1')
@@ -144,6 +144,7 @@ describe('retrieve() — discoveredTopicOccurrences additive parameter, end-to-e
       scoped_observations: [],
       user_goals: [],
       asset_provider_mentions: [{ mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: 'istock' }, confidence: 'confirmed', source_turn: 1, source_statement: 'iStock', superseded_by: null, usage: { state: 'unknown' }, license: { state: 'unknown' } }],
+      assessment_jurisdiction_mentions: [],
       current_phase: 2,
       gate_1_state: 'met',
       gate_2_state: 'not_yet_stable',

@@ -57,7 +57,7 @@ function relationship(overrides: Partial<TopicRelationship> & Pick<TopicRelation
 }
 
 function facts(overrides: Partial<ApplicabilityFacts> = {}): ApplicabilityFacts {
-  return { jurisdiction: { state: 'unknown' }, toolMentions: [], ...overrides }
+  return { jurisdiction: { included: [], excluded: [] }, toolMentions: [], ...overrides }
 }
 
 describe('lookupRelatedTopicClaims -- one-hop resolution', () => {
@@ -203,11 +203,11 @@ describe('lookupRelatedTopicClaims -- applicability parity with exact-topic path
       topic: 'copyrightability',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
-    const unmet = lookupRelatedTopicClaims([g], [rel], [c], facts({ jurisdiction: { state: 'unknown' } }))
+    const unmet = lookupRelatedTopicClaims([g], [rel], [c], facts({ jurisdiction: { included: [], excluded: [] } }))
     expect(unmet.matches).toEqual([])
     expect(unmet.diagnostics).toEqual([{ identifier: 'copyright_ownership', reason: 'applicability_unmet' }])
 
-    const met = lookupRelatedTopicClaims([g], [rel], [c], facts({ jurisdiction: { state: 'confirmed', value: 'United States' } }))
+    const met = lookupRelatedTopicClaims([g], [rel], [c], facts({ jurisdiction: { included: ['United States'], excluded: [] } }))
     expect(met.matches).toHaveLength(1)
   })
 })

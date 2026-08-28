@@ -103,7 +103,7 @@ describe('lookupTopicClaims: provider pre-filter (synthetic Adopted+eligible cla
   const istock = claim({ claim_id: 'ISTOCK-1', topic: 'third_party_source_rights', provider_scope: ['istock'] })
   const shutterstock = claim({ claim_id: 'SHUTTER-1', topic: 'third_party_source_rights', provider_scope: ['shutterstock'] })
   const allFour = [generic, getty, istock, shutterstock]
-  const facts = { jurisdiction: { state: 'unknown' as const }, toolMentions: [] }
+  const facts = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
 
   test('8: generic claim passes with no provider named', () => {
     const result = lookupTopicClaims([sourceRightsGoal()], [generic], facts, [])
@@ -160,7 +160,7 @@ describe('lookupTopicClaims: provider pre-filter (synthetic Adopted+eligible cla
 // ── GOVERNANCE: provider match is necessary but not sufficient (test plan 16-18, 40) ─
 
 describe('governance and provider-scope are independent gates (test plan 16-18, critical three-way proof)', () => {
-  const facts = { jurisdiction: { state: 'unknown' as const }, toolMentions: [] }
+  const facts = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
 
   // NOTE (updated 2026-08-18, following CRC-Publication Review #3 + PM
   // approval): CLAIM-STOCK-GETTY-EDITORIAL-001-v1 is now real
@@ -426,7 +426,7 @@ describe('end-to-end through runCRCConversation, real unmodified TOPIC_CLAIMS_FI
 // ── SYNTHETIC ELIGIBLE: future-behavior proof (test plan 24-30) ────────────
 
 describe('synthetic-eligible stock claims: proves future provider-narrowing behavior without touching real governance', () => {
-  const facts = { jurisdiction: { state: 'unknown' as const }, toolMentions: [] }
+  const facts = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
   // RENAMED + REDEFINED 2026-08-27 (Governance Correction Review,
   // governance-reviews/FGR_007_STOCK_EDITORIAL_PROVIDER_SCOPE_CORRECTION_
   // 2026-08-27.md): these two claims are NO LONGER provider_scope: null
@@ -520,7 +520,7 @@ describe('boundary proofs (test plan 31-35)', () => {
   test('32: build-bounded-interpretation.ts requires no logic change -- a synthetic-eligible Getty claim with unresolved_project_dependencies still renders via the existing Case 3B hedge, not a new status', () => {
     const eligibleGetty = eligibleStockFixture().find((c) => c.claim_id === 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1')!
     expect(eligibleGetty.unresolved_project_dependencies.length).toBeGreaterThan(0)
-    const out = retrieve(handoff(), MATRIX_FIXTURE, [sourceRightsGoal()], [eligibleGetty], { jurisdiction: { state: 'unknown' }, toolMentions: [] }, [], ['getty'])
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [sourceRightsGoal()], [eligibleGetty], { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }, [], ['getty'])
     expect(out.results).toHaveLength(1)
     expect(out.results[0].unresolved_project_dependencies).toEqual(eligibleGetty.unresolved_project_dependencies)
     // The claim surfaces as general knowledge -- the user's own asset's

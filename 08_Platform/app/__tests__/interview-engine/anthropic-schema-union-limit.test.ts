@@ -62,10 +62,13 @@ describe('Anthropic structured-output schema union-type limit guardrail', () => 
     expect(paths.length).toBeLessThanOrEqual(ANTHROPIC_UNION_LIMIT)
   })
 
-  // D. extractor expected union count after redesign (~12, per the diagnostic)
-  test('D: extractor union count is exactly 12 after the generic attributes[] redesign -- 20 (pre-fix) minus the 8 flat fields collapsed into attributes[] (0 new unions)', () => {
+  // D. extractor expected union count after redesign (12, per the diagnostic;
+  // 13 as of the Assessment-Jurisdiction Mention Model, 2026-08-28, which
+  // added exactly one new nullable-string union field, raw_jurisdiction_value
+  // -- is_jurisdiction_exclusion is a plain boolean and does not count).
+  test('D: extractor union count is exactly 13 after the generic attributes[] redesign (12) plus raw_jurisdiction_value (2026-08-28, +1 new union)', () => {
     const paths = unionCountOnWire(CANDIDATE_RESPONSE_SCHEMA)
-    expect(paths.length).toBe(12)
+    expect(paths.length).toBe(13)
   })
 
   // B. candidate-generator schema union count <= 16

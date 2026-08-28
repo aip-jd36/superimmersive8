@@ -31,6 +31,7 @@ function baseSU(overrides: Partial<StructuredUnderstanding> = {}): StructuredUnd
     scoped_observations: [],
     user_goals: [],
     asset_provider_mentions: [],
+    assessment_jurisdiction_mentions: [],
     current_phase: 1,
     gate_1_state: 'not_met',
     gate_2_state: 'not_yet_stable',
@@ -145,7 +146,17 @@ describe('evaluateJurisdictionClarificationEligibility', () => {
     expect(result.eligible).toBe(false)
   })
 
-  test('not eligible once jurisdiction is declined -- do not keep pestering after a decline', () => {
+  // Assessment-Jurisdiction Mention Model (2026-08-28): the legacy scalar's
+  // 'declined' state is no longer specially read by this module at all (see
+  // jurisdiction-clarification.ts's own computeJurisdictionNeedState header)
+  // -- decline no longer permanently locks out a value the way the old
+  // single-scalar model implied; "do not keep pestering" is enforced purely
+  // by the ordinary already-asked cap (`alreadyAskedThisConversation`),
+  // which in real production flow becomes true the moment the initial
+  // question is asked, decline or not. jurisdiction_unresolved on its own
+  // stays true (nothing was confirmed or explicitly excluded); eligibility
+  // is false because of the already-asked gate, not a special decline check.
+  test('not eligible once jurisdiction has already been asked (including after a decline) -- the already-asked cap, not a decline-specific state, prevents pestering', () => {
     const su = baseSU({
       user_goals: [goal({ goal_id: 'g-1', category: 'copyright_ownership' })],
       project_facts: {
@@ -155,8 +166,8 @@ describe('evaluateJurisdictionClarificationEligibility', () => {
         human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
       },
     })
-    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], false)
-    expect(result.jurisdiction_unresolved).toBe(false)
+    const result = evaluateJurisdictionClarificationEligibility(su, [jurisdictionGatedClaim()], true)
+    expect(result.jurisdiction_unresolved).toBe(true)
     expect(result.eligible).toBe(false)
   })
 
@@ -449,8 +460,15 @@ describe('buildJurisdictionClarificationProposal', () => {
     })
   })
 
-  test('the approved copy is exactly "Which country\'s copyright rules are most relevant to this project?" -- unchanged by T1', () => {
-    expect(JURISDICTION_CLARIFICATION_QUESTION).toBe("Which country's copyright rules are most relevant to this project?")
+  // Generalized by the Assessment-Jurisdiction Mention Model (2026-08-28):
+  // the original Copyright-only, country-only wording would have been
+  // actively misleading for a different jurisdiction-gated domain (e.g.
+  // Likeness) and never supported a subnational value. See
+  // JURISDICTION_CLARIFICATION_QUESTION's own doc comment.
+  test('the approved copy is exactly the generalized assessment-scope question -- CRC Assessment-Jurisdiction Mention Model, 2026-08-28', () => {
+    expect(JURISDICTION_CLARIFICATION_QUESTION).toBe(
+      'Which jurisdiction — for example, a country, or a specific state or province — should CRC consider for this assessment?',
+    )
   })
 })
 
@@ -495,7 +513,18 @@ describe('evaluateJurisdictionClarificationRetryEligibility', () => {
     expect(result.eligible).toBe(false)
   })
 
-  test('N: jurisdiction declined -> retry never becomes eligible (no forced repeat after a decline)', () => {
+  // Assessment-Jurisdiction Mention Model (2026-08-28): the legacy scalar's
+  // 'declined' state is no longer specially read by computeJurisdictionNeedState
+  // (see jurisdiction-clarification.ts's own header) -- a decline leaves
+  // jurisdiction genuinely unresolved (nothing confirmed or excluded), so
+  // the bounded, differently-worded retry is now correctly ELIGIBLE exactly
+  // once after a decline, gated only by its own once-only cap
+  // (retryAlreadyAskedThisConversation), not by a decline-specific
+  // suppression. This is an intentional product behavior, not a regression:
+  // the old single-scalar model conflated "declined" with "give up
+  // entirely," which this milestone's redesign deliberately does not
+  // reproduce.
+  test('N: jurisdiction declined -> retry is eligible once (the decline itself does not suppress the bounded retry; only the retry\'s own once-only cap does)', () => {
     const su = baseSU({
       user_goals: [goalCopyOwnership],
       project_facts: {
@@ -505,8 +534,12 @@ describe('evaluateJurisdictionClarificationRetryEligibility', () => {
         human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
       },
     })
-    const result = evaluateJurisdictionClarificationRetryEligibility(su, [jurisdictionGatedClaim()], true, false)
-    expect(result.eligible).toBe(false)
+    const eligibleForRetry = evaluateJurisdictionClarificationRetryEligibility(su, [jurisdictionGatedClaim()], true, false)
+    expect(eligibleForRetry.jurisdiction_unresolved).toBe(true)
+    expect(eligibleForRetry.eligible).toBe(true)
+
+    const retryAlreadyUsed = evaluateJurisdictionClarificationRetryEligibility(su, [jurisdictionGatedClaim()], true, true)
+    expect(retryAlreadyUsed.eligible).toBe(false)
   })
 
   test('not eligible when no active goal needs jurisdiction-scoped knowledge -- same governance gate as the initial question', () => {
@@ -549,7 +582,13 @@ describe('buildJurisdictionClarificationRetryProposal', () => {
     expect(JURISDICTION_CLARIFICATION_RETRY_QUESTION.length).toBeGreaterThan(0)
   })
 
-  test('the primary jurisdiction question itself is untouched by this milestone -- wording non-goal', () => {
-    expect(JURISDICTION_CLARIFICATION_QUESTION).toBe("Which country's copyright rules are most relevant to this project?")
+  // Generalized by the Assessment-Jurisdiction Mention Model (2026-08-28) --
+  // was untouched by the earlier Second-Jurisdiction UX milestone (J3) this
+  // test originally documented; this later milestone did change it. See
+  // JURISDICTION_CLARIFICATION_QUESTION's own doc comment.
+  test('the primary jurisdiction question itself is untouched by the Second-Jurisdiction UX (J3) milestone -- wording non-goal for J3', () => {
+    expect(JURISDICTION_CLARIFICATION_QUESTION).toBe(
+      'Which jurisdiction — for example, a country, or a specific state or province — should CRC consider for this assessment?',
+    )
   })
 })

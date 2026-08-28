@@ -277,7 +277,7 @@ describe('retrieve -- Topic Retrieval integration (CRC Living Knowledge Phase 1,
       topic: 'copyright_ownership',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
-    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], [c], { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [g], [c], { jurisdiction: { included: ['United States'], excluded: [] }, toolMentions: [] })
     expect(out.results).toHaveLength(1)
   })
 
@@ -354,8 +354,8 @@ describe('retrieve -- Governed Topic Relationships integration (2026-08-16)', ()
   test('omitting relationships entirely (pre-milestone call shape) behaves exactly as before -- backward compatible default', () => {
     const g = goal({ goal_id: 'g-1', category: 'copyright_ownership' })
     const c = topicClaim({ claim_id: 'CLAIM-COPY-004-v1', topic: 'copyright_ownership' })
-    const withoutParam = retrieve(handoff(), MATRIX_FIXTURE, [g], [c], { jurisdiction: { state: 'unknown' }, toolMentions: [] })
-    const withEmptyRelationships = retrieve(handoff(), MATRIX_FIXTURE, [g], [c], { jurisdiction: { state: 'unknown' }, toolMentions: [] }, [])
+    const withoutParam = retrieve(handoff(), MATRIX_FIXTURE, [g], [c], { jurisdiction: { included: [], excluded: [] }, toolMentions: [] })
+    const withEmptyRelationships = retrieve(handoff(), MATRIX_FIXTURE, [g], [c], { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }, [])
     expect(withEmptyRelationships.results).toEqual(withoutParam.results)
   })
 
@@ -434,7 +434,7 @@ describe('retrieve -- Matrix applicability (CRC Narrow Matrix Applicability mile
   }
 
   function facts(overrides: Partial<ApplicabilityFacts> = {}): ApplicabilityFacts {
-    return { jurisdiction: { state: 'unknown' }, toolMentions: [], ...overrides }
+    return { jurisdiction: { included: [], excluded: [] }, toolMentions: [], ...overrides }
   }
 
   // Test A: every existing (unconditional, applicability_requirements: [])
@@ -486,7 +486,7 @@ describe('retrieve -- Matrix applicability (CRC Narrow Matrix Applicability mile
       [gatedRow],
       [],
       [],
-      facts({ jurisdiction: { state: 'confirmed', value: 'United States' } }),
+      facts({ jurisdiction: { included: ['United States'], excluded: [] } }),
     )
     expect(out.results).toHaveLength(1)
     expect(out.results[0].claim_id).toBe('test-matrix-jurisdiction')
@@ -509,12 +509,15 @@ describe('retrieve -- Matrix applicability (CRC Narrow Matrix Applicability mile
         },
       ],
     }
+    // Assessment-Jurisdiction Mention Model (2026-08-28): a genuine not_met
+    // now requires an EXPLICIT exclusion, not merely a different included
+    // value.
     const out = retrieve(
       handoff({ tools: [{ identifier: 'test-matrix-jurisdiction', access_surface: 'unresolved', plan_tier: 'unknown' }] }),
       [gatedRow],
       [],
       [],
-      facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' } }),
+      facts({ jurisdiction: { included: [], excluded: ['United States'] } }),
     )
     expect(out.results).toEqual([])
     // identifier is the claim's topic (commercial_use), not claim_id -- see

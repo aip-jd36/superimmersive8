@@ -13,6 +13,7 @@
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
+import { deriveAssessmentJurisdictionFacts } from '@/lib/crc-engine/assessment-jurisdiction-scope'
 import { deriveSelectorNeeds } from '@/lib/crc-engine/selector-questioning'
 import { getSelectorAskabilityEntry, isSelectorAskable } from '@/lib/crc-engine/selector-askability'
 import { createInitialBoundaryState } from '@/lib/interview-engine/boundaries'
@@ -92,7 +93,7 @@ describe('A: old combined Kling claim retired, replaced by Model B decomposition
 })
 
 describe('B/C/D: unknown membership -- baseline retrieves, Member exception withheld with unresolved detail', () => {
-  const facts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+  const facts: ApplicabilityFacts = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
 
   test('B: baseline claim retrieves unconditionally regardless of membership status', () => {
     const out = retrieve(handoff({ tools: [tool('kling')] }), MATRIX_FIXTURE, [], [], facts)
@@ -118,7 +119,7 @@ describe('B/C/D: unknown membership -- baseline retrieves, Member exception with
 describe('E: BI preserves baseline + unresolved Member exception, without changing the resolved conclusion', () => {
   test('State A (membership unknown): directly_relevant on the baseline alone, Member claim preserved as unresolved_relevant_claims -- BI/Retrieval output is unaffected by selector-askability regardless of registry state', () => {
     const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?' })
-    const facts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+    const facts: ApplicabilityFacts = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
     const out = retrieve(handoff({ tools: [tool('kling')] }), MATRIX_FIXTURE, [g], [], facts)
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
     expect(interp.status).toBe('directly_relevant')
@@ -154,6 +155,7 @@ describe('E: BI preserves baseline + unresolved Member exception, without changi
       scoped_observations: [],
       user_goals: [g],
       asset_provider_mentions: [],
+      assessment_jurisdiction_mentions: [],
       current_phase: 3,
       gate_1_state: 'met',
       gate_2_state: 'not_yet_stable',
@@ -175,7 +177,7 @@ describe('E: BI preserves baseline + unresolved Member exception, without changi
 
 describe('F/G: State B -- known Member Account', () => {
   const memberFacts = (): ApplicabilityFacts => ({
-    jurisdiction: { state: 'unknown' },
+    jurisdiction: { included: [], excluded: [] },
     toolMentions: [toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'kling' }, account_status: { state: 'confirmed', value: 'Member Account' } })],
   })
 
@@ -206,7 +208,7 @@ describe('F/G: State B -- known Member Account', () => {
 
 describe('H/I: State C -- known Regular Account (non-Member)', () => {
   const regularFacts = (): ApplicabilityFacts => ({
-    jurisdiction: { state: 'unknown' },
+    jurisdiction: { included: [], excluded: [] },
     toolMentions: [toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'kling' }, account_status: { state: 'confirmed', value: 'Regular Account' } })],
   })
 
@@ -241,7 +243,7 @@ describe('J: provider isolation -- another tool having account_status confirmed 
   test("a different tool's confirmed Member Account status does not make Kling's Member claim applicable", () => {
     const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?' })
     const facts: ApplicabilityFacts = {
-      jurisdiction: { state: 'unknown' },
+      jurisdiction: { included: [], excluded: [] },
       toolMentions: [toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'runway-gen3' }, account_status: { state: 'confirmed', value: 'Member Account' } })],
     }
     // Kling is mentioned too, but its OWN account_status is unresolved -- only runway-gen3's mention carries a confirmed value.
@@ -300,6 +302,7 @@ describe('L: unresolved Kling membership status now produces a selector-need pro
       scoped_observations: [],
       user_goals: [g],
       asset_provider_mentions: [],
+      assessment_jurisdiction_mentions: [],
       current_phase: 3,
       gate_1_state: 'met',
       gate_2_state: 'not_yet_stable',
@@ -312,7 +315,7 @@ describe('L: unresolved Kling membership status now produces a selector-need pro
       MATRIX_FIXTURE,
       su.user_goals,
       [],
-      { jurisdiction: su.project_facts.jurisdiction.attestation, toolMentions: su.tool_mentions },
+      { jurisdiction: deriveAssessmentJurisdictionFacts(su), toolMentions: su.tool_mentions },
     )
     expect(gaps.some((d) => d.unmet_applicability?.some((u) => u.claim_id === MEMBER_ID))).toBe(true)
 
@@ -386,12 +389,12 @@ describe('correction semantics: unresolved membership resolving in either direct
     const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?' })
     const h = handoff({ tools: [tool('kling')] })
 
-    const turnN = retrieve(h, MATRIX_FIXTURE, [g], [], { jurisdiction: { state: 'unknown' }, toolMentions: [] })
+    const turnN = retrieve(h, MATRIX_FIXTURE, [g], [], { jurisdiction: { included: [], excluded: [] }, toolMentions: [] })
     const interpN = buildBoundedInterpretations([g], turnN.results, turnN.diagnostics)[0]
     expect(interpN.unresolved_relevant_claims).toEqual([{ claim_id: MEMBER_ID }])
 
     const turnNPlus1 = retrieve(h, MATRIX_FIXTURE, [g], [], {
-      jurisdiction: { state: 'unknown' },
+      jurisdiction: { included: [], excluded: [] },
       toolMentions: [toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'kling' }, account_status: { state: 'confirmed', value: 'Member Account' } })],
     })
     const interpNPlus1 = buildBoundedInterpretations([g], turnNPlus1.results, turnNPlus1.diagnostics)[0]
@@ -403,12 +406,12 @@ describe('correction semantics: unresolved membership resolving in either direct
     const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?' })
     const h = handoff({ tools: [tool('kling')] })
 
-    const turnN = retrieve(h, MATRIX_FIXTURE, [g], [], { jurisdiction: { state: 'unknown' }, toolMentions: [] })
+    const turnN = retrieve(h, MATRIX_FIXTURE, [g], [], { jurisdiction: { included: [], excluded: [] }, toolMentions: [] })
     const interpN = buildBoundedInterpretations([g], turnN.results, turnN.diagnostics)[0]
     expect(interpN.unresolved_relevant_claims).toEqual([{ claim_id: MEMBER_ID }])
 
     const turnNPlus1 = retrieve(h, MATRIX_FIXTURE, [g], [], {
-      jurisdiction: { state: 'unknown' },
+      jurisdiction: { included: [], excluded: [] },
       toolMentions: [toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'kling' }, account_status: { state: 'confirmed', value: 'Regular Account' } })],
     })
     const interpNPlus1 = buildBoundedInterpretations([g], turnNPlus1.results, turnNPlus1.diagnostics)[0]

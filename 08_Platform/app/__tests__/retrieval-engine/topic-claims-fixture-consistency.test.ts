@@ -92,6 +92,13 @@ const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set<string>([
   'CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1',
   'CLAIM-MUSIC-ARTLIST-PRO-ROYALTIES-001-v1',
   'CLAIM-MUSIC-ARTLIST-ENTERPRISE-THRESHOLD-001-v1',
+  // Pre-existing gap found during the Assessment-Jurisdiction Mention Model
+  // implementation (2026-08-28) -- Adopted in a prior milestone (Wave 4,
+  // 2026-08-28) with zero runtime fixture representation by explicit design
+  // (same "Adoption is pure governance documentation, zero runtime effect"
+  // discipline as every Music-domain claim above); never added to this set
+  // at Adoption time.
+  'CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1',
 ])
 
 /** Strips fenced code blocks (```...```) before scanning -- the entry template lives inside one and must never be counted as a real claim. */

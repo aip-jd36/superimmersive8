@@ -38,7 +38,7 @@ function claim(overrides: Partial<TopicClaim> & Pick<TopicClaim, 'claim_id' | 't
 }
 
 function facts(overrides: Partial<ApplicabilityFacts> = {}): ApplicabilityFacts {
-  return { jurisdiction: { state: 'unknown' }, toolMentions: [], ...overrides }
+  return { jurisdiction: { included: [], excluded: [] }, toolMentions: [], ...overrides }
 }
 
 function toolMention(overrides: Partial<ToolMention> & Pick<ToolMention, 'mention_id' | 'resolution'>): ToolMention {
@@ -86,28 +86,33 @@ describe('isApplicable', () => {
 
   test('jurisdiction requirement met when confirmed and equal', () => {
     const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }]
-    expect(isApplicable(req, facts({ jurisdiction: { state: 'confirmed', value: 'United States' } }))).toBe(true)
+    expect(isApplicable(req, facts({ jurisdiction: { included: ['United States'], excluded: [] } }))).toBe(true)
   })
 
   test('jurisdiction requirement unmet when confirmed but different value', () => {
     const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }]
-    expect(isApplicable(req, facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' } }))).toBe(false)
+    expect(isApplicable(req, facts({ jurisdiction: { included: ['Taiwan'], excluded: [] } }))).toBe(false)
   })
 
   test('jurisdiction requirement unmet when unknown -- never guessed', () => {
     const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }]
-    expect(isApplicable(req, facts({ jurisdiction: { state: 'unknown' } }))).toBe(false)
+    expect(isApplicable(req, facts({ jurisdiction: { included: [], excluded: [] } }))).toBe(false)
   })
 
   test('jurisdiction requirement unmet when declined', () => {
     const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }]
-    expect(isApplicable(req, facts({ jurisdiction: { state: 'declined' } }))).toBe(false)
+    expect(isApplicable(req, facts({ jurisdiction: { included: [], excluded: [] } }))).toBe(false)
   })
 
   test('not_equals operator', () => {
     const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'not_equals', value: 'United States' }]
-    expect(isApplicable(req, facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' } }))).toBe(true)
-    expect(isApplicable(req, facts({ jurisdiction: { state: 'confirmed', value: 'United States' } }))).toBe(false)
+    // Assessment-Jurisdiction Mention Model (2026-08-28): a different jurisdiction
+    // being included (Taiwan) no longer implies the required one (United States) is
+    // excluded -- silence about US is unresolved, not a positive not_equals match.
+    // Only an EXPLICIT exclusion satisfies not_equals now; see the dedicated
+    // explicit-exclusion coverage elsewhere in this file.
+    expect(isApplicable(req, facts({ jurisdiction: { included: ['Taiwan'], excluded: [] } }))).toBe(false)
+    expect(isApplicable(req, facts({ jurisdiction: { included: ['United States'], excluded: [] } }))).toBe(false)
   })
 
   test('tool_plan_tier requirement met for the specific tool', () => {
@@ -131,21 +136,25 @@ describe('isApplicable', () => {
   test('jurisdiction requirement met for every recognized United States alias (Copyright UAT Output-Path Diagnostic P0 fix, 2026-08-19)', () => {
     const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }]
     for (const alias of ['US', 'USA', 'U.S.', 'U.S.A.', 'the US', 'United States', 'united states']) {
-      expect(isApplicable(req, facts({ jurisdiction: { state: 'confirmed', value: alias } }))).toBe(true)
+      expect(isApplicable(req, facts({ jurisdiction: { included: [alias], excluded: [] } }))).toBe(true)
     }
   })
 
   test('jurisdiction requirement still unmet for an unrecognized value -- normalization does not weaken the gate (fail-closed regression)', () => {
     const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }]
     for (const value of ['United Kingdom', 'Canada', 'North America', 'California']) {
-      expect(isApplicable(req, facts({ jurisdiction: { state: 'confirmed', value } }))).toBe(false)
+      expect(isApplicable(req, facts({ jurisdiction: { included: [value], excluded: [] } }))).toBe(false)
     }
   })
 
-  test('not_equals operator also benefits from canonicalization -- a US alias correctly excludes a US-scoped not_equals requirement', () => {
+  test('not_equals operator also benefits from canonicalization -- a US alias correctly matches a US-scoped not_equals requirement whether included or excluded', () => {
     const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'not_equals', value: 'United States' }]
-    expect(isApplicable(req, facts({ jurisdiction: { state: 'confirmed', value: 'USA' } }))).toBe(false)
-    expect(isApplicable(req, facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' } }))).toBe(true)
+    expect(isApplicable(req, facts({ jurisdiction: { included: ['USA'], excluded: [] } }))).toBe(false)
+    // Assessment-Jurisdiction Mention Model (2026-08-28): not_equals is now met
+    // only by an EXPLICIT exclusion of the required value -- canonicalization
+    // still applies to that exclusion (a "USA" alias in excluded[] correctly
+    // matches the "United States" requirement).
+    expect(isApplicable(req, facts({ jurisdiction: { included: [], excluded: ['USA'] } }))).toBe(true)
   })
 
   test('tool_plan_tier requirement is NOT canonicalized -- normalization is scoped strictly to jurisdiction, per the exact opposite value used verbatim', () => {
@@ -161,27 +170,32 @@ describe('isApplicable', () => {
       { fact: 'tool_plan_tier', tool: 'elevenlabs', operator: 'equals', value: 'free' },
     ]
     const tm = toolMention({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'elevenlabs' }, plan_tier: { state: 'confirmed', value: 'free' } })
-    expect(isApplicable(req, facts({ jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [tm] }))).toBe(true)
-    expect(isApplicable(req, facts({ jurisdiction: { state: 'unknown' }, toolMentions: [tm] }))).toBe(false)
+    expect(isApplicable(req, facts({ jurisdiction: { included: ['United States'], excluded: [] }, toolMentions: [tm] }))).toBe(true)
+    expect(isApplicable(req, facts({ jurisdiction: { included: [], excluded: [] }, toolMentions: [tm] }))).toBe(false)
   })
 })
 
 describe('evaluateApplicabilityDetailed (Piece 1, CRC Narrow Governed Selector Questioning milestone, 2026-08-24)', () => {
   test('all requirements met -> every outcome is "met"', () => {
     const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }]
-    const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { state: 'confirmed', value: 'United States' } }))
+    const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { included: ['United States'], excluded: [] } }))
     expect(outcomes).toEqual([{ requirement: req[0], status: 'met' }])
   })
 
   test('unresolved requirement (unconfirmed fact) -> "unresolved", never "not_met"', () => {
     const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }]
-    const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { state: 'unknown' } }))
+    const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { included: [], excluded: [] } }))
     expect(outcomes).toEqual([{ requirement: req[0], status: 'unresolved' }])
   })
 
   test('known nonmatching requirement -> "not_met", never "unresolved"', () => {
     const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }]
-    const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' } }))
+    // Assessment-Jurisdiction Mention Model (2026-08-28): a genuinely
+    // "known-not-applicable" (not_met) status now requires an EXPLICIT
+    // exclusion -- merely including a different jurisdiction (e.g. Taiwan,
+    // with nothing said about the US) is unresolved, not not_met; see the
+    // "unresolved requirement" test immediately above for that case.
+    const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { included: [], excluded: ['United States'] } }))
     expect(outcomes).toEqual([{ requirement: req[0], status: 'not_met' }])
   })
 
@@ -191,7 +205,7 @@ describe('evaluateApplicabilityDetailed (Piece 1, CRC Narrow Governed Selector Q
       { fact: 'tool_plan_tier', tool: 'kling', operator: 'equals', value: 'paid' },
     ]
     const tm = toolMention({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'kling' }, plan_tier: { state: 'confirmed', value: 'free' } })
-    const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { state: 'unknown' }, toolMentions: [tm] }))
+    const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { included: [], excluded: [] }, toolMentions: [tm] }))
     expect(outcomes).toEqual([
       { requirement: req[0], status: 'unresolved' },
       { requirement: req[1], status: 'not_met' },
@@ -203,7 +217,7 @@ describe('evaluateApplicabilityDetailed (Piece 1, CRC Narrow Governed Selector Q
       { fact: 'jurisdiction', operator: 'equals', value: 'United States' },
       { fact: 'tool_plan_tier', tool: 'kling', operator: 'equals', value: 'paid' },
     ]
-    const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { state: 'unknown' }, toolMentions: [] }))
+    const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { included: [], excluded: [] }, toolMentions: [] }))
     expect(outcomes).toEqual([
       { requirement: req[0], status: 'unresolved' },
       { requirement: req[1], status: 'unresolved' },
@@ -220,14 +234,14 @@ describe('evaluateApplicabilityDetailed (Piece 1, CRC Narrow Governed Selector Q
       { fact: 'tool_plan_tier', tool: 'kling', operator: 'equals', value: 'paid' },
     ]
     const tm = toolMention({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'kling' }, plan_tier: { state: 'confirmed', value: 'paid' } })
-    const allMet = facts({ jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [tm] })
+    const allMet = facts({ jurisdiction: { included: ['United States'], excluded: [] }, toolMentions: [tm] })
     expect(isApplicable(req, allMet)).toBe(true)
     expect(evaluateApplicabilityDetailed(req, allMet).every((o) => o.status === 'met')).toBe(true)
 
-    const oneUnresolved = facts({ jurisdiction: { state: 'unknown' }, toolMentions: [tm] })
+    const oneUnresolved = facts({ jurisdiction: { included: [], excluded: [] }, toolMentions: [tm] })
     expect(isApplicable(req, oneUnresolved)).toBe(false)
 
-    const oneNotMet = facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' }, toolMentions: [tm] })
+    const oneNotMet = facts({ jurisdiction: { included: ['Taiwan'], excluded: [] }, toolMentions: [tm] })
     expect(isApplicable(req, oneNotMet)).toBe(false)
   })
 })
@@ -296,7 +310,7 @@ describe('lookupTopicClaims -- topic matching + eligibility gates', () => {
       topic: 'copyright_ownership',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
-    const result = lookupTopicClaims([g], [c], facts({ jurisdiction: { state: 'unknown' } }))
+    const result = lookupTopicClaims([g], [c], facts({ jurisdiction: { included: [], excluded: [] } }))
     expect(result.matches).toEqual([])
     expect(result.diagnostics).toEqual([
       {
@@ -314,7 +328,7 @@ describe('lookupTopicClaims -- topic matching + eligibility gates', () => {
       topic: 'copyright_ownership',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
-    const result = lookupTopicClaims([g], [c], facts({ jurisdiction: { state: 'confirmed', value: 'United States' } }))
+    const result = lookupTopicClaims([g], [c], facts({ jurisdiction: { included: ['United States'], excluded: [] } }))
     expect(result.matches).toEqual([c])
   })
 
@@ -325,25 +339,32 @@ describe('lookupTopicClaims -- topic matching + eligibility gates', () => {
       topic: 'copyright_ownership',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
-    const result = lookupTopicClaims([g], [c], facts({ jurisdiction: { state: 'confirmed', value: 'US' } }))
+    const result = lookupTopicClaims([g], [c], facts({ jurisdiction: { included: ['US'], excluded: [] } }))
     expect(result.matches).toEqual([c])
     expect(result.diagnostics).toEqual([])
   })
 
-  test('wrong jurisdiction -> unmet, not a fabricated match (US-only claim, Taiwan confirmed)', () => {
+  test('wrong jurisdiction -> unmet, not a fabricated match (US-only claim, Taiwan confirmed but US never excluded)', () => {
     const g = goal({ goal_id: 'g-1', category: 'copyright_ownership' })
     const c = claim({
       claim_id: 'C-1',
       topic: 'copyright_ownership',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
-    const result = lookupTopicClaims([g], [c], facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' } }))
+    // Assessment-Jurisdiction Mention Model (2026-08-28): confirming Taiwan as
+    // an in-scope jurisdiction does NOT implicitly exclude United States --
+    // silence about US is unresolved, not not_met. The claim is still
+    // correctly withheld (matches stays empty) either way; only the
+    // diagnostic's status classification changes. See the mixed-resolution
+    // diagnostic-parity tests below for genuine not_met coverage (explicit
+    // exclusion).
+    const result = lookupTopicClaims([g], [c], facts({ jurisdiction: { included: ['Taiwan'], excluded: [] } }))
     expect(result.matches).toEqual([])
     expect(result.diagnostics).toEqual([
       {
         identifier: 'copyright_ownership',
         reason: 'applicability_unmet',
-        unmet_applicability: [{ claim_id: 'C-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'not_met' }],
+        unmet_applicability: [{ claim_id: 'C-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
       },
     ])
   })
@@ -387,7 +408,7 @@ describe('lookupTopicClaims -- mixed-resolution diagnostic parity (CRC Generic A
       topic: 'commercial_use',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
-    const result = lookupTopicClaims([g], [met, unresolved], facts({ jurisdiction: { state: 'unknown' } }))
+    const result = lookupTopicClaims([g], [met, unresolved], facts({ jurisdiction: { included: [], excluded: [] } }))
     expect(result.matches).toEqual([met])
     expect(result.diagnostics).toEqual([
       {
@@ -407,7 +428,11 @@ describe('lookupTopicClaims -- mixed-resolution diagnostic parity (CRC Generic A
       topic: 'commercial_use',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
-    const result = lookupTopicClaims([g], [met, notMet], facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' } }))
+    // Assessment-Jurisdiction Mention Model (2026-08-28): a genuine not_met
+    // now requires an EXPLICIT exclusion, not merely a different included
+    // value (see the diagnostic-parity test A immediately above for the
+    // "different value included, nothing excluded" -- unresolved -- case).
+    const result = lookupTopicClaims([g], [met, notMet], facts({ jurisdiction: { included: [], excluded: ['United States'] } }))
     expect(result.matches).toEqual([met])
     expect(result.diagnostics).toEqual([
       {
@@ -432,10 +457,12 @@ describe('lookupTopicClaims -- mixed-resolution diagnostic parity (CRC Generic A
       topic: 'commercial_use',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
+    // Assessment-Jurisdiction Mention Model (2026-08-28): explicit exclusion
+    // is what makes NOT-MET's jurisdiction requirement genuinely not_met.
     const result = lookupTopicClaims(
       [g],
       [met, unresolved, notMet],
-      facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' }, toolMentions: [toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'test-tool' } })] }),
+      facts({ jurisdiction: { included: [], excluded: ['United States'] }, toolMentions: [toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'test-tool' } })] }),
     )
     expect(result.matches).toEqual([met])
     expect(result.diagnostics).toHaveLength(1)
@@ -455,7 +482,7 @@ describe('lookupTopicClaims -- mixed-resolution diagnostic parity (CRC Generic A
       topic: 'commercial_use',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
-    const result = lookupTopicClaims([g], [metA, metB, unresolved], facts({ jurisdiction: { state: 'unknown' } }))
+    const result = lookupTopicClaims([g], [metA, metB, unresolved], facts({ jurisdiction: { included: [], excluded: [] } }))
     expect(result.matches.map((m) => m.claim_id).sort()).toEqual(['MET-A', 'MET-B'])
     expect(result.diagnostics).toEqual([
       {
@@ -474,7 +501,7 @@ describe('lookupTopicClaims -- mixed-resolution diagnostic parity (CRC Generic A
       topic: 'commercial_use',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
-    const result = lookupTopicClaims([g], [unresolved], facts({ jurisdiction: { state: 'unknown' } }))
+    const result = lookupTopicClaims([g], [unresolved], facts({ jurisdiction: { included: [], excluded: [] } }))
     expect(result.matches).toEqual([])
     expect(result.diagnostics).toEqual([
       {
@@ -490,7 +517,9 @@ describe('lookupTopicClaims -- mixed-resolution diagnostic parity (CRC Generic A
     const g = goal({ goal_id: 'g-1', category: 'commercial_use' })
     const notMetA = claim({ claim_id: 'NOT-MET-A', topic: 'commercial_use', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] })
     const notMetB = claim({ claim_id: 'NOT-MET-B', topic: 'commercial_use', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] })
-    const result = lookupTopicClaims([g], [notMetA, notMetB], facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' } }))
+    // Assessment-Jurisdiction Mention Model (2026-08-28): explicit exclusion
+    // required for genuine not_met.
+    const result = lookupTopicClaims([g], [notMetA, notMetB], facts({ jurisdiction: { included: [], excluded: ['United States'] } }))
     expect(result.matches).toEqual([])
     expect(result.diagnostics).toHaveLength(1)
     expect(result.diagnostics[0].unmet_applicability?.every((d) => d.status === 'not_met')).toBe(true)
@@ -510,7 +539,7 @@ describe('lookupTopicClaims -- mixed-resolution diagnostic parity (CRC Generic A
     const result = lookupTopicClaims(
       [g],
       [met, unresolvedA, unresolvedB],
-      facts({ jurisdiction: { state: 'unknown' }, toolMentions: [toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'test-tool' } })] }),
+      facts({ jurisdiction: { included: [], excluded: [] }, toolMentions: [toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'test-tool' } })] }),
     )
     expect(result.matches).toEqual([met])
     expect(result.diagnostics[0].unmet_applicability?.map((d) => d.claim_id).sort()).toEqual(['UNRESOLVED-A', 'UNRESOLVED-B'])
@@ -527,7 +556,7 @@ describe('lookupTopicClaims -- mixed-resolution diagnostic parity (CRC Generic A
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
     // 'istock' supplied -- OTHER-PROVIDER (scoped to 'getty') never becomes a candidate at all.
-    const result = lookupTopicClaims([g], [met, otherProvider], facts({ jurisdiction: { state: 'unknown' } }), ['istock'])
+    const result = lookupTopicClaims([g], [met, otherProvider], facts({ jurisdiction: { included: [], excluded: [] } }), ['istock'])
     expect(result.matches).toEqual([met])
     expect(result.diagnostics).toEqual([])
   })
@@ -542,7 +571,7 @@ describe('lookupTopicClaims -- mixed-resolution diagnostic parity (CRC Generic A
       crc_eligible: 'No',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
-    const result = lookupTopicClaims([g], [met, ineligible], facts({ jurisdiction: { state: 'unknown' } }))
+    const result = lookupTopicClaims([g], [met, ineligible], facts({ jurisdiction: { included: [], excluded: [] } }))
     expect(result.matches).toEqual([met])
     expect(result.diagnostics).toEqual([])
   })

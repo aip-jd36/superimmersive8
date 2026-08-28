@@ -85,29 +85,37 @@
 import type { GoalCategory, Phase, StructuredUnderstanding } from '@/types/interview-engine'
 import type { CandidateQuestionProposal } from '@/lib/interview-engine/candidate-question'
 import type { TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
+import { canonicalizeJurisdictionValue, type AssessmentJurisdictionFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
+import { deriveAssessmentJurisdictionFacts } from './assessment-jurisdiction-scope'
 
 /**
- * PM-approved exact copy (SS3): "Which country's copyright rules are most
- * relevant to this project?" Fixed, catalog-owned, never LLM-generated --
- * same "trivial verbatim lookup" discipline as
- * COMMERCIAL_READINESS_DISCOVERY_QUESTIONS. Deliberately left UNCHANGED by
- * the Second-Jurisdiction UX milestone (2026-08-20) -- the completed
- * diagnostic flagged this wording as a plausible contributing factor, but
- * rewording it was explicitly out of scope for that milestone, to isolate
- * architecture behavior from copy behavior.
+ * Generalized (CRC Assessment-Jurisdiction Mention Model, 2026-08-28) from
+ * the original PM-approved SS3 copy, "Which country's copyright rules are
+ * most relevant to this project?" -- that wording was correct only for
+ * Copyright's own, country-only, single-domain need; it would have been
+ * actively misleading asked in service of a different, jurisdiction-gated
+ * domain (e.g. Likeness), and it never supported a subnational value at all.
+ * Fixed, catalog-owned, never LLM-generated -- same "trivial verbatim
+ * lookup" discipline as COMMERCIAL_READINESS_DISCOVERY_QUESTIONS. Asks for
+ * the user's own requested assessment scope as a self-report -- never
+ * "which law governs" or "which law applies" (see this module's own header
+ * and assessment-jurisdiction-scope.ts's for the full semantic contract this
+ * wording protects).
  */
-export const JURISDICTION_CLARIFICATION_QUESTION = "Which country's copyright rules are most relevant to this project?"
+export const JURISDICTION_CLARIFICATION_QUESTION =
+  'Which jurisdiction — for example, a country, or a specific state or province — should CRC consider for this assessment?'
 
 /**
- * Second-Jurisdiction UX milestone (2026-08-20), J3. Fixed, catalog-owned,
- * never LLM-generated -- same discipline as JURISDICTION_CLARIFICATION_QUESTION
- * above. Asked at most once, and only after the initial question above has
- * already been asked and left jurisdiction unresolved (see
- * evaluateJurisdictionClarificationRetryEligibility below). PM-suggested
- * copy, used verbatim.
+ * Second-Jurisdiction UX milestone (2026-08-20), J3; generalized alongside
+ * the initial question above (CRC Assessment-Jurisdiction Mention Model,
+ * 2026-08-28). Fixed, catalog-owned, never LLM-generated -- same discipline
+ * as JURISDICTION_CLARIFICATION_QUESTION above. Asked at most once, and only
+ * after the initial question above has already been asked and left
+ * jurisdiction unresolved (see evaluateJurisdictionClarificationRetryEligibility
+ * below).
  */
 export const JURISDICTION_CLARIFICATION_RETRY_QUESTION =
-  "Just to clarify for this check, which country's copyright law should we use — for example, United States, United Kingdom, or another country?"
+  'Just to clarify for this check, which jurisdiction should we use — for example, United States, United Kingdom, or a specific state or province?'
 
 export interface JurisdictionClarificationEligibilityResult {
   needs_jurisdiction: boolean
@@ -164,13 +172,73 @@ function goalNeedsJurisdiction(category: GoalCategory, topicClaims: TopicClaim[]
 }
 
 /**
+ * The specific jurisdiction value(s) a relevant claim's own governed
+ * applicability requires (CRC Assessment-Jurisdiction Mention Model,
+ * 2026-08-28) -- `not_equals` requirements are excluded here: this function
+ * answers "what value would make this claim's gate MET," which only an
+ * `equals` requirement expresses directly; a `not_equals` requirement is
+ * satisfied by an explicit exclusion of ITS OWN value, a materially
+ * different acquisition need this module does not attempt to drive
+ * (no real governed claim uses `not_equals` for jurisdiction today).
+ */
+function jurisdictionValuesRequiredBy(claim: TopicClaim): string[] {
+  return claim.applicability_requirements.filter((r) => r.fact === 'jurisdiction' && r.operator === 'equals').map((r) => r.value)
+}
+
+function claimsRelevantToGoal(category: GoalCategory, topicClaims: TopicClaim[], relationships: TopicRelationship[]): TopicClaim[] {
+  const direct = topicClaims.filter((c) => c.topic === category && claimNeedsJurisdiction(c))
+  const viaRelationship = eligibleRelationshipsFor(category, relationships).flatMap((r) =>
+    topicClaims.filter((c) => c.topic === r.target_topic && c.superseded_by === null && claimNeedsJurisdiction(c)),
+  )
+  return [...direct, ...viaRelationship]
+}
+
+/**
+ * Whether an active goal's category currently has a relevant, jurisdiction-
+ * gated claim whose specific required value has not yet been addressed
+ * (neither included nor explicitly excluded) in the current assessment-
+ * jurisdiction scope. Deliberately claim-value-aware, not merely "is
+ * jurisdiction the concept resolved at all" -- so a session that already
+ * confirmed "United States" (satisfying every Copyright claim) still
+ * correctly reports unresolved need for a DIFFERENT, still-relevant
+ * "New York"-gated claim, and vice versa. `facts.excluded` counts as
+ * addressed, not unresolved -- an explicitly excluded value is not worth
+ * re-asking about.
+ */
+function goalHasUnresolvedJurisdictionValue(
+  category: GoalCategory,
+  topicClaims: TopicClaim[],
+  relationships: TopicRelationship[],
+  facts: AssessmentJurisdictionFacts,
+): boolean {
+  const relevantClaims = claimsRelevantToGoal(category, topicClaims, relationships)
+  const alreadyAddressed = new Set([...facts.included, ...facts.excluded].map((v) => canonicalizeJurisdictionValue(v)))
+  return relevantClaims.some((c) => jurisdictionValuesRequiredBy(c).some((v) => !alreadyAddressed.has(canonicalizeJurisdictionValue(v))))
+}
+
+/**
  * Shared need-state computation (Second-Jurisdiction UX milestone,
- * 2026-08-20) -- factored out so evaluateJurisdictionClarificationEligibility
- * and evaluateJurisdictionClarificationRetryEligibility below can never
- * drift apart on what "needs jurisdiction" or "jurisdiction unresolved"
- * means; both the initial question and the one bounded retry must agree on
- * these two facts exactly, differing only in what else they additionally
- * require (already-asked state).
+ * 2026-08-20; generalized to claim-value-aware assessment scope, CRC
+ * Assessment-Jurisdiction Mention Model, 2026-08-28) -- factored out so
+ * evaluateJurisdictionClarificationEligibility and
+ * evaluateJurisdictionClarificationRetryEligibility below can never drift
+ * apart on what "needs jurisdiction" or "jurisdiction unresolved" means;
+ * both the initial question and the one bounded retry must agree on these
+ * two facts exactly, differing only in what else they additionally require
+ * (already-asked state).
+ *
+ * `needsJurisdiction` stays the coarse, per-category "is jurisdiction
+ * relevant at all" signal (unchanged shape). `jurisdictionUnresolved` is now
+ * value-aware (see `goalHasUnresolvedJurisdictionValue` above) rather than
+ * reading the legacy scalar's own single `state` -- this also, deliberately,
+ * drops the legacy behavior of suppressing the bounded retry specifically
+ * after an explicit conversational decline (that per-conversation decline
+ * concept has no per-value analogue in the new collection, and is not
+ * reintroduced here as a separate boundary-state flag -- see the
+ * Assessment-Jurisdiction Mention Model — Generic Implementation Final
+ * Report §AH for the disclosed, bounded-impact reasoning: the existing
+ * once-only initial-ask and once-only retry caps still fully bound total
+ * question count regardless).
  */
 function computeJurisdictionNeedState(
   understanding: StructuredUnderstanding,
@@ -180,8 +248,8 @@ function computeJurisdictionNeedState(
   const activeConfirmedGoals = understanding.user_goals.filter((g) => g.superseded_by === null && g.state === 'confirmed')
   const needsJurisdiction = activeConfirmedGoals.some((g) => goalNeedsJurisdiction(g.category, topicClaims, relationships))
 
-  const jurisdictionState = understanding.project_facts.jurisdiction.attestation.state
-  const jurisdictionUnresolved = jurisdictionState !== 'confirmed' && jurisdictionState !== 'declined'
+  const facts = deriveAssessmentJurisdictionFacts(understanding)
+  const jurisdictionUnresolved = activeConfirmedGoals.some((g) => goalHasUnresolvedJurisdictionValue(g.category, topicClaims, relationships, facts))
 
   return { needsJurisdiction, jurisdictionUnresolved }
 }

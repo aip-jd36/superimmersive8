@@ -36,7 +36,7 @@ function occurrence(overrides: Partial<DiscoveredTopicOccurrence> & Pick<Discove
 }
 
 function facts(overrides: Partial<ApplicabilityFacts> = {}): ApplicabilityFacts {
-  return { jurisdiction: { state: 'unknown' }, toolMentions: [], ...overrides }
+  return { jurisdiction: { included: [], excluded: [] }, toolMentions: [], ...overrides }
 }
 
 describe('lookupDiscoveredTopicClaims -- basic resolution', () => {
@@ -106,7 +106,7 @@ describe('V: applicability gating, attributed to the originating goal category',
       topic: 'copyrightability',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
-    const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { state: 'unknown' } }))
+    const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { included: [], excluded: [] } }))
     expect(result.matches).toEqual([])
     // CRC Generic Applicability Diagnostic Parity milestone (2026-08-24):
     // now carries unmet_applicability detail, matching the explicit
@@ -128,7 +128,7 @@ describe('V: applicability gating, attributed to the originating goal category',
       topic: 'copyrightability',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
-    const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { state: 'confirmed', value: 'United States' } }))
+    const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { included: ['United States'], excluded: [] } }))
     expect(result.matches).toEqual([{ claim: c, sourceGoalCategory: 'commercial_use' }])
   })
 })
@@ -188,7 +188,7 @@ describe('lookupDiscoveredTopicClaims -- applicability diagnostic parity (CRC Ge
       topic: 'third_party_source_rights',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
-    const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { state: 'unknown' } }))
+    const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { included: [], excluded: [] } }))
     expect(result.matches).toEqual([])
     expect(result.diagnostics).toEqual([
       {
@@ -207,7 +207,10 @@ describe('lookupDiscoveredTopicClaims -- applicability diagnostic parity (CRC Ge
       topic: 'third_party_source_rights',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
-    const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' } }))
+    // Assessment-Jurisdiction Mention Model (2026-08-28): a genuine not_met
+    // now requires an EXPLICIT exclusion, not merely a different included
+    // value.
+    const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { included: [], excluded: ['United States'] } }))
     expect(result.matches).toEqual([])
     expect(result.diagnostics).toEqual([
       {
@@ -226,7 +229,7 @@ describe('lookupDiscoveredTopicClaims -- applicability diagnostic parity (CRC Ge
       topic: 'third_party_source_rights',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
-    const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { state: 'confirmed', value: 'United States' } }))
+    const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { included: ['United States'], excluded: [] } }))
     expect(result.matches).toEqual([{ claim: c, sourceGoalCategory: 'commercial_use' }])
     expect(result.diagnostics).toEqual([])
   })
@@ -240,7 +243,7 @@ describe('lookupDiscoveredTopicClaims -- applicability diagnostic parity (CRC Ge
       topic: 'third_party_source_rights',
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
-    const result = lookupDiscoveredTopicClaims([occ], [met, unresolved], facts({ jurisdiction: { state: 'unknown' } }))
+    const result = lookupDiscoveredTopicClaims([occ], [met, unresolved], facts({ jurisdiction: { included: [], excluded: [] } }))
     expect(result.matches).toEqual([{ claim: met, sourceGoalCategory: 'commercial_use' }])
     expect(result.diagnostics).toEqual([
       {
@@ -259,7 +262,7 @@ describe('lookupDiscoveredTopicClaims -- applicability diagnostic parity (CRC Ge
       topic: 'third_party_source_rights', // intrinsic topic differs from the originating goal category
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
-    const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { state: 'unknown' } }))
+    const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { included: [], excluded: [] } }))
     expect(result.diagnostics[0].identifier).toBe('copyright_ownership') // the originating goal, not 'third_party_source_rights'
   })
 
@@ -268,7 +271,7 @@ describe('lookupDiscoveredTopicClaims -- applicability diagnostic parity (CRC Ge
     // Structural proof, not merely behavioral: the function signature itself has no UserGoal parameter.
     const occ = occurrence({ topic: 'third_party_source_rights', source_goal_category: 'commercial_use' })
     const c = claim({ claim_id: 'C-1', topic: 'third_party_source_rights', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] })
-    const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { state: 'unknown' } }))
+    const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { included: [], excluded: [] } }))
     expect(Object.keys(result)).toEqual(['matches', 'diagnostics'])
     expect(result.diagnostics[0]).not.toHaveProperty('goal_id')
   })
@@ -283,7 +286,7 @@ describe('lookupDiscoveredTopicClaims -- applicability diagnostic parity (CRC Ge
       provider_scope: ['getty'],
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     })
-    const result = lookupDiscoveredTopicClaims([occ], [met, otherProvider], facts({ jurisdiction: { state: 'unknown' } }), ['istock'])
+    const result = lookupDiscoveredTopicClaims([occ], [met, otherProvider], facts({ jurisdiction: { included: [], excluded: [] } }), ['istock'])
     expect(result.matches).toEqual([{ claim: met, sourceGoalCategory: 'commercial_use' }])
     expect(result.diagnostics).toEqual([])
   })

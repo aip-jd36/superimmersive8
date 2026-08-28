@@ -37,6 +37,7 @@
  */
 
 import type {
+  AssessmentJurisdictionMention,
   AssetProviderId,
   AssetProviderMention,
   AssetProviderUsageValue,
@@ -64,6 +65,8 @@ import {
   supersedeObservation,
   supersedeToolMention,
   supersedeUserGoal,
+  addAssessmentJurisdictionMention,
+  supersedeAssessmentJurisdictionMention,
 } from './mutations'
 
 // ── Raw input ────────────────────────────────────────────────────────────────
@@ -137,7 +140,7 @@ export interface CandidateObservation {
   proposal_id: string
   turn: number
   raw_text: string
-  kind: 'tool_mention' | 'scoped_observation' | 'project_fact' | 'user_goal' | 'asset_provider_mention'
+  kind: 'tool_mention' | 'scoped_observation' | 'project_fact' | 'user_goal' | 'asset_provider_mention' | 'assessment_jurisdiction_mention'
 
   /** kind === 'tool_mention' */
   raw_tool_name?: string
@@ -305,6 +308,33 @@ export interface CandidateObservation {
    */
   is_correction?: boolean
   correction_of_raw_text?: string
+
+  /**
+   * kind === 'assessment_jurisdiction_mention' (CRC Assessment-Jurisdiction
+   * Mention Model, 2026-08-28). The user explicitly asked CRC to consider
+   * (or explicitly asked CRC NOT to consider, per is_jurisdiction_exclusion
+   * below) governed knowledge scoped to this jurisdiction -- a flat,
+   * ungraded label, exactly as the user stated it (e.g. "United States",
+   * "New York", "the EU"). Never inferred from filming/distribution/client/
+   * subject-location statements -- see SYSTEM_PROMPT for the exact,
+   * unchanged discipline this mirrors from the legacy jurisdiction
+   * project_fact. For a correction ("not New York -- California"), this
+   * field carries the NEW value ("California"); correction_of_raw_text
+   * (already generic, above) carries the value being replaced ("New York"),
+   * mirroring resolveAssetProviderMentionTarget's own text-match resolution
+   * exactly -- code resolves the specific current mention this targets by
+   * canonicalized value match, never the model.
+   */
+  raw_jurisdiction_value?: string
+  /** kind === 'assessment_jurisdiction_mention'; set when this candidate corrects an existing mention (resolved by code, never the model -- see resolveAssessmentJurisdictionMentionTarget) */
+  supersedes_assessment_jurisdiction_mention_id?: string
+  /**
+   * kind === 'assessment_jurisdiction_mention'. True only when the user
+   * explicitly asked CRC NOT to assess a jurisdiction (e.g. "don't assess
+   * New York", "US only, not New York") -- never inferred from silence. A
+   * bare inclusion statement leaves this false/unset.
+   */
+  is_jurisdiction_exclusion?: boolean
 }
 
 export type CandidateExtractor = (turn: RawUserTurn) => Promise<CandidateObservation[]>
@@ -456,6 +486,7 @@ export type ProposedFact =
   | { kind: 'project_fact'; field: 'intended_use' | 'workflow_role' | 'jurisdiction' | 'human_contribution_description'; value: Attested<string> }
   | { kind: 'user_goal'; goal: UserGoal }
   | { kind: 'asset_provider_mention'; mention: AssetProviderMention }
+  | { kind: 'assessment_jurisdiction_mention'; mention: AssessmentJurisdictionMention }
   | { kind: 'undetermined' }
 
 /**
@@ -728,6 +759,31 @@ export function attestCandidate(
     }
   }
 
+  if (candidate.kind === 'assessment_jurisdiction_mention') {
+    if (!candidate.raw_jurisdiction_value) return null
+
+    // Turn-qualified, same minting rule as every other mention kind above.
+    const mentionId = `t${candidate.turn}-${candidate.proposal_id}`
+
+    return {
+      kind: 'assessment_jurisdiction_mention',
+      mention: {
+        mention_id: mentionId,
+        value: candidate.raw_jurisdiction_value,
+        // Direct-statement only -- the extractor either transcribed an
+        // inclusion or an explicit exclusion this turn; there is no
+        // "unknown"/"declined" per-mention state (see
+        // AssessmentJurisdictionMention's own doc comment) because a
+        // candidate only exists here at all when the user directly named a
+        // value.
+        confidence: candidate.is_jurisdiction_exclusion ? 'confirmed_absent' : 'confirmed',
+        source_turn: candidate.turn,
+        source_statement: candidate.raw_text,
+        superseded_by: null,
+      },
+    }
+  }
+
   if (candidate.kind === 'user_goal') {
     if (!candidate.goal_confidence_hint) return null
     // Turn-qualified unconditionally, mirroring tool_mention's own minting
@@ -959,6 +1015,93 @@ function resolveAssetProviderMentionTarget(
   return undefined
 }
 
+// ── Assessment-jurisdiction mention identity resolution (stage 3.5, CRC
+// Assessment-Jurisdiction Mention Model, 2026-08-28) ─────────────────────────
+
+/**
+ * Deliberately simpler than resolveAssetProviderMentionTarget's own "same-
+ * identity match, then is_correction-flagged retraction of a different
+ * mention" two-step algorithm -- jurisdiction has no canonical/unresolved-
+ * alias registry to identity-match against (a jurisdiction value is a flat,
+ * ungraded label, never resolved to a canonical form at extraction time --
+ * see AssessmentJurisdictionMention's own doc comment). Only the explicit-
+ * language path is supported: a correction resolves ONLY when the user's
+ * own statement names the specific value being replaced
+ * (correction_of_raw_text, mirroring correction_of_raw_text's existing
+ * generic role) -- there is no "other active mention" implicit fallback the
+ * way asset-provider correction has, per this task's own explicit "if zero
+ * or multiple current target matches make resolution ambiguous: fail
+ * closed... do not guess" instruction. Local, simple case-insensitive
+ * trim-based comparison only (mirrors resolveAssetProviderMentionTarget's
+ * own `label()` helper) -- deliberately NOT the authoritative
+ * `canonicalizeJurisdictionValue` alias-table comparison Retrieval uses at
+ * the applicability boundary, since lib/interview-engine/ may never import
+ * lib/retrieval-engine/ logic (subsystem-boundaries.test.ts). This is a
+ * narrower, local-only match for "which current mention is this candidate
+ * about," not the authoritative governed-applicability comparison.
+ *
+ * Returns undefined for CREATE (no correction signal, or nothing to match --
+ * a genuinely new mention) or the mention_id to supersede for a resolved
+ * correction/exclusion.
+ */
+function resolveAssessmentJurisdictionMentionTarget(candidate: CandidateObservation, su: StructuredUnderstanding): string | undefined {
+  if (candidate.kind !== 'assessment_jurisdiction_mention') return undefined
+  if (!candidate.is_correction) return undefined
+
+  const needle = (candidate.correction_of_raw_text ?? '').trim().toLowerCase()
+  if (!needle) return undefined
+
+  const active = su.assessment_jurisdiction_mentions.filter((m) => m.superseded_by === null)
+  const matches = active.filter((m) => m.value.trim().toLowerCase() === needle)
+  if (matches.length === 1) return matches[0].mention_id
+  return undefined // zero or multiple matches -- fail closed, never guess
+}
+
+/**
+ * Whether this session's `assessment_jurisdiction_mentions` collection has
+ * ever received any entry, active or superseded -- local reimplementation of
+ * `assessmentJurisdictionCollectionEverTouched`
+ * (lib/crc-engine/assessment-jurisdiction-scope.ts), duplicated deliberately
+ * rather than imported: that module lives in lib/crc-engine/, and
+ * lib/interview-engine/ may never import lib/crc-engine/ (the established
+ * dependency direction throughout this codebase is the reverse -- crc-engine
+ * depends on interview-engine and retrieval-engine, never imported by
+ * either). The check itself is a single, trivial array-length comparison,
+ * so this small duplication is judged safer than an inverted dependency.
+ */
+function assessmentJurisdictionCollectionEverTouchedLocal(su: StructuredUnderstanding): boolean {
+  return su.assessment_jurisdiction_mentions.length > 0
+}
+
+/**
+ * One-time, durable legacy-to-mention seed, applied immediately before the
+ * FIRST real mutation this session ever makes to the new collection --
+ * mirrors assessment-jurisdiction-scope.ts's own (crc-engine-side, read-only)
+ * fallback-eligibility rule exactly, applied here on the mutation side for
+ * the same reason `assessmentJurisdictionCollectionEverTouchedLocal` above is
+ * duplicated rather than imported. Reuses the scalar's own real,
+ * already-attested `source_turn`/`source_statement` -- never fabricated. A
+ * no-op (returns `su` unchanged) once the collection has already been
+ * touched, or if the scalar was never confirmed. Called once, at the top of
+ * `applyAssessmentJurisdictionCandidate` below, before both target
+ * resolution and mutation application, so a correction whose stated target
+ * IS the just-seeded legacy value resolves correctly against the same seeded
+ * state the mutation is then applied to.
+ */
+function seedAssessmentJurisdictionFromLegacyScalarIfNeeded(su: StructuredUnderstanding): StructuredUnderstanding {
+  if (assessmentJurisdictionCollectionEverTouchedLocal(su)) return su
+  const scalar = su.project_facts.jurisdiction.attestation
+  if (scalar.state !== 'confirmed') return su
+  return addAssessmentJurisdictionMention(su, {
+    mention_id: `legacy-seed-t${su.project_facts.jurisdiction.source_turn}`,
+    value: scalar.value,
+    confidence: 'confirmed',
+    source_turn: su.project_facts.jurisdiction.source_turn,
+    source_statement: su.project_facts.jurisdiction.source_statement,
+    superseded_by: null,
+  })
+}
+
 // ── Deterministic mutation + diagnostics (stage 4) ──────────────────────────
 
 export const REJECTED_REASON_CODES = [
@@ -1046,20 +1189,36 @@ export async function runExtractionPipeline(
   const retractedProvidersThisTurn = new Set<string>()
 
   for (const rawCandidate of candidates) {
-    // Exactly one of these three resolvers can ever return a value for a
+    // Assessment-jurisdiction legacy seed (CRC Assessment-Jurisdiction
+    // Mention Model, 2026-08-28): applied lazily, only immediately before
+    // this session's actual FIRST assessment-jurisdiction candidate is
+    // resolved/applied this turn -- never unconditionally every turn. A
+    // no-op once already touched or if the legacy scalar was never
+    // confirmed. Must run BEFORE resolveAssessmentJurisdictionMentionTarget
+    // below, against the SAME `current` that target resolution and the
+    // eventual mutation both use, so a correction whose stated target IS
+    // the just-seeded legacy value resolves correctly.
+    if (rawCandidate.kind === 'assessment_jurisdiction_mention') {
+      current = seedAssessmentJurisdictionFromLegacyScalarIfNeeded(current)
+    }
+
+    // Exactly one of these four resolvers can ever return a value for a
     // given candidate -- each short-circuits on candidate.kind not matching
     // its own concern -- mirroring the existing single-resolver call shape
     // rather than branching on kind here.
     const supersedesToolId = resolveToolMentionTarget(rawCandidate, current, retractedThisTurn)
     const supersedesGoalId = resolveUserGoalTarget(rawCandidate, current)
     const supersedesProviderId = resolveAssetProviderMentionTarget(rawCandidate, current, retractedProvidersThisTurn)
+    const supersedesJurisdictionId = resolveAssessmentJurisdictionMentionTarget(rawCandidate, current)
     const candidate = supersedesToolId
       ? { ...rawCandidate, supersedes_tool_mention_id: supersedesToolId }
       : supersedesGoalId
         ? { ...rawCandidate, supersedes_goal_id: supersedesGoalId }
         : supersedesProviderId
           ? { ...rawCandidate, supersedes_asset_provider_mention_id: supersedesProviderId }
-          : rawCandidate
+          : supersedesJurisdictionId
+            ? { ...rawCandidate, supersedes_assessment_jurisdiction_mention_id: supersedesJurisdictionId }
+            : rawCandidate
 
     const normalization = normalizeCandidate(candidate)
     const proposedFact = attestCandidate(candidate, normalization)
@@ -1179,6 +1338,11 @@ export async function runExtractionPipeline(
         } else {
           current = addAssetProviderMention(current, proposedFact.mention)
         }
+        appliedIdentifier = proposedFact.mention.mention_id
+      } else if (proposedFact.kind === 'assessment_jurisdiction_mention') {
+        current = candidate.supersedes_assessment_jurisdiction_mention_id
+          ? supersedeAssessmentJurisdictionMention(current, candidate.supersedes_assessment_jurisdiction_mention_id, proposedFact.mention)
+          : addAssessmentJurisdictionMention(current, proposedFact.mention)
         appliedIdentifier = proposedFact.mention.mention_id
       } else {
         // attestCandidate never actually returns {kind: 'undetermined'} (it

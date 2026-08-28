@@ -22,6 +22,7 @@ function currentSU(): StructuredUnderstanding {
     scoped_observations: [],
     user_goals: [{ goal_id: 'g-1', state: 'confirmed', raw_text: 'Can I use this commercially?', category: 'unknown', scope: 'informational', superseded_by: null, source_turn: 1, source_statement: 'placeholder' }],
     asset_provider_mentions: [],
+    assessment_jurisdiction_mentions: [],
     current_phase: 1,
     gate_1_state: 'not_met',
     gate_2_state: 'not_yet_stable',
@@ -95,7 +96,11 @@ describe('serializeStructuredUnderstanding / deserializeStructuredUnderstanding'
     const historicalShape = currentSU()
     const { jurisdiction: _omittedJurisdiction, ...projectFactsWithoutJurisdiction } = historicalShape.project_facts
     const historicalJson = JSON.stringify({ ...historicalShape, project_facts: projectFactsWithoutJurisdiction })
-    expect(historicalJson).not.toContain('jurisdiction')
+    // Checks for the exact `project_facts.jurisdiction` key, not the bare
+    // substring "jurisdiction" -- the top-level `assessment_jurisdiction_mentions`
+    // field (added by the Assessment-Jurisdiction Mention Model milestone,
+    // 2026-08-28) legitimately contains that substring and is untouched here.
+    expect(historicalJson).not.toContain('"jurisdiction":')
 
     const deserialized = deserializeStructuredUnderstanding(historicalJson)
     expect(deserialized.project_facts.jurisdiction).toEqual({ attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' })

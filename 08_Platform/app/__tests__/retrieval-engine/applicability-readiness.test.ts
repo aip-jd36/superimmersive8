@@ -31,7 +31,7 @@ function goal(overrides: Partial<UserGoal> & Pick<UserGoal, 'category'>): UserGo
 }
 
 function facts(overrides: Partial<ApplicabilityFacts> = {}): ApplicabilityFacts {
-  return { jurisdiction: { state: 'unknown' }, toolMentions: [], ...overrides }
+  return { jurisdiction: { included: [], excluded: [] }, toolMentions: [], ...overrides }
 }
 
 function matrixRow(overrides: Partial<MatrixRow> & Pick<MatrixRow, 'identifier'>): MatrixRow {
@@ -101,7 +101,10 @@ describe('deriveApplicabilityReadinessGaps -- Matrix-origin gaps', () => {
       ],
     })
     const h = handoff({ tools: [{ identifier: 'kling', access_surface: 'unresolved', plan_tier: 'unknown' }] })
-    const gaps = deriveApplicabilityReadinessGaps(h, [row], [goal({ category: 'commercial_use' })], [], facts({ jurisdiction: { state: 'confirmed', value: 'Taiwan' } }))
+    // Assessment-Jurisdiction Mention Model (2026-08-28): a genuine not_met
+    // now requires an EXPLICIT exclusion, not merely a different included
+    // value.
+    const gaps = deriveApplicabilityReadinessGaps(h, [row], [goal({ category: 'commercial_use' })], [], facts({ jurisdiction: { included: [], excluded: ['United States'] } }))
     expect(gaps).toHaveLength(1)
     expect(gaps[0].unmet_applicability).toEqual([
       { claim_id: 'kling', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'not_met' },

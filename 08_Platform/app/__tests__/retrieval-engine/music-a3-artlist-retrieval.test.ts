@@ -83,7 +83,7 @@ function suWithProvider(providerId: string | null, goalCategory: 'third_party_so
   }
 }
 
-const UNKNOWN_FACTS = { jurisdiction: { state: 'unknown' as const }, toolMentions: [] }
+const UNKNOWN_FACTS = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
 
 // ── One-claim isolation (§7) ────────────────────────────────────────────────
 

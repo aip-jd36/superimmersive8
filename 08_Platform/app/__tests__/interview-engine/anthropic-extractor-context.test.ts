@@ -64,11 +64,13 @@ describe('buildUserMessageContent', () => {
     expect(content.endsWith('The API one.')).toBe(true)
   })
 
-  // Second-Jurisdiction UX milestone (2026-08-20), J1.
+  // Second-Jurisdiction UX milestone (2026-08-20), J1; context-prefix text
+  // generalized by the Assessment-Jurisdiction Mention Model (2026-08-28) --
+  // was Copyright-only/country-only wording, now scope-general.
   test('answering_jurisdiction_question: true -> prepends a deterministic, fixed context line', () => {
     const turn: RawUserTurn = { turn: 2, text: 'My client is in the US.', answering_jurisdiction_question: true }
     const content = buildUserMessageContent(turn)
-    expect(content).toContain('directly asked the user which country')
+    expect(content).toContain('directly asked the user which jurisdiction(s) CRC should consider for this assessment')
     expect(content).toContain('My client is in the US.')
     expect(content.endsWith('My client is in the US.')).toBe(true)
   })
@@ -94,7 +96,7 @@ describe('buildUserMessageContent', () => {
     const content = buildUserMessageContent(turn)
     expect(content).toContain("tool mention 'Nano Banana'")
     expect(content).toContain('I selected the takes.')
-    expect(content).toContain('directly asked the user which country')
+    expect(content).toContain('directly asked the user which jurisdiction(s) CRC should consider for this assessment')
     expect(content.endsWith('United States.')).toBe(true)
   })
 })

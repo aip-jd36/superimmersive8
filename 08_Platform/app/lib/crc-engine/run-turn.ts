@@ -149,6 +149,7 @@ import {
   JURISDICTION_CLARIFICATION_QUESTION,
   JURISDICTION_CLARIFICATION_RETRY_QUESTION,
 } from './jurisdiction-clarification'
+import { deriveAssessmentJurisdictionFacts } from './assessment-jurisdiction-scope'
 import { buildHumanContributionClarificationProposal, evaluateHumanContributionClarificationEligibility } from './human-contribution-clarification'
 import { deriveKnowledgeReadinessNeeds, buildKnowledgeReadinessProposal } from './knowledge-readiness'
 import { deriveSelectorNeeds, buildSelectorNeedProposal } from './selector-questioning'
@@ -199,6 +200,7 @@ function emptyStructuredUnderstanding(): StructuredUnderstanding {
     scoped_observations: [],
     user_goals: [],
     asset_provider_mentions: [],
+    assessment_jurisdiction_mentions: [],
     current_phase: 1,
     gate_1_state: 'not_met',
     gate_2_state: 'not_yet_stable',
@@ -423,14 +425,29 @@ type CandidateAttemptResult =
 /**
  * Second-Jurisdiction UX milestone (2026-08-20), J2. Pure, deterministic:
  * true only when a candidate's own target_signal_id literally equals
- * project:jurisdiction AND the jurisdiction ProjectFact is currently
- * confirmed. Never routed through Constraint A -- see boundaries.ts's own
+ * project:jurisdiction AND jurisdiction has already been addressed. Never
+ * routed through Constraint A -- see boundaries.ts's own
  * targets_confirmed_jurisdiction field header for why this lives here
  * (StructuredUnderstanding-aware orchestration layer) rather than inside
  * boundaries.ts (deliberately StructuredUnderstanding-free).
+ *
+ * Generalized (CRC Assessment-Jurisdiction Mention Model, 2026-08-28) from
+ * reading the legacy scalar's own `state === 'confirmed'` to a coarser,
+ * deliberately simpler check: at least one assessment-jurisdiction value has
+ * been established at all (inclusion or explicit exclusion), via the new
+ * collection or the bounded legacy bridge. This is intentionally weaker than
+ * full need-satisfaction (`jurisdictionUnresolved` in
+ * jurisdiction-clarification.ts, which knows about specific required
+ * values) -- this veto's own job is only to stop a generic ORGANIC candidate
+ * from redundantly re-asking "what jurisdiction is this for" once the user
+ * has already told CRC at least one; the more precise "should CRC ask about
+ * a DIFFERENT, still-unresolved jurisdiction" question is the deterministic
+ * catalog's own, separate, already-generalized concern, not this veto's.
  */
 function targetsConfirmedJurisdiction(signalId: string | undefined, su: StructuredUnderstanding): boolean {
-  return signalId === PROJECT_FACT_SIGNAL_IDS.jurisdiction && su.project_facts.jurisdiction.attestation.state === 'confirmed'
+  if (signalId !== PROJECT_FACT_SIGNAL_IDS.jurisdiction) return false
+  const facts = deriveAssessmentJurisdictionFacts(su)
+  return facts.included.length > 0 || facts.excluded.length > 0
 }
 
 async function tryCandidate(

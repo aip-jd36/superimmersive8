@@ -157,7 +157,7 @@ describe('layer 2 -- the real relationship fixture explicitly passed to retrieve
       MATRIX_FIXTURE,
       [ownershipGoal()],
       TOPIC_CLAIMS_FIXTURE,
-      { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] },
+      { jurisdiction: { included: ['United States'], excluded: [] }, toolMentions: [] },
       TOPIC_RELATIONSHIPS_FIXTURE,
     )
     const exactResults = out.results.filter((r) => r.match_origin === 'exact_topic')
@@ -175,7 +175,7 @@ describe('layer 2 -- the real relationship fixture explicitly passed to retrieve
       MATRIX_FIXTURE,
       [ownershipGoal()],
       TOPIC_CLAIMS_FIXTURE,
-      { jurisdiction: { state: 'unknown' }, toolMentions: [] },
+      { jurisdiction: { included: [], excluded: [] }, toolMentions: [] },
       TOPIC_RELATIONSHIPS_FIXTURE,
     )
     const relatedResults = out.results.filter((r) => r.match_origin === 'related_topic')

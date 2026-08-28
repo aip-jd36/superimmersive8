@@ -36,6 +36,7 @@ function emptySU(overrides: Partial<StructuredUnderstanding> = {}): StructuredUn
     scoped_observations: [],
     user_goals: [],
     asset_provider_mentions: [],
+    assessment_jurisdiction_mentions: [],
     current_phase: 2,
     gate_1_state: 'not_met',
     gate_2_state: 'not_yet_stable',
@@ -132,15 +133,15 @@ describe('deriveSelectorNeeds -- eligibility', () => {
         { fact: 'tool_plan_tier', tool: 'kling', operator: 'equals', value: 'paid' },
       ],
     })
-    // jurisdiction confirmed to a DIFFERENT value -> known not_met.
+    // Assessment-Jurisdiction Mention Model (2026-08-28): a genuine known
+    // not_met now requires an EXPLICIT exclusion (confirming a different
+    // jurisdiction alone is unresolved, not not_met -- see
+    // deriveAssessmentJurisdictionFacts/evaluateJurisdictionRequirementStatus).
     const su = emptySU({
       user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })],
-      project_facts: {
-        intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
-        workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
-        jurisdiction: { attestation: { state: 'confirmed', value: 'Taiwan' }, source_turn: 1, source_statement: 'x' },
-        human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
-      },
+      assessment_jurisdiction_mentions: [
+        { mention_id: 'm-1', value: 'United States', confidence: 'confirmed_absent', source_turn: 1, source_statement: 'x', superseded_by: null },
+      ],
     })
     const needs = deriveSelectorNeeds(su, NO_MATRIX, [compoundClaim], createInitialBoundaryState())
     expect(needs).toEqual([])
@@ -175,14 +176,13 @@ describe('deriveSelectorNeeds -- eligibility', () => {
         { fact: 'tool_plan_tier', tool: 'kling', operator: 'equals', value: 'paid' },
       ],
     })
+    // Assessment-Jurisdiction Mention Model (2026-08-28): explicit exclusion
+    // required for CLAIM-B's jurisdiction requirement to be genuinely not_met.
     const su = emptySU({
       user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })],
-      project_facts: {
-        intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
-        workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
-        jurisdiction: { attestation: { state: 'confirmed', value: 'Taiwan' }, source_turn: 1, source_statement: 'x' },
-        human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
-      },
+      assessment_jurisdiction_mentions: [
+        { mention_id: 'm-1', value: 'United States', confidence: 'confirmed_absent', source_turn: 1, source_statement: 'x', superseded_by: null },
+      ],
     })
     const needs = deriveSelectorNeeds(su, NO_MATRIX, [claimA, claimB], createInitialBoundaryState())
     expect(needs).toHaveLength(1)

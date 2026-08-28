@@ -59,6 +59,7 @@ function discoveredOnlySU(overrides: Partial<StructuredUnderstanding> = {}): Str
     asset_provider_mentions: [
       { mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: 'istock' }, confidence: 'confirmed', source_turn: 1, source_statement: 'iStock', superseded_by: null, usage: { state: 'confirmed', value: 'direct_generation_input' }, license: { state: 'unknown' } },
     ],
+    assessment_jurisdiction_mentions: [],
     current_phase: 3,
     gate_1_state: 'met',
     gate_2_state: 'not_yet_stable',

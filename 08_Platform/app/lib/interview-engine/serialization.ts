@@ -110,6 +110,18 @@ export function deserializeStructuredUnderstanding(json: string): StructuredUnde
     license: m.license ?? { state: 'unknown' as const },
   }))
   /**
+   * `assessment_jurisdiction_mentions` defaulted to `[]` when absent (CRC
+   * Assessment-Jurisdiction Mention Model, 2026-08-28): same reasoning and
+   * same funnel as `asset_provider_mentions` above -- a session persisted
+   * before this field existed round-trips through JSON.parse with no
+   * `assessment_jurisdiction_mentions` key at all. An empty array here is
+   * indistinguishable, by design, from "genuinely never touched" -- see
+   * lib/crc-engine/assessment-jurisdiction-scope.ts for how the legacy
+   * `project_facts.jurisdiction` compatibility bridge uses this fact
+   * correctly (raw array length, not a separate initialization marker).
+   */
+  const assessment_jurisdiction_mentions = parsed.assessment_jurisdiction_mentions ?? []
+  /**
    * `account_status` per-element defaulting (CRC Kling Governed Knowledge
    * Correction + Decomposition milestone, 2026-08-24): same reasoning and
    * same funnel as the `usage`/`license` backfill immediately above -- a
@@ -125,7 +137,7 @@ export function deserializeStructuredUnderstanding(json: string): StructuredUnde
     ...m,
     account_status: m.account_status ?? { state: 'unknown' as const },
   }))
-  return { ...parsed, user_goals, project_facts, asset_provider_mentions, tool_mentions }
+  return { ...parsed, user_goals, project_facts, asset_provider_mentions, tool_mentions, assessment_jurisdiction_mentions }
 }
 
 /**

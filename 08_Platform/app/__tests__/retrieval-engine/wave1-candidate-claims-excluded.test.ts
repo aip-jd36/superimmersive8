@@ -33,6 +33,7 @@
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
+import { deriveAssessmentJurisdictionFacts } from '@/lib/crc-engine/assessment-jurisdiction-scope'
 import { TOPIC_RELATIONSHIPS_FIXTURE } from '@/lib/retrieval-engine/topic-relationships-fixture'
 import { lookupTopicClaims } from '@/lib/retrieval-engine/lookup-topic-claims'
 import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
@@ -167,19 +168,19 @@ describe('Wave 1 real claims -- governance state as of 2026-08-19 (all four COPY
 
 describe('CLAIM-COPY-004 -- reachable through exact Topic Retrieval (published 2026-08-17, unaffected by the 2026-08-19 package)', () => {
   test('lookupTopicClaims returns CLAIM-COPY-004 for a copyright_ownership goal, jurisdiction unconfirmed -- Global + empty applicability requirements means no gate to clear; COPY-001/002/003 never enter this result because lookupTopicClaims only ever exact-matches Topic, and their own Topic is copyrightability, not copyright_ownership', () => {
-    const result = lookupTopicClaims([copyrightGoal()], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'unknown' }, toolMentions: [] })
+    const result = lookupTopicClaims([copyrightGoal()], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { included: [], excluded: [] }, toolMentions: [] })
     expect(result.matches).toHaveLength(1)
     expect(result.matches[0].claim_id).toBe('CLAIM-COPY-004-v1')
   })
 
   test('retrieve() produces exactly one result for a copyright_ownership goal when jurisdiction is unconfirmed, correctly tagged exact_topic -- COPY-001/002/003 are now relationship-reachable in principle, but their own applicability_requirements (confirmed US jurisdiction) are unmet with unknown jurisdiction, so they never enter matches[] via the related-topic path either', () => {
-    const out = retrieve(handoff(), MATRIX_FIXTURE, [copyrightGoal()], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'unknown' }, toolMentions: [] }, TOPIC_RELATIONSHIPS_FIXTURE)
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [copyrightGoal()], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }, TOPIC_RELATIONSHIPS_FIXTURE)
     expect(out.results).toHaveLength(1)
     expect(out.results[0]).toMatchObject({ claim_id: 'CLAIM-COPY-004-v1', match_origin: 'exact_topic', matched_goal_category: 'copyright_ownership', relationship_id: null })
   })
 
   test('InterpretationStatus is directly_relevant, not a stronger claim -- COPY-004 has empty unresolved_project_dependencies, so Case 3B never fires (no relationships passed here, so this is COPY-004 in isolation, unaffected by the copyright publication package)', () => {
-    const out = retrieve(handoff(), MATRIX_FIXTURE, [copyrightGoal()], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'unknown' }, toolMentions: [] })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [copyrightGoal()], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { included: [], excluded: [] }, toolMentions: [] })
     const [interp] = buildBoundedInterpretations([copyrightGoal()], out.results, out.diagnostics)
     expect(interp.status).toBe('directly_relevant')
   })
@@ -192,13 +193,13 @@ describe('CLAIM-COPY-001/002/003 -- reachable through exact Topic Retrieval for 
       expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === id)?.lifecycle).toBe('Adopted')
       expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === id)?.crc_eligible).toBe('Yes')
     }
-    const result = lookupTopicClaims([goal], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] })
+    const result = lookupTopicClaims([goal], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { included: ['United States'], excluded: [] }, toolMentions: [] })
     expect(result.matches.map((m) => m.claim_id).sort()).toEqual(['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1'])
   })
 
   test('lookupTopicClaims returns zero matches for a copyrightability goal when jurisdiction is unconfirmed -- the one remaining real applicability boundary, expected and disclosed, not a routing defect', () => {
     const goal = copyrightabilityGoal()
-    const result = lookupTopicClaims([goal], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'unknown' }, toolMentions: [] })
+    const result = lookupTopicClaims([goal], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { included: [], excluded: [] }, toolMentions: [] })
     expect(result.matches).toEqual([])
     const diagnostic = result.diagnostics.find((d) => d.identifier === 'copyrightability' && d.reason === 'applicability_unmet')
     expect(diagnostic).toBeDefined()
@@ -222,7 +223,7 @@ describe('CLAIM-COPY-001/002/003 -- reachable through exact Topic Retrieval for 
     expect(claim001.unresolved_project_dependencies).toEqual(['human_contribution_description'])
     expect(claim001.lifecycle).toBe('Adopted')
     expect(claim001.crc_eligible).toBe('Yes')
-    const out = retrieve(handoff(), MATRIX_FIXTURE, [copyrightabilityGoal()], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] })
+    const out = retrieve(handoff(), MATRIX_FIXTURE, [copyrightabilityGoal()], TOPIC_CLAIMS_FIXTURE, { jurisdiction: { included: ['United States'], excluded: [] }, toolMentions: [] })
     const [interp] = buildBoundedInterpretations([copyrightabilityGoal()], out.results, out.diagnostics)
     expect(interp.status).toBe('relevant_applicability_unresolved')
     expect(interp.summary).toContain("there isn't enough project-specific information")
@@ -235,7 +236,7 @@ describe('CLAIM-COPY-001/002/003 -- reachable through exact Topic Retrieval for 
       MATRIX_FIXTURE,
       [goal],
       TOPIC_CLAIMS_FIXTURE,
-      { jurisdiction: { state: 'unknown' }, toolMentions: [] },
+      { jurisdiction: { included: [], excluded: [] }, toolMentions: [] },
     )
     expect(out.results).toEqual([])
   })
@@ -417,7 +418,7 @@ describe('Copyright UAT Output-Path Diagnostic P0 fix -- jurisdiction value norm
     const su = fullCopyrightState('US', RICH_CONTRIBUTION_TEXT)
 
     // Retrieval-level proof first: REL-COPY is the actual mechanism, not bypassed.
-    const handoffResult = retrieve(handoff({ tools: [{ identifier: 'kling', access_surface: 'unresolved', plan_tier: 'unknown' }] }), MATRIX_FIXTURE, su.user_goals, TOPIC_CLAIMS_FIXTURE, { jurisdiction: su.project_facts.jurisdiction.attestation, toolMentions: su.tool_mentions }, TOPIC_RELATIONSHIPS_FIXTURE)
+    const handoffResult = retrieve(handoff({ tools: [{ identifier: 'kling', access_surface: 'unresolved', plan_tier: 'unknown' }] }), MATRIX_FIXTURE, su.user_goals, TOPIC_CLAIMS_FIXTURE, { jurisdiction: deriveAssessmentJurisdictionFacts(su), toolMentions: su.tool_mentions }, TOPIC_RELATIONSHIPS_FIXTURE)
     const relatedResults = handoffResult.results.filter((r) => r.match_origin === 'related_topic')
     expect(relatedResults.map((r) => r.claim_id).sort()).toEqual(['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1'])
     expect(handoffResult.diagnostics).not.toContainEqual({ identifier: 'copyright_ownership', reason: 'applicability_unmet' })

@@ -99,8 +99,8 @@ function testRelationship(
   }
 }
 
-const usFacts: ApplicabilityFacts = { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] }
-const unknownFacts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+const usFacts: ApplicabilityFacts = { jurisdiction: { included: ['United States'], excluded: [] }, toolMentions: [] }
+const unknownFacts: ApplicabilityFacts = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
 
 describe('M2 -- related-only (no exact-topic match, only related-topic)', () => {
   test('a goal with zero exact-topic claims but an eligible related-topic claim is NOT outside_current_coverage', () => {

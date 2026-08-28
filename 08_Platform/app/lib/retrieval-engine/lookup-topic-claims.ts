@@ -18,16 +18,41 @@
  * true.
  */
 
-import type { Attested, GoalCategory, ToolMention, UserGoal } from '@/types/interview-engine'
+import type { GoalCategory, ToolMention, UserGoal } from '@/types/interview-engine'
 import type { ApplicabilityRequirement, RetrievalDiagnostic, TopicClaim, UnmetApplicabilityDetail } from './types'
+
+/**
+ * Assessment-jurisdiction membership facts (CRC Assessment-Jurisdiction
+ * Mention Model, 2026-08-28, replacing the original `Attested<string>`
+ * scalar per the accepted Jurisdiction Acquisition Contract semantic
+ * diagnostic). `included`/`excluded` are already-derived, already-
+ * canonicalization-agnostic raw value lists -- the current, non-superseded
+ * assessment-jurisdiction mentions with confidence `confirmed` /
+ * `confirmed_absent` respectively (plus the bounded legacy-scalar
+ * compatibility bridge for a genuinely untouched session -- see
+ * lib/crc-engine/assessment-jurisdiction-scope.ts, the single place this
+ * derivation happens; Retrieval itself never reads `StructuredUnderstanding`
+ * directly and remains unaware of mentions, supersession, or the legacy
+ * bridge -- it only ever sees these two flat lists). A value present in
+ * neither list is `unresolved` for every requirement referencing it -- never
+ * inferred as included or excluded from silence.
+ */
+export interface AssessmentJurisdictionFacts {
+  included: string[]
+  excluded: string[]
+}
 
 /**
  * Only the two Phase 1 IMPLEMENTED fact sources -- see APPLICABILITY_FACTS'
  * own doc comment in types.ts for why the other three predicate types are
- * reserved, not evaluable, in Phase 1.
+ * reserved, not evaluable, in Phase 1. `jurisdiction`'s own shape widened
+ * 2026-08-28 (see AssessmentJurisdictionFacts above) from a single
+ * `Attested<string>` to membership over a cardinality-many assessment scope
+ * -- the fact NAME and its role in `ApplicabilityRequirement` are unchanged;
+ * only how it is satisfied changed, so no governed claim needs any edit.
  */
 export interface ApplicabilityFacts {
-  jurisdiction: Attested<string>
+  jurisdiction: AssessmentJurisdictionFacts
   toolMentions: ToolMention[]
 }
 
@@ -107,12 +132,52 @@ export interface ApplicabilityRequirementOutcome {
   status: ApplicabilityRequirementStatus
 }
 
+/**
+ * Jurisdiction membership check (CRC Assessment-Jurisdiction Mention Model,
+ * 2026-08-28). Deliberately a separate, self-contained three-way computation
+ * rather than reducing to the generic single-`actual`-string pattern the
+ * other two facts below still use -- `facts.jurisdiction` is now a
+ * cardinality-many membership set (AssessmentJurisdictionFacts), not a
+ * single attested value, so "the one confirmed value" no longer exists to
+ * compare. Canonicalization is applied to every value on both sides before
+ * comparison, same mechanism, same discipline as before this milestone.
+ *
+ * Precedence when a value appears in BOTH `included` and `excluded` after
+ * canonicalization (a malformed state that correct mutation invariants
+ * should make unreachable -- see supersedeAssessmentJurisdictionMention's
+ * own single-active-mention-per-chain guarantee; this is defensive, not
+ * expected): fail closed to `unresolved`, never guess by picking whichever
+ * list happens to be checked first. A requirement is `met` only when the
+ * required value is included AND not also excluded.
+ */
+function evaluateJurisdictionRequirementStatus(req: ApplicabilityRequirement, facts: AssessmentJurisdictionFacts): ApplicabilityRequirementStatus {
+  const canonicalRequired = canonicalizeJurisdictionValue(req.value)
+  const includedMatch = facts.included.some((v) => canonicalizeJurisdictionValue(v) === canonicalRequired)
+  const excludedMatch = facts.excluded.some((v) => canonicalizeJurisdictionValue(v) === canonicalRequired)
+
+  if (includedMatch && excludedMatch) return 'unresolved' // conflicting current state -- fail closed, never guess
+  const isIncluded = includedMatch
+  const isExcluded = excludedMatch
+
+  if (req.operator === 'equals') {
+    if (isIncluded) return 'met'
+    if (isExcluded) return 'not_met' // explicit exclusion -- silence is never treated this way, only a real confirmed_absent mention
+    return 'unresolved' // never addressed at all -- not established, not the same as excluded
+  }
+
+  // operator === 'not_equals': met when explicitly excluded, unresolved when
+  // never addressed (never guessed from silence), not_met when explicitly included.
+  if (isExcluded) return 'met'
+  if (isIncluded) return 'not_met'
+  return 'unresolved'
+}
+
 function evaluateRequirementStatus(req: ApplicabilityRequirement, facts: ApplicabilityFacts): ApplicabilityRequirementStatus {
+  if (req.fact === 'jurisdiction') return evaluateJurisdictionRequirementStatus(req, facts.jurisdiction)
+
   let actual: string | undefined
 
-  if (req.fact === 'jurisdiction') {
-    actual = facts.jurisdiction.state === 'confirmed' ? facts.jurisdiction.value : undefined
-  } else if (req.fact === 'tool_plan_tier') {
+  if (req.fact === 'tool_plan_tier') {
     const mention = facts.toolMentions.find(
       (m) => m.superseded_by === null && m.resolution.kind === 'canonical' && m.resolution.identifier === req.tool,
     )
@@ -137,13 +202,6 @@ function evaluateRequirementStatus(req: ApplicabilityRequirement, facts: Applica
   // for selector-questioning purposes (one is worth asking about, the other
   // never is).
   if (actual === undefined) return 'unresolved'
-
-  if (req.fact === 'jurisdiction') {
-    const canonicalActual = canonicalizeJurisdictionValue(actual)
-    const canonicalRequired = canonicalizeJurisdictionValue(req.value)
-    const matches = req.operator === 'equals' ? canonicalActual === canonicalRequired : canonicalActual !== canonicalRequired
-    return matches ? 'met' : 'not_met'
-  }
 
   const matches = req.operator === 'equals' ? actual === req.value : actual !== req.value
   return matches ? 'met' : 'not_met'

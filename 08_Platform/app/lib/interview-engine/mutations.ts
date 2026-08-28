@@ -21,6 +21,7 @@
  */
 
 import type {
+  AssessmentJurisdictionMention,
   AssetProviderMention,
   Attested,
   ScopedObservation,
@@ -278,6 +279,83 @@ export function supersedeAssetProviderMention(
     ...su,
     asset_provider_mentions: [
       ...su.asset_provider_mentions.map((m) =>
+        m.mention_id === targetId ? { ...m, superseded_by: replacement.mention_id } : m,
+      ),
+      replacement,
+    ],
+  }
+}
+
+// ── Assessment jurisdiction mentions (CRC Assessment-Jurisdiction Mention
+// Model, 2026-08-28) ─────────────────────────────────────────────────────────
+
+/**
+ * Mirrors addAssetProviderMention exactly -- same duplicate-id /
+ * already-superseded-on-add invariants, no cap (a user may legitimately ask
+ * for several distinct assessment jurisdictions). Pure and mechanical, same
+ * as every other function in this module -- WHETHER to seed a legacy scalar
+ * value before this call, or how to resolve a stated correction to a
+ * specific target mention_id, are policy decisions made by the caller
+ * (lib/crc-engine/assessment-jurisdiction-scope.ts), never by this function.
+ */
+export function addAssessmentJurisdictionMention(
+  su: StructuredUnderstanding,
+  mention: AssessmentJurisdictionMention,
+): StructuredUnderstanding {
+  if (su.assessment_jurisdiction_mentions.some((m) => m.mention_id === mention.mention_id)) {
+    throw new Error(`Assessment jurisdiction mention id already exists: ${mention.mention_id}`)
+  }
+  if (mention.superseded_by !== null) {
+    throw new Error(
+      `A newly added assessment jurisdiction mention cannot already be superseded (mention_id: ${mention.mention_id})`,
+    )
+  }
+  return {
+    ...su,
+    assessment_jurisdiction_mentions: [...su.assessment_jurisdiction_mentions, mention],
+  }
+}
+
+/**
+ * Mirrors supersedeAssetProviderMention exactly -- same invariants (target
+ * must exist and must currently be the active/non-superseded head of its
+ * chain). Used for BOTH a correction ("not New York -- California") and an
+ * explicit exclusion (a replacement carrying confidence: 'confirmed_absent')
+ * -- there is no separate exclusion function, mirroring UserGoal's own
+ * "correction and retraction are the same supersede-with-a-new-attested-
+ * value mechanism" precedent.
+ */
+export function supersedeAssessmentJurisdictionMention(
+  su: StructuredUnderstanding,
+  targetId: string,
+  replacement: AssessmentJurisdictionMention,
+): StructuredUnderstanding {
+  const target = su.assessment_jurisdiction_mentions.find((m) => m.mention_id === targetId)
+  if (!target) {
+    throw new Error(`Cannot supersede unknown assessment jurisdiction mention: ${targetId}`)
+  }
+  if (target.superseded_by !== null) {
+    throw new Error(
+      `Cannot supersede assessment jurisdiction mention ${targetId}: it is already superseded by ${target.superseded_by}. ` +
+      `Corrections must target the current head of the chain, not a historical snapshot.`,
+    )
+  }
+  if (replacement.mention_id === targetId) {
+    throw new Error(`Replacement assessment jurisdiction mention must have a different id than the mention it supersedes: ${targetId}`)
+  }
+  if (su.assessment_jurisdiction_mentions.some((m) => m.mention_id === replacement.mention_id)) {
+    throw new Error(`Replacement assessment jurisdiction mention id already exists: ${replacement.mention_id}`)
+  }
+  if (replacement.superseded_by !== null) {
+    throw new Error(
+      `A newly added replacement assessment jurisdiction mention cannot already be superseded (mention_id: ${replacement.mention_id})`,
+    )
+  }
+
+  return {
+    ...su,
+    assessment_jurisdiction_mentions: [
+      ...su.assessment_jurisdiction_mentions.map((m) =>
         m.mention_id === targetId ? { ...m, superseded_by: replacement.mention_id } : m,
       ),
       replacement,

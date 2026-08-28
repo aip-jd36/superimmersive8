@@ -50,8 +50,7 @@ const SYSTEM_PROMPT = `You are the candidate-observation extraction stage of a l
 For each distinct fact-bearing statement in the turn, produce one candidate:
 - kind "tool_mention": the user names an AI generation tool/platform/app they used to CREATE something (e.g. Runway, Kling, ElevenLabs). Never use this for a third-party source/stock media provider -- see "asset_provider_mention" below for that distinct concept.
 - kind "scoped_observation": a fact about the project's process, review, or workflow (e.g. who reviewed it, what stage it's at, whether something happened).
-- kind "project_fact": a fact about the overall project's intended use, the user's own role, which country's laws they say are relevant (jurisdiction), or what the user personally did to shape the final output (human_contribution_description). For jurisdiction specifically: only propose this when the user DIRECTLY states a country/jurisdiction in answer to a question about applicable law -- e.g. "United States", "we're based in Taiwan", "US copyright rules apply here". NEVER infer it from where they mention working, filming, their client's location, or any other indirect signal -- those are separate facts (e.g. workflow details), not a jurisdiction statement. If the user names more than one country or gives an ambiguous answer (e.g. "the client is American but we're filming in Taiwan"), do NOT propose a single jurisdiction value -- either propose nothing for this fact, or propose it with fact_confidence_hint "unknown" to reflect the genuine ambiguity, never guess which one governs.
-  EXCEPTION -- only when the message includes the "[Context: your immediately preceding question directly asked the user which country's copyright rules are most relevant...]" prefix (Second-Jurisdiction UX milestone, 2026-08-20): in that specific context, the user is directly answering CRC's own explicit legal-jurisdiction question, so a concise, otherwise-indirect-looking location reply -- a bare country name or common abbreviation ("US", "USA", "America", "Canada"), or a sentence naming where the client and/or project is based ("My client is in the US.", "The project is in the United States.", "We're in the US.") -- MAY be proposed as the jurisdiction answer (normalize a plain abbreviation/short form to its country name, e.g. "US"/"USA"/"America" -> "United States", exactly the same kind of ordinary normalization "we're based in Taiwan" already gets; do not invent aliases for countries not named). This exception applies ONLY to the turn carrying that exact context prefix. Without it, the original rule above (client/company location is never sufficient on its own) applies exactly as written -- do not apply this relaxed reading to any other turn, and it does not change the "more than one country / genuinely ambiguous" rule above, which still applies.
+- kind "project_fact": a fact about the overall project's intended use, the user's own role, or what the user personally did to shape the final output (human_contribution_description). Jurisdiction/assessment-scope statements are NOT a project_fact -- see kind "assessment_jurisdiction_mention" below for that distinct concept (CRC Assessment-Jurisdiction Mention Model, 2026-08-28; a project may legitimately have more than one, so it is no longer a single scalar fact).
   For human_contribution_description specifically: propose this when the user directly describes what THEY PERSONALLY did to shape the FINAL VIDEO ITSELF, beyond (or instead of) entering prompts -- e.g. "I only wrote prompts", "I trimmed the beginning and end", "I selected several clips and reordered them", "I edited timing, added transitions, and composited several generated elements". This is specifically about shaping the OUTPUT (selecting takes, arranging the sequence, editing, compositing, directing what was generated) -- it is NOT about sourcing, creating, or supplying INPUT MATERIAL or handling OTHER PROJECT LOGISTICS. Do NOT propose a human_contribution_description candidate for statements like "I sourced everything else on my end", "I uploaded the reference images", "I created the mood board", "I sourced the music", "I handled the client relationship", "I produced the campaign", "I made the logo card" -- these are about supplying/sourcing material or managing the project, a different and separate kind of fact (capture them as a scoped_observation if they are a real, distinct project fact worth recording; never fold them into human_contribution_description). This distinction matters most, and is easy to get wrong, once a description has already been given: see the "[Context: the user has ALREADY confirmed...]" prefix below.
   Report the user's own description in compact free text via fact_value_hint, preserving what they actually said they did. You MUST NOT normalize, categorize, or rank this into any of "none"/"low"/"medium"/"high"/"meaningful"/"substantial"/"sufficient" or any other graded/legal-weight label -- this field records WHAT the user says they did, never HOW MUCH or WHETHER it counts for anything.
   When the turn begins with a line reading "[Context: the user has ALREADY confirmed this description of what they personally did to shape the video: "...".]" -- that is the CURRENT, real, already-confirmed value, given to you specifically because you have NO memory of prior turns. Read it. Only propose a NEW human_contribution_description candidate if the rest of the turn CLEARLY corrects or extends that specific description -- e.g. "Actually, I also did a lot of compositing", "Correction -- I didn't do the editing myself, my editor did", "I also arranged the sequence" -- and when you do, set is_correction: true, correction_of_raw_text to a short quote/paraphrase of the part being extended or corrected, and fact_value_hint to the COMPLETE UPDATED description (the preserved existing detail PLUS the new/corrected detail combined into one full statement, never just the new sentence alone). If the rest of the turn is about something else entirely -- sourcing, assets, logistics, or any of the excluded categories above, even one that superficially uses first-person creation verbs -- do NOT propose a human_contribution_description candidate at all, regardless of that context line being present; the existing confirmed value must be left untouched.
@@ -64,6 +63,12 @@ For each distinct fact-bearing statement in the turn, produce one candidate:
   - Set confidence to "confirmed" only when the user stated it as a clear, direct fact this turn. Omit the entry entirely (do not include a "usage"/"license" entry at all) when the turn says nothing about that provider's usage or license -- never inferred from generic context.
   - CRITICAL multi-provider safety: only add a usage/license entry on a candidate when it is clear which SPECIFIC provider the statement refers to. If more than one provider is active in the conversation and the turn's usage/license statement does not clearly attach to one of them (e.g. "I have the standard license" with both Getty and iStock already mentioned and no other cue), omit the usage/license entry entirely on every candidate this turn -- do NOT guess which provider it belongs to, and do NOT attach it to whichever provider happens to be mentioned first.
   - These entries can also appear on a candidate that corrects/restates the SAME provider already mentioned earlier (e.g. "Actually, those were Editorial-use iStock images.") -- propose it the same way any other asset_provider_mention correction is proposed, with the corrected usage/license entry included.
+- kind "assessment_jurisdiction_mention" (CRC Assessment-Jurisdiction Mention Model, 2026-08-28): the user explicitly asks CRC to consider governed knowledge scoped to a specific jurisdiction -- a country, or a specific state/province, or a supranational body (e.g. "the EU") -- report the exact value via raw_jurisdiction_value. This records ONLY that the user asked CRC to consider that jurisdiction -- it never means CRC has determined that jurisdiction's law actually governs the project, and it is NOT a factual-geography fact.
+  Only propose this when the user DIRECTLY states a jurisdiction in answer to a question about what CRC should consider, or unprompted but unambiguously framed as a request for CRC to consider it (e.g. "Please check this for New York", "We want this assessed against US and UK rules", "Also consider New York"). NEVER infer it from where they mention working, filming, their client's location, a depicted person's location, or where the project will be distributed -- those are separate, unrelated facts (workflow/scoped_observation, if worth recording at all), never an assessment-jurisdiction statement, regardless of how specific or confident the location detail is.
+  EXCEPTION -- only when the message includes a "[Context: your immediately preceding question asked which jurisdiction(s) CRC should consider...]" prefix: in that specific context, the user is directly answering CRC's own explicit assessment-scope question, so a concise, otherwise-indirect-looking reply -- a bare country/state name or common abbreviation ("US", "USA", "NY"), or a sentence naming where the client/project is based ("My client is in the US.", "We're in New York.") -- MAY be proposed as the jurisdiction answer. This exception applies ONLY to the turn carrying that exact context prefix; without it, the rule above (location mentions are never sufficient on their own) applies exactly as written.
+  If the user names more than one jurisdiction in one statement (e.g. "New York and California"), propose one separate assessment_jurisdiction_mention candidate per jurisdiction named -- never merge them, never pick one, never guess which one "counts."
+  Exclusion: if the user explicitly says CRC should NOT consider a jurisdiction (e.g. "don't assess New York", "US only, not New York"), propose the candidate exactly as above but set is_jurisdiction_exclusion: true. Never set this from silence or from the jurisdiction simply not being mentioned -- only from an explicit negative statement.
+  Correction: if this statement reverses or replaces what was said earlier about a SPECIFIC jurisdiction already established this conversation (e.g. "Not New York -- California" when New York was previously included; "Actually, don't assess New York after all" when New York was previously included; "Include New York after all" when it was previously excluded), set is_correction: true and correction_of_raw_text to the EXACT jurisdiction value being replaced/reversed (e.g. "New York") -- deterministic code, never you, resolves which existing mention this refers to, and will leave the state unresolved/ambiguous rather than guess if it cannot find exactly one match. Do NOT set is_correction for a plain addition alongside still-valid earlier jurisdictions (e.g. "Also assess New York" when United States was already included and remains wanted) -- that is a fresh candidate with no correction fields set.
 
 Third-party source rights is its own user_goal category (see goal_category_hint below) for whether the user has the RIGHTS to use third-party source material (e.g. a stock image) in the project -- a materially different question from commercial_use (whether the AI-generated OUTPUT can be used commercially). This category is EXPLICIT-QUESTION-GATED ONLY, exactly like every other goal category: propose it only when the user asks a direct question or states a direct need about permission/rights to use the source material.
 Examples that SHOULD produce a third_party_source_rights user_goal: "Can I use this Getty image in an ad?", "Can I use these iStock images in my client commercial?", "Do I have the rights to use this stock image?", "Can I use a Shutterstock Editorial photo in this campaign?", "Am I allowed to use this licensed stock footage in the video?".
@@ -125,11 +130,24 @@ When kind is "tool_mention" and the user DIRECTLY states which specific plan/tie
 
 If a turn contains nothing you can classify as one of the four kinds -- small talk, an incomplete thought, pure filler -- return no candidates for it, or set low_confidence: true on a best-effort candidate if you're genuinely unsure whether something is a real signal.`
 
-const CANDIDATE_KIND_VALUES = ['tool_mention', 'scoped_observation', 'project_fact', 'user_goal', 'asset_provider_mention'] as const
+const CANDIDATE_KIND_VALUES = ['tool_mention', 'scoped_observation', 'project_fact', 'user_goal', 'asset_provider_mention', 'assessment_jurisdiction_mention'] as const
 const OBSERVATION_SCOPE_VALUES = ['current_project', 'historical_project', 'general_practice'] as const
 const WORKFLOW_STAGE_VALUES = ['T0', 'T1', 'T2', 'T3', 'T4', 'T5'] as const
 const CONFIDENCE_HINT_VALUES = ['confirmed', 'confirmed_absent', 'unresolved_no_visibility', 'unknown', 'declined'] as const
-const PROJECT_FACT_FIELD_VALUES = ['intended_use', 'workflow_role', 'jurisdiction', 'human_contribution_description'] as const
+/**
+ * `'jurisdiction'` removed from this wire-schema enum (CRC Assessment-
+ * Jurisdiction Mention Model, 2026-08-28) -- the model may no longer
+ * propose a jurisdiction project_fact candidate at all; see kind
+ * "assessment_jurisdiction_mention" instead. `raw_fact_field`'s own
+ * CandidateObservation type (extraction.ts) still accepts 'jurisdiction'
+ * internally (setJurisdiction/the legacy scalar mutation still exist,
+ * used only by the legacy-scalar compatibility bridge and any existing
+ * test fixture), but this adapter's own live schema can never emit it
+ * again -- this is the actual, enforced new-session cutover (see
+ * assessment-jurisdiction-scope.ts's own header for why no separate
+ * launch-marker timestamp is needed).
+ */
+const PROJECT_FACT_FIELD_VALUES = ['intended_use', 'workflow_role', 'human_contribution_description'] as const
 /** Milestone 2 (2026-08-15); extended with 'third_party_source_rights' (Living Knowledge — Third-Party Source Rights, M1+M2, 2026-08-18). Mirrors GOAL_CATEGORIES / GOAL_SCOPES in types/interview-engine.ts -- kept as separate local consts here, same pattern as every other *_VALUES const in this file, rather than importing the runtime const array across the adapter boundary. */
 const GOAL_CATEGORY_VALUES = ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'third_party_source_rights', 'unknown'] as const
 const GOAL_SCOPE_VALUES = ['informational', 'determination_request'] as const
@@ -192,6 +210,16 @@ export const CANDIDATE_RESPONSE_SCHEMA = {
             type: ['string', 'null'],
             description:
               'When kind is asset_provider_mention: return ONLY the third-party source/stock media provider name itself (e.g. "Getty", "Getty Images", "iStock", "Shutterstock", "Adobe Stock"), preserving the user\'s wording. Never a tool/platform used to generate content -- see raw_tool_name for that. Never map it to a canonical id yourself. Null otherwise.',
+          },
+          raw_jurisdiction_value: {
+            type: ['string', 'null'],
+            description:
+              'When kind is assessment_jurisdiction_mention: return ONLY the jurisdiction itself (e.g. "United States", "New York", "the EU"), preserving the user\'s wording, exactly as named. Never map it to a canonical/normalized form yourself. If the user names more than one jurisdiction in one statement, propose one separate candidate per jurisdiction. Null otherwise.',
+          },
+          is_jurisdiction_exclusion: {
+            type: 'boolean',
+            description:
+              'When kind is assessment_jurisdiction_mention: true only when the user explicitly said CRC should NOT consider this jurisdiction (e.g. "don\'t assess New York"). Never true from silence or from a jurisdiction simply not being mentioned. False/unset for an ordinary inclusion.',
           },
           attributes: {
             type: 'array',
@@ -295,6 +323,8 @@ export const CANDIDATE_RESPONSE_SCHEMA = {
           'kind',
           'raw_tool_name',
           'raw_provider_name',
+          'raw_jurisdiction_value',
+          'is_jurisdiction_exclusion',
           'attributes',
           'is_correction',
           'correction_of_raw_text',
@@ -330,6 +360,8 @@ interface ParsedCandidate {
   kind: (typeof CANDIDATE_KIND_VALUES)[number]
   raw_tool_name: string | null
   raw_provider_name: string | null
+  raw_jurisdiction_value: string | null
+  is_jurisdiction_exclusion: boolean
   attributes: ParsedExtractedAttribute[]
   is_correction: boolean
   correction_of_raw_text: string | null
@@ -407,6 +439,8 @@ export function toCandidateObservation(parsed: ParsedCandidate, turn: number): C
     kind: parsed.kind,
     raw_tool_name: parsed.raw_tool_name ?? undefined,
     raw_provider_name: parsed.raw_provider_name ?? undefined,
+    raw_jurisdiction_value: parsed.raw_jurisdiction_value ?? undefined,
+    is_jurisdiction_exclusion: parsed.is_jurisdiction_exclusion || undefined,
     usage_confidence_hint: usage?.confidence,
     usage_value_hint: usageValue,
     license_confidence_hint: license?.confidence,
@@ -785,8 +819,14 @@ export function buildUserMessageContent(turn: RawUserTurn): string {
     )
   }
   if (turn.answering_jurisdiction_question) {
+    // Generalized (CRC Assessment-Jurisdiction Mention Model, 2026-08-28)
+    // from a Copyright- and country-specific prefix to a generic
+    // assessment-scope one, matching the underlying trigger
+    // (BoundaryState.jurisdiction_clarification_pending_answer), which was
+    // already fully generic and needed no change -- see jurisdiction-
+    // clarification.ts's own generalized JURISDICTION_CLARIFICATION_QUESTION.
     contextLines.push(
-      `[Context: your immediately preceding question directly asked the user which country's copyright rules are most relevant to this project -- an explicit legal-jurisdiction question. See the jurisdiction guidance in your system prompt for how this changes what counts as a valid jurisdiction answer for this reply only.]`,
+      `[Context: your immediately preceding question directly asked the user which jurisdiction(s) CRC should consider for this assessment -- an explicit assessment-scope question, not a request for the user to determine which law governs. See the assessment_jurisdiction_mention guidance in your system prompt for how this changes what counts as a valid answer for this reply only.]`,
     )
   }
   if (contextLines.length === 0) return turn.text

@@ -19,6 +19,7 @@ export function emptyStructuredUnderstanding(): StructuredUnderstanding {
     scoped_observations: [],
     user_goals: [],
     asset_provider_mentions: [],
+    assessment_jurisdiction_mentions: [],
     current_phase: 1,
     gate_1_state: 'not_met',
     gate_2_state: 'not_yet_stable',

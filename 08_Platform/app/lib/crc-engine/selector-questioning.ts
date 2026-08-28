@@ -63,6 +63,7 @@ import { deriveApplicabilityReadinessGaps } from '@/lib/retrieval-engine/applica
 import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
 import type { ApplicabilityFact, ApplicabilityRequirement, MatrixRow, TopicClaim, UnmetApplicabilityDetail } from '@/lib/retrieval-engine/types'
 import { getSelectorAskabilityEntry } from './selector-askability'
+import { deriveAssessmentJurisdictionFacts } from './assessment-jurisdiction-scope'
 
 /**
  * Facts owned entirely by a pre-existing, dedicated deterministic module --
@@ -85,7 +86,11 @@ export interface SelectorNeed {
 
 function buildApplicabilityFacts(understanding: StructuredUnderstanding): ApplicabilityFacts {
   return {
-    jurisdiction: understanding.project_facts.jurisdiction.attestation,
+    // CRC Assessment-Jurisdiction Mention Model (2026-08-28): same fix as
+    // run-crc-conversation.ts's own applicability-facts construction --
+    // sourced from the single, generic derivation, never the legacy scalar
+    // directly.
+    jurisdiction: deriveAssessmentJurisdictionFacts(understanding),
     toolMentions: understanding.tool_mentions,
   }
 }

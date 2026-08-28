@@ -76,6 +76,7 @@ import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-cla
 import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
 import type { GoalCategory, GoalScope } from '@/types/interview-engine'
 import type { InterpretationStatus } from '@/lib/bounded-interpretation/types'
+import { deriveAssessmentJurisdictionFacts } from '@/lib/crc-engine/assessment-jurisdiction-scope'
 
 const client = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 
@@ -127,13 +128,18 @@ async function main() {
       tally(scopeCounts, g.scope)
     }
 
-    const jurisdictionState = su.project_facts.jurisdiction.attestation.state
-    const jurisdictionUnresolved = jurisdictionState !== 'confirmed' && jurisdictionState !== 'declined'
+    // CRC Assessment-Jurisdiction Mention Model (2026-08-28): reads the same
+    // generic derivation the live pipeline now uses (included/excluded
+    // scope), rather than the legacy scalar directly -- this report would
+    // otherwise silently freeze at pre-cutover data for every session going
+    // forward, since new sessions never populate the scalar at all.
+    const assessmentJurisdictionFacts = deriveAssessmentJurisdictionFacts(su)
+    const jurisdictionUnresolved = assessmentJurisdictionFacts.included.length === 0 && assessmentJurisdictionFacts.excluded.length === 0
     if (jurisdictionUnresolved) sessionsWithUnresolvedJurisdiction += 1
 
     // Recompute against TODAY's Matrix + Governed Claims -- see module header.
     const handoff = buildRetrievalHandoff(su)
-    const applicabilityFacts: ApplicabilityFacts = { jurisdiction: su.project_facts.jurisdiction.attestation, toolMentions: su.tool_mentions }
+    const applicabilityFacts: ApplicabilityFacts = { jurisdiction: assessmentJurisdictionFacts, toolMentions: su.tool_mentions }
     const { results, diagnostics } = retrieve(handoff, MATRIX_FIXTURE, su.user_goals, TOPIC_CLAIMS_FIXTURE, applicabilityFacts, [], handoff.asset_providers)
     const interpretations = buildBoundedInterpretations(su.user_goals, results)
     for (const interp of interpretations) {

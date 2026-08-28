@@ -16,6 +16,7 @@
  */
 
 import { runTurn, type RunTurnDeps } from '@/lib/crc-engine/run-turn'
+import { deriveAssessmentJurisdictionFacts } from '@/lib/crc-engine/assessment-jurisdiction-scope'
 import { createInMemorySessionStore } from '@/lib/crc-engine/in-memory-session-store'
 import { constantExtractor } from '@/lib/interview-engine/mock-extractor'
 import { constantCandidateQuestionGenerator } from '@/lib/interview-engine/mock-candidate-question'
@@ -205,7 +206,7 @@ describe('ToolMention Supersession Fact Persistence -- product-consequence regre
     const handoff = buildRetrievalHandoff(su)
     const confirmedGoal = su.user_goals.find((g) => g.superseded_by === null && g.state === 'confirmed')!
     const retrievalResult = retrieve(handoff, MATRIX_FIXTURE, [confirmedGoal], [], {
-      jurisdiction: su.project_facts.jurisdiction.attestation,
+      jurisdiction: deriveAssessmentJurisdictionFacts(su),
       toolMentions: su.tool_mentions,
     })
     const [interpretation] = buildBoundedInterpretations([confirmedGoal], retrievalResult.results, retrievalResult.diagnostics)

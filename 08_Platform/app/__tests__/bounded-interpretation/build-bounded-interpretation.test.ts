@@ -215,7 +215,7 @@ describe('buildBoundedInterpretations -- source-aware boundary clause (LK Phase 
     }
   }
 
-  const testFacts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+  const testFacts: ApplicabilityFacts = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
 
   test('tool-sourced-only match gets the EXACT original platform-terms boundary, byte-for-byte unchanged (hard requirement: tool behavior unchanged)', () => {
     const out = retrieve(handoff({ tools: [tool('runway-gen3')] }), MATRIX_FIXTURE)
@@ -282,8 +282,8 @@ describe('buildBoundedInterpretations -- Case 3A / Case 3B relevant_applicabilit
     }
   }
 
-  const usFacts: ApplicabilityFacts = { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] }
-  const unknownFacts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+  const usFacts: ApplicabilityFacts = { jurisdiction: { included: ['United States'], excluded: [] }, toolMentions: [] }
+  const unknownFacts: ApplicabilityFacts = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
 
   test('Case 3A -- eligible claim exists, jurisdiction unknown -> relevant_applicability_unresolved, substantive claim text NOT exposed', () => {
     const topicClaims = [
@@ -612,7 +612,7 @@ describe('buildBoundedInterpretations -- CC-1 Claim-Level Bounded Grouping', () 
   const noConclusionLanguage =
     /\bresolved\b|\bunresolved_issue_resolved\b|\bappears resolved\b|\bsatisfied\b|\bverified\b|\bchecked\b|\bcleared\b|\bsafe\b|\bapproved\b|commercially usable|not a blocker|not the issue|no longer an issue/i
 
-  const facts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+  const facts: ApplicabilityFacts = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
 
   test('1. single claim, empty dependency array -- unaffected by CC-1, no generated conclusion language', () => {
     const claims = [testTopicClaim({ claim_id: 'NO-DEP', topic: 'copyrightability', crc_candidate_statement: 'A dependency-free governed statement.' })]
@@ -768,7 +768,7 @@ describe('buildBoundedInterpretations -- CC-2 Semantics-Preserving Rhetorical Co
   const noConclusionLanguage =
     /\bresolved\b|\bappears resolved\b|\bsatisfied\b|\bverified\b|\bchecked\b|\bcleared\b|\bsafe\b|\bapproved\b|commercially usable|not a blocker|\bblocker\b|main concern|material issue|material unresolved issue|most important issue|only remaining issue|not the issue|no longer an issue|primary blocker|because of this|therefore/i
 
-  const facts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+  const facts: ApplicabilityFacts = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
 
   test('mixed-group repetition reduction: "This is relevant to" is asserted exactly once, not twice, in a mixed dependency-free + dependency-bearing answer', () => {
     const claims = [
@@ -822,7 +822,7 @@ describe('buildBoundedInterpretations -- CC-2 Semantics-Preserving Rhetorical Co
       superseded_by: null,
     }
     const g = goal({ goal_id: 'g-1', raw_text: 'Do I own the copyright?', category: 'copyright_ownership' })
-    const usFacts: ApplicabilityFacts = { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] }
+    const usFacts: ApplicabilityFacts = { jurisdiction: { included: ['United States'], excluded: [] }, toolMentions: [] }
     const out = retrieve(handoff(), MATRIX_FIXTURE, [g], [copyOwnershipDirect, copyrightabilityDep], usFacts, [relationship])
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
     expect(interp.summary.match(/This is relevant to/g)).toHaveLength(1)
@@ -881,7 +881,7 @@ describe('buildBoundedInterpretations -- CC-2 Semantics-Preserving Rhetorical Co
       }),
     ]
     const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
-    const unknownFacts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+    const unknownFacts: ApplicabilityFacts = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
     const out = retrieve(handoff(), MATRIX_FIXTURE, [g], topicClaims, unknownFacts)
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
     expect(interp.status).toBe('relevant_applicability_unresolved')
@@ -911,7 +911,7 @@ describe('buildBoundedInterpretations -- Phase 1 summary_blocks structural equiv
     }
   }
 
-  const facts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+  const facts: ApplicabilityFacts = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
 
   test('structural equivalence: summary_blocks.join(\' \') reconstructs summary byte-for-byte, for every status', () => {
     const cases: Array<{ label: string; goals: ReturnType<typeof goal>[]; claims: TopicClaim[] }> = [
@@ -954,7 +954,7 @@ describe('buildBoundedInterpretations -- Phase 1 summary_blocks structural equiv
       }),
     ]
     const g = goal({ goal_id: 'g-1', raw_text: 'Is this copyrightable?', category: 'copyrightability' })
-    const unknownFacts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+    const unknownFacts: ApplicabilityFacts = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
     const out = retrieve(handoff(), MATRIX_FIXTURE, [g], topicClaims, unknownFacts)
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
     expect(interp.summary_blocks).toEqual([interp.summary])
@@ -1020,7 +1020,7 @@ describe('buildBoundedInterpretations -- Phase 1 summary_blocks structural equiv
       superseded_by: null,
     }
     const g = goal({ goal_id: 'g-1', raw_text: 'Do I own the copyright?', category: 'copyright_ownership' })
-    const usFacts: ApplicabilityFacts = { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] }
+    const usFacts: ApplicabilityFacts = { jurisdiction: { included: ['United States'], excluded: [] }, toolMentions: [] }
     const out = retrieve(handoff(), MATRIX_FIXTURE, [g], [noDep, copyrightabilityDep], usFacts, [relationship])
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics, { state: 'confirmed', value: 'I only wrote prompts.' })
     expect(interp.summary_blocks).toHaveLength(2)
@@ -1087,8 +1087,8 @@ describe('buildBoundedInterpretations -- never fabricates, never invents claim c
 })
 
 describe('buildBoundedInterpretations -- Case 3A reuse for a Matrix-origin applicability_unmet diagnostic (CRC Narrow Matrix Applicability milestone, 2026-08-23)', () => {
-  const usFacts: ApplicabilityFacts = { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] }
-  const unknownFacts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
+  const usFacts: ApplicabilityFacts = { jurisdiction: { included: ['United States'], excluded: [] }, toolMentions: [] }
+  const unknownFacts: ApplicabilityFacts = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
 
   test('a gated Matrix claim with jurisdiction unknown -> relevant_applicability_unresolved, exactly as an equivalent TopicClaim diagnostic already does -- no Matrix-specific BI branch exists or is needed', () => {
     const gatedRow: MatrixRow = {
@@ -1182,9 +1182,15 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
     }
   }
 
-  const unknownFacts: ApplicabilityFacts = { jurisdiction: { state: 'unknown' }, toolMentions: [] }
-  const usFacts: ApplicabilityFacts = { jurisdiction: { state: 'confirmed', value: 'United States' }, toolMentions: [] }
-  const mismatchedFacts: ApplicabilityFacts = { jurisdiction: { state: 'confirmed', value: 'Canada' }, toolMentions: [] }
+  const unknownFacts: ApplicabilityFacts = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
+  const usFacts: ApplicabilityFacts = { jurisdiction: { included: ['United States'], excluded: [] }, toolMentions: [] }
+  // Assessment-Jurisdiction Mention Model (2026-08-28): a genuine not_met now
+  // requires an EXPLICIT exclusion -- confirming a different jurisdiction
+  // (e.g. Canada) alone no longer implies United States is excluded; it's
+  // unresolved. Every `mismatchedFacts` use below is deliberately testing
+  // "known not applicable" (not_met) behavior, so this fixture uses an
+  // explicit exclusion to keep genuinely exercising that path.
+  const mismatchedFacts: ApplicabilityFacts = { jurisdiction: { included: [], excluded: ['United States'] }, toolMentions: [] }
 
   /**
    * Freshly-discovered during this milestone's own test execution (not
@@ -1331,7 +1337,10 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
       }),
     ]
     const facts: ApplicabilityFacts = {
-      jurisdiction: { state: 'confirmed', value: 'Canada' }, // mismatched -> not_met for NOT-APPLICABLE
+      // Assessment-Jurisdiction Mention Model (2026-08-28): a genuine not_met
+      // now requires an EXPLICIT exclusion, not merely a different included
+      // value.
+      jurisdiction: { included: [], excluded: ['United States'] }, // explicitly excluded -> not_met for NOT-APPLICABLE
       toolMentions: [toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'test-tool' } })], // plan_tier unknown -> unresolved for UNRESOLVED
     }
     const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
@@ -1361,7 +1370,7 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
       }),
     ]
     const facts: ApplicabilityFacts = {
-      jurisdiction: { state: 'unknown' },
+      jurisdiction: { included: [], excluded: [] },
       toolMentions: [
         toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'test-tool' } }),
         toolMention({ mention_id: 'tm-2', resolution: { kind: 'canonical', identifier: 'test-tool-2' } }),
