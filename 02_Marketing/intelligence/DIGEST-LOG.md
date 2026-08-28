@@ -9,6 +9,45 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of August 28, 2026
+*Run: 2026-08-28 · 14 high · 10 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Seen an ad with an AI influencer or actor? It may be against the law.](https://mashable.com/tech/synthetic-performer-disclosure-new-york-state-law-first-complaints) | Mashable | Thu, 27 Aug 2026 | ☐ |
+| 9 | post+update | [When the Algorithm Pours: How AI-Generated Imagery Is Testing the Boundaries of Alcohol Advertising Regulation](https://www.regulatoryoversight.com/2026/08/when-the-algorithm-pours-how-ai-generated-imagery-is-testing-the-boundaries-of-alcohol-advertising-regulation/) | regulatoryoversight.com | Tue, 25 Aug 2026 | ☐ |
+| 9 | post+update | [IAB updates AI disclosure rules for advertisers](https://www.contentgrip.com/iab-ai-disclosure-framework/) | ContentGrip | Fri, 21 Aug 2026 | ☐ |
+| 8 | post+update | [AI exclusions in D&O and E&O coverage: What insurers and insureds need to know](https://www.dentons.com/en/insights/articles/2026/august/27/ai-exclusions-in-d-and-o-and-e-and-o-coverage) | Dentons | Thu, 27 Aug 2026 | ☐ |
+| 8 | post+update | [AI Replicas Put Fashion Brands at Risk](https://www.law.com/newyorklawjournal/2026/08/24/ai-replicas-put-fashion-brands-at-risk/) | Law.com | Thu, 27 Aug 2026 | ☐ |
+| 8 | post+update | [IAB updates AI disclosure guidance as regulators tighten rules around AI-generated advertising](https://www.marketingtechnews.net/news/iab-updates-ai-disclosure-guidance-as-regulators-tighten-rules-around-ai-generated-advertising/) | Marketing Tech News | Thu, 27 Aug 2026 | ☐ |
+| 8 | post+update | [Regulating the Illusion of Intelligence in Ads](https://www.asa.org.uk/news/regulating-the-illusion-of-intelligence-in-ads.html) | ASA \| CAP | Thu, 27 Aug 2026 | ☐ |
+| 8 | post+update | [How Does the Industry Get AI Disclosure Right?](https://hellopartner.com/how-does-the-industry-get-ai-disclosure-right/) | Hello Partner | Wed, 26 Aug 2026 | ☐ |
+| 8 | post+update | [The AI clause that may already be on your contractor client's policy](https://www.insurancebusinessmag.com/us/news/sme/the-ai-clause-that-may-already-be-on-your-contractor-clients-policy-587395.aspx) | Insurance Business | Tue, 25 Aug 2026 | ☐ |
+| 8 | update | [The Regulatory Ledger, Edition 1: The Complete Map of AI Regulation, August 2026](https://medium.com/@adnanmasood/the-regulatory-ledger-edition-1-the-complete-map-of-ai-regulation-august-2026-b6b7d6e20fb0) | Medium | Sat, 22 Aug 2026 | ☐ |
+| 7 | post+update | [Booking.com's AI advertising backlash despite full disclosure](https://www.rentalscaleup.com/booking-com-ai-advertising-backlash-2026/) | RSU by PriceLabs | Thu, 27 Aug 2026 | ☐ |
+| 7 | post+update | [Dentsu signs EU Code on AI Transparency](https://marketingreport.one/ai-for-marketing/dentsu-signs-eu-code-on-ai-transparency.html) | marketingreport.one | Thu, 27 Aug 2026 | ☐ |
+| 7 | post+update | [USA Today reformats content for AI licensing](https://www.contentgrip.com/usa-today-ai-licensing/) | ContentGrip | Wed, 26 Aug 2026 | ☐ |
+| 7 | post+update | [Everyone read 'EU Delays AI Act' wrong, here's the actual timeline](https://securitybrief.co.uk/story/everyone-read-eu-delays-ai-act-wrong-here-s-the-actual-timeline) | SecurityBrief UK | Wed, 26 Aug 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Vobile Group’s AI Push Drives Surge in Interim Profit and New Copyright RWA Project](https://www.tipranks.com/news/company-announcements/vobile-groups-ai-push-drives-surge-in-interim-profit-and-new-copyright-rwa-project) | TipRanks | Thu, 27 Aug 2026 | ☐ |
+| 6 | monitor | [ASA guidance on advertising AI assistants and chatbots](https://www.resultsense.com/news/2026-08-27-asa-ai-assistant-ad-claims/) | Resultsense | Thu, 27 Aug 2026 | ☐ |
+| 6 | update | [Claude Watermarks Adopt SynthID Compliance](https://blockchain.news/ainews/claude-watermarks-adopt-synthid-compliance) | blockchain.news | Wed, 26 Aug 2026 | ☐ |
+| 6 | update | [Who’s suing AI and who’s signing latest: Editorial Perfil sues OpenAI, News Corp vs Brave](https://pressgazette.co.uk/platforms/news-publisher-ai-deals-lawsuits-openai-google/) | Press Gazette | Wed, 26 Aug 2026 | ☐ |
+| 6 | monitor | [The FTC Has Policed 13 AI Cases. None Target Agent Behavior.](https://forkast.news/the-ftc-has-policed-13-ai-cases-none-target-agent-behavior/) | forkast.news | Sat, 22 Aug 2026 | ☐ |
+| 5 | monitor | [The case for craft: How AI can help directors who know what they’re looking for](https://adage.com/studio-30/publishing-partners/aa-the-case-for-craft-how-ai-can-help-directors-who-know-what-theyre-looking-for/) | Ad Age | Wed, 26 Aug 2026 | ☐ |
+| 5 | monitor | [BMA Webinar: Intelligent Media Asset Management For The AI Era](https://news.broadcastmediaafrica.com/2026/08/24/bma-webinar-the-intelligent-media-asset-management-mam-hub-transforming-content-management-for-the-ai-era/) | Broadcast Media Africa | Mon, 24 Aug 2026 | ☐ |
+| 5 | monitor | [Why AI content labeling could hurt human authors](https://forklog.com/en/why-ai-content-labeling-could-hurt-human-authors/) | ForkLog | Fri, 21 Aug 2026 | ☐ |
+| 4 | monitor | [Why Ecommerce Sellers Can Bring More Ad-Video Production In-House with AI in 2026](https://www.bignewsnetwork.com/news/279266964/why-ecommerce-sellers-can-bring-more-ad-video-production-in-house-with-ai-in-2026) | Big News Network.com | Wed, 26 Aug 2026 | ☐ |
+| 4 | monitor | [Adobe vs Higgsfield: two AI video growth strategies](https://www.contentgrip.com/adobe-higgsfield-ai-video/) | ContentGrip | Mon, 24 Aug 2026 | ☐ |
+
+---
+
 ## Week of August 25, 2026
 *Run: 2026-08-25 · 15 high · 6 monitor · lookback 7 days*
 
