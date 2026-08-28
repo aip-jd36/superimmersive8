@@ -370,11 +370,13 @@ export type ContentPresenceCategory = (typeof CONTENT_PRESENCE_CATEGORIES)[numbe
  *     mention/supersession correction in this codebase ever performs (every
  *     precedent -- AssetProviderMention, ToolMention,
  *     AssessmentJurisdictionMention, scalar AttestedFact corrections -- is
- *     strict 1:1 supersession, never a 1-to-many split). See
- *     `resolveContentPresenceMentionTarget`'s own header (mutations
- *     consumer, extraction.ts) for how this is instead handled as a plain
- *     addition, never a fabricated decomposition. The literal count, if the
- *     user states one, survives only in `source_statement`.
+ *     strict 1:1 supersession, never a 1-to-many split). Content-presence
+ *     free-form extraction is append-only precisely because no such 1:1
+ *     target can ever be established without a count/identity this type
+ *     deliberately never carries (Content-Presence Correction Safety —
+ *     Append-Only Closure, 2026-08-28) -- see `superseded_by`'s own doc
+ *     comment below. The literal count, if the user states one, survives
+ *     only in `source_statement`.
  *   - `recognizability` -- the governed claim's own Prohibited Conclusions
  *     text makes any structured recognizability value permanently unusable
  *     for a downstream conclusion regardless of how it's captured; a
@@ -411,15 +413,29 @@ export type ContentPresenceCategory = (typeof CONTENT_PRESENCE_CATEGORIES)[numbe
  * `attestCandidate` (extraction.ts) is the single place this value is read
  * out of the generic wire-level `attributes[]` array and attached here.
  *
- * `superseded_by` follows the same supersede-and-mark discipline as every
- * other mention type in this file -- a correction never deletes or edits a
- * prior mention in place. See `resolveContentPresenceMentionTarget`
- * (extraction.ts) for the code-side, fail-closed-on-ambiguity target
- * resolution this type's cardinality-many shape requires -- multiple active
- * mentions represent multiple independently-stated (category ×
- * real_or_synthetic) propositions, NEVER one mention per literal individual
- * (no identity is ever tracked; "three people appear" produces exactly ONE
- * mention, with "three" surviving only in `source_statement`).
+ * `superseded_by` exists on this type for structural consistency with every
+ * other mention type in this file, but -- unlike those types -- free-form
+ * extraction NEVER sets it here. Content-Presence Correction Safety —
+ * Append-Only Closure (2026-08-28) established that logical conflict
+ * between two content-presence propositions (e.g. a later `absent` matching
+ * an earlier `present`) is NOT proof that the user intended to retract the
+ * earlier one: this type deliberately carries no count, individual
+ * identity, or project/temporal scope, so a free-form correction statement
+ * can never be matched to a single, deterministic, provably-correct prior
+ * target (a category can legitimately hold many independently-true
+ * propositions at once -- "three people appear" produces exactly ONE
+ * mention, with "three" surviving only in `source_statement` -- and even an
+ * apparently-contradicting later statement may describe a different
+ * project version/scope this type has no field to record). Every new
+ * content-presence candidate from ordinary conversation is therefore always
+ * a plain addition (`addContentPresenceMention`), never a supersession --
+ * see `runExtractionPipeline`'s content-presence dispatch branch
+ * (extraction.ts), which calls only that function for this candidate kind.
+ * `superseded_by` remains `null` for every mention this pipeline produces
+ * and is reserved, unused, for a future SYSTEM-controlled correction
+ * mechanism (CRC itself selecting the exact target `mention_id` before
+ * asking a targeted question -- never the model or user choosing it) --
+ * not implemented, not scheduled, by this milestone.
  */
 export interface ContentPresenceMention {
   mention_id: string

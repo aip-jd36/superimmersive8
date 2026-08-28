@@ -1,18 +1,39 @@
 /**
  * Content-Presence Mention Model tests (CRC Content-Presence Mention Model —
- * Generic Implementation, 2026-08-28).
+ * Generic Implementation, 2026-08-28; corrected by Content-Presence
+ * Correction Safety — Append-Only Closure/Implementation, 2026-08-28).
  *
- * Covers the Test Matrix required by the implementation task's own §27:
- * mutation invariants (mutations.ts), and end-to-end extraction (explicit
- * presence/absence, real/synthetic self-report, singular correction,
- * aggregate/plural correction safety, fail-closed ambiguous correction,
- * provenance, no fabricated UserGoal/Track A -- extraction.ts). Mirrors
- * assessment-jurisdiction-mentions.test.ts's own established pattern: mock
- * extractor, runExtractionPipeline exercised end-to-end for the
- * pipeline-level cases -- proves the proposal -> normalization ->
- * attestation -> mutation pipeline, not natural-language extraction
- * accuracy (a live-model eval concern, out of scope here, same split as
- * every other candidate kind in this codebase).
+ * INTENTIONAL BEHAVIOR CHANGE, disclosed here rather than silently: the
+ * original implementation (commit e86bc5d) allowed free-form extraction to
+ * automatically supersede an existing ContentPresenceMention in two
+ * circumstances -- a singular real<->synthetic reclassification, and (per
+ * an aggregate-marker regex) most other same-category corrections. An
+ * independent integration review proved the aggregate-marker regex was not
+ * a real safety boundary (8/8 adversarial phrasings bypassed it), and a
+ * follow-up architecture closure went further: this mention type carries no
+ * count, individual identity, or project/temporal scope, so NO free-form
+ * correction statement -- not even an apparently-singular one, not even a
+ * pure polarity flip like "present" -> "absent" -- can ever be proven to
+ * target one specific prior proposition rather than describe a different,
+ * additional, or later-scoped fact. Every content_presence_mention produced
+ * from ordinary conversation is therefore now an unconditional ADDITION
+ * (`addContentPresenceMention`); `is_correction`/`correction_of_raw_text`
+ * are read by other candidate kinds but are structurally ignored for this
+ * one. `supersedeContentPresenceMention` remains exported from mutations.ts,
+ * reachable only by tests and a possible future SYSTEM-controlled
+ * correction mechanism (never free-form extraction) -- see its own
+ * mutation-invariant tests below, still valid and unchanged.
+ *
+ * Covers the original Test Matrix (mutation invariants, explicit
+ * presence/absence, real/synthetic self-report, provenance, no fabricated
+ * UserGoal/Track A) PLUS the append-only regression corpus required by the
+ * Append-Only Implementation task: all 8 previously-failing adversarial
+ * aggregate scenarios, genuine singular reclassification, both polarity-flip
+ * directions, a temporal/scope example, and recognizability-only including a
+ * simulated model error. Mirrors assessment-jurisdiction-mentions.test.ts's
+ * own established pattern: mock extractor, runExtractionPipeline exercised
+ * end-to-end -- proves the pipeline, not natural-language extraction
+ * accuracy (a live-model eval concern, out of scope here).
  *
  * Run: npx jest __tests__/interview-engine/content-presence-mentions.test.ts
  */
@@ -274,8 +295,16 @@ describe('content_presence_mention extraction -- end-to-end pipeline', () => {
     expect(voice?.real_or_synthetic).toBe('synthetic')
   })
 
-  // 11. singular real -> synthetic correction
-  test('11: singular correction -- "A real person appears." -> "Actually it\'s fully synthetic." supersedes cleanly (1:1)', async () => {
+  // 11. INTENTIONAL BEHAVIOR CHANGE (was: singular real -> synthetic
+  // correction, supersession). A genuinely singular-looking real->synthetic
+  // reclassification is now append-only, same as every other case -- this
+  // representation cannot distinguish "genuinely singular" from "aggregate
+  // collapsed to one mention" or "a different, later scope" from the
+  // candidate's own structured fields, so it is never treated as safer than
+  // any other same-category reclassification. `is_correction: true` and
+  // `correction_of_raw_text` are present on the candidate exactly as before
+  // and are structurally ignored.
+  test('11: "A real person appears." -> "Actually it\'s fully synthetic." is append-only -- old mention remains active, new one is added, zero supersession', async () => {
     const t1 = await runExtractionPipeline(
       emptySU(),
       { turn: 1, text: 'A real person appears.' },
@@ -298,15 +327,20 @@ describe('content_presence_mention extraction -- end-to-end pipeline', () => {
     )
     expect(t2.updated.content_presence_mentions).toHaveLength(2)
     const activeMentions = active(t2.updated)
-    expect(activeMentions).toEqual([
-      { mention_id: 't2-c1', category: 'person_visual_presence', real_or_synthetic: 'synthetic', confidence: 'confirmed', source_turn: 2, source_statement: "Actually it's fully synthetic.", superseded_by: null },
-    ])
-    const superseded = t2.updated.content_presence_mentions.find((m) => m.mention_id === 't1-c1')
-    expect(superseded?.superseded_by).toBe('t2-c1')
+    expect(activeMentions.map((m) => m.real_or_synthetic).sort()).toEqual(['real', 'synthetic'])
+    const original = t2.updated.content_presence_mentions.find((m) => m.mention_id === 't1-c1')
+    expect(original?.superseded_by).toBeNull()
+    expect(original?.real_or_synthetic).toBe('real')
+    const added = t2.updated.content_presence_mentions.find((m) => m.mention_id === 't2-c1')
+    expect(added?.superseded_by).toBeNull()
+    expect(added?.real_or_synthetic).toBe('synthetic')
   })
 
-  // 12. unqualified -> synthetic singular correction
-  test('12: unqualified -> synthetic singular correction -- "A person appears." -> "Actually that\'s a fully synthetic character." supersedes the one active compatible target', async () => {
+  // 12. INTENTIONAL BEHAVIOR CHANGE (was: unqualified -> synthetic singular
+  // correction, supersession). Same reasoning as #11 -- an unqualified prior
+  // statement's own cardinality is just as unknown as a qualified one, so it
+  // gets no special treatment either.
+  test('12: "A person appears." -> "Actually that\'s a fully synthetic character." is append-only -- both mentions remain active', async () => {
     const t1 = await runExtractionPipeline(
       emptySU(),
       { turn: 1, text: 'A person appears.' },
@@ -330,9 +364,9 @@ describe('content_presence_mention extraction -- end-to-end pipeline', () => {
       ]),
     )
     const activeMentions = active(t2.updated)
-    expect(activeMentions).toHaveLength(1)
-    expect(activeMentions[0].real_or_synthetic).toBe('synthetic')
-    expect(activeMentions[0].mention_id).toBe('t2-c1')
+    expect(activeMentions).toHaveLength(2)
+    expect(activeMentions.find((m) => m.mention_id === 't1-c1')?.real_or_synthetic).toBeNull()
+    expect(activeMentions.find((m) => m.mention_id === 't2-c1')?.real_or_synthetic).toBe('synthetic')
   })
 
   // 13. recognizability-only correction does not fabricate state
@@ -350,7 +384,48 @@ describe('content_presence_mention extraction -- end-to-end pipeline', () => {
     expect(active(t2.updated)[0].mention_id).toBe('t1-c1')
   })
 
-  // 14. aggregate/plural correction does NOT decompose or supersede non-deterministically
+  // 13b. recognizability-only correction, MODEL ERROR simulation (Append-Only
+  // Closure §14/§N). Even if the model incorrectly proposes a candidate for
+  // this scenario (misreading "identifiable" as bearing on classification)
+  // and incorrectly flags is_correction, the append-only architecture makes
+  // deletion structurally impossible -- not merely unlikely -- because
+  // is_correction is never inspected for this candidate kind at all.
+  test('13b: recognizability-only follow-up, simulated model error (is_correction incorrectly set true) -- old presence mention still cannot be deleted, worst case is a harmless addition', async () => {
+    const t1 = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'A recognizable person appears.' },
+      constantExtractor([presenceCandidate({ raw_text: 'A recognizable person appears.' })]),
+    )
+    const t2 = await runExtractionPipeline(
+      t1.updated,
+      { turn: 2, text: "Actually I don't know whether they're identifiable." },
+      constantExtractor([
+        presenceCandidate({
+          proposal_id: 'c1',
+          turn: 2,
+          raw_text: "Actually I don't know whether they're identifiable.",
+          is_correction: true,
+          correction_of_raw_text: 'a recognizable person',
+        }),
+      ]),
+    )
+    const original = t2.updated.content_presence_mentions.find((m) => m.mention_id === 't1-c1')
+    expect(original?.superseded_by).toBeNull()
+    expect(active(t2.updated)).toHaveLength(2) // worst case: a harmless extra mention, never a deletion
+  })
+
+  // 14. aggregate/plural correction does NOT decompose or supersede
+  // non-deterministically. Historically (commit e86bc5d) this safety was
+  // provided by a phrase-list guard on correction_of_raw_text -- proven
+  // unsafe by independent integration review (8/8 adversarial phrasings
+  // bypassed it) and removed entirely (Append-Only Closure, 2026-08-28).
+  // Safety now comes from there being no resolver at all: is_correction and
+  // correction_of_raw_text are read here (this candidate still has them set)
+  // but are never inspected by the pipeline for this candidate kind, so the
+  // outcome below no longer depends on the specific wording of
+  // correction_of_raw_text -- see the 8-scenario permanent regression block
+  // below, which proves this directly against wording that has no marker
+  // word at all.
   test('14: aggregate/plural correction safety -- "Two real people appear." -> "Actually one is synthetic." (model incorrectly flags is_correction) does NOT supersede the original real mention', async () => {
     const t1 = await runExtractionPipeline(
       emptySU(),
@@ -361,9 +436,8 @@ describe('content_presence_mention extraction -- end-to-end pipeline', () => {
     const originalRealMentionId = active(t1.updated)[0].mention_id
 
     // Simulates the model INCORRECTLY setting is_correction: true for a
-    // partitive/aggregate referent ("one of them") -- per this task's own
-    // explicit requirement, code-side resolution must remain safe even when
-    // the model gets this wrong.
+    // partitive/aggregate referent ("one of them") -- harmless now
+    // regardless, since is_correction is never inspected for this kind.
     const t2 = await runExtractionPipeline(
       t1.updated,
       { turn: 2, text: 'Actually one of them is synthetic.' },
@@ -393,8 +467,13 @@ describe('content_presence_mention extraction -- end-to-end pipeline', () => {
     expect(activeMentions.map((m) => m.real_or_synthetic).sort()).toEqual(['real', 'synthetic'])
   })
 
-  // 15. zero-match correction fails closed
-  test('15: zero-match correction fails closed -- a correction with no matching active category still creates a genuine new mention, never guesses', async () => {
+  // 15. INTENTIONAL RENAME (was: "zero-match correction fails closed"). No
+  // resolver exists at all for this candidate kind, so there is no "match"
+  // being attempted in the first place -- a candidate flagged is_correction
+  // with no plausible target is handled identically to one with a
+  // plausible target (#16) or no correction fields at all: always a plain
+  // addition.
+  test('15: a correction-flagged candidate with no matching active category still creates a genuine new mention (no resolver ever runs)', async () => {
     const { updated, diagnostics } = await runExtractionPipeline(
       emptySU(),
       { turn: 1, text: 'Actually the voice is synthetic.' },
@@ -408,18 +487,17 @@ describe('content_presence_mention extraction -- end-to-end pipeline', () => {
         }),
       ]),
     )
-    // No prior person_voice_presence mention existed to match -- fails
-    // closed (no supersession), but the candidate itself still creates a
-    // genuine NEW mention (fail-closed means "do not guess a target," not
-    // "reject the whole candidate").
     expect(active(updated)).toHaveLength(1)
     expect(active(updated)[0].category).toBe('person_voice_presence')
     expect(diagnostics).toHaveLength(1)
     expect(diagnostics[0].decision.outcome).not.toBe('rejected')
   })
 
-  // 16. multiple-match correction fails closed
-  test('16: multiple-match correction fails closed -- two active mentions of the same category are never guessed between', async () => {
+  // 16. INTENTIONAL RENAME (was: "multiple-match correction fails closed").
+  // Same point as #15, now with two pre-existing active mentions of the same
+  // category present -- proves no target selection is ever attempted among
+  // them, regardless of how many candidates exist to choose from.
+  test('16: two pre-existing active mentions of the same category are both left untouched by a correction-flagged candidate -- no target selection occurs', async () => {
     // An artificial but valid same-category-twice state (two independent
     // add candidates in one turn, never deduplicated by category -- mirrors
     // the assessment-jurisdiction precedent's own "Test Territory" test).
@@ -441,8 +519,6 @@ describe('content_presence_mention extraction -- end-to-end pipeline', () => {
         }),
       ]),
     )
-    // Both original mentions remain active (untouched) -- the ambiguous
-    // correction created a new mention instead of guessing which one.
     const activeMentions = active(updated)
     expect(activeMentions.filter((m) => m.mention_id === 'm-1' || m.mention_id === 'm-2')).toHaveLength(2)
     expect(activeMentions.some((m) => m.real_or_synthetic === 'synthetic' && m.mention_id !== 'm-1' && m.mention_id !== 'm-2')).toBe(true)
@@ -490,6 +566,167 @@ describe('content_presence_mention extraction -- end-to-end pipeline', () => {
       constantExtractor([presenceCandidate({ real_or_synthetic_confidence_hint: 'confirmed', real_or_synthetic_value_hint: 'real' })]),
     )
     expect(updated.user_goals).toEqual([])
+  })
+})
+
+// ── Append-Only Regression Corpus (Content-Presence Correction Safety —
+// Append-Only Implementation, 2026-08-28) ──────────────────────────────────
+//
+// Permanent regression coverage for the 8 adversarial scenarios that proved
+// the original phrase-list mechanism unsafe (Integration Review), plus the
+// polarity-conflict and temporal-scope cases identified during the follow-up
+// architecture closure. Every case here asserts the SAME outcome shape:
+// the prior mention remains active and untouched, the new statement is
+// added as an independent mention, and the result does not depend in any
+// way on the specific wording of correction_of_raw_text -- because it is
+// never read for this candidate kind at all.
+
+describe('append-only regression corpus -- 8 adversarial aggregate scenarios (Integration Review, all previously unsafe)', () => {
+  const scenarios: Array<{ name: string; original: string; followup: string; correctionOfRawText: string }> = [
+    { name: 'two -> second', original: 'Two real people appear.', followup: 'Actually the second is synthetic.', correctionOfRawText: 'the real person' },
+    { name: 'three -> last one', original: 'Three real people appear.', followup: 'The last one is synthetic.', correctionOfRawText: 'the real person appearing' },
+    { name: 'several -> another', original: 'Several real people appear.', followup: 'Another one is synthetic.', correctionOfRawText: 'a real person' },
+    { name: 'multiple -> one isnt real', original: 'There are multiple real people.', followup: "One isn't real.", correctionOfRawText: 'the real people' },
+    { name: 'pair -> one', original: 'A pair of real people appear.', followup: 'One is synthetic.', correctionOfRawText: 'real people appear' },
+    { name: 'some -> one', original: 'Some real people appear.', followup: 'One is synthetic.', correctionOfRawText: 'real presence' },
+    { name: 'both -> the woman', original: 'Both are real.', followup: 'The woman is synthetic.', correctionOfRawText: 'the real person in the video' },
+    { name: 'the two -> only the left', original: 'The two people are real.', followup: 'Only the person on the left is real.', correctionOfRawText: 'the real people appearing' },
+  ]
+
+  for (const s of scenarios) {
+    test(`${s.name}: "${s.original}" -> "${s.followup}" is append-only regardless of correction_of_raw_text wording`, async () => {
+      const t1 = await runExtractionPipeline(
+        emptySU(),
+        { turn: 1, text: s.original },
+        constantExtractor([presenceCandidate({ raw_text: s.original, real_or_synthetic_confidence_hint: 'confirmed', real_or_synthetic_value_hint: 'real' })]),
+      )
+      expect(active(t1.updated)).toHaveLength(1)
+      const originalId = active(t1.updated)[0].mention_id
+
+      const t2 = await runExtractionPipeline(
+        t1.updated,
+        { turn: 2, text: s.followup },
+        constantExtractor([
+          presenceCandidate({
+            proposal_id: 'c2',
+            turn: 2,
+            raw_text: s.followup,
+            real_or_synthetic_confidence_hint: 'confirmed',
+            real_or_synthetic_value_hint: 'synthetic',
+            is_correction: true,
+            correction_of_raw_text: s.correctionOfRawText,
+          }),
+        ]),
+      )
+
+      const original = t2.updated.content_presence_mentions.find((m) => m.mention_id === originalId)
+      expect(original?.superseded_by).toBeNull()
+      expect(original?.real_or_synthetic).toBe('real')
+      expect(active(t2.updated)).toHaveLength(2)
+    })
+  }
+})
+
+describe('append-only regression corpus -- polarity conflicts and temporal/scope statements', () => {
+  // B. present(real) -> absent(real)
+  test('B: "A real person appears." -> "Actually no real person appears." is append-only -- old presence remains, new absence is added', async () => {
+    const t1 = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'A real person appears.' },
+      constantExtractor([presenceCandidate({ real_or_synthetic_confidence_hint: 'confirmed', real_or_synthetic_value_hint: 'real' })]),
+    )
+    const t2 = await runExtractionPipeline(
+      t1.updated,
+      { turn: 2, text: 'Actually no real person appears.' },
+      constantExtractor([
+        presenceCandidate({
+          proposal_id: 'c1',
+          turn: 2,
+          raw_text: 'Actually no real person appears.',
+          is_content_presence_absent: true,
+          real_or_synthetic_confidence_hint: 'confirmed',
+          real_or_synthetic_value_hint: 'real',
+          is_correction: true,
+          correction_of_raw_text: 'a real person',
+        }),
+      ]),
+    )
+    const original = t2.updated.content_presence_mentions.find((m) => m.mention_id === 't1-c1')
+    expect(original?.superseded_by).toBeNull()
+    expect(original?.confidence).toBe('confirmed')
+    const added = t2.updated.content_presence_mentions.find((m) => m.mention_id === 't2-c1')
+    expect(added?.confidence).toBe('confirmed_absent')
+    expect(active(t2.updated)).toHaveLength(2)
+  })
+
+  // C. absent(real) -> present(real)
+  test('C: "No real person appears." -> "Actually a real person appears." is append-only -- old absence remains, new presence is added', async () => {
+    const t1 = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'No real person appears.' },
+      constantExtractor([
+        presenceCandidate({
+          raw_text: 'No real person appears.',
+          is_content_presence_absent: true,
+          real_or_synthetic_confidence_hint: 'confirmed',
+          real_or_synthetic_value_hint: 'real',
+        }),
+      ]),
+    )
+    const t2 = await runExtractionPipeline(
+      t1.updated,
+      { turn: 2, text: 'Actually a real person appears.' },
+      constantExtractor([
+        presenceCandidate({
+          proposal_id: 'c1',
+          turn: 2,
+          raw_text: 'Actually a real person appears.',
+          real_or_synthetic_confidence_hint: 'confirmed',
+          real_or_synthetic_value_hint: 'real',
+          is_correction: true,
+          correction_of_raw_text: 'no real person',
+        }),
+      ]),
+    )
+    const original = t2.updated.content_presence_mentions.find((m) => m.mention_id === 't1-c1')
+    expect(original?.superseded_by).toBeNull()
+    expect(original?.confidence).toBe('confirmed_absent')
+    const added = t2.updated.content_presence_mentions.find((m) => m.mention_id === 't2-c1')
+    expect(added?.confidence).toBe('confirmed')
+    expect(active(t2.updated)).toHaveLength(2)
+  })
+
+  // D. temporal/scope example -- absent(voice, unqualified) -> present(voice, synthetic)
+  test('D: "No person\'s voice is used." -> "A synthetic voice is now used." is append-only -- both statements may describe different points in the project\'s timeline, never collapsed into one', async () => {
+    const t1 = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: "No person's voice is used." },
+      constantExtractor([
+        presenceCandidate({
+          raw_text: "No person's voice is used.",
+          raw_content_presence_category: 'person_voice_presence',
+          is_content_presence_absent: true,
+        }),
+      ]),
+    )
+    const t2 = await runExtractionPipeline(
+      t1.updated,
+      { turn: 2, text: 'A synthetic voice is now used.' },
+      constantExtractor([
+        presenceCandidate({
+          proposal_id: 'c1',
+          turn: 2,
+          raw_text: 'A synthetic voice is now used.',
+          raw_content_presence_category: 'person_voice_presence',
+          real_or_synthetic_confidence_hint: 'confirmed',
+          real_or_synthetic_value_hint: 'synthetic',
+        }),
+      ]),
+    )
+    const original = t2.updated.content_presence_mentions.find((m) => m.mention_id === 't1-c1')
+    expect(original?.superseded_by).toBeNull()
+    expect(original?.confidence).toBe('confirmed_absent')
+    expect(active(t2.updated)).toHaveLength(2)
   })
 })
 
