@@ -15,6 +15,7 @@
  */
 
 import { runSyntheticEligibilityCanary } from '@/lib/crc-engine/synthetic-eligibility-canary'
+import type { SyntheticEligibilityCanaryScenario } from '@/lib/crc-engine/synthetic-eligibility-canary'
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
@@ -58,8 +59,10 @@ const musicA3Claim = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === MUSIC_A3_CL
 // ── Likeness Candidate A -- no fixture entry (CRC Publication Scope:
 // WITHHELD) -- test-only representation, transcribed verbatim from
 // GOVERNED-CLAIMS.md, real crc_eligible left as governed ("Pending"). The
-// harness's own override is what makes this scenario retrievable, not this
-// object's own (real, non-eligible) state.
+// harness's own internal derivation (crc_publication_scope ??
+// crc_candidate_statement) is what makes this scenario retrievable -- this
+// claim's own real crc_candidate_statement is what gets used, automatically,
+// with no caller-supplied override of any kind.
 const LIKENESS_CANDIDATE_A_GOVERNED_CLAIM: TopicClaim = {
   claim_id: 'CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1',
   topic: 'likeness',
@@ -161,7 +164,6 @@ describe('generic synthetic eligibility canary -- Likeness Candidate A (provider
   test('§24 authority boundary, continued: the SAME claim through the harness IS retrieved -- proves the override is exactly what changes the outcome', () => {
     const result = runSyntheticEligibilityCanary({
       claim: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM,
-      syntheticPublicationScope: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM.crc_candidate_statement ?? undefined,
       handoff: handoff(),
       goals: [g()],
       applicabilityFacts: facts(['New York']),
@@ -173,7 +175,6 @@ describe('generic synthetic eligibility canary -- Likeness Candidate A (provider
   test('provider_scope: null passes generically -- no assetProviders needed, no harness-side special case for it', () => {
     const result = runSyntheticEligibilityCanary({
       claim: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM,
-      syntheticPublicationScope: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM.crc_candidate_statement ?? undefined,
       handoff: handoff(),
       goals: [g()],
       applicabilityFacts: facts(['New York']),
@@ -185,7 +186,6 @@ describe('generic synthetic eligibility canary -- Likeness Candidate A (provider
   test('New York applicability resolves via the existing generic evaluator -- no US -> NY hierarchy inferred', () => {
     const includedNY = runSyntheticEligibilityCanary({
       claim: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM,
-      syntheticPublicationScope: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM.crc_candidate_statement ?? undefined,
       handoff: handoff(),
       goals: [g()],
       applicabilityFacts: facts(['New York']),
@@ -194,7 +194,6 @@ describe('generic synthetic eligibility canary -- Likeness Candidate A (provider
 
     const excludedNY = runSyntheticEligibilityCanary({
       claim: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM,
-      syntheticPublicationScope: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM.crc_candidate_statement ?? undefined,
       handoff: handoff(),
       goals: [g()],
       applicabilityFacts: facts([], ['New York']),
@@ -203,7 +202,6 @@ describe('generic synthetic eligibility canary -- Likeness Candidate A (provider
 
     const onlyUnitedStates = runSyntheticEligibilityCanary({
       claim: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM,
-      syntheticPublicationScope: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM.crc_candidate_statement ?? undefined,
       handoff: handoff(),
       goals: [g()],
       applicabilityFacts: facts(['United States']), // deliberately not "New York"
@@ -214,7 +212,6 @@ describe('generic synthetic eligibility canary -- Likeness Candidate A (provider
   test('all three governed dependencies remain unresolved -- never projected, never resolved', () => {
     const result = runSyntheticEligibilityCanary({
       claim: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM,
-      syntheticPublicationScope: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM.crc_candidate_statement ?? undefined,
       handoff: handoff(),
       goals: [g()],
       applicabilityFacts: facts(['New York']),
@@ -229,7 +226,6 @@ describe('generic synthetic eligibility canary -- Likeness Candidate A (provider
   test('Bounded Interpretation hedges; Composition creates no project-specific legal conclusion', () => {
     const result = runSyntheticEligibilityCanary({
       claim: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM,
-      syntheticPublicationScope: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM.crc_candidate_statement ?? undefined,
       handoff: handoff(),
       goals: [g()],
       applicabilityFacts: facts(['New York']),
@@ -244,7 +240,6 @@ describe('generic synthetic eligibility canary -- Likeness Candidate A (provider
     const before = JSON.parse(JSON.stringify(LIKENESS_CANDIDATE_A_GOVERNED_CLAIM))
     runSyntheticEligibilityCanary({
       claim: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM,
-      syntheticPublicationScope: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM.crc_candidate_statement ?? undefined,
       handoff: handoff(),
       goals: [g()],
       applicabilityFacts: facts(['New York']),
@@ -279,11 +274,34 @@ describe('generic synthetic eligibility canary -- cross-cutting leakage / fail-c
     ).toThrow(/has been superseded by/)
   })
 
+  test('§6 fail-closed: an otherwise-valid claim with BOTH crc_publication_scope and crc_candidate_statement null is refused, never fabricated', () => {
+    const noScopeAtAllClaim: TopicClaim = { ...LIKENESS_CANDIDATE_A_GOVERNED_CLAIM, crc_publication_scope: null, crc_candidate_statement: null }
+    expect(() =>
+      runSyntheticEligibilityCanary({
+        claim: noScopeAtAllClaim,
+        handoff: handoff(),
+        goals: [goal({ goal_id: 'g1', category: 'likeness', raw_text: 'test' })],
+        applicabilityFacts: facts(['New York']),
+      }),
+    ).toThrow(/no real crc_publication_scope AND no crc_candidate_statement/)
+  })
+
+  test('§7 type-level removal: there is no scenario-level API through which a caller can supply arbitrary publication-scope prose -- TypeScript itself rejects it, not merely a runtime check', () => {
+    const attempted: SyntheticEligibilityCanaryScenario = {
+      claim: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM,
+      handoff: handoff(),
+      goals: [goal({ goal_id: 'g1', category: 'likeness', raw_text: 'test' })],
+      applicabilityFacts: facts(['New York']),
+      // @ts-expect-error -- syntheticPublicationScope must not exist on SyntheticEligibilityCanaryScenario. If this stops being a type error (e.g. the field is re-added), `tsc --noEmit` fails on this line, not this test's own runtime assertion -- that is the actual enforcement mechanism, this test only keeps it exercised.
+      syntheticPublicationScope: 'arbitrary, ungoverned prose a caller should never be able to inject',
+    }
+    expect(attempted.claim.claim_id).toBe(LIKENESS_CANDIDATE_A_GOVERNED_CLAIM.claim_id) // trivial runtime assertion; the real proof is the @ts-expect-error above
+  })
+
   test('§23 synthetic leakage: repeated canary runs never persist any state -- two independent runs of the same scenario are byte-identical in their own outputs', () => {
     const run = () =>
       runSyntheticEligibilityCanary({
         claim: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM,
-      syntheticPublicationScope: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM.crc_candidate_statement ?? undefined,
         handoff: handoff(),
         goals: [goal({ goal_id: 'g1', category: 'likeness', raw_text: 'Will this be an issue with the person in the video?' })],
         applicabilityFacts: facts(['New York']),
@@ -294,6 +312,67 @@ describe('generic synthetic eligibility canary -- cross-cutting leakage / fail-c
     // The synthetic clone is frozen internally and never returned -- nothing
     // from run 1 could have mutated the shared claim constant to affect run 2.
     expect(LIKENESS_CANDIDATE_A_GOVERNED_CLAIM.crc_eligible).toBe('Pending')
+  })
+
+  test('§12 alias isolation A: mutating the source claim\'s unresolved_project_dependencies AFTER a run does not change the already-returned, held result', () => {
+    const localClaim: TopicClaim = { ...LIKENESS_CANDIDATE_A_GOVERNED_CLAIM, unresolved_project_dependencies: [...LIKENESS_CANDIDATE_A_GOVERNED_CLAIM.unresolved_project_dependencies] }
+    const held = runSyntheticEligibilityCanary({
+      claim: localClaim,
+      handoff: handoff(),
+      goals: [goal({ goal_id: 'g1', category: 'likeness', raw_text: 'test' })],
+      applicabilityFacts: facts(['New York']),
+    })
+    const before = JSON.stringify(held.unresolved_project_dependencies_by_claim[localClaim.claim_id])
+    localClaim.unresolved_project_dependencies.push('injected_after_the_fact')
+    const after = JSON.stringify(held.unresolved_project_dependencies_by_claim[localClaim.claim_id])
+    expect(after).toBe(before) // held result unaffected -- proves structuredClone isolation, not just top-level freeze
+  })
+
+  test('§12 alias isolation B: mutating the source claim\'s applicability_requirements AFTER a run does not change a held result\'s own applicability-derived retrieval', () => {
+    const localClaim: TopicClaim = {
+      ...LIKENESS_CANDIDATE_A_GOVERNED_CLAIM,
+      applicability_requirements: LIKENESS_CANDIDATE_A_GOVERNED_CLAIM.applicability_requirements.map((r) => ({ ...r })),
+    }
+    const held = runSyntheticEligibilityCanary({
+      claim: localClaim,
+      handoff: handoff(),
+      goals: [goal({ goal_id: 'g1', category: 'likeness', raw_text: 'test' })],
+      applicabilityFacts: facts(['New York']),
+    })
+    const before = held.retrieved_claim_ids
+    localClaim.applicability_requirements[0].value = 'California' // mutate the ORIGINAL requirement object in place, after the run
+    expect(held.retrieved_claim_ids).toEqual(before) // already-returned result is unaffected
+  })
+
+  test('§12 alias isolation C: mutating the source claim\'s provider_scope (Music) AFTER a run does not change a held result', () => {
+    const localClaim: TopicClaim = { ...(musicA3Claim as TopicClaim), provider_scope: [...(musicA3Claim as TopicClaim).provider_scope!] }
+    const held = runSyntheticEligibilityCanary({
+      claim: localClaim,
+      handoff: handoff(),
+      goals: [goal({ goal_id: 'g1', category: 'third_party_source_rights', raw_text: 'test' })],
+      applicabilityFacts: facts(),
+      assetProviders: ['artlist'],
+    })
+    const before = held.retrieved_claim_ids
+    localClaim.provider_scope!.push('getty') // mutate the ORIGINAL provider_scope array in place, after the run
+    expect(held.retrieved_claim_ids).toEqual(before)
+    expect(localClaim.provider_scope).toEqual(['artlist', 'getty']) // confirms the mutation genuinely happened on the source
+  })
+
+  test('§13 reverse-alias safety: mutating an array returned inside the canary result does not mutate the original source claim', () => {
+    const localClaim: TopicClaim = { ...LIKENESS_CANDIDATE_A_GOVERNED_CLAIM, unresolved_project_dependencies: [...LIKENESS_CANDIDATE_A_GOVERNED_CLAIM.unresolved_project_dependencies] }
+    const held = runSyntheticEligibilityCanary({
+      claim: localClaim,
+      handoff: handoff(),
+      goals: [goal({ goal_id: 'g1', category: 'likeness', raw_text: 'test' })],
+      applicabilityFacts: facts(['New York']),
+    })
+    held.unresolved_project_dependencies_by_claim[localClaim.claim_id].push('injected_via_result')
+    expect(localClaim.unresolved_project_dependencies).toEqual([
+      'recognizable_likeness_or_voice_present',
+      'advertising_or_trade_use_confirmed',
+      'written_consent_confirmed',
+    ]) // source claim's own array is untouched by mutating the result
   })
 
   test('§13 no domain branching: the harness source contains no literal reference to Music/Likeness/Artlist/New York/any claim_id', () => {

@@ -24,38 +24,54 @@
  *     database call, no mutation of any governed artifact or fixture. It is
  *     a pure function over its own arguments.
  *   - Exactly two fields are ever overridden on the synthetic clone --
- *     `crc_eligible` (always, forced to `'Yes'`) and, ONLY when the real
- *     claim's own `crc_publication_scope` is `null`, `crc_publication_scope`
- *     itself (see `SELF-CAUGHT CORRECTION` below for why this second field
- *     is real, existing-invariant-required, not scope creep). The caller's
- *     own `claim` object is never mutated; the frozen clone this module
- *     builds is never returned to the caller, only a plain string
- *     `claim_id` is (see `SyntheticEligibilityCanaryResult`), so nothing
- *     resembling a "synthetically eligible claim object" can leak into or
- *     be mistaken for governed state anywhere downstream of this call.
+ *     `crc_eligible` (always, forced to `'Yes'`) and `crc_publication_scope`
+ *     (see `SCOPE DERIVATION` below). Both are set on an ISOLATED COPY, never
+ *     on the caller's own `claim` object, which is never mutated. The clone
+ *     this module builds is never returned to the caller, only a plain
+ *     string `claim_id` is (see `SyntheticEligibilityCanaryResult`), so
+ *     nothing resembling a "synthetically eligible claim object" can leak
+ *     into or be mistaken for governed state anywhere downstream.
+ *   - `synthetic_runtime_scope != real CRC publication authorization`: the
+ *     derived scope text (below) exists solely to satisfy an existing
+ *     runtime shape requirement, never to imply that content has been
+ *     reviewed or approved for real CRC publication.
  *
- * ── SELF-CAUGHT CORRECTION (discovered during two-domain testing, not
- * assumed in advance): `crc_eligible` is NOT, on its own, "the eligibility
- * gate." Real, existing, unmodified production code (`assemble-result.ts`'s
- * own `assembleTopicResult`) independently and correctly refuses to produce
- * a result for a `crc_eligible: 'Yes'` claim whose `crc_publication_scope`
- * is `null` -- diagnostic `yes_claim_missing_scope` -- a genuine
- * "never fabricate a scope" safety property, not a bug. A withheld claim
- * (e.g. Likeness Candidate A) has real `crc_publication_scope: null` by
- * definition (it was never approved, so no CRC-facing scope was ever
- * authored). Without accounting for this, the harness could exercise the
- * eligible path only for a claim that ALREADY has real scope text (Music
- * A-3) and would silently, uselessly no-op for exactly the claims a canary
- * is most useful for (an as-yet-unpublished one). The fix is NOT to
- * fabricate scope text inside this module (that would be exactly the
- * "strengthen the scenario" fabrication forbidden by design) -- it is to
- * require the CALLER to supply an explicit `syntheticPublicationScope`
- * (scenario-level, never invented here) whenever the real claim has none,
- * and to fail closed, loudly, if a null-scope claim is supplied without
- * one. Both prior manual canaries this module generalizes in fact already
- * did exactly this (using the claim's own already-governed, already-
- * reviewed `crc_candidate_statement` text) -- this correction recovers that
- * precedent into the generic contract, it does not invent new behavior. ──
+ * ── SCOPE DERIVATION (integration-review corrected, 2026-08-30 repair --
+ * this module previously accepted an arbitrary, caller-authored
+ * `syntheticPublicationScope: string` with no structural tie to the claim's
+ * own governed content; independent review found this created real,
+ * demonstrated semantic-freedom risk -- a caller could supply prose
+ * unrelated to, or stronger than, anything the claim's own governance
+ * actually says, and it would flow into the synthetic result undetected.
+ * Fixed by removing that field entirely): `crc_eligible` is NOT, on its
+ * own, "the eligibility gate." Real, existing, unmodified production code
+ * (`assemble-result.ts`'s own `assembleTopicResult`) independently and
+ * correctly refuses to produce a result for a `crc_eligible: 'Yes'` claim
+ * whose `crc_publication_scope` is `null` -- diagnostic
+ * `yes_claim_missing_scope` -- a genuine "never fabricate a scope" safety
+ * property, not a bug. This module now derives the synthetic runtime scope
+ * using a fixed, non-configurable precedence over the SAME claim's own
+ * already-governed fields only:
+ *
+ *     claim.crc_publication_scope ?? claim.crc_candidate_statement ?? FAIL
+ *
+ * A. Real, non-null `crc_publication_scope` (e.g. Music A-3, already
+ *    published) -- used unchanged, no derivation needed.
+ * B. Real `crc_publication_scope` is `null` (e.g. Likeness Candidate A,
+ *    withheld) but `crc_candidate_statement` is not -- the candidate
+ *    statement (already drafted, already reviewed at the FGR stage, just
+ *    not yet CRC-approved) is used as the synthetic runtime scope.
+ * C. Both are `null` -- refuses to run (see the function's own fail-closed
+ *    check) rather than fabricating prose from any other source. Never
+ *    derived from topic, claim_id, dependencies, provider, jurisdiction, a
+ *    UserGoal, or any test-scenario value -- only from the claim's own two
+ *    named fields.
+ *
+ * No scenario-level field exists through which a caller can supply
+ * arbitrary publication-scope prose -- this is enforced by the type
+ * signature itself (`SyntheticEligibilityCanaryScenario` has no such
+ * field), not merely by convention.
+ *
  *   - There is no `passed: boolean` field, no verdict, no recommendation
  *     anywhere in the result shape. `runSyntheticEligibilityCanary` returns
  *     raw pipeline facts only (what `retrieve()`/`buildBoundedInterpretations()`/
@@ -65,6 +81,31 @@
  *   - No companion "commit"/"promote"/"publish" function exists in this
  *     file, and none should be added -- there is structurally no path from
  *     a synthetic override to a persisted eligibility change.
+ *
+ * ── STRUCTURAL CLAIM ISOLATION (integration-review corrected, 2026-08-30
+ * repair -- `Object.freeze({ ...claim, ... })` freezes only the new
+ * top-level object; `TopicClaim`'s mutable nested fields
+ * (`applicability_requirements`, `unresolved_project_dependencies`,
+ * `provider_scope`) were the SAME array/object references as on the
+ * caller's source claim, not copies -- independent review directly
+ * demonstrated a caller mutating the source claim's own array after a
+ * canary run could change a previously-returned result's own field,
+ * because real, unmodified `assemble-result.ts` assigns
+ * `unresolved_project_dependencies: claim.unresolved_project_dependencies`
+ * by reference): this module now builds the synthetic clone from
+ * `structuredClone(claim)` -- a full, independent, structurally-shared-
+ * nothing copy -- before applying the two field overrides. `TopicClaim` is
+ * a plain, JSON-serializable data shape (strings, string arrays, `null`,
+ * and flat objects of strings only; no functions, `Date`s, class
+ * instances, or circular references), so `structuredClone` is safe and
+ * exact here; no new dependency, no JSON-stringify round-trip, no custom
+ * per-field copying was introduced. `Object.freeze` on the resulting
+ * object remains as an additional, cheap defensive measure against this
+ * module's own accidental self-mutation -- it is NOT what provides
+ * isolation from the source (that is `structuredClone`'s own job, already
+ * complete before freeze is ever applied), and it is still shallow, not
+ * recursive: this comment states that precisely rather than implying deep
+ * immutability freeze alone never provided.
  *
  * ── WHAT THIS MODULE DOES NOT KNOW ─────────────────────────────────────────
  *
@@ -115,15 +156,11 @@ export interface SyntheticEligibilityCanaryScenario {
   /** Canonical asset-provider identifiers the current project state names (e.g. `['artlist']`) -- the same parameter `retrieve()` itself accepts; default none. Irrelevant for a `provider_scope: null` claim, required for a provider-scoped one -- the scenario supplies it, this module never infers it. */
   assetProviders?: string[]
   humanContributionDescription?: Attested<string>
-  /**
-   * Required ONLY when `claim.crc_publication_scope` is `null` (see this
-   * module's own "SELF-CAUGHT CORRECTION" header). The caller supplies this
-   * -- typically the claim's own already-governed `crc_candidate_statement`
-   * -- never invented by this module. When the real claim already carries a
-   * non-null `crc_publication_scope`, this field is ignored; the real value
-   * is used unchanged.
-   */
-  syntheticPublicationScope?: string
+  // No caller-authored publication-scope field exists here, deliberately --
+  // see this module's own "SCOPE DERIVATION" header. The synthetic runtime
+  // scope is always derived internally from the claim's own governed
+  // fields; there is no scenario-level API through which a caller can
+  // supply arbitrary publication-scope prose.
 }
 
 /**
@@ -166,25 +203,33 @@ export function runSyntheticEligibilityCanary(scenario: SyntheticEligibilityCana
     )
   }
 
-  if (claim.crc_publication_scope === null && !scenario.syntheticPublicationScope) {
+  // Fixed precedence over the claim's OWN governed fields only -- see this
+  // module's own "SCOPE DERIVATION" header. No test-scenario input, no
+  // caller-authored string, participates in this derivation at all.
+  const derivedPublicationScope = claim.crc_publication_scope ?? claim.crc_candidate_statement
+  if (derivedPublicationScope === null) {
     throw new Error(
-      `Synthetic eligibility canary refuses to run: claim "${claim.claim_id}" has no real crc_publication_scope, and no scenario.syntheticPublicationScope was supplied. ` +
-        'Real, unmodified production code (assemble-result.ts) correctly refuses to assemble a result for an eligible claim with no scope text -- this harness will not work around that by fabricating one itself. ' +
-        'Supply an explicit scenario.syntheticPublicationScope (e.g. the claim\'s own crc_candidate_statement) if you intend to exercise the eligible-with-scope path for this claim.',
+      `Synthetic eligibility canary refuses to run: claim "${claim.claim_id}" has no real crc_publication_scope AND no crc_candidate_statement to derive a synthetic runtime scope from. ` +
+        'Real, unmodified production code (assemble-result.ts) correctly refuses to assemble a result for an eligible claim with no scope text -- this harness will not work around that by fabricating one from any other source.',
     )
   }
 
-  // Exactly two fields ever overridden, via a fresh object -- `claim` itself
-  // is never touched. `crc_publication_scope` only changes when the real
-  // claim has none (see this module's own "SELF-CAUGHT CORRECTION" header) --
-  // a real, already-authored scope is always used unchanged. Frozen so any
-  // accidental downstream mutation attempt (there should be none --
-  // retrieve()/buildBoundedInterpretations() are both pure) fails loudly
-  // instead of silently succeeding.
+  // Full, independent, structurally-shared-nothing copy of the caller's
+  // claim -- see this module's own "STRUCTURAL CLAIM ISOLATION" header for
+  // why a shallow spread was insufficient. TopicClaim's mutable nested
+  // fields (applicability_requirements, unresolved_project_dependencies,
+  // provider_scope) are copied, not aliased, by structuredClone -- no array
+  // or object reference on the returned synthetic claim is shared with
+  // `claim`. Exactly two fields are then overridden on this isolated copy;
+  // `claim` itself is never touched. Object.freeze remains as an additional,
+  // cheap, shallow defensive measure against this module's own accidental
+  // self-mutation -- isolation from the source is already complete by this
+  // point, independent of freeze.
+  const isolatedClaim = structuredClone(claim)
   const syntheticClaim: TopicClaim = Object.freeze({
-    ...claim,
+    ...isolatedClaim,
     crc_eligible: 'Yes' as const,
-    crc_publication_scope: claim.crc_publication_scope ?? scenario.syntheticPublicationScope ?? null,
+    crc_publication_scope: derivedPublicationScope,
   })
 
   const { results, diagnostics } = retrieve(
