@@ -26,7 +26,7 @@ function toolCandidate(overrides: Partial<CandidateObservation> = {}): Candidate
 // ── 1: bootstrap population ─────────────────────────────────────────────────
 
 describe('CANONICAL_TOOL_IDS -- bootstrap population', () => {
-  test('1: contains exactly the currently-evidenced union of KNOWN_TOOLS values, KNOWN_AMBIGUOUS_TOOLS candidates, and Matrix identifiers', () => {
+  test('1: contains exactly the LK-10 bootstrap union (KNOWN_TOOLS values, KNOWN_AMBIGUOUS_TOOLS candidates, Matrix identifiers) plus every identity registered since (LK-24: synthesia)', () => {
     const expected: CanonicalToolId[] = [
       'runway-gen3',
       'kling',
@@ -38,6 +38,7 @@ describe('CANONICAL_TOOL_IDS -- bootstrap population', () => {
       'google-veo',
       'adobe-firefly',
       'openai-sora',
+      'synthesia',
     ]
     expect([...CANONICAL_TOOL_IDS].sort()).toEqual([...expected].sort())
   })
@@ -166,5 +167,38 @@ describe('8: RetrievalHandoffTool.identifier unchanged', () => {
     }
     const handoff = buildRetrievalHandoff(understanding)
     expect(handoff.tools).toEqual([{ identifier: 'runway-gen3', access_surface: 'unresolved', plan_tier: 'unknown' }])
+  })
+})
+
+// ── LK-24: synthetic representation-readiness probe for the newly-registered
+// identity -- proves ONLY that tool_scope: ['synthesia'] is now mechanically
+// representable via the existing, unmodified LK-13 primitive. A synthetic
+// claim only, never Candidate A's own real proposition -- proves nothing
+// about Candidate A's correctness, FGR validity, Adoption, CRC eligibility,
+// provider policy, or commercial permission. ──────────────────────────────
+
+describe('LK-24: tool_scope referencing the newly-registered synthesia identity', () => {
+  test('a synthetic TopicClaim with tool_scope: ["synthesia"] passes checkTopicClaimRepresentationReadiness', async () => {
+    const { checkTopicClaimRepresentationReadiness } = await import('@/lib/representation-readiness/topic-claim-readiness')
+
+    const syntheticClaim: import('@/lib/retrieval-engine/types').TopicClaim = {
+      claim_id: 'CAND-SYNTHETIC-LK24-PROBE-001-v1',
+      topic: 'commercial_use' as const,
+      claim_character: 'established' as const,
+      jurisdiction: 'Global',
+      lifecycle: 'Candidate' as const,
+      crc_eligible: 'Pending' as const,
+      crc_publication_scope: null,
+      crc_candidate_statement: 'Synthetic probe only -- never real governed knowledge.',
+      applicability_requirements: [],
+      unresolved_project_dependencies: [],
+      provider_scope: null,
+      tool_scope: ['synthesia'],
+      last_verified: null,
+      superseded_by: null,
+    }
+
+    const result = checkTopicClaimRepresentationReadiness(syntheticClaim)
+    expect(result).toEqual({ ready: true, issues: [] })
   })
 })

@@ -73,7 +73,24 @@ export const CANONICAL_TOOL_IDS = [
   'google-veo',
   'adobe-firefly',
   'openai-sora',
+  'synthesia',
 ] as const
+
+/**
+ * 'synthesia' added 2026-08-29 (LK-24, Synthesia Canonical Tool Identity
+ * Extension) -- pure generic registry extension, same mechanism as every
+ * entry above, no new category. Repository evidence (evidence-captures/
+ * synthesia/MANIFEST.md: all four captured sources -- Video Licensing,
+ * Acceptable Use Policy, Customer Terms of Service, Terms & Policy Archives
+ * -- attributed to one unified `Provider: Synthesia`) supports exactly one
+ * canonical identity; no access-surface split analogous to gemini-api/
+ * gemini-consumer-app is evidenced anywhere in the captured material.
+ * Registration is independent of any Synthesia claim's own governance
+ * status -- see SYNTHESIA-SCENARIO-A-FGR-PACKAGE.md, still
+ * Lifecycle: Candidate, entirely unaffected by this registration -- and
+ * does not itself make any Synthesia proposition extraction-reachable
+ * (no KNOWN_TOOLS alias was added), Adopted, or CRC-eligible.
+ */
 
 export type CanonicalToolId = (typeof CANONICAL_TOOL_IDS)[number]
 
