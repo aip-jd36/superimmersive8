@@ -853,6 +853,23 @@ Every manual step in Year 1 is designed to become a platform feature later:
 
 ---
 
+## Strategic Product Direction Under Validation (Not Yet Approved — Aug 29, 2026)
+
+**This section describes a working hypothesis under active validation. It does not change, supersede, or commit SI8 to any revision of the Three-Gear Model, Revenue Model, or Platform Roadmap described above — those remain the CURRENT, operating business plan.** Full technical/architecture framing lives in `CLAUDE.md`'s own "ACTIVE STRATEGIC HYPOTHESIS" section; this section records the business-plan-level implication only.
+
+SI8 is evaluating whether Commercial Assurance — currently a primarily human-reviewed product (Gear A, 90-minute review) — could evolve toward broader, hybrid commercial-readiness decision infrastructure: machine-executed analysis where reliably determinable, human review concentrated on genuine exceptions and judgment calls rather than re-doing machine-resolvable work from scratch. The premise is that artifact compliance (what a file contains) is not the same question as project commercial readiness (whether the underlying production has the rights/evidence its intended commercial use requires) — two identical files can warrant different conclusions depending on facts not visible in the file itself.
+
+**Potential future surfaces under evaluation** (none built, none committed): a machine-resolvable decisioning layer; CRC/self-service access into it (CRC's current, frozen product definition is unchanged); embedded partner/API access for production platforms; a human-review/exception layer; Commercial Assurance itself, potentially running atop the same underlying capability rather than as an entirely separate manual workflow.
+
+**This direction is explicitly subject to three independent validations before any architecture or pricing commitment:**
+1. **Technical differentiation** — does project-state/evidence-aware analysis actually produce materially different, correct conclusions versus artifact-centric compliance tools (e.g. ZebraTruth) or a strong general-purpose model?
+2. **Customer/demand validation** — does any real buyer or gatekeeper (Creative Producers, agencies, brand legal, insurers, production platforms) care enough about that difference to change behavior or pay? Creative Producers are explicitly not assumed to be the economic buyer merely because they are the operational user.
+3. **Machine/human unit-economics validation** — can enough of the review process be reliably machine-resolved for human-reviewed assurance to remain economically scalable, or does this resemble technology-enabled professional services rather than scalable infrastructure?
+
+**Current decision:** validate this thesis (in parallel, across the three tracks above) before committing to any Decision Engine architecture, API, or pricing change. See `CLAUDE.md` EXECUTION GAPS §3s for the active validation workstreams. **Not decided:** whether to build it, what it should be called, who the buyer is, or what it should cost.
+
+---
+
 ## Appendix
 
 ### A. Peer Review Summary
