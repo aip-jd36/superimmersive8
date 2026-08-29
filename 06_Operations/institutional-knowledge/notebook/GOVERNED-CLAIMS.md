@@ -2405,8 +2405,24 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-29
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
+  DEFERRED FROM CRC (2026-08-30, PM: JD -- see CRC Publication Review #9,
+  CPR_009). Not for evidence quality, dependency handling, tool-scope
+  narrowing, Matrix coexistence, or Bounded Interpretation/Composition
+  behavior -- every one of those was independently checked (several
+  empirically, via the existing generic synthetic-eligibility-canary
+  harness) and found sufficient. Deferred solely because the governing
+  Synthesia Acceptable Use Policy evidence relied upon by FGR_009 is dated
+  2024-02-23 and was more than 2.5 years old at this review -- FGR_009
+  resolved that gap as "not blocking" for Adoption only, and CRC
+  Publication Policy Principle 1 ("never inferred from Status") requires an
+  independent judgment at the separate, higher-stakes Publication stage
+  rather than silently inheriting the Adoption-stage lean. Not a permanent
+  disposition -- reconsideration follows a targeted evidence refresh of
+  this specific proposition, not a general Synthesia provider review. See
+  CPR_009 for the complete publication-safety analysis.
 
 CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
   Synthesia's Acceptable Use Policy restricts using a Stock Avatar in paid
   advertising or promotion -- including paid social media ads, paid TV ads,
   and broadcast -- unless Synthesia has given written express consent; use
