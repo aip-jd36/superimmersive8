@@ -2334,3 +2334,86 @@ Full review artifact: `governance-reviews/FGR_008_CAND-LIKENESS-NY-CONSENT-REQUI
 Full CRC Publication Review artifact: `governance-reviews/CPR_008_CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1_2026-08-28.md`
 
 **Excluded from this Wave — not adopted, and not present anywhere above:** `CAND-LIKENESS-NY-EXPRESSIVE-WORK-BOUNDARY-001` (the "advertising purposes or purposes of trade" scope-boundary candidate) — remains `Lifecycle: Candidate`, `NOT READY FOR FGR`, in `LIKENESS-NY-SCENARIO-A-FGR-PACKAGE.md` only, explicitly out of scope for this Wave's own reviewing task. Does not appear in this document and should not be added without its own separate Formal Governance Review.
+
+---
+
+**Wave 5 claim below (2026-08-30) — the first claim in the AI Video Generation Platform Rights domain, and the first `tool_scope`-narrowed claim in this document.** `Lifecycle: Adopted` (Adoption Approver: JD (PM), Adoption Decision Date: 2026-08-29 — matching the human FGR decision date recorded in `SYNTHESIA-SCENARIO-A-FGR-PACKAGE.md`'s own governance table and `governance-reviews/FGR_009_SYNTHESIA_SCENARIO_A_PACKAGE_2026-08-29.md`), `Publication scope: Reviewer/Commercial Assurance`. Not CRC-eligible — `CRC Approver`/`CRC Decision Date` PENDING, same discipline as every prior wave; a separate CRC Publication Review is required, and per `CRC-PUBLICATION-POLICY.md`'s tool-scoped legacy-coexistence practice that review must additionally check for relevant legacy `PLATFORM-RIGHTS-MATRIX.md` coverage of Synthesia before granting eligibility — none currently exists (confirmed directly as of this recording, not assumed). Source candidate package: `SYNTHESIA-SCENARIO-A-FGR-PACKAGE.md` (Candidate A). **Representation history:** the human ADOPT decision (PM: JD, 2026-08-29) preceded durable corpus representation by one day — `FGR_009`'s own second addendum found, immediately after that decision, that no `TopicClaim` field then existed to represent a tool-specific proposition (`ARCHITECTURE_BLOCKER`). That generic gap was closed by `tool_scope` (LK-7) and the canonical tool identity registry (LK-9/LK-10, `synthesia` registered 2026-08-29); a durable, machine-checkable candidate representation was committed and passed representation readiness cleanly (`08_Platform/app/lib/candidates/CAND-SYNTHESIA-STOCK-PAID-PROMOTION-001.ts`); the transitional jurisdiction-compatibility rule immediately above (governance-discipline section) was recorded to reconcile this claim's platform-contractual jurisdiction representation with the strict `Global` definition. This entry records the human ADOPT decision durably in the authoritative corpus exactly as decided on 2026-08-29 — no new substantive governance decision is made by this recording.
+
+### CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1
+Domain: AI Video Generation Platform Rights — Synthesia
+Topic: commercial_use
+Subtopic: stock-avatar-paid-advertising-restriction
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — this is a Synthesia platform contractual restriction, not a legal-jurisdiction-scoped rule. See "Transitional jurisdiction representation for provider/platform propositions" (governance-discipline section above); the underlying `TopicClaim` representation records `jurisdiction: 'Global'` as a bounded transitional compatibility value under that rule, never as a claim of worldwide legal validation.
+Context: commercial AI-generated video produced with a Synthesia-provided Stock Avatar, intended for paid advertising or paid promotion.
+Claim proposition: >
+  Synthesia's Acceptable Use Policy prohibits incorporating a Stock Avatar in
+  content for "promoted", "boosted", or "paid" advertising on any social media
+  platform or similar media, and separately prohibits paid TV advertising and
+  broadcasting on TV without permission, absent written express consent from
+  Synthesia. Use of a Stock Avatar in content that does not constitute paid
+  promotion (e.g. organic social posts, on-site training or product videos)
+  is not restricted by this specific clause.
+
+Source references:
+  - primary: Synthesia Acceptable Use Policy, "Last Updated: February 23, 2024" — https://www.synthesia.io/legal/acceptable-use-policy
+  - secondary/corroborating: Synthesia Help Center, "Synthesia Video Licensing" — https://help.synthesia.io/en/articles/6341928-synthesia-video-licensing
+Source authority/type: Primary legal/official authority (Acceptable Use Policy); corroborated by Official platform authority (Help Center)
+Source fact: >
+  Acceptable Use Policy (verbatim, quote-verified against raw archived HTML —
+  see evidence-captures/synthesia/MANIFEST.md): prohibits "Incorporating a
+  Stock Avatar in content for 'promoted', 'boosted', or 'paid' advertising on
+  any social media platform or similar media, absent written express consent
+  from Synthesia." A separate enumerated list additionally prohibits paid TV
+  ads and "Broadcasting TV (without permission)." Video Licensing Help Center
+  article corroborates in checklist form: "❌ Paid TV ads", "❌ Use in paid
+  Facebook/Instagram/YouTube/TikTok/Snapchat ads", "❌ Use in paid programmatic
+  advertising", "❌ Use in any form of paid promotion", with the converse stated
+  as "✅ Any use that does not include paid promo."
+
+SI8 interpretation: >
+  A client who intends to use a Synthesia Stock Avatar video in ANY paid
+  advertising placement (social, TV, programmatic, or broadcast) needs either
+  (a) written express consent from Synthesia specifically, or (b) a Custom
+  Avatar instead (a separate, not-yet-adopted candidate proposition in the
+  same source package). This is a materially different restriction shape from
+  every other Matrix-governed AI video tool reviewed to date (Runway/Kling/
+  Pika/Veo/Midjourney are not paid-promotion-gated; ElevenLabs is
+  subscription-tier-gated, not use-type-gated) — this is SI8's own synthesis
+  of what the restriction means for a commercial workflow, not itself sourced
+  from Synthesia's own text.
+
+Applicability requirements: []
+Unresolved project dependencies: [synthesia_stock_avatar_used_confirmed, synthesia_written_consent_obtained]   <!-- CRC cannot structurally verify whether a project's Synthesia output actually uses a Stock (vs. Custom) Avatar, nor whether a client separately obtained Synthesia's own written consent for paid use -- both are evidence/documentary questions, not self-report-appropriate per Domain H/askability precedent -->
+Tool scope: ['synthesia']       <!-- first tool-scoped entry in this document (LK-7/LK-9/LK-10); 'synthesia' registered 2026-08-29 in lib/tool-identity/registry.ts. No PLATFORM-RIGHTS-MATRIX.md coverage exists for Synthesia as of this recording -- confirmed directly -- so the LK-22 legacy-coexistence CPR practice will find no relevant Matrix proposition when that review occurs. -->
+Prohibited conclusions: >
+  Does not establish that a Custom Avatar is free of all restrictions in every
+  respect (only that THIS specific paid-promotion clause does not apply to it
+  — that is governed by a separate, not-yet-adopted candidate proposition).
+  Does not establish whether a specific project's output actually used a
+  Stock or Custom Avatar. Does not establish whether Synthesia has granted
+  written consent for any specific paid-use case. Does not establish anything
+  about a jurisdiction's own likeness/publicity/disclosure law — this is a
+  platform contractual restriction only, not a legal clearance determination.
+  Does not establish that non-paid use is free of every other restriction
+  (e.g. a separate political/broadcast/sensitive-content restriction, also a
+  distinct not-yet-adopted candidate proposition in the same source package,
+  still applies regardless of paid status).
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-29
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+
+CRC Candidate Statement: >
+
+Effective date: 2026-08-29 (benchmark capture date; underlying AUP itself dated 2024-02-23)
+Last reviewed: 2026-08-29
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: —
+
+Full Formal Governance Review artifact: `governance-reviews/FGR_009_SYNTHESIA_SCENARIO_A_PACKAGE_2026-08-29.md`
+Candidate Representation: `08_Platform/app/lib/candidates/CAND-SYNTHESIA-STOCK-PAID-PROMOTION-001.ts @ 681a97c4b34d8cc09f3f3bc150eb13bb1744a71f`

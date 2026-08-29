@@ -99,6 +99,24 @@ const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set<string>([
   // discipline as every Music-domain claim above); never added to this set
   // at Adoption time.
   'CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1',
+  // Adopted 2026-08-30 (Wave 5, AI Video Generation Platform Rights --
+  // Synthesia; FGR_009, Adoption Approver: JD (PM), Adoption Decision Date:
+  // 2026-08-29). Mechanically representable -- LK-13's own
+  // checkTopicClaimRepresentationReadiness() returns { ready: true, issues:
+  // [] } for its committed candidate representation
+  // (08_Platform/app/lib/candidates/CAND-SYNTHESIA-STOCK-PAID-PROMOTION-001.ts
+  // @ 681a97c4b34d8cc09f3f3bc150eb13bb1744a71f) -- not excluded here for any
+  // architecture blocker. Deliberately not yet mirrored into
+  // TOPIC_CLAIMS_FIXTURE: durable Adoption is governance-corpus recording
+  // only, a separate and independently-timed act from runtime fixture
+  // mirroring, same "Adoption is pure governance documentation, zero runtime
+  // effect" discipline as the Likeness entry immediately above. CRC
+  // publication remains a later, separate, not-yet-performed step -- this
+  // claim's own `CRC Approver`/`CRC Decision Date` are `PENDING`, and per
+  // `CRC-PUBLICATION-POLICY.md`'s tool-scoped legacy-coexistence practice,
+  // reaching `CRC Eligible: Yes` will additionally require a CPR review of
+  // Synthesia's PLATFORM-RIGHTS-MATRIX.md coverage (none currently exists).
+  'CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1',
 ])
 
 /** Strips fenced code blocks (```...```) before scanning -- the entry template lives inside one and must never be counted as a real claim. */
