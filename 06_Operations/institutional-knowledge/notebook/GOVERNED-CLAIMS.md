@@ -1,13 +1,13 @@
 # Governed Claims
 
-**Status: ACTIVE — Phase 1 skeleton, 2026-08-16.** Canonical home for atomic, non-tool-scoped governed knowledge, per SI8 Living Knowledge Expansion PRD v0.2 and the repo-grounded technical design (`08_Platform/implementation/LK_PHASE1_TECHNICAL_DESIGN.md`, `LK_PHASE1_TECHNICAL_DESIGN_v2.md`).
+**Status: ACTIVE — Phase 1 skeleton, 2026-08-16.** Canonical home for atomic governed knowledge, per SI8 Living Knowledge Expansion PRD v0.2 and the repo-grounded technical design (`08_Platform/implementation/LK_PHASE1_TECHNICAL_DESIGN.md`, `LK_PHASE1_TECHNICAL_DESIGN_v2.md`).
 
 **This document does not replace or change the purpose of:**
-- `PLATFORM-RIGHTS-MATRIX.md` — tool-scoped commercial-use claims stay there, unchanged.
+- `PLATFORM-RIGHTS-MATRIX.md` — existing tool-scoped commercial-use claims stay there as legacy content, unchanged by this document; a new governed proposition may still be tool-specific and live here instead, via `tool_scope` (see below).
 - `SI8-POSITIONS.md` — settled institutional stances stay there, unchanged.
 - `EDGE-CASES.md` / `PENDING-QUESTIONS.md` — unchanged.
 
-**Its role is specifically:** governed knowledge that applies regardless of which AI tool was used — Wave 1 is U.S. Copyright & Human Authorship. A claim here has no Matrix row to attach to.
+**Its role is specifically:** governed knowledge expressed as a `TopicClaim`. Most propositions to date apply regardless of which AI tool was used (Wave 1, U.S. Copyright & Human Authorship, has no Matrix row to attach to) — but a `TopicClaim` may also represent a tool-specific proposition, narrowed via `tool_scope` (see its own doc comment, `retrieval-engine/types.ts`). A tool's historical placement in `PLATFORM-RIGHTS-MATRIX.md` does not by itself determine whether a governed proposition for that tool belongs here instead — see `CRC-PUBLICATION-POLICY.md`'s tool-scoped legacy-coexistence practice for what CRC Publication Review must additionally check before granting `CRC Eligible: Yes` to such a claim.
 
 ## How to read a claim
 

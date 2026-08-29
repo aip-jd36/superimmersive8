@@ -28,8 +28,26 @@
 4. If a user acted on this fact alone, would they be reasonably informed, or quietly under-informed?
 5. Is the underlying platform term itself new enough that SI8 hasn't yet seen how it holds up?
 6. For a compound row (mixed-confidence claims within one Tool): does `CRC Publication Scope` name the exact claim CRC is permitted to state, and confirm the weaker sub-claim is excluded — not just that the row overall is Verified?
+7. Does this claim carry a non-null `tool_scope`? If so, has legacy `PLATFORM-RIGHTS-MATRIX.md` coexistence for the scoped tool(s) been reviewed per the practice below?
 
 A No on any of these is a real reason to narrow, rewrite, or withhold — not just note and proceed.
+
+## Tool-Scoped Claims — Legacy Matrix Coexistence Check (Living Knowledge Matrix Coexistence practice, 2026-08-30)
+
+A `TopicClaim` with a non-null `tool_scope` narrows an already-relevant proposition to one or more specific tools (see `tool_scope`'s own doc comment, `08_Platform/app/lib/retrieval-engine/types.ts`) — the same tool may also already carry legacy commercial-use knowledge in `PLATFORM-RIGHTS-MATRIX.md`. **Sharing a tool is a discovery trigger only** — it does not by itself mean the two propositions concern the same real-world decision, and it does not by itself mean they conflict; the reviewer judges proposition relevance, not the runtime, and not the mere fact of a shared tool identifier.
+
+Before granting `CRC Eligible: Yes` to a tool-scoped claim:
+
+1. Inspect existing Matrix coverage for the scoped tool(s).
+2. Through ordinary human governance review, determine whether any Matrix proposition could materially overlap the candidate's own CRC conclusion.
+3. If a relevant Matrix proposition is identified, include those specific `MatrixRow`/`MatrixClaim` entries in the existing synthetic eligibility canary alongside the candidate, and inspect the combined Bounded Interpretation output for the same project state.
+4. If compatibility cannot be established, WITHHOLD `CRC Eligible: Yes` until it can.
+
+When Matrix coexistence is materially reviewed, record in the CPR artifact: the relevant `MatrixRow.identifier`, the relevant `MatrixClaim.claim_id` value(s), the coexistence conclusion, and whether the disposition is APPROVE or WITHHOLD — durable governance evidence in the CPR artifact, the same discipline as every other CPR finding; no new schema field or enum is introduced by this practice.
+
+This review reflects Matrix content as read at review time only. It does not remain automatically valid if the referenced Matrix row is later edited — Matrix carries no versioning or supersession mechanism to signal such a change. Re-verification triggered by a later Matrix edit is not addressed by this practice.
+
+This check governs `CRC Eligible: Yes` only. It does not affect whether a tool-scoped proposition may be substantively `Lifecycle: Adopted` — Adoption is a Living Knowledge governance decision under ordinary FGR criteria, independent of Matrix coexistence (see this document's own Purpose statement above: publication is a separate layer from knowledge and judgment).
 
 ## Publication Test
 

@@ -109,9 +109,15 @@ export interface MatrixRow {
 
 // ── Topic claims (CRC Living Knowledge Phase 1, 2026-08-16) ────────────────
 //
-// Non-tool-scoped governed knowledge -- e.g. copyright/human-authorship
-// claims that apply regardless of which AI platform was used, so they have
-// no MatrixRow to attach to. Canonical source is
+// Governed knowledge expressed as a TopicClaim -- most propositions to date
+// are non-tool-scoped (e.g. copyright/human-authorship claims that apply
+// regardless of which AI platform was used, so they have no MatrixRow to
+// attach to), but a TopicClaim may also represent a tool-specific
+// proposition via tool_scope below (LK-7, 2026-08-29) -- see that field's
+// own doc comment for the narrowing semantics, and CRC-PUBLICATION-POLICY.md
+// (06_Operations/institutional-knowledge/notebook/) for the CPR practice
+// governing legacy PLATFORM-RIGHTS-MATRIX.md coexistence before a
+// tool-scoped claim may become CRC-Eligible. Canonical source is
 // `06_Operations/institutional-knowledge/notebook/GOVERNED-CLAIMS.md`,
 // mirrored (same discipline as MATRIX_FIXTURE/matrix-fixture.ts, hand-synced,
 // no live markdown parser -- no precedent for one exists in this repo) into
