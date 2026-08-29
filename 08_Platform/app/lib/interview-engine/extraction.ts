@@ -70,6 +70,7 @@ import {
   supersedeAssessmentJurisdictionMention,
   addContentPresenceMention,
 } from './mutations'
+import type { CanonicalToolId } from '@/lib/tool-identity/registry'
 
 // ── Raw input ────────────────────────────────────────────────────────────────
 
@@ -416,7 +417,14 @@ export type NormalizationResult =
   | { status: 'unrecognized' }
 
 interface AmbiguousToolEntry {
-  candidateIdentifiers: string[]
+  /**
+   * Typed against the Canonical Tool Identity Authority (LK-10,
+   * lib/tool-identity/registry.ts) rather than a bare `string[]` -- a
+   * type-only import, so this module still introduces zero identifiers the
+   * registry doesn't already admit. The registry remains the authority;
+   * this is a consumer, never a source (see registry.ts's own header).
+   */
+  candidateIdentifiers: CanonicalToolId[]
   /**
    * Each pattern must describe an ACCESS METHOD, not just the tool's name or
    * generic enthusiasm about it -- "clearly describes how the user accessed
@@ -434,7 +442,7 @@ interface AmbiguousToolEntry {
    * disambiguation match's own result, surfaced as a field instead of only
    * an identifier.
    */
-  disambiguationRules: { pattern: RegExp; identifier: string; accessSurfaceLabel: string }[]
+  disambiguationRules: { pattern: RegExp; identifier: CanonicalToolId; accessSurfaceLabel: string }[]
 }
 
 const KNOWN_AMBIGUOUS_TOOLS: Record<string, AmbiguousToolEntry> = {
@@ -447,7 +455,16 @@ const KNOWN_AMBIGUOUS_TOOLS: Record<string, AmbiguousToolEntry> = {
   },
 }
 
-const KNOWN_TOOLS: Record<string, string> = {
+/**
+ * Typed against the Canonical Tool Identity Authority (LK-10,
+ * lib/tool-identity/registry.ts): every value here must be a
+ * CanonicalToolId, so this table can no longer introduce a canonical
+ * identifier the registry doesn't already admit -- a typo or a stale
+ * rename now fails to compile instead of silently drifting (LK-8 SS K
+ * failure mode 3). Keys, values, and resolution behavior are completely
+ * unchanged; this is a type-only tightening, not a data change.
+ */
+const KNOWN_TOOLS: Record<string, CanonicalToolId> = {
   runway: 'runway-gen3',
   'runway gen-3': 'runway-gen3',
   'runway gen 3': 'runway-gen3',
