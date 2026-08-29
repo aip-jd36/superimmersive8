@@ -2407,6 +2407,11 @@ Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
 
 CRC Candidate Statement: >
+  Synthesia's Acceptable Use Policy restricts using a Stock Avatar in paid
+  advertising or promotion -- including paid social media ads, paid TV ads,
+  and broadcast -- unless Synthesia has given written express consent; use
+  that isn't paid promotion, such as organic posts or internal/training
+  videos, isn't restricted by this specific clause.
 
 Effective date: 2026-08-29 (benchmark capture date; underlying AUP itself dated 2024-02-23)
 Last reviewed: 2026-08-29
