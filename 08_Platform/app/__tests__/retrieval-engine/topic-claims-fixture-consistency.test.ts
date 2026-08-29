@@ -110,12 +110,18 @@ const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set<string>([
   // TOPIC_CLAIMS_FIXTURE: durable Adoption is governance-corpus recording
   // only, a separate and independently-timed act from runtime fixture
   // mirroring, same "Adoption is pure governance documentation, zero runtime
-  // effect" discipline as the Likeness entry immediately above. CRC
-  // publication remains a later, separate, not-yet-performed step -- this
-  // claim's own `CRC Approver`/`CRC Decision Date` are `PENDING`, and per
-  // `CRC-PUBLICATION-POLICY.md`'s tool-scoped legacy-coexistence practice,
-  // reaching `CRC Eligible: Yes` will additionally require a CPR review of
-  // Synthesia's PLATFORM-RIGHTS-MATRIX.md coverage (none currently exists).
+  // effect" discipline as the Likeness entry immediately above. Now
+  // CRC-approved (CPR_009, PM: JD, CRC Decision Date: 2026-08-30, following
+  // an intervening DEFER + targeted evidence refresh -- see
+  // GOVERNED-CLAIMS.md's own CRC Publication Scope and
+  // governance-reviews/README.md's addendum trail for the full sequence;
+  // the required tool-scoped legacy-coexistence check per
+  // `CRC-PUBLICATION-POLICY.md` found NO MATRIX COVERAGE FOUND for
+  // Synthesia) -- still deliberately not yet runtime-mirrored. Governance
+  // approval and runtime activation remain separate, independently-timed
+  // acts, same discipline as every other claim in this set: mechanically
+  // representable and now CRC-approved, but runtime activation is a
+  // separate, later, controlled milestone.
   'CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1',
 ])
 

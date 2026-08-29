@@ -2405,24 +2405,34 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-29
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  DEFERRED FROM CRC (2026-08-30, PM: JD -- see CRC Publication Review #9,
-  CPR_009). Not for evidence quality, dependency handling, tool-scope
-  narrowing, Matrix coexistence, or Bounded Interpretation/Composition
-  behavior -- every one of those was independently checked (several
-  empirically, via the existing generic synthetic-eligibility-canary
-  harness) and found sufficient. Deferred solely because the governing
-  Synthesia Acceptable Use Policy evidence relied upon by FGR_009 is dated
-  2024-02-23 and was more than 2.5 years old at this review -- FGR_009
-  resolved that gap as "not blocking" for Adoption only, and CRC
-  Publication Policy Principle 1 ("never inferred from Status") requires an
-  independent judgment at the separate, higher-stakes Publication stage
-  rather than silently inheriting the Adoption-stage lean. Not a permanent
-  disposition -- reconsideration follows a targeted evidence refresh of
-  this specific proposition, not a general Synthesia provider review. See
-  CPR_009 for the complete publication-safety analysis.
+  APPROVED FOR CRC PUBLICATION (2026-08-30, CRC Approver: JD (PM) -- see
+  CRC Approver/CRC Decision Date below; CRC Publication Review #9 complete
+  at governance-reviews/CPR_009_CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1
+  _2026-08-30.md, initially recommending DEFER pending a targeted evidence
+  refresh -- that refresh, recorded in governance-reviews/README.md's own
+  2026-08-30 addendum, substantively confirmed the current Synthesia
+  Acceptable Use Policy and Video Licensing Help Center evidence, resolving
+  the freshness gap that caused the DEFER; see CPR_009's own updated
+  wrapper metadata for the full, unedited decision sequence). CRC may state
+  that Synthesia's Acceptable Use Policy restricts using a Stock Avatar in
+  paid advertising or promotion -- including paid social ads, paid TV ads,
+  and broadcast -- absent Synthesia's own written express consent, and that
+  non-paid use (e.g. organic posts, internal/training videos) is not
+  restricted by this specific clause. This is Synthesia's own provider/
+  platform policy, not law. CRC must not state whether a specific project
+  used a Stock or Custom Avatar, whether Synthesia has granted written
+  consent for any specific case, or whether the restriction therefore
+  applies to the user's own project. CRC must not represent the project as
+  commercially or legally cleared, and must not treat either evidence-only
+  dependency (synthesia_stock_avatar_used_confirmed,
+  synthesia_written_consent_obtained) as a self-attestation question --
+  both remain permanently unresolved through Bounded Interpretation's Case
+  3B boundary, exactly as for every other dependency-bearing claim in this
+  corpus. A human-reviewed Commercial Assurance Assessment remains the
+  higher-assurance path for resolving either dependency for a specific
+  project.
 
 CRC Candidate Statement: >
-  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
   Synthesia's Acceptable Use Policy restricts using a Stock Avatar in paid
   advertising or promotion -- including paid social media ads, paid TV ads,
   and broadcast -- unless Synthesia has given written express consent; use
@@ -2430,10 +2440,10 @@ CRC Candidate Statement: >
   videos, isn't restricted by this specific clause.
 
 Effective date: 2026-08-29 (benchmark capture date; underlying AUP itself dated 2024-02-23)
-Last reviewed: 2026-08-29
+Last reviewed: 2026-08-30 (targeted evidence refresh, LK-37 -- see CRC Publication Scope above)
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-08-30
 Related: —
 
 Full Formal Governance Review artifact: `governance-reviews/FGR_009_SYNTHESIA_SCENARIO_A_PACKAGE_2026-08-29.md`
