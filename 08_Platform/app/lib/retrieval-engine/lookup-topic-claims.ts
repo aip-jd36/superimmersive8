@@ -250,6 +250,30 @@ export function providerScopeMatches(claim: TopicClaim, assetProviders: readonly
   return claim.provider_scope.some((p) => assetProviders.includes(p))
 }
 
+/**
+ * Tool pre-filter (Living Knowledge — Canonical Tool-Scope Primitive, LK-7,
+ * 2026-08-29). Structurally identical to `providerScopeMatches` immediately
+ * above -- same null-is-generic, non-empty-array-requires-membership
+ * semantics, same "runs before Lifecycle/CRC-eligible/applicability, no
+ * diagnostic of its own" placement (see `lookupTopicClaims` below). A
+ * deliberately separate function, not a generalized "scope matches" helper
+ * shared with `providerScopeMatches` -- see `TopicClaim.tool_scope`'s own
+ * doc comment (types.ts) for why tool and provider identity are kept
+ * structurally independent throughout this codebase. `activeToolIds` must be
+ * canonical, active, resolved tool identifiers only (never an unresolved
+ * alias, never a raw `AssetProviderMention` identifier) -- see this
+ * function's own call site below for the exact source
+ * (`RetrievalHandoff.tools`, already computed by `buildRetrievalHandoff`).
+ * This function narrows an already topic-matched claim only -- it never
+ * decides topic relevance itself and must never be called, or have its
+ * result treated as, a substitute for the existing goal/Track-A relevance
+ * gate.
+ */
+export function toolScopeMatches(claim: TopicClaim, activeToolIds: readonly string[]): boolean {
+  if (claim.tool_scope === null) return true
+  return claim.tool_scope.some((t) => activeToolIds.includes(t))
+}
+
 export interface TopicLookupResult {
   matches: TopicClaim[]
   diagnostics: RetrievalDiagnostic[]
@@ -302,12 +326,30 @@ export function activeConfirmedGoalCategories(goals: UserGoal[]): Set<GoalCatego
   return new Set(goals.filter((g) => g.superseded_by === null && g.state === 'confirmed').map((g) => g.category))
 }
 
+/**
+ * `activeToolIds` (Living Knowledge — Canonical Tool-Scope Primitive, LK-7,
+ * 2026-08-29): additive, defaults to `[]` -- every pre-existing call site
+ * continues to compile and behave identically without passing it (a
+ * tool-scoped claim simply never matches when no tool identifiers are
+ * supplied, which is exactly correct: no tool information means no
+ * tool-specific claim can be a candidate). Placed last, after the
+ * pre-existing `discoveredTopics` parameter, so no existing positional call
+ * site is disturbed. Canonical identifiers only -- see `toolScopeMatches`'s
+ * own doc comment above for the exact contract. Deliberately NOT unioned
+ * into `activeGoalCategories` or treated as a relevance signal of any kind
+ * -- a tool identifier being present here narrows candidacy for claims that
+ * are ALREADY topic-matched; it never causes a claim to become topic-matched
+ * on its own (see `TopicClaim.tool_scope`'s own doc comment for the full
+ * boundary). No Track A discovered-relevance behavior is introduced or
+ * implied by this parameter.
+ */
 export function lookupTopicClaims(
   goals: UserGoal[],
   topicClaims: TopicClaim[],
   facts: ApplicabilityFacts,
   assetProviders: string[] = [],
   discoveredTopics: GoalCategory[] = [],
+  activeToolIds: string[] = [],
 ): TopicLookupResult {
   const diagnostics: RetrievalDiagnostic[] = []
   const matches: TopicClaim[] = []
@@ -320,9 +362,13 @@ export function lookupTopicClaims(
     // BEFORE Lifecycle/CRC-eligible/applicability evaluation below. A
     // provider-mismatched claim never enters this array at all, so it can
     // never affect `anyEligible`/`anyApplicable` or produce a diagnostic.
+    // Tool pre-filter (LK-7) runs the same way, independently -- a claim
+    // must pass BOTH gates (when both scope fields are non-null) to remain
+    // a candidate; see `toolScopeMatches`'s own doc comment.
     const candidates = topicClaims
       .filter((c) => c.topic === category && c.superseded_by === null)
       .filter((c) => providerScopeMatches(c, assetProviders))
+      .filter((c) => toolScopeMatches(c, activeToolIds))
 
     if (candidates.length === 0) {
       diagnostics.push({ identifier: category, reason: 'no_topic_claim' })

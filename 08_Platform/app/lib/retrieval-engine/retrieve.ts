@@ -104,6 +104,16 @@ const UNKNOWN_APPLICABILITY_FACTS: ApplicabilityFacts = { jurisdiction: { includ
  * note); a future relationship reachable only from a discovered topic
  * would need that extension made deliberately, not silently inherited
  * here.
+ *
+ * `activeToolIds` (Living Knowledge — Canonical Tool-Scope Primitive, LK-7,
+ * 2026-08-29): derived internally from `handoff.tools`, not a parameter on
+ * this function -- see the local `activeToolIds` computation below for why
+ * (the source is already in scope; no new signature entry is needed).
+ * Threaded only into `lookupTopicClaims`'s own additive `activeToolIds`
+ * parameter, which narrows `tool_scope`-bearing claims exactly as
+ * `assetProviders` narrows `provider_scope`-bearing ones. Zero behavior
+ * change for any existing claim -- every claim that predates this addition
+ * has `tool_scope: null`, which `toolScopeMatches` always passes.
  */
 export function retrieve(
   handoff: RetrievalHandoff,
@@ -186,7 +196,21 @@ export function retrieve(
     }
   }
 
-  const topicLookup = lookupTopicClaims(goals, topicClaims, applicabilityFacts, assetProviders)
+  // Tool pre-filter source (Living Knowledge — Canonical Tool-Scope
+  // Primitive, LK-7, 2026-08-29): same "smallest existing route" discipline
+  // as `assetProviders` above -- `handoff.tools` (already computed by
+  // `buildRetrievalHandoff`, already in scope here) is the correct source;
+  // no new parameter is added to `retrieve()`'s own signature. Canonical
+  // identifiers only, by construction (`RetrievalHandoffTool` entries are
+  // only ever produced for `resolution.kind === 'canonical'` tool mentions
+  // -- see handoff.ts). Passed only into `lookupTopicClaims`'s new,
+  // additive `activeToolIds` parameter -- never threaded into
+  // `lookupRelatedTopicClaims` or `lookupDiscoveredTopicClaims`, matching
+  // `assetProviders`'s own existing scoping, and never used to derive or
+  // widen `activeGoalCategories` -- it narrows candidacy only, per
+  // `TopicClaim.tool_scope`'s own doc comment.
+  const activeToolIds = handoff.tools.map((t) => t.identifier)
+  const topicLookup = lookupTopicClaims(goals, topicClaims, applicabilityFacts, assetProviders, [], activeToolIds)
   diagnostics.push(...topicLookup.diagnostics)
   for (const claim of topicLookup.matches) {
     const assembled = assembleTopicResult(claim)

@@ -273,6 +273,62 @@ export interface ApplicabilityRequirement {
  * other user-visible state; a mismatched claim is structurally
  * indistinguishable from a claim that was never a candidate at all.
  */
+/**
+ * `tool_scope` (Living Knowledge — Canonical Tool-Scope Primitive, LK-7,
+ * 2026-08-29). Governed runtime metadata, structurally parallel to
+ * `provider_scope` immediately above but semantically independent -- tools
+ * and asset providers are, and remain, distinct concepts throughout this
+ * codebase (see `ToolMention`/`AssetProviderMention`'s own separate types).
+ *
+ * CRITICAL SEMANTIC BOUNDARY: `tool_scope` NARROWS an already topic-relevant
+ * claim -- it never CREATES topic relevance on its own. A claim only
+ * becomes a candidate for `tool_scope` evaluation after the existing
+ * topic-matching path (an explicit, confirmed UserGoal, or a separately-
+ * governed Track A discovered-topic occurrence) has already established
+ * relevance. No code path introduced by this field surfaces a claim purely
+ * because a `ToolMention` exists with no corresponding topic/goal match --
+ * that would be exactly the fabricated-relevance failure mode Track A's own
+ * governance discipline exists to prevent (see `discovered-relevance.ts`'s
+ * own header). This field's addition registers no Track A trigger for any
+ * tool -- that remains a separate, later, independently-governed decision.
+ *
+ *   - `null` -- tool-independent (generic) claim. Always a topic candidate
+ *     for a matching goal category, regardless of which tool (if any) the
+ *     user named. Every claim that existed before this field was added is
+ *     `null` -- see topic-claims-fixture.ts.
+ *   - `string[]` (non-empty) -- tool-specific claim. A topic candidate ONLY
+ *     when at least one of the listed canonical tool identifiers is among
+ *     the current conversation's ACTIVE, CANONICALLY RESOLVED tool
+ *     identifiers (never an unresolved alias, raw text, AssetProviderMention
+ *     identifier, or inferred/fuzzy match -- see lookup-topic-claims.ts's
+ *     own `toolScopeMatches`). An empty array is not a meaningful state and
+ *     must never be authored, mirroring `provider_scope`'s own identical
+ *     rule.
+ *
+ * Tool identifiers are plain canonical strings -- the same `identifier:
+ * string` shape `RetrievalHandoffTool`/`ToolResolution`'s canonical variant
+ * already use -- deliberately NOT a new closed union type. Unlike
+ * `AssetProviderId`, no authoritative closed tool-identifier union exists
+ * anywhere in this codebase to reuse (tool identifiers are validated only by
+ * extraction.ts's own private `KNOWN_TOOLS` alias table); inventing one here
+ * for Living Knowledge alone would create a second, competing tool-identity
+ * concept, which this field deliberately does not do.
+ *
+ * REQUIRED, not optional -- same discipline as `provider_scope` and every
+ * other `TopicClaim` field: an author must make an explicit, reviewed choice
+ * for every claim, never fall through an implicit default. A tool-scope
+ * mismatch evaluates to exclusion from candidacy entirely (see
+ * `lookupTopicClaims`), producing no diagnostic of its own, mirroring
+ * `provider_scope`'s own silent-exclusion behavior exactly.
+ *
+ * When both `provider_scope` and `tool_scope` are non-null on the same
+ * claim, both independent conditions must be satisfied -- neither alone is
+ * sufficient, and each is evaluated against its own, non-overlapping
+ * structured fact source (`tool_scope` only ever reads canonical
+ * `ToolMention` identifiers; `provider_scope` only ever reads canonical
+ * `AssetProviderMention` identifiers) -- neither may substitute for the
+ * other.
+ */
 export interface TopicClaim {
   claim_id: string
   /** Matches UserGoal.category exactly -- this is the field Topic Retrieval actually matches on. */
@@ -289,6 +345,8 @@ export interface TopicClaim {
   unresolved_project_dependencies: string[]
   /** See this interface's own header comment, immediately above. */
   provider_scope: AssetProviderId[] | null
+  /** See this interface's own `tool_scope` doc comment, immediately above. */
+  tool_scope: string[] | null
   last_verified: string | null
   /** id of the claim version that replaced this one, or null if this is the current version. Mirrors UserGoal.superseded_by's own convention. */
   superseded_by: string | null

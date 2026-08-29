@@ -36,6 +36,7 @@ const COPYRIGHT_CLAIM: TopicClaim = {
   applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
   unresolved_project_dependencies: ['human_contribution_description'],
   provider_scope: null,
+  tool_scope: null,
   last_verified: '2026-08-16',
   superseded_by: null,
 }

@@ -85,6 +85,7 @@ function planClaim(overrides: Partial<TopicClaim> & Pick<TopicClaim, 'claim_id'>
     applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'kling', operator: 'equals', value: 'paid' }],
     unresolved_project_dependencies: [],
     provider_scope: null,
+    tool_scope: null,
     last_verified: null,
     superseded_by: null,
     ...overrides,

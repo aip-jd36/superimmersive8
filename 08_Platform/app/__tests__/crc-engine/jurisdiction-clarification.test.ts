@@ -65,6 +65,7 @@ function jurisdictionGatedClaim(overrides: Partial<TopicClaim> & Pick<TopicClaim
     applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     unresolved_project_dependencies: [],
     provider_scope: null,
+    tool_scope: null,
     last_verified: '2026-08-16',
     superseded_by: null,
     ...overrides,

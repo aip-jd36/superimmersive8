@@ -88,6 +88,7 @@ function stockClaim(overrides: Partial<TopicClaim> = {}): TopicClaim {
     applicability_requirements: [],
     unresolved_project_dependencies: ['test_provider_license_confirmed'],
     provider_scope: ['istock'],
+    tool_scope: null,
     last_verified: null,
     superseded_by: null,
     ...overrides,

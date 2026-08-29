@@ -47,6 +47,7 @@ const PLAN_GATED_CLAIM: TopicClaim = {
   applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'kling', operator: 'equals', value: 'paid' }],
   unresolved_project_dependencies: [],
   provider_scope: null,
+  tool_scope: null,
   last_verified: '2026-08-24',
   superseded_by: null,
 }
@@ -161,6 +162,7 @@ describe('governed selector questioning -- eligibility gating (mocked registry)'
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
       unresolved_project_dependencies: [],
       provider_scope: null,
+      tool_scope: null,
       last_verified: '2026-08-16',
       superseded_by: null,
     }

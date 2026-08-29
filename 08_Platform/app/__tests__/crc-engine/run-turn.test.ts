@@ -339,6 +339,7 @@ describe('runTurn -- Governed Topic Relationships orchestrator wiring (2026-08-1
       applicability_requirements: [],
       unresolved_project_dependencies: [],
       provider_scope: null,
+      tool_scope: null,
       last_verified: '2026-08-16',
       superseded_by: null,
       ...overrides,

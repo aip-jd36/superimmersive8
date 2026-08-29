@@ -76,6 +76,7 @@ const LIKENESS_CANDIDATE_A_GOVERNED_CLAIM: TopicClaim = {
   applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'New York' }],
   unresolved_project_dependencies: ['recognizable_likeness_or_voice_present', 'advertising_or_trade_use_confirmed', 'written_consent_confirmed'],
   provider_scope: null,
+  tool_scope: null,
   last_verified: '2026-08-28',
   superseded_by: null,
 }

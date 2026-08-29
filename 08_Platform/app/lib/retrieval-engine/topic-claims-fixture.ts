@@ -166,6 +166,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     unresolved_project_dependencies: ['human_contribution_description'],
     provider_scope: null,
+    tool_scope: null,
     last_verified: '2026-08-16',
     superseded_by: null,
   },
@@ -183,6 +184,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     unresolved_project_dependencies: ['human_contribution_description'],
     provider_scope: null,
+    tool_scope: null,
     last_verified: '2026-08-16',
     superseded_by: null,
   },
@@ -200,6 +202,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
     unresolved_project_dependencies: ['human_contribution_description'],
     provider_scope: null,
+    tool_scope: null,
     last_verified: '2026-08-16',
     superseded_by: null,
   },
@@ -227,6 +230,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     // claim, not one whose application depends on the specific project.
     unresolved_project_dependencies: [],
     provider_scope: null,
+    tool_scope: null,
     last_verified: '2026-08-16',
     superseded_by: null,
   },
@@ -278,6 +282,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     // HISTORICAL VALUE, preserved unchanged -- see the SUPERSEDED comment
     // above. The corrected scope lives on CLAIM-STOCK-EDITORIAL-001-v2 below.
     provider_scope: null,
+    tool_scope: null,
     last_verified: '2026-08-17',
     superseded_by: 'CLAIM-STOCK-EDITORIAL-001-v2',
   },
@@ -311,6 +316,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     // never a media-domain filter; a future fifth stock provider does not
     // inherit this claim without its own governance review.
     provider_scope: ['getty', 'istock', 'shutterstock', 'adobe-stock'],
+    tool_scope: null,
     last_verified: '2026-08-27',
     superseded_by: null,
   },
@@ -347,6 +353,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     // HISTORICAL VALUE, preserved unchanged -- see the SUPERSEDED comment
     // above. The corrected scope lives on CLAIM-STOCK-EDITORIAL-002-v2 below.
     provider_scope: null,
+    tool_scope: null,
     last_verified: '2026-08-17',
     superseded_by: 'CLAIM-STOCK-EDITORIAL-002-v2',
   },
@@ -380,6 +387,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     // governed markdown entry's own Source references). Real,
     // individually-evidenced provider identities only.
     provider_scope: ['getty', 'istock', 'shutterstock'],
+    tool_scope: null,
     last_verified: '2026-08-27',
     superseded_by: null,
   },
@@ -399,6 +407,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     // Provider-specific -- a topic candidate ONLY when 'getty' is among the
     // conversation's active, canonically-resolved asset providers.
     provider_scope: ['getty'],
+    tool_scope: null,
     last_verified: '2026-08-17',
     superseded_by: null,
   },
@@ -416,6 +425,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     applicability_requirements: [],
     unresolved_project_dependencies: ['asset_confirmed_shutterstock', 'editorial_designation_confirmed', 'rights_and_clearance_status'],
     provider_scope: ['shutterstock'],
+    tool_scope: null,
     last_verified: '2026-08-17',
     superseded_by: null,
   },
@@ -433,6 +443,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     applicability_requirements: [],
     unresolved_project_dependencies: ['asset_confirmed_istock', 'editorial_designation_confirmed'],
     provider_scope: ['istock'],
+    tool_scope: null,
     last_verified: '2026-08-17',
     superseded_by: null,
   },
@@ -473,6 +484,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     // A-3 must not, and does not, create any new user-facing question.
     unresolved_project_dependencies: ['artlist_subscription_active_at_publication_confirmed'],
     provider_scope: ['artlist'],
+    tool_scope: null,
     last_verified: '2026-08-27',
     superseded_by: null,
   },

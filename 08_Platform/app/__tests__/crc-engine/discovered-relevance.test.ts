@@ -68,6 +68,7 @@ function genericStockClaim(overrides: Partial<TopicClaim> = {}): TopicClaim {
     applicability_requirements: [],
     unresolved_project_dependencies: [],
     provider_scope: null,
+    tool_scope: null,
     last_verified: null,
     superseded_by: null,
     ...overrides,

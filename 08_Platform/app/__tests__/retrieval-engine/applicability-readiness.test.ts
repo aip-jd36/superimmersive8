@@ -168,6 +168,7 @@ describe('deriveApplicabilityReadinessGaps -- TopicClaim-origin gaps, provider-s
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
       unresolved_project_dependencies: [],
       provider_scope: ['istock'],
+      tool_scope: null,
       last_verified: null,
       superseded_by: null,
       ...overrides,
@@ -232,6 +233,7 @@ describe('deriveApplicabilityReadinessGaps -- combined Matrix + Topic', () => {
       applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
       unresolved_project_dependencies: [],
       provider_scope: null,
+      tool_scope: null,
       last_verified: null,
       superseded_by: null,
     }
