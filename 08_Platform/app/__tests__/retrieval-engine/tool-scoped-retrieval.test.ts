@@ -18,6 +18,9 @@
 
 import { lookupTopicClaims, toolScopeMatches } from '@/lib/retrieval-engine/lookup-topic-claims'
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
+import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
+import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
+import { assembleProjectionOutput } from '@/lib/projection-layer/assemble-projection-output'
 import type { RetrievalHandoff, ToolMention, AssetProviderMention, UserGoal } from '@/types/interview-engine'
 import type { TopicClaim } from '@/lib/retrieval-engine/types'
 
@@ -287,5 +290,110 @@ describe('retrieve(): explicit-goal retrieval with matching tool scope works wit
     const unrelatedGoal = commercialUseGoal({ category: 'copyrightability', raw_text: 'Can this be copyrighted?' })
     const { results } = retrieve(h, [], [unrelatedGoal], [klingOnly])
     expect(results).toEqual([])
+  })
+})
+
+// ── END-TO-END (REAL FIXTURE): first real tool-scoped TopicClaim,
+// CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1 (LK-39) ──────────────────────
+//
+// Every test above proves the generic tool_scope mechanism against synthetic,
+// test-only claims. This block proves the exact same generic mechanism --
+// no new code path, no Synthesia-specific branch anywhere in production --
+// against TOPIC_CLAIMS_FIXTURE's own real, committed entry, the first real
+// governed proposition to exercise tool_scope end-to-end. Loaded directly
+// from the real fixture, zero hand-transcription, zero drift risk (mirrors
+// synthetic-eligibility-canary.test.ts's own "load the real fixture entry"
+// precedent for CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1).
+describe('retrieve(): real fixture entry CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1 (first real tool-scoped TopicClaim)', () => {
+  const SYNTHESIA_CLAIM_ID = 'CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1'
+  const synthesiaClaim = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === SYNTHESIA_CLAIM_ID)
+  const facts = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
+
+  test('sanity precondition: the real fixture entry exists, is Adopted + CRC-eligible, and carries both governed dependencies unchanged', () => {
+    expect(synthesiaClaim).toBeDefined()
+    expect(synthesiaClaim?.lifecycle).toBe('Adopted')
+    expect(synthesiaClaim?.crc_eligible).toBe('Yes')
+    expect(synthesiaClaim?.tool_scope).toEqual(['synthesia'])
+    expect(synthesiaClaim?.provider_scope).toBeNull()
+    expect(synthesiaClaim?.unresolved_project_dependencies).toEqual([
+      'synthesia_stock_avatar_used_confirmed',
+      'synthesia_written_consent_obtained',
+    ])
+  })
+
+  test('§11 positive: explicit confirmed commercial_use goal + confirmed canonical synthesia ToolMention retrieves the real claim', () => {
+    const h = handoff({ tools: [{ identifier: 'synthesia', access_surface: 'unresolved', plan_tier: 'unknown' }] })
+    const { results } = retrieve(h, [], [commercialUseGoal()], TOPIC_CLAIMS_FIXTURE)
+    expect(results.map((r) => r.claim_id)).toEqual([SYNTHESIA_CLAIM_ID])
+    expect(results[0].match_origin).toBe('exact_topic')
+    expect(results[0].matched_goal_category).toBe('commercial_use')
+  })
+
+  test('§12 negative (no tool): explicit commercial_use goal, no synthesia ToolMention -- claim fails closed, not retrieved', () => {
+    const h = handoff({ tools: [] })
+    const { results } = retrieve(h, [], [commercialUseGoal()], TOPIC_CLAIMS_FIXTURE)
+    expect(results.map((r) => r.claim_id)).not.toContain(SYNTHESIA_CLAIM_ID)
+  })
+
+  test('§13 negative (different tool): explicit commercial_use goal + a different canonical tool -- claim fails closed, not retrieved', () => {
+    const h = handoff({ tools: [{ identifier: 'kling', access_surface: 'unresolved', plan_tier: 'unknown' }] })
+    const { results } = retrieve(h, [], [commercialUseGoal()], TOPIC_CLAIMS_FIXTURE)
+    expect(results.map((r) => r.claim_id)).not.toContain(SYNTHESIA_CLAIM_ID)
+  })
+
+  test('§14 negative (tool without goal): confirmed synthesia ToolMention, no explicit commercial_use goal, no discovered-topic occurrence -- claim not retrieved, no fabricated relevance', () => {
+    const h = handoff({ tools: [{ identifier: 'synthesia', access_surface: 'unresolved', plan_tier: 'unknown' }] })
+    const { results } = retrieve(h, [], [], TOPIC_CLAIMS_FIXTURE)
+    expect(results.map((r) => r.claim_id)).not.toContain(SYNTHESIA_CLAIM_ID)
+  })
+
+  test('§15 dependencies + Bounded Interpretation: strongest status is relevant_applicability_unresolved, both governed dependencies pass through unresolved, no forbidden conclusion appears', () => {
+    const h = handoff({ tools: [{ identifier: 'synthesia', access_surface: 'unresolved', plan_tier: 'unknown' }] })
+    const goals = [commercialUseGoal()]
+    const { results, diagnostics } = retrieve(h, [], goals, TOPIC_CLAIMS_FIXTURE)
+    expect(results.map((r) => r.claim_id)).toEqual([SYNTHESIA_CLAIM_ID])
+    expect(results[0].unresolved_project_dependencies).toEqual([
+      'synthesia_stock_avatar_used_confirmed',
+      'synthesia_written_consent_obtained',
+    ])
+
+    const interpretations = buildBoundedInterpretations(goals, results, diagnostics)
+    expect(interpretations).toHaveLength(1)
+    expect(interpretations[0].status).toBe('relevant_applicability_unresolved')
+    expect(interpretations[0].status).not.toBe('directly_relevant')
+
+    const forbidden = [
+      /stock avatar was used/i,
+      /consent (exists|was obtained)/i,
+      /consent does not exist/i,
+      /restriction (definitely|certainly) applies/i,
+      /commercially cleared/i,
+      /legally cleared/i,
+      /infring/i,
+      /legally unsafe/i,
+    ]
+    for (const pattern of forbidden) {
+      expect(interpretations[0].summary).not.toMatch(pattern)
+    }
+  })
+
+  test('§16 Consultative Composition: generic rendering only -- quoted governed statement, unresolved-applicability hedge, unconditional Commercial Assurance bridge, zero Synthesia-specific text', () => {
+    const h = handoff({ tools: [{ identifier: 'synthesia', access_surface: 'unresolved', plan_tier: 'unknown' }] })
+    const goals = [commercialUseGoal()]
+    const { results, diagnostics } = retrieve(h, [], goals, TOPIC_CLAIMS_FIXTURE)
+    const interpretations = buildBoundedInterpretations(goals, results, diagnostics)
+    const projection = assembleProjectionOutput(h, results, interpretations)
+
+    expect(projection.output.knowledge_items.map((k) => k.claim_id)).toEqual([SYNTHESIA_CLAIM_ID])
+    expect(projection.output.goal_interpretations).toHaveLength(1)
+    const summary = projection.output.goal_interpretations[0].summary
+    // The governed Candidate Statement, verbatim, is present.
+    expect(summary).toContain(synthesiaClaim?.crc_candidate_statement)
+    // The same fixed, generic Commercial Assurance bridge every other
+    // dependency-bearing claim in this corpus renders -- proves Composition
+    // did not strengthen or add a Synthesia-specific closing.
+    expect(summary).toContain('A human-reviewed Commercial Assurance Assessment can address this directly.')
+    // closing_cta is the same fixed, unconditional CTA regardless of domain.
+    expect(projection.output.closing_cta).toBe('If you need a human-reviewed commercial assurance assessment of the full workflow, SI8 can review it.')
   })
 })

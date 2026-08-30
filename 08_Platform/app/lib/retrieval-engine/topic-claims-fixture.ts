@@ -488,4 +488,48 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     last_verified: '2026-08-27',
     superseded_by: null,
   },
+  {
+    // First real tool_scope-narrowed TopicClaim runtime entry (LK-7 tool
+    // scope primitive; LK-9/LK-10 canonical tool identity registry, 2026-
+    // 08-29; CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1 Adopted 2026-08-29,
+    // FGR_009). CRC Publication approved 2026-08-30 (CRC Approver: JD (PM))
+    // following CPR_009 -- initial recommendation DEFER pending a targeted
+    // Synthesia AUP/Help Center evidence refresh (LK-37, Classification A --
+    // SUBSTANTIVELY CONFIRMED), then human APPROVE (LK-38) -- see
+    // GOVERNED-CLAIMS.md's own CRC Publication Scope and
+    // governance-reviews/CPR_009_CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1
+    // _2026-08-30.md for the full decision sequence and publication-safety
+    // analysis. tool_scope narrows this claim to conversations with a
+    // confirmed, canonical 'synthesia' ToolMention -- no PLATFORM-RIGHTS-
+    // MATRIX.md coverage exists for Synthesia (NO MATRIX COVERAGE FOUND,
+    // confirmed at CPR), so no legacy-coexistence conflict applies. Both
+    // unresolved_project_dependencies are evidence-only, non-askable, and
+    // permanently gate Bounded Interpretation to
+    // relevant_applicability_unresolved (Case 3B) -- CRC publication does
+    // not resolve, and cannot resolve, either one. No extraction alias for
+    // 'synthesia' exists in extraction.ts -- this entry proves canonical
+    // runtime retrieval given a confirmed synthesia ToolMention; it does not
+    // establish ordinary conversational reachability, a separate,
+    // independently-timed concern (CPR_007's own established finding).
+    claim_id: 'CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1',
+    topic: 'commercial_use',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      'CRC may state that Synthesia\'s Acceptable Use Policy restricts using a Stock Avatar in paid advertising or promotion -- including paid social ads, paid TV ads, and broadcast -- absent Synthesia\'s own written express consent, and that non-paid use (e.g. organic posts, internal/training videos) is not restricted by this specific clause. This is Synthesia\'s own provider/platform policy, not law. CRC must not state whether a specific project used a Stock or Custom Avatar, whether Synthesia has granted written consent for any specific case, or whether the restriction therefore applies to the user\'s own project. CRC must not represent the project as commercially or legally cleared, and must not treat either evidence-only dependency (synthesia_stock_avatar_used_confirmed, synthesia_written_consent_obtained) as a self-attestation question -- both remain permanently unresolved through Bounded Interpretation\'s Case 3B boundary, exactly as for every other dependency-bearing claim in this corpus.',
+    crc_candidate_statement:
+      'Synthesia\'s Acceptable Use Policy restricts using a Stock Avatar in paid advertising or promotion -- including paid social media ads, paid TV ads, and broadcast -- unless Synthesia has given written express consent; use that isn\'t paid promotion, such as organic posts or internal/training videos, isn\'t restricted by this specific clause.',
+    applicability_requirements: [],
+    // Evidence-only: neither dependency is registered in
+    // dependency-askability.ts -- fail-closed by default. No DAR performed
+    // or proposed by this milestone. Real CRC publication does not, and
+    // cannot, create any new user-facing question about either.
+    unresolved_project_dependencies: ['synthesia_stock_avatar_used_confirmed', 'synthesia_written_consent_obtained'],
+    provider_scope: null,
+    tool_scope: ['synthesia'],
+    last_verified: '2026-08-30',
+    superseded_by: null,
+  },
 ]
