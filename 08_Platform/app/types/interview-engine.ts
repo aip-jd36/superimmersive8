@@ -208,8 +208,20 @@ export type AssetProviderResolution =
  * CLAIM-MUSIC-* entries (Adopted, `CRC Approver: PENDING`, unaffected by
  * this registration) and CPR_007's own confirmation that runtime
  * reachability and CRC eligibility are separately governed.
+ *
+ * `'storyblocks'` added 2026-08-30 (Trial 2 Living Knowledge onboarding
+ * benchmark -- CLAIM-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1):
+ * identity registration only, same generic mechanism as every entry above.
+ * Deliberately does NOT add a `KNOWN_ASSET_PROVIDERS` extraction alias in
+ * the same change (unlike the combined Artlist registration commit) --
+ * per this milestone's own explicit instruction, identity registration and
+ * conversational extraction remain separate, independently-timed decisions,
+ * mirroring the LK-24/LK-40 precedent already established for canonical
+ * TOOL identity (`lib/tool-identity/registry.ts`) and its own deliberately
+ * unaliased entries. No conversational path can produce a confirmed,
+ * canonical Storyblocks `AssetProviderMention` as of this registration.
  */
-export const ASSET_PROVIDER_IDS = ['getty', 'istock', 'shutterstock', 'adobe-stock', 'artlist'] as const
+export const ASSET_PROVIDER_IDS = ['getty', 'istock', 'shutterstock', 'adobe-stock', 'artlist', 'storyblocks'] as const
 
 export type AssetProviderId = (typeof ASSET_PROVIDER_IDS)[number]
 
