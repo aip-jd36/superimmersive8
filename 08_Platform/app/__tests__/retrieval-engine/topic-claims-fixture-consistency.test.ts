@@ -99,22 +99,6 @@ const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set<string>([
   // discipline as every Music-domain claim above); never added to this set
   // at Adoption time.
   'CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1',
-  // Adopted 2026-08-30 (Wave 6, Trial 2 of the Living Knowledge onboarding
-  // benchmark -- LK-49; FGR_010, Adoption Approver: JD (PM)). Mechanically
-  // representable -- checkTopicClaimRepresentationReadiness() returns
-  // { ready: true, issues: [] } for its committed candidate representation
-  // (08_Platform/app/lib/candidates/CAND-STORYBLOCKS-BUSINESS-LICENSE-
-  // BROADCAST-001.ts @ efee49ded250488b9819ae31ae4c4b8234ad9ae2) -- not
-  // excluded here for any architecture blocker. Now CRC-approved (CPR_010,
-  // PM: JD, CRC Decision Date: 2026-08-30 -- see GOVERNED-CLAIMS.md's own
-  // CRC Publication Scope; the required provider-scoped Matrix coexistence
-  // check found NO MATRIX COVERAGE FOUND for Storyblocks) -- still
-  // deliberately not yet runtime-mirrored as of this comment. Governance
-  // approval and runtime activation remain separate, independently-timed
-  // acts, same discipline as every other claim in this set: mechanically
-  // representable and now CRC-approved, but runtime activation is a
-  // separate, later, controlled milestone.
-  'CLAIM-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1',
 ])
 
 /** Strips fenced code blocks (```...```) before scanning -- the entry template lives inside one and must never be counted as a real claim. */
@@ -409,8 +393,8 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
     }
   })
 
-  test('exactly eleven claims in the runtime fixture are Adopted + CRC-eligible as of 2026-08-30 -- the prior ten (CLAIM-COPY-004-v1, CLAIM-STOCK-EDITORIAL-001-v2/-002-v2, CLAIM-STOCK-GETTY/ISTOCK/SHUTTERSTOCK-EDITORIAL-001-v1, CLAIM-COPY-001-v1/-002-v1/-003-v1, CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1 -- see prior versions of this test/GOVERNED-CLAIMS.md for their own individual provenance) plus the eleventh and newest: CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1, the first real tool_scope-narrowed claim, CRC Publication approved 2026-08-30 (CRC Approver: JD (PM)) following CPR_009 + a targeted evidence refresh (LK-37, Classification A) -- the first AI Video Generation Platform Rights domain claim to reach CRC. The other 9 Music Scenario A claims remain WITHHELD/PENDING and are correctly absent from this list -- update only when a further real decision is recorded', () => {
+  test('exactly twelve claims in the runtime fixture are Adopted + CRC-eligible as of 2026-08-30 -- the prior eleven (CLAIM-COPY-004-v1, CLAIM-STOCK-EDITORIAL-001-v2/-002-v2, CLAIM-STOCK-GETTY/ISTOCK/SHUTTERSTOCK-EDITORIAL-001-v1, CLAIM-COPY-001-v1/-002-v1/-003-v1, CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1, CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1 -- see prior versions of this test/GOVERNED-CLAIMS.md for their own individual provenance) plus the twelfth and newest: CLAIM-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1, the first real provider_scope-narrowed claim since A-3, CRC Publication approved 2026-08-30 (CRC Approver: JD (PM)) following CPR_010 with no intervening DEFER -- Trial 2 of the Living Knowledge onboarding benchmark. The other 9 Music Scenario A claims remain WITHHELD/PENDING and are correctly absent from this list -- update only when a further real decision is recorded', () => {
     const liveClaims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.lifecycle === 'Adopted' && c.crc_eligible === 'Yes')
-    expect(liveClaims.map((c) => c.claim_id).sort()).toEqual(['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPY-004-v1', 'CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1', 'CLAIM-STOCK-EDITORIAL-001-v2', 'CLAIM-STOCK-EDITORIAL-002-v2', 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1', 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1', 'CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1'])
+    expect(liveClaims.map((c) => c.claim_id).sort()).toEqual(['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPY-004-v1', 'CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1', 'CLAIM-STOCK-EDITORIAL-001-v2', 'CLAIM-STOCK-EDITORIAL-002-v2', 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1', 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1', 'CLAIM-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1', 'CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1'])
   })
 })

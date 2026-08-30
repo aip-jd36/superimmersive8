@@ -134,8 +134,18 @@ describe('Wave 1 real claims -- governance state as of 2026-08-19 (all four COPY
    * Its own tool_scope/retrieval/BI/Composition behavior is proven
    * separately by tool-scoped-retrieval.test.ts's own real-fixture describe
    * block.
+   *
+   * Updated again 2026-08-30 (LK-51, Trial 2 -- First Real Provider-Scoped
+   * TopicClaim Runtime Mirroring Since A-3): CLAIM-STORYBLOCKS-BUSINESS-
+   * LICENSE-BROADCAST-001-v1 gained its first real runtime fixture entry --
+   * the second provider_scope-narrowed TopicClaim in this fixture --
+   * following explicit human CRC Publication approval (CPR_010, no
+   * intervening DEFER). Count grows from thirteen to fourteen. Its own
+   * provider_scope/retrieval/BI/Composition behavior is proven separately
+   * by storyblocks-runtime-retrieval.test.ts's own real-fixture describe
+   * block.
    */
-  test('all four Wave 1 claims plus the seven stock-media claims (five original + two -v2 correction successors) plus A-3 (the first published Music-domain claim) plus the first real tool-scoped claim (Synthesia) are present in the fixture', () => {
+  test('all four Wave 1 claims plus the seven stock-media claims (five original + two -v2 correction successors) plus A-3 (the first published Music-domain claim) plus the first real tool-scoped claim (Synthesia) plus the first real provider-scoped claim since A-3 (Storyblocks) are present in the fixture', () => {
     expect(TOPIC_CLAIMS_FIXTURE.map((c) => c.claim_id).sort()).toEqual([
       'CLAIM-COPY-001-v1',
       'CLAIM-COPY-002-v1',
@@ -149,6 +159,7 @@ describe('Wave 1 real claims -- governance state as of 2026-08-19 (all four COPY
       'CLAIM-STOCK-GETTY-EDITORIAL-001-v1',
       'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1',
       'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1',
+      'CLAIM-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1',
       'CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1',
     ])
   })

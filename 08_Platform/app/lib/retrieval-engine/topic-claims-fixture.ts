@@ -532,4 +532,51 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     last_verified: '2026-08-30',
     superseded_by: null,
   },
+  {
+    // First real provider_scope-narrowed TopicClaim runtime entry since the
+    // original Stock/Music domain build-out (CLAIM-MUSIC-ARTLIST-PROJECT-
+    // LICENSE-DURATION-001-v1 / A-3 was the first of any kind). Trial 2 of
+    // the Living Knowledge onboarding benchmark (LK-42 protocol);
+    // CLAIM-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1 Adopted
+    // 2026-08-30 (FGR_010). CRC Publication approved 2026-08-30 (CRC
+    // Approver: JD (PM)) following CPR_010 -- unlike the Synthesia
+    // precedent, no intervening DEFER (evidence freshness well within
+    // tolerance: Individual Agreement 73 days old, Small Business Agreement
+    // ~10.3 months old, at review) -- see GOVERNED-CLAIMS.md's own CRC
+    // Publication Scope and governance-reviews/CPR_010_CLAIM-STORYBLOCKS-
+    // BUSINESS-LICENSE-BROADCAST-001-v1_2026-08-30.md for the full
+    // publication-safety analysis. provider_scope narrows this claim to
+    // conversations with a confirmed, canonical 'storyblocks'
+    // AssetProviderMention -- no PLATFORM-RIGHTS-MATRIX.md coverage exists
+    // for Storyblocks (NO MATRIX COVERAGE FOUND, confirmed at CPR), so no
+    // legacy-coexistence conflict applies. The unresolved_project_
+    // dependency is evidence-only, non-askable, and permanently gates
+    // Bounded Interpretation to relevant_applicability_unresolved (Case
+    // 3B) -- CRC publication does not resolve, and cannot resolve, it. No
+    // extraction alias for 'storyblocks' exists in extraction.ts -- this
+    // entry proves canonical runtime retrieval given a confirmed
+    // storyblocks AssetProviderMention; it does not establish ordinary
+    // conversational reachability, a separate, independently-timed concern
+    // (CPR_007's own established finding).
+    claim_id: 'CLAIM-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1',
+    topic: 'commercial_use',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      'APPROVED FOR CRC PUBLICATION (2026-08-30, CRC Approver: JD (PM) -- see CRC Publication Review #10, CPR_010, governance-reviews/CPR_010_CLAIM-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1_2026-08-30.md). CRC may state that Storyblocks\' Individual and Small Business License Agreements (captured 2026-08-30; Individual Agreement Last updated June 18, 2026, Small Business Agreement Last updated October 20, 2025) exclude the right to use Stock Files in Broadcast, Television, or OTT platforms unless that use is explicitly included in the user\'s selected subscription plan, and that Storyblocks\' own licensing materials identify the Business License as covering broadcast, TV, streaming/OTT, and feature-film distribution. This is Storyblocks\' own provider/platform licensing policy, not law. CRC must not state that every non-Business Storyblocks subscription categorically prohibits Broadcast/Television/OTT use -- the exclusion is plan-contingent, not tier-name-absolute. CRC must not state which specific Storyblocks license or plan a user actually holds, must not state whether a specific project\'s Storyblocks-sourced assets are actually broadcast/OTT-cleared, must not state that holding a Business License by itself commercially clears a project, and must not state or imply that all rights, releases, or authorizations necessary for the project have been obtained or that the project is otherwise commercially cleared. The evidence-only dependency (storyblocks_license_tier_confirmed) remains permanently unresolved through Bounded Interpretation\'s Case 3B boundary, exactly as for every other dependency-bearing claim in this corpus. A human-reviewed Commercial Assurance Assessment remains the higher-assurance path for resolving a specific project\'s own Storyblocks license status.',
+    crc_candidate_statement:
+      'Storyblocks\' Individual and Small Business License Agreements state that their license does not include the right to use Stock Files in Broadcast, Television, or OTT platforms unless that use is explicitly included in the subscription plan you selected. Storyblocks\' own licensing materials identify the Business License specifically as covering broadcast, TV, streaming/OTT, and feature-film distribution.',
+    applicability_requirements: [],
+    // Evidence-only: absent from dependency-askability.ts -- fail-closed by
+    // default. No DAR performed or proposed by this milestone. Real CRC
+    // publication does not, and cannot, create any new user-facing
+    // question about it.
+    unresolved_project_dependencies: ['storyblocks_license_tier_confirmed'],
+    provider_scope: ['storyblocks'],
+    tool_scope: null,
+    last_verified: '2026-08-30',
+    superseded_by: null,
+  },
 ]
