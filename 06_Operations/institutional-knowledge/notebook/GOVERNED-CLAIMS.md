@@ -2567,3 +2567,100 @@ Related: —
 Full Formal Governance Review artifact: `governance-reviews/FGR_010_CAND-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001_2026-08-30.md`
 Full CRC Publication Review artifact: `governance-reviews/CPR_010_CLAIM-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1_2026-08-30.md`
 Candidate Representation: `08_Platform/app/lib/candidates/CAND-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001.ts @ efee49ded250488b9819ae31ae4c4b8234ad9ae2`
+
+### CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1
+Domain: Third-Party Source Assets / Stock Media Licensing — Pond5
+Topic: third_party_source_rights
+Subtopic: editorial-content-commercial-use-restriction-written-consent-exception
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — this is a Pond5 platform contractual license restriction, not a legal-jurisdiction-scoped rule. See "Transitional jurisdiction representation for provider/platform propositions" (governance-discipline section above); the underlying `TopicClaim` representation records `jurisdiction: 'Global'` as a bounded transitional compatibility value under that rule, never as a claim of worldwide legal validation.
+Context: commercial use of Pond5-provided Editorial Content (footage/audio/images) incorporated into a production intended for a commercial context (advertising, promotion, endorsement, advertorial, merchandise, or other commercial Production).
+Claim proposition: >
+  Pond5 Content identified on its Item Page as Editorial, or for editorial
+  use only, is intended for use only in connection with events or topics
+  that are newsworthy or of general public interest. Absent Pond5's
+  express and specific written consent, Pond5's Content License Agreement
+  restricts this Editorial Content from use in merchandise, advertisement
+  (other than in-context advertising of a Production in which the
+  Editorial Content has been incorporated), endorsement, promotion,
+  advertorial, or other commercial Production.
+
+Source references:
+  - primary (Primary legal/official authority, Class B human-verified rendered-page reading): Pond5 Content License Agreement, Section 7 "Editorial Content", visible revision "2024-01-03" — evidence-captures/pond5/content-license-agreement_20260830T203900+0800_efcac90e.pdf
+  - secondary\corroborating (Official platform authority): Pond5 Help Center, "What are the licensing options on Pond5, and how do Individual, Business, and Premium licenses differ?", visible date March 19, 2026 — evidence-captures/pond5/license-options-individual-business-premium_20260830T203900+0800_ca7121b6.pdf
+  - secondary\corroborating (first-party current product page): Pond5 Editorial page, captured 2026-08-30 — evidence-captures/pond5/editorial-page_20260830T203900+0800_d2217e81.pdf (corroborating context only — describes a route to contact Pond5 about clearing editorial clips for commercial use; not part of this proposition, per human FGR REVISE decision — see FGR_011)
+Source authority\type: Primary legal/official authority (Content License Agreement Section 7, human-verified by direct review of preserved rendered captures); corroborated by Official platform authority (Help Center) and first-party current product material (Editorial page)
+Source fact: >
+  Human-verified source facts (LK-59, against preserved, hashed capture
+  artifacts — see evidence-captures/pond5/MANIFEST.md): the Content
+  License Agreement's own Section 7 states, in substance, that Editorial
+  Content is intended only for use connected with newsworthy or
+  general-public-interest events/topics, and that absent Pond5's express
+  and specific written consent, such content may not be used in
+  merchandise, advertisement (other than in-context), endorsement,
+  promotion, advertorial, or other commercial Production. Section 7 also
+  contains a separate disclaimer of responsibility for clearances/
+  warranties related to personally identifiable information and
+  privacy/publicity rights associated with persons appearing in the
+  Content -- disclosed as evidence-limitation context below, not folded
+  into this proposition. This environment's own PDF tooling could not
+  independently extract or render the captured documents (zero embedded
+  text layer; no OCR/page-render/metadata-extraction capability
+  available) -- these findings are human-verified, not CLI-extracted, and
+  are recorded as such rather than silently upgraded.
+
+SI8 interpretation: >
+  A client incorporating Pond5-provided Content into a project intended
+  for a commercial context (advertising, promotion, endorsement,
+  advertorial, merchandise, or other commercial Production) should
+  confirm whether the specific item is Item-Page-designated Editorial,
+  and if so, whether Pond5 granted express and specific written consent
+  for that use, rather than assuming any Pond5-sourced Editorial content
+  is commercially usable by default.
+  This does not establish that a specific project's Pond5 Editorial
+  assets are actually cleared for the restricted commercial uses -- it
+  states what Pond5's own License Agreement says, not whether its
+  conditions were satisfied for any particular asset or project. This
+  does not establish that Editorial Content can never receive commercial
+  authorization -- the exclusion is contingent on Pond5's own consent,
+  not absolute. This does not establish that Pond5 disclaims all
+  responsibility generally -- the disclosed clearance/PII disclaimer in
+  Section 7 is a separate, narrower point from the commercial-use
+  restriction itself.
+
+Applicability requirements: []
+Unresolved project dependencies: [editorial_designation_confirmed, separate_authorization_obtained]   <!-- CRC cannot structurally verify whether a specific Pond5 asset is Item-Page-designated Editorial, or whether Pond5 granted express and specific written consent for an otherwise-restricted commercial use -- evidence/documentary questions, not self-report-appropriate, reusing the same generic dependency identifiers already governing the structurally identical Getty/iStock/Shutterstock Editorial claims (DAR_001 precedent), not newly minted for Pond5. -->
+Prohibited conclusions: >
+  Does not establish that a specific project's Pond5 Content is
+  Item-Page-designated Editorial. Does not establish that Pond5 granted
+  express and specific written consent for any specific project. Does not
+  establish that Editorial Content can never receive commercial
+  authorization -- the exclusion is contingent, not absolute. Does not
+  establish that contacting Pond5 constitutes authorization, that
+  authorization will be granted, or that any particular asset is
+  eligible. Does not establish that model/property/privacy/publicity
+  releases or clearances exist for any specific asset. Does not establish
+  anything about a jurisdiction's own broadcast/media/advertising law --
+  this is a platform contractual license restriction only, not a legal
+  clearance determination. Does not establish that the same Agreement
+  provisions govern the Digital License, Individual/Business/Premium
+  tier differences, indemnification, or any other Pond5 license term --
+  those remain separate, not-yet-reviewed propositions.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-30
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+
+CRC Candidate Statement: >
+
+Effective date: 2026-08-30 (evidence capture/review date; underlying Agreement's own visible revision date: 2024-01-03 -- not silently rewritten as 2026, per LK-59's own explicit instruction)
+Last reviewed: 2026-08-30
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: —
+
+Full Formal Governance Review artifact: `governance-reviews/FGR_011_CAND-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001_2026-08-30.md`
+Candidate Representation: `08_Platform/app/lib/candidates/CAND-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001.ts @ 8b8eef8c6401f8f84b4951db73927b59489a0ae7`

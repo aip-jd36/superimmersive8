@@ -99,6 +99,21 @@ const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set<string>([
   // discipline as every Music-domain claim above); never added to this set
   // at Adoption time.
   'CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1',
+  // Adopted 2026-08-30 (Wave 7, Trial 3 of the Living Knowledge onboarding
+  // benchmark -- LK-61; FGR_011, Adoption Approver: JD (PM), following an
+  // intervening REVISE -- LK-60). Mechanically representable --
+  // checkTopicClaimRepresentationReadiness() returns { ready: true, issues:
+  // [] } for its committed candidate representation
+  // (08_Platform/app/lib/candidates/CAND-POND5-EDITORIAL-COMMERCIAL-USE-
+  // CONSENT-001.ts @ 8b8eef8c6401f8f84b4951db73927b59489a0ae7) -- not
+  // excluded here for any architecture blocker. Deliberately not yet
+  // mirrored into TOPIC_CLAIMS_FIXTURE: durable Adoption is governance-
+  // corpus recording only, a separate and independently-timed act from
+  // runtime fixture mirroring, same "Adoption is pure governance
+  // documentation, zero runtime effect" discipline as every entry above.
+  // CRC publication remains a later, separate, not-yet-performed step --
+  // this claim's own `CRC Approver`/`CRC Decision Date` are `PENDING`.
+  'CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1',
 ])
 
 /** Strips fenced code blocks (```...```) before scanning -- the entry template lives inside one and must never be counted as a real claim. */
