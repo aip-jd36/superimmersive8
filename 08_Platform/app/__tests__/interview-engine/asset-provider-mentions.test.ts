@@ -310,6 +310,30 @@ describe('normalizeCandidate: asset provider canonicalization', () => {
     expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'Epidemic Sound' }))).toEqual({ status: 'unrecognized' })
   })
 
+  // Storyblocks alias registration (LK-54, 2026-08-30 -- Storyblocks
+  // Conversational Reachability Data Completeness): same generic
+  // mechanism/tests as Getty/iStock/Shutterstock/Adobe Stock/Artlist above.
+  // Only the exact surface form production UAT actually observed
+  // ("Storyblocks") is registered -- no speculative variants.
+  test('Storyblocks resolves to canonical "storyblocks"', () => {
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'Storyblocks' }))).toEqual({ status: 'resolved', canonical_identifier: 'storyblocks' })
+  })
+
+  test('Storyblocks is DISTINCT from every other registered provider -- registering it introduces no collision', () => {
+    const storyblocks = normalizeCandidate(providerCandidate({ raw_provider_name: 'Storyblocks' }))
+    const getty = normalizeCandidate(providerCandidate({ raw_provider_name: 'Getty' }))
+    const artlist = normalizeCandidate(providerCandidate({ raw_provider_name: 'Artlist' }))
+    expect(storyblocks).toEqual({ status: 'resolved', canonical_identifier: 'storyblocks' })
+    expect(storyblocks).not.toEqual(getty)
+    expect(storyblocks).not.toEqual(artlist)
+  })
+
+  test('speculative Storyblocks surface forms not justified by observed evidence remain unrecognized -- this milestone registers only the exact observed "Storyblocks" form', () => {
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'storyblocks.com' }))).toEqual({ status: 'unrecognized' })
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'Story Blocks' }))).toEqual({ status: 'unrecognized' })
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'SB' }))).toEqual({ status: 'unrecognized' })
+  })
+
   test('a tool_mention candidate is not_applicable to provider normalization (kind isolation)', () => {
     expect(normalizeCandidate(toolCandidate())).not.toEqual({ status: 'unrecognized' })
   })
@@ -568,6 +592,40 @@ describe('AssetProviderMention final shape', () => {
   })
 
   test('an unresolved mention carries resolution.kind "unresolved_alias" with the raw name preserved verbatim', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I used PhotoMega.' },
+      constantExtractor([providerCandidate({ raw_text: 'I used PhotoMega.', raw_provider_name: 'PhotoMega' })]),
+    )
+    expect(updated.asset_provider_mentions[0].resolution).toEqual({ kind: 'unresolved_alias', raw_name: 'PhotoMega' })
+    expect(updated.asset_provider_mentions[0].confidence).toBe('unresolved_no_visibility')
+  })
+
+  // Storyblocks reachability (LK-54, 2026-08-30): proves the real,
+  // unmodified proposal -> normalization -> attestation -> mutation
+  // pipeline (runExtractionPipeline, not just normalizeCandidate in
+  // isolation) now produces a canonical Storyblocks mention -- same shape
+  // assertions as the Getty "final shape" test above, same mechanism, only
+  // the raw_provider_name differs. Confirms an unrelated, still-unregistered
+  // name continues to fail closed through the identical real pipeline,
+  // proving this addition changed nothing about fail-closed behavior for
+  // any other provider.
+  test('a resolved Storyblocks mention carries mention_id, resolution.kind="canonical"/identifier="storyblocks", confidence, provenance, and null superseded_by -- via the real extraction pipeline, not dictionary lookup alone', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I used Storyblocks.' },
+      constantExtractor([providerCandidate({ raw_text: 'I used Storyblocks.', raw_provider_name: 'Storyblocks' })]),
+    )
+    const mention: AssetProviderMention = updated.asset_provider_mentions[0]
+    expect(mention.mention_id).toMatch(/^t1-/)
+    expect(mention.resolution).toEqual({ kind: 'canonical', identifier: 'storyblocks' })
+    expect(mention.confidence).toBe('confirmed')
+    expect(mention.source_turn).toBe(1)
+    expect(mention.source_statement).toBe('I used Storyblocks.')
+    expect(mention.superseded_by).toBeNull()
+  })
+
+  test('an unrelated still-unregistered provider name continues to fail closed as unresolved_alias through the same real pipeline, unaffected by the Storyblocks registration', async () => {
     const { updated } = await runExtractionPipeline(
       emptySU(),
       { turn: 1, text: 'I used PhotoMega.' },

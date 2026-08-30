@@ -509,6 +509,20 @@ const KNOWN_TOOLS: Record<string, CanonicalToolId> = {
  * deliberately unregistered, out of this milestone's one-provider scope --
  * a name like "Envato" or "Epidemic Sound" still resolves `unrecognized`
  * exactly as before.
+ *
+ * `storyblocks` added 2026-08-30 (LK-54, Storyblocks Conversational
+ * Reachability Data Completeness -- data-only, following LK-53's own
+ * generic diagnostic, which found no extraction/canonicalization
+ * architecture gap and classified this exact addition as the correct,
+ * evidence-driven remedy). `'storyblocks'` was already a registered
+ * canonical `AssetProviderId` (LK-49) with zero alias coverage by
+ * deliberate, separately-timed design; this entry closes that gap using
+ * the one surface form production UAT actually observed ("Storyblocks"),
+ * same exact-match mechanism as every entry above -- no fuzzy matching, no
+ * speculative variants (`storyblocks.com`, `story blocks`, `SB`, etc.)
+ * added, per this milestone's own explicit evidence-only scope. Mirrors
+ * the `'kling ai'` precedent (`KNOWN_TOOLS` above) exactly: one alias
+ * entry, added on real observed evidence, not proactively.
  */
 const KNOWN_ASSET_PROVIDERS: Record<string, AssetProviderId> = {
   getty: 'getty',
@@ -522,6 +536,7 @@ const KNOWN_ASSET_PROVIDERS: Record<string, AssetProviderId> = {
   adobestock: 'adobe-stock',
   artlist: 'artlist',
   'artlist.io': 'artlist',
+  storyblocks: 'storyblocks',
 }
 
 export function normalizeCandidate(candidate: CandidateObservation): NormalizationResult {

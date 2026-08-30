@@ -22,10 +22,14 @@ import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import { runCRCConversation } from '@/lib/crc-engine/run-crc-conversation'
 import { deriveDiscoveredTopicOccurrences } from '@/lib/crc-engine/discovered-relevance'
 import { getAskabilityEntry } from '@/lib/crc-engine/dependency-askability'
+import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { DIALOGUE_FIXTURES } from '@/lib/interview-engine/fixtures'
 import { buildRetrievalHandoff } from '@/lib/interview-engine/handoff'
+import { runExtractionPipeline } from '@/lib/interview-engine/extraction'
+import type { CandidateObservation } from '@/lib/interview-engine/extraction'
+import { constantExtractor } from '@/lib/interview-engine/mock-extractor'
 import type { AssetProviderMention, RetrievalHandoff, StructuredUnderstanding, UserGoal } from '@/types/interview-engine'
 
 const SB_ID = 'CLAIM-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1'
@@ -228,5 +232,134 @@ describe('registration/publication separation -- final evidenced progression', (
   test('exactly one CLAIM-STORYBLOCKS-* claim has fixture representation -- confirmed by exact count, not assumed', () => {
     const claims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id.startsWith('CLAIM-STORYBLOCKS'))
     expect(claims).toHaveLength(1)
+  })
+})
+
+// ── LK-54: end-to-end reachability -- real extraction pipeline through to
+// real Retrieval/BI, no hand-built structured state anywhere in this block.
+// Proves the newly reachable canonical provider feeds the already-existing
+// governed runtime path WITHOUT bypassing provider acquisition -- the one
+// deterministic boundary available without a live LLM call (see this file's
+// own header discipline: constantExtractor mocks the LLM call only; every
+// downstream step -- normalization, attestation, mutation, handoff,
+// Retrieval, Bounded Interpretation -- is real, unmodified production code).
+describe('LK-54: natural-language Storyblocks mention reaches the real Storyblocks claim end-to-end', () => {
+  function emptySU(): StructuredUnderstanding {
+    return {
+      project_facts: {
+        intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      },
+      tool_mentions: [],
+      scoped_observations: [],
+      user_goals: [],
+      asset_provider_mentions: [],
+      assessment_jurisdiction_mentions: [],
+      content_presence_mentions: [],
+      current_phase: 1,
+      gate_1_state: 'not_met',
+      gate_2_state: 'not_yet_stable',
+      completion_reason: null,
+      opt_out_scope: null,
+    }
+  }
+
+  function providerCandidate(overrides: Partial<CandidateObservation> = {}): CandidateObservation {
+    return { proposal_id: 'c1', turn: 1, raw_text: 'I used Storyblocks.', kind: 'asset_provider_mention', raw_provider_name: 'Storyblocks', ...overrides }
+  }
+
+  function goalCandidate(overrides: Partial<CandidateObservation> = {}): CandidateObservation {
+    return {
+      proposal_id: 'c2',
+      turn: 1,
+      raw_text: 'Can I use my Storyblocks footage in a broadcast TV spot?',
+      kind: 'user_goal',
+      goal_confidence_hint: 'confirmed',
+      goal_category_hint: 'commercial_use',
+      ...overrides,
+    }
+  }
+
+  const UNKNOWN_FACTS = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
+
+  test('§8 safety: a bare Storyblocks mention with no accompanying goal creates the AssetProviderMention but fabricates NO UserGoal', async () => {
+    const { updated } = await runExtractionPipeline(emptySU(), { turn: 1, text: 'I used Storyblocks.' }, constantExtractor([providerCandidate()]))
+    expect(updated.asset_provider_mentions).toHaveLength(1)
+    expect(updated.asset_provider_mentions[0].resolution).toEqual({ kind: 'canonical', identifier: 'storyblocks' })
+    expect(updated.user_goals).toHaveLength(0) // no fabricated UserGoal from provider recognition alone
+  })
+
+  test('end-to-end: real extraction (provider + explicit commercial_use goal, both via legitimate candidates) -> real handoff -> real retrieve() -> real Bounded Interpretation, Case 3B', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I used Storyblocks. Can I use my Storyblocks footage in a broadcast TV spot?' },
+      constantExtractor([providerCandidate(), goalCandidate()]),
+    )
+    // Extraction layer: canonical provider + one explicit, genuinely-asked goal -- neither fabricated by the other.
+    expect(updated.asset_provider_mentions[0].resolution).toEqual({ kind: 'canonical', identifier: 'storyblocks' })
+    expect(updated.user_goals).toHaveLength(1)
+    expect(updated.user_goals[0]).toMatchObject({ category: 'commercial_use', state: 'confirmed' })
+
+    const rHandoff = buildRetrievalHandoff(updated)
+    expect(rHandoff.asset_providers).toEqual(['storyblocks'])
+    expect(rHandoff.unresolved_asset_provider_mentions).toEqual([])
+
+    const { results, diagnostics } = retrieve(rHandoff, MATRIX_FIXTURE, updated.user_goals, TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, [], rHandoff.asset_providers, [])
+    expect(results.map((r) => r.claim_id)).toContain(SB_ID)
+    const sbResult = results.find((r) => r.claim_id === SB_ID)!
+    expect(sbResult.unresolved_project_dependencies).toEqual(['storyblocks_license_tier_confirmed'])
+
+    const interpretations = buildBoundedInterpretations(updated.user_goals, results, diagnostics, { state: 'unknown' })
+    const sbInterp = interpretations.find((i) => i.supporting_claim_ids.includes(SB_ID))
+    expect(sbInterp).toBeDefined()
+    expect(sbInterp!.status).toBe('relevant_applicability_unresolved')
+  })
+
+  test('§7 dependency safety: a Storyblocks mention carrying a "standard license" attestation hint does NOT resolve storyblocks_license_tier_confirmed -- the governed dependency is a static Living Knowledge fact, never wired to AssetProviderMention.license', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I have the standard Storyblocks license. Can I use my Storyblocks footage in a broadcast TV spot?' },
+      constantExtractor([
+        providerCandidate({ raw_text: 'I have the standard Storyblocks license.', license_confidence_hint: 'confirmed', license_value_hint: 'standard license' }),
+        goalCandidate(),
+      ]),
+    )
+    // The free-text attestation IS captured on the mention's own license field (existing, unmodified Track B behavior) ...
+    expect(updated.asset_provider_mentions[0].license).toEqual({ state: 'confirmed', value: 'standard license' })
+    // ... but the governed dependency is untouched by it -- confirmed both statically (absent from askability) and by real Retrieval still reporting it unresolved.
+    expect(getAskabilityEntry('storyblocks_license_tier_confirmed')).toBeUndefined()
+
+    const rHandoff = buildRetrievalHandoff(updated)
+    const { results } = retrieve(rHandoff, MATRIX_FIXTURE, updated.user_goals, TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, [], rHandoff.asset_providers, [])
+    const sbResult = results.find((r) => r.claim_id === SB_ID)!
+    expect(sbResult.unresolved_project_dependencies).toEqual(['storyblocks_license_tier_confirmed'])
+  })
+
+  test('correction/supersession: a canonical Storyblocks mention can be superseded using the same generic mechanism already proven for Getty/iStock (asset-provider-mentions.test.ts "AssetProviderMention correction mirrors ToolMention supersession behavior") -- exercised once here for this specific canonical id, not duplicating that generic suite', async () => {
+    const turn1 = await runExtractionPipeline(emptySU(), { turn: 1, text: 'I used Storyblocks.' }, constantExtractor([providerCandidate()]))
+    expect(turn1.updated.asset_provider_mentions.filter((m) => m.superseded_by === null)).toHaveLength(1)
+
+    const turn2 = await runExtractionPipeline(
+      turn1.updated,
+      { turn: 2, text: 'Sorry, it was actually Getty.' },
+      constantExtractor([
+        providerCandidate({ proposal_id: 'c1', turn: 2, raw_text: 'Sorry, it was actually Getty.', raw_provider_name: 'Getty', is_correction: true, correction_of_raw_text: 'Storyblocks' }),
+      ]),
+    )
+    const active = turn2.updated.asset_provider_mentions.filter((m) => m.superseded_by === null)
+    expect(active).toHaveLength(1)
+    expect(active[0].resolution).toEqual({ kind: 'canonical', identifier: 'getty' })
+    const supersededStoryblocks = turn2.updated.asset_provider_mentions.find((m) => m.resolution.kind === 'canonical' && m.resolution.identifier === 'storyblocks')
+    expect(supersededStoryblocks?.superseded_by).not.toBeNull()
+
+    // Post-correction: Storyblocks relevance disappears from Retrieval; no stale Storyblocks conclusion is retained.
+    const rHandoff = buildRetrievalHandoff(turn2.updated)
+    expect(rHandoff.asset_providers).toEqual(['getty'])
+    const goalOnly = await runExtractionPipeline(turn2.updated, { turn: 3, text: 'Can I use it in a broadcast TV spot?' }, constantExtractor([goalCandidate({ proposal_id: 'c3', turn: 3, raw_text: 'Can I use it in a broadcast TV spot?' })]))
+    const finalHandoff = buildRetrievalHandoff(goalOnly.updated)
+    const { results } = retrieve(finalHandoff, MATRIX_FIXTURE, goalOnly.updated.user_goals, TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, [], finalHandoff.asset_providers, [])
+    expect(results.map((r) => r.claim_id)).not.toContain(SB_ID)
   })
 })
