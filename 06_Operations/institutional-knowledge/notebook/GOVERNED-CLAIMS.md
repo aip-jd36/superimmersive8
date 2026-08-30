@@ -2652,15 +2652,47 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-30
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
+  APPROVED FOR CRC PUBLICATION (2026-08-30, CRC Approver: JD (PM) -- see
+  CRC Publication Review #11, CPR_011, governance-reviews/CPR_011_CLAIM-
+  POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1_2026-08-30.md). CRC may
+  state that Pond5's Content License Agreement identifies content Pond5
+  marks Editorial as intended for newsworthy or general-public-interest
+  use, and that -- absent Pond5's own express and specific written
+  consent -- that Agreement restricts Editorial Content from use in
+  merchandise, advertisement (other than in-context advertising of a
+  Production in which it has been incorporated), endorsement, promotion,
+  advertorial, or other commercial Production. This is Pond5's own
+  provider/platform licensing policy, not law. CRC must not state whether
+  the user's own specific Pond5 asset is Item-Page-designated Editorial,
+  must not state whether Pond5 granted express and specific written
+  consent for any specific case, must not state that every
+  Editorial-designated Pond5 asset is permanently barred from commercial
+  use (the exclusion is contingent on Pond5's own consent, not absolute),
+  must not treat a user's statement that they contacted Pond5 as evidence
+  that authorization was obtained, and must not state or imply that all
+  rights, releases, or authorizations necessary for the project have been
+  obtained or that the project is otherwise commercially cleared. The
+  evidence-only dependencies (editorial_designation_confirmed,
+  separate_authorization_obtained) remain permanently unresolved through
+  Bounded Interpretation's Case 3B boundary, exactly as for every other
+  dependency-bearing claim in this corpus. A human-reviewed Commercial
+  Assurance Assessment remains the higher-assurance path for resolving a
+  specific project's own Pond5 Editorial-content status.
 
 CRC Candidate Statement: >
+  Pond5's Content License Agreement states that content Pond5 identifies
+  as Editorial is intended for newsworthy or general-public-interest use,
+  and -- absent Pond5's express and specific written consent -- restricts
+  that content from use in merchandise, advertising, endorsements,
+  promotions, advertorials, or other commercial productions.
 
 Effective date: 2026-08-30 (evidence capture/review date; underlying Agreement's own visible revision date: 2024-01-03 -- not silently rewritten as 2026, per LK-59's own explicit instruction)
-Last reviewed: 2026-08-30
+Last reviewed: 2026-08-30 (CRC Publication Review #11, CPR_011)
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-08-30
 Related: —
 
 Full Formal Governance Review artifact: `governance-reviews/FGR_011_CAND-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001_2026-08-30.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_011_CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1_2026-08-30.md`
 Candidate Representation: `08_Platform/app/lib/candidates/CAND-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001.ts @ 8b8eef8c6401f8f84b4951db73927b59489a0ae7`

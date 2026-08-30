@@ -106,13 +106,15 @@ const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set<string>([
   // [] } for its committed candidate representation
   // (08_Platform/app/lib/candidates/CAND-POND5-EDITORIAL-COMMERCIAL-USE-
   // CONSENT-001.ts @ 8b8eef8c6401f8f84b4951db73927b59489a0ae7) -- not
-  // excluded here for any architecture blocker. Deliberately not yet
-  // mirrored into TOPIC_CLAIMS_FIXTURE: durable Adoption is governance-
-  // corpus recording only, a separate and independently-timed act from
-  // runtime fixture mirroring, same "Adoption is pure governance
-  // documentation, zero runtime effect" discipline as every entry above.
-  // CRC publication remains a later, separate, not-yet-performed step --
-  // this claim's own `CRC Approver`/`CRC Decision Date` are `PENDING`.
+  // excluded here for any architecture blocker. Now CRC-approved (CPR_011,
+  // PM: JD, CRC Decision Date: 2026-08-30 -- see GOVERNED-CLAIMS.md's own
+  // CRC Publication Scope; the required provider-scoped Matrix coexistence
+  // check found NO MATRIX COVERAGE FOUND for Pond5) -- still deliberately
+  // not yet runtime-mirrored as of this comment. Governance approval and
+  // runtime activation remain separate, independently-timed acts, same
+  // discipline as every other claim in this set: mechanically
+  // representable and now CRC-approved, but runtime activation is a
+  // separate, later, controlled milestone.
   'CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1',
 ])
 
