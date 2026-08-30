@@ -579,4 +579,62 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     last_verified: '2026-08-30',
     superseded_by: null,
   },
+  {
+    // Third real provider_scope-narrowed TopicClaim runtime entry (after
+    // A-3/Artlist and Storyblocks). Trial 3 of the Living Knowledge
+    // onboarding benchmark (LK-42 protocol); CLAIM-POND5-EDITORIAL-
+    // COMMERCIAL-USE-CONSENT-001-v1 Adopted 2026-08-30 (FGR_011, following
+    // an intervening REVISE -- LK-60 -- that removed a Tier 2
+    // contact-process sentence from the original Candidate Statement). CRC
+    // Publication approved 2026-08-30 (CRC Approver: JD (PM)) following
+    // CPR_011, no intervening DEFER -- see GOVERNED-CLAIMS.md's own CRC
+    // Publication Scope and governance-reviews/CPR_011_CLAIM-POND5-
+    // EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1_2026-08-30.md for the full
+    // publication-safety analysis, including the explicit reconciliation
+    // that Class B human-verified-rendered-page capture provenance does
+    // not, and per EVIDENCE-CAPTURE-SOP.md's own discipline cannot,
+    // downgrade the governing Content License Agreement's own Tier 1
+    // source authority. Unlike Synthesia/Storyblocks (topic:
+    // 'commercial_use', reached only via Track A discovery from a
+    // provider mention), this claim's own topic is 'third_party_source_
+    // rights' -- the same reachability shape as the Getty/iStock/
+    // Shutterstock Editorial claims it structurally mirrors, reachable via
+    // an explicit third_party_source_rights UserGoal directly.
+    // provider_scope narrows this claim to conversations with a
+    // confirmed, canonical 'pond5' AssetProviderMention -- no
+    // PLATFORM-RIGHTS-MATRIX.md coverage exists for Pond5 (NO MATRIX
+    // COVERAGE FOUND, confirmed at CPR), so no legacy-coexistence
+    // conflict applies. Both unresolved_project_dependencies are
+    // evidence-only, non-askable, reused (not newly minted) from the
+    // identical Getty/iStock/Shutterstock Editorial claims, and
+    // permanently gate Bounded Interpretation to relevant_applicability_
+    // unresolved (Case 3B) -- CRC publication does not resolve, and
+    // cannot resolve, either one. No pond5_license_tier_confirmed
+    // dependency exists -- this proposition does not turn on license
+    // tier. No extraction alias for 'pond5' exists in extraction.ts --
+    // this entry proves canonical runtime retrieval given a confirmed
+    // pond5 AssetProviderMention; it does not establish ordinary
+    // conversational reachability, a separate, independently-timed
+    // concern (CPR_007's own established finding).
+    claim_id: 'CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1',
+    topic: 'third_party_source_rights',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      'APPROVED FOR CRC PUBLICATION (2026-08-30, CRC Approver: JD (PM) -- see CRC Publication Review #11, CPR_011, governance-reviews/CPR_011_CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1_2026-08-30.md). CRC may state that Pond5\'s Content License Agreement identifies content Pond5 marks Editorial as intended for newsworthy or general-public-interest use, and that -- absent Pond5\'s own express and specific written consent -- that Agreement restricts Editorial Content from use in merchandise, advertisement (other than in-context advertising of a Production in which it has been incorporated), endorsement, promotion, advertorial, or other commercial Production. This is Pond5\'s own provider/platform licensing policy, not law. CRC must not state whether the user\'s own specific Pond5 asset is Item-Page-designated Editorial, must not state whether Pond5 granted express and specific written consent for any specific case, must not state that every Editorial-designated Pond5 asset is permanently barred from commercial use (the exclusion is contingent on Pond5\'s own consent, not absolute), must not treat a user\'s statement that they contacted Pond5 as evidence that authorization was obtained, and must not state or imply that all rights, releases, or authorizations necessary for the project have been obtained or that the project is otherwise commercially cleared. The evidence-only dependencies (editorial_designation_confirmed, separate_authorization_obtained) remain permanently unresolved through Bounded Interpretation\'s Case 3B boundary, exactly as for every other dependency-bearing claim in this corpus. A human-reviewed Commercial Assurance Assessment remains the higher-assurance path for resolving a specific project\'s own Pond5 Editorial-content status.',
+    crc_candidate_statement:
+      'Pond5\'s Content License Agreement states that content Pond5 identifies as Editorial is intended for newsworthy or general-public-interest use, and -- absent Pond5\'s express and specific written consent -- restricts that content from use in merchandise, advertising, endorsements, promotions, advertorials, or other commercial productions.',
+    applicability_requirements: [],
+    // Evidence-only: both absent from dependency-askability.ts -- fail-
+    // closed by default. No DAR performed or proposed by this milestone.
+    // Real CRC publication does not, and cannot, create any new
+    // user-facing question about either.
+    unresolved_project_dependencies: ['editorial_designation_confirmed', 'separate_authorization_obtained'],
+    provider_scope: ['pond5'],
+    tool_scope: null,
+    last_verified: '2026-08-30',
+    superseded_by: null,
+  },
 ]

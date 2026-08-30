@@ -144,14 +144,23 @@ describe('Wave 1 real claims -- governance state as of 2026-08-19 (all four COPY
    * provider_scope/retrieval/BI/Composition behavior is proven separately
    * by storyblocks-runtime-retrieval.test.ts's own real-fixture describe
    * block.
+   *
+   * Updated again 2026-08-30 (LK-63, Trial 3 -- Third Real Provider-Scoped
+   * TopicClaim Runtime Mirroring): CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-
+   * CONSENT-001-v1 gained its first real runtime fixture entry, following
+   * explicit human CRC Publication approval (CPR_011, no intervening
+   * DEFER). Count grows from fourteen to fifteen. Its own provider_scope/
+   * retrieval/BI/Composition behavior is proven separately by
+   * pond5-runtime-retrieval.test.ts's own real-fixture describe block.
    */
-  test('all four Wave 1 claims plus the seven stock-media claims (five original + two -v2 correction successors) plus A-3 (the first published Music-domain claim) plus the first real tool-scoped claim (Synthesia) plus the first real provider-scoped claim since A-3 (Storyblocks) are present in the fixture', () => {
+  test('all four Wave 1 claims plus the seven stock-media claims (five original + two -v2 correction successors) plus A-3 (the first published Music-domain claim) plus the first real tool-scoped claim (Synthesia) plus the second and third real provider-scoped claims since A-3 (Storyblocks, Pond5) are present in the fixture', () => {
     expect(TOPIC_CLAIMS_FIXTURE.map((c) => c.claim_id).sort()).toEqual([
       'CLAIM-COPY-001-v1',
       'CLAIM-COPY-002-v1',
       'CLAIM-COPY-003-v1',
       'CLAIM-COPY-004-v1',
       'CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1',
+      'CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1',
       'CLAIM-STOCK-EDITORIAL-001-v1',
       'CLAIM-STOCK-EDITORIAL-001-v2',
       'CLAIM-STOCK-EDITORIAL-002-v1',
