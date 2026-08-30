@@ -523,6 +523,20 @@ const KNOWN_TOOLS: Record<string, CanonicalToolId> = {
  * added, per this milestone's own explicit evidence-only scope. Mirrors
  * the `'kling ai'` precedent (`KNOWN_TOOLS` above) exactly: one alias
  * entry, added on real observed evidence, not proactively.
+ *
+ * `pond5` added 2026-08-30 (LK-66, Pond5 Observed Surface-Form
+ * Reachability Correction -- data-only, following LK-65's own generic
+ * diagnostic, which found no extraction/canonicalization architecture gap
+ * and classified this exact addition as the correct, evidence-driven
+ * remedy). `'pond5'` was already a registered canonical `AssetProviderId`
+ * (LK-59) with zero alias coverage by deliberate, separately-timed
+ * design; this entry closes that gap using the one surface form
+ * production UAT actually observed ("Pond5"), same exact-match mechanism
+ * as every entry above -- no fuzzy matching, no speculative variants
+ * (`pond 5`, `pond5.com`, etc.) added, per this milestone's own explicit
+ * evidence-only scope. Mirrors the Storyblocks precedent immediately
+ * above exactly: one alias entry, added on real observed evidence, not
+ * proactively.
  */
 const KNOWN_ASSET_PROVIDERS: Record<string, AssetProviderId> = {
   getty: 'getty',
@@ -537,6 +551,7 @@ const KNOWN_ASSET_PROVIDERS: Record<string, AssetProviderId> = {
   artlist: 'artlist',
   'artlist.io': 'artlist',
   storyblocks: 'storyblocks',
+  pond5: 'pond5',
 }
 
 export function normalizeCandidate(candidate: CandidateObservation): NormalizationResult {

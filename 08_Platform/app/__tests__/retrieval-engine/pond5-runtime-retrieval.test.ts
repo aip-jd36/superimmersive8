@@ -20,9 +20,15 @@
 import { lookupTopicClaims } from '@/lib/retrieval-engine/lookup-topic-claims'
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import { getAskabilityEntry } from '@/lib/crc-engine/dependency-askability'
+import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
+import { assembleProjectionOutput } from '@/lib/projection-layer/assemble-projection-output'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
-import type { RetrievalHandoff, UserGoal } from '@/types/interview-engine'
+import { runExtractionPipeline } from '@/lib/interview-engine/extraction'
+import type { CandidateObservation } from '@/lib/interview-engine/extraction'
+import { constantExtractor } from '@/lib/interview-engine/mock-extractor'
+import { buildRetrievalHandoff } from '@/lib/interview-engine/handoff'
+import type { RetrievalHandoff, StructuredUnderstanding, UserGoal } from '@/types/interview-engine'
 
 const POND5_ID = 'CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1'
 
@@ -200,5 +206,151 @@ describe('registration/publication separation -- final evidenced progression', (
   test('exactly one CLAIM-POND5-* claim has fixture representation -- confirmed by exact count, not assumed', () => {
     const claims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id.startsWith('CLAIM-POND5'))
     expect(claims).toHaveLength(1)
+  })
+})
+
+// ── LK-66: end-to-end reachability -- real extraction pipeline through to
+// real Retrieval/BI/Composition against the real committed Pond5 fixture, no
+// hand-built structured state anywhere in this block. Mirrors the identical
+// LK-54 Storyblocks end-to-end block exactly, adapted for Pond5's own
+// third_party_source_rights topic (explicit-goal reachable, no Track A
+// discovery needed) and its two evidence-only dependencies.
+describe('LK-66: natural-language Pond5 mention reaches the real Pond5 claim end-to-end', () => {
+  function emptySU(): StructuredUnderstanding {
+    return {
+      project_facts: {
+        intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      },
+      tool_mentions: [],
+      scoped_observations: [],
+      user_goals: [],
+      asset_provider_mentions: [],
+      assessment_jurisdiction_mentions: [],
+      content_presence_mentions: [],
+      current_phase: 1,
+      gate_1_state: 'not_met',
+      gate_2_state: 'not_yet_stable',
+      completion_reason: null,
+      opt_out_scope: null,
+    }
+  }
+
+  function providerCandidate(overrides: Partial<CandidateObservation> = {}): CandidateObservation {
+    return { proposal_id: 'c1', turn: 1, raw_text: 'I used Pond5.', kind: 'asset_provider_mention', raw_provider_name: 'Pond5', ...overrides }
+  }
+
+  function goalCandidate(overrides: Partial<CandidateObservation> = {}): CandidateObservation {
+    return {
+      proposal_id: 'c2',
+      turn: 1,
+      raw_text: 'Can I use this Pond5 clip in a commercial for my client?',
+      kind: 'user_goal',
+      goal_confidence_hint: 'confirmed',
+      goal_category_hint: 'third_party_source_rights',
+      ...overrides,
+    }
+  }
+
+  test('§8 safety: a bare Pond5 mention with no accompanying goal creates the AssetProviderMention but fabricates NO UserGoal', async () => {
+    const { updated } = await runExtractionPipeline(emptySU(), { turn: 1, text: 'I used Pond5.' }, constantExtractor([providerCandidate()]))
+    expect(updated.asset_provider_mentions).toHaveLength(1)
+    expect(updated.asset_provider_mentions[0].resolution).toEqual({ kind: 'canonical', identifier: 'pond5' })
+    expect(updated.user_goals).toHaveLength(0) // no fabricated UserGoal from provider recognition alone
+  })
+
+  test('end-to-end: real extraction (provider + explicit third_party_source_rights goal, both via legitimate candidates) -> real handoff -> real retrieve() -> real Bounded Interpretation, Case 3B', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I used Pond5. Can I use this Pond5 clip in a commercial for my client?' },
+      constantExtractor([providerCandidate(), goalCandidate()]),
+    )
+    expect(updated.asset_provider_mentions[0].resolution).toEqual({ kind: 'canonical', identifier: 'pond5' })
+    expect(updated.user_goals).toHaveLength(1)
+    expect(updated.user_goals[0]).toMatchObject({ category: 'third_party_source_rights', state: 'confirmed' })
+
+    const rHandoff = buildRetrievalHandoff(updated)
+    expect(rHandoff.asset_providers).toEqual(['pond5'])
+    expect(rHandoff.unresolved_asset_provider_mentions).toEqual([])
+
+    const { results, diagnostics } = retrieve(rHandoff, MATRIX_FIXTURE, updated.user_goals, TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, [], rHandoff.asset_providers, [])
+    expect(results.map((r) => r.claim_id)).toContain(POND5_ID)
+    const pond5Result = results.find((r) => r.claim_id === POND5_ID)!
+    expect(pond5Result.unresolved_project_dependencies).toEqual(['editorial_designation_confirmed', 'separate_authorization_obtained'])
+
+    const interpretations = buildBoundedInterpretations(updated.user_goals, results, diagnostics, { state: 'unknown' })
+    const pond5Interp = interpretations.find((i) => i.supporting_claim_ids.includes(POND5_ID))
+    expect(pond5Interp).toBeDefined()
+    expect(pond5Interp!.status).toBe('relevant_applicability_unresolved')
+
+    const forbidden = [
+      /is (marked|designated) editorial/i,
+      /is not editorial/i,
+      /consent was (obtained|granted)/i,
+      /commercially cleared/i,
+      /is prohibited/i,
+      /standard license resolves/i,
+      /subscription resolves/i,
+    ]
+    for (const pattern of forbidden) {
+      expect(pond5Interp!.summary).not.toMatch(pattern)
+    }
+
+    const projection = assembleProjectionOutput(rHandoff, results, interpretations)
+    expect(projection.output.knowledge_items.map((k) => k.claim_id)).toContain(POND5_ID)
+    const pond5Fixture = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === POND5_ID)!
+    const pond5GoalInterp = projection.output.goal_interpretations.find((g) => g.summary.includes(pond5Fixture.crc_candidate_statement!))
+    expect(pond5GoalInterp).toBeDefined()
+    expect(pond5GoalInterp!.summary).toContain('A human-reviewed Commercial Assurance Assessment can address this directly.')
+  })
+
+  test('§7 dependency safety: a Pond5 mention carrying a "standard license, paid subscription, assumption not checked" attestation does NOT resolve either evidence-only dependency -- both remain static Living Knowledge facts, never wired to AssetProviderMention.license/.usage', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I have a paid Pond5 subscription and downloaded it under the standard license. Can I use this Pond5 clip in a commercial for my client?' },
+      constantExtractor([
+        providerCandidate({
+          raw_text: 'I have a paid Pond5 subscription and downloaded it under the standard license.',
+          license_confidence_hint: 'confirmed',
+          license_value_hint: 'standard license, paid subscription',
+        }),
+        goalCandidate(),
+      ]),
+    )
+    expect(updated.asset_provider_mentions[0].license).toEqual({ state: 'confirmed', value: 'standard license, paid subscription' })
+    expect(getAskabilityEntry('editorial_designation_confirmed')).toBeUndefined()
+    expect(getAskabilityEntry('separate_authorization_obtained')).toBeUndefined()
+
+    const rHandoff = buildRetrievalHandoff(updated)
+    const { results } = retrieve(rHandoff, MATRIX_FIXTURE, updated.user_goals, TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, [], rHandoff.asset_providers, [])
+    const pond5Result = results.find((r) => r.claim_id === POND5_ID)!
+    expect(pond5Result.unresolved_project_dependencies).toEqual(['editorial_designation_confirmed', 'separate_authorization_obtained'])
+  })
+
+  test('correction/supersession: a canonical Pond5 mention can be superseded using the same generic mechanism already proven for Getty/iStock/Storyblocks -- exercised once here for this specific canonical id, not duplicating the generic suite', async () => {
+    const turn1 = await runExtractionPipeline(emptySU(), { turn: 1, text: 'I used Pond5.' }, constantExtractor([providerCandidate()]))
+    expect(turn1.updated.asset_provider_mentions.filter((m) => m.superseded_by === null)).toHaveLength(1)
+
+    const turn2 = await runExtractionPipeline(
+      turn1.updated,
+      { turn: 2, text: 'Sorry, it was actually Getty.' },
+      constantExtractor([
+        providerCandidate({ proposal_id: 'c1', turn: 2, raw_text: 'Sorry, it was actually Getty.', raw_provider_name: 'Getty', is_correction: true, correction_of_raw_text: 'Pond5' }),
+      ]),
+    )
+    const active = turn2.updated.asset_provider_mentions.filter((m) => m.superseded_by === null)
+    expect(active).toHaveLength(1)
+    expect(active[0].resolution).toEqual({ kind: 'canonical', identifier: 'getty' })
+    const supersededPond5 = turn2.updated.asset_provider_mentions.find((m) => m.resolution.kind === 'canonical' && m.resolution.identifier === 'pond5')
+    expect(supersededPond5?.superseded_by).not.toBeNull()
+
+    const rHandoff = buildRetrievalHandoff(turn2.updated)
+    expect(rHandoff.asset_providers).toEqual(['getty'])
+    const goalOnly = await runExtractionPipeline(turn2.updated, { turn: 3, text: 'Can I use it commercially?' }, constantExtractor([goalCandidate({ proposal_id: 'c3', turn: 3, raw_text: 'Can I use it commercially?' })]))
+    const finalHandoff = buildRetrievalHandoff(goalOnly.updated)
+    const { results } = retrieve(finalHandoff, MATRIX_FIXTURE, goalOnly.updated.user_goals, TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, [], finalHandoff.asset_providers, [])
+    expect(results.map((r) => r.claim_id)).not.toContain(POND5_ID)
   })
 })

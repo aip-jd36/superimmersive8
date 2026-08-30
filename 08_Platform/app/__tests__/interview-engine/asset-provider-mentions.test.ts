@@ -334,6 +334,28 @@ describe('normalizeCandidate: asset provider canonicalization', () => {
     expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'SB' }))).toEqual({ status: 'unrecognized' })
   })
 
+  // Pond5 alias registration (LK-66, 2026-08-30 -- Pond5 Observed
+  // Surface-Form Reachability Correction): same generic mechanism/tests as
+  // Storyblocks above. Only the exact surface form production UAT actually
+  // observed ("Pond5") is registered -- no speculative variants.
+  test('Pond5 resolves to canonical "pond5"', () => {
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'Pond5' }))).toEqual({ status: 'resolved', canonical_identifier: 'pond5' })
+  })
+
+  test('Pond5 is DISTINCT from every other registered provider -- registering it introduces no collision', () => {
+    const pond5 = normalizeCandidate(providerCandidate({ raw_provider_name: 'Pond5' }))
+    const getty = normalizeCandidate(providerCandidate({ raw_provider_name: 'Getty' }))
+    const storyblocks = normalizeCandidate(providerCandidate({ raw_provider_name: 'Storyblocks' }))
+    expect(pond5).toEqual({ status: 'resolved', canonical_identifier: 'pond5' })
+    expect(pond5).not.toEqual(getty)
+    expect(pond5).not.toEqual(storyblocks)
+  })
+
+  test('speculative Pond5 surface forms not justified by observed evidence remain unrecognized -- this milestone registers only the exact observed "Pond5" form', () => {
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'pond 5' }))).toEqual({ status: 'unrecognized' })
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'pond5.com' }))).toEqual({ status: 'unrecognized' })
+  })
+
   test('a tool_mention candidate is not_applicable to provider normalization (kind isolation)', () => {
     expect(normalizeCandidate(toolCandidate())).not.toEqual({ status: 'unrecognized' })
   })
@@ -626,6 +648,33 @@ describe('AssetProviderMention final shape', () => {
   })
 
   test('an unrelated still-unregistered provider name continues to fail closed as unresolved_alias through the same real pipeline, unaffected by the Storyblocks registration', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I used PhotoMega.' },
+      constantExtractor([providerCandidate({ raw_text: 'I used PhotoMega.', raw_provider_name: 'PhotoMega' })]),
+    )
+    expect(updated.asset_provider_mentions[0].resolution).toEqual({ kind: 'unresolved_alias', raw_name: 'PhotoMega' })
+    expect(updated.asset_provider_mentions[0].confidence).toBe('unresolved_no_visibility')
+  })
+
+  // Pond5 reachability (LK-66, 2026-08-30): same generic mechanism/tests as
+  // Storyblocks above, real extraction pipeline, not dictionary lookup alone.
+  test('a resolved Pond5 mention carries mention_id, resolution.kind="canonical"/identifier="pond5", confidence, provenance, and null superseded_by -- via the real extraction pipeline, not dictionary lookup alone', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I used Pond5.' },
+      constantExtractor([providerCandidate({ raw_text: 'I used Pond5.', raw_provider_name: 'Pond5' })]),
+    )
+    const mention: AssetProviderMention = updated.asset_provider_mentions[0]
+    expect(mention.mention_id).toMatch(/^t1-/)
+    expect(mention.resolution).toEqual({ kind: 'canonical', identifier: 'pond5' })
+    expect(mention.confidence).toBe('confirmed')
+    expect(mention.source_turn).toBe(1)
+    expect(mention.source_statement).toBe('I used Pond5.')
+    expect(mention.superseded_by).toBeNull()
+  })
+
+  test('an unrelated still-unregistered provider name continues to fail closed as unresolved_alias through the same real pipeline, unaffected by the Pond5 registration', async () => {
     const { updated } = await runExtractionPipeline(
       emptySU(),
       { turn: 1, text: 'I used PhotoMega.' },
