@@ -220,8 +220,20 @@ export type AssetProviderResolution =
  * TOOL identity (`lib/tool-identity/registry.ts`) and its own deliberately
  * unaliased entries. No conversational path can produce a confirmed,
  * canonical Storyblocks `AssetProviderMention` as of this registration.
+ *
+ * `'pond5'` added 2026-08-30 (LK-59, Trial 3 Living Knowledge onboarding
+ * benchmark -- CAND-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001): identity
+ * registration only, same generic mechanism as every entry above --
+ * mechanically required before `provider_scope: ['pond5']` can appear on a
+ * type-checked `TopicClaim`/Candidate (this field is typed `AssetProviderId[]
+ * | null`, not `string[]`), not itself a governance judgment. Deliberately
+ * does NOT add a `KNOWN_ASSET_PROVIDERS` extraction alias -- identity
+ * registration and conversational extraction remain separate,
+ * independently-timed decisions, same discipline as Storyblocks above. No
+ * conversational path can produce a confirmed, canonical Pond5
+ * `AssetProviderMention` as of this registration.
  */
-export const ASSET_PROVIDER_IDS = ['getty', 'istock', 'shutterstock', 'adobe-stock', 'artlist', 'storyblocks'] as const
+export const ASSET_PROVIDER_IDS = ['getty', 'istock', 'shutterstock', 'adobe-stock', 'artlist', 'storyblocks', 'pond5'] as const
 
 export type AssetProviderId = (typeof ASSET_PROVIDER_IDS)[number]
 
