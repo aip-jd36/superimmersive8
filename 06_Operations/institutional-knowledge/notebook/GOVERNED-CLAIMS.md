@@ -2448,3 +2448,89 @@ Related: —
 
 Full Formal Governance Review artifact: `governance-reviews/FGR_009_SYNTHESIA_SCENARIO_A_PACKAGE_2026-08-29.md`
 Candidate Representation: `08_Platform/app/lib/candidates/CAND-SYNTHESIA-STOCK-PAID-PROMOTION-001.ts @ 681a97c4b34d8cc09f3f3bc150eb13bb1744a71f`
+
+---
+
+**Wave 6 claim below (2026-08-30, Trial 2 of the Living Knowledge onboarding benchmark, LK-42 protocol) — the first real `provider_scope`-narrowed claim onboarded since the original Stock domain build-out, and the first claim in this document sourced from human-verified primary-evidence findings (browser Print-to-PDF capture, automated fetch of `www.storyblocks.com` returned empty content; `help.storyblocks.com` corroboration remains available but is superseded here by direct primary-document review) rather than either automated fetch or an AI-mediated summary.** `Lifecycle: Adopted` (Adoption Approver: JD (PM), Adoption Decision Date: 2026-08-30 — see `governance-reviews/FGR_010_CAND-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001_2026-08-30.md` for the full multi-stage evidence chain and decision record), `Publication scope: Reviewer/Commercial Assurance`. Not CRC-eligible — `CRC Approver`/`CRC Decision Date` PENDING, same discipline as every prior wave; a separate CRC Publication Review is required.
+
+### CLAIM-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1
+Domain: Third-Party Source Assets / Stock Media Licensing — Storyblocks
+Topic: commercial_use
+Subtopic: business-license-broadcast-television-ott-scope
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — this is a Storyblocks platform contractual license-scope restriction, not a legal-jurisdiction-scoped rule. See "Transitional jurisdiction representation for provider/platform propositions" (governance-discipline section above); the underlying `TopicClaim` representation records `jurisdiction: 'Global'` as a bounded transitional compatibility value under that rule, never as a claim of worldwide legal validation.
+Context: commercial use of Storyblocks-provided Stock Files (footage/audio/images) incorporated into a production intended for broadcast, television, or OTT distribution.
+Claim proposition: >
+  Storyblocks' Individual and Small Business License Agreements state that
+  their licenses do not include the right to use Stock Files in Broadcast,
+  Television, or OTT platforms unless that right is explicitly set forth in
+  the subscription plan selected. Storyblocks' licensing materials identify
+  its Business License as covering broadcast, TV, streaming/OTT, and
+  feature-film distribution.
+
+Source references:
+  - primary: Storyblocks Individual License Agreement, human-verified "Last updated: June 18, 2026" — https://www.storyblocks.com/license/individual-license
+  - primary: Storyblocks Small Business License Agreement, human-verified "Last updated: October 20, 2025" — https://www.storyblocks.com/license/small-business-license
+  - secondary/corroborating: Storyblocks License Comparison page — https://www.storyblocks.com/business-solutions/license-comparison
+  - secondary/corroborating: Storyblocks Help Center, "What is covered under the Business License?" and "What is the difference between the Individual and Business License?" (Official platform authority, Last-Updated 2026-03-09)
+Source authority/type: Primary legal/official authority (Individual and Small Business License Agreements, human-verified by direct review of preserved captures); corroborated by Strong secondary authority (License Comparison) and Official platform authority (Help Center)
+Source fact: >
+  Human-verified primary-evidence findings (LK-49, against preserved, hashed
+  capture artifacts — see evidence-captures/storyblocks/MANIFEST.md): the
+  Individual License Agreement's own §1.2 states, in substance, that the
+  license does not include the right to use Stock Files in Broadcast,
+  Television, or OTT platforms unless explicitly set forth in the selected
+  subscription plan; the Small Business License Agreement's own §1.2 states
+  materially the same condition. The License Comparison capture corroborates,
+  distinguishing Individual/Small Business/Business scope, with Business
+  materials identifying broadcast/TV/streaming-OTT/feature-film distribution.
+  This environment's own PDF tooling could not independently extract or
+  render the captured documents (zero embedded text layer; no OCR/page-render
+  capability available) — these findings are human-verified, not
+  CLI-extracted, and are recorded as such rather than silently upgraded.
+
+SI8 interpretation: >
+  A client incorporating Storyblocks-provided Stock Files into a project
+  intended for broadcast, television, or OTT distribution should confirm
+  whether their specific Storyblocks subscription plan explicitly includes
+  that scope, rather than assuming any Storyblocks subscription covers it.
+  This does not establish that every non-Business Storyblocks subscription
+  categorically prohibits broadcast/OTT use -- the Agreements' own language
+  conditions the exclusion on what the "selected subscription plan" itself
+  provides, not on tier name alone. This does not establish that holding a
+  Business License clears any specific project for broadcast use -- it
+  states what Storyblocks' own license materials say, not whether they were
+  satisfied for any particular asset or project.
+
+Applicability requirements: []
+Unresolved project dependencies: [storyblocks_license_tier_confirmed]   <!-- CRC cannot structurally verify which Storyblocks license tier a user holds, or whether their specific selected plan includes an explicit broadcast/TV/OTT grant beyond the tier default -- an evidence/documentary question, not self-report-appropriate, per the established Stock-domain DAR_001 precedent for provider-plan-shaped dependencies. -->
+Prohibited conclusions: >
+  Does not establish that a specific project's Storyblocks-sourced assets are
+  actually broadcast/TV/OTT-cleared. Does not establish that every
+  non-Business Storyblocks subscription prohibits broadcast/OTT use in every
+  case -- the exclusion is plan-contingent, not tier-name-absolute. Does not
+  establish that holding a Business License by itself clears a project for
+  broadcast use. Does not establish anything about a jurisdiction's own
+  broadcast/media law -- this is a platform contractual license-scope
+  restriction only, not a legal clearance determination. Does not establish
+  that the same Storyblocks Agreement provisions govern Editorial content,
+  AI/machine-learning use, releases, or any other Storyblocks license term --
+  those remain separate, not-yet-reviewed propositions.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-30
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+
+CRC Candidate Statement: >
+
+Effective date: 2026-08-30 (evidence capture/review date; underlying Agreements dated 2026-06-18 (Individual) and 2025-10-20 (Small Business) per their own visible "Last updated" text)
+Last reviewed: 2026-08-30
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: —
+
+Full Formal Governance Review artifact: `governance-reviews/FGR_010_CAND-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001_2026-08-30.md`
+Candidate Representation: `08_Platform/app/lib/candidates/CAND-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001.ts @ efee49ded250488b9819ae31ae4c4b8234ad9ae2`
