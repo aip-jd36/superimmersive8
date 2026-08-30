@@ -1,7 +1,27 @@
 /**
  * Governed Candidate Representation -- CAND-POND5-EDITORIAL-COMMERCIAL-USE-
  * CONSENT-001 (LK-59, 2026-08-30, Trial 3 Living Knowledge onboarding
- * benchmark).
+ * benchmark; REVISED LK-60, 2026-08-30, following human FGR decision:
+ * REVISE).
+ *
+ * CANDIDATE STATEMENT (FGR-stage proposition wording, exact, as revised):
+ *   "Pond5 Content identified on its Item Page as Editorial, or for
+ *   editorial use only, is intended for use only in connection with events
+ *   or topics that are newsworthy or of general public interest. Absent
+ *   Pond5's express and specific written consent, Pond5's Content License
+ *   Agreement restricts this Editorial Content from use in merchandise,
+ *   advertisement (other than in-context advertising of a Production in
+ *   which the Editorial Content has been incorporated), endorsement,
+ *   promotion, advertorial, or other commercial Production."
+ * LK-59's own original draft appended a third sentence describing Pond5's
+ * current Editorial-page contact route for commercial clearance. Human FGR
+ * (LK-60) removed that sentence from the Statement: the Tier 1 governing
+ * Agreement (Section 7) already establishes the material exception --
+ * Pond5's own express and specific written consent -- and the durable
+ * contractual proposition should not be coupled to a lower-authority,
+ * potentially more changeable support/contact-process description. The
+ * Editorial-page evidence is preserved (below) as corroborating source
+ * context, not as part of the governed proposition.
  *
  * MACHINE-CHECKABLE CANDIDATE REPRESENTATION ONLY. Not canonical governed
  * knowledge, not CRC-eligible, not authority over proposition meaning -- per
@@ -34,9 +54,15 @@
  *      for this proposition's own text, which comes from Section 7)
  *   -- editorial-page_20260830T203900+0800_d2217e81.pdf (current Pond5
  *      Editorial page; corroborates that Pond5 offers a separate contact
- *      route for editorial-clip commercial clearance -- referenced in this
- *      Candidate's own third sentence, not itself the source of the
- *      restriction)
+ *      route for editorial-clip commercial clearance -- REVISED LK-60:
+ *      preserved as corroborating source context/evidence limitation only,
+ *      no longer part of the Candidate Statement itself (see the CANDIDATE
+ *      STATEMENT block above). Does not establish, and must never be read
+ *      to imply, that contacting Pond5 constitutes authorization, that
+ *      authorization will be granted, that a particular asset is eligible,
+ *      that a particular user obtained authorization, that required
+ *      releases/clearances exist, or that any project is commercially
+ *      cleared.)
  *   -- pricing-page_20260830T204000+0800_4b288367.pdf (current Pond5
  *      Pricing page; NOT used as a source for this proposition -- its own
  *      broad Broadcast/OTT/Film & TV language is general-tier marketing
