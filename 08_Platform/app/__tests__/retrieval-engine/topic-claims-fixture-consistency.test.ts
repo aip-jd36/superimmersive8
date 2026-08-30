@@ -105,13 +105,15 @@ const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set<string>([
   // { ready: true, issues: [] } for its committed candidate representation
   // (08_Platform/app/lib/candidates/CAND-STORYBLOCKS-BUSINESS-LICENSE-
   // BROADCAST-001.ts @ efee49ded250488b9819ae31ae4c4b8234ad9ae2) -- not
-  // excluded here for any architecture blocker. Deliberately not yet
-  // mirrored into TOPIC_CLAIMS_FIXTURE: durable Adoption is governance-
-  // corpus recording only, a separate and independently-timed act from
-  // runtime fixture mirroring, same "Adoption is pure governance
-  // documentation, zero runtime effect" discipline as every entry above.
-  // CRC publication remains a later, separate, not-yet-performed step --
-  // this claim's own `CRC Approver`/`CRC Decision Date` are `PENDING`.
+  // excluded here for any architecture blocker. Now CRC-approved (CPR_010,
+  // PM: JD, CRC Decision Date: 2026-08-30 -- see GOVERNED-CLAIMS.md's own
+  // CRC Publication Scope; the required provider-scoped Matrix coexistence
+  // check found NO MATRIX COVERAGE FOUND for Storyblocks) -- still
+  // deliberately not yet runtime-mirrored as of this comment. Governance
+  // approval and runtime activation remain separate, independently-timed
+  // acts, same discipline as every other claim in this set: mechanically
+  // representable and now CRC-approved, but runtime activation is a
+  // separate, later, controlled milestone.
   'CLAIM-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1',
 ])
 

@@ -2522,15 +2522,48 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-30
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
+  APPROVED FOR CRC PUBLICATION (2026-08-30, CRC Approver: JD (PM) -- see
+  CRC Publication Review #10, CPR_010, governance-reviews/CPR_010_CLAIM-
+  STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1_2026-08-30.md). CRC may
+  state that Storyblocks' Individual and Small Business License Agreements
+  (captured 2026-08-30; Individual Agreement Last updated June 18, 2026,
+  Small Business Agreement Last updated October 20, 2025) exclude the right
+  to use Stock Files in Broadcast, Television, or OTT platforms unless that
+  use is explicitly included in the user's selected subscription plan, and
+  that Storyblocks' own licensing materials identify the Business License
+  as covering broadcast, TV, streaming/OTT, and feature-film distribution.
+  This is Storyblocks' own provider/platform licensing policy, not law. CRC
+  must not state that every non-Business Storyblocks subscription
+  categorically prohibits Broadcast/Television/OTT use -- the exclusion is
+  plan-contingent, not tier-name-absolute. CRC must not state which
+  specific Storyblocks license or plan a user actually holds, must not
+  state whether a specific project's Storyblocks-sourced assets are
+  actually broadcast/OTT-cleared, must not state that holding a Business
+  License by itself commercially clears a project, and must not state or
+  imply that all rights, releases, or authorizations necessary for the
+  project have been obtained or that the project is otherwise commercially
+  cleared. The evidence-only dependency (storyblocks_license_tier_confirmed)
+  remains permanently unresolved through Bounded Interpretation's Case 3B
+  boundary, exactly as for every other dependency-bearing claim in this
+  corpus. A human-reviewed Commercial Assurance Assessment remains the
+  higher-assurance path for resolving a specific project's own Storyblocks
+  license status.
 
 CRC Candidate Statement: >
+  Storyblocks' Individual and Small Business License Agreements state that
+  their license does not include the right to use Stock Files in
+  Broadcast, Television, or OTT platforms unless that use is explicitly
+  included in the subscription plan you selected. Storyblocks' own
+  licensing materials identify the Business License specifically as
+  covering broadcast, TV, streaming/OTT, and feature-film distribution.
 
 Effective date: 2026-08-30 (evidence capture/review date; underlying Agreements dated 2026-06-18 (Individual) and 2025-10-20 (Small Business) per their own visible "Last updated" text)
-Last reviewed: 2026-08-30
+Last reviewed: 2026-08-30 (CRC Publication Review #10, CPR_010)
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-08-30
 Related: —
 
 Full Formal Governance Review artifact: `governance-reviews/FGR_010_CAND-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001_2026-08-30.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_010_CLAIM-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1_2026-08-30.md`
 Candidate Representation: `08_Platform/app/lib/candidates/CAND-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001.ts @ efee49ded250488b9819ae31ae4c4b8234ad9ae2`
