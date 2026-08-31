@@ -1,0 +1,6 @@
+{"type":"TRIAL_START","trialId":"LK-68-INSTRUMENTATION-VALIDATION","ts":"2026-08-31T02:03:56.819Z","seq":1,"provenance":"LK-68 self-dogfood, CLI operator"}
+{"type":"MACHINE_STAGE","phase":"start","trialId":"LK-68-INSTRUMENTATION-VALIDATION","label":"typecheck","ts":"2026-08-31T02:03:57.756Z","seq":2,"provenance":"CLI operator"}
+{"type":"MACHINE_STAGE","phase":"end","trialId":"LK-68-INSTRUMENTATION-VALIDATION","label":"typecheck","ts":"2026-08-31T02:04:01.813Z","seq":3,"provenance":"CLI operator","status":"completed","timing":"measured","matchedStartSeq":2,"durationSeconds":4.057}
+{"type":"MACHINE_STAGE","phase":"start","trialId":"LK-68-INSTRUMENTATION-VALIDATION","label":"full-test-suite","ts":"2026-08-31T02:04:02.760Z","seq":4,"provenance":"CLI operator"}
+{"type":"MACHINE_STAGE","phase":"end","trialId":"LK-68-INSTRUMENTATION-VALIDATION","label":"full-test-suite","ts":"2026-08-31T02:04:07.598Z","seq":5,"provenance":"CLI operator","status":"failed","timing":"measured","matchedStartSeq":4,"durationSeconds":4.838}
+{"type":"TRIAL_END","trialId":"LK-68-INSTRUMENTATION-VALIDATION","ts":"2026-08-31T02:04:08.530Z","seq":6,"provenance":"CLI operator"}

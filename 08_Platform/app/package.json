@@ -15,7 +15,8 @@
     "eval:dialogue-mock-dryrun": "tsx lib/interview-engine/eval/run-mock-dialogue-eval.ts",
     "eval:dialogue-live": "tsx lib/interview-engine/eval/run-real-model-dialogue-eval.ts",
     "gallery:understood-summary": "tsx lib/projection-layer/gallery/render-understood-summary-gallery.ts",
-    "eval:crc-runtime-live": "tsx --env-file=.env.local lib/crc-engine/eval/run-live-turn-eval.ts"
+    "eval:crc-runtime-live": "tsx --env-file=.env.local lib/crc-engine/eval/run-live-turn-eval.ts",
+    "lk-benchmark": "tsx lib/lk-benchmark/cli.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
