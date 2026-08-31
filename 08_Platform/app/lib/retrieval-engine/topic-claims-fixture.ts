@@ -637,4 +637,72 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     last_verified: '2026-08-30',
     superseded_by: null,
   },
+  {
+    // Fourth real provider_scope-narrowed TopicClaim runtime entry (after
+    // A-3/Artlist, Storyblocks, Pond5). Trial 4 of the Living Knowledge
+    // onboarding benchmark -- the first trial run under the LK-68/LK-68A
+    // prospective benchmark instrumentation. CLAIM-ADOBESTOCK-AI-STUDIO-
+    // COMMERCIALLY-SAFE-LABEL-001-v1 Adopted 2026-08-31 (FGR_012, following
+    // an intervening REVISE -- LK-73 -- that removed an "Adobe provides
+    // IP indemnification protection" clause from the original Candidate
+    // Statement, since no directly-read source establishes that "Commercially
+    // safe" is equivalent to the separately-defined, conditioned, capped
+    // "Indemnified Firefly Output" contractual term). CRC Publication
+    // approved 2026-08-31 (CRC Approver: JD (PM)) following CPR_012, no
+    // intervening DEFER -- see GOVERNED-CLAIMS.md's own CRC Publication
+    // Scope and governance-reviews/CPR_012_CLAIM-ADOBESTOCK-AI-STUDIO-
+    // COMMERCIALLY-SAFE-LABEL-001-v1_2026-08-31.md for the full
+    // publication-safety analysis. `provider_scope: ['adobe-stock']`
+    // required zero registry work -- already canonically registered before
+    // this trial, unlike Pond5/Storyblocks. `topic: 'commercial_use'` was
+    // reverified at FGR against the real GoalCategory enum rather than
+    // reflexively copied from the Getty/Pond5 `third_party_source_rights`
+    // shape -- reachable via an explicit `commercial_use` UserGoal, the
+    // same shape as Synthesia/Storyblocks. THE FIRST CLAIM IN THIS CORPUS
+    // WITH `unresolved_project_dependencies: []` FROM ADOPTION -- a
+    // deliberate FGR-stage design (LK-73/74), not an oversight: the
+    // proposition presents its Adobe/Firefly and partner-model branches
+    // conditionally and does not select either branch for the user's
+    // project, so Bounded Interpretation does not require gating a
+    // project-specific fact to stay safe. CPR_012 empirically confirmed
+    // (via the existing generic synthetic-eligibility-canary.ts harness,
+    // no domain-specific harness created) that this resolves Bounded
+    // Interpretation to `directly_relevant` -- NOT Case 3B, correctly,
+    // since there is nothing to gate on -- while Composition still renders
+    // only the claim's own self-hedged attributed text plus the fixed,
+    // universal, domain-blind hedge every `directly_relevant`
+    // interpretation carries, never overstating the conclusion for any
+    // specific project. No PLATFORM-RIGHTS-MATRIX.md coverage exists for
+    // Adobe Stock as a provider (NO MATRIX COVERAGE FOUND, confirmed at
+    // CPR; the unrelated `adobe-firefly` Matrix row is tool-scoped, not
+    // provider-scoped, and is never read by this claim since
+    // `tool_scope: null`). No extraction alias for 'adobe-stock' exists in
+    // extraction.ts -- this entry proves canonical runtime retrieval given
+    // a confirmed adobe-stock AssetProviderMention; it does not establish
+    // ordinary conversational reachability, a separate,
+    // independently-timed concern (CPR_007's own established finding).
+    // The separate contractual "Indemnified Firefly Output" claim family
+    // remains completely unresearched and, per CPR_012 §16, structurally
+    // absent from this claim's own runtime representation -- not part of
+    // this entry, not authorized for CRC by it.
+    claim_id: 'CLAIM-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001-v1',
+    topic: 'commercial_use',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      'APPROVED FOR CRC PUBLICATION (2026-08-31, CRC Approver: JD (PM) -- see CRC Publication Review #12, CPR_012, governance-reviews/CPR_012_CLAIM-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001-v1_2026-08-31.md). CRC may state that Adobe\'s official AI Studio help material describes content labeled "Commercially safe" as generated with Adobe\'s own Firefly model, trained on content Adobe has permission or rights to use, and says this content may be used in commercial projects, and that for content generated using a partner (non-Adobe) AI model, Adobe says it cannot verify the training data or whether the output may contain third-party intellectual property, directing users to review that model\'s own terms before commercial use. This is Adobe\'s own product/help representation, not a legal or contractual conclusion. CRC must not state that "Commercially safe" is equivalent to, or triggers, Adobe\'s separate Tier 1 "Indemnified Firefly Output" contractual indemnification regime or its conditions/liability cap, must not state which AI model was used for any specific project\'s generation, must not state that a "Commercially safe" designation was actually displayed or applies to any specific asset, must not state that reviewing a partner model\'s own terms itself grants or confirms commercial permission, and must not state or imply that all rights, releases, or authorizations necessary for the project have been obtained or that the project is otherwise commercially cleared. A human-reviewed Commercial Assurance Assessment remains the higher-assurance path for resolving a specific project\'s own Adobe Stock AI Studio model/label status.',
+    crc_candidate_statement:
+      'Adobe\'s official AI Studio help material describes content labeled "Commercially safe" as generated with Adobe\'s own Firefly model, trained on content Adobe has permission or rights to use, and says this content may be used in commercial projects. For content generated using a partner (non-Adobe) AI model, Adobe says it cannot verify the training data or whether the output may contain third-party intellectual property, and directs users to review that model\'s own terms before commercial use.',
+    applicability_requirements: [],
+    // Deliberately empty -- see this entry's own header comment above and
+    // CPR_012 §7/§15. Not a data-completeness gap; a reviewed, empirically
+    // stress-tested design decision.
+    unresolved_project_dependencies: [],
+    provider_scope: ['adobe-stock'],
+    tool_scope: null,
+    last_verified: '2026-08-31',
+    superseded_by: null,
+  },
 ]

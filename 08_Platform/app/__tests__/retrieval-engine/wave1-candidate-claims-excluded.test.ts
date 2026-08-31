@@ -152,9 +152,21 @@ describe('Wave 1 real claims -- governance state as of 2026-08-19 (all four COPY
    * DEFER). Count grows from fourteen to fifteen. Its own provider_scope/
    * retrieval/BI/Composition behavior is proven separately by
    * pond5-runtime-retrieval.test.ts's own real-fixture describe block.
+   *
+   * Updated again 2026-08-31 (LK-75, Trial 4 -- Fourth Real Provider-Scoped
+   * TopicClaim Runtime Mirroring): CLAIM-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-
+   * SAFE-LABEL-001-v1 gained its first real runtime fixture entry, following
+   * explicit human CRC Publication approval (CPR_012, no intervening
+   * DEFER). Count grows from fifteen to sixteen. First claim in this
+   * fixture with unresolved_project_dependencies: [] from Adoption -- a
+   * deliberate FGR-stage design, empirically stress-tested at CPR_012, not
+   * a data-completeness gap. Its own provider_scope/retrieval/BI/
+   * Composition behavior is proven separately by
+   * adobestock-runtime-retrieval.test.ts's own real-fixture describe block.
    */
-  test('all four Wave 1 claims plus the seven stock-media claims (five original + two -v2 correction successors) plus A-3 (the first published Music-domain claim) plus the first real tool-scoped claim (Synthesia) plus the second and third real provider-scoped claims since A-3 (Storyblocks, Pond5) are present in the fixture', () => {
+  test('all four Wave 1 claims plus the seven stock-media claims (five original + two -v2 correction successors) plus A-3 (the first published Music-domain claim) plus the first real tool-scoped claim (Synthesia) plus the second, third, and fourth real provider-scoped claims since A-3 (Storyblocks, Pond5, Adobe Stock) are present in the fixture', () => {
     expect(TOPIC_CLAIMS_FIXTURE.map((c) => c.claim_id).sort()).toEqual([
+      'CLAIM-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001-v1',
       'CLAIM-COPY-001-v1',
       'CLAIM-COPY-002-v1',
       'CLAIM-COPY-003-v1',

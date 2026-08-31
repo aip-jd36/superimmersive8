@@ -2696,3 +2696,152 @@ Related: —
 Full Formal Governance Review artifact: `governance-reviews/FGR_011_CAND-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001_2026-08-30.md`
 Full CRC Publication Review artifact: `governance-reviews/CPR_011_CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1_2026-08-30.md`
 Candidate Representation: `08_Platform/app/lib/candidates/CAND-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001.ts @ 8b8eef8c6401f8f84b4951db73927b59489a0ae7`
+
+### CLAIM-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001-v1
+Domain: AI Generation Feature / Platform Product Representation — Adobe Stock AI Studio
+Topic: commercial_use
+Subtopic: ai-studio-commercially-safe-label-vs-partner-model-caveat
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — this is Adobe's own platform/product representation, not a legal-jurisdiction-scoped rule. See "Transitional jurisdiction representation for provider/platform propositions" (governance-discipline section above); the underlying `TopicClaim` representation records `jurisdiction: 'Global'` as a bounded transitional compatibility value under that rule, never as a claim of worldwide legal validation.
+Context: a production incorporating content generated or edited using Adobe Stock's AI Studio feature, where the commercial usability of that generated output may depend on which underlying AI model (Adobe's own Firefly, or a third-party partner model) was used for the generation.
+Claim proposition: >
+  Adobe's official AI Studio help material states that content labeled
+  "Commercially safe" in AI Studio is created using Adobe's generative AI
+  Firefly model, trained on content Adobe has permission or rights to
+  use, and that this content may be used in commercial projects. For
+  content generated using a partner (third-party, non-Adobe) AI model in
+  AI Studio, Adobe directs users to review that specific model's own
+  terms of service before commercial use, and states that Adobe cannot
+  verify the training data used to build a partner model or whether that
+  model's output may contain third-party intellectual property.
+
+Source references:
+  - primary/affirmative (Official platform help material, Class B human copy/paste capture, directly read in full): "AI Studio：了解點數和商業用途" ("AI Studio: Learn about credits and commercial use"), helpx.adobe.com, 上次更新時間 2026年7月21日 (last updated July 21, 2026), Traditional Chinese (繁體中文) locale — capture supplied verbatim by PM directly in the LK-72 task prompt (not filed as a separate evidence-captures/ artifact; see evidence-limitation note below).
+  - boundary/evidence-limitation only, NOT affirmative support for this claim (Tier 1, Official legal/contractual authority, Class A human-supplied original PDF, directly read in full): Adobe Stock Product Specific Terms, "Last updated January 16, 2026. Replaces all prior versions." Footer: Stock-Additional-Terms_en_US_20260116. Supplied 2026-08-31.
+Source authority\type: Official platform help material (Tier 2, primary/affirmative support); Official legal/contractual authority (Tier 1, boundary/evidence-limitation only — does not support any clause of this claim directly)
+Source fact: >
+  Directly-read source facts (LK-72): the Tier 2 help page states, in
+  substance, that content labeled "Commercially safe" in AI Studio is
+  created using Adobe's Firefly model, trained on content Adobe has
+  permission or rights to use, that this content may be used in
+  commercial projects, and that Adobe provides an unspecified degree of
+  IP-related assurance for such content -- this last representation is
+  DELIBERATELY EXCLUDED from the governed proposition above (see
+  "Revision" note below). The same page states that for partner
+  (third-party) AI models used within AI Studio, Adobe directs reviewing
+  that model's own terms before commercial use and states it cannot
+  verify the partner model's training data or whether its output may
+  contain third-party IP. The literal phrase "Commercially safe" does not
+  appear anywhere in the directly-read Tier 1 Adobe Stock Product Specific
+  Terms; that document instead separately defines "Indemnified Firefly
+  Output" (§1.10: Output generated via Eligible Firefly Features + an
+  Export Event, explicitly EXCLUDING pre-existing Stock Assets labeled
+  "Generated with AI" or similar) with its own materially conditioned
+  (§10.2, 8 exclusions), capped (§10.3, US$10,000 per Output) contractual
+  indemnification regime (§10). No sentence in either directly-read source
+  establishes that "Commercially safe" is legally equivalent to
+  "Indemnified Firefly Output." Three documents incorporated by reference
+  at Tier 1 §9.6/§1.8 (Firefly Product Description, Adobe Generative AI
+  Product Specific Terms, Adobe Generative AI User Guidelines) have NOT
+  been read and may bear on that unresolved equivalence question.
+Revision: >
+  The original Candidate draft (LK-72) included a clause stating "Adobe
+  provides intellectual-property indemnification protection for such
+  content," directly following the Tier 2 page's own "Adobe 對生成內容提供智慧財產權賠償保障"
+  language. Human FGR REVISE decision (LK-73) removed this clause in
+  full: carrying the Tier 2 phrase risked implying the Tier 1 contractual
+  indemnification regime (§10) without evidence establishing that link.
+  The contractual indemnification question is preserved as a SEPARATE,
+  UNRESOLVED, NOT-YET-RESEARCHED future claim family -- see "Related"
+  below -- and is NOT part of this claim's proposition.
+
+SI8 interpretation: >
+  A client incorporating content generated or edited via Adobe Stock's AI
+  Studio into a commercial production may find it relevant that Adobe's
+  own help material distinguishes content generated with Adobe's own
+  Firefly model (described by Adobe as "Commercially safe," trained on
+  Adobe-permissioned content, usable in commercial projects) from content
+  generated with a partner/third-party AI model within the same feature
+  (for which Adobe directs reviewing that model's own terms and states it
+  cannot verify the model's training data or third-party IP content).
+  This is Adobe's own attributed product representation, not an
+  independent legal or contractual conclusion. It does not establish
+  which AI model was used for any specific project's generation, does not
+  establish that a "Commercially safe" label was actually displayed for
+  any specific asset, and does not establish the precise legal scope,
+  conditions, or limits of any indemnification Adobe may separately
+  provide under its own Tier 1 contractual terms (a distinct, unresolved
+  question).
+
+Applicability requirements: []
+Unresolved project dependencies: []   <!-- Deliberately empty, reassessed from zero at LK-73 and rationale corrected at LK-74 human FGR: the proposition presents the Adobe/Firefly and partner-model branches CONDITIONALLY and does not select either branch for the user's project, so Bounded Interpretation does not require a project-specific dependency merely to retrieve and attributively communicate it. Persistence/re-checkability of the "Commercially safe" label remains genuinely unestablished by the evidence, but this is an evidence observation only, not the architectural reason no dependency exists -- see the Candidate file's own DEPENDENCY NECESSITY comment for the full rationale, including the generic principle "dependency necessity follows Bounded Interpretation requirements, not merely evidence availability." -->
+Prohibited conclusions: >
+  Does not establish that any specific project's Adobe Stock / AI Studio
+  output is commercially cleared, non-infringing, or legally safe to use.
+  Does not establish that Adobe guarantees commercial safety in an
+  unconditional or uncapped sense. Does not establish that "Commercially
+  safe" is equivalent to, or triggers, the separate Tier 1 "Indemnified
+  Firefly Output" contractual indemnification regime, its conditions, or
+  its US$10,000 liability cap. Does not establish which AI model (Adobe
+  Firefly or a partner model) was used for any specific project's
+  generation. Does not establish that a "Commercially safe" designation
+  was actually displayed or applies to any specific asset. Does not
+  establish that reviewing a partner model's own terms itself grants or
+  confirms commercial permission. Does not establish ownership, release
+  status, or rights-and-clearance status for any specific asset. Does not
+  establish anything about a jurisdiction's own broadcast/media/
+  advertising law -- this is a platform product representation only, not
+  a legal clearance determination. Does not establish suitability for
+  every commercial use. Does not establish the contents of the three
+  incorporated-but-unread documents (Firefly Product Description, Adobe
+  Generative AI Product Specific Terms, Adobe Generative AI User
+  Guidelines).
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-08-31
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  APPROVED FOR CRC PUBLICATION (2026-08-31, CRC Approver: JD (PM) -- see CRC
+  Publication Review #12, CPR_012, governance-reviews/CPR_012_CLAIM-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001-v1_2026-08-31.md).
+  CRC may state that Adobe's official AI Studio help material describes
+  content labeled "Commercially safe" as generated with Adobe's own Firefly
+  model, trained on content Adobe has permission or rights to use, and says
+  this content may be used in commercial projects, and that for content
+  generated using a partner (non-Adobe) AI model, Adobe says it cannot
+  verify the training data or whether the output may contain third-party
+  intellectual property, directing users to review that model's own terms
+  before commercial use. This is Adobe's own product/help representation,
+  not a legal or contractual conclusion. CRC must not state that
+  "Commercially safe" is equivalent to, or triggers, Adobe's separate Tier
+  1 "Indemnified Firefly Output" contractual indemnification regime or its
+  conditions/liability cap, must not state which AI model was used for any
+  specific project's generation, must not state that a "Commercially safe"
+  designation was actually displayed or applies to any specific asset, must
+  not state that reviewing a partner model's own terms itself grants or
+  confirms commercial permission, and must not state or imply that all
+  rights, releases, or authorizations necessary for the project have been
+  obtained or that the project is otherwise commercially cleared. A
+  human-reviewed Commercial Assurance Assessment remains the
+  higher-assurance path for resolving a specific project's own Adobe Stock
+  AI Studio model/label status.
+CRC Candidate Statement: >
+  Adobe's official AI Studio help material describes content labeled
+  "Commercially safe" as generated with Adobe's own Firefly model, trained
+  on content Adobe has permission or rights to use, and says this content
+  may be used in commercial projects. For content generated using a
+  partner (non-Adobe) AI model, Adobe says it cannot verify the training
+  data or whether the output may contain third-party intellectual
+  property, and directs users to review that model's own terms before
+  commercial use.
+
+Effective date: 2026-08-31 (evidence capture/review date; Source B's own visible revision date: 2026-07-21; Source A's own visible revision date: 2026-01-16 -- not silently rewritten as 2026-08-31, per the Pond5 precedent's own explicit instruction not to overwrite an underlying source's own visible date)
+Last reviewed: 2026-08-31 (CRC Publication Review #12, CPR_012)
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-08-31
+Related: A separate, unresolved, not-yet-researched future claim family may concern Adobe's Tier 1 contractual definition and conditional indemnification of "Indemnified Firefly Output" (§1.10 + §10). That family is not part of this claim, not required for this claim's Adoption or CRC publication, and not authorized for CRC by this entry.
+
+Full Formal Governance Review artifact: `governance-reviews/FGR_012_CAND-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001_2026-08-31.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_012_CLAIM-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001-v1_2026-08-31.md`
+Candidate Representation: `08_Platform/app/lib/candidates/CAND-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001.ts` (UNCOMMITTED as of this record — Trial 4 (LK-70 through LK-75) has deliberately kept all governance artifacts as prospective, uncommitted local work throughout, unlike Trial 2/3's per-step commit-and-push discipline; no commit hash exists to cite here. Flagged explicitly rather than fabricated — see LK-74/LK-75 Final Reports.)
