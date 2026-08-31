@@ -43,7 +43,62 @@ describe('computeSummary', () => {
     expect(summary.modelledHumanSeconds).toBe(135)
   })
 
-  test('sums only completed MACHINE_STAGE durations into the lower bound; excludes failed and dangling', () => {
+  test('A: a completed stage duration contributes to measured machine total', () => {
+    const events: BenchmarkEvent[] = [trialStart('2026-09-01T00:00:00.000Z', 1), stageStart(2, 'good'), stageEnd(3, 'good', 2, 100, 'completed')]
+    const summary = computeSummary(events, 'T')
+    expect(summary.machineStageMeasuredSeconds).toBe(100)
+    expect(summary.attendedProcessingLowerBoundSeconds).toBe(100)
+  })
+
+  test('B: a failed stage duration ALSO contributes to measured machine total (outcome is diagnostic, not an eligibility rule)', () => {
+    const events: BenchmarkEvent[] = [trialStart('2026-09-01T00:00:00.000Z', 1), stageStart(2, 'bad'), stageEnd(3, 'bad', 2, 50, 'failed')]
+    const summary = computeSummary(events, 'T')
+    expect(summary.machineStageMeasuredSeconds).toBe(50)
+    expect(summary.attendedProcessingLowerBoundSeconds).toBe(50)
+  })
+
+  test('C: completed + failed aggregate measured machine time equals the sum of both', () => {
+    const events: BenchmarkEvent[] = [
+      trialStart('2026-09-01T00:00:00.000Z', 1),
+      stageStart(2, 'good'),
+      stageEnd(3, 'good', 2, 100, 'completed'),
+      stageStart(4, 'bad'),
+      stageEnd(5, 'bad', 4, 50, 'failed'),
+    ]
+    const summary = computeSummary(events, 'T')
+    expect(summary.machineStageMeasuredSeconds).toBe(150)
+    expect(summary.attendedProcessingLowerBoundSeconds).toBe(150)
+  })
+
+  test('D: failed remains visibly failed in the outcome breakdown, distinct from completed', () => {
+    const events: BenchmarkEvent[] = [
+      trialStart('2026-09-01T00:00:00.000Z', 1),
+      stageStart(2, 'good'),
+      stageEnd(3, 'good', 2, 100, 'completed'),
+      stageStart(4, 'bad'),
+      stageEnd(5, 'bad', 4, 50, 'failed'),
+    ]
+    const summary = computeSummary(events, 'T')
+    expect(summary.machineStageCompletedCount).toBe(1)
+    expect(summary.machineStageCompletedSeconds).toBe(100)
+    expect(summary.machineStageFailedCount).toBe(1)
+    expect(summary.machineStageFailedSeconds).toBe(50)
+  })
+
+  test('E: a dangling (started, never closed) stage does not contribute a fabricated duration', () => {
+    const events: BenchmarkEvent[] = [
+      trialStart('2026-09-01T00:00:00.000Z', 1),
+      stageStart(2, 'good'),
+      stageEnd(3, 'good', 2, 100, 'completed'),
+      stageStart(4, 'dangling'), // never closed
+    ]
+    const summary = computeSummary(events, 'T')
+    expect(summary.machineStageDanglingLabels).toEqual(['dangling'])
+    expect(summary.machineStageMeasuredSeconds).toBe(100) // dangling contributes nothing
+    expect(summary.attendedProcessingLowerBoundSeconds).toBe(100)
+  })
+
+  test('F: completed + failed + dangling together -- lower bound includes measured failed execution but never dangling', () => {
     const events: BenchmarkEvent[] = [
       trialStart('2026-09-01T00:00:00.000Z', 1),
       stageStart(2, 'good'),
@@ -56,7 +111,21 @@ describe('computeSummary', () => {
     expect(summary.machineStageCompletedSeconds).toBe(100)
     expect(summary.machineStageFailedSeconds).toBe(50)
     expect(summary.machineStageDanglingLabels).toEqual(['dangling'])
-    expect(summary.attendedProcessingLowerBoundSeconds).toBe(100) // failed + dangling excluded
+    expect(summary.machineStageMeasuredSeconds).toBe(150) // completed + failed, dangling excluded
+    expect(summary.attendedProcessingLowerBoundSeconds).toBe(150)
+  })
+
+  test('G: modelled human accounting is unaffected by the measured-machine-time correction', () => {
+    const events: BenchmarkEvent[] = [
+      trialStart('2026-09-01T00:00:00.000Z', 1),
+      hrt(2),
+      handoff(3),
+      stageStart(4, 'bad'),
+      stageEnd(5, 'bad', 4, 50, 'failed'),
+    ]
+    const summary = computeSummary(events, 'T')
+    expect(summary.modelledHumanSeconds).toBe(75) // 60 + 15, unchanged
+    expect(summary.attendedProcessingLowerBoundSeconds).toBe(125) // 50 measured + 75 modelled
   })
 
   test('wall clock is null when trial has not both started and ended', () => {

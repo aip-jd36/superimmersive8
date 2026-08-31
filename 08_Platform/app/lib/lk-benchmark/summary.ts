@@ -16,7 +16,7 @@ import {
 } from './types'
 
 export const LOWER_BOUND_DISCLAIMER =
-  'The attended-processing lower bound is a partial subtotal (measured completed MACHINE_STAGE seconds + modelled HUMAN_REVIEW_TURN/MANUAL_ORCHESTRATION_HANDOFF seconds). It is NOT total onboarding time: unmeasured human source-reading/research time, unmeasured external-model processing time, failed or dangling machine-stage time, and any operator-unavailable intervals are excluded.'
+  'The attended-processing lower bound is a partial subtotal (measured MACHINE_STAGE seconds -- completed or failed, any stage that was actually bracketed with a real start and end -- + modelled HUMAN_REVIEW_TURN/MANUAL_ORCHESTRATION_HANDOFF seconds). It is NOT total onboarding time: unmeasured human source-reading/research time, unmeasured external-model processing time, dangling (started but never ended/failed) machine-stage time, and any operator-unavailable intervals are excluded.'
 
 export interface BenchmarkSummary {
   trialId: string
@@ -28,6 +28,15 @@ export interface BenchmarkSummary {
   machineStageCompletedSeconds: number
   machineStageFailedCount: number
   machineStageFailedSeconds: number
+  /**
+   * completed + failed measured seconds -- stage OUTCOME (completed/failed)
+   * is diagnostic metadata, not an eligibility rule for whether a real,
+   * successfully-bracketed duration counts as measured machine time. A
+   * failed stage that actually ran for a measured duration is still real
+   * machine-active processing. Only dangling (unclosed) stages are excluded
+   * -- see machineStageDanglingLabels.
+   */
+  machineStageMeasuredSeconds: number
   /** Started but never ended/failed -- excluded from every total below. */
   machineStageDanglingLabels: string[]
   modelledHumanSeconds: number
@@ -67,8 +76,13 @@ export function computeSummary(events: BenchmarkEvent[], trialId: string): Bench
   const handoffModelledSeconds = handoffCount * HANDOFF_MODELLED_SECONDS
   const machineStageCompletedSeconds = completed.reduce((sum, e) => sum + e.durationSeconds, 0)
   const machineStageFailedSeconds = failed.reduce((sum, e) => sum + e.durationSeconds, 0)
+  // Outcome (completed/failed) is diagnostic metadata, not an eligibility
+  // rule: both are real, successfully-bracketed measured durations. Only
+  // dangling (unclosed) stages are excluded -- they were never included in
+  // stageEnds to begin with, so this sum never reaches them.
+  const machineStageMeasuredSeconds = machineStageCompletedSeconds + machineStageFailedSeconds
   const modelledHumanSeconds = hrtModelledSeconds + handoffModelledSeconds
-  const attendedProcessingLowerBoundSeconds = machineStageCompletedSeconds + modelledHumanSeconds
+  const attendedProcessingLowerBoundSeconds = machineStageMeasuredSeconds + modelledHumanSeconds
 
   const start = trialEvents.find((e) => e.type === 'TRIAL_START')
   const end = trialEvents.find((e) => e.type === 'TRIAL_END')
@@ -84,6 +98,7 @@ export function computeSummary(events: BenchmarkEvent[], trialId: string): Bench
     machineStageCompletedSeconds,
     machineStageFailedCount: failed.length,
     machineStageFailedSeconds,
+    machineStageMeasuredSeconds,
     machineStageDanglingLabels: danglingLabels,
     modelledHumanSeconds,
     attendedProcessingLowerBoundSeconds,
@@ -106,7 +121,7 @@ export function renderSummaryMarkdown(summary: BenchmarkSummary): string {
   ]
   if (summary.machineStageFailedCount > 0) {
     lines.push(
-      `- MACHINE_STAGE failed: ${summary.machineStageFailedCount} (${summary.machineStageFailedSeconds}s measured, EXCLUDED from lower bound)`
+      `- MACHINE_STAGE failed: ${summary.machineStageFailedCount} (${summary.machineStageFailedSeconds}s measured -- still counted as measured machine time; outcome is diagnostic, not an eligibility rule)`
     )
   }
   if (summary.machineStageDanglingLabels.length > 0) {
@@ -115,6 +130,7 @@ export function renderSummaryMarkdown(summary: BenchmarkSummary): string {
     )
   }
   lines.push(
+    `- MACHINE_STAGE measured total (completed + failed): ${summary.machineStageMeasuredSeconds}s`,
     `- Modelled human seconds (HRT + handoff): ${summary.modelledHumanSeconds}`,
     `- **Attended-processing lower bound: ${summary.attendedProcessingLowerBoundSeconds}s**`,
     `- PROCESS_FRICTION events: ${summary.frictionCount}`,
