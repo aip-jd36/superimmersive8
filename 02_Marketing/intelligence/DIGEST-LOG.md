@@ -9,6 +9,40 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of August 31, 2026
+*Run: 2026-08-31 · 13 high · 6 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Seen an ad with an AI influencer or actor? It may be against the law.](https://mashable.com/tech/synthetic-performer-disclosure-new-york-state-law-first-complaints) | Mashable | Sun, 30 Aug 2026 | ☐ |
+| 9 | post+update | [Cox Media Group faces 20 years of FTC oversight over fake AI listening ads](https://ppc.land/cox-media-group-faces-20-years-of-ftc-oversight-over-fake-ai-listening-ads/) | PPC Land | Sun, 30 Aug 2026 | ☐ |
+| 9 | post+update | [AI exclusions in D&O and E&O coverage: What insurers and insureds need to know](https://www.dentons.com/en/insights/articles/2026/august/27/ai-exclusions-in-d-and-o-and-e-and-o-coverage) | Dentons | Thu, 27 Aug 2026 | ☐ |
+| 9 | post+update | [IAB updates AI disclosure guidance as regulators tighten rules around AI-generated advertising](https://www.marketingtechnews.net/news/iab-updates-ai-disclosure-guidance-as-regulators-tighten-rules-around-ai-generated-advertising/) | Marketing Tech News | Thu, 27 Aug 2026 | ☐ |
+| 8 | post+update | [Carl Sagan Rights Holder Sues Luma AI Over ‘Cosmos’ Voice Clip in Ad](https://www.lawcommentary.com/articles/carl-sagan-rights-holder-sues-luma-ai-over-cosmos-voice-clip-in-ad) | Law Commentary | Sun, 30 Aug 2026 | ☐ |
+| 8 | post+update | [The FTC’s Latest AI Crackdown: Why ‘Active Listening’ Was Just a Marketing Mirage](https://cryptorank.io/news/feed/b35f5-the-ftcs-latest-ai-crackdown-why-active-listening-was-just-a-marketing-mirage) | CryptoRank | Sat, 29 Aug 2026 | ☐ |
+| 8 | post+update | [AI Replicas Put Fashion Brands at Risk](https://www.law.com/newyorklawjournal/2026/08/24/ai-replicas-put-fashion-brands-at-risk/) | Law.com | Thu, 27 Aug 2026 | ☐ |
+| 8 | post+update | [Dentsu signs EU Code on AI Transparency](https://marketingreport.one/ai-for-marketing/dentsu-signs-eu-code-on-ai-transparency.html) | marketingreport.one | Thu, 27 Aug 2026 | ☐ |
+| 8 | post+update | [When the Algorithm Pours: How AI-Generated Imagery Is Testing the Boundaries of Alcohol Advertising Regulation](https://www.regulatoryoversight.com/2026/08/when-the-algorithm-pours-how-ai-generated-imagery-is-testing-the-boundaries-of-alcohol-advertising-regulation/) | regulatoryoversight.com | Tue, 25 Aug 2026 | ☐ |
+| 8 | post+update | [The AI clause that may already be on your contractor client's policy](https://www.insurancebusinessmag.com/us/news/sme/the-ai-clause-that-may-already-be-on-your-contractor-clients-policy-587395.aspx) | Insurance Business | Tue, 25 Aug 2026 | ☐ |
+| 8 | update | [Adobe vs Higgsfield: two AI video growth strategies](https://www.contentgrip.com/adobe-higgsfield-ai-video/) | ContentGrip | Mon, 24 Aug 2026 | ☐ |
+| 7 | post+update | [Navigating AI Ownership in Commercial and License Agreements: Key Considerations for Technology Providers and Customers](https://natlawreview.com/article/navigating-ai-ownership-commercial-and-license-agreements-key-considerations) | The National Law Review | Fri, 28 Aug 2026 | ☐ |
+| 7 | monitor | [Kling’s Q2 revenue raises the AI video benchmark](https://www.contentgrip.com/kling-ai-video-revenue/) | ContentGrip | Mon, 24 Aug 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [AI Isn’t Killing Marketing Accountability, It’s Exposing Who Never Had It](https://www.searchenginejournal.com/ai-isnt-killing-marketing-accountability-its-exposing-who-never-had-it/586486/) | Search Engine Journal | Fri, 28 Aug 2026 | ☐ |
+| 6 | monitor | ['Unresponsiveness' and 'Unclear Goals' Dog Big Law Marketing Departments—Not to Mention the AI Risks](https://www.law.com/americanlawyer/2026/08/28/unresponsiveness-and-unclear-goals-dog-big-law-marketing-departmentsnot-to-mention-the-ai-risks/) | Law.com | Fri, 28 Aug 2026 | ☐ |
+| 5 | monitor | [ASA guidance on advertising AI assistants and chatbots](https://www.resultsense.com/news/2026-08-27-asa-ai-assistant-ad-claims/) | Resultsense | Thu, 27 Aug 2026 | ☐ |
+| 5 | monitor | [Who’s suing AI and who’s signing latest: Editorial Perfil sues OpenAI, News Corp vs Brave](https://pressgazette.co.uk/platforms/news-publisher-ai-deals-lawsuits-openai-google/) | Press Gazette | Wed, 26 Aug 2026 | ☐ |
+| 5 | monitor | [BMA Webinar: Intelligent Media Asset Management For The AI Era](https://news.broadcastmediaafrica.com/2026/08/24/bma-webinar-the-intelligent-media-asset-management-mam-hub-transforming-content-management-for-the-ai-era/) | Broadcast Media Africa | Mon, 24 Aug 2026 | ☐ |
+| 4 | monitor | [[Marketing Week] Bob Koigi: The case for transparent AI](https://marketingreport.one/ai-for-marketing/marketing-week-bob-koigi-the-case-for-transparent-ai.html) | marketingreport.one | Fri, 28 Aug 2026 | ☐ |
+
+---
+
 ## Week of August 28, 2026
 *Run: 2026-08-28 · 14 high · 10 monitor · lookback 7 days*
 
