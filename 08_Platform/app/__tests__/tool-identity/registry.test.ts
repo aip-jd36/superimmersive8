@@ -26,7 +26,7 @@ function toolCandidate(overrides: Partial<CandidateObservation> = {}): Candidate
 // ── 1: bootstrap population ─────────────────────────────────────────────────
 
 describe('CANONICAL_TOOL_IDS -- bootstrap population', () => {
-  test('1: contains exactly the LK-10 bootstrap union (KNOWN_TOOLS values, KNOWN_AMBIGUOUS_TOOLS candidates, Matrix identifiers) plus every identity registered since (LK-24: synthesia)', () => {
+  test('1: contains exactly the LK-10 bootstrap union (KNOWN_TOOLS values, KNOWN_AMBIGUOUS_TOOLS candidates, Matrix identifiers) plus every identity registered since (LK-24: synthesia; LK-87: luma)', () => {
     const expected: CanonicalToolId[] = [
       'runway-gen3',
       'kling',
@@ -39,6 +39,7 @@ describe('CANONICAL_TOOL_IDS -- bootstrap population', () => {
       'adobe-firefly',
       'openai-sora',
       'synthesia',
+      'luma',
     ]
     expect([...CANONICAL_TOOL_IDS].sort()).toEqual([...expected].sort())
   })

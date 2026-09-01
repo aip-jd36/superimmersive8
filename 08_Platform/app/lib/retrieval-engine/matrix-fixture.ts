@@ -217,4 +217,36 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
       },
     ],
   },
+  {
+    // Trial 5 (Living Knowledge onboarding benchmark, LK-84 through LK-87).
+    // FGR decision 2026-09-01 (PM): ADOPT WITH NARROWED WORDING -- excludes
+    // current plan prices/plan-name merchandising, any inference that
+    // higher tiers inherit rights from the pricing page's own structure,
+    // ownership, copyrightability, third-party-rights clearance, and
+    // indemnification (in either direction -- no categorical indemnification
+    // conclusion is encoded here). CRC Publication approved 2026-09-01 (CRC
+    // Approver: JD (PM)) -- see 06_Operations/institutional-knowledge/
+    // notebook/PLATFORM-RIGHTS-MATRIX.md's own "Luma AI (Dream Machine)"
+    // section for the full governance record, source quotations, and
+    // evidence-boundary discussion. Text below copied verbatim from that
+    // record's own CRC Claims sub-table. `luma` registered in
+    // lib/tool-identity/registry.ts's CANONICAL_TOOL_IDS the same task; no
+    // KNOWN_TOOLS extraction alias added -- conversational reachability
+    // remains a separate, independently-timed concern, same discipline as
+    // every provider/tool onboarded in this corpus.
+    identifier: 'luma',
+    last_verified: '2026-09-01',
+    claims: [
+      {
+        claim_id: 'luma',
+        crc_eligible: 'Yes',
+        crc_publication_scope:
+          'CRC may state that under Luma AI\'s Terms of Service (effective May 14, 2026), Output may be used commercially only if it was produced during an active paid Subscription Term under a plan permitting commercial use, and that Output produced under Free or Trial use may not be used commercially. This publication scope does not extend to current plan prices or plan-name merchandising, ownership analysis, copyrightability, third-party-rights clearance, or indemnification — commercial-use permission under this claim does not itself establish that Luma provides indemnification or third-party-rights clearance, and CRC must not state or imply either. CRC must not state which specific plan the user holds or whether the user\'s own Output was produced during an eligible subscription term.',
+        crc_candidate_statement:
+          "Luma AI's current Terms of Service restrict commercial use of Dream Machine output to an active paid subscription plan that specifically permits commercial use. Output produced under Free or Trial use may not be used commercially.",
+        topic: 'commercial_use',
+        applicability_requirements: [],
+      },
+    ],
+  },
 ]

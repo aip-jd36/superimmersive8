@@ -74,7 +74,24 @@ export const CANONICAL_TOOL_IDS = [
   'adobe-firefly',
   'openai-sora',
   'synthesia',
+  'luma',
 ] as const
+
+/**
+ * 'luma' added 2026-09-01 (LK-87, Trial 5 Living Knowledge onboarding
+ * benchmark -- Luma AI / Dream Machine commercial-use-by-tier) -- pure
+ * generic registry extension, same mechanism as every entry above, no new
+ * category. Governed via `PLATFORM-RIGHTS-MATRIX.md`'s own Matrix
+ * convention (Status + `#### CRC Claims` sub-table), not GOVERNED-
+ * CLAIMS.md/FGR_NNN -- the same governance home already used for Runway/
+ * Kling/Pika/Midjourney/ElevenLabs above. Single evidence-backed canonical
+ * identity (Luma AI Terms of Service, effective 2026-05-14, governs the
+ * whole platform including Dream Machine); no access-surface split
+ * evidenced. Registration does not itself add a `KNOWN_TOOLS` extraction
+ * alias -- ordinary conversational reachability remains a separate,
+ * independently-timed concern, same discipline as every prior registration
+ * in this file.
+ */
 
 /**
  * 'synthesia' added 2026-08-29 (LK-24, Synthesia Canonical Tool Identity
