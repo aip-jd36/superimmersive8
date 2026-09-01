@@ -1,23 +1,26 @@
 /**
  * Suno commercial-use governed knowledge deterministic tests (Trial 6,
- * Living Knowledge onboarding benchmark, LK-95 through LK-99). Exercises the
- * REAL, live MATRIX_FIXTURE `suno` claim end-to-end through retrieve() ->
- * buildBoundedInterpretations() -> generic Composition, mirroring
+ * Living Knowledge onboarding benchmark, LK-95 through LK-100). Exercises
+ * the REAL, live MATRIX_FIXTURE `suno` claim end-to-end through retrieve()
+ * -> buildBoundedInterpretations() -> generic Composition, mirroring
  * luma-runtime-retrieval.test.ts's own structure. No live model needed --
  * pure functions.
  *
  * Suno is the first identity onboarded after LK-94's Canonicalization
  * Readiness gate. LK-99's own first-attempt readiness check (representative
  * expression "Suno", real `checkCanonicalizationReadiness`) FAILED -- no
- * `KNOWN_TOOLS` extraction alias exists for Suno at this commit, by design
+ * `KNOWN_TOOLS` extraction alias existed for Suno at that commit, by design
  * (registration does not itself add one; see registry.ts's own doc comment
- * for `suno`). Section I below documents that real, current FAIL state
- * directly through the real extraction pipeline -- it is not a negative
- * regression test for an established alias (there is none yet), it is
- * evidence of the exact gap LK-94's gate exists to catch pre-publication.
- * Sections A-H validate the SEPARATE, already-passing property: governed-
- * knowledge reachability given an already-resolved structured identity,
- * per the LK-93 five-property model.
+ * for `suno`). That FAIL result remains permanently preserved, unaltered, in
+ * commit e8285ef and the LK-99 Final Report -- it is not rewritten by this
+ * file. LK-100 then remediated the gap (one narrow `KNOWN_TOOLS` entry) and
+ * re-ran the same real check, which now genuinely PASSES. Section I below
+ * was updated at LK-100 to document that real, current, POST-remediation
+ * state -- superseding what it originally asserted, not erasing the
+ * historical failure it once proved. Sections A-H validate the SEPARATE,
+ * already-passing property: governed-knowledge reachability given an
+ * already-resolved structured identity, per the LK-93 five-property model --
+ * unaffected by either the LK-99 failure or the LK-100 remediation.
  */
 
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
@@ -303,17 +306,17 @@ function sunoToolCandidate(overrides: Partial<CandidateObservation> = {}): Candi
   }
 }
 
-describe('I: LK-99 real-pipeline evidence of the current, genuine Canonicalization Readiness FAIL state', () => {
-  test('checkCanonicalizationReadiness(suno, "Suno") is false -- the exact real first-attempt result this milestone recorded, reproduced deterministically here', () => {
-    expect(checkCanonicalizationReadiness({ kind: 'tool', identifier: 'suno', representativeExpression: 'Suno' })).toBe(false)
+describe('I: LK-100 real-pipeline evidence of the POST-remediation PASS state (the LK-99 FAIL these tests originally documented remains preserved, unaltered, in commit e8285ef and the LK-99 Final Report -- not rewritten here, superseded by a later, separate, real remediation)', () => {
+  test('checkCanonicalizationReadiness(suno, "Suno") is now true -- the exact real post-remediation result LK-100 recorded, reproduced deterministically here', () => {
+    expect(checkCanonicalizationReadiness({ kind: 'tool', identifier: 'suno', representativeExpression: 'Suno' })).toBe(true)
   })
 
-  test('normalizeCandidate confirms the precise failing boundary: raw_tool_name "Suno" normalizes to unrecognized (no KNOWN_TOOLS entry exists)', () => {
+  test('normalizeCandidate confirms the remediated boundary: raw_tool_name "Suno" now normalizes to the canonical suno identifier (KNOWN_TOOLS entry added, LK-100)', () => {
     const result = normalizeCandidate(sunoToolCandidate())
-    expect(result).toEqual({ status: 'unrecognized' })
+    expect(result).toEqual({ status: 'resolved', canonical_identifier: 'suno' })
   })
 
-  test('an ordinary opening turn naming Suno does NOT reach the governed suno claim through the real, unmodified extraction pipeline -- the exact production-shaped failure this gate caught pre-publication instead of in production UAT', async () => {
+  test('an ordinary opening turn naming Suno now reaches the governed suno claim through the real, unmodified (post-remediation) extraction pipeline', async () => {
     const { updated } = await runExtractionPipeline(
       emptySU(),
       { turn: 1, text: 'I made a song with Suno. Can I use it commercially?' },
@@ -330,15 +333,15 @@ describe('I: LK-99 real-pipeline evidence of the current, genuine Canonicalizati
         },
       ]),
     )
-    expect(updated.tool_mentions[0].resolution).toEqual({ kind: 'unresolved_alias', raw_name: 'Suno' })
+    expect(updated.tool_mentions[0].resolution).toEqual({ kind: 'canonical', identifier: 'suno' })
 
     const rHandoff = buildRetrievalHandoff(updated)
-    expect(rHandoff.tools).toEqual([])
-    expect(rHandoff.unresolved_aliases).toEqual(['Suno'])
+    expect(rHandoff.tools).toEqual([{ identifier: 'suno', access_surface: 'unresolved', plan_tier: 'unknown' }])
+    expect(rHandoff.unresolved_aliases).toEqual([])
 
     const facts: ApplicabilityFacts = { jurisdiction: { included: [], excluded: [] }, toolMentions: updated.tool_mentions }
     const out = retrieve(rHandoff, MATRIX_FIXTURE, updated.user_goals, [], facts)
-    expect(out.results.map((r) => r.claim_id)).not.toContain(SUNO_ID)
+    expect(out.results.map((r) => r.claim_id)).toContain(SUNO_ID)
   })
 
   test('the same governed knowledge IS reachable given an already-resolved structured identity -- confirms the failure is specifically at the raw-text-to-canonical-identity boundary, not downstream', () => {
@@ -347,12 +350,59 @@ describe('I: LK-99 real-pipeline evidence of the current, genuine Canonicalizati
     expect(out.results.map((r) => r.claim_id)).toContain(SUNO_ID)
   })
 
-  test('another known tool (Kling) is unaffected by Suno\'s absence from KNOWN_TOOLS -- still resolves canonically, no cross-registry interference', async () => {
+  test('another known tool (Kling) is unaffected by the new suno KNOWN_TOOLS entry -- still resolves canonically, no cross-registry interference', async () => {
     const { updated } = await runExtractionPipeline(
       emptySU(),
       { turn: 1, text: 'I used Kling AI.' },
       constantExtractor([{ proposal_id: 'c1', turn: 1, raw_text: 'I used Kling AI.', kind: 'tool_mention', raw_tool_name: 'Kling AI' }]),
     )
     expect(updated.tool_mentions[0].resolution).toEqual({ kind: 'canonical', identifier: 'kling' })
+  })
+
+  // LK-100 §13: one bounded correction test, existing generic harness only
+  // (no new implementation) -- mirrors luma-runtime-retrieval.test.ts's own
+  // "correcting Luma to a different known tool" test exactly.
+  test('correction semantics: correcting Suno to a different known tool (Kling) supersedes the Suno ToolMention -- Suno relevance does not remain stale', async () => {
+    const g: CandidateObservation = {
+      proposal_id: 'g1',
+      turn: 1,
+      raw_text: 'Can I use it commercially?',
+      kind: 'user_goal',
+      goal_confidence_hint: 'confirmed',
+      goal_category_hint: 'commercial_use',
+      goal_scope_hint: 'informational',
+    }
+    const turn1 = await runExtractionPipeline(emptySU(), { turn: 1, text: 'I made a song with Suno. Can I use it commercially?' }, constantExtractor([sunoToolCandidate(), g]))
+    expect(turn1.updated.tool_mentions.filter((m) => m.superseded_by === null)).toHaveLength(1)
+    expect(turn1.updated.tool_mentions[0].resolution).toEqual({ kind: 'canonical', identifier: 'suno' })
+
+    const turn2 = await runExtractionPipeline(
+      turn1.updated,
+      { turn: 2, text: 'Sorry, it was actually Kling AI, not Suno.' },
+      constantExtractor([
+        {
+          proposal_id: 'c1',
+          turn: 2,
+          raw_text: 'Sorry, it was actually Kling AI, not Suno.',
+          kind: 'tool_mention',
+          raw_tool_name: 'Kling AI',
+          is_correction: true,
+          correction_of_raw_text: 'Suno',
+        },
+      ]),
+    )
+    const active = turn2.updated.tool_mentions.filter((m) => m.superseded_by === null)
+    expect(active).toHaveLength(1)
+    expect(active[0].resolution).toEqual({ kind: 'canonical', identifier: 'kling' })
+    const supersededSuno = turn2.updated.tool_mentions.find((m) => m.resolution.kind === 'canonical' && m.resolution.identifier === 'suno')
+    expect(supersededSuno?.superseded_by).not.toBeNull()
+
+    // Downstream: only Kling's claim is now retrieved for the commercial_use
+    // goal -- Suno's claim does not remain stale-reachable after correction.
+    const rHandoff = buildRetrievalHandoff(turn2.updated)
+    const facts: ApplicabilityFacts = { jurisdiction: { included: [], excluded: [] }, toolMentions: turn2.updated.tool_mentions }
+    const out = retrieve(rHandoff, MATRIX_FIXTURE, turn2.updated.user_goals, [], facts)
+    expect(out.results.map((r) => r.claim_id)).not.toContain(SUNO_ID)
+    expect(out.results.map((r) => r.claim_id)).toContain('kling-commercial-use-baseline')
   })
 })

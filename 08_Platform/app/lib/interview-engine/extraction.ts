@@ -490,6 +490,18 @@ const KNOWN_TOOLS: Record<string, CanonicalToolId> = {
   // production expression -- no fuzzy matching, no speculative variants
   // ('luma', 'luma ai', 'dream machine', etc.) added.
   "luma ai's dream machine": 'luma',
+  // 'suno' added 2026-09-01 (LK-100, Trial 6 Suno Canonicalization
+  // Remediation): unlike every prior alias in this table (all added
+  // reactively, after a real production UAT observed the exact failing
+  // expression), this one is added PROSPECTIVELY -- LK-99's own first-attempt
+  // LK-94 Canonicalization Readiness check against the authoritative
+  // representative expression "Suno" (the platform's own name, per
+  // PLATFORM-RIGHTS-MATRIX.md's own "Suno" section) failed before any
+  // production UAT was ever run, and this entry is the smallest existing-
+  // mechanism remediation for that specific, already-recorded failure.
+  // Narrow, single alias only -- no fuzzy matching, no "suno ai" or other
+  // speculative variant added.
+  suno: 'suno',
 }
 
 /**

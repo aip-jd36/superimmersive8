@@ -116,6 +116,24 @@ describe('4: extraction behavior unchanged for existing aliases end-to-end (atte
       },
     })
   })
+
+  // LK-100 (Trial 6 Suno Canonicalization Remediation): unlike Kling/Luma
+  // above, this alias was added PROSPECTIVELY, following an LK-94
+  // Canonicalization Readiness gate FAILURE caught before any production
+  // UAT (LK-99) -- not reactively after an observed production UAT failure.
+  test('the authoritative representative expression "Suno" produces a confirmed, canonical suno ToolMention', () => {
+    const candidate = toolCandidate({ raw_tool_name: 'Suno', raw_text: 'I made a song with Suno.' })
+    const normalization = normalizeCandidate(candidate)
+    expect(normalization).toEqual({ status: 'resolved', canonical_identifier: 'suno' })
+    const fact = attestCandidate(candidate, normalization)
+    expect(fact).toMatchObject({
+      kind: 'tool_mention',
+      mention: {
+        resolution: { kind: 'canonical', identifier: 'suno' },
+        confidence: 'confirmed',
+      },
+    })
+  })
 })
 
 // ── 5: unknown-tool behavior remains unresolved_alias ───────────────────────
@@ -152,7 +170,12 @@ describe('6: ambiguous-tool behavior unchanged', () => {
 // ── 7: registry membership alone never makes a tool extraction-reachable ──
 
 describe('7: registry membership does not create extraction reachability', () => {
-  test.each(['pika', 'midjourney', 'google-veo', 'adobe-firefly', 'openai-sora', 'suno'] as const)(
+  // 'suno' removed from this list at LK-100 (Trial 6 Suno Canonicalization
+  // Remediation) -- it now has a real KNOWN_TOOLS entry, so it no longer
+  // belongs to the "registered but no alias" set this describe block
+  // exercises. See test 4 below and __tests__/retrieval-engine/
+  // suno-runtime-retrieval.test.ts §I for its own resolved-alias coverage.
+  test.each(['pika', 'midjourney', 'google-veo', 'adobe-firefly', 'openai-sora'] as const)(
     '%s is a registered canonical identity but has NO extraction alias -- still normalizes to unrecognized',
     (id) => {
       expect(isCanonicalToolIdentity(id)).toBe(true)

@@ -178,7 +178,17 @@ export const PRE_LK94_GRANDFATHERED_PROVIDER_IDS: readonly AssetProviderId[] = [
  * readiness evidence is declared -- never on a TopicClaim, MatrixRow, or any
  * Living Knowledge governance document.
  */
-export const NEW_IDENTITY_CANONICALIZATION_READINESS: readonly CanonicalizationReadinessCheck[] = []
+export const NEW_IDENTITY_CANONICALIZATION_READINESS: readonly CanonicalizationReadinessCheck[] = [
+  // 'suno' (LK-99/LK-100, Trial 6): the first identity registered after the
+  // LK-94 grandfather cutover. LK-99's first-attempt check against this
+  // exact representative expression FAILED (see PLATFORM-RIGHTS-MATRIX.md's
+  // own "Suno" section and LK-99's own report for the preserved evidence);
+  // LK-100 remediated the missing KNOWN_TOOLS entry and re-ran this same
+  // check, which now genuinely passes. This entry records that passing
+  // result -- it does not retroactively imply Suno was ever ready before
+  // remediation.
+  { kind: 'tool', identifier: 'suno', representativeExpression: 'Suno' },
+]
 
 /**
  * The enforcement primitive: given the CURRENT live registries, reports
