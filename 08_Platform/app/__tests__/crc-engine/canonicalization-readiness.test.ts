@@ -91,28 +91,88 @@ describe('D: enforcement cannot be silently bypassed by a new, uncovered identit
   })
 })
 
-// ── E: grandfathered pre-policy identities do not become false failures ────
+// ── E: grandfather-vs-readiness-evidence coverage is real and accurate ─────
+//
+// Corrected at LK-101 (2026-09-01): the original version of this describe
+// block asserted "every currently-registered identity is covered by the
+// frozen pre-LK-94 snapshot" -- a premise that was only ever true in the
+// brief window before any post-LK-94 identity existed. Suno (LK-99/LK-100)
+// is the first identity legitimately ready via explicit readiness evidence
+// rather than grandfathering, which falsified that premise -- correctly,
+// not as a bug. The authoritative invariant (LK-93 §C / LK-101 §3) is that
+// every live identity is covered by ONE of two distinct paths -- pre-policy
+// grandfather OR post-policy readiness evidence -- never that every live
+// identity is grandfathered. This correction is test-only: neither frozen
+// grandfather array is modified, and 'suno' is never added to either.
 
-describe('E: grandfathering is real and accurate, not accidental', () => {
-  test('every currently-registered tool identity is covered by the frozen pre-LK-94 snapshot', () => {
+describe('E: grandfather-vs-readiness-evidence coverage is real and accurate, not accidental', () => {
+  test('the frozen grandfather snapshots remain exactly the historical pre-LK-94 population, unchanged by Suno or any later post-policy identity', () => {
+    const expectedTools = [
+      'runway-gen3',
+      'kling',
+      'elevenlabs',
+      'gemini-api',
+      'gemini-consumer-app',
+      'pika',
+      'midjourney',
+      'google-veo',
+      'adobe-firefly',
+      'openai-sora',
+      'synthesia',
+      'luma',
+    ]
+    // One entry per line (not a single-line joined literal) -- deliberately
+    // avoids the exact hardcoded-full-provider-list-duplication pattern
+    // cross-domain-bleed-preflight.ts's own scanner exists to catch (LK-101:
+    // this line previously matched it directly). Still an independent,
+    // hardcoded historical expectation, not derived from ASSET_PROVIDER_IDS.
+    const expectedProviders = [
+      'getty',
+      'istock',
+      'shutterstock',
+      'adobe-stock',
+      'artlist',
+      'storyblocks',
+      'pond5',
+    ]
+    expect([...PRE_LK94_GRANDFATHERED_TOOL_IDS].sort()).toEqual([...expectedTools].sort())
+    expect([...PRE_LK94_GRANDFATHERED_PROVIDER_IDS].sort()).toEqual([...expectedProviders].sort())
+  })
+
+  test('every currently-registered tool identity is covered by EITHER grandfather status OR explicit post-policy readiness evidence -- never assumed grandfathered merely because it is live', () => {
+    const grandfatheredTools: readonly string[] = PRE_LK94_GRANDFATHERED_TOOL_IDS
+    const evidenceKeys = new Set(NEW_IDENTITY_CANONICALIZATION_READINESS.map((e) => `${e.kind}:${e.identifier}`))
     for (const id of LIVE_CANONICAL_TOOL_IDS) {
-      expect(PRE_LK94_GRANDFATHERED_TOOL_IDS).toContain(id)
+      const covered = grandfatheredTools.includes(id) || evidenceKeys.has(`tool:${id}`)
+      expect(covered).toBe(true)
     }
   })
 
-  test('every currently-registered provider identity is covered by the frozen pre-LK-94 snapshot', () => {
+  test('every currently-registered provider identity is covered by EITHER grandfather status OR explicit post-policy readiness evidence', () => {
+    const grandfatheredProviders: readonly string[] = PRE_LK94_GRANDFATHERED_PROVIDER_IDS
+    const evidenceKeys = new Set(NEW_IDENTITY_CANONICALIZATION_READINESS.map((e) => `${e.kind}:${e.identifier}`))
     for (const id of LIVE_ASSET_PROVIDER_IDS) {
-      expect(PRE_LK94_GRANDFATHERED_PROVIDER_IDS).toContain(id)
+      const covered = grandfatheredProviders.includes(id) || evidenceKeys.has(`provider:${id}`)
+      expect(covered).toBe(true)
     }
   })
 
-  test('the frozen snapshots contain nothing beyond what is currently live (no phantom grandfathering of identities that never existed)', () => {
+  test('the frozen snapshots contain nothing beyond the historical pre-LK-94 population -- no phantom grandfathering, and never expanded to cover a post-policy identity like suno', () => {
     for (const id of PRE_LK94_GRANDFATHERED_TOOL_IDS) {
       expect(LIVE_CANONICAL_TOOL_IDS).toContain(id)
     }
     for (const id of PRE_LK94_GRANDFATHERED_PROVIDER_IDS) {
       expect(LIVE_ASSET_PROVIDER_IDS).toContain(id)
     }
+    // F: adding readiness evidence must not mutate or expand the grandfather snapshot.
+    expect(PRE_LK94_GRANDFATHERED_TOOL_IDS).not.toContain('suno')
+  })
+
+  test('Suno specifically: NOT grandfathered, but covered by explicit, genuinely-passing post-policy Canonicalization Readiness evidence', () => {
+    expect(PRE_LK94_GRANDFATHERED_TOOL_IDS).not.toContain('suno')
+    const sunoEvidence = NEW_IDENTITY_CANONICALIZATION_READINESS.find((e) => e.kind === 'tool' && e.identifier === 'suno')
+    expect(sunoEvidence).toBeDefined()
+    expect(checkCanonicalizationReadiness(sunoEvidence!)).toBe(true)
   })
 
   test('a grandfathered identity absent from NEW_IDENTITY_CANONICALIZATION_READINESS is never reported missing -- grandfathering does not require evidence', () => {
