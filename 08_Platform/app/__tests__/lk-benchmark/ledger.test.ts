@@ -15,9 +15,13 @@ import {
   recordArchitectureDiscovery,
   recordHumanReviewTurn,
   recordManualOrchestrationHandoff,
+  recordMachineExecution,
+  recordOperatorUnavailable,
   recordProcessFriction,
+  recordProcessWait,
   recordTrialEnd,
   recordTrialStart,
+  recordUnmeasuredWork,
   startMachineStage,
 } from '@/lib/lk-benchmark/ledger'
 import { HANDOFF_MODELLED_SECONDS, HRT_MODELLED_SECONDS } from '@/lib/lk-benchmark/types'
@@ -94,14 +98,14 @@ describe('C: MANUAL_ORCHESTRATION_HANDOFF', () => {
   })
 })
 
-describe('D: MACHINE_STAGE bracketing', () => {
-  test('records a real measured duration between start and end', async () => {
+describe('D: MACHINE_STAGE bracketing (LK-82: never "measured" -- see G below for genuine measurement)', () => {
+  test('records a real bracketed elapsed duration between two separate start/end invocations, explicitly NOT labelled "measured"', async () => {
     recordTrialStart(ledgerPath, 'TEST-TRIAL', 'unit-test')
     startMachineStage(ledgerPath, 'TEST-TRIAL', 'evidence-capture', 'CLI operator')
     await new Promise((resolve) => setTimeout(resolve, 20))
     const end = endMachineStage(ledgerPath, 'TEST-TRIAL', 'evidence-capture', 'CLI operator')
     expect(end.status).toBe('completed')
-    expect(end.timing).toBe('measured')
+    expect(end.timing).toBe('bracketed')
     expect(end.durationSeconds).toBeGreaterThanOrEqual(0)
     expect(Number.isFinite(end.durationSeconds)).toBe(true)
   })
@@ -180,6 +184,118 @@ describe('F: unmeasured/unknown work remains explicitly unmeasured', () => {
     const events = readEvents(ledgerPath)
     const ends = events.filter((e) => e.type === 'MACHINE_STAGE' && e.phase === 'end')
     expect(ends).toHaveLength(0)
+  })
+
+  test('a historical ledger line with the pre-LK-82 "timing":"measured" literal (e.g. Trial 4) still parses through readEvents unchanged -- no runtime schema validation blocks it', () => {
+    fs.writeFileSync(
+      ledgerPath,
+      JSON.stringify({
+        type: 'MACHINE_STAGE',
+        phase: 'end',
+        trialId: 'TEST-TRIAL',
+        label: 'legacy',
+        ts: '2026-08-31T02:42:25.051Z',
+        seq: 5,
+        provenance: 'CLI operator',
+        status: 'completed',
+        timing: 'measured', // pre-LK-82 literal, byte-identical to real Trial 4 history
+        matchedStartSeq: 3,
+        durationSeconds: 390.411,
+      }) + '\n',
+      'utf-8'
+    )
+    const events = readEvents(ledgerPath)
+    expect(events).toHaveLength(1)
+    expect((events[0] as any).timing).toBe('measured')
+    expect((events[0] as any).durationSeconds).toBe(390.411)
+  })
+})
+
+describe('G: MACHINE_EXECUTION (LK-82) -- genuine, benchmark-process-owned execution', () => {
+  test('a successful subprocess records a real measured duration, status=completed, exitCode=0', () => {
+    recordTrialStart(ledgerPath, 'TEST-TRIAL', 'unit-test')
+    const event = recordMachineExecution(ledgerPath, 'TEST-TRIAL', 'echo-test', 'CLI operator', [
+      process.execPath,
+      '-e',
+      'setTimeout(() => process.exit(0), 20)',
+    ])
+    expect(event.type).toBe('MACHINE_EXECUTION')
+    expect(event.timing).toBe('measured')
+    expect(event.status).toBe('completed')
+    expect(event.exitCode).toBe(0)
+    expect(event.durationSeconds).toBeGreaterThanOrEqual(0)
+    expect(Number.isFinite(event.durationSeconds)).toBe(true)
+  })
+
+  test('a subprocess that exits non-zero records a real measured duration with status=failed -- the process genuinely ran, so its duration is not discarded', () => {
+    recordTrialStart(ledgerPath, 'TEST-TRIAL', 'unit-test')
+    const event = recordMachineExecution(ledgerPath, 'TEST-TRIAL', 'failing-test', 'CLI operator', [
+      process.execPath,
+      '-e',
+      'setTimeout(() => process.exit(1), 10)',
+    ])
+    expect(event.status).toBe('failed')
+    expect(event.exitCode).toBe(1)
+    expect(event.durationSeconds).toBeGreaterThanOrEqual(0)
+  })
+
+  test('a process that never actually started fails closed -- no event written, no fabricated duration', () => {
+    recordTrialStart(ledgerPath, 'TEST-TRIAL', 'unit-test')
+    expect(() =>
+      recordMachineExecution(ledgerPath, 'TEST-TRIAL', 'nonexistent-binary', 'CLI operator', [
+        'this-executable-definitely-does-not-exist-anywhere-lk82',
+      ])
+    ).toThrow(/FAIL CLOSED/)
+    const events = readEvents(ledgerPath)
+    expect(events.filter((e) => e.type === 'MACHINE_EXECUTION')).toHaveLength(0)
+  })
+
+  test('command is stored verbatim as an argv array, never re-joined into a shell string', () => {
+    recordTrialStart(ledgerPath, 'TEST-TRIAL', 'unit-test')
+    const event = recordMachineExecution(ledgerPath, 'TEST-TRIAL', 'argv-test', 'CLI operator', [
+      process.execPath,
+      '-e',
+      'process.exit(0)',
+    ])
+    expect(Array.isArray(event.command)).toBe(true)
+    expect(event.command).toEqual([process.execPath, '-e', 'process.exit(0)'])
+  })
+
+  test('MACHINE_EXECUTION and MACHINE_STAGE are structurally distinct event types, never conflated', () => {
+    recordTrialStart(ledgerPath, 'TEST-TRIAL', 'unit-test')
+    recordMachineExecution(ledgerPath, 'TEST-TRIAL', 'real', 'CLI operator', [process.execPath, '-e', 'process.exit(0)'])
+    startMachineStage(ledgerPath, 'TEST-TRIAL', 'legacy', 'CLI operator')
+    endMachineStage(ledgerPath, 'TEST-TRIAL', 'legacy', 'CLI operator')
+    const events = readEvents(ledgerPath)
+    const types = new Set(events.map((e) => e.type))
+    expect(types.has('MACHINE_EXECUTION')).toBe(true)
+    expect(types.has('MACHINE_STAGE')).toBe(true)
+  })
+})
+
+describe('I: PROCESS_WAIT / OPERATOR_UNAVAILABLE / UNMEASURED_WORK (LK-82) -- explicit, no-duration markers', () => {
+  test('PROCESS_WAIT records with a required note and no duration field', () => {
+    recordTrialStart(ledgerPath, 'TEST-TRIAL', 'unit-test')
+    const event = recordProcessWait(ledgerPath, 'TEST-TRIAL', 'CLI operator', 'waiting for Vercel deploy')
+    expect(event.type).toBe('PROCESS_WAIT')
+    expect('durationSeconds' in event).toBe(false)
+    expect(() => recordProcessWait(ledgerPath, 'TEST-TRIAL', 'CLI operator', '')).toThrow(/FAIL CLOSED/)
+  })
+
+  test('OPERATOR_UNAVAILABLE records with a required note and no duration field', () => {
+    recordTrialStart(ledgerPath, 'TEST-TRIAL', 'unit-test')
+    const event = recordOperatorUnavailable(ledgerPath, 'TEST-TRIAL', 'CLI operator', 'operator stepped away overnight')
+    expect(event.type).toBe('OPERATOR_UNAVAILABLE')
+    expect('durationSeconds' in event).toBe(false)
+    expect(() => recordOperatorUnavailable(ledgerPath, 'TEST-TRIAL', 'CLI operator', '')).toThrow(/FAIL CLOSED/)
+  })
+
+  test('UNMEASURED_WORK records with a required note and no duration field', () => {
+    recordTrialStart(ledgerPath, 'TEST-TRIAL', 'unit-test')
+    const event = recordUnmeasuredWork(ledgerPath, 'TEST-TRIAL', 'CLI operator', 'PM read source PDF, duration not tracked')
+    expect(event.type).toBe('UNMEASURED_WORK')
+    expect('durationSeconds' in event).toBe(false)
+    expect(() => recordUnmeasuredWork(ledgerPath, 'TEST-TRIAL', 'CLI operator', '')).toThrow(/FAIL CLOSED/)
   })
 })
 

@@ -20,19 +20,24 @@
 
 import * as fs from 'fs'
 import * as path from 'path'
+import { spawnSync } from 'child_process'
 import {
   BenchmarkEvent,
   ArchitectureDiscoveryEvent,
   HANDOFF_MODELLED_SECONDS,
   HRT_MODELLED_SECONDS,
   HumanReviewTurnEvent,
+  MachineExecutionEvent,
   MachineStageEndEvent,
   MachineStageStartEvent,
   ManualOrchestrationHandoffEvent,
   MAX_NOTE_LENGTH,
+  OperatorUnavailableEvent,
   ProcessFrictionEvent,
+  ProcessWaitEvent,
   TrialEndEvent,
   TrialStartEvent,
+  UnmeasuredWorkEvent,
 } from './types'
 
 function nowIso(): string {
@@ -280,7 +285,7 @@ function endMachineStageInternal(
     seq: nextSeq(ledgerPath),
     provenance,
     status,
-    timing: 'measured',
+    timing: 'bracketed',
     matchedStartSeq: openStart.seq,
     durationSeconds,
   }
@@ -304,6 +309,81 @@ export function failMachineStage(
   provenance: string
 ): MachineStageEndEvent {
   return endMachineStageInternal(ledgerPath, trialId, label, provenance, 'failed')
+}
+
+// ---------------------------------------------------------------------------
+// MACHINE_EXECUTION (LK-82) -- benchmark-process-owned subprocess execution,
+// the only event type whose duration may honestly be called measured
+// machine execution. Unlike MACHINE_STAGE, this is a SINGLE call that spawns
+// the bounded subprocess itself and owns the entire interval -- there is no
+// second, separately-issued CLI invocation for an operator-mediated gap to
+// hide inside.
+// ---------------------------------------------------------------------------
+
+/**
+ * Spawns `command` (argv array -- `command[0]` is the executable, the rest
+ * are literal arguments) as a real child process, with `shell: false`
+ * (explicit, not merely the default) so no argument is ever interpolated
+ * into a shell string -- eliminates shell-injection-prone construction by
+ * construction, not by sanitization. Records start/end timestamps
+ * immediately around the `spawnSync` call and appends exactly one atomic
+ * event once the process has genuinely exited.
+ *
+ * Fail-closed, per this module's own established discipline: if the process
+ * never actually started (`result.error` set -- e.g. ENOENT, EACCES), this
+ * throws WITHOUT appending anything. There is no defensible duration to
+ * record for a process that never ran, so none is invented -- exactly
+ * "UNMEASURED is preferable to MEASURED" (LK-82 fail-closed measurement
+ * principle). A process that DID start and exit -- whether with a zero or
+ * non-zero exit code, or terminated by signal -- has a genuinely measured,
+ * real duration, so it IS recorded: `status: 'completed'` only for exit code
+ * 0, `'failed'` otherwise (including signal termination, where `exitCode` is
+ * `null`, never fabricated as 0).
+ */
+export function recordMachineExecution(
+  ledgerPath: string,
+  trialId: string,
+  label: string,
+  provenance: string,
+  command: string[]
+): MachineExecutionEvent {
+  requireNonEmpty(trialId, 'trialId')
+  requireNonEmpty(label, 'label')
+  requireNonEmpty(provenance, 'provenance')
+  if (command.length === 0 || !command[0] || command[0].trim().length === 0) {
+    throw new Error('FAIL CLOSED: command must be a non-empty argv array with a non-empty executable as command[0]')
+  }
+  requireTrialOpen(ledgerPath, trialId)
+
+  const startMs = Date.now()
+  const result = spawnSync(command[0], command.slice(1), { stdio: 'inherit', shell: false })
+  const endTs = nowIso()
+  const durationSeconds = (Date.now() - startMs) / 1000
+
+  if (result.error) {
+    throw new Error(
+      `FAIL CLOSED: MACHINE_EXECUTION "${label}" never actually started (${result.error.message}) -- refusing to record a duration for a process that never ran`
+    )
+  }
+
+  const exitCode = result.status
+  const status: 'completed' | 'failed' = exitCode === 0 ? 'completed' : 'failed'
+
+  const event: MachineExecutionEvent = {
+    type: 'MACHINE_EXECUTION',
+    trialId,
+    label,
+    ts: endTs,
+    seq: nextSeq(ledgerPath),
+    provenance,
+    timing: 'measured',
+    status,
+    durationSeconds,
+    exitCode,
+    command,
+  }
+  appendEventRaw(ledgerPath, event)
+  return event
 }
 
 // ---------------------------------------------------------------------------
@@ -346,6 +426,69 @@ export function recordProcessFriction(
   requireTrialOpen(ledgerPath, trialId)
   const event: ProcessFrictionEvent = {
     type: 'PROCESS_FRICTION',
+    trialId,
+    ts: nowIso(),
+    seq: nextSeq(ledgerPath),
+    provenance,
+    note,
+  }
+  appendEventRaw(ledgerPath, event)
+  return event
+}
+
+// ---------------------------------------------------------------------------
+// PROCESS_WAIT / OPERATOR_UNAVAILABLE / UNMEASURED_WORK (LK-82) -- explicit,
+// operator-recorded, no-duration qualitative markers. Same shape and
+// discipline as ARCHITECTURE_DISCOVERY/PROCESS_FRICTION above: a required
+// non-empty note, no duration field, no classification performed by this
+// module. Never auto-inferred from a timestamp gap -- see types.ts's own
+// header comment.
+// ---------------------------------------------------------------------------
+
+export function recordProcessWait(ledgerPath: string, trialId: string, provenance: string, note: string): ProcessWaitEvent {
+  requireNonEmpty(trialId, 'trialId')
+  requireNonEmpty(provenance, 'provenance')
+  requireNonEmpty(note, 'note (required for PROCESS_WAIT: what was being waited on)')
+  validateNote(note)
+  requireTrialOpen(ledgerPath, trialId)
+  const event: ProcessWaitEvent = {
+    type: 'PROCESS_WAIT',
+    trialId,
+    ts: nowIso(),
+    seq: nextSeq(ledgerPath),
+    provenance,
+    note,
+  }
+  appendEventRaw(ledgerPath, event)
+  return event
+}
+
+export function recordOperatorUnavailable(ledgerPath: string, trialId: string, provenance: string, note: string): OperatorUnavailableEvent {
+  requireNonEmpty(trialId, 'trialId')
+  requireNonEmpty(provenance, 'provenance')
+  requireNonEmpty(note, 'note (required for OPERATOR_UNAVAILABLE: what the gap was / why)')
+  validateNote(note)
+  requireTrialOpen(ledgerPath, trialId)
+  const event: OperatorUnavailableEvent = {
+    type: 'OPERATOR_UNAVAILABLE',
+    trialId,
+    ts: nowIso(),
+    seq: nextSeq(ledgerPath),
+    provenance,
+    note,
+  }
+  appendEventRaw(ledgerPath, event)
+  return event
+}
+
+export function recordUnmeasuredWork(ledgerPath: string, trialId: string, provenance: string, note: string): UnmeasuredWorkEvent {
+  requireNonEmpty(trialId, 'trialId')
+  requireNonEmpty(provenance, 'provenance')
+  requireNonEmpty(note, 'note (required for UNMEASURED_WORK: what the unmeasured work was)')
+  validateNote(note)
+  requireTrialOpen(ledgerPath, trialId)
+  const event: UnmeasuredWorkEvent = {
+    type: 'UNMEASURED_WORK',
     trialId,
     ts: nowIso(),
     seq: nextSeq(ledgerPath),
