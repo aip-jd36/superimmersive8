@@ -61,6 +61,7 @@ describe('extraction canonical outputs are all valid registry identities', () =>
     { alias: 'kling ai', expected: 'kling' },
     { alias: 'elevenlabs', expected: 'elevenlabs' },
     { alias: 'eleven labs', expected: 'elevenlabs' },
+    { alias: "luma ai's dream machine", expected: 'luma' },
   ]
 
   test('2: every KNOWN_TOOLS alias resolves to a canonical identifier present in the registry', () => {
@@ -93,6 +94,23 @@ describe('4: extraction behavior unchanged for existing aliases end-to-end (atte
       kind: 'tool_mention',
       mention: {
         resolution: { kind: 'canonical', identifier: 'kling' },
+        confidence: 'confirmed',
+      },
+    })
+  })
+
+  // LK-89 (Trial 5 Luma observed-alias reachability remediation): same
+  // mechanism, same shape as the 'kling ai' precedent above -- a real
+  // production UAT (LK-88) observed this exact raw_tool_name.
+  test("the observed production expression \"Luma AI's Dream Machine\" produces a confirmed, canonical luma ToolMention", () => {
+    const candidate = toolCandidate({ raw_tool_name: "Luma AI's Dream Machine", raw_text: "I made a video with Luma AI's Dream Machine." })
+    const normalization = normalizeCandidate(candidate)
+    expect(normalization).toEqual({ status: 'resolved', canonical_identifier: 'luma' })
+    const fact = attestCandidate(candidate, normalization)
+    expect(fact).toMatchObject({
+      kind: 'tool_mention',
+      mention: {
+        resolution: { kind: 'canonical', identifier: 'luma' },
         confidence: 'confirmed',
       },
     })

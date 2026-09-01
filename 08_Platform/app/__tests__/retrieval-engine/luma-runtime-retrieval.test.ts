@@ -21,8 +21,12 @@ import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
 import { assembleProjectionOutput } from '@/lib/projection-layer/assemble-projection-output'
+import { runExtractionPipeline } from '@/lib/interview-engine/extraction'
+import type { CandidateObservation } from '@/lib/interview-engine/extraction'
+import { constantExtractor } from '@/lib/interview-engine/mock-extractor'
+import { buildRetrievalHandoff } from '@/lib/interview-engine/handoff'
 import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
-import type { RetrievalHandoff, UserGoal } from '@/types/interview-engine'
+import type { RetrievalHandoff, StructuredUnderstanding, UserGoal } from '@/types/interview-engine'
 
 function handoff(overrides: Partial<RetrievalHandoff> = {}): RetrievalHandoff {
   return {
@@ -243,5 +247,154 @@ describe('H: Luma reachability shape matches the established explicit-goal Matri
     const lumaResult = out.results.find((r) => r.claim_id === LUMA_ID)!
     expect(lumaResult.match_origin).toBe('exact_topic')
     expect(lumaResult.unresolved_project_dependencies).toEqual([])
+  })
+})
+
+// ── I. LK-89: real extraction pipeline, exact observed production expression ──
+
+function emptySU(): StructuredUnderstanding {
+  return {
+    project_facts: {
+      intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+    },
+    tool_mentions: [],
+    scoped_observations: [],
+    user_goals: [],
+    asset_provider_mentions: [],
+    assessment_jurisdiction_mentions: [],
+    content_presence_mentions: [],
+    current_phase: 1,
+    gate_1_state: 'not_met',
+    gate_2_state: 'not_yet_stable',
+    completion_reason: null,
+    opt_out_scope: null,
+  }
+}
+
+function lumaToolCandidate(overrides: Partial<CandidateObservation> = {}): CandidateObservation {
+  return {
+    proposal_id: 'c1',
+    turn: 1,
+    raw_text: "I made a video with Luma AI's Dream Machine.",
+    kind: 'tool_mention',
+    raw_tool_name: "Luma AI's Dream Machine",
+    ...overrides,
+  }
+}
+
+describe('I: LK-89 real-pipeline reproduction of the exact LK-88 production expression', () => {
+  test('the exact observed opening turn now reaches the governed luma claim end-to-end through the real, unmodified extraction pipeline', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: "I made a video with Luma AI's Dream Machine. Can I use it commercially?" },
+      constantExtractor([
+        lumaToolCandidate(),
+        {
+          proposal_id: 'c2',
+          turn: 1,
+          raw_text: 'Can I use it commercially?',
+          kind: 'user_goal',
+          goal_confidence_hint: 'confirmed',
+          goal_category_hint: 'commercial_use',
+          goal_scope_hint: 'informational',
+        },
+      ]),
+    )
+    expect(updated.tool_mentions[0].resolution).toEqual({ kind: 'canonical', identifier: 'luma' })
+
+    const rHandoff = buildRetrievalHandoff(updated)
+    expect(rHandoff.tools).toEqual([{ identifier: 'luma', access_surface: 'unresolved', plan_tier: 'unknown' }])
+    expect(rHandoff.unresolved_aliases).toEqual([])
+
+    const facts: ApplicabilityFacts = { jurisdiction: { included: [], excluded: [] }, toolMentions: updated.tool_mentions }
+    const out = retrieve(rHandoff, MATRIX_FIXTURE, updated.user_goals, [], facts)
+    expect(out.results.map((r) => r.claim_id)).toContain(LUMA_ID)
+
+    const interpretations = buildBoundedInterpretations(updated.user_goals, out.results, out.diagnostics)
+    const interp = interpretations.find((i) => i.supporting_claim_ids.includes(LUMA_ID))
+    expect(interp?.status).toBe('directly_relevant')
+  })
+
+  test('negative alias safety: the bare word "luma" alone does NOT resolve -- only the exact observed compound expression does (no speculative variant added)', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I used Luma.' },
+      constantExtractor([lumaToolCandidate({ raw_text: 'I used Luma.', raw_tool_name: 'Luma' })]),
+    )
+    expect(updated.tool_mentions[0].resolution).toEqual({ kind: 'unresolved_alias', raw_name: 'Luma' })
+  })
+
+  test('negative alias safety: "Dream Machine" alone does NOT resolve -- no speculative variant added', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I used Dream Machine.' },
+      constantExtractor([lumaToolCandidate({ raw_text: 'I used Dream Machine.', raw_tool_name: 'Dream Machine' })]),
+    )
+    expect(updated.tool_mentions[0].resolution).toEqual({ kind: 'unresolved_alias', raw_name: 'Dream Machine' })
+  })
+
+  test('negative alias safety: the new Luma alias does not cause any asset_provider_mention to be created (no cross-registry bleed)', async () => {
+    const { updated } = await runExtractionPipeline(emptySU(), { turn: 1, text: "I made a video with Luma AI's Dream Machine." }, constantExtractor([lumaToolCandidate()]))
+    expect(updated.asset_provider_mentions).toEqual([])
+  })
+
+  test('negative alias safety: another known tool (Kling) is unaffected -- still resolves canonically, never bleeds into Luma', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I used Kling AI.' },
+      constantExtractor([{ proposal_id: 'c1', turn: 1, raw_text: 'I used Kling AI.', kind: 'tool_mention', raw_tool_name: 'Kling AI' }]),
+    )
+    expect(updated.tool_mentions[0].resolution).toEqual({ kind: 'canonical', identifier: 'kling' })
+  })
+
+  test('correction semantics: correcting Luma to a different known tool supersedes the Luma ToolMention -- Luma relevance does not remain stale', async () => {
+    const g: CandidateObservation = {
+      proposal_id: 'g1',
+      turn: 1,
+      raw_text: 'Can I use it commercially?',
+      kind: 'user_goal',
+      goal_confidence_hint: 'confirmed',
+      goal_category_hint: 'commercial_use',
+      goal_scope_hint: 'informational',
+    }
+    const turn1 = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: "I made a video with Luma AI's Dream Machine. Can I use it commercially?" },
+      constantExtractor([lumaToolCandidate(), g]),
+    )
+    expect(turn1.updated.tool_mentions.filter((m) => m.superseded_by === null)).toHaveLength(1)
+    expect(turn1.updated.tool_mentions[0].resolution).toEqual({ kind: 'canonical', identifier: 'luma' })
+
+    const turn2 = await runExtractionPipeline(
+      turn1.updated,
+      { turn: 2, text: 'Sorry, it was actually Kling AI, not Luma.' },
+      constantExtractor([
+        {
+          proposal_id: 'c1',
+          turn: 2,
+          raw_text: 'Sorry, it was actually Kling AI, not Luma.',
+          kind: 'tool_mention',
+          raw_tool_name: 'Kling AI',
+          is_correction: true,
+          correction_of_raw_text: "Luma AI's Dream Machine",
+        },
+      ]),
+    )
+    const active = turn2.updated.tool_mentions.filter((m) => m.superseded_by === null)
+    expect(active).toHaveLength(1)
+    expect(active[0].resolution).toEqual({ kind: 'canonical', identifier: 'kling' })
+    const supersededLuma = turn2.updated.tool_mentions.find((m) => m.resolution.kind === 'canonical' && m.resolution.identifier === 'luma')
+    expect(supersededLuma?.superseded_by).not.toBeNull()
+
+    // Downstream: only Kling's claim is now retrieved for the commercial_use
+    // goal -- Luma's claim does not remain stale-reachable after correction.
+    const rHandoff = buildRetrievalHandoff(turn2.updated)
+    const facts: ApplicabilityFacts = { jurisdiction: { included: [], excluded: [] }, toolMentions: turn2.updated.tool_mentions }
+    const out = retrieve(rHandoff, MATRIX_FIXTURE, turn2.updated.user_goals, [], facts)
+    expect(out.results.map((r) => r.claim_id)).not.toContain(LUMA_ID)
+    expect(out.results.map((r) => r.claim_id)).toContain('kling-commercial-use-baseline')
   })
 })

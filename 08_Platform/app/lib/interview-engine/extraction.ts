@@ -480,6 +480,16 @@ const KNOWN_TOOLS: Record<string, CanonicalToolId> = {
   'kling ai': 'kling',
   elevenlabs: 'elevenlabs',
   'eleven labs': 'elevenlabs',
+  // 'luma ai's dream machine' added 2026-09-01 (LK-89, Trial 5 Luma
+  // observed-alias reachability remediation): a real production UAT
+  // (LK-88) showed a user naming the tool exactly this way -- extraction
+  // correctly proposed the tool_mention candidate, but the missing
+  // exact-string entry left it permanently `unresolved_alias`, matching
+  // the exact same failure mode/fix shape as the 'kling ai' precedent
+  // above. Narrow, single alias only, matching the one observed
+  // production expression -- no fuzzy matching, no speculative variants
+  // ('luma', 'luma ai', 'dream machine', etc.) added.
+  "luma ai's dream machine": 'luma',
 }
 
 /**
