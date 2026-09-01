@@ -554,6 +554,60 @@ const KNOWN_ASSET_PROVIDERS: Record<string, AssetProviderId> = {
   pond5: 'pond5',
 }
 
+function escapeForWordBoundaryMatch(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+/**
+ * Generic compound-expression corroboration (LK-78B, 2026-09-01 -- Trial 4
+ * Production Reachability Boundary Diagnostic remediation). A known
+ * canonical asset-provider identity may appear as a word-bounded phrase
+ * inside a longer compound provider/product/feature expression (observed
+ * live: "Adobe Stock / AI Studio", "Adobe Stock AI Studio") without the
+ * WHOLE expression being a registered KNOWN_ASSET_PROVIDERS key itself.
+ *
+ * Returns the single canonical AssetProviderId only when EXACTLY ONE
+ * distinct canonical identity is found -- zero matches (no known provider
+ * named at all, e.g. "Adobe Firefly", which contains no KNOWN_ASSET_PROVIDERS
+ * key) and multiple distinct matches (a genuinely ambiguous compound naming
+ * two or more known providers, e.g. "Getty or iStock, I don't remember
+ * which") both return undefined, never guessed -- this is the same
+ * generic invariant KNOWN_ASSET_PROVIDERS' own header already documents for
+ * the exact-match path, extended to the compound-expression case rather
+ * than replaced. Word-bounded (`\b...\b`) so a short key like "getty" can
+ * never match inside an unrelated longer word.
+ *
+ * Deliberately consults KNOWN_ASSET_PROVIDERS only -- never KNOWN_TOOLS or
+ * KNOWN_AMBIGUOUS_TOOLS, so a genuine tool name (e.g. "Runway", "Kling")
+ * can never be reinterpreted as a provider by this function. It has no
+ * branch or special case keyed on any specific provider string ("Adobe" is
+ * not named anywhere in this function's own logic) -- Adobe is the
+ * regression fixture that exposed this generic gap, not the architecture.
+ *
+ * Boundary is whitespace-or-string-edge, not generic `\b`. A plain regex
+ * word boundary treats ANY non-word character as a boundary, including
+ * "." -- which would incorrectly resolve unobserved, punctuation-glued
+ * surface forms like "storyblocks.com" or "pond5.com" (domain-style
+ * concatenation is not the same kind of compound naming as a genuine
+ * multi-concept phrase such as "Adobe Stock / AI Studio" or "Adobe Stock
+ * AI Studio"). Requiring the matched key to be flanked by whitespace or
+ * the string's own start/end preserves this project's existing
+ * evidence-only, no-speculative-variants discipline (see
+ * asset-provider-mentions.test.ts's "speculative surface forms... remain
+ * unrecognized" cases) while still matching the genuine compound
+ * expressions this function exists for.
+ */
+export function findCorroboratingAssetProvider(rawText: string): AssetProviderId | undefined {
+  const haystack = rawText.trim()
+  if (!haystack) return undefined
+  const matched = new Set<AssetProviderId>()
+  for (const [key, canonicalId] of Object.entries(KNOWN_ASSET_PROVIDERS)) {
+    const pattern = new RegExp(`(^|\\s)${escapeForWordBoundaryMatch(key)}(\\s|$)`, 'i')
+    if (pattern.test(haystack)) matched.add(canonicalId)
+  }
+  return matched.size === 1 ? [...matched][0] : undefined
+}
+
 export function normalizeCandidate(candidate: CandidateObservation): NormalizationResult {
   if (candidate.kind === 'asset_provider_mention') {
     if (!candidate.raw_provider_name) return { status: 'not_applicable' }
@@ -566,7 +620,13 @@ export function normalizeCandidate(candidate: CandidateObservation): Normalizati
     // flag such a candidate low_confidence (attestCandidate defers it
     // before normalization's result is ever used to assert an identity),
     // never resolved here to either provider by guessing.
-    return knownProvider ? { status: 'resolved', canonical_identifier: knownProvider } : { status: 'unrecognized' }
+    if (knownProvider) return { status: 'resolved', canonical_identifier: knownProvider }
+    // LK-78B fallback: the exact whole-string lookup above failed, but the
+    // raw name may be a compound expression containing a known provider
+    // identity (see findCorroboratingAssetProvider's own header for the
+    // exactly-one-match discipline that keeps this from ever guessing).
+    const corroborated = findCorroboratingAssetProvider(candidate.raw_provider_name)
+    return corroborated ? { status: 'resolved', canonical_identifier: corroborated } : { status: 'unrecognized' }
   }
 
   if (candidate.kind !== 'tool_mention' || !candidate.raw_tool_name) {
@@ -698,7 +758,23 @@ export function attestCandidate(
   candidate: CandidateObservation,
   normalization: NormalizationResult,
 ): ProposedFact | null {
-  if (candidate.low_confidence) return null
+  // LK-78B: a low_confidence asset_provider_mention whose raw name still
+  // resolves to a single known canonical provider -- whether via the
+  // exact-match lookup or the generic compound-expression fallback in
+  // normalizeCandidate -- is treated as corroborated despite the
+  // extractor's own uncertainty signal. The extractor's low_confidence hint
+  // exists for genuine ambiguity between two-or-more possible readings (see
+  // KNOWN_ASSET_PROVIDERS' own "Getty or iStock, I don't remember which"
+  // example); normalization's own exactly-one-distinct-match discipline
+  // already independently guards against exactly that case (a candidate
+  // naming two known providers resolves to 'unrecognized', not 'resolved',
+  // so this bypass never fires for it). This is scoped narrowly to
+  // asset_provider_mention candidates that DID resolve -- every other kind,
+  // and every unresolved asset_provider_mention, keeps the original
+  // unconditional defer below. Confidence gating is not weakened globally.
+  const isCorroboratedLowConfidenceProvider =
+    candidate.kind === 'asset_provider_mention' && candidate.low_confidence === true && normalization.status === 'resolved'
+  if (candidate.low_confidence && !isCorroboratedLowConfidenceProvider) return null
 
   if (candidate.kind === 'tool_mention') {
     if (!candidate.raw_tool_name) return null
@@ -1528,6 +1604,62 @@ export async function runExtractionPipeline(
         proposed_fact: proposedFact,
         decision: { outcome: 'rejected', ...classifyMutationError(err) },
       })
+    }
+
+    // LK-78B: tool/provider coexistence. A tool_mention candidate's raw
+    // name may ALSO corroborate a known asset-provider identity (observed
+    // live: "Adobe Stock AI Studio" -- a genuine compound naming both a
+    // provider brand and a generation-sounding feature). This never
+    // replaces or suppresses the tool_mention processed above (whatever its
+    // own outcome was) -- it is a SEPARATE, additional derived fact,
+    // applied only when no active mention with that canonical identity
+    // already exists (so a real, later, independently-stated provider
+    // mention is never duplicated), and run through the exact same
+    // normalizeCandidate -> attestCandidate -> addAssetProviderMention path
+    // every ordinary candidate uses, so it participates identically in
+    // later-turn correction/supersession (resolveAssetProviderMentionTarget's
+    // own Step 1 canonical-identity match). No Adobe-specific or
+    // provider-specific logic exists here -- the corroboration is generic
+    // (findCorroboratingAssetProvider) and the derivation path is the same
+    // one every real candidate already goes through.
+    if (candidate.kind === 'tool_mention' && candidate.raw_tool_name) {
+      const corroboratedProvider = findCorroboratingAssetProvider(candidate.raw_tool_name)
+      if (corroboratedProvider) {
+        const alreadyActive = current.asset_provider_mentions.some(
+          (m) => m.superseded_by === null && m.resolution.kind === 'canonical' && m.resolution.identifier === corroboratedProvider,
+        )
+        if (!alreadyActive) {
+          const derivedCandidate: CandidateObservation = {
+            proposal_id: `${candidate.proposal_id}-derived-provider`,
+            turn: candidate.turn,
+            raw_text: candidate.raw_text,
+            kind: 'asset_provider_mention',
+            raw_provider_name: candidate.raw_tool_name,
+          }
+          const derivedNormalization = normalizeCandidate(derivedCandidate)
+          const derivedFact = attestCandidate(derivedCandidate, derivedNormalization)
+          if (derivedFact && derivedFact.kind === 'asset_provider_mention') {
+            try {
+              current = addAssetProviderMention(current, derivedFact.mention)
+              diagnostics.push({
+                proposal_id: derivedCandidate.proposal_id,
+                candidate: derivedCandidate,
+                normalization: derivedNormalization,
+                proposed_fact: derivedFact,
+                decision: { outcome: 'accepted', applied_identifier: derivedFact.mention.mention_id },
+              })
+            } catch (err) {
+              diagnostics.push({
+                proposal_id: derivedCandidate.proposal_id,
+                candidate: derivedCandidate,
+                normalization: derivedNormalization,
+                proposed_fact: derivedFact,
+                decision: { outcome: 'rejected', ...classifyMutationError(err) },
+              })
+            }
+          }
+        }
+      }
     }
   }
 

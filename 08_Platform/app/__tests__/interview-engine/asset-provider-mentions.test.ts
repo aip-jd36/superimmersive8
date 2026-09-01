@@ -14,7 +14,7 @@
 
 import type { AssetProviderMention, StructuredUnderstanding } from '../../types/interview-engine'
 import type { CandidateObservation } from '../../lib/interview-engine/extraction'
-import { normalizeCandidate, runExtractionPipeline } from '../../lib/interview-engine/extraction'
+import { normalizeCandidate, runExtractionPipeline, findCorroboratingAssetProvider } from '../../lib/interview-engine/extraction'
 import { constantExtractor } from '../../lib/interview-engine/mock-extractor'
 import { buildRetrievalHandoff } from '../../lib/interview-engine/handoff'
 
@@ -682,5 +682,265 @@ describe('AssetProviderMention final shape', () => {
     )
     expect(updated.asset_provider_mentions[0].resolution).toEqual({ kind: 'unresolved_alias', raw_name: 'PhotoMega' })
     expect(updated.asset_provider_mentions[0].confidence).toBe('unresolved_no_visibility')
+  })
+})
+
+// ── LK-78B: generic compound provider identity extraction remediation
+// (2026-09-01 -- Trial 4 Production Reachability Boundary Diagnostic
+// remediation). Two confirmed production failure mechanisms for compound
+// provider/product expressions ("Adobe Stock / AI Studio", "Adobe Stock AI
+// Studio"): (1) confidence-gate deferral even when the raw name corroborates
+// exactly one known provider, (2) tool_mention/asset_provider_mention kind
+// misclassification when the model reads a compound expression as a tool
+// name because of generation-verb framing ("...to generate"). Both fixes
+// are generic (findCorroboratingAssetProvider consults only
+// KNOWN_ASSET_PROVIDERS, has no provider-specific branch) -- Adobe Stock is
+// the reproduction fixture, not special-cased logic. Cross-provider
+// controls below (Getty/iStock/Shutterstock/Storyblocks/Pond5) prove this
+// directly. ─────────────────────────────────────────────────────────────
+
+describe('LK-78B: findCorroboratingAssetProvider (unit)', () => {
+  test('resolves a known provider inside a slash-compound expression, whitespace-bounded', () => {
+    expect(findCorroboratingAssetProvider('Adobe Stock / AI Studio')).toBe('adobe-stock')
+  })
+
+  test('resolves a known provider inside a space-run compound expression (generation-verb framing observed live)', () => {
+    expect(findCorroboratingAssetProvider('Adobe Stock AI Studio')).toBe('adobe-stock')
+  })
+
+  test('cross-provider: same mechanism resolves Getty, iStock, Shutterstock, Storyblocks, and Pond5 inside analogous compound expressions -- no Adobe-specific branch', () => {
+    expect(findCorroboratingAssetProvider('Getty Creative Suite')).toBe('getty')
+    expect(findCorroboratingAssetProvider('iStock Content Suite')).toBe('istock')
+    expect(findCorroboratingAssetProvider('Shutterstock Creative Flow')).toBe('shutterstock')
+    expect(findCorroboratingAssetProvider('Storyblocks / Premium Library')).toBe('storyblocks')
+    expect(findCorroboratingAssetProvider('Pond5 Motion Library')).toBe('pond5')
+  })
+
+  test('a genuine tool name with no known provider substring never corroborates (Adobe Firefly, Kling)', () => {
+    expect(findCorroboratingAssetProvider('Adobe Firefly')).toBeUndefined()
+    expect(findCorroboratingAssetProvider('Kling')).toBeUndefined()
+  })
+
+  test('fail-closed: a compound naming two or more known providers never guesses -- "Getty or iStock" and a non-Adobe two-provider compound both stay unresolved', () => {
+    expect(findCorroboratingAssetProvider('Getty or iStock')).toBeUndefined()
+    expect(findCorroboratingAssetProvider('Getty or Shutterstock Suite')).toBeUndefined()
+  })
+
+  test('domain-suffix concatenation (no genuine word/phrase separation) does not corroborate -- preserves the existing evidence-only, no-speculative-variants discipline', () => {
+    expect(findCorroboratingAssetProvider('storyblocks.com')).toBeUndefined()
+    expect(findCorroboratingAssetProvider('pond5.com')).toBeUndefined()
+  })
+})
+
+describe('LK-78B: confidence-gate corroboration bypass (attestation)', () => {
+  // P1 -- exact LK-77/78A turn 1 reproduction: a low_confidence
+  // asset_provider_mention whose raw name is the slash-compound expression.
+  // Before this fix: deferred (CANDIDATE_TOO_LOW_CONFIDENCE), reachable in
+  // no diagnostic, no ProposedFact. After: accepted, resolved to
+  // 'adobe-stock', despite the extractor's own low_confidence hint --
+  // because normalization already independently corroborated exactly one
+  // canonical identity.
+  test('P1: "Adobe Stock / AI Studio content" (low_confidence asset_provider_mention) is accepted and resolves to adobe-stock, not deferred', async () => {
+    const { updated, diagnostics } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'Adobe Stock / AI Studio content' },
+      constantExtractor([
+        providerCandidate({
+          raw_text: 'Adobe Stock / AI Studio content',
+          raw_provider_name: 'Adobe Stock / AI Studio',
+          low_confidence: true,
+        }),
+      ]),
+    )
+    expect(diagnostics[0].decision.outcome).toBe('accepted')
+    const active = updated.asset_provider_mentions.filter((m) => m.superseded_by === null)
+    expect(active).toHaveLength(1)
+    expect(active[0].resolution).toEqual({ kind: 'canonical', identifier: 'adobe-stock' })
+  })
+
+  test('a low_confidence asset_provider_mention that does NOT corroborate any known provider still defers exactly as before (bypass is scoped, not a global confidence weakening)', async () => {
+    const { updated, diagnostics } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I got it from PhotoMega, or maybe a different site.' },
+      constantExtractor([providerCandidate({ raw_provider_name: 'PhotoMega or a different site', low_confidence: true })]),
+    )
+    expect(diagnostics[0].decision.outcome).toBe('deferred')
+    expect(updated.asset_provider_mentions).toHaveLength(0)
+  })
+
+  test('a low_confidence non-provider candidate kind (project_fact) is entirely unaffected by the bypass, which is scoped to asset_provider_mention only', async () => {
+    const { diagnostics } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'something uncertain' },
+      constantExtractor([
+        {
+          proposal_id: 'c1',
+          turn: 1,
+          raw_text: 'something uncertain',
+          kind: 'project_fact',
+          raw_fact_field: 'intended_use',
+          fact_confidence_hint: 'confirmed',
+          fact_value_hint: 'something uncertain',
+          low_confidence: true,
+        } as CandidateObservation,
+      ]),
+    )
+    expect(diagnostics[0].decision.outcome).toBe('deferred')
+  })
+
+  test('the pre-existing genuinely-ambiguous case ("Getty or iStock, I don\'t remember which") still defers -- normalization\'s exactly-one-match discipline means the bypass never fires for it', async () => {
+    const { updated, diagnostics } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: "I got it from Getty or iStock, I don't remember which." },
+      constantExtractor([providerCandidate({ raw_provider_name: 'Getty or iStock', low_confidence: true })]),
+    )
+    expect(updated.asset_provider_mentions).toHaveLength(0)
+    expect(diagnostics[0].decision.outcome).toBe('deferred')
+  })
+})
+
+describe('LK-78B: tool/provider coexistence -- a tool_mention candidate whose raw name corroborates a provider derives a separate AssetProviderMention', () => {
+  // P2 -- exact LK-77/78A turn 2 reproduction: the model classified this as
+  // a tool_mention (generation-verb framing: "...to generate the content").
+  // Before this fix: ToolMention(unresolved_alias "Adobe Stock AI Studio"),
+  // zero AssetProviderMentions, claim unreachable. After: the original
+  // ToolMention is untouched (still unresolved_alias -- "Adobe Stock AI
+  // Studio" is not a registered tool), AND a derived, resolved
+  // AssetProviderMention(adobe-stock) is created alongside it.
+  test('P2: "I used Adobe Stock AI Studio to generate the content." (tool_mention) derives an adobe-stock AssetProviderMention without altering the original ToolMention', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I used Adobe Stock AI Studio to generate the content.' },
+      constantExtractor([
+        toolCandidate({
+          raw_text: 'I used Adobe Stock AI Studio to generate the content.',
+          raw_tool_name: 'Adobe Stock AI Studio',
+        }),
+      ]),
+    )
+    expect(updated.tool_mentions).toHaveLength(1)
+    expect(updated.tool_mentions[0].resolution).toEqual({ kind: 'unresolved_alias', raw_name: 'Adobe Stock AI Studio' })
+    const activeProviders = updated.asset_provider_mentions.filter((m) => m.superseded_by === null)
+    expect(activeProviders).toHaveLength(1)
+    expect(activeProviders[0].resolution).toEqual({ kind: 'canonical', identifier: 'adobe-stock' })
+  })
+
+  test('cross-provider: the same coexistence mechanism derives Getty from a tool-framed compound mention -- no Adobe-specific branch', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I used Getty Creative Suite to edit the images.' },
+      constantExtractor([toolCandidate({ raw_text: 'I used Getty Creative Suite to edit the images.', raw_tool_name: 'Getty Creative Suite' })]),
+    )
+    const activeProviders = updated.asset_provider_mentions.filter((m) => m.superseded_by === null)
+    expect(activeProviders).toHaveLength(1)
+    expect(activeProviders[0].resolution).toEqual({ kind: 'canonical', identifier: 'getty' })
+  })
+
+  test('negative control: "I generated the images using Adobe Firefly." derives no AssetProviderMention -- Adobe Firefly names no known provider', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I generated the images using Adobe Firefly.' },
+      constantExtractor([toolCandidate({ raw_text: 'I generated the images using Adobe Firefly.', raw_tool_name: 'Adobe Firefly' })]),
+    )
+    expect(updated.asset_provider_mentions).toHaveLength(0)
+    expect(updated.tool_mentions).toHaveLength(1)
+  })
+
+  test('negative control: an ordinary non-Adobe tool ("Kling") derives no AssetProviderMention -- unaffected by the coexistence mechanism', async () => {
+    const { updated } = await runExtractionPipeline(emptySU(), { turn: 1, text: 'I used Kling.' }, constantExtractor([toolCandidate()]))
+    expect(updated.asset_provider_mentions).toHaveLength(0)
+    expect(updated.tool_mentions).toHaveLength(1)
+  })
+
+  test('negative control: a generic ambiguous tool-framed compound naming two known providers derives no AssetProviderMention -- fail-closed, never guessed', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: "I uploaded content via Getty or Shutterstock's plugin, not sure which." },
+      constantExtractor([
+        toolCandidate({
+          raw_text: "I uploaded content via Getty or Shutterstock's plugin, not sure which.",
+          raw_tool_name: 'Getty or Shutterstock plugin',
+        }),
+      ]),
+    )
+    expect(updated.asset_provider_mentions).toHaveLength(0)
+  })
+
+  test('a tool_mention corroborating a provider that already has an active mention does not create a duplicate', async () => {
+    const turn1 = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I used Adobe Stock.' },
+      constantExtractor([providerCandidate({ raw_text: 'I used Adobe Stock.', raw_provider_name: 'Adobe Stock' })]),
+    )
+    expect(turn1.updated.asset_provider_mentions.filter((m) => m.superseded_by === null)).toHaveLength(1)
+
+    const turn2 = await runExtractionPipeline(
+      turn1.updated,
+      { turn: 2, text: 'I used Adobe Stock AI Studio to generate the content.' },
+      constantExtractor([
+        toolCandidate({
+          proposal_id: 'c1',
+          turn: 2,
+          raw_text: 'I used Adobe Stock AI Studio to generate the content.',
+          raw_tool_name: 'Adobe Stock AI Studio',
+        }),
+      ]),
+    )
+    const activeProviders = turn2.updated.asset_provider_mentions.filter((m) => m.superseded_by === null)
+    expect(activeProviders).toHaveLength(1)
+    expect(activeProviders[0].resolution).toEqual({ kind: 'canonical', identifier: 'adobe-stock' })
+  })
+
+  test('provider+tool coexistence in the same turn: a genuine tool (Kling) and a derivable provider (Adobe Stock AI Studio) both resolve distinctly, no interference', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I used Kling to animate footage sourced from Adobe Stock AI Studio, which I also used to generate some elements.' },
+      constantExtractor([
+        toolCandidate({ proposal_id: 'c1', raw_text: 'I used Kling to animate footage', raw_tool_name: 'Kling' }),
+        toolCandidate({
+          proposal_id: 'c2',
+          raw_text: 'Adobe Stock AI Studio, which I also used to generate some elements',
+          raw_tool_name: 'Adobe Stock AI Studio',
+        }),
+      ]),
+    )
+    expect(updated.tool_mentions).toHaveLength(2)
+    expect(updated.tool_mentions.find((m) => m.resolution.kind === 'canonical' && m.resolution.identifier === 'kling')).toBeTruthy()
+    const activeProviders = updated.asset_provider_mentions.filter((m) => m.superseded_by === null)
+    expect(activeProviders).toHaveLength(1)
+    expect(activeProviders[0].resolution).toEqual({ kind: 'canonical', identifier: 'adobe-stock' })
+  })
+})
+
+describe('LK-78B: correction semantics apply identically to a derived AssetProviderMention', () => {
+  test('a derived adobe-stock mention (from a tool-framed compound) is superseded by a later explicit correction, exactly like a directly-stated mention', async () => {
+    const turn1 = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I used Adobe Stock AI Studio to generate the content.' },
+      constantExtractor([toolCandidate({ raw_text: 'I used Adobe Stock AI Studio to generate the content.', raw_tool_name: 'Adobe Stock AI Studio' })]),
+    )
+    const activeAfter1 = turn1.updated.asset_provider_mentions.filter((m) => m.superseded_by === null)
+    expect(activeAfter1).toHaveLength(1)
+    expect(activeAfter1[0].resolution).toEqual({ kind: 'canonical', identifier: 'adobe-stock' })
+
+    const turn2 = await runExtractionPipeline(
+      turn1.updated,
+      { turn: 2, text: 'Sorry, it was actually iStock, not Adobe Stock.' },
+      constantExtractor([
+        providerCandidate({
+          proposal_id: 'c1',
+          turn: 2,
+          raw_text: 'Sorry, it was actually iStock, not Adobe Stock.',
+          raw_provider_name: 'iStock',
+          is_correction: true,
+          correction_of_raw_text: 'Adobe Stock',
+        }),
+      ]),
+    )
+    const active = turn2.updated.asset_provider_mentions.filter((m) => m.superseded_by === null)
+    expect(active).toHaveLength(1)
+    expect(active[0].resolution).toEqual({ kind: 'canonical', identifier: 'istock' })
+    const supersededAdobe = turn2.updated.asset_provider_mentions.find((m) => m.resolution.kind === 'canonical' && m.resolution.identifier === 'adobe-stock')
+    expect(supersededAdobe?.superseded_by).not.toBeNull()
   })
 })

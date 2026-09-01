@@ -349,3 +349,133 @@ describe('LK-75: natural-language Adobe Stock mention reaches the real claim end
     expect(results.map((r) => r.claim_id)).not.toContain(ADOBESTOCK_ID)
   })
 })
+
+// ── LK-78B: runtime reachability canary against the real published claim,
+// reproducing the exact production input shape LK-77/78A found unreachable
+// -- a tool_mention candidate ALONE, with raw_tool_name "Adobe Stock AI
+// Studio" and NO separate asset_provider_mention candidate at all (the
+// model classified the whole compound expression as a tool, per LK-78A's
+// diagnosed kind-misclassification mechanism). Every prior test in this
+// file supplies an explicit providerCandidate() -- none of them exercise
+// this specific gap. Real fixture, real retrieve(), real Bounded
+// Interpretation, real Composition -- no downstream layer modified for
+// this fix; only the extraction pipeline's own tool/provider coexistence
+// derivation (extraction.ts) makes this reachable now. ─────────────────
+describe('LK-78B: the exact previously-unreachable tool_mention-only compound expression now reaches the real published claim end-to-end', () => {
+  function emptySU(): StructuredUnderstanding {
+    return {
+      project_facts: {
+        intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      },
+      tool_mentions: [],
+      scoped_observations: [],
+      user_goals: [],
+      asset_provider_mentions: [],
+      assessment_jurisdiction_mentions: [],
+      content_presence_mentions: [],
+      current_phase: 1,
+      gate_1_state: 'not_met',
+      gate_2_state: 'not_yet_stable',
+      completion_reason: null,
+      opt_out_scope: null,
+    }
+  }
+
+  function toolOnlyCandidate(overrides: Partial<CandidateObservation> = {}): CandidateObservation {
+    return {
+      proposal_id: 'c1',
+      turn: 1,
+      raw_text: 'I used Adobe Stock AI Studio to generate the content.',
+      kind: 'tool_mention',
+      raw_tool_name: 'Adobe Stock AI Studio',
+      ...overrides,
+    }
+  }
+
+  function goalCandidate(overrides: Partial<CandidateObservation> = {}): CandidateObservation {
+    return {
+      proposal_id: 'c2',
+      turn: 1,
+      raw_text: 'Can I use the finished video commercially?',
+      kind: 'user_goal',
+      goal_confidence_hint: 'confirmed',
+      goal_category_hint: 'commercial_use',
+      ...overrides,
+    }
+  }
+
+  test('the derived AssetProviderMention alone reaches the claim via retrieve() -- no separate provider candidate ever supplied', async () => {
+    const { updated } = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'I used Adobe Stock AI Studio to generate the content. Can I use the finished video commercially?' },
+      constantExtractor([toolOnlyCandidate(), goalCandidate()]),
+    )
+    // The original ToolMention is preserved, unresolved -- "Adobe Stock AI
+    // Studio" is not a registered tool. The derived mention is the ONLY
+    // path to reachability here.
+    expect(updated.tool_mentions).toHaveLength(1)
+    expect(updated.tool_mentions[0].resolution).toEqual({ kind: 'unresolved_alias', raw_name: 'Adobe Stock AI Studio' })
+    const activeProviders = updated.asset_provider_mentions.filter((m) => m.superseded_by === null)
+    expect(activeProviders).toHaveLength(1)
+    expect(activeProviders[0].resolution).toEqual({ kind: 'canonical', identifier: 'adobe-stock' })
+
+    const rHandoff = buildRetrievalHandoff(updated)
+    expect(rHandoff.asset_providers).toEqual(['adobe-stock'])
+
+    const { results, diagnostics } = retrieve(rHandoff, MATRIX_FIXTURE, updated.user_goals, TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, [], rHandoff.asset_providers, [])
+    expect(results.map((r) => r.claim_id)).toContain(ADOBESTOCK_ID)
+    const claimResult = results.find((r) => r.claim_id === ADOBESTOCK_ID)!
+    expect(claimResult.unresolved_project_dependencies).toEqual([])
+
+    const interpretations = buildBoundedInterpretations(updated.user_goals, results, diagnostics, { state: 'unknown' })
+    const claimInterp = interpretations.find((i) => i.supporting_claim_ids.includes(ADOBESTOCK_ID))
+    expect(claimInterp).toBeDefined()
+    expect(claimInterp!.status).toBe('directly_relevant')
+
+    // LK-78C integration audit (§9): the derived-mention path must be
+    // bounded exactly like the pre-existing explicit-providerCandidate path
+    // above (see the "end-to-end" test) -- same forbidden-pattern check,
+    // now also proven for this input shape, not just claimed by inference
+    // from "same claim, same pipeline."
+    const forbidden = [/indemnif/i, /commercially cleared/i, /is non-?infringing/i, /you (used|have) firefly/i, /you (used|have) a partner model/i]
+    for (const pattern of forbidden) {
+      expect(claimInterp!.summary).not.toMatch(pattern)
+    }
+
+    const projection = assembleProjectionOutput(rHandoff, results, interpretations)
+    expect(projection.output.knowledge_items.map((k) => k.claim_id)).toContain(ADOBESTOCK_ID)
+  })
+
+  test('the exact LK-77/78A two-turn shape (compound provider hint deferred turn 1, tool-framed restatement turn 2) reaches the claim by end of turn 2', async () => {
+    const turn1 = await runExtractionPipeline(
+      emptySU(),
+      { turn: 1, text: 'Adobe Stock / AI Studio content' },
+      constantExtractor([
+        {
+          proposal_id: 'c1',
+          turn: 1,
+          raw_text: 'Adobe Stock / AI Studio content',
+          kind: 'asset_provider_mention',
+          raw_provider_name: 'Adobe Stock / AI Studio',
+          low_confidence: true,
+        },
+        goalCandidate({ raw_text: 'Can I use the finished video commercially?' }),
+      ]),
+    )
+    const turn2 = await runExtractionPipeline(
+      turn1.updated,
+      { turn: 2, text: 'I used Adobe Stock AI Studio to generate the content.' },
+      constantExtractor([toolOnlyCandidate({ turn: 2 })]),
+    )
+    const activeProviders = turn2.updated.asset_provider_mentions.filter((m) => m.superseded_by === null)
+    expect(activeProviders).toHaveLength(1) // deferred-then-derived never duplicates
+    expect(activeProviders[0].resolution).toEqual({ kind: 'canonical', identifier: 'adobe-stock' })
+
+    const rHandoff = buildRetrievalHandoff(turn2.updated)
+    const { results } = retrieve(rHandoff, MATRIX_FIXTURE, turn2.updated.user_goals, TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, [], rHandoff.asset_providers, [])
+    expect(results.map((r) => r.claim_id)).toContain(ADOBESTOCK_ID)
+  })
+})
