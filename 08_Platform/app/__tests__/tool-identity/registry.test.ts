@@ -26,7 +26,7 @@ function toolCandidate(overrides: Partial<CandidateObservation> = {}): Candidate
 // ── 1: bootstrap population ─────────────────────────────────────────────────
 
 describe('CANONICAL_TOOL_IDS -- bootstrap population', () => {
-  test('1: contains exactly the LK-10 bootstrap union (KNOWN_TOOLS values, KNOWN_AMBIGUOUS_TOOLS candidates, Matrix identifiers) plus every identity registered since (LK-24: synthesia; LK-87: luma)', () => {
+  test('1: contains exactly the LK-10 bootstrap union (KNOWN_TOOLS values, KNOWN_AMBIGUOUS_TOOLS candidates, Matrix identifiers) plus every identity registered since (LK-24: synthesia; LK-87: luma; LK-99: suno)', () => {
     const expected: CanonicalToolId[] = [
       'runway-gen3',
       'kling',
@@ -40,6 +40,7 @@ describe('CANONICAL_TOOL_IDS -- bootstrap population', () => {
       'openai-sora',
       'synthesia',
       'luma',
+      'suno',
     ]
     expect([...CANONICAL_TOOL_IDS].sort()).toEqual([...expected].sort())
   })
@@ -151,7 +152,7 @@ describe('6: ambiguous-tool behavior unchanged', () => {
 // ── 7: registry membership alone never makes a tool extraction-reachable ──
 
 describe('7: registry membership does not create extraction reachability', () => {
-  test.each(['pika', 'midjourney', 'google-veo', 'adobe-firefly', 'openai-sora'] as const)(
+  test.each(['pika', 'midjourney', 'google-veo', 'adobe-firefly', 'openai-sora', 'suno'] as const)(
     '%s is a registered canonical identity but has NO extraction alias -- still normalizes to unrecognized',
     (id) => {
       expect(isCanonicalToolIdentity(id)).toBe(true)

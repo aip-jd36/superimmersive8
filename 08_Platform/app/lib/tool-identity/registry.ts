@@ -75,7 +75,28 @@ export const CANONICAL_TOOL_IDS = [
   'openai-sora',
   'synthesia',
   'luma',
+  'suno',
 ] as const
+
+/**
+ * 'suno' added 2026-09-01 (LK-99, Trial 6 Living Knowledge onboarding
+ * benchmark -- Suno commercial-use-by-tier; the first genuinely new identity
+ * registered after LK-94's Canonicalization Readiness gate took effect) --
+ * pure generic registry extension, same mechanism as every entry above, no
+ * new category. Governed via `PLATFORM-RIGHTS-MATRIX.md`'s own Matrix
+ * convention (Status + `#### CRC Claims` sub-table), same governance home
+ * already used for Runway/Kling/Pika/Midjourney/ElevenLabs/Luma above.
+ * Single evidence-backed canonical identity (Suno Terms of Service, Date of
+ * Last Revision March 26, 2026, governs the whole platform); no
+ * access-surface split evidenced. Registration does not itself add a
+ * `KNOWN_TOOLS` extraction alias -- ordinary conversational reachability
+ * remains a separate, independently-timed concern, same discipline as every
+ * prior registration in this file. This registration is the precondition
+ * for LK-94's Canonicalization Readiness check (`lib/crc-engine/
+ * canonicalization-readiness.ts`), exercised against this identity
+ * immediately after registration, before any `KNOWN_TOOLS` alias is added --
+ * see that milestone's own report for the first-attempt result.
+ */
 
 /**
  * 'luma' added 2026-09-01 (LK-87, Trial 5 Living Knowledge onboarding

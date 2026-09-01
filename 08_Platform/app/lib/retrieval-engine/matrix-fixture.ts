@@ -249,4 +249,43 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
       },
     ],
   },
+  {
+    // Trial 6 (Living Knowledge onboarding benchmark, LK-95 through LK-99) --
+    // the first genuinely new identity registered after LK-94's
+    // Canonicalization Readiness gate took effect. FGR decision 2026-09-01
+    // (PM): ADOPT WITH NARROWED WORDING. CPR decision 2026-09-01 (PM):
+    // APPROVE WITH BOUNDED WORDING -- excludes copyrightability, ownership
+    // beyond Suno's own stated assignment, non-infringement, third-party-
+    // rights clearance, training-data legality, indemnification, and any
+    // post-cancellation/lapse persistence-or-termination conclusion (the
+    // Terms are silent on the latter). See 06_Operations/institutional-
+    // knowledge/notebook/PLATFORM-RIGHTS-MATRIX.md's own "Suno" section for
+    // the full governance record, source quotations, and evidence-boundary
+    // discussion. Text below copied verbatim from that record's own CRC
+    // Claims sub-table (the LK-99 §2-corrected wording, not LK-98's
+    // over-strengthened first draft). `suno` registered in
+    // lib/tool-identity/registry.ts's CANONICAL_TOOL_IDS the same task; no
+    // KNOWN_TOOLS extraction alias added -- conversational reachability
+    // remains a separate, independently-timed concern, same discipline as
+    // every provider/tool onboarded in this corpus. LK-99's own first-attempt
+    // Canonicalization Readiness check against this identity (representative
+    // expression "Suno") FAILED -- see that milestone's own report; this
+    // fixture entry represents structured-state governed-knowledge
+    // reachability only, a separate property from conversational
+    // canonicalization readiness, per the LK-93 five-property model.
+    identifier: 'suno',
+    last_verified: '2026-09-01',
+    claims: [
+      {
+        claim_id: 'suno',
+        crc_eligible: 'Yes',
+        crc_publication_scope:
+          "CRC may state that under Suno's Terms of Service (revised March 26, 2026), Output generated under Suno's Free or Basic tier is restricted to non-commercial use, and that for a user subscribed to Suno's Pro or Premier paid tier, Suno assigns its right, title and interest in Output generated during the term of that paid-tier subscription to the user. This publication scope does not extend to copyrightability of any specific Output (Suno's own Terms disclaim any warranty that copyright vests in Output), ownership beyond Suno's stated assignment, non-infringement, third-party-rights clearance, training-data legality, indemnification, or whether this status persists or terminates if the paid subscription is later cancelled or lapses (the Terms are silent on this) — CRC must not state or imply any of these. CRC must not state which specific plan the user holds or whether the user's own Output was generated during an eligible paid-tier term.",
+        crc_candidate_statement:
+          'Under Suno\'s Terms of Service revised March 26, 2026, Output generated under the Free or Basic tier is restricted to non-commercial use. For Output generated during a Pro or Premier paid-tier subscription term, Suno states that it assigns its right, title and interest in that Output to the user.',
+        topic: 'commercial_use',
+        applicability_requirements: [],
+      },
+    ],
+  },
 ]
