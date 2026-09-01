@@ -9,6 +9,47 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of September 01, 2026
+*Run: 2026-09-01 · 15 high · 11 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Cox Media Group faces 20 years of FTC oversight over fake AI listening ads](https://ppc.land/cox-media-group-faces-20-years-of-ftc-oversight-over-fake-ai-listening-ads/) | PPC Land | Sun, 30 Aug 2026 | ☐ |
+| 9 | post+update | [AI exclusions in D&O and E&O coverage: What insurers and insureds need to know](https://www.dentons.com/en/insights/articles/2026/august/27/ai-exclusions-in-d-and-o-and-e-and-o-coverage) | Dentons | Thu, 27 Aug 2026 | ☐ |
+| 9 | post+update | [Seen an ad with an AI influencer or actor? It may be against the law.](https://mashable.com/tech/synthetic-performer-disclosure-new-york-state-law-first-complaints) | Mashable | Thu, 27 Aug 2026 | ☐ |
+| 9 | post+update | [The AI clause that may already be on your contractor client's policy](https://www.insurancebusinessmag.com/us/news/sme/the-ai-clause-that-may-already-be-on-your-contractor-clients-policy-587395.aspx) | Insurance Business | Tue, 25 Aug 2026 | ☐ |
+| 8 | post+update | [FTC Fines Cox Media $930K Over Fake AI Ad Claims](https://tech-insider.org/ftc-cox-media-group-ai-active-listening-fine-2026/) | tech-insider.org | Tue, 01 Sep 2026 | ☐ |
+| 8 | post+update | [Carl Sagan Rights Holder Sues Luma AI Over ‘Cosmos’ Voice Clip in Ad](https://www.lawcommentary.com/articles/carl-sagan-rights-holder-sues-luma-ai-over-cosmos-voice-clip-in-ad) | Law Commentary | Sun, 30 Aug 2026 | ☐ |
+| 8 | monitor | [The FTC’s Latest AI Crackdown: Why ‘Active Listening’ Was Just a Marketing Mirage](https://cryptorank.io/news/feed/b35f5-the-ftcs-latest-ai-crackdown-why-active-listening-was-just-a-marketing-mirage) | CryptoRank | Sat, 29 Aug 2026 | ☐ |
+| 8 | post+update | [Dentsu signs EU Code on AI Transparency](https://marketingreport.one/ai-for-marketing/dentsu-signs-eu-code-on-ai-transparency.html) | marketingreport.one | Thu, 27 Aug 2026 | ☐ |
+| 8 | post+update | [Regulating the Illusion of Intelligence in Ads](https://www.asa.org.uk/news/regulating-the-illusion-of-intelligence-in-ads.html) | ASA \| CAP | Thu, 27 Aug 2026 | ☐ |
+| 8 | post+update | [When the Algorithm Pours: How AI-Generated Imagery Is Testing the Boundaries of Alcohol Advertising Regulation](https://www.regulatoryoversight.com/2026/08/when-the-algorithm-pours-how-ai-generated-imagery-is-testing-the-boundaries-of-alcohol-advertising-regulation/) | regulatoryoversight.com | Tue, 25 Aug 2026 | ☐ |
+| 7 | post | [Callaway and Good Good’s Ad Was So Bad, Even AI Audiences Sounded the Alarm](https://www.adweek.com/brand-marketing/callaway-and-good-goods-ad-was-so-bad-even-ai-audiences-sounded-the-alarm/) | ADWEEK | Mon, 31 Aug 2026 | ☐ |
+| 7 | update | [Navigating AI Ownership in Commercial and License Agreements: Key Considerations for Technology Providers and Customers](https://natlawreview.com/article/navigating-ai-ownership-commercial-and-license-agreements-key-considerations) | The National Law Review | Fri, 28 Aug 2026 | ☐ |
+| 7 | update | [IAB updates AI disclosure guidance as regulators tighten rules around AI-generated advertising](https://www.marketingtechnews.net/news/iab-updates-ai-disclosure-guidance-as-regulators-tighten-rules-around-ai-generated-advertising/) | Marketing Tech News | Thu, 27 Aug 2026 | ☐ |
+| 7 | post+update | [How Does the Industry Get AI Disclosure Right?](https://hellopartner.com/how-does-the-industry-get-ai-disclosure-right/) | Hello Partner | Wed, 26 Aug 2026 | ☐ |
+| 7 | post+update | [Who’s suing AI and who’s signing latest: Editorial Perfil sues OpenAI, News Corp vs Brave](https://pressgazette.co.uk/platforms/news-publisher-ai-deals-lawsuits-openai-google/) | Press Gazette | Wed, 26 Aug 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [AI Era Corp. Begins Monetizing Its Content Library by Licensing Online Broadcast Rights — Retaining AI Training Rights as the Library Grows from the uFilm.ai Production Loop](https://markets.businessinsider.com/news/stocks/ai-era-corp-begins-monetizing-its-content-library-by-licensing-online-broadcast-rights-retaining-ai-training-rights-as-the-library-grows-from-the-ufilm-ai-production-loop-1036508044) | markets.businessinsider.com | Mon, 31 Aug 2026 | ☐ |
+| 6 | update | [Music publishers accuse Anthropic of ‘blatant theft’ in major new lawsuit](https://amp.scmp.com/tech/big-tech/article/3365770/sony-music-warner-accuse-anthropic-blatant-theft-major-new-lawsuit) | South China Morning Post | Sun, 30 Aug 2026 | ☐ |
+| 6 | monitor | [AI Isn’t Killing Marketing Accountability, It’s Exposing Who Never Had It](https://www.searchenginejournal.com/ai-isnt-killing-marketing-accountability-its-exposing-who-never-had-it/586486/) | Search Engine Journal | Fri, 28 Aug 2026 | ☐ |
+| 6 | monitor | [Everyone read 'EU Delays AI Act' wrong, here's the actual timeline](https://securitybrief.co.uk/story/everyone-read-eu-delays-ai-act-wrong-here-s-the-actual-timeline) | SecurityBrief UK | Wed, 26 Aug 2026 | ☐ |
+| 6 | monitor | [Stability AI Raises $76 Million from UMG, WMG, Sony Music, More](https://variety.com/2026/biz/news/stability-ai-raises-76-million-funding-round-1236842351/) | Variety | Tue, 25 Aug 2026 | ☐ |
+| 5 | monitor | [U.S. Copyright Office Fees Set to Rise Nearly 43% This November](https://www.einpresswire.com/article/937963115/u-s-copyright-office-fees-set-to-rise-nearly-43-this-november) | EIN Presswire | Mon, 31 Aug 2026 | ☐ |
+| 5 | monitor | [[Marketing Week] Bob Koigi: The case for transparent AI](https://marketingreport.one/ai-for-marketing/marketing-week-bob-koigi-the-case-for-transparent-ai.html) | marketingreport.one | Fri, 28 Aug 2026 | ☐ |
+| 4 | monitor | [10 Best AI Explainer Video Makers for Product Marketing Teams](https://nerdbot.com/2026/08/31/10-best-ai-explainer-video-makers-for-product-marketing-teams/) | nerdbot | Mon, 31 Aug 2026 | ☐ |
+| 4 | monitor | [The Growing Push for AI Transparency: What South African Businesses Should Know](https://www.fanews.co.za/article/legal-affairs/10/general/1120/the-growing-push-for-ai-transparency-what-south-african-businesses-should-know/44601) | fanews.co.za | Mon, 31 Aug 2026 | ☐ |
+| 4 | monitor | [ASA guidance on advertising AI assistants and chatbots](https://www.resultsense.com/news/2026-08-27-asa-ai-assistant-ad-claims/) | resultsense.com | Thu, 27 Aug 2026 | ☐ |
+| 4 | monitor | [The case for craft: How AI can help directors who know what they’re looking for](https://adage.com/studio-30/publishing-partners/aa-the-case-for-craft-how-ai-can-help-directors-who-know-what-theyre-looking-for/) | Ad Age | Wed, 26 Aug 2026 | ☐ |
+
+---
+
 ## Week of August 31, 2026
 *Run: 2026-08-31 · 13 high · 6 monitor · lookback 7 days*
 
