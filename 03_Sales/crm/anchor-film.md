@@ -22,6 +22,19 @@ Graduated from `03_Sales/CRM.md` (row B164) on 2026-08-15 — an active, develop
 
 ## Interaction log (reverse-chronological)
 
+### 2026-09-01 — Commercial Readiness discovery prompt prepared for next direct conversation (not a message to send)
+
+**Context:** part of a batch Commercial Readiness discovery pass across 10 warm leads, testing whether evidence/documentation feeds into a distinct interpretation + commercial-use decision layer (`evidence/documentation → interpretation or review → commercial-use decision/sign-off`) or whether documentation alone is sufficient. Alice is the one relationship in this batch treated as a live discussion, not outbound messaging — stage and next_action above are **unchanged** by this entry; the existing "schedule call next week" action remains authoritative.
+
+**Why this matters:** Alice's own 創作履歷 (creation-record) prototype is a direct test case for the hypothesis — does producing a structured creation record itself solve the commercial-readiness question, or does it merely supply evidence to a later decision-maker (at Chunghwa Telecom, Uni-President, or another client)?
+
+**Discussion prompt (to raise live, at the rescheduled call — not a LinkedIn/outbound send):**
+> Once your prototype produces the record, is there another step where someone at Chunghwa Telecom or Uni-President actually reviews it and says the project is okay to use commercially? Or does producing the record itself effectively count as the approval?
+
+**Analytical discipline reminder (applies once she answers):** classify her response as CURRENT FACT before drawing any WORKING HYPOTHESIS about the Commercial Readiness layer generally — Alice's own workflow, however informative, is one data point, not a market-wide conclusion.
+
+**Tags:** Commercial Readiness Discovery · Warm Lead · Prior Response · Qualitative Evidence · Relationship/Live Discussion (not a batch-priority tier)
+
 ### 2026-08-28 / 2026-09-01 — LINE thread: Creation Rights reference shared; Living Lab event skipped, grant discussion re-scheduled
 
 **Aug 28 (Fri), 17:52-18:01:** JD shared `https://creationrights.com/solutions/studios` via LINE, noting it resembles the production-capture platform concept they'd discussed ("蠻像我們討論的platform，可以參考"). Alice responded positively ("哇好！") within minutes. No further detail exchanged on this thread — a reference/FYI share, not a structured discussion.
