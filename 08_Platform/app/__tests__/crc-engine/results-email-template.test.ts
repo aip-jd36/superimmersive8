@@ -6,6 +6,13 @@
 
 import { buildResultsEmailContent } from '../../lib/crc-engine/results-email-template'
 import type { ProjectionOutput } from '../../lib/projection-layer/types'
+import { buildConsultativeAnswerPlan } from '../../lib/crc-engine/consultative-answer-plan'
+import { buildBoundedInterpretations } from '../../lib/bounded-interpretation/build-bounded-interpretation'
+import { assembleProjectionOutput } from '../../lib/projection-layer/assemble-projection-output'
+import { retrieve } from '../../lib/retrieval-engine/retrieve'
+import { MATRIX_FIXTURE } from '../../lib/retrieval-engine/matrix-fixture'
+import type { ApplicabilityFacts } from '../../lib/retrieval-engine/lookup-topic-claims'
+import type { RetrievalHandoff, ToolMention, UserGoal } from '../../types/interview-engine'
 
 const FULL_OUTPUT: ProjectionOutput = {
   opening_line: 'You mentioned using Veo for a client project.',
@@ -193,6 +200,149 @@ describe('buildResultsEmailContent', () => {
       expect(html).toContain('Current guidance')
       expect(text).toContain('YOUR WORKFLOW')
       expect(text).toContain('CURRENT GUIDANCE')
+    })
+  })
+
+  describe('CC-3B -- deterministic consultative surface realization (2026-09-02)', () => {
+    const h = (o: Partial<RetrievalHandoff> = {}): RetrievalHandoff => ({
+      tools: [], unresolved_aliases: [], asset_providers: [], unresolved_asset_provider_mentions: [],
+      workflow_role: 'unresolved', intended_use: 'unclear', scoped_observations: [], certainty_state: 'gate_1_unmet', exclusions: [], ...o,
+    })
+    const tool = (identifier: string) => ({ identifier, access_surface: 'unresolved' as const, plan_tier: 'unknown' as const })
+    const g = (goal_id: string, raw_text: string, category: UserGoal['category']): UserGoal =>
+      ({ goal_id, raw_text, category, state: 'confirmed', scope: 'informational', superseded_by: null, source_turn: 1, source_statement: raw_text })
+    const tmn = (identifier: string): ToolMention => ({
+      mention_id: `m-${identifier}`, resolution: { kind: 'canonical', identifier },
+      access_surface: { state: 'unknown' }, plan_tier: { state: 'unknown' }, account_status: { state: 'unknown' },
+      confidence: 'confirmed', source_turn: 1, source_statement: identifier, superseded_by: null,
+    })
+    const facts = (tms: ToolMention[] = []): ApplicabilityFacts => ({ jurisdiction: { included: [], excluded: [] }, toolMentions: tms })
+
+    function pipeline(handoff: RetrievalHandoff, goals: UserGoal[], applic: ApplicabilityFacts) {
+      const out = retrieve(handoff, MATRIX_FIXTURE, goals, [], applic)
+      const interps = buildBoundedInterpretations(goals, out.results, out.diagnostics)
+      const { output } = assembleProjectionOutput(handoff, out.results, interps)
+      const plan = buildConsultativeAnswerPlan(interps, out.results, out.diagnostics)
+      return { output, plan }
+    }
+
+    test('CASE 1 (Runway, one goal): governed guidance appears exactly ONCE, under "What this means", not also under "Current guidance"', () => {
+      const { output, plan } = pipeline(h({ tools: [tool('runway-gen3')] }), [g('g1', 'Can I use it commercially?', 'commercial_use')], facts())
+      const stmt = output.knowledge_items[0].statement
+      const withoutPlan = buildResultsEmailContent(output, 'attr-1', 'jd@example.com')
+      const withPlan = buildResultsEmailContent(output, 'attr-1', 'jd@example.com', plan)
+
+      // before CC-3B: the statement appears twice (Current guidance + What this means)
+      expect(withoutPlan.text.split(stmt.slice(0, 40)).length - 1).toBe(2)
+      // after CC-3B: exactly once
+      expect(withPlan.text.split(stmt.slice(0, 40)).length - 1).toBe(1)
+      // it survives, inside the goal section (plain-text is unescaped)
+      expect(withPlan.html).toContain('What this means for what you asked')
+      expect(withPlan.text).toContain(stmt)
+      // "Current guidance" heading is gone (nothing left to render there)
+      expect(withPlan.html).not.toContain('Current guidance')
+      expect(withPlan.text).not.toContain('CURRENT GUIDANCE')
+    })
+
+    test('CASE 2 (Suno + Kling, unresolved applicability): Suno/Kling guidance rendered once; no blocker/material/prevents/clears language; boundary preserved', () => {
+      const { output, plan } = pipeline(
+        h({ tools: [tool('suno'), tool('kling')] }),
+        [g('g1', 'Can I use it commercially?', 'commercial_use')],
+        facts([tmn('suno'), tmn('kling')]),
+      )
+      const { html, text } = buildResultsEmailContent(output, 'attr-1', 'jd@example.com', plan)
+
+      // the Suno conditional text appears once, inside the goal section
+      const sunoFragment = 'Pro or Premier paid-tier subscription term'
+      expect(text.split(sunoFragment).length - 1).toBe(1)
+      // the "additional governed guidance" hedge (from BI) is still present -- CC-3B does not remove it
+      expect(text).toMatch(/additional governed guidance/i)
+      // no materiality / blocker language introduced anywhere
+      expect(text.toLowerCase()).not.toMatch(/\b(blocker|the material issue|prevents commercial use|you're cleared|this is resolved|will clear this)\b/)
+      // CRC boundary + CA CTA preserved exactly, once, at the end
+      expect(html).toContain('not an SI8 Commercial Assurance Assessment')
+      expect(html).toContain('Talk with SI8 about a Commercial Assurance Assessment')
+      expect((html.match(/not an SI8 Commercial Assurance Assessment/g) || []).length).toBe(1)
+    })
+
+    test('CASE 3 (explicit + discovered): explicit goal section renders before any leftover "Also relevant" block; no fabricated goal', () => {
+      // a discovered result surfaces via a topic claim NOT tied as an exact-topic match;
+      // approximate with a literal output+plan where one knowledge_item is NOT in the goal section.
+      const output: ProjectionOutput = {
+        opening_line: 'You mentioned a tool and some stock footage.',
+        understood_summary: 'workflow recap',
+        knowledge_items: [
+          { claim_id: 'kling-commercial-use-baseline', statement: 'Explicit-goal governed statement.', last_verified: null },
+          { claim_id: 'DISCOVERED-STOCK', statement: 'Discovered stock-media consideration.', last_verified: null },
+        ],
+        goal_interpretations: [{ goal_text: 'Can I use it commercially?', summary: 'Explicit-goal governed statement. This is relevant to whether this can be used commercially, though it reflects the platform\'s own terms.', summary_blocks: ['Explicit-goal governed statement. This is relevant to whether this can be used commercially, though it reflects the platform\'s own terms.'] }],
+        closing_cta: '',
+      }
+      const plan = {
+        explicit_sections: [{
+          goal_text: 'Can I use it commercially?', category: 'commercial_use' as const, bi_status: 'directly_relevant' as const, disposition: 'governed_guidance_available' as const,
+          supported_claim_refs: [{ claim_id: 'kling-commercial-use-baseline', matrix_identifier: 'kling', match_origin: 'exact_topic' as const, matched_goal_category: 'commercial_use' as const, relationship_id: null, last_verified: null }],
+          unresolved_items: [], missing_evidence: [], boundary_ref: 'tool_source' as const, bi_summary_blocks: ['x'],
+        }],
+        discovered_context: [{ claim_ref: { claim_id: 'DISCOVERED-STOCK', matrix_identifier: 'tprs', match_origin: 'discovered_topic' as const, matched_goal_category: 'commercial_use' as const, relationship_id: null, last_verified: null }, authorizing_goal_category: 'commercial_use' as const }],
+        render_once_markers: [], commercial_assurance_refs: [],
+      }
+      const { html } = buildResultsEmailContent(output, 'attr-1', 'jd@example.com', plan)
+      // explicit goal section is first
+      expect(html.indexOf('What this means for what you asked')).toBeLessThan(html.indexOf('Also relevant to your workflow'))
+      // the discovered item still renders, under the subordinate neutral heading
+      expect(html).toContain('Also relevant to your workflow')
+      expect(html).toContain('Discovered stock-media consideration.')
+      // the explicit-goal claim is NOT re-rendered under the subordinate heading
+      const subordinateSlice = html.slice(html.indexOf('Also relevant to your workflow'))
+      expect(subordinateSlice).not.toContain('Explicit-goal governed statement.')
+      // no fabricated goal_text for the discovered item
+      expect(html).not.toContain('You asked: &ldquo;Discovered')
+    })
+
+    test('CASE 4 (no goal / outside coverage): with an empty plan, output is byte-identical to the no-plan render (fail closed to existing behavior)', () => {
+      const { output, plan } = pipeline(h({ tools: [tool('runway-gen3')] }), [], facts())
+      expect(plan.explicit_sections).toEqual([])
+      const withPlan = buildResultsEmailContent(output, 'attr-1', 'jd@example.com', plan)
+      const withoutPlan = buildResultsEmailContent(output, 'attr-1', 'jd@example.com')
+      expect(withPlan).toEqual(withoutPlan)
+    })
+
+    test('CASE 5 (correction/supersession): a post-correction output/plan referencing only Kling renders no Suno content', () => {
+      const output: ProjectionOutput = {
+        opening_line: 'x', understood_summary: 'x',
+        knowledge_items: [{ claim_id: 'kling-commercial-use-baseline', statement: 'Kling governed statement.', last_verified: null }],
+        goal_interpretations: [{ goal_text: 'Can I use it commercially?', summary: 'Kling governed statement. Boundary.', summary_blocks: ['Kling governed statement. Boundary.'] }],
+        closing_cta: '',
+      }
+      const plan = {
+        explicit_sections: [{
+          goal_text: 'Can I use it commercially?', category: 'commercial_use' as const, bi_status: 'directly_relevant' as const, disposition: 'governed_guidance_available' as const,
+          supported_claim_refs: [{ claim_id: 'kling-commercial-use-baseline', matrix_identifier: 'kling', match_origin: 'exact_topic' as const, matched_goal_category: 'commercial_use' as const, relationship_id: null, last_verified: null }],
+          unresolved_items: [], missing_evidence: [], boundary_ref: 'tool_source' as const, bi_summary_blocks: ['x'],
+        }],
+        discovered_context: [], render_once_markers: [], commercial_assurance_refs: [],
+      }
+      const { html, text } = buildResultsEmailContent(output, 'attr-1', 'jd@example.com', plan)
+      expect(html.toLowerCase()).not.toContain('suno')
+      expect(text.toLowerCase()).not.toContain('suno')
+    })
+
+    test('no-plan call is byte-for-byte identical to the pre-CC-3B renderer for every existing scenario', () => {
+      const scenarios: ProjectionOutput[] = [
+        FULL_OUTPUT,
+        EMPTY_OUTPUT,
+        { ...FULL_OUTPUT, goal_interpretations: [{ goal_text: 'Q', summary: 'A.', summary_blocks: ['A.'] }] },
+        { ...EMPTY_OUTPUT, goal_interpretations: [{ goal_text: 'Q', summary: 'A. B.', summary_blocks: ['A.', 'B.'] }] },
+      ]
+      for (const s of scenarios) {
+        expect(buildResultsEmailContent(s, 'attr-1', 'jd@example.com', undefined)).toEqual(buildResultsEmailContent(s, 'attr-1', 'jd@example.com'))
+      }
+    })
+
+    test('deterministic -- same output+plan renders identically across calls', () => {
+      const { output, plan } = pipeline(h({ tools: [tool('suno'), tool('kling')] }), [g('g1', 'commercial?', 'commercial_use')], facts([tmn('suno'), tmn('kling')]))
+      expect(buildResultsEmailContent(output, 'a', 'e@x.com', plan)).toEqual(buildResultsEmailContent(output, 'a', 'e@x.com', plan))
     })
   })
 })

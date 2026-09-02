@@ -252,24 +252,62 @@ describe('subsystem boundaries -- Consultative Answer Plan (CC-3A)', () => {
     }
   })
 
-  test('no orchestration/realization file calls it in CC-3A -- nothing renders it yet (surface unchanged)', () => {
-    // The realization/orchestration path that would wire the plan into the
-    // user-visible answer. A dev/review script under scripts/ importing it is
-    // fine and expected; the point is that the RENDERING path is untouched.
-    const REALIZATION_PATH = [
-      'lib/crc-engine/run-crc-conversation.ts',
-      'lib/crc-engine/run-turn.ts',
-      'lib/crc-engine/results-email-delivery.ts',
-      'lib/crc-engine/results-email-template.ts',
-      'lib/crc-engine/complete-response.ts',
+  test('CC-3B: the plan is consumed ONLY by the deterministic realization path -- never by BI, Retrieval, Interview, questioning, or ProjectionOutput assembly', () => {
+    const ALLOWED = new Set([
+      'lib/crc-engine/consultative-answer-plan.ts',
+      'lib/crc-engine/consultative-realization.ts',
+      'lib/crc-engine/run-crc-conversation.ts', // orchestrator builds the plan
+      'lib/crc-engine/results-email-template.ts', // CC-3B: consumes plan to de-duplicate rendering
+      'lib/crc-engine/results-email-delivery.ts', // passes the built plan to the template
+      'lib/crc-engine/scripts/cc3a-plan-snapshots.ts',
+      'lib/crc-engine/scripts/cc3b-before-after-snapshots.ts',
+    ])
+    const FORBIDDEN = [
+      ...BOUNDED_INTERPRETATION_FILES,
+      ...RETRIEVAL_ENGINE_FILES,
+      ...INTERVIEW_ENGINE_FILES,
       'lib/projection-layer/assemble-projection-output.ts',
       'lib/projection-layer/project-knowledge-items.ts',
       'lib/projection-layer/understood-summary.ts',
+      'lib/projection-layer/types.ts',
+      'lib/crc-engine/run-turn.ts',
+      'lib/crc-engine/complete-response.ts',
+      'lib/crc-engine/selector-questioning.ts',
+      'lib/crc-engine/knowledge-readiness.ts',
     ]
-    const callers = REALIZATION_PATH.filter((file) => {
+    for (const file of FORBIDDEN) {
       const source = fs.readFileSync(path.join(APP_ROOT, file), 'utf-8')
-      return /buildConsultativeAnswerPlan|consultative-answer-plan/.test(source)
-    })
-    expect(callers).toEqual([])
+      expect(source).not.toMatch(/buildConsultativeAnswerPlan|consultative-answer-plan|consultative-realization/)
+    }
+    for (const file of CRC_ENGINE_FILES) {
+      const source = fs.readFileSync(path.join(APP_ROOT, file), 'utf-8')
+      if (/buildConsultativeAnswerPlan|consultative-answer-plan|consultative-realization/.test(source)) {
+        expect(ALLOWED.has(file.split(path.sep).join('/'))).toBe(true)
+      }
+    }
+  })
+})
+
+describe('subsystem boundaries -- Consultative Realization (CC-3B)', () => {
+  const FILE = 'lib/crc-engine/consultative-realization.ts'
+  const importText = importLinesOf(FILE).join('\n')
+
+  test('it exists', () => {
+    expect(fs.existsSync(path.join(APP_ROOT, FILE))).toBe(true)
+  })
+
+  test('imports no BI/Retrieval/Interview LOGIC, no Matrix, no LLM -- only types', () => {
+    expect(importText).not.toMatch(/lib\/bounded-interpretation\/(rules|build-bounded-interpretation)/i)
+    expect(importText).not.toMatch(/lib\/retrieval-engine\/(retrieve|lookup-|enumerate-eligible-claims|extract-matchable-facts|assemble-result|matrix-fixture)/i)
+    expect(importText).not.toMatch(/lib\/interview-engine\//i)
+    expect(importText).not.toMatch(/platform-rights-matrix/i)
+    expect(importText).not.toMatch(/anthropic/i)
+    expect(importText).not.toMatch(/openai/i)
+  })
+
+  test('every import is type-only', () => {
+    for (const line of importLinesOf(FILE)) {
+      expect(line).toMatch(/^import type /)
+    }
   })
 })

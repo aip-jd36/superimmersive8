@@ -9,7 +9,7 @@
  * type-only (see the subsystem-boundaries test suite, which verifies this
  * as a structural property, not a discipline).
  *
- * Glue only: four already-published pure function calls, in order, each
+ * Glue only: five already-published pure function calls, in order, each
  * one's full output passed to the next unmodified. No reinterpretation of
  * any value, no duplicated business logic, no re-implementation of
  * Retrieval's matching or Projection's rendering. If this function ever
@@ -27,6 +27,17 @@
  * `assembleProjectionOutput`'s new third parameter unmodified, same
  * "full output passed to the next unmodified" discipline as every other
  * step here.
+ *
+ * CC-3B addition (2026-09-02, Deterministic Consultative Surface
+ * Realization): `buildConsultativeAnswerPlan` (CC-3A) is the fifth pure
+ * call -- built from the same `interpretations` / `results` /
+ * `retrievalDiagnostics` this function already has in hand, never a second
+ * Retrieval or BI pass. Its output is returned as an additive
+ * `plan` field alongside `output` -- `output` itself is NOT modified here
+ * or anywhere downstream in this module. Surface realization
+ * (`results-email-template.ts`) reads `plan` to suppress the duplicate
+ * rendering of a governed statement that already appears verbatim inside a
+ * goal section; see `consultative-realization.ts`.
  *
  * Input boundary (architecture decision, Phase 1 review, 2026-08-08):
  * `StructuredUnderstanding`, NOT raw conversation turns. JD's own
@@ -62,6 +73,7 @@ import type { ProjectionDiagnostic, ProjectionOutput } from '@/lib/projection-la
 import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
 import { deriveDiscoveredTopicOccurrences } from './discovered-relevance'
 import { deriveAssessmentJurisdictionFacts } from './assessment-jurisdiction-scope'
+import { buildConsultativeAnswerPlan, type ConsultativeAnswerPlan } from './consultative-answer-plan'
 import type { RetrievalHandoff, StructuredUnderstanding } from '@/types/interview-engine'
 
 export interface CRCPipelineDiagnostics {
@@ -85,6 +97,19 @@ export interface CRCPipelineTrace {
 
 export interface CRCPipelineResult {
   output: ProjectionOutput
+  /**
+   * CC-3B (2026-09-02): the deterministic ConsultativeAnswerPlan for this
+   * turn, built by CC-3A's `buildConsultativeAnswerPlan` from the same
+   * `interpretations` / `results` / `retrievalDiagnostics` this function
+   * already computed. Additive -- `output` is unchanged (same object,
+   * same fields), so every existing consumer that reads only `output`,
+   * `diagnostics`, or `trace` is unaffected, and the teaser's
+   * `knowledge_items.length` count is untouched. The plan is consumed by
+   * surface realization (`results-email-template.ts`) to suppress the
+   * duplicate rendering of a governed statement that already appears
+   * verbatim inside a goal section -- see `consultative-realization.ts`.
+   */
+  plan: ConsultativeAnswerPlan
   diagnostics: CRCPipelineDiagnostics
   trace: CRCPipelineTrace
 }
@@ -189,8 +214,14 @@ export function runCRCConversation(
   )
   const { output, diagnostics: projectionDiagnostics } = assembleProjectionOutput(handoff, results, interpretations)
 
+  // CC-3B: deterministic plan built from the SAME already-computed values --
+  // glue only, same discipline as every other call in this module. `output`
+  // is not modified by this line or anything downstream of it here.
+  const plan = buildConsultativeAnswerPlan(interpretations, results, retrievalDiagnostics)
+
   return {
     output,
+    plan,
     diagnostics: { retrieval: retrievalDiagnostics, projection: projectionDiagnostics },
     trace: { retrieval_handoff: handoff, retrieval_results: results, projection_output: output },
   }

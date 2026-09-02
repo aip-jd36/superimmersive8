@@ -233,6 +233,20 @@ describe('runCRCConversation -- traceability (Phase 5)', () => {
     expect(trace.projection_output).toEqual(EMPTY_PROJECTION_OUTPUT)
   })
 
+  test('CC-3B: an additive `plan` (CC-3A ConsultativeAnswerPlan) is returned, and adding it does NOT alter `output` -- same 5 keys, same knowledge_items the teaser count reads', () => {
+    const { output, plan } = runCRCConversation(DIALOGUE_FIXTURES.rich_signal.structured_understanding, MATRIX_FIXTURE)
+    expect(Object.keys(output).sort()).toEqual(['closing_cta', 'goal_interpretations', 'knowledge_items', 'opening_line', 'understood_summary'])
+    expect(Object.keys(plan).sort()).toEqual(['commercial_assurance_refs', 'discovered_context', 'explicit_sections', 'render_once_markers'])
+    expect(Array.isArray(plan.explicit_sections)).toBe(true)
+  })
+
+  test('CC-3B: the all-empty case produces an empty plan -- fail-closed', () => {
+    const { plan } = runCRCConversation(DIALOGUE_FIXTURES.no_signal.structured_understanding, MATRIX_FIXTURE)
+    expect(plan.explicit_sections).toEqual([])
+    expect(plan.discovered_context).toEqual([])
+    expect(plan.commercial_assurance_refs).toEqual([])
+  })
+
   test('all 8 canonical DIALOGUE_FIXTURES run through the full pipeline without error, producing a valid ProjectionOutput shape every time', () => {
     for (const fixture of Object.values(DIALOGUE_FIXTURES)) {
       const { output } = runCRCConversation(fixture.structured_understanding, MATRIX_FIXTURE)

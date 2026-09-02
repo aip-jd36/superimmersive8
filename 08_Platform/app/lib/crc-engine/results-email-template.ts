@@ -44,9 +44,32 @@
  * colored differently from another; visual symmetry is a hard requirement,
  * not a default that happened to be convenient (PM instruction: dependency-
  * free and dependency-bearing content must carry equal visual weight).
+ *
+ * CC-3B (2026-09-02, Deterministic Consultative Surface Realization):
+ * `buildResultsEmailContent` now accepts an OPTIONAL `plan`
+ * (ConsultativeAnswerPlan, CC-3A). When it is passed:
+ *   - "What this means for what you asked" (goal_interpretations) renders
+ *     BEFORE the knowledge-item list, so the explicit-goal answer comes
+ *     first.
+ *   - a knowledge_item whose claim is already rendered, verbatim, inside a
+ *     goal section (`explicit_sections[].supported_claim_refs`) is NOT
+ *     rendered a second time -- this removes the duplicate presentation of
+ *     the same governed statement across "Current guidance" and "What this
+ *     means". Structural identity only (claim_id); nothing is dropped, only
+ *     de-duplicated in rendering. See `consultative-realization.ts`.
+ *   - any remaining knowledge_item (workflow-relevant considerations not
+ *     tied to the explicit goal -- the plan's discovered context, in the
+ *     has-goal case) renders under a neutral subordinate heading.
+ * When `plan` is omitted the output is byte-for-byte identical to before
+ * this milestone (same order, same "Current guidance" heading, every item).
+ * No new claim prose, no ranking, no materiality, no boundary-language
+ * change: the educational disclaimer and the Commercial Assurance CTA are
+ * exactly as before, still rendered once, at the end.
  */
 
-import type { ProjectionOutput } from '@/lib/projection-layer/types'
+import type { ProjectionKnowledgeItem, ProjectionOutput } from '@/lib/projection-layer/types'
+import type { ConsultativeAnswerPlan } from './consultative-answer-plan'
+import { partitionKnowledgeItemsByPlan, planHasExplicitGoalSections } from './consultative-realization'
 import { buildCalendlyUrl } from './calendly-attribution'
 
 function formatLastVerified(value: string | null): string | null {
@@ -74,7 +97,12 @@ const EDUCATIONAL_DISCLAIMER =
   'This is educational workflow guidance from a short conversation, not an SI8 Commercial Assurance Assessment. It does not provide legal advice or certify commercial use.'
 const CTA_LABEL = 'Talk with SI8 about a Commercial Assurance Assessment'
 
-export function buildResultsEmailContent(output: ProjectionOutput, attributionToken: string | null | undefined, email: string): ResultsEmailContent {
+export function buildResultsEmailContent(
+  output: ProjectionOutput,
+  attributionToken: string | null | undefined,
+  email: string,
+  plan?: ConsultativeAnswerPlan,
+): ResultsEmailContent {
   const isFullyEmpty =
     output.opening_line === '' && output.understood_summary === '' && output.knowledge_items.length === 0 && output.goal_interpretations.length === 0
   const ctaUrl = buildCalendlyUrl(attributionToken, email)
@@ -84,6 +112,63 @@ export function buildResultsEmailContent(output: ProjectionOutput, attributionTo
 
   htmlParts.push('<h1 style="font-size:20px;margin:0 0 20px;padding-bottom:14px;color:#111;border-bottom:2px solid #233f66;">Your Commercial Readiness Check</h1>')
   textParts.push('YOUR COMMERCIAL READINESS CHECK\n')
+
+  // CC-3B: with a plan, drop any knowledge_item already rendered verbatim
+  // inside a goal section, and label the rest as subordinate context.
+  // Without a plan, this resolves to "render every item under the original
+  // 'Current guidance' heading" -- byte-identical to before CC-3B.
+  const knowledgeItemsToRender: ProjectionKnowledgeItem[] = plan
+    ? partitionKnowledgeItemsByPlan(output.knowledge_items, plan).supplementary
+    : output.knowledge_items
+  const knowledgeHeadingHtml =
+    plan && planHasExplicitGoalSections(plan)
+      ? 'Also relevant to your workflow'
+      : 'Current guidance'
+  const knowledgeHeadingText =
+    plan && planHasExplicitGoalSections(plan) ? 'ALSO RELEVANT TO YOUR WORKFLOW' : 'CURRENT GUIDANCE'
+
+  const renderKnowledgeItems = () => {
+    if (knowledgeItemsToRender.length === 0) return
+    htmlParts.push(`<p style="font-size:13px;font-weight:600;margin:0 0 10px;color:#111;">${knowledgeHeadingHtml}</p>`)
+    textParts.push(`\n${knowledgeHeadingText}\n`)
+    for (const item of knowledgeItemsToRender) {
+      const lastUpdated = formatLastVerified(item.last_verified)
+      htmlParts.push(
+        `<div style="border:1px solid #e0e0e0;border-radius:6px;padding:14px 16px;margin:0 0 12px;">` +
+          `<p style="font-size:14px;color:#222;white-space:pre-line;margin:0;">${escapeHtml(item.statement)}</p>` +
+          (lastUpdated ? `<p style="font-size:12px;color:#888;margin:8px 0 0;">Content last updated ${escapeHtml(lastUpdated)}</p>` : '') +
+          `</div>`,
+      )
+      textParts.push(`- ${item.statement}${lastUpdated ? ` (Content last updated ${lastUpdated})` : ''}\n`)
+    }
+  }
+
+  const renderGoalInterpretations = () => {
+    if (output.goal_interpretations.length === 0) return
+    htmlParts.push('<p style="font-size:14px;font-weight:600;margin:24px 0 10px;color:#111;border-top:1px solid #eee;padding-top:20px;">What this means for what you asked</p>')
+    textParts.push('\nWHAT THIS MEANS FOR WHAT YOU ASKED\n')
+    for (const item of output.goal_interpretations) {
+      // Phase 1: one <p> per already-authorized block instead of one <p>
+      // around the whole joined string -- every block gets IDENTICAL
+      // styling (no emphasis differences between blocks), and a block
+      // gets its own bottom margin only when another block follows it,
+      // so a single-block item (the ordinary case outside CC-1's mixed
+      // Case-3B shape) renders exactly as before, byte-for-byte spacing.
+      const blockParagraphsHtml = item.summary_blocks
+        .map((block, i) => {
+          const isLast = i === item.summary_blocks.length - 1
+          return `<p style="font-size:14px;color:#222;white-space:pre-line;margin:0${isLast ? '' : ' 0 10px'};">${escapeHtml(block)}</p>`
+        })
+        .join('')
+      htmlParts.push(
+        `<div style="border:1px solid #e0e0e0;border-radius:6px;padding:14px 16px;margin:0 0 12px;">` +
+          `<p style="font-size:13px;font-style:italic;color:#555;margin:0 0 10px;">You asked: &ldquo;${escapeHtml(item.goal_text)}&rdquo;</p>` +
+          blockParagraphsHtml +
+          `</div>`,
+      )
+      textParts.push(`You asked: "${item.goal_text}"\n\n${item.summary_blocks.join('\n\n')}\n\n`)
+    }
+  }
 
   if (isFullyEmpty) {
     const emptyLine =
@@ -101,44 +186,14 @@ export function buildResultsEmailContent(output: ProjectionOutput, attributionTo
       htmlParts.push(`<p style="font-size:14px;color:#444;white-space:pre-line;margin:0 0 20px;">${escapeHtml(output.understood_summary)}</p>`)
       textParts.push(`${output.understood_summary}\n`)
     }
-    if (output.knowledge_items.length > 0) {
-      htmlParts.push('<p style="font-size:13px;font-weight:600;margin:0 0 10px;color:#111;">Current guidance</p>')
-      textParts.push('\nCURRENT GUIDANCE\n')
-      for (const item of output.knowledge_items) {
-        const lastUpdated = formatLastVerified(item.last_verified)
-        htmlParts.push(
-          `<div style="border:1px solid #e0e0e0;border-radius:6px;padding:14px 16px;margin:0 0 12px;">` +
-            `<p style="font-size:14px;color:#222;white-space:pre-line;margin:0;">${escapeHtml(item.statement)}</p>` +
-            (lastUpdated ? `<p style="font-size:12px;color:#888;margin:8px 0 0;">Content last updated ${escapeHtml(lastUpdated)}</p>` : '') +
-            `</div>`,
-        )
-        textParts.push(`- ${item.statement}${lastUpdated ? ` (Content last updated ${lastUpdated})` : ''}\n`)
-      }
-    }
-    if (output.goal_interpretations.length > 0) {
-      htmlParts.push('<p style="font-size:14px;font-weight:600;margin:24px 0 10px;color:#111;border-top:1px solid #eee;padding-top:20px;">What this means for what you asked</p>')
-      textParts.push('\nWHAT THIS MEANS FOR WHAT YOU ASKED\n')
-      for (const item of output.goal_interpretations) {
-        // Phase 1: one <p> per already-authorized block instead of one <p>
-        // around the whole joined string -- every block gets IDENTICAL
-        // styling (no emphasis differences between blocks), and a block
-        // gets its own bottom margin only when another block follows it,
-        // so a single-block item (the ordinary case outside CC-1's mixed
-        // Case-3B shape) renders exactly as before, byte-for-byte spacing.
-        const blockParagraphsHtml = item.summary_blocks
-          .map((block, i) => {
-            const isLast = i === item.summary_blocks.length - 1
-            return `<p style="font-size:14px;color:#222;white-space:pre-line;margin:0${isLast ? '' : ' 0 10px'};">${escapeHtml(block)}</p>`
-          })
-          .join('')
-        htmlParts.push(
-          `<div style="border:1px solid #e0e0e0;border-radius:6px;padding:14px 16px;margin:0 0 12px;">` +
-            `<p style="font-size:13px;font-style:italic;color:#555;margin:0 0 10px;">You asked: &ldquo;${escapeHtml(item.goal_text)}&rdquo;</p>` +
-            blockParagraphsHtml +
-            `</div>`,
-        )
-        textParts.push(`You asked: "${item.goal_text}"\n\n${item.summary_blocks.join('\n\n')}\n\n`)
-      }
+    if (plan) {
+      // Explicit-goal answer first, then any subordinate workflow context.
+      renderGoalInterpretations()
+      renderKnowledgeItems()
+    } else {
+      // Pre-CC-3B order, preserved byte-for-byte when no plan is supplied.
+      renderKnowledgeItems()
+      renderGoalInterpretations()
     }
   }
 

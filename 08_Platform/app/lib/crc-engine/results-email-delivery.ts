@@ -109,7 +109,10 @@ export async function deliverCrcResultsEmail(client: SupabaseClient, params: Del
   // ── Recompute the already-completed result -- pure, no model call, same
   // function GET already uses for a completed session. ──
   const result = runCRCConversation(params.structuredUnderstanding, params.matrix, params.topicClaims ?? [], params.relationships ?? [])
-  const { html, text } = buildResultsEmailContent(result.output, params.attributionToken, params.email)
+  // CC-3B: pass the deterministic plan so the email renderer suppresses the
+  // duplicate rendering of governed statements already shown inside a goal
+  // section. `result.output` is unchanged by CC-3B.
+  const { html, text } = buildResultsEmailContent(result.output, params.attributionToken, params.email, result.plan)
 
   const outcome = await sendCrcResultsEmail(params.email, 'Your Commercial Readiness Check results', html, text)
 
