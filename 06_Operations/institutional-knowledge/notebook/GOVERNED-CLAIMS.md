@@ -2845,3 +2845,209 @@ Related: A separate, unresolved, not-yet-researched future claim family may conc
 Full Formal Governance Review artifact: `governance-reviews/FGR_012_CAND-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001_2026-08-31.md`
 Full CRC Publication Review artifact: `governance-reviews/CPR_012_CLAIM-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001-v1_2026-08-31.md`
 Candidate Representation: `08_Platform/app/lib/candidates/CAND-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001.ts` (UNCOMMITTED as of this record — Trial 4 (LK-70 through LK-75) has deliberately kept all governance artifacts as prospective, uncommitted local work throughout, unlike Trial 2/3's per-step commit-and-push discipline; no commit hash exists to cite here. Flagged explicitly rather than fabricated — see LK-74/LK-75 Final Reports.)
+
+---
+
+**Two claims below (2026-09-02, `FGR_013`/`CPR_013`) — the first claims in this document independently re-reviewed for a tool already carrying a live, `Yes`-decided `PLATFORM-RIGHTS-MATRIX.md` row, and the first real use of `claim_character: conditional`.** `Lifecycle: Adopted` for both (Adoption Approver: JD (PM), Adoption Decision Date: 2026-09-02 — `governance-reviews/FGR_013_CAND-KLING-COMMERCIAL-USE-001_2026-09-02.md`), `Publication scope: Reviewer/Commercial Assurance`. **Not CRC-eligible — `CRC Approver`/`CRC Decision Date` PENDING, but for a different reason than every prior wave's ordinary "CPR not yet performed" PENDING:** `governance-reviews/CPR_013_KLING_COMMERCIAL_USE_PACKAGE_2026-09-02.md` was performed and recommended **WITHHOLD** for both, per the tool-scoped legacy-coexistence practice (`CRC-PUBLICATION-POLICY.md`) — a combined synthetic canary empirically showed the live Kling Matrix row (`kling-commercial-use-baseline`, `kling-commercial-use-member`, both still `crc_eligible: Yes` there, unretired, unmodified by this recording) and these two TopicClaims producing verbatim-duplicated rendered output when both are simultaneously eligible. This WITHHOLD is a publication-layer finding only — it does not affect, reduce, or qualify the ADOPT decision below. No `TOPIC_CLAIMS_FIXTURE` entry exists for Kling as of this recording; runtime activation remains a separate, later, independently-timed act, unaffected either way by the current WITHHOLD.
+
+### CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1
+Domain: AI Video Generation Platform Rights — Kling
+Topic: commercial_use
+Subtopic: kling-unconditional-written-permission-default
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — this is a Kling platform contractual restriction, not a legal-jurisdiction-scoped rule. See "Transitional jurisdiction representation for provider/platform propositions" (governance-discipline section above); the underlying `TopicClaim` representation records `jurisdiction: 'Global'` as a bounded transitional compatibility value under that rule, never as a claim of worldwide legal validation.
+Context: commercial AI-generated video produced using Kling, regardless of the account's current membership status.
+
+GOVERNANCE TREATMENT (2026-09-02, PM adoption decision, following Formal Governance Review #13 — `governance-reviews/FGR_013_CAND-KLING-COMMERCIAL-USE-001_2026-09-02.md`): `provider_scope: null`, `tool_scope: ['kling']` — `'kling'` is an existing `CANONICAL_TOOL_ID`, requiring zero registry work. Kling has carried a `Yes`-decided legacy `PLATFORM-RIGHTS-MATRIX.md` row (`kling-commercial-use-baseline`) since 2026-08-24, under that document's own separate, lighter authoring process; per `CRC-PUBLICATION-POLICY.md`'s explicit text ("Adoption is a Living Knowledge governance decision under ordinary FGR criteria, independent of Matrix coexistence"), that historical Matrix decision is treated as reusable primary-source provenance only, never as TopicClaim Adoption or Publication authority. FGR_013 independently re-verified K1's own text and evidence freshness (Classification A) rather than inheriting the Matrix's prior conclusion. FGR disposition: ADOPT (no wording change from the Matrix's own text).
+
+Claim proposition: >
+  Under Kling's current Terms of Service, using generated Output for
+  commercial purposes without Kling's written permission is not permitted
+  by default. This default applies regardless of the account's current
+  membership status.
+
+Source references:
+  - primary (Official platform authority, Class A, human-captured browser Print-to-PDF, directly read in full and cross-checked twice): Kling AI Terms of Service (`kling.ai/docs/user-policy`), Release/Effective 2026-04-21 — K1 §4.6.
+Source authority/type: Official platform authority (directly source-backed, single-provider)
+Source fact: >
+  Kling AI's own Terms of Service, §4.6, states that using generated
+  Output for commercial purposes without Kling's written permission is
+  not permitted by default. Direct re-fetch of the source page returned
+  HTTP 446 at FGR_013 review time (a pre-existing, previously disclosed
+  access limitation); a bounded live check independently corroborated the
+  same 2026-04-21 effective date with no indication of a later change.
+
+SI8 interpretation: >
+  A client using Kling-generated Output in a commercial production should
+  confirm whether the account currently holds a Kling Member Account
+  (see `CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1`) before assuming
+  commercial use is permitted without Kling's separate written
+  permission — this claim states only the unconditional default, not any
+  project's specific account status.
+
+Applicability requirements: []
+Unresolved project dependencies: []
+Tool scope: ['kling']
+Prohibited conclusions: >
+  Does not establish branding requirements, training-data provisions,
+  downstream IP clearance, ownership analysis, the account's current
+  membership status, or any broader commercial-readiness conclusion. Is
+  not a substitute for Commercial Assurance evidence review.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-09-02
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  WITHHELD FROM CRC (2026-09-02, per CRC Publication Review #13,
+  `CPR_013`). Not for evidence quality (Class A platform-authority
+  support, Classification A freshness — CPR_013 §3), not for dependency
+  handling (`unresolved_project_dependencies: []`, no dependency to
+  evaluate), and not for isolated Bounded Interpretation/Composition
+  behavior (independently, empirically confirmed clean, CPR_013
+  §16-§17) — withheld solely because CPR_013's Matrix Coexistence
+  Inspection (LK-22 / `CRC-PUBLICATION-POLICY.md`'s tool-scoped
+  legacy-coexistence practice) found this claim substantively equivalent
+  to the still-live, still-`Yes`-eligible Matrix claim
+  `kling-commercial-use-baseline`, and a combined synthetic canary
+  empirically demonstrated that publishing both simultaneously would
+  render the same governed content twice, verbatim, in a single CRC
+  response (CPR_013 §14). Not a finding that this claim's own content is
+  inaccurate, unsafe, or should be distrusted. Not a permanent
+  disposition — reconsideration is possible if a separate, later,
+  explicitly authorized governance decision retires or otherwise
+  suppresses the corresponding Matrix row, or if a future generic
+  cross-origin deduplication mechanism resolves the duplication without
+  Matrix retirement (CPR_013 §21) — never by a runtime/engineering change
+  alone absent such a decision. See CPR_013 for the complete
+  publication-safety analysis, including the already-drafted CRC
+  Candidate Statement available for direct reuse should this disposition
+  later be revisited.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review reconsideration; not yet
+  approved for CRC use, per the WITHHOLD disposition above]
+  Under Kling's current Terms of Service, you may not use, reproduce,
+  distribute, modify, or create derivative works from generated Output
+  for commercial purposes without Kling's written permission.
+
+Effective date: 2026-09-02 (review date); underlying K1 Release/Effective Date: 2026-04-21, human-captured 2026-08-24
+Last reviewed: 2026-09-02 (CRC Publication Review #13, CPR_013)
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: [[CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1]] (same provider, same Terms family, complementary conditioned exception)
+
+Full Formal Governance Review artifact: `governance-reviews/FGR_013_CAND-KLING-COMMERCIAL-USE-001_2026-09-02.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_013_KLING_COMMERCIAL_USE_PACKAGE_2026-09-02.md`
+
+### CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1
+Domain: AI Video Generation Platform Rights — Kling
+Topic: commercial_use
+Subtopic: kling-member-account-commercial-use-exception
+Claim character: conditional
+Jurisdiction: Not a legal jurisdiction — this is a Kling platform contractual restriction, not a legal-jurisdiction-scoped rule. See "Transitional jurisdiction representation for provider/platform propositions" (governance-discipline section above); the underlying `TopicClaim` representation records `jurisdiction: 'Global'` as a bounded transitional compatibility value under that rule, never as a claim of worldwide legal validation.
+Context: commercial AI-generated video produced using Kling, where the account currently holds a Kling Member Account.
+
+GOVERNANCE TREATMENT (2026-09-02, PM adoption decision, following Formal Governance Review #13 — `governance-reviews/FGR_013_CAND-KLING-COMMERCIAL-USE-001_2026-09-02.md`): `provider_scope: null`, `tool_scope: ['kling']`. Corresponds to the legacy `PLATFORM-RIGHTS-MATRIX.md` row `kling-commercial-use-member` (`Yes`-decided since 2026-08-24, historical provenance only per the same discipline as the baseline claim above). **First claim in this document to use `claim_character: conditional`** — tested, not assumed, against `LK_PHASE1_TECHNICAL_DESIGN.md` §6's operative definitions (FGR_013 §9); confirmed by direct code inspection to be read by zero production Retrieval/Bounded Interpretation/Composition code, so its use here introduces no architecture risk and required no governance decision beyond ordinary FGR judgment. The `tool_account_status` applicability fact this claim's gate depends on is an existing, first-class `APPLICABILITY_FACTS` member (added specifically for Kling, 2026-08-24) — already registered `askable_in_crc` (`selector-askability.ts`); `PLATFORM-RIGHTS-MATRIX.md`'s own Kling-section prose describing this fact as "not yet authorized" for askability is stale relative to actual code state and is flagged, not corrected, by this recording (disclosed documentation debt, FGR_013 §7/§12). FGR disposition: ADOPT (no wording change from the Matrix's own text).
+
+Claim proposition: >
+  If the account currently holds a Kling Member Account — defined as
+  being subscribed to Kling's Membership Service specifically, not
+  merely having paid Kling anything (Credits/Separately Purchased
+  Services are Paid Services without conferring Member status) — Kling's
+  current Terms of Paid Service permit commercial use of generated Output
+  without additional written permission, except for developing or
+  offering products or services that compete with Kling AI.
+
+Source references:
+  - primary (Official platform authority, Class A, human-captured browser Print-to-PDF, directly read in full and cross-checked twice): Kling AI Terms of Paid Service (`kling.ai/docs/payment-policy`), Release/Effective 2026-04-21 — K2 §1.4-1.6, §3.1.2, §3.1.5, §4.3.3.
+Source authority/type: Official platform authority (directly source-backed, single-provider)
+Source fact: >
+  Kling AI's own Terms of Paid Service define Member Account status
+  (§1.4-1.6) as distinct from having made any paid purchase (§4.3.3:
+  Credits/Separately Purchased Services are Paid Services but do not
+  confer Member status), and state (§3.1.2, §3.1.5) that a current Member
+  Account may use generated Output commercially without additional
+  written permission, except to develop or offer competing products or
+  services. Same freshness posture as K1 above (HTTP 446 on direct
+  re-fetch at FGR_013 review time; independently corroborated 2026-04-21
+  effective date via a bounded live check).
+
+SI8 interpretation: >
+  A reviewer should confirm the account currently holds a Kling Member
+  Account specifically — not merely that the account has made a paid
+  purchase — before treating commercial use as exempt from Kling's
+  written-permission default. Whether Member Account status must hold
+  continuously, at generation time, or at commercial-use time is not
+  stated by the source and is not established by this claim (see
+  Prohibited conclusions).
+
+Applicability requirements:
+  - fact: tool_account_status
+    tool: kling
+    operator: equals
+    value: Member Account
+Unresolved project dependencies: []
+Tool scope: ['kling']
+Prohibited conclusions: >
+  Does not establish branding requirements, training-data provisions,
+  downstream IP clearance, ownership analysis, membership status at any
+  time other than currently, or whether a specific use falls within the
+  "competing products or services" carve-out. Does not establish whether
+  Member Account status must persist beyond the moment it is confirmed
+  (temporal semantics not established by the source). Is not a substitute
+  for Commercial Assurance evidence review.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-09-02
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  WITHHELD FROM CRC (2026-09-02, per CRC Publication Review #13,
+  `CPR_013`). Not for evidence quality (Class A platform-authority
+  support, Classification A freshness — CPR_013 §3), not for dependency
+  or applicability handling (`unresolved_project_dependencies: []`; the
+  `tool_account_status` applicability gate is an existing, already-
+  askable governed fact, empirically confirmed to fail closed on
+  `unknown` and on a known non-matching value, and to become applicable
+  only once confirmed `Member Account` — CPR_013 §14, three-state
+  canary), and not for isolated Bounded Interpretation/Composition
+  behavior (independently, empirically confirmed clean — CPR_013
+  §16-§17) — withheld solely because CPR_013's Matrix Coexistence
+  Inspection found this claim substantively equivalent to the still-live,
+  still-`Yes`-eligible Matrix claim `kling-commercial-use-member`, and
+  the same combined synthetic canary that tested the baseline claim
+  empirically demonstrated that publishing both simultaneously (in the
+  maximal-overlap state, `tool_account_status` confirmed Member Account)
+  would render the same governed content twice, verbatim, in a single CRC
+  response (CPR_013 §14). Not a finding that this claim's own content is
+  inaccurate, unsafe, or should be distrusted. Not a permanent
+  disposition — reconsideration is possible if a separate, later,
+  explicitly authorized governance decision retires or otherwise
+  suppresses the corresponding Matrix row, or if a future generic
+  cross-origin deduplication mechanism resolves the duplication without
+  Matrix retirement (CPR_013 §21) — never by a runtime/engineering change
+  alone absent such a decision. See CPR_013 for the complete
+  publication-safety analysis, including the already-drafted CRC
+  Candidate Statement available for direct reuse should this disposition
+  later be revisited.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review reconsideration; not yet
+  approved for CRC use, per the WITHHOLD disposition above]
+  If you currently hold a Kling Member Account (i.e. you're subscribed to
+  Kling's Membership Service), Kling's current Terms of Paid Service
+  permit commercial use of generated Output without additional written
+  permission, except for developing or offering products or services
+  that compete with Kling AI.
+
+Effective date: 2026-09-02 (review date); underlying K2 Release/Effective Date: 2026-04-21, human-captured 2026-08-24
+Last reviewed: 2026-09-02 (CRC Publication Review #13, CPR_013)
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: [[CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1]] (same provider, same Terms family, complementary unconditional default)
+
+Full Formal Governance Review artifact: `governance-reviews/FGR_013_CAND-KLING-COMMERCIAL-USE-001_2026-09-02.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_013_KLING_COMMERCIAL_USE_PACKAGE_2026-09-02.md`
