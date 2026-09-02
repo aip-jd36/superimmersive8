@@ -61,6 +61,13 @@ export default async function AdminLayout({
                 >
                   Users
                 </Link>
+                <Link
+                  href="/admin/crc-leads"
+                  className="px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-secondary"
+                  style={{ color: '#52504A' }}
+                >
+                  CRC Leads
+                </Link>
               </div>
             </div>
 
