@@ -68,6 +68,27 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
     // search-snippet excerpts). See PLATFORM-RIGHTS-MATRIX.md's own Kling
     // section for the full source-wording quotation and reconciliation.
     last_verified: '2026-08-24',
+    /**
+     * Matrix Retirement (2026-09-02): both claims below were
+     * `crc_eligible: 'Yes'` from 2026-08-24 (JD, CRC Decision Date
+     * 2026-08-24) until this date, when JD/PM authorized their retirement
+     * as CRC-active representations via FGR_014 -- see
+     * 06_Operations/institutional-knowledge/notebook/governance-reviews/
+     * FGR_014_KLING_MATRIX_RETIREMENT_AUTHORIZATION_2026-09-02.md. This is
+     * representation supersession, not substantive reversal -- FGR_014 §3
+     * confirms neither claim's underlying content is inaccurate, unsafe,
+     * or distrusted; the sole reason is CPR_013's empirical finding that
+     * simultaneous Matrix + TopicClaim publication of the same knowledge
+     * produces duplicate CRC output. `kling-commercial-use-baseline` is
+     * superseded by governed successor claim
+     * CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1; `kling-commercial-use-
+     * member` is superseded by governed successor claim
+     * CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1 (both GOVERNED-CLAIMS.md,
+     * Lifecycle: Adopted, CRC eligibility pending a separate, not-yet-
+     * conducted post-retirement CPR reconsideration -- see CPR_014 and its
+     * disposition-correction addendum). `crc_eligible` below is
+     * accordingly 'No' effective 2026-09-02.
+     */
     claims: [
       /**
        * Model B decomposition (accepted design, following the Governed
@@ -91,7 +112,7 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
        */
       {
         claim_id: 'kling-commercial-use-baseline',
-        crc_eligible: 'Yes',
+        crc_eligible: 'No',
         crc_publication_scope:
           "CRC may state that, under Kling's current Terms of Service, using generated Output for commercial purposes without Kling's written permission is not permitted by default. This publication scope does not extend to branding requirements, training-data provisions, downstream IP clearance, ownership analysis, membership status, or broader commercial-readiness conclusions.",
         crc_candidate_statement:
@@ -115,7 +136,7 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
        */
       {
         claim_id: 'kling-commercial-use-member',
-        crc_eligible: 'Yes',
+        crc_eligible: 'No',
         crc_publication_scope:
           "CRC may state that, if the account currently holds a Kling Member Account (i.e. is subscribed to Kling's Membership Service), Kling's current Terms of Paid Service permit commercial use of generated Output without additional written permission, except for developing or offering products or services that compete with Kling AI. This publication scope does not extend to branding requirements, training-data provisions, downstream IP clearance, ownership analysis, membership status at any time other than currently, or broader commercial-readiness conclusions.",
         crc_candidate_statement:
