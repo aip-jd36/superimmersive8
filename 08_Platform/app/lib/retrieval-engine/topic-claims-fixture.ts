@@ -705,4 +705,87 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     last_verified: '2026-08-31',
     superseded_by: null,
   },
+  {
+    // Second tool_scope-narrowed TopicClaim runtime entry (after Synthesia
+    // above). CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1 Adopted 2026-09-02
+    // (FGR_013). Initially WITHHELD from CRC by CPR_013 -- not for evidence,
+    // applicability, or isolated Bounded Interpretation/Composition
+    // reasons, but because the legacy PLATFORM-RIGHTS-MATRIX.md row
+    // `kling-commercial-use-baseline` was simultaneously Yes-eligible, and
+    // a combined synthetic canary showed publishing both would duplicate
+    // the same governed content verbatim in a single CRC response
+    // (CPR_013 §14). FGR_014 authorized Matrix retirement as representation
+    // supersession (never substantive reversal); that retirement was
+    // executed (both Kling Matrix rows flipped crc_eligible: 'No', with a
+    // dated provenance annotation) and confirmed live in Production via
+    // direct Vercel dashboard evidence. CPR_015 then independently
+    // reconsidered CRC eligibility against that real, executed state (not
+    // a staged/candidate one) and APPROVED both Kling claims; the
+    // CPR_015 addendum empirically re-confirmed, via a live executed
+    // canary against the real pipeline, zero Matrix-origin Kling results
+    // in all three tested account-status scenarios -- the coexistence
+    // blocker is not merely avoided but structurally eliminated, since
+    // the retired Matrix row now contributes zero results at Retrieval.
+    // See GOVERNED-CLAIMS.md's own CRC Publication Scope and
+    // governance-reviews/CPR_015_KLING_COMMERCIAL_USE_POST-RETIREMENT_
+    // RECONSIDERATION_2026-09-02.md (plus its empirical-confirmation
+    // addendum) for the full decision sequence and publication-safety
+    // analysis. No extraction alias question applies here -- 'kling' is
+    // an existing CANONICAL_TOOL_ID with existing conversational aliases
+    // ('kling', 'kling ai') in extraction.ts, already conversationally
+    // reachable.
+    claim_id: 'CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1',
+    topic: 'commercial_use',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      'APPROVED FOR CRC PUBLICATION (2026-09-02, CRC Approver: JD (PM) -- see CRC Publication Review #15, CPR_015, governance-reviews/CPR_015_KLING_COMMERCIAL_USE_POST-RETIREMENT_RECONSIDERATION_2026-09-02.md, superseding CPR_013\'s and CPR_014\'s prior WITHHOLD dispositions following executed, production-confirmed Matrix retirement of the corresponding legacy `kling-commercial-use-baseline` Matrix row -- now crc_eligible: \'No\'; empirically confirmed by governance-reviews/CPR_015_ADDENDUM_EMPIRICAL_CONFIRMATION_2026-09-02.md, which found zero Matrix-origin Kling results across all three tested account-status scenarios). CRC may state that, under Kling\'s current Terms of Service, using generated Output for commercial purposes without Kling\'s written permission is not permitted by default. This default applies regardless of the account\'s current membership status. This is Kling\'s own provider/platform policy, not law. CRC must not state branding requirements, training-data provisions, downstream IP clearance, ownership analysis, the account\'s current membership status, or any broader commercial-readiness conclusion. A human-reviewed Commercial Assurance Assessment remains the higher-assurance path for resolving a specific project\'s own Kling account status or broader commercial readiness.',
+    crc_candidate_statement:
+      'Under Kling\'s current Terms of Service, you may not use, reproduce, distribute, modify, or create derivative works from generated Output for commercial purposes without Kling\'s written permission.',
+    applicability_requirements: [],
+    unresolved_project_dependencies: [],
+    provider_scope: null,
+    tool_scope: ['kling'],
+    last_verified: '2026-09-02',
+    superseded_by: null,
+  },
+  {
+    // Companion entry to CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1 above
+    // -- same provider, same governance sequence (FGR_013 -> CPR_013
+    // WITHHOLD -> FGR_014 Matrix retirement authorization -> retirement
+    // executed and Production-confirmed -> CPR_015 APPROVE, empirically
+    // confirmed). This is the first published applicability-gated
+    // tool_scope claim: `applicability_requirements` narrows it to
+    // conversations where the generic, first-class `tool_account_status`
+    // fact (retrieval-engine/types.ts, already registered askable_in_crc
+    // in selector-askability.ts) is confirmed 'Member Account' for
+    // 'kling' -- an unknown or non-matching value leaves this claim
+    // unresolved / not_met, never guessed. CPR_015 §5 (unchanged from
+    // CPR_013 §14/§16) empirically confirmed this fail-closed behavior
+    // across all three states; the addendum's live canary re-confirmed
+    // zero Matrix-origin duplication specifically in the maximal-overlap
+    // confirmed-Member-Account state. claim_character: 'conditional' --
+    // the first use of this character in this corpus (FGR_013 §9),
+    // confirmed by CPR_015 §3 to remain read by zero production
+    // Retrieval/Bounded Interpretation/Composition code, so its
+    // publication introduces no architecture risk.
+    claim_id: 'CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1',
+    topic: 'commercial_use',
+    claim_character: 'conditional',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      'APPROVED FOR CRC PUBLICATION (2026-09-02, CRC Approver: JD (PM) -- see CRC Publication Review #15, CPR_015, governance-reviews/CPR_015_KLING_COMMERCIAL_USE_POST-RETIREMENT_RECONSIDERATION_2026-09-02.md, superseding CPR_013\'s and CPR_014\'s prior WITHHOLD dispositions following executed, production-confirmed Matrix retirement of the corresponding legacy `kling-commercial-use-member` Matrix row -- now crc_eligible: \'No\'; empirically confirmed by governance-reviews/CPR_015_ADDENDUM_EMPIRICAL_CONFIRMATION_2026-09-02.md, which found zero Matrix-origin Kling results across all three tested account-status scenarios, including the maximal-overlap confirmed-Member-Account state). CRC may state that, if the account currently holds a Kling Member Account (i.e. is subscribed to Kling\'s Membership Service), Kling\'s current Terms of Paid Service permit commercial use of generated Output without additional written permission, except for developing or offering products or services that compete with Kling AI. This is Kling\'s own provider/platform policy, not law. CRC must not state branding requirements, training-data provisions, downstream IP clearance, ownership analysis, membership status at any time other than currently, or whether a specific use falls within the "competing products or services" carve-out. CRC must not state or imply that Member Account status must persist beyond the moment it is confirmed (temporal semantics not established by the source). A human-reviewed Commercial Assurance Assessment remains the higher-assurance path for resolving a specific project\'s own Kling account status or broader commercial readiness.',
+    crc_candidate_statement:
+      'If you currently hold a Kling Member Account (i.e. you\'re subscribed to Kling\'s Membership Service), Kling\'s current Terms of Paid Service permit commercial use of generated Output without additional written permission, except for developing or offering products or services that compete with Kling AI.',
+    applicability_requirements: [{ fact: 'tool_account_status', tool: 'kling', operator: 'equals', value: 'Member Account' }],
+    unresolved_project_dependencies: [],
+    provider_scope: null,
+    tool_scope: ['kling'],
+    last_verified: '2026-09-02',
+    superseded_by: null,
+  },
 ]
