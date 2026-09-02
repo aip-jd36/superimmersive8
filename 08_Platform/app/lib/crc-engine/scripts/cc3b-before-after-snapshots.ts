@@ -1,155 +1,142 @@
 /**
- * CC-3B -- human-review BEFORE vs AFTER of the user-visible results email.
+ * CC-3B / CC-3B.1 -- human-review BEFORE vs AFTER of the user-visible results email.
  *
  * BEFORE = buildResultsEmailContent(output)                 (no plan -- pre-CC-3B)
- * AFTER  = buildResultsEmailContent(output, ..., plan)      (CC-3B)
+ * AFTER  = buildResultsEmailContent(output, ..., plan)      (CC-3B + CC-3B.1)
  *
- * Real retrieve() + buildBoundedInterpretations() + assembleProjectionOutput()
- * + buildConsultativeAnswerPlan() over MATRIX_FIXTURE wherever possible.
- * Prints the PLAIN-TEXT body of each email (the HTML carries the same
- * content). This is a review aid, not a test, not production code.
+ * Every scenario is driven end to end through the REAL pipeline:
+ *   buildRetrievalHandoff -> retrieve -> buildBoundedInterpretations
+ *   -> assembleProjectionOutput -> buildConsultativeAnswerPlan -> render.
+ * Prints the PLAIN-TEXT body (the HTML carries identical content). Review
+ * aid, not a test, not production code.
  *
  * Run:  npx tsx lib/crc-engine/scripts/cc3b-before-after-snapshots.ts   (from 08_Platform/app)
  */
 
 import { buildResultsEmailContent } from '@/lib/crc-engine/results-email-template'
-import { buildConsultativeAnswerPlan } from '@/lib/crc-engine/consultative-answer-plan'
+import { buildConsultativeAnswerPlan, type ConsultativeAnswerPlan } from '@/lib/crc-engine/consultative-answer-plan'
 import { partitionKnowledgeItemsByPlan } from '@/lib/crc-engine/consultative-realization'
 import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
+import type { BoundedInterpretation } from '@/lib/bounded-interpretation/types'
 import { assembleProjectionOutput } from '@/lib/projection-layer/assemble-projection-output'
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
-import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
+import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
+import { TOPIC_RELATIONSHIPS_FIXTURE } from '@/lib/retrieval-engine/topic-relationships-fixture'
+import { buildRetrievalHandoff } from '@/lib/interview-engine/handoff'
+import { deriveAssessmentJurisdictionFacts } from '@/lib/crc-engine/assessment-jurisdiction-scope'
+import { deriveDiscoveredTopicOccurrences } from '@/lib/crc-engine/discovered-relevance'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
-import type { ConsultativeAnswerPlan } from '@/lib/crc-engine/consultative-answer-plan'
-import type { RetrievalHandoff, ToolMention, UserGoal } from '@/types/interview-engine'
+import type { RetrievalResult } from '@/lib/retrieval-engine/types'
+import type { AssetProviderMention, StructuredUnderstanding, ToolMention, UserGoal } from '@/types/interview-engine'
 
-const h = (o: Partial<RetrievalHandoff> = {}): RetrievalHandoff => ({
-  tools: [], unresolved_aliases: [], asset_providers: [], unresolved_asset_provider_mentions: [],
-  workflow_role: 'unresolved', intended_use: 'unclear', scoped_observations: [], certainty_state: 'gate_1_unmet', exclusions: [], ...o,
-})
-const tool = (identifier: string) => ({ identifier, access_surface: 'unresolved' as const, plan_tier: 'unknown' as const })
-const g = (id: string, raw: string, category: UserGoal['category']): UserGoal =>
-  ({ goal_id: id, raw_text: raw, category, state: 'confirmed', scope: 'informational', superseded_by: null, source_turn: 1, source_statement: raw })
-const tm = (identifier: string): ToolMention => ({
-  mention_id: `m-${identifier}`, resolution: { kind: 'canonical', identifier },
-  access_surface: { state: 'unknown' }, plan_tier: { state: 'unknown' }, account_status: { state: 'unknown' },
-  confidence: 'confirmed', source_turn: 1, source_statement: identifier, superseded_by: null,
-})
-const facts = (tms: ToolMention[] = []): ApplicabilityFacts => ({ jurisdiction: { included: [], excluded: [] }, toolMentions: tms })
+const goal = (id: string, raw: string, category: UserGoal['category'], scope: UserGoal['scope'] = 'informational'): UserGoal =>
+  ({ goal_id: id, raw_text: raw, category, scope, state: 'confirmed', superseded_by: null, source_turn: 1, source_statement: raw })
+const tm = (identifier: string): ToolMention => ({ mention_id: `m-${identifier}`, resolution: { kind: 'canonical', identifier }, access_surface: { state: 'unknown' }, plan_tier: { state: 'unknown' }, account_status: { state: 'unknown' }, confidence: 'confirmed', source_turn: 1, source_statement: identifier, superseded_by: null })
+const apm = (identifier: string): AssetProviderMention => ({ mention_id: `ap-${identifier}`, resolution: { kind: 'canonical', identifier }, confidence: 'confirmed', source_turn: 1, source_statement: identifier, superseded_by: null, usage: { state: 'unknown' }, license: { state: 'unknown' } })
 
-function pipeline(handoff: RetrievalHandoff, goals: UserGoal[], applic: ApplicabilityFacts) {
-  const out = retrieve(handoff, MATRIX_FIXTURE, goals, [], applic)
-  const interps = buildBoundedInterpretations(goals, out.results, out.diagnostics)
-  const { output } = assembleProjectionOutput(handoff, out.results, interps)
-  const plan = buildConsultativeAnswerPlan(interps, out.results, out.diagnostics)
-  return { output, plan, biStatuses: interps.map((i) => i.status) }
+function pipeline(goals: UserGoal[], tools: ToolMention[], providers: AssetProviderMention[]) {
+  const su: StructuredUnderstanding = {
+    project_facts: {
+      intended_use: { attestation: { state: 'confirmed', value: 'a client social ad' }, source_turn: 1, source_statement: 'x' },
+      workflow_role: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'x' },
+      jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+    },
+    tool_mentions: tools, user_goals: goals, asset_provider_mentions: providers,
+    scoped_observations: [], assessment_jurisdiction_mentions: [], content_presence_mentions: [],
+    current_phase: 3, gate_1_state: 'met', gate_2_state: 'stable', completion_reason: null, opt_out_scope: null,
+  }
+  const handoff = buildRetrievalHandoff(su)
+  const applic = { jurisdiction: deriveAssessmentJurisdictionFacts(su), toolMentions: su.tool_mentions }
+  const discovered = deriveDiscoveredTopicOccurrences(su, TOPIC_CLAIMS_FIXTURE)
+  const { results, diagnostics } = retrieve(handoff, MATRIX_FIXTURE, su.user_goals, TOPIC_CLAIMS_FIXTURE, applic, TOPIC_RELATIONSHIPS_FIXTURE, handoff.asset_providers, discovered)
+  const interps = buildBoundedInterpretations(su.user_goals, results, diagnostics, su.project_facts.human_contribution_description.attestation)
+  const { output } = assembleProjectionOutput(handoff, results, interps)
+  const plan = buildConsultativeAnswerPlan(interps, results, diagnostics)
+  return { results, interps, output, plan }
 }
 
-function show(
-  title: string,
-  inputSummary: string,
-  biStatus: string,
-  output: ProjectionOutput,
-  plan: ConsultativeAnswerPlan,
-  doesNotConclude: string[],
-) {
+function occurrences(haystack: string, needle: string): number {
+  return needle.length === 0 ? 0 : haystack.split(needle).length - 1
+}
+
+function show(title: string, inputSummary: string, output: ProjectionOutput, plan: ConsultativeAnswerPlan, interps: BoundedInterpretation[], doesNotConclude: string[]) {
   const before = buildResultsEmailContent(output, 'token', 'user@example.com').text
   const after = buildResultsEmailContent(output, 'token', 'user@example.com', plan).text
   const { renderedInGoalSection, supplementary } = partitionKnowledgeItemsByPlan(output.knowledge_items, plan)
-
-  console.log(`\n${'='.repeat(80)}\n${title}\n${'='.repeat(80)}`)
+  console.log(`\n${'='.repeat(82)}\n${title}\n${'='.repeat(82)}`)
   console.log(`INPUT SUMMARY: ${inputSummary}`)
-  console.log(`BI STATUS: ${biStatus}`)
-  console.log(`PLAN STRUCTURE SUMMARY: ${plan.explicit_sections.length} explicit section(s); ` +
-    `${plan.explicit_sections.reduce((n, s) => n + s.supported_claim_refs.length, 0)} supported claim ref(s); ` +
-    `${plan.explicit_sections.reduce((n, s) => n + s.unresolved_items.length, 0)} unresolved item(s); ` +
-    `${plan.discovered_context.length} discovered-context item(s); ` +
-    `${plan.commercial_assurance_refs.length} CA ref(s)`)
-  console.log(`\n--- BEFORE USER-VISIBLE OUTPUT (plain text) ---\n${before}`)
-  console.log(`--- AFTER USER-VISIBLE OUTPUT (plain text) ---\n${after}`)
-  console.log(`DE-DUPLICATION APPLIED: ${renderedInGoalSection.length} knowledge_item(s) suppressed as already-in-goal-section ` +
-    `[${renderedInGoalSection.map((i) => i.claim_id).join(', ') || 'none'}]; ` +
-    `${supplementary.length} kept as supplementary [${supplementary.map((i) => i.claim_id).join(', ') || 'none'}]`)
-  const unresolvedShown = plan.explicit_sections.flatMap((s) => s.unresolved_items.map((u) => JSON.stringify(u)))
-  console.log(`UNRESOLVED ITEMS SHOWN (structural, in plan; rendered via BI's own hedge sentence, not new prose): ${unresolvedShown.join(' | ') || 'none'}`)
-  console.log(`BOUNDARY LANGUAGE: unchanged -- the single educational disclaimer ("not an SI8 Commercial Assurance Assessment ... does not provide legal advice or certify commercial use") + the Commercial Assurance CTA, both once, at the end`)
+  console.log(`BI STATUS: ${interps.map((i) => `${i.category}=${i.status}`).join(', ') || '(no goals)'}`)
+  console.log(`PLAN STRUCTURE SUMMARY: ${plan.explicit_sections.length} section(s); ` +
+    `summary_claim_refs=[${plan.explicit_sections.flatMap((s) => s.summary_claim_refs.map((r) => r.claim_id)).join(', ') || '-'}]; ` +
+    `supported_claim_refs=[${plan.explicit_sections.flatMap((s) => s.supported_claim_refs.map((r) => r.claim_id)).join(', ') || '-'}]; ` +
+    `discovered_context=[${plan.discovered_context.map((d) => d.claim_ref.claim_id).join(', ') || '-'}]`)
+  console.log(`\n--- BEFORE USER-VISIBLE OUTPUT ---\n${before}`)
+  console.log(`--- AFTER USER-VISIBLE OUTPUT ---\n${after}`)
+  console.log(`DE-DUPLICATION APPLIED: renderedInGoalSection=[${renderedInGoalSection.map((i) => i.claim_id).join(', ') || 'none'}]; supplementary=[${supplementary.map((i) => i.claim_id).join(', ') || 'none'}]`)
+  console.log(`UNRESOLVED ITEMS SHOWN (structural, in plan; surfaced to the user only via BI's own unchanged hedge): ${plan.explicit_sections.flatMap((s) => s.unresolved_items.map((u) => JSON.stringify(u))).join(' | ') || 'none'}`)
+  console.log(`BOUNDARY LANGUAGE: unchanged -- one educational disclaimer + one Commercial Assurance CTA, both once, at the end`)
   console.log(`WHAT THE NEW OUTPUT DELIBERATELY DOES NOT CONCLUDE:`)
   for (const d of doesNotConclude) console.log(`  - ${d}`)
 }
 
 // 1. simple directly relevant
 {
-  const { output, plan, biStatuses } = pipeline(h({ tools: [tool('runway-gen3')] }), [g('g1', 'Can I use it commercially?', 'commercial_use')], facts())
-  show('1. SIMPLE DIRECTLY RELEVANT (Runway, one commercial_use goal)',
-    'user named Runway, asked "Can I use it commercially?"', biStatuses.join(', '), output, plan,
-    ['that the project is commercially cleared / certified',
-     'anything beyond the referenced runway-gen3 claim',
-     'the governed statement now appears once (in "What this means"), not twice'])
+  const { output, plan, interps } = pipeline([goal('g1', 'Can I use it commercially?', 'commercial_use')], [tm('runway-gen3')], [])
+  show('1. SIMPLE DIRECTLY RELEVANT (Runway)', 'user named Runway, asked about commercial use', output, plan, interps,
+    ['project is cleared / certified', 'anything beyond the runway-gen3 claim', 'the governed statement now appears once (in "What this means"), not twice'])
 }
 
-// 2. unresolved applicability (Suno + Kling)
+// 2. unresolved applicability
 {
-  const { output, plan, biStatuses } = pipeline(h({ tools: [tool('suno'), tool('kling')] }),
-    [g('g1', 'Can I use it commercially?', 'commercial_use')], facts([tm('suno'), tm('kling')]))
-  show('2. UNRESOLVED APPLICABILITY (Suno + Kling, Kling account status unknown)',
-    'user named Suno + Kling, asked about commercial use', biStatuses.join(', '), output, plan,
+  const { output, plan, interps } = pipeline([goal('g1', 'Can I use it commercially?', 'commercial_use')], [tm('suno'), tm('kling')], [])
+  show('2. UNRESOLVED APPLICABILITY (Suno + Kling)', 'user named Suno + Kling; Kling account status unknown', output, plan, interps,
     ['that the Kling Member exception applies (its applicability is unresolved)',
      'that the unresolved account-status item is "the blocker" / "prevents commercial use" / "is resolved"',
-     'that account status "resolves commercial readiness"',
-     'the Suno + Kling guidance appears once, not duplicated across "Current guidance" and "What this means"'])
+     'the Suno + Kling guidance appears once, not duplicated'])
 }
 
-// 3. explicit + discovered (literal -- discovered pipeline exercised in discovered-relevance-retrieval.test.ts)
+// 3. explicit + discovered  -- with OWNERSHIP TRACE
 {
-  const output: ProjectionOutput = {
-    opening_line: 'You mentioned a video tool and some stock footage.',
-    understood_summary: 'You mentioned using kling. Your role on this: editor.',
-    knowledge_items: [
-      { claim_id: 'kling-commercial-use-baseline', statement: 'Under Kling’s current Terms of Service, using generated Output commercially requires written permission.', last_verified: '2026-08-24' },
-      { claim_id: 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1', statement: 'iStock editorial-licensed assets carry use restrictions that can conflict with commercial deployment.', last_verified: '2026-08-18' },
-    ],
-    goal_interpretations: [{
-      goal_text: 'Can I use it commercially?',
-      summary: 'Under Kling’s current Terms of Service, using generated Output commercially requires written permission. iStock editorial-licensed assets carry use restrictions that can conflict with commercial deployment. This is relevant to whether this can be used commercially, though it reflects the platforms’ own terms.',
-      summary_blocks: ['Under Kling’s current Terms of Service, using generated Output commercially requires written permission. iStock editorial-licensed assets carry use restrictions that can conflict with commercial deployment. This is relevant to whether this can be used commercially, though it reflects the platforms’ own terms.'],
-    }],
-    closing_cta: '',
-  }
-  const plan: ConsultativeAnswerPlan = {
-    explicit_sections: [{
-      goal_text: 'Can I use it commercially?', category: 'commercial_use', bi_status: 'directly_relevant', disposition: 'governed_guidance_available',
-      supported_claim_refs: [{ claim_id: 'kling-commercial-use-baseline', matrix_identifier: 'kling', match_origin: 'exact_topic', matched_goal_category: 'commercial_use', relationship_id: null, last_verified: '2026-08-24' }],
-      unresolved_items: [], missing_evidence: [], boundary_ref: 'tool_source', bi_summary_blocks: ['x'],
-    }],
-    discovered_context: [{ claim_ref: { claim_id: 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1', matrix_identifier: 'third_party_source_rights', match_origin: 'discovered_topic', matched_goal_category: 'commercial_use', relationship_id: null, last_verified: '2026-08-18' }, authorizing_goal_category: 'commercial_use' }],
-    render_once_markers: [], commercial_assurance_refs: [],
-  }
-  show('3. EXPLICIT GOAL + DISCOVERED CONTEXT (Kling explicit; iStock stock claim discovered)',
-    'explicit commercial_use goal about Kling; a stock-media consideration surfaced from the described workflow', 'directly_relevant', output, plan,
-    ['that the stock-media consideration is something the user explicitly asked about (it renders under a neutral subordinate heading, after the explicit answer)',
+  const { results, interps, output, plan } = pipeline([goal('g1', 'Can I use it commercially?', 'commercial_use')], [tm('kling')], [apm('istock')])
+  show('3. EXPLICIT GOAL + DISCOVERED CONTEXT (Kling explicit; iStock stock claims discovered)',
+    'explicit commercial_use goal about Kling; stock-media considerations surfaced from the described workflow', output, plan, interps,
+    ['that the stock guidance answers the user\'s explicit question',
      'a fabricated UserGoal for third-party source rights',
-     'NOTE (known limitation, reported for CC-3C): the discovered claim’s text is still embedded inside the BI goal summary because BI does not distinguish match_origin -- CC-3B does not modify BI summaries'])
+     'each governed occurrence renders exactly once; no second "Also relevant" copy of the discovered claims'])
+
+  console.log(`\n--- OWNERSHIP TRACE (explicit + discovered) ---`)
+  const summarySet = new Set(plan.explicit_sections.flatMap((s) => s.summary_claim_refs.map((r) => `${r.matrix_identifier} ${r.claim_id}`)))
+  const supportedSet = new Set(plan.explicit_sections.flatMap((s) => s.supported_claim_refs.map((r) => r.claim_id)))
+  const discoveredSet = new Set(plan.discovered_context.map((d) => d.claim_ref.claim_id))
+  const afterText = buildResultsEmailContent(output, 'token', 'user@example.com', plan).text
+  for (const r of results) {
+    const inSummaryBlocks = interps.some((i) => i.summary_blocks.join(' ').includes(r.candidate_statement ?? ' nope'))
+    const ki = output.knowledge_items.find((k) => k.claim_id === r.claim_id && k.matrix_identifier === r.matrix_identifier)
+    const owner =
+      summarySet.has(`${r.matrix_identifier} ${r.claim_id}`) ? 'goal section (bi_summary_blocks)'
+      : ki ? 'subordinate "Also relevant" block'
+      : 'not rendered'
+    const proseCount = r.candidate_statement ? occurrences(afterText, r.candidate_statement.slice(0, 60)) : 0
+    console.log(`  ${r.matrix_identifier} :: ${r.claim_id}`)
+    console.log(`    match_origin=${r.match_origin} | authorizing_goal=${r.matched_goal_category}`)
+    console.log(`    BI summary occurrence=${inSummaryBlocks} | plan: summary_claim_refs=${summarySet.has(`${r.matrix_identifier} ${r.claim_id}`)} supported_claim_refs=${supportedSet.has(r.claim_id)} discovered_context=${discoveredSet.has(r.claim_id)}`)
+    console.log(`    Projection knowledge_item=${!!ki} | FINAL RENDER OWNER=${owner} | FINAL PROSE OCCURRENCE COUNT=${proseCount}`)
+  }
 }
 
 // 4. determination declined
 {
-  const { output, plan, biStatuses } = pipeline(h({ tools: [tool('runway-gen3')] }),
-    [g('g1', 'Can you certify this is cleared for commercial use?', 'commercial_use')], facts())
-  // Force the determination scope so BI resolves to determination_declined
-  const dg = { ...g('g1', 'Can you certify this is cleared for commercial use?', 'commercial_use'), scope: 'determination_request' as const }
-  const p2 = pipeline(h({ tools: [tool('runway-gen3')] }), [dg], facts())
-  show('4. DETERMINATION DECLINED (user asked CRC to certify)',
-    'user asked "Can you certify this is cleared for commercial use?"', p2.biStatuses.join(', '), p2.output, p2.plan,
+  const { output, plan, interps } = pipeline([goal('g1', 'Can you certify this is cleared for commercial use?', 'commercial_use', 'determination_request')], [tm('runway-gen3')], [])
+  show('4. DETERMINATION DECLINED (user asked CRC to certify)', 'user asked "Can you certify this is cleared for commercial use?"', output, plan, interps,
     ['CRC does not certify / clear / determine -- the existing determination-declined BI copy renders unchanged',
-     'no governed guidance is invented to fill the gap'])
-  void output; void plan; void biStatuses
+     'no governed guidance is invented to fill the gap; the Runway platform fact stays a subordinate consideration'])
 }
 
-// 5. no goal / outside coverage
+// 5. no goal stated
 {
-  const { output, plan, biStatuses } = pipeline(h({ tools: [tool('runway-gen3')] }), [], facts())
-  show('5. NO GOAL STATED (outside the goal-interpretation path)',
-    'user named Runway but asked no explicit question', biStatuses.join(', ') || '(no goals -> no interpretations)', output, plan,
-    ['with an empty plan, CC-3B changes nothing -- "Current guidance" renders exactly as before (fail-closed to existing behavior)'])
+  const { output, plan, interps } = pipeline([], [tm('runway-gen3')], [])
+  show('5. NO GOAL STATED', 'user named Runway but asked no explicit question', output, plan, interps,
+    ['with an empty plan, CC-3B changes nothing -- "Current guidance" renders exactly as before (fail-closed)'])
 }

@@ -146,6 +146,22 @@ export interface PlanGoalSection {
   disposition: PlanDisposition
   /** Explicit-origin supporting claims only (`exact_topic` / `related_topic`). Discovered-origin results go to `discovered_context`. */
   supported_claim_refs: PlanClaimRef[]
+  /**
+   * CC-3B.1 (2026-09-02) -- render-ownership set. EVERY claim whose
+   * `candidate_statement` prose is rendered, verbatim, inside this section's
+   * `bi_summary_blocks`, regardless of `match_origin`. This is exactly
+   * `BoundedInterpretation.supporting_claim_ids` joined back to `results`
+   * for the full `(matrix_identifier, claim_id)` identity -- so it is
+   * `supported_claim_refs` PLUS any discovered-origin claim that BI folded
+   * into this goal's bounded answer via Track C (`matched_goal_category`).
+   * Empty for `determination_declined` / `outside_current_coverage` /
+   * Case-3A (BI uses a fixed template there, joins no claim prose --
+   * `supporting_claim_ids` is `[]`). Realization (CC-3B) uses THIS set,
+   * not `supported_claim_refs`, to decide a knowledge_item is already
+   * rendered and must not be shown a second time. `discovered_context`
+   * still carries the Track C provenance separately and unchanged.
+   */
+  summary_claim_refs: PlanClaimRef[]
   unresolved_items: PlanUnresolvedItem[]
   missing_evidence: PlanMissingEvidenceRef[]
   boundary_ref: RulesBoundaryId
@@ -322,11 +338,17 @@ export function buildConsultativeAnswerPlan(
     // attributed to the right section, not both. Discovered-origin supporting
     // results are routed to `discovered_context` (built below), never into
     // `supported_claim_refs`.
-    const supportedResults = interp.supporting_claim_ids
+    // CC-3B.1: `summaryResults` is EVERY claim whose prose BI folded into
+    // this section's summary -- `interp.supporting_claim_ids` joined back to
+    // `results` for the full identity, regardless of `match_origin`. This is
+    // the render-ownership set. `supportedResults` is the explicit-origin
+    // subset (unchanged CC-3A semantics -- what the section is "about").
+    const summaryResults = interp.supporting_claim_ids
       .flatMap((cid) => results.filter((r) => r.claim_id === cid && r.matched_goal_category === interp.category))
       .filter(hasClaimProvenance)
-      .filter((r) => r.match_origin !== 'discovered_topic')
+    const supportedResults = summaryResults.filter((r) => r.match_origin !== 'discovered_topic')
 
+    const summary_claim_refs: PlanClaimRef[] = summaryResults.map(toClaimRef)
     const supported_claim_refs: PlanClaimRef[] = supportedResults.map(toClaimRef)
 
     // ── Unresolved items (skipped entirely for determination_declined /
@@ -397,6 +419,7 @@ export function buildConsultativeAnswerPlan(
       bi_status: biStatusLiteral,
       disposition,
       supported_claim_refs,
+      summary_claim_refs,
       unresolved_items,
       missing_evidence,
       boundary_ref,
@@ -421,14 +444,14 @@ export function buildConsultativeAnswerPlan(
     ...discovered_context.map((d) => d.claim_ref),
   ]
   for (const ref of allRefs) {
-    const key = `${ref.matrix_identifier} ${ref.claim_id}`
+    const key = `${ref.matrix_identifier} ${ref.claim_id}`
     const existing = occurrences.get(key)
     if (existing) existing.occurrence_count += 1
     else occurrences.set(key, { matrix_identifier: ref.matrix_identifier, claim_id: ref.claim_id, occurrence_count: 1 })
   }
   const render_once_markers = [...occurrences.values()]
     .filter((m) => m.occurrence_count > 1)
-    .sort((a, b) => `${a.matrix_identifier} ${a.claim_id}`.localeCompare(`${b.matrix_identifier} ${b.claim_id}`))
+    .sort((a, b) => `${a.matrix_identifier} ${a.claim_id}`.localeCompare(`${b.matrix_identifier} ${b.claim_id}`))
 
   // ── Commercial Assurance references (reference-only in CC-3A). Union of
   //    every section's missing-evidence, deduped by identity. ──
@@ -436,7 +459,7 @@ export function buildConsultativeAnswerPlan(
   const commercial_assurance_refs: CommercialAssuranceRef[] = []
   for (const section of explicit_sections) {
     for (const me of section.missing_evidence) {
-      const key = `${me.source_claim_id} ${me.dependency_id ?? ''} ${me.applicability_fact ?? ''}`
+      const key = `${me.source_claim_id} ${me.dependency_id ?? ''} ${me.applicability_fact ?? ''}`
       if (caSeen.has(key)) continue
       caSeen.add(key)
       commercial_assurance_refs.push({

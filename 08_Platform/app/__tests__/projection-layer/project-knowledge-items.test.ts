@@ -56,7 +56,19 @@ describe('projectKnowledgeItems', () => {
     const scope = 'CRC may state only that Runway permits commercial use -- this publication scope does not extend to ownership analysis.'
     const out = projectKnowledgeItems([retrievalResult({ publication_scope: scope, candidate_statement: 'A distinct, unrelated candidate statement.' })])
     expect(JSON.stringify(out)).not.toContain('does not extend to ownership analysis')
-    expect(Object.keys(out.knowledge_items[0]).sort()).toEqual(['claim_id', 'last_verified', 'statement'])
+    // CC-3B.1: matrix_identifier is now carried (structural identity) -- still never rendered as user text.
+    expect(Object.keys(out.knowledge_items[0]).sort()).toEqual(['claim_id', 'last_verified', 'matrix_identifier', 'statement'])
+  })
+
+  test('CC-3B.1: matrix_identifier is copied verbatim from the RetrievalResult (structural identity), for every item', () => {
+    const out = projectKnowledgeItems([
+      retrievalResult({ claim_id: 'a', matrix_identifier: 'row-x', candidate_statement: 's1' }),
+      retrievalResult({ claim_id: 'b', matrix_identifier: 'topic-y', candidate_statement: 's2' }),
+    ])
+    expect(out.knowledge_items.map((i) => [i.matrix_identifier, i.claim_id])).toEqual([
+      ['row-x', 'a'],
+      ['topic-y', 'b'],
+    ])
   })
 
   test('5: null candidate_statement -> diagnostic, no item, never fabricated or falls back to publication_scope', () => {
@@ -123,6 +135,9 @@ describe('projectKnowledgeItems', () => {
     expect(out.knowledge_items).toHaveLength(2)
     expect(out.knowledge_items.map((i) => i.statement)).toEqual(['Tool A statement.', 'Tool B statement.'])
     expect(out.knowledge_items.every((i) => i.claim_id === 'shared-id')).toBe(true)
+    // CC-3B.1: the two items are distinguishable ONLY by matrix_identifier --
+    // exactly why claim_id alone is not a safe identity.
+    expect(out.knowledge_items.map((i) => i.matrix_identifier)).toEqual(['tool-a', 'tool-b'])
   })
 
   test('10b: fully identical duplicate results (same claim_id, same matrix_identifier, same statement) -- still not deduped, preserved 1:1 with input', () => {

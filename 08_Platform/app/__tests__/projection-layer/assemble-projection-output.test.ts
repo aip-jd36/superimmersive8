@@ -86,7 +86,7 @@ describe('assembleProjectionOutput', () => {
       [retrievalResult({ claim_id: 'runway-gen3', matrix_identifier: 'runway-gen3' })],
     )
     expect(output.knowledge_items).toEqual([
-      { claim_id: 'runway-gen3', statement: "Runway's current Terms allow commercial use across all subscription tiers.", last_verified: '2026-07-01' },
+      { claim_id: 'runway-gen3', matrix_identifier: 'runway-gen3', statement: "Runway's current Terms allow commercial use across all subscription tiers.", last_verified: '2026-07-01' },
     ])
   })
 

@@ -11,13 +11,18 @@ import { buildBoundedInterpretations } from '../../lib/bounded-interpretation/bu
 import { assembleProjectionOutput } from '../../lib/projection-layer/assemble-projection-output'
 import { retrieve } from '../../lib/retrieval-engine/retrieve'
 import { MATRIX_FIXTURE } from '../../lib/retrieval-engine/matrix-fixture'
+import { TOPIC_CLAIMS_FIXTURE } from '../../lib/retrieval-engine/topic-claims-fixture'
+import { TOPIC_RELATIONSHIPS_FIXTURE } from '../../lib/retrieval-engine/topic-relationships-fixture'
+import { buildRetrievalHandoff } from '../../lib/interview-engine/handoff'
+import { deriveAssessmentJurisdictionFacts } from '../../lib/crc-engine/assessment-jurisdiction-scope'
+import { deriveDiscoveredTopicOccurrences } from '../../lib/crc-engine/discovered-relevance'
 import type { ApplicabilityFacts } from '../../lib/retrieval-engine/lookup-topic-claims'
-import type { RetrievalHandoff, ToolMention, UserGoal } from '../../types/interview-engine'
+import type { RetrievalHandoff, StructuredUnderstanding, ToolMention, UserGoal } from '../../types/interview-engine'
 
 const FULL_OUTPUT: ProjectionOutput = {
   opening_line: 'You mentioned using Veo for a client project.',
   understood_summary: 'Here is what we understood about your workflow.',
-  knowledge_items: [{ claim_id: 'c1', statement: 'Veo commercial terms depend on plan tier.', last_verified: '2026-08-01T00:00:00.000Z' }],
+  knowledge_items: [{ claim_id: 'c1', matrix_identifier: 'veo', statement: 'Veo commercial terms depend on plan tier.', last_verified: '2026-08-01T00:00:00.000Z' }],
   goal_interpretations: [],
   closing_cta: 'ignored -- retired at the display layer',
 }
@@ -203,7 +208,7 @@ describe('buildResultsEmailContent', () => {
     })
   })
 
-  describe('CC-3B -- deterministic consultative surface realization (2026-09-02)', () => {
+  describe('CC-3B / CC-3B.1 -- deterministic consultative surface realization', () => {
     const h = (o: Partial<RetrievalHandoff> = {}): RetrievalHandoff => ({
       tools: [], unresolved_aliases: [], asset_providers: [], unresolved_asset_provider_mentions: [],
       workflow_role: 'unresolved', intended_use: 'unclear', scoped_observations: [], certainty_state: 'gate_1_unmet', exclusions: [], ...o,
@@ -218,12 +223,19 @@ describe('buildResultsEmailContent', () => {
     })
     const facts = (tms: ToolMention[] = []): ApplicabilityFacts => ({ jurisdiction: { included: [], excluded: [] }, toolMentions: tms })
 
-    function pipeline(handoff: RetrievalHandoff, goals: UserGoal[], applic: ApplicabilityFacts) {
-      const out = retrieve(handoff, MATRIX_FIXTURE, goals, [], applic)
+    function pipeline(handoff: RetrievalHandoff, goals: UserGoal[], applic: ApplicabilityFacts, opts: { topicClaims?: unknown[]; relationships?: unknown[]; discovered?: unknown[] } = {}) {
+      const out = retrieve(
+        handoff, MATRIX_FIXTURE, goals,
+        (opts.topicClaims ?? []) as never,
+        applic,
+        (opts.relationships ?? []) as never,
+        handoff.asset_providers,
+        (opts.discovered ?? []) as never,
+      )
       const interps = buildBoundedInterpretations(goals, out.results, out.diagnostics)
       const { output } = assembleProjectionOutput(handoff, out.results, interps)
       const plan = buildConsultativeAnswerPlan(interps, out.results, out.diagnostics)
-      return { output, plan }
+      return { output, plan, results: out.results }
     }
 
     test('CASE 1 (Runway, one goal): governed guidance appears exactly ONCE, under "What this means", not also under "Current guidance"', () => {
@@ -265,39 +277,45 @@ describe('buildResultsEmailContent', () => {
       expect((html.match(/not an SI8 Commercial Assurance Assessment/g) || []).length).toBe(1)
     })
 
-    test('CASE 3 (explicit + discovered): explicit goal section renders before any leftover "Also relevant" block; no fabricated goal', () => {
-      // a discovered result surfaces via a topic claim NOT tied as an exact-topic match;
-      // approximate with a literal output+plan where one knowledge_item is NOT in the goal section.
-      const output: ProjectionOutput = {
-        opening_line: 'You mentioned a tool and some stock footage.',
-        understood_summary: 'workflow recap',
-        knowledge_items: [
-          { claim_id: 'kling-commercial-use-baseline', statement: 'Explicit-goal governed statement.', last_verified: null },
-          { claim_id: 'DISCOVERED-STOCK', statement: 'Discovered stock-media consideration.', last_verified: null },
-        ],
-        goal_interpretations: [{ goal_text: 'Can I use it commercially?', summary: 'Explicit-goal governed statement. This is relevant to whether this can be used commercially, though it reflects the platform\'s own terms.', summary_blocks: ['Explicit-goal governed statement. This is relevant to whether this can be used commercially, though it reflects the platform\'s own terms.'] }],
-        closing_cta: '',
+    test('CASE 3 (explicit + discovered, REAL pipeline: Kling + iStock): each governed occurrence renders exactly once; discovered stock guidance is NOT duplicated', () => {
+      const su: StructuredUnderstanding = {
+        project_facts: {
+          intended_use: { attestation: { state: 'confirmed', value: 'client ad' }, source_turn: 1, source_statement: 'x' },
+          workflow_role: { attestation: { state: 'unknown' }, source_turn: 1, source_statement: 'x' },
+          jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+          human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        },
+        tool_mentions: [tmn('kling')],
+        scoped_observations: [],
+        user_goals: [g('g1', 'Can I use it commercially?', 'commercial_use')],
+        asset_provider_mentions: [{ mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: 'istock' }, confidence: 'confirmed', source_turn: 1, source_statement: 'iStock footage', superseded_by: null, usage: { state: 'unknown' }, license: { state: 'unknown' } }],
+        assessment_jurisdiction_mentions: [], content_presence_mentions: [],
+        current_phase: 3, gate_1_state: 'met', gate_2_state: 'stable', completion_reason: null, opt_out_scope: null,
       }
-      const plan = {
-        explicit_sections: [{
-          goal_text: 'Can I use it commercially?', category: 'commercial_use' as const, bi_status: 'directly_relevant' as const, disposition: 'governed_guidance_available' as const,
-          supported_claim_refs: [{ claim_id: 'kling-commercial-use-baseline', matrix_identifier: 'kling', match_origin: 'exact_topic' as const, matched_goal_category: 'commercial_use' as const, relationship_id: null, last_verified: null }],
-          unresolved_items: [], missing_evidence: [], boundary_ref: 'tool_source' as const, bi_summary_blocks: ['x'],
-        }],
-        discovered_context: [{ claim_ref: { claim_id: 'DISCOVERED-STOCK', matrix_identifier: 'tprs', match_origin: 'discovered_topic' as const, matched_goal_category: 'commercial_use' as const, relationship_id: null, last_verified: null }, authorizing_goal_category: 'commercial_use' as const }],
-        render_once_markers: [], commercial_assurance_refs: [],
+      const handoff = buildRetrievalHandoff(su)
+      const applic = { jurisdiction: deriveAssessmentJurisdictionFacts(su), toolMentions: su.tool_mentions }
+      const discovered = deriveDiscoveredTopicOccurrences(su, TOPIC_CLAIMS_FIXTURE)
+      const { output, plan, results } = pipeline(handoff, su.user_goals, applic, { topicClaims: TOPIC_CLAIMS_FIXTURE as unknown[], relationships: TOPIC_RELATIONSHIPS_FIXTURE as unknown[], discovered: discovered as unknown[] })
+
+      // sanity: discovered stock claims were produced and folded into the goal summary
+      const discoveredIds = results.filter((r) => r.match_origin === 'discovered_topic').map((r) => r.claim_id)
+      expect(discoveredIds.length).toBeGreaterThan(0)
+
+      const { html, text } = buildResultsEmailContent(output, 'attr-1', 'jd@example.com', plan)
+
+      // each governed statement appears exactly once, all inside "What this means"
+      for (const item of output.knowledge_items) {
+        const frag = item.statement.slice(0, 45)
+        expect(text.split(frag).length - 1).toBe(1)
       }
-      const { html } = buildResultsEmailContent(output, 'attr-1', 'jd@example.com', plan)
-      // explicit goal section is first
-      expect(html.indexOf('What this means for what you asked')).toBeLessThan(html.indexOf('Also relevant to your workflow'))
-      // the discovered item still renders, under the subordinate neutral heading
-      expect(html).toContain('Also relevant to your workflow')
-      expect(html).toContain('Discovered stock-media consideration.')
-      // the explicit-goal claim is NOT re-rendered under the subordinate heading
-      const subordinateSlice = html.slice(html.indexOf('Also relevant to your workflow'))
-      expect(subordinateSlice).not.toContain('Explicit-goal governed statement.')
-      // no fabricated goal_text for the discovered item
-      expect(html).not.toContain('You asked: &ldquo;Discovered')
+      // every discovered claim's prose sits inside the goal section, NOT a second "Also relevant" block
+      expect(html).toContain('What this means for what you asked')
+      expect(html).not.toContain('Also relevant to your workflow')
+      expect(text).not.toContain('ALSO RELEVANT')
+      // no fabricated goal for the discovered topic
+      expect(plan.explicit_sections.map((s) => s.category)).toEqual(['commercial_use'])
+      // Track C provenance is retained in the plan
+      expect(plan.discovered_context.map((d) => d.claim_ref.claim_id).sort()).toEqual([...discoveredIds].sort())
     })
 
     test('CASE 4 (no goal / outside coverage): with an empty plan, output is byte-identical to the no-plan render (fail closed to existing behavior)', () => {
@@ -309,16 +327,17 @@ describe('buildResultsEmailContent', () => {
     })
 
     test('CASE 5 (correction/supersession): a post-correction output/plan referencing only Kling renders no Suno content', () => {
+      const ref = { claim_id: 'kling-commercial-use-baseline', matrix_identifier: 'kling', match_origin: 'exact_topic' as const, matched_goal_category: 'commercial_use' as const, relationship_id: null, last_verified: null }
       const output: ProjectionOutput = {
         opening_line: 'x', understood_summary: 'x',
-        knowledge_items: [{ claim_id: 'kling-commercial-use-baseline', statement: 'Kling governed statement.', last_verified: null }],
+        knowledge_items: [{ claim_id: 'kling-commercial-use-baseline', matrix_identifier: 'kling', statement: 'Kling governed statement.', last_verified: null }],
         goal_interpretations: [{ goal_text: 'Can I use it commercially?', summary: 'Kling governed statement. Boundary.', summary_blocks: ['Kling governed statement. Boundary.'] }],
         closing_cta: '',
       }
       const plan = {
         explicit_sections: [{
           goal_text: 'Can I use it commercially?', category: 'commercial_use' as const, bi_status: 'directly_relevant' as const, disposition: 'governed_guidance_available' as const,
-          supported_claim_refs: [{ claim_id: 'kling-commercial-use-baseline', matrix_identifier: 'kling', match_origin: 'exact_topic' as const, matched_goal_category: 'commercial_use' as const, relationship_id: null, last_verified: null }],
+          supported_claim_refs: [ref], summary_claim_refs: [ref],
           unresolved_items: [], missing_evidence: [], boundary_ref: 'tool_source' as const, bi_summary_blocks: ['x'],
         }],
         discovered_context: [], render_once_markers: [], commercial_assurance_refs: [],

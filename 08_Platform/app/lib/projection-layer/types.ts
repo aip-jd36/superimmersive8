@@ -40,6 +40,18 @@
  */
 export interface ProjectionKnowledgeItem {
   claim_id: string
+  /**
+   * CC-3B.1 (2026-09-02). The Matrix row / topic identifier this claim
+   * belongs to -- copied verbatim from `RetrievalResult.matrix_identifier`.
+   * With `claim_id` it forms the authoritative structural identity
+   * `(matrix_identifier, claim_id)` that Retrieval's own dedup keys on
+   * (lib/retrieval-engine/retrieve.ts). `claim_id` alone is a Matrix-
+   * authoring convention, NOT an enforced global-uniqueness contract (see
+   * project-knowledge-items.ts's header and its test case 10). Traceability
+   * / render-control only; like `claim_id`, never itself rendered into
+   * user-facing text (architecture doc §6).
+   */
+  matrix_identifier: string
   statement: string
   last_verified: string | null
 }

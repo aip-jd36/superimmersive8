@@ -55,6 +55,14 @@ export function projectKnowledgeItems(results: RetrievalResult[]): ProjectKnowle
     }
     knowledge_items.push({
       claim_id: result.claim_id,
+      // CC-3B.1 (2026-09-02): carry the authoritative structural identity
+      // `(matrix_identifier, claim_id)` -- the exact key Retrieval's own
+      // dedup uses (retrieve.ts) and which this module's own header names.
+      // `claim_id` alone is Matrix-authoring convention, NOT an enforced
+      // global-uniqueness contract (see case 10 in this module's test).
+      // Traceability / render-control only; still never rendered as
+      // user-facing text (architecture doc §6).
+      matrix_identifier: result.matrix_identifier,
       statement: result.candidate_statement,
       last_verified: result.last_verified,
     })

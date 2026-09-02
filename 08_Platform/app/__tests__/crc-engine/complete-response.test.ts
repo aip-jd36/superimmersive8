@@ -13,8 +13,8 @@ const SAMPLE_OUTPUT: ProjectionOutput = {
   opening_line: 'Real opening line.',
   understood_summary: 'Real summary text that must never leak.',
   knowledge_items: [
-    { claim_id: 'c1', statement: 'Real finding one.', last_verified: null },
-    { claim_id: 'c2', statement: 'Real finding two.', last_verified: null },
+    { claim_id: 'c1', matrix_identifier: 'm1', statement: 'Real finding one.', last_verified: null },
+    { claim_id: 'c2', matrix_identifier: 'm2', statement: 'Real finding two.', last_verified: null },
   ],
   goal_interpretations: [],
   closing_cta: '',
