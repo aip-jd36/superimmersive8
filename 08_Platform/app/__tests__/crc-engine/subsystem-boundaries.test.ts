@@ -213,3 +213,63 @@ describe('subsystem boundaries -- crc-engine orchestrator', () => {
     expect(importText).not.toMatch(/@anthropic-ai/i)
   })
 })
+
+describe('subsystem boundaries -- Consultative Answer Plan (CC-3A)', () => {
+  const PLAN_FILE = 'lib/crc-engine/consultative-answer-plan.ts'
+  const importText = importLinesOf(PLAN_FILE).join('\n')
+
+  test('it exists (guards against a silent rename breaking this whole block)', () => {
+    expect(fs.existsSync(path.join(APP_ROOT, PLAN_FILE))).toBe(true)
+  })
+
+  test('imports no Bounded Interpretation LOGIC -- only @/lib/bounded-interpretation/types', () => {
+    expect(importText).not.toMatch(/lib\/bounded-interpretation\/(rules|build-bounded-interpretation)/i)
+    expect(importText).toMatch(/@\/lib\/bounded-interpretation\/types/)
+  })
+
+  test('imports no Retrieval Engine LOGIC or Matrix fixture -- only @/lib/retrieval-engine/types', () => {
+    expect(importText).not.toMatch(/lib\/retrieval-engine\/(retrieve|lookup-|enumerate-eligible-claims|extract-matchable-facts|assemble-result|matrix-fixture)/i)
+    expect(importText).not.toMatch(/platform-rights-matrix/i)
+  })
+
+  test('imports no Interview Engine LOGIC -- only the shared @/types/interview-engine contract module', () => {
+    expect(importText).not.toMatch(/lib\/interview-engine\//i)
+  })
+
+  test('imports no Projection Layer module (it will be consumed BY realization later, never a consumer of it)', () => {
+    expect(importText).not.toMatch(/lib\/projection-layer\//i)
+  })
+
+  test('imports no LLM/adapter module -- the planner is a pure deterministic function', () => {
+    expect(importText).not.toMatch(/anthropic/i)
+    expect(importText).not.toMatch(/openai/i)
+  })
+
+  test('its only value (non-type) imports are the two crc-engine askability registries', () => {
+    const valueImports = (importLinesOf(PLAN_FILE) ?? []).filter((line) => !/^import type /.test(line))
+    for (const line of valueImports) {
+      expect(line).toMatch(/\.\/(dependency-askability|selector-askability)/)
+    }
+  })
+
+  test('no orchestration/realization file calls it in CC-3A -- nothing renders it yet (surface unchanged)', () => {
+    // The realization/orchestration path that would wire the plan into the
+    // user-visible answer. A dev/review script under scripts/ importing it is
+    // fine and expected; the point is that the RENDERING path is untouched.
+    const REALIZATION_PATH = [
+      'lib/crc-engine/run-crc-conversation.ts',
+      'lib/crc-engine/run-turn.ts',
+      'lib/crc-engine/results-email-delivery.ts',
+      'lib/crc-engine/results-email-template.ts',
+      'lib/crc-engine/complete-response.ts',
+      'lib/projection-layer/assemble-projection-output.ts',
+      'lib/projection-layer/project-knowledge-items.ts',
+      'lib/projection-layer/understood-summary.ts',
+    ]
+    const callers = REALIZATION_PATH.filter((file) => {
+      const source = fs.readFileSync(path.join(APP_ROOT, file), 'utf-8')
+      return /buildConsultativeAnswerPlan|consultative-answer-plan/.test(source)
+    })
+    expect(callers).toEqual([])
+  })
+})
