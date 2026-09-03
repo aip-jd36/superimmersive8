@@ -110,10 +110,11 @@ function deriveMatrixApplicabilityGaps(handoff: RetrievalHandoff, matrix: Matrix
 /**
  * The single generic entry point: governed applicability gaps across both
  * claim sources, for the currently permitted explicit-goal relevance
- * universe. `handoff` supplies canonical tool identifiers (for the Matrix
- * path) and canonical asset-provider identifiers (for the TopicClaim
- * path's own `providerScopeMatches` gate, via `lookupTopicClaims`'s
- * existing `assetProviders` parameter) -- both derived by the SAME
+ * universe. `handoff` supplies canonical tool identifiers (used for BOTH the
+ * Matrix path AND the TopicClaim path's own `toolScopeMatches` gate) and
+ * canonical asset-provider identifiers (for the TopicClaim path's own
+ * `providerScopeMatches` gate, via `lookupTopicClaims`'s existing
+ * `assetProviders` parameter) -- all derived by the SAME
  * `buildRetrievalHandoff()` function `runCRCConversation()` itself uses to
  * build the handoff passed into full `retrieve()`, guaranteeing parity by
  * construction, never by re-derivation (see this module's own header;
@@ -122,6 +123,22 @@ function deriveMatrixApplicabilityGaps(handoff: RetrievalHandoff, matrix: Matrix
  * only ever receives it, never builds it, preserving the existing
  * subsystem-boundary discipline that lib/retrieval-engine/ never imports
  * Interview Engine LOGIC).
+ *
+ * Tool-scope parity (Applicability-Readiness Tool-Scope Parity milestone):
+ * `retrieve()`'s own TopicClaim stage derives `activeToolIds` from
+ * `handoff.tools` and passes them into `lookupTopicClaims`'s `activeToolIds`
+ * parameter (LK-7 canonical `tool_scope` primitive, 2026-08-29), so a
+ * `tool_scope`-narrowed governed claim is a candidate only when its tool is
+ * actually active in the conversation. This primitive MUST use the identical
+ * source and semantics -- when it did not, every `tool_scope`-narrowed
+ * governed claim was silently excluded from readiness evaluation before its
+ * applicability was ever checked, so a governed selector need on such a claim
+ * (e.g. an `askable_in_crc` applicability fact left `unresolved`) could never
+ * be derived, even though the exact same claim remained fully visible to
+ * full `retrieve()` and Bounded Interpretation. This is a parity restoration
+ * only: `tool_scope`, applicability operators, and requirement evaluation are
+ * all unchanged; the sole effect is that a claim scoped to an active tool is
+ * no longer dropped before evaluation.
  */
 export function deriveApplicabilityReadinessGaps(
   handoff: RetrievalHandoff,
@@ -134,7 +151,17 @@ export function deriveApplicabilityReadinessGaps(
 
   const matrixGaps = deriveMatrixApplicabilityGaps(handoff, matrix, activeGoalCategories, facts)
 
-  const topicLookup = lookupTopicClaims(goals, topicClaims, facts, handoff.asset_providers)
+  // Same `activeToolIds` source and semantics as `retrieve()`'s own
+  // TopicClaim stage (retrieve.ts) -- canonical identifiers only, by
+  // construction (`RetrievalHandoffTool` entries exist only for
+  // `resolution.kind === 'canonical'` tool mentions; see handoff.ts).
+  // `discoveredTopics` (arg 5) is deliberately left `[]` -- the explicit-goal-
+  // only relevance policy is unchanged by this parity fix (see this module's
+  // own header). See the header's Tool-scope parity note for why omitting
+  // this argument silently hid every `tool_scope`-narrowed governed claim
+  // from the readiness path.
+  const activeToolIds = handoff.tools.map((t) => t.identifier)
+  const topicLookup = lookupTopicClaims(goals, topicClaims, facts, handoff.asset_providers, [], activeToolIds)
   const topicGaps = topicLookup.diagnostics.filter((d) => d.reason === 'applicability_unmet')
 
   return [...matrixGaps, ...topicGaps]

@@ -326,6 +326,105 @@ describe('deriveSelectorNeeds -- Matrix-origin genericity (CRC Generic Applicabi
   })
 })
 
+describe('deriveSelectorNeeds -- tool-scoped TopicClaim parity (Applicability-Readiness Tool-Scope Parity milestone)', () => {
+  // Proves the crc-engine consumer end-to-end: a `tool_scope`-narrowed
+  // governed TopicClaim with an unresolved, registered-askable applicability
+  // fact now yields a SelectorNeed when its tool is active in the
+  // conversation -- and yields nothing when it is not. Before the parity
+  // fix, `deriveApplicabilityReadinessGaps` dropped every `tool_scope`
+  // claim (it never threaded active tool identity into `lookupTopicClaims`),
+  // so no such need could ever be derived even though full Retrieval /
+  // Bounded Interpretation saw the same claim. Synthetic tool + claim id --
+  // this asserts the invariant, not any tool's wording.
+  const SCOPED_TOOL = 'synthtool'
+
+  function toolScopedClaim(overrides: Partial<TopicClaim> & Pick<TopicClaim, 'claim_id'>): TopicClaim {
+    return {
+      topic: 'commercial_use',
+      claim_character: 'conditional',
+      jurisdiction: 'Global',
+      lifecycle: 'Adopted',
+      crc_eligible: 'Yes',
+      crc_publication_scope: 'scope',
+      crc_candidate_statement: 'statement',
+      applicability_requirements: [{ fact: 'tool_account_status', tool: SCOPED_TOOL, operator: 'equals', value: 'Member Account' }],
+      unresolved_project_dependencies: [],
+      provider_scope: null,
+      tool_scope: [SCOPED_TOOL],
+      last_verified: null,
+      superseded_by: null,
+      ...overrides,
+    }
+  }
+
+  test('tool active + explicit goal + unresolved askable fact -> the governed selector need IS derived', () => {
+    mockedGetSelectorAskabilityEntry.mockImplementation((fact: string) =>
+      fact === 'tool_account_status' ? { treatment: 'askable_in_crc', question_text: 'What kind of {tool} account do you have?' } : undefined,
+    )
+    const su = emptySU({
+      user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })],
+      tool_mentions: [toolMention({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: SCOPED_TOOL } })],
+    })
+    const needs = deriveSelectorNeeds(su, NO_MATRIX, [toolScopedClaim({ claim_id: 'CLAIM-SYNTH-TOOLSCOPE-1' })], createInitialBoundaryState())
+    expect(needs).toEqual([
+      {
+        fact: 'tool_account_status',
+        tool: SCOPED_TOOL,
+        originating_goal_category: 'commercial_use',
+        unmet_claim_ids: ['CLAIM-SYNTH-TOOLSCOPE-1'],
+        dedupe_key: `tool_account_status::${SCOPED_TOOL}`,
+      },
+    ])
+  })
+
+  test('same claim + explicit goal, but the tool is NOT active in the conversation -> no need (fail closed)', () => {
+    mockedGetSelectorAskabilityEntry.mockImplementation((fact: string) =>
+      fact === 'tool_account_status' ? { treatment: 'askable_in_crc', question_text: 'What kind of {tool} account do you have?' } : undefined,
+    )
+    const su = emptySU({
+      user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })],
+      tool_mentions: [], // tool never mentioned
+    })
+    const needs = deriveSelectorNeeds(su, NO_MATRIX, [toolScopedClaim({ claim_id: 'CLAIM-SYNTH-TOOLSCOPE-1' })], createInitialBoundaryState())
+    expect(needs).toEqual([])
+  })
+
+  test('tool active, but the applicability fact is conclusively not_met -> no need (unresolved vs not_met preserved)', () => {
+    mockedGetSelectorAskabilityEntry.mockImplementation((fact: string) =>
+      fact === 'tool_account_status' ? { treatment: 'askable_in_crc', question_text: 'What kind of {tool} account do you have?' } : undefined,
+    )
+    const su = emptySU({
+      user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })],
+      tool_mentions: [
+        toolMention({
+          mention_id: 'm1',
+          resolution: { kind: 'canonical', identifier: SCOPED_TOOL },
+          account_status: { state: 'confirmed', value: 'Regular Account' },
+        }),
+      ],
+    })
+    const needs = deriveSelectorNeeds(su, NO_MATRIX, [toolScopedClaim({ claim_id: 'CLAIM-SYNTH-TOOLSCOPE-1' })], createInitialBoundaryState())
+    expect(needs).toEqual([])
+  })
+
+  test('tool active + unresolved askable fact, but the claim topic matches NO active explicit goal -> no need (explicit-goal-only policy unchanged)', () => {
+    mockedGetSelectorAskabilityEntry.mockImplementation((fact: string) =>
+      fact === 'tool_account_status' ? { treatment: 'askable_in_crc', question_text: 'What kind of {tool} account do you have?' } : undefined,
+    )
+    const su = emptySU({
+      user_goals: [goal({ goal_id: 'g-1', category: 'commercial_use' })],
+      tool_mentions: [toolMention({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: SCOPED_TOOL } })],
+    })
+    const needs = deriveSelectorNeeds(
+      su,
+      NO_MATRIX,
+      [toolScopedClaim({ claim_id: 'CLAIM-SYNTH-TOOLSCOPE-1', topic: 'copyright_ownership' })],
+      createInitialBoundaryState(),
+    )
+    expect(needs).toEqual([])
+  })
+})
+
 describe('buildSelectorNeedProposal', () => {
   test('constructs the same downstream proposal shape as other deterministic clarification modules, with {tool} substituted for the canonical tool identifier', () => {
     mockedGetSelectorAskabilityEntry.mockImplementation((fact: string) => (fact === 'tool_plan_tier' ? { treatment: 'askable_in_crc', question_text: 'Which plan or account tier were you using for {tool}?' } : undefined))

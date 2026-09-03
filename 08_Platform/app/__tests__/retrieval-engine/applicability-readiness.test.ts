@@ -7,6 +7,7 @@
  */
 
 import { deriveApplicabilityReadinessGaps } from '@/lib/retrieval-engine/applicability-readiness'
+import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import type { MatrixRow, TopicClaim } from '@/lib/retrieval-engine/types'
 import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
 import type { RetrievalHandoff, ToolMention, UserGoal } from '@/types/interview-engine'
@@ -203,6 +204,129 @@ describe('deriveApplicabilityReadinessGaps -- TopicClaim-origin gaps, provider-s
     const h = handoff({ asset_providers: [] })
     const gaps = deriveApplicabilityReadinessGaps(h, [], [goal({ category: 'third_party_source_rights' })], [claim], facts())
     expect(gaps).toHaveLength(1)
+  })
+})
+
+describe('deriveApplicabilityReadinessGaps -- TopicClaim-origin gaps, tool-scope parity (Applicability-Readiness Tool-Scope Parity milestone)', () => {
+  // Deliberately synthetic tool identity + claim id -- these tests prove the
+  // architectural invariant (readiness uses the SAME `handoff.tools`-derived
+  // active-tool identity as `retrieve()` for the `toolScopeMatches` gate),
+  // never any specific tool's wording.
+  const SYNTH_TOOL = 'synthtool'
+  const OTHER_TOOL = 'othertool'
+
+  function toolScopedClaim(overrides: Partial<TopicClaim> & Pick<TopicClaim, 'claim_id'>): TopicClaim {
+    return {
+      topic: 'commercial_use',
+      claim_character: 'conditional',
+      jurisdiction: 'Global',
+      lifecycle: 'Adopted',
+      crc_eligible: 'Yes',
+      crc_publication_scope: 'scope',
+      crc_candidate_statement: 'statement',
+      applicability_requirements: [{ fact: 'tool_account_status', tool: SYNTH_TOOL, operator: 'equals', value: 'Member Account' }],
+      unresolved_project_dependencies: [],
+      provider_scope: null,
+      tool_scope: [SYNTH_TOOL],
+      last_verified: null,
+      superseded_by: null,
+      ...overrides,
+    }
+  }
+
+  function tool(identifier: string) {
+    return { identifier, access_surface: 'unresolved' as const, plan_tier: 'unknown' as const }
+  }
+
+  test('E1: tool-scoped claim + matching active tool in handoff.tools + explicit goal + unresolved requirement -> gap visible (was silently lost before this fix)', () => {
+    const claim = toolScopedClaim({ claim_id: 'CLAIM-SYNTH-TOOLSCOPE-1' })
+    const h = handoff({ tools: [tool(SYNTH_TOOL)] })
+    const gaps = deriveApplicabilityReadinessGaps(h, [], [goal({ category: 'commercial_use' })], [claim], facts())
+    expect(gaps).toHaveLength(1)
+    expect(gaps[0].identifier).toBe('commercial_use')
+    expect(gaps[0].unmet_applicability).toEqual([
+      { claim_id: 'CLAIM-SYNTH-TOOLSCOPE-1', requirement: { fact: 'tool_account_status', tool: SYNTH_TOOL, operator: 'equals', value: 'Member Account' }, status: 'unresolved' },
+    ])
+  })
+
+  test('E2: tool-scope parity -- for equivalent inputs, retrieve() and deriveApplicabilityReadinessGaps() BOTH surface the same tool-scoped claim as an applicability_unmet gap (the exact contract divergence this milestone fixes)', () => {
+    const claim = toolScopedClaim({ claim_id: 'CLAIM-SYNTH-TOOLSCOPE-1' })
+    const g = goal({ category: 'commercial_use' })
+    const h = handoff({ tools: [tool(SYNTH_TOOL)] })
+    const f = facts()
+
+    // Full Retrieval: the claim is a recognized candidate, withheld only for
+    // its unresolved applicability requirement -> an applicability_unmet
+    // diagnostic naming the claim.
+    const retrieveDiag = retrieve(h, [], [g], [claim], f).diagnostics.filter(
+      (d) => d.reason === 'applicability_unmet' && d.unmet_applicability?.some((u) => u.claim_id === 'CLAIM-SYNTH-TOOLSCOPE-1'),
+    )
+    expect(retrieveDiag).toHaveLength(1)
+
+    // Readiness primitive: must see the identical gap -- no silent loss.
+    const readinessDiag = deriveApplicabilityReadinessGaps(h, [], [g], [claim], f).filter(
+      (d) => d.reason === 'applicability_unmet' && d.unmet_applicability?.some((u) => u.claim_id === 'CLAIM-SYNTH-TOOLSCOPE-1'),
+    )
+    expect(readinessDiag).toHaveLength(1)
+    expect(readinessDiag[0].unmet_applicability).toEqual(retrieveDiag[0].unmet_applicability)
+  })
+
+  test('E3: tool-scoped claim but NO matching active tool -> no gap (fail closed, exact parity with final Retrieval)', () => {
+    const claim = toolScopedClaim({ claim_id: 'CLAIM-SYNTH-TOOLSCOPE-1' })
+    const h = handoff({ tools: [] })
+    const gaps = deriveApplicabilityReadinessGaps(h, [], [goal({ category: 'commercial_use' })], [claim], facts())
+    expect(gaps).toEqual([])
+    // Same outcome from full Retrieval -- the claim is never a candidate.
+    expect(retrieve(h, [], [goal({ category: 'commercial_use' })], [claim], facts()).results.map((r) => r.claim_id)).not.toContain('CLAIM-SYNTH-TOOLSCOPE-1')
+  })
+
+  test('E3b: a DIFFERENT active tool does not satisfy a claim scoped to another tool', () => {
+    const claim = toolScopedClaim({ claim_id: 'CLAIM-SYNTH-TOOLSCOPE-1', tool_scope: [SYNTH_TOOL] })
+    const h = handoff({ tools: [tool(OTHER_TOOL)] })
+    const gaps = deriveApplicabilityReadinessGaps(h, [], [goal({ category: 'commercial_use' })], [claim], facts())
+    expect(gaps).toEqual([])
+  })
+
+  test('E4: tool-scoped claim, requirement conclusively not_met -> reported as not_met, NEVER converted to unresolved (unresolved vs not_met distinction preserved)', () => {
+    const claim = toolScopedClaim({ claim_id: 'CLAIM-SYNTH-TOOLSCOPE-1' })
+    const h = handoff({ tools: [tool(SYNTH_TOOL)] })
+    function tm(overrides: Partial<ToolMention> & Pick<ToolMention, 'mention_id' | 'resolution'>): ToolMention {
+      return { access_surface: { state: 'unknown' }, plan_tier: { state: 'unknown' }, account_status: { state: 'unknown' }, confidence: 'confirmed', source_turn: 1, source_statement: 'x', superseded_by: null, ...overrides }
+    }
+    const mention = tm({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: SYNTH_TOOL }, account_status: { state: 'confirmed', value: 'Regular Account' } })
+    const gaps = deriveApplicabilityReadinessGaps(h, [], [goal({ category: 'commercial_use' })], [claim], facts({ toolMentions: [mention] }))
+    expect(gaps).toHaveLength(1)
+    expect(gaps[0].unmet_applicability).toEqual([
+      { claim_id: 'CLAIM-SYNTH-TOOLSCOPE-1', requirement: { fact: 'tool_account_status', tool: SYNTH_TOOL, operator: 'equals', value: 'Member Account' }, status: 'not_met' },
+    ])
+  })
+
+  test('E5: tool-scoped claim on an active tool, unresolved requirement, but the claim topic matches NO active explicit goal -> no gap (explicit-goal-only policy unchanged)', () => {
+    const claim = toolScopedClaim({ claim_id: 'CLAIM-SYNTH-TOOLSCOPE-1', topic: 'copyright_ownership' })
+    const h = handoff({ tools: [tool(SYNTH_TOOL)] })
+    // Only a commercial_use goal is active.
+    const gaps = deriveApplicabilityReadinessGaps(h, [], [goal({ category: 'commercial_use' })], [claim], facts())
+    expect(gaps).toEqual([])
+  })
+
+  test('E5b: tool present but the claim requires NO explicit goal at all -- a tool identifier alone never surfaces a gap (tool_scope narrows, it never creates topic relevance)', () => {
+    const claim = toolScopedClaim({ claim_id: 'CLAIM-SYNTH-TOOLSCOPE-1' })
+    const h = handoff({ tools: [tool(SYNTH_TOOL)] })
+    const gaps = deriveApplicabilityReadinessGaps(h, [], [], [claim], facts())
+    expect(gaps).toEqual([])
+  })
+
+  test('E6: regression safety -- a tool_scope: null claim is unaffected by handoff.tools in either direction (byte-identical to pre-fix behavior)', () => {
+    const genericClaim = toolScopedClaim({ claim_id: 'CLAIM-GENERIC-1', tool_scope: null })
+    // With no tools present:
+    const gapsNoTools = deriveApplicabilityReadinessGaps(handoff({ tools: [] }), [], [goal({ category: 'commercial_use' })], [genericClaim], facts())
+    // With an unrelated tool present:
+    const gapsWithTool = deriveApplicabilityReadinessGaps(handoff({ tools: [tool(OTHER_TOOL)] }), [], [goal({ category: 'commercial_use' })], [genericClaim], facts())
+    expect(gapsNoTools).toHaveLength(1)
+    expect(gapsWithTool).toEqual(gapsNoTools)
+    expect(gapsNoTools[0].unmet_applicability).toEqual([
+      { claim_id: 'CLAIM-GENERIC-1', requirement: { fact: 'tool_account_status', tool: SYNTH_TOOL, operator: 'equals', value: 'Member Account' }, status: 'unresolved' },
+    ])
   })
 })
 
