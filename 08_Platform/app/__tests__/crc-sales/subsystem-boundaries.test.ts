@@ -100,12 +100,16 @@ describe('crc-sales never writes CRC conversational state or any Assurance table
   })
 })
 
-describe('answer-context recomputes via the unchanged pipeline, does not reimplement it', () => {
-  test('imports runCRCConversation + buildBoundedInterpretations (unmodified), never Retrieval LOGIC internals', () => {
+describe('answer-context CONSUMES the unchanged pipeline; owns neither Retrieval nor BI (CAH-3B.1)', () => {
+  test('imports runCRCConversation, never a Retrieval LOGIC internal, never a BI constructor', () => {
     const src = read('lib/crc-sales/answer-context.ts')
     expect(src).toMatch(/from\s+['"]@\/lib\/crc-engine\/run-crc-conversation['"]/)
-    expect(src).toMatch(/from\s+['"]@\/lib\/bounded-interpretation\/build-bounded-interpretation['"]/)
+    // BI is CONSUMED from the pipeline result, not constructed here.
+    expect(src).not.toMatch(/from\s+['"]@\/lib\/bounded-interpretation\/build-bounded-interpretation['"]/)
+    expect(src).not.toMatch(/buildBoundedInterpretations?\s*\(/)
     expect(src).not.toMatch(/@\/lib\/retrieval-engine\/(retrieve|lookup-rows|enumerate-eligible-claims|assemble-result|lookup-topic-claims)['"]/)
+    // and it reads the authoritative BI field.
+    expect(src).toMatch(/\.bounded_interpretations\b/)
   })
 })
 

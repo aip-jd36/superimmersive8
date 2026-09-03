@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import type { SalesSessionWorkflowState } from '@/lib/crc-sales/types'
 import type { SalesStatus, SalesCloseReason } from '@/lib/crc-sales/workflow'
 
-const CLOSE_REASONS: SalesCloseReason[] = ['converted', 'declined', 'not_a_fit', 'unreachable', 'no_response']
+const CLOSE_REASONS: SalesCloseReason[] = ['converted', 'declined', 'unreachable', 'no_response']
 
 function nextActions(status: SalesStatus): Array<{ to: SalesStatus; label: string; needsReason?: boolean }> {
   switch (status) {
@@ -35,7 +35,7 @@ export function SessionStatusControl({ sessionId, initial }: { sessionId: string
   const [wf, setWf] = useState(initial)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
-  const [reason, setReason] = useState<SalesCloseReason>('not_a_fit')
+  const [reason, setReason] = useState<SalesCloseReason>('no_response')
 
   async function transition(to: SalesStatus, withReason: boolean) {
     setBusy(true)

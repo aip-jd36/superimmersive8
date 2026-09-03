@@ -1,6 +1,7 @@
 /**
  * CAH-3B — current-LK answer context: exhaustive mapping, structural
- * boundedness, Track C provenance, fail-closed, no fork of Retrieval/BI.
+ * boundedness, Track C provenance, fail-closed.
+ * CAH-3B.1 — consumes authoritative pipeline BI (see bi-ownership.test.ts).
  * (§15, §16, §17, §23.C)
  */
 
@@ -117,6 +118,7 @@ describe('buildSalesAnswerContext — real pipeline', () => {
     jest.isolateModules(() => {
       jest.doMock('@/lib/crc-engine/run-crc-conversation', () => ({
         runCRCConversation: () => ({
+          bounded_interpretations: [],
           trace: {
             retrieval_results: [
               { claim_id: 'ok', matrix_identifier: 'm', topic: 'commercial_use', match_origin: 'exact_topic', matched_goal_category: 'commercial_use', relationship_id: null, last_verified: null },
@@ -126,7 +128,6 @@ describe('buildSalesAnswerContext — real pipeline', () => {
           diagnostics: { retrieval: [] },
         }),
       }))
-      jest.doMock('@/lib/bounded-interpretation/build-bounded-interpretation', () => ({ buildBoundedInterpretations: () => [] }))
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { buildSalesAnswerContext: build } = require('@/lib/crc-sales/answer-context')
       const ctx = build(su([goal('g1', 'x', 'commercial_use')], []), null)

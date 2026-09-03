@@ -13,9 +13,12 @@
  *
  * Ambiguities CAH-3A left open, resolved here to the smaller / fail-closed
  * option (CAH-3B §8):
- *   - NEW -> CLOSED directly: ALLOWED (a rep can close an obviously
- *     unusable lead without a pointless "contacted" step). Reasons
- *     'not_a_fit' / 'unreachable' / 'no_response' are all valid from NEW.
+ *   - NEW -> CLOSED directly: ALLOWED (a rep can close a lead without a
+ *     pointless "contacted" step). All close reasons are valid from NEW.
+ *   - Close reasons are operationally factual only (CAH-3B.1): 'not_a_fit'
+ *     was removed -- it can imply an ungoverned judgment about commercial
+ *     suitability / readiness / risk / qualification, which the Sales layer
+ *     must never make.
  *   - NEW -> CONVERTING directly: REJECTED (a customer cannot agree to
  *     Assurance before being contacted).
  *   - Re-issuing the current status (e.g. CONTACTED -> CONTACTED):
@@ -28,7 +31,7 @@
 export const SALES_STATUSES = ['NEW', 'CONTACTED', 'CONVERTING', 'CLOSED'] as const
 export type SalesStatus = (typeof SALES_STATUSES)[number]
 
-export const SALES_CLOSE_REASONS = ['converted', 'declined', 'not_a_fit', 'unreachable', 'no_response'] as const
+export const SALES_CLOSE_REASONS = ['converted', 'declined', 'unreachable', 'no_response'] as const
 export type SalesCloseReason = (typeof SALES_CLOSE_REASONS)[number]
 
 /** Exhaustive allowed (from -> to) pairs. Anything not listed is invalid. */
