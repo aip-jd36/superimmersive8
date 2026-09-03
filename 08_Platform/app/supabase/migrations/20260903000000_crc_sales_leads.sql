@@ -72,7 +72,7 @@ END $$;
 DO $$ BEGIN
   ALTER TABLE crc_sales_state
     ADD CONSTRAINT crc_sales_state_close_reason_values
-    CHECK (close_reason IS NULL OR close_reason IN ('converted', 'declined', 'not_a_fit', 'unreachable', 'no_response'));
+    CHECK (close_reason IS NULL OR close_reason IN ('converted', 'declined', 'unreachable', 'no_response'));
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 

@@ -1,23 +1,29 @@
 /**
  * CRC -> Sales SECONDARY "answer context" (CAH-3B §15-§18).
  *
- * OPTIONAL, lazy, current-governed-knowledge view. It recomputes Retrieval
- * + Bounded Interpretation via the UNCHANGED CRC pipeline and then projects
- * ONLY permitted upstream representations. It is NOT required for the lead
- * list, contact detail, transcript, or Sales workflow state -- any of those
- * work with this returning `{ available: false }`.
+ * OPTIONAL, lazy, current-governed-knowledge view. It runs the UNCHANGED
+ * CRC pipeline and then projects ONLY permitted upstream representations.
+ * It is NOT required for the lead list, contact detail, transcript, or
+ * Sales workflow state -- any of those work with this returning
+ * `{ available: false }`.
  *
- * ── How it uses the pipeline (no fork) ──
+ * ── BI ownership (CAH-3B.1) ──
  *
- * Retrieval output is taken VERBATIM from `runCRCConversation(...).trace.
- * retrieval_results` / `.diagnostics.retrieval` -- exactly what production
- * computed. Bounded Interpretation is then re-derived by calling the
- * PURE, UNMODIFIED `buildBoundedInterpretations` with those same retrieval
- * results + the session's own goals + human-contribution attestation --
- * the identical inputs `runCRCConversation` passes internally, so the
- * result is byte-identical to the pipeline's own `interpretations`
- * (asserted by a cross-check test). No Retrieval logic, no BI logic, and
- * no orchestration code is modified or reimplemented here.
+ * This module CONSUMES authoritative Bounded Interpretation; it does not
+ * PRODUCE it. The authority chain is:
+ *
+ *   Living Knowledge -> Retrieval -> Bounded Interpretation -> Sales projection
+ *
+ * `runCRCConversation()` is the single authoritative CRC pipeline. It
+ * computes Retrieval AND Bounded Interpretation internally and now exposes
+ * both on its result (`trace.retrieval_results`, `diagnostics.retrieval`,
+ * and `bounded_interpretations` -- the last exposed by the CAH-3B.1
+ * additive contract change, the exact array the pipeline already passed to
+ * Projection). This module reads those authoritative values and does
+ * nothing more than field selection + deterministic rendering + fail-closed
+ * handling. It MUST NOT import or invoke `buildBoundedInterpretations` or
+ * any BI-construction primitive -- enforced by
+ * __tests__/crc-sales/bi-ownership.test.ts.
  *
  * ── Structural boundedness (Correction 4) ──
  *
@@ -38,7 +44,6 @@
  */
 
 import { runCRCConversation } from '@/lib/crc-engine/run-crc-conversation'
-import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { TOPIC_RELATIONSHIPS_FIXTURE } from '@/lib/retrieval-engine/topic-relationships-fixture'
@@ -79,15 +84,15 @@ export function buildSalesAnswerContext(
   let interpretations
   try {
     const pipe = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    // Consume authoritative upstream values -- never re-run Retrieval or BI.
     results = pipe.trace.retrieval_results
     retrievalDiagnostics = pipe.diagnostics.retrieval
-    interpretations = buildBoundedInterpretations(
-      su.user_goals,
-      results,
-      retrievalDiagnostics,
-      su.project_facts.human_contribution_description.attestation,
-    )
+    interpretations = pipe.bounded_interpretations
   } catch {
+    return { available: false, temporal_note: TEMPORAL_NOTE, session_runtime_commit: sessionRuntimeCommit }
+  }
+  // Missing authoritative BI -> do not reconstruct it; current-LK context unavailable.
+  if (!Array.isArray(interpretations)) {
     return { available: false, temporal_note: TEMPORAL_NOTE, session_runtime_commit: sessionRuntimeCommit }
   }
 

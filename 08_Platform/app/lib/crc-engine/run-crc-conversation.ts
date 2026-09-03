@@ -71,6 +71,7 @@ import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-cla
 import { assembleProjectionOutput } from '@/lib/projection-layer/assemble-projection-output'
 import type { ProjectionDiagnostic, ProjectionOutput } from '@/lib/projection-layer/types'
 import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
+import type { BoundedInterpretation } from '@/lib/bounded-interpretation/types'
 import { deriveDiscoveredTopicOccurrences } from './discovered-relevance'
 import { deriveAssessmentJurisdictionFacts } from './assessment-jurisdiction-scope'
 import { buildConsultativeAnswerPlan, type ConsultativeAnswerPlan } from './consultative-answer-plan'
@@ -110,6 +111,23 @@ export interface CRCPipelineResult {
    * verbatim inside a goal section -- see `consultative-realization.ts`.
    */
   plan: ConsultativeAnswerPlan
+  /**
+   * CAH-3B.1 (2026-09-03): the authoritative `BoundedInterpretation[]` this
+   * function ALREADY computes (the exact array passed to
+   * `assembleProjectionOutput` and `buildConsultativeAnswerPlan` below) --
+   * previously computed and then discarded from the public result.
+   * Additive and referentially identical: `output`, `plan`, `diagnostics`,
+   * and `trace` are unchanged, so every existing consumer is unaffected.
+   * Exposed so a downstream deterministic projection (the Sales
+   * answer-context, `lib/crc-sales/answer-context.ts`) can CONSUME
+   * authoritative Bounded Interpretation instead of re-invoking
+   * `buildBoundedInterpretations` itself -- preserving the
+   * `Living Knowledge -> Retrieval -> Bounded Interpretation -> Projection`
+   * ownership chain. No Retrieval / BI / Projection / Composition / CRC
+   * conversation semantics change; this line only stops throwing away a
+   * value that was already produced.
+   */
+  bounded_interpretations: BoundedInterpretation[]
   diagnostics: CRCPipelineDiagnostics
   trace: CRCPipelineTrace
 }
@@ -222,6 +240,10 @@ export function runCRCConversation(
   return {
     output,
     plan,
+    // CAH-3B.1: the SAME `interpretations` value already passed to
+    // assembleProjectionOutput() and buildConsultativeAnswerPlan() above --
+    // exposed, not recomputed.
+    bounded_interpretations: interpretations,
     diagnostics: { retrieval: retrievalDiagnostics, projection: projectionDiagnostics },
     trace: { retrieval_handoff: handoff, retrieval_results: results, projection_output: output },
   }

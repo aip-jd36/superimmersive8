@@ -1,5 +1,6 @@
 /**
  * CAH-3B — Sales workflow state machine (§8, §23.F).
+ * CAH-3B.1 — 'not_a_fit' removed from close reasons (§11).
  */
 
 import { validateTransition, timestampColumnFor, SALES_STATUSES, SALES_CLOSE_REASONS } from '@/lib/crc-sales/workflow'
@@ -9,7 +10,7 @@ describe('validateTransition — valid paths', () => {
     expect(validateTransition('NEW', 'CONTACTED', null)).toEqual({ ok: true, to: 'CONTACTED', close_reason: null })
   })
   test('NEW → CLOSED{reason} allowed', () => {
-    expect(validateTransition('NEW', 'CLOSED', 'not_a_fit')).toEqual({ ok: true, to: 'CLOSED', close_reason: 'not_a_fit' })
+    expect(validateTransition('NEW', 'CLOSED', 'unreachable')).toEqual({ ok: true, to: 'CLOSED', close_reason: 'unreachable' })
   })
   test('CONTACTED → CONVERTING', () => {
     expect(validateTransition('CONTACTED', 'CONVERTING', null).ok).toBe(true)
@@ -48,6 +49,11 @@ describe('validateTransition — rejected', () => {
   test('unknown close_reason rejected', () => {
     expect(validateTransition('NEW', 'CLOSED', 'bogus' as never)).toEqual({ ok: false, code: 'unknown_close_reason' })
   })
+  test('CAH-3B.1: not_a_fit is no longer a valid close reason', () => {
+    expect(SALES_CLOSE_REASONS as readonly string[]).not.toContain('not_a_fit')
+    expect(validateTransition('NEW', 'CLOSED', 'not_a_fit' as never)).toEqual({ ok: false, code: 'unknown_close_reason' })
+    expect(validateTransition('CONTACTED', 'CLOSED', 'not_a_fit' as never).ok).toBe(false)
+  })
   test('unknown status rejected', () => {
     expect(validateTransition('NEW', 'WAT' as never, null)).toEqual({ ok: false, code: 'unknown_status' })
     expect(validateTransition('WAT' as never, 'CONTACTED', null)).toEqual({ ok: false, code: 'unknown_status' })
@@ -64,8 +70,8 @@ describe('timestampColumnFor', () => {
 })
 
 describe('enums', () => {
-  test('close reasons are a small bounded set', () => {
-    expect(SALES_CLOSE_REASONS).toEqual(['converted', 'declined', 'not_a_fit', 'unreachable', 'no_response'])
+  test('close reasons are a small bounded, operationally-factual set (CAH-3B.1)', () => {
+    expect(SALES_CLOSE_REASONS).toEqual(['converted', 'declined', 'unreachable', 'no_response'])
   })
   test('no REVIEWED state', () => {
     expect(SALES_STATUSES).not.toContain('REVIEWED')
