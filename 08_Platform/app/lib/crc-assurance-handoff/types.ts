@@ -25,26 +25,30 @@
  * permitted" fact is `authorization_basis` -- a PERMISSION fact only.
  */
 
-// ── Authorization basis (CAH-3C.1 §H, CAH-3D §6) ──────────────────────────
+// ── Authorization basis (CAH-3C.1 §H, CAH-3D §6, CAH-3D.1) ────────────────
 
 /**
- * SEMANTIC INPUT CLASSES for how a (trusted, already-authorized) caller was
- * permitted to create an association. CAH-3D builds NONE of the real-world
- * front doors, so it supports exactly one honestly-labelled value:
+ * KNOWN / DESCRIBED semantic input classes for how a real association-
+ * authorization capability could permit a creation. Every member names a
+ * concrete future capability -- an actual mechanism a later reviewed milestone
+ * would build and enable:
  *
- *   'core_internal_uninferred' -- a trusted internal service caller (tests, or
- *   a future deliberate internal backfill). No real-world possession or
- *   identity signal was inferred. Implies NOTHING about historical CRC
- *   ownership.
+ *   - authenticated_email_candidate_confirmation  (Variant A front door)
+ *   - same_browser_session_confirmation
+ *   - possession_reference_confirmation
+ *   - association_token_confirmation
+ *   - delegated_authorization
  *
- * The remaining members are declared for type-completeness of the eventual
- * contract but are NOT accepted by the core service (`isSupportedAuthorizationBasis`
- * returns false) and are NOT in the DB CHECK constraint. Each is unlocked --
- * in this type, in `SUPPORTED_AUTHORIZATION_BASES`, and in the migration's
- * CHECK -- only by the milestone that builds the corresponding front door.
+ * CAH-3D.1: there is NO placeholder / "uninferred" / "internal" member. The
+ * CAH-3D `core_internal_uninferred` value was removed -- it let the production
+ * service create a real durable association even though NO real association-
+ * authorization capability had been implemented. Submission ownership proves
+ * "this actor may act on this submission"; it does NOT prove "this actor is
+ * authorized to associate this particular CRC work product." An
+ * authorization_basis must record HOW that specific action was permitted -- so
+ * a basis meaning "no mechanism was established" cannot be production-valid.
  */
 export type AuthorizationBasis =
-  | 'core_internal_uninferred'
   | 'authenticated_email_candidate_confirmation'
   | 'same_browser_session_confirmation'
   | 'possession_reference_confirmation'
@@ -52,17 +56,34 @@ export type AuthorizationBasis =
   | 'delegated_authorization'
 
 /**
- * The ONLY authorization bases the CAH-3D core will accept. Anything else --
- * including a future-declared member of `AuthorizationBasis` that no front
- * door has yet been built for -- fails closed.
+ * The syntactic vocabulary the DB CHECK bounds `authorization_basis` to. Being
+ * KNOWN means the string is a recognised future capability name -- NOT that it
+ * currently authorizes anything.
  */
-export const SUPPORTED_AUTHORIZATION_BASES: ReadonlySet<AuthorizationBasis> = new Set<AuthorizationBasis>([
-  'core_internal_uninferred',
+export const KNOWN_AUTHORIZATION_BASES: ReadonlySet<AuthorizationBasis> = new Set<AuthorizationBasis>([
+  'authenticated_email_candidate_confirmation',
+  'same_browser_session_confirmation',
+  'possession_reference_confirmation',
+  'association_token_confirmation',
+  'delegated_authorization',
 ])
 
-export function isSupportedAuthorizationBasis(v: unknown): v is AuthorizationBasis {
-  return typeof v === 'string' && SUPPORTED_AUTHORIZATION_BASES.has(v as AuthorizationBasis)
+export function isKnownAuthorizationBasis(v: unknown): v is AuthorizationBasis {
+  return typeof v === 'string' && KNOWN_AUTHORIZATION_BASES.has(v as AuthorizationBasis)
 }
+
+/**
+ * The bases whose corresponding authorization CAPABILITY has actually been
+ * implemented and enabled. CAH-3D / CAH-3D.1 implement ZERO real-world
+ * capabilities -- so this set is EMPTY, and the production association service
+ * cannot create any association today, for any basis (CAH-3D.1 §1).
+ *
+ * A member is added here ONLY by the milestone that builds and reviews the
+ * corresponding capability -- never as a convenience, never for testability
+ * (see `AuthorizationPolicy` for the test seam), never via env var / NODE_ENV.
+ * A structural test asserts this set is initialised empty.
+ */
+export const CURRENTLY_ENABLED_AUTHORIZATION_BASES: ReadonlySet<AuthorizationBasis> = new Set<AuthorizationBasis>([])
 
 // ── Association record ────────────────────────────────────────────────────
 
@@ -103,7 +124,12 @@ export interface CreateAssociationInput {
   submissionId: string
   /** CRC session to associate. */
   crcSessionId: string
-  /** How the caller was authorized. Must be in SUPPORTED_AUTHORIZATION_BASES or the create fails closed. */
+  /**
+   * Which concrete authorization capability permitted this action. Must be a
+   * KNOWN basis AND currently ENABLED (via the injected `AuthorizationPolicy`)
+   * or the create fails closed. Today no basis is enabled -> no create
+   * succeeds (CAH-3D.1 §1).
+   */
   authorizationBasis: AuthorizationBasis
 }
 
@@ -112,7 +138,8 @@ export type CreateAssociationResult =
   | {
       ok: false
       code:
-        | 'unsupported_authorization_basis'
+        | 'unknown_authorization_basis'
+        | 'authorization_basis_not_enabled'
         | 'submission_not_found'
         | 'not_submission_owner'
         | 'crc_session_not_found'

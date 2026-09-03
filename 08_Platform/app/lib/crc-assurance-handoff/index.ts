@@ -18,7 +18,12 @@ export type {
   RemoveAssociationResult,
   CrcStateComparison,
 } from './types'
-export { SUPPORTED_AUTHORIZATION_BASES, isSupportedAuthorizationBasis } from './types'
+export {
+  KNOWN_AUTHORIZATION_BASES,
+  CURRENTLY_ENABLED_AUTHORIZATION_BASES,
+  isKnownAuthorizationBasis,
+} from './types'
+export { PRODUCTION_AUTHORIZATION_POLICY, type AuthorizationPolicy } from './authorization-policy'
 
 export {
   CANONICALIZATION_VERSION,

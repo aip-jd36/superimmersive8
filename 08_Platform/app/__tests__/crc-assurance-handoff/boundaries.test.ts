@@ -155,3 +155,45 @@ describe('no customer / reviewer / Sales route or UI was added', () => {
     expect(hits).toEqual([])
   })
 })
+
+describe('CAH-3D.1: authorization cannot be enabled by an arbitrary string', () => {
+  test('CURRENTLY_ENABLED_AUTHORIZATION_BASES is initialised to an empty Set in source', () => {
+    const src = read('lib/crc-assurance-handoff/types.ts')
+    // The declaration must construct an empty set -- `new Set<...>([])` or `new Set()`.
+    expect(src).toMatch(/CURRENTLY_ENABLED_AUTHORIZATION_BASES[^\n]*new Set<[^>]*>\(\[\]\)/)
+    // ...and must NOT list any member.
+    const decl = src.slice(src.indexOf('CURRENTLY_ENABLED_AUTHORIZATION_BASES'))
+    const firstStmt = decl.slice(0, decl.indexOf('\n\n') === -1 ? decl.length : decl.indexOf('\n\n'))
+    expect(firstStmt).not.toMatch(/_confirmation'|delegated_authorization'/)
+  })
+
+  test('only PRODUCTION_AUTHORIZATION_POLICY is constructed in lib code; the service default is that policy', () => {
+    for (const rel of FILES) {
+      const code = codeOnly(rel)
+      // Detect CONSTRUCTION of an AuthorizationPolicy -- a typed
+      // `: AuthorizationPolicy = {` or an object literal defining an
+      // `isEnabled:` member -- NOT a call to `.isEnabled(...)`.
+      const builds = /:\s*AuthorizationPolicy\s*=\s*\{/.test(code) || /\bisEnabled\s*:/.test(code)
+      if (builds && !rel.endsWith('authorization-policy.ts')) {
+        throw new Error(`${rel} constructs an AuthorizationPolicy outside authorization-policy.ts`)
+      }
+    }
+    const svc = codeOnly('lib/crc-assurance-handoff/service.ts')
+    expect(svc).toMatch(/policy:\s*AuthorizationPolicy\s*=\s*PRODUCTION_AUTHORIZATION_POLICY/)
+  })
+
+  test('authorization-policy.ts has no hardcoded allow / env / NODE_ENV branch', () => {
+    const code = codeOnly('lib/crc-assurance-handoff/authorization-policy.ts')
+    expect(code).not.toMatch(/return\s+true/)
+    expect(code).not.toMatch(/NODE_ENV|process\.env/)
+    expect(code).toMatch(/CURRENTLY_ENABLED_AUTHORIZATION_BASES/)
+  })
+
+  test('no removed placeholder basis survives anywhere in lib/', () => {
+    for (const rel of FILES) {
+      const code = codeOnly(rel)
+      expect(code).not.toMatch(/'core_internal_uninferred'|"core_internal_uninferred"/)
+      expect(code).not.toMatch(/SUPPORTED_AUTHORIZATION_BASES|isSupportedAuthorizationBasis/)
+    }
+  })
+})

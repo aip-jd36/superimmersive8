@@ -183,6 +183,11 @@ import {
   removeCrcAssuranceAssociation,
 } from '@/lib/crc-assurance-handoff/service'
 import type { AuthorizationBasis } from '@/lib/crc-assurance-handoff/types'
+import {
+  KNOWN_AUTHORIZATION_BASES,
+  CURRENTLY_ENABLED_AUTHORIZATION_BASES,
+} from '@/lib/crc-assurance-handoff/types'
+import { PRODUCTION_AUTHORIZATION_POLICY, type AuthorizationPolicy } from '@/lib/crc-assurance-handoff/authorization-policy'
 
 // ── fixtures ─────────────────────────────────────────────────────────────
 
@@ -213,7 +218,19 @@ const OWNER = 'user-owner'
 const OTHER = 'user-other'
 const SUB = 'sub-1'
 const SESSION = 'sess-1'
-const BASIS: AuthorizationBasis = 'core_internal_uninferred'
+const BASIS: AuthorizationBasis = 'association_token_confirmation' // a real KNOWN basis
+
+/**
+ * CAH-3D.1 test seam: an inline policy that authorizes any KNOWN basis. It is
+ * constructed only here in __tests__/, never exported, and structurally cannot
+ * become a production policy (the production default is
+ * PRODUCTION_AUTHORIZATION_POLICY, which enables nothing). Used ONLY to reach
+ * the persistence / ownership / completion / state-binding / audit / duplicate
+ * / removal code paths that must remain proven.
+ */
+const TEST_POLICY: AuthorizationPolicy = { isEnabled: () => true }
+const associate = (i: Parameters<typeof associateCrcSessionWithSubmission>[0]) =>
+  associateCrcSessionWithSubmission(i, TEST_POLICY)
 
 function seed(su: unknown = completedSU(), runtimeCommit: string | null = 'abc123') {
   db.submissions.push({ id: SUB, user_id: OWNER })
@@ -227,13 +244,13 @@ beforeEach(reset)
 describe('CAH-3D association contract', () => {
   test('1: association records actor / submission / session / time / authorization basis', async () => {
     seed()
-    const res = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    const res = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
     expect(res.ok).toBe(true)
     if (!res.ok) return
     expect(res.association.associated_by).toBe(OWNER)
     expect(res.association.submission_id).toBe(SUB)
     expect(res.association.crc_session_id).toBe(SESSION)
-    expect(res.association.authorization_basis).toBe('core_internal_uninferred')
+    expect(res.association.authorization_basis).toBe('association_token_confirmation')
     expect(typeof res.association.associated_at).toBe('string')
     expect(res.association.crc_state_fingerprint).toMatch(/^[0-9a-f]{64}$/)
     expect(res.association.crc_state_canon_version).toBe('csi-v1')
@@ -249,7 +266,7 @@ describe('CAH-3D association contract', () => {
       expect(code).not.toContain(forbidden)
     }
     seed()
-    const res = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    const res = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
     expect(res.ok).toBe(true)
     if (!res.ok) return
     expect(Object.keys(res.association)).not.toContain('ownership_mechanism')
@@ -259,17 +276,17 @@ describe('CAH-3D association contract', () => {
     db.submissions.push({ id: SUB, user_id: OWNER })
     db.crc_sessions.push({ id: 'sess-a', structured_understanding: completedSU(), runtime_commit: null })
     db.crc_sessions.push({ id: 'sess-b', structured_understanding: completedSU({ completion_reason: 'declined' }), runtime_commit: null })
-    const a = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: 'sess-a', authorizationBasis: BASIS })
-    const b = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: 'sess-b', authorizationBasis: BASIS })
+    const a = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: 'sess-a', authorizationBasis: BASIS })
+    const b = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: 'sess-b', authorizationBasis: BASIS })
     expect(a.ok && b.ok).toBe(true)
     expect(db.associations.filter((x) => x.submission_id === SUB && x.status === 'active')).toHaveLength(2)
   })
 
   test('4: same CRC session cannot create a duplicate ACTIVE association to the same submission', async () => {
     seed()
-    const first = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    const first = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
     expect(first.ok).toBe(true)
-    const dup = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    const dup = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
     expect(dup).toEqual({ ok: false, code: 'duplicate_active' })
   })
 
@@ -277,8 +294,8 @@ describe('CAH-3D association contract', () => {
     db.submissions.push({ id: SUB, user_id: OWNER })
     db.submissions.push({ id: 'sub-2', user_id: OWNER })
     db.crc_sessions.push({ id: SESSION, structured_understanding: completedSU(), runtime_commit: null })
-    const a = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
-    const b = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: 'sub-2', crcSessionId: SESSION, authorizationBasis: BASIS })
+    const a = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    const b = await associate({ actorUserId: OWNER, submissionId: 'sub-2', crcSessionId: SESSION, authorizationBasis: BASIS })
     expect(a.ok && b.ok).toBe(true)
     // And the migration DDL (comments stripped) must not contain a global
     // UNIQUE(crc_session_id).
@@ -293,7 +310,7 @@ describe('CAH-3D association contract', () => {
 
   test('6: a removed association is distinguishable from an active one', async () => {
     seed()
-    const res = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    const res = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
     expect(res.ok).toBe(true)
     if (!res.ok) return
     const rm = await removeCrcAssuranceAssociation({ actorUserId: OWNER, associationId: res.association.id })
@@ -303,7 +320,7 @@ describe('CAH-3D association contract', () => {
     expect(rm.association.removed_by).toBe(OWNER)
     expect(typeof rm.association.removed_at).toBe('string')
     // A fresh active association for the same pair is now allowed.
-    const again = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    const again = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
     expect(again.ok).toBe(true)
   })
 })
@@ -313,14 +330,14 @@ describe('CAH-3D association contract', () => {
 describe('CAH-3D authorization / ownership', () => {
   test('7 + 8: actor must own the target submission; non-owner cannot create', async () => {
     seed()
-    const res = await associateCrcSessionWithSubmission({ actorUserId: OTHER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    const res = await associate({ actorUserId: OTHER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
     expect(res).toEqual({ ok: false, code: 'not_submission_owner' })
     expect(db.associations).toHaveLength(0)
   })
 
   test('9: non-owner cannot remove', async () => {
     seed()
-    const res = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    const res = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
     expect(res.ok).toBe(true)
     if (!res.ok) return
     const rm = await removeCrcAssuranceAssociation({ actorUserId: OTHER, associationId: res.association.id })
@@ -328,24 +345,16 @@ describe('CAH-3D authorization / ownership', () => {
     expect(db.associations[0].status).toBe('active')
   })
 
-  test('10: unknown authorization basis fails closed', async () => {
+  test('10: arbitrary / unknown authorization basis fails closed (regardless of policy)', async () => {
     seed()
-    const res = await associateCrcSessionWithSubmission({
-      actorUserId: OWNER,
-      submissionId: SUB,
-      crcSessionId: SESSION,
-      authorizationBasis: 'same_browser_session_confirmation' as AuthorizationBasis, // declared but not built
-    })
-    expect(res).toEqual({ ok: false, code: 'unsupported_authorization_basis' })
+    for (const bad of ['totally-made-up', '', 'internal', 'admin', 'system']) {
+      const res = await associateCrcSessionWithSubmission(
+        { actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: bad as unknown as AuthorizationBasis },
+        { isEnabled: () => true }, // even a permissive policy cannot rescue an unknown basis
+      )
+      expect(res).toEqual({ ok: false, code: 'unknown_authorization_basis' })
+    }
     expect(db.associations).toHaveLength(0)
-
-    const res2 = await associateCrcSessionWithSubmission({
-      actorUserId: OWNER,
-      submissionId: SUB,
-      crcSessionId: SESSION,
-      authorizationBasis: 'totally-made-up' as unknown as AuthorizationBasis,
-    })
-    expect(res2).toEqual({ ok: false, code: 'unsupported_authorization_basis' })
   })
 
   test('11: the core service performs no email / cookie / token / Sales check', () => {
@@ -384,7 +393,7 @@ describe('CAH-3D authorization / ownership', () => {
 describe('CAH-3D completion eligibility', () => {
   test('12: an incomplete CRC session cannot be associated', async () => {
     seed(completedSU({ completion_reason: null }))
-    const res = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    const res = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
     expect(res).toEqual({ ok: false, code: 'crc_session_not_completed' })
     expect(db.associations).toHaveLength(0)
   })
@@ -395,7 +404,7 @@ describe('CAH-3D completion eligibility', () => {
       reset()
       db.submissions.push({ id: SUB, user_id: OWNER })
       db.crc_sessions.push({ id: SESSION, structured_understanding: completedSU({ completion_reason: r }), runtime_commit: null })
-      const res = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+      const res = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
       expect(res.ok).toBe(true)
     }
   })
@@ -406,19 +415,19 @@ describe('CAH-3D completion eligibility', () => {
     // Even if the raw persisted state carries a product_stop_reason-like flag,
     // the service never reads it -- eligibility depends solely on completion_reason.
     ;(db.crc_sessions[0].structured_understanding as Record<string, unknown>).product_stop_reason = 'conversation_limit_reached'
-    const res = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    const res = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
     expect(res).toEqual({ ok: false, code: 'crc_session_not_completed' })
   })
 
   test('missing submission / missing session fail closed', async () => {
     db.crc_sessions.push({ id: SESSION, structured_understanding: completedSU(), runtime_commit: null })
-    expect(await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: 'nope', crcSessionId: SESSION, authorizationBasis: BASIS })).toEqual({
+    expect(await associate({ actorUserId: OWNER, submissionId: 'nope', crcSessionId: SESSION, authorizationBasis: BASIS })).toEqual({
       ok: false,
       code: 'submission_not_found',
     })
     reset()
     db.submissions.push({ id: SUB, user_id: OWNER })
-    expect(await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: 'nope', authorizationBasis: BASIS })).toEqual({
+    expect(await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: 'nope', authorizationBasis: BASIS })).toEqual({
       ok: false,
       code: 'crc_session_not_found',
     })
@@ -427,7 +436,7 @@ describe('CAH-3D completion eligibility', () => {
   test('unreadable persisted CRC state fails closed', async () => {
     db.submissions.push({ id: SUB, user_id: OWNER })
     db.crc_sessions.push({ id: SESSION, structured_understanding: { user_goals: 'not-an-array' }, runtime_commit: null })
-    const res = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    const res = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
     expect(res).toEqual({ ok: false, code: 'crc_state_unreadable' })
   })
 })
@@ -438,7 +447,7 @@ describe('CAH-3D fail-closed audit', () => {
   test('26: creation-audit failure means NO association is created', async () => {
     seed()
     db.forceAuditFailure = true
-    const res = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    const res = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
     expect(res).toEqual({ ok: false, code: 'persistence_failed' })
     expect(db.associations).toHaveLength(0)
     expect(db.events).toHaveLength(0)
@@ -446,7 +455,7 @@ describe('CAH-3D fail-closed audit', () => {
 
   test('27: removal-audit failure means the association remains ACTIVE', async () => {
     seed()
-    const created = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    const created = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
     expect(created.ok).toBe(true)
     if (!created.ok) return
     db.forceAuditFailure = true
@@ -458,7 +467,7 @@ describe('CAH-3D fail-closed audit', () => {
 
   test('28: a successful creation has exactly one association_created audit event', async () => {
     seed()
-    const res = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    const res = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
     expect(res.ok).toBe(true)
     if (!res.ok) return
     const created = db.events.filter((e) => e.event_type === 'association_created' && e.association_id === res.association.id)
@@ -468,7 +477,7 @@ describe('CAH-3D fail-closed audit', () => {
 
   test('29: a successful removal has exactly one association_removed audit event', async () => {
     seed()
-    const res = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    const res = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
     expect(res.ok).toBe(true)
     if (!res.ok) return
     await removeCrcAssuranceAssociation({ actorUserId: OWNER, associationId: res.association.id })
@@ -479,12 +488,12 @@ describe('CAH-3D fail-closed audit', () => {
   test('a transient RPC/DB error fails closed to persistence_failed', async () => {
     seed()
     db.forceRpcError = true
-    expect(await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })).toEqual({
+    expect(await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })).toEqual({
       ok: false,
       code: 'persistence_failed',
     })
     db.forceRpcError = false
-    const ok = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    const ok = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
     expect(ok.ok).toBe(true)
     if (!ok.ok) return
     db.forceRpcError = true
@@ -497,10 +506,157 @@ describe('CAH-3D fail-closed audit', () => {
       ok: false,
       code: 'association_not_found',
     })
-    const res = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    const res = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
     expect(res.ok).toBe(true)
     if (!res.ok) return
     await removeCrcAssuranceAssociation({ actorUserId: OWNER, associationId: res.association.id })
     expect(await removeCrcAssuranceAssociation({ actorUserId: OWNER, associationId: res.association.id })).toEqual({ ok: false, code: 'not_active' })
+  })
+})
+
+// ── CAH-3D.1: authorization fail-closed correction ──────────────────────
+
+describe('CAH-3D.1 authorization fail-closed', () => {
+  test('1: the production enabled authorization-basis set is EMPTY', () => {
+    expect(CURRENTLY_ENABLED_AUTHORIZATION_BASES.size).toBe(0)
+    expect([...CURRENTLY_ENABLED_AUTHORIZATION_BASES]).toEqual([])
+  })
+
+  test('2: every KNOWN future real-world basis is rejected by the PRODUCTION service', async () => {
+    seed()
+    for (const basis of KNOWN_AUTHORIZATION_BASES) {
+      // No policy arg -> PRODUCTION_AUTHORIZATION_POLICY (enables nothing).
+      const res = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: basis })
+      expect(res).toEqual({ ok: false, code: 'authorization_basis_not_enabled' })
+    }
+    expect(db.associations).toHaveLength(0)
+    expect(db.events).toHaveLength(0)
+  })
+
+  test('3: an arbitrary unknown basis is rejected (unknown, not "not enabled")', async () => {
+    seed()
+    const res = await associateCrcSessionWithSubmission({
+      actorUserId: OWNER,
+      submissionId: SUB,
+      crcSessionId: SESSION,
+      authorizationBasis: 'made_up_basis' as unknown as AuthorizationBasis,
+    })
+    expect(res).toEqual({ ok: false, code: 'unknown_authorization_basis' })
+  })
+
+  test('4 + 5: no placeholder / synonym bypass basis exists', async () => {
+    seed()
+    const bypasses = [
+      'core_internal_uninferred', 'internal', 'trusted_caller', 'system', 'manual',
+      'admin', 'service_role', 'internal_service', 'preauthorized', 'test',
+      'migration', 'support', 'unspecified', 'inferred', 'legacy',
+    ]
+    for (const bypass of bypasses) {
+      const res = await associateCrcSessionWithSubmission({
+        actorUserId: OWNER,
+        submissionId: SUB,
+        crcSessionId: SESSION,
+        authorizationBasis: bypass as unknown as AuthorizationBasis,
+      })
+      expect(res).toEqual({ ok: false, code: 'unknown_authorization_basis' })
+    }
+    expect(db.associations).toHaveLength(0)
+  })
+
+  test('6: submission ownership ALONE cannot create an association', async () => {
+    seed()
+    const res = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    expect(res.ok).toBe(false)
+    expect(db.associations).toHaveLength(0)
+  })
+
+  test('7 + 8: completed CRC + ownership together STILL cannot create without an enabled capability', async () => {
+    seed()
+    const res = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    expect(res).toEqual({ ok: false, code: 'authorization_basis_not_enabled' })
+    expect(db.events).toHaveLength(0)
+  })
+
+  test('9/10/11: no Sales / email / cookie authorization input or capability exists', () => {
+    const fs = require('fs')
+    const path = require('path')
+    const dir = path.join(__dirname, '..', '..', 'lib/crc-assurance-handoff')
+    for (const f of fs.readdirSync(dir)) {
+      if (!f.endsWith('.ts')) continue
+      const code = fs
+        .readFileSync(path.join(dir, f), 'utf8')
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/(^|[^:])\/\/.*$/gm, '$1')
+      expect(code).not.toMatch(/CONVERTING|crc_sales|email_normalized/i)
+    }
+    expect([...KNOWN_AUTHORIZATION_BASES]).not.toContain('sales_converting' as never)
+    expect([...KNOWN_AUTHORIZATION_BASES]).not.toContain('email_match' as never)
+    expect([...KNOWN_AUTHORIZATION_BASES]).not.toContain('cookie_present' as never)
+  })
+
+  test('12: no customer / browser / API association route exists', () => {
+    const fs = require('fs')
+    const path = require('path')
+    const APP = path.join(__dirname, '..', '..')
+    for (const p of [
+      'app/api/crc-assurance-handoff', 'app/api/associations',
+      'app/api/admin/crc-associations', 'app/admin/crc-associations',
+      'app/dashboard/associations',
+    ]) {
+      expect(fs.existsSync(path.join(APP, p))).toBe(false)
+    }
+  })
+
+  test('13-19 (seam): persistence / audit / duplicate / removal still provable via the TEST policy', async () => {
+    seed()
+    const created = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    expect(created.ok).toBe(true)
+    if (!created.ok) return
+    expect(db.associations).toHaveLength(1)
+    expect(db.events.filter((e) => e.event_type === 'association_created')).toHaveLength(1)
+    const dup = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    expect(dup).toEqual({ ok: false, code: 'duplicate_active' })
+    const rm = await removeCrcAssuranceAssociation({ actorUserId: OWNER, associationId: created.association.id })
+    expect(rm.ok).toBe(true)
+    expect(db.events.filter((e) => e.event_type === 'association_removed')).toHaveLength(1)
+
+    reset()
+    seed()
+    db.forceAuditFailure = true
+    const failed = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    expect(failed).toEqual({ ok: false, code: 'persistence_failed' })
+    expect(db.associations).toHaveLength(0)
+
+    reset()
+    seed()
+    const c2 = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    expect(c2.ok).toBe(true)
+    if (!c2.ok) return
+    db.forceAuditFailure = true
+    const rm2 = await removeCrcAssuranceAssociation({ actorUserId: OWNER, associationId: c2.association.id })
+    expect(rm2).toEqual({ ok: false, code: 'persistence_failed' })
+    expect(db.associations[0].status).toBe('active')
+  })
+
+  test('23 + 24: incomplete CRC / product_stop_reason still fail closed (even with an enabling policy)', async () => {
+    seed(completedSU({ completion_reason: null }))
+    ;(db.crc_sessions[0].structured_understanding as Record<string, unknown>).product_stop_reason = 'conversation_limit_reached'
+    const prod = await associateCrcSessionWithSubmission({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    expect(prod.ok).toBe(false)
+    const withPolicy = await associate({ actorUserId: OWNER, submissionId: SUB, crcSessionId: SESSION, authorizationBasis: BASIS })
+    expect(withPolicy).toEqual({ ok: false, code: 'crc_session_not_completed' })
+  })
+
+  test('PRODUCTION_AUTHORIZATION_POLICY delegates to the enabled set (no hardcoded allow, no env branch)', () => {
+    for (const b of KNOWN_AUTHORIZATION_BASES) expect(PRODUCTION_AUTHORIZATION_POLICY.isEnabled(b)).toBe(false)
+    expect(PRODUCTION_AUTHORIZATION_POLICY.isEnabled('anything')).toBe(false)
+    const src = require('fs').readFileSync(
+      require('path').join(__dirname, '..', '..', 'lib/crc-assurance-handoff/authorization-policy.ts'),
+      'utf8',
+    )
+    const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1')
+    expect(code).toMatch(/CURRENTLY_ENABLED_AUTHORIZATION_BASES/)
+    expect(code).not.toMatch(/return\s+true/)
+    expect(code).not.toMatch(/NODE_ENV|process\.env/)
   })
 })
