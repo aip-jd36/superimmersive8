@@ -3040,3 +3040,98 @@ Related: [[CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1]] (same provider, same Ter
 
 Full Formal Governance Review artifact: `governance-reviews/FGR_013_CAND-KLING-COMMERCIAL-USE-001_2026-09-02.md`
 Full CRC Publication Review artifact: `governance-reviews/CPR_013_KLING_COMMERCIAL_USE_PACKAGE_2026-09-02.md`
+
+### CLAIM-RUNWAY-COMMERCIAL-USE-001-v1
+Domain: AI Video Generation Platform Rights — Runway
+Topic: commercial_use
+Subtopic: runway-unconditional-commercial-use-grant
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — this is a Runway platform contractual representation, not a legal-jurisdiction-scoped rule. See "Transitional jurisdiction representation for provider/platform propositions" (governance-discipline section above); the underlying `TopicClaim` representation records `jurisdiction: 'Global'` as a bounded transitional compatibility value under that rule, never as a claim of worldwide legal validation.
+Context: commercial use of AI-generated Output produced using Runway, on Runway's individual/team subscription tiers (Free, Standard, Pro, Max — not Enterprise).
+
+GOVERNANCE TREATMENT (2026-09-03, PM adoption decision, following Formal Governance Review #15 — `governance-reviews/FGR_015_CAND-RUNWAY-COMMERCIAL-USE-001_2026-09-03.md`): `provider_scope: null`, `tool_scope: ['runway-gen3']` — `'runway-gen3'` is an existing `CANONICAL_TOOL_ID`, requiring zero registry work. Runway has carried a `Yes`-decided legacy `PLATFORM-RIGHTS-MATRIX.md` row (`runway-gen3`) since 2026-08-05, under that document's own separate, lighter authoring process; per `CRC-PUBLICATION-POLICY.md`'s explicit text ("Adoption is a Living Knowledge governance decision under ordinary FGR criteria, independent of Matrix coexistence"), that historical Matrix decision is treated as reusable primary-source provenance only, never as TopicClaim Adoption or Publication authority. FGR_015 independently re-fetched and re-verified the primary Terms of Use rather than inheriting the Matrix's prior conclusion, and found the Matrix's own prose narrower-than-warranted in one respect: FGR_015 excludes Enterprise from this claim's scope because Runway's Enterprise tier is governed by a separate, non-public, customer-specific terms document not evidenced by this review — the Matrix's prose had implied "the same language" covers Enterprise, which the primary source does not actually support. FGR disposition: ADOPT, with this Enterprise-scope narrowing applied.
+
+Claim proposition: >
+  Under Runway's current Terms of Use, commercial use of generated Output
+  is permitted across Runway's individual/team subscription tiers (Free,
+  Standard, Pro, and Max), subject to general compliance with the
+  Agreement, including a restriction against using the Services or
+  Outputs to create, train, develop, or improve similar or competitive
+  products or services. This proposition does not extend to Runway's
+  Enterprise tier, which is governed by separate, non-public,
+  customer-specific terms not evidenced by this claim.
+
+Source references:
+  - primary (Official platform authority, Class A, directly fetched): Runway Terms of Use (`runway.com/terms-of-use`), directly fetched 2026-09-03, document's own stated last-updated date May 11, 2026 — §4.4, §5.
+Source authority/type: Official platform authority (directly source-backed, single-provider)
+Source fact: >
+  Runway's own Terms of Use, §4.4, states "The Company does not claim
+  ownership of any of your Inputs or Outputs" and "the Company does not
+  restrict your commercial use of your Outputs." §5 restricts using the
+  Services or Outputs "to create, train, develop, or improve similar or
+  competitive products or services." No tier-based differentiation of
+  commercial-use rights appears anywhere in this document. A companion
+  direct fetch of `runway.com/pricing` (2026-09-03) confirmed current
+  tier names as Free, Standard, Pro, Max, Enterprise — the Matrix's Plan
+  Tier field's "Unlimited" naming is stale relative to current product
+  naming (flagged as documentation debt, not corrected here). A
+  follow-up search confirmed Runway's Enterprise terms are
+  customer-specific/negotiated and not published as a single public
+  document, distinct from the standard Terms of Use.
+
+SI8 interpretation: >
+  A client using Runway-generated Output in a commercial production on
+  Runway's Free, Standard, Pro, or Max tiers may rely on this
+  unconditional grant, subject to the competitive-products restriction
+  (Terms of Use §5), which requires case-specific judgment this claim
+  does not perform. A client on Runway's Enterprise tier is out of scope
+  for this claim entirely — Enterprise commercial-use status is neither
+  confirmed nor denied here.
+
+Applicability requirements: []
+Unresolved project dependencies: []
+Tool scope: ['runway-gen3']
+Prohibited conclusions: >
+  Does not establish Enterprise-tier commercial-use status of any kind
+  (explicitly out of scope); whether a specific project's use falls
+  within the "similar or competitive products or services" restriction
+  (Terms of Use §5) — that determination requires case-specific judgment
+  this claim does not perform; ownership analysis beyond the quoted
+  non-claim-of-ownership language; downstream IP clearance; platform
+  suitability for a particular commercial project; or any broader
+  commercial-readiness conclusion. Is not a substitute for Commercial
+  Assurance evidence review.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-09-03
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  PENDING — not yet reviewed for CRC Publication. FGR_015 recommends CRC
+  eligibility (§14 rationale), but this is a directional recommendation
+  only, not a Publication-stage decision; a separate CRC Publication
+  Review is required. FGR_015 §12 additionally flags a forward-looking
+  coexistence question for that future CPR to resolve: the legacy
+  `PLATFORM-RIGHTS-MATRIX.md` `runway-gen3` row remains `crc_eligible:
+  Yes` today, and a future CPR must independently assess whether
+  publishing this successor claim would require Matrix retirement first
+  (per the sequencing this repository's Kling cycle established: MRR
+  authorization -> post-retirement CPR -> coordinated activation), not
+  assumed or shortcut here.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  Under Runway's current Terms of Use, you may use generated Output
+  commercially across Runway's Free, Standard, Pro, and Max tiers,
+  subject to a restriction against using the Services or Outputs to
+  create, train, develop, or improve similar or competitive products or
+  services. This does not apply to Runway's Enterprise tier.
+
+Effective date: 2026-09-03 (review date); underlying primary source last-updated date: May 11, 2026, directly fetched 2026-09-03
+Last reviewed: 2026-09-03 (Formal Governance Review #15, FGR_015)
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: none
+
+Full Formal Governance Review artifact: `governance-reviews/FGR_015_CAND-RUNWAY-COMMERCIAL-USE-001_2026-09-03.md`
