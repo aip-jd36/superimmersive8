@@ -19,12 +19,24 @@
  * It deliberately does NOT check email match, cookie possession, reference
  * codes, association tokens, or Sales CONVERTING -- those belong to the future
  * caller / front door (CAH-3D §2, §20).
+ *
+ * ── CAH-3D.1: authorization is a REQUIRED gate, and nothing is enabled ──
+ *
+ * Submission ownership proves the actor may act on the submission -- NOT that
+ * they are authorized to associate this particular CRC work product. That
+ * second permission is `AuthorizationPolicy.isEnabled(basis)`. The production
+ * policy enables nothing (`CURRENTLY_ENABLED_AUTHORIZATION_BASES` is empty), so
+ * `associateCrcSessionWithSubmission` cannot succeed today for ANY basis. The
+ * `policy` parameter defaults to `PRODUCTION_AUTHORIZATION_POLICY`; only
+ * unit tests pass an enabling policy, and only to exercise the persistence /
+ * ownership / completion / state-binding / audit / duplicate / removal paths.
  */
 
 import { COMPLETION_REASONS, type CompletionReason } from '@/types/interview-engine'
 import { deserializeStructuredUnderstanding } from '@/lib/interview-engine/serialization'
 import type { StructuredUnderstanding } from '@/types/interview-engine'
-import { isSupportedAuthorizationBasis } from './types'
+import { isKnownAuthorizationBasis } from './types'
+import { PRODUCTION_AUTHORIZATION_POLICY, type AuthorizationPolicy } from './authorization-policy'
 import type {
   CreateAssociationInput,
   CreateAssociationResult,
@@ -61,10 +73,16 @@ function completionReasonOf(raw: unknown): { ok: true; value: CompletionReason }
 
 export async function associateCrcSessionWithSubmission(
   input: CreateAssociationInput,
+  policy: AuthorizationPolicy = PRODUCTION_AUTHORIZATION_POLICY,
 ): Promise<CreateAssociationResult> {
-  // 1. Authorization basis must be one the core actually supports.
-  if (!isSupportedAuthorizationBasis(input.authorizationBasis)) {
-    return { ok: false, code: 'unsupported_authorization_basis' }
+  // 1a. The basis must be a recognised capability name (syntactic).
+  if (!isKnownAuthorizationBasis(input.authorizationBasis)) {
+    return { ok: false, code: 'unknown_authorization_basis' }
+  }
+  // 1b. ...and its capability must actually be implemented and enabled.
+  //     Production enables nothing -> this rejects every basis today.
+  if (!policy.isEnabled(input.authorizationBasis)) {
+    return { ok: false, code: 'authorization_basis_not_enabled' }
   }
 
   try {

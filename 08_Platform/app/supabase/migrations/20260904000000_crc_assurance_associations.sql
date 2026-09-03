@@ -1,4 +1,4 @@
--- Migration: CRC <-> Assurance association core (CAH-3D)
+-- Migration: CRC <-> Assurance association core (CAH-3D, corrected by CAH-3D.1)
 -- Date: 2026-09-04
 --
 -- Accepted design: CAH-3C discovery + CAH-3C.1 semantic contract. Implements
@@ -9,10 +9,27 @@
 --
 -- This milestone does NOT build a usable customer association flow. There is
 -- no candidate discovery, no email match, no cookie/reference/token front
--- door, no customer/reviewer/admin route or UI. Every association row is
--- created by a trusted internal service caller (tests, or a future deliberate
--- internal backfill) -- see the `authorization_basis` CHECK below, which for
--- CAH-3D permits exactly one honestly-labelled value.
+-- door, no customer/reviewer/admin route or UI.
+--
+-- ── CAH-3D.1: authorization_basis is a syntactic bound; enablement is the
+--    service's ──
+--
+-- `authorization_basis` names a CONCRETE future authorization capability. The
+-- CHECK below bounds it to the set of KNOWN capability names (prevents garbage)
+-- -- it does NOT mean any of them currently authorizes a creation. WHICH bases
+-- are actually enabled is owned by the trusted TS service
+-- (lib/crc-assurance-handoff: `CURRENTLY_ENABLED_AUTHORIZATION_BASES`, an
+-- EMPTY set + an injected `AuthorizationPolicy`). CAH-3D / CAH-3D.1 implement
+-- ZERO real-world capabilities, so the production association service cannot
+-- create any association today, for any basis. The CAH-3D placeholder
+-- `core_internal_uninferred` was REMOVED: a basis meaning "no mechanism was
+-- established" must never be production-valid (CAH-3D.1 §0-§2).
+--
+-- RPC trust boundary: `create_crc_assurance_association` assumes authorization
+-- has already occurred at the trusted service boundary (CAH-3C.1 §11); it does
+-- not re-derive it. It is not exported/presented as proving authorization, and
+-- there is no anon/authenticated/browser path to it -- only supabaseAdmin via
+-- the internal service, which itself enables nothing today.
 --
 -- CAH-3C.1 propositions encoded here:
 --   P2/P3  -- an association is an authenticated actor's deliberate C1 claim,
@@ -78,16 +95,11 @@ CREATE TABLE IF NOT EXISTS crc_assurance_associations (
   associated_by             UUID NOT NULL,
   associated_at             TIMESTAMPTZ NOT NULL DEFAULT now(),
 
-  -- HOW the product permitted the association action -- a PERMISSION fact,
-  -- never an ownership fact (CAH-3C.1 §H). CAH-3D has no customer-facing
-  -- authorization front door, so the only honest value is
-  -- 'core_internal_uninferred' (a trusted internal service caller, no
-  -- real-world signal inferred). The real-world bases -- same-browser
-  -- possession, reference-code possession, association-token possession,
-  -- delegated authorization -- are added to this CHECK, and to the TS
-  -- AuthorizationBasis type, ONLY by the milestone that builds the
-  -- corresponding front door. None of them, and certainly not this one, imply
-  -- historical CRC ownership.
+  -- WHICH concrete authorization capability permitted this action -- a
+  -- PERMISSION fact, never an ownership fact (CAH-3C.1 §H). The CHECK below
+  -- bounds this to the KNOWN capability names; enablement (which are actually
+  -- usable today) is the trusted service's job and is currently NONE
+  -- (CAH-3D.1). No value implies historical CRC ownership.
   authorization_basis       TEXT NOT NULL,
 
   status                    TEXT NOT NULL DEFAULT 'active',
@@ -119,13 +131,20 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
--- CAH-3D permits exactly one authorization basis: an honestly-labelled
--- "no front door was used" value. Widening this CHECK is a deliberate act of
--- the milestone that builds a real front door.
+-- Syntactic bound over the KNOWN capability names. Being listed here does NOT
+-- enable a basis (the service's CURRENTLY_ENABLED_AUTHORIZATION_BASES does,
+-- and it is empty). There is deliberately NO "internal"/"uninferred"/
+-- placeholder value (CAH-3D.1 §2).
 DO $$ BEGIN
   ALTER TABLE crc_assurance_associations
     ADD CONSTRAINT crc_assurance_associations_authorization_basis_values
-    CHECK (authorization_basis IN ('core_internal_uninferred'));
+    CHECK (authorization_basis IN (
+      'authenticated_email_candidate_confirmation',
+      'same_browser_session_confirmation',
+      'possession_reference_confirmation',
+      'association_token_confirmation',
+      'delegated_authorization'
+    ));
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
@@ -219,10 +238,12 @@ GRANT ALL ON public.crc_assurance_association_events TO service_role;
 -- 'duplicate_active' result rather than a raw error.
 --
 -- Completion eligibility (completion_reason in the 5 governed values, and
--- product_stop_reason conferring NOTHING) is enforced by the TS service before
--- this is called -- it needs the deserialized StructuredUnderstanding, which is
--- cleaner in TS than in SQL. This function trusts that check and does not
--- re-implement it.
+-- product_stop_reason conferring NOTHING) AND authorization-basis ENABLEMENT
+-- are enforced by the TS service before this is called. Completion needs the
+-- deserialized StructuredUnderstanding (cleaner in TS); enablement is the
+-- trusted service's allowlist (CAH-3D.1). This function trusts both and
+-- re-implements neither -- it only re-checks submission ownership (a cheap,
+-- security-consequential invariant worth closing the TOCTOU window on).
 
 CREATE OR REPLACE FUNCTION create_crc_assurance_association(
   p_crc_session_id            UUID,
