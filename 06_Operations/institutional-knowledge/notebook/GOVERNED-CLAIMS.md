@@ -3107,20 +3107,30 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-09-03
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  PENDING — not yet reviewed for CRC Publication. FGR_015 recommends CRC
-  eligibility (§14 rationale), but this is a directional recommendation
-  only, not a Publication-stage decision; a separate CRC Publication
-  Review is required. FGR_015 §12 additionally flags a forward-looking
-  coexistence question for that future CPR to resolve: the legacy
-  `PLATFORM-RIGHTS-MATRIX.md` `runway-gen3` row remains `crc_eligible:
-  Yes` today, and a future CPR must independently assess whether
-  publishing this successor claim would require Matrix retirement first
-  (per the sequencing this repository's Kling cycle established: MRR
-  authorization -> post-retirement CPR -> coordinated activation), not
-  assumed or shortcut here.
+  APPROVED FOR CRC PUBLICATION (2026-09-03, CRC Approver: JD (PM) -- see
+  CRC Approver/CRC Decision Date below; CRC Publication Review #17
+  complete at governance-reviews/CPR_017_RUNWAY_COMMERCIAL_USE_POST-
+  RETIREMENT_RECONSIDERATION_2026-09-03.md, superseding CPR_016's prior
+  WITHHOLD disposition following executed, empirically-confirmed Matrix
+  retirement of the corresponding legacy `runway-gen3` Matrix row (now
+  `crc_eligible: No`); explicit PM/JD concurrence recorded at
+  governance-reviews/CPR_017_ADDENDUM_PM_CONCURRENCE_2026-09-03.md, which
+  found zero Matrix-origin Runway results and no scope contradiction in
+  the empirically-executed post-retirement canary). CRC may state that,
+  under Runway's current Terms of Use, commercial use of generated Output
+  is permitted across Runway's Free, Standard, Pro, and Max tiers,
+  subject to the competitive-products restriction, and that this does not
+  extend to Runway's Enterprise tier. This is Runway's own
+  provider/platform policy, not law. CRC must not state ownership
+  analysis beyond the quoted non-claim-of-ownership language, whether a
+  specific project falls within the "similar or competitive products or
+  services" restriction, downstream IP clearance, Enterprise-tier
+  commercial-use status of any kind, or any broader commercial-readiness
+  conclusion. A human-reviewed Commercial Assurance Assessment remains
+  the higher-assurance path for resolving a specific project's own
+  Runway tier status or broader commercial readiness.
 
 CRC Candidate Statement: >
-  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
   Under Runway's current Terms of Use, you may use generated Output
   commercially across Runway's Free, Standard, Pro, and Max tiers,
   subject to a restriction against using the Services or Outputs to
@@ -3128,10 +3138,11 @@ CRC Candidate Statement: >
   services. This does not apply to Runway's Enterprise tier.
 
 Effective date: 2026-09-03 (review date); underlying primary source last-updated date: May 11, 2026, directly fetched 2026-09-03
-Last reviewed: 2026-09-03 (Formal Governance Review #15, FGR_015)
+Last reviewed: 2026-09-03 (CRC Publication Review #17, CPR_017, PM/JD concurrence recorded in its addendum)
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-09-03
 Related: none
 
 Full Formal Governance Review artifact: `governance-reviews/FGR_015_CAND-RUNWAY-COMMERCIAL-USE-001_2026-09-03.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_017_RUNWAY_COMMERCIAL_USE_POST-RETIREMENT_RECONSIDERATION_2026-09-03.md`

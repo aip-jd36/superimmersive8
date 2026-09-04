@@ -788,4 +788,51 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     last_verified: '2026-09-02',
     superseded_by: null,
   },
+  {
+    // Third tool_scope-narrowed TopicClaim runtime entry (after Synthesia
+    // and the two Kling claims above). CLAIM-RUNWAY-COMMERCIAL-USE-001-v1
+    // Adopted 2026-09-03 (FGR_015). Initially WITHHELD from CRC by CPR_016
+    // -- not for evidence, applicability, or isolated Bounded
+    // Interpretation/Composition reasons, but because the legacy
+    // PLATFORM-RIGHTS-MATRIX.md row `runway-gen3` was simultaneously
+    // Yes-eligible, and a combined synthetic canary showed publishing both
+    // would produce not merely duplication but a scope *contradiction* on
+    // Enterprise (the legacy Matrix row's prose implied Enterprise
+    // coverage; this claim, per FGR_015's own independent primary-source
+    // re-verification, explicitly excludes it) (CPR_016 §5). An explicit
+    // JD/PM decision authorized Matrix retirement as representation
+    // supersession (never substantive reversal); that retirement was
+    // executed (`runway-gen3` flipped crc_eligible: 'No', with a dated
+    // provenance annotation, historical proposition/evidence/provenance
+    // preserved verbatim). CPR_017 then independently reconsidered CRC
+    // eligibility against that real, executed state (not a staged/
+    // candidate one) and APPROVED the claim; the CPR_017 addendum records
+    // the required explicit PM/JD concurrence and an empirically-executed
+    // canary against the real pipeline finding zero Matrix-origin Runway
+    // results and no scope contradiction -- the coexistence blocker is
+    // not merely avoided but structurally eliminated, since the retired
+    // Matrix row now contributes zero results at Retrieval. See
+    // GOVERNED-CLAIMS.md's own CRC Publication Scope and
+    // governance-reviews/CPR_017_RUNWAY_COMMERCIAL_USE_POST-RETIREMENT_
+    // RECONSIDERATION_2026-09-03.md (plus its PM-concurrence addendum) for
+    // the full decision sequence and publication-safety analysis. No
+    // extraction alias question applies here -- 'runway-gen3' is an
+    // existing CANONICAL_TOOL_ID, already conversationally reachable.
+    claim_id: 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1',
+    topic: 'commercial_use',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      'APPROVED FOR CRC PUBLICATION (2026-09-03, CRC Approver: JD (PM) -- see CRC Publication Review #17, CPR_017, governance-reviews/CPR_017_RUNWAY_COMMERCIAL_USE_POST-RETIREMENT_RECONSIDERATION_2026-09-03.md, superseding CPR_016\'s prior WITHHOLD disposition following executed, empirically-confirmed Matrix retirement of the corresponding legacy `runway-gen3` Matrix row -- now crc_eligible: \'No\'; explicit PM/JD concurrence recorded at governance-reviews/CPR_017_ADDENDUM_PM_CONCURRENCE_2026-09-03.md, which found zero Matrix-origin Runway results and no scope contradiction in the empirically-executed post-retirement canary). CRC may state that, under Runway\'s current Terms of Use, commercial use of generated Output is permitted across Runway\'s Free, Standard, Pro, and Max tiers, subject to a restriction against using the Services or Outputs to create, train, develop, or improve similar or competitive products or services, and that this does not extend to Runway\'s Enterprise tier. This is Runway\'s own provider/platform policy, not law. CRC must not state ownership analysis beyond the quoted non-claim-of-ownership language, whether a specific project falls within the "similar or competitive products or services" restriction, downstream IP clearance, Enterprise-tier commercial-use status of any kind, or any broader commercial-readiness conclusion. A human-reviewed Commercial Assurance Assessment remains the higher-assurance path for resolving a specific project\'s own Runway tier status or broader commercial readiness.',
+    crc_candidate_statement:
+      'Under Runway\'s current Terms of Use, you may use generated Output commercially across Runway\'s Free, Standard, Pro, and Max tiers, subject to a restriction against using the Services or Outputs to create, train, develop, or improve similar or competitive products or services. This does not apply to Runway\'s Enterprise tier.',
+    applicability_requirements: [],
+    unresolved_project_dependencies: [],
+    provider_scope: null,
+    tool_scope: ['runway-gen3'],
+    last_verified: '2026-09-03',
+    superseded_by: null,
+  },
 ]
