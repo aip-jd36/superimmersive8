@@ -6,7 +6,14 @@
  * comment for why).
  */
 
-import { evaluateCategoryEligibility, getCommercialReadinessTakeaway, selectEligibleCommercialReadinessCategory } from '@/lib/crc-engine/commercial-readiness-catalog'
+import {
+  COMMERCIAL_READINESS_CATEGORIES,
+  COMMERCIAL_READINESS_DISCOVERY_QUESTIONS,
+  COMMERCIAL_READINESS_TAKEAWAYS,
+  evaluateCategoryEligibility,
+  getCommercialReadinessTakeaway,
+  selectEligibleCommercialReadinessCategory,
+} from '@/lib/crc-engine/commercial-readiness-catalog'
 import type { CommercialReadinessIndicators, IndicatorState } from '@/lib/crc-engine/commercial-readiness-indicators'
 
 function indicators(overrides: Partial<CommercialReadinessIndicators> = {}): CommercialReadinessIndicators {
@@ -152,10 +159,10 @@ describe('selectEligibleCommercialReadinessCategory', () => {
   })
 })
 
-describe('client_provided_source_assets takeaway copy (PM-approved revision, 2026-08-15)', () => {
-  test('exact copy -- softened, no liability-allocation clause', () => {
+describe('client_provided_source_assets takeaway copy (answer-neutral revision, CRD-1, 2026-09-05)', () => {
+  test('exact copy -- conditional framing, no presupposition that client assets were supplied', () => {
     expect(getCommercialReadinessTakeaway('client_provided_source_assets')).toBe(
-      "Worth knowing: client-supplied photos, footage, logos, or brand assets create a separate rights and documentation question from the AI platform's own terms. For commercial work, it's useful to document what the client supplied and what permissions or representations accompanied those assets.",
+      "Worth knowing: when a client or brand supplies their own photos, footage, logos, or brand assets, that material carries its own rights and documentation questions, separate from the AI platform's own terms. For commercial work, it's useful to document any such client-supplied material -- what was provided, and what permissions or representations came with it.",
     )
   })
 
@@ -164,5 +171,131 @@ describe('client_provided_source_assets takeaway copy (PM-approved revision, 202
     expect(text).not.toContain('responsibility sits with')
     expect(text).not.toContain('generally sits with the client')
     expect(text).not.toContain('clearance responsibility')
+  })
+
+  test('does not tell the user to document "what the client supplied" as though something was supplied (the CC-4 UAT defect)', () => {
+    const text = getCommercialReadinessTakeaway('client_provided_source_assets').toLowerCase()
+    // The exact presupposing phrase from the pre-CRD-1 copy.
+    expect(text).not.toContain('document what the client supplied')
+    expect(text).not.toContain('accompanied those assets')
+  })
+})
+
+describe('takeaway copy left byte-identical by CRD-1 (already answer-neutral -- minimal diff)', () => {
+  test('likeness_publicity_rights -- unchanged', () => {
+    expect(getCommercialReadinessTakeaway('likeness_publicity_rights')).toBe(
+      "Worth knowing: showing a real person's face, voice, or likeness in commercial content is typically governed by publicity and likeness rights, which are separate from -- and not covered by -- an AI tool's own commercial-use terms. Getting a platform's permission to generate something is not the same as getting that person's permission to be shown.",
+    )
+  })
+
+  test('third_party_visual_assets -- sentence 1 unchanged; sentence 2 generic-input phrasing', () => {
+    expect(getCommercialReadinessTakeaway('third_party_visual_assets')).toBe(
+      "Worth knowing: reference material you upload or start from -- photos, stock footage, existing video -- carries its own licensing terms, separate from the AI tool's own commercial-use terms. A platform's terms cover what it generates, not necessarily the rights to any material fed into it.",
+    )
+  })
+
+  test('third_party_visual_assets no longer says "material you fed into it" (past-tense, second-person-specific -- reads as presupposing input after a "no")', () => {
+    expect(getCommercialReadinessTakeaway('third_party_visual_assets')).not.toContain('material you fed into it')
+  })
+})
+
+describe('CRD-1 -- answer-neutral educational takeaway invariant (all categories)', () => {
+  test('every discovery category still has a fixed, non-empty takeaway and question', () => {
+    for (const category of COMMERCIAL_READINESS_CATEGORIES) {
+      expect(typeof COMMERCIAL_READINESS_TAKEAWAYS[category]).toBe('string')
+      expect(COMMERCIAL_READINESS_TAKEAWAYS[category].length).toBeGreaterThan(0)
+      expect(getCommercialReadinessTakeaway(category)).toBe(COMMERCIAL_READINESS_TAKEAWAYS[category])
+      expect(typeof COMMERCIAL_READINESS_DISCOVERY_QUESTIONS[category]).toBe('string')
+      expect(COMMERCIAL_READINESS_DISCOVERY_QUESTIONS[category].length).toBeGreaterThan(0)
+    }
+  })
+
+  test('no takeaway presupposes the asked-about condition is present in THIS project', () => {
+    // Phrases that only make sense if the user answered "yes" -- a second-
+    // person-specific past action, or a directive that assumes the thing exists.
+    const presupposesPresence = [
+      'what the client supplied',
+      'what you supplied',
+      'the assets you',
+      'material you fed into it',
+      'the person you',
+      'the people you',
+      'your uploaded',
+    ]
+    for (const category of COMMERCIAL_READINESS_CATEGORIES) {
+      const text = getCommercialReadinessTakeaway(category).toLowerCase()
+      for (const phrase of presupposesPresence) {
+        expect(text).not.toContain(phrase)
+      }
+    }
+  })
+
+  test('no takeaway presupposes the asked-about condition is ABSENT either', () => {
+    const presupposesAbsence = ['since you did not', "since you didn't", 'because none', 'as none were', 'you have none']
+    for (const category of COMMERCIAL_READINESS_CATEGORIES) {
+      const text = getCommercialReadinessTakeaway(category).toLowerCase()
+      for (const phrase of presupposesAbsence) {
+        expect(text).not.toContain(phrase)
+      }
+    }
+  })
+
+  test('no takeaway uses verdict / clearance / materiality / risk / evidence / project-finding language', () => {
+    // "material" as a bare noun ("source material", "reference material") is
+    // legitimate and predates CRD-1 -- the concern is materiality/risk as a
+    // JUDGMENT, so the phrases below target that, not the word in isolation.
+    const forbidden = [
+      'checked',
+      'cleared',
+      'verified',
+      'compliant',
+      'noncompliant',
+      'found a risk',
+      'is material',
+      'materially',
+      'a risk',
+      'legal risk',
+      'commercial risk',
+      'blocker',
+      'is resolved',
+      'this project is',
+      'your project is',
+      'you are cleared',
+      "you're cleared",
+      'commercial assurance will',
+      'we will verify',
+      'evidence has been',
+    ]
+    for (const category of COMMERCIAL_READINESS_CATEGORIES) {
+      const text = getCommercialReadinessTakeaway(category).toLowerCase()
+      for (const phrase of forbidden) {
+        expect(text).not.toContain(phrase)
+      }
+    }
+  })
+
+  test('every takeaway still opens with the fixed "Worth knowing:" educational framing', () => {
+    for (const category of COMMERCIAL_READINESS_CATEGORIES) {
+      expect(getCommercialReadinessTakeaway(category).startsWith('Worth knowing:')).toBe(true)
+    }
+  })
+
+  test('client_provided_source_assets takeaway is coherent after a clean negative answer (regression fixture for the CC-4 UAT)', () => {
+    // The UAT sequence: CRC asked the client-assets discovery question; the
+    // user answered "No. The client didn't provide any images, video, logos,
+    // or other brand assets for this project." The fixed takeaway then fires
+    // unconditionally (unchanged lifecycle). It must not read as a directive
+    // about assets that were supplied.
+    const takeaway = getCommercialReadinessTakeaway('client_provided_source_assets')
+    const lower = takeaway.toLowerCase()
+    // Concept still taught: client-supplied brand assets carry their own
+    // rights/documentation question, distinct from the platform's terms.
+    expect(lower).toContain('rights and documentation question')
+    expect(lower).toContain("ai platform's own terms")
+    // Conditional framing present -- the takeaway describes the concept, not
+    // a fact about this conversation.
+    expect(lower).toContain('when a client or brand supplies')
+    // No directive that only parses if something was supplied.
+    expect(lower).not.toContain('document what the client supplied')
   })
 })

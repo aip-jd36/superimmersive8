@@ -143,14 +143,34 @@ export const COMMERCIAL_READINESS_DISCOVERY_QUESTIONS: Record<CommercialReadines
  * never uses verdict language ("checked," "cleared," "verified," "found a
  * risk") -- per the approved "CRC introduces commercial readiness; it does
  * not establish commercial readiness" principle.
+ *
+ * ANSWER-NEUTRALITY INVARIANT (CRD-1, 2026-09-05, following the CC-4
+ * Negative-State Relevance diagnostic). The takeaway lifecycle is
+ * deliberately unconditional: the discovery question is asked, then this
+ * fixed concept takeaway is shown -- run-turn.ts never inspects the user's
+ * answer to decide whether or how to show it (CC-4 confirmed this, and the
+ * accepted architecture decision keeps it that way -- no answer-state
+ * classifier, no affirmative/negative variants). Because of that, EACH
+ * string here must stay semantically coherent whichever way the preceding
+ * answer went -- affirmative, negative, unknown, declined, or otherwise
+ * unresolved. A takeaway may teach the concept, but it must NOT presuppose
+ * that the concept's triggering condition is present in this project (nor
+ * that it is absent): a live UAT surfaced the client_provided_source_assets
+ * entry telling a user to "document what the client supplied" one turn
+ * after they said the client supplied nothing. Prefer conditional
+ * constructions ("when X is supplied...", "any such material...") over
+ * present-tense/second-person-specific phrasing ("what you supplied", "what
+ * you fed in") that reads as if the answer went one way. This is rhetorical
+ * neutrality only -- it adds no project-state finding, no legal conclusion,
+ * no materiality/risk language, and no new substantive proposition.
  */
 export const COMMERCIAL_READINESS_TAKEAWAYS: Record<CommercialReadinessCategory, string> = {
   client_provided_source_assets:
-    "Worth knowing: client-supplied photos, footage, logos, or brand assets create a separate rights and documentation question from the AI platform's own terms. For commercial work, it's useful to document what the client supplied and what permissions or representations accompanied those assets.",
+    "Worth knowing: when a client or brand supplies their own photos, footage, logos, or brand assets, that material carries its own rights and documentation questions, separate from the AI platform's own terms. For commercial work, it's useful to document any such client-supplied material -- what was provided, and what permissions or representations came with it.",
   likeness_publicity_rights:
     "Worth knowing: showing a real person's face, voice, or likeness in commercial content is typically governed by publicity and likeness rights, which are separate from -- and not covered by -- an AI tool's own commercial-use terms. Getting a platform's permission to generate something is not the same as getting that person's permission to be shown.",
   third_party_visual_assets:
-    "Worth knowing: reference material you upload or start from -- photos, stock footage, existing video -- carries its own licensing terms, separate from the AI tool's own commercial-use terms. A platform's terms cover what it generates, not necessarily the rights to material you fed into it.",
+    "Worth knowing: reference material you upload or start from -- photos, stock footage, existing video -- carries its own licensing terms, separate from the AI tool's own commercial-use terms. A platform's terms cover what it generates, not necessarily the rights to any material fed into it.",
 }
 
 /**
