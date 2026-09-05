@@ -164,7 +164,7 @@ describe('Wave 1 real claims -- governance state as of 2026-08-19 (all four COPY
    * Composition behavior is proven separately by
    * adobestock-runtime-retrieval.test.ts's own real-fixture describe block.
    */
-  test('all four Wave 1 claims plus the seven stock-media claims (five original + two -v2 correction successors) plus A-3 (the first published Music-domain claim) plus the first real tool-scoped claim (Synthesia) plus the second, third, and fourth real provider-scoped claims since A-3 (Storyblocks, Pond5, Adobe Stock) plus the fifth and sixth, the first two-claim tool_scope-narrowed publication (Kling baseline + member, CPR_015, 2026-09-02, superseding CPR_013/CPR_014\'s prior WITHHOLD after Matrix retirement) are present in the fixture', () => {
+  test('all four Wave 1 claims plus the seven stock-media claims (five original + two -v2 correction successors) plus A-3 (the first published Music-domain claim) plus the first real tool-scoped claim (Synthesia) plus the second, third, and fourth real provider-scoped claims since A-3 (Storyblocks, Pond5, Adobe Stock) plus the fifth and sixth, the first two-claim tool_scope-narrowed publication (Kling baseline + member, CPR_015, 2026-09-02, superseding CPR_013/CPR_014\'s prior WITHHOLD after Matrix retirement) plus the seventh (Runway, CPR_017, 2026-09-03, superseding CPR_016\'s prior WITHHOLD after Matrix retirement) are present in the fixture', () => {
     expect(TOPIC_CLAIMS_FIXTURE.map((c) => c.claim_id).sort()).toEqual([
       'CLAIM-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001-v1',
       'CLAIM-COPY-001-v1',
@@ -175,6 +175,7 @@ describe('Wave 1 real claims -- governance state as of 2026-08-19 (all four COPY
       'CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1',
       'CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1',
       'CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1',
+      'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1',
       'CLAIM-STOCK-EDITORIAL-001-v1',
       'CLAIM-STOCK-EDITORIAL-001-v2',
       'CLAIM-STOCK-EDITORIAL-002-v1',

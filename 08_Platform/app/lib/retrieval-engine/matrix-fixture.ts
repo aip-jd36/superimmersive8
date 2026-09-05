@@ -43,10 +43,36 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
   {
     identifier: 'runway-gen3',
     last_verified: '2026-08-05',
+    /**
+     * Matrix Retirement (2026-09-03): this claim was `crc_eligible: 'Yes'`
+     * from 2026-08-05 (JD, CRC Decision Date 2026-08-05) until this date,
+     * when JD/PM authorized its retirement as a CRC-active representation
+     * -- see PLATFORM-RIGHTS-MATRIX.md's Runway Retirement status note.
+     * This is representation supersession, not substantive reversal -- the
+     * claim's core commercial-use grant is not found to be inaccurate; the
+     * sole reason is CPR_016's empirical finding that simultaneous Matrix +
+     * TopicClaim publication of the same knowledge produces scope-
+     * inconsistent CRC output on the Enterprise dimension (worse than mere
+     * duplication -- the two representations disagree, not merely repeat).
+     * Separately, and independently of the coexistence issue, this claim's
+     * own "same language applies to ... Enterprise" wording is itself found
+     * (by FGR_015 and reconfirmed by CPR_016) to be unsupported by the
+     * primary Runway Terms of Use, which carves Enterprise out to a
+     * separate, non-public terms document -- a documentation-accuracy
+     * finding preserved here, not silently corrected. This claim is
+     * superseded by governed successor claim
+     * CLAIM-RUNWAY-COMMERCIAL-USE-001-v1 (GOVERNED-CLAIMS.md, Lifecycle:
+     * Adopted, CRC eligibility pending a separate, not-yet-conducted
+     * post-retirement CPR reconsideration -- see
+     * governance-reviews/FGR_015_CAND-RUNWAY-COMMERCIAL-USE-001_2026-09-03.md
+     * and governance-reviews/CPR_016_RUNWAY_COMMERCIAL_USE_INITIAL_
+     * PUBLICATION_REVIEW_2026-09-03.md). `crc_eligible` below is
+     * accordingly 'No' effective 2026-09-03.
+     */
     claims: [
       {
         claim_id: 'runway-gen3',
-        crc_eligible: 'Yes',
+        crc_eligible: 'No',
         crc_publication_scope:
           "CRC may state only that Runway's current Terms permit commercial use across subscription tiers when the Terms of Service are followed, and that the Free plan differs primarily by watermarking rather than commercial-use rights. This publication scope does not extend to ownership analysis, enterprise training provisions, downstream IP clearance, platform suitability for a particular commercial project, or broader commercial-readiness conclusions.",
         crc_candidate_statement:
