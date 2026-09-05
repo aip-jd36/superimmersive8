@@ -42,18 +42,35 @@
  * header for why reusing question copy for explanation would conflate
  * questioning with projection.
  *
- * SHIPPED EMPTY (M2B, 2026-09-05), by explicit instruction, mirroring
+ * SHIPPED EMPTY through M2B (2026-09-05), by explicit instruction, mirroring
  * selector-askability.ts's own precedent exactly ("SHIPPED EMPTY ... by
  * explicit PM/Architecture instruction -- the registry existing, fully
  * wired, and fail-closed WAS the capability; no fact was registered
  * askable"). A repository-wide search for an already-approved, genuinely
  * user-facing display label for `tool_account_status` (as distinct from the
  * existing selector QUESTION text, informal governance-review prose, or
- * test wording) found none -- see M2B's own implementation report. Adding a
- * real entry is a governance decision this file does not make on its own
- * authority; it requires the same explicit PM/Architecture review discipline
- * selector-askability.ts's own header describes for registering a fact
- * askable, applied here to registering a fact's display label instead.
+ * test wording) found none at that time -- see M2B's own implementation
+ * report.
+ *
+ * `tool_account_status` ACTIVATED (M2B.1, 2026-09-05) -- first real entry
+ * this registry has ever carried, following explicit human/PM approval of
+ * the neutral lexical alias "account or membership status" and nothing
+ * else. The approval is scoped exactly this narrowly: it authorizes ONLY
+ * that `tool_account_status` may be referred to by this noun phrase in
+ * bounded Composition prose. It does NOT authorize, and this entry must
+ * never be read as encoding: a paid-plan -> Member Account inference, a
+ * plan-tier -> account-status inference, any provider-specific mapping, a
+ * legal/commercial conclusion, an evidence requirement, materiality/risk,
+ * or any Commercial Assurance wording -- see this module's own header
+ * above for the complete, unchanged list of what a label must never
+ * encode. No other `ApplicabilityFact` is activated by this change --
+ * `tool_plan_tier` and `jurisdiction` remain unregistered (fail-closed).
+ *
+ * Adding any FUTURE real entry remains a governance decision this file
+ * does not make on its own authority; it requires the same explicit
+ * PM/Architecture review discipline selector-askability.ts's own header
+ * describes for registering a fact askable, applied here to registering a
+ * fact's display label instead.
  *
  * Absence defaults to no label, never a fallback to the raw enum string or
  * an improvised description -- see `getApplicabilityFactLabel`'s own
@@ -74,15 +91,17 @@ export interface ApplicabilityFactDisplayEntry {
 }
 
 /**
- * Intentionally empty -- see module header. Do not add an entry without a
- * recorded governance sign-off (mirrors selector-askability.ts's own
- * discipline for registering a fact askable). Do not populate this from
- * informal wording found in governance-review markdown, PLATFORM-RIGHTS-
- * MATRIX.md column headers, or the existing `tool_account_status` selector
- * question text -- none of those are an approved display label (M2B's own
- * implementation report documents the search and its negative result).
+ * One entry (M2B.1, 2026-09-05, human/PM-approved). `tool_plan_tier` and
+ * `jurisdiction` are deliberately NOT entries here -- see module header --
+ * and must not be added without their own separate governance sign-off. Do
+ * not populate any future entry from informal wording found in
+ * governance-review markdown, PLATFORM-RIGHTS-MATRIX.md column headers, or
+ * an existing selector question's own text -- none of those are an
+ * approved display label on their own.
  */
-const APPLICABILITY_FACT_DISPLAY: Partial<Record<ApplicabilityFact, ApplicabilityFactDisplayEntry>> = {}
+const APPLICABILITY_FACT_DISPLAY: Partial<Record<ApplicabilityFact, ApplicabilityFactDisplayEntry>> = {
+  tool_account_status: { label: 'account or membership status' },
+}
 
 /**
  * Fail-closed by construction, never a thrown error -- an unregistered fact
