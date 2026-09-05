@@ -156,44 +156,75 @@ describe('no customer / reviewer / Sales route or UI was added', () => {
   })
 })
 
-describe('CAH-3D.1: authorization cannot be enabled by an arbitrary string', () => {
-  test('CURRENTLY_ENABLED_AUTHORIZATION_BASES is initialised to an empty Set in source', () => {
-    const src = read('lib/crc-assurance-handoff/types.ts')
-    // The declaration must construct an empty set -- `new Set<...>([])` or `new Set()`.
-    expect(src).toMatch(/CURRENTLY_ENABLED_AUTHORIZATION_BASES[^\n]*new Set<[^>]*>\(\[\]\)/)
-    // ...and must NOT list any member.
-    const decl = src.slice(src.indexOf('CURRENTLY_ENABLED_AUTHORIZATION_BASES'))
-    const firstStmt = decl.slice(0, decl.indexOf('\n\n') === -1 ? decl.length : decl.indexOf('\n\n'))
-    expect(firstStmt).not.toMatch(/_confirmation'|delegated_authorization'/)
-  })
-
-  test('only PRODUCTION_AUTHORIZATION_POLICY is constructed in lib code; the service default is that policy', () => {
+describe('CAH-3E.2: the association core is non-authorizing', () => {
+  test('no generic authorization-decision machinery exists in lib/ (removed, not emptied)', () => {
     for (const rel of FILES) {
       const code = codeOnly(rel)
-      // Detect CONSTRUCTION of an AuthorizationPolicy -- a typed
-      // `: AuthorizationPolicy = {` or an object literal defining an
-      // `isEnabled:` member -- NOT a call to `.isEnabled(...)`.
-      const builds = /:\s*AuthorizationPolicy\s*=\s*\{/.test(code) || /\bisEnabled\s*:/.test(code)
-      if (builds && !rel.endsWith('authorization-policy.ts')) {
-        throw new Error(`${rel} constructs an AuthorizationPolicy outside authorization-policy.ts`)
-      }
+      // The CAH-3D.1 enablement gate is gone entirely.
+      expect(code).not.toMatch(/\bAuthorizationPolicy\b/)
+      expect(code).not.toMatch(/\bPRODUCTION_AUTHORIZATION_POLICY\b/)
+      expect(code).not.toMatch(/\bCURRENTLY_ENABLED_AUTHORIZATION_BASES\b/)
+      expect(code).not.toMatch(/\.isEnabled\s*\(/)
     }
-    const svc = codeOnly('lib/crc-assurance-handoff/service.ts')
-    expect(svc).toMatch(/policy:\s*AuthorizationPolicy\s*=\s*PRODUCTION_AUTHORIZATION_POLICY/)
+    expect(fs.existsSync(path.join(APP_ROOT, 'lib/crc-assurance-handoff/authorization-policy.ts'))).toBe(false)
   })
 
-  test('authorization-policy.ts has no hardcoded allow / env / NODE_ENV branch', () => {
-    const code = codeOnly('lib/crc-assurance-handoff/authorization-policy.ts')
-    expect(code).not.toMatch(/return\s+true/)
-    expect(code).not.toMatch(/NODE_ENV|process\.env/)
-    expect(code).toMatch(/CURRENTLY_ENABLED_AUTHORIZATION_BASES/)
+  test('no AuthorizationGrant / branded-authority-object / Symbol-brand mechanism was introduced (CAH-3E.1 rejection)', () => {
+    for (const rel of FILES) {
+      const code = codeOnly(rel)
+      expect(code).not.toMatch(/AuthorizationGrant/)
+      expect(code).not.toMatch(/issueAuthorizationGrant|isAuthorizationGrant/)
+      // No module-private brand symbol used as an authority marker.
+      expect(code).not.toMatch(/GRANT_BRAND|_brand|Symbol\(['"][^'"]*grant/i)
+    }
   })
 
-  test('no removed placeholder basis survives anywhere in lib/', () => {
+  test('the primitive is non-authorizing: no generic "authorize-and-create" entry point on the package surface', () => {
+    const idx = codeOnly('lib/crc-assurance-handoff/index.ts')
+    // The renamed creation primitive is NOT re-exported from index.ts.
+    expect(idx).not.toMatch(/createAssociationAfterAuthorization/)
+    expect(idx).not.toMatch(/associateCrcSessionWithSubmission/)
+    // Removal (ownership-only, non-authorizing) may be exported.
+    expect(idx).toMatch(/removeCrcAssuranceAssociation/)
+    // No authorization-policy export.
+    expect(idx).not.toMatch(/AuthorizationPolicy|CURRENTLY_ENABLED/)
+  })
+
+  test('CreateAssociationResult no longer carries an enablement failure code', () => {
+    const t = read('lib/crc-assurance-handoff/types.ts')
+    expect(t).not.toMatch(/authorization_basis_not_enabled/)
+    // KNOWN-basis vocabulary validation is retained.
+    expect(t).toMatch(/unknown_authorization_basis/)
+    expect(t).toMatch(/isKnownAuthorizationBasis/)
+  })
+
+  test('service.ts states its non-authorizing contract and its honest trust-boundary limits', () => {
+    const src = read('lib/crc-assurance-handoff/service.ts')
+    expect(src).toMatch(/NON-AUTHORIZING/)
+    expect(src).toMatch(/not a security boundary|NOT a security boundary/i)
+    expect(src).toMatch(/service_role/)
+  })
+
+  test('authorization_basis is retained as persisted provenance (domain + record type)', () => {
+    const t = read('lib/crc-assurance-handoff/types.ts')
+    expect(t).toMatch(/authorization_basis:\s*AuthorizationBasis/)
+    expect(t).toMatch(/authorizationBasis:\s*AuthorizationBasis/)
+  })
+
+  test('no removed placeholder / older-milestone symbols survive in lib/', () => {
     for (const rel of FILES) {
       const code = codeOnly(rel)
       expect(code).not.toMatch(/'core_internal_uninferred'|"core_internal_uninferred"/)
       expect(code).not.toMatch(/SUPPORTED_AUTHORIZATION_BASES|isSupportedAuthorizationBasis/)
+    }
+  })
+
+  test('no front-door authorization mechanism logic in the core (cookie / email / token / reference / delegated)', () => {
+    for (const rel of FILES) {
+      const code = codeOnly(rel)
+      expect(code).not.toMatch(/cookies?\s*\(|getCookie|readCookie/i)
+      expect(code).not.toMatch(/redeemToken|verifyToken|consumeToken|matchEmail|emailMatches|delegationGrant/i)
+      expect(code).not.toMatch(/crc_leads|email_normalized|attribution_token/i)
     }
   })
 })
