@@ -1,42 +1,52 @@
 /**
- * CRC <-> Assurance association -- internal service (CAH-3D §20-§22).
+ * CRC <-> Assurance association -- NON-AUTHORIZING invariant/persistence
+ * primitive (CAH-3D, corrected CAH-3D.1, re-architected CAH-3E.2).
  *
- * INTERNAL ONLY. Not exposed through any public/customer/reviewer/Sales/admin
- * route in this milestone (CAH-3D §27) -- otherwise a caller could simply
- * assert an authorization basis. A trusted caller (tests today; a future
- * front-door milestone tomorrow) supplies:
+ * ── Semantic contract (CAH-3E.2) ──
  *
- *   - the authenticated actor id;
- *   - the target Assurance submission id;
- *   - the CRC session id;
- *   - the authorization_basis (how THAT caller was authorized).
+ * "The caller has already established whatever capability-specific
+ *  authorization the product requires. This function does NOT establish or
+ *  prove that authorization. It independently enforces the generic association
+ *  invariants, binds the CRC state, and persists / atomically audits the
+ *  resulting association and its authorization provenance."
  *
- * This service verifies only the invariants that are independent of the future
- * front door, then delegates the atomic write + required security-critical
- * audit to the repository's Postgres functions. Every failure is fail-closed:
- * no association is created / removed.
+ * `createAssociationAfterAuthorization` is INTERNAL server-side infrastructure.
+ * It is deliberately NOT part of `index.ts`'s public package surface: there is
+ * no longer any generic, product-facing "give me an authorization basis and
+ * I'll decide whether you are authorized" entry point (CAH-3E.2 §9). A future
+ * reviewed capability module -- and only such a module -- imports this seam
+ * directly and calls it AFTER it has:
+ *   - validated its own mechanism-specific signal (a resolved cookie, a
+ *     confirmed email-matched candidate, a redeemed token, ...);
+ *   - authenticated the acting Assurance user;
+ *   - derived the authoritative actor id and CRC session id from that signal
+ *     (never from client-supplied request fields);
+ *   - received the customer's deliberate association act;
+ * and it passes its OWN fixed `authorizationBasis` constant (never a
+ * parameter it received from anywhere else).
  *
- * It deliberately does NOT check email match, cookie possession, reference
- * codes, association tokens, or Sales CONVERTING -- those belong to the future
- * caller / front door (CAH-3D §2, §20).
+ * ── Trust boundary (honest statement, CAH-3E.2 §X) ──
  *
- * ── CAH-3D.1: authorization is a REQUIRED gate, and nothing is enabled ──
+ * Module visibility, naming and structural tests are ARCHITECTURE HYGIENE and
+ * code-review signal -- NOT a security boundary. Any code already running with
+ * the application's server-side / service_role privileges could import this
+ * seam directly, or call the Supabase RPC directly, or write to the tables
+ * directly; none of that is prevented here and none is claimed to be. The
+ * database's service_role-only grant remains the actual high-trust persistence
+ * boundary. What this design DOES achieve: the normal, product-facing
+ * architecture encodes authorization ownership correctly (each capability owns
+ * its own establishment + its own fixed provenance), and any route that
+ * reached this primitive with client-controlled actor/session/basis would be a
+ * glaring, code-review-catchable architecture violation -- not the intended
+ * API.
  *
- * Submission ownership proves the actor may act on the submission -- NOT that
- * they are authorized to associate this particular CRC work product. That
- * second permission is `AuthorizationPolicy.isEnabled(basis)`. The production
- * policy enables nothing (`CURRENTLY_ENABLED_AUTHORIZATION_BASES` is empty), so
- * `associateCrcSessionWithSubmission` cannot succeed today for ANY basis. The
- * `policy` parameter defaults to `PRODUCTION_AUTHORIZATION_POLICY`; only
- * unit tests pass an enabling policy, and only to exercise the persistence /
- * ownership / completion / state-binding / audit / duplicate / removal paths.
+ * Every failure is fail-closed: no association is created / removed.
  */
 
 import { COMPLETION_REASONS, type CompletionReason } from '@/types/interview-engine'
 import { deserializeStructuredUnderstanding } from '@/lib/interview-engine/serialization'
 import type { StructuredUnderstanding } from '@/types/interview-engine'
 import { isKnownAuthorizationBasis } from './types'
-import { PRODUCTION_AUTHORIZATION_POLICY, type AuthorizationPolicy } from './authorization-policy'
 import type {
   CreateAssociationInput,
   CreateAssociationResult,
@@ -57,6 +67,8 @@ import {
  * five governed `COMPLETION_REASONS`. `product_stop_reason` is NEVER read
  * here: an email-decline (retired) or an anti-abuse turn ceiling is not a
  * customer-completed CRC (CAH-3B Correction 1, restated for CAH-3D §29 test 14).
+ * This is the single canonical definition of "genuinely completed" -- it must
+ * never be reimplemented per-capability (CAH-3E.2 §B).
  */
 const GOVERNED_COMPLETION_REASONS: ReadonlySet<CompletionReason> = new Set(
   COMPLETION_REASONS as readonly CompletionReason[],
@@ -71,38 +83,43 @@ function completionReasonOf(raw: unknown): { ok: true; value: CompletionReason }
   }
 }
 
-export async function associateCrcSessionWithSubmission(
+/**
+ * NON-AUTHORIZING. See module header. Enforces generic invariants, binds CRC
+ * state, persists + atomically audits. Does NOT decide whether the upstream
+ * capability's real-world authorization signal was satisfied.
+ */
+export async function createAssociationAfterAuthorization(
   input: CreateAssociationInput,
-  policy: AuthorizationPolicy = PRODUCTION_AUTHORIZATION_POLICY,
 ): Promise<CreateAssociationResult> {
-  // 1a. The basis must be a recognised capability name (syntactic).
+  // 1. Data validity only (NOT an authorization decision): the basis string
+  //    must be recognised vocabulary, matching the DB CHECK. KNOWN != ENABLED
+  //    != AUTHORIZED -- see types.ts.
   if (!isKnownAuthorizationBasis(input.authorizationBasis)) {
     return { ok: false, code: 'unknown_authorization_basis' }
   }
-  // 1b. ...and its capability must actually be implemented and enabled.
-  //     Production enables nothing -> this rejects every basis today.
-  if (!policy.isEnabled(input.authorizationBasis)) {
-    return { ok: false, code: 'authorization_basis_not_enabled' }
-  }
 
   try {
-    // 2. Submission must exist AND be owned by the acting user.
+    // 2. GENERIC: submission must exist AND be owned by the acting user.
+    //    Applies identically to every authorization capability -- enforced
+    //    here, once, authoritatively; never delegated to a front door.
     const owner = await getSubmissionOwner(input.submissionId)
     if (owner === null) return { ok: false, code: 'submission_not_found' }
     if (owner !== input.actorUserId) return { ok: false, code: 'not_submission_owner' }
 
-    // 3. CRC session must exist.
+    // 3. GENERIC: CRC session must exist.
     const session = await getCrcSessionForAssociation(input.crcSessionId)
     if (session === null) return { ok: false, code: 'crc_session_not_found' }
 
-    // 4. CRC session must be genuinely completed (governed completion_reason only).
+    // 4. GENERIC: CRC session must be genuinely completed (governed
+    //    completion_reason only; product_stop_reason is never read). The
+    //    single source of truth for "is this CRC actually done."
     const cr = completionReasonOf(session.structured_understanding)
     if (!cr.ok) return { ok: false, code: 'crc_state_unreadable' }
     if (cr.value === null || !GOVERNED_COMPLETION_REASONS.has(cr.value)) {
       return { ok: false, code: 'crc_session_not_completed' }
     }
 
-    // 5. Capture state binding (SB3) from the PERSISTED project state.
+    // 5. GENERIC: capture state binding (SB3) from the PERSISTED project state.
     let identity
     try {
       identity = computeCrcStateIdentity(session.structured_understanding)
@@ -110,7 +127,9 @@ export async function associateCrcSessionWithSubmission(
       return { ok: false, code: 'crc_state_unreadable' }
     }
 
-    // 6. Atomic create + required 'association_created' audit (one transaction).
+    // 6. GENERIC: atomic create + required 'association_created' audit
+    //    (one transaction); duplicate-active-pair / cardinality enforced by
+    //    the DB.
     const res = await createAssociationAtomic({
       crcSessionId: input.crcSessionId,
       submissionId: input.submissionId,
@@ -139,6 +158,12 @@ export async function associateCrcSessionWithSubmission(
   }
 }
 
+/**
+ * Removal is, and remains, independent of creation authorization (CAH-3E.2
+ * §T): it requires only that the acting user owns the associated submission.
+ * No basis, no capability, no original browser / cookie / email is required or
+ * referenced.
+ */
 export async function removeCrcAssuranceAssociation(
   input: RemoveAssociationInput,
 ): Promise<RemoveAssociationResult> {
