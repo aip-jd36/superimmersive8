@@ -112,7 +112,9 @@ export async function deliverCrcResultsEmail(client: SupabaseClient, params: Del
   // CC-3B: pass the deterministic plan so the email renderer suppresses the
   // duplicate rendering of governed statements already shown inside a goal
   // section. `result.output` is unchanged by CC-3B.
-  const { html, text } = buildResultsEmailContent(result.output, params.attributionToken, params.email, result.plan)
+  // M2B: pass the SAME already-computed `result.consultative_notes` -- one
+  // realization per turn, never a second one computed here.
+  const { html, text } = buildResultsEmailContent(result.output, params.attributionToken, params.email, result.plan, result.consultative_notes)
 
   const outcome = await sendCrcResultsEmail(params.email, 'Your Commercial Readiness Check results', html, text)
 

@@ -34,6 +34,7 @@ import { CrcProjectionOutput } from '@/components/CrcProjectionOutput'
 import { CommercialAssuranceBridge } from '@/components/CommercialAssuranceBridge'
 import type { CrcResultsEmailState, CrcTeaser, TurnResponseBody, SessionStatusResponseBody } from '@/lib/crc-engine/api-contract'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
+import type { ConsultativeNote } from '@/lib/crc-engine/unresolved-applicability-realization'
 import { shouldShowAcknowledgmentGuidance, ACKNOWLEDGMENT_GUIDANCE_COPY, type CrcPagePhase as Phase } from '@/lib/crc-engine/acknowledgment-guidance'
 import { getRateLimitMessage } from '@/lib/crc-engine/rate-limit-copy'
 import { RESULTS_GATE_COPY, buildConfirmationCopy, buildTeaserCopy } from '@/lib/crc-engine/results-gate-copy'
@@ -61,6 +62,10 @@ export default function CrcPage() {
   const [phase, setPhase] = useState<Phase>('loading')
   const [messages, setMessages] = useState<Message[]>([])
   const [projection, setProjection] = useState<ProjectionOutput | null>(null)
+  // M2B (2026-09-05): Consultative-Composition-owned, already-realized
+  // bounded detail -- gated identically to `projection` server-side (see
+  // complete-response.ts). Never computed client-side.
+  const [consultativeNotes, setConsultativeNotes] = useState<ConsultativeNote[] | undefined>(undefined)
   const [inputText, setInputText] = useState('')
   const [feedbackRating, setFeedbackRating] = useState<FeedbackRating | null>(null)
   const [feedbackText, setFeedbackText] = useState('')
@@ -86,6 +91,7 @@ export default function CrcPage() {
     setAttributionToken(data.attribution_token)
     if (data.grandfathered) {
       setProjection(data.projection ?? null)
+      setConsultativeNotes(data.consultative_notes)
       setEmail(data.email)
       setPhase('complete')
     } else {
@@ -271,6 +277,7 @@ export default function CrcPage() {
     await fetch('/api/crc/turn?restart=true', { method: 'GET' })
     setMessages([])
     setProjection(null)
+    setConsultativeNotes(undefined)
     setInputText('')
     pendingRequestRef.current = null
     setFeedbackRating(null)
@@ -451,7 +458,7 @@ export default function CrcPage() {
 
               {phase === 'complete' && projection && (
                 <div className="border-t pt-4">
-                  <CrcProjectionOutput output={projection} />
+                  <CrcProjectionOutput output={projection} consultativeNotes={consultativeNotes} />
 
                   <div className="mt-6">
                     <CommercialAssuranceBridge attributionToken={attributionToken} email={email} />

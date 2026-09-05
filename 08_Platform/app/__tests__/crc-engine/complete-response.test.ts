@@ -8,6 +8,7 @@
 import { buildCompleteResponseFields } from '../../lib/crc-engine/complete-response'
 import { CRC_CONFIG } from '../../lib/crc-engine/config'
 import type { ProjectionOutput } from '../../lib/projection-layer/types'
+import type { ConsultativeNote } from '../../lib/crc-engine/unresolved-applicability-realization'
 
 const SAMPLE_OUTPUT: ProjectionOutput = {
   opening_line: 'Real opening line.',
@@ -20,6 +21,9 @@ const SAMPLE_OUTPUT: ProjectionOutput = {
   closing_cta: '',
 }
 
+/** M2B: a realized note, distinct enough (a real sentence, not an empty placeholder) to prove leak-detection assertions below are meaningful. */
+const SAMPLE_NOTES: ConsultativeNote[] = [{ goal_index: 0, text: "Specifically, this depends on your test fact, which hasn't been confirmed in this conversation." }]
+
 const BEFORE_LAUNCH = new Date(new Date(CRC_CONFIG.resultsGateLaunchedAt).getTime() - 1000).toISOString()
 const AFTER_LAUNCH = new Date(new Date(CRC_CONFIG.resultsGateLaunchedAt).getTime() + 1000).toISOString()
 
@@ -28,6 +32,7 @@ describe('buildCompleteResponseFields', () => {
     const fields = buildCompleteResponseFields({
       sessionCreatedAt: BEFORE_LAUNCH,
       output: SAMPLE_OUTPUT,
+      consultativeNotes: SAMPLE_NOTES,
       attributionToken: 'attr-1',
       email: 'jd@example.com',
       resultsEmailStatus: null,
@@ -40,11 +45,27 @@ describe('buildCompleteResponseFields', () => {
     expect(fields.email).toBe('jd@example.com')
   })
 
+  // M2B: grandfathered sessions receive the realized notes exactly as
+  // computed, same gating discipline as `projection` itself.
+  test('grandfathered -> consultative_notes present, equal to what was computed', () => {
+    const fields = buildCompleteResponseFields({
+      sessionCreatedAt: BEFORE_LAUNCH,
+      output: SAMPLE_OUTPUT,
+      consultativeNotes: SAMPLE_NOTES,
+      attributionToken: 'attr-1',
+      email: 'jd@example.com',
+      resultsEmailStatus: null,
+      resultsEmailLastRecipient: null,
+    })
+    expect(fields.consultative_notes).toEqual(SAMPLE_NOTES)
+  })
+
   // PM case R: full Projection absent from every new-gated response.
   test('non-grandfathered -> projection is absent entirely (not null, not present at all)', () => {
     const fields = buildCompleteResponseFields({
       sessionCreatedAt: AFTER_LAUNCH,
       output: SAMPLE_OUTPUT,
+      consultativeNotes: SAMPLE_NOTES,
       attributionToken: 'attr-1',
       email: 'jd@example.com',
       resultsEmailStatus: null,
@@ -54,10 +75,28 @@ describe('buildCompleteResponseFields', () => {
     expect('projection' in fields).toBe(false)
   })
 
+  // M2B: mirrors PM case R exactly, for the new Composition-owned field --
+  // a non-grandfathered response must never carry realized detail either,
+  // even when notes were actually computed for this turn.
+  test('non-grandfathered -> consultative_notes is absent entirely, even when notes were computed', () => {
+    const fields = buildCompleteResponseFields({
+      sessionCreatedAt: AFTER_LAUNCH,
+      output: SAMPLE_OUTPUT,
+      consultativeNotes: SAMPLE_NOTES,
+      attributionToken: 'attr-1',
+      email: 'jd@example.com',
+      resultsEmailStatus: null,
+      resultsEmailLastRecipient: null,
+    })
+    expect('consultative_notes' in fields).toBe(false)
+    expect(JSON.stringify(fields)).not.toContain('depends on your')
+  })
+
   test('non-grandfathered -> teaser count is knowledge_items.length, never the items themselves', () => {
     const fields = buildCompleteResponseFields({
       sessionCreatedAt: AFTER_LAUNCH,
       output: SAMPLE_OUTPUT,
+      consultativeNotes: SAMPLE_NOTES,
       attributionToken: undefined,
       email: null,
       resultsEmailStatus: null,
@@ -72,6 +111,7 @@ describe('buildCompleteResponseFields', () => {
     const fields = buildCompleteResponseFields({
       sessionCreatedAt: AFTER_LAUNCH,
       output: SAMPLE_OUTPUT,
+      consultativeNotes: SAMPLE_NOTES,
       attributionToken: undefined,
       email: 'jd@example.com',
       resultsEmailStatus: 'accepted',
@@ -85,6 +125,7 @@ describe('buildCompleteResponseFields', () => {
     const fields = buildCompleteResponseFields({
       sessionCreatedAt: AFTER_LAUNCH,
       output: SAMPLE_OUTPUT,
+      consultativeNotes: SAMPLE_NOTES,
       attributionToken: undefined,
       email: null,
       resultsEmailStatus: null,
@@ -97,6 +138,7 @@ describe('buildCompleteResponseFields', () => {
     const fields = buildCompleteResponseFields({
       sessionCreatedAt: AFTER_LAUNCH,
       output: SAMPLE_OUTPUT,
+      consultativeNotes: SAMPLE_NOTES,
       attributionToken: undefined,
       email: null,
       resultsEmailStatus: 'accepted',
@@ -109,6 +151,7 @@ describe('buildCompleteResponseFields', () => {
     const fields = buildCompleteResponseFields({
       sessionCreatedAt: CRC_CONFIG.resultsGateLaunchedAt,
       output: SAMPLE_OUTPUT,
+      consultativeNotes: SAMPLE_NOTES,
       attributionToken: undefined,
       email: null,
       resultsEmailStatus: null,

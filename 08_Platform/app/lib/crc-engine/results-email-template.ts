@@ -65,11 +65,27 @@
  * No new claim prose, no ranking, no materiality, no boundary-language
  * change: the educational disclaimer and the Commercial Assurance CTA are
  * exactly as before, still rendered once, at the end.
+ *
+ * M2B (2026-09-05, Bounded Unresolved-Applicability Realization):
+ * `buildResultsEmailContent` now also accepts an OPTIONAL `consultativeNotes`
+ * (`ConsultativeNote[]`, Consultative-Composition-owned, already fully
+ * realized text -- see unresolved-applicability-realization.ts's own
+ * header). This renderer does NOT decide whether a note exists, does not
+ * inspect `ApplicabilityFact`/classification, and does not reconstruct any
+ * sentence -- it only attaches an already-finished `note.text` as one more,
+ * identically-styled paragraph immediately after the matching goal's own
+ * `summary_blocks`, joined by `note.goal_index` against that goal's position
+ * in `output.goal_interpretations` (see the realization module's own header
+ * for why array position is the correct, already-existing association, not
+ * `{category, goal_text}`). A goal with no matching note renders exactly as
+ * before this milestone. Additive only: `goal_interpretations`/
+ * `summary_blocks` content and order are completely unchanged.
  */
 
 import type { ProjectionKnowledgeItem, ProjectionOutput } from '@/lib/projection-layer/types'
 import type { ConsultativeAnswerPlan } from './consultative-answer-plan'
 import { partitionKnowledgeItemsByPlan, planHasExplicitGoalSections } from './consultative-realization'
+import type { ConsultativeNote } from './unresolved-applicability-realization'
 import { buildCalendlyUrl } from './calendly-attribution'
 
 function formatLastVerified(value: string | null): string | null {
@@ -102,6 +118,7 @@ export function buildResultsEmailContent(
   attributionToken: string | null | undefined,
   email: string,
   plan?: ConsultativeAnswerPlan,
+  consultativeNotes?: ConsultativeNote[],
 ): ResultsEmailContent {
   const isFullyEmpty =
     output.opening_line === '' && output.understood_summary === '' && output.knowledge_items.length === 0 && output.goal_interpretations.length === 0
@@ -147,16 +164,25 @@ export function buildResultsEmailContent(
     if (output.goal_interpretations.length === 0) return
     htmlParts.push('<p style="font-size:14px;font-weight:600;margin:24px 0 10px;color:#111;border-top:1px solid #eee;padding-top:20px;">What this means for what you asked</p>')
     textParts.push('\nWHAT THIS MEANS FOR WHAT YOU ASKED\n')
-    for (const item of output.goal_interpretations) {
+    output.goal_interpretations.forEach((item, goalIndex) => {
       // Phase 1: one <p> per already-authorized block instead of one <p>
       // around the whole joined string -- every block gets IDENTICAL
       // styling (no emphasis differences between blocks), and a block
       // gets its own bottom margin only when another block follows it,
       // so a single-block item (the ordinary case outside CC-1's mixed
       // Case-3B shape) renders exactly as before, byte-for-byte spacing.
-      const blockParagraphsHtml = item.summary_blocks
+      //
+      // M2B: an optional realized note for THIS goal (matched by array
+      // position -- see this module's own header) is appended as one more
+      // block, identically styled, after Bounded Interpretation's own
+      // blocks -- never in place of them, never styled differently (this
+      // renderer makes no distinction between BI-owned and
+      // Composition-owned text visually; only the source module differs).
+      const note = consultativeNotes?.find((n) => n.goal_index === goalIndex)
+      const blocks = note ? [...item.summary_blocks, note.text] : item.summary_blocks
+      const blockParagraphsHtml = blocks
         .map((block, i) => {
-          const isLast = i === item.summary_blocks.length - 1
+          const isLast = i === blocks.length - 1
           return `<p style="font-size:14px;color:#222;white-space:pre-line;margin:0${isLast ? '' : ' 0 10px'};">${escapeHtml(block)}</p>`
         })
         .join('')
@@ -166,8 +192,8 @@ export function buildResultsEmailContent(
           blockParagraphsHtml +
           `</div>`,
       )
-      textParts.push(`You asked: "${item.goal_text}"\n\n${item.summary_blocks.join('\n\n')}\n\n`)
-    }
+      textParts.push(`You asked: "${item.goal_text}"\n\n${blocks.join('\n\n')}\n\n`)
+    })
   }
 
   if (isFullyEmpty) {

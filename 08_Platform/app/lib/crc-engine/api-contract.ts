@@ -16,6 +16,7 @@ import type { DeclineAction } from './decline'
 import { DECLINE_ACTIONS } from './decline'
 import type { TranscriptEntry } from './supabase-session-store'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
+import type { ConsultativeNote } from './unresolved-applicability-realization'
 import type { SessionCreationRateResult, BurstResult } from './abuse-prevention'
 
 /**
@@ -149,6 +150,8 @@ export type TurnResponseBody =
       teaser?: CrcTeaser
       results_email?: CrcResultsEmailState
       projection?: ProjectionOutput
+      /** M2B (2026-09-05). Same gating as `projection` above -- present only for grandfathered sessions. See complete-response.ts's own doc comment. */
+      consultative_notes?: ConsultativeNote[]
       precedingTakeaway?: string
       attribution_token?: string
       email?: string | null
@@ -170,6 +173,8 @@ export type SessionStatusResponseBody =
       teaser?: CrcTeaser
       results_email?: CrcResultsEmailState
       projection?: ProjectionOutput
+      /** M2B (2026-09-05). Same gating as `projection` above -- present only for grandfathered sessions. See complete-response.ts's own doc comment. */
+      consultative_notes?: ConsultativeNote[]
       attribution_token?: string
       email?: string | null
     }

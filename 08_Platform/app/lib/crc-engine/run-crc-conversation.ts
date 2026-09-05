@@ -75,6 +75,7 @@ import type { BoundedInterpretation } from '@/lib/bounded-interpretation/types'
 import { deriveDiscoveredTopicOccurrences } from './discovered-relevance'
 import { deriveAssessmentJurisdictionFacts } from './assessment-jurisdiction-scope'
 import { buildConsultativeAnswerPlan, type ConsultativeAnswerPlan } from './consultative-answer-plan'
+import { realizeUnresolvedApplicability, toConsultativeNotes, type ConsultativeNote } from './unresolved-applicability-realization'
 import type { RetrievalHandoff, StructuredUnderstanding } from '@/types/interview-engine'
 
 export interface CRCPipelineDiagnostics {
@@ -128,6 +129,21 @@ export interface CRCPipelineResult {
    * value that was already produced.
    */
   bounded_interpretations: BoundedInterpretation[]
+  /**
+   * M2B -- Bounded Unresolved-Applicability Realization (2026-09-05).
+   * Consultative-Composition-owned, additive sibling -- `output`, `plan`,
+   * `bounded_interpretations`, `diagnostics`, and `trace` are all unchanged
+   * by this field's presence. Computed ONCE here, from the SAME `plan`
+   * already built above, by `realizeUnresolvedApplicability` (see that
+   * module's own header for the full authority/ownership contract: Bounded
+   * Interpretation is never touched, never receives a new parameter, and
+   * its `summary_blocks` render byte-identically with or without this
+   * field). Every consumer (the API route, results-email-delivery.ts)
+   * threads this SAME array to its renderer unmodified -- there is exactly
+   * one realization computation for a given turn, never one per surface,
+   * so browser and email cannot independently diverge.
+   */
+  consultative_notes: ConsultativeNote[]
   diagnostics: CRCPipelineDiagnostics
   trace: CRCPipelineTrace
 }
@@ -237,6 +253,14 @@ export function runCRCConversation(
   // is not modified by this line or anything downstream of it here.
   const plan = buildConsultativeAnswerPlan(interpretations, results, retrievalDiagnostics)
 
+  // M2B: deterministic realization built from the SAME `plan` just
+  // computed -- glue only. `plan.explicit_sections` only, never `plan`
+  // itself, is passed on (see realizeUnresolvedApplicability's own
+  // signature) -- discovered-context notes are out of scope by
+  // construction, not by a runtime check. Narrowed to the transport shape
+  // immediately -- nothing beyond `{goal_index, text}` leaves this function.
+  const consultative_notes = toConsultativeNotes(realizeUnresolvedApplicability(plan.explicit_sections))
+
   return {
     output,
     plan,
@@ -244,6 +268,7 @@ export function runCRCConversation(
     // assembleProjectionOutput() and buildConsultativeAnswerPlan() above --
     // exposed, not recomputed.
     bounded_interpretations: interpretations,
+    consultative_notes,
     diagnostics: { retrieval: retrievalDiagnostics, projection: projectionDiagnostics },
     trace: { retrieval_handoff: handoff, retrieval_results: results, projection_output: output },
   }

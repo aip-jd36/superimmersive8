@@ -32,6 +32,7 @@ import { CRC_CONFIG } from './config'
 import { maskEmail } from './results-gate-copy'
 import type { CrcResultsEmailState, CrcTeaser } from './api-contract'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
+import type { ConsultativeNote } from './unresolved-applicability-realization'
 
 /**
  * Takes an already-computed ProjectionOutput rather than computing it
@@ -47,6 +48,18 @@ import type { ProjectionOutput } from '@/lib/projection-layer/types'
 export interface CompleteResponseInput {
   sessionCreatedAt: string
   output: ProjectionOutput
+  /**
+   * M2B (2026-09-05). Required, not defaulted -- every real call site
+   * already has `CRCPipelineResult.consultative_notes` in hand from the
+   * same `runCRCConversation()` call that produced `output`, so there is no
+   * safe default that wouldn't silently under-report. Non-grandfathered
+   * sessions never receive this in the response regardless of what is
+   * passed here (see the non-grandfathered branch below) -- passing it is
+   * about keeping this function's own gating logic the single place that
+   * decision is made, mirroring `output`'s own "caller already has it"
+   * discipline (this file's own header).
+   */
+  consultativeNotes: ConsultativeNote[]
   attributionToken: string | null | undefined
   email: string | null
   resultsEmailStatus: string | null
@@ -58,6 +71,17 @@ export interface CompleteResponseFields {
   teaser?: CrcTeaser
   results_email?: CrcResultsEmailState
   projection?: ProjectionOutput
+  /**
+   * M2B (2026-09-05). Additive, Consultative-Composition-owned bounded
+   * realization -- present ONLY on the grandfathered branch, exactly
+   * mirroring `projection`'s own gating (this file's own header: "This is
+   * the ONLY branch that ever returns `projection`"; the non-grandfathered
+   * branch must never leak Composition's realized content pre-email any
+   * more than it may leak `projection` itself). A renderer treats an
+   * absent/empty array as "no additional bounded detail" -- never as an
+   * error.
+   */
+  consultative_notes?: ConsultativeNote[]
   attribution_token?: string
   email?: string | null
 }
@@ -69,6 +93,7 @@ export function buildCompleteResponseFields(input: CompleteResponseInput): Compl
     return {
       grandfathered: true,
       projection: input.output,
+      consultative_notes: input.consultativeNotes,
       attribution_token: input.attributionToken ?? undefined,
       email: input.email,
     }

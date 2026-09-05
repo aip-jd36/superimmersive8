@@ -261,6 +261,11 @@ describe('subsystem boundaries -- Consultative Answer Plan (CC-3A)', () => {
       'lib/crc-engine/results-email-delivery.ts', // passes the built plan to the template
       'lib/crc-engine/scripts/cc3a-plan-snapshots.ts',
       'lib/crc-engine/scripts/cc3b-before-after-snapshots.ts',
+      // M2B (2026-09-05): reads plan.explicit_sections' own PlanGoalSection/
+      // PlanUnresolvedItem TYPES only (see this file's own header) to realize
+      // bounded unresolved-applicability text -- never BI, Retrieval,
+      // Interview, questioning, or ProjectionOutput assembly.
+      'lib/crc-engine/unresolved-applicability-realization.ts',
     ])
     const FORBIDDEN = [
       ...BOUNDED_INTERPRETATION_FILES,
