@@ -175,10 +175,37 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
   {
     identifier: 'pika',
     last_verified: '2026-08-06',
+    /**
+     * Matrix Retirement (2026-09-06): this claim was `crc_eligible: 'Yes'`
+     * from 2026-08-06 (JD, CRC Decision Date 2026-08-06) until this date,
+     * when JD/PM authorized its retirement as a CRC-active representation
+     * -- see PLATFORM-RIGHTS-MATRIX.md's Pika Retirement status note.
+     * This is representation supersession, not substantive reversal -- the
+     * claim's core commercial-use grant (Free = non-commercial; Standard/
+     * Pro/Fancy = commercial use) is not found to be inaccurate; the sole
+     * reason is CPR_018's empirical finding that this unconditional Matrix
+     * row co-fires alongside the governed baseline successor claim in
+     * every tested scenario (8/8) -- a duplicate-authority problem, not a
+     * factual contradiction (unlike Runway's Enterprise-scope finding).
+     * This claim is superseded by four governed successor claims:
+     * CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1,
+     * CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-STANDARD-001-v1,
+     * -PRO-001-v1, and -FANCY-001-v1 (GOVERNED-CLAIMS.md, all Lifecycle:
+     * Adopted, CRC eligibility pending a separate, not-yet-conducted
+     * post-retirement CPR reconsideration -- see
+     * governance-reviews/FGR_016_CAND-PIKA-COMMERCIAL-USE-001_2026-09-05.md
+     * and governance-reviews/CPR_018_PIKA_COMMERCIAL_USE_INITIAL_
+     * PUBLICATION_REVIEW_2026-09-06.md, whose own disposition is WITHHOLD
+     * for this exact coexistence reason). `crc_eligible` below is
+     * accordingly 'No' effective 2026-09-06. This retirement does not
+     * itself grant CRC eligibility to any successor claim, does not
+     * publish anything into topic-claims-fixture.ts, and does not update
+     * GOVERNED-CLAIMS.md.
+     */
     claims: [
       {
         claim_id: 'pika',
-        crc_eligible: 'Yes',
+        crc_eligible: 'No',
         crc_publication_scope:
           "CRC may state that Pika's Free tier is limited to personal, non-commercial use, and that current paid plans include commercial-use rights. CRC must not imply that every feature within every paid plan is commercially licensed beyond what Pika's published documentation explicitly confirms.",
         crc_candidate_statement:
