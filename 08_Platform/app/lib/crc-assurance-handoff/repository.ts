@@ -1,16 +1,18 @@
 /**
- * CRC <-> Assurance association -- data access (CAH-3D).
+ * CRC <-> Assurance association -- data access (CAH-3D, extended read-only by
+ * CAH-3F).
  *
  * The ONLY module in lib/crc-assurance-handoff/ that talks to the database.
- * Reads exactly what the service needs to validate front-door-independent
- * invariants (submission existence + ownership; CRC session existence +
- * persisted state + runtime_commit); performs the atomic create/remove via
- * the two Postgres functions from migration 20260904000000, which write the
- * association row AND the required security-critical audit event in one
+ * Reads exactly what the service and reviewed capability modules need
+ * (submission existence + ownership; CRC session existence + persisted state;
+ * CAH-3F: email->lead->session correlation reads, and an inverse
+ * active-association lookup by CRC session); performs the atomic create/remove
+ * via the two Postgres functions from migration 20260904000000, which write
+ * the association row AND the required security-critical audit event in one
  * transaction (CAH-3D §23).
  *
- * It NEVER writes to crc_sessions / submissions / users / any Assurance table,
- * and never reads or writes crc_sales_state / crc_sales_events.
+ * It NEVER writes to crc_sessions / crc_leads / submissions / users / any
+ * Assurance table, and never reads or writes crc_sales_state / crc_sales_events.
  */
 
 import { supabaseAdmin } from '@/lib/supabase/admin'
@@ -74,6 +76,65 @@ export async function listActiveAssociationsForSubmission(submissionId: string):
     .order('associated_at', { ascending: false })
   if (error) throw new Error(`[crc-assurance-handoff/repository] listActiveAssociationsForSubmission: ${error.message}`)
   return (data ?? []) as unknown as CrcAssuranceAssociation[]
+}
+
+/**
+ * Active associations that reference a given CRC session (inverse of the
+ * above). CAH-3F uses this to fail closed when a candidate CRC session is
+ * already associated with a DIFFERENT submission -- the DB permits it (no
+ * global UNIQUE(crc_session_id)) but the CAH-3F capability deliberately does
+ * not (V1 conservative boundary, §12).
+ */
+export async function listActiveAssociationsForCrcSession(crcSessionId: string): Promise<CrcAssuranceAssociation[]> {
+  const { data, error } = await supabaseAdmin
+    .from('crc_assurance_associations')
+    .select(ASSOCIATION_COLUMNS)
+    .eq('crc_session_id', crcSessionId)
+    .eq('status', 'active')
+  if (error) throw new Error(`[crc-assurance-handoff/repository] listActiveAssociationsForCrcSession: ${error.message}`)
+  return (data ?? []) as unknown as CrcAssuranceAssociation[]
+}
+
+// ── CAH-3F: email -> lead -> session correlation reads ────────────────────
+//
+// These are plain lookups. Correlation is by exact match on the CRC's own
+// canonical `email_normalized` (crc_leads is UNIQUE on it). No Gmail-dot /
+// plus-address / fuzzy matching -- conservative and deterministic (CAH-3F §7).
+
+/** The crc_leads.id for an exact normalized-email match, or null. */
+export async function findCrcLeadIdByNormalizedEmail(emailNormalized: string): Promise<string | null> {
+  const { data, error } = await supabaseAdmin
+    .from('crc_leads')
+    .select('id')
+    .eq('email_normalized', emailNormalized)
+    .maybeSingle()
+  if (error) throw new Error(`[crc-assurance-handoff/repository] findCrcLeadIdByNormalizedEmail: ${error.message}`)
+  if (!data) return null
+  return (data as { id: string }).id
+}
+
+export interface CorrelatedCrcSessionRow {
+  id: string
+  structured_understanding: unknown
+  identity_source: string | null
+  email: string | null
+  crc_lead_id: string | null
+}
+
+/**
+ * CRC sessions linked to a lead via the email gate. The caller applies the
+ * authoritative governed-completion filter (CAH-3F composes the same
+ * `COMPLETION_REASONS` set the association core uses -- see
+ * email-correlation.ts).
+ */
+export async function listSessionsForCrcLead(leadId: string): Promise<CorrelatedCrcSessionRow[]> {
+  const { data, error } = await supabaseAdmin
+    .from('crc_sessions')
+    .select('id, structured_understanding, identity_source, email, crc_lead_id')
+    .eq('crc_lead_id', leadId)
+    .eq('identity_source', 'email_gate')
+  if (error) throw new Error(`[crc-assurance-handoff/repository] listSessionsForCrcLead: ${error.message}`)
+  return (data ?? []) as unknown as CorrelatedCrcSessionRow[]
 }
 
 // ── atomic writes (create/remove + required audit, one transaction each) ──
