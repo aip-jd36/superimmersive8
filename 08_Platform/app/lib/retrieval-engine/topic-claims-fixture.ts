@@ -835,4 +835,114 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     last_verified: '2026-09-03',
     superseded_by: null,
   },
+  {
+    // Fourth tool_scope-narrowed provider (after Synthesia, Kling, Runway).
+    // CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1 Adopted 2026-09-05 (FGR_016)
+    // -- unconditional baseline half of a baseline-plus-exception pair,
+    // structurally like Kling's, not Runway's single-uniform-grant shape.
+    // Companion claim CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-001-v1 (the
+    // original open-world `not_equals 'Free'` exception) was found unsafe
+    // post-adoption (FGR_016 addenda, 2026-09-05/06) and superseded --
+    // never published here, remains Deprecated in GOVERNED-CLAIMS.md --
+    // by three closed-world `equals` successor claims (Standard/Pro/Fancy,
+    // immediately below). CPR_018 initially WITHHELD all four pending
+    // Matrix coexistence resolution, mirroring Runway's CPR_016; the
+    // legacy PLATFORM-RIGHTS-MATRIX.md `pika` row was then retired
+    // (`crc_eligible: 'No'`, historical proposition/evidence preserved) by
+    // explicit JD/PM authorization, and CPR_019 independently reconsidered
+    // CRC eligibility against that real, executed state and APPROVED all
+    // four claims; the CPR_019 addendum records explicit PM/JD concurrence
+    // and an empirically-executed canary against the real pipeline finding
+    // zero Matrix-origin Pika results across all 8 tested scenarios. See
+    // GOVERNED-CLAIMS.md's own CRC Publication Scope and
+    // governance-reviews/CPR_019_PIKA_COMMERCIAL_USE_POST-RETIREMENT_
+    // RECONSIDERATION_2026-09-06.md (plus its PM-concurrence addendum) for
+    // the full decision sequence. No extraction alias question applies --
+    // 'pika' is an existing CANONICAL_TOOL_ID, already conversationally
+    // reachable.
+    claim_id: 'CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1',
+    topic: 'commercial_use',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      'APPROVED FOR CRC PUBLICATION (2026-09-06, CRC Approver: JD (PM) -- see CRC Approver/CRC Decision Date below; CRC Publication Review #19 complete at governance-reviews/CPR_019_PIKA_COMMERCIAL_USE_POST-RETIREMENT_RECONSIDERATION_2026-09-06.md, superseding CPR_018\'s prior WITHHOLD disposition following executed, empirically-confirmed Matrix retirement of the corresponding legacy `pika` Matrix row (now `crc_eligible: No`); explicit PM/JD concurrence recorded at governance-reviews/CPR_019_ADDENDUM_PM_CONCURRENCE_2026-09-06.md, which found zero Matrix-origin Pika results and no duplication or contradiction in the empirically-executed post-retirement canary, across all 8 tested scenarios). CRC may state that, under Pika\'s current Terms of Service, use of generated Output is restricted to personal, non-commercial purposes by default, except for paid subscription plans (Standard, Pro, or Fancy), which include commercial-use rights -- this baseline default applies unconditionally regardless of plan tier; the paid-plan commercial-use exception is governed separately by CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-STANDARD-001-v1 / -PRO-001-v1 / -FANCY-001-v1. This is Pika\'s own provider/platform policy, not law. CRC must not state the full text or complete scope of Pika\'s Terms of Service beyond the quoted excerpt, feature-level licensing detail beyond the "Commercial use" bullet itself, any project-specific commercial-readiness conclusion, or downstream IP clearance. A human-reviewed Commercial Assurance Assessment remains the higher-assurance path for resolving a specific project\'s own Pika plan status or broader commercial readiness.',
+    crc_candidate_statement:
+      'Under Pika\'s current Terms of Service, use of generated Output is restricted to personal, non-commercial purposes by default, except for paid subscription plans, which include commercial-use rights.',
+    applicability_requirements: [],
+    unresolved_project_dependencies: [],
+    provider_scope: null,
+    tool_scope: ['pika'],
+    last_verified: '2026-09-06',
+    superseded_by: null,
+  },
+  {
+    // CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-STANDARD-001-v1 -- one of three
+    // closed-world successor claims to the deprecated, never-published
+    // CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-001-v1 (`not_equals 'Free'`,
+    // found unsafe -- open-world). `tool_plan_tier` is single-valued per
+    // tool mention, so at most one of this claim and its two siblings
+    // (Pro/Fancy, immediately below) can ever resolve `met` for a given
+    // project -- no duplicate-authority risk among the three. See
+    // GOVERNED-CLAIMS.md entry and CPR_019 for full decision sequence.
+    claim_id: 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-STANDARD-001-v1',
+    topic: 'commercial_use',
+    claim_character: 'conditional',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      'APPROVED FOR CRC PUBLICATION (2026-09-06, CRC Approver: JD (PM) -- see CRC Approver/CRC Decision Date below; CRC Publication Review #19 complete at governance-reviews/CPR_019_PIKA_COMMERCIAL_USE_POST-RETIREMENT_RECONSIDERATION_2026-09-06.md, superseding CPR_018\'s prior WITHHOLD disposition following executed, empirically-confirmed Matrix retirement of the corresponding legacy `pika` Matrix row (now `crc_eligible: No`); explicit PM/JD concurrence recorded at governance-reviews/CPR_019_ADDENDUM_PM_CONCURRENCE_2026-09-06.md, which found zero Matrix-origin Pika results and no duplication or contradiction in the empirically-executed post-retirement canary, across all 8 tested scenarios). CRC may state that if the user\'s current Pika subscription plan is specifically the Standard tier, that plan includes commercial-use rights for generated Output. This is Pika\'s own provider/platform policy, not law. CRC must not state the full text or complete scope of Pika\'s Terms of Service beyond the quoted excerpt, feature-level licensing detail beyond the "Commercial use" bullet itself, any project-specific commercial-readiness conclusion, or downstream IP clearance. Applicability remains gated on `tool_plan_tier equals \'Standard\'` exactly as adopted -- CRC must not infer this claim applies from generic "paid" wording. A human-reviewed Commercial Assurance Assessment remains the higher-assurance path for resolving a specific project\'s own Pika plan status or broader commercial readiness.',
+    crc_candidate_statement:
+      'If you are on Pika\'s Standard plan, your plan includes commercial-use rights for generated Output.',
+    applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'pika', operator: 'equals', value: 'Standard' }],
+    unresolved_project_dependencies: [],
+    provider_scope: null,
+    tool_scope: ['pika'],
+    last_verified: '2026-09-06',
+    superseded_by: null,
+  },
+  {
+    // CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-PRO-001-v1 -- sibling of the
+    // Standard claim above; see that entry's comment for the shared
+    // supersession/coexistence rationale.
+    claim_id: 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-PRO-001-v1',
+    topic: 'commercial_use',
+    claim_character: 'conditional',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      'APPROVED FOR CRC PUBLICATION (2026-09-06, CRC Approver: JD (PM) -- see CRC Approver/CRC Decision Date below; CRC Publication Review #19 complete at governance-reviews/CPR_019_PIKA_COMMERCIAL_USE_POST-RETIREMENT_RECONSIDERATION_2026-09-06.md, superseding CPR_018\'s prior WITHHOLD disposition following executed, empirically-confirmed Matrix retirement of the corresponding legacy `pika` Matrix row (now `crc_eligible: No`); explicit PM/JD concurrence recorded at governance-reviews/CPR_019_ADDENDUM_PM_CONCURRENCE_2026-09-06.md, which found zero Matrix-origin Pika results and no duplication or contradiction in the empirically-executed post-retirement canary, across all 8 tested scenarios). CRC may state that if the user\'s current Pika subscription plan is specifically the Pro tier, that plan includes commercial-use rights for generated Output. This is Pika\'s own provider/platform policy, not law. CRC must not state the full text or complete scope of Pika\'s Terms of Service beyond the quoted excerpt, feature-level licensing detail beyond the "Commercial use" bullet itself, any project-specific commercial-readiness conclusion, or downstream IP clearance. Applicability remains gated on `tool_plan_tier equals \'Pro\'` exactly as adopted -- CRC must not infer this claim applies from generic "paid" wording. A human-reviewed Commercial Assurance Assessment remains the higher-assurance path for resolving a specific project\'s own Pika plan status or broader commercial readiness.',
+    crc_candidate_statement:
+      'If you are on Pika\'s Pro plan, your plan includes commercial-use rights for generated Output.',
+    applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'pika', operator: 'equals', value: 'Pro' }],
+    unresolved_project_dependencies: [],
+    provider_scope: null,
+    tool_scope: ['pika'],
+    last_verified: '2026-09-06',
+    superseded_by: null,
+  },
+  {
+    // CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-FANCY-001-v1 -- sibling of the
+    // Standard claim above; see that entry's comment for the shared
+    // supersession/coexistence rationale.
+    claim_id: 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-FANCY-001-v1',
+    topic: 'commercial_use',
+    claim_character: 'conditional',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      'APPROVED FOR CRC PUBLICATION (2026-09-06, CRC Approver: JD (PM) -- see CRC Approver/CRC Decision Date below; CRC Publication Review #19 complete at governance-reviews/CPR_019_PIKA_COMMERCIAL_USE_POST-RETIREMENT_RECONSIDERATION_2026-09-06.md, superseding CPR_018\'s prior WITHHOLD disposition following executed, empirically-confirmed Matrix retirement of the corresponding legacy `pika` Matrix row (now `crc_eligible: No`); explicit PM/JD concurrence recorded at governance-reviews/CPR_019_ADDENDUM_PM_CONCURRENCE_2026-09-06.md, which found zero Matrix-origin Pika results and no duplication or contradiction in the empirically-executed post-retirement canary, across all 8 tested scenarios). CRC may state that if the user\'s current Pika subscription plan is specifically the Fancy tier, that plan includes commercial-use rights for generated Output. This is Pika\'s own provider/platform policy, not law. CRC must not state the full text or complete scope of Pika\'s Terms of Service beyond the quoted excerpt, feature-level licensing detail beyond the "Commercial use" bullet itself, any project-specific commercial-readiness conclusion, or downstream IP clearance. Applicability remains gated on `tool_plan_tier equals \'Fancy\'` exactly as adopted -- CRC must not infer this claim applies from generic "paid" wording. A human-reviewed Commercial Assurance Assessment remains the higher-assurance path for resolving a specific project\'s own Pika plan status or broader commercial readiness.',
+    crc_candidate_statement:
+      'If you are on Pika\'s Fancy plan, your plan includes commercial-use rights for generated Output.',
+    applicability_requirements: [{ fact: 'tool_plan_tier', tool: 'pika', operator: 'equals', value: 'Fancy' }],
+    unresolved_project_dependencies: [],
+    provider_scope: null,
+    tool_scope: ['pika'],
+    last_verified: '2026-09-06',
+    superseded_by: null,
+  },
 ]

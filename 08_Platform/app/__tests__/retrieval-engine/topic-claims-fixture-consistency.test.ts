@@ -99,6 +99,17 @@ const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set<string>([
   // discipline as every Music-domain claim above); never added to this set
   // at Adoption time.
   'CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1',
+  // CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-001-v1 -- Deprecated 2026-09-06
+  // (FGR_016 addenda): its applicability requirement (`tool_plan_tier
+  // not_equals 'Free'`) was found unsafe (open-world negative predicate)
+  // and superseded by three closed-world `equals` successor claims
+  // (CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-STANDARD-001-v1/-PRO-001-v1/
+  // -FANCY-001-v1, all three published below). This deprecated claim never
+  // had a runtime fixture entry (never reached CRC Publication Review) and
+  // must never get one -- it is preserved in GOVERNED-CLAIMS.md only as an
+  // unmodified historical record, per this document's own
+  // never-edit-a-superseded-record discipline.
+  'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-001-v1',
 ])
 
 /** Strips fenced code blocks (```...```) before scanning -- the entry template lives inside one and must never be counted as a real claim. */
@@ -393,8 +404,8 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
     }
   })
 
-  test('exactly seventeen claims in the runtime fixture are Adopted + CRC-eligible as of 2026-09-03 -- the prior sixteen (see prior versions of this test/GOVERNED-CLAIMS.md for their own individual provenance, most recently the Kling baseline+member pair via CPR_015) plus the seventeenth: CLAIM-RUNWAY-COMMERCIAL-USE-001-v1, CRC Publication approved 2026-09-03 (CRC Approver: JD (PM)) following CPR_017 -- a post-retirement reconsideration superseding CPR_016\'s prior WITHHOLD, after the corresponding legacy PLATFORM-RIGHTS-MATRIX.md `runway-gen3` row was executed-retired (crc_eligible: No), empirically re-confirmed by CPR_017\'s own PM-concurrence addendum. The 9 Music Scenario A claims remain WITHHELD/PENDING and are correctly absent from this list -- update only when a further real decision is recorded', () => {
+  test('exactly twenty-one claims in the runtime fixture are Adopted + CRC-eligible as of 2026-09-06 -- the prior seventeen (see prior versions of this test/GOVERNED-CLAIMS.md for their own individual provenance, most recently CLAIM-RUNWAY-COMMERCIAL-USE-001-v1 via CPR_017) plus the eighteenth through twenty-first: the four Pika commercial-use claims (CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1 -- unconditional -- plus CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-STANDARD-001-v1/-PRO-001-v1/-FANCY-001-v1, each closed-world `tool_plan_tier equals` a single tier), CRC Publication approved 2026-09-06 (CRC Approver: JD (PM)) following CPR_019 -- a post-retirement reconsideration superseding CPR_018\'s prior WITHHOLD, after the corresponding legacy PLATFORM-RIGHTS-MATRIX.md `pika` row was executed-retired (crc_eligible: No), empirically re-confirmed by CPR_019\'s own PM-concurrence addendum. The now-Deprecated CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-001-v1 (superseded by the three tier-specific claims above, its unsafe `not_equals` applicability requirement never corrected in place) and the 9 Music Scenario A claims remain correctly absent from this list -- update only when a further real decision is recorded', () => {
     const liveClaims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.lifecycle === 'Adopted' && c.crc_eligible === 'Yes')
-    expect(liveClaims.map((c) => c.claim_id).sort()).toEqual(['CLAIM-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001-v1', 'CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPY-004-v1', 'CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1', 'CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1', 'CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1', 'CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1', 'CLAIM-STOCK-EDITORIAL-001-v2', 'CLAIM-STOCK-EDITORIAL-002-v2', 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1', 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1', 'CLAIM-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1', 'CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1'])
+    expect(liveClaims.map((c) => c.claim_id).sort()).toEqual(['CLAIM-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001-v1', 'CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPY-004-v1', 'CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1', 'CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1', 'CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-FANCY-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-PRO-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-STANDARD-001-v1', 'CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1', 'CLAIM-STOCK-EDITORIAL-001-v2', 'CLAIM-STOCK-EDITORIAL-002-v2', 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1', 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1', 'CLAIM-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1', 'CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1'])
   })
 })
