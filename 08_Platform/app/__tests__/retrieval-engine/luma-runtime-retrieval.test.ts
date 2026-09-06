@@ -172,17 +172,22 @@ describe('E: Bounded Interpretation preserves the conditional rule without selec
     }
   })
 
-  test('boundary clause is source-aware (allToolSourced) -- the same generic mechanism already proven for Runway/Kling/Pika/Midjourney/ElevenLabs, no Luma-specific wording branch', () => {
+  test('boundary clause is source-aware (allToolSourced) -- the same generic mechanism already proven for Runway/Kling/Midjourney/ElevenLabs, no Luma-specific wording branch', () => {
     const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?' })
     const lumaOut = retrieve(handoff({ tools: [tool('luma')] }), MATRIX_FIXTURE, [g], [], UNKNOWN_FACTS)
-    const pikaOut = retrieve(handoff({ tools: [tool('pika')] }), MATRIX_FIXTURE, [g], [], UNKNOWN_FACTS)
+    const midjourneyOut = retrieve(handoff({ tools: [tool('midjourney')] }), MATRIX_FIXTURE, [g], [], UNKNOWN_FACTS)
     const lumaInterp = buildBoundedInterpretations([g], lumaOut.results, lumaOut.diagnostics)[0]
-    const pikaInterp = buildBoundedInterpretations([g], pikaOut.results, pikaOut.diagnostics)[0]
+    const midjourneyInterp = buildBoundedInterpretations([g], midjourneyOut.results, midjourneyOut.diagnostics)[0]
     // Same status, same summary_blocks shape (single block, no guidance
     // block) -- proves the boundary/composition mechanism is generic across
-    // tool-sourced results, not conditioned on which tool.
-    expect(lumaInterp.status).toBe(pikaInterp.status)
-    expect(lumaInterp.summary_blocks).toHaveLength(pikaInterp.summary_blocks.length)
+    // tool-sourced results, not conditioned on which tool. (Comparison tool
+    // switched from Pika to Midjourney 2026-09-06: Pika's Matrix row was
+    // retired in favor of its TopicClaim successors, so it no longer
+    // produces a Matrix-sourced result here -- Midjourney remains an
+    // unconditional, Matrix-active claim with the identical single-block
+    // shape, preserving the exact invariant this test checks.)
+    expect(lumaInterp.status).toBe(midjourneyInterp.status)
+    expect(lumaInterp.summary_blocks).toHaveLength(midjourneyInterp.summary_blocks.length)
   })
 })
 
