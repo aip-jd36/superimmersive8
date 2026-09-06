@@ -363,9 +363,13 @@ describe('CAH-3D authorization / ownership', () => {
         .readFileSync(path.join(dir, f), 'utf8')
         .replace(/\/\*[\s\S]*?\*\//g, '')
         .replace(/(^|[^:])\/\/.*$/gm, '$1')
-      // No dependency on any front-door subsystem, in ANY file.
+      // No dependency on any front-door subsystem, in ANY core file.
       expect(code).not.toMatch(/crc_sales_state|crc_sales_events|crc-sales/i)
-      expect(code).not.toMatch(/email_normalized|crc_leads/i)
+      // repository.ts (the single DB-access module) legitimately reads
+      // crc_leads / email_normalized for the CAH-3F capability's correlation
+      // query -- it makes no authorization decision. Every OTHER top-level
+      // core file must not.
+      if (f !== 'repository.ts') expect(code).not.toMatch(/email_normalized|crc_leads/i)
       expect(code).not.toMatch(/attribution_token|CONVERTING/i)
       // No front-door VERB anywhere (the AuthorizationBasis union in types.ts
       // legitimately NAMES the future classes as unsupported string literals;
@@ -571,7 +575,7 @@ describe('CAH-3E.2 non-authorizing primitive', () => {
       .toEqual({ ok: false, code: 'crc_session_not_completed' })
   })
 
-  test('no Sales / email / cookie authorization logic anywhere in lib/crc-assurance-handoff', () => {
+  test('no Sales / cookie authorization logic anywhere in lib/crc-assurance-handoff; no email logic in the core', () => {
     const fs = require('fs')
     const path = require('path')
     const dir = path.join(__dirname, '..', '..', 'lib/crc-assurance-handoff')
@@ -581,9 +585,15 @@ describe('CAH-3E.2 non-authorizing primitive', () => {
         .readFileSync(path.join(dir, f), 'utf8')
         .replace(/\/\*[\s\S]*?\*\//g, '')
         .replace(/(^|[^:])\/\/.*$/gm, '$1')
-      expect(code).not.toMatch(/CONVERTING|crc_sales|email_normalized/i)
-      expect(code).not.toMatch(/cookies?\s*\(|getCookie|readCookie/i)
-      expect(code).not.toMatch(/redeemToken|verifyToken|consumeToken|matchEmail|emailMatches/i)
+      // Sales + cookie bans apply to EVERY top-level file (core + repository).
+      // ("crc_sessions" the table and "crc_session_id" the column are fine;
+      // reading the "crc_session" *cookie* is not.)
+      expect(code).not.toMatch(/CONVERTING|crc_sales/i)
+      expect(code).not.toMatch(/cookies?\s*\(|getCookie|readCookie|(['"])crc_session\1/i)
+      expect(code).not.toMatch(/redeemToken|verifyToken|consumeToken|attribution_token/i)
+      // email correlation logic must not live in the core; repository.ts's
+      // plain read helpers are the one exception (see CAH-3F).
+      if (f !== 'repository.ts') expect(code).not.toMatch(/email_normalized|crc_leads|matchEmail|emailMatches/i)
     }
   })
 

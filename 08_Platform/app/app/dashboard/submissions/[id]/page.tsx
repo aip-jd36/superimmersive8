@@ -9,6 +9,7 @@ import {
   ArrowLeft, CheckCircle, Clock, XCircle, FileText,
   Download, ExternalLink, AlertCircle
 } from 'lucide-react'
+import { CrcAssociationPanel } from './CrcAssociationPanel'
 
 type PageProps = { params: { id: string } }
 
@@ -190,6 +191,12 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
       {/* Status Banner */}
       <div className="mb-6">
         <StatusBanner status={submission.status} reviewNotes={submission.review_notes} />
+      </div>
+
+      {/* CAH-3F: non-blocking, minimal panel to deliberately link a potentially
+          related CRC conversation (email-correlated, never same-browser). */}
+      <div className="mb-6">
+        <CrcAssociationPanel submissionId={params.id} />
       </div>
 
       <div className="space-y-6">
