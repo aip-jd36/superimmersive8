@@ -600,22 +600,22 @@ export function Section7Brief({
   // Requires an outcome from Section 6 (assessments.outcome is NOT NULL);
   // the button below is already disabled until outcomeLbl is set, so this
   // should only throw if that gate is somehow bypassed.
+  // CA-RLK-2a: the assessment now exists only as the product of a durable
+  // reviewer sign-off (§ 6). This route is lookup-only — it verifies an
+  // ACTIVE, revision-matched sign-off and returns its number.
   const ensureAssessmentNumber = async (): Promise<string> => {
-    if (assessmentNumber) return assessmentNumber
-    if (!section6.outcome) {
-      throw new Error('Complete § 6 (Overall Assessment) before generating a report.')
-    }
     const res = await fetch(
       `/api/admin/submissions/${encodeURIComponent(submission.id)}/ensure-assessment`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ outcome: section6.outcome }),
-      }
+      { method: 'POST', headers: { 'Content-Type': 'application/json' } }
     )
     if (!res.ok) {
       const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-      throw new Error(err.error || `HTTP ${res.status}`)
+      const map: Record<string, string> = {
+        assessment_not_signed_off: 'Sign off the assessment in § 6 before generating the report.',
+        signoff_invalidated: 'The sign-off was invalidated by a later workbook edit — re-sign in § 6.',
+        workbook_changed_since_signoff: 'The workbook changed after sign-off — re-sign in § 6, then generate.',
+      }
+      throw new Error(map[err.error] || err.message || err.error || `HTTP ${res.status}`)
     }
     const json = await res.json()
     onAssessmentNumberChange(json.assessmentNumber)

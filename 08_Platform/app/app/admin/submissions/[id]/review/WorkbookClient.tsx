@@ -21,6 +21,7 @@ type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 interface WorkbookClientProps {
   submissionId: string
   assessmentNumber: string | null
+  initialSignoffStatus: 'active' | 'invalidated' | null
   initialWorkbook: WorkbookData
   submission: Record<string, any>
   evidenceFiles: Array<{ name: string; url: string }>
@@ -37,8 +38,9 @@ function formatSavedAt(iso: string | null): string {
 }
 
 export function WorkbookClient({
-  submissionId, assessmentNumber: initialAssessmentNumber, initialWorkbook, submission, evidenceFiles,
+  submissionId, assessmentNumber: initialAssessmentNumber, initialSignoffStatus, initialWorkbook, submission, evidenceFiles,
 }: WorkbookClientProps) {
+  const [signoffStatus, setSignoffStatus] = useState<'active' | 'invalidated' | null>(initialSignoffStatus)
   const [workbook, setWorkbook] = useState<WorkbookData>(
     Object.keys(initialWorkbook).length > 1 ? initialWorkbook : EMPTY_WORKBOOK
   )
@@ -67,9 +69,11 @@ export function WorkbookClient({
         body: JSON.stringify({ workbook_data: data }),
       })
       if (res.ok) {
-        const { savedAt: ts } = await res.json()
-        setSavedAt(ts)
+        const body = await res.json()
+        setSavedAt(body.savedAt)
         setSaveStatus('saved')
+        // CA-RLK-2a: a save that invalidated an active durable sign-off.
+        if (body.signoffInvalidated) setSignoffStatus('invalidated')
       } else {
         setSaveStatus('error')
       }
@@ -328,7 +332,10 @@ export function WorkbookClient({
                 findings={workbook.section_5.findings}
                 gaps={workbook.section_4.gaps}
                 assessmentNumber={assessmentNumber}
+                submissionId={submissionId}
+                signoffStatus={signoffStatus}
                 onChange={updates => updateSection('section_6', updates)}
+                onSignoffChange={setSignoffStatus}
               />
             )}
             {activeSection === '7' && (

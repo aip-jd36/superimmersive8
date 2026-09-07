@@ -1,20 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
-import { invalidateGeneratedReport } from '@/lib/assessments/service'
+import { patchWorkbookAtomic } from '@/lib/assessments/repository'
 
 type RouteContext = { params: { id: string } }
 
-// Milestone detection — returns which milestones are newly met so the caller
-// can write immutable snapshots. Checks existing snapshots to avoid duplicates.
-//
-// snapshotTag is a stable internal label for the snapshot rows — historically
-// the legacy submissions.assess_id, now the submission_id. This table is
-// write-only internal audit trail (nothing reads it back), not part of the
-// canonical Assessment Registry, and milestones like intake_complete can be
-// reached before any assessment_number exists (Section 1 can complete well
-// before Section 6 sets an outcome) — so it deliberately does not depend on
-// the canonical assessment_number existing yet.
+// Milestone detection — write-only internal audit trail (workbook_snapshots).
+// Best-effort, runs AFTER the atomic workbook write. Nothing reads it back;
+// it is not part of the canonical Assessment Registry.
 async function checkMilestones(
   submissionId: string,
   workbook: Record<string, any>,
@@ -39,7 +32,6 @@ async function checkMilestones(
       s6.signed_off === true,
   }
 
-  // Fetch already-written milestones for this submission
   const { data: existing } = await supabaseAdmin
     .from('workbook_snapshots')
     .select('milestone')
@@ -59,6 +51,18 @@ async function checkMilestones(
   }
 }
 
+/**
+ * PATCH — save the workbook (CA-RLK-2a).
+ *
+ * ONE atomic operation (patch_workbook_atomic RPC): update workbook_data,
+ * increment submissions.workbook_revision, and — if an ACTIVE durable sign-off
+ * exists on a pre-delivery assessment — flip it to 'invalidated' while
+ * PRESERVING signed_off_by / signed_off_at / signed_workbook_revision, and
+ * (if REPORT_GENERATED) revert to DRAFT and clear the stale report binding.
+ *
+ * A DELIVERED assessment blocks the whole save with 409 — no workbook mutation,
+ * no revision bump, no invalidation.
+ */
 export async function PATCH(request: NextRequest, { params }: RouteContext) {
   try {
     const supabase = createClient()
@@ -78,29 +82,31 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: 'workbook_data required' }, { status: 400 })
     }
 
-    const { error: updateError } = await supabaseAdmin
-      .from('submissions')
-      .update({ workbook_data })
-      .eq('id', params.id)
-
-    if (updateError) {
+    const result = await patchWorkbookAtomic(params.id, workbook_data, authUser.id)
+    if (!result.ok) {
+      if (result.code === 'delivered') {
+        return NextResponse.json(
+          { error: 'delivered', message: 'This assessment has been delivered and its workbook is locked.' },
+          { status: 409 },
+        )
+      }
+      if (result.code === 'submission_not_found') {
+        return NextResponse.json({ error: 'Submission not found' }, { status: 404 })
+      }
       return NextResponse.json({ error: 'Failed to save' }, { status: 500 })
     }
 
-    // Milestone check — best-effort, don't block the save response on failure
+    // Best-effort audit snapshot — never blocks the save response.
     await checkMilestones(params.id, workbook_data, params.id).catch(err =>
       console.error('Milestone check failed:', err)
     )
 
-    // Stale-report invalidation — best-effort, don't block the save response
-    // on failure. No-ops unless a report was already generated (processing_status
-    // REPORT_GENERATED); reverts that assessment to DRAFT and clears the now-stale
-    // report binding so it can't be signed until regenerated from this saved data.
-    await invalidateGeneratedReport(params.id).catch(err =>
-      console.error('Report invalidation check failed:', err)
-    )
-
-    return NextResponse.json({ savedAt: new Date().toISOString() })
+    return NextResponse.json({
+      savedAt: new Date().toISOString(),
+      workbookRevision: result.workbookRevision,
+      signoffInvalidated: result.signoffInvalidated,
+      reportInvalidated: result.reportInvalidated,
+    })
   } catch (err: any) {
     console.error('Error in workbook save route:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

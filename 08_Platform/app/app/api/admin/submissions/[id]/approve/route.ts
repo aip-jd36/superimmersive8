@@ -35,20 +35,24 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
     console.log('🔍 Approving submission:', params.id)
 
-    // For SI8 Certified, verify workbook Section 6 is signed off before approving
+    // For SI8 Certified, verify a durable ACTIVE assessment sign-off exists
+    // (CA-RLK-2a — no longer the mutable workbook_data.section_6.signed_off).
     const { data: submissionCheck } = await supabaseAdmin
       .from('submissions')
-      .select('tier, workbook_data, risk_rating')
+      .select('tier, risk_rating')
       .eq('id', params.id)
       .single()
 
     if (submissionCheck?.tier === 'si8_certified') {
-      const workbookData = submissionCheck.workbook_data as any
-      const workbookSignedOff = workbookData?.section_6?.signed_off === true
+      const { data: assessmentCheck } = await supabaseAdmin
+        .from('assessments')
+        .select('signoff_status')
+        .eq('submission_id', params.id)
+        .single()
 
-      if (!workbookSignedOff) {
+      if ((assessmentCheck as any)?.signoff_status !== 'active') {
         return NextResponse.json(
-          { error: 'Reviewer workbook Section 6 must be signed off before approving an SI8 Certified submission' },
+          { error: 'The assessment must be signed off (§ 6) before approving an SI8 Certified submission' },
           { status: 400 }
         )
       }

@@ -29,7 +29,7 @@ export async function POST(_request: NextRequest, { params }: RouteContext) {
     // Fetch submission
     const { data: submission, error: fetchError } = await supabaseAdmin
       .from('submissions')
-      .select('id, title, workbook_data, source_video_url, report_pdf_url, report_pdf_assessment_id')
+      .select('id, title, workbook_data, workbook_revision, source_video_url, report_pdf_url, report_pdf_assessment_id')
       .eq('id', params.id)
       .single()
     if (fetchError || !submission) {
@@ -40,8 +40,6 @@ export async function POST(_request: NextRequest, { params }: RouteContext) {
     const missing: string[] = []
     if (!submission.source_video_url) missing.push('source video')
     if (!submission.report_pdf_url)   missing.push('report PDF')
-    const workbookSignedOff = !!(submission.workbook_data as any)?.section_6?.signed_off
-    if (!workbookSignedOff) missing.push('workbook sign-off (Section 6)')
     if (missing.length > 0) {
       return NextResponse.json(
         { error: `Prerequisites not met: ${missing.join(', ')}` },
@@ -49,20 +47,39 @@ export async function POST(_request: NextRequest, { params }: RouteContext) {
       )
     }
 
-    // The assessment must already exist — created by Generate Report /
-    // ensure-assessment earlier in the workflow. /sign no longer creates it:
-    // the canonical assessment_number must be embedded in the PDF from the
-    // moment it's generated, not attached retroactively at signing time.
+    // The assessment must already exist — created by the reviewer's durable
+    // sign-off (POST /sign-off). /sign no longer creates it, and it no longer
+    // trusts workbook_data.section_6.signed_off (a mutable draft field).
     const assessment = await findAssessmentBySubmissionId(params.id)
     if (!assessment) {
       return NextResponse.json(
         {
           error:
-            'No assessment exists for this submission. Run "Generate Client Report (PDF)" in ' +
-            'the Assessment Workbook (§ 7) before signing.',
+            'No assessment exists for this submission. Sign off the assessment in § 6, then ' +
+            'generate the client report in § 7 before signing.',
         },
         { status: 400 },
       )
+    }
+
+    // CA-RLK-2a: provenance signing requires an ACTIVE, revision-matched durable
+    // human sign-off — not the workbook boolean.
+    if (
+      assessment.processing_status !== 'SIGNED' &&
+      assessment.processing_status !== 'DELIVERED'
+    ) {
+      if (assessment.signoff_status !== 'active') {
+        return NextResponse.json(
+          { error: 'Assessment sign-off is not active (invalidated by a later workbook edit). Re-sign in § 6.' },
+          { status: 409 },
+        )
+      }
+      if (assessment.signed_workbook_revision !== Number((submission as any).workbook_revision ?? 0)) {
+        return NextResponse.json(
+          { error: 'The workbook changed after sign-off. Re-sign in § 6 and regenerate the report before signing.' },
+          { status: 409 },
+        )
+      }
     }
 
     // Already fully signed — return success without re-running the signing flow

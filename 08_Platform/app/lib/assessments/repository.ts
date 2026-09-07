@@ -18,6 +18,7 @@ import type {
   ProcessingStatus,
   VerificationPageData,
 } from '@/types/assessment'
+import { LOCKED_ASSESSMENT_FIELDS } from './signoff'
 
 // ── Public visibility gate ────────────────────────────────────────────────────
 
@@ -114,7 +115,7 @@ export async function findAssessmentForVerification(
     .from('assessments')
     .select(
       `assessment_number, institutional_status, status_reason, outcome, assessment_date, methodology_version, reviewer_organization, numbers_asset_id, processing_status, is_system_test,
-       submission:submissions!submission_id ( title, runtime )`,
+       asset_title, asset_media_type, asset_runtime, scope_domain_codes`,
     )
     .eq('assessment_number', assessmentNumber)
     .single()
@@ -152,13 +153,6 @@ export async function findAssessmentForVerification(
   // "not found" from "found but not yet issued" in the response.
   if (!isPubliclyVisibleProcessingStatus(data.processing_status as ProcessingStatus)) return null
 
-  // Supabase returns joined rows as an array even for to-one relationships.
-  // Unwrap the first element; use explicit field mapping — do not spread.
-  const rawSub = Array.isArray(data.submission)
-    ? (data.submission[0] ?? null)
-    : (data.submission ?? null)
-  const sub = rawSub as { title: string; runtime: number | null } | null
-
   return {
     assessment_number:  data.assessment_number,
     institutional_status: data.institutional_status,
@@ -170,11 +164,13 @@ export async function findAssessmentForVerification(
     numbers_asset_id:   data.numbers_asset_id,
     processing_status:  data.processing_status,
     is_system_test:     data.is_system_test,
-    // Asset section — sourced from submissions join.
-    // asset_media_type is hardcoded "Video" for all v1 assessments.
-    asset_title:      sub?.title ?? '',
-    asset_runtime:    sub?.runtime ?? null,
-    asset_media_type: 'Video',
+    // CA-RLK-2a: asset descriptors + scope are HISTORICAL SNAPSHOTS on the
+    // assessments row (written at sign-off), not a live submissions lookup.
+    // A delivered record no longer drifts when the submission is edited.
+    asset_title:        (data.asset_title as string | null) ?? '',
+    asset_runtime:      (data.asset_runtime as number | null) ?? null,
+    asset_media_type:   (data.asset_media_type as string | null) ?? 'Video',
+    scope_domain_codes: (data.scope_domain_codes as string[] | null) ?? null,
   }
 }
 
@@ -195,10 +191,23 @@ export async function createAssessment(
   return data as Assessment
 }
 
+/**
+ * Generic assessment update. CA-RLK-2a §28: this path must NEVER mutate a
+ * locked sign-off / snapshot column — those are written ONLY by the atomic
+ * sign_off_assessment RPC (see signOffAssessment). A stray attempt is a bug,
+ * so this throws rather than silently dropping the key.
+ */
 export async function updateAssessment(
   id: string,
   updates: AssessmentUpdate,
 ): Promise<Assessment> {
+  const locked = Object.keys(updates).filter((k) => LOCKED_ASSESSMENT_FIELDS.includes(k))
+  if (locked.length > 0) {
+    throw new Error(
+      `updateAssessment(${id}): refusing to mutate locked field(s) [${locked.join(', ')}] — ` +
+      `sign-off/snapshot columns are written only by the sign_off_assessment RPC (CA-RLK-2a §28).`,
+    )
+  }
   const { data, error } = await supabaseAdmin
     .from('assessments')
     .update(updates)
@@ -210,6 +219,90 @@ export async function updateAssessment(
     throw new Error(`Failed to update assessment ${id}: ${error?.message ?? 'unknown error'}`)
   }
   return data as Assessment
+}
+
+// ── CA-RLK-2a: atomic sign-off + atomic workbook mutation ────────────────────
+
+export interface SignOffParams {
+  submissionId: string
+  actorUserId: string
+  expectedRevision: number
+  outcome: string
+  methodologyVersion: string
+  reviewerOrganization: string
+  siteUrl: string
+  assetTitle: string | null
+  assetMediaType: string
+  assetRuntime: number | null
+  scopeDomainCodes: readonly string[]
+}
+
+export type SignOffResult =
+  | { ok: true; assessment: Assessment; created?: boolean; resigned?: boolean; idempotent?: boolean }
+  | { ok: false; code: 'submission_not_found' | 'workbook_changed' | 'not_pre_delivery' | string; currentRevision?: number; processingStatus?: string }
+
+/** Calls the atomic sign_off_assessment(...) Postgres function (migration 20260907000000). */
+export async function signOffAssessment(p: SignOffParams): Promise<SignOffResult> {
+  const { data, error } = await supabaseAdmin.rpc('sign_off_assessment', {
+    p_submission_id:         p.submissionId,
+    p_actor:                 p.actorUserId,
+    p_expected_revision:     p.expectedRevision,
+    p_outcome:               p.outcome,
+    p_methodology_version:   p.methodologyVersion,
+    p_reviewer_organization: p.reviewerOrganization,
+    p_site_url:              p.siteUrl,
+    p_asset_title:           p.assetTitle,
+    p_asset_media_type:      p.assetMediaType,
+    p_asset_runtime:         p.assetRuntime,
+    p_scope_domain_codes:    p.scopeDomainCodes as string[],
+  })
+  if (error) throw new Error(`[assessments/repository] signOffAssessment RPC: ${error.message}`)
+  const row = (Array.isArray(data) ? data[0] : data) as Record<string, unknown> | null
+  if (!row || typeof row !== 'object') throw new Error('[assessments/repository] signOffAssessment: RPC returned no object')
+  if (row.ok === true) {
+    return {
+      ok: true,
+      assessment: row.assessment as unknown as Assessment,
+      created: row.created as boolean | undefined,
+      resigned: row.resigned as boolean | undefined,
+      idempotent: row.idempotent as boolean | undefined,
+    }
+  }
+  return {
+    ok: false,
+    code: (row.code as string) ?? 'unknown',
+    currentRevision: row.current_revision as number | undefined,
+    processingStatus: row.processing_status as string | undefined,
+  }
+}
+
+export type PatchWorkbookResult =
+  | { ok: true; workbookRevision: number; signoffInvalidated: boolean; reportInvalidated: boolean }
+  | { ok: false; code: 'submission_not_found' | 'delivered' | string }
+
+/** Calls the atomic patch_workbook_atomic(...) Postgres function. */
+export async function patchWorkbookAtomic(
+  submissionId: string,
+  workbookData: unknown,
+  actorUserId: string,
+): Promise<PatchWorkbookResult> {
+  const { data, error } = await supabaseAdmin.rpc('patch_workbook_atomic', {
+    p_submission_id: submissionId,
+    p_workbook_data: workbookData,
+    p_actor:         actorUserId,
+  })
+  if (error) throw new Error(`[assessments/repository] patchWorkbookAtomic RPC: ${error.message}`)
+  const row = (Array.isArray(data) ? data[0] : data) as Record<string, unknown> | null
+  if (!row || typeof row !== 'object') throw new Error('[assessments/repository] patchWorkbookAtomic: RPC returned no object')
+  if (row.ok === true) {
+    return {
+      ok: true,
+      workbookRevision: row.workbook_revision as number,
+      signoffInvalidated: Boolean(row.signoff_invalidated),
+      reportInvalidated: Boolean(row.report_invalidated),
+    }
+  }
+  return { ok: false, code: (row.code as string) ?? 'unknown' }
 }
 
 // ── Processing status transitions ─────────────────────────────────────────────

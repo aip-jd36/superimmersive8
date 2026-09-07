@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { WorkbookData, OUTCOME_OPTIONS, CONFIDENCE_OPTIONS } from './workbook-schema'
 
 type S6 = WorkbookData['section_6']
@@ -11,7 +12,10 @@ interface Props {
   findings: Finding[]
   gaps: Gap[]
   assessmentNumber: string | null
+  submissionId: string
+  signoffStatus: 'active' | 'invalidated' | null
   onChange: (updates: Partial<S6>) => void
+  onSignoffChange?: (status: 'active' | 'invalidated' | null) => void
 }
 
 const OUTCOME_GUIDANCE: Record<string, string> = {
@@ -35,9 +39,38 @@ const IMPACT_SORT: Record<string, number> = {
   'High risk — material commercial concern': 4,
 }
 
-export function Section6Assessment({ data, findings, gaps, assessmentNumber, onChange }: Props) {
+export function Section6Assessment({ data, findings, gaps, assessmentNumber, submissionId, signoffStatus, onChange, onSignoffChange }: Props) {
   const isComplete = !!(data.outcome && data.commercial_confidence && data.signed_off)
   const canSignOff = !!(data.outcome && data.commercial_confidence && data.basis.trim().length > 20)
+
+  const [signing, setSigning] = useState(false)
+  const [signoffMsg, setSignoffMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
+
+  const recordSignoff = async () => {
+    setSigning(true)
+    setSignoffMsg(null)
+    try {
+      const res = await fetch(`/api/admin/submissions/${submissionId}/sign-off`, { method: 'POST' })
+      const json = await res.json()
+      if (res.ok && json.ok) {
+        onSignoffChange?.('active')
+        setSignoffMsg({
+          kind: 'ok',
+          text: json.idempotent
+            ? 'Already signed off (unchanged).'
+            : `Sign-off recorded — ${json.assessmentNumber} (revision ${json.signedWorkbookRevision}). Section 7 unlocked.`,
+        })
+      } else if (res.status === 422 && Array.isArray(json.reasons)) {
+        setSignoffMsg({ kind: 'err', text: `Incomplete: ${json.reasons.slice(0, 4).join('; ')}${json.reasons.length > 4 ? '…' : ''}` })
+      } else {
+        setSignoffMsg({ kind: 'err', text: json.error || json.code || `HTTP ${res.status}` })
+      }
+    } catch {
+      setSignoffMsg({ kind: 'err', text: 'Network error' })
+    } finally {
+      setSigning(false)
+    }
+  }
 
   // Gap summary counts
   const gapHigh = gaps.filter(g => g.commercial_impact?.startsWith('High')).length
@@ -355,11 +388,36 @@ export function Section6Assessment({ data, findings, gaps, assessmentNumber, onC
           </div>
         </label>
 
-        {data.signed_off && (
-          <div className="text-xs text-green-700 font-medium">
-            ✓ Milestone snapshot recorded. Section 7 unlocked.
-          </div>
-        )}
+        {/* CA-RLK-2a: durable, actor-bearing, revision-bound sign-off. */}
+        <div className="pt-3 mt-1 border-t border-black/10">
+          {signoffStatus === 'active' ? (
+            <div className="text-xs text-green-700 font-medium">
+              ✓ Durable sign-off active. Section 7 unlocked.
+            </div>
+          ) : (
+            <>
+              {signoffStatus === 'invalidated' && (
+                <div className="text-xs text-amber-700 mb-2">
+                  A workbook edit invalidated the previous sign-off (who/when is preserved). Re-sign to proceed.
+                </div>
+              )}
+              <button
+                type="button"
+                disabled={!canSignOff || signing}
+                onClick={recordSignoff}
+                className="text-sm font-medium rounded-md px-3 py-1.5 text-white disabled:opacity-50"
+                style={{ backgroundColor: '#1a1918' }}
+              >
+                {signing ? 'Recording…' : signoffStatus === 'invalidated' ? 'Re-sign assessment' : 'Record durable sign-off'}
+              </button>
+            </>
+          )}
+          {signoffMsg && (
+            <div className={`text-xs mt-2 ${signoffMsg.kind === 'ok' ? 'text-green-700' : 'text-red-600'}`}>
+              {signoffMsg.text}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

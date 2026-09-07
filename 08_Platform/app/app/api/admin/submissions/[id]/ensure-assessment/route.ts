@@ -1,35 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
-import { createAssessmentFromWorkbook, syncDraftAssessmentFromWorkbook } from '@/lib/assessments/service'
-import type { AssessmentOutcome } from '@/types/assessment'
+import { findAssessmentBySubmissionId } from '@/lib/assessments/repository'
 
 type RouteContext = { params: { id: string } }
 
-const VALID_OUTCOMES = new Set<AssessmentOutcome>([
-  'EVIDENCE_SUPPORTS',
-  'EVIDENCE_SUPPORTS_WITH_CONDITIONS',
-  'MATERIAL_RISKS_IDENTIFIED',
-  'INSUFFICIENT_EVIDENCE',
-  'UNABLE_TO_ASSESS',
-])
-
 /**
- * Get-or-create the canonical assessment for a submission and return its
- * assessment_number, so the report PDF can be stamped with the real
- * Registry number instead of the legacy submissions.assess_id field.
+ * POST /api/admin/submissions/[id]/ensure-assessment  (CA-RLK-2a — lookup only)
  *
- * Called by Section7Brief's "Generate Report" / "Download source" actions
- * before building the Typst content — the assessment must exist first
- * because the number is embedded in the document itself, not attached to it
- * afterward.
+ * Was: create-or-return the canonical assessment (accepting an outcome).
+ * Now: verify a valid, ACTIVE, revision-matched durable sign-off exists.
+ * Generate Report (§ 7) calls this before building the Typst content — the
+ * assessment_number must already exist, and it now exists only as the product
+ * of a server-validated human sign-off (POST /sign-off).
  *
- * Requires an outcome (assessments.outcome is NOT NULL), which is why this
- * can't run any earlier than Section 6 being filled in — matches the
- * existing "Generate Report only available once Section 6 is complete" gate
- * in the workbook UI.
+ * This route NEVER creates an assessment and NEVER accepts an outcome.
  */
-export async function POST(request: NextRequest, { params }: RouteContext) {
+export async function POST(_request: NextRequest, { params }: RouteContext) {
   try {
     const supabase = createClient()
     const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
@@ -37,44 +24,47 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const { data: userData } = await supabaseAdmin
-      .from('users')
-      .select('is_admin')
-      .eq('id', authUser.id)
-      .single()
+      .from('users').select('is_admin').eq('id', authUser.id).single()
     if (!userData?.is_admin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const { outcome } = await request.json()
-    if (!outcome || !VALID_OUTCOMES.has(outcome)) {
+    const assessment = await findAssessmentBySubmissionId(params.id)
+    if (!assessment) {
       return NextResponse.json(
-        { error: `Missing or invalid outcome: "${outcome}". Complete Section 6 before generating a report.` },
+        { error: 'assessment_not_signed_off', message: 'Sign off the assessment in § 6 before generating the report.' },
+        { status: 400 },
+      )
+    }
+    if (assessment.signoff_status !== 'active') {
+      return NextResponse.json(
+        { error: 'signoff_invalidated', message: 'The sign-off was invalidated by a later workbook edit. Re-sign in § 6.' },
         { status: 400 },
       )
     }
 
-    // Create-or-return. Never mutates an existing row's outcome.
-    const assessment = await createAssessmentFromWorkbook(params.id, outcome as AssessmentOutcome)
-
-    // Reconcile outcome drift explicitly, only while still DRAFT. If the
-    // assessment has already moved past DRAFT (a report was generated and
-    // then invalidated, or — defensively — some other path), the workbook
-    // autosave route is responsible for having already reverted it to DRAFT
-    // when the outcome changed; if it somehow hasn't, sync throws rather
-    // than silently drifting.
-    const synced = assessment.processing_status === 'DRAFT'
-      ? await syncDraftAssessmentFromWorkbook(assessment.id, outcome as AssessmentOutcome)
-      : assessment
+    const { data: submission } = await supabaseAdmin
+      .from('submissions').select('workbook_revision').eq('id', params.id).single()
+    const currentRevision = Number((submission as any)?.workbook_revision ?? 0)
+    if (assessment.signed_workbook_revision !== currentRevision) {
+      return NextResponse.json(
+        {
+          error: 'workbook_changed_since_signoff',
+          message: 'The workbook changed after sign-off. Re-sign in § 6 before generating the report.',
+        },
+        { status: 400 },
+      )
+    }
 
     return NextResponse.json({
-      assessmentId:     synced.id,
-      assessmentNumber: synced.assessment_number,
-      processingStatus: synced.processing_status,
+      assessmentId:     assessment.id,
+      assessmentNumber: assessment.assessment_number,
+      processingStatus: assessment.processing_status,
     })
   } catch (error: any) {
     console.error('[ensure-assessment]', error)
     return NextResponse.json(
-      { error: error?.message ?? 'Failed to get or create assessment' },
+      { error: error?.message ?? 'Failed to verify sign-off' },
       { status: 500 },
     )
   }

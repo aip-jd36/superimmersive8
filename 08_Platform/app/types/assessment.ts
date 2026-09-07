@@ -104,6 +104,25 @@ export interface Assessment {
   signed_asset_path: string | null    // Supabase storage path; populated after SIGNED
   pdf_hash_sha256: string | null      // internal only; not displayed or embedded in v1
   is_system_test: boolean             // true when submitter and reviewer are the same person
+  // ── Durable human sign-off (CA-RLK-2a) ──────────────────────────────────────
+  // NULL on legacy rows issued before the sign-off schema — actor/time were not
+  // captured and are NOT fabricated. INTERNAL provenance only; never public.
+  signed_off_by: string | null            // auth.users.id of the reviewer who signed off
+  signed_off_at: string | null            // system/DB timestamp of the sign-off act
+  signoff_status: 'active' | 'invalidated' | null
+  signoff_invalidated_at: string | null   // set when a post-sign-off workbook edit cleared the active sign-off
+  signoff_invalidated_by: string | null
+  signed_workbook_revision: number | null // the exact submissions.workbook_revision bound by this sign-off
+  // ── Historical asset descriptors (CA-RLK-2a) ────────────────────────────────
+  // Snapshotted at sign-off so a mutable submissions.title/runtime cannot
+  // rewrite a delivered Public Assessment Record.
+  asset_title: string | null
+  asset_media_type: string                // 'Video' for v1; column default
+  asset_runtime: number | null            // seconds
+  // ── Methodology-bound public scope (CA-RLK-2a) ──────────────────────────────
+  // The COMPLETE domain set for this assessment's methodology_version. Never
+  // derived from Not-Applicable control judgments.
+  scope_domain_codes: string[] | null
   created_at: string
   updated_at: string
 }
@@ -203,9 +222,16 @@ export interface VerificationPageData {
   processing_status: ProcessingStatus
   is_system_test: boolean           // shown as a quiet footer disclaimer, never a banner
   // Asset section — publicly safe media description (no creator identity, no paths)
+  // CA-RLK-2a: sourced from the assessments row (snapshotted at sign-off), NOT
+  // from a live submissions join — a delivered record no longer drifts if the
+  // submission is later edited.
   asset_title: string
   asset_runtime: number | null      // runtime in seconds; null = not provided; format as M:SS for display
   asset_media_type: string          // "Video" for all v1 assessments; future: "Audio", "Image"
+  // CA-RLK-2a: the methodology-version's complete domain set, snapshotted at
+  // sign-off. NULL on legacy rows -> the page falls back to the current
+  // ASSESSMENT_DOMAINS constant.
+  scope_domain_codes: string[] | null
 }
 
 // ── Assessment number format ──────────────────────────────────────────────────

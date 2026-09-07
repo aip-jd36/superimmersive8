@@ -34,6 +34,8 @@ export default async function WorkbookPage({ params }: PageProps) {
 
   const existingAssessment = await findAssessmentBySubmissionId(params.id)
   const assessmentNumber: string | null = existingAssessment?.assessment_number ?? null
+  const initialSignoffStatus: 'active' | 'invalidated' | null =
+    (existingAssessment?.signoff_status as 'active' | 'invalidated' | null) ?? null
 
   const rawWorkbook = (submission as any).workbook_data
   const initialWorkbook = rawWorkbook
@@ -89,6 +91,7 @@ export default async function WorkbookPage({ params }: PageProps) {
     <WorkbookClient
       submissionId={params.id}
       assessmentNumber={assessmentNumber}
+      initialSignoffStatus={initialSignoffStatus}
       initialWorkbook={initialWorkbook}
       submission={submission as any}
       evidenceFiles={evidenceFiles ?? []}

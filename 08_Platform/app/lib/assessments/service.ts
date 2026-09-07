@@ -23,17 +23,16 @@
 import crypto from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import {
-  createAssessment,
   findAssessmentById,
   findAssessmentBySubmissionId,
-  generateAssessmentNumber,
   markFailed,
   transitionProcessingStatus,
   updateAssessment,
+  signOffAssessment as signOffAssessmentAtomic,
 } from './repository'
+import { validateWorkbookForSignoff, domainCodesForMethodology } from './signoff'
 import type {
   Assessment,
-  AssessmentInsert,
   AssessmentMetadata,
   AssessmentOutcome,
   DigitalSourceTypeUri,
@@ -58,95 +57,82 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://app.superimmersive
 const DEFAULT_DIGITAL_SOURCE_TYPE: DigitalSourceTypeUri =
   DIGITAL_SOURCE_TYPE_URIS.compositeWithTrainedAlgorithmicMedia
 
-// ── Create assessment ─────────────────────────────────────────────────────────
+// ── Durable human sign-off (CA-RLK-2a) ─────────────────────────
 
 /**
- * Get-or-create the canonical Assessment record for a submission.
+ * The reviewer's durable sign-off act. THIS is what creates (or re-signs) the
+ * canonical assessment row — not "Generate Report". Replaces the removed
+ * createAssessmentFromWorkbook / syncDraftAssessmentFromWorkbook.
  *
- * Called by the Generate Report action, the first point in the reviewer
- * workflow where a real assessment_number is needed (the assessments table
- * requires outcome NOT NULL, so this cannot run before Section 6 is filled
- * in — Generate Report only becomes available once it is).
- *
- * Strictly create-or-return: if an assessment already exists for this
- * submission_id, it is returned completely unchanged — this function never
- * mutates an existing row, including outcome. That's a deliberate, separate
- * step (see syncDraftAssessmentFromWorkbook) so that reconciling drift
- * between the workbook and an already-created assessment is always an
- * explicit, auditable operation, never a silent side effect of "just asking
- * for the assessment."
+ * The route has already authenticated + authorized (V1: users.is_admin) and
+ * passes the actor's auth.users id. This function:
+ *   - loads the canonical submission + workbook (never a client payload);
+ *   - validates the EXISTING decision-completeness gates server-side
+ *     (lib/assessments/signoff.ts validateWorkbookForSignoff — no new
+ *     methodology rules);
+ *   - derives outcome from the canonical workbook, methodology from the
+ *     authoritative constant, the domain-scope set from the methodology, and
+ *     the asset descriptors from the submission;
+ *   - delegates the atomic create/re-sign + workbook-revision binding to the
+ *     sign_off_assessment(...) Postgres RPC (migration 20260907000000), which
+ *     locks the submission row and rejects the sign-off if the workbook
+ *     revision moved (correction #2). assessment_date and signed_off_at are
+ *     DB-derived inside the RPC — never client-supplied.
  */
-export async function createAssessmentFromWorkbook(
+export type SignOffOutcome =
+  | { ok: true; assessment: Assessment; created?: boolean; resigned?: boolean; idempotent?: boolean }
+  | { ok: false; code: 'incomplete'; reasons: string[] }
+  | { ok: false; code: 'unknown_methodology' | 'submission_not_found' | 'workbook_changed' | 'not_pre_delivery'; detail?: string }
+
+export async function signOffAssessment(
   submissionId: string,
-  outcome: AssessmentOutcome,
-): Promise<Assessment> {
-  // Idempotency: return existing assessment if already created
-  const existing = await findAssessmentBySubmissionId(submissionId)
-  if (existing) return existing
+  actorUserId: string,
+): Promise<SignOffOutcome> {
+  const { data: submission, error } = await supabaseAdmin
+    .from('submissions')
+    .select('id, title, runtime, tier, custodian_declaration, indemnification_confirmed, workbook_data, workbook_revision')
+    .eq('id', submissionId)
+    .single()
+  if (error || !submission) return { ok: false, code: 'submission_not_found' }
 
-  const assessmentNumber = await generateAssessmentNumber()
-  const verificationUrl = `${SITE_URL}/assessment/${assessmentNumber}`
-
-  const insert: AssessmentInsert = {
-    submission_id:        submissionId,
-    assessment_number:    assessmentNumber,
-    assessment_date:      new Date().toISOString().split('T')[0],
-    methodology_version:  METHODOLOGY_VERSION,
-    reviewer_organization: REVIEWER_ORGANIZATION,
-    outcome,
-    institutional_status: 'ACTIVE',
-    status_reason:        null,
-    processing_status:    'DRAFT',
-    // Every assessment is created as a real (non-test) record by default,
-    // matching the DB column's own DEFAULT false. A record is only ever
-    // marked a system test by an explicit, separate admin action after
-    // creation — see the verification checklist step for the internal test
-    // run this deploy is meant to support (never auto-detected).
-    is_system_test:       false,
-    failure_diagnostic:   null,
-    verification_url:     verificationUrl,
-    numbers_asset_id:     null,
-    signed_asset_path:    null,
-    pdf_hash_sha256:      null,
+  const validation = validateWorkbookForSignoff(submission.workbook_data, {
+    custodian_declaration: submission.custodian_declaration,
+    indemnification_confirmed: submission.indemnification_confirmed,
+    tier: submission.tier,
+  })
+  if (!validation.ok || !validation.outcome) {
+    return { ok: false, code: 'incomplete', reasons: validation.reasons }
   }
 
-  return createAssessment(insert)
-}
-
-/**
- * Explicitly synchronize outcome from the workbook onto a DRAFT assessment.
- *
- * Only valid while the assessment is still DRAFT. Once a report has been
- * generated (REPORT_GENERATED or later), an outcome change must go through
- * invalidateGeneratedReport() first — the workbook autosave route does this
- * automatically whenever workbook data changes on a REPORT_GENERATED
- * assessment, which reverts it to DRAFT and clears the stale report binding.
- * This guards against the case where a PDF was generated for Outcome A, the
- * reviewer silently changes Section 6 to Outcome B, and the (now
- * substantively wrong) PDF remains signable because only the assessment
- * number — not the report's content — was being checked.
- *
- * No-ops (returns the assessment unchanged, no DB write) if outcome hasn't
- * actually changed, so routine autosave ticks don't bump updated_at.
- */
-export async function syncDraftAssessmentFromWorkbook(
-  assessmentId: string,
-  outcome: AssessmentOutcome,
-): Promise<Assessment> {
-  const assessment = await findAssessmentById(assessmentId)
-  if (!assessment) throw new Error(`Assessment ${assessmentId} not found`)
-
-  if (assessment.processing_status !== 'DRAFT') {
-    throw new Error(
-      `Cannot sync outcome onto assessment ${assessmentId}: processing_status is ` +
-      `${assessment.processing_status}, expected DRAFT. A generated report must be ` +
-      `invalidated (see invalidateGeneratedReport) before its outcome can change.`,
-    )
+  const scopeDomainCodes = domainCodesForMethodology(METHODOLOGY_VERSION)
+  if (!scopeDomainCodes) {
+    // FAIL CLOSED — never snapshot "current domains" for an unknown methodology.
+    return { ok: false, code: 'unknown_methodology', detail: METHODOLOGY_VERSION }
   }
 
-  if (assessment.outcome === outcome) return assessment
-  return updateAssessment(assessmentId, { outcome })
+  const result = await signOffAssessmentAtomic({
+    submissionId,
+    actorUserId,
+    expectedRevision: Number(submission.workbook_revision ?? 0),
+    outcome: validation.outcome,
+    methodologyVersion: METHODOLOGY_VERSION,
+    reviewerOrganization: REVIEWER_ORGANIZATION,
+    siteUrl: SITE_URL,
+    assetTitle: (submission.title as string | null) ?? null,
+    assetMediaType: 'Video',
+    assetRuntime: (submission.runtime as number | null) ?? null,
+    scopeDomainCodes,
+  })
+
+  if (result.ok) {
+    return { ok: true, assessment: result.assessment, created: result.created, resigned: result.resigned, idempotent: result.idempotent }
+  }
+  if (result.code === 'workbook_changed') return { ok: false, code: 'workbook_changed' }
+  if (result.code === 'not_pre_delivery') return { ok: false, code: 'not_pre_delivery', detail: result.processingStatus }
+  if (result.code === 'submission_not_found') return { ok: false, code: 'submission_not_found' }
+  return { ok: false, code: 'not_pre_delivery', detail: result.code }
 }
+
 
 /**
  * Record a successfully generated report PDF against its canonical assessment.

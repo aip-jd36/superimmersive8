@@ -15,6 +15,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { findAssessmentForVerification } from '@/lib/assessments/repository'
 import { OUTCOME_LABELS, ASSESSMENT_DOMAINS } from '@/types/assessment'
+import { DOMAIN_CODE_LABELS } from '@/lib/assessments/signoff'
 import type { InstitutionalStatus, VerificationPageData } from '@/types/assessment'
 
 // Must render fresh on every request. [assessment_number] makes the URL
@@ -187,7 +188,7 @@ export default async function VerificationPage({ params }: PageProps) {
             covered — no domain scores, risk indicators, or individual findings are
             disclosed in this record.
           </p>
-          <DomainList />
+          <DomainList codes={assessment.scope_domain_codes} />
         </Section>
 
         {/* Numbers verification link */}
@@ -519,10 +520,17 @@ function InstitutionalStatusBadge({ status }: { status: InstitutionalStatus }) {
   )
 }
 
-function DomainList() {
+function DomainList({ codes }: { codes: string[] | null }) {
+  // CA-RLK-2a: render the assessment's SNAPSHOTTED domain scope. Legacy rows
+  // (NULL) fall back to the current methodology constant. An unrecognised code
+  // renders as itself — never invents a domain name.
+  const list =
+    codes && codes.length > 0
+      ? codes.map((code) => ({ code, label: DOMAIN_CODE_LABELS[code] ?? code }))
+      : ASSESSMENT_DOMAINS.map(({ code, label }) => ({ code, label }))
   return (
     <div>
-      {ASSESSMENT_DOMAINS.map(({ code, label }, idx) => (
+      {list.map(({ code, label }, idx) => (
         <div
           key={code}
           style={{
@@ -531,7 +539,7 @@ function DomainList() {
             gap: '0.75rem',
             padding: '0.625rem 1.25rem',
             borderBottom:
-              idx < ASSESSMENT_DOMAINS.length - 1
+              idx < list.length - 1
                 ? '1px solid rgba(0,0,0,0.06)'
                 : 'none',
             fontSize: '0.875rem',
