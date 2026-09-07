@@ -857,9 +857,17 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     // GOVERNED-CLAIMS.md's own CRC Publication Scope and
     // governance-reviews/CPR_019_PIKA_COMMERCIAL_USE_POST-RETIREMENT_
     // RECONSIDERATION_2026-09-06.md (plus its PM-concurrence addendum) for
-    // the full decision sequence. No extraction alias question applies --
-    // 'pika' is an existing CANONICAL_TOOL_ID, already conversationally
-    // reachable.
+    // the full decision sequence. CORRECTION (CRC-Active Tool Extraction
+    // Reachability Backstop + Gap Remediation): this comment previously
+    // stated "No extraction alias question applies -- 'pika' is an
+    // existing CANONICAL_TOOL_ID, already conversationally reachable."
+    // That was factually wrong -- 'pika' had zero KNOWN_TOOLS coverage and
+    // was empirically unreachable via ordinary conversation until this
+    // remediation added it. Retained here only as a source-comment
+    // correction (this is live code commentary, not a historical
+    // governance artifact); CPR_019's own governance-reviews/ file is left
+    // unmodified as the historical record of the original, mistaken
+    // assertion.
     claim_id: 'CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1',
     topic: 'commercial_use',
     claim_character: 'established',

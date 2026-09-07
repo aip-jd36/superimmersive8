@@ -323,22 +323,22 @@ describe('I: LK-89 real-pipeline reproduction of the exact LK-88 production expr
     expect(interp?.status).toBe('directly_relevant')
   })
 
-  test('negative alias safety: the bare word "luma" alone does NOT resolve -- only the exact observed compound expression does (no speculative variant added)', async () => {
+  test('SUPERSEDED (CRC-Active Tool Extraction Reachability Backstop + Gap Remediation, 2026-09-07): the bare word "luma" now resolves canonically -- a dedicated reachability audit found this exact LK-89-era limitation left the platform\'s own ordinary name unreachable in production, and added it as an explicit, evidenced KNOWN_TOOLS entry (see extraction.ts\'s own comment). This test previously asserted the old, narrower behavior as intended; it now asserts the corrected behavior. See crc-active-reachability-remediation.test.ts for the full remediation test suite.', async () => {
     const { updated } = await runExtractionPipeline(
       emptySU(),
       { turn: 1, text: 'I used Luma.' },
       constantExtractor([lumaToolCandidate({ raw_text: 'I used Luma.', raw_tool_name: 'Luma' })]),
     )
-    expect(updated.tool_mentions[0].resolution).toEqual({ kind: 'unresolved_alias', raw_name: 'Luma' })
+    expect(updated.tool_mentions[0].resolution).toEqual({ kind: 'canonical', identifier: 'luma' })
   })
 
-  test('negative alias safety: "Dream Machine" alone does NOT resolve -- no speculative variant added', async () => {
+  test('SUPERSEDED (CRC-Active Tool Extraction Reachability Backstop + Gap Remediation, 2026-09-07): "Dream Machine" alone now resolves canonically -- same remediation as the bare-"luma" case immediately above. See crc-active-reachability-remediation.test.ts for the full remediation test suite.', async () => {
     const { updated } = await runExtractionPipeline(
       emptySU(),
       { turn: 1, text: 'I used Dream Machine.' },
       constantExtractor([lumaToolCandidate({ raw_text: 'I used Dream Machine.', raw_tool_name: 'Dream Machine' })]),
     )
-    expect(updated.tool_mentions[0].resolution).toEqual({ kind: 'unresolved_alias', raw_name: 'Dream Machine' })
+    expect(updated.tool_mentions[0].resolution).toEqual({ kind: 'canonical', identifier: 'luma' })
   })
 
   test('negative alias safety: the new Luma alias does not cause any asset_provider_mention to be created (no cross-registry bleed)', async () => {

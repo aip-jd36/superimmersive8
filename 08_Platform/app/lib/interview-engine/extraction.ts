@@ -490,6 +490,41 @@ const KNOWN_TOOLS: Record<string, CanonicalToolId> = {
   // production expression -- no fuzzy matching, no speculative variants
   // ('luma', 'luma ai', 'dream machine', etc.) added.
   "luma ai's dream machine": 'luma',
+  // 'luma' / 'luma ai' / 'dream machine' / 'luma dream machine' added
+  // (CRC-Active Tool Extraction Reachability Backstop + Gap Remediation):
+  // the LK-89 entry above only covers the one exact phrase actually
+  // observed in a production UAT ("Luma AI's Dream Machine") -- a
+  // dedicated reachability audit of every current CRC-active governed
+  // tool found that Luma's own ordinary product/company names ("Luma",
+  // "Luma AI", "Dream Machine", "Luma Dream Machine") stayed
+  // `unresolved_alias` under this same pipeline, empirically confirmed
+  // before this change. All four map to the same canonical identity as
+  // the existing entry -- no fuzzy matching, no speculative branding
+  // variants beyond these ordinary, evidenced forms.
+  luma: 'luma',
+  'luma ai': 'luma',
+  'dream machine': 'luma',
+  'luma dream machine': 'luma',
+  // 'pika' added (CRC-Active Tool Extraction Reachability Backstop + Gap
+  // Remediation): 'pika' has been a registered canonical CanonicalToolId
+  // with four CRC-active governed TopicClaims (CLAIM-PIKA-COMMERCIAL-USE-*)
+  // since 2026-09-06, but never had a KNOWN_TOOLS entry -- the same
+  // reachability gap already hit and fixed for 'kling ai', "luma ai's
+  // dream machine", 'suno', and 'midjourney' above. A dedicated
+  // reachability audit found this empirically, contradicting a
+  // topic-claims-fixture.ts comment that had incorrectly asserted Pika was
+  // "already conversationally reachable" (corrected alongside this entry).
+  // Narrow, single alias only -- no fuzzy matching, no speculative variants
+  // ('pika labs', 'pika ai', 'pika art', etc.) added.
+  pika: 'pika',
+  // 'synthesia' added (CRC-Active Tool Extraction Reachability Backstop +
+  // Gap Remediation): 'synthesia' has one CRC-active governed TopicClaim
+  // (CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1, Adopted 2026-08-29) --
+  // that claim's own comment already honestly disclosed "No extraction
+  // alias for 'synthesia' exists" as a known, separately-timed gap (CPR_007's
+  // established finding); this entry closes that disclosed gap. Narrow,
+  // single alias only.
+  synthesia: 'synthesia',
   // 'suno' added 2026-09-01 (LK-100, Trial 6 Suno Canonicalization
   // Remediation): unlike every prior alias in this table (all added
   // reactively, after a real production UAT observed the exact failing
