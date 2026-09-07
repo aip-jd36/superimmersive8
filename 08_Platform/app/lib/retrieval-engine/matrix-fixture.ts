@@ -252,13 +252,13 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
   },
   {
     identifier: 'midjourney',
-    last_verified: '2026-08-05',
+    last_verified: '2026-09-07',
     claims: [
       {
         claim_id: 'midjourney',
         crc_eligible: 'Yes',
         crc_publication_scope:
-          "CRC may state only that Midjourney's commercial-use permissions differ by subscription under the current Terms: free users are limited to non-commercial use, while paid members may use generated assets commercially. CRC may also state that Midjourney's Terms require a corporate membership plan when the Service is used for the benefit of a company with more than US$1 million in annual gross revenue. This publication scope does not extend to Midjourney's ownership language, copyright analysis, training-data licensing, downstream IP clearance, or broader commercial-readiness conclusions.",
+          "CRC may state only that Midjourney's commercial-use permissions differ by subscription under the current Terms: free users are limited to non-commercial use, while paid members may use generated assets commercially. CRC may also state that Midjourney's Terms require a corporate membership plan when the Service is used for the benefit of a company with more than US$1 million in annual gross revenue. This publication scope does not extend to Midjourney's ownership language, copyright analysis, training-data licensing, downstream IP clearance, or broader commercial-readiness conclusions. CRC must not state or imply that the user's own organization is below the revenue threshold, that the threshold does not apply to the user's project, or that any required corporate-membership plan is held — this claim does not evaluate or resolve the user's organization's revenue status or corporate-membership compliance.",
         crc_candidate_statement:
           "Midjourney's commercial-use permissions depend on your subscription. Under the current Terms, free users are limited to non-commercial use, while paid members may use generated assets commercially. If the Service is being used for the benefit of a company with more than US$1 million in annual gross revenue, Midjourney's Terms also require a corporate membership plan.",
         topic: 'commercial_use',
