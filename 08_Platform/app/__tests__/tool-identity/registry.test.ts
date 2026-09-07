@@ -134,6 +134,44 @@ describe('4: extraction behavior unchanged for existing aliases end-to-end (atte
       },
     })
   })
+
+  // Midjourney extraction-alias fix: same reactive shape as the Kling/Luma
+  // precedents above -- a real production UAT observed "Midjourney" staying
+  // unresolved_alias despite a registered CanonicalToolId and CRC-active
+  // governed Matrix knowledge (session 4cec0008-081e-41f0-8c68-1fb2e7f3df83).
+  test('the ordinary provider name "Midjourney" produces a confirmed, canonical midjourney ToolMention', () => {
+    const candidate = toolCandidate({ raw_tool_name: 'Midjourney', raw_text: 'I used Midjourney.' })
+    const normalization = normalizeCandidate(candidate)
+    expect(normalization).toEqual({ status: 'resolved', canonical_identifier: 'midjourney' })
+    const fact = attestCandidate(candidate, normalization)
+    expect(fact).toMatchObject({
+      kind: 'tool_mention',
+      mention: {
+        resolution: { kind: 'canonical', identifier: 'midjourney' },
+        confidence: 'confirmed',
+      },
+    })
+  })
+
+  // CRC-active extraction-reachability backstop remediation: like Suno's
+  // LK-100 fix, this alias was added PROSPECTIVELY -- caught by a generic
+  // CRC-active tool reachability audit (not a live production UAT failure)
+  // after Pika's four published, crc_eligible: 'Yes' TopicClaims were found
+  // to be conversationally unreachable despite 'pika' already being a
+  // registered CanonicalToolId.
+  test('the ordinary provider name "Pika" produces a confirmed, canonical pika ToolMention', () => {
+    const candidate = toolCandidate({ raw_tool_name: 'Pika', raw_text: 'I used Pika.' })
+    const normalization = normalizeCandidate(candidate)
+    expect(normalization).toEqual({ status: 'resolved', canonical_identifier: 'pika' })
+    const fact = attestCandidate(candidate, normalization)
+    expect(fact).toMatchObject({
+      kind: 'tool_mention',
+      mention: {
+        resolution: { kind: 'canonical', identifier: 'pika' },
+        confidence: 'confirmed',
+      },
+    })
+  })
 })
 
 // ── 5: unknown-tool behavior remains unresolved_alias ───────────────────────
@@ -175,7 +213,13 @@ describe('7: registry membership does not create extraction reachability', () =>
   // belongs to the "registered but no alias" set this describe block
   // exercises. See test 4 below and __tests__/retrieval-engine/
   // suno-runtime-retrieval.test.ts §I for its own resolved-alias coverage.
-  test.each(['pika', 'midjourney', 'google-veo', 'adobe-firefly', 'openai-sora'] as const)(
+  //
+  // 'midjourney' removed via the Midjourney extraction-alias fix (reactive,
+  // production-UAT-driven) and 'pika' removed via the CRC-active extraction-
+  // reachability backstop remediation (prospective, audit-driven) -- both
+  // now have real KNOWN_TOOLS entries. See the two new tests in section 4
+  // above for their resolved-alias coverage.
+  test.each(['google-veo', 'adobe-firefly', 'openai-sora'] as const)(
     '%s is a registered canonical identity but has NO extraction alias -- still normalizes to unrecognized',
     (id) => {
       expect(isCanonicalToolIdentity(id)).toBe(true)
