@@ -201,7 +201,14 @@ function makeDb() {
   const now = () => `t${++clock}`
 
   function patchWorkbook(data: any, actor: string) {
-    if (asm && asm.processing_status === 'DELIVERED') return { ok: false, code: 'delivered' as const }
+    // CA-RLK-2a.1: post-provenance immutability — block SIGNING/SIGNED/DELIVERED
+    // BEFORE any write (no revision bump, no sign-off change).
+    if (asm && ['SIGNING', 'SIGNED', 'DELIVERED'].includes(asm.processing_status)) {
+      const code = asm.processing_status === 'SIGNING' ? 'locked_for_signing'
+        : asm.processing_status === 'SIGNED' ? 'signed_immutable'
+        : 'delivered'
+      return { ok: false, code: code as 'locked_for_signing' | 'signed_immutable' | 'delivered' }
+    }
     sub.workbook_data = data
     sub.workbook_revision += 1
     let signoff_invalidated = false
@@ -250,7 +257,19 @@ function makeDb() {
     return { ok: true as const, created: true, assessment: { ...asm } }
   }
 
-  return { sub, get asm() { return asm }, patchWorkbook, signOff }
+  // CA-RLK-2a.1 downstream backstop: deliver only from SIGNED + active +
+  // revision-matched sign-off. A failed check performs NO state transition.
+  function markDelivered() {
+    if (!asm) return { ok: false, code: 'assessment_not_signed_off' as const }
+    if (asm.processing_status !== 'SIGNED') return { ok: false, code: 'not_signed' as const }
+    if (asm.signoff_status !== 'active') return { ok: false, code: 'signoff_invalidated' as const }
+    if (asm.signed_workbook_revision == null) return { ok: false, code: 'assessment_not_signed_off' as const }
+    if (asm.signed_workbook_revision !== sub.workbook_revision) return { ok: false, code: 'workbook_changed_since_signoff' as const }
+    asm.processing_status = 'DELIVERED'
+    return { ok: true as const }
+  }
+
+  return { sub, get asm() { return asm }, patchWorkbook, signOff, markDelivered }
 }
 
 describe('atomic sign-off / workbook-revision concurrency model (CA-RLK-2a §31)', () => {
@@ -366,6 +385,128 @@ describe('atomic sign-off / workbook-revision concurrency model (CA-RLK-2a §31)
     const r = db.signOff('R', 1)
     expect(r.ok).toBe(false)
     expect(!r.ok && r.code).toBe('not_pre_delivery')
+  })
+})
+
+// ── CA-RLK-2a.1: post-provenance immutability + delivery backstop ───────────
+
+describe('post-provenance workbook immutability (CA-RLK-2a.1 §7-§9, §15 C/D/E)', () => {
+  function atState(state: 'DRAFT' | 'REPORT_GENERATED' | 'SIGNING' | 'SIGNED' | 'DELIVERED') {
+    const db = makeDb()
+    db.patchWorkbook({ v: 1 }, 'R')     // revision 1
+    db.signOff('R', 1)
+    if (state !== 'DRAFT') db.asm!.processing_status = state
+    if (state === 'REPORT_GENERATED') { db.sub.report_pdf_url = 'x.pdf'; db.sub.report_pdf_assessment_id = db.asm!.id }
+    return db
+  }
+
+  test('DRAFT — edit allowed; revision bumps; sign-off invalidated; provenance preserved (§5 / §15 A)', () => {
+    const db = atState('DRAFT')
+    const p = db.patchWorkbook({ v: 2 }, 'R')
+    expect(p.ok && p.workbook_revision).toBe(2)
+    expect(db.asm!.signoff_status).toBe('invalidated')
+    expect(db.asm!.signed_off_by).toBe('R')
+    expect(db.asm!.signed_workbook_revision).toBe(1)
+    expect(db.asm!.processing_status).toBe('DRAFT')
+  })
+
+  test('REPORT_GENERATED — edit allowed; sign-off + report invalidated; -> DRAFT (§6 / §15 B)', () => {
+    const db = atState('REPORT_GENERATED')
+    const p = db.patchWorkbook({ v: 2 }, 'R')
+    expect(p.ok && (p as any).report_invalidated).toBe(true)
+    expect(db.asm!.signoff_status).toBe('invalidated')
+    expect(db.asm!.processing_status).toBe('DRAFT')
+    expect(db.sub.report_pdf_url).toBeNull()
+    expect(db.sub.report_pdf_assessment_id).toBeNull()
+  })
+
+  test('SIGNING — workbook mutation returns 409; nothing changes (§7 / §15 C)', () => {
+    const db = atState('SIGNING')
+    const revBefore = db.sub.workbook_revision
+    const p = db.patchWorkbook({ tampered: true }, 'R')
+    expect(p.ok).toBe(false)
+    expect(!p.ok && p.code).toBe('locked_for_signing')
+    expect(db.sub.workbook_revision).toBe(revBefore)
+    expect(db.asm!.signoff_status).toBe('active')
+    expect(db.asm!.processing_status).toBe('SIGNING')
+  })
+
+  test('SIGNED — workbook mutation returns 409; nothing changes (§8 / §15 D)', () => {
+    const db = atState('SIGNED')
+    const revBefore = db.sub.workbook_revision
+    const p = db.patchWorkbook({ tampered: true }, 'R')
+    expect(p.ok).toBe(false)
+    expect(!p.ok && p.code).toBe('signed_immutable')
+    expect(db.sub.workbook_revision).toBe(revBefore)
+    expect(db.asm!.signoff_status).toBe('active')
+    expect(db.asm!.signed_workbook_revision).toBe(1)
+    expect(db.sub.report_pdf_url == null).toBe(true) // report binding untouched
+  })
+
+  test('DELIVERED — workbook mutation returns 409 (§9 / §15 E)', () => {
+    const db = atState('DELIVERED')
+    const p = db.patchWorkbook({ tampered: true }, 'R')
+    expect(p.ok).toBe(false)
+    expect(!p.ok && p.code).toBe('delivered')
+  })
+
+  test('the exact gap sequence is now closed: SIGNED -> edit -> deliver', () => {
+    const db = makeDb()
+    db.patchWorkbook({}, 'R'); db.signOff('R', 1)
+    db.asm!.processing_status = 'SIGNED'
+    const edit = db.patchWorkbook({ sneaky: true }, 'R')   // was: silently invalidated the sign-off
+    expect(edit.ok).toBe(false)                            // now: blocked outright
+    expect(db.asm!.signoff_status).toBe('active')
+    expect(db.markDelivered().ok).toBe(true)               // delivery is safe
+  })
+})
+
+describe('mark-delivered defensive gate (CA-RLK-2a.1 §10 / §15 F-J)', () => {
+  test('F — SIGNED + active + revision-matched -> delivers', () => {
+    const db = makeDb()
+    db.patchWorkbook({}, 'R'); db.signOff('R', 1)
+    db.asm!.processing_status = 'SIGNED'
+    expect(db.markDelivered().ok).toBe(true)
+    expect(db.asm!.processing_status).toBe('DELIVERED')
+  })
+
+  test('G — SIGNED + signoff_status invalidated -> fails, no transition (§15 G, J)', () => {
+    const db = makeDb()
+    db.patchWorkbook({}, 'R'); db.signOff('R', 1)
+    db.asm!.processing_status = 'SIGNED'
+    db.asm!.signoff_status = 'invalidated' // simulate a legacy pre-2a.1 invalidation
+    const r = db.markDelivered()
+    expect(r.ok).toBe(false)
+    expect(!r.ok && r.code).toBe('signoff_invalidated')
+    expect(db.asm!.processing_status).toBe('SIGNED')
+  })
+
+  test('H — SIGNED + signed_workbook_revision != workbook_revision -> fails (§15 H, J)', () => {
+    const db = makeDb()
+    db.patchWorkbook({}, 'R'); db.signOff('R', 1)
+    db.asm!.processing_status = 'SIGNED'
+    db.sub.workbook_revision = 5 // drifted (e.g. via a legacy path)
+    const r = db.markDelivered()
+    expect(r.ok).toBe(false)
+    expect(!r.ok && r.code).toBe('workbook_changed_since_signoff')
+    expect(db.asm!.processing_status).toBe('SIGNED')
+  })
+
+  test('I — SIGNED + signed_workbook_revision NULL -> fails (§15 I)', () => {
+    const db = makeDb()
+    db.patchWorkbook({}, 'R'); db.signOff('R', 1)
+    db.asm!.processing_status = 'SIGNED'
+    db.asm!.signed_workbook_revision = null
+    const r = db.markDelivered()
+    expect(r.ok).toBe(false)
+    expect(db.asm!.processing_status).toBe('SIGNED')
+  })
+
+  test('mark-delivered still requires SIGNED (REPORT_GENERATED is rejected)', () => {
+    const db = makeDb()
+    db.patchWorkbook({}, 'R'); db.signOff('R', 1)
+    db.asm!.processing_status = 'REPORT_GENERATED'
+    expect(db.markDelivered().ok).toBe(false)
   })
 })
 

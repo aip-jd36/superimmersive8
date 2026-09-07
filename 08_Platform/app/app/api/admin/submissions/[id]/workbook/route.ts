@@ -84,11 +84,14 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
 
     const result = await patchWorkbookAtomic(params.id, workbook_data, authUser.id)
     if (!result.ok) {
-      if (result.code === 'delivered') {
-        return NextResponse.json(
-          { error: 'delivered', message: 'This assessment has been delivered and its workbook is locked.' },
-          { status: 409 },
-        )
+      // CA-RLK-2a.1: once provenance signing has begun the workbook is locked.
+      const locked: Record<string, string> = {
+        locked_for_signing: 'Provenance signing is in progress — the workbook is locked.',
+        signed_immutable: 'This assessment has been provenance-signed and its workbook is locked.',
+        delivered: 'This assessment has been delivered and its workbook is locked.',
+      }
+      if (result.code in locked) {
+        return NextResponse.json({ error: result.code, message: locked[result.code] }, { status: 409 })
       }
       if (result.code === 'submission_not_found') {
         return NextResponse.json({ error: 'Submission not found' }, { status: 404 })

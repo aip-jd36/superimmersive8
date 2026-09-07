@@ -33,16 +33,18 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
     }
 
-    // CA-RLK-2a: the source video is a signed-asset input. Once the assessment
-    // is DELIVERED it is a historical record — block the mutation.
+    // CA-RLK-2a / 2a.1: the source video is the signed-asset input. Once
+    // provenance signing has begun (SIGNING) or completed (SIGNED / DELIVERED),
+    // changing it would break the signed-asset <-> report relationship.
     const { data: assessment } = await supabaseAdmin
       .from('assessments')
       .select('processing_status')
       .eq('submission_id', params.id)
       .single()
-    if ((assessment as any)?.processing_status === 'DELIVERED') {
+    const ps = (assessment as any)?.processing_status
+    if (ps === 'SIGNING' || ps === 'SIGNED' || ps === 'DELIVERED') {
       return NextResponse.json(
-        { error: 'delivered', message: 'This assessment has been delivered; its assessed-asset inputs are locked.' },
+        { error: 'assessed_asset_locked', message: `Assessed-asset inputs are locked (assessment state: ${ps}).` },
         { status: 409 },
       )
     }

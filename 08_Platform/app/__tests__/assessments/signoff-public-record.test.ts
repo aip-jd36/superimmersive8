@@ -155,6 +155,55 @@ describe('sign-off authority cannot be spoofed', () => {
     expect(fn).not.toMatch(/Date\.now\(\)|new Date\(\)/)
   })
 
+  test('CA-RLK-2a.1 — patch_workbook_atomic blocks SIGNING/SIGNED/DELIVERED BEFORE any write', () => {
+    const mig = read('supabase/migrations/20260907000000_assessment_signoff_integrity.sql')
+    const fn = mig.slice(
+      mig.indexOf('CREATE OR REPLACE FUNCTION patch_workbook_atomic'),
+      mig.indexOf('CREATE OR REPLACE FUNCTION sign_off_assessment'),
+    )
+    expect(fn).toMatch(/processing_status IN \('SIGNING',\s*'SIGNED',\s*'DELIVERED'\)/)
+    expect(fn).toMatch(/'locked_for_signing'/)
+    expect(fn).toMatch(/'signed_immutable'/)
+    const guardIdx = fn.indexOf("processing_status IN ('SIGNING'")
+    const bumpIdx = fn.indexOf('workbook_revision = workbook_revision + 1')
+    expect(guardIdx).toBeGreaterThan(0)
+    expect(guardIdx).toBeLessThan(bumpIdx)
+  })
+
+  test('CA-RLK-2a.1 — mark-delivered requires SIGNED + active + revision-matched sign-off, no transition on failure', () => {
+    const route = read('app/api/admin/submissions/[id]/mark-delivered/route.ts')
+    expect(route).toMatch(/processing_status !== 'SIGNED'/)
+    expect(route).toMatch(/signoff_status !== 'active'/)
+    expect(route).toMatch(/signed_workbook_revision == null/)
+    expect(route).toMatch(/signed_workbook_revision !== currentRevision/)
+    const firstGuard = route.indexOf("processing_status !== 'SIGNED'")
+    const transition = route.indexOf("transitionProcessingStatus(assessment.id, 'DELIVERED')")
+    expect(firstGuard).toBeGreaterThan(0)
+    expect(firstGuard).toBeLessThan(transition)
+    expect(route.slice(firstGuard, transition)).toMatch(/signoff_invalidated[\s\S]*workbook_changed_since_signoff/)
+  })
+
+  test('CA-RLK-2a.1 — delivery-files locks the source video at SIGNING/SIGNED/DELIVERED', () => {
+    const route = read('app/api/admin/submissions/[id]/delivery-files/route.ts')
+    expect(route).toMatch(/ps === 'SIGNING' \|\| ps === 'SIGNED' \|\| ps === 'DELIVERED'/)
+    expect(route).toMatch(/assessed_asset_locked/)
+  })
+
+  test('CA-RLK-2a.1 — DRAFT / REPORT_GENERATED editability + provenance preservation unchanged', () => {
+    const mig = read('supabase/migrations/20260907000000_assessment_signoff_integrity.sql')
+    const fn = mig.slice(
+      mig.indexOf('CREATE OR REPLACE FUNCTION patch_workbook_atomic'),
+      mig.indexOf('CREATE OR REPLACE FUNCTION sign_off_assessment'),
+    )
+    expect(fn).toMatch(/workbook_revision = workbook_revision \+ 1/)
+    expect(fn).toMatch(/signoff_status\s*=\s*'invalidated'/)
+    expect(fn).toMatch(/THEN 'DRAFT' ELSE processing_status END/)
+    expect(fn).toMatch(/report_pdf_url = NULL, report_pdf_assessment_id = NULL/)
+    const inv = fn.indexOf("signoff_status         = 'invalidated'")
+    const invEnd = fn.indexOf('END IF;', inv)
+    expect(fn.slice(inv, invEnd)).not.toMatch(/signed_off_by\s*=|signed_off_at\s*=|signed_workbook_revision\s*=/)
+  })
+
   test('the sign_off_assessment RPC uses DB time (now / CURRENT_DATE), never a parameter, for signed_off_at / assessment_date', () => {
     const mig = read('supabase/migrations/20260907000000_assessment_signoff_integrity.sql')
     const start = mig.indexOf('CREATE OR REPLACE FUNCTION sign_off_assessment')

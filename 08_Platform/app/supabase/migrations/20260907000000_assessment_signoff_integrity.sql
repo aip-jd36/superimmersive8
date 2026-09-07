@@ -108,9 +108,16 @@ WHERE s.id = a.submission_id;
 -- a pre-delivery assessment, flip it to 'invalidated' WHILE PRESERVING
 -- signed_off_by / signed_off_at / signed_workbook_revision (correction #1),
 -- and (if REPORT_GENERATED) revert to DRAFT and clear the stale report binding.
--- A DELIVERED assessment blocks the whole operation (409 at the route).
 -- An already-invalidated sign-off is NOT touched again — the FIRST
 -- invalidation time is preserved until re-sign (CA-RLK-2a §14).
+--
+-- CA-RLK-2a.1: once provenance signing has begun, the assessment basis must be
+-- immutable through the ordinary workbook path. SIGNING / SIGNED / DELIVERED
+-- each block the whole operation (409 at the route) — no workbook_data write,
+-- no revision bump, no sign-off change, no report change. DRAFT and
+-- REPORT_GENERATED stay editable (an edit still invalidates the sign-off).
+-- FAILED remains editable — a failed sign produced no signed artifact and the
+-- FAILED->SIGNING retry already assumes a re-sign.
 
 CREATE OR REPLACE FUNCTION patch_workbook_atomic(
   p_submission_id UUID,
@@ -132,8 +139,17 @@ BEGIN
   SELECT * INTO v_a FROM assessments WHERE submission_id = p_submission_id FOR UPDATE;
   v_has_assessment := FOUND;
 
-  IF v_has_assessment AND v_a.processing_status = 'DELIVERED' THEN
-    RETURN jsonb_build_object('ok', false, 'code', 'delivered');
+  -- CA-RLK-2a.1: post-provenance immutability. Returns BEFORE any write.
+  IF v_has_assessment AND v_a.processing_status IN ('SIGNING', 'SIGNED', 'DELIVERED') THEN
+    RETURN jsonb_build_object(
+      'ok', false,
+      'code', CASE v_a.processing_status
+                WHEN 'SIGNING'   THEN 'locked_for_signing'
+                WHEN 'SIGNED'    THEN 'signed_immutable'
+                ELSE 'delivered'
+              END,
+      'processing_status', v_a.processing_status
+    );
   END IF;
 
   UPDATE submissions
