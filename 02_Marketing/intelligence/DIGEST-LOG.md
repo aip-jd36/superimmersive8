@@ -9,6 +9,52 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of September 07, 2026
+*Run: 2026-09-07 · 15 high · 16 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [The Insurance Industry’s Retreat from AI Threatens to Slow Innovation and Adoption](https://www.csis.org/analysis/insurance-industrys-retreat-ai-threatens-slow-innovation-and-adoption) | CSIS \| Center for Strategic and International Studies | Fri, 04 Sep 2026 | ☐ |
+| 9 | post+update | [New York's AI ad disclosure law gets first complaints over undisclosed synthetic models](https://www.thecooldown.com/green-tech/new-york-ai-ad-disclosure-complaints-synthetic-models/) | thecooldown.com | Wed, 02 Sep 2026 | ☐ |
+| 9 | post+update | [FTC Fines Cox Media $930K Over Fake AI Ad Claims](https://tech-insider.org/ftc-cox-media-group-ai-active-listening-fine-2026/) | tech-insider.org | Tue, 01 Sep 2026 | ☐ |
+| 8 | post+update | [The EU AI Compliance Stack Is Crystallizing Into Three Layers – and None of Them Talk to Each Other](https://forkast.news/the-eu-ai-compliance-stack-is-crystallizing-into-three-layers-and-none-of-them-talk-to-each-other/) | forkast.news | Sun, 06 Sep 2026 | ☐ |
+| 8 | post+update | [Dutch trade body maps 4 AI disclosure triggers for ad agencies](https://ppc.land/dutch-trade-body-maps-4-ai-disclosure-triggers-for-ad-agencies/) | PPC Land | Sat, 05 Sep 2026 | ☐ |
+| 8 | post+update | [Shruti Haasan Wins Interim Relief In AI Deepfake Case, Court Orders Fake Content Removal](https://news.abplive.com/entertainment/celebrities/shruti-haasan-wins-interim-relief-in-ai-deepfake-case-court-orders-fake-content-removal-1865184) | ABP Live English | Fri, 04 Sep 2026 | ☐ |
+| 8 | post+update | [EU AI Office Hiring 40 Enforcement Staff Signals Q4 Crackdown](https://forkast.news/eu-ai-office-hiring-40-enforcement-staff-signals-q4-crackdown/) | forkast.news | Thu, 03 Sep 2026 | ☐ |
+| 8 | post+update | [AI Insights: This Ad Was Made by a Robot](https://www.jdsupra.com/legalnews/ai-insights-this-ad-was-made-by-a-robot-2822029/) | JD Supra | Tue, 01 Sep 2026 | ☐ |
+| 8 | update | [Anthropic Sued Over Copyright Infringement by Sony and Warner; Know Complete Details Here](https://www.latestly.com/business/anthropic-sued-over-copyright-infringement-by-sony-and-warner-know-complete-details-here-7584816.html) | LatestLY | Tue, 01 Sep 2026 | ☐ |
+| 8 | post+update | [Sony and Warner Music sue Anthropic over alleged theft of 'tens of thousands' of songs](https://fortune.com/2026/09/01/anthropic-warner-sony-music-songs-lawsuit/) | Fortune | Tue, 01 Sep 2026 | ☐ |
+| 8 | post+update | [Callaway and Good Good’s Ad Was So Bad, Even AI Audiences Sounded the Alarm](https://www.adweek.com/brand-marketing/callaway-and-good-goods-ad-was-so-bad-even-ai-audiences-sounded-the-alarm/) | ADWEEK | Mon, 31 Aug 2026 | ☐ |
+| 7 | post+update | [Why the Blige-Suno Ad Should Worry Every Artist](https://rollingout.com/2026/09/03/mary-j-blige-suno-ai-ad-consent-problem/) | Rolling Out | Thu, 03 Sep 2026 | ☐ |
+| 7 | update | [Generative AI Copyright: Law & Litigation](https://aimultiple.com/generative-ai-copyright) | AIMultiple | Thu, 03 Sep 2026 | ☐ |
+| 7 | post+update | [Trustworthiness of AI Generated Marketing Content in Enterprise [In-Depth Analysis, 2026]](https://www.klover.ai/trustworthiness_of_ai_generated_marketing_content_in_enterprise_indepth_analysis_2026/) | Klover.ai | Tue, 01 Sep 2026 | ☐ |
+| 7 | post+update | [Enterprise Strategies for AI Provenance: Balancing the Verification Tax Against Risk Management and Regulatory Compliance [In-Depth Analysis, 2026]](https://www.klover.ai/enterprise_strategies_for_ai_provenance_balancing_the_verification_tax_against_risk_management_regulatory_compliance_indepth_anlaysis_2026/) | Klover.ai | Tue, 01 Sep 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [How Does AI Agent Liability Insurance Actually Work?](https://startupfortune.com/how-does-ai-agent-liability-insurance-actually-work/) | Startup Fortune | Sun, 06 Sep 2026 | ☐ |
+| 6 | monitor | [In AI-made Likud ad, Mamdani, Khamenei and Erdogan prematurely celebrate Netanyahu’s defeat](https://www.timesofisrael.com/in-ai-made-likud-ad-mamdani-khamenei-and-erdogan-celebrate-netanyahus-expected-defeat/) | The Times of Israel | Sat, 05 Sep 2026 | ☐ |
+| 6 | monitor | [Global Cyber Insurance Market 2026: Growth, Rates, AI Risks and Outlook](https://beinsure.com/global-cyber-insurance-market-rates-ai-risks/) | Beinsure | Thu, 03 Sep 2026 | ☐ |
+| 6 | update | [AI-Generated Content and Copyright Law: What We Know](https://builtin.com/artificial-intelligence/ai-copyright) | Built In | Thu, 03 Sep 2026 | ☐ |
+| 6 | monitor | [AI Marketing Source Verification: Enterprise CMO Strategies, Compliance Frameworks, and Technical Architecture [In-Depth Analysis, 2026]](https://www.klover.ai/ai_marketing_source_verification_enterprise_cmo_strategies_compliance_frameworks_technical_architecture_indepth_analysis_2026/) | Klover.ai | Wed, 02 Sep 2026 | ☐ |
+| 6 | monitor | [Jason Isbell Claims Suno Used Artists' Identities to Train AI 'Without Consent' in New Lawsuit](https://www.rollingstone.com/music/music-news/jason-isbell-suno-lawsuit-artist-identities-1235619317/) | Rolling Stone | Tue, 01 Sep 2026 | ☐ |
+| 6 | monitor | [Jason Isbell Files Class Action Lawsuit Claiming Suno Coded AI to ‘Extract Musicians’ Identities’](https://www.billboard.com/pro/jason-isbell-class-action-lawsuit-ai-music-platform-suno/) | Billboard | Tue, 01 Sep 2026 | ☐ |
+| 5 | monitor | [[Today’s Signal] OpenAI Faces Two Audit Trails: Disclose AI Activity and Information Sources](https://www.koreaittimes.com/news/articleView.html?idxno=156825) | Korea IT Times | Sun, 06 Sep 2026 | ☐ |
+| 5 | monitor | [New York Times Lawsuit 2026: OpenAI Damages and Payouts](https://lawfold.com/new-york-times-lawsuit/) | LawFold.com | Thu, 03 Sep 2026 | ☐ |
+| 5 | monitor | [US govt sides with OpenAI in New York Times copyright lawsuit](https://www.freemalaysiatoday.com/category/world/2026/09/03/us-govt-sides-with-openai-in-new-york-times-copyright-lawsuit) | Free Malaysia Today | Thu, 03 Sep 2026 | ☐ |
+| 5 | monitor | [Enterprise Crisis of Artificial Truth: Navigating Epistemic Risk in AI Deployments [In-Depth Analysis, 2026]](https://www.klover.ai/enterprise_crisis_of_artificial_truth_navigating_epistemic_risk_in_ai_deployments_indepth_analysis_2026/) | Klover.ai | Wed, 02 Sep 2026 | ☐ |
+| 4 | monitor | [VC and Celebrity Money Flows into AI Media and Sports](https://www.whalesbook.com/news/English/media-and-entertainment/VC-and-Celebrity-Money-Flows-into-AI-Media-and-Sports/6a9dc0bf40007e01b83c0bcd) | Whalesbook | Sun, 06 Sep 2026 | ☐ |
+| 4 | monitor | [VCs, celebrities bet on AI startups in media, sports](https://timesofindia.indiatimes.com/business/india-business/vcs-celebrities-bet-on-ai-startups-in-media-sports/amp_articleshow/133850158.cms) | The Times of India | Sun, 06 Sep 2026 | ☐ |
+| 4 | monitor | [DOJ Says Barring AI Training on Copyrighted Material Could 'Severely Hamper' Tech Progress](https://reason.com/2026/09/04/doj-says-barring-ai-training-on-copyrighted-material-could-severely-hamper-tech-progress/) | Reason Magazine | Fri, 04 Sep 2026 | ☐ |
+| 4 | monitor | [AI Agents Push Cyber Insurers to Rethink Policy Language](https://beinsure.com/ai-agents-push-cyber-insurers/) | Beinsure | Thu, 03 Sep 2026 | ☐ |
+| 4 | monitor | [Marketing AI Governance: Safe Integration in Enterprise [In-Depth Analysis, 2026]](https://www.klover.ai/marketing_ai_governance_safe_integration_in_enterprise_indepth_analysis_2026/) | Klover.ai | Tue, 01 Sep 2026 | ☐ |
+
+---
+
 ## Week of September 04, 2026
 *Run: 2026-09-04 · 15 high · 15 monitor · lookback 7 days*
 
