@@ -502,6 +502,22 @@ const KNOWN_TOOLS: Record<string, CanonicalToolId> = {
   // Narrow, single alias only -- no fuzzy matching, no "suno ai" or other
   // speculative variant added.
   suno: 'suno',
+  // 'midjourney' added 2026-09-07 (Midjourney Extraction-Alias Defect):
+  // 'midjourney' has been a registered canonical CanonicalToolId (see
+  // tool-identity/registry.ts) since the original bootstrap, but never had
+  // a KNOWN_TOOLS entry -- the same reachability gap already hit and fixed
+  // for 'kling ai' and "luma ai's dream machine" above. A reported
+  // production interaction showed the question-generator naming
+  // "Midjourney" by name (proving conversational recognition of the raw
+  // text) while the governed Midjourney Matrix authority was never
+  // reached, because buildRetrievalHandoff() only forwards
+  // resolution.kind === 'canonical' mentions and this raw string stayed
+  // `unresolved_alias` for lack of this entry. Confirmed empirically
+  // against the real extraction/retrieval pipeline before this change (see
+  // the Midjourney Extraction-Alias Defect diagnostic). Narrow, single
+  // alias only -- no fuzzy matching, no speculative variants ('midjourney
+  // ai', 'mj', etc.) added.
+  midjourney: 'midjourney',
 }
 
 /**
