@@ -242,10 +242,11 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
     claims: [
       {
         claim_id: 'gemini-api',
-        crc_eligible: 'No',
+        crc_eligible: 'Yes',
         crc_publication_scope:
-          'None -- withheld pending extraction/reachability remediation. FGR-ADOPTED (evidence-limitation / non-determination proposition, 2026-09-08); CPR decision: WITHHOLD, not because the proposition is unsafe but because gemini-api currently has no KNOWN_TOOLS extraction alias. Expected to flip to Yes once remediated -- distinct from elevenlabs-voice-consent, a permanent policy withhold.',
-        crc_candidate_statement: null,
+          "CRC may state that Google's Gemini API Additional Terms of Service do not state whether output generated through the Gemini API may be used commercially -- the Terms contain neither an affirmative commercial-use grant nor an explicit commercial-use restriction. CRC may also state the ownership disclaimer, the professional/business-purpose service-eligibility condition, the EEA/Switzerland/UK Paid Services deployment condition, and the Free/Paid data-treatment distinction, each kept distinct from the commercial-use question. This publication scope does not extend to Gemini Consumer App or Vertex AI/Gemini Enterprise. CRC must not state or imply that Gemini API output may or may not be used commercially, must not treat the professional/business-purpose or EEA/Switzerland/UK conditions as answering the commercial-use question, must not state or infer the user's own tier, business/consumer classification, or deployment location, and must not encode a recommendation to seek further review as part of this claim.",
+        crc_candidate_statement:
+          "Google's Gemini API Additional Terms of Service (effective March 23, 2026, last updated April 28, 2026) do not state whether output generated through the Gemini API may be used commercially -- the Terms contain neither an affirmative commercial-use grant nor an explicit commercial-use restriction. Separately, Google does not claim ownership of generated content, while reserving the right to generate similar content for others. The Terms restrict use of the Gemini API and Google AI Studio to professional or business purposes, not consumer use. Users in the European Economic Area, Switzerland, or the United Kingdom may only use Paid Services when making API Clients available there. Content submitted under the unpaid tier may be used by Google to improve its products; content submitted under paid tiers is excluded from that use.",
         topic: 'commercial_use',
         applicability_requirements: [],
       },
