@@ -345,6 +345,8 @@ export function WorkbookClient({
                 section5={workbook.section_5}
                 section4={workbook.section_4}
                 section3={workbook.section_3}
+                section2={workbook.section_2}
+                section1={workbook.section_1}
                 assessmentNumber={assessmentNumber}
                 onAssessmentNumberChange={setAssessmentNumber}
                 submission={submission}

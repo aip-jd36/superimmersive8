@@ -4,12 +4,21 @@ import { useState } from 'react'
 import { Download, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { WorkbookData, DOMAIN_LABELS, OUTCOME_OPTIONS } from './workbook-schema'
+import {
+  projectReport,
+  domainWorstJudgment,
+  DOMAIN_CONTROLS,
+  type ReportProjection,
+  type EvidenceRecordField,
+} from '@/lib/assessments/reportProjection'
 
 type S7 = WorkbookData['section_7']
 type S6 = WorkbookData['section_6']
 type S5 = WorkbookData['section_5']
 type S4 = WorkbookData['section_4']
 type S3 = WorkbookData['section_3']
+type S2 = WorkbookData['section_2']
+type S1 = WorkbookData['section_1']
 
 interface Props {
   data: S7
@@ -17,6 +26,8 @@ interface Props {
   section5: S5
   section4: S4
   section3: S3
+  section2: S2
+  section1: S1
   /** Canonical assessment_number, if one already exists (null before first Generate). */
   assessmentNumber: string | null
   /** Called with the canonical number once ensure-assessment creates/returns it. */
@@ -79,19 +90,8 @@ function outcomeLabel(value: string): string {
   return OUTCOME_OPTIONS.find(o => o.value === value)?.label ?? value
 }
 
-function domainWorstJudgment(domain: string, section3: S3): string {
-  const controlMap: Record<string, string[]> = {
-    A: ['A01'], R: ['R01','R02','R03','R04'], H: ['H01','H02'],
-    I: ['I01','I02','I03'], L: ['L01','L02','L03'], T: ['T01'], D: ['D01','D02'],
-  }
-  const controls = controlMap[domain] ?? []
-  const judgments = controls.map(id => (section3 as any)[id]?.judgment ?? '').filter(Boolean)
-  if (judgments.includes('Not Provided')) return 'Not Provided'
-  if (judgments.includes('Partially Verified')) return 'Partially Verified'
-  if (judgments.every(j => j === 'Not Applicable')) return 'Not Applicable'
-  if (judgments.includes('Verified')) return 'Verified'
-  return 'Not Provided'
-}
+// `domainWorstJudgment` and `DOMAIN_CONTROLS` are the canonical versions from
+// lib/assessments/reportProjection (imported above).
 
 // ─── Domain content helpers ────────────────────────────────────────────────
 
@@ -114,31 +114,6 @@ function formatIntendedUse(raw: any): string {
   return String(raw)
 }
 
-const DOMAIN_CONTROLS: Record<string, string[]> = {
-  A: ['A01'], R: ['R01', 'R02', 'R03', 'R04'], H: ['H01', 'H02'],
-  I: ['I01', 'I02', 'I03'], L: ['L01', 'L02', 'L03'], T: ['T01'], D: ['D01', 'D02'],
-}
-
-function getDomainEvidence(letter: string, controls: string[], section3: S3, section5: S5): string {
-  const fromFindings = section5.findings
-    .filter(f => f.domain === letter).map(f => f.evidence_basis?.trim()).filter(Boolean) as string[]
-  if (fromFindings.length > 0) return fromFindings.join('. ')
-
-  const fromControls = controls
-    .map(id => {
-      const ctrl = (section3 as any)[id]
-      if (!ctrl || ctrl.judgment === 'Not Applicable') return null
-      return ctrl.notes?.trim() || null
-    }).filter(Boolean) as string[]
-  if (fromControls.length > 0) return fromControls.join('. ')
-
-  const allNA = controls.every(id => (section3 as any)[id]?.judgment === 'Not Applicable')
-  if (allNA) return 'Not applicable to this content.'
-  const status = domainWorstJudgment(letter, section3)
-  if (status === 'Not Provided') return 'No evidence provided by submitter for this domain.'
-  return 'CertForm submission and attached documentation reviewed.'
-}
-
 function getDomainFinding(letter: string, controls: string[], section3: S3, section4: S4, section5: S5): string {
   const fromFindings = section5.findings
     .filter(f => f.domain === letter).map(f => f.finding?.trim()).filter(Boolean) as string[]
@@ -152,7 +127,7 @@ function getDomainFinding(letter: string, controls: string[], section3: S3, sect
   const allNA = controls.every(id => (section3 as any)[id]?.judgment === 'Not Applicable')
   if (allNA) return 'Not applicable to this content.'
   const status = domainWorstJudgment(letter, section3)
-  if (status === 'Verified') return 'Evidence reviewed supports this domain. No material concerns identified during independent review.'
+  if (status === 'Verified') return 'Independent review identified no material concerns in this domain.'
   if (status === 'Partially Verified') return 'Evidence partially established. Specific gaps are documented in the Gap Log.'
   if (status === 'Not Provided') return 'No evidence was provided for this domain during the assessment period.'
   return 'See assessment workbook for detail.'
@@ -185,11 +160,15 @@ function getDomainImplication(letter: string, controls: string[], section3: S3, 
   return 'See Gap Log for commercial impact detail.'
 }
 
-function buildDomainBlocks(section3: S3, section4: S4, section5: S5): string {
+function buildDomainBlocks(
+  section3: S3, section4: S4, section5: S5, perDomainEvidence: Record<string, string>,
+): string {
   return Object.entries(DOMAIN_LABELS).map(([letter, name]) => {
     const controls = DOMAIN_CONTROLS[letter] ?? []
     const status = domainWorstJudgment(letter, section3)
-    const evidence = getDomainEvidence(letter, controls, section3, section5)
+    // Evidence-reviewed narrative comes from the bounded projection (reviewer-
+    // authored content only; no manufactured "documentation reviewed").
+    const evidence = perDomainEvidence[letter] ?? 'Not recorded.'
     const finding = getDomainFinding(letter, controls, section3, section4, section5)
     const implication = getDomainImplication(letter, controls, section3, section4, section5)
     return `#domain-block(
@@ -202,55 +181,79 @@ function buildDomainBlocks(section3: S3, section4: S4, section5: S5): string {
   }).join('\n\n')
 }
 
-function buildScopeBox(section3: S3, section5: S5): string {
-  const anyNotMissing = (ids: string[]) =>
-    ids.some(id => { const j = (section3 as any)[id]?.judgment; return j && j !== 'Not Provided' })
+// CA-RLK-2b: Section 1's domain scope is carried by the governed "Evidence
+// Coverage Overview" table (already rendered from `domainWorstJudgment`). The
+// obsolete `buildScopeBox` — an eight-item grid inferred from control judgment
+// status — is deleted: no judgment value (including `Verified`) independently
+// establishes that a documentation category was reviewed.
+// `projection.domainsAssessed` remains available for the governed methodology
+// scope where a caller needs it explicitly.
 
-  const items: Array<[boolean, string]> = [
-    [true, 'Submitted video content'],
-    [true, 'Production declarations'],
-    [anyNotMissing(['R01', 'R02']), 'Commercial licensing documentation'],
-    [anyNotMissing(['H01']), 'Human authorship evidence'],
-    [anyNotMissing(['I01', 'I02', 'I03']), 'Third-party IP disclosures'],
-    [anyNotMissing(['L01', 'L02', 'L03']), 'Likeness disclosures'],
-    [anyNotMissing(['T01']), 'Workflow & technical documentation'],
-    [section5.findings.some(f => !!f.evidence_basis?.trim()), 'Supporting evidence package'],
-  ]
+/**
+ * Section 2 "Evidence provided" (Report Template v0.2): the reviewer's authored
+ * `evidence_reviewed` list, verbatim. Fail closed to governed neutral text when
+ * the reviewer did not author a consolidated list — never synthesised from
+ * judgment status or submission shape.
+ */
+function buildEvidenceList(p: ReportProjection): string {
+  const lines = p.evidenceReviewedAuthored
+    ? p.evidenceReviewedLines.map(e => `- ${esc(e)}`).join('\n')
+    : `_${esc(p.evidenceReviewedFallback)}_`
+  const observed = p.videoIndependentlyObserved
+    ? '\n- Direct review of submitted video content'
+    : ''
+  return `${lines}${observed}`
+}
 
-  const gridItems = items.map(([checked, label]) => {
-    const icon = checked
-      ? '#text(fill: c-verified-fg, weight: "bold")[#sym.checkmark]'
-      : '#text(fill: c-missing-fg)[○]'
-    return `[${icon} ${esc(label)}]`
-  }).join(',\n    ')
+/** Section 2 "AI tools declared by submitter" (Report Template v0.2). */
+function buildDeclaredToolsLine(submission: Record<string, any>): string {
+  const raw = submission.tools_used
+  const arr = Array.isArray(raw)
+    ? raw
+    : (typeof raw === 'string' ? (() => { try { return JSON.parse(raw) } catch { return [] } })() : [])
+  const names = arr
+    .map((t: any) => (t?.tool_name || t?.toolName || t?.tool || t?.name || '').toString().trim())
+    .filter(Boolean)
+  if (names.length === 0) return '_No AI tools were declared by the submitter._'
+  return names.map((n: string) => `- ${esc(n)}`).join('\n')
+}
 
-  return `#assurance-box[
-  *Scope of Independent Review*
-  #v(5pt)
-  #set text(size: 9.5pt)
-  #grid(
-    columns: (1fr, 1fr),
-    row-gutter: 5pt,
-    column-gutter: 12pt,
-    ${gridItems},
-  )
+/**
+ * Appendix A: Supporting Evidence Record (Report Template v0.2).
+ * Every label/value is passed in Typst *content* position (`[...]`) with
+ * `esc()` applied — the same escaping contract the domain blocks use — never
+ * as a string literal (where `esc()`'s `\[`/`\#` output would be invalid).
+ */
+function buildSupportingEvidenceRecord(p: ReportProjection): string {
+  const renderField = (f: EvidenceRecordField): string => {
+    if (f.sub && f.sub.length > 0) {
+      const subLines = f.sub
+        .map(sub => `  #field(label: [${esc(sub.label)}], value: [${esc(sub.value)}])`)
+        .join('\n')
+      return `#text(weight: "bold", fill: c-navy, size: 9.5pt)[${esc(f.label)}]
+#v(2pt)
+#pad(left: 12pt)[
+${subLines}
+]
+#v(4pt)`
+    }
+    return `#field(label: [${esc(f.label)}], value: [${esc(f.value)}])`
+  }
+
+  const body = p.supportingEvidenceRecord.map(renderField).join('\n\n')
+
+  return `_This appendix provides a structured record of the evidence submitted. It is a documentation record, not a narrative assessment. For the commercial assessment and findings, see Sections 1--3._
+
+${body}
+
+#v(0.6em)
+#assurance-box[
+  #text(size: 9pt)[${esc(p.supportingEvidenceLimitation)}]
 ]`
 }
 
-function buildEvidenceList(data: S7, section5: S5): string {
-  if (data.evidence_reviewed.length > 0) return data.evidence_reviewed.map(e => `- ${esc(e)}`).join('\n')
-  const fromFindings = section5.findings.map(f => f.evidence_basis?.trim()).filter(Boolean) as string[]
-  const standard = [
-    'CertForm submission and production declarations',
-    'Evidence Custodian Declaration',
-    'Submitted video content (independent observation)',
-  ]
-  const combined = [...new Set([...fromFindings, ...standard])]
-  return combined.map(e => `- ${esc(e)}`).join('\n')
-}
-
 function buildTypContent(
-  data: S7, section6: S6, section5: S5, section4: S4, section3: S3,
+  data: S7, section6: S6, section5: S5, section4: S4, section3: S3, section2: S2, section1: S1,
   assessmentNumber: string, submission: Record<string, any>,
 ): string {
   const reportDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -291,10 +294,35 @@ function buildTypContent(
     ? `== Recommended Next Steps\n\n${data.next_steps.map((s, i) => `${i + 1}. ${esc(s)}\n`).join('')}\n`
     : ''
 
-  const evidenceList = buildEvidenceList(data, section5)
-  const scopeBox = buildScopeBox(section3, section5)
-  const domainBlocks = buildDomainBlocks(section3, section4, section5)
-  const intendedUse = esc(formatIntendedUse(submission.intended_use))
+  const intendedUseRaw = formatIntendedUse(submission.intended_use)
+  const intendedUse = esc(intendedUseRaw)
+  const territory = esc(
+    (submission.territory || submission.territory_preferences || '').toString().trim() || 'Not stated',
+  )
+
+  // CA-RLK-2b: the report may only assert propositions traceable to signed
+  // assessment state, reviewer-authored text, or an actual submission artifact.
+  // All Section-1 scope, Section-2 evidence, per-domain evidence, and Appendix A
+  // content is derived through this one bounded projection (fail-closed = omit).
+  const projection = projectReport({
+    section2,
+    section3,
+    section5,
+    section6,
+    section7: data,
+    submission,
+    scopeDomainCodes: null,
+    assessmentNumber,
+    reportDate,
+    outcomeLabel: outcomeFull,
+    intendedUse: intendedUseRaw,
+  })
+
+  const evidenceList = buildEvidenceList(projection)
+  const declaredTools = buildDeclaredToolsLine(submission)
+  const scopeLimitations = esc((section1?.scope_limitations || '').trim()) || 'None noted.'
+  const domainBlocks = buildDomainBlocks(section3, section4, section5, projection.perDomainEvidence)
+  const supportingEvidenceRecord = buildSupportingEvidenceRecord(projection)
 
   return `// ─────────────────────────────────────────────────────────────────────────────
 // SI8 Commercial Assurance Assessment Report
@@ -417,11 +445,7 @@ _This section is designed for the commercial decision-maker: the brand legal tea
 
 *Outcome: ${esc(outcomeFull)}*
 
-${esc(data.executive_summary || '[Complete before delivery: Write 2-4 sentences for the client legal team. State what SI8 independently reviewed, the outcome reached, and the primary evidential basis. Example: "SI8 independently reviewed the submitted video content, AI tool disclosures, and commercial licensing documentation. The evidence reviewed supports the intended commercial use of this content as an agency deliverable. No material IP, likeness, or rights conflicts were identified during the review period."]')}
-
-== Scope of Independent Review
-
-${scopeBox}
+${esc(data.executive_summary || '[Complete before delivery: Write 2-4 sentences for the client legal team. State what SI8 independently reviewed, the outcome reached, and the primary evidential basis. Describe only what the evidence shows for this assessment — this placeholder does not presume a supportive or adverse outcome.]')}
 
 == Commercial Confidence
 
@@ -456,11 +480,19 @@ ${conditionsBlock}${residualBlock}${nextStepsBlock}
 = Section 2: Assessment Scope
 
 *Content assessed:*
-"${title}" — submitted by ${filmmaker}. Intended use: ${intendedUse}. Territory: ${esc(submission.territory_preferences ?? 'Global')}.
+"${title}" — submitted by ${filmmaker}. Intended commercial use: ${intendedUse}. Intended territory: ${territory}.
 
-*Evidence reviewed:*
+*AI tools declared by submitter:*
+
+${declaredTools}
+
+*Evidence provided:*
 
 ${evidenceList}
+
+*Scope limitations:*
+
+${scopeLimitations}
 
 *Assessment conducted by:* PMF Strategy Inc. d/b/a SuperImmersive 8 ("SI8"), Taipei, Taiwan.
 
@@ -506,26 +538,12 @@ ${domainBlocks}
 
 
 // ═════════════════════════════════════════════════════════════════════════════
-// APPENDIX A: CHAIN OF TITLE
+// APPENDIX A: SUPPORTING EVIDENCE RECORD
 // ═════════════════════════════════════════════════════════════════════════════
 
-= Appendix A: Chain of Title
+= Appendix A: Supporting Evidence Record
 
-_Chain of Title documentation for "${title}" as disclosed by the submitter and reviewed by SI8._
-
-#table(
-  columns: (1fr, 2fr),
-  [*Field*], [*Detail*],
-  [Assessment ID], [${assessmentNumber}],
-  [Content Title], [${title}],
-  [Submitter], [${filmmaker}],
-  [Submission ID], [${submissionId}],
-  [Review Date], [${reportDate}],
-  [Outcome], [${esc(outcomeFull)}],
-  [Commercial Confidence], [${esc(confidence)}],
-)
-
-_Chain of Title detail is drawn from the domain findings in Section 3 above._
+${supportingEvidenceRecord}
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -584,7 +602,7 @@ function StringList({ label, items, onChange, placeholder, hint }: {
 }
 
 export function Section7Brief({
-  data, section6, section5, section4, section3,
+  data, section6, section5, section4, section3, section2, section1,
   assessmentNumber, onAssessmentNumberChange, submission, onChange,
 }: Props) {
   const [generating, setGenerating] = useState(false)
@@ -673,7 +691,7 @@ export function Section7Brief({
     setPdfError(null)
     try {
       const num = await ensureAssessmentNumber()
-      const content = buildTypContent(data, section6, section5, section4, section3, num, submission)
+      const content = buildTypContent(data, section6, section5, section4, section3, section2, section1, num, submission)
       const res = await fetch(
         `/api/admin/submissions/${encodeURIComponent(submission.id)}/generate-report`,
         {
@@ -708,7 +726,7 @@ export function Section7Brief({
     setPdfError(null)
     try {
       const num = await ensureAssessmentNumber()
-      const content = buildTypContent(data, section6, section5, section4, section3, num, submission)
+      const content = buildTypContent(data, section6, section5, section4, section3, section2, section1, num, submission)
       const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
