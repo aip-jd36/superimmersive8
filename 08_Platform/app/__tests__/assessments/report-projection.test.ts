@@ -284,6 +284,93 @@ describe('supporting evidence record', () => {
   })
 })
 
+// ── CA-RLK-2b-PATCH — absence/free-text must not become a stronger proposition ─
+//
+// Semantic contract (not an implementation-constant mirror):
+//   - "not applicable" must never be projected as "missing evidence";
+//   - a free-text reviewer note must never be projected as a positive
+//     structured fact.
+
+describe('supporting evidence record — bounded absence handling (CA-RLK-2b-PATCH)', () => {
+  const sub = (p: ReturnType<typeof projectReport>, label: string, subLabel: string) =>
+    record(p, label)?.sub?.find((x) => x.label === subLabel)?.value
+
+  it('PATCH-A: Domain I Verified with no Domain-I finding and no ip_license_path → License on file = N/A (a licence is not expected), never "Not provided"', () => {
+    const p = projectReport(
+      makeInput({
+        section3: s3All('Verified'),
+        section5: { findings: [] },
+        submission: { id: 'a', title: 'X' }, // no ip_license_path
+      }),
+    )
+    expect(sub(p, 'Third-party assets', 'Declared')).toBe('None identified in independent review')
+    expect(sub(p, 'Third-party assets', 'License on file')).toBe('N/A')
+    expect(sub(p, 'Third-party assets', 'License on file')).not.toBe('Not provided')
+  })
+
+  it('PATCH-A: Domain I applicable-but-unverified with no artifact still uses the bounded missing-evidence state', () => {
+    // I controls left blank → domain rolls up to Not Provided → licence *is* expected, none on file.
+    const p = projectReport(makeInput({ section3: s3(), submission: { id: 'a', title: 'X' } }))
+    expect(sub(p, 'Third-party assets', 'License on file')).toBe('Not provided')
+  })
+
+  it('PATCH-B: Domain L Verified with no Domain-L finding and no likeness_release_path → Release on file = N/A (a release is not expected), never "Not provided"', () => {
+    const p = projectReport(
+      makeInput({
+        section3: s3All('Verified'),
+        section5: { findings: [] },
+        submission: { id: 'a', title: 'X' }, // no likeness_release_path
+      }),
+    )
+    expect(sub(p, 'Likeness / performer', 'Real person present')).toBe('No — none identified in independent review')
+    expect(sub(p, 'Likeness / performer', 'Release on file')).toBe('N/A')
+    expect(sub(p, 'Likeness / performer', 'Release on file')).not.toBe('Not provided')
+  })
+
+  it('PATCH-B: Domain L applicable-but-unverified with no artifact still uses the bounded missing-evidence state', () => {
+    const p = projectReport(makeInput({ section3: s3(), submission: { id: 'a', title: 'X' } }))
+    expect(sub(p, 'Likeness / performer', 'Release on file')).toBe('Not provided')
+  })
+
+  it('PATCH-C: a free-text T01.metadata_provided note stating ABSENCE must not project C2PA = "Present"', () => {
+    const p = projectReport(
+      makeInput({
+        section3: {
+          ...s3All('Verified'),
+          T01: {
+            judgment: 'Verified',
+            metadata_provided: 'No C2PA or Content Credentials metadata was found in the file.',
+          },
+        },
+      }),
+    )
+    expect(sub(p, 'Provenance metadata', 'C2PA / Content Credentials')).toBe('Unknown')
+    expect(sub(p, 'Provenance metadata', 'C2PA / Content Credentials')).not.toBe('Present')
+  })
+
+  it('PATCH-C: even a note that sounds affirmative does not establish C2PA presence — still "Unknown"', () => {
+    const p = projectReport(
+      makeInput({
+        section3: {
+          ...s3All('Verified'),
+          T01: { judgment: 'Verified', metadata_provided: 'C2PA manifest embedded by the generation tool.' },
+        },
+      }),
+    )
+    expect(sub(p, 'Provenance metadata', 'C2PA / Content Credentials')).toBe('Unknown')
+    expect(sub(p, 'Provenance metadata', 'C2PA / Content Credentials')).not.toBe('Present')
+  })
+
+  it('PATCH-C: Domain T Not Applicable → C2PA = N/A', () => {
+    const p = projectReport(
+      makeInput({
+        section3: { ...s3(), T01: { judgment: 'Not Applicable' } },
+      }),
+    )
+    expect(sub(p, 'Provenance metadata', 'C2PA / Content Credentials')).toBe('N/A')
+  })
+})
+
 // ── Fail-closed: a near-empty assessment never throws, never invents ────────
 
 describe('fail-closed behaviour', () => {

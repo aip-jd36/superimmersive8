@@ -350,11 +350,12 @@ function projectSupportingEvidenceRecord(
           ? 'None identified in independent review'
           : 'See Domain I in Section 3'
   const ipLicensePath = s(submission.ip_license_path)
-  const iLicense = ipLicensePath
-    ? 'Yes'
-    : iStatus === 'Not Applicable'
-      ? 'N/A'
-      : 'Not provided'
+  // No third-party IP identified (Domain I Not Applicable, or Verified with no
+  // Domain-I finding) → a third-party licence is not expected → N/A, not a
+  // missing-evidence implication.
+  const iLicenseNotExpected =
+    iStatus === 'Not Applicable' || (iStatus === 'Verified' && iFindings.length === 0)
+  const iLicense = ipLicensePath ? 'Yes' : iLicenseNotExpected ? 'N/A' : 'Not provided'
   fields.push({
     label: 'Third-party assets',
     value: '',
@@ -378,11 +379,12 @@ function projectSupportingEvidenceRecord(
           ? 'No — none identified in independent review'
           : 'See Domain L in Section 3'
   const releasePath = s(submission.likeness_release_path)
-  const release = releasePath
-    ? 'Yes'
-    : lStatus === 'Not Applicable'
-      ? 'N/A'
-      : 'Not provided'
+  // No real person identified (Domain L Not Applicable, or Verified with no
+  // Domain-L finding) → a likeness release is not expected → N/A, not a
+  // missing-evidence implication.
+  const releaseNotExpected =
+    lStatus === 'Not Applicable' || (lStatus === 'Verified' && lFindings.length === 0)
+  const release = releasePath ? 'Yes' : releaseNotExpected ? 'N/A' : 'Not provided'
   fields.push({
     label: 'Likeness / performer',
     value: '',
@@ -393,14 +395,14 @@ function projectSupportingEvidenceRecord(
   })
 
   // ── Provenance metadata ────────────────────────────────────────────────
+  // `section_3.T01.metadata_provided` is a free-text reviewer note — a non-empty
+  // value frequently *describes the absence* of metadata. There is no
+  // authoritative structured boolean establishing C2PA presence, so the
+  // projection never asserts "Present" (or "Not present"). Fail closed to
+  // "Unknown". A future structured provenance model can support a stronger
+  // proposition.
   const tStatus = domainWorstJudgment('T', section3)
-  const metadataNote = s(section3?.T01?.metadata_provided)
-  const c2pa =
-    metadataNote
-      ? 'Present'
-      : tStatus === 'Not Applicable'
-        ? 'N/A'
-        : 'Unknown'
+  const c2pa = tStatus === 'Not Applicable' ? 'N/A' : 'Unknown'
   fields.push({
     label: 'Provenance metadata',
     value: '',
