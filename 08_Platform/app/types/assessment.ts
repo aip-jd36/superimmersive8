@@ -234,6 +234,30 @@ export interface VerificationPageData {
   scope_domain_codes: string[] | null
 }
 
+/**
+ * Bounded tombstone data for a Public Assessment Record whose publication was
+ * revoked (CA-RLK-2g, R2). The URL still resolves; substantive assessment
+ * content is withheld. MUST NOT carry outcome, methodology, reviewer org,
+ * asset descriptors, domain codes, is_system_test, revoked_reason, evidence,
+ * or any internal audit metadata.
+ */
+export interface VerificationTombstoneData {
+  assessment_number: string
+  revoked_at: string
+  // Shown only when not ACTIVE, to explain the record's institutional standing.
+  institutional_status: InstitutionalStatus
+}
+
+/**
+ * The tagged result of a public verification lookup (CA-RLK-2g).
+ *   { kind: 'record', ... }    — DELIVERED + active publication episode
+ *   { kind: 'tombstone', ... } — DELIVERED + publication revoked, no active episode
+ *   null                       — not public / not found (indistinguishable)
+ */
+export type VerificationLookupResult =
+  | ({ kind: 'record' } & VerificationPageData)
+  | ({ kind: 'tombstone' } & VerificationTombstoneData)
+
 // ── Assessment number format ──────────────────────────────────────────────────
 
 /**

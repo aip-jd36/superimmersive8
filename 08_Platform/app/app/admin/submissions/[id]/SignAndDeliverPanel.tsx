@@ -11,7 +11,9 @@ import {
 import {
   projectTechnicalProvenance,
   shouldShowPublicAssessmentRecord,
+  shouldShowPublicTombstoneLink,
 } from '@/lib/assessments/sign-deliver-projection'
+import type { AdminPublicationState, PublicVisibility } from '@/lib/assessments/publication'
 
 interface SignAndDeliverPanelProps {
   submissionId: string
@@ -33,6 +35,10 @@ interface SignAndDeliverPanelProps {
   numbersAssetId: string | null
   /** updated_at from assessments row, set when status is SIGNED or DELIVERED. */
   signedAt: string | null
+  /** CA-RLK-2g: explicit publication-authorization state (server-derived). */
+  publicationState: AdminPublicationState
+  /** CA-RLK-2g: authoritative current public visibility (RECORD | TOMBSTONE | NOT_PUBLIC). */
+  publicVisibility: PublicVisibility
 }
 
 function formatSignedAt(iso: string | null): string {
@@ -57,9 +63,13 @@ export function SignAndDeliverPanel({
   verificationUrl,
   numbersAssetId,
   signedAt,
+  publicationState,
+  publicVisibility,
 }: SignAndDeliverPanelProps) {
   const router = useRouter()
   const [signing, setSigning] = useState(false)
+  const [publishing, setPublishing] = useState(false)
+  const [revoking, setRevoking] = useState(false)
   const [delivering, setDelivering] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
@@ -115,15 +125,50 @@ export function SignAndDeliverPanel({
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const handlePublish = async () => {
+    setPublishing(true)
+    setError(null)
+    try {
+      const res = await fetch(`/api/admin/submissions/${submissionId}/publish`, { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) setError(`${data.message ?? data.error ?? 'Publish failed'}`)
+      else router.refresh()
+    } catch (err: any) {
+      setError(err.message ?? 'Network error')
+    } finally {
+      setPublishing(false)
+    }
+  }
+
+  const handleRevokePublication = async () => {
+    const reason = window.prompt('Reason for revoking publication (recorded for audit, not shown publicly):')
+    if (reason == null || reason.trim() === '') return
+    setRevoking(true)
+    setError(null)
+    try {
+      const res = await fetch(`/api/admin/submissions/${submissionId}/revoke-publication`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: reason.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) setError(`${data.message ?? data.error ?? 'Revoke failed'}`)
+      else router.refresh()
+    } catch (err: any) {
+      setError(err.message ?? 'Network error')
+    } finally {
+      setRevoking(false)
+    }
+  }
+
   // ── Signed / Delivered state ────────────────────────────────────────────
   if (isSigned) {
     // Capability projection (CA-RLK-2d-UI): present only what the assessment's
     // actual provider/execution class and public-visibility eligibility support.
     const provenance = projectTechnicalProvenance({ isSystemTest, numbersAssetId })
-    const showPublicRecord = shouldShowPublicAssessmentRecord({
-      processingStatus,
-      verificationUrl,
-    })
+    const showPublicRecord = shouldShowPublicAssessmentRecord({ verificationUrl, publicVisibility })
+    const showTombstoneLink = shouldShowPublicTombstoneLink({ verificationUrl, publicVisibility })
+    const canPublish = isDelivered && publicationState.kind !== 'published_explicit' && publicationState.kind !== 'published_legacy'
 
     return (
       <Card className="border-2" style={{ borderColor: 'rgba(22,163,74,0.3)', backgroundColor: '#f0fdf4' }}>
@@ -173,10 +218,33 @@ export function SignAndDeliverPanel({
             )}
           </div>
 
-          {/* Public Assessment Record section */}
-          {showPublicRecord && (
-            <div className="space-y-2">
-              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Public Assessment Record</div>
+          {/* Publication section (CA-RLK-2g) — explicit publication authorization */}
+          <div className="space-y-2">
+            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Publication</div>
+
+            {publicationState.kind === 'not_published' && (
+              <p className="text-xs text-gray-500">
+                Not published. The Public Assessment Record is not accessible.
+                {!isDelivered && ' Mark the assessment delivered before publishing.'}
+              </p>
+            )}
+            {publicationState.kind === 'published_explicit' && (
+              <p className="text-xs text-green-700">
+                Published {formatSignedAt(publicationState.recordedAt)}
+              </p>
+            )}
+            {publicationState.kind === 'published_legacy' && (
+              <p className="text-xs text-green-700">
+                Legacy public record (migrated {formatSignedAt(publicationState.recordedAt)}) — no deliberate authorizer recorded.
+              </p>
+            )}
+            {publicationState.kind === 'revoked' && (
+              <p className="text-xs text-amber-700">
+                Publication revoked {formatSignedAt(publicationState.revokedAt)} — {publicationState.revokedReason}
+              </p>
+            )}
+
+            {showPublicRecord && (
               <div className="flex items-center gap-2">
                 <a
                   href={verificationUrl ?? undefined}
@@ -199,8 +267,43 @@ export function SignAndDeliverPanel({
                   }
                 </button>
               </div>
-            </div>
-          )}
+            )}
+            {showTombstoneLink && (
+              <a
+                href={verificationUrl ?? undefined}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-gray-500 hover:underline flex items-center gap-1"
+              >
+                <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                View Public Tombstone
+              </a>
+            )}
+
+            {canPublish && (
+              <Button
+                size="sm"
+                className="w-full"
+                onClick={handlePublish}
+                disabled={publishing}
+                style={{ backgroundColor: '#1C3557', color: 'white' }}
+              >
+                <ExternalLink className="w-3.5 h-3.5 mr-2" />
+                {publishing ? 'Publishing…' : 'Publish Public Record'}
+              </Button>
+            )}
+            {(publicationState.kind === 'published_explicit' || publicationState.kind === 'published_legacy') && (
+              <button
+                type="button"
+                onClick={handleRevokePublication}
+                disabled={revoking}
+                className="text-xs text-gray-500 hover:text-red-500 flex items-center gap-1 disabled:opacity-50"
+              >
+                <AlertCircle className="w-3 h-3" />
+                {revoking ? 'Revoking…' : 'Revoke Publication'}
+              </button>
+            )}
+          </div>
 
           {/* Delivery section */}
           <div className="space-y-2">
@@ -340,7 +443,7 @@ export function SignAndDeliverPanel({
         )}
 
         <p className="text-xs text-gray-400">
-          Issues the SI8 commercial assurance assessment and registers it in the Assessment Registry.
+          Signs the assessment and completes provenance processing.
         </p>
       </CardContent>
     </Card>

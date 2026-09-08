@@ -11,12 +11,15 @@
  * This component renders only what findAssessmentForVerification returns.
  */
 
-import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { findAssessmentForVerification } from '@/lib/assessments/repository'
 import { OUTCOME_LABELS, ASSESSMENT_DOMAINS } from '@/types/assessment'
 import { DOMAIN_CODE_LABELS } from '@/lib/assessments/signoff'
-import type { InstitutionalStatus, VerificationPageData } from '@/types/assessment'
+import type {
+  InstitutionalStatus,
+  VerificationPageData,
+  VerificationTombstoneData,
+} from '@/types/assessment'
 
 // Must render fresh on every request. [assessment_number] makes the URL
 // parameterized, but a dynamic segment does not by itself mean dynamic
@@ -52,11 +55,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function VerificationPage({ params }: PageProps) {
   const { assessment_number } = params
 
-  const assessment = await findAssessmentForVerification(assessment_number)
+  const result = await findAssessmentForVerification(assessment_number)
 
-  if (!assessment) {
+  if (!result) {
     return <AssessmentNotFound assessmentNumber={assessment_number} />
   }
+
+  if (result.kind === 'tombstone') {
+    return <PublicationRevoked data={result} />
+  }
+
+  const assessment = result
 
   return (
     <div
@@ -109,6 +118,11 @@ export default async function VerificationPage({ params }: PageProps) {
           </a>
         </div>
       </div>
+
+      {/* CA-RLK-2g: prominent lead disclosure for a deliberately published
+          internal SI8 demonstration / system-test record. Generic — applies to
+          any is_system_test record that is publicly visible. */}
+      {assessment.is_system_test && <SystemTestBanner />}
 
       {/* Status banner for SUPERSEDED or WITHDRAWN */}
       <InstitutionalStatusBanner assessment={assessment} />
@@ -281,6 +295,107 @@ function AssessmentNotFound({ assessmentNumber }: { assessmentNumber: string }) 
           {assessmentNumber}
         </span>{' '}
         was found in the SI8 Assessment Registry. Verify the assessment number and try again.
+      </p>
+    </div>
+  )
+}
+
+/**
+ * CA-RLK-2g: prominent lead disclosure for a publicly visible is_system_test
+ * record. The quiet footer disclaimer remains as secondary disclosure; this
+ * banner ensures a casual reader cannot mistake it for an external client
+ * assessment. Not special-cased to any assessment number.
+ */
+function SystemTestBanner() {
+  return (
+    <div
+      role="alert"
+      style={{
+        backgroundColor: '#EEF2FF',
+        borderBottom: '1px solid #6366F1',
+        padding: '0.875rem 1.5rem',
+      }}
+    >
+      <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+        <strong style={{ fontSize: '0.875rem', color: '#3730A3' }}>
+          Internal SI8 Demonstration / System Test
+        </strong>
+        <p style={{ fontSize: '0.8125rem', color: '#3730A3', margin: '0.25rem 0 0' }}>
+          This record was produced by SI8 to exercise or demonstrate the assessment
+          pipeline. It does not represent an external client engagement or a
+          substantive commercial assurance opinion for a third party.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * CA-RLK-2g (R2 tombstone): a Public Assessment Record whose publication was
+ * deliberately revoked. The URL still resolves; substantive assessment content
+ * is withheld. Shows only the bounded minimum.
+ */
+function PublicationRevoked({ data }: { data: VerificationTombstoneData }) {
+  const revokedDate = (() => {
+    try {
+      return new Date(data.revoked_at).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC',
+      })
+    } catch {
+      return null
+    }
+  })()
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundColor: '#FAFAF7',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem',
+        textAlign: 'center',
+      }}
+    >
+      <div
+        style={{
+          fontFamily: 'Space Grotesk, system-ui, sans-serif',
+          fontWeight: 700,
+          fontSize: '1rem',
+          color: '#C8900A',
+          marginBottom: '1.5rem',
+        }}
+      >
+        SuperImmersive 8
+      </div>
+      <h1
+        style={{
+          fontFamily: 'Space Grotesk, system-ui, sans-serif',
+          fontSize: '1.25rem',
+          fontWeight: 700,
+          color: '#1a1918',
+          marginBottom: '0.75rem',
+        }}
+      >
+        Public record no longer available
+      </h1>
+      <p style={{ fontSize: '0.875rem', color: '#52504A', maxWidth: '420px', lineHeight: 1.6 }}>
+        The public record for{' '}
+        <span
+          style={{
+            fontFamily: 'ui-monospace, "Cascadia Code", monospace',
+            backgroundColor: 'rgba(0,0,0,0.05)',
+            padding: '0.125rem 0.375rem',
+            borderRadius: '3px',
+          }}
+        >
+          {data.assessment_number}
+        </span>{' '}
+        was withdrawn from publication{revokedDate ? ` on ${revokedDate}` : ''}.
+        {data.institutional_status !== 'ACTIVE' && (
+          <> This assessment&apos;s institutional status is <strong>{data.institutional_status}</strong>.</>
+        )}
       </p>
     </div>
   )

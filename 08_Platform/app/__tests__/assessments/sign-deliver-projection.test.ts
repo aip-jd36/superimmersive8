@@ -22,12 +22,12 @@ import path from 'path'
 import {
   projectTechnicalProvenance,
   shouldShowPublicAssessmentRecord,
+  shouldShowPublicTombstoneLink,
   NON_PRODUCTION_PROVENANCE_NOTE,
   PENDING_PROVENANCE_NOTE,
 } from '@/lib/assessments/sign-deliver-projection'
-import { isPubliclyVisibleProcessingStatus } from '@/lib/assessments/public-visibility'
-import { isPubliclyVisibleProcessingStatus as fromRepository } from '@/lib/assessments/repository'
-import { PROCESSING_STATUSES, type ProcessingStatus } from '@/types/assessment'
+import type { PublicVisibility } from '@/lib/assessments/publication'
+import type { ProcessingStatus } from '@/types/assessment'
 
 const URL = 'https://app.superimmersive8.com/assessment/ASSESS-007-2026-09-07'
 
@@ -63,39 +63,29 @@ describe('Technical Provenance projection', () => {
   })
 })
 
-// ── Q — Public Assessment Record projection ────────────────────────────────
+// ── Q — Public Assessment Record projection (CA-RLK-2g: keyed on visibility) ──
 
 describe('Public Assessment Record projection', () => {
-  it('T4: not-publicly-visible status + verification_url present → affordance NOT shown', () => {
-    for (const status of ['DRAFT', 'REPORT_GENERATED', 'SIGNING', 'SIGNED', 'FAILED'] as ProcessingStatus[]) {
-      expect(shouldShowPublicAssessmentRecord({ processingStatus: status, verificationUrl: URL })).toBe(false)
+  it('T4: publicVisibility !== RECORD → "Open Public Assessment Record" NOT shown', () => {
+    for (const v of ['NOT_PUBLIC', 'TOMBSTONE'] as PublicVisibility[]) {
+      expect(shouldShowPublicAssessmentRecord({ verificationUrl: URL, publicVisibility: v })).toBe(false)
     }
   })
 
-  it('T5: DELIVERED + verification_url present → affordance shown', () => {
-    expect(shouldShowPublicAssessmentRecord({ processingStatus: 'DELIVERED', verificationUrl: URL })).toBe(true)
+  it('T5: publicVisibility === RECORD + verification_url → shown', () => {
+    expect(shouldShowPublicAssessmentRecord({ verificationUrl: URL, publicVisibility: 'RECORD' })).toBe(true)
   })
 
-  it('T6: the projection tracks the canonical shared predicate across every processing status', () => {
-    for (const status of PROCESSING_STATUSES) {
-      expect(shouldShowPublicAssessmentRecord({ processingStatus: status, verificationUrl: URL })).toBe(
-        isPubliclyVisibleProcessingStatus(status as ProcessingStatus),
-      )
-    }
+  it('T7: verification_url absent → NOT shown even for RECORD visibility', () => {
+    expect(shouldShowPublicAssessmentRecord({ verificationUrl: null, publicVisibility: 'RECORD' })).toBe(false)
+    expect(shouldShowPublicAssessmentRecord({ verificationUrl: '', publicVisibility: 'RECORD' })).toBe(false)
   })
 
-  it('T6: the public route and the admin projection import the SAME predicate (no duplicate status list)', () => {
-    // repository.ts re-exports the pure module's function — identity, not a copy.
-    expect(fromRepository).toBe(isPubliclyVisibleProcessingStatus)
-  })
-
-  it('T7: verification_url absent → affordance NOT shown even for an otherwise-eligible status', () => {
-    expect(shouldShowPublicAssessmentRecord({ processingStatus: 'DELIVERED', verificationUrl: null })).toBe(false)
-    expect(shouldShowPublicAssessmentRecord({ processingStatus: 'DELIVERED', verificationUrl: '' })).toBe(false)
-  })
-
-  it('T7: null processing status → not shown', () => {
-    expect(shouldShowPublicAssessmentRecord({ processingStatus: null, verificationUrl: URL })).toBe(false)
+  it('tombstone link shown only for TOMBSTONE visibility with a URL', () => {
+    expect(shouldShowPublicTombstoneLink({ verificationUrl: URL, publicVisibility: 'TOMBSTONE' })).toBe(true)
+    expect(shouldShowPublicTombstoneLink({ verificationUrl: URL, publicVisibility: 'RECORD' })).toBe(false)
+    expect(shouldShowPublicTombstoneLink({ verificationUrl: URL, publicVisibility: 'NOT_PUBLIC' })).toBe(false)
+    expect(shouldShowPublicTombstoneLink({ verificationUrl: null, publicVisibility: 'TOMBSTONE' })).toBe(false)
   })
 })
 

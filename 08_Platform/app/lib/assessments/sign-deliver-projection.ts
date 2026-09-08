@@ -18,8 +18,7 @@
  * here — only the projection of existing state.
  */
 
-import type { ProcessingStatus } from '@/types/assessment'
-import { isPubliclyVisibleProcessingStatus } from './public-visibility'
+import type { PublicVisibility } from './publication'
 
 // ── Technical Provenance ───────────────────────────────────────────────────
 
@@ -62,15 +61,26 @@ export function projectTechnicalProvenance(input: {
 /**
  * Whether the admin panel may offer the "Open Public Assessment Record"
  * affordance. Requires BOTH a stored public URL AND that the assessment is
- * actually publicly resolvable under the governed predicate — a stored
- * `verification_url` alone (written at sign-off, long before delivery) must
- * NOT make the affordance appear.
+ * a **full-record** public visibility right now (CA-RLK-2g: DELIVERED + an
+ * active publication episode). A stored `verification_url` alone, or DELIVERED
+ * without a publication episode, or a revoked publication (tombstone), must NOT
+ * make the "Open Public Assessment Record" affordance appear.
  */
 export function shouldShowPublicAssessmentRecord(input: {
-  processingStatus: string | null
   verificationUrl: string | null
+  publicVisibility: PublicVisibility
 }): boolean {
   if (!input.verificationUrl) return false
-  if (!input.processingStatus) return false
-  return isPubliclyVisibleProcessingStatus(input.processingStatus as ProcessingStatus)
+  return input.publicVisibility === 'RECORD'
+}
+
+/**
+ * Whether to offer a secondary "View Public Tombstone" link — only when the
+ * publication was revoked (the URL still resolves to a bounded tombstone).
+ */
+export function shouldShowPublicTombstoneLink(input: {
+  verificationUrl: string | null
+  publicVisibility: PublicVisibility
+}): boolean {
+  return !!input.verificationUrl && input.publicVisibility === 'TOMBSTONE'
 }

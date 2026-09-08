@@ -19,12 +19,103 @@ import type {
   VerificationPageData,
 } from '@/types/assessment'
 import { LOCKED_ASSESSMENT_FIELDS } from './signoff'
-// The governed public-visibility predicate now lives in a pure module so the
-// admin Sign & Deliver projection can share it (see ./public-visibility.ts).
-// Re-exported here to keep the existing import path stable.
-import { isPubliclyVisibleProcessingStatus } from './public-visibility'
+import {
+  resolvePublicVisibility,
+  type PublicationEpisode,
+} from './publication'
+import type { VerificationLookupResult } from '@/types/assessment'
 
+// The processing-status component of public visibility still lives in a pure
+// module (CA-RLK-2d-UI); re-exported here to keep its existing import path
+// stable. CA-RLK-2g: full public visibility is now the composed
+// resolvePublicVisibility() (DELIVERED + an active publication episode).
 export { isPubliclyVisibleProcessingStatus } from './public-visibility'
+
+// ── Publication episodes (CA-RLK-2g) ─────────────────────────────────────────
+//
+// Persist and read publication-authorization state. These functions do NOT
+// decide whether the caller is authorized to publish/revoke or whether the
+// lifecycle preconditions hold — that authority belongs to the /publish and
+// /revoke-publication routes. Here we only read/write rows.
+
+/** The single active (non-revoked) publication episode for an assessment, or null. */
+export async function findActivePublication(
+  assessmentId: string,
+): Promise<PublicationEpisode | null> {
+  const { data, error } = await supabaseAdmin
+    .from('assessment_publications')
+    .select('*')
+    .eq('assessment_id', assessmentId)
+    .is('revoked_at', null)
+    .maybeSingle()
+  if (error) {
+    console.error('[findActivePublication] query failed', { assessmentId, code: error.code, message: error.message })
+    return null
+  }
+  return (data as PublicationEpisode | null) ?? null
+}
+
+/** All publication episodes for an assessment, most recent first. */
+export async function listPublicationEpisodes(
+  assessmentId: string,
+): Promise<PublicationEpisode[]> {
+  const { data, error } = await supabaseAdmin
+    .from('assessment_publications')
+    .select('*')
+    .eq('assessment_id', assessmentId)
+    .order('recorded_at', { ascending: false })
+  if (error || !data) return []
+  return data as PublicationEpisode[]
+}
+
+/**
+ * Insert one EXPLICIT_AUTHORIZATION publication episode. `recorded_at` is
+ * server-owned (DB default now()); `published_by` is the authenticated admin.
+ * The partial-unique index rejects a second active episode.
+ */
+export async function createPublicationEpisode(args: {
+  assessmentId: string
+  publishedBy: string
+}): Promise<PublicationEpisode> {
+  const { data, error } = await supabaseAdmin
+    .from('assessment_publications')
+    .insert({
+      assessment_id: args.assessmentId,
+      publication_basis: 'EXPLICIT_AUTHORIZATION',
+      published_by: args.publishedBy,
+    })
+    .select()
+    .single()
+  if (error || !data) {
+    throw new Error(`Failed to create publication episode for ${args.assessmentId}: ${error?.message ?? 'no data'}`)
+  }
+  return data as PublicationEpisode
+}
+
+/** Revoke the currently-active publication episode for an assessment. */
+export async function revokeActivePublication(args: {
+  assessmentId: string
+  revokedBy: string
+  revokedReason: string
+}): Promise<PublicationEpisode | null> {
+  const active = await findActivePublication(args.assessmentId)
+  if (!active) return null
+  const { data, error } = await supabaseAdmin
+    .from('assessment_publications')
+    .update({
+      revoked_at: new Date().toISOString(),
+      revoked_by: args.revokedBy,
+      revoked_reason: args.revokedReason,
+    })
+    .eq('id', active.id)
+    .is('revoked_at', null)
+    .select()
+    .single()
+  if (error || !data) {
+    throw new Error(`Failed to revoke publication episode ${active.id}: ${error?.message ?? 'no data'}`)
+  }
+  return data as PublicationEpisode
+}
 
 // ── Assessment number generation ──────────────────────────────────────────────
 
@@ -98,11 +189,11 @@ export async function findAssessmentBySubmissionId(
  */
 export async function findAssessmentForVerification(
   assessmentNumber: string,
-): Promise<VerificationPageData | null> {
+): Promise<VerificationLookupResult | null> {
   const { data, error } = await supabaseAdmin
     .from('assessments')
     .select(
-      `assessment_number, institutional_status, status_reason, outcome, assessment_date, methodology_version, reviewer_organization, numbers_asset_id, processing_status, is_system_test,
+      `id, assessment_number, institutional_status, status_reason, outcome, assessment_date, methodology_version, reviewer_organization, numbers_asset_id, processing_status, is_system_test,
        asset_title, asset_media_type, asset_runtime, scope_domain_codes`,
     )
     .eq('assessment_number', assessmentNumber)
@@ -136,12 +227,32 @@ export async function findAssessmentForVerification(
 
   if (!data) return null
 
-  // Public exposure gate: an assessment that exists but hasn't been delivered
-  // must resolve exactly like a nonexistent assessment number — no distinguishing
-  // "not found" from "found but not yet issued" in the response.
-  if (!isPubliclyVisibleProcessingStatus(data.processing_status as ProcessingStatus)) return null
+  // CA-RLK-2g: public visibility is now DELIVERED **and** an explicit active
+  // publication episode. DELIVERED alone is necessary, not sufficient. An
+  // assessment that exists but is not publicly authorized must resolve exactly
+  // like a nonexistent number.
+  const episodes = await listPublicationEpisodes(data.id as string)
+  const activeEpisode = episodes.find((e) => e.revoked_at == null) ?? null
+  const visibility = resolvePublicVisibility({
+    processingStatus: data.processing_status as ProcessingStatus,
+    activeEpisode,
+    hasRevokedHistory: episodes.some((e) => e.revoked_at != null),
+  })
+
+  if (visibility === 'NOT_PUBLIC') return null
+
+  if (visibility === 'TOMBSTONE') {
+    const mostRecentRevoked = episodes.find((e) => e.revoked_at != null)
+    return {
+      kind: 'tombstone',
+      assessment_number: data.assessment_number,
+      revoked_at: (mostRecentRevoked?.revoked_at as string) ?? '',
+      institutional_status: data.institutional_status,
+    }
+  }
 
   return {
+    kind: 'record',
     assessment_number:  data.assessment_number,
     institutional_status: data.institutional_status,
     status_reason:      data.status_reason,

@@ -11,6 +11,8 @@ import { SourceVideoUpload } from './SourceVideoUpload'
 import { ReportPDFUpload } from './ReportPDFUpload'
 import { WorkbookEntryPoint } from './WorkbookEntryPoint'
 import { SignAndDeliverPanel } from './SignAndDeliverPanel'
+import { listPublicationEpisodes } from '@/lib/assessments/repository'
+import { projectAdminPublicationState, resolvePublicVisibility, type PublicVisibility } from '@/lib/assessments/publication'
 import { notFound } from 'next/navigation'
 
 type PageProps = {
@@ -114,6 +116,22 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
 
   // Informational only — signing works without this key (mock provider is used)
   const hasNumbersKey = !!process.env.NUMBERS_API_KEY
+
+  // CA-RLK-2g: explicit publication-authorization state for the panel.
+  const publicationEpisodes = assessment?.id
+    ? await listPublicationEpisodes(assessment.id)
+    : []
+  const activePublicationEpisode = publicationEpisodes.find((e) => e.revoked_at == null) ?? null
+  const mostRecentPublicationEpisode = publicationEpisodes[0] ?? null
+  const adminPublicationState = projectAdminPublicationState(
+    activePublicationEpisode,
+    mostRecentPublicationEpisode,
+  )
+  const publicVisibility: PublicVisibility = resolvePublicVisibility({
+    processingStatus,
+    activeEpisode: activePublicationEpisode,
+    hasRevokedHistory: publicationEpisodes.some((e) => e.revoked_at != null),
+  })
 
   const getStatusColor = (status: string) => {
     const colors = {
@@ -434,6 +452,8 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                 verificationUrl={verificationUrl}
                 numbersAssetId={assessmentNumbersAssetId}
                 signedAt={signedAt}
+                publicationState={adminPublicationState}
+                publicVisibility={publicVisibility}
               />
             )}
 
