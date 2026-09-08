@@ -8,6 +8,10 @@ import {
   Shield, CheckCircle, AlertCircle, Clock,
   Copy, ExternalLink, Package, RefreshCw,
 } from 'lucide-react'
+import {
+  projectTechnicalProvenance,
+  shouldShowPublicAssessmentRecord,
+} from '@/lib/assessments/sign-deliver-projection'
 
 interface SignAndDeliverPanelProps {
   submissionId: string
@@ -113,10 +117,13 @@ export function SignAndDeliverPanel({
 
   // ── Signed / Delivered state ────────────────────────────────────────────
   if (isSigned) {
-    // Numbers provenance link — only shown when a real asset ID is present
-    const numbersVerifyUrl = numbersAssetId
-      ? `https://verify.numbersprotocol.io/asset-profile?nid=${numbersAssetId}`
-      : null
+    // Capability projection (CA-RLK-2d-UI): present only what the assessment's
+    // actual provider/execution class and public-visibility eligibility support.
+    const provenance = projectTechnicalProvenance({ isSystemTest, numbersAssetId })
+    const showPublicRecord = shouldShowPublicAssessmentRecord({
+      processingStatus,
+      verificationUrl,
+    })
 
     return (
       <Card className="border-2" style={{ borderColor: 'rgba(22,163,74,0.3)', backgroundColor: '#f0fdf4' }}>
@@ -148,11 +155,11 @@ export function SignAndDeliverPanel({
           {/* Technical Provenance section */}
           <div className="space-y-2">
             <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Technical Provenance</div>
-            {numbersVerifyUrl ? (
+            {provenance.kind === 'numbers-record' ? (
               <div className="space-y-1">
                 <div className="text-xs text-gray-700">Signed</div>
                 <a
-                  href={numbersVerifyUrl}
+                  href={provenance.verifyUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs text-blue-600 hover:underline flex items-center gap-1"
@@ -162,19 +169,17 @@ export function SignAndDeliverPanel({
                 </a>
               </div>
             ) : (
-              <p className="text-xs text-gray-400">
-                Pending — provenance signing will occur when NUMBERS_API_KEY is configured.
-              </p>
+              <p className="text-xs text-gray-400">{provenance.note}</p>
             )}
           </div>
 
           {/* Public Assessment Record section */}
-          {verificationUrl && (
+          {showPublicRecord && (
             <div className="space-y-2">
               <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Public Assessment Record</div>
               <div className="flex items-center gap-2">
                 <a
-                  href={verificationUrl}
+                  href={verificationUrl ?? undefined}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs text-blue-600 hover:underline flex items-center gap-1 flex-1 min-w-0"

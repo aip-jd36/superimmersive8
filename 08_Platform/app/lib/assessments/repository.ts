@@ -19,24 +19,12 @@ import type {
   VerificationPageData,
 } from '@/types/assessment'
 import { LOCKED_ASSESSMENT_FIELDS } from './signoff'
+// The governed public-visibility predicate now lives in a pure module so the
+// admin Sign & Deliver projection can share it (see ./public-visibility.ts).
+// Re-exported here to keep the existing import path stable.
+import { isPubliclyVisibleProcessingStatus } from './public-visibility'
 
-// ── Public visibility gate ────────────────────────────────────────────────────
-
-/**
- * Processing statuses that make an assessment publicly resolvable on the
- * Verification Page. Public visibility follows institutional issuance
- * (delivery), not merely successful signing — a SIGNED asset may still fail
- * delivery or be intentionally paused before the customer receives it.
- *
- * DRAFT, REPORT_GENERATED, SIGNING, SIGNED, and FAILED assessments must
- * resolve identically to a nonexistent assessment number: no leaking that a
- * draft exists, what its preliminary outcome is, or that review is underway.
- */
-const PUBLICLY_VISIBLE_PROCESSING_STATUSES: readonly ProcessingStatus[] = ['DELIVERED']
-
-export function isPubliclyVisibleProcessingStatus(status: ProcessingStatus): boolean {
-  return PUBLICLY_VISIBLE_PROCESSING_STATUSES.includes(status)
-}
+export { isPubliclyVisibleProcessingStatus } from './public-visibility'
 
 // ── Assessment number generation ──────────────────────────────────────────────
 
