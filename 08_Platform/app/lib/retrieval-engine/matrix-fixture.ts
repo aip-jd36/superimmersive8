@@ -238,9 +238,17 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
   },
   {
     identifier: 'gemini-api',
-    last_verified: '2026-08-05',
+    last_verified: '2026-09-08',
     claims: [
-      { claim_id: 'gemini-api', crc_eligible: 'Pending', crc_publication_scope: null, crc_candidate_statement: null, topic: 'commercial_use', applicability_requirements: [] },
+      {
+        claim_id: 'gemini-api',
+        crc_eligible: 'No',
+        crc_publication_scope:
+          'None -- withheld pending extraction/reachability remediation. FGR-ADOPTED (evidence-limitation / non-determination proposition, 2026-09-08); CPR decision: WITHHOLD, not because the proposition is unsafe but because gemini-api currently has no KNOWN_TOOLS extraction alias. Expected to flip to Yes once remediated -- distinct from elevenlabs-voice-consent, a permanent policy withhold.',
+        crc_candidate_statement: null,
+        topic: 'commercial_use',
+        applicability_requirements: [],
+      },
     ],
   },
   {
