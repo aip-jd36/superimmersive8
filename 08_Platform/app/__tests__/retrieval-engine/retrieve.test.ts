@@ -64,12 +64,22 @@ describe('retrieve — required Phase 7 cases', () => {
   })
 
   test('5: Verified-but-Pending row never treated as eligible (MatrixRow has no Status field at all, structurally cannot leak)', () => {
-    // gemini-api is the real worked example: Verified Status in the actual Matrix, CRC-Eligible: Pending.
-    const geminiRow = MATRIX_FIXTURE.find((r) => r.identifier === 'gemini-api')!
-    expect((geminiRow as unknown as { status?: unknown }).status).toBeUndefined()
-    const out = retrieve(handoff({ tools: [tool('gemini-api')] }), MATRIX_FIXTURE)
+    // Synthetic fixture, not a real provider row (see test 4's identical pattern): the
+    // MatrixRow type itself has no `status` field for ANY row (real or synthetic) --
+    // Gemini API was previously used here as a real "Verified + Pending" worked example,
+    // but that made this test's premise depend on a governance-mutable provider's specific
+    // crc_eligible state; Gemini API's own later CPR reconsideration (LK-TRIAL-9) flipped
+    // it to CRC-Eligible: Yes and broke this test, though Retrieval's behavior was correct.
+    // A one-off synthetic row proves the same structural invariant without that coupling.
+    const pendingRow: MatrixRow = {
+      identifier: 'test-tool-verified-pending',
+      last_verified: '2026-08-08',
+      claims: [{ claim_id: 'test-tool-verified-pending', crc_eligible: 'Pending', crc_publication_scope: null, crc_candidate_statement: null, applicability_requirements: [] }],
+    }
+    expect((pendingRow as unknown as { status?: unknown }).status).toBeUndefined()
+    const out = retrieve(handoff({ tools: [tool('test-tool-verified-pending')] }), [pendingRow])
     expect(out.results).toEqual([])
-    expect(out.diagnostics).toEqual([{ identifier: 'gemini-api', reason: 'no_eligible_claims' }])
+    expect(out.diagnostics).toEqual([{ identifier: 'test-tool-verified-pending', reason: 'no_eligible_claims' }])
   })
 
   test('6: compound row (ElevenLabs) -- Yes claim surfaces, No claim silently excluded, no diagnostic (row has >0 eligible claims)', () => {
