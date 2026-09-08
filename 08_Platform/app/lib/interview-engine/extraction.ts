@@ -553,6 +553,30 @@ const KNOWN_TOOLS: Record<string, CanonicalToolId> = {
   // alias only -- no fuzzy matching, no speculative variants ('midjourney
   // ai', 'mj', etc.) added.
   midjourney: 'midjourney',
+  // 'gemini api' / 'gemini developer api' added 2026-09-08 (Gemini API
+  // Extraction / Runtime Reachability Remediation): 'gemini-api' became a
+  // CRC-active governed Matrix authority (CRC eligibility APPROVE, same
+  // date) but had zero KNOWN_TOOLS coverage -- the same reachability gap
+  // already hit and fixed for 'kling ai', "luma ai's dream machine",
+  // 'pika', 'synthesia', and 'midjourney' above, confirmed empirically
+  // before this change (only "Nano Banana" phrasings resolved, via the
+  // existing KNOWN_AMBIGUOUS_TOOLS API-vs-Consumer-App disambiguation
+  // below). Both entries name the Gemini Developer API path specifically
+  // ("Gemini API" is the Matrix row's own current section-header name,
+  // per PLATFORM-RIGHTS-MATRIX.md; "Gemini Developer API" is the same
+  // product's other established name, used in this claim's own governed
+  // proposition text) -- neither can plausibly refer to Gemini Consumer
+  // App or Vertex AI/Gemini Enterprise, so no ambiguity is introduced.
+  // Bare "Gemini" is deliberately NOT added here: it names an entire
+  // multi-surface product family (API, Consumer App, and the deferred
+  // Vertex AI/Gemini Enterprise surface), each governed by a different
+  // document, and no production evidence establishes a single
+  // unambiguous referent for the bare word the way "Nano Banana" has an
+  // evidenced, tested disambiguation path below -- it remains
+  // unrecognized rather than guessed, per this table's existing
+  // evidence-only, no-speculative-inference discipline.
+  'gemini api': 'gemini-api',
+  'gemini developer api': 'gemini-api',
 }
 
 /**

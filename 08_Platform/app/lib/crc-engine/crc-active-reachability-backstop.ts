@@ -92,6 +92,14 @@ const REPRESENTATIVE_EXPRESSIONS: Record<string, string> = {
   elevenlabs: 'ElevenLabs',
   luma: 'Luma',
   suno: 'Suno',
+  // 'gemini-api' added 2026-09-08 (Gemini API Extraction / Runtime
+  // Reachability Remediation): the representative expression is "Gemini
+  // API," matching PLATFORM-RIGHTS-MATRIX.md's own section-header name
+  // for this identity ("Gemini API (Nano Banana image generation)"),
+  // trimmed to the core product name per this file's own header
+  // discipline (mirrors midjourney/luma/suno above, none of which use
+  // their full parenthetical row title either).
+  'gemini-api': 'Gemini API',
   // TopicClaim-origin
   kling: 'Kling',
   'runway-gen3': 'Runway',
