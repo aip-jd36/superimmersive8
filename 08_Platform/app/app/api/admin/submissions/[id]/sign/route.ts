@@ -3,9 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { signAssessment } from '@/lib/assessments/service'
 import { findAssessmentBySubmissionId } from '@/lib/assessments/repository'
-import { MockProvenanceProvider } from '@/lib/assessments/providers/mock'
-import { NumbersProvenanceProvider } from '@/lib/assessments/providers/numbers'
-import type { ProvenanceProvider } from '@/types/assessment'
+import { selectSigningProvider } from '@/lib/assessments/signing-provider-policy'
 
 // Vercel Pro max — downloading + uploading large MP4s needs headroom
 export const maxDuration = 60
@@ -129,11 +127,21 @@ export async function POST(_request: NextRequest, { params }: RouteContext) {
       )
     }
 
-    // Select provider — real when Numbers API key is present, mock otherwise.
-    // Swap activates automatically once NUMBERS_API_KEY is set in Vercel env vars.
-    const provider: ProvenanceProvider = process.env.NUMBERS_API_KEY
-      ? new NumbersProvenanceProvider(process.env.NUMBERS_API_KEY)
-      : new MockProvenanceProvider()
+    // Select provider — server-owned policy (CA-RLK-2d). The concrete choice
+    // depends ONLY on the assessment's own is_system_test flag and the
+    // server-side NUMBERS_API_KEY; nothing in the request can influence it.
+    // A system-test assessment is isolated to the non-production provider even
+    // when NUMBERS_API_KEY is configured. See lib/assessments/signing-provider-policy.ts.
+    const { provider, kind, systemTestIsolated } = selectSigningProvider({
+      isSystemTest: assessment.is_system_test,
+      numbersApiKey: process.env.NUMBERS_API_KEY,
+    })
+    if (systemTestIsolated) {
+      console.info(
+        `[sign] assessment ${assessment.assessment_number} is is_system_test — ` +
+        `isolated to the "${kind}" provider (production provenance provider withheld).`,
+      )
+    }
 
     // Download report PDF
     const { data: pdfBlob, error: pdfError } = await supabaseAdmin.storage

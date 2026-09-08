@@ -16,6 +16,12 @@ interface SignAndDeliverPanelProps {
   hasReportPdf: boolean
   /** Informational only — signing works without it (mock provider is used). */
   hasNumbersKey: boolean
+  /**
+   * Informational only — CA-RLK-2d isolates a system-test assessment to the
+   * non-production signing provider server-side, regardless of hasNumbersKey.
+   * The enforcement is in lib/assessments/signing-provider-policy.ts, not here.
+   */
+  isSystemTest: boolean
   /** Processing status from assessments table. null = no assessment yet. */
   processingStatus: string | null
   assessmentNumber: string | null
@@ -41,6 +47,7 @@ export function SignAndDeliverPanel({
   hasSourceVideo,
   hasReportPdf,
   hasNumbersKey,
+  isSystemTest,
   processingStatus,
   assessmentNumber,
   verificationUrl,
@@ -294,9 +301,11 @@ export function SignAndDeliverPanel({
 
         {/* Provider status — informational, not a blocker */}
         <p className="text-xs text-gray-400">
-          {hasNumbersKey
-            ? 'Numbers Protocol key configured — provenance signing active.'
-            : 'Provenance signing inactive — add NUMBERS_API_KEY to enable live signing.'
+          {isSystemTest
+            ? 'System-test assessment — non-production signing mode (external provenance provider withheld).'
+            : hasNumbersKey
+              ? 'Numbers Protocol key configured — provenance signing active.'
+              : 'Provenance signing inactive — add NUMBERS_API_KEY to enable live signing.'
           }
         </p>
 

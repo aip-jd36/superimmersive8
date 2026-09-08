@@ -95,7 +95,7 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
   // Falls back gracefully to nulls when no assessment has been created yet.
   const { data: assessment } = await supabaseAdmin
     .from('assessments')
-    .select('id, assessment_number, processing_status, verification_url, numbers_asset_id, updated_at')
+    .select('id, assessment_number, processing_status, verification_url, numbers_asset_id, updated_at, is_system_test')
     .eq('submission_id', params.id)
     .maybeSingle()
 
@@ -103,6 +103,10 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
   const assessmentNumber = assessment?.assessment_number ?? null
   const verificationUrl  = assessment?.verification_url  ?? null
   const assessmentNumbersAssetId = assessment?.numbers_asset_id ?? null
+  // CA-RLK-2d: a system-test assessment is server-isolated to the
+  // non-production signing provider regardless of NUMBERS_API_KEY. Passed to
+  // the panel for display only — the enforcement is server-side.
+  const assessmentIsSystemTest = assessment?.is_system_test === true
   // Use updated_at as the signed timestamp when SIGNED or DELIVERED
   const signedAt = (
     processingStatus === 'SIGNED' || processingStatus === 'DELIVERED'
@@ -424,6 +428,7 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                 hasSourceVideo={!!sourceVideoUrl}
                 hasReportPdf={!!reportPdfUrl}
                 hasNumbersKey={hasNumbersKey}
+                isSystemTest={assessmentIsSystemTest}
                 processingStatus={processingStatus}
                 assessmentNumber={assessmentNumber}
                 verificationUrl={verificationUrl}
