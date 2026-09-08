@@ -747,6 +747,53 @@ export function normalizeCandidate(candidate: CandidateObservation): Normalizati
   const known = KNOWN_TOOLS[key]
   if (known) return { status: 'resolved', canonical_identifier: known }
 
+  // Compound-identity reconstruction (Gemini API Extraction Identity
+  // Preservation, 2026-09-08). Production UAT exposed a generic gap: the
+  // extractor's own "access_surface is distinct from the tool name" rule
+  // (SYSTEM_PROMPT, anthropic-extractor.ts) can strip an identity-bearing
+  // word out of a product's own official name when that word also looks
+  // like an access-method qualifier -- observed live: "the Gemini API"
+  // extracted as raw_tool_name: "Gemini" + attributes.access_surface:
+  // "API", so the compound string "Gemini API" never reached the exact-
+  // match check above, and the already-correct KNOWN_TOOLS entries for
+  // 'gemini api'/'gemini developer api' never got a chance to match.
+  //
+  // This mirrors findCorroboratingAssetProvider's own precedent above
+  // (LK-78B): a deterministic, code-level reconstruction of already-
+  // extracted structured fields, never a change to what the model is
+  // asked to produce (no prompt change, no loosening of raw_tool_name
+  // discipline), and never fuzzy/speculative -- it only recombines the
+  // SAME candidate's own two directly-stated hints from the SAME turn,
+  // then requires an EXACT match against the existing KNOWN_TOOLS table.
+  // A leading article ("the"/"a"/"an") on the access-surface hint is
+  // stripped before combining -- plain text normalization, not inference,
+  // since the model's own wording is inconsistent about including one
+  // ("the API" vs "API").
+  //
+  // Generic and provider-agnostic by construction: it runs after, not
+  // instead of, the direct KNOWN_TOOLS/KNOWN_AMBIGUOUS_TOOLS checks above,
+  // so it can never fire for a name that already resolves alone (e.g.
+  // "Kling" + access_surface "API" still resolves to plain 'kling' at the
+  // `known` check above and never reaches this block), and it never
+  // consults KNOWN_AMBIGUOUS_TOOLS, so it cannot resolve a genuinely
+  // ambiguous bare name (e.g. bare "Gemini", which carries no access-
+  // surface hint in that case) or bleed into Nano Banana's own
+  // disambiguation path. If the reconstructed compound string doesn't
+  // match any KNOWN_TOOLS entry, this falls through to 'unrecognized'
+  // exactly as before -- it can never invent a match.
+  if (candidate.access_surface_value_hint) {
+    const strippedSurface = candidate.access_surface_value_hint
+      .trim()
+      .replace(/^(the|a|an)\s+/i, '')
+      .toLowerCase()
+    if (strippedSurface) {
+      const compoundMatch = KNOWN_TOOLS[`${key} ${strippedSurface}`]
+      if (compoundMatch) {
+        return { status: 'resolved', canonical_identifier: compoundMatch, access_surface: candidate.access_surface_value_hint }
+      }
+    }
+  }
+
   return { status: 'unrecognized' }
 }
 
