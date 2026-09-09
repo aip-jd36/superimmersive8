@@ -577,6 +577,33 @@ const KNOWN_TOOLS: Record<string, CanonicalToolId> = {
   // evidence-only, no-speculative-inference discipline.
   'gemini api': 'gemini-api',
   'gemini developer api': 'gemini-api',
+  // 'gemini consumer app' / 'gemini app' / 'the gemini app' added 2026-09-09
+  // (Gemini Consumer App Runtime Identity / Reachability Remediation,
+  // LK-TRIAL-11): 'gemini-consumer-app' became a CRC-active governed Matrix
+  // authority on 2026-09-09 (CPR APPROVE, crc_eligible Pending -> Yes) but
+  // had zero KNOWN_TOOLS coverage -- "Gemini Consumer App," "the Gemini
+  // app," and bare "Gemini" all resolved unrecognized, and only "Nano
+  // Banana" + Consumer-App context reached this identity via the
+  // KNOWN_AMBIGUOUS_TOOLS disambiguation below. Same reachability-gap class
+  // and same remediation shape as 'gemini api'/'gemini developer api'
+  // immediately above. Every alias here names the CONSUMER app surface
+  // specifically -- the word "app" (and the explicit "consumer app") cannot
+  // plausibly refer to the Gemini Developer API (named "Gemini API"/"Gemini
+  // Developer API"/AI Studio), Vertex AI/Google Cloud ("Vertex AI"), or
+  // Gemini for Google Workspace/Gemini Business ("Gemini for Workspace",
+  // "Gemini in Docs"), so no ambiguity with a separately-governed Google
+  // surface is introduced. "Gemini Consumer App" is this row's own
+  // PLATFORM-RIGHTS-MATRIX.md section-header name (core, parenthetical
+  // trimmed); "Gemini app"/"the Gemini app" are the ordinary conversational
+  // forms an ordinary user uses for the standalone consumer product. Bare
+  // "Gemini" is still deliberately NOT added (see the gemini-api note
+  // above) -- it names the whole product family and stays unrecognized.
+  // "the app" as a leading fragment is NOT aliased -- it only signals the
+  // Consumer App surface as an access-surface hint alongside "Nano Banana"
+  // (KNOWN_AMBIGUOUS_TOOLS), never as a standalone tool name.
+  'gemini consumer app': 'gemini-consumer-app',
+  'gemini app': 'gemini-consumer-app',
+  'the gemini app': 'gemini-consumer-app',
   // 'stability ai' / 'stable diffusion' added 2026-09-09 (Stability AI
   // Runtime Identity / Representation-Readiness Remediation, Trial 10):
   // added PROSPECTIVELY, mirroring 'suno''s own precedent above -- no

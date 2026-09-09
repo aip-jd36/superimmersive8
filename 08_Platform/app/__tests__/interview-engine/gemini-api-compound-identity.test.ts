@@ -178,18 +178,18 @@ describe('C: existing providers with a separately-stated access_surface are unaf
 // ── E. scope protection ───────────────────────────────────────────────────
 
 describe('E: Consumer App / Vertex AI scope protection', () => {
-  test('"Gemini" + access_surface "app" does not resolve to gemini-api (no KNOWN_TOOLS entry for the reconstructed compound)', () => {
-    expect(
-      normalizeCandidate({
-        proposal_id: 'c1',
-        turn: 1,
-        kind: 'tool_mention',
-        raw_tool_name: 'Gemini',
-        raw_text: 'the Gemini app on my phone',
-        access_surface_confidence_hint: 'confirmed',
-        access_surface_value_hint: 'app',
-      }),
-    ).toEqual({ status: 'unrecognized' })
+  test('"Gemini" + access_surface "app" resolves to gemini-consumer-app -- NEVER gemini-api (updated 2026-09-09, LK-TRIAL-11: "gemini app" gained a KNOWN_TOOLS entry -> gemini-consumer-app once that Matrix row became CRC-active; the compound reconstruction correctly routes the Consumer App surface. The governing invariant of this test -- "not the API" -- is unchanged.)', () => {
+    const r = normalizeCandidate({
+      proposal_id: 'c1',
+      turn: 1,
+      kind: 'tool_mention',
+      raw_tool_name: 'Gemini',
+      raw_text: 'the Gemini app on my phone',
+      access_surface_confidence_hint: 'confirmed',
+      access_surface_value_hint: 'app',
+    })
+    expect(r).toEqual({ status: 'resolved', canonical_identifier: 'gemini-consumer-app', access_surface: 'app' })
+    expect(r).not.toEqual(expect.objectContaining({ canonical_identifier: 'gemini-api' }))
   })
 
   test('"Vertex AI" + access_surface "API" does not resolve to gemini-api -- separate deferred scope, no row', () => {

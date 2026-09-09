@@ -100,6 +100,22 @@ const REPRESENTATIVE_EXPRESSIONS: Record<string, string> = {
   // discipline (mirrors midjourney/luma/suno above, none of which use
   // their full parenthetical row title either).
   'gemini-api': 'Gemini API',
+  // 'gemini-consumer-app' added 2026-09-09 (Gemini Consumer App Runtime
+  // Identity / Reachability Remediation, LK-TRIAL-11): this row became a
+  // CRC-active Matrix authority on 2026-09-09 (CPR APPROVE, crc_eligible
+  // Pending -> Yes) but had no KNOWN_TOOLS coverage -- only the existing
+  // "Nano Banana" + Consumer-App-context disambiguation resolved it. Same
+  // reachability-gap class already fixed for gemini-api above. The
+  // representative expression is "Gemini Consumer App," trimmed from this
+  // identity's own PLATFORM-RIGHTS-MATRIX.md section-header name ("Gemini
+  // Consumer App (Nano Banana image generation)"), exactly as 'gemini-api'
+  // is trimmed from "Gemini API (Nano Banana image generation)". The
+  // phrase unambiguously names the consumer surface -- it cannot be the
+  // API ("Gemini API"/"Gemini Developer API"), Vertex AI ("Vertex AI"),
+  // or Workspace ("Gemini for Workspace"). The KNOWN_TOOLS entry added in
+  // the same milestone also covers the ordinary conversational forms
+  // "Gemini app" / "the Gemini app".
+  'gemini-consumer-app': 'Gemini Consumer App',
   // TopicClaim-origin
   kling: 'Kling',
   'runway-gen3': 'Runway',

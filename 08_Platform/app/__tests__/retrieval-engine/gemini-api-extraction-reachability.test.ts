@@ -88,10 +88,11 @@ describe('A: normalizeCandidate resolves explicit Gemini API naming', () => {
     })
   })
 
-  test('"Gemini app" remains unrecognized -- explicitly names the Consumer App surface, must not resolve to gemini-api', () => {
-    expect(
-      normalizeCandidate({ proposal_id: 'c1', turn: 1, kind: 'tool_mention', raw_tool_name: 'Gemini app', raw_text: 'Gemini app' }),
-    ).toEqual({ status: 'unrecognized' })
+  test('"Gemini app" names the Consumer App surface -- must NOT resolve to gemini-api (updated 2026-09-09: resolves to gemini-consumer-app since its own CPR APPROVE + reachability remediation, LK-TRIAL-11 -- was `unrecognized` while that row was Pending)', () => {
+    const r = normalizeCandidate({ proposal_id: 'c1', turn: 1, kind: 'tool_mention', raw_tool_name: 'Gemini app', raw_text: 'Gemini app' })
+    expect(r).toEqual({ status: 'resolved', canonical_identifier: 'gemini-consumer-app' })
+    // the governing invariant of this test is unchanged: "Gemini app" is not the API
+    expect(r).not.toEqual({ status: 'resolved', canonical_identifier: 'gemini-api' })
   })
 
   test('"Vertex AI" remains unrecognized -- separate deferred contractual scope, no row, must not resolve to gemini-api', () => {
