@@ -44,6 +44,7 @@ const REVIEWER_CONTEXT_ALL = [
   ...REVIEWER_CONTEXT_ROUTES,
   'app/admin/submissions/[id]/review/ReviewerCrcContextPanel.tsx',
   'app/admin/submissions/[id]/review/ReviewerTranscriptDrawer.tsx', // CAH-4C
+  'app/admin/submissions/[id]/review/ReviewerResources.tsx', // CAH-4F container
 ]
 
 // The assessment WRITE/domain surface: everything under lib/assessments plus
@@ -225,16 +226,24 @@ describe('E — the reviewer CRC panel is a sibling, not a workbook field/sectio
     expect(read(drawer)).toMatch(/[Nn]ot verified and not assessment evidence/)
   })
 
-  test('page.tsx renders the panel as a SIBLING of <WorkbookClient>, not a child/prop of it', () => {
+  test('the panel is a SIBLING of <WorkbookClient>, not a child/prop of it (CAH-4F: grouped under <ReviewerResources>)', () => {
     const src = read(page)
-    // the panel is its own self-closing element taking only submissionId
-    expect(src).toMatch(/<ReviewerCrcContextPanel\s+submissionId=\{params\.id\}\s*\/>/)
+    const container = 'app/admin/submissions/[id]/review/ReviewerResources.tsx'
+    // CAH-4F: page.tsx renders the panel via the <ReviewerResources> container
+    // (a server-component sibling of <WorkbookClient>), not directly.
+    expect(src).toMatch(/<ReviewerResources\s+submissionId=\{params\.id\}\s*\/>/)
+    expect(src).not.toMatch(/<ReviewerCrcContextPanel/) // no longer rendered directly by page.tsx
+    // the container renders the panel as its own self-closing element taking only submissionId
+    const containerSrc = read(container)
+    expect(containerSrc).toMatch(/<ReviewerCrcContextPanel\s+submissionId=\{submissionId\}\s*\/>/)
+    // the container is a server component and never a WorkbookClient child/prop
+    expect(containerSrc).not.toMatch(/^['"]use client['"]/m)
     // <WorkbookClient ...> is self-closing (no children) — its opening tag ends with "/>"
     const wc = src.slice(src.indexOf('<WorkbookClient'))
-    expect(wc.slice(0, wc.indexOf('>') + 1)).not.toContain('ReviewerCrcContextPanel')
+    expect(wc.slice(0, wc.indexOf('>') + 1)).not.toContain('ReviewerResources')
     expect(wc).not.toMatch(/<WorkbookClient[^>]*>[\s\S]*<\/WorkbookClient>/) // never has children
-    // the panel is not handed to WorkbookClient as a prop under any name
-    expect(src).not.toMatch(/crcContext=|reviewerContext=|reviewerCrcContext=|contextPanel=/)
+    // the panel/container is not handed to WorkbookClient as a prop under any name
+    expect(src).not.toMatch(/crcContext=|reviewerContext=|reviewerCrcContext=|contextPanel=|reviewerResources=|resourcesPanel=/)
   })
 
   test('the panel exposes no editable control / save / copy-to-evidence / apply / accept', () => {

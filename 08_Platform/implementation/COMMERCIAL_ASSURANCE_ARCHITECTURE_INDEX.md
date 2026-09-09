@@ -46,7 +46,7 @@
 | CAH-4C | reviewer CRC transcript access + fail-closed audit (`access_kind:'transcript'`) | shipped, in `9fa6d1c` |
 | CAH-4D | reviewer Living Knowledge architecture inventory | design only |
 | CAH-4E | Human Reviewer Living Knowledge V1 (reviewer-eligible `publication_scope` gate, `access_kind:'lk_research'`, look-up route + panel) | shipped + integrated (`9fa6d1c`); production application of `20260910000000` and the CAH-4E production smoke are asserted by the PM checkpoint |
-| **CAH-4F** | **Reviewer Resources UX + LK Context Semantics** | **PRD + design + ADR authored (this milestone); not built** |
+| **CAH-4F** | **Reviewer Resources UX + LK Context Semantics** — `ReviewerResources` container groups the LK + CRC panels beside the workbook; claim card re-ordered proposition-first; explicit Applicability heading; plain-English topic labels; `crc_publication_scope` prose + `crc_eligible` removed from the reviewer view. Presentation only — no route/selector/eligibility/applicability/audit/schema/migration change. | **built (implementation milestone); not yet integrated to `origin/main`** |
 | CAH-4G | Conversational Reviewer Living Knowledge (`question → governed retrieval → BI → reviewer-oriented composition`) | future intent only — see `PRD_CAH_4F_REVIEWER_RESOURCES.md §11` |
 
 ## 4. Invariants a reviewer-surface change must not break

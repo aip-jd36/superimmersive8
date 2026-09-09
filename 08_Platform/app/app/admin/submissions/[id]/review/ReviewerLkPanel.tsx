@@ -1,9 +1,13 @@
 /**
- * Reviewer Living Knowledge panel (CAH-4E §14).
+ * Reviewer Living Knowledge panel (CAH-4E §14; re-homed under Reviewer
+ * Resources in CAH-4F).
  *
- * A read-only SERVER component rendered as a SIBLING of `<WorkbookClient>` and
- * `<ReviewerCrcContextPanel>` on the review page — never a workbook field or
- * section, structurally incapable of sharing client state with the workbook.
+ * A read-only SERVER component. Rendered inside the CAH-4F `<ReviewerResources>`
+ * container, which is itself a SIBLING of `<WorkbookClient>` — never a workbook
+ * field or section, structurally incapable of sharing client state with the
+ * workbook. Grouping under `<ReviewerResources>` is placement only: this panel
+ * keeps its own access check, its own data path, and its own `lk_research`
+ * audit, all independent of the CRC context panel beside it.
  *
  * This surface is DELIBERATELY SEPARATE from the CRC context panel. The two
  * are different authorities:
@@ -27,7 +31,7 @@ export async function ReviewerLkPanel({ submissionId }: { submissionId: string }
   if (!access.ok) return null
 
   return (
-    <div className="max-w-2xl mx-auto px-8 pt-6">
+    <div className="mt-3">
       <details className="rounded-lg border" style={{ borderColor: '#e0ddd2', backgroundColor: '#f7f5ef' }}>
         <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium" style={{ color: '#1c1c1e' }}>
           {REVIEWER_LK_FRAMING.heading}

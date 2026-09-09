@@ -1,6 +1,6 @@
 # ADR-001: Reviewer Living Knowledge is a research authority surface, not an assessment authority surface
 
-**Status:** Accepted — describes an invariant already enforced in code (CAH-4B…4E); recorded here so it survives individual milestones.
+**Status:** Accepted — describes an invariant already enforced in code (CAH-4B…4F); recorded here so it survives individual milestones.
 **Date:** 2026-09-10
 **Context:** CAH-4F (Reviewer Resources + Living Knowledge Context Semantics) documentation-contract milestone. As-built basis `origin/main` = `9fa6d1c`.
 **Applies to:** `lib/reviewer-lk/**`, `lib/reviewer-context/**`, `lib/crc-project-context/**`, the reviewer-side panels on `app/admin/submissions/[id]/review/page.tsx`, and any future CAH-4G work.
@@ -52,6 +52,10 @@ At `origin/main` = `9fa6d1c`:
 | audit-before-content: governed result returned only after the audit row is durably written; audit failure → 503, zero content | `route.ts` step 4→5, `__tests__/reviewer-lk/route-and-audit.test.ts` |
 | CRC retrieval byte-unchanged by the reviewer path | `__tests__/reviewer-lk/crc-regression.test.ts` |
 | CRC transcript access is deliberate + audited (`access_kind:'transcript'`), never auto-loaded | CAH-4C, `__tests__/reviewer-context/**` |
+| **(CAH-4F)** the reviewer surface renders no `crc_publication_scope` prose and no `crc_eligible` — CRC-channel governance metadata is not projected as reviewer authority language | `__tests__/reviewer-lk/authority-firewall.test.ts` F, `reviewer-resources-presentation.test.ts` |
+| **(CAH-4F)** the topic label map is display-only — the value sent to `GET …/reviewer-lk?topic=` is the unchanged `GoalCategory` enum | `reviewer-resources-presentation.test.ts` ("topic labels never change the value sent to the API") |
+| **(CAH-4F)** `<ReviewerResources>` is a server component that only groups the two panels — no `fetch`, no client state, no `.insert`/`.update`/`.rpc`, no promotion control | `authority-firewall.test.ts` E ("<ReviewerResources> is a server component…"), `reviewer-resources-presentation.test.ts` |
+| **(CAH-4F)** "Applicability: Not established" is rendered with neutral text weight and the explicit "not a negative finding" sentence — no green/red pass-fail colour tokens | `reviewer-resources-presentation.test.ts` FR-4 |
 
 This ADR names the principle those tests defend, so a reviewer of a *future* change can check the change against the principle, not just against whatever the tests happened to cover.
 

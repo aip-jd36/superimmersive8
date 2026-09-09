@@ -31,7 +31,8 @@ const REVIEWER_LK_LIB = listFiles('lib/reviewer-lk', ['.ts'])
 const REVIEWER_LK_ROUTE = 'app/api/admin/submissions/[id]/reviewer-lk/route.ts'
 const REVIEWER_LK_PANEL = 'app/admin/submissions/[id]/review/ReviewerLkPanel.tsx'
 const REVIEWER_LK_LOOKUP = 'app/admin/submissions/[id]/review/ReviewerLkLookup.tsx'
-const REVIEWER_LK_ALL = [...REVIEWER_LK_LIB, REVIEWER_LK_ROUTE, REVIEWER_LK_PANEL, REVIEWER_LK_LOOKUP]
+const REVIEWER_LK_RESOURCES = 'app/admin/submissions/[id]/review/ReviewerResources.tsx' // CAH-4F container
+const REVIEWER_LK_ALL = [...REVIEWER_LK_LIB, REVIEWER_LK_ROUTE, REVIEWER_LK_PANEL, REVIEWER_LK_LOOKUP, REVIEWER_LK_RESOURCES]
 
 const ASSESSMENT_DOMAIN = [
   ...listFiles('lib/assessments', ['.ts']),
@@ -150,12 +151,52 @@ describe('E — the panel is a server component; the lookup client shares no wor
     expect(src).not.toMatch(/copyToEvidence|applyToWorkbook|acceptClaim|summari[sz]e/i)
     expect(src).not.toMatch(/<textarea|<input\b/)
   })
-  test('the review page renders ReviewerLkPanel as a sibling, not inside WorkbookClient or the CRC block (code, not comments)', () => {
-    const src = codeOnly('app/admin/submissions/[id]/review/page.tsx')
-    expect(src).toMatch(/<ReviewerLkPanel submissionId=\{params\.id\} \/>/)
-    // WorkbookClient's opening tag must not contain ReviewerLkPanel as a child
-    const wbOpen = src.match(/<WorkbookClient[\s\S]*?\/>/)
+  test('the LK panel reaches the page via the <ReviewerResources> sibling container, never inside WorkbookClient (code, not comments)', () => {
+    const page = codeOnly('app/admin/submissions/[id]/review/page.tsx')
+    // CAH-4F: page.tsx renders the container, not the panel directly.
+    expect(page).toMatch(/<ReviewerResources submissionId=\{params\.id\} \/>/)
+    expect(page).not.toMatch(/<ReviewerLkPanel/)
+    // WorkbookClient's opening tag must not contain the container or the panel as a child/prop
+    const wbOpen = page.match(/<WorkbookClient[\s\S]*?\/>/)
     expect(wbOpen).not.toBeNull()
-    expect(wbOpen![0]).not.toMatch(/ReviewerLkPanel/)
+    expect(wbOpen![0]).not.toMatch(/ReviewerResources|ReviewerLkPanel|ReviewerCrcContextPanel/)
+  })
+
+  test('<ReviewerResources> is a server component that only groups the two panels — no client state, no fetch, no write', () => {
+    const src = codeOnly(REVIEWER_LK_RESOURCES)
+    expect(read(REVIEWER_LK_RESOURCES)).not.toMatch(/^'use client'/m)
+    expect(src).toMatch(/<ReviewerLkPanel submissionId=\{submissionId\} \/>/)
+    expect(src).toMatch(/<ReviewerCrcContextPanel submissionId=\{submissionId\} \/>/)
+    expect(src).not.toMatch(/fetch\(|useState|useEffect|\.insert\s*\(|\.update\s*\(|\.rpc\s*\(/)
+    expect(src).not.toMatch(/<textarea|<input\b/)
+    expect(src).not.toMatch(/copyToEvidence|applyToWorkbook|acceptClaim/i)
+  })
+})
+
+describe('F — CAH-4F presentation: governance prose / CRC-channel metadata is not rendered as reviewer authority', () => {
+  const lookup = codeOnly(REVIEWER_LK_LOOKUP)
+
+  test('raw crc_publication_scope (CRC-channel "may/must" prose) is never rendered by the reviewer lookup', () => {
+    expect(lookup).not.toMatch(/crc_publication_scope/)
+  })
+
+  test('crc_eligible is not rendered by the reviewer lookup (SR-5 / FR-7 — not shown by default)', () => {
+    expect(lookup).not.toMatch(/crc_eligible/)
+    expect(lookup).not.toMatch(/CRC channel:/)
+  })
+
+  test('the reviewer-readable topic label map keys are exactly GOAL_CATEGORIES minus "unknown"', () => {
+    const { REVIEWER_TOPIC_LABELS } = require('@/lib/reviewer-lk/topic-labels')
+    const { GOAL_CATEGORIES } = require('@/types/interview-engine')
+    expect(Object.keys(REVIEWER_TOPIC_LABELS).sort()).toEqual(
+      GOAL_CATEGORIES.filter((c: string) => c !== 'unknown').sort(),
+    )
+  })
+
+  test('topic labels never change the value sent to the API — the fetch still uses the raw enum topic', () => {
+    expect(lookup).toMatch(/topic=\$\{encodeURIComponent\(topic\)\}/)
+    // the <select> value is the enum; only the option TEXT is the label
+    expect(lookup).toMatch(/value=\{topic\}/)
+    expect(lookup).toMatch(/<option key=\{t\} value=\{t\}>\s*\{reviewerTopicLabel\(t\)\}/)
   })
 })

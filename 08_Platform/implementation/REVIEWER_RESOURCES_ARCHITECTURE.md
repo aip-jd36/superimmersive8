@@ -1,4 +1,4 @@
-# Reviewer Resources — Architecture (as-built CAH-4B…4E + CAH-4F design surface)
+# Reviewer Resources — Architecture (as-built CAH-4B…4F)
 
 **Status:** ACTIVE — the normative internal-design reference for the reviewer-side surfaces of the CRC → Commercial Assurance handoff.
 **As-built basis:** `origin/main` = `9fa6d1c` (feat(reviewer-lk): Human Reviewer Living Knowledge V1). All file paths, types, and behaviours in §1–§5 were read from that commit.
@@ -14,17 +14,20 @@ This doc has two halves:
 
 ## 1. Component / data-flow map (as-built at `9fa6d1c`)
 
-Review page: `08_Platform/app/app/admin/submissions/[id]/review/page.tsx` (server component, `requireAdmin()`), renders three siblings:
+Review page: `08_Platform/app/app/admin/submissions/[id]/review/page.tsx` (server component, `requireAdmin()`), renders two siblings (CAH-4F grouped the secondary surfaces):
 
 ```
 page.tsx
-├── <ReviewerCrcContextPanel submissionId>        ← CAH-4B  (server component)
-│     └── ReviewerTranscriptDrawer                ← CAH-4C  ('use client')
-├── <ReviewerLkPanel submissionId>                ← CAH-4E  (server component)
-│     └── ReviewerLkLookup                        ← CAH-4E  ('use client')
+├── <ReviewerResources submissionId>              ← CAH-4F  (server component — grouping/framing wrapper, no data fetch)
+│     ├── <ReviewerLkPanel submissionId>          ← CAH-4E  (server component)
+│     │     └── ReviewerLkLookup                  ← CAH-4E  ('use client')
+│     └── <ReviewerCrcContextPanel submissionId>  ← CAH-4B  (server component)
+│           └── ReviewerTranscriptDrawer          ← CAH-4C  ('use client')
 └── <WorkbookClient submissionId … />             ← pre-CAH-4x  ('use client')
         └── Section1Intake … Section7Brief
 ```
+
+`<ReviewerResources>` is a sibling of `<WorkbookClient>`, never a child or prop. Each inner panel keeps its own `checkReviewerContextAccess()` gate, its own data path, and its own audit — grouping is placement only, not merged authority (ADR-001).
 
 ### 1.1 Reviewer Living Knowledge (CAH-4E)
 
@@ -132,7 +135,21 @@ The client renders `ReviewerLkClaim[]` and `ReviewerLkWithheld[]`. Current per-c
 Plus a header line: `Retrieval context (submission facts — not evidence): tools … · jurisdiction …`, and a collapsed `N governed claim(s) on this topic withheld from reviewer research` list.
 
 **What is already compliant:** proposition is verbatim; applicability status is verbatim; withheld shows id+reason only; applicability styling is dark-vs-grey text weight, not red/green; nothing labelled evidence/finding.
-**What CAH-4F changes:** ordering (2 before 4), an explicit "Applicability" heading, reviewer-readable topic labels, "Context used for this look-up" wording, remove raw `crc_publication_scope` (item 3) from reviewer view, hide `crc_eligible` by default, move items 1/5/6/7 behind progressive disclosure.
+
+**What CAH-4F changed (as-built — `ReviewerLkLookup.tsx` after the CAH-4F implementation milestone):**
+
+Per-claim rendered order is now:
+
+1. **the governed proposition** (`claim.statement`, verbatim) — leads the card
+2. **Applicability** — explicit `<h4>Applicability</h4>` heading; `Established` / `Not established` in neutral grey/dark text weight (no colour); "Not established" carries the sentence *"A required fact is unresolved or does not match this submission's context — this is not a negative finding."*; then the per-requirement rows (`fact operator "value" — {status}`, `{status}` verbatim)
+3. **Context used for this look-up** — `Resolved tools: … · Jurisdiction: …` from `retrieval_context`, explicitly labelled *"Submission-derived inputs to retrieval — not assessment evidence."*
+4. **Details — governance & provenance** — a `<details>` disclosure containing `claim_id`, `claim_character`, `jurisdiction`, `lifecycle`, `scope: {publication_scope}`, `verified {last_verified}`, governed project dependencies, provider/tool scope, and the `governed_claims_reference`
+
+Removed from the reviewer view entirely: the raw `crc_publication_scope` prose (old item 3) and `crc_eligible` / "CRC channel" (old metadata row) — see SR-4 / SR-5.
+
+Topic `<select>`: option **text** is `reviewerTopicLabel(t)` (plain English); option **value** is the unchanged `GoalCategory` enum; the fetch still sends `topic=${encodeURIComponent(topic)}`.
+
+Results header: `Reference only — not assessment evidence.` + `REVIEWER_LK_FRAMING.applicability_note` (replaces the old "Retrieval context (submission facts — not evidence)" line).
 
 ## 6. Audit contract (as-built — unchanged by CAH-4F)
 
@@ -141,25 +158,23 @@ Plus a header line: `Retrieval context (submission facts — not evidence): tool
 - Row carries `actor_user_id` + `submission_id` only. `association_id` / `crc_session_id` NULL (LK research is not tied to a CRC association — the `_transcript_is_scoped` CHECK is guarded on `access_kind='transcript'`).
 - Append-only: no FK, no `updated_at`, no policy — RLS on, service-role only.
 
-## 7. CAH-4F proposed implementation surface
+## 7. CAH-4F implementation surface (as-built)
 
-**Constraint:** no change to the route contract, the selector, eligibility, applicability, the audit, `crc_context_access_events`, the migration set, workbook behaviour, sign-off, report, publication, or CRC.
+**Constraint (held):** no change to the route contract, the selector, eligibility, applicability, the audit, `crc_context_access_events`, the migration set, workbook behaviour, sign-off, report, publication, or CRC. Verified: `git diff --stat` touches only the files below; full Jest failure set is byte-identical before/after (20 pre-existing unrelated suite failures — `bounded-interpretation` / `crc-engine` / `crc-sales` / `retrieval-engine` / `assessments`, none reviewer-side).
 
-CAH-4F is expected to touch **at most**:
-
-| File | Change | Notes |
+| File | Change | Kind |
 |---|---|---|
-| `app/admin/submissions/[id]/review/ReviewerLkLookup.tsx` | re-order claim card; add "Applicability" heading; reviewer-readable topic labels; "Context used for this look-up" wording; drop raw `crc_publication_scope` from render; hide `crc_eligible` by default; progressive-disclosure for governance metadata | the bulk of the work; presentation only |
-| `app/admin/submissions/[id]/review/ReviewerLkPanel.tsx` | possibly re-home under a Reviewer Resources container | server component stays server component |
-| `app/admin/submissions/[id]/review/ReviewerCrcContextPanel.tsx` | possibly re-home under the same container (behaviour unchanged) | OQ-4 |
-| `app/admin/submissions/[id]/review/page.tsx` | wrap the two secondary panels in a `<ReviewerResources>` layout element (sibling of `<WorkbookClient>`, never a child) | one small JSX change |
-| **new** `app/admin/submissions/[id]/review/ReviewerResources.tsx` (or similar) | the container / right-side inspector layout | server component; no data fetching of its own |
-| `lib/reviewer-lk/project-reviewer-claims.ts` | *optionally* — if a reviewer-oriented statement-scope note (FR-6) is derived at projection time rather than omitted | OQ-2; prefer omission for V1 |
-| **new** a small topic-label constants module *or* an inline map in `ReviewerLkLookup.tsx` | `GoalCategory → reviewer label` | OQ-5; must not change the value sent to the API |
-| `__tests__/reviewer-lk/authority-firewall.test.ts` | extend E (control scan) to the new container; assert raw `crc_publication_scope` and default `crc_eligible` are absent from the reviewer DOM | |
-| **new** `__tests__/reviewer-lk/reviewer-resources-presentation.test.ts` (or extend `projection.test.ts`) | card order, applicability heading, label map, wording, no-promotion-control | |
+| `app/admin/submissions/[id]/review/ReviewerLkLookup.tsx` | claim card re-ordered (proposition → Applicability → Context → Details); explicit `<h4>Applicability</h4>`; `reviewerTopicLabel` on the `<option>` text; "Context used for this look-up" block; raw `crc_publication_scope` and `crc_eligible` removed from render; governance metadata moved into a `<details>`; "Reference only — not assessment evidence" cue | edit — presentation only |
+| **new** `app/admin/submissions/[id]/review/ReviewerResources.tsx` | server component; `checkReviewerContextAccess()` gate; renders `<ReviewerLkPanel>` + `<ReviewerCrcContextPanel>` inside one labelled `<section aria-label="Reviewer resources">` with the not-evidence cue; no data fetch of its own | new — layout/framing wrapper |
+| `app/admin/submissions/[id]/review/ReviewerLkPanel.tsx` | outer `max-w-2xl mx-auto px-8 pt-6` wrapper → `mt-3` (container now owns page spacing); `<details>` + lookup unchanged | edit — wrapper only |
+| `app/admin/submissions/[id]/review/ReviewerCrcContextPanel.tsx` | same wrapper swap; all CAH-4B/4C behaviour byte-unchanged | edit — wrapper only |
+| `app/admin/submissions/[id]/review/page.tsx` | the two direct panel renders → one `<ReviewerResources submissionId={params.id} />` (sibling of `<WorkbookClient>`, never a child/prop) | edit — one JSX swap + import |
+| **new** `lib/reviewer-lk/topic-labels.ts` | `REVIEWER_TOPIC_LABELS: Record<Exclude<GoalCategory,'unknown'>, string>` + `reviewerTopicLabel()` fail-safe fallback. Pure (imports one type). Display only — never changes the API value. | new — constants |
+| `__tests__/reviewer-lk/authority-firewall.test.ts` | E-block updated for the container (page renders `<ReviewerResources>`, container is a server component grouping both panels, no fetch/state/write); new F block — no `crc_publication_scope` / `crc_eligible` in the lookup, label-map keys = `GOAL_CATEGORIES \ 'unknown'`, API value unchanged | test — extended |
+| `__tests__/reviewer-context/authority-firewall.test.ts` | E-block "sibling" test updated: panel reaches the page via the `<ReviewerResources>` container; container added to the import-scan list | test — extended |
+| **new** `__tests__/reviewer-lk/reviewer-resources-presentation.test.ts` | 40 assertions — label map, card order, Applicability heading, neutral styling (no green/red tokens), context wording, no CRC-channel metadata, no promotion control, verbatim proposition, and a real-fixture check that both `Established` and `Not established` are reachable | test — new |
 
-**Explicitly NOT touched:** `route.ts`, `select-reviewer-claims.ts`, `eligibility.ts`, `submission-facts.ts`, `repository.ts`, `types.ts` (the API contract), `lib/retrieval-engine/**`, `lib/reviewer-context/**` behaviour, any migration, `WorkbookClient.tsx` / `Section*.tsx` / `workbook-schema.ts` / `guidance.ts`.
+**NOT touched (confirmed):** `route.ts`, `select-reviewer-claims.ts`, `eligibility.ts`, `submission-facts.ts`, `repository.ts`, `types.ts`, `project-reviewer-claims.ts` (OQ-2 resolved to omission — no scope note derived), `lib/retrieval-engine/**`, `lib/reviewer-context/**` behaviour, any migration, `WorkbookClient.tsx` / `Section*.tsx` / `workbook-schema.ts` / `guidance.ts`.
 
 ## 8. Data / API changes
 
@@ -191,7 +206,7 @@ CAH-4F is expected to touch **at most**:
 
 | Risk | Mitigation |
 |---|---|
-| Right-side inspector layout forces a `WorkbookClient` refactor | OQ-1 — if incompatible, ship stacked panels grouped under a Reviewer Resources heading; the inspector is preferred, not required (PRD §8.2 vs §8.3) |
+| Right-side inspector layout forces a `WorkbookClient` refactor | **Resolved (OQ-1):** shipped the §8.3 fallback — stacked panels grouped under a `ReviewerResources` server component, sibling of `<WorkbookClient>`. `WorkbookClient.tsx` untouched. The container is one component → re-homing into an inspector later is a move, not a re-architecture. |
 | Topic label map drifts from `GOAL_CATEGORIES` | a test asserting the map's keys are exactly `GOAL_CATEGORIES \ 'unknown'` |
 | A future dev adds a "cite in note" button and wires it to the workbook | firewall E scan + ADR-001; any such affordance is a separate approved decision |
 | Hiding `crc_eligible` breaks a governance consumer | it is client-render only; the API payload is unchanged; no server consumer reads the rendered DOM |
@@ -220,6 +235,33 @@ CAH-4G would add a reviewer free-form question box that flows `question → gove
 - the Reviewer Resources container should be structured so a question section can be *added* later without re-architecting (e.g. sections within the inspector), but **no question input ships in CAH-4F**;
 - the projection module (`project-reviewer-claims.ts`) stays a thin pass-through — CAH-4G's "reviewer-oriented composition" is a new, separate composition step, not an extension of CAH-4F presentation;
 - the audit `access_kind` vocabulary may need a third value for CAH-4G (e.g. `lk_question`) — that is a CAH-4G migration decision, explicitly out of CAH-4F scope.
+
+## 15. CAH-4F UAT script (manual — no browser harness in this repo)
+
+**Environment:** a deploy of the CAH-4F implementation commit. Sign in as an admin (`users.is_admin = true`). Pick a `si8_certified` submission at `/admin/submissions/[id]/review`. For the two applicability states, use two look-ups against the live `TOPIC_CLAIMS_FIXTURE`:
+- **Established** — topic **Copyright ownership** → `CLAIM-COPY-004-v1` (no applicability requirements → vacuously applicable).
+- **Not established** — topic **Copyrightability** → `CLAIM-COPY-001-v1` (one `unresolved` requirement under a submission with no matching facts).
+
+| # | Step | Expected |
+|---|---|---|
+| 1 | Open the review page. | Workbook is the primary, expanded surface. Above it, one **"Reviewer resources"** heading with the sub-line *"Reference only — not assessment evidence…"*, then two collapsed panels. |
+| 2 | Read the "Reviewer resources" framing. | It states consulting these creates no evidence / findings / control result / outcome / conclusion, and that the reviewer records their own reasoning in the workbook. |
+| 3 | Expand **"Governed SI8 Living Knowledge — reviewer research"**. | Topic `<select>` + "Look up governed knowledge" button. Nothing has loaded yet. |
+| 4 | Open the topic `<select>`. | Options read **Commercial use / Copyright ownership / Copyrightability / Likeness / Third-party source rights** — no `snake_case`, no raw enum. |
+| 5 | Pick **Copyright ownership**, click **Look up governed knowledge**. | One result card. Card leads with the **governed proposition** (body text). |
+| 6 | Inspect the card order. | proposition → **Applicability** (explicit heading) → **Context used for this look-up** → **Details — governance & provenance** (collapsed `<details>`). |
+| 7 | Read the Applicability section. | Heading "Applicability"; then **"Established for this submission."**; neutral text — **no green tick, no red, no colour-only status**. |
+| 8 | Read "Context used for this look-up". | Names **Resolved tools** + **Jurisdiction** actually used; explicitly *"Submission-derived inputs to retrieval — not assessment evidence."* |
+| 9 | Expand **Details — governance & provenance**. | `claim_id`, `claim_character`, `jurisdiction`, `lifecycle`, `scope: <publication_scope>`, `verified <date>`, provider/tool scope, `governed_claims_reference`. **No `crc_eligible` / "CRC channel". No "Scope of the statement:" CRC-channel prose anywhere on the card.** |
+| 10 | Change topic to **Copyrightability**, click **Look up** again. | New results. At least one card shows **"Not established for this submission. A required fact is unresolved or does not match this submission's context — this is not a negative finding."** |
+| 11 | Read the per-requirement rows on that card. | Each row ends with a verbatim status word (`met` / `unresolved` / `not_met`) — not "PASS"/"FAIL", not a tick/cross. |
+| 12 | Look for any action control on either card / the panel. | **None.** No "Add to evidence", "Apply", "Accept", "Approve", "Clear", "Pass", "Cite in note", checkbox, or drag handle. Only the `<details>` disclosures, the topic `<select>`, and the look-up button. |
+| 13 | In Supabase, count `crc_context_access_events` for this `submission_id`, `access_kind = 'lk_research'`. | Exactly **2** new rows (one per look-up in steps 5 and 10), each `actor_user_id` = your admin id, `association_id` / `crc_session_id` NULL. Opening/closing the panels created none. |
+| 14 | Re-read the submission's `workbook_data` and its `assessments` row. | **Byte-unchanged** by any of the above. No evidence, gap, finding, control result, outcome, sign-off, report, or publication row was created or altered. |
+
+Then expand **"Linked CRC context"** (if a CRC conversation is linked) and confirm it behaves exactly as CAH-4B/4C (goals/assertions shown; "View transcript" is deliberate + audited as `access_kind:'transcript'`; `crc_project_state` unchanged after viewing).
+
+**Pass = every row matches.** Any mismatch on rows 9, 12, 13, or 14 is a release blocker.
 
 ---
 

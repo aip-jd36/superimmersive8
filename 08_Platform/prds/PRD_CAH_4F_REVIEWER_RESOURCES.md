@@ -1,6 +1,6 @@
 # PRD — CAH-4F: Reviewer Resources + Living Knowledge Context Semantics
 
-**Status:** DRAFT — product contract for the CAH-4F implementation milestone. Not yet built.
+**Status:** IMPLEMENTED — product contract for the CAH-4F implementation milestone. Built as a reviewer-page **presentation** change only (no route/selector/eligibility/applicability/audit/schema/migration change). Open questions resolved in §13. As-built design: `08_Platform/implementation/REVIEWER_RESOURCES_ARCHITECTURE.md` §5, §7.
 **Milestone series:** CAH-4x (CRC → Commercial Assurance handoff). CAH-4B/4C/4D/4E are shipped and integrated at `origin/main` = `9fa6d1c` (feat(reviewer-lk): Human Reviewer Living Knowledge V1). CAH-4F is the next milestone.
 **Scope of this PRD:** the *what*. The *how* is in `08_Platform/implementation/REVIEWER_RESOURCES_ARCHITECTURE.md`. The durable authority decision is `08_Platform/app/lib/reviewer-lk/ADR-001-reviewer-resources-authority-boundary.md`.
 **Frozen prior specs this PRD does not reopen:** `PRD_CRC_v1.0.md`, `PRD_ASSESSMENT_SERVICE_v1.0.md`, `PRD_REVIEWER_WORKBOOK_UI.md`, `PRD_LIVING_NOTEBOOK.md`, `PRD_LIVING_KNOWLEDGE_SOURCE_INPUTS_v0.1.md`.
@@ -212,16 +212,16 @@ CAH-4F is done when:
 8. No migration added. No production behaviour changed beyond reviewer-page presentation.
 9. A short UAT script exists: a reviewer performs one look-up, confirms the new presentation, confirms one `lk_research` event, confirms `workbook_data` / assessment unchanged.
 
-## 13. Open questions
+## 13. Open questions — RESOLVED in the CAH-4F implementation milestone
 
-| # | Question | Owner |
+| # | Question | Resolution (as-built) |
 |---|---|---|
-| OQ-1 | Right-side inspector vs. top-of-page stacked panels — is the inspector layout compatible with `WorkbookClient.tsx`'s existing full-width layout without a disruptive refactor? | design spec / eng |
-| OQ-2 | Is a reviewer-oriented "scope of this statement" note (FR-6) worth deriving in V1, or is omitting `crc_publication_scope` entirely the smaller, safer V1? | PM + eng |
-| OQ-3 | Do reviewers ever need `crc_eligible` visible (SR-5 / FR-7)? Requires a recorded reviewer-need observation before it is surfaced even behind disclosure. | PM |
-| OQ-4 | Should "Linked CRC Context" move *into* the inspector in CAH-4F, or stay a separate top panel and only be *referenced* by the Reviewer Resources frame? | PM + design |
-| OQ-5 | Topic label wording — align to `SI8-Reviewer-Manual-v0.2.md` domain vocabulary, or to plain customer-facing language? | PM + reviewer manual owner |
-| OQ-6 | Does CAH-4F need to touch `guidance.ts` (the static per-section workbook guidance) at all, or is it strictly out of scope? (Current position: out of scope.) | PM |
+| OQ-1 | Right-side inspector vs. top-of-page stacked panels — compatible with `WorkbookClient.tsx` without a disruptive refactor? | **Fallback (§8.3).** Source inspection at `9fa6d1c`: `WorkbookClient.tsx` is a `flex flex-col h-screen` client shell with its own 280px right `<aside>` tab panel (`guidance`/`submission`/`evidence`). A persistent beside-workbook inspector would require threading a server-rendered node as a prop into that `'use client'` component (+ a 4th tab in a too-narrow column) or wrapping the self-scrolling `h-screen` shell in a new outer flex — both Workbook layout changes the milestone forbids. Shipped: a `ReviewerResources` **server component** grouping both panels (each collapsed `<details>`), rendered as a sibling above `<WorkbookClient>` — visually secondary, single component, trivially re-homable to an inspector later. |
+| OQ-2 | Reviewer-oriented "scope of this statement" note, or omit `crc_publication_scope`? | **Omit entirely** — the smaller, safer V1. No scope note derived; `project-reviewer-claims.ts` unchanged (still a thin pass-through). |
+| OQ-3 | Do reviewers need `crc_eligible` visible? | **Not surfaced at all** (not even behind disclosure). No reviewer-need observation is on record. It stays in the API payload as governance metadata; the reviewer DOM never renders it. |
+| OQ-4 | "Linked CRC Context" *into* the container, or referenced only? | **Into** the `ReviewerResources` container, behaviour byte-unchanged from CAH-4B/4C (same `ReviewerCrcContextPanel` / `ReviewerTranscriptDrawer`, same service/audit path). Grouping is placement, not merged authority. |
+| OQ-5 | Topic label wording — Reviewer Manual domain vocabulary, or plain language? | **Plain language** (`commercial_use → "Commercial use"`, etc.). The reviewer is picking a research topic, not classifying a control. `lib/reviewer-lk/topic-labels.ts`. |
+| OQ-6 | Touch `guidance.ts`? | **No.** Strictly out of scope; untouched. |
 
 ---
 

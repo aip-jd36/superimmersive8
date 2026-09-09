@@ -2,8 +2,7 @@ import { requireAdmin } from '@/lib/auth/admin'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import { WorkbookClient } from './WorkbookClient'
-import { ReviewerCrcContextPanel } from './ReviewerCrcContextPanel'
-import { ReviewerLkPanel } from './ReviewerLkPanel'
+import { ReviewerResources } from './ReviewerResources'
 import { EMPTY_WORKBOOK } from './workbook-schema'
 import { findAssessmentBySubmissionId } from '@/lib/assessments/repository'
 
@@ -91,16 +90,13 @@ export default async function WorkbookPage({ params }: PageProps) {
 
   return (
     <>
-      {/* CAH-4B: read-only reviewer CRC context — a sibling reference surface,
-          NOT a workbook field/section. Renders nothing (fragment collapses to
-          just <WorkbookClient/>) when no CRC is linked, so the review page is
-          byte-identical to before in that common case. */}
-      <ReviewerCrcContextPanel submissionId={params.id} />
-      {/* CAH-4E: read-only reviewer Living Knowledge research — a SEPARATE
-          sibling authority surface (governed SI8 knowledge), never combined
-          with the CRC context block, never a workbook field. Deliberate
-          reviewer action only; nothing fetched on page load. */}
-      <ReviewerLkPanel submissionId={params.id} />
+      {/* CAH-4F: read-only "Reviewer resources" — a sibling reference surface
+          grouping the CAH-4E Living Knowledge panel and the CAH-4B/4C CRC
+          context panel. NOT a workbook field/section, NOT a WorkbookClient
+          prop/child. Each child panel keeps its own independent access check,
+          data path, and audit; grouping is placement only, not merged
+          authority. Renders only for admins. */}
+      <ReviewerResources submissionId={params.id} />
       <WorkbookClient
         submissionId={params.id}
         assessmentNumber={assessmentNumber}

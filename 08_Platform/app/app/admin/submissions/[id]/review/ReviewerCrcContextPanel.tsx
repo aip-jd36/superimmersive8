@@ -1,10 +1,15 @@
 /**
- * Reviewer CRC Context panel (CAH-4B §10).
+ * Reviewer CRC Context panel (CAH-4B §10; re-homed under Reviewer Resources in
+ * CAH-4F).
  *
- * A read-only SERVER component rendered as a SIBLING of `<WorkbookClient>` on
- * the review page — never a WorkbookClient field or section, never part of
- * workbook form state. Being a server component, it is structurally incapable
- * of sharing client state with the workbook.
+ * A read-only SERVER component. Rendered inside the CAH-4F `<ReviewerResources>`
+ * container, which is itself a SIBLING of `<WorkbookClient>` — never a
+ * WorkbookClient field or section, never part of workbook form state. Being a
+ * server component, it is structurally incapable of sharing client state with
+ * the workbook. Grouping under `<ReviewerResources>` beside the Living
+ * Knowledge panel is placement only — the two remain different authorities
+ * (customer-provided context vs. governed SI8 knowledge) with independent
+ * data paths and audits.
  *
  * It shows only:
  *   - that a linked CRC conversation exists, and its association provenance
@@ -140,7 +145,7 @@ export async function ReviewerCrcContextPanel({ submissionId }: { submissionId: 
   if (!context.linked) return null
 
   return (
-    <div className="max-w-2xl mx-auto px-8 pt-6">
+    <div className="mt-3">
       <details
         className="rounded-lg border"
         style={{ borderColor: '#e0ddd2', backgroundColor: '#f7f5ef' }}
