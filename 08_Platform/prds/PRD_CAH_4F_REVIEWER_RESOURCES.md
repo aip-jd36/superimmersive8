@@ -1,6 +1,9 @@
 # PRD — CAH-4F: Reviewer Resources + Living Knowledge Context Semantics
 
-**Status:** IMPLEMENTED — product contract for the CAH-4F implementation milestone. Built as a reviewer-page **presentation** change only (no route/selector/eligibility/applicability/audit/schema/migration change). Open questions resolved in §13. As-built design: `08_Platform/implementation/REVIEWER_RESOURCES_ARCHITECTURE.md` §5, §7.
+**Status:** INTEGRATED / DEPLOYED — PRODUCTION UAT INCOMPLETE. Built as a reviewer-page **presentation** change only (no route/selector/eligibility/applicability/audit/schema/migration change). Open questions resolved in §13. As-built design: `08_Platform/implementation/REVIEWER_RESOURCES_ARCHITECTURE.md` §5, §7, §15 (UAT script).
+- **Repository-integrated:** yes — `origin/main` = `d19b678` (docs `2562996` + impl `d19b678`, two distinct commits, fast-forward `e2b736d..d19b678`, 2026-09-09). Rebased cleanly onto the 4 upstream LK-TRIAL-11 commits — zero file overlap, patch-ids identical.
+- **Deployed:** Vercel auto-deploys `main`; `app.superimmersive8.com` is live and the admin/reviewer routes respond (307→/auth/login, `/api/admin/.../reviewer-lk`→401). Commit-level deployment confirmation requires Vercel dashboard access (operator).
+- **Production-proven:** NOT YET — the §15 UAT requires an authenticated admin/reviewer session (operator-controlled). Runbook is ready; evidence to collect is enumerated in §15 rows 1–14.
 **Milestone series:** CAH-4x (CRC → Commercial Assurance handoff). CAH-4B/4C/4D/4E are shipped and integrated at `origin/main` = `9fa6d1c` (feat(reviewer-lk): Human Reviewer Living Knowledge V1). CAH-4F is the next milestone.
 **Scope of this PRD:** the *what*. The *how* is in `08_Platform/implementation/REVIEWER_RESOURCES_ARCHITECTURE.md`. The durable authority decision is `08_Platform/app/lib/reviewer-lk/ADR-001-reviewer-resources-authority-boundary.md`.
 **Frozen prior specs this PRD does not reopen:** `PRD_CRC_v1.0.md`, `PRD_ASSESSMENT_SERVICE_v1.0.md`, `PRD_REVIEWER_WORKBOOK_UI.md`, `PRD_LIVING_NOTEBOOK.md`, `PRD_LIVING_KNOWLEDGE_SOURCE_INPUTS_v0.1.md`.

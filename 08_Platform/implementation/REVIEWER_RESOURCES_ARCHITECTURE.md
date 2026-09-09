@@ -216,9 +216,11 @@ Results header: `Reference only — not assessment evidence.` + `REVIEWER_LK_FRA
 ## 12. Rollout / UAT expectations
 
 - CAH-4F is a **reviewer-page presentation change only**. No migration. No production data change.
-- Rollout = normal branch → PR → review → non-force fast-forward integration → Vercel auto-deploy (same as CAH-4E-INT).
-- UAT is a single reviewer session on an internal fixture (§10.5). No customer-facing surface changes.
-- No CAH-4E-PROD-style migration gate (there is no migration).
+- Rollout = normal branch → non-force fast-forward integration → Vercel auto-deploy (same as CAH-4E-INT).
+- **Integrated 2026-09-09:** `origin/main` = `d19b678` (docs `2562996` + impl `d19b678`). Rebased onto the 4 upstream LK-TRIAL-11 commits (`9fa6d1c → e2b736d`); zero file overlap; patch-ids identical pre/post rebase; fast-forward push `e2b736d..d19b678`.
+- **Deployed:** Vercel auto-deploy from `main`. `app.superimmersive8.com` live; admin/reviewer routes gated as expected. Commit-level deploy confirmation = operator (Vercel dashboard).
+- UAT = §15 script, one reviewer session on an internal `si8_certified` fixture. Requires an authenticated admin session (operator). No customer-facing surface changes.
+- No CAH-4E-PROD-style migration gate (there is no migration — fresh inspection at integration confirmed `supabase/migrations/` unchanged by CAH-4F).
 
 ## 13. Explicit prohibited couplings
 
