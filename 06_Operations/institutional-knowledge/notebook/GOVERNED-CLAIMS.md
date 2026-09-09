@@ -3856,18 +3856,45 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-09-09
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  PENDING — not yet reviewed against this now-Adopted claim.
-  `governance-reviews/CPR_020_CAND-STABILITYAI-COMMERCIAL-USE-001_2026-09-09.md`
-  (conducted pre-Adoption, out of normal sequence, while evidence was fresh)
-  recommended WITHHOLD strictly on sequencing/missing-prerequisite grounds --
-  no substantive publication-safety defect was found. A bounded CPR
-  reconsideration, including the mandatory synthetic-eligibility-canary
-  Retrieval -> Bounded Interpretation -> Composition verification against
-  this now-Adopted claim's real drafted text, is required before
-  `crc_eligible` can be decided.
+  APPROVED FOR CRC PUBLICATION (2026-09-09, CRC Approver: JD (PM) -- see
+  CRC Approver/CRC Decision Date below; CRC Publication Review #20 initially
+  recommended WITHHOLD on sequencing/missing-prerequisite grounds only,
+  governance-reviews/CPR_020_CAND-STABILITYAI-COMMERCIAL-USE-001_2026-09-09.md,
+  superseded by that same file's own 2026-09-09 addendum recording a bounded
+  in-sequence CPR reconsideration -- the mandatory synthetic-eligibility-
+  canary was run for the first time against this real, now-Adopted claim
+  and its real approved text, confirming exactly what CPR_020's own
+  predictive probe anticipated: Bounded Interpretation never exceeds
+  `relevant_applicability_unresolved` (Case 3B), all three unresolved
+  project dependencies pass through unmodified, and no scope bleed into
+  Stable Chat/Stable Assistant occurs). CRC may state that Stability AI's
+  Community License grants a royalty-free license to use its Core Models
+  (including the Stable Diffusion family) for commercial purposes, subject
+  to the Agreement's conditions -- including a commercial-use registration
+  requirement and an aggregate-Affiliate-revenue threshold of USD
+  $1,000,000 above which the Agreement's licenses terminate and continued
+  use requires a separate, Stability-AI-discretionary license -- and that
+  output ownership is stated separately and does not by itself establish
+  commercial permission. This is Stability AI's own provider/platform
+  policy, not law. CRC must not state or imply that a specific user's
+  organization is above or below the revenue threshold, that required
+  registration has occurred, that the Community License definitely governs
+  the particular Stability AI product/model the user used, that a separate
+  license is or is not currently required for this user, or that Stability
+  AI would grant one if requested. CRC must not extend this statement to
+  Stable Chat, Stable Assistant, Stable App, or any other separately
+  governed Stability AI product or service, and must not assert that
+  hosted/API and self-hosted access carry a fully identical complete
+  contractual regime beyond the Agreement's own silence on the distinction.
+  A human-reviewed Commercial Assurance Assessment remains the
+  higher-assurance path for resolving a specific project's own Stability AI
+  revenue/registration/product-scope status or broader commercial
+  readiness. **Runtime note:** `stability-ai` is not yet a registered
+  `CanonicalToolId` (Principle 7) -- this claim is CRC-authorized but not
+  yet conversationally reachable; that is a separate, later, mechanical
+  remediation, not performed by this decision.
 
 CRC Candidate Statement: >
-  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
   Stability AI's Community License grants a royalty-free license to use its
   Core Models (including the Stable Diffusion family) for commercial
   purposes, subject to the Agreement's conditions. Commercial use requires
@@ -3883,13 +3910,13 @@ CRC Candidate Statement: >
   They do not by themselves establish that a particular project is cleared
   for commercial use.
 
-Effective date: 2026-09-09 (benchmark/recording date; underlying Community License Agreement itself dated 2024-07-05, independently confirmed current and unsuperseded three times across this onboarding cycle, most recently in CPR_020)
-Last reviewed: 2026-09-09 (CPR_020's independent primary-evidence re-verification, four Stability-controlled sources)
+Effective date: 2026-09-09 (benchmark/recording date; underlying Community License Agreement itself dated 2024-07-05, independently confirmed current and unsuperseded three times across this onboarding cycle, most recently in the CPR reconsideration below)
+Last reviewed: 2026-09-09 (CPR reconsideration -- real synthetic-eligibility-canary run against the actual Adopted claim, see CPR_020's own 2026-09-09 addendum)
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-09-09
 Related: —
 
 Full Formal Governance Review artifact: `governance-reviews/FGR_017_CAND-STABILITYAI-COMMERCIAL-USE-001_2026-09-09.md`
-Full CRC Publication Review artifact (pre-Adoption, out-of-sequence, recommends WITHHOLD on sequencing grounds only -- reconsideration required): `governance-reviews/CPR_020_CAND-STABILITYAI-COMMERCIAL-USE-001_2026-09-09.md`
+Full CRC Publication Review artifact (initial review recommended WITHHOLD on sequencing grounds only; 2026-09-09 addendum records the in-sequence reconsideration and final APPROVE): `governance-reviews/CPR_020_CAND-STABILITYAI-COMMERCIAL-USE-001_2026-09-09.md`
 Candidate Representation: `08_Platform/app/lib/candidates/CAND-STABILITYAI-COMMERCIAL-USE-001.ts @ b99b89940d78e1f8f4a9f8c0a5d5b7f9e6a08288`
