@@ -188,6 +188,13 @@ export const NEW_IDENTITY_CANONICALIZATION_READINESS: readonly CanonicalizationR
   // result -- it does not retroactively imply Suno was ever ready before
   // remediation.
   { kind: 'tool', identifier: 'suno', representativeExpression: 'Suno' },
+  // 'stability-ai' (Stability AI Runtime Identity / Representation-Readiness
+  // Remediation, Trial 10): representative expression "Stability AI" is the
+  // identity's own canonical/governed name, per GOVERNED-CLAIMS.md's Domain
+  // header ("AI Video Generation Platform Rights -- Stability AI") -- no
+  // Matrix section header exists for this TopicClaim-only identity, matching
+  // the Synthesia precedent's own sourcing rule.
+  { kind: 'tool', identifier: 'stability-ai', representativeExpression: 'Stability AI' },
 ]
 
 /**

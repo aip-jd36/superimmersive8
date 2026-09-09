@@ -76,7 +76,32 @@ export const CANONICAL_TOOL_IDS = [
   'synthesia',
   'luma',
   'suno',
+  'stability-ai',
 ] as const
+
+/**
+ * 'stability-ai' added 2026-09-09 (Stability AI Runtime Identity /
+ * Representation-Readiness Remediation, Trial 10 Living Knowledge onboarding
+ * benchmark -- CLAIM-STABILITYAI-COMMERCIAL-USE-001-v1) -- pure generic
+ * registry extension, same mechanism as every entry above, no new category.
+ * Governed via `GOVERNED-CLAIMS.md` (not `PLATFORM-RIGHTS-MATRIX.md` -- no
+ * Matrix coverage exists for Stability AI, confirmed directly), following
+ * the same governance home already used for Synthesia. Single evidence-
+ * backed canonical identity (Stability AI Community License Agreement,
+ * "Last Updated: July 5, 2024," governs the Core Models / Stable Diffusion
+ * family); the Agreement's own text explicitly excludes separately governed
+ * Stability AI products (Stable Assistant, Stable Chat) from its scope --
+ * those remain deliberately unregistered under this identity, not merged
+ * into it. This registration is the precondition for LK-94's
+ * Canonicalization Readiness check (`lib/crc-engine/
+ * canonicalization-readiness.ts`), exercised against this identity
+ * immediately after registration, per the same discipline established for
+ * 'suno' below (the first identity registered after the LK-94 grandfather
+ * cutover) -- 'stability-ai' is likewise NOT grandfathered (registered
+ * 2026-09-09, well after the 2026-09-01 cutover) and requires a passing
+ * `NEW_IDENTITY_CANONICALIZATION_READINESS` entry, added in that file at the
+ * same time as this registration.
+ */
 
 /**
  * 'suno' added 2026-09-01 (LK-99, Trial 6 Living Knowledge onboarding

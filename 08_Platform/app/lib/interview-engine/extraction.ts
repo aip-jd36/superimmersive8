@@ -577,6 +577,22 @@ const KNOWN_TOOLS: Record<string, CanonicalToolId> = {
   // evidence-only, no-speculative-inference discipline.
   'gemini api': 'gemini-api',
   'gemini developer api': 'gemini-api',
+  // 'stability ai' / 'stable diffusion' added 2026-09-09 (Stability AI
+  // Runtime Identity / Representation-Readiness Remediation, Trial 10):
+  // added PROSPECTIVELY, mirroring 'suno''s own precedent above -- no
+  // production UAT has yet observed either phrase; both are the identity's
+  // own ordinary, evidenced names (the company name and the model family
+  // name used throughout the Adopted claim's own governed proposition text
+  // and Community License Agreement). Narrow, single-word-boundary aliases
+  // only -- no fuzzy/substring matching. Deliberately does NOT include
+  // 'stable assistant', 'stable chat', or 'stable app': those are
+  // separately governed Stability AI products explicitly excluded from
+  // this claim's own scope (GOVERNED-CLAIMS.md, CLAIM-STABILITYAI-
+  // COMMERCIAL-USE-001-v1) -- adding an alias for them would resolve a
+  // different, ungoverned product to this identity, which this table's
+  // exact-match-only design must never do.
+  'stability ai': 'stability-ai',
+  'stable diffusion': 'stability-ai',
 }
 
 /**
