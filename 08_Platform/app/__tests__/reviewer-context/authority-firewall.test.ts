@@ -34,22 +34,27 @@ const importLines = (rel: string) => (read(rel).match(/^\s*import[\s\S]*?from\s+
 
 const REVIEWER_CONTEXT_LIB = listFiles('lib/reviewer-context', ['.ts'])
 const CRC_PROJECT_CONTEXT_LIB = listFiles('lib/crc-project-context', ['.ts'])
+const REVIEWER_CONTEXT_ROUTES = [
+  'app/api/admin/submissions/[id]/reviewer-crc-context/route.ts',
+  'app/api/admin/submissions/[id]/reviewer-crc-context/[association_id]/transcript/route.ts', // CAH-4C
+]
 const REVIEWER_CONTEXT_ALL = [
   ...REVIEWER_CONTEXT_LIB,
   ...CRC_PROJECT_CONTEXT_LIB,
-  'app/api/admin/submissions/[id]/reviewer-crc-context/route.ts',
+  ...REVIEWER_CONTEXT_ROUTES,
   'app/admin/submissions/[id]/review/ReviewerCrcContextPanel.tsx',
+  'app/admin/submissions/[id]/review/ReviewerTranscriptDrawer.tsx', // CAH-4C
 ]
 
-const REVIEWER_CONTEXT_ROUTE = 'app/api/admin/submissions/[id]/reviewer-crc-context/route.ts'
 // The assessment WRITE/domain surface: everything under lib/assessments plus
-// the submissions API routes — EXCEPT the reviewer-context route itself, which
-// physically sits in the submissions tree but IS the reviewer-context surface
-// (it is allowed, and required, to import lib/reviewer-context).
+// the submissions API routes — EXCEPT the reviewer-context routes themselves,
+// which physically sit in the submissions tree but ARE the reviewer-context
+// surface (allowed, and required, to import lib/reviewer-context).
+const REVIEWER_CONTEXT_ROUTES_NORM = REVIEWER_CONTEXT_ROUTES.map((r) => path.normalize(r))
 const ASSESSMENT_DOMAIN = [
   ...listFiles('lib/assessments', ['.ts']),
   ...listFiles('app/api/admin/submissions', ['.ts']),
-].filter((rel) => path.normalize(rel) !== path.normalize(REVIEWER_CONTEXT_ROUTE))
+].filter((rel) => !REVIEWER_CONTEXT_ROUTES_NORM.includes(path.normalize(rel)))
 
 // ── A. reviewer-context modules do not import assessment mutation / domain ──
 
@@ -94,13 +99,49 @@ describe('C — the reviewer-context service is read-only', () => {
     }
   })
 
-  test('performs NO database write — no .insert / .update / .upsert / .delete / .rpc, no supabaseAdmin', () => {
+  test('service.ts performs NO database write — no .insert / .update / .upsert / .delete / .rpc, no supabaseAdmin', () => {
     const src = codeOnly(svc)
     expect(src).not.toMatch(/\.(insert|update|upsert|delete)\s*\(/)
     expect(src).not.toMatch(/supabaseAdmin/)
     expect(src).not.toMatch(/\.rpc\s*\(/)
     // it never names an assessment-state table
     expect(src).not.toMatch(/from\(\s*['"](assessments|submissions|workbook_snapshots|assessment_publications)['"]/)
+  })
+
+  // CAH-4C: the ONLY write introduced is the fail-closed context-access audit,
+  // and it lives in the dedicated repository — targeting ONLY crc_context_access_events.
+  test('repository.ts writes ONLY crc_context_access_events, and reads ONLY crc_sessions', () => {
+    const repo = 'lib/reviewer-context/repository.ts'
+    const src = codeOnly(repo)
+    const writeTargets = [...src.matchAll(/\.from\(\s*['"]([a-z_]+)['"]\s*\)[\s\S]{0,160}?\.(insert|update|upsert|delete)\b/g)].map((m) => m[1])
+    expect(writeTargets).toEqual(['crc_context_access_events'])
+    // no assessment-state table touched at all
+    expect(src).not.toMatch(/from\(\s*['"](assessments|submissions|workbook_snapshots|assessment_publications|crc_sales_state|crc_sales_events|crc_assurance_association_events|crc_assurance_associations)['"]/)
+    // the ONLY read table is crc_sessions
+    const readTargets = [...new Set([...src.matchAll(/\.from\(\s*['"]([a-z_]+)['"]\s*\)/g)].map((m) => m[1]))].sort()
+    expect(readTargets).toEqual(['crc_context_access_events', 'crc_sessions'])
+    // never writes crc_sessions
+    expect(src).not.toMatch(/from\(\s*['"]crc_sessions['"]\s*\)[\s\S]{0,160}?\.(insert|update|upsert|delete)\b/)
+    expect(src).not.toMatch(/\.rpc\s*\(/)
+  })
+
+  test('the transcript route imports only reviewer-context auth/service/repository — never an assessment mutation service', () => {
+    const imports = importLines('app/api/admin/submissions/[id]/reviewer-crc-context/[association_id]/transcript/route.ts')
+    expect(imports).not.toMatch(/@\/lib\/assessments|patchWorkbookAtomic|updateAssessment|signOffAssessment|workbook\/route|@\/lib\/crc-sales/)
+    expect(imports).toMatch(/@\/lib\/reviewer-context\/(auth|service|repository)/)
+  })
+
+  test('no transcript -> evidence / finding / outcome conversion helper anywhere in reviewer-context', () => {
+    for (const rel of [...REVIEWER_CONTEXT_LIB, 'app/admin/submissions/[id]/review/ReviewerTranscriptDrawer.tsx']) {
+      const src = codeOnly(rel).toLowerCase()
+      for (const token of [
+        'transcripttoevidence', 'transcript_to_evidence', 'entrytoevidence', 'transcripttofinding',
+        'transcripttooutcome', 'summarizetranscript', 'summarisetranscript', 'interprettranscript',
+        'applytranscript', 'accepttranscript', 'workbook_data', 'workbookdata', 'section_3', 'section_5', 'section_6',
+      ]) {
+        expect(src).not.toContain(token)
+      }
+    }
   })
 
   test('no export or helper converts a CRC goal/assertion into evidence / control / gap / finding / outcome / report', () => {
@@ -146,13 +187,37 @@ describe('E — the reviewer CRC panel is a sibling, not a workbook field/sectio
   const panel = 'app/admin/submissions/[id]/review/ReviewerCrcContextPanel.tsx'
   const page = 'app/admin/submissions/[id]/review/page.tsx'
 
-  test('the panel is a server component (no "use client"), so it cannot share workbook client state', () => {
+  test('the base panel is a server component (no "use client"), so it cannot share workbook client state', () => {
     expect(read(panel)).not.toMatch(/^['"]use client['"]/m)
   })
 
   test('the panel does not import WorkbookClient or any Section component', () => {
     const imports = importLines(panel)
     expect(imports).not.toMatch(/WorkbookClient|Section[1-7]|workbook-schema|guidance/)
+  })
+
+  // CAH-4C: the transcript drawer is the ONLY client component in the surface.
+  const drawer = 'app/admin/submissions/[id]/review/ReviewerTranscriptDrawer.tsx'
+  test('the transcript drawer shares no workbook state and imports no Section / WorkbookClient / workbook-schema', () => {
+    const imports = importLines(drawer)
+    expect(imports).not.toMatch(/WorkbookClient|Section[1-7]|workbook-schema|guidance|@\/lib\/assessments|@\/lib\/crc-sales/)
+    const src = codeOnly(drawer)
+    expect(src).not.toMatch(/crcContext|reviewerContext|workbook|useContext\(|createContext\(/i)
+  })
+
+  test('the transcript drawer issues exactly one GET and no mutating request / copy-to-evidence / apply / accept', () => {
+    const src = codeOnly(drawer)
+    expect(src).not.toMatch(/method:\s*['"](POST|PUT|PATCH|DELETE)/)
+    expect(src).not.toMatch(/copy to evidence|apply to workbook|accept finding|use as evidence|add to workbook|summariz|summaris/i)
+    expect(src).not.toMatch(/<(input|textarea|select)\b/)
+    const fetches = [...src.matchAll(/fetch\(/g)]
+    expect(fetches.length).toBe(1)
+    expect(src).toMatch(/method:\s*['"]GET['"]/)
+    expect(src).toMatch(/reviewer-crc-context\/\$\{associationId\}\/transcript/)
+  })
+
+  test('the transcript drawer carries the fixed "not verified / not assessment evidence" framing', () => {
+    expect(read(drawer)).toMatch(/[Nn]ot verified and not assessment evidence/)
   })
 
   test('page.tsx renders the panel as a SIBLING of <WorkbookClient>, not a child/prop of it', () => {

@@ -31,12 +31,14 @@
 
 import { deserializeStructuredUnderstanding } from '@/lib/interview-engine/serialization'
 import { buildCrcProjectContext } from '@/lib/crc-project-context/projection'
+import { shapeCrcTranscript, type CrcTranscriptEntry } from '@/lib/crc-project-context/transcript'
 import {
   listActiveAssociationsForSubmission,
   compareCrcStateIdentity,
   computeCrcStateIdentity,
 } from '@/lib/crc-assurance-handoff'
 import { getCrcSessionForAssociation } from '@/lib/crc-assurance-handoff/repository'
+import { getCrcSessionTranscript } from './repository'
 import type { CrcProjectContext } from '@/lib/crc-project-context/types'
 import type { ReviewerCrcContext, ReviewerCrcContextItem, CrcStateComparison } from './types'
 
@@ -95,4 +97,38 @@ export async function getReviewerCrcContext(submissionId: string): Promise<Revie
     })
   }
   return { linked: true, associations: items }
+}
+
+// ── CAH-4C: deliberate, on-demand transcript resolution ────────────────────
+
+export type ReviewerTranscriptResolution =
+  | { ok: true; crcSessionId: string; entries: CrcTranscriptEntry[] }
+  | { ok: false; code: 'no_such_active_association' | 'session_unavailable' }
+
+/**
+ * RESOLVES (does NOT audit, does NOT return over the wire) the verbatim
+ * transcript for ONE authoritatively-associated CRC conversation.
+ *
+ * Authorization chain (CAH-4C §2): the caller has already authenticated the
+ * reviewer; here `associationId` MUST be an ACTIVE association OF `submissionId`
+ * (`listActiveAssociationsForSubmission` is active-only, so a removed
+ * association — or an association of a different submission — resolves to
+ * `no_such_active_association`, exposing zero transcript). The `crc_session_id`
+ * is taken from that association only — never a parameter, never client-supplied.
+ *
+ * This function performs NO write. The route calls it, then persists the
+ * fail-closed access audit, and ONLY THEN returns `entries` (CAH-4C §4).
+ */
+export async function getReviewerCrcTranscript(
+  submissionId: string,
+  associationId: string,
+): Promise<ReviewerTranscriptResolution> {
+  const associations = await listActiveAssociationsForSubmission(submissionId)
+  const association = associations.find((a) => a.id === associationId)
+  if (!association) return { ok: false, code: 'no_such_active_association' }
+
+  const raw = await getCrcSessionTranscript(association.crc_session_id)
+  if (raw === null) return { ok: false, code: 'session_unavailable' }
+
+  return { ok: true, crcSessionId: association.crc_session_id, entries: shapeCrcTranscript(raw) }
 }

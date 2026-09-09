@@ -18,15 +18,19 @@
  *   - superseded / corrected context     -> `CrcProjectContext.correction_history`
  *   - association provenance             -> `ReviewerCrcAssociationProvenance`
  *
- * Living Knowledge reviewer access is out of scope (CAH-4B §12). Transcript
- * access is out of scope (CAH-4B §11) — this contract exposes only THAT a
- * linked CRC exists, never the raw transcript.
+ * Living Knowledge reviewer access is out of scope (CAH-4B §12 / CAH-4C §9).
+ *
+ * CAH-4C: the base `ReviewerCrcContext` still exposes only THAT a linked CRC
+ * exists — never transcript content. The verbatim transcript is a SEPARATE,
+ * deliberate, audit-gated read (`getReviewerCrcTranscript` -> the transcript
+ * route); it is never smuggled into this contract's normal response.
  */
 
 import type { CrcProjectContext } from '@/lib/crc-project-context/types'
+import type { CrcTranscriptEntry } from '@/lib/crc-project-context/transcript'
 import type { CrcStateComparison } from '@/lib/crc-assurance-handoff'
 
-export type { CrcStateComparison }
+export type { CrcStateComparison, CrcTranscriptEntry }
 
 /**
  * A permission / correlation fact about how the association was made — NEVER a

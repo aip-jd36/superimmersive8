@@ -23,6 +23,7 @@
 import { checkReviewerContextAccess } from '@/lib/reviewer-context/auth'
 import { getReviewerCrcContext } from '@/lib/reviewer-context/service'
 import type { CrcStateComparison, ReviewerCrcContextItem } from '@/lib/reviewer-context/types'
+import { ReviewerTranscriptDrawer } from './ReviewerTranscriptDrawer'
 
 const NOT_EVIDENCE_NOTICE =
   'Customer-provided CRC context — not verified, and not assessment evidence. It does not affect controls, evidence, gaps, findings, outcome, confidence, or sign-off.'
@@ -38,7 +39,15 @@ function stateComparisonLabel(c: CrcStateComparison): string {
   }
 }
 
-function AssociationBlock({ item, index }: { item: ReviewerCrcContextItem; index: number }) {
+function AssociationBlock({
+  item,
+  index,
+  submissionId,
+}: {
+  item: ReviewerCrcContextItem
+  index: number
+  submissionId: string
+}) {
   const { provenance, project, state_comparison } = item
   return (
     <div
@@ -53,6 +62,9 @@ function AssociationBlock({ item, index }: { item: ReviewerCrcContextItem; index
       <div className="mt-1 text-xs" style={{ color: '#4a4a52' }}>
         {stateComparisonLabel(state_comparison)}
       </div>
+
+      {/* CAH-4C: deliberate, audited, on-demand transcript — does NOT load with the page. */}
+      <ReviewerTranscriptDrawer submissionId={submissionId} associationId={provenance.association_id} />
 
       {project == null ? (
         <p className="mt-3 text-sm" style={{ color: '#83837e' }}>
@@ -141,7 +153,12 @@ export async function ReviewerCrcContextPanel({ submissionId }: { submissionId: 
         </summary>
         <div className="px-4 pb-4">
           {context.associations.map((item, i) => (
-            <AssociationBlock key={item.provenance.association_id} item={item} index={i} />
+            <AssociationBlock
+              key={item.provenance.association_id}
+              item={item}
+              index={i}
+              submissionId={submissionId}
+            />
           ))}
         </div>
       </details>

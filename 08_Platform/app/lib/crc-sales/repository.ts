@@ -16,6 +16,7 @@ import type { StructuredUnderstanding } from '@/types/interview-engine'
 import type { CompletionReason } from '@/types/interview-engine'
 import { isSalesEligible } from './eligibility'
 import { buildSalesSessionProject } from './projection'
+import { shapeCrcTranscript } from '@/lib/crc-project-context/transcript'
 import {
   validateTransition,
   timestampColumnFor,
@@ -253,16 +254,12 @@ export async function getEligibleSessionTranscript(sessionId: string): Promise<S
   const row = data as unknown as RawSessionRow
   if (eligibleRowsFrom([row]).length === 0) return null
 
-  const raw = Array.isArray(row.transcript) ? (row.transcript as Array<Record<string, unknown>>) : []
-  const entries: SalesTranscriptEntry[] = []
-  for (const e of raw) {
-    const role = e.role
-    if (role !== 'user' && role !== 'assistant') continue
-    const text = typeof e.text === 'string' ? e.text : ''
-    const timestamp = typeof e.timestamp === 'string' ? e.timestamp : null
-    entries.push({ role, text, timestamp })
-  }
-  return entries
+  // CAH-4C: the verbatim-shaping loop was extracted VERBATIM into the neutral
+  // `shapeCrcTranscript` primitive so `lib/reviewer-context` can reuse it
+  // without importing `lib/crc-sales`. Sales-eligibility gating (above) is
+  // unchanged; `SalesTranscriptEntry` is a structural alias of
+  // `CrcTranscriptEntry`.
+  return shapeCrcTranscript(row.transcript)
 }
 
 /**
