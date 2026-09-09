@@ -1,15 +1,15 @@
 /**
- * Reviewer CRC Context panel (CAH-4B §10; re-homed under Reviewer Resources in
- * CAH-4F).
+ * Reviewer CRC Context view (CAH-4B §10; CAH-4F.1: moved into the inspector's
+ * "Linked CRC Context" tab — the outer <details> disclosure is gone, the tab IS
+ * the disclosure).
  *
- * A read-only SERVER component. Rendered inside the CAH-4F `<ReviewerResources>`
- * container, which is itself a SIBLING of `<WorkbookClient>` — never a
- * WorkbookClient field or section, never part of workbook form state. Being a
- * server component, it is structurally incapable of sharing client state with
- * the workbook. Grouping under `<ReviewerResources>` beside the Living
- * Knowledge panel is placement only — the two remain different authorities
- * (customer-provided context vs. governed SI8 knowledge) with independent
- * data paths and audits.
+ * A read-only SERVER component. Rendered as the `linkedCrcContext` slot of
+ * `ReviewerResourcesInspector`, which sits in `ReviewerShell`'s inspector
+ * region — a peer of, never a child of, `WorkbookClient`. Being a server
+ * component, it is structurally incapable of sharing client state with the
+ * workbook. Grouping it beside the Living Knowledge view is placement only —
+ * the two remain different authorities (customer-provided context vs. governed
+ * SI8 knowledge) with independent data paths and audits.
  *
  * It shows only:
  *   - that a linked CRC conversation exists, and its association provenance
@@ -20,9 +20,12 @@
  *   - superseded / corrected context where present;
  *   - a neutral "unchanged / changed / comparison unavailable" state marker.
  *
+ * For a submission with NO linked CRC conversation it renders a NEUTRAL empty
+ * state — a missing CRC is not an assessment deficiency, and the tab stays
+ * present so the inspector's two-mode IA is stable per CAH-4F.1.
+ *
  * No editable control. No save. No "copy to evidence" / "apply" / "accept".
- * No finding/outcome suggestion. Collapsed by default; renders nothing when
- * there is no linked CRC.
+ * No finding/outcome suggestion.
  */
 
 import { checkReviewerContextAccess } from '@/lib/reviewer-context/auth'
@@ -142,31 +145,35 @@ export async function ReviewerCrcContextPanel({ submissionId }: { submissionId: 
   if (!access.ok) return null
 
   const context = await getReviewerCrcContext(submissionId)
-  if (!context.linked) return null
+
+  if (!context.linked) {
+    return (
+      <div>
+        <p className="text-sm" style={{ color: '#4a4a52' }}>
+          No CRC conversation is linked to this submission.
+        </p>
+        <p className="mt-1 text-xs" style={{ color: '#83837e' }}>
+          A linked CRC conversation is optional customer/project context. Its absence is not an
+          assessment deficiency and does not affect controls, evidence, gaps, findings, outcome,
+          confidence, or sign-off.
+        </p>
+      </div>
+    )
+  }
 
   return (
-    <div className="mt-3">
-      <details
-        className="rounded-lg border"
-        style={{ borderColor: '#e0ddd2', backgroundColor: '#f7f5ef' }}
-      >
-        <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium" style={{ color: '#1c1c1e' }}>
-          Linked CRC context ({context.associations.length})
-          <span className="block mt-0.5 text-xs font-normal" style={{ color: '#83837e' }}>
-            {NOT_EVIDENCE_NOTICE}
-          </span>
-        </summary>
-        <div className="px-4 pb-4">
-          {context.associations.map((item, i) => (
-            <AssociationBlock
-              key={item.provenance.association_id}
-              item={item}
-              index={i}
-              submissionId={submissionId}
-            />
-          ))}
-        </div>
-      </details>
+    <div>
+      <p className="mb-3 text-xs" style={{ color: '#83837e' }}>
+        {NOT_EVIDENCE_NOTICE}
+      </p>
+      {context.associations.map((item, i) => (
+        <AssociationBlock
+          key={item.provenance.association_id}
+          item={item}
+          index={i}
+          submissionId={submissionId}
+        />
+      ))}
     </div>
   )
 }

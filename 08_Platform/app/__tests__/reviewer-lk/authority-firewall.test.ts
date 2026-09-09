@@ -31,8 +31,18 @@ const REVIEWER_LK_LIB = listFiles('lib/reviewer-lk', ['.ts'])
 const REVIEWER_LK_ROUTE = 'app/api/admin/submissions/[id]/reviewer-lk/route.ts'
 const REVIEWER_LK_PANEL = 'app/admin/submissions/[id]/review/ReviewerLkPanel.tsx'
 const REVIEWER_LK_LOOKUP = 'app/admin/submissions/[id]/review/ReviewerLkLookup.tsx'
-const REVIEWER_LK_RESOURCES = 'app/admin/submissions/[id]/review/ReviewerResources.tsx' // CAH-4F container
-const REVIEWER_LK_ALL = [...REVIEWER_LK_LIB, REVIEWER_LK_ROUTE, REVIEWER_LK_PANEL, REVIEWER_LK_LOOKUP, REVIEWER_LK_RESOURCES]
+const REVIEWER_LK_RESOURCES = 'app/admin/submissions/[id]/review/ReviewerResources.tsx' // CAH-4F container (server slot provider)
+const REVIEWER_RESOURCES_INSPECTOR = 'app/admin/submissions/[id]/review/ReviewerResourcesInspector.tsx' // CAH-4F.1 (client tab host)
+const REVIEWER_SHELL = 'app/admin/submissions/[id]/review/ReviewerShell.tsx' // CAH-4F.1 (generic layout owner)
+const REVIEWER_LK_ALL = [
+  ...REVIEWER_LK_LIB,
+  REVIEWER_LK_ROUTE,
+  REVIEWER_LK_PANEL,
+  REVIEWER_LK_LOOKUP,
+  REVIEWER_LK_RESOURCES,
+  REVIEWER_RESOURCES_INSPECTOR,
+  REVIEWER_SHELL,
+]
 
 const ASSESSMENT_DOMAIN = [
   ...listFiles('lib/assessments', ['.ts']),
@@ -151,25 +161,38 @@ describe('E — the panel is a server component; the lookup client shares no wor
     expect(src).not.toMatch(/copyToEvidence|applyToWorkbook|acceptClaim|summari[sz]e/i)
     expect(src).not.toMatch(/<textarea|<input\b/)
   })
-  test('the LK panel reaches the page via the <ReviewerResources> sibling container, never inside WorkbookClient (code, not comments)', () => {
+  test('the LK view reaches the page via the <ReviewerShell> inspector slot, never inside WorkbookClient (code, not comments)', () => {
     const page = codeOnly('app/admin/submissions/[id]/review/page.tsx')
-    // CAH-4F: page.tsx renders the container, not the panel directly.
-    expect(page).toMatch(/<ReviewerResources submissionId=\{params\.id\} \/>/)
+    // CAH-4F.1: page.tsx wraps WorkbookClient in <ReviewerShell> and passes
+    // <ReviewerResources> as the opaque `inspector` slot — never as a
+    // WorkbookClient prop/child.
+    expect(page).toMatch(/<ReviewerShell/)
+    expect(page).toMatch(/inspector=\{[^}]*<ReviewerResources submissionId=\{params\.id\} \/>/)
     expect(page).not.toMatch(/<ReviewerLkPanel/)
-    // WorkbookClient's opening tag must not contain the container or the panel as a child/prop
+    // WorkbookClient's opening tag carries no reviewer component as a prop
     const wbOpen = page.match(/<WorkbookClient[\s\S]*?\/>/)
     expect(wbOpen).not.toBeNull()
-    expect(wbOpen![0]).not.toMatch(/ReviewerResources|ReviewerLkPanel|ReviewerCrcContextPanel/)
+    expect(wbOpen![0]).not.toMatch(/ReviewerResources|ReviewerLkPanel|ReviewerCrcContextPanel|ReviewerShell/)
   })
 
-  test('<ReviewerResources> is a server component that only groups the two panels — no client state, no fetch, no write', () => {
+  test('<ReviewerResources> is a server component that only hands the two views to the client inspector as slots', () => {
     const src = codeOnly(REVIEWER_LK_RESOURCES)
     expect(read(REVIEWER_LK_RESOURCES)).not.toMatch(/^'use client'/m)
-    expect(src).toMatch(/<ReviewerLkPanel submissionId=\{submissionId\} \/>/)
-    expect(src).toMatch(/<ReviewerCrcContextPanel submissionId=\{submissionId\} \/>/)
+    expect(src).toMatch(/<ReviewerResourcesInspector/)
+    expect(src).toMatch(/livingKnowledge=\{<ReviewerLkPanel submissionId=\{submissionId\} \/>\}/)
+    expect(src).toMatch(/linkedCrcContext=\{<ReviewerCrcContextPanel submissionId=\{submissionId\} \/>\}/)
     expect(src).not.toMatch(/fetch\(|useState|useEffect|\.insert\s*\(|\.update\s*\(|\.rpc\s*\(/)
     expect(src).not.toMatch(/<textarea|<input\b/)
     expect(src).not.toMatch(/copyToEvidence|applyToWorkbook|acceptClaim/i)
+  })
+
+  test('<ReviewerResourcesInspector> is a client tab host with no data path — imports no reviewer-lk/reviewer-context/assessment service', () => {
+    const imports = importLines(REVIEWER_RESOURCES_INSPECTOR)
+    expect(read(REVIEWER_RESOURCES_INSPECTOR)).toMatch(/^'use client'/m)
+    expect(imports).not.toMatch(/@\/lib\/reviewer-lk|@\/lib\/reviewer-context|@\/lib\/assessments|@\/lib\/retrieval-engine/)
+    const src = codeOnly(REVIEWER_RESOURCES_INSPECTOR)
+    expect(src).not.toMatch(/fetch\(|\.insert\s*\(|\.update\s*\(|\.rpc\s*\(/)
+    expect(src).not.toMatch(/<textarea|<input\b/)
   })
 })
 
@@ -193,10 +216,12 @@ describe('F — CAH-4F presentation: governance prose / CRC-channel metadata is 
     )
   })
 
-  test('topic labels never change the value sent to the API — the fetch still uses the raw enum topic', () => {
+  test('CAH-4F.1: topic chips carry the canonical enum, not a label round-trip — the fetch still uses the raw enum topic', () => {
     expect(lookup).toMatch(/topic=\$\{encodeURIComponent\(topic\)\}/)
-    // the <select> value is the enum; only the option TEXT is the label
-    expect(lookup).toMatch(/value=\{topic\}/)
-    expect(lookup).toMatch(/<option key=\{t\} value=\{t\}>\s*\{reviewerTopicLabel\(t\)\}/)
+    // radiogroup of buttons (not <select>); canonical value in data-topic; label is display-only
+    expect(lookup).toMatch(/role="radiogroup"/)
+    expect(lookup).toMatch(/data-topic=\{t\}/)
+    expect(lookup).toMatch(/onClick=\{\(\) => onChange\(t\)\}/)
+    expect(lookup).toMatch(/\{reviewerTopicLabel\(t\)\}/)
   })
 })
