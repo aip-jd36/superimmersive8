@@ -166,7 +166,12 @@ export function WorkbookClient({
   const audioDisc = parseJsonb(submission.audio_disclosure, {})
 
   return (
-    <div className="flex flex-col h-screen" style={{ backgroundColor: '#FAFAF7' }}>
+    // CAH-4F.1: viewport height is now owned by the page shell that wraps this
+    // component. This outer container is `h-full` (100% of the shell's
+    // workspace cell) instead of `h-screen`. The internal 3-zone layout,
+    // sticky header, section navigation, and nested scroll regions below are
+    // byte-unchanged.
+    <div className="flex flex-col h-full" style={{ backgroundColor: '#FAFAF7' }}>
 
       {/* ── Sticky Header ──────────────────────────────────────────────────── */}
       <div
