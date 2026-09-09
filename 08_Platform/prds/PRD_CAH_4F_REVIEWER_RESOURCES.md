@@ -1,9 +1,8 @@
 # PRD — CAH-4F: Reviewer Resources + Living Knowledge Context Semantics
 
-**Status:** INTEGRATED / DEPLOYED — PRODUCTION UAT INCOMPLETE. Built as a reviewer-page **presentation** change only (no route/selector/eligibility/applicability/audit/schema/migration change). Open questions resolved in §13. As-built design: `08_Platform/implementation/REVIEWER_RESOURCES_ARCHITECTURE.md` §5, §7, §15 (UAT script).
-- **Repository-integrated:** yes — `origin/main` = `d19b678` (docs `2562996` + impl `d19b678`, two distinct commits, fast-forward `e2b736d..d19b678`, 2026-09-09). Rebased cleanly onto the 4 upstream LK-TRIAL-11 commits — zero file overlap, patch-ids identical.
-- **Deployed:** Vercel auto-deploys `main`; `app.superimmersive8.com` is live and the admin/reviewer routes respond (307→/auth/login, `/api/admin/.../reviewer-lk`→401). Commit-level deployment confirmation requires Vercel dashboard access (operator).
-- **Production-proven:** NOT YET — the §15 UAT requires an authenticated admin/reviewer session (operator-controlled). Runbook is ready; evidence to collect is enumerated in §15 rows 1–14.
+**Status:** two milestones under this one product spec.
+- **CAH-4F** (grouped top-of-page layout + LK Context Semantics) — **INTEGRATED / DEPLOYED** at `origin/main` = `ed3333e` (impl `d19b678`, 2026-09-09). The **semantic** work (labels, proposition-first, explicit Applicability, neutral status, context wording, provenance, no `crc_eligible` / no raw `crc_publication_scope` prose, firewall, audit) is validated and **retained**. The **layout** (a stacked block above the Workbook) did **not** deliver the intended primary/secondary hierarchy in production.
+- **CAH-4F.1 — Reviewer Workspace Shell** — **IMPLEMENTED, NOT PUSHED** (local branch `work/cah-4f-reviewer-resources`, parent `ed3333e`). Introduces the approved three-region shell (`ASSESSMENT NAVIGATION | ASSESSMENT WORK SURFACE | REVIEWER RESOURCES inspector`), moving all CAH-4F semantic work into a closable right-side inspector. **Supersedes the CAH-4F layout only.** No route/selector/eligibility/applicability/audit/schema/migration change; `WorkbookClient` change = one line (`h-screen`→`h-full`). Open questions resolved in §13. As-built design: `REVIEWER_RESOURCES_ARCHITECTURE.md` §1, §5, §7, §11 (responsive), §16 (UAT). Awaiting PM visual review before integration.
 **Milestone series:** CAH-4x (CRC → Commercial Assurance handoff). CAH-4B/4C/4D/4E are shipped and integrated at `origin/main` = `9fa6d1c` (feat(reviewer-lk): Human Reviewer Living Knowledge V1). CAH-4F is the next milestone.
 **Scope of this PRD:** the *what*. The *how* is in `08_Platform/implementation/REVIEWER_RESOURCES_ARCHITECTURE.md`. The durable authority decision is `08_Platform/app/lib/reviewer-lk/ADR-001-reviewer-resources-authority-boundary.md`.
 **Frozen prior specs this PRD does not reopen:** `PRD_CRC_v1.0.md`, `PRD_ASSESSMENT_SERVICE_v1.0.md`, `PRD_REVIEWER_WORKBOOK_UI.md`, `PRD_LIVING_NOTEBOOK.md`, `PRD_LIVING_KNOWLEDGE_SOURCE_INPUTS_v0.1.md`.
@@ -106,16 +105,20 @@ Route: `08_Platform/app/app/api/admin/submissions/[id]/reviewer-lk/route.ts`. Or
 
 ## 6. Desired user journey
 
-1. Reviewer opens `/admin/submissions/[id]/review`. Workbook is the primary, expanded surface. A **Reviewer Resources** area is visibly distinct and secondary (right-side inspector is the preferred direction — see §8).
-2. Reviewer expands **Living Knowledge**, picks a topic from a list of **plain-English labels**, clicks **Look up**.
+**As-built for CAH-4F.1:**
+
+1. Reviewer opens `/admin/submissions/[id]/review`. Three regions: left §-nav, center Workbook (primary, expanded, its own dark header + guidance/submission/evidence aside intact), and a **secondary right-side Reviewer Resources inspector** — an in-flow column at ≥1440px, an overlay drawer (default closed) below that. The inspector has a title "Reviewer Resources", a "not assessment evidence" subtitle, and a **✕ close**; when closed a slim right-edge button reopens it.
+2. Reviewer selects the **Living Knowledge** tab (default), picks a topic from **plain-English chips** (`role="radiogroup"`, keyboard-navigable), clicks **Look up**.
 3. Results show, per governed claim, in this order:
-   - **the proposition** (the governed statement), prominent;
-   - an **Applicability** section — an explicit heading, then `Established` / `Not established`, then the per-requirement rows, in neutral (non-pass/fail) styling;
-   - **Context used for this look-up** — the exact submission-derived inputs the selector used (resolved tools, jurisdiction), labelled as context, not evidence;
-   - **governance / provenance metadata** (`claim_id`, `lifecycle`, `publication_scope`, `last_verified`, ledger reference) behind a "Details" / progressive-disclosure control.
-4. Reviewer reads, forms their own judgment, and — if they choose to reference it — types their reasoning **into the workbook themselves**. No UI shortcut does this for them.
-5. Reviewer expands **Linked CRC Context** (if a CRC conversation is linked) to see customer-stated goals/assertions; opens the transcript deliberately if needed (audited).
-6. At no point does consulting a resource change `workbook_data`, an assessment field, or produce a finding.
+   - **the proposition** (the governed statement), visually primary;
+   - an **Applicability** section — explicit heading, a neutral dot + `Established` / `Not established` (never green/red), and the "not a negative finding" clarification when not established;
+   - **Context used for this look-up** — the exact submission-derived inputs the selector used (resolved tools, jurisdiction), labelled context not evidence;
+   - **Why this applies** — disclosure: every applicability requirement with verbatim `status`;
+   - **Evidence limitations / unresolved requirements** — disclosure with a count badge;
+   - **Provenance and governance details** — disclosure: `claim_id`, `lifecycle`, `publication_scope`, `last_verified`, ledger reference.
+4. Reviewer reads, forms their own judgment, and — if they choose to reference it — types their reasoning **into the workbook themselves**. No UI shortcut does this.
+5. Reviewer switches to the **Linked CRC Context** tab (always present): customer-stated goals/assertions if a CRC is linked, else a neutral "No CRC conversation is linked to this submission." Transcript access stays deliberate + audited.
+6. Switching tabs, opening/closing the inspector, and resizing never fetch, never audit, and never remount the Workbook. At no point does consulting a resource change `workbook_data`, an assessment field, or produce a finding.
 
 ## 7. Functional requirements
 
@@ -139,19 +142,19 @@ The design direction below is split into **product requirement** (must hold), **
 
 ### 8.1 Product requirement (must hold)
 - Reviewer Resources is **secondary** to the workbook and must never visually compete with it for primary attention.
-- Reviewer-readable topic labels; explicit **Applicability** heading; neutral applicability styling (no pass/fail red/green); "Context used for this look-up" wording; proposition-first ordering; provenance progressively disclosed; no CRC-audience language projected as reviewer authority; `crc_eligible` not shown by default; no silent promotion controls.
+- Reviewer-readable topic labels; explicit **Applicability** heading; neutral applicability styling (no pass/fail red/green); "Context used for this look-up" wording; proposition-first ordering; provenance progressively disclosed; no CRC-audience language projected as reviewer authority; `crc_eligible` not shown; no silent promotion controls.
 
-### 8.2 Current preferred UX
-- A **right-side research inspector / panel** beside the workbook (persistent, collapsible), containing Living Knowledge and Linked CRC Context as separate sections.
-- Living Knowledge section: topic label picker → look-up → results list. Each result is a card: proposition (body text), then an "Applicability" subsection, then "Context used for this look-up", then a "Governance details" disclosure.
-- Linked CRC Context section: the existing CAH-4B panel content, re-homed into the inspector without behavioural change.
+### 8.2 Target UX (CAH-4F.1 — built)
+- A **right-side research inspector** beside the workbook: an in-flow, closable column on ordinary desktop (≥1440px measured — see `REVIEWER_RESOURCES_ARCHITECTURE.md` §11), an overlay drawer below that width, default closed on narrow. A persistent right-edge reopen button when closed. Never the top-of-page stacked block on any desktop width.
+- Distinct **Living Knowledge** and **Linked CRC Context** tabs (`role="tablist"`). Both tab panels stay mounted; switching is visibility-only (no fetch, no audit, no remount).
+- Living Knowledge: topic **chips** (`role="radiogroup"`, keyboard-navigable, `data-topic` = canonical enum) → look-up → results. Each result: proposition (primary) → Applicability → "Context used for this look-up" → "Why this applies" disclosure → "Evidence limitations / unresolved requirements" disclosure (count badge) → "Provenance and governance details" disclosure.
+- Linked CRC Context: the CAH-4B/4C content, re-homed without behavioural change; **neutral empty state** ("No CRC conversation is linked to this submission.") when unlinked — the tab is never hidden and never framed as a deficiency.
 
-### 8.3 Implementation detail (subject to repository constraints — decided in the design spec)
-- Whether the inspector is a new layout wrapper around the existing `page.tsx` siblings, or a re-parenting of `ReviewerLkPanel` / `ReviewerCrcContextPanel`.
-- Whether the topic label map lives client-side (in `ReviewerLkLookup.tsx`) or is added to `REVIEWER_LK_FRAMING` / a small shared constants module.
-- Whether a reviewer-oriented statement-scope note (FR-6) is derived at projection time (`project-reviewer-claims.ts`) or simply omitted in V1.
-- Responsive behaviour of a right-side inspector on narrow viewports.
-- These are `_ARCHITECTURE.md` decisions, not PRD commitments.
+### 8.3 Resolved implementation decisions
+- Layout: a generic client **`ReviewerShell`** owns the page frame + inspector open/close + responsive; `WorkbookClient` is its `children` (unchanged bar `h-screen`→`h-full`); the resources content is one opaque `React.ReactNode` `inspector` slot. `ReviewerResources` (server) hands `<ReviewerLkPanel>` / `<ReviewerCrcContextPanel>` to a client `ReviewerResourcesInspector` (tab state only) via the RSC-slot pattern.
+- Topic label map: `lib/reviewer-lk/topic-labels.ts` (pure, display-only) — unchanged from CAH-4F.
+- Reviewer-oriented statement-scope note (old FR-6 option): **omitted** — `project-reviewer-claims.ts` stays a thin pass-through.
+- Responsive breakpoint: `ADJACENT_MIN_PX = 1440`, chosen from measured region widths, not Tailwind's default `2xl` (1536).
 
 ### 8.4 Accessibility
 - The inspector must be keyboard-navigable and screen-reader-labelled; applicability status must be conveyed by text, never by colour alone (this also satisfies "no red/green").
@@ -203,23 +206,25 @@ CAH-4F ships **no free-text input** in the Reviewer Resources area. Adding one i
 
 ## 12. Acceptance criteria
 
-CAH-4F is done when:
+**CAH-4F.1 is done when:**
 
-1. The review page shows a distinct, secondary **Reviewer Resources** area containing Living Knowledge and Linked CRC Context (FR-1).
-2. Topic selection uses reviewer-readable labels; the API still receives exact `GoalCategory` values; the route contract is byte-unchanged (FR-2, FR-11).
-3. Each claim renders proposition → applicability (explicit heading, neutral styling, verbatim per-requirement status) → "Context used for this look-up" → progressively-disclosed governance metadata (FR-3, FR-4, FR-5).
-4. Raw `crc_publication_scope` prose is absent from the reviewer DOM; `crc_eligible` is not shown by default (FR-6, FR-7, SR-4, SR-5).
-5. No control promotes a resource into workbook / assessment / evidence / findings / conclusion state; `__tests__/reviewer-lk/authority-firewall.test.ts` is extended and green (FR-8).
-6. `route-and-audit`, `reviewer-context/**`, `crc-regression`, `eligibility`, `select-reviewer-claims`, `projection` test suites are unchanged in intent and green; audit-before-content and explicit-action-only are preserved (FR-9, FR-10).
-7. `tsc --noEmit` clean; `next build` exit 0; full Jest suite shows zero new failed suites / tests / failure classes vs the pre-CAH-4F `origin/main` baseline.
-8. No migration added. No production behaviour changed beyond reviewer-page presentation.
-9. A short UAT script exists: a reviewer performs one look-up, confirms the new presentation, confirms one `lk_research` event, confirms `workbook_data` / assessment unchanged.
+1. The review page renders three regions — left §-nav, center Workbook (primary), right **Reviewer Resources inspector** (secondary, closable) — with the inspector adjacent (not above) on ordinary desktop and an overlay drawer below the measured breakpoint (FR-1, §8.1, §8.2).
+2. `ReviewerShell` is generic: imports no reviewer-lk / reviewer-context / assessment service, no `WorkbookClient`; both slots are opaque `React.ReactNode`.
+3. `WorkbookClient` is unchanged except `h-screen`→`h-full`; opening/closing the inspector or switching tabs never remounts it; unsaved edits survive; no extra `PATCH /workbook`.
+4. Topic **chips** send the exact `GoalCategory` enum; the route contract is byte-unchanged (FR-2, FR-11).
+5. Result order proposition → applicability (explicit heading, neutral, verbatim status) → "Context used for this look-up" → limitations → provenance; raw `crc_publication_scope` prose and `crc_eligible` absent (FR-3..FR-7, SR-4, SR-5).
+6. Linked CRC Context is always a tab with a neutral empty state; transcript access + audit unchanged (FR-10).
+7. No control promotes a resource into workbook / assessment state; `lk_research` fires only on the explicit look-up, `transcript` only on the explicit view; nothing on page load / tab switch / open-close (FR-8, FR-9).
+8. `__tests__/reviewer-lk/**`, `__tests__/reviewer-context/**`, `__tests__/reviewer-shell/**` green; `route-and-audit` / `eligibility` / `select-reviewer-claims` / `projection` / `crc-regression` unchanged in intent.
+9. `tsc --noEmit` clean; `next build` exit 0; full Jest failure set **byte-identical** to parent `ed3333e`.
+10. No migration. No API/schema change. No Section / nav / guidance / workbook-aside redesign.
+11. Viewport screenshots (or, where browser tooling is unavailable, deterministic per-viewport layout evidence) at 1280 / 1440 / 1536 / 1920 for PM visual review, compared against the approved mockup's information architecture.
 
-## 13. Open questions — RESOLVED in the CAH-4F implementation milestone
+## 13. Open questions — RESOLVED
 
 | # | Question | Resolution (as-built) |
 |---|---|---|
-| OQ-1 | Right-side inspector vs. top-of-page stacked panels — compatible with `WorkbookClient.tsx` without a disruptive refactor? | **Fallback (§8.3).** Source inspection at `9fa6d1c`: `WorkbookClient.tsx` is a `flex flex-col h-screen` client shell with its own 280px right `<aside>` tab panel (`guidance`/`submission`/`evidence`). A persistent beside-workbook inspector would require threading a server-rendered node as a prop into that `'use client'` component (+ a 4th tab in a too-narrow column) or wrapping the self-scrolling `h-screen` shell in a new outer flex — both Workbook layout changes the milestone forbids. Shipped: a `ReviewerResources` **server component** grouping both panels (each collapsed `<details>`), rendered as a sibling above `<WorkbookClient>` — visually secondary, single component, trivially re-homable to an inspector later. |
+| OQ-1 | Right-side inspector vs. top-of-page stacked panels. | **Inspector (CAH-4F.1).** The CAH-4F grouped top-of-page block did not deliver the primary/secondary hierarchy in production. CAH-4F.1 introduces a generic client `ReviewerShell` that owns the page frame; `WorkbookClient` becomes its `children` (only change: `h-screen`→`h-full`); the resources content is an opaque `React.ReactNode` inspector slot. No `WorkbookClient` nav/header/aside/scroll/state change; no disproportionate refactor. |
 | OQ-2 | Reviewer-oriented "scope of this statement" note, or omit `crc_publication_scope`? | **Omit entirely** — the smaller, safer V1. No scope note derived; `project-reviewer-claims.ts` unchanged (still a thin pass-through). |
 | OQ-3 | Do reviewers need `crc_eligible` visible? | **Not surfaced at all** (not even behind disclosure). No reviewer-need observation is on record. It stays in the API payload as governance metadata; the reviewer DOM never renders it. |
 | OQ-4 | "Linked CRC Context" *into* the container, or referenced only? | **Into** the `ReviewerResources` container, behaviour byte-unchanged from CAH-4B/4C (same `ReviewerCrcContextPanel` / `ReviewerTranscriptDrawer`, same service/audit path). Grouping is placement, not merged authority. |

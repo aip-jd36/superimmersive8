@@ -56,15 +56,18 @@ At `origin/main` = `9fa6d1c`:
 | **(CAH-4F)** the topic label map is display-only — the value sent to `GET …/reviewer-lk?topic=` is the unchanged `GoalCategory` enum | `reviewer-resources-presentation.test.ts` ("topic labels never change the value sent to the API") |
 | **(CAH-4F)** `<ReviewerResources>` is a server component that only groups the two panels — no `fetch`, no client state, no `.insert`/`.update`/`.rpc`, no promotion control | `authority-firewall.test.ts` E ("<ReviewerResources> is a server component…"), `reviewer-resources-presentation.test.ts` |
 | **(CAH-4F)** "Applicability: Not established" is rendered with neutral text weight and the explicit "not a negative finding" sentence — no green/red pass-fail colour tokens | `reviewer-resources-presentation.test.ts` FR-4 |
+| **(CAH-4F.1)** the page-frame owner `ReviewerShell` is generic — it imports no reviewer-lk / reviewer-context / assessment service and no `WorkbookClient`; the workbook (`children`) and resources (`inspector`) reach it as opaque `React.ReactNode` slots; co-location in one shell is a layout choice, not an authority statement | `__tests__/reviewer-shell/reviewer-shell.test.ts` B |
+| **(CAH-4F.1)** opening/closing the inspector, switching the Living Knowledge / Linked CRC Context tab, and resizing fire no network call, no audit event, and never remount `WorkbookClient` (unsaved workbook state survives) | `reviewer-shell.test.ts` C/D, `route-and-audit.test.ts` (unchanged) |
+| **(CAH-4F.1)** `WorkbookClient` is unchanged except its outer `h-screen`→`h-full`; it references no shell/inspector/reviewer identifier | `reviewer-shell.test.ts` C, `reviewer-context/authority-firewall.test.ts` D |
 
 This ADR names the principle those tests defend, so a reviewer of a *future* change can check the change against the principle, not just against whatever the tests happened to cover.
 
 ## Consequences
 
 **Positive:**
-- CAH-4F, CAH-4G, and any later reviewer-surface work have a single stated boundary to design against.
-- The "beside each other ≠ merged authority" rule is explicit, so a right-side inspector layout (CAH-4F's preferred direction) is safe: co-location is a layout choice, not an authority statement.
-- `crc_eligible` and `crc_publication_scope` are classified: governance metadata about the *CRC channel*, not reviewer authority language — CAH-4F removes the raw prose from the reviewer view on that basis.
+- CAH-4F, CAH-4F.1, CAH-4G, and any later reviewer-surface work have a single stated boundary to design against.
+- The "beside each other ≠ merged authority" rule is explicit, so the CAH-4F.1 right-side inspector layout is safe: `ReviewerShell` co-locates the workbook and the resources content as opaque slots without ever coupling to either — co-location is a layout choice, not an authority statement.
+- `crc_eligible` and `crc_publication_scope` are classified: governance metadata about the *CRC channel*, not reviewer authority language — the reviewer view renders neither.
 
 **Costs / limits:**
 - In CAH-4F there is **no** transfer or citation affordance between Reviewer Resources and the workbook. A reviewer who wants to reference a governed claim in their workbook note types it themselves. This is a **scope decision for CAH-4F, not a permanent architectural prohibition** — see the non-decision below.
