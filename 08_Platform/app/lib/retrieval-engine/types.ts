@@ -346,6 +346,24 @@ export interface TopicClaim {
   crc_eligible: CrcEligible
   crc_publication_scope: string | null
   crc_candidate_statement: string | null
+  /**
+   * Structured governed publication scope (CAH-4E) -- ported verbatim from
+   * GOVERNED-CLAIMS.md's own `Publication scope:` line, hand-synced exactly
+   * as `crc_eligible`/`lifecycle` are (no live markdown parser; the
+   * `topic-claims-fixture-consistency.test.ts` check enforces no silent
+   * divergence). Single value per the authoritative ledger. Reuses the
+   * existing `PublicationScope` enum.
+   *
+   * Optional so the ~40 pre-CAH-4E `TopicClaim` test literals compile
+   * unchanged; every entry in the production `TOPIC_CLAIMS_FIXTURE` sets it
+   * explicitly. Governs which consumers/surfaces may use the claim, and is
+   * INDEPENDENT of `crc_eligible`. Read ONLY by `lib/reviewer-lk/`; the CRC
+   * retrieval path never references it. A missing / null / unrecognized
+   * value is treated as reviewer-INELIGIBLE (fail closed) -- see
+   * `REVIEWER_ELIGIBLE_PUBLICATION_SCOPES` above and
+   * `lib/reviewer-lk/eligibility.ts`.
+   */
+  publication_scope?: PublicationScope
   applicability_requirements: ApplicabilityRequirement[]
   /** See the doc comment immediately above this interface. */
   unresolved_project_dependencies: string[]
@@ -413,15 +431,41 @@ export type RelationshipType = (typeof RELATIONSHIP_TYPES)[number]
  * The four-value governance-stage vocabulary GOVERNED-CLAIMS.md's own entry
  * template already uses informally for claims ("Publication scope:
  * Internal/research | Reviewer/Commercial Assurance | CRC eligible | Public
- * SI8 position") but which was never ported into TopicClaim as a typed
- * field (TopicClaim only carries `crc_publication_scope`, the free-text
- * scope description, and `crc_eligible`, the Yes/No/Pending gate). Defined
- * here, once, because TopicRelationship's governance record explicitly
- * requires it -- this is surfacing existing markdown vocabulary as a
- * reusable type, not inventing a new taxonomy.
+ * SI8 position"). Originally defined here for `TopicRelationship`'s
+ * governance record; ported onto `TopicClaim.publication_scope` as an
+ * optional typed field by CAH-4E (Human Reviewer Living Knowledge V1) --
+ * hand-synced from GOVERNED-CLAIMS.md's own `Publication scope:` line
+ * exactly as `crc_eligible`/`lifecycle` already are. This is surfacing
+ * existing markdown vocabulary as a reusable type, not inventing a new
+ * taxonomy.
+ *
+ * INDEPENDENT of `crc_eligible`: `publication_scope` governs which
+ * consumers/surfaces may use a governed proposition at all;
+ * `crc_eligible` (Yes/No/Pending) governs ONLY whether the unsupervised
+ * CRC channel may state it. A claim is routinely
+ * `publication_scope: 'Reviewer/Commercial Assurance'` while
+ * `crc_eligible` is any of the three -- see CRC-PUBLICATION-POLICY.md.
  */
 export const PUBLICATION_SCOPES = ['Internal/research', 'Reviewer/Commercial Assurance', 'CRC eligible', 'Public SI8 position'] as const
 export type PublicationScope = (typeof PUBLICATION_SCOPES)[number]
+
+/**
+ * The subset of `PublicationScope` values a Human Reviewer conducting a
+ * Commercial Assurance Assessment may consult (CAH-4E). `'Internal/research'`
+ * is deliberately EXCLUDED -- it is not even reviewer-eligible. A missing,
+ * null, or unrecognized scope value is NOT in this set, so the reviewer
+ * eligibility predicate (`lib/reviewer-lk/eligibility.ts`) fails closed for
+ * it. `crc_eligible` is NEVER consulted for reviewer eligibility.
+ *
+ * NEVER read by CRC retrieval (`retrieve.ts` / `lookupTopicClaims` /
+ * `enumerateEligibleClaims` / the Track A/B/C paths are byte-unchanged by
+ * CAH-4E) -- consumed only by `lib/reviewer-lk/`.
+ */
+export const REVIEWER_ELIGIBLE_PUBLICATION_SCOPES = [
+  'Reviewer/Commercial Assurance',
+  'CRC eligible',
+  'Public SI8 position',
+] as const satisfies readonly PublicationScope[]
 
 /**
  * One governed, directional, one-hop routing link between two GoalCategory

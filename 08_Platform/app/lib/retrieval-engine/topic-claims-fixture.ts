@@ -147,6 +147,14 @@
  * `06_Operations/institutional-knowledge/notebook/GOVERNED-CLAIMS.md`'s own
  * updated GOVERNANCE TREATMENT notes on each of the five stock entries for
  * the parallel current-state documentation update.
+ *
+ * CAH-4E (Human Reviewer Living Knowledge V1, 2026-09-09): every entry now
+ * carries `publication_scope`, hand-synced verbatim from its GOVERNED-CLAIMS.md
+ * `Publication scope:` line (all 24 are `'Reviewer/Commercial Assurance'` as
+ * of this date). Read ONLY by `lib/reviewer-lk/`; the CRC retrieval path
+ * (`retrieve.ts`, `lookupTopicClaims`, etc.) is byte-unchanged and never
+ * references it. The consistency test now also asserts every fixture claim's
+ * `publication_scope` matches the markdown -- it cannot silently diverge.
  */
 
 import type { TopicClaim } from './types'
@@ -167,6 +175,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     unresolved_project_dependencies: ['human_contribution_description'],
     provider_scope: null,
     tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-08-16',
     superseded_by: null,
   },
@@ -185,6 +194,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     unresolved_project_dependencies: ['human_contribution_description'],
     provider_scope: null,
     tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-08-16',
     superseded_by: null,
   },
@@ -203,6 +213,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     unresolved_project_dependencies: ['human_contribution_description'],
     provider_scope: null,
     tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-08-16',
     superseded_by: null,
   },
@@ -231,6 +242,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     unresolved_project_dependencies: [],
     provider_scope: null,
     tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-08-16',
     superseded_by: null,
   },
@@ -283,6 +295,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     // above. The corrected scope lives on CLAIM-STOCK-EDITORIAL-001-v2 below.
     provider_scope: null,
     tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-08-17',
     superseded_by: 'CLAIM-STOCK-EDITORIAL-001-v2',
   },
@@ -317,6 +330,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     // inherit this claim without its own governance review.
     provider_scope: ['getty', 'istock', 'shutterstock', 'adobe-stock'],
     tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-08-27',
     superseded_by: null,
   },
@@ -354,6 +368,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     // above. The corrected scope lives on CLAIM-STOCK-EDITORIAL-002-v2 below.
     provider_scope: null,
     tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-08-17',
     superseded_by: 'CLAIM-STOCK-EDITORIAL-002-v2',
   },
@@ -388,6 +403,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     // individually-evidenced provider identities only.
     provider_scope: ['getty', 'istock', 'shutterstock'],
     tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-08-27',
     superseded_by: null,
   },
@@ -408,6 +424,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     // conversation's active, canonically-resolved asset providers.
     provider_scope: ['getty'],
     tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-08-17',
     superseded_by: null,
   },
@@ -426,6 +443,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     unresolved_project_dependencies: ['asset_confirmed_shutterstock', 'editorial_designation_confirmed', 'rights_and_clearance_status'],
     provider_scope: ['shutterstock'],
     tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-08-17',
     superseded_by: null,
   },
@@ -444,6 +462,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     unresolved_project_dependencies: ['asset_confirmed_istock', 'editorial_designation_confirmed'],
     provider_scope: ['istock'],
     tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-08-17',
     superseded_by: null,
   },
@@ -485,6 +504,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     unresolved_project_dependencies: ['artlist_subscription_active_at_publication_confirmed'],
     provider_scope: ['artlist'],
     tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-08-27',
     superseded_by: null,
   },
@@ -529,6 +549,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     unresolved_project_dependencies: ['synthesia_stock_avatar_used_confirmed', 'synthesia_written_consent_obtained'],
     provider_scope: null,
     tool_scope: ['synthesia'],
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-08-30',
     superseded_by: null,
   },
@@ -576,6 +597,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     unresolved_project_dependencies: ['storyblocks_license_tier_confirmed'],
     provider_scope: ['storyblocks'],
     tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-08-30',
     superseded_by: null,
   },
@@ -634,6 +656,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     unresolved_project_dependencies: ['editorial_designation_confirmed', 'separate_authorization_obtained'],
     provider_scope: ['pond5'],
     tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-08-30',
     superseded_by: null,
   },
@@ -702,6 +725,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     unresolved_project_dependencies: [],
     provider_scope: ['adobe-stock'],
     tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-08-31',
     superseded_by: null,
   },
@@ -748,6 +772,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     unresolved_project_dependencies: [],
     provider_scope: null,
     tool_scope: ['kling'],
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-09-02',
     superseded_by: null,
   },
@@ -785,6 +810,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     unresolved_project_dependencies: [],
     provider_scope: null,
     tool_scope: ['kling'],
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-09-02',
     superseded_by: null,
   },
@@ -832,6 +858,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     unresolved_project_dependencies: [],
     provider_scope: null,
     tool_scope: ['runway-gen3'],
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-09-03',
     superseded_by: null,
   },
@@ -882,6 +909,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     unresolved_project_dependencies: [],
     provider_scope: null,
     tool_scope: ['pika'],
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-09-06',
     superseded_by: null,
   },
@@ -908,6 +936,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     unresolved_project_dependencies: [],
     provider_scope: null,
     tool_scope: ['pika'],
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-09-06',
     superseded_by: null,
   },
@@ -929,6 +958,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     unresolved_project_dependencies: [],
     provider_scope: null,
     tool_scope: ['pika'],
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-09-06',
     superseded_by: null,
   },
@@ -950,6 +980,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     unresolved_project_dependencies: [],
     provider_scope: null,
     tool_scope: ['pika'],
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-09-06',
     superseded_by: null,
   },
@@ -1007,6 +1038,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     ],
     provider_scope: null,
     tool_scope: ['stability-ai'],
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-09-09',
     superseded_by: null,
   },

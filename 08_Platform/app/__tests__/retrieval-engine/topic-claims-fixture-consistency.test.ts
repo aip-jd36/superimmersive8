@@ -19,6 +19,7 @@ import * as path from 'path'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { GOAL_CATEGORIES, ASSET_PROVIDER_IDS } from '@/types/interview-engine'
 import { providerScopeMatches } from '@/lib/retrieval-engine/lookup-topic-claims'
+import { PUBLICATION_SCOPES } from '@/lib/retrieval-engine/types'
 
 const GOVERNED_CLAIMS_PATH = path.join(__dirname, '..', '..', '..', '..', '06_Operations', 'institutional-knowledge', 'notebook', 'GOVERNED-CLAIMS.md')
 
@@ -401,6 +402,32 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
       const markdownClaim = markdownById.get(fixtureClaim.claim_id)
       if (!markdownClaim) continue // already caught by the "missing from markdown" test above
       expect(markdownClaim.topic).toBe(fixtureClaim.topic)
+    }
+  })
+
+  /**
+   * Structured `publication_scope` drift detection (CAH-4E, 2026-09-09).
+   * The runtime `TopicClaim` now carries `publication_scope` as a typed
+   * field, ported from the markdown's own `Publication scope:` line. It is
+   * hand-synced -- no live parser -- so it can silently diverge exactly the
+   * way `crc_eligible`/`lifecycle`/`topic` could before their own drift
+   * guards. This closes that gap for the new field.
+   */
+  test('every fixture claim carries a recognized PublicationScope value (fail-closed: no missing / unknown / malformed scope)', () => {
+    for (const claim of TOPIC_CLAIMS_FIXTURE) {
+      expect(claim.publication_scope).toBeDefined()
+      expect(PUBLICATION_SCOPES as readonly string[]).toContain(claim.publication_scope)
+    }
+  })
+
+  test("every fixture claim's publication_scope agrees, verbatim, with the markdown's `Publication scope:` line (drift detection)", () => {
+    const markdown = fs.readFileSync(GOVERNED_CLAIMS_PATH, 'utf-8')
+    const markdownById = new Map(extractMarkdownClaims(markdown).map((c) => [c.claim_id, c]))
+
+    for (const fixtureClaim of TOPIC_CLAIMS_FIXTURE) {
+      const markdownClaim = markdownById.get(fixtureClaim.claim_id)
+      if (!markdownClaim) continue // already caught by the "missing from markdown" test above
+      expect(markdownClaim.publication_scope).toBe(fixtureClaim.publication_scope)
     }
   })
 

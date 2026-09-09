@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import { WorkbookClient } from './WorkbookClient'
 import { ReviewerCrcContextPanel } from './ReviewerCrcContextPanel'
+import { ReviewerLkPanel } from './ReviewerLkPanel'
 import { EMPTY_WORKBOOK } from './workbook-schema'
 import { findAssessmentBySubmissionId } from '@/lib/assessments/repository'
 
@@ -95,6 +96,11 @@ export default async function WorkbookPage({ params }: PageProps) {
           just <WorkbookClient/>) when no CRC is linked, so the review page is
           byte-identical to before in that common case. */}
       <ReviewerCrcContextPanel submissionId={params.id} />
+      {/* CAH-4E: read-only reviewer Living Knowledge research — a SEPARATE
+          sibling authority surface (governed SI8 knowledge), never combined
+          with the CRC context block, never a workbook field. Deliberate
+          reviewer action only; nothing fetched on page load. */}
+      <ReviewerLkPanel submissionId={params.id} />
       <WorkbookClient
         submissionId={params.id}
         assessmentNumber={assessmentNumber}

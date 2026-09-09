@@ -47,14 +47,19 @@ const REVIEWER_CONTEXT_ALL = [
 ]
 
 // The assessment WRITE/domain surface: everything under lib/assessments plus
-// the submissions API routes — EXCEPT the reviewer-context routes themselves,
-// which physically sit in the submissions tree but ARE the reviewer-context
-// surface (allowed, and required, to import lib/reviewer-context).
-const REVIEWER_CONTEXT_ROUTES_NORM = REVIEWER_CONTEXT_ROUTES.map((r) => path.normalize(r))
+// the submissions API routes — EXCEPT the reviewer-side READ routes that
+// physically sit in the submissions tree but are NOT assessment-domain code:
+// the reviewer-context routes (CAH-4B/4C) and the reviewer-LK route (CAH-4E),
+// each allowed to import its own reviewer-side module (and, for reviewer-LK,
+// to reuse `lib/reviewer-context/auth`).
+const REVIEWER_SIDE_ROUTES_NORM = [
+  ...REVIEWER_CONTEXT_ROUTES,
+  'app/api/admin/submissions/[id]/reviewer-lk/route.ts', // CAH-4E
+].map((r) => path.normalize(r))
 const ASSESSMENT_DOMAIN = [
   ...listFiles('lib/assessments', ['.ts']),
   ...listFiles('app/api/admin/submissions', ['.ts']),
-].filter((rel) => !REVIEWER_CONTEXT_ROUTES_NORM.includes(path.normalize(rel)))
+].filter((rel) => !REVIEWER_SIDE_ROUTES_NORM.includes(path.normalize(rel)))
 
 // ── A. reviewer-context modules do not import assessment mutation / domain ──
 
