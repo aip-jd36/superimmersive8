@@ -3748,3 +3748,148 @@ Applicability safety finding: `governance-reviews/FGR_016_ADDENDUM_APPLICABILITY
 Closed-world representation reconsideration: `governance-reviews/FGR_016_ADDENDUM_CLOSED_WORLD_RECONSIDERATION_2026-09-06.md`
 PM concurrence authorizing this correction: `governance-reviews/FGR_016_ADDENDUM_CLOSED_WORLD_PM_CONCURRENCE_2026-09-06.md`
 Full CRC Publication Review artifact: `governance-reviews/CPR_019_PIKA_COMMERCIAL_USE_POST-RETIREMENT_RECONSIDERATION_2026-09-06.md`
+
+---
+
+**Wave 7 claim below (2026-09-09) — the second claim in the AI Video Generation Platform Rights domain (joining Synthesia, Wave 5) and the first Stability AI / image-generation-model claim in this document.** `Lifecycle: Adopted` (Adoption Approver: JD (PM), Adoption Decision Date: 2026-09-09, per the explicit PM/JD decision "ADOPTION APPROVED — STABILITY AI" supplied directly in this recording task, approving the revised CRC Candidate Statement below in place of `CPR_020` §4's own draft wording), `Publication scope: Reviewer/Commercial Assurance`. Not CRC-eligible — `CRC Approver`/`CRC Decision Date` PENDING; a separate, bounded CPR reconsideration is required before any `crc_eligible: 'Yes'` decision, per `CRC-PUBLICATION-POLICY.md`'s governance/reachability-independence discipline (Principle 7) and this domain's own tool-scoped legacy-coexistence practice (none currently exists — confirmed directly, not assumed: zero Stability AI matches anywhere in `PLATFORM-RIGHTS-MATRIX.md`/`matrix-fixture.ts`/`topic-claims-fixture.ts` as of this recording). **Sequencing note, disclosed rather than smoothed over:** `governance-reviews/CPR_020_CAND-STABILITYAI-COMMERCIAL-USE-001_2026-09-09.md` was conducted *before* this Adoption recording (an out-of-normal-sequence independent publication analysis, performed while primary evidence was fresh) and recommended WITHHOLD strictly on that sequencing/missing-prerequisite basis — not a substantive publication-safety defect; every substantive dimension it could assess pre-Adoption (evidence currency, applicability structure, dependency treatment, scope boundaries, Matrix coexistence, Principle 3) passed. `stability-ai` is not yet a registered `CanonicalToolId` — a separate, later, mechanical runtime-reachability step (Principle 7), explicitly not performed by this recording. Source Formal Governance Review: `governance-reviews/FGR_017_CAND-STABILITYAI-COMMERCIAL-USE-001_2026-09-09.md`. This entry records the human ADOPT decision durably in the authoritative corpus using the PM/JD-approved final wording — no new substantive governance decision beyond that explicit approval is made by this recording.
+
+### CLAIM-STABILITYAI-COMMERCIAL-USE-001-v1
+Domain: AI Video Generation Platform Rights — Stability AI
+Topic: commercial_use
+Subtopic: stability-ai-community-license-commercial-use
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — this is a Stability AI platform contractual restriction, not a legal-jurisdiction-scoped rule. See "Transitional jurisdiction representation for provider/platform propositions" (governance-discipline section above); the underlying `TopicClaim` representation records `jurisdiction: 'Global'` as a bounded transitional compatibility value under that rule, never as a claim of worldwide legal validation.
+Context: commercial AI-generated image or video content produced using Stability AI's Core Models (the Stable Diffusion family and sibling Core Models) under the Stability AI Community License Agreement.
+Claim proposition: >
+  Stability AI's Community License grants a royalty-free license to use its
+  Core Models (including the Stable Diffusion family) for commercial
+  purposes, subject to the Agreement's conditions. Commercial use requires
+  registration with Stability AI. If you or your Affiliates generate more
+  than USD $1,000,000 in aggregate annual revenue from any source, the
+  licenses granted under the Agreement terminate, and continued use requires
+  a separate license from Stability AI, which Stability AI may grant at its
+  discretion. Separately, the Agreement states that, as between you and
+  Stability AI, you own outputs generated from the Models or Derivative
+  Works to the extent permitted by applicable law. These terms concern Core
+  Models governed by the Community License and do not extend to separately
+  governed Stability AI products such as Stable Assistant or Stable Chat.
+  They do not by themselves establish that a particular project is cleared
+  for commercial use.
+
+Source references:
+  - primary: Stability AI Community License Agreement, "Last Updated: July 5, 2024" — https://stability.ai/community-license-agreement
+  - corroborating: model-bundled license file, "STABILITY AI COMMUNITY LICENSE AGREEMENT, Last Updated: July 5, 2024" (commit history unchanged since 2024-07-05) — https://huggingface.co/stabilityai/stable-diffusion-3.5-large/blob/main/LICENSE.md
+  - corroborating: Stability AI license overview page (Community vs. Enterprise threshold description) — https://stability.ai/license
+  - corroborating: Stability AI license-update announcement (2024-07-05) — https://stability.ai/news-updates/license-update
+Source authority/type: Primary legal/official authority (Community License Agreement); corroborated by the model-bundled license file (with independently-checked commit history confirming no revision since 2024-07-05) and two official marketing/announcement pages
+Source fact: >
+  Community License Agreement (verbatim, independently re-verified twice in
+  this onboarding cycle plus once more in CPR_020, byte-consistent across all
+  three checks): Section III grants a "non-exclusive, worldwide,
+  non-transferable, non-sublicensable, revocable and royalty-free limited
+  license ... to use, reproduce, distribute, and create Derivative Works" for
+  a "Commercial Purpose," conditioned on "If You are using or distributing
+  the Stability AI Materials for a Commercial Purpose, You must register
+  with Stability AI." The revenue-threshold clause: "If at any time You or
+  Your Affiliate(s), either individually or in aggregate, generate more than
+  USD $1,000,000 in annual revenue (or the equivalent thereof in Your local
+  currency), regardless of whether that revenue is generated directly or
+  indirectly from the Stability AI Materials or Derivative Works, any
+  licenses granted to You under this Agreement shall terminate as of such
+  date." Post-termination: "You must request a license from Stability AI,
+  which Stability AI may grant to You in its sole discretion." Output
+  ownership (separate clause): "As between You and Stability AI, You own any
+  outputs generated from the Models or Derivative Works to the extent
+  permitted by applicable law." "Affiliate(s)" = entities under >50% common
+  ownership/control. No clause anywhere distinguishes hosted/API access from
+  downloaded/self-hosted model use — an absence-of-stated-distinction
+  finding, not an affirmative equivalence claim (a hosted surface could carry
+  an additional API terms-of-service/SLA layer this Agreement would not need
+  to mention). Stability AI separately publishes distinct Terms of Service
+  for Stable Chat and Stable Assistant/Stable App, confirmed to exist as
+  separate documents outside this Agreement's scope.
+
+SI8 interpretation: >
+  A creator using Stability AI's Core Models (e.g. Stable Diffusion) for
+  commercial work has a real, affirmative commercial-use grant under the
+  Community License — but that grant is conditioned on registration and is
+  structurally different from a simple "always permitted" rule: it depends
+  on an aggregate organizational revenue threshold CRC has no reliable way
+  to verify, and continued use past that threshold depends on a
+  discretionary relicense Stability AI is not obligated to grant. This is a
+  materially different shape from every other governed AI-generation-tool
+  claim in this corpus to date: Kling/Runway/Pika gate on individual
+  plan/account tier (an askable-in-principle, if not always askable-in-CRC,
+  fact); Midjourney and Gemini API's own commercial-use questions turned on
+  provider-rule absence-of-permission/prohibition rather than an
+  organization-revenue condition; Stability AI is the first claim in this
+  corpus whose real governed rule is an affirmative grant gated on a fact
+  (aggregate organizational revenue) that repository policy has already
+  determined is not a reliable, structured, askable project fact (PM
+  decision, 2026-08-16) — this is SI8's own synthesis of what that means for
+  representation, not itself sourced from Stability AI's own text.
+
+Applicability requirements: []
+Unresolved project dependencies: [stabilityai_organization_revenue_threshold_status, stabilityai_commercial_registration_completed, stabilityai_product_is_core_model_under_community_license]   <!-- (1) whether the licensee + Affiliates' aggregate annual revenue exceeds USD $1,000,000 -- a real governed qualification that is also an evidence limitation, consistent with the 2026-08-16 PM decision against organization-revenue-shaped structured facts; (2) whether required commercial-use registration with Stability AI has been completed -- a step the user either has or hasn't taken, no CRC signal exists, not askable per DEPENDENCY_TREATMENTS/isDependencyAskableInCrc(); (3) whether the actual Stability AI product/model in use is a Core Model under this Agreement vs. a separately-governed product (Stable Chat/Stable Assistant) -- a provider_scope-boundary condition expressed as a dependency, more precisely the future tool-identity/registry layer's own reachability-design responsibility (narrow canonical-ID scoping, mirroring the Gemini API/Consumer App disambiguation) than a per-project fact CRC must track; retained here as an interim disclosure per CPR_020's own finding -->
+Tool scope: ['stability-ai']       <!-- 'stability-ai' is NOT YET a registered CanonicalToolId (confirmed directly, checkTopicClaimRepresentationReadiness() empirically returns {ready:false, issues:[invalid_tool_scope_entry]}) -- a separate, later, mechanical runtime-reachability remediation under CRC-PUBLICATION-POLICY Principle 7, deliberately not performed by this Adoption recording. No PLATFORM-RIGHTS-MATRIX.md coverage exists for Stability AI as of this recording -- confirmed directly -- so the tool-scoped legacy-coexistence CPR practice will find no relevant Matrix proposition when the deferred CPR reconsideration occurs. -->
+Prohibited conclusions: >
+  Does not establish that a specific user's organization is above or below
+  the USD $1,000,000 aggregate annual-revenue threshold. Does not establish
+  that required commercial-use registration with Stability AI has been
+  completed. Does not establish that the Community License Agreement
+  definitely governs the particular Stability AI product/model the user
+  actually used. Does not establish that a separate/Enterprise license is
+  currently required for this user, nor that Stability AI would grant one if
+  requested. Does not treat output ownership as proof of unconditional
+  commercial permission. Does not treat unresolved revenue or registration
+  status as a prohibition on commercial use. Does not treat the general
+  commercial-purpose license grant as commercial clearance or certification
+  of any specific project. Does not extend to Stable Chat, Stable Assistant,
+  Stable App, or any other separately governed Stability AI product or
+  service. Does not assert that hosted/API and self-hosted access carry a
+  fully identical complete contractual regime beyond the Agreement's own
+  silence on the distinction. Not legal advice, not a Commercial Assurance
+  Assessment, not project certification.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-09-09
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  PENDING — not yet reviewed against this now-Adopted claim.
+  `governance-reviews/CPR_020_CAND-STABILITYAI-COMMERCIAL-USE-001_2026-09-09.md`
+  (conducted pre-Adoption, out of normal sequence, while evidence was fresh)
+  recommended WITHHOLD strictly on sequencing/missing-prerequisite grounds --
+  no substantive publication-safety defect was found. A bounded CPR
+  reconsideration, including the mandatory synthetic-eligibility-canary
+  Retrieval -> Bounded Interpretation -> Composition verification against
+  this now-Adopted claim's real drafted text, is required before
+  `crc_eligible` can be decided.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  Stability AI's Community License grants a royalty-free license to use its
+  Core Models (including the Stable Diffusion family) for commercial
+  purposes, subject to the Agreement's conditions. Commercial use requires
+  registration with Stability AI. If you or your Affiliates generate more
+  than USD $1,000,000 in aggregate annual revenue from any source, the
+  licenses granted under the Agreement terminate, and continued use requires
+  a separate license from Stability AI, which Stability AI may grant at its
+  discretion. Separately, the Agreement states that, as between you and
+  Stability AI, you own outputs generated from the Models or Derivative
+  Works to the extent permitted by applicable law. These terms concern Core
+  Models governed by the Community License and do not extend to separately
+  governed Stability AI products such as Stable Assistant or Stable Chat.
+  They do not by themselves establish that a particular project is cleared
+  for commercial use.
+
+Effective date: 2026-09-09 (benchmark/recording date; underlying Community License Agreement itself dated 2024-07-05, independently confirmed current and unsuperseded three times across this onboarding cycle, most recently in CPR_020)
+Last reviewed: 2026-09-09 (CPR_020's independent primary-evidence re-verification, four Stability-controlled sources)
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: —
+
+Full Formal Governance Review artifact: `governance-reviews/FGR_017_CAND-STABILITYAI-COMMERCIAL-USE-001_2026-09-09.md`
+Full CRC Publication Review artifact (pre-Adoption, out-of-sequence, recommends WITHHOLD on sequencing grounds only -- reconsideration required): `governance-reviews/CPR_020_CAND-STABILITYAI-COMMERCIAL-USE-001_2026-09-09.md`
+Candidate Representation: `08_Platform/app/lib/candidates/CAND-STABILITYAI-COMMERCIAL-USE-001.ts @ b99b89940d78e1f8f4a9f8c0a5d5b7f9e6a08288`
