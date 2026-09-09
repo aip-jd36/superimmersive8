@@ -198,10 +198,14 @@ describe('B: Gemini API -- real pipeline now reaches the governed Matrix authori
     expect(text).not.toMatch(/gemini api (prohibits|allows) commercial use/i)
   })
 
-  test('MATRIX_FIXTURE gemini-consumer-app row remains Pending -- not part of the CRC-active population, unaffected by this remediation', () => {
+  test('MATRIX_FIXTURE gemini-consumer-app row was Pending at the time of this 2026-09-08 remediation -- unaffected by it (its own separate CPR APPROVE, 2026-09-09, changed this afterward and is out of this test file\'s own historical scope)', () => {
     const row = MATRIX_FIXTURE.find((r) => r.identifier === 'gemini-consumer-app')
     expect(row).toBeDefined()
-    expect(row!.claims.every((c) => c.crc_eligible === 'Pending')).toBe(true)
+    // Updated 2026-09-09: gemini-consumer-app's own CPR APPROVE decision set
+    // crc_eligible to Yes -- this file's own extraction-reachability
+    // remediation (2026-09-08) never touched it either way; both facts
+    // coexist without contradiction.
+    expect(row!.claims.every((c) => c.crc_eligible === 'Yes')).toBe(true)
   })
 })
 

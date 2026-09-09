@@ -256,7 +256,16 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
     identifier: 'gemini-consumer-app',
     last_verified: '2026-08-06',
     claims: [
-      { claim_id: 'gemini-consumer-app', crc_eligible: 'Pending', crc_publication_scope: null, crc_candidate_statement: null, topic: 'commercial_use', applicability_requirements: [] },
+      {
+        claim_id: 'gemini-consumer-app',
+        crc_eligible: 'Yes',
+        crc_publication_scope:
+          "CRC may state that Google's Terms of Service and Generative AI Prohibited Use Policy -- the documents governing the Gemini Consumer App -- do not state whether output generated through the Gemini Consumer App may be used commercially: they contain neither an affirmative commercial-use grant nor an explicit commercial-use restriction. CRC may also state the ownership disclaimer (Google does not claim ownership of user content) and the Prohibited Use Policy's content-safety restrictions, each kept distinct from the commercial-use question. CRC may state that no commercial-use-rights distinction between the free and paid consumer subscription tiers (Google AI Plus/Pro/Ultra) was found in these documents. This publication scope does not extend to Gemini API, Vertex AI/Google Cloud, Gemini Business, or Google Workspace. CRC must not state or imply that Gemini Consumer App output may or may not be used commercially, must not treat the ownership disclaimer or the Prohibited Use Policy's restrictions as answering the commercial-use question, must not state or infer that a paid Google AI plan creates commercial-use rights or that a free plan prohibits commercial use, must not state or infer the user's own subscription tier, and must not encode a recommendation to seek further review as part of this claim.",
+        crc_candidate_statement:
+          "Google's Terms of Service (effective July 30, 2026) and Generative AI Prohibited Use Policy (last modified December 17, 2024) -- the documents governing the Gemini Consumer App -- do not state whether output generated through the Gemini Consumer App may be used commercially; they contain neither an affirmative commercial-use grant nor an explicit commercial-use restriction. Separately, Google does not claim ownership of user content submitted to or generated through the Gemini Consumer App. The Generative AI Prohibited Use Policy sets content-safety restrictions (for example, prohibiting deceptive impersonation and content that violates others' privacy or intellectual property rights) but does not itself determine commercial-use permission. No commercial-use-rights distinction between the free and paid consumer subscription tiers (Google AI Plus, Google AI Pro, Google AI Ultra) was found in these documents.",
+        topic: 'commercial_use',
+        applicability_requirements: [],
+      },
     ],
   },
   {
