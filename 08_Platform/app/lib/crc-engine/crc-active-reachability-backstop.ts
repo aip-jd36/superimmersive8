@@ -112,6 +112,12 @@ const REPRESENTATIVE_EXPRESSIONS: Record<string, string> = {
   artlist: 'Artlist',
   storyblocks: 'Storyblocks',
   pond5: 'Pond5',
+  // 'stability-ai' added 2026-09-09 (Stability AI Runtime Identity /
+  // Representation-Readiness Remediation, Trial 10): TopicClaim-origin,
+  // matching Synthesia/Pika's own precedent (no Matrix row). Sourced from
+  // the claim's own platform name, same as every other TopicClaim-origin
+  // entry above.
+  'stability-ai': 'Stability AI',
 }
 
 export interface CrcActiveReachabilityResult {
