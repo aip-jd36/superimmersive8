@@ -2,6 +2,7 @@ import { requireAdmin } from '@/lib/auth/admin'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import { WorkbookClient } from './WorkbookClient'
+import { ReviewerCrcContextPanel } from './ReviewerCrcContextPanel'
 import { EMPTY_WORKBOOK } from './workbook-schema'
 import { findAssessmentBySubmissionId } from '@/lib/assessments/repository'
 
@@ -88,13 +89,20 @@ export default async function WorkbookPage({ params }: PageProps) {
   // No longer fetching opt_ins to get video_url.
 
   return (
-    <WorkbookClient
-      submissionId={params.id}
-      assessmentNumber={assessmentNumber}
-      initialSignoffStatus={initialSignoffStatus}
-      initialWorkbook={initialWorkbook}
-      submission={submission as any}
-      evidenceFiles={evidenceFiles ?? []}
-    />
+    <>
+      {/* CAH-4B: read-only reviewer CRC context — a sibling reference surface,
+          NOT a workbook field/section. Renders nothing (fragment collapses to
+          just <WorkbookClient/>) when no CRC is linked, so the review page is
+          byte-identical to before in that common case. */}
+      <ReviewerCrcContextPanel submissionId={params.id} />
+      <WorkbookClient
+        submissionId={params.id}
+        assessmentNumber={assessmentNumber}
+        initialSignoffStatus={initialSignoffStatus}
+        initialWorkbook={initialWorkbook}
+        submission={submission as any}
+        evidenceFiles={evidenceFiles ?? []}
+      />
+    </>
   )
 }
