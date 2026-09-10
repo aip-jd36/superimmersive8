@@ -59,14 +59,16 @@ At `origin/main` = `9fa6d1c`:
 | **(CAH-4F.1)** the page-frame owner `ReviewerShell` is generic — it imports no reviewer-lk / reviewer-context / assessment service and no `WorkbookClient`; the workbook (`children`) and resources (`inspector`) reach it as opaque `React.ReactNode` slots; co-location in one shell is a layout choice, not an authority statement | `__tests__/reviewer-shell/reviewer-shell.test.ts` B |
 | **(CAH-4F.1)** opening/closing the inspector, switching the Living Knowledge / Linked CRC Context tab, and resizing fire no network call, no audit event, and never remount `WorkbookClient` (unsaved workbook state survives) | `reviewer-shell.test.ts` C/D, `route-and-audit.test.ts` (unchanged) |
 | **(CAH-4F.1)** `WorkbookClient` is unchanged except its outer `h-screen`→`h-full`; it references no shell/inspector/reviewer identifier | `reviewer-shell.test.ts` C, `reviewer-context/authority-firewall.test.ts` D |
+| **(CAH-4F.2)** at adjacent widths only one contextual surface occupies the right rail at a time: `ReviewerShell` derives one **layout-only** boolean (`workbookContextAsideHidden = resourcesAvailable && inspectorOpen && adjacent`) and publishes it via the domain-neutral `workspace-layout-context` around the opaque Workbook child; `WorkbookClient` consumes only that boolean and **CSS-hides (never unmounts)** its own Guidance/Submission/Evidence aside. The channel carries layout state only — no LK data, CRC context, applicability, governed claims, Workbook data, evidence, audit info, assessment conclusions, or mutating callback. `rightTab` stays Workbook-owned; the autosave `useEffect` gains no layout dependency; opening/closing Reviewer Resources fires no PATCH and no audit event. **This is a UX / perceptual-clarity mechanism, not an authority boundary** — it does not strengthen, weaken, or restate any authority separation; those remain enforced independently through data ownership, service boundaries, audit paths, bounded interpretation and mutation boundaries. Contextual rail time-sharing improves workspace clarity; the existing authority boundaries are unaffected. | `__tests__/reviewer-shell/context-coordination.test.ts`, `reviewer-shell.test.ts` C |
 
 This ADR names the principle those tests defend, so a reviewer of a *future* change can check the change against the principle, not just against whatever the tests happened to cover.
 
 ## Consequences
 
 **Positive:**
-- CAH-4F, CAH-4F.1, CAH-4G, and any later reviewer-surface work have a single stated boundary to design against.
+- CAH-4F, CAH-4F.1, CAH-4F.2, CAH-4G, and any later reviewer-surface work have a single stated boundary to design against.
 - The "beside each other ≠ merged authority" rule is explicit, so the CAH-4F.1 right-side inspector layout is safe: `ReviewerShell` co-locates the workbook and the resources content as opaque slots without ever coupling to either — co-location is a layout choice, not an authority statement.
+- CAH-4F.2 extends the same rule to *rail occupancy*: which contextual surface is on screen is a layout choice; it never speaks to authority. The layout channel is a deliberately minimal boolean so it cannot become a coupling vector.
 - `crc_eligible` and `crc_publication_scope` are classified: governance metadata about the *CRC channel*, not reviewer authority language — the reviewer view renders neither.
 
 **Costs / limits:**

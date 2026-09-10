@@ -22,11 +22,16 @@ Review page: `08_Platform/app/app/admin/submissions/[id]/review/page.tsx` (serve
 page.tsx  (server)
 └── <ReviewerShell resourcesAvailable inspector={…}>       ← CAH-4F.1  ('use client' — generic page-frame owner)
     │     owns: h-screen frame · inspectorOpen · adjacent↔drawer responsive · reopen affordance · Esc-closes-drawer
+    │     CAH-4F.2: derives workbookContextAsideHidden = resourcesAvailable && inspectorOpen && adjacent
     │     imports NOTHING from reviewer-lk / reviewer-context / assessments / crc-* / WorkbookClient / Section*
+    │     (only new import: ./workspace-layout-context — a domain-neutral layout channel)
     │
-    ├── children ─ <WorkbookClient submissionId … />       ← pre-CAH-4x  ('use client')
-    │       ALWAYS mounted · never remounted on inspector open/close
-    │       └── sticky header · left §-nav · <main> Section1…7 · own 280px guidance/submission/evidence aside
+    ├── <WorkspaceLayoutProvider value={{ workbookContextAsideHidden }}>   ← CAH-4F.2  (neutral, 1 boolean)
+    │   └── children ─ <WorkbookClient submissionId … />   ← pre-CAH-4x  ('use client')
+    │         ALWAYS mounted · never remounted on inspector open/close · not remounted by the provider
+    │         CAH-4F.2: useWorkspaceLayout() → CSS-hides (never unmounts) its own 280px context aside
+    │                   when Reviewer Resources holds the adjacent rail; rightTab stays Workbook-owned
+    │         └── sticky header · left §-nav · <main> Section1…7 · own 280px guidance/submission/evidence aside
     │
     └── inspector ─ <ReviewerResources submissionId>       ← CAH-4F  (server — access gate + slot provider)
           └── <ReviewerResourcesInspector>                 ← CAH-4F.1  ('use client' — owns mode/tab state ONLY)
@@ -37,8 +42,9 @@ page.tsx  (server)
 ```
 
 **Ownership contract:**
-- `ReviewerShell` owns the page frame + inspector open/close + the adjacent-column ⇄ overlay-drawer decision. It receives the workbook as `children` and the resources content as one opaque `inspector: React.ReactNode`. It never inspects or couples to either slot — UI adjacency does not merge the three authority surfaces (ADR-001).
-- `WorkbookClient` is unchanged except its outer container: `h-screen` → `h-full` (the shell now owns viewport height). All 9 `useState`, the auto-save `useEffect`, `computeGates` gating, `sectionNav`, `activeDomain`, `rightTab`, the sticky header, and the three nested scroll regions are byte-identical.
+- `ReviewerShell` owns the page frame + inspector open/close + the adjacent-column ⇄ overlay-drawer decision. It receives the workbook as `children` and the resources content as one opaque `inspector: React.ReactNode`. It never inspects or couples to either slot — UI adjacency does not merge the three authority surfaces (ADR-001). **CAH-4F.2:** it also derives one layout-only boolean, `workbookContextAsideHidden` (`resourcesAvailable && inspectorOpen && adjacent`), and publishes it through `WorkspaceLayoutProvider` (from the domain-neutral `workspace-layout-context` module) wrapped once, unconditionally, around `{children}`. The shell still knows nothing about `rightTab`, guidance/submission/evidence, LK topics or CRC associations.
+- `workspace-layout-context.tsx` (CAH-4F.2) — a domain-neutral client module: `createContext<{ workbookContextAsideHidden: boolean }>` (default `false`), `WorkspaceLayoutProvider`, `useWorkspaceLayout()`. Imports only React. No fetch, no persistence, no audit, no `@/lib/*`. **The channel carries layout state only** — never Reviewer LK data, CRC context, applicability, governed claims, Workbook data, evidence, audit information, assessment conclusions, or any mutating callback. Contextual rail time-sharing improves workspace clarity; existing authority boundaries remain enforced independently through data, service, audit, interpretation and mutation boundaries.
+- `WorkbookClient` is unchanged except: (CAH-4F.1) its outer container `h-screen` → `h-full`; (CAH-4F.2) it calls `useWorkspaceLayout()` and adds one conditional class to its **existing** right `<aside>` — `${workbookContextAsideHidden ? 'hidden' : 'flex'}` — so the aside is CSS-hidden (Tailwind `display:none`), **never unmounted**, while Reviewer Resources holds the adjacent rail. All 9 `useState` (incl. `rightTab`), the auto-save `useEffect` (deps still `[workbook, save]` — no layout dependency), `computeGates` gating, `sectionNav`, `activeDomain`, the sticky header, and the three nested scroll regions are otherwise byte-identical. `rightTab` remains entirely Workbook-owned and layout-independent; on close the aside returns with the same tab selected. The `/api/admin/submissions/[id]/workbook` PATCH path is unchanged; opening/closing Reviewer Resources fires no PATCH.
 - `ReviewerResources` (server) runs the single access check and server-renders `<ReviewerLkPanel>` + `<ReviewerCrcContextPanel>` as two `ReactNode` slots for the client `ReviewerResourcesInspector` (RSC-slot interleaving). Each resource view keeps its own `checkReviewerContextAccess()`, its own data path, and its own audit (`lk_research` / `transcript`), independent of the other.
 - `ReviewerResourcesInspector` (client) owns only `mode ∈ {living_knowledge, linked_crc}`. Both tab panels stay mounted; switching is a visibility toggle — a completed look-up survives a tab switch, and a tab switch fires **no** network call and **no** audit event.
 - The **Linked CRC Context** tab is always present; a submission with no linked CRC renders a neutral empty state ("No CRC conversation is linked to this submission."), never `null`, never framed as an assessment deficiency.
@@ -234,12 +240,31 @@ Removed from the reviewer view entirely: raw `crc_publication_scope` prose and `
 | **1536** | adjacent, open | 380px (`2xl`) | 1156 | `min(612, 672)` = **612** | Comfortable. |
 | **1920** | adjacent, open | 380px | 1540 | `min(996, 672)` = **672** (capped) | Inspector a genuine column; center at full ideal width with generous margins. |
 
-- **Adjacent (≥ 1440):** in-flow `<aside>` beside the workbook; the workbook flexes narrower; no `position: fixed`; both the workbook's own aside and the inspector are visible.
-- **Drawer (< 1440):** right-anchored `position: fixed` overlay with a `translate-x` transition + a light click-to-close backdrop; the workbook DOM is **not** reflowed; default **closed**; `Esc` closes.
+- **Adjacent (≥ 1440):** in-flow `<aside>` beside the workbook; the workbook flexes narrower; no `position: fixed`. **(CAH-4F.2, see §11a)** the workbook's own context aside and the Reviewer Resources inspector time-share the rail — only one is visible at a time.
+- **Drawer (< 1440):** right-anchored `position: fixed` overlay with a `translate-x` transition + a light click-to-close backdrop; the workbook DOM is **not** reflowed; default **closed**; `Esc` closes. **(CAH-4F.2)** unchanged — `workbookContextAsideHidden` is gated on `adjacent`, so in drawer mode the workbook context aside always stays visible under the floating overlay.
 - **Never** the top-of-page stacked fallback at any desktop width.
 - When closed (any width): a slim persistent right-edge "Reviewer Resources" button reopens it.
 
-**Known product concern, deliberately not solved here:** at 1440–1536 the four visible regions (nav / center / workbook-aside / inspector) make the center tighter than ideal. The mockup's end state folds the workbook's own context aside into the center and moves the header into the left rail — that is a **Workbook UX redesign, a separate future milestone** (out of scope: "do not remove/redesign the existing Workbook context aside"). The shell is built so that later change is additive, not another shell rewrite.
+## 11a. Contextual rail time-sharing (CAH-4F.2)
+
+Production visual UAT of CAH-4F.1 (~1440px) confirmed the shell architecture but found the four simultaneous regions in §11's table made the assessment work surface unnecessarily cramped (556px center at 1440). CAH-4F.2 makes the contextual right rail hold **one surface at a time at adjacent widths**.
+
+`ReviewerShell` derives `workbookContextAsideHidden = resourcesAvailable && inspectorOpen && adjacent` and publishes it (layout-only) via `workspace-layout-context`. `WorkbookClient` CSS-hides its own 280px Guidance/Submission/Evidence aside while that is true — the aside stays mounted, `rightTab` and scroll survive, and it returns unchanged on close.
+
+| Viewport | Mode | Reviewer Resources **CLOSED** | Reviewer Resources **OPEN** | Center when OPEN |
+|---|---|---|---|---|
+| **1280** | drawer | `NAV 200 │ WORKBOOK │ CONTEXT-ASIDE 280` — center **672** | fixed overlay drawer floats over the right side; workbook DOM not reflowed; context aside stays (occluded by the overlay) | n/a (drawer steals no width) |
+| **1440** | adjacent | `NAV 200 │ WORKBOOK │ CONTEXT-ASIDE 280` — center **672** | context aside **hidden**; `NAV 200 │ WORKBOOK │ REVIEWER-RESOURCES 340` — center **672** | **672 (ideal restored)** |
+| **1536** | adjacent | center **672** | context aside hidden; inspector 380 — center **672** | **672** |
+| **1920** | adjacent | `NAV 200 │ WORKBOOK │ CONTEXT-ASIDE 280` — center capped **672** | context aside hidden; inspector 380 — center capped **672** | **672** |
+
+- **Uniform mutual exclusion at every adjacent width, including 1920px.** No ">= ~1800px show-both" exception — consistency is the approved product decision for this milestone.
+- **On close:** `workbookContextAsideHidden` → false → the context aside un-hides showing the **same `rightTab`** (guidance/submission/evidence); nothing to restore, it was never unmounted.
+- The reviewer trades simultaneity for a wider work surface: Evidence / Submission context is one click away (close Reviewer Resources) rather than always on screen. This is the product's stated "one contextual surface at a time" preference.
+
+**Deferred, not addressed by CAH-4F.2:** the CAH-4F.1 breakpoint-crossing behaviour — the two separate `<aside>` JSX branches (`adjacent` vs `!adjacent`) mean the Reviewer Resources inspector subtree remounts when the viewport crosses 1440px, losing an in-progress LK look-up / tab selection. `WorkbookClient` is unaffected. Tracked separately; a future change could unify the two branches into one element with conditional classes.
+
+**Also still deferred (unchanged from §11):** the broader Workbook visual-system redesign (fold the context aside into the center, move the dark header into the left rail) — a Workbook UX redesign, explicitly out of scope here ("do not remove/redesign the existing Workbook context aside"). CAH-4F.2 is the smaller coordination fix; the shell + this layout channel are built so that later change stays additive.
 
 ## 12. Regression risks
 
@@ -310,6 +335,27 @@ CAH-4G would add a reviewer free-form question box that flows `question → gove
 | 18 | Resize the browser to ~1280px. | The inspector becomes a **right-anchored overlay drawer** (default closed); the Workbook is full-width and comfortable underneath; the reopen button summons the drawer; ✕ / backdrop / `Esc` dismiss it; the Workbook DOM does not shift. |
 
 **Pass = every row matches.** Rows 10, 11, 14, 15, 16, 17 are release blockers.
+
+## 17. CAH-4F.2 UAT script (manual — no browser harness in this repo)
+
+**Environment:** a deploy of the CAH-4F.2 branch. Sign in as an admin (`users.is_admin = true`). Open `/admin/submissions/{id}/review` for the internal synthetic **`CA-RLK-2a PROD SMOKE`** (`ASSESS-007-2026-09-07`). Browser at **~1440px** unless a row says otherwise. **Do not** run an LK look-up until row 6.
+
+| # | Action | Expected |
+|---|---|---|
+| 1 | Load the page at ~1440px. Reviewer Resources opens by default (CAH-4F.1). | Layout is `NAV │ WORKBOOK │ REVIEWER RESOURCES` — the Guidance/Submission/Evidence aside is **not** visible. Work surface is comfortably wide (~672px content). |
+| 2 | Close Reviewer Resources (**✕**). | Layout becomes `NAV │ WORKBOOK │ GUIDANCE/SUBMISSION/EVIDENCE`. The Workbook keeps roughly the same content width (the context aside took the space the inspector had). |
+| 3 | In the context aside, click the **Submission** tab, then the **Evidence** tab. | Tab switches normally; content updates. |
+| 4 | With **Evidence** selected, reopen Reviewer Resources (right-edge button). | The Guidance/Submission/Evidence aside **disappears**; `NAV │ WORKBOOK │ REVIEWER RESOURCES`; the Workbook reclaims the width. |
+| 5 | Close Reviewer Resources again. | The context aside **returns, still on the Evidence tab** (not reset to Guidance). |
+| 6 | Type an unsaved note in a Workbook field (e.g. a Section 2 textarea). Do **not** wait for autosave. Open Reviewer Resources, then close it. | The unsaved text is **still there**. The save indicator does **not** flash "Saving…" as a result of the open/close. |
+| 7 | Navigate to Section 3, focus a domain (sets `rightTab='guidance'`, `activeDomain`). Open + close Reviewer Resources. | Section 3 + the focused domain are unchanged; the context aside returns on **Guidance** showing that domain's guidance. |
+| 8 | Open Reviewer Resources, run an LK look-up (topic → "Look up governed knowledge"). Close, reopen. | LK result still shown (CAH-4F.1 behaviour, unchanged). |
+| 9 | Resize to **1536px**, then **1920px**. Toggle Reviewer Resources at each. | Same mutual exclusion at both — open ⇒ context aside hidden, closed ⇒ context aside shown. **No "both visible" mode at any width.** |
+| 10 | Resize to **~1280px**. | Drawer mode (CAH-4F.1): Reviewer Resources is a right-anchored overlay; the Guidance/Submission/Evidence aside **stays visible** underneath; opening the drawer does not hide it; ✕ / backdrop / `Esc` dismiss the drawer. |
+| 11 | In Supabase, count `crc_context_access_events` for this `submission_id`. | Exactly the look-ups you performed in row 8 — **zero** additional rows from any aside toggle / open / close / resize. |
+| 12 | Re-read the submission's `workbook_data` + its `assessments` row. | **Byte-unchanged** except the note you deliberately typed in row 6 (if autosave ran). No evidence/gap/finding/outcome/sign-off/report row created or altered by any coordination action. |
+
+**Pass = every row matches.** Rows 5, 6, 11, 12 are release blockers.
 
 ---
 
