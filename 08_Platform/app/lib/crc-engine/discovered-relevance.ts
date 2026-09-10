@@ -80,23 +80,47 @@
  * is a direct sibling, not a new architectural layer).
  */
 
-import type { GoalCategory, StructuredUnderstanding } from '@/types/interview-engine'
+import type { ContentPresenceCategory, GoalCategory, StructuredUnderstanding } from '@/types/interview-engine'
 import type { DiscoveredTopicOccurrence, TopicClaim } from '@/lib/retrieval-engine/types'
 
 /**
- * Closed today to the one structurally-supported evidence type. Adding a
- * genuinely new source kind (e.g. a future `recognizable_person_present`
- * fact) requires (a) a new `StructuredUnderstanding` fact/observation type
- * to exist first (a one-time, per-fact-shape engineering cost, not a
- * per-domain one -- same discipline as Track B's own AssetProviderMention.
- * usage/license fields) and (b) one new `case` in
- * `evaluateTriggerOccurrences` below -- neither touches `run-turn.ts`,
- * `retrieve()`, or any other orchestration call site, which is exactly
- * the scalability property Section 32 of this milestone's task spec asks
- * to prove (see the synthetic extensibility test in this module's own
- * test file).
+ * Closed to the structurally-supported evidence types that actually exist.
+ * `content_presence_mention` (Bridge #2 — Synthetic-Person Observable Fact
+ * -> Track A Likeness Discovered Relevance, 2026-09-11) is the second entry,
+ * added under the exact extension discipline this module's own prior
+ * milestone (Track A — Generic Discovered Relevance, 2026-08-21) predicted
+ * and proved the shape for (see that milestone's "synthetic extensibility"
+ * test in this module's own test file): the fact/observation type
+ * (`ContentPresenceMention`) already existed on `StructuredUnderstanding`
+ * before this milestone (Content-Presence Correction Safety — Append-Only
+ * Closure, 2026-08-28, and earlier), so this milestone required only (a)
+ * widening this union and (b) one new `case` in
+ * `deriveDiscoveredTopicOccurrences` below -- neither touched `run-turn.ts`,
+ * `retrieve()`, `lookupDiscoveredTopicClaims`, or any other orchestration
+ * call site, exactly the scalability property the 2026-08-21 milestone's own
+ * task spec asked to prove.
+ *
+ * Adding a genuinely NEW source kind still requires (a) a new
+ * `StructuredUnderstanding` fact/observation type to exist first (a one-time,
+ * per-fact-shape engineering cost, not a per-domain one) and (b) one new
+ * `case` here -- this module's own generic dispatch loop is unchanged in
+ * shape by this milestone, only in how many source kinds it recognizes.
  */
-export type DiscoveredRelevanceSourceKind = 'asset_provider_mention'
+export type DiscoveredRelevanceSourceKind = 'asset_provider_mention' | 'content_presence_mention'
+
+/**
+ * Bridge #2's own qualifying observable-fact categories: a synthetic-person
+ * content-presence mention is only "about a person" when its `category` is
+ * one of these two (both of `ContentPresenceCategory`'s current values,
+ * spelled out explicitly rather than relying on that being the full set
+ * today -- so a future, non-person `ContentPresenceCategory` addition does
+ * not silently become likeness-qualifying without an explicit registry
+ * decision). Generic observable-FACT gating only -- no statute, no
+ * jurisdiction, no "recognizable" distinction; see this module's own header
+ * for the observable-fact-vs-legal-conclusion boundary this trigger is
+ * built to respect.
+ */
+const LIKENESS_QUALIFYING_CONTENT_PRESENCE_CATEGORIES: readonly ContentPresenceCategory[] = ['person_visual_presence', 'person_voice_presence']
 
 export interface DiscoveredRelevanceTrigger {
   trigger_id: string
@@ -113,20 +137,50 @@ export interface DiscoveredRelevanceTrigger {
 }
 
 /**
- * Canonical first (and, as of this milestone, only) trigger: a confirmed,
- * canonical AssetProviderMention -- for ANY of the four canonical
- * provider ids (getty/istock/shutterstock/adobe-stock), never a
+ * First trigger (Track A — Generic Discovered Relevance, 2026-08-21): a
+ * confirmed, canonical AssetProviderMention -- for ANY of the four
+ * canonical provider ids (getty/istock/shutterstock/adobe-stock), never a
  * provider-specific branch -- discovers `third_party_source_rights`
  * relevance, but ONLY when an active `commercial_use` goal already
  * exists. This directly, and only, models the confirmed production
  * failure case; it does not generalize to other parent goals without a
  * new evidenced case (Section 20: "Do not guess").
+ *
+ * Second trigger (Bridge #2, 2026-09-11): a confirmed, non-superseded
+ * `ContentPresenceMention` describing a SYNTHETIC person's visual or voice
+ * presence -- again only when an active `commercial_use` goal already
+ * exists -- discovers `likeness` relevance. This closes the production gap
+ * where a user describes a synthetic performer in a commercial-use question
+ * (e.g. "Are there any rules I should know about before using this
+ * commercially?" -- now correctly classified `commercial_use` since Bridge
+ * #1) but never phrases a separate, explicit `likeness`-shaped question, so
+ * `likeness`-topic governed knowledge (e.g. NY GBL §396-b synthetic
+ * performer disclosure) was never even considered relevant. Deliberately
+ * generic and NON-statute-specific, exactly mirroring the first trigger's
+ * own discipline: this trigger encodes only "a synthetic person is
+ * described, in a commercial-use context" -- an OBSERVABLE FACT -- never
+ * any statute's own legal elements (jurisdiction, "recognizable as any
+ * identifiable natural performer," actual knowledge, duty-holder status,
+ * exemption). Those remain exclusively the governed `TopicClaim`'s own
+ * `applicability_requirements`/`unresolved_project_dependencies`, evaluated
+ * entirely downstream of this module, unchanged by this milestone. A bare
+ * `commercial_use` -> `likeness` `TopicRelationship` was explicitly
+ * evaluated and rejected as over-broad (it would fire for EVERY
+ * commercial_use goal regardless of whether any person appears at all) --
+ * this trigger is the narrower, evidence-gated alternative Bridge #2 exists
+ * to implement instead.
  */
 const DISCOVERED_RELEVANCE_TRIGGERS: readonly DiscoveredRelevanceTrigger[] = [
   {
     trigger_id: 'asset_provider_mention_to_third_party_source_rights',
     source_kind: 'asset_provider_mention',
     topic: 'third_party_source_rights',
+    allowed_parent_goals: ['commercial_use'],
+  },
+  {
+    trigger_id: 'synthetic_person_content_presence_to_likeness',
+    source_kind: 'content_presence_mention',
+    topic: 'likeness',
     allowed_parent_goals: ['commercial_use'],
   },
 ]
@@ -209,6 +263,45 @@ export function deriveDiscoveredTopicOccurrences(understanding: StructuredUnders
         if (mention.superseded_by !== null) continue
         if (mention.resolution.kind !== 'canonical') continue
         if (mention.confidence !== 'confirmed') continue
+        for (const sourceGoalCategory of satisfiedParentGoals) {
+          occurrences.push({
+            topic: trigger.topic,
+            trigger_id: trigger.trigger_id,
+            source_kind: trigger.source_kind,
+            source_id: mention.mention_id,
+            source_goal_category: sourceGoalCategory,
+          })
+        }
+      }
+    }
+
+    // Bridge #2 (2026-09-11): mirrors the asset_provider_mention branch's
+    // own shape exactly -- enumerate qualifying structured mentions, emit
+    // one occurrence per (qualifying mention x satisfied parent goal).
+    // "Qualifying" is the OBSERVABLE FACT only (superseded_by null,
+    // confirmed, a person-presence category, synthetic) -- never a legal
+    // characterization. `ContentPresenceMention`s are append-only (no
+    // extraction-driven supersession exists today -- see that type's own
+    // doc comment, "Content-Presence Correction Safety — Append-Only
+    // Closure," 2026-08-28), so a later real-person correction adds a
+    // SECOND, separate mention rather than retracting an earlier synthetic
+    // one; this trigger therefore keeps firing on the still-non-superseded
+    // synthetic mention even after such a correction. Deliberately not
+    // worked around here -- this is pre-existing, generic content-presence
+    // correction-semantics debt (not introduced by this milestone, not
+    // specific to this trigger), and the resulting effect is bounded to
+    // TOPIC relevance/education only: every one of §396-b's own legal
+    // dependencies (including `synthetic_performer_present_confirmed`
+    // itself) remains independently unresolved/evidence-only downstream,
+    // so this can only make likeness-topic governed knowledge discoverable
+    // when it might not currently apply -- it can never fabricate a legal
+    // conclusion. See this module's own test file for the direct proof.
+    if (trigger.source_kind === 'content_presence_mention') {
+      for (const mention of understanding.content_presence_mentions) {
+        if (mention.superseded_by !== null) continue
+        if (mention.confidence !== 'confirmed') continue
+        if (!LIKENESS_QUALIFYING_CONTENT_PRESENCE_CATEGORIES.includes(mention.category)) continue
+        if (mention.real_or_synthetic !== 'synthetic') continue
         for (const sourceGoalCategory of satisfiedParentGoals) {
           occurrences.push({
             topic: trigger.topic,

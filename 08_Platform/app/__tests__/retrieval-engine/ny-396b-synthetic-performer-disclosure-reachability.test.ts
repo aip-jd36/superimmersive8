@@ -21,13 +21,15 @@
 import { lookupTopicClaims } from '@/lib/retrieval-engine/lookup-topic-claims'
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import { runCRCConversation } from '@/lib/crc-engine/run-crc-conversation'
-import { deriveDiscoveredTopicOccurrences } from '@/lib/crc-engine/discovered-relevance'
+import { deriveDiscoveredTopicOccurrences, discoveredTopicCategories } from '@/lib/crc-engine/discovered-relevance'
 import { getAskabilityEntry } from '@/lib/crc-engine/dependency-askability'
+import { deriveKnowledgeReadinessNeeds } from '@/lib/crc-engine/knowledge-readiness'
+import { createInitialBoundaryState } from '@/lib/interview-engine/boundaries'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { DIALOGUE_FIXTURES } from '@/lib/interview-engine/fixtures'
 import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
-import type { RetrievalHandoff, StructuredUnderstanding, UserGoal } from '@/types/interview-engine'
+import type { ContentPresenceMention, RetrievalHandoff, StructuredUnderstanding, UserGoal } from '@/types/interview-engine'
 
 const CLAIM_ID = 'CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1'
 const SIBLING_ID = 'CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1' // WITHHELD (CPR_008) -- no fixture entry, must never appear reachable
@@ -63,6 +65,39 @@ function likenessGoal(overrides: Partial<UserGoal> = {}): UserGoal {
 
 function facts(jurisdictionIncluded: string[] = [], jurisdictionExcluded: string[] = []): ApplicabilityFacts {
   return { jurisdiction: { included: jurisdictionIncluded, excluded: jurisdictionExcluded }, toolMentions: [] }
+}
+
+// Bridge #2 (2026-09-11) helpers -- the production case this milestone
+// closes: an active EXPLICIT `commercial_use` goal (never `likeness`,
+// exactly as Bridge #1 correctly classifies "Are there any rules I should
+// know about before using this commercially?"), plus an observable
+// synthetic-person content-presence fact.
+
+function commercialUseGoal(overrides: Partial<UserGoal> = {}): UserGoal {
+  return {
+    goal_id: 'g-cu',
+    state: 'confirmed',
+    raw_text: 'Are there any rules I should know about before using this commercially?',
+    category: 'commercial_use',
+    scope: 'informational',
+    superseded_by: null,
+    source_turn: 1,
+    source_statement: 'Are there any rules I should know about before using this commercially?',
+    ...overrides,
+  }
+}
+
+function syntheticPresenceMention(overrides: Partial<ContentPresenceMention> = {}): ContentPresenceMention {
+  return {
+    mention_id: 'cp-1',
+    category: 'person_visual_presence',
+    real_or_synthetic: 'synthetic',
+    confidence: 'confirmed',
+    source_turn: 1,
+    source_statement: "It's an AI-generated performer who isn't based on or recognizable as any real person.",
+    superseded_by: null,
+    ...overrides,
+  }
 }
 
 // ── §5/§7: fixture fidelity + dependency preservation ──────────────────────
@@ -153,16 +188,206 @@ describe('jurisdiction applicability, real committed fixture', () => {
   })
 })
 
-// ── §9: discovered relevance / Track C -- honestly reported, not manufactured ──
+// ── §9: discovered relevance / Track C ──────────────────────────────────────
+//
+// Bridge #2 (2026-09-11) registered a generic content_presence_mention ->
+// likeness trigger (synthetic_person_content_presence_to_likeness,
+// lib/crc-engine/discovered-relevance.ts). The claim below remains
+// explicit-goal-only ONLY in the absence of both an active commercial_use
+// goal AND an observable synthetic-person fact -- see the two describe
+// blocks below for the pre-/post-Bridge-#2 boundary, both proven against
+// this real, committed fixture.
 
-describe('Track C discovered relevance -- no registered trigger for likeness topic today', () => {
-  test('no discovered-relevance trigger exists for the likeness topic (only third_party_source_rights, via asset-provider mentions, is registered) -- this claim is explicit-goal-only, matching the sibling claim\'s own architecture, exactly as this milestone\'s own report discloses rather than manufactures', () => {
+describe('Track C discovered relevance -- no goal, no fact -> still explicit-goal-only', () => {
+  test('with no active goal at all, no discovered-relevance occurrence is produced for likeness (the registered trigger requires an active commercial_use goal, per Option D -- absence of a goal is absence of relevance, not absence of a trigger)', () => {
     const su: StructuredUnderstanding = {
       ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
       user_goals: [], // no explicit goal
     }
     const occurrences = deriveDiscoveredTopicOccurrences(su, TOPIC_CLAIMS_FIXTURE)
     expect(occurrences.filter((o) => o.topic === 'likeness')).toEqual([])
+  })
+
+  test('with an active commercial_use goal but NO content-presence evidence, likeness is still not discovered -- the trigger requires the observable synthetic-person fact, not merely the parent goal', () => {
+    const su: StructuredUnderstanding = {
+      ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
+      user_goals: [commercialUseGoal()],
+      content_presence_mentions: [],
+    }
+    const occurrences = deriveDiscoveredTopicOccurrences(su, TOPIC_CLAIMS_FIXTURE)
+    expect(occurrences.filter((o) => o.topic === 'likeness')).toEqual([])
+  })
+})
+
+describe('Bridge #2 — real production gap closed: commercial_use goal + synthetic-person fact -> likeness discovered against the real fixture', () => {
+  function suWithSyntheticPersonAndJurisdiction(jurisdiction: string | null): StructuredUnderstanding {
+    return {
+      ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
+      user_goals: [commercialUseGoal()],
+      content_presence_mentions: [syntheticPresenceMention()],
+      project_facts: {
+        ...DIALOGUE_FIXTURES.no_signal.structured_understanding.project_facts,
+        jurisdiction:
+          jurisdiction === null
+            ? DIALOGUE_FIXTURES.no_signal.structured_understanding.project_facts.jurisdiction
+            : { attestation: { state: 'confirmed', value: jurisdiction }, source_turn: 1, source_statement: jurisdiction },
+      },
+    }
+  }
+
+  test('discovered occurrence: topic likeness, source_kind content_presence_mention, matched_goal_category commercial_use -- against the real TOPIC_CLAIMS_FIXTURE, no synthetic clone', () => {
+    const su = suWithSyntheticPersonAndJurisdiction('New York')
+    const occurrences = deriveDiscoveredTopicOccurrences(su, TOPIC_CLAIMS_FIXTURE)
+    const likenessOcc = occurrences.find((o) => o.topic === 'likeness')
+    expect(likenessOcc).toBeDefined()
+    expect(likenessOcc?.source_kind).toBe('content_presence_mention')
+    expect(likenessOcc?.source_goal_category).toBe('commercial_use')
+  })
+
+  // Positive §396-b canary (task Section 8).
+  test('POSITIVE CANARY: full pipeline, NY jurisdiction + synthetic person + commercial_use goal -> CLAIM_ID retrieves via discovered_topic/commercial_use, no fabricated goal, dependencies still unresolved, BI bounded, Projection renders the approved candidate statement, no project-specific legal conclusion', () => {
+    const su = suWithSyntheticPersonAndJurisdiction('New York')
+    const discoveredOccurrences = deriveDiscoveredTopicOccurrences(su, TOPIC_CLAIMS_FIXTURE)
+    const applicabilityFacts = facts(['New York'])
+
+    // 1. Track A emits discovered likeness relevance.
+    expect(discoveredOccurrences.some((o) => o.topic === 'likeness')).toBe(true)
+
+    // 2 + 3 + 4. §396-b retrieves, match_origin discovered_topic, matched_goal_category commercial_use.
+    const out = retrieve(handoff(), MATRIX_FIXTURE, su.user_goals, TOPIC_CLAIMS_FIXTURE, applicabilityFacts, [], [], discoveredOccurrences)
+    const result = out.results.find((r) => r.claim_id === CLAIM_ID)
+    expect(result).toBeDefined()
+    expect(result?.match_origin).toBe('discovered_topic')
+    expect(result?.matched_goal_category).toBe('commercial_use')
+
+    // 5. No fabricated UserGoal -- the only goal remains the real explicit commercial_use one.
+    expect(su.user_goals).toHaveLength(1)
+    expect(su.user_goals[0].category).toBe('commercial_use')
+
+    // 6. Jurisdiction applicability independently passes (New York confirmed).
+    // Already proven by claim presence above -- applicability_requirements
+    // gates on the SAME `facts` this call already used.
+
+    // 7. All four legal dependencies remain unresolved/evidence-only.
+    expect(result?.unresolved_project_dependencies).toEqual([
+      'advertiser_or_duty_holder_status_confirmed',
+      'synthetic_performer_present_confirmed',
+      'actual_knowledge_confirmed',
+      'expressive_work_exemption_applies',
+    ])
+
+    // 8 + 9 + 10. BI bounded, Projection renders the approved candidate
+    // statement, no project-specific legal conclusion -- exercised through
+    // the real end-to-end conversation pipeline (a fresh commercial_use-only
+    // StructuredUnderstanding, matching the actual failed-UAT opening shape
+    // -- no explicit likeness goal anywhere in this input).
+    const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
+    const claimIds = output.knowledge_items.map((k) => k.claim_id)
+    expect(claimIds).toContain(CLAIM_ID)
+    const item = output.knowledge_items.find((k) => k.claim_id === CLAIM_ID)
+    expect(item?.statement).toBe(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === CLAIM_ID)!.crc_candidate_statement)
+
+    const interp = output.goal_interpretations.find((i) => i.goal_text === commercialUseGoal().raw_text)
+    expect(interp).toBeDefined()
+    const summary = interp!.summary
+    expect(summary).toMatch(/there isn't enough project-specific information to determine how it applies to your specific project/)
+    expect(summary).not.toMatch(/violates|complies with (the|this) (law|statute|section)/i)
+    expect(summary).not.toMatch(/you are (the|a) (statutory )?duty-holder/i)
+    expect(summary).not.toMatch(/your (content|ad|video) (is|contains) a synthetic performer/i)
+    expect(summary).not.toMatch(/you (had|have) actual knowledge/i)
+    expect(summary).not.toMatch(/the exemption (applies|does not apply) to you/i)
+    expect(summary).not.toMatch(/new york law (governs|applies to) your project/i)
+  })
+
+  // Negative-control matrix (task Section 9).
+  test('A: commercial_use + New York + NO person presence -> no likeness discovery, no §396-b', () => {
+    const su = suWithSyntheticPersonAndJurisdiction('New York')
+    su.content_presence_mentions = []
+    const occurrences = deriveDiscoveredTopicOccurrences(su, TOPIC_CLAIMS_FIXTURE)
+    expect(occurrences.filter((o) => o.topic === 'likeness')).toEqual([])
+    const out = retrieve(handoff(), MATRIX_FIXTURE, su.user_goals, TOPIC_CLAIMS_FIXTURE, facts(['New York']), [], [], occurrences)
+    expect(out.results.map((r) => r.claim_id)).not.toContain(CLAIM_ID)
+  })
+
+  test('B: commercial_use + New York + REAL person only (not synthetic) -> synthetic-only trigger does NOT fire', () => {
+    const su = suWithSyntheticPersonAndJurisdiction('New York')
+    su.content_presence_mentions = [syntheticPresenceMention({ real_or_synthetic: 'real' })]
+    const occurrences = deriveDiscoveredTopicOccurrences(su, TOPIC_CLAIMS_FIXTURE)
+    expect(occurrences.filter((o) => o.topic === 'likeness')).toEqual([])
+  })
+
+  test('C: commercial_use + New York + real_or_synthetic = null (unresolved) -> no synthetic-person discovery', () => {
+    const su = suWithSyntheticPersonAndJurisdiction('New York')
+    su.content_presence_mentions = [syntheticPresenceMention({ real_or_synthetic: null })]
+    const occurrences = deriveDiscoveredTopicOccurrences(su, TOPIC_CLAIMS_FIXTURE)
+    expect(occurrences.filter((o) => o.topic === 'likeness')).toEqual([])
+  })
+
+  test('D: commercial_use + New York + synthetic person -> §396-b retrieves (positive, restated as its own negative-matrix row)', () => {
+    const su = suWithSyntheticPersonAndJurisdiction('New York')
+    const occurrences = deriveDiscoveredTopicOccurrences(su, TOPIC_CLAIMS_FIXTURE)
+    const out = retrieve(handoff(), MATRIX_FIXTURE, su.user_goals, TOPIC_CLAIMS_FIXTURE, facts(['New York']), [], [], occurrences)
+    expect(out.results.map((r) => r.claim_id)).toContain(CLAIM_ID)
+  })
+
+  test('E: commercial_use + California + synthetic person -> likeness IS discovered generically (topic relevance is jurisdiction-agnostic), but §396-b fails applicability and does not retrieve', () => {
+    const su = suWithSyntheticPersonAndJurisdiction('California')
+    const occurrences = deriveDiscoveredTopicOccurrences(su, TOPIC_CLAIMS_FIXTURE)
+    expect(occurrences.some((o) => o.topic === 'likeness')).toBe(true)
+    const out = retrieve(handoff(), MATRIX_FIXTURE, su.user_goals, TOPIC_CLAIMS_FIXTURE, facts(['California']), [], [], occurrences)
+    expect(out.results.map((r) => r.claim_id)).not.toContain(CLAIM_ID)
+  })
+
+  test('F: commercial_use + "United States" (country-level) only + synthetic person -> no NY inference, §396-b does not retrieve', () => {
+    const su = suWithSyntheticPersonAndJurisdiction('United States')
+    const occurrences = deriveDiscoveredTopicOccurrences(su, TOPIC_CLAIMS_FIXTURE)
+    expect(occurrences.some((o) => o.topic === 'likeness')).toBe(true)
+    const out = retrieve(handoff(), MATRIX_FIXTURE, su.user_goals, TOPIC_CLAIMS_FIXTURE, facts(['United States']), [], [], occurrences)
+    expect(out.results.map((r) => r.claim_id)).not.toContain(CLAIM_ID)
+  })
+
+  test('G: commercial_use + jurisdiction unresolved + synthetic person -> topic still discoverable, but §396-b does not retrieve (jurisdiction never guessed from silence)', () => {
+    const su = suWithSyntheticPersonAndJurisdiction(null)
+    const occurrences = deriveDiscoveredTopicOccurrences(su, TOPIC_CLAIMS_FIXTURE)
+    expect(occurrences.some((o) => o.topic === 'likeness')).toBe(true)
+    const out = retrieve(handoff(), MATRIX_FIXTURE, su.user_goals, TOPIC_CLAIMS_FIXTURE, facts(), [], [], occurrences)
+    expect(out.results.map((r) => r.claim_id)).not.toContain(CLAIM_ID)
+  })
+
+  test('L: explicit likeness goal + synthetic person -> exact_topic path wins, no duplicate discovered_topic result for the same claim', () => {
+    const su = suWithSyntheticPersonAndJurisdiction('New York')
+    su.user_goals = [likenessGoal()]
+    const occurrences = deriveDiscoveredTopicOccurrences(su, TOPIC_CLAIMS_FIXTURE)
+    expect(occurrences.filter((o) => o.topic === 'likeness')).toEqual([])
+    const out = retrieve(handoff(), MATRIX_FIXTURE, su.user_goals, TOPIC_CLAIMS_FIXTURE, facts(['New York']), [], [], occurrences)
+    const matches = out.results.filter((r) => r.claim_id === CLAIM_ID)
+    expect(matches).toHaveLength(1)
+    expect(matches[0].match_origin).toBe('exact_topic')
+    expect(matches[0].matched_goal_category).toBe('likeness')
+  })
+})
+
+// ── §11: questioning safety -- discovery never makes a dependency askable ──
+
+describe('Bridge #2 — questioning safety: discovered relevance never creates a new askable dependency', () => {
+  test('with the claim discoverable (commercial_use + synthetic person + NY), deriveKnowledgeReadinessNeeds still proposes NO need for any of the four §396-b dependencies -- the askability registry gate is untouched by this milestone', () => {
+    const su: StructuredUnderstanding = {
+      ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
+      user_goals: [commercialUseGoal()],
+      content_presence_mentions: [syntheticPresenceMention()],
+      project_facts: {
+        ...DIALOGUE_FIXTURES.no_signal.structured_understanding.project_facts,
+        jurisdiction: { attestation: { state: 'confirmed', value: 'New York' }, source_turn: 1, source_statement: 'New York' },
+      },
+    }
+    const discoveredTopics = discoveredTopicCategories(deriveDiscoveredTopicOccurrences(su, TOPIC_CLAIMS_FIXTURE))
+    expect(discoveredTopics).toContain('likeness')
+    const needs = deriveKnowledgeReadinessNeeds(su, TOPIC_CLAIMS_FIXTURE, createInitialBoundaryState(), discoveredTopics)
+    const dependencyIds = needs.map((n) => n.dependency_id)
+    expect(dependencyIds).not.toContain('advertiser_or_duty_holder_status_confirmed')
+    expect(dependencyIds).not.toContain('synthetic_performer_present_confirmed')
+    expect(dependencyIds).not.toContain('actual_knowledge_confirmed')
+    expect(dependencyIds).not.toContain('expressive_work_exemption_applies')
   })
 })
 
