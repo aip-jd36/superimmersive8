@@ -304,10 +304,64 @@ describe('normalizeCandidate: asset provider canonicalization', () => {
     expect(artlist).not.toEqual(getty)
   })
 
-  test('Envato and Epidemic Sound remain unrecognized -- this milestone registers only Artlist, per its own one-provider scope', () => {
+  // Envato + Epidemic provider registration (Envato + Epidemic Provider
+  // Registration / CPR-Readiness Remediation, 2026-09-10): same generic
+  // mechanism/tests as Getty/iStock/Shutterstock/Adobe Stock/Artlist above.
+  // Preparing CLAIM-MUSIC-ENVATO-SYNC-001-v1, -CANCELLATION-001-v1, and
+  // CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1 (all Adopted under FGR_006,
+  // all still crc_eligible: Pending) for a real CPR reconsideration --
+  // identity/alias registration only, no CRC-eligibility or fixture change.
+  test('Envato Elements resolves to canonical "envato-elements"', () => {
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'Envato Elements' }))).toEqual({ status: 'resolved', canonical_identifier: 'envato-elements' })
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'envato elements' }))).toEqual({ status: 'resolved', canonical_identifier: 'envato-elements' })
+  })
+
+  test('bare "Envato" (the company, not the Elements product specifically) remains unrecognized -- deliberately not registered, per this milestone\'s own ambiguity discipline (Envato also sells the Market/ThemeForest marketplace and Tuts+)', () => {
     expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'Envato' }))).toEqual({ status: 'unrecognized' })
-    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'Envato Elements' }))).toEqual({ status: 'unrecognized' })
-    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'Epidemic Sound' }))).toEqual({ status: 'unrecognized' })
+  })
+
+  test('speculative Envato Elements surface forms not justified by observed evidence remain unrecognized -- no domain-style or squished variant registered', () => {
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'envatoelements' }))).toEqual({ status: 'unrecognized' })
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'elements.envato.com' }))).toEqual({ status: 'unrecognized' })
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'Envato Market' }))).toEqual({ status: 'unrecognized' })
+  })
+
+  test('Envato Elements is DISTINCT from every other registered provider, including Artlist (same domain: music licensing) -- registering it introduces no collision', () => {
+    const envato = normalizeCandidate(providerCandidate({ raw_provider_name: 'Envato Elements' }))
+    const artlist = normalizeCandidate(providerCandidate({ raw_provider_name: 'Artlist' }))
+    const epidemic = normalizeCandidate(providerCandidate({ raw_provider_name: 'Epidemic Sound' }))
+    const getty = normalizeCandidate(providerCandidate({ raw_provider_name: 'Getty' }))
+    expect(envato).toEqual({ status: 'resolved', canonical_identifier: 'envato-elements' })
+    expect(envato).not.toEqual(artlist)
+    expect(envato).not.toEqual(epidemic)
+    expect(envato).not.toEqual(getty)
+  })
+
+  test('Epidemic Sound resolves to canonical "epidemic-sound", including the squished-domain form', () => {
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'Epidemic Sound' }))).toEqual({ status: 'resolved', canonical_identifier: 'epidemic-sound' })
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'epidemic sound' }))).toEqual({ status: 'resolved', canonical_identifier: 'epidemic-sound' })
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'EpidemicSound' }))).toEqual({ status: 'resolved', canonical_identifier: 'epidemic-sound' })
+  })
+
+  test('speculative Epidemic Sound surface forms not justified by observed evidence remain unrecognized', () => {
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'Epidemic' }))).toEqual({ status: 'unrecognized' })
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'epidemic-sound.com' }))).toEqual({ status: 'unrecognized' })
+  })
+
+  test('Epidemic Sound is DISTINCT from every other registered provider, including Artlist and Envato Elements (same domain: music licensing) -- registering it introduces no collision', () => {
+    const epidemic = normalizeCandidate(providerCandidate({ raw_provider_name: 'Epidemic Sound' }))
+    const artlist = normalizeCandidate(providerCandidate({ raw_provider_name: 'Artlist' }))
+    const envato = normalizeCandidate(providerCandidate({ raw_provider_name: 'Envato Elements' }))
+    const getty = normalizeCandidate(providerCandidate({ raw_provider_name: 'Getty' }))
+    expect(epidemic).toEqual({ status: 'resolved', canonical_identifier: 'epidemic-sound' })
+    expect(epidemic).not.toEqual(artlist)
+    expect(epidemic).not.toEqual(envato)
+    expect(epidemic).not.toEqual(getty)
+  })
+
+  test('an unrelated/unknown provider name remains unrecognized -- fail-closed, unaffected by the Envato/Epidemic registration', () => {
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: 'SomeRandomStockSite' }))).toEqual({ status: 'unrecognized' })
+    expect(normalizeCandidate(providerCandidate({ raw_provider_name: '' }))).toEqual({ status: 'not_applicable' })
   })
 
   // Storyblocks alias registration (LK-54, 2026-08-30 -- Storyblocks

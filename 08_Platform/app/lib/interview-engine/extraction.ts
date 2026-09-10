@@ -677,6 +677,33 @@ const KNOWN_TOOLS: Record<string, CanonicalToolId> = {
  * evidence-only scope. Mirrors the Storyblocks precedent immediately
  * above exactly: one alias entry, added on real observed evidence, not
  * proactively.
+ *
+ * `'envato elements'` added 2026-09-10 (Envato + Epidemic Provider
+ * Registration / CPR-Readiness Remediation): the exact, full official
+ * product name every one of this claim family's own governed Source
+ * references uses ("Envato Elements' own licensing-explainer page...").
+ * Deliberately does NOT register bare `'envato'` -- Envato the company
+ * sells multiple distinct products (Elements, the Market/ThemeForest
+ * marketplace, Tuts+), so the bare company name is genuinely ambiguous as
+ * to which product a user means; the governed claims are scoped
+ * specifically to Envato Elements' own license terms, never to Envato
+ * generally. No domain-style variant is registered either -- Envato
+ * Elements' real domain (`elements.envato.com`) does not collapse to a
+ * clean single-word form the way `istockphoto.com`/`adobestock.com` do,
+ * so no analogous squished-domain alias exists to add without inventing
+ * one. Fails closed on the bare/ambiguous form, per this milestone's own
+ * explicit no-speculative-alias discipline.
+ *
+ * `'epidemic sound'` / `'epidemicsound'` added 2026-09-10 (same
+ * remediation): `'epidemic sound'` is the exact official product name
+ * this claim family's own governed Source references use throughout
+ * ("Epidemic Sound, Single Track Licenses v8..."). `'epidemicsound'`
+ * additionally mirrors the `istockphoto`/`adobestock` squished-domain
+ * precedent -- Epidemic Sound's own real domain is `epidemicsound.com`,
+ * a genuine, non-speculative surface form, unlike a guessed variant. No
+ * ambiguity concern analogous to Envato's exists here -- "Epidemic
+ * Sound" does not name a family of distinct products the way "Envato"
+ * does.
  */
 const KNOWN_ASSET_PROVIDERS: Record<string, AssetProviderId> = {
   getty: 'getty',
@@ -692,6 +719,9 @@ const KNOWN_ASSET_PROVIDERS: Record<string, AssetProviderId> = {
   'artlist.io': 'artlist',
   storyblocks: 'storyblocks',
   pond5: 'pond5',
+  'envato elements': 'envato-elements',
+  'epidemic sound': 'epidemic-sound',
+  epidemicsound: 'epidemic-sound',
 }
 
 function escapeForWordBoundaryMatch(value: string): string {
