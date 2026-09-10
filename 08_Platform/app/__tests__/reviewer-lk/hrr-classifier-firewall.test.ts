@@ -91,29 +91,29 @@ describe('the authority gate is deterministic (no model, no async I/O)', () => {
   })
 })
 
-describe('Phase 11 — the topic-button path invokes NO classifier / model call', () => {
-  const TOPIC_PATH_FILES = [
+describe('the reviewer-channel governed selection modules invoke NO classifier / model call (topic path = 0 model calls)', () => {
+  const SELECTION_FILES = [
     'lib/reviewer-lk/select-reviewer-claims.ts',
     'lib/reviewer-lk/project-reviewer-claims.ts',
     'lib/reviewer-lk/repository.ts',
     'lib/reviewer-lk/submission-facts.ts',
     'lib/reviewer-lk/eligibility.ts',
     'lib/reviewer-lk/topic-labels.ts',
-    'app/api/admin/submissions/[id]/reviewer-lk/route.ts',
   ]
 
-  test.each(TOPIC_PATH_FILES)('%s imports no HRR classifier / authority gate / Anthropic adapter', (rel) => {
+  test.each(SELECTION_FILES)('%s imports no HRR classifier / authority gate / Anthropic adapter', (rel) => {
     const imp = importLines(rel)
     expect(imp).not.toMatch(/interpret-research-intent|hrr-authority-gate|hrr-intent/i)
     expect(imp).not.toMatch(/@anthropic-ai\/sdk|anthropic-structured-output-retry|anthropic-decision|anthropic-extractor/)
   })
 
-  test('the reviewer-lk route still exports GET only and reads no request body (topic path unchanged)', () => {
-    const src = codeOnly('app/api/admin/submissions/[id]/reviewer-lk/route.ts')
-    expect(src).toMatch(/export async function GET\b/)
-    expect(src).not.toMatch(/export async function (POST|PUT|PATCH|DELETE)\b/)
-    expect(src).not.toMatch(/request\.(json|formData|text)\(\)/)
-    expect(src).toMatch(/searchParams\.get\(\s*['"]topic['"]\s*\)/)
+  test('CAH-4G.7: the research route constructs the classifier ONLY for mode "question" — never for a topic pick', () => {
+    const src = codeOnly('app/api/admin/submissions/[id]/reviewer-lk/research/route.ts')
+    // topic branch uses the deterministic synthesizer
+    expect(src).toMatch(/topicSelectionGateResult\s*\(\s*parsed\.topic\s*\)/)
+    // the classifier construction is guarded inside the else (mode === 'question') branch
+    expect(src).toMatch(/parsed\.mode === 'topic_pick'[\s\S]*?else[\s\S]*?createAnthropicResearchIntentInterpreter\s*\(/)
+    // behavioural proof lives in hrr-research-route.test.ts ("topic_pick → 0 classifier calls")
   })
 })
 
@@ -131,11 +131,10 @@ describe('the classifier + authority gate themselves add no route / migration / 
     expect(migs.filter((m) => /hrr|cah.?4g|research_audit|research_mode/i.test(m))).toEqual([])
   })
 
-  test('CAH-4G.6: the ONE UI-reachable HRR route is the converged POST research route; the classifier is called only there', () => {
+  test('CAH-4G.7: the ONE HRR route is the converged POST research route (legacy CAH-4E GET topic route retired)', () => {
     const routeDir = path.join(APP_ROOT, 'app/api/admin/submissions/[id]/reviewer-lk')
     const entries = fs.existsSync(routeDir) ? fs.readdirSync(routeDir).sort() : []
-    // legacy topic GET retained (not UI-reachable) + the converged research POST
-    expect(entries).toEqual(['research', 'route.ts'])
+    expect(entries).toEqual(['research']) // only the research/ subdir — no legacy route.ts
     const research = codeOnly('app/api/admin/submissions/[id]/reviewer-lk/research/route.ts')
     expect(research).toMatch(/createAnthropicResearchIntentInterpreter\s*\(/)
     expect(research).toMatch(/hrrAuthorityGate\s*\(/)

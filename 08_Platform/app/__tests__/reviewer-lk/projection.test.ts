@@ -1,11 +1,17 @@
 /**
- * CAH-4E §9 — reviewer projection: thin, neutral, required framing, no prose,
- * no bounded interpretation, no consultative composition.
+ * CAH-4E §9 / CAH-4G.7 — reviewer LK framing + selector projection fidelity.
+ *
+ * `projectReviewerLkResult` / `ReviewerLkLookupResult` were retired with the
+ * legacy `GET .../reviewer-lk` route (CAH-4G.7). What survives and is still
+ * required:
+ *   - the fixed reviewer-facing authority framing (`REVIEWER_LK_FRAMING`);
+ *   - `selectReviewerClaims` carrying the FULL governed record a reviewer needs
+ *     (still the input to `runHrrResearch`).
  */
 
 import * as fs from 'fs'
 import * as path from 'path'
-import { REVIEWER_LK_FRAMING, projectReviewerLkResult } from '@/lib/reviewer-lk/project-reviewer-claims'
+import { REVIEWER_LK_FRAMING } from '@/lib/reviewer-lk/project-reviewer-claims'
 import { selectReviewerClaims } from '@/lib/reviewer-lk/select-reviewer-claims'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 
@@ -21,30 +27,17 @@ test('the framing states: governed knowledge / for research / not a conclusion /
   expect(all).toMatch(/not a negative finding/)
 })
 
-test('the projection module imports no bounded-interpretation / consultative / retrieve module', () => {
+test('the framing module imports no bounded-interpretation / consultative / retrieve module (and no longer any projection helper)', () => {
   const src = fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'reviewer-lk', 'project-reviewer-claims.ts'), 'utf-8')
   const imports = (src.match(/^\s*import[\s\S]*?from\s+['"][^'"]+['"]/gm) ?? []).join('\n')
   expect(imports).not.toMatch(/bounded-interpretation|consultative|retrieval-engine\/retrieve|projection-layer/)
+  // it is now a leaf constant module — no imports at all
+  expect(imports).toBe('')
+  const code = src.replace(/\/\*[\s\S]*?\*\//g, '')
+  expect(code).not.toMatch(/projectReviewerLkResult|ReviewerLkLookupResult/)
 })
 
-test('projectReviewerLkResult is a pure assembly — same claims/withheld, plus topic + context, ok:true', () => {
-  const selection = selectReviewerClaims({
-    topic: 'copyright_ownership',
-    topicClaims: TOPIC_CLAIMS_FIXTURE,
-    assetProviderIds: [],
-    activeToolIds: [],
-    applicabilityFacts: NO_FACTS,
-  })
-  const ctx = { resolved_tool_ids: [], resolved_asset_provider_ids: [], jurisdiction_included: [] }
-  const result = projectReviewerLkResult({ topic: 'copyright_ownership', retrievalContext: ctx, selection })
-  expect(result.ok).toBe(true)
-  expect(result.topic).toBe('copyright_ownership')
-  expect(result.claims).toBe(selection.claims)
-  expect(result.withheld).toBe(selection.withheld)
-  expect(result.retrieval_context).toBe(ctx)
-})
-
-test('a projected claim carries the FULL governed record a reviewer needs (more than RetrievalResult)', () => {
+test('a selected claim carries the FULL governed record a reviewer needs (more than RetrievalResult) — the input to runHrrResearch', () => {
   const selection = selectReviewerClaims({
     topic: 'copyright_ownership', topicClaims: TOPIC_CLAIMS_FIXTURE, assetProviderIds: [], activeToolIds: [], applicabilityFacts: NO_FACTS,
   })

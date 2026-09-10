@@ -28,8 +28,7 @@ const codeOnly = (rel: string) =>
 const importLines = (rel: string) => (read(rel).match(/^\s*import[\s\S]*?from\s+['"][^'"]+['"]/gm) ?? []).join('\n')
 
 const REVIEWER_LK_LIB = listFiles('lib/reviewer-lk', ['.ts'])
-const REVIEWER_LK_ROUTE = 'app/api/admin/submissions/[id]/reviewer-lk/route.ts'
-const HRR_RESEARCH_ROUTE = 'app/api/admin/submissions/[id]/reviewer-lk/research/route.ts' // CAH-4G.6
+const HRR_RESEARCH_ROUTE = 'app/api/admin/submissions/[id]/reviewer-lk/research/route.ts' // CAH-4G.6 — the one HRR route
 const HRR_ANSWER_VIEW = 'app/admin/submissions/[id]/review/HrrResearchAnswerView.tsx' // CAH-4G.6
 const REVIEWER_LK_PANEL = 'app/admin/submissions/[id]/review/ReviewerLkPanel.tsx'
 const REVIEWER_LK_LOOKUP = 'app/admin/submissions/[id]/review/ReviewerLkLookup.tsx'
@@ -38,7 +37,6 @@ const REVIEWER_RESOURCES_INSPECTOR = 'app/admin/submissions/[id]/review/Reviewer
 const REVIEWER_SHELL = 'app/admin/submissions/[id]/review/ReviewerShell.tsx' // CAH-4F.1 (generic layout owner)
 const REVIEWER_LK_ALL = [
   ...REVIEWER_LK_LIB,
-  REVIEWER_LK_ROUTE,
   HRR_RESEARCH_ROUTE,
   HRR_ANSWER_VIEW,
   REVIEWER_LK_PANEL,
@@ -134,15 +132,12 @@ describe('C — reviewer-lk performs no assessment-state write; exactly one audi
   })
 })
 
-describe('D — the research routes are research + append-only audit only', () => {
-  const legacy = codeOnly(REVIEWER_LK_ROUTE)
+describe('D — the ONE HRR research route is research + append-only audit only', () => {
   const research = codeOnly(HRR_RESEARCH_ROUTE)
 
-  test('legacy topic route (CAH-4E) is unchanged — still GET only, still no request body', () => {
-    expect(legacy).toMatch(/export async function GET\b/)
-    expect(legacy).not.toMatch(/export async function (POST|PUT|PATCH|DELETE)\b/)
-    expect(legacy).not.toMatch(/request\.(json|formData|text)\(\)/)
-    expect(legacy).toMatch(/searchParams\.get\(\s*['"]topic['"]\s*\)/)
+  test('CAH-4G.7: the legacy GET topic route is retired — the reviewer-lk route dir holds only the research POST', () => {
+    const dir = path.join(APP_ROOT, 'app/api/admin/submissions/[id]/reviewer-lk')
+    expect(fs.readdirSync(dir).sort()).toEqual(['research'])
   })
 
   test('CAH-4G.6 research route: POST only — no GET/PUT/PATCH/DELETE', () => {

@@ -1,30 +1,19 @@
 /**
- * Reviewer Living Knowledge projection (CAH-4E §9).
+ * Reviewer Living Knowledge authority framing (CAH-4E §9).
  *
- * Thin and neutral. It assembles the selector output + retrieval context into
- * the final `ReviewerLkLookupResult` and attaches the fixed framing. It does
- * NOT:
- *   - call `buildBoundedInterpretation` or any Consultative Composition
- *     module;
- *   - generate prose;
- *   - rank, weight, or prioritise claims;
- *   - interpret applicability status;
- *   - re-derive anything the selector already computed.
+ * NOTE (CAH-4G.7): the `projectReviewerLkResult` projection helper and the
+ * `ReviewerLkLookupResult` response type were retired together with the legacy
+ * `GET /api/admin/submissions/[id]/reviewer-lk?topic=` route — the converged
+ * HRR path (`POST .../reviewer-lk/research` → `HrrResearchAnswer`) replaced both.
+ * This module now carries only the fixed reviewer-facing framing constant,
+ * which `ReviewerLkPanel` still renders above the research surface.
  *
- * The governed statements it carries are the verbatim
- * `TopicClaim.crc_candidate_statement` values the selector passed through —
- * the plainest GOVERNED wording of each proposition, not a CRC educational
- * answer and not reviewer-specific prose.
+ * Fixed, generic, not domain-specific. It states: governed institutional
+ * knowledge · for the reviewer's research · not an assessment conclusion ·
+ * completes no Commercial Assurance control · applicability is informational,
+ * not reviewer judgment.
  */
 
-import type { GoalCategory } from '@/types/interview-engine'
-import type { SelectReviewerClaimsOutput } from './select-reviewer-claims'
-import type { ReviewerLkLookupResult, ReviewerLkRetrievalContext } from './types'
-
-/**
- * The reviewer-facing authority framing for this surface. Fixed, generic, not
- * domain-specific. Rendered wherever reviewer-LK results appear.
- */
 export const REVIEWER_LK_FRAMING = {
   heading: 'Governed SI8 Living Knowledge — reviewer research',
   body:
@@ -35,17 +24,3 @@ export const REVIEWER_LK_FRAMING = {
     'Applicability is evaluated deterministically against the submission’s own facts. ' +
     '“Not established” means a required fact is unresolved or does not match — it is not a negative finding.',
 } as const
-
-export function projectReviewerLkResult(args: {
-  topic: GoalCategory
-  retrievalContext: ReviewerLkRetrievalContext
-  selection: SelectReviewerClaimsOutput
-}): Extract<ReviewerLkLookupResult, { ok: true }> {
-  return {
-    ok: true,
-    topic: args.topic,
-    retrieval_context: args.retrievalContext,
-    claims: args.selection.claims,
-    withheld: args.selection.withheld,
-  }
-}

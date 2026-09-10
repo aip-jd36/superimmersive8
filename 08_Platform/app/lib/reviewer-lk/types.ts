@@ -256,16 +256,9 @@ export interface ReviewerLkWithheld {
     | 'publication_scope_missing_or_unknown'
 }
 
-export type ReviewerLkLookupResult =
-  | {
-      ok: true
-      topic: GoalCategory
-      /** The submission facts actually used to narrow retrieval — echoed back for the reviewer's transparency, NEVER written anywhere. */
-      retrieval_context: ReviewerLkRetrievalContext
-      claims: ReviewerLkClaim[]
-      withheld: ReviewerLkWithheld[]
-    }
-  | { ok: false; code: 'unknown_topic' | 'no_such_submission' | 'lookup_failed' }
+// `ReviewerLkLookupResult` (the CAH-4E topic-lookup response) was retired in
+// CAH-4G.7 with the legacy `GET .../reviewer-lk` route. The converged HRR path
+// returns `HrrResearchAnswer` (`lib/hrr/types.ts`) for both entry modes.
 
 /**
  * The bounded, authoritative submission facts used as retrieval context.
