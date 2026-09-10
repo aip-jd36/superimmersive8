@@ -185,6 +185,8 @@ The design direction below is split into **product requirement** (must hold), **
 
 ## 11. Explicit future boundary — CAH-4G (Conversational Reviewer Living Knowledge)
 
+> **Now formalized (2026-09-10):** CAH-4G is specified in `PRD_CAH_4G_HRR.md` + `HRR_GRI_TECHNICAL_DESIGN.md` + `ADR-002-governed-research-interface.md`, status `DESIGNED / NOT IMPLEMENTED`. It is now named **HRR** (Human Reviewer Research) as the product capability, built on **GRI** (Governed Research Interface). This section is retained as historical context and as the constraints CAH-4F was designed against; the new PRD is authoritative.
+
 CAH-4G is a **later, separate** milestone. This PRD records the *intent* only, so CAH-4F is designed not to preclude it and not to accidentally implement it.
 
 **Intended concept:**
