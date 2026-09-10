@@ -106,52 +106,64 @@ describe('ONE shared renderer — HrrResearchAnswerView', () => {
 
 // ── consultative hierarchy = render order ─────────────────────────────────
 
-describe('render order = the Slice-4 consultative hierarchy', () => {
+describe('render order = the consultative hierarchy (CAH-4G.7 — meaning first)', () => {
   const view = codeOnly(ANSWER_VIEW)
-  const iOrientation = view.indexOf('topic.orientation')
-  const iBiBlocks = view.indexOf('topic.bi_summary_blocks')
-  const iConsiderations = view.indexOf('topic.governed_considerations')
-  const iApplicability = view.indexOf('topic.applicability')
-  const iUnresolved = view.indexOf('topic.unresolved_inputs')
-  const iDoesNotApply = view.indexOf('topic.does_not_apply')
-  const iBoundary = view.indexOf('topic.boundary_note')
-  const iProvenance = view.indexOf('topic.governed_claim_refs')
+  // anchor on the *first render-site* reference, not a hoisted const
+  const iOrientation = view.indexOf('{topic.orientation}')
+  const iUnresolved = view.indexOf('topic.unresolved_inputs.length > 0')
+  const iBiBlocks = view.indexOf('topic.bi_summary_blocks.map')
+  const iSettled = view.indexOf('a={topic.applicability}')
+  const iDoesNotApply = view.indexOf('topic.does_not_apply.length > 0')
+  const iBoundary = view.indexOf('{topic.boundary_note}')
+  const iProvenance = view.indexOf('topic.governed_claim_refs.length > 0')
 
   test('all hierarchy anchors are present', () => {
-    for (const i of [iOrientation, iBiBlocks, iConsiderations, iApplicability, iUnresolved, iDoesNotApply, iBoundary, iProvenance]) {
+    for (const [name, i] of Object.entries({ iOrientation, iUnresolved, iBiBlocks, iSettled, iDoesNotApply, iBoundary, iProvenance })) {
+      expect([name, i]).toEqual([name, expect.any(Number)])
       expect(i).toBeGreaterThan(-1)
     }
   })
 
-  test('orientation is first; unresolved comes BEFORE the research boundary and BEFORE provenance', () => {
-    expect(iOrientation).toBeLessThan(iBiBlocks)
-    expect(iBiBlocks).toBeLessThan(iConsiderations)
-    expect(iConsiderations).toBeLessThan(iApplicability)
-    expect(iApplicability).toBeLessThan(iUnresolved)
-    expect(iUnresolved).toBeLessThan(iBoundary)
-    expect(iBoundary).toBeLessThan(iProvenance)
+  test('the MATERIAL ISSUE leads: orientation → what remains unresolved → the governed reading → settled applicability → does-not-apply → boundary → provenance', () => {
+    expect(iOrientation).toBeLessThan(iUnresolved)
+    expect(iUnresolved).toBeLessThan(iBiBlocks)      // unresolved requirements come BEFORE the (denser) governed reading
+    expect(iBiBlocks).toBeLessThan(iSettled)
+    expect(iSettled).toBeLessThan(iDoesNotApply)
+    expect(iDoesNotApply).toBeLessThan(iBoundary)
+    expect(iBoundary).toBeLessThan(iProvenance)       // provenance is LAST, and progressive
   })
 
   test('orientation is rendered prominently (font-medium / not inside a <details>)', () => {
-    // the orientation paragraph carries a prominence class and is not wrapped in <details>
-    const orientationBlock = view.slice(iOrientation - 200, iOrientation + 80)
+    const orientationBlock = view.slice(iOrientation - 220, iOrientation + 40)
     expect(orientationBlock).toMatch(/font-medium/)
     expect(orientationBlock).not.toMatch(/<summary/)
   })
 
-  test('provenance & withheld sit behind a <details> disclosure (progressive)', () => {
-    const provBlock = view.slice(iProvenance - 300)
+  test('provenance & withheld sit behind a SINGLE <details> disclosure (progressive), placed last', () => {
+    const provBlock = view.slice(iProvenance - 200)
     expect(provBlock).toMatch(/<details/)
     expect(provBlock).toMatch(/Provenance &amp; governance details|Provenance & governance details/)
     expect(provBlock).toMatch(/topic\.withheld/)
+    // exactly one per-topic provenance disclosure (the old "Governed claims — applicability & provenance" second disclosure is gone)
+    expect((view.match(/Provenance &amp; governance details/g) ?? []).length).toBe(1)
+    expect(view).not.toMatch(/Governed claims &mdash; applicability|Governed claims — applicability/)
+  })
+
+  test('each fact stated once: an unresolved requirement is NOT re-listed per governed claim; a governed record ref appears once', () => {
+    // the per-claim applicability_outcomes re-list is gone from the provenance block
+    // (the rollup + "What remains unresolved" carry it)
+    const provStart = view.indexOf('Provenance &amp; governance details')
+    const provBlock = view.slice(provStart)
+    expect(provBlock).not.toMatch(/applicability_outcomes\.map/)
+    expect(provBlock).not.toMatch(/unresolved_project_dependencies\.join/)
+    // the "Not yet established" rollup group is dropped — unresolved lives only in "What remains unresolved"
+    expect(view).not.toMatch(/Not yet established/)
   })
 
   test('empty sections are omitted — every optional block is guarded by a length check', () => {
-    expect(view).toMatch(/topic\.governed_considerations\.length > 0 &&/)
     expect(view).toMatch(/topic\.unresolved_inputs\.length > 0 &&/)
     expect(view).toMatch(/topic\.does_not_apply\.length > 0 &&/)
     expect(view).toMatch(/answer\.topics\.map/)
-    // authority note + scope note are conditional too
     expect(view).toMatch(/answer\.assessment_authority_note &&/)
     expect(view).toMatch(/answer\.scope_note &&/)
   })
