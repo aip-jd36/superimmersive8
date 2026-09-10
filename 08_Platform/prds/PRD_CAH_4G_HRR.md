@@ -1,6 +1,6 @@
 # PRD — CAH-4G: HRR V1 / Governed Research Interface (GRI)
 
-**Status:** `ARCHITECTURE FROZEN / IMPLEMENTATION IN PROGRESS` — **Slice 1 (BI input adaptation boundary) COMPLETE (CAH-4G.1)**; **Slice 2 (structured research-intent classifier + authority gate) COMPLETE (CAH-4G.2)**; **Slice 3 (converged governed-research pipeline) COMPLETE after the 3A semantic correction (CAH-4G.3 + CAH-4G.3A, 2026-09-10)**; **Slice 4 (deterministic consultative composition / projection) COMPLETE (CAH-4G.4, 2026-09-10)**; **Slice 5 (audit enrichment + audit-before-content) COMPLETE (CAH-4G.5, 2026-09-10 — Option A, NO migration)**; Slices 6–7 not started. This document + `08_Platform/implementation/HRR_GRI_TECHNICAL_DESIGN.md` (with its §U Architecture Freeze + §V Implementation Contract) + `08_Platform/app/lib/reviewer-lk/ADR-002-governed-research-interface.md` are the implementation contract. **`runAuditedHrrResearch()` composes the deterministic pipeline with the required append-only `lk_research` audit, fail-closed. No HRR route, no HRR free-form UI exists yet; the answer is NOT surfaced in Reviewer Resources yet. CRC behavior is unchanged.** The one genuinely-open item is a bounded implementation experiment (`HRR_GRI_TECHNICAL_DESIGN.md §T-4` — free-form multi-topic maximum, shipped at 2).
+**Status:** `ARCHITECTURE FROZEN / IMPLEMENTATION IN PROGRESS` — **Slices 1–5 COMPLETE** (CAH-4G.1 / .2 / .3+3A / .4 / .5, 2026-09-10); **Slice 6 (Reviewer Resources HRR interface + audited runtime integration) COMPLETE (CAH-4G.6, 2026-09-10)**; Slice 7 not started. This document + `08_Platform/implementation/HRR_GRI_TECHNICAL_DESIGN.md` (§S/§T/§U/§V) + `08_Platform/app/lib/reviewer-lk/ADR-002-governed-research-interface.md` are the implementation contract. **The Living Knowledge tab is the converged Governed Research Interface: topic shortcuts + Ask HRR both POST `.../reviewer-lk/research` → `runAuditedHrrResearch()` (audit-before-content, fail-closed) → one `HrrResearchAnswer` rendered by one `<HrrResearchAnswerView>`. Single-turn; the raw question is never persisted. The legacy `GET .../reviewer-lk` topic route is retained non-UI pending a Slice-7 retirement. CRC behavior is unchanged. Not deployed — PM review of the rendered interface pending.** The one genuinely-open item is a bounded implementation experiment (`§T-4` — free-form multi-topic maximum, shipped at 2).
 
 **CAH-4G.1 (2026-09-10):** Slice 1 shipped `BiIntent` + the `userGoalsToBiIntents` adapter with a proven byte-for-byte CRC regression (`BiResult` deferred). The **mixed-intent authority contract is corrected** (see §5, §8, §19-6): a prohibited assessment-decision intent never converts a permitted research clause to a determination request.
 
@@ -9,6 +9,8 @@
 **CAH-4G.3 (2026-09-10):** Slice 3 shipped the converged pipeline in a new `lib/hrr/` directory: `runHrrResearch()` (PURE — one downstream path for both the topic chip and the free-form classifier+gate), the `researchIntentToBiIntent` / `reviewerClaimToBiResult` adapters, and the `HrrResearchResult` structured internal result. `BiResult` (the minimal result contract) was introduced with **zero CRC call-site / test churn** (`RetrievalResult` structurally satisfies it) and proven byte-for-byte behavior-neutral. Reviewer selection / eligibility / applicability are byte-unchanged; `not_met` claims are excluded from BI and returned separately; the raw reviewer question never enters selection/applicability/BI. No composition, no route, no UI, no audit.
 
 **CAH-4G.3A (2026-09-10) — Slice 3 semantic correction (CONDITIONAL PASS resolved):** deterministic applicability is now a **generic upstream semantic input to Bounded Interpretation** (`BiResult.applicability`, optional — CRC byte-unchanged). A governed proposition with an `unresolved` applicability requirement is interpreted as **`relevant_applicability_unresolved`, never `directly_relevant`** — the proposition stays visible + verbatim, the unresolved requirement is preserved for composition, and it is never a pass/fail or a negative finding. This makes the implementation match §13 / §18-9 of this PRD. No new BI status; no composition workaround; no CRC change. Zero new test failures; `tsc` clean; `next build` exit 0.
+
+**CAH-4G.6 (2026-09-10):** Slice 6 shipped the first user-facing HRR integration — the Living Knowledge tab is now the converged GRI. **One route:** `POST /api/admin/submissions/[id]/reviewer-lk/research` accepts `{ mode: 'topic_pick', topic }` or `{ mode: 'question', question }` (strict input contract — a `messages[]` / `history` / `session_id` shape is rejected 400; length-bounded at `HRR_QUESTION_MAX_LENGTH`); both modes call `runAuditedHrrResearch()`. **One renderer:** `<HrrResearchAnswerView>` presents `HrrResearchAnswer` for both entry modes — no topic/question split, no topic-specific branch, orientation prominent, unresolved before provenance, provenance progressive, the assessment-authority boundary a visually distinct callout, empty sections omitted, neutral styling (no pass/fail, no ✓/✗), no `crc_eligible` / `crc_publication_scope`, no promotion/apply/accept control. **UI:** topic chips run the research on click (0 model calls); a labelled `<textarea>` "Ask HRR" (1 classify-only call, fails closed); one current response replaces the previous; a monotonic request counter prevents a slow earlier response from overwriting a newer one; the raw question lives only in component state + the server-round-tripped `question_text` echo — never `localStorage` / URL / logs; reloading the page clears it. The CAH-4F.1/4F.2 shell, inspector, tab separation, and responsive behaviour are unchanged. The legacy `GET .../reviewer-lk` route is retained (no UI consumer) pending a Slice-7 retirement. Zero new test failures (baseline `c39c85d`); `tsc` clean; `next build` exit 0. **Not deployed.**
 
 **CAH-4G.5 (2026-09-10):** Slice 5 shipped the HRR audit boundary as **Option A — the existing CAH-4E `lk_research` access contract reused UNCHANGED, NO migration** (a source-backed deviation from the frozen Option B; see `HRR_GRI_TECHNICAL_DESIGN.md §K`). An HRR audit record means only *"an authorized Human Reviewer used the governed Living Knowledge research capability, in this authorized submission context, at this time"* — it is an ACCESS fact, never assessment evidence / a finding / a control result / evidence sufficiency / an outcome / a sign-off, and never implies the reviewer relied on any proposition. `projectHrrAuditRecord` (PURE) produces the sanitized record `{ actorUserId, submissionId }` — or `null` when no governed research occurred (authority-only / unsupported → **no event**; multi-topic / mixed → **one row per reviewer action**). `runAuditedHrrResearch` (the one impure boundary) runs the pure pipeline in memory, then `await recordReviewerLkAccess(...)` — **on failure it throws `HrrAuditNotRecordedError` and returns nothing governed** (no proposition, no applicability, no BI summary, no `does_not_apply` content, no claim reference, no answer). The raw reviewer question is never persisted and never hashed. Applicability / BI status / claim ids are deliberately not persisted (stable `claim_id`s already identify governed material; the audit must survive a copy change). No route, no UI. Zero new test failures (baseline `2421749`); `tsc` clean; `next build` exit 0.
 
@@ -142,25 +144,35 @@ Each HRR question — topic or free-form — is **independently interpreted agai
 
 **CAH-4G does not change CRC.** No CRC topic selectors, no CRC topic shortcuts, no CRC input redesign, no change to CRC pilot questioning, no CRC composition change "for symmetry with HRR". **CRC stays free-form during the pilot** deliberately, so SI8 can observe what customers naturally ask, how they phrase it, which concepts confuse them, which goals recur, and what pathways emerge without UI prompting — *before* designing evidence-based CRC topic shortcuts. Introducing CRC selectors now would bias that dataset. The design doc may *document* GRI convergence opportunities between CRC and HRR; CAH-4G *implementation scope* must not include any CRC change.
 
-## 14. Expected UX
+## 14. UX — as-built (CAH-4G.6)
 
-Inside the existing Reviewer Resources inspector → **Living Knowledge** tab (no shell/page-tree change — `REVIEWER_RESOURCES_ARCHITECTURE.md §15`):
+Inside the existing Reviewer Resources inspector → **Living Knowledge** tab (no shell/page-tree change; CAH-4F.1/4F.2 layout intact):
 
 ```
-Human Reviewer Research
+Research SI8's governed Living Knowledge for this submission — pick a topic
+shortcut, or ask a research question.
 
-┌───────────────────────────────────────────────┐
-│ Ask a research question about this submission… │   ← single-line free-form input (expands as typed)
-└───────────────────────────────────────────────┘   [ Ask ]
+TOPIC SHORTCUTS
+[ Commercial use ] [ Copyright ownership ] [ Copyrightability ]
+[ Likeness ] [ Third-party source rights ]                       ← a click runs the research (0 model calls)
 
-Common research topics:
-[ Commercial use ] [ Copyright ownership ] [ Copyrightability ] [ Likeness ] [ Third-party source rights ]
-────────────────────────────────────────────────
-[ answer renders here ]
+ASK HRR
+┌───────────────────────────────────────────────────────────┐
+│ What would you like to research about this submission?     │   ← <textarea>, real <label>, Cmd/Ctrl+Enter
+└───────────────────────────────────────────────────────────┘
+[ Ask ]   HRR searches and interprets governed SI8 Living Knowledge for this
+          submission. Not legal advice; not a commercial-clearance determination.
+────────────────────────────────────────────────────────────
+GOVERNED RESEARCH RESPONSE   (one <HrrResearchAnswerView>; one current response)
+   [assessment-authority boundary callout — only when a decision was asked]
+   per topic:  orientation → what governed knowledge says → for this submission →
+               what remains unresolved → does not apply → research boundary →
+               [Governed claims — applicability & provenance ▸]  [Provenance & governance ▸]
+   [reviewer-responsibility footer]
 ```
 
-- Topic shortcuts and free-form input are **peers** into the same research capability. Exact hierarchy / order / copy is formalized in the design doc; the input must **not** look like an unconstrained chatbot.
-- **Answer priority order** (challenge in the design doc if evidence supports better): (1) direct bounded response to the research question; (2) what governed knowledge says (verbatim propositions); (3) applicability to the current submission; (4) unresolved requirements / limitations; (5) what HRR cannot establish; (6) provenance / governed records.
+- Topic shortcuts and Ask HRR are **peers** into ONE research capability, rendered through ONE answer component. The input does **not** look like a chatbot — no avatar, no "AI is typing", no chat bubbles, no model branding.
+- **Answer priority order (as-built):** (1) orientation / direct bounded response; (2) what governed knowledge says (verbatim BI reading + verbatim propositions behind a disclosure); (3) applicability to the current submission; (4) what remains unresolved (before provenance); (5) does-not-apply (neutral); (6) research / authority boundary; (7) provenance / governed records (progressive disclosure). Empty sections are omitted.
 - Assessment-authority questions open with the §5 authority note, then either the explicit-topic research (if named) or the offered research paths.
 - Explicit-question results render before any (future) discovered-relevance results, under a clear label.
 - No "copy to evidence" / "apply" / "accept" / "summarize" / "approve" affordance anywhere.
