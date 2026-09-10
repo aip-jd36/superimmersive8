@@ -181,6 +181,7 @@ Removed from the reviewer view entirely: raw `crc_publication_scope` prose and `
 - Audit-write failure ⇒ `503`, zero content. Selection/read error ⇒ `500`/`404`/`400`, **no audit row**.
 - Row carries `actor_user_id` + `submission_id` only. `association_id` / `crc_session_id` NULL (LK research is not tied to a CRC association — the `_transcript_is_scoped` CHECK is guarded on `access_kind='transcript'`).
 - Append-only: no FK, no `updated_at`, no policy — RLS on, service-role only.
+- **CAH-4G.5 (HRR):** the free-form HRR research path **reuses this exact contract UNCHANGED** — same `access_kind='lk_research'`, same `{actor, submission}` row, same audit-before-content + fail-closed discipline, via the PURE `lib/hrr/project-hrr-audit-record.ts` + the impure `lib/hrr-audit/run-audited-hrr-research.ts`. No third `access_kind`, **no migration**. Authority-only ("should I approve this?") + unsupported → **no row** (no governed knowledge accessed). Multi-topic / mixed free-form → **one row per reviewer action**. Raw question never persisted. See `HRR_GRI_TECHNICAL_DESIGN.md §K`.
 
 ## 7. CAH-4F.1 implementation surface (as-built)
 
@@ -303,7 +304,7 @@ Production visual UAT of CAH-4F.1 (~1440px) confirmed the shell architecture but
 CAH-4G would add a reviewer free-form question box that flows `question → governed retrieval → bounded interpretation → reviewer-oriented composition`. For CAH-4F.1 this means:
 - the inspector is already a tabbed container — a "question" affordance would live inside the Living Knowledge tab (or a third mode) without a shell or page-tree change;
 - `project-reviewer-claims.ts` stays a thin pass-through — CAH-4G's "reviewer-oriented composition" is a new, separate composition step;
-- the audit `access_kind` vocabulary may need a third value (e.g. `lk_question`) — a CAH-4G migration decision, out of CAH-4F.1 scope.
+- ~~the audit `access_kind` vocabulary may need a third value (e.g. `lk_question`)~~ — **RESOLVED CAH-4G.5:** no third value, no migration. Free-form HRR reuses `access_kind='lk_research'` unchanged (§6).
 
 ## 16. CAH-4F.1 UAT script (manual — no browser harness in this repo)
 
