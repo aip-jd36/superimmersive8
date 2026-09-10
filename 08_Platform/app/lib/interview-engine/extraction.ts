@@ -620,6 +620,34 @@ const KNOWN_TOOLS: Record<string, CanonicalToolId> = {
   // exact-match-only design must never do.
   'stability ai': 'stability-ai',
   'stable diffusion': 'stability-ai',
+  // 'veo' / 'google veo' / 'veo 3' / 'veo 3.1' added 2026-09-10 (Google Veo
+  // Runtime Identity / Reachability Remediation): 'google-veo' became a
+  // CRC-active governed Matrix authority the same date (CPR_023, CRC
+  // eligibility APPROVE WITH BOUNDED WORDING) but had zero KNOWN_TOOLS
+  // coverage -- the same reachability gap already hit and fixed for
+  // 'kling ai', "luma ai's dream machine", 'pika', 'synthesia',
+  // 'midjourney', 'gemini api', 'gemini consumer app', and 'stability ai'
+  // above. Added PROSPECTIVELY, mirroring 'suno'/'stability ai''s own
+  // precedent -- no production UAT has yet observed a failing expression;
+  // all four are the identity's own ordinary, evidenced current names
+  // (Google's own current product/model branding, per this row's own FGR
+  // research and PLATFORM-RIGHTS-MATRIX.md's "Google Veo" section header).
+  // Narrow, single-word-boundary/exact aliases only -- no fuzzy/substring
+  // matching. Deliberately does NOT include 'veo 2' (an older model
+  // generation with no current evidence of ongoing relevance -- would be
+  // scope creep, not an evidenced current name). Deliberately does NOT
+  // include 'flow' or 'google flow': "Flow" names Google's containing
+  // multi-tool creative-studio surface ("AI Creative Studio for Video,
+  // Images & Custom Tools" per Google's own product page), not a 1:1
+  // synonym for the Veo model specifically -- no evidence establishes a
+  // safe one-to-one canonicalization from bare "Flow" to this identity,
+  // so it fails closed and stays unresolved, per this table's existing
+  // evidence-only, no-speculative-inference discipline (the same
+  // discipline that already deliberately excludes bare "Gemini").
+  veo: 'google-veo',
+  'google veo': 'google-veo',
+  'veo 3': 'google-veo',
+  'veo 3.1': 'google-veo',
 }
 
 /**

@@ -217,9 +217,18 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
   },
   {
     identifier: 'google-veo',
-    last_verified: '2026-08-05',
+    last_verified: '2026-09-10',
     claims: [
-      { claim_id: 'google-veo', crc_eligible: 'Pending', crc_publication_scope: null, crc_candidate_statement: null, topic: 'commercial_use', applicability_requirements: [] },
+      {
+        claim_id: 'google-veo',
+        crc_eligible: 'Yes',
+        crc_publication_scope:
+          "CRC may state that Google's Terms of Service (effective July 30, 2026) and Generative AI Prohibited Use Policy (last modified December 17, 2024) -- the documents governing the Google Flow consumer surface, including Veo-family video generation -- do not state whether generated output may be used commercially, containing neither an affirmative commercial-use grant nor an explicit commercial-use restriction. CRC may also state the ownership disclaimer (Google does not claim ownership of content generated through Flow) and that no commercial-use-rights distinction was found between the free and Google AI Pro/Ultra consumer subscription tiers, each kept distinct from the commercial-use question. This publication scope does not extend to Vertex AI, Google Cloud Platform, Gemini API, Gemini Consumer App, Google Workspace, or any other separately-governed Google product or surface -- Google Cloud Platform's own Pre-GA Offerings / Generative AI Preview Products commercial-use restriction must not be treated as applying to the Flow consumer surface. CRC must not state or imply that Flow/Veo output may or may not be used commercially, must not treat the ownership disclaimer as establishing commercial-use permission, must not state or imply that a paid Google AI Pro/Ultra subscription creates commercial-use rights or that the free tier prohibits commercial use, must not state or infer the user's own subscription tier, must not state or imply that Google has commercially cleared Veo/Flow output or that the user's project is commercially or legally ready, and must not encode a recommendation to seek further review as part of this claim. A human-reviewed Commercial Assurance Assessment remains the higher-assurance path for resolving a specific project's own Flow/Veo commercial-readiness status.",
+        crc_candidate_statement:
+          "Google's Terms of Service and Generative AI Prohibited Use Policy -- the documents governing the Google Flow consumer surface, where Veo-family video is generated -- do not state whether the output you generate there may be used commercially: they contain neither an affirmative commercial-use grant nor an explicit commercial-use restriction. Separately, Google states it does not claim ownership of the content you generate through Flow. No commercial-use-rights distinction between the free tier and the Google AI Pro/Ultra subscription tiers was found in these documents.",
+        topic: 'commercial_use',
+        applicability_requirements: [],
+      },
     ],
   },
   {

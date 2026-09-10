@@ -47,9 +47,14 @@ describe('retrieve — required Phase 7 cases', () => {
   })
 
   test('3: resolved tool + Pending claim -> no_eligible_claims', () => {
-    const out = retrieve(handoff({ tools: [tool('google-veo')] }), MATRIX_FIXTURE)
+    // google-veo was this test's example until 2026-09-10 (Google Veo CPR
+    // Concurrence / CRC Activation), when it became crc_eligible: 'Yes' --
+    // swapped to adobe-firefly, which remains genuinely Pending, to keep
+    // testing this same generic Retrieval behavior without relying on a
+    // specific claim's own current eligibility state.
+    const out = retrieve(handoff({ tools: [tool('adobe-firefly')] }), MATRIX_FIXTURE)
     expect(out.results).toEqual([])
-    expect(out.diagnostics).toEqual([{ identifier: 'google-veo', reason: 'no_eligible_claims' }])
+    expect(out.diagnostics).toEqual([{ identifier: 'adobe-firefly', reason: 'no_eligible_claims' }])
   })
 
   test('4: resolved tool + single-claim No row -> no_eligible_claims, never fabricated', () => {
