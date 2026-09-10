@@ -2,7 +2,8 @@
 
 /**
  * Human Reviewer Research (HRR) — the converged Governed Research Interface
- * surface inside the "Living Knowledge" tab (CAH-4E → CAH-4F → CAH-4G.6).
+ * surface inside the "Living Knowledge" tab (CAH-4E → CAH-4F → CAH-4G.6 →
+ * CAH-4G.10).
  *
  * TWO entry modes into ONE governed research capability:
  *   - TOPIC SHORTCUTS  — deterministic; clicking a chip runs the research
@@ -16,40 +17,47 @@
  * returns one `HrrResearchAnswer`. Both render through the ONE
  * `<HrrResearchAnswerView>` — there is no topic-vs-question presentation split.
  *
- * NOTHING is fetched on mount, on inspector open, or on tab switch. Each
- * question/topic is interpreted independently from its own text — there is NO
- * conversation memory: a previous answer is never sent into the next request.
- * The raw question lives only in this component's state for the current
- * request + the attributed "You asked:" echo; it is never persisted to storage
- * or a URL. Reloading the page shows the empty surface again.
+ * CAH-4G.10 Slice A — VISIBLE CONVERSATIONAL THREAD:
+ * successive research actions are now APPEND-ONLY. Asking a second question no
+ * longer replaces the first interaction — the prior reviewer turns and HRR
+ * answers stay visible (`hrr-thread.ts`). This is a VISIBLE thread, NOT a
+ * CONTEXTUAL one: every free-form question is still classified independently
+ * from its own text alone. NO prior turn is sent to the classifier /
+ * retrieval / applicability / BI / composition / audit. There is NO
+ * `prior_context` in the request body — the POST body is byte-for-byte the
+ * same `{ mode, topic }` / `{ mode, question }` it is in production today.
  *
- * One current research response. A new topic/question replaces it — this is the
- * honest representation of the stateless V1 architecture.
+ * NOTHING is fetched on mount, on inspector open, or on tab switch. The thread
+ * lives only in this component's `useReducer` state — no storage, no URL, no
+ * server round-trip. A page reload shows the empty surface again; an inspector
+ * tab-switch / close-reopen keeps the thread (component stays mounted).
  *
  * No editable control that touches assessment state. No "copy to evidence" /
  * "apply" / "accept" / "summarize".
  */
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useReducer, useRef, useState } from 'react'
 import type { GoalCategory } from '@/types/interview-engine'
 import { reviewerTopicLabel } from '@/lib/reviewer-lk/topic-labels'
 import { HRR_QUESTION_MAX_LENGTH } from '@/lib/reviewer-lk/types'
 import type { HrrResearchAnswer } from '@/lib/hrr/types'
 import { HrrResearchAnswerView } from './HrrResearchAnswerView'
+import {
+  EMPTY_HRR_THREAD,
+  hrrThreadReducer,
+  questionReviewerTurn,
+  topicReviewerTurn,
+  type HrrThreadTurn,
+} from './hrr-thread'
 
 type ResearchPayload =
   | { mode: 'topic_pick'; topic: GoalCategory }
   | { mode: 'question'; question: string }
 
-type State =
-  | { kind: 'idle' }
-  | { kind: 'loading' }
-  | { kind: 'answer'; answer: HrrResearchAnswer }
-  | { kind: 'error'; message: string }
-
 const ACCENT = '#233f66'
 const INK_SOFT = '#4a4a52'
 const MUTED = '#83837e'
+const LINE = '#e0ddd2'
 
 /** Reviewer-readable topic chips. `data-topic` carries the canonical enum; a click runs the research. */
 function TopicShortcuts({
@@ -95,6 +103,41 @@ function TopicShortcuts({
   )
 }
 
+/** One turn in the append-only research thread. Reviewer actions and HRR responses render distinctly but soberly — no chat bubbles, no avatars. */
+function ThreadTurn({
+  turn,
+  onResearchTopic,
+}: {
+  turn: HrrThreadTurn
+  onResearchTopic: (topic: GoalCategory) => void
+}) {
+  if (turn.role === 'reviewer') {
+    return (
+      <div className="text-xs" style={{ color: INK_SOFT }}>
+        <span className="mr-1.5 font-semibold uppercase tracking-wide" style={{ color: MUTED }}>
+          {turn.entryMode === 'topic' ? 'Research:' : 'You asked:'}
+        </span>
+        {turn.entryMode === 'topic' ? turn.label : turn.question}
+      </div>
+    )
+  }
+  if (turn.status === 'pending') {
+    return (
+      <p className="text-sm" role="status" aria-live="polite" style={{ color: MUTED }}>
+        Performing governed research…
+      </p>
+    )
+  }
+  if (turn.status === 'error') {
+    return (
+      <p className="text-sm" role="alert" style={{ color: '#9a3b2f' }}>
+        {turn.message}
+      </p>
+    )
+  }
+  return <HrrResearchAnswerView answer={turn.answer} onResearchTopic={onResearchTopic} />
+}
+
 export function ReviewerLkLookup({
   submissionId,
   topics,
@@ -102,17 +145,34 @@ export function ReviewerLkLookup({
   submissionId: string
   topics: readonly GoalCategory[]
 }) {
-  const [state, setState] = useState<State>({ kind: 'idle' })
+  const [thread, dispatch] = useReducer(hrrThreadReducer, EMPTY_HRR_THREAD)
   const [question, setQuestion] = useState('')
-  // Monotonic request sequence — a slower earlier response can never overwrite a
-  // newer one (rapid topic clicks / question submits).
+  // Monotonic request id — a slower earlier response can never resolve a turn
+  // after a newer request or a "Clear conversation" (checked here AND in the
+  // reducer, which also enforces one request in flight at a time).
   const seqRef = useRef(0)
+
+  const loading = thread.inFlight !== 0
 
   const research = useCallback(
     async (payload: ResearchPayload) => {
       const mine = ++seqRef.current
-      setState({ kind: 'loading' })
+      dispatch({
+        type: 'begin',
+        seq: mine,
+        reviewer:
+          payload.mode === 'topic_pick'
+            ? topicReviewerTurn(mine, payload.topic, reviewerTopicLabel(payload.topic))
+            : questionReviewerTurn(mine, payload.question),
+      })
+      const settle = (result: { answer: HrrResearchAnswer } | { message: string }) => {
+        if (mine !== seqRef.current) return
+        dispatch({ type: 'settle', seq: mine, result })
+      }
       try {
+        // The request body is EXACTLY `{ mode, topic }` / `{ mode, question }`.
+        // No transcript, no messages[], no prior_context, no prior answer — a
+        // second/third question sends ONLY that question (CAH-4G.10 Slice A).
         const res = await fetch(
           `/api/admin/submissions/${submissionId}/reviewer-lk/research`,
           {
@@ -124,52 +184,61 @@ export function ReviewerLkLookup({
         )
         if (mine !== seqRef.current) return
         if (res.status === 503) {
-          setState({ kind: 'error', message: 'Living Knowledge research unavailable — access could not be recorded. Try again.' })
+          settle({ message: 'Living Knowledge research unavailable — access could not be recorded. Try again.' })
           return
         }
         if (res.status === 400) {
           const data = (await res.json().catch(() => null)) as { error?: string } | null
-          setState({ kind: 'error', message: data?.error ?? 'Check your research question and try again.' })
+          settle({ message: data?.error ?? 'Check your research question and try again.' })
           return
         }
         if (!res.ok) {
-          setState({ kind: 'error', message: 'Living Knowledge research is unavailable right now. Try again.' })
+          settle({ message: 'Living Knowledge research is unavailable right now. Try again.' })
           return
         }
         const answer = (await res.json()) as HrrResearchAnswer
-        if (mine !== seqRef.current) return
-        setState({ kind: 'answer', answer })
+        settle({ answer })
       } catch {
-        if (mine !== seqRef.current) return
-        setState({ kind: 'error', message: 'Could not reach Living Knowledge research. Check your connection and try again.' })
+        settle({ message: 'Could not reach Living Knowledge research. Check your connection and try again.' })
       }
     },
     [submissionId],
   )
 
+  // One research request in flight at a time — topic clicks and question
+  // submits are both gated on `thread.inFlight === 0` (and the controls are
+  // `disabled` while loading).
+  const runTopic = useCallback(
+    (topic: GoalCategory) => {
+      if (thread.inFlight === 0) research({ mode: 'topic_pick', topic })
+    },
+    [thread.inFlight, research],
+  )
+
   const submitQuestion = useCallback(() => {
     const q = question.trim()
-    if (q.length === 0 || state.kind === 'loading') return
+    if (q.length === 0 || thread.inFlight !== 0) return
+    setQuestion('') // the question is now recorded as a visible reviewer turn
     research({ mode: 'question', question: q })
-  }, [question, state.kind, research])
+  }, [question, thread.inFlight, research])
 
-  const loading = state.kind === 'loading'
+  const clearConversation = useCallback(() => {
+    seqRef.current++ // invalidate any in-flight response
+    setQuestion('')
+    dispatch({ type: 'clear' })
+  }, [])
 
   return (
     <div className="text-sm">
       <p className="text-xs leading-relaxed" style={{ color: INK_SOFT }}>
-        Research SI8&rsquo;s governed Living Knowledge for this submission — pick a topic shortcut, or ask a research question.
+        Research SI8&rsquo;s governed Living Knowledge for this submission — pick a topic shortcut, or ask a research question. Each question is researched independently.
       </p>
 
       {/* ── Topic shortcuts ─────────────────────────────────────────────── */}
       <p className="mt-3 text-xs font-semibold uppercase tracking-wide" style={{ color: MUTED }}>
         Topic shortcuts
       </p>
-      <TopicShortcuts
-        topics={topics}
-        disabled={loading}
-        onResearch={(topic) => { if (!loading) research({ mode: 'topic_pick', topic }) }}
-      />
+      <TopicShortcuts topics={topics} disabled={loading} onResearch={runTopic} />
 
       {/* ── Ask HRR ─────────────────────────────────────────────────────── */}
       <div className="mt-4">
@@ -205,41 +274,30 @@ export function ReviewerLkLookup({
         </div>
       </div>
 
-      {/* ── Loading ─────────────────────────────────────────────────────── */}
-      {loading && (
-        <p className="mt-3 text-sm" role="status" aria-live="polite" style={{ color: MUTED }}>
-          Performing governed research…
-        </p>
-      )}
-
-      {/* ── Error ───────────────────────────────────────────────────────── */}
-      {state.kind === 'error' && (
-        <p className="mt-3 text-sm" role="alert" style={{ color: '#9a3b2f' }}>
-          {state.message}
-        </p>
-      )}
-
-      {/* ── One current research response ───────────────────────────────── */}
-      {state.kind === 'answer' && (
-        <div className="mt-4">
-          <div className="mb-2 flex items-center justify-between text-xs" style={{ color: MUTED }}>
-            <span className="font-semibold uppercase tracking-wide">Governed research response</span>
+      {/* ── Append-only research conversation ───────────────────────────── */}
+      {thread.turns.length > 0 && (
+        <div className="mt-4 border-t pt-3" style={{ borderColor: LINE }}>
+          <div className="mb-1 flex items-center justify-between text-xs" style={{ color: MUTED }}>
+            <span className="font-semibold uppercase tracking-wide">Research conversation</span>
             <button
               type="button"
-              onClick={() => { seqRef.current++; setState({ kind: 'idle' }); setQuestion('') }}
+              onClick={clearConversation}
               className="font-medium hover:underline"
               style={{ color: ACCENT }}
             >
-              Clear
+              Clear conversation
             </button>
           </div>
-          <p className="mb-2 text-[11px] italic" style={{ color: MUTED }}>
-            Reference only — not assessment evidence.
+          <p className="mb-3 text-[11px] italic" style={{ color: MUTED }}>
+            Reference only — not assessment evidence. Each question above was researched on its own.
           </p>
-          <HrrResearchAnswerView
-            answer={state.answer}
-            onResearchTopic={(topic) => { if (!loading) research({ mode: 'topic_pick', topic }) }}
-          />
+          <ol className="space-y-3">
+            {thread.turns.map((turn) => (
+              <li key={turn.id}>
+                <ThreadTurn turn={turn} onResearchTopic={runTopic} />
+              </li>
+            ))}
+          </ol>
         </div>
       )}
     </div>

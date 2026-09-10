@@ -32,6 +32,7 @@ const HRR_RESEARCH_ROUTE = 'app/api/admin/submissions/[id]/reviewer-lk/research/
 const HRR_ANSWER_VIEW = 'app/admin/submissions/[id]/review/HrrResearchAnswerView.tsx' // CAH-4G.6
 const REVIEWER_LK_PANEL = 'app/admin/submissions/[id]/review/ReviewerLkPanel.tsx'
 const REVIEWER_LK_LOOKUP = 'app/admin/submissions/[id]/review/ReviewerLkLookup.tsx'
+const HRR_THREAD = 'app/admin/submissions/[id]/review/hrr-thread.ts' // CAH-4G.10 — client thread reducer (presentation state only)
 const REVIEWER_LK_RESOURCES = 'app/admin/submissions/[id]/review/ReviewerResources.tsx' // CAH-4F container (server slot provider)
 const REVIEWER_RESOURCES_INSPECTOR = 'app/admin/submissions/[id]/review/ReviewerResourcesInspector.tsx' // CAH-4F.1 (client tab host)
 const REVIEWER_SHELL = 'app/admin/submissions/[id]/review/ReviewerShell.tsx' // CAH-4F.1 (generic layout owner)
@@ -41,6 +42,7 @@ const REVIEWER_LK_ALL = [
   HRR_ANSWER_VIEW,
   REVIEWER_LK_PANEL,
   REVIEWER_LK_LOOKUP,
+  HRR_THREAD,
   REVIEWER_LK_RESOURCES,
   REVIEWER_RESOURCES_INSPECTOR,
   REVIEWER_SHELL,

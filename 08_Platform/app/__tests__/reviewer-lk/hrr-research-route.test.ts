@@ -137,6 +137,43 @@ test('question → exactly 1 classifier call, audited answer, verbatim question 
   expect(answer.topics[0].intent_origin).toBe('interpreted_question')
 })
 
+// ── CAH-4G.10 Slice A — the visible thread never becomes reasoning context ─
+// The client-side conversational thread (hrr-thread.ts / ReviewerLkLookup) is
+// append-only UI state. The route contract is UNCHANGED: a second/third
+// free-form question is still classified from ONLY that question's own text.
+
+test('a free-form body carrying an extra conversational field is still classified from ONLY the question (extra field ignored, never sent to the model)', async () => {
+  const res = await POST(
+    req({
+      mode: 'question',
+      question: 'what about copyrightability?',
+      // not part of the Slice-A contract — must not reach the classifier
+      prior_context: { prior_resolved_topics: [{ topic: 'copyright_ownership', scope: 'informational', bi_status: 'directly_relevant' }] },
+      previous_answer: 'earlier HRR answer prose',
+    } as any),
+    ctx,
+  )
+  expect(res.status).toBe(200)
+  expect(classifier).toHaveBeenCalledTimes(1)
+  expect(classifier).toHaveBeenCalledWith('what about copyrightability?')
+  expect(classifier.mock.calls[0]).toHaveLength(1)
+  expect(classifier).not.toHaveBeenCalledWith(expect.stringMatching(/prior_context|prior_resolved_topics|earlier HRR answer/))
+})
+
+test('successive independent questions each send ONLY their own text — no server-side accumulation', async () => {
+  await POST(req({ mode: 'question', question: 'first: copyright ownership?' }), ctx)
+  await POST(req({ mode: 'question', question: 'second: copyrightability?' }), ctx)
+  await POST(req({ mode: 'question', question: 'third: commercial use?' }), ctx)
+  expect(classifier).toHaveBeenCalledTimes(3)
+  expect(classifier).toHaveBeenNthCalledWith(1, 'first: copyright ownership?')
+  expect(classifier).toHaveBeenNthCalledWith(2, 'second: copyrightability?')
+  expect(classifier).toHaveBeenNthCalledWith(3, 'third: commercial use?')
+  for (const call of classifier.mock.calls) {
+    expect(call).toHaveLength(1)
+    expect(typeof call[0]).toBe('string')
+  }
+})
+
 // ── audit-before-content ─────────────────────────────────────────────────
 
 test('ORDERING: submission read → audit write → 200 (audit before the answer body)', async () => {
