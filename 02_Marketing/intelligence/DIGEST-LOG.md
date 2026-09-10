@@ -9,6 +9,52 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of September 10, 2026
+*Run: 2026-09-10 · 18 high · 13 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [Paxton's new AI ad puts words in a fake Talarico's mouth. Watch it here](https://www.usatoday.com/story/news/state/texas/2026/09/09/ken-paxton-talarico-artificial-intelligence-ad/91672483007/) | USA Today | Wed, 09 Sep 2026 | ☐ |
+| 9 | post+update | [NY Disclosure Law Serves as Bellwether Amid AI Content Explosion](https://news.bloomberglaw.com/litigation/ny-disclosure-law-serves-as-bellwether-amid-ai-content-explosion) | Bloomberg Law News | Wed, 09 Sep 2026 | ☐ |
+| 9 | post+update | [Who Owns an AI Celebrity? Taylor Swift, Matthew McConaughey, Erling Haaland, and the Limits of Trademark and Publicity Rights](https://www.jdsupra.com/legalnews/who-owns-an-ai-celebrity-taylor-swift-3546718/) | JD Supra | Tue, 08 Sep 2026 | ☐ |
+| 9 | post+update | [OpenAI, New York Times case tees up key test of AI training under copyright law](https://www.reuters.com/legal/litigation/openai-new-york-times-case-tees-up-key-test-ai-training-under-copyright-law-2026-09-08/) | Reuters | Tue, 08 Sep 2026 | ☐ |
+| 9 | post+update | [EU AI Act Article 50: New Guidance Expands Enterprise AI Compliance Obligations](https://www.law.com/corpcounsel/2026/09/08/eu-ai-act-article-50-new-guidance-expands-enterprise-ai-compliance-obligations/) | Law.com | Tue, 08 Sep 2026 | ☐ |
+| 9 | post+update | [PUBLICITY RIGHTS NEWS—A multi-jurisdiction class action lawsuit is filed against Suno over publicity rights](https://www.vitallaw.com/news/publicity-rights-news-a-multi-jurisdiction-class-action-lawsuit-is-filed-against-suno-over-publicity-rights/ipm0173b931e376d043639b9341ce79864927) | VitalLaw.com | Tue, 08 Sep 2026 | ☐ |
+| 9 | post+update | [AI Training & Copyright Part 3: Recent Case Law by the Regional Court of Munich (“GEMA vs. Suno”)](https://www.freshfields.com/en/our-thinking/blogs/technology-quotient/ai-training-copyright-part-3-recent-case-law-by-the-regional-court-of-munich-102o0dn) | Freshfields | Mon, 07 Sep 2026 | ☐ |
+| 9 | post+update | [The Insurance Industry’s Retreat from AI Threatens to Slow Innovation and Adoption](https://www.csis.org/analysis/insurance-industrys-retreat-ai-threatens-slow-innovation-and-adoption) | CSIS \| Center for Strategic and International Studies | Fri, 04 Sep 2026 | ☐ |
+| 9 | post+update | [Mary J. Blige Caught in Another Ad Mess as Suno Pulls Unauthorized Campaign](https://www.complex.com/music/a/bernadette-giacomazzo/suno-pulls-mary-j-blige-ai-ad) | Complex | Fri, 04 Sep 2026 | ☐ |
+| 8 | update | [Blee, a Cardumen Capital portfolio company, raises $27 million to bring its AI-powered marketing compliance solution to large enterprises](https://capital-riesgo.es/en/articles/blee-a-cardumen-capital-portfolio-company-raises-27-million-to-bring-its-ai-powered-marketing-compliance-solution-to-large-enterprises/) | Capital Riesgo | Wed, 09 Sep 2026 | ☐ |
+| 8 | post+update | [Blee raises $20m to govern AI marketing content](https://fintech.global/2026/09/08/blee-raises-20m-to-govern-ai-marketing-content/) | FinTech Global | Tue, 08 Sep 2026 | ☐ |
+| 8 | update | [Blee Lands $27 Million to Help Enterprises Govern AI-Generated Marketing Content](https://www.citybiz.co/article/899439/blee-lands-27-million-to-help-enterprises-govern-ai-generated-marketing-content/) | citybiz | Tue, 08 Sep 2026 | ☐ |
+| 8 | update | [Blee Raises $27 Million to Introduce AI Content Governance to the Enterprise](https://www.businesswire.com/news/home/20260908307044/en/Blee-Raises-%2427-Million-to-Introduce-AI-Content-Governance-to-the-Enterprise) | Business Wire | Tue, 08 Sep 2026 | ☐ |
+| 8 | post+update | [The EU AI Compliance Stack Is Crystallizing Into Three Layers – and None of Them Talk to Each Other](https://forkast.news/the-eu-ai-compliance-stack-is-crystallizing-into-three-layers-and-none-of-them-talk-to-each-other/) | forkast.news | Sun, 06 Sep 2026 | ☐ |
+| 8 | post+update | [In AI-made Likud ad, Mamdani, Khamenei and Erdogan prematurely celebrate Netanyahu’s defeat](https://www.timesofisrael.com/in-ai-made-likud-ad-mamdani-khamenei-and-erdogan-celebrate-netanyahus-expected-defeat/) | The Times of Israel | Sat, 05 Sep 2026 | ☐ |
+| 8 | post+update | [Dutch trade body maps 4 AI disclosure triggers for ad agencies](https://ppc.land/dutch-trade-body-maps-4-ai-disclosure-triggers-for-ad-agencies/) | PPC Land | Sat, 05 Sep 2026 | ☐ |
+| 8 | post+update | [Legal Issues of "Dual Permission" for AI Agents Operating on Behalf of Clients: Comprehensive Analysis](https://eu.36kr.com/en/p/3967489473533569) | eu.36kr.com | Fri, 04 Sep 2026 | ☐ |
+| 7 | update | [Generative AI Copyright: Law & Litigation](https://aimultiple.com/generative-ai-copyright) | aimultiple.com | Thu, 03 Sep 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [SPECTRA Launches First Certification Framework for Insurable AI, Reinforcing the Critical Role of MSPs in Helping Businesses Deploy and Manage AI Safely](https://www.businesswire.com/news/home/20260909032763/en/SPECTRA-Launches-First-Certification-Framework-for-Insurable-AI-Reinforcing-the-Critical-Role-of-MSPs-in-Helping-Businesses-Deploy-and-Manage-AI-Safely) | Business Wire | Wed, 09 Sep 2026 | ☐ |
+| 6 | monitor | [EU Forces Every Chatbot To Admit It's AI Starting Now Jason Kenney (IV7LbCKmcA)](https://mshale.com/0795e231/f1217093VAo_BDMsGiwpGDQ) | Mshale | Wed, 09 Sep 2026 | ☐ |
+| 6 | monitor | [Artificial Intelligence in Italy: Compliance Roadmap after the Digital Omnibus](https://www.roedl.com/en/insights/artificial-intelligence-italy/) | RÖDL | Mon, 07 Sep 2026 | ☐ |
+| 6 | monitor | [Who's suing AI and who's signing latest: Seattle Times, Newsday, Editorial Perfil and Wikihow sue OpenAI](https://pressgazette.co.uk/platforms/news-publisher-ai-deals-lawsuits-openai-google/) | Press Gazette | Mon, 07 Sep 2026 | ☐ |
+| 6 | monitor | [AI Agents Push Cyber Insurers to Rethink Policy Language](https://beinsure.com/ai-agents-push-cyber-insurers/) | Beinsure | Thu, 03 Sep 2026 | ☐ |
+| 6 | monitor | [US govt sides with OpenAI in New York Times copyright lawsuit](https://www.freemalaysiatoday.com/category/world/2026/09/03/us-govt-sides-with-openai-in-new-york-times-copyright-lawsuit) | Free Malaysia Today | Thu, 03 Sep 2026 | ☐ |
+| 5 | monitor | [Celerity Risk launches personal brand coverage](https://coverager.com/celerity-risk-launches-personal-brand-coverage/) | Coverager | Wed, 09 Sep 2026 | ☐ |
+| 5 | monitor | [AI Training Data Licensing Lawsuit Statistics 2026](https://www.aboutchromebooks.com/ai-training-data-licensing-lawsuit-statistics/) | About Chromebooks | Mon, 07 Sep 2026 | ☐ |
+| 5 | monitor | [AI-Generated Content and Copyright Law: What We Know](https://builtin.com/artificial-intelligence/ai-copyright) | Built In | Thu, 03 Sep 2026 | ☐ |
+| 4 | monitor | [AI and GDPR Monthly Update](https://www.dentons.com/en/insights/newsletters/2026/september/9/eu-ai-and-gdpr-key-trends-and-insights/ai-and-gdpr-monthly-update-august/ai-and-gdpr-monthly-update-eng) | Dentons | Wed, 09 Sep 2026 | ☐ |
+| 4 | monitor | [B2B Agents Will Need Their Own Contracting Playbooks](https://abovethelaw.com/2026/09/b2b-agents-will-need-their-own-contracting-playbooks/) | Above the Law | Tue, 08 Sep 2026 | ☐ |
+| 4 | monitor | [Adobe brings AI video and sound effect generation to Premiere timeline, plus beta audio source separation](https://finance.biggo.com/news/bf78bc0a-0a1f-421e-a48a-55cc13f549dd) | finance.biggo.com | Tue, 08 Sep 2026 | ☐ |
+| 4 | monitor | [Best AI Filmmaking Tools in 2026: A Complete Workflow Guide](https://programminginsider.com/best-ai-filmmaking-tools-in-2026-a-complete-workflow-guide/) | Programming Insider | Fri, 04 Sep 2026 | ☐ |
+
+---
+
 ## Week of September 07, 2026
 *Run: 2026-09-07 · 15 high · 16 monitor · lookback 7 days*
 
