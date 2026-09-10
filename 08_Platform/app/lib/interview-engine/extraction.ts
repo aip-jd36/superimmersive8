@@ -648,6 +648,37 @@ const KNOWN_TOOLS: Record<string, CanonicalToolId> = {
   'google veo': 'google-veo',
   'veo 3': 'google-veo',
   'veo 3.1': 'google-veo',
+  // 'adobe firefly' / 'firefly' added 2026-09-10 (Adobe Firefly Runtime
+  // Identity / Reachability Remediation): 'adobe-firefly' became a
+  // CRC-active governed Matrix authority the same date (CPR_024, CRC
+  // eligibility APPROVE WITH BOUNDED WORDING) but had zero KNOWN_TOOLS
+  // coverage -- the same reachability gap already hit and fixed for
+  // 'kling ai', "luma ai's dream machine", 'pika', 'synthesia',
+  // 'midjourney', 'gemini api', 'gemini consumer app', 'stability ai', and
+  // 'veo'/'google veo' above. Added PROSPECTIVELY, mirroring 'veo'/'suno'/
+  // 'stability ai''s own precedent -- both are the identity's own
+  // ordinary, evidenced current names (the full product name and the
+  // product's own short name, per this row's own Matrix section header,
+  // "Adobe Firefly"). Narrow, exact, single-word/two-word aliases only --
+  // no fuzzy/substring matching. Deliberately does NOT include 'creative
+  // cloud', 'adobe', 'firefly video', 'firefly image', 'firefly boards',
+  // 'firefly services', 'adobe express', 'photoshop', or 'premiere':
+  // those are either a broader containing company/suite name, unrelated
+  // Adobe products, or specific Eligible Firefly Features/Surfaces whose
+  // exact current list this claim's own governed proposition explicitly
+  // leaves unconfirmed (Firefly Product Description, 403) -- the same
+  // containing-surface-is-not-a-1:1-alias discipline already applied to
+  // "Flow" for Google Veo. Adding any of them would resolve a broader or
+  // materially different scope to this narrowly-governed identity, which
+  // this table's exact-match-only design must never do. Checked for
+  // collision against the separate KNOWN_ASSET_PROVIDERS table (a
+  // different candidate kind, `asset_provider_mention` vs `tool_mention`,
+  // parsed independently): 'adobe stock'/'adobestock' are registered
+  // there as a distinct AssetProviderId ('adobe-stock'), not a
+  // CanonicalToolId -- no runtime collision is possible between the two
+  // tables, and bare "Adobe" alone is registered in neither.
+  'adobe firefly': 'adobe-firefly',
+  firefly: 'adobe-firefly',
 }
 
 /**
