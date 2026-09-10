@@ -1,23 +1,34 @@
 /**
- * Music Scenario A -- Artlist A-3 real-publication retrieval tests
- * (2026-08-27, A-3 CRC Publication Recording task).
+ * Music Scenario A -- Artlist real-publication retrieval tests.
  *
- * CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1 (A-3) is the first
- * Music-domain claim to receive a real TOPIC_CLAIMS_FIXTURE entry and
- * CRC Publication approval (CRC Approver: JD (PM), 2026-08-27), following
- * CPR_007's own "runtime prerequisite only" disposition and its
- * subsequent clearance via the Artlist A-3 Synthetic Runtime Canary and
- * the Artlist Provider Registration Canary Integration Review.
+ * Originally written 2026-08-27 (A-3 CRC Publication Recording task) when
+ * CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1 (A-3) was the first,
+ * and only, Music-domain claim with a real TOPIC_CLAIMS_FIXTURE entry.
+ *
+ * UPDATED 2026-09-10 (Artlist Remaining Claims activation, CPR_021): five
+ * more Artlist claims were published in one bounded mechanical activation
+ * package following individually-attributed PM concurrence -- Social vs
+ * Pro, Client License Retention, Standalone Exploitation, Pro Royalties,
+ * Enterprise Threshold. Six Artlist claims are now real, reachable
+ * TOPIC_CLAIMS_FIXTURE entries; this file's own former "one-claim
+ * isolation" premise is retitled "six-claim reachability" below and its
+ * assertions updated accordingly -- not weakened, the same rigor applied
+ * to a now-larger correctly-reachable set. `CLAIM-MUSIC-ARTLIST-AI-
+ * TRAINING-EXCLUSION-001-v1` ("A-5") was independently reviewed in the
+ * same CPR_021 package and explicitly WITHHELD (Publication Policy
+ * Principle 6 volatility concern) -- it has no fixture entry and remains
+ * unreachable, proven below alongside the six reachable claims.
  *
  * These tests exercise the REAL, unmodified pipeline against the REAL,
  * committed TOPIC_CLAIMS_FIXTURE -- no synthetic clone, mirroring exactly
- * what the now-deleted scratch canary files proved on a throwaway basis,
- * now made permanent because A-3 is permanently, really reachable.
+ * what the throwaway scratch canary (`CPR_021`'s own activation gate)
+ * proved before these fixture entries were added.
  *
- * The other 9 Music Scenario A claims remain WITHHELD/PENDING and have no
- * fixture entry -- this file proves they stay completely unreachable
- * alongside A-3's own correct reachability, per this task's own one-claim
- * isolation requirement.
+ * The three remaining Music Scenario A claims (Envato Sync, Envato
+ * Cancellation, Epidemic Tier Advertising) remain unreachable for a
+ * DIFFERENT, larger reason -- their own provider identities
+ * (`envato-elements`/`epidemic-sound`) are still not registered
+ * `AssetProviderId`s -- unaffected by, and unchanged by, this activation.
  */
 
 import { lookupTopicClaims } from '@/lib/retrieval-engine/lookup-topic-claims'
@@ -32,6 +43,19 @@ import { buildRetrievalHandoff } from '@/lib/interview-engine/handoff'
 import type { AssetProviderMention, RetrievalHandoff, StructuredUnderstanding, UserGoal } from '@/types/interview-engine'
 
 const A3_ID = 'CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1'
+// The five claims activated 2026-09-10 alongside A-3 (CPR_021) -- together
+// with A3_ID, the complete set of currently-reachable Artlist claims.
+const ARTLIST_REMAINING_ACTIVATED_IDS = [
+  'CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1',
+  'CLAIM-MUSIC-ARTLIST-CLIENT-LICENSE-RETENTION-001-v1',
+  'CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1',
+  'CLAIM-MUSIC-ARTLIST-PRO-ROYALTIES-001-v1',
+  'CLAIM-MUSIC-ARTLIST-ENTERPRISE-THRESHOLD-001-v1',
+]
+const ALL_REACHABLE_ARTLIST_IDS = [A3_ID, ...ARTLIST_REMAINING_ACTIVATED_IDS].sort()
+// Explicitly WITHHELD (CPR_021, Publication Policy Principle 6) -- no
+// fixture entry, must never appear in a reachable-claims result.
+const WITHHELD_A5_ID = 'CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1'
 
 function handoff(overrides: Partial<RetrievalHandoff> = {}): RetrievalHandoff {
   return {
@@ -87,37 +111,51 @@ const UNKNOWN_FACTS = { jurisdiction: { included: [], excluded: [] }, toolMentio
 
 // ── One-claim isolation (§7) ────────────────────────────────────────────────
 
-describe('one-claim isolation: A-3 is the only reachable Music claim', () => {
-  test('exactly one CLAIM-MUSIC-* entry exists in TOPIC_CLAIMS_FIXTURE, and it is A-3', () => {
+describe('six-claim reachability: A-3 + the five 2026-09-10 activated siblings are the only reachable Music claims', () => {
+  test('exactly six CLAIM-MUSIC-* entries exist in TOPIC_CLAIMS_FIXTURE, and they are exactly A-3 + its five activated siblings', () => {
     const musicClaims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id.startsWith('CLAIM-MUSIC'))
-    expect(musicClaims.map((c) => c.claim_id)).toEqual([A3_ID])
+    expect(musicClaims.map((c) => c.claim_id).sort()).toEqual(ALL_REACHABLE_ARTLIST_IDS)
   })
 
-  test('A-3 is Lifecycle: Adopted and crc_eligible: Yes; no other Music claim is', () => {
-    const a3 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === A3_ID)!
-    expect(a3.lifecycle).toBe('Adopted')
-    expect(a3.crc_eligible).toBe('Yes')
+  test('all six are Lifecycle: Adopted and crc_eligible: Yes; A-5 (withheld) has no entry at all', () => {
+    for (const id of ALL_REACHABLE_ARTLIST_IDS) {
+      const claim = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === id)!
+      expect(claim.lifecycle).toBe('Adopted')
+      expect(claim.crc_eligible).toBe('Yes')
+    }
+    expect(TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === WITHHELD_A5_ID)).toBeUndefined()
   })
 
-  test('Artlist + relevant goal retrieves ONLY A-3 among Music claims -- no other Music claim becomes reachable merely because A-3 is now published', () => {
+  test('Artlist + relevant goal retrieves exactly the six reachable Music claims -- no Envato/Epidemic claim and no withheld A-5 becomes reachable merely because these six are now published', () => {
     const result = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, ['artlist'])
     const musicIds = result.matches.map((m) => m.claim_id).filter((id) => id.startsWith('CLAIM-MUSIC'))
-    expect(musicIds).toEqual([A3_ID])
+    expect(musicIds.sort()).toEqual(ALL_REACHABLE_ARTLIST_IDS)
+    expect(musicIds).not.toContain(WITHHELD_A5_ID)
+  })
+
+  test('each of the six independently preserves its own governed dependency/hedge shape when co-firing -- no cross-claim bleed or flattening', () => {
+    const result = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, ['artlist'])
+    for (const match of result.matches) {
+      if (!match.claim_id.startsWith('CLAIM-MUSIC')) continue
+      const original = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === match.claim_id)!
+      expect(match.unresolved_project_dependencies).toEqual(original.unresolved_project_dependencies)
+    }
   })
 })
 
 // ── §8: real explicit-goal pipeline ─────────────────────────────────────────
 
 describe('explicit-goal retrieval, real committed fixture', () => {
-  test('POSITIVE: Artlist + third_party_source_rights goal -> A-3 returned, correct provider_scope, correct candidate statement, no stock claim, no other Music claim', () => {
+  test('POSITIVE: Artlist + third_party_source_rights goal -> A-3 + its five activated siblings returned, A-3 own provider_scope/candidate statement correct, no stock claim, no withheld A-5', () => {
     const result = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, ['artlist'])
     const ids = result.matches.map((m) => m.claim_id)
-    expect(ids).toEqual([A3_ID])
-    const a3 = result.matches[0]
+    expect(ids.sort()).toEqual(ALL_REACHABLE_ARTLIST_IDS)
+    const a3 = result.matches.find((m) => m.claim_id === A3_ID)!
     expect(a3.provider_scope).toEqual(['artlist'])
     expect(a3.crc_candidate_statement).toBe("Artlist's stated policy is that already-completed, already-published work stays licensed after cancellation, while new use does not.")
     expect(ids).not.toContain('CLAIM-STOCK-EDITORIAL-001-v2')
     expect(ids).not.toContain('CLAIM-STOCK-EDITORIAL-002-v2')
+    expect(ids).not.toContain(WITHHELD_A5_ID)
   })
 
   test.each([
@@ -142,7 +180,7 @@ describe('explicit-goal retrieval, real committed fixture', () => {
 // ── §9/§10: real Track A / Track C ──────────────────────────────────────────
 
 describe('Track A discovered relevance, real committed fixture', () => {
-  test('canonical Artlist mention + commercial_use goal -> third_party_source_rights discovered -> A-3 only (Music); stock v2 claims absent; no fabricated UserGoal', () => {
+  test('canonical Artlist mention + commercial_use goal -> third_party_source_rights discovered -> A-3 + its five activated siblings (Music); stock v2 claims absent; no fabricated UserGoal', () => {
     const su = suWithProvider('artlist', 'commercial_use')
     const occurrences = deriveDiscoveredTopicOccurrences(su, TOPIC_CLAIMS_FIXTURE)
     expect(occurrences.length).toBeGreaterThan(0)
@@ -152,9 +190,10 @@ describe('Track A discovered relevance, real committed fixture', () => {
     const rHandoff = buildRetrievalHandoff(su)
     const { results } = retrieve(rHandoff, MATRIX_FIXTURE, su.user_goals, TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, [], rHandoff.asset_providers, occurrences)
     const ids = results.map((r) => r.claim_id)
-    expect(ids.filter((id) => id.startsWith('CLAIM-MUSIC'))).toEqual([A3_ID])
+    expect(ids.filter((id) => id.startsWith('CLAIM-MUSIC')).sort()).toEqual(ALL_REACHABLE_ARTLIST_IDS)
     expect(ids).not.toContain('CLAIM-STOCK-EDITORIAL-001-v2')
     expect(ids).not.toContain('CLAIM-STOCK-EDITORIAL-002-v2')
+    expect(ids).not.toContain(WITHHELD_A5_ID)
 
     const a3Result = results.find((r) => r.claim_id === A3_ID)
     expect(a3Result?.match_origin).toBe('discovered_topic') // provenance stays discovered
@@ -226,14 +265,15 @@ describe('stock domain-safety, unaffected by A-3\'s real publication', () => {
 
 // ── §16: registration/publication separation, final state ──────────────────
 
-describe('registration/publication separation -- final evidenced progression', () => {
-  test('Artlist registered + A-3 real + CRC-eligible = exactly A-3 reachable for Artlist (not zero, not more than one)', () => {
+describe('registration/publication separation -- final evidenced progression as of the 2026-09-10 Artlist Remaining Claims activation', () => {
+  test('Artlist registered + six real, CRC-eligible claims = exactly those six reachable for Artlist (not zero, not more, not the withheld seventh)', () => {
     const result = lookupTopicClaims([sourceRightsGoal()], TOPIC_CLAIMS_FIXTURE, UNKNOWN_FACTS, ['artlist'])
-    expect(result.matches.map((m) => m.claim_id)).toEqual([A3_ID])
+    expect(result.matches.map((m) => m.claim_id).sort()).toEqual(ALL_REACHABLE_ARTLIST_IDS)
   })
 
-  test('the other 9 Music Scenario A claims have zero fixture representation -- confirmed by exact count, not assumed', () => {
+  test('exactly six CLAIM-MUSIC-* entries have fixture representation -- confirmed by exact count, not assumed; the remaining 4 Music Scenario A claims (3 Envato/Epidemic + withheld A-5) do not', () => {
     const musicClaims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id.startsWith('CLAIM-MUSIC'))
-    expect(musicClaims).toHaveLength(1)
+    expect(musicClaims).toHaveLength(6)
+    expect(musicClaims.map((c) => c.claim_id).sort()).toEqual(ALL_REACHABLE_ARTLIST_IDS)
   })
 })

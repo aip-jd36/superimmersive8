@@ -58,41 +58,52 @@ const GOVERNED_CLAIMS_PATH = path.join(__dirname, '..', '..', '..', '..', '06_Op
  *   - A1, A2 (`CLAIM-MUSIC-ENVATO-*`) and EP1 (`CLAIM-MUSIC-EPIDEMIC-
  *     TIER-ADVERTISING-001-v1`) remain unrepresentable for the ORIGINAL
  *     architectural reason: `envato-elements`/`epidemic-sound` are still not
- *     registered in `ASSET_PROVIDER_IDS` -- this milestone's own one-
- *     provider scope deliberately left them unregistered.
+ *     registered in `ASSET_PROVIDER_IDS` -- still true as of 2026-09-10;
+ *     this remains a separate, larger prerequisite than the Artlist claims
+ *     below ever had.
  *   - The remaining six `CLAIM-MUSIC-ARTLIST-*` claims (A-1, A-2, A-4, A-5,
- *     A-6, A-7a) are a DIFFERENT case: `artlist` WAS registered in
+ *     A-6, A-7a) were a DIFFERENT case: `artlist` WAS registered in
  *     `ASSET_PROVIDER_IDS` (a generic registry extension, confirmed no
  *     Music-specific mechanism added -- see `types/interview-engine.ts`),
- *     so the registry blocker is gone for these six specifically. They
- *     remain in this set for the SAME kind of reason the five stock claims
- *     above are excluded from CRC output -- CRC eligibility, not
- *     fixture-representability. `CPR_007` recommends WITHHOLD for all of
- *     them (PM decision on that combined review: PENDING; each one's own
- *     `CRC Approver` field in GOVERNED-CLAIMS.md remains `PENDING`).
+ *     so the registry blocker was gone for these six specifically even
+ *     while `CPR_007` (2026-08-27) recommended WITHHOLD for all of them on
+ *     a separate, shared runtime-verification-methodology prerequisite (PM
+ *     decision on that combined review: PENDING).
  *
  * REMOVED 2026-08-27 (later same session, A-3 CRC Publication Recording
  * task): `CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1` (A-3) --
- * this claim ONLY. CRC Publication was explicitly approved for A-3
- * specifically (CRC Approver: JD (PM), CRC Decision Date: 2026-08-27, see
- * GOVERNED-CLAIMS.md's own "CRC PUBLICATION APPROVED" note), following the
- * Artlist A-3 Synthetic Runtime Canary and Artlist Provider Registration
+ * this claim ONLY, at the time. CRC Publication was explicitly approved for
+ * A-3 specifically (CRC Approver: JD (PM), CRC Decision Date: 2026-08-27,
+ * see GOVERNED-CLAIMS.md's own "CRC PUBLICATION APPROVED" note), following
+ * the Artlist A-3 Synthetic Runtime Canary and Artlist Provider Registration
  * Canary Integration Review clearing the runtime-verification prerequisite
  * CPR_007 §3 identified as the sole blocker. A-3 now has a real
  * `TOPIC_CLAIMS_FIXTURE` entry (`crc_eligible: 'Yes'`) -- see the dedicated
- * tests below. The other 9 Music Scenario A claims are UNAFFECTED by this
- * removal and remain exactly as before, per the split above.
+ * tests below.
+ *
+ * REMOVED 2026-09-10 (Artlist Remaining Claims activation, CPR_021):
+ * `CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1`, `-CLIENT-LICENSE-RETENTION-
+ * 001-v1`, `-STANDALONE-EXPLOITATION-001-v1`, `-PRO-ROYALTIES-001-v1`, and
+ * `-ENTERPRISE-THRESHOLD-001-v1` -- five of the six remaining Artlist
+ * claims. `CPR_021` independently re-confirmed `CPR_007`'s own prior
+ * runtime-verification-methodology prerequisite is now clearable (real
+ * synthetic-eligibility-canary + direct multi-claim `retrieve()` runs, both
+ * exercised before these fixture entries were added) and found each of
+ * these five publication-safe (two required a bounded copy correction --
+ * Social vs Pro's Enterprise-threshold qualifier, Pro Royalties'
+ * bidirectional overclaim/underclaim guardrails -- applied to both
+ * `GOVERNED-CLAIMS.md` and this fixture). PM concurrence: 2026-09-10, CRC
+ * Approver: JD (PM) on all five. `CLAIM-MUSIC-ARTLIST-AI-TRAINING-
+ * EXCLUSION-001-v1` ("A-5") remains in this set below -- `CPR_021` found
+ * its blocker was Publication Policy Principle 6 (subject-matter
+ * volatility), not wording, and PM explicitly concurred not to override it
+ * in this activation wave; it stays Adopted but CRC-inactive.
  */
 const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set<string>([
   'CLAIM-MUSIC-ENVATO-SYNC-001-v1',
   'CLAIM-MUSIC-ENVATO-CANCELLATION-001-v1',
   'CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1',
-  'CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1',
-  'CLAIM-MUSIC-ARTLIST-CLIENT-LICENSE-RETENTION-001-v1',
-  'CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1',
   'CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1',
-  'CLAIM-MUSIC-ARTLIST-PRO-ROYALTIES-001-v1',
-  'CLAIM-MUSIC-ARTLIST-ENTERPRISE-THRESHOLD-001-v1',
   // Pre-existing gap found during the Assessment-Jurisdiction Mention Model
   // implementation (2026-08-28) -- Adopted in a prior milestone (Wave 4,
   // 2026-08-28) with zero runtime fixture representation by explicit design
@@ -431,8 +442,41 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
     }
   })
 
-  test('exactly twenty-two claims in the runtime fixture are Adopted + CRC-eligible as of 2026-09-09 -- the prior twenty-one (see prior versions of this test/GOVERNED-CLAIMS.md for their own individual provenance, most recently the four Pika commercial-use claims via CPR_019) plus the twenty-second: CLAIM-STABILITYAI-COMMERCIAL-USE-001-v1, Adopted 2026-09-09 (FGR_017), CRC Publication approved 2026-09-09 (CRC Approver: JD (PM)) following CPR_020\'s initial sequencing-only WITHHOLD and its own same-day addendum reconsideration (the real mandatory synthetic-eligibility-canary run against this exact claim). The now-Deprecated CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-001-v1 (superseded by the three tier-specific Pika claims, its unsafe `not_equals` applicability requirement never corrected in place) and the 9 Music Scenario A claims remain correctly absent from this list -- update only when a further real decision is recorded', () => {
+  test('exactly twenty-seven claims in the runtime fixture are Adopted + CRC-eligible as of 2026-09-10 -- the prior twenty-two (see prior versions of this test/GOVERNED-CLAIMS.md for their own individual provenance, most recently CLAIM-STABILITYAI-COMMERCIAL-USE-001-v1 via CPR_020) plus five Artlist Remaining Claims activated together via CPR_021 (Social vs Pro [corrected wording], Client License Retention, Standalone Exploitation, Pro Royalties [corrected bidirectional-guardrail wording], Enterprise Threshold) -- CRC Approver: JD (PM), CRC Decision Date: 2026-09-10 on all five. CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1 ("A-5") was independently reviewed in the same CPR_021 package and explicitly WITHHELD (Publication Policy Principle 6 volatility concern, PM concurred not to override) -- it remains correctly absent from this list and from CLAIMS_WITHOUT_FIXTURE_REPRESENTATION above must still name it. The now-Deprecated CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-001-v1, the 3 remaining Music Scenario A claims still gated on provider registration (Envato x2, Epidemic Sound x1), and CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1 remain correctly absent from this list -- update only when a further real decision is recorded', () => {
     const liveClaims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.lifecycle === 'Adopted' && c.crc_eligible === 'Yes')
-    expect(liveClaims.map((c) => c.claim_id).sort()).toEqual(['CLAIM-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001-v1', 'CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPY-004-v1', 'CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1', 'CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1', 'CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-FANCY-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-PRO-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-STANDARD-001-v1', 'CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1', 'CLAIM-STABILITYAI-COMMERCIAL-USE-001-v1', 'CLAIM-STOCK-EDITORIAL-001-v2', 'CLAIM-STOCK-EDITORIAL-002-v2', 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1', 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1', 'CLAIM-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1', 'CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1'])
+    expect(liveClaims.map((c) => c.claim_id).sort()).toEqual(['CLAIM-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001-v1', 'CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPY-004-v1', 'CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1', 'CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1', 'CLAIM-MUSIC-ARTLIST-CLIENT-LICENSE-RETENTION-001-v1', 'CLAIM-MUSIC-ARTLIST-ENTERPRISE-THRESHOLD-001-v1', 'CLAIM-MUSIC-ARTLIST-PRO-ROYALTIES-001-v1', 'CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1', 'CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1', 'CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-FANCY-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-PRO-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-STANDARD-001-v1', 'CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1', 'CLAIM-STABILITYAI-COMMERCIAL-USE-001-v1', 'CLAIM-STOCK-EDITORIAL-001-v2', 'CLAIM-STOCK-EDITORIAL-002-v2', 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1', 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1', 'CLAIM-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1', 'CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1'])
+  })
+
+  describe.each([
+    ['CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1', ['artlist'], ['which_music_provider', 'artlist_license_type_confirmed']],
+    ['CLAIM-MUSIC-ARTLIST-CLIENT-LICENSE-RETENTION-001-v1', ['artlist'], []],
+    ['CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1', ['artlist'], []],
+    ['CLAIM-MUSIC-ARTLIST-PRO-ROYALTIES-001-v1', ['artlist'], []],
+    ['CLAIM-MUSIC-ARTLIST-ENTERPRISE-THRESHOLD-001-v1', ['artlist'], ['artlist_licensee_employer_type_confirmed', 'artlist_licensee_employer_size_confirmed']],
+  ] as const)('%s -- Artlist Remaining Claims activation (CPR_021, 2026-09-10)', (claimId, expectedProviderScope, expectedDependencies) => {
+    test('real entry in TOPIC_CLAIMS_FIXTURE, Adopted + CRC-eligible', () => {
+      const claim = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === claimId)
+      expect(claim).toBeDefined()
+      expect(claim?.topic).toBe('third_party_source_rights')
+      expect(claim?.lifecycle).toBe('Adopted')
+      expect(claim?.crc_eligible).toBe('Yes')
+    })
+
+    test('provider_scope matches the governed scope exactly', () => {
+      const claim = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === claimId)
+      expect(claim?.provider_scope).toEqual(expectedProviderScope)
+      expect(claim?.tool_scope).toBeNull()
+    })
+
+    test('unresolved_project_dependencies preserved exactly as governed', () => {
+      const claim = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === claimId)
+      expect(claim?.unresolved_project_dependencies).toEqual(expectedDependencies)
+    })
+  })
+
+  test("CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1 (A-5) remains correctly WITHHELD -- no fixture entry, per explicit PM concurrence with CPR_021's Principle 6 finding", () => {
+    const claim = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1')
+    expect(claim).toBeUndefined()
+    expect(CLAIMS_WITHOUT_FIXTURE_REPRESENTATION.has('CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1')).toBe(true)
   })
 })

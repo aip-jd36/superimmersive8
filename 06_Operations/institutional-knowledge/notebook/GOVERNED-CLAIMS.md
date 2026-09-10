@@ -1745,6 +1745,8 @@ Context: Commercial Assurance evidence review of any commercial/client/brand vid
 
 GOVERNANCE TREATMENT (2026-08-27, PM adoption decision, FGR #6): `provider_scope: ['artlist']` — same registry-gap note as above. Evidence: Class B (human-captured, full-document visual read), corroborated across both preserved Artlist sources (`evidence-captures/artlist/MANIFEST.md`). **Wording corrected 2026-08-27, before this Adoption, per the FGR_006 integration review**: the proposition previously ended "...permits broadcasting (subject to §D2 below for agency/broadcaster/large-company cases)" — "§D2" was never a valid heading anywhere in the source candidate package (the Enterprise-threshold content is section C's own A-7a, not section D). Corrected to a stable claim-ID cross-reference: "...permits broadcasting, subject to Artlist's separate Enterprise/Max Business plan requirement for agencies, broadcasters, and larger companies (see CLAIM-MUSIC-ARTLIST-ENTERPRISE-THRESHOLD-001-v1)." Does not merge this claim with CLAIM-MUSIC-ARTLIST-ENTERPRISE-THRESHOLD-001-v1 — both are separately governed, separately Adopted below. The correction did not change evidence, provider_scope, dependencies, or FGR disposition (ACCEPT, unchanged). Adopted below in its corrected form only.
 
+**CRC PUBLICATION APPROVED 2026-09-10** (CRC Approver: JD (PM); basis: `governance-reviews/CPR_021_ARTLIST_REMAINING_CLAIMS_RECONSIDERATION_2026-09-10.md`, following the runtime-prerequisite clearance established by A-3's own Artlist Provider Registration Canary — `artlist` is now a registered `AssetProviderId` with a working extraction alias, confirmed directly, unchanged by this decision). `CPR_021` found the Adopted proposition sound but its pre-existing draft `CRC Candidate Statement` omitted the Enterprise-threshold qualifier the governed proposition itself already carries — a bounded-copy correction, not a change to the Claim proposition above, applied below. Activation gate: the real, unmodified `runSyntheticEligibilityCanary`/`retrieve()` pipeline was exercised against this corrected text (provider-gated retrieval, fail-closed on wrong/absent provider, dependency preservation, Case 3B hedge behavior, and a 6-claim simultaneous co-firing check alongside A-2/A-3/A-4/A-6/A-7a) — all passed; see `CPR_021`'s own record for the full scenario set. `CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1` ("A-5") remains explicitly WITHHELD — see that claim's own entry — and is not activated alongside this one.
+
 Claim proposition: >
   Artlist's Social license is exclusively for personal content creators
   (hobbyists, vloggers, independent creators) and does not cover projects
@@ -1787,22 +1789,40 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-27
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  PENDING — not yet reviewed for CRC Publication. FGR_006 recommends CRC
-  eligibility (§9); separate CRC Publication Review required.
+  APPROVED FOR CRC PUBLICATION (2026-09-10, CRC Approver: JD (PM) -- see
+  CRC Approver/CRC Decision Date below; `CPR_021` bounded-copy correction
+  applied, restoring the Enterprise-threshold qualifier the pre-approval
+  draft below had omitted). CRC may state that Artlist's Social license is
+  exclusively for personal content creators and doesn't cover work made
+  for clients or brands, paid or promoted videos, or broadcast use, and
+  that the Pro/Business license covers client and brand work, paid or
+  promoted videos, and commercials -- including broadcasting -- but that
+  Pro/Business broadcasting is itself subject to Artlist's separate
+  Enterprise or Max Business plan requirement for agencies, broadcasters,
+  and larger companies. CRC must not state which license type the user's
+  account actually holds, must not state whether the user's entity
+  triggers the Enterprise/Max Business threshold, and must not state or
+  imply that a Pro/Business license unconditionally covers broadcasting
+  without that qualifier.
 
 CRC Candidate Statement: >
-  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
-  Artlist distinguishes a personal-only Social license from a Pro/Business
-  license covering client, brand, and advertising use.
+  Artlist's Social license is exclusively for personal content creators
+  and doesn't cover work made for clients or brands, paid or promoted
+  videos, or broadcast use. The Pro/Business license covers client and
+  brand work, paid or promoted videos, and commercials -- including
+  broadcasting -- but Pro/Business broadcasting is itself subject to
+  Artlist's separate Enterprise or Max Business plan requirement for
+  agencies, broadcasters, and larger companies.
 
 Effective date: 2026-02-15
-Last reviewed: 2026-08-27
+Last reviewed: 2026-09-10
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-09-10
 Related: [[CLAIM-MUSIC-ARTLIST-ENTERPRISE-THRESHOLD-001-v1]] (Pro/Business broadcasting qualified by this separately governed threshold), [[CLAIM-MUSIC-ARTLIST-CLIENT-LICENSE-RETENTION-001-v1]], [[CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1]], [[CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1]], [[CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1]], [[CLAIM-MUSIC-ARTLIST-PRO-ROYALTIES-001-v1]] (same provider, same license family, distinct facts)
 
 Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_021_ARTLIST_REMAINING_CLAIMS_RECONSIDERATION_2026-09-10.md`
 
 ### CLAIM-MUSIC-ARTLIST-CLIENT-LICENSE-RETENTION-001-v1
 Domain: Third-Party Source Assets / Music Licensing
@@ -1813,6 +1833,8 @@ Jurisdiction: Not a legal jurisdiction — governed by Artlist's current License
 Context: Commercial Assurance evidence review of an Artlist-scored Project delivered to a client under Artlist's Pro/Business license
 
 GOVERNANCE TREATMENT (2026-08-27, PM adoption decision, FGR #6): `provider_scope: ['artlist']`, same registry-gap note. Evidence: Class B, single-source (formal License only — disclosed, not a defect; the Help Center source simply does not cover this specific point). FGR disposition: ACCEPT (no wording change).
+
+**CRC PUBLICATION APPROVED 2026-09-10** (CRC Approver: JD (PM); basis: `governance-reviews/CPR_021_ARTLIST_REMAINING_CLAIMS_RECONSIDERATION_2026-09-10.md`, same runtime-prerequisite clearance as `CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1`'s own entry above). `CPR_021` found this claim "CONDITIONALLY READY... runtime prerequisite only" (`CPR_007`'s own prior finding, re-confirmed) — no wording change; the draft `CRC Candidate Statement`/`Publication Scope` below is approved as originally drafted. Activation gate: the real, unmodified pipeline was exercised (provider-gated retrieval, fail-closed on wrong/absent provider, `directly_relevant` status confirmed for this claim's empty dependency list, and the 6-claim simultaneous co-firing check) — all passed; see `CPR_021` for the full scenario set.
 
 Claim proposition: >
   Under Artlist's Pro/Business license, a Project incorporating a
@@ -1848,24 +1870,33 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-27
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  PENDING — not yet reviewed for CRC Publication. FGR_006 recommends CRC
-  eligibility (§9); separate CRC Publication Review required.
+  APPROVED FOR CRC PUBLICATION (2026-09-10, CRC Approver: JD (PM) -- see
+  CRC Approver/CRC Decision Date below; `CPR_021`, approved as originally
+  drafted, no wording change). CRC may state this exact structural fact:
+  under Artlist's Pro/Business license, delivering a finished Project to
+  a client does not transfer the underlying music license to that client
+  -- the subscriber remains the license holder and remains responsible
+  for the client's compliant use. CRC must not state that a specific
+  client or collaborator is or is not complying with the license, must
+  not state that the user currently holds any particular Artlist license
+  type, and must not state or imply the project is otherwise commercially
+  cleared.
 
 CRC Candidate Statement: >
-  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
   Under Artlist's Pro/Business license, delivering a finished Project to
   a client does not transfer the underlying music license to that client
   — the subscriber remains the license holder and remains responsible
   for the client's compliant use.
 
 Effective date: 2026-02-15
-Last reviewed: 2026-08-27
+Last reviewed: 2026-09-10
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-09-10
 Related: [[CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1]] (same provider, same license family, distinct fact)
 
 Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_021_ARTLIST_REMAINING_CLAIMS_RECONSIDERATION_2026-09-10.md`
 
 ### CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1
 Domain: Third-Party Source Assets / Music Licensing
@@ -1956,6 +1987,8 @@ Context: Commercial Assurance evidence review of any workflow that might distrib
 
 GOVERNANCE TREATMENT (2026-08-27, PM adoption decision, FGR #6): `provider_scope: ['artlist']`, same registry-gap note. Evidence: Class B, single-source, disclosed. Correctly kept separate from CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1 (different restriction category — standalone distribution vs. AI-training/derivative-work input — sourced from the same source paragraph but evidencing two distinct rules). FGR disposition: ACCEPT (no wording change).
 
+**CRC PUBLICATION APPROVED 2026-09-10** (CRC Approver: JD (PM); basis: `governance-reviews/CPR_021_ARTLIST_REMAINING_CLAIMS_RECONSIDERATION_2026-09-10.md`, same runtime-prerequisite clearance as the sibling Artlist claims above). Approved as originally drafted, no wording change. Activation gate: the real, unmodified pipeline was exercised (provider-gated retrieval, fail-closed on wrong/absent provider, `directly_relevant` status confirmed for this claim's empty dependency list, and the 6-claim simultaneous co-firing check) — all passed; see `CPR_021`. **`CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1` (the sibling this claim's own GOVERNANCE TREATMENT note above cross-references) is explicitly NOT part of this activation — it remains WITHHELD, see that claim's own entry.**
+
 Claim proposition: >
   Artlist Assets may only be used as integrated elements within a
   broader Project, and may not be copied, distributed, sold, shared, or
@@ -1987,22 +2020,27 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-27
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  PENDING — not yet reviewed for CRC Publication. FGR_006 recommends CRC
-  eligibility (§9); separate CRC Publication Review required.
+  APPROVED FOR CRC PUBLICATION (2026-09-10, CRC Approver: JD (PM) -- see
+  CRC Approver/CRC Decision Date below; `CPR_021`, approved as originally
+  drafted, no wording change). CRC may state this restriction plainly:
+  Artlist Assets may only be used as part of an integrated Project, not
+  distributed or exploited on their own. CRC must not state whether the
+  user's own specific output configuration constitutes "standalone" use
+  under Artlist's own terms.
 
 CRC Candidate Statement: >
-  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
   Artlist Assets may only be used as part of an integrated Project, not
   distributed or exploited on their own.
 
 Effective date: 2026-02-15
-Last reviewed: 2026-08-27
+Last reviewed: 2026-09-10
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
-Related: [[CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1]] (same source paragraph, distinct restriction category), [[CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1]] (same provider, same license family)
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-09-10
+Related: [[CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1]] (same source paragraph, distinct restriction category — that claim remains WITHHELD, unaffected by this activation), [[CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1]] (same provider, same license family)
 
 Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_021_ARTLIST_REMAINING_CLAIMS_RECONSIDERATION_2026-09-10.md`
 
 ### CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1
 Domain: Third-Party Source Assets / Music Licensing
@@ -2048,9 +2086,25 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-27
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  PENDING — FGR_006 explicitly recommends DEFER TO CRC PUBLICATION REVIEW
-  for this claim specifically (AI-related term volatility). Not yet
-  reviewed.
+  WITHHELD FROM CRC (2026-09-10, PM: JD -- see CRC Publication Review
+  #21, `CPR_021`). `CPR_021` independently re-confirmed the wording itself
+  is safe (no overclaim), and surfaced a genuine tension with Publication
+  Policy Principle 6's own "a long-settled fact doesn't need a waiting
+  period just because it was verified recently" carve-out (this clause has
+  been stable, unchanged, since its 2026-02-15 effective date, independently
+  re-verified 2026-08-27 with no signal of change) -- but explicitly
+  declined to resolve that tension unilaterally, surfacing it for PM
+  decision instead. PM concurrence (2026-09-10): **do not override the
+  Principle 6 volatility concern in this activation wave** -- the claim
+  remains Adopted but CRC-inactive, reserved for separate reconsideration
+  (either a deliberate PM determination that the ~7-month stability record
+  is sufficient, or a future explicitly-scoped evidence-refresh pass).
+  This claim is deliberately NOT part of the 2026-09-10 Artlist mechanical
+  activation package that published its five sibling claims (Social vs
+  Pro, Client License Retention, Standalone Exploitation, Pro Royalties,
+  Enterprise Threshold) -- see those claims' own entries. Not a permanent
+  disposition -- reconsiderable per the terms above, never by a runtime/
+  engineering change alone.
 
 CRC Candidate Statement: >
   [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
@@ -2058,13 +2112,14 @@ CRC Candidate Statement: >
   included in AI-training datasets.
 
 Effective date: 2026-02-15
-Last reviewed: 2026-08-27
+Last reviewed: 2026-09-10
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
 CRC Approver: PENDING
 CRC Decision Date: PENDING
-Related: [[CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1]] (same source paragraph, distinct restriction category), [[CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1]] (same provider, same license family)
+Related: [[CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1]] (same source paragraph, distinct restriction category — that sibling claim IS activated; this one is not), [[CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1]] (same provider, same license family)
 
 Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_021_ARTLIST_REMAINING_CLAIMS_RECONSIDERATION_2026-09-10.md`
 
 ### CLAIM-MUSIC-ARTLIST-PRO-ROYALTIES-001-v1
 Domain: Third-Party Source Assets / Music Licensing
@@ -2075,6 +2130,8 @@ Jurisdiction: Not a legal jurisdiction — governed by Artlist's current License
 Context: Commercial Assurance evidence review of any broadcast-bound or publicly-performed commercial video workflow incorporating a licensed Artlist track
 
 GOVERNANCE TREATMENT (2026-08-27, PM adoption decision, FGR #6): `provider_scope: ['artlist']`, same registry-gap note. Evidence: Class B, single-source, independently re-verified via direct page re-render during FGR_006 itself (not merely re-read from the prior manifest). Unconditional on license tier (unlike CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1). FGR disposition: ACCEPT (no wording change). **CRC-eligibility lean: DEFER TO CRC PUBLICATION REVIEW** (FGR_006 §4 — technical enough that plain CRC publication risks either overclaiming "you will owe money" or dangerously underclaiming "this is Artlist's problem, not mine"; Reviewer/Commercial-Assurance-only is the safer default pending a future CPR).
+
+**CRC PUBLICATION APPROVED 2026-09-10** (CRC Approver: JD (PM); basis: `governance-reviews/CPR_021_ARTLIST_REMAINING_CLAIMS_RECONSIDERATION_2026-09-10.md`, PM concurrence following explicit flagging as "the closest call among the five approvals"). `CPR_021` resolved the overclaim/underclaim risk FGR_006 originally flagged via a bounded copy correction — not by narrowing the underlying proposition — adding explicit bidirectional language foreclosing both misreadings ("doesn't mean a royalty is currently owed," "doesn't mean you have no exposure"), applied below. Activation gate: the real, unmodified pipeline was exercised, including a dedicated check that the rendered summary carries BOTH bidirectional guardrails intact, plus provider-gated retrieval, `directly_relevant` status confirmation, and the 6-claim simultaneous co-firing check — all passed; see `CPR_021`.
 
 Claim proposition: >
   Artlist's public-performance/broadcast permission does not itself
@@ -2115,23 +2172,48 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-27
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  PENDING — FGR_006 explicitly recommends DEFER TO CRC PUBLICATION REVIEW
-  for this claim specifically (technical nuance risk). Not yet reviewed.
+  APPROVED FOR CRC PUBLICATION (2026-09-10, CRC Approver: JD (PM) -- see
+  CRC Approver/CRC Decision Date below; `CPR_021` bounded bidirectional-
+  guardrail correction applied, PM concurrence recorded as the closest
+  call among the five 2026-09-10 approvals). CRC may state that Artlist's
+  license permission for broadcast or public-performance use doesn't
+  include paying royalties to Performance Rights Organizations (PROs) or
+  other collecting societies -- those are handled separately from the
+  Artlist license itself -- and that if a project is broadcast or
+  publicly performed, the subscriber (or their client) may still need to
+  arrange or pay PRO/collecting-society royalties, separately from what
+  the Artlist license already covers. This is a general point about how
+  Artlist's license and PRO royalties relate to each other -- it doesn't
+  mean a royalty is currently owed for the user's project, and it doesn't
+  mean the user has no exposure just because it isn't covered by the
+  Artlist license. CRC must not state or imply that a specific royalty
+  payment is currently owed for the user's project, must not state or
+  imply that the user has no PRO/collecting-society exposure because it
+  "isn't covered" by the Artlist license, must not identify which PRO or
+  which jurisdiction's collecting society would be involved, and must not
+  state or imply the project is otherwise commercially cleared.
 
 CRC Candidate Statement: >
-  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
-  Artlist's broadcast/public-performance permission does not itself
-  cover PRO/collecting-society royalties — the subscriber may still be
-  responsible for those separately.
+  Artlist's license permission for broadcast or public-performance use
+  doesn't include paying royalties to Performance Rights Organizations
+  (PROs) or other collecting societies -- those are handled separately
+  from the Artlist license itself. If a project is broadcast or publicly
+  performed, you (or your client) may still need to arrange or pay
+  PRO/collecting-society royalties, separately from what the Artlist
+  license already covers. This is a general point about how Artlist's
+  license and PRO royalties relate to each other -- it doesn't mean a
+  royalty is currently owed for your project, and it doesn't mean you
+  have no exposure just because it isn't covered by the Artlist license.
 
 Effective date: 2026-02-15
-Last reviewed: 2026-08-27
+Last reviewed: 2026-09-10
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-09-10
 Related: [[CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1]] (same provider, same license family)
 
 Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_021_ARTLIST_REMAINING_CLAIMS_RECONSIDERATION_2026-09-10.md`
 
 ### CLAIM-MUSIC-ARTLIST-ENTERPRISE-THRESHOLD-001-v1
 Domain: Third-Party Source Assets / Music Licensing
@@ -2168,8 +2250,10 @@ SI8 interpretation: >
   question (how many individuals may share one account), which was
   deliberately not drafted into a governed claim (see FGR_006 §4, A-7b).
 
+**CRC PUBLICATION APPROVED 2026-09-10** (CRC Approver: JD (PM); basis: `governance-reviews/CPR_021_ARTLIST_REMAINING_CLAIMS_RECONSIDERATION_2026-09-10.md`). `CPR_021` re-confirmed `CPR_007` §8's own prior finding: the two evidence-only employer-fact dependencies below do not block eligibility — this claim will always render via the Case 3B hedge, structurally identical to Getty's own multi-week pre-DAR history. Approved as originally drafted, no wording change. Activation gate: the real, unmodified pipeline was exercised (provider-gated retrieval, fail-closed on wrong/absent provider, dependency preservation, Case 3B hedge confirmation, and the 6-claim simultaneous co-firing check) — all passed; see `CPR_021`.
+
 Applicability requirements: []
-Unresolved project dependencies: [artlist_licensee_employer_type_confirmed, artlist_licensee_employer_size_confirmed]   <!-- flagged by FGR_006 as a plausible future Dependency Askability Review candidate: unlike most other Music-domain dependencies (account/subscription-tier facts), a user's own employer type and headcount are facts a person can typically self-report reliably, structurally closer to human_contribution_description (the one live askable_in_crc entry) than to epidemic_license_tier_confirmed. This claim's Adoption does NOT perform that review or register anything in dependency-askability.ts -- both remain evidence-only under current fail-closed default (absent from the registry). DAR is a separate, later governance stage, chartered only after Adoption AND CRC eligibility both already exist, per DAR_001's own precedent. -->
+Unresolved project dependencies: [artlist_licensee_employer_type_confirmed, artlist_licensee_employer_size_confirmed]   <!-- flagged by FGR_006 as a plausible future Dependency Askability Review candidate: unlike most other Music-domain dependencies (account/subscription-tier facts), a user's own employer type and headcount are facts a person can typically self-report reliably, structurally closer to human_contribution_description (the one live askable_in_crc entry) than to epidemic_license_tier_confirmed. This claim's Adoption does NOT perform that review or register anything in dependency-askability.ts -- both remain evidence-only under current fail-closed default (absent from the registry). DAR is a separate, later governance stage, chartered only after Adoption AND CRC eligibility both already exist, per DAR_001's own precedent -- now both exist as of this 2026-09-10 activation, so a future DAR for this claim is newly in-scope, though not performed by this activation. -->
 Prohibited conclusions: >
   Does not establish the user's actual employer classification or size,
   or whether their actual plan matches what this threshold requires. Is
@@ -2180,24 +2264,28 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-27
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  PENDING — not yet reviewed for CRC Publication. FGR_006 recommends CRC
-  eligibility (§9) — single, plain, provider-level rule, passes the CRC
-  Publication Policy's own Publication Test cleanly on FGR_006's own
-  assessment — but this remains a directional recommendation only, not a
-  Publication-stage decision; a separate CRC Publication Review is
-  required.
+  APPROVED FOR CRC PUBLICATION (2026-09-10, CRC Approver: JD (PM) -- see
+  CRC Approver/CRC Decision Date below; `CPR_021`, approved as originally
+  drafted, no wording change). CRC may state Artlist's stated agency/
+  broadcaster/>50-employee threshold and the Max Business/Enterprise
+  requirement, including the AI-Services-only carve-out: Artlist's
+  standard Pro/Business plans may not be sufficient for agencies,
+  broadcasters, or larger companies, who may need a Max Business or
+  Enterprise agreement instead. CRC must not state the user's actual
+  employer classification or size, must not state which plan the user
+  currently holds, and must not state whether a standard Pro/Business
+  plan is or is not sufficient for the user's specific case.
 
 CRC Candidate Statement: >
-  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
   Artlist's standard Pro/Business plans may not be sufficient for
   agencies, broadcasters, or larger companies, who may need a Max
   Business or Enterprise agreement instead.
 
 Effective date: 2026-02-15
-Last reviewed: 2026-08-27
+Last reviewed: 2026-09-10
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-09-10
 Related: [[CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1]] (Pro/Business broadcasting qualified by this threshold)
 
 Formal Governance Review #6 (2026-08-27, combined package): ACCEPT WITH
@@ -2207,6 +2295,7 @@ deferred, not adopted, not a claim). See full review for the split
 reasoning.
 
 Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_021_ARTLIST_REMAINING_CLAIMS_RECONSIDERATION_2026-09-10.md`
 
 **Excluded from this Wave — not adopted, per FGR_006's own disposition, and not present anywhere above:** the undrafted Artlist seat/member-mechanics background (FGR_006's "A-7b" — DEFERRED, never assigned a claim ID, never drafted as a proposition) and `CLAIM-MUSIC-ACCESS-NOT-LICENSE-001-v1` (FGR_006's "G-1," the generic cross-provider "access ≠ specific licensed use" candidate — REJECTED by FGR_006 §5 as duplicative of boundary language every claim above already individually carries). Neither appears in this document and neither should be added without a new Formal Governance Review.
 

@@ -509,6 +509,175 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     superseded_by: null,
   },
   {
+    // Music Scenario A -- Artlist Remaining Claims activation (CPR_021,
+    // 2026-09-10). Five of the six claims CPR_007 originally withheld
+    // (2026-08-27) for the same shared runtime-verification prerequisite
+    // A-3's own entry above describes -- that prerequisite is cleared for
+    // every Artlist claim generically (provider registration is not
+    // claim-specific). CPR_021 independently re-confirmed publication
+    // safety for all six, five APPROVE (this one and its four siblings
+    // below) and one WITHHOLD (CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-
+    // 001-v1 -- Publication Policy Principle 6 volatility concern, PM
+    // concurred not to override; deliberately has NO fixture entry here or
+    // anywhere in this file). PM concurrence 2026-09-10 (CRC Approver: JD
+    // (PM)) -- see GOVERNED-CLAIMS.md's own CRC PUBLICATION APPROVED note
+    // and governance-reviews/CPR_021_ARTLIST_REMAINING_CLAIMS_
+    // RECONSIDERATION_2026-09-10.md for the full decision record. This
+    // entry's own crc_candidate_statement below is CORRECTED from the
+    // original FGR_006 draft (CPR_021 found the draft omitted the
+    // Enterprise-threshold qualifier the governed Claim proposition itself
+    // already carries) -- restored here, verified end-to-end through the
+    // real, unmodified pipeline before this entry was added.
+    claim_id: 'CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1',
+    topic: 'third_party_source_rights',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      "CRC may state that Artlist's Social license is exclusively for personal content creators and doesn't cover work made for clients or brands, paid or promoted videos, or broadcast use, and that the Pro/Business license covers client and brand work, paid or promoted videos, and commercials -- including broadcasting -- but that Pro/Business broadcasting is itself subject to Artlist's separate Enterprise or Max Business plan requirement for agencies, broadcasters, and larger companies. CRC must not state which license type the user's account actually holds, must not state whether the user's entity triggers the Enterprise/Max Business threshold, and must not state or imply that a Pro/Business license unconditionally covers broadcasting without that qualifier.",
+    crc_candidate_statement:
+      "Artlist's Social license is exclusively for personal content creators and doesn't cover work made for clients or brands, paid or promoted videos, or broadcast use. The Pro/Business license covers client and brand work, paid or promoted videos, and commercials -- including broadcasting -- but Pro/Business broadcasting is itself subject to Artlist's separate Enterprise or Max Business plan requirement for agencies, broadcasters, and larger companies.",
+    applicability_requirements: [],
+    // Both evidence-only: account/license-type facts, not registered in
+    // dependency-askability.ts -- fail-closed by default, unchanged by
+    // this activation. Permanently gates Bounded Interpretation to
+    // relevant_applicability_unresolved (Case 3B), confirmed via the
+    // real, unmodified pipeline before this entry was added.
+    unresolved_project_dependencies: ['which_music_provider', 'artlist_license_type_confirmed'],
+    provider_scope: ['artlist'],
+    tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
+    last_verified: '2026-09-10',
+    superseded_by: null,
+  },
+  {
+    // Music Scenario A -- Artlist Remaining Claims activation (CPR_021,
+    // 2026-09-10). See CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1's own entry
+    // immediately above for the shared activation context. Approved as
+    // originally drafted -- no wording change (CPR_021 found this claim
+    // "CONDITIONALLY READY... runtime prerequisite only," re-confirming
+    // CPR_007's own prior finding).
+    claim_id: 'CLAIM-MUSIC-ARTLIST-CLIENT-LICENSE-RETENTION-001-v1',
+    topic: 'third_party_source_rights',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      "CRC may state this exact structural fact: under Artlist's Pro/Business license, delivering a finished Project to a client does not transfer the underlying music license to that client -- the subscriber remains the license holder and remains responsible for the client's compliant use. CRC must not state that a specific client or collaborator is or is not complying with the license, must not state that the user currently holds any particular Artlist license type, and must not state or imply the project is otherwise commercially cleared.",
+    crc_candidate_statement:
+      "Under Artlist's Pro/Business license, delivering a finished Project to a client does not transfer the underlying music license to that client -- the subscriber remains the license holder and remains responsible for the client's compliant use.",
+    applicability_requirements: [],
+    // Genuinely empty -- confirmed universal across Artlist license types
+    // at Adoption time. Resolves directly_relevant (no Case 3B hedge),
+    // confirmed via the real, unmodified pipeline before this entry was
+    // added.
+    unresolved_project_dependencies: [],
+    provider_scope: ['artlist'],
+    tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
+    last_verified: '2026-09-10',
+    superseded_by: null,
+  },
+  {
+    // Music Scenario A -- Artlist Remaining Claims activation (CPR_021,
+    // 2026-09-10). See CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1's own entry
+    // above for the shared activation context. Approved as originally
+    // drafted -- no wording change. Its sibling,
+    // CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1 (same source
+    // paragraph, distinct restriction category), remains WITHHELD and has
+    // no fixture entry.
+    claim_id: 'CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1',
+    topic: 'third_party_source_rights',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      'CRC may state this restriction plainly: Artlist Assets may only be used as part of an integrated Project, not distributed or exploited on their own. CRC must not state whether the user\'s own specific output configuration constitutes "standalone" use under Artlist\'s own terms.',
+    crc_candidate_statement: 'Artlist Assets may only be used as part of an integrated Project, not distributed or exploited on their own.',
+    applicability_requirements: [],
+    // Genuinely empty -- confirmed universal, unconditional on tier.
+    // Resolves directly_relevant (no Case 3B hedge), confirmed via the
+    // real, unmodified pipeline before this entry was added.
+    unresolved_project_dependencies: [],
+    provider_scope: ['artlist'],
+    tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
+    last_verified: '2026-09-10',
+    superseded_by: null,
+  },
+  {
+    // Music Scenario A -- Artlist Remaining Claims activation (CPR_021,
+    // 2026-09-10). See CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1's own entry
+    // above for the shared activation context. This entry's own
+    // crc_candidate_statement/crc_publication_scope below are CORRECTED
+    // from the original FGR_006 draft -- CPR_021 flagged this as "the
+    // closest call among the five APPROVE recommendations" (technical-
+    // nuance/no-hedge overclaim-or-underclaim risk, Publication Policy
+    // Principle 2) and resolved it via explicit bidirectional guardrail
+    // language rather than narrowing the underlying Claim proposition; the
+    // real, unmodified pipeline was exercised specifically to confirm both
+    // guardrail sentences render intact before this entry was added.
+    claim_id: 'CLAIM-MUSIC-ARTLIST-PRO-ROYALTIES-001-v1',
+    topic: 'third_party_source_rights',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      'CRC may state that Artlist\'s license permission for broadcast or public-performance use doesn\'t include paying royalties to Performance Rights Organizations (PROs) or other collecting societies -- those are handled separately from the Artlist license itself -- and that if a project is broadcast or publicly performed, the subscriber (or their client) may still need to arrange or pay PRO/collecting-society royalties, separately from what the Artlist license already covers. This is a general point about how Artlist\'s license and PRO royalties relate to each other -- it doesn\'t mean a royalty is currently owed for the user\'s project, and it doesn\'t mean the user has no exposure just because it isn\'t covered by the Artlist license. CRC must not state or imply that a specific royalty payment is currently owed for the user\'s project, must not state or imply that the user has no PRO/collecting-society exposure because it "isn\'t covered" by the Artlist license, must not identify which PRO or which jurisdiction\'s collecting society would be involved, and must not state or imply the project is otherwise commercially cleared.',
+    crc_candidate_statement:
+      'Artlist\'s license permission for broadcast or public-performance use doesn\'t include paying royalties to Performance Rights Organizations (PROs) or other collecting societies -- those are handled separately from the Artlist license itself. If a project is broadcast or publicly performed, you (or your client) may still need to arrange or pay PRO/collecting-society royalties, separately from what the Artlist license already covers. This is a general point about how Artlist\'s license and PRO royalties relate to each other -- it doesn\'t mean a royalty is currently owed for your project, and it doesn\'t mean you have no exposure just because it isn\'t covered by the Artlist license.',
+    applicability_requirements: [],
+    // Genuinely empty -- confirmed universal, unconditional on tier.
+    // Resolves directly_relevant (no Case 3B hedge) -- the corrected
+    // wording above is the sole safeguard for this claim, confirmed
+    // present in rendered output via the real, unmodified pipeline before
+    // this entry was added.
+    unresolved_project_dependencies: [],
+    provider_scope: ['artlist'],
+    tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
+    last_verified: '2026-09-10',
+    superseded_by: null,
+  },
+  {
+    // Music Scenario A -- Artlist Remaining Claims activation (CPR_021,
+    // 2026-09-10). See CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1's own entry
+    // above for the shared activation context. Approved as originally
+    // drafted -- no wording change. CPR_021 re-confirmed CPR_007 §8's own
+    // prior finding: the two evidence-only employer-fact dependencies
+    // below do not block eligibility -- this claim always renders via the
+    // Case 3B hedge, structurally identical to Getty's own multi-week
+    // pre-DAR history (asset_confirmed_getty et al.).
+    claim_id: 'CLAIM-MUSIC-ARTLIST-ENTERPRISE-THRESHOLD-001-v1',
+    topic: 'third_party_source_rights',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      "CRC may state Artlist's stated agency/broadcaster/>50-employee threshold and the Max Business/Enterprise requirement, including the AI-Services-only carve-out: Artlist's standard Pro/Business plans may not be sufficient for agencies, broadcasters, or larger companies, who may need a Max Business or Enterprise agreement instead. CRC must not state the user's actual employer classification or size, must not state which plan the user currently holds, and must not state whether a standard Pro/Business plan is or is not sufficient for the user's specific case.",
+    crc_candidate_statement:
+      "Artlist's standard Pro/Business plans may not be sufficient for agencies, broadcasters, or larger companies, who may need a Max Business or Enterprise agreement instead.",
+    applicability_requirements: [],
+    // Both evidence-only: self-known employer-type/size facts, not
+    // registered in dependency-askability.ts -- fail-closed by default,
+    // unchanged by this activation (flagged by FGR_006 as a plausible
+    // future DAR candidate, not performed here). Permanently gates
+    // Bounded Interpretation to relevant_applicability_unresolved (Case
+    // 3B), confirmed via the real, unmodified pipeline before this entry
+    // was added.
+    unresolved_project_dependencies: ['artlist_licensee_employer_type_confirmed', 'artlist_licensee_employer_size_confirmed'],
+    provider_scope: ['artlist'],
+    tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
+    last_verified: '2026-09-10',
+    superseded_by: null,
+  },
+  {
     // First real tool_scope-narrowed TopicClaim runtime entry (LK-7 tool
     // scope primitive; LK-9/LK-10 canonical tool identity registry, 2026-
     // 08-29; CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1 Adopted 2026-08-29,
