@@ -1543,6 +1543,8 @@ Context: Commercial Assurance evidence review of any commercial video workflow t
 
 GOVERNANCE TREATMENT (2026-08-27, PM adoption decision, following Formal Governance Review #6 — combined package, `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`): `provider_scope: ['envato-elements']` — NOT YET a valid runtime `AssetProviderId` (see Wave 3 header note above); this claim is Adopted governed knowledge but not CRC-reachable via Retrieval until `ASSET_PROVIDER_IDS` and its alias-resolution table (`extraction.ts`'s `KNOWN_ASSET_PROVIDERS`) are extended — a generic registry extension, not a music-specific one, deliberately not performed by this or any prior task in this domain. FGR_006 evidence status: SUPPORTED AS WRITTEN, independently re-fetched live (`elements.envato.com/learn/how-envato-licensing-works`) during both the FGR and this Adoption recording's own governance chain. FGR disposition: ACCEPT (no wording change).
 
+**CRC PUBLICATION APPROVED 2026-09-10** (CRC Approver: JD (PM); basis: `governance-reviews/CPR_022_ENVATO_EPIDEMIC_RECONSIDERATION_2026-09-10.md`, following the runtime-prerequisite clearance from the Envato + Epidemic Provider Registration / CPR-Readiness Remediation — `envato-elements` is now a registered `AssetProviderId` with a working extraction alias, confirmed directly, unchanged by this decision). `CPR_022` found the Adopted proposition sound, approved as originally drafted, no wording change. Activation gate: the real, unmodified pipeline was exercised (provider-gated retrieval, fail-closed on wrong/absent provider, dependency preservation, Case 3B hedge behavior, and cross-provider isolation against Epidemic Sound and Artlist) — all passed; see `CPR_022` for the full scenario set.
+
 Claim proposition: >
   Under Envato Elements' standard subscription, music items are licensed
   for use synchronized with other media (e.g. as part of a video), and
@@ -1581,25 +1583,31 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-27
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  PENDING — not yet reviewed for CRC Publication. FGR_006 recommends CRC
-  eligibility (§9), but this is a directional recommendation only, not a
-  Publication-stage decision; a separate CRC Publication Review is
-  required.
+  APPROVED FOR CRC PUBLICATION (2026-09-10, CRC Approver: JD (PM) -- see
+  CRC Approver/CRC Decision Date below; `CPR_022`, approved as originally
+  drafted, no wording change). CRC may state that Envato Elements'
+  standard license ties music use to synchronization with other media
+  (such as being part of a video) and excludes standalone
+  resale/redistribution and broadcast presentations specifically. CRC
+  must not state whether the user's own specific use constitutes
+  standalone resale or broadcast use, must not state that the user holds
+  a valid Envato Elements subscription for the track, and must not state
+  or imply the project is otherwise commercially cleared.
 
 CRC Candidate Statement: >
-  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
-  Envato's standard license ties music use to synchronization with other
-  media and excludes standalone resale and broadcast use, as a general
-  framing.
+  Envato Elements' standard license ties music use to synchronization
+  with other media, and excludes standalone resale/redistribution and
+  broadcast presentations specifically.
 
 Effective date: 2026-08-27
-Last reviewed: 2026-08-27
+Last reviewed: 2026-09-10
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-09-10
 Related: [[CLAIM-MUSIC-ENVATO-CANCELLATION-001-v1]] (same provider, same license, distinct fact)
 
 Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_022_ENVATO_EPIDEMIC_RECONSIDERATION_2026-09-10.md`
 
 ### CLAIM-MUSIC-ENVATO-CANCELLATION-001-v1
 Domain: Third-Party Source Assets / Music Licensing
@@ -1610,6 +1618,8 @@ Jurisdiction: Not a legal jurisdiction — governed by Envato Elements' current 
 Context: Commercial Assurance evidence review of a commercial video workflow whose Envato Elements subscription has since lapsed or been cancelled
 
 GOVERNANCE TREATMENT (2026-08-27, PM adoption decision, FGR #6): `provider_scope: ['envato-elements']`, same registry-gap note as CLAIM-MUSIC-ENVATO-SYNC-001-v1 above. **Wording corrected 2026-08-27, before this Adoption, per the FGR_006 integration review**: the proposition previously read "remains valid permanently, even if the subscription is later cancelled" — the cited evidence states indefinite continuation but never uses "permanently"; narrowed to "remains licensed even if the subscription later ends" to track the source exactly. The correction did not change evidence, provider_scope, dependencies, or FGR disposition (ACCEPT, unchanged). Adopted below in its corrected form only.
+
+**CRC PUBLICATION APPROVED 2026-09-10** (CRC Approver: JD (PM); basis: `governance-reviews/CPR_022_ENVATO_EPIDEMIC_RECONSIDERATION_2026-09-10.md`, same runtime-prerequisite clearance as `CLAIM-MUSIC-ENVATO-SYNC-001-v1`'s own entry above). `CPR_022` scrutinized `music_subscription_active_at_publication_confirmed` specifically (Step 5's own explicit focus): genuinely required, correctly evidence-only, structurally identical to Artlist A-3's own already-approved, already-in-production dependency — not converted to a self-attestation question. Approved as originally drafted, no wording change. Activation gate: the real, unmodified pipeline was exercised (provider-gated retrieval, fail-closed on wrong/absent provider, dependency preservation, Case 3B hedge behavior, and cross-provider isolation) — all passed; see `CPR_022`.
 
 Claim proposition: >
   Per Envato Elements' own stated policy, a music license for a project
@@ -1648,22 +1658,30 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-27
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  PENDING — not yet reviewed for CRC Publication. FGR_006 recommends CRC
-  eligibility (§9); separate CRC Publication Review required.
+  APPROVED FOR CRC PUBLICATION (2026-09-10, CRC Approver: JD (PM) -- see
+  CRC Approver/CRC Decision Date below; `CPR_022`, approved as originally
+  drafted, no wording change). CRC may state that Envato's stated policy
+  is that music used in a project completed and published while the
+  subscription was active remains licensed even after the subscription
+  ends, while new or incomplete projects after cancellation are not
+  covered. CRC must not state whether the user's own specific project was
+  actually completed and published while their subscription was active,
+  and must not state or imply the project is otherwise commercially
+  cleared.
 
 CRC Candidate Statement: >
-  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
   Envato's stated policy is that already-completed, already-published
   work stays licensed after cancellation, while new use does not.
 
 Effective date: 2026-08-27
-Last reviewed: 2026-08-27
+Last reviewed: 2026-09-10
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-09-10
 Related: [[CLAIM-MUSIC-ENVATO-SYNC-001-v1]] (same provider, same license, distinct fact)
 
 Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_022_ENVATO_EPIDEMIC_RECONSIDERATION_2026-09-10.md`
 
 ### CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1
 Domain: Third-Party Source Assets / Music Licensing
@@ -1674,6 +1692,8 @@ Jurisdiction: Not a legal jurisdiction — governed by Epidemic Sound's current 
 Context: Commercial Assurance evidence review of any commercial/advertising video workflow that incorporates a pre-existing licensed Epidemic Sound single-track music license
 
 GOVERNANCE TREATMENT (2026-08-27, PM adoption decision, FGR #6): `provider_scope: ['epidemic-sound']` — same registry-gap note as the Envato claims above. Compound proposition (Private-tier restriction + Commercial-tier's narrower restriction + Commercial-tier Monetization right) found ACCEPTABLY COMPOUND by FGR_006 — splitting would leave the Private-tier restriction reading as applying regardless of tier, which is false and is the entire point the evidence establishes. Evidence independently re-verified twice: once during the original FGR-prep milestone (initial `pypdf` extraction after an automated-summarization failure), once during FGR_006 itself (fresh download + fresh extraction, tier-section boundaries confirmed directly by text search — the paid-media restriction occurs only within the Private Tier section, zero occurrences after the Commercial Tier section header). FGR disposition: ACCEPT (no wording change). **CRC-eligibility lean: DEFER TO CRC PUBLICATION REVIEW** (FGR_006 §4 — the tier-conditional compound shape needs bespoke bounded-copy drafting before plain CRC publication; this does not affect Adoption, which is a separate, prior decision).
+
+**CRC PUBLICATION APPROVED 2026-09-10 WITH BOUNDED WORDING CORRECTION** (CRC Approver: JD (PM); basis: `governance-reviews/CPR_022_ENVATO_EPIDEMIC_RECONSIDERATION_2026-09-10.md`, PM concurrence explicitly on the corrected wording below). `CPR_022` resolved the tier-vagueness risk FGR_006 originally flagged — not by narrowing the underlying proposition, but by stating both tiers' actual rules explicitly rather than abstractly, plus bidirectional guardrails against reading either tier as a universal permission/prohibition — applied below. Activation gate: the real, unmodified pipeline was exercised across Private-tier-known, Commercial-tier-known, and tier-unresolved scenarios, plus provider-gated retrieval, fail-closed on wrong/absent provider, and cross-provider isolation — all passed; see `CPR_022`.
 
 Claim proposition: >
   Epidemic Sound's Single-Track Private Tier license excludes use in
@@ -1715,25 +1735,40 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-08-27
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  PENDING — FGR_006 explicitly recommends DEFER TO CRC PUBLICATION REVIEW
-  for this claim specifically (tier-conditional compound shape requires
-  bespoke bounded-copy drafting before plain publication). Not yet
-  reviewed.
+  APPROVED FOR CRC PUBLICATION (2026-09-10, CRC Approver: JD (PM) -- see
+  CRC Approver/CRC Decision Date below; `CPR_022` bounded tier-specificity
+  correction applied, PM concurrence explicitly on this corrected wording).
+  CRC may state that Epidemic Sound's Single-Track Private Tier license
+  excludes use in advertisements and other paid-media productions
+  (including online pre/mid/post-roll placements), that the separate
+  Commercial Tier license does not carry that same exclusion (it excludes
+  only broadcast-type content such as TV ads), and that the Commercial
+  Tier separately grants a right to monetize through third-party ads on
+  the subscriber's own published work -- and that which of these applies
+  depends on which tier the subscriber actually holds. CRC must not state
+  which tier the user's account actually holds, must not state that the
+  Private tier prohibits all commercial use (only advertising/paid-media
+  use specifically), must not state that the Commercial tier's
+  monetization right by itself clears a project commercially, and must
+  not state or imply the project is otherwise commercially cleared.
 
 CRC Candidate Statement: >
-  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
-  Epidemic Sound's own license documents distinguish tiers by
-  advertising/paid-media permission, with materially different rules
-  between Private and Commercial tiers.
+  Epidemic Sound's Single-Track Private Tier license excludes use in
+  advertisements and other paid-media productions -- but the separate
+  Commercial Tier license doesn't carry that same exclusion; it only
+  excludes broadcast-type content such as TV ads, and separately allows
+  you to monetize your own published work through third-party ads. Which
+  of these applies depends on which tier you're actually subscribed to.
 
 Effective date: 2026-08-27
-Last reviewed: 2026-08-27
+Last reviewed: 2026-09-10
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-09-10
 Related: none
 
 Full review artifact: `governance-reviews/FGR_006_MUSIC_SCENARIO_A_PACKAGE_2026-08-27.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_022_ENVATO_EPIDEMIC_RECONSIDERATION_2026-09-10.md`
 
 ### CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1
 Domain: Third-Party Source Assets / Music Licensing

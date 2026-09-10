@@ -232,8 +232,30 @@ export type AssetProviderResolution =
  * independently-timed decisions, same discipline as Storyblocks above. No
  * conversational path can produce a confirmed, canonical Pond5
  * `AssetProviderMention` as of this registration.
+ *
+ * `'envato-elements'` and `'epidemic-sound'` added 2026-09-10 (Envato +
+ * Epidemic Provider Registration / CPR-Readiness Remediation, preparing
+ * `CLAIM-MUSIC-ENVATO-SYNC-001-v1`, `CLAIM-MUSIC-ENVATO-CANCELLATION-001-v1`,
+ * and `CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1` -- all three Adopted
+ * under FGR_006, 2026-08-27, all three `crc_eligible: Pending` -- for a real
+ * CPR reconsideration): identity registration ONLY, same generic mechanism
+ * as every entry above. Unlike Storyblocks/Pond5, this registration DOES
+ * add matching `KNOWN_ASSET_PROVIDERS` extraction aliases in the same
+ * change (mirroring the Artlist precedent instead) -- these three claims'
+ * eventual usefulness to a CRC beta user depends on real conversational
+ * reachability, not merely type-level testability, per this remediation's
+ * own explicit scope. Registering these two identifiers is independent of
+ * any of the three Music claims' own CRC-publication status -- this
+ * registration changes `crc_eligible` on none of them, and adds no
+ * `TopicClaim` fixture entry for any of them; see CPR_007's own confirmation
+ * (cited on every Music claim's own GOVERNED-CLAIMS.md entry) that runtime
+ * reachability and CRC eligibility are separately governed. Both new
+ * identifiers require passing `NEW_IDENTITY_CANONICALIZATION_READINESS`
+ * evidence (`lib/crc-engine/canonicalization-readiness.ts`) -- registered
+ * after the 2026-09-01 LK-94 grandfather cutover, so neither is
+ * grandfathered.
  */
-export const ASSET_PROVIDER_IDS = ['getty', 'istock', 'shutterstock', 'adobe-stock', 'artlist', 'storyblocks', 'pond5'] as const
+export const ASSET_PROVIDER_IDS = ['getty', 'istock', 'shutterstock', 'adobe-stock', 'artlist', 'storyblocks', 'pond5', 'envato-elements', 'epidemic-sound'] as const
 
 export type AssetProviderId = (typeof ASSET_PROVIDER_IDS)[number]
 

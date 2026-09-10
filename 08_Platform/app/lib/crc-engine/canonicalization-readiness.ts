@@ -195,6 +195,15 @@ export const NEW_IDENTITY_CANONICALIZATION_READINESS: readonly CanonicalizationR
   // Matrix section header exists for this TopicClaim-only identity, matching
   // the Synthesia precedent's own sourcing rule.
   { kind: 'tool', identifier: 'stability-ai', representativeExpression: 'Stability AI' },
+  // 'envato-elements' / 'epidemic-sound' (Envato + Epidemic Provider
+  // Registration / CPR-Readiness Remediation, 2026-09-10): TopicClaim-origin
+  // provider identities, no Matrix row for either. Representative
+  // expressions are each identity's own full, official product name, per
+  // LK-93 §G, matching exactly what every governed claim's own Source
+  // references call them ("Envato Elements", "Epidemic Sound") -- not the
+  // bare, deliberately-unregistered "Envato" company name.
+  { kind: 'provider', identifier: 'envato-elements', representativeExpression: 'Envato Elements' },
+  { kind: 'provider', identifier: 'epidemic-sound', representativeExpression: 'Epidemic Sound' },
 ]
 
 /**
