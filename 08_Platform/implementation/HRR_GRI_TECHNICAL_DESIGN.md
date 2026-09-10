@@ -1,6 +1,6 @@
 # HRR V1 / Governed Research Interface — Technical Design
 
-**Status:** `DESIGNED / NOT IMPLEMENTED` — source-backed design for CAH-4G. No runtime code, tests, migrations, or audit fields exist. PM review gates implementation.
+**Status:** `ARCHITECTURE FROZEN / NOT IMPLEMENTED` (frozen 2026-09-10). Sections A–R are the design narrative; **§S (Architecture Freeze), §T (Resolved open questions), §U (Implementation contract), §V (Frozen UAT)** are the binding implementation contract — an implementation agent follows them and makes no architecture decisions while coding. No runtime code, tests, migrations, or audit fields exist. One genuinely-open item: `HRR_MAX_RESOLVED_TOPICS` (§T-4, recommended default 2) — a bounded implementation experiment, not an architecture blocker.
 **Date:** 2026-09-10
 **Source basis:** `origin/main` = `238670c` (every file/type/line referenced was read at this commit).
 **Product spec (the *what*):** `08_Platform/prds/PRD_CAH_4G_HRR.md`. **Durable decision:** `08_Platform/app/lib/reviewer-lk/ADR-002-governed-research-interface.md`. **Authority firewall inherited:** `ADR-001-reviewer-resources-authority-boundary.md`.
@@ -14,24 +14,27 @@
 2. **The model classifies and maps; it never answers.** Its entire influence is choosing which governed topics/scope a deterministic pipeline then processes.
 3. **Fail closed at every structured/model/governance boundary.**
 4. **Extract only the smallest honest shared contract** needed for HRR V1. No abstraction for symmetry.
-5. **Zero CRC change.** `lib/crc-engine/**`, `lib/interview-engine/**` (except a possible *additive* generalization of one Bounded-Interpretation input type — §H), CRC routes, CRC UI: untouched.
+5. **Zero CRC change.** `lib/crc-engine/**`, `lib/interview-engine/**` (except the FROZEN additive `BiIntent`/`BiResult` generalization of `buildBoundedInterpretations` — §S-5/§U slice 1, requires CRC regression proof), CRC routes, CRC UI: untouched.
 
 ## A. Entry modes
 
 ```
-TOPIC PATH  (research_mode = 'topic_pick')  — unchanged CAH-4E, 0 model calls
+TOPIC PATH  (research_mode = 'topic_pick')  — 0 model classification calls
   chip click → GoalCategory
             → ExplicitResearchIntent { source_kind:'topic_selection', topic, scope:'informational' }
             → GRI pipeline
 
-FREE-FORM PATH  (research_mode = 'question')  — new, exactly 1 model call
-  reviewer question (verbatim) 
-            → interpretResearchIntent()  [ONE bounded structured LLM call]
+FREE-FORM PATH  (research_mode = 'question')  — exactly 1 classify-only model call
+  reviewer question (verbatim, UNTRUSTED — §L)
+            → interpretResearchIntent()  [ONE bounded structured LLM call — classifies/maps, NEVER answers]
             → PermittedResearchIntent { intent, resolved_topics[], scope, unresolved_ambiguity[] }
             → authority gate (§D)
-            → for each resolved topic: ExplicitResearchIntent { source_kind:'interpreted_question', topic, scope, source_text_ref }
+            → for each resolved topic (max HRR_MAX_RESOLVED_TOPICS, frozen default 2 — §T-4):
+              ExplicitResearchIntent { source_kind:'interpreted_question', topic, scope, source_text_ref }
             → GRI pipeline
 ```
+
+**Frozen topic-path contract (§S).** The topic path is **not** "byte-identical to CAH-4E" — it now also flows through Bounded Interpretation + HRR composition (intentional CAH-4G product evolution). What is **frozen unchanged** for the topic path: 0 model classification calls; `evaluateReviewerEligibility` authority; `selectReviewerClaims` selection authority (byte-identical calls); `evaluateApplicabilityDetailed` (`met`/`unresolved`/`not_met`, never collapsed); no inferred project facts; no assessment authority; audit-before-content; the same `GoalCategory` topic identifiers. What **evolves**: the presentation/interpretation layer only — BI status + consultative framing + navigation. Every governed proposition CAH-4E surfaced is still surfaced verbatim.
 
 **GRI pipeline (identical for both modes):**
 ```
@@ -41,7 +44,7 @@ ExplicitResearchIntent[]
   → Bounded Interpretation     buildBoundedInterpretations(BiIntent[], …)   (lib/bounded-interpretation/ — REUSED via §H adaptation)
   → consultative composition   projectHrrResearchAnswer()                   (NEW, thin, deterministic, no model call — §I)
   → provenance / projection    HrrResearchAnswer                            (NEW type — §J)
-  → append-only access audit   recordHrrResearchAccess()                    (audit contract §K — reuse lk_research, decision deferred)
+  → append-only access audit   recordHrrResearchAccess()                    (audit contract §K FROZEN — reuse lk_research + additive nullable enrichment)
 ```
 
 **Convergence point:** both modes converge at `ExplicitResearchIntent[]` — *before* retrieval. Everything downstream is shared and model-free.
@@ -139,14 +142,21 @@ The generic deterministic evaluator `evaluateApplicabilityDetailed` (`lib/retrie
 
 **Current:** `buildBoundedInterpretations(goals: UserGoal[], results: RetrievalResult[], diagnostics?, humanContributionDescription?)` (`build-bounded-interpretation.ts:172`). It reads only `goal.{superseded_by, state, scope, category, goal_id, raw_text}`.
 
-**Recommended (RECOMMENDATION — decision deferred, §T-2): additive generalization of the input type.**
+**FROZEN (OQ-2, §T-2): additive generalization of the input type.** `buildBoundedInterpretations` takes `BiIntent[]`; CRC adapts through a one-line `userGoalsToBiIntents` adapter; HRR builds `BiIntent` directly. CRC `UserGoal`s stay genuine `UserGoal`s; HRR research intents stay genuine research intents. The alternative (HRR-local rule re-application) is **rejected** — it would create a second place the four-status rule table lives.
 - Introduce `BiIntent` — the minimal shape BI needs:
   ```ts
   interface BiIntent { intent_id: string; intent_text: string; category: GoalCategory; scope: GoalScope }
   ```
 - `buildBoundedInterpretations` accepts `BiIntent[]` instead of `UserGoal[]`. **CRC is unaffected**: add a one-line adapter `userGoalsToBiIntents(goals: UserGoal[]): BiIntent[]` that filters `superseded_by === null && state === 'confirmed'` (the exact filter BI already applies internally, line 178) and maps `{goal_id→intent_id, raw_text→intent_text, category, scope}`. CRC's call site changes from `buildBoundedInterpretations(goals, …)` to `buildBoundedInterpretations(userGoalsToBiIntents(goals), …)` — **zero behavior change, provable by the existing BI test suite** (`__tests__/bounded-interpretation/**`).
-- HRR builds `BiIntent` directly from `ExplicitResearchIntent` (`intent_id` = a per-request id, `intent_text` = the reviewer's verbatim question or the topic label, `category` = `intent.topic`, `scope` = `intent.scope`). **No synthetic `UserGoal`.**
+- HRR builds `BiIntent` directly from `ExplicitResearchIntent` (`intent_id` = a per-request id; `intent_text` = for a topic pick, the fixed topic label; for a question, the attributed quotation — **used only as `BoundedInterpretation.goal_text` which BI renders verbatim and never transforms**, per `build-bounded-interpretation.ts:391` + the PM revision-6 note; `category` = `intent.topic`; `scope` = `intent.scope`). **No synthetic `UserGoal`.**
 - HRR provenance (`interpreted`, `source_kind`, `source_text_ref`) is carried alongside by the HRR caller, keyed by `intent_id` — it never enters `BiIntent` or BI.
+
+**Second adaptation boundary — results (FROZEN).** `buildBoundedInterpretations` also reads a `RetrievalResult[]` and (verified at `238670c`) touches exactly these fields per result: `matched_goal_category` (the §198 filter), `unresolved_project_dependencies`, `claim_id`, `candidate_statement`, `match_origin` (checks `=== 'related_topic'`), `source_fact.kind` (checks `=== 'tool'`). HRR's selector emits `ReviewerLkClaim[]`, not `RetrievalResult[]`, so a pure adapter **`reviewerClaimToBiResult(claim, topic): BiResult`** is required. Frozen mapping: `matched_goal_category = topic`; `candidate_statement = claim.statement`; `claim_id`, `unresolved_project_dependencies` verbatim; `match_origin = 'exact_topic'` (HRR V1 has no related/discovered path); `source_fact = { kind: 'topic' }` (a topic-sourced claim — the tool-specific template clauses correctly do not fire). Freeze `BiResult` as the same minimal 6-field subset (not the full `RetrievalResult`) so BI's input is one small shared contract, mirroring `BiIntent`.
+
+**Frozen BI-input semantics for HRR:**
+- **`diagnostics` is always `[]`** for HRR. CAH-4E's `selectReviewerClaims` *surfaces* a topic-matched claim regardless of applicability status (it never produces an `applicability_unmet` diagnostic the way CRC's `retrieve()` does). So **Case 3A (formal-gate-unmet → claim withheld) never fires for HRR** — HRR does not withhold; it shows the claim with its `unresolved` requirement verbatim ("not a negative finding"). Case 3B (`relevant_applicability_unresolved` via `unresolved_project_dependencies.length > 0`) **does** apply and is wanted.
+- **`not_met` claims.** A claim with any `not_met` requirement (fact confirmed-false → the claim provably does not apply) is **not** fed to BI as a responsive match. It is carried in `HrrResearchAnswer` in a separate "governed knowledge that does not apply to this submission" block — verbatim `statement` + the failing requirement — shown for transparency, never woven into the direct answer. Claims with only `met` and/or `unresolved` requirements feed BI normally.
+- The per-requirement `met`/`unresolved`/`not_met` outcomes always ride alongside in `HrrResearchAnswer.per_topic[].governed_propositions[].applicability_outcomes` — never collapsed into `bi_status`, never into pass/fail.
 
 **Alternative (if the generalization is judged too invasive for V1):** an HRR-local `buildHrrInterpretation()` that imports only `lib/bounded-interpretation/rules.ts` (the fixed templates) + `INTERPRETATION_STATUSES` + `BoundedInterpretation` type — **not** `build-bounded-interpretation.ts` logic — and re-applies the same four-status rule table for HRR's inputs. This is a *second small rule application*, not a second engine, and it risks drift from `rules.ts` updates. **The recommended generalization is preferred** precisely because it keeps one rule table.
 
@@ -167,13 +177,22 @@ The generic deterministic evaluator `evaluateApplicabilityDetailed` (`lib/retrie
         CRC answer               HRR answer
 ```
 
-**V1 implementation: deterministic / template-based `projectHrrResearchAnswer()` (NEW, `lib/reviewer-lk/`, no model call).** It assembles the `HrrResearchAnswer` from: verbatim governed `statement`s + `BoundedInterpretation.summary_blocks` + fixed per-status templates + the reviewer's verbatim question + mechanical enumerations of `claim_id` / `status` / `requirement`.
+**V1 implementation: deterministic / template-based `projectHrrResearchAnswer()` (NEW, `lib/reviewer-lk/`, no model call).** It assembles the `HrrResearchAnswer` from: verbatim governed `statement`s + `BoundedInterpretation.summary_blocks` + fixed per-status templates + mechanical enumerations of `claim_id` / `status` / `requirement`. The reviewer's question is carried **only** as an attributed quotation string (`HrrResearchAnswer.question_text`) — it is displayed, never a factual grounding source (§L, `ADR-002`).
 
-**Shared-primitive opportunity (evaluate, do not force in V1):** `lib/crc-engine/consultative-answer-plan.ts` (`buildConsultativeAnswerPlan`) is already deterministic, no-LLM, carries **no governed prose** (only `claim_id` refs + verbatim `summary_blocks`), and produces per-goal sections + neutral `unresolved_items` + `MissingEvidenceClassification` + `RulesBoundaryId` refs + explicit-vs-discovered split. **Caveat:** it reads two `lib/crc-engine/` askability registries (`dependency-askability.ts`, `selector-askability.ts`) to classify missing evidence, pulling a (read-only, type-mostly) crc-engine dependency into the reviewer path. **V1 recommendation: write the smaller HRR-local composer** — HRR needs less than CRC's plan (no askability, no CRC bridge, no email projection) — and revisit extracting a genuinely shared `consultative-composition-core` **after** HRR ships and CRC's own needs are re-examined (§R). This avoids a speculative refactor.
+**FROZEN (OQ-3, §T-3): HRR V1 composition is deterministic / template-based after BI. No second LLM composition call.** `projectHrrResearchAnswer()` reads only the already-built `BoundedInterpretation[]` + the `ReviewerLkClaim[]` (for verbatim `statement` + applicability outcomes + provenance refs) + `withheld[]` + the attributed question quotation, and applies fixed templates. It **does not** re-read retrieval, re-classify askability, re-evaluate applicability, or touch Bounded Interpretation.
 
-**The durable composition invariant (`ADR-002`):** composition may express **only** semantic content permitted by Bounded Interpretation and traceable to governed propositions / permitted structured outputs. "Templates forever" is **not** the invariant — a future HRR composer could use a bounded model stage *if* every substantive sentence still traces to a governed proposition / BI output and passes a grounding check.
+**Not built in V1 — the `buildConsultativeAnswerPlan` reuse.** `lib/crc-engine/consultative-answer-plan.ts` is deterministic and carries no governed prose, but it reads two `lib/crc-engine/` askability registries — pulling a crc-engine dependency into the reviewer path. HRR needs less than CRC's plan (no askability classification, no CRC bridge, no email projection). Extracting a genuinely shared `consultative-composition-core` is a **separate future decision** (§R), taken only after HRR's V1 composer and CRC's plan builder are both known real consumers.
 
-**Answer grounding rule (test-enforced):** every substantive sentence in a composed HRR answer is (a) a verbatim governed `statement`, (b) a fixed template string, (c) the reviewer's own verbatim question, or (d) a mechanical enumeration of `claim_id` / `status` / `requirement` values.
+**The durable composition invariant (`ADR-002`, FROZEN as semantic — not implementation-specific):** *composition may express only semantic content permitted by Bounded Interpretation and traceable to governed propositions / permitted structured outputs.* "Templates forever" is **not** the architecture — a future HRR composer *may* use a bounded model stage **if** every substantive proposition still traces to grounding source A–E and passes the grounding test.
+
+**Answer grounding rule (FROZEN — test-enforced; `ADR-002` authoritative).** Every HRR **substantive factual proposition** traces to exactly one of:
+- **(A)** governed Living Knowledge permitted for HRR (a verbatim `TopicClaim.crc_candidate_statement`);
+- **(B)** deterministic applicability / permitted structured submission context (`met`/`unresolved`/`not_met` outcomes, `resolved_tool_ids`, `jurisdiction_included`), accurately characterized;
+- **(C)** a `BoundedInterpretation` output (`summary` / `summary_blocks`) derived from permitted governed inputs;
+- **(D)** a fixed authority / limitation / navigation template string;
+- **(E)** a mechanical provenance / status enumeration (`claim_id`, `governed_claims_reference`, requirement identifiers, status values).
+
+**Reviewer-authored text grounds INTENT provenance only** — it may appear as an attributed quotation and may drive the classifier's structured output; it may **never** substantiate a factual proposition, become governed truth by repetition, or override Living Knowledge / applicability / BI. A false premise in the question (e.g. *"Since Veo gives us copyright ownership…"*) is never echoed as fact.
 
 ## J. Provenance / projection
 
@@ -205,9 +224,31 @@ interface HrrResearchAnswer {
 
 **Original reviewer action preserved:** `research_mode`, `intent_origin` per topic (`topic_selection` vs `interpreted_question`), `authority_note`. Explicit reviewer intent is never merged with system-expanded relevance — a future discovered-relevance block would be a *separate* `per_topic` entry with `intent_origin` marked accordingly (§ compatibility only, not built in V1).
 
-## K. Audit / privacy — compare, recommend, do NOT implement
+## K. Audit / privacy — FROZEN contract (migration is an implementation requirement, not created here)
 
-Current: `crc_context_access_events`, `CHECK access_kind IN ('transcript', 'lk_research')` (migrations `20260909010000`, `20260910000000`); row = access fact only (actor, submission, time); `lk_research` rows leave `association_id` / `crc_session_id` NULL. The `access_kind` vocabulary is *"explicitly designed to be"* extended.
+Current CAH-4E audit (verified at `238670c` — `route.ts` §12 comment + `repository.ts`): `crc_context_access_events`, `CHECK access_kind IN ('transcript', 'lk_research')` (migrations `20260909010000`, `20260910000000`); row = access fact only (actor, submission, time); `lk_research` rows leave `association_id` / `crc_session_id` NULL. The `access_kind` vocabulary is *"explicitly designed to be"* extended.
+
+### Audit-before-content execution order (FROZEN — extends, does not weaken, the CAH-4E guarantee)
+
+CAH-4E's route order is: (1) authorize; (2) validate request; (3) select governed results **into memory** (no audit); (4) **persist the `lk_research` audit — throws on failure**; (5) **only then** return governed content. On audit-persistence failure → **503, zero governed content**.
+
+HRR's frozen order is a **superset** of that — internal computation may occur before the audit write *only where it is needed to know what must be audited*, and **no governed content leaves the server before the audit row is durably persisted:**
+
+```
+1. authenticate / authorize reviewer               checkReviewerContextAccess()  — fail → 401/403, no audit
+2. receive the explicit reviewer action            topic pick  OR  free-form question
+3. classify intent (free-form only)                interpretResearchIntent()  — 1 model call; fail-closed → 'unsupported'
+                                                    (the classifier returns NOTHING to the reviewer; its result is audit metadata)
+4. authority gate + resolve permitted topic(s)     hrrAuthorityGate()  — assessment_judgment/unsupported → offered-paths only, skip 5–8
+5. governed selection + applicability + BI          selectReviewerClaims() per topic → reviewerClaimToBiResult → buildBoundedInterpretations
+                                                    — all IN MEMORY, nothing returned yet
+6. determine structured audit metadata             { research_mode, resolved_topics, question_intent, governed_claim_ids }
+7. PERSIST the lk_research audit event              recordHrrResearchAccess()  — THROWS on failure
+      audit persistence fails  →  FAIL CLOSED  →  return NO governed claim content, NO HRR substantive answer (503 / bounded error)
+8. ONLY THEN                                        projectHrrResearchAnswer()  →  return HrrResearchAnswer to the reviewer
+```
+
+The classifier call at step 3 is not governed content and returns nothing to the reviewer; incurring its cost before the audit persists is acceptable (a failed audit discards the classification and exposes nothing). **The CAH-4E audit-before-content guarantee is preserved and strengthened** (HRR additionally audits *which governed claims* were accessed).
 
 | Option | What | Migration? | Verdict |
 |---|---|---|---|
@@ -216,7 +257,7 @@ Current: `crc_context_access_events`, `CHECK access_kind IN ('transcript', 'lk_r
 | **C. separate detail record linked to the access event** | `crc_context_access_events` row (unchanged) + a `hrr_research_query_details` row FK'd to it | **yes (1 migration, new table)** | ⚠️ more moving parts; only worth it if detail retention policy must differ from the access-fact retention policy. |
 | **D. structured payload in an existing JSONB column** | if `crc_context_access_events` has an unconstrained JSONB `details`/`metadata` column (it does **not** today — verified), stash the structured resolution there | n/a | not available |
 
-**Recommendation:** **B**, with a hard rule: **the raw free-form question is not persisted by default.** Store `resolved_topics` (governed enum values — safe), `question_intent` (`research` / `assessment_judgment` / `unsupported`), `research_mode`, and `governed_claim_ids` (the "governed content access" fact). The reviewer question is reviewer-authored (lower risk than customer text) but may still quote submission/customer detail or PII; the structured resolution fully satisfies auditability without retaining free text. If a future audit/legal requirement for verbatim questions emerges, add it behind an **explicit retention decision** (hashed, or a separately-access-controlled column) — a new milestone, not CAH-4G. **Audit-before-content** is preserved: the access record persists before any composed answer is returned; failure → 503, zero content. **This decision is not implemented in this task.**
+**FROZEN (OQ-1, §T-1): Option B.** `access_kind` stays `'lk_research'` (no new value, no CHECK change). One **additive, nullable, no-backfill** migration adds four columns to `crc_context_access_events`: `research_mode text` (`'topic_pick'` \| `'question'`), `resolved_topics text[]` (governed `GoalCategory` enum values), `question_intent text` (`'research'` \| `'assessment_judgment'` \| `'unsupported'`), `governed_claim_ids text[]`. **The raw free-form question is never persisted** — not by default, not for debugging, not as a transcript. The structured resolution fully satisfies "actor + submission + explicit action + research-request provenance + governed content access". Any future verbatim-question retention (eval dataset, legal hold) is a **separate explicit privacy/data-governance decision**, not CAH-4G. The existing `crc_context_access_events` CHECK, RLS, and `authority-firewall` tests are unaffected (additive nullable columns). **This migration is an implementation requirement, not created in this task.**
 
 ## L. Trust / prompt-injection boundaries
 
@@ -234,9 +275,9 @@ Current: `crc_context_access_events`, `CHECK access_kind IN ('transcript', 'lk_r
 
 HRR V1 retrieval reads **only** the submission's own authoritative structured facts. It does **not** read `crc_assurance_associations`, CRC structured project context, or CRC transcript — automatically or by default. UI adjacency (both tabs in the inspector) is not retrieval authority. The Reviewer LK ↔ Linked CRC Context separation stays authoritative and independently audited (`lk_research` vs `transcript`). Future explicit contextual inclusion = a separate architecture decision with its own provenance + evidence-boundary analysis.
 
-## N. State — single-turn semantic model
+## N. State — single-turn semantic model (FROZEN, OQ-6)
 
-**Carried between questions: nothing (semantically).** Each question — topic or free-form — is independently interpreted against the *current* submission structured facts. No server session, no `crc_sessions`-style state, no question history in the model context, no "prior answer influences next retrieval".
+**Carried between questions: nothing (semantically).** Each question — topic or free-form — is independently interpreted against the *current* submission structured facts. No server session, no `crc_sessions`-style state, no question history in the model context, no "prior answer influences next retrieval", **no server-side semantic conversation state at all**.
 
 **Not carried:** prior questions, prior answers, prior resolved topics, prior BI outputs, conversational corrections.
 
@@ -282,6 +323,77 @@ The smallest honest shared contracts, in likely order of extraction (each is a *
 
 ---
 
+## S. Architecture Freeze (2026-09-10) — the binding contract
+
+| # | Frozen decision |
+|---|---|
+| S-1 | **Converged pipeline.** Both entry modes produce `HrrResearchAnswer` via one internal `runHrrResearch()`. Topic mode = the converged pipeline minus the classifier. `GET /api/admin/submissions/[id]/reviewer-lk?topic=<GoalCategory>` is superseded by `runHrrResearch({ mode:'topic', topic })`; the free-form route is `POST /api/admin/submissions/[id]/reviewer-lk/research` calling `runHrrResearch({ mode:'question', question })`. The CAH-4E `ReviewerLkLookupResult` response shape is retired in favor of `HrrResearchAnswer`; the CAH-4E `route-and-audit` / `projection` / `presentation` tests are updated (a new milestone may change them). |
+| S-2 | **Topic path — unchanged authority spine** (see §A frozen contract): 0 model classification calls; `evaluateReviewerEligibility`; `selectReviewerClaims`; `evaluateApplicabilityDetailed`; no inferred facts; no assessment authority; audit-before-content; same `GoalCategory` identifiers. **Evolves:** presentation only (BI + composition). |
+| S-3 | **Free-form path — exactly one classify-only model call** (`interpretResearchIntent`). Structured enum-bounded output; no answer prose; recovery retry only per the existing structured-output reliability policy (`callWithStructuredOutputRecoveryRetry`); **fail closed to `intent:'unsupported'`** if a valid permitted structured interpretation cannot be obtained. |
+| S-4 | **Trust / grounding** (§I frozen rule, `ADR-002`): reviewer text is untrusted; it grounds INTENT provenance only; every substantive factual proposition traces to grounding source A–E; a false premise is never echoed as fact. |
+| S-5 | **BI adaptation** (§H FROZEN): `buildBoundedInterpretations` takes `BiIntent[]` (`{intent_id, intent_text, category, scope}`) + a `BiResult[]` (`{matched_goal_category, unresolved_project_dependencies, claim_id, candidate_statement, match_origin, source_fact_kind}`). CRC adapts via `userGoalsToBiIntents` (1-line call-site change, zero behavior change). HRR adapts via `reviewerClaimToBiResult`. No synthetic `UserGoal`; no HRR-local BI rule table. `diagnostics` always `[]` for HRR. `not_met` claims are excluded from BI matches and shown in a separate "does not apply" block. |
+| S-6 | **Composition** (§I FROZEN, OQ-3): deterministic/template `projectHrrResearchAnswer()`; **no second model call**; grounding-test-enforced. The durable invariant is semantic ("only what BI permits, traceable to grounding A–E"), not "templates forever". |
+| S-7 | **Authority gate** (§D, §J FROZEN): `research` → pipeline; `assessment_judgment` + explicit topic → decline the decision + research the named topic(s) with `scope:'determination_request'` (→ `determination_declined`); `assessment_judgment` + no topic → decline + offer research paths; `unsupported` → fixed "try a topic". **Never** a yes/no on approval/clearance/control/outcome. **Never** an invented "closest topic". Mixed → decline **and** research the explicit portion, structurally separated. |
+| S-8 | **Audit** (§K FROZEN, OQ-1): reuse `access_kind='lk_research'` + one additive nullable migration (`research_mode`, `resolved_topics`, `question_intent`, `governed_claim_ids`). **Raw question never persisted.** Audit-before-content order per §K; audit failure → 503, zero content. |
+| S-9 | **Single-turn** (§N FROZEN, OQ-6): nothing carried semantically between questions; no server-side conversation state; client-only scrollback is "history you can see", not "history that reasons". No raw-question / debug / transcript retention. |
+| S-10 | **Linked CRC Context** (§M FROZEN, OQ-… / Task 9): **no automatic participation** — no transcript, no CRC conversation history, no silent CRC structured-context ingestion. UI adjacency ≠ retrieval authority. Future explicit inclusion = a separate architecture decision. |
+| S-11 | **CRC boundary** (§R, Task 8 FROZEN): CAH-4G changes **no** CRC file — no CRC topic selectors, no CRC input redesign, no CRC composition change. CRC stays free-form during the pilot deliberately. GRI convergence with CRC is documented (§R) but **not implemented**; CRC changes only on CRC's own usage evidence. |
+| S-12 | **Reviewer eligibility** (§F FROZEN): `evaluateReviewerEligibility` only (lifecycle + reviewer `publication_scope` + supersession). `crc_eligible` / `crc_publication_scope` never gate or render. |
+| S-13 | **Likeness coverage** (OQ-7 FROZEN): 0 reviewer-eligible `TopicClaim`s for `likeness` does **not** block HRR V1. A `likeness` topic/question returns the bounded equivalent of "outside current governed coverage" (`bi_status: outside_current_coverage`). This is a governed-knowledge backlog item, not an orchestration patch. **No `likeness` claim added in this milestone.** |
+| S-14 | **Classifier model/provider** (OQ-8 FROZEN): inherits the interview-engine adapter pattern — `DEFAULT_MODEL = 'claude-sonnet-5'`, env override `HRR_INTENT_CLASSIFIER_MODEL`, `ANTHROPIC_API_KEY`. No new HRR-specific model *architecture*. Exact model choice is an implementation cost/quality-eval parameter (§V-7), not a blocker. |
+| S-15 | **Authorization rollout** (OQ-9 FROZEN): `checkReviewerContextAccess()` (`is_admin`) is acceptable for **internal HRR V1 / pilot**. A dedicated reviewer role/grant is **required before broader reviewer rollout** — and per `auth.ts`'s own note, only that file changes then. CAH-4G is **not** a role/authorization redesign. |
+| S-16 | **The GRI pipeline** is `ExplicitResearchIntent[] → governed retrieval → deterministic applicability → Bounded Interpretation → HRR consultative composition → HRR projection → audit`. No downstream layer expresses a conclusion stronger than Bounded Interpretation permits. |
+
+## T. Resolved open questions
+
+| OQ | Decision | Source-backed reason | Implementation implication |
+|---|---|---|---|
+| **T-1 Audit storage** | **Reuse `access_kind='lk_research'` + 1 additive nullable migration** (Option B). Raw question never persisted. | `crc_context_access_events` has no JSONB column (Option D unavailable); the `access_kind` vocabulary is designed to extend but a *new value* is unnecessary — the same "governed content access" fact is being recorded; a separate detail table (Option C) adds moving parts with no retention-policy difference. | One migration file (implementation requirement). `recordHrrResearchAccess()` writes the 4 columns. `authority-firewall` tests extend to assert no raw-question column. |
+| **T-2 BI generic input** | **`BiIntent` + `BiResult` minimal shared contracts.** `buildBoundedInterpretations(BiIntent[], BiResult[], diagnostics?, humanContributionDescription?)`. | Verified fields BI reads: goals → `{superseded_by, state, scope, category, goal_id, raw_text}`; results → `{matched_goal_category, unresolved_project_dependencies, claim_id, candidate_statement, match_origin, source_fact.kind}`. Nothing more. | `lib/bounded-interpretation/build-bounded-interpretation.ts` signature change (CRC-shared — regression proof required, §U slice 1). `userGoalsToBiIntents` + `reviewerClaimToBiResult` adapters. |
+| **T-3 V1 composition** | **Fully deterministic / template-based. No second LLM call.** Durable invariant stays semantic, not "templates forever". | `project-reviewer-claims.ts` (CAH-4E) is already a deterministic passthrough; `rules.ts` + `summary_blocks` already provide fixed, verbatim-quoting copy; a model composer adds a grounding-verification burden with no V1-required benefit. | `projectHrrResearchAnswer()` reads only already-built BI + claims + templates. `hrr-projection.test.ts` enforces grounding A–E. |
+| **T-4 Free-form multi-topic maximum** | **`HRR_MAX_RESOLVED_TOPICS = 2` (recommended default — the one genuinely-open item; a bounded implementation experiment may raise it).** | The governed topic universe has 5 topics; the only evidenced multi-topic reviewer question shape names exactly 2 ("does commercial-use permission tell me anything about copyright ownership?"). 3+ topics produces an answer too large for the inspector rail (280–420px) and dilutes the direct response. Each extra topic is a cheap deterministic `selectReviewerClaims` pass, so the cost of a low cap is only UX, not correctness. | Classifier schema caps `resolved_topics` at `MAX`. If `intent:'research'` resolves >MAX distinct topics → keep the first MAX (by governed enum order) + a bounded "your question spans several topics; researched: X, Y" note. The classifier **never invents** a topic absent from permitted interpretation. **Recommend a bounded 2-week HRR-internal experiment measuring how often reviewers hit the cap before changing it.** |
+| **T-5 Mixed judgment + research** | **Decline the decision; preserve reviewer authority; research only the explicitly-supported permitted topic(s); structurally separate the refusal from the research; never yes/no; never invent a topic. No surviving explicit topic → decline + offer paths.** | `build-bounded-interpretation.ts:185` checks `scope === 'determination_request'` **before** any matching → `determination_declined` for that topic regardless of whether a claim exists; a topic explicitly named in a mixed question survives the gate as an `ExplicitResearchIntent`. | `hrrAuthorityGate()` returns `{ authority_note:'assessment_judgment_redirected', researched_intents: [<explicit topics>] , offered_paths: <if none> }`. `HrrResearchAnswer` renders the refusal block first, then the per-topic research, visually separated. |
+| **T-6 Raw-question persistence** | **None for V1** — no default, no debug retention, no hidden transcript, no history-for-convenience. Structured derived metadata per T-1 only. | Reviewer text may quote submission/customer PII; auditability is fully met by the structured resolution; there is no V1 requirement for verbatim capture. | Any future raw-question dataset = a separate explicit privacy/data-governance milestone. |
+| **T-7 Likeness coverage** | **Does not block HRR V1.** Return the bounded "outside current governed coverage" equivalent. | `TOPIC_CLAIMS_FIXTURE` at `238670c` has 0 `likeness` claims; the one `likeness` claim is tool-scoped in `MATRIX_FIXTURE` and withheld under CRC Publication Policy Principle 3 (governance decision, not a code gap). | `bi_status: outside_current_coverage` for `likeness`; a governed-knowledge backlog ticket, not an HRR change. |
+| **T-8 Classifier model/provider** | **Inherit the interview-engine adapter config pattern.** One classify-only call max per free-form action; enum-bounded output; existing retry policy; fail closed. | `anthropic-extractor.ts` / `anthropic-candidate-question.ts` / `anthropic-decision.ts` all use `DEFAULT_MODEL='claude-sonnet-5'` + a per-job env override + `ANTHROPIC_API_KEY`. | New adapter `interpret-research-intent.anthropic.ts` mirroring `anthropic-extractor.ts`; `HRR_INTENT_CLASSIFIER_MODEL` env var; a mock adapter for tests. Model choice = a V-7 cost/quality eval parameter. |
+| **T-9 Reviewer authorization** | **`is_admin` OK for internal V1 / pilot; dedicated grant required before broader rollout; only `auth.ts` changes then.** | `checkReviewerContextAccess()` is `is_admin` with an explicit "FUTURE: dedicated reviewer grant, ONLY this file changes" note; no dedicated grant exists in source today. | No auth change in CAH-4G. The rollout boundary is a documented gate, not a code task. |
+
+**Genuinely still open:** only **T-4** (the exact `HRR_MAX_RESOLVED_TOPICS` value) — and the recommendation is to ship with `2` and run a bounded internal experiment. Nothing else is open; the remaining choices are ordinary implementation choices, not architecture.
+
+## U. Implementation contract — dependency-ordered slices (do NOT implement here)
+
+Each slice is independently reviewable and independently revertible. **No slice ships CRC behavior change.**
+
+| # | Slice | Files expected to change | Authority invariant | Tests required | Non-goals | CRC code touched? |
+|---|---|---|---|---|---|---|
+| **1** | **BI input adaptation boundary** | `lib/bounded-interpretation/types.ts` (`BiIntent`, `BiResult`), `build-bounded-interpretation.ts` (signature `UserGoal[]→BiIntent[]`, `RetrievalResult[]→BiResult[]`), a new `lib/bounded-interpretation/adapters.ts` (`userGoalsToBiIntents`), CRC call site in `lib/crc-engine/run-crc-conversation.ts` (1-line: wrap `goals` / map results) | BI reads only the frozen minimal fields; no new inference; `determination_declined` still fires on `scope` before matching | **CRC regression proof: the full `__tests__/bounded-interpretation/**` + `__tests__/crc-engine/run-crc-conversation*.test.ts` pass byte-for-byte before/after (established via an isolated baseline worktree at the same parent).** New adapter unit tests. | no new BI status; no HRR logic yet; no HRR type | **YES** — `run-crc-conversation.ts` call site (1 line) + `build-bounded-interpretation.ts` (shared). **Regression proof mandatory.** |
+| **2** | **HRR structured free-form classifier + authority gate** | NEW `lib/reviewer-lk/interpret-research-intent.ts` (+ `.anthropic.ts` + `.mock.ts`), `lib/reviewer-lk/hrr-authority-gate.ts`, types in `lib/reviewer-lk/types.ts` (`ExplicitResearchIntent`, `PermittedResearchIntent`) | classify-only; enum-only schema (no prose field); fail closed → `unsupported`; gate never invents a topic, never answers | source-scan: schema has no `answer`/`summary`/prose field; `interpret-research-intent.test.ts` (mock adapter: fail-closed paths, cap enforcement); `hrr-authority-gate.test.ts` (research/judgment/mixed/unsupported routing) | no retrieval yet; no composition; no real Anthropic in tests | no |
+| **3** | **Converged HRR research pipeline** | NEW `lib/reviewer-lk/run-hrr-research.ts` (`ExplicitResearchIntent[] → selectReviewerClaims → reviewerClaimToBiResult → buildBoundedInterpretations`), `reviewerClaimToBiResult` adapter, refactor `app/api/admin/submissions/[id]/reviewer-lk/route.ts` topic path to call it + NEW `…/research/route.ts` for free-form | `selectReviewerClaims` / `evaluateReviewerEligibility` / `evaluateApplicabilityDetailed` **byte-identical calls**; `diagnostics: []`; `not_met` excluded from matches; no `crc_eligible` | `run-hrr-research.test.ts` (single/multi-topic, `outside_current_coverage`, `not_met` separation); reuse `reviewer-lk/authority-firewall.test.ts` for both routes; `select-reviewer-claims` unchanged (its tests still pass) | no composition prose yet (return the structured `HrrResearchAnswer` skeleton); no UI | no |
+| **4** | **Deterministic HRR composition / projection** | NEW `lib/reviewer-lk/project-hrr-research-answer.ts`, `HrrResearchAnswer` type, per-status fixed templates (a `lib/reviewer-lk/hrr-rules.ts` OR reuse `bounded-interpretation/rules.ts` outputs) | grounding A–E only; no second model call; reviewer text = attributed quotation, never factual | `hrr-projection.test.ts` — **grounding test**: every rendered substantive string maps to a governed `statement` / fixed template / mechanical enumeration; false-premise question → premise not echoed as fact | no model composition; no ranking | no |
+| **5** | **Audit enrichment + audit-before-content** | NEW migration `2026…_hrr_research_audit_enrichment.sql` (additive nullable), `recordHrrResearchAccess()` in `lib/reviewer-lk/repository.ts`, wire step 6→7→8 in both routes | audit persists before any governed content; failure → 503 zero content; raw question never written | `route-and-audit` extended: audit row before response; audit-failure → 503; no raw-question column; zero rows from re-render | no new `access_kind`; no `association_id`/`crc_session_id` | no |
+| **6** | **Reviewer Resources free-form UI** | `app/admin/submissions/[id]/review/ReviewerLkLookup.tsx` (add the input peer to the chips; render `HrrResearchAnswer`) | no shell/page-tree change; no copy-to-evidence/apply/approve control; chatbot-avoidant layout; assessment-authority answers lead with the refusal | source-scan (`reviewer-resources-presentation.test.ts` extended): input present; no promotion affordance; no `crc_eligible` render; answer-priority order 1–6 | no `ReviewerShell` / `workspace-layout-context` / `page.tsx` change; no multi-turn UI | no |
+| **7** | **Tests / UAT / cost-quality eval** | `__tests__/reviewer-lk/**` completion; a manual UAT run of §V; a bounded classifier cost/quality eval (offline, real model, held-out reviewer questions) + the `HRR_MAX_RESOLVED_TOPICS` experiment | — | full §V UAT; classifier accuracy on adversarial paired questions (research vs judgment vs false-premise); fail-closed rate | not a CRC eval; not a raw-question corpus | no |
+
+**Slice ordering rationale (challenged against source):** slice 1 must precede everything (BI is the semantic ceiling and its input type is shared with CRC — get the regression proof out of the way first). Slices 2–4 are HRR-internal and independent of the UI/audit. Slice 5 (audit) can technically precede 3–4 but is placed after so the audit metadata (`governed_claim_ids`) has real producers. Slice 6 (UI) last of the build slices. Slice 7 gates broader rollout.
+
+## V. Frozen UAT contract
+
+The full scenario list is `PRD_CAH_4G_HRR §19` (14 scenarios). Binding for implementation acceptance, in addition:
+
+- **V-1** Topic selection fires **zero** `hrr_intent` telemetry events; the topic path's governed selection is byte-identical to CAH-4E (assert the same `selectReviewerClaims` inputs); the *presentation* is the new `HrrResearchAnswer`.
+- **V-2** Free-form single-topic and **V-3** bounded multi-topic (≤ `HRR_MAX_RESOLVED_TOPICS`) research.
+- **V-4** Unsupported / over-general → fixed "try a topic".
+- **V-5** "Should I approve this?" → decline, **no yes/no, no invented topic**, no retrieval.
+- **V-6** "Should I approve this, and what does governed knowledge say about copyright ownership?" → decline the approval decision **and** answer the `copyright_ownership` research separately, structurally distinct.
+- **V-7** "Since Veo gives us copyright ownership, is this cleared?" → the false premise is **not** repeated as factual authority; the decision is declined; only governed material (grounding A–E) substantiates the research response. (Also the classifier cost/quality eval parameter.)
+- **V-8** Likeness question → honest "outside current governed coverage".
+- **V-9** Applicability `unresolved` → not pass/fail, not silently assumed; `not_met` → "does not apply", in the separate block.
+- **V-10** Audit persistence failure → **no governed claim content and no HRR substantive answer** returned.
+- **V-11** Linked CRC present vs absent → identical HRR answer (no automatic participation).
+- **V-12** Workbook (`workbook_data` + `assessments`) byte-unchanged; no evidence/finding/gap/control/outcome/sign-off mutation.
+- **V-13** CRC: zero behavior/UI change (`/crc` runtime, input, composition, pilot questioning).
+- **V-14** No `crc_eligible` / CRC-prose rendered; no promotion affordance anywhere.
+
 ## Module / type inventory
 
 | Kind | Name | Location | Status |
@@ -294,7 +406,7 @@ The smallest honest shared contracts, in likely order of extraction (each is a *
 | REUSED as-is | `GoalCategory`, `GoalScope`, `GOAL_CATEGORIES` | `types/interview-engine.ts` | — |
 | REUSED as-is | `BoundedInterpretation`, `INTERPRETATION_STATUSES`, `rules.ts` templates, `DETERMINATION_DECLINED_TEMPLATE` | `lib/bounded-interpretation/` | — |
 | REUSED as-is | Anthropic Structured Outputs adapter shape, `callWithStructuredOutputRecoveryRetry`, telemetry sinks | `lib/interview-engine/anthropic-extractor.ts`, `anthropic-structured-output-retry.ts` | — |
-| ADAPTED (additive) | `buildBoundedInterpretations` input: `UserGoal[]` → `BiIntent[]` + `userGoalsToBiIntents` adapter (CRC call site: 1-line change, 0 behavior change) | `lib/bounded-interpretation/` | **proposed — decision deferred §T-2** |
+| ADAPTED (additive) | `buildBoundedInterpretations` input: `UserGoal[]` → `BiIntent[]` + `userGoalsToBiIntents` adapter (CRC call site: 1-line change, 0 behavior change) | `lib/bounded-interpretation/` | **FROZEN §S-5/§T-2 — signature also takes BiResult[]; regression proof required (§U slice 1)** |
 | NEW type | `ExplicitResearchIntent`, `PermittedResearchIntent`, `HrrResearchAnswer`, `BiIntent` | `lib/reviewer-lk/types.ts` (+ `BiIntent` in `lib/bounded-interpretation/types.ts` if §H adopted) | designed |
 | NEW module | `interpretResearchIntent()` (the one model call) | `lib/reviewer-lk/interpret-research-intent.ts` (+ anthropic adapter, mock adapter) | designed |
 | NEW module | `hrrAuthorityGate()` (deterministic routing over `PermittedResearchIntent`) | `lib/reviewer-lk/hrr-authority-gate.ts` | designed |
@@ -302,6 +414,6 @@ The smallest honest shared contracts, in likely order of extraction (each is a *
 | NEW route | `POST /api/admin/submissions/[id]/reviewer-lk/question` (free-form; audited; audit-before-content) | `app/api/admin/submissions/[id]/reviewer-lk/question/route.ts` | designed |
 | NEW UI | free-form input inside `ReviewerLkLookup.tsx` (peer to the existing topic chips; no shell change) | `app/admin/submissions/[id]/review/ReviewerLkLookup.tsx` | designed |
 | NEW tests | `hrr-authority-gate.test.ts`, `interpret-research-intent.test.ts` (schema/fail-closed, source-scan), `hrr-projection.test.ts` (grounding rule), route firewall/audit, `ReviewerLkLookup` presentation — all source-scan, no render harness | `__tests__/reviewer-lk/`, `__tests__/reviewer-shell/` | designed |
-| AUDIT | reuse `access_kind='lk_research'`; **recommended** additive nullable columns (Option B §K) | migration `2026…_hrr_research_audit_enrichment.sql` | **not implemented — decision deferred §T-1** |
+| AUDIT | reuse `access_kind='lk_research'`; **recommended** additive nullable columns (Option B §K) | migration `2026…_hrr_research_audit_enrichment.sql` | **FROZEN §S-8/§T-1 — additive nullable; migration = §U slice 5** |
 
 **Unchanged, explicitly:** all of `lib/crc-engine/**`, `lib/interview-engine/**` (except the `BiIntent` generalization if adopted — additive), `lib/crc-project-context/**`, `lib/crc-assurance-handoff/**`, `lib/assessments/**`, `WorkbookClient.tsx`, `page.tsx`, `ReviewerShell.tsx`, `workspace-layout-context.tsx`, every CRC route and the CRC UI, `retrieve.ts` / `enumerateEligibleClaims` / `crc_eligible` / governed claims / `provider_scope` / `Lifecycle` / supersession / CRC eligibility.

@@ -1,6 +1,6 @@
 # PRD — CAH-4G: HRR V1 / Governed Research Interface (GRI)
 
-**Status:** `DESIGNED / NOT IMPLEMENTED` — this document + `08_Platform/implementation/HRR_GRI_TECHNICAL_DESIGN.md` + `08_Platform/app/lib/reviewer-lk/ADR-002-governed-research-interface.md` formalize the approved direction. No runtime code, tests, migrations, or audit fields exist for CAH-4G. PM review of the architecture gates implementation authorization.
+**Status:** `ARCHITECTURE FROZEN / NOT IMPLEMENTED` (frozen 2026-09-10, `docs(cah-4g): freeze HRR V1 implementation contract`). This document + `08_Platform/implementation/HRR_GRI_TECHNICAL_DESIGN.md` (with its §U Architecture Freeze + §V Implementation Contract) + `08_Platform/app/lib/reviewer-lk/ADR-002-governed-research-interface.md` are the implementation contract. No runtime code, tests, migrations, or audit fields exist for CAH-4G. An implementation agent follows these documents and does not make architecture decisions while coding. The one genuinely-open item is a bounded implementation experiment (`HRR_GRI_TECHNICAL_DESIGN.md §T` — free-form multi-topic maximum, recommended default = 2). PM authorization of bounded implementation planning gates the first slice.
 **Date:** 2026-09-10
 **Milestone series:** CAH-4x (CRC → Commercial Assurance handoff / Human Reviewer experience). CAH-4E shipped Human Reviewer Living Knowledge V1 (deterministic topic look-up). CAH-4F/4F.1/4F.2 shipped and production-proved the Reviewer Resources inspector. **CAH-4G adds free-form research questions alongside the existing topic look-up, inside the same inspector.**
 **Supersedes:** the *intent-only* forward boundary in `PRD_CAH_4F_REVIEWER_RESOURCES.md §11` ("Explicit future boundary — CAH-4G"). That section stays as historical context; this PRD is now the authoritative CAH-4G spec.
@@ -19,10 +19,21 @@ CAH-4G lets the reviewer **ask the question in natural language** and get a **bo
 
 Introduce **HRR — Human Reviewer Research** as a product capability inside the Reviewer Resources → Living Knowledge tab, built on a reusable architecture named **GRI — Governed Research Interface**. HRR V1 supports two peer entry modes into one governed research pipeline:
 
-- **Topic mode** (existing CAH-4E path, unchanged): a chip click is an explicit structured research intent; **no LLM call**; deterministic.
+- **Topic mode**: a chip click is an explicit structured research intent; **no Anthropic/model classification call** is required. Deterministic through retrieval, eligibility, and applicability.
 - **Free-form mode** (new): a natural-language question is passed through **one bounded structured LLM interpretation stage** that determines *permitted research intent only* (which governed topic(s) the question asks about, and whether it is a research question or an assessment-authority request). The model never generates the substantive governed answer.
 
-Both modes converge — as early as semantically appropriate — into the same pipeline:
+**Both modes converge — before retrieval — into one governed pipeline.** This is an intentional CAH-4G product evolution, not an accidental regression: the topic path no longer ends at CAH-4E's thin claim-list passthrough — it now also flows through Bounded Interpretation and HRR consultative composition, so a topic pick and a free-form question produce the same shape of consultative answer. **What is unchanged for the topic path** (frozen — see `HRR_GRI_TECHNICAL_DESIGN.md §U` and §C of this PRD's freeze):
+- topic selection requires **zero LLM classification calls**;
+- **reviewer-channel eligibility authority is unchanged** — `evaluateReviewerEligibility` (lifecycle `Adopted` + reviewer-permitted `publication_scope` + not superseded); `crc_eligible` never consulted;
+- **governed claim selection authority is unchanged** — `selectReviewerClaims` (topic match + `providerScopeMatches` + `toolScopeMatches` + eligibility), byte-identical calls;
+- **deterministic applicability is unchanged** — `evaluateApplicabilityDetailed`; `met` / `unresolved` / `not_met` per requirement, never collapsed;
+- **no new project facts are inferred**;
+- **no assessment authority is added**;
+- **audit-before-content remains required**;
+- **the same governed topic identifiers** (`GoalCategory` enum) govern which claims are eligible.
+- **What evolves**: the presentation/interpretation layer only — BI status + consultative framing + "what this does not establish" + navigation. Every governed proposition CAH-4E showed is still shown, verbatim, with the same applicability and provenance.
+
+Pipeline:
 
 ```
 permitted structured research intent
@@ -34,7 +45,11 @@ permitted structured research intent
   → append-only access audit
 ```
 
-**The invariant (from `ADR-002`):** a natural-language research interface is an *intent-entry mechanism* into governed retrieval + Bounded Interpretation. It is **not an independent answer authority**. No downstream layer may express a stronger conclusion than Bounded Interpretation permits, and every substantive statement must trace to a governed proposition or a permitted structured output.
+**The invariant (from `ADR-002`):** a natural-language research interface is an *intent-entry mechanism* into governed retrieval + Bounded Interpretation. It is **not an independent answer authority**. No downstream layer may express a stronger conclusion than Bounded Interpretation permits.
+
+**Trust / grounding contract (frozen 2026-09-10 — `ADR-002` is authoritative):** **reviewer-authored text is UNTRUSTED / NON-AUTHORITATIVE INPUT.** It *may* be: displayed as an explicitly attributed question; used by the bounded classifier to determine permitted structured intent; referenced as provenance for *what the reviewer asked*. It *may not*: substantiate an HRR factual proposition; become governed truth through repetition; override Living Knowledge, applicability, or Bounded Interpretation; create project facts, assessment facts, findings, or conclusions. Every HRR **substantive factual proposition** must trace to one of: **(A)** governed Living Knowledge permitted for HRR; **(B)** deterministic applicability / permitted structured submission context, accurately characterized; **(C)** a Bounded Interpretation output derived from permitted governed inputs; **(D)** a fixed authority / limitation / navigation template; **(E)** a mechanical provenance / status enumeration. **Reviewer text grounds INTENT provenance only — never factual authority.**
+
+> Example: reviewer asks *"Since Veo gives us copyright ownership, is this cleared?"* → HRR may echo *"You asked: 'Since Veo gives us copyright ownership, is this cleared?'"*, declines the clearance decision (it is an assessment-authority request), and researches only the explicit `copyright_ownership` portion using governed Living Knowledge. HRR must **not** treat *"Veo gives us copyright ownership"* as factual grounding merely because the reviewer wrote it.
 
 ## 3. Terminology (use consistently across all SI8 docs)
 
@@ -176,18 +191,20 @@ The CAH-4G *discovery* report stated `copyright_ownership` and `copyrightability
 
 Environment: a deploy of the CAH-4G branch; authenticated admin; internal synthetic `CA-RLK-2a PROD SMOKE` / `ASSESS-007-2026-09-07`; ~1440px.
 
-1. **Topic path unchanged.** Click "Copyright ownership" → the CAH-4E result renders exactly as CAH-4F.2 UAT (§17a) recorded; **no** Anthropic call fires (confirmed via absence of an interpretation telemetry event); `lk_research` audit row written as before.
-2. **Free-form research question.** Type *"Does a platform allowing commercial use tell me anything about copyright ownership?"* → Ask → the answer groups governed propositions under `commercial_use` and `copyright_ownership`, each with Applicability + limitations + provenance; the reviewer's verbatim question is echoed; no free-authored legal prose.
-3. **Free-form → no coverage.** Type a `likeness` question → `outside_current_coverage` answer (honest "no governed Living Knowledge on this topic yet"), not an error, not an invented answer.
-4. **Assessment-authority question.** Type *"Should I approve this assessment?"* → HRR states it does not determine the outcome, the reviewer owns it; offers the research topic list; **does not** answer yes/no; **does not** invent a topic.
-5. **Mixed question.** Type *"Should I approve this given the stock images were only references?"* → HRR declines the approval decision AND runs `third_party_source_rights` research on the explicit reference-use portion, clearly separating "your decision" from "what governed knowledge says".
-6. **Unsupported / over-general.** Type *"What does the law say about everything relevant here?"* → fixed "HRR answers narrower governed questions — try one of these topics" + chips; no retrieval, no model answer.
-7. **Applicability distinctness.** A result with an `unresolved` requirement shows it verbatim with the "not a negative finding" note; a `not_met` requirement reads as "does not apply", not "unresolved"; neither renders as green/red pass-fail.
-8. **No CRC-channel metadata.** `crc_eligible` / "CRC channel: Yes" and raw `crc_publication_scope` "CRC may state…" prose never appear.
-9. **No promotion affordance.** No copy-to-evidence / apply / accept / approve control anywhere in HRR.
-10. **Audit.** Each free-form question writes exactly one `lk_research`-family access record (per the recommended audit contract) carrying actor + submission + explicit action + resolved topics + governed claim_ids surfaced — **not** the raw question text. Zero audit rows from typing, editing, or re-rendering.
-11. **Workbook untouched.** `workbook_data` + `assessments` row byte-unchanged by any HRR interaction; no spurious PATCH.
-12. **CRC untouched.** No change to `/crc` runtime, CRC input, CRC composition, or CRC pilot behavior.
+1. **Topic selection.** Click "Copyright ownership" → **zero classification model calls** (confirmed via absence of an `hrr_intent` telemetry event); the same reviewer-eligibility + `selectReviewerClaims` + deterministic-applicability authority as CAH-4E; the result now passes through the frozen HRR/GRI answer pipeline (BI + consultative composition) and renders as an `HrrResearchAnswer` — every governed proposition CAH-4F.2 UAT (§17a) recorded is still shown verbatim with the same applicability + provenance; `lk_research` audit row written before content.
+2. **Free-form single-topic research.** Type *"What does Living Knowledge say about copyright ownership for this submission?"* → `CLAIM-COPY-004-v1` rendered with Applicability + limitations + provenance; question echoed as an attributed quotation; **no factual proposition traces to the question text** (grounding A–E only).
+3. **Free-form bounded multi-topic research.** Type *"Does a platform allowing commercial use tell me anything about copyright ownership?"* → answer groups governed propositions under `commercial_use` and `copyright_ownership`; **at most `HRR_MAX_RESOLVED_TOPICS` (frozen default 2)** topics researched; the classifier never invents a topic absent from permitted interpretation.
+4. **Unsupported / over-general.** Type *"What does the law say about everything relevant here?"* → fixed "HRR answers narrower governed questions — try one of these topics" + chips; no retrieval, no model answer.
+5. **Assessment-judgment.** Type *"Should I approve this assessment?"* → HRR states it does not determine the outcome, the reviewer owns it; offers the research topic list; **no yes/no**; **no invented topic**; no retrieval, no BI.
+6. **Mixed judgment + research.** Type *"Should I approve this, and what does governed knowledge say about copyright ownership?"* → the approval decision is declined + Human Reviewer authority preserved; `copyright_ownership` governed research runs separately; the authority refusal is visually and structurally separate from the governed research; **never yes/no**.
+7. **False premise embedded.** Type *"Since Veo gives us copyright ownership, is this cleared?"* → *"Veo gives us copyright ownership"* is **not** repeated as factual authority anywhere in the answer; the clearance decision is declined; only governed Living Knowledge (grounding A–E) may substantiate the `copyright_ownership` research portion.
+8. **Likeness — honest coverage limitation.** Type a `likeness` question → the bounded equivalent of "outside current governed coverage" (no reviewer-eligible `TopicClaim` for `likeness` today); not an error, not an invented answer.
+9. **Applicability unresolved.** A result with an `unresolved` requirement shows it verbatim with the "not a negative finding" note and is **never** silently assumed met and **never** rendered as pass/fail; a `not_met` requirement reads "does not apply to this submission", distinct from `unresolved`.
+10. **Audit failure → fail closed.** If the `lk_research` access record cannot be persisted → **no governed claim content and no HRR substantive answer** is returned (503 / bounded error); zero audit rows from typing / editing / re-rendering / resize.
+11. **Linked CRC Context — no automatic participation.** No transcript, no CRC conversation history, no CRC structured context enters HRR retrieval; a submission *with* a linked CRC conversation produces an identical HRR answer to one without.
+12. **Workbook untouched.** `workbook_data` + `assessments` row byte-unchanged by any HRR interaction; no evidence / finding / gap / control-result / outcome / sign-off / report / publication mutation; no spurious PATCH.
+13. **CRC — zero behavior/UI change.** No change to `/crc` runtime, CRC input, CRC topic selectors (there are none — must stay none), CRC composition, or CRC pilot questioning.
+14. **No CRC-channel metadata / no promotion affordance.** `crc_eligible` / "CRC channel: Yes" / raw `crc_publication_scope` "CRC may state…" prose never appear; no copy-to-evidence / apply / accept / approve control anywhere in HRR.
 
 ## 20. Future learning loop
 
