@@ -117,11 +117,25 @@ describe('only gated / normalized intent can enter the orchestrator', () => {
     expect(src).not.toMatch(/parsed_output|messages\.parse|validateAndNormalizePermittedResearchIntent/)
   })
 
-  test('the bi-adapters never read applicability/project facts through BiIntent — only {topic, scope}', () => {
+  test('researchIntentToBiIntent maps ONLY {topic, scope} into BiIntent — no applicability/project fact, no raw reviewer text', () => {
     const src = codeOnly('lib/hrr/bi-adapters.ts')
-    expect(src).not.toMatch(/applicability|jurisdiction|project_fact|human_contribution|toolMentions/i)
-    // intent_text is the fixed topic label, never raw reviewer text
-    expect(src).toMatch(/reviewerTopicLabel\(intent\.topic\)/)
+    // isolate the researchIntentToBiIntent function body
+    const body = src.slice(src.indexOf('export function researchIntentToBiIntent'), src.indexOf('export function reviewerClaimToBiResult'))
+    expect(body).not.toMatch(/applicability|jurisdiction|project_fact|human_contribution|toolMentions|applicability_outcomes/i)
+    expect(body).toMatch(/reviewerTopicLabel\(intent\.topic\)/) // fixed topic label, never raw reviewer text
+    expect(body).toMatch(/category:\s*intent\.topic/)
+    expect(body).toMatch(/scope:\s*intent\.scope/)
+  })
+
+  test('reviewerClaimToBiResult TRANSLATES the already-determined applicability — it never re-evaluates or infers a fact (CAH-4G.3A)', () => {
+    const src = codeOnly('lib/hrr/bi-adapters.ts')
+    const body = src.slice(src.indexOf('export function reviewerClaimToBiResult'))
+    // reads the upstream outcome...
+    expect(body).toMatch(/claim\.applicability_outcomes\.filter\(\(o\) => o\.status === 'unresolved'\)/)
+    expect(body).toMatch(/status:\s*'unresolved'|status:\s*'established'/)
+    // ...but NEVER calls the evaluator or an inference primitive
+    expect(body).not.toMatch(/evaluateApplicabilityDetailed|isApplicable|evaluateRequirementStatus|jurisdiction|toolMentions/)
+    expect(body).not.toMatch(/@anthropic|messages\.parse/)
   })
 })
 

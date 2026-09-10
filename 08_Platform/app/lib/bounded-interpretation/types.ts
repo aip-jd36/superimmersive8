@@ -30,7 +30,7 @@
  */
 
 import type { GoalCategory, GoalScope } from '@/types/interview-engine'
-import type { MatchOrigin, RetrievalSourceFactKind } from '@/lib/retrieval-engine/types'
+import type { ApplicabilityRequirement, MatchOrigin, RetrievalSourceFactKind } from '@/lib/retrieval-engine/types'
 
 /**
  * BiIntent — the generic, deliberately minimal input contract for
@@ -88,14 +88,15 @@ export interface BiIntent {
  *   - `match_origin` — only ever compared `=== 'related_topic'` (drives the
  *     generic epistemic-boundary clause);
  *   - `source_fact.kind` — only ever compared `=== 'tool'` (drives the
- *     tool-terms boundary clause).
+ *     tool-terms boundary clause);
+ *   - `applicability` (optional, CAH-4G.3A) — see the field's own doc.
  *
  * `source_fact` is kept as a NESTED `{ kind }` (not flattened) so a CRC
  * `RetrievalResult` — which carries all six fields plus more — structurally
  * satisfies `BiResult[]` with **zero call-site change**. CRC keeps passing
- * its own `RetrievalResult[]`; HRR builds `BiResult` directly from a
- * `ReviewerLkClaim` via `lib/hrr/reviewer-claim-to-bi-result.ts`, needing
- * NONE of `RetrievalResult`'s CRC-shaped fields (`matrix_identifier`,
+ * its own `RetrievalResult[]`; a reviewer-research caller (`lib/hrr/`) builds
+ * `BiResult` directly from its own governed-claim projection, needing NONE
+ * of `RetrievalResult`'s CRC-shaped fields (`matrix_identifier`,
  * `relationship_id`, `topic`, `publication_scope`, `source_fact.identifier`)
  * — so no synthetic value is ever constructed.
  *
@@ -104,6 +105,38 @@ export interface BiIntent {
  * module this file may already read) rather than redeclared — the value
  * space is genuinely the same and drift would be a hazard.
  */
+/**
+ * Deterministic applicability of a governed result to the current project,
+ * evaluated UPSTREAM (`evaluateApplicabilityDetailed` — Bounded Interpretation
+ * never re-derives it, never reads `ApplicabilityRequirement`/`isApplicable()`
+ * itself). CAH-4G.3A.
+ *
+ * This is an UPSTREAM SEMANTIC FACT, not a channel policy — never
+ * `hrr_unresolved` / `reviewer_applicability_unresolved` / `crc_diagnostic_present`.
+ * It exists so a result whose applicability requirements are deterministically
+ * `unresolved` cannot be interpreted as `directly_relevant` merely because a
+ * channel happens not to supply a CRC `RetrievalDiagnostic`.
+ *
+ *   - `status: 'established'` — every applicability requirement evaluated
+ *     `met` (or the claim has none). BI treats the result as it always has.
+ *   - `status: 'unresolved'` — ≥1 requirement is `unresolved` (required
+ *     structured information is not established). BI must render the result
+ *     under `relevant_applicability_unresolved` — the governed proposition
+ *     stays visible and verbatim; only the closing sentence + status change.
+ *     `unresolved_requirements` carries the specific requirement(s) for a
+ *     later composition step to explain (BI itself does not read them).
+ *
+ * `not_met` requirements are DELIBERATELY not representable here: a governed
+ * result whose applicability is settled-false must be excluded from the BI
+ * feed entirely by the caller and shown separately, never as "unresolved"
+ * and never as a match.
+ */
+export interface BiApplicability {
+  status: 'established' | 'unresolved'
+  /** The requirement(s) that evaluated `unresolved` — carried for a later composition step; BI never reads this. Empty/absent when `status === 'established'`. */
+  unresolved_requirements?: ApplicabilityRequirement[]
+}
+
 export interface BiResult {
   matched_goal_category: GoalCategory
   unresolved_project_dependencies: string[]
@@ -111,6 +144,19 @@ export interface BiResult {
   candidate_statement: string | null
   match_origin: MatchOrigin
   source_fact: { kind: RetrievalSourceFactKind }
+  /**
+   * OPTIONAL (CAH-4G.3A). **Absent** = the caller does not model per-result
+   * applicability, which is exactly correct for CRC: `retrieve()` withholds a
+   * non-applicable claim BEFORE Bounded Interpretation, so every
+   * `RetrievalResult` BI receives from CRC is already applicable (its
+   * `applicability_requirements` gate passed) — a CRC `RetrievalResult`
+   * carries no `applicability` field, still structurally satisfies
+   * `BiResult`, and BI's behavior for CRC is byte-unchanged. A
+   * reviewer-research caller (`lib/hrr/`) DOES populate this, because that
+   * channel deliberately surfaces an applicability-`unresolved` governed
+   * proposition rather than withholding it.
+   */
+  applicability?: BiApplicability
 }
 
 /**

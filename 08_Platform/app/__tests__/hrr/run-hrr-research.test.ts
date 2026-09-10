@@ -99,7 +99,7 @@ describe('researchIntentToBiIntent', () => {
 })
 
 describe('reviewerClaimToBiResult', () => {
-  test('every field is a verbatim passthrough; no CRC-shaped field is constructed', () => {
+  test('every field is a verbatim passthrough; no CRC-shaped field is constructed; a fully-met claim carries applicability: established', () => {
     const { claims } = selectReviewerClaims({ topic: 'copyright_ownership', topicClaims: [OWN_INFO], assetProviderIds: [], activeToolIds: [], applicabilityFacts: ctx().applicabilityFacts })
     const r = reviewerClaimToBiResult(claims[0])
     expect(r).toEqual({
@@ -109,8 +109,21 @@ describe('reviewerClaimToBiResult', () => {
       candidate_statement: 'ownership statement',
       match_origin: 'exact_topic',
       source_fact: { kind: 'topic' },
+      applicability: { status: 'established' },
     })
-    expect(Object.keys(r).sort()).toEqual(['candidate_statement', 'claim_id', 'match_origin', 'matched_goal_category', 'source_fact', 'unresolved_project_dependencies'])
+    expect(Object.keys(r).sort()).toEqual(['applicability', 'candidate_statement', 'claim_id', 'match_origin', 'matched_goal_category', 'source_fact', 'unresolved_project_dependencies'])
+    // no synthetic CRC RetrievalResult field
+    expect(r).not.toHaveProperty('matrix_identifier')
+    expect(r).not.toHaveProperty('relationship_id')
+    expect(r).not.toHaveProperty('publication_scope')
+  })
+
+  test('a claim with an unresolved requirement → applicability: { status: unresolved, unresolved_requirements: [...] } (translated, never re-evaluated)', () => {
+    const usReq = { fact: 'jurisdiction' as const, operator: 'equals' as const, value: 'United States' }
+    const usClaim = claim({ claim_id: 'CLAIM-US-v1', topic: 'copyright_ownership', crc_candidate_statement: 's', applicability_requirements: [usReq] })
+    const { claims } = selectReviewerClaims({ topic: 'copyright_ownership', topicClaims: [usClaim], assetProviderIds: [], activeToolIds: [], applicabilityFacts: { jurisdiction: { included: [], excluded: [] }, toolMentions: [] } })
+    const r = reviewerClaimToBiResult(claims[0])
+    expect(r.applicability).toEqual({ status: 'unresolved', unresolved_requirements: [usReq] })
   })
 })
 
@@ -255,14 +268,17 @@ describe('applicability semantics', () => {
     expect(res.per_topic[0].bi_status).toBe('directly_relevant')
   })
 
-  test('unresolved → claim surfaced + fed to BI, requirement shown verbatim, never pass/fail, never in does_not_apply', () => {
+  test('unresolved → claim surfaced + fed to BI, requirement shown verbatim, BI status is relevant_applicability_unresolved (NOT directly_relevant), never pass/fail, never in does_not_apply (CAH-4G.3A)', () => {
     const res = runHrrResearch(runInput({ gate: topicSelectionGateResult('copyright_ownership'), topicClaims: [usOnlyClaim], reviewerContext: ctx() }))
     const t = res.per_topic[0]
-    expect(t.governed_claims).toHaveLength(1)
+    expect(t.governed_claims).toHaveLength(1) // shown, not withheld
     expect(t.governed_claims[0].applicability_established).toBe(false)
-    expect(t.governed_claims[0].applicability_outcomes[0].status).toBe('unresolved')
-    expect(t.does_not_apply).toEqual([])
-    expect(t.bi_status).toBe('directly_relevant') // shown, not withheld (diagnostics [] for HRR)
+    expect(t.governed_claims[0].applicability_outcomes[0].status).toBe('unresolved') // requirement preserved verbatim
+    expect(t.does_not_apply).toEqual([]) // NOT a negative finding
+    expect(t.bi_status).toBe('relevant_applicability_unresolved') // NOT directly_relevant — deterministic applicability reaches BI
+    expect(t.summary_blocks.join(' ')).toContain('US ownership rule') // governed proposition stays visible + verbatim
+    expect(t.summary_blocks.join(' ')).toMatch(/isn't enough project-specific information to determine how it applies/) // the applicability-unresolved hedge, not a directly_relevant close
+    expect(t.supporting_claim_ids).toEqual(['CLAIM-US-OWN-v1'])
   })
 
   test('not_met → EXCLUDED from BI, returned in does_not_apply, NOT converted to unresolved or a negative finding', () => {
@@ -288,6 +304,53 @@ describe('applicability semantics', () => {
     expect(t.bi_status).toBe('directly_relevant')
     expect(t.summary_blocks.join(' ')).toContain('global rule')
     expect(t.summary_blocks.join(' ')).not.toContain('US ownership rule')
+  })
+
+  test('CAH-4G.3A — mixed: one fully-applicable claim + one unresolved-applicability claim, same topic → relevant_applicability_unresolved; BOTH visible; the applicable one keeps its plain clause', () => {
+    const applicable = claim({ claim_id: 'CLAIM-GLOBAL-OWN-v1', topic: 'copyright_ownership', crc_candidate_statement: 'global rule' })
+    const res = runHrrResearch(runInput({
+      gate: topicSelectionGateResult('copyright_ownership'),
+      topicClaims: [applicable, usOnlyClaim],
+      reviewerContext: ctx(), // jurisdiction unresolved → usOnlyClaim is unresolved, not not_met
+    }))
+    const t = res.per_topic[0]
+    expect(t.governed_claims.map((c) => c.claim_id)).toEqual(['CLAIM-GLOBAL-OWN-v1', 'CLAIM-US-OWN-v1']) // both fed to BI
+    expect(t.does_not_apply).toEqual([]) // neither is not_met
+    expect(t.bi_status).toBe('relevant_applicability_unresolved') // intent-level aggregation (existing CC-1 model)
+    const text = t.summary_blocks.join(' ')
+    expect(text).toContain('global rule')
+    expect(text).toContain('US ownership rule') // the unresolved claim's proposition still visible + verbatim
+    expect(text).toMatch(/isn't enough project-specific information to determine how it applies/)
+  })
+
+  test('CAH-4G.3A — a claim with multiple requirements, one unresolved → relevant_applicability_unresolved', () => {
+    const multiReq = claim({
+      claim_id: 'CLAIM-MULTI-v1', topic: 'copyright_ownership', crc_candidate_statement: 'multi-req rule',
+      applicability_requirements: [
+        { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, // unresolved (jurisdiction not included)
+      ],
+    })
+    const res = runHrrResearch(runInput({ gate: topicSelectionGateResult('copyright_ownership'), topicClaims: [multiReq], reviewerContext: ctx() }))
+    expect(res.per_topic[0].bi_status).toBe('relevant_applicability_unresolved')
+    expect(res.per_topic[0].governed_claims[0].applicability_outcomes.some((o) => o.status === 'unresolved')).toBe(true)
+  })
+
+  test('CAH-4G.3A — determination_request + a matching unresolved-applicability claim → determination_declined stays authoritative', () => {
+    const gate = hrrAuthorityGate(permitted({ research_intents: [{ topic: 'copyright_ownership', scope: 'determination_request' }] }))
+    const res = runHrrResearch(runInput({ gate, topicClaims: [usOnlyClaim], reviewerContext: ctx() }))
+    expect(res.per_topic[0].bi_status).toBe('determination_declined') // NOT relevant_applicability_unresolved
+    expect(res.per_topic[0].supporting_claim_ids).toEqual([])
+  })
+
+  test('CAH-4G.3A — unresolved-applicability semantics are identical on the topic-shortcut and free-form paths', () => {
+    const viaTopic = runHrrResearch(runInput({ gate: topicSelectionGateResult('copyright_ownership'), topicClaims: [usOnlyClaim], reviewerContext: ctx() }))
+    const viaFree = runHrrResearch(runInput({
+      gate: hrrAuthorityGate(permitted({ research_intents: [{ topic: 'copyright_ownership', scope: 'informational' }] })),
+      topicClaims: [usOnlyClaim], reviewerContext: ctx(), attributedQuestion: 'copyright ownership?',
+    }))
+    expect(viaFree.per_topic[0].bi_status).toBe(viaTopic.per_topic[0].bi_status)
+    expect(viaFree.per_topic[0].bi_status).toBe('relevant_applicability_unresolved')
+    expect(viaFree.per_topic[0].summary_blocks).toEqual(viaTopic.per_topic[0].summary_blocks)
   })
 })
 

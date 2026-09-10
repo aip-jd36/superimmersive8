@@ -20,18 +20,28 @@
  * future research-intent caller adapts its own genuine intent the same way,
  * without either caller's shape leaking in here.
  *
- * `diagnostics` (new, additive, defaults to `[]` -- every pre-existing
- * caller/test continues to compile and behave identically without
- * passing it): this module's only use of it is Case 3A detection --
- * "does this goal's category have an `applicability_unmet`
- * RetrievalDiagnostic," meaning a formally-gated claim exists but its
- * required fact (jurisdiction, tool plan tier) isn't confirmed. This
- * module never re-derives applicability itself, never reads
- * `ApplicabilityRequirement`/`isApplicable()` directly, and never imports
- * anything from Retrieval's LOGIC modules to compute this -- it only
- * reads a diagnostic Retrieval already produced, exactly the same
- * "lookup, not inference" discipline this module's own header always
- * described for `results`.
+ * `diagnostics` (additive, defaults to `[]`): this module's only use of it
+ * is Case 3A detection -- "does this goal's category have an
+ * `applicability_unmet` RetrievalDiagnostic," meaning CRC's `retrieve()`
+ * WITHHELD a formally-gated claim because its required fact (jurisdiction,
+ * tool plan tier) isn't confirmed, and the claim therefore never reached
+ * `matches[]`.
+ *
+ * `BiResult.applicability` (optional, CAH-4G.3A): the generic RESULT-side
+ * counterpart -- a caller that SURFACES an applicability-`unresolved`
+ * governed result rather than withholding it attaches this so the result,
+ * once in `matches[]`, is still rendered under
+ * `relevant_applicability_unresolved`, never `directly_relevant`. Same
+ * semantic fact as the diagnostic; not CRC-specific transport. A CRC
+ * `RetrievalResult` carries no `applicability` field and CRC's behavior is
+ * byte-unchanged.
+ *
+ * This module never re-derives applicability itself, never reads
+ * `ApplicabilityRequirement`/`isApplicable()` for a decision, never imports
+ * anything from Retrieval's LOGIC modules -- it only reads what Retrieval /
+ * the caller's applicability adapter already produced, the same "lookup, not
+ * inference" discipline this module's own header always described for
+ * `results`.
  */
 
 import type { RetrievalDiagnostic } from '@/lib/retrieval-engine/types'
@@ -67,6 +77,39 @@ const HUMAN_CONTRIBUTION_DEPENDENCY = 'human_contribution_description'
  */
 function hasGovernedProjectDependencies(match: BiResult): boolean {
   return match.unresolved_project_dependencies.length > 0
+}
+
+/**
+ * CAH-4G.3A — a matched governed result whose deterministic applicability
+ * requirements are `unresolved` (evaluated upstream, never here). It is
+ * treated EXACTLY like a Case-3B project-dependency match: the governed
+ * proposition stays visible and verbatim, the overall status becomes
+ * `relevant_applicability_unresolved`, and only the closing sentence
+ * differs from `directly_relevant`. This is NOT withholding (a caller may
+ * still show the proposition) and NOT a negative finding — "unresolved"
+ * means required structured information is not established.
+ *
+ * For CRC this is always `false`: `retrieve()` withholds a non-applicable
+ * claim before it can reach `matches[]`, so a CRC `RetrievalResult` carries
+ * no `applicability` field and this predicate is a no-op for it — CRC
+ * behavior is byte-unchanged. A caller that instead surfaces such a claim
+ * populates `BiResult.applicability` (an upstream semantic fact, never a
+ * channel policy).
+ */
+function hasUnresolvedApplicability(match: BiResult): boolean {
+  return match.applicability?.status === 'unresolved'
+}
+
+/**
+ * The two Case-3B triggers, unified: a matched claim needs the
+ * relevant-applicability-unresolved hedge if its real-world application
+ * depends on unmodeled governed project facts (`unresolved_project_dependencies`)
+ * OR its deterministic applicability requirements are `unresolved`
+ * (CAH-4G.3A). Both mean the same thing — "relevant, but applicability to
+ * THIS project is not established" — and share the same status + rendering.
+ */
+function needsApplicabilityHedge(match: BiResult): boolean {
+  return hasGovernedProjectDependencies(match) || hasUnresolvedApplicability(match)
 }
 
 /**
@@ -245,17 +288,19 @@ export function buildBoundedInterpretations(
         return buildInterpretation(intent, 'outside_current_coverage', outsideCoverageSummary(intent.category), [outsideCoverageSummary(intent.category)], [])
       }
 
-      // Case 3B (Living Knowledge governance review, 2026-08-16): every
-      // matched claim already passed its formal applicability gate(s) --
-      // this is a read of RetrievalResult.unresolved_project_dependencies,
-      // governance metadata Retrieval already carried through, never a
-      // new fact-matching capability. If ANY matched claim's real-world
-      // application still depends on project facts CRC doesn't model,
-      // the whole combined statement renders under the unresolved-
-      // applicability template instead of directly_relevant -- content is
-      // still quoted (matches directly_relevant's own quoting discipline),
-      // only the closing sentence and status differ.
-      if (matches.some(hasGovernedProjectDependencies)) {
+      // Case 3B (Living Knowledge governance review, 2026-08-16; extended
+      // CAH-4G.3A): a matched claim's real-world application still depends on
+      // project facts the channel doesn't model
+      // (`unresolved_project_dependencies`) OR its deterministic applicability
+      // requirements are `unresolved` (`applicability.status`, populated by a
+      // caller that surfaces rather than withholds such a claim).
+      // Either way the whole combined statement renders under the
+      // relevant-applicability-unresolved template instead of
+      // directly_relevant -- content is still quoted verbatim (matches
+      // directly_relevant's own quoting discipline), only the closing
+      // sentence and status differ. Never withholding, never a negative
+      // finding.
+      if (matches.some(needsApplicabilityHedge)) {
         // CC-1 -- Claim-Level Bounded Grouping (2026-08-21): the prior
         // single `combinedStatement` flattened every matched claim
         // (dependency-bearing and dependency-free alike) into one join,
@@ -273,8 +318,17 @@ export function buildBoundedInterpretations(
         // unchanged (still triggered by the same `.some()` check above,
         // just now backed by the named helper instead of an inline
         // expression -- behavior-identical refactor).
-        const dependencyBearingMatches = matches.filter(hasGovernedProjectDependencies)
-        const noDependencyMatches = matches.filter((m) => !hasGovernedProjectDependencies(m))
+        // The hedge-needing group (unmodeled project deps OR unresolved
+        // applicability requirements) gets the "not enough project-specific
+        // information to determine how it applies" closing sentence; the
+        // plain group (every applicability requirement met, no project deps)
+        // gets the same fixed boundary clause `directly_relevant` already
+        // uses. CAH-4G.3A widened the split predicate from
+        // `hasGovernedProjectDependencies` to `needsApplicabilityHedge`;
+        // for CRC (whose results never carry an `applicability` field) this
+        // is byte-identical.
+        const dependencyBearingMatches = matches.filter(needsApplicabilityHedge)
+        const noDependencyMatches = matches.filter((m) => !needsApplicabilityHedge(m))
 
         const dependencyBearingStatement = dependencyBearingMatches
           .map((m) => m.candidate_statement)
