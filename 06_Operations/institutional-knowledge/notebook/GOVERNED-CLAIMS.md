@@ -4175,31 +4175,86 @@ Lifecycle: Adopted
 Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-09-10
 Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  APPROVED FOR CRC PUBLICATION (2026-09-10, CRC Approver: JD (PM) -- see
+  CRC Approver/CRC Decision Date below; CRC Publication Review #25 complete
+  at governance-reviews/CPR_025_NY_GBL_396B_SYNTHETIC_PERFORMER_DISCLOSURE_
+  REVIEW_2026-09-10.md, APPROVE WITH BOUNDED WORDING -- the approved
+  wording below is CPR_025 §S/§T verbatim, not the shorter pre-CPR draft
+  this field previously held). **Principle 3 finding (CPR_025 §E, PM/JD-
+  concurred):** the existing Principle 3 withholding applied to the
+  real-person likeness/identity risk represented by the sibling New York
+  likeness claim (CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1, withheld
+  under CPR_008) does not automatically extend to this distinct statutory
+  synthetic-performer disclosure proposition merely because both currently
+  use GoalCategory `likeness` -- the substantive distinction is that this
+  statute concerns a performer statutorily defined as NOT recognizable as
+  any identifiable natural performer, a disclosure/anti-deception mandate
+  rather than a real-person identity/consent right. This finding is
+  claim-specific: it does not hold that Principle 3 is inapplicable to
+  synthetic performers generally, that statutory disclosure laws are
+  categorically outside Principle 3, or that any `likeness`-topic claim is
+  now presumptively CRC-eligible. The sibling claim is unaffected and
+  remains `CRC Publication Scope: WITHHELD FROM CRC`, unchanged by this
+  decision. CRC may state that NY GBL § 396-b requires a commercial
+  advertisement producer/creator with actual knowledge of a synthetic
+  performer's presence to conspicuously disclose that fact, subject to the
+  statute's expressive-work (conditional), audio-only, and translation-only
+  exemptions and $1,000/$5,000 civil penalties, and that media/platforms
+  that merely publish or disseminate a non-compliant advertisement are
+  separately, expressly exempted. This is New York statutory law, not
+  SI8's own policy. CRC must not state or imply: that a specific project
+  violates or complies with § 396-b; that the user is (or is not) the
+  statutory duty-holder; that specific content does (or does not) meet the
+  statutory synthetic-performer definition; that actual knowledge does (or
+  does not) exist; that any exemption does (or does not) apply to a
+  specific project; that New York jurisdiction attaches to a specific
+  project for any reason, including the user merely mentioning New York;
+  that a real, identifiable person's likeness or digital replica is
+  governed by this statute (that subject is governed by a separate
+  statute, NY Civil Rights Law §§ 50-51); that AI tool providers are
+  expressly exempt (only media/platforms that merely publish or
+  disseminate are); or that satisfying the disclosure duty establishes
+  broader legal compliance, copyright clearance, provider/platform
+  permission, or overall commercial readiness. A human-reviewed Commercial
+  Assurance Assessment remains the higher-assurance path for resolving any
+  of these project-specific facts. **Runtime note:** this claim has no
+  `TOPIC_CLAIMS_FIXTURE` representation (confirmed directly, unchanged by
+  this decision) -- CRC-authorized but not yet conversationally reachable;
+  that is a separate, later, mechanical remediation, not performed by this
+  decision.
+
 CRC Candidate Statement: >
-  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
   New York General Business Law § 396-b requires a person who, for a
   commercial purpose, produces or creates an advertisement and has actual
-  knowledge that it includes a synthetic (AI-generated, non-identifiable)
-  performer to conspicuously disclose that fact within the advertisement
-  -- subject to exemptions for expressive-work advertisements (where the
-  synthetic performer's use matches its use in the work), audio-only
-  ads, and translation-only AI use, and subject to a civil penalty of
-  $1,000 for a first violation and $5,000 for any subsequent violation.
-  Media/platforms that merely publish or disseminate the advertisement
-  are separately exempted.
+  knowledge that it includes a synthetic performer -- a digitally created
+  figure, made using generative AI or a software algorithm, intended to
+  create the impression of a human performance but not recognizable as any
+  identifiable natural performer -- to conspicuously disclose that fact
+  within the advertisement. The duty does not apply to advertisements for
+  expressive works (where the synthetic performer's use is consistent with
+  its use in the work), audio-only advertisements, or advertisements
+  limited to AI-based language translation of a human performer. A
+  violation carries a civil penalty of $1,000 for a first violation and
+  $5,000 for any subsequent violation; media and platforms that merely
+  publish or disseminate a non-compliant advertisement are separately,
+  expressly exempted.
 
 Effective date: 2026-06-09 (statutory effective date, independently
   computed and confirmed from primary source: signed/enacted 2025-12-11,
   Chapter 617 of the Laws of 2025, "180 days after it becomes law" per
   the bill's own sponsor memo; confirmed operative as of 2026-09-10)
-Last reviewed: 2026-09-10
+Last reviewed: 2026-09-10 (CRC Publication Review, CPR_025)
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-09-10
 Related: [[CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1]] (§ 396-b(5)'s
   own text expressly cross-references NY Civil Rights Law §§ 50/50-f/51
   -- the statute this sibling claim governs -- confirming complementary,
   non-overlapping authority: one governs a real identifiable person's
-  likeness, the other a synthetic non-identifiable performer)
+  likeness, the other a synthetic non-identifiable performer; CPR_025
+  independently confirmed this distinctness is also what separates the two
+  claims' Principle 3 outcomes -- see CRC Publication Scope above)
 
 Full Formal Governance Review artifact: `governance-reviews/FGR_018_CAND-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001_2026-09-10.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_025_NY_GBL_396B_SYNTHETIC_PERFORMER_DISCLOSURE_REVIEW_2026-09-10.md`
