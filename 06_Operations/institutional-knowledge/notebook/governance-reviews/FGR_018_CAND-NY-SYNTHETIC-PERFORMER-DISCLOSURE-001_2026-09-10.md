@@ -1,6 +1,6 @@
 # Formal Governance Review #18 — CAND-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001
 
-**Status: AI-DRAFTED RECOMMENDATION. Not yet reviewed or concurred by PM. `Lifecycle: Candidate`. Not adopted. Not CRC-eligible.**
+**Status: ADOPTED (2026-09-10, subsequent to this file's original creation).** PM/JD explicitly concurred with this review's recommendation ("YES — CONCUR. ADOPT WITH BOUNDED WORDING") in a separate, later, explicitly authorized governance-recording task, using §15's exact governed proposition verbatim (no paraphrase, simplification, or reconstruction). The claim is now recorded in `GOVERNED-CLAIMS.md` as `CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1` (Wave 8), `Lifecycle: Adopted`, `Adoption Approver: JD (PM)`, `Adoption Decision Date: 2026-09-10`. `CRC Eligible` remains `Pending` — this Adoption is a Living Knowledge governance decision only, not a CRC Publication decision; no CRC Publication Review has been conducted. The verbatim review body below (§§1–21) is unmodified — only this status line was updated, per established precedent (see `FGR_008`'s own equivalent adoption-status update).
 
 ## 1. Basis
 

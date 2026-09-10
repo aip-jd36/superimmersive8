@@ -4044,3 +4044,162 @@ Related: —
 Full Formal Governance Review artifact: `governance-reviews/FGR_017_CAND-STABILITYAI-COMMERCIAL-USE-001_2026-09-09.md`
 Full CRC Publication Review artifact (initial review recommended WITHHOLD on sequencing grounds only; 2026-09-09 addendum records the in-sequence reconsideration and final APPROVE): `governance-reviews/CPR_020_CAND-STABILITYAI-COMMERCIAL-USE-001_2026-09-09.md`
 Candidate Representation: `08_Platform/app/lib/candidates/CAND-STABILITYAI-COMMERCIAL-USE-001.ts @ b99b89940d78e1f8f4a9f8c0a5d5b7f9e6a08288`
+
+---
+
+**Wave 8 claim below (2026-09-10) — the third claim in the Likeness/New-York-statutory domain family (joining `CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1`, Wave 4), and the second New York state statute captured via raw Class A primary-source `curl` evidence following the same evidence-capture discipline established for NY Civil Rights Law §§ 50-51.** `Lifecycle: Adopted` (Adoption Approver: JD (PM), Adoption Decision Date: 2026-09-10, following `governance-reviews/FGR_018_CAND-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001_2026-09-10.md`'s recommendation, ADOPT WITH BOUNDED WORDING, and this task's own explicit human concurrence to adopt the exact FGR-drafted proposition without paraphrase, simplification, or reconstruction), `Publication scope: Reviewer/Commercial Assurance`. Not CRC-eligible — `CRC Approver`/`CRC Decision Date` PENDING, same discipline as every prior wave; a separate CRC Publication Review is required, and per FGR_018 §17 this claim's own topic (`likeness`) is the same subject named in `CRC-PUBLICATION-POLICY.md` Principle 3 as a No-List-adjacent subject-matter gate (likeness, voice cloning, deepfakes, political persuasion) — the future CPR must treat it as Principle-3-gated from the outset, not resolvable by ordinary narrow-before-withhold reasoning, exactly as already established for the sibling claim. Source Formal Governance Review: `governance-reviews/FGR_018_CAND-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001_2026-09-10.md`. Runtime note, same shape as every prior non-fixture wave's own: this claim has no `TOPIC_CLAIMS_FIXTURE` (`08_Platform/app/lib/retrieval-engine/topic-claims-fixture.ts`) representation — confirmed directly against current code as part of this Adoption recording, not assumed (zero `likeness`-topic claims of any kind currently have a fixture entry, matching the sibling claim's own unreached state). This is Adoption as pure governance documentation, with zero runtime effect: this claim is governed Living Knowledge, immediately useful to a human reviewer, but structurally unreachable by CRC Retrieval until a separate, deliberately unperformed engineering task adds a fixture entry (which itself would still not make it CRC-eligible without a separate, later CRC Publication Review).**
+
+### CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1
+Domain: Synthetic Performer Advertising Disclosure (New York)
+Topic: likeness
+Subtopic: ny-synthetic-performer-advertisement-disclosure-duty
+Claim character: established
+Jurisdiction: New York (state)
+Context: a commercial AI-generated or AI-assisted video advertisement that may include a synthetic (AI-generated, non-identifiable) performer
+
+GOVERNANCE TREATMENT (2026-09-10, PM adoption decision, FGR #18): `provider_scope: null` (explicit — general New York statutory knowledge, not attached to any AI-video or asset provider). FGR disposition: ADOPT WITH BOUNDED WORDING — the governed proposition below is adopted exactly as drafted in `governance-reviews/FGR_018_CAND-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001_2026-09-10.md` §15, without paraphrase, simplification, or reconstruction, per this Adoption's own explicit human instruction not to reconstruct it from the concurrence prompt alone.
+
+Claim proposition: >
+  Under New York General Business Law § 396-b, a person engaged in the
+  business of dealing in property or a service who, for any commercial
+  purpose, produces or creates an advertisement respecting that property
+  or service must conspicuously disclose within the advertisement that a
+  synthetic performer is in the advertisement, where that person has
+  actual knowledge of the synthetic performer's presence. "Synthetic
+  performer" means a digitally created asset, made using generative
+  artificial intelligence or a software algorithm, intended to create the
+  impression that the asset is engaging in an audiovisual and/or visual
+  performance of a human performer who is not recognizable as any
+  identifiable natural performer. This duty does not apply to: (a)
+  advertisements or promotional materials for expressive works (including
+  motion pictures, television programs, streaming content, documentaries,
+  video games, and similar audiovisual works), provided the synthetic
+  performer's use in the advertisement or promotional material is
+  consistent with its use in the expressive work; (b) audio-only
+  advertisements; or (c) advertisements where the use of artificial
+  intelligence is solely for language translation of a human performer. A
+  violation carries a civil penalty of $1,000 for a first violation and
+  $5,000 for any subsequent violation. Media and platforms that merely
+  publish or disseminate a non-compliant advertisement (including,
+  without limitation, newspapers, magazines, television networks and
+  stations, streaming services, cable television systems, billboards, and
+  transit advertisements) are expressly exempted from this section. AI
+  tool providers are not named among the statute's described duty-holders
+  and are not the subject of any express exemption; their position
+  outside the duty-holder class is a matter of statutory scope, not a
+  stated carve-out. This section expressly preserves (neither limits nor
+  enlarges) rights under NY Civil Rights Law §§ 50, 50-f, and 51, and
+  expressly preserves (neither limits nor enlarges) federal 47 U.S.C.
+  § 230 protections. Whether a specific project's advertisement
+  producer/creator falls within the statutory duty-holder class, whether
+  specific advertisement content meets the statutory synthetic-performer
+  definition, whether actual knowledge exists, and whether any exemption
+  applies are unresolved, project-specific legal questions this
+  proposition does not answer.
+
+Source references:
+  - primary (Class A, independently retrieved verbatim, direct `curl` fetch of the official page's own `nys-openleg-result-text` container, no model summarization; first attempt returned an HTTP 403 Cloudflare challenge, retried successfully with a fuller browser User-Agent + Referer/Accept/Accept-Language headers): N.Y. General Business Law § 396-b (Advertisements), `nysenate.gov/legislation/laws/GBS/396-B`, durably preserved at `evidence-captures/ny-general-business-law/ny-gbs-396-b_20260910T093133Z.html`, SHA-256 `ca85e666ce91613ed66c240697f4165c4168ea1063ca86c3dbe942534f4f5702`.
+  - primary (Class A, same method, HTTP 200 on first attempt): NY State Senate Bill S8420A's own official status page (action-history table + sponsor memo, enactment/effective-date evidence), `nysenate.gov/legislation/bills/2025/s8420`, durably preserved at `evidence-captures/ny-general-business-law/ny-s8420a-bill-status_20260910T093133Z.html`, SHA-256 `02a2dd70c4ef3eb6c143ba702c262266e2531bff839aadd074478e0312b2c587`.
+Source authority/type: Primary legal/official authority (state statute)
+Source fact: >
+  § 396-b(1)(c): "'Synthetic performer' means a digitally created asset
+  created, reproduced, or modified by computer, using generative
+  artificial intelligence or a software algorithm, that is intended to
+  create the impression that the asset is engaging in an audiovisual
+  and/or visual performance of a human performer who is not recognizable
+  as any identifiable natural performer." § 396-b(3): "Any person engaged
+  in the business of dealing in any property or service who for any
+  commercial purpose produces or creates an advertisement respecting any
+  such property or service, in any medium or media in which such
+  advertisement appears, shall conspicuously disclose in such
+  advertisement that a synthetic performer is in such advertisement,
+  where such person has actual knowledge. A violation of this subdivision
+  shall result in a civil penalty of one thousand dollars for a first
+  violation, and five thousand dollars for any subsequent violation."
+  § 396-b(4): "This section shall not apply to advertisements and
+  promotional materials for expressive works...provided that the use of a
+  synthetic performer in the advertisement or promotional material is
+  consistent with its use in the expressive work." § 396-b(8): "Nothing
+  in this section shall apply to any medium used for advertising...by
+  whom any advertisement or solicitation in violation of this section is
+  published or disseminated." No subdivision anywhere in the captured
+  text expressly exempts AI tool providers/vendors (independently
+  re-searched for "provider"/"vendor"/"developer"/"tool" during FGR_018's
+  own re-verification; the only match is § 396-b(6)'s unrelated Section
+  230 "information content provider" cross-reference). Bill status page:
+  "Dec 11, 2025 signed chap.617" (Chapter 617 of the Laws of 2025);
+  sponsor memo: "EFFECTIVE DATE: This act shall take effect 180 days
+  after it becomes law" (independently computed to 2026-06-09).
+
+SI8 interpretation: >
+  A commercial AI-video advertisement that includes a synthetic
+  (non-identifiable, AI-generated) performer should not be represented to
+  a client, buyer, or platform as ready for commercial use in New York
+  without first confirming (a) whether the advertisement's
+  producer/creator falls within the statutory duty-holder class, (b)
+  whether the depicted figure meets the statutory synthetic-performer
+  definition, (c) whether actual knowledge existed, and (d) whether the
+  conspicuous-disclosure duty was met or an exemption applies -- these
+  are documentary/legal facts CRC cannot establish from conversation
+  alone.
+
+Applicability requirements:
+  - fact: jurisdiction
+    operator: equals
+    value: New York
+Unresolved project dependencies: [advertiser_or_duty_holder_status_confirmed, synthetic_performer_present_confirmed, actual_knowledge_confirmed, expressive_work_exemption_applies]   <!-- advertiser_or_duty_holder_status_confirmed: whether the specific project's advertisement producer/creator falls within Section 396-b(3)'s duty-holder class -- a legal characterization, evidence-only, never self-attested. synthetic_performer_present_confirmed: whether depicted content meets the full statutory synthetic-performer definition (digitally created, generative-AI/algorithm-made, intended to create the impression of a performance, not recognizable as any identifiable natural performer) -- compound fact with an observable component (an AI-generated human-like figure appears) and a legal-definitional component (satisfies the statute's precise test); modeled evidence-only per FGR_018 §9. actual_knowledge_confirmed: a state-of-mind element the duty is conditioned on -- evidence-only, mirroring written_consent_confirmed's established treatment on the sibling Likeness claim; never treated as established by a conversational assertion. expressive_work_exemption_applies: a two-part conditional legal test (advertisement is for an expressive work AND the synthetic performer's use is consistent with its use in that work) -- too interpretive for self-attestation, mirroring advertising_or_trade_use_confirmed's established treatment. None of the sibling Likeness claim's own three dependency names were reused -- they concern a different statute's elements. -->
+Prohibited conclusions: >
+  Does not establish that this project violates or complies with
+  § 396-b. Does not establish that § 396-b applies outside New York.
+  Does not establish that any AI-generated person in a video is a
+  "synthetic performer" as statutorily defined, nor that a real,
+  identifiable person's digital replica/likeness is governed by this
+  proposition (that subject is governed by
+  `CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1`, a distinct,
+  complementary statute per § 396-b(5)'s own cross-reference). Does not
+  establish that the CRC user is the statutory duty-holder, that actual
+  knowledge exists, or that any exemption (expressive-work, audio-only,
+  translation-only, or platform/medium) does or does not apply to a
+  specific project. Does not establish that New York jurisdiction
+  attaches to a specific project. Does not establish that AI tool
+  providers are expressly exempt, or that the platform/medium exemption
+  extends beyond its statutory wording (mere publication/dissemination).
+  Does not establish that compliance with the disclosure duty
+  establishes commercial clearance, copyright clearance, or AI-tool-
+  provider/platform permission generally, nor that absence of a known
+  violation means legal permission. Is not a substitute for Commercial
+  Assurance evidence review of the actual project's producer/creator
+  role, advertisement content, and actual-knowledge/exemption facts.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-09-10
+Publication scope: Reviewer/Commercial Assurance
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  New York General Business Law § 396-b requires a person who, for a
+  commercial purpose, produces or creates an advertisement and has actual
+  knowledge that it includes a synthetic (AI-generated, non-identifiable)
+  performer to conspicuously disclose that fact within the advertisement
+  -- subject to exemptions for expressive-work advertisements (where the
+  synthetic performer's use matches its use in the work), audio-only
+  ads, and translation-only AI use, and subject to a civil penalty of
+  $1,000 for a first violation and $5,000 for any subsequent violation.
+  Media/platforms that merely publish or disseminate the advertisement
+  are separately exempted.
+
+Effective date: 2026-06-09 (statutory effective date, independently
+  computed and confirmed from primary source: signed/enacted 2025-12-11,
+  Chapter 617 of the Laws of 2025, "180 days after it becomes law" per
+  the bill's own sponsor memo; confirmed operative as of 2026-09-10)
+Last reviewed: 2026-09-10
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: [[CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1]] (§ 396-b(5)'s
+  own text expressly cross-references NY Civil Rights Law §§ 50/50-f/51
+  -- the statute this sibling claim governs -- confirming complementary,
+  non-overlapping authority: one governs a real identifiable person's
+  likeness, the other a synthetic non-identifiable performer)
+
+Full Formal Governance Review artifact: `governance-reviews/FGR_018_CAND-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001_2026-09-10.md`
