@@ -57,8 +57,7 @@ const REVIEWER_CONTEXT_ALL = [
 // to reuse `lib/reviewer-context/auth`).
 const REVIEWER_SIDE_ROUTES_NORM = [
   ...REVIEWER_CONTEXT_ROUTES,
-  'app/api/admin/submissions/[id]/reviewer-lk/route.ts', // CAH-4E (legacy topic GET — retained, not UI-reachable)
-  'app/api/admin/submissions/[id]/reviewer-lk/research/route.ts', // CAH-4G.6 (the converged HRR POST)
+  'app/api/admin/submissions/[id]/reviewer-lk/research/route.ts', // CAH-4G.6 — the one HRR route (legacy CAH-4E GET retired CAH-4G.7)
 ].map((r) => path.normalize(r))
 const ASSESSMENT_DOMAIN = [
   ...listFiles('lib/assessments', ['.ts']),
