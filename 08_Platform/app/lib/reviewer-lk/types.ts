@@ -27,7 +27,151 @@ import type {
   PublicationScope,
 } from '@/lib/retrieval-engine/types'
 import type { ApplicabilityRequirementStatus } from '@/lib/retrieval-engine/lookup-topic-claims'
-import type { GoalCategory } from '@/types/interview-engine'
+import type { GoalCategory, GoalScope } from '@/types/interview-engine'
+
+// ── HRR — free-form research intent (CAH-4G.2 Slice 2, 2026-09-10) ───────────
+//
+// The bounded interpretation of a Human Reviewer's free-form research
+// question into VALIDATED STRUCTURED INTENT. This is intent entry only — it
+// never answers the question, never retrieves Living Knowledge, never
+// evaluates applicability, never runs Bounded Interpretation, never composes
+// an answer. See `HRR_GRI_TECHNICAL_DESIGN.md §C/§D` and `ADR-002`.
+
+/**
+ * The governed topic universe a Human Reviewer may research — every
+ * `GoalCategory` except `'unknown'` (`'unknown'` is never a research topic).
+ * The single runtime source of the reviewer-facing labels for these is
+ * `topic-labels.ts` (`REVIEWER_TOPIC_LABELS`); this tuple and those keys are
+ * asserted equal (and equal to `GOAL_CATEGORIES \ 'unknown'`) by
+ * `__tests__/reviewer-lk/hrr-intent-classifier.test.ts`, so a new
+ * `GoalCategory` cannot silently bypass one of them.
+ */
+export const REVIEWER_RESEARCH_TOPICS = [
+  'commercial_use',
+  'copyright_ownership',
+  'copyrightability',
+  'likeness',
+  'third_party_source_rights',
+] as const
+
+export type ReviewerResearchTopic = (typeof REVIEWER_RESEARCH_TOPICS)[number]
+
+/**
+ * The maximum number of distinct governed topics ONE free-form reviewer
+ * question may resolve to (`HRR_GRI_TECHNICAL_DESIGN.md §T-4`, frozen
+ * recommended default `2` pending a bounded internal experiment). Enforced
+ * both in the classifier JSON schema (`maxItems`) and again deterministically
+ * by `validateAndNormalizePermittedResearchIntent` (a model that ignores
+ * `maxItems` must not be able to fan retrieval out later).
+ */
+export const HRR_MAX_RESOLVED_TOPICS = 2
+
+/**
+ * Why the classifier could not (fully) resolve a permitted explicit research
+ * topic. Diagnostic / UI-routing signal only — never an answer, never a
+ * factual claim. A future free-form UI uses this to decide how to offer the
+ * governed research paths. Enum-closed, no free text.
+ */
+export const HRR_UNRESOLVED_AMBIGUITY_REASONS = [
+  'no_governed_topic_matched',
+  'topic_without_governed_coverage',
+  'question_too_general',
+  'multiple_unrelated_topics',
+] as const
+
+export type HrrUnresolvedAmbiguityReason = (typeof HRR_UNRESOLVED_AMBIGUITY_REASONS)[number]
+
+/**
+ * The bounded, schema-constrained output of the ONE classify-only model call
+ * (`interpret-research-intent.ts`). A single reviewer utterance may carry
+ * MORE THAN ONE semantic intent; the classifier separates them, the
+ * deterministic authority gate (`hrr-authority-gate.ts`) routes each
+ * independently.
+ *
+ * Structurally incapable of carrying an answer: every field is an enum, a
+ * boolean, or an array of enums. There is no `answer` / `summary` /
+ * `statement` / `explanation` / `conclusion` / `applicability` field, by
+ * construction — a prose emission outside this contract fails validation and
+ * the caller fails closed to the unsupported result.
+ */
+export interface PermittedResearchIntent {
+  /**
+   * Each governed research clause the question EXPLICITLY names, each with
+   * ITS OWN scope. `[]` is valid (no explicitly-supported research clause).
+   * Never a fabricated "closest topic". Deduplicated, capped at
+   * `HRR_MAX_RESOLVED_TOPICS`.
+   */
+  research_intents: Array<{
+    topic: ReviewerResearchTopic
+    /**
+     * THIS clause's own scope. `'determination_request'` only when THIS
+     * research clause itself asks HRR to decide/determine the topic (e.g.
+     * "can you determine whether copyright ownership is satisfied?"),
+     * otherwise `'informational'`. Never set by contagion from a separate
+     * assessment-decision request in the same utterance
+     * (`HRR_GRI_TECHNICAL_DESIGN.md §T-5`, CAH-4G.1).
+     */
+    scope: GoalScope
+  }>
+  /**
+   * `true` iff the utterance also asks HRR to make a Commercial Assurance
+   * assessment decision it is not authorized to make — approve / reject /
+   * commercially clear / mark a control passed / declare a finding / judge
+   * evidence sufficiency / reach an assessment outcome / sign off. Declined
+   * by the authority gate as its own block; NEVER changes the scope of any
+   * `research_intents[]` entry.
+   */
+  assessment_decision_requested: boolean
+  unresolved_ambiguity: HrrUnresolvedAmbiguityReason[]
+}
+
+/**
+ * One permitted research clause, as routed by the deterministic authority
+ * gate toward the (future, Slice 3) governed research pipeline. HRR-owned;
+ * deliberately NOT a CRC `UserGoal` (which carries conversation lifecycle
+ * meaningless for a single reviewer research action —
+ * `HRR_GRI_TECHNICAL_DESIGN.md §B`). It also is not yet adapted to `BiIntent`
+ * — that adapter lands with the converged pipeline in Slice 3, next to its
+ * first real consumer.
+ */
+export interface ExplicitResearchIntent {
+  source_kind: 'topic_selection' | 'interpreted_question'
+  topic: ReviewerResearchTopic
+  /** Per-clause scope, carried through verbatim from the classifier / the topic pick (always `'informational'` for a topic pick). */
+  scope: GoalScope
+  /** `true` iff `source_kind === 'interpreted_question'` — i.e. the topic was interpreted from a natural-language question rather than explicitly selected. Provenance, preserved for the answer. */
+  interpreted: boolean
+  /**
+   * A reference to the originating reviewer action (for an interpreted
+   * question) — NOT the raw question text, which is never persisted
+   * (`HRR_GRI_TECHNICAL_DESIGN.md §T-6`). `null` for a topic pick and until
+   * the audited action id exists (Slice 3+).
+   */
+  source_text_ref: string | null
+}
+
+/**
+ * The deterministic output of the authority gate (`hrr-authority-gate.ts`) —
+ * what the system is PERMITTED to route. Carries no answer, no governed
+ * proposition, no assessment conclusion.
+ */
+export interface HrrAuthorityGateResult {
+  /**
+   * `'research'` — pure research; run the pipeline for `research_intents`.
+   * `'assessment_judgment_redirected'` — the utterance asked for an
+   * assessment decision; that is declined (its own refusal block), and any
+   * `research_intents` still run independently at their own scope.
+   * `'unsupported'` — nothing explicitly supported to research and no
+   * assessment decision requested; offer the governed research paths.
+   */
+  authority_note: 'research' | 'assessment_judgment_redirected' | 'unsupported'
+  /** The permitted research clauses to route onward. `[]` when `authority_note !== 'research'` and nothing survived. */
+  research_intents: ExplicitResearchIntent[]
+  /** The governed research paths to offer the reviewer — populated ONLY when `authority_note !== 'research'`; `null` otherwise. Never an invented "closest topic". */
+  offered_research_paths: ReviewerResearchTopic[] | null
+  /** Passed through from the classifier for UI routing / observability. */
+  unresolved_ambiguity: HrrUnresolvedAmbiguityReason[]
+}
 
 /**
  * One applicability requirement of a governed claim, paired with its
