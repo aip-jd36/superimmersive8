@@ -1,6 +1,6 @@
 # ADR-002: A natural-language research interface is an intent-entry mechanism into governed retrieval and Bounded Interpretation — not an independent answer authority
 
-**Status:** Accepted (design) — `ARCHITECTURE FROZEN / IMPLEMENTATION IN PROGRESS` (frozen 2026-09-10; CAH-4G.1 Slice 1 complete, 2026-09-10). Formalized + frozen with CAH-4G (`PRD_CAH_4G_HRR.md`, `HRR_GRI_TECHNICAL_DESIGN.md §S–§V`). Slice 1 shipped the `BiIntent` generic Bounded-Interpretation input (with the mixed-intent authority contract corrected — see Decision point 3); no HRR runtime, classifier, route, or composition exists yet. This ADR states the durable principle the eventual implementation and every future channel must be checked against.
+**Status:** Accepted (design) — `ARCHITECTURE FROZEN / IMPLEMENTATION IN PROGRESS` (frozen 2026-09-10; CAH-4G.1 Slice 1 + CAH-4G.2 Slice 2 complete, 2026-09-10). Formalized + frozen with CAH-4G (`PRD_CAH_4G_HRR.md`, `HRR_GRI_TECHNICAL_DESIGN.md §S–§V`). Slice 1 shipped the `BiIntent` generic Bounded-Interpretation input (with the mixed-intent authority contract corrected — see Decision point 3). Slice 2 shipped the **intent-entry classifier** (`interpret-research-intent.*` — one classify-only model call, enum-only schema, fails closed, never answers) and the **deterministic authority gate** (`hrr-authority-gate.ts`) — the concrete realization of Decision points 1, 3, and 6 for HRR. No governed retrieval from free-form questions, no HRR pipeline, no composition, no route, no UI exists yet. This ADR states the durable principle the eventual implementation and every future channel must be checked against.
 **Date:** 2026-09-10
 **Context:** CAH-4G — HRR V1 / Governed Research Interface. HRR (Human Reviewer Research) is the first deliberate product surface built on GRI (Governed Research Interface). GRI's shape — *structured or natural-language intent → governed retrieval → applicability → Bounded Interpretation → consultative composition → provenance/projection* — will recur (a future CRC topic path; possibly other channels). This ADR names the invariant so a future change to any such surface can be checked against the principle, not just against whatever tests happened to cover.
 **Relationship to ADR-001:** `ADR-001-reviewer-resources-authority-boundary.md` establishes *"Reviewer Living Knowledge is a research authority surface, not an assessment authority surface"* (research ≠ the assessment). ADR-002 establishes a **different, broader axis**: *the interface for entering a research question is not itself an answer authority* (intent entry ≠ answer generation). Both apply to HRR. ADR-001's `Applies to` line already anticipates CAH-4G; ADR-002 extends the same design discipline to the shape of natural-language research interfaces generally.
@@ -59,14 +59,20 @@ Each of these collapses the boundary GRI exists to hold: **the interface accepts
 **Frozen by `HRR_GRI_TECHNICAL_DESIGN.md §S–§T` (2026-09-10; amended by CAH-4G.1, 2026-09-10), not re-decided here:** audit = reuse `access_kind='lk_research'` + additive nullable enrichment, raw question never persisted (§T-1); the `BiIntent` generalization **shipped (CAH-4G.1 Slice 1, proven zero CRC behavior change)**, HRR-local rule application rejected, the `BiResult` result-side adapter deferred to the HRR-runtime slice (§T-2); V1 composition fully deterministic (§T-3); **mixed judgment + research → decline the decision; each explicitly-supported research clause survives independently at its own scope (a prohibited intent never rewrites a permitted one's scope) (§T-5, corrected CAH-4G.1)**; likeness gap does not block V1 (§T-7); classifier inherits the interview-engine adapter config pattern (§T-8); `is_admin` OK for internal pilot, dedicated grant before broader rollout (§T-9).
 **Genuinely still open:** only the exact value of `HRR_MAX_RESOLVED_TOPICS` (§T-4, recommended `2` + a bounded internal experiment) — an implementation-tuning parameter, not an architecture decision.
 
-## Enforcement (to be added with implementation)
+## Enforcement
 
-- schema for the intent classifier: enum-only fields, no free-text field, no `summary`/`answer`/`statement` field;
-- a source-scan test that the classifier module contains no answer-composition path and the classifier schema carries no prose field;
-- a grounding test on the HRR composer: every rendered substantive **factual proposition** maps to grounding source A–E (governed `statement` / accurately-characterized applicability / BI output / fixed template / mechanical enumeration) — **the reviewer's question text is not a grounding source**; it may appear only as an attributed quotation, and a false premise within it must not be echoed as fact;
-- an authority-gate test: `assessment_judgment` intent with no resolved topic → offered-paths, never a fabricated topic, never a yes/no;
-- reuse of `reviewer-lk/authority-firewall.test.ts` for the new route (GET/POST research + append-only audit only; no assessment-state write; `evaluateReviewerEligibility`, never `crc_eligible`);
-- fail-closed tests at each boundary in `HRR_GRI_TECHNICAL_DESIGN.md §P`.
+**In place (CAH-4G.2 Slice 2 — `__tests__/reviewer-lk/hrr-intent-classifier.test.ts`, `hrr-authority-gate.test.ts`, `hrr-classifier-firewall.test.ts`):**
+- schema for the intent classifier asserted enum-only, `additionalProperties: false`, no `answer`/`summary`/`statement`/`explanation`/`conclusion`/`applicability`/`rationale`/`finding`/`verdict`/`cleared` field anywhere;
+- source-scan: the classifier + gate modules contain no answer-composition path, no `select-reviewer-claims` / `retrieve` / `applicability` / `bounded-interpretation` / consultative-composition import, no `UserGoal`, no DB write, no raw-question persistence, no Linked-CRC read;
+- deterministic normalizer tests: a non-enum topic/scope is dropped (never coerced/guessed/added), prose in an extra key is dropped, an unrecoverable shape → `null` → fail closed;
+- the adapter never throws — provider error / unrecoverable miss / normalizer rejection → `unsupportedResearchIntent()`;
+- authority-gate tests: `assessment_decision_requested` with no research clause → offered-paths, never a fabricated topic, never a yes/no; the gate is pure and never declines a `determination_request` research clause itself (that is BI's ceiling);
+- the topic-button path invokes no classifier / model call (Phase 11).
+
+**To be added with later slices:**
+- a grounding test on the HRR composer (Slice 4): every rendered substantive **factual proposition** maps to grounding source A–E — **the reviewer's question text is not a grounding source**; a false premise within it must not be echoed as fact;
+- reuse of `reviewer-lk/authority-firewall.test.ts` for the new free-form route (Slice 3/5): research + append-only audit only; no assessment-state write; `evaluateReviewerEligibility`, never `crc_eligible`;
+- audit-before-content + fail-closed tests at each boundary in `HRR_GRI_TECHNICAL_DESIGN.md §P` (Slice 5).
 
 ---
 
