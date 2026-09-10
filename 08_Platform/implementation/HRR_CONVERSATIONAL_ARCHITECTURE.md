@@ -1,6 +1,6 @@
 # HRR Conversational Research — Architecture & Design (CAH-4G.9)
 
-**Status:** `SLICE A IMPLEMENTED (local) / SLICE B NOT STARTED` — CAH-4G.9 designed the architecture (§A–§AA); **CAH-4G.10 (2026-09-11) implemented Slice A — the VISIBLE conversational thread**. HRR is now VISIBLY conversational (successive research turns stay on screen, append-only) but NOT yet CONTEXTUALLY conversational (every free-form question is still classified independently from its own text alone; no `prior_context`; no prior turn reaches the classifier / retrieval / applicability / BI / composition / audit). Server route, `runHrrResearch`, model-call budget, audit, and CRC are all byte-unchanged. Not pushed, not deployed. **Slice B (bounded structured follow-up context, §X) is a separate, independently-optional change — not started.** See §BB for the Slice-A as-built.
+**Status:** `SLICE A IMPLEMENTED + REVIEWED LOCALLY — NOT ON main, NOT IN PRODUCTION (CAH-4G.10P) / SLICE B NOT STARTED` — CAH-4G.9 designed the architecture (§A–§AA); **CAH-4G.10 (2026-09-11) implemented Slice A — the VISIBLE conversational thread** (`bea6f2d` feat + `f4d33ec` docs, on the local branch `work/cah-4f-reviewer-resources`). HRR is VISIBLY conversational in the reviewed code (successive research turns stay on screen, append-only) but NOT yet CONTEXTUALLY conversational. Server route, `runHrrResearch`, model-call budget, audit, and CRC are all byte-unchanged. **The Slice A commits were never pushed / merged / deployed** — an authenticated production UAT on 2026-09-11 correctly observed the pre-Slice-A single-turn surface (`origin/main` = `f8a4a12` still carries `ReviewerLkLookup.tsx` byte-identical to `bea6f2d^` and has no `hrr-thread.ts`). **DEPLOYMENT GAP, not a defect** — see §CC. **Slice B (bounded structured follow-up context, §X) is a separate, independently-optional change — not started.** As-built: §BB. Reconciliation: §CC.
 
 **Companion docs:** `PRD_CAH_4G_HRR.md` (the *what*), `HRR_GRI_TECHNICAL_DESIGN.md` (§N single-turn model — **amended by this doc**, §R future GRI reuse), `ADR-002` (intent entry ≠ answer authority), `ADR-003-hrr-conversation-context.md` (the decision recorded below), `REVIEWER_RESOURCES_ARCHITECTURE.md` §15/§18.
 
@@ -713,3 +713,58 @@ CAH-4G.9 §F/§Q floated a generic `components/conversation/` primitive set. App
 ### Verification
 
 `tsc --noEmit` exit 0 · `next build` "✓ Compiled successfully" exit 0 (HRR route present) · full Jest: 20 failed suites / 77 failed tests / 3697 passed — the failing-test-name set is **byte-identical** to a fresh `origin/main` (`08f20e9`) baseline (77 = 77, `comm` both directions empty); **zero new failures**; +36 passing (30 new `hrr-thread` cases + 2 route cases + firewall `test.each` expansion) · CRC `subsystem-boundaries.test.ts` / `crc-assurance-handoff/boundaries.test.ts` in the unchanged set.
+
+---
+
+## CC. Deployed-source reconciliation (CAH-4G.10P, 2026-09-11)
+
+An authenticated production UAT at `app.superimmersive8.com` ran the CAH-4G.10 thread scenario and observed the **pre-Slice-A** single-turn behaviour: a second free-form question replaced the first exchange; the composer kept its submitted text; the surface showed the "GOVERNED RESEARCH RESPONSE" heading and a "Clear" action, not an append-only thread. CAH-4G.10P reconciled *local reviewed source* vs *`origin/main`* vs *production*.
+
+### Evidence
+
+| Check | Result |
+|---|---|
+| CAH-4G.10 implementation commit | **`bea6f2d`** `feat(cah-4g): add visible HRR research thread` — `ReviewerLkLookup.tsx` (rewritten), `hrr-thread.ts` (NEW), + 3 test files |
+| CAH-4G.10 docs commit | **`f4d33ec`** `docs(cah-4g): record conversational thread slice` |
+| `bea6f2d` / `f4d33ec` ancestor of local HEAD? | **YES** (`work/cah-4f-reviewer-resources`) |
+| `bea6f2d` / `f4d33ec` ancestor of `origin/main`? | **NO** |
+| `bea6f2d` / `f4d33ec` on any origin ref? | **NO** — `git branch -r --contains` empty; `git ls-remote origin \| grep` empty. Local-only. |
+| `origin/main` HEAD | `f8a4a12` `fix(crc): widen commercial_use goal classification…` — `08f20e9` (CAH-4G.8 docs) + one CRC-only commit (`anthropic-extractor.ts` +1 line + a test). **Touches no HRR / reviewer-lk / review-dir file.** |
+| `origin/main:ReviewerLkLookup.tsx` vs `bea6f2d^:ReviewerLkLookup.tsx` | **byte-identical** (`git diff --quiet` → identical) — `origin/main` has the pre-Slice-A component verbatim |
+| `origin/main:hrr-thread.ts` | **ABSENT** (`git cat-file -e` fails) |
+| Production deployment SHA | **cannot be independently proven** (no Vercel auth / `.vercel` link / token in this environment; `VERCEL_GIT_COMMIT_SHA` is server-only, never exposed publicly). **But bounded:** Vercel `si8-creator-portal` deploys `main`; every commit reachable from `main` (`f8a4a12`) predates Slice A. Deployed buildId `40sGNlM5ZqyZbvfRFy8ed` (changed since CAH-4G.8's `Ar_zjQ9CmNNqabrmSsQcW` → a real redeploy of a `main` commit happened; `main-app` client chunk hash `b768503421f535d6` unchanged, consistent with `f8a4a12`'s server-only change). |
+
+### Runtime fingerprint
+
+| Behaviour | pre-Slice-A / `origin/main` | Slice A (`bea6f2d`) | production observed |
+|---|---|---|---|
+| retained prior turns | no — one `state` slot, `setState({ kind: 'answer', answer })` replaces | yes — `useReducer` append-only `turns[]` | **no (replaced)** ✓ pre-Slice-A |
+| composer clears on submit | no — `setQuestion('')` only in `Clear` | yes — `setQuestion('')` in `submitQuestion` | **no (kept text)** ✓ pre-Slice-A |
+| heading | "Governed research response" | "Research conversation" | **"Governed research response"** ✓ pre-Slice-A |
+| clear control | "Clear" (`setState({ kind: 'idle' })`) | "Clear conversation" (`dispatch({ type: 'clear' })`) | **"Clear"** ✓ pre-Slice-A |
+| request body | `{ mode, topic }` / `{ mode, question }` | identical (byte-unchanged) | — (Slice A didn't change it) |
+
+**All five observed characteristics match the pre-Slice-A source exactly; none match Slice A.**
+
+### Root cause: DEPLOYMENT GAP
+
+Slice A was implemented and reviewed **GO for integration**, then never pushed / merged / deployed (the CAH-4G.10 report's own git section said "Pushed = NO / Deployed = NO"; the commit boundary said "DO NOT push / merge / deploy"). The production UAT ran ahead of the integration step. **Not an implementation defect, not a partial integration, not an alias mismatch, not a test-coverage gap** — the reviewed code is simply not on `main`.
+
+### Tests reconciled
+
+The CAH-4G.10 tests (`hrr-thread.test.ts` 30 cases + 2 `hrr-research-route.test.ts` cases) **do** prove append-only retention, composer-clear, and "request 2 contains only question 2 / no `prior_context` / no transcript". They source-scan the real `ReviewerLkLookup.tsx` and unit-test the real `hrr-thread.ts` reducer. The component path is unambiguous and single: `page.tsx` → `ReviewerShell` → `ReviewerResources` → `ReviewerLkPanel` → `<ReviewerLkLookup>`. There is no alternate production component. The tests are valid; they validate the local branch, which is not deployed. **58/58 pass on HEAD.**
+
+### Next step (do NOT execute in CAH-4G.10P)
+
+Integrate the reviewed commits to `main` via the repo's normal method. Drift is one CRC-only commit (`f8a4a12`) with **zero file overlap** with the CAH-4G.9/.10 work, so a rebase of `work/cah-4f-reviewer-resources` (`b4ba0e0` + `bea6f2d` + `f4d33ec`) onto `f8a4a12` is clean:
+
+```
+git fetch origin --prune
+git rebase f8a4a12                     # onto current origin/main (from work/cah-4f-reviewer-resources)
+git range-diff f8a4a12...ORIG_HEAD f8a4a12...HEAD   # expect all '=' (patch-identical)
+npx tsc --noEmit && npx next build && npx jest      # re-verify; failing set vs a fresh f8a4a12 baseline
+git push origin HEAD:main              # fast-forward, no force  (PM-authorized integration milestone only)
+# then Vercel auto-deploys main; re-run REVIEWER_RESOURCES_ARCHITECTURE.md §18 + thread addendum
+```
+
+This is a **CAH-4G.10I — Slice A integration + production deployment** milestone, PM-authorized, not part of this investigation.

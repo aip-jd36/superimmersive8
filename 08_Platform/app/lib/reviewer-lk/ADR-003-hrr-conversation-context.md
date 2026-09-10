@@ -1,6 +1,6 @@
 # ADR-003: A visible HRR research thread is UI; the reasoning pipeline gets a bounded enum-only referent, never the transcript
 
-**Status:** ACCEPTED — CAH-4G.9 (design, 2026-09-10). **Slice A implemented CAH-4G.10 (2026-09-11)** — the VISIBLE thread only (`hrr-thread.ts` local reducer; `ReviewerLkLookup` → `useReducer`); decisions 1, 5, 6, 7, 8 below are now enforced in code + tests. Decisions 2, 3, 4 (the bounded enum-only referent + follow-up resolution) remain design for **Slice B**, not started. Full as-built: `HRR_CONVERSATIONAL_ARCHITECTURE.md §BB`.
+**Status:** ACCEPTED — CAH-4G.9 (design, 2026-09-10). **Slice A implemented + reviewed CAH-4G.10 (2026-09-11) — code on the local branch only; NOT on `main`, NOT in production (CAH-4G.10P deployed-source reconciliation).** The VISIBLE thread (`hrr-thread.ts` local reducer; `ReviewerLkLookup` → `useReducer`) enforces decisions 1, 5, 6, 7, 8 below in code + tests. Decisions 2, 3, 4 (the bounded enum-only referent + follow-up resolution) remain design for **Slice B**, not started. As-built: `HRR_CONVERSATIONAL_ARCHITECTURE.md §BB`; reconciliation: §CC.
 
 **Context:** CAH-4G is production-deployed and semantically safe. PM production UAT found the single-turn HRR model *too visible*: asking a second free-form question replaces the first. Human Reviewers expect a conversational research thread (interaction model like CRC). See `HRR_CONVERSATIONAL_ARCHITECTURE.md` §A.
 
