@@ -17,7 +17,23 @@ import { getSelectorAskabilityEntry } from '@/lib/crc-engine/selector-askability
 import { getApplicabilityFactLabel } from '@/lib/crc-engine/applicability-fact-display'
 import { buildConsultativeAnswerPlan } from '@/lib/crc-engine/consultative-answer-plan'
 import type { PlanClaimRef, PlanGoalSection, PlanUnresolvedItem } from '@/lib/crc-engine/consultative-answer-plan'
-import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
+import { buildBoundedInterpretations as buildBoundedInterpretationsRaw } from '@/lib/bounded-interpretation/build-bounded-interpretation'
+import { userGoalsToBiIntents } from '@/lib/bounded-interpretation/adapters'
+
+// CAH-4G Slice 1 (2026-09-10): Bounded Interpretation's input contract
+// generalized from `UserGoal[]` to the generic `BiIntent[]`. This local
+// shim routes every pre-existing call in this suite through the real CRC
+// adapter (`userGoalsToBiIntents` -- same active-and-confirmed filter BI
+// used to apply inline) with ZERO other change, so this whole file doubles
+// as the slice's zero-behavior-change equivalence check.
+const buildBoundedInterpretations = (
+  goals: Parameters<typeof userGoalsToBiIntents>[0],
+  ...rest: [
+    Parameters<typeof buildBoundedInterpretationsRaw>[1],
+    Parameters<typeof buildBoundedInterpretationsRaw>[2]?,
+    Parameters<typeof buildBoundedInterpretationsRaw>[3]?,
+  ]
+) => buildBoundedInterpretationsRaw(userGoalsToBiIntents(goals), ...rest)
 import type { BoundedInterpretation } from '@/lib/bounded-interpretation/types'
 import type { RetrievalResult } from '@/lib/retrieval-engine/types'
 import type { UserGoal } from '@/types/interview-engine'

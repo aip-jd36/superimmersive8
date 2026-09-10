@@ -13,6 +13,7 @@
 
 import { buildConsultativeAnswerPlan } from '@/lib/crc-engine/consultative-answer-plan'
 import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
+import { userGoalsToBiIntents } from '@/lib/bounded-interpretation/adapters'
 import type { BoundedInterpretation } from '@/lib/bounded-interpretation/types'
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
@@ -54,7 +55,7 @@ function show(title: string, inputSummary: string, biStatuses: string[], plan: u
 {
   const goal = g('g1', 'Can I use it commercially?', 'commercial_use')
   const out = retrieve(handoff({ tools: [t('runway-gen3')] }), MATRIX_FIXTURE, [goal], [], facts())
-  const interps = buildBoundedInterpretations([goal], out.results, out.diagnostics)
+  const interps = buildBoundedInterpretations(userGoalsToBiIntents([goal]), out.results, out.diagnostics)
   const plan = buildConsultativeAnswerPlan(interps, out.results, out.diagnostics)
   show('1. SIMPLE DIRECTLY RELEVANT', 'commercial_use goal + Runway tool', interps.map((i) => i.status), plan, [
     'that the project is commercially cleared / rights-cleared / certified',
@@ -67,7 +68,7 @@ function show(title: string, inputSummary: string, biStatuses: string[], plan: u
 {
   const goal = g('g1', 'Can I use it commercially?', 'commercial_use')
   const out = retrieve(handoff({ tools: [t('suno'), t('kling')] }), MATRIX_FIXTURE, [goal], [], facts([tm('suno'), tm('kling')]))
-  const interps = buildBoundedInterpretations([goal], out.results, out.diagnostics)
+  const interps = buildBoundedInterpretations(userGoalsToBiIntents([goal]), out.results, out.diagnostics)
   const plan = buildConsultativeAnswerPlan(interps, out.results, out.diagnostics)
   show('2. UNRESOLVED APPLICABILITY / DEPENDENCY', 'commercial_use goal + Suno + Kling (Kling account_status unknown)', interps.map((i) => i.status), plan, [
     'that the Kling Member exception applies (its applicability is unresolved, retained as a neutral item)',

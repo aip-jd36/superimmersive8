@@ -71,6 +71,7 @@ import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-cla
 import { assembleProjectionOutput } from '@/lib/projection-layer/assemble-projection-output'
 import type { ProjectionDiagnostic, ProjectionOutput } from '@/lib/projection-layer/types'
 import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
+import { userGoalsToBiIntents } from '@/lib/bounded-interpretation/adapters'
 import type { BoundedInterpretation } from '@/lib/bounded-interpretation/types'
 import { deriveDiscoveredTopicOccurrences } from './discovered-relevance'
 import { deriveAssessmentJurisdictionFacts } from './assessment-jurisdiction-scope'
@@ -240,8 +241,14 @@ export function runCRCConversation(
   // fact through is additive-only -- see build-bounded-interpretation.ts's
   // own shouldIncludeHumanContributionSentence for the exact narrow
   // conditions under which this changes rendered output at all.
+  // CAH-4G Slice 1 (2026-09-10): Bounded Interpretation now takes the
+  // generic `BiIntent[]` contract. `userGoalsToBiIntents` applies the exact
+  // active-and-confirmed filter BI used to apply inline and maps the four
+  // fields BI reads — zero behavior change (proven by the full BI + CRC
+  // regression suites). `understanding.user_goals` stays a genuine,
+  // unmodified `UserGoal[]`; nothing synthetic is constructed.
   const interpretations = buildBoundedInterpretations(
-    understanding.user_goals,
+    userGoalsToBiIntents(understanding.user_goals),
     results,
     retrievalDiagnostics,
     understanding.project_facts.human_contribution_description.attestation,
