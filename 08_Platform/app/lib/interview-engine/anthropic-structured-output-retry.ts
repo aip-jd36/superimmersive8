@@ -1,9 +1,14 @@
 /**
- * Shared bounded-recovery-retry helper for the two Anthropic structured-
- * output adapters that had zero retry coverage before this milestone --
- * the Constraint A decider (anthropic-decision.ts) and the candidate-
- * question generator (anthropic-candidate-question.ts). Built from the
- * accepted findings of the CRC 503 Reliability Diagnostic (2026-08-20).
+ * Shared bounded-recovery-retry helper for the small-schema, low-max_tokens
+ * Anthropic structured-output adapters. Built from the accepted findings of
+ * the CRC 503 Reliability Diagnostic (2026-08-20) for the two that had zero
+ * retry coverage then -- the Constraint A decider (anthropic-decision.ts)
+ * and the candidate-question generator (anthropic-candidate-question.ts).
+ * CAH-4G.2 (2026-09-10) adds a third consumer, HRR's research-intent
+ * classifier (lib/reviewer-lk/interpret-research-intent.anthropic.ts), which
+ * has the identical shape; this file is generic reliability infrastructure,
+ * not interview-engine logic, and a future cleanup may relocate it to a
+ * neutral path.
  *
  * Deliberately NOT used by anthropic-extractor.ts, which already has its
  * own working callWithOneRecoveryRetry/isStructuredOutputParseFailure
@@ -61,7 +66,18 @@ import { performance } from 'node:perf_hooks'
 
 export type StructuredOutputFailureClass = 'missing_output_max_tokens' | 'missing_output_other' | 'sdk_parse_failure'
 
-export type StructuredOutputAdapterName = 'decider' | 'candidate_generator'
+/**
+ * Which structured-output adapter a telemetry event / final error belongs
+ * to. Purely a label — no runtime branch keys on this value; adding a member
+ * cannot change any retry decision or CRC behavior. `'hrr_intent_classifier'`
+ * added CAH-4G.2 (2026-09-10): HRR's free-form research-intent classifier
+ * (`lib/reviewer-lk/interpret-research-intent.anthropic.ts`) has the exact
+ * small-schema / low-`max_tokens` / un-requested-`thinking`-block shape this
+ * helper exists to cover, so it reuses this one implementation rather than
+ * forking a third retry stack. It is NOT a CRC / interview-engine adapter;
+ * this module stays generic reliability infrastructure.
+ */
+export type StructuredOutputAdapterName = 'decider' | 'candidate_generator' | 'hrr_intent_classifier'
 
 /**
  * The minimal shape this module needs from a parsed Anthropic response.
