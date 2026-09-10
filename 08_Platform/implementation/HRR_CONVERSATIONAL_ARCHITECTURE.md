@@ -1,6 +1,6 @@
 # HRR Conversational Research — Architecture & Design (CAH-4G.9)
 
-**Status:** `DESIGN COMPLETE / NOT IMPLEMENTED` — architecture/design milestone only (CAH-4G.9, 2026-09-10). No runtime code. Implementation is the dependency-ordered slices in §W, each independently testable and reversible, none begun.
+**Status:** `SLICE A IMPLEMENTED (local) / SLICE B NOT STARTED` — CAH-4G.9 designed the architecture (§A–§AA); **CAH-4G.10 (2026-09-11) implemented Slice A — the VISIBLE conversational thread**. HRR is now VISIBLY conversational (successive research turns stay on screen, append-only) but NOT yet CONTEXTUALLY conversational (every free-form question is still classified independently from its own text alone; no `prior_context`; no prior turn reaches the classifier / retrieval / applicability / BI / composition / audit). Server route, `runHrrResearch`, model-call budget, audit, and CRC are all byte-unchanged. Not pushed, not deployed. **Slice B (bounded structured follow-up context, §X) is a separate, independently-optional change — not started.** See §BB for the Slice-A as-built.
 
 **Companion docs:** `PRD_CAH_4G_HRR.md` (the *what*), `HRR_GRI_TECHNICAL_DESIGN.md` (§N single-turn model — **amended by this doc**, §R future GRI reuse), `ADR-002` (intent entry ≠ answer authority), `ADR-003-hrr-conversation-context.md` (the decision recorded below), `REVIEWER_RESOURCES_ARCHITECTURE.md` §15/§18.
 
@@ -674,3 +674,42 @@ Derived from the repository (not assumed):
 - **The contract each keeps:** CRC — Track A/B/C provenance, explicit-vs-discovered distinction, no fabricated `UserGoal`, correction supersession, bounded questioning. HRR — reviewer text is intent entry only (`ADR-002`), BI is the semantic ceiling, deterministic applicability, audit-before-content, `lk_research` bounded, **reviewer conversation is not a project fact and not evidence** (§M), one-model-call ceiling (§P).
 
 **This amends `HRR_GRI_TECHNICAL_DESIGN.md` §N (OQ-6, "single-turn semantic model"):** the visible thread is still client-only and non-semantic; the **only** new reasoning context is a bounded enum-only `{topic, scope, bi_status}` referent (`HrrThreadContext`) — never prior answers, never prose, never facts. `ExplicitResearchIntent` and `HrrResearchAnswer` remain self-contained; the thread wrapper does not change them.
+
+---
+
+## BB. Slice A as-built (CAH-4G.10, 2026-09-11)
+
+**Implemented:** the VISIBLE conversational thread. **Not implemented:** any reasoning context (Slice B).
+
+### Abstraction decision — LOCAL HRR MECHANICS, not a generic framework
+
+CAH-4G.9 §F/§Q floated a generic `components/conversation/` primitive set. Applying the PM's Phase-4 test (product-agnostic? needed now? simplifies rather than enlarges? avoids HRR semantics? CRC-adoptable later without CRC change today?): a `components/conversation/` package would be 3–4 new files of framework for **one** consumer, which *enlarges* rather than simplifies. Chosen instead: **one small local module `app/admin/submissions/[id]/review/hrr-thread.ts`** (~110 lines) — a pure append-only reducer + two turn-builders, imports only types (`@/types/interview-engine`, `@/lib/hrr/types`), no React. It is unit-tested directly (`__tests__/reviewer-lk/hrr-thread.test.ts`, 30 cases) since the repo has no React render harness. **CRC runtime was not touched.** If Slice B or a real second consumer proves the need, extract to a shared primitive then.
+
+### Files
+
+| File | Change |
+|---|---|
+| `app/admin/submissions/[id]/review/hrr-thread.ts` | **NEW** — `HrrThreadTurn` / `HrrThreadState` / `EMPTY_HRR_THREAD` / `hrrThreadReducer` (`begin` / `settle` / `clear`) + `topicReviewerTurn` / `questionReviewerTurn`. Append-only; one request in flight (a hard reducer invariant); a stale `settle` (`seq !== inFlight`, or after `clear`) is inert. Presentation/session state only — no persistence, no network, no audit. |
+| `app/admin/submissions/[id]/review/ReviewerLkLookup.tsx` | **REWRITTEN** — `useReducer(hrrThreadReducer, EMPTY_HRR_THREAD)` replaces the single `state` slot. `research()` dispatches `begin` (appends a truthful reviewer turn + a pending HRR turn), then `settle` on resolve/fail, guarded by the monotonic `seqRef`. `runTopic` / `submitQuestion` both gate on `thread.inFlight`. `submitQuestion` clears the composer on submit; `runTopic` never touches the composer. `clearConversation` bumps `seqRef` + dispatches `clear`. The thread renders as an `<ol>` of `<ThreadTurn>`; the answer turn is the unchanged `<HrrResearchAnswerView>`. Still exactly one `fetch`, still inside the `research` `useCallback`, still no `useEffect`. Request body byte-unchanged: `JSON.stringify(payload)` where `payload` is only `{ mode, topic }` / `{ mode, question }`. |
+| `__tests__/reviewer-lk/hrr-thread.test.ts` | **NEW** — reducer logic (initial empty; append; one-in-flight; settle→answer/error; stale-drop; settle-after-clear inert; 2nd/3rd turn preserves earlier; clear→empty; topic turn carries no `question`) + `ReviewerLkLookup` source scans (no `setState({kind:'answer'})`; `useReducer`+`hrrThreadReducer`; `thread.turns.map`; one `HrrResearchAnswerView`; `Research:`/`You asked:` not a fabricated question; composer clears on submit; topic never populates composer; `thread.inFlight` gate; one `fetch`; no `useEffect`; body has no `prior_context`/transcript/messages/history/prior-answer; no storage APIs; disclaimers present; no auto-scroll). |
+| `__tests__/reviewer-lk/hrr-research-route.test.ts` | **+2 tests** — an extra conversational field in the body is ignored and never reaches the classifier; three successive questions each send only their own text (no server-side accumulation). |
+| `__tests__/reviewer-lk/authority-firewall.test.ts` | `hrr-thread.ts` added to `REVIEWER_LK_ALL` (firewall coverage — imports nothing from `lib/assessments` / `crc-sales` / `retrieve` / BI / composition). |
+
+### Behaviour
+
+- **Topic shortcut:** appends a reviewer turn rendered `Research: <reviewerTopicLabel(topic)>` — the canonical enum + label, never a synthesised sentence. **0 model calls** (unchanged). Then the HRR answer turn via `HrrResearchAnswerView`.
+- **Free-form:** appends the verbatim question as a `You asked:` reviewer turn, then the answer turn. **≤1 classify-only call** per question, each classified from that question's own text alone (route tests prove the classifier receives one string and never `prior_context`).
+- **Successive turns:** append-only. A new question never replaces or recomposes an earlier turn. `settle` only ever resolves the pending turn whose `seq` matches the current in-flight request.
+- **Loading / error:** the pending HRR turn (`role="status"`) appears immediately below the reviewer turn; a failure resolves it to a bounded error turn (`role="alert"`) — earlier turns are untouched. Audit-before-content unchanged: a 503 from an audit failure yields zero governed content for that turn.
+- **Clear conversation:** one control (replaces "Clear current response"). Empties `thread.turns`, clears the composer, invalidates any in-flight response (`seqRef` bump + reducer `clear`). No server call, no audit change, no assessment/project mutation, no effect on Linked CRC Context.
+- **Lifetime:** the thread lives in `useReducer` state. It survives a Living Knowledge ↔ Linked CRC tab switch and an inspector close/reopen (both are `block`/`hidden` visibility toggles — the component stays mounted). A full page refresh clears it (React remount → `EMPTY_HRR_THREAD`). No `localStorage` / `sessionStorage` / IndexedDB / cookie / URL state.
+- **Accessibility:** topic chips (radiogroup + roving tabindex + arrow keys), `<textarea id="hrr-question">` + `<label htmlFor>`, `Ask` button, Cmd/Ctrl+Enter, `Clear conversation` button, and the `<details>` provenance disclosures inside `HrrResearchAnswerView` are all unchanged and keyboard-operable. **No auto-scroll** in Slice A (no `scrollIntoView`, no scroll ref, no effect) — no disruptive focus jumps; the tab panel's own `overflow-y-auto` scrolls.
+
+### Not solved here (recorded, deliberately out of scope)
+
+- The known **multi-claim `bi_summary_blocks` density** in the narrow rail — unchanged; still a composition-layer backlog item.
+- **Bounded conversational context / follow-up referent resolution** ("why does that matter?", "does that mean I should approve this?") — Slice B. In Slice A those either resolve as independent questions if the stateless classifier happens to, or fall through to the existing fail-closed / offered-paths behaviour. No pronoun heuristics, no topic inheritance, no domain-specific rules were added.
+
+### Verification
+
+`tsc --noEmit` exit 0 · `next build` "✓ Compiled successfully" exit 0 (HRR route present) · full Jest: 20 failed suites / 77 failed tests / 3697 passed — the failing-test-name set is **byte-identical** to a fresh `origin/main` (`08f20e9`) baseline (77 = 77, `comm` both directions empty); **zero new failures**; +36 passing (30 new `hrr-thread` cases + 2 route cases + firewall `test.each` expansion) · CRC `subsystem-boundaries.test.ts` / `crc-assurance-handoff/boundaries.test.ts` in the unchanged set.
