@@ -13,6 +13,7 @@ import { Section4Gaps } from './Section4Gaps'
 import { Section5Findings } from './Section5Findings'
 import { Section6Assessment } from './Section6Assessment'
 import { Section7Brief } from './Section7Brief'
+import { useWorkspaceLayout } from './workspace-layout-context'
 
 type Section = '1' | '2' | '3' | '4' | '5' | '6' | '7'
 type RightTab = 'submission' | 'evidence' | 'guidance'
@@ -56,6 +57,13 @@ export function WorkbookClient({
   const [savedAtDisplay, setSavedAtDisplay] = useState('')
   const saveTimer = useRef<NodeJS.Timeout>()
   const isFirstRender = useRef(true)
+
+  // CAH-4F.2: one layout-only fact from the page-frame shell. When true,
+  // Reviewer Resources occupies the adjacent contextual rail and this
+  // component's own context aside is CSS-hidden — it stays mounted, keeps
+  // `rightTab`, and reappears unchanged when this goes back to false. Not a
+  // workbook value, never a save/autosave/gating input, never persisted.
+  const { workbookContextAsideHidden } = useWorkspaceLayout()
 
   const gates = computeGates(workbook)
 
@@ -393,9 +401,13 @@ export function WorkbookClient({
           </div>
         </main>
 
-        {/* Right Context Panel */}
+        {/* Right Context Panel — the Workbook's own Guidance / Submission /
+            Evidence surface. CAH-4F.2: at adjacent widths it CSS-yields the
+            rail (`hidden`) while Reviewer Resources occupies it — it stays
+            mounted, so `rightTab` and scroll survive, and it returns unchanged
+            on close. `rightTab` remains owned entirely by this component. */}
         <aside
-          className="flex-shrink-0 flex flex-col border-l overflow-hidden"
+          className={`flex-shrink-0 ${workbookContextAsideHidden ? 'hidden' : 'flex'} flex-col border-l overflow-hidden`}
           style={{ width: 280, borderColor: 'rgba(0,0,0,0.08)' }}
         >
           {/* Tabs */}

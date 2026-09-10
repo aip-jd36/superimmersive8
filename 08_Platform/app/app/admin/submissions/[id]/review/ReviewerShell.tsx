@@ -32,10 +32,20 @@
  *     the workbook flexes narrower beside it;
  *   - viewport <  ADJACENT_MIN_PX → inspector is a right-anchored overlay
  *     drawer; the workbook DOM is not reflowed; default closed.
+ *
+ * CAH-4F.2 (Contextual Inspector Coordination): at adjacent widths, only one
+ * contextual surface occupies the right rail at a time. The shell derives one
+ * layout-only fact — `workbookContextAsideHidden` — and publishes it through a
+ * domain-neutral context (`./workspace-layout-context`) around the opaque
+ * Workbook child. The shell still knows nothing about `rightTab`, guidance,
+ * submission, evidence, LK topics or CRC associations — it only knows whether
+ * Reviewer Resources currently occupies the adjacent rail. This is a UX
+ * mechanism, not an authority boundary.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { PanelRightOpen, X } from 'lucide-react'
+import { WorkspaceLayoutProvider } from './workspace-layout-context'
 
 /**
  * Below this width the assessment work surface (left nav 200px + its own
@@ -90,11 +100,26 @@ export function ReviewerShell({
   const showInspector = resourcesAvailable && open
   const showReopenTab = resourcesAvailable && !open
 
+  // CAH-4F.2: the one layout-only fact handed to the Workbook child. True only
+  // while Reviewer Resources is an in-flow adjacent column — so the Workbook's
+  // own context aside yields the rail. In drawer mode (`!adjacent`) the
+  // inspector is a fixed overlay that does not reflow the workbook, so the
+  // aside stays visible: this stays false. Layout state only — no `rightTab`,
+  // no guidance/submission/evidence, no resource data, no callback.
+  const workspaceLayout = useMemo(
+    () => ({ workbookContextAsideHidden: showInspector && adjacent }),
+    [showInspector, adjacent],
+  )
+
   return (
     <div className="flex h-screen overflow-hidden" style={{ backgroundColor: '#FAFAF7' }}>
       {/* ── Assessment nav + work surface (the WorkbookClient owns its own
-             internal 3-zone layout; the shell only bounds its width/height) ── */}
-      <div className="flex-1 min-w-0 h-full overflow-hidden">{children}</div>
+             internal 3-zone layout; the shell only bounds its width/height).
+             CAH-4F.2: wrapped in the neutral layout provider — the shell never
+             inspects or couples to `children`, it only publishes one boolean. */}
+      <div className="flex-1 min-w-0 h-full overflow-hidden">
+        <WorkspaceLayoutProvider value={workspaceLayout}>{children}</WorkspaceLayoutProvider>
+      </div>
 
       {/* ── Reviewer Resources — adjacent column ─────────────────────────────
              Rendered in normal flow beside the workbook when the viewport is

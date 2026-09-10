@@ -58,8 +58,9 @@ describe('A — shell structure', () => {
   test('ReviewerShell is a client component that lays workspace + inspector as peers in ONE viewport-height flex row', () => {
     expect(read(SHELL)).toMatch(/^'use client'/m)
     expect(shell).toMatch(/className="flex h-screen overflow-hidden"/)
-    // workspace cell renders {children} verbatim; inspector is a separate <aside>
-    expect(shell).toMatch(/<div className="flex-1 min-w-0 h-full overflow-hidden">\{children\}<\/div>/)
+    // workspace cell renders {children} (CAH-4F.2: wrapped only in the neutral
+    // layout provider); inspector is a separate <aside>
+    expect(shell).toMatch(/<div className="flex-1 min-w-0 h-full overflow-hidden">\s*<WorkspaceLayoutProvider value=\{workspaceLayout\}>\{children\}<\/WorkspaceLayoutProvider>\s*<\/div>/)
     expect(shell).toMatch(/<aside\b[\s\S]*?aria-label="Reviewer Resources"/)
   })
 
@@ -68,6 +69,9 @@ describe('A — shell structure', () => {
     expect(occurrences.length).toBe(1)
     expect(shell).not.toMatch(/\{\s*open\s*&&\s*children\s*\}/)
     expect(shell).not.toMatch(/\{\s*[a-zA-Z]+\s*\?\s*children\s*:/)
+    // CAH-4F.2: the provider around {children} is rendered unconditionally too
+    expect(shell).not.toMatch(/\{\s*[a-zA-Z]+\s*&&\s*<WorkspaceLayoutProvider/)
+    expect(shell).not.toMatch(/\{\s*[a-zA-Z]+\s*\?\s*<WorkspaceLayoutProvider/)
   })
 })
 
@@ -105,11 +109,17 @@ describe('B — authority isolation', () => {
 // ── C. Workbook persistence — never remounted, one structural change ──────
 
 describe('C — Workbook persistence', () => {
-  test('the ONLY structural change to WorkbookClient is the outer h-screen → h-full', () => {
+  test('WorkbookClient structural changes are only: (CAH-4F.1) outer h-screen→h-full, (CAH-4F.2) the context-aside visibility class', () => {
     const wb = read(WORKBOOK)
-    // outer container is now h-full (height owned by the shell), not h-screen
+    // CAH-4F.1: outer container is h-full (height owned by the shell), not h-screen
     expect(wb).toMatch(/<div className="flex flex-col h-full" style=\{\{ backgroundColor: '#FAFAF7' \}\}>/)
     expect(wb).not.toMatch(/className="flex flex-col h-screen"/)
+    // CAH-4F.2: the Workbook's own context <aside> is CSS-hidden (not unmounted)
+    // when Reviewer Resources holds the adjacent rail
+    expect(wb).toMatch(/workbookContextAsideHidden \? 'hidden' : 'flex'/)
+    // it is still unconditionally in the JSX — visibility is a class, not a mount gate
+    expect(wb).not.toMatch(/\{\s*!?\s*workbookContextAsideHidden\s*&&\s*[\s\S]{0,40}<aside/)
+    expect(wb).not.toMatch(/\{\s*!workbookContextAsideHidden\s*&&/)
   })
 
   test('all workbook state / behavior identifiers are still present (regression tripwire)', () => {
