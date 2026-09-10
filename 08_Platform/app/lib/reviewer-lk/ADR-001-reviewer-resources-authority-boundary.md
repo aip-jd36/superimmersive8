@@ -80,7 +80,7 @@ This ADR names the principle those tests defend, so a reviewer of a *future* cha
 ## Non-decisions (left open)
 
 - **A future deliberate, reviewer-initiated, provenance-preserving citation / reference affordance** — e.g. an explicit "reference this governed claim in my note" action that carries the `claim_id` + `last_verified` + `governed_claims_reference` and is attributed to the reviewer's own action. This is **explicitly not prohibited** by this ADR. It is out of scope for CAH-4F; it would be specified in its own milestone and recorded in a new or amended ADR. The permanent constraint above still applies: such an affordance must be reviewer-initiated and provenance-preserving, never silent or automatic, and it must not convert research into an assessment conclusion.
-- CAH-4G's composition step — a *new, separate* bounded composition, not an extension of the CAH-4F passthrough projection; its own design and its own `access_kind`.
+- CAH-4G's composition step — a *new, separate* bounded composition, not an extension of the CAH-4F passthrough projection; its own design. (Formalized 2026-09-10 in `PRD_CAH_4G_HRR.md` + `HRR_GRI_TECHNICAL_DESIGN.md` + `ADR-002-governed-research-interface.md`, status `DESIGNED / NOT IMPLEMENTED`. Note: the design recommends **reusing** `access_kind = 'lk_research'` with additive nullable structured enrichment — the "its own `access_kind`" expectation here is superseded by that source-backed recommendation; the audit contract is a deferred decision, not implemented.)
 - Matrix-claim reviewer access (the reviewer path is `TopicClaim`-only today) — separate future milestone.
 
 ## Related
@@ -89,4 +89,5 @@ This ADR names the principle those tests defend, so a reviewer of a *future* cha
 - `08_Platform/implementation/REVIEWER_RESOURCES_ARCHITECTURE.md` §2, §13
 - `08_Platform/implementation/CRC_CURRENT_STATE.md` §1 (CRC product boundary), §2 (layering invariant)
 - `08_Platform/prds/PRD_CRC_v1.0.md`, `08_Platform/prds/PRD_ASSESSMENT_SERVICE_v1.0.md`
-- sibling ADRs: `08_Platform/app/lib/assessments/ADR-001..004`
+- sibling ADRs: `08_Platform/app/lib/assessments/ADR-001..004`; `08_Platform/app/lib/reviewer-lk/ADR-002-governed-research-interface.md` (CAH-4G / GRI — a natural-language research interface is intent entry, not an answer authority)
+- `08_Platform/prds/PRD_CAH_4G_HRR.md`, `08_Platform/implementation/HRR_GRI_TECHNICAL_DESIGN.md`
