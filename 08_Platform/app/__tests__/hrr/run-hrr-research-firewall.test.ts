@@ -33,12 +33,13 @@ const HRR_FILES = listTs(HRR_DIR)
 
 describe('lib/hrr module tree', () => {
   test('is present and non-trivial', () => {
-    expect(HRR_FILES.length).toBeGreaterThanOrEqual(4)
+    expect(HRR_FILES.length).toBeGreaterThanOrEqual(5)
     expect(HRR_FILES).toEqual(expect.arrayContaining([
       'lib/hrr/run-hrr-research.ts',
       'lib/hrr/bi-adapters.ts',
       'lib/hrr/types.ts',
       'lib/hrr/project-hrr-research-answer.ts',
+      'lib/hrr/project-hrr-audit-record.ts',
     ]))
   })
 })
