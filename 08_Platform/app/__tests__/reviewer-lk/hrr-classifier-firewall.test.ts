@@ -117,23 +117,28 @@ describe('Phase 11 — the topic-button path invokes NO classifier / model call'
   })
 })
 
-describe('Slice 2 adds no route, no migration, no UI', () => {
-  test('no new HRR route file exists', () => {
-    const routeDir = path.join(APP_ROOT, 'app/api/admin/submissions/[id]/reviewer-lk')
-    const entries = fs.existsSync(routeDir) ? fs.readdirSync(routeDir) : []
-    expect(entries).toEqual(['route.ts']) // no research/route.ts, no POST route
+describe('the classifier + authority gate themselves add no route / migration / UI', () => {
+  test('the Slice-2 classifier/gate modules import no route and no UI', () => {
+    for (const rel of SLICE2_FILES) {
+      const imp = importLines(rel)
+      expect(imp).not.toMatch(/reviewer-lk\/route|reviewer-lk\/research\/route|\.tsx['"]|next\/server/)
+    }
   })
 
-  test('no CAH-4G migration was added', () => {
+  test('no CAH-4G migration was added (audit reuses the existing lk_research contract — CAH-4G.5 Option A)', () => {
     const migDir = path.join(APP_ROOT, '..', 'supabase', 'migrations')
     const migs = fs.existsSync(migDir) ? fs.readdirSync(migDir) : []
     expect(migs.filter((m) => /hrr|cah.?4g|research_audit|research_mode/i.test(m))).toEqual([])
   })
 
-  test('the reviewer lookup UI still has no free-form input (unchanged by Slice 2)', () => {
-    const src = codeOnly('app/admin/submissions/[id]/review/ReviewerLkLookup.tsx')
-    expect(src).not.toMatch(/<textarea|<input\b/)
-    expect(src).not.toMatch(/interpret-research-intent|hrr-authority-gate/)
+  test('CAH-4G.6: the ONE UI-reachable HRR route is the converged POST research route; the classifier is called only there', () => {
+    const routeDir = path.join(APP_ROOT, 'app/api/admin/submissions/[id]/reviewer-lk')
+    const entries = fs.existsSync(routeDir) ? fs.readdirSync(routeDir).sort() : []
+    // legacy topic GET retained (not UI-reachable) + the converged research POST
+    expect(entries).toEqual(['research', 'route.ts'])
+    const research = codeOnly('app/api/admin/submissions/[id]/reviewer-lk/research/route.ts')
+    expect(research).toMatch(/createAnthropicResearchIntentInterpreter\s*\(/)
+    expect(research).toMatch(/hrrAuthorityGate\s*\(/)
   })
 })
 

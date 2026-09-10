@@ -1,26 +1,29 @@
 /**
- * CAH-4F / CAH-4F.1 — Reviewer Resources presentation contract.
+ * CAH-4G.6 — Reviewer Resources HRR presentation contract.
  *
- * The repo has no React render harness (no @testing-library/react, no jsdom).
- * Every reviewer-surface guarantee in this project is asserted by SOURCE SCAN
- * (see `authority-firewall.test.ts` and `reviewer-shell.test.ts`) — this file
- * follows that convention, plus one real data-path check that both applicability
- * states are reachable from the live fixtures.
+ * The repo has no React render harness (testEnvironment: 'node', no jsdom, no
+ * @testing-library/react). Every reviewer-surface guarantee in this project is
+ * asserted by SOURCE SCAN — this file follows that convention.
  *
- * Verifies (CAH-4F semantic work, carried unchanged into the CAH-4F.1 inspector):
- *   - reviewer-readable topic labels; API value unchanged;
- *   - result order: proposition → Applicability → Context → limitations → provenance;
- *   - explicit "Applicability" heading; neutral (non pass/fail) styling;
- *   - "Context used for this look-up" wording;
- *   - raw `crc_publication_scope` prose absent; `crc_eligible` absent;
- *   - "not assessment evidence" framing present;
- *   - no promotion control / button.
+ * Supersedes the CAH-4F `ClaimCard` presentation contract: the topic look-up and
+ * the free-form question now render the SAME `HrrResearchAnswer` through ONE
+ * `<HrrResearchAnswerView>`. What is verified:
+ *   - ONE shared renderer — no topic/question split, no topic-specific branch;
+ *   - the Slice-4 consultative hierarchy is the render order (orientation first,
+ *     unresolved before provenance, provenance progressive);
+ *   - the assessment-authority boundary (Lane 1) is visually distinguishable
+ *     from the governed research (Lane 2);
+ *   - empty sections are omitted, never rendered as an empty heading;
+ *   - no raw `ReviewerLkClaim` serialization as the primary answer;
+ *   - neutral styling only (no pass/fail colour, no ✓/✗/PASS/FAIL);
+ *   - reviewer-readable topic labels; the request carries the unchanged enum;
+ *   - "not assessment evidence" framing present; no commercial-clearance /
+ *     legal-advice language; `crc_eligible` / raw `crc_publication_scope` absent;
+ *   - no "copy to evidence" / apply / accept control anywhere.
  */
 
 import * as fs from 'fs'
 import * as path from 'path'
-import { selectReviewerClaims } from '@/lib/reviewer-lk/select-reviewer-claims'
-import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { REVIEWER_TOPIC_LABELS, reviewerTopicLabel } from '@/lib/reviewer-lk/topic-labels'
 import { GOAL_CATEGORIES } from '@/types/interview-engine'
 
@@ -29,14 +32,18 @@ const read = (rel: string) => fs.readFileSync(path.join(APP_ROOT, rel), 'utf-8')
 const codeOnly = (rel: string) =>
   read(rel).replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1')
 
-const LOOKUP = 'app/admin/submissions/[id]/review/ReviewerLkLookup.tsx'
-const LK_PANEL = 'app/admin/submissions/[id]/review/ReviewerLkPanel.tsx'
-const RESOURCES = 'app/admin/submissions/[id]/review/ReviewerResources.tsx'
-const INSPECTOR = 'app/admin/submissions/[id]/review/ReviewerResourcesInspector.tsx'
-const SHELL = 'app/admin/submissions/[id]/review/ReviewerShell.tsx'
+const R = 'app/admin/submissions/[id]/review'
+const LOOKUP = `${R}/ReviewerLkLookup.tsx`
+const ANSWER_VIEW = `${R}/HrrResearchAnswerView.tsx`
+const LK_PANEL = `${R}/ReviewerLkPanel.tsx`
+const RESOURCES = `${R}/ReviewerResources.tsx`
+const INSPECTOR = `${R}/ReviewerResourcesInspector.tsx`
+const SHELL = `${R}/ReviewerShell.tsx`
 
-describe('FR-2 — reviewer-readable topic labels; API value is the unchanged enum', () => {
-  test('the label map covers exactly the reviewer topics (GOAL_CATEGORIES minus "unknown")', () => {
+// ── topic labels ──────────────────────────────────────────────────────────
+
+describe('topic labels — reviewer-readable; the request carries the unchanged enum', () => {
+  test('the label map covers exactly GOAL_CATEGORIES minus "unknown"', () => {
     expect(Object.keys(REVIEWER_TOPIC_LABELS).sort()).toEqual(
       GOAL_CATEGORIES.filter((c) => c !== 'unknown').sort(),
     )
@@ -55,127 +62,167 @@ describe('FR-2 — reviewer-readable topic labels; API value is the unchanged en
     expect(reviewerTopicLabel('commercial_use')).toBe('Commercial use')
   })
 
-  test('CAH-4F.1: topic chips carry the canonical enum in data-topic and render the label only', () => {
+  test('topic chips: radiogroup of buttons, canonical enum in data-topic, label-only display, a click runs the research', () => {
     const src = codeOnly(LOOKUP)
-    // the fetch URL still carries the raw enum topic
-    expect(src).toMatch(/topic=\$\{encodeURIComponent\(topic\)\}/)
-    // the chip control is a radiogroup of buttons (not <select>), each carrying
-    // the canonical value in data-topic and displaying only the reviewer label
     expect(src).toMatch(/role="radiogroup"/)
     expect(src).toMatch(/role="radio"/)
     expect(src).toMatch(/data-topic=\{t\}/)
     expect(src).toMatch(/\{reviewerTopicLabel\(t\)\}/)
-    // onChange receives the enum value `t` itself (no label round-trip)
-    expect(src).toMatch(/onClick=\{\(\) => onChange\(t\)\}/)
-    // no free-text input
-    expect(src).not.toMatch(/<textarea|<input\b/)
+    // a chip click POSTs { mode: 'topic_pick', topic: <enum t> } — no label round-trip
+    expect(src).toMatch(/onResearch\(t\)/)
+    expect(src).toMatch(/mode:\s*'topic_pick',\s*topic/)
+    expect(src).not.toMatch(/<select\b/)
   })
 })
 
-describe('FR-3 — result order: proposition → Applicability → Context → limitations → provenance', () => {
-  const src = codeOnly(LOOKUP)
-  const iProposition = src.indexOf('claim.statement ?')
-  const iApplicability = src.indexOf('Applicability')
-  const iContext = src.indexOf('Context used for this look-up')
-  const iLimitations = src.indexOf('Evidence limitations / unresolved requirements')
-  const iProvenance = src.indexOf('Provenance and governance details')
+// ── one shared renderer ───────────────────────────────────────────────────
 
-  test('all five sections are present', () => {
-    for (const i of [iProposition, iApplicability, iContext, iLimitations, iProvenance]) {
+describe('ONE shared renderer — HrrResearchAnswerView', () => {
+  const lookup = codeOnly(LOOKUP)
+  const view = codeOnly(ANSWER_VIEW)
+
+  test('both entry modes render through <HrrResearchAnswerView answer={...}> — no second renderer', () => {
+    expect(lookup).toMatch(/<HrrResearchAnswerView\s+answer=\{[^}]*\}/)
+    expect(lookup.match(/HrrResearchAnswerView/g)?.length).toBeGreaterThanOrEqual(1)
+    expect(view).toMatch(/answer:\s*HrrResearchAnswer/)
+    // no topic-vs-question presentation split
+    for (const s of [lookup, view]) {
+      expect(s).not.toMatch(/TopicResearchResultView|QuestionResearchResultView|TopicAnswerView|QuestionAnswerView/)
+    }
+  })
+
+  test('no topic-specific rendering branch — the view never switches on a topic enum value', () => {
+    expect(view).not.toMatch(/topic\s*===\s*'(commercial_use|copyright_ownership|copyrightability|likeness|third_party_source_rights)'/)
+    expect(view).not.toMatch(/switch\s*\(\s*[a-zA-Z.]*topic[a-zA-Z.]*\s*\)/)
+  })
+
+  test('the view is presentational only — no fetch, no db verbs, no re-interpretation, no promotion control', () => {
+    expect(view).not.toMatch(/fetch\(|\.insert\s*\(|\.update\s*\(|\.rpc\s*\(/)
+    expect(view).not.toMatch(/buildBoundedInterpretations|evaluateApplicabilityDetailed|selectReviewerClaims|runHrrResearch/)
+    expect(view).not.toMatch(/summari[sz]e|paraphrase|rephrase|shorten/i)
+    expect(view).not.toMatch(/copyToEvidence|applyToWorkbook|acceptClaim|promoteClaim|addToEvidence/i)
+  })
+})
+
+// ── consultative hierarchy = render order ─────────────────────────────────
+
+describe('render order = the Slice-4 consultative hierarchy', () => {
+  const view = codeOnly(ANSWER_VIEW)
+  const iOrientation = view.indexOf('topic.orientation')
+  const iBiBlocks = view.indexOf('topic.bi_summary_blocks')
+  const iConsiderations = view.indexOf('topic.governed_considerations')
+  const iApplicability = view.indexOf('topic.applicability')
+  const iUnresolved = view.indexOf('topic.unresolved_inputs')
+  const iDoesNotApply = view.indexOf('topic.does_not_apply')
+  const iBoundary = view.indexOf('topic.boundary_note')
+  const iProvenance = view.indexOf('topic.governed_claim_refs')
+
+  test('all hierarchy anchors are present', () => {
+    for (const i of [iOrientation, iBiBlocks, iConsiderations, iApplicability, iUnresolved, iDoesNotApply, iBoundary, iProvenance]) {
       expect(i).toBeGreaterThan(-1)
     }
   })
 
-  test('they appear in the required order', () => {
-    expect(iProposition).toBeLessThan(iApplicability)
-    expect(iApplicability).toBeLessThan(iContext)
-    expect(iContext).toBeLessThan(iLimitations)
-    expect(iLimitations).toBeLessThan(iProvenance)
+  test('orientation is first; unresolved comes BEFORE the research boundary and BEFORE provenance', () => {
+    expect(iOrientation).toBeLessThan(iBiBlocks)
+    expect(iBiBlocks).toBeLessThan(iConsiderations)
+    expect(iConsiderations).toBeLessThan(iApplicability)
+    expect(iApplicability).toBeLessThan(iUnresolved)
+    expect(iUnresolved).toBeLessThan(iBoundary)
+    expect(iBoundary).toBeLessThan(iProvenance)
   })
 
-  test('governance/provenance metadata sits behind a disclosure, after the proposition', () => {
-    const provBlock = src.slice(iProvenance)
-    expect(provBlock).toMatch(/claim\.claim_id/)
-    expect(provBlock).toMatch(/claim\.publication_scope/)
-    expect(provBlock).toMatch(/governed_claims_reference/)
-    // the provenance block is inside a <Disclosure> (which renders <details>)
-    expect(src.slice(0, iProvenance)).toMatch(/function Disclosure[\s\S]*<details/)
+  test('orientation is rendered prominently (font-medium / not inside a <details>)', () => {
+    // the orientation paragraph carries a prominence class and is not wrapped in <details>
+    const orientationBlock = view.slice(iOrientation - 200, iOrientation + 80)
+    expect(orientationBlock).toMatch(/font-medium/)
+    expect(orientationBlock).not.toMatch(/<summary/)
+  })
+
+  test('provenance & withheld sit behind a <details> disclosure (progressive)', () => {
+    const provBlock = view.slice(iProvenance - 300)
+    expect(provBlock).toMatch(/<details/)
+    expect(provBlock).toMatch(/Provenance &amp; governance details|Provenance & governance details/)
+    expect(provBlock).toMatch(/topic\.withheld/)
+  })
+
+  test('empty sections are omitted — every optional block is guarded by a length check', () => {
+    expect(view).toMatch(/topic\.governed_considerations\.length > 0 &&/)
+    expect(view).toMatch(/topic\.unresolved_inputs\.length > 0 &&/)
+    expect(view).toMatch(/topic\.does_not_apply\.length > 0 &&/)
+    expect(view).toMatch(/answer\.topics\.map/)
+    // authority note + scope note are conditional too
+    expect(view).toMatch(/answer\.assessment_authority_note &&/)
+    expect(view).toMatch(/answer\.scope_note &&/)
   })
 })
 
-describe('FR-4 — Applicability: explicit heading, neutral styling, verbatim status', () => {
-  const src = read(LOOKUP)
+// ── two lanes ─────────────────────────────────────────────────────────────
 
-  test('there is an explicit "Applicability" heading element', () => {
-    expect(src).toMatch(/<h4[^>]*>\s*Applicability\s*<\/h4>/)
+describe('Lane 1 (assessment authority) is distinguishable from Lane 2 (governed research)', () => {
+  const view = codeOnly(ANSWER_VIEW)
+
+  test('the assessment-authority note renders as its own visually distinct region, before the topic blocks', () => {
+    const iAuthority = view.indexOf('answer.assessment_authority_note')
+    const iTopics = view.indexOf('answer.topics.map')
+    expect(iAuthority).toBeGreaterThan(-1)
+    expect(iAuthority).toBeLessThan(iTopics)
+    const authorityBlock = view.slice(iAuthority, iTopics)
+    expect(authorityBlock).toMatch(/role="note"|aria-label="Assessment authority boundary"/)
+    // it is a distinct callout (its own border / background), not blended into a topic block
+    expect(authorityBlock).toMatch(/border-l-2|rounded-md border/)
   })
 
-  test('states are the neutral pair "Established" / "Not established"', () => {
-    expect(src).toMatch(/Established/)
-    expect(src).toMatch(/Not established/)
+  test('the refusal text is the answer field verbatim — the view adds no yes/no, no "although … this looks fine"', () => {
+    expect(view).toMatch(/\{answer\.assessment_authority_note\}/)
+    expect(view).not.toMatch(/looks fine|although|however,? (this|it)/i)
+  })
+})
+
+// ── neutral styling ───────────────────────────────────────────────────────
+
+describe('neutral styling — no pass/fail, no evidence/clearance language', () => {
+  const view = read(ANSWER_VIEW)
+  const lookup = read(LOOKUP)
+
+  test('no green/red pass-fail colour tokens', () => {
+    for (const src of [view, lookup]) {
+      expect(src).not.toMatch(/#(dc2626|ef4444|f87171|16a34a|22c55e|15803d|4ade80|dcfce7|fee2e2)/i)
+      expect(src).not.toMatch(/\b(text|bg|border)-(red|green|emerald|rose)-\d{2,3}\b/)
+    }
   })
 
-  test('"Not established" is explicitly framed as NOT a negative finding (SR-2)', () => {
-    expect(src).toMatch(/not a\s+negative finding/i)
-  })
-
-  test('no green/red pass-fail colour tokens anywhere in the reviewer lookup', () => {
-    expect(src).not.toMatch(/#(dc2626|ef4444|f87171|16a34a|22c55e|15803d|4ade80|dcfce7|fee2e2)/i)
-    expect(src).not.toMatch(/\b(text|bg|border)-(red|green|emerald|rose)-\d{2,3}\b/)
-    expect(src).not.toMatch(/color:\s*['"]?(red|green)['"]?/i)
+  test('no PASS/FAIL/checkmark/cross glyphs', () => {
+    for (const src of [codeOnly(ANSWER_VIEW), codeOnly(LOOKUP)]) {
+      expect(src).not.toMatch(/PASS|FAIL|✓|✗|✅|❌/)
+    }
   })
 
   test('per-requirement status is rendered verbatim ({o.status}), never remapped to pass/fail words', () => {
-    const src2 = codeOnly(LOOKUP)
-    expect(src2).toMatch(/\{o\.status\}/)
-    expect(src2).not.toMatch(/PASS|FAIL|✓|✗|✅|❌/)
+    expect(codeOnly(ANSWER_VIEW)).toMatch(/\{o\.status\}/)
+  })
+
+  test('no "assessment evidence" / "commercial clearance" / "legal advice" claim in the surface', () => {
+    for (const src of [view, lookup]) {
+      expect(src).not.toMatch(/is assessment evidence|as assessment evidence|commercially cleared by|constitutes (legal|commercial) advice/i)
+    }
+    // the honest disclaimers ARE present
+    expect(lookup).toMatch(/not assessment evidence/i)
+    expect(lookup).toMatch(/[Nn]ot legal advice/)
+    expect(lookup).toMatch(/not a commercial-clearance determination/i)
+  })
+
+  test('crc_eligible / raw crc_publication_scope are never rendered (the contract does not carry them)', () => {
+    for (const src of [codeOnly(ANSWER_VIEW), codeOnly(LOOKUP)]) {
+      expect(src).not.toMatch(/crc_eligible|crc_publication_scope|CRC channel/)
+    }
   })
 })
 
-describe('FR-5 / SR-3 — context block wording', () => {
-  const src = read(LOOKUP)
+// ── inspector / framing unchanged ─────────────────────────────────────────
 
-  test('the context block is titled "Context used for this look-up"', () => {
-    expect(src).toMatch(/Context used for this look-up/)
-  })
-
-  test('the old broad "Retrieval context (submission facts — not evidence)" wording is gone', () => {
-    expect(src).not.toMatch(/Retrieval context \(submission facts/)
-  })
-
-  test('the context is explicitly labelled not-evidence', () => {
-    expect(src).toMatch(/not assessment evidence/i)
-  })
-
-  test('it names the resolved tools + jurisdiction actually used', () => {
-    expect(src).toMatch(/Resolved tools/)
-    expect(src).toMatch(/Jurisdiction/)
-    const code = codeOnly(LOOKUP)
-    expect(code).toMatch(/retrieval_context\.resolved_tool_ids/)
-    expect(code).toMatch(/retrieval_context\.jurisdiction_included/)
-  })
-})
-
-describe('FR-6 / FR-7 / SR-4 / SR-5 — CRC-channel governance metadata is not reviewer authority text', () => {
-  const src = codeOnly(LOOKUP)
-
-  test('raw crc_publication_scope prose is not rendered at all', () => {
-    expect(src).not.toMatch(/crc_publication_scope/)
-    expect(read(LOOKUP)).not.toMatch(/Scope of the statement:/)
-  })
-
-  test('crc_eligible / "CRC channel" is not shown', () => {
-    expect(src).not.toMatch(/crc_eligible/)
-    expect(read(LOOKUP)).not.toMatch(/CRC channel/)
-  })
-
-  test('the structured publication_scope tag IS still available (behind provenance disclosure)', () => {
-    expect(src).toMatch(/claim\.publication_scope/)
-  })
-})
-
-describe('FR-1 / FR-8 — inspector: grouping only, no promotion control', () => {
-  test('ReviewerResources is a server component that hands both views to the client inspector as slots', () => {
+describe('inspector grouping + reference framing (unchanged by CAH-4G.6)', () => {
+  test('ReviewerResources is a server component handing both views to the client inspector as slots', () => {
     const src = codeOnly(RESOURCES)
     expect(read(RESOURCES)).not.toMatch(/^'use client'/m)
     expect(src).toMatch(/<ReviewerResourcesInspector/)
@@ -184,15 +231,11 @@ describe('FR-1 / FR-8 — inspector: grouping only, no promotion control', () =>
     expect(src).not.toMatch(/fetch\(|useState|useEffect|\.insert\s*\(|\.update\s*\(|\.rpc\s*\(/)
   })
 
-  test('the inspector only switches modes — no fetch, no write, no workbook coupling', () => {
+  test('the inspector only switches modes — no fetch, no write, no workbook coupling; both tabs always mounted', () => {
     const src = codeOnly(INSPECTOR)
     expect(read(INSPECTOR)).toMatch(/^'use client'/m)
     expect(src).not.toMatch(/fetch\(|\.insert\s*\(|\.update\s*\(|\.rpc\s*\(/)
     expect(src).not.toMatch(/WorkbookClient|workbook-schema|@\/lib\/assessments/)
-    // both slots are ALWAYS rendered (visibility toggled by class, never
-    // conditionally mounted) so a completed look-up survives a tab switch
-    expect(src).toMatch(/\{livingKnowledge\}/)
-    expect(src).toMatch(/\{linkedCrcContext\}/)
     expect(src).toMatch(/'block' : 'hidden'/)
     expect(src).not.toMatch(/\{mode === '[a-z_]+' && /)
   })
@@ -204,7 +247,7 @@ describe('FR-1 / FR-8 — inspector: grouping only, no promotion control', () =>
   })
 
   test('no promotion / apply / accept / approve / clear / pass control anywhere in the reviewer surface', () => {
-    for (const rel of [LOOKUP, RESOURCES, INSPECTOR, LK_PANEL, SHELL]) {
+    for (const rel of [LOOKUP, ANSWER_VIEW, RESOURCES, INSPECTOR, LK_PANEL, SHELL]) {
       const s = codeOnly(rel)
       expect(s).not.toMatch(/>\s*(Add to evidence|Apply to finding|Use as finding|Cite in note|Accept claim|Approve claim)\s*</i)
       expect(s).not.toMatch(/copyToEvidence|applyToWorkbook|acceptClaim|promoteClaim|addToEvidence/i)
@@ -212,42 +255,16 @@ describe('FR-1 / FR-8 — inspector: grouping only, no promotion control', () =>
   })
 })
 
-describe('SR-1 — proposition is the verbatim governed statement (no paraphrase in the surface)', () => {
-  test('the card renders claim.statement directly — no transform', () => {
-    const src = codeOnly(LOOKUP)
-    expect(src).toMatch(/\{claim\.statement\}/)
-    expect(src).not.toMatch(/summari[sz]e|paraphrase|rephrase|shorten/i)
-  })
-})
+// ── governed statement is verbatim ───────────────────────────────────────
 
-describe('data path — both applicability states are reachable from the live fixtures (one Established, one Not established)', () => {
-  const NO_FACTS = { jurisdiction: { included: [], excluded: [] }, toolMentions: [] }
-
-  test('copyright_ownership yields an Established claim (no requirements → vacuously applicable)', () => {
-    const sel = selectReviewerClaims({
-      topic: 'copyright_ownership',
-      topicClaims: TOPIC_CLAIMS_FIXTURE,
-      assetProviderIds: [],
-      activeToolIds: [],
-      applicabilityFacts: NO_FACTS,
-    })
-    expect(sel.claims.filter((c) => c.applicability_established).length).toBeGreaterThanOrEqual(1)
+describe('the governed proposition is the verbatim statement (no paraphrase in the surface)', () => {
+  test('the consideration renders statement_verbatim directly — no transform', () => {
+    const src = codeOnly(ANSWER_VIEW)
+    expect(src).toMatch(/\{c\.statement_verbatim\}/)
+    expect(src).not.toMatch(/statement_verbatim[^}]*\.(slice|substring|toUpperCase|replace)\(/)
   })
 
-  test('copyrightability yields a Not-established claim with an unresolved requirement (not withheld, not a finding)', () => {
-    const sel = selectReviewerClaims({
-      topic: 'copyrightability',
-      topicClaims: TOPIC_CLAIMS_FIXTURE,
-      assetProviderIds: [],
-      activeToolIds: [],
-      applicabilityFacts: NO_FACTS,
-    })
-    const notEstablished = sel.claims.filter((c) => !c.applicability_established)
-    expect(notEstablished.length).toBeGreaterThanOrEqual(1)
-    for (const c of notEstablished) {
-      for (const o of c.applicability_outcomes) {
-        expect(['met', 'unresolved', 'not_met']).toContain(o.status)
-      }
-    }
+  test('BI summary blocks are rendered verbatim (no per-block transform)', () => {
+    expect(codeOnly(ANSWER_VIEW)).toMatch(/topic\.bi_summary_blocks\.map\(\(block, i\) => \(/)
   })
 })

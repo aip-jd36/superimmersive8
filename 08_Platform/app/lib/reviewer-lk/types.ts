@@ -67,6 +67,15 @@ export type ReviewerResearchTopic = (typeof REVIEWER_RESEARCH_TOPICS)[number]
 export const HRR_MAX_RESOLVED_TOPICS = 2
 
 /**
+ * The maximum length (characters, post-trim) of ONE free-form reviewer research
+ * question accepted by the HRR research route (CAH-4G.6). A bound at the route
+ * boundary — Slice 2 froze no length. A research question about one submission
+ * is a sentence or a short paragraph; anything longer is almost certainly a
+ * pasted transcript / document and is rejected with a 400, never truncated.
+ */
+export const HRR_QUESTION_MAX_LENGTH = 1000
+
+/**
  * Why the classifier could not (fully) resolve a permitted explicit research
  * topic. Diagnostic / UI-routing signal only — never an answer, never a
  * factual claim. A future free-form UI uses this to decide how to offer the
