@@ -1,7 +1,7 @@
 # Reviewer Resources — Architecture (as-built CAH-4B…4F)
 
 **Status:** ACTIVE — the normative internal-design reference for the reviewer-side surfaces of the CRC → Commercial Assurance handoff.
-**As-built basis:** `9fa6d1c` for the §1.1 data-flow internals; the **page shell** (§1 tree, §7 file table, §Responsive, §15 UAT) is as-built for **CAH-4F.1 — Reviewer Workspace Shell**, integrated to `origin/main` = `b0e067f` (feat `f76dc85`, docs `b0e067f`) on 2026-09-10 and deployed to the `si8-creator-portal` **Production** environment (`app.superimmersive8.com`). Status: **INTEGRATED / PRODUCTION DEPLOYED — VISUAL UAT PENDING** — the manual authenticated visual UAT (§16) has not yet been performed, so this is not production-proven. **CAH-4F.2 — Contextual Inspector Coordination** (§1 tree, §11a, §17) is likewise **INTEGRATED / PRODUCTION DEPLOYED — VISUAL UAT PENDING**: `origin/main` = `f29b0fb` (feat `4f1969d`, rebased onto `74a8f63` + fast-forwarded), Vercel `si8-creator-portal` Production build `success` on `app.superimmersive8.com`; the §17 visual UAT has not yet been performed.
+**As-built basis:** `9fa6d1c` for the §1.1 data-flow internals; the **page shell** (§1 tree, §7 file table, §Responsive, §15 UAT) is as-built for **CAH-4F.1 — Reviewer Workspace Shell**, integrated to `origin/main` = `b0e067f` (feat `f76dc85`, docs `b0e067f`) on 2026-09-10 and deployed to the `si8-creator-portal` **Production** environment (`app.superimmersive8.com`). Status: **INTEGRATED / PRODUCTION DEPLOYED** — the dedicated §16 CAH-4F.1 UAT was not run separately, but the shell IA + closable inspector + LK / Linked-CRC tab separation + "no stacked layout" were exercised and confirmed operational in production during the 2026-09-10 CAH-4F.2 UAT (§17a). **CAH-4F.2 — Contextual Inspector Coordination** (§1 tree, §11a, §17, §17a) is **CLOSED / PRODUCTION-PROVEN** (2026-09-10): `origin/main` = `f29b0fb` (feat `4f1969d`, rebased onto `74a8f63` + fast-forwarded), Vercel `si8-creator-portal` Production build `success` on `app.superimmersive8.com`; the §17 visual UAT was performed by PM/user and passed — see §17a for the recorded result and evidence-class breakdown.
 **Product spec:** `08_Platform/prds/PRD_CAH_4F_REVIEWER_RESOURCES.md` (the *what*). This doc is the *how*.
 **Decision record:** `08_Platform/app/lib/reviewer-lk/ADR-001-reviewer-resources-authority-boundary.md`.
 **Layer-normative docs it defers to:** `RETRIEVAL_ENGINE_ARCHITECTURE.md`, `PROJECTION_LAYER_ARCHITECTURE.md`, `LK_PHASE1_TECHNICAL_DESIGN.md` / `_v2.md`, `THIRD_PARTY_SOURCE_ASSETS_ROUTING_ARCHITECTURE.md`, `CRC_CURRENT_STATE.md`.
@@ -356,6 +356,44 @@ CAH-4G would add a reviewer free-form question box that flows `question → gove
 | 12 | Re-read the submission's `workbook_data` + its `assessments` row. | **Byte-unchanged** except the note you deliberately typed in row 6 (if autosave ran). No evidence/gap/finding/outcome/sign-off/report row created or altered by any coordination action. |
 
 **Pass = every row matches.** Rows 5, 6, 11, 12 are release blockers.
+
+## 17a. CAH-4F.2 Production UAT — PASS (2026-09-10)
+
+**Decision:** PM/user — **CAH-4F.2 PRODUCTION UAT PASS** → milestone recorded **CLOSED / PRODUCTION-PROVEN**.
+
+**Environment:** Production — `https://app.superimmersive8.com`
+**Fixture:** `CA-RLK-2a PROD SMOKE — internal synthetic, delete after` · assessment `ASSESS-007-2026-09-07`
+**Viewport:** ~1440px (ordinary desktop). Authenticated admin reviewer session.
+
+Two evidence classes, recorded separately and not conflated:
+
+### Engineering / repository proof (this milestone's diff + tests)
+
+- **Layout-only coordination.** The shell → Workbook channel is one boolean, `workbookContextAsideHidden` (`workspace-layout-context.tsx`, React-only, no `@/lib` import, no fetch/persistence/audit). `context-coordination.test.ts` A asserts the contract is a single boolean field and nothing else.
+- **Workbook context aside kept mounted** — CSS `hidden`, never unmounted (`context-coordination.test.ts` C: `${workbookContextAsideHidden ? 'hidden' : 'flex'}`, no `{… && <aside}` mount gate).
+- **`rightTab` remains Workbook-owned** and layout-independent (`context-coordination.test.ts` C).
+- **No API / route / schema / migration / retrieval / applicability / audit / CRC-linkage change** — the CAH-4F.2 feat commit (`4f1969d`) touches only `workspace-layout-context.tsx` (new), `ReviewerShell.tsx` (+import, +derived boolean, +provider wrap), `WorkbookClient.tsx` (+hook, +one class), and two `__tests__/reviewer-shell/*` files. `page.tsx` and every Reviewer Resources component byte-unchanged (`context-coordination.test.ts` D/E).
+- **Validation:** 15 reviewer suites / 320 tests pass; `tsc --noEmit` clean; `next build` exit 0; full Jest failing set byte-identical to a fresh `74a8f63` baseline (20 suites / 77 tests), zero new failures — established twice (pre-change local `e63ceda`; fresh from the rebased tree `74a8f63`).
+
+### Production visual proof (PM/user observed)
+
+1. **Reviewer Resources CLOSED** → `NAV | WORKBOOK | WORKBOOK CONTEXT`. Assessment navigation visible; Workbook visible and primary; Workbook context aside visible with Guidance / Submission / Evidence.
+2. **Reviewer Resources OPEN** → `NAV | WORKBOOK | REVIEWER RESOURCES`. The Workbook context aside disappeared visually; the Workbook reclaimed the contextual-rail width; Reviewer Resources stayed visually separate from the Workbook; Living Knowledge + Linked CRC Context tabs visible; **no** top-of-page stacked Reviewer Resources layout. The earlier CAH-4F.1 four-region density was no longer present.
+3. **Reviewer Resources CLOSED again** → Workbook context aside returned; Guidance / Submission / Evidence returned; the previously-selected **Guidance** tab remained selected; the assessment remained on the same section; no visible Workbook reset. *(Visual / session-state confirmation only — this is not an independent database-invariance proof; §17 rows 11–12 were not separately re-queried this session.)*
+4. **Explicit `Copyright ownership` Living Knowledge look-up** (one deliberate action) → **1 governed result**, rendered inside the coordinated inspector while the Workbook stayed visible and primary. Proposition visually primary; explicit heading **"Applicability"** → "Established for this submission." + "No additional applicability requirements."; **"Context used for this look-up"** → Jurisdiction: "Global" + "Submission-derived inputs to retrieval — not assessment evidence."; separate **"Evidence limitations / unresolved requirements"** and **"Provenance and governance details"**.
+5. `crc_eligible` / "CRC channel: Yes" **not shown**; raw CRC publication prose ("CRC may state…") **not shown**.
+6. **No** evidence-promotion / finding / conclusion affordance anywhere in the inspector; reviewer framing "Reference materials to support your review — not assessment evidence." intact; LK framing remained explicit that it is governed SI8 institutional knowledge / reviewer research / not an assessment conclusion / completes no Commercial Assurance control / no substitute for reviewer judgment.
+7. Workbook remained visually primary throughout.
+
+**Result: PASS.**
+
+### Audit-path note
+
+The `lk_research` audit contract (audit-before-content, `access_kind`-only row, no query/claim/interpretation text) was **production-proven by CAH-4E**. **CAH-4F.2 does not change that path** — no `lib/reviewer-lk` / route / audit file is in the CAH-4F.2 diff, `reviewer-shell.test.ts` D + `context-coordination.test.ts` D assert no fetch fires on inspector open / tab-switch / resize, and `route-and-audit.test.ts` is unchanged and passing. This UAT session produced **no new `crc_context_access_events` query** and none is claimed here.
+
+### Non-blocking presentation-polish observation
+
+`non-blocking presentation polish` — the "Context used for this look-up" section renders **`Resolved tools —`** even when no resolved tools are available. It could later be omitted when empty. Not a CAH-4F.2 issue, not an open architectural risk, not scheduled.
 
 ---
 

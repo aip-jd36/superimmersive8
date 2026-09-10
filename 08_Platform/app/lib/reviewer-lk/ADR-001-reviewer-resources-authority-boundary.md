@@ -1,6 +1,6 @@
 # ADR-001: Reviewer Living Knowledge is a research authority surface, not an assessment authority surface
 
-**Status:** Accepted — describes an invariant already enforced in code (CAH-4B…4F); recorded here so it survives individual milestones.
+**Status:** Accepted — describes an invariant already enforced in code (CAH-4B…4F.2); recorded here so it survives individual milestones. The CAH-4F.2 row (rail time-sharing) was additionally confirmed in a passing production visual UAT on 2026-09-10 — the reviewer saw no evidence-promotion affordance, no CRC-only publication prose, and the "not assessment evidence" framing intact while a real governed Living Knowledge result rendered inside the coordinated inspector (`REVIEWER_RESOURCES_ARCHITECTURE.md` §17a).
 **Date:** 2026-09-10
 **Context:** CAH-4F (Reviewer Resources + Living Knowledge Context Semantics) documentation-contract milestone. As-built basis `origin/main` = `9fa6d1c`.
 **Applies to:** `lib/reviewer-lk/**`, `lib/reviewer-context/**`, `lib/crc-project-context/**`, the reviewer-side panels on `app/admin/submissions/[id]/review/page.tsx`, and any future CAH-4G work.
