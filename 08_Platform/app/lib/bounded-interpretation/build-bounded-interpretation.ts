@@ -2,10 +2,13 @@
  * Bounded Interpretation composition (CRC Milestone 2, 2026-08-15;
  * extended for Case 3A/3B during the Living Knowledge governance review,
  * 2026-08-16; input contract generalized to `BiIntent[]` in CAH-4G Slice 1,
+ * 2026-09-10; result contract generalized to `BiResult[]` in CAH-4G Slice 3,
  * 2026-09-10). Pure function: generic bounded-interpretation intents
- * (`BiIntent[]`, types.ts) + already-computed RetrievalResult[] (+ optional
- * RetrievalDiagnostic[]) -> BoundedInterpretation[]. No new inference, no
- * fact-conditional matching added to Retrieval, no model call.
+ * (`BiIntent[]`, types.ts) + already-computed governed results (`BiResult[]`
+ * — a CRC `RetrievalResult[]` structurally satisfies it, so CRC call sites
+ * are unchanged) (+ optional RetrievalDiagnostic[]) -> BoundedInterpretation[].
+ * No new inference, no fact-conditional matching added to Retrieval, no
+ * model call.
  *
  * This function interprets EVERY intent it is handed — it no longer knows
  * any caller's lifecycle model. CRC's `userGoalsToBiIntents` adapter
@@ -31,9 +34,9 @@
  * described for `results`.
  */
 
-import type { RetrievalDiagnostic, RetrievalResult } from '@/lib/retrieval-engine/types'
+import type { RetrievalDiagnostic } from '@/lib/retrieval-engine/types'
 import type { Attested } from '@/types/interview-engine'
-import type { BiIntent, BoundedInterpretation, UnresolvedRelevantClaim } from './types'
+import type { BiIntent, BiResult, BoundedInterpretation, UnresolvedRelevantClaim } from './types'
 import {
   DETERMINATION_DECLINED_TEMPLATE,
   directlyRelevantSummary,
@@ -62,7 +65,7 @@ const HUMAN_CONTRIBUTION_DEPENDENCY = 'human_contribution_description'
  * for how this boolean is used -- to GROUP already-selected, already-quoted
  * claim statements, never to rank, explain, or strengthen them.
  */
-function hasGovernedProjectDependencies(match: RetrievalResult): boolean {
+function hasGovernedProjectDependencies(match: BiResult): boolean {
   return match.unresolved_project_dependencies.length > 0
 }
 
@@ -90,7 +93,7 @@ function hasGovernedProjectDependencies(match: RetrievalResult): boolean {
  */
 function shouldIncludeHumanContributionSentence(
   category: BiIntent['category'],
-  matches: RetrievalResult[],
+  matches: BiResult[],
   humanContributionDescription: Attested<string>,
 ): boolean {
   const concernsHumanContributionGoal = category === 'copyright_ownership' || category === 'copyrightability'
@@ -176,7 +179,7 @@ function appendMixedResolutionGuidance(
 
 export function buildBoundedInterpretations(
   intents: BiIntent[],
-  results: RetrievalResult[],
+  results: BiResult[],
   diagnostics: RetrievalDiagnostic[] = [],
   humanContributionDescription: Attested<string> = { state: 'unknown' },
 ): BoundedInterpretation[] {

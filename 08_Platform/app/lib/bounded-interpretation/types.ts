@@ -30,6 +30,7 @@
  */
 
 import type { GoalCategory, GoalScope } from '@/types/interview-engine'
+import type { MatchOrigin, RetrievalSourceFactKind } from '@/lib/retrieval-engine/types'
 
 /**
  * BiIntent — the generic, deliberately minimal input contract for
@@ -69,6 +70,47 @@ export interface BiIntent {
   intent_text: string
   category: GoalCategory
   scope: GoalScope
+}
+
+/**
+ * BiResult — the generic, deliberately minimal *result* contract for
+ * `buildBoundedInterpretations` (CAH-4G Slice 3, 2026-09-10; frozen shape in
+ * `HRR_GRI_TECHNICAL_DESIGN.md §H`/`§S-5`, deferred from Slice 1 until a real
+ * consumer existed — HRR is now that consumer).
+ *
+ * Exactly the fields the deterministic rule table reads off a governed
+ * result, verified against `build-bounded-interpretation.ts`:
+ *   - `matched_goal_category` — filtered against `BiIntent.category`;
+ *   - `unresolved_project_dependencies` — `.length` and
+ *     `.includes('human_contribution_description')`;
+ *   - `claim_id` — into `supporting_claim_ids` / `unresolved_relevant_claims`;
+ *   - `candidate_statement` — verbatim-quoted (null-filtered);
+ *   - `match_origin` — only ever compared `=== 'related_topic'` (drives the
+ *     generic epistemic-boundary clause);
+ *   - `source_fact.kind` — only ever compared `=== 'tool'` (drives the
+ *     tool-terms boundary clause).
+ *
+ * `source_fact` is kept as a NESTED `{ kind }` (not flattened) so a CRC
+ * `RetrievalResult` — which carries all six fields plus more — structurally
+ * satisfies `BiResult[]` with **zero call-site change**. CRC keeps passing
+ * its own `RetrievalResult[]`; HRR builds `BiResult` directly from a
+ * `ReviewerLkClaim` via `lib/hrr/reviewer-claim-to-bi-result.ts`, needing
+ * NONE of `RetrievalResult`'s CRC-shaped fields (`matrix_identifier`,
+ * `relationship_id`, `topic`, `publication_scope`, `source_fact.identifier`)
+ * — so no synthetic value is ever constructed.
+ *
+ * `MatchOrigin` / `RetrievalSourceFactKind` are reused from
+ * `@/lib/retrieval-engine/types` (the established cross-subsystem contract
+ * module this file may already read) rather than redeclared — the value
+ * space is genuinely the same and drift would be a hazard.
+ */
+export interface BiResult {
+  matched_goal_category: GoalCategory
+  unresolved_project_dependencies: string[]
+  claim_id: string
+  candidate_statement: string | null
+  match_origin: MatchOrigin
+  source_fact: { kind: RetrievalSourceFactKind }
 }
 
 /**
