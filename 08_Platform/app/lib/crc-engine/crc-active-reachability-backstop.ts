@@ -141,6 +141,18 @@ const REPRESENTATIVE_EXPRESSIONS: Record<string, string> = {
   // claim's own governed product name.
   'envato-elements': 'Envato Elements',
   'epidemic-sound': 'Epidemic Sound',
+  // 'google-veo' added 2026-09-10 (Google Veo CPR Concurrence / CRC
+  // Activation, CPR_023, LK-TRIAL-12): Matrix-origin, matching Gemini
+  // API/Gemini Consumer App's own precedent -- this entry documents the
+  // authoritative representative expression per this file's own required-
+  // at-publication-time convention. It deliberately does NOT itself add a
+  // KNOWN_TOOLS extraction alias for "Veo"/"Google Veo"/"Flow" -- no such
+  // alias exists yet, so this identity is correctly and loudly reported as
+  // `reachable: false` (a detected-but-authorized gap, not a silent
+  // MISSING-representative-expression gap) until a separate, later, purely
+  // mechanical runtime-reachability milestone closes it. Sourced from this
+  // row's own Matrix section header, "Google Veo."
+  'google-veo': 'Google Veo',
 }
 
 export interface CrcActiveReachabilityResult {
