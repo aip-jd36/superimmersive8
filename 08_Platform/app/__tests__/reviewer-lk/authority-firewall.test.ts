@@ -29,6 +29,8 @@ const importLines = (rel: string) => (read(rel).match(/^\s*import[\s\S]*?from\s+
 
 const REVIEWER_LK_LIB = listFiles('lib/reviewer-lk', ['.ts'])
 const REVIEWER_LK_ROUTE = 'app/api/admin/submissions/[id]/reviewer-lk/route.ts'
+const HRR_RESEARCH_ROUTE = 'app/api/admin/submissions/[id]/reviewer-lk/research/route.ts' // CAH-4G.6
+const HRR_ANSWER_VIEW = 'app/admin/submissions/[id]/review/HrrResearchAnswerView.tsx' // CAH-4G.6
 const REVIEWER_LK_PANEL = 'app/admin/submissions/[id]/review/ReviewerLkPanel.tsx'
 const REVIEWER_LK_LOOKUP = 'app/admin/submissions/[id]/review/ReviewerLkLookup.tsx'
 const REVIEWER_LK_RESOURCES = 'app/admin/submissions/[id]/review/ReviewerResources.tsx' // CAH-4F container (server slot provider)
@@ -37,6 +39,8 @@ const REVIEWER_SHELL = 'app/admin/submissions/[id]/review/ReviewerShell.tsx' // 
 const REVIEWER_LK_ALL = [
   ...REVIEWER_LK_LIB,
   REVIEWER_LK_ROUTE,
+  HRR_RESEARCH_ROUTE,
+  HRR_ANSWER_VIEW,
   REVIEWER_LK_PANEL,
   REVIEWER_LK_LOOKUP,
   REVIEWER_LK_RESOURCES,
@@ -130,22 +134,49 @@ describe('C — reviewer-lk performs no assessment-state write; exactly one audi
   })
 })
 
-describe('D — the route is a GET research + append-only audit only', () => {
-  const src = codeOnly(REVIEWER_LK_ROUTE)
+describe('D — the research routes are research + append-only audit only', () => {
+  const legacy = codeOnly(REVIEWER_LK_ROUTE)
+  const research = codeOnly(HRR_RESEARCH_ROUTE)
 
-  test('exports GET only — no POST / PUT / PATCH / DELETE', () => {
-    expect(src).toMatch(/export async function GET\b/)
-    expect(src).not.toMatch(/export async function (POST|PUT|PATCH|DELETE)\b/)
+  test('legacy topic route (CAH-4E) is unchanged — still GET only, still no request body', () => {
+    expect(legacy).toMatch(/export async function GET\b/)
+    expect(legacy).not.toMatch(/export async function (POST|PUT|PATCH|DELETE)\b/)
+    expect(legacy).not.toMatch(/request\.(json|formData|text)\(\)/)
+    expect(legacy).toMatch(/searchParams\.get\(\s*['"]topic['"]\s*\)/)
   })
 
-  test('reads no request body; topic is the only request-derived value', () => {
-    expect(src).not.toMatch(/request\.(json|formData|text)\(\)/)
-    expect(src).toMatch(/searchParams\.get\(\s*['"]topic['"]\s*\)/)
+  test('CAH-4G.6 research route: POST only — no GET/PUT/PATCH/DELETE', () => {
+    expect(research).toMatch(/export async function POST\b/)
+    expect(research).not.toMatch(/export async function (GET|PUT|PATCH|DELETE)\b/)
   })
 
-  test('never imports an assessment mutation service or CRC retrieve', () => {
-    const imports = importLines(REVIEWER_LK_ROUTE)
-    expect(imports).not.toMatch(/@\/lib\/assessments|patchWorkbookAtomic|workbook\/route|@\/lib\/retrieval-engine\/retrieve/)
+  test('CAH-4G.6 research route never imports an assessment mutation service, CRC retrieve, CRC session, or Linked CRC context', () => {
+    const imports = importLines(HRR_RESEARCH_ROUTE)
+    expect(imports).not.toMatch(/@\/lib\/assessments|patchWorkbookAtomic|workbook\/route|updateAssessment|signOffAssessment/)
+    expect(imports).not.toMatch(/@\/lib\/retrieval-engine\/retrieve|enumerate-eligible-claims/)
+    expect(imports).not.toMatch(/crc_sessions|@\/lib\/crc-engine|@\/lib\/crc-sales|@\/lib\/crc-assurance|reviewer-crc-context|linked.*crc/i)
+  })
+
+  test('CAH-4G.6 research route never returns governed content except through the audited orchestration boundary', () => {
+    // runAuditedHrrResearch is the only producer of the answer; projectHrrResearchAnswer
+    // is never called directly (which would bypass the required audit).
+    expect(research).toMatch(/runAuditedHrrResearch\s*\(/)
+    expect(research).not.toMatch(/projectHrrResearchAnswer\s*\(/)
+    expect(research).not.toMatch(/runHrrResearch\s*\(/)
+    // both entry modes go through the gate, never a hand-rolled intent
+    expect(research).toMatch(/topicSelectionGateResult\s*\(|hrrAuthorityGate\s*\(/)
+  })
+
+  test('CAH-4G.6 research route never accepts actor identity / authority facts from the client', () => {
+    expect(research).toMatch(/checkReviewerContextAccess\s*\(/)
+    expect(research).toMatch(/actorUserId:\s*access\.userId/)
+    // the client body is only parsed via parseBody → { mode, topic|question }
+    expect(research).not.toMatch(/body\.(actor|actorUserId|claim_id|claimIds|applicability|bi_status|authority|assessment)/i)
+  })
+
+  test('CAH-4G.6 research route: audit failure → 503 with a fixed message, zero governed content', () => {
+    expect(research).toMatch(/HrrAuditNotRecordedError/)
+    expect(research).toMatch(/status:\s*503/)
   })
 })
 
@@ -153,13 +184,28 @@ describe('E — the panel is a server component; the lookup client shares no wor
   test('ReviewerLkPanel.tsx is NOT a client component', () => {
     expect(read(REVIEWER_LK_PANEL)).not.toMatch(/^'use client'/m)
   })
-  test('ReviewerLkLookup.tsx issues exactly one fetch, GET, and has no copy-to-evidence / apply-to-workbook control (code, not comments)', () => {
+  test('ReviewerLkLookup.tsx: one POST to the converged research route; no copy-to-evidence / apply-to-workbook control', () => {
     const src = codeOnly(REVIEWER_LK_LOOKUP)
     const fetches = src.match(/fetch\(/g) ?? []
     expect(fetches).toHaveLength(1)
-    expect(src).toMatch(/method:\s*'GET'/)
+    expect(src).toMatch(/method:\s*'POST'/)
+    expect(src).toMatch(/reviewer-lk\/research/)
+    // the legacy GET topic path is NOT used by the UI any more
+    expect(src).not.toMatch(/reviewer-lk\?topic=/)
     expect(src).not.toMatch(/copyToEvidence|applyToWorkbook|acceptClaim|summari[sz]e/i)
-    expect(src).not.toMatch(/<textarea|<input\b/)
+    // a labelled free-form input is expected (Ask HRR); no bare unlabelled input
+    expect(src).toMatch(/<textarea\b/)
+    expect(src).toMatch(/htmlFor="hrr-question"/)
+    expect(src).toMatch(/id="hrr-question"/)
+  })
+  test('HrrResearchAnswerView.tsx is the one shared renderer — no topic/question split, no reinterpretation, no promotion control', () => {
+    const src = codeOnly(HRR_ANSWER_VIEW)
+    expect(src).not.toMatch(/TopicResearchResultView|QuestionResearchResultView/)
+    expect(src).not.toMatch(/fetch\(|\.insert\s*\(|\.update\s*\(|\.rpc\s*\(/)
+    expect(src).not.toMatch(/copyToEvidence|applyToWorkbook|acceptClaim|promoteClaim|addToEvidence|summari[sz]e/i)
+    expect(src).not.toMatch(/buildBoundedInterpretations|evaluateApplicabilityDetailed|selectReviewerClaims/)
+    // renders the composed answer only
+    expect(src).toMatch(/answer:\s*HrrResearchAnswer/)
   })
   test('the LK view reaches the page via the <ReviewerShell> inspector slot, never inside WorkbookClient (code, not comments)', () => {
     const page = codeOnly('app/admin/submissions/[id]/review/page.tsx')
@@ -196,16 +242,16 @@ describe('E — the panel is a server component; the lookup client shares no wor
   })
 })
 
-describe('F — CAH-4F presentation: governance prose / CRC-channel metadata is not rendered as reviewer authority', () => {
+describe('F — CRC-channel governance metadata is not rendered as reviewer authority (CAH-4F → CAH-4G.6)', () => {
   const lookup = codeOnly(REVIEWER_LK_LOOKUP)
+  const view = codeOnly(HRR_ANSWER_VIEW)
 
-  test('raw crc_publication_scope (CRC-channel "may/must" prose) is never rendered by the reviewer lookup', () => {
-    expect(lookup).not.toMatch(/crc_publication_scope/)
-  })
-
-  test('crc_eligible is not rendered by the reviewer lookup (SR-5 / FR-7 — not shown by default)', () => {
-    expect(lookup).not.toMatch(/crc_eligible/)
-    expect(lookup).not.toMatch(/CRC channel:/)
+  test('raw crc_publication_scope / crc_eligible are never rendered by the HRR surface', () => {
+    for (const src of [lookup, view]) {
+      expect(src).not.toMatch(/crc_publication_scope/)
+      expect(src).not.toMatch(/crc_eligible/)
+      expect(src).not.toMatch(/CRC channel/)
+    }
   })
 
   test('the reviewer-readable topic label map keys are exactly GOAL_CATEGORIES minus "unknown"', () => {
@@ -216,12 +262,12 @@ describe('F — CAH-4F presentation: governance prose / CRC-channel metadata is 
     )
   })
 
-  test('CAH-4F.1: topic chips carry the canonical enum, not a label round-trip — the fetch still uses the raw enum topic', () => {
-    expect(lookup).toMatch(/topic=\$\{encodeURIComponent\(topic\)\}/)
-    // radiogroup of buttons (not <select>); canonical value in data-topic; label is display-only
+  test('CAH-4G.6: topic chips carry the canonical enum (data-topic), display the label only, and a click runs the research', () => {
     expect(lookup).toMatch(/role="radiogroup"/)
     expect(lookup).toMatch(/data-topic=\{t\}/)
-    expect(lookup).toMatch(/onClick=\{\(\) => onChange\(t\)\}/)
+    expect(lookup).toMatch(/onClick=\{\(\) => onResearch\(t\)\}/)
     expect(lookup).toMatch(/\{reviewerTopicLabel\(t\)\}/)
+    // the enum reaches the server in the POST body, never a label round-trip
+    expect(lookup).toMatch(/mode:\s*'topic_pick',\s*topic/)
   })
 })

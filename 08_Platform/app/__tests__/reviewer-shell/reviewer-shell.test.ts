@@ -157,10 +157,12 @@ describe('D — Living Knowledge', () => {
       expect(codeOnly(rel)).not.toMatch(/fetch\(/)
     }
     const lookup = codeOnly(LK_LOOKUP)
-    // the single fetch lives inside the lookUp callback, never a useEffect
+    // the single fetch lives inside the `research` callback, never a useEffect
     expect((lookup.match(/fetch\(/g) ?? []).length).toBe(1)
-    expect(lookup).not.toMatch(/useEffect\([\s\S]*?fetch\(/)
-    expect(lookup).toMatch(/const lookUp = useCallback\(async \(\) => \{[\s\S]*?fetch\(/)
+    expect(lookup).not.toMatch(/useEffect\b/)
+    expect(lookup).toMatch(/const research = useCallback\(\s*async \(payload[\s\S]*?fetch\(/)
+    // the shared answer renderer is presentational only — no fetch of its own
+    expect(codeOnly('app/admin/submissions/[id]/review/HrrResearchAnswerView.tsx')).not.toMatch(/fetch\(/)
   })
 
   test('the inspector tab host performs NO network call when switching modes', () => {
@@ -169,11 +171,22 @@ describe('D — Living Knowledge', () => {
     expect(src).toMatch(/onClick=\{\(\) => setMode\(id\)\}/)
   })
 
-  test('canonical topic id is unchanged — fetch URL carries the raw enum, chips carry data-topic', () => {
+  test('CAH-4G.6: canonical topic id is unchanged — chips carry data-topic, the request carries the enum, both entry modes POST the converged research route', () => {
     const lookup = codeOnly(LK_LOOKUP)
-    expect(lookup).toMatch(/reviewer-lk\?topic=\$\{encodeURIComponent\(topic\)\}/)
+    expect(lookup).toMatch(/reviewer-lk\/research/)
+    expect(lookup).toMatch(/method:\s*'POST'/)
+    expect(lookup).toMatch(/mode:\s*'topic_pick',\s*topic/)
     expect(lookup).toMatch(/role="radiogroup"/)
     expect(lookup).toMatch(/data-topic=\{t\}/)
+    // the legacy GET topic path is no longer used by the UI
+    expect(lookup).not.toMatch(/reviewer-lk\?topic=/)
+  })
+
+  test('CAH-4G.6: exactly one fetch, still inside a callback (no mount effect), still one POST', () => {
+    const lookup = codeOnly(LK_LOOKUP)
+    expect((lookup.match(/fetch\(/g) ?? []).length).toBe(1)
+    expect(lookup).not.toMatch(/useEffect\([\s\S]*?fetch\(/)
+    expect(lookup).toMatch(/const research = useCallback\(\s*async \(payload[\s\S]*?fetch\(/)
   })
 
   test('the "Living Knowledge" tab label + governed-research framing survive the move into the inspector', () => {
