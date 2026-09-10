@@ -33,11 +33,12 @@ const HRR_FILES = listTs(HRR_DIR)
 
 describe('lib/hrr module tree', () => {
   test('is present and non-trivial', () => {
-    expect(HRR_FILES.length).toBeGreaterThanOrEqual(3)
+    expect(HRR_FILES.length).toBeGreaterThanOrEqual(4)
     expect(HRR_FILES).toEqual(expect.arrayContaining([
       'lib/hrr/run-hrr-research.ts',
       'lib/hrr/bi-adapters.ts',
       'lib/hrr/types.ts',
+      'lib/hrr/project-hrr-research-answer.ts',
     ]))
   })
 })
@@ -76,7 +77,11 @@ describe('lib/hrr imports the reviewer selector + Bounded Interpretation ONLY', 
     expect(imp).not.toMatch(/@anthropic-ai\/sdk/)
     expect(imp).not.toMatch(/anthropic-structured-output-retry|anthropic-decision|anthropic-extractor|anthropic-candidate-question/)
     expect(imp).not.toMatch(/interpret-research-intent\.anthropic/)
-    expect(imp).not.toMatch(/project-hrr-research-answer|projectHrrResearchAnswer/) // Slice 4, does not exist yet
+    // Slice 4 (CAH-4G.4): the deterministic composer exists, but the pipeline
+    // core (run-hrr-research.ts / bi-adapters.ts) must never depend on it —
+    // composition is strictly downstream, and project-hrr-research-answer.ts
+    // itself never imports its own name.
+    expect(imp).not.toMatch(/project-hrr-research-answer|projectHrrResearchAnswer/)
   })
 
   test.each(HRR_FILES)('%s imports no UI / React component', (rel) => {
