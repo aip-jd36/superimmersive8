@@ -4218,11 +4218,22 @@ CRC Publication Scope: >
   broader legal compliance, copyright clearance, provider/platform
   permission, or overall commercial readiness. A human-reviewed Commercial
   Assurance Assessment remains the higher-assurance path for resolving any
-  of these project-specific facts. **Runtime note:** this claim has no
-  `TOPIC_CLAIMS_FIXTURE` representation (confirmed directly, unchanged by
-  this decision) -- CRC-authorized but not yet conversationally reachable;
-  that is a separate, later, mechanical remediation, not performed by this
-  decision.
+  of these project-specific facts. **Runtime note (superseded 2026-09-10,
+  Generic Non-Provider TopicClaim Runtime Activation milestone):** this
+  claim previously had no `TOPIC_CLAIMS_FIXTURE` representation, as
+  recorded at CRC Publication time above -- that gap is now closed. A real
+  fixture entry was added mechanically (faithful projection of this
+  claim's own governed fields, no wording change), the existing
+  `topic-claims-fixture-consistency.test.ts` invariant (which was already
+  failing for exactly this claim before the addition) now passes, and the
+  claim is conversationally reachable via an explicit `likeness`-category
+  UserGoal with confirmed New York jurisdiction -- proven against the
+  real, unmodified pipeline in
+  `08_Platform/app/__tests__/retrieval-engine/ny-396b-synthetic-performer-
+  disclosure-reachability.test.ts`. No Retrieval, Bounded Interpretation,
+  Projection/Composition, questioning, GoalCategory, or applicability
+  semantics were changed to achieve this -- mechanical representation
+  only, per this milestone's own architecture-boundary discipline.
 
 CRC Candidate Statement: >
   New York General Business Law § 396-b requires a person who, for a
