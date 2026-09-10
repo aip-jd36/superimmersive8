@@ -57,12 +57,21 @@ export function researchIntentToBiIntent(intent: ExplicitResearchIntent): BiInte
  *   - `match_origin = 'exact_topic'` — HRR V1 has no related/discovered
  *     path, and the claim's topic already equals the researched topic;
  *   - `source_fact.kind = 'topic'` — a topic-sourced (non-tool) governed
- *     claim, so BI's tool-terms boundary clause correctly does not fire.
+ *     claim, so BI's tool-terms boundary clause correctly does not fire;
+ *   - `applicability` (CAH-4G.3A) — the ALREADY-DETERMINED reviewer
+ *     applicability result, translated (never re-evaluated, no fact
+ *     inferred): `established` when every requirement is `met`,
+ *     `unresolved` when ≥1 requirement is `unresolved` (carrying those
+ *     requirement(s) for a later composition step). This is what stops BI
+ *     from rendering an applicability-`unresolved` governed proposition as
+ *     `directly_relevant`.
  *
  * The caller (`runHrrResearch`) is responsible for NOT passing a claim with
- * any `not_met` applicability requirement here.
+ * any `not_met` applicability requirement here — such a claim is excluded
+ * from the BI feed entirely and returned in `does_not_apply[]`.
  */
 export function reviewerClaimToBiResult(claim: ReviewerLkClaim): BiResult {
+  const unresolved = claim.applicability_outcomes.filter((o) => o.status === 'unresolved')
   return {
     matched_goal_category: claim.topic,
     unresolved_project_dependencies: claim.unresolved_project_dependencies,
@@ -70,5 +79,9 @@ export function reviewerClaimToBiResult(claim: ReviewerLkClaim): BiResult {
     candidate_statement: claim.statement,
     match_origin: 'exact_topic',
     source_fact: { kind: 'topic' },
+    applicability:
+      unresolved.length > 0
+        ? { status: 'unresolved', unresolved_requirements: unresolved.map((o) => o.requirement) }
+        : { status: 'established' },
   }
 }
