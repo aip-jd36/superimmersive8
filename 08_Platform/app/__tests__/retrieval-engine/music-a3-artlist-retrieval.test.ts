@@ -111,10 +111,18 @@ const UNKNOWN_FACTS = { jurisdiction: { included: [], excluded: [] }, toolMentio
 
 // ── One-claim isolation (§7) ────────────────────────────────────────────────
 
-describe('six-claim reachability: A-3 + the five 2026-09-10 activated siblings are the only reachable Music claims', () => {
-  test('exactly six CLAIM-MUSIC-* entries exist in TOPIC_CLAIMS_FIXTURE, and they are exactly A-3 + its five activated siblings', () => {
-    const musicClaims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id.startsWith('CLAIM-MUSIC'))
-    expect(musicClaims.map((c) => c.claim_id).sort()).toEqual(ALL_REACHABLE_ARTLIST_IDS)
+describe('six-claim reachability: A-3 + the five 2026-09-10 activated siblings are the only reachable ARTLIST claims', () => {
+  // Scoped to CLAIM-MUSIC-ARTLIST specifically (not the broader CLAIM-MUSIC
+  // prefix) -- as of the 2026-09-10 Envato + Epidemic activation
+  // (envato-epidemic-retrieval.test.ts), CLAIM-MUSIC-* also includes two
+  // Envato claims and one Epidemic claim, a different provider family this
+  // file's own "six-claim" premise was never about. This is a scope
+  // correction, not a weakening -- the assertion is exactly as strict as
+  // before, just correctly bounded to the provider this file actually
+  // tests.
+  test('exactly six CLAIM-MUSIC-ARTLIST-* entries exist in TOPIC_CLAIMS_FIXTURE, and they are exactly A-3 + its five activated siblings', () => {
+    const artlistClaims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id.startsWith('CLAIM-MUSIC-ARTLIST'))
+    expect(artlistClaims.map((c) => c.claim_id).sort()).toEqual(ALL_REACHABLE_ARTLIST_IDS)
   })
 
   test('all six are Lifecycle: Adopted and crc_eligible: Yes; A-5 (withheld) has no entry at all', () => {
@@ -271,9 +279,18 @@ describe('registration/publication separation -- final evidenced progression as 
     expect(result.matches.map((m) => m.claim_id).sort()).toEqual(ALL_REACHABLE_ARTLIST_IDS)
   })
 
-  test('exactly six CLAIM-MUSIC-* entries have fixture representation -- confirmed by exact count, not assumed; the remaining 4 Music Scenario A claims (3 Envato/Epidemic + withheld A-5) do not', () => {
-    const musicClaims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id.startsWith('CLAIM-MUSIC'))
-    expect(musicClaims).toHaveLength(6)
-    expect(musicClaims.map((c) => c.claim_id).sort()).toEqual(ALL_REACHABLE_ARTLIST_IDS)
+  // Scoped to CLAIM-MUSIC-ARTLIST specifically -- see this file's own
+  // top-of-describe-block note above on why CLAIM-MUSIC-* broadly now
+  // includes Envato/Epidemic too (envato-epidemic-retrieval.test.ts owns
+  // that family's own exact-count assertions).
+  test('exactly six CLAIM-MUSIC-ARTLIST-* entries have fixture representation -- confirmed by exact count, not assumed; the withheld A-5 does not', () => {
+    const artlistClaims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id.startsWith('CLAIM-MUSIC-ARTLIST'))
+    expect(artlistClaims).toHaveLength(6)
+    expect(artlistClaims.map((c) => c.claim_id).sort()).toEqual(ALL_REACHABLE_ARTLIST_IDS)
+  })
+
+  test('total CLAIM-MUSIC-* reachable population (all providers) is nine as of the 2026-09-10 Envato + Epidemic activation -- six Artlist + two Envato + one Epidemic; see envato-epidemic-retrieval.test.ts for that family\'s own dedicated coverage', () => {
+    const allMusicClaims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id.startsWith('CLAIM-MUSIC'))
+    expect(allMusicClaims).toHaveLength(9)
   })
 })

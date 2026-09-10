@@ -98,11 +98,22 @@ const GOVERNED_CLAIMS_PATH = path.join(__dirname, '..', '..', '..', '..', '06_Op
  * its blocker was Publication Policy Principle 6 (subject-matter
  * volatility), not wording, and PM explicitly concurred not to override it
  * in this activation wave; it stays Adopted but CRC-inactive.
+ *
+ * REMOVED 2026-09-10 (later same day, Envato + Epidemic CPR Decision
+ * Persistence + Activation Package, CPR_022): `CLAIM-MUSIC-ENVATO-SYNC-
+ * 001-v1`, `-CANCELLATION-001-v1`, and `CLAIM-MUSIC-EPIDEMIC-TIER-
+ * ADVERTISING-001-v1` -- all three. The registry blocker described in the
+ * paragraph above (`envato-elements`/`epidemic-sound` not registered) was
+ * closed by the Envato + Epidemic Provider Registration / CPR-Readiness
+ * Remediation (generic `ASSET_PROVIDER_IDS` + `KNOWN_ASSET_PROVIDERS`
+ * extension, same mechanism as every entry above); `CPR_022` then
+ * independently re-verified publication safety for all three (Envato Sync
+ * and Envato Cancellation approved as originally drafted; Epidemic Tier
+ * Advertising approved with a bounded tier-specificity wording correction,
+ * PM-supplied final text) before these fixture entries were added. PM
+ * concurrence 2026-09-10, CRC Approver: JD (PM) on all three.
  */
 const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set<string>([
-  'CLAIM-MUSIC-ENVATO-SYNC-001-v1',
-  'CLAIM-MUSIC-ENVATO-CANCELLATION-001-v1',
-  'CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1',
   'CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1',
   // Pre-existing gap found during the Assessment-Jurisdiction Mention Model
   // implementation (2026-08-28) -- Adopted in a prior milestone (Wave 4,
@@ -442,9 +453,34 @@ describe('GOVERNED-CLAIMS.md <-> topic-claims-fixture.ts consistency', () => {
     }
   })
 
-  test('exactly twenty-seven claims in the runtime fixture are Adopted + CRC-eligible as of 2026-09-10 -- the prior twenty-two (see prior versions of this test/GOVERNED-CLAIMS.md for their own individual provenance, most recently CLAIM-STABILITYAI-COMMERCIAL-USE-001-v1 via CPR_020) plus five Artlist Remaining Claims activated together via CPR_021 (Social vs Pro [corrected wording], Client License Retention, Standalone Exploitation, Pro Royalties [corrected bidirectional-guardrail wording], Enterprise Threshold) -- CRC Approver: JD (PM), CRC Decision Date: 2026-09-10 on all five. CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1 ("A-5") was independently reviewed in the same CPR_021 package and explicitly WITHHELD (Publication Policy Principle 6 volatility concern, PM concurred not to override) -- it remains correctly absent from this list and from CLAIMS_WITHOUT_FIXTURE_REPRESENTATION above must still name it. The now-Deprecated CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-001-v1, the 3 remaining Music Scenario A claims still gated on provider registration (Envato x2, Epidemic Sound x1), and CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1 remain correctly absent from this list -- update only when a further real decision is recorded', () => {
+  test('exactly thirty claims in the runtime fixture are Adopted + CRC-eligible as of 2026-09-10 -- the prior twenty-seven (five Artlist Remaining Claims via CPR_021, see prior version of this test/GOVERNED-CLAIMS.md for full provenance) plus three Envato + Epidemic claims activated together via CPR_022 (Envato Sync, Envato Cancellation, Epidemic Tier Advertising [corrected bidirectional tier-specificity wording]) -- CRC Approver: JD (PM), CRC Decision Date: 2026-09-10 on all three. CLAIM-MUSIC-ARTLIST-AI-TRAINING-EXCLUSION-001-v1 remains correctly absent (WITHHELD, unaffected by this activation). The now-Deprecated CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-001-v1 remains correctly absent -- update only when a further real decision is recorded', () => {
     const liveClaims = TOPIC_CLAIMS_FIXTURE.filter((c) => c.lifecycle === 'Adopted' && c.crc_eligible === 'Yes')
-    expect(liveClaims.map((c) => c.claim_id).sort()).toEqual(['CLAIM-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001-v1', 'CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPY-004-v1', 'CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1', 'CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1', 'CLAIM-MUSIC-ARTLIST-CLIENT-LICENSE-RETENTION-001-v1', 'CLAIM-MUSIC-ARTLIST-ENTERPRISE-THRESHOLD-001-v1', 'CLAIM-MUSIC-ARTLIST-PRO-ROYALTIES-001-v1', 'CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1', 'CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1', 'CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-FANCY-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-PRO-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-STANDARD-001-v1', 'CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1', 'CLAIM-STABILITYAI-COMMERCIAL-USE-001-v1', 'CLAIM-STOCK-EDITORIAL-001-v2', 'CLAIM-STOCK-EDITORIAL-002-v2', 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1', 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1', 'CLAIM-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1', 'CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1'])
+    expect(liveClaims.map((c) => c.claim_id).sort()).toEqual(['CLAIM-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001-v1', 'CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPY-004-v1', 'CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1', 'CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1', 'CLAIM-MUSIC-ARTLIST-CLIENT-LICENSE-RETENTION-001-v1', 'CLAIM-MUSIC-ARTLIST-ENTERPRISE-THRESHOLD-001-v1', 'CLAIM-MUSIC-ARTLIST-PRO-ROYALTIES-001-v1', 'CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1', 'CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1', 'CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1', 'CLAIM-MUSIC-ENVATO-CANCELLATION-001-v1', 'CLAIM-MUSIC-ENVATO-SYNC-001-v1', 'CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-FANCY-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-PRO-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-STANDARD-001-v1', 'CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1', 'CLAIM-STABILITYAI-COMMERCIAL-USE-001-v1', 'CLAIM-STOCK-EDITORIAL-001-v2', 'CLAIM-STOCK-EDITORIAL-002-v2', 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1', 'CLAIM-STOCK-ISTOCK-EDITORIAL-001-v1', 'CLAIM-STOCK-SHUTTERSTOCK-EDITORIAL-001-v1', 'CLAIM-STORYBLOCKS-BUSINESS-LICENSE-BROADCAST-001-v1', 'CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1'])
+  })
+
+  describe.each([
+    ['CLAIM-MUSIC-ENVATO-SYNC-001-v1', ['envato-elements'], ['which_music_provider']],
+    ['CLAIM-MUSIC-ENVATO-CANCELLATION-001-v1', ['envato-elements'], ['music_subscription_active_at_publication_confirmed']],
+    ['CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1', ['epidemic-sound'], ['which_music_provider', 'epidemic_license_tier_confirmed']],
+  ] as const)('%s -- Envato + Epidemic activation (CPR_022, 2026-09-10)', (claimId, expectedProviderScope, expectedDependencies) => {
+    test('real entry in TOPIC_CLAIMS_FIXTURE, Adopted + CRC-eligible', () => {
+      const claim = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === claimId)
+      expect(claim).toBeDefined()
+      expect(claim?.topic).toBe('third_party_source_rights')
+      expect(claim?.lifecycle).toBe('Adopted')
+      expect(claim?.crc_eligible).toBe('Yes')
+    })
+
+    test('provider_scope matches the governed scope exactly', () => {
+      const claim = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === claimId)
+      expect(claim?.provider_scope).toEqual(expectedProviderScope)
+      expect(claim?.tool_scope).toBeNull()
+    })
+
+    test('unresolved_project_dependencies preserved exactly as governed', () => {
+      const claim = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === claimId)
+      expect(claim?.unresolved_project_dependencies).toEqual(expectedDependencies)
+    })
   })
 
   describe.each([

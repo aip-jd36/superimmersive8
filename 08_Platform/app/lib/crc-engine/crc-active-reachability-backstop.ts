@@ -134,6 +134,13 @@ const REPRESENTATIVE_EXPRESSIONS: Record<string, string> = {
   // the claim's own platform name, same as every other TopicClaim-origin
   // entry above.
   'stability-ai': 'Stability AI',
+  // 'envato-elements' / 'epidemic-sound' added 2026-09-10 (Envato +
+  // Epidemic Provider Registration / CPR-Readiness Remediation, then CRC
+  // Publication via CPR_022): TopicClaim-origin, matching Artlist/
+  // Storyblocks/Pond5's own precedent (no Matrix row). Sourced from each
+  // claim's own governed product name.
+  'envato-elements': 'Envato Elements',
+  'epidemic-sound': 'Epidemic Sound',
 }
 
 export interface CrcActiveReachabilityResult {

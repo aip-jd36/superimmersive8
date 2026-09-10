@@ -678,6 +678,117 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     superseded_by: null,
   },
   {
+    // Music Scenario A -- Envato + Epidemic activation (CPR_022,
+    // 2026-09-10). Runtime prerequisite cleared by the Envato + Epidemic
+    // Provider Registration / CPR-Readiness Remediation (envato-elements
+    // now a registered AssetProviderId, with a matching extraction alias)
+    // -- mirroring exactly the Artlist runtime-clearance precedent above.
+    // PM concurrence 2026-09-10 (CRC Approver: JD (PM)) -- see
+    // GOVERNED-CLAIMS.md's own CRC PUBLICATION APPROVED note and
+    // governance-reviews/CPR_022_ENVATO_EPIDEMIC_RECONSIDERATION_
+    // 2026-09-10.md for the full decision record. Approved as originally
+    // drafted, no wording change.
+    claim_id: 'CLAIM-MUSIC-ENVATO-SYNC-001-v1',
+    topic: 'third_party_source_rights',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      "CRC may state that Envato Elements' standard license ties music use to synchronization with other media (such as being part of a video) and excludes standalone resale/redistribution and broadcast presentations specifically. CRC must not state whether the user's own specific use constitutes standalone resale or broadcast use, must not state that the user holds a valid Envato Elements subscription for the track, and must not state or imply the project is otherwise commercially cleared.",
+    crc_candidate_statement:
+      "Envato Elements' standard license ties music use to synchronization with other media, and excludes standalone resale/redistribution and broadcast presentations specifically.",
+    applicability_requirements: [],
+    // Evidence-only: structurally auto-satisfied by the time this
+    // provider-scoped claim is even a retrieval candidate at all (the same
+    // observation DAR_001 made for Getty's own asset_confirmed_getty), but
+    // left in the governed dependency list unchanged, per this document's
+    // own "never retroactively edit for convenience" discipline -- Case 3B
+    // still fires; the claim never renders unhedged. Confirmed via the
+    // real, unmodified pipeline before this entry was added.
+    unresolved_project_dependencies: ['which_music_provider'],
+    provider_scope: ['envato-elements'],
+    tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
+    last_verified: '2026-09-10',
+    superseded_by: null,
+  },
+  {
+    // Music Scenario A -- Envato + Epidemic activation (CPR_022,
+    // 2026-09-10). See CLAIM-MUSIC-ENVATO-SYNC-001-v1's own entry
+    // immediately above for the shared activation context. Approved as
+    // originally drafted, no wording change -- near-identical in shape to
+    // Artlist A-3's own already-approved, already-in-production
+    // post-cancellation continuity claim.
+    claim_id: 'CLAIM-MUSIC-ENVATO-CANCELLATION-001-v1',
+    topic: 'third_party_source_rights',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      "CRC may state that Envato's stated policy is that music used in a project completed and published while the subscription was active remains licensed even after the subscription ends, while new or incomplete projects after cancellation are not covered. CRC must not state whether the user's own specific project was actually completed and published while their subscription was active, and must not state or imply the project is otherwise commercially cleared.",
+    crc_candidate_statement:
+      "Envato's stated policy is that already-completed, already-published work stays licensed after cancellation, while new use does not.",
+    applicability_requirements: [],
+    // Genuine, evidence-only, non-auto-satisfied documentary/account-
+    // history fact -- structurally identical to Artlist A-3's own
+    // artlist_subscription_active_at_publication_confirmed, already
+    // CRC-active and in production with the identical evidence-only
+    // treatment. Not converted to a self-attestation question by this
+    // activation. Permanently gates Bounded Interpretation to
+    // relevant_applicability_unresolved (Case 3B), confirmed via the
+    // real, unmodified pipeline before this entry was added.
+    unresolved_project_dependencies: ['music_subscription_active_at_publication_confirmed'],
+    provider_scope: ['envato-elements'],
+    tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
+    last_verified: '2026-09-10',
+    superseded_by: null,
+  },
+  {
+    // Music Scenario A -- Envato + Epidemic activation (CPR_022,
+    // 2026-09-10). See CLAIM-MUSIC-ENVATO-SYNC-001-v1's own entry above for
+    // the shared activation context. This entry's own
+    // crc_candidate_statement/crc_publication_scope below are CORRECTED
+    // from the original FGR_006 draft -- CPR_022 resolved the tier-
+    // vagueness risk FGR_006 originally flagged (the draft was too
+    // abstract to tell a user which tier permits what) by stating both
+    // tiers' actual rules explicitly, with bidirectional guardrails
+    // against either tier being read as a universal commercial-use
+    // permission or prohibition. PM supplied this exact final wording
+    // directly (cosmetically, not substantively, different from CPR_022's
+    // own draft -- see that review's own wrapper metadata); persisted here
+    // verbatim as supplied, not CPR_022's own draft text.
+    claim_id: 'CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1',
+    topic: 'third_party_source_rights',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      "CRC may state that Epidemic Sound's Single-Track Private Tier license excludes use in advertisements and other paid-media productions (including online pre/mid/post-roll placements), that the separate Commercial Tier license does not carry that same exclusion (it excludes only broadcast-type content such as TV ads), and that the Commercial Tier separately grants a right to monetize through third-party ads on the subscriber's own published work -- and that which of these applies depends on which tier the subscriber actually holds. CRC must not state which tier the user's account actually holds, must not state that the Private tier prohibits all commercial use (only advertising/paid-media use specifically), must not state that the Commercial tier's monetization right by itself clears a project commercially, and must not state or imply the project is otherwise commercially cleared.",
+    crc_candidate_statement:
+      "Epidemic Sound's Single-Track Private Tier license excludes use in advertisements and other paid-media productions -- but the separate Commercial Tier license doesn't carry that same exclusion; it only excludes broadcast-type content such as TV ads, and separately allows you to monetize your own published work through third-party ads. Which of these applies depends on which tier you're actually subscribed to.",
+    applicability_requirements: [],
+    // which_music_provider: evidence-only, structurally auto-satisfied
+    // (same as Envato's own). epidemic_license_tier_confirmed: genuine
+    // account/subscription fact, evidence-only, structurally identical in
+    // kind to Artlist's own artlist_license_type_confirmed (already
+    // CRC-active). Neither converted to a self-attestation question.
+    // Permanently gates Bounded Interpretation to
+    // relevant_applicability_unresolved (Case 3B) regardless of which
+    // tier the user actually holds -- confirmed via the real, unmodified
+    // pipeline (Private-tier-known, Commercial-tier-known, and
+    // tier-unresolved scenarios) before this entry was added.
+    unresolved_project_dependencies: ['which_music_provider', 'epidemic_license_tier_confirmed'],
+    provider_scope: ['epidemic-sound'],
+    tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
+    last_verified: '2026-09-10',
+    superseded_by: null,
+  },
+  {
     // First real tool_scope-narrowed TopicClaim runtime entry (LK-7 tool
     // scope primitive; LK-9/LK-10 canonical tool identity registry, 2026-
     // 08-29; CLAIM-SYNTHESIA-STOCK-PAID-PROMOTION-001-v1 Adopted 2026-08-29,
