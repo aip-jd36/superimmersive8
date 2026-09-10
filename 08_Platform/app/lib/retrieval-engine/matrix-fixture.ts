@@ -233,9 +233,18 @@ export const MATRIX_FIXTURE: MatrixRow[] = [
   },
   {
     identifier: 'adobe-firefly',
-    last_verified: '2026-08-05',
+    last_verified: '2026-09-10',
     claims: [
-      { claim_id: 'adobe-firefly', crc_eligible: 'Pending', crc_publication_scope: null, crc_candidate_statement: null, topic: 'commercial_use', applicability_requirements: [] },
+      {
+        claim_id: 'adobe-firefly',
+        crc_eligible: 'Yes',
+        crc_publication_scope:
+          "CRC may state that Adobe's current Generative AI Product Specific Terms include a conditional Firefly Output Indemnification mechanism, gated on Creative Cloud for teams/enterprise status plus a specific paid plan (Creative Cloud Pro Plus or Creative Cloud, Edition 4) with the indemnification add-on, applicable only to output from Adobe-designated Eligible Firefly Features on Eligible Firefly Surfaces following an Export Event, capped at US$10,000 per output or Infringement Claim, subject to stated exclusions and procedural conditions. CRC may state that this indemnification does not extend to Non-Adobe/partner models used within Adobe surfaces, to free-tier use, or to plans without the add-on, and that the exact current list of Eligible Firefly Features/Surfaces has not been independently confirmed. CRC must not state or imply that the user's own plan is an Eligible Plan, that the user's own feature/surface is an Eligible Firefly Feature/Surface, that an Export Event has occurred for the user's output, that Adobe will defend any specific claim, that US$10,000 is a guaranteed payout rather than a maximum cap, that having any Adobe or Creative Cloud subscription qualifies as an Eligible Plan, that the user owns the output, that Non-Adobe models receive the same indemnification, or that this indemnification establishes commercial-use permission, commercial clearance, or that the user's project has no other commercial-readiness issues. A human-reviewed Commercial Assurance Assessment remains the higher-assurance path for resolving a specific project's own Adobe Firefly eligibility and commercial-readiness status.",
+        crc_candidate_statement:
+          "Adobe offers a narrow, conditional indemnification for some Firefly output -- but it only applies if you're a Creative Cloud for teams or enterprise customer on a specific paid plan (Creative Cloud Pro Plus or Creative Cloud, Edition 4) that includes this add-on, and only for output from the specific Firefly features and surfaces Adobe currently designates as eligible (that exact current list isn't something we've independently confirmed). Having any Adobe or Creative Cloud subscription doesn't by itself mean you're covered. Even when it applies, Adobe's liability is capped at US$10,000 per output or claim, subject to conditions and exclusions, and it doesn't cover output from non-Adobe/partner models used inside Adobe's tools. This indemnification is separate from -- and doesn't by itself establish -- whether you may use the output commercially or whether your project is otherwise cleared.",
+        topic: 'commercial_use',
+        applicability_requirements: [],
+      },
     ],
   },
   {

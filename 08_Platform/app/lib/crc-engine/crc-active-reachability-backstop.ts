@@ -153,6 +153,18 @@ const REPRESENTATIVE_EXPRESSIONS: Record<string, string> = {
   // mechanical runtime-reachability milestone closes it. Sourced from this
   // row's own Matrix section header, "Google Veo."
   'google-veo': 'Google Veo',
+  // 'adobe-firefly' added 2026-09-10 (Adobe Firefly CPR Concurrence / CRC
+  // Activation, CPR_024, LK-TRIAL-13): Matrix-origin, matching Google
+  // Veo's own precedent -- this entry documents the authoritative
+  // representative expression per this file's own required-at-
+  // publication-time convention. It deliberately does NOT itself add a
+  // KNOWN_TOOLS extraction alias for "Firefly"/"Adobe Firefly" -- no such
+  // alias exists yet, so this identity is correctly and loudly reported as
+  // `reachable: false` (a detected-but-authorized gap, not a silent
+  // MISSING-representative-expression gap) until a separate, later, purely
+  // mechanical runtime-reachability milestone closes it. Sourced from this
+  // row's own Matrix section header, "Adobe Firefly."
+  'adobe-firefly': 'Adobe Firefly',
 }
 
 export interface CrcActiveReachabilityResult {
