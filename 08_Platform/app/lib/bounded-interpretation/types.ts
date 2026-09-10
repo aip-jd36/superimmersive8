@@ -29,7 +29,47 @@
  * documented as "traceability only, never rendered."
  */
 
-import type { GoalCategory } from '@/types/interview-engine'
+import type { GoalCategory, GoalScope } from '@/types/interview-engine'
+
+/**
+ * BiIntent — the generic, deliberately minimal input contract for
+ * `buildBoundedInterpretations` (CAH-4G Slice 1, 2026-09-10; frozen in
+ * `HRR_GRI_TECHNICAL_DESIGN.md §H`/`§S-5`, refined by the CAH-4G.1 task).
+ *
+ * Bounded Interpretation used to take `UserGoal[]` directly, which coupled a
+ * generic deterministic rule table to one caller's captured-goal shape. HRR
+ * (Human Reviewer Research, CAH-4G) must feed the same rule table from a
+ * genuine research intent WITHOUT fabricating a `UserGoal`. `BiIntent` is the
+ * smallest shape the rule table actually consumes:
+ *
+ *   - `intent_id`    — opaque identifier, echoed to `BoundedInterpretation.goal_id`
+ *                      (internal-only, never rendered — see that field's doc).
+ *   - `intent_text`  — the human-readable text of the intent, echoed VERBATIM
+ *                      to `BoundedInterpretation.goal_text` and never
+ *                      transformed (PM revision 6). For CRC this is the user's
+ *                      own `UserGoal.raw_text`; for HRR it is the fixed topic
+ *                      label or the attributed question quotation.
+ *   - `category`     — which governed topic this intent concerns; matched
+ *                      against `RetrievalResult.matched_goal_category`.
+ *   - `scope`        — `'informational'` vs `'determination_request'`; the
+ *                      latter yields `determination_declined` BEFORE any
+ *                      matching, exactly as before.
+ *
+ * It deliberately does NOT carry `UserGoal` lifecycle fields (`state`,
+ * `superseded_by`, `source_turn`, `source_statement`). Deciding which goals
+ * are active/confirmed is the CALLER's concern (CRC's `userGoalsToBiIntents`
+ * adapter applies the exact `superseded_by === null && state === 'confirmed'`
+ * filter Bounded Interpretation used to apply internally — see
+ * `adapters.ts`). It carries no CRC-specific or HRR-specific concept, no
+ * provenance, and nothing that could license a stronger downstream
+ * conclusion.
+ */
+export interface BiIntent {
+  intent_id: string
+  intent_text: string
+  category: GoalCategory
+  scope: GoalScope
+}
 
 /**
  * PM revision 4 (2026-08-15): named `directly_relevant`, not

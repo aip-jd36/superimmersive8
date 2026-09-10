@@ -20,7 +20,23 @@
 import { lookupTopicClaims } from '@/lib/retrieval-engine/lookup-topic-claims'
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import { getAskabilityEntry } from '@/lib/crc-engine/dependency-askability'
-import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
+import { buildBoundedInterpretations as buildBoundedInterpretationsRaw } from '@/lib/bounded-interpretation/build-bounded-interpretation'
+import { userGoalsToBiIntents } from '@/lib/bounded-interpretation/adapters'
+
+// CAH-4G Slice 1 (2026-09-10): Bounded Interpretation's input contract
+// generalized from `UserGoal[]` to the generic `BiIntent[]`. This local
+// shim routes every pre-existing call in this suite through the real CRC
+// adapter (`userGoalsToBiIntents` -- same active-and-confirmed filter BI
+// used to apply inline) with ZERO other change, so this whole file doubles
+// as the slice's zero-behavior-change equivalence check.
+const buildBoundedInterpretations = (
+  goals: Parameters<typeof userGoalsToBiIntents>[0],
+  ...rest: [
+    Parameters<typeof buildBoundedInterpretationsRaw>[1],
+    Parameters<typeof buildBoundedInterpretationsRaw>[2]?,
+    Parameters<typeof buildBoundedInterpretationsRaw>[3]?,
+  ]
+) => buildBoundedInterpretationsRaw(userGoalsToBiIntents(goals), ...rest)
 import { assembleProjectionOutput } from '@/lib/projection-layer/assemble-projection-output'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
@@ -143,7 +159,7 @@ describe('Bounded Interpretation + Projection, real published Pond5 claim', () =
     expect(results[0].unresolved_project_dependencies).toEqual(['editorial_designation_confirmed', 'separate_authorization_obtained'])
 
     const { buildBoundedInterpretations } = await import('@/lib/bounded-interpretation/build-bounded-interpretation')
-    const interpretations = buildBoundedInterpretations([sourceRightsGoal()], results, diagnostics, { state: 'unknown' })
+    const interpretations = buildBoundedInterpretations(userGoalsToBiIntents([sourceRightsGoal()]), results, diagnostics, { state: 'unknown' })
     expect(interpretations).toHaveLength(1)
     expect(interpretations[0].status).toBe('relevant_applicability_unresolved')
     expect(interpretations[0].status).not.toBe('directly_relevant')

@@ -17,6 +17,7 @@ import { buildResultsEmailContent } from '@/lib/crc-engine/results-email-templat
 import { buildConsultativeAnswerPlan, type ConsultativeAnswerPlan } from '@/lib/crc-engine/consultative-answer-plan'
 import { partitionKnowledgeItemsByPlan } from '@/lib/crc-engine/consultative-realization'
 import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
+import { userGoalsToBiIntents } from '@/lib/bounded-interpretation/adapters'
 import type { BoundedInterpretation } from '@/lib/bounded-interpretation/types'
 import { assembleProjectionOutput } from '@/lib/projection-layer/assemble-projection-output'
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
@@ -51,7 +52,7 @@ function pipeline(goals: UserGoal[], tools: ToolMention[], providers: AssetProvi
   const applic = { jurisdiction: deriveAssessmentJurisdictionFacts(su), toolMentions: su.tool_mentions }
   const discovered = deriveDiscoveredTopicOccurrences(su, TOPIC_CLAIMS_FIXTURE)
   const { results, diagnostics } = retrieve(handoff, MATRIX_FIXTURE, su.user_goals, TOPIC_CLAIMS_FIXTURE, applic, TOPIC_RELATIONSHIPS_FIXTURE, handoff.asset_providers, discovered)
-  const interps = buildBoundedInterpretations(su.user_goals, results, diagnostics, su.project_facts.human_contribution_description.attestation)
+  const interps = buildBoundedInterpretations(userGoalsToBiIntents(su.user_goals), results, diagnostics, su.project_facts.human_contribution_description.attestation)
   const { output } = assembleProjectionOutput(handoff, results, interps)
   const plan = buildConsultativeAnswerPlan(interps, results, diagnostics)
   return { results, interps, output, plan }

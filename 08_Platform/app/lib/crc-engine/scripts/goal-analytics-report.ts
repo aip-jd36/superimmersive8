@@ -74,6 +74,7 @@ import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
 import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
+import { userGoalsToBiIntents } from '@/lib/bounded-interpretation/adapters'
 import type { GoalCategory, GoalScope } from '@/types/interview-engine'
 import type { InterpretationStatus } from '@/lib/bounded-interpretation/types'
 import { deriveAssessmentJurisdictionFacts } from '@/lib/crc-engine/assessment-jurisdiction-scope'
@@ -141,7 +142,7 @@ async function main() {
     const handoff = buildRetrievalHandoff(su)
     const applicabilityFacts: ApplicabilityFacts = { jurisdiction: assessmentJurisdictionFacts, toolMentions: su.tool_mentions }
     const { results, diagnostics } = retrieve(handoff, MATRIX_FIXTURE, su.user_goals, TOPIC_CLAIMS_FIXTURE, applicabilityFacts, [], handoff.asset_providers)
-    const interpretations = buildBoundedInterpretations(su.user_goals, results)
+    const interpretations = buildBoundedInterpretations(userGoalsToBiIntents(su.user_goals), results)
     for (const interp of interpretations) {
       tally(statusCounts, interp.status)
     }

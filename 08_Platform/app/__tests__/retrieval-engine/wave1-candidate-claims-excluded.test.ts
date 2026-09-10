@@ -36,7 +36,23 @@ import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixtur
 import { deriveAssessmentJurisdictionFacts } from '@/lib/crc-engine/assessment-jurisdiction-scope'
 import { TOPIC_RELATIONSHIPS_FIXTURE } from '@/lib/retrieval-engine/topic-relationships-fixture'
 import { lookupTopicClaims } from '@/lib/retrieval-engine/lookup-topic-claims'
-import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
+import { buildBoundedInterpretations as buildBoundedInterpretationsRaw } from '@/lib/bounded-interpretation/build-bounded-interpretation'
+import { userGoalsToBiIntents } from '@/lib/bounded-interpretation/adapters'
+
+// CAH-4G Slice 1 (2026-09-10): Bounded Interpretation's input contract
+// generalized from `UserGoal[]` to the generic `BiIntent[]`. This local
+// shim routes every pre-existing call in this suite through the real CRC
+// adapter (`userGoalsToBiIntents` -- same active-and-confirmed filter BI
+// used to apply inline) with ZERO other change, so this whole file doubles
+// as the slice's zero-behavior-change equivalence check.
+const buildBoundedInterpretations = (
+  goals: Parameters<typeof userGoalsToBiIntents>[0],
+  ...rest: [
+    Parameters<typeof buildBoundedInterpretationsRaw>[1],
+    Parameters<typeof buildBoundedInterpretationsRaw>[2]?,
+    Parameters<typeof buildBoundedInterpretationsRaw>[3]?,
+  ]
+) => buildBoundedInterpretationsRaw(userGoalsToBiIntents(goals), ...rest)
 import { runCRCConversation } from '@/lib/crc-engine/run-crc-conversation'
 import { DIALOGUE_FIXTURES } from '@/lib/interview-engine/fixtures'
 import type { RetrievalHandoff, StructuredUnderstanding, UserGoal } from '@/types/interview-engine'

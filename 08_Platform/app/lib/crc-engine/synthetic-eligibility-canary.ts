@@ -133,6 +133,7 @@ import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
 import type { MatrixRow, RetrievalDiagnostic, TopicClaim } from '@/lib/retrieval-engine/types'
 import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
+import { userGoalsToBiIntents } from '@/lib/bounded-interpretation/adapters'
 import type { BoundedInterpretation } from '@/lib/bounded-interpretation/types'
 import { assembleProjectionOutput } from '@/lib/projection-layer/assemble-projection-output'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
@@ -243,7 +244,7 @@ export function runSyntheticEligibilityCanary(scenario: SyntheticEligibilityCana
     [],
   )
 
-  const interpretations = buildBoundedInterpretations(scenario.goals, results, diagnostics, scenario.humanContributionDescription ?? { state: 'unknown' })
+  const interpretations = buildBoundedInterpretations(userGoalsToBiIntents(scenario.goals), results, diagnostics, scenario.humanContributionDescription ?? { state: 'unknown' })
 
   const projection = assembleProjectionOutput(scenario.handoff, results, interpretations)
   const projectionIsEmpty = projection.output.understood_summary === '' && projection.output.knowledge_items.length === 0 && projection.output.goal_interpretations.length === 0

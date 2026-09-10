@@ -1,16 +1,21 @@
 /**
  * Bounded Interpretation composition (CRC Milestone 2, 2026-08-15;
  * extended for Case 3A/3B during the Living Knowledge governance review,
- * 2026-08-16). Pure function: active, confirmed user goals +
- * already-computed RetrievalResult[] (+ optional RetrievalDiagnostic[]) ->
- * BoundedInterpretation[]. No new inference, no fact-conditional matching
- * added to Retrieval, no model call.
+ * 2026-08-16; input contract generalized to `BiIntent[]` in CAH-4G Slice 1,
+ * 2026-09-10). Pure function: generic bounded-interpretation intents
+ * (`BiIntent[]`, types.ts) + already-computed RetrievalResult[] (+ optional
+ * RetrievalDiagnostic[]) -> BoundedInterpretation[]. No new inference, no
+ * fact-conditional matching added to Retrieval, no model call.
  *
- * Only goals that are both ACTIVE (`superseded_by === null`) and
- * `state === 'confirmed'` produce an interpretation — a declined,
- * confirmed_absent, or superseded goal has no "thing the user actually
- * asked" left to interpret (mirrors PM invariant #8: "positive
- * interpretation requires confirmed fact").
+ * This function interprets EVERY intent it is handed — it no longer knows
+ * any caller's lifecycle model. CRC's `userGoalsToBiIntents` adapter
+ * (adapters.ts) applies the "active (`superseded_by === null`) and
+ * `state === 'confirmed'`" filter this function used to apply inline (a
+ * declined, confirmed_absent, or superseded `UserGoal` has no "thing the
+ * user actually asked" left to interpret — PM invariant #8: "positive
+ * interpretation requires confirmed fact"), then maps to `BiIntent`. A
+ * future research-intent caller adapts its own genuine intent the same way,
+ * without either caller's shape leaking in here.
  *
  * `diagnostics` (new, additive, defaults to `[]` -- every pre-existing
  * caller/test continues to compile and behave identically without
@@ -27,8 +32,8 @@
  */
 
 import type { RetrievalDiagnostic, RetrievalResult } from '@/lib/retrieval-engine/types'
-import type { Attested, UserGoal } from '@/types/interview-engine'
-import type { BoundedInterpretation, UnresolvedRelevantClaim } from './types'
+import type { Attested } from '@/types/interview-engine'
+import type { BiIntent, BoundedInterpretation, UnresolvedRelevantClaim } from './types'
 import {
   DETERMINATION_DECLINED_TEMPLATE,
   directlyRelevantSummary,
@@ -84,7 +89,7 @@ function hasGovernedProjectDependencies(match: RetrievalResult): boolean {
  * owns the actual fixed, deterministic sentence.
  */
 function shouldIncludeHumanContributionSentence(
-  category: UserGoal['category'],
+  category: BiIntent['category'],
   matches: RetrievalResult[],
   humanContributionDescription: Attested<string>,
 ): boolean {
@@ -132,7 +137,7 @@ function shouldIncludeHumanContributionSentence(
  * `unmet_applicability`, the same uniform shape every Retrieval path already
  * produces; there is no `if (source === ...)` branch anywhere in this file.
  */
-function collectUnresolvedRelevantClaimIds(category: UserGoal['category'], diagnostics: RetrievalDiagnostic[], matchedClaimIds: Set<string>): UnresolvedRelevantClaim[] {
+function collectUnresolvedRelevantClaimIds(category: BiIntent['category'], diagnostics: RetrievalDiagnostic[], matchedClaimIds: Set<string>): UnresolvedRelevantClaim[] {
   const ids = new Set<string>()
   for (const diagnostic of diagnostics) {
     if (diagnostic.identifier !== category || diagnostic.reason !== 'applicability_unmet' || !diagnostic.unmet_applicability) continue
@@ -170,20 +175,24 @@ function appendMixedResolutionGuidance(
 }
 
 export function buildBoundedInterpretations(
-  goals: UserGoal[],
+  intents: BiIntent[],
   results: RetrievalResult[],
   diagnostics: RetrievalDiagnostic[] = [],
   humanContributionDescription: Attested<string> = { state: 'unknown' },
 ): BoundedInterpretation[] {
-  const activeConfirmedGoals = goals.filter((g) => g.superseded_by === null && g.state === 'confirmed')
-
-  return activeConfirmedGoals.map((goal) => {
+  // `intents` is already the caller-resolved set — for CRC, the
+  // active-and-confirmed `UserGoal`s filtered + mapped by
+  // `userGoalsToBiIntents` (adapters.ts), exactly the
+  // `superseded_by === null && state === 'confirmed'` predicate this
+  // function used to apply inline. Bounded Interpretation no longer knows
+  // any caller's lifecycle model; it interprets every intent it is handed.
+  return intents.map((intent) => {
     // Scope check first, unconditionally -- a determination request never
     // receives a category-specific coverage answer, even when a matching
     // claim exists, per PM revision 2/3: answering the category question
     // at all would still be issuing something CRC doesn't issue.
-    if (goal.scope === 'determination_request') {
-      return buildInterpretation(goal, 'determination_declined', DETERMINATION_DECLINED_TEMPLATE, [DETERMINATION_DECLINED_TEMPLATE], [])
+    if (intent.scope === 'determination_request') {
+      return buildInterpretation(intent, 'determination_declined', DETERMINATION_DECLINED_TEMPLATE, [DETERMINATION_DECLINED_TEMPLATE], [])
     }
 
     // matched_goal_category, not topic (Governed Topic Relationships
@@ -195,7 +204,7 @@ export function buildBoundedInterpretations(
     // this result to surface" -- equals topic for every pre-existing
     // exact_topic result (tool or direct topic match), so this is a
     // behavior-preserving generalization, not a new matching concept.
-    const matches = results.filter((r) => r.matched_goal_category === goal.category)
+    const matches = results.filter((r) => r.matched_goal_category === intent.category)
     if (matches.length > 0) {
       // Generic Mixed-Resolution Bounded Interpretation milestone
       // (2026-08-24): computed once per goal, used by BOTH return paths
@@ -204,7 +213,7 @@ export function buildBoundedInterpretations(
       // which renders as `outside_current_coverage` and keeps that status's
       // existing (empty) representation unchanged.
       const unresolvedRelevantClaims = collectUnresolvedRelevantClaimIds(
-        goal.category,
+        intent.category,
         diagnostics,
         new Set(matches.map((m) => m.claim_id)),
       )
@@ -230,7 +239,7 @@ export function buildBoundedInterpretations(
         // reachable with the current Matrix. Falls back to
         // outside_current_coverage rather than rendering an empty
         // sentence, never fabricating claim text to fill the gap.
-        return buildInterpretation(goal, 'outside_current_coverage', outsideCoverageSummary(goal.category), [outsideCoverageSummary(goal.category)], [])
+        return buildInterpretation(intent, 'outside_current_coverage', outsideCoverageSummary(intent.category), [outsideCoverageSummary(intent.category)], [])
       }
 
       // Case 3B (Living Knowledge governance review, 2026-08-16): every
@@ -284,7 +293,7 @@ export function buildBoundedInterpretations(
         // renders byte-identical to before H5 existed. Still evaluated
         // against ALL matches (unchanged) -- H5's own gating is untouched
         // by this milestone.
-        const humanContributionSentence = shouldIncludeHumanContributionSentence(goal.category, matches, humanContributionDescription)
+        const humanContributionSentence = shouldIncludeHumanContributionSentence(intent.category, matches, humanContributionDescription)
           ? humanContributionRelevanceSentence(humanContributionDescription.state === 'confirmed' ? humanContributionDescription.value : '')
           : null
         // Mixed-Resolution Consultative Guidance milestone (2026-08-24):
@@ -295,7 +304,7 @@ export function buildBoundedInterpretations(
         // dependency. Identity when unresolvedRelevantClaims is empty.
         const case3bWithGuidance = appendMixedResolutionGuidance(
           relevantApplicabilityUnresolvedWithContentSummary(
-            goal.category,
+            intent.category,
             dependencyBearingStatement,
             includesRelatedTopicContent,
             humanContributionSentence,
@@ -308,7 +317,7 @@ export function buildBoundedInterpretations(
           // doc comment for why `blocks.join(' ')` reconstructs the
           // `summary` string above byte-for-byte.
           relevantApplicabilityUnresolvedWithContentBlocks(
-            goal.category,
+            intent.category,
             dependencyBearingStatement,
             includesRelatedTopicContent,
             humanContributionSentence,
@@ -318,7 +327,7 @@ export function buildBoundedInterpretations(
           unresolvedRelevantClaims,
         )
         return buildInterpretation(
-          goal,
+          intent,
           'relevant_applicability_unresolved',
           case3bWithGuidance.summary,
           case3bWithGuidance.summary_blocks,
@@ -333,7 +342,7 @@ export function buildBoundedInterpretations(
       // this is a read of existing data, not a new fact or new matching
       // logic.
       const allToolSourced = matches.every((m) => m.source_fact.kind === 'tool')
-      const directlyRelevantResult = directlyRelevantSummary(goal.category, combinedStatement, allToolSourced, includesRelatedTopicContent)
+      const directlyRelevantResult = directlyRelevantSummary(intent.category, combinedStatement, allToolSourced, includesRelatedTopicContent)
       // Single-group shape (every matched claim dependency-free) has no
       // internal boundary CC-1 ever computed -- one block, not artificially
       // split, per this milestone's own "if a case naturally yields one
@@ -346,7 +355,7 @@ export function buildBoundedInterpretations(
       // is empty (every pre-existing goal renders byte-identical).
       const directlyRelevantWithGuidance = appendMixedResolutionGuidance(directlyRelevantResult, [directlyRelevantResult], unresolvedRelevantClaims)
       return buildInterpretation(
-        goal,
+        intent,
         'directly_relevant',
         directlyRelevantWithGuidance.summary,
         directlyRelevantWithGuidance.summary_blocks,
@@ -362,19 +371,19 @@ export function buildBoundedInterpretations(
     // than because no governed coverage exists at all. Content-free by
     // design -- see relevantApplicabilityUnresolvedNoContentSummary's own
     // doc comment for why nothing is quoted here.
-    const hasUnmetApplicability = diagnostics.some((d) => d.identifier === goal.category && d.reason === 'applicability_unmet')
+    const hasUnmetApplicability = diagnostics.some((d) => d.identifier === intent.category && d.reason === 'applicability_unmet')
     if (hasUnmetApplicability) {
-      const noContentSummary = relevantApplicabilityUnresolvedNoContentSummary(goal.category)
-      return buildInterpretation(goal, 'relevant_applicability_unresolved', noContentSummary, [noContentSummary], [])
+      const noContentSummary = relevantApplicabilityUnresolvedNoContentSummary(intent.category)
+      return buildInterpretation(intent, 'relevant_applicability_unresolved', noContentSummary, [noContentSummary], [])
     }
 
-    const outsideCoverage = outsideCoverageSummary(goal.category)
-    return buildInterpretation(goal, 'outside_current_coverage', outsideCoverage, [outsideCoverage], [])
+    const outsideCoverage = outsideCoverageSummary(intent.category)
+    return buildInterpretation(intent, 'outside_current_coverage', outsideCoverage, [outsideCoverage], [])
   })
 }
 
 function buildInterpretation(
-  goal: UserGoal,
+  intent: BiIntent,
   status: BoundedInterpretation['status'],
   summary: string,
   summary_blocks: string[],
@@ -387,9 +396,12 @@ function buildInterpretation(
   unresolved_relevant_claims: UnresolvedRelevantClaim[] = [],
 ): BoundedInterpretation {
   return {
-    goal_id: goal.goal_id,
-    goal_text: goal.raw_text,
-    category: goal.category,
+    // `BoundedInterpretation` keeps its established output field names
+    // (`goal_id`/`goal_text`); only the INPUT contract generalized in
+    // CAH-4G Slice 1, so every downstream consumer is untouched.
+    goal_id: intent.intent_id,
+    goal_text: intent.intent_text,
+    category: intent.category,
     status,
     summary,
     summary_blocks,
