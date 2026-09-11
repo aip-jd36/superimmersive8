@@ -1,7 +1,7 @@
 # CRC — Current Accepted State, Closed Milestones, Deferred Backlog, Next Workstream
 
 **Status:** ACTIVE — the living cross-cutting status doc for CRC/Living Knowledge engineering. Supersedes nothing — the layer-specific architecture docs below remain the normative design references; this doc tracks *which milestones against them are closed*, *what's deliberately deferred*, and *what's next*.
-**Last updated:** 2026-08-27 (created earlier this date during the original documentation-closeout pass, §5's "as of commit `18a308d`" reflects that original snapshot; §9 updated again later the same date, after that milestone's own §5 content, to record the Music/Artlist A-3 Living Knowledge domain-portability result — a documentation-only closeout, no further §5 milestones added by this later pass)
+**Last updated:** 2026-08-27 (created earlier this date during the original documentation-closeout pass, §5's "as of commit `18a308d`" reflects that original snapshot; §9 updated again later the same date, after that milestone's own §5 content, to record the Music/Artlist A-3 Living Knowledge domain-portability result — a documentation-only closeout, no further §5 milestones added by this later pass); §8/§10 updated 2026-09-11 to record the Synthetic-Person Natural-Language Extraction Robustness deferred item (item I), arising from the Bridge #1/#2 production UAT sequence — documentation-only, no runtime/governance/§5 change
 **Why this file exists:** no single doc previously tracked rolling CRC engineering status — `CRC_PROTOTYPE_ALPHA_ROADMAP.md` is a closed, point-in-time execution plan (Aug 8, 2026, "Prototype Alpha" only); the various `*_ARCHITECTURE.md`/`LK_PHASE1_TECHNICAL_DESIGN*.md` docs each normatively define one layer's internal design, not cross-cutting status; `implementation/eval-reports/` holds dated, historical diagnostic reports (preserved as-is, never rewritten). This file is the missing "what's accepted, what's deferred, what's next" index — created 2026-08-27 during a documentation-closeout pass, not to replace any of the above.
 **Companion doc:** `CRC_IMPLEMENTATION_RISKS.md` — pre-prototype empirical risk list, narrower scope (kept separate deliberately, per its own header), not superseded by this file.
 **Companion index (added 2026-09-10, CAH-4F documentation-contract milestone):** `COMMERCIAL_ASSURANCE_ARCHITECTURE_INDEX.md` — a pointer doc covering CRC, Living Knowledge, the CRC → Commercial Assurance handoff (CAH-4x), the Reviewer surfaces (`lib/reviewer-context/**`, `lib/reviewer-lk/**`), and the Assessment Workbook authority boundary. Start there for reviewer-side or handoff engineering. This `CRC_CURRENT_STATE.md` file was not extended with the CAH-4B…4E reviewer-side milestones — those are covered by the index and by `REVIEWER_RESOURCES_ARCHITECTURE.md`.
@@ -90,6 +90,7 @@ Consultative Composition remains an important product workstream but is **not** 
 | F | **Semantic duplicate detection** | Not approved. No fuzzy/text-similarity duplicate-question system should be introduced without substantially stronger evidence than currently exists. |
 | G | **Duplicate POST / session-state concurrency** | Existing duplicate-POST / unconditional-update persistence race — recorded here as technical debt. Not investigated or solved in this pass. |
 | H | **Gate-2 stability-diff coverage** | If incomplete stability tracking for fields such as `asset_provider_mentions`, `ToolMention.account_status`, or `user_goals` is already recorded elsewhere as debt, it remains outstanding — not reopened, not re-litigated, and not newly asserted from memory here (no repository evidence was reviewed for this specific item during this documentation pass; if a prior record of it exists, treat that record as authoritative, not this line). |
+| I | **Synthetic-person natural-language extraction robustness** | Deferred, not a defect. See §10 below. |
 
 ## 9. Living Knowledge Domain Portability / Extensibility — Music / Artlist A-3 (first result, 2026-08-27)
 
@@ -163,6 +164,42 @@ The diagnostic this section originally called for asked 10 questions before any 
 10. What code changes would actually be necessary? — **A provider-registry append + aliases (one commit, `76ad4be`) and one fixture entry (one commit, `054c625`). Nothing else in Retrieval/BI/Projection/Composition/questioning.**
 
 Not answered by this experiment, carried forward as the actual open question for the next one (§9.8): whether these same answers hold for a domain that is **not** provider-shaped.
+
+## 10. Synthetic-Person Natural-Language Extraction Robustness — deferred (item I)
+
+**Status: DEFERRED, not a defect.** Investigated following a Bridge #1/Bridge #2 production UAT sequence (2026-09-10/11) that extended Track A discovered relevance to synthetic-person likeness discovery. **PM/JD decision: defer remediation and continue Living Knowledge domain onboarding; revisit only under the reopening criteria below.** Not solved by new code — no runtime code, extractor prompt, or governed claim was changed by this finding.
+
+**Context:** Bridge #1 (`f8a4a12`) widened `commercial_use` goal classification to cover regulatory/compliance-phrased questions ("Are there any rules I should know about before using this commercially?"). Bridge #2 (`d06c6683c`) added one generic Track A trigger (`synthetic_person_content_presence_to_likeness`, `lib/crc-engine/discovered-relevance.ts`) so a confirmed, non-superseded `ContentPresenceMention` describing a synthetic person's visual or voice presence, alongside an active `commercial_use` goal, discovers `likeness`-topic governed knowledge — closing the reachability gap for `CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1` (NY GBL §396-b) without any statute-specific code, without a `commercial_use` → `likeness` `TopicRelationship`, and without fabricating a `UserGoal`.
+
+**PROVEN:**
+- Bridge #1's own production UAT passed — ordinary regulatory/compliance-phrased questions reach the `commercial_use` goal path.
+- A subsequent, controlled diagnostic production UAT using more explicit wording ("It contains a synthetic performer who isn't recognizable as any identifiable natural performer.") DID surface §396-b and produced the bounded, governed explanation — §396-b is therefore production-reachable through this architecture.
+- When the qualifying structured `content_presence_mention` fact exists, direct engineering tracing (Track A discovery → Retrieval, including jurisdiction applicability → Bounded Interpretation → Projection/Composition, and specifically the "mixed resolution" case where §396-b co-occurs with an already-resolved, directly-relevant Kling commercial-use result under the same goal) confirmed the existing generic downstream architecture carries the fact safely end-to-end.
+- Bounded Interpretation remained safe throughout every traced/observed run: CRC never determined statutory synthetic-performer status, duty-holder status, actual knowledge, exemption applicability, jurisdictional attachment, or violation/compliance — only the governed proposition itself, hedged, was ever rendered.
+
+**STRONGLY SUPPORTED / NOT FULLY PROVEN:**
+- The original production UAT's more ordinary wording ("It includes an AI-generated performer who isn't based on or recognizable as any real person.") did NOT surface §396-b. By elimination against the proven downstream chain above (persistence, discovery, provenance, retrieval, applicability, dependencies, Bounded Interpretation, and Composition were each independently confirmed correct given the qualifying fact), this most likely diverges at structured-fact extraction/canonicalization — i.e. the natural-language description was not reliably canonicalized into the existing `content_presence_mention` structured fact (`person_visual_presence`/`person_voice_presence` category + `real_or_synthetic: 'synthetic'`).
+
+**NOT ESTABLISHED — do not treat as fact:**
+- That a particular Anthropic model output actually omitted the candidate. No live, model-backed extraction trace was run against this exact input; no API credentials were available in the diagnostic environment. This remains a statically-reasoned, not an empirically observed, conclusion.
+- That visual-vs-voice category ambiguity (the `content_presence_mention` schema requires choosing `person_visual_presence` XOR `person_voice_presence`, with no explicit extractor guidance for a "performer" description that states neither modality) is definitively the causal mechanism — a plausible, named hypothesis only, not confirmed.
+- That any specific phrase list, alias table, or keyword/regex match would solve this generically.
+
+**DECISION (PM/JD):**
+- Defer remediation.
+- Continue onboarding additional Living Knowledge domains before designing a broader extraction-canonicalization solution — those domains may reveal the recurring structured-fact families that should drive a generic improvement, per this file's own §9.8 "next portability experiment" direction.
+- Do NOT implement phrase-specific or domain-specific (e.g. NY/§396-b-specific) keyword/regex matching to work around this.
+- This is NOT a §396-b governance defect, NOT a §396-b runtime defect, NOT a Track A/Retrieval/Bounded Interpretation/Composition defect, and NOT a beta blocker.
+- If future remediation is justified, the preferred direction is generic semantic acquisition/canonicalization of reusable structured project facts — never enumerated hypothetical phrases or per-domain special-casing.
+
+**Reopening criteria — revisit only when one or more occurs:**
+1. Additional Living Knowledge domains expose the same natural-language → structured-fact acquisition problem.
+2. Production UAT shows material frequency/user impact.
+3. A generic structured-fact model emerges across multiple domains.
+4. Extraction robustness becomes a beta-readiness blocker.
+5. A bounded, model-backed extraction study can test the problem generically without turning into phrase-by-phrase tuning.
+
+If revisited, the first milestone is diagnostic/model-backed extraction research, not implementation.
 
 ---
 
