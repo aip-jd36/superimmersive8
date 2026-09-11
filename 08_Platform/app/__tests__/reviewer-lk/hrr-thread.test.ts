@@ -188,8 +188,9 @@ describe('ReviewerLkLookup — append-only visible thread', () => {
     expect(src).toMatch(/from '\.\/hrr-thread'/)
   })
 
-  test('every turn renders as a list item; the answer turn uses the ONE canonical renderer', () => {
-    expect(src).toMatch(/thread\.turns\.map\(/)
+  test('every turn renders as a list item, grouped into reviewer/response pairs (CAH-4H.2 — a pure render-time re-partition of thread.turns, not new state); the answer turn uses the ONE canonical renderer', () => {
+    // CAH-4H.2: turns are grouped via pairThreadTurns(thread.turns) — still exactly thread.turns, just paired for presentation.
+    expect(src).toMatch(/pairThreadTurns\(thread\.turns\)\.map\(/)
     expect(src).toMatch(/<HrrResearchAnswerView\s+answer=\{turn\.answer\}/)
     // no forked renderer
     expect(src).not.toMatch(/TopicResearchResultView|QuestionResearchResultView|HistoricalAnswerView|ConversationalAnswerView/)
