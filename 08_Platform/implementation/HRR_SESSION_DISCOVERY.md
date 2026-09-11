@@ -1,6 +1,6 @@
 # HRR Session-Focused Production Discovery (CAH-4G.13)
 
-**Status:** `CAH-4G.13 — SESSION-FOCUSED PRODUCTION DISCOVERY / PRE-REGISTERED / PM EXECUTION PENDING` (2026-09-11). No runtime change. `CAH-4G.10 SLICE A remains CLOSED / PRODUCTION-PROVEN` (unchanged). `CAH-4G.12` architecture (`HRR_RESEARCH_SESSION_CONTRACT.md`) **ACCEPTED**. **Bounded session context: NOT IMPLEMENTED. CAH-4G.14 implementation: NOT AUTHORIZED. Workbook Research Log: FUTURE / NOT AUTHORIZED.** Production execution: **CLI AUTHENTICATED EXECUTION NOT AVAILABLE — PM EXECUTION PENDING** (no connected browser session in this environment; no authentication bypass attempted). This document is the pre-registration + PM execution script for the discovery `HRR_RESEARCH_SESSION_CONTRACT.md §Q` and `HRR_FOLLOWUP_DISCOVERY.md` called for; it extends rather than duplicates either.
+**Status:** `CAH-4G.13 — SESSION-FOCUSED PRODUCTION DISCOVERY / SESSION 1 EVIDENCE RECORDED / SESSION 2 GATE` (2026-09-11, updated). No runtime change. `CAH-4G.10 SLICE A remains CLOSED / PRODUCTION-PROVEN` (unchanged). `CAH-4G.12` architecture (`HRR_RESEARCH_SESSION_CONTRACT.md`) **ACCEPTED**. **Bounded session context: NOT IMPLEMENTED. CAH-4G.14 implementation: NOT AUTHORIZED (evidence threshold NOT MET — §O). Workbook Research Log: FUTURE / NOT AUTHORIZED.** PM has manually executed **Session 1** (Copyrightability, Turns 1–4) against the internal synthetic fixture; results and classification review are recorded in **§O below**, with the original pre-registration (§A–§N above) preserved unmodified. **The single recommended next experiment (§O) is a POST-SESSION-1 DISCRIMINATING CONTROL, not yet executed.** This document is the pre-registration + PM execution script for the discovery `HRR_RESEARCH_SESSION_CONTRACT.md §Q` and `HRR_FOLLOWUP_DISCOVERY.md` called for; it extends rather than duplicates either.
 
 ---
 
@@ -160,4 +160,106 @@ None of these are to be run until Turns 1–4 of Session 1 are reviewed and a de
 | `HRR_RESEARCH_SESSION_CONTRACT.md`, `HRR_FOLLOWUP_DISCOVERY.md` | one-line pointer to this document (§Q / discovery-plan cross-reference) |
 | `PRD_CAH_4G_HRR.md`, `COMMERCIAL_ASSURANCE_ARCHITECTURE_INDEX.md`, `claude.md` | status line addition only |
 
-**Status recorded:** `CAH-4G.13 — SESSION-FOCUSED PRODUCTION DISCOVERY / PRE-REGISTERED / PM EXECUTION PENDING`. Slice A: `CLOSED / PRODUCTION-PROVEN` (unchanged). CAH-4G.12 architecture: **ACCEPTED**. Bounded context: **NOT IMPLEMENTED**. CAH-4G.14: **NOT AUTHORIZED**. Research Log: **FUTURE / NOT AUTHORIZED**. **Runtime changes: NONE.**
+**Status recorded (at pre-registration):** `CAH-4G.13 — SESSION-FOCUSED PRODUCTION DISCOVERY / PRE-REGISTERED / PM EXECUTION PENDING`. Slice A: `CLOSED / PRODUCTION-PROVEN` (unchanged). CAH-4G.12 architecture: **ACCEPTED**. Bounded context: **NOT IMPLEMENTED**. CAH-4G.14: **NOT AUTHORIZED**. Research Log: **FUTURE / NOT AUTHORIZED**. **Runtime changes: NONE.**
+
+*(Sections A–N above are the original CAH-4G.13 pre-registration, preserved unmodified. Section O below is the CAH-4G.13 Session-1 evidence record, appended after production execution — no prediction above was edited after seeing results.)*
+
+---
+
+## O. PRODUCTION EVIDENCE — SESSION 1 (recorded after PM execution, 2026-09-11)
+
+**Fixture:** `CA-RLK-2a PROD SMOKE - internal synthetic, delete after` / `ASSESS-007-2026-09-07`. **Research focus:** Copyrightability. Repository state at recording time: `origin/main` = `cc814cf` (one unrelated CRC-docs commit landed since pre-registration `53db917` — `CRC_CURRENT_STATE.md` only, zero overlap with HRR; no runtime drift; the experiment is unaffected).
+
+### O.1 Exact evidence and classification
+
+| Turn | Question | Observed behavior | Primary classification | Secondary possibility | Confidence | Why |
+|---|---|---|---|---|---|---|
+| S1-T1 | "What does governed knowledge say about copyrightability here?" | Classified as Copyrightability; governed material surfaced; applicability stated unresolved; unresolved inputs identified as `jurisdiction` and `human_contribution_description`; Human-Reviewer/Commercial-Assurance authority boundary preserved; no project-specific conclusion made. | **1 — CURRENT ARCHITECTURE SUFFICIENT** | none | High | Matches the pre-registered expected safe boundary exactly; the mechanism (`relevant_applicability_unresolved` + `HrrUnresolvedInput` naming the two governed requirement keys) is fully understood from source and needs no inference. |
+| S1-T2 | "Why isn't that established?" | Generic "try a governed research topic" fallback with topic shortcuts; no Copyrightability applicability content returned. | **2 — REFERENT UNRESOLVED** | none | High | **OBSERVATION:** the utterance names no governed topic at all. **INFERENCE (architecture-grounded, not directly visible in the UI):** the classifier's own contract requires an explicit governed-topic name to produce a non-empty `research_intents`; with none present and no context supplied, `research_intents: []` and the `unsupported`/offered-paths fallback is the designed, fail-closed outcome for exactly this shape of question — not a defect. |
+| S1-T3 *(one semantic trial — accidentally submitted twice, both submissions returned the identical fallback and are counted as one trial per the pre-registration's own instruction)* | "What do you mean by human contribution?" | Generic fallback, both times; no Copyrightability content; no definition of "human contribution" surfaced. | **UNRESOLVED between 3 — TOPIC CONTINUITY LOST and 4 — RETRIEVAL FAILURE (classifier/retrieval vocabulary limitation)** | either 3 or 4 | **Low–Medium** | **Challenged, not accepted, per the task's explicit instruction — see §O.2.** |
+| S1-T4 | "Why does that matter?" | Generic fallback; no governed content reached. | **2 — REFERENT UNRESOLVED (observed, mechanically clean)** | evidentiary value for the *general* cross-turn-context question is reduced | Medium | **OBSERVATION:** empty `research_intents`, same fallback shape as T2. **INFERENCE, flagged as weaker than it looks:** T4 was asked immediately after T3's own failure, so "that" is ambiguous among (a) the original Copyrightability applicability issue from T1, (b) "human contribution" from T3, (c) the fact that T3 itself failed. A version of this question asked directly after a *successful* turn would isolate the failure mode more cleanly than this instance does. |
+
+### O.2 Classification challenge (T3, in detail — as required)
+
+The provisional label "TOPIC CONTINUITY LOST" is **not accepted as-is**. "Human contribution" is explicit vocabulary in the current utterance, but it is **not one of the five topic names** the classifier's own schema recognizes (`commercial_use`, `copyright_ownership`, `copyrightability`, `likeness`, `third_party_source_rights`) — it is a **requirement/fact-key** (`human_contribution_description`) that exists only *inside* Copyrightability's applicability data, already surfaced once in T1's own `HrrUnresolvedInput`. Two structurally different explanations both fit the *same* observed fallback:
+
+- **(A) Topic continuity loss:** with the active focus (Copyrightability) known, the question would resolve and re-render Copyrightability's applicability rollup, which already names `human_contribution_description` — session context would fix it.
+- **(B) Classifier/retrieval vocabulary limitation:** the classifier only ever routes to the five *topic* names; "human contribution" is a *sub-topic requirement key*, not a topic, so even a context-aware classifier that knew the active focus might still fail to route this specific phrasing — and even if it did route, the deterministic composition pipeline has no mechanism to synthesize a new ad-hoc *definition* of "human contribution" beyond the fixed `unresolved_dependency_note` template already shown in T1. Session context would **not** fix this case.
+
+**Session 1's evidence cannot distinguish (A) from (B).** Per the task's explicit instruction, this is **not promoted** to TOPIC CONTINUITY LOST merely to make the evidence cleaner or to help the threshold. It is recorded as unresolved and is the direct motivation for the recommended next experiment (§O.9).
+
+### O.3 Observation vs. inference (explicit separation)
+
+| | Observation (directly shown by the production run) | Inference (architecture-grounded reasoning, not directly visible) |
+|---|---|---|
+| T1 | Rendered a `relevant_applicability_unresolved` answer naming two unresolved inputs | This matches `runHrrResearch`/`projectHrrResearchAnswer`'s known, unmodified behavior |
+| T2 | Returned the generic fallback | The classifier emitted `research_intents: []` because no topic name is present in the text — inferred from the classifier's documented contract, not observed directly (no network/payload inspection was performed, consistent with the pre-registration's own instruction not to ask PM to do so) |
+| T3 | Returned the identical fallback on both submissions | Cause is **ambiguous by design of this record** — see §O.2; no single inference is asserted as fact |
+| T4 | Returned the generic fallback | Mechanically the same as T2's inferred cause, but the *referent* "that" is itself ambiguous because of T3's own failure — this is inference layered on inference and is flagged as lower-confidence for that reason |
+
+### O.4 Composition-vs-context analysis
+
+All three follow-up failures (T2, T3, T4) occurred **before** governed composition ever ran: each produced `research_intents: []` (or equivalent), meaning retrieval, applicability, Bounded Interpretation, and `projectHrrResearchAnswer` were never invoked at all. **None of T2/T3/T4 is a composition failure** — there was no rendered governed content to be dense, repetitive, or poorly prioritized; the pipeline never reached that stage. Separately: whether T1's *own* rendered answer was itself well- or poorly-composed **cannot be assessed from the evidence captured** (a structured summary was recorded, not the full verbatim rendered text) — this is recorded as **insufficient evidence**, not as "composition was fine." **Why the reviewer asked a follow-up** (T1's answer may or may not have been complete/clear enough to preempt "why isn't that established?") is kept explicitly separate from **why HRR failed to answer** (a pre-composition routing failure, independent of T1's composition quality) — improving T1's composition could plausibly reduce how often a reviewer *asks* certain follow-ups, but it cannot be credited with, or blamed for, why the follow-ups that *were* asked failed to route.
+
+### O.5 What Session 1 proves
+
+1. Current independent-turn HRR correctly handles the initial self-contained research question — **confirmed**, T1 matches the pre-registered expected behavior exactly.
+2. Current independent-turn HRR does not support at least some natural short follow-ups inside the intended Research Session UX — **confirmed for T2** (unambiguous), **observed for T4** (mechanically clean, interpretively confounded).
+3. At least one clear, unambiguous referential failure exists — **yes, T2**: a follow-up naming no topic at all fails exactly as the current fail-closed design predicts.
+4. The observed failures occur before consultative composition, not within it — **directly supported**, all three follow-up failures short-circuited at classification/routing.
+5. The topic-scoped Research Session product requirement is empirically relevant — **yes**: a real reviewer, in a real production session, naturally asked exactly the kind of elliptical follow-up CAH-4G.11/.12 anticipated, and received an unhelpful generic fallback instead of a governed answer.
+
+### O.6 What Session 1 does NOT prove
+
+Explicitly, Session 1 does **not** establish that: HRR needs general/unlimited conversation memory; prior answer *prose* is needed; a transcript is needed; Research Focus identity **alone** is sufficient (T3 specifically raises doubt); Research Focus identity is **necessary** (only one clean case, T2, exists so far); T3 is definitively a topic-continuity failure (explicitly left unresolved); bounded referent candidates (Option D) are required; a second model call is required (nothing shown demonstrates the single-call architecture itself is insufficient — every observed failure is the *same* call correctly reporting "no topic named"); any previous BI/applicability state should be cached (rejected in principle regardless, §O.7); CAH-4G.14 should be implemented; 3–4 turns should become a hard cap (the session was truncated by failures, not by natural completion, so no length conclusion follows); that HRR's classifier vocabulary needs to be expanded (a hypothesis for T3, not shown); that "human contribution" specifically needs a new governed-knowledge entry; or that T1's composition is currently adequate or inadequate (no evidence either way).
+
+### O.7 Freshness / provenance guard (reaffirmed, unchanged)
+
+Even if a future session mechanism identifies Copyrightability as the intended focus, HRR must **not** reuse previous answer prose, a previous applicability result, a previous BI result, or previous project-fact values. The pattern remains: *bounded interpretation of the current reviewer utterance* + *bounded session provenance/focus, if ever justified* → the **current** governed research pipeline, run fresh, every turn. Nothing in Session 1 weakens or needs to change this invariant (`HRR_RESEARCH_SESSION_CONTRACT.md §H`).
+
+### O.8 CAH-4G.14 evidence-threshold status
+
+| Threshold condition | Status | Evidence |
+|---|---|---|
+| Multiple independently-worded failures | **PARTIALLY MET** | T2 is one clean, independent case. T4 is confounded by T3's own prior failure. T3 is not confidently classified at all. Not the "multiple, clean, independent" showing the threshold intends. |
+| Spanning ≥2 relevant classes (e.g., REFERENT UNRESOLVED *and* TOPIC CONTINUITY LOST) | **NOT MET** | Only class 2 is confidently represented (T2; T4 with caveats). T3 — the only candidate for a second class — is explicitly left unresolved between class 3 and class 4, per §O.2, and is **not promoted** merely to satisfy this condition. |
+| Composition ruled out as the explanation | **MET, narrowly** | All three observed follow-up failures occurred pre-composition (§O.4). This shows composition isn't the explanation *for these three failures*; it does not show composition is adequate in general. |
+| Missing information representable as bounded structured session state | **NOT YET PROVEN** | Architecturally plausible for T2 (§O.9 candidate analysis) but not empirically tested — no experiment has yet varied the context and observed a different classifier outcome. |
+| No full transcript necessary | **NOT TESTED** | No transcript-based variant was tried, nor was one expected to be; nothing in Session 1 speaks to this either way. |
+| Authority firewall unaffected | **NOT TESTED** | No authority-drift question was asked in Session 1 (that is Option 1 territory for a later experiment, not this one). |
+| Every turn still re-runs the current fresh pipeline | **MET (inherited constraint)** | True by construction of the existing architecture (unaffected by Session 1's results); still binding as a constraint on any future design. |
+| O(1) model/context cost achievable | **NOT YET APPLICABLE** | No context mechanism exists yet to measure; nothing to test. |
+
+**Overall: the CAH-4G.14 evidence threshold is NOT MET.** The decisive gap is the second condition — a confident second failure class — which Session 1 does not establish. CAH-4G.14 remains unauthorized.
+
+### O.9 Minimum-context hypothesis update
+
+| Candidate | Session 1 effect | Still viable? | What remains unproven |
+|---|---|---|---|
+| **A — no context** | Directly shown insufficient for the product's own UX goal in at least the T2 case (a real reviewer's natural follow-up got an unhelpful fallback) | Remains *safe*, but weakened as *sufficient for the desired experience* | Whether the product friction is frequent/severe enough, beyond this one session, to justify a change |
+| **B — Research Focus identity only** | Neither confirmed nor refuted. Architecturally plausible for T2 (a topic hint would let the classifier route "why isn't that established?" back to Copyrightability, and the existing fresh pipeline would then honestly re-render T1's own already-computed rollup) | **Viable for T2; questionable for T3** (§O.2 — "human contribution" isn't a topic name, so a topic hint alone may not help); **unproven for T4** (confounded) | Whether the classifier, given a bounded topic hint, actually changes its output for phrasings like T2's — not yet empirically tested |
+| **C — Focus + originating provenance turn id** | No evidence either way | Same status as B | The turn id adds nothing Session 1 speaks to |
+| **D — bounded referent candidates from the session** | No evidence — Session 1 only ever had one always-active focus, never a multi-candidate disambiguation scenario | Untested | Whether multiple simultaneous candidate referents are ever a real product scenario worth designing for |
+| **E — bounded structured context + existing classifier, combined mechanism** | Same as B/C — this is a "how," not a "what" | Unproven pending a choice among B/C/D | Everything B/C/D remain unproven on |
+
+**No implementation is selected.** The T2 case keeps B/C/E architecturally plausible; the T3 case is the open question the next experiment (§O.10) targets directly.
+
+### O.10 Session-length observation
+
+The reviewer attempted approximately three follow-ups after the baseline (T2, T3, T4) — but by T2 the current architecture had **already** lost continuity, so **none of the three follow-ups succeeded**. This session therefore cannot tell us anything about how many *successful* follow-ups a reviewer finds valuable, or whether 3–4 turns is a natural session length — it measured how the current (unfixed) architecture behaves under natural follow-up pressure, not how a reviewer uses a working session. **No turn-count conclusion is drawn.**
+
+### O.11 Duplicate-turn observation
+
+T3 was accidentally submitted twice by the reviewer; both submissions returned the identical fallback. This is recorded as a minor **UI/product observation** (an accidental double-submission), consistent with the existing `hrr-thread.ts` one-in-flight design (each submission completed and returned before the next was sent, so this reads as two sequential identical requests, not a race). It is **not** counted as a second independent architecture-failure data point, and it is **not** the same phenomenon as the existing CAH-4G.10C "duplicate question echo" observation (that one is a *display* duplication — the question rendered twice in the UI for one turn; this one is an accidental *double submission* — two separate turns with identical text). No fix is proposed or made.
+
+### O.12 Next experiment recommendation
+
+> **POST-SESSION-1 DISCRIMINATING CONTROL — not part of the original 12-turn pre-registered table (§D); added here, labeled explicitly, because Session 1 exposed an ambiguity (§O.2) the original table did not anticipate needing to resolve on its own.**
+
+**Recommended single next experiment:** a **fresh conversation**, one self-contained question naming both the topic and the term explicitly:
+
+> *"In the copyrightability guidance, what does human contribution mean?"*
+
+**Why this has the highest information value:** it is the cheapest possible test that directly discriminates the one classification actually blocking the evidence threshold (§O.8, condition 2). By stating the topic explicitly in the same utterance, it removes the referent-resolution question entirely and isolates a single variable: does the classifier route a "human contribution" question to Copyrightability **when topic identity is not in doubt**? — If it still fails to produce a useful, specific answer about "human contribution," that is strong evidence T3's failure is a **classifier/retrieval-vocabulary or governed-coverage limitation independent of session context** (weakening candidates B/C/E as a fix for T3-shaped questions). If it succeeds, that confirms the underlying governed vocabulary is reachable once topic-anchored, meaning T3's failure **was specifically about missing topic context** (strengthening B/C/E). This is a stronger discriminator, for less cost, than either Option 1 (authority boundary — answers a different, currently non-blocking question) or Option 2 (explicit focus switch — also valuable, but not what's currently blocking the threshold).
+
+**This experiment is not executed in this milestone.** It is proposed only, exactly per §K's gated, one-turn-at-a-time PM protocol; PM/Architecture must review Session 1 (this section) before running it.
