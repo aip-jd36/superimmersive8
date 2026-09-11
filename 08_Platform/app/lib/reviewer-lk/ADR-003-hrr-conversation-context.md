@@ -1,6 +1,6 @@
 # ADR-003: A visible HRR research thread is UI; the reasoning pipeline gets a bounded enum-only referent, never the transcript
 
-**Status:** ACCEPTED — CAH-4G.9 (design, 2026-09-10). **Slice A: CLOSED / PRODUCTION-PROVEN (CAH-4G.10 → CAH-4G.10P deployment-gap found → CAH-4G.10I integrated to `main` = `4b9ee5a` → CAH-4G.10C authenticated production UAT PASSED all 10 checks, 2026-09-11 — evidence: `HRR_CONVERSATIONAL_ARCHITECTURE.md §FF`).** **CAH-4G.11 → CAH-4G.12 → CAH-4G.13 (2026-09-11 — `HRR_FOLLOWUP_DISCOVERY.md`, `HRR_RESEARCH_SESSION_CONTRACT.md`, `HRR_SESSION_DISCOVERY.md`)** ran the full generic-taxonomy discovery program culminating in four rounds of real production evidence (Session 1, a discriminating control, an authority-drift safety experiment, and an explicit focus-switch experiment — `HRR_SESSION_DISCOVERY.md` §O–§R) and closed **COMPLETE FOR DESIGN** at `origin/main` = `8206415`. **CAH-4G.14 (2026-09-11, this update) is the DESIGN/PRE-REGISTRATION-ONLY milestone that refines the original `HrrThreadContext` hypothesis (decisions 2–4 below) into a concrete, evidence-grounded `ResearchSessionContext` design — see the new section below.** Decisions 1, 5, 6, 7, 8 below remain production-proven in code + real reviewer sessions, unchanged. Decisions 2, 3, 4 (the bounded referent + follow-up resolution) are **superseded in specificity, not in principle**, by the CAH-4G.14 design below — the original `HrrThreadContext` sketch is preserved here unmodified as historical record; the refined, evidence-grounded shape is `ResearchSessionContext` (see below). **Slice B / CAH-4G.14 RUNTIME IMPLEMENTATION remains a separate, NOT STARTED, NOT AUTHORIZED milestone**, gated on the conditions in the CAH-4G.14 section below. **CAH-4G.15 (2026-09-11) is a TEST-FIRST / PRE-IMPLEMENTATION-GATE milestone — it adds inert, unwired pure primitives (`lib/hrr/research-session-context.ts`, `.schema.ts`) plus 3 test files (108 tests) proving the CAH-4G.14 design is mechanically testable, with zero production behavior change.** **CAH-4G.16 (2026-09-11) is an INTEGRATION-SAFETY / DARK-WIRING milestone (see the new section further below) — it adds a NEW authoritative-referent validator (`research-session-context-referents.ts`, reusing `selectReviewerClaims` for a generic, submission+topic-scoped trust boundary) and, for the first time, MODIFIES the live research route to genuinely parse/validate/authoritatively-check a client-supplied `context` field — but the classifier call (route step 3) is provably unaffected, since step 4.5's context handling runs strictly after it and never reassigns any variable step 3 produced. 47 new tests (route-level + validator-level) plus the pre-existing 28-test route regression suite all pass unchanged.** **CAH-4G.17 (2026-09-11) is a BEHAVIORAL ENABLEMENT milestone, tightly bounded to `activeFocus` only (never `activeReferents`), behind a NEW feature flag `HRR_ACTIVE_FOCUS_CONTEXT_ENABLED` (OFF by default, OFF in production) — when ON, the classifier's existing single call receives a fixed advisory `[Context: Active Research Focus = <topic>.]` prefix; the classifier's own structured output still determines routing, with no post-classification override anywhere in the code. 23 new tests prove the wiring (exact input format, referent exclusion, authority parity, fail-closed behavior) using a mocked classifier — this environment has no live Anthropic API access, so whether a REAL model actually resolves the target follow-up questions given this context remains an explicitly acknowledged, untested gap, recommended for a PM-executed CAH-4G.18 trial. CONTEXTUAL ROUTING IN PRODUCTION REMAINS OFF — no user-visible HRR behavior changed.** The VISIBLE thread is `hrr-thread.ts` (reducer) + `ReviewerLkLookup` (`useReducer`). As-built: `HRR_CONVERSATIONAL_ARCHITECTURE.md §BB`; deployment-gap reconciliation: §CC; integration record: §DD; production UAT evidence: §FF; CAH-4G.13 discovery evidence: `HRR_SESSION_DISCOVERY.md` §O–§R.
+**Status:** ACCEPTED — CAH-4G.9 (design, 2026-09-10). **Slice A: CLOSED / PRODUCTION-PROVEN (CAH-4G.10 → CAH-4G.10P deployment-gap found → CAH-4G.10I integrated to `main` = `4b9ee5a` → CAH-4G.10C authenticated production UAT PASSED all 10 checks, 2026-09-11 — evidence: `HRR_CONVERSATIONAL_ARCHITECTURE.md §FF`).** **CAH-4G.11 → CAH-4G.12 → CAH-4G.13 (2026-09-11 — `HRR_FOLLOWUP_DISCOVERY.md`, `HRR_RESEARCH_SESSION_CONTRACT.md`, `HRR_SESSION_DISCOVERY.md`)** ran the full generic-taxonomy discovery program culminating in four rounds of real production evidence (Session 1, a discriminating control, an authority-drift safety experiment, and an explicit focus-switch experiment — `HRR_SESSION_DISCOVERY.md` §O–§R) and closed **COMPLETE FOR DESIGN** at `origin/main` = `8206415`. **CAH-4G.14 (2026-09-11, this update) is the DESIGN/PRE-REGISTRATION-ONLY milestone that refines the original `HrrThreadContext` hypothesis (decisions 2–4 below) into a concrete, evidence-grounded `ResearchSessionContext` design — see the new section below.** Decisions 1, 5, 6, 7, 8 below remain production-proven in code + real reviewer sessions, unchanged. Decisions 2, 3, 4 (the bounded referent + follow-up resolution) are **superseded in specificity, not in principle**, by the CAH-4G.14 design below — the original `HrrThreadContext` sketch is preserved here unmodified as historical record; the refined, evidence-grounded shape is `ResearchSessionContext` (see below). **Slice B / CAH-4G.14 RUNTIME IMPLEMENTATION remains a separate, NOT STARTED, NOT AUTHORIZED milestone**, gated on the conditions in the CAH-4G.14 section below. **CAH-4G.15 (2026-09-11) is a TEST-FIRST / PRE-IMPLEMENTATION-GATE milestone — it adds inert, unwired pure primitives (`lib/hrr/research-session-context.ts`, `.schema.ts`) plus 3 test files (108 tests) proving the CAH-4G.14 design is mechanically testable, with zero production behavior change.** **CAH-4G.16 (2026-09-11) is an INTEGRATION-SAFETY / DARK-WIRING milestone (see the new section further below) — it adds a NEW authoritative-referent validator (`research-session-context-referents.ts`, reusing `selectReviewerClaims` for a generic, submission+topic-scoped trust boundary) and, for the first time, MODIFIES the live research route to genuinely parse/validate/authoritatively-check a client-supplied `context` field — but the classifier call (route step 3) is provably unaffected, since step 4.5's context handling runs strictly after it and never reassigns any variable step 3 produced. 47 new tests (route-level + validator-level) plus the pre-existing 28-test route regression suite all pass unchanged.** **CAH-4G.17 (2026-09-11) is a BEHAVIORAL ENABLEMENT milestone, tightly bounded to `activeFocus` only (never `activeReferents`), behind a NEW feature flag `HRR_ACTIVE_FOCUS_CONTEXT_ENABLED` (OFF by default, OFF in production) — when ON, the classifier's existing single call receives a fixed advisory `[Context: Active Research Focus = <topic>.]` prefix; the classifier's own structured output still determines routing, with no post-classification override anywhere in the code. 23 new tests prove the wiring (exact input format, referent exclusion, authority parity, fail-closed behavior) using a mocked classifier — this environment has no live Anthropic API access, so whether a REAL model actually resolves the target follow-up questions given this context remains an explicitly acknowledged, untested gap, recommended for a PM-executed CAH-4G.18 trial. CONTEXTUAL ROUTING IN PRODUCTION REMAINS OFF — no user-visible HRR behavior changed.** **CAH-4G.18A (investigation) found that production Turn 1B of the CAH-4G.18 UAT was INVALID evidence — `ReviewerLkLookup.tsx` never actually sent `context` (root cause: CLIENT WIRING GAP, `deriveResearchSessionContext` existed since CAH-4G.15 but was never called client-side). CAH-4G.18B closes this: `ReviewerLkLookup.tsx` now derives context from the live thread and sends it on every free-form request; `topic_pick` remains context-free; 9 new tests (source-scan + real-reducer-sequence) mechanically prove the transport, closing the exact blind spot that let this gap survive three prior milestones. Not yet deployed by this repository; semantic UAT remains PAUSED pending PM confirmation of a post-repair production deployment with the flag ON.** The VISIBLE thread is `hrr-thread.ts` (reducer) + `ReviewerLkLookup` (`useReducer`). As-built: `HRR_CONVERSATIONAL_ARCHITECTURE.md §BB`; deployment-gap reconciliation: §CC; integration record: §DD; production UAT evidence: §FF; CAH-4G.13 discovery evidence: `HRR_SESSION_DISCOVERY.md` §O–§R.
 
 **Context:** CAH-4G is production-deployed and semantically safe. PM production UAT found the single-turn HRR model *too visible*: asking a second free-form question replaces the first. Human Reviewers expect a conversational research thread (interaction model like CRC). See `HRR_CONVERSATIONAL_ARCHITECTURE.md` §A.
 
@@ -612,3 +612,85 @@ Per §2, this is not a SUFFICIENT / PARTIALLY SUFFICIENT / INSUFFICIENT finding 
 ## 15. Recommended next milestone
 
 **CAH-4G.18 — Controlled trial / UAT, flag ON, internal synthetic fixture only** (`CA-RLK-2a PROD SMOKE` or equivalent), PM-executed, one gated turn at a time, targeting exactly the questions CAH-4G.13 already pre-registered evidence around: T2 ("why isn't that established?"), T3 ("what do you mean by human contribution?"), and the post-switch continuity question ("what does this mean for ownership?"). This is the step that actually answers §11's open sufficiency question. **Not authorized or executed by this document.**
+
+---
+
+# CAH-4G.18A — Active-Focus Request-Path Verification (Investigation, 2026-09-11)
+
+**Production CAH-4G.18 UAT began. Turn 1A ("what does governed knowledge say about copyrightability here?") produced the correct baseline. Turn 1B ("why isn't that established?") produced the generic fallback — the same result seen before `activeFocus` existed.** Per PM/Architecture instruction, this was **not** accepted as semantic evidence without first proving the request path — CAH-4G.16 had explicitly left `deriveResearchSessionContext` "still unwired to the client UI," and no CAH-4G.15/16/17 test had ever exercised `ReviewerLkLookup.tsx`'s own request-body construction (every route-level test built its own synthetic body directly).
+
+**Investigation result, from direct source inspection:** `ReviewerLkLookup.tsx`'s `ResearchPayload` type carried only `{ mode: 'topic_pick'; topic }` / `{ mode: 'question'; question }` — **no `context` field existed anywhere in the client.** `deriveResearchSessionContext` (CAH-4G.15) was never imported into `app/` at all outside the server route. The component's own header comment, unchanged since CAH-4G.10, stated explicitly that the POST body was "byte-for-byte the same `{ mode, topic }` / `{ mode, question }`." **Root cause: CLIENT WIRING GAP** (not a client-derivation defect, not a transport defect, not a server defect, and — critically — **not** a classifier semantic failure, since the classifier never received anything to fail to resolve). Production Turn 1B is therefore **INVALID / NOT semantic evidence about `activeFocus`** — the server feature flag's value was irrelevant, because the request it evaluated never carried a context field regardless.
+
+This is recorded as a genuine, previously-unnoticed test-coverage gap spanning three prior milestones (CAH-4G.15/16/17), each of which built and tested the server side correctly while never completing (or testing for) the client half of the "wire it into `ReviewerLkLookup.tsx`" step CAH-4G.14 §17/§20 and CAH-4G.15 §20 had already scoped as the eventual next slice.
+
+---
+
+# CAH-4G.18B — Client Context Transport Repair (2026-09-11)
+
+**Closes the CAH-4G.18A gap. Mechanical transport only — does NOT determine activeFocus sufficiency.** CAH-4G.18's semantic UAT resumes from Test 1 only after this repair is deployed.
+
+## 1. What changed
+
+| File | Change |
+|---|---|
+| `app/admin/submissions/[id]/review/ReviewerLkLookup.tsx` | `ResearchPayload`'s `question` variant gains `context: ResearchSessionContext`. `submitQuestion` now calls `deriveResearchSessionContext(thread)` on the CURRENT thread, immediately before sending, and includes the result. `runTopic` (`topic_pick`) is **unchanged** — no context field, ever. Header comments and the fetch-call comment updated to state the current, accurate contract (previously-accurate historical claims about Slice A preserved, not rewritten to claim more than they proved at the time). |
+| `__tests__/reviewer-lk/hrr-thread.test.ts` | One assertion updated: the `ResearchPayload` question-shape regex now expects `context: ResearchSessionContext`, matching the new, intentional type. |
+| `__tests__/reviewer-lk/hrr-lookup-context-transport.test.ts` | **NEW** — 9 tests closing exactly the coverage gap CAH-4G.18A identified (see §7 below). |
+
+**No other file changed.** No server code touched — CAH-4G.15/16/17's route, schema validator, authoritative-referent validator, and feature gate are byte-identical to before this milestone.
+
+## 2. Client transport — resulting contract
+
+```ts
+type ResearchPayload =
+  | { mode: 'topic_pick'; topic: GoalCategory }                                   // UNCHANGED — no context field
+  | { mode: 'question'; question: string; context: ResearchSessionContext }        // NEW field
+```
+
+`context` comes from exactly one place: `deriveResearchSessionContext(thread)` (CAH-4G.15, unmodified), called on the component's own live `HrrThreadState` at the moment of submit. Nothing in `ReviewerLkLookup.tsx` constructs a context object independently, reads a prior answer's rendered prose, or reads the reviewer's own prior question text for this purpose.
+
+## 3. Turn 1 → Turn 2 regression — exact resulting request
+
+For the CAH-4G.18A scenario (free-form Turn 1 resolving to Copyrightability, then Turn 2 "why isn't that established?"), the request body `ReviewerLkLookup.tsx` now constructs is:
+
+```json
+{
+  "mode": "question",
+  "question": "Why isn't that established?",
+  "context": {
+    "activeFocus": "copyrightability",
+    "activeFocusOrigin": "interpreted_question",
+    "unresolvedReferents": []
+  }
+}
+```
+
+Proven directly (`hrr-lookup-context-transport.test.ts`, describe B) by running the REAL `hrrThreadReducer` through the REAL begin/settle sequence a real Turn 1 produces, then calling the REAL `deriveResearchSessionContext` on the resulting thread — not asserted in the abstract. **This is a transport proof only — it makes no claim about what the live classifier does with this body.**
+
+## 4. Server trust boundary — unchanged, re-confirmed
+
+`parseBody`, `resolveResearchSessionContext`, `enforceAuthoritativeReferents`, and the CAH-4G.17 feature gate are byte-identical to CAH-4G.17. All CAH-4G.16/17 server-side tests pass unchanged, confirming the newly-real client payload is still handled exactly as the (previously synthetic) test payloads always were.
+
+## 5. ActiveReferents — still dark, still zeroed
+
+The client now transports `unresolvedReferents` as part of the bounded `ResearchSessionContext` contract (the selector always computed it; CAH-4G.15/16/17 never disabled that field client-side). The **server** still unconditionally force-zeroes it before classifier augmentation (`{ ...resolvedContext!, unresolvedReferents: [] }`, unchanged CAH-4G.17 code) — proven by the pre-existing `hrr-research-route-active-focus.test.ts` suite, re-run and still passing. No referent identifier reaches the classifier in this milestone, under any circumstances.
+
+## 6. Feature flag, precedence, authority, freshness
+
+All unchanged from CAH-4G.17, re-verified: OFF means the transported context is validated and then ignored (classifier receives the bare question); ON means `activeFocus` alone (never referents) is folded into the single existing classify call; the classifier's own structured output still determines routing with no post-classification override anywhere; authority refusal behavior tested identical regardless of context; `getSubmissionFactsForReviewerLk` still resolved fresh every request; zero new model calls.
+
+## 7. Why this closes the exact blind spot
+
+`hrr-lookup-context-transport.test.ts` §A source-scans `ReviewerLkLookup.tsx` itself (not a synthetic mock) for the literal call `deriveResearchSessionContext(thread)` inside `submitQuestion` and the literal `research({ mode: 'question', question: q, context })` call, and separately confirms `runTopic`'s block contains no reference to `context` at all. §B then runs the real reducer + real selector in the real sequence and asserts the resulting request body. **This is the test that did not exist through CAH-4G.15/16/17** — every route-level test in those milestones asserted server behavior given an assumed request body; none asserted that `ReviewerLkLookup.tsx` itself produces that body. A future regression that silently drops the `context` argument, or reintroduces a synthetic/independent context construction, would now fail §A immediately.
+
+## 8. Test results
+
+New: 1 file, 9 tests, all passing. 1 pre-existing assertion updated (not weakened) in `hrr-thread.test.ts`. `__tests__/hrr` + `__tests__/reviewer-lk`: 22 suites / 635 tests, all passing. Full repo suite: 20 failed suites / 77 failed tests — the same pre-existing, unrelated baseline as every prior CAH-4G.1x milestone — zero new attributable failures. `npx tsc --noEmit`: clean. `next build`: exit 0 (same placeholder-credential caveat as CAH-4G.16/17 — unrelated Supabase/Stripe/Resend routes only; this build also confirms the new client import bundles correctly with no server-only leakage).
+
+## 9. Production status
+
+**Not deployed by this milestone.** This is a source change requiring the normal repository → Vercel production deployment path (auto-deploy on push to `main`), which this document does not itself trigger beyond the ordinary git push. `HRR_ACTIVE_FOCUS_CONTEXT_ENABLED`'s current production value is unknown from this environment (no Vercel credentials — unchanged limitation). **Semantic UAT remains PAUSED** until PM confirms the deployed production build includes this repair (i.e., postdates this commit) and the flag is ON.
+
+## 10. ActiveFocus sufficiency / ActiveReferents
+
+Unchanged from CAH-4G.17 §11/§12: **UNKNOWN / NOT YET TESTED SEMANTICALLY** (this milestone is transport-only and makes no sufficiency claim); **`activeReferents`: NOT AUTHORIZED**, unaffected by this repair.
