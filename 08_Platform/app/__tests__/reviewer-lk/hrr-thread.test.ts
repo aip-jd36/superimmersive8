@@ -249,13 +249,13 @@ describe('ReviewerLkLookup — append-only visible thread', () => {
     expect(src).toMatch(/const research = useCallback\(\s*async \(payload[\s\S]*?fetch\(/)
   })
 
-  test('the POST body is ONLY { mode, topic } / { mode, question } — no prior_context / transcript / messages / history / prior answer', () => {
+  test('the POST body is ONLY { mode, topic } / { mode, question, context } — no prior_context / transcript / messages / history / prior answer prose (CAH-4G.18B: context is bounded/structured, added to the question shape only)', () => {
     // body is the untouched payload
     expect(src).toMatch(/body:\s*JSON\.stringify\(payload\)/)
     expect(src).not.toMatch(/prior_context|priorContext|prior_answer|priorAnswer|prior_topic|priorTopic|previous_answer|messages:\s*\[|history:|transcript|conversation_id|conversationId/)
-    // the payload type carries only the two shapes
+    // the payload type carries only the two shapes — topic_pick still carries NO context field
     expect(src).toMatch(/\{ mode: 'topic_pick'; topic: GoalCategory \}/)
-    expect(src).toMatch(/\{ mode: 'question'; question: string \}/)
+    expect(src).toMatch(/\{ mode: 'question'; question: string; context: ResearchSessionContext \}/)
   })
 
   test('no browser storage / URL state / cookie', () => {
