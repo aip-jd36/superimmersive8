@@ -1,6 +1,6 @@
 # ADR-003: A visible HRR research thread is UI; the reasoning pipeline gets a bounded enum-only referent, never the transcript
 
-**Status:** ACCEPTED — CAH-4G.9 (design, 2026-09-10). **Slice A: CLOSED / PRODUCTION-PROVEN (CAH-4G.10 → CAH-4G.10P deployment-gap found → CAH-4G.10I integrated to `main` = `4b9ee5a` → CAH-4G.10C authenticated production UAT PASSED all 10 checks, 2026-09-11 — evidence: `HRR_CONVERSATIONAL_ARCHITECTURE.md §FF`).** **CAH-4G.11 → CAH-4G.12 → CAH-4G.13 (2026-09-11 — `HRR_FOLLOWUP_DISCOVERY.md`, `HRR_RESEARCH_SESSION_CONTRACT.md`, `HRR_SESSION_DISCOVERY.md`)** ran the full generic-taxonomy discovery program culminating in four rounds of real production evidence (Session 1, a discriminating control, an authority-drift safety experiment, and an explicit focus-switch experiment — `HRR_SESSION_DISCOVERY.md` §O–§R) and closed **COMPLETE FOR DESIGN** at `origin/main` = `8206415`. **CAH-4G.14 (2026-09-11, this update) is the DESIGN/PRE-REGISTRATION-ONLY milestone that refines the original `HrrThreadContext` hypothesis (decisions 2–4 below) into a concrete, evidence-grounded `ResearchSessionContext` design — see the new section below.** Decisions 1, 5, 6, 7, 8 below remain production-proven in code + real reviewer sessions, unchanged. Decisions 2, 3, 4 (the bounded referent + follow-up resolution) are **superseded in specificity, not in principle**, by the CAH-4G.14 design below — the original `HrrThreadContext` sketch is preserved here unmodified as historical record; the refined, evidence-grounded shape is `ResearchSessionContext` (see below). **Slice B / CAH-4G.14 RUNTIME IMPLEMENTATION remains a separate, NOT STARTED, NOT AUTHORIZED milestone**, gated on the conditions in the CAH-4G.14 section below. **CAH-4G.15 (2026-09-11) is a TEST-FIRST / PRE-IMPLEMENTATION-GATE milestone — it adds inert, unwired pure primitives (`lib/hrr/research-session-context.ts`, `.schema.ts`) plus 3 test files (108 tests) proving the CAH-4G.14 design is mechanically testable, with zero production behavior change.** **CAH-4G.16 (2026-09-11) is an INTEGRATION-SAFETY / DARK-WIRING milestone (see the new section further below) — it adds a NEW authoritative-referent validator (`research-session-context-referents.ts`, reusing `selectReviewerClaims` for a generic, submission+topic-scoped trust boundary) and, for the first time, MODIFIES the live research route to genuinely parse/validate/authoritatively-check a client-supplied `context` field — but the classifier call (route step 3) is provably unaffected, since step 4.5's context handling runs strictly after it and never reassigns any variable step 3 produced. 47 new tests (route-level + validator-level) plus the pre-existing 28-test route regression suite all pass unchanged. CONTEXTUAL ROUTING REMAINS OFF — no user-visible HRR behavior changed.** The VISIBLE thread is `hrr-thread.ts` (reducer) + `ReviewerLkLookup` (`useReducer`). As-built: `HRR_CONVERSATIONAL_ARCHITECTURE.md §BB`; deployment-gap reconciliation: §CC; integration record: §DD; production UAT evidence: §FF; CAH-4G.13 discovery evidence: `HRR_SESSION_DISCOVERY.md` §O–§R.
+**Status:** ACCEPTED — CAH-4G.9 (design, 2026-09-10). **Slice A: CLOSED / PRODUCTION-PROVEN (CAH-4G.10 → CAH-4G.10P deployment-gap found → CAH-4G.10I integrated to `main` = `4b9ee5a` → CAH-4G.10C authenticated production UAT PASSED all 10 checks, 2026-09-11 — evidence: `HRR_CONVERSATIONAL_ARCHITECTURE.md §FF`).** **CAH-4G.11 → CAH-4G.12 → CAH-4G.13 (2026-09-11 — `HRR_FOLLOWUP_DISCOVERY.md`, `HRR_RESEARCH_SESSION_CONTRACT.md`, `HRR_SESSION_DISCOVERY.md`)** ran the full generic-taxonomy discovery program culminating in four rounds of real production evidence (Session 1, a discriminating control, an authority-drift safety experiment, and an explicit focus-switch experiment — `HRR_SESSION_DISCOVERY.md` §O–§R) and closed **COMPLETE FOR DESIGN** at `origin/main` = `8206415`. **CAH-4G.14 (2026-09-11, this update) is the DESIGN/PRE-REGISTRATION-ONLY milestone that refines the original `HrrThreadContext` hypothesis (decisions 2–4 below) into a concrete, evidence-grounded `ResearchSessionContext` design — see the new section below.** Decisions 1, 5, 6, 7, 8 below remain production-proven in code + real reviewer sessions, unchanged. Decisions 2, 3, 4 (the bounded referent + follow-up resolution) are **superseded in specificity, not in principle**, by the CAH-4G.14 design below — the original `HrrThreadContext` sketch is preserved here unmodified as historical record; the refined, evidence-grounded shape is `ResearchSessionContext` (see below). **Slice B / CAH-4G.14 RUNTIME IMPLEMENTATION remains a separate, NOT STARTED, NOT AUTHORIZED milestone**, gated on the conditions in the CAH-4G.14 section below. **CAH-4G.15 (2026-09-11) is a TEST-FIRST / PRE-IMPLEMENTATION-GATE milestone — it adds inert, unwired pure primitives (`lib/hrr/research-session-context.ts`, `.schema.ts`) plus 3 test files (108 tests) proving the CAH-4G.14 design is mechanically testable, with zero production behavior change.** **CAH-4G.16 (2026-09-11) is an INTEGRATION-SAFETY / DARK-WIRING milestone (see the new section further below) — it adds a NEW authoritative-referent validator (`research-session-context-referents.ts`, reusing `selectReviewerClaims` for a generic, submission+topic-scoped trust boundary) and, for the first time, MODIFIES the live research route to genuinely parse/validate/authoritatively-check a client-supplied `context` field — but the classifier call (route step 3) is provably unaffected, since step 4.5's context handling runs strictly after it and never reassigns any variable step 3 produced. 47 new tests (route-level + validator-level) plus the pre-existing 28-test route regression suite all pass unchanged.** **CAH-4G.17 (2026-09-11) is a BEHAVIORAL ENABLEMENT milestone, tightly bounded to `activeFocus` only (never `activeReferents`), behind a NEW feature flag `HRR_ACTIVE_FOCUS_CONTEXT_ENABLED` (OFF by default, OFF in production) — when ON, the classifier's existing single call receives a fixed advisory `[Context: Active Research Focus = <topic>.]` prefix; the classifier's own structured output still determines routing, with no post-classification override anywhere in the code. 23 new tests prove the wiring (exact input format, referent exclusion, authority parity, fail-closed behavior) using a mocked classifier — this environment has no live Anthropic API access, so whether a REAL model actually resolves the target follow-up questions given this context remains an explicitly acknowledged, untested gap, recommended for a PM-executed CAH-4G.18 trial. CONTEXTUAL ROUTING IN PRODUCTION REMAINS OFF — no user-visible HRR behavior changed.** The VISIBLE thread is `hrr-thread.ts` (reducer) + `ReviewerLkLookup` (`useReducer`). As-built: `HRR_CONVERSATIONAL_ARCHITECTURE.md §BB`; deployment-gap reconciliation: §CC; integration record: §DD; production UAT evidence: §FF; CAH-4G.13 discovery evidence: `HRR_SESSION_DISCOVERY.md` §O–§R.
 
 **Context:** CAH-4G is production-deployed and semantically safe. PM production UAT found the single-turn HRR model *too visible*: asking a second free-form question replaces the first. Human Reviewers expect a conversational research thread (interaction model like CRC). See `HRR_CONVERSATIONAL_ARCHITECTURE.md` §A.
 
@@ -516,3 +516,99 @@ New: 3 files, 47 tests (10 + 37), all passing. Plus the updated boundary test (5
 ## 15. Smallest next enablement milestone (recommended, not decided here)
 
 **CAH-4G.17 — Enable bounded same-focus resolution, under a feature/behavior gate.** Scoped to the smallest class the dark-wiring evidence actually supports: thread `activeFocus` through to the classifier call (finally consuming `buildResearchSessionContextPrefix`'s output for real, prepended to `parsed.question`), for **free-form turns whose OWN classification would otherwise resolve to zero topics** (the `unsupported` fallback case — T2/Turn-3-shaped questions), gated behind an explicit, off-by-default flag for controlled rollout. **`activeReferents` (the unresolved-item hint) should be deferred to a later slice** — it addresses a narrower, less-validated class of question (T2/T4-shaped vague pronouns) and adds interpretive complexity the dark-wiring evidence does not yet justify enabling in the same step as bare focus continuity. This recommendation is not authorized by this document — it requires its own explicit milestone.
+
+---
+
+# CAH-4G.17 — Active-Focus Classifier Enablement: Feature-Gated, Production OFF (2026-09-11)
+
+**BEHAVIORAL ENABLEMENT MILESTONE, TIGHTLY BOUNDED. `activeFocus` only — `activeReferents` NOT enabled. Feature flag OFF by default and OFF in production at the end of this milestone.**
+
+## 1. What changed
+
+| File | Change |
+|---|---|
+| `lib/reviewer-lk/interpret-research-intent.ts` | `RESEARCH_INTENT_SYSTEM_PROMPT` gains one new paragraph documenting an OPTIONAL advisory `[Context: Active Research Focus = <topic>.]` line a caller may prepend. Schema (`RESEARCH_INTENT_CLASSIFIER_SCHEMA`), the interpreter function's signature, and the deterministic normalizer are **all unchanged**. |
+| `app/api/.../reviewer-lk/research/route.ts` | New `isActiveFocusContextEnabled()` gate (`HRR_ACTIVE_FOCUS_CONTEXT_ENABLED === '1'`, OFF by default). When ON, `mode: 'question'` requests fold `activeFocus` (referents forced to `[]`, unconditionally) into the classifier's input text via the unchanged `buildResearchSessionContextPrefix`. `topic_pick` never reads context, regardless of the flag. `attributedQuestion` (shown to the reviewer as "You asked: …") stays the verbatim question, never the augmented text. |
+| `__tests__/reviewer-lk/hrr-research-route-active-focus.test.ts` | **NEW** — 23 tests: exact classifier-input format, referent exclusion, topic-pick immunity, "classifier's own output wins" (no post-classification override), authority parity, fail-closed/malformed-context handling, freshness, cost, and a prompt/prefix-builder consistency check |
+
+## 2. Honest scope: what this milestone can and cannot prove
+
+**No live Anthropic API access exists in this environment** (no `ANTHROPIC_API_KEY`) — exactly the same standing limitation this entire CAH-4G program has honored throughout (CAH-4G.8's "authenticated production browser UAT... NOT performed," CAH-4G.13's PM-executed production turns, etc.). Every test in this milestone therefore uses a **mocked** classifier, as every other route test in this repo already does. This proves, with certainty:
+
+- the EXACT text the classifier receives, byte-for-byte, in both flag states;
+- that `unresolvedReferents` never reaches that text under any circumstances;
+- that `topic_pick` never reads context;
+- that whatever the (mocked) classifier's OWN structured output says is exactly what the route acts on — **no post-classification override exists anywhere in the code**, in either flag state;
+- that authority, freshness, and cost behavior are identical ON vs OFF.
+
+It does **NOT and cannot** prove that a REAL model, given the advisory line, actually resolves "why isn't that established?" or "what do you mean by human contribution?" to the intended topic. That is a genuine, acknowledged evidentiary gap — not glossed over, not assumed in either direction — and is exactly the question a PM-executed production/preview trial (CAH-4G.18, §11 below) would need to answer, the same way PM manually executed every actual production turn throughout CAH-4G.13.
+
+## 3. Feature gate
+
+`isActiveFocusContextEnabled()` — `process.env.HRR_ACTIVE_FOCUS_CONTEXT_ENABLED === '1'`. OFF by default (unset, or any other value). No DB row, no migration, no per-user/per-domain setting, no persisted rollout state — an env var read fresh on every request, trivially reversible by unsetting it. Matches the exact convention CAH-4G.16 already established for `HRR_DARK_CONTEXT_DEBUG`.
+
+## 4. Classifier integration — exact format
+
+When ON and `resolvedContext.activeFocus` is non-null:
+
+```
+classifierInput = `${buildResearchSessionContextPrefix({...resolvedContext, unresolvedReferents: []})}\n\n${parsed.question}`
+```
+
+Example: `"[Context: Active Research Focus = copyrightability.]\n\nwhy isn't that established?"`. One call, same schema, same `ResearchIntentInterpreter` signature — verified directly (`describe B`, `hrr-research-route-active-focus.test.ts`). `unresolvedReferents` is force-zeroed regardless of what the client sent or what schema validation returned — verified directly (a test sends real referent strings and asserts they never appear in the classifier input).
+
+## 5. Explicit-intent precedence — how it is (and is not) enforced
+
+Per instruction, **no post-classifier override logic exists**. Precedence is stated entirely in the system prompt: "the reviewer's own current question ALWAYS takes priority... never let the advisory line override, dilute, or add to an explicit topic the question itself names." Mechanically verified: (a) the topic-pick path structurally cannot consult context at all (unchanged from CAH-4G.16); (b) for the free-form path, whatever topic the (mocked) classifier resolves is exactly what the route routes to, regardless of what `activeFocus` was supplied — proving the WIRING has no competing logic that could ever second-guess the classifier's resolution. Whether the REAL model actually honors the prompt's precedence instruction is the same acknowledged gap as §2.
+
+## 6. Authority parity
+
+Tested across three `(activeFocus, question)` combinations (`copyrightability`/"Is that enough evidence?", `copyright_ownership`/"Should I approve this?", `likeness`/"Does this clear the control?"), flag ON vs OFF, using an identical mocked `assessment_decision_requested: true` classifier output for both runs of each pair: identical `authority_note` and `assessment_authority_note` in every case.
+
+## 7. Fail-closed behavior
+
+If the (mocked) classifier still returns `research_intents: []` even with the advisory line present, HRR falls back to `unsupported` / offered research paths exactly as it does with no context at all — no silent coercion to `activeFocus` exists anywhere in the code (there is no code path that could do this; the route never reads its own `activeFocus` variable again after building `classifierInput`).
+
+## 8. Downstream firewall — unchanged
+
+`activeFocus` is folded into `classifierInput` (a local string) and then discarded — it is never passed to `hrrAuthorityGate`, `runAuditedHrrResearch`, `selectReviewerClaims`, Bounded Interpretation, `projectHrrResearchAnswer`, or the audit writer. Everything from `gate` onward is byte-identical in shape to CAH-4G.16.
+
+## 9. Cost and freshness
+
+Model-call count is unchanged: 0 for topic-pick, exactly 1 (classify-only) for free-form, in both flag states — verified directly. `getSubmissionFactsForReviewerLk` is still called fresh, once, per request, flag ON — verified directly; the full Retrieval → Applicability → BI → Composition pipeline downstream of `runAuditedHrrResearch` is entirely untouched by this milestone.
+
+## 10. Test results
+
+New: 1 file, 23 tests, all passing. `__tests__/hrr` + `__tests__/reviewer-lk`: 21 suites / 626 tests, all passing. Full repo suite: 20 failed suites / 77 failed tests — the same pre-existing, unrelated baseline as every prior CAH-4G.1x milestone — zero new attributable failures. `npx tsc --noEmit`: clean. `next build`: exit 0 (same placeholder-credential caveat as CAH-4G.16 — unrelated Supabase/Stripe/Resend routes in this local sandbox, nothing HRR-related).
+
+## 11. ActiveFocus sufficiency — CANNOT BE DETERMINED IN THIS ENVIRONMENT
+
+Per §2, this is not a SUFFICIENT / PARTIALLY SUFFICIENT / INSUFFICIENT finding — it is an honest "not yet measurable here." The wiring is fully proven safe; whether `activeFocus` alone actually resolves the target production questions (T2 "why isn't that established?", T3 "what do you mean by human contribution?", the post-switch "what does this mean for ownership?") requires a real classifier call this environment cannot make. **Recommendation: a PM-executed trial** (CAH-4G.18, flag ON, internal synthetic fixture only, one gated turn at a time — mirroring the exact protocol CAH-4G.13's Session 1/discriminating-control/authority-drift/focus-switch experiments already used) **is the correct and only way to obtain this evidence**, not a CLI-side simulation.
+
+## 12. ActiveReferents decision
+
+**NEEDS SEPARATE DESIGN/TEST MILESTONE — not decided or implemented here.** Consistent with CAH-4G.16 §15's original recommendation: referent-context complexity should not be added until `activeFocus`'s own sufficiency (or insufficiency) is empirically established by a real trial.
+
+## 13. CAH-4G.14/.15/.16 implementation-gate status (re-evaluated)
+
+| # | Condition | Status |
+|---|---|---|
+| 1 | Design review accepted | MET (unchanged) |
+| 2 | Full adversarial matrix, test-first | **PARTIALLY MET (unchanged)** — every WIRING-level row is now tested across three milestones; the one remaining row (does a real model correctly use the prefix) requires live model access, which does not exist here |
+| 3 | Authority independence testable | MET (unchanged, reinforced — §6) |
+| 4 | Correction behavior specified | PARTIALLY MET (unchanged — the correction hypothesis still requires live model access to validate) |
+| 5 | Focus-switch supersession testable | PARTIALLY MET (unchanged, same reason) |
+| 6 | Freshness invariant testable | MET (unchanged) |
+| 7 | No transcript/state creep, O(1) | MET (unchanged) |
+| 8 | Fail-closed/rollback specified+testable | MET (reinforced — §7) |
+| 9 | `parseBody` deliberately extended + rejection test | MET (unchanged) |
+
+**Overall: unchanged from CAH-4G.16 — 6 of 9 MET, 3 PARTIALLY MET, 0 NOT MET.** The three partial conditions all reduce to the same single evidentiary gap (§2/§11), not three separate problems.
+
+## 14. Production behavior
+
+`HRR_ACTIVE_FOCUS_CONTEXT_ENABLED` is **OFF** at the end of this milestone, in every environment, including production. **Contextual routing in production remains OFF.** No user-visible HRR behavior has changed.
+
+## 15. Recommended next milestone
+
+**CAH-4G.18 — Controlled trial / UAT, flag ON, internal synthetic fixture only** (`CA-RLK-2a PROD SMOKE` or equivalent), PM-executed, one gated turn at a time, targeting exactly the questions CAH-4G.13 already pre-registered evidence around: T2 ("why isn't that established?"), T3 ("what do you mean by human contribution?"), and the post-switch continuity question ("what does this mean for ownership?"). This is the step that actually answers §11's open sufficiency question. **Not authorized or executed by this document.**
