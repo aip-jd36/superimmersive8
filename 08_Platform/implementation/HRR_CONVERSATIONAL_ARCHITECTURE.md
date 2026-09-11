@@ -1,6 +1,6 @@
 # HRR Conversational Research — Architecture & Design (CAH-4G.9)
 
-**Status:** `CAH-4G.10 SLICE A — CLOSED / PRODUCTION-PROVEN` — `CAH-4G CONVERSATIONAL HRR — VISIBLE THREAD PRODUCTION-PROVEN / BOUNDED CONVERSATIONAL CONTEXT NOT STARTED` (CAH-4G.10C, 2026-09-11). **CAH-4G.11 (2026-09-11) — `HRR_FOLLOWUP_DISCOVERY.md`** re-derives, from a generic follow-up taxonomy and a pre-registered production discovery script, whether/what bounded conversational context is actually justified — **the §J `HrrThreadContext` sketch below is a design hypothesis under validation, not a requirement; Slice B remains NOT STARTED / NOT AUTHORIZED** pending that evidence. **CAH-4G.12 (2026-09-11) — `HRR_RESEARCH_SESSION_CONTRACT.md`** is now the authoritative document: PM has scoped any future conversational context to a bounded, topic-anchored "Research Session," never unlimited workbook-wide memory — see that document for the full product contract, which reframes (and in places narrows) the reasoning-context sections below (§J onward) under the Research Session model — this document's own visible-thread as-built (§A–§II) is unaffected and remains current. A PM-performed authenticated production UAT against the internal synthetic fixture `CA-RLK-2a PROD SMOKE` / `ASSESS-007-2026-09-07` **passed all 10 acceptance checks** (§FF) — production is confirmed serving the Slice-A append-only conversational thread (`origin/main` = `2d648d3`, unchanged since CAH-4G.10I; source contract re-verified — §GG). **What is closed:** the VISIBLE conversational thread only — successive research turns append, retain history, and the composer clears on submit, as designed. **What remains open:** bounded conversational context / follow-up referent resolution (Slice B) is a **separate, still-`NOT STARTED` / not-PM-authorized** milestone; each question today is still researched fully independently. Non-blocking product observations from this UAT are recorded in §HH (thread density, duplicate question rendering, a navigation-persistence product question for a future decision) — **none are Slice-A defects and none are fixed in this milestone.** As-built: §BB. Deployment-gap reconciliation: §CC. Integration/deployment record: §DD. PM UAT script (now executed): §EE. Production UAT evidence: §FF. Post-UAT source reconciliation: §GG. Non-blocking observations: §HH.
+**Status:** `CAH-4G.10 SLICE A — CLOSED / PRODUCTION-PROVEN` — `CAH-4G CONVERSATIONAL HRR — VISIBLE THREAD PRODUCTION-PROVEN / BOUNDED CONVERSATIONAL CONTEXT NOT STARTED` (CAH-4G.10C, 2026-09-11). **CAH-4G.11 (2026-09-11) — `HRR_FOLLOWUP_DISCOVERY.md`** re-derives, from a generic follow-up taxonomy and a pre-registered production discovery script, whether/what bounded conversational context is actually justified — **the §J `HrrThreadContext` sketch below is a design hypothesis under validation, not a requirement; Slice B remains NOT STARTED / NOT AUTHORIZED** pending that evidence. **CAH-4G.12 (2026-09-11) — `HRR_RESEARCH_SESSION_CONTRACT.md`** is now the authoritative document: PM has scoped any future conversational context to a bounded, topic-anchored "Research Session," never unlimited workbook-wide memory — see that document for the full product contract, which reframes (and in places narrows) the reasoning-context sections below (§J onward) under the Research Session model — this document's own visible-thread as-built (§A–§II) is unaffected and remains current. A PM-performed authenticated production UAT against the internal synthetic fixture `CA-RLK-2a PROD SMOKE` / `ASSESS-007-2026-09-07` **passed all 10 acceptance checks** (§FF) — production is confirmed serving the Slice-A append-only conversational thread (`origin/main` = `2d648d3`, unchanged since CAH-4G.10I; source contract re-verified — §GG). **What is closed:** the VISIBLE conversational thread only — successive research turns append, retain history, and the composer clears on submit, as designed. **What remains open:** bounded conversational context / follow-up referent resolution (Slice B) is a **separate, still-`NOT STARTED` / not-PM-authorized** milestone; each question today is still researched fully independently. Non-blocking product observations from this UAT are recorded in §HH (thread density, duplicate question rendering, a navigation-persistence product question for a future decision) — **none are Slice-A defects and none are fixed in this milestone.** As-built: §BB. Deployment-gap reconciliation: §CC. Integration/deployment record: §DD. PM UAT script (now executed): §EE. Production UAT evidence: §FF. Post-UAT source reconciliation: §GG. Non-blocking observations: §HH. **CAH-4H.1 (2026-09-11, design only, §JJ)** — after CAH-4G.19 accepted `activeFocus` for normal production use, this milestone begins a new presentation-focused family (CAH-4H) directly closing §HH items 1–2: a Research Thread presentation discovery selecting a minimal candidate (suppress the duplicate question echo; add a panel-level `Researching: <topic>` indicator derived from the existing `deriveResearchSessionContext`; de-duplicate the per-turn `reviewer_responsibility_note`) — zero new server output, zero new reasoning state, no runtime change in this milestone. See §JJ for the full discovery.
 
 **Companion docs:** `PRD_CAH_4G_HRR.md` (the *what*), `HRR_GRI_TECHNICAL_DESIGN.md` (§N single-turn model — **amended by this doc**, §R future GRI reuse), `ADR-002` (intent entry ≠ answer authority), `ADR-003-hrr-conversation-context.md` (the decision recorded below), `REVIEWER_RESOURCES_ARCHITECTURE.md` §15/§18.
 
@@ -893,3 +893,145 @@ The tested-in-production implementation is exactly the implementation currently 
 - Hypothetical research remains out of V1 unless separately authorized. Not touched.
 
 No settled architecture is reopened by this closeout; the production-UAT polish observations (§HH) are recorded as backlog evidence for a future decision, not as a reason to revisit CAH-4G.9.
+
+---
+
+## JJ. CAH-4H.1 — HRR Research Thread UX Discovery (2026-09-11, design only)
+
+**ARCHITECTURE/UX CONTRACT ONLY. No runtime implementation.** Starts a new milestone family (CAH-4H — presentation) after CAH-4G.19 accepted `activeFocus` for normal production use. Directly closes the loop on §HH items 1 (thread density) and 2 (duplicate question rendering), both deferred since Slice 7/CAH-4G.10C.
+
+### JJ.1 Current render architecture (as re-derived from source)
+
+```
+ReviewerResourcesInspector (adjacent rail: w-[340px] / 2xl:w-[380px]; drawer below: w-[min(420px,92vw)]; p-4, overflow-y-auto)
+ └─ ReviewerLkLookup (useReducer(hrrThreadReducer))
+     ├─ TopicShortcuts (deterministic, 0 model calls)
+     ├─ Ask HRR composer (<textarea> + submit)
+     └─ thread.turns.map(<ThreadTurn>)             ← the append-only, ever-growing list
+         ├─ reviewer turn: "Research: <label>" | "You asked: <question>"   [CLIENT-rendered label]
+         ├─ pending turn: "Performing governed research…"
+         ├─ error turn: fixed message
+         └─ answer turn → <HrrResearchAnswerView answer>
+             ├─ "You asked: <question_text>"        [SERVER-composed echo — duplicates the reviewer turn above]
+             ├─ assessment_authority_note            [Lane 1 — already visually distinct: accent left-border, tinted bg]
+             ├─ scope_note
+             ├─ topics.map(<TopicBlock>)             [Lane 2 — one full block per resolved topic]
+             │   ├─ topic_label + intent_origin tag
+             │   ├─ orientation (bold, prominent)
+             │   ├─ "What remains unresolved" (if any)
+             │   ├─ bi_summary_blocks (verbatim governed prose — can be long)
+             │   ├─ settled applicability (established / confirmed-not-to-apply)
+             │   ├─ "Does not apply" (if any)
+             │   ├─ boundary_note                    [ANOTHER boundary text, per topic]
+             │   └─ <details> "Provenance & governance details"  [ALREADY a native progressive disclosure]
+             ├─ offered_research_paths (unsupported fallback → topic buttons)
+             └─ reviewer_responsibility_note          [ALWAYS rendered, every single turn — a THIRD boundary text]
+```
+
+**Data provenance:** every string in `HrrResearchAnswerView` is server-composed (`projectHrrResearchAnswer`, CAH-4G.4/7, deterministic, no reinterpretation) — the component adds only structural chrome (headings, `<details>`, spacing, the topic-button click handler). The ONLY client-generated labels are `ReviewerLkLookup`'s reviewer-turn prefix (`"Research:"` / `"You asked:"`) and the pending/error copy.
+
+**Confirmed duplication (source-verified, not assumed):** the reviewer-turn label in `ReviewerLkLookup.tsx` and `HrrResearchAnswerView`'s own `question_text` echo are two independent renders of the same fact — nothing in `hrr-projection.test.ts` or any other test asserts the CLIENT must render `question_text` at all; only the server VALUE is tested. This is fixable presentationally, with zero server/schema change.
+
+**Confirmed pre-existing strengths, not to be discarded:** the consultative hierarchy inside one topic block (CAH-4G.7-hardened: unresolved leads, then governed reading, then settled applicability, then boundary, then provenance) is already well-ordered; `assessment_authority_note` already has distinct styling; provenance is already behind a native `<details>` disclosure. **The problem this milestone addresses is thread-level (how multiple turns stack and relate), not answer-level (how one answer is internally organized).**
+
+### JJ.2 Production UX failure analysis (A–F), classified UI vs. Composition vs. Semantic
+
+| Turn | What the reviewer currently sees | Classification |
+|---|---|---|
+| A. Initial question | One well-organized block | Baseline — no problem |
+| B. "Why isn't that established?" | A second full block stacks below A, restating the topic tag, orientation, unresolved list, full governed prose, and all three boundary texts again | **UI/projection** (thread-level stacking, no per-turn summarization) |
+| C. "What do you mean by human contribution?" | A third full block; because the composed answer is topic-level (not narrowly targeted to "human contribution" specifically), the reviewer sees the same broad Copyrightability material a third time | **Mixed**: the vertical stacking is UI; the fact that the content itself doesn't narrow to the sub-question is **Consultative Composition**, explicitly not fixable by this milestone (§JJ.6) |
+| D. Explicit switch to Copyright ownership | New topic block appended; correctly distinct content, no leakage (already production-proven) | Baseline — no problem, but nothing currently signals "the research focus just changed" at a glance |
+| E. Post-switch follow-up | Another full block | Same as B/C — UI/projection (stacking), not a semantic problem (routing is now production-proven correct, CAH-4G.18/19) |
+| F. "Is that enough evidence?" | The authority block (already distinctly styled) plus — per CAH-4G.19's own finding — an ADDITIONAL research lane and a Copyrightability-specific refusal and the standard reviewer-responsibility note, i.e. up to three boundary-shaped texts in one turn | **UI/projection** (redundant boundary-text repetition) layered on a correct, already-classified **Composition polish** finding (CAH-4G.19 §5) — not reclassified here |
+
+**Generic UX problems observed, named once each (not per-topic):** turn ownership ambiguity (mitigated already by the reviewer-turn label, but weakened by the duplicate echo diluting which element "owns" the question); duplicated question; excessive vertical repetition (repeated boundary texts × every turn); topic/focus ambiguity at a glance (no persistent "what am I researching right now" indicator); provenance is not dominant (already collapsed) — not a problem; boundary-text repetition (up to 3 boundary-shaped strings per turn); inability to quickly scan unresolved items across a growing thread; narrow-panel density compounding all of the above at 300–380px usable width.
+
+### JJ.3 Minimum presentation model — reuse audit
+
+| Concept | Status | Source |
+|---|---|---|
+| ReviewerTurn | **A — already exists** | `HrrReviewerTurn` (`hrr-thread.ts`) |
+| HrrTurn (pending/error/answer) | **A — already exists** | `HrrResponseTurn` (`hrr-thread.ts`) |
+| ResearchTopic/Focus (current) | **B — derivable deterministically** | `deriveResearchSessionContext(thread)` — already built (CAH-4G.15), already wired client-side (CAH-4G.18B) for transport; **the exact same function can drive a UI label with zero new code path** |
+| ResearchResult | **A — already exists** | `HrrResearchAnswer` / `HrrAnswerTopic` |
+| UnresolvedApplicability | **A — already exists** | `HrrAnswerTopic.unresolved_inputs` |
+| AuthorityRefusal | **A — already exists** | `answer.assessment_authority_note` (already styled distinctly) |
+| Governance/Provenance disclosure | **A — already exists** | The `<details>` block in `TopicBlock` |
+
+**No concept in this list requires new server output (C) or new reasoning state (D).** Every structural building block a redesigned thread view needs already exists; the work is presentational composition of existing data, not new data.
+
+### JJ.4 Current-focus display
+
+**Recommended: yes**, a compact, panel-level (not per-turn) indicator such as `Researching: Copyrightability`.
+
+**Derivation:** `deriveResearchSessionContext(thread).activeFocus` — the identical, already-production-accepted (CAH-4G.19) function and field already used for classifier assistance. No new state.
+
+**Behavior by state, derived from the selector's own already-tested rules (CAH-4G.15 §Q.11 lifecycle, unchanged):**
+- Initial/empty thread → `activeFocus === null` → no indicator shown (nothing to display, not a blank/placeholder state).
+- First research turn resolves one topic → indicator appears, showing that topic.
+- Same-focus continuation → indicator unchanged (same value, re-derived fresh each render, never cached).
+- Explicit topic switch → indicator updates immediately to the new topic (the selector's own case 5, already proven in production, CAH-4G.18/19).
+- Authority-only turn (no research clause) → per the selector's own transparency rule (case 7), the PRIOR focus is preserved, not cleared — the indicator should reflect this correctly (showing the still-active prior focus), since that already matches the selector's real, tested behavior.
+- Multi-topic result → selector resets to `null` (case 11) → indicator should disappear or show a neutral "multiple topics" state rather than pick one arbitrarily — must not guess.
+- Clear conversation → thread empties → indicator disappears, matching case 1/10.
+
+**This display must be presented as a UI convenience, never as a claim of persistent memory** — it is a live re-derivation of client-only, ephemeral thread state, not a stored session attribute; it must visually reset exactly when "Clear conversation" resets the thread (no new lifecycle to design — this falls out of reusing the existing derivation for free).
+
+### JJ.5 Turn pairing
+
+**Finding: the duplicate "You asked" is not semantically required and should not both exist.** `HrrResearchAnswerView`'s own `question_text` echo exists for a case that no longer applies at the thread-rendering call site: it is useful when `HrrResearchAnswerView` might be rendered WITHOUT a paired visible reviewer turn (its original, pre-Slice-A single-turn design). Inside the append-only thread, the reviewer turn is ALWAYS rendered immediately above the paired answer turn — the pairing is already unambiguous structurally (adjacent list items, `seq`-matched). **Recommended resolution (structural, not yet implemented): the thread-rendering call site suppresses `HrrResearchAnswerView`'s internal echo when it is known to be paired with an already-rendered reviewer turn** (e.g. a prop, or simply not passing `question_text` through at that call site) — `question_text` itself remains on the server-composed contract unchanged (still useful for any future context where `HrrResearchAnswerView` renders standalone) and remains fully auditable in place (nothing about `lk_research` audit rows or server behavior changes; this is a pure rendering decision).
+
+### JJ.6 Governance/provenance disclosure
+
+- **Must remain immediately visible, every turn:** the unresolved-items list (when present) and the ONE assessment-authority boundary callout (when present) — these carry the material "what's missing" and "who decides" signals.
+- **Already correctly behind progressive disclosure:** provenance/governance (`<details>`) — no change needed here; it already satisfies invariant 9 (accessible, doesn't imply stronger applicability).
+- **Candidate for panel/session-level consolidation rather than per-turn repetition:** `reviewer_responsibility_note` — currently identical boilerplate repeated on literally every turn. Showing it once (e.g. panel-level, near the composer, or collapsed after the first occurrence) rather than after every single answer would materially reduce repetition without ever hiding it — it remains equally visible, just not re-stated turn after turn. The per-topic `boundary_note` is more context-specific (keyed on `bi_status`) and should likely remain turn-specific, but candidate for tightening.
+- **Empty-provenance rendering:** `TopicBlock`'s `<details>` already guards on `governed_considerations.length > 0 || withheld.length > 0 || governed_claim_refs.length > 0` — an empty disclosure is NOT currently possible to render; not a defect, already correct.
+- **Reference-only distinction:** protected in all candidates below — no candidate proposes removing or softening `reviewer_responsibility_note`'s content, only its per-turn repetition frequency.
+
+### JJ.7 Authority-response presentation
+
+**Recommended generic state name: "Research boundary."** Neutral, describes a structural limit, not a verdict. Avoid "Reviewer decision required" (implies HRR is assigning the reviewer a task) and avoid anything evoking severity/failure (no warning icon, no red, no "insufficient"). The EXISTING `assessment_authority_note` styling (accent-colored left border, tinted background, distinct from the neutral topic-block styling) already achieves unmistakability without inventing a new visual severity language — this milestone's recommendation is to KEEP that treatment and extend the SAME generic pattern to make the (now CAH-4G.19-confirmed) mixed-intent case — a refusal alongside real research content — visually legible as "two separate things happened," not blended into one paragraph. No domain-specific styling per topic.
+
+### JJ.8 Narrow-panel constraints (confirmed from source)
+
+Adjacent rail: `340px` (`380px` at `2xl`); drawer/overlay below the breakpoint: `min(420px, 92vw)`. Usable content width after `p-4` padding: roughly 300–390px. This is a genuinely narrow column — every recommendation above is chosen partly because it reduces vertical stacking without requiring horizontal space (no side-by-side layouts, no wide tables). No mobile-specific implications beyond the existing drawer mode were found in source (the drawer already handles the narrow/overlay case).
+
+### JJ.9 Design candidates
+
+| Candidate | Structural model | Changes | Unchanged | State/data needs | Governance risk | Complexity | Narrow-panel fit |
+|---|---|---|---|---|---|---|---|
+| **1 — Minimal (recommended)** | Keep the append-only list exactly as-is; (a) suppress the duplicate echo at the call site, (b) add a panel-level `Researching: <topic>` indicator via the existing selector, (c) de-duplicate `reviewer_responsibility_note` to once-per-panel-session rather than once-per-turn | `ReviewerLkLookup.tsx` rendering only | `HrrResearchAnswerView`'s internal hierarchy, server contract, `hrr-thread.ts`, audit | None new — 100% derived from existing thread state | Lowest — no new authority/session concept introduced | Low | Best — reduces height with zero new interaction pattern |
+| **2 — Collapsible prior turns** | As candidate 1, plus older (not-most-recent) answer turns default to a collapsed/summary state (topic + orientation only), expandable on click | `ReviewerLkLookup.tsx` + a new lightweight collapsed/expanded UI state per turn (ephemeral, client-only, not persisted) | Same as candidate 1, plus `HrrResearchAnswerView` gains an optional "compact" rendering mode | Ephemeral per-turn UI toggle (not session/reasoning state — purely visual) | Low — still no new reasoning concept, but must be careful the collapsed summary doesn't visually imply "resolved" | Medium | Good — directly addresses long-thread density |
+| **3 — Grouped-by-focus sections** | Turns are visually grouped under focus-change boundaries (a divider/heading whenever `deriveResearchSessionContext` would change), rather than a flat list | `ReviewerLkLookup.tsx` layout only | Everything else | Derived, same selector, applied per-turn retroactively over `thread.turns` | Low-medium — must not imply the GROUPING itself is a stored "session" (it's a pure render-time partition of the existing append-only array) | Medium | Good, but the extra grouping chrome costs some of the narrow width it's trying to save |
+| **4 — Two-pane split (rejected as disproportionate)** | Persistent question/topic list in one pane, detail in another, within the same rail | Would require restructuring the rail itself, likely conflicting with the existing `340–420px` single-column constraint | — | — | Low | High | Poor — the rail is too narrow for a genuine two-pane split without shrinking both below usability |
+
+### JJ.10 Selected HRR Research Thread Presentation Contract
+
+**Candidate 1 (Minimal), selected** — materially solves the observed problem (duplication, absent focus indicator, repeated boilerplate) at the lowest complexity and governance risk, and does not foreclose layering Candidate 2's collapsing on top later if evidence shows it's still needed.
+
+**STRUCTURAL DATA CONTRACT** (what data drives what — no new types):
+- Reviewer-turn treatment: unchanged (`HrrReviewerTurn`, existing labels).
+- HRR-response treatment: unchanged internally (`HrrResearchAnswer`/`HrrAnswerTopic`, CAH-4G.7 hierarchy) EXCEPT the question echo is suppressed when a paired reviewer turn already rendered it.
+- Topic/focus treatment: a new, panel-level (not per-turn) read of `deriveResearchSessionContext(thread).activeFocus`, re-derived on every render, never stored.
+- Unresolved/applicability treatment: unchanged (`unresolved_inputs`, already leads the hierarchy).
+- Authority-response treatment: unchanged data (`assessment_authority_note`); visual treatment kept, not weakened, not domain-branded.
+- Governance/provenance disclosure: unchanged (`<details>`), reaffirmed correct as-is.
+- Clear-conversation behavior: unchanged (`EMPTY_HRR_THREAD`) — the focus indicator and any future collapse-state are pure functions of `thread`, so they reset for free.
+- Topic-shortcut behavior: unchanged (0 model calls, deterministic, context-independent).
+- Loading/error behavior: unchanged (`pending`/`error` turn rendering).
+
+**VISUAL DESIGN SUGGESTION** (iterable later without semantic change): compact focus indicator near the top of the panel or composer; `reviewer_responsibility_note` shown once (first turn) rather than after every answer, with the per-topic `boundary_note` still carrying turn-specific nuance; the suppressed duplicate question simply removed from the answer's own render at this call site.
+
+### JJ.11 Test/UAT contract (discovery-level — not implemented)
+
+Discriminating matrix: initial question; same-focus follow-up; sub-term follow-up; explicit switch; post-switch follow-up; authority refusal (incl. the mixed-intent case, CAH-4G.19); unresolved applicability present/absent; multi-topic answer; error; loading; clear conversation (focus indicator must reset); a long answer in the narrow rail (no horizontal overflow); empty provenance (already structurally impossible — regression-guard only). Tests should assert semantic presence/absence (e.g. "the question text appears exactly once across the reviewer turn + its paired answer," "the focus indicator matches `deriveResearchSessionContext`'s output for this exact thread state") rather than pixel snapshots, consistent with this repo's existing convention (`testEnvironment: 'node'`, source-scan + pure-function proofs). A small PM visual-UAT script (4–5 gated turns mirroring CAH-4G.18/19's fixture) should visually confirm the narrow-panel result once implemented.
+
+### JJ.12 Consultative Composition boundary — explicitly not solved here
+
+This milestone cannot and does not: narrow "what do you mean by human contribution?"'s answer to a targeted explanation (composition still returns the full topic-level proposition — CAH-4G.13 §R.9/CAH-4G.19 §5, unchanged); reduce the number of DISTINCT boundary-shaped sentences composition itself generates (only their per-turn REPETITION count is addressed here); rewrite or summarize governed content beyond what `projectHrrResearchAnswer` already supplies. These remain explicit inputs to a future, separate Consultative Composition milestone.
+
+### JJ.13 Smallest implementation milestone (recommended, not authorized, not started)
+
+**Server/API/schema requirement: NONE.** Challenged directly against source: every data element candidate 1 needs already exists in `HrrThreadState`/`HrrResearchAnswer`/`deriveResearchSessionContext` — confirmed by the reuse audit (§JJ.3). **CAH-4H.2** (a future, separately-authorized milestone) would be scoped to exactly candidate 1: `ReviewerLkLookup.tsx` presentation changes only, zero new server output, zero new reasoning state, with the test matrix in §JJ.11 written test-first.
