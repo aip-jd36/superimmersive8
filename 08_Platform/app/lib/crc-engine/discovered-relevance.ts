@@ -60,28 +60,59 @@
  * governance markdown cannot inject code, only enable/disable an
  * engineering-authored trigger by existing (Section 6's Option B gate).
  *
- * One-hop only (Section 21): this module produces discovered TOPIC
- * relevance from structured evidence exactly once per turn -- it never
- * consumes its own output as input to discover a second-order topic, and
- * it does not itself traverse `TopicRelationship` (that remains Retrieval's
- * own, already-designed, already-gated one-hop mechanism, operating on
- * whatever active topic set -- explicit or discovered -- it is handed;
- * no `third_party_source_rights`-sourced relationship is approved today,
- * so this composition currently has no live effect, disclosed here rather
- * than silently assumed).
+ * One-hop only (Section 21): the FIXED-TOPIC trigger loop below produces
+ * discovered TOPIC relevance from structured evidence exactly once per
+ * turn -- it never consumes its own output as input to discover a
+ * second-order topic, and it does not itself traverse `TopicRelationship`.
+ *
+ * Generic Orthogonal-Fact Discovery — TopicRelationship Authorization
+ * milestone (2026-09-11) ADDS a second, independent discovery mechanism
+ * below (`deriveClaimTargetedDiscoveryOccurrences`) that DOES traverse
+ * `TopicRelationship` -- in the REVERSE direction from
+ * `lookupRelatedTopicClaims` (lib/retrieval-engine/lookup-topic-relationships.ts):
+ * that function asks "goal G is active -- which topics may inform it?";
+ * this one asks "claim X's orthogonal-fact discovery metadata matches --
+ * which ACTIVE goal(s) is claim X's own topic governed to inform?" Same
+ * underlying data (`TopicRelationship`, same `relationshipIsAdoptedAndCrcEligible`
+ * gate, factored out of `lookup-topic-relationships.ts` specifically so
+ * this consumer can never accidentally diverge from or weaken it), reverse
+ * query direction. Still one-hop only: this new path never chains a
+ * resulting discovered topic into a second lookup.
+ *
+ * This is the direct outcome of a dedicated architecture diagnostic
+ * (2026-09-11, superseding an earlier, now-removed implementation that
+ * hard-coded `distribution_territory_mention -> copyright_ownership` as a
+ * FIXED-TOPIC trigger -- see git history for that diagnostic's full
+ * reasoning). The diagnostic found: (1) an orthogonal structured fact (like
+ * a distribution territory) does not itself determine a single valid topic
+ * -- it can make claims under MANY different topics candidates
+ * simultaneously; (2) the codebase already has a governed, PM-approved
+ * contract for "topic X's claims may inform goal category Y"
+ * (`TopicRelationship`), currently used only from the explicit-goal
+ * direction; (3) reusing it in the reverse direction, rather than inventing
+ * a parallel authorization mechanism or hard-coding a topic per orthogonal
+ * fact type, is the correct, smallest generalization -- it requires zero
+ * new types, zero new registries, and zero changes to `TopicRelationship`
+ * itself or to its existing governance gates.
  *
  * Ownership/location: `lib/crc-engine/`, mirroring `knowledge-readiness.ts`'s
  * own precedent exactly -- this is the orchestration layer already
  * established as the correct place for code that needs both Interview
  * Engine (`StructuredUnderstanding`, `GoalCategory`) and Retrieval
- * (`TopicClaim`) TYPES, without either subsystem importing the other's
- * logic (jurisdiction-clarification.ts/human-contribution-clarification.ts
- * already set this precedent for the two-type-boundary case; this module
- * is a direct sibling, not a new architectural layer).
+ * (`TopicClaim`, `TopicRelationship`) TYPES, without either subsystem
+ * importing the other's logic (jurisdiction-clarification.ts/
+ * human-contribution-clarification.ts already set this precedent for the
+ * two-type-boundary case; this module is a direct sibling, not a new
+ * architectural layer). `territoryRelevanceMatches` and
+ * `relationshipIsAdoptedAndCrcEligible` are imported one-way from
+ * lib/retrieval-engine/ -- the same established dependency direction this
+ * module already uses for the `TopicClaim` type.
  */
 
 import type { ContentPresenceCategory, GoalCategory, StructuredUnderstanding } from '@/types/interview-engine'
-import type { DiscoveredTopicOccurrence, TopicClaim } from '@/lib/retrieval-engine/types'
+import type { DiscoveredTopicOccurrence, TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
+import { territoryRelevanceMatches } from '@/lib/retrieval-engine/lookup-topic-claims'
+import { relationshipIsAdoptedAndCrcEligible } from '@/lib/retrieval-engine/lookup-topic-relationships'
 
 /**
  * Closed to the structurally-supported evidence types that actually exist.
@@ -105,8 +136,25 @@ import type { DiscoveredTopicOccurrence, TopicClaim } from '@/lib/retrieval-engi
  * per-fact-shape engineering cost, not a per-domain one) and (b) one new
  * `case` here -- this module's own generic dispatch loop is unchanged in
  * shape by this milestone, only in how many source kinds it recognizes.
+ *
+ * `distribution_territory_mention` (Generic Distribution/Output-Use
+ * Territory Contract, 2026-09-11) is the third entry -- but, UNLIKE the two
+ * above it, it is NOT a fixed-topic `DISCOVERED_RELEVANCE_TRIGGERS` entry.
+ * An orthogonal structured fact (see this module's own header for the full
+ * architecture-diagnostic rationale) does not itself determine a single
+ * valid topic the way an asset-provider mention or a synthetic-person
+ * content-presence mention does -- it can make claims under MANY different
+ * topics candidates simultaneously, so it cannot be expressed as one
+ * `{source_kind, topic}` pair. Occurrences carrying this `source_kind` are
+ * instead produced by the separate `deriveClaimTargetedDiscoveryOccurrences`
+ * function below, which derives `topic` from the MATCHING CLAIM's own topic
+ * and authorizes `source_goal_category` via a governed `TopicRelationship`
+ * lookup, never a fixed trigger config. This value remains part of the
+ * union because it is still a real, valid value on
+ * `DiscoveredTopicOccurrence.source_kind` -- just never as a
+ * `DiscoveredRelevanceTrigger.source_kind`.
  */
-export type DiscoveredRelevanceSourceKind = 'asset_provider_mention' | 'content_presence_mention'
+export type DiscoveredRelevanceSourceKind = 'asset_provider_mention' | 'content_presence_mention' | 'distribution_territory_mention'
 
 /**
  * Bridge #2's own qualifying observable-fact categories: a synthetic-person
@@ -169,6 +217,21 @@ export interface DiscoveredRelevanceTrigger {
  * commercial_use goal regardless of whether any person appears at all) --
  * this trigger is the narrower, evidence-gated alternative Bridge #2 exists
  * to implement instead.
+ *
+ * DEFERRED ARCHITECTURAL DEBT (recorded, not fixed, by the Generic
+ * Orthogonal-Fact Discovery milestone, 2026-09-11): neither of these two
+ * triggers' `allowed_parent_goals: ['commercial_use']` is backed by a real
+ * `TopicRelationship` record (`TOPIC_RELATIONSHIPS_FIXTURE` today contains
+ * exactly one relationship, `copyright_ownership -> copyrightability`,
+ * unrelated to either). They remain exactly as shipped -- engineering-
+ * authored, evidenced by a real production case each, ungoverned by
+ * `TopicRelationship`. Migrating them onto the newer, more general
+ * `TopicRelationship`-authorized mechanism below is a legitimate future
+ * consistency improvement but carries real regression risk to already-
+ * shipped, production-live behavior and is explicitly OUT OF SCOPE for this
+ * milestone, which proves the new generic path independently. Do not
+ * migrate or refactor these two triggers as a side effect of touching this
+ * file for the new path.
  */
 const DISCOVERED_RELEVANCE_TRIGGERS: readonly DiscoveredRelevanceTrigger[] = [
   {
@@ -218,14 +281,22 @@ function activeConfirmedGoalCategories(understanding: StructuredUnderstanding): 
 
 /**
  * Derives, fresh every turn (never persisted -- see this module's own
- * header, Section 30 of the task spec), every discovered-topic occurrence
- * currently satisfied by structured evidence. Not deduplicated by topic
- * (multiple providers can each independently satisfy the same trigger,
- * e.g. iStock AND Getty both mentioned -- see `discoveredTopicCategories`
- * below for the deduplicated view Retrieval/Track B actually consume, and
- * `computeRelevantTopics` for the provenance-preserving diagnostic view).
+ * header, Section 30 of the task spec), every FIXED-TOPIC discovered-topic
+ * occurrence currently satisfied by structured evidence. Not deduplicated
+ * by topic (multiple providers can each independently satisfy the same
+ * trigger, e.g. iStock AND Getty both mentioned -- see
+ * `discoveredTopicCategories` below for the deduplicated view Retrieval/
+ * Track B actually consume, and `computeRelevantTopics` for the
+ * provenance-preserving diagnostic view).
+ *
+ * Renamed from `deriveDiscoveredTopicOccurrences` (Generic Orthogonal-Fact
+ * Discovery — TopicRelationship Authorization milestone, 2026-09-11) --
+ * this is now the fixed-topic-trigger half only, unmodified in behavior
+ * from before this milestone. `deriveDiscoveredTopicOccurrences` (below)
+ * is the new, still-exported, public entry point that merges this
+ * function's output with `deriveClaimTargetedDiscoveryOccurrences`'s own.
  */
-export function deriveDiscoveredTopicOccurrences(understanding: StructuredUnderstanding, topicClaims: TopicClaim[]): DiscoveredTopicOccurrence[] {
+function deriveFixedTopicTriggerOccurrences(understanding: StructuredUnderstanding, topicClaims: TopicClaim[]): DiscoveredTopicOccurrence[] {
   const activeGoals = activeConfirmedGoalCategories(understanding)
   const occurrences: DiscoveredTopicOccurrence[] = []
 
@@ -316,6 +387,166 @@ export function deriveDiscoveredTopicOccurrences(understanding: StructuredUnders
   }
 
   return occurrences
+}
+
+/**
+ * Stable, generic provenance identifier for every occurrence produced by
+ * `deriveClaimTargetedDiscoveryOccurrences` below -- deliberately NOT a
+ * per-topic or per-relationship id, mirroring how a `DiscoveredRelevanceTrigger`'s
+ * own `trigger_id` names the MECHANISM, not the specific topic/claim it
+ * happened to reach this time. This mechanism is topic-agnostic by design
+ * (see this module's own header) -- one stable id for the whole class of
+ * "an orthogonal fact's claim-level discovery metadata matched, and a
+ * governed `TopicRelationship` authorized the result" occurrences,
+ * regardless of which claim/topic/relationship record was actually
+ * involved.
+ */
+const CLAIM_TARGETED_TERRITORY_DISCOVERY_TRIGGER_ID = 'distribution_territory_mention_claim_targeted_discovery'
+
+/**
+ * Generic Orthogonal-Fact Discovery — TopicRelationship Authorization
+ * milestone (2026-09-11). See this module's own header for the full
+ * architecture rationale; this is the implementation.
+ *
+ * TWO INDEPENDENT AUTHORIZATION QUESTIONS, in order:
+ *
+ * (1) DISCOVERY CONDITION -- which claims does the orthogonal fact make
+ *     CANDIDATES at all? For distribution territory: a claim whose own
+ *     `geographic_relevance_scope` (governed, claim-level, deliberately
+ *     inverted-null-polarity -- see that field's own doc comment,
+ *     lib/retrieval-engine/types.ts) matches an active, confirmed,
+ *     non-superseded `DistributionTerritoryMention` value, via
+ *     `territoryRelevanceMatches` (the exact same literal-matching
+ *     primitive, imported one-way, never reimplemented here). This
+ *     function additionally requires the MATCHING claim itself to be
+ *     `lifecycle: 'Adopted'` and `crc_eligible: 'Yes'` -- a stricter,
+ *     simpler, fail-closed rule than the fixed-topic triggers' own
+ *     topic-level `hasGovernedClaimForTopic` gate, chosen deliberately
+ *     because the geographic opt-in here is itself claim-specific (unlike
+ *     a bare provider mention, which says nothing about any particular
+ *     claim) -- a Pending/unreviewed claim's own geographic opt-in must
+ *     never make some OTHER, unrelated, already-Adopted claim of the same
+ *     topic newly reachable through a territory fact that other claim
+ *     never itself opted into.
+ *
+ * (2) GOAL-CONTRIBUTION AUTHORIZATION -- which REAL, ACTIVE, CONFIRMED,
+ *     EXPLICIT `UserGoal` category may the matching claim's OWN topic
+ *     legitimately inform? Answered ENTIRELY by governed `TopicRelationship`
+ *     records with `target_topic === claim.topic`, each independently
+ *     gated by `relationshipIsAdoptedAndCrcEligible` (the EXACT SAME
+ *     governance gate `lookupRelatedTopicClaims` applies for the
+ *     explicit-goal-driven direction -- imported, never re-derived) AND
+ *     whose `source_topic` is among the caller's own active, confirmed
+ *     explicit goal categories. Zero eligible relationships -> zero
+ *     occurrences for that claim (fail-closed; never "pick the only active
+ *     goal"). Multiple simultaneously-eligible relationships (e.g. two
+ *     different active goals both independently authorized) -> one
+ *     occurrence per authorized, active goal, mirroring the fixed-topic
+ *     triggers' own "one occurrence per satisfied parent goal" precedent.
+ *
+ * These two questions are answered completely independently, in this
+ * order, and NEITHER ever fabricates a `UserGoal` -- `source_goal_category`
+ * always equals a real relationship's own `source_topic`, itself checked
+ * against the real, active, confirmed goal set.
+ *
+ * EXPLICIT-PRECEDENCE SUPPRESSION applies per matching claim's own topic,
+ * mirroring the fixed-topic triggers' identical rule: if the claim's topic
+ * is ALREADY an active, explicit, confirmed goal category, ordinary
+ * explicit retrieval already covers it -- no discovered occurrence is
+ * produced for that claim, regardless of any relationship that might
+ * otherwise authorize it.
+ *
+ * GEOGRAPHY IS ADDITIVE DISCOVERY ONLY: this function only ever CREATES
+ * occurrences (candidates for `lookupDiscoveredTopicClaims`'s own,
+ * completely unmodified, topic-scoped candidate enumeration downstream) --
+ * it never filters, narrows, or removes a claim reachable through ANY other
+ * path. A claim independently reachable via the fixed-topic triggers, an
+ * explicit goal, or a governed `TopicRelationship` traversal is never
+ * affected by this function returning nothing for it.
+ *
+ * `relationships` additive, defaults to `[]` at the one real call site
+ * (`deriveDiscoveredTopicOccurrences` below) -- with no relationships
+ * supplied, this function always returns `[]`, a true zero-behavior-change
+ * default matching every other additive parameter in this codebase.
+ */
+export function deriveClaimTargetedDiscoveryOccurrences(
+  understanding: StructuredUnderstanding,
+  topicClaims: TopicClaim[],
+  relationships: TopicRelationship[],
+): DiscoveredTopicOccurrence[] {
+  const activeGoals = activeConfirmedGoalCategories(understanding)
+  const occurrences: DiscoveredTopicOccurrence[] = []
+
+  const activeTerritoryMentions = understanding.distribution_territory_mentions.filter(
+    (m) => m.superseded_by === null && m.confidence === 'confirmed',
+  )
+  if (activeTerritoryMentions.length === 0) return occurrences
+
+  for (const claim of topicClaims) {
+    if (claim.superseded_by !== null) continue
+    if (claim.lifecycle !== 'Adopted' || claim.crc_eligible !== 'Yes') continue
+
+    // Explicit-precedence suppression -- see this function's own header.
+    if (activeGoals.has(claim.topic)) continue
+
+    // Discovery condition (1): which active territory mentions, if any,
+    // does THIS claim's own governed scope opt into? Checked per mention
+    // (not per deduplicated value) so `source_id` below always names a
+    // real, specific mention_id, exactly like the fixed-topic triggers'
+    // own `source_id` provenance discipline.
+    const matchingMentions = activeTerritoryMentions.filter((m) => territoryRelevanceMatches(claim, [m.value]))
+    if (matchingMentions.length === 0) continue
+
+    // Goal-contribution authorization (2): which active explicit goal(s)
+    // is this claim's own topic governed to inform? Never a fabricated or
+    // arbitrarily-chosen goal -- see this function's own header.
+    const authorizedSourceGoals = relationships
+      .filter((r) => r.target_topic === claim.topic && relationshipIsAdoptedAndCrcEligible(r) && activeGoals.has(r.source_topic))
+      .map((r) => r.source_topic)
+    if (authorizedSourceGoals.length === 0) continue
+
+    for (const mention of matchingMentions) {
+      for (const sourceGoalCategory of authorizedSourceGoals) {
+        occurrences.push({
+          topic: claim.topic,
+          trigger_id: CLAIM_TARGETED_TERRITORY_DISCOVERY_TRIGGER_ID,
+          source_kind: 'distribution_territory_mention',
+          source_id: mention.mention_id,
+          source_goal_category: sourceGoalCategory,
+        })
+      }
+    }
+  }
+
+  return occurrences
+}
+
+/**
+ * Public entry point (Generic Orthogonal-Fact Discovery — TopicRelationship
+ * Authorization milestone, 2026-09-11). Merges the pre-existing, unmodified
+ * fixed-topic-trigger occurrences (`deriveFixedTopicTriggerOccurrences`,
+ * itself renamed from this function's own pre-milestone name -- see its own
+ * header) with the new claim-targeted, `TopicRelationship`-authorized
+ * occurrences (`deriveClaimTargetedDiscoveryOccurrences`). Every existing
+ * call site continues to compile and behave IDENTICALLY without passing
+ * `relationships` (defaults to `[]`, under which
+ * `deriveClaimTargetedDiscoveryOccurrences` always returns `[]`) -- the
+ * same zero-behavior-change discipline this codebase uses for every other
+ * additive parameter (see e.g. `retrieve()`'s own `relationships`
+ * parameter). Callers that already have `relationships` in scope for
+ * `retrieve()`/`lookupRelatedTopicClaims()` (i.e. `run-crc-conversation.ts`)
+ * pass the SAME array here -- one governed relationship list, two
+ * independent consumers, never two different sources of truth.
+ */
+export function deriveDiscoveredTopicOccurrences(
+  understanding: StructuredUnderstanding,
+  topicClaims: TopicClaim[],
+  relationships: TopicRelationship[] = [],
+): DiscoveredTopicOccurrence[] {
+  return [
+    ...deriveFixedTopicTriggerOccurrences(understanding, topicClaims),
+    ...deriveClaimTargetedDiscoveryOccurrences(understanding, topicClaims, relationships),
+  ]
 }
 
 /** Deduplicated topic list, for feeding directly into `retrieve()`'s/`lookupTopicClaims()`'s/`deriveKnowledgeReadinessNeeds()`'s additive `discoveredTopics` parameters. */

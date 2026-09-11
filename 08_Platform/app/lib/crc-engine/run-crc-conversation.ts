@@ -234,7 +234,7 @@ export function runCRCConversation(
   // goal-provenance-preserving occurrence list, not a flattened
   // `GoalCategory[]`) passed to `retrieve()`'s own additive parameter
   // unmodified.
-  const discoveredTopicOccurrences = deriveDiscoveredTopicOccurrences(understanding, topicClaims)
+  const discoveredTopicOccurrences = deriveDiscoveredTopicOccurrences(understanding, topicClaims, relationships)
   const { results, diagnostics: retrievalDiagnostics } = retrieve(handoff, matrix, understanding.user_goals, topicClaims, applicabilityFacts, relationships, handoff.asset_providers, discoveredTopicOccurrences)
   // H5 -- minimal echo-only relevance composition (Copyright UAT Correction
   // Milestone, 2026-08-19): threading the confirmed/unconfirmed contribution

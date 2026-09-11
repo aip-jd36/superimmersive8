@@ -335,6 +335,63 @@ export interface ApplicabilityRequirement {
  * `AssetProviderMention` identifiers) -- neither may substitute for the
  * other.
  */
+/**
+ * `geographic_relevance_scope` (Generic Distribution/Output-Use Territory
+ * Contract, 2026-09-11). Governed runtime metadata, structurally parallel to
+ * `provider_scope`/`tool_scope` immediately above -- BUT WITH A DELIBERATELY
+ * INVERTED DEFAULT POLARITY. Read this doc comment before touching this
+ * field or its consumer (`territoryRelevanceMatches`,
+ * lib/retrieval-engine/lookup-discovered-topic-claims.ts) -- the inversion
+ * is intentional and load-bearing, not a bug to "normalize" into matching
+ * `provider_scope`/`tool_scope`'s convention.
+ *
+ * *** DEFAULT POLARITY IS INVERTED FROM `provider_scope`/`tool_scope`: ***
+ *   - `null` here means the claim DOES NOT PARTICIPATE in territory-driven
+ *     discovery at all (opt OUT). This is the OPPOSITE of `provider_scope`/
+ *     `tool_scope`, where `null` means "matches everything" (opt-IN by
+ *     default). Every pre-existing claim in `TOPIC_CLAIMS_FIXTURE` is `null`
+ *     -- adding this field must never retroactively make any existing claim
+ *     newly discoverable via a distribution-territory fact.
+ *   - `string[]` (non-empty) -- an explicit, reviewed governance decision
+ *     that this claim IS relevant when the project's stated distribution
+ *     territory (see `DistributionTerritoryMention`,
+ *     types/interview-engine.ts) matches one of the listed literal values,
+ *     case-insensitively. An empty array is not a meaningful state and must
+ *     never be authored, mirroring `provider_scope`'s own identical rule.
+ *
+ * WHY THE INVERSION: `provider_scope`/`tool_scope` narrow a claim that is
+ * ALREADY topic-relevant through an existing, separately-governed path (an
+ * explicit UserGoal or an existing Track A trigger) -- opt-out-by-default is
+ * safe there because relevance was already established another way.
+ * `geographic_relevance_scope`, by contrast, is consulted ONLY on the
+ * discovered-topic path (see `territoryRelevanceMatches`'s placement in
+ * `lookupDiscoveredTopicClaims`, mirroring `providerScopeMatches`'s exact
+ * placement) -- it is what MAKES a claim reachable via the new
+ * `'distribution_territory_mention'` Track A trigger in the first place. An
+ * opt-in-by-default (`null` = matches everything) polarity here would mean
+ * every claim with no governance review at all would suddenly become
+ * discoverable to any project that ever states a distribution territory --
+ * silently and by omission, never by an author's explicit choice. Requiring
+ * an explicit non-null array is the only way to preserve the same
+ * "an author must make an explicit, reviewed choice, never fall through an
+ * implicit default" discipline `provider_scope`/`tool_scope` state for
+ * themselves, given this field's different position in the pipeline.
+ *
+ * Values are plain literal strings -- deliberately no alias table, no
+ * country-to-region inference, no legal-jurisdiction hierarchy anywhere in
+ * this codebase (see `DistributionTerritoryMention`'s own doc comment for
+ * the same prohibition stated on the fact side). Matching is exact,
+ * case-insensitive literal comparison only.
+ *
+ * This field is NEVER consulted anywhere except
+ * `territoryRelevanceMatches`/`lookupDiscoveredTopicClaims` -- it does not
+ * participate in `applicability_requirements` evaluation, Bounded
+ * Interpretation, or Composition. A claim reached via this field still goes
+ * through the same Lifecycle/`crc_eligible`/applicability gates every other
+ * discovered-topic candidate does; this field only ever narrows which
+ * claims are considered as candidates in the first place, exactly like
+ * `provider_scope`/`tool_scope` do for their own paths.
+ */
 export interface TopicClaim {
   claim_id: string
   /** Matches UserGoal.category exactly -- this is the field Topic Retrieval actually matches on. */
@@ -371,6 +428,22 @@ export interface TopicClaim {
   provider_scope: AssetProviderId[] | null
   /** See this interface's own `tool_scope` doc comment, immediately above. */
   tool_scope: string[] | null
+  /**
+   * See this interface's own `geographic_relevance_scope` doc comment,
+   * immediately above. INVERTED DEFAULT POLARITY vs. `provider_scope`/
+   * `tool_scope`: `null` (or absent -- see below) means opt-OUT (does not
+   * participate in territory-driven discovery), not opt-in.
+   *
+   * Optional, mirroring `publication_scope`'s own precedent immediately
+   * above (avoiding a mechanical edit of every pre-existing `TopicClaim`
+   * test/fixture literal across the codebase for a field with a safe,
+   * unambiguous default). Unlike `publication_scope`, an absent value here
+   * is semantically IDENTICAL to explicit `null` -- both mean opt-out --
+   * `territoryRelevanceMatches` MUST treat `undefined` and `null`
+   * identically (never treat "field not present" as a different, more
+   * permissive state than "field explicitly null").
+   */
+  geographic_relevance_scope?: string[] | null
   last_verified: string | null
   /** id of the claim version that replaced this one, or null if this is the current version. Mirrors UserGoal.superseded_by's own convention. */
   superseded_by: string | null

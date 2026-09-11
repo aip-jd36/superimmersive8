@@ -105,6 +105,23 @@ export function lookupDiscoveredTopicClaims(
     // Provider pre-filter runs as part of computing `candidates` itself --
     // BEFORE Lifecycle/CRC-eligible/applicability evaluation below, same
     // ordering/discipline as lookupTopicClaims's own candidates computation.
+    //
+    // Generic Orthogonal-Fact Discovery — TopicRelationship Authorization
+    // milestone (2026-09-11): geographic (or any other orthogonal-fact)
+    // narrowing is DELIBERATELY NOT applied here. An orthogonal fact's own
+    // claim-level discovery metadata (e.g. `geographic_relevance_scope`) is
+    // consulted ONLY upstream, in `deriveClaimTargetedDiscoveryOccurrences`
+    // (lib/crc-engine/discovered-relevance.ts), to decide WHETHER a
+    // territory-sourced occurrence exists for a given (topic,
+    // sourceGoalCategory) pair at all -- geography is additive discovery
+    // only, never a downstream narrowing filter here. A prior
+    // implementation (superseded, see that module's own header) applied a
+    // `viaTerritoryTrigger`-gated territory filter in this exact spot; it
+    // was removed because a pair-level narrowing filter cannot safely
+    // coexist with a pair simultaneously reached by an unrelated,
+    // non-territory trigger (it would silently exclude claims that trigger
+    // legitimately reached) -- see `discovered-relevance.ts`'s own header
+    // for the full architecture-diagnostic trail.
     const candidates = topicClaims.filter((c) => c.topic === topic && c.superseded_by === null).filter((c) => providerScopeMatches(c, assetProviders))
 
     if (candidates.length === 0) {
