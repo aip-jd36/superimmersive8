@@ -76,6 +76,10 @@ For each distinct fact-bearing statement in the turn, produce one candidate:
   Explicit absence: if the user explicitly denies presence of a category (e.g. "No person's image appears."), propose the candidate exactly as above but set is_content_presence_absent: true. If the denial is qualified to a specific real/synthetic classification (e.g. "No REAL person's image appears." -- leaving open whether a synthetic one might still appear), also set the attributes "real_or_synthetic" entry to "real" so the denial is recorded as qualified, not absolute. Never set is_content_presence_absent from silence or from a category simply not being mentioned -- only from an explicit negative statement.
   Never set is_correction (or correction_of_raw_text) for this candidate kind, even when a statement appears to reverse or reclassify something said earlier (e.g. "Actually it's fully synthetic." after "A real person appears."; "Actually no real person appears." after "A real person appears."). This pipeline records every content-presence statement as new evidence and never attempts to automatically retract an earlier one from free-form text -- this candidate kind carries no count, individual identity, or project/version scope, so no prior statement can ever be safely identified as the one specific fact being replaced (Content-Presence Correction Safety — Append-Only Closure, 2026-08-28). Always propose a fresh, independent content_presence_mention candidate for what the user just stated, with is_correction unset, and leave any earlier statement alone -- deterministic code always adds it as new evidence alongside whatever was said before.
   A recognizability-only follow-up (e.g. "Actually I don't know whether they're identifiable." after "A recognizable person appears.") is NEVER a content_presence_mention candidate at all, correction or otherwise -- recognizability has no structured representation anywhere in this pipeline, so there is nothing to correct; do not propose a candidate for it.
+- kind "distribution_territory_mention" (Generic Distribution/Output-Use Territory Contract, 2026-09-11): the user directly states a territory (a country, region, or similar geographic value) that is part of the project's intended DISTRIBUTION or OUTPUT-USE -- e.g. "this will run in France", "the campaign is for the UK market", "we're distributing this in Germany". Report the exact value via raw_territory_value, preserving the user's own wording. This is a plain FACTUAL PROJECT-GEOGRAPHY statement -- it never means CRC has determined that any law applies, and it is NOT a request for CRC to consider a jurisdiction (see kind "assessment_jurisdiction_mention" above for that distinct, unrelated concept).
+  Only propose this when the user DIRECTLY states where the project's OUTPUT will be distributed or used -- e.g. "This is for a France campaign.", "The video will run in the UK and Germany.", "We're launching this in Japan." NEVER infer it from a filming location, a client's location, a depicted person's location, or an assessment-jurisdiction statement -- e.g. "We filmed in New York." and "Please assess this for New York." must NEVER produce a distribution_territory_mention candidate; those are separate, unrelated facts (workflow/scoped_observation or assessment_jurisdiction_mention respectively).
+  If the user names more than one territory in one statement (e.g. "France and Germany"), propose one separate distribution_territory_mention candidate per territory named -- never merge them, never pick one, never guess which one "counts."
+  Correction: if this statement reverses or replaces what was said earlier about the project's distribution territory (e.g. "Actually, this is only for Germany, not France" when France was previously stated), set is_correction: true and correction_of_raw_text to the EXACT territory value being replaced (e.g. "France") -- deterministic code, never you, resolves which existing mention this refers to, and will leave the state unresolved/ambiguous rather than guess if it cannot find exactly one match. Do NOT set is_correction for a plain addition alongside a still-valid earlier territory (e.g. "Also distributing this in Germany" when France was already stated and remains wanted) -- that is a fresh candidate with no correction fields set. There is no exclusion concept for this candidate kind (no "is_territory_exclusion" field) -- a statement that a territory is NOT part of distribution is simply not proposed as a candidate at all.
 
 Third-party source rights is its own user_goal category (see goal_category_hint below) for whether the user has the RIGHTS to use third-party source material (e.g. a stock image) in the project -- a materially different question from commercial_use (whether the AI-generated OUTPUT can be used commercially). This category is EXPLICIT-QUESTION-GATED ONLY, exactly like every other goal category: propose it only when the user asks a direct question or states a direct need about permission/rights to use the source material.
 Examples that SHOULD produce a third_party_source_rights user_goal: "Can I use this Getty image in an ad?", "Can I use these iStock images in my client commercial?", "Do I have the rights to use this stock image?", "Can I use a Shutterstock Editorial photo in this campaign?", "Am I allowed to use this licensed stock footage in the video?".
@@ -137,7 +141,7 @@ When kind is "tool_mention" and the user DIRECTLY states which specific plan/tie
 
 If a turn contains nothing you can classify as one of the four kinds -- small talk, an incomplete thought, pure filler -- return no candidates for it, or set low_confidence: true on a best-effort candidate if you're genuinely unsure whether something is a real signal.`
 
-const CANDIDATE_KIND_VALUES = ['tool_mention', 'scoped_observation', 'project_fact', 'user_goal', 'asset_provider_mention', 'assessment_jurisdiction_mention', 'content_presence_mention'] as const
+const CANDIDATE_KIND_VALUES = ['tool_mention', 'scoped_observation', 'project_fact', 'user_goal', 'asset_provider_mention', 'assessment_jurisdiction_mention', 'content_presence_mention', 'distribution_territory_mention'] as const
 /** Mirrors CONTENT_PRESENCE_CATEGORIES in types/interview-engine.ts -- kept as a separate local const here, same pattern as GOAL_CATEGORY_VALUES/GOAL_SCOPE_VALUES above, rather than importing the runtime const array across the adapter boundary. */
 const CONTENT_PRESENCE_CATEGORY_VALUES = ['person_visual_presence', 'person_voice_presence'] as const
 const OBSERVATION_SCOPE_VALUES = ['current_project', 'historical_project', 'general_practice'] as const
@@ -257,6 +261,11 @@ export const CANDIDATE_RESPONSE_SCHEMA = {
             description:
               'When kind is content_presence_mention: true only when the user explicitly denied presence of this category (e.g. "no person\'s image appears"). Never true from silence or from a category simply not being mentioned. False/unset for an ordinary presence statement.',
           },
+          raw_territory_value: {
+            type: ['string', 'null'],
+            description:
+              'When kind is distribution_territory_mention: return ONLY the territory itself (e.g. "France", "the UK", "Germany"), preserving the user\'s wording, exactly as named. Never map it to a canonical/normalized form yourself. Never infer from a filming/client/subject location or an assessment-jurisdiction statement. If the user names more than one territory in one statement, propose one separate candidate per territory. Null otherwise.',
+          },
           attributes: {
             type: 'array',
             description:
@@ -363,6 +372,7 @@ export const CANDIDATE_RESPONSE_SCHEMA = {
           'is_jurisdiction_exclusion',
           'raw_content_presence_category',
           'is_content_presence_absent',
+          'raw_territory_value',
           'attributes',
           'is_correction',
           'correction_of_raw_text',
@@ -402,6 +412,7 @@ interface ParsedCandidate {
   is_jurisdiction_exclusion: boolean
   raw_content_presence_category: (typeof CONTENT_PRESENCE_CATEGORY_VALUES)[number] | null
   is_content_presence_absent: boolean
+  raw_territory_value: string | null
   attributes: ParsedExtractedAttribute[]
   is_correction: boolean
   correction_of_raw_text: string | null
@@ -495,6 +506,7 @@ export function toCandidateObservation(parsed: ParsedCandidate, turn: number): C
     is_jurisdiction_exclusion: parsed.is_jurisdiction_exclusion || undefined,
     raw_content_presence_category: parsed.raw_content_presence_category ?? undefined,
     is_content_presence_absent: parsed.is_content_presence_absent || undefined,
+    raw_territory_value: parsed.raw_territory_value ?? undefined,
     real_or_synthetic_confidence_hint: realOrSynthetic?.confidence,
     real_or_synthetic_value_hint: realOrSyntheticValue,
     usage_confidence_hint: usage?.confidence,

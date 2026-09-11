@@ -69,7 +69,7 @@ function realPipeline(su: Partial<StructuredUnderstanding> & Pick<StructuredUnde
       jurisdiction: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
       human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
     },
-    scoped_observations: [], assessment_jurisdiction_mentions: [], content_presence_mentions: [],
+    scoped_observations: [], assessment_jurisdiction_mentions: [], content_presence_mentions: [], distribution_territory_mentions: [],
     current_phase: 3, gate_1_state: 'met', gate_2_state: 'stable', completion_reason: null, opt_out_scope: null,
     ...su,
   }

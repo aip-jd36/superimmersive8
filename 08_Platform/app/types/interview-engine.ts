@@ -347,6 +347,57 @@ export interface AssessmentJurisdictionMention {
   superseded_by: string | null
 }
 
+// ── Distribution territory mentions (Generic Distribution/Output-Use
+// Territory Contract, 2026-09-11) ──────────────────────────────────────────
+
+/**
+ * A territory (country, region, or similar geographic value) the user has
+ * stated as part of the project's intended distribution or output-use --
+ * e.g. "this will run in France", "the campaign is for the UK market". This
+ * is a plain FACTUAL PROJECT-GEOGRAPHY fact, deliberately NOT an assessment-
+ * scope request (see `AssessmentJurisdictionMention` above for that
+ * distinct, unrelated concept -- a user explicitly asking CRC to consider a
+ * jurisdiction's governed knowledge) and NOT itself a determination that any
+ * law applies. Recording a distribution-territory mention never causes CRC
+ * to assert or imply legal applicability by itself -- it only makes a
+ * governed claim discoverable (see `geographic_relevance_scope` below),
+ * exactly like `AssetProviderMention` makes a provider-scoped claim
+ * discoverable without asserting the provider's terms apply.
+ *
+ * Real correction/supersession semantics (unlike `ContentPresenceMention`'s
+ * deliberate append-only design below) -- mirrors `AssessmentJurisdictionMention`
+ * exactly, because a distribution territory is a single project-level fact a
+ * later statement can directly replace ("Actually, this is only for
+ * Germany, not France"), the same shape `AssessmentJurisdictionMention`
+ * solves for jurisdictions.
+ *
+ * Values remain flat, ungraded, literal labels -- deliberately no `level`,
+ * `parent`, `country`, or `subdivision` field, and deliberately no alias
+ * table anywhere in this pipeline (unlike `JURISDICTION_VALUE_ALIASES`).
+ * Matching against a governed claim's `geographic_relevance_scope` (see
+ * `TopicClaim` in lib/retrieval-engine/types.ts) is exact, case-insensitive
+ * literal comparison only -- no country-to-region inference, no legal-
+ * jurisdiction hierarchy. This is a deliberate scope boundary, not an
+ * oversight.
+ *
+ * `confidence` uses only `confirmed` meaningfully at the per-mention level
+ * (an explicit, stated distribution territory). There is no "explicitly not
+ * distributed in X" concept represented here -- only correction (superseding
+ * a prior stated territory) is supported, never exclusion.
+ *
+ * `superseded_by` follows the same supersede-and-mark discipline as every
+ * other mention type in this file -- a correction never deletes or edits a
+ * prior mention in place.
+ */
+export interface DistributionTerritoryMention {
+  mention_id: string
+  value: string
+  confidence: ConfidenceState
+  source_turn: number
+  source_statement: string
+  superseded_by: string | null
+}
+
 // ── Content presence mentions (CRC Content-Presence Mention Model,
 // 2026-08-28, following the accepted Representation Simplification Review)
 // ─────────────────────────────────────────────────────────────────────────
@@ -804,6 +855,25 @@ export interface StructuredUnderstanding {
    * -- each is its own, separately authorized future milestone).
    */
   content_presence_mentions: ContentPresenceMention[]
+  /**
+   * Generic Distribution/Output-Use Territory Contract (2026-09-11).
+   * Additive and backward-compatible, same discipline as
+   * `assessment_jurisdiction_mentions` before it: a historical session's
+   * stored JSON predating this field deserializes with it defaulted to
+   * `[]` (see serialization.ts's deserializeStructuredUnderstanding), never
+   * `undefined` at runtime. An empty array means no recorded information --
+   * NEVER confirmed absence. Unlike `content_presence_mentions`, this field
+   * DOES have a downstream Track A discovery consumer (see
+   * `DiscoveredRelevanceSourceKind`'s `'distribution_territory_mention'`
+   * value in lib/crc-engine/discovered-relevance.ts) and a downstream
+   * discovered-topic claim filter (`territoryRelevanceMatches`,
+   * lib/retrieval-engine/lookup-discovered-topic-claims.ts) -- it carries
+   * real correction/supersession semantics precisely because that consumer
+   * needs the current, corrected set of active mentions, not an append-only
+   * log. No BI/Projection/Composition consumer exists beyond that filter;
+   * this field never touches `applicability_requirements`.
+   */
+  distribution_territory_mentions: DistributionTerritoryMention[]
   current_phase: Phase
   gate_1_state: Gate1State
   gate_2_state: Gate2State

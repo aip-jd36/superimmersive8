@@ -71,10 +71,16 @@ describe('Anthropic structured-output schema union-type limit guardrail', () => 
   // -- is_content_presence_absent is a plain boolean and does not count.
   // real_or_synthetic travels entirely through the existing attributes[]
   // bag, contributing zero new top-level unions -- see the dedicated
-  // attribute-key-enum test immediately below).
-  test('D: extractor union count is exactly 14 after the generic attributes[] redesign (12) plus raw_jurisdiction_value (13) plus raw_content_presence_category (2026-08-28, +1 new union)', () => {
+  // attribute-key-enum test immediately below.
+  // 15 as of the Generic Distribution/Output-Use Territory Contract,
+  // 2026-09-11, same shape again -- exactly one new nullable-string union
+  // field, raw_territory_value; this fact type has no exclusion flag at all
+  // (see DistributionTerritoryMention's own doc comment), so there is no
+  // sibling boolean to note. Still well under the ANTHROPIC_UNION_LIMIT (16)
+  // test A already enforces generically.
+  test('D: extractor union count is exactly 15 after the generic attributes[] redesign (12) plus raw_jurisdiction_value (13) plus raw_content_presence_category (14) plus raw_territory_value (2026-09-11, +1 new union)', () => {
     const paths = unionCountOnWire(CANDIDATE_RESPONSE_SCHEMA)
-    expect(paths.length).toBe(14)
+    expect(paths.length).toBe(15)
   })
 
   // B. candidate-generator schema union count <= 16

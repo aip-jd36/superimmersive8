@@ -45,7 +45,7 @@ function pipeline(goals: UserGoal[], tools: ToolMention[], providers: AssetProvi
       human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
     },
     tool_mentions: tools, user_goals: goals, asset_provider_mentions: providers,
-    scoped_observations: [], assessment_jurisdiction_mentions: [], content_presence_mentions: [],
+    scoped_observations: [], assessment_jurisdiction_mentions: [], content_presence_mentions: [], distribution_territory_mentions: [],
     current_phase: 3, gate_1_state: 'met', gate_2_state: 'stable', completion_reason: null, opt_out_scope: null,
   }
   const handoff = buildRetrievalHandoff(su)

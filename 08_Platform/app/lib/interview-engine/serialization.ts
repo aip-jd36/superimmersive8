@@ -132,6 +132,15 @@ export function deserializeStructuredUnderstanding(json: string): StructuredUnde
    */
   const content_presence_mentions = parsed.content_presence_mentions ?? []
   /**
+   * `distribution_territory_mentions` defaulted to `[]` when absent (Generic
+   * Distribution/Output-Use Territory Contract, 2026-09-11): same reasoning
+   * and same funnel as `assessment_jurisdiction_mentions` above -- a session
+   * persisted before this field existed round-trips through JSON.parse with
+   * no `distribution_territory_mentions` key at all. An empty array here
+   * means "no recorded information" -- NEVER "confirmed absence."
+   */
+  const distribution_territory_mentions = parsed.distribution_territory_mentions ?? []
+  /**
    * `account_status` per-element defaulting (CRC Kling Governed Knowledge
    * Correction + Decomposition milestone, 2026-08-24): same reasoning and
    * same funnel as the `usage`/`license` backfill immediately above -- a
@@ -147,7 +156,7 @@ export function deserializeStructuredUnderstanding(json: string): StructuredUnde
     ...m,
     account_status: m.account_status ?? { state: 'unknown' as const },
   }))
-  return { ...parsed, user_goals, project_facts, asset_provider_mentions, tool_mentions, assessment_jurisdiction_mentions, content_presence_mentions }
+  return { ...parsed, user_goals, project_facts, asset_provider_mentions, tool_mentions, assessment_jurisdiction_mentions, content_presence_mentions, distribution_territory_mentions }
 }
 
 /**

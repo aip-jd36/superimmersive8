@@ -213,6 +213,7 @@ describe('Track C discovered relevance -- no goal, no fact -> still explicit-goa
       ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
       user_goals: [commercialUseGoal()],
       content_presence_mentions: [],
+      distribution_territory_mentions: [],
     }
     const occurrences = deriveDiscoveredTopicOccurrences(su, TOPIC_CLAIMS_FIXTURE)
     expect(occurrences.filter((o) => o.topic === 'likeness')).toEqual([])
