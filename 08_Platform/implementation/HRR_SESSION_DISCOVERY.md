@@ -1,6 +1,6 @@
 # HRR Session-Focused Production Discovery (CAH-4G.13)
 
-**Status:** `CAH-4G.13 — SESSION-FOCUSED PRODUCTION DISCOVERY / AUTHORITY SAFETY PASSED / FOCUS-SWITCH DISCOVERY PENDING / CAH-4G.14 NOT AUTHORIZED` (2026-09-11, updated). No runtime change. `CAH-4G.10 SLICE A remains CLOSED / PRODUCTION-PROVEN` (unchanged). `CAH-4G.12` architecture (`HRR_RESEARCH_SESSION_CONTRACT.md`) **ACCEPTED**. **Bounded session context: NOT IMPLEMENTED. CAH-4G.14 implementation: NOT AUTHORIZED (evidence threshold still NOT MET — now primarily blocked on focus-switch leakage §Q.4 condition 10, and correction semantics §Q.4 condition 9; authority-firewall safety is now the strongest-supported condition — §Q.4 condition 6). Workbook Research Log: FUTURE / NOT AUTHORIZED.** PM has manually executed, in chronological order: **Session 1** (Copyrightability, Turns 1–4, §O); the **POST-SESSION-1 DISCRIMINATING CONTROL** (§P) — T3 upgraded to **TOPIC CONTINUITY LOST, MODERATE CONFIDENCE** (§P.3); and the **AUTHORITY-DRIFT SAFETY EXPERIMENT** (§Q) — 2/2 clean authority-firewall refusals, referent-independent gating confirmed in production (§Q.2). The original pre-registration (§A–§N), the Session 1 evidence record (§O), and the discriminating-control record (§P) are preserved unmodified. **The next recommended experiment (§Q.11) is an EXPLICIT FOCUS-SWITCH probe, not yet executed. Discovery is not yet complete** — focus-switch leakage and correction semantics remain open. This document is the pre-registration + PM execution script for the discovery `HRR_RESEARCH_SESSION_CONTRACT.md §Q` and `HRR_FOLLOWUP_DISCOVERY.md` called for; it extends rather than duplicates either. (Note: `HRR_RESEARCH_SESSION_CONTRACT.md §Q` is a section in a *different* document — unrelated to this document's own §Q above.)
+**Status:** `CAH-4G.13 — SESSION-FOCUSED PRODUCTION DISCOVERY / COMPLETE FOR DESIGN / CAH-4G.14 DESIGN-ONLY AUTHORIZED / RUNTIME IMPLEMENTATION NOT AUTHORIZED` (2026-09-11, updated). No runtime change. `CAH-4G.10 SLICE A remains CLOSED / PRODUCTION-PROVEN` (unchanged). `CAH-4G.12` architecture (`HRR_RESEARCH_SESSION_CONTRACT.md`) **ACCEPTED**. **Bounded session context: NOT IMPLEMENTED.** CAH-4G.13 production discovery is now **COMPLETE FOR DESIGN** (§R.12) — a separate **CAH-4G.14 DESIGN/PRE-REGISTRATION-ONLY milestone is authorized** to specify the minimum bounded session-context contract (§R.13); **CAH-4G.14 RUNTIME IMPLEMENTATION remains NOT AUTHORIZED** and requires its own later, explicit gate after the design milestone defines and the design itself passes adversarial/pre-implementation tests. **Workbook Research Log: FUTURE / NOT AUTHORIZED.** PM has manually executed, in chronological order: **Session 1** (Copyrightability, Turns 1–4, §O); the **POST-SESSION-1 DISCRIMINATING CONTROL** (§P) — T3 upgraded to **TOPIC CONTINUITY LOST, MODERATE CONFIDENCE**; the **AUTHORITY-DRIFT SAFETY EXPERIMENT** (§Q) — 2/2 clean authority-firewall refusals, referent-independent gating confirmed in production; and the **EXPLICIT FOCUS-SWITCH EXPERIMENT** (§R) — explicit focus switching PASSED cleanly (property A), post-switch natural continuity FAILED under today's architecture (property B, Turn 3 = TOPIC CONTINUITY LOST/MODERATE with a live secondary vocabulary-limitation explanation), no old-focus leakage observed or architecturally possible today. The original pre-registration (§A–§N) and every prior evidence record (§O, §P, §Q) are preserved unmodified. This document is the pre-registration + PM execution script for the discovery `HRR_RESEARCH_SESSION_CONTRACT.md §Q` and `HRR_FOLLOWUP_DISCOVERY.md` called for; it extends rather than duplicates either. (Note: `HRR_RESEARCH_SESSION_CONTRACT.md §Q` is a section in a *different* document — unrelated to this document's own §Q/§R above.)
 
 ---
 
@@ -526,3 +526,139 @@ A future Research Session mechanism, if ever authorized, must satisfy:
 ### Q.13 Status
 
 `CAH-4G.13 — SESSION-FOCUSED PRODUCTION DISCOVERY / AUTHORITY SAFETY PASSED / FOCUS-SWITCH DISCOVERY PENDING / CAH-4G.14 NOT AUTHORIZED`. Discovery is **not** complete — focus-switch leakage (§Q.11) and correction semantics (§Q.9) remain open, pre-registered but unexecuted.
+
+---
+
+## R. EXPLICIT FOCUS-SWITCH PRODUCTION EVIDENCE — CLOSEOUT (recorded 2026-09-11)
+
+**Repository state at recording time:** `origin/main` = `197f3fb` (the authority-drift evidence commit — no drift since). Drift classification: **NONE**. No STOP condition triggered. The executed sequence matches §Q.11's pre-registration exactly, word-for-word for Turns 1 and 3, and via the explicit topic shortcut for Turn 2 — no substitution occurred.
+
+### R.1 Exact production evidence
+
+Fixture unchanged throughout: `CA-RLK-2a PROD SMOKE - internal synthetic, delete after` / `ASSESS-007-2026-09-07`. Fresh conversation.
+
+| Turn | Action/question | Observed result (direct) | Classification | Confidence | PASS/FAIL vs. §Q.11 |
+|---|---|---|---|---|---|
+| 1 | *"What does governed knowledge say about copyrightability here?"* | Routed to Copyrightability; unresolved applicability (`jurisdiction`, `human_contribution_description`); authority boundary preserved | 1 — CURRENT ARCHITECTURE SUFFICIENT | High | PASS |
+| 2 | Explicit **"Copyright ownership" topic shortcut** click | Turn 1 remained visible; new thread action "Research: Copyright ownership"; Copyright-ownership governed material rendered; no Copyrightability-specific unresolved items (`jurisdiction`/`human_contribution_description`) reappeared; authority boundary preserved | A — EXPLICIT FOCUS SWITCH | High | PASS |
+| 3 | *"What does this mean for ownership?"* | No routing to Copyright ownership; no reversion to Copyrightability; generic "Try a governed research topic" fallback with topic shortcuts; authority boundary preserved | D — TOPIC CONTINUITY LOST (primary); E — RETRIEVAL/CLASSIFIER VOCABULARY LIMITATION (secondary, genuinely live) | **Moderate** (primary) | Consistent with expected-today outcome (§Q.11: "a fallback is expected/acceptable today") — recorded as an informative production data point, not a pass/fail against a prediction of success |
+
+### R.2 Turn 2 challenge — what is and is not proven
+
+Answering the five required questions:
+
+1. **Deterministic identification?** Yes, by construction — the topic shortcut dispatches `{mode:'topic_pick', topic}` with zero model calls; topic identity is never LLM-inferred for this path.
+2. **Does the rendered response demonstrate Copyright ownership (not Copyrightability) was researched?** Yes — the thread action label and the governed content itself were specific to Copyright ownership.
+3. **Is the absence of Copyrightability-specific unresolved state meaningful evidence against leakage?** Partially. It is real, observable evidence *against visible leakage* — but its absence is not, by itself, logically conclusive against every conceivable form of hidden internal carryover, since a different kind of leakage might not necessarily reproduce the exact same unresolved-item labels.
+4. **Could hidden old-focus state exist without affecting the render?** Architecturally, no — stronger than pure absence-of-evidence: today's V1 pipeline is stateless per request (`runHrrResearch()` is pure; the request body is strictly `{mode, topic|question}`, never `prior_context`). There is no code path through which any state — visible or hidden — could carry from Turn 1 into Turn 2's request. This is a source-grounded structural guarantee, not merely an observational inference.
+5. **What can and cannot be claimed?**
+   - **SUPPORTED:** an explicit reviewer topic action cleanly and deterministically routes the current turn to the newly selected topic, with no leakage from the immediately prior topic — observed, and architecturally guaranteed under today's stateless design.
+   - **NOT YET PROVEN:** that a *future* session-context implementation — which would necessarily introduce some carried state, unlike today's system — will correctly supersede inherited focus. This turn's evidence comes from a system with zero state; it cannot speak to how a stateful system would behave, any more than the earlier discriminating control could speak to a session-carried (vs. typed) focus mechanism.
+
+### R.3 Turn 3 challenge — classification review
+
+Working through the seven required questions:
+
+1. **Does "ownership" alone provide enough topic signal that the classifier arguably should have resolved Copyright ownership without any session state?** Arguably yes in principle, but it is a materially *weaker* signal than what the discriminating control tested. The control used a close-to-canonical phrase ("in the copyrightability guidance"); Turn 3 uses only a bare, colloquial fragment ("ownership") — not the full topic label "Copyright ownership" and not the topic's internal identifier. This is a real, unaddressed gap between the two tests, not a like-for-like replication.
+2. **Could this instead reveal a classifier vocabulary limitation?** Yes — genuinely live. It is entirely plausible that "ownership" alone, in isolation, is simply too weak/ambiguous a token for the classifier to route on, *independent of whether any session focus was available*. This was never isolated: no fresh, zero-context, first-turn control of this exact colloquial phrasing was run.
+3. **Does the immediately preceding explicit Copyright ownership action make lack of active Research Focus the more plausible missing variable?** Plausible, but not more plausible than #2 without an isolating control — the two explanations are confounded here in a way the earlier discriminating control (§P) did not suffer from, because that control paired a hard term with a *strong*, close-to-canonical topic phrase, whereas Turn 3 pairs no hard term with only a *weak* topic fragment.
+4. **Any evidence Copyrightability leaked forward?** No — the observed fallback showed no reversion to Copyrightability content whatsoever.
+5. **Did Turn 3 fail before Composition?** Yes — the "Try a governed research topic" fallback is the standard `research_intents: []` pattern, occurring at classification/routing, before Retrieval/Applicability/BI/Composition ever run. Consistent with every other fallback observed across this program (T2, T3-original, T4).
+6. **Would active Research Focus = Copyright ownership plausibly resolve this utterance?** Plausible — consistent with, and arguably reinforced by, the discriminating-control mechanism (a bounded context injection carrying the topic label alongside the current utterance's own partial reference could plausibly succeed, the same way an in-utterance topic name did).
+7. **Is that proven, or merely strengthened?** Merely strengthened — the same analogical-not-literal caveat applies as it did to T3-original (§P.2–P.3): no session-carried-context mechanism has ever actually been exercised.
+
+**Primary classification: D — TOPIC CONTINUITY LOST, MODERATE confidence.** Not lower, because Turn 3 fits the same fully consistent pattern observed across every prior instance in this program (topic name/phrase absent from the current utterance → fallback; present → success), now replicated a second time under a genuinely different question shape. Not higher, because of the specific new confound in point 1/2/3 above — "ownership" is a materially weaker signal than anything previously tested as a positive control, and that specific weaker-signal case was never isolated. **Secondary classification recorded, not manufactured: E — RETRIEVAL/CLASSIFIER VOCABULARY LIMITATION**, because it is a genuinely live, evidence-consistent alternative, not boilerplate hedging.
+
+### R.4 Focus-switch result — two properties, kept separate
+
+**A. EXPLICIT FOCUS SWITCH: PASS.** A reviewer can explicitly select a different governed topic via the topic shortcut and reliably get that new topic's governed content — deterministic, zero-model-call, clean, with no leakage observed or (per §R.2 point 4) architecturally possible under today's design.
+
+**B. POST-SWITCH CONTINUITY: FAIL**, under today's independent-turn architecture. A subsequent natural-language follow-up could not use the just-selected focus without the reviewer re-stating or re-selecting it explicitly. This is derived directly from Turn 3's observed fallback, not assumed in advance.
+
+### R.5 No-leakage claim — precise wording
+
+**Supported wording:** "No old-focus leakage was observed in the rendered Turn 2 or Turn 3 behavior, and no mechanism exists in today's architecture through which such leakage could occur, since each request is independently stateless."
+
+**Not supported, and explicitly not claimed:** "old focus cannot leak" (as a general, permanent property) or "a future session context mechanism would be leakage-safe." No such mechanism exists yet; this finding describes today's system only.
+
+### R.6 Accumulated discovery evidence (synthesis, no retroactive rewriting)
+
+- **Session 1** (§O): T1 baseline PASS; T2 REFERENT UNRESOLVED (high confidence, unchanged); T3 TOPIC CONTINUITY LOST/MODERATE as finalized in §P (not re-opened or upgraded here); T4 REFERENT UNRESOLVED, mechanically clean but referentially confounded by T3's own prior failure (unchanged).
+- **Discriminating control** (§P): full topic-phrase + hard term → success; established the classifier is not categorically vocabulary-blind; supported (not proved) T3's continuity-loss reading.
+- **Authority-drift experiment** (§Q): 2/2 clean, bounded authority-firewall refusals; authority determination confirmed structurally independent of referent resolution.
+- **Focus-switch experiment** (§R, this section): property A (explicit switch) PASS at high confidence; property B (post-switch continuity) FAIL, consistent with and replicating the topic-continuity-loss pattern at moderate confidence, with a genuinely live secondary explanation (vocabulary limitation) that the discriminating control's evidence does not fully rule out for this specific weaker-signal phrasing.
+
+**The newest experiment does not erase uncertainty from older experiments.** T3-original's MODERATE confidence (§P.3) is not retroactively upgraded by Turn 3's replication; it is only noted as consistent with the same overall pattern.
+
+### R.7 CAH-4G.14 evidence-threshold update (12 conditions)
+
+| # | Condition | Status | Evidence |
+|---|---|---|---|
+| 1 | Multiple independently-worded continuity failures | **MET** | T2, T3-original, and now Turn 3 — three differently-worded instances |
+| 2 | ≥2 relevant failure classes | **PARTIALLY MET** (unchanged tier, strengthened) | REFERENT UNRESOLVED (T2) + TOPIC CONTINUITY LOST (T3, Turn 3) — now *replicated twice*, both still individually moderate-confidence; coverage of 2 classes is real, but confidence in the second class remains capped by the same structural (analogical-not-literal) gap in both instances |
+| 3 | Composition ruled out where relevant | **MET** | All continuity failures, including Turn 3, occur pre-composition |
+| 4 | Bounded structured context plausibly sufficient | **PARTIALLY MET** (strengthened) | Reinforced by a second consistent data point; still never literally tested |
+| 5 | Transcript unnecessary | **PARTIALLY MET / mixed** | Strongly supported for the authority dimension (§Q); untested for the general continuity-resolution dimension |
+| 6 | Authority firewall preserved in baseline evidence | **MET** | Reinforced again — authority boundary held across all 3 focus-switch turns in addition to the dedicated §Q experiment |
+| 7 | Fresh governed pipeline invariant compatible with proposed context | **MET** | Unchanged, architectural |
+| 8 | O(1) context/model cost plausibly achievable | **PARTIALLY MET — at the design-plausibility level only** | Topic shortcuts already cost 0 calls, free-form ≤1; any proposed bounded-context injection (CRC's `[Context:]`-line precedent) would augment the existing single call's input, not add a call — this is a *design-plausibility* judgment, explicitly not an *implementation-proven* fact (no mechanism built) |
+| 9 | Explicit focus-switch semantics established | **MET (new)** | §R.4 property A — clean, deterministic, high confidence |
+| 10 | No old-focus leakage observed | **MET, observationally, for today's architecture only (new)** | §R.5 — precise wording, not overclaimed |
+| 11 | Correction semantics | **NOT TESTED** | Deliberately deferred — §R.9 |
+| 12 | Evidence supports a generic architecture over domain-specific orchestration | **MET (new)** | Both Copyrightability and Copyright ownership were handled by the identical generic classifier/authority-gate/composition pipeline throughout; nothing in any experiment suggests topic-specific code paths are needed |
+
+**Overall:** distinguishing three separate gates per instruction —
+- **EVIDENCE SUFFICIENT TO DESIGN:** **YES.** Conditions 1, 3, 6, 7, 9, 10, 12 are solidly MET; conditions 2, 4, 5, 8 are well-developed PARTIALLY MET states whose remaining gaps (the analogical-vs-literal test distinction, transcript-for-continuity, exact cost of a specific design) are the kind of question a design document should resolve by *specifying a mechanism precisely*, not by gathering more raw production discovery.
+- **EVIDENCE SUFFICIENT TO IMPLEMENT:** **NO.** No mechanism has been specified yet to implement.
+- **IMPLEMENTATION PROVEN SAFE:** **NO, and cannot be, until something is actually built** — this requires the adversarial/pre-implementation tests that the design milestone itself must define (§R.11).
+
+### R.8 Minimum-context candidate review (evidence-for / evidence-against / viability)
+
+| Candidate | Evidence for | Evidence against | Addresses | Leaves unexplained | Authority implications | Complexity | Transcript needed? |
+|---|---|---|---|---|---|---|---|
+| **A — no context** | Zero risk, zero complexity, fully proven safe by definition | Directly falsified as *sufficient for the desired UX* — T2, T3, Turn 3 all fail today | Nothing (baseline) | All observed continuity failures | None (nothing to secure) | None | No |
+| **B — Research Focus identity only** | Plausible for "sub-concept naming" follow-ups (T3, Turn 3) — both name a term/fragment that a bounded focus hint could plausibly disambiguate | **Challenged directly, per instruction:** plausibly **insufficient alone** for referentially generic follow-ups (T2 "why isn't that established?", T4 "why does that matter?") where bare topic identity doesn't say *which* of multiple unresolved items or prior propositions "that" points to | T3/Turn-3-shaped questions (unproven, analogical only) | T2/T4-shaped questions (plausibly, per the above) | No new risk identified beyond the general safety case (§Q) | Low | No |
+| **C — Focus + originating provenance turn id** | Could in principle let a future turn look up "which turn" a referent came from | Risks reintroducing cached prior-answer content if the turn id is used to re-fetch stored prior output — in tension with §R.10's "session state must never become truth" principle unless carefully scoped to identifiers only | Same as B, plus some turn-provenance questions | Same open questions as B unless paired with D | Requires care: must not become a backdoor to reusing stale prior conclusions | Medium | No, if scoped correctly |
+| **D — bounded referent candidates** | Directly targets the T2/T4-shaped gap B leaves open — a bounded pointer to *which specific unresolved item or governed proposition* was last surfaced, without caching its content | Entirely untested; no multi-candidate-referent production scenario has ever arisen | T2/T4-shaped questions (plausibly) | Whether reviewers actually produce genuinely multi-candidate ambiguity often enough to justify the complexity | Consistent with §R.10 if scoped to identifiers, never content | Medium-High | No |
+| **E — bounded structured context + existing classifier (B + D combined, as needed)** | **Best-supported minimum-necessary candidate**: uses the unmodified classifier (already shown to work given an explicit signal — §P, §R.2), combines focus identity (covers T3/Turn-3-shaped cases) with a bounded referent pointer (covers T2/T4-shaped cases) without ever caching substantive content | Still entirely unimplemented and untested as an integrated mechanism | The full demonstrated failure set, plausibly, if both sub-parts are included | Whether the *combination* introduces its own new interaction risks (never tested) | Same safety case as B, must still be validated by the design milestone's own pre-implementation tests (§R.11) | Medium | No |
+
+**Explicit rejection of over-simplification:** per instruction, Candidate B alone is **not** called sufficient merely because it is smallest. The evidence (T2, T4 both plausibly needing more than bare topic identity) argues the minimum-necessary design is closer to **E** — bounded focus identity **plus** a bounded referent pointer, both scoped to identifiers only, never cached content — not B in isolation.
+
+### R.9 Correction-semantics decision
+
+**Choice: B — SAFE TO DEFER INTO THE DESIGN MILESTONE, as an explicit unresolved contract that must be specified before implementation.** Reasoning: we already have enough architectural understanding to state the relevant distinction precisely (explicit focus switch = a deliberate, deterministic UI action selecting a new governed topic; correction = a natural-language amendment to what was just asked, e.g. "No, I meant ownership") and to propose a testable hypothesis for the design document (a correction plausibly reduces to a new explicit topic-intent classification rather than an in-place edit of history) — but this hypothesis must be explicitly flagged as **unvalidated** and made one of the adversarial/pre-implementation tests the design milestone is required to define (§R.11), rather than requiring a dedicated production discovery round before design work can even begin. Option A (required before design) is rejected as unnecessarily blocking; option C (required as one more production experiment before any design work) is rejected because the design work itself does not depend on correction being resolved empirically first — only its eventual implementation does.
+
+### R.10 Session-state-must-not-become-truth (reaffirmed)
+
+Explicitly prohibited from ever being carried forward as substantive truth in any future mechanism: prior answer prose; prior generated explanation; prior applicability result; prior BI conclusion; prior project-fact interpretation; any evidence-sufficiency conclusion; any control result; any assessment verdict. The narrow candidate design space characterized (not yet authorized) by this discovery program: active governed Research Focus identity; a provenance/origin identifier (scoped carefully, per §R.8's caveat on Candidate C); bounded governed referent identifiers (e.g., a specific unresolved-requirement key or governed-proposition id most recently surfaced) — never the content behind them. None of these are authorized for implementation by this milestone.
+
+### R.11 Explicit-intent precedence
+
+**Supported directly by production evidence** (§R.2, §R.4 property A): Turn 2's explicit topic-shortcut click correctly and deterministically established Copyright ownership as the new focus, cleanly superseding Copyrightability, through a deterministic, non-LLM UI action — not through any transcript-semantics judgment.
+
+**Proposed invariant:** *Current explicit reviewer intent, expressed through an explicit topic action, must always override any inherited/session-carried context. A future session mechanism must never ask an LLM to arbitrate between an explicit current topic action and inherited focus based on transcript semantics — topic selection via explicit action must remain the deterministic, non-model-mediated dispatch it already is today.*
+
+### R.12 Discovery status
+
+**COMPLETE FOR DESIGN.** Not "COMPLETE" outright — correction semantics (§R.9) and the integrated B+D combination in Candidate E (§R.8) remain unvalidated, but per the explicit instruction, those gaps are the kind of uncertainty a design/pre-registration milestone should resolve by specification and by defining adversarial pre-implementation tests, not by further raw production discovery. **Runtime implementation remains separately, explicitly unauthorized.**
+
+### R.13 Next milestone — CAH-4G.14, DESIGN / PRE-REGISTRATION ONLY (not implementation)
+
+**Proposed high-level objective (not written here, not implemented):** specify the minimum generic, bounded, O(1) Research Session context contract needed to support natural same-focus follow-ups, while preserving — as binding constraints on the design itself, not just aspirations:
+
+- authority independence (§Q.2's invariant, unconditionally)
+- explicit-intent precedence (§R.11)
+- focus-switch semantics (§R.4 property A, as already proven)
+- an explicit, testable correction-semantics proposal (§R.9, flagged unvalidated)
+- fresh governed pipeline execution every turn, unconditionally (§O.7/§P.9/§Q.9, reaffirmed)
+- provenance (identifiers only, never cached content — §R.10)
+- fail-closed behavior as the default
+- no transcript dependence
+- no workbook-wide memory
+- no verdict automation
+
+The design milestone **must** define its own adversarial/pre-implementation test plan (at minimum: an authority-drift retest against the *actual* proposed mechanism, a focus-switch-leakage retest against the actual mechanism, and a correction-semantics test) as a condition of any later, separately-authorized runtime-implementation gate. **No implementation code is authorized by this section, and none is written here.**
+
+### R.14 Status
+
+`CAH-4G.13 — SESSION-FOCUSED PRODUCTION DISCOVERY / COMPLETE FOR DESIGN / CAH-4G.14 DESIGN-ONLY AUTHORIZED / RUNTIME IMPLEMENTATION NOT AUTHORIZED`.
