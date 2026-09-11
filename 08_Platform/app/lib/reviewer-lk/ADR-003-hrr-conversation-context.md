@@ -1,6 +1,6 @@
 # ADR-003: A visible HRR research thread is UI; the reasoning pipeline gets a bounded enum-only referent, never the transcript
 
-**Status:** ACCEPTED — CAH-4G.9 (design, 2026-09-10). **Slice A: CLOSED / PRODUCTION-PROVEN (CAH-4G.10 → CAH-4G.10P deployment-gap found → CAH-4G.10I integrated to `main` = `4b9ee5a` → CAH-4G.10C authenticated production UAT PASSED all 10 checks, 2026-09-11 — evidence: `HRR_CONVERSATIONAL_ARCHITECTURE.md §FF`).** **CAH-4G.11 → CAH-4G.12 → CAH-4G.13 (2026-09-11 — `HRR_FOLLOWUP_DISCOVERY.md`, `HRR_RESEARCH_SESSION_CONTRACT.md`, `HRR_SESSION_DISCOVERY.md`)** ran the full generic-taxonomy discovery program culminating in four rounds of real production evidence (Session 1, a discriminating control, an authority-drift safety experiment, and an explicit focus-switch experiment — `HRR_SESSION_DISCOVERY.md` §O–§R) and closed **COMPLETE FOR DESIGN** at `origin/main` = `8206415`. **CAH-4G.14 (2026-09-11, this update) is the DESIGN/PRE-REGISTRATION-ONLY milestone that refines the original `HrrThreadContext` hypothesis (decisions 2–4 below) into a concrete, evidence-grounded `ResearchSessionContext` design — see the new section below.** Decisions 1, 5, 6, 7, 8 below remain production-proven in code + real reviewer sessions, unchanged. Decisions 2, 3, 4 (the bounded referent + follow-up resolution) are **superseded in specificity, not in principle**, by the CAH-4G.14 design below — the original `HrrThreadContext` sketch is preserved here unmodified as historical record; the refined, evidence-grounded shape is `ResearchSessionContext` (see below). **Slice B / CAH-4G.14 RUNTIME IMPLEMENTATION remains a separate, NOT STARTED, NOT AUTHORIZED milestone**, gated on the conditions in the CAH-4G.14 section below. The VISIBLE thread is `hrr-thread.ts` (reducer) + `ReviewerLkLookup` (`useReducer`). As-built: `HRR_CONVERSATIONAL_ARCHITECTURE.md §BB`; deployment-gap reconciliation: §CC; integration record: §DD; production UAT evidence: §FF; CAH-4G.13 discovery evidence: `HRR_SESSION_DISCOVERY.md` §O–§R.
+**Status:** ACCEPTED — CAH-4G.9 (design, 2026-09-10). **Slice A: CLOSED / PRODUCTION-PROVEN (CAH-4G.10 → CAH-4G.10P deployment-gap found → CAH-4G.10I integrated to `main` = `4b9ee5a` → CAH-4G.10C authenticated production UAT PASSED all 10 checks, 2026-09-11 — evidence: `HRR_CONVERSATIONAL_ARCHITECTURE.md §FF`).** **CAH-4G.11 → CAH-4G.12 → CAH-4G.13 (2026-09-11 — `HRR_FOLLOWUP_DISCOVERY.md`, `HRR_RESEARCH_SESSION_CONTRACT.md`, `HRR_SESSION_DISCOVERY.md`)** ran the full generic-taxonomy discovery program culminating in four rounds of real production evidence (Session 1, a discriminating control, an authority-drift safety experiment, and an explicit focus-switch experiment — `HRR_SESSION_DISCOVERY.md` §O–§R) and closed **COMPLETE FOR DESIGN** at `origin/main` = `8206415`. **CAH-4G.14 (2026-09-11, this update) is the DESIGN/PRE-REGISTRATION-ONLY milestone that refines the original `HrrThreadContext` hypothesis (decisions 2–4 below) into a concrete, evidence-grounded `ResearchSessionContext` design — see the new section below.** Decisions 1, 5, 6, 7, 8 below remain production-proven in code + real reviewer sessions, unchanged. Decisions 2, 3, 4 (the bounded referent + follow-up resolution) are **superseded in specificity, not in principle**, by the CAH-4G.14 design below — the original `HrrThreadContext` sketch is preserved here unmodified as historical record; the refined, evidence-grounded shape is `ResearchSessionContext` (see below). **Slice B / CAH-4G.14 RUNTIME IMPLEMENTATION remains a separate, NOT STARTED, NOT AUTHORIZED milestone**, gated on the conditions in the CAH-4G.14 section below. **CAH-4G.15 (2026-09-11) is a TEST-FIRST / PRE-IMPLEMENTATION-GATE milestone (see the new section further below) — it adds inert, unwired pure primitives (`lib/hrr/research-session-context.ts`, `.schema.ts`) plus 3 new test files (108 tests) proving the CAH-4G.14 design is mechanically testable. It changes NO production behavior — confirmed by `git status` (5 new, untracked files only; zero existing files modified) and a static boundary test proving nothing in the live pipeline imports the new files.** The VISIBLE thread is `hrr-thread.ts` (reducer) + `ReviewerLkLookup` (`useReducer`). As-built: `HRR_CONVERSATIONAL_ARCHITECTURE.md §BB`; deployment-gap reconciliation: §CC; integration record: §DD; production UAT evidence: §FF; CAH-4G.13 discovery evidence: `HRR_SESSION_DISCOVERY.md` §O–§R.
 
 **Context:** CAH-4G is production-deployed and semantically safe. PM production UAT found the single-turn HRR model *too visible*: asking a second free-form question replaces the first. Human Reviewers expect a conversational research thread (interaction model like CRC). See `HRR_CONVERSATIONAL_ARCHITECTURE.md` §A.
 
@@ -285,3 +285,142 @@ Runtime implementation of any part of this design remains **separately, explicit
 If and when a separate implementation-authorization gate is granted, the smallest defensible first slice is: (a) the pure `deriveResearchSessionContext()` selector over the existing client `HrrThreadState` (no server change, no route change — purely client-side, testable in isolation); (b) extending `parseBody` to accept and schema-validate the new field (rejecting malformed shapes per §14/§19.9); (c) the bounded context-prefix construction fed into the existing single classify call (§9) — explicitly **not** slicing in the authority-consultation path, since §10 requires that path to remain permanently untouched by design, not merely "not yet touched." Correction (§8) and the multi-topic/authority-only lifecycle rules (§6) should ship in the same slice as (a)–(c), since they are selector-level decisions, not separate follow-on work — splitting them out would leave the selector's behavior partially unspecified in production.
 
 **No code in this section is implemented. No runtime change has been made anywhere in this milestone.**
+
+---
+
+# CAH-4G.15 — Bounded Session Context Pre-Implementation Gate: Test-First Contract (2026-09-11)
+
+**TEST-FIRST / PRE-IMPLEMENTATION GATE. Production behavior is unchanged.** This section records what was actually built and tested against the CAH-4G.14 design above (§1–§20) — pure types, a pure selector, a server-trust-boundary validator, and 108 tests across 3 new files — with **zero existing files modified** and **zero imports from the live pipeline into any of it**. Runtime implementation remains a separate, later, explicitly unauthorized decision.
+
+## 1. What exists now
+
+| File | Role | Wired into production? |
+|---|---|---|
+| `lib/hrr/research-session-context.ts` | `ResearchSessionContext` type, `deriveResearchSessionContext()` pure selector, `buildResearchSessionContextPrefix()` pure text builder | **No** |
+| `lib/hrr/research-session-context.schema.ts` | `validateResearchSessionContext()` (strict) + `resolveResearchSessionContext()` (lenient, fail-closed, never null) — the server trust boundary | **No** |
+| `__tests__/hrr/research-session-context.test.ts` | Selector lifecycle (13 cases), correction contract, no-prose proof, O(1) bound proofs, prefix builder | n/a (test-only) |
+| `__tests__/hrr/research-session-context-schema.test.ts` | Server trust-boundary accept/reject matrix | n/a (test-only) |
+| `__tests__/hrr/research-session-context-boundary.test.ts` | Static proof: no live-pipeline import, authority independence, no-transcript firewall, no-prose dependency | n/a (test-only) |
+
+## 2. Context schema (as implemented, exactly matching the CAH-4G.14 design §3)
+
+```ts
+interface ResearchSessionContext {
+  activeFocus: ReviewerResearchTopic | null        // governed enum, never free text
+  activeFocusOrigin: 'topic_selection' | 'interpreted_question' | null   // reuses the EXISTING intent_origin/source_kind enum
+  unresolvedReferents: string[]                    // ≤ HRR_MAX_UNRESOLVED_REFERENTS (5), each ≤ HRR_MAX_REFERENT_IDENTIFIER_LENGTH (100) chars
+}
+```
+
+No field can carry transcript, prior answer prose, a generated summary, a cached applicability/BI result, a project fact, or an assessment conclusion — there is no field for any of them (mechanically enforced by the no-transcript firewall tests, §7 below).
+
+## 3. Referent contract (Phase 13)
+
+**Allowed referent category:** governed requirement/dependency identifiers — reusing the **already-existing** `HrrUnresolvedInput.identifier` field (`lib/hrr/types.ts`), which is itself either an `ApplicabilityFact` enum value or a governed project-dependency identifier. **No new domain-specific identifier was invented.** (The design's STOP condition — "if stable referent identifiers do not currently exist" — did not trigger: this field already exists in the shipped `HrrResearchAnswer` shape.)
+
+- **Authoritative source:** `projectHrrResearchAnswer()` (Slice 4, unmodified) — this milestone never computes or invents a referent; it only reads one that already exists on a settled answer.
+- **Who creates it:** the existing, unmodified consultative-composition layer.
+- **When it becomes active:** the moment a turn's answer resolves to exactly one topic (selector case 2/3/4/5).
+- **When it is cleared:** on "Clear conversation" (selector case 10), on a multi-topic/ambiguous turn (case 11, reset), or superseded by a fresh single-topic turn's own `unresolved_inputs` (case 4/5 — referents always refresh to the MOST RECENT single-topic turn's own values, never accumulated across turns).
+- **Survives a focus switch?** No — referents are always for the CURRENT `activeFocus` only; switching focus (case 5) replaces both together, atomically, from the same turn.
+- **Safe to pass to classifier interpretation?** Yes, by design — it is an identifier, never content; the current turn's fresh pipeline (§11) is what determines its CURRENT status, the referent only tells the classifier what the reviewer is likely still asking about.
+- **Recomputed fresh downstream?** Yes, unconditionally — see §11.
+
+## 4. Selector semantics (§5 of the design, Phase 5's 13 cases — all implemented and tested)
+
+Session start / same-focus / explicit switch / failed turn (transparent) / authority-only turn (transparent) / pending turn (transparent) / stale-aborted turn (structurally unrepresentable — the reducer's own `settle` guard already discards it before append) / clear conversation / multi-topic-ambiguous (reset, stop scanning) / no resolved topic / malformed topic value (filtered, degrades to the appropriate other case) — see `research-session-context.ts`'s own docstring and `research-session-context.test.ts`'s 13 labelled tests for the exact, tested behavior of each.
+
+## 5. No-prior-answer-prose proof (Phase 4)
+
+`deriveResearchSessionContext()` reads ONLY `turn.role`, `turn.status`, `turn.answer.topics`, and within each topic only `.topic`, `.intent_origin`, `.unresolved_inputs[].identifier` — proven exhaustively by a property-access allowlist test (`research-session-context-boundary.test.ts`, describe block C) covering every local variable name the file actually uses. It never reads `orientation`, `boundary_note`, `bi_summary_blocks`, `governed_considerations[].statement_verbatim`, or the reviewer's own raw `question` text — proven both by the allowlist test and by dedicated pattern tests, and behaviorally by a test asserting a fixture's deliberately-marked prose (`"PROSE — must never be read by the selector"`) never appears anywhere in the derived context's serialized output.
+
+## 6. Explicit-intent precedence — what CAH-4G.15 can and cannot prove (Phase 6)
+
+**Proven mechanically, for the topic-pick path:** `topicSelectionGateResult()` has arity 1 — `(topic)` only — and produces byte-identical output regardless of any "would-be" inherited context, because it structurally has no parameter to receive one. Tested directly.
+
+**NOT provable in this milestone, for the free-form path, and stated honestly rather than assumed:** the real mechanism (§9 of the CAH-4G.14 design) is a bounded TEXT PREFIX fed into the SAME existing classifier call — precedence between an explicit current-utterance topic and an inherited focus hint is therefore ultimately the classifier's own behavior given a prompt that does not yet exist and is explicitly out of scope to write in this milestone. **This is a genuine, acknowledged limit of what a pre-implementation test-first gate can prove without enabling the feature** — recorded here rather than glossed over. What IS proven: nothing downstream of the classify call (§7 below) could ever override an explicit classifier result even if precedence were somehow violated upstream — the blast radius of a future prompt-level precedence bug is structurally confined to a single call's output, never silently amplified by any other layer.
+
+## 7. Authority independence — tests and result (Phase 7)
+
+All pass:
+
+- `hrr-authority-gate.ts` imports nothing from `research-session-context` (static import-graph test).
+- `hrr-authority-gate.ts`'s source contains no reference to `ResearchSessionContext`, `activeFocus`, or `unresolvedReferents` anywhere (static source-grep test).
+- `hrrAuthorityGate` has arity ≤ 2 — `(classified, options)` only; no context parameter exists to be consulted.
+- `run-hrr-research.ts` carries no reference to any of the new types either.
+
+**Invariant is enforced structurally, not by convention** — mirroring the existing `authority-firewall.test.ts` discipline for the rest of `lib/reviewer-lk/**`.
+
+## 8. Server trust boundary — accepted/rejected payload matrix (Phase 8/9)
+
+| Payload | Result |
+|---|---|
+| absent (`undefined`/`null`) — old client compatibility | **accept** → empty context |
+| valid `activeFocus` only | **accept** |
+| valid `activeFocus` + bounded `unresolvedReferents` | **accept** |
+| exactly `HRR_MAX_UNRESOLVED_REFERENTS` referents | **accept** |
+| unknown/invalid `activeFocus` value | **reject** → `null` (strict) / empty (lenient) |
+| unknown `activeFocusOrigin` value | **reject** |
+| `activeFocusOrigin` or referents present without a focus | **reject** (inconsistent combination) |
+| non-string / object-shaped referent entry | **reject** |
+| free-text-injection-shaped referent (long prose string) | **reject** |
+| over-limit referent count | **reject — whole payload, never silently truncated** |
+| malformed object (array / bare string / bare number) | **reject** |
+| unexpected extra top-level field (incl. a `messages`/`priorAnswer`-shaped smuggling attempt) | **reject — unrecognized keys are NOT silently ignored** |
+| nested/malformed structure (array of arrays, etc.) | **reject** |
+| empty-string referent | **reject** |
+
+`resolveResearchSessionContext()` — the only function a future route should call — never returns `null` and never throws; every reject case above degrades to the empty context, never blocking the underlying research request and never guessing a stronger meaning.
+
+## 9. O(1) bound — exact limits and tests (Phase 10)
+
+`HRR_MAX_UNRESOLVED_REFERENTS = 5`, `HRR_MAX_REFERENT_IDENTIFIER_LENGTH = 100` — fixed constants, never inferred from array length. Tested: referents cap at 5 regardless of how many an answer carried; 100 synthetic visible turns still produce exactly the 3 declared fields, nothing more; an oversized identifier is dropped, not truncated-and-kept; the rendered prefix's length has a computed hard upper bound, verified against the actual worst-case input, not merely asserted.
+
+## 10. Freshness guard (Phase 11)
+
+Not exercised behaviorally in this milestone (the feature is not enabled), but structurally guaranteed: `ResearchSessionContext` carries no applicability/BI/composition output field of any kind — there is nothing in the type for a future implementation to accidentally treat as a cached conclusion. `deriveResearchSessionContext()` is re-run fresh on every call (no memoization, no module-level mutable state) over the client's own already-ephemeral `HrrThreadState`.
+
+## 11. No-transcript firewall (Phase 12)
+
+Static pattern tests confirm neither `research-session-context.ts` nor `.schema.ts` contains `messages:`, `transcript`, `history:`, `previousAnswer`, `priorAnswer`, or any reference to `question_text`/`orientation`/`boundary_note`/`bi_summary_blocks`/`statement_verbatim`. `buildResearchSessionContextPrefix()`'s output is asserted to never contain any of a fixture's deliberately-marked prose strings.
+
+## 12. Correction contract — tests and remaining uncertainty (Phase 14)
+
+**Tested:** a simulated correction ("No, I meant ownership") passes through the IDENTICAL selector code path as an ordinary explicit focus switch — no correction-specific branch exists to diverge (proven by construction: the selector has no `if` branch keyed on any notion of "is this a correction"). An ambiguous correction (simulated as an unresolvable multi-topic turn) fails closed identically to the pre-existing multi-topic case. A correction that resolves to nothing leaves the prior focus intact (transparent, same as an authority-only turn). The thread stays strictly append-only through a correction — no history mutation, matching the unmodified `hrrThreadReducer` contract.
+
+**NOT tested, and stated honestly:** whether the REAL classifier, given a real "No, I meant ownership" utterance plus a real context prefix, actually resolves the new topic correctly. That requires the classifier prompt work explicitly out of scope here — the hypothesis (§8 of the CAH-4G.14 design) remains unvalidated behaviorally, only structurally consistent.
+
+## 13. Fail-closed matrix (Phase 15 — summary)
+
+Missing/stale/malformed context, unknown focus/referent, over-limit referents, contradictory explicit-vs-inherited topics, multi-topic results, authority-only turns, and a stale/raced settle are all covered above (§5 selector cases + §8 schema matrix). Classifier failure / retrieval failure / audit failure are **out of scope for this milestone** — they are properties of the (unmodified, untouched) live pipeline, already covered by existing tests (`hrr-research-route.test.ts`, `audited-hrr-research.test.ts`) and unaffected by anything added here, since nothing added here is wired into that pipeline yet.
+
+## 14. Test results
+
+- New suites: **3 files, 108 tests, all passing.**
+- `__tests__/hrr` + `__tests__/reviewer-lk` (full domain): **18 suites, 545 tests, all passing.**
+- `npx tsc --noEmit`: clean.
+- Full repository suite: **20 failed suites / 77 failed tests** — this is the pre-existing, long-documented baseline (rooted in `retrieve()` returning nothing for `runway-gen3`, present on `origin/main` itself, unrelated to HRR) — **zero new attributable failures**; confirmed additionally by `git status` showing only 5 new, untracked files (no existing file modified, so no existing test's target code changed at all).
+
+## 15. Runtime behavior
+
+**Unchanged.** No existing file was modified. No new file is imported by the live route, the classifier, the authority gate, the research pipeline, the audit layer, or any UI component — proven by a dedicated static test (`research-session-context-boundary.test.ts`, describe block A), not merely asserted.
+
+## 16. CAH-4G.14 implementation-gate status (the nine conditions, §19 above)
+
+| # | Condition | Status |
+|---|---|---|
+| 1 | Design review accepted as the implementation basis | **NOT MET** — this document existing is not that review; a separate PM/architecture sign-off is required |
+| 2 | Full adversarial matrix (§15, 14 rows) implemented as executable tests before runtime code is exercised | **PARTIALLY MET** — the selector/schema/authority/no-transcript/no-prose/O(1)/correction properties are now tested; the 14-row matrix's ROUTING-level scenarios (e.g. rows 1, 2, 4, 8, 9, 13 as full end-to-end HTTP-route behaviors) remain untested because the route itself is untouched — those rows describe integrated behavior that does not exist to test yet |
+| 3 | Authority-independence mechanically testable | **MET** — §7 above, structural + behavioral tests exist and pass |
+| 4 | Correction behavior specified as one of the tested outcomes | **PARTIALLY MET** — the contract is specified and structurally tested (§12); the underlying classifier hypothesis is explicitly unvalidated |
+| 5 | Focus-switch supersession testable | **PARTIALLY MET** — fully tested and passing for the selector/derivation layer (case 5); not testable end-to-end until the route/classifier are wired |
+| 6 | Freshness invariant testable | **PARTIALLY MET** — structurally guaranteed and documented (§10); not behaviorally exercisable without enabling the feature |
+| 7 | No transcript/state creep — O(1) size-bound test | **MET** — §9/§11 above |
+| 8 | Fail-closed/rollback behavior specified and testable | **MET** — §8/§13 above |
+| 9 | `parseBody` deliberately extended, with a dedicated rejection test for `messages`/`history`/`conversation`/`session_id`/`sessionId` | **NOT MET** — `parseBody` is deliberately UNCHANGED in this milestone (Phase 16's explicit requirement); a test confirms it still rejects the transcript-shaped fields exactly as today, but the NEW field has not yet been added to it at all |
+
+**Overall: 3 of 9 fully MET, 5 PARTIALLY MET, 1 NOT MET.** The unmet/partial conditions are not defects — they describe work that is, by design, integration-level and therefore cannot exist without enabling the feature this milestone is explicitly forbidden from enabling. **Runtime implementation authorization is not granted by this milestone.**
+
+## 17. Recommended smallest runtime implementation slice (for a SEPARATE future authorization — not implemented, not started)
+
+Unchanged from the CAH-4G.14 design's own §20 recommendation, now more concretely scoped given what exists: (a) wire `deriveResearchSessionContext()` into `ReviewerLkLookup.tsx`'s request-building code (client-only, still no server change); (b) extend `parseBody` in the research route to accept an optional `context` field via `resolveResearchSessionContext()`, with condition 9's dedicated backward-compatibility test written FIRST; (c) construct `buildResearchSessionContextPrefix()`'s output and prepend it to the classifier's question text, with condition 2's remaining routing-level adversarial rows written and passing BEFORE this ships. **None of (a)–(c) is implemented here.**
