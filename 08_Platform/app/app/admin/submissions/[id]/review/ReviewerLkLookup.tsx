@@ -21,11 +21,18 @@
  * successive research actions are now APPEND-ONLY. Asking a second question no
  * longer replaces the first interaction — the prior reviewer turns and HRR
  * answers stay visible (`hrr-thread.ts`). This is a VISIBLE thread, NOT a
- * CONTEXTUAL one: every free-form question is still classified independently
- * from its own text alone. NO prior turn is sent to the classifier /
- * retrieval / applicability / BI / composition / audit. There is NO
- * `prior_context` in the request body — the POST body is byte-for-byte the
- * same `{ mode, topic }` / `{ mode, question }` it is in production today.
+ * CONTEXTUAL one: every free-form question is STILL classified from its own
+ * text as the primary signal. NO prior turn's PROSE (question text, answer
+ * text, applicability, BI, composition) is ever sent anywhere — the audit,
+ * retrieval, applicability, BI, and composition layers never see anything
+ * beyond the current turn. As of CAH-4G.18B, a `mode: 'question'` request
+ * ADDITIONALLY carries a bounded, structured `context` field (see CAH-4G.18B
+ * below) — enum/identifier only, never prose, never a transcript. Through
+ * CAH-4G.10–CAH-4G.17 the POST body for `mode: 'question'` genuinely was
+ * `{ mode, question }` only (`deriveResearchSessionContext` existed
+ * server-side from CAH-4G.15 but this component never called it — the exact
+ * gap CAH-4G.18A found). `mode: 'topic_pick'` remains `{ mode, topic }` only,
+ * unchanged since Slice A — explicit topic actions carry no context, ever.
  *
  * NOTHING is fetched on mount, on inspector open, or on tab switch. The thread
  * lives only in this component's `useReducer` state — no storage, no URL, no
@@ -34,6 +41,20 @@
  *
  * No editable control that touches assessment state. No "copy to evidence" /
  * "apply" / "accept" / "summarize".
+ *
+ * CAH-4G.18B — CLIENT CONTEXT TRANSPORT (closes the gap CAH-4G.18A found:
+ * `deriveResearchSessionContext` existed server-side since CAH-4G.15 but was
+ * never actually called here, so no `mode: 'question'` request ever carried
+ * `context`, regardless of the CAH-4G.17 server feature flag). A free-form
+ * submit now derives `ResearchSessionContext` from the CURRENT visible
+ * thread, immediately before sending — the selector remains the SOLE
+ * derivation authority; nothing here constructs context independently or
+ * reads prior answer prose. `mode: 'topic_pick'` requests remain byte-for-byte
+ * unchanged — NO `context` field, ever (explicit topic actions stay
+ * structurally independent of inherited context). Whether the server
+ * actually USES the transported `activeFocus` is still gated entirely by
+ * `HRR_ACTIVE_FOCUS_CONTEXT_ENABLED` (CAH-4G.17, unchanged) — this file only
+ * ensures the bounded contract reaches the existing server trust boundary.
  */
 
 import { useCallback, useReducer, useRef, useState } from 'react'
@@ -41,6 +62,7 @@ import type { GoalCategory } from '@/types/interview-engine'
 import { reviewerTopicLabel } from '@/lib/reviewer-lk/topic-labels'
 import { HRR_QUESTION_MAX_LENGTH } from '@/lib/reviewer-lk/types'
 import type { HrrResearchAnswer } from '@/lib/hrr/types'
+import { deriveResearchSessionContext, type ResearchSessionContext } from '@/lib/hrr/research-session-context'
 import { HrrResearchAnswerView } from './HrrResearchAnswerView'
 import {
   EMPTY_HRR_THREAD,
@@ -52,7 +74,7 @@ import {
 
 type ResearchPayload =
   | { mode: 'topic_pick'; topic: GoalCategory }
-  | { mode: 'question'; question: string }
+  | { mode: 'question'; question: string; context: ResearchSessionContext }
 
 const ACCENT = '#233f66'
 const INK_SOFT = '#4a4a52'
@@ -170,9 +192,13 @@ export function ReviewerLkLookup({
         dispatch({ type: 'settle', seq: mine, result })
       }
       try {
-        // The request body is EXACTLY `{ mode, topic }` / `{ mode, question }`.
-        // No transcript, no messages[], no prior_context, no prior answer — a
-        // second/third question sends ONLY that question (CAH-4G.10 Slice A).
+        // The request body is EXACTLY `{ mode, topic }` (topic_pick) or
+        // `{ mode, question, context }` (question, CAH-4G.18B). `payload`
+        // (built by the caller) is the WHOLE body — this function adds
+        // nothing to it. No transcript, no messages[], no prior question/
+        // answer prose — a second/third question still sends only ITS OWN
+        // question text; `context` is bounded/structured/enum-only, never
+        // prose (`deriveResearchSessionContext`, CAH-4G.15).
         const res = await fetch(
           `/api/admin/submissions/${submissionId}/reviewer-lk/research`,
           {
@@ -218,9 +244,15 @@ export function ReviewerLkLookup({
   const submitQuestion = useCallback(() => {
     const q = question.trim()
     if (q.length === 0 || thread.inFlight !== 0) return
+    // CAH-4G.18B: derived from the CURRENT thread, immediately before
+    // sending — `deriveResearchSessionContext` is the sole derivation
+    // authority (never constructed independently here, never from prior
+    // answer prose). Bounded, structured, enum/identifier-only — see
+    // `lib/hrr/research-session-context.ts`.
+    const context = deriveResearchSessionContext(thread)
     setQuestion('') // the question is now recorded as a visible reviewer turn
-    research({ mode: 'question', question: q })
-  }, [question, thread.inFlight, research])
+    research({ mode: 'question', question: q, context })
+  }, [question, thread, research])
 
   const clearConversation = useCallback(() => {
     seqRef.current++ // invalidate any in-flight response
