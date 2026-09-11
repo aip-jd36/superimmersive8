@@ -1,6 +1,6 @@
 # HRR Conversational Research — Architecture & Design (CAH-4G.9)
 
-**Status:** `SLICE A IMPLEMENTED + REVIEWED LOCALLY — NOT ON main, NOT IN PRODUCTION (CAH-4G.10P) / SLICE B NOT STARTED` — CAH-4G.9 designed the architecture (§A–§AA); **CAH-4G.10 (2026-09-11) implemented Slice A — the VISIBLE conversational thread** (`bea6f2d` feat + `f4d33ec` docs, on the local branch `work/cah-4f-reviewer-resources`). HRR is VISIBLY conversational in the reviewed code (successive research turns stay on screen, append-only) but NOT yet CONTEXTUALLY conversational. Server route, `runHrrResearch`, model-call budget, audit, and CRC are all byte-unchanged. **The Slice A commits were never pushed / merged / deployed** — an authenticated production UAT on 2026-09-11 correctly observed the pre-Slice-A single-turn surface (`origin/main` = `f8a4a12` still carries `ReviewerLkLookup.tsx` byte-identical to `bea6f2d^` and has no `hrr-thread.ts`). **DEPLOYMENT GAP, not a defect** — see §CC. **Slice B (bounded structured follow-up context, §X) is a separate, independently-optional change — not started.** As-built: §BB. Reconciliation: §CC.
+**Status:** `SLICE A INTEGRATED / PRODUCTION DEPLOYED / AUTHENTICATED VISUAL UAT PENDING / SLICE B NOT AUTHORIZED` — CAH-4G.9 designed the architecture (§A–§AA); CAH-4G.10 implemented Slice A (reviewed, then found not deployed — §CC, CAH-4G.10P). **CAH-4G.10I (2026-09-11) — integration + deployment:** the reviewed lineage (`92cb06b`/`73eef5c`/`0a06809`/`4b9ee5a`, patch-identical to the original `b4ba0e0`/`bea6f2d`/`f4d33ec`/`af42002` per `git range-diff`) was rebased cleanly onto `origin/main` (`d06c668` — two intervening CRC-only commits, zero file overlap) and **fast-forward-pushed to `main`: `d06c668 → 4b9ee5a` (no force)**. `origin/main` confirmed `== 4b9ee5a`. Full regression: `tsc` clean, `next build` exit 0, full-suite failing set byte-identical to a fresh `d06c668` baseline (77=77, zero new failures, +36 passing). Vercel `si8-creator-portal` auto-deploys `main`; a new deployment was observed (build id changed) shortly after the push, but **the exact production commit SHA could not be certified from this environment** (no Vercel credentials) and **the authenticated visual fingerprint (heading/label text) could not be checked** (no connected browser, no admin credentials) — this is the acceptable, disclosed limit of CLI-based proof; see §DD. **Not yet `PRODUCTION-PROVEN` — an authenticated human visual UAT (§EE script) is the remaining gate. Slice B remains NOT AUTHORIZED.** As-built: §BB. Prior reconciliation: §CC. Integration/deployment record: §DD.
 
 **Companion docs:** `PRD_CAH_4G_HRR.md` (the *what*), `HRR_GRI_TECHNICAL_DESIGN.md` (§N single-turn model — **amended by this doc**, §R future GRI reuse), `ADR-002` (intent entry ≠ answer authority), `ADR-003-hrr-conversation-context.md` (the decision recorded below), `REVIEWER_RESOURCES_ARCHITECTURE.md` §15/§18.
 
@@ -768,3 +768,62 @@ git push origin HEAD:main              # fast-forward, no force  (PM-authorized 
 ```
 
 This is a **CAH-4G.10I — Slice A integration + production deployment** milestone, PM-authorized, not part of this investigation.
+
+---
+
+## DD. Integration + production deployment record (CAH-4G.10I, 2026-09-11)
+
+### Rebase / integration
+
+| | |
+|---|---|
+| Backup branch | `cah-4g-10-pre-integration-backup` → `af42002` (the pre-integration lineage, retained) |
+| Drift since CAH-4G.10P | 2 commits on `origin/main`: `f8a4a12` (`fix(crc): widen commercial_use goal classification…`) + `d06c668` (`fix(crc): discover likeness from synthetic person presence`) — both CRC-only (`lib/interview-engine/anthropic-extractor.ts`, `lib/crc-engine/discovered-relevance.ts` + tests). **Zero file overlap** with `ReviewerLkLookup.tsx` / `hrr-thread.ts` / Reviewer Resources / `lib/hrr/**` / `lib/reviewer-lk/**` / audit / CRC shell. |
+| Rebase | `git rebase d06c668` — **no conflicts** |
+| SHA map | `b4ba0e0→92cb06b` (CAH-4G.9 docs) · `bea6f2d→73eef5c` (CAH-4G.10 feat) · `f4d33ec→0a06809` (CAH-4G.10 docs) · `af42002→4b9ee5a` (CAH-4G.10P docs) |
+| `git range-diff` | all 4 commits **`=`** (patch-identical) — Slice-A runtime semantics unchanged by the rebase |
+| Pre-push re-fetch | `origin/main` re-confirmed `d06c668` (unmoved) immediately before push |
+| Push | `git push origin HEAD:main` → **`d06c668..4b9ee5a HEAD -> main`** (fast-forward, no force) |
+| Post-push | `origin/main` == local `HEAD` == `4b9ee5a` (`git fetch` + `git rev-parse` both sides) |
+
+### Pre-push regression (rebased lineage vs a fresh `d06c668` baseline worktree)
+
+| | fresh `d06c668` baseline | rebased branch |
+|---|---|---|
+| `tsc --noEmit` | — | exit 0 |
+| `next build` | — | "✓ Compiled successfully", exit 0, HRR route present |
+| failed suites / tests | 20 / 77 | 20 / 77 |
+| passed | 3694 | 3730 (+36 — CAH-4G.10 additions) |
+| failing-test-name diff (`comm`) | — | **EMPTY both directions — zero new failures** |
+
+### Production deployment — evidence and its limits
+
+- Vercel `si8-creator-portal` is configured to auto-deploy `main` (established, working mechanism across every prior CAH-4x milestone).
+- `app.superimmersive8.com` served buildId `40sGNlM5ZqyZbvfRFy8ed` during CAH-4G.10P; ~3 minutes after this session's push it served **`fVUuRleeVuLDH0dcDILmD`** — a different build, stable across repeated polls over ~6 minutes with cache-busting query params.
+- **This is consistent with a new deployment having completed**, but it is **not conclusive proof that the live build is `4b9ee5a` specifically** rather than the intervening `d06c668` (pushed to `main` earlier by JD directly, which Vercel may have already built before this session began) — this environment has no Vercel authentication (`vercel whoami` fails, no `.vercel` link, no token), so the deployment's source-SHA metadata cannot be read directly.
+- The review page (`/admin/submissions/[id]/review`) is auth-gated (307 → login) and its client bundle is not reachable without an authenticated session, so the "Research conversation" / "Clear conversation" runtime fingerprint (§EE) **cannot be checked from this environment**. `list_connected_browsers` → `[]` — no Claude Chrome extension connection available.
+- **Per this milestone's own instruction:** a minified bundle's absence of a literal source string is not evidence of deployment failure, and the authenticated UI check being unreachable from CLI is an acceptable, disclosed handoff to PM — not a gate failure.
+
+**Conclusion:** integration to `main` is fully proven by git evidence. Deployment very likely occurred and is very likely current (auto-deploy pipeline + observed build change), but is **not independently certified to the exact SHA** from this environment. The authenticated visual UAT is the actual proof, and it is PM's to perform (§EE).
+
+## EE. PM authenticated visual UAT script
+
+1. Open an authenticated Commercial Assurance review.
+2. Open Reviewer Resources → Living Knowledge.
+3. Confirm heading reads: **Research conversation**
+4. Confirm action reads: **Clear conversation**
+5. Click: **Copyright ownership**
+6. Confirm a truthful topic research action ("Research: Copyright ownership") + governed answer appear.
+7. Ask: *"What does governed knowledge say about copyrightability here?"*
+8. Confirm: composer clears after submission · the Copyright ownership exchange remains visible · the Copyrightability exchange appends below it.
+9. Ask: *"What does governed knowledge say about commercial use?"*
+10. Confirm: composer clears · both prior exchanges remain · the Commercial use exchange appends.
+11. Switch Living Knowledge → Linked CRC Context → Living Knowledge. Confirm the thread remains.
+12. Close Reviewer Resources and reopen it. Confirm the thread remains (component stays mounted).
+13. Click **Clear conversation**. Confirm the visible HRR thread clears without changing any assessment state.
+14. Create one new exchange.
+15. Refresh the browser page. Confirm the HRR thread clears.
+
+Also visually judge: scrolling behaviour; whether new turns are easy to find; the visual distinction between reviewer actions and HRR responses; narrow-rail readability; and whether the interface now feels like ongoing Human Reviewer Research rather than repeated lookup.
+
+**Do not mark CAH-4G `CLOSED` / `PRODUCTION-PROVEN` until this script passes.**
