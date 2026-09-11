@@ -28,6 +28,18 @@
  * path, NO CRC retrieval orchestrator, NO Linked CRC context. It is a research +
  * append-only audit surface only — enforced by
  * `__tests__/reviewer-lk/hrr-research-route.test.ts`.
+ *
+ * CAH-4G.17 (2026-09-11, feature-gated, OFF by default — `HRR_ACTIVE_FOCUS_CONTEXT_ENABLED`):
+ * when ON, a `mode: 'question'` request's server-validated `activeFocus` (ONLY
+ * — never `unresolvedReferents`, still not authorized) is folded into the SAME
+ * single classifier call as a fixed advisory text prefix
+ * (`buildResearchSessionContextPrefix`, CAH-4G.15). `topic_pick` requests never
+ * consult it. The classifier's OWN structured output still determines routing —
+ * no post-classification override exists anywhere in this file; explicit-intent
+ * precedence and authority independence are enforced entirely by the classifier
+ * prompt (`interpret-research-intent.ts`), never by code here. When the flag is
+ * OFF (the production default), this route is behaviorally identical to
+ * CAH-4G.16 — see `__tests__/reviewer-lk/hrr-research-route-active-focus.test.ts`.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -43,19 +55,33 @@ import { topicSelectionGateResult } from '@/lib/hrr/run-hrr-research'
 import { runAuditedHrrResearch, HrrAuditNotRecordedError } from '@/lib/hrr-audit/run-audited-hrr-research'
 import type { HrrAuthorityGateResult, ReviewerResearchTopic } from '@/lib/reviewer-lk/types'
 import type { HrrResearchAnswer } from '@/lib/hrr/types'
-// CAH-4G.16 — DARK WIRING ONLY. Everything imported below this line is used
-// exclusively to VALIDATE and OBSERVE a client-supplied ResearchSessionContext
-// AFTER the classifier call (step 3) has already run and returned. None of it
-// is ever passed into `createAnthropicResearchIntentInterpreter()`, `gate`,
-// `runAuditedHrrResearch()`, or the response body. Live routing, the
-// classifier's input, and every returned answer are BYTE-IDENTICAL to the
-// pre-CAH-4G.16 route — see `__tests__/reviewer-lk/hrr-research-route.test.ts`
-// and `research-session-context-dark-wiring.test.ts` for the regression proof.
+// `research-session-context*` imports below this line: CAH-4G.16 wired
+// `resolveResearchSessionContext` / `buildResearchSessionContextPrefix` /
+// `enforceAuthoritativeReferents` as fully DARK (step 4.5 only, after the
+// classifier call, never affecting it). CAH-4G.17 (feature-gated, OFF by
+// default) additionally consults `resolvedContext.activeFocus` at step 3 —
+// but ONLY `activeFocus`; `enforceAuthoritativeReferents` and everything
+// involving `unresolvedReferents` remain exactly as dark/inert as CAH-4G.16
+// left them. With the CAH-4G.17 flag OFF, step 3 is byte-identical to
+// CAH-4G.16 — see `__tests__/reviewer-lk/hrr-research-route-active-focus.test.ts`.
 import { buildResearchSessionContextPrefix } from '@/lib/hrr/research-session-context'
 import { resolveResearchSessionContext } from '@/lib/hrr/research-session-context.schema'
 import { enforceAuthoritativeReferents } from '@/lib/hrr/research-session-context-referents'
 
 export const dynamic = 'force-dynamic'
+
+/**
+ * CAH-4G.17 feature gate. OFF by default (unset, or any value other than
+ * `'1'`). Trivially reversible: no DB row, no migration, no per-user/per-
+ * domain setting, no persisted rollout state — an env var read fresh on
+ * every request. Controls ONLY whether `activeFocus` (never
+ * `unresolvedReferents`) is folded into the free-form classifier's input.
+ * `topic_pick` requests never consult this flag at all — that path never
+ * reads context regardless of its value.
+ */
+function isActiveFocusContextEnabled(): boolean {
+  return process.env.HRR_ACTIVE_FOCUS_CONTEXT_ENABLED === '1'
+}
 
 /** Reviewer-selectable topics: every GoalCategory except the 'unknown' sentinel. */
 const REVIEWER_TOPICS = GOAL_CATEGORIES.filter((c): c is ReviewerResearchTopic => c !== 'unknown')
@@ -133,17 +159,38 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   const parsed = parseBody(raw)
   if (!parsed.ok) return badRequest(parsed.message)
 
+  // 2.5. CAH-4G.15 schema-only validation of any client-supplied context.
+  //      `activeFocus` (a fixed enum) needs no submission data to validate —
+  //      unlike `unresolvedReferents`, which additionally requires the
+  //      authoritative, submission-scoped check at step 4.5 below, AFTER
+  //      submission context resolves. Computed once, reused at step 3 (focus
+  //      only, gated) and step 4.5 (full referent check, still dark/CAH-4G.16).
+  const resolvedContext = parsed.mode === 'question' ? resolveResearchSessionContext(parsed.context) : null
+
   // 3. resolve the permitted research intent
   let gate: HrrAuthorityGateResult
   let attributedQuestion: string | null = null
   try {
     if (parsed.mode === 'topic_pick') {
-      gate = topicSelectionGateResult(parsed.topic) // deterministic — 0 model calls
+      gate = topicSelectionGateResult(parsed.topic) // deterministic — 0 model calls; context is never consulted for this mode (CAH-4G.17 §7)
     } else {
-      attributedQuestion = parsed.question
+      attributedQuestion = parsed.question // ALWAYS the verbatim reviewer text — never the augmented classifier input below
+      let classifierInput = parsed.question
+      if (isActiveFocusContextEnabled() && resolvedContext?.activeFocus !== null) {
+        // CAH-4G.17: activeFocus ONLY — unresolvedReferents explicitly zeroed
+        // regardless of what schema validation returned; that capability is
+        // not authorized in this milestone. No authoritative (submission-
+        // scoped) check is needed for a bare topic enum — CAH-4G.15's schema
+        // validation (enum membership) already makes it fully trustworthy.
+        const focusOnly = { ...resolvedContext!, unresolvedReferents: [] }
+        const prefix = buildResearchSessionContextPrefix(focusOnly)
+        if (prefix) classifierInput = `${prefix}\n\n${parsed.question}`
+      }
       // one classify-only model call; the adapter fails closed to
       // `unsupportedResearchIntent()` on any provider error and never throws.
-      const classified = await createAnthropicResearchIntentInterpreter()(parsed.question)
+      // The classifier's OWN structured output resolves the topic — nothing
+      // below this line ever overrides or post-processes it based on context.
+      const classified = await createAnthropicResearchIntentInterpreter()(classifierInput)
       gate = hrrAuthorityGate(classified, { sourceTextRef: null })
     }
   } catch (err) {
@@ -173,8 +220,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   //      `runAuditedHrrResearch` below — none of those variables are
   //      reassigned. Observable ONLY behind an explicit, off-by-default debug
   //      flag; never reaches the response body, the classifier, or the audit.
-  if (parsed.mode === 'question') {
-    const resolvedContext = resolveResearchSessionContext(parsed.context) // CAH-4G.15 shape/bounds — never null, never throws
+  if (parsed.mode === 'question' && resolvedContext) {
     const authoritativeContext = enforceAuthoritativeReferents(resolvedContext, reviewerContext, TOPIC_CLAIMS_FIXTURE) // CAH-4G.16 — real identifiers only
     const darkContextPrefixForTesting = buildResearchSessionContextPrefix(authoritativeContext) // CAH-4G.15 — bounded, fixed-template
     if (process.env.HRR_DARK_CONTEXT_DEBUG === '1') {
