@@ -29,6 +29,22 @@
  * `crc_eligible`, no raw `crc_publication_scope` (the contract does not carry
  * them). No "copy to evidence" / "apply" / "accept" affordance. This is
  * reference material, not assessment evidence.
+ *
+ * CAH-4H.2 — presentation-only additions, no data/schema change:
+ *   - `hideQuestionEcho` / `hideResponsibilityNote`: this component is the ONE
+ *     shared renderer (still true) and remains fully self-contained by
+ *     default (both `false`) for any future standalone caller. The current
+ *     and only caller, `ReviewerLkLookup.tsx`'s thread rendering, passes both
+ *     `true` — it already shows the reviewer's question immediately above
+ *     (the `question_text` echo here would duplicate it) and shows
+ *     `reviewer_responsibility_note` once, panel-level, sourced from the
+ *     same invariant server field (`REVIEWER_RESPONSIBILITY_NOTE`,
+ *     `lib/hrr/project-hrr-research-answer.ts`, confirmed unconditional and
+ *     identical on every `projectHrrResearchAnswer` call — never re-derived
+ *     or paraphrased client-side).
+ *   - The assessment-authority callout gains a fixed "Research boundary"
+ *     label so its purpose is legible without reading the prose — the note
+ *     text itself, its styling, and its trigger condition are unchanged.
  */
 
 import type { GoalCategory } from '@/types/interview-engine'
@@ -239,14 +255,20 @@ function TopicBlock({ topic }: { topic: HrrAnswerTopic }) {
 export function HrrResearchAnswerView({
   answer,
   onResearchTopic,
+  hideQuestionEcho = false,
+  hideResponsibilityNote = false,
 }: {
   answer: HrrResearchAnswer
   /** Optional — makes "offered research paths" clickable. Pure navigation; no reinterpretation. */
   onResearchTopic?: (topic: GoalCategory) => void
+  /** CAH-4H.2 — default false (standalone-safe). The thread caller passes `true`: the paired reviewer turn already shows the question immediately above. */
+  hideQuestionEcho?: boolean
+  /** CAH-4H.2 — default false (standalone-safe). The thread caller passes `true`: shown once, panel-level, sourced from the same invariant field. */
+  hideResponsibilityNote?: boolean
 }) {
   return (
     <div className="space-y-3">
-      {answer.question_text && (
+      {!hideQuestionEcho && answer.question_text && (
         <p className="text-xs italic" style={{ color: MUTED }}>
           You asked: &ldquo;{answer.question_text}&rdquo;
         </p>
@@ -260,6 +282,9 @@ export function HrrResearchAnswerView({
           className="rounded-md border-l-2 px-3 py-2 text-sm leading-relaxed"
           style={{ borderColor: ACCENT, backgroundColor: '#eef2f8', color: '#33415c' }}
         >
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide" style={{ color: ACCENT }}>
+            Research boundary
+          </p>
           {answer.assessment_authority_note}
         </div>
       )}
@@ -306,9 +331,11 @@ export function HrrResearchAnswerView({
         </div>
       )}
 
-      <p className="border-t pt-2 text-[11px] leading-relaxed" style={{ borderColor: LINE, color: MUTED }}>
-        {answer.reviewer_responsibility_note}
-      </p>
+      {!hideResponsibilityNote && (
+        <p className="border-t pt-2 text-[11px] leading-relaxed" style={{ borderColor: LINE, color: MUTED }}>
+          {answer.reviewer_responsibility_note}
+        </p>
+      )}
     </div>
   )
 }

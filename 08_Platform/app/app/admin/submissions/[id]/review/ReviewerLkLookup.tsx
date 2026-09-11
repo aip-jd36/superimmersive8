@@ -55,6 +55,26 @@
  * actually USES the transported `activeFocus` is still gated entirely by
  * `HRR_ACTIVE_FOCUS_CONTEXT_ENABLED` (CAH-4G.17, unchanged) — this file only
  * ensures the bounded contract reaches the existing server trust boundary.
+ *
+ * CAH-4H.2 — RESEARCH THREAD PRESENTATION (implements `HRR_CONVERSATIONAL_
+ * ARCHITECTURE.md §JJ`'s selected Candidate 1). Presentation only — no
+ * server/API/reasoning/session-context change:
+ *   - a compact "Researching: <topic>" indicator is derived, at render time,
+ *     from the SAME `deriveResearchSessionContext(thread)` already used for
+ *     transport (CAH-4G.18B) — no new state, hidden when `activeFocus` is
+ *     `null`, resets for free on Clear conversation (`EMPTY_HRR_THREAD`);
+ *   - `HrrResearchAnswerView`'s per-turn question echo and
+ *     `reviewer_responsibility_note` are suppressed in the thread (both
+ *     `hideQuestionEcho`/`hideResponsibilityNote={true}`) — the reviewer
+ *     turn already shows the question immediately above, and the
+ *     responsibility note (proven invariant from source,
+ *     `lib/hrr/project-hrr-research-answer.ts`) is shown ONCE, panel-level,
+ *     sourced from the most recent settled answer's own field — never
+ *     hardcoded or paraphrased client-side;
+ *   - turns render as reviewer-turn/response PAIRS (a pure, render-time
+ *     grouping of the existing append-only `thread.turns` array — no new
+ *     reducer state, no new grouping concept in `hrr-thread.ts`) with
+ *     tighter spacing within a pair and more spacing between pairs.
  */
 
 import { useCallback, useReducer, useRef, useState } from 'react'
@@ -139,7 +159,9 @@ function ThreadTurn({
         <span className="mr-1.5 font-semibold uppercase tracking-wide" style={{ color: MUTED }}>
           {turn.entryMode === 'topic' ? 'Research:' : 'You asked:'}
         </span>
-        {turn.entryMode === 'topic' ? turn.label : turn.question}
+        <span className="font-medium" style={{ color: '#1c1c1e' }}>
+          {turn.entryMode === 'topic' ? turn.label : turn.question}
+        </span>
       </div>
     )
   }
@@ -157,7 +179,45 @@ function ThreadTurn({
       </p>
     )
   }
-  return <HrrResearchAnswerView answer={turn.answer} onResearchTopic={onResearchTopic} />
+  // CAH-4H.2: the paired reviewer turn (rendered immediately above, in the
+  // same pair — see `pairThreadTurns`) already shows the question and will
+  // carry the panel-level responsibility note — see ReviewerLkLookup below.
+  return (
+    <HrrResearchAnswerView
+      answer={turn.answer}
+      onResearchTopic={onResearchTopic}
+      hideQuestionEcho
+      hideResponsibilityNote
+    />
+  )
+}
+
+/**
+ * CAH-4H.2 — pure, render-time grouping of the EXISTING append-only
+ * `thread.turns` array into reviewer-turn/response pairs. No new state, no
+ * new concept in `hrr-thread.ts` — a reviewer turn always immediately
+ * precedes its own response (the reducer's own `begin`/`settle` invariant),
+ * so this is a presentation-only re-partition of already-ordered data.
+ */
+function pairThreadTurns(turns: HrrThreadTurn[]): HrrThreadTurn[][] {
+  const pairs: HrrThreadTurn[][] = []
+  for (const turn of turns) {
+    if (turn.role === 'reviewer' || pairs.length === 0) {
+      pairs.push([turn])
+    } else {
+      pairs[pairs.length - 1].push(turn)
+    }
+  }
+  return pairs
+}
+
+/** The most recently SETTLED answer's `reviewer_responsibility_note` — proven invariant (`REVIEWER_RESPONSIBILITY_NOTE`, `project-hrr-research-answer.ts`), never hardcoded here. `null` before any turn has settled. */
+function latestResponsibilityNote(turns: HrrThreadTurn[]): string | null {
+  for (let i = turns.length - 1; i >= 0; i--) {
+    const t = turns[i]
+    if (t.role === 'hrr' && t.status === 'answer') return t.answer.reviewer_responsibility_note
+  }
+  return null
 }
 
 export function ReviewerLkLookup({
@@ -175,6 +235,11 @@ export function ReviewerLkLookup({
   const seqRef = useRef(0)
 
   const loading = thread.inFlight !== 0
+
+  // CAH-4H.2 — display-only re-derivation, every render, from the CURRENT
+  // thread. The SAME selector already used for transport (CAH-4G.18B); no
+  // new state, no persistence, resets for free when `thread` empties.
+  const activeContext = deriveResearchSessionContext(thread)
 
   const research = useCallback(
     async (payload: ResearchPayload) => {
@@ -266,6 +331,16 @@ export function ReviewerLkLookup({
         Research SI8&rsquo;s governed Living Knowledge for this submission — pick a topic shortcut, or ask a research question. Each question is researched independently.
       </p>
 
+      {/* CAH-4H.2 — compact, non-dominant current-focus indicator. Derived live
+          from `deriveResearchSessionContext`; hidden whenever `activeFocus`
+          is null (empty thread, multi-topic reset, or after Clear
+          conversation) — never a guess, never implies persistent memory. */}
+      {activeContext.activeFocus && (
+        <p className="mt-2 text-[11px] font-medium" style={{ color: MUTED }} aria-live="polite">
+          Researching: <span style={{ color: INK_SOFT }}>{reviewerTopicLabel(activeContext.activeFocus)}</span>
+        </p>
+      )}
+
       {/* ── Topic shortcuts ─────────────────────────────────────────────── */}
       <p className="mt-3 text-xs font-semibold uppercase tracking-wide" style={{ color: MUTED }}>
         Topic shortcuts
@@ -321,12 +396,19 @@ export function ReviewerLkLookup({
             </button>
           </div>
           <p className="mb-3 text-[11px] italic" style={{ color: MUTED }}>
-            Reference only — not assessment evidence. Each question above was researched on its own.
+            {/* CAH-4H.2: once a first answer has settled, the REAL, server-
+                sourced (invariant) responsibility note replaces this interim
+                line — never a client-authored paraphrase. Shown once,
+                panel-level, not per turn (see HrrResearchAnswerView's
+                `hideResponsibilityNote` above). */}
+            {latestResponsibilityNote(thread.turns) ?? 'Reference only — not assessment evidence. Each question above was researched on its own.'}
           </p>
-          <ol className="space-y-3">
-            {thread.turns.map((turn) => (
-              <li key={turn.id}>
-                <ThreadTurn turn={turn} onResearchTopic={runTopic} />
+          <ol className="space-y-4">
+            {pairThreadTurns(thread.turns).map((pair) => (
+              <li key={pair[0].id} className="space-y-1.5">
+                {pair.map((turn) => (
+                  <ThreadTurn key={turn.id} turn={turn} onResearchTopic={runTopic} />
+                ))}
               </li>
             ))}
           </ol>
