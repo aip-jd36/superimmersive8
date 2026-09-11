@@ -1,6 +1,6 @@
 # HRR Conversational Research — Architecture & Design (CAH-4G.9)
 
-**Status:** `SLICE A INTEGRATED / PRODUCTION DEPLOYED / AUTHENTICATED VISUAL UAT PENDING / SLICE B NOT AUTHORIZED` — CAH-4G.9 designed the architecture (§A–§AA); CAH-4G.10 implemented Slice A (reviewed, then found not deployed — §CC, CAH-4G.10P). **CAH-4G.10I (2026-09-11) — integration + deployment:** the reviewed lineage (`92cb06b`/`73eef5c`/`0a06809`/`4b9ee5a`, patch-identical to the original `b4ba0e0`/`bea6f2d`/`f4d33ec`/`af42002` per `git range-diff`) was rebased cleanly onto `origin/main` (`d06c668` — two intervening CRC-only commits, zero file overlap) and **fast-forward-pushed to `main`: `d06c668 → 4b9ee5a` (no force)**. `origin/main` confirmed `== 4b9ee5a`. Full regression: `tsc` clean, `next build` exit 0, full-suite failing set byte-identical to a fresh `d06c668` baseline (77=77, zero new failures, +36 passing). Vercel `si8-creator-portal` auto-deploys `main`; a new deployment was observed (build id changed) shortly after the push, but **the exact production commit SHA could not be certified from this environment** (no Vercel credentials) and **the authenticated visual fingerprint (heading/label text) could not be checked** (no connected browser, no admin credentials) — this is the acceptable, disclosed limit of CLI-based proof; see §DD. **Not yet `PRODUCTION-PROVEN` — an authenticated human visual UAT (§EE script) is the remaining gate. Slice B remains NOT AUTHORIZED.** As-built: §BB. Prior reconciliation: §CC. Integration/deployment record: §DD.
+**Status:** `CAH-4G.10 SLICE A — CLOSED / PRODUCTION-PROVEN` — `CAH-4G CONVERSATIONAL HRR — VISIBLE THREAD PRODUCTION-PROVEN / BOUNDED CONVERSATIONAL CONTEXT NOT STARTED` (CAH-4G.10C, 2026-09-11). A PM-performed authenticated production UAT against the internal synthetic fixture `CA-RLK-2a PROD SMOKE` / `ASSESS-007-2026-09-07` **passed all 10 acceptance checks** (§FF) — production is confirmed serving the Slice-A append-only conversational thread (`origin/main` = `2d648d3`, unchanged since CAH-4G.10I; source contract re-verified — §GG). **What is closed:** the VISIBLE conversational thread only — successive research turns append, retain history, and the composer clears on submit, as designed. **What remains open:** bounded conversational context / follow-up referent resolution (Slice B) is a **separate, still-`NOT STARTED` / not-PM-authorized** milestone; each question today is still researched fully independently. Non-blocking product observations from this UAT are recorded in §HH (thread density, duplicate question rendering, a navigation-persistence product question for a future decision) — **none are Slice-A defects and none are fixed in this milestone.** As-built: §BB. Deployment-gap reconciliation: §CC. Integration/deployment record: §DD. PM UAT script (now executed): §EE. Production UAT evidence: §FF. Post-UAT source reconciliation: §GG. Non-blocking observations: §HH.
 
 **Companion docs:** `PRD_CAH_4G_HRR.md` (the *what*), `HRR_GRI_TECHNICAL_DESIGN.md` (§N single-turn model — **amended by this doc**, §R future GRI reuse), `ADR-002` (intent entry ≠ answer authority), `ADR-003-hrr-conversation-context.md` (the decision recorded below), `REVIEWER_RESOURCES_ARCHITECTURE.md` §15/§18.
 
@@ -827,3 +827,69 @@ This is a **CAH-4G.10I — Slice A integration + production deployment** milesto
 Also visually judge: scrolling behaviour; whether new turns are easy to find; the visual distinction between reviewer actions and HRR responses; narrow-rail readability; and whether the interface now feels like ongoing Human Reviewer Research rather than repeated lookup.
 
 **Do not mark CAH-4G `CLOSED` / `PRODUCTION-PROVEN` until this script passes.**
+
+---
+
+## FF. Production UAT evidence (CAH-4G.10C, 2026-09-11)
+
+PM performed the §EE script as an authenticated Commercial Assurance reviewer against the internal synthetic fixture **"CA-RLK-2a PROD SMOKE - internal synthetic, delete after"** / **ASSESS-007-2026-09-07** on production (app.superimmersive8.com). This is the first authenticated human visual confirmation of the deployment §DD could only infer from git evidence + a buildId change.
+
+| # | Check | Observed | Result |
+|---|---|---|---|
+| 1 | Slice-A fingerprint | After refresh: heading "Research conversation", action "Clear conversation", supporting copy "Each question is researched independently." — the pre-Slice-A "Governed research response" / "Clear" surface is gone. | PASS |
+| 2 | Topic shortcut | Clicked "Copyright ownership" → truthful reviewer action "Research: Copyright ownership" (no fabricated sentence) → governed HRR response followed; topic path stayed zero-model; HrrResearchAnswerView presentation intact. | PASS |
+| 3 | First free-form turn appends | Asked "What does governed knowledge say about copyrightability here?" → appended as a new reviewer turn; the Copyright ownership exchange stayed visible; the Copyrightability answer appended below it; composer cleared on success. | PASS |
+| 4 | Third turn appends | Asked "What does governed knowledge say about commercial use?" → composer cleared; Copyright ownership + Copyrightability both remained; Commercial use appended — all three exchanges visible in one conversation. This is the core Slice-A acceptance proof: successive research actions append rather than replace. | PASS |
+| 5 | Tab-switch retention | Living Knowledge → Linked CRC Context → Living Knowledge: all three HRR exchanges remained. | PASS |
+| 6 | Inspector close/reopen retention | Closed Reviewer Resources, reopened it: the HRR thread remained (confirms the intended current-page component-lifetime behaviour). | PASS |
+| 7 | Workbook-navigation lifecycle | Navigated away to the parent submission page and back into the reviewer workbook: the HRR thread was gone; Living Knowledge returned to its initial state. This matches the V1 contract exactly (client React memory only; no DB, no localStorage/sessionStorage, no server-side HRR conversation persistence) — not a defect. | PASS against current contract |
+| 8 | Clear conversation | Created a new Likeness exchange, then clicked "Clear conversation": the visible HRR conversation cleared; topic shortcuts and Ask HRR remained; Reviewer Resources remained available; no reported assessment/workbook state change. | PASS |
+| 9 | Composer clear (cross-checked in #3/#4) | Composer cleared after every successful free-form submission. | PASS |
+| 10 | Assessment state unaffected | No check in this UAT reported any change to assessment/workbook/finding/outcome/sign-off state. | PASS |
+
+**Engineering evidence (from CAH-4G.10 / .10I, reconfirmed unchanged in §GG) vs. production UAT evidence (this section) are kept distinct:**
+
+| | Engineering evidence | Production UAT evidence |
+|---|---|---|
+| append-only behaviour | `hrrThreadReducer` unit tests (begin/settle invariants) | items 3 to 4 above (real successive turns retained) |
+| independent request semantics | route tests — 3 questions, 3 single-string classifier calls | item 4 (three real distinct governed answers, no cross-contamination observed) |
+| no prior_context / no transcript | source scan + route test (extra field ignored) | not independently re-provable via UAT (no network inspection performed); relies on the engineering proof |
+| no persistence | source scan (no storage APIs) | item 7 (workbook navigation cleared the thread, live) |
+| audit unchanged | no audit file in the diff; lk_research contract tests unchanged | not re-checked in this UAT (no audit-DB access reported); relies on the engineering proof |
+| tests/regression | tsc clean, next build exit 0, zero new failures vs a fresh baseline | (n/a) |
+| composer clears | submitQuestion source (setQuestion) + test | items 3, 4, 9 (real composer observed clearing) |
+| topic action is truthful | source (topicReviewerTurn, no question field) | item 2 ("Research: Copyright ownership", not a fabricated question) |
+
+## GG. Post-UAT source reconciliation (CAH-4G.10C)
+
+Re-verified directly against origin/main = `2d648d3` (unchanged since CAH-4G.10I — 0 commits of drift):
+
+- `useReducer(hrrThreadReducer, EMPTY_HRR_THREAD)` present (ReviewerLkLookup.tsx); the begin / settle / clear cases present (hrr-thread.ts).
+- `setQuestion('')` present in submitQuestion (composer clears on submit).
+- topicReviewerTurn carries {topic, label}, no question field; render prefix "Research:".
+- Headings: "Research conversation", "Clear conversation", "Each question is researched independently." all present verbatim.
+- `<HrrResearchAnswerView>` — one render site, canonical, unforked.
+- ResearchPayload = {mode:'topic_pick', topic} or {mode:'question', question} — unchanged.
+- prior_context / transcript / localStorage / sessionStorage / indexedDB appear only inside comments asserting their absence — zero code usage.
+- No audit file (lib/reviewer-lk/repository.ts, lib/hrr-audit, any migration) in the CAH-4G.9/.10/.10I/.10C diff.
+- No lib/crc-engine / app/crc / app/api/crc file in the diff.
+- tsc --noEmit exit 0.
+
+The tested-in-production implementation is exactly the implementation currently on main. No STOP condition triggered — the source contract has not drifted since the UAT.
+
+## HH. Non-blocking production observations (backlog evidence, not Slice-A defects)
+
+1. Thread density / navigation. Long governed answers — especially Copyrightability — make the narrow Reviewer Resources rail vertically dense as the conversation grows; topic shortcuts and the Ask HRR composer can end up far above the current reading position. Prior turns are retained correctly — this is a readability/navigation observation, not a correctness defect. No solution is prescribed here. Candidate future solution classes (not chosen, not authorized): progressive disclosure, collapsing prior turns, compact turn summaries, improved in-thread navigation, generic consultative-composition chunking. This is the same density observation already tracked from Slice 7 (unresolved) and is not solved in this milestone.
+2. Duplicate question rendering. A free-form question currently appears twice: once as the visible reviewer turn ("You asked: ...") and again inside HrrResearchAnswerView's own "You asked: ..." echo. Redundant visual weight. Recorded as non-blocking presentation/composition polish. HrrResearchAnswerView is not changed in this milestone.
+3. Navigation persistence — a future product question, not a decision. Closing/reopening Reviewer Resources preserves the thread (component stays mounted); leaving the workbook and re-entering clears it (React remount). This matches the V1 client-memory architecture exactly and is not a defect. Real reviewer usage during this UAT suggests research-session continuity across ordinary workbook navigation may deserve a future product decision. Open question for a future architecture/product review: should HRR research survive navigation away from and back into the workbook? Answering yes would require a deliberate persistence/lifecycle decision (client vs. server, retention, audit implications) — not an incidental client-state change, and not authorized or scoped here.
+
+## II. Architecture reconciliation (CAH-4G.9 principles, reconfirmed after real UAT)
+
+- Client-memory V1 persistence decision (§H) remains valid for Slice A. Nothing in this UAT required DB/session persistence for correctness — item 7 is the V1 contract working exactly as designed, not a gap that correctness needs closed. (Observation 3 is a distinct, future product question, not a correctness requirement.)
+- Bounded conversational context (Slice B) remains a distinct, not-started, not-authorized future milestone. No UAT evidence changes this.
+- Full transcript must still never be sent to Anthropic. Unchanged; not touched by this UAT or this milestone.
+- Project facts remain authoritative outside HRR conversation. Unchanged; item 10 (no assessment/workbook state change observed) is consistent with this.
+- Audit semantics remain unchanged. No audit file touched since CAH-4G.10; UAT did not exercise or require any audit-schema change.
+- Hypothetical research remains out of V1 unless separately authorized. Not touched.
+
+No settled architecture is reopened by this closeout; the production-UAT polish observations (§HH) are recorded as backlog evidence for a future decision, not as a reason to revisit CAH-4G.9.
