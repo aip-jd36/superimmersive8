@@ -36,6 +36,26 @@ import type { RetrievalDiagnostic, TopicClaim, TopicRelationship } from './types
 import { isApplicable, type ApplicabilityFacts } from './lookup-topic-claims'
 
 /**
+ * The relationship-side governance gate `lookupRelatedTopicClaims` below has
+ * always applied inline -- factored out (Generic Orthogonal-Fact Discovery —
+ * TopicRelationship Authorization, 2026-09-11) so a second, independent
+ * consumer (the claim-targeted discovery path in
+ * lib/crc-engine/discovered-relevance.ts, which queries `TopicRelationship`
+ * in the REVERSE direction -- topic-of-a-discovered-claim -> which active
+ * explicit goal(s) it may inform, rather than goal -> which topics inform
+ * it) can reuse the EXACT SAME gate rather than re-deriving or (worse)
+ * subtly re-approximating it. Deliberately excludes the directional match
+ * (`source_topic === category` here; `target_topic === candidate topic` for
+ * the reverse consumer) -- that half is caller-specific by construction, the
+ * governance-eligibility half is not and must never diverge between the two
+ * consumers. Zero behavior change for this function: the boolean expression
+ * is unchanged, only extracted.
+ */
+export function relationshipIsAdoptedAndCrcEligible(r: TopicRelationship): boolean {
+  return r.superseded_by === null && r.lifecycle === 'Adopted' && r.crc_eligible === 'Yes'
+}
+
+/**
  * One related claim, still paired with the relationship and originating
  * goal category that produced it -- assembleRelatedTopicResult (Phase 6)
  * needs all three to stamp RetrievalResult's provenance fields correctly.
@@ -79,9 +99,7 @@ export function lookupRelatedTopicClaims(
     // COPYRIGHTABILITY-v1 record, today) never enters this list at all --
     // this is what makes the zero-behavior-change guarantee hold by
     // construction, not by a separate runtime check.
-    const eligibleRelationships = relationships.filter(
-      (r) => r.source_topic === category && r.superseded_by === null && r.lifecycle === 'Adopted' && r.crc_eligible === 'Yes',
-    )
+    const eligibleRelationships = relationships.filter((r) => r.source_topic === category && relationshipIsAdoptedAndCrcEligible(r))
 
     for (const relationship of eligibleRelationships) {
       const targetCandidates = topicClaims.filter((c) => c.topic === relationship.target_topic && c.superseded_by === null)

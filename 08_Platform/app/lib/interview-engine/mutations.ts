@@ -25,6 +25,7 @@ import type {
   AssetProviderMention,
   Attested,
   ContentPresenceMention,
+  DistributionTerritoryMention,
   ScopedObservation,
   StructuredUnderstanding,
   ToolMention,
@@ -432,6 +433,86 @@ export function supersedeContentPresenceMention(
     ...su,
     content_presence_mentions: [
       ...su.content_presence_mentions.map((m) =>
+        m.mention_id === targetId ? { ...m, superseded_by: replacement.mention_id } : m,
+      ),
+      replacement,
+    ],
+  }
+}
+
+// ── Distribution territory mentions (Generic Distribution/Output-Use
+// Territory Contract, 2026-09-11) ──────────────────────────────────────────
+
+/**
+ * Mirrors addAssessmentJurisdictionMention exactly -- same duplicate-id /
+ * already-superseded-on-add invariants, no cap. Pure and mechanical, same as
+ * every other function in this module -- how a stated correction resolves to
+ * a specific target mention_id is a policy decision made by the caller
+ * (lib/interview-engine/extraction.ts), never by this function. Unlike
+ * `addContentPresenceMention`, this fact type has REAL supersession
+ * semantics (see `supersedeDistributionTerritoryMention` immediately below)
+ * -- a distribution territory is a single project-level fact a later
+ * statement can directly replace, the same shape
+ * `AssessmentJurisdictionMention` solves for jurisdictions, deliberately NOT
+ * the append-only shape `ContentPresenceMention` uses.
+ */
+export function addDistributionTerritoryMention(
+  su: StructuredUnderstanding,
+  mention: DistributionTerritoryMention,
+): StructuredUnderstanding {
+  if (su.distribution_territory_mentions.some((m) => m.mention_id === mention.mention_id)) {
+    throw new Error(`Distribution territory mention id already exists: ${mention.mention_id}`)
+  }
+  if (mention.superseded_by !== null) {
+    throw new Error(
+      `A newly added distribution territory mention cannot already be superseded (mention_id: ${mention.mention_id})`,
+    )
+  }
+  return {
+    ...su,
+    distribution_territory_mentions: [...su.distribution_territory_mentions, mention],
+  }
+}
+
+/**
+ * Mirrors supersedeAssessmentJurisdictionMention exactly -- same invariants
+ * (target must exist and must currently be the active/non-superseded head of
+ * its chain). A distribution territory has no exclusion concept (see
+ * `DistributionTerritoryMention`'s own doc comment) -- this function is used
+ * for ordinary correction only ("Actually, this is only for Germany, not
+ * France").
+ */
+export function supersedeDistributionTerritoryMention(
+  su: StructuredUnderstanding,
+  targetId: string,
+  replacement: DistributionTerritoryMention,
+): StructuredUnderstanding {
+  const target = su.distribution_territory_mentions.find((m) => m.mention_id === targetId)
+  if (!target) {
+    throw new Error(`Cannot supersede unknown distribution territory mention: ${targetId}`)
+  }
+  if (target.superseded_by !== null) {
+    throw new Error(
+      `Cannot supersede distribution territory mention ${targetId}: it is already superseded by ${target.superseded_by}. ` +
+      `Corrections must target the current head of the chain, not a historical snapshot.`,
+    )
+  }
+  if (replacement.mention_id === targetId) {
+    throw new Error(`Replacement distribution territory mention must have a different id than the mention it supersedes: ${targetId}`)
+  }
+  if (su.distribution_territory_mentions.some((m) => m.mention_id === replacement.mention_id)) {
+    throw new Error(`Replacement distribution territory mention id already exists: ${replacement.mention_id}`)
+  }
+  if (replacement.superseded_by !== null) {
+    throw new Error(
+      `A newly added replacement distribution territory mention cannot already be superseded (mention_id: ${replacement.mention_id})`,
+    )
+  }
+
+  return {
+    ...su,
+    distribution_territory_mentions: [
+      ...su.distribution_territory_mentions.map((m) =>
         m.mention_id === targetId ? { ...m, superseded_by: replacement.mention_id } : m,
       ),
       replacement,

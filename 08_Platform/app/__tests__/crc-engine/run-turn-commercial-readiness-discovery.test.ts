@@ -242,6 +242,7 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
         asset_provider_mentions: [],
         assessment_jurisdiction_mentions: [],
         content_presence_mentions: [],
+        distribution_territory_mentions: [],
     current_phase: 2,
         gate_1_state: 'met',
         gate_2_state: 'not_yet_stable',

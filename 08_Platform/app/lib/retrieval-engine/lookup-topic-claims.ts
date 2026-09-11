@@ -274,6 +274,43 @@ export function toolScopeMatches(claim: TopicClaim, activeToolIds: readonly stri
   return claim.tool_scope.some((t) => activeToolIds.includes(t))
 }
 
+/**
+ * Distribution-territory DISCOVERY-CANDIDATE test (Generic Orthogonal-Fact
+ * Discovery — TopicRelationship Authorization milestone, 2026-09-11,
+ * correcting the original Generic Distribution/Output-Use Territory
+ * Contract, 2026-09-11). Structurally similar to `providerScopeMatches`/
+ * `toolScopeMatches` immediately above -- same exact-literal, case-
+ * insensitive matching shape -- but with a DELIBERATELY INVERTED null-check
+ * (see `TopicClaim.geographic_relevance_scope`'s own doc comment, types.ts,
+ * for the full rationale) AND A DIFFERENT ROLE: this function answers ONLY
+ * "is this claim a candidate the stated territory makes potentially
+ * relevant" (Core Distinction A, discovery condition) -- it is NEVER a
+ * downstream narrowing filter over an already-topic-relevant candidate set,
+ * unlike `providerScopeMatches`/`toolScopeMatches`. It is called from
+ * `deriveClaimTargetedDiscoveryOccurrences` (lib/crc-engine/
+ * discovered-relevance.ts) -- one-way import, crc-engine consuming a pure
+ * retrieval-engine function, the same established dependency direction
+ * crc-engine already uses for `TopicClaim`/`TopicRelationship` types --
+ * NEVER from `lookupTopicClaims` or `lookupDiscoveredTopicClaims`. Which
+ * EXPLICIT GOAL a resulting candidate may actually inform is a wholly
+ * separate, independently governed question -- see
+ * `relationshipIsAdoptedAndCrcEligible` (lookup-topic-relationships.ts) and
+ * `deriveClaimTargetedDiscoveryOccurrences`'s own header for that half.
+ *
+ * `claim.geographic_relevance_scope == null` (covers both `null` and
+ * `undefined` -- see the field's own optionality doc comment) means this
+ * claim does NOT participate in territory-driven discovery -- returns
+ * `false`, the inverse of `providerScopeMatches`/`toolScopeMatches`'s `true`
+ * for their own null case. A non-empty array matches case-insensitively
+ * against `distributionTerritories` (raw, user-stated literal values --
+ * never canonicalized, never passed through an alias table).
+ */
+export function territoryRelevanceMatches(claim: TopicClaim, distributionTerritories: readonly string[]): boolean {
+  if (claim.geographic_relevance_scope == null) return false
+  const scope = claim.geographic_relevance_scope.map((v) => v.toLowerCase())
+  return distributionTerritories.some((t) => scope.includes(t.toLowerCase()))
+}
+
 export interface TopicLookupResult {
   matches: TopicClaim[]
   diagnostics: RetrievalDiagnostic[]

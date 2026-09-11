@@ -305,7 +305,7 @@ describe('buildResultsEmailContent', () => {
         scoped_observations: [],
         user_goals: [g('g1', 'Can I use it commercially?', 'commercial_use')],
         asset_provider_mentions: [{ mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: 'istock' }, confidence: 'confirmed', source_turn: 1, source_statement: 'iStock footage', superseded_by: null, usage: { state: 'unknown' }, license: { state: 'unknown' } }],
-        assessment_jurisdiction_mentions: [], content_presence_mentions: [],
+        assessment_jurisdiction_mentions: [], content_presence_mentions: [], distribution_territory_mentions: [],
         current_phase: 3, gate_1_state: 'met', gate_2_state: 'stable', completion_reason: null, opt_out_scope: null,
       }
       const handoff = buildRetrievalHandoff(su)
