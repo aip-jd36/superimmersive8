@@ -43,6 +43,17 @@ import { topicSelectionGateResult } from '@/lib/hrr/run-hrr-research'
 import { runAuditedHrrResearch, HrrAuditNotRecordedError } from '@/lib/hrr-audit/run-audited-hrr-research'
 import type { HrrAuthorityGateResult, ReviewerResearchTopic } from '@/lib/reviewer-lk/types'
 import type { HrrResearchAnswer } from '@/lib/hrr/types'
+// CAH-4G.16 — DARK WIRING ONLY. Everything imported below this line is used
+// exclusively to VALIDATE and OBSERVE a client-supplied ResearchSessionContext
+// AFTER the classifier call (step 3) has already run and returned. None of it
+// is ever passed into `createAnthropicResearchIntentInterpreter()`, `gate`,
+// `runAuditedHrrResearch()`, or the response body. Live routing, the
+// classifier's input, and every returned answer are BYTE-IDENTICAL to the
+// pre-CAH-4G.16 route — see `__tests__/reviewer-lk/hrr-research-route.test.ts`
+// and `research-session-context-dark-wiring.test.ts` for the regression proof.
+import { buildResearchSessionContextPrefix } from '@/lib/hrr/research-session-context'
+import { resolveResearchSessionContext } from '@/lib/hrr/research-session-context.schema'
+import { enforceAuthoritativeReferents } from '@/lib/hrr/research-session-context-referents'
 
 export const dynamic = 'force-dynamic'
 
@@ -51,7 +62,12 @@ const REVIEWER_TOPICS = GOAL_CATEGORIES.filter((c): c is ReviewerResearchTopic =
 
 type ParsedBody =
   | { ok: true; mode: 'topic_pick'; topic: ReviewerResearchTopic }
-  | { ok: true; mode: 'question'; question: string }
+  // `context` (CAH-4G.16): raw, UNVALIDATED at parse time — shape/authoritative
+  // validation happens later, after submission context is resolved (step 4.5),
+  // strictly AFTER the classifier call (step 3) already ran and returned.
+  // `undefined` for a pre-CAH-4G.16 client — see `resolveResearchSessionContext`
+  // (CAH-4G.15) for why `undefined` always means "no context supplied".
+  | { ok: true; mode: 'question'; question: string; context: unknown }
   | { ok: false; message: string }
 
 /** Strict free-form input contract — no messages[] transcript, no history, no session id, no client authority facts. */
@@ -82,7 +98,14 @@ function parseBody(body: unknown): ParsedBody {
     if (question.length > HRR_QUESTION_MAX_LENGTH) {
       return { ok: false, message: `Keep your research question under ${HRR_QUESTION_MAX_LENGTH} characters.` }
     }
-    return { ok: true, mode: 'question', question }
+    // CAH-4G.16: `context` is captured raw here — an unrecognized shape is
+    // NEVER a 400 at this stage (fail-closed is the schema/authoritative
+    // validator's job, step 4.5, not the parser's). A topic-pick request
+    // never reads a `context` field at all, by design (§6/Phase 6: explicit
+    // current intent needs no inherited context — the field is simply never
+    // looked at for that mode, matching this parser's existing convention of
+    // never rejecting fields it doesn't recognize for the wrong mode).
+    return { ok: true, mode: 'question', question, context: 'context' in b ? b.context : undefined }
   }
 
   return { ok: false, message: 'Request "mode" must be "topic_pick" or "question".' }
@@ -141,6 +164,28 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   } catch (err) {
     console.error('[reviewer-lk/research] submission context read failed', err instanceof Error ? err.name : 'unknown')
     return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+  }
+
+  // 4.5. CAH-4G.16 DARK CONTEXT VALIDATION — inert by construction: this block
+  //      runs AFTER step 3's classifier call has already executed and `gate`
+  //      is already fixed. Nothing computed here can retroactively change
+  //      `gate`, `attributedQuestion`, or anything passed to
+  //      `runAuditedHrrResearch` below — none of those variables are
+  //      reassigned. Observable ONLY behind an explicit, off-by-default debug
+  //      flag; never reaches the response body, the classifier, or the audit.
+  if (parsed.mode === 'question') {
+    const resolvedContext = resolveResearchSessionContext(parsed.context) // CAH-4G.15 shape/bounds — never null, never throws
+    const authoritativeContext = enforceAuthoritativeReferents(resolvedContext, reviewerContext, TOPIC_CLAIMS_FIXTURE) // CAH-4G.16 — real identifiers only
+    const darkContextPrefixForTesting = buildResearchSessionContextPrefix(authoritativeContext) // CAH-4G.15 — bounded, fixed-template
+    if (process.env.HRR_DARK_CONTEXT_DEBUG === '1') {
+      // Non-production observability only — never enabled by default, never
+      // read by any code path that affects the response.
+      console.debug('[reviewer-lk/research] CAH-4G.16 dark context (NOT used for routing/answer)', {
+        activeFocus: authoritativeContext.activeFocus,
+        referentCount: authoritativeContext.unresolvedReferents.length,
+        prefixLength: darkContextPrefixForTesting?.length ?? 0,
+      })
+    }
   }
 
   // 5-8. audited HRR research — the required audit persists BEFORE the answer
