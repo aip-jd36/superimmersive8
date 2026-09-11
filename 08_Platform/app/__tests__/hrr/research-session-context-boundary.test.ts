@@ -27,19 +27,25 @@ const HRR_RESEARCH_ROUTE = 'app/api/admin/submissions/[id]/reviewer-lk/research/
 const HRR_AUDIT_RUNNER = 'lib/hrr-audit/run-audited-hrr-research.ts'
 const HRR_ANSWER_VIEW = 'app/admin/submissions/[id]/review/HrrResearchAnswerView.tsx'
 
-describe('A — NO RUNTIME BEHAVIOR CHANGE: nothing in the live pipeline imports the new context primitives yet', () => {
-  test.each([AUTHORITY_GATE, RUN_HRR_RESEARCH, INTENT_CLASSIFIER, INTENT_CLASSIFIER_ANTHROPIC, HRR_RESEARCH_ROUTE, HRR_AUDIT_RUNNER])(
-    '%s does not import research-session-context (inert — CAH-4G.15 makes no behavior change)',
+describe('A — NO RUNTIME BEHAVIOR CHANGE (CAH-4G.15 baseline): the pipeline BELOW the classifier boundary never imports the context primitives', () => {
+  // CAH-4G.16 deliberately wires the ONE exception — the route itself — for
+  // dark validation. Everything downstream of the classifier call
+  // (authority gate, the research pipeline, both classifier variants, the
+  // audit runner) must still never import it: that is what keeps CAH-4G.16
+  // inert. See `research-session-context-dark-wiring.test.ts` for the
+  // CAH-4G.16-specific proofs (route wiring IS expected there; the
+  // classifier's actual input is proven byte-unchanged there instead).
+  test.each([AUTHORITY_GATE, RUN_HRR_RESEARCH, INTENT_CLASSIFIER, INTENT_CLASSIFIER_ANTHROPIC, HRR_AUDIT_RUNNER])(
+    '%s does not import research-session-context (inert — no behavior change)',
     (rel) => {
       const imports = importLines(rel)
       expect(imports).not.toMatch(/research-session-context/)
     },
   )
 
-  test('the live research route body-parser (parseBody) is byte-unchanged in shape — still rejects messages/history/conversation/session_id, and does not yet accept a context field', () => {
+  test('the live research route body-parser (parseBody) still rejects messages/history/conversation/session_id exactly as before CAH-4G.16', () => {
     const route = codeOnly(HRR_RESEARCH_ROUTE)
     expect(route).toMatch(/'messages' in b \|\| 'history' in b \|\| 'conversation' in b \|\| 'session_id' in b \|\| 'sessionId' in b/)
-    expect(route).not.toMatch(/activeFocus|unresolvedReferents|ResearchSessionContext|resolveResearchSessionContext/)
   })
 })
 
