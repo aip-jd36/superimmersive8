@@ -37,6 +37,7 @@
 | **Assessment Registry / lifecycle / provenance / publication** | `PRD_ASSESSMENT_SERVICE_v1.0.md`, `ADR-001..004` in `lib/assessments/` | `lib/assessments/**`, `assessments` + `assessment_publications` tables |
 | **Workbook / assessment authority boundary vs. Reviewer Resources** | `ADR-001-reviewer-resources-authority-boundary.md`, `PRD_CAH_4F_REVIEWER_RESOURCES.md §4` | `app/admin/submissions/[id]/review/page.tsx`, `WorkbookClient.tsx`, `Section1Intake.tsx`…`Section7Brief.tsx`, `workbook-schema.ts` |
 | **Customer / operational journey (end-to-end)** | `06_Operations/customer-experience/SI8-Customer-Journey-v1.0.md`, `SI8-Operational-Journey-v1.0.md` | — |
+| **Submission fact acquisition — upstream of Consultative Composition (CAH-4I, discovery only, not yet actioned)** | `08_Platform/implementation/COMMERCIAL_ASSURANCE_SUBMISSION_FACT_COVERAGE_DISCOVERY.md` — whether CertForm/RecordForm collect the project facts the current Commercial Assurance architecture (workbook, CRC, LK) actually needs; coverage matrix; territory/registration/trademark findings; no implementation authorized | `app/certify/page.tsx`, `app/record/page.tsx`, `lib/reviewer-lk/submission-facts.ts`, `lib/crc-engine/dependency-askability.ts` |
 
 ## 3. Milestone map (CAH-4x)
 
