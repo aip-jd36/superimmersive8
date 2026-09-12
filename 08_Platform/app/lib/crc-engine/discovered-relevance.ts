@@ -110,7 +110,7 @@
  */
 
 import type { ContentPresenceCategory, GoalCategory, StructuredUnderstanding } from '@/types/interview-engine'
-import type { DiscoveredTopicOccurrence, TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
+import type { DiscoveredTopicOccurrence, KnowledgeTopic, TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
 import { territoryRelevanceMatches } from '@/lib/retrieval-engine/lookup-topic-claims'
 import { relationshipIsAdoptedAndCrcEligible } from '@/lib/retrieval-engine/lookup-topic-relationships'
 
@@ -275,8 +275,17 @@ function hasGovernedClaimForTopic(topic: GoalCategory, topicClaims: TopicClaim[]
   return topicClaims.some((c) => c.topic === topic && c.superseded_by === null && c.lifecycle === 'Adopted' && c.crc_eligible === 'Yes')
 }
 
-function activeConfirmedGoalCategories(understanding: StructuredUnderstanding): Set<GoalCategory> {
-  return new Set(understanding.user_goals.filter((g) => g.superseded_by === null && g.state === 'confirmed').map((g) => g.category))
+/**
+ * Returns `Set<KnowledgeTopic>`, not `Set<GoalCategory>` (KnowledgeTopic
+ * Foundation milestone, 2026-09-13) -- every VALUE inserted is still a real
+ * `UserGoal.category` (`GoalCategory`), zero behavior change; only the
+ * STATIC type widens, so this Set can be compared against a
+ * `KnowledgeTopic`-typed `claim.topic`/`trigger.topic` below via `.has()`
+ * without a compile error. A `GoalCategory` value is always a valid
+ * `KnowledgeTopic` -- see that type's own module header, retrieval-engine/types.ts.
+ */
+function activeConfirmedGoalCategories(understanding: StructuredUnderstanding): Set<KnowledgeTopic> {
+  return new Set<KnowledgeTopic>(understanding.user_goals.filter((g) => g.superseded_by === null && g.state === 'confirmed').map((g) => g.category))
 }
 
 /**
@@ -549,15 +558,27 @@ export function deriveDiscoveredTopicOccurrences(
   ]
 }
 
-/** Deduplicated topic list, for feeding directly into `retrieve()`'s/`lookupTopicClaims()`'s/`deriveKnowledgeReadinessNeeds()`'s additive `discoveredTopics` parameters. */
-export function discoveredTopicCategories(occurrences: DiscoveredTopicOccurrence[]): GoalCategory[] {
+/**
+ * Deduplicated topic list, for feeding directly into `retrieve()`'s/
+ * `lookupTopicClaims()`'s/`deriveKnowledgeReadinessNeeds()`'s additive
+ * `discoveredTopics` parameters. Returns `KnowledgeTopic[]`, not
+ * `GoalCategory[]` (KnowledgeTopic Foundation milestone, 2026-09-13) --
+ * `DiscoveredTopicOccurrence.topic` is itself a `KnowledgeTopic` (a discovered
+ * occurrence's own topic is the matching claim's intrinsic subject, which may
+ * be knowledge-only). Production `retrieve.ts` never feeds this list into
+ * `lookupTopicClaims`'s exact-topic path (it always passes `[]` there); the
+ * live consumer is Track B (`deriveKnowledgeReadinessNeeds`), whose own
+ * `discoveredTopics` parameter widens identically -- see that function's own
+ * doc comment.
+ */
+export function discoveredTopicCategories(occurrences: DiscoveredTopicOccurrence[]): KnowledgeTopic[] {
   return Array.from(new Set(occurrences.map((o) => o.topic)))
 }
 
 export type TopicOrigin = 'explicit_goal' | 'discovered'
 
 export interface RelevantTopic {
-  topic: GoalCategory
+  topic: KnowledgeTopic
   origin: TopicOrigin
   /** UserGoal.goal_id[] for an explicit topic; AssetProviderMention.mention_id[] (or other future source-fact id[]) for a discovered one. */
   source_ids: string[]
@@ -574,12 +595,12 @@ export interface RelevantTopic {
  */
 export function computeRelevantTopics(understanding: StructuredUnderstanding, topicClaims: TopicClaim[]): RelevantTopic[] {
   const explicitGoals = understanding.user_goals.filter((g) => g.superseded_by === null && g.state === 'confirmed')
-  const explicitByTopic = new Map<GoalCategory, string[]>()
+  const explicitByTopic = new Map<KnowledgeTopic, string[]>()
   for (const g of explicitGoals) {
     explicitByTopic.set(g.category, [...(explicitByTopic.get(g.category) ?? []), g.goal_id])
   }
 
-  const discoveredByTopic = new Map<GoalCategory, string[]>()
+  const discoveredByTopic = new Map<KnowledgeTopic, string[]>()
   for (const o of deriveDiscoveredTopicOccurrences(understanding, topicClaims)) {
     discoveredByTopic.set(o.topic, [...(discoveredByTopic.get(o.topic) ?? []), o.source_id])
   }

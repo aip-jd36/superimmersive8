@@ -69,13 +69,14 @@ import { normalizeCandidate, type CandidateObservation } from '@/lib/interview-e
 import { buildRetrievalHandoff } from '@/lib/interview-engine/handoff'
 import { ASSET_PROVIDER_IDS, GOAL_CATEGORIES } from '@/types/interview-engine'
 import type { AssetProviderMention, GoalCategory, StructuredUnderstanding, UserGoal } from '@/types/interview-engine'
-import type { TopicClaim } from '@/lib/retrieval-engine/types'
+import type { KnowledgeTopic, TopicClaim } from '@/lib/retrieval-engine/types'
 
 // ── A/B: provider-scope exposure ────────────────────────────────────────────
 
 export interface NullScopeExposure {
   claim_id: string
-  topic: GoalCategory
+  /** A KnowledgeTopic (KnowledgeTopic Foundation milestone, 2026-09-13) -- report-only, never fed into matched_goal_category/BI, so no narrowing guard is needed here, unlike assembleTopicResult/reviewerClaimToBiResult. */
+  topic: KnowledgeTopic
   lifecycle: string
   crc_eligible: string
 }
@@ -124,7 +125,8 @@ export function findExplicitScopeEffects(topicClaims: readonly TopicClaim[], can
 // ── C: discovered-relevance exposure ────────────────────────────────────────
 
 export interface DiscoveredTopicExposure {
-  topic: GoalCategory
+  /** A KnowledgeTopic -- report-only, see NullScopeExposure.topic's own comment. */
+  topic: KnowledgeTopic
   /** Which synthetic goal category the probe used to surface this -- diagnostic transparency only, never a real UserGoal. */
   probed_via_goal_category: GoalCategory
 }

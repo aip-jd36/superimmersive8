@@ -23,7 +23,7 @@
  */
 
 import type { GoalCategory } from '@/types/interview-engine'
-import type { MatrixClaim, MatrixRow, RetrievalResult, RetrievalSourceFact, TopicClaim } from './types'
+import { isGoalCategoryTopic, type MatrixClaim, type MatrixRow, type RetrievalResult, type RetrievalSourceFact, type TopicClaim } from './types'
 
 /** Returns null (never a fabricated scope) if the claim has no publication scope text -- see the 'yes_claim_missing_scope' diagnostic in retrieve.ts, which is where this case is actually surfaced. */
 export function assembleResult(sourceFact: RetrievalSourceFact, row: MatrixRow, claim: MatrixClaim): RetrievalResult | null {
@@ -61,9 +61,27 @@ export function assembleResult(sourceFact: RetrievalSourceFact, row: MatrixRow, 
  * Yes-eligible topic claim with no scope text would be an authoring
  * inconsistency, exactly mirroring the Matrix's own 'yes_claim_missing_scope'
  * case.
+ *
+ * `matched_goal_category` (KnowledgeTopic Foundation milestone, 2026-09-13):
+ * a direct Topic Retrieval match only ever reaches this function via
+ * `lookupTopicClaims`'s own exact-topic gate (`c.topic === category`, where
+ * `category` ranges only over real `GoalCategory` values -- see that
+ * function's own header) -- so `claim.topic` is, by construction, ALWAYS
+ * also a real `GoalCategory` here, never knowledge-only. `isGoalCategoryTopic`
+ * makes that pre-existing runtime invariant visible to the type system now
+ * that `TopicClaim.topic` is `KnowledgeTopic`-typed; it is not new behavior
+ * and this function's own construction makes it structurally unreachable to
+ * fail. It throws rather than silently guessing if it ever somehow does --
+ * that would mean `lookupTopicClaims`'s own exact-topic gate was bypassed, a
+ * genuine invariant violation this function has no safe way to recover from.
  */
 export function assembleTopicResult(claim: TopicClaim): RetrievalResult | null {
   if (claim.crc_publication_scope === null) return null
+  if (!isGoalCategoryTopic(claim.topic)) {
+    throw new Error(
+      `assembleTopicResult: exact-topic claim ${claim.claim_id} has a knowledge-only topic (${claim.topic}) -- structurally unreachable via lookupTopicClaims's own exact-topic gate`,
+    )
+  }
   return {
     source_fact: { kind: 'topic', identifier: claim.topic },
     claim_id: claim.claim_id,

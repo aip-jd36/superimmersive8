@@ -14,7 +14,7 @@
  */
 
 import type { GoalCategory, ConfidenceState } from '@/types/interview-engine'
-import type { MatchOrigin } from '@/lib/retrieval-engine/types'
+import type { KnowledgeTopic, MatchOrigin } from '@/lib/retrieval-engine/types'
 import type { SalesStatus, SalesCloseReason } from './workflow'
 
 // ── Contact list ──────────────────────────────────────────────────────────
@@ -126,7 +126,8 @@ export interface SalesAnswerGoalStatus {
 export interface SalesAnswerGovernedReference {
   claim_id: string
   matrix_identifier: string
-  topic: GoalCategory
+  /** A KnowledgeTopic (KnowledgeTopic Foundation milestone, 2026-09-13) -- verbatim passthrough of RetrievalResult.topic, display-only; matched_goal_category below remains the authority-bearing GoalCategory field. */
+  topic: KnowledgeTopic
   match_origin: MatchOrigin
   /** The explicit goal category that caused this result to surface (Track C provenance for discovered_topic). */
   matched_goal_category: GoalCategory

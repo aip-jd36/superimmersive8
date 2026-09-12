@@ -53,7 +53,7 @@
  */
 
 import type { GoalCategory } from '@/types/interview-engine'
-import type { DiscoveredTopicOccurrence, RetrievalDiagnostic, TopicClaim, UnmetApplicabilityDetail } from './types'
+import type { DiscoveredTopicOccurrence, KnowledgeTopic, RetrievalDiagnostic, TopicClaim, UnmetApplicabilityDetail } from './types'
 import { evaluateApplicabilityDetailed, providerScopeMatches, type ApplicabilityFacts } from './lookup-topic-claims'
 
 /**
@@ -96,7 +96,7 @@ export function lookupDiscoveredTopicClaims(
   const matches: DiscoveredTopicClaimMatch[] = []
   const seen = new Set<string>()
 
-  const pairs = new Map<string, { topic: GoalCategory; sourceGoalCategory: GoalCategory }>()
+  const pairs = new Map<string, { topic: KnowledgeTopic; sourceGoalCategory: GoalCategory }>()
   for (const occ of occurrences) {
     pairs.set(`${occ.topic}:${occ.source_goal_category}`, { topic: occ.topic, sourceGoalCategory: occ.source_goal_category })
   }

@@ -80,11 +80,11 @@
  * intention.
  */
 
-import type { GoalCategory, StructuredUnderstanding } from '@/types/interview-engine'
+import type { StructuredUnderstanding } from '@/types/interview-engine'
 import type { Phase } from '@/types/interview-engine'
 import type { CandidateQuestionProposal } from '@/lib/interview-engine/candidate-question'
 import type { BoundaryState } from '@/lib/interview-engine/boundaries'
-import type { TopicClaim } from '@/lib/retrieval-engine/types'
+import type { KnowledgeTopic, TopicClaim } from '@/lib/retrieval-engine/types'
 import { getAskabilityEntry, type ReadinessTarget } from './dependency-askability'
 
 /**
@@ -184,12 +184,21 @@ function relevantProviderMentions(understanding: StructuredUnderstanding, claim:
  * (lifecycle/crc_eligible/supersession/provider_scope), the askability
  * registry lookup, the attempt-cap check, and the dedupe-by-target-key
  * logic below are all completely untouched by this milestone.
+ *
+ * `KnowledgeTopic`, not `GoalCategory` (KnowledgeTopic Foundation milestone,
+ * 2026-09-13): `discoveredTopicCategories()` (discovered-relevance.ts) now
+ * returns `KnowledgeTopic[]`, since a discovered occurrence's own topic is
+ * the matching claim's intrinsic subject, which may be knowledge-only. The
+ * `activeGoalCategories` union below and `isReadinessCandidateClaim`'s own
+ * parameter are already `ReadonlySet<string>`/ generic-string-shaped, so
+ * this widening requires no other change in this file -- see that
+ * function's own doc comment.
  */
 export function deriveKnowledgeReadinessNeeds(
   understanding: StructuredUnderstanding,
   topicClaims: TopicClaim[],
   boundaryState: BoundaryState,
-  discoveredTopics: GoalCategory[] = [],
+  discoveredTopics: KnowledgeTopic[] = [],
 ): KnowledgeReadinessNeed[] {
   const activeGoalCategories = new Set([
     ...understanding.user_goals.filter((g) => g.superseded_by === null && g.state === 'confirmed').map((g) => g.category),
