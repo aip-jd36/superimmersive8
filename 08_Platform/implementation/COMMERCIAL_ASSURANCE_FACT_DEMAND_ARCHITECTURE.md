@@ -859,3 +859,102 @@ Each requires its own explicit PM/governance authorization referencing this docu
 - No legal conclusion is asserted. Every reference to applicability, jurisdiction, copyrightability, infringement, or clearance either quotes SI8's existing disclaimers or is explicitly flagged **E8 — not establishable**.
 - Three CAH-4I.1 findings are corrected with source citations rather than silently restated (§2.3 items 4, 5, and the §11.2 root-cause reclassification).
 - Doc-vs-code drift recorded in §2.3; code treated as authoritative throughout.
+
+---
+
+## 23. CAH-4I.2 REVIEW / PM ARCHITECTURE GATE (2026-09-12)
+
+**Status:** Independent review of this document, performed against source (not against this document's own citations). Format below is **ORIGINAL CLAIM vs REVIEW FINDING** throughout. This section does not rewrite §0–§22; it gates which parts convert to adopted architecture.
+
+**Reviewer's method note:** every claim below marked "independently re-verified" was checked directly against source in this review pass (grep/read on the actual files), not accepted on the strength of §0–§22's own citations. Claims marked "not independently re-checked this pass" were verified by the predecessor CAH-4I.1 review (a separate, earlier independent pass) and are carried forward without re-verification here for effort reasons; they are flagged, not silently trusted.
+
+### 23.1 Artifact quality assessment
+
+This is unusually well-grounded work for a design document: every load-bearing claim cites a `file:line` or a verbatim quote, doc-vs-code drift is recorded rather than papered over (§2.3), and the document twice corrects its own predecessor (CAH-4I.1) with cited evidence rather than silently restating it. The independent re-derivation performed for this review confirmed every claim it attempted to check. That is a strong result but it is not a reason to skip governance — see §23.3 and §23.10.
+
+### 23.2 Independently re-verified this pass (highest-stakes claims)
+
+| # | Claim | Source checked | Result |
+|---|---|---|---|
+| 1 | `review/page.tsx` builds the reviewer evidence list from exactly `tools_used[].receipt_path` and `audio_disclosure.license_path`, nothing else | `grep -n` on the file's `rawPaths` construction | **CONFIRMED EXACTLY.** Two sources, no more. |
+| 2 | `likeness_release_path`, `ip_license_path`, `fair_use_doc_path`, `third_party_assets`, `production_evidence_paths` never appear anywhere under `app/admin/` | repo-wide grep of the admin tree | **CONFIRMED — zero hits.** All five are written at submission time (`certify/page.tsx`) and rendered on the creator's own dashboard (`app/dashboard/submissions/[id]/page.tsx`), never on any reviewer surface. |
+| 3 | `reportProjection.ts` sets "Release on file" / "License on file" from path non-emptiness | grep on `reportProjection.ts` | **CONFIRMED** — lines ~352, ~364, ~381, ~393 set exactly these labels from `s(submission.ip_license_path)` / `s(submission.likeness_release_path)` non-emptiness. |
+| 4 | CertForm's route has no askability/governance registry equivalent to CRC's | grep for askability/governance terms under `app/certify/` | **CONFIRMED — zero hits.** No registry, no import, no reference. |
+| 5 | `dependency-askability.ts` fail-closed default with exactly one `askable_in_crc` entry | read of the file | **CONFIRMED** — `DEPENDENCY_TREATMENTS` has exactly one entry (`human_contribution_description`); header states "Absence defaults to [non-askable]." |
+| 6 | `crc-assurance-handoff/types.ts` unauthenticated-identity language, quoted verbatim in §5/§12 | read of the file | **CONFIRMED near-verbatim** — "CRC has no authenticated identity and `crc_sessions.email` is unverified... a PERMISSION fact only" is genuine source text, not a paraphrase dressed as a quote. |
+| 7 | 37 `CLAIM-` headers in `GOVERNED-CLAIMS.md`; zero are trademark-domain claims | `grep -c "^### CLAIM-"` + trademark grep | **CONFIRMED** — 37 headers exactly; the only 3 "trademark" mentions are incidental language inside stock-provider claims, not a dedicated claim. |
+| 8 | Control I03 exists, machine-required at sign-off, with a `trademark_elements` field | `signoff.ts`, `workbook-schema.ts` | **CONFIRMED.** |
+
+**New finding produced by this review, not present in §0–§22:** `e9e40b1` (the other session's accidental checkpoint on this branch) and `origin/main`'s own `23f6b82` are **tree-identical for all 13 CR-validation files** — `git diff 23f6b82 e9e40b1 --stat` shows zero difference outside our own two CAH-4I docs. This matters directly for §23.13 (branch cleanup): `e9e40b1` is not unique content requiring preservation via cherry-pick; it is a duplicate of content `main` already has under a different commit. See §23.13.
+
+**Not independently re-checked this pass** (verified by the CAH-4I.1 review, an earlier, separate independent pass, and not re-derived here): the R03 custom-model acquisition gap (`AddToolModal` field sweep); the full 62-row §16 inventory beyond the rows implicated in the claims above; the exact wording of `jurisdiction-clarification.ts`'s question text and `JURISDICTION_VALUE_ALIASES`' seven US aliases (the core `resolveSubmissionJurisdiction` code-path claim itself *was* independently verified, in the CAH-4I.1 review pass, reading the actual function body).
+
+### 23.3 Phase 3 — Shared fact-demand vs. fact-instance: **ACCEPT**
+
+Re-derived from first principles rather than checked against the document's own framing: the strongest argument for a shared canonical instance is deduplication (avoid asking the same thing twice, avoid divergence). The strongest argument against is that "one fact instance" silently collapses onto "one authority source" the moment any consumer has to pick which instance to trust — and no precedence rule between an authenticated declaration, an unauthenticated conversational aside, and an inspected document can be written that doesn't either discard the stronger evidence or promote the weaker evidence to a status it hasn't earned. That is not an implementation inconvenience; it is the actual product being sold (independent judgment, P3) collapsing into whichever channel happened to write last. The document's own worked counter-example (`human_contribution_description` vs. `authorship_statement`, §12.3) is a real, checkable instance of two genuinely different questions at different granularity for different purposes — not a rhetorical device. **The "share demand, never the instance" resolution is sound, not merely internally consistent**, and it is correctly qualified (not absolute) — it permits a deliberate, provenance-preserving reference, which is the right escape hatch and matches ADR-001's own stated allowance.
+
+### 23.4 Phase 4 — CRC → CertForm reuse/prefill: **ACCEPT WITH QUALIFICATION**
+
+The substantive architecture conclusion holds and is correctly reasoned: identity, not caution, is the blocker (§12.2's "authority laundering" framing is the right frame — importing an E2 value into an E1 slot and asking the submitter to warrant it is a real integrity problem, not a hypothetical one). But **the qualification matters and should be stated plainly rather than left implicit**: the document does *not* actually reject all reuse — it explicitly leaves "pre-fill with explicit user reconfirmation" (option B) open, blocked only by a *product-risk* decision (D-4), not an architectural one. The framing this milestone's own kickoff message used ("CAH-4I.2 reportedly rejects CRC → CertForm prefill") **overstates the source document's actual position**. This review corrects that framing: CAH-4I.2 rejects *silent* prefill and rejects treating a shared record as canonical; it does not foreclose reconfirmed reuse. That is a materially different, and more useful, conclusion for a PM reading only a one-line summary.
+
+### 23.5 Phase 5 — CertForm evidence-only governance gap: **Real. Severity: HIGH (not CRITICAL, not overstated).**
+
+Independently confirmed as a genuine structural absence (§23.2 items 4–5). Classified HIGH rather than CRITICAL because it is **latent, not live** — this review found no current instance of an evidence-only fact actually being self-attested in CertForm today (`ip_no_trademarked_ip` is an adjacent, separately-flagged concern — a legal characterisation asked of a lay submitter, not one of the four `DAR_001`-classified evidence-only stock facts). The gap is that nothing would catch it if someone added one tomorrow, not that one exists. That distinction matters for prioritization: it is a process/governance fix (write the rule, require the same review shape `DAR_001` used), not an emergency patch.
+
+### 23.6 Phase 6 — Reviewer evidence reachability: **Real, proven, CRITICAL.**
+
+The single strongest finding in the document and the one this review invested the most direct verification in (§23.2 items 1–3). Correctly disaggregated per the task's own instruction: this is a **missing-UI-reachability** problem, not missing data (all five fields are persisted, confirmed by direct file read) and not a documentation mismatch (the Report's limitation paragraph already exists, so "License on file: Yes" is not a misstatement — it is accurate and unhelpful). The proven consequence — Domain L03's own decision table cannot be executed as written because the release its "Verified" branch requires is not visible to the person making that judgment — is an active assessment-integrity gap affecting every SI8 Certified submission with likeness content today, not a theoretical one. **This finding should be treated as the most urgent single item in the entire review**, independent of any of the architectural questions.
+
+### 23.7 Phase 7 — Geography/jurisdiction: **ACCEPT the diagnosis; UNRESOLVED (correctly) on the G2 authority recommendation.**
+
+The G1/distribution-territory vs. G2/assessment-jurisdiction-scope vs. G3/applicable-law three-way split is a genuine improvement over CAH-4I.1's classification (which the document itself, correctly, records as a correction rather than silently restating — §2.3 item 4). The root-cause claim (`resolveSubmissionJurisdiction` reads a G1 value and returns a G2-typed object) was independently verified against the actual function body in the predecessor review pass and holds. The recommendation that G2 should be reviewer-established (E5) rather than customer-declared (E1) is well-argued from the Manual's own text (scope is already a reviewer act) but is explicitly and correctly left as an open decision (D-3) rather than asserted as settled — this review agrees it should stay open; the case for E5 is stronger than for E1, but "stronger" is not "proven," and a pricing/expectation-setting decision legitimately belongs to PM, not to this document.
+
+### 23.8 Phase 8 — Copyright registration: **ACCEPT.**
+
+The four-way decomposition (registration status / application status / ownership claim / independent verification) is the correct move and matches the task's own instruction not to conflate them. "Ownership claim" being already covered by H02 and the other three being out of scope (with (a)/(b) reclassifiable as optional expansion, (d) blocked by SI8's own delivered disclaimer language) is a sound, appropriately conservative conclusion. Nothing in this review's independent checks contradicts it.
+
+### 23.9 Phase 9 — Trademark: **ACCEPT.**
+
+Independently confirmed: I03 is a real, sign-off-gated control (not a documentation aspiration), and zero governed trademark claims exist. The classification — LK knowledge gap sitting underneath an already-designed control, not a fact-demand gap, not a submission gap, not a reviewer-workflow gap — is exactly the right granularity of classification and correctly resists the temptation to treat "no trademark LK" as evidence trademark is out of scope (which would have inverted the task's own explicit caution).
+
+### 23.10 Phase 10 — Custom/fine-tuned model (R03): **Carried forward from CAH-4I.1, not re-derived this pass.**
+
+This review did not re-grep `AddToolModal` independently; it relies on CAH-4I.1's own prior independent verification (a separate review pass) that no such field exists. Given that CAH-4I.1's other checkable claims held up perfectly under this review's spot-checks, there is no specific reason to doubt this one, but it is flagged here rather than silently affirmed, per this review's own stated method.
+
+### 23.11 Phase 11 — Authority/provenance taxonomy: **ACCEPT — this is the document's strongest structural contribution.**
+
+Tested directly against the task's own adequacy criterion (fact authority ≠ evidence status ≠ provenance ≠ workflow): the document keeps these as four genuinely separate, independently-enumerated dimensions (§5 establishment class, §6 acquisition channel, §7 evidence status, §8 consumer/workflow), and it correctly rejects the task's own proposed taxonomy where "CRC-askable" was offered as a peer establishment class — that would have made channel and authority non-orthogonal, and the document's fix (askability is a permission on a fact×channel pair, not a class) is the right correction, not a rationalization. This is the one place in the review where the document improves on the task's own framing rather than merely satisfying it.
+
+### 23.12 Phase 12 — Correction/supersession: **ACCEPT.**
+
+The per-class policy (E1 append-only-versioned-with-invalidation reusing the report-binding lifecycle's existing stale-report pattern; E2 left as CRC's own unmodified mechanism; E3 immutable-plus-new-deposit; E4/E5 already handled by workbook revisioning) correctly avoids the trap the task warned against — forcing CRC's turn-scoped supersede-and-mark onto a point-in-time attested submission, which is a different kind of object with different stakes. No objection.
+
+### 23.13 Phase 15 — Branch topology and cleanup recommendation
+
+Confirmed topology: `cah-4i2-fact-demand-contract` = `358f2bf` (this review's parent commit) → `e9e40b1` (other session's checkpoint, accidentally here) → `b863738` (CAH-4I.1) → `173ed53` → `92ef003` (= `origin/main`'s ancestor at the time). `origin/main` is currently at `23f6b82`, one commit ahead of that same ancestor, with **tree-identical content to `e9e40b1`** (confirmed this review pass, §23.2).
+
+**Recommended cleanup, once separately authorized (not executed in this review):** `git rebase origin/main` on this branch. Because `e9e40b1`'s patch is content-identical to what `origin/main` already carries via `23f6b82`, a standard rebase should let git recognize it as an empty/already-upstream patch and drop it automatically, replaying only `b863738` and `358f2bf` (and this review's own commit) cleanly onto current `main`. **No cherry-pick of `e9e40b1` onto `main` is needed or recommended** — it would create a duplicate, not preserve anything unique. Verify with `git range-diff` before trusting the rebase output, and re-confirm working-tree cleanliness immediately after, per this repo's own established `git range-diff` + rebase discipline (seen elsewhere in this codebase's CAH-4G integration history).
+
+### 23.14 Ranked findings (this review's own ranking, not a restatement of §16/§17)
+
+| Finding | Proven? | Severity | Assessment-integrity impact | Scope | Smallest next action |
+|---|---|---|---|---|---|
+| Reviewer evidence unreachable (5 upload channels) | Yes — independently confirmed | **CRITICAL** | Active — Domain L03 unexecutable as specified, today, on live submissions | Narrow, additive UI fix | Extend `rawPaths` in `review/page.tsx` (no schema change) |
+| CertForm has no askability governance (C1/C2) | Yes — independently confirmed | HIGH | Latent — no live violation found, but no mechanism would catch one | Process + one governance doc | Write the `DAR_001`-shaped rule; no code |
+| Geography G1/G2 category error | Yes — independently confirmed (this + predecessor pass) | HIGH | Currently degrades reviewer-LK applicability silently (claims surface as `unresolved`, not wrongly `met` — so not a false-positive risk, but a dead-code-path risk) | Requires a PM decision (D-3) before any fix | Resolve D-3 first; do not canonicalize G1→G2 as a stopgap |
+| Trademark LK gap under I03 | Yes — independently confirmed | MEDIUM | An existing control operates without a differentiated legal standard | LK onboarding (deferred, correctly) | None this milestone |
+| Copyright registration absent | Yes | LOW (by design) | None — nothing consumes it | Product-scope decision only | None unless a driver (e.g. E&O) appears |
+| Provider-scope blindness (~58% of LK invisible to reviewers, no diagnostic) | Reported in §11.4, not independently re-verified this pass | Reported as HIGH by the source document | Would be a significant reviewer-visibility gap if the claim count holds | Needs its own verification pass before acting | Independently verify the 19/33 count before treating as settled |
+
+### 23.15 Roadmap review: **ACCEPT the document's own recommendation, with one addition.**
+
+The proposed smallest-next-milestone (CAH-4I.3 — Reviewer Evidence Reachability) is independently justified by this review's own verification, not merely by internal consistency with the rest of the document: it is the only finding in the whole set that is (a) fully proven against source, (b) currently causing a live control to be unexecutable as specified, and (c) fixable with a genuinely small, schema-free change. It should go first. The alternative "governance-first" framing (CAH-4I.3G) is not wrong, but it is process work with no live-defect urgency behind it — this review recommends sequencing evidence reachability first and governance adoption second, rather than treating them as a choice between equals. **One addition this review makes:** before either milestone starts, resolve the branch-topology question (§23.13) so the eventual PR for CAH-4I.3 is not built on top of an accidental cross-session commit.
+
+### 23.16 GO / HOLD / NO-GO (this review's own recommendation)
+
+- **GO** — adopt §16 as Commercial Assurance Fact-Demand Contract v0.1 (subject to D-1/D-2), and proceed with CAH-4I.3 (Reviewer Evidence Reachability) as the next milestone. Both are independently justified by this review's own verification, not merely by the source document's internal consistency.
+- **GO, WITH THE FRAMING CORRECTION IN §23.4** — the CRC→CertForm reuse conclusion is sound but should not be summarized as a flat "rejects prefill"; option B (reconfirmed prefill) remains open pending D-4.
+- **HOLD** — the G2-as-reviewer-established (E5) recommendation (§23.7) and the provider-scope-blindness severity claim (§23.14 last row) until each gets its own targeted verification or PM decision; neither should convert to architecture on this document's citation alone.
+- **NO-GO** — no change to this review's own conclusions on trademark, copyright registration, or the shared-fact-instance rejection; all three held up under independent challenge.
+
+**No runtime, schema, API, UI, CRC, LK, or Commercial Assurance control change was made in the course of this review.** All verification was read-only (`grep`, `git show`, `git diff`, file reads); no source file was edited.
