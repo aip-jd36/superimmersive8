@@ -1168,3 +1168,183 @@ Re-tested per the task's explicit instruction not to promote it without new auth
 ### 25.16 Documentation / git state
 
 Committed on a dedicated branch (`cah-4i4-submission-fact-acquisition-governance`), created off the integrated `main` baseline (`5a95065`, which already includes CAH-4I.1–4I.3). Not pushed, not merged — per this milestone's own instruction to keep it isolated and reviewable pending PM review of §25.13.
+
+---
+
+## 26. CAH-4I.4A — Human Reviewer Audiovisual Observation / Inspection Architecture Discovery (2026-09-13)
+
+**Status: DISCOVERY / GOVERNANCE ONLY. No database field, workbook control, UI, form, API, prompt, reviewer workflow, media-analysis system, or Living Knowledge change is authorized by this section.** It tests whether Commercial Assurance formally models direct Human Reviewer audiovisual observation as a distinct source of project fact, using source verified this pass, not carried forward from prior sections' citations.
+
+### 26.1 Product-promise finding (Phase 1) — EXPLICITLY REQUIRED, not inferred
+
+`SI8-Reviewer-Manual-v0.2.md` states, verbatim, for two domains independently:
+
+> Domain I (Third-Party IP), line 456: **"This domain requires direct content review. The reviewer must watch or view the content, not rely solely on the submitter's disclosure."**
+> Domain L (Likeness & Performer Rights), line 499: **"This domain requires direct content review."**
+
+This is the strongest classification available (**explicitly required**), not "strongly implied." The Manual's own decision logic already goes further than a bare requirement to watch — it explicitly separates the *act of observing* from the *legal weight of the observation*, in its own words, independently of anything CAH-4I.2/4I.4 proposed:
+
+> Domain L, line 528: *"The reviewer is not making a legal determination — they are documenting whether a reasonable commercial concern exists."*
+
+This is direct evidence that the product methodology already understands the observation/conclusion boundary conceptually, in prose, before this milestone asked the question. What was untested until this pass is whether that prose intent is actually carried through in the *data model* — answered in §26.3–§26.4.
+
+Per-capability classification, source-checked individually:
+
+| Capability | Classification | Source |
+|---|---|---|
+| Reviewer watches the video | **Explicitly required** | Manual:456, 499; `section_2.viewing_passes.first_complete` is a signoff-blocking gate (`signoff.ts:161`) |
+| Reviewer listens to audio | **Explicitly required** (as part of "direct content review"; no separate audio-specific mandate sentence exists, but I02's `audio_reviewed` checkbox and Section 2's `has_audio`/`music_heard`/`speech_heard` fields make it operationally identical to the visual mandate) | `workbook-schema.ts` `section_3.I02.audio_reviewed`; `section_2.music_heard` |
+| Reviewer looks for visual third-party IP | **Explicitly required** | Manual:454–478 (Domain I decision logic) |
+| Reviewer looks for likeness/person issues | **Explicitly required** | Manual:497–530 (Domain L decision logic) |
+| Reviewer looks for logos/brands/trademarks | **Explicitly required** (subsumed under Domain I's "character, logo, artwork" language, and independently captured as its own Section 2 field) | Manual:477; `workbook-schema.ts` `logos_observed`/`trademarks_observed` |
+| Reviewer evaluates music/audio concerns for third-party similarity | **Possible but undocumented as its own mandate** — the Manual's only audio-specific sentence concerns *voice-model provenance* ("Voice synthesis used; no information on voice model source"), not "does this music resemble known third-party material." `music_heard`'s `PRESENCE` options (`None observed`/`Possible`/`Confirmed`) structurally support recording exactly this concern, but no Manual sentence instructs the reviewer to listen *for* third-party-similarity the way Domain I's sentence instructs looking for visual IP. | Manual:526 (voice provenance only); `workbook-schema.ts` `music_heard` (structurally capable, not textually mandated) |
+| Reviewer identifies undisclosed material | **Explicitly required, and explicitly generic** — Section 2's `unexpected_content`/`unexpected_description` fields exist with no domain qualifier at all, alongside the domain-specific fields | `workbook-schema.ts` `section_2.unexpected_content` |
+| Reviewer requests/follows up on evidence based on inspection | **Possible but incompletely structured** — see §26.6 | Section 4 (Evidence Gap Log) exists; no explicit observation→gap link field |
+
+### 26.2 Controls relying on direct media inspection (Phase 2)
+
+Re-derived from `signoff.ts`'s `ALL_CONTROLS` and the Manual, cross-checked against `workbook-schema.ts` `section_3` this pass (not carried forward):
+
+| Control | Fact assessed | Source(s) expected | Requires direct inspection? | Self-report alone sufficient? | Observation can contradict submitter? | Structurally captured? | Reviewer records why flagged? | Timestamp captured? | Reaches signed workbook? | Distinguishes observation from legal conclusion? |
+|---|---|---|---|---|---|---|---|---|---|---|
+| I01 — recognizable third-party copyrighted content | Visual IP presence | Direct viewing + submitter disclosure | **Yes** | No (Manual:465, "weak evidence") | Yes | Yes — `section_2.copyrighted_artwork` (PRESENCE) + `section_3.I01.elements_identified` (free text) + `content_viewed` checkbox | Via free-text description only, no structured reason field | Informally — placeholder text invites it, no dedicated field | Yes (`workbook_data`) | **Yes** — Manual:528 explicit; `section_2` (PRESENCE) vs `section_3` (JUDGMENT) is a different, orthogonal vocabulary |
+| I02 — audio/music rights | Audio source + licensing | Submitter disclosure + `audio_reviewed` flag | Operationally yes (checkbox exists), not textually mandated the way I01/L is | Structurally yes today (no Manual sentence forces contradiction-seeking for audio) | Structurally possible (`music_heard`), not methodology-mandated | Yes — `section_2.music_heard` (PRESENCE) | Same as I01 | Same as I01 | Yes | Same mechanism as I01, less textual mandate |
+| I03 — brand/logo/trademark elements | Trademark/brand presence | Direct viewing + submitter checkboxes | **Yes** | No | Yes | Yes — `section_2.logos_observed`/`trademarks_observed` (PRESENCE) + `section_3.I03.trademark_elements` (free text) | Free text only | Informally, placeholder-prompted | Yes | Yes, same mechanism |
+| L01/L02 — likeness / synthetic-performer presence | Real-person resemblance | Direct viewing | **Yes, explicitly (Manual:499)** | No | Yes | Yes — `section_2.real_likeness_suspected`/`synthetic_humans` + `section_3.L01.likeness_found` | Free text only | Informally | Yes | **Yes — the clearest instance**: Manual:528 states the observation/conclusion boundary in words; `real_likeness_suspected` (Possible/Confirmed) is structurally distinct from `L01.likeness_found` (None identified/Suspected/Confirmed — a *different*, overlapping-but-separate enum, itself worth flagging, §26.9) |
+| L03 — consent/release documentation | Documentation, not observation per se | Evidence artifact (fixed by CAH-4I.3) | No — this is an evidence-sufficiency control, not an observation control | N/A | N/A | N/A | N/A | N/A | Yes | N/A — correctly not an observation control |
+| (no control) — `unexpected_content` | Anything unanticipated | Direct viewing | Implicit (part of "direct content review" generally) | No | Yes | Yes, but **with no linked control at all** (§26.6) | Free text only | Informally | Yes | Ambiguous — has no control to route a conclusion through |
+
+### 26.3 The current reviewer data model (Phase 3) — a real, generic, two-vocabulary structure already exists
+
+Read `workbook-schema.ts` in full this pass (not from citation). The canonical `EMPTY_WORKBOOK` (`workbook_version: '0.2'`) already contains:
+
+- **`section_2`** — ~30 fields, generic across every domain touched (visual, audio, likeness, brand): a small set of **procedural fields** (`viewing_passes: {first_complete, second_viewing, frame_by_frame}`, `runtime_observed`, `scene_count`) plus, for each observation category, a **bounded enum** (`Sel`, options `['None observed', 'Possible', 'Confirmed']` — the `PRESENCE` constant, `Section2Visual.tsx:110`) with a **conditionally-revealed free-text elaboration field** (`Textarea`) that only appears once the enum indicates something was seen. This same `Sel`+conditional-`Textarea` pattern is reused identically across `synthetic_humans`, `real_likeness_suspected`, `music_heard`, `logos_observed`, `trademarks_observed`, `landmarks_observed`, `copyrighted_artwork` — genuinely one generic structural pattern, not domain-specific bespoke code, even though each field is separately named (unavoidable — "logo" and "likeness" are different concepts).
+- **`section_3`** — 16 control judgments, each using the **entirely separate** `JUDGMENT_OPTIONS = ['Verified', 'Partially Verified', 'Not Provided', 'Not Applicable']` enum.
+- **`section_4`** — Evidence Gap Log, control-linked (`{id, control, what_missing, addressable, commercial_impact, impact_description}`).
+- **`section_5`** — Findings Log, domain-linked (`{id, domain, finding, evidence_basis, commercial_impact, addressable}`) — per the markdown Workbook Schema doc's own definition (§367 of that file, re-read this pass): *"A finding is what you concluded from the evidence, not just what was provided"* — i.e., Section 5 is explicitly conclusion-level, not observation-level.
+
+**Direct code-level UI linkage confirmed, read in full this pass:** `Section3Evidence.tsx` renders an `S2Banner` inside each relevant control's editing block (I01, I02, I03, L01), pulling the specific `section_2` fields relevant to that control and displaying them alongside the control's own judgment inputs — e.g., I03's block shows `Logos`/`Trademarks` from `section_2` next to the `trademark_elements` free-text field the reviewer fills in for the control itself. **This linkage is real and functioning, but is a hand-written UI-code convention (each control's JSX manually names which `section_2` fields to show), not a data-level relationship** (no `linked_control` field exists on any `section_2` entry).
+
+**Section-ordering enforces the observation-before-determination discipline procedurally, not just conceptually:** `computeGates()` in `workbook-schema.ts` makes `canEnterSection3: section2Complete` — a reviewer cannot even open the control-judgment section until Section 2's `viewing_passes.first_complete` is true and `freeform_observations` is ≥20 characters (also enforced again at `signoff.ts:161-163` as a hard signoff-blocking check). This is a genuine, code-enforced sequencing rule, not documentation-only.
+
+**Answering Phase 3's ten questions directly:** semantically, `section_2` represents observation and `section_3` represents determination (yes, structured, not free text alone — bounded enums with conditional elaboration); it has *no* per-field reviewer identity, timestamp, or media-location beyond what a reviewer chooses to type into the elaboration text; it links to controls only via UI code, not data; it can represent an observation without a conclusion (this is exactly what Section 2 does — `PRESENCE` never implies `JUDGMENT`); it survives signoff (it is part of the same `workbook_data` JSONB the report-binding lifecycle already protects); it does **not** reach the customer Report (§26.5); it is auditable internally after signing (the raw JSONB persists) but not customer-visible.
+
+### 26.4 Fact-authority model test (Phase 4) — the distinction PM asked about already exists in the taxonomy; this pass confirms it against code for the first time
+
+CAH-4I.2's own §5 taxonomy (independently re-accepted, not re-derived, in this document's §23.11) **already contains exactly this split**, and it was not invented for this milestone:
+
+> **E4 — Reviewer direct observation:** *"The reviewer watches/views the content and records what is present."* Examples listed: *"logos/trademarks observed; real-likeness suspected; synthetic humans; music heard..."*
+> **E5 — Reviewer judgment:** *"A control judgment, gap, finding, outcome, confidence, or scope limitation. Always an output, never an input."*
+
+What this milestone adds, verified this pass and not merely re-asserted: **E4 and E5 are not just conceptually distinct in a governance document — they are implemented as two different bounded enums in production code** (`PRESENCE` vs. `JUDGMENT_OPTIONS`), gated by a procedural section-ordering rule enforced at both the UI (`computeGates`) and the signoff-validation layer (`signoff.ts`). This is materially stronger evidence than CAH-4I.2 had when it wrote §5 — that section was reasoning from the Manual's prose and the schema's field *names*; this pass reasoned from the enums' actual *values* and the code paths that gate between them.
+
+**Direct answer to Phase 4's core question:** "reviewer observation" is **not a new authority class** — it is E4, already named, and this milestone found no evidence requiring a ninth class. What was genuinely open before this pass — whether E4 is *actually* distinguishable from E5 in the running system, or only on paper — is now closed: **yes, distinguishable, confirmed structurally.** The real, remaining gap is not in the taxonomy; it is in the **provenance layer underneath E4** (§26.7) and the **observation→investigation mechanism** (§26.6), neither of which the taxonomy alone guarantees.
+
+**One taxonomy-adjacent finding this pass does add:** `section_3.L01.likeness_found` uses its own enum (`['None identified', 'Suspected — describe in notes', 'Confirmed — describe in notes']`) — a *third*, separate vocabulary, distinct from both `PRESENCE` and `JUDGMENT_OPTIONS`, describing essentially the same conceptual axis as `section_2.real_likeness_suspected`'s `PRESENCE` value but with different wording and housed in Section 3 rather than Section 2. This is not evidence of a missing authority class — it is evidence of **vocabulary proliferation within E4/E5's boundary**, worth flagging (§26.9) as a smaller, adjacent hygiene finding, not the core question this milestone was asked to answer.
+
+### 26.5 Submitter representation vs. reviewer observation — discriminating examples (Phase 5)
+
+All four examples are answerable from source, not hypothetically:
+
+| Example | What the architecture actually permits today | Does observation overwrite submitter fact? | Does it manufacture a conclusion? |
+|---|---|---|---|
+| A. Submitter says no logos; reviewer sees one | `submissions.ip_confirmation` (submitter, E1) and `workbook_data.section_2.logos_observed` (reviewer, E4) are **different JSONB columns on different tables** (`submissions` vs. the assessment's workbook) — structurally impossible for one to overwrite the other. The reviewer records `Confirmed` + a free-text description; `section_3.I03.trademark_elements` is where the reviewer writes their own assessment, informed by both, per Manual:477's decision logic (*"depending on whether the submitter disclosed and licensed it"*). | **No — confirmed structurally impossible**, not merely discouraged. | No — `I03.judgment` is a separate field the reviewer sets manually; nothing computes it from `logos_observed` |
+| B. Submitter says no likeness; reviewer suspects resemblance | Same structural separation. Manual:528's own language — *"document the uncertainty in the Findings Log rather than making a definitive call"* — is the prescribed path when the reviewer is unsure, i.e., escalate to Section 5 as a *finding under uncertainty*, not silently resolve it either way. | No | No — the Manual explicitly instructs against a premature legal conclusion here |
+| C. Submitter declares original audio; reviewer hears something similar to known music | Structurally identical mechanism (`music_heard` = `Possible`/`Confirmed`), but **methodologically the weakest-supported of the four** — no Manual sentence parallels Domain I/L's explicit "must watch/view" mandate for audio-similarity specifically (§26.1). The structure exists; the textual mandate to actively listen *for third-party similarity* (as opposed to listening for source/provenance) does not, as clearly. | No (same structural guarantee) | No, but the methodology gap means a reviewer has less explicit instruction on *when* to escalate this one |
+| D. Submitter declares no third-party visual assets; reviewer sees artwork/signage/character imagery | Same as A, via `copyrighted_artwork`/`I01`. | No | No |
+
+**Across all four, the request/investigate/unresolved path is the same generic one** (Section 4's Evidence Gap Log, or Section 5's Findings Log under Manual:528's "document uncertainty" instruction) — there is no domain-specific escalation mechanism, and this milestone found no evidence one is needed (consistent with the task's own strong presumption against domain-specific structures, §26.8).
+
+### 26.6 Observation → investigation (Phase 6) — the generic mechanism exists but the link is not structural
+
+The dangerous shortcut ("observation → legal conclusion") is **not** wired anywhere — confirmed by the complete absence of any code path that reads `section_2` values and writes a `section_3` judgment automatically (grepped; none found). The safe path — *"I observed X, therefore I need to investigate Y"* — is expressible today, but through **two independent, pre-existing generic mechanisms, connected only by reviewer discretion**:
+
+1. **Section 4 (Evidence Gap Log):** structured, control-linked, but keyed to a *control ID*, not to a specific Section-2 observation entry. A reviewer who saw something in Section 2 must manually decide to open a gap and manually write which control it relates to; there is no `source_observation` field pointing back.
+2. **Section 5 (Findings Log) under Manual:528's instruction:** the closest thing to a formal "document the uncertainty" path, but it is a *prose instruction in the Manual*, not a structural requirement — nothing in `workbook-schema.ts` forces an uncertain Section-2 `Possible` value to produce a Section-5 finding or a Section-4 gap. A reviewer could technically mark `logos_observed: 'Possible'`, write a two-sentence description, and proceed to `I03: Verified` without the system ever requiring a gap or finding to reconcile the tension. This is the **most concrete gap this milestone identifies**: the *capability* to express "observed, therefore investigate" exists, but the *requirement* that an ambiguous or contradictory observation actually be reconciled before signoff does not.
+
+**Bounded-Interpretation-style discipline (Phase 8's principle, checked here for consistency) is preserved regardless:** because nothing computes a control judgment from an observation automatically, no downstream layer can currently produce "a stronger conclusion than the observation itself permits" — the risk is under-enforcement of investigation, not over-assertion of conclusions. That is a materially safer failure mode, and this milestone records it as such rather than treating the two risks as equally severe.
+
+### 26.7 Provenance / auditability (Phase 7)
+
+Minimum fields present today for a `section_2` entry: **value** (PRESENCE enum) and **elaboration** (free text, which informally carries timestamp/location when the reviewer chooses to type it — both `logos_description` and `trademarks_description` placeholders literally say *"Describe what you saw and at which timestamp"*, confirmed by direct read of `Section2Visual.tsx`). **Not present as structured fields:** reviewer identity per-entry (implicit only, via the single authenticated reviewer who owns the whole assessment — adequate today since one reviewer completes one workbook, but not per-observation), a structured timecode/frame field (informally text-only), creation timestamp per entry (the workbook's own revision history covers the whole document, not per-field), an explicit link to which control the observation feeds (UI-code convention only, §26.3), and correction/supersession at the per-observation level (the whole `workbook_data` JSONB is what the report-binding lifecycle already protects — overwriting a field before signoff is silent, exactly like every other pre-signoff draft field in this system, and is not a *new* gap introduced by this analysis).
+
+**Signed-workbook immutability already covers this class of information, fully, at the document level — not at the per-observation level.** The report-binding lifecycle's stale-report invalidation (Execution Gaps §3o, this repo's own institutional record) reverts `REPORT_GENERATED` to `DRAFT` whenever *any* workbook data changes post-generation, `section_2` included — so an observation cannot be silently altered after a report has been generated without forcing regeneration. This is adequate document-level auditability; it is not per-observation provenance, and this milestone does not recommend building the latter absent a demonstrated need (none was found).
+
+### 26.8 Living Knowledge interaction (Phase 8)
+
+Confirmed by direct re-check: nothing in `submission-facts.ts`'s `buildReviewerLkContext` (re-read this pass) reads any `section_2` field — Reviewer-LK narrowing is driven only by `tools_used` and `territory_preferences`, exactly as this document's earlier sections already established. **A reviewer observation is, today, none of "retrieval trigger," "assessment fact," or "contextual input" to Living Knowledge — it is invisible to LK entirely.** A reviewer who observes a logo and wants governed trademark-adjacent knowledge must manually invoke HRR's free-form research interface and type a question themselves; there is no automatic "observation made LK content newly relevant" trigger, and — per this milestone's restrictions — none is proposed. This is consistent with, not a violation of, the Living Knowledge → Retrieval → Bounded Interpretation → Projection chain: LK simply does not currently ingest reviewer observations as an input at all, so there is no risk of an observation being laundered into a stronger LK-backed conclusion than Bounded Interpretation permits, because the pipe does not exist yet in either direction.
+
+### 26.9 Impact on CAH-4I fact acquisition (Phase 9)
+
+**The authority × applicability × channel askability model from CAH-4I.4 (§25) still holds and needs no structural extension** — E4 (reviewer direct observation) was already a class in that model before this milestone; nothing here required adding a class, splitting one, or introducing a new axis. What this milestone clarifies, as a refinement rather than a correction: **E4 is a genuine, distinct *acquisition channel* (C5 in §25/§6.1's own table — "Reviewer §2 observation") separate from Human Reviewer Determination (E5, produced via C6 — "Reviewer §3 control field")** — and this separation was already present in CAH-4I.2's own channel table (§6.1: `C5 Reviewer §2 observation` vs. `C6 Reviewer §3 control field`, each with a different establishment-class column). This milestone's contribution is verifying that separation against the actual Section 2/Section 3 code split, not introducing it.
+
+**No authority-laundering risk was found**, because — unlike the CRC→CertForm case §25.5 spent most of its analysis on — there is no channel boundary being crossed here at all: both the observation (C5) and the determination (C6) are made by the same authenticated reviewer, within the same signed document, and the system already keeps them in structurally separate fields with separate vocabularies. The CRC↔CertForm reuse risk (an *unauthenticated* party's statement being imported as an *authenticated* one) has no analogue here.
+
+### 26.10 Product coverage classification (Phase 10)
+
+**B — PARTIALLY MODELED.**
+
+Not A, because the capture layer is real and structurally distinct from determination, but incomplete: no per-instance/timestamped structure (one aggregate field per observation category, not a list), no data-level control linkage (UI convention only), no structural observation→investigation requirement (§26.6), and raw observation content does not reach the customer Report (§26.3/§26.5 — confirmed again this pass: `reportProjection.ts` reads only `section2?.viewing_passes?.first_complete`, nothing else from `section_2`).
+
+Not C ("unmodeled material capability"), because a generic, cross-domain observation-capture mechanism genuinely exists in production, is signoff-enforced, and is UI-linked to the relevant controls — this is well past "the architecture has no governed observation layer."
+
+Not D, because this is not a future/aspirational capability — it is live, shipped, signoff-gated, and used on every SI8 Certified assessment today.
+
+### 26.11 Do we need a new control? (Phase 11)
+
+**No new control.** Re-testing the three possibilities against source: (1) inspection-as-review-method is exactly what exists today — Section 2 is a review *method* applied once per assessment, feeding multiple controls (I01, I02, I03, L01, L02); (2) a standalone "media was inspected" control would be redundant with the existing signoff-blocking `viewing_passes.first_complete` + `freeform_observations` ≥ 20 chars gate, which already functions as a procedural completion requirement without needing to be a numbered control (`ALL_CONTROLS` deliberately does not include a "viewing completed" entry, and this milestone found no evidence that omission is a defect — the gate is enforced at `signoff.ts`, which is arguably the *correct* place for a procedural precondition, not the Findings/Judgment layer that answers substantive questions); (3) domain controls consuming observation as one of several evidence sources is exactly today's model (I01/I02/I03/L01/L02 each read from Section 2 alongside submitter disclosure and uploaded evidence). **The smallest correct model is already in production: inspection is a review method (option 1), generically structured (Section 2), feeding existing domain controls (option 3) — not a new control, and not merely domain controls alone without the generic capture layer that already exists.**
+
+### 26.12 Automation boundary (Phase 12)
+
+Nothing in this milestone's findings touches, requires, or gestures toward computer vision, audio fingerprinting, face recognition, or automated detection of any kind. Every mechanism discussed (`section_2`'s bounded enums, the S2Banner UI linkage, the Evidence Gap Log, the Findings Log) is a **human-entered** data structure describing what a **human** reviewer personally saw or heard. This boundary was never at risk of being crossed by this discovery pass and is recorded as explicitly preserved.
+
+### 26.13 Architecture options compared (Phase 13)
+
+| Option | Governance safety | Generic scalability | Provenance | Auditability | Correction | Complexity | Control coupling | LK compatibility | Report/signoff impact |
+|---|---|---|---|---|---|---|---|---|---|
+| **1. Clarify existing notes/rationale semantics (no structural change)** | Adequate — the E4/E5 split already exists | Already generic | Unchanged (weak, informal timestamp) | Unchanged (document-level only) | Unchanged | **Lowest — documentation only** | Unchanged (UI convention) | Unchanged (none) | None |
+| **2. Generic structured `ReviewerObservation` concept (per-instance, timestamped, control-linked, list-valued)** | Strong — closes §26.6/§26.7's real gaps | High — one shape, many domains, matches the CRC-precedent discipline (§25.6: small, purpose-owned structures, not a mega-framework) | Strong if built to include reviewer/time/control/timecode | Strong | Would need its own append-vs-correct policy (not yet designed) | **Highest of the three real options** — schema, migration, UI, signoff-validation changes | Would formalize the existing informal C5→C6 link as data | Could become an LK/HRR context input if later authorized — not proposed here | Would need report-projection review (currently correctly excludes raw observations; a structured version might change that calculus, a future decision) |
+| **3. Domain-specific observation structures (separate shapes for copyright/likeness/trademark/music)** | Would fragment the fail-closed, generic discipline this document has repeatedly found to be load-bearing (§25.6, §15) | **Low — explicitly what this milestone's own instructions and CAH-4I.2/4I.4's prior findings argue against** | Inconsistent across domains by construction | Inconsistent | Inconsistent | High, and repeated per domain | Ad hoc per control | Would repeat the anti-pattern `dependency-askability.ts`'s own header explicitly rejected once already (§25.6) | Inconsistent | **Rejected — no evidence supports it; strong presumption confirmed, not overridden** |
+| **4. Treat uploaded media as evidence, leave observations implicit** | Weak — this is close to the *pre-CAH-4I.3* state for uploaded documents (present but unreachable/unexamined), and would discard the real, working Section-2 capture layer that already exists | N/A | None | Weakest | N/A | Lowest (do nothing) | None | None | None — **actively regresses** a working capability |
+
+**Option 3 is rejected, per the task's own strong presumption, with direct evidence: `dependency-askability.ts`'s own header already documents choosing a small generic mechanism over per-domain frameworks once, for the identical reason, in this same codebase (§25.6).** Option 4 is rejected as a regression from the current state, not merely as insufficient. The realistic choice is between Option 1 (do nothing; the existing E4/E5 split and Section 2/3 structure already substantially answer PM's question) and Option 2 (a future, separately-authorized design milestone to close the specific, named gaps in §26.6/§26.7).
+
+### 26.14 Recommended architecture (Phase 13/14)
+
+**Recommend Option 1 now; scope Option 2 as a named future candidate, not as this milestone's output.** The evidence does not show the current architecture is broken or misrepresents the product — it shows a real, working, generically-structured observation layer with three specific, narrow, named incompleteness gaps: (a) no structural observation→investigation requirement (§26.6), (b) informal rather than structured timecode/location provenance (§26.7), (c) no data-level control linkage (§26.3). None of the three, individually or together, rises to "the product methodology depends on human audiovisual inspection but the architecture has no governed observation layer" (Phase 10's option C) — that classification would be **false** on this evidence, and this document does not assert it.
+
+### 26.15 Claims challenged, rejected, or qualified
+
+- **Challenged and refined:** the implicit premise that this milestone would be discovering something new. It is largely **confirming and hardening** a distinction (E4 vs. E5) CAH-4I.2 already made and this milestone's own earlier §23 review already endorsed — the genuine new contribution is code-level verification (`PRESENCE` vs. `JUDGMENT_OPTIONS`, `computeGates`, `signoff.ts`'s gate) that had not previously been checked at this level of detail.
+- **Qualified:** "reviewer evaluates music/audio for third-party similarity" — downgraded from "explicitly required" (which the task's illustrative framing implied) to "structurally supported, methodologically less explicit than the visual mandate" (§26.1) — a real, if narrow, distinction the source does not fully support treating as identical to the visual case.
+- **Rejected:** the premise that a new authority class or a domain-specific architecture is needed. Neither is supported.
+- **Incidental finding, not requested but discovered via source verification and recorded rather than fixed (per this milestone's own no-implementation rule):** `Section3Evidence.tsx`'s `S2Banner` `warn` logic for `logos_observed` and `trademarks_observed` compares against the literal string `'No'` (`section2.logos_observed !== 'No'`), but the actual `PRESENCE` enum never contains that value (`'None observed' | 'Possible' | 'Confirmed'`) — meaning the "all clear" case (`'None observed'`) is miscompared and the warning banner likely renders even when nothing was observed. `copyrighted_artwork` and `music_heard`'s parallel checks correctly compare against `'None observed'`/`'None'`. This is a small, localized, mechanically-fixable UI bug, unrelated to any of this milestone's architectural conclusions, explicitly **not fixed here** — recorded for a future, narrowly-scoped bug-fix milestone.
+
+### 26.16 Governance risks
+
+- Building Option 2 without first deciding its report-projection policy (does a structured observation ever become customer-visible, and under what review) would repeat exactly the risk pattern CAH-4I.2 named for evidence generally (§7's V1-never-becomes-V2-by-restatement rule) — a structured observation is still V1/V3-adjacent, not automatically stronger evidence merely because it gained a timecode field.
+- The informal "describe what you saw and at which timestamp" placeholder pattern is a real, working mitigation today, but it depends entirely on reviewer diligence with no system-level enforcement — acceptable given the single-reviewer, single-document signoff model, but worth naming as a soft spot rather than a hard guarantee.
+
+### 26.17 PM decisions required
+
+| # | Decision |
+|---|---|
+| D-9 | Should Option 2 (structured, timestamped, control-linked `ReviewerObservation`) be scoped as a future design milestone, given the three specific gaps named in §26.14, or is Option 1 (status quo, documentation-only clarification) sufficient indefinitely? |
+| D-10 | Should an ambiguous (`Possible`) Section-2 observation be *required* to produce a Section-4 gap or Section-5 finding before signoff (closing §26.6's most concrete gap), independent of whether the fuller Option-2 structure is ever built? This is a smaller, cheaper decision than D-9 and could be adopted on its own. |
+| D-11 | Should the Manual gain an explicit audio-similarity-listening sentence parallel to Domain I/L's visual mandate (§26.1), or is the current, less explicit treatment intentional? |
+
+### 26.18 Smallest next milestone
+
+**Not a design or implementation milestone for Option 2.** The smallest next step is a **governance decision milestone** resolving D-9 and D-10 — both answerable from this document without further source investigation, and D-10 in particular could independently justify a very small, tightly-scoped follow-on (a signoff-validation rule, not a schema change) if approved. The incidental `S2Banner` sentinel bug (§26.15) is a separate, unrelated, and much smaller candidate for its own narrow bug-fix milestone whenever convenient — it should not be bundled into whatever D-9/D-10 produces.
+
+### 26.19 Runtime-change confirmation
+
+None. This section is the only change made in this milestone.
+
+### 26.20 Documentation / git state
+
+Continued on the same isolated branch as CAH-4I.4 (`cah-4i4-submission-fact-acquisition-governance`), one commit above `06fbc62`. Not pushed, not merged, per this milestone's own instruction.
+
+### 26.21 GO / HOLD / NO-GO
+
+**HOLD** — not because the architecture is unsound (it is not; §26.10's classification is B, not C), but because §26.14's recommendation (Option 1 now, Option 2 scoped as a future candidate) itself depends on D-9/D-10, which are PM decisions this milestone can name but not make. This is a narrower, more optimistic HOLD than CAH-4I.4's own — this milestone found the underlying architecture materially sound, with small, specific, well-understood gaps, not an open design question requiring new invention.
