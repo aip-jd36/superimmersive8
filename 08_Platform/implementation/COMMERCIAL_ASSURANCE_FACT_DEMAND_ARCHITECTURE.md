@@ -1990,3 +1990,64 @@ Record each scenario's actual result (PASS/FAIL) and any exact message text obse
 ### 31.11 Final status of this milestone
 
 **CAH-4I.4 is NOT yet closed.** CAH-4I.4A through 4I.4E are complete and re-confirmed by source and automated test as of this pass. **CAH-4I.4F itself remains open** pending either (a) live PM UAT per §31.10, or (b) an explicit PM decision to authorize integration on the strength of the automated verification alone — a product/risk decision this milestone can surface but not make unilaterally.
+
+---
+
+## 32. CAH-4I.4F-PROD — Controlled Production UAT Integration (2026-09-13)
+
+**Status: DEPLOYED FOR CONTROLLED UAT. NOT YET PRODUCTION-ACCEPTED.** PM explicitly authorized running controlled UAT directly in Production (no live Commercial Assurance users currently rely on it, so Preview does not materially reduce blast radius). This section records the integration only — **it does not close CAH-4I.4**, which remains open pending real production observations from PM. §31's HOLD result above is left unmodified as the historical record of the state before this authorization.
+
+### 32.1 Drift re-inspection (Phases 0-1)
+
+Re-verified in the dedicated worktree: branch, HEAD (`190a742`), full lineage, clean working tree — all as §31 left them. `origin/main` had **not moved** since §31's own check (still `f4347c6`) — the only drift since the branch base remains the 7-commit EU AI Act Article 50 governance/evidence-capture range (17 files, all under `06_Operations/institutional-knowledge/notebook/`), re-confirmed via `git diff --name-only` to have **zero overlap**, programmatically (via `comm`), with the 7 files this branch touches. No semantic overlap either — the drift is pure LK research documentation, no code.
+
+### 32.2 Patch verification (Phase 2)
+
+Re-confirmed the full CAH-4I.4 range touches exactly 7 files: the reconciliation module, its two test files, `signoff.ts` (additive only), `Section3Evidence.tsx` (the 4D fix), the Section3Evidence regression test, and this architecture document. No schema, API, report-projection, Living Knowledge, or CRC file anywhere in the range.
+
+### 32.3 Rebase (Phase 3)
+
+`git rebase origin/main` — **clean, zero conflicts**, all 7 commits replayed.
+
+### 32.4 SHA mapping (Phase 4)
+
+| Original | Rebased |
+|---|---|
+| `06fbc62` | `bc606cd` |
+| `79f3d4b` | `89ca081` |
+| `226c48f` | `e515097` |
+| `fd4ad4f` | `a779312` |
+| `135f57a` | `c773b4e` |
+| `1709e8d` | `92fc337` |
+| `190a742` | `fe0a86e` |
+
+### 32.5 Range-diff / semantic equivalence (Phase 4)
+
+`git range-diff 5a95065..190a742 f4347c6..fe0a86e` — **all 7 commits marked `=` (patch-identical)**. `git diff --check` on the full range: clean. Additionally, not relying on the range-diff marker alone, directly re-grepped the rebased tree and confirmed unchanged: the reconciliation predicate (`trim().length > 0`, no length threshold), the mapping targets (`trademark_elements`, `elements_identified`, `likeness_found`, `audio_source`), the Section3Evidence clean-state fix (all four occurrences using `'None observed'`/`'None identified'`, never `'No'`), and the `signoff.ts` integration (import + additive loop).
+
+### 32.6 Automated regression gate (Phase 5)
+
+Focused suite (`observation-reconciliation.test.ts`, `signoff-reconciliation.test.ts`, `signoff-integrity.test.ts`, `signoff-public-record.test.ts`, `reviewer-workbook/`): **128/128 passing**, re-run post-rebase. `tsc --noEmit`: clean. Full repository suite: **77 pre-existing failures, unchanged — zero new**, re-confirmed a further time post-rebase.
+
+### 32.7 Production deployment readiness (Phase 6)
+
+Per this repository's own documented deployment model (`CLAUDE.md`: Vercel auto-deploy from GitHub pushes to `main`, ~2 minutes) — pushing to `main` **automatically** triggers a Production deploy; no separate manual deploy step exists or is required. PM's authorization for this exact path is on record in this milestone's own instructions. No inference was needed beyond citing the repository's own stated behavior.
+
+### 32.8 Push evidence (Phase 7)
+
+```
+git push origin cah-4i4-submission-fact-acquisition-governance:main
+   f4347c6..fe0a86e  cah-4i4-submission-fact-acquisition-governance -> main
+```
+
+Fast-forward, no force. Post-push: `origin/main` = local `HEAD` = `fe0a86e17ee9d15f5953d02387b005bdc86d94ca`, ahead/behind `0/0`, working tree clean. Local `main` ref synced to match (`git fetch origin main:main`).
+
+**Production-target SHA: `fe0a86e17ee9d15f5953d02387b005bdc86d94ca`.**
+
+### 32.9 Documentation status (Phase 9)
+
+This section records integration and deployed-for-controlled-UAT status only. **CAH-4I.4 is explicitly NOT marked closed and NOT marked production-accepted.** That determination is deferred entirely to real PM observations against the §31.10 manual UAT script (unchanged, still the operative script — reproduced in the final report below for convenience).
+
+### 32.10 Current acceptance status
+
+**DEPLOYED FOR CONTROLLED UAT. UAT-PENDING.** Vercel's own deploy will complete automatically within its usual ~2-minute window following the push above; PM should confirm the deploy has completed (e.g., via the Vercel dashboard or by confirming the reconciliation behavior is present) before beginning the §31.10 scenarios. Next action is PM running those scenarios against an internal/synthetic assessment in Production and returning the actual observed results — signoff blocked/allowed, exact message text, observation and accounting values used, and any unexpected UI behavior — to this document, at which point CAH-4I.4 can be formally closed or, if any scenario fails, rolled back/repaired.
