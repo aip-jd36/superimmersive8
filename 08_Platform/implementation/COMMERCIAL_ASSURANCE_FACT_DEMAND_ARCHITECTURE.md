@@ -958,3 +958,47 @@ The proposed smallest-next-milestone (CAH-4I.3 — Reviewer Evidence Reachabilit
 - **NO-GO** — no change to this review's own conclusions on trademark, copyright registration, or the shared-fact-instance rejection; all three held up under independent challenge.
 
 **No runtime, schema, API, UI, CRC, LK, or Commercial Assurance control change was made in the course of this review.** All verification was read-only (`grep`, `git show`, `git diff`, file reads); no source file was edited.
+
+---
+
+## 24. CAH-4I.3 — Reviewer Evidence Reachability — IMPLEMENTED (2026-09-12)
+
+**Status: implemented and merged.** This closes the highest-materiality finding from §17.3/§23.6: five evidence-upload channels were persisted at submission time, rendered on the creator's own dashboard, and reachable from **zero** reviewer surfaces.
+
+**Proven defect (re-confirmed against source before implementation, not assumed from citation):** `review/page.tsx`'s evidence collection built its `rawPaths` list from exactly two sources (`tools_used[].receipt_path`, `audio_disclosure.license_path`). A repo-wide grep of the entire `app/admin/` tree confirmed zero references to `likeness_release_path`, `ip_license_path`, `fair_use_doc_path`, `third_party_assets`, or `production_evidence_paths` anywhere outside the creator's own dashboard.
+
+**Generic architecture already existed; only its population was incomplete.** The reviewer workbook already has a persistent, always-reachable "Evidence" sidebar tab (`WorkbookClient.tsx`, `rightTab === 'evidence'`) rendering a flat `{name, url}[]` list — i.e., the "one generic submission evidence inventory visible throughout review" pattern was already built. Signed-URL generation (`supabaseAdmin.storage.from('submission-files').createSignedUrls(...)`) is already fully generic and path-agnostic — it does not care what kind of evidence a path represents. **No new security model, storage pattern, or UI surface was needed** — the defect was entirely in the population step (`rawPaths` construction), which wired 2 of 7 known channels.
+
+**Selected architecture:** extract the `rawPaths` collection into a small, pure, unit-tested function — `collectSubmissionEvidencePaths()` in `lib/reviewer-evidence/collect-evidence-paths.ts` — rather than leave it inlined and untestable in the server component. This follows the exact precedent already set by `resolveSubmissionToolIds`/`resolveSubmissionJurisdiction` in `lib/reviewer-lk/submission-facts.ts` (pure function, `parseJsonMaybe` helper, no side effects), kept in its own module rather than added to `submission-facts.ts` because that module's own header scopes it specifically to LK-retrieval narrowing — a different concern from evidence surfacing. `review/page.tsx` now calls this function instead of inlining the logic; behavior for the two pre-existing channels is unchanged (proven by the regression-guard tests in §24 below), and five more channels are now collected the same way.
+
+**Rejected alternative:** adding four bespoke, differently-shaped rendering blocks (one per evidence type) directly in `WorkbookClient.tsx`. Rejected because it would duplicate the existing generic list-and-sign pattern per domain — exactly the "domain-specific hard-coded patch" this milestone's own instructions ruled out in favor of a generic mechanism.
+
+**Fail-closed behavior preserved, explicitly checked:** the new function's output is exactly `{label, path}` — no status field, no verification flag, no control identifier. Presence in the list means only "a file was uploaded," never "sufficient" or "Verified." Confirmed by source inspection that no code path reads `evidenceFiles.length` (or anything derived from it) to set any workbook control judgment — every `'Verified'` in the review tree is a reviewer-selected dropdown value, never a file-presence inference. This is also enforced by a dedicated test (`__tests__/reviewer-evidence/collect-evidence-paths.test.ts`, "assessment-integrity shape guarantee" — asserts the returned object has exactly the keys `label` and `path`, nothing else).
+
+**Provenance:** each entry's `label` names the evidence type (and, for array channels, a 1-based index plus the submitter's own type/title text) so a reviewer can tell what an item is without opening it; this matches the existing convention (`"Runway receipt"`, `"Audio license"`) rather than inventing a new tagging scheme. Explicitly **not** added: a control-code tag (e.g., "L03") on each label — the existing two channels never carried one either, and adding one now would be a labeling-convention change beyond this milestone's reachability scope (recorded as a possible future enhancement, §24 Remaining risks below, not implemented here).
+
+**Security/access:** no change to the authorization boundary. The whole page remains gated behind `requireAdmin()` before any of this code runs; the newly-collected paths were already present in the same `select('*')` row already being read with `supabaseAdmin` (service-role) — no new read path, no new grant, no widened exposure. Signed URLs remain 1-hour-expiring and are generated server-side only, exactly as for the two pre-existing channels.
+
+**Runtime files changed:**
+- New: `lib/reviewer-evidence/collect-evidence-paths.ts` (pure function + types).
+- New: `__tests__/reviewer-evidence/collect-evidence-paths.test.ts` (12 tests).
+- Modified: `app/admin/submissions/[id]/review/page.tsx` — inlined `rawPaths` construction (~65 lines) replaced with a single call to `collectSubmissionEvidencePaths(submission)`.
+- No schema/migration, no new questionnaire field, no new control, no evidence reclassification, no change to control-outcome logic, no change to `WorkbookClient.tsx`'s rendering (the existing evidence tab renders the longer list with zero changes to it).
+
+**Tests:** 12 new tests — absent input, malformed JSON (never throws), empty-string paths ignored, the two pre-existing channels as an explicit regression guard, each of the five newly-reachable channels individually, a full seven-channel submission together, and the assessment-integrity shape guarantee. All 12 pass.
+
+**Full-suite regression check:** ran the complete Jest suite twice — once with CAH-4I.3's changes stashed (clean `eea7a9d` baseline) and once with them applied. **Identical result both times: 77 pre-existing failures / 20 pre-existing failing suites**, all in unrelated CRC-engine/Bounded-Interpretation tests untouched by this milestone. **Zero new failures.** `tsc --noEmit` clean. `next build`: webpack compilation and type-checking both succeeded ("Compiled successfully"); the build could not complete the page-data-collection step due to a missing `SUPABASE_URL` environment variable in this sandbox, affecting unrelated API routes (`/api/admin/catalog/...`, `/api/admin/submissions/.../generate-report`) — a pre-existing environment limitation, not a defect introduced here.
+
+**UAT contract (not executed — design/spec only, per this milestone's own restriction against production UAT without separate authorization):**
+1. Synthetic submission with likeness content + a talent-release upload → reviewer opens the workbook → Evidence tab shows "Talent release" → reviewer can open it → Domain L03's judgment field is still a manual reviewer selection, unaffected by the file's presence.
+2. Synthetic submission with a third-party asset licence upload → Evidence tab shows "Third-party asset license #1: <type>" → openable.
+3. Synthetic submission with no evidence uploads at all → Evidence tab correctly shows "No evidence files uploaded." (pre-existing empty-state copy, unchanged).
+4. Reviewer authorization: a non-admin session cannot reach this page at all (`requireAdmin()` gate, unchanged, not touched by this milestone).
+5. Confirm no control's judgment field is pre-populated or defaulted to "Verified" by evidence presence, for any of the five newly-reachable channels.
+
+**Remaining risks / explicitly deferred (not part of this milestone):**
+- Evidence items are not individually cross-linked to their specific control (e.g., no inline "see L03" affordance next to the Talent release link) — the generic evidence-library pattern (always-visible sidebar tab) is the existing architecture and was preserved as-is, per this milestone's instruction not to invent new UI patterns beyond the reachability fix itself.
+- `WorkbookClient.tsx` keys each rendered evidence link on `file.name` (the label) — a pre-existing fragility this milestone did not touch; the new labels were deliberately made unique (via a 1-based index for array-derived channels) to avoid triggering it, but the underlying key choice itself was left alone as out of scope.
+- The Report's own "License on file" / "Release on file" presence-boolean phrasing (§17.3, §23.6) is a separate, lower-priority, non-blocking finding and was **not** touched by this milestone.
+
+**Smallest next milestone after this:** none required to close CAH-4I.3 itself. The next open item from the broader CAH-4I roadmap is CertForm askability governance (D-1/D-2, §20), unrelated to evidence reachability.
