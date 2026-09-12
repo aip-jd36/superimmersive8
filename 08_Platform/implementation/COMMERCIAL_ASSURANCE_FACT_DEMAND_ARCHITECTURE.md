@@ -1499,3 +1499,196 @@ Committed on the same isolated branch as CAH-4I.4/4I.4A (`cah-4i4-submission-fac
 ### 27.16 GO / HOLD / NO-GO
 
 **GO — for scoping the §27.11 implementation as a future milestone.** Unlike CAH-4I.4/4I.4A's HOLDs, this milestone resolved its own central open question (D-10) rather than merely naming it, using evidence gathered this pass (the complete, unabridged `validateWorkbookForSignoff` read) rather than deferring further. The remaining open items (§27.12) are small, scoped design decisions appropriate for the implementation milestone itself, not further governance review.
+
+---
+
+## 28. CAH-4I.4C — Reviewer Observation Reconciliation Implementation Design (2026-09-13)
+
+**Status: DESIGN / VERIFICATION ONLY. No schema, UI, signoff code, workbook field, or control change is authorized by this section.** Its purpose was explicitly to verify, not extend, CAH-4I.4B's proposed mechanism — and the verification pass **found real errors in CAH-4I.4B's own sketch**, corrected below rather than carried forward.
+
+**Repository note (Phase 0):** mid-milestone, the shared working directory was found checked out on `main` at a merge commit (`f4347c6`, "Merge EU AI Act Article 50 governance/evidence package") rather than this branch — a different concurrent session's activity, not this milestone's. Verified via `git reflog` before touching anything: this branch and all three prior CAH-4I.4 commits (`06fbc62`, `79f3d4b`, `226c48f`) were fully intact and untouched. Verified the merge's 17 changed files (`git diff --name-only 5a95065 f4347c6`) have zero overlap with any file this milestone reads or would touch. A second collision occurred later in the same milestone — a concurrent session switched the shared working directory to `main` and then to a third branch (`work/lk-knowledgetopic-foundation`) mid-edit; the edit tool detected the on-disk mismatch and refused to write rather than silently overwriting, so nothing was lost, and this branch's commits were re-confirmed intact before resuming. Neither `main` nor `origin/main` was touched, rebased, or merged by this work.
+
+### 28.1 Canonical observation inventory (Phase 1) — every `section_2` field, read exhaustively this pass, not sampled
+
+`Section2Visual.tsx` read in full (not excerpted). Every field, its actual widget/enum, and whether it carries rights/observation semantics at all:
+
+| Field | Widget / actual options | Carries a Possible/Confirmed-style judgment? |
+|---|---|---|
+| `video_url_confirmed`, `runtime_observed`, `scene_count`, `aspect_ratio`, `pacing`, `color_treatment` | Text/Num/Sel, purely technical | No |
+| `viewing_passes.*` | Check, procedural | No (gates entry, not an observation) |
+| `synthetic_humans` | `Sel`, options `['None', '1–2', 'Several (3–10)', 'Many (10+)']` | **No — a quantity descriptor, not a resemblance judgment.** Textually adjacent to likeness but structurally a different axis. |
+| `real_likeness_suspected` | `Sel`, options **hand-typed** `['None identified', 'Possible', 'Confirmed']` — **not** the shared `PRESENCE` constant, and its "clean" sentinel (`'None identified'`) differs from `PRESENCE`'s (`'None observed'`) | Yes |
+| `real_likeness_description` | Conditional `Textarea` (shown when `Possible`/`Confirmed`) | N/A — this is the *observation's own* elaboration, not a control-accounting field |
+| `animals_present`, `children_present` | Check | No |
+| `has_audio`, `speech_heard`, `sound_effects`, `audio_quality_issues` | Check/Text, technical | No |
+| `music_heard` | `Sel`, options **hand-typed** `['None', 'Generic / royalty-free', 'Identifiable track', 'Possibly identifiable']` — **four values, not three; not the shared `PRESENCE` constant** | Yes, but the trigger is *not* "≠ `'None'`" — `'Generic / royalty-free'` is also a clean, non-concerning state |
+| `text_visible` / `text_description` | Check + conditional `Textarea` | Ambiguous — see §28.3 |
+| `logos_observed` | `Sel`, `options={[...PRESENCE]}` — **literally spreads the shared constant** | Yes, standard `PRESENCE` |
+| `trademarks_observed` | `Sel`, `options={[...PRESENCE]}` — **literally spreads the shared constant** | Yes, standard `PRESENCE` |
+| `landmarks_observed` | `Sel`, `options={[...PRESENCE]}`, with legacy boolean→string normalization | Yes, standard `PRESENCE` |
+| `copyrighted_artwork` | `Sel`, `options={[...PRESENCE]}` | Yes, standard `PRESENCE` |
+| `ai_artifacts`, `temporal_consistency`, `visual_quality` | `Sel`, technical/quality severity scales (one, `ai_artifacts`, coincidentally starts with the string `'None observed'` but is not spread from `PRESENCE` and has no rights semantics) | No |
+| `unexpected_content` / `unexpected_description` | Check + conditional `Textarea` | Yes — already established (CAH-4I.4A/4B) as generic and control-less |
+| `freeform_observations`, `overall_first_impression` | `Textarea` | N/A — general-purpose, already signoff-gated as a whole (≥20 chars), not per-category |
+
+**Correction to CAH-4I.4A/4B, made explicit rather than silently absorbed:** only **four** fields (`logos_observed`, `trademarks_observed`, `landmarks_observed`, `copyrighted_artwork`) actually share the literal `PRESENCE` constant and its `'None observed'` sentinel. `real_likeness_suspected` and `music_heard` are separately hand-typed with **different** vocabularies and **different** "clean" sentinels. CAH-4I.4A's citation of these fields as if they were uniformly `PRESENCE`-shaped was imprecise; this milestone's own signoff-invariant design in §27 did not yet depend on that imprecision, but a future implementation would have failed silently if it assumed one universal trigger condition (`value !== 'None observed'`) across all six fields — `real_likeness_suspected` would never trigger (it never equals `'None observed'`, so a naive check comparing against that string would treat every value, including the real `'None identified'` clean state, as requiring reconciliation), and `music_heard` would over-trigger on `'Generic / royalty-free'`, a state that should not require reconciliation.
+
+`synthetic_humans` is excluded from the reconciliation-relevant set entirely — it is a count, not a judgment, and this milestone found no control or Manual passage that treats it as a trigger in its own right (only `real_likeness_suspected` carries the actual resemblance judgment).
+
+### 28.2 Canonical control / accounting-field inventory (Phase 1)
+
+Re-read `workbook-schema.ts` `section_3` and `Section3Evidence.tsx`'s per-control JSX in full this pass:
+
+| Control | Fields | Accounting shape |
+|---|---|---|
+| I01 | `{evidence, judgment, notes, content_viewed, elements_identified}` | `elements_identified` (Textarea) is the specific descriptive field; `notes` is general-purpose; `content_viewed` (bool) is a generic "watched independently" flag, not tied to any specific observation |
+| I02 | `{judgment, notes, audio_source, license_provided, audio_reviewed}` | `audio_source` (Textarea) + `notes`; `audio_reviewed` (bool) generic, same caveat as `content_viewed` |
+| I03 | `{judgment, notes, trademark_elements}` | `trademark_elements` (Textarea) is the specific descriptive field — **shared by both `logos_observed` and `trademarks_observed`**, confirming a genuine "multiple observations → one control (one field)" case |
+| L01 | `{judgment, notes, content_viewed, likeness_found}` | `likeness_found` is itself a **third** enum (`['None identified', 'Suspected — describe in notes', 'Confirmed — describe in notes']`), distinct from both `PRESENCE` and `real_likeness_suspected`'s own enum — but string-typed like every other field, so a non-empty/non-default check still applies uniformly |
+| L02 | `{judgment, notes, performers_present, distinctness}` | **Conditional shape, read in full this pass**: `performers_present` (bool) gates whether `distinctness` (Sel, 3 options) is shown/required at all — accounting is "`performers_present` explicitly recorded, AND if true, `distinctness` non-empty," not simply "one field non-empty" |
+| L03 | evidence-sufficiency control, not an observation-accounting control (unchanged from CAH-4I.4A) | N/A |
+
+### 28.3 Explicit vs. inferred relationships (Phase 2) — the discipline the task required
+
+Classified per the task's own A/B/C scheme, not assumed:
+
+- **Category A (Manual/schema/control-name established):** `logos_observed`+`trademarks_observed`→I03 (the control is literally named "Brand, Logo, and Trademark Elements"); `copyrighted_artwork`→I01 (Manual:477 names "artwork, distinctive architectural work" under Domain I's own decision logic); `real_likeness_suspected`→L01/L02 (Manual:497-530's explicit Domain L mandate, and L02's own `distinctness` field is worded almost identically to the resemblance question); `music_heard`→I02 (I02 is explicitly the audio/music control).
+- **Category B (UI-label-implied only):** `text_visible`/`text_description` — the placeholder text ("Any brand or IP references?") *suggests* a connection to I01/I03, but no Manual sentence or control definition establishes it, and no other source ties it to a specific control by name. **Per the task's own instruction ("only A should normally be eligible for a hard signoff mapping"), this field is excluded from the mapping.** It remains a legitimate free-text observation with no reconciliation obligation attached, pending a future, separate PM/Manual decision if one is ever wanted.
+- **Category C (would have to be invented):** none found. Every field with genuine rights/observation semantics maps to an existing control under Category A, except the two below.
+- **Newly confirmed, previously unflagged:** `landmarks_observed` has **no linked control at all** — a second instance of the `unexpected_content` problem, not identified in CAH-4I.4A or CAH-4I.4B. The Manual and Schema name no "Location/Landmark Clearance" control anywhere in the 16-control set, yet the field's own placeholder ("Could they trigger location clearance requirements?") shows real commercial-risk intent behind its existence.
+
+### 28.4 Accounting-field suitability (Phase 3)
+
+Tested each candidate field against the task's nine questions. All are genuinely reviewer-authored (persisted only via the same authenticated reviewer's own workbook edits), part of the relevant control's own record, intended to capture control-specific reasoning, persisted in `workbook_data`, survive signoff (protected by the same report-binding stale-report invalidation already covering the whole document), and mutable up to signoff. **The one substantive risk the task asked to check: could a field be non-empty for reasons unrelated to the triggering observation?** Yes, in principle, for any free-text field — a reviewer could paste boilerplate, or text left over from editing a different concern. This milestone does **not** propose solving that by semantic analysis (explicitly rejected, §28.5). It is accepted as a known, bounded limitation: the mechanical predicate proves *attention*, not *correctness of content* — exactly what CAH-4I.4B already defined reconciliation to mean (§27.5), and no stronger claim is made here.
+
+### 28.5 Challenge to the "non-trivial text" proxy (Phase 4)
+
+| Option | Verdict |
+|---|---|
+| **A — non-empty text (`trim().length > 0`)** | **Selected**, for the reasons under D below. |
+| **B — minimum length ("non-trivial")** | **Rejected, per the task's own explicit skepticism, and independently re-derived here.** A length threshold (the 20-character convention already used for `freeform_observations`) creates exactly the "fake rigor" risk named in the prompt: a reviewer could type 20 characters of meaningless filler and pass, while a genuinely complete but terse answer ("Generic logo, no mark" — 21 characters, coincidentally passes; "N/A" — 3 characters, fails) is judged by an arbitrary count that has no relationship to whether the observation was actually addressed. Non-emptiness (Option A) already proves the reviewer took an affirmative action distinct from leaving a field at its default; a length threshold adds no additional real guarantee, only false precision. **Rejected.** |
+| **C — new explicit reconciliation boolean/state** | Rejected as unnecessary — §27.5 already established existing fields suffice; inventing a new field the reviewer must separately check would add a second, redundant place to record the same fact the descriptive field already records, and risks a reviewer checking the box without actually writing anything (worse than today, not better). |
+| **D — existing control judgment-completion alone** | **Rejected — this is exactly the status quo CAH-4I.4B already proved is insufficient** (§27.3: `judgment` being any valid enum value is already required today and does not prevent the empty-`trademark_elements` case). |
+| **E — another existing structural signal** | Considered: the generic `content_viewed`/`audio_reviewed` booleans (I01, I02, L01) are a candidate *complementary* signal (a reviewer affirmatively confirming independent review occurred) but do not, on their own, prove the *specific* flagged observation was addressed — a reviewer could have checked it from routine habit unrelated to what they observed. **Not selected as a substitute for the descriptive-field check; could optionally be required in addition to it in a future implementation, but that is an enhancement decision for that milestone, not a requirement this design imposes.** |
+
+**Non-trivial-text proposal (CAH-4I.4B's own phrasing): QUALIFIED — accepted in substance, corrected in threshold.** "Non-trivial" is replaced with plain non-emptiness (Option A); the word "trivial" implied a judgment this milestone found no safe, non-semantic way to operationalize, and the length-threshold instantiation of it is explicitly rejected above.
+
+### 28.6 Selected mechanical predicate (Phase 5)
+
+```
+hasReviewerAccounting(value: unknown): boolean {
+  return typeof value === 'string' && value.trim().length > 0
+}
+```
+
+Applied per mapping entry (not universally) against the specific field(s) named in §28.7's table — for entries with a conditional shape (L02), the predicate is composed as described there, still built entirely from this same primitive plus an explicit boolean check, never from text content inspection.
+
+**Why this does not judge substantive sufficiency (Phase 5's own required proof):** the predicate takes a single field's raw value and asks only whether a human typed something into it. It has no access to, and makes no use of, what the *other* fields say (the triggering observation's own value, the chosen `judgment`, any other control) — it cannot and does not compare the text's content against the observation, evaluate whether the explanation is legally sound, or influence what `judgment` value is legitimate. It is the same shape of check `signoff.ts` already performs for `freeform_observations` and `section_6.basis`, just without the arbitrary length threshold those two already (perhaps unnecessarily) carry — this milestone does not recommend revisiting those two existing checks, which are out of scope here.
+
+### 28.7 Final canonical mapping (Phase 2/6/7) — corrected, complete, and precise enough to implement without further governance decisions
+
+| Observation field | Trigger condition | Category | Linked control | Accounting requirement | Signoff consequence if unmet |
+|---|---|---|---|---|---|
+| `logos_observed` | `value ∉ {'', 'None observed'}` | A | I03 | `trademark_elements` non-empty | Fail closed |
+| `trademarks_observed` | `value ∉ {'', 'None observed'}` | A | I03 (**same field** as above — one control, satisfied once) | `trademark_elements` non-empty | Fail closed |
+| `copyrighted_artwork` | `value ∉ {'', 'None observed'}` | A | I01 | `elements_identified` non-empty | Fail closed |
+| `real_likeness_suspected` | `value ∉ {'', 'None identified'}` **(note: different sentinel than `PRESENCE`)** | A | L01 and, where `synthetic_humans` context indicates a synthetic performer specifically, L02 | L01: `likeness_found` non-default-empty **or** `notes` non-empty. L02: `performers_present` explicitly set (`true` or `false`), **and if `true`**, `distinctness` non-empty | Fail closed |
+| `music_heard` | `value ∈ {'Identifiable track', 'Possibly identifiable'}` **(not `≠ 'None'`)** | A | I02 | `audio_source` non-empty **or** `notes` non-empty | Fail closed |
+| `landmarks_observed` | `value ∉ {'', 'None observed'}` | **A relationship to a concern exists; no control exists** | none | At least one Section-5 finding with non-empty `domain` and `finding` | Fail closed, via the Section-5 fallback (§28.8), not a control field |
+| `unexpected_content` | `=== true` | Established (CAH-4I.4A/4B) | none, by design | Same Section-5 fallback | Fail closed |
+| `text_visible` | — | **B — excluded from the hard mapping** | — | — | No signoff consequence; unchanged from today |
+| `synthetic_humans` | — | **Excluded — not a judgment field** | — | — | No signoff consequence |
+
+**One observation → one control:** `copyrighted_artwork`→I01, `music_heard`→I02, `real_likeness_suspected`→L01 (primary). **Multiple observations → one control:** `logos_observed` + `trademarks_observed` → I03 (same field). **One observation → multiple controls:** `real_likeness_suspected` → L01 and, conditionally, L02. **Mixed** is therefore the correct general answer to Phase 2's question, not a uniform 1:1 assumption.
+
+### 28.8 `unexpected_content` and `landmarks_observed` — the uncontrolled-observation fallback (Phase 7)
+
+Both resolved the same way, for the same reason, confirmed from source: **Option B (exclude from a control-specific hard mapping; route to the existing generic Section-5 fallback) — not Option A (force into a control that doesn't own it) and not Option C (a genuine architecture gap requiring new design).** `unexpected_content` was already so classified in CAH-4I.4A/4B; `landmarks_observed` is newly found to need the identical treatment, for the identical reason (a real commercial concern with no owning control), and this milestone applies the already-established rule rather than inventing a new one. **No fake control is created merely to make the mapping symmetrical**, matching the task's own explicit instruction.
+
+### 28.9 Multi-control / multi-observation / correction behavior (Phase 6) — all twelve cases
+
+1. **One observation → one control:** covered, §28.7.
+2. **One observation → multiple controls:** `real_likeness_suspected` → L01 and L02 — both must satisfy their own accounting requirement independently; satisfying one does not satisfy the other.
+3. **Multiple observations → one control:** `logos_observed` + `trademarks_observed` → I03's single `trademark_elements` field — either observation being triggered requires the same one field to be non-empty; if both are triggered, the single non-empty field satisfies both (there is no way to distinguish which prompted it, and this milestone does not propose inventing one — a coarser but honest outcome).
+4. **Relevant control unresolved:** legitimate — `judgment` may be any value; the predicate does not read `judgment` at all.
+5. **Relevant control insufficient evidence:** legitimate, same reasoning — `'Not Provided'` is a fully valid `judgment` alongside a non-empty accounting field.
+6. **Relevant control passes ('Verified'):** legitimate, unaffected.
+7. **Relevant control fails (no equivalent "fail" state exists in `JUDGMENT_OPTIONS`** — the closest is `'Not Provided'`, already covered above).
+8. **Accounting text entered before the observation was recorded:** the predicate is stateless and re-evaluated at signoff time only — order of entry during drafting is irrelevant; only the final persisted values at the moment of signoff matter.
+9. **Observation changes `None observed` → `Possible`:** the trigger becomes active; if the linked accounting field is still empty from before, signoff now fails closed where it previously would have passed — correct, intended behavior.
+10. **Observation changes `Possible` → `None observed`:** the trigger becomes inactive; a previously-required accounting field is no longer required (though any text already there is simply left in place — nothing is cleared automatically, and this design does not propose clearing it).
+11. **Observation changes `Possible` → `Confirmed`:** no change in required behavior — both values trigger the same requirement identically; there is no escalation in the accounting requirement itself between the two.
+12. **Accounting text later becomes blank** (edited down to empty after having been non-empty): the predicate is re-evaluated fresh each time signoff is attempted — a blank field fails closed exactly the same as one that was never filled in. **No correction/supersession machinery is introduced or required** — this is the same "revision-tracked as a whole document" behavior `workbook_data` already has (§27's own finding), not a new per-field history mechanism.
+
+### 28.10 Mapping ownership / location (Phase 8)
+
+**A single, small, dedicated constant — not inline in `signoff.ts`, not duplicated into the UI.** Precedent already established twice in this codebase for exactly this shape and size of decision (`dependency-askability.ts`'s ~1-entry-today, generically-shaped registry; this document's own §25.6 finding that such registries are deliberately kept small, separate, and purpose-owned rather than merged). The mapping expresses only *structural* relationships (`observation field → control id → accounting field(s) → shape`), never legal reasoning — consistent with the task's own example distinction ("`observation category → existing control/accounting surface`," not "`logo → trademark infringement investigation`"). `Section3Evidence.tsx`'s existing hand-written `S2Banner` calls (§26.3, §28.2) would ideally read from the same constant in a future refactor to eliminate the current UI/signoff duplication risk, but that consolidation is not required to ship the signoff check itself and is noted as a nice-to-have, not a blocker.
+
+### 28.11 Signoff failure-message contract (Phase 9)
+
+**One error per unmet mapping entry (not per observation-field, not per control) is the correct deterministic unit**, because a single control (I03) can be the accounting target for two different observation triggers (§28.9 case 3) — emitting one error per *entry* naturally collapses to one message even when two observation fields point at the same requirement, avoiding duplicate, confusing errors about the same missing field.
+
+Message shape, conceptually (not implemented): *"You recorded [Possible/Confirmed] for [observation label]. Account for this in [control label]'s notes before signoff."* — names the observation and the destination, never a legal conclusion, matching the task's own good/bad examples exactly. For the Section-5 fallback: *"You recorded [unexpected content / a possible landmark]. Add a Finding (Section 5) accounting for it before signoff."*
+
+### 28.12 Authority / governance firewall (Phase 10) — explicitly proven, not asserted
+
+The predicate (§28.6) reads exactly one field's type and trimmed length. It has no branch, lookup, or dependency that could interpret content, infer infringement, infer missing rights, infer likeness violation, infer copyrightability, infer trademark status, judge evidence sufficiency, choose a `judgment` value, or require any particular outcome. It cannot require a PASS: `'Not Provided'` and `'Partially Verified'` satisfy it identically to `'Verified'` (§28.9 cases 4–6). It does not touch `submissions` (submitter facts), Living Knowledge, Retrieval, or Bounded Interpretation in any way — it is entirely internal to the reviewer's own `workbook_data`. It creates no new Commercial Assurance control (§26.11's conclusion stands, unmodified). **The firewall reduces to exactly the sentence the task itself specifies:** a Human Reviewer recorded a governed observation that requires accounting; therefore the Human Reviewer must explicitly account for it before signoff — nothing more is enforced, and nothing less.
+
+### 28.13 Section3Evidence bug — re-verified a third time, still not fixed (Phase 11)
+
+Re-traced end-to-end this pass, independently of the two prior confirmations: `S2Banner`'s `warn` prop (`Section3Evidence.tsx:123-143`) renders an amber-vs-gray chip based on the caller-supplied boolean; the I03 and L01 call sites (`:217`, `:251-252`, `:266`) compute that boolean as `value !== 'No'`, but `logos_observed`/`trademarks_observed`/`real_likeness_suspected` never take the literal value `'No'` (their real "clean" sentinels are `'None observed'` and `'None identified'` respectively) — so the comparison is always true for any non-empty value, including the clean case, and the banner likely renders amber even when nothing was observed. `copyrighted_artwork`/`music_heard`'s parallel checks (`:218`, `:234`) correctly compare against their own real sentinels (`'None observed'`, `'None'`) and do not share this defect.
+
+**Interaction with this milestone's own design:** the bug affects only banner *coloring* in the UI, not the `section_2`/`section_3` field values themselves, and not the mechanical predicate in §28.6 (which never reads `warn` or any UI-computed boolean). **It could create visual noise during a future UAT** (a tester seeing an amber "clean" banner might mistakenly think reconciliation should be required when it should not), so it is worth fixing **before** UAT of the future signoff implementation, though it does not need to be fixed before the implementation is *designed* or even *built* — the signoff check reads raw field values, not banner colors. **Recommendation: fix as its own tiny, separate milestone, scheduled before (not bundled into) the future implementation's UAT phase.** Not fixed here.
+
+### 28.14 Exact future implementation scope (Phase 12)
+
+Files a future, separately-authorized milestone would touch — identified, not edited:
+
+1. **New:** a small constant module (e.g. `lib/assessments/observation-reconciliation.ts` or similar — exact naming/location is that milestone's own small decision) containing `hasReviewerAccounting()` and the §28.7 mapping table.
+2. **Modified:** `lib/assessments/signoff.ts` — one additive block in `validateWorkbookForSignoff`, after the existing Section 3 check, applying the mapping.
+3. **Modified (optional, not required to ship):** `Section3Evidence.tsx` — could import the same mapping constant to eliminate the `S2Banner` call-site duplication, and, if fixed then, correct the §28.13 bug in the same pass.
+4. **No changes to:** `workbook-schema.ts` (no new fields), any migration, any UI form structure, `reportProjection.ts`, or any test file until the implementation milestone writes its own.
+
+### 28.15 Test matrix (Phase 12)
+
+| Case | Expected |
+|---|---|
+| Every observation `'None observed'`/`'None identified'`/`'None'`/`false` | Signoff not blocked by this check |
+| `'Possible'` with empty accounting field | Blocked |
+| `'Confirmed'` with empty accounting field | Blocked |
+| `'Possible'`/`'Confirmed'` with non-empty accounting field | Not blocked by this check |
+| `judgment` = `'Verified'`, `'Partially Verified'`, `'Not Provided'`, `'Not Applicable'` — each paired with a satisfied accounting requirement | Not blocked, in every case — proves the check never inspects `judgment` |
+| Whitespace-only accounting text (`'   '`) | Blocked — `trim().length > 0` fails |
+| `logos_observed = 'Confirmed'`, `trademarks_observed = 'None observed'`, `trademark_elements` non-empty | Not blocked — one shared field satisfies both |
+| `real_likeness_suspected = 'Possible'`, L02 `performers_present = false` | Not blocked — an explicit `false` is a complete answer |
+| `real_likeness_suspected = 'Possible'`, L02 `performers_present = true`, `distinctness = ''` | Blocked |
+| `unexpected_content = true`, no Section-5 finding | Blocked |
+| `landmarks_observed = 'Possible'`, a Section-5 finding exists with non-empty `domain`/`finding` | Not blocked |
+| An unrelated control (e.g. R02) with its own pre-existing judgment requirement | Unaffected — proves no cross-contamination with existing checks |
+| Full existing signoff test suite (if one exists for `signoff.ts`) | Zero new failures — this is additive only |
+
+### 28.16 Implementation gate (Phase 13)
+
+**A — READY FOR SMALL GENERIC IMPLEMENTATION.** Every entry in §28.7's mapping now has a fully specified, non-ambiguous, purely structural trigger, target field(s), and required shape — including the two conditional/multi-field cases (I03's shared field; L02's gated `distinctness`) and the two uncontrolled categories (routed identically to Section 5, not invented separately). The one Category-B relationship found (`text_visible`) is excluded by consistent application of the task's own stated rule, not left as an open judgment call. No remaining entry requires a new governance decision before a future milestone can implement it directly from §28.7/§28.14/§28.15.
+
+### 28.17 Remaining risks / open decisions
+
+- Whether `content_viewed`/`audio_reviewed` should be required *in addition to* the descriptive-field check (§28.5, Option E) — a genuine enhancement decision, not a blocker, left to the implementing milestone.
+- Whether the future implementation should also update `Section3Evidence.tsx` to read from the same mapping constant (closing the UI/signoff duplication and, incidentally, the §28.13 bug) in the same change, or as a strictly separate follow-up — a sequencing preference, not an open architectural question.
+- The exact module name/location for the new mapping constant (§28.14 item 1) — a naming decision, not a design one.
+
+### 28.18 Smallest next milestone
+
+**The implementation itself** (§28.14), now that this milestone has resolved D-10's mechanism precisely enough to build from directly — **but the §28.13 UI bug should be fixed first, as its own separate, smaller, unrelated milestone**, so that the future implementation's UAT is not confused by a miscolored banner while verifying reconciliation behavior.
+
+### 28.19 Runtime-change confirmation
+
+None. This section is the only change made in this milestone.
+
+### 28.20 Documentation / git state
+
+Committed on the same isolated branch as CAH-4I.4/4I.4A/4I.4B (`cah-4i4-submission-fact-acquisition-governance`), one commit above `226c48f`. Not pushed, not merged. `main`/`origin/main` moved independently during this milestone (§28's repository note) but were not touched by this work.
+
+### 28.21 GO / HOLD / NO-GO
+
+**GO.** This is the first CAH-4I.4 sub-milestone to reach a clean **A** implementation-readiness gate rather than a HOLD — the verification pass this milestone was chartered to perform found and corrected real errors in the prior sketch (§28.1's `PRESENCE`-sharing correction; §28.3's second uncontrolled category) rather than rubber-stamping it, which is what makes the resulting mapping trustworthy enough to build from without further governance review.
