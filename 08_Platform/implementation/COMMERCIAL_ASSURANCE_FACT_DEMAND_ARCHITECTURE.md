@@ -1348,3 +1348,154 @@ Continued on the same isolated branch as CAH-4I.4 (`cah-4i4-submission-fact-acqu
 ### 26.21 GO / HOLD / NO-GO
 
 **HOLD** — not because the architecture is unsound (it is not; §26.10's classification is B, not C), but because §26.14's recommendation (Option 1 now, Option 2 scoped as a future candidate) itself depends on D-9/D-10, which are PM decisions this milestone can name but not make. This is a narrower, more optimistic HOLD than CAH-4I.4's own — this milestone found the underlying architecture materially sound, with small, specific, well-understood gaps, not an open design question requiring new invention.
+
+---
+
+## 27. CAH-4I.4B — Reviewer Observation Reconciliation Governance / Signoff Contract (2026-09-13)
+
+**Status: GOVERNANCE / ARCHITECTURE ONLY. No schema, UI, signoff code, workbook field, control, or LK change is authorized by this section.** It re-derives, from a fresh direct read of `signoff.ts` (not from §26's own citations), whether an ambiguous or material Section-2 observation can currently be signed off without being accounted for — and if so, defines the smallest generic contract to close that gap, without designing or building it.
+
+### 27.1 Current observation contract (re-verified, unchanged from §26)
+
+`section_2` observation values remain the bounded `PRESENCE` enum (`'None observed' | 'Possible' | 'Confirmed'`, `Section2Visual.tsx:110`) with conditional free-text elaboration, distinct from `section_3`'s `JUDGMENT` enum. Nothing in this pass changes that finding; it is the premise this milestone builds on.
+
+### 27.2 Current determination contract (re-verified)
+
+`section_3` control judgments use `JUDGMENTS = ['Verified', 'Partially Verified', 'Not Provided', 'Not Applicable']` (`signoff.ts:122`, identical to `workbook-schema.ts`'s `JUDGMENT_OPTIONS`). Each control also carries its own descriptive sub-field(s) — e.g. `I03: {judgment, notes, trademark_elements}`, `I01: {evidence, judgment, notes, content_viewed, elements_identified}`, `L01: {judgment, notes, content_viewed, likeness_found}` (where `likeness_found` is itself a third, separate enum — `['None identified', 'Suspected — describe in notes', 'Confirmed — describe in notes']` — distinct from both `PRESENCE` and `JUDGMENT_OPTIONS`; noted, not resolved, in §26.9, and not re-opened here).
+
+### 27.3 Current signoff behavior — read in full this pass, not excerpted from citation
+
+`validateWorkbookForSignoff` (`signoff.ts:131-193`, read start-to-finish) checks, in order: Section 1's five scope-check booleans; the submission's two platform declarations; Section 2's `viewing_passes.first_complete` and `freeform_observations` length ≥ 20; **for Section 3, only that `JUDGMENTS.includes(s3[id].judgment)` for every control** — no check of any kind on `notes`, `elements_identified`, `trademark_elements`, `likeness_found`, or any other descriptive sub-field; Section 5's requirement of at least one non-empty finding *anywhere*, not per-domain or per-control; and Section 6's outcome/confidence/basis/conditions. **The function ends there — nothing after it.**
+
+**This directly and conclusively answers Phase 1's question 5:** a reviewer can sign off today with `section_2.logos_observed = 'Confirmed'`, `section_2.logos_description` populated, `section_3.I03.judgment = 'Verified'`, and `section_3.I03.trademark_elements = ''` (empty) — the signoff function has no code path that would reject this. The same is true for `'Possible'` and for an "unresolved/ambiguous" observation left with no corresponding control text at all. **Phase 1's question 6 (is there already a "reconciled"/"investigated"/"disposition" concept) is answered no** — a repo-wide grep for `reconcil`, `disposition`, `investigat` across `app/` and `lib/` found no reviewer-observation-reconciliation concept anywhere; every hit was either an unrelated Report-boilerplate sentence ("chain of copyright investigations," `reportProjection.ts:438`) or unrelated code in other subsystems (CRC abuse-prevention, interview-engine decision logic, etc.).
+
+### 27.4 Challenge to the proposed governance principle (Phase 2)
+
+> "A reviewer observation that could materially affect an existing Commercial Assurance control must not itself determine that control, but it must be reconciled before assessment signoff."
+
+**A. "Could materially affect" is not sufficiently bounded for a system contract — rejected as the trigger, not as the intent.** Materiality is exactly the judgment call the reviewer, not the system, is positioned to make, and the system already has a bounded proxy for it: **the reviewer's own choice of `PRESENCE` value.** Requiring the system to separately assess "could this materially affect a control" before requiring reconciliation would have the system second-guess the reviewer's primary judgment call before the reviewer has even acted on it — backwards, and unnecessary, because a deterministic trigger already exists: **`PRESENCE !== 'None observed'`** (i.e., `'Possible'` or `'Confirmed'`).
+
+**B. Reconciliation should be required for both `'Possible'` and `'Confirmed'`, not one or the other.** Both states are the reviewer affirmatively flagging that something may be present; `'None observed'` is the only state that legitimately requires nothing further.
+
+**C. Reconciliation does not require a new reviewer-entered *state*, but current authoritative state cannot yet *prove* it either — a small, additive check is needed, not a new field.** Re-derived directly: `judgment` being any valid enum value is already required and proves nothing about whether the observation was addressed (§27.3). What *would* prove it, using **fields that already exist** for every domain control with an observation link (`trademark_elements`, `elements_identified`, `likeness_found` + `notes`, `audio_source`/`license_provided`) — is requiring that field to be non-empty (or non-trivial, mirroring the existing `freeform_observations ≥ 20 chars` precedent already in `signoff.ts:162-163`) whenever the linked Section-2 observation is `'Possible'` or `'Confirmed'`. This needs one small, explicit, generic **observation-category → control mapping** (five or six entries, the same shape and size as `dependency-askability.ts`'s own registry) plus one additive signoff check function — not a new workbook field, not a new enum, not a new authority class.
+
+**D. Requiring reconciliation must not force a stronger conclusion — verified safe by construction.** The proposed check only requires the descriptive *field* to be non-empty; it says nothing about what `judgment` value must be chosen. `'Not Provided'` and `'Partially Verified'` remain fully legitimate judgments under the check — the reviewer is required to *write something*, never to *resolve* anything.
+
+**E. A legitimate reconciliation outcome may be unresolved, insufficient, "concern remains," or "not material to this control"** — confirmed compatible: nothing in the proposed check inspects the *content* of the descriptive field for a particular conclusion, only its presence. A reviewer writing "Possible logo observed at ~00:17; generic geometric shape, not identifiable as any specific mark; not material" and setting `judgment: 'Verified'` satisfies the check exactly as validly as one writing "Confirmed identifiable logo; no license on file" and setting `judgment: 'Not Provided'`.
+
+**F. The current architecture does not already guarantee this indirectly** — conclusively re-verified in §27.3; this is not a restatement of §26's finding, it is that finding confirmed against the complete, unabridged validation function.
+
+**Refined principle, replacing the original as too broadly framed:**
+
+> **Any Section-2 observation recorded as `'Possible'` or `'Confirmed'`, for a category with an existing linked control, must be accompanied — before signoff — by non-trivial reviewer-authored text in that control's own descriptive field, regardless of what judgment the reviewer ultimately reaches for that control.**
+
+This is materially narrower than the original (a deterministic enum trigger, not a judged "materiality" trigger) and materially safer to implement (it can never elevate or manufacture a conclusion, by construction, per D/E above).
+
+### 27.5 Final reconciliation definition (Phase 3)
+
+The candidate definition —
+
+> "An observation is reconciled when the Human Reviewer has explicitly accounted for its relevance to the applicable Commercial Assurance control(s) through the governed assessment workflow, including where the resulting determination remains unresolved or insufficient."
+
+— is sound in substance but under-specified in one place: **"through the governed assessment workflow" does not name which existing artifact counts.** Sharpened:
+
+> **An observation is reconciled, for signoff purposes, when the reviewer has entered non-trivial, control-specific text addressing it — in that control's own descriptive field (the default path), or, for an observation category with no linked control, in a Section 5 finding naming the relevant domain (§27.7) — regardless of whether the resulting judgment is Verified, Partially Verified, Not Provided, or Not Applicable. Reconciliation proves attention was paid and recorded. It never itself constitutes evidence, sufficiency, authorization, clearance, or a legal conclusion.**
+
+Per Phase 3's own preference ("prefer no new state if existing authoritative state can prove reconciliation without ambiguity"): **no new reviewer-entered fact or state is introduced.** The definition is built entirely from fields that already exist (`notes`, `elements_identified`, `trademark_elements`, `likeness_found`, `audio_source`, Section 5's `finding`/`domain`) plus one new, additive, generic **signoff-time check** — closest to Phase 3's options 2 ("derived from existing determination completion") and 4 ("a signoff invariant spanning observation + existing control state") combined.
+
+### 27.6 Observation → control relationship (Phase 4) — discriminating examples
+
+| # | Observation | Linked control | Reconciliation obligation? | Legitimate reconciled outcome | Signoff consequence today (unreconciled) |
+|---|---|---|---|---|---|
+| 1 | Possible logo in background | I03 (`logos_observed`/`trademarks_observed`) | Yes | `judgment` + non-empty `trademark_elements`, any conclusion | **Currently passes signoff with `trademark_elements` empty — the gap** |
+| 2 | Character resembling a known fictional character | I01 (`copyrighted_artwork`, not `logos_observed` — a copyright-character concern, not a trademark/logo one) | Yes | `judgment` + non-empty `elements_identified` | Same gap, I01 instead of I03 |
+| 3 | Music sounds potentially familiar | I02 (`music_heard`) | Yes | `judgment` + non-empty `audio_source` (or `notes`, whichever the reviewer used to record the concern) | Same gap |
+| 4 | Person may resemble an identifiable natural person | L01/L02 (`real_likeness_suspected`) | Yes | `judgment` + `likeness_found` set beyond its default, or `notes` populated | Same gap |
+| 5 | "None observed" | — | **No** — the clean case; nothing to reconcile | N/A | No gap; correctly requires nothing |
+| 6 | Possible issue; reviewer determines insufficient evidence | Whichever domain applies | Yes | `judgment: 'Not Provided'` + notes explaining the insufficiency — **explicitly legitimate**, not a failure to reconcile | Would now require the explanatory text; does not require resolution |
+| 7 | Possible issue; reviewer determines not material to the control | Whichever domain applies | Yes | `judgment` (Verified or Not Applicable, reviewer's call) + notes explaining why it's immaterial — **explicitly legitimate** | Same — text required, conclusion not dictated |
+| 8 | Confirmed presence; authorization evidence missing | Whichever domain applies | Yes | `judgment: 'Not Provided'` (already the Manual's own prescribed outcome, e.g. Manual:483) + notes | Already the Manual's expected path; the check would simply require the notes to exist |
+
+**No example manufactures a legal conclusion.** In every row, the reconciliation obligation is satisfied by presence of reviewer-authored text, never by any particular value of `judgment`.
+
+### 27.7 Signoff invariant (Phase 5)
+
+Refined from the candidate shape given, resolving each open question against source:
+
+> IF `section_2.<observation_field>` is `'Possible'` or `'Confirmed'` for a category with a linked control (per a small, explicit, generic mapping — not inferred), THEN signoff must fail closed unless that control's own descriptive field is non-trivial (mirroring the existing `≥ 20 chars` convention already used for `freeform_observations`). For `unexpected_content` (no linked control), the same fail-closed rule applies against **Section 5** instead — at least one finding must exist whose `domain` is populated and whose `finding` text is non-trivial, when `unexpected_content = true`.
+
+Resolved questions:
+- **What existing state proves "accounted for"?** Non-triviality of the linked control's own descriptive sub-field (or, for `unexpected_content`, a populated Section-5 finding) — nothing else.
+- **Can the reviewer legitimately sign with an unresolved/insufficient determination?** Yes, unconditionally — §27.4.D/E.
+- **Does the gate require resolution or merely an explicit bounded disposition?** Merely a bounded disposition. Never resolution.
+- **How should `unexpected_content` behave?** Routed to Section 5, not forced into the same control-mapping table as the other categories — Section 5 is already domain-scoped rather than control-scoped, making it the correct existing home for an observation with no natural control, rather than a reason to invent one.
+- **Would a generic gate accidentally make `unexpected_content` impossible to complete?** Only if wrongly forced into the control-mapping approach; routing it to Section 5 instead avoids that failure mode entirely.
+- **Is this a signoff concern, workbook-schema concern, or methodology guidance?** Primarily a **signoff concern** (an additive check in `signoff.ts`, reusing existing fields — no schema change for the five mapped categories); only a light **methodology-guidance** note is needed for the `unexpected_content` → Section 5 routing, since Section 5 already exists.
+
+### 27.8 D-9 / D-10 / D-11 — restated exactly, then decided
+
+> **D-9** (§26, verbatim): *"Should Option 2 (structured, timestamped, control-linked `ReviewerObservation`) be scoped as a future design milestone, given the three specific gaps named in §26.14, or is Option 1 (status quo, documentation-only clarification) sufficient indefinitely?"*
+> **Decision: ACCEPT WITH QUALIFICATION.** This milestone's signoff-invariant design closes the *reconciliation* gap — the most material of §26.14's three — without needing Option 2's full per-instance/timestamped structure. Option 2 remains a legitimate future candidate for the *other* two gaps (structured timecode provenance, data-level control linkage) if a future need (e.g., legal discoverability) is demonstrated, but is **not** required to solve reconciliation specifically. Not accepted or rejected outright — narrowed to what it would actually still be for.
+
+> **D-10** (§26, verbatim): *"Should an ambiguous (`Possible`) Section-2 observation be required to produce a Section-4 gap or Section-5 finding before signoff (closing §26.6's most concrete gap), independent of whether the fuller Option-2 structure is ever built? This is a smaller, cheaper decision than D-9 and could be adopted on its own."*
+> **Decision: ACCEPT WITH QUALIFICATION — the mechanism is refined, not the goal.** This milestone finds the *precise* location for the required text should be **the linked control's own descriptive field** (already existing, already control-specific) as the default path, with Section 4/5 reserved for the one category (`unexpected_content`) that has no linked control. D-10 as originally framed (route everything through Section 4/5) would work but is less precise than reusing each control's own field — the control's field is a tighter, more directly relevant place to require the explanation than a general gap/finding log, and requires no cross-referencing between logs and controls to audit later. This is a genuine refinement of D-10, recorded explicitly rather than silently substituted.
+
+> **D-11** (§26, verbatim): *"Should the Manual gain an explicit audio-similarity-listening sentence parallel to Domain I/L's visual mandate (§26.1), or is the current, less explicit treatment intentional?"*
+> **Decision: DEFER — unchanged.** Nothing in this milestone's reconciliation analysis bears on Manual wording; D-11 is an independent methodology-completeness question, correctly left exactly where §26 left it.
+
+### 27.9 Separate backlog items (Phase 7) — kept explicitly out of scope
+
+1. **`Section3Evidence.tsx` `'No'` vs. `'None observed'` sentinel mismatch:** re-confirmed, not re-derived (already verified against the literal `PRESENCE` enum in §26.15/CAH-4I.4A) — this is a genuine, narrow, unrelated UI bug. **Not fixed here.** Recorded as its own tiny bug-fix candidate.
+2. **Structured timestamp/location provenance:** re-tested against this milestone's own reconciliation definition — **not required.** Reconciliation as defined (§27.5) needs only that non-trivial text exist in the linked field; it does not need a machine-parseable timecode. The existing informal "describe what you saw and at which timestamp" placeholder remains sufficient for reconciliation specifically. A stronger, structured provenance need (e.g., for legal discoverability) is a separate question, unaffected by this decision.
+3. **Customer-report projection of observations:** untouched. Reconciliation is an internal signoff concern; nothing here changes what `reportProjection.ts` projects.
+4. **Living Knowledge integration:** untouched. No observation is wired into LK or retrieval by this milestone, and none is proposed.
+5. **Trademark LK onboarding:** untouched, separate workstream.
+6. **Submission questionnaire / fact acquisition:** untouched. No CertForm question is added, removed, or reworded.
+
+### 27.10 Architecture invariants — explicitly re-verified against the proposed contract
+
+- **Reviewer observation ≠ reviewer determination:** preserved — the check requires text in the determination section but never sets or infers the judgment value itself.
+- **Submitter disclosure ≠ reviewer observation:** untouched by this milestone; no interaction proposed between the two.
+- **Evidence ≠ fact ≠ sufficiency:** preserved — non-trivial text is required, not any particular evidentiary weight or sufficiency conclusion.
+- **Observation cannot itself create a legal conclusion:** preserved by construction (§27.4.D) — the check never reads or constrains the *content* of the required text, only its non-emptiness.
+- **Bounded Interpretation remains the conclusion ceiling:** unaffected — this contract is entirely within the reviewer-authored workbook layer; it does not touch LK, Retrieval, or Bounded Interpretation in any way.
+- **Signoff fails closed where required:** this is the entire point of the proposed invariant, and it extends (does not weaken) the existing fail-closed pattern already in `signoff.ts`.
+- **No domain-specific orchestration unless proven necessary:** the mapping table is small and generic (one shape, five or six entries, reused identically per category) — the same discipline already demonstrated safe by `dependency-askability.ts`'s own registry; `unexpected_content`'s Section-5 routing reuses an existing generic mechanism rather than inventing a domain-specific one.
+- **No automatic LK conclusion from reviewer observation:** untouched, unchanged.
+- **Human Reviewer retains assessment authority:** preserved — the reviewer chooses the judgment value and the wording; the system only verifies non-emptiness.
+- **Unresolved/insufficient evidence remains a legitimate bounded outcome:** explicitly and repeatedly confirmed (§27.4.E, §27.6 rows 6–7).
+- **Commercial Assurance remains human-reviewed:** unaffected — nothing here is automated interpretation of the observation's content; only its presence is checked, mechanically, the same way `freeform_observations`' length already is.
+
+All eleven hold under the proposed contract as designed; none required weakening or a workaround.
+
+### 27.11 Implementation gate (Phase 9)
+
+**B — SMALL GENERIC IMPLEMENTATION JUSTIFIED**, not built in this milestone. The smallest future implementation, if separately authorized, would be:
+
+1. A small, explicit, generic constant mapping Section-2 observation-category keys to `{control_id, descriptive_field}` (five or six entries: `logos_observed`/`trademarks_observed` → I03/`trademark_elements`; `copyrighted_artwork` → I01/`elements_identified`; `music_heard` → I02/`audio_source`; `real_likeness_suspected`/`synthetic_humans` → L01/`likeness_found` — exact field choices for the L-domain and any consolidation across `logos_observed`+`trademarks_observed` sharing one I03 field are implementation detail for that future milestone, not decided here).
+2. One additive function in `signoff.ts`, alongside the existing checks, applying that mapping plus a `≥ N` non-trivial-length check (reusing the existing `trim().length` pattern already in the file) — no new import, no new dependency, no schema change.
+3. One additional rule for `unexpected_content` requiring a populated Section-5 finding when true.
+
+This is explicitly **not** authorized to be built now.
+
+### 27.12 Remaining open questions
+
+- The exact minimum-length threshold for "non-trivial" (this milestone reused the existing 20-character convention as a plausible default; a future milestone should decide it deliberately, not inherit it silently).
+- Whether `logos_observed` and `trademarks_observed` should map to the *same* I03 field (as they do today in the UI, §26.3) or whether the future signoff check should require the field to actually discuss *both* concerns when both are non-`'None observed'` — a real, small design question for the future milestone, not resolved here.
+- Whether any assessment currently in `DRAFT`/pre-signoff state would newly fail this check if adopted retroactively — not investigated in this milestone (would require querying live data, out of scope for a documentation/governance pass).
+
+### 27.13 Smallest next milestone
+
+**A small, scoped implementation-design milestone** (not documentation-only, unlike D-9/D-10 themselves, which this milestone has now resolved) — specifically: design and build the signoff-invariant described in §27.11, resolving §27.12's two open design questions first. This is smaller and more concrete than CAH-4I.4A's own recommended next step, because this milestone converted D-10 from an open governance question into a scoped, safe, small design.
+
+### 27.14 Runtime-change confirmation
+
+None. This section is the only change made in this milestone.
+
+### 27.15 Documentation / git state
+
+Committed on the same isolated branch as CAH-4I.4/4I.4A (`cah-4i4-submission-fact-acquisition-governance`), one commit above `79f3d4b`. Not pushed, not merged, per this milestone's own instruction.
+
+### 27.16 GO / HOLD / NO-GO
+
+**GO — for scoping the §27.11 implementation as a future milestone.** Unlike CAH-4I.4/4I.4A's HOLDs, this milestone resolved its own central open question (D-10) rather than merely naming it, using evidence gathered this pass (the complete, unabridged `validateWorkbookForSignoff` read) rather than deferring further. The remaining open items (§27.12) are small, scoped design decisions appropriate for the implementation milestone itself, not further governance review.
