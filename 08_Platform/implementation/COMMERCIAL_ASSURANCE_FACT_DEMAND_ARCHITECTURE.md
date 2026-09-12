@@ -1002,3 +1002,169 @@ The proposed smallest-next-milestone (CAH-4I.3 — Reviewer Evidence Reachabilit
 - The Report's own "License on file" / "Release on file" presence-boolean phrasing (§17.3, §23.6) is a separate, lower-priority, non-blocking finding and was **not** touched by this milestone.
 
 **Smallest next milestone after this:** none required to close CAH-4I.3 itself. The next open item from the broader CAH-4I roadmap is CertForm askability governance (D-1/D-2, §20), unrelated to evidence reachability.
+
+---
+
+## 25. CAH-4I.4 — Submission Fact Acquisition / Askability Governance (2026-09-12)
+
+**Status: GOVERNANCE / ARCHITECTURE DISCOVERY ONLY. No runtime, schema, questionnaire, CRC, LK, or reviewer-workbook change is authorized by this section.** It re-derives the acquisition/askability contract §18–§20 gestured at but did not fully specify, and answers the open decisions D-1 through D-5/D-7 as far as the evidence actually supports — no further.
+
+### 25.1 Re-deriving the pipeline — the proposed formulation is incomplete, not wrong
+
+The proposed shape was:
+
+```
+Commercial Assurance fact demand → fact authority → channel permission/askability
+→ already-established fact availability → acquisition need → question/evidence request/reviewer establishment
+```
+
+Re-derived from the one channel where this is most mature — CRC — this collapses two independent gates into one step. `jurisdiction-clarification.ts`'s actual eligibility rule (read in full this pass) requires, as **separate, conjunctive conditions**: (A) an active confirmed UserGoal resolves to a governed claim needing jurisdiction — **applicability/relevance**, computed from this submission's own context — AND (C) `ProjectFacts.jurisdiction` is neither confirmed nor declined — **not-already-satisfied** — AND the ordinary Constraint pipeline permits it — **generic conversational-fit**. `dependency-askability.ts` supplies a *fourth*, independent gate — **channel askability**, a fail-closed registry lookup that has nothing to do with whether the fact is relevant to this submission. CAH-4I.2 already stated the first pairwise distinction generically (`CRC_CURRENT_STATE.md` §4: *"Selector askability ≠ applicability"*); this milestone's re-derivation confirms it holds up under a real worked example and generalizes cleanly.
+
+**Corrected shape** — fact authority and applicability are properties of the *demand*, evaluated independently of each other and of the channel; askability is a property of the *(demand, channel)* pair; all three gate an acquisition attempt in conjunction, not in sequence:
+
+```
+                         FACT DEMAND
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        ▼                      ▼                      ▼
+  FACT AUTHORITY        APPLICABILITY           CHANNEL ASKABILITY
+  (who may ever          (is this fact           (may THIS channel
+   establish it —        relevant to THIS         actively ask, at
+   channel-independent)  submission —             all — a governance
+                          channel-independent)     record, not a
+                                                    relevance judgment)
+        └─────────────────────┬─────────────────────┘
+                               ▼
+              acquisition authorized iff: applicable
+              AND askable-for-this-channel AND not
+              already satisfied for this instance
+                               ▼
+                    ACQUISITION ATTEMPT (bounded,
+                    channel-native mechanism)
+                               ▼
+              FACT INSTANCE (channel-scoped: own
+              provenance, own evidence status —
+              never merged with another channel's
+              instance for the same demand)
+```
+
+This is not a cosmetic redraw. It matters concretely for CertForm: CAH-4I.2 (§11) already found CertForm has **no applicability mechanism at all** (only hardcoded UI branches) and **no askability governance at all** (§15/§23). Treating these as one linear "channel permission" step would understate that CertForm is missing *two* independent primitives, not one — and a fix that adds askability governance without also adding applicability-gating would only solve half the problem this milestone is chartered to name.
+
+### 25.2 Authority taxonomy — reused, not re-invented, then narrowed for this milestone's actual question
+
+CAH-4I.2's E1–E8 taxonomy (§23.11 of this document independently accepted it as sound and orthogonal) is reused rather than re-derived from zero — the task's own instruction is to avoid blind adoption, not to discard working prior art without cause, and re-testing it against `dependency-askability.ts` and `jurisdiction-clarification.ts` this pass found no conflict.
+
+**Narrowed for CAH-4I.4's specific deliverable** (a CertForm ask/no-ask contract): "askability" is only ever a live question for **E1** facts (attributed self-report — the only class a *question* can legitimately target). E2 is CRC-specific by definition (unauthenticated). E3–E8 are never askable-as-a-question by construction — they are acquired by upload, direct review, computation, or external lookup, never by asking the submitter to assert them. This is exactly why CAH-4I.2's §15 adversarial check treated a hypothetical evidence-only self-attestation checkbox as a **category error**, not merely a missing gate: an E3 fact was never a candidate for "ask" in the first place, and no governance record can make it one — only re-classifying the fact's authority could, and that is a legal/product decision far outside this milestone's remit.
+
+### 25.3 CertForm ask/no-ask decision contract
+
+The task proposed six categories. Re-tested against the taxonomy above, they are **not six peers of the same kind** — category 6 is a cross-cutting modifier, not a sixth alternative outcome, and this milestone corrects that rather than implementing the six as given:
+
+| # | Category (as proposed) | Correction after re-derivation |
+|---|---|---|
+| 1 | REQUIRED / ASK | Valid outcome — applies when: fact authority includes E1, applicability = always-true (no gating dependency), and a channel-askability record exists (or is created) authorizing CertForm specifically. |
+| 2 | CONDITIONAL / ASK WHEN APPLICABLE | Valid outcome, but requires CertForm to have an **applicability mechanism** it does not currently have (§25.1) — this category is currently **unimplementable on CertForm as built**, not merely unused. It is fully implemented on the CRC side (`jurisdiction-clarification.ts` is a worked instance of exactly this category). |
+| 3 | DO NOT ASK — EVIDENCE ONLY | Valid outcome — the stock-governance class (§25.7) and any other E3 fact. Never a question, regardless of applicability. |
+| 4 | DO NOT ASK — REVIEWER ESTABLISHES | Valid outcome — E4/E5. CertForm may still collect a submitter's own good-faith disclosure as *context* for the reviewer (the existing I01 pattern: submitter disclosure input + independent reviewer visual review), but that disclosure is never itself the established fact. |
+| 5 | DO NOT ASK — SYSTEM/EXTERNAL | Valid outcome — E6/E7. |
+| 6 | ALREADY AVAILABLE, RECONFIRMATION MAY BE POSSIBLE | **Not a peer category — a cross-cutting flag.** Any fact in categories 1–2 can *additionally* have a prior instance available from another channel (typically CRC). Whether that prior instance may inform this acquisition is answered by §25.5's reuse contract, independently of which of 1–5 the fact belongs to. Re-classified here as a modifier, not an outcome. |
+
+**The governance record itself (D-1) is the actual missing primitive**, independent of which category a given fact falls into: `dependency-askability.ts` proves the pattern (a small, explicit, fail-closed registry + a per-entry PM/legal decision record, `DAR_001`'s shape) works for one channel (CRC). Nothing analogous exists for CertForm. This milestone recommends the **same pattern, a separate registry** — not a shared one (§25.6) — scoped to CertForm questions, populated one deliberate entry at a time, exactly as CRC's own registry has exactly one real entry today despite the mechanism being fully generic.
+
+### 25.4 Fact-instance / provenance contract
+
+No change from CAH-4I.2 §9/§12.5, re-confirmed rather than re-derived: a fact instance is channel-scoped (own `asserted_by`, `establishment_class`, `evidence_status`, `source_ref`); "another channel has a value" means exactly that and nothing more automatically — it does not mean *this* channel's acquisition requirement is satisfied, shown to the user, or reconfirmable, each of which is a separate, explicit governance question (§25.5).
+
+### 25.5 CRC → CertForm reuse contract — re-derived, not merely re-asserted
+
+The task is correct that CAH-4I.2 did not prove all reuse is forbidden, and this milestone's own re-review (§23.4 of this document, produced independently before this section) already flagged the "rejects prefill" framing as an overstatement. Re-deriving the five options directly:
+
+| Option | Determination |
+|---|---|
+| A. "CRC said X, therefore CertForm fact = X" (silent) | **Forbidden.** Authority laundering — an E2 (unauthenticated) instance becomes an E1 (attributed, warranted) instance with no act by the authenticated party. `crc-assurance-handoff/types.ts`'s own unauthenticated-identity language is a hard architectural fact, re-verified this pass, not a policy preference that could be waived by convenience. |
+| B. "CRC previously recorded X; CertForm displays it as reference" | **Permitted, and already has a partial precedent** — `buildCrcProjectContext` already does exactly this for the **reviewer** (a neutral, read-only, never-evidence projection). Extending an equivalent read-only reference display to the **submitter's own** CertForm session is architecturally the same shape, but does not exist today and would be new product surface, not a code reuse of the reviewer-facing path. |
+| C. "CRC previously recorded X; submitter explicitly confirms X for this submission" | **Not architecturally forbidden — re-establishes E1 authority the moment the authenticated party affirms it.** But this milestone found **zero existing plumbing** for it (no session-to-CertForm value-passing mechanism was found anywhere in `crc-assurance-handoff` or the CertForm route). This is D-4, correctly left open in CAH-4I.2, and this milestone does not newly resolve it — it is a genuine product-risk decision (showing a user words that may not be theirs, inside a form whose entire value proposition is that the words *are* theirs), not an architecture gap. |
+| D. "CRC previously recorded X; submitter corrects it to Y" | Falls out of C for free once C is designed: correction is just declining the shown value and asserting a new one, which is ordinary E1 acquisition, unaffected by where the displayed default came from. No new mechanism needed beyond whatever C requires. |
+| E. "Reviewer can see both instances with provenance" | **Already implemented, verified this pass by cross-reference to the Reviewer Resources / Linked CRC Context work** (CAH-4F/4G, indexed in `COMMERCIAL_ASSURANCE_ARCHITECTURE_INDEX.md`) — the reviewer already has a tab showing CRC session content separately from the Workbook, with the boundary that CRC context is never assessment evidence enforced structurally (ADR-001). This is the mechanism that should be pointed to as the working precedent for "provenance-preserving reference," not a hypothetical. |
+
+**Net determination:** the reuse question decomposes cleanly into "is silent authority transfer safe" (no, settled) and "should CertForm ever show a submitter their own prior CRC answer for reconfirmation" (D-4, genuinely open, a product decision about UX/trust framing, not an architecture question this milestone can resolve).
+
+### 25.6 Relationship to Living Knowledge — does the system need one shared registry?
+
+**No — and there is now direct precedent for this conclusion, not just CAH-4I.2's own reasoning.** `dependency-askability.ts`'s own header states its designers already considered and explicitly rejected a generic cross-channel "InformationNeed framework living inside governance," citing two prior diagnostics by name, for the stated reason that it would blur the ownership boundary between governed claim content (Retrieval/governance's domain) and acquisition-side product metadata (CRC's own domain). This is the identical question CAH-4I.4 was asked to resolve for CertForm, already asked and answered for CRC, by the people who own that boundary, roughly three weeks before this milestone. Applying the same reasoning: Commercial Assurance fact demand, LK applicability demand, CRC askability, and (the newly-proposed) CertForm askability should remain **separate, small, purpose-owned registries with explicit cross-references** — exactly CAH-4I.2's "share the demand, never merge the vocabulary" conclusion (§4.2), now reinforced by a second, independent instance of the same design choice already made elsewhere in this codebase for a structurally identical reason.
+
+### 25.7 Stock-governance / fail-closed re-confirmation
+
+Re-tested against `dependency-askability.ts`'s literal registry contents (read in full this pass, not re-derived): exactly one entry (`human_contribution_description`), fail-closed default confirmed in the file's own header (*"Absence defaults to non-askable, never the reverse"*), and the four real stock dependencies (`editorial_designation_confirmed`, `separate_authorization_obtained`, `release_status_confirmed`, `rights_and_clearance_status`) confirmed absent from the registry — meaning CRC cannot ask about them, by construction, not by discipline. No equivalent mechanism exists for CertForm (§25.3's D-1 finding, unchanged from the CAH-4I.2 review). **No fact classified evidence-only anywhere in this document is proposed here for self-attestation.**
+
+### 25.8 Discriminating examples — applying the contract
+
+| Fact | CA demand today? | Authority | May ask? (which channel) | Currently collected? | Existing value reusable? | Evidence involved? | CertForm question = authority error? |
+|---|---|---|---|---|---|---|---|
+| Distribution territory (G1) | Yes (Report, Manual heuristic) | E1 | Yes — CertForm (already does), CRC (passive extraction only) | Yes, coarse | N/A | No | No |
+| Assessment jurisdiction scope (G2) | Yes (LK applicability gate) | **See §25.9 — genuinely re-examined, not simply re-asserted E5** | CRC only, today (tightly gated per §25.1) | No, on CertForm | CRC's instance is session-scoped only | No | Not yet askable on CertForm at all — no authority error exists to make, because no question exists |
+| Applicable law (G3) | No — explicitly disclaimed | **E8** | None | No | N/A | No | Would be, if ever asked |
+| `human_contribution_description` (CRC) vs `authorship_statement` (CertForm) | Yes, both | E1/E2 respectively | Both — different granularity, different purpose (§23 of this doc already found these are siblings, not duplicates) | Yes, both, independently | Per §25.5(C), not today | Only via H-5 corroborating artifact | No — each is a genuine, separately-authorized question |
+| Custom/fine-tuned model (R03) | Yes (named control, no trigger) | E1 (existence) | CertForm, conditionally (category 2) | No | N/A | Training-data rights doc would be E3 | **CertForm cannot ask this conditionally today — §25.3 category-2 unimplementability, not a missing question** |
+| Work-for-hire (R04) | Yes (acceptable evidence in Manual) | E1 (existence) + E3 (agreement) | CertForm, category 1 or 2 | No, only inferable | N/A | Yes, contractor agreement | Weak candidate, not proven necessary given existing inference path |
+| Third-party asset/licence facts | Yes (I01/I02) | E1 (existence) + E3 (licence) | CertForm | Yes | N/A | Yes | No |
+| Likeness/release evidence | Yes (L03) | E1 (self-report) + E3 (release document, reviewer-inspected) | CertForm for both; reviewer inspects | Yes (fixed by CAH-4I.3) | N/A | Yes, now reachable | No |
+| Stock-governance facts | Yes (via `CLAIM-STOCK-*`) | **E3 — evidence only, by explicit prior governance decision** | **No channel may ask** | No | N/A | Yes, only | **Would be, definitively — this is the exact case the fail-closed registry exists to prevent** |
+| Copyright registration | **Re-tested, not promoted** — see §25.10 | F (unresolved authority) if ever adopted | None today | No | N/A | Would be E3 if adopted | N/A — not currently a demand |
+| Trademark / trademark registration | See §25.11 | E1 (existing self-attestation) + E4 (reviewer visual) for the *content* fact; registration status is a **separate, currently non-demanded** concept | CertForm already asks the content-presence self-attestation | Yes, for content presence only | N/A | Reviewer visual review | The *existing* `ip_no_trademarked_ip` checkbox is itself an unreviewed, ungoverned authority decision (flagged, not newly created, by CAH-4I.2 §14.6) — registration status is not asked and this milestone does not recommend adding it |
+| C2PA / provenance presence | Yes (T01, positive factor) | **E4 — technical/file-level inspection** | None (correctly) | No field | N/A | N/A (a reviewer-tool gap, not a fact-acquisition gap) | Would be, if ever asked as a self-report |
+| Documentation-consistency (D01/D02) | Yes | **E5 — reviewer synthesis output** | None (correctly) | N/A | N/A | N/A | Would be, definitively — a control cannot self-attest its own cross-check |
+
+**Nothing above adds a fact to the demand contract because it "sounds commercially useful."** Every "Yes" in the first column traces to a named control, claim, or Report field already established in CAH-4I.1/4I.2; every entry re-examined for copyright and trademark below explicitly declines promotion absent new authority.
+
+### 25.9 Assessment jurisdiction authority — genuinely re-examined, resolved to RECOMMENDED not UNRESOLVED, with a specific reason not previously stated
+
+CAH-4I.2 offered E5 (reviewer-established) as "a recommendation, not a decision," and this document's own §23.7 review held that open. Re-examining with the freshly-read CRC precedent: CRC's own live, shipped `JURISDICTION_CLARIFICATION_QUESTION` — *"Which jurisdiction ... should CRC consider for this assessment?"* — already asks the **user** a jurisdiction-scope-preference question, tightly gated, and treats the answer as a **preference CRC will use to select governed knowledge**, never as a legal conclusion CRC asserts. This is a real, already-approved (per the file's own PM-approval citation) precedent for exactly the authority split this milestone needs: **the submitter may express an assessment-jurisdiction preference (E1, category-2 conditional-ask, gated on an applicability trigger analogous to CRC's own); the reviewer retains final authority to accept, narrow, or override it when setting the workbook's own Assessment Scope (E5)** — matching the Manual's existing reviewer-owned scope-setting act (Step 1) exactly, rather than replacing it.
+
+This is stated as **RECOMMENDED, requires PM approval** — not PROVEN, because CertForm has no equivalent field or applicability mechanism today and the CRC precedent, while real, was approved for CRC's own conversational context, not for a static submission form. It is a materially stronger basis than CAH-4I.2's original framing (which cited only the Manual's scope-ownership language, not this now-verified CRC precedent), so it is upgraded from CAH-4I.2's bare "recommendation" to this milestone's own qualified recommendation, but it is not asserted as settled.
+
+### 25.10 Copyright registration — re-tested, conclusion unchanged, reasoning strengthened
+
+Re-tested per the task's explicit instruction not to promote it without new authority. Nothing found this pass changes CAH-4I.2 §13's conclusion: swept again against `signoff.ts`'s 16 controls, the Manual's 7 domains, and the Report's own disclaimer language — no consumer demands registration/application status today, and the disclaimer (*"SI8 has not conducted independent title searches, chain of copyright investigations, or registrations with any government body"*) remains live, shipped Report boilerplate. **Classification unchanged: OUT OF SCOPE today, OPTIONAL PRODUCT EXPANSION if a future driver (most plausibly E&O underwriting) appears.** Not promoted to required fact.
+
+### 25.11 Trademark — re-tested, distinguishing four concepts as instructed
+
+1. **Existing assessment/control demand:** I03 remains real and sign-off-gated (re-verified in the CAH-4I.3 work this session, `signoff.ts` `ALL_CONTROLS` still includes it).
+2. **Submission fact demand:** the *content-presence* self-attestation (`ip_no_trademarked_ip` et al.) already exists and is already flagged (not newly discovered) as an ungoverned E1 checkbox that would not obviously survive an askability review — this remains true and unresolved by this milestone (it requires the same D-1 governance process, applied retroactively to an existing question, which is a larger and more sensitive undertaking than gating new questions and is explicitly out of scope here).
+3. **Registration/status information:** genuinely **not currently demanded by any control** — distinct from content-presence, and this milestone does not invent a demand for it merely because "trademark" and "registration" are adjacent concepts. No promotion.
+4. **Future LK knowledge coverage:** unchanged — zero governed trademark claims exist; this is a knowledge-onboarding gap under an already-designed control, not a fact-acquisition gap, and LK's absence here is not used as a reason to suppress or invent submission-fact demand in either direction.
+
+### 25.12 Questionnaire architecture implications
+
+**Assessment: a full generic metadata-driven acquisition layer is not proven necessary by this milestone's evidence — a smaller architecture is.** The concrete gaps found (category-2 conditional-ask unimplementability, no askability governance) both trace to two *specific, missing primitives* — an applicability check and a governance registry — not to the static-form model itself being wrong. CRC's own precedent (`dependency-askability.ts` + `jurisdiction-clarification.ts`) proves these two primitives can be added to an existing, otherwise-conventional codebase incrementally, one small module at a time, without a wholesale form-generation rewrite. **Recommendation: if CertForm ever needs conditional/governed questions, add the same two small, purpose-specific primitives CRC already has (an askability registry; a per-fact applicability-eligibility function) rather than building a generic form-schema engine.** This is deliberately the conservative reading — CAH-4I.2 §18.1's three-layer model (registry, governance, per-channel instances) already pointed the same direction; this milestone's contribution is confirming, via CRC's own build history, that the *smaller* version of that model was sufficient there and is the more defensible starting point here too.
+
+### 25.13 PM / governance decision table
+
+| # | Decision | Status | Basis |
+|---|---|---|---|
+| D-1 | CertForm askability governance (a `DAR_001`-shaped registry + review process for CertForm questions) | **RECOMMENDED, requires PM approval** | Proven necessary (§25.7); proven pattern exists (`dependency-askability.ts`); zero code required to start (a process + a registry file) |
+| D-2 | Adopt §16's inventory as Commercial Assurance Fact-Demand Contract v0.1 | **RECOMMENDED, requires PM approval** | Unchanged from CAH-4I.2; this milestone adds no new inventory rows, only re-examines existing ones |
+| D-3 | Assessment-jurisdiction authority (submitter-preference + reviewer-confirms) | **RECOMMENDED, requires PM approval** — upgraded from "unresolved recommendation" per §25.9's new CRC-precedent evidence | Real precedent (CRC's shipped, PM-approved jurisdiction question) now supports the split explicitly, but CertForm has no implementation and the precedent was approved for a different channel |
+| D-4 | CRC-answer reconfirmation in CertForm | **UNRESOLVED** — genuinely, not a placeholder | No architectural blocker (§25.5, option C); zero existing plumbing; a product-trust framing decision this milestone has no authority to make |
+| D-5 | External (E7) registry verification | **DEFERRED** | Would require changing shipped Report language; no driver identified this pass |
+| D-7 | Reviewer visibility of scope-excluded LK claims | **Not newly examined this pass** — carried forward unresolved from CAH-4I.2 §20, no new evidence found or sought (out of this milestone's discriminating-example set) |
+| New | A generic acquisition-metadata layer for CertForm (full engine, not two small primitives) | **REJECTED as the next step** | §25.12 — not proven necessary; smaller architecture (registry + applicability function) suffices per CRC's own precedent |
+| New | Category 6 ("already available, reconfirmation possible") as a peer ask/no-ask outcome | **REJECTED as originally framed** | §25.3 — re-classified as a cross-cutting modifier on categories 1–2, not a sixth outcome |
+
+### 25.14 Architecture risks
+
+- **The two-registry-parity risk:** building a CertForm askability registry that silently drifts in structure or review rigor from CRC's own would recreate exactly the asymmetry this milestone diagnoses, just with two weak registries instead of one strong one and one absent one. Any D-1 implementation should be reviewed against `dependency-askability.ts`'s actual shape and `DAR_001`'s actual review rigor, not merely inspired by them.
+- **The D-3 upgrade risk:** this milestone upgraded D-3 from "unresolved" to "recommended" on the strength of a precedent from a different channel (CRC). If a PM reviews the CRC precedent and finds it was approved for reasons specific to CRC's conversational, bounded context, the upgrade should be reverted — this milestone's confidence is qualified, not asserted as certain, and says so explicitly (§25.9).
+- **Scope creep into implementation:** every table and contract above is deliberately abstract; none names a specific new CertForm field, section, or copy. The temptation this milestone's own findings create — "we now know exactly which facts to ask" — is precisely the trap Phase 4's instructions warned against, and this document does not cross that line.
+
+### 25.15 Implementation gate
+
+**B — HOLD.** D-1 through D-4 are PM/governance decisions this milestone correctly identifies but cannot resolve on its own authority — exactly the boundary CAH-4I.2 already respected and this milestone preserves. The governance *contract* (the pipeline, taxonomy, and ask/no-ask categories) is sound and internally consistent, re-tested against fresh source this pass, but "sound contract" is not the same as "authorized to build" — D-1/D-2/D-3 need explicit PM sign-off before any subsequent design milestone should begin drafting a registry, an applicability function, or a jurisdiction-scope field.
+
+**Smallest next milestone:** a **governance decision milestone**, not a design or implementation one — specifically, a PM review of D-1 (adopt CertForm askability governance, yes/no, and who reviews entries) and D-3 (accept the submitter-preference + reviewer-confirms jurisdiction split, yes/no). Both are cheap to decide (no code, no new research needed — the evidence is already in this document) and both gate everything else in §25.13. Trademark LK onboarding, a geography implementation, and any CertForm question change should all wait behind this decision, not proceed in parallel with it.
+
+**Runtime-change confirmation:** none. This section is the only change made in this milestone; verified via `git diff --check` and a changed-file-scope check before commit (§25.16).
+
+### 25.16 Documentation / git state
+
+Committed on a dedicated branch (`cah-4i4-submission-fact-acquisition-governance`), created off the integrated `main` baseline (`5a95065`, which already includes CAH-4I.1–4I.3). Not pushed, not merged — per this milestone's own instruction to keep it isolated and reviewable pending PM review of §25.13.
