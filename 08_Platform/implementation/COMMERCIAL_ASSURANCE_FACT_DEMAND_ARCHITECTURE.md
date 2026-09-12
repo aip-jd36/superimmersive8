@@ -1773,3 +1773,136 @@ This milestone was a prerequisite, not a substitute: CAH-4I.4C's reconciliation 
 ### 29.12 GO / HOLD / NO-GO
 
 **GO.** Success criterion met: the clean observation state renders correctly, a concerning observation still renders as concerning, and nothing about Commercial Assurance semantics or signoff changed — confirmed by source diff inspection, not merely asserted.
+
+---
+
+## 30. CAH-4I.4E — Reviewer Observation Reconciliation Implementation (2026-09-13)
+
+**Status: IMPLEMENTED.** The signoff invariant designed in CAH-4I.4C is now live: a reviewer cannot sign a workbook while a non-clean audiovisual observation lacks structurally-present reconciliation in its mapped existing field, while remaining completely agnostic about what conclusion the reviewer reaches.
+
+**Repository/concurrency note:** this milestone experienced the most severe interference of the CAH-4I series to date — the shared main working directory was found, before any edit, checked out on a *third* unrelated branch (`work/lk-knowledgetopic-foundation`, with a new commit already on top of the earlier Article-50 merge). Given the repository already has an established convention of ~10 dedicated worktrees for concurrent isolated work, this milestone followed that precedent rather than continuing in the shared directory: a new worktree was created (`git worktree add`, purely additive, touching no other worktree or branch) checked out to the existing isolated `cah-4i4-submission-fact-acquisition-governance` branch, and all implementation work was performed there. `node_modules` (not git-tracked) was linked via a directory junction to the main worktree's existing install rather than reinstalling — a read-only reference, not a write. All work in this section was done entirely inside that dedicated worktree; the shared main directory was not touched again after Phase 0.
+
+### 30.1 Lineage re-verification (Phase 0)
+
+Confirmed in the new worktree before any edit: branch `cah-4i4-submission-fact-acquisition-governance`, HEAD `135f57a` (CAH-4I.4D), clean working tree, and all five prior CAH-4I.4 commits present (`06fbc62`, `79f3d4b`, `226c48f`, `fd4ad4f`, `135f57a`).
+
+### 30.2 Re-derivation from current source (Phase 1) — no drift found
+
+Re-checked directly in the new worktree, not assumed from CAH-4I.4C's own citations: `PRESENCE` enum (`Section2Visual.tsx:110`) unchanged; `real_likeness_suspected` options (`['None identified', 'Possible', 'Confirmed']`) unchanged; `music_heard` options (`['None', 'Generic / royalty-free', 'Identifiable track', 'Possibly identifiable']`) unchanged; `section_3` control shapes (`workbook-schema.ts`) unchanged; `section_5` findings shape unchanged; `signoff.ts` contained no pre-existing reconciliation logic (confirmed by grep). **CAH-4I.4C's mapping was found fully current — no discrepancy, no STOP required.**
+
+### 30.3 Final observation inventory / vocabularies / clean sentinels (Phase 2, E/F/G/H final report items)
+
+| Observation field | Vocabulary | Clean sentinel | Trigger |
+|---|---|---|---|
+| `logos_observed` | shared `PRESENCE` | `'None observed'` | `∉ {'', 'None observed'}` |
+| `trademarks_observed` | shared `PRESENCE` | `'None observed'` | `∉ {'', 'None observed'}` |
+| `copyrighted_artwork` | shared `PRESENCE` | `'None observed'` | `∉ {'', 'None observed'}` |
+| `landmarks_observed` | shared `PRESENCE` (legacy-normalized) | `'None observed'` | `∉ {'', 'None observed'}` |
+| `real_likeness_suspected` | own, separate enum | `'None identified'` | `∉ {'', 'None identified'}` |
+| `music_heard` | own, four-value enum | `'None'` **and** `'Generic / royalty-free'` (both clean) | `∈ {'Identifiable track', 'Possibly identifiable'}` |
+| `unexpected_content` | boolean | `false` | `=== true` |
+| `text_visible` | boolean | — | **excluded — no reconciliation obligation** (Category B relationship only, per CAH-4I.4C, unchanged here) |
+| `synthetic_humans` | count enum | — | **excluded — not a judgment field** (unchanged from CAH-4I.4C) |
+
+### 30.4 Final mapping (Phase 2/6, G)
+
+Implemented in `08_Platform/app/lib/assessments/observation-reconciliation.ts`:
+
+| Observation | Target | Satisfied by |
+|---|---|---|
+| `logos_observed` **or** `trademarks_observed` | I03 (shared) | `trademark_elements` non-empty |
+| `copyrighted_artwork` | I01 | `elements_identified` non-empty |
+| `real_likeness_suspected` | L01 (only — see below) | `likeness_found` non-empty **or** `notes` non-empty |
+| `music_heard` | I02 | `audio_source` non-empty **or** `notes` non-empty |
+| `landmarks_observed` | Section 5 (no control) | ≥1 finding with non-empty `domain` **and** `finding` |
+| `unexpected_content` | Section 5 (no control) | same fallback, shared with `landmarks_observed` |
+
+**A scope decision made and documented, not silently resolved:** `real_likeness_suspected` maps only to L01, not additionally to L02 as CAH-4I.4C's own design left open ("where `synthetic_humans` context indicates..."). L02's `performers_present` boolean defaults to `false`, which is structurally indistinguishable from "the reviewer explicitly recorded no performers present" — enforcing it as a required gate would require inventing a new touched/untouched tri-state, which this design deliberately does not do. L01's plain-string fields (`likeness_found`, `notes`) have a clean empty/non-empty distinction and are used as the sole required target. This is recorded in the module's own header comment, not hidden.
+
+### 30.5 Structural predicate (Phase 3, I/J)
+
+```ts
+function isNonEmptyString(value: unknown): boolean {
+  return typeof value === 'string' && value.trim().length > 0
+}
+```
+
+No minimum-length threshold (explicitly rejected in CAH-4I.4C as "fake rigor," re-confirmed here). Proven by construction and by direct test (`observation-reconciliation.test.ts`, "authority firewall" describe block) that the predicate's result is identical regardless of the linked control's `judgment` value — `'Verified'`, `'Partially Verified'`, `'Not Provided'`, `'Not Applicable'`, and even an arbitrary/undefined value all produce the same block/pass behavior, driven entirely by the accounting field's non-emptiness.
+
+### 30.6 Signoff invariant (Phase 5, J)
+
+One additive block in `validateWorkbookForSignoff` (`signoff.ts`), inserted immediately after the existing Section 3 judgment-completeness loop:
+
+```ts
+for (const issue of findUnreconciledObservations(wb)) {
+  reasons.push(issue.message)
+}
+```
+
+Existing validation is unmodified and remains authoritative; this only adds new possible entries to the same `reasons` array every other check already populates. No mutation, no new persisted state, no judgment-setting, no outcome inference.
+
+### 30.7 Failure-message contract (Phase 5/9, K)
+
+Example: *"Account for the observed logo/trademark element in Control I03's notes before signoff."* — names the observation category and the destination field, never a legal or commercial conclusion. Directly tested (`signoff-reconciliation.test.ts`, "failure-message contract") against six forbidden patterns (`infring`, `resolve the`, `obtain rights`, `cannot pass`, `violation`, `insufficient evidence detected`) — none match.
+
+### 30.8 Special cases (Phase 6, L/M/N/O)
+
+- **Shared targets (L):** `logos_observed` and `trademarks_observed` both target `I03.trademark_elements`; if both trigger and the field is empty, exactly **one** issue is raised (not two) — tested directly.
+- **`unexpected_content` (M):** routed to the Section-5 fallback exactly as CAH-4I.4C specified; no new control created.
+- **`landmarks_observed` (N):** routed to the identical Section-5 fallback, sharing it with `unexpected_content` — if both trigger, one qualifying finding satisfies both (tested); if neither has one, two independent issues are raised (tested).
+- **`real_likeness_suspected` (O):** confirmed its own distinct enum is used, not the shared `PRESENCE` sentinel — its clean state (`'None identified'`) does not accidentally trigger, and L02 is deliberately excluded from the hard gate (§30.4).
+- **`text_visible`:** confirmed absent from the implementation entirely — the CAH-4I.4C Category-B exclusion was preserved, not silently converted into a governed relationship.
+
+### 30.9 Correction / current-state semantics (Phase 8, Q)
+
+No new correction/supersession or historical-state machinery was added or is needed. `findUnreconciledObservations` is a pure function re-evaluated fresh against whatever workbook state is passed to it — a correction from non-clean to clean removes the requirement immediately; a change from clean to non-clean introduces it immediately; reconciliation text added satisfies it; the same text later deleted re-introduces the requirement with no memory of the prior satisfied state. All four directions directly tested.
+
+### 30.10 Unresolved / insufficient outcomes (R)
+
+Explicitly and repeatedly tested: text documenting "unable to determine," "insufficient evidence," or any adverse (`'Not Provided'`) judgment all satisfy the reconciliation gate identically to a favorable (`'Verified'`) one with equivalent text — the gate has no opinion on which outcome is correct.
+
+### 30.11 Authority-firewall verification (Phase 7, S)
+
+Proven, not merely asserted: `findUnreconciledObservations` reads exactly two kinds of input per rule — a Section-2 observation value (string or boolean) and a Section-3/Section-5 field's type + trimmed length. It contains no code path capable of reading, comparing, or reasoning about text content beyond emptiness; no code path writes to the workbook; no code path reads or sets `judgment`, `outcome`, or `commercial_confidence`. It is therefore structurally incapable of deciding infringement, rights sufficiency, copyrightability, trademark status, likeness authorization, music licensing, or any assessment outcome — these categories of decision simply have no representation anywhere in the function's inputs or logic.
+
+### 30.12 Runtime files changed (T)
+
+- **New:** `08_Platform/app/lib/assessments/observation-reconciliation.ts`.
+- **New:** `08_Platform/app/__tests__/assessments/observation-reconciliation.test.ts` (32 tests).
+- **New:** `08_Platform/app/__tests__/assessments/signoff-reconciliation.test.ts` (21 tests).
+- **Modified:** `08_Platform/app/lib/assessments/signoff.ts` — one import line + one 7-line additive block.
+- **No changes to:** `workbook-schema.ts`, `Section2Visual.tsx`, `Section3Evidence.tsx`, `reportProjection.ts`, any migration, any API route, any Living Knowledge or CRC file.
+
+### 30.13 Tests / regression results (U/V)
+
+- New tests: 53/53 passing (32 pure-module + 21 signoff-integration), covering all 19 of CAH-4I.4C's discriminating cases plus the failure-message contract and an explicit authority-firewall proof.
+- **Test-first discipline honored, not just claimed:** the signoff-integration test file was run against the *unmodified* `signoff.ts` first and produced 9 failing / 12 passing (proving the gap existed exactly as designed), then re-run after the additive integration and produced 21/21 passing.
+- Full existing `assessments`/`reviewer-workbook`/`reviewer-lk`/`reviewer-evidence` suites: only 2 pre-existing failures (`mock-provider.test.ts`, `MockProvenanceProvider` — a mock asset-ID generator, zero relationship to `signoff.ts` or this change), independently reconfirmed as pre-existing by stashing this milestone's entire changeset and re-running the same file, which failed identically.
+- Full repository suite: **77 pre-existing failures — identical to the baseline independently confirmed multiple times earlier in the CAH-4I.3/4I.4D milestones.** Zero new failures.
+- `tsc --noEmit`: clean.
+
+### 30.14 PM UAT contract (Phase 10, X) — not executed
+
+Scenarios A-F as specified in the task, mapped directly onto the implemented mapping: **A** (all-clean) → not blocked; **B** (logo/trademark) → blocked with the §30.7 message, clears once accounting text is entered including an unresolved conclusion; **C** (likeness) → correctly targets L01, not a `PRESENCE`-style comparison; **D** (music) → triggers on `'Identifiable track'`/`'Possibly identifiable'`, clears on either `'None'` or `'Generic / royalty-free'`; **E** (unresolved) → gate accepts the documentation structurally, existing control/signoff rules independently govern the judgment; **F** (correction) → reverting to the clean value removes the requirement with no stale state.
+
+### 30.15 Documentation / git state (Y/Z)
+
+This section, appended in the dedicated worktree, chronology preserved (§25-29 untouched). Committed locally on `cah-4i4-submission-fact-acquisition-governance` (see final report for the exact SHA) inside the dedicated worktree; not pushed, not merged, main/origin main untouched throughout.
+
+### 30.16 Runtime-scope confirmation (AA)
+
+Confirmed via `git diff --check` and file-by-file inspection immediately before staging: exactly one existing file modified (`signoff.ts`, additive only), one new lib module, two new test files, one doc section. No schema, migration, UI, API route, report-projection, Living Knowledge, or CRC file touched.
+
+### 30.17 Remaining limitations / risks (AB)
+
+- L02 remains outside the hard reconciliation gate for likeness observations (§30.4) — a deliberate, documented scope decision, not an oversight; revisiting it would require a governance decision about whether a boolean's default value may ever function as a valid "explicitly answered" signal, which this milestone correctly declines to make unilaterally.
+- The Section-5 fallback for `unexpected_content`/`landmarks_observed` is workbook-wide (any one qualifying finding satisfies both), not per-observation — an honest, structural limitation already anticipated and accepted in CAH-4I.4C rather than a new gap introduced here.
+- `Section3Evidence.tsx`'s `S2Banner` UI was not updated to read from the same mapping constant (CAH-4I.4C §28.10 noted this as an optional, non-blocking future consolidation) — the signoff invariant and the UI banner remain two independently-correct but separately-maintained representations of similar information.
+
+### 30.18 Smallest next milestone (AC)
+
+None required by this milestone's own success criterion, which is now met. Any further CAH-4I work (L02 inclusion, UI/signoff mapping consolidation, CertForm askability governance from CAH-4I.4's own D-1/D-2) is a separate, later decision, not implied or begun here.
+
+### 30.19 GO / HOLD / NO-GO (AD)
+
+**GO.** Success criterion met exactly: a reviewer cannot sign off while a current non-clean audiovisual observation lacks structurally-present reconciliation in its mapped field, proven by 53 passing tests including a before/after proof of the gap's existence and closure; the implementation remains completely agnostic about what conclusion the reviewer reaches, proven by explicit tests pairing every `JUDGMENT_OPTIONS` value with both an empty and a satisfied accounting field and observing identical pass/block behavior driven only by text presence.

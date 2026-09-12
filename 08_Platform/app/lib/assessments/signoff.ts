@@ -17,6 +17,7 @@
  */
 
 import { ASSESSMENT_OUTCOMES, type AssessmentOutcome } from '@/types/assessment'
+import { findUnreconciledObservations } from './observation-reconciliation'
 
 // ── Sign-off status ──────────────────────────────────────────────────────────
 
@@ -167,6 +168,14 @@ export function validateWorkbookForSignoff(
   for (const id of CONTROLS) {
     const j = s3?.[id]?.judgment
     if (!JUDGMENTS.includes(j)) reasons.push(`section_3.${id} has no accepted judgment`)
+  }
+
+  // Reviewer observation reconciliation (CAH-4I.4E) — additive, structural only.
+  // Never inspects a judgment value or the CONTENT of any reconciliation
+  // text; only whether a non-clean Section-2 observation has a non-empty
+  // reviewer-authored accounting field. See observation-reconciliation.ts.
+  for (const issue of findUnreconciledObservations(wb)) {
+    reasons.push(issue.message)
   }
 
   // Section 5 — at least one non-empty finding
