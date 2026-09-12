@@ -4,6 +4,7 @@
 **Added:** 2026-09-12, during "EU AI Act Article 50 — Canonical Primary-Source Evidence Capture."
 **Updated:** 2026-09-12, during the follow-up milestone "EU AI Act Article 50 — Digital Omnibus Canonical Evidence Completion" — added §2a below. That milestone used the labels **SOURCE-DERIVED FACT** / **LATER GOVERNANCE INTERPRETATION**; the original sections below still use this note's original **SOURCE SAYS** / **SI8 INTERPRETATION FOR LATER REVIEW** labels, left as originally written. The two label pairs mean the same thing; §2a uses the newer wording because that is what its own milestone specified.
 **Updated again:** 2026-09-12, during "EU AI Act Article 50 — Digital Omnibus Canonical Instrument Ingestion and Evidence Reconciliation" — added §2b below, reconciling §2a's institutional-description-based findings against the actual enacted text of Regulation (EU) 2026/1744, now captured (see `MANIFEST.md`). §2b uses the same SOURCE-DERIVED FACT / LATER GOVERNANCE INTERPRETATION labels as §2a.
+**Updated a third time:** 2026-09-12, during "EU AI Act Article 50(4) — Article 3 Definition Evidence Completion" — added §2c below, capturing Article 3's canonical "deployer" and "deep fake" definitions (load-bearing for the Article 50(4) candidate package, `EU-AI-ACT-ARTICLE-50-4-AUDIOVISUAL-FGR-PACKAGE.md`) and their amendment status under Regulation (EU) 2026/1744. §2c uses the same SOURCE-DERIVED FACT / LATER GOVERNANCE INTERPRETATION labels as §2a/§2b.
 **Supports:** the evidence in `MANIFEST.md` (this folder). Written per that milestone's Step 8 instruction to separate **SOURCE SAYS** from **SI8 INTERPRETATION FOR LATER REVIEW**, and to record which prior SI8 secondary assertions are supported, unsupported, stale, or incomplete — without deciding what a governed proposition should say.
 **Prior state this corrects:** a read-only diagnostic immediately preceding this milestone established that the inherited claim "canonical EU evidence is complete" was not repository-provable, and that everything previously labeled "Article 50 research" (`01_Business/research/ASA-IAB-2026-AI-CONTENT-RESEARCH.md` §7, `06_Operations/institutional-knowledge/notebook/SI8-POSITIONS.md` POS-002) was secondary/interpretive, not canonical primary-source capture. This note records what capture actually changed that picture.
 
@@ -96,6 +97,56 @@ This section closes the gap §2a.iv named. The user manually captured the actual
 - Article 50 itself: not previously examined at this resolution → **positive confirmation that only paragraph 7 (codes-of-practice mechanism) changed; paragraphs 1-6 are untouched**.
 
 The one item that remains genuinely open is narrower than before: this session's reading was targeted (confirming the specific provisions relevant to Article 50/Article 2 of the base Act) rather than an exhaustive read of all 47 pages' every clause (e.g. the Article 5/Article 6 prohibited-practices and safety-component amendments, and the amendments to Regulation (EU) 2018/1139 and (EU) 2023/1230 in the Omnibus's own Articles 2-3, were not the target of this pass and were not read for their own sake). None of the unread material was found, in the process of sequentially tracking article numbers to locate Article 50/Article 2/Article 111, to contain any further reference to Article 50 or Article 2(1) — but this note does not claim an exhaustive line-by-line read of the full 47 pages, and says so plainly.
+
+---
+
+## 2c. Article 3 definitions pass (2026-09-11/12, "Article 3 Definition Evidence Completion" milestone)
+
+This section closes the specific gap the Article 50(4) candidate package (`EU-AI-ACT-ARTICLE-50-4-AUDIOVISUAL-FGR-PACKAGE.md` §16.2) named: Article 3's "deployer" and "deep fake" definitions had never been independently captured. A previously-flagged-but-unverified Desktop artifact (`27 July 2026 consolidated Regulation (EU) 20241689.pdf`) was independently verified from its own content (not its filename) and ingested. See `MANIFEST.md`'s new row for full provenance.
+
+### 2c.i — Source identity, verified from the artifact itself
+
+**SOURCE-DERIVED FACT:** The ingested PDF's own page 1 states: "Consolidated text: Regulation (EU) 2024/1689 of the European Parliament and of the Council of 13 June 2024... (Artificial Intelligence Act)," with an "Access initial legal act" link, status "In force," and **ELI: `http://data.europa.eu/eli/reg/2024/1689/2026-07-27`** — EUR-Lex's own dated consolidated-version identifier, matching its own internal document header "`02024R1689 — EN — 27.07.2026 — 001.001`." The page also carries EUR-Lex's own standard disclaimer for every consolidated-text rendering: "This text is meant purely as a documentation tool and has no legal effect... The authentic versions... are those published in the Official Journal." The browser print footer confirms the source URL as `eur-lex.europa.eu/eli/reg/2024/1689/2026-07-27/eng...`.
+
+**LATER GOVERNANCE INTERPRETATION:** This is a genuine, official EUR-Lex consolidated-text tool rendering of the base AI Act, dated exactly to 27 July 2026 — the same date the Digital Omnibus entered into force — meaning it is EUR-Lex's own attempt to show the base Act's current, post-Omnibus state. Per its own stated status, it is **not itself an authentic legal text** (only the Official Journal originals are); this package treats it accordingly, as strong official evidence of current content, not as a substitute for the enacted instruments already captured. This mirrors exactly how this notebook already treats the Commission Guidelines' non-binding status — a real, official, useful source that is nonetheless not itself "the law."
+
+### 2c.ii — Canonical definitions captured
+
+**SOURCE-DERIVED FACT — Article 3, point (4), "deployer":** *"'deployer' means a natural or legal person, public authority, agency or other body using an AI system under its authority except where the AI system is used in the course of a personal non-professional activity;"*
+
+**SOURCE-DERIVED FACT — Article 3, point (60), "deep fake":** *"'deep fake' means AI-generated or manipulated image, audio or video content that resembles existing persons, objects, places, entities or events and would falsely appear to a person to be authentic or truthful;"*
+
+**SOURCE-DERIVED FACT — Article 3, point (3), "provider" (captured for contrast, per the candidate package's own request):** *"'provider' means a natural or legal person, public authority, agency or other body that develops an AI system or a general-purpose AI model or that has an AI system or a general-purpose AI model developed and places it on the market or puts the AI system into service under its own name or trademark, whether for payment or free of charge;"*
+
+**SOURCE-DERIVED FACT — Article 3, point (1), "AI system" (captured for contrast):** *"'AI system' means a machine-based system that is designed to operate with varying levels of autonomy and that may exhibit adaptiveness after deployment, and that, for explicit or implicit objectives, infers, from the input it receives, how to generate outputs such as predictions, content, recommendations, or decisions that can influence physical or virtual environments;"*
+
+**LATER GOVERNANCE INTERPRETATION:** The "deep fake" definition is materially more precise than any assumption the candidate package could previously state without fabricating it. Two concrete consequences for the candidate package:
+1. It does **not** require an identifiable *natural person* — it covers content resembling "existing persons, objects, places, entities or events." The candidate package's own §5/§9 discussion, drafted before this capture, correctly anticipated this possibility by explicitly not assuming an identifiable-natural-person requirement — that caution is now **CONFIRMED BY ENACTED TEXT**, not merely appropriately hedged.
+2. It requires the content to "falsely appear to a person to be authentic or truthful" — a materially different, and narrower, test than "any synthetic content" or "any content generated by an AI system." A piece of obviously stylized/cartoonish/non-realistic synthetic content, even if AI-generated, would not on its face meet this test. The candidate package's §9 treatment of `content_constitutes_deep_fake` as a judgment-laden, evidence-only dependency (not a simple yes/no fact) is **CONFIRMED BY ENACTED TEXT** — the definition itself turns on a "would falsely appear... to be authentic" characterization, which is exactly the kind of judgment call this notebook's discipline says must not become a naive self-attestation question.
+
+### 2c.iii — Digital Omnibus amendment status, cross-validated two independent ways
+
+**SOURCE-DERIVED FACT (structural/consolidation-marker evidence):** The ingested consolidated PDF uses EUR-Lex's own standard consolidation markup: `▼B▼` marks base (originally-enacted, unamended) text; `▼M1▼` marks text introduced by the first consolidated amendment (the Digital Omnibus). Article 3 opens with a `▼B▼` marker immediately before its heading. Points (1) through (13) carry no interruption. Point (14) ("safety component") is preceded by a `▼M1▼` marker; the newly-inserted points (14a) ("SME") and (14b) ("SMC") are also under that same `▼M1▼` block. A `▼B▼` marker resumes immediately after point (14b), covering point (15) onward — including points (56) "AI literacy," (60) "deep fake," and (68) "downstream provider" (the article's last point) — with no further `▼M1▼` interruption anywhere in that range.
+
+**SOURCE-DERIVED FACT (independent cross-check, from directly re-reading the enacted Digital Omnibus text already captured in `c5d9378`):** The Omnibus's own amendment list, point (4), reads: *"Article 3 is amended as follows: (a) point (14) is amended as follows: [safety component text]... (b) the following points are inserted: '(14a) "micro, small and medium-sized enterprise" or "SME" means...; (14b) "small mid-cap enterprise" or "SMC" means...'"* — and no other point in the Omnibus's full (1)-through-(43) amendment list names Article 3 again.
+
+**LATER GOVERNANCE INTERPRETATION:** Two independently-obtained pieces of evidence — the consolidated document's own structural consolidation markup, and a direct re-read of the amending instrument's own operative text — agree exactly: **the Digital Omnibus's only effect on Article 3 is point (14) ("safety component") plus the newly inserted (14a)/(14b) (SME/SMC definitions)**, none of which are load-bearing for the Article 50(4) candidate package. Classification, per this milestone's own required format:
+- **"AI system" (Art. 3(1)): UNCHANGED**
+- **"provider" (Art. 3(3)): UNCHANGED**
+- **"deployer" (Art. 3(4)): UNCHANGED**
+- **"deep fake" (Art. 3(60)): UNCHANGED**
+- ("safety component" (Art. 3(14)): AMENDED — replaced, plus two new points inserted — not load-bearing, noted only for completeness of the cross-check.)
+
+No contradiction was found between the consolidated PDF and the amending instrument — both sources agree completely. No STOP condition was triggered.
+
+### 2c.iv — Consequence for the Article 50(4) candidate package
+
+**LATER GOVERNANCE INTERPRETATION:** None of the candidate package's substantive assumptions are contradicted. Both are confirmed, one qualified:
+- **CONFIRMED:** "deployer" preserved exactly as the candidate package already used it (§5) — no redefinition, no surprise.
+- **CONFIRMED, and strengthened:** the candidate package's deliberate refusal to assume an identifiable-natural-person requirement for "deep fake" (§5/§9) was the correct call — the actual definition indeed extends to "objects, places, entities or events," not only persons.
+- **QUALIFIED:** the candidate package's `content_constitutes_deep_fake` dependency (§9) can now be stated more precisely — it is not merely "unresolved pending a definition," but unresolved against a *specific, now-known* two-part test (content-type gate + a "would falsely appear... authentic or truthful" characterization test) that is itself evidently judgment-laden, reinforcing (not merely maintaining) the candidate package's decision to keep it evidence-only rather than a self-attestation question.
+
+No candidate proposition wording was rewritten to "make it pass" — per this milestone's own instruction. The candidate package's own text is updated only to point to this section for the now-resolved definitions (see its own revised §16 entry).
 
 ---
 
