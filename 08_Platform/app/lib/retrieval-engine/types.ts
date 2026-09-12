@@ -40,7 +40,7 @@
  * uses everywhere else in this codebase.
  */
 
-import type { AssetProviderId, GoalCategory } from '@/types/interview-engine'
+import { GOAL_CATEGORIES, type AssetProviderId, type GoalCategory } from '@/types/interview-engine'
 
 export const CRC_ELIGIBLE_VALUES = ['Yes', 'No', 'Pending'] as const
 export type CrcEligible = (typeof CRC_ELIGIBLE_VALUES)[number]
@@ -392,10 +392,113 @@ export interface ApplicabilityRequirement {
  * claims are considered as candidates in the first place, exactly like
  * `provider_scope`/`tool_scope` do for their own paths.
  */
+
+// ── KnowledgeTopic (KnowledgeTopic Foundation milestone, 2026-09-13) ───────
+//
+// Separates two concepts a single GoalCategory-typed field used to conflate:
+//
+//   GoalCategory   -- what a user EXPLICITLY WANTS HELP WITH. Extracted from
+//                      a user's own words (UserGoal.category); the
+//                      extractor-facing goal taxonomy. Unchanged by this
+//                      milestone.
+//   KnowledgeTopic -- what governed knowledge is INTRINSICALLY ABOUT
+//                      (TopicClaim.topic and everything downstream of it).
+//                      A strict superset of GoalCategory: every existing
+//                      GoalCategory value remains a legitimate
+//                      KnowledgeTopic (so every existing TopicClaim/
+//                      TopicRelationship migrates with zero data change),
+//                      but a KnowledgeTopic value can also be
+//                      KNOWLEDGE-ONLY -- real, governed, retrievable
+//                      subject matter that must NEVER be fabricated into,
+//                      or treated as, a UserGoal.category. See
+//                      PENDING-QUESTIONS.md / the FGR_019 governance record
+//                      for why this separation was needed (a governed
+//                      subject -- e.g. an AI-transparency-disclosure
+//                      obligation -- that no user would ever phrase as an
+//                      explicit goal, but that should still be able to
+//                      inform a real explicit goal via a governed
+//                      TopicRelationship).
+//
+// This milestone adds the TYPE separation only. KNOWLEDGE_ONLY_TOPICS is
+// deliberately EMPTY -- no knowledge-only production topic value has been
+// governed yet (Article 50 remains CANDIDATE -- NOT ADOPTED, NOT
+// CRC-ELIGIBLE; see FGR_019). KnowledgeTopic is therefore, in practice,
+// exactly GoalCategory today -- this is intentional: the closed set is
+// ready to grow the moment a real governed knowledge-only topic is
+// adopted, without ever touching GOAL_CATEGORIES/GoalCategory/the
+// extractor's user-goal schema to do it.
+
+/**
+ * Closed set of knowledge-only topic values -- governed knowledge subjects
+ * that are NOT, and must never become, valid `GoalCategory`/
+ * `UserGoal.category` values. Deliberately empty today (see the module
+ * header immediately above). Adding a future value here is the ONLY way a
+ * new knowledge-only topic may exist -- never a free-text string, never a
+ * cast, never a reuse of `'unknown'`. Composed the same way every other
+ * closed-set taxonomy in this codebase is (`GOAL_CATEGORIES`,
+ * `RELATIONSHIP_TYPES`, `LIFECYCLE_VALUES`, ...): a `readonly` tuple plus a
+ * derived literal-union type, never `string`.
+ */
+export const KNOWLEDGE_ONLY_TOPICS = [] as const
+export type KnowledgeOnlyTopic = (typeof KNOWLEDGE_ONLY_TOPICS)[number]
+
+/**
+ * The governed knowledge-topic taxonomy. Strict superset of `GoalCategory`
+ * by construction (see module header above) -- assignable in exactly one
+ * direction: any `GoalCategory` value is always a valid `KnowledgeTopic`;
+ * the reverse is not guaranteed (a `KnowledgeTopic` value may be
+ * knowledge-only). `UserGoal.category` remains `GoalCategory`, never this
+ * type -- explicit user intent can never be fabricated from governed
+ * knowledge existing.
+ *
+ * IMPORTANT, verified directly against `tsc` (not merely asserted): while
+ * `KnowledgeOnlyTopic` is `never` (`KNOWLEDGE_ONLY_TOPICS` empty), TypeScript
+ * simplifies `GoalCategory | never` to exactly `GoalCategory` -- so
+ * `KnowledgeTopic` and `GoalCategory` are STRUCTURALLY IDENTICAL TYPES today,
+ * not merely "compatible." The one-direction-only assignability described
+ * above becomes compile-time-enforced the moment a real value is ever added
+ * to `KNOWLEDGE_ONLY_TOPICS`; until then, the separation this milestone
+ * establishes is real at the FIELD level (which fields are declared
+ * `KnowledgeTopic` vs `GoalCategory`, and the runtime guard `isGoalCategoryTopic`
+ * below) even though the two type names are not yet distinguishable by the
+ * compiler. See `__tests__/retrieval-engine/knowledge-topic-foundation.test.ts`
+ * for the direct confirmation of this collapse.
+ */
+export type KnowledgeTopic = GoalCategory | KnowledgeOnlyTopic
+
+/**
+ * Runtime closed-set array mirroring `KnowledgeTopic` exactly --
+ * `GOAL_CATEGORIES` concatenated with `KNOWLEDGE_ONLY_TOPICS`. The one place
+ * another module should check "is this raw value a legitimate KnowledgeTopic"
+ * against (e.g. a claim-authoring validator) -- never re-derive the union by
+ * hand-listing `GOAL_CATEGORIES` alone, which would silently reject a real,
+ * governed, future knowledge-only topic as invalid.
+ */
+export const KNOWLEDGE_TOPICS: readonly string[] = [...GOAL_CATEGORIES, ...KNOWLEDGE_ONLY_TOPICS]
+
+/**
+ * Runtime narrowing guard: is this `KnowledgeTopic` value also a valid
+ * `GoalCategory`? Backed directly by the canonical `GOAL_CATEGORIES` array
+ * -- never a second, hand-maintained list that could drift from the real
+ * user-goal taxonomy. Needed only at the small number of sites where a
+ * value already known, by construction, to equal an active explicit goal's
+ * category must be proven to the type system as `GoalCategory` (e.g.
+ * `RetrievalResult.matched_goal_category`) -- see
+ * `assemble-result.ts`'s `assembleTopicResult` and
+ * `lib/hrr/bi-adapters.ts`'s `reviewerClaimToBiResult` for the two real
+ * call sites, and each one's own doc comment for why the guard can never
+ * actually fail there today. Fails closed: a `KnowledgeTopic` value this
+ * function returns `false` for is never usable where a `GoalCategory` is
+ * required.
+ */
+export function isGoalCategoryTopic(topic: KnowledgeTopic): topic is GoalCategory {
+  return (GOAL_CATEGORIES as readonly string[]).includes(topic)
+}
+
 export interface TopicClaim {
   claim_id: string
-  /** Matches UserGoal.category exactly -- this is the field Topic Retrieval actually matches on. */
-  topic: GoalCategory
+  /** The claim's own intrinsic subject -- a KnowledgeTopic, not necessarily a GoalCategory. See the KnowledgeTopic module header above. Matches UserGoal.category exactly ONLY when the value happens to also be a GoalCategory -- this is the field Topic Retrieval's exact-topic path actually matches on. */
+  topic: KnowledgeTopic
   claim_character: ClaimCharacter
   /** Free text (e.g. "United States (federal)", "Global") -- not an enum. Wave 1 needs exactly one value; richer values are representable without a schema change. */
   jurisdiction: string
@@ -541,10 +644,25 @@ export const REVIEWER_ELIGIBLE_PUBLICATION_SCOPES = [
 ] as const satisfies readonly PublicationScope[]
 
 /**
- * One governed, directional, one-hop routing link between two GoalCategory
- * topics. `relationship_id` carries its own version suffix (e.g.
- * "REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1"), mirroring TopicClaim's own
- * `claim_id` versioning convention exactly.
+ * One governed, directional, one-hop routing link between an explicit GOAL
+ * and a governed KNOWLEDGE TOPIC. `relationship_id` carries its own version
+ * suffix (e.g. "REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1"), mirroring
+ * TopicClaim's own `claim_id` versioning convention exactly.
+ *
+ * `source_topic`/`target_topic` are DELIBERATELY ASYMMETRIC (KnowledgeTopic
+ * Foundation milestone, 2026-09-13) -- this is LOAD-BEARING, not a
+ * stylistic choice, and must never be "fixed" to match for symmetry:
+ *   - `source_topic: GoalCategory` -- proven by `lookupRelatedTopicClaims`'s
+ *     own matching rule (lookup-topic-relationships.ts): a relationship's
+ *     `source_topic` is matched ONLY against a REAL, active, confirmed,
+ *     explicit `UserGoal.category`. A relationship authorizes a
+ *     contribution FROM an explicit goal -- it can never originate from a
+ *     knowledge-only topic, because nothing can explicitly ask about one.
+ *   - `target_topic: KnowledgeTopic` -- matched only against
+ *     `TopicClaim.topic`, which is itself a KnowledgeTopic. The knowledge a
+ *     relationship points AT may be knowledge-only (e.g. a future
+ *     AI-transparency-disclosure topic informing a real `commercial_use`
+ *     goal) even though where it points FROM never can be.
  *
  * Governance is two-stage, exactly like TopicClaim: `lifecycle` +
  * `adoption_approver`/`adoption_decision_date` govern whether this is valid
@@ -559,8 +677,10 @@ export const REVIEWER_ELIGIBLE_PUBLICATION_SCOPES = [
  */
 export interface TopicRelationship {
   relationship_id: string
+  /** A real explicit GoalCategory only -- see this interface's own header for why this is never widened to KnowledgeTopic. */
   source_topic: GoalCategory
-  target_topic: GoalCategory
+  /** A governed KnowledgeTopic -- may be knowledge-only. Matched only against TopicClaim.topic. */
+  target_topic: KnowledgeTopic
   relationship_type: RelationshipType
   /**
    * STRUCTURAL GOVERNANCE METADATA ONLY (PM decision, approved 2026-08-16)
@@ -625,8 +745,8 @@ export interface RetrievalResult {
   /** Opaque passthrough -- see the module-header note on MatrixClaim.crc_candidate_statement above. */
   candidate_statement: string | null
   last_verified: string | null
-  /** Required, always resolved (defaults to 'unknown' for an untagged claim) -- see module header's "Topic tagging" note. Descriptive only; never influenced how this result was matched or whether it was included. Always the claim's OWN intrinsic subject -- never overwritten to make a related-topic result appear exact (see MatchOrigin above). */
-  topic: GoalCategory
+  /** Required, always resolved (defaults to 'unknown' for an untagged claim) -- see module header's "Topic tagging" note. Descriptive only; never influenced how this result was matched or whether it was included. Always the claim's OWN intrinsic subject -- never overwritten to make a related-topic result appear exact (see MatchOrigin above). A KnowledgeTopic -- may be knowledge-only for a related_topic/discovered_topic result (see KnowledgeTopic's own module header); an exact_topic result's `topic` is always ALSO a real GoalCategory, by construction (lookupTopicClaims's own exact-topic gate can never reach a knowledge-only claim -- see assembleTopicResult). */
+  topic: KnowledgeTopic
   /**
    * Passthrough of `TopicClaim.unresolved_project_dependencies` (Living
    * Knowledge governance review, 2026-08-16) -- always `[]` for a
@@ -680,7 +800,8 @@ export interface RetrievalResult {
  * lib/crc-engine/.
  */
 export interface DiscoveredTopicOccurrence {
-  topic: GoalCategory
+  /** The matching claim's own intrinsic subject -- a KnowledgeTopic, may be knowledge-only. See RetrievalResult.topic's own doc comment. */
+  topic: KnowledgeTopic
   trigger_id: string
   source_kind: string
   /** The specific structured-fact id that satisfied the trigger (e.g. an AssetProviderMention.mention_id). */

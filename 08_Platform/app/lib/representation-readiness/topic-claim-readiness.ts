@@ -41,8 +41,8 @@
  */
 
 import type { ApplicabilityRequirement, TopicClaim } from '@/lib/retrieval-engine/types'
-import { APPLICABILITY_FACTS, CRC_ELIGIBLE_VALUES, LIFECYCLE_VALUES } from '@/lib/retrieval-engine/types'
-import { ASSET_PROVIDER_IDS, GOAL_CATEGORIES } from '@/types/interview-engine'
+import { APPLICABILITY_FACTS, CRC_ELIGIBLE_VALUES, KNOWLEDGE_TOPICS, LIFECYCLE_VALUES } from '@/lib/retrieval-engine/types'
+import { ASSET_PROVIDER_IDS } from '@/types/interview-engine'
 import { isCanonicalToolIdentity } from '@/lib/tool-identity/registry'
 
 export type RepresentationReadinessIssueCode =
@@ -74,7 +74,17 @@ export interface RepresentationReadinessResult {
   issues: RepresentationReadinessIssue[]
 }
 
-const GOAL_CATEGORY_SET: ReadonlySet<string> = new Set(GOAL_CATEGORIES)
+/**
+ * `KnowledgeTopic`-shaped, not `GoalCategory`-only (KnowledgeTopic
+ * Foundation milestone, 2026-09-13) -- `TopicClaim.topic` is now
+ * `KnowledgeTopic`-typed, and a governed knowledge-only topic (once one is
+ * ever adopted) is a legitimate, representable value, not a validation
+ * error. `KNOWLEDGE_TOPICS` is `GOAL_CATEGORIES` plus `KNOWLEDGE_ONLY_TOPICS`
+ * (currently empty), so this check's actual membership is byte-identical to
+ * before this milestone today, and only ever grows alongside a real,
+ * separately-governed adoption decision -- never silently.
+ */
+const KNOWLEDGE_TOPIC_SET: ReadonlySet<string> = new Set(KNOWLEDGE_TOPICS)
 const LIFECYCLE_SET: ReadonlySet<string> = new Set(LIFECYCLE_VALUES)
 const CRC_ELIGIBLE_SET: ReadonlySet<string> = new Set(CRC_ELIGIBLE_VALUES)
 const ASSET_PROVIDER_ID_SET: ReadonlySet<string> = new Set(ASSET_PROVIDER_IDS)
@@ -118,7 +128,7 @@ function checkApplicabilityRequirement(req: ApplicabilityRequirement, index: num
 export function checkTopicClaimRepresentationReadiness(claim: TopicClaim): RepresentationReadinessResult {
   const issues: RepresentationReadinessIssue[] = []
 
-  if (!GOAL_CATEGORY_SET.has(claim.topic)) {
+  if (!KNOWLEDGE_TOPIC_SET.has(claim.topic)) {
     issues.push({ code: 'invalid_topic', path: 'topic', value: claim.topic })
   }
 

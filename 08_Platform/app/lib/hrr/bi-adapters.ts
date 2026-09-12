@@ -18,6 +18,7 @@
  */
 
 import type { BiIntent, BiResult } from '@/lib/bounded-interpretation/types'
+import { isGoalCategoryTopic } from '@/lib/retrieval-engine/types'
 import type { ExplicitResearchIntent, ReviewerLkClaim } from '@/lib/reviewer-lk/types'
 import { reviewerTopicLabel } from '@/lib/reviewer-lk/topic-labels'
 
@@ -51,7 +52,17 @@ export function researchIntentToBiIntent(intent: ExplicitResearchIntent): BiInte
  * projection of the governed `TopicClaim`):
  *   - `matched_goal_category = claim.topic` — the reviewer-channel selector
  *     only ever returns claims whose own `topic` equals the researched
- *     topic, so this is accurate, not fabricated;
+ *     topic, so this is accurate, not fabricated. `claim.topic` is now
+ *     `KnowledgeTopic`-typed (KnowledgeTopic Foundation milestone,
+ *     2026-09-13); `isGoalCategoryTopic` proves it is also a real
+ *     `GoalCategory` here, which today is always true by construction --
+ *     `ExplicitResearchIntent.topic` (`ReviewerResearchTopic`,
+ *     `lib/reviewer-lk/types.ts`), the only value `selectReviewerClaims` is
+ *     ever actually called with, is itself a `GoalCategory`-shaped closed
+ *     set unchanged by this milestone. Throws rather than silently guessing
+ *     if that invariant is ever violated -- see `assemble-result.ts`'s
+ *     `assembleTopicResult` for the identical pattern in the CRC retrieval
+ *     path;
  *   - `candidate_statement = claim.statement` (the governed
  *     `crc_candidate_statement`, verbatim);
  *   - `match_origin = 'exact_topic'` — HRR V1 has no related/discovered
@@ -72,6 +83,11 @@ export function researchIntentToBiIntent(intent: ExplicitResearchIntent): BiInte
  */
 export function reviewerClaimToBiResult(claim: ReviewerLkClaim): BiResult {
   const unresolved = claim.applicability_outcomes.filter((o) => o.status === 'unresolved')
+  if (!isGoalCategoryTopic(claim.topic)) {
+    throw new Error(
+      `reviewerClaimToBiResult: reviewer-selected claim ${claim.claim_id} has a knowledge-only topic (${claim.topic}) -- structurally unreachable via selectReviewerClaims's own topic-match gate given today's GoalCategory-shaped ReviewerResearchTopic input`,
+    )
+  }
   return {
     matched_goal_category: claim.topic,
     unresolved_project_dependencies: claim.unresolved_project_dependencies,

@@ -27,16 +27,25 @@ import {
   toolScopeMatches,
   type ApplicabilityFacts,
 } from '@/lib/retrieval-engine/lookup-topic-claims'
-import type { TopicClaim } from '@/lib/retrieval-engine/types'
-import type { GoalCategory } from '@/types/interview-engine'
+import type { KnowledgeTopic, TopicClaim } from '@/lib/retrieval-engine/types'
 import { evaluateReviewerEligibility } from './eligibility'
 import type { ReviewerApplicabilityOutcome, ReviewerLkClaim, ReviewerLkWithheld } from './types'
 
 const GOVERNED_CLAIMS_DOC = '06_Operations/institutional-knowledge/notebook/GOVERNED-CLAIMS.md'
 
 export interface SelectReviewerClaimsInput {
-  /** The explicit topic the reviewer chose to research. */
-  topic: GoalCategory
+  /**
+   * The topic the reviewer chose to research. `KnowledgeTopic`, not
+   * `GoalCategory` (KnowledgeTopic Foundation milestone, 2026-09-13) --
+   * reviewer knowledge browsing is legitimately topic-oriented, so a future
+   * knowledge-only topic must be selectable here even though no
+   * `UserGoal.category` could ever equal it. Today's real caller
+   * (`ExplicitResearchIntent.topic: ReviewerResearchTopic`,
+   * `lib/reviewer-lk/types.ts`) still only ever supplies a real
+   * `GoalCategory`-shaped value -- that classifier enum is a deliberately
+   * separate, still-narrower contract, unchanged by this milestone.
+   */
+  topic: KnowledgeTopic
   /** All governed topic claims (the production fixture, or a test set). */
   topicClaims: TopicClaim[]
   /** Submission-derived. Canonical asset-provider ids for `providerScopeMatches`. */

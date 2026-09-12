@@ -23,11 +23,12 @@ import type {
   ApplicabilityRequirement,
   ClaimCharacter,
   CrcEligible,
+  KnowledgeTopic,
   Lifecycle,
   PublicationScope,
 } from '@/lib/retrieval-engine/types'
 import type { ApplicabilityRequirementStatus } from '@/lib/retrieval-engine/lookup-topic-claims'
-import type { GoalCategory, GoalScope } from '@/types/interview-engine'
+import type { GoalScope } from '@/types/interview-engine'
 
 // ── HRR — free-form research intent (CAH-4G.2 Slice 2, 2026-09-10) ───────────
 //
@@ -204,7 +205,8 @@ export interface ReviewerApplicabilityOutcome {
  */
 export interface ReviewerLkClaim {
   claim_id: string
-  topic: GoalCategory
+  /** A KnowledgeTopic -- verbatim passthrough of the governed TopicClaim's own topic, which may be knowledge-only. Reviewer knowledge browsing is legitimately topic-oriented (unlike CRC's matched_goal_category), so this is never narrowed to GoalCategory. See lib/hrr/bi-adapters.ts's reviewerClaimToBiResult for the one place a value read from this field is narrowed back to GoalCategory, and why that narrowing is safe there. */
+  topic: KnowledgeTopic
   claim_character: ClaimCharacter
   jurisdiction: string
   /** Governance-stage. Always `'Adopted'` for a surfaced claim (the eligibility gate excludes every other value). */
