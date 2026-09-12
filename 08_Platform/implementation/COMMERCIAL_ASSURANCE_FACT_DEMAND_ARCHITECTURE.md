@@ -1692,3 +1692,84 @@ Committed on the same isolated branch as CAH-4I.4/4I.4A/4I.4B (`cah-4i4-submissi
 ### 28.21 GO / HOLD / NO-GO
 
 **GO.** This is the first CAH-4I.4 sub-milestone to reach a clean **A** implementation-readiness gate rather than a HOLD — the verification pass this milestone was chartered to perform found and corrected real errors in the prior sketch (§28.1's `PRESENCE`-sharing correction; §28.3's second uncontrolled category) rather than rubber-stamping it, which is what makes the resulting mapping trustworthy enough to build from without further governance review.
+
+---
+
+## 29. CAH-4I.4D — Section3Evidence Clean-State Presentation Bug Fix (2026-09-13)
+
+**Status: SMALL RUNTIME BUG FIX, IMPLEMENTED.** The presentation defect independently re-verified in §26.15, §27.13, and §28.13 is fixed in this milestone. No observation semantics, enums, reviewer determinations, controls, signoff behavior, reconciliation behavior, schema, database, report projection, Living Knowledge, CRC, or submission questions were changed.
+
+**Repository note:** this milestone experienced the most severe concurrent-session interference of the CAH-4I series so far — a working-tree edit was made, then transiently appeared reverted (working tree briefly showed clean against the buggy source) before reappearing correctly, consistent with another concurrent session's own `stash`/checkout activity in this same shared directory (that session's own 10 unrelated, in-progress `lib/crc-engine/`, `lib/retrieval-engine/`, `lib/reviewer-lk/`, `lib/hrr/`, `lib/crc-sales/` modifications were visible throughout and were never touched, staged, or committed by this work). Verified via direct `grep` re-check and `git branch`/`git rev-parse HEAD` immediately before staging that this branch, `fd4ad4f`, and the actual fix content were all correct before committing. `git add` was scoped to exactly the two files below; the other session's ten files were confirmed excluded from the staged diff before commit.
+
+### 29.1 Bug re-proven from source (Phase 1)
+
+**A. Canonical clean-state value(s):** `logos_observed`/`trademarks_observed` share the literal `PRESENCE` constant (`Section2Visual.tsx:110`, `['None observed', 'Possible', 'Confirmed']`) — clean sentinel `'None observed'`. `real_likeness_suspected` has its own, separately hand-typed enum (`Section2Visual.tsx:214-216`, `['None identified', 'Possible', 'Confirmed']`) — clean sentinel `'None identified'`. Neither enum contains the string `'No'`.
+
+**B. Presentation condition found in source, four occurrences, all identical in shape:** `Section3Evidence.tsx` lines 217, 251, 252, 266 (pre-fix) each computed `warn: !!section2.<field> && section2.<field> !== 'No'`.
+
+**C. Is `'No'` a valid value for these fields?** No — confirmed by direct enumeration of both enums above; the string never appears in either.
+
+**D. Exact UI consequence:** because the comparison is against a string the field can never equal, `warn` evaluates `true` for *any* non-empty value of the field, including its own real clean sentinel — the clean-observation banner chip (`S2Banner`, same file, lines 123-144) renders with amber/warning styling (`border-amber-300 bg-amber-50 text-amber-800`) instead of neutral styling (`border-gray-200 bg-white text-gray-600`) whenever a reviewer records `'None observed'`/`'None identified'`.
+
+**E. Scope of effect, confirmed by reading the full render path:** styling only — specifically, which of two pre-defined Tailwind class strings is applied to one `<span>`. Confirmed this does **not** affect: the persisted `section_2`/`section_3` field values (the `warn` boolean is computed inline at render time and is never written back anywhere); the label or value text shown (`String(i.value)` renders regardless of `warn`); reviewer workflow, judgment selection, or signoff (`signoff.ts`'s `validateWorkbookForSignoff`, re-confirmed by grep this pass, contains no reference to `warn`, `S2Banner`, or any color/styling computation).
+
+**Classification: CONFIRMED — a real, source-proven presentation-only defect.** Not merely re-asserted from CAH-4I.4A/B/C's own citations — independently re-traced end to end in this milestone before any edit was made.
+
+### 29.2 Fix (Phase 2/4)
+
+Four literal string replacements, one per occurrence, using each field's own already-correct canonical clean value — no shared constant introduced, no new abstraction, no helper function, no import added:
+
+| Line (pre-fix) | Control | Field | Before | After |
+|---|---|---|---|---|
+| 217 | I01 | `logos_observed` | `!== 'No'` | `!== 'None observed'` |
+| 251 | I03 | `logos_observed` | `!== 'No'` | `!== 'None observed'` |
+| 252 | I03 | `trademarks_observed` | `!== 'No'` | `!== 'None observed'` |
+| 266 | L01 | `real_likeness_suspected` | `!== 'No'` | `!== 'None identified'` |
+
+The already-correct comparisons for `copyrighted_artwork` (`!== 'None observed'`) and `music_heard` (`!== 'None'`) were left untouched — confirmed by diff inspection (§29.5) and by the test's own regression guard (§29.3). `real_likeness_suspected`'s distinct sentinel (`'None identified'`, not `'None observed'`) was deliberately preserved as its own, different value — per CAH-4I.4C's own finding that these fields carry genuinely different vocabularies, this fix does not collapse them into one.
+
+### 29.3 Regression test (Phase 3)
+
+No component-rendering test convention exists anywhere in this repository (`jest.config.js` uses `testEnvironment: 'node'`; no `@testing-library/react` dependency). Introducing DOM-rendering infrastructure for a four-line string-literal fix would be disproportionate, per the task's own explicit escape hatch. Instead: `__tests__/reviewer-workbook/section3-evidence-clean-state.test.ts` — a source-contract test reading `Section3Evidence.tsx`'s own text and asserting, via targeted regex extraction, that each field's warn-comparison sentinel matches its real canonical clean value, that the literal string `'No'` never appears as a warn-comparison sentinel anywhere in the file, and that the two already-correct comparisons remain unchanged (a regression guard against this fix accidentally touching them). **Proven to genuinely discriminate the bug**: run against the pre-fix source, 4 of 5 tests failed; run against the post-fix source, all 5 passed (§29.6).
+
+### 29.4 Concerning-state behavior preserved (Phase 3/6, "J")
+
+Unaffected: the fix only changes which literal string a field's value is compared *against* for the amber/gray styling choice — it does not change the enum, the field, the styling classes themselves, or the fact that `'Possible'`/`'Confirmed'` (and `real_likeness_suspected`'s own `'Possible'`/`'Confirmed'`) still evaluate `warn: true` exactly as before. No test or code path was found that would suggest otherwise.
+
+### 29.5 Semantic non-change verification (Phase 5)
+
+`git diff` on the staged change (§29 repository note) shows exactly 8 lines changed (4 removed, 4 added) in `Section3Evidence.tsx`, all four inside `warn:` expressions, none touching: `workbook-schema.ts` (not modified), `Section2Visual.tsx` (not modified — observation collection unchanged), `signoff.ts` (not modified, and confirmed by grep this pass to contain no reference to the changed expressions), `reportProjection.ts` (not modified), any control's `judgment`/`notes`/descriptive fields (the `Textarea`/`Sel` elements below each `S2Banner` are untouched), or any evidence-reachability code from CAH-4I.3 (untouched). Reviewer authority and assessment-outcome logic are unaffected — nothing in this fix reads or writes `judgment`, `outcome`, `commercial_confidence`, or any signoff field.
+
+### 29.6 Tests / typecheck / build (Phase 6)
+
+- New regression test: 5/5 passing (confirmed failing pre-fix, passing post-fix — a genuine before/after proof, not just a passing test written after the fact).
+- `tsc --noEmit`: clean, no output.
+- Full suite: **77 pre-existing failures / 20 pre-existing failing suites — identical to the baseline independently confirmed twice already in the CAH-4I.3 milestone.** Zero new failures. (Total test count rose by exactly 5, all passing, matching the new file.)
+- `next build` not re-run this pass — the pre-existing environment limitation documented in CAH-4I.3 (missing `SUPABASE_URL` blocking unrelated API-route page-data collection) is unrelated to this change and `tsc`'s clean result already covers what a build's type-checking phase would additionally reveal for this specific edit.
+
+### 29.7 PM visual-UAT contract (Phase 7) — not executed
+
+1. **Clean observation:** reviewer records `logos_observed = 'None observed'` (or `trademarks_observed`, or `real_likeness_suspected = 'None identified'`) → open the corresponding control (I01/I03/L01) → expect the §2 observation banner chip to render in **neutral gray**, not amber.
+2. **Concerning observation:** reviewer records `'Possible'` or `'Confirmed'` for the same field → expect the chip to render in **amber**, exactly as before this fix.
+3. **Persistence:** navigate away from and back to the control (or reload the workbook) → the recorded observation value is unchanged — confirmed structurally by this fix touching no write path, only a render-time comparison.
+
+### 29.8 Documentation / git state (Phase 8/9)
+
+**Runtime files changed:** exactly two — `08_Platform/app/app/admin/submissions/[id]/review/Section3Evidence.tsx` (4 literal edits) and the new test file `08_Platform/app/__tests__/reviewer-workbook/section3-evidence-clean-state.test.ts`. Verified via `git diff --cached --stat` immediately before commit that no other file was staged, and via `git status` that the other concurrent session's ten unrelated modified files remained present but untouched and unstaged. Branch confirmed (`cah-4i4-submission-fact-acquisition-governance`) and HEAD confirmed (`fd4ad4f`, this milestone's own parent) immediately before staging. Not pushed, not merged, main/origin main untouched.
+
+### 29.9 Relationship to CAH-4I.4E
+
+This milestone was a prerequisite, not a substitute: CAH-4I.4C's reconciliation mapping and predicate are unaffected by and independent of this fix (the reconciliation predicate never reads `warn` or any UI-computed value). CAH-4I.4E may now proceed using CAH-4I.4C's verified mapping without the risk this milestone was chartered to remove — a future reviewer testing reconciliation behavior will no longer see a miscolored clean-state banner that could be mistaken for a reconciliation signal.
+
+### 29.10 Remaining risks
+
+- The other concurrent session's ten unrelated in-progress files remain uncommitted in this shared working directory as of this milestone's close — not this milestone's responsibility, not touched, but worth the next session in this directory being aware they are still there.
+- No new risks specific to this fix were identified — it is a minimal, fully tested, semantically-verified presentation correction.
+
+### 29.11 Smallest next milestone
+
+**CAH-4I.4E — Reviewer Observation Reconciliation Implementation**, using CAH-4I.4C's verified observation→control→accounting-field mapping (§28.7) and structural reconciliation predicate (§28.6) directly, now unblocked by this fix.
+
+### 29.12 GO / HOLD / NO-GO
+
+**GO.** Success criterion met: the clean observation state renders correctly, a concerning observation still renders as concerning, and nothing about Commercial Assurance semantics or signoff changed — confirmed by source diff inspection, not merely asserted.

@@ -214,7 +214,7 @@ function ControlExtras({ id, data, update, section2 }: {
       <div className="space-y-2">
         {section2 && (
           <S2Banner items={[
-            { label: 'Logos', value: section2.logos_observed, warn: !!section2.logos_observed && section2.logos_observed !== 'No' },
+            { label: 'Logos', value: section2.logos_observed, warn: !!section2.logos_observed && section2.logos_observed !== 'None observed' },
             { label: 'Copyright artwork', value: section2.copyrighted_artwork, warn: !!section2.copyrighted_artwork && section2.copyrighted_artwork !== 'None observed' },
             ...(section2.logos_description ? [{ label: 'Logo notes', value: section2.logos_description }] : []),
           ]} />
@@ -248,8 +248,8 @@ function ControlExtras({ id, data, update, section2 }: {
       <div className="space-y-2">
         {section2 && (
           <S2Banner items={[
-            { label: 'Logos', value: section2.logos_observed, warn: !!section2.logos_observed && section2.logos_observed !== 'No' },
-            { label: 'Trademarks', value: section2.trademarks_observed, warn: !!section2.trademarks_observed && section2.trademarks_observed !== 'No' },
+            { label: 'Logos', value: section2.logos_observed, warn: !!section2.logos_observed && section2.logos_observed !== 'None observed' },
+            { label: 'Trademarks', value: section2.trademarks_observed, warn: !!section2.trademarks_observed && section2.trademarks_observed !== 'None observed' },
             ...(section2.trademarks_description ? [{ label: 'TM notes', value: section2.trademarks_description }] : []),
           ]} />
         )}
@@ -263,7 +263,7 @@ function ControlExtras({ id, data, update, section2 }: {
         {section2 && (
           <S2Banner items={[
             { label: 'Synthetic humans', value: section2.synthetic_humans },
-            { label: 'Likeness suspected', value: section2.real_likeness_suspected, warn: !!section2.real_likeness_suspected && section2.real_likeness_suspected !== 'No' },
+            { label: 'Likeness suspected', value: section2.real_likeness_suspected, warn: !!section2.real_likeness_suspected && section2.real_likeness_suspected !== 'None identified' },
             ...(section2.real_likeness_description ? [{ label: 'Likeness notes', value: section2.real_likeness_description, warn: true }] : []),
           ]} />
         )}
