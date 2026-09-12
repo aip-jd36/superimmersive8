@@ -1906,3 +1906,87 @@ None required by this milestone's own success criterion, which is now met. Any f
 ### 30.19 GO / HOLD / NO-GO (AD)
 
 **GO.** Success criterion met exactly: a reviewer cannot sign off while a current non-clean audiovisual observation lacks structurally-present reconciliation in its mapped field, proven by 53 passing tests including a before/after proof of the gap's existence and closure; the implementation remains completely agnostic about what conclusion the reviewer reaches, proven by explicit tests pairing every `JUDGMENT_OPTIONS` value with both an empty and a satisfied accounting field and observing identical pass/block behavior driven only by text presence.
+
+---
+
+## 31. CAH-4I.4F — Reviewer Observation Reconciliation UAT / Integration Gate (2026-09-13)
+
+**Status: AUTOMATED VERIFICATION COMPLETE AND RE-CONFIRMED. LIVE PM UAT NOT PERFORMED — INFRASTRUCTURE UNAVAILABLE TO THIS CLI SESSION. INTEGRATION HELD PENDING LIVE UAT OR EXPLICIT PM AUTHORIZATION.** This section is deliberately honest about the boundary between what was re-verified by source/test inspection and what would require a live, deployed, credentialed environment this session does not have — the same boundary this document's own institutional history (referenced in `COMMERCIAL_ASSURANCE_ARCHITECTURE_INDEX.md`'s CAH-4G entries, e.g. CAH-4G.8/4G.10C) has repeatedly and explicitly drawn rather than papered over.
+
+### 31.1 Repository/worktree re-verification (Phase 0)
+
+Confirmed in the dedicated CAH-4I.4E worktree (`C:/Users/User/Desktop/si8-cah4i4e-reconciliation`): branch `cah-4i4-submission-fact-acquisition-governance`, HEAD `1709e8d`, working tree clean, no in-progress merge/rebase/cherry-pick, full CAH-4I.4 lineage intact (`06fbc62`→`79f3d4b`→`226c48f`→`fd4ad4f`→`135f57a`→`1709e8d`). `origin/main` fetched for awareness: `f4347c6`, 6 ahead / 7 behind (unrelated drift, not yet inspected for overlap — deferred to §31.9 since integration itself is held, per §31.2). No STOP condition triggered — this is the correct isolated worktree, no runtime overlap found, no unexplained working-tree state.
+
+### 31.2 Why integration (Phase 7) is not attempted in this milestone
+
+The task's own Phase 3 instruction governs directly: *"If deployment is not yet available, do NOT fabricate UAT results. If CLI cannot deploy or inspect production directly, provide the exact PM handoff steps and stop at the appropriate gate."* Checked directly: no `.env.local` exists in this worktree (only `.env.local.example`), confirming no live Supabase credentials are configured; the branch is local-only and unpushed, so no Vercel preview deployment exists for it (per this repo's own documented deployment model — Vercel auto-deploys from GitHub pushes to `main`, and this branch has never been pushed); this CLI session has no admin-authenticated browser session and no Claude-in-Chrome connection established. **Live, credentialed, browser-based PM UAT against a real (or synthetic) reviewer workbook is therefore not executable from this session — not a failure, an infrastructure absence.** Per Phase 6/7's own gating ("only if all required UAT scenarios pass" / STOP on failure or inconclusive), and per this milestone's explicit prohibition on fabricating results, **Phase 7 (rebase/integration/push to main) is correctly withheld.**
+
+### 31.3 What WAS re-verified (Phases 1-2, in full)
+
+- **Phase 1 (contract re-verification):** `git show 1709e8d` re-read in full. Confirmed: the mapping is exactly as designed (§30.4, unchanged); clean sentinels remain field-specific (`'None observed'` for the `PRESENCE`-style fields, `'None identified'` for `real_likeness_suspected`, and both `'None'`/`'Generic / royalty-free'` for `music_heard`); the predicate remains exactly `typeof value === 'string' && value.trim().length > 0`, nothing more; no judgment-value inspection exists anywhere in `observation-reconciliation.ts`; no legal/rights conclusion is inferred anywhere (re-confirmed by re-reading the module's full source, not just its diff); unresolved/insufficient dispositions remain structurally permitted (nothing checks disposition, only presence); exactly 5 files are touched by the whole CAH-4I.4E commit, none of them schema, API, report-projection, Living Knowledge, or CRC files.
+- **Phase 2 (automated re-verification):** re-ran `observation-reconciliation.test.ts` (32), `signoff-reconciliation.test.ts` (21), `signoff-integrity.test.ts`, `signoff-public-record.test.ts`, and the full `reviewer-workbook` suite together — **128/128 passing.** `tsc --noEmit`: clean. Full repository suite: **77 pre-existing failures, identical to the baseline independently confirmed at least three times earlier in this arc (CAH-4I.3, CAH-4I.4D, CAH-4I.4E) — zero new failures, re-confirmed once more in this milestone.**
+
+### 31.4 UAT preconditions assessment (Phase 3) — the honest gate
+
+| Precondition | Status |
+|---|---|
+| Implementation deployed to a reviewer-UAT-accessible environment | **No** — branch is local-only, unpushed |
+| Test submission is internal/synthetic | Would need to be created once deployed — not yet applicable |
+| No real customer assessment affected | Cannot be affirmed or denied without a live environment; moot until deployed |
+| PM can access the reviewer workbook | Not from this CLI session — no admin browser session, no Claude-in-Chrome connection active |
+| Reconciliation behavior active in deployed code | **No deployed code exists yet for this branch** |
+
+**None of the five preconditions are met.** Per the task's own instruction, this milestone does not proceed to fabricate Phase 4-6 results against a nonexistent deployment.
+
+### 31.5 Scenario-by-scenario status (Phases 4-5)
+
+For each scenario, two columns are reported honestly and never conflated: **Live PM UAT** (requires deployment + admin browser access — not available this session) and **Automated equivalent** (the exact scenario's logic, re-run this pass against the committed implementation, in `signoff-reconciliation.test.ts`/`observation-reconciliation.test.ts`).
+
+| Scenario | Live PM UAT | Automated equivalent (re-run this pass) |
+|---|---|---|
+| A — Clean observation | **INCONCLUSIVE — not performed, no live environment** | PASS — `completeWorkbook()` with `logos_observed: 'None observed'` signs cleanly (test 1) |
+| B — Possible logo/trademark | **INCONCLUSIVE** | PASS — blocked empty (tests 2-3), neutral message confirmed (failure-message contract test), clears on ordinary text (test 5) |
+| C — Unresolved/insufficient | **INCONCLUSIVE** | PASS — explicit "unable to determine"/"insufficient evidence" text satisfies the gate identically to any other text (tests 6-7); safety-critical case directly covered |
+| D — Likeness | **INCONCLUSIVE** | PASS — targets L01 correctly, does not use the shared `PRESENCE` sentinel (test 15; pure-module tests confirm the distinct enum throughout) |
+| E — Music | **INCONCLUSIVE** | PASS — triggers only on `'Identifiable track'`/`'Possibly identifiable'`; both clean states (`'None'`, `'Generic / royalty-free'`) confirmed non-triggering (test 16 + pure-module music tests) |
+| F — Correction / no stale state | **INCONCLUSIVE** | PASS — non-clean→clean removes the block immediately with no added text (test 17); clean→non-clean introduces it (test 18) |
+| G — Shared target | **INCONCLUSIVE** | PASS — `logos_observed`+`trademarks_observed` both triggered, one field satisfies both, exactly one issue when unmet (test 11 + pure-module shared-target tests) |
+| H — Unexpected/landmarks fallback | **INCONCLUSIVE** | PASS — both route to the Section-5 fallback exactly as designed (tests 13-14 + pure-module fallback tests) |
+
+**No scenario is classified as a live PASS.** Classifying any of them as "PASS" against real production/reviewer behavior would be exactly the fabrication this milestone is instructed not to commit. The automated-equivalent column is offered as strong, real, re-executed supporting evidence — not a substitute for the live UAT the task requires before integration.
+
+### 31.6 Authority-firewall / neutral-message / unresolved-outcome re-confirmation (M/N/O)
+
+All re-confirmed by direct re-read of the committed source and re-run tests, not carried forward from the CAH-4I.4E report without re-checking: the predicate reads no `judgment` field anywhere in `observation-reconciliation.ts` (grep-confirmed this pass); the failure message (*"Account for the observed logo/trademark element in Control I03's notes before signoff."*) contains none of the six forbidden legal-conclusion patterns (re-run test, passing); unresolved/insufficient-evidence text satisfies the gate identically to any other non-empty text (re-run tests 6-7, C-scenario's automated equivalent).
+
+### 31.7 Correction / no-stale-state re-confirmation (P)
+
+Re-run this pass: reverting `logos_observed` from `'Confirmed'` to `'None observed'` with the accounting field still empty removes the block immediately (test 17) — the predicate is stateless and re-evaluated fresh against whatever workbook state is passed to it; no historical/audit machinery exists or is needed.
+
+### 31.8 Origin/main drift (Q) — not yet actioned
+
+`origin/main` is at `f4347c6`, 7 commits ahead of this branch's own base (`5a95065`) — unrelated EU AI Act Article 50 and Living-Knowledge-topic-foundation work, per the branch names observed during this arc's own repository-safety checks. **Not inspected for file-level overlap in this milestone**, because integration itself is correctly held pending live UAT (§31.2) — inspecting drift in detail now would be preparatory work for a gate this milestone does not reach, and is deferred to whichever future milestone actually performs the integration once UAT evidence exists.
+
+### 31.9 Integration / rebase / push (R-U) — NOT PERFORMED
+
+No rebase, no range-diff, no push. `main`/`origin/main` untouched by this milestone, exactly as required when the integration gate is not reached.
+
+### 31.10 PM handoff — manual UAT script (for when live access exists)
+
+To be run by whoever has admin access to a deployed instance of this branch (or a merged preview), against one internal synthetic submission, one scenario at a time, recording actual observed behavior rather than expected behavior:
+
+1. **Deploy this branch** (or have it merged/previewed) so the reconciliation check is live.
+2. **Scenario A:** On a synthetic submission's workbook, Section 2 → set "Logos observed" to `None observed`. Attempt signoff (with everything else complete). Expect: not blocked by any reconciliation-related message.
+3. **Scenario B:** Set "Logos observed" to `Possible` or `Confirmed`. Leave I03's "Trademark/brand elements" field empty. Attempt signoff. Expect: blocked, with a message naming the observation and Control I03 — never a legal conclusion. Then type any non-empty text (e.g. *"Observed a possible logo in the background; unable to determine significance from the submitted material."*) into that field. Attempt signoff again. Expect: no longer blocked by this check (other checks may still apply).
+4. **Scenario C:** Repeat B's setup, but enter text that explicitly states the concern is unresolved or evidence is insufficient. Expect: still not blocked — the system does not require a favorable or resolved conclusion.
+5. **Scenario D:** Set "Real person likeness" to `Possible` or `Confirmed`. Leave L01's fields empty. Expect: blocked. Add any text to L01's notes or select any `likeness_found` value. Expect: no longer blocked.
+6. **Scenario E:** Set "Music heard" to `Identifiable track`. Expect: blocked. Change it to `None` — expect: no longer blocked. Change it to `Generic / royalty-free` instead — expect: also no longer blocked (this is the specific over-trigger risk CAH-4I.4C/4E both flagged and fixed; confirm it in the real UI, not just the automated test).
+7. **Scenario F:** With a triggered, unaccounted-for observation blocking signoff, revert the observation itself back to its clean value **without** adding any accounting text. Expect: the block disappears immediately.
+8. **Scenario G:** Set both "Logos observed" and "Trademarks observed" to non-clean values, leave I03 empty. Expect: one blocking message, not two. Fill I03's field once. Expect: fully cleared.
+9. **Scenario H:** Set "Unexpected content" to true (or a landmark observation to non-clean) with no Section 5 finding present. Expect: blocked, directing to Section 5. Add one finding with both a domain and finding text. Expect: cleared.
+
+Record each scenario's actual result (PASS/FAIL) and any exact message text observed, then return to this document to close CAH-4I.4F for real.
+
+### 31.11 Final status of this milestone
+
+**CAH-4I.4 is NOT yet closed.** CAH-4I.4A through 4I.4E are complete and re-confirmed by source and automated test as of this pass. **CAH-4I.4F itself remains open** pending either (a) live PM UAT per §31.10, or (b) an explicit PM decision to authorize integration on the strength of the automated verification alone — a product/risk decision this milestone can surface but not make unilaterally.
