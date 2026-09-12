@@ -13,6 +13,38 @@
 
 ## Log
 
+### 2026-09-11 — Commercial Readiness Strategy & Documentation Synchronized (A1/A2/B1/B2)
+**Insight:** Not a market finding — a documentation-synchronization pointer. Strategic OS issued "SI8 Commercial Readiness Validation — Strategic Thesis & Product-Surface Mapping" (2026-09-11), restating the RECORD→DECIDE→ASSURE thesis, the three-surface product mapping (Living Knowledge / Decision Engine / CRC), and formally naming the four current experiments as **A1** (JD: After Documentation), **A2** (Angel: Decision Ownership), **B1** (JD: Creator Readiness), **B2** (Vanessa: Decision Friction) — A2/B2 documented as sub-experiments of Track A/B, not new top-level tracks. Repository synchronized: `COMMERCIAL-READINESS-VALIDATION-PLAN-v1.md` §2/§6/§9 updated with the A1/A2/B1/B2 structure and the A–H evidence-chain framing; two new spec files created (`CR-TRACK-A2-DECISION-OWNERSHIP-SPEC.md`, `CR-TRACK-B2-DECISION-FRICTION-SPEC.md`); the Dripify sourcing-vs-actual-outreach distinction (list membership ≠ prior contact) documented in `VALIDATION-LEDGER-SCHEMA.md`.
+
+**Explicitly NOT synchronized, and logged as an OPEN QUESTION instead of a FACT:** the memo's §7 claim that the A1/B1 (JD Track A/B) campaigns "have now launched," and its attribution of specific current responses to four named respondents (Johnny Otto, Michael Fayek, Shyan Pawl, Henri Kang) — including a specific claim about Henri Kang's commercial-project status. Re-verified directly against the repository at the time of this sync: `SI8_CR-TrackA-B_JD_Wave1_QA.md` §9 still reads "No Dripify campaign created. No LinkedIn message sent."; no Supabase export newer than `supabase-export-2026-07-17.csv` exists; no current-campaign trace for Shyan Pawl exists anywhere; the only Henri Kang record is an unrelated 2026-05-22 reply predating Track B. Per this program's own evidence discipline (never promote an unsourced assertion to FACT), these claims are not written into this log or `data/validation-ledger.csv` as evidence pending the actual source from Strategic OS (export file, screenshots, or verbatim text).
+
+**Source:** Strategic OS synchronization memo, 2026-09-11; direct repository re-verification performed at sync time.
+
+**Product implication:** None yet on Surface 2 — the memo explicitly reaffirms the decision gate (§11: Capability/Demand/Economics must be validated before Surface 2 moves toward committed architecture) and explicitly defers Decision Engine output taxonomy, API productization, large-scale Living Knowledge expansion, and pricing changes.
+
+**Status:** Documentation-structure synchronization complete. Evidence-claim discrepancy open, referred back to Strategic OS.
+
+**Deep-dive:** [`COMMERCIAL-READINESS-VALIDATION-PLAN-v1.md`](COMMERCIAL-READINESS-VALIDATION-PLAN-v1.md) §6 (Open Questions), §5a (evidence chain)
+
+**Version impact:** None — documentation synchronization only, no product code or architecture touched
+
+---
+
+### 2026-08-30 — Commercial Readiness Market Validation System Stood Up
+**Insight:** Not a finding yet — this entry is a pointer. Per the SI8 Strategic Handoff (2026-08-30), a durable execution package for validating the Commercial Readiness Decision Layer hypothesis (CLAUDE.md §3s) has been created: `COMMERCIAL-READINESS-VALIDATION-PLAN-v1.md` (this folder) plus warm-lead and STEC experiment specs, ledger schema, and review template under `03_Sales/validation/`. Two validation tracks — CR-Track A (B2B Readiness) and CR-Track B (Creator Readiness) — deliberately relabeled to avoid colliding with the live `ICP-DEFINITIONS.md` numbering.
+
+**Source:** SI8 Strategic Handoff, "Commercial Readiness Market Validation System," 2026-08-30.
+
+**Product implication:** None yet — no campaigns launched, no product code touched. This is infrastructure for the Demand workstream in CLAUDE.md §3s.
+
+**Status:** Hypothesis-validation infrastructure only. First real evidence entry will land here once warm-lead calls or STEC replies produce a finding.
+
+**Deep-dive:** [`COMMERCIAL-READINESS-VALIDATION-PLAN-v1.md`](COMMERCIAL-READINESS-VALIDATION-PLAN-v1.md)
+
+**Version impact:** None — validation infrastructure, not product architecture
+
+---
+
 ### 2026-08-04 — The Enterprise Trigger (T4/T5) Is Almost Never Observed
 **Insight:** Tested whether "Commercial Assurance is too early" (Possibility A) vs. "the trigger exists but is uninstrumented" (Possibility B) by searching every available source — CRM notes, call notes, discovery logs, not just the 642-reply LinkedIn set — for actual observed enterprise-approval events (T4) or post-delivery risk events (T5), classified on a T0–T5 taxonomy. T5 (dispute/claim/litigation/insurance denial/audit) is a clean zero across every source. T4 (an actual external review/approval event) was found exactly 6 times against several hundred contacts (~1% base rate) — but all 6 cluster inside large/institutional/regulated-adjacent buyers (State Street, government/health-board clients, Amazon, Sony Pictures, an enterprise-clients Dubai agency), none from small agencies or general consumer brands. The one campaign explicitly labeled/targeted for finserv (Legal Friction — FinServ) produced a clean null result — zero T3+ signal — while every real T4 example came from unfiltered outreach that happened to land on a large buyer.
 
