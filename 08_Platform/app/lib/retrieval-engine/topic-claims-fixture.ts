@@ -155,6 +155,59 @@
  * (`retrieve.ts`, `lookupTopicClaims`, etc.) is byte-unchanged and never
  * references it. The consistency test now also asserts every fixture claim's
  * `publication_scope` matches the markdown -- it cannot silently diverge.
+ *
+ * Adopted Article 50(4) Audiovisual TopicClaim production representation
+ * (2026-09-13, bounded production Living-Knowledge authoring milestone):
+ * `CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1` now has a real
+ * fixture entry -- the first `topic: 'ai_content_transparency'`
+ * (`KnowledgeOnlyTopic`, not a `GoalCategory`) entry in this file, made
+ * representable by the KnowledgeTopic Foundation + First Real Knowledge-Only
+ * Topic milestones earlier the same day. `crc_eligible: 'Pending'` (per
+ * GOVERNED-CLAIMS.md's own `CRC Approver: PENDING`) -- this milestone does
+ * NOT author a CRC Publication Review and does NOT change that value.
+ * Structurally inert for CRC by construction, not merely by convention:
+ * (a) `lookupTopicClaims()`'s exact-topic path can never match this claim's
+ * topic against any `UserGoal.category`, since `ai_content_transparency` is
+ * not, and does not become, a `GoalCategory` value; (b) no `TopicClaim` in
+ * this fixture and no `TopicRelationship` in topic-relationships-fixture.ts
+ * targets `ai_content_transparency`, so the related-topic path has no edge
+ * to traverse; (c) `lookupTopicClaims`/`lookupDiscoveredTopicClaims`/
+ * `deriveClaimTargetedDiscoveryOccurrences`/`deriveKnowledgeReadinessNeeds`
+ * each independently gate on `lifecycle === 'Adopted' && crc_eligible ===
+ * 'Yes'` before this claim could ever become a candidate through any path,
+ * so `crc_eligible: 'Pending'` alone is already sufficient. `geographic_
+ * relevance_scope` is deliberately left absent (opt-out, per that field's
+ * own inverted-default-polarity doc comment) -- this milestone does not
+ * activate territory-driven discovery for this claim. `crc_publication_
+ * scope`/`crc_candidate_statement` are `null`: GOVERNED-CLAIMS.md's own
+ * "CRC Publication Scope" field for this claim contains no authored scope
+ * rule (only meta-commentary that no CRC Publication Review has occurred
+ * yet), matching `crc_publication_scope`'s own documented "`null` only for
+ * a claim with no scope authored yet (typically CRC-Eligible: Pending)"
+ * convention (see types.ts, and the historical Wave 1 precedent where this
+ * held before COPY-001/-002/-003/-004 were later published); the markdown's
+ * "CRC Candidate Statement" for this claim is explicitly bracketed
+ * "[DRAFT -- pending CRC Publication Review; not yet approved for CRC use]"
+ * -- left `null` here rather than carried into a production field whose own
+ * convention (see this header, above) is to hold real, governed CRC-facing
+ * text, not an explicitly-unapproved draft. `unresolved_project_dependencies`
+ * carries the deployer-actor-status gap (`deployer_status_confirmed`) the
+ * same way `CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1` above already
+ * carries its own actor-status gap (`advertiser_or_duty_holder_status_
+ * confirmed`) -- no `provider_scope`/`tool_scope` mechanism exists for
+ * "who is the deployer," so actor status is preserved as an unresolved
+ * dependency, per FGR_019's own governance record, rather than fake-mapped
+ * onto the asset-provider-scoped `provider_scope` field (a structurally
+ * different concept -- see that field's own doc comment). `applicability_
+ * requirements: []` (vacuous, no gate) -- FGR_019 §6/§13 independently
+ * confirmed no currently-implemented `ApplicabilityFact` can soundly
+ * represent Article 2(1)(b)/(c)'s establishment/output-use test (and
+ * `JURISDICTION_VALUE_ALIASES` has zero EU-related entries); the gap is
+ * instead disclosed as the `union_establishment_or_output_use` unresolved
+ * dependency, mirroring this same architecture-gap-disclosure precedent.
+ * See GOVERNED-CLAIMS.md's own Wave 9 entry and `governance-reviews/
+ * FGR_019_CAND-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001_2026-09-12.md`
+ * for the full governance record this entry mirrors.
  */
 
 import type { TopicClaim } from './types'
@@ -1359,6 +1412,63 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     tool_scope: null,
     publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
     last_verified: '2026-09-10',
+    superseded_by: null,
+  },
+  {
+    // EU AI Act Article 50(4) Audiovisual/Deepfake Disclosure (2026-09-13,
+    // Adopted TopicClaim production representation milestone). See this
+    // file's own header comment (above) for the full rationale on every
+    // field below. Mirrored from GOVERNED-CLAIMS.md's Wave 9 entry; no
+    // wording strengthened, simplified, or reconstructed here. STILL
+    // `crc_eligible: 'Pending'` -- this milestone does not perform or imply
+    // a CRC Publication Review. No TopicRelationship targets this claim's
+    // topic (`ai_content_transparency`); none is authored by this milestone.
+    claim_id: 'CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1',
+    topic: 'ai_content_transparency',
+    claim_character: 'established',
+    jurisdiction: 'European Union',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Pending',
+    // No scope authored yet -- GOVERNED-CLAIMS.md's own "CRC Publication
+    // Scope" field for this claim contains only meta-commentary that no CRC
+    // Publication Review has occurred, not an authored scope rule. See this
+    // file's own header comment for the full reasoning.
+    crc_publication_scope: null,
+    // GOVERNED-CLAIMS.md carries a bracketed "[DRAFT -- pending CRC
+    // Publication Review; not yet approved for CRC use]" candidate
+    // statement for this claim -- deliberately left null here rather than
+    // carrying unapproved draft prose into a production field whose
+    // convention is to hold real, governed CRC-facing text. See this file's
+    // own header comment.
+    crc_candidate_statement: null,
+    // Deliberately none authored -- FGR_019 §6/§13 confirmed no currently-
+    // implemented ApplicabilityFact can soundly represent Article
+    // 2(1)(b)/(c)'s establishment/output-use test without conflating two
+    // independently-sufficient statutory conditions, and
+    // JURISDICTION_VALUE_ALIASES has zero EU-related entries. Represented
+    // instead as the union_establishment_or_output_use unresolved
+    // dependency below.
+    applicability_requirements: [],
+    unresolved_project_dependencies: [
+      'deployer_status_confirmed',
+      'content_constitutes_deep_fake',
+      'artistic_creative_satirical_fictional_analogous_work',
+      'union_establishment_or_output_use',
+    ],
+    // Statutory, tool-independent, and not a third-party asset-provider-
+    // scoped claim -- see GOVERNED-CLAIMS.md's own "Provider/actor scope:
+    // deployer only (Article 3(4))" note. Deployer-actor status has no
+    // provider_scope/tool_scope mechanism to attach to and is preserved
+    // instead via deployer_status_confirmed above, never fake-mapped onto
+    // this (asset-provider-sense) field.
+    provider_scope: null,
+    tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
+    // geographic_relevance_scope deliberately omitted (opt-out by this
+    // field's own inverted default polarity) -- this milestone does not
+    // activate territory-driven discovery for this claim. See this file's
+    // own header comment.
+    last_verified: '2026-09-13',
     superseded_by: null,
   },
 ]
