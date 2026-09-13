@@ -2174,3 +2174,113 @@ This milestone made no runtime, UI, fixture, Living Knowledge, or CRC change. `g
 ### 34.10 Deferred-UAT resumption trigger
 
 Resume Scenarios C–H against Production when either: (a) SI8 has a first paying Commercial Assurance customer (the originally-stated reason Preview vs. Production distinction stopped mattering also stops applying once real customer data exists), or (b) any future change touches the reconciliation module, `Section3Evidence.tsx`'s I03/I01/L01/I02 blocks, or the workbook schema in a way that could plausibly affect a deferred scenario's behavior — whichever comes first. No calendar-based deadline is set; this is a risk-triggered, not time-triggered, resumption condition.
+
+---
+
+## 35. CA-METH-1 — Commercial Assurance Hidden-Risk Coverage Audit (2026-09-14)
+
+**Status: METHODOLOGY DISCOVERY ONLY. No runtime, schema, control, question, or Living Knowledge change made.** This section is independent of, and does not resume, CA-HRQ-1/CA-HRQ-2 (uncommitted, read-only discovery on the *discovered-relevance/HRR* question). CA-METH-1 asks a prior, more basic question: is the workbook methodology itself — the 16 controls a Human Reviewer completes — structurally sufficient to cause a diligent reviewer to consider every commercially material class of question SI8's product promise implies, independent of whether Living Knowledge or HRR ever gets consulted at all.
+
+### 35.1 Method
+
+Coverage was tested against one counterfactual, applied per scenario: *could a competent reviewer complete the current 16-control workbook faithfully, in good faith, and still never investigate this issue?* A control is credited only if its actual evidence requirement or judgment field would force the issue into view — not because a reviewer *could* choose to write about it in a freeform field. Source inspected directly: `workbook-schema.ts` (EMPTY_WORKBOOK, ALL_CONTROLS, computeGates), `Section1Intake.tsx` (intake context, No List, scope checks), `Section3Evidence.tsx` (all 16 CONTROL_DESCRIPTIONS/CONTROL_OBJECTIVES/ControlExtras field-by-field), `Section4Gaps.tsx` (gap log — control-anchored, auto-seeded only from Not-Provided/Partially-Verified judgments), `Section5Findings.tsx` (findings log — free-form domain/finding/evidence/impact, not control-anchored, but reviewer-discretionary), `signoff.ts` (`validateWorkbookForSignoff`, `METHODOLOGY_DOMAIN_CODES`), `SI8-Reviewer-Manual-v0.2.md` (Parts 1–7, all seven Domain Guidance sections read in full), `PRD_CERT_FORM.md` (all 11 CertForm intake sections).
+
+### 35.2 The 16-control map and what it is structurally optimized to detect
+
+| Control | Question actually asked | Category |
+|---|---|---|
+| A01 | Who submitted this, and their relationship to the project | Submitter identity/accountability |
+| R01 | Which AI tools were used | Tool provenance |
+| R02 | Was each tool used under a plan permitting commercial output | **Inbound** — provider permission |
+| R03 | Was a custom/fine-tuned model used, and is its training-data provenance documented | Inbound — provider/training provenance |
+| R04 | Does the submitter hold commercial rights to the AI output (ToS ownership language, work-for-hire) | Inbound — right to use the specific output |
+| H01 | Is human creative contribution documented | Inbound — authorship-claim support |
+| H02 | Is an asserted authorship claim plausible and evidenced | Inbound — authorship-claim support |
+| I01/I02/I03 | Did the reviewer's own independent viewing/listening find third-party copyrighted visual/audio/trademark content | Inbound — third-party rights in the *output as rendered* |
+| L01/L02/L03 | Does a synthetic performer resemble a real, identifiable person; is documentation on file | Inbound — likeness/consent |
+| T01 | Does the declared production workflow cohere with the reviewed content | Technical provenance |
+| D01/D02 | Are dates/versions consistent; any retroactive-documentation indicators | Documentation integrity |
+
+**What the methodology is optimized to detect:** whether the submitter had the *right to make and submit* this specific piece of content — provider licensing, training-data provenance, authorship-claim plausibility, third-party rights *visible in the rendered output*, and documentation integrity. It is a rigorous **inbound-rights-to-the-artifact** methodology. It was not designed to, and does not, ask what the client/creator commercially *expects* to do with the result beyond running it — the **outbound/defensibility/exploitation** side of the same transaction.
+
+### 35.3 Anchor Case 1 — provenance vs. protectability (COVERED: NO)
+
+Scenario: a Creative Director believes "I have prompts + receipts, therefore I own and can protect the finished film," and separately expects to control a recurring AI-generated character across future campaigns.
+
+- H01/H02 test *whether a human plausibly directed the work enough to claim authorship* — a question about supporting an authorship **claim** for licensing-confidence purposes (Manual v0.2 line 412 states this explicitly: "The copyright question belongs to courts and lawyers... is there documented evidence of human creative involvement that supports the submitter's claim to have created or directed this content?"). Nothing in H01/H02's evidence fields (`contribution_level`, `copyright_claim`, `claim_basis`, `assessment`) asks what the client expects to **exclude others from doing**, license, or merchandise.
+- R04 asks whether the submitter holds rights to **use** the AI output (ToS ownership language, work-for-hire) — inbound use-permission, not outbound exclusivity/control expectations.
+- A reviewer can score H01=Verified, H02=Verified ("Plausible and documented"), R04=Verified, complete all 16 controls, and sign off — **having never asked the client what they expect to own, exclude, license, or reuse beyond running this one film.**
+- **Coverage classification: C — NOT COVERED.** A related but structurally distinct control exists (H02); it does not reach the actual question.
+
+### 35.4 Anchor Case 2 — territory vs. jurisdiction (COVERED: PARTIAL)
+
+Scenario: creator states distribution territory as "United States"; a narrower jurisdiction (New York, calibration example only) carries an additional disclosure obligation.
+
+- `Section1Intake.tsx` displays `submission.territory_preferences` (broad, free-text/category) at the top of §1 as read-only context — not a control, not gated.
+- The **one existing mechanism that reaches this at all** is Reviewer Manual v0.2 Domain L guidance (line 530): *"For any submission with US territory in the intended deployment, flag [NY Synthetic Performer Law]'s applicability... Note it in the Residual Commercial Risks section for all US-deployed commercial AI video."* This is real, substantive guidance — but it is **narrative text in a document the reviewer is not required to open per-control**, not a workbook field, gate, or `computeGates` check. `validateWorkbookForSignoff` never verifies a jurisdiction-specific consideration was made; nothing prevents signoff if the reviewer never reads or recalls that Manual paragraph.
+- The Manual's own §Phase-0-style Scope Confirmation (line 227) treats an unresearched jurisdiction as a **scope-limitation narrative note**, not a structured gate either.
+- **Coverage classification: B — PARTIALLY COVERED.** Real methodology text exists and correctly distinguishes G1 (territory) from G2 (jurisdiction-specific applicability) in principle; it is not enforceable — a diligent reviewer who has not memorized Part 4 Domain L guidance can complete all 16 controls and sign off without ever considering it.
+
+### 35.5 Inbound vs. outbound rights (Phase 5)
+
+Every control in Domains R, H, I, and L, and R04 specifically, was verified to ask an **inbound** question (rights/permission to make and use this specific artifact). **No control asks what the client/creator expects to own, exclude others from, license to third parties, merchandise, adapt, or otherwise commercially control in the result** — the outbound/defensibility half of the same transaction is structurally absent from all 16 controls. This is not a criticism of any single control; it is a genuine, generalizable gap class (§35.3, §35.8 scenario 3/4).
+
+### 35.6 Contractual/commercial-expectation assessment (Phase 7)
+
+`Section1Intake.tsx` surfaces `intended_use` (a fixed category: brand_commercial / agency_deliverable / streaming_submission / licensing_marketplace / festival / social_media / portfolio / other) and an optional freeform `campaign_description` as **read-only context**, not as an input to any control's evidence requirement or judgment. A reviewer can complete the workbook having only glanced at these fields; nothing requires them to reconcile a stated `licensing_marketplace` or `agency_deliverable` intended use against R04's output-ownership finding, or to ask whether the client's actual exploitation plan (sequel reuse, third-party sublicense, merchandising) is broader than "run this one video." **Coverage classification: C — NOT COVERED** as a control-level mechanism; the raw fact is displayed but not acted upon by methodology.
+
+### 35.7 Additional hidden-risk scenarios (Phase 3/K) — full coverage matrix (Phase 11, primary deliverable)
+
+| # | Scenario (hidden question) | Why a creator/reviewer might miss it | Current control(s) touched | Coverage | Why | Coverage level | Min. fact/evidence class | Likely methodology home |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Provenance ≠ protectability/exclusivity expectation (Anchor 1) | Creator conflates "I can prove I made it" with "I can own/protect/merchandise it" | H01, H02, R04 | **C — Not Covered** | H02 tests claim plausibility, not client's outbound expectation; R04 tests use-rights, not exclusivity | Always-Consider (light-touch) | D (reviewer follow-up on intent) + G (specialist escalation if asserted) | New sub-question under H02 or R04, or a new generic control |
+| 2 | Territory vs. narrower jurisdiction applicability (Anchor 2) | Broad "US" territory hides state/national disclosure regimes | Section 1 intake display; Manual Domain L narrative only | **B — Partial** | Real guidance exists but is unenforceable narrative, not a gate | Conditionally applicable | C (governed LK, once it exists) + D | Governed Reviewer Resources prompt tied to territory, or conditional L-domain sub-question |
+| 3 | Recurring character/asset commercialization beyond the single film | Client assumes "video cleared" = "character cleared for merchandising/reuse" | H02, R04 | **C — Not Covered** | Neither control's evidence requirement distinguishes the film from a separable, reusable asset | Conditionally applicable (triggered by stated intended use) | D (reviewer follow-up) informed by A (intended_use category) | New conditional sub-question under R04 |
+| 4 | Sublicense/resale of the finished video to third parties vs. own-campaign use | "Commercial rights confirmed" is read as unconditional; some tool ToS grant use but restrict resale/sublicense of raw output | R02, R04 | **B — Partial** | R02/R04 ask "commercial output rights," not specifically "including resale/sublicense to third parties" | Conditionally applicable | D + G (ToS interpretation may need escalation) | Clarify R04's evidence requirement to name sublicense/resale explicitly |
+| 5 | Agency-submits-on-behalf-of-client rights flow-down | A01 confirms submitter identity, not that the deploying client actually holds the assessed rights | A01 | **C — Not Covered** | A01's objective is "who submitted and their relationship," never "does the actual commercial deployer hold rights flowing from the submitter" | Conditionally applicable (agency-mode submissions) | D (reviewer follow-up) + G | Conditional sub-question under A01 for agency-mode submissions |
+| 6 | Reference/source material used as generation *input* that is not visually obvious in the *output* | I01 is keyed to the reviewer's own independent visual identification in the rendered output; a style/composition reference that never appears recognizably is invisible to that method | I01 | **C — Not Covered** | I01's objective is literally "did your independent review identify..." — it cannot catch a non-visible input dependency | Conditionally applicable | D (reviewer follow-up on declared inputs) + A (CertForm §4 already asks "stock footage or stock assets Y/N" at intake, per PRD_CERT_FORM.md, but no control cross-checks it) | Cross-reference existing intake disclosure into I01/R02's evidence requirement |
+| 7 | Localization/adaptation into new markets after assessment | Client assumes clearance travels with the file into any future market | None (Recommended Next Steps' generic "resubmit on material change" language is the only touchpoint) | **B — Partial** | Generic resubmission principle exists; nothing requires the reviewer to name what would constitute a material change for footprint expansion | Reviewer-discretion, elevated to Conditionally-applicable when the client discloses adaptation plans | D | Section 7 Recommended Next Steps guidance, made structured rather than freeform |
+| 8 | Rights durability — account/subscription status *after* assessment, before actual deployment | R02/Manual explicitly handle *retroactive* misalignment (current plan doesn't cover past generation) but not *forward* durability (lapse/ToS change before deployment) | R02 | **B — Partial** | Manual's "date alignment" guidance is one-directional (backward-looking only) | Reviewer-discretion / Residual Risk | F (a structured `tool_account_status` fact does not exist yet — this is the same gap CA-HRQ-2 independently found in the CRC↔CA fact-transport inventory) | Residual Commercial Risks (Section 7), eventually informed by governed Living Knowledge once `tool_account_status` is acquired anywhere |
+| 9 | Voice-only persona resemblance (no visual likeness at all) | Domain L's stated *purpose* explicitly includes voice (Manual line 495: "face, voice, or distinctive persona"), but its actual fields and Section 2's observation vocabulary are visual-forward (`synthetic_humans`, `real_likeness_suspected`) with no audio-persona-resemblance field | L01 | **C — Not Covered** (despite being nominally inside Domain L's stated purpose) | A reviewer can complete L01 exactly as designed using only the visual S2Banner context and never independently assess whether a narrator voice resembles a real identifiable person | Always-Consider when audio/narration is present | D (reviewer follow-up, independent listen-through) | New Section 2 observation field + L01 evidence requirement extension |
+| 10 | Evidence ambiguity escalated to specialist/legal review vs. scored as a plain gap | D02/H02 ambiguity (e.g., suspected retroactive documentation combined with an authorship claim) has no distinct outcome path from an ordinary "Not Provided"/"Material Risk" gap | D02, H02, Section 6 outcome | **B — Partial** | "Recommended Next Steps" freeform bullet is the only place specialist referral can be noted; no structured escalation flag exists | Escalation/out-of-scope (recognize, don't decide) | G (explicitly a non-fact — SI8 must not convert this into a determination) | New structured "flag for specialist escalation" field, separate from Judgment |
+
+### 35.8 Domain-model adequacy (Phase 12)
+
+The seven domains (A/R/H/I/L/T/D) remain conceptually adequate as *containers* for every gap above **except** the outbound/exclusivity/exploitation-expectation class (scenarios 1, 3, 4, 5) — H and R can each host a conditional sub-question, but none of the seven domains' stated *purpose* text currently claims to cover "what does the client expect to control or exploit beyond running this specific file." A hypothesis-only candidate concept — "Commercial Exploitation & Defensibility" — surfaces from four independent scenarios (1/3/4/5), which is the multi-scenario bar Phase 12 itself sets before treating a new domain as warranted. **This is recorded as a hypothesis for the next design milestone, not adopted here.** The remaining six scenarios (2, 6, 7, 8, 9, 10) fit cleanly as sub-questions or field extensions inside existing domains (L, R, I) or existing report sections (Residual Risks, Recommended Next Steps) — no new domain is needed for those.
+
+### 35.9 Negative controls (Phase 16) — proving this does not become an unbounded legal audit
+
+- A submission with a purely Taiwan-only stated distribution footprint: investigating NY Synthetic Performer Law applicability would be **correctly out of scope** — Anchor 2's gap is about *unenforced* consideration when a US footprint IS stated, not about manufacturing jurisdiction checks where none is claimed.
+- A client who states only "run this one 30-second social ad, no further plans": investigating merchandising/character-reuse (scenario 3) is **correctly N/A** — the conditional trigger (a stated broader intended use) is absent.
+- Whether a specific tool's ToS clause would survive a legal challenge, or whether a specific license's indemnification language is enforceable in a specific state's courts: **correctly out of scope for SI8 to decide** (Manual line 70, explicit) — the methodology gap is only that no mechanism *flags the need to ask*, not that SI8 should resolve the underlying legal question itself.
+- Speculative future litigation risk over a specific AI model's training-data lawsuit status: already correctly handled today as a **generic, always-present Residual Risk** ("training data liability appears as a residual risk in every assessment" — Manual line 754), not a per-project research obligation — this is the right level of engagement and needs no change.
+- An artifact with no stated territory beyond the platform default and no likeness/audio at all: scenarios 2 and 9 correctly resolve to N/A, not to manufactured findings.
+
+### 35.10 Sales-reuse observations (Phase 13) — non-binding
+
+Scenarios 1, 3, 4, 5, and 8 each have an obvious shape as a post-CRC Sales discovery prompt (e.g., "You've documented your prompts and receipts — have you also thought about what you expect to own or control if this character comes back in a future campaign?"). No Sales workflow, copy, or responsibility is designed here; this is recorded only as evidence the taxonomy discovered here is reusable outside Commercial Assurance, per the milestone's own Phase 13 instruction.
+
+### 35.11 Living Knowledge role (Phase 14) — non-binding, no implementation
+
+Scenario 8 (rights durability / `tool_account_status`) and scenario 2 (jurisdiction-specific applicability) are the two scenarios where governed Living Knowledge is the natural eventual informant — both already appear in CA-HRQ-2's independently-derived fact-transport gap inventory (`tool_account_status`: acquired nowhere; jurisdiction: acquired nowhere on CertForm). This section does not resume CA-HRQ-2's proactive-discovery implementation question; it only records that the two audits' findings are consistent with each other, discovered independently, from different directions (HRR-consumption architecture vs. workbook-methodology coverage).
+
+### 35.12 Prioritization (Phase 15)
+
+- **P0 (methodology-critical):** #1 (outbound ownership/exclusivity expectation), #2 (jurisdiction enforceability), #9 (voice-only persona resemblance — a real gap inside a domain SI8 already claims to cover).
+- **P1 (important):** #3 (character/asset reuse), #5 (agency rights flow-down), #6 (non-visible reference-material inputs), #10 (structured escalation path).
+- **P2 (useful, deferrable):** #4 (sublicense/resale specificity — largely foldable into a #1 fix), #7 (localization/adaptation), #8 (rights durability — blocked on a fact-acquisition gap outside this milestone's authority to add).
+- **Out of scope:** none of the ten scenarios were found to be out of scope in themselves; the negative controls (§35.9) instead prove the *boundary conditions* around them are sound.
+
+### 35.13 What this audit does NOT establish
+
+It does not establish that any specific new control, field, or domain should be built — Phase 17 below is a discovery-to-design gate, not a design. It does not establish that CRC should change (CRC's frozen scope is untouched). It does not establish that Living Knowledge should acquire any new claim. It does not resolve the Domain-model hypothesis in §35.8 either way — that requires its own design pass.
+
+### 35.14 Implementation gate (Phase 17)
+
+**A — READY FOR METHODOLOGY DESIGN**, scoped narrowly to the P0 set (#1, #2, #9). These three are proven from source (not merely theorized), are generalizable across AI-video projects (not domain-specific patches), and each has an identifiable, small methodology home (a conditional sub-question under H02/R04, a structured jurisdiction-consideration gate under L, and a Section-2/L01 field extension for voice-only persona) without requiring the new-domain hypothesis in §35.8 to be resolved first.
+
+**Recommended next milestone:** a bounded methodology-DESIGN milestone (not implementation) that: (a) drafts the exact conditional sub-question text and evidence requirement for #1 under H02 and/or R04; (b) designs the smallest enforceable jurisdiction-consideration gate for #2 (a `computeGates`-visible check, not new narrative text) that stays generic across jurisdictions, using NY only as the calibration case; (c) drafts the Section 2 + L01 field extension for #9. Each of the three should independently pass the same negative-control discipline used in §35.9 before being built.
+
+### 35.15 Runtime changes made
+
+None. `git status` remains clean apart from this documentation section.
