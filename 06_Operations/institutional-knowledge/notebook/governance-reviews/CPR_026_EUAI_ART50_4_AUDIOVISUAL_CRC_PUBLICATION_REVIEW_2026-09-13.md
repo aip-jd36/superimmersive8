@@ -14,6 +14,8 @@ PM decision: **NOT MADE BY THIS REVIEW.** Per this milestone's own explicit char
 
 Historical status: VERBATIM ARCHIVE — DO NOT EDIT HISTORICAL BODY once a PM decision is recorded. Future amendments should be appended outside the body below, or captured in a new review artifact.
 
+Addendum (2026-09-13): `CPR_026_ADDENDUM_REMEDY_SUPERSESSION_2026-09-13.md` records that this review's own §F/§W proposed remedy (`jurisdiction == "European Union"`) has been superseded by subsequent generic-applicability architecture analysis and PM concurrence (`ADR-001-generic-applicability-architecture.md`). This review's own WITHHOLD disposition and safety finding (§F/§U) remain fully authoritative and unchanged; see the addendum for the full supersession record.
+
 --- BEGIN VERBATIM CRC PUBLICATION REVIEW ---
 
 # EU AI Act Article 50(4) Audiovisual/Deepfake Disclosure — CRC Publication Review Final Report
