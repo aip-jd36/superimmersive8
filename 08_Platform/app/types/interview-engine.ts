@@ -398,6 +398,85 @@ export interface DistributionTerritoryMention {
   superseded_by: string | null
 }
 
+// ── Organization location mentions (Generic Applicability Architecture --
+// OrganizationLocationMention Fact Representation, 2026-09-13, per
+// ADR-001-generic-applicability-architecture.md §J) ─────────────────────────
+
+/**
+ * A plain, user-attested, observational statement about where the user's
+ * organization/company is based, established, located, or equivalent --
+ * e.g. "Our company is based in France", "We're a US company", "The agency
+ * is located in Germany". This is a FACTUAL, SELF-REPORTED GEOGRAPHY fact
+ * only -- it deliberately means nothing more than "the user said this about
+ * their own organization." It is NOT, and must never be read, computed, or
+ * consumed as:
+ *   - a legal establishment determination (e.g. under EU AI Act Article
+ *     2(1)(b)'s "place of establishment" test);
+ *   - a deployer, provider, or duty-holder status determination (e.g.
+ *     Article 3(4)'s "deployer" definition);
+ *   - a regulatory/statutory applicability conclusion of any kind;
+ *   - an `AssessmentJurisdictionMention` (above) -- a categorically
+ *     different concept (the jurisdiction the user asked CRC to consider),
+ *     never inferred from or conflated with this fact;
+ *   - a `DistributionTerritoryMention` (above) -- a categorically different
+ *     concept (where the project's OUTPUT is distributed/used), never
+ *     inferred from or conflated with this fact, and vice versa;
+ *   - a compliance conclusion of any kind.
+ *
+ * This type is deliberately named for the OBSERVATION, not a legal
+ * conclusion -- "location," not "establishment" -- precisely to avoid
+ * echoing Article 2(1)(b)'s own statutory term ("place of establishment")
+ * in a fact that only ever carries what the user actually said (see
+ * ADR-001 §J/§K for the full naming rationale: `jurisdiction`'s own field
+ * is deliberately not called `applicable_jurisdiction`/`governing_jurisdiction`
+ * for the identical reason).
+ *
+ * CAPTURE-ONLY (2026-09-13 milestone): this type has NO consumer anywhere
+ * in this codebase. It is not in `APPLICABILITY_FACTS`
+ * (lib/retrieval-engine/types.ts), `evaluateRequirementStatus`
+ * (lib/retrieval-engine/lookup-topic-claims.ts) has no branch for it, no
+ * `TopicClaim.applicability_requirements` can reference it, no Track A
+ * discovery trigger exists for it (unlike `DistributionTerritoryMention`'s
+ * own `geographic_relevance_scope` consumer), no dependency-askability or
+ * clarification module asks for it proactively, and no Bounded
+ * Interpretation/Composition consumer exists for it. Adding this fact alone
+ * changes no runtime retrieval, applicability, or Article 50 behavior --
+ * mirrors `ContentPresenceMention`'s own "generic project state only, each
+ * consumer a separately authorized future milestone" precedent for field
+ * placement, though NOT its append-only correction shape (see below).
+ *
+ * Real correction/supersession semantics (unlike `ContentPresenceMention`'s
+ * deliberate append-only design) -- mirrors `DistributionTerritoryMention`
+ * exactly, because an organization's location is a single project-level
+ * fact a later statement can directly replace ("Correction -- we're
+ * actually based in Switzerland, not Germany"), the same shape
+ * `AssessmentJurisdictionMention`/`DistributionTerritoryMention` already
+ * solve.
+ *
+ * Values remain flat, ungraded, literal labels -- deliberately no `level`,
+ * `parent`, `country`, or `subdivision` field, and deliberately no alias
+ * table anywhere in this pipeline, mirroring `DistributionTerritoryMention`'s
+ * own identical scope boundary.
+ *
+ * `confidence` uses only `confirmed` meaningfully at the per-mention level
+ * (an explicit, stated organization location) -- mirrors
+ * `DistributionTerritoryMention`'s own "no exclusion concept" discipline
+ * exactly: only correction (superseding a prior stated location) is
+ * supported, never exclusion.
+ *
+ * `superseded_by` follows the same supersede-and-mark discipline as every
+ * other mention type in this file -- a correction never deletes or edits a
+ * prior mention in place.
+ */
+export interface OrganizationLocationMention {
+  mention_id: string
+  value: string
+  confidence: ConfidenceState
+  source_turn: number
+  source_statement: string
+  superseded_by: string | null
+}
+
 // ── Content presence mentions (CRC Content-Presence Mention Model,
 // 2026-08-28, following the accepted Representation Simplification Review)
 // ─────────────────────────────────────────────────────────────────────────
@@ -874,6 +953,27 @@ export interface StructuredUnderstanding {
    * this field never touches `applicability_requirements`.
    */
   distribution_territory_mentions: DistributionTerritoryMention[]
+  /**
+   * Generic Applicability Architecture -- OrganizationLocationMention Fact
+   * Representation (2026-09-13, per ADR-001-generic-applicability-
+   * architecture.md §J). Additive and backward-compatible, same discipline
+   * as `distribution_territory_mentions` before it: a historical session's
+   * stored JSON predating this field deserializes with it defaulted to `[]`
+   * (see serialization.ts's deserializeStructuredUnderstanding), never
+   * `undefined` at runtime. An empty array means no recorded information --
+   * NEVER confirmed absence. Unlike `distribution_territory_mentions`, this
+   * field has NO downstream consumer of any kind -- not in
+   * `APPLICABILITY_FACTS`, no `evaluateRequirementStatus` branch, no Track A
+   * discovery trigger, no dependency-askability/clarification module, no
+   * Bounded Interpretation/Composition consumer. This is deliberate --
+   * capture-only, mirroring `content_presence_mentions`' own "generic
+   * project state only, each consumer a separately authorized future
+   * milestone" precedent for field placement (though this field DOES carry
+   * real correction/supersession semantics, unlike
+   * `content_presence_mentions`' own append-only shape -- see
+   * `OrganizationLocationMention`'s own doc comment above for why).
+   */
+  organization_location_mentions: OrganizationLocationMention[]
   current_phase: Phase
   gate_1_state: Gate1State
   gate_2_state: Gate2State

@@ -28,6 +28,7 @@ function emptySU(overrides: Partial<StructuredUnderstanding> = {}): StructuredUn
     assessment_jurisdiction_mentions: [],
     content_presence_mentions: [],
     distribution_territory_mentions: [],
+    organization_location_mentions: [],
     current_phase: 2,
     gate_1_state: 'not_met',
     gate_2_state: 'not_yet_stable',
@@ -396,6 +397,7 @@ describe('existing asset_provider_mention Track A path unaffected by the new con
       asset_provider_mentions: [providerMention({ mention_id: 'ap-1' })],
       content_presence_mentions: [],
       distribution_territory_mentions: [],
+      organization_location_mentions: [],
     })
     const occurrences = deriveDiscoveredTopicOccurrences(su, [genericStockClaim(), genericLikenessClaim()])
     expect(occurrences).toHaveLength(1)

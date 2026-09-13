@@ -202,6 +202,7 @@ function completedSU(overrides: Record<string, unknown> = {}) {
     assessment_jurisdiction_mentions: [],
     content_presence_mentions: [],
     distribution_territory_mentions: [],
+    organization_location_mentions: [],
     current_phase: 4,
     gate_1_state: 'met',
     gate_2_state: 'stable',

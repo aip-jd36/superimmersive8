@@ -193,6 +193,7 @@ export function findDiscoveredTopicExposure(topicClaims: readonly TopicClaim[], 
       assessment_jurisdiction_mentions: [],
       content_presence_mentions: [],
       distribution_territory_mentions: [],
+      organization_location_mentions: [],
     }
     buildRetrievalHandoff(su) // exercised for parity with the real call shape; occurrences themselves come from the call below
     const occurrences = deriveDiscoveredTopicOccurrences(su, topicClaims as TopicClaim[])

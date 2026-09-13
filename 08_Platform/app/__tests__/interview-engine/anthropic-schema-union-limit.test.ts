@@ -76,11 +76,22 @@ describe('Anthropic structured-output schema union-type limit guardrail', () => 
   // 2026-09-11, same shape again -- exactly one new nullable-string union
   // field, raw_territory_value; this fact type has no exclusion flag at all
   // (see DistributionTerritoryMention's own doc comment), so there is no
-  // sibling boolean to note. Still well under the ANTHROPIC_UNION_LIMIT (16)
-  // test A already enforces generically.
-  test('D: extractor union count is exactly 15 after the generic attributes[] redesign (12) plus raw_jurisdiction_value (13) plus raw_content_presence_category (14) plus raw_territory_value (2026-09-11, +1 new union)', () => {
+  // sibling boolean to note.
+  // 16 as of the Generic Applicability Architecture --
+  // OrganizationLocationMention Fact Representation, 2026-09-13, same shape
+  // again -- exactly one new nullable-string union field,
+  // raw_organization_location_value; this fact type also has no exclusion
+  // flag (see OrganizationLocationMention's own doc comment), so there is no
+  // sibling boolean to note. This lands EXACTLY AT the ANTHROPIC_UNION_LIMIT
+  // (16) test A already enforces generically -- still compliant (test A
+  // asserts <=16, not <16), but this exhausts all remaining headroom: any
+  // FUTURE new top-level nullable-string union field will require either
+  // consolidating an existing field into the generic attributes[] bag (the
+  // same P0 mechanism that created that bag) or another dedicated
+  // union-reduction pass before it can be added.
+  test('D: extractor union count is exactly 16 after the generic attributes[] redesign (12) plus raw_jurisdiction_value (13) plus raw_content_presence_category (14) plus raw_territory_value (15) plus raw_organization_location_value (2026-09-13, +1 new union, now AT the 16-parameter ceiling)', () => {
     const paths = unionCountOnWire(CANDIDATE_RESPONSE_SCHEMA)
-    expect(paths.length).toBe(15)
+    expect(paths.length).toBe(16)
   })
 
   // B. candidate-generator schema union count <= 16
