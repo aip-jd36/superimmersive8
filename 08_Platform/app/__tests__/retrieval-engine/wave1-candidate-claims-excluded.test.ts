@@ -179,14 +179,26 @@ describe('Wave 1 real claims -- governance state as of 2026-08-19 (all four COPY
    * a data-completeness gap. Its own provider_scope/retrieval/BI/
    * Composition behavior is proven separately by
    * adobestock-runtime-retrieval.test.ts's own real-fixture describe block.
+   *
+   * Updated again 2026-09-13 (Adopted Article 50(4) Audiovisual TopicClaim
+   * production representation milestone): CLAIM-EUAI-ART50-4-AUDIOVISUAL-
+   * DEEPFAKE-DISCLOSURE-001-v1 gained its first real runtime fixture entry
+   * -- the first `topic: 'ai_content_transparency'` (KnowledgeOnlyTopic,
+   * not a GoalCategory) entry in this fixture. Count grows from
+   * thirty-two to thirty-three. Unlike every other addition in this list,
+   * `crc_eligible: 'Pending'` -- no CRC Publication Review has been
+   * performed or implied by this addition; its own retrieval-dormancy
+   * behavior is proven separately by
+   * euai-art50-4-topicclaim.test.ts's own dedicated describe block.
    */
-  test('all four Wave 1 claims plus the seven stock-media claims (five original + two -v2 correction successors) plus A-3 (the first published Music-domain claim) plus the first real tool-scoped claim (Synthesia) plus the second, third, and fourth real provider-scoped claims since A-3 (Storyblocks, Pond5, Adobe Stock) plus the fifth and sixth, the first two-claim tool_scope-narrowed publication (Kling baseline + member, CPR_015, 2026-09-02, superseding CPR_013/CPR_014\'s prior WITHHOLD after Matrix retirement) plus the seventh (Runway, CPR_017, 2026-09-03, superseding CPR_016\'s prior WITHHOLD after Matrix retirement) plus the eighth through eleventh (the four Pika commercial-use claims -- baseline plus Standard/Pro/Fancy -- CPR_019, 2026-09-06, superseding CPR_018\'s prior WITHHOLD after Matrix retirement) plus the twelfth (Stability AI, CPR_020, 2026-09-09, initial sequencing-only WITHHOLD superseded same-day by that file\'s own addendum reconsideration) plus the thirteenth through seventeenth (five Artlist Remaining Claims -- Social vs Pro, Client License Retention, Standalone Exploitation, Pro Royalties, Enterprise Threshold -- CPR_021, 2026-09-10; the sixth reviewed sibling, AI Training Exclusion, was explicitly WITHHELD and has no fixture entry) plus the eighteenth through twentieth (Envato Sync, Envato Cancellation, Epidemic Tier Advertising [corrected wording] -- CPR_022, 2026-09-10, same day) plus the twenty-first (CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1, the first likeness-topic / jurisdiction-scoped non-provider claim in this fixture, activated via CPR_025, Generic Non-Provider TopicClaim Runtime Activation milestone, 2026-09-10 -- the sibling CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1 remains withheld under CPR_008 and has no fixture entry, unaffected) are present in the fixture', () => {
+  test('all four Wave 1 claims plus the seven stock-media claims (five original + two -v2 correction successors) plus A-3 (the first published Music-domain claim) plus the first real tool-scoped claim (Synthesia) plus the second, third, and fourth real provider-scoped claims since A-3 (Storyblocks, Pond5, Adobe Stock) plus the fifth and sixth, the first two-claim tool_scope-narrowed publication (Kling baseline + member, CPR_015, 2026-09-02, superseding CPR_013/CPR_014\'s prior WITHHOLD after Matrix retirement) plus the seventh (Runway, CPR_017, 2026-09-03, superseding CPR_016\'s prior WITHHOLD after Matrix retirement) plus the eighth through eleventh (the four Pika commercial-use claims -- baseline plus Standard/Pro/Fancy -- CPR_019, 2026-09-06, superseding CPR_018\'s prior WITHHOLD after Matrix retirement) plus the twelfth (Stability AI, CPR_020, 2026-09-09, initial sequencing-only WITHHOLD superseded same-day by that file\'s own addendum reconsideration) plus the thirteenth through seventeenth (five Artlist Remaining Claims -- Social vs Pro, Client License Retention, Standalone Exploitation, Pro Royalties, Enterprise Threshold -- CPR_021, 2026-09-10; the sixth reviewed sibling, AI Training Exclusion, was explicitly WITHHELD and has no fixture entry) plus the eighteenth through twentieth (Envato Sync, Envato Cancellation, Epidemic Tier Advertising [corrected wording] -- CPR_022, 2026-09-10, same day) plus the twenty-first (CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1, the first likeness-topic / jurisdiction-scoped non-provider claim in this fixture, activated via CPR_025, Generic Non-Provider TopicClaim Runtime Activation milestone, 2026-09-10 -- the sibling CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1 remains withheld under CPR_008 and has no fixture entry, unaffected) plus the twenty-second (CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1, still crc_eligible: Pending -- present in the fixture but structurally CRC-dormant, see this file\'s own header update above) are present in the fixture', () => {
     expect(TOPIC_CLAIMS_FIXTURE.map((c) => c.claim_id).sort()).toEqual([
       'CLAIM-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001-v1',
       'CLAIM-COPY-001-v1',
       'CLAIM-COPY-002-v1',
       'CLAIM-COPY-003-v1',
       'CLAIM-COPY-004-v1',
+      'CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1',
       'CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1',
       'CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1',
       'CLAIM-MUSIC-ARTLIST-CLIENT-LICENSE-RETENTION-001-v1',
