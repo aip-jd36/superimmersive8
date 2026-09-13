@@ -9,6 +9,46 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of September 13, 2026
+*Run: 2026-09-13 · 13 high · 12 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [AI Marketing Gets Consumer Protection Test in NY Disclosure Law](https://news.bloomberglaw.com/litigation/ny-disclosure-law-serves-as-bellwether-amid-ai-content-explosion) | Bloomberg Law News | Wed, 09 Sep 2026 | ☐ |
+| 9 | post+update | [Who Owns an AI Celebrity? Taylor Swift, Matthew McConaughey, Erling Haaland, and the Limits of Trademark and Publicity Rights](https://www.jdsupra.com/legalnews/who-owns-an-ai-celebrity-taylor-swift-3546718/) | JD Supra | Tue, 08 Sep 2026 | ☐ |
+| 9 | post+update | [EU AI Act Article 50: New Guidance Expands Enterprise AI Compliance Obligations](https://www.law.com/corpcounsel/2026/09/08/eu-ai-act-article-50-new-guidance-expands-enterprise-ai-compliance-obligations/) | Law.com | Tue, 08 Sep 2026 | ☐ |
+| 9 | post+update | [AI Training & Copyright Part 3: Recent Case Law by the Regional Court of Munich (“GEMA vs. Suno”)](https://www.freshfields.com/en/our-thinking/blogs/technology-quotient/ai-training-copyright-part-3-recent-case-law-by-the-regional-court-of-munich-102o0dn) | Freshfields | Mon, 07 Sep 2026 | ☐ |
+| 8 | post+update | [The Real AI Revolution in Hollywood Isn’t on Screen, It’s in the Supply Chain \| Guest Column](https://www.thewrap.com/commentary-analysis/columns/ai-revolution-hollywood-supply-chain-guest-column/) | TheWrap | Fri, 11 Sep 2026 | ☐ |
+| 8 | post+update | [New York’s AI Disclosure Law Draws First Complaints As California, Hawaii Follow Suit](https://www.netinfluencer.com/new-york-ai-disclosure-law-draws-first-complaints-as-california-hawaii-follow-suit/) | Net Influencer | Thu, 10 Sep 2026 | ☐ |
+| 8 | post+update | [Paxton's new AI ad puts words in a fake Talarico's mouth. Watch it here](https://www.usatoday.com/story/news/state/texas/2026/09/09/ken-paxton-talarico-artificial-intelligence-ad/91672483007/) | USA Today | Wed, 09 Sep 2026 | ☐ |
+| 8 | post+update | [OpenAI, New York Times case tees up key test of AI training under copyright law](https://www.reuters.com/legal/litigation/openai-new-york-times-case-tees-up-key-test-ai-training-under-copyright-law-2026-09-08/) | Reuters | Tue, 08 Sep 2026 | ☐ |
+| 8 | post+update | [PUBLICITY RIGHTS NEWS—A multi-jurisdiction class action lawsuit is filed against Suno over publicity rights](https://www.vitallaw.com/news/publicity-rights-news-a-multi-jurisdiction-class-action-lawsuit-is-filed-against-suno-over-publicity-rights/ipm0173b931e376d043639b9341ce79864927) | VitalLaw.com | Tue, 08 Sep 2026 | ☐ |
+| 8 | post+update | [The EU AI Compliance Stack Is Crystallizing Into Three Layers – and None of Them Talk to Each Other](https://forkast.news/the-eu-ai-compliance-stack-is-crystallizing-into-three-layers-and-none-of-them-talk-to-each-other/) | forkast.news | Sun, 06 Sep 2026 | ☐ |
+| 7 | update | [Who Owns an AI-Generated Film? Copyright Questions Every Indie Filmmaker Should Understand](https://www.indieshortsmag.com/articles/2026/09/who-owns-ai-generated-film-copyright-questions-indie-filmmaker-should-understand/) | Indie Shorts Mag | Fri, 11 Sep 2026 | ☐ |
+| 7 | post+update | [AI-Generated Content and Copyright Law: What We Know](https://builtin.com/artificial-intelligence/ai-copyright) | Built In | Tue, 08 Sep 2026 | ☐ |
+| 7 | update | [AI Training Data Licensing Lawsuit Statistics 2026](https://www.aboutchromebooks.com/ai-training-data-licensing-lawsuit-statistics/) | About Chromebooks | Mon, 07 Sep 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [The Enforcement Wave: Five Deadlines That Will Define AI Agent Governance This Year](https://forkast.news/the-enforcement-wave-five-deadlines-that-will-define-ai-agent-governance-this-year/) | forkast.news | Thu, 10 Sep 2026 | ☐ |
+| 6 | monitor | [Dalet Helps Media Organizations Navigate the Rise of Synthetic Content with NVIDIA AI](https://natlawreview.com/press-releases/dalet-helps-media-organizations-navigate-rise-synthetic-content-nvidia-ai) | The National Law Review | Thu, 10 Sep 2026 | ☐ |
+| 6 | update | [Blee Raises $20 Million Series A To Expand AI Content Governance Platform](https://pulse2.com/blee-raises-20-million-series-a-to-expand-ai-content-governance-platform/) | Pulse 2.0 | Wed, 09 Sep 2026 | ☐ |
+| 6 | update | [Blee, a Cardumen Capital portfolio company, raises $27 million to bring its AI-powered marketing compliance solution to large enterprises](https://capital-riesgo.es/en/articles/blee-a-cardumen-capital-portfolio-company-raises-27-million-to-bring-its-ai-powered-marketing-compliance-solution-to-large-enterprises/) | Capital-Riesgo.es | Wed, 09 Sep 2026 | ☐ |
+| 6 | monitor | [Who's suing AI and who's signing latest: Seattle Times, Newsday, Editorial Perfil and Wikihow sue OpenAI](https://pressgazette.co.uk/platforms/news-publisher-ai-deals-lawsuits-openai-google/) | Press Gazette | Mon, 07 Sep 2026 | ☐ |
+| 5 | monitor | [What AI can do for real estate marketing](https://runway.com/resources/ai-real-estate-marketing) | Runway | Fri, 11 Sep 2026 | ☐ |
+| 5 | monitor | [Should your company advertise on ChatGPT? The legal risks to weigh](https://www.lexology.com/pro/content/should-your-company-advertise-chatgpt-the-legal-risks-weigh) | Lexology | Fri, 11 Sep 2026 | ☐ |
+| 5 | monitor | [The BR Privacy, Security & AI Download: September 2026](https://natlawreview.com/article/br-privacy-security-ai-download-september-2026) | The National Law Review | Thu, 10 Sep 2026 | ☐ |
+| 5 | monitor | [Will Embedded AI Strengthen Adobe’s Creative Software Position?](https://futurumgroup.com/insights/will-embedded-ai-strengthen-adobes-creative-software-position/) | futurumgroup.com | Thu, 10 Sep 2026 | ☐ |
+| 5 | monitor | [SPECTRA Launches First Certification Framework for Insurable AI, Reinforcing the Critical Role of MSPs in Helping Businesses Deploy and Manage AI Safely](https://www.businesswire.com/news/home/20260909032763/en/SPECTRA-Launches-First-Certification-Framework-for-Insurable-AI-Reinforcing-the-Critical-Role-of-MSPs-in-Helping-Businesses-Deploy-and-Manage-AI-Safely) | businesswire.com | Wed, 09 Sep 2026 | ☐ |
+| 4 | monitor | [Top 10 AI Video Generators for High-Quality Results](https://indiacsr.in/top-10-ai-video-generators-for-high-quality-results/) | India CSR | Sat, 12 Sep 2026 | ☐ |
+| 4 | monitor | [Adobe brings AI video and sound effect generation to Premiere timeline, plus beta audio source separation](https://finance.biggo.com/news/bf78bc0a-0a1f-421e-a48a-55cc13f549dd) | finance.biggo.com | Tue, 08 Sep 2026 | ☐ |
+
+---
+
 ## Week of September 10, 2026
 *Run: 2026-09-10 · 18 high · 13 monitor · lookback 7 days*
 
