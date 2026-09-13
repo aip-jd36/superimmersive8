@@ -9,10 +9,18 @@
  * exact-topic, related-topic, discovered/territory-topic, and knowledge-
  * readiness questioning -- solely because `crc_eligible: 'Pending'` (plus,
  * independently, because `ai_content_transparency` is not, and does not
- * become, a `GoalCategory` value, and no `TopicRelationship` targets it).
- * This milestone does not author a CRC Publication Review, does not change
- * `crc_eligible`, and does not author a `commercial_use ->
- * ai_content_transparency` `TopicRelationship`.
+ * become, a `GoalCategory` value). This milestone does not author a CRC
+ * Publication Review, does not change `crc_eligible`, and does not author a
+ * `commercial_use -> ai_content_transparency` `TopicRelationship`.
+ *
+ * [UPDATE, Adopted TopicRelationship production representation milestone,
+ * 2026-09-13, same day, later session]: `REL-COMMERCIAL-USE-AI-CONTENT-
+ * TRANSPARENCY-v1` now exists in `topic-relationships-fixture.ts` (formally
+ * Adopted, `crc_eligible: 'Pending'`) -- test C below is updated
+ * accordingly to assert the correct, current invariant (a relationship
+ * targeting this topic must remain `crc_eligible: 'Pending'`, not that none
+ * exists). Full relationship-side dormancy proof lives in
+ * `euai-art50-4-topicrelationship.test.ts`, not duplicated here.
  */
 
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
@@ -110,9 +118,11 @@ describe('CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1 -- productio
     expect(c.crc_candidate_statement).toBeNull()
   })
 
-  test('C. no TopicRelationship in the production fixture targets ai_content_transparency -- this milestone does not author one', () => {
+  test('C. any TopicRelationship targeting ai_content_transparency in the production fixture remains crc_eligible: Pending -- never Yes, i.e. never CRC-active through a relationship', () => {
     const targeting = TOPIC_RELATIONSHIPS_FIXTURE.filter((r) => r.target_topic === TOPIC)
-    expect(targeting).toEqual([])
+    for (const r of targeting) {
+      expect(r.crc_eligible).toBe('Pending')
+    }
   })
 
   test('H. ai_content_transparency is not, and does not become, a GoalCategory -- no fabricated UserGoal category exists for this topic', () => {
