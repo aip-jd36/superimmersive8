@@ -101,6 +101,40 @@ Related: [[CLAIM-COPY-001-v1]], [[CLAIM-COPY-002-v1]], [[CLAIM-COPY-003-v1]], [[
 
 Full CRC Publication Review artifact: `governance-reviews/CPR_006_COPYRIGHT_PUBLICATION_PACKAGE_2026-08-19.md`
 
+### REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-v1
+
+**GOVERNANCE TREATMENT (2026-09-13, PM adoption decision, FGR_020):** `Target topic: ai_content_transparency` is a `KnowledgeTopic` value, not a `GoalCategory` value — this entry template's own comment above ("must match an existing GoalCategory value") predates the `KnowledgeTopic` engineering foundation (superset type, integrated 2026-09-13, same day) and is superseded for this entry only, exactly mirroring the identical, already-established override on `GOVERNED-CLAIMS.md`'s own Wave 9 claim entry (`CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1`). `Source topic: commercial_use` remains a real `GoalCategory` value, unaffected.
+
+Source topic: commercial_use
+Target topic: ai_content_transparency
+Relationship type: relevant_consideration
+Rationale: >
+  Claims under the target topic may provide relevant governed information
+  for interpreting a goal under the source topic, but do not themselves
+  determine the source-topic answer. Specifically: a user's explicit
+  commercial-use question may have a complete, honest answer that
+  separately notes an EU AI-content-transparency disclosure consideration
+  potentially relevant to the same content, without that consideration by
+  itself determining whether, or confirming that, the project may be used
+  commercially.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-09-13
+Publication scope: Reviewer/Commercial Assurance
+CRC Eligible: Pending
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Last reviewed: 2026-09-13
+Superseded by: none
+Related: [[CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1]]
+
+**Governance note:** this relationship is Adopted for reviewer/institutional use only — `CRC Eligible` remains `Pending`, unchanged and independently gated from Adoption, per this document's own governance discipline (see "Governance" section above) and the live precedent this entry follows (`REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1` was itself Adopted 2026-08-16 with its target claims still `Pending`, becoming `CRC Eligible: Yes` only 2026-08-19 via a separate CRC Publication Review). `lookupRelatedTopicClaims()` requires both `Adopted` and `CRC Eligible: Yes` on this relationship itself, AND `Adopted` and `CRC Eligible: Yes` on the target claim (`CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1`, itself currently `crc_eligible: Pending`), before any related-topic content could ever reach CRC output — this double gate independently, structurally fail-closes retrieval today regardless of this Adoption decision. No production `TopicRelationship`/`TopicClaim` fixture entry is created or modified by this Adoption; `topic-relationships-fixture.ts` remains unchanged, exactly as `CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1`'s own Adoption (2026-09-13) left `topic-claims-fixture.ts` unchanged until its own, separate, later production-representation task.
+
+**Formal Governance Review (2026-09-13): ADOPT.** Independently re-derived (not accepted from the target claim's own `FGR_019` §9 on precedent alone) that `commercial_use` is the sole well-justified explicit-goal source for `ai_content_transparency` knowledge — `likeness`, `copyright_ownership`, `copyrightability`, `third_party_source_rights`, and `unknown` were each independently considered and rejected (no evidenced substantive connection, or, for `unknown`, a categorical rejection as a governed-relationship source). Confirmed the relationship can authorize only `relevant_consideration` (Category A: relevant, not a prerequisite, applicability determination, or compliance conclusion) — the schema's own single implemented `relationship_type` structurally forecloses the other three categories. Verified empirically, via a throwaway, never-committed synthetic-eligibility canary, that (a) the relationship's own governance state alone cannot make the real, `Pending` target claim retrievable, (b) a fully-synthetic-eligible scenario resolves to Bounded Interpretation's Case 3B (`relevant_applicability_unresolved`), never `directly_relevant` and never a compliance/applicability/deployer/deep-fake conclusion, and (c) `matched_goal_category` is always the real explicit `commercial_use` goal, never a fabricated `ai_content_transparency` goal. Full review: `governance-reviews/FGR_020_CAND-REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-001_2026-09-13.md`.
+
+Full Formal Governance Review artifact: `governance-reviews/FGR_020_CAND-REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-001_2026-09-13.md`
+
 ## Runtime fixture
 
 Canonical source above is hand-synced (same discipline as `GOVERNED-CLAIMS.md` ↔ `topic-claims-fixture.ts` — no live markdown parser exists anywhere in this repository) into `08_Platform/app/lib/retrieval-engine/topic-relationships-fixture.ts`. A consistency test (`__tests__/retrieval-engine/topic-relationships-fixture-consistency.test.ts`) catches drift on `relationship_id` / `source_topic` / `target_topic` / `relationship_type` / `lifecycle` / `publication_scope` / `crc_eligible` / `superseded_by` between this document and the runtime fixture.
