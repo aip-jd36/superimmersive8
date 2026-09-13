@@ -4269,3 +4269,120 @@ Related: [[CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1]] (§ 396-b(5)'s
 
 Full Formal Governance Review artifact: `governance-reviews/FGR_018_CAND-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001_2026-09-10.md`
 Full CRC Publication Review artifact: `governance-reviews/CPR_025_NY_GBL_396B_SYNTHETIC_PERFORMER_DISCLOSURE_REVIEW_2026-09-10.md`
+
+---
+
+**Wave 9 claim below (2026-09-13) — the first claim in the EU AI Act / AI Content Transparency domain, and the first claim in this document whose `Topic` field is a `KnowledgeTopic` value that is NOT a `GoalCategory` value** (`ai_content_transparency` — the entry template's own comment above, "must match an existing GoalCategory value," predates the `KnowledgeTopic` engineering foundation integrated 2026-09-13 and is superseded for this claim only; see GOVERNANCE TREATMENT below). `Lifecycle: Adopted` (Adoption Approver: JD (PM), Adoption Decision Date: 2026-09-13, following `governance-reviews/FGR_019_CAND-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001_2026-09-12.md`'s recommendation — DEFER ADOPTION pending topic representation, since resolved — and the PM-concurred `ai_content_transparency` KnowledgeTopic identifier recorded in `governance-reviews/FGR_019_ADDENDUM_TOPIC_TAXONOMY_RECOMMENDATION_2026-09-13.md`/`FGR_019_ADDENDUM_TOPIC_TAXONOMY_PM_CONCURRENCE_2026-09-13.md`, and this task's own explicit, separately-authorized governance-recording milestone), `Publication scope: Reviewer/Commercial Assurance`. Not CRC-eligible — `CRC Approver`/`CRC Decision Date` PENDING, same discipline as every prior wave; a separate CRC Publication Review is required, and per FGR_019 §13/§14 this claim sits adjacent to deep-fake/likeness subject matter without itself being a real-person-likeness claim — a future CPR must independently assess whether `CRC-PUBLICATION-POLICY.md` Principle 3 applies to an AI-content-transparency disclosure obligation (distinct in kind from the likeness/synthetic-performer claims Principle 3 was originally named for), not assume either outcome. Source Formal Governance Review: `governance-reviews/FGR_019_CAND-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001_2026-09-12.md`. Source candidate package: `EU-AI-ACT-ARTICLE-50-4-AUDIOVISUAL-FGR-PACKAGE.md` (this folder). Runtime note, same shape as every prior non-fixture wave's own, but one step further: this claim has no `TOPIC_CLAIMS_FIXTURE` (`08_Platform/app/lib/retrieval-engine/topic-claims-fixture.ts`) representation, AND its own `topic` value (`ai_content_transparency`) is not yet a member of `KNOWLEDGE_ONLY_TOPICS` (`08_Platform/app/lib/retrieval-engine/types.ts`, currently `[]`) — confirmed directly against current code as part of this Adoption recording, not assumed. This is a strictly stronger runtime-separation than any prior wave: even authoring a fixture entry for this claim today would not type-check under the current `KnowledgeTopic` union until a separate, deliberately unperformed engineering task adds `ai_content_transparency` to `KNOWLEDGE_ONLY_TOPICS`. This is Adoption as pure governance documentation, with zero runtime effect: this claim is governed Living Knowledge, immediately useful to a human reviewer, but structurally unreachable by CRC Retrieval until that separate engineering task, a separate `TopicRelationship` authoring task (see Related below), and a separate, later CRC Publication Review all occur.
+
+### CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1
+Domain: EU AI Act / AI Content Transparency — Article 50(4) Audiovisual/Deepfake Disclosure
+Topic: ai_content_transparency
+Subtopic: eu-ai-act-article-50-4-deployer-audiovisual-disclosure
+Claim character: established
+Jurisdiction: European Union
+Context: commercially intended AI-generated or AI-manipulated audiovisual (image/audio/video) content deployed (published, put into use, made available) by an entity within Regulation (EU) 2024/1689's territorial scope
+
+GOVERNANCE TREATMENT (2026-09-13, PM adoption decision, FGR #19): `Topic: ai_content_transparency` is a `KnowledgeTopic` value, not a `GoalCategory` value — `GOAL_CATEGORIES` remains unchanged (`commercial_use | copyright_ownership | copyrightability | likeness | third_party_source_rights | unknown`); this claim's own topic is representable only because of the separate `KnowledgeTopic` engineering foundation (superset type, integrated 2026-09-13), per `FGR_019` §8/§13 and its two addenda. `provider_scope: null`, `tool_scope: null` (explicit — general EU statutory knowledge, tool-independent and not attached to any AI-video or asset provider). FGR disposition: DEFER ADOPTION — TOPIC REPRESENTATION DECISION REQUIRED, resolved by subsequent PM concurrence with the topic identifier; the governed proposition below is adopted exactly as bounded-wording-corrected in `governance-reviews/FGR_019_CAND-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001_2026-09-12.md` §2, without further paraphrase, simplification, or reconstruction.
+
+Claim proposition: >
+  Under Article 50(4), first subparagraph, of Regulation (EU) 2024/1689
+  (the AI Act), a deployer of an AI system that generates or manipulates
+  image, audio, or video content constituting a "deep fake" must disclose
+  that the content has been artificially generated or manipulated. This
+  obligation does not apply where the use is authorised by law to detect,
+  prevent, investigate, or prosecute criminal offences. Where the content
+  forms part of an evidently artistic, creative, satirical, fictional, or
+  analogous work or programme, this disclosure obligation is not removed
+  but is limited to disclosing the existence of such generated or
+  manipulated content in an appropriate manner that does not hamper the
+  display or enjoyment of the work.
+
+Source references:
+  - primary (Class A, AI Act Service Desk; Class B, confirmed unamended by the enacted Digital Omnibus): Regulation (EU) 2024/1689, Article 50(4), first subparagraph — `evidence-captures/eu-ai-act/ai-act-servicedesk-article-50_20260912T040235Z_eb822bdb.html`, cross-checked against `eur-lex-regulation-2026-1744-digital-omnibus_20260912T085700Z_b5544b0c.pdf` (point (20) of the amendment list touches only paragraph 7).
+  - context: Regulation (EU) 2024/1689, Article 2(1)(b)/(c) — territorial/application scope (see Applicability requirements below).
+  - context: Commission Communication C(2026) 5054 final, §6 ("Article 50(4): Labelling of Deep Fakes and Certain Text Publications") — non-binding interpretive guidance, cited as context only, never as the source of this proposition's own wording.
+Source authority/type: Primary legal/official authority (enacted Regulation text) — Class A/B
+Source fact: >
+  "4. Deployers of an AI system that generates or manipulates image,
+  audio or video content constituting a deep fake, shall disclose that
+  the content has been artificially generated or manipulated. This
+  obligation shall not apply where the use is authorised by law to
+  detect, prevent, investigate or prosecute criminal offence. Where the
+  content forms part of an evidently artistic, creative, satirical,
+  fictional or analogous work or programme, the transparency obligations
+  set out in this paragraph are limited to disclosure of the existence of
+  such generated or manipulated content in an appropriate manner that
+  does not hamper the display or enjoyment of the work."
+
+SI8 interpretation: >
+  A commercially distributed AI video containing synthetic audiovisual
+  content resembling an existing person, object, place, entity, or event,
+  that a reasonable viewer could mistake for authentic (i.e., plausibly
+  "constituting a deep fake" per Article 3(60)), should not be represented
+  to a client, buyer, or platform as clear of Article 50(4) disclosure
+  obligations without confirming both (a) whether the content in fact
+  meets that definition, and (b) who the "deployer" is for this specific
+  project (Article 3(4)) -- SI8's typical client role (production agency
+  creating content on behalf of a brand/publisher) does not automatically
+  resolve either question, and CRC must not assume it does.
+
+Applicability requirements: []   <!-- Deliberately none authored -- FGR_019 §6/§13 and the candidate package §6 both independently confirm no currently-implemented APPLICABILITY_FACTS value (jurisdiction | tool_plan_tier | tool_account_status) can soundly represent Article 2(1)(b)/(c)'s establishment/output-use test without conflating two independently-sufficient statutory conditions into one blunt "jurisdiction" match, compounded by JURISDICTION_VALUE_ALIASES having zero EU-related entries. Represented instead as the union_establishment_or_output_use unresolved dependency below -- an honest architecture-gap disclosure, not a forced/misleading formal gate, mirroring the NY likeness package's own precedent. -->
+Unresolved project dependencies: [deployer_status_confirmed, content_constitutes_deep_fake, artistic_creative_satirical_fictional_analogous_work, union_establishment_or_output_use]   <!-- deployer_status_confirmed: Type D, not currently representable -- no structured fact type exists anywhere in the interview-engine contract for "who is deploying/publishing this AI system's output" (Article 3(4)); fails closed (claim cannot resolve to "applies to you" for any project without it). content_constitutes_deep_fake: Type C, evidence-only -- Article 3(60)'s own "would falsely appear...authentic" characterization is a legal/factual judgment, not a raw self-attestable fact, structurally identical in kind to advertising_or_trade_use_confirmed's established treatment; never a direct CRC self-attestation question (Stock Governance Rule). artistic_creative_satirical_fictional_analogous_work: Type C, evidence-only/judgment-laden -- determines disclosure manner, not whether disclosure is owed at all; absent resolution, the stricter (non-carve-out) disclosure manner is the safer default framing. union_establishment_or_output_use: Type B, bounded user-attestable fact but only partially -- a stated DistributionTerritoryMention is already-modeled and CRC can already ask about it, but per FGR_019 §6/§7 and package §6, it only evidences, never conclusively resolves, Article 2(1)(b)/(c) applicability; CRC must never treat a captured distribution territory as itself resolving this dependency. -->
+Provider/actor scope: deployer only (Article 3(4)) -- never conflated with "provider" (the Article 50(2) actor), "operator," "user," "producer," "advertiser," "agency," or "client," none of which are the statute's own vocabulary. Tool scope: null (statutory, tool-independent). Provider scope (asset-provider sense): null (not a third-party asset-provider-scoped claim).
+Prohibited conclusions: >
+  Does not establish whether a SPECIFIC project's content constitutes a
+  "deep fake" as the Regulation defines the term (Article 3(60)) -- that
+  remains a judgment call this claim does not make. Does not establish
+  who the "deployer" is for a specific project (Article 3(4)). Does not
+  establish whether the artistic/creative/satirical/fictional/analogous-
+  work carve-out applies to a specific project. Does not establish
+  whether Article 2's territorial/application conditions are met for a
+  specific project. Does not constitute a compliance determination, legal
+  advice, or certification that any project is cleared under Article
+  50(4) -- that remains a Commercial Assurance Assessment / legal-review
+  question, never a CRC output. Does not address the deferred
+  public-interest-text branch (Article 50(4), second subparagraph) --
+  remains out of scope. Does not address Article 50(2) (a distinct
+  provider marking obligation) -- remains out of scope, confirmed
+  severable per FGR_019 §13/package §13.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-09-13
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  PENDING -- not yet reviewed for CRC Publication. No CRC Publication
+  Review has been conducted. FGR_019 §10/§11 found the proposition
+  CRC-suitable in principle (every Bounded Interpretation state passes
+  the milestone's own prohibited-conclusion tests), but "suitable in
+  principle" is explicitly not the same as ready for `crc_eligible: Yes`
+  (FGR_019 §10). A future CRC Publication Review must additionally
+  resolve: whether `CRC-PUBLICATION-POLICY.md` Principle 3's subject-
+  matter gate applies to this AI-content-transparency disclosure
+  obligation (distinct in kind from the likeness/synthetic-performer
+  claims Principle 3 was originally named for -- not pre-judged here);
+  and must not be conducted before a `commercial_use -> ai_content_
+  transparency` TopicRelationship exists (FGR_019 §9/§13 and addendum §7
+  -- substantively justified but not yet authored) and this claim's own
+  applicability/geography activation gaps (see Unresolved project
+  dependencies above) are at minimum explicitly re-confirmed still open,
+  not silently assumed resolved.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  EU law (Article 50(4) of the AI Act) may require AI-generated or
+  manipulated audiovisual content that constitutes a deep fake to be
+  disclosed as such by whoever deploys it, with a lighter disclosure
+  standard for evidently artistic, creative, satirical, or fictional
+  work.
+
+Effective date: Regulation (EU) 2024/1689 in force; Article 50(4) confirmed unamended by the enacted Digital Omnibus (Regulation (EU) 2026/1744) as of the evidence captured 2026-09-12.
+Last reviewed: 2026-09-13
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: [[POS-002]], [[POS-003]] (both already establish SI8's "do not pitch as EU AI Act compliance" position, directly applicable here), [[EC-001]] (Domain H self-attestation caution, structurally analogous to the deployer-identity dependency above). A future `commercial_use -> ai_content_transparency` `TopicRelationship` is substantively justified (FGR_019 §9, addendum §7) but not yet authored -- a separate, later governance step. Not related to `CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1` or `CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1` -- this claim governs AI-content-origin disclosure generally, not any real or synthetic person's likeness/identity (FGR_019 addendum §1 explicitly rejected a "synthetic"-anchored name for this reason).
+
+Full Formal Governance Review artifact: `governance-reviews/FGR_019_CAND-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001_2026-09-12.md`
+Full topic-taxonomy recommendation addendum: `governance-reviews/FGR_019_ADDENDUM_TOPIC_TAXONOMY_RECOMMENDATION_2026-09-13.md`
+Full topic-taxonomy PM-concurrence addendum: `governance-reviews/FGR_019_ADDENDUM_TOPIC_TAXONOMY_PM_CONCURRENCE_2026-09-13.md`
