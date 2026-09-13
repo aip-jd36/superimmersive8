@@ -2101,3 +2101,76 @@ The repair adds exactly the same primitive (`isNonEmptyString`) to two more fiel
 ### 33.7 Deployment
 
 See final report for the exact rebase/range-diff/push sequence and production-target SHA. CAH-4I.4 remains **OPEN / UAT-PENDING** — this repair unblocks Scenario B; it does not itself constitute production acceptance.
+
+---
+
+## 34. CAH-4I.4F-UAT-6 — Observation Reconciliation Proportional Closeout (2026-09-14)
+
+**Status: CORE INVARIANT PRODUCTION-PROVEN. FULL PERMUTATION UAT PROPORTIONALLY DEFERRED, NOT ABANDONED.** This is a deliberate, PM-authorized product-stage decision, re-derived below rather than accepted at face value, and it closes the *active engineering/UAT milestone* — it does not assert exhaustive verification that was never performed.
+
+### 34.1 Repository state re-confirmed (Phase 0)
+
+Clean: branch `cah-4i4-submission-fact-acquisition-governance`, `HEAD` = `origin/main` = `fcea685` exactly (zero drift), no in-progress git operation. Unrelated concurrent Living Knowledge work on `origin/main`'s own further history was not inspected or touched — not needed for a documentation-only closeout.
+
+### 34.2 Authoritative state re-confirmed (Phase 1) — no discrepancy found
+
+Re-checked directly against source, not assumed from this milestone's own prompt: the `notes`-fallback repair (`s3?.I03?.notes`, `s3?.I01?.notes`) is present exactly as CAH-4I.4F-UAT-5 committed it; `observation-reconciliation.test.ts` + `signoff-reconciliation.test.ts` re-run this pass: **63/63 passing**. Everything in this milestone's own briefing matches repository evidence exactly — no flagged discrepancy.
+
+### 34.3 Final Production evidence (Phase 2)
+
+| Scenario | Status | Evidence |
+|---|---|---|
+| **A — clean-vs-triggered fail-closed** | **PASS** | `logos_observed = Possible`, I03 `judgment = Verified`, accounting blank → durable signoff **BLOCKED**: *"Incomplete: Account for the observed logo/trademark element in Control I03's notes before signoff."* |
+| **B — pre-repair** | **FAIL — exposed a real implementation mapping bug** (CAH-4I.4F-UAT-4/5), not a design or governance defect | I03 `notes` populated, persisted across refresh, signoff still blocked — validator checked only `trademark_elements` |
+| **B — post-repair** | **PASS** | Same fixture, same persisted `notes` text, no re-entry, no judgment change → *"✓ Durable sign-off active. Section 7 unlocked."* / *"Sign-off recorded — **ASSESS-008-2026-09-13** (revision 96). Section 7 unlocked."* — recorded here as Production evidence supplied by PM, not independently re-queried (no live DB access in this session, consistent with every prior milestone in this arc) |
+| **C — Unresolved/insufficient** | **DEFERRED / NOT EXECUTED** | Automated coverage exists (§32.5 scenario table; `signoff-reconciliation.test.ts` tests 6–7) |
+| **D — Likeness** | **DEFERRED / NOT EXECUTED** | Automated coverage exists (real_likeness_suspected describe block, `observation-reconciliation.test.ts`) |
+| **E — Music** | **DEFERRED / NOT EXECUTED** | Automated coverage exists (music_heard tests, including the specific `'Generic / royalty-free'` non-trigger case) |
+| **F — Correction / no stale state** | **DEFERRED / NOT EXECUTED** | Automated coverage exists ("current-state (not historical) evaluation" describe block) |
+| **G — Shared target** | **DEFERRED / NOT EXECUTED** | Automated coverage exists ("shared target" describe block) |
+| **H — Unexpected/landmarks fallback** | **DEFERRED / NOT EXECUTED** | Automated coverage exists ("uncontrolled observations route to Section 5" describe block) |
+
+**Scenarios C–H are recorded as DEFERRED, not PASS, and no claim of exhaustive Production UAT is made anywhere in this section.**
+
+### 34.4 Closeout status terminology (Phase 3) — reused, not invented
+
+This document's own established vocabulary (used throughout this arc and this repository's own institutional history — e.g. the `CAH-4G.10C — CLOSED / PRODUCTION-PROVEN` precedent indexed in `COMMERCIAL_ASSURANCE_ARCHITECTURE_INDEX.md`) already distinguishes "closed for a specific proven scope" from "fully verified in every dimension." Applying that same discipline here, precisely worded rather than borrowed wholesale (this milestone's scope genuinely differs from CAH-4G.10C's — one governance invariant proven, not a full feature surface):
+
+> **CORE GOVERNANCE INVARIANT: PRODUCTION-PROVEN. REMAINING PERMUTATION UAT: PROPORTIONALLY DEFERRED — NOT REQUIRED FOR CURRENT PRODUCT STAGE.**
+
+This is not "fully Production UAT complete" — that wording is deliberately avoided, since it would misstate what actually happened (Scenarios C–H were never run against Production). It is also not "unresolved" or "blocked" — the one thing this whole milestone existed to prove (the fail-closed/pass-with-accounting invariant, including the mid-arc defect-and-repair cycle) has direct, real Production evidence, not merely automated test evidence.
+
+### 34.5 What is proven vs. not proven (Phase 4) — stated without inflation
+
+**PROVEN, with direct Production evidence:**
+- A triggered, unaccounted-for observation blocks durable signoff (Scenario A).
+- The exact defect this arc found and repaired (I03/I01 missing the `notes` fallback) is genuinely fixed in Production, not merely in a test file (Scenario B post-repair, using the *same* persisted reviewer text, no re-entry).
+- **Reconciliation does not require the reviewer to change their control judgment** — Scenario B post-repair signed off successfully with `judgment` untouched from its original `Verified` value, directly demonstrating the core design claim (§25–28: presence of accounting, never content or conclusion, is what the system checks).
+
+**NOT proven by Production UAT (proven only by automated test, per §34.3's table):**
+- Every mapping permutation (L01/I02/landmarks/unexpected_content triggering and clearing in the live UI).
+- Every shared-target combination (both `logos_observed` and `trademarks_observed` triggered simultaneously, live).
+- Every correction/supersession scenario (non-clean→clean removing a live block).
+- Every persistence/navigation permutation beyond the one already exercised in Scenario B.
+
+This distinction is preserved deliberately, not glossed over — automated coverage is real and thorough (138 tests total across the two reconciliation test files), but it is not a substitute for the specific claim "this exact behavior was observed against real Production infrastructure," which this document has been careful to distinguish throughout the arc (§31.5's identical two-column discipline).
+
+### 34.6 Deferred-scenario register (Phase 5) — reusing this document's own existing table convention
+
+No new tracking framework is created. The table in §34.3 *is* the deferred register — the same "governance decision table" pattern already used at §20, §25.13, and elsewhere in this document. Deferral reason, stated once and applying to all six: **"Proportional product-stage prioritization prior to paid Commercial Assurance customer usage — not because any scenario is believed to fail."** The automated tests backing each deferred scenario remain in the repository, unmodified, and can be re-run at any time; nothing about this closeout requires new test infrastructure or new fixtures.
+
+### 34.7 Governance/authority final assessment (Phase 4/§7 of the original CAH-4I.4B/C/E chain, re-confirmed)
+
+Unaffected by this closeout, which makes no code change: observation ≠ determination; submitter disclosure ≠ reviewer observation; evidence ≠ fact ≠ sufficiency; no semantic evaluation of reviewer text (proven again by Scenario B post-repair accepting the reviewer's own "no further conclusion is inferred from the observation itself" language verbatim, unchanged, as satisfying); no automatic legal conclusion; unresolved/insufficient remains a valid disposition; Human Reviewer retains authority; Bounded Interpretation remains the conclusion ceiling — none of this required re-verification since no runtime code changed in this milestone.
+
+### 34.8 No scope creep (Phase 6) — confirmed
+
+This milestone made no runtime, UI, fixture, Living Knowledge, or CRC change. `git diff` on this closeout is documentation-only (verified below).
+
+### 34.9 Final CAH-4I.4 status
+
+**CLOSED for the current engineering/UAT milestone, with the core governance invariant Production-proven and the mid-arc implementation defect found and repaired.** Not "fully Production UAT complete" (Scenarios C–H genuinely deferred, not silently passed). Ready for the next Commercial Assurance / Living Knowledge architecture question (not begun here, per instruction) without any open blocker from this arc.
+
+### 34.10 Deferred-UAT resumption trigger
+
+Resume Scenarios C–H against Production when either: (a) SI8 has a first paying Commercial Assurance customer (the originally-stated reason Preview vs. Production distinction stopped mattering also stops applying once real customer data exists), or (b) any future change touches the reconciliation module, `Section3Evidence.tsx`'s I03/I01/L01/I02 blocks, or the workbook schema in a way that could plausibly affect a deferred scenario's behavior — whichever comes first. No calendar-based deadline is set; this is a risk-triggered, not time-triggered, resumption condition.
