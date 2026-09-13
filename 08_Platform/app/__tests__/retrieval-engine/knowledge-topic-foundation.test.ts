@@ -1,8 +1,16 @@
 /**
  * KnowledgeTopic Foundation milestone (2026-09-13) -- focused regression
- * tests proving the GoalCategory/KnowledgeTopic separation, without adding
- * any production knowledge-only topic value (KNOWLEDGE_ONLY_TOPICS stays
- * empty; no Article 50 content of any kind).
+ * tests proving the GoalCategory/KnowledgeTopic separation. Originally
+ * written when `KNOWLEDGE_ONLY_TOPICS` was still empty (no production
+ * knowledge-only topic value existed yet); the two tests in the
+ * "KnowledgeTopic closed-set contract" block below were updated the same day
+ * by the First Real Knowledge-Only Topic milestone, which added the set's
+ * first real member (`'ai_content_transparency'`) -- see that constant's own
+ * doc comment in `lib/retrieval-engine/types.ts` for the full governance
+ * provenance. This file's SIMULATED_KNOWLEDGE_ONLY_TOPIC mechanism and every
+ * other test below are UNCHANGED and remain accurate: they never depended on
+ * the set being empty, only on it not (yet) containing their own
+ * test-only-cast value.
  *
  * This file does NOT re-prove existing exact-topic/related-topic/discovered-
  * topic behavior end to end -- the full pre-existing suite (retrieve.test.ts,
@@ -92,12 +100,12 @@ function reviewerClaim(overrides: Partial<ReviewerLkClaim> & Pick<ReviewerLkClai
 const SIMULATED_KNOWLEDGE_ONLY_TOPIC = 'test_only_simulated_knowledge_only_topic' as unknown as KnowledgeTopic
 
 describe('KnowledgeTopic closed-set contract', () => {
-  test('KNOWLEDGE_ONLY_TOPICS is empty -- no production knowledge-only topic exists yet', () => {
-    expect(KNOWLEDGE_ONLY_TOPICS).toEqual([])
+  test('KNOWLEDGE_ONLY_TOPICS has exactly its first real member -- ai_content_transparency (First Real Knowledge-Only Topic milestone, 2026-09-13)', () => {
+    expect(KNOWLEDGE_ONLY_TOPICS).toEqual(['ai_content_transparency'])
   })
 
-  test('KNOWLEDGE_TOPICS is exactly GOAL_CATEGORIES today (empty knowledge-only addition)', () => {
-    expect([...KNOWLEDGE_TOPICS].sort()).toEqual([...GOAL_CATEGORIES].sort())
+  test('KNOWLEDGE_TOPICS is exactly GOAL_CATEGORIES plus the one real knowledge-only topic', () => {
+    expect([...KNOWLEDGE_TOPICS].sort()).toEqual([...GOAL_CATEGORIES, 'ai_content_transparency'].sort())
   })
 
   test('every GoalCategory value is a valid KnowledgeTopic (superset property)', () => {

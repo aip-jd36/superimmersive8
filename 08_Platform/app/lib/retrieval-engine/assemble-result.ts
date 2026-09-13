@@ -110,8 +110,19 @@ export function assembleTopicResult(claim: TopicClaim): RetrievalResult | null {
  * unchanged as the claim's own intrinsic subject (never overwritten to look
  * exact -- see RetrievalResult.topic's own doc comment). Same
  * never-fabricate-scope discipline as assembleResult/assembleTopicResult.
+ *
+ * `sourceGoalCategory` is deliberately typed `GoalCategory`, NOT
+ * `TopicClaim['topic']` (First Real Knowledge-Only Topic milestone,
+ * 2026-09-13 correction) -- this parameter is always the relationship's own
+ * `source_topic` (`RelatedTopicMatch.sourceGoalCategory: GoalCategory`,
+ * lookup-topic-relationships.ts), a real explicit-goal provenance value,
+ * never the claim's own (possibly knowledge-only) topic. The two types were
+ * structurally identical before `KNOWLEDGE_ONLY_TOPICS` gained a real member,
+ * which is why this parameter could previously be declared with either type
+ * without consequence; now that `KnowledgeTopic` is genuinely wider, only
+ * `GoalCategory` is correct here.
  */
-export function assembleRelatedTopicResult(claim: TopicClaim, relationshipId: string, sourceGoalCategory: TopicClaim['topic']): RetrievalResult | null {
+export function assembleRelatedTopicResult(claim: TopicClaim, relationshipId: string, sourceGoalCategory: GoalCategory): RetrievalResult | null {
   if (claim.crc_publication_scope === null) return null
   return {
     source_fact: { kind: 'topic', identifier: claim.topic },

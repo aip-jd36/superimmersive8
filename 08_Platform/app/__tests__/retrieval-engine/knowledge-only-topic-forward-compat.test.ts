@@ -200,8 +200,8 @@ describe('STEP 3/4 -- test-only KnowledgeTopic mechanism and type separation', (
     expect(isGoalCategoryTopic(SIMULATED_TOPIC)).toBe(false)
   })
 
-  test('KNOWLEDGE_ONLY_TOPICS remains empty -- this file adopts nothing', () => {
-    expect(KNOWLEDGE_ONLY_TOPICS).toEqual([])
+  test('KNOWLEDGE_ONLY_TOPICS does not contain this file\'s own simulated test-only value -- this file adopts nothing (the real member added by the First Real Knowledge-Only Topic milestone, ai_content_transparency, is a separate, deliberate, governed decision, not something this file introduces)', () => {
+    expect(KNOWLEDGE_ONLY_TOPICS as readonly string[]).not.toContain(SIMULATED_TOPIC)
   })
 })
 

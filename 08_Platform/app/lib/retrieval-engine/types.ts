@@ -419,27 +419,48 @@ export interface ApplicabilityRequirement {
 //                      inform a real explicit goal via a governed
 //                      TopicRelationship).
 //
-// This milestone adds the TYPE separation only. KNOWLEDGE_ONLY_TOPICS is
-// deliberately EMPTY -- no knowledge-only production topic value has been
-// governed yet (Article 50 remains CANDIDATE -- NOT ADOPTED, NOT
-// CRC-ELIGIBLE; see FGR_019). KnowledgeTopic is therefore, in practice,
-// exactly GoalCategory today -- this is intentional: the closed set is
-// ready to grow the moment a real governed knowledge-only topic is
-// adopted, without ever touching GOAL_CATEGORIES/GoalCategory/the
-// extractor's user-goal schema to do it.
+// The KnowledgeTopic Foundation milestone (2026-09-13) added the TYPE
+// separation only -- KNOWLEDGE_ONLY_TOPICS was deliberately left EMPTY, since
+// no knowledge-only production topic value had been governed yet.
+//
+// [UPDATE, First Real Knowledge-Only Topic milestone, 2026-09-13, same day]
+// `KNOWLEDGE_ONLY_TOPICS` now has its first real member,
+// `'ai_content_transparency'` (see that constant's own doc comment below for
+// the full governance provenance). `KnowledgeOnlyTopic` is therefore no
+// longer `never`, and `KnowledgeTopic` is now GENUINELY WIDER than
+// `GoalCategory` at compile time for the first time -- the
+// `GoalCategory | never` collapse this section and this milestone's own
+// tests previously documented no longer applies. This is a taxonomy
+// REPRESENTABILITY change only: it does not, by itself, make
+// `CAND-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001` (still
+// `crc_eligible: Pending`, per FGR_019) retrievable, CRC-active, or reachable
+// through any production `TopicClaim`/`TopicRelationship` -- none exist yet.
 
 /**
  * Closed set of knowledge-only topic values -- governed knowledge subjects
  * that are NOT, and must never become, valid `GoalCategory`/
- * `UserGoal.category` values. Deliberately empty today (see the module
- * header immediately above). Adding a future value here is the ONLY way a
+ * `UserGoal.category` values. Adding a future value here is the ONLY way a
  * new knowledge-only topic may exist -- never a free-text string, never a
  * cast, never a reuse of `'unknown'`. Composed the same way every other
  * closed-set taxonomy in this codebase is (`GOAL_CATEGORIES`,
  * `RELATIONSHIP_TYPES`, `LIFECYCLE_VALUES`, ...): a `readonly` tuple plus a
  * derived literal-union type, never `string`.
+ *
+ * `'ai_content_transparency'` (First Real Knowledge-Only Topic milestone,
+ * 2026-09-13) -- the first real member of this set. Governed knowledge
+ * subject for CAND-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001
+ * (Lifecycle: Adopted; `crc_eligible: Pending`; see FGR_019 and the
+ * KnowledgeTopic decision record). This is a TAXONOMY REPRESENTABILITY
+ * change only -- adding it here does not add a TopicClaim, does not add a
+ * TopicRelationship, does not change `crc_eligible`, does not add
+ * `geographic_relevance_scope`, and does not make Article 50 retrievable or
+ * CRC-active by itself. No user would ever phrase this as an explicit goal
+ * (there is no corresponding `GoalCategory` value, and none is added by this
+ * change) -- it exists so a future, separately-governed `TopicClaim`/
+ * `TopicRelationship` pair can eventually reference it as a real subject,
+ * exactly per this module's own header rationale.
  */
-export const KNOWLEDGE_ONLY_TOPICS = [] as const
+export const KNOWLEDGE_ONLY_TOPICS = ['ai_content_transparency'] as const
 export type KnowledgeOnlyTopic = (typeof KNOWLEDGE_ONLY_TOPICS)[number]
 
 /**
@@ -451,18 +472,23 @@ export type KnowledgeOnlyTopic = (typeof KNOWLEDGE_ONLY_TOPICS)[number]
  * type -- explicit user intent can never be fabricated from governed
  * knowledge existing.
  *
- * IMPORTANT, verified directly against `tsc` (not merely asserted): while
- * `KnowledgeOnlyTopic` is `never` (`KNOWLEDGE_ONLY_TOPICS` empty), TypeScript
- * simplifies `GoalCategory | never` to exactly `GoalCategory` -- so
- * `KnowledgeTopic` and `GoalCategory` are STRUCTURALLY IDENTICAL TYPES today,
- * not merely "compatible." The one-direction-only assignability described
- * above becomes compile-time-enforced the moment a real value is ever added
- * to `KNOWLEDGE_ONLY_TOPICS`; until then, the separation this milestone
- * establishes is real at the FIELD level (which fields are declared
- * `KnowledgeTopic` vs `GoalCategory`, and the runtime guard `isGoalCategoryTopic`
- * below) even though the two type names are not yet distinguishable by the
- * compiler. See `__tests__/retrieval-engine/knowledge-topic-foundation.test.ts`
- * for the direct confirmation of this collapse.
+ * HISTORICAL NOTE (KnowledgeTopic Foundation milestone, 2026-09-13, same day
+ * superseded): while `KNOWLEDGE_ONLY_TOPICS` was empty, `KnowledgeOnlyTopic`
+ * was `never`, and TypeScript simplified `GoalCategory | never` to exactly
+ * `GoalCategory` -- so the two type names were structurally identical at
+ * compile time, and the one-direction-only assignability described above was
+ * enforced only at the field-declaration level, not yet by the compiler
+ * rejecting a reverse assignment. `__tests__/retrieval-engine/knowledge-topic-
+ * foundation.test.ts` documents that collapsed state as it was.
+ *
+ * [UPDATE, First Real Knowledge-Only Topic milestone, 2026-09-13]
+ * `KNOWLEDGE_ONLY_TOPICS` now has a real member (`'ai_content_transparency'`),
+ * so `KnowledgeOnlyTopic` is no longer `never` and `KnowledgeTopic` is now
+ * GENUINELY WIDER than `GoalCategory` -- the compiler will reject assigning a
+ * bare `KnowledgeTopic` value to a `GoalCategory`-typed field without going
+ * through `isGoalCategoryTopic` first. See
+ * `__tests__/retrieval-engine/first-knowledge-only-topic.test.ts` for the
+ * real (non-simulated) compile-time separation proof.
  */
 export type KnowledgeTopic = GoalCategory | KnowledgeOnlyTopic
 
