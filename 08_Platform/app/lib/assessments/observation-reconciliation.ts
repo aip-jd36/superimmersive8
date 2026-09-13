@@ -1,5 +1,6 @@
 /**
- * Reviewer observation reconciliation registry (CAH-4I.4E).
+ * Reviewer observation reconciliation registry (CAH-4I.4E; I03/I01 notes
+ * fallback repaired CAH-4I.4F-UAT-5 after Production UAT proved the gap).
  *
  * Enforces, structurally only, that a Human Reviewer has explicitly
  * accounted for every non-clean Section-2 audiovisual observation before
@@ -96,20 +97,25 @@ export function findUnreconciledObservations(workbook: unknown): ReconciliationI
 
   const issues: ReconciliationIssue[] = []
 
-  // logos_observed + trademarks_observed -> I03.trademark_elements (shared target)
+  // logos_observed + trademarks_observed -> I03.trademark_elements OR I03.notes (shared target)
   const logoOrTrademarkTriggered =
     isPresenceStyleTriggered(s2.logos_observed, 'logos_observed') ||
     isPresenceStyleTriggered(s2.trademarks_observed, 'trademarks_observed')
-  if (logoOrTrademarkTriggered && !isNonEmptyString(s3?.I03?.trademark_elements)) {
+  if (
+    logoOrTrademarkTriggered &&
+    !isNonEmptyString(s3?.I03?.trademark_elements) &&
+    !isNonEmptyString(s3?.I03?.notes)
+  ) {
     issues.push({
       message: "Account for the observed logo/trademark element in Control I03's notes before signoff.",
     })
   }
 
-  // copyrighted_artwork -> I01.elements_identified
+  // copyrighted_artwork -> I01.elements_identified OR I01.notes
   if (
     isPresenceStyleTriggered(s2.copyrighted_artwork, 'copyrighted_artwork') &&
-    !isNonEmptyString(s3?.I01?.elements_identified)
+    !isNonEmptyString(s3?.I01?.elements_identified) &&
+    !isNonEmptyString(s3?.I01?.notes)
   ) {
     issues.push({
       message: "Account for the observed copyrighted artwork/set design in Control I01's notes before signoff.",

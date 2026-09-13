@@ -83,6 +83,28 @@ describe('validateWorkbookForSignoff — reconciliation invariant (CAH-4I.4E)', 
     expect(validateWorkbookForSignoff(wb, OK_SUBMISSION).ok).toBe(true)
   })
 
+  test('5b. CAH-4I.4F-UAT-5 production reproduction: notes populated instead of trademark_elements -> gate satisfied', () => {
+    // Reproduces the exact Production UAT Scenario B fixture (submission
+    // f5833dfd-2442-4d6d-8b61-fa6bc22df174): the reviewer used I03's generic
+    // "Assessment notes" field, which the UI persists correctly but which
+    // the pre-repair validator never checked -- only trademark_elements.
+    const base = completeWorkbook()
+    const wb = {
+      ...base,
+      section_2: { ...base.section_2, logos_observed: 'Possible' },
+      section_3: {
+        ...base.section_3,
+        I03: {
+          judgment: 'Verified',
+          trademark_elements: '',
+          notes: 'Possible logo observation reviewed. The element was considered during I03 assessment; no further conclusion is inferred from the observation itself.',
+        },
+      },
+    }
+    const r = validateWorkbookForSignoff(wb, OK_SUBMISSION)
+    expect(r.ok).toBe(true)
+  })
+
   test('6. non-clean observation + text explicitly documenting an unresolved outcome -> gate satisfied', () => {
     const base = completeWorkbook()
     const wb = {

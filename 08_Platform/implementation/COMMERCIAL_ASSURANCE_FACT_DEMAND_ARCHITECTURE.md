@@ -2051,3 +2051,53 @@ This section records integration and deployed-for-controlled-UAT status only. **
 ### 32.10 Current acceptance status
 
 **DEPLOYED FOR CONTROLLED UAT. UAT-PENDING.** Vercel's own deploy will complete automatically within its usual ~2-minute window following the push above; PM should confirm the deploy has completed (e.g., via the Vercel dashboard or by confirming the reconciliation behavior is present) before beginning the §31.10 scenarios. Next action is PM running those scenarios against an internal/synthetic assessment in Production and returning the actual observed results — signoff blocked/allowed, exact message text, observation and accounting values used, and any unexpected UI behavior — to this document, at which point CAH-4I.4 can be formally closed or, if any scenario fails, rolled back/repaired.
+
+---
+
+## 33. CAH-4I.4F-UAT-5 — Reconciliation Notes-Fallback Repair (2026-09-13)
+
+**Status: REPAIR IMPLEMENTED, TESTED, AND DEPLOYED. CAH-4I.4 REMAINS OPEN / UAT-PENDING — this milestone does not close the arc.** Controlled Production UAT (§32) on a fresh SI8 Certified submission (`f5833dfd-2442-4d6d-8b61-fa6bc22df174`, "CAH-4I.4F PROD UAT — Observation Reconciliation") surfaced a real, unambiguous implementation defect in the CAH-4I.4E validator, diagnosed in a dedicated (undocumented-in-this-file, chat-only) diagnostic pass and repaired here.
+
+### 33.1 Production UAT evidence
+
+**Scenario A — PASS.** Logos observed = `Possible`, I03 judgment = `Verified`, I03 accounting fields blank, all 16 controls complete, §6 complete, declaration signed. Durable signoff correctly **blocked**: *"Incomplete: Account for the observed logo/trademark element in Control I03's notes before signoff."*
+
+**Scenario B — FAIL, not reinterpreted as inconclusive.** PM populated I03's generic "Assessment notes" field with reconciliation text; a browser refresh proved the text persisted; PM clicked "Record durable sign-off" again. Result: **blocked again, identical message** — despite the field the reviewer had genuinely accounted the observation in being real, persisted, and reviewer-authored.
+
+### 33.2 Root cause
+
+`Section3Evidence.tsx` renders **two** independently-persisted reviewer-editable text fields for I03: a control-specific `Textarea` bound to `trademark_elements` (from `ControlExtras`), and a **generic "Assessment notes" block rendered identically for all 16 controls**, bound to `ctrl.notes`. The CAH-4I.4E validator checked only `I03.trademark_elements` — never `I03.notes` — despite the blocking message's own wording explicitly promising *"...in Control I03's notes..."*. The identical defect existed for `copyrighted_artwork → I01.elements_identified` (no `notes` fallback). **L01 and I02 already implemented the correct pattern** (specific field OR `notes`) — this was an inconsistency within CAH-4I.4E's own design, affecting exactly 2 of 7 mapping entries, not a systemic or architectural flaw.
+
+### 33.3 Repair
+
+Mechanical, minimal, using the existing `isNonEmptyString` predicate exclusively — no new logic, no semantic inspection, no schema change, no new state:
+
+```diff
+- if (logoOrTrademarkTriggered && !isNonEmptyString(s3?.I03?.trademark_elements)) {
++ if (logoOrTrademarkTriggered
++     && !isNonEmptyString(s3?.I03?.trademark_elements)
++     && !isNonEmptyString(s3?.I03?.notes)) {
+
+- if (isPresenceStyleTriggered(...) && !isNonEmptyString(s3?.I01?.elements_identified)) {
++ if (isPresenceStyleTriggered(...)
++     && !isNonEmptyString(s3?.I01?.elements_identified)
++     && !isNonEmptyString(s3?.I01?.notes)) {
+```
+
+Error messages required no change — their existing wording (*"...in Control I03's/I01's notes..."*) is now accurate rather than misleading. `08_Platform/app/lib/assessments/observation-reconciliation.ts` is the only runtime file touched.
+
+### 33.4 Tests
+
+10 new tests added (8 explicit numbered cases from the authorization spec + 1 shared-target consistency check in `observation-reconciliation.test.ts`, + 1 exact production-fixture reproduction in `signoff-reconciliation.test.ts` using the reviewer's own real UAT text verbatim). **Test-first discipline honored**: all notes-fallback-dependent tests were run against the pre-fix source first and failed exactly as predicted (3/41 in the pure-module suite; the production-reproduction test failed `expect(false).toBe(true)` in the signoff-integration suite) — then re-run post-fix, all passing. Full focused suite (reconciliation + signoff-integrity + signoff-public-record + reviewer-workbook): **138/138 passing** (128 prior + 10 new). Full repository suite: **77 pre-existing failures, unchanged, zero new.** `tsc --noEmit` clean. `git diff --check` clean.
+
+### 33.5 Cross-mapping regression
+
+Re-ran the complete reconciliation matrix (I03, I01, L01, I02, `unexpected_content`, `landmarks_observed`) — all existing behavior for the five unaffected mappings confirmed byte-identical; only I03 and I01 gained the `notes` fallback.
+
+### 33.6 Authority preservation
+
+The repair adds exactly the same primitive (`isNonEmptyString`) to two more field checks — no new capability, no content inspection, no judgment-value read. The existing authority-firewall test (which specifically exercises I03 across every `JUDGMENT_OPTIONS` value) re-passed unchanged post-fix, confirming the firewall holds: the validator still cannot infer infringement, missing rights, evidence sufficiency, or force any particular outcome; `'Not Provided'`/`'Partially Verified'` with a satisfied notes field remain fully legitimate.
+
+### 33.7 Deployment
+
+See final report for the exact rebase/range-diff/push sequence and production-target SHA. CAH-4I.4 remains **OPEN / UAT-PENDING** — this repair unblocks Scenario B; it does not itself constitute production acceptance.

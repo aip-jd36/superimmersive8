@@ -114,6 +114,70 @@ describe('findUnreconciledObservations — shared target (logos_observed + trade
   })
 })
 
+// CAH-4I.4F-UAT-5: I03 and I01 must accept the generic `notes` field as an
+// alternative to their specific field, exactly like L01/I02 already do — the
+// bug this repair closes (production UAT proved the UI's "Assessment notes"
+// field persists correctly but was never checked for I03/I01).
+describe('findUnreconciledObservations — I03 notes fallback (CAH-4I.4F-UAT-5 repair)', () => {
+  test('1. triggered + trademark_elements empty + notes empty -> blocked', () => {
+    const result = findUnreconciledObservations(wb({ logos_observed: 'Confirmed' }, { I03: { trademark_elements: '', notes: '' } }))
+    expect(result).toHaveLength(1)
+  })
+
+  test('2. triggered + trademark_elements non-empty + notes empty -> satisfied', () => {
+    const result = findUnreconciledObservations(
+      wb({ logos_observed: 'Confirmed' }, { I03: { trademark_elements: 'Generic shape, not a mark.', notes: '' } }),
+    )
+    expect(result).toEqual([])
+  })
+
+  test('3. triggered + trademark_elements empty + notes non-empty -> satisfied (the exact production UAT case)', () => {
+    const result = findUnreconciledObservations(
+      wb(
+        { logos_observed: 'Possible' },
+        { I03: { trademark_elements: '', notes: 'Possible logo observation reviewed. The element was considered during I03 assessment; no further conclusion is inferred from the observation itself.' } },
+      ),
+    )
+    expect(result).toEqual([])
+  })
+
+  test('4. notes whitespace-only -> still blocked (fails closed same as empty)', () => {
+    const result = findUnreconciledObservations(wb({ logos_observed: 'Confirmed' }, { I03: { trademark_elements: '', notes: '   ' } }))
+    expect(result).toHaveLength(1)
+  })
+
+  test('trademarks_observed alone also satisfies via notes (shared-target consistency)', () => {
+    const result = findUnreconciledObservations(wb({ trademarks_observed: 'Confirmed' }, { I03: { trademark_elements: '', notes: 'Reviewed.' } }))
+    expect(result).toEqual([])
+  })
+})
+
+describe('findUnreconciledObservations — I01 notes fallback (CAH-4I.4F-UAT-5 repair)', () => {
+  test('5. triggered + elements_identified empty + notes empty -> blocked', () => {
+    const result = findUnreconciledObservations(wb({ copyrighted_artwork: 'Confirmed' }, { I01: { elements_identified: '', notes: '' } }))
+    expect(result).toHaveLength(1)
+  })
+
+  test('6. triggered + elements_identified non-empty + notes empty -> satisfied', () => {
+    const result = findUnreconciledObservations(
+      wb({ copyrighted_artwork: 'Confirmed' }, { I01: { elements_identified: 'Generic set piece, not identifiable.', notes: '' } }),
+    )
+    expect(result).toEqual([])
+  })
+
+  test('7. triggered + elements_identified empty + notes non-empty -> satisfied', () => {
+    const result = findUnreconciledObservations(
+      wb({ copyrighted_artwork: 'Possible' }, { I01: { elements_identified: '', notes: 'Background artwork reviewed; no specific work identified.' } }),
+    )
+    expect(result).toEqual([])
+  })
+
+  test('8. notes whitespace-only -> still blocked', () => {
+    const result = findUnreconciledObservations(wb({ copyrighted_artwork: 'Confirmed' }, { I01: { elements_identified: '', notes: '   ' } }))
+    expect(result).toHaveLength(1)
+  })
+})
+
 describe('findUnreconciledObservations — independent multi-observation cases', () => {
   test('two independent non-clean observations each require their own reconciliation', () => {
     const result = findUnreconciledObservations(
