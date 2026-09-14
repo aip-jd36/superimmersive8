@@ -130,6 +130,63 @@ export const EMPTY_WORKBOOK = {
 
 export type WorkbookData = typeof EMPTY_WORKBOOK
 
+/**
+ * Reconcile a persisted (possibly legacy) workbook_data object onto the
+ * CURRENT EMPTY_WORKBOOK shape (CA-METH-4A production hotfix).
+ *
+ * A key entirely ABSENT from the persisted object falls through to the
+ * current default -- the schema's own "never considered / unaddressed"
+ * empty value. It is never fabricated, never inferred from another field
+ * (e.g. never derived from a sibling field), and never marked complete. A
+ * key that IS present in the persisted object -- even '', even false, even
+ * an empty array -- always wins; this function never overwrites real
+ * reviewer-entered data.
+ *
+ * Necessary because a workbook saved before a schema addition (e.g.
+ * CA-METH-3B's `section_1.jurisdiction_context`, or any future field)
+ * predates that field entirely in the database: the raw JSONB has no such
+ * key at all, not merely an empty one. Rendering that raw object directly
+ * crashed `Section1Intake.tsx`'s unguarded `data.jurisdiction_context.status`
+ * read -- the CA-METH-4A production regression this function fixes.
+ *
+ * This is the ONE generic reconciliation layer, applied once at load time
+ * (`app/admin/submissions/[id]/review/page.tsx`) -- component render code
+ * should not need ad hoc `?? {}` patches to cope with legacy shape.
+ * (`Section3Evidence.tsx`'s own pre-existing per-control `(data as any)[id]
+ * ?? {}` guard already gave Section 3 controls, including R05, this same
+ * protection defensively; this function makes it universal and generic
+ * across the whole schema, current and future, rather than something each
+ * new field's author must remember to reinvent at the render site.)
+ *
+ * Arrays are never deep-merged -- a present persisted array (even `[]`)
+ * always wins outright over the default array, preserving real reviewer
+ * data (Gap Log / Findings entries) exactly as recorded.
+ */
+function mergeWorkbookDefaults(defaultValue: unknown, persistedValue: unknown): unknown {
+  if (persistedValue === undefined) return defaultValue
+  if (Array.isArray(defaultValue)) {
+    return Array.isArray(persistedValue) ? persistedValue : defaultValue
+  }
+  if (defaultValue !== null && typeof defaultValue === 'object') {
+    if (persistedValue === null || typeof persistedValue !== 'object' || Array.isArray(persistedValue)) {
+      return defaultValue
+    }
+    const out: Record<string, unknown> = {}
+    for (const key of Object.keys(defaultValue as Record<string, unknown>)) {
+      out[key] = mergeWorkbookDefaults(
+        (defaultValue as Record<string, unknown>)[key],
+        (persistedValue as Record<string, unknown>)[key],
+      )
+    }
+    return out
+  }
+  return persistedValue
+}
+
+export function normalizeWorkbook(raw: unknown): WorkbookData {
+  return mergeWorkbookDefaults(EMPTY_WORKBOOK, raw) as WorkbookData
+}
+
 export const JUDGMENT_OPTIONS = [
   'Verified',
   'Partially Verified',

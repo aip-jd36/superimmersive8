@@ -5,7 +5,7 @@ import { WorkbookClient } from './WorkbookClient'
 import { ReviewerShell } from './ReviewerShell'
 import { ReviewerResources } from './ReviewerResources'
 import { checkReviewerContextAccess } from '@/lib/reviewer-context/auth'
-import { EMPTY_WORKBOOK } from './workbook-schema'
+import { normalizeWorkbook } from './workbook-schema'
 import { findAssessmentBySubmissionId } from '@/lib/assessments/repository'
 import { collectSubmissionEvidencePaths } from '@/lib/reviewer-evidence/collect-evidence-paths'
 
@@ -41,10 +41,15 @@ export default async function WorkbookPage({ params }: PageProps) {
   const initialSignoffStatus: 'active' | 'invalidated' | null =
     (existingAssessment?.signoff_status as 'active' | 'invalidated' | null) ?? null
 
+  // Legacy/current-schema reconciliation (CA-METH-4A) — a persisted
+  // workbook_data may predate a later schema addition entirely (e.g.
+  // section_1.jurisdiction_context). normalizeWorkbook merges it onto the
+  // current EMPTY_WORKBOOK shape: an absent key falls through to the
+  // schema's own "never considered" default; any present key (including a
+  // falsy one) always wins. Never mutates the DB row.
   const rawWorkbook = (submission as any).workbook_data
-  const initialWorkbook = rawWorkbook
-    ? (typeof rawWorkbook === 'string' ? JSON.parse(rawWorkbook) : rawWorkbook)
-    : EMPTY_WORKBOOK
+  const parsedWorkbook = typeof rawWorkbook === 'string' ? JSON.parse(rawWorkbook) : rawWorkbook
+  const initialWorkbook = normalizeWorkbook(parsedWorkbook)
 
   // Collect evidence file paths from submission JSONB fields + direct upload
   // columns (CAH-4I.3: extended from 2 channels to all 7 known channels).
