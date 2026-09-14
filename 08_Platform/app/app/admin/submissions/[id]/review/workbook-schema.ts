@@ -3,7 +3,7 @@
 // Updated here when the schema changes; bump workbook_version.
 
 export const EMPTY_WORKBOOK = {
-  workbook_version: '0.3',
+  workbook_version: '0.4',
   section_1: {
     campaign_description: '',
     assessment_start: '',
@@ -15,6 +15,17 @@ export const EMPTY_WORKBOOK = {
       certified_tier: false,
     },
     scope_limitations: '',
+    // Assessment jurisdiction (G2, CA-METH-3B) -- the narrower jurisdictional
+    // context the REVIEWER has established as relevant to this Commercial
+    // Assurance assessment. Structurally distinct from `submission.
+    // territory_preferences` (G1, distribution/exhibition footprint): G1 is
+    // broad and creator-supplied; G2 is reviewer-established and may be
+    // narrower, or explicitly absent, or explicitly unresolved. `status` is
+    // mandatory-to-CONSIDER, not mandatory-to-RESOLVE -- see signoff.ts.
+    jurisdiction_context: {
+      status: '' as '' | 'no_narrower_jurisdiction_implicated' | 'narrower_jurisdiction_noted' | 'unresolved_requires_followup',
+      details: '',
+    },
   },
   section_2: {
     video_url_confirmed: '',

@@ -96,6 +96,8 @@ export function domainWorstJudgment(letter: string, section3: any): Judgment {
 // ── Types ──────────────────────────────────────────────────────────────────
 
 export interface ReportProjectionInput {
+  /** Optional — only `jurisdiction_context` is read (CA-METH-3B). Omitting it fails closed to the neutral "Not established" label, never a fabricated value. */
+  section1?: any
   section2: any
   section3: any
   section5: any
@@ -244,6 +246,28 @@ function projectPerDomainEvidence(
   return out
 }
 
+/**
+ * Assessment jurisdiction (G2, CA-METH-3B) -- renders the reviewer's OWN
+ * recorded `section_1.jurisdiction_context` verbatim/neutrally; never a
+ * legal conclusion, never derived from `territory_preferences` (G1). A
+ * missing/legacy/unrecognized status fails closed to a neutral label, never
+ * to an inferred or fabricated jurisdiction.
+ */
+function projectJurisdictionContext(section1: any): string {
+  const jc = section1?.jurisdiction_context
+  const status = jc?.status
+  if (status === 'no_narrower_jurisdiction_implicated') {
+    return 'No narrower jurisdiction identified as material to this assessment.'
+  }
+  if (status === 'narrower_jurisdiction_noted') {
+    return s(jc?.details) || 'Narrower jurisdiction(s) identified — no detail recorded.'
+  }
+  if (status === 'unresolved_requires_followup') {
+    return 'Unresolved — flagged by the reviewer for follow-up.'
+  }
+  return 'Not established.'
+}
+
 function projectSupportingEvidenceRecord(
   input: ReportProjectionInput,
 ): EvidenceRecordField[] {
@@ -277,6 +301,10 @@ function projectSupportingEvidenceRecord(
   fields.push({
     label: 'Intended territory',
     value: s(submission.territory) || s(submission.territory_preferences) || 'Not stated',
+  })
+  fields.push({
+    label: 'Assessment jurisdiction context',
+    value: projectJurisdictionContext(input.section1),
   })
 
   // ── AI tools declared + commercial license status ────────────────────────

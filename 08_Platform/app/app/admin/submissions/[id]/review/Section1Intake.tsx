@@ -133,6 +133,37 @@ export function Section1Intake({ data, submission, toolsUsed, onChange }: Props)
         />
       </div>
 
+      {/* Assessment jurisdiction (G2) */}
+      <div>
+        <label className="block text-sm font-medium mb-1" style={{ color: '#1a1918' }}>
+          Assessment jurisdiction
+        </label>
+        <p className="text-xs text-gray-400 mb-2">
+          Distribution territory (above) is broad and creator-supplied. This is different: does a narrower jurisdiction within it carry requirements relevant to this specific assessment? You are not required to name one — recording that you considered this is what matters.
+        </p>
+        <select
+          value={data.jurisdiction_context.status}
+          onChange={e => onChange({ jurisdiction_context: { ...data.jurisdiction_context, status: e.target.value as typeof data.jurisdiction_context.status } })}
+          className="text-sm border rounded px-3 py-1.5 w-full"
+          style={{ borderColor: 'rgba(0,0,0,0.15)' }}
+        >
+          <option value="">— Select —</option>
+          <option value="no_narrower_jurisdiction_implicated">No narrower jurisdiction identified as material to this assessment</option>
+          <option value="narrower_jurisdiction_noted">Narrower jurisdiction(s) identified — describe below</option>
+          <option value="unresolved_requires_followup">Unresolved — requires follow-up before signoff</option>
+        </select>
+        {data.jurisdiction_context.status === 'narrower_jurisdiction_noted' && (
+          <textarea
+            value={data.jurisdiction_context.details}
+            onChange={e => onChange({ jurisdiction_context: { ...data.jurisdiction_context, details: e.target.value } })}
+            rows={2}
+            placeholder="Name the specific narrower jurisdiction(s) and why they matter for this assessment."
+            className="w-full text-sm border rounded px-3 py-2 resize-none mt-2"
+            style={{ borderColor: 'rgba(0,0,0,0.15)' }}
+          />
+        )}
+      </div>
+
       {/* Scope checks */}
       <div>
         <div className="text-sm font-medium mb-3" style={{ color: '#1a1918' }}>Scope checks</div>

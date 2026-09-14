@@ -305,6 +305,7 @@ function buildTypContent(
   // All Section-1 scope, Section-2 evidence, per-domain evidence, and Appendix A
   // content is derived through this one bounded projection (fail-closed = omit).
   const projection = projectReport({
+    section1,
     section2,
     section3,
     section5,

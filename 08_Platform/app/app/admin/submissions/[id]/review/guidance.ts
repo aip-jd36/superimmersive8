@@ -22,6 +22,8 @@ Evidence Custodian Declaration and Indemnification: These are logged by the plat
 
 Video URL: Video URL is a required field on all submissions. If no URL appears in the context box, the submission record is incomplete — note "Video URL not provided — requested from creator" in Scope Limitations. Do not check the video_accessible scope box until you have confirmed the video is watchable. Email the creator immediately; assessment is paused until the URL is received.
 
+Assessment jurisdiction: the "Territory" shown above is broad and creator-supplied (G1) — it does not by itself establish the narrower jurisdictional context relevant to this specific assessment (G2). Do not infer G2 from G1. Record your own determination: a narrower jurisdiction identified (name it briefly), no narrower jurisdiction identified as material (a genuine conclusion, not a default), or unresolved — requires follow-up (a legitimate, complete answer — never relabel this as "none" just to move past the field). You are required to consider this, not to name a jurisdiction.
+
 Scope limitations: Record anything that will affect the reliability of this assessment. Incomplete evidence, video access issues, unusual commercial context — all belong here. Be specific. "Reviewer unable to verify audio source independently" is useful. "Some limitations noted" is not.`,
 
   '2': `SECTION 2 — INDEPENDENT VIDEO OBSERVATION

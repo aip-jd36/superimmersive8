@@ -162,6 +162,20 @@ export function validateWorkbookForSignoff(
   if (submission.custodian_declaration !== true) reasons.push('submission Evidence Custodian Declaration not on record')
   if (submission.indemnification_confirmed !== true) reasons.push('submission Indemnification warranty not on record')
 
+  // Section 1 — assessment jurisdiction (G2, CA-METH-3B): mandatory to
+  // CONSIDER, never mandatory to resolve. Any of the three valid statuses
+  // satisfies this check, including the explicitly-unresolved one — only an
+  // untouched/never-considered field fails. Mirrors the scope_checks loop
+  // above exactly: this checks THAT a value was set, never WHICH one.
+  const JURISDICTION_CONTEXT_STATUSES = [
+    'no_narrower_jurisdiction_implicated',
+    'narrower_jurisdiction_noted',
+    'unresolved_requires_followup',
+  ]
+  if (!JURISDICTION_CONTEXT_STATUSES.includes(s1.jurisdiction_context?.status)) {
+    reasons.push('section_1.jurisdiction_context not considered (assessment jurisdiction)')
+  }
+
   // Section 2 — first viewing pass + observation minimum
   if (s2.viewing_passes?.first_complete !== true) reasons.push('section_2 first viewing pass not complete')
   if (typeof s2.freeform_observations !== 'string' || s2.freeform_observations.trim().length < 20) {

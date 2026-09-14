@@ -35,6 +35,7 @@ function completeWorkbook(overrides: Record<string, any> = {}): any {
         video_accessible: true,
         certified_tier: true,
       },
+      jurisdiction_context: { status: 'no_narrower_jurisdiction_implicated', details: '' },
     },
     section_2: { viewing_passes: { first_complete: true }, freeform_observations: 'x'.repeat(25) },
     section_3,

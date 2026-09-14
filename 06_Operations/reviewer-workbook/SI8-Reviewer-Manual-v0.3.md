@@ -227,6 +227,14 @@ Review the submission overview: content title, format, duration, stated commerci
 - Content intended for jurisdictions not yet researched by SI8 — note the limitation in scope
 - Content types not covered by the 7 domains (e.g., pure audio without video) — note the scope limitation
 
+**Assessment jurisdiction (added v0.3):** the submitter's stated distribution territory is broad and creator-supplied (e.g. "United States," "Global") — call this **G1**. It does not by itself establish the narrower jurisdictional context relevant to this specific assessment — call that **G2**. Broad G1 never automatically answers G2; do not infer one from the other. Record your own G2 determination in Workbook Section 1 as one of:
+
+- **A narrower jurisdiction identified** — name it and briefly note why it matters for this assessment.
+- **No narrower jurisdiction identified as material** — a genuine, considered conclusion, not a default.
+- **Unresolved — requires follow-up** — you have not yet been able to establish this. This is a legitimate, complete answer; it is not the same as "no narrower jurisdiction" and must never be recorded as such merely to move past this field. It becomes a gap, not a blocker.
+
+You are not required to name a jurisdiction. You are required to have considered the question. This is a generic methodology requirement, not a rule about any specific jurisdiction — this Manual does not maintain jurisdiction-by-jurisdiction rules here (see Domain L for the one calibration example currently documented).
+
 Record any scope limitations explicitly in Workbook Section 1. These will carry through to the Report's Assessment Scope section.
 
 ---
@@ -903,7 +911,7 @@ A Case Library entry does not automatically update the Manual. It provides a ref
 |---------|------|-------------------|
 | 0.1 | 2026-07-05 | Initial version — all 7 parts. Pre-operational; domain decision thresholds are design estimates. |
 | 0.2 | 2026-07-20 | Domain H (Human Creative Contribution) now requires a corroborating artifact — not just a detailed submitter narrative — to reach "Verified"; uncorroborated self-attestation caps at "Partially Verified." Domain H added as a required-Verified gate for the top outcome ("Evidence Supports Intended Commercial Use") and for High confidence. Added the Version Bump Requirement to Part 7, formalizing that substantive Part 4/Part 5 changes require a version bump plus a matching update to the application's methodology-version constant in the same change set. |
-| 0.3 | 2026-09-14 | Added Domain R control R05 (Intended Exploitation / Commercial Expectation) — establishes what the customer expects to do with the resulting work beyond the stated delivery (ownership, exclusivity, reuse, adaptation, licensing), kept structurally separate from the reviewer's own evidence-based risk-recognition judgment. Neither establishes nor implies any legal conclusion (copyrightability, trademark validity, enforceability, exclusivity). No new domain; no change to R01–R04, Domain H/I/L/T/D guidance, or outcome/confidence gating logic (CA-METH-2/CA-METH-3A). |
+| 0.3 | 2026-09-14 | Added Domain R control R05 (Intended Exploitation / Commercial Expectation) — establishes what the customer expects to do with the resulting work beyond the stated delivery (ownership, exclusivity, reuse, adaptation, licensing), kept structurally separate from the reviewer's own evidence-based risk-recognition judgment. Neither establishes nor implies any legal conclusion (copyrightability, trademark validity, enforceability, exclusivity). No new domain; no change to R01–R04, Domain H/I/L/T/D guidance, or outcome/confidence gating logic (CA-METH-2/CA-METH-3A). Same-cycle addition (CA-METH-3B, same effective date, not a separate version): Workbook Section 1 now requires the reviewer to establish assessment jurisdiction (G2) as distinct from the submitter's broad distribution territory (G1) — a narrower jurisdiction identified, none identified as material, or explicitly unresolved; mandatory to consider, never mandatory to resolve, and never inferred from G1. No jurisdiction-specific rules added. |
 
 ---
 
