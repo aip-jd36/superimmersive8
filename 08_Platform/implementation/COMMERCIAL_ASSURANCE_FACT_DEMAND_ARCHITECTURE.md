@@ -2284,3 +2284,202 @@ It does not establish that any specific new control, field, or domain should be 
 ### 35.15 Runtime changes made
 
 None. `git status` remains clean apart from this documentation section.
+
+---
+
+## 36. CA-METH-2 — Commercial Assurance P0 Methodology Design (2026-09-14)
+
+**Status: METHODOLOGY DESIGN ONLY. No runtime, schema, control, or Living Knowledge change made.** Converts CA-METH-1's proven P0 findings into a bounded design without assuming CA-METH-1's own suggested implementation shape. Re-inspected `retrieval-engine/types.ts` in full for this milestone (the `ApplicabilityRequirement`/`unresolved`/fail-closed pattern used as design precedent below, never as code to reuse directly — CA-HRQ-2 already established CA does not consume this pipeline).
+
+### 36.1 Scenario #9 revalidation — DOWNGRADED to P1, excluded from this milestone
+
+Applying the six revalidation questions directly:
+
+1. **Exact hidden question:** whether an AI-generated voice/narration resembles a specific real, identifiable person, when no visual likeness is present at all.
+2. **Why missed today:** L01's fields and Section 2's observation vocabulary (`synthetic_humans`, `real_likeness_suspected`) are visual-only; no audio-persona-resemblance observation exists.
+3. **Materiality vs. P0-A/P0-B:** narrower in frequency than either surviving P0 — it only matters for submissions with narration/voice-over where no visual likeness already triggers L01, and the overt case (deliberate voice cloning of a named person) is already screened at intake by the No List (Section1Intake NO_LIST_ITEMS #2), which the calibration set's own severity bar (frequency × how badly missing it undermines the product promise) does not put in the same tier as an ownership-expectation gap touching nearly every commercial submission, or a statutory jurisdiction-disclosure gap.
+4. **Generic class or voice-specific patch:** genuinely generic — it is not a new concept at all. Domain L's own stated purpose (Manual line 495: "face, voice, or distinctive persona") already claims this territory; the defect is that L01's *operationalization* only wires in one modality (visual) of a concept it already claims to cover in full.
+5. **Does an existing mechanism already cover the class if designed correctly:** yes — L01's "identifiable real-person resemblance, independently reviewed" concept is already the correct generic mechanism; nothing new needs inventing.
+6. **New field required:** no new *concept*; at most L01's existing `content_viewed` label and `likeness_found` evidence requirement would need to explicitly extend to "every modality present in the content" rather than a wholly new field. That is itself a small, self-contained future fix.
+
+**Conclusion:** the source-grounded characterization survives, but the P0 severity claim does not. **Downgraded to P1**, correctly reframed for whoever picks it up next: *extend L01's existing evidence requirement across every modality present, never add a parallel `synthetic_voice_risk`-shaped field.* Excluded from this milestone's design and from the calibration test set below.
+
+### 36.2 Corrected characterization of current methodology (replaces CA-METH-1 §35.2's "inbound" shorthand)
+
+CA-METH-1's "all 16 controls are inbound" is directionally right but imprecise. The accurate breakdown, re-verified against Section3Evidence.tsx and the Manual: the methodology is a rigorous review of **project/artifact provenance** (T, D), **authority to use tools/assets/inputs** (R01–R03), **inbound third-party exposure in the rendered output** (I01–I03), **human-contribution supportability for an authorship claim** (H01/H02), **likeness/performer permissions** (L01–L03), and **submitter identity/accountability** (A01) — a coherent, real methodology, not a mislabeled one. It has no systematic mechanism for **customer commercial expectation / intended exploitation scope** (P0-A) and no *enforceable* mechanism for **narrower jurisdiction-specific applicability within a stated distribution footprint** (P0-B). This is terminology correction only — it does not change §35's scenario matrix or matrix conclusions.
+
+### 36.3 P0-A — institutional requirement and fact/legal boundary
+
+**Institutional requirement:** a competent reviewer must establish, for every assessment, what the customer's own **stated** expectation is regarding control of the commercially important elements of the result — never whether that expectation is legally achievable. This is a **project fact** (what the customer says they expect), structurally identical in kind to `campaign_description`/`intended_use` already captured today, not a legal conclusion.
+
+**Fact vs. legal-determination boundary (kept structurally separate, two distinct fields, never merged):**
+- **Field 1 — stated expectation** (a project fact, always answerable — even "no additional expectation" is a complete answer): collapses Design Question 1's A–G list to four reviewer-facing states, since B/C (ownership/exclusivity) and D/E (reuse/licensing/adaptation/merchandising) do not need separate states to trigger the same methodology consequence — only the reviewer's free-text elaboration needs to preserve which: `no_additional_expectation` (A/F) · `ownership_or_exclusivity_expected` (B/C) · `reuse_or_exploitation_expected` (D/E) · `unclear_requires_followup` (G).
+- **Field 2 — reviewer commercial-risk-recognition judgment** (never a legal conclusion; fixed vocabulary mirroring H02's existing `assessment` field pattern exactly): `Current evidence is consistent with the stated expectation` · `Current evidence does not clearly support the stated expectation — recommend specialist/legal review` · `Not evaluated — determination outside SI8 assessment scope`. This is the exact same "given this evidence, what can a commercial party reasonably rely upon" framing the Manual already uses everywhere else (line 77) — never "you own this" / "you can exclude others."
+
+Calibration test 7 (the direct "does this prove we own copyright" question) is answered entirely by Field 2's third option existing as a legitimate, complete, non-blocking answer — SI8 recognizes the expectation was raised without resolving it.
+
+### 36.4 P0-A architecture options (Design Question 3) — evaluated, not assumed
+
+| Option | Verdict | Why |
+|---|---|---|
+| A — extend H02 only | **Rejected** | H02 tests authorship-claim plausibility; a client can expect full exclusivity via contract with zero personal-authorship claim (e.g. agency work-for-hire), and vice versa — the two are logically independent, and conflating them inside one control would make H02 answer two unrelated questions |
+| B — extend R04 only | **Rejected** | R04 is ToS/tool-output-rights-scoped; the customer's exploitation expectation is a project-level fact, not a tool-license fact — too narrow a host |
+| C — duplicate sub-question on both H02 and R04 | **Rejected** | Creates a real divergence risk (the two could disagree) with no single home for the Report to cite |
+| D — new generic control in Domain R | **Retained as the core** | Domain R ("Commercial Rights & Licensing") is the correct conceptual neighborhood; a 17th control is proportionate (mirrors how I01–I03 already cluster three related controls in one domain) and gets `ALL_CONTROLS`/`section3Complete`/Gap-Log auto-seed support for free, with zero changes to those generic mechanisms (`buildSuggestedGaps` iterates `Object.keys(section3)` generically already) |
+| E — new domain ("Commercial Exploitation & Defensibility") | **Rejected for now** | Per §35.8, a new domain needs evidence from multiple *domain-shaped* scenarios; P0-A is one control's worth of question, not several — disproportionate until a second, unrelated control-shaped need in the same space is proven |
+| F — Reviewer Resources guidance only | **Rejected** | This is exactly Anchor 2's own failure mode (unenforceable narrative) — would repeat the defect being fixed |
+| **G — combination: new control (Option D) is the sole authoritative home, Reviewer Manual guidance explains decision logic** | **SELECTED** | Matches the existing, already-proven pattern for every other domain (enforced control + explanatory Manual guidance, never guidance alone) |
+
+### 36.5 Selected P0-A methodology home
+
+A new Domain-R control (illustrative id only, not prescribed: "R05"), using the **existing** `judgment`/`JUDGMENT_OPTIONS` machinery unchanged (Verified/Partially Verified/Not Provided/Not Applicable — "Not Applicable" is the correct, complete answer for calibration test 1's one-off-film case), plus the two fields from §36.3 as its evidence extras, following the exact `ControlExtras` shape already used by H02/R04/L03. No new state system; no new gating mechanism — it is a 17th control participating in every existing generic mechanism (`ALL_CONTROLS`, `section3Complete`, Gap Log auto-seed, Section 5 Findings' existing domain tag for `R`) with zero changes to any of them.
+
+### 36.6 P0-B — institutional requirement
+
+A competent reviewer must establish, as part of scope-setting, whether the stated distribution footprint (G1) implicates any narrower jurisdiction whose governed requirements might materially change the review (G2) — or explicitly determine that none does, or explicitly flag that this could not yet be established. The requirement is to **demonstrate consideration**, never to enumerate every jurisdiction on earth.
+
+### 36.7 G1/G2 contract
+
+1. **G1** = `submission.territory_preferences` — broad distribution/exhibition footprint, already acquired at CertForm intake, already displayed read-only in Section 1. Unchanged.
+2. **G2** = assessment jurisdiction / narrower applicability context — the specific narrower jurisdiction(s), if any, within G1's footprint whose governed requirements might matter (NY Synthetic Performer Law is the calibration example only).
+3. **Current source for G1:** CertForm intake (exists). **Current source for G2:** none — confirmed absent from CertForm, confirmed absent from any workbook field, confirmed present only as unenforced Manual narrative (§35.4). This is the same gap CA-HRQ-2 independently found from the opposite direction (fact-transport inventory, class D).
+4. **Missing/conflated:** G2 is missing outright, not conflated with G1 in this codebase (the CRC-side `TopicClaim.jurisdiction`/`ApplicabilityFact 'jurisdiction'` free-text precedent — re-read this milestone, `retrieval-engine/types.ts` lines 149–174, 529–530 — is the CRC-side analogue of exactly this concept, already proven safe as a **free-text field, not an enum**, which this design reuses as precedent, not as shared code, since CA does not consume CRC's retrieval pipeline).
+5. **Stage:** established by the reviewer **after** the intake territory (G1) is known but as part of **scope-setting** (Section 1), not folded into evidence review (Section 3) — because it defines what governed considerations are even in play, and several downstream domains (L, Section 6/7) need it available before they are judged.
+6. **Who establishes it:** the Human Reviewer, from their own judgment informed by G1 and the campaign description — never a customer self-attestation. Dumping a jurisdiction-sufficiency quiz on the creator would repeat the "evidence-only fact converted into self-attestation" failure mode this whole engagement has repeatedly guarded against elsewhere.
+7. **Can it legitimately be unresolved:** yes — `unresolved_requires_followup` is a first-class, complete, sign-off-compatible answer (see §36.9), never a block.
+8. **When unresolved:** it becomes a Gap Log candidate (a **new, small extension** to `buildSuggestedGaps`, since that function currently only reads `section3` — this is the one place §36 requires a (future, not built now) generic extension, not a domain-specific one, and it is scoped to "does a Section-1 scope field carry an unresolved state," not to jurisdiction specifically).
+9. **When definitively irrelevant:** `no_narrower_jurisdiction_implicated` is an equally first-class, complete answer (calibration tests 4/9) — no manufactured checklist item.
+10. **Evidence of consideration:** the field itself having a set, non-default value is the proof — exactly the same "was a judgment selected, not which one" discipline `validateWorkbookForSignoff` already applies to every Section-3 control.
+
+### 36.8 P0-B architecture options (Design Question 5) — evaluated
+
+| Option | Verdict | Why |
+|---|---|---|
+| A — Section 1 scope/intake | **Selected for fact acquisition** | G1 already lives here; G2 is a scope-defining fact needed before Section 3 domains are judged |
+| B — Section 2 reviewer-established context | Rejected | Section 2 is independent-viewing observation of the artifact itself, not a footprint/legal-context determination |
+| C — Section 3 conditional applicability | Rejected as the *acquisition* site (right as a future *consumption* site — see below) | Section 3 controls are artifact-evidence judgments; jurisdiction context is upstream of them |
+| D — separate reviewer-scope declaration | Folded into A | A new standalone section would duplicate Section 1's existing scope-declaration role for no benefit |
+| E — signoff gate on an upstream fact | **Selected for the completion check only, not for the value** | Mirrors `validateWorkbookForSignoff`'s existing "some accepted value must exist" pattern exactly — never gates on *which* value |
+| F — governed Reviewer Resources support | **Deferred, future** | The right eventual home for *governed applicability content* (what NY's law actually requires) once a CA↔LK bridge exists — not built in this milestone (CA-HRQ-2 territory, not resumed) |
+| G — combination | **SELECTED (A for acquisition, E for completion-consideration, F deferred for governed-applicability content)** | Keeps the three layers in §36.9 structurally distinct rather than collapsing them into one field |
+
+### 36.9 Selected P0-B methodology home, and the three-layer separation
+
+- **Fact acquisition** ("which jurisdiction(s) are actually relevant?") — one new Section-1 field, illustrative name `jurisdiction_context`, three states as in §36.7 item 7–9, free text for the named-jurisdiction case (never an enum — same discipline as `TopicClaim.jurisdiction`).
+- **Governed applicability** ("what CA considerations apply there?") — explicitly **not built this milestone**. Today this stays exactly where the Manual already puts it (narrative guidance, e.g. the NY paragraph) — the difference CA-METH-2 makes is only that the reviewer is now structurally required to have *named* the jurisdiction that guidance should be checked against, not whether the guidance content itself becomes governed/structured.
+- **Assessment judgment** ("what does the reviewer conclude?") — unchanged; flows into existing Section 6/7 Residual Risks / Recommended Next Steps exactly as the Manual already documents for the NY case (§35.4), now populated because the reviewer was required to consider the input, not because a new judgment field was added.
+
+### 36.10 Mandatory-consideration vs. mandatory-answer (Design Question 6, formalized)
+
+**Principle:** a Commercial Assurance domain or scope element may be **mandatory to consider** without every one of its answers being **mandatory to resolve**. "Considered" means a value was affirmatively set from a closed, non-default set that includes at least one legitimate not-applicable/unresolved state; "resolved" means that value additionally represents a positive determination. The existing workbook already implements this for all 16 controls (`Not Applicable` and `Not Provided` are both complete, sign-off-compatible judgments) — §36.5 and §36.9's new elements reuse this identical semantics rather than inventing a parallel one. State model (fully reused, no new enum introduced):
+
+| State | Existing equivalent reused |
+|---|---|
+| Considered / not applicable | `JUDGMENT_OPTIONS: 'Not Applicable'` / new `no_narrower_jurisdiction_implicated` |
+| Applicable / resolved | `JUDGMENT_OPTIONS: 'Verified'` / new `narrower_jurisdiction_noted: <text>` |
+| Applicable / unresolved | `JUDGMENT_OPTIONS: 'Partially Verified'` or `'Not Provided'` / new `unresolved_requires_followup` |
+| Insufficient evidence | `JUDGMENT_OPTIONS: 'Not Provided'` (reused verbatim, no new value) |
+| Escalation required | New Field 2 third-state pattern (§36.3), scoped to P0-A's control only |
+| Outside SI8 assessment scope | Manual's existing boundary language (lines 67–77), reused as reviewer-note convention, not a new enum value |
+
+### 36.11 Completion / signoff semantics (Design Question 7)
+
+For both P0-A and P0-B: **reviewer consideration must be demonstrable** (a value must be set); **a factual answer need not exist** (unresolved/N/A are complete); **"unknown/unresolved" is always a valid completed state**; **unresolved produces a Gap Log entry, never a signoff block**; **no condition here creates a hard gate beyond "some value was set"** — identical in shape to every existing control. `validateWorkbookForSignoff` requires exactly one more thing than it does today for each: that the new R-control has an accepted judgment (added to the existing `CONTROLS`/`ALL_CONTROLS` list, zero new logic) and that `jurisdiction_context` is non-default (one new, generic, three-line check mirroring the existing `scope_checks` loop already in `validateWorkbookForSignoff` — not a jurisdiction-specific rule, the exact same shape as the five existing scope-check lines).
+
+### 36.12 Gap / finding / report semantics (Design Question 8)
+
+Neither new element requires a new report field. P0-A's control flows into the *existing* Gap Log (auto-seeded, generic, unmodified function), the *existing* Section 5 Findings' `R` domain tag, and the *existing* Section 7 `key_findings`/`residual_risks`. P0-B's `jurisdiction_context` flows into the *existing* Section 6 `residual_risks` / Section 7 `next_steps` string arrays — populated because consideration is now required, not because a new array was added. The report projection layer (`reportProjection.ts`, `Section7Brief.tsx`) requires **no changes** — both new elements produce the same primitive shapes (strings, an existing judgment enum) the report already knows how to render. The distinction the report must never silently collapse — "customer expects exclusive control" vs. "customer possesses exclusive legal rights" — is preserved exactly because Field 2 (§36.3) and the Manual's Standard Assurance Language boundary (line 77) already forbid the second phrasing everywhere in this document; nothing new needs to be added to enforce it, only followed.
+
+### 36.13 Evidence-only and specialist/legal escalation boundaries (Design Questions 1/2/T)
+
+Both new elements are **reviewer determinations informed by project facts and evidence**, never evidence-only facts converted into a customer self-attestation (§36.7 item 6 states this explicitly for G2; P0-A's Field 1 is likewise always reviewer-recorded from the customer's own stated intent, not a new CertForm checkbox). The specialist/legal boundary is enforced by construction: Field 2's third state (§36.3) and the Manual's existing "the reviewer does not opine on... whether the content is legally copyrightable... whether a specific jurisdiction's law applies" boundary (lines 67–73) are the same boundary reused, not a new one authored for this milestone.
+
+### 36.14 Living Knowledge role (Design Question 9) — subordinate, not built
+
+For P0-A: LK could eventually supply governed propositions about specific providers' ToS sublicense/resale scope (informing Field 2) — not built here; the existing HRR/Reviewer Resources mechanism (already live, CAH-4G) already lets a reviewer ask a free-form question if they want to consult it, with zero new wiring required for this control to exist and function without LK. For P0-B: LK could eventually supply which narrower jurisdictions carry governed requirements for a given G1 value (the CA-HRQ-2 discovered-relevance question) — explicitly not resumed here. Neither element defines customer intent, establishes evidence, makes the assessment, or produces a conclusion stronger than Bounded Interpretation would permit; both remain pure workbook methodology, independent of whether LK integration ever ships.
+
+### 36.15 Sales-reuse compatibility (Design Question 10)
+
+Both new elements produce small, discrete, already-labeled values (`ownership_or_exclusivity_expected`, `narrower_jurisdiction_noted`) rather than free-form legal reasoning — trivially quotable as a future Sales discovery prompt exactly as CA-METH-1 §35.10 illustrated, without redesign. No Sales workflow is built or designed here.
+
+### 36.16 Calibration test results
+
+| # | Test | Result |
+|---|---|---|
+| 1 | One-off film, no exclusivity expectation | P0-A control resolves `no_additional_expectation` / judgment `Not Applicable` — no manufactured investigation |
+| 2 | Recurring synthetic character | P0-A control resolves `ownership_or_exclusivity_expected`; Field 2 records evidence-sufficiency only, never a protectability determination |
+| 3 | Downstream licensing | P0-A control resolves `reuse_or_exploitation_expected`; same Field 2 discipline |
+| 4 | Ordinary US campaign, no narrower jurisdiction implicated | `jurisdiction_context = no_narrower_jurisdiction_implicated` — no noise created |
+| 5 | Broad US/NA distribution, narrower applicability unresolved | `jurisdiction_context = unresolved_requires_followup` — Gap Log entry created, signoff not blocked |
+| 6 | Correction (jurisdiction X corrected later) | `jurisdiction_context` is a live Section-1 field like every other; the reviewer edits it to the corrected value before signoff, exactly as any other Section-1/3 field is corrected today — no new correction mechanism needed |
+| 7 | Legal-determination boundary ("does this prove we own copyright") | Field 2's third state ("Not evaluated — outside SI8 assessment scope") is the complete, correct answer |
+| 8 | Negative control — speculative future exploitation | `no_additional_expectation` is correct and sufficient; nothing manufactures scenarios 2/3's investigation without a stated trigger |
+| 9 | Negative control — irrelevant jurisdiction | `no_narrower_jurisdiction_implicated` is correct even though governed LK knowledge about some other jurisdiction may exist elsewhere in the system — existence of governed knowledge never forces a checklist item |
+| 10 | Scenario #9 calibration | N/A — excluded from this milestone per §36.1 |
+
+### 36.17 Negative-control results
+
+All pass by construction: neither new element has any code path that fires without the reviewer affirmatively setting it, and `no_additional_expectation`/`no_narrower_jurisdiction_implicated` are first-class, zero-friction, zero-Gap-Log-entry answers — confirmed against the exact same discipline `Not Applicable` already provides for all 16 existing controls.
+
+### 36.18 Proposed structured design contract
+
+**P0-A (illustrative control id "R05" — name not prescribed):**
+
+1. Institutional purpose — surface the customer's stated commercial-control expectation for reviewer commercial-risk recognition, never a legal determination.
+2. Reviewer question — "What does the customer expect to own, exclude others from, license, or reuse beyond delivering this specific content?"
+3. Trigger — always-consider (participates in `ALL_CONTROLS`/`section3Complete` like every other control); `Not Applicable` is a first-class answer.
+4. Authoritative fact source — the customer's own stated intent, as relayed via campaign description / reviewer follow-up (never CRC, never Living Knowledge).
+5. Evidence source — reviewer inquiry/notes; no new intake field required.
+6. Allowed unresolved state — `unclear_requires_followup` (Field 1) / `Not Provided` (judgment).
+7. Evidence-only boundary — never a self-attestation checkbox; always reviewer-recorded.
+8. Legal/specialist boundary — Field 2's third state; never converts to "customer owns/can exclude."
+9. Workbook home — new Domain-R control, per §36.5.
+10. Completion semantics — any accepted judgment, including `Not Applicable`, satisfies signoff.
+11. Gap semantics — auto-seeded by the existing, unmodified `buildSuggestedGaps` once `Not Provided`/`Partially Verified`.
+12. Finding/report semantics — existing Section 5 `R`-domain tag; existing Section 7 arrays; no new report field.
+13. Living Knowledge role — none required; HRR consultation optionally available today, unchanged.
+14. Sales-reuse potential — direct, per §36.15.
+15. Correction/freshness — ordinary live-field editing, no new mechanism.
+16. Fail-closed behavior — default/never-set state is not a valid signoff-satisfying value, mirroring every existing control.
+
+**P0-B (illustrative field id "jurisdiction_context"):**
+
+1. Institutional purpose — demonstrate the reviewer considered whether a narrower jurisdiction within the stated territory carries governed requirements.
+2. Reviewer question — "Does the stated distribution footprint implicate a narrower jurisdiction with materially different requirements?"
+3. Trigger — always-consider at scope-setting (Section 1); no per-jurisdiction enumeration required.
+4. Authoritative fact source — reviewer judgment informed by G1 (`territory_preferences`) and campaign description.
+5. Evidence source — reviewer's own determination; free text for the named case.
+6. Allowed unresolved state — `unresolved_requires_followup`, first-class and complete.
+7. Evidence-only boundary — never a customer self-attestation question.
+8. Legal/specialist boundary — the field records *that a narrower jurisdiction was named*, never *what the law there requires or means* (that remains Manual guidance / future governed LK).
+9. Workbook home — new Section 1 field, per §36.9.
+10. Completion semantics — any of the three states satisfies the new `validateWorkbookForSignoff` check; never gated on which.
+11. Gap semantics — `unresolved_requires_followup` becomes a Gap Log candidate via a small, generic (not jurisdiction-specific) future extension to gap-seeding.
+12. Finding/report semantics — flows into existing Section 6/7 residual-risk/next-steps arrays; no new field.
+13. Living Knowledge role — none required now; future governed-applicability content deferred (CA-HRQ-2 territory).
+14. Sales-reuse potential — direct, per §36.15.
+15. Correction/freshness — ordinary live-field editing (calibration test 6).
+16. Fail-closed behavior — default/never-set state is not signoff-satisfying.
+
+### 36.19 Smallest implementation slices (proposed, not authorized)
+
+- **Slice 1** — P0-A control: one new `WorkbookData.section_3` entry + one new `Section3Evidence.tsx` `ControlExtras` case + `ALL_CONTROLS`/`CONTROLS` list additions. No schema/DB migration (JSONB `workbook_data` already schema-flexible per existing precedent). No report-projection change required.
+- **Slice 2** — P0-B field: one new `WorkbookData.section_1` field + one small `Section1Intake.tsx` UI addition + one new, generic (non-jurisdiction-specific) three-line check added to `validateWorkbookForSignoff`, mirroring the existing `scope_checks` loop shape exactly. No schema/DB migration.
+- **Slice 3 (#9)** — explicitly not sliced here; excluded per §36.1, left for a future P1 milestone.
+- Each slice is independently shippable; neither depends on the other, and neither depends on any CA-HRQ-2/Living-Knowledge-integration work.
+
+### 36.20 Fact/schema, workbook, and gating changes eventually required (AA/AB/AC)
+
+No database migration — both live inside the existing flexible `workbook_data` JSONB. Workbook changes: one new `section_3` control object; one new `section_1` field. Gating changes: two small additions to the *existing* `CONTROLS` array and `validateWorkbookForSignoff` (one line each for "has an accepted judgment" and "jurisdiction_context is set"), zero new gating *concepts*.
+
+### 36.21 What CRC does not need to change
+
+Nothing. Both elements are Commercial Assurance workbook methodology only; CRC's frozen PRD, Interview Engine, Retrieval, and Bounded Interpretation are untouched by this design and require no change for it to function.
+
+### 36.22 What remains P1/P2
+
+Scenario #9 (voice-only persona, correctly reframed per §36.1). CA-METH-1's remaining P1 set (#3 character/asset reuse, #5 agency rights flow-down, #6 non-visible reference inputs, #10 structured escalation) and P2 set (#4, #7, #8) are unaffected by this milestone and remain exactly as CA-METH-1 classified them — #3's substance is now largely *absorbed* into P0-A's control (a client stating "recurring character" naturally lands in `ownership_or_exclusivity_expected`), which may narrow #3's own future scope but is not a decision made here.
+
+### 36.23 Runtime changes made
+
+None.
