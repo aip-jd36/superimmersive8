@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { ChevronDown, ChevronRight, CheckCircle } from 'lucide-react'
 import { WorkbookData, DOMAIN_LABELS, JUDGMENT_OPTIONS, ALL_CONTROLS } from './workbook-schema'
+import { useWorkbookReadOnly } from './workbook-readonly-context'
 
 type S3 = WorkbookData['section_3']
 type S2 = WorkbookData['section_2']
@@ -71,8 +72,9 @@ function Sel({ value, onChange, options, placeholder, className = '' }: {
   value: string; onChange: (v: string) => void
   options: string[]; placeholder?: string; className?: string
 }) {
+  const readOnly = useWorkbookReadOnly()
   return (
-    <select value={value} onChange={e => onChange(e.target.value)}
+    <select value={value} onChange={e => onChange(e.target.value)} disabled={readOnly}
       className={`text-sm border rounded px-2 py-1.5 ${className}`}
       style={{ borderColor: 'rgba(0,0,0,0.15)' }}>
       {placeholder && <option value="">{placeholder}</option>}
@@ -84,18 +86,21 @@ function Sel({ value, onChange, options, placeholder, className = '' }: {
 function Text({ value, onChange, placeholder, className = '' }: {
   value: string; onChange: (v: string) => void; placeholder?: string; className?: string
 }) {
+  const readOnly = useWorkbookReadOnly()
   return (
     <input type="text" value={value} onChange={e => onChange(e.target.value)}
-      placeholder={placeholder}
+      placeholder={placeholder} disabled={readOnly}
       className={`text-sm border rounded px-2 py-1.5 ${className}`}
       style={{ borderColor: 'rgba(0,0,0,0.15)' }} />
   )
 }
 
 function Check({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
+  const readOnly = useWorkbookReadOnly()
   return (
     <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
       <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)}
+        disabled={readOnly}
         style={{ accentColor: '#C8900A' }} />
       {label}
     </label>
@@ -105,8 +110,10 @@ function Check({ checked, onChange, label }: { checked: boolean; onChange: (v: b
 function Textarea({ value, onChange, rows = 3, placeholder }: {
   value: string; onChange: (v: string) => void; rows?: number; placeholder?: string
 }) {
+  const readOnly = useWorkbookReadOnly()
   return (
     <textarea value={value} onChange={e => onChange(e.target.value)} rows={rows} placeholder={placeholder}
+      disabled={readOnly}
       className="w-full text-sm border rounded px-2 py-1.5 resize-none"
       style={{ borderColor: 'rgba(0,0,0,0.15)' }} />
   )
@@ -405,6 +412,7 @@ function ControlExtras({ id, data, update, section2 }: {
 function ControlRow({ id, data, onChange, section2 }: {
   id: ControlId; data: S3; onChange: (updates: Partial<S3>) => void; section2?: S2
 }) {
+  const readOnly = useWorkbookReadOnly()
   const ctrl = (data as any)[id] ?? {}
   const update = (updates: any) => onChange({ [id]: { ...ctrl, ...updates } } as any)
   const judged = !!(ctrl.judgment)
@@ -454,6 +462,7 @@ function ControlRow({ id, data, onChange, section2 }: {
             onChange={e => update({ notes: e.target.value })}
             rows={2}
             placeholder="Discrepancies, uncertainty, and reasoning a future reviewer should know"
+            disabled={readOnly}
             className="w-full text-xs border rounded px-2 py-1.5 resize-none text-gray-600"
             style={{ borderColor: 'rgba(0,0,0,0.10)' }}
           />
@@ -468,6 +477,7 @@ function ControlRow({ id, data, onChange, section2 }: {
           <select
             value={ctrl.judgment ?? ''}
             onChange={e => update({ judgment: e.target.value })}
+            disabled={readOnly}
             className={`w-full text-sm border rounded px-2 py-2 font-medium ${judgmentColor(ctrl.judgment ?? '')}`}
             style={{ borderColor: 'rgba(0,0,0,0.15)' }}
           >

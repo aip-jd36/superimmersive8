@@ -14,18 +14,45 @@ import { Section5Findings } from './Section5Findings'
 import { Section6Assessment } from './Section6Assessment'
 import { Section7Brief } from './Section7Brief'
 import { useWorkspaceLayout } from './workspace-layout-context'
+import { WorkbookReadOnlyProvider } from './workbook-readonly-context'
+import type { ProcessingStatus } from '@/types/assessment'
 
 type Section = '1' | '2' | '3' | '4' | '5' | '6' | '7'
 type RightTab = 'submission' | 'evidence' | 'guidance'
-type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'error' | 'locked'
 
 interface WorkbookClientProps {
   submissionId: string
   assessmentNumber: string | null
   initialSignoffStatus: 'active' | 'invalidated' | null
+  /** CA-OPS-3: assessments.processing_status, or null if no assessment row exists yet. */
+  processingStatus: ProcessingStatus | null
   initialWorkbook: WorkbookData
   submission: Record<string, any>
   evidenceFiles: Array<{ name: string; url: string }>
+}
+
+// CA-OPS-3 — the ONE authoritative derivation of "this workbook is
+// immutable," mirroring patch_workbook_atomic's own lock check exactly
+// (migration 20260907000000: `processing_status IN ('SIGNING','SIGNED',
+// 'DELIVERED')`). Every recognized PATCH-route lock code maps 1:1 to the
+// processing_status value that produces it, so both the page-load-known case
+// and the stale-client/race case (a 409 arriving mid-session) resolve
+// through this same three-value lookup -- never a second, independently
+// re-derived notion of "locked."
+const IMMUTABLE_PROCESSING_STATUSES = ['SIGNING', 'SIGNED', 'DELIVERED'] as const
+type LockedStatus = (typeof IMMUTABLE_PROCESSING_STATUSES)[number]
+
+const LOCK_CODE_TO_STATUS: Record<string, LockedStatus> = {
+  locked_for_signing: 'SIGNING',
+  signed_immutable: 'SIGNED',
+  delivered: 'DELIVERED',
+}
+
+const LOCK_MESSAGES: Record<LockedStatus, string> = {
+  SIGNING: 'Workbook locked — this assessment is currently being signed.',
+  SIGNED: 'Workbook locked — this assessment has already been signed.',
+  DELIVERED: 'Workbook locked — this assessment has already been delivered.',
 }
 
 function formatSavedAt(iso: string | null): string {
@@ -39,7 +66,7 @@ function formatSavedAt(iso: string | null): string {
 }
 
 export function WorkbookClient({
-  submissionId, assessmentNumber: initialAssessmentNumber, initialSignoffStatus, initialWorkbook, submission, evidenceFiles,
+  submissionId, assessmentNumber: initialAssessmentNumber, initialSignoffStatus, processingStatus, initialWorkbook, submission, evidenceFiles,
 }: WorkbookClientProps) {
   const [signoffStatus, setSignoffStatus] = useState<'active' | 'invalidated' | null>(initialSignoffStatus)
   const [workbook, setWorkbook] = useState<WorkbookData>(
@@ -57,6 +84,24 @@ export function WorkbookClient({
   const [savedAtDisplay, setSavedAtDisplay] = useState('')
   const saveTimer = useRef<NodeJS.Timeout>()
   const isFirstRender = useRef(true)
+
+  // CA-OPS-3: the stale-client/race case. A workbook that was editable when
+  // this page loaded can become immutable elsewhere while the reviewer is
+  // still on this page; the server's 409 (locked_for_signing / signed_immutable
+  // / delivered) is what sets this, never a client guess. Once set, `immutable`
+  // below is true for the rest of this page's lifetime -- the same one-way
+  // transition the backend itself enforces (SIGNING/SIGNED/DELIVERED is not
+  // something a workbook edit can undo).
+  const [raceLockedCode, setRaceLockedCode] = useState<string | null>(null)
+
+  // Single authoritative derivation, reused for both the known-at-load case
+  // and the race case -- see the module-level comment above.
+  const lockedStatus: LockedStatus | null =
+    (raceLockedCode && LOCK_CODE_TO_STATUS[raceLockedCode]) ||
+    (processingStatus && (IMMUTABLE_PROCESSING_STATUSES as readonly string[]).includes(processingStatus)
+      ? (processingStatus as LockedStatus)
+      : null)
+  const immutable = lockedStatus !== null
 
   // CAH-4F.2: one layout-only fact from the page-frame shell. When true,
   // Reviewer Resources occupies the adjacent contextual rail and this
@@ -82,6 +127,24 @@ export function WorkbookClient({
         setSaveStatus('saved')
         // CA-RLK-2a: a save that invalidated an active durable sign-off.
         if (body.signoffInvalidated) setSignoffStatus('invalidated')
+        return
+      }
+      // CA-OPS-3: distinguish an authoritative immutable-state rejection from
+      // any other failure, using ONLY the structured `error` code the route
+      // already returns -- never free-form message text (route.ts's `locked`
+      // map: locked_for_signing / signed_immutable / delivered, all HTTP 409).
+      // This never expands what the backend can reject; it only decides how
+      // the client PRESENTS a rejection the server already made.
+      let code: string | undefined
+      try {
+        const body = await res.json()
+        code = body?.error
+      } catch {
+        // Malformed/non-JSON body — fall through to the generic error path.
+      }
+      if (code && code in LOCK_CODE_TO_STATUS) {
+        setRaceLockedCode(code)
+        setSaveStatus('locked')
       } else {
         setSaveStatus('error')
       }
@@ -92,10 +155,14 @@ export function WorkbookClient({
 
   useEffect(() => {
     if (isFirstRender.current) { isFirstRender.current = false; return }
+    // CA-OPS-3: a known-immutable workbook never schedules a write attempt —
+    // the backend would reject it anyway (see patch_workbook_atomic), so this
+    // is purely to avoid a doomed request, not a second enforcement point.
+    if (immutable) return
     clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(() => save(workbook), 600)
     return () => clearTimeout(saveTimer.current)
-  }, [workbook, save])
+  }, [workbook, save, immutable])
 
   // Update "N min ago" display every 30s
   useEffect(() => {
@@ -174,11 +241,17 @@ export function WorkbookClient({
   const audioDisc = parseJsonb(submission.audio_disclosure, {})
 
   return (
-    // CAH-4F.1: viewport height is now owned by the page shell that wraps this
-    // component. This outer container is `h-full` (100% of the shell's
-    // workspace cell) instead of `h-screen`. The internal 3-zone layout,
-    // sticky header, section navigation, and nested scroll regions below are
-    // byte-unchanged.
+    // CA-OPS-3: WorkbookReadOnlyProvider carries the one derived `immutable`
+    // fact to every Section's input primitives — see
+    // workbook-readonly-context.tsx. It is presentation-only and grants no
+    // write authority; patch_workbook_atomic remains the sole enforcement
+    // point regardless of this value.
+    <WorkbookReadOnlyProvider value={immutable}>
+    {/* CAH-4F.1: viewport height is now owned by the page shell that wraps this
+        component. This outer container is `h-full` (100% of the shell's
+        workspace cell) instead of `h-screen`. The internal 3-zone layout,
+        sticky header, section navigation, and nested scroll regions below are
+        byte-unchanged. */}
     <div className="flex flex-col h-full" style={{ backgroundColor: '#FAFAF7' }}>
 
       {/* ── Sticky Header ──────────────────────────────────────────────────── */}
@@ -227,11 +300,13 @@ export function WorkbookClient({
           {/* Auto-save indicator */}
           <span className="text-xs" style={{
             color: saveStatus === 'error' ? '#f87171'
+              : saveStatus === 'locked' ? '#f59e0b'
               : saveStatus === 'saving' ? '#9ca3af'
               : saveStatus === 'saved' ? '#6ee7b7'
               : '#6b7280'
           }}>
             {saveStatus === 'saving' ? 'Saving…'
+              : saveStatus === 'locked' ? 'Locked — not saved'
               : saveStatus === 'error' ? 'Save failed'
               : saveStatus === 'saved' ? `Saved ${savedAtDisplay}`
               : ''}
@@ -303,6 +378,26 @@ export function WorkbookClient({
         {/* Center — Workbook Form */}
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-2xl mx-auto px-8 py-8">
+            {/* CA-OPS-3: persistent locked-state banner — visible regardless of
+                active section, so it survives section navigation rather than
+                being tied to any one Section's own render. */}
+            {immutable && lockedStatus && (
+              <div
+                className="mb-6 px-4 py-3 rounded border text-sm flex items-start gap-2"
+                style={{ borderColor: 'rgba(200,144,10,0.3)', backgroundColor: '#fffbf0', color: '#7a5b00' }}
+              >
+                <Lock className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-medium">{LOCK_MESSAGES[lockedStatus]}</div>
+                  {raceLockedCode && (
+                    <div className="text-xs mt-1" style={{ color: '#92702a' }}>
+                      Your most recent change was not saved. Refresh the page to view the current record.
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {activeSection === '1' && (
               <Section1Intake
                 data={workbook.section_1}
@@ -582,5 +677,6 @@ export function WorkbookClient({
         </aside>
       </div>
     </div>
+    </WorkbookReadOnlyProvider>
   )
 }

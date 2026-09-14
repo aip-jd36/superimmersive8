@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Download, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { WorkbookData, DOMAIN_LABELS, OUTCOME_OPTIONS } from './workbook-schema'
+import { useWorkbookReadOnly } from './workbook-readonly-context'
 import {
   projectReport,
   domainWorstJudgment,
@@ -559,12 +560,13 @@ function Textarea({ label, value, onChange, rows = 4, placeholder, hint }: {
   label: string; value: string; onChange: (v: string) => void
   rows?: number; placeholder?: string; hint?: string
 }) {
+  const readOnly = useWorkbookReadOnly()
   return (
     <div>
       <label className="block text-sm font-medium mb-1" style={{ color: '#1a1918' }}>{label}</label>
       {hint && <p className="text-xs text-gray-400 mb-1">{hint}</p>}
       <textarea value={value} onChange={e => onChange(e.target.value)} rows={rows}
-        placeholder={placeholder}
+        placeholder={placeholder} disabled={readOnly}
         className="w-full text-sm border rounded px-3 py-2 resize-none"
         style={{ borderColor: 'rgba(0,0,0,0.15)' }} />
     </div>
@@ -576,6 +578,7 @@ function StringList({ label, items, onChange, placeholder, hint }: {
   onChange: (items: string[]) => void
   placeholder?: string; hint?: string
 }) {
+  const readOnly = useWorkbookReadOnly()
   const update = (i: number, v: string) => onChange(items.map((x, idx) => idx === i ? v : x))
   const remove = (i: number) => onChange(items.filter((_, idx) => idx !== i))
   const add = () => onChange([...items, ''])
@@ -588,15 +591,15 @@ function StringList({ label, items, onChange, placeholder, hint }: {
         {items.map((item, i) => (
           <div key={i} className="flex gap-2">
             <input type="text" value={item} onChange={e => update(i, e.target.value)}
-              placeholder={placeholder}
+              placeholder={placeholder} disabled={readOnly}
               className="flex-1 text-sm border rounded px-3 py-1.5"
               style={{ borderColor: 'rgba(0,0,0,0.15)' }} />
-            <button type="button" onClick={() => remove(i)}
-              className="text-gray-300 hover:text-red-400 px-2">✕</button>
+            <button type="button" onClick={() => remove(i)} disabled={readOnly}
+              className="text-gray-300 hover:text-red-400 px-2 disabled:opacity-40 disabled:cursor-not-allowed">✕</button>
           </div>
         ))}
-        <button type="button" onClick={add}
-          className="text-sm text-gray-400 hover:text-gray-600">+ Add</button>
+        <button type="button" onClick={add} disabled={readOnly}
+          className="text-sm text-gray-400 hover:text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed">+ Add</button>
       </div>
     </div>
   )
@@ -606,6 +609,7 @@ export function Section7Brief({
   data, section6, section5, section4, section3, section2, section1,
   assessmentNumber, onAssessmentNumberChange, submission, onChange,
 }: Props) {
+  const readOnly = useWorkbookReadOnly()
   const [generating, setGenerating] = useState(false)
   const [generated, setGenerated] = useState(false)
   const [generatingPdf, setGeneratingPdf] = useState(false)
@@ -787,7 +791,8 @@ export function Section7Brief({
             <button
               type="button"
               onClick={handleSeed}
-              className="flex-shrink-0 flex items-center gap-1.5 text-xs px-3 py-1.5 rounded border font-medium transition-colors hover:bg-amber-50"
+              disabled={readOnly}
+              className="flex-shrink-0 flex items-center gap-1.5 text-xs px-3 py-1.5 rounded border font-medium transition-colors hover:bg-amber-50 disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ borderColor: '#C8900A', color: '#C8900A' }}
             >
               <Sparkles className="w-3 h-3" />

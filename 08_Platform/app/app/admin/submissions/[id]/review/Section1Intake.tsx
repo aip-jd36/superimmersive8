@@ -1,6 +1,7 @@
 'use client'
 
 import { WorkbookData } from './workbook-schema'
+import { useWorkbookReadOnly } from './workbook-readonly-context'
 
 type S1 = WorkbookData['section_1']
 
@@ -66,6 +67,7 @@ export function formatIntendedUse(raw: any): string {
 }
 
 export function Section1Intake({ data, submission, toolsUsed, onChange }: Props) {
+  const readOnly = useWorkbookReadOnly()
   const tools = toolsUsed.map(t => `${t.tool_name || t.tool}${t.plan_type ? ` (${t.plan_type})` : ''}`).join(', ')
 
   const handleCheck = (key: keyof S1['scope_checks'], value: boolean) => {
@@ -111,6 +113,7 @@ export function Section1Intake({ data, submission, toolsUsed, onChange }: Props)
           type="datetime-local"
           value={data.assessment_start || new Date().toISOString().slice(0, 16)}
           onChange={e => onChange({ assessment_start: e.target.value })}
+          disabled={readOnly}
           className="text-sm border rounded px-3 py-1.5"
           style={{ borderColor: 'rgba(0,0,0,0.15)' }}
         />
@@ -128,6 +131,7 @@ export function Section1Intake({ data, submission, toolsUsed, onChange }: Props)
           onChange={e => onChange({ campaign_description: e.target.value })}
           rows={3}
           placeholder="e.g. 30-sec social ad for a finserv brand in the UK, submitted by Singapore agency on behalf of client"
+          disabled={readOnly}
           className="w-full text-sm border rounded px-3 py-2 resize-none"
           style={{ borderColor: 'rgba(0,0,0,0.15)' }}
         />
@@ -144,6 +148,7 @@ export function Section1Intake({ data, submission, toolsUsed, onChange }: Props)
         <select
           value={data.jurisdiction_context.status}
           onChange={e => onChange({ jurisdiction_context: { ...data.jurisdiction_context, status: e.target.value as typeof data.jurisdiction_context.status } })}
+          disabled={readOnly}
           className="text-sm border rounded px-3 py-1.5 w-full"
           style={{ borderColor: 'rgba(0,0,0,0.15)' }}
         >
@@ -158,6 +163,7 @@ export function Section1Intake({ data, submission, toolsUsed, onChange }: Props)
             onChange={e => onChange({ jurisdiction_context: { ...data.jurisdiction_context, details: e.target.value } })}
             rows={2}
             placeholder="Name the specific narrower jurisdiction(s) and why they matter for this assessment."
+            disabled={readOnly}
             className="w-full text-sm border rounded px-3 py-2 resize-none mt-2"
             style={{ borderColor: 'rgba(0,0,0,0.15)' }}
           />
@@ -174,6 +180,7 @@ export function Section1Intake({ data, submission, toolsUsed, onChange }: Props)
             <label className="flex items-start gap-3 cursor-pointer">
               <input type="checkbox" checked={data.scope_checks.no_list_reviewed}
                 onChange={e => handleCheck('no_list_reviewed', e.target.checked)}
+                disabled={readOnly}
                 className="mt-0.5 flex-shrink-0" style={{ accentColor: '#C8900A' }} />
               <span className="text-sm text-gray-700">No List reviewed — none of the 8 exclusions apply to this submission</span>
             </label>
@@ -192,6 +199,7 @@ export function Section1Intake({ data, submission, toolsUsed, onChange }: Props)
           <label className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" checked={data.scope_checks.custodian_declaration}
               onChange={e => handleCheck('custodian_declaration', e.target.checked)}
+              disabled={readOnly}
               className="mt-0.5 flex-shrink-0" style={{ accentColor: '#C8900A' }} />
             <div>
               <div className="text-sm text-gray-700">Evidence Custodian Declaration confirmed signed in submission record</div>
@@ -203,6 +211,7 @@ export function Section1Intake({ data, submission, toolsUsed, onChange }: Props)
           <label className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" checked={data.scope_checks.indemnification_confirmed}
               onChange={e => handleCheck('indemnification_confirmed', e.target.checked)}
+              disabled={readOnly}
               className="mt-0.5 flex-shrink-0" style={{ accentColor: '#C8900A' }} />
             <div>
               <div className="text-sm text-gray-700">Indemnification warranty confirmed signed in submission record</div>
@@ -214,6 +223,7 @@ export function Section1Intake({ data, submission, toolsUsed, onChange }: Props)
           <label className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" checked={data.scope_checks.video_accessible}
               onChange={e => handleCheck('video_accessible', e.target.checked)}
+              disabled={readOnly}
               className="mt-0.5 flex-shrink-0" style={{ accentColor: '#C8900A' }} />
             <span className="text-sm text-gray-700">Video URL is accessible and playable</span>
           </label>
@@ -222,6 +232,7 @@ export function Section1Intake({ data, submission, toolsUsed, onChange }: Props)
           <label className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" checked={data.scope_checks.certified_tier}
               onChange={e => handleCheck('certified_tier', e.target.checked)}
+              disabled={readOnly}
               className="mt-0.5 flex-shrink-0" style={{ accentColor: '#C8900A' }} />
             <div>
               <div className="text-sm text-gray-700">Submission is SI8 Certified tier ($499)</div>
@@ -243,6 +254,7 @@ export function Section1Intake({ data, submission, toolsUsed, onChange }: Props)
           onChange={e => onChange({ scope_limitations: e.target.value })}
           rows={4}
           placeholder="Record anything that will affect assessment reliability: incomplete evidence, video access issues, unusual commercial context. Leave blank if none."
+          disabled={readOnly}
           className="w-full text-sm border rounded px-3 py-2 resize-none"
           style={{ borderColor: 'rgba(0,0,0,0.15)' }}
         />

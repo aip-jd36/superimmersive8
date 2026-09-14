@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { WorkbookData, OUTCOME_OPTIONS, CONFIDENCE_OPTIONS } from './workbook-schema'
+import { useWorkbookReadOnly } from './workbook-readonly-context'
 
 type S6 = WorkbookData['section_6']
 type Finding = WorkbookData['section_5']['findings'][number]
@@ -40,6 +41,7 @@ const IMPACT_SORT: Record<string, number> = {
 }
 
 export function Section6Assessment({ data, findings, gaps, assessmentNumber, submissionId, signoffStatus, onChange, onSignoffChange }: Props) {
+  const readOnly = useWorkbookReadOnly()
   const isComplete = !!(data.outcome && data.commercial_confidence && data.signed_off)
   const canSignOff = !!(data.outcome && data.commercial_confidence && data.basis.trim().length > 20)
 
@@ -119,6 +121,7 @@ export function Section6Assessment({ data, findings, gaps, assessmentNumber, sub
           type="datetime-local"
           value={data.assessment_end || ''}
           onChange={e => onChange({ assessment_end: e.target.value })}
+          disabled={readOnly}
           className="text-sm border rounded px-3 py-1.5"
           style={{ borderColor: 'rgba(0,0,0,0.15)' }}
         />
@@ -187,6 +190,7 @@ export function Section6Assessment({ data, findings, gaps, assessmentNumber, sub
                 value={opt.value}
                 checked={data.outcome === opt.value}
                 onChange={() => onChange({ outcome: opt.value })}
+                disabled={readOnly}
                 className="mt-0.5 flex-shrink-0"
                 style={{ accentColor: '#C8900A' }}
               />
@@ -213,15 +217,16 @@ export function Section6Assessment({ data, findings, gaps, assessmentNumber, sub
                   value={c}
                   onChange={e => handleCondition(i, e.target.value)}
                   placeholder={`Condition ${i + 1} — e.g. "Obtain sync license for background audio before commercial deployment"`}
+                  disabled={readOnly}
                   className="flex-1 text-sm border rounded px-3 py-1.5"
                   style={{ borderColor: 'rgba(0,0,0,0.15)' }}
                 />
-                <button type="button" onClick={() => handleRemoveCondition(i)}
-                  className="text-gray-300 hover:text-red-400 text-xs px-2">✕</button>
+                <button type="button" onClick={() => handleRemoveCondition(i)} disabled={readOnly}
+                  className="text-gray-300 hover:text-red-400 text-xs px-2 disabled:opacity-40 disabled:cursor-not-allowed">✕</button>
               </div>
             ))}
-            <button type="button" onClick={handleAddCondition}
-              className="text-sm text-amber-600 hover:text-amber-700">
+            <button type="button" onClick={handleAddCondition} disabled={readOnly}
+              className="text-sm text-amber-600 hover:text-amber-700 disabled:opacity-40 disabled:cursor-not-allowed">
               + Add condition
             </button>
           </div>
@@ -238,6 +243,7 @@ export function Section6Assessment({ data, findings, gaps, assessmentNumber, sub
           onChange={e => onChange({ basis: e.target.value })}
           rows={4}
           placeholder="e.g. 'Commercial rights were independently supported for all declared AI tools, no material IP or likeness issues were identified through independent review, and the remaining evidence gap does not materially affect commercial reliance.'"
+          disabled={readOnly}
           className="w-full text-sm border rounded px-3 py-2 resize-none"
           style={{ borderColor: 'rgba(0,0,0,0.15)' }}
         />
@@ -257,7 +263,8 @@ export function Section6Assessment({ data, findings, gaps, assessmentNumber, sub
             {CONFIDENCE_OPTIONS.map(c => (
               <button key={c} type="button"
                 onClick={() => onChange({ commercial_confidence: c })}
-                className={`flex-1 py-2 text-sm rounded border transition-colors ${
+                disabled={readOnly}
+                className={`flex-1 py-2 text-sm rounded border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
                   data.commercial_confidence === c
                     ? 'font-semibold'
                     : 'text-gray-500 hover:text-gray-700'
@@ -279,7 +286,8 @@ export function Section6Assessment({ data, findings, gaps, assessmentNumber, sub
             {CONFIDENCE_OPTIONS.map(c => (
               <button key={c} type="button"
                 onClick={() => onChange({ reviewer_confidence: c })}
-                className={`flex-1 py-2 text-sm rounded border transition-colors ${
+                disabled={readOnly}
+                className={`flex-1 py-2 text-sm rounded border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
                   data.reviewer_confidence === c ? 'font-semibold' : 'text-gray-500 hover:text-gray-700'
                 }`}
                 style={{
@@ -304,6 +312,7 @@ export function Section6Assessment({ data, findings, gaps, assessmentNumber, sub
           onChange={e => onChange({ reviewer_confidence_notes: e.target.value })}
           rows={2}
           placeholder="What additional evidence or clarification would most improve confidence in this assessment?"
+          disabled={readOnly}
           className="w-full text-sm border rounded px-3 py-2 resize-none"
           style={{ borderColor: 'rgba(0,0,0,0.15)' }}
         />
@@ -373,7 +382,7 @@ export function Section6Assessment({ data, findings, gaps, assessmentNumber, sub
           <input
             type="checkbox"
             checked={data.signed_off}
-            disabled={!canSignOff && !data.signed_off}
+            disabled={(!canSignOff && !data.signed_off) || readOnly}
             onChange={e => onChange({ signed_off: e.target.checked })}
             className="mt-0.5 flex-shrink-0"
             style={{ accentColor: '#22c55e' }}
@@ -403,7 +412,7 @@ export function Section6Assessment({ data, findings, gaps, assessmentNumber, sub
               )}
               <button
                 type="button"
-                disabled={!canSignOff || signing}
+                disabled={!canSignOff || signing || readOnly}
                 onClick={recordSignoff}
                 className="text-sm font-medium rounded-md px-3 py-1.5 text-white disabled:opacity-50"
                 style={{ backgroundColor: '#1a1918' }}

@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { Trash2 } from 'lucide-react'
 import { WorkbookData } from './workbook-schema'
+import { useWorkbookReadOnly } from './workbook-readonly-context'
 
 type S4 = WorkbookData['section_4']
 type S3 = WorkbookData['section_3']
@@ -58,8 +59,14 @@ function buildSuggestedGaps(section3: S3): Gap[] {
 }
 
 export function Section4Gaps({ data, section3, onChange }: Props) {
-  // Auto-seed gaps when section first loads and gaps is empty
+  const readOnly = useWorkbookReadOnly()
+
+  // Auto-seed gaps when section first loads and gaps is empty.
+  // CA-OPS-3: a known-immutable workbook must not mutate state on mount —
+  // disabling the rendered inputs alone would not stop this effect from
+  // firing, since it is driven by mount, not by user interaction.
   useEffect(() => {
+    if (readOnly) return
     if (data.gaps.length === 0) {
       const suggested = buildSuggestedGaps(section3)
       if (suggested.length > 0) {
@@ -133,6 +140,7 @@ export function Section4Gaps({ data, section3, onChange }: Props) {
                 <select
                   value={gap.control}
                   onChange={e => updateGap(i, { control: e.target.value })}
+                  disabled={readOnly}
                   className="text-sm border rounded px-2 py-1.5"
                   style={{ borderColor: 'rgba(0,0,0,0.15)' }}
                 >
@@ -142,8 +150,8 @@ export function Section4Gaps({ data, section3, onChange }: Props) {
                   ))}
                 </select>
               </div>
-              <button type="button" onClick={() => removeGap(i)}
-                className="text-gray-300 hover:text-red-400 transition-colors">
+              <button type="button" onClick={() => removeGap(i)} disabled={readOnly}
+                className="text-gray-300 hover:text-red-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
@@ -155,6 +163,7 @@ export function Section4Gaps({ data, section3, onChange }: Props) {
                 onChange={e => updateGap(i, { what_missing: e.target.value })}
                 rows={2}
                 placeholder="Describe specifically what evidence was not provided or was insufficient"
+                disabled={readOnly}
                 className="w-full text-sm border rounded px-2 py-1.5 resize-none"
                 style={{ borderColor: 'rgba(0,0,0,0.12)' }}
               />
@@ -166,6 +175,7 @@ export function Section4Gaps({ data, section3, onChange }: Props) {
                 <select
                   value={gap.addressable}
                   onChange={e => updateGap(i, { addressable: e.target.value })}
+                  disabled={readOnly}
                   className="w-full text-sm border rounded px-2 py-1.5"
                   style={{ borderColor: 'rgba(0,0,0,0.12)' }}
                 >
@@ -180,6 +190,7 @@ export function Section4Gaps({ data, section3, onChange }: Props) {
                 <select
                   value={gap.commercial_impact}
                   onChange={e => updateGap(i, { commercial_impact: e.target.value })}
+                  disabled={readOnly}
                   className="w-full text-sm border rounded px-2 py-1.5"
                   style={{ borderColor: 'rgba(0,0,0,0.12)' }}
                 >
@@ -198,6 +209,7 @@ export function Section4Gaps({ data, section3, onChange }: Props) {
                 value={gap.impact_description}
                 onChange={e => updateGap(i, { impact_description: e.target.value })}
                 placeholder="e.g. Without contemporaneous prompt records, provenance of the generated output cannot be independently confirmed"
+                disabled={readOnly}
                 className="w-full text-sm border rounded px-2 py-1.5"
                 style={{ borderColor: 'rgba(0,0,0,0.12)' }}
               />
@@ -209,7 +221,8 @@ export function Section4Gaps({ data, section3, onChange }: Props) {
       <button
         type="button"
         onClick={addGap}
-        className="w-full py-2 text-sm border-2 border-dashed rounded-lg text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
+        disabled={readOnly}
+        className="w-full py-2 text-sm border-2 border-dashed rounded-lg text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       >
         + Add gap manually
       </button>

@@ -2,6 +2,7 @@
 
 import { Trash2 } from 'lucide-react'
 import { WorkbookData, DOMAIN_LABELS } from './workbook-schema'
+import { useWorkbookReadOnly } from './workbook-readonly-context'
 
 type S5 = WorkbookData['section_5']
 type Finding = S5['findings'][number]
@@ -18,6 +19,7 @@ function generateId() {
 }
 
 export function Section5Findings({ data, onChange }: Props) {
+  const readOnly = useWorkbookReadOnly()
   const updateFinding = (index: number, updates: Partial<Finding>) => {
     const updated = data.findings.map((f, i) => i === index ? { ...f, ...updates } : f)
     onChange({ findings: updated })
@@ -72,6 +74,7 @@ export function Section5Findings({ data, onChange }: Props) {
                 <select
                   value={finding.domain}
                   onChange={e => updateFinding(i, { domain: e.target.value })}
+                  disabled={readOnly}
                   className="text-xs border rounded px-2 py-1"
                   style={{ borderColor: 'rgba(0,0,0,0.15)' }}
                 >
@@ -80,8 +83,8 @@ export function Section5Findings({ data, onChange }: Props) {
                   <option value="Overall">Overall</option>
                 </select>
               </div>
-              <button type="button" onClick={() => removeFinding(i)}
-                className="text-gray-300 hover:text-red-400 transition-colors">
+              <button type="button" onClick={() => removeFinding(i)} disabled={readOnly}
+                className="text-gray-300 hover:text-red-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
@@ -93,6 +96,7 @@ export function Section5Findings({ data, onChange }: Props) {
                 onChange={e => updateFinding(i, { finding: e.target.value })}
                 rows={2}
                 placeholder="e.g. 'Commercial licenses for all declared AI tools were adequately established for the stated generation period.' — noun-first, past-tense, factual."
+                disabled={readOnly}
                 className="w-full text-sm border rounded px-2 py-1.5 resize-none"
                 style={{ borderColor: 'rgba(0,0,0,0.12)' }}
               />
@@ -105,6 +109,7 @@ export function Section5Findings({ data, onChange }: Props) {
                 value={finding.evidence_basis}
                 onChange={e => updateFinding(i, { evidence_basis: e.target.value })}
                 placeholder="Cite the specific documents reviewed — e.g. 'Kling AI Pro receipt (Jan 2026); Pro plan ToS reviewed — confirms commercial output rights for paid subscribers'"
+                disabled={readOnly}
                 className="w-full text-sm border rounded px-2 py-1.5"
                 style={{ borderColor: 'rgba(0,0,0,0.12)' }}
               />
@@ -116,6 +121,7 @@ export function Section5Findings({ data, onChange }: Props) {
                 <select
                   value={finding.commercial_impact}
                   onChange={e => updateFinding(i, { commercial_impact: e.target.value })}
+                  disabled={readOnly}
                   className="w-full text-sm border rounded px-2 py-1.5"
                   style={{ borderColor: 'rgba(0,0,0,0.12)' }}
                 >
@@ -132,6 +138,7 @@ export function Section5Findings({ data, onChange }: Props) {
                 <select
                   value={finding.addressable}
                   onChange={e => updateFinding(i, { addressable: e.target.value })}
+                  disabled={readOnly}
                   className="w-full text-sm border rounded px-2 py-1.5"
                   style={{ borderColor: 'rgba(0,0,0,0.12)' }}
                 >
@@ -150,7 +157,8 @@ export function Section5Findings({ data, onChange }: Props) {
       <button
         type="button"
         onClick={addFinding}
-        className="w-full py-2.5 text-sm border-2 border-dashed rounded-lg transition-colors"
+        disabled={readOnly}
+        className="w-full py-2.5 text-sm border-2 border-dashed rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         style={{ borderColor: 'rgba(200,144,10,0.3)', color: '#C8900A' }}
         onMouseEnter={e => (e.currentTarget.style.borderColor = '#C8900A')}
         onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(200,144,10,0.3)')}

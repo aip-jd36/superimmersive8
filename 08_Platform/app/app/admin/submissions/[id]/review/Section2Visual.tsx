@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react'
 import { useEffect } from 'react'
 import { WorkbookData } from './workbook-schema'
+import { useWorkbookReadOnly } from './workbook-readonly-context'
 
 type S2 = WorkbookData['section_2']
 
@@ -26,10 +27,12 @@ function Sel({ value, onChange, options, placeholder }: {
   value: string; onChange: (v: string) => void
   options: string[]; placeholder?: string
 }) {
+  const readOnly = useWorkbookReadOnly()
   return (
     <select
       value={value}
       onChange={e => onChange(e.target.value)}
+      disabled={readOnly}
       className="w-full text-sm border rounded px-3 py-1.5"
       style={{ borderColor: 'rgba(0,0,0,0.15)' }}
     >
@@ -40,12 +43,14 @@ function Sel({ value, onChange, options, placeholder }: {
 }
 
 function Text({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+  const readOnly = useWorkbookReadOnly()
   return (
     <input
       type="text"
       value={value}
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
+      disabled={readOnly}
       className="w-full text-sm border rounded px-3 py-1.5"
       style={{ borderColor: 'rgba(0,0,0,0.15)' }}
     />
@@ -53,6 +58,7 @@ function Text({ value, onChange, placeholder }: { value: string; onChange: (v: s
 }
 
 function Num({ value, onChange, placeholder }: { value: number | null; onChange: (v: number | null) => void; placeholder?: string }) {
+  const readOnly = useWorkbookReadOnly()
   return (
     <input
       type="number"
@@ -60,6 +66,7 @@ function Num({ value, onChange, placeholder }: { value: number | null; onChange:
       value={value ?? ''}
       onChange={e => onChange(e.target.value ? Number(e.target.value) : null)}
       placeholder={placeholder}
+      disabled={readOnly}
       className="w-32 text-sm border rounded px-3 py-1.5"
       style={{ borderColor: 'rgba(0,0,0,0.15)' }}
     />
@@ -67,9 +74,10 @@ function Num({ value, onChange, placeholder }: { value: number | null; onChange:
 }
 
 function Check({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
+  const readOnly = useWorkbookReadOnly()
   return (
     <label className="flex items-center gap-2 cursor-pointer">
-      <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} style={{ accentColor: '#C8900A' }} />
+      <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} disabled={readOnly} style={{ accentColor: '#C8900A' }} />
       <span className="text-sm text-gray-700">{label}</span>
     </label>
   )
@@ -78,12 +86,14 @@ function Check({ checked, onChange, label }: { checked: boolean; onChange: (v: b
 function Textarea({ value, onChange, rows = 3, placeholder }: {
   value: string; onChange: (v: string) => void; rows?: number; placeholder?: string
 }) {
+  const readOnly = useWorkbookReadOnly()
   return (
     <textarea
       value={value}
       onChange={e => onChange(e.target.value)}
       rows={rows}
       placeholder={placeholder}
+      disabled={readOnly}
       className="w-full text-sm border rounded px-3 py-2 resize-none"
       style={{ borderColor: 'rgba(0,0,0,0.15)' }}
     />
@@ -112,6 +122,7 @@ const PRESENCE = ['None observed', 'Possible', 'Confirmed'] as const
 const DEFAULT_PASSES = { first_complete: false, second_viewing: false, frame_by_frame: false }
 
 export function Section2Visual({ data, submission, onChange }: Props) {
+  const readOnly = useWorkbookReadOnly()
   const u = (updates: Partial<S2>) => onChange(updates)
 
   // Safe read — existing workbooks saved before this schema change have viewing_passes undefined
@@ -122,8 +133,12 @@ export function Section2Visual({ data, submission, onChange }: Props) {
     ? (data.landmarks_observed ? 'Confirmed' : '')
     : (data.landmarks_observed as string)
 
-  // Pre-populate URL field on first open if still empty
+  // Pre-populate URL field on first open if still empty.
+  // CA-OPS-3: a known-immutable workbook must not mutate state on mount —
+  // disabling the rendered inputs alone would not stop this effect from
+  // firing, since it is driven by mount, not by user interaction.
   useEffect(() => {
+    if (readOnly) return
     if (!data.video_url_confirmed && submission.video_url) {
       u({ video_url_confirmed: submission.video_url })
     }

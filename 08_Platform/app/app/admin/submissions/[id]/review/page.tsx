@@ -40,6 +40,11 @@ export default async function WorkbookPage({ params }: PageProps) {
   const assessmentNumber: string | null = existingAssessment?.assessment_number ?? null
   const initialSignoffStatus: 'active' | 'invalidated' | null =
     (existingAssessment?.signoff_status as 'active' | 'invalidated' | null) ?? null
+  // CA-OPS-3: the same authoritative field patch_workbook_atomic itself
+  // checks (SIGNING/SIGNED/DELIVERED locks the workbook) -- already fetched
+  // above via findAssessmentBySubmissionId, just not previously passed down.
+  // null when no assessment row exists yet (always editable, same as the RPC).
+  const processingStatus = existingAssessment?.processing_status ?? null
 
   // Legacy/current-schema reconciliation (CA-METH-4A) — a persisted
   // workbook_data may predate a later schema addition entirely (e.g.
@@ -99,6 +104,7 @@ export default async function WorkbookPage({ params }: PageProps) {
         submissionId={params.id}
         assessmentNumber={assessmentNumber}
         initialSignoffStatus={initialSignoffStatus}
+        processingStatus={processingStatus}
         initialWorkbook={initialWorkbook}
         submission={submission as any}
         evidenceFiles={evidenceFiles ?? []}
