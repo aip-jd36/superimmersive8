@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronDown, ChevronRight, CheckCircle } from 'lucide-react'
 import { WorkbookData, DOMAIN_LABELS, JUDGMENT_OPTIONS, ALL_CONTROLS } from './workbook-schema'
 
@@ -560,6 +560,21 @@ export function Section3Evidence({ data, section2, onChange, onDomainFocus }: Pr
   // First incomplete domain opens by default; all others start collapsed
   const firstIncompleteDomain = Object.entries(DOMAIN_CONTROLS)
     .find(([, controls]) => controls.some(id => !(data as any)[id]?.judgment))?.[0]
+
+  // CA-METH-6B -- the domain above auto-opens visually via DomainSection's
+  // initialOpen, but that alone never told the Guidance panel which domain
+  // is active. Mirror the exact same notification a reviewer click would
+  // produce, once per mount, so guidance context matches whatever domain
+  // Section 3 actually opened for review -- generic to any domain, not R05
+  // or Domain R specific. One-time on mount: Section3Evidence fully
+  // unmounts/remounts on section navigation (matching DomainSection's own
+  // initialOpen semantics), and this must never re-fire on every re-render
+  // or it would repeatedly override a reviewer's later, explicit domain
+  // selection.
+  useEffect(() => {
+    if (firstIncompleteDomain) onDomainFocus?.(firstIncompleteDomain)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div>
