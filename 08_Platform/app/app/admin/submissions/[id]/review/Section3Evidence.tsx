@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronDown, ChevronRight, CheckCircle } from 'lucide-react'
-import { WorkbookData, DOMAIN_LABELS, JUDGMENT_OPTIONS } from './workbook-schema'
+import { WorkbookData, DOMAIN_LABELS, JUDGMENT_OPTIONS, ALL_CONTROLS } from './workbook-schema'
 
 type S3 = WorkbookData['section_3']
 type S2 = WorkbookData['section_2']
@@ -554,6 +554,7 @@ function DomainSection({ domain, controls, data, section2, onChange, onDomainFoc
 // ── Section root ──────────────────────────────────────────────────────────────
 
 export function Section3Evidence({ data, section2, onChange, onDomainFocus }: Props) {
+  const totalControls = ALL_CONTROLS.length
   const totalDone = Object.keys(data).filter(id => !!(data as any)[id]?.judgment).length
 
   // First incomplete domain opens by default; all others start collapsed
@@ -565,15 +566,15 @@ export function Section3Evidence({ data, section2, onChange, onDomainFocus }: Pr
       <div className="mb-6">
         <h2 className="text-lg font-semibold mb-1" style={{ color: '#1a1918' }}>§ 3  Evidence Review</h2>
         <p className="text-sm text-gray-500">
-          16 controls across 7 domains. Compare submitted evidence against your observations. Assign a judgment to each.
-          All 16 must be completed to unlock Sections 4 and 5.
+          {totalControls} controls across 7 domains. Compare submitted evidence against your observations. Assign a judgment to each.
+          All {totalControls} must be completed to unlock Sections 4 and 5.
         </p>
         <div className={`mt-2 text-xs px-3 py-1.5 rounded inline-block ${
-          totalDone === 16 ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-500'
+          totalDone === totalControls ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-500'
         }`}>
-          {totalDone === 16
-            ? '✓ All 16 controls complete'
-            : `Assessment progress: ${totalDone} of 16 controls completed`}
+          {totalDone === totalControls
+            ? `✓ All ${totalControls} controls complete`
+            : `Assessment progress: ${totalDone} of ${totalControls} controls completed`}
         </div>
       </div>
 
