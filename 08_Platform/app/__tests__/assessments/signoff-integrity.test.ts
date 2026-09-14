@@ -21,7 +21,7 @@ import { METHODOLOGY_VERSION } from '../../lib/assessments/service'
 
 // ── a complete, valid workbook ──────────────────────────────────────────────
 
-const CONTROLS = ['A01','R01','R02','R03','R04','H01','H02','I01','I02','I03','L01','L02','L03','T01','D01','D02']
+const CONTROLS = ['A01','R01','R02','R03','R04','R05','H01','H02','I01','I02','I03','L01','L02','L03','T01','D01','D02']
 
 function completeWorkbook(overrides: Record<string, any> = {}): any {
   const section_3: Record<string, any> = {}
@@ -121,6 +121,9 @@ describe('validateWorkbookForSignoff', () => {
 describe('domainCodesForMethodology', () => {
   test('v0.2 -> the seven domains', () => {
     expect(domainCodesForMethodology('SI8 Reviewer Manual v0.2')).toEqual(['A','R','H','I','L','T','D'])
+  })
+  test('v0.3 -> the same seven domains (CA-METH-3A added a control within Domain R, not a new domain)', () => {
+    expect(domainCodesForMethodology('SI8 Reviewer Manual v0.3')).toEqual(['A','R','H','I','L','T','D'])
   })
   test('the live METHODOLOGY_VERSION constant is mapped', () => {
     expect(domainCodesForMethodology(METHODOLOGY_VERSION)).not.toBeNull()

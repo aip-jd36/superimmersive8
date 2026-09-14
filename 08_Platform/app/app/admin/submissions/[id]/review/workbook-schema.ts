@@ -3,7 +3,7 @@
 // Updated here when the schema changes; bump workbook_version.
 
 export const EMPTY_WORKBOOK = {
-  workbook_version: '0.2',
+  workbook_version: '0.3',
   section_1: {
     campaign_description: '',
     assessment_start: '',
@@ -62,6 +62,7 @@ export const EMPTY_WORKBOOK = {
     R02: { evidence: '', judgment: '', notes: '', tools_reviewed: '', license_status: '', receipts: '' },
     R03: { judgment: '', notes: '', custom_model: false, training_data: '', licensing_documented: '' },
     R04: { evidence: '', judgment: '', notes: '', tos_summary: '', work_for_hire: '' },
+    R05: { judgment: '', notes: '', intended_exploitation: '', expectation_details: '', reviewer_risk_recognition: '' },
     H01: { evidence: '', judgment: '', notes: '', contribution_level: '' },
     H02: { judgment: '', notes: '', copyright_claim: '', claim_basis: '', assessment: '' },
     I01: { evidence: '', judgment: '', notes: '', content_viewed: false, elements_identified: '' },
@@ -145,7 +146,7 @@ export const DOMAIN_LABELS: Record<string, string> = {
   D: 'Documentation Integrity',
 }
 
-export const ALL_CONTROLS = ['A01','R01','R02','R03','R04','H01','H02','I01','I02','I03','L01','L02','L03','T01','D01','D02'] as const
+export const ALL_CONTROLS = ['A01','R01','R02','R03','R04','R05','H01','H02','I01','I02','I03','L01','L02','L03','T01','D01','D02'] as const
 
 // Compute section completion states from workbook data
 export function computeGates(workbook: WorkbookData) {

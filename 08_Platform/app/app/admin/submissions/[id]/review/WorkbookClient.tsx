@@ -135,7 +135,7 @@ export function WorkbookClient({
   }, {} as Record<string, string>)
   const s3DoneCounts = {
     A: ['A01'].filter(id => controlCounts[id] === 'done').length,
-    R: ['R01','R02','R03','R04'].filter(id => controlCounts[id] === 'done').length,
+    R: ['R01','R02','R03','R04','R05'].filter(id => controlCounts[id] === 'done').length,
     H: ['H01','H02'].filter(id => controlCounts[id] === 'done').length,
     I: ['I01','I02','I03'].filter(id => controlCounts[id] === 'done').length,
     L: ['L01','L02','L03'].filter(id => controlCounts[id] === 'done').length,
@@ -281,7 +281,7 @@ export function WorkbookClient({
           {activeSection === '3' && (
             <div className="mt-1 border-t pt-2" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
               {Object.entries(DOMAIN_LABELS).map(([domain, name]) => {
-                const counts = { A: 1, R: 4, H: 2, I: 3, L: 3, T: 1, D: 2 }
+                const counts = { A: 1, R: 5, H: 2, I: 3, L: 3, T: 1, D: 2 }
                 const total = counts[domain as keyof typeof counts]
                 const done = s3DoneCounts[domain as keyof typeof s3DoneCounts]
                 return (

@@ -1,5 +1,5 @@
 // Static guidance content per active section / domain.
-// Sourced from SI8 Reviewer Manual v0.2 Part 4.
+// Sourced from SI8 Reviewer Manual v0.3 Part 4.
 // Updates here require a code deploy — no CMS needed for Year 1.
 
 export const GUIDANCE: Record<string, string> = {
@@ -73,7 +73,9 @@ R02 — Commercial license: Check the ToS for each named tool as of the generati
 
 R03 — Custom models: Fine-tuned models trained on third-party data carry significant risk. If training data is unclear or not documented, this is Not Provided regardless of how complete other evidence is.
 
-R04 — Output rights: Who owns the AI output? Most commercial tools grant rights to the subscriber for commercial use. Confirm this is consistent with the work-for-hire arrangement if a contractor or agency produced the work.`,
+R04 — Output rights: Who owns the AI output? Most commercial tools grant rights to the subscriber for commercial use. Confirm this is consistent with the work-for-hire arrangement if a contractor or agency produced the work.
+
+R05 — Intended exploitation / commercial expectation: a different question from R01-R04 — not whether the tool permits commercial output, but what the CUSTOMER expects to do with the result beyond this specific delivery (ownership, exclusivity, reuse, adaptation, licensing to a third party). Record the customer's own stated expectation first, then — separately — your own risk-recognition judgment on whether current evidence supports it. Never conclude ownership, copyrightability, trademark validity, or enforceability yourself; if a broader expectation is stated and the evidence doesn't clearly support it, record "recommend specialist/legal review," not a legal answer. No additional expectation stated → Not Applicable.`,
 
   'H': `DOMAIN H — HUMAN CREATIVE CONTRIBUTION
 

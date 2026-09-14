@@ -20,6 +20,7 @@ const CONTROL_LABELS: Record<string, string> = {
   R02: 'R02 — Commercial License',
   R03: 'R03 — Custom Model Provenance',
   R04: 'R04 — Output Ownership',
+  R05: 'R05 — Intended Exploitation / Commercial Expectation',
   H01: 'H01 — Human Contribution',
   H02: 'H02 — Authorship Claim',
   I01: 'I01 — Third-Party IP (Visual)',

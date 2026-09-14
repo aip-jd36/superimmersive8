@@ -18,7 +18,7 @@ import { buildC2PAManifest, METHODOLOGY_VERSION } from '../../lib/assessments/se
 // own stored methodology_version claims.
 describe('METHODOLOGY_VERSION', () => {
   test('points at the currently active Manual version', () => {
-    expect(METHODOLOGY_VERSION).toBe('SI8 Reviewer Manual v0.2')
+    expect(METHODOLOGY_VERSION).toBe('SI8 Reviewer Manual v0.3')
   })
 })
 

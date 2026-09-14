@@ -1,13 +1,10 @@
 # SI8 Reviewer Manual — Volume I: Core Review Principles
-**Version:** 0.2
-**Effective date:** July 20, 2026
-**Status:** SUPERSEDED
-**Superseded by:** SI8 Reviewer Manual v0.3, effective September 14, 2026 — see `SI8-Reviewer-Manual-v0.3.md`
+**Version:** 0.3
+**Effective date:** September 14, 2026
+**Status:** ACTIVE
 **Audience:** SI8 reviewers — internal only. Do not share with customers or third parties.
 **Owner:** Chief of Staff
 **Companion documents:** Reviewer Workbook Schema v0.1 · Assessment Report Template v0.2 · Post-Assessment Review Template v0.1
-
-**Historical record — do not use for new assessments.** This version governed SI8's methodology from July 20, 2026 to September 13, 2026, and is preserved unmodified below because it is the methodology under which prior assessments were issued. Assessments reference the specific manual version they were reviewed under (`assessments.methodology_version`); that reference is never retroactively changed when the Manual is updated. For current guidance, use `SI8-Reviewer-Manual-v0.3.md`.
 
 ---
 
@@ -403,6 +400,21 @@ This is the most commercially critical domain. A weak or missing finding here di
 
 **Commercial implications:**
 Unverified commercial licensing is the most direct source of commercial liability in AI-generated content. A tool used without commercial rights creates a direct infringement claim against the submitter and any downstream commercial party. This domain must be Verified or Partially Verified (with conditions to close the gap) for SI8 to reach a positive outcome.
+
+**R05 — Intended Exploitation / Commercial Expectation (added v0.3):** R01–R04 establish whether the AI tools themselves permit commercial output. R05 is a different question: what does the customer actually expect to do with the resulting work beyond the delivery described in this assessment — ownership, exclusivity/control over commercially important elements, reuse, adaptation, or licensing to a third party? This is a project fact, established from the customer's own stated intent (the campaign/use-case description, or a direct reviewer follow-up) — never inferred from the artifact itself, and never a legal conclusion.
+
+R05 has two structurally separate parts, and they must never be collapsed into one another:
+
+- *Intended exploitation* — the customer's own stated expectation. Record it as one of: no additional expectation beyond the stated use; ownership or exclusivity expected; reuse or exploitation expected; or unclear (requires follow-up). "The customer didn't mention anything else" is not the same as "no additional expectation" — confirm it, don't default to it.
+- *Reviewer risk-recognition assessment* — given the evidence already reviewed elsewhere in this workbook, is that evidence consistent with the stated expectation, or does it warrant specialist/legal review? This is never a determination that the customer owns, can exclude others from, or holds an enforceable legal right in anything. SI8 does not decide copyrightability, trademark validity, or enforceability (Part 1) — R05 exists so the reviewer notices when a customer's expectation has outrun what this assessment can support, not so SI8 can resolve it.
+
+R05 judgment guide:
+- **Not Applicable:** the customer has confirmed no expectation beyond the artifact delivered under this assessment.
+- **Verified:** a broader expectation was stated, and current evidence is consistent with it for commercial-reliance purposes.
+- **Partially Verified:** a broader expectation was stated, but material uncertainty remains, or specialist/legal review is warranted before anyone relies on it.
+- **Not Provided:** the customer's expectation could not be established at all, or no evidence exists against which to assess a stated expectation.
+
+If a customer asks whether this assessment proves they own exclusive rights, or that a competitor is legally barred from a similar element, the correct reviewer disposition is "Not evaluated — outside SI8 assessment scope," recorded in the reviewer risk-recognition field. Never let R05 imply the answer is yes.
 
 ---
 
@@ -891,6 +903,7 @@ A Case Library entry does not automatically update the Manual. It provides a ref
 |---------|------|-------------------|
 | 0.1 | 2026-07-05 | Initial version — all 7 parts. Pre-operational; domain decision thresholds are design estimates. |
 | 0.2 | 2026-07-20 | Domain H (Human Creative Contribution) now requires a corroborating artifact — not just a detailed submitter narrative — to reach "Verified"; uncorroborated self-attestation caps at "Partially Verified." Domain H added as a required-Verified gate for the top outcome ("Evidence Supports Intended Commercial Use") and for High confidence. Added the Version Bump Requirement to Part 7, formalizing that substantive Part 4/Part 5 changes require a version bump plus a matching update to the application's methodology-version constant in the same change set. |
+| 0.3 | 2026-09-14 | Added Domain R control R05 (Intended Exploitation / Commercial Expectation) — establishes what the customer expects to do with the resulting work beyond the stated delivery (ownership, exclusivity, reuse, adaptation, licensing), kept structurally separate from the reviewer's own evidence-based risk-recognition judgment. Neither establishes nor implies any legal conclusion (copyrightability, trademark validity, enforceability, exclusivity). No new domain; no change to R01–R04, Domain H/I/L/T/D guidance, or outcome/confidence gating logic (CA-METH-2/CA-METH-3A). |
 
 ---
 

@@ -38,6 +38,10 @@ export type SignoffStatus = (typeof SIGNOFF_STATUSES)[number]
 export const METHODOLOGY_DOMAIN_CODES: Record<string, readonly string[]> = {
   'SI8 Reviewer Manual v0.1': ['A', 'R', 'H', 'I', 'L', 'T', 'D'],
   'SI8 Reviewer Manual v0.2': ['A', 'R', 'H', 'I', 'L', 'T', 'D'],
+  // v0.3 (CA-METH-3A) added Domain R control R05 (Intended Exploitation /
+  // Commercial Expectation) — a new control within an existing domain, never
+  // a new domain. Same seven-domain scope as v0.1/v0.2.
+  'SI8 Reviewer Manual v0.3': ['A', 'R', 'H', 'I', 'L', 'T', 'D'],
 }
 
 /**
@@ -116,7 +120,7 @@ export function deriveOutcomeFromWorkbook(workbook: unknown): AssessmentOutcome 
 //     confidence.
 
 const CONTROLS = [
-  'A01', 'R01', 'R02', 'R03', 'R04', 'H01', 'H02', 'I01',
+  'A01', 'R01', 'R02', 'R03', 'R04', 'R05', 'H01', 'H02', 'I01',
   'I02', 'I03', 'L01', 'L02', 'L03', 'T01', 'D01', 'D02',
 ] as const
 

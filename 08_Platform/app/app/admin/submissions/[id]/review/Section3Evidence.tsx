@@ -17,7 +17,7 @@ interface Props {
 
 const DOMAIN_CONTROLS: Record<string, ControlId[]> = {
   A: ['A01'],
-  R: ['R01', 'R02', 'R03', 'R04'],
+  R: ['R01', 'R02', 'R03', 'R04', 'R05'],
   H: ['H01', 'H02'],
   I: ['I01', 'I02', 'I03'],
   L: ['L01', 'L02', 'L03'],
@@ -31,6 +31,7 @@ const CONTROL_DESCRIPTIONS: Record<ControlId, string> = {
   R02: 'Commercial license confirmation for each named tool',
   R03: 'Custom or fine-tuned model provenance',
   R04: 'AI output ownership and work-for-hire arrangement',
+  R05: 'Intended exploitation / commercial expectation',
   H01: 'Human creative contribution — level and documentation',
   H02: 'Authorship claim — basis and supportability',
   I01: 'Third-party copyrighted content — visual',
@@ -50,6 +51,7 @@ const CONTROL_OBJECTIVES: Record<ControlId, string> = {
   R02: 'Does the evidence support that each AI tool was used under a license permitting this intended commercial use?',
   R03: 'Were any custom or fine-tuned AI models used, and is their provenance sufficiently documented?',
   R04: 'Does the evidence support the submitter\'s commercial rights to use the AI-generated output?',
+  R05: 'What does the customer expect to own, control, reuse, or license in the resulting work beyond this specific delivery — and is that expectation adequately addressed by the evidence already reviewed?',
   H01: 'Is the submitter\'s human creative contribution sufficiently documented to understand their role in creating the work?',
   H02: 'Does the submission assert human authorship, and is that assertion reasonably supported by the evidence?',
   I01: 'Did your independent review identify any third-party copyrighted visual content?',
@@ -184,6 +186,32 @@ function ControlExtras({ id, data, update, section2 }: {
         <Sel value={data.work_for_hire} onChange={v => update({ work_for_hire: v })} className="w-full"
           options={['Yes — documented', 'Not applicable (creator owns work)', 'Unclear / undocumented']}
           placeholder="Work-for-hire arrangement…" />
+      </div>
+    )
+
+    case 'R05': return (
+      <div className="space-y-2">
+        <Sel value={data.intended_exploitation} onChange={v => update({ intended_exploitation: v })} className="w-full"
+          options={[
+            'No additional expectation beyond the stated use',
+            'Ownership or exclusivity expected',
+            'Reuse or exploitation expected',
+            'Unclear — requires follow-up',
+          ]}
+          placeholder="Customer's stated commercial expectation…" />
+        {data.intended_exploitation && data.intended_exploitation !== 'No additional expectation beyond the stated use' && (
+          <>
+            <Textarea value={data.expectation_details} onChange={v => update({ expectation_details: v })} rows={2}
+              placeholder="What specifically does the customer expect? (their own words/description, not a legal conclusion)" />
+            <Sel value={data.reviewer_risk_recognition} onChange={v => update({ reviewer_risk_recognition: v })} className="w-full"
+              options={[
+                'Current evidence is consistent with the stated expectation',
+                'Current evidence does not clearly support the stated expectation — recommend specialist/legal review',
+                'Not evaluated — determination outside SI8 assessment scope',
+              ]}
+              placeholder="Reviewer risk-recognition assessment (not a legal conclusion)…" />
+          </>
+        )}
       </div>
     )
 

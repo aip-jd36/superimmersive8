@@ -498,7 +498,7 @@ ${scopeLimitations}
 
 *Assessment date:* ${reportDate}
 
-*Methodology:* SI8 Reviewer Workbook v0.1 | SI8 Reviewer Manual v0.2
+*Methodology:* SI8 Reviewer Workbook v0.1 | SI8 Reviewer Manual v0.3
 
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -521,7 +521,7 @@ ${domainBlocks}
 #assurance-box[
   *Scope of Assessment*
 
-  This assessment was conducted by PMF Strategy Inc. d/b/a SuperImmersive 8 ("SI8") in accordance with the SI8 Reviewer Manual v0.2 and Reviewer Workbook Schema v0.1. The assessment covers the specific content and evidence submitted and is limited to the scope described in Section 2.
+  This assessment was conducted by PMF Strategy Inc. d/b/a SuperImmersive 8 ("SI8") in accordance with the SI8 Reviewer Manual v0.3 and Reviewer Workbook Schema v0.1. The assessment covers the specific content and evidence submitted and is limited to the scope described in Section 2.
 
   *Nature of Opinion*
 

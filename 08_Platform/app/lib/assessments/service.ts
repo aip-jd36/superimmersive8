@@ -48,7 +48,7 @@ const REVIEWER_ORGANIZATION = 'PMF Strategy Inc. d/b/a SuperImmersive 8'
 // createAssessmentFromWorkbook. See Reviewer Manual v0.2, Part 7, "Version
 // Bump Requirement" — this constant must move in lockstep with the Manual's
 // own version header on every substantive Part 4/Part 5 change.
-export const METHODOLOGY_VERSION = 'SI8 Reviewer Manual v0.2'
+export const METHODOLOGY_VERSION = 'SI8 Reviewer Manual v0.3'
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://app.superimmersive8.com'
 
 // For v1, default to compositeWithTrainedAlgorithmicMedia (covers the typical

@@ -14,7 +14,7 @@
 
 import { validateWorkbookForSignoff } from '../../lib/assessments/signoff'
 
-const CONTROLS = ['A01', 'R01', 'R02', 'R03', 'R04', 'H01', 'H02', 'I01', 'I02', 'I03', 'L01', 'L02', 'L03', 'T01', 'D01', 'D02']
+const CONTROLS = ['A01', 'R01', 'R02', 'R03', 'R04', 'R05', 'H01', 'H02', 'I01', 'I02', 'I03', 'L01', 'L02', 'L03', 'T01', 'D01', 'D02']
 
 function completeWorkbook(overrides: Record<string, any> = {}): any {
   const section_3: Record<string, any> = {}

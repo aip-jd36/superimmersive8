@@ -38,7 +38,7 @@ import { ASSESSMENT_DOMAINS } from '@/types/assessment'
 
 export const DOMAIN_CONTROLS: Record<string, string[]> = {
   A: ['A01'],
-  R: ['R01', 'R02', 'R03', 'R04'],
+  R: ['R01', 'R02', 'R03', 'R04', 'R05'],
   H: ['H01', 'H02'],
   I: ['I01', 'I02', 'I03'],
   L: ['L01', 'L02', 'L03'],
@@ -46,17 +46,32 @@ export const DOMAIN_CONTROLS: Record<string, string[]> = {
   D: ['D01', 'D02'],
 }
 
+/**
+ * Controls whose actual subject is a specific AI tool's commercial license
+ * status -- used ONLY by the per-tool "Commercial license status" derivation
+ * in `projectSupportingEvidenceRecord`. Deliberately NOT the same list as
+ * `DOMAIN_CONTROLS.R` (which also includes R05, CA-METH-3A's Intended
+ * Exploitation / Commercial Expectation control) -- a customer's stated
+ * commercial expectation is a different question from whether a given tool's
+ * plan permits commercial output, and must never silently degrade the
+ * per-tool license derivation below by pulling R05's judgment into the same
+ * "worst of" computation.
+ */
+const TOOL_LICENSE_CONTROLS = ['R01', 'R02', 'R03', 'R04']
+
 const JUDGMENTS = ['Verified', 'Partially Verified', 'Not Provided', 'Not Applicable'] as const
 type Judgment = (typeof JUDGMENTS)[number]
 
 /**
- * The domain's overall judgment: the "worst" of its controls, with an explicit
- * all-N/A short-circuit. Not Provided > Partially Verified > (all) Not
- * Applicable > Verified. A domain with no accepted judgments at all reads as
- * Not Provided (fail closed).
+ * The "worst" of a set of controls' judgments, with an explicit all-N/A
+ * short-circuit. Not Provided > Partially Verified > (all) Not Applicable >
+ * Verified. No accepted judgments at all reads as Not Provided (fail closed).
+ * Shared core for `domainWorstJudgment` (domain-keyed) and any caller that
+ * needs the worst-of-an-explicit-control-list computation without pulling in
+ * every control `DOMAIN_CONTROLS` maps to that letter (see
+ * `TOOL_LICENSE_CONTROLS` above).
  */
-export function domainWorstJudgment(letter: string, section3: any): Judgment {
-  const controls = DOMAIN_CONTROLS[letter] ?? []
+function worstJudgmentOf(controls: string[], section3: any): Judgment {
   const judgments = controls
     .map((id) => (section3?.[id]?.judgment as string) ?? '')
     .filter(Boolean)
@@ -66,6 +81,16 @@ export function domainWorstJudgment(letter: string, section3: any): Judgment {
   if (judgments.every((j) => j === 'Not Applicable')) return 'Not Applicable'
   if (judgments.includes('Verified')) return 'Verified'
   return 'Not Provided'
+}
+
+/**
+ * The domain's overall judgment: the "worst" of its controls, with an explicit
+ * all-N/A short-circuit. Not Provided > Partially Verified > (all) Not
+ * Applicable > Verified. A domain with no accepted judgments at all reads as
+ * Not Provided (fail closed).
+ */
+export function domainWorstJudgment(letter: string, section3: any): Judgment {
+  return worstJudgmentOf(DOMAIN_CONTROLS[letter] ?? [], section3)
 }
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -257,7 +282,9 @@ function projectSupportingEvidenceRecord(
   // ── AI tools declared + commercial license status ────────────────────────
   const tools = parseJson(submission.tools_used)
   const toolList: any[] = Array.isArray(tools) ? tools : []
-  const rStatus = domainWorstJudgment('R', section3)
+  // Tool-license status is scoped to R01-R04 only -- see TOOL_LICENSE_CONTROLS's
+  // own doc comment for why this must not be domainWorstJudgment('R', ...).
+  const rStatus = worstJudgmentOf(TOOL_LICENSE_CONTROLS, section3)
 
   if (toolList.length === 0) {
     fields.push({ label: 'AI tools declared', value: 'None declared' })
