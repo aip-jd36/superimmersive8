@@ -424,6 +424,14 @@ R05 judgment guide:
 
 If a customer asks whether this assessment proves they own exclusive rights, or that a competitor is legally barred from a similar element, the correct reviewer disposition is "Not evaluated — outside SI8 assessment scope," recorded in the reviewer risk-recognition field. Never let R05 imply the answer is yes.
 
+**Illustrative questions to elicit this (examples only — not a required script or checklist; use whichever are relevant to the conversation, and record the customer's stated expectation accurately):**
+- Is this delivery the only planned use of this content, or do you expect to reuse any part of it elsewhere?
+- Do you expect to own, control, or have exclusive use of anything created here — a character, image, voice, or other distinctive element?
+- Could any element become a recurring asset for your brand or future campaigns?
+- Do you expect to adapt, license, or otherwise use this work commercially beyond what's being delivered now?
+
+These questions surface the customer's own stated expectation for the *Intended exploitation* field above. They do not themselves establish, and must never be read as SI8 confirming, that any such ownership, exclusivity, or control actually exists.
+
 ---
 
 ### Domain H — Human Creative Contribution
