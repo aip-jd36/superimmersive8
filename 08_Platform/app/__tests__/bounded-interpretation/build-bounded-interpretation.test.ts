@@ -1289,10 +1289,17 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
     ]
     const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
     const out = retrieve(handoff({ tools: [tool('MATCHED'), tool('NOT-APPLICABLE')] }), matrix, [g], [], mismatchedFacts)
+    // Generic Shallow Applicability -- Runtime Foundation milestone
+    // (2026-09-15, ADR-001 §K.5): the diagnostic still fires (Case 3A
+    // presence detection unaffected), but carries no not_met entry --
+    // nothing is material once a claim's own aggregate has settled
+    // `not_met`. This test's own title ("not_met is never treated as
+    // unresolved") is exactly what the empty `unmet_applicability` proves
+    // even more strongly than a populated-with-not_met-entry array did.
     expect(out.diagnostics).toContainEqual({
       identifier: 'commercial_use',
       reason: 'applicability_unmet',
-      unmet_applicability: [{ claim_id: 'NOT-APPLICABLE', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'not_met' }],
+      unmet_applicability: [],
     })
 
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)

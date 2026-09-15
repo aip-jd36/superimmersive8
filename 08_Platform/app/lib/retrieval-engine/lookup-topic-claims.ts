@@ -20,6 +20,7 @@
 
 import type { GoalCategory, ToolMention, UserGoal } from '@/types/interview-engine'
 import type { ApplicabilityRequirement, RetrievalDiagnostic, TopicClaim, UnmetApplicabilityDetail } from './types'
+import { validateApplicabilityAnyOf, type ApplicabilityAnyOfViolation } from './applicability-any-of-structural-validation'
 
 /**
  * Assessment-jurisdiction membership facts (CRC Assessment-Jurisdiction
@@ -224,6 +225,141 @@ export function isApplicable(requirements: ApplicabilityRequirement[], facts: Ap
   return evaluateApplicabilityDetailed(requirements, facts).every((o) => o.status === 'met')
 }
 
+// ── Generic Shallow Applicability Expression evaluator (ADR-001-generic-
+// applicability-architecture.md §K, PM Freeze Amendment, 2026-09-15;
+// Generic Shallow Applicability -- Runtime Foundation milestone) ───────────
+//
+// The SOLE evaluator of `TopicClaim.applicability_any_of`/
+// `MatrixClaim.applicability_any_of`'s OR/AND structure. No other module in
+// this codebase may independently interpret that structure (ADR-001
+// §K.7/§K.9) -- every consumer (Retrieval, Track B, Bounded Interpretation)
+// must call `evaluateApplicabilityExpression` and read only its
+// authoritative `status` and centrally-derived `material_unresolved`
+// output, never rescan `all_outcomes` to (re)derive either.
+
+/** Kleene strong three-valued AND -- `not_met` dominates, `met` is the identity, two `unresolved` stay `unresolved`. Frozen, ADR-001 §K.4. Not exported -- no consumer may implement this algebra independently. */
+function andStatus(a: ApplicabilityRequirementStatus, b: ApplicabilityRequirementStatus): ApplicabilityRequirementStatus {
+  if (a === 'not_met' || b === 'not_met') return 'not_met'
+  if (a === 'unresolved' || b === 'unresolved') return 'unresolved'
+  return 'met'
+}
+
+/** Kleene strong three-valued OR -- `met` dominates, `not_met` is the identity, two `unresolved` stay `unresolved`. Frozen, ADR-001 §K.4. Not exported -- no consumer may implement this algebra independently. */
+function orStatus(a: ApplicabilityRequirementStatus, b: ApplicabilityRequirementStatus): ApplicabilityRequirementStatus {
+  if (a === 'met' || b === 'met') return 'met'
+  if (a === 'unresolved' || b === 'unresolved') return 'unresolved'
+  return 'not_met'
+}
+
+/** AND-reduces a group's own per-leaf outcomes to one status. `[].reduce(andStatus, 'met')` = `'met'` for an empty group -- the existing, unchanged vacuous-truth convention `applicability_requirements: []` already relies on. */
+function groupStatus(outcomes: ApplicabilityRequirementOutcome[]): ApplicabilityRequirementStatus {
+  return outcomes.reduce((acc, o) => andStatus(acc, o.status), 'met' as ApplicabilityRequirementStatus)
+}
+
+interface EvaluatedGroup {
+  status: ApplicabilityRequirementStatus
+  outcomes: ApplicabilityRequirementOutcome[]
+}
+
+function evaluateGroup(group: ApplicabilityRequirement[], facts: ApplicabilityFacts): EvaluatedGroup {
+  const outcomes = evaluateApplicabilityDetailed(group, facts)
+  return { status: groupStatus(outcomes), outcomes }
+}
+
+/**
+ * The one authoritative applicability conclusion any downstream consumer may
+ * use (ADR-001 §K.6). `status` is sole authority. `material_unresolved` is
+ * the sole centrally-derived unresolved-dependency source (ADR-001 §K.5) --
+ * empty unless `status === 'unresolved'`. `all_outcomes` is NON-AUTHORITATIVE
+ * diagnostic/provenance detail (every leaf this expression evaluated,
+ * mandatory group first, then each alternative group in order) -- no
+ * downstream consumer may rescan it to (re)derive `status` or materiality.
+ */
+/** A material-unresolved entry's status is always `'unresolved'` by construction (see `evaluateApplicabilityExpression`'s own materiality derivation) -- narrowed here, not just at the value level, so a caller converting this into an `UnmetApplicabilityDetail` (whose own `status` excludes `'met'`) never needs an unsound cast. */
+export interface MaterialUnresolvedOutcome {
+  requirement: ApplicabilityRequirement
+  status: 'unresolved'
+}
+
+export interface ApplicabilityExpressionOutcome {
+  status: ApplicabilityRequirementStatus
+  material_unresolved: MaterialUnresolvedOutcome[]
+  all_outcomes: ApplicabilityRequirementOutcome[]
+}
+
+/**
+ * Invalid governed applicability (ADR-001 §K.3) -- structurally distinct
+ * from every valid `status` value, never a fourth normal applicability
+ * state. Produced only when `applicability_any_of` itself fails
+ * `validateApplicabilityAnyOf` (defense-in-depth: this can only happen today
+ * if malformed data somehow bypasses the TypeScript-typed fixture files and
+ * the test-time consistency guard, per ADR-001 §K.8). A caller receiving
+ * this MUST exclude the claim from candidacy (mirroring how a settled
+ * `not_met` claim is already excluded) via a diagnostic path distinguishable
+ * from `applicability_unmet` -- never feeding `violations` into
+ * `unresolvedRequirementsIfClaimStillEligible`/materiality/Track B, never an
+ * ordinary `unresolved_project_dependencies` string, never silently
+ * reinterpreted as `met` or `not_met`.
+ */
+export interface ApplicabilityExpressionInvalid {
+  valid: false
+  violations: ApplicabilityAnyOfViolation[]
+}
+
+export type ApplicabilityExpressionResult = ({ valid: true } & ApplicabilityExpressionOutcome) | ApplicabilityExpressionInvalid
+
+/**
+ * The sole evaluator of the combined mandatory-AND-group-plus-alternative-
+ * AND-groups expression (ADR-001 §K.1/§K.4-§K.6):
+ *
+ *   MANDATORY    = AND(mandatory)                            -- unchanged, today's existing flat-array meaning
+ *   ALTERNATIVES = MET (no-op) if alternatives is undefined, else OR(AND(group_1), AND(group_2), ...)
+ *   AGGREGATE    = AND(MANDATORY, ALTERNATIVES)
+ *
+ * `alternatives` absent (every production claim today) makes `ALTERNATIVES`
+ * vacuously `met`, so `AGGREGATE` collapses to exactly `MANDATORY` -- byte-
+ * identical to `isApplicable`'s existing behavior for every current claim
+ * (ADR-001 §K.1's own backward-compatibility guarantee).
+ *
+ * Material-unresolved derivation (ADR-001 §K.5): only computed when
+ * `AGGREGATE === 'unresolved'` (nothing is material once the aggregate has
+ * already resolved either way). Within that case, a leaf is material iff its
+ * own immediate AND-group's status is not `'not_met'` (no `not_met` sibling
+ * -- the group remains "live"). The mandatory group and each alternative
+ * group are each checked independently by this same rule.
+ */
+export function evaluateApplicabilityExpression(
+  mandatory: ApplicabilityRequirement[],
+  alternatives: ApplicabilityRequirement[][] | undefined,
+  facts: ApplicabilityFacts,
+): ApplicabilityExpressionResult {
+  if (alternatives !== undefined) {
+    const violations = validateApplicabilityAnyOf(alternatives)
+    if (violations.length > 0) return { valid: false, violations }
+  }
+
+  const mandatoryGroup = evaluateGroup(mandatory, facts)
+  const alternativeGroups = alternatives === undefined ? [] : alternatives.map((group) => evaluateGroup(group, facts))
+  const alternativesStatus: ApplicabilityRequirementStatus = alternatives === undefined ? 'met' : alternativeGroups.reduce((acc, g) => orStatus(acc, g.status), 'not_met' as ApplicabilityRequirementStatus)
+
+  const status = andStatus(mandatoryGroup.status, alternativesStatus)
+
+  const all_outcomes = [...mandatoryGroup.outcomes, ...alternativeGroups.flatMap((g) => g.outcomes)]
+
+  const material_unresolved: MaterialUnresolvedOutcome[] = []
+  if (status === 'unresolved') {
+    if (mandatoryGroup.status !== 'not_met') {
+      for (const o of mandatoryGroup.outcomes) if (o.status === 'unresolved') material_unresolved.push({ requirement: o.requirement, status: 'unresolved' })
+    }
+    for (const g of alternativeGroups) {
+      if (g.status === 'not_met') continue
+      for (const o of g.outcomes) if (o.status === 'unresolved') material_unresolved.push({ requirement: o.requirement, status: 'unresolved' })
+    }
+  }
+
+  return { valid: true, status, material_unresolved, all_outcomes }
+}
+
 /**
  * Provider pre-filter (Living Knowledge — Third-Party Source Rights, M3,
  * 2026-08-18, per THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md
@@ -418,18 +554,56 @@ export function lookupTopicClaims(
     // category (unchanged shape), but now carries enough detail for
     // selector-questioning.ts to regroup by claim_id itself (§K of the
     // accepted design: need aggregation happens downstream, not here).
+    //
+    // Generic Shallow Applicability -- Runtime Foundation milestone
+    // (2026-09-15): the applicability CALCULATION now goes through
+    // `evaluateApplicabilityExpression` (mandatory + optional
+    // `applicability_any_of` alternatives), replacing the direct
+    // `evaluateApplicabilityDetailed`/`.every()` pair -- the inclusion/
+    // exclusion POLICY below is otherwise byte-for-byte unchanged: only
+    // `status === 'met'` reaches `matches[]`; anything else contributes
+    // diagnostic detail and is excluded. `unmetDetail` is now populated from
+    // the evaluator's own centrally-derived `material_unresolved` (ADR-001
+    // §K.5), not a raw leaf dump -- for every claim that has no
+    // `applicability_any_of` (every production claim today), this is
+    // byte-identical to the old population (a single mandatory AND-group's
+    // own unresolved leaves, with no `not_met` sibling in that same group --
+    // exactly the case the old code's `outcomes` loop already produced,
+    // since a `not_met` sibling there always forced the WHOLE flat array's
+    // old boolean to `false` too). Invalid governed applicability (ADR-001
+    // §K.3) is aggregated separately, per category, and never contributes to
+    // `unmetDetail` -- see the dedicated `applicability_invalid_governance`
+    // diagnostic below.
     const unmetDetail: UnmetApplicabilityDetail[] = []
+    const invalidGovernanceClaimIds: string[] = []
+    // Tracked independently of `unmetDetail.length` (Generic Shallow
+    // Applicability -- Runtime Foundation milestone, 2026-09-15): a claim
+    // whose own aggregate is `not_met` now contributes NOTHING to
+    // `unmetDetail` (ADR-001 §K.5 -- nothing is material once a claim's own
+    // expression has settled false), but `build-bounded-interpretation.ts`'s
+    // own Case 3A detection (`hasUnmetApplicability`) keys on DIAGNOSTIC
+    // PRESENCE alone (`reason === 'applicability_unmet'`), never on
+    // `unmet_applicability`'s content -- see that module's own
+    // `hasUnmetApplicability` line. This flag preserves that existing
+    // consumer policy exactly: the diagnostic still fires whenever any
+    // eligible, validly-governed claim in this category failed to fully
+    // match, even when nothing in it is materially unresolved.
+    let anyNonMet = false
 
     for (const claim of candidates) {
       if (claim.lifecycle !== 'Adopted' || claim.crc_eligible !== 'Yes') continue
       anyEligible = true
 
-      const outcomes = evaluateApplicabilityDetailed(claim.applicability_requirements, facts)
-      const isClaimApplicable = outcomes.every((o) => o.status === 'met')
-      if (!isClaimApplicable) {
-        for (const o of outcomes) {
-          if (o.status !== 'met') unmetDetail.push({ claim_id: claim.claim_id, requirement: o.requirement, status: o.status })
-        }
+      const result = evaluateApplicabilityExpression(claim.applicability_requirements, claim.applicability_any_of, facts)
+
+      if (!result.valid) {
+        invalidGovernanceClaimIds.push(claim.claim_id)
+        continue
+      }
+
+      if (result.status !== 'met') {
+        anyNonMet = true
+        for (const o of result.material_unresolved) unmetDetail.push({ claim_id: claim.claim_id, requirement: o.requirement, status: o.status })
         continue
       }
 
@@ -440,22 +614,31 @@ export function lookupTopicClaims(
     }
 
     // CRC Generic Applicability Diagnostic Parity milestone (2026-08-24):
-    // gated on `unmetDetail.length > 0`, NOT on `!anyApplicable` (the prior
-    // condition) -- the prior condition silently discarded a fully-computed
-    // `unmetDetail` array whenever ANY sibling claim in the same category
-    // was applicable, so a category with one matched claim and one
+    // gated on `anyNonMet` (was `unmetDetail.length > 0` before the Generic
+    // Shallow Applicability -- Runtime Foundation milestone, 2026-09-15,
+    // decoupled these two for the reason explained on `anyNonMet`'s own
+    // comment above), NOT on `!anyApplicable` (the original, pre-2026-08-24
+    // condition) -- that original condition silently discarded a
+    // fully-computed unmet-detail whenever ANY sibling claim in the same
+    // category was applicable, so a category with one matched claim and one
     // genuinely unresolved/not_met sibling produced no diagnostic at all for
-    // the sibling. `unmetDetail.length > 0` is a strict generalization: when
-    // no claim in the category is applicable (the pre-existing Case 3A
-    // shape), every eligible candidate necessarily contributed to
-    // `unmetDetail`, so this branch fires identically to before -- zero
-    // behavior change for that case. It additionally fires in the
-    // previously-suppressed mixed case, without ever changing which claims
-    // reach `matches[]` above (that loop is completely untouched).
+    // the sibling. `anyNonMet` is a strict generalization: when no claim in
+    // the category is applicable (the pre-existing Case 3A shape), every
+    // eligible candidate necessarily sets it, so this branch fires
+    // identically to before -- zero behavior change for that case. It
+    // additionally fires in the previously-suppressed mixed case, without
+    // ever changing which claims reach `matches[]` above (that loop is
+    // completely untouched).
     if (!anyEligible) {
       diagnostics.push({ identifier: category, reason: 'not_adopted_or_eligible' })
-    } else if (unmetDetail.length > 0) {
-      diagnostics.push({ identifier: category, reason: 'applicability_unmet', unmet_applicability: unmetDetail })
+    } else {
+      if (anyNonMet) diagnostics.push({ identifier: category, reason: 'applicability_unmet', unmet_applicability: unmetDetail })
+      // Invalid-governance defense (ADR-001 §K.3): a distinct diagnostic,
+      // never carrying `unmet_applicability` -- never feeds materiality,
+      // never creates a Track B need, never silently reinterpreted as
+      // `applicability_unmet`. Unreachable for any production claim today
+      // (every `applicability_any_of` is absent or already valid).
+      if (invalidGovernanceClaimIds.length > 0) diagnostics.push({ identifier: category, reason: 'applicability_invalid_governance' })
     }
   }
 

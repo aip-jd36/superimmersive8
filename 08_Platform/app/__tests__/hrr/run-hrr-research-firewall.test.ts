@@ -133,14 +133,20 @@ describe('only gated / normalized intent can enter the orchestrator', () => {
     expect(body).toMatch(/scope:\s*intent\.scope/)
   })
 
-  test('reviewerClaimToBiResult TRANSLATES the already-determined applicability — it never re-evaluates or infers a fact (CAH-4G.3A)', () => {
+  test('reviewerClaimToBiResult TRANSLATES the already-determined AUTHORITATIVE applicability status — it never re-evaluates, never infers a fact, and never reconstructs the aggregate by scanning raw leaf outcomes (CAH-4G.3A; Reviewer Aggregate Authority Completion, 2026-09-15)', () => {
     const src = codeOnly('lib/hrr/bi-adapters.ts')
     const body = src.slice(src.indexOf('export function reviewerClaimToBiResult'))
-    // reads the upstream outcome...
-    expect(body).toMatch(/claim\.applicability_outcomes\.filter\(\(o\) => o\.status === 'unresolved'\)/)
+    // reads the upstream AUTHORITATIVE fields directly -- claim.applicability_status
+    // (never claim.applicability_outcomes) decides established vs. unresolved,
+    // and claim.applicability_material_unresolved (never a raw outcomes.filter)
+    // supplies the unresolved_requirements list.
+    expect(body).toMatch(/claim\.applicability_status\s*===\s*'unresolved'/)
+    expect(body).toMatch(/claim\.applicability_material_unresolved/)
     expect(body).toMatch(/status:\s*'unresolved'|status:\s*'established'/)
-    // ...but NEVER calls the evaluator or an inference primitive
-    expect(body).not.toMatch(/evaluateApplicabilityDetailed|isApplicable|evaluateRequirementStatus|jurisdiction|toolMentions/)
+    // NEVER reconstructs the aggregate by scanning raw applicability_outcomes.
+    expect(body).not.toMatch(/applicability_outcomes\.filter|applicability_outcomes\.some|applicability_outcomes\.length/)
+    // ...and NEVER calls the evaluator or an inference primitive
+    expect(body).not.toMatch(/evaluateApplicabilityDetailed|evaluateApplicabilityExpression|isApplicable|evaluateRequirementStatus|jurisdiction|toolMentions/)
     expect(body).not.toMatch(/@anthropic|messages\.parse/)
   })
 })

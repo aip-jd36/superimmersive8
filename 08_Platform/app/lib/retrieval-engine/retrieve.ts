@@ -33,7 +33,7 @@ import { extractMatchableFacts } from './extract-matchable-facts'
 import { lookupRows } from './lookup-rows'
 import { enumerateEligibleClaims } from './enumerate-eligible-claims'
 import { assembleResult, assembleTopicResult, assembleRelatedTopicResult, assembleDiscoveredTopicResult } from './assemble-result'
-import { evaluateApplicabilityDetailed, lookupTopicClaims, type ApplicabilityFacts } from './lookup-topic-claims'
+import { evaluateApplicabilityExpression, lookupTopicClaims, type ApplicabilityFacts } from './lookup-topic-claims'
 import { lookupRelatedTopicClaims } from './lookup-topic-relationships'
 import { lookupDiscoveredTopicClaims } from './lookup-discovered-topic-claims'
 import type { DiscoveredTopicOccurrence, MatrixRow, RetrievalDiagnostic, RetrievalResult, TopicClaim, TopicRelationship, UnmetApplicabilityDetail } from './types'
@@ -166,16 +166,32 @@ export function retrieve(
       // `yes_claim_missing_scope`'s own claim-level identifier convention.
       //
       // Piece 1 (CRC Narrow Governed Selector Questioning milestone,
-      // 2026-08-24): uses evaluateApplicabilityDetailed (Matrix/Topic parity
+      // 2026-08-24): uses the applicability evaluator (Matrix/Topic parity
       // requirement) instead of isApplicable, so the same single evaluation
       // pass both decides inclusion/exclusion AND populates unmet_applicability
       // -- never a second, separately-invoked evaluation.
-      const outcomes = evaluateApplicabilityDetailed(claim.applicability_requirements, applicabilityFacts)
-      if (!outcomes.every((o) => o.status === 'met')) {
-        const unmetDetail: UnmetApplicabilityDetail[] = []
-        for (const o of outcomes) {
-          if (o.status !== 'met') unmetDetail.push({ claim_id: claim.claim_id, requirement: o.requirement, status: o.status })
-        }
+      //
+      // Generic Shallow Applicability -- Runtime Foundation milestone
+      // (2026-09-15): the CALCULATION now goes through
+      // `evaluateApplicabilityExpression` (mandatory + optional
+      // `applicability_any_of` alternatives, ADR-001 §K) -- the
+      // inclusion/exclusion POLICY is unchanged: only `status === 'met'`
+      // reaches `assembleResult` below. `unmet_applicability` is populated
+      // from the evaluator's own centrally-derived `material_unresolved`
+      // (empty for a `not_met` claim -- nothing is material once a claim's
+      // own expression has settled false; every existing consumer already
+      // filtered `not_met` entries away, see lookup-topic-claims.ts's own
+      // equivalent comment). Invalid governed applicability (ADR-001 §K.3)
+      // gets a distinct diagnostic reason, never `applicability_unmet`,
+      // never carrying `unmet_applicability` -- unreachable for any
+      // production Matrix claim today.
+      const result = evaluateApplicabilityExpression(claim.applicability_requirements, claim.applicability_any_of, applicabilityFacts)
+      if (!result.valid) {
+        diagnostics.push({ identifier: claim.topic ?? 'unknown', reason: 'applicability_invalid_governance' })
+        continue
+      }
+      if (result.status !== 'met') {
+        const unmetDetail: UnmetApplicabilityDetail[] = result.material_unresolved.map((o) => ({ claim_id: claim.claim_id, requirement: o.requirement, status: o.status }))
         diagnostics.push({ identifier: claim.topic ?? 'unknown', reason: 'applicability_unmet', unmet_applicability: unmetDetail })
         continue
       }

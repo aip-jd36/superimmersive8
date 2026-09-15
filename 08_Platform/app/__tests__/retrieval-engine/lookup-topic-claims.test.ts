@@ -421,7 +421,7 @@ describe('lookupTopicClaims -- mixed-resolution diagnostic parity (CRC Generic A
   })
 
   // B. one met + one not_met
-  test('B: one met claim + one known-not-applicable claim -- the met claim retrieves, the not_met one is withheld with a not_met (never unresolved) diagnostic', () => {
+  test('B: one met claim + one known-not-applicable claim -- the met claim retrieves, the diagnostic still fires (Case 3A presence detection), but carries no not_met entry', () => {
     const g = goal({ goal_id: 'g-1', category: 'commercial_use' })
     const met = claim({ claim_id: 'MET', topic: 'commercial_use' })
     const notMet = claim({
@@ -435,11 +435,23 @@ describe('lookupTopicClaims -- mixed-resolution diagnostic parity (CRC Generic A
     // "different value included, nothing excluded" -- unresolved -- case).
     const result = lookupTopicClaims([g], [met, notMet], facts({ jurisdiction: { included: [], excluded: ['United States'] } }))
     expect(result.matches).toEqual([met])
+    // Generic Shallow Applicability -- Runtime Foundation milestone
+    // (2026-09-15, ADR-001 §K.5): the diagnostic still fires (Case 3A
+    // detection in build-bounded-interpretation.ts keys on diagnostic
+    // PRESENCE alone, via `hasUnmetApplicability`, unaffected), but
+    // `unmet_applicability` no longer carries a `not_met` leaf -- nothing is
+    // material once a claim's own aggregate has settled `not_met` (frozen
+    // algebra, acceptance cases 5/7). Every existing consumer of this field
+    // already filtered `not_met` entries away
+    // (`detail.status !== 'unresolved' => continue`, see
+    // build-bounded-interpretation.ts/consultative-answer-plan.ts/
+    // crc-sales/answer-context.ts), so this is a content-only precision fix
+    // with zero observable behavior change anywhere downstream.
     expect(result.diagnostics).toEqual([
       {
         identifier: 'commercial_use',
         reason: 'applicability_unmet',
-        unmet_applicability: [{ claim_id: 'NOT-MET', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'not_met' }],
+        unmet_applicability: [],
       },
     ])
   })
@@ -467,10 +479,14 @@ describe('lookupTopicClaims -- mixed-resolution diagnostic parity (CRC Generic A
     )
     expect(result.matches).toEqual([met])
     expect(result.diagnostics).toHaveLength(1)
+    // Generic Shallow Applicability -- Runtime Foundation milestone
+    // (2026-09-15, ADR-001 §K.5): NOT-MET's own aggregate is `not_met`, so it
+    // contributes no entry to the centrally-derived material-unresolved list
+    // -- only UNRESOLVED's own leaf (whose own aggregate is genuinely
+    // `unresolved`) remains. See test B's own comment (above) for the full
+    // rationale; every real consumer already filtered `not_met` away.
     const detail = result.diagnostics[0].unmet_applicability
-    expect(detail).toContainEqual({ claim_id: 'UNRESOLVED', requirement: { fact: 'tool_plan_tier', tool: 'test-tool', operator: 'equals', value: 'pro' }, status: 'unresolved' })
-    expect(detail).toContainEqual({ claim_id: 'NOT-MET', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'not_met' })
-    expect(detail).toHaveLength(2)
+    expect(detail).toEqual([{ claim_id: 'UNRESOLVED', requirement: { fact: 'tool_plan_tier', tool: 'test-tool', operator: 'equals', value: 'pro' }, status: 'unresolved' }])
   })
 
   // D. two met + one unresolved
@@ -514,7 +530,7 @@ describe('lookupTopicClaims -- mixed-resolution diagnostic parity (CRC Generic A
   })
 
   // F. zero met + all not_met
-  test('F: zero met claims, all not_met -- diagnostic preserved with not_met detail for every claim, matches stay empty', () => {
+  test('F: zero met claims, all not_met -- diagnostic still fires (Case 3A presence detection), matches stay empty, no not_met detail carried', () => {
     const g = goal({ goal_id: 'g-1', category: 'commercial_use' })
     const notMetA = claim({ claim_id: 'NOT-MET-A', topic: 'commercial_use', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] })
     const notMetB = claim({ claim_id: 'NOT-MET-B', topic: 'commercial_use', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] })
@@ -522,9 +538,14 @@ describe('lookupTopicClaims -- mixed-resolution diagnostic parity (CRC Generic A
     // required for genuine not_met.
     const result = lookupTopicClaims([g], [notMetA, notMetB], facts({ jurisdiction: { included: [], excluded: ['United States'] } }))
     expect(result.matches).toEqual([])
-    expect(result.diagnostics).toHaveLength(1)
-    expect(result.diagnostics[0].unmet_applicability?.every((d) => d.status === 'not_met')).toBe(true)
-    expect(result.diagnostics[0].unmet_applicability?.map((d) => d.claim_id).sort()).toEqual(['NOT-MET-A', 'NOT-MET-B'])
+    // Generic Shallow Applicability -- Runtime Foundation milestone
+    // (2026-09-15, ADR-001 §K.5): the diagnostic still fires (Case 3A
+    // presence detection unaffected -- `anyNonMet` in lookupTopicClaims is
+    // tracked independently of `unmet_applicability`'s own content), but the
+    // field itself is now empty -- nothing is material once every candidate
+    // claim's own aggregate has settled `not_met`. See test B's own comment
+    // for the full rationale.
+    expect(result.diagnostics).toEqual([{ identifier: 'commercial_use', reason: 'applicability_unmet', unmet_applicability: [] }])
   })
 
   // G. multiple unresolved claims -> deterministic claim identities, no accidental loss

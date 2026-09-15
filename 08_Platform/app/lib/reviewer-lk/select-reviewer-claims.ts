@@ -5,15 +5,22 @@
  * (`retrieve.ts`, `lookupTopicClaims`, `lookupRelatedTopicClaims`,
  * `lookupDiscoveredTopicClaims`, Track A/B/C). It reuses the existing GENERIC
  * PURE primitives (`providerScopeMatches`, `toolScopeMatches`,
- * `evaluateApplicabilityDetailed`) and never reimplements them.
+ * `evaluateApplicabilityExpression`) and never reimplements them.
  *
  * Differences from CRC selection, all deliberate:
  *   - eligibility gate is `evaluateReviewerEligibility` (lifecycle +
  *     publication_scope + supersession), NOT `crc_eligible === 'Yes'`;
- *   - a topic-matched, scope-matched, reviewer-eligible claim is SURFACED
- *     regardless of applicability status — an unresolved requirement is shown
- *     to the reviewer verbatim, never silently withheld and never
- *     reinterpreted as a negative finding (§10);
+ *   - a topic-matched, scope-matched, reviewer-eligible claim with a VALID
+ *     applicability expression is SURFACED regardless of its met/not_met/
+ *     unresolved status — an unresolved requirement is shown to the
+ *     reviewer verbatim, never silently withheld and never reinterpreted as
+ *     a negative finding (§10). A claim whose governed `applicability_any_of`
+ *     is itself structurally INVALID (ADR-001 §K.3) is a distinct condition
+ *     — withheld via the same `withheld[]` mechanism as every other
+ *     reviewer-ineligibility reason, reason `'invalid_governed_applicability'`
+ *     (Reviewer/HRR Fail-Closed Completion milestone, 2026-09-15) — never
+ *     treated as an ordinary met/not_met/unresolved outcome, and never
+ *     reaching `claims[]` at all;
  *   - input is an EXPLICIT reviewer-selected topic + the submission's own
  *     authoritative facts — never CRC goals, CRC context, CRC transcript,
  *     discovered relevance, or in-flight workbook state (§6).
@@ -22,7 +29,7 @@
  */
 
 import {
-  evaluateApplicabilityDetailed,
+  evaluateApplicabilityExpression,
   providerScopeMatches,
   toolScopeMatches,
   type ApplicabilityFacts,
@@ -89,12 +96,52 @@ export function selectReviewerClaims(input: SelectReviewerClaimsInput): SelectRe
       continue
     }
 
-    const rawOutcomes = evaluateApplicabilityDetailed(claim.applicability_requirements, input.applicabilityFacts)
-    const applicability_outcomes: ReviewerApplicabilityOutcome[] = rawOutcomes.map((o) => ({
-      requirement: o.requirement,
-      status: o.status,
-    }))
-    const applicability_established = applicability_outcomes.every((o) => o.status === 'met')
+    // Generic Shallow Applicability -- Runtime Foundation milestone
+    // (2026-09-15): the CALCULATION now goes through
+    // `evaluateApplicabilityExpression` (mandatory + optional
+    // `applicability_any_of` alternatives, ADR-001 §K); this consumer's own
+    // POLICY is unchanged -- every eligible claim is still surfaced
+    // regardless of applicability status (§10, unchanged), carrying the
+    // full raw leaf detail (mandatory group first, then each alternative
+    // group in order) for the reviewer to read verbatim, and a single
+    // established boolean, unchanged in meaning.
+    //
+    // Reviewer/HRR Fail-Closed Completion milestone (2026-09-15): invalid
+    // governed applicability (ADR-001 §K.3) is now withheld HERE, at the
+    // earliest point the authoritative evaluator's own explicit `valid`
+    // flag is available -- exactly the same place, and the same existing
+    // `withheld[]` mechanism, every other reviewer-ineligibility reason
+    // already uses (see `evaluateReviewerEligibility` immediately above).
+    // An invalid claim never becomes a `ReviewerLkClaim` at all, so no
+    // downstream consumer (the HRR applicability partition, the BI
+    // adapter) ever has to infer invalidity from
+    // `applicability_outcomes.length === 0` -- a shape that, before this
+    // fix, was indistinguishable from a legitimately empty, vacuously-met
+    // requirement list, and let an invalid claim reach
+    // `BiResult.applicability = { status: 'established' }` (the strongest
+    // possible conclusion) undetected. See
+    // `__tests__/reviewer-lk/hrr-invalid-governance-fail-closed.test.ts`
+    // for the end-to-end regression proving this.
+    // Reviewer Aggregate Authority Completion milestone (2026-09-15):
+    // `applicability_status` is stamped directly from the evaluator's own
+    // `result.status` -- the sole authoritative field any downstream
+    // consumer (the HRR does-not-apply partition, the BI adapter) may use
+    // to decide this claim's whole-claim applicability disposition.
+    // `applicability_material_unresolved` is stamped directly from the
+    // evaluator's own centrally-derived `result.material_unresolved` --
+    // already correctly excludes a leaf from a dead alternative group, so
+    // no downstream consumer needs to re-derive materiality. Neither is
+    // computed from `applicability_outcomes`'s own shape -- both come
+    // straight from the evaluator, alongside it, from the same call.
+    const result = evaluateApplicabilityExpression(claim.applicability_requirements, claim.applicability_any_of, input.applicabilityFacts)
+    if (!result.valid) {
+      withheld.push({ claim_id: claim.claim_id, reason: 'invalid_governed_applicability' })
+      continue
+    }
+    const applicability_outcomes: ReviewerApplicabilityOutcome[] = result.all_outcomes.map((o) => ({ requirement: o.requirement, status: o.status }))
+    const applicability_status = result.status
+    const applicability_material_unresolved = result.material_unresolved.map((o) => o.requirement)
+    const applicability_established = result.status === 'met'
 
     claims.push({
       claim_id: claim.claim_id,
@@ -108,6 +155,8 @@ export function selectReviewerClaims(input: SelectReviewerClaimsInput): SelectRe
       statement: claim.crc_candidate_statement,
       crc_publication_scope: claim.crc_publication_scope,
       applicability_outcomes,
+      applicability_status,
+      applicability_material_unresolved,
       applicability_established,
       unresolved_project_dependencies: claim.unresolved_project_dependencies,
       provider_scope: claim.provider_scope,

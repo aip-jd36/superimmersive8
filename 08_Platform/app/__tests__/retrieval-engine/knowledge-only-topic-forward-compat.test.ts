@@ -386,6 +386,8 @@ describe('STEP 9 -- reviewer flow: selectReviewerClaims / reviewerClaimToBiResul
       statement: 'Test statement.',
       crc_publication_scope: 'Test scope.',
       applicability_outcomes: [],
+      applicability_status: 'met',
+      applicability_material_unresolved: [],
       applicability_established: true,
       unresolved_project_dependencies: [],
       provider_scope: null,

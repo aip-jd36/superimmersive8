@@ -542,11 +542,17 @@ describe('retrieve -- Matrix applicability (CRC Narrow Matrix Applicability mile
     expect(out.results).toEqual([])
     // identifier is the claim's topic (commercial_use), not claim_id -- see
     // retrieve.ts's own comment at this exact call site for why.
+    // Generic Shallow Applicability -- Runtime Foundation milestone
+    // (2026-09-15, ADR-001 §K.5): the diagnostic still fires, but carries no
+    // not_met entry -- nothing is material once a claim's own aggregate has
+    // settled `not_met` (frozen algebra). Every existing consumer already
+    // filtered `not_met` entries away, so this is a content-only precision
+    // fix with zero observable behavior change downstream.
     expect(out.diagnostics).toEqual([
       {
         identifier: 'commercial_use',
         reason: 'applicability_unmet',
-        unmet_applicability: [{ claim_id: 'test-matrix-jurisdiction', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'not_met' }],
+        unmet_applicability: [],
       },
     ])
   })
@@ -619,13 +625,14 @@ describe('retrieve -- Matrix applicability (CRC Narrow Matrix Applicability mile
     expect(out.results[0].claim_id).toBe('test-tool-tiered-paid')
     expect(out.results.some((r) => r.claim_id === 'test-tool-tiered-free')).toBe(false)
     // identifier is the (shared) topic, not the failing claim's own claim_id.
+    // Generic Shallow Applicability -- Runtime Foundation milestone
+    // (2026-09-15, ADR-001 §K.5): the diagnostic still fires, but carries no
+    // not_met entry for the sibling -- see test C's own comment above.
     expect(out.diagnostics).toEqual([
       {
         identifier: 'commercial_use',
         reason: 'applicability_unmet',
-        unmet_applicability: [
-          { claim_id: 'test-tool-tiered-free', requirement: { fact: 'tool_plan_tier', tool: 'test-tool-tiered', operator: 'equals', value: 'free' }, status: 'not_met' },
-        ],
+        unmet_applicability: [],
       },
     ])
   })

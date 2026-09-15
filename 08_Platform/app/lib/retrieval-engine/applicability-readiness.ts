@@ -65,7 +65,7 @@ import type { RetrievalHandoff, UserGoal } from '@/types/interview-engine'
 import { extractMatchableFacts } from './extract-matchable-facts'
 import { lookupRows } from './lookup-rows'
 import { enumerateEligibleClaims } from './enumerate-eligible-claims'
-import { activeConfirmedGoalCategories, evaluateApplicabilityDetailed, lookupTopicClaims, type ApplicabilityFacts } from './lookup-topic-claims'
+import { activeConfirmedGoalCategories, evaluateApplicabilityExpression, lookupTopicClaims, type ApplicabilityFacts } from './lookup-topic-claims'
 import type { MatrixRow, RetrievalDiagnostic, TopicClaim, UnmetApplicabilityDetail } from './types'
 
 /**
@@ -93,13 +93,23 @@ function deriveMatrixApplicabilityGaps(handoff: RetrievalHandoff, matrix: Matrix
       if (seen.has(dedupeKey)) continue
       seen.add(dedupeKey)
 
-      const outcomes = evaluateApplicabilityDetailed(claim.applicability_requirements, facts)
-      if (outcomes.every((o) => o.status === 'met')) continue
+      // Generic Shallow Applicability -- Runtime Foundation milestone
+      // (2026-09-15): the CALCULATION now goes through
+      // `evaluateApplicabilityExpression` (ADR-001 §K); this module's
+      // Track-B-only purpose (never consumed by Bounded Interpretation)
+      // means an invalid-governance claim or a claim with nothing
+      // materially unresolved (a settled `not_met`, per ADR-001 §K.5)
+      // simply produces no gap here at all -- selector-questioning.ts
+      // already treats "no diagnostic" and "diagnostic with empty
+      // unmet_applicability" identically, and per Phase 11's own hard
+      // requirement, invalid governed applicability must never create a
+      // Track B/question candidate.
+      const result = evaluateApplicabilityExpression(claim.applicability_requirements, claim.applicability_any_of, facts)
+      if (!result.valid) continue
+      if (result.status === 'met') continue
+      if (result.material_unresolved.length === 0) continue
 
-      const unmetDetail: UnmetApplicabilityDetail[] = []
-      for (const o of outcomes) {
-        if (o.status !== 'met') unmetDetail.push({ claim_id: claim.claim_id, requirement: o.requirement, status: o.status })
-      }
+      const unmetDetail: UnmetApplicabilityDetail[] = result.material_unresolved.map((o) => ({ claim_id: claim.claim_id, requirement: o.requirement, status: o.status }))
       diagnostics.push({ identifier: topic, reason: 'applicability_unmet', unmet_applicability: unmetDetail })
     }
   }
@@ -162,7 +172,17 @@ export function deriveApplicabilityReadinessGaps(
   // from the readiness path.
   const activeToolIds = handoff.tools.map((t) => t.identifier)
   const topicLookup = lookupTopicClaims(goals, topicClaims, facts, handoff.asset_providers, [], activeToolIds)
-  const topicGaps = topicLookup.diagnostics.filter((d) => d.reason === 'applicability_unmet')
+  // Generic Shallow Applicability -- Runtime Foundation milestone
+  // (2026-09-15): `lookupTopicClaims` itself still emits an
+  // `applicability_unmet` diagnostic on PRESENCE alone (any non-met
+  // eligible claim in the category), even when nothing in it is materially
+  // unresolved (ADR-001 §K.5) -- required so Bounded Interpretation's own
+  // Case 3A detection, which keys on diagnostic presence, is unaffected.
+  // This module, unlike lookupTopicClaims, is consumed exclusively by
+  // selector-questioning.ts (Track B) -- a presence-only diagnostic with
+  // nothing material carries no gap worth surfacing, so it is filtered out
+  // here, mirroring the Matrix-origin path's own equivalent filter above.
+  const topicGaps = topicLookup.diagnostics.filter((d) => d.reason === 'applicability_unmet' && d.unmet_applicability && d.unmet_applicability.length > 0)
 
   return [...matrixGaps, ...topicGaps]
 }
