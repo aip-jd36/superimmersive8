@@ -22,7 +22,7 @@
  */
 
 import {
-  evaluateApplicabilityDetailed,
+  evaluateApplicabilityExpression,
   providerScopeMatches,
   toolScopeMatches,
   type ApplicabilityFacts,
@@ -89,12 +89,23 @@ export function selectReviewerClaims(input: SelectReviewerClaimsInput): SelectRe
       continue
     }
 
-    const rawOutcomes = evaluateApplicabilityDetailed(claim.applicability_requirements, input.applicabilityFacts)
-    const applicability_outcomes: ReviewerApplicabilityOutcome[] = rawOutcomes.map((o) => ({
-      requirement: o.requirement,
-      status: o.status,
-    }))
-    const applicability_established = applicability_outcomes.every((o) => o.status === 'met')
+    // Generic Shallow Applicability -- Runtime Foundation milestone
+    // (2026-09-15): the CALCULATION now goes through
+    // `evaluateApplicabilityExpression` (mandatory + optional
+    // `applicability_any_of` alternatives, ADR-001 §K); this consumer's own
+    // POLICY is unchanged -- every eligible claim is still surfaced
+    // regardless of applicability status (§10, unchanged), carrying the
+    // full raw leaf detail (mandatory group first, then each alternative
+    // group in order) for the reviewer to read verbatim, and a single
+    // established boolean, unchanged in meaning. Invalid governed
+    // applicability (ADR-001 §K.3, unreachable for any production claim
+    // today) is handled maximally conservatively: zero outcome detail,
+    // never established -- never silently interpreted as met, never
+    // surfaced as an open question, without inventing a new withheld-reason
+    // taxonomy for a currently-unreachable defensive path.
+    const result = evaluateApplicabilityExpression(claim.applicability_requirements, claim.applicability_any_of, input.applicabilityFacts)
+    const applicability_outcomes: ReviewerApplicabilityOutcome[] = result.valid ? result.all_outcomes.map((o) => ({ requirement: o.requirement, status: o.status })) : []
+    const applicability_established = result.valid && result.status === 'met'
 
     claims.push({
       claim_id: claim.claim_id,

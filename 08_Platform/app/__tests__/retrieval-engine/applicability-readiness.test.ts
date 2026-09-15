@@ -84,7 +84,7 @@ describe('deriveApplicabilityReadinessGaps -- Matrix-origin gaps', () => {
     expect(gaps).toEqual([])
   })
 
-  test('C: mixed unresolved + not_met on the same Matrix claim -> both appear, raw and unsuppressed (suppression is selector-questioning\'s own job, not readiness\'s)', () => {
+  test('C: mixed unresolved + not_met in the SAME mandatory AND-group -> no gap at all (Generic Shallow Applicability -- Runtime Foundation milestone, 2026-09-15, ADR-001 §K.5: the not_met sibling makes the whole group, and therefore the claim\'s own aggregate, not_met -- nothing is material once a claim has settled false; materiality is now centrally computed, so this module no longer emits a raw, unsuppressed gap for selector-questioning to filter downstream -- it never did anything different in practice, since selector-questioning\'s own unresolvedRequirementsIfClaimStillEligible already suppressed exactly this case before this milestone)', () => {
     const row = matrixRow({
       identifier: 'kling',
       claims: [
@@ -106,11 +106,12 @@ describe('deriveApplicabilityReadinessGaps -- Matrix-origin gaps', () => {
     // now requires an EXPLICIT exclusion, not merely a different included
     // value.
     const gaps = deriveApplicabilityReadinessGaps(h, [row], [goal({ category: 'commercial_use' })], [], facts({ jurisdiction: { included: [], excluded: ['United States'] } }))
-    expect(gaps).toHaveLength(1)
-    expect(gaps[0].unmet_applicability).toEqual([
-      { claim_id: 'kling', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'not_met' },
-      { claim_id: 'kling', requirement: { fact: 'tool_plan_tier', tool: 'kling', operator: 'equals', value: 'paid' }, status: 'unresolved' },
-    ])
+    // No gap: this claim's single mandatory AND-group aggregate is `not_met`
+    // (jurisdiction explicitly excluded dominates the sibling's unresolved
+    // tool_plan_tier, per the frozen Kleene AND algebra) -- asking the user
+    // for their Kling plan tier could never make this claim applicable, so
+    // it is correctly not surfaced as a gap at all.
+    expect(gaps).toEqual([])
   })
 
   test('D: fully-met Matrix claim -> no gap', () => {
@@ -287,7 +288,7 @@ describe('deriveApplicabilityReadinessGaps -- TopicClaim-origin gaps, tool-scope
     expect(gaps).toEqual([])
   })
 
-  test('E4: tool-scoped claim, requirement conclusively not_met -> reported as not_met, NEVER converted to unresolved (unresolved vs not_met distinction preserved)', () => {
+  test('E4: tool-scoped claim, requirement conclusively not_met -> no gap (a settled not_met claim has nothing material to ask about, Generic Shallow Applicability -- Runtime Foundation milestone, 2026-09-15, ADR-001 §K.5)', () => {
     const claim = toolScopedClaim({ claim_id: 'CLAIM-SYNTH-TOOLSCOPE-1' })
     const h = handoff({ tools: [tool(SYNTH_TOOL)] })
     function tm(overrides: Partial<ToolMention> & Pick<ToolMention, 'mention_id' | 'resolution'>): ToolMention {
@@ -295,10 +296,7 @@ describe('deriveApplicabilityReadinessGaps -- TopicClaim-origin gaps, tool-scope
     }
     const mention = tm({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: SYNTH_TOOL }, account_status: { state: 'confirmed', value: 'Regular Account' } })
     const gaps = deriveApplicabilityReadinessGaps(h, [], [goal({ category: 'commercial_use' })], [claim], facts({ toolMentions: [mention] }))
-    expect(gaps).toHaveLength(1)
-    expect(gaps[0].unmet_applicability).toEqual([
-      { claim_id: 'CLAIM-SYNTH-TOOLSCOPE-1', requirement: { fact: 'tool_account_status', tool: SYNTH_TOOL, operator: 'equals', value: 'Member Account' }, status: 'not_met' },
-    ])
+    expect(gaps).toEqual([])
   })
 
   test('E5: tool-scoped claim on an active tool, unresolved requirement, but the claim topic matches NO active explicit goal -> no gap (explicit-goal-only policy unchanged)', () => {

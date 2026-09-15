@@ -87,6 +87,8 @@ export interface MatrixClaim {
    * changes zero existing retrieval behavior.
    */
   applicability_requirements: ApplicabilityRequirement[]
+  /** See `TopicClaim.applicability_any_of`'s own doc comment, immediately below -- identical contract, mirrored onto MatrixClaim. */
+  applicability_any_of?: ApplicabilityRequirement[][]
 }
 
 /**
@@ -551,6 +553,43 @@ export interface TopicClaim {
    */
   publication_scope?: PublicationScope
   applicability_requirements: ApplicabilityRequirement[]
+  /**
+   * Generic Shallow Applicability Expression Contract (ADR-001-generic-
+   * applicability-architecture.md §K, PM Freeze Amendment, 2026-09-15).
+   * Additive, optional, shallow OR-of-AND-groups -- `applicability_requirements`
+   * above remains the mandatory AND-group, unchanged in meaning; this field
+   * is an independent set of alternative pathways, any ONE of which may
+   * satisfy the claim in addition to the mandatory gate. Combined
+   * valid-expression aggregate = `AND(mandatory, alternatives)` -- see
+   * `evaluateApplicabilityExpression` (lookup-topic-claims.ts), the sole
+   * evaluator of this field; no other module may interpret its OR/AND
+   * structure (ADR-001 §K.7/§K.9).
+   *
+   * ABSENT (every claim today) -- contributes `met`/no-op to composition;
+   * `AND(mandatory, met) = mandatory`, so behavior is byte-identical to
+   * before this field existed. This is the only state any production
+   * `TopicClaim`/`MatrixClaim` may carry as of this milestone -- see
+   * `applicability-any-of-structural-validation.ts`'s own header and
+   * `applicability-any-of-production-zero-use.test.ts` for the governance
+   * gate enforcing zero production adoption.
+   *
+   * STRUCTURAL VALIDITY (ADR-001 §K.2, enforced by
+   * `validateApplicabilityAnyOf` in `applicability-any-of-structural-
+   * validation.ts` -- never by this type alone): when present, the outer
+   * array must have >=1 group, and every group must have >=1 well-formed
+   * `ApplicabilityRequirement` whose `fact` is a real `ApplicabilityFact`
+   * and whose `operator` is supported. An empty outer array, an empty
+   * inner group, a malformed requirement, an unknown fact, or an
+   * unsupported operator are ALL invalid governed knowledge -- never
+   * authorable, never silently reinterpreted as `met`/`not_met`/`unresolved`
+   * (ADR-001 §K.3). Duplicate requirements/groups are valid and idempotent
+   * (hygiene-only, never a validation failure).
+   *
+   * No recursive expression tree, no nesting beyond this one shallow
+   * OR-of-ANDs level -- `T[][]` is structurally as deep as this schema can
+   * ever go, by construction, not by a runtime check.
+   */
+  applicability_any_of?: ApplicabilityRequirement[][]
   /** See the doc comment immediately above this interface. */
   unresolved_project_dependencies: string[]
   /** See this interface's own header comment, immediately above. */
@@ -894,6 +933,19 @@ export const NON_MATCH_REASONS = [
   'no_topic_claim',
   'not_adopted_or_eligible',
   'applicability_unmet',
+  /**
+   * Invalid governed applicability (ADR-001 §K.3, PM Freeze Amendment;
+   * Generic Shallow Applicability -- Runtime Foundation milestone) --
+   * structurally distinguishable from `applicability_unmet` so it can never
+   * be fed into `unresolvedRequirementsIfClaimStillEligible`/materiality/
+   * Track B alongside a genuine per-requirement outcome. Fires only when a
+   * claim's `applicability_any_of` fails `validateApplicabilityAnyOf`
+   * (`applicability-any-of-structural-validation.ts`) -- defense-in-depth
+   * only, since every production claim's `applicability_any_of` is
+   * validated (or absent) by construction today. Never carries
+   * `unmet_applicability` -- see that field's own doc comment.
+   */
+  'applicability_invalid_governance',
 ] as const
 export type NonMatchReason = (typeof NON_MATCH_REASONS)[number]
 
