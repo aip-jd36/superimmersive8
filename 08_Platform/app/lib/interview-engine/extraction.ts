@@ -56,6 +56,8 @@ import type {
   UserGoal,
   WorkflowStage,
 } from '@/types/interview-engine'
+import { ASSET_PROVIDER_IDS } from '@/types/interview-engine'
+import type { PendingClarification } from './pending-clarification'
 import {
   addAssetProviderMention,
   addObservation,
@@ -76,7 +78,7 @@ import {
   addOrganizationLocationMention,
   supersedeOrganizationLocationMention,
 } from './mutations'
-import type { CanonicalToolId } from '@/lib/tool-identity/registry'
+import { CANONICAL_TOOL_IDS, type CanonicalToolId } from '@/lib/tool-identity/registry'
 
 // ── Raw input ────────────────────────────────────────────────────────────────
 
@@ -895,6 +897,31 @@ export function findCorroboratingAssetProvider(rawText: string): AssetProviderId
   return matched.size === 1 ? [...matched][0] : undefined
 }
 
+/**
+ * Normalization idempotency (Generic Follow-Up Target Reconciliation,
+ * 2026-09-15). `normalize(canonical_identifier) === canonical_identifier`
+ * must hold for every governed canonical identifier -- KNOWN_TOOLS/
+ * KNOWN_ASSET_PROVIDERS are alias tables, not identity authorities (see
+ * lib/tool-identity/registry.ts's own header), and neither was ever
+ * required to contain a self-referential entry for its own canonical
+ * values. Production evidence: a candidate whose raw_tool_name happened to
+ * already BE the canonical string 'runway-gen3' (rather than a natural
+ * alias like "Runway") failed to normalize, defeating same-tool identity
+ * matching in resolveToolMentionTarget even though the tool was already,
+ * unambiguously known.
+ *
+ * Derived directly from each domain's own identity-authority source
+ * (CANONICAL_TOOL_IDS / ASSET_PROVIDER_IDS), never a hand-maintained
+ * duplicate list that could drift out of sync -- and generic by
+ * construction: this closes the gap for every current and future
+ * registered tool/provider, not a Runway-specific alias entry. Existing
+ * natural aliases in KNOWN_TOOLS/KNOWN_ASSET_PROVIDERS are completely
+ * unaffected; a string that is neither a known alias nor an exact
+ * canonical identifier remains unresolved, exactly as before.
+ */
+const CANONICAL_TOOL_ID_SET: ReadonlySet<string> = new Set<string>(CANONICAL_TOOL_IDS)
+const CANONICAL_ASSET_PROVIDER_ID_SET: ReadonlySet<string> = new Set<string>(ASSET_PROVIDER_IDS)
+
 export function normalizeCandidate(candidate: CandidateObservation): NormalizationResult {
   if (candidate.kind === 'asset_provider_mention') {
     if (!candidate.raw_provider_name) return { status: 'not_applicable' }
@@ -908,6 +935,12 @@ export function normalizeCandidate(candidate: CandidateObservation): Normalizati
     // before normalization's result is ever used to assert an identity),
     // never resolved here to either provider by guessing.
     if (knownProvider) return { status: 'resolved', canonical_identifier: knownProvider }
+    // Normalization idempotency (see this function's own header comment
+    // above): the raw string may already BE a canonical AssetProviderId
+    // (e.g. an id echoed back from existing structured context, not a
+    // natural alias) -- checked before the compound-reconstruction
+    // fallback below, mirroring the direct alias lookup immediately above.
+    if (CANONICAL_ASSET_PROVIDER_ID_SET.has(providerKey)) return { status: 'resolved', canonical_identifier: providerKey as AssetProviderId }
     // LK-78B fallback: the exact whole-string lookup above failed, but the
     // raw name may be a compound expression containing a known provider
     // identity (see findCorroboratingAssetProvider's own header for the
@@ -936,6 +969,12 @@ export function normalizeCandidate(candidate: CandidateObservation): Normalizati
 
   const known = KNOWN_TOOLS[key]
   if (known) return { status: 'resolved', canonical_identifier: known }
+
+  // Normalization idempotency (see this function's own header comment
+  // above): the raw string may already BE a canonical CanonicalToolId --
+  // checked before the compound-reconstruction fallback below, mirroring
+  // the direct alias lookup immediately above.
+  if (CANONICAL_TOOL_ID_SET.has(key)) return { status: 'resolved', canonical_identifier: key as CanonicalToolId }
 
   // Compound-identity reconstruction (Gemini API Extraction Identity
   // Preservation, 2026-09-08). Production UAT exposed a generic gap: the
@@ -1065,6 +1104,24 @@ function resolveAttestedToolField(
  * already identified a same-canonical-tool (or same-raw-alias) supersession
  * target -- this function never decides identity itself, only merges
  * fields for a target already established to be the same tool.
+ *
+ * `resolution` preservation (Generic Follow-Up Target Reconciliation,
+ * 2026-09-15): Step 1/Step 2's existing supersession targets were always
+ * identity-based -- `newMention.resolution` genuinely reflects THIS turn's
+ * own confirmed identity, so it has always correctly been the merge's
+ * result (unchanged below). Step 3's new pending-target fallback is
+ * different in kind: it fires precisely when THIS turn's own candidate
+ * identity could NOT be resolved at all (resolveToolMentionTarget's own
+ * `thisCanonicalKey === null` guard), so `newMention.resolution` is always
+ * `unresolved_alias` there -- it asserts nothing about identity one way or
+ * the other, it simply couldn't confirm one from this turn's text alone.
+ * Spreading it in unconditionally would silently DOWNGRADE an already-
+ * established canonical identity to unresolved merely because a follow-up
+ * answer (e.g. a plan-tier reply) didn't restate the tool's name -- a
+ * regression this fix exists to prevent. The rule stays generic and
+ * conservative: an unresolved new candidate never overrides a canonical
+ * prior identity; a canonical new candidate (the ordinary, already-tested
+ * Step 1/Step 2 case) is completely unaffected, byte-identical to before.
  */
 function mergeToolMentionFieldsOnSupersession(
   newMention: ToolMention,
@@ -1076,9 +1133,11 @@ function mergeToolMentionFieldsOnSupersession(
     candidate.access_surface_confidence_hint !== undefined || (normalization.status === 'resolved' && normalization.access_surface !== undefined)
   const planTierAddressed = candidate.plan_tier_confidence_hint !== undefined
   const accountStatusAddressed = candidate.account_status_confidence_hint !== undefined
+  const resolution = newMention.resolution.kind === 'unresolved_alias' && priorMention.resolution.kind === 'canonical' ? priorMention.resolution : newMention.resolution
 
   return {
     ...newMention,
+    resolution,
     access_surface: accessSurfaceAddressed ? newMention.access_surface : priorMention.access_surface,
     plan_tier: planTierAddressed ? newMention.plan_tier : priorMention.plan_tier,
     account_status: accountStatusAddressed ? newMention.account_status : priorMention.account_status,
@@ -1526,11 +1585,31 @@ function resolveUserGoalTarget(candidate: CandidateObservation, su: StructuredUn
  * supersede). The caller mints the actual replacement id; this function
  * never does, and never relies on proposal_id uniqueness to make its own
  * decision -- it only reads existing, already-persistent mention_ids.
+ *
+ * STEP 3 -- pending-target fallback (Generic Follow-Up Target Reconciliation,
+ * 2026-09-15). Only reached when Step 1 found ZERO identity matches (not
+ * multiple -- the multi-match ambiguity branch above already returned,
+ * fail-closed, before this point) and the candidate is NOT flagged as an
+ * explicit correction (an is_correction candidate always proceeds through
+ * Step 2 unchanged; explicit correction/addition evidence always outranks a
+ * pending target -- frozen architecture contract). `pendingClarification` is
+ * `RawUserTurn.pending_clarification` -- the SAME structural
+ * `CandidateQuestionProposal.target_signal_id` that survived into
+ * `PendingClarification.signal_id` when CRC's own immediately-preceding
+ * question targeted a specific ToolMention (pending-clarification.ts). It is
+ * consulted ONLY here, as the last-resort identity source, and is always
+ * re-validated fresh against the CURRENT `su` by
+ * `resolvePendingToolMentionTarget` below -- never trusted merely because it
+ * was valid when the question was generated. If the candidate's own identity
+ * already resolved (Step 1 succeeded, matching or not) this step is never
+ * reached at all, so a genuinely new, independently-resolved tool can never
+ * be collapsed into a stale pending target.
  */
 function resolveToolMentionTarget(
   candidate: CandidateObservation,
   su: StructuredUnderstanding,
   retractedThisTurn: ReadonlySet<string>,
+  pendingClarification?: PendingClarification | null,
 ): string | undefined {
   if (candidate.kind !== 'tool_mention') return undefined
   if (candidate.supersedes_tool_mention_id) return candidate.supersedes_tool_mention_id
@@ -1551,7 +1630,19 @@ function resolveToolMentionTarget(
   if (identityMatches.length > 1) return undefined // ambiguous -- never guess, fall through to create
 
   // Step 2: is_correction-flagged retraction of a different tool.
-  if (!candidate.is_correction) return undefined
+  if (!candidate.is_correction) {
+    // Step 3 -- see this function's own header. Reached only when Step 1
+    // found no identity match at all AND the candidate's own identity did
+    // not even resolve to a genuinely new (if currently inactive) canonical
+    // tool -- `thisCanonicalKey === null` means normalizeCandidate could not
+    // confidently resolve this candidate's own raw text at all (unrecognized
+    // or known_ambiguous), so there is no independently-resolved identity
+    // for the pending target to compete with or override.
+    if (thisCanonicalKey === null) {
+      return resolvePendingToolMentionTarget(pendingClarification, su)
+    }
+    return undefined
+  }
 
   const needle = (candidate.correction_of_raw_text ?? '').toLowerCase()
   if (needle) {
@@ -1565,6 +1656,28 @@ function resolveToolMentionTarget(
   if (otherActive.length === 1) return otherActive[0].mention_id
 
   return undefined
+}
+
+/**
+ * Generic Follow-Up Target Reconciliation (2026-09-15) -- the ToolMention
+ * adoption of the frozen target-provenance-authority contract. Returns the
+ * mention_id of the CURRENTLY ACTIVE ToolMention a pending clarification
+ * targets, or undefined if there is no pending clarification, it targets a
+ * different entity kind (e.g. a scoped_observation or project_fact --
+ * ScopedObservation has no equivalent resolver; deliberately deferred, see
+ * the architecture freeze), or the target is stale (mention_id no longer
+ * exists, or exists but is already superseded). Re-validated fresh against
+ * CURRENT `su` on every call -- a `PendingClarification` computed when the
+ * question was rendered is never assumed still authoritative by the time an
+ * answer is being reconciled, possibly turns later.
+ */
+function resolvePendingToolMentionTarget(
+  pendingClarification: PendingClarification | null | undefined,
+  su: StructuredUnderstanding,
+): string | undefined {
+  if (!pendingClarification) return undefined
+  const target = su.tool_mentions.find((m) => m.mention_id === pendingClarification.signal_id && m.superseded_by === null)
+  return target?.mention_id
 }
 
 // ── Asset provider mention identity resolution (stage 3.5, Living Knowledge
@@ -1877,7 +1990,7 @@ export async function runExtractionPipeline(
     // mention type (no count/identity/scope is tracked), so every
     // content_presence_mention candidate always falls through to a plain
     // addition below, regardless of is_correction/correction_of_raw_text.
-    const supersedesToolId = resolveToolMentionTarget(rawCandidate, current, retractedThisTurn)
+    const supersedesToolId = resolveToolMentionTarget(rawCandidate, current, retractedThisTurn, turn.pending_clarification)
     const supersedesGoalId = resolveUserGoalTarget(rawCandidate, current)
     const supersedesProviderId = resolveAssetProviderMentionTarget(rawCandidate, current, retractedProvidersThisTurn)
     const supersedesJurisdictionId = resolveAssessmentJurisdictionMentionTarget(rawCandidate, current)
