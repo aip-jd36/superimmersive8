@@ -184,12 +184,17 @@ export interface HrrAuthorityGateResult {
 }
 
 /**
- * One applicability requirement of a governed claim, paired with its
- * deterministically-evaluated status against the submission's own facts.
- * `status` is the exact value the generic `evaluateApplicabilityDetailed`
- * primitive returns — never re-derived, never interpreted here, never
+ * One applicability leaf of a governed claim's VALID expression (mandatory
+ * requirement or one `applicability_any_of` alternative-group member),
+ * paired with its deterministically-evaluated status against the
+ * submission's own facts. `status` is the exact per-leaf value the generic
+ * `evaluateApplicabilityExpression` primitive's own `all_outcomes` carries
+ * for a valid claim — never re-derived, never interpreted here, never
  * withheld: `'unresolved'` is shown to the reviewer as "not established",
- * NOT silently treated as a negative finding.
+ * NOT silently treated as a negative finding. A claim whose
+ * `applicability_any_of` is itself structurally INVALID never produces a
+ * `ReviewerLkClaim` (and therefore never these outcomes) at all — see
+ * `ReviewerLkWithheld`'s own `'invalid_governed_applicability'` reason.
  */
 export interface ReviewerApplicabilityOutcome {
   requirement: ApplicabilityRequirement
@@ -230,7 +235,18 @@ export interface ReviewerLkClaim {
   /** The governed CRC publication-scope prose, verbatim. Additional reviewer context on what the statement is and is not scoped to say. */
   crc_publication_scope: string | null
   applicability_outcomes: ReviewerApplicabilityOutcome[]
-  /** `true` iff every applicability requirement evaluated `'met'`. `false` means "one or more requirements are unresolved / not met" — shown, never interpreted as a negative finding. Empty requirement list ⇒ `true` (vacuously applicable). */
+  /**
+   * `true` iff the claim's VALID applicability expression evaluated `'met'`.
+   * `false` means "one or more requirements are unresolved / not met" —
+   * shown, never interpreted as a negative finding. Empty requirement list
+   * ⇒ `true` (vacuously applicable) — this can only mean a genuinely empty
+   * mandatory-AND-group-with-no-alternatives, never invalid governance: a
+   * claim with invalid `applicability_any_of` is withheld before a
+   * `ReviewerLkClaim` is ever constructed (see `ReviewerLkWithheld`'s own
+   * `'invalid_governed_applicability'` reason) — `applicability_established`
+   * and `applicability_outcomes` are therefore always derived from a
+   * VALID expression only, never from a governance-invalid one.
+   */
   applicability_established: boolean
   /** Governed project-fact dependencies CRC does not model — verbatim identifiers, informational only. */
   unresolved_project_dependencies: string[]
@@ -256,6 +272,25 @@ export interface ReviewerLkWithheld {
     | 'superseded'
     | 'publication_scope_not_reviewer_eligible'
     | 'publication_scope_missing_or_unknown'
+    /**
+     * Generic Shallow Applicability -- Reviewer/HRR Fail-Closed Completion
+     * milestone (2026-09-15; ADR-001-generic-applicability-architecture.md
+     * §K.3). The claim's `applicability_any_of` failed structural validation
+     * (`validateApplicabilityAnyOf`) -- defense-in-depth only, unreachable
+     * for any production claim today (every `applicability_any_of` is
+     * absent or already valid). Withheld exactly like every other reason in
+     * this union: the reviewer is told governed knowledge exists on this
+     * topic and is not shown, never the claim's content, never a
+     * conclusion about the claim's substance. Deliberately NOT surfaced via
+     * `ReviewerLkClaim.applicability_established`/`applicability_outcomes`
+     * (which represent a VALID expression's real met/not_met/unresolved
+     * detail only) -- a claim withheld for this reason never becomes a
+     * `ReviewerLkClaim` at all, so no downstream consumer (the HRR
+     * applicability partition, the BI adapter) ever needs to distinguish
+     * "no requirements, vacuously met" from "governance too malformed to
+     * evaluate" by inspecting array shape.
+     */
+    | 'invalid_governed_applicability'
 }
 
 // `ReviewerLkLookupResult` (the CAH-4E topic-lookup response) was retired in
