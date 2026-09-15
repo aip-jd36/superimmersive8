@@ -122,12 +122,25 @@ export function selectReviewerClaims(input: SelectReviewerClaimsInput): SelectRe
     // possible conclusion) undetected. See
     // `__tests__/reviewer-lk/hrr-invalid-governance-fail-closed.test.ts`
     // for the end-to-end regression proving this.
+    // Reviewer Aggregate Authority Completion milestone (2026-09-15):
+    // `applicability_status` is stamped directly from the evaluator's own
+    // `result.status` -- the sole authoritative field any downstream
+    // consumer (the HRR does-not-apply partition, the BI adapter) may use
+    // to decide this claim's whole-claim applicability disposition.
+    // `applicability_material_unresolved` is stamped directly from the
+    // evaluator's own centrally-derived `result.material_unresolved` --
+    // already correctly excludes a leaf from a dead alternative group, so
+    // no downstream consumer needs to re-derive materiality. Neither is
+    // computed from `applicability_outcomes`'s own shape -- both come
+    // straight from the evaluator, alongside it, from the same call.
     const result = evaluateApplicabilityExpression(claim.applicability_requirements, claim.applicability_any_of, input.applicabilityFacts)
     if (!result.valid) {
       withheld.push({ claim_id: claim.claim_id, reason: 'invalid_governed_applicability' })
       continue
     }
     const applicability_outcomes: ReviewerApplicabilityOutcome[] = result.all_outcomes.map((o) => ({ requirement: o.requirement, status: o.status }))
+    const applicability_status = result.status
+    const applicability_material_unresolved = result.material_unresolved.map((o) => o.requirement)
     const applicability_established = result.status === 'met'
 
     claims.push({
@@ -142,6 +155,8 @@ export function selectReviewerClaims(input: SelectReviewerClaimsInput): SelectRe
       statement: claim.crc_candidate_statement,
       crc_publication_scope: claim.crc_publication_scope,
       applicability_outcomes,
+      applicability_status,
+      applicability_material_unresolved,
       applicability_established,
       unresolved_project_dependencies: claim.unresolved_project_dependencies,
       provider_scope: claim.provider_scope,

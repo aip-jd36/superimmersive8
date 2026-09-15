@@ -77,6 +77,8 @@ function reviewerClaim(overrides: Partial<ReviewerLkClaim> & Pick<ReviewerLkClai
     statement: 'Statement.',
     crc_publication_scope: 'Scope text.',
     applicability_outcomes: [],
+    applicability_status: 'met',
+    applicability_material_unresolved: [],
     applicability_established: true,
     unresolved_project_dependencies: [],
     provider_scope: null,

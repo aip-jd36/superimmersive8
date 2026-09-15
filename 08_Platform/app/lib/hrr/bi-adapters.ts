@@ -69,20 +69,27 @@ export function researchIntentToBiIntent(intent: ExplicitResearchIntent): BiInte
  *     path, and the claim's topic already equals the researched topic;
  *   - `source_fact.kind = 'topic'` — a topic-sourced (non-tool) governed
  *     claim, so BI's tool-terms boundary clause correctly does not fire;
- *   - `applicability` (CAH-4G.3A) — the ALREADY-DETERMINED reviewer
- *     applicability result, translated (never re-evaluated, no fact
- *     inferred): `established` when every requirement is `met`,
- *     `unresolved` when ≥1 requirement is `unresolved` (carrying those
- *     requirement(s) for a later composition step). This is what stops BI
- *     from rendering an applicability-`unresolved` governed proposition as
- *     `directly_relevant`.
+ *   - `applicability` (CAH-4G.3A; authority source corrected by the
+ *     Reviewer Aggregate Authority Completion milestone, 2026-09-15) — the
+ *     ALREADY-DETERMINED reviewer applicability result, translated (never
+ *     re-evaluated, no fact inferred) directly from
+ *     `claim.applicability_status` (the field `selectReviewerClaims` stamps
+ *     straight from `evaluateApplicabilityExpression`'s own `result.status`
+ *     — never reconstructed here by scanning `applicability_outcomes`):
+ *     `established` for `'met'`, `unresolved` for `'unresolved'` (carrying
+ *     `claim.applicability_material_unresolved` — the evaluator's own
+ *     centrally-derived material list, ADR-001 §K.5 — for a later
+ *     composition step; NEVER a naive
+ *     `applicability_outcomes.filter(status==='unresolved')`, which could
+ *     incorrectly include a non-material leaf from an already-dead
+ *     alternative group). This is what stops BI from rendering an
+ *     applicability-`unresolved` governed proposition as `directly_relevant`.
  *
- * The caller (`runHrrResearch`) is responsible for NOT passing a claim with
- * any `not_met` applicability requirement here — such a claim is excluded
+ * The caller (`runHrrResearch`) is responsible for NOT passing a claim whose
+ * own `applicability_status` is `'not_met'` here — such a claim is excluded
  * from the BI feed entirely and returned in `does_not_apply[]`.
  */
 export function reviewerClaimToBiResult(claim: ReviewerLkClaim): BiResult {
-  const unresolved = claim.applicability_outcomes.filter((o) => o.status === 'unresolved')
   if (!isGoalCategoryTopic(claim.topic)) {
     throw new Error(
       `reviewerClaimToBiResult: reviewer-selected claim ${claim.claim_id} has a knowledge-only topic (${claim.topic}) -- structurally unreachable via selectReviewerClaims's own topic-match gate given today's GoalCategory-shaped ReviewerResearchTopic input`,
@@ -96,8 +103,8 @@ export function reviewerClaimToBiResult(claim: ReviewerLkClaim): BiResult {
     match_origin: 'exact_topic',
     source_fact: { kind: 'topic' },
     applicability:
-      unresolved.length > 0
-        ? { status: 'unresolved', unresolved_requirements: unresolved.map((o) => o.requirement) }
+      claim.applicability_status === 'unresolved'
+        ? { status: 'unresolved', unresolved_requirements: claim.applicability_material_unresolved }
         : { status: 'established' },
   }
 }

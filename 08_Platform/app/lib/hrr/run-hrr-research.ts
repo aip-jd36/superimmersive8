@@ -52,9 +52,23 @@ import type { TopicClaim } from '@/lib/retrieval-engine/types'
 import { researchIntentToBiIntent, reviewerClaimToBiResult } from './bi-adapters'
 import type { HrrResearchResult, HrrResearchTopicResult } from './types'
 
-/** A claim provably does NOT apply iff any of its applicability requirements evaluated `'not_met'` (a settled false fact — never "unresolved", never a negative finding). */
+/**
+ * A claim provably does NOT apply iff its own AUTHORITATIVE aggregate
+ * applicability status is `'not_met'` (a settled false conclusion — never
+ * "unresolved", never a negative finding). Reviewer Aggregate Authority
+ * Completion milestone (2026-09-15): reads `claim.applicability_status`
+ * directly -- the field `selectReviewerClaims` stamps straight from
+ * `evaluateApplicabilityExpression`'s own `result.status` -- never
+ * reconstructed by scanning `applicability_outcomes` (the prior
+ * `.some(status==='not_met')` form incorrectly classified a whole claim as
+ * NOT_MET whenever ANY leaf anywhere was not_met, even when the claim's
+ * true aggregate — e.g. `A not_met OR B unresolved` — was UNRESOLVED, a
+ * live, hedge-worthy question the reviewer should still see; see
+ * `__tests__/reviewer-lk/hrr-valid-aggregate-authority.test.ts` for the
+ * end-to-end regression proving this).
+ */
 function claimDoesNotApply(claim: ReviewerLkClaim): boolean {
-  return claim.applicability_outcomes.some((o) => o.status === 'not_met')
+  return claim.applicability_status === 'not_met'
 }
 
 export interface RunHrrResearchInput {

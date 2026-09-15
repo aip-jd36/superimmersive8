@@ -234,18 +234,76 @@ export interface ReviewerLkClaim {
   statement: string | null
   /** The governed CRC publication-scope prose, verbatim. Additional reviewer context on what the statement is and is not scoped to say. */
   crc_publication_scope: string | null
+  /**
+   * DIAGNOSTIC/PROVENANCE ONLY (Reviewer Aggregate Authority Completion
+   * milestone, 2026-09-15; ADR-001-generic-applicability-architecture.md
+   * §K.6) -- every leaf this claim's valid expression evaluated (mandatory
+   * group first, then each `applicability_any_of` alternative group in
+   * order), for the reviewer to read verbatim. NOT authoritative for the
+   * claim's own whole-claim applicability conclusion -- a downstream
+   * consumer MUST NOT derive established/not-established/unresolved status
+   * by scanning this array (`.some(status==='not_met')`,
+   * `.filter(status==='unresolved')`, or any other raw-leaf
+   * reconstruction); that is exactly the authority-loss bug this milestone
+   * closes (see `applicability_status`'s own doc comment immediately
+   * below). Safe, correct diagnostic uses: rendering every leaf to the
+   * reviewer (`HrrResearchAnswerView.tsx`), grouping requirement objects
+   * for a display rollup (`project-hrr-research-answer.ts`'s
+   * `collectRequirements`), or extracting the set of governed fact
+   * identifiers a claim references (`research-session-context-referents.ts`)
+   * -- none of these decide whether the claim itself is established,
+   * excluded, or hedged.
+   */
   applicability_outcomes: ReviewerApplicabilityOutcome[]
   /**
-   * `true` iff the claim's VALID applicability expression evaluated `'met'`.
-   * `false` means "one or more requirements are unresolved / not met" —
-   * shown, never interpreted as a negative finding. Empty requirement list
-   * ⇒ `true` (vacuously applicable) — this can only mean a genuinely empty
-   * mandatory-AND-group-with-no-alternatives, never invalid governance: a
-   * claim with invalid `applicability_any_of` is withheld before a
-   * `ReviewerLkClaim` is ever constructed (see `ReviewerLkWithheld`'s own
-   * `'invalid_governed_applicability'` reason) — `applicability_established`
-   * and `applicability_outcomes` are therefore always derived from a
-   * VALID expression only, never from a governance-invalid one.
+   * AUTHORITATIVE (Reviewer Aggregate Authority Completion milestone,
+   * 2026-09-15). The exact `status` `evaluateApplicabilityExpression`
+   * computed for this claim's valid expression -- `'met' | 'not_met' |
+   * 'unresolved'`, never re-derived, never reinterpreted downstream. This
+   * is the ONLY field any consumer may use to decide the claim's own
+   * whole-claim applicability disposition (HRR's does-not-apply partition,
+   * the BI adapter's established/unresolved branch). Reuses the existing
+   * generic vocabulary verbatim -- no new, semantically-equivalent enum.
+   * `'not_met'` can occur here (unlike in `applicability_established`'s own
+   * simpler boolean, below) specifically so a caller can distinguish a
+   * genuine settled exclusion from an open, hedge-worthy question; today's
+   * one caller (`run-hrr-research.ts`) still chooses to route BOTH outcomes
+   * to the same partition side it always did (`not_met` → `does_not_apply`),
+   * but it now does so by reading this field directly, never by scanning
+   * `applicability_outcomes`.
+   */
+  applicability_status: ApplicabilityRequirementStatus
+  /**
+   * AUTHORITATIVE, centrally-derived (mirrors `MaterialUnresolvedOutcome`
+   * in `lookup-topic-claims.ts` exactly, flattened to bare requirements to
+   * match `BiApplicability.unresolved_requirements`'s own shape one-for-one).
+   * Populated only when `applicability_status === 'unresolved'` -- the
+   * SOLE source `reviewerClaimToBiResult` may use for
+   * `BiApplicability.unresolved_requirements`; never a naive
+   * `applicability_outcomes.filter(status==='unresolved')`, which could
+   * incorrectly include a leaf from an already-dead alternative group (one
+   * with its own `not_met` sibling) that the evaluator's own materiality
+   * rule (ADR-001 §K.5) has already determined is NOT actionable.
+   */
+  applicability_material_unresolved: ApplicabilityRequirement[]
+  /**
+   * DERIVED CONVENIENCE, computed in the same line and from the same
+   * source as `applicability_status` (`=== 'met'`) -- can never diverge
+   * from it. Retained for the existing display consumer
+   * (`HrrResearchAnswerView.tsx`'s established/not-established label) and
+   * any other pre-existing boolean-shaped reader; `applicability_status`
+   * is the field any NEW or whole-claim-authority-sensitive consumer must
+   * use. `true` iff the claim's VALID applicability expression evaluated
+   * `'met'`. `false` means "one or more requirements are unresolved / not
+   * met" — shown, never interpreted as a negative finding. Empty
+   * requirement list ⇒ `true` (vacuously applicable) — this can only mean
+   * a genuinely empty mandatory-AND-group-with-no-alternatives, never
+   * invalid governance: a claim with invalid `applicability_any_of` is
+   * withheld before a `ReviewerLkClaim` is ever constructed (see
+   * `ReviewerLkWithheld`'s own `'invalid_governed_applicability'` reason)
+   * — every applicability field on this interface is therefore always
+   * derived from a VALID expression only, never from a governance-invalid
+   * one.
    */
   applicability_established: boolean
   /** Governed project-fact dependencies CRC does not model — verbatim identifiers, informational only. */
