@@ -80,6 +80,11 @@ For each distinct fact-bearing statement in the turn, produce one candidate:
   Only propose this when the user DIRECTLY states where the project's OUTPUT will be distributed or used -- e.g. "This is for a France campaign.", "The video will run in the UK and Germany.", "We're launching this in Japan." NEVER infer it from a filming location, a client's location, a depicted person's location, or an assessment-jurisdiction statement -- e.g. "We filmed in New York." and "Please assess this for New York." must NEVER produce a distribution_territory_mention candidate; those are separate, unrelated facts (workflow/scoped_observation or assessment_jurisdiction_mention respectively).
   If the user names more than one territory in one statement (e.g. "France and Germany"), propose one separate distribution_territory_mention candidate per territory named -- never merge them, never pick one, never guess which one "counts."
   Correction: if this statement reverses or replaces what was said earlier about the project's distribution territory (e.g. "Actually, this is only for Germany, not France" when France was previously stated), set is_correction: true and correction_of_raw_text to the EXACT territory value being replaced (e.g. "France") -- deterministic code, never you, resolves which existing mention this refers to, and will leave the state unresolved/ambiguous rather than guess if it cannot find exactly one match. Do NOT set is_correction for a plain addition alongside a still-valid earlier territory (e.g. "Also distributing this in Germany" when France was already stated and remains wanted) -- that is a fresh candidate with no correction fields set. There is no exclusion concept for this candidate kind (no "is_territory_exclusion" field) -- a statement that a territory is NOT part of distribution is simply not proposed as a candidate at all.
+- kind "organization_location_mention" (Generic Applicability Architecture -- OrganizationLocationMention Fact Representation, 2026-09-13): the user directly states where THEIR OWN organization/company is based, established, or located -- e.g. "Our company is based in France.", "We're a US company.", "The agency is located in Germany.", "Our organization is based in Singapore." Report the exact value via raw_organization_location_value, preserving the user's own wording. This is a plain, SELF-REPORTED ORGANIZATION-GEOGRAPHY statement -- it never means CRC has determined legal establishment, deployer status, provider status, duty-holder status, or that any law applies, and it is NOT the project's distribution/output-use territory (see kind "distribution_territory_mention" above for that distinct, unrelated concept) and NOT a request for CRC to consider a jurisdiction (see kind "assessment_jurisdiction_mention" above for that distinct, unrelated concept).
+  Only propose this when the user DIRECTLY states where THEIR OWN organization/company is based/established/located -- e.g. "We're a French company.", "Our agency is headquartered in Germany.", "We're based out of Singapore." NEVER infer it from: a client's or third party's location ("We're working with a French company." -- that names the CLIENT's or PARTNER's location, not the user's own organization -- do NOT propose a candidate), a team member's or crew's current location ("Our team is currently in Paris." -- travel/current-location, not organizational base -- do NOT propose a candidate), a filming/production location, a depicted person's location, an AI tool/provider's own location ("We use a US-based AI provider." -- that is the TOOL's location, not the user's organization -- do NOT propose a candidate), an assessment-jurisdiction statement ("Please assess this for New York." -- see kind "assessment_jurisdiction_mention" instead -- do NOT propose a candidate), a distribution-territory statement ("The ad runs in France." -- see kind "distribution_territory_mention" instead -- do NOT propose a candidate), an IP address, browser locale, billing address, or tool-account country (none of these are ever visible to you or relevant -- never propose a candidate on this basis). When in doubt about whether a stated location is the user's OWN organization versus someone/something else's, do NOT propose a candidate -- err toward omission, never guess.
+  A statement about the user's organization HAVING A PRESENCE somewhere (an office, a branch, operations) is NOT necessarily the same as stating where the organization IS BASED/LOCATED -- e.g. "We have offices in France and Germany." does NOT by itself establish which (if either) is the organization's base; do NOT propose an organization_location_mention candidate for a bare multi-office/presence statement like this unless the user's own words also directly state which one is the base/headquarters/home location (e.g. "We have offices in France and Germany, but we're based in France." DOES support one candidate, raw_organization_location_value "France"). Prefer omitting the candidate over guessing which office is the base.
+  If the user names more than one organization location in one statement in a way that is genuinely ambiguous (e.g. simply listing multiple countries with no single base stated), do not propose a candidate at all rather than guessing which one "counts."
+  Correction: if this statement reverses or replaces what was said earlier about the organization's location (e.g. "Correction -- we're actually based in Switzerland, not Germany" when Germany was previously stated), set is_correction: true and correction_of_raw_text to the EXACT location value being replaced (e.g. "Germany") -- deterministic code, never you, resolves which existing mention this refers to, and will leave the state unresolved/ambiguous rather than guess if it cannot find exactly one match. Do NOT set is_correction for a plain addition or restatement -- that is a fresh candidate with no correction fields set. There is no exclusion concept for this candidate kind (no "is_organization_location_exclusion" field) -- a statement that the organization is NOT based somewhere is simply not proposed as a candidate at all.
 
 Third-party source rights is its own user_goal category (see goal_category_hint below) for whether the user has the RIGHTS to use third-party source material (e.g. a stock image) in the project -- a materially different question from commercial_use (whether the AI-generated OUTPUT can be used commercially). This category is EXPLICIT-QUESTION-GATED ONLY, exactly like every other goal category: propose it only when the user asks a direct question or states a direct need about permission/rights to use the source material.
 Examples that SHOULD produce a third_party_source_rights user_goal: "Can I use this Getty image in an ad?", "Can I use these iStock images in my client commercial?", "Do I have the rights to use this stock image?", "Can I use a Shutterstock Editorial photo in this campaign?", "Am I allowed to use this licensed stock footage in the video?".
@@ -141,7 +146,7 @@ When kind is "tool_mention" and the user DIRECTLY states which specific plan/tie
 
 If a turn contains nothing you can classify as one of the four kinds -- small talk, an incomplete thought, pure filler -- return no candidates for it, or set low_confidence: true on a best-effort candidate if you're genuinely unsure whether something is a real signal.`
 
-const CANDIDATE_KIND_VALUES = ['tool_mention', 'scoped_observation', 'project_fact', 'user_goal', 'asset_provider_mention', 'assessment_jurisdiction_mention', 'content_presence_mention', 'distribution_territory_mention'] as const
+const CANDIDATE_KIND_VALUES = ['tool_mention', 'scoped_observation', 'project_fact', 'user_goal', 'asset_provider_mention', 'assessment_jurisdiction_mention', 'content_presence_mention', 'distribution_territory_mention', 'organization_location_mention'] as const
 /** Mirrors CONTENT_PRESENCE_CATEGORIES in types/interview-engine.ts -- kept as a separate local const here, same pattern as GOAL_CATEGORY_VALUES/GOAL_SCOPE_VALUES above, rather than importing the runtime const array across the adapter boundary. */
 const CONTENT_PRESENCE_CATEGORY_VALUES = ['person_visual_presence', 'person_voice_presence'] as const
 const OBSERVATION_SCOPE_VALUES = ['current_project', 'historical_project', 'general_practice'] as const
@@ -266,6 +271,11 @@ export const CANDIDATE_RESPONSE_SCHEMA = {
             description:
               'When kind is distribution_territory_mention: return ONLY the territory itself (e.g. "France", "the UK", "Germany"), preserving the user\'s wording, exactly as named. Never map it to a canonical/normalized form yourself. Never infer from a filming/client/subject location or an assessment-jurisdiction statement. If the user names more than one territory in one statement, propose one separate candidate per territory. Null otherwise.',
           },
+          raw_organization_location_value: {
+            type: ['string', 'null'],
+            description:
+              'When kind is organization_location_mention: return ONLY the location itself (e.g. "France", "the US", "Germany"), preserving the user\'s wording, exactly as named, for where the user\'s OWN organization/company is based/established/located. Never map it to a canonical/normalized form yourself. Never infer from a client/partner/team-member/tool-provider location, an assessment-jurisdiction statement, or a distribution-territory statement. Never infer from a bare "we have offices in X and Y" statement unless the user\'s own words also state which one is the base. Null otherwise.',
+          },
           attributes: {
             type: 'array',
             description:
@@ -373,6 +383,7 @@ export const CANDIDATE_RESPONSE_SCHEMA = {
           'raw_content_presence_category',
           'is_content_presence_absent',
           'raw_territory_value',
+          'raw_organization_location_value',
           'attributes',
           'is_correction',
           'correction_of_raw_text',
@@ -413,6 +424,7 @@ interface ParsedCandidate {
   raw_content_presence_category: (typeof CONTENT_PRESENCE_CATEGORY_VALUES)[number] | null
   is_content_presence_absent: boolean
   raw_territory_value: string | null
+  raw_organization_location_value: string | null
   attributes: ParsedExtractedAttribute[]
   is_correction: boolean
   correction_of_raw_text: string | null
@@ -507,6 +519,7 @@ export function toCandidateObservation(parsed: ParsedCandidate, turn: number): C
     raw_content_presence_category: parsed.raw_content_presence_category ?? undefined,
     is_content_presence_absent: parsed.is_content_presence_absent || undefined,
     raw_territory_value: parsed.raw_territory_value ?? undefined,
+    raw_organization_location_value: parsed.raw_organization_location_value ?? undefined,
     real_or_synthetic_confidence_hint: realOrSynthetic?.confidence,
     real_or_synthetic_value_hint: realOrSyntheticValue,
     usage_confidence_hint: usage?.confidence,

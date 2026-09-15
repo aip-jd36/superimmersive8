@@ -49,6 +49,7 @@ import type {
   GoalCategory,
   GoalScope,
   ObservationScope,
+  OrganizationLocationMention,
   ScopedObservation,
   StructuredUnderstanding,
   ToolMention,
@@ -72,6 +73,8 @@ import {
   addContentPresenceMention,
   addDistributionTerritoryMention,
   supersedeDistributionTerritoryMention,
+  addOrganizationLocationMention,
+  supersedeOrganizationLocationMention,
 } from './mutations'
 import type { CanonicalToolId } from '@/lib/tool-identity/registry'
 
@@ -166,7 +169,7 @@ export interface CandidateObservation {
   proposal_id: string
   turn: number
   raw_text: string
-  kind: 'tool_mention' | 'scoped_observation' | 'project_fact' | 'user_goal' | 'asset_provider_mention' | 'assessment_jurisdiction_mention' | 'content_presence_mention' | 'distribution_territory_mention'
+  kind: 'tool_mention' | 'scoped_observation' | 'project_fact' | 'user_goal' | 'asset_provider_mention' | 'assessment_jurisdiction_mention' | 'content_presence_mention' | 'distribution_territory_mention' | 'organization_location_mention'
 
   /** kind === 'tool_mention' */
   raw_tool_name?: string
@@ -431,6 +434,34 @@ export interface CandidateObservation {
   raw_territory_value?: string
   /** kind === 'distribution_territory_mention'; set when this candidate corrects an existing mention (resolved by code, never the model -- see resolveDistributionTerritoryMentionTarget) */
   supersedes_distribution_territory_mention_id?: string
+
+  /**
+   * kind === 'organization_location_mention' (Generic Applicability
+   * Architecture -- OrganizationLocationMention Fact Representation,
+   * 2026-09-13). The user directly stated where their organization/company
+   * is based, established, located, or equivalent -- a flat, ungraded,
+   * literal label, exactly as the user stated it (e.g. "France", "the US",
+   * "Germany"). This is a plain, SELF-REPORTED ORGANIZATION-GEOGRAPHY fact
+   * -- deliberately NOT a legal establishment/deployer/duty-holder/
+   * applicability determination, NOT an assessment-scope request (see
+   * `raw_jurisdiction_value` above for that distinct, unrelated concept),
+   * and NOT the project's own distribution/output-use territory (see
+   * `raw_territory_value` above for that distinct, unrelated concept --
+   * never inferred from one to populate the other, in either direction).
+   * Never inferred from a filming location, client location, team location,
+   * a depicted person's location, IP address, browser locale, billing
+   * address, or tool-account country -- only a direct statement about where
+   * the user's OWN organization/company is based/located. For a correction
+   * ("Correction -- we're actually based in Switzerland, not Germany"), this
+   * field carries the NEW value ("Switzerland"); correction_of_raw_text
+   * (already generic, above) carries the value being replaced ("Germany"),
+   * mirroring raw_territory_value's own text-match resolution exactly --
+   * code resolves the specific current mention this targets by exact,
+   * case-insensitive value match, never the model.
+   */
+  raw_organization_location_value?: string
+  /** kind === 'organization_location_mention'; set when this candidate corrects an existing mention (resolved by code, never the model -- see resolveOrganizationLocationMentionTarget) */
+  supersedes_organization_location_mention_id?: string
 }
 
 export type CandidateExtractor = (turn: RawUserTurn) => Promise<CandidateObservation[]>
@@ -967,6 +998,7 @@ export type ProposedFact =
   | { kind: 'assessment_jurisdiction_mention'; mention: AssessmentJurisdictionMention }
   | { kind: 'content_presence_mention'; mention: ContentPresenceMention }
   | { kind: 'distribution_territory_mention'; mention: DistributionTerritoryMention }
+  | { kind: 'organization_location_mention'; mention: OrganizationLocationMention }
   | { kind: 'undetermined' }
 
 /**
@@ -1337,6 +1369,31 @@ export function attestCandidate(
     }
   }
 
+  if (candidate.kind === 'organization_location_mention') {
+    if (!candidate.raw_organization_location_value) return null
+
+    // Turn-qualified, same minting rule as every other mention kind above.
+    const mentionId = `o${candidate.turn}-${candidate.proposal_id}`
+
+    return {
+      kind: 'organization_location_mention',
+      mention: {
+        mention_id: mentionId,
+        value: candidate.raw_organization_location_value,
+        // Direct-statement only -- there is no "unknown"/"declined"/
+        // "confirmed_absent" per-mention state (see
+        // OrganizationLocationMention's own doc comment: no exclusion
+        // concept exists for this fact type) because a candidate only
+        // exists here at all when the user directly named an organization
+        // location.
+        confidence: 'confirmed',
+        source_turn: candidate.turn,
+        source_statement: candidate.raw_text,
+        superseded_by: null,
+      },
+    }
+  }
+
   if (candidate.kind === 'user_goal') {
     if (!candidate.goal_confidence_hint) return null
     // Turn-qualified unconditionally, mirroring tool_mention's own minting
@@ -1637,6 +1694,34 @@ function resolveDistributionTerritoryMentionTarget(candidate: CandidateObservati
   return undefined // zero or multiple matches -- fail closed, never guess
 }
 
+// ── Organization-location mention identity resolution (stage 3.5, Generic
+// Applicability Architecture -- OrganizationLocationMention Fact
+// Representation, 2026-09-13) ────────────────────────────────────────────────
+
+/**
+ * Mirrors resolveDistributionTerritoryMentionTarget exactly -- same
+ * deliberately simple, explicit-language-only algorithm (no canonical/
+ * unresolved-alias registry, no "other active mention" implicit fallback,
+ * local case-insensitive trim-based comparison only, zero-or-multiple
+ * matches fails closed, never guesses).
+ *
+ * Returns undefined for CREATE (no correction signal, or nothing to match --
+ * a genuinely new mention) or the mention_id to supersede for a resolved
+ * correction.
+ */
+function resolveOrganizationLocationMentionTarget(candidate: CandidateObservation, su: StructuredUnderstanding): string | undefined {
+  if (candidate.kind !== 'organization_location_mention') return undefined
+  if (!candidate.is_correction) return undefined
+
+  const needle = (candidate.correction_of_raw_text ?? '').trim().toLowerCase()
+  if (!needle) return undefined
+
+  const active = su.organization_location_mentions.filter((m) => m.superseded_by === null)
+  const matches = active.filter((m) => m.value.trim().toLowerCase() === needle)
+  if (matches.length === 1) return matches[0].mention_id
+  return undefined // zero or multiple matches -- fail closed, never guess
+}
+
 /**
  * Whether this session's `assessment_jurisdiction_mentions` collection has
  * ever received any entry, active or superseded -- local reimplementation of
@@ -1782,7 +1867,7 @@ export async function runExtractionPipeline(
       current = seedAssessmentJurisdictionFromLegacyScalarIfNeeded(current)
     }
 
-    // Exactly one of these five resolvers can ever return a value for a
+    // Exactly one of these six resolvers can ever return a value for a
     // given candidate -- each short-circuits on candidate.kind not matching
     // its own concern -- mirroring the existing single-resolver call shape
     // rather than branching on kind here. content_presence_mention
@@ -1797,6 +1882,7 @@ export async function runExtractionPipeline(
     const supersedesProviderId = resolveAssetProviderMentionTarget(rawCandidate, current, retractedProvidersThisTurn)
     const supersedesJurisdictionId = resolveAssessmentJurisdictionMentionTarget(rawCandidate, current)
     const supersedesTerritoryId = resolveDistributionTerritoryMentionTarget(rawCandidate, current)
+    const supersedesOrgLocationId = resolveOrganizationLocationMentionTarget(rawCandidate, current)
     const candidate = supersedesToolId
       ? { ...rawCandidate, supersedes_tool_mention_id: supersedesToolId }
       : supersedesGoalId
@@ -1807,7 +1893,9 @@ export async function runExtractionPipeline(
             ? { ...rawCandidate, supersedes_assessment_jurisdiction_mention_id: supersedesJurisdictionId }
             : supersedesTerritoryId
               ? { ...rawCandidate, supersedes_distribution_territory_mention_id: supersedesTerritoryId }
-              : rawCandidate
+              : supersedesOrgLocationId
+                ? { ...rawCandidate, supersedes_organization_location_mention_id: supersedesOrgLocationId }
+                : rawCandidate
 
     const normalization = normalizeCandidate(candidate)
     const proposedFact = attestCandidate(candidate, normalization)
@@ -1943,6 +2031,11 @@ export async function runExtractionPipeline(
         current = candidate.supersedes_distribution_territory_mention_id
           ? supersedeDistributionTerritoryMention(current, candidate.supersedes_distribution_territory_mention_id, proposedFact.mention)
           : addDistributionTerritoryMention(current, proposedFact.mention)
+        appliedIdentifier = proposedFact.mention.mention_id
+      } else if (proposedFact.kind === 'organization_location_mention') {
+        current = candidate.supersedes_organization_location_mention_id
+          ? supersedeOrganizationLocationMention(current, candidate.supersedes_organization_location_mention_id, proposedFact.mention)
+          : addOrganizationLocationMention(current, proposedFact.mention)
         appliedIdentifier = proposedFact.mention.mention_id
       } else {
         // attestCandidate never actually returns {kind: 'undetermined'} (it

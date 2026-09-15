@@ -26,6 +26,7 @@ import type {
   Attested,
   ContentPresenceMention,
   DistributionTerritoryMention,
+  OrganizationLocationMention,
   ScopedObservation,
   StructuredUnderstanding,
   ToolMention,
@@ -513,6 +514,88 @@ export function supersedeDistributionTerritoryMention(
     ...su,
     distribution_territory_mentions: [
       ...su.distribution_territory_mentions.map((m) =>
+        m.mention_id === targetId ? { ...m, superseded_by: replacement.mention_id } : m,
+      ),
+      replacement,
+    ],
+  }
+}
+
+// ── Organization location mentions (Generic Applicability Architecture --
+// OrganizationLocationMention Fact Representation, 2026-09-13) ──────────────
+
+/**
+ * Mirrors addDistributionTerritoryMention exactly -- same duplicate-id /
+ * already-superseded-on-add invariants, no cap. Pure and mechanical, same as
+ * every other function in this module -- how a stated correction resolves to
+ * a specific target mention_id is a policy decision made by the caller
+ * (lib/interview-engine/extraction.ts), never by this function. This fact
+ * type has REAL supersession semantics (see
+ * `supersedeOrganizationLocationMention` immediately below) -- an
+ * organization's location is a single project-level fact a later statement
+ * can directly replace, the same shape `AssessmentJurisdictionMention`/
+ * `DistributionTerritoryMention` solve, deliberately NOT the append-only
+ * shape `ContentPresenceMention` uses. This function has no applicability,
+ * Track A, or Bounded Interpretation consumer of any kind -- see
+ * `OrganizationLocationMention`'s own doc comment (types/interview-engine.ts).
+ */
+export function addOrganizationLocationMention(
+  su: StructuredUnderstanding,
+  mention: OrganizationLocationMention,
+): StructuredUnderstanding {
+  if (su.organization_location_mentions.some((m) => m.mention_id === mention.mention_id)) {
+    throw new Error(`Organization location mention id already exists: ${mention.mention_id}`)
+  }
+  if (mention.superseded_by !== null) {
+    throw new Error(
+      `A newly added organization location mention cannot already be superseded (mention_id: ${mention.mention_id})`,
+    )
+  }
+  return {
+    ...su,
+    organization_location_mentions: [...su.organization_location_mentions, mention],
+  }
+}
+
+/**
+ * Mirrors supersedeDistributionTerritoryMention exactly -- same invariants
+ * (target must exist and must currently be the active/non-superseded head of
+ * its chain). An organization location has no exclusion concept (see
+ * `OrganizationLocationMention`'s own doc comment) -- this function is used
+ * for ordinary correction only ("Correction -- we're actually based in
+ * Switzerland, not Germany").
+ */
+export function supersedeOrganizationLocationMention(
+  su: StructuredUnderstanding,
+  targetId: string,
+  replacement: OrganizationLocationMention,
+): StructuredUnderstanding {
+  const target = su.organization_location_mentions.find((m) => m.mention_id === targetId)
+  if (!target) {
+    throw new Error(`Cannot supersede unknown organization location mention: ${targetId}`)
+  }
+  if (target.superseded_by !== null) {
+    throw new Error(
+      `Cannot supersede organization location mention ${targetId}: it is already superseded by ${target.superseded_by}. ` +
+      `Corrections must target the current head of the chain, not a historical snapshot.`,
+    )
+  }
+  if (replacement.mention_id === targetId) {
+    throw new Error(`Replacement organization location mention must have a different id than the mention it supersedes: ${targetId}`)
+  }
+  if (su.organization_location_mentions.some((m) => m.mention_id === replacement.mention_id)) {
+    throw new Error(`Replacement organization location mention id already exists: ${replacement.mention_id}`)
+  }
+  if (replacement.superseded_by !== null) {
+    throw new Error(
+      `A newly added replacement organization location mention cannot already be superseded (mention_id: ${replacement.mention_id})`,
+    )
+  }
+
+  return {
+    ...su,
+    organization_location_mentions: [
+      ...su.organization_location_mentions.map((m) =>
         m.mention_id === targetId ? { ...m, superseded_by: replacement.mention_id } : m,
       ),
       replacement,

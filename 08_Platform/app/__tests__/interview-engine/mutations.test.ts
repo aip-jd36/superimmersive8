@@ -46,6 +46,7 @@ function emptyStructuredUnderstanding(): StructuredUnderstanding {
     assessment_jurisdiction_mentions: [],
     content_presence_mentions: [],
     distribution_territory_mentions: [],
+    organization_location_mentions: [],
     current_phase: 1,
     gate_1_state: 'not_met',
     gate_2_state: 'not_yet_stable',
