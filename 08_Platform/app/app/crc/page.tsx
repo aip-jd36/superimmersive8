@@ -37,6 +37,7 @@ import type { ProjectionOutput } from '@/lib/projection-layer/types'
 import type { ConsultativeNote } from '@/lib/crc-engine/unresolved-applicability-realization'
 import { shouldShowAcknowledgmentGuidance, ACKNOWLEDGMENT_GUIDANCE_COPY, type CrcPagePhase as Phase } from '@/lib/crc-engine/acknowledgment-guidance'
 import { getRateLimitMessage } from '@/lib/crc-engine/rate-limit-copy'
+import { formatWaitIndicator, startElapsedSecondsTicker } from '@/lib/crc-engine/wait-indicator'
 import { RESULTS_GATE_COPY, buildConfirmationCopy, buildTeaserCopy } from '@/lib/crc-engine/results-gate-copy'
 import { buildCalendlyUrl } from '@/lib/crc-engine/calendly-attribution'
 
@@ -76,6 +77,11 @@ export default function CrcPage() {
   const [email, setEmail] = useState<string | null | undefined>(undefined)
   // CRC Rate-Limit UX refinement, 2026-08-14.
   const [rateLimitMessage, setRateLimitMessage] = useState('')
+  // CRC Wait-State UX. Purely presentational -- see wait-indicator.ts's own
+  // header for why this is never pipeline/model telemetry. Starts/stops
+  // strictly off the existing `phase === 'sending'` authoritative pending
+  // state below; not a new source of truth.
+  const [elapsedSeconds, setElapsedSeconds] = useState(0)
   // CRC Results Gate milestone, 2026-08-14.
   const [teaser, setTeaser] = useState<CrcTeaser | undefined>(undefined)
   const [resultsEmail, setResultsEmail] = useState<CrcResultsEmailState | undefined>(undefined)
@@ -132,6 +138,25 @@ export default function CrcPage() {
   useEffect(() => {
     scrollAnchorRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, phase])
+
+  // CRC Wait-State UX. Elapsed-wait ticker, bound strictly to the existing
+  // `phase === 'sending'` authoritative pending-turn state -- not a new
+  // state machine. Starts a fresh ticker (starting at 0) the moment `phase`
+  // becomes 'sending'; the cleanup below stops it immediately the instant
+  // `phase` changes to anything else, for any reason (success, failure,
+  // rate limit, session-not-found, retry, Start Over) -- see submit()'s own
+  // exhaustive phase transitions above, every one of which leaves
+  // 'sending'. A later turn re-enters this effect fresh (a brand-new
+  // ticker instance, per startElapsedSecondsTicker's own contract), so it
+  // can never inherit a prior turn's elapsed count.
+  useEffect(() => {
+    if (phase !== 'sending') {
+      setElapsedSeconds(0)
+      return
+    }
+    const ticker = startElapsedSecondsTicker(setElapsedSeconds)
+    return () => ticker.stop()
+  }, [phase])
 
   // Results Gate impression tracking (PM-approved §15/§22) -- fires once
   // the teaser+gate screen is actually shown, not merely on completion.
@@ -379,7 +404,7 @@ export default function CrcPage() {
                 <div ref={scrollAnchorRef} />
               </div>
 
-              {phase === 'sending' && <p className="text-sm text-muted-foreground">Thinking…</p>}
+              {phase === 'sending' && <p className="text-sm text-muted-foreground">{formatWaitIndicator(elapsedSeconds)}</p>}
 
               {phase === 'retry' && (
                 <div className="space-y-2 rounded border border-red-200 bg-red-50 p-3">
