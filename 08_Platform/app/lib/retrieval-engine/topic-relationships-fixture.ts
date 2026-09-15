@@ -58,6 +58,14 @@
  * TRANSPARENCY-v1` entry and `governance-reviews/
  * FGR_020_CAND-REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-001_2026-09-13.md`
  * for the full governance record this entry mirrors verbatim.
+ *
+ * [UPDATE, Principle 3 PM Concurrence Recording + Final CPR_026
+ * Re-Review milestone, 2026-09-15]: the `crc_eligible: 'Pending'`
+ * description above describes this relationship's state as of its
+ * original authoring, no longer current -- see the entry's own inline
+ * comment below. `crc_eligible` is now `'Yes'` on both this relationship
+ * and its target claim, together, following PM's explicit Principle 3
+ * concurrence and the final CPR_026 re-review.
  */
 
 import type { TopicRelationship } from './types'
@@ -86,8 +94,17 @@ export const TOPIC_RELATIONSHIPS_FIXTURE: TopicRelationship[] = [
     // milestone). See this file's own header comment (above) for the full
     // rationale on every field below. Mirrored verbatim from
     // TOPIC-RELATIONSHIPS.md's own adopted entry; no wording strengthened,
-    // simplified, or reconstructed here. STILL `crc_eligible: 'Pending'` --
-    // this milestone does not perform or imply a CRC Publication Review.
+    // simplified, or reconstructed here.
+    //
+    // [UPDATE, Principle 3 PM Concurrence Recording + Final CPR_026
+    // Re-Review milestone, 2026-09-15]: crc_eligible flips Pending -> Yes
+    // together with its target claim (CLAIM-EUAI-ART50-4-AUDIOVISUAL-
+    // DEEPFAKE-DISCLOSURE-001-v1), per CPR_026 §N's own "approved
+    // together, never staggered" sequencing -- see
+    // governance-reviews/CPR_026_ADDENDUM_3_PRINCIPLE_3_CONCURRENCE_FINAL_REVIEW_2026-09-15.md.
+    // No independent Principle 3/reach defect was ever found in this
+    // relationship itself (CPR_026 §M); its disposition has always
+    // tracked the claim's own.
     relationship_id: 'REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-v1',
     source_topic: 'commercial_use',
     target_topic: 'ai_content_transparency',
@@ -98,10 +115,10 @@ export const TOPIC_RELATIONSHIPS_FIXTURE: TopicRelationship[] = [
     adoption_approver: 'JD (PM)',
     adoption_decision_date: '2026-09-13',
     publication_scope: 'Reviewer/Commercial Assurance',
-    crc_eligible: 'Pending',
-    crc_approver: 'PENDING',
-    crc_decision_date: 'PENDING',
-    last_reviewed: '2026-09-13',
+    crc_eligible: 'Yes',
+    crc_approver: 'JD (PM)',
+    crc_decision_date: '2026-09-15',
+    last_reviewed: '2026-09-15',
     superseded_by: null,
   },
 ]

@@ -119,8 +119,8 @@ describe('TOPIC-RELATIONSHIPS.md <-> topic-relationships-fixture.ts consistency'
     }
   })
 
-  test('exactly one relationship in the runtime fixture is Adopted + CRC-eligible as of 2026-08-19 -- REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1, published atomically alongside its three target claims (CLAIM-COPY-001-v1/-002-v1/-003-v1) following a bounded Copyright CRC Publication-Readiness Review (recommendation A -- PASS/GO AS-IS, no rationale change); see governance-reviews/CPR_006_COPYRIGHT_PUBLICATION_PACKAGE_2026-08-19.md -- update only when a further real decision is recorded', () => {
+  test('exactly two relationships in the runtime fixture are Adopted + CRC-eligible as of 2026-09-15 -- REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1 (2026-08-19, see governance-reviews/CPR_006_COPYRIGHT_PUBLICATION_PACKAGE_2026-08-19.md) plus REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-v1, activated together with its target claim via the Principle 3 PM Concurrence Recording + Final CPR_026 Re-Review milestone (see governance-reviews/CPR_026_ADDENDUM_3_PRINCIPLE_3_CONCURRENCE_FINAL_REVIEW_2026-09-15.md) -- update only when a further real decision is recorded', () => {
     const liveRelationships = TOPIC_RELATIONSHIPS_FIXTURE.filter((r) => r.lifecycle === 'Adopted' && r.crc_eligible === 'Yes')
-    expect(liveRelationships.map((r) => r.relationship_id)).toEqual(['REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1'])
+    expect(liveRelationships.map((r) => r.relationship_id).sort()).toEqual(['REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-v1', 'REL-COPY-OWNERSHIP-COPYRIGHTABILITY-v1'])
   })
 })

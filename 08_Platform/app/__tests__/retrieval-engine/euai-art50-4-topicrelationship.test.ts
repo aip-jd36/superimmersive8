@@ -108,7 +108,12 @@ describe('REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-v1 -- production TopicRelat
     expect(r.target_topic).toBe(TOPIC)
     expect(r.relationship_type).toBe('relevant_consideration')
     expect(r.lifecycle).toBe('Adopted')
-    expect(r.crc_eligible).toBe('Pending')
+    // Principle 3 PM Concurrence Recording + Final CPR_026 Re-Review
+    // milestone (2026-09-15): crc_eligible flips Pending -> Yes, together
+    // with the target claim, per CPR_026 §N's own "approved together,
+    // never staggered" sequencing. See
+    // CPR_026_ADDENDUM_3_PRINCIPLE_3_CONCURRENCE_FINAL_REVIEW_2026-09-15.md.
+    expect(r.crc_eligible).toBe('Yes')
     expect(r.superseded_by).toBeNull()
   })
 
@@ -117,30 +122,30 @@ describe('REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-v1 -- production TopicRelat
     expect(r.adoption_approver).toBe('JD (PM)')
     expect(r.adoption_decision_date).toBe('2026-09-13')
     expect(r.publication_scope).toBe('Reviewer/Commercial Assurance')
-    expect(r.crc_approver).toBe('PENDING')
-    expect(r.crc_decision_date).toBe('PENDING')
-    expect(r.last_reviewed).toBe('2026-09-13')
+    expect(r.crc_approver).toBe('JD (PM)')
+    expect(r.crc_decision_date).toBe('2026-09-15')
+    expect(r.last_reviewed).toBe('2026-09-15')
   })
 
-  test('F. target claim remains Lifecycle: Adopted, crc_eligible: Pending -- unaffected and unchanged by this relationship\'s authoring', () => {
+  test('F. target claim is Lifecycle: Adopted, crc_eligible: Yes -- together with this relationship (Principle 3 PM Concurrence Recording + Final CPR_026 Re-Review milestone, 2026-09-15)', () => {
     const c = targetClaim()
     expect(c.lifecycle).toBe('Adopted')
-    expect(c.crc_eligible).toBe('Pending')
-    // Bounded Fixture Governance Authoring milestone (2026-09-15): NY
-    // precedent jurisdiction gate now authored -- see
+    expect(c.crc_eligible).toBe('Yes')
+    // NY precedent jurisdiction gate (Bounded Fixture Governance
+    // Authoring milestone, 2026-09-15) -- see
     // euai-art50-4-topicclaim.test.ts test B for the full assertion; this
-    // relationship's own gate (crc_eligible: Pending) remains the reason
-    // this test's other assertions (G/H below) still exclude the claim.
+    // gate, not crc_eligible, is now what governs whether the claim is
+    // actually reached via this relationship (see G/H below).
     expect(c.applicability_requirements).toEqual([{ fact: 'jurisdiction', operator: 'equals', value: 'European Union' }])
     expect(c.geographic_relevance_scope).toBeUndefined()
   })
 
-  test('relationshipIsAdoptedAndCrcEligible returns false for this relationship -- crc_eligible: Pending alone is sufficient to exclude it from every eligible-relationship computation', () => {
-    expect(relationshipIsAdoptedAndCrcEligible(relationship())).toBe(false)
+  test('relationshipIsAdoptedAndCrcEligible returns true for this relationship, now that crc_eligible: Yes (Principle 3 PM Concurrence Recording + Final CPR_026 Re-Review milestone, 2026-09-15) -- reachability is now governed by the jurisdiction gate (see G below), not this double gate', () => {
+    expect(relationshipIsAdoptedAndCrcEligible(relationship())).toBe(true)
   })
 
-  describe('G. commercial_use related-topic retrieval does NOT surface Article 50 through this relationship', () => {
-    test('lookupRelatedTopicClaims: a confirmed commercial_use goal against the real, unmodified production fixtures never returns the target claim', () => {
+  describe('G. commercial_use related-topic retrieval surfaces Article 50 through this relationship ONLY when EU assessment jurisdiction is stated (Principle 3 PM Concurrence Recording + Final CPR_026 Re-Review milestone, 2026-09-15)', () => {
+    test('lookupRelatedTopicClaims: a confirmed commercial_use goal against the real, unmodified production fixtures, with NO jurisdiction stated, never returns the target claim (jurisdiction gate unresolved, not met)', () => {
       const result = lookupRelatedTopicClaims(
         [goal()],
         TOPIC_RELATIONSHIPS_FIXTURE,
@@ -150,23 +155,33 @@ describe('REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-v1 -- production TopicRelat
       expect(result.matches.map((m) => m.claim.claim_id)).not.toContain(CLAIM_ID)
     })
 
-    test('lookupRelatedTopicClaims: even with EU-flavored jurisdiction facts attested, still no match -- crc_eligible: Pending is the controlling gate, not applicability', () => {
+    test('lookupRelatedTopicClaims: with EU jurisdiction stated, the target claim IS now returned -- this is the intended, governed behavior (CPR_026 Addendum 2/3): the jurisdiction gate is an assessment-scope eligibility/relevance gate, not Article 2 applicability evidence; the claim\'s own bounded wording (euai-art50-4-topicclaim.test.ts test B2) independently forecloses CRC from treating this as establishing Article 50 applies to the project', () => {
       const result = lookupRelatedTopicClaims(
         [goal()],
         TOPIC_RELATIONSHIPS_FIXTURE,
         TOPIC_CLAIMS_FIXTURE,
-        { jurisdiction: { included: ['European Union', 'France'], excluded: [] }, toolMentions: [] },
+        { jurisdiction: { included: ['European Union'], excluded: [] }, toolMentions: [] },
+      )
+      expect(result.matches.map((m) => m.claim.claim_id)).toContain(CLAIM_ID)
+    })
+
+    test('lookupRelatedTopicClaims: a non-EU jurisdiction (New York, France-as-literal-non-EU-alias-miss) still excludes the target claim -- the gate is specific to a literal "European Union" match, not any jurisdiction', () => {
+      const result = lookupRelatedTopicClaims(
+        [goal()],
+        TOPIC_RELATIONSHIPS_FIXTURE,
+        TOPIC_CLAIMS_FIXTURE,
+        { jurisdiction: { included: ['New York', 'France'], excluded: [] }, toolMentions: [] },
       )
       expect(result.matches.map((m) => m.claim.claim_id)).not.toContain(CLAIM_ID)
     })
 
-    for (const category of GOAL_CATEGORIES) {
-      test(`no other real GoalCategory ('${category}') surfaces the target claim via this relationship either`, () => {
+    for (const category of GOAL_CATEGORIES.filter((c) => c !== 'commercial_use')) {
+      test(`no other real GoalCategory ('${category}') surfaces the target claim via this relationship, even with EU jurisdiction stated -- the relationship's own source_topic is commercial_use only`, () => {
         const result = lookupRelatedTopicClaims(
           [goal({ category })],
           TOPIC_RELATIONSHIPS_FIXTURE,
           TOPIC_CLAIMS_FIXTURE,
-          { jurisdiction: { included: [], excluded: [] }, toolMentions: [] },
+          { jurisdiction: { included: ['European Union'], excluded: [] }, toolMentions: [] },
         )
         expect(result.matches.map((m) => m.claim.claim_id)).not.toContain(CLAIM_ID)
       })
@@ -245,32 +260,54 @@ describe('REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-v1 -- production TopicRelat
   })
 
   /**
-   * Double-gate proof (Step 10) -- synthetic, never-production copies only.
-   * Neither production `crc_eligible` value is ever changed; these clones
-   * exist solely to demonstrate the double gate holds in each direction
-   * independently, establishing that a future publication decision on
-   * either side remains independently governed.
+   * Double-gate proof (Step 10; REWRITTEN, Principle 3 PM Concurrence
+   * Recording + Final CPR_026 Re-Review milestone, 2026-09-15) -- fully
+   * synthetic, never-production copies on BOTH sides of every row now.
+   * The real claim and relationship are both `crc_eligible: 'Yes'` as of
+   * this milestone (tests A/F above), so the double gate can no longer be
+   * demonstrated using real current state for the "Pending" side, as the
+   * pre-existing version of this block did. This rewrite makes the proof
+   * self-contained and independent of either object's real eligibility
+   * value going forward -- it demonstrates the permanent architectural
+   * invariant (`lookupRelatedTopicClaims` requires BOTH sides
+   * independently Adopted + crc_eligible: Yes), not a fact about this
+   * specific claim's current governance state. All jurisdiction facts
+   * below include European Union so the applicability dimension is
+   * satisfied in every row -- isolating the eligibility dimension alone,
+   * exactly as this block's own name promises.
    */
-  describe('double-gate proof -- synthetic clones only, production eligibility never changed', () => {
+  describe('double-gate proof -- fully synthetic clones on both sides, independent of real production eligibility', () => {
+    const euFacts = { jurisdiction: { included: ['European Union'], excluded: [] }, toolMentions: [] }
+
     const syntheticEligibleClaim: TopicClaim = {
       ...targetClaim(),
       crc_eligible: 'Yes',
-      crc_publication_scope: 'SYNTHETIC TEST ONLY -- not a real approved scope.',
-      crc_candidate_statement: 'SYNTHETIC TEST ONLY.',
+      crc_publication_scope: targetClaim().crc_publication_scope ?? 'SYNTHETIC TEST ONLY -- not a real approved scope.',
+      crc_candidate_statement: targetClaim().crc_candidate_statement ?? 'SYNTHETIC TEST ONLY.',
+    }
+    const syntheticPendingClaim: TopicClaim = {
+      ...targetClaim(),
+      crc_eligible: 'Pending',
     }
     const syntheticEligibleRelationship: TopicRelationship = {
       ...relationship(),
       crc_eligible: 'Yes',
-      crc_approver: 'SYNTHETIC TEST',
-      crc_decision_date: '2026-09-13',
+      crc_approver: relationship().crc_approver,
+      crc_decision_date: relationship().crc_decision_date,
+    }
+    const syntheticPendingRelationship: TopicRelationship = {
+      ...relationship(),
+      crc_eligible: 'Pending',
+      crc_approver: 'PENDING',
+      crc_decision_date: 'PENDING',
     }
 
     test('1. relationship Pending + claim Yes -> no retrieval', () => {
       const result = lookupRelatedTopicClaims(
         [goal()],
-        TOPIC_RELATIONSHIPS_FIXTURE, // real, unmodified -- relationship still Pending
+        [syntheticPendingRelationship],
         [...TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id !== CLAIM_ID), syntheticEligibleClaim],
-        { jurisdiction: { included: [], excluded: [] }, toolMentions: [] },
+        euFacts,
       )
       expect(result.matches).toEqual([])
     })
@@ -279,38 +316,37 @@ describe('REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-v1 -- production TopicRelat
       const result = lookupRelatedTopicClaims(
         [goal()],
         [syntheticEligibleRelationship],
-        TOPIC_CLAIMS_FIXTURE, // real, unmodified -- claim still Pending
-        { jurisdiction: { included: [], excluded: [] }, toolMentions: [] },
+        [...TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id !== CLAIM_ID), syntheticPendingClaim],
+        euFacts,
       )
       expect(result.matches).toEqual([])
     })
 
-    test('3. relationship Pending + claim Pending (the real, current production state) -> no retrieval', () => {
+    test('3. relationship Pending + claim Pending -> no retrieval', () => {
       const result = lookupRelatedTopicClaims(
         [goal()],
-        TOPIC_RELATIONSHIPS_FIXTURE,
-        TOPIC_CLAIMS_FIXTURE,
-        { jurisdiction: { included: [], excluded: [] }, toolMentions: [] },
+        [syntheticPendingRelationship],
+        [...TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id !== CLAIM_ID), syntheticPendingClaim],
+        euFacts,
       )
       expect(result.matches).toEqual([])
     })
 
-    test('sanity check: BOTH synthetically eligible together, WITH the EU jurisdiction gate satisfied, DOES retrieve -- confirms tests 1-3 fail closed for the right reason (a real gate), not because the lookup is broken', () => {
-      // Bounded Fixture Governance Authoring milestone (2026-09-15): the
-      // target claim now carries applicability_requirements (the NY-
-      // precedent EU jurisdiction gate), so this sanity check must supply
-      // matching jurisdiction facts -- an empty-facts scenario would now
-      // fail closed on applicability alone (`unresolved`, isApplicable
-      // false), no longer isolating the double-gate mechanism this test
-      // exists to prove. See the dedicated jurisdiction-gate canary
-      // describe block below for the applicability dimension itself.
+    test('sanity check: BOTH synthetically eligible together, WITH the EU jurisdiction gate satisfied, DOES retrieve -- confirms tests 1-3 fail closed for the right reason (the eligibility gate), not because the lookup is broken', () => {
       const result = lookupRelatedTopicClaims(
         [goal()],
         [syntheticEligibleRelationship],
         [...TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id !== CLAIM_ID), syntheticEligibleClaim],
-        { jurisdiction: { included: ['European Union'], excluded: [] }, toolMentions: [] },
+        euFacts,
       )
       expect(result.matches.map((m) => m.claim.claim_id)).toContain(CLAIM_ID)
+    })
+
+    test('this describe block never mutates the real production fixtures', () => {
+      const beforeClaim = JSON.parse(JSON.stringify(targetClaim()))
+      const beforeRel = JSON.parse(JSON.stringify(relationship()))
+      expect(targetClaim()).toEqual(beforeClaim)
+      expect(relationship()).toEqual(beforeRel)
     })
   })
 

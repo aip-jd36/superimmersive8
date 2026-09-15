@@ -213,11 +213,22 @@
  * the `applicability_requirements: []` description above describes this
  * claim's state as of its original authoring, no longer current -- see
  * the claim's own inline comments below for the NY-precedent jurisdiction
- * gate now authored (CPR_026 Remedy Reconsideration concurrence).
- * `union_establishment_or_output_use` remains, unchanged, the sole
- * representation of Article 2(1)(b)/(c)'s own substantive test. Still
- * `crc_eligible: 'Pending'` -- this milestone stages a CPR_026 re-review
- * candidate; it does not decide or imply CRC Publication.
+ * gate authored that same milestone (CPR_026 Remedy Reconsideration
+ * concurrence). `union_establishment_or_output_use` remains, unchanged,
+ * the sole representation of Article 2(1)(b)/(c)'s own substantive test.
+ *
+ * [UPDATE 2, Principle 3 PM Concurrence Recording + Final CPR_026
+ * Re-Review milestone, 2026-09-15, same day]: `crc_eligible` is now
+ * `'Yes'` on both this claim and `REL-COMMERCIAL-USE-AI-CONTENT-
+ * TRANSPARENCY-v1` -- PM explicitly concurred that this specific governed
+ * proposition falls outside Principle 3, and the final CPR_026 re-review
+ * re-confirmed every other Publication Policy principle against the
+ * exact staged wording. See
+ * `governance-reviews/CPR_026_ADDENDUM_3_PRINCIPLE_3_CONCURRENCE_FINAL_REVIEW_2026-09-15.md`
+ * for the full record. `union_establishment_or_output_use` and the other
+ * three `unresolved_project_dependencies` remain unchanged and
+ * permanently unresolved -- CRC eligibility never resolves, and was never
+ * conditioned on resolving, Article 2(1)(b)/(c) applicability itself.
  */
 
 import type { TopicClaim } from './types'
@@ -1438,29 +1449,51 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     claim_character: 'established',
     jurisdiction: 'European Union',
     lifecycle: 'Adopted',
-    crc_eligible: 'Pending',
+    // Article 50 -- Principle 3 PM Concurrence Recording + Final CPR_026
+    // Re-Review milestone (2026-09-15). PM explicitly concurred (dedicated
+    // Principle 3 decision dossier, this same date) that this specific
+    // governed proposition -- a disclosure/anti-deception mandate, never
+    // characterizing, producing, or facilitating deceptive content --
+    // falls outside CRC-PUBLICATION-POLICY.md's Principle 3 sensitivity
+    // gate. Proposition-specific: not a blanket approval for other
+    // deepfake/likeness-adjacent Living Knowledge. With Principle 3
+    // resolved, every other Publication Policy principle re-confirmed
+    // clean against this exact staged wording (see
+    // CPR_026_ADDENDUM_3_PRINCIPLE_3_CONCURRENCE_FINAL_REVIEW_2026-09-15.md).
+    // crc_eligible flips Pending -> Yes together with the relationship
+    // below, per CPR_026 §N's own "approved together, never staggered"
+    // sequencing (neither object's eligibility alone produces any
+    // retrievable content).
+    crc_eligible: 'Yes',
     // Bounded Fixture Governance Authoring milestone (2026-09-15,
-    // CPR_026 Remedy Reconsideration concurrence). NOT a CRC Publication
-    // Review and does NOT change crc_eligible (still 'Pending' below) --
-    // this text is staged for the future CPR_026 re-review candidate this
-    // milestone prepares, per PM concurrence that the NY Performer Law
-    // precedent (CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1, CPR_025)
-    // transfers: a stated assessment jurisdiction may gate WHICH governed
+    // CPR_026 Remedy Reconsideration concurrence): per PM concurrence,
+    // the NY Performer Law precedent
+    // (CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1, CPR_025)
+    // transfers: a stated assessment jurisdiction gates WHICH governed
     // knowledge is eligible/relevant to discuss, but must never be read as
     // establishing that the underlying statute territorially applies.
     // Wording follows CPR_025 §S/§T's own bounded-wording shape and
     // CPR_026 §J's draft, strengthened with CPR_025's own explicit "even
     // merely mentioning" disclaimer (the terminology-clarity finding from
-    // the concurrence diagnostic). Remains inert while crc_eligible stays
-    // 'Pending' -- the double gate (lifecycle==='Adopted' &&
-    // crc_eligible==='Yes') means neither field can reach a real CRC user
-    // regardless of this text's content.
+    // the concurrence diagnostic). Formally reviewed and re-confirmed
+    // against every Publication Policy principle by the final CPR_026
+    // re-review (2026-09-15) prior to the crc_eligible flip above -- see
+    // CPR_026_ADDENDUM_3_PRINCIPLE_3_CONCURRENCE_FINAL_REVIEW_2026-09-15.md.
     crc_publication_scope:
       "CRC may state that EU Regulation (EU) 2024/1689 (the AI Act), Article 50(4), first subparagraph, imposes a disclosure duty on deployers of AI systems whose output constitutes a \"deep fake,\" subject to the law-enforcement exception and the artistic/creative/satirical/fictional/analogous-work manner-limitation described in the candidate statement, and that this is EU statutory law, not SI8's own policy. The user asking CRC to consider the European Union as the assessment jurisdiction permits this EU-specific governed knowledge to be brought into the conversation as potentially relevant to discuss -- it does NOT establish that Regulation (EU) 2024/1689 territorially applies to the user's project. CRC must not state or imply, for any reason, including the user merely selecting, stating, or mentioning the European Union as the assessment jurisdiction: that Article 50 applies to the user's specific project; that the user (or their organization) is the statutory \"deployer\"; that the project satisfies Article 2(1)(b)'s establishment test or Article 2(1)(c)'s output-use test (both remain unresolved -- see union_establishment_or_output_use below); that specific content does or does not meet the Article 3(60) \"deep fake\" definition; that the artistic-work carve-out does or does not apply to specific content; that a real, identifiable person's likeness is separately governed by this Article (that subject is a distinct question -- see the New York likeness/synthetic-performer claims for that jurisdiction's own separate authority, never conflated with this one); or that satisfying, or being exempt from, this disclosure duty establishes broader legal compliance, copyright clearance, provider/platform permission, or overall commercial readiness. This is educational workflow guidance, not legal advice or a commercial-readiness determination. A human-reviewed Commercial Assurance Assessment remains the higher-assurance path for resolving the project-specific facts this claim leaves open -- deployer status, actual deep-fake characterization, and genuine Article 2 territorial applicability, each requiring documentary or content-level evidence CRC's conversational self-report cannot supply.",
-    // FGR_019 §2's clause-by-clause corrected wording, verbatim -- no
+    // FGR_019 §2's clause-by-clause corrected wording, byte-identical to
+    // GOVERNED-CLAIMS.md's own "Claim proposition" text -- no
     // strengthening, simplification, or reconstruction applied here.
+    // [CORRECTION, 2026-09-15 final re-review, Phase 4 wording-integrity
+    // check]: the version staged by the prior Bounded Fixture Governance
+    // Authoring milestone had lightly restructured this sentence's own
+    // opening clause ("The EU AI Act (Regulation...)... requires... to
+    // disclose" rather than "Under Article 50(4)... a deployer... must
+    // disclose") -- substance-preserving but not actually verbatim,
+    // despite this comment's own prior claim to the contrary. Replaced
+    // here with the true FGR_019 §2 text, restoring strict fidelity.
     crc_candidate_statement:
-      "The EU AI Act (Regulation (EU) 2024/1689), Article 50(4), first subparagraph, requires a deployer of an AI system that generates or manipulates image, audio, or video content constituting a \"deep fake\" to disclose that the content has been artificially generated or manipulated. This obligation does not apply where the use is authorised by law to detect, prevent, investigate, or prosecute criminal offences. Where the content forms part of an evidently artistic, creative, satirical, fictional, or analogous work or programme, this disclosure obligation is not removed but is limited to disclosing the existence of such generated or manipulated content in an appropriate manner that does not hamper the display or enjoyment of the work.",
+      "Under Article 50(4), first subparagraph, of Regulation (EU) 2024/1689 (the AI Act), a deployer of an AI system that generates or manipulates image, audio, or video content constituting a \"deep fake\" must disclose that the content has been artificially generated or manipulated. This obligation does not apply where the use is authorised by law to detect, prevent, investigate, or prosecute criminal offences. Where the content forms part of an evidently artistic, creative, satirical, fictional, or analogous work or programme, this disclosure obligation is not removed but is limited to disclosing the existence of such generated or manipulated content in an appropriate manner that does not hamper the display or enjoyment of the work.",
     // Bounded Fixture Governance Authoring milestone (2026-09-15): the NY
     // precedent (CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1,
     // applicability_requirements: [{fact:'jurisdiction', equals, 'New

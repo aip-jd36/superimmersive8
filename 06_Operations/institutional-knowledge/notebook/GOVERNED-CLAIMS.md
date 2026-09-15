@@ -4326,7 +4326,7 @@ SI8 interpretation: >
   creating content on behalf of a brand/publisher) does not automatically
   resolve either question, and CRC must not assume it does.
 
-Applicability requirements: []   <!-- Deliberately none authored -- FGR_019 §6/§13 and the candidate package §6 both independently confirm no currently-implemented APPLICABILITY_FACTS value (jurisdiction | tool_plan_tier | tool_account_status) can soundly represent Article 2(1)(b)/(c)'s establishment/output-use test without conflating two independently-sufficient statutory conditions into one blunt "jurisdiction" match, compounded by JURISDICTION_VALUE_ALIASES having zero EU-related entries. Represented instead as the union_establishment_or_output_use unresolved dependency below -- an honest architecture-gap disclosure, not a forced/misleading formal gate, mirroring the NY likeness package's own precedent. -->
+Applicability requirements: [{fact: jurisdiction, operator: equals, value: European Union}]   <!-- [UPDATE, Principle 3 PM Concurrence Recording + Final CPR_026 Re-Review milestone, 2026-09-15, superseding the original "[]" gate this comment described]: NY Performer Law precedent, transferred (CPR_026 Addendum 2) -- this is an assessment-scope eligibility/relevance gate ONLY. It does NOT represent, and must never be read as establishing, Article 2(1)(b)/(c)'s establishment/output-use test -- that remains represented, unchanged, only by the union_establishment_or_output_use unresolved dependency below. FGR_019 §6/§13's own original finding stands: no currently-implemented APPLICABILITY_FACTS value can soundly represent Article 2(1)(b)/(c) itself without conflating two independently-sufficient statutory conditions. JURISDICTION_VALUE_ALIASES has zero EU-related entries, so this gate under-fires (misses "France"/"Germany"-phrased statements) rather than over-fires -- the accepted, safer-direction trade-off already precedented for NY. -->
 Unresolved project dependencies: [deployer_status_confirmed, content_constitutes_deep_fake, artistic_creative_satirical_fictional_analogous_work, union_establishment_or_output_use]   <!-- deployer_status_confirmed: Type D, not currently representable -- no structured fact type exists anywhere in the interview-engine contract for "who is deploying/publishing this AI system's output" (Article 3(4)); fails closed (claim cannot resolve to "applies to you" for any project without it). content_constitutes_deep_fake: Type C, evidence-only -- Article 3(60)'s own "would falsely appear...authentic" characterization is a legal/factual judgment, not a raw self-attestable fact, structurally identical in kind to advertising_or_trade_use_confirmed's established treatment; never a direct CRC self-attestation question (Stock Governance Rule). artistic_creative_satirical_fictional_analogous_work: Type C, evidence-only/judgment-laden -- determines disclosure manner, not whether disclosure is owed at all; absent resolution, the stricter (non-carve-out) disclosure manner is the safer default framing. union_establishment_or_output_use: Type B, bounded user-attestable fact but only partially -- a stated DistributionTerritoryMention is already-modeled and CRC can already ask about it, but per FGR_019 §6/§7 and package §6, it only evidences, never conclusively resolves, Article 2(1)(b)/(c) applicability; CRC must never treat a captured distribution territory as itself resolving this dependency. -->
 Provider/actor scope: deployer only (Article 3(4)) -- never conflated with "provider" (the Article 50(2) actor), "operator," "user," "producer," "advertiser," "agency," or "client," none of which are the statute's own vocabulary. Tool scope: null (statutory, tool-independent). Provider scope (asset-provider sense): null (not a third-party asset-provider-scoped claim).
 Prohibited conclusions: >
@@ -4351,37 +4351,78 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-09-13
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  PENDING -- not yet reviewed for CRC Publication. No CRC Publication
-  Review has been conducted. FGR_019 §10/§11 found the proposition
-  CRC-suitable in principle (every Bounded Interpretation state passes
-  the milestone's own prohibited-conclusion tests), but "suitable in
-  principle" is explicitly not the same as ready for `crc_eligible: Yes`
-  (FGR_019 §10). A future CRC Publication Review must additionally
-  resolve: whether `CRC-PUBLICATION-POLICY.md` Principle 3's subject-
-  matter gate applies to this AI-content-transparency disclosure
-  obligation (distinct in kind from the likeness/synthetic-performer
-  claims Principle 3 was originally named for -- not pre-judged here);
-  and must not be conducted before a `commercial_use -> ai_content_
-  transparency` TopicRelationship exists (FGR_019 §9/§13 and addendum §7
-  -- substantively justified but not yet authored) and this claim's own
-  applicability/geography activation gaps (see Unresolved project
-  dependencies above) are at minimum explicitly re-confirmed still open,
-  not silently assumed resolved.
+  APPROVED FOR CRC PUBLICATION (2026-09-15, CRC Approver: JD (PM) -- see
+  CRC Approver/CRC Decision Date below). Path: CRC Publication Review #26
+  (governance-reviews/CPR_026_EUAI_ART50_4_AUDIOVISUAL_CRC_PUBLICATION_
+  REVIEW_2026-09-13.md, WITHHOLD on a narrow, non-Principle-3 reach
+  ground) -> Addendum (remedy superseded, generic-applicability
+  architecture direction concurred) -> Addendum 2 (NY Performer Law
+  jurisdiction-gate precedent concurred as an assessment-scope
+  eligibility/relevance gate, never Article 2 applicability evidence) ->
+  a dedicated Principle 3 PM decision dossier -> Addendum 3 (PM Principle
+  3 concurrence recorded; every other Publication Policy principle
+  re-confirmed against the exact staged wording below;
+  governance-reviews/CPR_026_ADDENDUM_3_PRINCIPLE_3_CONCURRENCE_FINAL_REVIEW_2026-09-15.md).
+  **Principle 3 finding (CPR_026 §I, PM/JD-concurred):** this specific
+  governed proposition -- a disclosure/anti-deception mandate that never
+  characterizes, produces, or facilitates deceptive content -- falls
+  outside Principle 3's sensitivity gate, on the basis that publishing a
+  disclosure obligation informs against deception rather than
+  facilitating it. This finding is proposition-specific: it does not hold
+  that Principle 3 is inapplicable to deepfake/likeness-adjacent subject
+  matter generally, and does not make any other deepfake- or
+  likeness-topic claim presumptively CRC-eligible. **Reach finding
+  (CPR_026 §D/§F, resolved):** Applicability requirements above now gates
+  on `jurisdiction equals European Union` -- the NY Performer Law
+  precedent, transferred: this gates assessment-scope eligibility/
+  relevance only, and must never be read as establishing Article
+  2(1)(b)/(c) territorial applicability, which remains represented,
+  unchanged, only by `union_establishment_or_output_use` in Unresolved
+  project dependencies above. CRC may state the disclosure duty, the
+  "deployer" actor term, the law-enforcement exception, and the
+  artistic-work manner-limitation, once the user has stated the European
+  Union as the assessment jurisdiction. CRC must not state or imply, for
+  any reason, including the user merely selecting, stating, or mentioning
+  the European Union as the assessment jurisdiction: that Article 50
+  applies to the user's specific project; that the user (or their
+  organization) is the statutory "deployer"; that the project satisfies
+  Article 2(1)(b)'s establishment test or Article 2(1)(c)'s output-use
+  test (both remain unresolved); that specific content does or does not
+  meet the Article 3(60) "deep fake" definition; that the artistic-work
+  carve-out does or does not apply to specific content; that a real,
+  identifiable person's likeness is separately governed by this Article
+  (a distinct question -- see the New York likeness/synthetic-performer
+  claims for that jurisdiction's own separate authority, never conflated
+  with this one); or that satisfying, or being exempt from, this
+  disclosure duty establishes broader legal compliance, copyright
+  clearance, provider/platform permission, or overall commercial
+  readiness. This is educational workflow guidance, not legal advice or a
+  commercial-readiness determination. A human-reviewed Commercial
+  Assurance Assessment remains the higher-assurance path for resolving
+  the project-specific facts this claim leaves open -- deployer status,
+  actual deep-fake characterization, and genuine Article 2 territorial
+  applicability, each requiring documentary or content-level evidence
+  CRC's conversational self-report cannot supply.
 
 CRC Candidate Statement: >
-  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
-  EU law (Article 50(4) of the AI Act) may require AI-generated or
-  manipulated audiovisual content that constitutes a deep fake to be
-  disclosed as such by whoever deploys it, with a lighter disclosure
-  standard for evidently artistic, creative, satirical, or fictional
-  work.
+  Under Article 50(4), first subparagraph, of Regulation (EU) 2024/1689
+  (the AI Act), a deployer of an AI system that generates or manipulates
+  image, audio, or video content constituting a "deep fake" must disclose
+  that the content has been artificially generated or manipulated. This
+  obligation does not apply where the use is authorised by law to detect,
+  prevent, investigate, or prosecute criminal offences. Where the content
+  forms part of an evidently artistic, creative, satirical, fictional, or
+  analogous work or programme, this disclosure obligation is not removed
+  but is limited to disclosing the existence of such generated or
+  manipulated content in an appropriate manner that does not hamper the
+  display or enjoyment of the work.
 
 Effective date: Regulation (EU) 2024/1689 in force; Article 50(4) confirmed unamended by the enacted Digital Omnibus (Regulation (EU) 2026/1744) as of the evidence captured 2026-09-12.
-Last reviewed: 2026-09-13
+Last reviewed: 2026-09-15 (final CPR_026 re-review, Addendum 3)
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
-Related: [[POS-002]], [[POS-003]] (both already establish SI8's "do not pitch as EU AI Act compliance" position, directly applicable here), [[EC-001]] (Domain H self-attestation caution, structurally analogous to the deployer-identity dependency above). A future `commercial_use -> ai_content_transparency` `TopicRelationship` is substantively justified (FGR_019 §9, addendum §7) but not yet authored -- a separate, later governance step. Not related to `CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1` or `CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1` -- this claim governs AI-content-origin disclosure generally, not any real or synthetic person's likeness/identity (FGR_019 addendum §1 explicitly rejected a "synthetic"-anchored name for this reason).
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-09-15
+Related: [[POS-002]], [[POS-003]] (both already establish SI8's "do not pitch as EU AI Act compliance" position, directly applicable here), [[EC-001]] (Domain H self-attestation caution, structurally analogous to the deployer-identity dependency above). A future `commercial_use -> ai_content_transparency` `TopicRelationship` is substantively justified (FGR_019 §9, addendum §7) but not yet authored -- a separate, later governance step. [Stale as of this same day, 2026-09-13: `REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-v1` was authored later that day (FGR_020) and is now, per the 2026-09-15 Principle 3 PM Concurrence milestone, `crc_eligible: Yes` -- see TOPIC-RELATIONSHIPS.md's own entry. Left uncorrected above per this document's own append-don't-rewrite discipline; noted here rather than silently fixed.] Not related to `CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1` or `CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1` -- this claim governs AI-content-origin disclosure generally, not any real or synthetic person's likeness/identity (FGR_019 addendum §1 explicitly rejected a "synthetic"-anchored name for this reason).
 
 Full Formal Governance Review artifact: `governance-reviews/FGR_019_CAND-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001_2026-09-12.md`
 Full topic-taxonomy recommendation addendum: `governance-reviews/FGR_019_ADDENDUM_TOPIC_TAXONOMY_RECOMMENDATION_2026-09-13.md`

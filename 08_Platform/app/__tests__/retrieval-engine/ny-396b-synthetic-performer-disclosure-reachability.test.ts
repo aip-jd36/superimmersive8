@@ -505,8 +505,8 @@ describe('Copyright (provider_scope: null) claims unaffected by this activation'
 // ── §16: total reachable population sanity ──────────────────────────────────
 
 describe('total fixture population sanity', () => {
-  test('exactly thirty-one Adopted + CRC-eligible claims exist (see topic-claims-fixture-consistency.test.ts for the authoritative, itemized manifest assertion)', () => {
+  test('exactly thirty-two Adopted + CRC-eligible claims exist as of 2026-09-15 (see topic-claims-fixture-consistency.test.ts for the authoritative, itemized manifest assertion -- the 32nd is CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1, activated via the Principle 3 PM Concurrence Recording + Final CPR_026 Re-Review milestone)', () => {
     const live = TOPIC_CLAIMS_FIXTURE.filter((c) => c.lifecycle === 'Adopted' && c.crc_eligible === 'Yes')
-    expect(live).toHaveLength(31)
+    expect(live).toHaveLength(32)
   })
 })

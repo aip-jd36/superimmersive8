@@ -412,13 +412,13 @@ describe('copyright ownership UAT regression: "Do I own the copyright?" now beco
 // ── Other-goal regression (Interview Engine Diagnostic Slice 1, 2026-08-19) ──
 
 describe('other-goal regression: unrelated categories, stock claims, and provider mentions are unaffected', () => {
-  test('commercial_use goal: unaffected by the real relationships fixture -- no commercial_use-sourced relationship exists', () => {
+  test('commercial_use goal: NOW eligible, one hop via REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-v1 -> CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1, both Adopted + CRC-eligible: Yes as of the Principle 3 PM Concurrence Recording + Final CPR_026 Re-Review milestone (2026-09-15) -- this is the intended, governed consequence of that milestone (rule A2, jurisdiction-clarification.ts\'s own one-hop relationship eligibility), not a regression: a bare commercial_use goal with jurisdiction still unresolved can now legitimately prompt CRC to ask which jurisdiction, exactly the mechanism ADR-001 Decision 5 exists for', () => {
     const su = baseSU({
       user_goals: [{ goal_id: 'g-1', state: 'confirmed', raw_text: 'Can I use this commercially?', category: 'commercial_use', scope: 'informational', superseded_by: null, source_turn: 1, source_statement: 'x' }],
     })
     const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, TOPIC_RELATIONSHIPS_FIXTURE)
-    expect(result.needs_jurisdiction).toBe(false)
-    expect(result.eligible).toBe(false)
+    expect(result.needs_jurisdiction).toBe(true)
+    expect(result.eligible).toBe(true)
   })
 
   test('third_party_source_rights goal: unaffected -- no relationship sources from third_party_source_rights, and the real stock claims carry no jurisdiction requirement', () => {
