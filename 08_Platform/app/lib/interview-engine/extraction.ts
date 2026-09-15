@@ -177,6 +177,22 @@ export interface CandidateObservation {
   raw_tool_name?: string
   /** kind === 'tool_mention'; set when this candidate corrects an existing mention */
   supersedes_tool_mention_id?: string
+  /**
+   * kind === 'tool_mention' (Generic Follow-Up Target Reconciliation --
+   * correction repair, 2026-09-15). Internal-only, set exclusively by
+   * resolveToolMentionTarget's own Step 3 (pending-target fallback), never
+   * by the extractor and never true alongside `is_correction`. Exists so
+   * mergeToolMentionFieldsOnSupersession can distinguish "the prior
+   * ToolMention's identity is authoritative for this new record" (Step 3
+   * enrichment, where structural question-target provenance establishes
+   * continuity of the SAME entity) from every other path that can set
+   * `supersedes_tool_mention_id` (an ordinary identity match, or an
+   * explicit correction, where the prior identity is NOT authoritative for
+   * -- and must never be silently inherited by -- the new record). See
+   * resolveToolMentionTarget's own header for the full precedence
+   * contract this flag encodes.
+   */
+  tool_mention_enrichment_authority?: boolean
 
   /**
    * kind === 'asset_provider_mention' (Living Knowledge — Third-Party Source
@@ -1106,22 +1122,45 @@ function resolveAttestedToolField(
  * fields for a target already established to be the same tool.
  *
  * `resolution` preservation (Generic Follow-Up Target Reconciliation,
- * 2026-09-15): Step 1/Step 2's existing supersession targets were always
- * identity-based -- `newMention.resolution` genuinely reflects THIS turn's
- * own confirmed identity, so it has always correctly been the merge's
- * result (unchanged below). Step 3's new pending-target fallback is
- * different in kind: it fires precisely when THIS turn's own candidate
- * identity could NOT be resolved at all (resolveToolMentionTarget's own
- * `thisCanonicalKey === null` guard), so `newMention.resolution` is always
- * `unresolved_alias` there -- it asserts nothing about identity one way or
- * the other, it simply couldn't confirm one from this turn's text alone.
- * Spreading it in unconditionally would silently DOWNGRADE an already-
- * established canonical identity to unresolved merely because a follow-up
- * answer (e.g. a plan-tier reply) didn't restate the tool's name -- a
- * regression this fix exists to prevent. The rule stays generic and
- * conservative: an unresolved new candidate never overrides a canonical
- * prior identity; a canonical new candidate (the ordinary, already-tested
- * Step 1/Step 2 case) is completely unaffected, byte-identical to before.
+ * 2026-09-15; corrected 2026-09-15 after controlled-integration review
+ * found the original shape-based guard unsafe -- see below): Step 1/Step
+ * 2's existing supersession targets are always identity-based --
+ * `newMention.resolution` genuinely reflects THIS turn's own confirmed
+ * identity there, so it is always correctly the merge's result for those
+ * two (unchanged, byte-identical to before this whole milestone). Step
+ * 3's pending-target fallback is different in kind: it fires precisely
+ * when THIS turn's own candidate identity could NOT be resolved at all,
+ * so `newMention.resolution` is always `unresolved_alias` there -- it
+ * asserts nothing about identity one way or the other, it simply
+ * couldn't confirm one from this turn's text alone, and spreading it in
+ * unconditionally would silently DOWNGRADE an already-established
+ * canonical identity to unresolved merely because a follow-up answer
+ * (e.g. a plan-tier reply) didn't restate the tool's name.
+ *
+ * The ORIGINAL fix inferred "this is a Step 3 enrichment" purely from
+ * resolution SHAPE (`newMention` unresolved + `priorMention` canonical).
+ * That inference is UNSOUND: Step 2 (explicit correction) can produce the
+ * identical shape -- a user correcting AWAY from a canonical tool to a
+ * replacement name that itself fails to normalize -- and shape alone
+ * cannot distinguish "the prior identity continues into this record" from
+ * "the prior identity is exactly what the user just said is wrong."
+ * Confirmed live: an is_correction candidate whose own raw_tool_name did
+ * not normalize, correcting away from an active canonical mention, would
+ * have had the OLD canonical identity silently survive onto the
+ * "corrected" record -- never acceptable; explicit user correction is
+ * always authoritative over prior structured identity.
+ *
+ * The fix: consult `candidate.tool_mention_enrichment_authority` directly
+ * -- the explicit signal resolveToolMentionTarget's own Step 3 sets (and
+ * ONLY Step 3 ever sets; see CandidateObservation's own field comment and
+ * resolveToolMentionTarget's own header) -- rather than re-deriving intent
+ * from field shapes after the fact. Preservation now requires BOTH this
+ * explicit authority AND `priorMention.resolution.kind === 'canonical'`
+ * (Step 3 can also target an already-unresolved prior mention, e.g. a
+ * follow-up disambiguating a still-ambiguous tool; there is nothing
+ * meaningful to preserve in that case, so `newMention.resolution` --
+ * unchanged from before this whole milestone -- is used, exactly as for
+ * every candidate this function has ever processed for that shape).
  */
 function mergeToolMentionFieldsOnSupersession(
   newMention: ToolMention,
@@ -1133,7 +1172,7 @@ function mergeToolMentionFieldsOnSupersession(
     candidate.access_surface_confidence_hint !== undefined || (normalization.status === 'resolved' && normalization.access_surface !== undefined)
   const planTierAddressed = candidate.plan_tier_confidence_hint !== undefined
   const accountStatusAddressed = candidate.account_status_confidence_hint !== undefined
-  const resolution = newMention.resolution.kind === 'unresolved_alias' && priorMention.resolution.kind === 'canonical' ? priorMention.resolution : newMention.resolution
+  const resolution = candidate.tool_mention_enrichment_authority && priorMention.resolution.kind === 'canonical' ? priorMention.resolution : newMention.resolution
 
   return {
     ...newMention,
@@ -1582,9 +1621,30 @@ function resolveUserGoalTarget(candidate: CandidateObservation, su: StructuredUn
  * Returns undefined for CREATE (no matching existing tool -- a genuinely
  * new one, or an ambiguous alias that stays unresolved, exactly as
  * normalizeCandidate already decides) or ATTACH/CORRECT (the mention_id to
- * supersede). The caller mints the actual replacement id; this function
- * never does, and never relies on proposal_id uniqueness to make its own
- * decision -- it only reads existing, already-persistent mention_ids.
+ * supersede, plus `enrichment_authority`). The caller mints the actual
+ * replacement id; this function never does, and never relies on
+ * proposal_id uniqueness to make its own decision -- it only reads
+ * existing, already-persistent mention_ids.
+ *
+ * `enrichment_authority` (Generic Follow-Up Target Reconciliation --
+ * correction repair, 2026-09-15): `true` ONLY for a Step 3 result; `false`
+ * for every other path (the pre-set `candidate.supersedes_tool_mention_id`
+ * escape hatch, Step 1's identity match, and Step 2's correction match).
+ * This is the explicit signal `mergeToolMentionFieldsOnSupersession`
+ * consumes to decide whether the prior ToolMention's `resolution` is
+ * authoritative for the new record -- see that function's own header for
+ * why inferring this from resolution SHAPE alone (canonical prior +
+ * unresolved new) was unsound: Step 2 can produce that exact same shape
+ * for a genuine correction (the user names a replacement tool that itself
+ * fails to normalize), where the prior's canonical identity is precisely
+ * what the user is correcting AWAY from, never something to preserve.
+ * `false` is the safe default for every path this function did not
+ * itself just prove is Step 3 -- including the pre-set escape hatch,
+ * which is unreachable from real extractor output (the model is never
+ * asked to set `supersedes_tool_mention_id` -- see this header's own
+ * opening paragraph) but is given no special authority here regardless,
+ * since nothing establishes that a caller-supplied id represents the
+ * SAME kind of structurally-tracked continuity Step 3 provides.
  *
  * STEP 3 -- pending-target fallback (Generic Follow-Up Target Reconciliation,
  * 2026-09-15). Only reached when Step 1 found ZERO identity matches (not
@@ -1605,14 +1665,19 @@ function resolveUserGoalTarget(candidate: CandidateObservation, su: StructuredUn
  * reached at all, so a genuinely new, independently-resolved tool can never
  * be collapsed into a stale pending target.
  */
+interface ToolMentionTargetResolution {
+  mention_id: string
+  enrichment_authority: boolean
+}
+
 function resolveToolMentionTarget(
   candidate: CandidateObservation,
   su: StructuredUnderstanding,
   retractedThisTurn: ReadonlySet<string>,
   pendingClarification?: PendingClarification | null,
-): string | undefined {
+): ToolMentionTargetResolution | undefined {
   if (candidate.kind !== 'tool_mention') return undefined
-  if (candidate.supersedes_tool_mention_id) return candidate.supersedes_tool_mention_id
+  if (candidate.supersedes_tool_mention_id) return { mention_id: candidate.supersedes_tool_mention_id, enrichment_authority: false }
 
   const active = su.tool_mentions.filter((m) => m.superseded_by === null)
   const label = (m: ToolMention) => (m.resolution.kind === 'canonical' ? m.resolution.identifier : m.resolution.raw_name).toLowerCase()
@@ -1626,7 +1691,7 @@ function resolveToolMentionTarget(
     if (rawToolName && m.resolution.kind === 'unresolved_alias' && m.resolution.raw_name.trim().toLowerCase() === rawToolName) return true
     return false
   })
-  if (identityMatches.length === 1) return identityMatches[0].mention_id
+  if (identityMatches.length === 1) return { mention_id: identityMatches[0].mention_id, enrichment_authority: false }
   if (identityMatches.length > 1) return undefined // ambiguous -- never guess, fall through to create
 
   // Step 2: is_correction-flagged retraction of a different tool.
@@ -1639,7 +1704,8 @@ function resolveToolMentionTarget(
     // or known_ambiguous), so there is no independently-resolved identity
     // for the pending target to compete with or override.
     if (thisCanonicalKey === null) {
-      return resolvePendingToolMentionTarget(pendingClarification, su)
+      const pendingTarget = resolvePendingToolMentionTarget(pendingClarification, su)
+      return pendingTarget ? { mention_id: pendingTarget, enrichment_authority: true } : undefined
     }
     return undefined
   }
@@ -1647,13 +1713,13 @@ function resolveToolMentionTarget(
   const needle = (candidate.correction_of_raw_text ?? '').toLowerCase()
   if (needle) {
     const textMatches = active.filter((m) => needle.includes(label(m)))
-    if (textMatches.length === 1) return textMatches[0].mention_id
+    if (textMatches.length === 1) return { mention_id: textMatches[0].mention_id, enrichment_authority: false }
   }
 
   if (retractedThisTurn.has(rawToolName)) return undefined
 
   const otherActive = active.filter((m) => label(m) !== rawToolName)
-  if (otherActive.length === 1) return otherActive[0].mention_id
+  if (otherActive.length === 1) return { mention_id: otherActive[0].mention_id, enrichment_authority: false }
 
   return undefined
 }
@@ -1990,14 +2056,14 @@ export async function runExtractionPipeline(
     // mention type (no count/identity/scope is tracked), so every
     // content_presence_mention candidate always falls through to a plain
     // addition below, regardless of is_correction/correction_of_raw_text.
-    const supersedesToolId = resolveToolMentionTarget(rawCandidate, current, retractedThisTurn, turn.pending_clarification)
+    const toolTarget = resolveToolMentionTarget(rawCandidate, current, retractedThisTurn, turn.pending_clarification)
     const supersedesGoalId = resolveUserGoalTarget(rawCandidate, current)
     const supersedesProviderId = resolveAssetProviderMentionTarget(rawCandidate, current, retractedProvidersThisTurn)
     const supersedesJurisdictionId = resolveAssessmentJurisdictionMentionTarget(rawCandidate, current)
     const supersedesTerritoryId = resolveDistributionTerritoryMentionTarget(rawCandidate, current)
     const supersedesOrgLocationId = resolveOrganizationLocationMentionTarget(rawCandidate, current)
-    const candidate = supersedesToolId
-      ? { ...rawCandidate, supersedes_tool_mention_id: supersedesToolId }
+    const candidate = toolTarget
+      ? { ...rawCandidate, supersedes_tool_mention_id: toolTarget.mention_id, tool_mention_enrichment_authority: toolTarget.enrichment_authority }
       : supersedesGoalId
         ? { ...rawCandidate, supersedes_goal_id: supersedesGoalId }
         : supersedesProviderId

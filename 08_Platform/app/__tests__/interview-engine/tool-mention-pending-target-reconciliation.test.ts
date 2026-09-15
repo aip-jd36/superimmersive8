@@ -208,6 +208,41 @@ describe('ToolMention pending-target reconciliation', () => {
     expect(updated.tool_mentions.find((m) => m.mention_id === 'tm-1')?.superseded_by).not.toBeNull()
   })
 
+  test('4b. MANDATORY REGRESSION (controlled-integration HOLD finding): explicit correction away from a canonical tool, to a replacement name that itself fails to normalize -- the old canonical identity MUST NOT survive onto the "corrected" record', async () => {
+    const su = baseSU({ tool_mentions: [canonicalRunwayMention()] })
+    // No pending_clarification at all -- this must be denied purely on
+    // explicit-correction grounds, never merely because no pending target
+    // happens to be present.
+    const candidates: CandidateObservation[] = [
+      {
+        proposal_id: 'c-correction-unresolved',
+        turn: 7,
+        raw_text: 'Actually it was not Runway, it was some other tool I do not remember the name of.',
+        kind: 'tool_mention',
+        raw_tool_name: 'SomeCompletelyUnrecognizedToolName999',
+        is_correction: true,
+        correction_of_raw_text: 'Runway',
+      },
+    ]
+
+    const { updated } = await runExtractionPipeline(
+      su,
+      turn({ text: 'Actually it was not Runway, it was some other tool I do not remember the name of.' }),
+      constantExtractor(candidates),
+    )
+
+    const active = updated.tool_mentions.filter((m) => m.superseded_by === null)
+    expect(active).toHaveLength(1)
+    // The new active record must be unresolved for the REPLACEMENT raw
+    // name -- honest uncertainty, not a silent inheritance of Runway's
+    // own canonical identity.
+    expect(active[0].resolution).toEqual({ kind: 'unresolved_alias', raw_name: 'SomeCompletelyUnrecognizedToolName999' })
+    expect(active[0].resolution.kind).not.toBe('canonical')
+    // Correction lineage intact: the old Runway record is superseded, not
+    // left dangling or silently reused.
+    expect(updated.tool_mentions.find((m) => m.mention_id === 'tm-1')?.superseded_by).toBe(active[0].mention_id)
+  })
+
   test('5. explicit addition of a genuinely distinct second tool remains independently addable -- pending target (Runway) is untouched, Pika is added fresh', async () => {
     const su = baseSU({ tool_mentions: [canonicalRunwayMention()] })
     const pending = pendingRunwayClarification()
