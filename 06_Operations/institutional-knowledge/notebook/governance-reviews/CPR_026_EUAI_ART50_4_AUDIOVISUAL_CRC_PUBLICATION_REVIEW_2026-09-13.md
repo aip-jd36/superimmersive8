@@ -16,6 +16,8 @@ Historical status: VERBATIM ARCHIVE — DO NOT EDIT HISTORICAL BODY once a PM de
 
 Addendum (2026-09-13): `CPR_026_ADDENDUM_REMEDY_SUPERSESSION_2026-09-13.md` records that this review's own §F/§W proposed remedy (`jurisdiction == "European Union"`) has been superseded by subsequent generic-applicability architecture analysis and PM concurrence (`ADR-001-generic-applicability-architecture.md`). This review's own WITHHOLD disposition and safety finding (§F/§U) remain fully authoritative and unchanged; see the addendum for the full supersession record.
 
+Addendum 2 (2026-09-15): `CPR_026_ADDENDUM_2_NY_JURISDICTION_GATE_REREVIEW_CANDIDATE_2026-09-15.md` records that PM Architecture subsequently concurred (following an NY Performer Law precedent diagnostic) that the §F/§W jurisdiction gate, superseded above as Article-2-applicability EVIDENCE, is nonetheless valid as a pure assessment-scope ELIGIBILITY/RELEVANCE gate — the same distinction the NY Performer Law claim (`CPR_025`) already uses in production. A bounded fixture edit implementing this distinction, plus empirical retrieval and Bounded-Interpretation-ceiling canaries, has been authored and locally committed on a dedicated branch (NOT merged to main). This review's own WITHHOLD disposition (§U/§V) remains fully authoritative and unchanged — `crc_eligible` remains `Pending` for both objects, Article 50 onboarding remains PAUSED, and the Principle 3 finding (§I) still requires its own separate, explicit PM confirmation before any future publication decision. See the addendum for the full re-review-candidate record.
+
 --- BEGIN VERBATIM CRC PUBLICATION REVIEW ---
 
 # EU AI Act Article 50(4) Audiovisual/Deepfake Disclosure — CRC Publication Review Final Report

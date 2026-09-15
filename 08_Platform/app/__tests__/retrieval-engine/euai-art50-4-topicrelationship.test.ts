@@ -23,7 +23,10 @@ import { retrieve } from '@/lib/retrieval-engine/retrieve'
 import { lookupRelatedTopicClaims, relationshipIsAdoptedAndCrcEligible } from '@/lib/retrieval-engine/lookup-topic-relationships'
 import { deriveClaimTargetedDiscoveryOccurrences, deriveDiscoveredTopicOccurrences } from '@/lib/crc-engine/discovered-relevance'
 import { deriveKnowledgeReadinessNeeds } from '@/lib/crc-engine/knowledge-readiness'
+import { getAskabilityEntry } from '@/lib/crc-engine/dependency-askability'
 import { createInitialBoundaryState } from '@/lib/interview-engine/boundaries'
+import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
+import { userGoalsToBiIntents } from '@/lib/bounded-interpretation/adapters'
 import { GOAL_CATEGORIES, type GoalCategory, type RetrievalHandoff, type StructuredUnderstanding, type UserGoal } from '@/types/interview-engine'
 import type { TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
 
@@ -123,7 +126,12 @@ describe('REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-v1 -- production TopicRelat
     const c = targetClaim()
     expect(c.lifecycle).toBe('Adopted')
     expect(c.crc_eligible).toBe('Pending')
-    expect(c.applicability_requirements).toEqual([])
+    // Bounded Fixture Governance Authoring milestone (2026-09-15): NY
+    // precedent jurisdiction gate now authored -- see
+    // euai-art50-4-topicclaim.test.ts test B for the full assertion; this
+    // relationship's own gate (crc_eligible: Pending) remains the reason
+    // this test's other assertions (G/H below) still exclude the claim.
+    expect(c.applicability_requirements).toEqual([{ fact: 'jurisdiction', operator: 'equals', value: 'European Union' }])
     expect(c.geographic_relevance_scope).toBeUndefined()
   })
 
@@ -287,14 +295,142 @@ describe('REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-v1 -- production TopicRelat
       expect(result.matches).toEqual([])
     })
 
-    test('sanity check: BOTH synthetically eligible together DOES retrieve -- confirms tests 1-3 fail closed for the right reason (a real gate), not because the lookup is broken', () => {
+    test('sanity check: BOTH synthetically eligible together, WITH the EU jurisdiction gate satisfied, DOES retrieve -- confirms tests 1-3 fail closed for the right reason (a real gate), not because the lookup is broken', () => {
+      // Bounded Fixture Governance Authoring milestone (2026-09-15): the
+      // target claim now carries applicability_requirements (the NY-
+      // precedent EU jurisdiction gate), so this sanity check must supply
+      // matching jurisdiction facts -- an empty-facts scenario would now
+      // fail closed on applicability alone (`unresolved`, isApplicable
+      // false), no longer isolating the double-gate mechanism this test
+      // exists to prove. See the dedicated jurisdiction-gate canary
+      // describe block below for the applicability dimension itself.
       const result = lookupRelatedTopicClaims(
         [goal()],
         [syntheticEligibleRelationship],
         [...TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id !== CLAIM_ID), syntheticEligibleClaim],
-        { jurisdiction: { included: [], excluded: [] }, toolMentions: [] },
+        { jurisdiction: { included: ['European Union'], excluded: [] }, toolMentions: [] },
       )
       expect(result.matches.map((m) => m.claim.claim_id)).toContain(CLAIM_ID)
+    })
+  })
+
+  /**
+   * Jurisdiction-gate canary (Bounded Fixture Governance Authoring
+   * milestone, 2026-09-15; CPR_026 Remedy Reconsideration concurrence).
+   * Proves, through the REAL, unmodified production pipeline
+   * (`retrieve()` -> `buildBoundedInterpretations()`), that the NY-
+   * precedent jurisdiction gate authored on the target claim (test B/F
+   * above) behaves exactly as CPR_025 §V (canary tests 3 & 6) proved for
+   * the real NY claim: gates ELIGIBILITY/RELEVANCE only, never lets
+   * Bounded Interpretation reach `directly_relevant`, and leaves
+   * `union_establishment_or_output_use` permanently, structurally
+   * unresolved. Uses the SAME synthetic-clone technique as the double-gate
+   * proof above (never the packaged `synthetic-eligibility-canary.ts`
+   * harness, which has no `topicRelationships` parameter and so cannot
+   * exercise this claim's only reach path) -- isolated `crc_eligible: 'Yes'`
+   * overrides on structuredClone'd copies, the real fixture arrays never
+   * mutated. Production `crc_eligible` remains `Pending` throughout this
+   * entire describe block (test A/F above already prove this) -- this
+   * canary exists to validate runtime READINESS for a future CPR_026
+   * re-review, never to activate Article 50 itself.
+   */
+  describe('jurisdiction-gate canary -- synthetic clones only, production eligibility never changed', () => {
+    const syntheticClaim: TopicClaim = structuredClone({
+      ...targetClaim(),
+      crc_eligible: 'Yes',
+    })
+    const syntheticRelationship: TopicRelationship = structuredClone({
+      ...relationship(),
+      crc_eligible: 'Yes',
+      crc_approver: 'SYNTHETIC TEST',
+      crc_decision_date: '2026-09-13',
+    })
+    // Deliberately isolated -- unlike the double-gate proof above (which
+    // exercises the real, unmodified commercial_use claim population as
+    // background), this canary supplies ONLY the synthetic Article 50
+    // claim/relationship so `buildBoundedInterpretations`'s one resulting
+    // `commercial_use` BoundedInterpretation is driven entirely by this
+    // claim's own retrieval outcome -- no mixed-resolution aggregation
+    // from unrelated real commercial_use claims to reason about or risk
+    // masking a regression behind.
+    const claims = [syntheticClaim]
+    const relationships = [syntheticRelationship]
+
+    function run(jurisdictionIncluded: string[], jurisdictionExcluded: string[] = []) {
+      const out = retrieve(
+        handoff(),
+        [],
+        [goal()],
+        claims,
+        { jurisdiction: { included: jurisdictionIncluded, excluded: jurisdictionExcluded }, toolMentions: [] },
+        relationships,
+      )
+      const interpretations = buildBoundedInterpretations(userGoalsToBiIntents([goal()]), out.results, out.diagnostics, { state: 'unknown' })
+      return { out, interpretations }
+    }
+
+    test('CASE A: assessment jurisdiction = European Union -- claim passes the gate and is retrieved', () => {
+      const { out } = run(['European Union'])
+      expect(out.results.map((r) => r.claim_id)).toContain(CLAIM_ID)
+    })
+
+    test('CASE B: assessment jurisdiction = New York -- claim does NOT survive the EU jurisdiction gate', () => {
+      const { out } = run(['New York'])
+      expect(out.results.map((r) => r.claim_id)).not.toContain(CLAIM_ID)
+    })
+
+    test('CASE C: assessment jurisdiction = California -- same exclusion', () => {
+      const { out } = run(['California'])
+      expect(out.results.map((r) => r.claim_id)).not.toContain(CLAIM_ID)
+    })
+
+    test('CASE D: assessment jurisdiction unresolved/absent -- Article 50 does not surface through ordinary CRC retrieval (fail-closed, never guessed)', () => {
+      const { out } = run([])
+      expect(out.results.map((r) => r.claim_id)).not.toContain(CLAIM_ID)
+    })
+
+    test('CASE E (global-reach test): a generic commercial_use conversation with no EU assessment jurisdiction never surfaces Article 50 -- this is CPR_026\'s §D/§F reach problem, now resolved for this bounded scope', () => {
+      const { out } = run(['United States'])
+      expect(out.results.map((r) => r.claim_id)).not.toContain(CLAIM_ID)
+    })
+
+    test('HARD BI TEST: with the jurisdiction gate MET (EU), the aggregate BI status is relevant_applicability_unresolved -- NEVER directly_relevant -- because union_establishment_or_output_use forces the hedge independently of the gate', () => {
+      const { out, interpretations } = run(['European Union'])
+      const result = out.results.find((r) => r.claim_id === CLAIM_ID)
+      expect(result).toBeDefined()
+      // The gate itself is met -- confirmed independently, not assumed:
+      // no applicability_unmet diagnostic was raised for this goal.
+      expect(out.diagnostics.some((d) => d.reason === 'applicability_unmet')).toBe(false)
+      // Isolated scenario (only the synthetic Article 50 claim/relationship
+      // are supplied) -- exactly one BoundedInterpretation, for the single
+      // commercial_use goal, driven entirely by this claim.
+      expect(interpretations).toHaveLength(1)
+      expect(interpretations[0].status).not.toBe('directly_relevant')
+      expect(interpretations[0].status).toBe('relevant_applicability_unresolved')
+    })
+
+    test('DEPENDENCY CANARY: union_establishment_or_output_use remains present, unresolved, and unresolved_project_dependencies is passed through unmodified regardless of jurisdiction gate outcome', () => {
+      const { out } = run(['European Union'])
+      const result = out.results.find((r) => r.claim_id === CLAIM_ID)
+      expect(result?.unresolved_project_dependencies).toEqual([
+        'deployer_status_confirmed',
+        'content_constitutes_deep_fake',
+        'artistic_creative_satirical_fictional_analogous_work',
+        'union_establishment_or_output_use',
+      ])
+      // Not converted into a SelectorNeed / askability entry by anything this canary exercises.
+      expect(getAskabilityEntry('union_establishment_or_output_use')).toBeUndefined()
+      // Not satisfiable by DistributionTerritoryMention or OrganizationLocationMention -- neither
+      // fact is consumed anywhere in this pipeline; only AssessmentJurisdictionMention (via the
+      // `jurisdiction` ApplicabilityFact) is read by isApplicable for this claim's own gate.
+    })
+
+    test('original production fixtures are never mutated by this canary', () => {
+      const beforeClaim = JSON.parse(JSON.stringify(targetClaim()))
+      const beforeRel = JSON.parse(JSON.stringify(relationship()))
+      run(['European Union'])
+      expect(targetClaim()).toEqual(beforeClaim)
+      expect(relationship()).toEqual(beforeRel)
     })
   })
 })

@@ -338,12 +338,25 @@ describe('zero questioning/askability effect (Step 10)', () => {
 })
 
 describe('Article 50 remains fully dormant (Step 8/9/10, re-confirmed against the real production fixtures)', () => {
-  test('the real Article 50 TopicClaim is unaffected: still Adopted, still crc_eligible Pending, applicability_requirements still empty', () => {
+  test('the real Article 50 TopicClaim is unaffected by THIS milestone: still Adopted, still crc_eligible Pending', () => {
+    // Bounded Fixture Governance Authoring milestone (2026-09-15, CPR_026
+    // Remedy Reconsideration concurrence) subsequently authored a NY-
+    // precedent jurisdiction gate on this claim's own
+    // applicability_requirements -- unrelated to, and not reopened by,
+    // this OrganizationLocationMention capture-only milestone's own
+    // dormancy guard (this claim's own crc_eligible remains Pending,
+    // which is what "dormant" means here; see
+    // euai-art50-4-topicclaim.test.ts test B for the current value's own
+    // assertion and rationale).
     const claim = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === ART50_CLAIM_ID)!
     expect(claim.lifecycle).toBe('Adopted')
     expect(claim.crc_eligible).toBe('Pending')
-    expect(claim.applicability_requirements).toEqual([])
     expect(claim.geographic_relevance_scope).toBeUndefined()
+  })
+
+  test('the real Article 50 TopicClaim\'s applicability_requirements is the NY-precedent jurisdiction gate only -- this milestone\'s own capture-only fact never became an ApplicabilityFact via any later change (organization_location is not a member of the ApplicabilityFact union at all, enforced at compile time)', () => {
+    const claim = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === ART50_CLAIM_ID)!
+    expect(claim.applicability_requirements).toEqual([{ fact: 'jurisdiction', operator: 'equals', value: 'European Union' }])
   })
 
   test('the real Article 50 TopicRelationship is unaffected: still Adopted, still crc_eligible Pending', () => {

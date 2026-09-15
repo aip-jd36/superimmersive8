@@ -208,6 +208,16 @@
  * See GOVERNED-CLAIMS.md's own Wave 9 entry and `governance-reviews/
  * FGR_019_CAND-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001_2026-09-12.md`
  * for the full governance record this entry mirrors.
+ *
+ * [UPDATE, Bounded Fixture Governance Authoring milestone, 2026-09-15]:
+ * the `applicability_requirements: []` description above describes this
+ * claim's state as of its original authoring, no longer current -- see
+ * the claim's own inline comments below for the NY-precedent jurisdiction
+ * gate now authored (CPR_026 Remedy Reconsideration concurrence).
+ * `union_establishment_or_output_use` remains, unchanged, the sole
+ * representation of Article 2(1)(b)/(c)'s own substantive test. Still
+ * `crc_eligible: 'Pending'` -- this milestone stages a CPR_026 re-review
+ * candidate; it does not decide or imply CRC Publication.
  */
 
 import type { TopicClaim } from './types'
@@ -1429,26 +1439,50 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     jurisdiction: 'European Union',
     lifecycle: 'Adopted',
     crc_eligible: 'Pending',
-    // No scope authored yet -- GOVERNED-CLAIMS.md's own "CRC Publication
-    // Scope" field for this claim contains only meta-commentary that no CRC
-    // Publication Review has occurred, not an authored scope rule. See this
-    // file's own header comment for the full reasoning.
-    crc_publication_scope: null,
-    // GOVERNED-CLAIMS.md carries a bracketed "[DRAFT -- pending CRC
-    // Publication Review; not yet approved for CRC use]" candidate
-    // statement for this claim -- deliberately left null here rather than
-    // carrying unapproved draft prose into a production field whose
-    // convention is to hold real, governed CRC-facing text. See this file's
-    // own header comment.
-    crc_candidate_statement: null,
-    // Deliberately none authored -- FGR_019 §6/§13 confirmed no currently-
-    // implemented ApplicabilityFact can soundly represent Article
-    // 2(1)(b)/(c)'s establishment/output-use test without conflating two
-    // independently-sufficient statutory conditions, and
-    // JURISDICTION_VALUE_ALIASES has zero EU-related entries. Represented
-    // instead as the union_establishment_or_output_use unresolved
-    // dependency below.
-    applicability_requirements: [],
+    // Bounded Fixture Governance Authoring milestone (2026-09-15,
+    // CPR_026 Remedy Reconsideration concurrence). NOT a CRC Publication
+    // Review and does NOT change crc_eligible (still 'Pending' below) --
+    // this text is staged for the future CPR_026 re-review candidate this
+    // milestone prepares, per PM concurrence that the NY Performer Law
+    // precedent (CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1, CPR_025)
+    // transfers: a stated assessment jurisdiction may gate WHICH governed
+    // knowledge is eligible/relevant to discuss, but must never be read as
+    // establishing that the underlying statute territorially applies.
+    // Wording follows CPR_025 §S/§T's own bounded-wording shape and
+    // CPR_026 §J's draft, strengthened with CPR_025's own explicit "even
+    // merely mentioning" disclaimer (the terminology-clarity finding from
+    // the concurrence diagnostic). Remains inert while crc_eligible stays
+    // 'Pending' -- the double gate (lifecycle==='Adopted' &&
+    // crc_eligible==='Yes') means neither field can reach a real CRC user
+    // regardless of this text's content.
+    crc_publication_scope:
+      "CRC may state that EU Regulation (EU) 2024/1689 (the AI Act), Article 50(4), first subparagraph, imposes a disclosure duty on deployers of AI systems whose output constitutes a \"deep fake,\" subject to the law-enforcement exception and the artistic/creative/satirical/fictional/analogous-work manner-limitation described in the candidate statement, and that this is EU statutory law, not SI8's own policy. The user asking CRC to consider the European Union as the assessment jurisdiction permits this EU-specific governed knowledge to be brought into the conversation as potentially relevant to discuss -- it does NOT establish that Regulation (EU) 2024/1689 territorially applies to the user's project. CRC must not state or imply, for any reason, including the user merely selecting, stating, or mentioning the European Union as the assessment jurisdiction: that Article 50 applies to the user's specific project; that the user (or their organization) is the statutory \"deployer\"; that the project satisfies Article 2(1)(b)'s establishment test or Article 2(1)(c)'s output-use test (both remain unresolved -- see union_establishment_or_output_use below); that specific content does or does not meet the Article 3(60) \"deep fake\" definition; that the artistic-work carve-out does or does not apply to specific content; that a real, identifiable person's likeness is separately governed by this Article (that subject is a distinct question -- see the New York likeness/synthetic-performer claims for that jurisdiction's own separate authority, never conflated with this one); or that satisfying, or being exempt from, this disclosure duty establishes broader legal compliance, copyright clearance, provider/platform permission, or overall commercial readiness. This is educational workflow guidance, not legal advice or a commercial-readiness determination. A human-reviewed Commercial Assurance Assessment remains the higher-assurance path for resolving the project-specific facts this claim leaves open -- deployer status, actual deep-fake characterization, and genuine Article 2 territorial applicability, each requiring documentary or content-level evidence CRC's conversational self-report cannot supply.",
+    // FGR_019 §2's clause-by-clause corrected wording, verbatim -- no
+    // strengthening, simplification, or reconstruction applied here.
+    crc_candidate_statement:
+      "The EU AI Act (Regulation (EU) 2024/1689), Article 50(4), first subparagraph, requires a deployer of an AI system that generates or manipulates image, audio, or video content constituting a \"deep fake\" to disclose that the content has been artificially generated or manipulated. This obligation does not apply where the use is authorised by law to detect, prevent, investigate, or prosecute criminal offences. Where the content forms part of an evidently artistic, creative, satirical, fictional, or analogous work or programme, this disclosure obligation is not removed but is limited to disclosing the existence of such generated or manipulated content in an appropriate manner that does not hamper the display or enjoyment of the work.",
+    // Bounded Fixture Governance Authoring milestone (2026-09-15): the NY
+    // precedent (CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1,
+    // applicability_requirements: [{fact:'jurisdiction', equals, 'New
+    // York'}]) is concurred as transferable -- assessment jurisdiction may
+    // gate ELIGIBILITY/RELEVANCE for this EU-specific governed knowledge,
+    // never as evidence that Article 2(1)(b)/(c) territorial applicability
+    // is established. That substantive statutory question remains
+    // represented, unchanged, ONLY by union_establishment_or_output_use
+    // below (FGR_019 §6/§13's own finding stands: no currently-implemented
+    // ApplicabilityFact can soundly represent Article 2(1)(b)/(c) itself
+    // without conflating two independently-sufficient statutory
+    // conditions). JURISDICTION_VALUE_ALIASES has zero EU-related entries
+    // today, so this gate under-fires (misses "France"/"Germany"-phrased
+    // statements) rather than over-fires -- the accepted, safer-direction
+    // trade-off already precedented for NY and named in ADR-001 §Y.
+    // union_establishment_or_output_use's own non-empty presence in
+    // unresolved_project_dependencies (unchanged below) structurally caps
+    // Bounded Interpretation at relevant_applicability_unresolved
+    // regardless of this gate's own status -- proven for NY by CPR_025 §V
+    // (canary tests 3 & 6) and re-proven for this claim by this
+    // milestone's own canary tests.
+    applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'European Union' }],
     unresolved_project_dependencies: [
       'deployer_status_confirmed',
       'content_constitutes_deep_fake',

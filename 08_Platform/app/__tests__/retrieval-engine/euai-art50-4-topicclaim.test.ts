@@ -97,7 +97,13 @@ describe('CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1 -- productio
     const c = claim()
     expect(c.claim_character).toBe('established')
     expect(c.jurisdiction).toBe('European Union')
-    expect(c.applicability_requirements).toEqual([])
+    // Bounded Fixture Governance Authoring milestone (2026-09-15, CPR_026
+    // Remedy Reconsideration concurrence): the NY precedent's jurisdiction
+    // gate, transferred -- see the fixture's own inline comment for why
+    // this is eligibility/relevance gating, never Article 2 applicability
+    // evidence. union_establishment_or_output_use (below) remains the
+    // sole carrier of the actual statutory question.
+    expect(c.applicability_requirements).toEqual([{ fact: 'jurisdiction', operator: 'equals', value: 'European Union' }])
     expect(c.unresolved_project_dependencies).toEqual([
       'deployer_status_confirmed',
       'content_constitutes_deep_fake',
@@ -113,10 +119,17 @@ describe('CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1 -- productio
     expect(c.geographic_relevance_scope).toBeUndefined()
   })
 
-  test('B2. crc_publication_scope/crc_candidate_statement are null -- no CRC Publication Review has occurred, and the markdown\'s own candidate statement is an explicitly unapproved DRAFT, never carried into this production field', () => {
+  test('B2. crc_publication_scope/crc_candidate_statement are now authored (Bounded Fixture Governance Authoring milestone, 2026-09-15) but this is NOT a CRC Publication Review -- crc_eligible remains Pending (test A) so neither field can reach a real CRC user', () => {
     const c = claim()
-    expect(c.crc_publication_scope).toBeNull()
-    expect(c.crc_candidate_statement).toBeNull()
+    expect(c.crc_publication_scope).not.toBeNull()
+    expect(c.crc_candidate_statement).not.toBeNull()
+    // The T-finding terminology clarification (CPR_026 Remedy
+    // Reconsideration concurrence): must explicitly disclaim jurisdiction-
+    // attachment even from mere mention, mirroring CPR_025's own NY wording.
+    expect(c.crc_publication_scope).toMatch(/even.*merely.*mentioning|including the user merely (selecting|stating|mentioning)/i)
+    expect(c.crc_publication_scope).toMatch(/does NOT establish that Regulation \(EU\) 2024\/1689 territorially applies/i)
+    expect(c.crc_publication_scope).toMatch(/must not state or imply.*that the user.*is the statutory "deployer"/i)
+    expect(c.crc_publication_scope).toMatch(/Article 2\(1\)\(b\).*establishment.*Article 2\(1\)\(c\).*output-use.*remain unresolved/i)
   })
 
   test('C. any TopicRelationship targeting ai_content_transparency in the production fixture remains crc_eligible: Pending -- never Yes, i.e. never CRC-active through a relationship', () => {
@@ -149,7 +162,7 @@ describe('CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1 -- productio
       })
     }
 
-    test('lookupTopicClaims: even with EU-flavored jurisdiction/territory facts attested, commercial_use never returns this claim (no formal gate exists to satisfy in the first place -- crc_eligible: Pending is the controlling gate)', () => {
+    test('lookupTopicClaims: even with EU-flavored jurisdiction/territory facts attested, commercial_use never returns this claim (this claim is knowledge-only -- ai_content_transparency is not a GoalCategory, so it is structurally unreachable via lookupTopicClaims\'s exact-topic path regardless of applicability_requirements or crc_eligible; the newly-authored jurisdiction gate, per test B above, has no bearing on this exact-topic path at all -- see euai-art50-4-topicrelationship.test.ts and the jurisdiction-gate canary for the relationship path this gate actually governs)', () => {
       const result = lookupTopicClaims(
         [goal({ category: 'commercial_use' })],
         TOPIC_CLAIMS_FIXTURE,
