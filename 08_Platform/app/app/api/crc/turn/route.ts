@@ -65,6 +65,7 @@ import { classifyTraffic, shouldApplyRateLimiting } from '@/lib/crc-engine/traff
 import { checkSessionCreationRate, checkBurst, checkTurnCeiling, logRateLimitedEvent } from '@/lib/crc-engine/abuse-prevention'
 import { getRuntimeCommit, getModelConfig } from '@/lib/crc-engine/runtime-metadata'
 import { buildCompleteResponseFields } from '@/lib/crc-engine/complete-response'
+import { recordCrcCompletionTrace } from '@/lib/crc-engine/turn-traces'
 import { deliverCrcResultsEmail } from '@/lib/crc-engine/results-email-delivery'
 import { getResultsEmailErrorMessage, type ResultsEmailClaimReason } from '@/lib/crc-engine/results-gate-copy'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
@@ -260,6 +261,18 @@ export async function POST(request: NextRequest) {
   let existingAttributionToken: string | undefined
   let existingEmail: string | null | undefined
   let existingCreatedAt: string | undefined
+  // CRC-PILOT-OBS-3: true only when this EXISTING session's own Interview-
+  // Engine-level completion_reason was already non-null BEFORE this turn
+  // ran -- i.e. runTurn()'s own "a completed session never re-enters the
+  // loop" §7 recovery guard (run-turn.ts) is what will produce THIS turn's
+  // `outcome.kind === 'complete'`, not a genuine new completion. A
+  // brand-new session (isNewSession) can never have been complete before
+  // its own first turn, so this stays false for that branch unconditionally
+  // -- never set inside the `if (isNewSession)` branch below. Read BEFORE
+  // runTurn() is called (not re-derived from `outcome` after), since
+  // `outcome.kind === 'complete'` is structurally identical for a genuine
+  // completion and a recomputation -- see turn-traces.ts's own header.
+  let wasAlreadyComplete = false
 
   if (isNewSession) {
     // No token supplied at all, or the user explicitly asked to restart --
@@ -289,6 +302,7 @@ export async function POST(request: NextRequest) {
     existingAttributionToken = productState?.attribution_token ?? undefined
     existingEmail = productState?.email ?? undefined
     existingCreatedAt = productState?.created_at
+    wasAlreadyComplete = engineState.structured_understanding.completion_reason !== null
 
     // Already finalized at the PRODUCT layer (the hard turn ceiling was
     // already hit on a prior request) -- deliberately kept separate from
@@ -379,6 +393,17 @@ export async function POST(request: NextRequest) {
           console.error('[api/crc/turn] saveCrcSessionProductStop (conversation_limit_reached) failed', err)
         }
         const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+        // CRC-PILOT-OBS-3: the product-layer turn-ceiling stop is a genuine
+        // first completion in its own right (distinct from, and guarded
+        // the same one-time way as, Interview-Engine-level completion --
+        // see this route's own product_stop_reason early-return check
+        // above, which this branch can only be reached without having
+        // already hit). Best-effort, fail-open -- see turn-traces.ts's own
+        // header; a rare duplicate attempt (e.g. a session that separately
+        // already has an Interview-Engine completion trace) is correctly
+        // rejected by crc_turn_traces_session_turn_kind_unique, not
+        // specially handled here.
+        await recordCrcCompletionTrace(supabaseAdmin, { sessionId: token, turnNumber, result })
         const ceilingResponse = NextResponse.json<TurnResponseBody>(
           buildCompleteTurnResponse(productState ?? ({} as CrcSessionProductState), result.output, result.consultative_notes),
         )
@@ -517,6 +542,17 @@ export async function POST(request: NextRequest) {
   // in which case there is nothing to log.
   if (outcome.discoverySignal) {
     await logAnalyticsEvent(supabaseAdmin, { session_id: token, event_type: 'discovery_signal', event_data: outcome.discoverySignal })
+  }
+
+  // CRC-PILOT-OBS-3: only on a GENUINE first completion this turn -- never
+  // on runTurn()'s own §7 recovery replay of an already-completed session
+  // (which also returns outcome.kind === 'complete', but wasAlreadyComplete
+  // was already true before this turn even ran; see this variable's own
+  // header comment above). Best-effort, fail-open, after every other
+  // authoritative write this turn has already succeeded -- see
+  // turn-traces.ts's own header.
+  if (outcome.kind === 'complete' && !wasAlreadyComplete) {
+    await recordCrcCompletionTrace(supabaseAdmin, { sessionId: token, turnNumber, result: outcome.result })
   }
 
   const response =

@@ -21,6 +21,7 @@ import { DIALOGUE_FIXTURES } from '@/lib/interview-engine/fixtures'
 import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { runCRCConversation } from '@/lib/crc-engine/run-crc-conversation'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
+import { deriveDiscoveredTopicOccurrences } from '@/lib/crc-engine/discovered-relevance'
 import type { StructuredUnderstanding, UserGoal } from '@/types/interview-engine'
 import type { TopicClaim } from '@/lib/retrieval-engine/types'
 
@@ -570,5 +571,81 @@ describe('third_party_source_rights + AssetProviderMention full pipeline (Living
     const { output } = runCRCConversation(suProviderOnly, MATRIX_FIXTURE, [])
     expect(output.goal_interpretations).toEqual([])
     expect(output.understood_summary).toContain('Getty Images as a source provider')
+  })
+})
+
+describe('CRCPipelineResult additive completion fields (CRC-PILOT-OBS-3, 2026-09-15)', () => {
+  test('structured_understanding echoes the exact input StructuredUnderstanding, unmodified', () => {
+    const su = DIALOGUE_FIXTURES.rich_signal.structured_understanding
+    const result = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE)
+    expect(result.structured_understanding).toBe(su)
+  })
+
+  // Same fixture combination as
+  // __tests__/crc-engine/discovered-relevance.test.ts's own "A: commercial_use
+  // goal + confirmed canonical iStock mention" case -- proves
+  // CRCPipelineResult.discovered_topic_occurrences is the SAME value
+  // deriveDiscoveredTopicOccurrences() itself produces for these inputs, not
+  // a separately (and possibly divergently) recomputed one.
+  test('discovered_topic_occurrences exposes the exact, non-empty Track A occurrence array runCRCConversation already computes internally', () => {
+    const genericStockClaim: TopicClaim = {
+      claim_id: 'CLAIM-STOCK-GENERIC-TEST',
+      topic: 'third_party_source_rights',
+      claim_character: 'established',
+      jurisdiction: 'Global',
+      lifecycle: 'Adopted',
+      crc_eligible: 'Yes',
+      crc_publication_scope: 'Third-party stock/source rights guidance -- test fixture.',
+      crc_candidate_statement: null,
+      applicability_requirements: [],
+      unresolved_project_dependencies: [],
+      provider_scope: null,
+      tool_scope: null,
+      last_verified: null,
+      superseded_by: null,
+    }
+    const goal: UserGoal = {
+      goal_id: 'g-1',
+      state: 'confirmed',
+      raw_text: 'Can I use this in a commercial?',
+      category: 'commercial_use',
+      scope: 'informational',
+      superseded_by: null,
+      source_turn: 1,
+      source_statement: 'Can I use this in a commercial?',
+    }
+    const su: StructuredUnderstanding = {
+      ...DIALOGUE_FIXTURES.rich_signal.structured_understanding,
+      user_goals: [goal],
+      asset_provider_mentions: [
+        { mention_id: 'ap-1', resolution: { kind: 'canonical', identifier: 'istock' }, confidence: 'confirmed', source_turn: 1, source_statement: 'iStock', superseded_by: null, usage: { state: 'unknown' }, license: { state: 'unknown' } },
+      ],
+    }
+
+    const result = runCRCConversation(su, MATRIX_FIXTURE, [genericStockClaim])
+    const independentlyDerivedOccurrences = deriveDiscoveredTopicOccurrences(su, [genericStockClaim], [])
+
+    expect(result.discovered_topic_occurrences).toHaveLength(1)
+    expect(result.discovered_topic_occurrences).toEqual(independentlyDerivedOccurrences)
+    expect(result.discovered_topic_occurrences[0]).toEqual({
+      topic: 'third_party_source_rights',
+      trigger_id: 'asset_provider_mention_to_third_party_source_rights',
+      source_kind: 'asset_provider_mention',
+      source_id: 'ap-1',
+      source_goal_category: 'commercial_use',
+    })
+
+    // Track C provenance: the corresponding RetrievalResult (not just the
+    // DiscoveredTopicOccurrence) also preserves the originating explicit
+    // goal and its discovered-topic match_origin.
+    const discoveredResult = result.trace.retrieval_results.find((r) => r.topic === 'third_party_source_rights')
+    expect(discoveredResult).toBeDefined()
+    expect(discoveredResult?.match_origin).toBe('discovered_topic')
+    expect(discoveredResult?.matched_goal_category).toBe('commercial_use')
+  })
+
+  test('discovered_topic_occurrences is an empty array (not undefined) when nothing is discovered', () => {
+    const result = runCRCConversation(DIALOGUE_FIXTURES.no_signal.structured_understanding, MATRIX_FIXTURE)
+    expect(result.discovered_topic_occurrences).toEqual([])
   })
 })

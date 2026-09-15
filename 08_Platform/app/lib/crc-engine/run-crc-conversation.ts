@@ -66,7 +66,7 @@
 
 import { buildRetrievalHandoff } from '@/lib/interview-engine/handoff'
 import { retrieve } from '@/lib/retrieval-engine/retrieve'
-import type { MatrixRow, RetrievalDiagnostic, RetrievalResult, TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
+import type { DiscoveredTopicOccurrence, MatrixRow, RetrievalDiagnostic, RetrievalResult, TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
 import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
 import { assembleProjectionOutput } from '@/lib/projection-layer/assemble-projection-output'
 import type { ProjectionDiagnostic, ProjectionOutput } from '@/lib/projection-layer/types'
@@ -147,6 +147,29 @@ export interface CRCPipelineResult {
   consultative_notes: ConsultativeNote[]
   diagnostics: CRCPipelineDiagnostics
   trace: CRCPipelineTrace
+  /**
+   * CRC-PILOT-OBS-3 (2026-09-15): the exact `DiscoveredTopicOccurrence[]`
+   * this function ALREADY computes (`discoveredTopicOccurrences`, passed to
+   * `retrieve()` below) -- previously computed and then discarded, never
+   * exposed on the public result (OBS-2A Hard Gate 2 finding). Additive and
+   * referentially identical, same "stop discarding an existing value"
+   * discipline as `bounded_interpretations` (CAH-3B.1) above: `output`,
+   * `plan`, `bounded_interpretations`, `consultative_notes`, `diagnostics`,
+   * and `trace` are all unchanged. Track A discovery itself is not
+   * recomputed, altered, or duplicated anywhere by this field's existence.
+   */
+  discovered_topic_occurrences: DiscoveredTopicOccurrence[]
+  /**
+   * CRC-PILOT-OBS-3 (2026-09-15): echoes the `understanding` parameter this
+   * function was called with -- the exact StructuredUnderstanding this
+   * entire result was computed from. Additive; every existing consumer
+   * that reads only the other fields is unaffected. Exists so a completion-
+   * time observational trace writer (outside this pure orchestrator) can
+   * snapshot "what CRC believed when this completion was computed" without
+   * a second, independent load of session state, and without this function
+   * losing its own "glue only" purity (no new I/O, no new parameter).
+   */
+  structured_understanding: StructuredUnderstanding
 }
 
 /**
@@ -278,5 +301,10 @@ export function runCRCConversation(
     consultative_notes,
     diagnostics: { retrieval: retrievalDiagnostics, projection: projectionDiagnostics },
     trace: { retrieval_handoff: handoff, retrieval_results: results, projection_output: output },
+    // CRC-PILOT-OBS-3: the SAME `discoveredTopicOccurrences` value already
+    // computed above and passed to `retrieve()` -- exposed, not recomputed.
+    discovered_topic_occurrences: discoveredTopicOccurrences,
+    // CRC-PILOT-OBS-3: the SAME `understanding` parameter this call received.
+    structured_understanding: understanding,
   }
 }
