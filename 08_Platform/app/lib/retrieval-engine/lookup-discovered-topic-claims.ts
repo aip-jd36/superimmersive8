@@ -54,7 +54,7 @@
 
 import type { GoalCategory } from '@/types/interview-engine'
 import type { DiscoveredTopicOccurrence, KnowledgeTopic, RetrievalDiagnostic, TopicClaim, UnmetApplicabilityDetail } from './types'
-import { evaluateApplicabilityDetailed, providerScopeMatches, type ApplicabilityFacts } from './lookup-topic-claims'
+import { evaluateApplicabilityExpression, providerScopeMatches, type ApplicabilityFacts } from './lookup-topic-claims'
 
 /**
  * One discovered-topic-eligible claim, still paired with the originating
@@ -136,18 +136,46 @@ export function lookupDiscoveredTopicClaims(
     // sibling candidate is applicable, and emitted below whenever non-empty
     // (never gated on "every candidate is inapplicable," which is what
     // silently dropped this detail before this milestone).
+    //
+    // Generic Shallow Applicability -- Track A Authority Completion
+    // milestone (2026-09-15): the applicability CALCULATION now goes
+    // through `evaluateApplicabilityExpression` (ADR-001-generic-
+    // applicability-architecture.md §K), the SAME authoritative evaluator
+    // `lookupTopicClaims`/`retrieve.ts`/`applicability-readiness.ts` already
+    // use -- closing the exact local-duplicate-interpretation seam this
+    // module's own header previously described ("switched from
+    // isApplicable() to evaluateApplicabilityDetailed()... the same single
+    // three-state applicability authority every other Retrieval path
+    // already uses"). This module still does zero OR/AND/materiality logic
+    // of its own -- it consumes the evaluator's authoritative `status` and
+    // centrally-derived `material_unresolved` exactly as the other three
+    // consumers do. `unmetDetail` is populated from `material_unresolved`
+    // (empty for a claim whose own aggregate has settled `not_met` --
+    // nothing is material once an expression is false; see
+    // lookup-topic-claims.ts's own identical-rationale comment).
+    // `anyNonMet`, tracked independently of `unmetDetail.length`, preserves
+    // this module's own documented Case 3A requirement (diagnostic
+    // PRESENCE, keyed on `sourceGoalCategory`, must fire whenever any
+    // eligible discovered claim failed to fully match -- unchanged by
+    // whether anything in it turned out to be material).
     const unmetDetail: UnmetApplicabilityDetail[] = []
+    const invalidGovernanceClaimIds: string[] = []
+    let anyNonMet = false
 
     for (const claim of candidates) {
       if (claim.lifecycle !== 'Adopted' || claim.crc_eligible !== 'Yes') continue
       anyEligible = true
 
-      const outcomes = evaluateApplicabilityDetailed(claim.applicability_requirements, facts)
-      const isClaimApplicable = outcomes.every((o) => o.status === 'met')
-      if (!isClaimApplicable) {
-        for (const o of outcomes) {
-          if (o.status !== 'met') unmetDetail.push({ claim_id: claim.claim_id, requirement: o.requirement, status: o.status })
-        }
+      const result = evaluateApplicabilityExpression(claim.applicability_requirements, claim.applicability_any_of, facts)
+
+      if (!result.valid) {
+        invalidGovernanceClaimIds.push(claim.claim_id)
+        continue
+      }
+
+      if (result.status !== 'met') {
+        anyNonMet = true
+        for (const o of result.material_unresolved) unmetDetail.push({ claim_id: claim.claim_id, requirement: o.requirement, status: o.status })
         continue
       }
 
@@ -165,14 +193,24 @@ export function lookupDiscoveredTopicClaims(
 
     if (!anyEligible) {
       diagnostics.push({ identifier: sourceGoalCategory, reason: 'not_adopted_or_eligible' })
-    } else if (unmetDetail.length > 0) {
-      // `identifier: sourceGoalCategory` (the ORIGINATING explicit goal
-      // category), never `topic` -- unchanged Track C provenance discipline,
-      // identical to every other diagnostic this loop already emits (see
-      // this module's own header) and identical to how `matches` above are
-      // already stamped with `sourceGoalCategory`, not the claim's own
-      // intrinsic topic.
-      diagnostics.push({ identifier: sourceGoalCategory, reason: 'applicability_unmet', unmet_applicability: unmetDetail })
+    } else {
+      if (anyNonMet) {
+        // `identifier: sourceGoalCategory` (the ORIGINATING explicit goal
+        // category), never `topic` -- unchanged Track C provenance discipline,
+        // identical to every other diagnostic this loop already emits (see
+        // this module's own header) and identical to how `matches` above are
+        // already stamped with `sourceGoalCategory`, not the claim's own
+        // intrinsic topic.
+        diagnostics.push({ identifier: sourceGoalCategory, reason: 'applicability_unmet', unmet_applicability: unmetDetail })
+      }
+      // Invalid-governance defense (ADR-001 §K.3): a distinct diagnostic,
+      // never `applicability_unmet`, never carrying `unmet_applicability` --
+      // never feeds materiality, never creates a Track B need, never
+      // silently reinterpreted. Unreachable for any production discovered-
+      // topic claim today (every `applicability_any_of` is absent or
+      // already valid). Same generic diagnostic reason every other
+      // Retrieval path already uses -- no Track-A-specific taxonomy needed.
+      if (invalidGovernanceClaimIds.length > 0) diagnostics.push({ identifier: sourceGoalCategory, reason: 'applicability_invalid_governance' })
     }
   }
 

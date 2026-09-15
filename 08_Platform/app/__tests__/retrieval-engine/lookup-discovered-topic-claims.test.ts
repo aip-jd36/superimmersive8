@@ -213,11 +213,20 @@ describe('lookupDiscoveredTopicClaims -- applicability diagnostic parity (CRC Ge
     // value.
     const result = lookupDiscoveredTopicClaims([occ], [c], facts({ jurisdiction: { included: [], excluded: ['United States'] } }))
     expect(result.matches).toEqual([])
+    // Generic Shallow Applicability -- Track A Authority Completion
+    // milestone (2026-09-15, ADR-001 §K.5): the diagnostic still fires
+    // (Case 3A presence detection, keyed on `sourceGoalCategory`,
+    // unaffected), but carries no not_met entry -- nothing is material once
+    // a claim's own aggregate has settled `not_met` (frozen algebra). Every
+    // existing consumer of this field already filtered `not_met` entries
+    // away, so this is a content-only precision fix with zero observable
+    // behavior change downstream -- see lookup-topic-claims.test.ts's own
+    // identical-rationale comment (test B) from the prior milestone.
     expect(result.diagnostics).toEqual([
       {
         identifier: 'commercial_use',
         reason: 'applicability_unmet',
-        unmet_applicability: [{ claim_id: 'C-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'not_met' }],
+        unmet_applicability: [],
       },
     ])
   })
