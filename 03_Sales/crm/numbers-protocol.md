@@ -6,7 +6,7 @@ contacts:
   - name: "Sherry Chung"
     role: "Business Developer (possibly also co-founder/technical lead — unconfirmed, needs a direct check with her)"
 slug: numbers-protocol
-stage: evaluating
+stage: nurturing
 source: network
 next_action: "Follow up on Trust List Q + API credentials request"
 next_action_date: 2026-07-07
@@ -25,6 +25,10 @@ Graduated from `03_Sales/CRM.md` (rows P001, P002) on 2026-08-15 — real in-per
 **Note on `next_action_date`:** 2026-07-07 is the date carried over from CRM.md's own row — it is over a month overdue as of this record's creation. Preserved as-is rather than silently updated; needs a real check with Sofia on current status, not a guessed new date.
 
 ## Interaction log (reverse-chronological)
+
+### 2026-09-15 — Pipeline stage moved to Nurturing
+
+No new activity since the Jul 30 panel conversation; the Jul 7 `next_action_date` (Trust List Q + API credentials follow-up) has gone unactioned for over 2 months. Moved from `evaluating` to `nurturing` to reflect actual cadence — infra-partner relationship, low-touch, not actively progressing toward a decision. Does not change the underlying facts (Numbers confirmed infra-only, Trust List status for an edited MP4 via Capture API still UNCONFIRMED) — only the pipeline categorization.
 
 ### 2026-07-30 — Sherry Chung, in-person, AI Wave 微醺夜 panel
 
