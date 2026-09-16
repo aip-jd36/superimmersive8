@@ -6,9 +6,9 @@ contacts:
 slug: anchor-film
 stage: evaluating
 source: event
-next_action: "Follow up on the Oct cross-domain SME co-creation grant (中小及新創企業署) Alice surfaced Sept 15 — request the full RFP/program materials (the 2 slides are draft/summary only), confirm whether this supersedes or runs alongside the Sept MODA grant (九月標案) status is now unclear since Alice pivoted the conversation to October without answering JD's Sept 14 question directly. See `01_Business/research/TAIWAN-CROSSDOMAIN-AI-GRANT-2026-SMEA.md` for full analysis + open questions before any lead-applicant/scope discussion."
-next_action_date: 2026-09-19
-last_contacted: 2026-09-15
+next_action: "Awaiting Alice's reply with the full October cross-domain grant RFP/program materials, requested by JD on Sept 16. Once received: reconcile JD's 'US/Europe primary market since the start' framing against claude.md's own Geographic Strategy section (active geos = UK/Netherlands/Dubai/Singapore — no US line) before the story is repeated in a written proposal (see interaction log); confirm whether the Sept MODA grant (九月標案) is still live or superseded — still unanswered by Alice."
+next_action_date: 2026-09-22
+last_contacted: 2026-09-16
 blocked: false
 blocked_reason: null
 review_date: null
@@ -21,6 +21,21 @@ created: 2026-08-15
 Graduated from `03_Sales/CRM.md` (row B164) on 2026-08-15 — an active, developing strategic-partnership discovery conversation, well past a reply-only signal.
 
 ## Interaction log (reverse-chronological)
+
+### 2026-09-16 — JD commits to pursuing the October cross-domain grant jointly, proposes Anchor/SI8 role split
+
+**13:20, LINE:** JD replied to Alice's Sept 15 slides with a substantive pitch, not just acknowledgment. Key claims made (his own words, summarized):
+
+- The October Agentic AI track's listed elements (Agentic AI, domain knowledge base/RAG, trustworthiness & evaluation) line up with work SI8 has already built: the Commercial Assurance domain knowledge base, RAG/AI decision workflow, CRC (Commercial Readiness Check), and AI-video commercial-risk assessment + traceable record-keeping.
+- Framed SI8's target market as "originally US and Europe," not newly added for this grant — cited existing EU AI Act-specific domain knowledge as evidence, and stated the plan is to have customer revenue by end of 2026, scaling in 2027.
+- Proposed the story: Anchor does Taiwan field validation (場域驗證), SI8 does US/Europe commercialization (國際出海) — pitched as a complete narrative for the program's stated 場域驗證→國內落地→國際出海 arc and its overseas-revenue emphasis.
+- Asked Alice to send the complete RFP/program materials so he can review in detail before scheduling a joint-proposal discussion.
+
+**Accuracy flags on JD's own claims (for internal tracking, not corrections sent to Alice):**
+- "US and Europe" as SI8's original primary target market is a stronger/broader claim than what's currently documented in `claude.md`'s Geographic Strategy section, which lists active geos as UK, Netherlands, Dubai, and Singapore (Europe is represented via UK/Netherlands; no explicit US line exists there). Worth reconciling before this framing goes into a written proposal — either the docs are stale or the claim overstates current geographic focus.
+- "Plan to start customer revenue before end of 2026" understates current state — SI8 already has at least one completed paid SI8 Certified assessment (Cloud World, `ASSESS-005-2026-07-12`) per the platform's live-mode launch (claude.md §3k, Mar 27, 2026). Not a misstatement of direction, but the message reads as pre-revenue when SI8 has already closed a live paying transaction.
+
+**Status:** this is JD's first message in the thread that commits real intent to co-applying, beyond just reviewing materials. No commitment from Alice yet on role split or lead applicant — this was a one-way pitch awaiting her RFP materials and reaction.
 
 ### 2026-09-14/15 — LINE thread: October cross-domain SME co-creation grant surfaced, September grant status left unanswered
 
