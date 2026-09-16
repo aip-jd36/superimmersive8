@@ -4427,3 +4427,116 @@ Related: [[POS-002]], [[POS-003]] (both already establish SI8's "do not pitch as
 Full Formal Governance Review artifact: `governance-reviews/FGR_019_CAND-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001_2026-09-12.md`
 Full topic-taxonomy recommendation addendum: `governance-reviews/FGR_019_ADDENDUM_TOPIC_TAXONOMY_RECOMMENDATION_2026-09-13.md`
 Full topic-taxonomy PM-concurrence addendum: `governance-reviews/FGR_019_ADDENDUM_TOPIC_TAXONOMY_PM_CONCURRENCE_2026-09-13.md`
+
+### CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1
+Domain: U.S. Trademark Law — Lanham Act § 1125(a)(1) Confusion/Affiliation Rule
+Topic: trademark
+Subtopic: lanham-act-1125a-confusion-affiliation-sponsorship-approval
+
+GOVERNANCE TREATMENT (2026-09-16, PM adoption decision, FGR #21): `Topic: trademark` is a **proposed new `GoalCategory` value**, not yet implemented in `GOAL_CATEGORIES` — this Adoption is a Living Knowledge governance decision only; it does not itself add the enum value, add a `TopicClaim` fixture entry, or activate any runtime path. Type/runtime implementation is a separate, later, explicitly-authorized milestone, mirroring the exact timing precedent already established for `CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1` (whose own `KnowledgeTopic` engineering foundation was likewise implemented in a separate, later session after its own Adoption). Because `KnowledgeTopic = GoalCategory | KNOWLEDGE_ONLY_TOPICS` is a union (`08_Platform/app/lib/retrieval-engine/types.ts`), once `trademark` is added to `GOAL_CATEGORIES`, it automatically becomes a valid `TopicClaim.topic` value too — no separate `KNOWLEDGE_ONLY_TOPICS` addition is needed or proposed, and (unlike the Article 50 precedent) no `TopicRelationship` is needed or proposed, since this domain is explicit-goal-reachable directly.
+Claim character: established
+Jurisdiction: United States (federal)
+Context: commercial AI-generated video content that visibly uses or depicts a third party's brand name, logo, or other source-identifying material
+
+Claim proposition: >
+  Under 15 U.S.C. § 1125(a)(1), a person who uses in commerce a word,
+  name, symbol, device, or any combination thereof, or any false
+  designation of origin, in a way likely to cause confusion, mistake, or
+  deception as to the affiliation, connection, or association of that
+  person with another person, or as to the origin, sponsorship, or
+  approval of that person's goods, services, or commercial activities by
+  another person, may be civilly liable to anyone likely to be damaged by
+  that use. This is a federal cause of action distinct from copyright, and
+  does not require the mark to be federally registered.
+
+Source references:
+  - primary (Class A, GPO official U.S. Code, 2023 edition, direct PDF capture, independently cross-validated against a separately-obtained Cornell LII rendering and an independent WebSearch snippet, byte-identical across all three): 15 U.S.C. § 1125(a)(1) — `evidence-captures/us-trademark/uscode-2023-title15-sec1125_20260916T083022Z_51c96e65.pdf`.
+  - supporting (Class A, same method): 15 U.S.C. § 1127 (definitions of "use in commerce," "trademark," "service mark") — `evidence-captures/us-trademark/uscode-2023-title15-sec1127_20260916T083022Z_cfd770e7.pdf`.
+  - context (Class A, official USPTO publication): "Protecting Your Trademark: Basic Facts About Trademarks" (trademark-vs-copyright educational framing only) — `evidence-captures/us-trademark/uspto-protecting-your-trademark-basicfacts_20260916T083022Z_8aba008b.pdf`.
+Source authority/type: Primary legal/official authority (enacted U.S. Code text) — Class A
+Source fact: >
+  "(1) Any person who, on or in connection with any goods or services, or
+  any container for goods, uses in commerce any word, term, name, symbol,
+  or device, or any combination thereof, or any false designation of
+  origin, false or misleading description of fact, or false or misleading
+  representation of fact, which-- (A) is likely to cause confusion, or to
+  cause mistake, or to deceive as to the affiliation, connection, or
+  association of such person with another person, or as to the origin,
+  sponsorship, or approval of his or her goods, services, or commercial
+  activities by another person... shall be liable in a civil action by any
+  person who believes that he or she is or is likely to be damaged by such
+  act." (15 U.S.C. § 1125(a)(1)(A)). "The term 'use in commerce' means the
+  bona fide use of a mark in the ordinary course of trade, and not made
+  merely to reserve a right in a mark." (15 U.S.C. § 1127) — no
+  registration requirement appears anywhere in either provision.
+
+SI8 interpretation: >
+  A commercial AI-video project that visibly uses or depicts a third
+  party's brand name, logo, or other source-identifying material should
+  not be represented to a client, buyer, or platform as clear of Lanham
+  Act § 1125(a)(1) considerations without confirming whether the specific
+  use is likely to cause confusion, mistake, or deception as to
+  affiliation, connection, association, origin, sponsorship, or approval
+  -- a legal/factual characterization this claim does not resolve and CRC
+  cannot establish from conversation alone.
+
+Applicability requirements:
+  - fact: jurisdiction
+    operator: equals
+    value: United States
+  <!-- Mirrors CLAIM-COPY-001-v1's own precedent exactly: AssessmentJurisdictionMention represents only that the user asked CRC to consider United States law -- it is never proof that this statute's territorial/commerce-clause reach actually attaches to a specific project. Because this claim is reached via an explicit goal (never a TopicRelationship), it does not have Article 50's own unrestricted-global-reach exposure, so this gate serves its original, simpler CLAIM-COPY-001-style purpose. -->
+Unresolved project dependencies: [confusion_as_to_affiliation_or_sponsorship]   <!-- confusion_as_to_affiliation_or_sponsorship: Type C, evidence-only -- whether a specific depicted use is, in fact, likely to cause confusion, mistake, or deception as to affiliation, connection, association, origin, sponsorship, or approval (15 U.S.C. § 1125(a)(1)(A)'s own single disjunctive test, collapsed into one dependency string rather than fragmented, mirroring the statute's own structure). A legal/factual characterization about likely consumer perception, not a raw self-attestable fact -- structurally identical in kind to CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1's own content_constitutes_deep_fake dependency; never a direct CRC self-attestation question (Stock Governance Rule). Unresolved under the currently governed CRC evidence model -- not a timeless claim that no future governed evidence model could ever resolve it. Retained not because Composition would otherwise fabricate an infringement/confusion conclusion (the existing fixed, domain-blind Bounded Interpretation/Composition templates already structurally prevent that regardless of dependency count, confirmed by direct source trace during this domain's own architecture diagnostics) but for Reviewer/HRR aggregate-signal honesty and CRC disclosure specificity. Authorization/permission, ownership, validity, and registration status are deliberately NOT represented as dependencies of this claim -- authorization/permission functions as a defense to this specific cause of action, not an element of it (out of scope for this first slice, not merely deferred); ownership and validity are elements of the distinct, registration-specific 15 U.S.C. § 1114 cause of action, not this one; registration is not required by § 1125(a)(1) at all. -->
+Provider/actor scope: not tool- or asset-provider-scoped (statutory, tool-independent knowledge). Tool scope: null. Provider scope (asset-provider sense): null.
+Prohibited conclusions: >
+  Does not establish that a specific project's use causes (or does not
+  cause) confusion, mistake, or deception. Does not establish affiliation,
+  connection, association, sponsorship, or approval (in either direction).
+  Does not establish that a specific use constitutes "use in commerce."
+  Does not establish authorization, permission, ownership, or validity (in
+  either direction). Does not constitute legal advice, a compliance
+  determination, or a certification of commercial readiness -- a
+  human-reviewed Commercial Assurance Assessment (Reviewer Workbook Domain
+  I, control I03) remains the higher-assurance path for the
+  project-specific facts this claim leaves open. Domain I03 itself is
+  human observation and evidentiary note-taking, not legal infringement
+  adjudication -- no repository governance artifact establishes that
+  Commercial Assurance adjudicates legal trademark infringement, and this
+  claim does not imply otherwise.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-09-16
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  PENDING -- not yet reviewed for CRC Publication. No CRC Publication
+  Review has been conducted. FGR_021 found the proposition source-faithful,
+  correctly bounded, and safe on every reviewed dimension (source fidelity,
+  goal/topic identity, jurisdiction semantics, applicability, dependency
+  semantics, askability, evidence limitations, prohibited conclusions,
+  Commercial Assurance boundary, explicit-vs-discovered treatment, no
+  fabricated UserGoal, no domain-specific orchestration, fail-closed
+  behavior) -- but "suitable in principle" is not the same as ready for
+  `crc_eligible: Yes`, which requires its own separate, future CRC
+  Publication Review.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  Under U.S. federal law (the Lanham Act, 15 U.S.C. § 1125(a)(1)), using
+  another party's brand name, logo, or other source-identifying material
+  in commerce can create civil liability where the use is likely to cause
+  confusion, mistake, or deception as to affiliation, connection, or
+  association with that party, or as to the origin, sponsorship, or
+  approval of goods, services, or commercial activities. This applies
+  regardless of whether the mark is federally registered, and is a
+  separate legal question from copyright.
+
+Effective date: 15 U.S.C. § 1125(a)(1) is existing, long-settled federal statutory law (no recent amendment identified or relied upon); evidence captured 2026-09-16 from the GPO's 2023 U.S. Code edition, the most recent complete annual edition available at capture time.
+Last reviewed: 2026-09-16 (FGR_021)
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: none yet. This claim is deliberately NOT related to any existing Copyright, Likeness, or Article 50 claim -- per this domain's own governing diagnostics, Copyright and Trademark remain separate governed domains even where the same project or asset could raise both, and no combined UserGoal or cross-domain dependency is authored by this claim.
+
+Full candidate governance package: `US-TRADEMARK-LANHAM-1125A-FGR-PACKAGE.md`
+Full Formal Governance Review artifact: `governance-reviews/FGR_021_CAND-TRADEMARK-US-LANHAM-CONFUSION-001_2026-09-16.md`
+Full evidence manifest: `evidence-captures/us-trademark/MANIFEST.md`
