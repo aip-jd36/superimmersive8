@@ -4508,19 +4508,46 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-09-16
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  PENDING -- not yet reviewed for CRC Publication. No CRC Publication
-  Review has been conducted. FGR_021 found the proposition source-faithful,
-  correctly bounded, and safe on every reviewed dimension (source fidelity,
-  goal/topic identity, jurisdiction semantics, applicability, dependency
-  semantics, askability, evidence limitations, prohibited conclusions,
-  Commercial Assurance boundary, explicit-vs-discovered treatment, no
-  fabricated UserGoal, no domain-specific orchestration, fail-closed
-  behavior) -- but "suitable in principle" is not the same as ready for
-  `crc_eligible: Yes`, which requires its own separate, future CRC
-  Publication Review.
+  APPROVED FOR CRC PUBLICATION (2026-09-16, CRC Approver: JD (PM) -- see
+  CRC Approver/CRC Decision Date below; CRC Publication Review #27 complete
+  at governance-reviews/CPR_027_CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1_
+  2026-09-16.md, APPROVE, no wording edit required --
+  independently re-verified against the Adopted governance record, the
+  evidence manifest, and current production source (not inherited from
+  FGR_021 alone) -- source fidelity, goal/topic identity, jurisdiction
+  semantics, applicability, dependency semantics, askability (re-confirmed
+  directly against `dependency-askability.ts`: `confusion_as_to_
+  affiliation_or_sponsorship` has no registry entry, fail-closed by
+  construction), Bounded Interpretation compatibility (re-confirmed
+  directly against `build-bounded-interpretation.ts`'s own
+  `needsApplicabilityHedge`), Composition compatibility, evidence
+  limitations, prohibited conclusions, and the Commercial Assurance
+  boundary all independently re-checked and found sound; no substantive
+  publication risk identified). CRC may state that 15 U.S.C. § 1125(a)(1)
+  imposes civil liability on a person who uses another party's mark or
+  source-identifying material in commerce in a way likely to cause
+  confusion, mistake, or deception as to affiliation, connection, or
+  association, or as to origin, sponsorship, or approval, and that this
+  applies regardless of federal registration and is a separate legal
+  question from copyright. CRC must not state or imply: that a specific
+  project's use does or does not cause confusion, mistake, or deception;
+  that affiliation, connection, association, sponsorship, or approval is
+  or is not established for a specific project; that a specific use does
+  or does not constitute "use in commerce"; that the user (or anyone) has
+  or lacks authorization or permission; that the user (or anyone) owns a
+  valid trademark; that United States jurisdiction attaches to a specific
+  project for any reason, including the user merely selecting, stating,
+  or mentioning the United States as the assessment jurisdiction; that a
+  specific project is or is not legally permitted; or that satisfying or
+  avoiding this rule establishes broader legal compliance, copyright
+  clearance, or overall commercial readiness. This is educational
+  workflow guidance, not legal advice. A human-reviewed Commercial
+  Assurance Assessment (Reviewer Workbook Domain I, control I03 --
+  human observation and evidentiary note-taking, never a legal
+  infringement adjudication) remains the higher-assurance path for the
+  project-specific facts this claim leaves open.
 
 CRC Candidate Statement: >
-  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
   Under U.S. federal law (the Lanham Act, 15 U.S.C. § 1125(a)(1)), using
   another party's brand name, logo, or other source-identifying material
   in commerce can create civil liability where the use is likely to cause
@@ -4531,12 +4558,13 @@ CRC Candidate Statement: >
   separate legal question from copyright.
 
 Effective date: 15 U.S.C. § 1125(a)(1) is existing, long-settled federal statutory law (no recent amendment identified or relied upon); evidence captured 2026-09-16 from the GPO's 2023 U.S. Code edition, the most recent complete annual edition available at capture time.
-Last reviewed: 2026-09-16 (FGR_021)
+Last reviewed: 2026-09-16 (CRC Publication Review, following FGR_021)
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-09-16
 Related: none yet. This claim is deliberately NOT related to any existing Copyright, Likeness, or Article 50 claim -- per this domain's own governing diagnostics, Copyright and Trademark remain separate governed domains even where the same project or asset could raise both, and no combined UserGoal or cross-domain dependency is authored by this claim.
 
 Full candidate governance package: `US-TRADEMARK-LANHAM-1125A-FGR-PACKAGE.md`
 Full Formal Governance Review artifact: `governance-reviews/FGR_021_CAND-TRADEMARK-US-LANHAM-CONFUSION-001_2026-09-16.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_027_CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1_2026-09-16.md`
 Full evidence manifest: `evidence-captures/us-trademark/MANIFEST.md`
