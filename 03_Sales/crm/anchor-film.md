@@ -6,7 +6,7 @@ contacts:
 slug: anchor-film
 stage: evaluating
 source: event
-next_action: "Awaiting Alice's reply with the full October cross-domain grant RFP/program materials, requested by JD on Sept 16. Once received: reconcile JD's 'US/Europe primary market since the start' framing against claude.md's own Geographic Strategy section (active geos = UK/Netherlands/Dubai/Singapore — no US line) before the story is repeated in a written proposal (see interaction log); confirm whether the Sept MODA grant (九月標案) is still live or superseded — still unanswered by Alice."
+next_action: "Awaiting Alice's reply with the full/current October cross-domain grant RFP (slides remain 草案/draft even in the Sept 16 'latest' version). Before any application design: (1) run SI8's non-PRC AI-model/API/dependency + SBOM-readiness audit against the newly-surfaced supply-chain requirement — see `01_Business/research/TAIWAN-CROSSDOMAIN-AI-GRANT-2026-SMEA.md` §7; (2) reconcile JD's 'US/Europe primary market since the start' framing against claude.md's own Geographic Strategy section (active geos = UK/Netherlands/Dubai/Singapore — no US line); (3) confirm whether the Sept MODA grant (九月標案) is still live or superseded — still unanswered by Alice; (4) identify who 'Kay' is (source of the Sept 16 materials, unconfirmed identity/relationship)."
 next_action_date: 2026-09-22
 last_contacted: 2026-09-16
 blocked: false
@@ -22,7 +22,7 @@ Graduated from `03_Sales/CRM.md` (row B164) on 2026-08-15 — an active, develop
 
 ## Interaction log (reverse-chronological)
 
-### 2026-09-16 — JD commits to pursuing the October cross-domain grant jointly, proposes Anchor/SI8 role split
+### 2026-09-16 — JD pitches a role split; Alice agrees on the international angle and sends newer draft slides (non-PRC supply-chain requirement surfaces)
 
 **13:20, LINE:** JD replied to Alice's Sept 15 slides with a substantive pitch, not just acknowledgment. Key claims made (his own words, summarized):
 
@@ -35,7 +35,18 @@ Graduated from `03_Sales/CRM.md` (row B164) on 2026-08-15 — an active, develop
 - "US and Europe" as SI8's original primary target market is a stronger/broader claim than what's currently documented in `claude.md`'s Geographic Strategy section, which lists active geos as UK, Netherlands, Dubai, and Singapore (Europe is represented via UK/Netherlands; no explicit US line exists there). Worth reconciling before this framing goes into a written proposal — either the docs are stale or the claim overstates current geographic focus.
 - "Plan to start customer revenue before end of 2026" understates current state — SI8 already has at least one completed paid SI8 Certified assessment (Cloud World, `ASSESS-005-2026-07-12`) per the platform's live-mode launch (claude.md §3k, Mar 27, 2026). Not a misstatement of direction, but the message reads as pre-revenue when SI8 has already closed a live paying transaction.
 
-**Status:** this is JD's first message in the thread that commits real intent to co-applying, beyond just reviewing materials. No commitment from Alice yet on role split or lead applicant — this was a one-way pitch awaiting her RFP materials and reaction.
+**13:39, LINE:** Alice responded: "對呀 海外那塊您這邊現成有 非常有利" (exactly — the overseas piece is something you already have on your side, very advantageous). This confirms Alice's read of JD's pitch but is Alice's own characterization, not new evidence of existing overseas revenue — do not convert "現成有" into a claim that SI8 has closed overseas business (SI8's actual overseas activity is outreach/pipeline, per `03_Sales/CRM.md`, not signed revenue).
+
+She then noted the material came from a third party — "這也Kay 貼給我的" (Kay posted this to me too) — the first mention of "Kay" as a source; identity/role unconfirmed, not yet in SI8's records. Alice then sent an image and immediately retracted it (已收回訊息, "message recalled") — content unknown, not recoverable, no further mention of it in the thread. At 13:40 she sent 2 replacement images captioned "最新草案～～" (latest draft).
+
+**New draft content (slides described as newer/更新 versions of the Sept 15 deck, still 草案/draft):**
+
+1. **Updated Agentic AI slide (主軸一：代理式AI與領域應用)** — adds detail beyond the Sept 15 version: explicitly covers discriminative, generative, and agentic AI, and states plainly "不以具備完整代理能力為申請門檻" (full agentic capability is NOT an application threshold) — lowers the bar for what counts as qualifying technology. Lists the same architecture blocks as before (multimodal sensing, domain knowledge base/RAG, agentic framework, tool interoperability via MCP/A2A, edge/cloud deployment, trustworthiness & evaluation) plus a 12-item numbered scenario list across primary/secondary/tertiary industry (農林漁牧 / 製造與營建 / 服務流通與醫療). **Scenario #12 — "專業服務文件審閱與法遵作業" (professional-services document review and regulatory/compliance work) — is the closest direct-language match yet to SI8's actual Commercial Assurance use case.** Scenarios are stated as illustrative, not exhaustive ("不以此為限").
+2. **New slide — 非紅供應鏈說明 (non-PRC supply-chain requirement), page 7 of the deck.** This is new information not present in the Sept 15 slides. Establishes mandatory non-mainland-China sourcing rules split by R&D target category (AI software/services / unmanned vehicles / robotics). For AI software/services specifically: **mandatory exclusion of mainland-China-origin AI models, APIs, and services — explicitly including open-source, open-weight, fine-tuned, and distilled models built on a mainland-China-origin base.** Non-AI open-source packages must be disclosed (name, version, source, SBOM). Taiwan-domestic models/services/cloud/compute are "encouraged" (not mandatory). Verification stated as occurring at application, review, execution, and closeout stages — a final BOM (bill of materials) is required at closeout; false statements or use of prohibited components can result in expense disallowance and subsidy clawback.
+
+**Why the non-PRC slide matters beyond BD tracking:** this is a real engineering-relevant compliance requirement, not just a BD data point — SI8 has not audited its own model/API/dependency supply chain against a "no mainland-China-origin AI model or component, including fine-tuned/distilled derivatives" standard, and does not currently have SBOM-generation capability confirmed. Flagged as an action item below; do not assume compliance without checking.
+
+**Status:** JD has now made a one-sided pitch; Alice has responded positively on the international-fit framing specifically ("現成有，非常有利") and continued supplying materials, but no side has committed to lead applicant, workshare, budget, scope, or IP. Full analysis (updated FACTS/HYPOTHESES/OPEN QUESTIONS, technical-fit table, non-PRC compliance audit action item): `01_Business/research/TAIWAN-CROSSDOMAIN-AI-GRANT-2026-SMEA.md`. Raw images: `03_Sales/crm/raw/anchor-film/2026-09-16-crossdomain-grant-slide-7-non-prc-supply-chain.jpg`, `...-slide-3-agentic-ai-updated.jpg`.
 
 ### 2026-09-14/15 — LINE thread: October cross-domain SME co-creation grant surfaced, September grant status left unanswered
 
