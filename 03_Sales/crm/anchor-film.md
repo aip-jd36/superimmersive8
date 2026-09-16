@@ -6,9 +6,9 @@ contacts:
 slug: anchor-film
 stage: evaluating
 source: event
-next_action: "Schedule call next week (~Sept 8-12) to discuss the September grant proposal (九月標案) — the Aug 25 Zoom request never happened, JD re-proposed via LINE on Sept 1; separately, JD confirmed (Sept 1) he will NOT attend the Sept 3-4 Living Lab event (kids' activity conflict) — the AI film director face-to-face intro Alice offered did not happen this cycle, but Alice noted a follow-on session in October as a fallback opportunity"
-next_action_date: 2026-09-08
-last_contacted: 2026-09-01
+next_action: "Follow up on the Oct cross-domain SME co-creation grant (中小及新創企業署) Alice surfaced Sept 15 — request the full RFP/program materials (the 2 slides are draft/summary only), confirm whether this supersedes or runs alongside the Sept MODA grant (九月標案) status is now unclear since Alice pivoted the conversation to October without answering JD's Sept 14 question directly. See `01_Business/research/TAIWAN-CROSSDOMAIN-AI-GRANT-2026-SMEA.md` for full analysis + open questions before any lead-applicant/scope discussion."
+next_action_date: 2026-09-19
+last_contacted: 2026-09-15
 blocked: false
 blocked_reason: null
 review_date: null
@@ -21,6 +21,20 @@ created: 2026-08-15
 Graduated from `03_Sales/CRM.md` (row B164) on 2026-08-15 — an active, developing strategic-partnership discovery conversation, well past a reply-only signal.
 
 ## Interaction log (reverse-chronological)
+
+### 2026-09-14/15 — LINE thread: October cross-domain SME co-creation grant surfaced, September grant status left unanswered
+
+**Sep 14 (Mon), 17:01:** JD followed up: "Hi Alice! 想問看妳還計劃申請九月標案？" (still planning to apply for the September grant?).
+
+**Sep 15 (Tue), 20:47-20:48:** Alice did not answer the September question directly. Instead she sent 2 slides from a different, draft-stage government program — a cross-domain SME co-creation AI grant issued by 中小及新創企業署 (SME & Startup Administration, MOEA; a different agency from the MODA program tracked in September) — with the message: "10月跨域這個 很重海外營收～～ 看要不要提這個～～" (this October cross-domain one weighs overseas revenue heavily — see if we want to propose this instead).
+
+**What the slides show (draft/草案 marked, not a finalized RFP):** 3 proposal tracks (Agentic AI 與領域應用 / Sustainable AI 與災防管理 / Physical AI 技術與服務); required commercialization arc 場域驗證→國內落地→國際出海; eligibility requires 2+ SMEs applying jointly with an SME lead; subsidy capped at NT$9M, ≤50% of total project cost, with 補助款≤自籌款≤實收資本額; execution window through 2027-10-31 (~9 months); bonus points for startup alliance members, verified carbon reduction, and international market expansion. The Agentic AI track's named sub-technologies (agentic frameworks, domain knowledge base/RAG, MCP/A2A tool interoperability, "trustworthiness and evaluation" / decision traceability) map plausibly onto SI8's current architecture (Living Knowledge, the Decision Engine hypothesis, CRC, Commercial Assurance, assessment audit trails) without requiring SI8 to build a production/capture platform — see full analysis for the complete FACTS/HYPOTHESES/OPEN QUESTIONS breakdown.
+
+**Read on this exchange:** stronger collaboration signal than Alice simply agreeing to ideas JD proposes — she independently surfaced a second funding vehicle and suggested pursuing it. It does NOT resolve whether the September grant (九月標案) is still active, abandoned, or superseded by this October option; JD's direct question about it went unanswered. Do not assume October replaces September — that is an open question, not a fact.
+
+**Full analysis (FACTS/HYPOTHESES/OPEN QUESTIONS format, per Decision Quality Standards):** `01_Business/research/TAIWAN-CROSSDOMAIN-AI-GRANT-2026-SMEA.md`. Raw slide images: `03_Sales/crm/raw/anchor-film/2026-09-15-crossdomain-grant-slide-1-overview.jpg`, `...-slide-2-agentic-ai.jpg`. Note logged in that analysis file: the Sept MODA program's own research doc (`01_Business/research/TAIWAN-AI-SUBSIDY-PROGRAM-2026-MODA.md`) was found to be missing from current `main` during cross-referencing — flagged there, not yet investigated.
+
+**Next commercial milestone (unchanged priority order from the analysis doc):** obtain full October program materials → confirm SI8/Anchor formal eligibility → resolve September-vs-October status → define project scope aligned to SI8's existing strategy → decide lead applicant → establish workshare/budget/IP → then decide whether to submit.
 
 ### 2026-09-01 — Commercial Readiness discovery prompt prepared for next direct conversation (not a message to send)
 
