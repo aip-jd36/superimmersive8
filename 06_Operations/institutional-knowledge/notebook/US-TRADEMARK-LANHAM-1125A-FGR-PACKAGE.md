@@ -1,0 +1,88 @@
+# U.S. Trademark — Lanham Act §1125(a)(1) Confusion/Affiliation Rule — Candidate Governance Package
+
+Drafted 2026-09-16, "Trademark — First Governed Proposition Candidate + FGR" milestone, following four prior read-only diagnostics this same week: repository discovery (no existing Trademark work found), targeted U.S. primary-source research (15 U.S.C. §1125(a)(1) identified as the supporting statute), a proposition-boundary/goal-semantics diagnostic, and a BI/dependency architecture diagnostic (proved the fixed Composition templates already structurally prevent a fabricated infringement/confusion conclusion regardless of dependency count, and re-derived the dependency's actual purpose as aggregate-signal honesty and disclosure quality, not a Composition-safety workaround). This package consolidates those findings into one candidate proposition for FGR review. **No CRC eligibility, no runtime change, no TopicRelationship, no discovered relevance, no brand/logo ContentPresenceCategory is authorized by this package.**
+
+## 1. Proposition under review
+
+> Under 15 U.S.C. § 1125(a)(1), a person who uses in commerce a word, name, symbol, device, or any combination thereof, or any false designation of origin, in a way likely to cause confusion, mistake, or deception as to the affiliation, connection, or association of that person with another person, or as to the origin, sponsorship, or approval of that person's goods, services, or commercial activities by another person, may be civilly liable to anyone likely to be damaged by that use. This is a federal cause of action distinct from copyright, and does not require the mark to be federally registered.
+
+## 2. Source fidelity
+
+Primary source (Class A, GPO-published U.S. Code, 2023 edition, `evidence-captures/us-trademark/uscode-2023-title15-sec1125_20260916T083022Z_51c96e65.pdf`):
+
+> "(1) Any person who, on or in connection with any goods or services, or any container for goods, uses in commerce any word, term, name, symbol, or device, or any combination thereof, or any false designation of origin, false or misleading description of fact, or false or misleading representation of fact, which— (A) is likely to cause confusion, or to cause mistake, or to deceive as to the affiliation, connection, or association of such person with another person, or as to the origin, sponsorship, or approval of his or her goods, services, or commercial activities by another person, or (B) in commercial advertising or promotion, misrepresents the nature, characteristics, qualities, or geographic origin of his or her or another person's goods, services, or commercial activities, shall be liable in a civil action by any person who believes that he or she is or is likely to be damaged by such act."
+
+Tested element by element against the proposition in §1: actor ("any person") preserved exactly; trigger ("uses in commerce... word, term, name, symbol, or device... or false designation of origin") preserved; the confusion test (affiliation/connection/association, or origin/sponsorship/approval) preserved in full, not narrowed or broadened; civil-liability consequence preserved ("shall be liable... in a civil action"). **The proposition deliberately omits §1125(a)(1)(B)** (commercial-advertising misrepresentation of nature/characteristics/qualities/geographic origin) — a distinct, narrower branch of the same subsection, not needed for the target problem class (a depicted third-party brand/logo, not a misrepresentation about the user's own goods) — this is a scope decision, not an evidentiary gap, and is disclosed here rather than silently narrowed without comment.
+
+No instance of the proposition being stated more strongly than the source was found — no registration requirement is implied (correctly, per §1125(a)(1)'s own text and per §1127's "use in commerce" definition, neither of which conditions liability on registration), no confusion/affiliation/sponsorship/approval finding is asserted as established, no defendant/actor is named.
+
+## 3. Evidence sufficiency
+
+- **15 U.S.C. § 1125(a)(1):** Class A (GPO official U.S. Code, 2023 edition, direct PDF capture) — cross-validated three independent ways (WebSearch snippet, Cornell LII fetch, GPO PDF), byte-identical across all three.
+- **15 U.S.C. § 1127 (definitions):** Class A, same method. Supplies "use in commerce" and "trademark"/"service mark" definitions, used only to confirm that no registration requirement exists and that "use in commerce" is itself a defined statutory term (not further operationalized into a CRC-facing rule — see §6).
+- **USPTO, "Protecting Your Trademark: Basic Facts About Trademarks":** Class A (official agency publication, direct PDF capture). Used only for the general "trademarks and copyrights protect different things" educational framing (§5's candidate wording draws on this to distinguish trademark from copyright, mirroring the existing `CLAIM-COPY-001-v1`'s own precedent of naming the adjacent-but-distinct legal question).
+
+No remaining evidence gap blocks this review for the narrow proposition in §1.
+
+## 4. Actor scope
+
+The statute's actor is "any person" — broader and less specific than Article 50's "deployer" or NY GBL §396-b's duty-holder class. This proposition does not attempt to identify who, in a specific project, is the liable "person" — that determination is not attempted by the proposition and is not represented by any applicability requirement or dependency (a deliberate scope decision: unlike Article 50/NY, this statute's actor definition is broad enough that a specific-actor dependency would add complexity without corresponding disclosure value — the confusion/affiliation dependency, §7, already captures the one genuinely open legal question).
+
+## 5. Candidate CRC statement (draft, not yet FGR-approved wording — recorded here per corpus convention, refined at CPR stage)
+
+> Under U.S. federal law (the Lanham Act, 15 U.S.C. § 1125(a)(1)), using another party's brand name, logo, or other source-identifying material in commerce can create civil liability where the use is likely to cause confusion, mistake, or deception as to affiliation, connection, or association with that party, or as to the origin, sponsorship, or approval of goods, services, or commercial activities. This applies regardless of whether the mark is federally registered, and is a separate legal question from copyright.
+
+## 6. Applicability
+
+`applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }]` — the same mechanism, and the same non-conflation discipline, already governing `CLAIM-COPY-001-v1`/`002-v1`/`003-v1`. **`AssessmentJurisdictionMention` represents only that the user asked CRC to consider United States law** — it is not, and must never be read as, proof that this statute's territorial/commerce-clause reach actually attaches to the user's specific project. No new applicability mechanism, and no territorial-reach rules engine, is proposed or needed — this mirrors the already-frozen discipline from the Article 50/NY jurisdiction-gate precedent, re-derived independently (not copied) per the preceding diagnostic's own Question 6 analysis: because this proposition is reached via an explicit, dedicated goal (§7 of the prior diagnostic; not a relationship), it does not have Article 50's own unrestricted-global-reach problem, so the gate here serves its original, simpler purpose — same as `CLAIM-COPY-001`'s.
+
+## 7. Project dependency
+
+Exactly one, combined, per the statute's own single disjunctive test:
+
+**`confusion_as_to_affiliation_or_sponsorship`** — whether the specific depicted use is, in fact, likely to cause confusion, mistake, or deception as to affiliation, connection, association, origin, sponsorship, or approval. Type C (evidence-only), structurally identical in kind to Article 3(60)'s "deep fake" characterization dependency (`content_constitutes_deep_fake`) — a legal/factual judgment about likely consumer perception, not a raw self-attestable fact. **Never a direct CRC self-attestation question** (Stock Governance Rule). No `dependency-askability.ts` entry is authored or implied by this package — fail-closed by default, exactly as every sibling legal-characterization dependency in this corpus.
+
+**Explicitly excluded from the dependency model, per the preceding BI/dependency diagnostic's own re-derivation:**
+- **Authorization/permission** — not an element of §1125(a)(1) at all (it functions only as a defense, out of scope for this first slice); modeling it as a dependency would risk exactly the self-attestation-without-askability-review failure mode `COMMERCIAL_ASSURANCE_FACT_DEMAND_ARCHITECTURE.md` already documents for CertForm.
+- **Ownership** — an element of the registration-specific §1114 cause of action, not §1125(a); out of scope.
+- **Validity** — same reasoning as ownership.
+- **Registration status** — §1125(a)(1) does not require registration; not a dependency of this proposition.
+- **"Use in commerce" as a separately-tracked dependency** — near-definitionally satisfied for CRC's own always-commercial user population; folded into general evidence-limitation wording (§8) rather than given its own tracked string, avoiding a dependency with no real resolution value.
+
+**Why this dependency is retained** (recorded explicitly, per the preceding diagnostic's own finding, to prevent this package from being misread): **not** because Composition would otherwise fabricate an infringement/confusion conclusion — the fixed, domain-blind `rules.ts` templates already structurally prevent that regardless of dependency count (confirmed by direct source trace, not assumption; see the "Trademark — Zero-Dependency vs Unresolved-Dependency BI Diagnostic" milestone). Retained because: (1) it truthfully represents the one genuinely open, permanently-unresolvable-by-CRC legal characterization; (2) it prevents the Reviewer/HRR-facing **aggregate** `BoundedInterpretation.status` from reading `directly_relevant` merely because the narrower jurisdiction-only `BiApplicability.status` field independently reads `'established'` (those are two separate fields, traced directly in `bi-adapters.ts`); (3) it produces the more specific, more honest Case 3B closing sentence for the CRC user.
+
+## 8. Evidence limitations / general rule vs. prohibited conclusions
+
+**General rule CRC may explain** (§5's candidate statement): the existence of the §1125(a)(1) cause of action, its actor, its trigger, and its confusion/affiliation/sponsorship/approval test, and that it applies without regard to registration.
+
+**Project-specific conclusions CRC may not make:** that a specific project's use is (or is not) likely to cause confusion, mistake, or deception; that affiliation, connection, association, sponsorship, or approval is (or is not) established; that the depicted use constitutes "use in commerce" for this specific project; that the user (or anyone) has (or lacks) authorization or permission; that the user (or anyone) owns a valid trademark; that a specific project is (or is not) legally permitted; that satisfying or avoiding this rule establishes broader legal compliance, copyright clearance, or overall commercial readiness.
+
+**On `crc_publication_scope`'s actual role** (recorded accurately, per this package's own governing diagnostic finding, not overstated): this text is authored as FGR/CPR-review governance documentation and audit prose. It is never parsed or rendered by any runtime code path (traced directly: `project-knowledge-items.ts` reads only `candidate_statement`, never `publication_scope`) — the actual runtime-enforced boundary against a fabricated stronger conclusion is the fixed, domain-blind Composition template mechanism (§7), independent of this field's content. This prose remains valuable as the human-review record of what a reviewer approved, and as the source for §5's own candidate statement discipline, but this package does not claim it is itself an enforced rendering boundary.
+
+## 9. Commercial Assurance boundary
+
+Repository evidence (Reviewer Workbook Domain I, control I03, `guidance.ts`: *"I03 — Logos and trademarks: Even clearly AI-generated content can contain synthetic logos that resemble real marks. Note these even if you cannot confirm they are deliberate."*) establishes that Domain I03 is **human observation and evidentiary note-taking**, corroboration-graded (`Verified`/`Partially Verified`/`Not Verified`, the same vocabulary used across every other domain for evidentiary confidence, not legal adjudication). **Repository evidence does not establish that Domain I03, or Commercial Assurance generally, adjudicates legal trademark infringement** — no governance artifact anywhere in this corpus states that. The three-tier boundary preserved by this package:
+
+- **CRC** → general educational rule (§5) + the one unresolved project-specific characterization (§7), never a project conclusion.
+- **Commercial Assurance (Domain I03)** → human observes and notes the presence/character of depicted marks, forms an evidentiary-confidence judgment, feeding SI8's own institutional commercial-risk opinion (the Assessment Report).
+- **Neither CRC nor Commercial Assurance** → a court-like legal infringement adjudication. That remains outside SI8's own product scope entirely, consistent with every existing governed claim's own "not legal advice" framing.
+
+## 10. Explicit-vs-discovered treatment
+
+This package proposes **explicit-goal reachability only** (§11). No `TopicRelationship`, no discovered-relevance trigger, and no `ContentPresenceCategory` extension is proposed, authored, or implied — all three are explicitly out of scope for this milestone per its own governing instructions, and this package does not smuggle any of them in.
+
+## 11. GoalCategory / KnowledgeTopic identity
+
+**Proposed new `GoalCategory` value: `trademark`.**
+
+- **Governed semantic:** the user is asking CRC to help understand trademark/brand-use considerations relevant to their commercial AI content — never a request CRC will resolve into a permission, clearance, infringement, ownership, or validity conclusion.
+- **Included intents:** "What trademark issues should I consider if another company's logo appears in my commercial?"; "Can I use another company's logo in my commercial?"; "Does showing this brand infringe its trademark?" — all three collapse to the same underlying educational need (confirmed by direct scenario-testing in the preceding proposition-boundary diagnostic), answered identically and safely by the same hedge regardless of how the question is phrased.
+- **Excluded intents:** any request framed as wanting CRC to *determine* permission, authorization, ownership, or validity as a final answer — the goal semantic supports discussing the topic, never resolving those questions; the same BI/Composition hedge applies regardless of framing, so no separate "excluded" goal category is needed — exclusion is enforced at the conclusion level (§8), not the intake level.
+- **Why existing categories are insufficient:** `commercial_use` is specifically about whether content itself may be used commercially under tool/platform terms — a different question from third-party brand depiction; `copyright_ownership`/`copyrightability`/`likeness`/`third_party_source_rights` each name a different, already-settled legal subject matter. None represents trademark/brand-use without semantic distortion (confirmed by direct testing against all four example scenarios, not assumed).
+- **Why the semantic does not imply permission/clearance/infringement/ownership/validity:** the governed semantic (above) is deliberately phrased as "considerations," mirroring `likeness`'s own existing pattern (a subject-matter label, not a promise of resolution) — the same discipline already governing every other `GoalCategory`.
+
+**KnowledgeTopic identity:** the new `GoalCategory` value **is** its own `TopicClaim.topic` value — no separate `KNOWLEDGE_ONLY_TOPICS` addition is proposed or needed. Because `KnowledgeTopic = GoalCategory | KNOWLEDGE_ONLY_TOPICS` (a union, per `retrieval-engine/types.ts`), adding `trademark` to `GOAL_CATEGORIES` automatically makes it a valid `KnowledgeTopic` value for `TopicClaim.topic` — one governed-data addition satisfies both roles, exactly mirroring `likeness`/`copyright_ownership`'s own existing shape (never Article 50's `KNOWLEDGE_ONLY_TOPICS`-only, relationship-routed shape, which does not fit here since this domain is directly, explicitly askable). This enables direct exact-topic retrieval via the existing, unmodified `lookupTopicClaims` path — **no `TopicRelationship` is required or proposed.**
+
+## 12. Prohibited conclusions (summary, restates §8 for the governed-record template)
+
+Does not establish that a specific project's use causes (or does not cause) confusion, mistake, or deception. Does not establish affiliation, connection, association, sponsorship, or approval (in either direction). Does not establish that a specific use constitutes "use in commerce." Does not establish authorization, permission, ownership, or validity (in either direction). Does not constitute legal advice, a compliance determination, or a certification of commercial readiness — a human-reviewed Commercial Assurance Assessment (Domain I03 and the surrounding institutional review) remains the higher-assurance path for the project-specific facts this claim leaves open.
