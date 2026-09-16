@@ -9,6 +9,35 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of September 16, 2026
+*Run: 2026-09-16 · 7 high · 7 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [SECUR3D pushes brand security and IP protection upstream as AI-generated content floods marketplaces](https://www.bnnbloomberg.ca/investment-trends/2026/09/14/secur3d-pushes-brand-security-and-ip-protection-upstream-as-ai-generated-content-floods-marketplaces/) | BNN Bloomberg | Mon, 14 Sep 2026 | ☐ |
+| 9 | post+update | [New York’s AI Disclosure Law Draws First Complaints As California, Hawaii Follow Suit](https://www.netinfluencer.com/new-york-ai-disclosure-law-draws-first-complaints-as-california-hawaii-follow-suit/) | Net Influencer | Thu, 10 Sep 2026 | ☐ |
+| 8 | post | [The AI content tsunami: Creation is the easy part](https://www.marketingdive.com/spons/the-ai-content-tsunami-creation-is-the-easy-part/830184/) | Marketing Dive | Mon, 14 Sep 2026 | ☐ |
+| 8 | post+update | [Who Owns an AI-Generated Film? Copyright Questions Every Indie Filmmaker Should Understand](https://www.indieshortsmag.com/articles/2026/09/who-owns-ai-generated-film-copyright-questions-indie-filmmaker-should-understand/) | Indie Shorts Mag | Fri, 11 Sep 2026 | ☐ |
+| 8 | post+update | [AI Marketing Gets Consumer Protection Test in NY Disclosure Law](https://news.bloomberglaw.com/litigation/ny-disclosure-law-serves-as-bellwether-amid-ai-content-explosion) | Bloomberg Law News | Wed, 09 Sep 2026 | ☐ |
+| 7 | post+update | [California’s 2026 Legislative Session Wraps: A Wave of Privacy and AI…](https://www.kelleydrye.com/viewpoints/blogs/ad-law-access/californias-2026-legislative-session-wraps-a-wave-of-privacy-and-ai-bills-reaches-the-governor-with-key-child-safety-and-ai-measures-signed-into-law) | Kelley Drye & Warren LLP | Mon, 14 Sep 2026 | ☐ |
+| 7 | update | [Blee, a Cardumen Capital portfolio company, raises $27 million to bring its AI-powered marketing compliance solution to large enterprises](https://capital-riesgo.es/en/articles/blee-a-cardumen-capital-portfolio-company-raises-27-million-to-bring-its-ai-powered-marketing-compliance-solution-to-large-enterprises/) | Capital-Riesgo.es | Wed, 09 Sep 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [A Look Back at Digital Media & Content Platforms Stocks’ Q2 Earnings: Getty Images (NYSE:GETY) Vs The Rest Of The Pack](https://www.tradingview.com/news/stockstory:1a4beb799094b:0-a-look-back-at-digital-media-content-platforms-stocks-q2-earnings-getty-images-nyse-gety-vs-the-rest-of-the-pack/) | TradingView | Tue, 15 Sep 2026 | ☐ |
+| 6 | monitor | [Why one IT consultancy thinks AI insurance stays a niche through 2028](https://www.insurancebusinessmag.com/us/news/technology/why-one-it-consultancy-thinks-ai-insurance-stays-a-niche-through-2028-589556.aspx) | Insurance Business | Mon, 14 Sep 2026 | ☐ |
+| 6 | monitor | [Should your company advertise on ChatGPT? The legal risks to weigh](https://www.lexology.com/pro/content/should-your-company-advertise-chatgpt-the-legal-risks-weigh) | Lexology | Fri, 11 Sep 2026 | ☐ |
+| 5 | monitor | [Rogue AI — Is Your Company Prepared?](https://www.hunton.com/hunton-insurance-recovery-blog/rogue-ai-is-your-company-prepared) | Hunton Andrews Kurth LLP | Mon, 14 Sep 2026 | ☐ |
+| 5 | monitor | [Will Embedded AI Strengthen Adobe’s Creative Software Position?](https://futurumgroup.com/insights/will-embedded-ai-strengthen-adobes-creative-software-position/) | The Futurum Group | Thu, 10 Sep 2026 | ☐ |
+| 4 | monitor | [California Leads the Way With New Slate of AI Bills](https://www.techpolicy.press/california-leads-the-way-with-new-slate-of-ai-bills/) | Tech Policy Press | Tue, 15 Sep 2026 | ☐ |
+| 4 | monitor | [AI and GDPR Monthly Update](https://www.dentons.com/en/insights/newsletters/2026/september/9/eu-ai-and-gdpr-key-trends-and-insights/ai-and-gdpr-monthly-update-august/ai-and-gdpr-monthly-update-eng) | Dentons | Wed, 09 Sep 2026 | ☐ |
+
+---
+
 ## Week of September 13, 2026
 *Run: 2026-09-13 · 13 high · 12 monitor · lookback 7 days*
 
