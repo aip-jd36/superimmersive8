@@ -147,7 +147,7 @@ describe('validateAndNormalizePermittedResearchIntent — malformed model output
 
   test('invalid enum topic is DROPPED, never coerced or guessed', () => {
     const out = validateAndNormalizePermittedResearchIntent(
-      permitted({ research_intents: [ri('trademark'), ri('copyright ownership'), ri('copyright_ownership')] }),
+      permitted({ research_intents: [ri('brand_use'), ri('copyright ownership'), ri('copyright_ownership')] }),
     )
     expect(out!.research_intents).toEqual([{ topic: 'copyright_ownership', scope: 'informational' }])
   })

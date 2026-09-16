@@ -196,8 +196,13 @@ describe('STEP 3/4 -- test-only KnowledgeTopic mechanism and type separation', (
     expect(GOAL_CATEGORIES).toContain(result?.matched_goal_category)
   })
 
-  test('GOAL_CATEGORIES remains unchanged (6 values, extractor schema untouched)', () => {
-    expect(GOAL_CATEGORIES.length).toBe(6)
+  // Count updated 6 -> 7 by the Trademark CRC Production Representation
+  // milestone, which deliberately added a real 'trademark' GoalCategory value
+  // (unlike SIMULATED_TOPIC here, which is intentionally never added). This
+  // test's real assertion -- that a knowledge-only test topic is NOT a
+  // GoalCategory -- is untouched by that milestone.
+  test('GOAL_CATEGORIES reflects only deliberate, governed additions (7 values, extractor schema untouched by this file)', () => {
+    expect(GOAL_CATEGORIES.length).toBe(7)
     expect(isGoalCategoryTopic(SIMULATED_TOPIC)).toBe(false)
   })
 

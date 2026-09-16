@@ -771,7 +771,31 @@ export interface ProjectFacts {
  * why (provider-scoped retrieval, M3, is a separate, not-yet-authorized
  * milestone).
  */
-export const GOAL_CATEGORIES = ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'third_party_source_rights', 'unknown'] as const
+/**
+ * `trademark` (Trademark — CRC Production Representation, 2026-09-16, per
+ * CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1's own governance chain --
+ * FGR_021 Adoption, CPR_027 Publication approval): the user is explicitly
+ * asking CRC to help understand trademark/brand-use considerations relevant
+ * to commercial AI content -- e.g. use or depiction of another party's
+ * brand name, logo, or other source-identifying material. Deliberately
+ * NEVER a promise that CRC will determine infringement, likelihood of
+ * confusion, authorization, permission, clearance, ownership, or validity
+ * -- those remain unresolved project-specific legal characterizations (see
+ * `CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1`'s own governed dependency,
+ * `confusion_as_to_affiliation_or_sponsorship`, evidence-only, non-askable).
+ * A materially different question from `commercial_use` (tool/platform-term
+ * permission for the content itself) and from `likeness`/`copyright_
+ * ownership`/`copyrightability` (each a distinct, already-settled legal
+ * subject matter) -- confirmed by direct scenario-testing against realistic
+ * explicit intents during this domain's own proposition-boundary diagnostic,
+ * not assumed from the word "trademark" alone. The same value serves as
+ * `TopicClaim.topic` directly (`KnowledgeTopic = GoalCategory |
+ * KNOWLEDGE_ONLY_TOPICS`, a union) -- no separate `KNOWLEDGE_ONLY_TOPICS`
+ * addition, and (unlike EU AI Act Article 50's own `ai_content_
+ * transparency`) no `TopicRelationship`, since this domain is explicit-
+ * goal-reachable directly.
+ */
+export const GOAL_CATEGORIES = ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'third_party_source_rights', 'trademark', 'unknown'] as const
 
 export type GoalCategory = (typeof GOAL_CATEGORIES)[number]
 

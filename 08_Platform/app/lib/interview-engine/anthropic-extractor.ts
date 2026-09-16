@@ -173,8 +173,8 @@ const CONFIDENCE_HINT_VALUES = ['confirmed', 'confirmed_absent', 'unresolved_no_
  * launch-marker timestamp is needed).
  */
 const PROJECT_FACT_FIELD_VALUES = ['intended_use', 'workflow_role', 'human_contribution_description'] as const
-/** Milestone 2 (2026-08-15); extended with 'third_party_source_rights' (Living Knowledge — Third-Party Source Rights, M1+M2, 2026-08-18). Mirrors GOAL_CATEGORIES / GOAL_SCOPES in types/interview-engine.ts -- kept as separate local consts here, same pattern as every other *_VALUES const in this file, rather than importing the runtime const array across the adapter boundary. */
-const GOAL_CATEGORY_VALUES = ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'third_party_source_rights', 'unknown'] as const
+/** Milestone 2 (2026-08-15); extended with 'third_party_source_rights' (Living Knowledge — Third-Party Source Rights, M1+M2, 2026-08-18); extended with 'trademark' (Trademark — CRC Production Representation, 2026-09-16). Mirrors GOAL_CATEGORIES / GOAL_SCOPES in types/interview-engine.ts -- kept as separate local consts here, same pattern as every other *_VALUES const in this file, rather than importing the runtime const array across the adapter boundary. */
+const GOAL_CATEGORY_VALUES = ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'third_party_source_rights', 'trademark', 'unknown'] as const
 const GOAL_SCOPE_VALUES = ['informational', 'determination_request'] as const
 /**
  * P0 Anthropic schema-union-limit fix (2026-08-21). Generic wire-level
@@ -358,7 +358,7 @@ export const CANDIDATE_RESPONSE_SCHEMA = {
             type: ['string', 'null'],
             enum: [...GOAL_CATEGORY_VALUES, null],
             description:
-              'When kind is user_goal and goal_confidence_hint is confirmed: the goal\'s coarse subject matter -- commercial_use, copyright_ownership, copyrightability, likeness, or unknown if you cannot confidently classify it. Never guessed from adjacent context the user did not actually state. Null otherwise.',
+              'When kind is user_goal and goal_confidence_hint is confirmed: the goal\'s coarse subject matter -- commercial_use, copyright_ownership, copyrightability, likeness, trademark, or unknown if you cannot confidently classify it. Never guessed from adjacent context the user did not actually state. Null otherwise.',
           },
           goal_scope_hint: {
             type: ['string', 'null'],

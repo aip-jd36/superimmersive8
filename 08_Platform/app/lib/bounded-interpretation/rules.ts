@@ -52,6 +52,7 @@ const CATEGORY_LABELS: Record<GoalCategory, string> = {
   copyrightability: 'whether this kind of output can be copyrighted at all',
   likeness: 'likeness, voice, or consent',
   third_party_source_rights: 'whether you have the rights to use third-party source material',
+  trademark: 'trademark or brand-use considerations',
   unknown: 'what you asked',
 }
 
@@ -91,6 +92,18 @@ const OUTSIDE_COVERAGE_BY_CATEGORY: Record<GoalCategory, string> = {
    */
   third_party_source_rights:
     `CRC doesn't currently have governed guidance covering ${CATEGORY_LABELS.third_party_source_rights}. ${BRIDGE_SENTENCE}`,
+  /**
+   * `trademark` (Trademark — CRC Production Representation, 2026-09-16):
+   * unlike `third_party_source_rights` above, a real governed claim IS
+   * reachable under this category (`CLAIM-TRADEMARK-US-LANHAM-CONFUSION-
+   * 001-v1`, exact-topic, jurisdiction-gated) -- this template renders only
+   * when that claim's own applicability gate is not met (e.g. assessment
+   * jurisdiction unresolved or not United States), the same "outside
+   * current coverage" fallback every other real category already has for
+   * its own unmatched case, not a permanent "no coverage yet" state.
+   */
+  trademark:
+    `CRC doesn't currently have governed guidance covering this specific ${CATEGORY_LABELS.trademark} question. ${BRIDGE_SENTENCE}`,
   unknown:
     `CRC's current governed knowledge doesn't cover this specific question yet. ${BRIDGE_SENTENCE}`,
 }

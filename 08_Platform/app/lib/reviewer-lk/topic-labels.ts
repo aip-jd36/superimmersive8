@@ -23,6 +23,7 @@ export const REVIEWER_TOPIC_LABELS: Record<Exclude<GoalCategory, 'unknown'>, str
   copyrightability: 'Copyrightability',
   likeness: 'Likeness',
   third_party_source_rights: 'Third-party source rights',
+  trademark: 'Trademark',
 }
 
 /**

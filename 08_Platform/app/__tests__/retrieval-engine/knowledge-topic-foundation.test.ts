@@ -212,9 +212,14 @@ describe('TopicRelationship source_topic/target_topic asymmetry (load-bearing, n
 })
 
 describe('extractor isolation -- GOAL_CATEGORIES is untouched by this milestone', () => {
-  test('GOAL_CATEGORIES is still exactly the 6 pre-existing values', () => {
+  // This suite's own KnowledgeTopic-foundation milestone deliberately left
+  // GOAL_CATEGORIES untouched. The later Trademark CRC Production
+  // Representation milestone, unlike this one, DID intentionally add a
+  // category ('trademark') -- a separate, deliberate, governed decision, not
+  // a regression of the isolation this suite otherwise proves.
+  test('GOAL_CATEGORIES is exactly the 7 current values', () => {
     expect([...GOAL_CATEGORIES].sort()).toEqual(
-      ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'third_party_source_rights', 'unknown'].sort(),
+      ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'third_party_source_rights', 'trademark', 'unknown'].sort(),
     )
   })
 })

@@ -1538,4 +1538,81 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     last_verified: '2026-09-13',
     superseded_by: null,
   },
+  {
+    // U.S. Trademark, Lanham Act §1125(a)(1) confusion/affiliation rule
+    // (Trademark -- CRC Production Representation milestone, 2026-09-16).
+    // Faithful, mechanical projection of GOVERNED-CLAIMS.md's own
+    // CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1 entry (Lifecycle: Adopted,
+    // FGR_021; CRC Publication Scope: APPROVED FOR CRC PUBLICATION, CPR_027)
+    // -- no wording strengthened, simplified, or reconstructed here.
+    // `topic: 'trademark'` is the first entry whose topic is also a real
+    // `GoalCategory` value added in this same milestone (`types/interview-
+    // engine.ts`'s own `GOAL_CATEGORIES`) -- reached via the existing,
+    // unmodified exact-topic path (`lookupTopicClaims`), never a
+    // `TopicRelationship` (unlike `ai_content_transparency` above, which is
+    // `KnowledgeTopic`-only and relationship-routed). No discovered
+    // relevance, no `ContentPresenceCategory`, no `TopicRelationship` is
+    // authored by this milestone.
+    claim_id: 'CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1',
+    topic: 'trademark',
+    claim_character: 'established',
+    jurisdiction: 'United States (federal)',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    // Verbatim from GOVERNED-CLAIMS.md's own CRC Publication Scope field
+    // (CPR_027, 2026-09-16) -- carries the full prohibited-conclusions
+    // boundary, including the explicit "even merely selecting, stating, or
+    // mentioning the United States" disclaimer mirroring the NY/Article 50
+    // precedent. Per this codebase's own established discipline
+    // (types.ts's own header comment), this text is never parsed or
+    // rendered by any runtime code path -- audit/governance prose only;
+    // the actual runtime-enforced boundary is the fixed, domain-blind
+    // Composition template mechanism (rules.ts), independent of this
+    // field's content.
+    crc_publication_scope:
+      'CRC may state that 15 U.S.C. § 1125(a)(1) imposes civil liability on a person who uses another party\'s mark or source-identifying material in commerce in a way likely to cause confusion, mistake, or deception as to affiliation, connection, or association, or as to origin, sponsorship, or approval, and that this applies regardless of federal registration and is a separate legal question from copyright. CRC must not state or imply: that a specific project\'s use does or does not cause confusion, mistake, or deception; that affiliation, connection, association, sponsorship, or approval is or is not established for a specific project; that a specific use does or does not constitute "use in commerce"; that the user (or anyone) has or lacks authorization or permission; that the user (or anyone) owns a valid trademark; that United States jurisdiction attaches to a specific project for any reason, including the user merely selecting, stating, or mentioning the United States as the assessment jurisdiction; that a specific project is or is not legally permitted; or that satisfying or avoiding this rule establishes broader legal compliance, copyright clearance, or overall commercial readiness. This is educational workflow guidance, not legal advice. A human-reviewed Commercial Assurance Assessment (Reviewer Workbook Domain I, control I03 -- human observation and evidentiary note-taking, never a legal infringement adjudication) remains the higher-assurance path for the project-specific facts this claim leaves open.',
+    // Verbatim from GOVERNED-CLAIMS.md's own CRC Candidate Statement field.
+    crc_candidate_statement:
+      'Under U.S. federal law (the Lanham Act, 15 U.S.C. § 1125(a)(1)), using another party\'s brand name, logo, or other source-identifying material in commerce can create civil liability where the use is likely to cause confusion, mistake, or deception as to affiliation, connection, or association with that party, or as to the origin, sponsorship, or approval of goods, services, or commercial activities. This applies regardless of whether the mark is federally registered, and is a separate legal question from copyright.',
+    // Mirrors CLAIM-COPY-001-v1's own precedent exactly: AssessmentJurisdictionMention
+    // represents only that the user asked CRC to consider United States
+    // law -- never proof that this statute's territorial/commerce-clause
+    // reach actually attaches to a specific project. This claim is reached
+    // via an explicit goal (never a relationship), so it has no Article
+    // 50-style unrestricted-global-reach exposure to solve.
+    applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+    // confusion_as_to_affiliation_or_sponsorship: Type C, evidence-only --
+    // whether a specific depicted use is, in fact, likely to cause
+    // confusion, mistake, or deception as to affiliation, connection,
+    // association, origin, sponsorship, or approval (15 U.S.C. §
+    // 1125(a)(1)(A)'s own single disjunctive test, collapsed into one
+    // dependency string mirroring the statute's own structure). A legal/
+    // factual characterization about likely consumer perception, not a
+    // raw self-attestable fact -- structurally identical in kind to
+    // CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1's own
+    // content_constitutes_deep_fake dependency; never a direct CRC
+    // self-attestation question (Stock Governance Rule). Unresolved under
+    // the currently governed CRC evidence model -- not a timeless claim
+    // that no future governed evidence model could ever resolve it.
+    // Retained not because Composition would otherwise fabricate an
+    // infringement/confusion conclusion (the existing fixed, domain-blind
+    // Bounded Interpretation/Composition templates already structurally
+    // prevent that regardless of dependency count -- confirmed by direct
+    // source trace) but for Reviewer/HRR aggregate-signal honesty and CRC
+    // disclosure specificity. Authorization/permission, ownership,
+    // validity, and registration status are deliberately NOT represented
+    // as dependencies of this claim -- see GOVERNED-CLAIMS.md's own entry
+    // for the full reasoning.
+    unresolved_project_dependencies: ['confusion_as_to_affiliation_or_sponsorship'],
+    // Statutory, tool-independent, and not a third-party asset-provider-
+    // scoped claim.
+    provider_scope: null,
+    tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
+    // geographic_relevance_scope deliberately omitted (opt-out by this
+    // field's own inverted default polarity) -- no discovered relevance is
+    // activated by this milestone; this claim is explicit-goal-only.
+    last_verified: '2026-09-16',
+    superseded_by: null,
+  },
 ]
