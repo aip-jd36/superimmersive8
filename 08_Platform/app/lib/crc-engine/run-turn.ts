@@ -157,7 +157,7 @@ import { deriveDiscoveredTopicOccurrences, discoveredTopicCategories } from './d
 import type { SessionStore } from './session-store'
 import type { CRCSessionState } from './types'
 import type { MatrixRow, TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
-import type { Phase, StructuredUnderstanding } from '@/types/interview-engine'
+import type { KnowledgeDemandOccurrence, Phase, StructuredUnderstanding } from '@/types/interview-engine'
 
 /**
  * Runtime-owned fixed copy for a turn where nothing is asked but the
@@ -229,6 +229,21 @@ export type TurnOutcome = (
    * through Constraint A/B.
    */
   precedingTakeaway?: string
+  /**
+   * LK-DEMAND-2C (2026-09-18). Whatever `runExtractionPipeline` (extraction.ts)
+   * computed as this turn's own `knowledgeDemandOccurrences` -- additive,
+   * rides along with whatever this turn's own outcome already is, exactly
+   * like `precedingTakeaway` above. Present (non-empty) only when this
+   * turn's extraction produced at least one material-demand occurrence,
+   * the ordinary case being no occurrences at all on most turns. Consumed
+   * downstream ONLY by app/api/crc/turn/route.ts's own best-effort,
+   * fail-open call to `recordKnowledgeDemandEvidence` -- never by
+   * questioning, gates, phase, completion, Retrieval, BI, Composition, or
+   * Projection, none of which read this field. This is evidence, never a
+   * coverage conclusion -- see KnowledgeDemandOccurrence's own header
+   * (types/interview-engine.ts) for the full boundary.
+   */
+  knowledgeDemandOccurrences?: KnowledgeDemandOccurrence[]
   /**
    * CRC Identity + Abuse Prevention + Analytics milestone -- discovery
    * analytics instrumentation (design report §11). Surfaces the SAME
@@ -574,7 +589,14 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     current_human_contribution_description: currentHumanContributionDescription,
     answering_jurisdiction_question: answeringJurisdictionQuestion,
   }
-  const { updated: extracted } = await runExtractionPipeline(suLoaded, rawTurn, deps.extractor)
+  // LK-DEMAND-2C (2026-09-18): captured here, threaded through to this
+  // function's own return points (below) as additive TurnOutcome metadata
+  // only -- never merged into `extracted`/`suAfter`/StructuredUnderstanding.
+  // See KnowledgeDemandOccurrence's own header (types/interview-engine.ts)
+  // for why: it must never participate in Gate 1/Gate 2 diffing, phase
+  // computation, or completion, and this capture point changes nothing
+  // about how `extracted` itself is used below.
+  const { updated: extracted, knowledgeDemandOccurrences } = await runExtractionPipeline(suLoaded, rawTurn, deps.extractor)
 
   // Decline pre-processing BEFORE gate evaluation -- Phase 7's own shipped
   // bugfix (evaluateGate1's decline branch, and evaluateGate2's decline
@@ -701,7 +723,8 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
         pending_commercial_readiness_takeaway: null,
       })
       const completeOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suAfter, deps.matrix, topicClaims, relationships) }
-      return precedingTakeaway ? { ...completeOutcome, precedingTakeaway } : completeOutcome
+      const withTakeaway = precedingTakeaway ? { ...completeOutcome, precedingTakeaway } : completeOutcome
+      return knowledgeDemandOccurrences.length > 0 ? { ...withTakeaway, knowledgeDemandOccurrences } : withTakeaway
     }
     // Else: at least one governed selector need is still live and
     // un-consumed -- fall through to the ordinary candidate-generation
@@ -798,7 +821,8 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
         pending_commercial_readiness_takeaway: null,
       })
       const budgetExhaustedOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suBudgetExhausted, deps.matrix, topicClaims, relationships) }
-      return precedingTakeaway ? { ...budgetExhaustedOutcome, precedingTakeaway } : budgetExhaustedOutcome
+      const withTakeaway = precedingTakeaway ? { ...budgetExhaustedOutcome, precedingTakeaway } : budgetExhaustedOutcome
+      return knowledgeDemandOccurrences.length > 0 ? { ...withTakeaway, knowledgeDemandOccurrences } : withTakeaway
     }
 
     // CRC Limited Pilot -- Model 4 (bounded alternative-question search),
@@ -1181,7 +1205,8 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
               humanContributionSignal,
               selectorSignal,
             }
-            return precedingTakeaway ? { ...exhaustedOutcome, precedingTakeaway } : exhaustedOutcome
+            const withTakeaway = precedingTakeaway ? { ...exhaustedOutcome, precedingTakeaway } : exhaustedOutcome
+            return knowledgeDemandOccurrences.length > 0 ? { ...withTakeaway, knowledgeDemandOccurrences } : withTakeaway
           }
         }
       }
@@ -1230,5 +1255,6 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   finalOutcome = jurisdictionSignal ? { ...finalOutcome, jurisdictionSignal } : finalOutcome
   finalOutcome = humanContributionSignal ? { ...finalOutcome, humanContributionSignal } : finalOutcome
   finalOutcome = selectorSignal ? { ...finalOutcome, selectorSignal } : finalOutcome
-  return precedingTakeaway ? { ...finalOutcome, precedingTakeaway } : finalOutcome
+  const withTakeaway = precedingTakeaway ? { ...finalOutcome, precedingTakeaway } : finalOutcome
+  return knowledgeDemandOccurrences.length > 0 ? { ...withTakeaway, knowledgeDemandOccurrences } : withTakeaway
 }

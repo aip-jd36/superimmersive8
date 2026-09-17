@@ -553,3 +553,120 @@ describe('Behavioral non-interference: runTurn() outcome is byte-identical with 
     expect(loadedWith.structured_understanding.user_goals).toHaveLength(loadedWithout.structured_understanding.user_goals.length)
   })
 })
+
+// ── LK-DEMAND-2C -- durable evidence transport seam (2026-09-18) ───────────
+//
+// LK-DEMAND-2A/2A-R1 (above) proved knowledgeDemandOccurrences exists as an
+// in-memory runExtractionPipeline return value and never leaks into
+// StructuredUnderstanding/Gate 1/Gate 2/phase/completion. LK-DEMAND-2C adds
+// no new extraction/qualification logic -- it only threads that same,
+// already-proven-inert value out through TurnOutcome as additive metadata
+// (mirroring the existing precedingTakeaway field), for
+// app/api/crc/turn/route.ts to hand to recordKnowledgeDemandEvidence()
+// AFTER the authoritative session save. These tests exercise the real
+// runTurn() entry point to prove that transport, not the persistence writer
+// itself (see __tests__/crc-engine/knowledge-demand-evidence.test.ts for
+// that). Case letters below refer to the LK-DEMAND-2C task's own Phase 11
+// matrix, not this file's earlier (unrelated) Case A-N lettering.
+
+describe('LK-DEMAND-2C -- TurnOutcome.knowledgeDemandOccurrences transport', () => {
+  test('Case J -- a qualified occurrence rides along on an ordinary "question" TurnOutcome, correctly shaped', async () => {
+    const goal = goalCandidate({ proposal_id: 'c4', raw_text: 'Can I use this on Twitch commercially?' })
+    const demand = demandCandidate({ proposal_id: 'c5', raw_text: 'on Twitch', supports_goal_quote: 'use this on Twitch commercially' })
+    const outcome = await runTurn({ token: 'j1', turnNumber: 1, userText: 'x' }, runTurnDeps({ extractor: constantExtractor([goal, demand]) }))
+
+    expect(outcome.kind).toBe('question')
+    expect(outcome.knowledgeDemandOccurrences).toHaveLength(1)
+    expect(outcome.knowledgeDemandOccurrences![0].raw_text).toBe('on Twitch')
+    expect(outcome.knowledgeDemandOccurrences![0].qualification_state).toBe('qualified')
+    expect(outcome.knowledgeDemandOccurrences![0].source_turn).toBe(1)
+  })
+
+  test('Case K -- no material demand this turn: the field is entirely absent from TurnOutcome, not an empty array', async () => {
+    const goal = goalCandidate()
+    const outcome = await runTurn({ token: 'k1', turnNumber: 1, userText: 'x' }, runTurnDeps({ extractor: constantExtractor([goal]) }))
+
+    expect(outcome.kind).toBe('question')
+    expect(outcome).not.toHaveProperty('knowledgeDemandOccurrences')
+  })
+
+  test('Case L -- multiple qualified occurrences from Case H\'s own fixture shape all ride along together, independently', async () => {
+    const goal = goalCandidate({ raw_text: 'Can my client use this on Kick and Twitch?' })
+    const kickDemand = demandCandidate({ proposal_id: 'c2', raw_text: 'on Kick', supports_goal_quote: 'use this on Kick and Twitch' })
+    const twitchDemand = demandCandidate({ proposal_id: 'c3', raw_text: 'Twitch', supports_goal_quote: 'use this on Kick and Twitch' })
+    const outcome = await runTurn(
+      { token: 'l1', turnNumber: 1, userText: 'x' },
+      runTurnDeps({ extractor: constantExtractor([goal, kickDemand, twitchDemand]) }),
+    )
+
+    expect(outcome.knowledgeDemandOccurrences).toHaveLength(2)
+    expect(outcome.knowledgeDemandOccurrences!.map((o) => o.raw_text).sort()).toEqual(['Twitch', 'on Kick'].sort())
+  })
+
+  test('Case M -- same-turn correction: both occurrences ride along, superseded_by correctly links them', async () => {
+    const goal = goalCandidate({ raw_text: 'Can I use this commercially on a platform?' })
+    const kickDemand = demandCandidate({ proposal_id: 'c2', raw_text: 'on Kick', supports_goal_quote: 'use this commercially on a platform' })
+    const correction = demandCandidate({
+      proposal_id: 'c3',
+      raw_text: 'Twitch',
+      supports_goal_quote: 'use this commercially on a platform',
+      is_correction: true,
+      correction_of_raw_text: 'Kick',
+    })
+    const outcome = await runTurn(
+      { token: 'm1', turnNumber: 1, userText: 'x' },
+      runTurnDeps({ extractor: constantExtractor([goal, kickDemand, correction]) }),
+    )
+
+    const occurrences = outcome.knowledgeDemandOccurrences!
+    expect(occurrences).toHaveLength(2)
+    const kick = occurrences.find((o) => o.raw_text === 'on Kick')!
+    const twitch = occurrences.find((o) => o.raw_text === 'Twitch')!
+    expect(kick.superseded_by).toBe(twitch.occurrence_id)
+    expect(twitch.superseded_by).toBeNull()
+  })
+
+  test('Case N -- the field also rides along on a "complete" TurnOutcome (stop_interview decline path)', async () => {
+    const goal = goalCandidate({ raw_text: 'Can I use this on Twitch commercially?' })
+    const demand = demandCandidate({ raw_text: 'on Twitch', supports_goal_quote: 'use this on Twitch commercially' })
+    const outcome = await runTurn(
+      { token: 'n1', turnNumber: 1, userText: 'skip', declineAction: 'stop_interview' },
+      runTurnDeps({ extractor: constantExtractor([goal, demand]) }),
+    )
+
+    expect(outcome.kind).toBe('complete')
+    expect(outcome.knowledgeDemandOccurrences).toHaveLength(1)
+    expect(outcome.knowledgeDemandOccurrences![0].raw_text).toBe('on Twitch')
+  })
+
+  test('Case O -- a replayed already-complete session (no extraction runs) carries no knowledgeDemandOccurrences field at all', async () => {
+    // Mirrors run-turn.ts's own §7 recovery short-circuit (completion_reason
+    // already set): runExtractionPipeline never runs on this path, so there
+    // is no new evidence to report for a turn that was never really
+    // processed.
+    const store = createInMemorySessionStore()
+    const goal = goalCandidate({ raw_text: 'Can I use this on Twitch commercially?' })
+    const demand = demandCandidate({ raw_text: 'on Twitch', supports_goal_quote: 'use this on Twitch commercially' })
+    await runTurn(
+      { token: 'o1', turnNumber: 1, userText: 'skip', declineAction: 'stop_interview' },
+      runTurnDeps({ extractor: constantExtractor([goal, demand]) }, store),
+    )
+
+    const replay = await runTurn({ token: 'o1', turnNumber: 2, userText: 'anything' }, runTurnDeps({}, store))
+    expect(replay.kind).toBe('complete')
+    expect(replay).not.toHaveProperty('knowledgeDemandOccurrences')
+  })
+
+  test('Case P -- knowledgeDemandOccurrences is never written into persisted session state -- it is TurnOutcome-only metadata, never engine state', async () => {
+    const store = createInMemorySessionStore()
+    const goal = goalCandidate({ raw_text: 'Can I use this on Twitch commercially?' })
+    const demand = demandCandidate({ raw_text: 'on Twitch', supports_goal_quote: 'use this on Twitch commercially' })
+    const outcome = await runTurn({ token: 'p1', turnNumber: 1, userText: 'x' }, runTurnDeps({ extractor: constantExtractor([goal, demand]) }, store))
+    expect(outcome.knowledgeDemandOccurrences).toHaveLength(1)
+
+    const loaded = (await store.load('p1')) as unknown as { structured_understanding: Record<string, unknown> }
+    expect(loaded.structured_understanding).not.toHaveProperty('knowledgeDemandOccurrences')
+    expect(loaded.structured_understanding).not.toHaveProperty('knowledge_demand_occurrences')
+    expect(JSON.stringify(loaded.structured_understanding)).not.toContain('knowledgeDemandOccurrences')
+  })
+})

@@ -69,6 +69,7 @@ import { checkSessionCreationRate, checkBurst, checkTurnCeiling, logRateLimitedE
 import { getRuntimeCommit, getModelConfig } from '@/lib/crc-engine/runtime-metadata'
 import { buildCompleteResponseFields } from '@/lib/crc-engine/complete-response'
 import { recordCrcCompletionTrace } from '@/lib/crc-engine/turn-traces'
+import { recordKnowledgeDemandEvidence } from '@/lib/crc-engine/knowledge-demand-evidence'
 import { deliverCrcResultsEmail } from '@/lib/crc-engine/results-email-delivery'
 import { getResultsEmailErrorMessage, type ResultsEmailClaimReason } from '@/lib/crc-engine/results-gate-copy'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
@@ -663,6 +664,19 @@ export async function POST(request: NextRequest) {
     const retryResponse = NextResponse.json<TurnResponseBody>({ status: 'retry' }, { status: 503 })
     setSessionCookie(retryResponse, token)
     return retryResponse
+  }
+
+  // LK-DEMAND-2C (2026-09-18): durable material-demand evidence, best-
+  // effort, after the turn's own authoritative persistence (runTurn()'s
+  // own engine-state save, then saveCrcSessionProductState immediately
+  // above) has already succeeded -- same fail-open placement and ordering
+  // discipline as recordCrcCompletionTrace()/logAnalyticsEvent() below.
+  // Unconditional on outcome.kind (unlike the completion-trace call
+  // further down): a material demand can be expressed on ANY turn, not
+  // only a completing one. A no-op when this turn produced no occurrences
+  // -- the ordinary case -- see recordKnowledgeDemandEvidence's own header.
+  if (outcome.knowledgeDemandOccurrences) {
+    await recordKnowledgeDemandEvidence(supabaseAdmin, { sessionId: token, occurrences: outcome.knowledgeDemandOccurrences })
   }
 
   // Discovery analytics instrumentation (design report §11) -- logged
