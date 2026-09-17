@@ -612,8 +612,164 @@ export interface TopicClaim {
    * permissive state than "field explicitly null").
    */
   geographic_relevance_scope?: string[] | null
+  /**
+   * `subject_ids` (LK-DEMAND-2B2 -- Governed Subject Foundation,
+   * 2026-09-17). The `GovernedSubject.subject_id` values (see that type's
+   * own header, this file) this claim is ABOUT -- an independent dimension
+   * from every scope/applicability field on this interface.
+   *
+   * CRITICAL SEMANTIC BOUNDARY, deliberately the OPPOSITE relationship
+   * `provider_scope`/`tool_scope` express: those two fields NARROW an
+   * already topic-relevant claim's CANDIDACY given the CURRENT project's
+   * active tool/provider (an applicability-adjacent gate -- see their own
+   * doc comments above, in particular `tool_scope`'s explicit "NARROWS...
+   * never CREATES topic relevance on its own"). `subject_ids` makes no
+   * applicability/candidacy claim at all -- it is a plain, declarative
+   * "this governed proposition concerns these real-world subjects," true
+   * regardless of what any given project's own active tools/providers
+   * happen to be. A claim may declare `subject_ids` with `tool_scope: null`
+   * (about a subject, but not gated by which tool the project used), or
+   * have a non-null `tool_scope` with no `subject_ids` at all (gated by
+   * tool identity, with no separate governed subject declared) -- these are
+   * independent, never inferred from one another.
+   *
+   * Optional, mirroring `publication_scope`'s own established precedent
+   * (this interface, above) for the identical reason: every pre-existing
+   * `TopicClaim` test/fixture literal across the codebase compiles and
+   * behaves unchanged without it. UNLIKE `publication_scope`'s own
+   * fail-closed absence default (missing/null treated as reviewer-
+   * ineligible), an absent `subject_ids` carries NO governance meaning in
+   * either direction -- it means only "no explicit governed-subject
+   * association has been declared for this claim," never "subject
+   * unknown," "claim ungoverned," "claim ineligible," "claim globally
+   * applicable," "claim about every subject," or "claim about no possible
+   * real-world thing." No code in this milestone reads, infers, backfills,
+   * or validates this field against a populated subject registry -- see
+   * `lib/retrieval-engine/governed-subject.ts`'s own header for the
+   * standalone, unwired validation helpers this milestone provides instead
+   * of wiring referential integrity into existing claim-loading paths.
+   */
+  subject_ids?: string[]
   last_verified: string | null
   /** id of the claim version that replaced this one, or null if this is the current version. Mirrors UserGoal.superseded_by's own convention. */
+  superseded_by: string | null
+}
+
+// ── Governed Subject (LK-DEMAND-2B2 -- Governed Subject Foundation,
+// 2026-09-17) ───────────────────────────────────────────────────────────
+//
+// A GOVERNED SUBJECT represents a real-world entity that governed
+// knowledge (a `TopicClaim`, via its own `subject_ids` field above) may be
+// ABOUT -- deliberately distinct from every other identity/taxonomy
+// concept in this codebase:
+//
+//   KnowledgeTopic  -- the governed QUESTION/KNOWLEDGE CATEGORY a claim
+//                      contributes to (commercial_use, copyright_ownership,
+//                      ...). Never a real-world entity -- see that type's
+//                      own header, above.
+//   GoalCategory    -- what a user explicitly wants help with. A strict
+//                      subset of KnowledgeTopic. Also never a real-world
+//                      entity.
+//   provider_scope / tool_scope (TopicClaim, above) -- an applicability-
+//                      candidacy NARROWING gate over an already topic-
+//                      relevant claim, keyed to the CURRENT project's
+//                      active identifiers. Not a declaration of aboutness.
+//   GovernedSubject -- (this section) a plain, governed IDENTITY -- a
+//                      stable id, a type/class, and a canonical name. Says
+//                      nothing about which claims exist, which questions it
+//                      relates to, or whether/when it applies to any given
+//                      project. Existence of a GovernedSubject record never
+//                      implies CRC eligibility of anything -- that remains
+//                      exclusively a `TopicClaim`-level (`crc_eligible`)
+//                      concern.
+//
+// THIS MILESTONE IS INFRASTRUCTURE ONLY. Zero `GovernedSubject` records
+// exist, zero subject-to-claim associations are declared on any real
+// `TopicClaim`, and `GOVERNED_SUBJECT_TYPES` is DELIBERATELY EMPTY.
+//
+// LK-DEMAND-2B2-R1 (2026-09-17) correction: the original LK-DEMAND-2B2 cut
+// of this file seeded `GOVERNED_SUBJECT_TYPES` with `'tool'`/
+// `'asset_provider'`, reasoning that those two identity classes already
+// have real, independently-governed registries elsewhere
+// (`lib/tool-identity/registry.ts`, `KNOWN_ASSET_PROVIDERS`). On review,
+// that reasoning was insufficient: an EXISTING identity class having its
+// own registry for its own EXISTING purpose (extraction-time alias
+// resolution) is not, by itself, a governance decision that the same class
+// is also a member of THIS NEW, DIFFERENT ontology (governed-knowledge
+// "aboutness"). A tool such as Runway MAY eventually be both a project
+// tool identity and a governed subject -- but SI8 has not yet made that
+// call generically, and an engineering default must not make it instead.
+// `GOVERNED_SUBJECT_TYPES` therefore starts genuinely empty, and stays
+// empty until an explicit future governance/product decision adds a real
+// member -- for `'tool'`/`'asset_provider'` exactly as much as for any
+// other future class (e.g. a distribution-platform class). Recognizing
+// either existing registry as a subject class remains available later, but
+// is no longer treated as self-evident.
+//
+// CLOSED-WORLD SEMANTICS: "closed vocabulary" does not mean "must contain
+// at least one member" -- it means "only explicitly governed members are
+// valid." An empty governed set is a legitimate, fully closed world: EVERY
+// attempted `subject_type` is invalid until governance adds one. TypeScript
+// enforces this at compile time, not merely at runtime: with
+// `GOVERNED_SUBJECT_TYPES` empty, `GovernedSubjectType` (derived from it,
+// below) collapses to `never`, so `GovernedSubject.subject_type: never`
+// makes it a compile error to construct ANY production `GovernedSubject`
+// object at all -- exactly the intended state ("governed subject types =
+// ZERO, governed subjects = ZERO") enforced by the type system itself, not
+// merely documented. The moment governance adds a first real member,
+// `GovernedSubjectType` naturally widens and construction becomes
+// possible -- no other code changes are required at that point.
+//
+// This uninstantiability is also why the STRUCTURAL validator below
+// (`validateGovernedSubjects`, governed-subject.ts) accepts a separate,
+// more permissive `GovernedSubjectCandidate` shape (`subject_type: string`)
+// rather than `GovernedSubject` itself, and accepts an INJECTABLE governed-
+// type list rather than reading `GOVERNED_SUBJECT_TYPES` unconditionally --
+// see that module's own header for why: it lets tests exercise "does a
+// governed type pass / does an ungoverned type fail" validation logic
+// against a test-local governed-type set, without ever adding a synthetic
+// type to this production constant.
+export const GOVERNED_SUBJECT_TYPES = [] as const
+
+export type GovernedSubjectType = (typeof GOVERNED_SUBJECT_TYPES)[number]
+
+/**
+ * A single governed subject identity. Deliberately minimal -- every field
+ * below is required to make the identity concept itself well-formed; no
+ * speculative field (description, URL, external ids, metadata, confidence,
+ * popularity, demand count, onboarding status) is included, since none is
+ * justified by any real use case yet (this milestone onboards zero
+ * subjects -- see this section's own header).
+ *
+ * No separate `Lifecycle` union (unlike `TopicClaim.lifecycle`, which
+ * tracks a PROPOSITION's own governance maturity -- Candidate/Under
+ * Review/Adopted/Deprecated). A subject identity is not a proposition
+ * under review; it is closer in kind to a plain closed-registry entry
+ * (`AssetProviderId`/`CanonicalToolId`, neither of which carries any
+ * lifecycle field at all). The one lifecycle concept a plain identity
+ * registry entry genuinely needs -- "is this the current, active entry, or
+ * has it been retired/replaced" -- is already fully carried by
+ * `superseded_by` alone, mirroring `TopicClaim.superseded_by`'s and
+ * `UserGoal.superseded_by`'s own identical convention verbatim. No second,
+ * incompatible lifecycle vocabulary is introduced.
+ *
+ * No `crc_eligible` field: subject EXISTENCE and claim CRC ELIGIBILITY are
+ * deliberately independent (this section's own header) -- eligibility
+ * remains authoritative exclusively at the `TopicClaim` level.
+ *
+ * No `aliases` field: deferred, not merely omitted by oversight. Adding one
+ * now, before any real `subject_type` has ever been populated, would fix
+ * an alias-governance shape (case sensitivity, primary-vs-secondary
+ * aliases, per-type vs. global uniqueness) with no real instance to
+ * validate the design against -- exactly the kind of speculative field
+ * this contract otherwise avoids. Revisit when the first real subject
+ * class is actually governed, with real requirements in hand.
+ */
+export interface GovernedSubject {
+  subject_id: string
+  subject_type: GovernedSubjectType
+  canonical_name: string
+  /** id of the GovernedSubject that replaced this one, or null if this is the current entry. Mirrors TopicClaim.superseded_by / UserGoal.superseded_by verbatim. */
   superseded_by: string | null
 }
 
