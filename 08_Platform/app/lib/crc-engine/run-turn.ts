@@ -611,15 +611,58 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   // computation, never duplicated.
   const boundaryStateForTurn = presatisfyStructuralFollowUpNeeds(suAfter, boundaryStateLoaded)
 
-  if (completion.is_complete) {
+  // Generic Completion-Exhaustion milestone (2026-09-17). Real-production-UAT-
+  // found defect: `gate_1_unmet_exhausted` (checkCompletion, completion.ts)
+  // fires the instant phase reaches 3 with Gate 1 still unmet -- entirely
+  // independent of whether the existing, generic bounded candidate-question
+  // search (jurisdiction / human-contribution / Discovery / ordinary organic
+  // / Track B readiness / selector, all below) has ever been given a chance
+  // to run. `phase === 3 && Gate 1 === not_met` was being treated as
+  // equivalent to genuine questioning exhaustion, but the architecture's own
+  // existing definition of that concept is `completion_reason:
+  // 'questioning_exhausted'` (types/interview-engine.ts's own doc comment on
+  // COMPLETION_REASONS) -- reached only after that entire bounded search
+  // fails. `gate_1_unmet_exhausted` was never actually proving that: it
+  // could (and in the confirmed production UAT case, did) finalize with
+  // zero questions ever asked.
+  //
+  // Fix: for this reason specifically, ALWAYS defer to the ordinary
+  // candidate-generation path below -- never conditioned on a pending
+  // selector need, unlike the sibling `gate_1_gate_2_met` guard immediately
+  // below, where deferring is a narrow, deliberate exception because Gate 1
+  // + Gate 2 already agree understanding is complete. No new eligibility,
+  // askability, or evidence-governance logic is introduced anywhere: every
+  // existing governed mechanism (Constraint A/B, evidence-only/non-askable
+  // exclusions, applicability, the jurisdiction/human-contribution/selector
+  // caps) continues to decide, completely unchanged, whether any candidate
+  // is ever actually approved. This does not mean "Gate 1 missing fact ->
+  // ask the user for it" -- it means "Gate 1 unmet -> let the existing
+  // governed question machinery decide whether anything remains to ask."
+  //
+  // `exhaustionCompletionReason` threads the deferred verdict through to the
+  // bounded search's own pre-existing final fallback (below, "Bounded
+  // search exhausted") so that if the search genuinely finds nothing to
+  // ask, the turn still finalizes as `gate_1_unmet_exhausted` -- a
+  // legitimate, still-reachable outcome -- rather than the generic
+  // `questioning_exhausted` that fallback otherwise uses for its own
+  // pre-existing invocation context (a turn that was never `is_complete` to
+  // begin with).
+  let exhaustionCompletionReason: 'questioning_exhausted' | 'gate_1_unmet_exhausted' = 'questioning_exhausted'
+
+  if (completion.is_complete && completion.reason === 'gate_1_unmet_exhausted') {
+    exhaustionCompletionReason = 'gate_1_unmet_exhausted'
+    // completion_reason must not persist as non-null on a turn that did NOT
+    // actually finalize -- same discipline as the sibling guard below.
+    suAfter = { ...suAfter, completion_reason: null }
+  } else if (completion.is_complete) {
     // Selector Opportunity Before Natural Completion milestone (2026-08-25).
     // Real-UAT-found defect: natural completion (checkCompletion, gates.ts)
     // was entirely independent of whether an already-eligible, un-consumed
     // governed selector need existed -- CRC could finalize with reason
-    // gate_1_gate_2_met (or gate_1_unmet_exhausted) one turn before a live
-    // tool_account_status-style question ever got a chance to compete in
-    // candidate generation below, because natural completion short-circuits
-    // before candidate generation ever runs.
+    // gate_1_gate_2_met one turn before a live tool_account_status-style
+    // question ever got a chance to compete in candidate generation below,
+    // because natural completion short-circuits before candidate
+    // generation ever runs.
     //
     // Fix: reuse deriveSelectorNeeds -- the exact same, sole selector-
     // eligibility authority selector-questioning.ts and the organic path
@@ -1113,7 +1156,17 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
             // tried) ever reaches evaluateBoundary's "allowed" branch (the
             // only branch that mutates boundary state), so there is nothing
             // to carry forward beyond what was already loaded.
-            const suExhausted: StructuredUnderstanding = { ...suAfter, completion_reason: 'questioning_exhausted' }
+            //
+            // `exhaustionCompletionReason` (Generic Completion-Exhaustion
+            // milestone, 2026-09-17) is `'gate_1_unmet_exhausted'` here
+            // specifically when this exact bounded search was reached via a
+            // deferred Gate-1-unmet verdict above, and plain
+            // `'questioning_exhausted'` (its original, only prior value) for
+            // every other route into this same fallback -- preserving
+            // `gate_1_unmet_exhausted` as a legitimate outcome exactly when
+            // questioning is genuinely exhausted, never merely because
+            // phase reached 3.
+            const suExhausted: StructuredUnderstanding = { ...suAfter, completion_reason: exhaustionCompletionReason }
             await deps.sessionStore.save(input.token, {
               structured_understanding: suExhausted,
               boundary_state: nextBoundaryState,
