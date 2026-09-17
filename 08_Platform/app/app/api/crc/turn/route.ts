@@ -45,10 +45,13 @@ import {
   saveCrcSessionProductState,
   saveCrcSessionCreationMeta,
   saveCrcSessionProductStop,
+  createGuidedEntrySession,
   type TranscriptEntry,
   type MessageKind,
   type CrcSessionProductState,
 } from '@/lib/crc-engine/supabase-session-store'
+import { applyGuidedEntrySelection, initialBoundaryStateForGuidedEntry } from '@/lib/crc-engine/guided-entry-init'
+import { serializeStructuredUnderstanding, serializeBoundaryState } from '@/lib/interview-engine/serialization'
 import { createAnthropicExtractor } from '@/lib/interview-engine/anthropic-extractor'
 import { createAnthropicCandidateQuestionGenerator } from '@/lib/interview-engine/anthropic-candidate-question'
 import { createAnthropicConstraintADecider } from '@/lib/interview-engine/anthropic-decision'
@@ -242,7 +245,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json<TurnResponseBody>({ status: 'invalid_request', error: 'Cannot request results email before completing the Commercial Readiness Check.' }, { status: 400 })
   }
 
-  if (isNewSession && rateLimitingApplies) {
+  // Guided Entry Foundation (GE-1): a guided_entry_init request is always
+  // a session-creation attempt too, regardless of whether `isNewSession`
+  // happens to independently be true (it usually is, but a stale,
+  // unrelated cookie could make it false) -- covered here, once, rather
+  // than a second duplicate check inside the guided branch below, so a
+  // single guided_entry_init request is never counted as two
+  // session-creation attempts against the rate limiter.
+  if ((isNewSession || parsed.kind === 'guided_entry_init') && rateLimitingApplies) {
     const rateCheck = await checkSessionCreationRate(supabaseAdmin, abuseKey!)
     if (rateCheck.limited) {
       await logRateLimitedEvent(supabaseAdmin, null, rateCheck.reason, rawIp)
@@ -274,7 +284,77 @@ export async function POST(request: NextRequest) {
   // completion and a recomputation -- see turn-traces.ts's own header.
   let wasAlreadyComplete = false
 
-  if (isNewSession) {
+  if (parsed.kind === 'guided_entry_init') {
+    // Guided Entry Foundation (GE-1). A parallel sibling to the
+    // isNewSession/else branches below, not nested inside either --
+    // guided initialization always creates a fresh session (its own
+    // client-supplied guidedEntryInitId, validated as a UUID by
+    // parseRequest(), IS the session token) regardless of whatever
+    // `existingToken` cookie happens to be present. Converges into the
+    // exact same shared tail every other request kind uses (runTurn()
+    // call, transcript/turn_count persistence, completion trace,
+    // buildCompleteTurnResponse) -- see guided-entry-init.ts's own header
+    // for why no parallel response-building path exists. Session-creation
+    // rate limiting for this request kind is already handled by the
+    // shared check above (covers isNewSession OR guided_entry_init) --
+    // not repeated here.
+    token = parsed.guidedEntryInitId
+    const seededSU = applyGuidedEntrySelection(parsed.selection, token)
+    const boundaryState = initialBoundaryStateForGuidedEntry()
+    const guidedAttributionToken = randomUUID()
+
+    let creation: Awaited<ReturnType<typeof createGuidedEntrySession>>
+    try {
+      creation = await createGuidedEntrySession(supabaseAdmin, {
+        token,
+        structured_understanding: JSON.parse(serializeStructuredUnderstanding(seededSU)),
+        boundary_state: JSON.parse(serializeBoundaryState(boundaryState)),
+        guided_entry_definition_id: parsed.selection.definitionId,
+        guided_entry_definition_version: parsed.selection.definitionVersion,
+        traffic_type: trafficType,
+        abuse_key: abuseKey,
+        runtime_commit: getRuntimeCommit(),
+        model_config: getModelConfig(),
+        attribution_token: guidedAttributionToken,
+      })
+    } catch (err) {
+      console.error('[api/crc/turn] createGuidedEntrySession failed', err)
+      return NextResponse.json<TurnResponseBody>({ status: 'retry', message: "Something went wrong. Nothing was lost -- you can try again." })
+    }
+
+    if (creation.outcome === 'conflict') {
+      // Fail closed -- per guided-entry-init.ts's own provenance/atomicity
+      // header: an id that already resolves to a DIFFERENT (or
+      // non-guided) session must never be silently reused or overwritten.
+      return NextResponse.json<TurnResponseBody>({ status: 'invalid_request', error: 'This guided entry session could not be initialized.' }, { status: 409 })
+    }
+
+    // 'created' or 'already_initialized' (a legitimate idempotent retry)
+    // both proceed identically from here -- turnNumber is always computed
+    // fresh from the session's own persisted turn_count, the same
+    // discipline the existing-session branch below already uses, so a
+    // genuine retry after the free-text turn already succeeded advances
+    // correctly rather than reprocessing turn 2 as turn 2 again (the same
+    // class of retry behavior ordinary Free Form messages already have --
+    // see this route's own module header on persistence-only-after-success).
+    const productState = await loadCrcSessionProductState(supabaseAdmin, token)
+    turnNumber = (productState?.turn_count ?? 0) + 1
+    transcript = []
+    existingAttributionToken = productState?.attribution_token ?? guidedAttributionToken
+    // On a genuine 'created' pass this is structurally always false (turn
+    // 2 hasn't run yet). On an 'already_initialized' retry it must be
+    // re-checked for real, same discipline as the existing-session branch
+    // below -- otherwise a retry landing on run-turn.ts's own §7
+    // already-complete replay guard would be mistaken for a brand-new
+    // completion and attempt a redundant recordCrcCompletionTrace() call
+    // (harmless -- swallowed by the unique constraint, matching this
+    // route's own established fail-open discipline for exactly this class
+    // of duplicate -- but worth getting right rather than relying on that).
+    if (creation.outcome === 'already_initialized') {
+      const guidedEngineState = await sessionStore.load(token)
+      wasAlreadyComplete = guidedEngineState?.structured_understanding.completion_reason !== null
+    }
+  } else if (isNewSession) {
     // No token supplied at all, or the user explicitly asked to restart --
     // both are legitimately "begin a new conversation," never confused
     // with an unresolvable existing one (see the else branch).
@@ -413,10 +493,14 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // parsed.kind is guaranteed 'message' | 'decline' by this point -- both
-  // 'email' and 'resend_result_email' kinds returned early above, in both
-  // the new-session guard and the existing-session branch.
-  const userText = parsed.kind === 'message' ? parsed.text : parsed.kind === 'decline' ? DECLINE_LABEL[parsed.action] : ''
+  // parsed.kind is guaranteed 'message' | 'decline' | 'guided_entry_init' by
+  // this point -- both 'email' and 'resend_result_email' kinds returned
+  // early above, in both the new-session guard and the existing-session
+  // branch. Guided Entry Foundation (GE-1): a guided_entry_init request's
+  // free-text concern is handed to runTurn() exactly like an ordinary
+  // message's text -- same extraction/goal pipeline, never a fabricated or
+  // pre-classified UserGoal (see guided-entry-init.ts's own header).
+  const userText = parsed.kind === 'message' ? parsed.text : parsed.kind === 'decline' ? DECLINE_LABEL[parsed.action] : parsed.kind === 'guided_entry_init' ? parsed.selection.concern : ''
   const declineAction = parsed.kind === 'decline' ? parsed.action : undefined
 
   let outcome: Awaited<ReturnType<typeof runTurn>>
@@ -465,7 +549,16 @@ export async function POST(request: NextRequest) {
   }
 
   let attributionToken: string | undefined
-  if (isNewSession) {
+  // Guided Entry Foundation (GE-1): excluded here -- a guided_entry_init
+  // session already wrote its own traffic_type/abuse_key/runtime_commit/
+  // model_config/attribution_token/initialization_source atomically inside
+  // createGuidedEntrySession() above, before runTurn() was ever called.
+  // Running this Free-Form-only block again for it would silently
+  // overwrite initialization_source with nothing (this call never sets
+  // that column) and duplicate work that already succeeded -- excluded by
+  // kind, not by isNewSession alone, since a guided request also
+  // satisfies `isNewSession` (no pre-existing cookie).
+  if (isNewSession && parsed.kind !== 'guided_entry_init') {
     // Session-creation-time facts (design report §7/§14) -- NOT part of
     // CRCSessionState, so runTurn()'s own save() never writes these for a
     // brand-new token. Written here, once, now that runTurn() has
@@ -479,6 +572,7 @@ export async function POST(request: NextRequest) {
         runtime_commit: getRuntimeCommit(),
         model_config: getModelConfig(),
         attribution_token: attributionToken,
+        initialization_source: 'free_form',
       })
     } catch (err) {
       // Best-effort, not fatal -- a failure here means this session is

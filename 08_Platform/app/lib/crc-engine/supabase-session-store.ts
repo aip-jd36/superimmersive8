@@ -159,6 +159,21 @@ export interface CrcSessionProductState {
   capture_notice_version: string | null
   results_email_status: string | null
   results_email_last_recipient: string | null
+  /**
+   * Guided Entry Foundation (GE-1). `null` for every session created
+   * before this milestone, and for any future code path this milestone
+   * doesn't cover — deliberately NOT backfilled to 'free_form' (an
+   * unknown historical initialization path is unknown, not assumed free
+   * form; see the migration's own header). `'guided'` is set exactly
+   * once, atomically with session-row creation, by
+   * createGuidedEntrySession() below — never by an .update() call, so
+   * there is no window where the row exists without this field already
+   * being correct (see guided-entry-init.ts's own provenance/atomicity
+   * header and the GE-1 diagnostic's Phase 8).
+   */
+  initialization_source: 'free_form' | 'guided' | null
+  guided_entry_definition_id: string | null
+  guided_entry_definition_version: string | null
 }
 
 /**
@@ -171,7 +186,7 @@ export async function loadCrcSessionProductState(client: SupabaseClient, token: 
   const { data, error } = await client
     .from(TABLE)
     .select(
-      'turn_count, transcript, updated_at, email, traffic_type, abuse_key, attribution_token, product_stop_reason, created_at, crc_lead_id, capture_notice_version, results_email_status, results_email_last_recipient',
+      'turn_count, transcript, updated_at, email, traffic_type, abuse_key, attribution_token, product_stop_reason, created_at, crc_lead_id, capture_notice_version, results_email_status, results_email_last_recipient, initialization_source, guided_entry_definition_id, guided_entry_definition_version',
     )
     .eq('id', token)
     .maybeSingle()
@@ -194,6 +209,9 @@ export async function loadCrcSessionProductState(client: SupabaseClient, token: 
     capture_notice_version: (data.capture_notice_version as string | null) ?? null,
     results_email_status: (data.results_email_status as string | null) ?? null,
     results_email_last_recipient: (data.results_email_last_recipient as string | null) ?? null,
+    initialization_source: (data.initialization_source as CrcSessionProductState['initialization_source']) ?? null,
+    guided_entry_definition_id: (data.guided_entry_definition_id as string | null) ?? null,
+    guided_entry_definition_version: (data.guided_entry_definition_version as string | null) ?? null,
   }
 }
 
@@ -215,6 +233,17 @@ export interface CrcSessionCreationMeta {
   runtime_commit: string
   model_config: Record<string, unknown>
   attribution_token: string
+  /**
+   * Guided Entry Foundation (GE-1). Required, not optional/defaulted, so
+   * every call site must explicitly decide it rather than silently
+   * inheriting a DB default — the existing Free Form call site in route.ts
+   * now passes `'free_form'` explicitly. Guided-entry-initialized sessions
+   * never call this function at all; they use createGuidedEntrySession()
+   * below instead, which sets 'guided' as part of one atomic row-creation
+   * insert (see that function's own header for why the two paths are not
+   * unified into one function).
+   */
+  initialization_source: 'free_form'
 }
 
 export async function saveCrcSessionCreationMeta(client: SupabaseClient, token: string, meta: CrcSessionCreationMeta): Promise<void> {
@@ -313,4 +342,97 @@ export async function saveCrcSessionFeedback(client: SupabaseClient, token: stri
   if (!data || data.length === 0) {
     throw new Error('[SupabaseSessionStore] saveCrcSessionFeedback failed: no row found for token -- expected the row to already exist')
   }
+}
+
+// ── Guided Entry Foundation (GE-1) ──────────────────────────────────────────
+
+export interface GuidedEntrySessionCreationInput {
+  token: string
+  structured_understanding: unknown // serialized (JSON.parse'd) StructuredUnderstanding -- kept as `unknown` here so this module does not need to import interview-engine types beyond what it already does for CRCSessionState
+  boundary_state: unknown // serialized BoundaryState, same reasoning
+  guided_entry_definition_id: string
+  guided_entry_definition_version: string
+  traffic_type: string
+  abuse_key: string | null
+  runtime_commit: string
+  model_config: Record<string, unknown>
+  attribution_token: string
+}
+
+/** `true` when a row for this token already exists and was genuinely created by this same function with the same definition id/version (a legitimate retry, per guided-entry-init.ts's provenance/atomicity header) -- `false` when the row exists but was NOT created by createGuidedEntrySession() with matching data (a real id collision, or an in-flight/failed partial creation by something else -- callers must fail closed, never silently proceed). */
+export interface GuidedEntrySessionCreationResult {
+  outcome: 'created' | 'already_initialized' | 'conflict'
+}
+
+/**
+ * Diagnostic Phase 8 (atomicity/idempotency): a guided-initialized
+ * session's row is created by exactly ONE single-row `.insert()` call,
+ * containing the engine-state columns (structured_understanding,
+ * boundary_state, pending_clarification) AND the guided-entry marker
+ * columns (initialization_source='guided', guided_entry_definition_id/
+ * version) AND the same creation-meta columns
+ * saveCrcSessionCreationMeta() sets for Free Form (traffic_type,
+ * abuse_key, runtime_commit, model_config, attribution_token) — all in one
+ * atomic statement, never two separate writes. This is the fix for the
+ * narrow failure window a two-write design would leave open (a crash
+ * between "create engine-state row" and "set the guided marker" would
+ * otherwise leave a row that exists but cannot be distinguished from a
+ * genuine token collision on retry). A single-row Postgres INSERT is
+ * atomic by construction — there is no partial-write state to land in.
+ *
+ * On a duplicate-key error (a retry with the same `guidedEntryInitId`, or
+ * an actual collision), this function re-reads the existing row and
+ * compares definition id/version: matching data -> `already_initialized`
+ * (a legitimate idempotent retry — the caller should proceed exactly as
+ * if this call had just created the row); non-matching or non-guided data
+ * -> `conflict` (fail closed — the caller must reject the request, never
+ * silently reuse or overwrite someone else's session).
+ */
+export async function createGuidedEntrySession(client: SupabaseClient, input: GuidedEntrySessionCreationInput): Promise<GuidedEntrySessionCreationResult> {
+  const { error: insertError } = await client.from(TABLE).insert({
+    id: input.token,
+    structured_understanding: input.structured_understanding,
+    boundary_state: input.boundary_state,
+    pending_clarification: null,
+    pending_commercial_readiness_takeaway: null,
+    // 1, not 0: the guided initialization itself (source_turn
+    // GUIDED_ENTRY_INIT_TURN = 1 on every guided-origin fact, see
+    // guided-entry-init.ts) is this session's own turn 1. The caller's
+    // first runTurn() call for the free-text concern computes its
+    // turnNumber as `turn_count + 1` (route.ts), landing on turn 2 --
+    // GUIDED_ENTRY_FIRST_FREE_TEXT_TURN -- the same "compute fresh from
+    // persisted turn_count" discipline every other request kind already
+    // uses, not a hardcoded literal.
+    turn_count: 1,
+    transcript: [],
+    initialization_source: 'guided',
+    guided_entry_definition_id: input.guided_entry_definition_id,
+    guided_entry_definition_version: input.guided_entry_definition_version,
+    traffic_type: input.traffic_type,
+    abuse_key: input.abuse_key,
+    runtime_commit: input.runtime_commit,
+    model_config: input.model_config,
+    attribution_token: input.attribution_token,
+  })
+
+  if (!insertError) {
+    return { outcome: 'created' }
+  }
+
+  // Postgres unique-violation on the primary key -- code '23505'. Any
+  // other error is a genuine failure, not a retry signal; surface it.
+  if ((insertError as { code?: string }).code !== '23505') {
+    throw new Error(`[SupabaseSessionStore] createGuidedEntrySession failed: ${insertError.message}`)
+  }
+
+  const existing = await loadCrcSessionProductState(client, input.token)
+  if (
+    existing &&
+    existing.initialization_source === 'guided' &&
+    existing.guided_entry_definition_id === input.guided_entry_definition_id &&
+    existing.guided_entry_definition_version === input.guided_entry_definition_version
+  ) {
+    return { outcome: 'already_initialized' }
+  }
+  return { outcome: 'conflict' }
 }

@@ -295,6 +295,13 @@ describe('product-layer helpers (turn_count/transcript, not part of SessionStore
       capture_notice_version: null,
       results_email_status: null,
       results_email_last_recipient: null,
+      // Guided Entry Foundation (GE-1): additive fields, default to null
+      // when the underlying columns are absent from the row (a
+      // pre-migration/historical row, or -- as in this fixture -- simply
+      // omitted from the fake select payload).
+      initialization_source: null,
+      guided_entry_definition_id: null,
+      guided_entry_definition_version: null,
     })
   })
 
