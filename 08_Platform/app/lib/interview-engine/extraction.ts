@@ -1632,22 +1632,25 @@ function resolveUserGoalTarget(candidate: CandidateObservation, su: StructuredUn
 function resolveMaterialDemandGoalTarget(candidate: CandidateObservation, su: StructuredUnderstanding): string | undefined {
   if (candidate.kind !== 'material_demand_mention') return undefined
 
+  // LK-DEMAND-2A-R1 (2026-09-17): explicit textual provenance is mandatory
+  // -- deliberately NOT the same single-active-goal fallback
+  // resolveUserGoalTarget grants for a vague correction back-reference.
+  // That fallback is safe there because is_correction already establishes
+  // SOMETHING is being corrected (the only open question is which existing
+  // record) -- there is no equivalent prior evidence here. A missing/blank
+  // supports_goal_quote carries zero textual evidence of which goal (if
+  // any) this demand qualifies, and a sole active UserGoal is a fact about
+  // goal COUNT, not about what the candidate's own text actually said --
+  // it must never be treated as authorization to fabricate the missing
+  // provenance relationship. Fail closed unconditionally when no quote is
+  // present, regardless of how many goals are active.
   const active = su.user_goals.filter((g) => g.superseded_by === null)
   const needle = (candidate.supports_goal_quote ?? '').trim().toLowerCase()
-  if (needle) {
-    const textMatches = active.filter((g) => g.raw_text.toLowerCase().includes(needle))
-    if (textMatches.length === 1) return textMatches[0].goal_id
-    return undefined // zero or multiple matches -- never guessed
-  }
+  if (!needle) return undefined
 
-  // Defensive only: the production schema requires supports_goal_quote (see
-  // CANDIDATE_RESPONSE_SCHEMA in anthropic-extractor.ts), so an empty quote
-  // is not expected from the real extractor. Same single-active-goal
-  // fallback resolveUserGoalTarget grants for a vague back-reference with
-  // no identifiable quote -- never when zero or multiple goals are active.
-  if (active.length === 1) return active[0].goal_id
-
-  return undefined
+  const textMatches = active.filter((g) => g.raw_text.toLowerCase().includes(needle))
+  if (textMatches.length === 1) return textMatches[0].goal_id
+  return undefined // zero or multiple matches -- never guessed
 }
 
 // ── Tool mention identity resolution (stage 3.5) ────────────────────────────

@@ -366,6 +366,82 @@ describe('Case M -- correction/supersession', () => {
   })
 })
 
+// ── Case N -- explicit provenance fail-closed matrix (LK-DEMAND-2A-R1,
+// 2026-09-17) ────────────────────────────────────────────────────────────
+//
+// The established invariant: model supplies textual goal provenance ->
+// deterministic code resolves exactly one active explicit UserGoal ->
+// occurrence may be constructed. If provenance is missing, blank,
+// unresolvable, or ambiguous, fail closed -- a sole active UserGoal (or
+// any other goal-COUNT fact) never authorizes deterministic code to
+// fabricate the missing provenance relationship.
+
+describe('Case N -- explicit provenance is mandatory; no fallback ever fabricates it', () => {
+  test('N.A -- supports_goal_quote missing entirely (undefined): zero occurrences, even with exactly one active goal', async () => {
+    const goal = goalCandidate()
+    const demand = demandCandidate({ supports_goal_quote: undefined })
+    const result = await runExtractionPipeline(emptySU(), { turn: 1, text: 'x' }, constantExtractor([goal, demand]))
+    expect(result.knowledgeDemandOccurrences).toHaveLength(0)
+  })
+
+  test('N.B -- supports_goal_quote blank (empty string / whitespace-only): zero occurrences, even with exactly one active goal', async () => {
+    const goal = goalCandidate()
+    for (const blank of ['', '   ', '\t\n']) {
+      const demand = demandCandidate({ supports_goal_quote: blank })
+      const result = await runExtractionPipeline(emptySU(), { turn: 1, text: 'x' }, constantExtractor([goal, demand]))
+      expect(result.knowledgeDemandOccurrences).toHaveLength(0)
+    }
+  })
+
+  test('N.C -- supports_goal_quote unresolvable (matches no active goal\'s raw_text): zero occurrences', async () => {
+    const goal = goalCandidate({ raw_text: 'Can my client use this commercially?' })
+    const demand = demandCandidate({ supports_goal_quote: 'a completely unrelated quote matching nothing' })
+    const result = await runExtractionPipeline(emptySU(), { turn: 1, text: 'x' }, constantExtractor([goal, demand]))
+    expect(result.knowledgeDemandOccurrences).toHaveLength(0)
+  })
+
+  test('N.D -- supports_goal_quote ambiguous across two active goals: zero occurrences, no nearest-match guess', async () => {
+    const sharedPhrase = 'use this commercially for a client ad'
+    const goalOne = goalCandidate({ proposal_id: 'c1', raw_text: `Can I ${sharedPhrase}?` })
+    const goalTwo = goalCandidate({ proposal_id: 'c2', raw_text: `Do I own the copyright, and can I ${sharedPhrase}?`, goal_category_hint: 'copyright_ownership' })
+    const demand = demandCandidate({ proposal_id: 'c3', supports_goal_quote: sharedPhrase })
+    const result = await runExtractionPipeline(emptySU(), { turn: 1, text: 'x' }, constantExtractor([goalOne, goalTwo, demand]))
+    expect(result.updated.user_goals).toHaveLength(2)
+    expect(result.knowledgeDemandOccurrences).toHaveLength(0)
+  })
+
+  test('N.E -- supports_goal_quote refers only to a superseded (inactive) goal: zero occurrences, no reach-back through a correction', async () => {
+    const originalGoal = goalCandidate({ proposal_id: 'c1', raw_text: 'Can I use this commercially for a client?' })
+    const correction = goalCandidate({
+      proposal_id: 'c2',
+      raw_text: 'Actually, do I own the copyright instead?',
+      goal_category_hint: 'copyright_ownership',
+      is_correction: true,
+      // resolveUserGoalTarget requires correction_of_raw_text to CONTAIN
+      // the target goal's own raw_text (needle.includes(g.raw_text)) --
+      // the exact full text guarantees an unambiguous single match.
+      correction_of_raw_text: originalGoal.raw_text,
+    })
+    // The demand's own quote matches ONLY the now-superseded original goal
+    // -- never a live goal at all.
+    const demand = demandCandidate({ proposal_id: 'c3', supports_goal_quote: 'use this commercially for a client' })
+    const result = await runExtractionPipeline(emptySU(), { turn: 1, text: 'x' }, constantExtractor([originalGoal, correction, demand]))
+
+    const loadedGoal = result.updated.user_goals.find((g) => g.raw_text === originalGoal.raw_text)!
+    expect(loadedGoal.superseded_by).not.toBeNull() // sanity: the goal really is superseded
+    expect(result.knowledgeDemandOccurrences).toHaveLength(0)
+  })
+
+  test('N.F -- positive control: a valid explicit quote resolving to exactly one active goal still constructs the occurrence normally', async () => {
+    const goal = goalCandidate({ raw_text: 'Can I use this on Twitch commercially?' })
+    const demand = demandCandidate({ raw_text: 'on Twitch', supports_goal_quote: 'use this on Twitch commercially' })
+    const result = await runExtractionPipeline(emptySU(), { turn: 1, text: 'x' }, constantExtractor([goal, demand]))
+    expect(result.knowledgeDemandOccurrences).toHaveLength(1)
+    expect(result.knowledgeDemandOccurrences[0].goal_id).toBe(result.updated.user_goals[0].goal_id)
+    expect(result.knowledgeDemandOccurrences[0].qualification_state).toBe('qualified')
+  })
+})
+
 describe('Structured-output reliability', () => {
   test('a material_demand_mention candidate with no supports_goal_quote at all, and more than one active goal, fails closed (no fallback guess)', async () => {
     const goalOne = goalCandidate({ proposal_id: 'c1', raw_text: 'Can I use this commercially?' })
@@ -375,12 +451,14 @@ describe('Structured-output reliability', () => {
     expect(result.knowledgeDemandOccurrences).toHaveLength(0)
   })
 
-  test('a material_demand_mention candidate with no supports_goal_quote and exactly one active goal resolves via the defensive single-active-goal fallback', async () => {
+  test('a material_demand_mention candidate with no supports_goal_quote and exactly ONE active goal STILL fails closed (LK-DEMAND-2A-R1: no single-active-goal fallback)', async () => {
     const goal = goalCandidate()
     const demand = demandCandidate({ supports_goal_quote: undefined })
     const result = await runExtractionPipeline(emptySU(), { turn: 1, text: 'x' }, constantExtractor([goal, demand]))
-    expect(result.knowledgeDemandOccurrences).toHaveLength(1)
-    expect(result.knowledgeDemandOccurrences[0].goal_id).toBe(result.updated.user_goals[0].goal_id)
+    // Pre-R1 behavior fabricated an occurrence here via a sole-goal
+    // fallback. R1 removed that: a missing quote carries zero textual
+    // evidence, and goal COUNT is never treated as provenance.
+    expect(result.knowledgeDemandOccurrences).toHaveLength(0)
   })
 
   test('existing candidate kinds remain valid and unaffected by the new kind existing in the same union', async () => {
