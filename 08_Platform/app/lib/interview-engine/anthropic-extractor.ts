@@ -85,6 +85,13 @@ For each distinct fact-bearing statement in the turn, produce one candidate:
   A statement about the user's organization HAVING A PRESENCE somewhere (an office, a branch, operations) is NOT necessarily the same as stating where the organization IS BASED/LOCATED -- e.g. "We have offices in France and Germany." does NOT by itself establish which (if either) is the organization's base; do NOT propose an organization_location_mention candidate for a bare multi-office/presence statement like this unless the user's own words also directly state which one is the base/headquarters/home location (e.g. "We have offices in France and Germany, but we're based in France." DOES support one candidate, raw_organization_location_value "France"). Prefer omitting the candidate over guessing which office is the base.
   If the user names more than one organization location in one statement in a way that is genuinely ambiguous (e.g. simply listing multiple countries with no single base stated), do not propose a candidate at all rather than guessing which one "counts."
   Correction: if this statement reverses or replaces what was said earlier about the organization's location (e.g. "Correction -- we're actually based in Switzerland, not Germany" when Germany was previously stated), set is_correction: true and correction_of_raw_text to the EXACT location value being replaced (e.g. "Germany") -- deterministic code, never you, resolves which existing mention this refers to, and will leave the state unresolved/ambiguous rather than guess if it cannot find exactly one match. Do NOT set is_correction for a plain addition or restatement -- that is a fresh candidate with no correction fields set. There is no exclusion concept for this candidate kind (no "is_organization_location_exclusion" field) -- a statement that the organization is NOT based somewhere is simply not proposed as a candidate at all.
+- kind "material_demand_mention" (LK-DEMAND-2A, 2026-09-17): the user expressed a subject, condition, or constraint that participates in the grammatical/semantic structure of an ALREADY-EXPLICIT user_goal's own question or stated need -- something the user is asking CRC to account for when answering that goal, not something that merely occurs in surrounding narrative, disclosure, project history, or communication context. This is the SAME "disclosure is not itself a goal" discipline the asset_provider_mention guidance above already applies when deciding whether to propose a third_party_source_rights goal at all -- applied one level narrower, to whether a detail qualifies an already-established goal, not to whether it creates one.
+  Only propose this when the subject/condition/constraint sits inside the sentence structure of the user's own question or stated need. Report the exact span via raw_text (same verbatim discipline as every other candidate kind), and report, in this candidate's attributes array, one entry with key "supports_goal" whose value is a short, verbatim quote of the SPECIFIC active user_goal's own words this demand qualifies -- never the goal's internal id (you never see or handle this pipeline's internal ids for anything, exactly like every other correction/target field in this schema). See the attributes field description for the exact shape.
+  Qualifying examples (the subject sits inside the question/need itself): "Can I publish this on Twitch?" -> "Twitch" qualifies. "Does using Shutterstock footage affect whether I can use this commercially?" -> "Shutterstock" qualifies (it is the grammatical subject of a condition embedded in the question). "Can my client use this on Twitch and TikTok?" -> propose ONE separate material_demand_mention candidate per subject named, never merged (same discipline as multi-jurisdiction/multi-territory candidates above).
+  Non-qualifying examples (the subject sits in a separate, prior, declarative sentence -- mere disclosure/context, not part of what's being asked): "I discussed this with my client on Slack. Can they use it commercially?" -> "Slack" does NOT qualify (it is incidental to HOW the conversation happened, not part of what the commercial-use question asks). "I edited the file in Photoshop. Can my client use it commercially?" -> "Photoshop" does NOT qualify (same shape). "My client emailed me a Shutterstock link yesterday. Can they commercially use the video?" -> "Shutterstock" does NOT qualify from the language alone, even though it names a real, recognized provider -- a subject being independently known to you elsewhere is never itself evidence that THIS turn's question is asking about it; the test is the sentence structure of what's actually being asked, never whether the name is familiar. Do not propose a candidate at all for an ordinary goal with no such qualifier (e.g. "Can my client use this commercially?" alone needs no material_demand_mention).
+  If you are genuinely uncertain whether a span participates in the request's own structure versus merely occurring nearby (e.g. it is stated close to the question but its grammatical role is ambiguous), still propose the candidate but set low_confidence: true rather than omitting it or guessing -- exactly the same discipline low_confidence already carries for every other kind.
+  You may ONLY judge whether a span participates in the request's own linguistic structure. You must NEVER use this candidate kind to indicate, and this field never means: that governed knowledge exists or is missing for this subject; that this is a new knowledge domain SI8 should look into; that something is legally significant; or that anything about how CRC should answer should change. Those are not extraction-time judgments and are entirely out of scope for you.
+  Correction: if this statement reverses or replaces an earlier material-demand mention (e.g. "Actually, I mean [Platform B], not [Platform A]"), set is_correction: true and correction_of_raw_text to the EXACT earlier span being replaced -- deterministic code, never you, resolves which existing mention this refers to, and will leave it unresolved/ambiguous rather than guess if it cannot find exactly one match. Do NOT set is_correction for a plain addition alongside a still-valid earlier mention.
 
 Third-party source rights is its own user_goal category (see goal_category_hint below) for whether the user has the RIGHTS to use third-party source material (e.g. a stock image) in the project -- a materially different question from commercial_use (whether the AI-generated OUTPUT can be used commercially). This category is EXPLICIT-QUESTION-GATED ONLY, exactly like every other goal category: propose it only when the user asks a direct question or states a direct need about permission/rights to use the source material.
 Examples that SHOULD produce a third_party_source_rights user_goal: "Can I use this Getty image in an ad?", "Can I use these iStock images in my client commercial?", "Do I have the rights to use this stock image?", "Can I use a Shutterstock Editorial photo in this campaign?", "Am I allowed to use this licensed stock footage in the video?".
@@ -146,7 +153,7 @@ When kind is "tool_mention" and the user DIRECTLY states which specific plan/tie
 
 If a turn contains nothing you can classify as one of the four kinds -- small talk, an incomplete thought, pure filler -- return no candidates for it, or set low_confidence: true on a best-effort candidate if you're genuinely unsure whether something is a real signal.`
 
-const CANDIDATE_KIND_VALUES = ['tool_mention', 'scoped_observation', 'project_fact', 'user_goal', 'asset_provider_mention', 'assessment_jurisdiction_mention', 'content_presence_mention', 'distribution_territory_mention', 'organization_location_mention'] as const
+const CANDIDATE_KIND_VALUES = ['tool_mention', 'scoped_observation', 'project_fact', 'user_goal', 'asset_provider_mention', 'assessment_jurisdiction_mention', 'content_presence_mention', 'distribution_territory_mention', 'organization_location_mention', 'material_demand_mention'] as const
 /** Mirrors CONTENT_PRESENCE_CATEGORIES in types/interview-engine.ts -- kept as a separate local const here, same pattern as GOAL_CATEGORY_VALUES/GOAL_SCOPE_VALUES above, rather than importing the runtime const array across the adapter boundary. */
 const CONTENT_PRESENCE_CATEGORY_VALUES = ['person_visual_presence', 'person_voice_presence'] as const
 const OBSERVATION_SCOPE_VALUES = ['current_project', 'historical_project', 'general_practice'] as const
@@ -201,8 +208,22 @@ const GOAL_SCOPE_VALUES = ['informational', 'determination_request'] as const
  * including why "it resembles a celebrity" must never populate this as
  * "real"). Deliberately the only attribute this candidate kind carries --
  * there is no "recognizability" key and none should be added.
+ *
+ * 'supports_goal' added (LK-DEMAND-2A, 2026-09-17) -- routed through this
+ * generic bag rather than a new top-level nullable field specifically
+ * because CANDIDATE_RESPONSE_SCHEMA was already AT the 16-parameter
+ * Anthropic union-type ceiling (see
+ * __tests__/interview-engine/anthropic-schema-union-limit.test.ts's own
+ * "D" test and its comment: "any FUTURE new top-level nullable-string union
+ * field will require... consolidating an existing field into the generic
+ * attributes[] bag"). Applies only when kind is material_demand_mention;
+ * `value` carries a short, verbatim quote of the specific active
+ * user_goal's own words this demand qualifies -- never an internal id (the
+ * model never sees or handles this pipeline's internal ids for anything);
+ * `confidence` is always "confirmed" for this key (self-reported only,
+ * mirroring real_or_synthetic's own always-"confirmed" discipline).
  */
-const EXTRACTED_ATTRIBUTE_KEY_VALUES = ['access_surface', 'plan_tier', 'account_status', 'usage', 'license', 'real_or_synthetic'] as const
+const EXTRACTED_ATTRIBUTE_KEY_VALUES = ['access_surface', 'plan_tier', 'account_status', 'usage', 'license', 'real_or_synthetic', 'supports_goal'] as const
 type ExtractedAttributeKey = (typeof EXTRACTED_ATTRIBUTE_KEY_VALUES)[number]
 
 /**
@@ -279,7 +300,7 @@ export const CANDIDATE_RESPONSE_SCHEMA = {
           attributes: {
             type: 'array',
             description:
-              'P0 schema-union-limit fix (2026-08-21): a generic, closed-vocabulary list of secondary attributes about this candidate\'s own named target (a tool, a third-party source provider, or a content-presence category), replacing four formerly-separate dedicated field pairs. Include ONE entry per attribute the user directly stated this turn -- never one entry per possible attribute padded with placeholders. Omit an attribute ENTIRELY (do not add an entry for it) when the turn says nothing about it, exactly as the old null/unset representation meant -- an empty attributes array is the normal case for most candidates. See each entry\'s own property descriptions for the exact evidentiary rules per key ("usage"/"license" apply only to asset_provider_mention; "plan_tier"/"access_surface"/"account_status" apply only to tool_mention; "real_or_synthetic" applies only to content_presence_mention -- never add an entry whose key does not match this candidate\'s own kind).',
+              'P0 schema-union-limit fix (2026-08-21): a generic, closed-vocabulary list of secondary attributes about this candidate\'s own named target (a tool, a third-party source provider, a content-presence category, or -- LK-DEMAND-2A, 2026-09-17 -- the goal a material-demand mention supports), replacing what would otherwise be dedicated field pairs. Include ONE entry per attribute the user directly stated this turn -- never one entry per possible attribute padded with placeholders. Omit an attribute ENTIRELY (do not add an entry for it) when the turn says nothing about it, exactly as the old null/unset representation meant -- an empty attributes array is the normal case for most candidates. See each entry\'s own property descriptions for the exact evidentiary rules per key ("usage"/"license" apply only to asset_provider_mention; "plan_tier"/"access_surface"/"account_status" apply only to tool_mention; "real_or_synthetic" applies only to content_presence_mention; "supports_goal" applies only to material_demand_mention -- never add an entry whose key does not match this candidate\'s own kind).',
             items: {
               type: 'object',
               properties: {
@@ -287,18 +308,18 @@ export const CANDIDATE_RESPONSE_SCHEMA = {
                   type: 'string',
                   enum: [...EXTRACTED_ATTRIBUTE_KEY_VALUES],
                   description:
-                    '"access_surface", "plan_tier", and "account_status" apply only when kind is tool_mention. "usage" and "license" apply only when kind is asset_provider_mention. "real_or_synthetic" applies only when kind is content_presence_mention. Never add an entry with a key that does not match this candidate\'s own kind.',
+                    '"access_surface", "plan_tier", and "account_status" apply only when kind is tool_mention. "usage" and "license" apply only when kind is asset_provider_mention. "real_or_synthetic" applies only when kind is content_presence_mention. "supports_goal" applies only when kind is material_demand_mention. Never add an entry with a key that does not match this candidate\'s own kind.',
                 },
                 confidence: {
                   type: 'string',
                   enum: [...CONFIDENCE_HINT_VALUES],
                   description:
-                    '"confirmed" when the user stated it as a clear, direct fact this turn. For "plan_tier"/"access_surface"/"account_status" only, "unknown" is valid when the user expressed genuine uncertainty (e.g. "I think it might be Pro", "I might have a member account, not sure") -- "usage"/"license"/"real_or_synthetic" are only ever reported as "confirmed" (per their own evidentiary rules above); never fabricate a "confirmed_absent"/"unresolved_no_visibility"/"declined" state for any of these six keys unless the user\'s own words genuinely support it.',
+                    '"confirmed" when the user stated it as a clear, direct fact this turn. For "plan_tier"/"access_surface"/"account_status" only, "unknown" is valid when the user expressed genuine uncertainty (e.g. "I think it might be Pro", "I might have a member account, not sure") -- "usage"/"license"/"real_or_synthetic"/"supports_goal" are only ever reported as "confirmed" (per their own evidentiary rules above); never fabricate a "confirmed_absent"/"unresolved_no_visibility"/"declined" state for any of these seven keys unless the user\'s own words genuinely support it.',
                 },
                 value: {
                   type: 'string',
                   description:
-                    'For "access_surface"/"plan_tier"/"usage"/"license": the user\'s own wording for this attribute, preserved as stated -- never translated to a category or canonical label you infer. For "account_status" ONLY: the tool\'s own governed account/membership status term the statement directly and unambiguously establishes (e.g. "Member Account", "Regular Account") -- this is the one key where you DO translate, but ONLY when the statement itself directly supports that specific governed term; see the tool_mention attributes guidance above for the full evidentiary rule and fail-closed examples. For "real_or_synthetic": exactly "real" or "synthetic", self-reported only -- see the content_presence_mention guidance above for the full evidentiary rule (never infer from "resembles a celebrity" or similar). Empty string when confidence is not "confirmed".',
+                    'For "access_surface"/"plan_tier"/"usage"/"license": the user\'s own wording for this attribute, preserved as stated -- never translated to a category or canonical label you infer. For "account_status" ONLY: the tool\'s own governed account/membership status term the statement directly and unambiguously establishes (e.g. "Member Account", "Regular Account") -- this is the one key where you DO translate, but ONLY when the statement itself directly supports that specific governed term; see the tool_mention attributes guidance above for the full evidentiary rule and fail-closed examples. For "real_or_synthetic": exactly "real" or "synthetic", self-reported only -- see the content_presence_mention guidance above for the full evidentiary rule (never infer from "resembles a celebrity" or similar). For "supports_goal": a short, verbatim quote of the SPECIFIC active user_goal candidate\'s own words this material_demand_mention qualifies -- never an internal id. Empty string when confidence is not "confirmed".',
                 },
               },
               required: ['key', 'confidence', 'value'],
@@ -369,7 +390,7 @@ export const CANDIDATE_RESPONSE_SCHEMA = {
           low_confidence: {
             type: 'boolean',
             description:
-              'True if you are not confident this raw text represents a real, classifiable fact at all -- filler, unrelated small talk, or too vague to categorize.',
+              'True if you are not confident this raw text represents a real, classifiable fact at all -- filler, unrelated small talk, or too vague to categorize. Also true, for kind material_demand_mention specifically, when you are genuinely unsure whether a span participates in the request\'s own structure versus merely occurring nearby.',
           },
         },
         required: [
@@ -487,6 +508,7 @@ export function toCandidateObservation(parsed: ParsedCandidate, turn: number): C
   const toolAttributes = parsed.kind === 'tool_mention' ? parsed.attributes : []
   const providerAttributes = parsed.kind === 'asset_provider_mention' ? parsed.attributes : []
   const contentPresenceAttributes = parsed.kind === 'content_presence_mention' ? parsed.attributes : []
+  const materialDemandAttributes = parsed.kind === 'material_demand_mention' ? parsed.attributes : []
 
   const accessSurface = extractAttributeHint(toolAttributes, 'access_surface')
   const planTier = extractAttributeHint(toolAttributes, 'plan_tier')
@@ -494,6 +516,7 @@ export function toCandidateObservation(parsed: ParsedCandidate, turn: number): C
   const usage = extractAttributeHint(providerAttributes, 'usage')
   const license = extractAttributeHint(providerAttributes, 'license')
   const realOrSynthetic = extractAttributeHint(contentPresenceAttributes, 'real_or_synthetic')
+  const supportsGoal = extractAttributeHint(materialDemandAttributes, 'supports_goal')
 
   // usage's value used to be wire-enum-constrained to ASSET_PROVIDER_USAGE_VALUES;
   // the generic attributes[].value field is free text shared across all four
@@ -543,6 +566,7 @@ export function toCandidateObservation(parsed: ParsedCandidate, turn: number): C
     goal_confidence_hint: parsed.goal_confidence_hint ?? undefined,
     goal_category_hint: parsed.goal_category_hint ?? undefined,
     goal_scope_hint: parsed.goal_scope_hint ?? undefined,
+    supports_goal_quote: supportsGoal?.value || undefined,
     low_confidence: parsed.low_confidence || undefined,
   }
 }

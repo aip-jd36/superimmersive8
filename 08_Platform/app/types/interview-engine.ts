@@ -838,6 +838,67 @@ export interface UserGoal {
   source_statement: string
 }
 
+// ── Knowledge demand (LK-DEMAND-2A, 2026-09-17) ─────────────────────────────
+//
+// A KnowledgeDemandOccurrence represents ONLY what the user materially asked
+// CRC to account for within an already-explicit UserGoal -- it never
+// represents whether governed Living Knowledge actually covers it.
+// Coverage determination is explicitly out of scope for this milestone
+// (deferred to LK-DEMAND-2B); this type must never carry a coverage_status,
+// uncovered, knowledge_topic, candidate_domain, onboarding_status, or
+// retrieval_result field. See 08_Platform/prds/PRD_LIVING_KNOWLEDGE_
+// SOURCE_INPUTS_v0.1.md §3 (Source A) and the LK-DEMAND-1 / LK-DEMAND-1A
+// architecture-design records for the full reasoning.
+//
+// Deliberately NOT a field on StructuredUnderstanding (see
+// runExtractionPipeline's own header in lib/interview-engine/extraction.ts):
+// it must never participate in Gate 1/Gate 2 diffing, phase computation, or
+// completion. This milestone's entire purpose is a non-interfering
+// extraction-time observation, constructed and returned as an additive
+// field on runExtractionPipeline's own result -- never wired into
+// StructuredUnderstanding, run-turn.ts, Retrieval, BI, Composition, or any
+// persistence.
+
+export const QUALIFICATION_STATES = ['qualified', 'indeterminate'] as const
+
+export type QualificationState = (typeof QUALIFICATION_STATES)[number]
+
+export interface KnowledgeDemandOccurrence {
+  occurrence_id: string
+  /**
+   * The explicit, active UserGoal this demand qualifies -- required, never
+   * fabricated. Resolved deterministically by resolveMaterialDemandGoalTarget
+   * (extraction.ts) against the current active user_goals, never asserted by
+   * the model as an id -- the model never sees or handles this pipeline's
+   * internal ids anywhere (see CandidateObservation.supports_goal_quote's
+   * own doc comment for the same discipline every other candidate kind's
+   * correction/target fields already follow).
+   */
+  goal_id: string
+  source_turn: number
+  raw_text: string
+  source_statement: string
+  /**
+   * 'qualified' when the extractor's own low_confidence hint was unset/false
+   * (the ordinary case); 'indeterminate' when low_confidence was true -- the
+   * extractor is genuinely unsure this span participates in what the user is
+   * asking CRC to account for. An indeterminate occurrence is NOT uncovered
+   * knowledge and is not, by itself, evidence of anything about Living
+   * Knowledge coverage -- see this type's own header.
+   */
+  qualification_state: QualificationState
+  /**
+   * Correction/supersession target, mirroring every other structured-fact
+   * type's own superseded_by discipline exactly. LK-DEMAND-2A resolves this
+   * ONLY within a single turn's own runExtractionPipeline call (against
+   * occurrences already constructed earlier in that same call) -- there is
+   * no durable store yet for a later turn to resolve against. Cross-turn
+   * correction is an explicitly deferred limitation of this milestone, not
+   * an oversight -- see runExtractionPipeline's own header.
+   */
+  superseded_by: string | null
+}
+
 // ── Phase state, gates, completion (architecture doc §3, §11) ──────────────
 
 export const PHASES = [1, 2, 3, 4] as const

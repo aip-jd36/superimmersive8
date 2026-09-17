@@ -89,6 +89,12 @@ describe('Anthropic structured-output schema union-type limit guardrail', () => 
   // consolidating an existing field into the generic attributes[] bag (the
   // same P0 mechanism that created that bag) or another dedicated
   // union-reduction pass before it can be added.
+  // Still 16 as of LK-DEMAND-2A (2026-09-17): material_demand_mention's
+  // provenance field (`supports_goal`) was deliberately routed through the
+  // existing attributes[] bag rather than a new top-level nullable field --
+  // exactly the "consolidate into the generic bag" option this comment
+  // already named as the only way to add a new provenance field with zero
+  // headroom left. Zero new top-level unions.
   test('D: extractor union count is exactly 16 after the generic attributes[] redesign (12) plus raw_jurisdiction_value (13) plus raw_content_presence_category (14) plus raw_territory_value (15) plus raw_organization_location_value (2026-09-13, +1 new union, now AT the 16-parameter ceiling)', () => {
     const paths = unionCountOnWire(CANDIDATE_RESPONSE_SCHEMA)
     expect(paths.length).toBe(16)
@@ -139,9 +145,14 @@ describe('Anthropic structured-output schema union-type limit guardrail', () => 
   // 'real_or_synthetic' added (CRC Content-Presence Mention Model,
   // 2026-08-28) -- growth via the existing closed key vocabulary, exactly
   // the mechanism this bag exists for; zero new top-level schema unions.
-  test('the attribute key enum is exactly the closed six-value set (real_or_synthetic added, CRC Content-Presence Mention Model, 2026-08-28)', () => {
+  // 'supports_goal' added (LK-DEMAND-2A, 2026-09-17) -- same mechanism,
+  // same reason: CANDIDATE_RESPONSE_SCHEMA was already AT the 16-parameter
+  // ceiling (test D above), so material_demand_mention's provenance quote
+  // was routed through this existing bag instead of a new top-level
+  // nullable field.
+  test('the attribute key enum is exactly the closed seven-value set (supports_goal added, LK-DEMAND-2A, 2026-09-17)', () => {
     const entrySchema = (CANDIDATE_RESPONSE_SCHEMA.properties.candidates.items as any).properties.attributes.items
-    expect(entrySchema.properties.key.enum.slice().sort()).toEqual(['access_surface', 'account_status', 'license', 'plan_tier', 'real_or_synthetic', 'usage'].sort())
+    expect(entrySchema.properties.key.enum.slice().sort()).toEqual(['access_surface', 'account_status', 'license', 'plan_tier', 'real_or_synthetic', 'supports_goal', 'usage'].sort())
   })
 })
 

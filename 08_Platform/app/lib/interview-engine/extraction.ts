@@ -48,6 +48,7 @@ import type {
   DistributionTerritoryMention,
   GoalCategory,
   GoalScope,
+  KnowledgeDemandOccurrence,
   ObservationScope,
   OrganizationLocationMention,
   ScopedObservation,
@@ -171,7 +172,7 @@ export interface CandidateObservation {
   proposal_id: string
   turn: number
   raw_text: string
-  kind: 'tool_mention' | 'scoped_observation' | 'project_fact' | 'user_goal' | 'asset_provider_mention' | 'assessment_jurisdiction_mention' | 'content_presence_mention' | 'distribution_territory_mention' | 'organization_location_mention'
+  kind: 'tool_mention' | 'scoped_observation' | 'project_fact' | 'user_goal' | 'asset_provider_mention' | 'assessment_jurisdiction_mention' | 'content_presence_mention' | 'distribution_territory_mention' | 'organization_location_mention' | 'material_demand_mention'
 
   /** kind === 'tool_mention' */
   raw_tool_name?: string
@@ -480,6 +481,44 @@ export interface CandidateObservation {
   raw_organization_location_value?: string
   /** kind === 'organization_location_mention'; set when this candidate corrects an existing mention (resolved by code, never the model -- see resolveOrganizationLocationMentionTarget) */
   supersedes_organization_location_mention_id?: string
+
+  /**
+   * kind === 'material_demand_mention' (LK-DEMAND-2A, 2026-09-17). The user
+   * expressed a subject, condition, or constraint that participates in the
+   * grammatical/semantic structure of an already-explicit UserGoal's own
+   * question or stated need -- never something that merely occurs in
+   * surrounding narrative, disclosure, or context. Reuses the exact
+   * "explicit-question-vs-incidental-disclosure" discipline SYSTEM_PROMPT
+   * (anthropic-extractor.ts) already applies to asset_provider_mention ->
+   * third_party_source_rights goal creation, generalized one level: from
+   * "does this make the whole turn a goal" to "does this qualify what an
+   * already-established goal is asking."
+   *
+   * supports_goal_quote is a short quote/paraphrase of the SPECIFIC active
+   * UserGoal's own raw_text this demand qualifies -- never an internal
+   * goal_id, which the model never sees or handles anywhere in this
+   * pipeline (mirroring correction_of_raw_text's own "the model flags it,
+   * deterministic code resolves it" discipline exactly). Resolved
+   * deterministically by resolveMaterialDemandGoalTarget against the
+   * CURRENT active user_goals; required exactly one match, or the candidate
+   * is dropped -- see that function's own header.
+   *
+   * The model may ONLY judge whether a span participates in the request's
+   * own structure. It may never judge, and this field never represents,
+   * whether governed Living Knowledge exists, is missing, constitutes a new
+   * domain, should be onboarded, is legally significant, or should change
+   * Bounded Interpretation -- see KnowledgeDemandOccurrence's own header
+   * (types/interview-engine.ts) for the full authority boundary.
+   *
+   * is_correction/correction_of_raw_text (already-generic fields above) are
+   * reused for material-demand corrections exactly as they already are for
+   * every other candidate kind -- see resolveMaterialDemandGoalTarget's own
+   * header for the within-turn-only scope this milestone supports.
+   * low_confidence (already-generic, above) drives
+   * KnowledgeDemandOccurrence.qualification_state directly: unset/false ->
+   * 'qualified', true -> 'indeterminate'.
+   */
+  supports_goal_quote?: string
 }
 
 export type CandidateExtractor = (turn: RawUserTurn) => Promise<CandidateObservation[]>
@@ -1560,6 +1599,57 @@ function resolveUserGoalTarget(candidate: CandidateObservation, su: StructuredUn
   return undefined
 }
 
+/**
+ * Resolves which ACTIVE explicit UserGoal a material_demand_mention
+ * candidate's `supports_goal_quote` refers to (LK-DEMAND-2A, 2026-09-17).
+ * Deterministic only, never the model's job -- the model supplies a
+ * quote/paraphrase of the goal's own words, exactly like
+ * correction_of_raw_text elsewhere in this file; it never sees or invents
+ * an internal goal_id (see CandidateObservation.supports_goal_quote's own
+ * doc comment). Mirrors resolveUserGoalTarget's own text-match +
+ * single-active-goal fallback discipline exactly (LK-DEMAND-1A's own
+ * "reuse the strongest appropriate existing quote/reference resolution
+ * semantics already proven elsewhere in the engine" -- no new resolution
+ * strategy is invented here).
+ *
+ * Match direction: an active goal's own `raw_text` must CONTAIN the quote
+ * as a substring -- i.e. the model is expected to quote a short, verbatim
+ * fragment of the goal's own words, not reproduce the entire goal or
+ * paraphrase freely. This is the one direction the production schema
+ * actually asks the model for (see SYSTEM_PROMPT), and keeps the match
+ * conservative: a short quote can only match a goal that genuinely
+ * contains it, never the reverse (which would let a long quote spuriously
+ * "contain" many short, unrelated goals).
+ *
+ * Zero matches, or more than one, fail closed -- returns undefined, and the
+ * caller (runExtractionPipeline) drops the candidate entirely: no
+ * occurrence is ever constructed with fabricated or guessed provenance
+ * (LK-DEMAND-1's own accepted baseline #3). This is necessary, not merely
+ * sufficient, evidence for an occurrence to exist -- see
+ * KnowledgeDemandOccurrence's own header for why a resolvable goal_id alone
+ * is never treated as proof of materiality.
+ */
+function resolveMaterialDemandGoalTarget(candidate: CandidateObservation, su: StructuredUnderstanding): string | undefined {
+  if (candidate.kind !== 'material_demand_mention') return undefined
+
+  const active = su.user_goals.filter((g) => g.superseded_by === null)
+  const needle = (candidate.supports_goal_quote ?? '').trim().toLowerCase()
+  if (needle) {
+    const textMatches = active.filter((g) => g.raw_text.toLowerCase().includes(needle))
+    if (textMatches.length === 1) return textMatches[0].goal_id
+    return undefined // zero or multiple matches -- never guessed
+  }
+
+  // Defensive only: the production schema requires supports_goal_quote (see
+  // CANDIDATE_RESPONSE_SCHEMA in anthropic-extractor.ts), so an empty quote
+  // is not expected from the real extractor. Same single-active-goal
+  // fallback resolveUserGoalTarget grants for a vague back-reference with
+  // no identifiable quote -- never when zero or multiple goals are active.
+  if (active.length === 1) return active[0].goal_id
+
+  return undefined
+}
+
 // ── Tool mention identity resolution (stage 3.5) ────────────────────────────
 
 /**
@@ -2023,7 +2113,7 @@ export async function runExtractionPipeline(
   su: StructuredUnderstanding,
   turn: RawUserTurn,
   extractCandidates: CandidateExtractor,
-): Promise<{ updated: StructuredUnderstanding; diagnostics: ExtractionDiagnostic[] }> {
+): Promise<{ updated: StructuredUnderstanding; diagnostics: ExtractionDiagnostic[]; knowledgeDemandOccurrences: KnowledgeDemandOccurrence[] }> {
   const candidates = await extractCandidates(turn)
   const diagnostics: ExtractionDiagnostic[] = []
   let current = su
@@ -2031,8 +2121,84 @@ export async function runExtractionPipeline(
   const retractedThisTurn = new Set<string>()
   /** Same guard, own Set, for asset provider mentions -- kept separate from retractedThisTurn (not merged) so a coincidental name collision between a tool and a provider can never cross-suppress the other kind's own guard. */
   const retractedProvidersThisTurn = new Set<string>()
+  /**
+   * LK-DEMAND-2A (2026-09-17). Entirely separate from `current`
+   * (StructuredUnderstanding) -- see KnowledgeDemandOccurrence's own header
+   * (types/interview-engine.ts) for why it must never become a project
+   * fact, participate in Gate 1/Gate 2 diffing, phase computation, or
+   * completion. Returned as an additive field on this function's own
+   * result, never threaded into `current`/`updated`.
+   */
+  const knowledgeDemandOccurrences: KnowledgeDemandOccurrence[] = []
 
   for (const rawCandidate of candidates) {
+    // Material-demand mention (LK-DEMAND-2A): a wholly separate, parallel
+    // micro-pipeline -- never touches `current`, never reaches
+    // normalizeCandidate/attestCandidate/mutations.ts, and produces no
+    // ExtractionDiagnostic (this milestone has no persisted/observable
+    // trace for a dropped candidate -- see this function's own header
+    // above). Handled first, before the six existing resolvers below, since
+    // none of them apply to this kind and it must never fall through into
+    // the tool/goal/provider/jurisdiction/territory/org-location mutation
+    // path.
+    if (rawCandidate.kind === 'material_demand_mention') {
+      // Provenance resolution reads `current.user_goals` -- the SAME
+      // accumulator every other candidate in this turn already mutates --
+      // so a user_goal candidate proposed earlier in this exact turn (the
+      // common case: the goal and its material qualifier are stated in the
+      // same message) is visible here.
+      const goalId = resolveMaterialDemandGoalTarget(rawCandidate, current)
+      if (!goalId) {
+        // Zero or multiple active-goal matches -- fail closed. No
+        // occurrence, no fabricated provenance.
+        continue
+      }
+
+      // Within-turn-only correction resolution -- resolved ONLY against
+      // occurrences already constructed earlier in THIS SAME
+      // runExtractionPipeline call, mirroring retractedThisTurn's
+      // in-turn-only scope exactly. Cross-turn correction (a prior turn's
+      // occurrence, already returned and discarded by the caller) is not
+      // resolvable here -- there is no durable store yet to resolve
+      // against; this is an explicitly deferred limitation of this
+      // milestone (LK-DEMAND-2A), not an oversight -- see
+      // KnowledgeDemandOccurrence's own header.
+      let supersedesOccurrenceId: string | undefined
+      if (rawCandidate.is_correction) {
+        const needle = (rawCandidate.correction_of_raw_text ?? '').trim().toLowerCase()
+        if (needle) {
+          const activeThisTurn = knowledgeDemandOccurrences.filter((o) => o.superseded_by === null)
+          const textMatches = activeThisTurn.filter((o) => o.raw_text.toLowerCase().includes(needle))
+          if (textMatches.length === 1) supersedesOccurrenceId = textMatches[0].occurrence_id
+          // Zero or multiple matches: fail closed on WHICH occurrence this
+          // corrects (never guessed) -- the candidate below still becomes
+          // its own new, independent occurrence, exactly mirroring
+          // resolveUserGoalTarget's own "no target found -> treat as
+          // CREATE, not correction" discipline.
+        }
+      }
+
+      const occurrenceId = `kd-t${rawCandidate.turn}-${rawCandidate.proposal_id}`
+      const occurrence: KnowledgeDemandOccurrence = {
+        occurrence_id: occurrenceId,
+        goal_id: goalId,
+        source_turn: rawCandidate.turn,
+        raw_text: rawCandidate.raw_text,
+        source_statement: rawCandidate.raw_text,
+        qualification_state: rawCandidate.low_confidence ? 'indeterminate' : 'qualified',
+        superseded_by: null,
+      }
+
+      if (supersedesOccurrenceId) {
+        const targetIndex = knowledgeDemandOccurrences.findIndex((o) => o.occurrence_id === supersedesOccurrenceId)
+        if (targetIndex !== -1) {
+          knowledgeDemandOccurrences[targetIndex] = { ...knowledgeDemandOccurrences[targetIndex], superseded_by: occurrenceId }
+        }
+      }
+      knowledgeDemandOccurrences.push(occurrence)
+      continue
+    }
+
     // Assessment-jurisdiction legacy seed (CRC Assessment-Jurisdiction
     // Mention Model, 2026-08-28): applied lazily, only immediately before
     // this session's actual FIRST assessment-jurisdiction candidate is
@@ -2298,5 +2464,5 @@ export async function runExtractionPipeline(
     }
   }
 
-  return { updated: current, diagnostics }
+  return { updated: current, diagnostics, knowledgeDemandOccurrences }
 }
