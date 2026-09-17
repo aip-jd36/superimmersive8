@@ -20,7 +20,30 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-export const ANALYTICS_EVENT_TYPES = ['cta_click', 'discovery_signal', 'commercial_assurance_bridge_shown', 'results_gate_shown'] as const
+/**
+ * 'guided_entry_submitted' / 'guided_entry_crc_initialized' /
+ * 'free_form_crc_initialized' (GE-2, Guided Entry mobile product surface).
+ * Logged server-side, in app/api/crc/turn/route.ts, only at points a real
+ * crc_sessions row already exists -- this table's own session_id column is
+ * `NOT NULL REFERENCES crc_sessions(id)` (see its migration), and this
+ * route's own established discipline (see cta-click/route.ts's own header)
+ * is to never trust a client-supplied session_id. A true PRE-session
+ * impression (the entry-choice screen shown, or a role card tapped, before
+ * any session exists) is therefore deliberately NOT logged to this table in
+ * GE-2 -- doing so honestly would require either a schema change (a
+ * nullable/non-FK session_id) or trusting a client-generated id, neither
+ * undertaken here without a separate, explicit product decision. See
+ * GE-2's own Final Report, section M, for the full reasoning.
+ */
+export const ANALYTICS_EVENT_TYPES = [
+  'cta_click',
+  'discovery_signal',
+  'commercial_assurance_bridge_shown',
+  'results_gate_shown',
+  'guided_entry_submitted',
+  'guided_entry_crc_initialized',
+  'free_form_crc_initialized',
+] as const
 export type AnalyticsEventType = (typeof ANALYTICS_EVENT_TYPES)[number]
 
 export interface AnalyticsEvent {

@@ -283,6 +283,10 @@ export async function POST(request: NextRequest) {
   // `outcome.kind === 'complete'` is structurally identical for a genuine
   // completion and a recomputation -- see turn-traces.ts's own header.
   let wasAlreadyComplete = false
+  // GE-2: true only for a genuinely fresh guided-entry session's own first
+  // (free-text) runTurn() call -- gates the one-time guided_entry_crc_initialized
+  // analytics event further below, after that shared call succeeds.
+  let isFreshGuidedInit = false
 
   if (parsed.kind === 'guided_entry_init') {
     // Guided Entry Foundation (GE-1). A parallel sibling to the
@@ -327,6 +331,21 @@ export async function POST(request: NextRequest) {
       // header: an id that already resolves to a DIFFERENT (or
       // non-guided) session must never be silently reused or overwritten.
       return NextResponse.json<TurnResponseBody>({ status: 'invalid_request', error: 'This guided entry session could not be initialized.' }, { status: 409 })
+    }
+
+    // GE-2: logged only on a genuine first creation, not on an idempotent
+    // retry (which would otherwise double-count one real submission). The
+    // row now genuinely exists, so this satisfies crc_analytics_events'
+    // own NOT NULL REFERENCES crc_sessions(id) constraint -- see that
+    // table's own migration and analytics-events.ts's updated header for
+    // why a pre-session impression is not logged here.
+    isFreshGuidedInit = creation.outcome === 'created'
+    if (isFreshGuidedInit) {
+      await logAnalyticsEvent(supabaseAdmin, {
+        session_id: token,
+        event_type: 'guided_entry_submitted',
+        event_data: { definition_id: parsed.selection.definitionId, definition_version: parsed.selection.definitionVersion },
+      })
     }
 
     // 'created' or 'already_initialized' (a legitimate idempotent retry)
@@ -548,6 +567,16 @@ export async function POST(request: NextRequest) {
     await logPilotEvent(supabaseAdmin, { session_id: token, event_type: DECLINE_EVENT_TYPE[declineAction] })
   }
 
+  if (isFreshGuidedInit) {
+    // GE-2: the free-text concern's own runTurn() call (turnNumber
+    // computed fresh above, per guided-entry-init.ts's own turn-numbering
+    // convention) just succeeded for the first time on this
+    // freshly-created guided session -- CRC is now genuinely underway.
+    // Distinct from guided_entry_submitted above (that only means the
+    // session row was created; this means the first real turn worked).
+    await logAnalyticsEvent(supabaseAdmin, { session_id: token, event_type: 'guided_entry_crc_initialized' })
+  }
+
   let attributionToken: string | undefined
   // Guided Entry Foundation (GE-1): excluded here -- a guided_entry_init
   // session already wrote its own traffic_type/abuse_key/runtime_commit/
@@ -574,6 +603,12 @@ export async function POST(request: NextRequest) {
         attribution_token: attributionToken,
         initialization_source: 'free_form',
       })
+      // GE-2: the Free Form equivalent of guided_entry_crc_initialized --
+      // a brand-new session's first runTurn() call just succeeded. Placed
+      // inside the same try as saveCrcSessionCreationMeta (both are
+      // best-effort analytics/identity metadata, same fail-open discipline
+      // below) rather than a second try block.
+      await logAnalyticsEvent(supabaseAdmin, { session_id: token, event_type: 'free_form_crc_initialized' })
     } catch (err) {
       // Best-effort, not fatal -- a failure here means this session is
       // missing identity/analytics metadata, never a broken user-facing
