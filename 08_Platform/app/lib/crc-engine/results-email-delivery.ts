@@ -20,6 +20,7 @@ import { runCRCConversation } from './run-crc-conversation'
 import type { MatrixRow, TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
 import type { StructuredUnderstanding } from '@/types/interview-engine'
 import { buildResultsEmailContent } from './results-email-template'
+import { buildConsultativeRealization } from './consultative-realization-contract'
 import { sendCrcResultsEmail } from '@/lib/emails'
 import { upsertCrcLead, linkSessionToLead, normalizeEmail } from './crc-leads'
 import { saveCrcSessionEmail } from './supabase-session-store'
@@ -114,7 +115,20 @@ export async function deliverCrcResultsEmail(client: SupabaseClient, params: Del
   // section. `result.output` is unchanged by CC-3B.
   // M2B: pass the SAME already-computed `result.consultative_notes` -- one
   // realization per turn, never a second one computed here.
-  const { html, text } = buildResultsEmailContent(result.output, params.attributionToken, params.email, result.plan, result.consultative_notes)
+  // CC-4C.2B (2026-09-19): also build the shared ConsultativeRealization
+  // (CC-4C.2A) from the SAME already-computed `result.plan` / `result.
+  // output` / `result.consultative_notes` -- narrowest safe integration
+  // point (single production call site of buildResultsEmailContent; see
+  // the CC-4C.2B Final Report Part 1 for why this is preferred over adding
+  // a field to CRCPipelineResult itself). Pure, zero I/O, computed once,
+  // per turn, here. Guarded on `result.plan`/`result.output` -- both are
+  // non-optional on the real `CRCPipelineResult` (runCRCConversation always
+  // returns them), but `buildResultsEmailContent`'s own `plan`/
+  // `consultativeNotes` parameters have been optional since CC-3B/M2B, and
+  // this guard preserves that exact same fail-open discipline rather than
+  // assuming a shape stronger than the function signature itself commits to.
+  const realization = result.plan && result.output ? buildConsultativeRealization(result.plan, result.output, result.consultative_notes ?? []) : undefined
+  const { html, text } = buildResultsEmailContent(result.output, params.attributionToken, params.email, result.plan, result.consultative_notes, realization)
 
   const outcome = await sendCrcResultsEmail(params.email, 'Your Commercial Readiness Check results', html, text)
 

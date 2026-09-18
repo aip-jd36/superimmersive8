@@ -23,69 +23,79 @@
  * revision, 2026-08-14) -- the underlying feedback system is untouched,
  * just not wired into this new flow yet.
  *
+ * CC-4C.2B (2026-09-19, Email Consumes Consultative Realization) --
+ * `buildResultsEmailContent` now accepts an OPTIONAL fifth parameter,
+ * `realization` (`ConsultativeRealization`, CC-4C.2A). When it is passed,
+ * it becomes the STRUCTURAL SOURCE for the substantive consultative answer
+ * -- `renderConsultativeAnswer` below reads `realization.goal_answers`
+ * (never `output.goal_interpretations`) for per-goal content, and adds
+ * three new answer-level sections driven only by
+ * `realization.unresolved_groups`, `realization.missing_evidence_groups`,
+ * and `realization.commercial_assurance`. `output.goal_interpretations`
+ * and `consultativeNotes` are NOT read at all inside the `realization`
+ * branch -- they remain the fallback path, exercised only when
+ * `realization` is omitted (mirroring CC-3B's own "when plan is omitted,
+ * output is byte-for-byte identical to before" precedent exactly, one
+ * milestone later). See `renderConsultativeAnswer`'s own header for the
+ * full per-section authority contract and duplication notes.
+ *
+ * `plan` is STILL accepted and used, independently of `realization`, for
+ * exactly one purpose unchanged since CC-3B: `partitionKnowledgeItemsByPlan`
+ * or the "Current guidance"/"Also relevant to your workflow" knowledge-item
+ * dedup (Part 9 of CC-4C.2B: do not regress this, do not create a second
+ * competing dedup implementation). `plan.discovered_context` is
+ * DELIBERATELY not separately re-rendered from `realization.
+ * discovered_context` -- the existing knowledge-item dedup + "Also
+ * relevant to your workflow" heading already correctly keeps Track-C
+ * discovered content subordinate to its authorizing goal (CC-3B/M3.1), so
+ * CC-4C.2B reuses that existing, already-tested presentation rather than
+ * building a second, redundant discovered-context rendering pass off
+ * `realization.discovered_context` directly (Part 8: "if the current
+ * presentation already preserves this distinction safely, reuse/adapt it
+ * rather than redesigning it unnecessarily").
+ *
  * "What this means for what you asked" section (CRC Milestone 2, User
- * Goal + Bounded Interpretation, 2026-08-15): renders
- * `output.goal_interpretations`, only when non-empty (the ordinary case
- * today, since goal capture remains incidental). Each item quotes the
- * user's own words verbatim ("You asked: ...") -- this "You asked:"
- * framing is composed HERE, at render time, not baked into
- * ProjectionOutput's own data (PM revision 6: preserve the user's wording,
+ * Goal + Bounded Interpretation, 2026-08-15; structural source changed to
+ * `ConsultativeRealization.goal_answers` by CC-4C.2B when `realization` is
+ * present -- see above): renders one card per explicit goal, only when
+ * non-empty. Each item quotes the user's own words verbatim ("You asked:
+ * ...") -- this "You asked:" framing is composed HERE, at render time, not
+ * baked into the source data (PM revision 6: preserve the user's wording,
  * never transform it into a stronger proposition).
  *
- * Phase 1 (2026-08-23): the fixed, bounded content per item now renders
- * from `item.summary_blocks` (additive, `lib/bounded-interpretation` /
- * `lib/projection-layer`) -- one `<p>` per already-authorized block instead
- * of one `<p>` around the whole pre-joined `summary` string. This is
- * presentation only: `summary_blocks` carries exactly the same words, in
- * exactly the same order, as `summary` (see that field's own doc comment);
- * this module does not decide where a boundary exists, only how to lay out
- * boundaries lib/bounded-interpretation already decided. Every block
- * receives IDENTICAL styling -- no block is emphasized, highlighted, or
- * colored differently from another; visual symmetry is a hard requirement,
- * not a default that happened to be convenient (PM instruction: dependency-
- * free and dependency-bearing content must carry equal visual weight).
+ * Phase 1 (2026-08-23): the fixed, bounded content per item renders from
+ * `summary_blocks`/`content_blocks` (additive, `lib/bounded-interpretation`
+ * / `lib/projection-layer` / `lib/crc-engine`) -- one `<p>` per
+ * already-authorized block instead of one `<p>` around the whole
+ * pre-joined string. This is presentation only: this module does not
+ * decide where a boundary exists, only how to lay out boundaries
+ * lib/bounded-interpretation already decided. Every block receives
+ * IDENTICAL styling -- no block is emphasized, highlighted, or colored
+ * differently from another; visual symmetry is a hard requirement, not a
+ * default that happened to be convenient (PM instruction: dependency-free
+ * and dependency-bearing content must carry equal visual weight).
  *
- * CC-3B (2026-09-02, Deterministic Consultative Surface Realization):
- * `buildResultsEmailContent` now accepts an OPTIONAL `plan`
- * (ConsultativeAnswerPlan, CC-3A). When it is passed:
- *   - "What this means for what you asked" (goal_interpretations) renders
- *     BEFORE the knowledge-item list, so the explicit-goal answer comes
- *     first.
- *   - a knowledge_item whose claim is already rendered, verbatim, inside a
- *     goal section (`explicit_sections[].supported_claim_refs`) is NOT
- *     rendered a second time -- this removes the duplicate presentation of
- *     the same governed statement across "Current guidance" and "What this
- *     means". Structural identity only (claim_id); nothing is dropped, only
- *     de-duplicated in rendering. See `consultative-realization.ts`.
- *   - any remaining knowledge_item (workflow-relevant considerations not
- *     tied to the explicit goal -- the plan's discovered context, in the
- *     has-goal case) renders under a neutral subordinate heading.
- * When `plan` is omitted the output is byte-for-byte identical to before
- * this milestone (same order, same "Current guidance" heading, every item).
- * No new claim prose, no ranking, no materiality, no boundary-language
- * change: the educational disclaimer and the Commercial Assurance CTA are
- * exactly as before, still rendered once, at the end.
- *
- * M2B (2026-09-05, Bounded Unresolved-Applicability Realization):
- * `buildResultsEmailContent` now also accepts an OPTIONAL `consultativeNotes`
- * (`ConsultativeNote[]`, Consultative-Composition-owned, already fully
- * realized text -- see unresolved-applicability-realization.ts's own
- * header). This renderer does NOT decide whether a note exists, does not
- * inspect `ApplicabilityFact`/classification, and does not reconstruct any
- * sentence -- it only attaches an already-finished `note.text` as one more,
- * identically-styled paragraph immediately after the matching goal's own
- * `summary_blocks`, joined by `note.goal_index` against that goal's position
- * in `output.goal_interpretations` (see the realization module's own header
- * for why array position is the correct, already-existing association, not
- * `{category, goal_text}`). A goal with no matching note renders exactly as
- * before this milestone. Additive only: `goal_interpretations`/
- * `summary_blocks` content and order are completely unchanged.
+ * M2B (2026-09-05, Bounded Unresolved-Applicability Realization): a
+ * realized note, when present, is appended as one more identically-styled
+ * paragraph immediately after a goal's own content blocks. In the
+ * `realization` branch this is `ConsultativeGoalAnswer.note` (already
+ * matched by CC-4C.2A); in the fallback (`plan`-only or bare) branch this
+ * remains the original `consultativeNotes?.find((n) => n.goal_index ===
+ * goalIndex)` lookup against `output.goal_interpretations`, unchanged.
  */
 
 import type { ProjectionKnowledgeItem, ProjectionOutput } from '@/lib/projection-layer/types'
 import type { ConsultativeAnswerPlan } from './consultative-answer-plan'
 import { partitionKnowledgeItemsByPlan, planHasExplicitGoalSections } from './consultative-realization'
 import type { ConsultativeNote } from './unresolved-applicability-realization'
+import type {
+  ConsultativeGoalAnswer,
+  ConsultativeMissingEvidenceGroup,
+  ConsultativeRealization,
+  ConsultativeUnresolvedGroup,
+} from './consultative-realization-contract'
+import type { MissingEvidenceClassification, PlanUnresolvedItem } from './consultative-answer-plan'
+import { getApplicabilityFactLabel } from './applicability-fact-display'
 import { buildCalendlyUrl } from './calendly-attribution'
 
 function formatLastVerified(value: string | null): string | null {
@@ -113,12 +123,53 @@ const EDUCATIONAL_DISCLAIMER =
   'This is educational workflow guidance from a short conversation, not an SI8 Commercial Assurance Assessment. It does not provide legal advice or certify commercial use.'
 const CTA_LABEL = 'Talk with SI8 about a Commercial Assurance Assessment'
 
+/**
+ * CC-4C.2B, Part 5. Fixed, neutral presentation label per existing
+ * `MissingEvidenceClassification` value -- a lexical translation only,
+ * never a meaning change. `requires_documentary_evidence`'s own label is
+ * deliberately worded so it can never be read as something the user can
+ * self-attest in this conversation (Part 5's own critical rule) -- it never
+ * says "confirm," "just tell us," or any conversational-answer framing.
+ * `applicability_unresolved`'s own label deliberately names only that
+ * applicability is undetermined -- it never guesses what evidence would
+ * resolve it.
+ */
+const MISSING_EVIDENCE_LABELS: Record<MissingEvidenceClassification, string> = {
+  answerable_in_conversation: 'can be confirmed in a follow-up conversation',
+  requires_documentary_evidence: 'requires supporting documentation for a human reviewer',
+  applicability_unresolved: 'not yet determined whether this applies',
+}
+
+/**
+ * CC-4C.2B, Part 4. Fixed, kind-level, non-item-specific label. Reuses the
+ * SAME `getApplicabilityFactLabel` registry M2B already reads (fail-closed
+ * to a generic sentence when no label is registered -- currently only
+ * `tool_account_status` has one; see that module's own header). No display
+ * label exists anywhere in the repository for a bare claim_id or
+ * dependency_id (`withheld_relevant_claim` / `open_project_dependency`),
+ * so those two kinds share one fixed, maximally generic sentence rather
+ * than inventing claim-specific wording this module has no authority to
+ * generate. See this module's own header + the CC-4C.2B Final Report's
+ * duplication analysis for why this sentence is EXPECTED to overlap with
+ * BI's own already-rendered `mixedResolutionUnresolvedGuidanceSentence()`
+ * content in `content_blocks` -- that overlap is reported, not hidden or
+ * suppressed by paraphrasing/deleting BI content.
+ */
+function unresolvedItemSentence(item: PlanUnresolvedItem): string {
+  if (item.kind === 'unresolved_applicability') {
+    const label = getApplicabilityFactLabel(item.fact)
+    return label ? `Your ${label} hasn't been confirmed in this conversation.` : "A related condition hasn't been confirmed in this conversation."
+  }
+  return "An additional governed consideration for this topic hasn't been confirmed."
+}
+
 export function buildResultsEmailContent(
   output: ProjectionOutput,
   attributionToken: string | null | undefined,
   email: string,
   plan?: ConsultativeAnswerPlan,
   consultativeNotes?: ConsultativeNote[],
+  realization?: ConsultativeRealization,
 ): ResultsEmailContent {
   const isFullyEmpty =
     output.opening_line === '' && output.understood_summary === '' && output.knowledge_items.length === 0 && output.goal_interpretations.length === 0
@@ -134,15 +185,14 @@ export function buildResultsEmailContent(
   // inside a goal section, and label the rest as subordinate context.
   // Without a plan, this resolves to "render every item under the original
   // 'Current guidance' heading" -- byte-identical to before CC-3B.
+  // CC-4C.2B: unchanged by this milestone -- still keyed on `plan`, not
+  // `realization` (Part 9: do not regress, do not create a second dedup).
   const knowledgeItemsToRender: ProjectionKnowledgeItem[] = plan
     ? partitionKnowledgeItemsByPlan(output.knowledge_items, plan).supplementary
     : output.knowledge_items
-  const knowledgeHeadingHtml =
-    plan && planHasExplicitGoalSections(plan)
-      ? 'Also relevant to your workflow'
-      : 'Current guidance'
-  const knowledgeHeadingText =
-    plan && planHasExplicitGoalSections(plan) ? 'ALSO RELEVANT TO YOUR WORKFLOW' : 'CURRENT GUIDANCE'
+  const hasExplicitGoals = realization ? realization.goal_answers.length > 0 : Boolean(plan && planHasExplicitGoalSections(plan))
+  const knowledgeHeadingHtml = hasExplicitGoals ? 'Also relevant to your workflow' : 'Current guidance'
+  const knowledgeHeadingText = hasExplicitGoals ? 'ALSO RELEVANT TO YOUR WORKFLOW' : 'CURRENT GUIDANCE'
 
   const renderKnowledgeItems = () => {
     if (knowledgeItemsToRender.length === 0) return
@@ -160,24 +210,14 @@ export function buildResultsEmailContent(
     }
   }
 
+  // ── Legacy path (CRC Milestone 2 / CC-3B / M2B): renders
+  // output.goal_interpretations directly. Exercised only when `realization`
+  // is NOT supplied -- unchanged, byte-for-byte, since before CC-4C.2B. ──
   const renderGoalInterpretations = () => {
     if (output.goal_interpretations.length === 0) return
     htmlParts.push('<p style="font-size:14px;font-weight:600;margin:24px 0 10px;color:#111;border-top:1px solid #eee;padding-top:20px;">What this means for what you asked</p>')
     textParts.push('\nWHAT THIS MEANS FOR WHAT YOU ASKED\n')
     output.goal_interpretations.forEach((item, goalIndex) => {
-      // Phase 1: one <p> per already-authorized block instead of one <p>
-      // around the whole joined string -- every block gets IDENTICAL
-      // styling (no emphasis differences between blocks), and a block
-      // gets its own bottom margin only when another block follows it,
-      // so a single-block item (the ordinary case outside CC-1's mixed
-      // Case-3B shape) renders exactly as before, byte-for-byte spacing.
-      //
-      // M2B: an optional realized note for THIS goal (matched by array
-      // position -- see this module's own header) is appended as one more
-      // block, identically styled, after Bounded Interpretation's own
-      // blocks -- never in place of them, never styled differently (this
-      // renderer makes no distinction between BI-owned and
-      // Composition-owned text visually; only the source module differs).
       const note = consultativeNotes?.find((n) => n.goal_index === goalIndex)
       const blocks = note ? [...item.summary_blocks, note.text] : item.summary_blocks
       const blockParagraphsHtml = blocks
@@ -196,6 +236,129 @@ export function buildResultsEmailContent(
     })
   }
 
+  // ── CC-4C.2B answer, driven ONLY by `realization`. See this module's own
+  // header for the full per-section authority contract. ──
+  const renderGoalAnswers = (goalAnswers: ConsultativeGoalAnswer[]) => {
+    if (goalAnswers.length === 0) return
+    htmlParts.push('<p style="font-size:14px;font-weight:600;margin:24px 0 10px;color:#111;border-top:1px solid #eee;padding-top:20px;">What this means for what you asked</p>')
+    textParts.push('\nWHAT THIS MEANS FOR WHAT YOU ASKED\n')
+    goalAnswers.forEach((answer) => {
+      // Verbatim content_blocks (BI-authorized, CC-3A passthrough) + the
+      // already-realized note, if any -- never paraphrased, never
+      // reordered, never labelled "resolved"/"cleared"/"approved"/"safe"/
+      // "commercially ready" anywhere in this renderer. `disposition` and
+      // `boundary_ref` are read ONLY as internal routing (they already
+      // fully determined `content_blocks`' own wording upstream in
+      // rules.ts) -- neither is independently re-worded or summarized
+      // here.
+      const blocks = answer.note ? [...answer.content_blocks, answer.note.text] : answer.content_blocks
+      const blockParagraphsHtml = blocks
+        .map((block, i) => {
+          const isLast = i === blocks.length - 1
+          return `<p style="font-size:14px;color:#222;white-space:pre-line;margin:0${isLast ? '' : ' 0 10px'};">${escapeHtml(block)}</p>`
+        })
+        .join('')
+      htmlParts.push(
+        `<div style="border:1px solid #e0e0e0;border-radius:6px;padding:14px 16px;margin:0 0 12px;">` +
+          `<p style="font-size:13px;font-style:italic;color:#555;margin:0 0 10px;">You asked: &ldquo;${escapeHtml(answer.goal_text)}&rdquo;</p>` +
+          blockParagraphsHtml +
+          `</div>`,
+      )
+      textParts.push(`You asked: "${answer.goal_text}"\n\n${blocks.join('\n\n')}\n\n`)
+    })
+  }
+
+  /**
+   * CC-4C.2B, Part 4. "Still open" -- driven only by
+   * `realization.unresolved_groups`. Neutral, non-ranked, deterministic
+   * existing order (group order = goal_index order, already established by
+   * CC-4C.2A; item order within a group is CC-3A's own existing stable
+   * order, unchanged). Goal attribution uses the user's own `goal_text`
+   * (never an internal GoalCategory/goal_index), and is shown ONLY when
+   * more than one goal has open items -- for the common single-goal case,
+   * omitting a redundant "You asked: ..." repeat is unambiguous (there is
+   * only one candidate goal), never a provenance loss (the underlying
+   * `goal_index` is still correct internally, simply not re-printed).
+   */
+  const renderUnresolved = (groups: ConsultativeUnresolvedGroup[], goalAnswers: ConsultativeGoalAnswer[]) => {
+    if (groups.length === 0) return
+    const multiGoal = goalAnswers.length > 1
+    htmlParts.push('<p style="font-size:14px;font-weight:600;margin:24px 0 10px;color:#111;border-top:1px solid #eee;padding-top:20px;">Still open</p>')
+    textParts.push('\nSTILL OPEN\n')
+    for (const group of groups) {
+      if (multiGoal) {
+        const goalText = goalAnswers[group.goal_index]?.goal_text ?? ''
+        htmlParts.push(`<p style="font-size:13px;font-style:italic;color:#555;margin:12px 0 6px;">For: &ldquo;${escapeHtml(goalText)}&rdquo;</p>`)
+        textParts.push(`For: "${goalText}"\n`)
+      }
+      for (const item of group.items) {
+        const sentence = unresolvedItemSentence(item)
+        htmlParts.push(`<p style="font-size:14px;color:#222;margin:0 0 8px;">${escapeHtml(sentence)}</p>`)
+        textParts.push(`- ${sentence}\n`)
+      }
+    }
+  }
+
+  /**
+   * CC-4C.2B, Part 5. "What's still needed" -- driven only by
+   * `realization.missing_evidence_groups`. Renders a per-classification
+   * COUNT within each goal's group, never re-narrating each item's
+   * specific claim/dependency (no display-label source exists for those --
+   * see `unresolvedItemSentence`'s own header) and never cross-referencing
+   * back to a specific "Still open" line (no safe existing join exists
+   * between `unresolved_groups` and `missing_evidence_groups` short of
+   * re-deriving CC-3A's own construction logic here, which this renderer
+   * must not do). The CC-4C.2B Final Report's duplication analysis reports
+   * this expected overlap for human review rather than inventing a merge.
+   * The three classifications are rendered as three structurally distinct
+   * labels (`MISSING_EVIDENCE_LABELS`) -- never collapsed into each other,
+   * and `requires_documentary_evidence` is never phrased as something to
+   * "confirm" in conversation (Part 5's critical rule).
+   */
+  const renderMissingEvidence = (groups: ConsultativeMissingEvidenceGroup[], goalAnswers: ConsultativeGoalAnswer[]) => {
+    if (groups.length === 0) return
+    const multiGoal = goalAnswers.length > 1
+    htmlParts.push('<p style="font-size:14px;font-weight:600;margin:24px 0 10px;color:#111;border-top:1px solid #eee;padding-top:20px;">What\'s still needed</p>')
+    textParts.push("\nWHAT'S STILL NEEDED\n")
+    for (const group of groups) {
+      if (multiGoal) {
+        const goalText = goalAnswers[group.goal_index]?.goal_text ?? ''
+        htmlParts.push(`<p style="font-size:13px;font-style:italic;color:#555;margin:12px 0 6px;">For: &ldquo;${escapeHtml(goalText)}&rdquo;</p>`)
+        textParts.push(`For: "${goalText}"\n`)
+      }
+      const counts = new Map<MissingEvidenceClassification, number>()
+      for (const item of group.items) counts.set(item.classification, (counts.get(item.classification) ?? 0) + 1)
+      // Deterministic, fixed presentation order (matches
+      // MISSING_EVIDENCE_CLASSIFICATIONS' own declared order in
+      // consultative-answer-plan.ts) -- never reordered by count or by any
+      // notion of importance.
+      const ORDER: MissingEvidenceClassification[] = ['answerable_in_conversation', 'requires_documentary_evidence', 'applicability_unresolved']
+      for (const classification of ORDER) {
+        const count = counts.get(classification)
+        if (!count) continue
+        const noun = count === 1 ? 'item' : 'items'
+        const line = `${count} ${noun} ${MISSING_EVIDENCE_LABELS[classification]}.`
+        htmlParts.push(`<p style="font-size:14px;color:#222;margin:0 0 8px;">${escapeHtml(line)}</p>`)
+        textParts.push(`- ${line}\n`)
+      }
+    }
+  }
+
+  /**
+   * CC-4C.2B, Part 7. One answer-level Commercial Assurance sentence,
+   * rendered only when `commercial_assurance.applies` is true. `applies`
+   * is consulted ONLY as a boolean gate -- never read as authority to
+   * generate any prose beyond the verbatim, already-approved `closing_cta`
+   * string (`assemble-projection-output.ts`'s own fixed copy). No ref
+   * counts, claim ids, dependency ids, or "will resolve/clear/approve/
+   * certify/confirm" wording is ever introduced here.
+   */
+  const renderCommercialAssurance = (ca: ConsultativeRealization['commercial_assurance']) => {
+    if (!ca.applies || ca.closing_cta === '') return
+    htmlParts.push('<p style="font-size:14px;color:#222;margin:20px 0 0;padding-top:16px;border-top:1px solid #eee;">' + escapeHtml(ca.closing_cta) + '</p>')
+    textParts.push(`\n${ca.closing_cta}\n`)
+  }
+
   if (isFullyEmpty) {
     const emptyLine =
       "The interview is complete. There wasn't enough information shared to generate a summary this time — nothing was lost, and you're welcome to start a new conversation whenever you'd like to share more."
@@ -212,12 +375,23 @@ export function buildResultsEmailContent(
       htmlParts.push(`<p style="font-size:14px;color:#444;white-space:pre-line;margin:0 0 20px;">${escapeHtml(output.understood_summary)}</p>`)
       textParts.push(`${output.understood_summary}\n`)
     }
-    if (plan) {
-      // Explicit-goal answer first, then any subordinate workflow context.
+    if (realization) {
+      // CC-4C.2B: ConsultativeRealization is the structural source. Order:
+      // goal answers, then knowledge items (Part 9: unchanged position
+      // relative to goal answers), then the three new answer-level
+      // sections, then the existing footer block below.
+      renderGoalAnswers(realization.goal_answers)
+      renderKnowledgeItems()
+      renderUnresolved(realization.unresolved_groups, realization.goal_answers)
+      renderMissingEvidence(realization.missing_evidence_groups, realization.goal_answers)
+      renderCommercialAssurance(realization.commercial_assurance)
+    } else if (plan) {
+      // Legacy CC-3B/M2B path, unchanged: explicit-goal answer first, then
+      // any subordinate workflow context. No new answer-level sections.
       renderGoalInterpretations()
       renderKnowledgeItems()
     } else {
-      // Pre-CC-3B order, preserved byte-for-byte when no plan is supplied.
+      // Pre-CC-3B order, preserved byte-for-byte when neither is supplied.
       renderKnowledgeItems()
       renderGoalInterpretations()
     }

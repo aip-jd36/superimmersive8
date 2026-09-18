@@ -357,13 +357,20 @@ describe('subsystem boundaries -- Consultative Realization Contract (CC-4C.2A)',
     }
   })
 
-  test('CC-4C.2A: zero production call sites yet -- no channel renderer, orchestrator, or API route imports this module (deferred to CC-4C.2B, after human review)', () => {
-    const PRODUCTION_CONSUMER_CANDIDATES = [
-      'lib/crc-engine/run-crc-conversation.ts',
-      'lib/crc-engine/results-email-template.ts',
-      'lib/crc-engine/results-email-delivery.ts',
-    ]
-    for (const file of PRODUCTION_CONSUMER_CANDIDATES) {
+  test('CC-4C.2B: results-email-delivery.ts is the ONE place buildConsultativeRealization is called -- the narrowest integration point, upstream of the email template (Final Report Part 1)', () => {
+    const source = fs.readFileSync(path.join(APP_ROOT, 'lib/crc-engine/results-email-delivery.ts'), 'utf-8')
+    expect(source).toMatch(/buildConsultativeRealization/)
+  })
+
+  test('CC-4C.2B: results-email-template.ts consumes the ConsultativeRealization TYPE only -- it never calls buildConsultativeRealization itself (construction stays upstream)', () => {
+    const source = fs.readFileSync(path.join(APP_ROOT, 'lib/crc-engine/results-email-template.ts'), 'utf-8')
+    expect(source).toMatch(/consultative-realization-contract/)
+    expect(source).not.toMatch(/buildConsultativeRealization/)
+  })
+
+  test('CC-4C.2B: run-crc-conversation.ts, the browser CrcProjectionOutput.tsx, and the API route remain untouched by this contract -- channel/orchestrator scope boundary preserved', () => {
+    const UNTOUCHED_CANDIDATES = ['lib/crc-engine/run-crc-conversation.ts']
+    for (const file of UNTOUCHED_CANDIDATES) {
       const source = fs.readFileSync(path.join(APP_ROOT, file), 'utf-8')
       expect(source).not.toMatch(/consultative-realization-contract|buildConsultativeRealization/)
     }
