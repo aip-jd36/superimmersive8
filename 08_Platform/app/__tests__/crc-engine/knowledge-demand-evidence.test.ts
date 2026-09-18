@@ -1,20 +1,26 @@
 /**
- * recordKnowledgeDemandEvidence tests (LK-DEMAND-2C, 2026-09-18). Same
- * fake-client dependency-injection pattern as turn-traces.test.ts/
- * pilot-events.test.ts.
+ * recordKnowledgeDemandEvidence tests (LK-DEMAND-2C, 2026-09-18; return
+ * contract widened LK-DEMAND-2E, 2026-09-18). Same fake-client
+ * dependency-injection pattern as turn-traces.test.ts/pilot-events.test.ts.
  */
 
 import { recordKnowledgeDemandEvidence, KNOWLEDGE_DEMAND_EVIDENCE_SCHEMA_VERSION } from '../../lib/crc-engine/knowledge-demand-evidence'
 import type { KnowledgeDemandOccurrence } from '../../types/interview-engine'
 
-function fakeClient(overrides: { upsertResult?: { error: unknown } } = {}) {
-  const upsertResult = overrides.upsertResult ?? { error: null }
-  const upsertCalls: { rows: unknown; options: unknown }[] = []
+function fakeClient(overrides: { upsertResult?: { data?: unknown; error?: unknown } } = {}) {
+  const upsertResult = overrides.upsertResult ?? { data: [], error: null }
+  const upsertCalls: { rows: unknown; options: unknown; selectColumns?: unknown }[] = []
   const client = {
     from: jest.fn(() => ({
-      upsert: jest.fn(async (rows: unknown, options: unknown) => {
-        upsertCalls.push({ rows, options })
-        return upsertResult
+      upsert: jest.fn((rows: unknown, options: unknown) => {
+        const call: { rows: unknown; options: unknown; selectColumns?: unknown } = { rows, options }
+        upsertCalls.push(call)
+        return {
+          select: jest.fn(async (columns: unknown) => {
+            call.selectColumns = columns
+            return upsertResult
+          }),
+        }
       }),
     })),
   }
@@ -34,7 +40,20 @@ function occurrence(overrides: Partial<KnowledgeDemandOccurrence> = {}): Knowled
   }
 }
 
-describe('recordKnowledgeDemandEvidence', () => {
+function durableRow(overrides: Record<string, unknown> = {}) {
+  return {
+    id: 'row-uuid-1',
+    session_id: 'session-123',
+    occurrence_id: 'kd-t1-c2',
+    source_turn: 1,
+    raw_text: 'on a test platform',
+    source_statement: 'on a test platform',
+    created_at: '2026-09-18T00:00:00.000Z',
+    ...overrides,
+  }
+}
+
+describe('recordKnowledgeDemandEvidence -- persistence shape (LK-DEMAND-2C)', () => {
   test('writes one row per occurrence with session_id, runtime_commit, schema_version', async () => {
     const { client, upsertCalls } = fakeClient()
     const o1 = occurrence({ occurrence_id: 'kd-t1-c2' })
@@ -81,34 +100,6 @@ describe('recordKnowledgeDemandEvidence', () => {
     expect(upsertCalls[0].options).toEqual({ onConflict: 'session_id,occurrence_id', ignoreDuplicates: true })
   })
 
-  test('zero occurrences -- no DB call at all', async () => {
-    const { client, upsertCalls } = fakeClient()
-    await recordKnowledgeDemandEvidence(client, { sessionId: 'session-123', occurrences: [] })
-    expect(client.from).not.toHaveBeenCalled()
-    expect(upsertCalls).toHaveLength(0)
-  })
-
-  test('a Supabase upsert error does not throw -- best-effort, fail-open', async () => {
-    const { client } = fakeClient({ upsertResult: { error: { message: 'write failed' } } })
-    await expect(recordKnowledgeDemandEvidence(client, { sessionId: 'x', occurrences: [occurrence()] })).resolves.toBeUndefined()
-  })
-
-  test('a unique-constraint violation does not throw (defense in depth alongside ignoreDuplicates)', async () => {
-    const { client } = fakeClient({
-      upsertResult: { error: { code: '23505', message: 'duplicate key value violates unique constraint "crc_knowledge_demand_occurrences_session_occurrence_unique"' } },
-    })
-    await expect(recordKnowledgeDemandEvidence(client, { sessionId: 'x', occurrences: [occurrence()] })).resolves.toBeUndefined()
-  })
-
-  test('an unexpected exception from the client does not throw', async () => {
-    const client = {
-      from: jest.fn(() => {
-        throw new Error('client blew up')
-      }),
-    } as any
-    await expect(recordKnowledgeDemandEvidence(client, { sessionId: 'x', occurrences: [occurrence()] })).resolves.toBeUndefined()
-  })
-
   test('no coverage/subject/onboarding field is ever written -- evidence only', async () => {
     const { client, upsertCalls } = fakeClient()
     await recordKnowledgeDemandEvidence(client, { sessionId: 'session-123', occurrences: [occurrence()] })
@@ -117,5 +108,102 @@ describe('recordKnowledgeDemandEvidence', () => {
     for (const key of forbiddenKeys) {
       expect(Object.prototype.hasOwnProperty.call(row, key)).toBe(false)
     }
+  })
+
+  test('10. client-side duplicate occurrence_id collapses to one row sent to upsert -- existing deterministic-identity semantics unchanged', async () => {
+    const { client, upsertCalls } = fakeClient({ upsertResult: { data: [durableRow()], error: null } })
+    const o1 = occurrence({ occurrence_id: 'kd-t1-c2', raw_text: 'first' })
+    const o2 = occurrence({ occurrence_id: 'kd-t1-c2', raw_text: 'first-duplicate' })
+    await recordKnowledgeDemandEvidence(client, { sessionId: 'session-123', occurrences: [o1, o2] })
+    const rows = upsertCalls[0].rows as any[]
+    expect(rows).toHaveLength(1) // first-wins dedup, unchanged from LK-DEMAND-2C-R2
+    expect(rows[0].raw_text).toBe('first')
+  })
+})
+
+describe('recordKnowledgeDemandEvidence -- newly-inserted-row return contract (LK-DEMAND-2E)', () => {
+  test('1. a newly inserted occurrence is returned', async () => {
+    const row = durableRow({ occurrence_id: 'kd-t1-c2' })
+    const { client } = fakeClient({ upsertResult: { data: [row], error: null } })
+    const result = await recordKnowledgeDemandEvidence(client, { sessionId: 'session-123', occurrences: [occurrence()] })
+    expect(result).toEqual([row])
+  })
+
+  test('2. returned row contains the required durable fields', async () => {
+    const row = durableRow()
+    const { client } = fakeClient({ upsertResult: { data: [row], error: null } })
+    const [result] = await recordKnowledgeDemandEvidence(client, { sessionId: 'session-123', occurrences: [occurrence()] })
+    expect(Object.keys(result).sort()).toEqual(['id', 'session_id', 'occurrence_id', 'source_turn', 'raw_text', 'source_statement', 'created_at'].sort())
+  })
+
+  test('requests exactly the minimum durable columns via .select()', async () => {
+    const { client, upsertCalls } = fakeClient({ upsertResult: { data: [], error: null } })
+    await recordKnowledgeDemandEvidence(client, { sessionId: 'session-123', occurrences: [occurrence()] })
+    expect(upsertCalls[0].selectColumns).toBe('id, session_id, occurrence_id, source_turn, raw_text, source_statement, created_at')
+  })
+
+  test('3. a duplicate/skipped occurrence (upsert reports it absent) is NOT returned as newly inserted', async () => {
+    // Simulates Postgres's own ON CONFLICT DO NOTHING RETURNING behavior:
+    // a row that already existed is silently absent from the returned set.
+    const { client } = fakeClient({ upsertResult: { data: [], error: null } })
+    const result = await recordKnowledgeDemandEvidence(client, { sessionId: 'session-123', occurrences: [occurrence()] })
+    expect(result).toEqual([])
+  })
+
+  test('4. an all-duplicate batch (multiple input occurrences, zero newly inserted) returns []', async () => {
+    const { client } = fakeClient({ upsertResult: { data: [], error: null } })
+    const o1 = occurrence({ occurrence_id: 'kd-t1-c2' })
+    const o2 = occurrence({ occurrence_id: 'kd-t1-c3', raw_text: 'on another platform' })
+    const result = await recordKnowledgeDemandEvidence(client, { sessionId: 'session-123', occurrences: [o1, o2] })
+    expect(result).toEqual([])
+  })
+
+  test('mixed batch -- only the genuinely-newly-inserted rows are returned, not the skipped ones', async () => {
+    const newRow = durableRow({ occurrence_id: 'kd-t1-c3', raw_text: 'on another platform' })
+    // Only the second row is returned -- the first was skipped as an
+    // existing duplicate, exactly like a real ON CONFLICT DO NOTHING
+    // RETURNING result would omit it.
+    const { client } = fakeClient({ upsertResult: { data: [newRow], error: null } })
+    const o1 = occurrence({ occurrence_id: 'kd-t1-c2' })
+    const o2 = occurrence({ occurrence_id: 'kd-t1-c3', raw_text: 'on another platform' })
+    const result = await recordKnowledgeDemandEvidence(client, { sessionId: 'session-123', occurrences: [o1, o2] })
+    expect(result).toEqual([newRow])
+  })
+
+  test('5. empty input returns [] -- no DB call at all', async () => {
+    const { client, upsertCalls } = fakeClient()
+    const result = await recordKnowledgeDemandEvidence(client, { sessionId: 'session-123', occurrences: [] })
+    expect(result).toEqual([])
+    expect(client.from).not.toHaveBeenCalled()
+    expect(upsertCalls).toHaveLength(0)
+  })
+
+  test('6/7. a Supabase upsert error remains fail-open and resolves to []', async () => {
+    const { client } = fakeClient({ upsertResult: { error: { message: 'write failed' } } })
+    await expect(recordKnowledgeDemandEvidence(client, { sessionId: 'x', occurrences: [occurrence()] })).resolves.toEqual([])
+  })
+
+  test('8. persistence failure still logs via the existing convention', async () => {
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const { client } = fakeClient({ upsertResult: { error: { message: 'write failed' } } })
+    await recordKnowledgeDemandEvidence(client, { sessionId: 'x', occurrences: [occurrence()] })
+    expect(spy).toHaveBeenCalledWith('[recordKnowledgeDemandEvidence] insert error', { message: 'write failed' })
+    spy.mockRestore()
+  })
+
+  test('a unique-constraint-shaped error remains fail-open and resolves to [] (defense in depth alongside ignoreDuplicates)', async () => {
+    const { client } = fakeClient({
+      upsertResult: { error: { code: '23505', message: 'duplicate key value violates unique constraint "crc_knowledge_demand_occurrences_session_occurrence_unique"' } },
+    })
+    await expect(recordKnowledgeDemandEvidence(client, { sessionId: 'x', occurrences: [occurrence()] })).resolves.toEqual([])
+  })
+
+  test('an unexpected exception from the client does not throw and resolves to []', async () => {
+    const client = {
+      from: jest.fn(() => {
+        throw new Error('client blew up')
+      }),
+    } as any
+    await expect(recordKnowledgeDemandEvidence(client, { sessionId: 'x', occurrences: [occurrence()] })).resolves.toEqual([])
   })
 })

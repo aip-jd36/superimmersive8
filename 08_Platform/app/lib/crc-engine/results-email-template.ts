@@ -95,8 +95,8 @@ function formatLastVerified(value: string | null): string | null {
   return parsed.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
-/** Same escaping discipline any HTML-email renderer needs -- ProjectionOutput text is user-influenced (derived from conversation content), never assume it's safe to inline raw. */
-function escapeHtml(value: string): string {
+/** Same escaping discipline any HTML-email renderer needs -- ProjectionOutput text is user-influenced (derived from conversation content), never assume it's safe to inline raw. Exported (LK-DEMAND-2E, 2026-09-18) so other user-influenced-content email builders (e.g. lib/emails.ts's sendMaterialDemandAdminNotification) can reuse this exact discipline rather than duplicate it -- no behavior change to this file's own callers. */
+export function escapeHtml(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 }
 

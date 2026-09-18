@@ -69,7 +69,7 @@ import { checkSessionCreationRate, checkBurst, checkTurnCeiling, logRateLimitedE
 import { getRuntimeCommit, getModelConfig } from '@/lib/crc-engine/runtime-metadata'
 import { buildCompleteResponseFields } from '@/lib/crc-engine/complete-response'
 import { recordCrcCompletionTrace } from '@/lib/crc-engine/turn-traces'
-import { recordKnowledgeDemandEvidence } from '@/lib/crc-engine/knowledge-demand-evidence'
+import { recordAndNotifyMaterialDemandEvidence } from '@/lib/crc-engine/material-demand-notification-trigger'
 import { deliverCrcResultsEmail } from '@/lib/crc-engine/results-email-delivery'
 import { getResultsEmailErrorMessage, type ResultsEmailClaimReason } from '@/lib/crc-engine/results-gate-copy'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
@@ -676,7 +676,17 @@ export async function POST(request: NextRequest) {
   // only a completing one. A no-op when this turn produced no occurrences
   // -- the ordinary case -- see recordKnowledgeDemandEvidence's own header.
   if (outcome.knowledgeDemandOccurrences) {
-    await recordKnowledgeDemandEvidence(supabaseAdmin, { sessionId: token, occurrences: outcome.knowledgeDemandOccurrences })
+    // LK-DEMAND-2E (2026-09-18): recordAndNotifyMaterialDemandEvidence
+    // persists this turn's evidence, then attempts one best-effort admin
+    // notification email strictly gated on rows PROVEN newly inserted this
+    // call (never on outcome.knowledgeDemandOccurrences itself, which
+    // reflects in-memory extraction, not confirmed persistence) -- a
+    // duplicate/retried occurrence never re-notifies. Fully fail-open; a
+    // notification failure cannot alter crc_sessions, this durable
+    // evidence, or the response below. See material-demand-notification-
+    // trigger.ts's own header for why persistence and notification are
+    // sequenced there rather than inline here.
+    await recordAndNotifyMaterialDemandEvidence(supabaseAdmin, { sessionId: token, occurrences: outcome.knowledgeDemandOccurrences })
   }
 
   // Discovery analytics instrumentation (design report §11) -- logged

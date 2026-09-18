@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { escapeHtml } from '@/lib/crc-engine/results-email-template'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -262,6 +263,103 @@ export async function sendCrcResultsEmail(to: string, subject: string, html: str
     // response was received -- Resend may have already accepted the
     // request. Must not be reported as 'failed'.
     return { status: 'unknown', error: err instanceof Error ? err.message : String(err) }
+  }
+}
+
+/**
+ * Material Demand admin notification (LK-DEMAND-2E, 2026-09-18). Prompt,
+ * best-effort operational visibility for a human when CRC durably records
+ * one or more genuinely NEW qualified Material Demand observations --
+ * fire-and-forget, same discipline as every other admin notification in
+ * this file above (sendNewUserSignupEmail, the admin halves of
+ * sendSubmissionReceivedEmail/sendCreatorRecordApprovedEmail): internal
+ * try/catch, console.error on failure, never throws, caller (CRC's own
+ * request handler) is never affected either way.
+ *
+ * AUTHORITY BOUNDARY -- this email reports EVIDENCE, never interpretation.
+ * A Material Demand observation proves only "the user materially asked
+ * CRC to account for this text." It does NOT prove canonical subject
+ * identity, GovernedSubject existence, Living Knowledge coverage or its
+ * absence, a knowledge gap, a new LK domain, a governance candidate, or an
+ * onboarding requirement -- see KnowledgeDemandOccurrence's own header
+ * (types/interview-engine.ts) and the crc_knowledge_demand_occurrences
+ * migration's own header for the full boundary this email must never
+ * cross. GOVERNANCE_STATUS_COPY below is therefore a FIXED, literal
+ * constant -- never composed, interpolated, or model-generated from
+ * observation content -- and this function imports nothing from
+ * lib/crc-engine/governance-candidates.ts: it creates no governance
+ * candidate, no evidence association, no GovernedSubject, and determines
+ * no coverage or gap conclusion. A human reading this email may later,
+ * separately, manually choose to act through that entirely distinct
+ * tooling; this email has zero structural connection to it.
+ *
+ * ESCAPING: `raw_text` is verbatim, fully user-controlled conversation
+ * content -- reuses results-email-template.ts's own escapeHtml() (the
+ * established discipline for exactly this content category: "user-
+ * influenced... never assume it's safe to inline raw"), not the raw
+ * interpolation pattern the other functions in this file predate that
+ * discipline with.
+ *
+ * ONE EMAIL PER CALL: callers pass every newly-inserted observation from
+ * one accepted CRC turn in a single array -- this function sends exactly
+ * one email containing all of them (never one email per observation, never
+ * aggregated across turns/sessions). A no-op (zero provider calls) when
+ * `observations` is empty.
+ */
+export interface MaterialDemandObservation {
+  occurrence_id: string
+  session_id: string
+  source_turn: number
+  raw_text: string
+  created_at: string
+}
+
+const MATERIAL_DEMAND_GOVERNANCE_STATUS_COPY =
+  'Raw Material Demand evidence only. Not yet classified as a governed subject, knowledge gap, or governance candidate. No action is implied.'
+
+// Presentation-only bound -- the persisted evidence row and occurrence
+// identity are always unaffected; only the email's own rendered text may
+// be shortened. No length limit exists on raw_text at the schema level.
+const MATERIAL_DEMAND_DISPLAY_TEXT_MAX_LENGTH = 500
+
+function truncateForDisplay(value: string, maxLength: number): string {
+  if (value.length <= maxLength) return value
+  return `${value.slice(0, maxLength)}… (truncated for display only -- full text preserved in crc_knowledge_demand_occurrences)`
+}
+
+export async function sendMaterialDemandAdminNotification(observations: MaterialDemandObservation[]): Promise<void> {
+  if (observations.length === 0) return
+
+  try {
+    const observationsHtml = observations
+      .map(
+        (o) => `
+          <div style="background: white; padding: 12px 16px; border-radius: 6px; margin: 10px 0; border: 1px solid #eee;">
+            <p style="margin: 4px 0;"><strong>Observation:</strong> ${escapeHtml(truncateForDisplay(o.raw_text, MATERIAL_DEMAND_DISPLAY_TEXT_MAX_LENGTH))}</p>
+            <p style="margin: 4px 0;"><strong>Session:</strong> ${escapeHtml(o.session_id)}</p>
+            <p style="margin: 4px 0;"><strong>Turn:</strong> ${escapeHtml(String(o.source_turn))}</p>
+            <p style="margin: 4px 0;"><strong>Occurrence:</strong> ${escapeHtml(o.occurrence_id)}</p>
+            <p style="margin: 4px 0;"><strong>Recorded:</strong> ${escapeHtml(o.created_at)}</p>
+          </div>`,
+      )
+      .join('')
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject: 'New CRC Material Demand observation',
+      html: `
+        <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 560px; margin: 0 auto; padding: 20px;">
+          <h2 style="margin-top: 0;">New CRC Material Demand observation${observations.length > 1 ? 's' : ''}</h2>
+          ${observationsHtml}
+          <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #ddd; font-size: 13px; color: #666;">
+            <p style="margin: 4px 0;"><strong>Governance status:</strong> ${MATERIAL_DEMAND_GOVERNANCE_STATUS_COPY}</p>
+          </div>
+        </div>
+      `,
+    })
+  } catch (error) {
+    console.error('Error sending Material Demand admin notification email:', error)
   }
 }
 

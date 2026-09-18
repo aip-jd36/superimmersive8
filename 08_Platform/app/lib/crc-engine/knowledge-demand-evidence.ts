@@ -49,6 +49,30 @@
  * Supabase/PostgREST upsert path resolves multiple conflicting rows
  * within one batch -- a real operational question this environment has no
  * live database to empirically confirm.
+ *
+ * LK-DEMAND-2E (2026-09-18): RETURN CONTRACT. `recordKnowledgeDemandEvidence`
+ * now returns the durable rows ACTUALLY NEWLY INSERTED by this call --
+ * previously it returned nothing at all (Promise<void>), discarding this
+ * information entirely. Adds a trailing `.select(...)` to the existing
+ * upsert call; Postgres's own `INSERT ... ON CONFLICT DO NOTHING
+ * RETURNING ...` semantics (which `ignoreDuplicates: true` maps to) return
+ * ONLY the rows actually inserted this statement -- a row skipped because
+ * it already existed (a genuine retry reproducing the same deterministic
+ * occurrence_id, LK-DEMAND-2C-R1/R2's own guarantee) is silently absent
+ * from the result, never included. This is a query-SHAPE change only --
+ * zero schema change, and the existing idempotency/fail-open/dedup
+ * discipline above is entirely unchanged.
+ *
+ * This return value means "newly persisted by THIS call," never "all
+ * matching evidence currently in the database" -- callers (see
+ * app/api/crc/turn/route.ts's own call site) use it strictly as a
+ * notification-eligibility signal, never as a general evidence query.
+ * Still never throws: on any failure (including the empty-input no-op)
+ * this resolves to `[]`, exactly the same "nothing to notify about" shape
+ * a genuine all-duplicate retry produces -- callers cannot and must not
+ * distinguish "evidence failed to persist" from "everything in this batch
+ * already existed" from this return value alone; both correctly result in
+ * no further downstream action.
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -60,6 +84,25 @@ export const KNOWLEDGE_DEMAND_EVIDENCE_SCHEMA_VERSION = 1
 export interface RecordKnowledgeDemandEvidenceParams {
   sessionId: string
   occurrences: readonly KnowledgeDemandOccurrence[]
+}
+
+/**
+ * The minimum durable fields a caller needs to act on a newly-inserted
+ * Material Demand evidence row (LK-DEMAND-2E's own notification trigger is
+ * the only current consumer). Deliberately a narrow subset of the full
+ * crc_knowledge_demand_occurrences row -- goal_id/qualification_state/
+ * superseded_by/runtime_commit/schema_version are persisted but not
+ * returned here, since nothing downstream of this return value needs them
+ * yet; widen only when a real caller needs a specific additional field.
+ */
+export interface NewlyInsertedMaterialDemandEvidenceRow {
+  id: string
+  session_id: string
+  occurrence_id: string
+  source_turn: number
+  raw_text: string
+  source_statement: string
+  created_at: string
 }
 
 /**
@@ -80,12 +123,20 @@ function dedupeByOccurrenceId<T extends { occurrence_id: string }>(rows: readonl
 
 /**
  * Writes one crc_knowledge_demand_occurrences row per DISTINCT
- * occurrence_id in `occurrences`. A no-op (zero DB calls) when
- * `occurrences` is empty -- the ordinary case for most turns, which
+ * occurrence_id in `occurrences`. A no-op (zero DB calls, returns `[]`)
+ * when `occurrences` is empty -- the ordinary case for most turns, which
  * express no material demand at all.
+ *
+ * Returns the rows ACTUALLY NEWLY INSERTED by this call -- see this
+ * module's own header (LK-DEMAND-2E) for the full return contract. Never
+ * throws; any failure resolves to `[]`, identical in shape to a genuine
+ * all-duplicate no-op.
  */
-export async function recordKnowledgeDemandEvidence(client: SupabaseClient, params: RecordKnowledgeDemandEvidenceParams): Promise<void> {
-  if (params.occurrences.length === 0) return
+export async function recordKnowledgeDemandEvidence(
+  client: SupabaseClient,
+  params: RecordKnowledgeDemandEvidenceParams,
+): Promise<NewlyInsertedMaterialDemandEvidenceRow[]> {
+  if (params.occurrences.length === 0) return []
 
   try {
     const rows = dedupeByOccurrenceId(
@@ -102,11 +153,17 @@ export async function recordKnowledgeDemandEvidence(client: SupabaseClient, para
         schema_version: KNOWLEDGE_DEMAND_EVIDENCE_SCHEMA_VERSION,
       })),
     )
-    const { error } = await client.from('crc_knowledge_demand_occurrences').upsert(rows, { onConflict: 'session_id,occurrence_id', ignoreDuplicates: true })
+    const { data, error } = await client
+      .from('crc_knowledge_demand_occurrences')
+      .upsert(rows, { onConflict: 'session_id,occurrence_id', ignoreDuplicates: true })
+      .select('id, session_id, occurrence_id, source_turn, raw_text, source_statement, created_at')
     if (error) {
       console.error('[recordKnowledgeDemandEvidence] insert error', error)
+      return []
     }
+    return (data ?? []) as NewlyInsertedMaterialDemandEvidenceRow[]
   } catch (err) {
     console.error('[recordKnowledgeDemandEvidence] unexpected failure', err)
+    return []
   }
 }
