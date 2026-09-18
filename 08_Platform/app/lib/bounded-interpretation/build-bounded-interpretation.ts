@@ -44,7 +44,7 @@
  * `results`.
  */
 
-import type { RetrievalDiagnostic } from '@/lib/retrieval-engine/types'
+import type { ApplicabilityFact, RetrievalDiagnostic } from '@/lib/retrieval-engine/types'
 import type { Attested } from '@/types/interview-engine'
 import type { BiIntent, BiResult, BoundedInterpretation, UnresolvedRelevantClaim } from './types'
 import {
@@ -183,17 +183,64 @@ function shouldIncludeHumanContributionSentence(
  * `unmet_applicability`, the same uniform shape every Retrieval path already
  * produces; there is no `if (source === ...)` branch anywhere in this file.
  */
+/**
+ * CC-4C.2D (2026-09-19): now also collects, per claim_id, the SAME bounded
+ * `(fact, tool)` pair already read off `ApplicabilityRequirement` for the
+ * sibling `unresolved_applicability` case elsewhere in this file (`detail.
+ * requirement.fact`/`.tool`) -- never `operator`/`value`, never
+ * `candidate_statement`. See `UnresolvedRelevantClaim`'s own doc comment
+ * (types.ts) for the full authority argument.
+ *
+ * One-claim-to-many-facts handling: the underlying evaluator's
+ * `material_unresolved` array (lookup-topic-claims.ts) can in principle
+ * push more than one `UnmetApplicabilityDetail` for the SAME `claim_id`
+ * (one claim's `applicability_requirements` could, in principle, contain
+ * more than one entry). Confirmed by direct inspection: zero production
+ * `TopicClaim`/`MatrixClaim` has more than one `applicability_requirements`
+ * entry today, so this is not currently reachable -- but this function must
+ * not silently assume that forever. When two DISTINCT `(fact, tool)` pairs
+ * are seen for the same `claim_id`, this function fails closed to `{fact:
+ * null, tool: null}` for that claim_id -- never picking one arbitrarily
+ * (no "first wins"/"most specific wins" rule is invented) -- mirroring
+ * `unresolved-applicability-realization.ts`'s own already human-approved
+ * "two or more distinct facts fail closed to the generic hedge" precedent
+ * (M2A/M2A.1) exactly, applied here rather than invented fresh. An
+ * identical repeated `(fact, tool)` pair for the same claim_id (e.g. the
+ * same claim surfacing in more than one diagnostic entry) is NOT
+ * ambiguous and does not trigger this fallback.
+ *
+ * `claim_id` SET MEMBERSHIP is completely unchanged by this milestone --
+ * this function still decides WHICH claims qualify as unresolved-relevant
+ * exactly as before (same category/reason/status/matchedClaimIds filters,
+ * same claim_id-keyed identity); only the additional `fact`/`tool`
+ * attached to an already-qualifying claim_id is new. Insertion order is
+ * preserved exactly as the prior `Set<string>`-based implementation
+ * produced it (first-seen claim_id order), so `PlanUnresolvedItem`
+ * ordering downstream (CC-3A's own stable sort) is unaffected.
+ */
 function collectUnresolvedRelevantClaimIds(category: BiIntent['category'], diagnostics: RetrievalDiagnostic[], matchedClaimIds: Set<string>): UnresolvedRelevantClaim[] {
-  const ids = new Set<string>()
+  type FactToolPair = { fact: ApplicabilityFact; tool: string | null }
+  const byClaimId = new Map<string, FactToolPair | 'ambiguous'>()
+  const order: string[] = []
   for (const diagnostic of diagnostics) {
     if (diagnostic.identifier !== category || diagnostic.reason !== 'applicability_unmet' || !diagnostic.unmet_applicability) continue
     for (const detail of diagnostic.unmet_applicability) {
       if (detail.status !== 'unresolved') continue
       if (matchedClaimIds.has(detail.claim_id)) continue
-      ids.add(detail.claim_id)
+      const current: FactToolPair = { fact: detail.requirement.fact, tool: detail.requirement.tool ?? null }
+      const existing = byClaimId.get(detail.claim_id)
+      if (existing === undefined) {
+        byClaimId.set(detail.claim_id, current)
+        order.push(detail.claim_id)
+      } else if (existing !== 'ambiguous' && (existing.fact !== current.fact || existing.tool !== current.tool)) {
+        byClaimId.set(detail.claim_id, 'ambiguous')
+      }
     }
   }
-  return Array.from(ids, (claim_id) => ({ claim_id }))
+  return order.map((claim_id) => {
+    const entry = byClaimId.get(claim_id)
+    return entry && entry !== 'ambiguous' ? { claim_id, fact: entry.fact, tool: entry.tool } : { claim_id, fact: null, tool: null }
+  })
 }
 
 /**

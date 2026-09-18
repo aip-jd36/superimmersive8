@@ -30,7 +30,7 @@
  */
 
 import type { GoalCategory, GoalScope } from '@/types/interview-engine'
-import type { ApplicabilityRequirement, MatchOrigin, RetrievalSourceFactKind } from '@/lib/retrieval-engine/types'
+import type { ApplicabilityFact, ApplicabilityRequirement, MatchOrigin, RetrievalSourceFactKind } from '@/lib/retrieval-engine/types'
 
 /**
  * BiIntent — the generic, deliberately minimal input contract for
@@ -257,16 +257,46 @@ export type InterpretationStatus = (typeof INTERPRETATION_STATUSES)[number]
  * `'unresolved'` — never `'not_met'` (see `UnmetApplicabilityDetail`'s own
  * status union, lib/retrieval-engine/types.ts): a known-false requirement
  * means the claim genuinely does not apply and carries no place here,
- * exactly as before this milestone. Deliberately minimal — `claim_id` only,
- * for traceability, mirroring `supporting_claim_ids`' own "id only, never
- * itself rendered" discipline. No `ApplicabilityRequirement` (fact/tool/
- * operator/value), no `RetrievalDiagnostic`, no askability information is
- * ever carried here — see build-bounded-interpretation.ts's own header for
- * the full authority argument for why this boundary is load-bearing, not
- * incidental.
+ * exactly as before this milestone. No `RetrievalDiagnostic`, no askability
+ * information is ever carried here — see build-bounded-interpretation.ts's
+ * own header for the full authority argument for why this boundary is
+ * load-bearing, not incidental.
+ *
+ * `fact`/`tool` (CC-4C.2D — Withheld Claim Applicability-Fact Passthrough,
+ * 2026-09-19, human-approved architecture decision): the SAME bounded
+ * `ApplicabilityFact` subset of `ApplicabilityRequirement` that
+ * `PlanUnresolvedItem.unresolved_applicability` already carries downstream
+ * for an already-MATCHED claim's own hedge — extended here to a claim that
+ * is NOT matched at all. This identifies only the CATEGORY OF PROJECT
+ * INFORMATION whose absence prevents the withheld claim from being
+ * evaluated (e.g. "account or membership status") — never a stronger
+ * signal. The claim's own `candidate_statement`/proposition remains
+ * withheld exactly as before this milestone; nothing added here makes it
+ * reachable. `operator` and `value` (the other two `ApplicabilityRequirement`
+ * fields) are DELIBERATELY excluded — carrying them would let Composition
+ * describe the specific threshold ("requires the Pro plan") rather than
+ * only the fact CATEGORY, which is a stronger disclosure this milestone
+ * does not authorize. `null` (never simply absent) means either no
+ * `ApplicabilityRequirement` detail was available for this claim, or —
+ * see build-bounded-interpretation.ts's own `collectUnresolvedRelevantClaimIds`
+ * comment — the same claim_id carried more than one DISTINCT unresolved
+ * `(fact, tool)` pair across the diagnostics collected for this goal, a
+ * genuine one-claim-to-many-facts case the current governed-claim data
+ * model does not exercise (zero production `TopicClaim`/`MatrixClaim` has
+ * more than one `applicability_requirements` entry, confirmed by direct
+ * inspection) but which the underlying evaluator's own `material_unresolved`
+ * array structurally permits. `null` in that case fails closed to the
+ * pre-existing, unlabelled generic presentation — mirroring
+ * `unresolved-applicability-realization.ts`'s own already-established
+ * "two or more distinct facts fail closed to the generic hedge, no
+ * exception" precedent (M2A/M2A.1) exactly, rather than inventing a new
+ * precedence rule (first-fact-wins, etc.) this milestone has no authority
+ * to make.
  */
 export interface UnresolvedRelevantClaim {
   claim_id: string
+  fact: ApplicabilityFact | null
+  tool: string | null
 }
 
 export interface BoundedInterpretation {

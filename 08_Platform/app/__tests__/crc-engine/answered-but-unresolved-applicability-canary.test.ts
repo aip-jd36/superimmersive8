@@ -155,7 +155,9 @@ describe('Answered-but-Unresolved Applicability -- empirical canary (real pipeli
     const result = runPipeline(structuredUnderstanding())
     const interp = result.bounded_interpretations[0]
     expect(interp.status).toBe('directly_relevant')
-    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: MEMBER_ID }])
+    // CC-4C.2D (2026-09-19): fact/tool are now carried through -- unambiguous
+    // for this real governed claim (gated on tool_account_status/kling).
+    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: MEMBER_ID, fact: 'tool_account_status', tool: 'kling' }])
     expect(interp.summary_blocks[interp.summary_blocks.length - 1]).toBe(
       "There's additional governed guidance relevant to this topic that hasn't been confirmed as applicable based on what's been described here — it may or may not apply, and CRC can't determine that from this conversation.",
     )

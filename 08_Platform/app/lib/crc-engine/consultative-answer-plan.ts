@@ -117,9 +117,19 @@ export interface PlanClaimRef {
  * blocker or that it prevents/clears anything. Ordering of a section's
  * `unresolved_items` is a stable presentation order (see
  * `sortUnresolvedItems`), explicitly NOT a priority or materiality rank.
+ *
+ * `withheld_relevant_claim.fact`/`.tool` (CC-4C.2D, 2026-09-19): a verbatim
+ * copy of `BoundedInterpretation.UnresolvedRelevantClaim.fact`/`.tool` --
+ * see that type's own doc comment (bounded-interpretation/types.ts) for the
+ * full authority argument. `null` means either no fact was available or the
+ * underlying claim carried more than one distinct unresolved fact (fails
+ * closed, never guesses). This is STILL never the withheld claim's own
+ * `candidate_statement`/proposition -- only the bounded category of missing
+ * project information, identical in kind to `unresolved_applicability`'s
+ * own `fact` field on the sibling variant below.
  */
 export type PlanUnresolvedItem =
-  | { kind: 'withheld_relevant_claim'; claim_id: string }
+  | { kind: 'withheld_relevant_claim'; claim_id: string; fact: ApplicabilityFact | null; tool: string | null }
   | { kind: 'unresolved_applicability'; claim_id: string; fact: ApplicabilityFact; tool: string | null }
   | { kind: 'open_project_dependency'; source_claim_id: string; dependency_id: string }
 
@@ -356,8 +366,8 @@ export function buildConsultativeAnswerPlan(
     //    about, and BI itself never gives those a category-specific answer). ──
     const unresolvedItems: PlanUnresolvedItem[] = []
     if (!isDeterminationDeclined && !isOutsideCoverage) {
-      for (const { claim_id } of interp.unresolved_relevant_claims) {
-        unresolvedItems.push({ kind: 'withheld_relevant_claim', claim_id })
+      for (const { claim_id, fact, tool } of interp.unresolved_relevant_claims) {
+        unresolvedItems.push({ kind: 'withheld_relevant_claim', claim_id, fact, tool })
       }
       for (const d of diagnostics) {
         if (d.reason !== 'applicability_unmet' || d.identifier !== interp.category || !d.unmet_applicability) continue

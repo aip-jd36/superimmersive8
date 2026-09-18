@@ -156,7 +156,7 @@ describe('realizeUnresolvedApplicability -- fail-closed', () => {
   test('5: not_met (no unresolved_applicability item, mirroring CC-3A\'s own not_met exclusion) -> zero notes', () => {
     mockedAskability.mockImplementation(() => askableEntry())
     mockedLabel.mockImplementation(() => TEST_LABEL)
-    expect(realizeUnresolvedApplicability([section({ unresolved_items: [{ kind: 'withheld_relevant_claim', claim_id: 'X' }] })])).toEqual([])
+    expect(realizeUnresolvedApplicability([section({ unresolved_items: [{ kind: 'withheld_relevant_claim', claim_id: 'X', fact: null, tool: null }] })])).toEqual([])
   })
 
   // 9/10: requires_documentary_evidence / evidence-only -> zero note.

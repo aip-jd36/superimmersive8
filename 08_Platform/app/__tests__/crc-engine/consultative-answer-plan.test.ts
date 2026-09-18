@@ -356,7 +356,11 @@ describe('CC-3A -- CASE 8: ambiguous unresolved ordering', () => {
     category: 'commercial_use',
     status: 'directly_relevant',
     supporting_claim_ids: ['c1'],
-    unresolved_relevant_claims: [{ claim_id: 'z-claim' }, { claim_id: 'a-claim' }, { claim_id: 'm-claim' }],
+    unresolved_relevant_claims: [
+      { claim_id: 'z-claim', fact: null, tool: null },
+      { claim_id: 'a-claim', fact: null, tool: null },
+      { claim_id: 'm-claim', fact: null, tool: null },
+    ],
   })
   const results = [result({ claim_id: 'c1', matched_goal_category: 'commercial_use' })]
   const plan = buildConsultativeAnswerPlan([g], results, [])
@@ -368,17 +372,23 @@ describe('CC-3A -- CASE 8: ambiguous unresolved ordering', () => {
 
   test('order is deterministic and stable (kind, then identity) -- not a materiality rank', () => {
     expect(items).toEqual([
-      { kind: 'withheld_relevant_claim', claim_id: 'a-claim' },
-      { kind: 'withheld_relevant_claim', claim_id: 'm-claim' },
-      { kind: 'withheld_relevant_claim', claim_id: 'z-claim' },
+      { kind: 'withheld_relevant_claim', claim_id: 'a-claim', fact: null, tool: null },
+      { kind: 'withheld_relevant_claim', claim_id: 'm-claim', fact: null, tool: null },
+      { kind: 'withheld_relevant_claim', claim_id: 'z-claim', fact: null, tool: null },
     ])
     // rebuilding yields the identical order
     expect(buildConsultativeAnswerPlan([g], results, []).explicit_sections[0].unresolved_items).toEqual(items)
   })
 
+  // CC-4C.2D (2026-09-19): fact/tool are now legitimate fields on this
+  // variant (the bounded applicability-fact passthrough) -- still no rank/
+  // priority/severity field, which is what this test actually guards.
   test('no item carries a rank / priority / severity field', () => {
     for (const it of items) {
-      expect(Object.keys(it).sort()).toEqual(['claim_id', 'kind'])
+      expect(Object.keys(it).sort()).toEqual(['claim_id', 'fact', 'kind', 'tool'])
+      expect(it).not.toHaveProperty('rank')
+      expect(it).not.toHaveProperty('priority')
+      expect(it).not.toHaveProperty('severity')
     }
   })
 })
@@ -450,7 +460,7 @@ describe('CC-3A -- not_met applicability is never an open item', () => {
 
 describe('CC-3A -- purity / no mutation of inputs', () => {
   test('inputs are not mutated', () => {
-    const interps = [interp({ goal_id: 'g1', category: 'commercial_use', status: 'directly_relevant', supporting_claim_ids: ['c1'], unresolved_relevant_claims: [{ claim_id: 'b' }, { claim_id: 'a' }] })]
+    const interps = [interp({ goal_id: 'g1', category: 'commercial_use', status: 'directly_relevant', supporting_claim_ids: ['c1'], unresolved_relevant_claims: [{ claim_id: 'b', fact: null, tool: null }, { claim_id: 'a', fact: null, tool: null }] })]
     const results = [result({ claim_id: 'c1', matched_goal_category: 'commercial_use' })]
     const diags: RetrievalDiagnostic[] = []
     const snapshotInterps = JSON.stringify(interps)

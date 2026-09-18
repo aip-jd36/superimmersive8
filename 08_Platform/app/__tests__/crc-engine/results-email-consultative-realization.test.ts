@@ -89,7 +89,7 @@ function unresolvedApplicabilityItem(overrides: Partial<Extract<PlanUnresolvedIt
   return { kind: 'unresolved_applicability', claim_id: 'CLAIM-A', fact: 'tool_account_status', tool: 'synthtool', ...overrides }
 }
 function withheldClaimItem(overrides: Partial<Extract<PlanUnresolvedItem, { kind: 'withheld_relevant_claim' }>> = {}): PlanUnresolvedItem {
-  return { kind: 'withheld_relevant_claim', claim_id: 'CLAIM-B', ...overrides }
+  return { kind: 'withheld_relevant_claim', claim_id: 'CLAIM-B', fact: null, tool: null, ...overrides }
 }
 function openDependencyItem(overrides: Partial<Extract<PlanUnresolvedItem, { kind: 'open_project_dependency' }>> = {}): PlanUnresolvedItem {
   return { kind: 'open_project_dependency', source_claim_id: 'CLAIM-A', dependency_id: 'dep-1', ...overrides }
