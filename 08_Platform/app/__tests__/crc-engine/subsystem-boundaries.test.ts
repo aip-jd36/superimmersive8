@@ -266,6 +266,13 @@ describe('subsystem boundaries -- Consultative Answer Plan (CC-3A)', () => {
       // bounded unresolved-applicability text -- never BI, Retrieval,
       // Interview, questioning, or ProjectionOutput assembly.
       'lib/crc-engine/unresolved-applicability-realization.ts',
+      // CC-4C.2A (2026-09-18): the shared ConsultativeRealization contract --
+      // reads plan TYPES only (types-only import, see the dedicated boundary
+      // block below), reshapes ConsultativeAnswerPlan + ProjectionOutput +
+      // ConsultativeNote[] into one channel-independent structure. Zero
+      // production call sites as of this milestone (CC-4C.2B wires a channel
+      // renderer to it, after human review).
+      'lib/crc-engine/consultative-realization-contract.ts',
     ])
     const FORBIDDEN = [
       ...BOUNDED_INTERPRETATION_FILES,
@@ -313,6 +320,61 @@ describe('subsystem boundaries -- Consultative Realization (CC-3B)', () => {
   test('every import is type-only', () => {
     for (const line of importLinesOf(FILE)) {
       expect(line).toMatch(/^import type /)
+    }
+  })
+})
+
+describe('subsystem boundaries -- Consultative Realization Contract (CC-4C.2A)', () => {
+  const FILE = 'lib/crc-engine/consultative-realization-contract.ts'
+  const importText = importLinesOf(FILE).join('\n')
+
+  test('it exists', () => {
+    expect(fs.existsSync(path.join(APP_ROOT, FILE))).toBe(true)
+  })
+
+  test('imports no BI/Retrieval/Interview LOGIC, no Matrix, no LLM -- only types', () => {
+    expect(importText).not.toMatch(/lib\/bounded-interpretation\/(rules|build-bounded-interpretation)/i)
+    expect(importText).not.toMatch(/lib\/retrieval-engine\/(retrieve|lookup-|enumerate-eligible-claims|extract-matchable-facts|assemble-result|matrix-fixture)/i)
+    expect(importText).not.toMatch(/lib\/interview-engine\//i)
+    expect(importText).not.toMatch(/platform-rights-matrix/i)
+    expect(importText).not.toMatch(/anthropic/i)
+    expect(importText).not.toMatch(/openai/i)
+  })
+
+  test('imports no Projection Layer LOGIC module -- only @/lib/projection-layer/types (its one already-approved-elsewhere exception)', () => {
+    expect(importText).not.toMatch(/lib\/projection-layer\/(assemble-projection-output|project-knowledge-items|understood-summary)/i)
+  })
+
+  test('imports no UI component, email-sending infrastructure, or locale/presentation-language module (CC-4C.2A channel independence)', () => {
+    expect(importText).not.toMatch(/components\//i)
+    expect(importText).not.toMatch(/crc-locale|crc-ui-copy|CrcLocaleProvider/i)
+    expect(importText).not.toMatch(/lib\/emails|results-email-delivery|results-email-template/i)
+  })
+
+  test('every import is type-only -- the module is pure reshaping with zero value-level dependencies', () => {
+    for (const line of importLinesOf(FILE)) {
+      expect(line).toMatch(/^import type /)
+    }
+  })
+
+  test('CC-4C.2A: zero production call sites yet -- no channel renderer, orchestrator, or API route imports this module (deferred to CC-4C.2B, after human review)', () => {
+    const PRODUCTION_CONSUMER_CANDIDATES = [
+      'lib/crc-engine/run-crc-conversation.ts',
+      'lib/crc-engine/results-email-template.ts',
+      'lib/crc-engine/results-email-delivery.ts',
+    ]
+    for (const file of PRODUCTION_CONSUMER_CANDIDATES) {
+      const source = fs.readFileSync(path.join(APP_ROOT, file), 'utf-8')
+      expect(source).not.toMatch(/consultative-realization-contract|buildConsultativeRealization/)
+    }
+    const appDir = path.join(APP_ROOT, 'app')
+    const apiCrcTurnRoute = path.join(appDir, 'api', 'crc', 'turn', 'route.ts')
+    if (fs.existsSync(apiCrcTurnRoute)) {
+      expect(fs.readFileSync(apiCrcTurnRoute, 'utf-8')).not.toMatch(/consultative-realization-contract|buildConsultativeRealization/)
+    }
+    const crcProjectionOutput = path.join(APP_ROOT, 'components', 'CrcProjectionOutput.tsx')
+    if (fs.existsSync(crcProjectionOutput)) {
+      expect(fs.readFileSync(crcProjectionOutput, 'utf-8')).not.toMatch(/consultative-realization-contract|buildConsultativeRealization/)
     }
   })
 })
