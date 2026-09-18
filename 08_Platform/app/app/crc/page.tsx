@@ -35,19 +35,52 @@ import { CommercialAssuranceBridge } from '@/components/CommercialAssuranceBridg
 import type { CrcResultsEmailState, CrcTeaser, TurnResponseBody, SessionStatusResponseBody } from '@/lib/crc-engine/api-contract'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
 import type { ConsultativeNote } from '@/lib/crc-engine/unresolved-applicability-realization'
-import { shouldShowAcknowledgmentGuidance, ACKNOWLEDGMENT_GUIDANCE_COPY, type CrcPagePhase as Phase } from '@/lib/crc-engine/acknowledgment-guidance'
-import { getRateLimitMessage } from '@/lib/crc-engine/rate-limit-copy'
-import { formatWaitIndicator, startElapsedSecondsTicker } from '@/lib/crc-engine/wait-indicator'
-import { RESULTS_GATE_COPY, buildConfirmationCopy, buildTeaserCopy } from '@/lib/crc-engine/results-gate-copy'
+import { shouldShowAcknowledgmentGuidance, type CrcPagePhase as Phase } from '@/lib/crc-engine/acknowledgment-guidance'
+import { startElapsedSecondsTicker } from '@/lib/crc-engine/wait-indicator'
 import { buildCalendlyUrl } from '@/lib/crc-engine/calendly-attribution'
 import { CrcEntryFlow, type GuidedSubmission } from '@/components/crc/CrcEntryFlow'
+import { CrcLocaleProvider, useCrcLocale } from '@/components/crc/CrcLocaleProvider'
+import { CrcLanguageControl } from '@/components/crc/CrcLanguageControl'
+import { CrcIdentityMark } from '@/components/crc/CrcIdentityMark'
+import { CrcZhLocaleNotice } from '@/components/crc/CrcZhLocaleNotice'
+import {
+  formatWaitIndicatorLocalized,
+  getRateLimitMessageLocalized,
+  buildTeaserCopyLocalized,
+  buildConfirmationCopyLocalized,
+  getResultsGateCopyLocalized,
+  getAcknowledgmentGuidanceCopyLocalized,
+} from '@/components/crc/crc-ui-copy'
+// NOTE (CRC-UI-1 scope boundary): getResultsEmailErrorMessage is called
+// SERVER-SIDE (app/api/crc/turn/route.ts:474) and the resulting English
+// string is sent to the client as `results_email.error_message`/`data.
+// message`/`data.error` -- the client never receives the underlying reason
+// code. Localizing these specific server-generated fallback strings would
+// require an API contract change (sending a reason code instead of/in
+// addition to pre-rendered text), which is explicitly out of scope for this
+// presentation-only milestone. They remain English regardless of locale;
+// only the CLIENT-OWNED literal fallback used when the server field is
+// absent is localized below. See the implementation report's own "Known
+// Visual/Product Gaps" section.
 
 interface Message {
   role: 'user' | 'assistant'
   text: string
 }
 
-/** Mirrors route.ts's own DECLINE_LABEL exactly, for immediate optimistic display before the server responds. */
+/**
+ * Mirrors route.ts's own DECLINE_LABEL exactly, for immediate optimistic
+ * display before the server responds. CRC-UI-1: this is ENGINE-BOUND text
+ * -- `submit()` below sends this exact string as the turn's own userText
+ * for a skip/stop action (see `optimisticText` in submit()). It MUST NEVER
+ * be sourced from crc-ui-copy.ts / read `locale` / change with the
+ * language selector -- doing so would send Traditional-Chinese text into
+ * extraction. The VISIBLE skip/stop BUTTON LABELS the user clicks
+ * (copy.skipQuestion/copy.skipSection/copy.stop, rendered lower in this
+ * file) are a completely separate, safely localizable set of strings that
+ * happen to trigger this same fixed, English-only constant. See
+ * __tests__/crc/crc-decline-label-locale-independence.test.ts.
+ */
 const DECLINE_LABEL = {
   skip_question: "Let's skip this question.",
   skip_phase: "Let's skip this section.",
@@ -60,7 +93,13 @@ type PendingRequestBody = { message: string } | { declineAction: keyof typeof DE
 type FeedbackRating = 'yes' | 'somewhat' | 'no'
 type FeedbackStatus = 'idle' | 'submitting' | 'submitted' | 'error'
 
-export default function CrcPage() {
+/**
+ * CRC-UI-1: the page's actual content, wrapped by CrcLocaleProvider below
+ * so `useCrcLocale()` is available -- the provider itself must be an
+ * ancestor, not a sibling, of the component that calls the hook.
+ */
+function CrcPageContent() {
+  const { locale, copy } = useCrcLocale()
   // GE-2: gates whether the entry-choice/Guided-Entry flow (CrcEntryFlow)
   // or the existing chat experience (driven by `phase`, below, entirely
   // unchanged) renders. Deliberately a SEPARATE piece of state from
@@ -221,7 +260,7 @@ export default function CrcPage() {
     } catch {
       if (fromEntryFlow) {
         setEntryFlowSubmitting(false)
-        setEntryFlowError("That didn't go through. You can try again.")
+        setEntryFlowError(copy.networkErrorGeneric)
       } else {
         setPhase('retry')
       }
@@ -278,11 +317,11 @@ export default function CrcPage() {
     } else if (data.status === 'rate_limited') {
       if (fromEntryFlow) {
         setEntryFlowSubmitting(false)
-        setEntryFlowError(getRateLimitMessage(data.reason, data.retryAfterSeconds))
+        setEntryFlowError(getRateLimitMessageLocalized(locale, data.reason, data.retryAfterSeconds))
         return
       }
       setMessages((prev) => prev.slice(0, -1))
-      setRateLimitMessage(getRateLimitMessage(data.reason, data.retryAfterSeconds))
+      setRateLimitMessage(getRateLimitMessageLocalized(locale, data.reason, data.retryAfterSeconds))
       setPhase('rate_limited')
     } else if (data.status === 'session_not_found') {
       // Cannot occur on the guidedInit path (it always targets a token
@@ -290,7 +329,7 @@ export default function CrcPage() {
       // rather than assumed unreachable.
       if (fromEntryFlow) {
         setEntryFlowSubmitting(false)
-        setEntryFlowError('Something went wrong. You can try again.')
+        setEntryFlowError(copy.networkErrorGeneric)
         return
       }
       setLastOutcomeWasAcknowledgment(false)
@@ -298,7 +337,7 @@ export default function CrcPage() {
     } else if (data.status === 'retry') {
       if (fromEntryFlow) {
         setEntryFlowSubmitting(false)
-        setEntryFlowError(data.message ?? 'Something went wrong. Nothing was lost -- you can try again.')
+        setEntryFlowError(data.message ?? copy.retryMessage)
         return
       }
       setPhase('retry')
@@ -334,7 +373,7 @@ export default function CrcPage() {
       })
     } catch {
       setResultsEmailSubmitting(false)
-      setResultsEmailError('That didn’t go through. You can try again.')
+      setResultsEmailError(copy.networkErrorGeneric)
       return
     }
     const data: TurnResponseBody = await res.json()
@@ -350,7 +389,7 @@ export default function CrcPage() {
     } else if (data.status === 'retry') {
       setResultsEmailError(data.message ?? "We couldn't save that right now. Please try again.")
     } else if (data.status === 'rate_limited') {
-      setResultsEmailError(getRateLimitMessage(data.reason, data.retryAfterSeconds))
+      setResultsEmailError(getRateLimitMessageLocalized(locale, data.reason, data.retryAfterSeconds))
     } else if (data.status === 'invalid_request') {
       setResultsEmailError(data.error)
     }
@@ -448,7 +487,7 @@ export default function CrcPage() {
 
   function handleStartOverClick() {
     const hasUnfinishedProgress = messages.length > 0 && phase !== 'complete' && phase !== 'results_confirmation'
-    if (hasUnfinishedProgress && !window.confirm('Start over? This will clear the current conversation.')) return
+    if (hasUnfinishedProgress && !window.confirm(copy.startOverConfirm)) return
     handleStartOver()
   }
 
@@ -470,14 +509,21 @@ export default function CrcPage() {
     }
   }
 
-  const confirmationCopy = resultsEmail?.masked_email ? buildConfirmationCopy(resultsEmail.masked_email) : null
+  const confirmationCopy = resultsEmail?.masked_email ? buildConfirmationCopyLocalized(locale, resultsEmail.masked_email) : null
+  const resultsGateCopy = getResultsGateCopyLocalized(locale)
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="mx-auto max-w-2xl space-y-6">
+    <div className="crc-shell min-h-screen bg-background px-4 py-8">
+      <div className="mx-auto max-w-2xl space-y-6 lg:max-w-3xl">
+        <div className="flex items-center justify-between">
+          <CrcIdentityMark />
+          <CrcLanguageControl />
+        </div>
+        <CrcZhLocaleNotice />
+
         {entryFlowScreen === 'loading' && (
           <Card>
-            <CardContent className="p-6 text-sm text-muted-foreground">Loading…</CardContent>
+            <CardContent className="p-6 text-sm text-muted-foreground">{copy.loading}</CardContent>
           </Card>
         )}
 
@@ -502,16 +548,12 @@ export default function CrcPage() {
             <Card>
               <CardHeader className="flex flex-row items-start justify-between gap-4">
                 <div>
-                  <CardTitle>Commercial Readiness Check</CardTitle>
-                  <CardDescription>
-                    A short conversation about how your AI video was made. There&apos;s no wrong answer, and you can skip anything you&apos;d rather not cover.
-                    This is educational workflow guidance, not an SI8 Commercial Assurance Assessment -- it doesn&apos;t provide legal advice or certify
-                    commercial use.
-                  </CardDescription>
+                  <CardTitle>{copy.headerTitle}</CardTitle>
+                  <CardDescription>{copy.headerDescription}</CardDescription>
                 </div>
                 {phase !== 'loading' && (
                   <Button variant="ghost" size="sm" className="shrink-0" onClick={handleStartOverClick}>
-                    Start Over
+                    {copy.startOver}
                   </Button>
                 )}
               </CardHeader>
@@ -519,15 +561,15 @@ export default function CrcPage() {
 
             {phase === 'loading' && (
               <Card>
-                <CardContent className="p-6 text-sm text-muted-foreground">Loading…</CardContent>
+                <CardContent className="p-6 text-sm text-muted-foreground">{copy.loading}</CardContent>
               </Card>
             )}
 
             {phase === 'session_not_found' && (
               <Card>
                 <CardContent className="space-y-4 p-6">
-                  <p className="text-sm text-red-600">Your session could not be found. It may have expired.</p>
-                  <Button onClick={handleStartOver}>Start New Conversation</Button>
+                  <p className="text-sm text-red-600">{copy.sessionNotFoundMessage}</p>
+                  <Button onClick={handleStartOver}>{copy.sessionNotFoundButton}</Button>
                 </CardContent>
               </Card>
             )}
@@ -541,9 +583,7 @@ export default function CrcPage() {
               phase === 'results_confirmation') && (
               <Card>
                 <CardContent className="space-y-4 p-6">
-                  {messages.length === 0 && phase === 'idle' && (
-                    <p className="text-sm text-muted-foreground">Tell me a bit about the project to get started.</p>
-                  )}
+                  {messages.length === 0 && phase === 'idle' && <p className="text-sm text-muted-foreground">{copy.emptyStateHint}</p>}
 
                   <div className="space-y-3">
                     {messages.map((m, i) => (
@@ -551,8 +591,8 @@ export default function CrcPage() {
                         <div
                           className={
                             m.role === 'user'
-                              ? 'max-w-[80%] rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground'
-                              : 'max-w-[80%] rounded-lg bg-muted px-4 py-2 text-sm'
+                              ? 'max-w-[80%] rounded-2xl bg-primary px-4 py-2 text-sm text-primary-foreground'
+                              : 'max-w-[80%] rounded-2xl bg-accent px-4 py-2 text-sm text-accent-foreground'
                           }
                         >
                           {m.text}
@@ -562,13 +602,13 @@ export default function CrcPage() {
                     <div ref={scrollAnchorRef} />
                   </div>
 
-                  {phase === 'sending' && <p className="text-sm text-muted-foreground">{formatWaitIndicator(elapsedSeconds)}</p>}
+                  {phase === 'sending' && <p className="text-sm text-muted-foreground">{formatWaitIndicatorLocalized(locale, elapsedSeconds)}</p>}
 
                   {phase === 'retry' && (
                     <div className="space-y-2 rounded border border-red-200 bg-red-50 p-3">
-                      <p className="text-sm text-red-600">Something went wrong. Nothing was lost -- you can try again.</p>
+                      <p className="text-sm text-red-600">{copy.retryMessage}</p>
                       <Button variant="outline" size="sm" onClick={handleRetry}>
-                        Retry
+                        {copy.retryButton}
                       </Button>
                     </div>
                   )}
@@ -583,7 +623,7 @@ export default function CrcPage() {
                     <div className="space-y-4 border-t pt-4">
                       {teaser &&
                         (() => {
-                          const teaserCopy = buildTeaserCopy(teaser.consideration_count)
+                          const teaserCopy = buildTeaserCopyLocalized(locale, teaser.consideration_count)
                           return (
                             <div>
                               <p className="text-base font-semibold">{teaserCopy.heading}</p>
@@ -592,12 +632,12 @@ export default function CrcPage() {
                           )
                         })()}
                       <div className="space-y-3 border-t pt-4">
-                        <p className="text-sm font-medium">{RESULTS_GATE_COPY.heading}</p>
-                        <p className="text-sm text-muted-foreground">{RESULTS_GATE_COPY.valueProp}</p>
+                        <p className="text-sm font-medium">{resultsGateCopy.heading}</p>
+                        <p className="text-sm text-muted-foreground">{resultsGateCopy.valueProp}</p>
                         <Textarea
                           value={resultsEmailInput}
                           onChange={(e) => setResultsEmailInput(e.target.value)}
-                          placeholder={RESULTS_GATE_COPY.fieldLabel}
+                          placeholder={resultsGateCopy.fieldLabel}
                           disabled={resultsEmailSubmitting}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter' && !e.shiftKey) {
@@ -608,9 +648,9 @@ export default function CrcPage() {
                         />
                         {resultsEmailError && <p className="text-sm text-red-600">{resultsEmailError}</p>}
                         <Button type="button" size="sm" disabled={!resultsEmailInput.trim() || resultsEmailSubmitting} onClick={handleResultsEmailSubmit}>
-                          {RESULTS_GATE_COPY.buttonText}
+                          {resultsGateCopy.buttonText}
                         </Button>
-                        <p className="text-xs text-muted-foreground">{RESULTS_GATE_COPY.disclosure}</p>
+                        <p className="text-xs text-muted-foreground">{resultsGateCopy.disclosure}</p>
                       </div>
                     </div>
                   )}
@@ -623,16 +663,16 @@ export default function CrcPage() {
 
                       <Button asChild variant="outline" size="sm">
                         <a href={buildCalendlyUrl(attributionToken)} target="_blank" rel="noopener noreferrer" onClick={handleCommercialAssuranceCtaClick}>
-                          Talk with SI8 about a Commercial Assurance Assessment
+                          {copy.commercialAssuranceCta}
                         </a>
                       </Button>
 
                       <div className="flex gap-4 text-sm text-muted-foreground">
                         <button type="button" className="underline" onClick={handleChangeEmailClick} disabled={resultsEmailSubmitting}>
-                          Wrong email? Change it
+                          {copy.changeEmail}
                         </button>
                         <button type="button" className="underline" onClick={handleResendResultEmail} disabled={resultsEmailSubmitting}>
-                          Didn&apos;t get it? Resend
+                          {copy.resendEmail}
                         </button>
                       </div>
                       {resultsEmailError && <p className="text-sm text-red-600">{resultsEmailError}</p>}
@@ -648,10 +688,10 @@ export default function CrcPage() {
                       </div>
 
                       {feedbackStatus === 'submitted' ? (
-                        <p className="mt-6 border-t pt-4 text-sm text-muted-foreground">Thanks for the feedback.</p>
+                        <p className="mt-6 border-t pt-4 text-sm text-muted-foreground">{copy.feedbackThanks}</p>
                       ) : (
                         <div className="mt-6 space-y-3 border-t pt-4">
-                          <p className="text-sm font-medium">Was this helpful?</p>
+                          <p className="text-sm font-medium">{copy.feedbackPrompt}</p>
                           <div className="flex gap-2">
                             {(['yes', 'somewhat', 'no'] as const).map((rating) => (
                               <Button
@@ -662,39 +702,37 @@ export default function CrcPage() {
                                 disabled={feedbackStatus === 'submitting'}
                                 onClick={() => setFeedbackRating(rating)}
                               >
-                                {rating === 'yes' ? 'Yes' : rating === 'somewhat' ? 'Somewhat' : 'No'}
+                                {rating === 'yes' ? copy.feedbackYes : rating === 'somewhat' ? copy.feedbackSomewhat : copy.feedbackNo}
                               </Button>
                             ))}
                           </div>
                           <Textarea
                             value={feedbackText}
                             onChange={(e) => setFeedbackText(e.target.value)}
-                            placeholder="Anything you'd add? (optional)"
+                            placeholder={copy.feedbackPlaceholder}
                             disabled={feedbackStatus === 'submitting'}
                           />
-                          {feedbackStatus === 'error' && (
-                            <p className="text-sm text-red-600">Something went wrong submitting your feedback. You can try again.</p>
-                          )}
+                          {feedbackStatus === 'error' && <p className="text-sm text-red-600">{copy.feedbackError}</p>}
                           <Button type="button" size="sm" disabled={!feedbackRating || feedbackStatus === 'submitting'} onClick={handleSubmitFeedback}>
-                            Submit feedback
+                            {copy.feedbackSubmit}
                           </Button>
                         </div>
                       )}
 
                       <Button variant="outline" size="sm" className="mt-4" onClick={handleStartOver}>
-                        Start a New Conversation
+                        {copy.startNewConversation}
                       </Button>
                     </div>
                   )}
 
                   {phase === 'results_confirmation' && (
                     <Button variant="outline" size="sm" className="mt-4" onClick={handleStartOver}>
-                      Start a New Conversation
+                      {copy.startNewConversation}
                     </Button>
                   )}
 
                   {shouldShowAcknowledgmentGuidance(phase, lastOutcomeWasAcknowledgment) && (
-                    <p className="text-sm text-muted-foreground">{ACKNOWLEDGMENT_GUIDANCE_COPY}</p>
+                    <p className="text-sm text-muted-foreground">{getAcknowledgmentGuidanceCopyLocalized(locale)}</p>
                   )}
 
                   {(phase === 'idle' || phase === 'sending') && (
@@ -702,7 +740,7 @@ export default function CrcPage() {
                       <Textarea
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
-                        placeholder="Type your answer…"
+                        placeholder={copy.typeYourAnswer}
                         disabled={phase === 'sending'}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {
@@ -714,17 +752,17 @@ export default function CrcPage() {
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex flex-wrap gap-2">
                           <Button type="button" variant="ghost" size="sm" disabled={phase === 'sending'} onClick={() => handleDecline('skip_question')}>
-                            Skip question
+                            {copy.skipQuestion}
                           </Button>
                           <Button type="button" variant="ghost" size="sm" disabled={phase === 'sending'} onClick={() => handleDecline('skip_phase')}>
-                            Skip section
+                            {copy.skipSection}
                           </Button>
                           <Button type="button" variant="ghost" size="sm" disabled={phase === 'sending'} onClick={() => handleDecline('stop_interview')}>
-                            Stop
+                            {copy.stop}
                           </Button>
                         </div>
                         <Button type="button" disabled={phase === 'sending' || inputText.trim().length === 0} onClick={handleSend}>
-                          Send
+                          {copy.send}
                         </Button>
                       </div>
                     </div>
@@ -736,5 +774,21 @@ export default function CrcPage() {
         )}
       </div>
     </div>
+  )
+}
+
+/**
+ * CRC-UI-1: the actual default export. CrcLocaleProvider wraps
+ * CrcPageContent so `useCrcLocale()` has an ancestor provider -- this is
+ * the ONLY new top-level element this milestone adds outside CrcPageContent
+ * itself; no other page/layout file is touched (see this milestone's own
+ * report -- app/layout.tsx is deliberately NOT where locale state lives,
+ * keeping this entirely scoped to the /crc route).
+ */
+export default function CrcPage() {
+  return (
+    <CrcLocaleProvider>
+      <CrcPageContent />
+    </CrcLocaleProvider>
   )
 }

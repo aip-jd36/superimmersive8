@@ -39,3 +39,42 @@
     -moz-osx-font-smoothing: grayscale;
   }
 }
+
+/*
+ * CRC-scoped blue/navy token override (CRC-UI-1, 2026-09-18).
+ *
+ * DELIBERATELY SCOPED to `.crc-shell`, never the `:root` block above.
+ * `--primary`/`--accent`/etc. are shared, app-wide shadcn tokens consumed
+ * by 30+ non-CRC files (admin panel, dashboard, every page using the
+ * default Button/Card variants) via the SAME CSS custom properties --
+ * redefining them at `:root` would repaint every one of those surfaces
+ * amber-to-blue unintentionally. CSS custom properties cascade normally,
+ * so wrapping only the CRC page tree in a `.crc-shell` class and
+ * redefining these variables there overrides them for every `bg-primary`/
+ * `text-accent-foreground`/etc. utility used inside that subtree, while
+ * every other route (which never renders inside `.crc-shell`) continues
+ * reading the unmodified `:root` amber values exactly as before. See this
+ * milestone's own diagnostic report ("Critical Color Scope Rule") for the
+ * full rationale -- this comment restates it, not a duplicate decision.
+ */
+.crc-shell {
+  --background: 210 40% 98%;       /* #F8FAFC cool near-white */
+  --foreground: 222 47% 11%;       /* #0F172A dark navy */
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 221 83% 53%;          /* #2563EB blue */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 214 32% 91%;        /* #E2E8F0 */
+  --secondary-foreground: 222 47% 11%;
+  --muted: 214 32% 91%;
+  --muted-foreground: 215 16% 47%; /* #64748B */
+  --accent: 214 95% 93%;           /* #DBEAFE pale blue -- assistant surfaces */
+  --accent-foreground: 222 47% 11%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 221 83% 53%;
+}

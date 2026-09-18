@@ -24,7 +24,7 @@
  */
 
 import { useReducer } from 'react'
-import { Building2, ChevronLeft, MessageCircle, User, Users } from 'lucide-react'
+import { Building2, ChevronLeft, ChevronRight, MessageCircle, User, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
@@ -38,6 +38,10 @@ import {
   visibleFields as selectVisibleFields,
 } from '@/lib/crc-engine/guided-entry-flow-state'
 import type { GuidedEntryDefinition, GuidedFieldSpec } from '@/types/guided-entry'
+import { useCrcLocale } from './CrcLocaleProvider'
+import { getRoleDisplay, getFieldPrompt, getOptionDisplayLabel } from './crc-ui-copy'
+import type { CrcLocale } from './crc-locale'
+import type { CrcUiCopy } from './crc-ui-copy'
 
 const CONCERN_MAX_LENGTH = 500
 
@@ -72,6 +76,10 @@ export function CrcEntryFlow({ onFreeFormSubmit, onGuidedSubmit, submitting, err
   // environment in this repo).
   const [state, dispatch] = useReducer(guidedEntryFlowReducer, undefined, initialGuidedEntryFlowState)
   const { screen, selectedDefinition, stepIndex, answers, concern, freeFormText } = state
+  // CRC-UI-1: UI-shell locale only -- see CrcLocaleProvider.tsx's own
+  // header. Never read by guided-entry-flow-state.ts's reducer, never
+  // passed to buildGuidedSubmission, never part of GuidedSubmission.
+  const { locale, copy } = useCrcLocale()
 
   const visibleFields = selectVisibleFields(selectedDefinition)
   const isOnConcernStep = selectIsOnConcernStep(state)
@@ -130,36 +138,43 @@ export function CrcEntryFlow({ onFreeFormSubmit, onGuidedSubmit, submitting, err
       <CardContent className="space-y-5 p-6">
         {screen === 'choice' && (
           <div className="space-y-5">
-            <h1 className="text-xl font-semibold leading-snug">How are you making this project?</h1>
+            <h1 className="text-xl font-semibold leading-snug text-foreground sm:text-2xl">{copy.roleScreenHeading}</h1>
             <div className="flex flex-col gap-3">
               {GUIDED_ENTRY_DEFINITIONS.map((def) => {
                 const presentation = ROLE_PRESENTATION[def.definitionId]
                 const Icon = presentation?.Icon ?? Users
+                const display = getRoleDisplay(locale, def.definitionId, def.label, def.description)
                 return (
                   <button
                     key={def.definitionId}
                     type="button"
                     onClick={() => selectRole(def)}
-                    className="flex min-h-[64px] items-center gap-4 rounded-lg border bg-background p-4 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:bg-accent"
+                    className="group flex min-h-[64px] items-center gap-4 rounded-xl border border-input bg-card p-4 text-left shadow-sm transition-colors hover:border-primary hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:bg-accent"
                   >
-                    <Icon className="h-6 w-6 shrink-0 text-muted-foreground" aria-hidden="true" />
-                    <span>
-                      <span className="block text-base font-medium">{def.label}</span>
-                      <span className="block text-sm text-muted-foreground">{def.description}</span>
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-primary">
+                      <Icon className="h-5 w-5" aria-hidden="true" />
                     </span>
+                    <span className="flex-1">
+                      <span className="block text-base font-semibold text-foreground">{display.label}</span>
+                      <span className="block text-sm text-muted-foreground">{display.description}</span>
+                    </span>
+                    <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
                   </button>
                 )
               })}
               <button
                 type="button"
                 onClick={selectFreeForm}
-                className="flex min-h-[64px] items-center gap-4 rounded-lg border bg-background p-4 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:bg-accent"
+                className="group flex min-h-[64px] items-center gap-4 rounded-xl border border-input bg-card p-4 text-left shadow-sm transition-colors hover:border-primary hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:bg-accent"
               >
-                <MessageCircle className="h-6 w-6 shrink-0 text-muted-foreground" aria-hidden="true" />
-                <span>
-                  <span className="block text-base font-medium">Tell us in your own words</span>
-                  <span className="block text-sm text-muted-foreground">Start with your question</span>
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-primary">
+                  <MessageCircle className="h-5 w-5" aria-hidden="true" />
                 </span>
+                <span className="flex-1">
+                  <span className="block text-base font-semibold text-foreground">{copy.freeFormLabel}</span>
+                  <span className="block text-sm text-muted-foreground">{copy.freeFormDescription}</span>
+                </span>
+                <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -167,7 +182,7 @@ export function CrcEntryFlow({ onFreeFormSubmit, onGuidedSubmit, submitting, err
 
         {screen === 'guided_step' && selectedDefinition && (
           <div className="space-y-5">
-            <GuidedStepHeader definition={selectedDefinition} totalDots={totalDots} activeDotIndex={activeDotIndex} onBack={goBack} />
+            <GuidedStepHeader definition={selectedDefinition} totalDots={totalDots} activeDotIndex={activeDotIndex} onBack={goBack} locale={locale} copy={copy} />
 
             {currentField && (
               <FieldStep
@@ -176,6 +191,8 @@ export function CrcEntryFlow({ onFreeFormSubmit, onGuidedSubmit, submitting, err
                 onChange={(value) => setFieldAnswer(currentField, value)}
                 onSkip={() => skipField(currentField)}
                 onContinue={() => continueFromField(currentField)}
+                locale={locale}
+                copy={copy}
               />
             )}
 
@@ -186,7 +203,8 @@ export function CrcEntryFlow({ onFreeFormSubmit, onGuidedSubmit, submitting, err
                 onSubmit={submitGuided}
                 submitting={submitting}
                 errorMessage={errorMessage}
-                heading="What's your main question or concern?"
+                heading={copy.concernHeadingGuided}
+                copy={copy}
               />
             )}
           </div>
@@ -200,7 +218,7 @@ export function CrcEntryFlow({ onFreeFormSubmit, onGuidedSubmit, submitting, err
               className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-              Back
+              {copy.back}
             </button>
             <ConcernStep
               value={freeFormText}
@@ -208,7 +226,8 @@ export function CrcEntryFlow({ onFreeFormSubmit, onGuidedSubmit, submitting, err
               onSubmit={submitFreeForm}
               submitting={submitting}
               errorMessage={errorMessage}
-              heading="What would you like to know about your project?"
+              heading={copy.concernHeadingFreeForm}
+              copy={copy}
             />
           </div>
         )}
@@ -222,14 +241,19 @@ function GuidedStepHeader({
   totalDots,
   activeDotIndex,
   onBack,
+  locale,
+  copy,
 }: {
   definition: GuidedEntryDefinition
   totalDots: number
   activeDotIndex: number
   onBack: () => void
+  locale: CrcLocale
+  copy: CrcUiCopy
 }) {
   const presentation = ROLE_PRESENTATION[definition.definitionId]
   const Icon = presentation?.Icon ?? Users
+  const display = getRoleDisplay(locale, definition.definitionId, definition.label, definition.description)
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -239,16 +263,16 @@ function GuidedStepHeader({
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-          Back
+          {copy.back}
         </button>
-        <span className="flex items-center gap-1.5 text-sm font-medium">
-          <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-          {definition.label}
+        <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+          <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
+          {display.label}
         </span>
       </div>
       <div className="flex items-center gap-1.5" role="progressbar" aria-valuenow={activeDotIndex + 1} aria-valuemin={1} aria-valuemax={totalDots}>
         {Array.from({ length: totalDots }).map((_, i) => (
-          <span key={i} className={`h-1.5 flex-1 rounded-full ${i <= activeDotIndex ? 'bg-primary' : 'bg-muted'}`} />
+          <span key={i} className={`h-1.5 flex-1 rounded-full transition-colors ${i <= activeDotIndex ? 'bg-primary' : 'bg-muted'}`} />
         ))}
       </div>
     </div>
@@ -261,19 +285,24 @@ function FieldStep({
   onChange,
   onSkip,
   onContinue,
+  locale,
+  copy,
 }: {
   field: GuidedFieldSpec
   value: string
   onChange: (value: string) => void
   onSkip: () => void
   onContinue: () => void
+  locale: CrcLocale
+  copy: CrcUiCopy
 }) {
+  const prompt = getFieldPrompt(locale, field.kind, field.prompt)
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold leading-snug">{field.prompt}</h2>
+      <h2 className="text-xl font-semibold leading-snug text-foreground sm:text-2xl">{prompt}</h2>
       <div className="space-y-1.5">
         <label htmlFor={`guided-field-${field.fieldId}`} className="sr-only">
-          {field.prompt}
+          {prompt}
         </label>
         <select
           id={`guided-field-${field.fieldId}`}
@@ -281,21 +310,21 @@ function FieldStep({
           onChange={(e) => onChange(e.target.value)}
           className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
-          <option value="">{field.kind === 'tool' ? 'Select a tool' : 'Select a jurisdiction'}</option>
+          <option value="">{field.kind === 'tool' ? copy.selectTool : copy.selectJurisdiction}</option>
           {field.options.map((opt) => (
             <option key={opt.value} value={opt.value}>
-              {opt.label}
+              {getOptionDisplayLabel(locale, field.kind, opt.value, opt.label)}
             </option>
           ))}
         </select>
       </div>
       <div className="flex flex-col gap-2">
         <Button type="button" size="lg" className="h-12 w-full text-base" onClick={onContinue}>
-          Continue
+          {copy.continueLabel}
         </Button>
         {!field.required && (
           <button type="button" onClick={onSkip} className="text-sm text-muted-foreground underline hover:text-foreground">
-            I&apos;m not sure / skip
+            {copy.skipOptional}
           </button>
         )}
       </div>
@@ -310,6 +339,7 @@ function ConcernStep({
   submitting,
   errorMessage,
   heading,
+  copy,
 }: {
   value: string
   onChange: (value: string) => void
@@ -317,15 +347,16 @@ function ConcernStep({
   submitting: boolean
   errorMessage: string | null
   heading: string
+  copy: CrcUiCopy
 }) {
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold leading-snug">{heading}</h2>
+      <h2 className="text-xl font-semibold leading-snug text-foreground sm:text-2xl">{heading}</h2>
       <div className="space-y-1">
         <Textarea
           value={value}
           onChange={(e) => onChange(e.target.value.slice(0, CONCERN_MAX_LENGTH))}
-          placeholder="Type your question…"
+          placeholder={copy.typeYourQuestion}
           rows={5}
           disabled={submitting}
           className="text-base"
@@ -336,7 +367,14 @@ function ConcernStep({
       </div>
       {errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
       <Button type="button" size="lg" className="h-12 w-full text-base" disabled={value.trim().length === 0 || submitting} onClick={onSubmit}>
-        {submitting ? 'Setting up your session…' : 'Start Conversation'}
+        {submitting ? (
+          <span className="inline-flex items-center gap-2">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/40 border-t-primary-foreground" aria-hidden="true" />
+            {copy.settingUpSession}
+          </span>
+        ) : (
+          copy.startConversation
+        )}
       </Button>
     </div>
   )
