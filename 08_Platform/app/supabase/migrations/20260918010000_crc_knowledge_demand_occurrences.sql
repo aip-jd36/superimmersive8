@@ -35,14 +35,28 @@
 -- authoritatively saved by runTurn() this same turn, so the row is
 -- guaranteed to exist.
 --
--- occurrence_id is the runtime-generated id (`kd-t{turn}-{proposal_id}`,
--- extraction.ts) -- stable and deterministic WITHIN one session, but not
--- globally unique across sessions (two different sessions' own turn-3/
--- candidate-c2 slots would mint the identical string). UNIQUE
--- (session_id, occurrence_id), not occurrence_id alone, is therefore the
--- correct idempotency key -- a client-retried request that re-runs the
--- same turn's extraction and produces the same candidate slot must not
--- create a duplicate evidence row. The primary key remains a fresh
+-- occurrence_id is the runtime-generated id (extraction.ts,
+-- computeMaterialDemandOccurrenceId) -- `kd-t{turn}-{sha256 digest}[:16]`,
+-- where the digest is over a canonical JSON tuple of (turn, the resolved
+-- goal's own raw_text, the demand's own raw_text, a same-turn ordinal).
+-- REPAIRED under LK-DEMAND-2C-R1 (2026-09-18): the ORIGINAL 2C formula was
+-- `kd-t{turn}-{proposal_id}`, where proposal_id is a MODEL-ASSIGNED
+-- transport label with no cross-call stability guarantee -- a genuine
+-- client retry of an already-accepted turn re-invokes the (non-
+-- temperature-pinned) extractor, which could assign different labels to
+-- the same semantic content on its second sample, producing a DIFFERENT
+-- occurrence_id and defeating the uniqueness constraint below. The
+-- repaired formula depends only on stable, non-model-assigned provenance,
+-- so the SAME accepted turn's SAME qualified demand now resolves to the
+-- SAME occurrence_id on retry.
+--
+-- Stable WITHIN one session, but not globally unique across sessions (two
+-- different sessions' own turn-3/identical-demand-text slots would mint
+-- the identical digest). UNIQUE (session_id, occurrence_id), not
+-- occurrence_id alone, is therefore the correct idempotency key -- a
+-- client-retried request that re-runs the same turn's extraction and
+-- reproduces the same (turn, goal text, demand text, ordinal) tuple must
+-- not create a duplicate evidence row. The primary key remains a fresh
 -- gen_random_uuid(), mirroring crc_turn_traces' own id column, since
 -- occurrence_id's own uniqueness is scoped, not global.
 --

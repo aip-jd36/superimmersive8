@@ -58,6 +58,7 @@ import type {
   WorkflowStage,
 } from '@/types/interview-engine'
 import { ASSET_PROVIDER_IDS } from '@/types/interview-engine'
+import { createHash } from 'crypto'
 import type { PendingClarification } from './pending-clarification'
 import {
   addAssetProviderMention,
@@ -1653,6 +1654,58 @@ function resolveMaterialDemandGoalTarget(candidate: CandidateObservation, su: St
   return undefined // zero or multiple matches -- never guessed
 }
 
+/**
+ * LK-DEMAND-2C-R1 (2026-09-18) -- deterministic KnowledgeDemandOccurrence
+ * identity, replacing the LK-DEMAND-2A original `kd-t{turn}-{proposal_id}`
+ * scheme. `proposal_id` is a MODEL-ASSIGNED transport label ("a short
+ * unique id you assign for this candidate within this turn, e.g. 'c1',
+ * 'c2'" -- anthropic-extractor.ts's own schema description) with zero
+ * cross-call stability guarantee, produced by a non-temperature-pinned API
+ * call. A genuine client retry of an already-accepted turn (route.ts's own
+ * `turnNumber = (productState?.turn_count ?? 0) + 1`, recomputed fresh
+ * every request until turn_count actually advances) re-invokes the
+ * extractor -- a second, independent model sample that may assign
+ * different proposal_id labels to the SAME semantic content, producing a
+ * DIFFERENT occurrence_id for what is really the same accepted-turn
+ * evidence. See __tests__/interview-engine/material-demand-identity.test.ts
+ * for a direct demonstration.
+ *
+ * This function derives identity ONLY from stable, non-model-assigned
+ * provenance: the turn number (server-computed, never model-assigned), the
+ * RESOLVED goal's own raw_text (not its goal_id, which may itself be
+ * freshly minted this same turn from an equally unstable proposal_id --
+ * see resolveMaterialDemandGoalTarget's own goal_id return value), the
+ * demand's own raw_text (required verbatim-extraction per the model
+ * schema, never paraphrased), and a same-turn ordinal that disambiguates
+ * two textually-identical demands legitimately proposed for the same goal
+ * on the same turn (the pre-existing 2A contract already treats two such
+ * candidates as independent occurrences -- this preserves that, it does
+ * not newly collapse them).
+ *
+ * Deliberately SHA-256 over a plain JSON-array canonical tuple (mirroring
+ * lib/crc-assurance-handoff/state-binding.ts's own canonical-tuple-hash
+ * precedent) -- no case-folding, no trimming, no substring matching: this
+ * is an identity key, not a fuzzy-match key, and must never silently
+ * collapse two texts a human would consider meaningfully different.
+ * Hashing here is purely for a short, stable, collision-resistant string;
+ * it performs no normalization of what the text means.
+ *
+ * Residual, disclosed limitation (not solvable within this bounded
+ * repair): this still assumes the extractor reproduces the SAME raw_text
+ * substrings for the SAME fixed input text across two independent calls.
+ * That is a far more constrained assumption than proposal_id's own "you
+ * assign an arbitrary label" contract, but it is not a mathematical
+ * guarantee. If it is ever violated, the failure mode is an EXTRA
+ * append-only evidence row for one real accepted turn -- never corrupted
+ * data, never a fabricated GovernedSubject/coverage conclusion, never a
+ * change to any protected CRC behavior.
+ */
+function computeMaterialDemandOccurrenceId(turn: number, goalRawText: string, demandRawText: string, ordinal: number): string {
+  const canonical = JSON.stringify([turn, goalRawText, demandRawText, ordinal])
+  const digest = createHash('sha256').update(canonical, 'utf8').digest('hex').slice(0, 16)
+  return `kd-t${turn}-${digest}`
+}
+
 // ── Tool mention identity resolution (stage 3.5) ────────────────────────────
 
 /**
@@ -2133,6 +2186,16 @@ export async function runExtractionPipeline(
    * result, never threaded into `current`/`updated`.
    */
   const knowledgeDemandOccurrences: KnowledgeDemandOccurrence[] = []
+  /**
+   * LK-DEMAND-2C-R1 (2026-09-18). Tracks how many occurrences already
+   * constructed THIS call share the same (turn, goal raw_text, demand
+   * raw_text) tuple, so two textually-identical demands legitimately
+   * proposed for the same goal on the same turn still get distinct
+   * deterministic identities -- see computeMaterialDemandOccurrenceId's
+   * own header. Scoped to this single runExtractionPipeline call only,
+   * exactly like retractedThisTurn/retractedProvidersThisTurn above.
+   */
+  const materialDemandOrdinals = new Map<string, number>()
 
   for (const rawCandidate of candidates) {
     // Material-demand mention (LK-DEMAND-2A): a wholly separate, parallel
@@ -2156,6 +2219,13 @@ export async function runExtractionPipeline(
         // occurrence, no fabricated provenance.
         continue
       }
+      // LK-DEMAND-2C-R1: the resolved goal's own raw_text, not goal_id --
+      // see computeMaterialDemandOccurrenceId's own header for why goal_id
+      // itself is not a safe identity input (it may be freshly minted this
+      // same turn from an equally model-assigned proposal_id). Always
+      // found -- goalId came from a textMatches[0] lookup against this
+      // same current.user_goals array one line above.
+      const goalRawText = current.user_goals.find((g) => g.goal_id === goalId)!.raw_text
 
       // Within-turn-only correction resolution -- resolved ONLY against
       // occurrences already constructed earlier in THIS SAME
@@ -2181,7 +2251,18 @@ export async function runExtractionPipeline(
         }
       }
 
-      const occurrenceId = `kd-t${rawCandidate.turn}-${rawCandidate.proposal_id}`
+      // LK-DEMAND-2C-R1: deterministic, retry-safe identity -- see
+      // computeMaterialDemandOccurrenceId's own header. The ordinal
+      // disambiguates two textually-identical demands for the same goal on
+      // the same turn (the pre-existing 2A contract already treats these
+      // as independent occurrences; this repair does not newly collapse
+      // them), and is itself deterministic within this call: candidates
+      // are processed in the same fixed array order every time this exact
+      // turn's raw input is (re-)extracted.
+      const ordinalKey = JSON.stringify([rawCandidate.turn, goalRawText, rawCandidate.raw_text])
+      const ordinal = materialDemandOrdinals.get(ordinalKey) ?? 0
+      materialDemandOrdinals.set(ordinalKey, ordinal + 1)
+      const occurrenceId = computeMaterialDemandOccurrenceId(rawCandidate.turn, goalRawText, rawCandidate.raw_text, ordinal)
       const occurrence: KnowledgeDemandOccurrence = {
         occurrence_id: occurrenceId,
         goal_id: goalId,
