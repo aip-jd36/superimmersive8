@@ -1674,34 +1674,59 @@ function resolveMaterialDemandGoalTarget(candidate: CandidateObservation, su: St
  * provenance: the turn number (server-computed, never model-assigned), the
  * RESOLVED goal's own raw_text (not its goal_id, which may itself be
  * freshly minted this same turn from an equally unstable proposal_id --
- * see resolveMaterialDemandGoalTarget's own goal_id return value), the
+ * see resolveMaterialDemandGoalTarget's own goal_id return value), and the
  * demand's own raw_text (required verbatim-extraction per the model
- * schema, never paraphrased), and a same-turn ordinal that disambiguates
- * two textually-identical demands legitimately proposed for the same goal
- * on the same turn (the pre-existing 2A contract already treats two such
- * candidates as independent occurrences -- this preserves that, it does
- * not newly collapse them).
+ * schema, never paraphrased).
+ *
+ * LK-DEMAND-2C-R2 (2026-09-18) -- NO ordinal. R1 additionally included a
+ * same-turn duplicate-count ordinal, which (a) made identity depend on
+ * candidate array order/count rather than provenance alone, and (b) meant
+ * two exact-duplicate candidates (same turn, same resolved goal text, same
+ * demand text) durably persisted as TWO separate governance observations.
+ * Per the durable-evidence invariant this milestone establishes -- "ONE
+ * accepted user turn x ONE exact explicit goal source text x ONE exact
+ * material-demand source text = ONE durable Material Demand observation"
+ * -- that is wrong: the proposition being recorded is "on accepted turn N,
+ * the user expressed exact material demand D as part of explicit goal G,"
+ * and a candidate being proposed twice does not mean the user expressed
+ * the demand twice. Removing the ordinal makes two such candidates
+ * converge on the SAME occurrence_id BY CONSTRUCTION -- no separate
+ * dedup step is introduced; the existing DB uniqueness constraint
+ * (UNIQUE(session_id, occurrence_id), knowledge-demand-evidence.ts's own
+ * upsert with ignoreDuplicates) now collapses them into one durable row
+ * for free, exactly as it already does for a genuine cross-call retry.
  *
  * Deliberately SHA-256 over a plain JSON-array canonical tuple (mirroring
  * lib/crc-assurance-handoff/state-binding.ts's own canonical-tuple-hash
  * precedent) -- no case-folding, no trimming, no substring matching: this
- * is an identity key, not a fuzzy-match key, and must never silently
+ * is an EXACT identity key, not a fuzzy-match key, and must never silently
  * collapse two texts a human would consider meaningfully different.
  * Hashing here is purely for a short, stable, collision-resistant string;
- * it performs no normalization of what the text means.
+ * it performs no normalization of what the text means. session_id is
+ * deliberately NOT part of this tuple -- identical provenance in two
+ * different sessions may produce the same runtime occurrence_id, which is
+ * safe and intentional because persistence namespaces uniqueness with
+ * UNIQUE(session_id, occurrence_id), never occurrence_id alone.
  *
  * Residual, disclosed limitation (not solvable within this bounded
- * repair): this still assumes the extractor reproduces the SAME raw_text
- * substrings for the SAME fixed input text across two independent calls.
- * That is a far more constrained assumption than proposal_id's own "you
- * assign an arbitrary label" contract, but it is not a mathematical
- * guarantee. If it is ever violated, the failure mode is an EXTRA
- * append-only evidence row for one real accepted turn -- never corrupted
- * data, never a fabricated GovernedSubject/coverage conclusion, never a
- * change to any protected CRC behavior.
+ * repair, and NOT what this function claims to guarantee): this still
+ * assumes the extractor reproduces the SAME raw_text substrings for the
+ * SAME fixed input across two independent calls or candidates. The
+ * guarantee here is IDENTICAL STABLE PROVENANCE -> IDENTICAL DURABLE
+ * IDENTITY -- never "semantically equivalent model extraction -> identical
+ * durable identity." Two genuinely different verbatim spans for
+ * semantically equivalent content (e.g. "on YouTube" vs "show it
+ * commercially on YouTube") remain, correctly, two distinct occurrences --
+ * solving that would require governed normalization or semantic matching,
+ * explicitly out of scope here. If ever violated in the narrower sense
+ * (the SAME extraction pass or a genuine retry fails to reproduce the same
+ * span), the failure mode is an EXTRA append-only evidence row for one
+ * real accepted turn -- never corrupted data, never a fabricated
+ * GovernedSubject/coverage conclusion, never a change to any protected CRC
+ * behavior.
  */
-function computeMaterialDemandOccurrenceId(turn: number, goalRawText: string, demandRawText: string, ordinal: number): string {
-  const canonical = JSON.stringify([turn, goalRawText, demandRawText, ordinal])
+function computeMaterialDemandOccurrenceId(turn: number, goalRawText: string, demandRawText: string): string {
+  const canonical = JSON.stringify([turn, goalRawText, demandRawText])
   const digest = createHash('sha256').update(canonical, 'utf8').digest('hex').slice(0, 16)
   return `kd-t${turn}-${digest}`
 }
@@ -2186,16 +2211,6 @@ export async function runExtractionPipeline(
    * result, never threaded into `current`/`updated`.
    */
   const knowledgeDemandOccurrences: KnowledgeDemandOccurrence[] = []
-  /**
-   * LK-DEMAND-2C-R1 (2026-09-18). Tracks how many occurrences already
-   * constructed THIS call share the same (turn, goal raw_text, demand
-   * raw_text) tuple, so two textually-identical demands legitimately
-   * proposed for the same goal on the same turn still get distinct
-   * deterministic identities -- see computeMaterialDemandOccurrenceId's
-   * own header. Scoped to this single runExtractionPipeline call only,
-   * exactly like retractedThisTurn/retractedProvidersThisTurn above.
-   */
-  const materialDemandOrdinals = new Map<string, number>()
 
   for (const rawCandidate of candidates) {
     // Material-demand mention (LK-DEMAND-2A): a wholly separate, parallel
@@ -2251,18 +2266,16 @@ export async function runExtractionPipeline(
         }
       }
 
-      // LK-DEMAND-2C-R1: deterministic, retry-safe identity -- see
-      // computeMaterialDemandOccurrenceId's own header. The ordinal
-      // disambiguates two textually-identical demands for the same goal on
-      // the same turn (the pre-existing 2A contract already treats these
-      // as independent occurrences; this repair does not newly collapse
-      // them), and is itself deterministic within this call: candidates
-      // are processed in the same fixed array order every time this exact
-      // turn's raw input is (re-)extracted.
-      const ordinalKey = JSON.stringify([rawCandidate.turn, goalRawText, rawCandidate.raw_text])
-      const ordinal = materialDemandOrdinals.get(ordinalKey) ?? 0
-      materialDemandOrdinals.set(ordinalKey, ordinal + 1)
-      const occurrenceId = computeMaterialDemandOccurrenceId(rawCandidate.turn, goalRawText, rawCandidate.raw_text, ordinal)
+      // LK-DEMAND-2C-R2: deterministic, EXACT-provenance identity -- see
+      // computeMaterialDemandOccurrenceId's own header. Two candidates
+      // sharing (turn, goalRawText, raw_text) converge on the SAME
+      // occurrence_id by construction -- an exact duplicate is not a
+      // second occurrence, it is the same durable observation proposed
+      // twice, and is safely resolved to one durable row downstream by the
+      // existing UNIQUE(session_id, occurrence_id) + ignoreDuplicates
+      // upsert (knowledge-demand-evidence.ts), the identical mechanism
+      // that already collapses a genuine cross-call retry.
+      const occurrenceId = computeMaterialDemandOccurrenceId(rawCandidate.turn, goalRawText, rawCandidate.raw_text)
       const occurrence: KnowledgeDemandOccurrence = {
         occurrence_id: occurrenceId,
         goal_id: goalId,

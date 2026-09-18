@@ -37,27 +37,40 @@
 --
 -- occurrence_id is the runtime-generated id (extraction.ts,
 -- computeMaterialDemandOccurrenceId) -- `kd-t{turn}-{sha256 digest}[:16]`,
--- where the digest is over a canonical JSON tuple of (turn, the resolved
--- goal's own raw_text, the demand's own raw_text, a same-turn ordinal).
--- REPAIRED under LK-DEMAND-2C-R1 (2026-09-18): the ORIGINAL 2C formula was
--- `kd-t{turn}-{proposal_id}`, where proposal_id is a MODEL-ASSIGNED
--- transport label with no cross-call stability guarantee -- a genuine
--- client retry of an already-accepted turn re-invokes the (non-
--- temperature-pinned) extractor, which could assign different labels to
--- the same semantic content on its second sample, producing a DIFFERENT
--- occurrence_id and defeating the uniqueness constraint below. The
--- repaired formula depends only on stable, non-model-assigned provenance,
--- so the SAME accepted turn's SAME qualified demand now resolves to the
--- SAME occurrence_id on retry.
+-- where the digest is over a canonical JSON tuple of EXACTLY (turn, the
+-- resolved goal's own raw_text, the demand's own raw_text) -- no
+-- proposal_id, no goal_id, no ordinal. REPAIRED in two steps: LK-DEMAND-
+-- 2C-R1 (2026-09-18) removed proposal_id/goal_id -- the ORIGINAL 2C
+-- formula was `kd-t{turn}-{proposal_id}`, where proposal_id is a MODEL-
+-- ASSIGNED transport label with no cross-call stability guarantee (a
+-- genuine client retry of an already-accepted turn re-invokes the
+-- non-temperature-pinned extractor, which could assign different labels
+-- to the same semantic content). LK-DEMAND-2C-R2 (2026-09-18) additionally
+-- removed R1's own same-turn duplicate-ordinal, establishing the durable
+-- invariant this table now embodies: ONE accepted user turn x ONE exact
+-- explicit goal source text x ONE exact material-demand source text = ONE
+-- durable Material Demand observation. Two extractor candidates sharing
+-- (turn, goal text, demand text) -- whether from one extraction pass
+-- proposing an exact duplicate, or two independent retries of the same
+-- accepted turn -- now converge on the SAME occurrence_id by construction,
+-- not via any dedup step. This is EXACT provenance identity only: no
+-- case-folding, no trimming, no fuzzy/semantic matching -- two genuinely
+-- different verbatim spans for semantically-equivalent content (e.g. "on
+-- YouTube" vs "show it commercially on YouTube") remain, correctly, two
+-- distinct occurrences.
 --
 -- Stable WITHIN one session, but not globally unique across sessions (two
 -- different sessions' own turn-3/identical-demand-text slots would mint
--- the identical digest). UNIQUE (session_id, occurrence_id), not
--- occurrence_id alone, is therefore the correct idempotency key -- a
--- client-retried request that re-runs the same turn's extraction and
--- reproduces the same (turn, goal text, demand text, ordinal) tuple must
--- not create a duplicate evidence row. The primary key remains a fresh
--- gen_random_uuid(), mirroring crc_turn_traces' own id column, since
+-- the identical digest -- session_id is deliberately NOT part of the
+-- runtime digest). UNIQUE (session_id, occurrence_id), not occurrence_id
+-- alone, is therefore the correct idempotency key -- a client-retried
+-- request that re-runs the same turn's extraction and reproduces the same
+-- (turn, goal text, demand text) tuple must not create a duplicate
+-- evidence row, and a same-pass exact-duplicate candidate must not either
+-- (the writer additionally dedupes same-call duplicate rows client-side
+-- before this constraint is even reached -- see recordKnowledgeDemandEvidence's
+-- own header, knowledge-demand-evidence.ts). The primary key remains a
+-- fresh gen_random_uuid(), mirroring crc_turn_traces' own id column, since
 -- occurrence_id's own uniqueness is scoped, not global.
 --
 -- qualification_state is persisted as written by the runtime
