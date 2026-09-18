@@ -127,42 +127,43 @@ export async function updateGovernanceCandidateLabel(
  *   - existing row, currently active (unlinked_at IS NULL): idempotent
  *     success -- no duplicate insert, no rewrite of linked_at.
  *   - existing row, currently unlinked (unlinked_at IS NOT NULL):
- *     reactivate the SAME row (unlinked_at set back to NULL). linked_at is
- *     preserved at its ORIGINAL first-link value, never advanced to the
- *     reactivation time -- the row represents one durable association,
- *     not activation chronology.
+ *     reactivate the SAME row (unlinked_at set back to NULL). linked_at
+ *     AND linked_by are preserved at their ORIGINAL first-link values,
+ *     never rewritten on reactivation -- linked_by means "the actor who
+ *     originally created this durable association," and the row
+ *     represents one durable association, not activation chronology or a
+ *     link/unlink audit trail (2D1 deliberately has neither).
+ *
+ * LK-DEMAND-2D1-R1 (2026-09-18): CONCURRENCY-SAFE. The lookup-then-insert
+ * above has a real race window between two concurrent calls for the same
+ * (candidateId, evidenceRowId) with no existing row: both observe "no row"
+ * and both attempt INSERT; the database's own UNIQUE(candidate_id,
+ * evidence_row_id) constraint correctly rejects the second one, but that
+ * must resolve as idempotent success at the application boundary (per this
+ * function's own contract), never as a thrown error to the loser of the
+ * race. Repaired by catching the specific Postgres unique-violation
+ * (SQLSTATE '23505') on the INSERT and re-resolving exactly as the
+ * "existing row" branch does -- mirrors the identical, already-established
+ * pattern in supabase-session-store.ts's own createGuidedEntrySession
+ * (insert -> on '23505' specifically, not any error, re-read and resolve
+ * idempotently; any other error code is a genuine failure, surfaced as-is).
+ * This is NOT an upsert: Supabase's plain .upsert() would overwrite EVERY
+ * column present in the payload on conflict, including linked_by --
+ * silently rewriting the original actor to whichever request lost the
+ * race, which G's own preserved-actor contract forbids. Catch-and-reread
+ * is the only mechanism here that keeps insert-needs-linked_by and
+ * conflict-must-never-touch-linked_by both true at once.
+ *
  * Throws on failure (fail-closed), including an invalid candidateId or
- * evidenceRowId (FK violation).
+ * evidenceRowId (FK violation) or a genuine (non-'23505') database error.
  */
 export async function linkDemandEvidence(
   client: SupabaseClient,
   params: { candidateId: string; evidenceRowId: string; actorUserId: string },
 ): Promise<GovernanceCandidateEvidenceLink> {
-  const { data: existing, error: selectError } = await client
-    .from('crc_knowledge_demand_governance_candidate_evidence')
-    .select()
-    .eq('candidate_id', params.candidateId)
-    .eq('evidence_row_id', params.evidenceRowId)
-    .maybeSingle()
-  if (selectError) {
-    throw new Error(`[governance-candidates] linkDemandEvidence lookup failed: ${selectError.message}`)
-  }
-
+  const existing = await lookupAssociation(client, params.candidateId, params.evidenceRowId)
   if (existing) {
-    const row = existing as GovernanceCandidateEvidenceLink
-    if (row.unlinked_at === null) {
-      return row // already active -- idempotent, no rewrite
-    }
-    const { data, error } = await client
-      .from('crc_knowledge_demand_governance_candidate_evidence')
-      .update({ unlinked_at: null })
-      .eq('id', row.id)
-      .select()
-      .single()
-    if (error) {
-      throw new Error(`[governance-candidates] linkDemandEvidence reactivate failed: ${error.message}`)
-    }
-    return data as GovernanceCandidateEvidenceLink
+    return resolveExistingAssociation(client, existing)
   }
 
   const { data, error } = await client
@@ -170,8 +171,56 @@ export async function linkDemandEvidence(
     .insert({ candidate_id: params.candidateId, evidence_row_id: params.evidenceRowId, linked_by: params.actorUserId })
     .select()
     .single()
-  if (error) {
+  if (!error) {
+    return data as GovernanceCandidateEvidenceLink
+  }
+
+  if ((error as { code?: string }).code !== '23505') {
     throw new Error(`[governance-candidates] linkDemandEvidence insert failed: ${error.message}`)
+  }
+
+  // Lost the race: a concurrent request's row now exists. Resolve exactly
+  // as the "existing row" branch above would have, never as a failure.
+  const raceWinner = await lookupAssociation(client, params.candidateId, params.evidenceRowId)
+  if (!raceWinner) {
+    throw new Error('[governance-candidates] linkDemandEvidence: unique violation but row not found on re-read')
+  }
+  return resolveExistingAssociation(client, raceWinner)
+}
+
+async function lookupAssociation(
+  client: SupabaseClient,
+  candidateId: string,
+  evidenceRowId: string,
+): Promise<GovernanceCandidateEvidenceLink | null> {
+  const { data, error } = await client
+    .from('crc_knowledge_demand_governance_candidate_evidence')
+    .select()
+    .eq('candidate_id', candidateId)
+    .eq('evidence_row_id', evidenceRowId)
+    .maybeSingle()
+  if (error) {
+    throw new Error(`[governance-candidates] lookupAssociation failed: ${error.message}`)
+  }
+  return data as GovernanceCandidateEvidenceLink | null
+}
+
+/** Active row: returned as-is (idempotent, no rewrite). Inactive row: reactivated in place -- id/linked_at/linked_by untouched, only unlinked_at -> NULL. */
+async function resolveExistingAssociation(
+  client: SupabaseClient,
+  row: GovernanceCandidateEvidenceLink,
+): Promise<GovernanceCandidateEvidenceLink> {
+  if (row.unlinked_at === null) {
+    return row
+  }
+  const { data, error } = await client
+    .from('crc_knowledge_demand_governance_candidate_evidence')
+    .update({ unlinked_at: null })
+    .eq('id', row.id)
+    .select()
+    .single()
+  if (error) {
+    throw new Error(`[governance-candidates] linkDemandEvidence reactivate failed: ${error.message}`)
   }
   return data as GovernanceCandidateEvidenceLink
 }
@@ -191,20 +240,11 @@ export async function unlinkDemandEvidence(
   client: SupabaseClient,
   params: { candidateId: string; evidenceRowId: string },
 ): Promise<GovernanceCandidateEvidenceLink | null> {
-  const { data: existing, error: selectError } = await client
-    .from('crc_knowledge_demand_governance_candidate_evidence')
-    .select()
-    .eq('candidate_id', params.candidateId)
-    .eq('evidence_row_id', params.evidenceRowId)
-    .maybeSingle()
-  if (selectError) {
-    throw new Error(`[governance-candidates] unlinkDemandEvidence lookup failed: ${selectError.message}`)
-  }
-  if (!existing) {
+  const row = await lookupAssociation(client, params.candidateId, params.evidenceRowId)
+  if (!row) {
     return null // no association ever existed -- no-op, nothing manufactured
   }
 
-  const row = existing as GovernanceCandidateEvidenceLink
   if (row.unlinked_at !== null) {
     return row // already unlinked -- idempotent, no rewrite
   }

@@ -18,7 +18,10 @@ type Row = Record<string, any>
  * update().eq().select().single(), select().eq().eq().maybeSingle(). Not a
  * generic Supabase mock -- tailored to this module's own call shapes only.
  */
-function createFakeClient(tables: Record<string, Row[]>, errorHooks: Record<string, () => string | null> = {}) {
+type FakeError = { code?: string; message: string }
+type ErrorHook = (op: 'select' | 'insert' | 'update') => FakeError | null
+
+function createFakeClient(tables: Record<string, Row[]>, errorHooks: Record<string, ErrorHook> = {}) {
   let idCounter = 0
   return {
     from(tableName: string) {
@@ -43,18 +46,18 @@ function createFakeClient(tables: Record<string, Row[]>, errorHooks: Record<stri
           return builder
         },
         async maybeSingle() {
-          return resolve(true)
+          return resolve(true, 'select')
         },
         async single() {
-          return resolve(false)
+          return resolve(false, pendingInsert ? 'insert' : 'update')
         },
       }
       function applyFilters(arr: Row[]) {
         return arr.filter((r) => filters.every(([c, v]) => r[c] === v))
       }
-      function resolve(allowZero: boolean) {
-        const errMsg = errorHooks[tableName]?.()
-        if (errMsg) return { data: null, error: { message: errMsg } }
+      function resolve(allowZero: boolean, op: 'select' | 'insert' | 'update') {
+        const hookError = errorHooks[tableName]?.(op)
+        if (hookError) return { data: null, error: hookError }
         if (pendingInsert) {
           idCounter += 1
           const isLinkTable = tableName === 'crc_knowledge_demand_governance_candidate_evidence'
@@ -225,19 +228,67 @@ describe('linkDemandEvidence / unlinkDemandEvidence', () => {
     expect(tables.crc_knowledge_demand_governance_candidate_evidence).toHaveLength(1)
   })
 
-  test('14. duplicate active association cannot be created via direct insert attempt (application-level guard proven above); underlying DB uniqueness is enforced by UNIQUE(candidate_id, evidence_row_id) in the migration', async () => {
-    // The DB constraint itself requires a live Postgres instance to prove
-    // directly (no live DB in this environment); test 9 above proves the
-    // application-level guard that makes the constraint unreachable on the
-    // normal path. The migration's own UNIQUE(candidate_id, evidence_row_id)
-    // (non-partial, per 2D1's explicit correction) is the durable backstop.
-    expect(true).toBe(true)
+  test('14. concurrent-insert race: unique-violation (23505) on the INSERT resolves as idempotent success against the concurrent winner row (LK-DEMAND-2D1-R1)', async () => {
+    const tables = freshDb()
+    const candidate = await createGovernanceCandidate(createFakeClient(freshDb()), { label: 'x', actorUserId: 'user-1' })
+
+    // Simulates: this request's own lookup observes no row (array is empty
+    // at that point), then its INSERT hits the database's real
+    // UNIQUE(candidate_id, evidence_row_id) constraint because a concurrent
+    // request's own insert landed first. The hook fires ONLY for the
+    // insert op (not the preceding select) -- pushes the "concurrent
+    // winner" row into the table (simulating the other request's
+    // already-committed insert) and returns the 23505 error for THIS
+    // request's own insert attempt.
+    let insertAttempted = false
+    const client = createFakeClient(tables, {
+      crc_knowledge_demand_governance_candidate_evidence: (op) => {
+        if (op === 'insert' && !insertAttempted) {
+          insertAttempted = true
+          tables.crc_knowledge_demand_governance_candidate_evidence.push({
+            id: 'row-concurrent-winner',
+            candidate_id: candidate.id,
+            evidence_row_id: 'evidence-1',
+            linked_by: 'other-actor',
+            linked_at: '2026-01-01T00:00:00.000Z',
+            unlinked_at: null,
+          })
+          return { code: '23505', message: 'duplicate key value violates unique constraint "crc_knowledge_demand_governance_candidate_evidence_unique"' }
+        }
+        return null
+      },
+    })
+
+    const result = await linkDemandEvidence(client, { candidateId: candidate.id, evidenceRowId: 'evidence-1', actorUserId: 'racing-actor' })
+
+    expect(insertAttempted).toBe(true)
+    expect(result.id).toBe('row-concurrent-winner')
+    expect(result.candidate_id).toBe(candidate.id)
+    expect(result.evidence_row_id).toBe('evidence-1')
+    expect(result.unlinked_at).toBeNull()
+    // linked_by is NEVER rewritten to the losing request's actor -- the
+    // concurrent winner's own original actor is preserved.
+    expect(result.linked_by).toBe('other-actor')
+    // exactly one durable row, not two.
+    expect(tables.crc_knowledge_demand_governance_candidate_evidence).toHaveLength(1)
+  })
+
+  test('a genuine (non-23505) insert error still throws, never silently resolved', async () => {
+    const tables = freshDb()
+    const candidate = await createGovernanceCandidate(createFakeClient(freshDb()), { label: 'x', actorUserId: 'user-1' })
+    const client = createFakeClient(tables, {
+      crc_knowledge_demand_governance_candidate_evidence: (op) => (op === 'insert' ? { message: 'connection reset' } : null),
+    })
+    await expect(linkDemandEvidence(client, { candidateId: candidate.id, evidenceRowId: 'evidence-1', actorUserId: 'user-1' })).rejects.toThrow(
+      /connection reset/,
+    )
   })
 
   test('15. an invalid candidate FK fails (simulated DB error surfaces as a thrown error)', async () => {
     const tables = freshDb()
     const client = createFakeClient(tables, {
-      crc_knowledge_demand_governance_candidate_evidence: () => 'insert or update on table violates foreign key constraint (candidate_id)',
+      crc_knowledge_demand_governance_candidate_evidence: (op) =>
+        op === 'insert' ? { message: 'insert or update on table violates foreign key constraint (candidate_id)' } : null,
     })
     await expect(linkDemandEvidence(client, { candidateId: 'nonexistent-candidate', evidenceRowId: 'evidence-1', actorUserId: 'user-1' })).rejects.toThrow(
       /foreign key/,
@@ -247,7 +298,8 @@ describe('linkDemandEvidence / unlinkDemandEvidence', () => {
   test('16. an invalid evidence FK fails (simulated DB error surfaces as a thrown error)', async () => {
     const tables = freshDb()
     const client = createFakeClient(tables, {
-      crc_knowledge_demand_governance_candidate_evidence: () => 'insert or update on table violates foreign key constraint (evidence_row_id)',
+      crc_knowledge_demand_governance_candidate_evidence: (op) =>
+        op === 'insert' ? { message: 'insert or update on table violates foreign key constraint (evidence_row_id)' } : null,
     })
     const candidate = await createGovernanceCandidate(createFakeClient(freshDb()), { label: 'x', actorUserId: 'user-1' })
     await expect(linkDemandEvidence(client, { candidateId: candidate.id, evidenceRowId: 'nonexistent-evidence', actorUserId: 'user-1' })).rejects.toThrow(
