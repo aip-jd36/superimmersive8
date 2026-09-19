@@ -128,10 +128,25 @@ describe('CC-4C.2D -- F/G: Plan and Realization copy verbatim', () => {
     expect(planItem).toEqual({ kind: 'withheld_relevant_claim', claim_id: 'WITHHELD', fact: biItem?.fact, tool: biItem?.tool })
   })
 
-  test('G: Realization preserves the Plan item exactly, unchanged', () => {
-    const planItem = plan.explicit_sections[0].unresolved_items.find((i) => i.kind === 'withheld_relevant_claim')
-    const realizationItem = realization.unresolved_groups[0].items.find((i) => i.kind === 'withheld_relevant_claim')
-    expect(realizationItem).toEqual(planItem)
+  // CC-4C.2F (2026-09-19): this fixture's WITHHELD claim is EXACTLY the
+  // exact same-claim collapse-eligible shape CC-4C.2E proved (its own
+  // `unresolved_relevant_claims` entry and its own raw-diagnostic
+  // `unresolved_applicability` sibling share identical claim_id/fact/tool).
+  // Test G's own original premise ("Realization preserves the Plan item
+  // exactly, unchanged") no longer holds for `withheld_relevant_claim`
+  // specifically -- this is the intended, human-approved behavior change
+  // this milestone implements, not a regression. Plan itself remains
+  // fully unchanged (still proven by Test F, and independently by
+  // CC-4C.2F's own Plan-preservation tests).
+  test('G (CC-4C.2F-revised): the eligible withheld_relevant_claim/unresolved_applicability pair collapses in Realization -- the unresolved_applicability sibling survives verbatim from Plan, the withheld item does not', () => {
+    const planWithheldItem = plan.explicit_sections[0].unresolved_items.find((i) => i.kind === 'withheld_relevant_claim')
+    const planApplicabilityItem = plan.explicit_sections[0].unresolved_items.find((i) => i.kind === 'unresolved_applicability')
+    expect(planWithheldItem).toBeDefined() // Plan still has it -- provenance-complete
+    const realizationWithheldItem = realization.unresolved_groups[0].items.find((i) => i.kind === 'withheld_relevant_claim')
+    const realizationApplicabilityItem = realization.unresolved_groups[0].items.find((i) => i.kind === 'unresolved_applicability')
+    expect(realizationWithheldItem).toBeUndefined() // collapsed
+    expect(realizationApplicabilityItem).toEqual(planApplicabilityItem) // surviving item copied verbatim
+    expect(realization.unresolved_groups[0].items).toHaveLength(1)
   })
 })
 
@@ -196,9 +211,19 @@ describe('CC-4C.2D -- I: unregistered ApplicabilityFact fails closed, full pipel
     expect(interps[0].unresolved_relevant_claims.find((c: { claim_id: string }) => c.claim_id === 'WITHHELD')?.fact).toBe('jurisdiction')
   })
 
-  test('email retains the existing generic fallback sentence -- fail-closed behavior is a PASS, no label is fabricated', () => {
-    expect(email.text).toContain("An additional governed consideration for this topic hasn't been confirmed.")
+  // CC-4C.2F (2026-09-19): this WITHHELD/jurisdiction fixture is ALSO the
+  // exact same-claim collapse-eligible shape (non-null fact, matching
+  // unresolved_applicability sibling) -- so it now collapses to ONE
+  // "Still open" line, surviving as `unresolved_applicability`'s own
+  // fallback sentence ("A related condition..."), not
+  // `withheld_relevant_claim`'s own ("An additional governed
+  // consideration..."). Fail-closed behavior (no label fabricated) is
+  // still fully intact -- this test now also proves the duplicate is gone.
+  test('email retains the existing generic fallback sentence, now exactly once -- fail-closed behavior is a PASS, no label is fabricated', () => {
+    expect(email.text).toContain("A related condition hasn't been confirmed in this conversation.")
     expect(email.text).not.toContain('jurisdiction')
+    const stillOpenLines = (email.text.match(/hasn't been confirmed in this conversation\./g) || []).length
+    expect(stillOpenLines).toBe(1)
   })
 })
 

@@ -95,6 +95,15 @@
  * derived from the SAME loop that reads the section's own items, never
  * assembled separately).
  *
+ * `unresolved_groups[].items` is `section.unresolved_items` passed through
+ * `collapseExactSameClaimApplicabilityDuplicates` (CC-4C.2F, 2026-09-19) --
+ * see that function's own header for the full, narrowly-scoped predicate.
+ * This is the ONE exception to "copied through unchanged" for
+ * `unresolved_items` specifically: `missing_evidence_groups[].items` remains
+ * an exact, uncollapsed copy of `section.missing_evidence`, and
+ * `ConsultativeAnswerPlan` itself is never mutated -- Plan stays
+ * provenance-complete, carrying every original item.
+ *
  * ── DISCOVERED CONTEXT ──────────────────────────────────────────────────
  *
  * `plan.discovered_context` is copied through unchanged -- CC-3A already
@@ -239,6 +248,97 @@ function noteForGoal(notes: ConsultativeNote[], goal_index: number): Consultativ
 }
 
 /**
+ * CC-4C.2F (2026-09-19), human-approved exact collapse predicate. Removes,
+ * from ONE goal's already-computed `unresolved_items`, the
+ * `withheld_relevant_claim` half of a pair that is structurally proven
+ * (CC-4C.2E) to represent the SAME underlying `UnmetApplicabilityDetail` as
+ * a sibling `unresolved_applicability` item -- two independent, pre-existing
+ * Plan-construction loops (`consultative-answer-plan.ts`) read the same
+ * `RetrievalDiagnostic.unmet_applicability` data and, for a withheld
+ * (never-matched) claim, always produce one item of each kind with
+ * identical `claim_id`/`fact`/`tool`. This function does NOT touch
+ * `ConsultativeAnswerPlan` -- Plan remains provenance-complete, carrying
+ * both original items unchanged; only this realization-level, answer-facing
+ * copy is affected.
+ *
+ * ELIGIBLE ONLY WHEN, for one `withheld_relevant_claim` item W and one
+ * `unresolved_applicability` item U within the SAME `items` array (i.e. the
+ * same goal / same `ConsultativeUnresolvedGroup` -- this function is called
+ * once per goal section, so cross-goal pairing is structurally impossible):
+ *   1. W.claim_id === U.claim_id
+ *   2. W.fact !== null            (an ambiguous/absent fact -- CC-4C.2D's
+ *                                  own fail-closed {fact:null,tool:null}
+ *                                  case -- can never participate; two
+ *                                  unknowns are never treated as the same
+ *                                  thing)
+ *   3. W.fact === U.fact
+ *   4. W.tool === U.tool
+ * Symmetric with respect to source ordering (Plan's own `sortUnresolvedItems`
+ * places `withheld_relevant_claim` before `unresolved_applicability` by
+ * `UNRESOLVED_KIND_ORDER`, but this function never assumes that order).
+ *
+ * SURVIVING REPRESENTATION: `unresolved_applicability` is retained,
+ * `withheld_relevant_claim` is removed. DESIGN CHOICE (human-approved,
+ * per this milestone's own Part 3): `unresolved_applicability` is the
+ * direct requirement-instance representation and is what Plan's own
+ * `missing_evidence` derivation already reads (`classifyApplicabilityFact`)
+ * -- unaffected either way, since `missing_evidence` is computed entirely
+ * in Plan, before this function ever runs, and this function never touches
+ * `PlanMissingEvidenceRef`/`missing_evidence_groups`. The one OBSERVABLE
+ * consequence of this choice: when `fact` has no registered display label
+ * (`getApplicabilityFactLabel` returns `undefined`), `results-email-
+ * template.ts`'s existing, UNCHANGED `unresolvedItemSentence` falls back to
+ * `unresolved_applicability`'s own fallback ("A related condition hasn't
+ * been confirmed in this conversation."), never `withheld_relevant_claim`'s
+ * ("An additional governed consideration for this topic hasn't been
+ * confirmed.") -- both were already existing, already-approved fallback
+ * strings; this function only decides which ONE of the two pre-existing
+ * strings survives when a pair collapses, authors neither.
+ *
+ * MULTIPLICITY / FAIL-CLOSED (CC-4C.2E Part 13): current Plan construction
+ * can allow a withheld claim's own `unresolved_relevant_claims` entry
+ * (deduped 1:1 by `claim_id` at the BI layer -- see build-bounded-
+ * interpretation.ts's `collectUnresolvedRelevantClaimIds`) to coexist with
+ * MORE THAN ONE `unresolved_applicability` item sharing the identical
+ * `(claim_id, fact, tool)` -- e.g. if a governed claim's own
+ * `applicability_requirements` array happened to contain a literal
+ * duplicate requirement (not type-prevented, though not observed in
+ * production governed data). When a withheld item has zero or MORE THAN
+ * ONE matching `unresolved_applicability` candidate, it is left
+ * untouched -- never collapsed, never guessed. This function never removes
+ * an `unresolved_applicability` item; same-kind duplicates (two
+ * `unresolved_applicability` items, or two `withheld_relevant_claim`
+ * items) are explicitly out of this milestone's approved predicate and are
+ * never touched, regardless of how many fields they share.
+ *
+ * No lookups, no Retrieval diagnostics, no Living Knowledge access, no
+ * display strings, no semantic inference -- reads only the four already-
+ * existing fields (`kind`, `claim_id`, `fact`, `tool`) already present on
+ * `PlanUnresolvedItem`.
+ */
+function collapseExactSameClaimApplicabilityDuplicates(items: PlanUnresolvedItem[]): PlanUnresolvedItem[] {
+  type UnresolvedApplicabilityItem = Extract<PlanUnresolvedItem, { kind: 'unresolved_applicability' }>
+  const applicabilityByClaimId = new Map<string, UnresolvedApplicabilityItem[]>()
+  for (const item of items) {
+    if (item.kind !== 'unresolved_applicability') continue
+    const existing = applicabilityByClaimId.get(item.claim_id)
+    if (existing) existing.push(item)
+    else applicabilityByClaimId.set(item.claim_id, [item])
+  }
+
+  const withheldToRemove = new Set<PlanUnresolvedItem>()
+  for (const item of items) {
+    if (item.kind !== 'withheld_relevant_claim') continue
+    if (item.fact === null) continue
+    const candidates = (applicabilityByClaimId.get(item.claim_id) ?? []).filter((u) => u.fact === item.fact && u.tool === item.tool)
+    if (candidates.length !== 1) continue // 0 -> no eligible sibling; >1 -> ambiguous, fail closed (retain everything)
+    withheldToRemove.add(item)
+  }
+
+  return withheldToRemove.size === 0 ? items : items.filter((item) => !withheldToRemove.has(item))
+}
+
+/**
  * Pure. No I/O, no LLM, no mutation of `plan`, `output`, or `notes`. Given
  * structurally identical inputs, produces structurally identical output
  * (CC-4C.2A §9).
@@ -258,8 +358,14 @@ export function buildConsultativeRealization(
     note: noteForGoal(notes, goal_index),
   }))
 
+  // CC-4C.2F: collapses ONLY the exact same-claim withheld_relevant_claim/
+  // unresolved_applicability pair, per goal, per section.unresolved_items --
+  // never across goals (this .map() runs once per section, already
+  // goal-scoped). Plan itself (`section.unresolved_items`) is never mutated
+  // or reassigned -- see collapseExactSameClaimApplicabilityDuplicates's
+  // own header.
   const unresolved_groups: ConsultativeUnresolvedGroup[] = plan.explicit_sections
-    .map((section, goal_index) => ({ goal_index, category: section.category, items: section.unresolved_items }))
+    .map((section, goal_index) => ({ goal_index, category: section.category, items: collapseExactSameClaimApplicabilityDuplicates(section.unresolved_items) }))
     .filter((group) => group.items.length > 0)
 
   const missing_evidence_groups: ConsultativeMissingEvidenceGroup[] = plan.explicit_sections
