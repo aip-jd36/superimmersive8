@@ -9,6 +9,55 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of September 19, 2026
+*Run: 2026-09-19 · 28 high · 6 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 10 | post+update | [EU AI Act Article 50 - New Technology - European Union](https://www.mondaq.com/new-technology/1843358/eu-ai-act-article-50) | Mondaq | Wed, 16 Sep 2026 | ☐ |
+| 9 | post+update | [Newsom Signs Law Requiring Disclosure Of AI-Generated Performers In Ads](https://tvnewscheck.com/ai/article/newsom-signs-law-requiring-disclosure-of-ai-generated-performers-in-ads/) | TV News Check | Fri, 18 Sep 2026 | ☐ |
+| 9 | post+update | [Gambling Ads: ASA Bans AI TikTok Ad](https://www.esports.net/betting/gambling-ad-ruling-midnite/) | Esports.net | Fri, 18 Sep 2026 | ☐ |
+| 9 | post+update | [Newsom Signs Law Requiring Disclosure Of AI-Generated Performers In Ads 09/18/2026](https://www.mediapost.com/publications/article/418095/newsom-signs-law-requiring-disclosure-of-ai-genera.html) | MediaPost | Fri, 18 Sep 2026 | ☐ |
+| 9 | post+update | [California Enacts SB 1050 Requiring AI Disclosures in Ads](https://suaragarut.id/en/california-enacts-sb-1050-ai-disclosures) | SuaraGarut.ID | Thu, 17 Sep 2026 | ☐ |
+| 9 | post+update | [AI-generated advertising rules are fragmenting, complicating creative and compliance](https://www.emarketer.com/content/ai-generated-advertising-rules-fragmenting--complicating-creative-compliance) | eMarketer | Thu, 17 Sep 2026 | ☐ |
+| 9 | post+update | [California Enacts a “Synthetic Performer” Law](https://www.kelleydrye.com/viewpoints/blogs/ad-law-access/california-enacts-a-synthetic-performer-law) | kelleydrye.com | Thu, 17 Sep 2026 | ☐ |
+| 9 | post+update | [ASA Enforces UK Gambling Ad Rules in Rulings on AI Content and E-Sports Promotions](https://sccgmanagement.com/sccg-articles/2026/09/17/asa-enforces-uk-gambling-ad-rules-in-rulings-on-ai-content-and-e-sports-promotions/) | SCCG Management | Thu, 17 Sep 2026 | ☐ |
+| 9 | post+update | [UK ASA Rules AI-Generated Characters Subject to Gambling Ad Age Limits in Midnite Case](https://sccgmanagement.com/sccg-articles/2026/09/17/uk-asa-rules-ai-generated-characters-subject-to-gambling-ad-age-limits-in-midnite-case/) | SCCG Management | Thu, 17 Sep 2026 | ☐ |
+| 9 | post+update | [What Happens When Brands Have to Label AI-Generated Ads?](https://www.thefashionlaw.com/what-happens-when-brands-have-to-label-ai-generated-ads/) | The Fashion Law | Wed, 16 Sep 2026 | ☐ |
+| 8 | post+update | [Think-tank warns brokers against assuming AI is covered](https://www.insurancebusinessmag.com/us/news/cyber/thinktank-warns-brokers-against-assuming-ai-is-covered-590236.aspx) | Insurance Business | Fri, 18 Sep 2026 | ☐ |
+| 8 | post+update | [AI risks make some insurers wary of corporate liability](https://www.theregister.com/ai-and-ml/2026/09/18/ai-risks-make-some-insurers-wary-of-corporate-liability/5297347) | The Register | Fri, 18 Sep 2026 | ☐ |
+| 8 | post+update | [California Will Make Ads Tell You When Their “Actors” Are AI](https://www.gadgetreview.com/california-will-make-ads-tell-you-when-their-actors-are-ai) | Gadget Review | Thu, 17 Sep 2026 | ☐ |
+| 8 | post+update | [Important New AI Disclosure Law](https://www.loeb.com/en/insights/passle/2026/09/important-new-ai-disclosure-law) | Loeb & Loeb LLP | Thu, 17 Sep 2026 | ☐ |
+| 8 | post+update | [ASA upholds complaint against Midnite over AI-generated character in TikTok ad](https://igamingbusiness.com/marketing-affiliates/asa-complaint-midnite-ai-generated-character-tiktok-ad/) | iGaming Business | Thu, 17 Sep 2026 | ☐ |
+| 8 | post+update | [Calif. AI Law Requires Ads To Disclose 'Synthetic Performers'](https://www.law360.com/employment-authority/labor/articles/2526283/calif-ai-law-requires-ads-to-disclose-synthetic-performers-) | Law360 | Thu, 17 Sep 2026 | ☐ |
+| 8 | monitor | [California Enacts Synthetic Performer Advertising Disclosure Law](https://news.bloomberglaw.com/product-liability-and-toxics-law/california-enacts-synthetic-performer-advertising-disclosure-law) | Bloomberg Law News | Wed, 16 Sep 2026 | ☐ |
+| 8 | monitor | [California joins New York in requiring disclosure of synthetic performers in ads](https://www.transparencycoalition.ai/news/california-joins-new-york-in-requiring-disclosure-of-synthetic-performers-in-ads) | Transparency Coalition | Wed, 16 Sep 2026 | ☐ |
+| 8 | update | [Gov. Gavin Newsom signs California law to ban AI actors in ads without disclosure](https://www.sacbee.com/news/politics-government/capitol-alert/article317268680.html) | Sacramento Bee | Wed, 16 Sep 2026 | ☐ |
+| 8 | update | [Governor Newsom signs new law to protect workers, require disclosures on AI-generated advertising](https://www.gov.ca.gov/2026/09/16/governor-newsom-signs-new-law-to-protect-workers-require-disclosures-on-ai-generated-advertising/) | California State Portal \| CA.gov | Wed, 16 Sep 2026 | ☐ |
+| 8 | post+update | [Midnite AI Gambling Ad Banned Over ‘Under-25’ Appearance](https://www.thelines.com/uk/legal-betting/midnite-ai-gambling-ad-banned-over-under-25-appearance/) | TheLines.com | Wed, 16 Sep 2026 | ☐ |
+| 8 | post+update | [UK Advertising Watchdog Bans AI 'Nudify' Advertisements on Meta Platforms Over Abuse Concerns](https://streamlinefeed.co.ke/news/uk-advertising-watchdog-bans-ai-nudify-advertisements-on-meta-platforms-over-abuse-concerns) | streamlinefeed.co.ke | Wed, 16 Sep 2026 | ☐ |
+| 7 | update | [Microsoft exec called AI scraping ‘the largest theft of labor in human history,' new unredacted filings reveal](https://techcrunch.com/2026/09/17/microsoft-exec-called-ai-scraping-the-largest-theft-of-labor-in-human-history-new-unredacted-filings-reveal/) | TechCrunch | Thu, 17 Sep 2026 | ☐ |
+| 7 | post+update | [New California law mandates AI performer disclosure in ads](https://www.straitstimes.com/world/united-states/new-california-law-mandates-ai-performer-disclosure-in-ads) | The Straits Times | Thu, 17 Sep 2026 | ☐ |
+| 7 | post+update | [California Ads Must Disclose When Actors Are AI-Generated Under New Law](https://www.lawcommentary.com/articles/california-ai-generated-actors-ad-disclosure-law) | Law Commentary | Thu, 17 Sep 2026 | ☐ |
+| 7 | post+update | [How Is Artificial Intelligence Insured?](https://www.rand.org/pubs/research_reports/RRA5130-1.html) | RAND | Wed, 16 Sep 2026 | ☐ |
+| 7 | monitor | [ASA warns Midnite over advert](https://next.io/news/regulation/asa-warns-midnite-over-advert-white-hat-cleared/) | NEXT.io | Wed, 16 Sep 2026 | ☐ |
+| 7 | monitor | [Midnite TikTok ad created by affiliate gets banned by ASA](https://sbcnews.co.uk/sportsbook/2026/09/16/midnite-tiktok-ad-asa-ban/) | sbcnews.co.uk | Wed, 16 Sep 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [AI Legislative Update: September 18, 2026](https://www.transparencycoalition.ai/news/ai-legislative-update-september18-2026) | Transparency Coalition | Thu, 17 Sep 2026 | ☐ |
+| 6 | monitor | [Best AI Video Generators of 2026: We Put All the Big Models to the Test](https://www.cnet.com/tech/services-and-software/best-ai-video-generators/) | CNET | Mon, 14 Sep 2026 | ☐ |
+| 6 | monitor | [Why one IT consultancy thinks AI insurance stays a niche through 2028](https://www.insurancebusinessmag.com/us/news/technology/why-one-it-consultancy-thinks-ai-insurance-stays-a-niche-through-2028-589556.aspx) | Insurance Business | Mon, 14 Sep 2026 | ☐ |
+| 5 | monitor | [California’s 2026 Legislative Session Wraps: A Wave of Privacy and AI…](https://www.kelleydrye.com/viewpoints/blogs/ad-law-access/californias-2026-legislative-session-wraps-a-wave-of-privacy-and-ai-bills-reaches-the-governor-with-key-child-safety-and-ai-measures-signed-into-law) | kelleydrye.com | Mon, 14 Sep 2026 | ☐ |
+| 4 | monitor | [Shutterstock’s synthetic AI model raises questions about the economics and ownership of stock images](http://www.milwaukeeindependent.com/explainers/shutterstocks-synthetic-ai-model-raises-questions-economics-ownership-stock-images/) | Milwaukee Independent | Fri, 18 Sep 2026 | ☐ |
+| 4 | monitor | [How Is AI Regulated? Examples, Benefits, & Drawbacks \| Britannica Money](https://www.britannica.com/money/ai-rules-and-regulations) | Britannica | Tue, 15 Sep 2026 | ☐ |
+
+---
+
 ## Week of September 16, 2026
 *Run: 2026-09-16 · 7 high · 7 monitor · lookback 7 days*
 
