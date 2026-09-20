@@ -216,10 +216,12 @@ describe('extractor isolation -- GOAL_CATEGORIES is untouched by this milestone'
   // GOAL_CATEGORIES untouched. The later Trademark CRC Production
   // Representation milestone, unlike this one, DID intentionally add a
   // category ('trademark') -- a separate, deliberate, governed decision, not
-  // a regression of the isolation this suite otherwise proves.
-  test('GOAL_CATEGORIES is exactly the 7 current values', () => {
+  // a regression of the isolation this suite otherwise proves. The later
+  // Third-Party Copyright CRC Production Representation milestone
+  // (2026-09-19) similarly, intentionally added 'third_party_copyright'.
+  test('GOAL_CATEGORIES is exactly the 8 current values', () => {
     expect([...GOAL_CATEGORIES].sort()).toEqual(
-      ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'third_party_source_rights', 'trademark', 'unknown'].sort(),
+      ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'third_party_copyright', 'third_party_source_rights', 'trademark', 'unknown'].sort(),
     )
   })
 })

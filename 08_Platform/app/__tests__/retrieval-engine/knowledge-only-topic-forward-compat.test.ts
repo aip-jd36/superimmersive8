@@ -200,9 +200,12 @@ describe('STEP 3/4 -- test-only KnowledgeTopic mechanism and type separation', (
   // milestone, which deliberately added a real 'trademark' GoalCategory value
   // (unlike SIMULATED_TOPIC here, which is intentionally never added). This
   // test's real assertion -- that a knowledge-only test topic is NOT a
-  // GoalCategory -- is untouched by that milestone.
-  test('GOAL_CATEGORIES reflects only deliberate, governed additions (7 values, extractor schema untouched by this file)', () => {
-    expect(GOAL_CATEGORIES.length).toBe(7)
+  // GoalCategory -- is untouched by that milestone. Count updated 7 -> 8 by
+  // the Third-Party Copyright CRC Production Representation milestone
+  // (2026-09-19), same reasoning: 'third_party_copyright' is a real,
+  // deliberate, governed addition.
+  test('GOAL_CATEGORIES reflects only deliberate, governed additions (8 values, extractor schema untouched by this file)', () => {
+    expect(GOAL_CATEGORIES.length).toBe(8)
     expect(isGoalCategoryTopic(SIMULATED_TOPIC)).toBe(false)
   })
 

@@ -794,8 +794,36 @@ export interface ProjectFacts {
  * addition, and (unlike EU AI Act Article 50's own `ai_content_
  * transparency`) no `TopicRelationship`, since this domain is explicit-
  * goal-reachable directly.
+ *
+ * `third_party_copyright` (Third-Party Copyright — CRC Production
+ * Representation, 2026-09-19, per CLAIM-COPYRIGHT-US-THIRD-PARTY-OUTPUT-
+ * 001-v1's own governance chain -- FGR_022 Adoption, CPR_028 Publication
+ * approval): the user is explicitly asking CRC to help understand
+ * copyright considerations relevant to third-party material (e.g. a
+ * character, artwork, or other pre-existing work) appearing in, or
+ * resembled by, the user's own AI-generated/AI-assisted commercial
+ * output. Deliberately NEVER a promise that CRC will determine
+ * infringement, protected status, ownership, copying, substantial
+ * similarity, derivative-work status, authorization sufficiency, or fair
+ * use -- those remain unresolved project-specific legal characterizations
+ * this claim's own governed record leaves open (see GOVERNED-CLAIMS.md's
+ * `CLAIM-COPYRIGHT-US-THIRD-PARTY-OUTPUT-001-v1` entry's Prohibited
+ * conclusions). A materially different question from `copyright_
+ * ownership`/`copyrightability` (each concerns only the user's own
+ * authorship/ownership in the user's own output, never a third party's
+ * rights) and from `third_party_source_rights` (which presupposes a
+ * named, licensed stock-media provider relationship -- inapplicable to
+ * emergent or uncredited resemblance to a third party's work) --
+ * independently re-derived via head-to-head taxonomy testing three times
+ * across this domain's own governance history (candidate design, FGR_022,
+ * PM Adoption), not assumed from the word "copyright" alone. The same
+ * value serves as `TopicClaim.topic` directly (`KnowledgeTopic =
+ * GoalCategory | KNOWLEDGE_ONLY_TOPICS`, a union) -- no separate
+ * `KNOWLEDGE_ONLY_TOPICS` addition, and no `TopicRelationship`, since this
+ * domain is explicit-goal-reachable directly, mirroring `trademark`'s own
+ * shape exactly.
  */
-export const GOAL_CATEGORIES = ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'third_party_source_rights', 'trademark', 'unknown'] as const
+export const GOAL_CATEGORIES = ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'third_party_copyright', 'third_party_source_rights', 'trademark', 'unknown'] as const
 
 export type GoalCategory = (typeof GOAL_CATEGORIES)[number]
 

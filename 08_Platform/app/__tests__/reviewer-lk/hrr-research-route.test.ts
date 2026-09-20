@@ -221,7 +221,7 @@ test('"should I approve this?" → 200 bounded refusal answer, NO audit (no gove
   expect(answer.authority_note).toBe('assessment_judgment_redirected')
   expect(answer.assessment_authority_note).toBeTruthy()
   expect(answer.topics).toEqual([])
-  expect(answer.offered_research_paths.length).toBe(6)
+  expect(answer.offered_research_paths.length).toBe(7)
 })
 
 test('unsupported / over-general question → 200 bounded answer, NO audit', async () => {

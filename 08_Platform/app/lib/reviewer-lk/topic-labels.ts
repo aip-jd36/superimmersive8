@@ -24,6 +24,7 @@ export const REVIEWER_TOPIC_LABELS: Record<Exclude<GoalCategory, 'unknown'>, str
   likeness: 'Likeness',
   third_party_source_rights: 'Third-party source rights',
   trademark: 'Trademark',
+  third_party_copyright: 'Third-party copyright',
 }
 
 /**
