@@ -4568,3 +4568,156 @@ Full candidate governance package: `US-TRADEMARK-LANHAM-1125A-FGR-PACKAGE.md`
 Full Formal Governance Review artifact: `governance-reviews/FGR_021_CAND-TRADEMARK-US-LANHAM-CONFUSION-001_2026-09-16.md`
 Full CRC Publication Review artifact: `governance-reviews/CPR_027_CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1_2026-09-16.md`
 Full evidence manifest: `evidence-captures/us-trademark/MANIFEST.md`
+
+### CLAIM-COPYRIGHT-US-THIRD-PARTY-OUTPUT-001-v1
+Domain: U.S. Copyright Law — 17 U.S.C. §§ 106 & 501, Third-Party Material in Output
+Topic: third_party_copyright
+Subtopic: exclusive-rights-reproduction-derivative-works-infringement
+
+GOVERNANCE TREATMENT (2026-09-18, PM adoption decision, FGR #22): `Topic: third_party_copyright` is a **proposed new `GoalCategory` value**, not yet implemented in `GOAL_CATEGORIES` (independently re-confirmed absent at this Adoption review, `08_Platform/app/types/interview-engine.ts` line 798) — this Adoption is a Living Knowledge governance decision only; it does not itself add the enum value, add a `TopicClaim` fixture entry, or activate any runtime path. Type/runtime implementation is a separate, later, explicitly-authorized milestone, mirroring the exact timing precedent already established for `CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1`'s own `trademark` GoalCategory. Because `KnowledgeTopic = GoalCategory | KNOWLEDGE_ONLY_TOPICS` is a union, once `third_party_copyright` is added to `GOAL_CATEGORIES`, it automatically becomes a valid `TopicClaim.topic` value too — no separate `KNOWLEDGE_ONLY_TOPICS` addition or `TopicRelationship` is needed or proposed, since this domain is explicit-goal-reachable directly (independently re-derived via T1–T4 twice — once in the candidate package, once independently at FGR_022 §2/§3 against three freshly-constructed test intents — and re-confirmed a third time at this Adoption review rather than accepted on either prior conclusion's say-so). This `GoalCategory` is deliberately distinct from `copyright_ownership`/`copyrightability` (which concern only the user's own authorship/ownership in the user's own output) and from `third_party_source_rights` (which presupposes a named, licensed stock-media provider relationship — inapplicable to emergent or uncredited resemblance to a third party's work). The durable claim identifier below uses the current corpus-wide descriptive-ID convention (`CLAIM-<DOMAIN>-<JURISDICTION>-<CONCEPT>-NNN-v1`, the convention used by every claim adopted since Trademark/Likeness/Storyblocks/Pond5/Synthesia/Adobe Stock), not the legacy short numeric `CLAIM-COPY-NNN-v1` sequence reserved for the pre-existing ownership/copyrightability claim family (`CLAIM-COPY-001` through `-004`) — using the next number in that sequence would misleadingly imply this is simply another entry in the ownership/copyrightability family, which this review independently confirms it is not.
+
+Claim character: established
+Jurisdiction: United States (federal)
+Context: commercial AI-generated or AI-assisted video content that contains, reproduces, adapts, or resembles pre-existing third-party copyrighted material
+
+Claim proposition: >
+  Under 17 U.S.C. § 106, a copyright owner holds exclusive rights to
+  reproduce their copyrighted work and to prepare derivative works based
+  upon it, among other rights, subject to the limitations and exceptions
+  in sections 107 through 122. Under 17 U.S.C. § 501(a), anyone who
+  violates any of those exclusive rights without authorization is an
+  infringer of the copyright and may be civilly liable. This is a
+  separate legal question from whether the user's own AI-assisted output
+  is itself copyrightable.
+
+Source references:
+  - primary (Class A, GPO official U.S. Code, 2023 edition, direct PDF capture, independently cross-validated against a separately-obtained Cornell LII rendering, byte-identical): 17 U.S.C. § 106 — `evidence-captures/us-copyright-third-party/uscode-2023-title17-sec106_20260918T075020Z_56f13a52.pdf`.
+  - primary (Class A, same method): 17 U.S.C. § 501(a) — `evidence-captures/us-copyright-third-party/uscode-2023-title17-sec501_20260918T075020Z_06c69f9e.pdf`.
+Source authority/type: Primary legal/official authority (enacted U.S. Code text) — Class A
+Source fact: >
+  "Subject to sections 107 through 122, the owner of copyright under this
+  title has the exclusive rights to do and to authorize any of the
+  following: (1) to reproduce the copyrighted work in copies or
+  phonorecords; (2) to prepare derivative works based upon the
+  copyrighted work..." (17 U.S.C. § 106). "Anyone who violates any of the
+  exclusive rights of the copyright owner as provided by sections 106
+  through 122... is an infringer of the copyright... as the case may
+  be." (17 U.S.C. § 501(a)). Both independently re-extracted via
+  `pdftotext -layout` and independently checksum-verified against the
+  evidence manifest at this Adoption review (SHA-256 matches confirmed
+  for both PDFs), not accepted on the candidate package's or FGR_022's
+  quotation alone.
+
+SI8 interpretation: >
+  A commercial AI-generated or AI-assisted video project that contains,
+  reproduces, adapts, or resembles pre-existing third-party copyrighted
+  material should not be represented to a client, buyer, or platform as
+  clear of copyright considerations without confirming whether the
+  specific output reproduces or is a derivative work based on
+  identifiable third-party protected expression, and whether it was
+  authorized — a legal/factual characterization this claim does not
+  resolve and CRC cannot establish from conversation alone.
+
+Applicability requirements:
+  - fact: jurisdiction
+    operator: equals
+    value: United States
+  <!-- Mirrors CLAIM-COPY-001-v1's and CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1's own precedent exactly: AssessmentJurisdictionMention represents only that the user asked CRC to consider United States law -- never proof that this statute's territorial reach actually attaches to a specific project. Because this claim is reached via an explicit goal (never a TopicRelationship), it has no Article-50-style unrestricted-global-reach exposure, so this gate serves its original, simpler CLAIM-COPY-001-style purpose. -->
+Unresolved project dependencies: []   <!-- D0, independently re-derived three times across this candidate's history (the candidate package's own §8-REVISED Dependency Semantics Challenge; FGR_022 §5's independent re-derivation by direct re-inspection of build-bounded-interpretation.ts/assemble-result.ts; and re-confirmed a third time at this Adoption review) rather than accepted on any single prior conclusion's say-so: unresolved_project_dependencies is a static, governance-authored, claim-level classification in current production source -- never dynamically resolved at runtime by any project fact, evidence review, or Commercial Assurance outcome, confirmed true of CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1's own dependency as well (per CPR_027: "unresolved (always, under the current governed evidence model)... only feeds the Case 3B hedge content"). A previously-considered composite dependency (unauthorized_reproduction_or_derivative_use_of_third_party_work) was rejected -- it bundled at least four categorically distinct judgment types (identity of work, protected status, copying-in-fact, derivative-work characterization, authorization) into one string, unlocked no additional CRC-permitted conclusion (the fixed, domain-blind Bounded Interpretation/Composition templates already structurally prevent an infringement/copying/derivative-work conclusion regardless of dependency count), and would have duplicated Commercial Assurance Domain I01's own evidence-review role rather than serving an independent Living Knowledge purpose. directlyRelevantSummary's own fixed boundary clause ("though it doesn't by itself determine the answer for your specific project") already discharges the same epistemic-honesty function -- empirically consistent with the already-adopted, zero-dependency CLAIM-ADOBESTOCK-AI-STUDIO-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001-v1 precedent (a more complex, branching proposition, canary-confirmed safe at directly_relevant). -->
+Tool scope: null                 <!-- tool-independent, general statutory knowledge --> Provider scope (asset-provider sense): null.
+Prohibited conclusions: >
+  Does not establish that a specific project's output does (or does not)
+  reproduce or constitute a derivative work based on any specific third
+  party's protected expression. Does not establish that any specific
+  third-party material is (or is not) legally protected, valid, or still
+  in term. Does not establish ownership of any third-party copyright.
+  Does not establish authorization, permission, or license sufficiency
+  (in either direction). Does not establish that legally relevant copying
+  occurred. Does not establish substantial similarity. Does not establish
+  derivative-work status as a legal matter. Does not establish that fair
+  use or any other 17 U.S.C. §§ 107-122 exception applies (or does not
+  apply). Does not establish that United States jurisdiction attaches to
+  a specific project for any reason, including the user merely selecting,
+  stating, or mentioning the United States as the assessment
+  jurisdiction. Does not constitute legal advice, a compliance
+  determination, or a certification of commercial readiness — a
+  human-reviewed Commercial Assurance Assessment (Reviewer Workbook
+  Domain I, control I01) remains the higher-assurance path for the
+  project-specific facts this claim leaves open. Domain I01 itself is
+  human observation and evidentiary note-taking, not legal infringement
+  adjudication — no repository governance artifact establishes that
+  Commercial Assurance adjudicates legal copyright infringement, and this
+  claim does not imply otherwise.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-09-18
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  APPROVED FOR CRC PUBLICATION (2026-09-19, CRC Approver: JD (PM) -- see
+  CRC Approver/CRC Decision Date below; CRC Publication Review #28 complete
+  at governance-reviews/CPR_028_CLAIM-COPYRIGHT-US-THIRD-PARTY-OUTPUT-001-v1_
+  2026-09-19.md, APPROVE, no wording edit required --
+  independently re-verified against the Adopted governance record, the
+  evidence manifest, and current production source (not inherited from
+  FGR_022 alone) -- source fidelity, goal/topic identity, jurisdiction
+  semantics, applicability, zero-dependency Bounded Interpretation safety
+  (re-confirmed directly against `build-bounded-interpretation.ts`'s own
+  `needsApplicabilityHedge`/`hasGovernedProjectDependencies`), askability
+  (re-confirmed directly against `dependency-askability.ts`: no registry
+  entry exists, moot by design given zero dependencies), Composition
+  compatibility, evidence limitations, prohibited conclusions, the
+  Commercial Assurance boundary, the output-vs-training-data boundary, and
+  CRC-PUBLICATION-POLICY.md Principle 3's subject-sensitivity gate
+  (explicitly tested and found inapplicable -- Principle 3's own text names
+  its boundaries as "likeness, voice cloning, deepfakes, political
+  persuasion" only, none of which this claim's topic is) all independently
+  re-checked and found sound; no substantive publication risk identified).
+  CRC may state that 17 U.S.C. § 106 gives a copyright owner exclusive
+  rights to reproduce their work and prepare derivative works based on it,
+  subject to statutory limitations and exceptions, and that 17 U.S.C. §
+  501(a) makes violating those rights without authorization copyright
+  infringement, and that this is a separate legal question from whether
+  the user's own AI-assisted output is itself copyrightable. CRC must not
+  state or imply: that a specific project's output does or does not
+  reproduce or constitute a derivative work based on any specific third
+  party's protected expression; that any specific third-party material is
+  or is not legally protected, valid, or still in term; ownership of any
+  third-party copyright; authorization, permission, or license sufficiency
+  (in either direction); that legally relevant copying occurred;
+  substantial similarity; derivative-work status as a legal matter; that
+  fair use or any other 17 U.S.C. §§ 107-122 exception applies or does not
+  apply; that United States jurisdiction attaches to a specific project for
+  any reason, including the user merely selecting, stating, or mentioning
+  the United States as the assessment jurisdiction; or that satisfying or
+  avoiding this rule establishes broader legal compliance or overall
+  commercial readiness. This is educational workflow guidance, not legal
+  advice. A human-reviewed Commercial Assurance Assessment (Reviewer
+  Workbook Domain I, control I01 -- human observation and evidentiary
+  note-taking, never a legal infringement adjudication) remains the
+  higher-assurance path for the project-specific facts this claim leaves
+  open. Not yet runtime-reachable by any CRC user -- `third_party_copyright`
+  remains absent from production `GOAL_CATEGORIES`; production
+  representation is a separate, later, explicitly-authorized milestone.
+
+CRC Candidate Statement: >
+  Under U.S. federal copyright law (17 U.S.C. § 106), the owner of a
+  copyrighted work holds exclusive rights to reproduce it and to prepare
+  derivative works based on it, among other rights, subject to statutory
+  limitations and exceptions. Under 17 U.S.C. § 501(a), using another
+  party's protected work in a way that violates those exclusive rights,
+  without authorization, can create copyright infringement liability.
+  This is a separate legal question from whether your own AI-assisted
+  output is itself copyrightable.
+
+Effective date: 17 U.S.C. §§ 106/501 are existing, long-settled federal statutory law (no recent amendment identified or relied upon); evidence captured 2026-09-18 from the GPO's 2023 U.S. Code edition, the most recent complete annual edition available at capture time.
+Last reviewed: 2026-09-19 (CRC Publication Review, following FGR_022)
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-09-19
+Related: [[CLAIM-COPY-001-v1]] (copyrightability of the user's own output -- distinct question, not related in substance beyond both being Copyright-domain), [[CLAIM-COPY-004-v1]] (ownership vs. ToS permission -- distinct question), [[CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1]] (structurally similar but legally distinct sibling domain -- third-party mark vs. third-party protected expression). Deliberately not related to any Third-Party Source Assets claim (which presuppose a named, licensed stock provider — this claim does not).
+
+Full candidate governance package: `US-COPYRIGHT-106-501-THIRD-PARTY-OUTPUT-FGR-PACKAGE.md`
+Full Formal Governance Review artifact: `governance-reviews/FGR_022_CAND-COPYRIGHT-US-THIRD-PARTY-OUTPUT-001_2026-09-18.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_028_CLAIM-COPYRIGHT-US-THIRD-PARTY-OUTPUT-001-v1_2026-09-19.md`
+Full evidence manifest: `evidence-captures/us-copyright-third-party/MANIFEST.md`

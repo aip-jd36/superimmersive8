@@ -116,7 +116,9 @@ goal_category_hint -- the goal's coarse subject matter:
 - "copyright_ownership": who owns the copyright in the output (e.g. "Do I own this?", "Does my client own the rights?").
 - "copyrightability": whether the output can be copyrighted at all, as a category (e.g. "Is AI-generated video even copyrightable?"). Distinct from copyright_ownership -- ownership presupposes something ownable exists; copyrightability asks whether it exists at all. Only use this when the user is asking about the concept in general, not who specifically owns a specific piece.
 - "likeness": questions about a real person's face, voice, or likeness appearing in or being cloned by the output.
+- "third_party_copyright": whether using, reproducing, or adapting someone else's pre-existing copyrighted material (e.g. a movie, TV show, song, artwork, or other creative work not made for this project) within the AI-generated/AI-assisted output raises copyright issues -- distinct from third_party_source_rights, which is about whether a license or permission from a specific source/stock provider covers the contemplated use. Use third_party_copyright when the question is about the copyright implications of a pre-existing third-party work appearing in the output at all (e.g. "I used a clip from an existing movie I don't own -- what copyright issues should I think about?", "Can I recreate a scene from a copyrighted film?"); use third_party_source_rights when the question is about whether a specific provider's license/permission scope covers the use (e.g. "I have a Getty license -- does it cover this?"). Both may be proposed for the same turn when the user's own words raise both questions.
 - "third_party_source_rights": whether the user has sufficient rights or permission to use third-party source material (e.g. a stock image, licensed footage) in the project -- distinct from commercial_use, which is about the AI-generated OUTPUT, not an input source. See the asset_provider_mention guidance above for the full explicit-question-vs-incidental-disclosure distinction that governs this category specifically.
+- "trademark": questions about a third party's brand name, logo, or other source-identifying material appearing in or being depicted by the output (e.g. "Can I show a real company's logo in this ad?", "Does using this brand name in my video raise trademark issues?").
 - "unknown": the goal doesn't clearly fit any of the above, or you're not confident enough to classify it.
 Never guess a specific category from adjacent context the user didn't actually state -- e.g. never "copyright_ownership" merely because a client or a paid campaign was mentioned elsewhere in the turn. When genuinely unsure, use "unknown" rather than guessing.
 
@@ -180,8 +182,8 @@ const CONFIDENCE_HINT_VALUES = ['confirmed', 'confirmed_absent', 'unresolved_no_
  * launch-marker timestamp is needed).
  */
 const PROJECT_FACT_FIELD_VALUES = ['intended_use', 'workflow_role', 'human_contribution_description'] as const
-/** Milestone 2 (2026-08-15); extended with 'third_party_source_rights' (Living Knowledge — Third-Party Source Rights, M1+M2, 2026-08-18); extended with 'trademark' (Trademark — CRC Production Representation, 2026-09-16). Mirrors GOAL_CATEGORIES / GOAL_SCOPES in types/interview-engine.ts -- kept as separate local consts here, same pattern as every other *_VALUES const in this file, rather than importing the runtime const array across the adapter boundary. */
-const GOAL_CATEGORY_VALUES = ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'third_party_source_rights', 'trademark', 'unknown'] as const
+/** Milestone 2 (2026-08-15); extended with 'third_party_source_rights' (Living Knowledge — Third-Party Source Rights, M1+M2, 2026-08-18); extended with 'trademark' (Trademark — CRC Production Representation, 2026-09-16); extended with 'third_party_copyright' (Third-Party Copyright — CRC Production Representation, 2026-09-19). Mirrors GOAL_CATEGORIES / GOAL_SCOPES in types/interview-engine.ts -- kept as separate local consts here, same pattern as every other *_VALUES const in this file, rather than importing the runtime const array across the adapter boundary. */
+const GOAL_CATEGORY_VALUES = ['commercial_use', 'copyright_ownership', 'copyrightability', 'likeness', 'third_party_copyright', 'third_party_source_rights', 'trademark', 'unknown'] as const
 const GOAL_SCOPE_VALUES = ['informational', 'determination_request'] as const
 /**
  * P0 Anthropic schema-union-limit fix (2026-08-21). Generic wire-level
@@ -379,7 +381,7 @@ export const CANDIDATE_RESPONSE_SCHEMA = {
             type: ['string', 'null'],
             enum: [...GOAL_CATEGORY_VALUES, null],
             description:
-              'When kind is user_goal and goal_confidence_hint is confirmed: the goal\'s coarse subject matter -- commercial_use, copyright_ownership, copyrightability, likeness, trademark, or unknown if you cannot confidently classify it. Never guessed from adjacent context the user did not actually state. Null otherwise.',
+              'When kind is user_goal and goal_confidence_hint is confirmed: the goal\'s coarse subject matter -- commercial_use, copyright_ownership, copyrightability, likeness, trademark, third_party_copyright, or unknown if you cannot confidently classify it. Never guessed from adjacent context the user did not actually state. Null otherwise.',
           },
           goal_scope_hint: {
             type: ['string', 'null'],

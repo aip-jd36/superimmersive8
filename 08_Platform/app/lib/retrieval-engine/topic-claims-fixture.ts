@@ -1615,4 +1615,81 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     last_verified: '2026-09-16',
     superseded_by: null,
   },
+  {
+    // U.S. Copyright, 17 U.S.C. §§ 106 & 501, third-party material in
+    // AI-generated/AI-assisted output (Third-Party Copyright -- CRC
+    // Production Representation milestone, 2026-09-19). Faithful,
+    // mechanical projection of GOVERNED-CLAIMS.md's own
+    // CLAIM-COPYRIGHT-US-THIRD-PARTY-OUTPUT-001-v1 entry (Lifecycle:
+    // Adopted, FGR_022; CRC Publication Scope: APPROVED FOR CRC
+    // PUBLICATION, CPR_028) -- no wording strengthened, simplified, or
+    // reconstructed here. `topic: 'third_party_copyright'` is a real
+    // `GoalCategory` value added in this same milestone (`types/interview-
+    // engine.ts`'s own `GOAL_CATEGORIES`) -- reached via the existing,
+    // unmodified exact-topic path (`lookupTopicClaims`), never a
+    // `TopicRelationship`. No discovered relevance, no
+    // `ContentPresenceCategory`, no `TopicRelationship` is authored by
+    // this milestone.
+    claim_id: 'CLAIM-COPYRIGHT-US-THIRD-PARTY-OUTPUT-001-v1',
+    topic: 'third_party_copyright',
+    claim_character: 'established',
+    jurisdiction: 'United States (federal)',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    // Verbatim from GOVERNED-CLAIMS.md's own CRC Publication Scope field
+    // (CPR_028, 2026-09-19), EXCEPT for that field's own trailing
+    // implementation-status sentence ("Not yet runtime-reachable... a
+    // separate, later, explicitly-authorized milestone") -- that sentence
+    // describes production-representation status, not governed CRC-facing
+    // content, and this fixture entry IS that separate, later, explicitly-
+    // authorized milestone, so including it verbatim here would embed a
+    // now-self-contradicting statement inside the very entry that makes it
+    // false. Per this codebase's own established discipline (types.ts's
+    // own header comment), this text is never parsed or rendered by any
+    // runtime code path -- audit/governance prose only; the actual
+    // runtime-enforced boundary is the fixed, domain-blind Composition
+    // template mechanism (rules.ts), independent of this field's content.
+    crc_publication_scope:
+      'CRC may state that 17 U.S.C. § 106 gives a copyright owner exclusive rights to reproduce their work and prepare derivative works based on it, subject to statutory limitations and exceptions, and that 17 U.S.C. § 501(a) makes violating those rights without authorization copyright infringement, and that this is a separate legal question from whether the user\'s own AI-assisted output is itself copyrightable. CRC must not state or imply: that a specific project\'s output does or does not reproduce or constitute a derivative work based on any specific third party\'s protected expression; that any specific third-party material is or is not legally protected, valid, or still in term; ownership of any third-party copyright; authorization, permission, or license sufficiency (in either direction); that legally relevant copying occurred; substantial similarity; derivative-work status as a legal matter; that fair use or any other 17 U.S.C. §§ 107-122 exception applies or does not apply; that United States jurisdiction attaches to a specific project for any reason, including the user merely selecting, stating, or mentioning the United States as the assessment jurisdiction; or that satisfying or avoiding this rule establishes broader legal compliance or overall commercial readiness. This is educational workflow guidance, not legal advice. A human-reviewed Commercial Assurance Assessment (Reviewer Workbook Domain I, control I01 -- human observation and evidentiary note-taking, never a legal infringement adjudication) remains the higher-assurance path for the project-specific facts this claim leaves open.',
+    // Verbatim from GOVERNED-CLAIMS.md's own CRC Candidate Statement field.
+    crc_candidate_statement:
+      'Under U.S. federal copyright law (17 U.S.C. § 106), the owner of a copyrighted work holds exclusive rights to reproduce it and to prepare derivative works based on it, among other rights, subject to statutory limitations and exceptions. Under 17 U.S.C. § 501(a), using another party\'s protected work in a way that violates those exclusive rights, without authorization, can create copyright infringement liability. This is a separate legal question from whether your own AI-assisted output is itself copyrightable.',
+    // Mirrors CLAIM-COPY-001-v1's and CLAIM-TRADEMARK-US-LANHAM-CONFUSION-
+    // 001-v1's own precedent exactly: AssessmentJurisdictionMention
+    // represents only that the user asked CRC to consider United States
+    // law -- never proof that this statute's territorial reach actually
+    // attaches to a specific project. This claim is reached via an
+    // explicit goal (never a relationship), so it has no Article
+    // 50-style unrestricted-global-reach exposure to solve.
+    applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+    // D0 -- zero dependencies, independently re-derived three times across
+    // this candidate's governance history (candidate package's own
+    // §8-REVISED Dependency Semantics Challenge; FGR_022 §5's independent
+    // re-derivation by direct source inspection; PM Adoption's third
+    // independent re-confirmation) rather than accepted on any single
+    // prior conclusion's say-so. A previously-considered composite
+    // dependency (unauthorized_reproduction_or_derivative_use_of_third_
+    // party_work) was rejected -- it bundled at least four categorically
+    // distinct judgment types (identity of work, protected status,
+    // copying-in-fact, derivative-work characterization, authorization)
+    // into one string, unlocked no additional CRC-permitted conclusion
+    // (the fixed, domain-blind Bounded Interpretation/Composition
+    // templates already structurally prevent an infringement/copying/
+    // derivative-work conclusion regardless of dependency count), and
+    // would have duplicated Commercial Assurance Domain I01's own
+    // evidence-review role rather than serving an independent Living
+    // Knowledge purpose. See GOVERNED-CLAIMS.md's own entry for the full
+    // reasoning.
+    unresolved_project_dependencies: [],
+    // Statutory, tool-independent, and not a third-party asset-provider-
+    // scoped claim.
+    provider_scope: null,
+    tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
+    // geographic_relevance_scope deliberately omitted (opt-out by this
+    // field's own inverted default polarity) -- no discovered relevance is
+    // activated by this milestone; this claim is explicit-goal-only.
+    last_verified: '2026-09-19',
+    superseded_by: null,
+  },
 ]

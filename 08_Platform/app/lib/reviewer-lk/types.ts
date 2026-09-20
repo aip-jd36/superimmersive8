@@ -54,6 +54,7 @@ export const REVIEWER_RESEARCH_TOPICS = [
   'likeness',
   'third_party_source_rights',
   'trademark',
+  'third_party_copyright',
 ] as const
 
 export type ReviewerResearchTopic = (typeof REVIEWER_RESEARCH_TOPICS)[number]
