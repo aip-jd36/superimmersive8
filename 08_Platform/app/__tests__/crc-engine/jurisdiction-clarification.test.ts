@@ -409,6 +409,95 @@ describe('copyright ownership UAT regression: "Do I own the copyright?" now beco
   })
 })
 
+// ── Multi-Jurisdiction-Topic Correction (2026-09-21) ──
+//
+// Generic regression matrix for the corrected `goalHasUnresolvedJurisdictionValue`
+// invariant: a goal's jurisdiction concern is resolved once the user has given
+// ANY definitive jurisdiction answer, regardless of whether that specific value
+// matches every (or even any) relevant claim's own required value. Deliberately
+// uses two entirely fictional jurisdiction values (never 'United States' or
+// 'Taiwan') and a synthetic two-claim topic, so this proves the fix is generic
+// -- correct for an arbitrary future N-claim, N-jurisdiction topic -- not
+// specific to the real Copyright/Taiwan claim pair that originally exposed the
+// bug (that real-fixture proof lives in the "copyright ownership UAT
+// regression" block above, unchanged by this addition).
+describe('Multi-Jurisdiction-Topic Correction: generic N-jurisdiction regression matrix', () => {
+  const multiJurisdictionGoal: UserGoal = {
+    goal_id: 'g-mj', state: 'confirmed', raw_text: 'placeholder', category: 'copyright_ownership',
+    scope: 'informational', superseded_by: null, source_turn: 1, source_statement: 'placeholder',
+  }
+  const claimA = jurisdictionGatedClaim({ claim_id: 'C-MJ-A', topic: 'copyright_ownership', jurisdiction: 'Ruritania', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'Ruritania' }] })
+  const claimB = jurisdictionGatedClaim({ claim_id: 'C-MJ-B', topic: 'copyright_ownership', jurisdiction: 'Wakanda', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'Wakanda' }] })
+  const confirmedFacts = (value: string) => ({
+    intended_use: { attestation: { state: 'unknown' as const }, source_turn: 0, source_statement: '' },
+    workflow_role: { attestation: { state: 'unknown' as const }, source_turn: 0, source_statement: '' },
+    jurisdiction: { attestation: { state: 'confirmed' as const, value }, source_turn: 2, source_statement: value },
+    human_contribution_description: { attestation: { state: 'unknown' as const }, source_turn: 0, source_statement: '' },
+  })
+
+  test('1. topic has claims for jurisdiction A + B; effective jurisdiction = A -> no spurious re-ask', () => {
+    const su = baseSU({ user_goals: [multiJurisdictionGoal], project_facts: confirmedFacts('Ruritania') })
+    const result = evaluateJurisdictionClarificationEligibility(su, [claimA, claimB], false)
+    expect(result.jurisdiction_unresolved).toBe(false)
+    expect(result.eligible).toBe(false)
+  })
+
+  test('2. topic has claims for jurisdiction A + B; effective jurisdiction = B -> no spurious re-ask (symmetric)', () => {
+    const su = baseSU({ user_goals: [multiJurisdictionGoal], project_facts: confirmedFacts('Wakanda') })
+    const result = evaluateJurisdictionClarificationEligibility(su, [claimA, claimB], false)
+    expect(result.jurisdiction_unresolved).toBe(false)
+    expect(result.eligible).toBe(false)
+  })
+
+  test('3. no effective jurisdiction at all; topic has multiple jurisdiction-specific claims -> legitimate clarification is preserved', () => {
+    const su = baseSU({ user_goals: [multiJurisdictionGoal] })
+    const result = evaluateJurisdictionClarificationEligibility(su, [claimA, claimB], false)
+    expect(result.needs_jurisdiction).toBe(true)
+    expect(result.jurisdiction_unresolved).toBe(true)
+    expect(result.eligible).toBe(true)
+  })
+
+  test('4. jurisdiction corrected A -> B: current (B) state governs; stale A does not linger as ambiguity', () => {
+    const su = baseSU({
+      user_goals: [multiJurisdictionGoal],
+      assessment_jurisdiction_mentions: [
+        { mention_id: 'ajm-1', value: 'Ruritania', confidence: 'confirmed', source_turn: 2, source_statement: 'Ruritania', superseded_by: 'ajm-2' },
+        { mention_id: 'ajm-2', value: 'Wakanda', confidence: 'confirmed', source_turn: 4, source_statement: 'actually Wakanda', superseded_by: null },
+      ],
+    })
+    const result = evaluateJurisdictionClarificationEligibility(su, [claimA, claimB], false)
+    expect(result.jurisdiction_unresolved).toBe(false)
+    expect(result.eligible).toBe(false)
+  })
+
+  test('5. jurisdiction corrected B -> A: symmetric result', () => {
+    const su = baseSU({
+      user_goals: [multiJurisdictionGoal],
+      assessment_jurisdiction_mentions: [
+        { mention_id: 'ajm-1', value: 'Wakanda', confidence: 'confirmed', source_turn: 2, source_statement: 'Wakanda', superseded_by: 'ajm-2' },
+        { mention_id: 'ajm-2', value: 'Ruritania', confidence: 'confirmed', source_turn: 4, source_statement: 'actually Ruritania', superseded_by: null },
+      ],
+    })
+    const result = evaluateJurisdictionClarificationEligibility(su, [claimA, claimB], false)
+    expect(result.jurisdiction_unresolved).toBe(false)
+    expect(result.eligible).toBe(false)
+  })
+
+  test('6. confirmed jurisdiction has no applicable claim for this topic at all -> resolved, not endless re-ask (Case G: confirmed jurisdiction exists != a governed claim must apply)', () => {
+    const su = baseSU({ user_goals: [multiJurisdictionGoal], project_facts: confirmedFacts('Freedonia') })
+    const result = evaluateJurisdictionClarificationEligibility(su, [claimA, claimB], false)
+    expect(result.jurisdiction_unresolved).toBe(false)
+    expect(result.eligible).toBe(false)
+  })
+
+  test('a topic with only ONE jurisdiction-specific claim still behaves correctly (N=1 case, not just N=2)', () => {
+    const su = baseSU({ user_goals: [multiJurisdictionGoal], project_facts: confirmedFacts('Ruritania') })
+    const result = evaluateJurisdictionClarificationEligibility(su, [claimA], false)
+    expect(result.jurisdiction_unresolved).toBe(false)
+    expect(result.eligible).toBe(false)
+  })
+})
+
 // ── Other-goal regression (Interview Engine Diagnostic Slice 1, 2026-08-19) ──
 
 describe('other-goal regression: unrelated categories, stock claims, and provider mentions are unaffected', () => {

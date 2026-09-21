@@ -85,7 +85,7 @@
 import type { GoalCategory, Phase, StructuredUnderstanding } from '@/types/interview-engine'
 import type { CandidateQuestionProposal } from '@/lib/interview-engine/candidate-question'
 import type { TopicClaim, TopicRelationship } from '@/lib/retrieval-engine/types'
-import { canonicalizeJurisdictionValue, type AssessmentJurisdictionFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
+import type { AssessmentJurisdictionFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
 import { deriveAssessmentJurisdictionFacts } from './assessment-jurisdiction-scope'
 
 /**
@@ -171,20 +171,6 @@ function goalNeedsJurisdiction(category: GoalCategory, topicClaims: TopicClaim[]
   )
 }
 
-/**
- * The specific jurisdiction value(s) a relevant claim's own governed
- * applicability requires (CRC Assessment-Jurisdiction Mention Model,
- * 2026-08-28) -- `not_equals` requirements are excluded here: this function
- * answers "what value would make this claim's gate MET," which only an
- * `equals` requirement expresses directly; a `not_equals` requirement is
- * satisfied by an explicit exclusion of ITS OWN value, a materially
- * different acquisition need this module does not attempt to drive
- * (no real governed claim uses `not_equals` for jurisdiction today).
- */
-function jurisdictionValuesRequiredBy(claim: TopicClaim): string[] {
-  return claim.applicability_requirements.filter((r) => r.fact === 'jurisdiction' && r.operator === 'equals').map((r) => r.value)
-}
-
 function claimsRelevantToGoal(category: GoalCategory, topicClaims: TopicClaim[], relationships: TopicRelationship[]): TopicClaim[] {
   const direct = topicClaims.filter((c) => c.topic === category && claimNeedsJurisdiction(c))
   const viaRelationship = eligibleRelationshipsFor(category, relationships).flatMap((r) =>
@@ -195,15 +181,71 @@ function claimsRelevantToGoal(category: GoalCategory, topicClaims: TopicClaim[],
 
 /**
  * Whether an active goal's category currently has a relevant, jurisdiction-
+ * gated claim AND the user has not yet given any definitive assessment-
+ * jurisdiction answer at all (Multi-Jurisdiction-Topic Correction,
+ * 2026-09-21, generic fix -- see this module's own top-of-file addendum).
+ *
+ * `[CORRECTED 2026-09-21]` The prior claim-value-aware design (comment
+ * preserved below for the historical record it documents) computed
+ * "unresolved" per RELEVANT CLAIM's own specific required jurisdiction
+ * value: a goal was reported unresolved if ANY relevant claim's value
+ * (e.g. `'Taiwan'`) had not itself been individually included/excluded --
+ * even when the user had already given a definitive, different jurisdiction
+ * answer (e.g. `'United States'`) that fully resolves every OTHER relevant
+ * claim under the same topic. That conflated two genuinely different
+ * questions this module's own header (and Retrieval's own single-owner
+ * applicability boundary) already keeps separate elsewhere: "has the user
+ * told CRC what jurisdiction to consider" (this module's own concern) versus
+ * "does a specific governed claim's applicability actually match that
+ * value" (Retrieval's concern, never this module's). The bug was never
+ * exercised by any real governed data until the Taiwan AI-Assisted
+ * Copyrightability claim became the first claim in this corpus to place a
+ * second, different jurisdiction value under an already-populated topic
+ * (`copyrightability`, alongside the pre-existing United-States-scoped
+ * claims) -- confirmed by direct search: no test anywhere in this codebase
+ * exercised `goalHasUnresolvedJurisdictionValue`'s per-claim-value branch
+ * before this correction, and the function was not otherwise called or
+ * exported anywhere outside this file.
+ *
+ * Corrected rule: once the user has given ANY definitive jurisdiction
+ * answer (included OR excluded, any value) for a goal that has at least one
+ * relevant jurisdiction-gated claim, that goal's jurisdiction concern is
+ * resolved -- full stop, regardless of whether the specific value given
+ * happens to match any particular relevant claim's own required value.
+ * A confirmed jurisdiction with zero matching claims under this topic (e.g.
+ * the user confirms a jurisdiction this corpus has no governed knowledge
+ * for at all) is not, and must never become, a reason to keep re-asking:
+ * "the user answered the jurisdiction question" and "a specific claim's
+ * applicability_requirements gate is met" are different questions, and only
+ * Retrieval's own `isApplicable()` -- never this module -- decides the
+ * second one. This is what makes the invariant genuinely generic: it holds
+ * unchanged for a topic with one claim, two claims for two different
+ * jurisdictions, or an arbitrary future N-claim, N-jurisdiction topic,
+ * without any claim-count- or jurisdiction-value-specific code anywhere in
+ * this file.
+ *
+ * PRESERVED FOR THE HISTORICAL RECORD, describing the now-corrected design
+ * this replaces -- never accurate production behavior after this date:
+ * "Whether an active goal's category currently has a relevant, jurisdiction-
  * gated claim whose specific required value has not yet been addressed
  * (neither included nor explicitly excluded) in the current assessment-
  * jurisdiction scope. Deliberately claim-value-aware, not merely "is
  * jurisdiction the concept resolved at all" -- so a session that already
  * confirmed "United States" (satisfying every Copyright claim) still
  * correctly reports unresolved need for a DIFFERENT, still-relevant
- * "New York"-gated claim, and vice versa. `facts.excluded` counts as
- * addressed, not unresolved -- an explicitly excluded value is not worth
- * re-asking about.
+ * "New York"-gated claim, and vice versa." That aspiration was never
+ * validated against a real multi-jurisdiction-topic governed claim before
+ * this correction, and Case G of the Multi-Jurisdiction-Topic Correction's
+ * own diagnostic ("a confirmed jurisdiction with no applicable claim must
+ * not itself force continued clarification") is incompatible with it: both
+ * cannot be true simultaneously without also tracking, per goal, whether a
+ * given confirmed value was ever intended to satisfy every relevant claim
+ * or merely one of them -- a distinction no governed data in this corpus
+ * has ever required, and one this correction does not invent speculatively.
+ * If a genuine future need for per-claim-value-specific re-asking (e.g. a
+ * federal answer that legitimately leaves a state-specific claim open)
+ * arises from real governed data, it requires its own explicit governance-
+ * reviewed design, not a silent revival of this exact removed shape.
  */
 function goalHasUnresolvedJurisdictionValue(
   category: GoalCategory,
@@ -212,8 +254,9 @@ function goalHasUnresolvedJurisdictionValue(
   facts: AssessmentJurisdictionFacts,
 ): boolean {
   const relevantClaims = claimsRelevantToGoal(category, topicClaims, relationships)
-  const alreadyAddressed = new Set([...facts.included, ...facts.excluded].map((v) => canonicalizeJurisdictionValue(v)))
-  return relevantClaims.some((c) => jurisdictionValuesRequiredBy(c).some((v) => !alreadyAddressed.has(canonicalizeJurisdictionValue(v))))
+  if (relevantClaims.length === 0) return false
+  const anyJurisdictionAnswerGiven = facts.included.length > 0 || facts.excluded.length > 0
+  return !anyJurisdictionAnswerGiven
 }
 
 /**
