@@ -206,14 +206,27 @@ describe('Wave 1 real claims -- governance state as of 2026-08-19 (all four COPY
    * (CPR_028), with zero unresolved_project_dependencies (D0) -- its own
    * reachability/applicability/BI behavior is proven separately by a
    * dedicated third-party-copyright test file.
+   *
+   * Updated again 2026-09-21 (Taiwan AI-Assisted Copyrightability CRC
+   * Production Representation milestone): CLAIM-COPYRIGHT-TW-AI-ASSISTED-
+   * OUTPUT-001-v1 gained its first real runtime fixture entry -- the first
+   * `jurisdiction: 'Taiwan'` entry under the existing `copyrightability`
+   * topic (reused verbatim from CLAIM-COPY-001/002/003-v1, no new
+   * GoalCategory/KnowledgeTopic). Count grows from thirty-five to
+   * thirty-six. This one IS `crc_eligible: 'Yes'` (CPR_029), with
+   * `unresolved_project_dependencies: ['human_contribution_description']`
+   * (D1, reused from CLAIM-COPY-001/002/003-v1, not fabricated) -- its own
+   * reachability/applicability/BI behavior is proven separately by a
+   * dedicated Taiwan copyrightability test file.
    */
-  test('all four Wave 1 claims plus the seven stock-media claims (five original + two -v2 correction successors) plus A-3 (the first published Music-domain claim) plus the first real tool-scoped claim (Synthesia) plus the second, third, and fourth real provider-scoped claims since A-3 (Storyblocks, Pond5, Adobe Stock) plus the fifth and sixth, the first two-claim tool_scope-narrowed publication (Kling baseline + member, CPR_015, 2026-09-02, superseding CPR_013/CPR_014\'s prior WITHHOLD after Matrix retirement) plus the seventh (Runway, CPR_017, 2026-09-03, superseding CPR_016\'s prior WITHHOLD after Matrix retirement) plus the eighth through eleventh (the four Pika commercial-use claims -- baseline plus Standard/Pro/Fancy -- CPR_019, 2026-09-06, superseding CPR_018\'s prior WITHHOLD after Matrix retirement) plus the twelfth (Stability AI, CPR_020, 2026-09-09, initial sequencing-only WITHHOLD superseded same-day by that file\'s own addendum reconsideration) plus the thirteenth through seventeenth (five Artlist Remaining Claims -- Social vs Pro, Client License Retention, Standalone Exploitation, Pro Royalties, Enterprise Threshold -- CPR_021, 2026-09-10; the sixth reviewed sibling, AI Training Exclusion, was explicitly WITHHELD and has no fixture entry) plus the eighteenth through twentieth (Envato Sync, Envato Cancellation, Epidemic Tier Advertising [corrected wording] -- CPR_022, 2026-09-10, same day) plus the twenty-first (CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1, the first likeness-topic / jurisdiction-scoped non-provider claim in this fixture, activated via CPR_025, Generic Non-Provider TopicClaim Runtime Activation milestone, 2026-09-10 -- the sibling CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1 remains withheld under CPR_008 and has no fixture entry, unaffected) plus the twenty-second (CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1, still crc_eligible: Pending -- present in the fixture but structurally CRC-dormant, see this file\'s own header update above) plus the twenty-third (CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1, the first trademark-topic claim, activated via the Trademark CRC Production Representation milestone, 2026-09-16, crc_eligible: Yes) plus the twenty-fourth (CLAIM-COPYRIGHT-US-THIRD-PARTY-OUTPUT-001-v1, the first third_party_copyright-topic claim, activated via the Third-Party Copyright CRC Production Representation milestone, 2026-09-19, crc_eligible: Yes, zero unresolved_project_dependencies) are present in the fixture', () => {
+  test('all four Wave 1 claims plus the seven stock-media claims (five original + two -v2 correction successors) plus A-3 (the first published Music-domain claim) plus the first real tool-scoped claim (Synthesia) plus the second, third, and fourth real provider-scoped claims since A-3 (Storyblocks, Pond5, Adobe Stock) plus the fifth and sixth, the first two-claim tool_scope-narrowed publication (Kling baseline + member, CPR_015, 2026-09-02, superseding CPR_013/CPR_014\'s prior WITHHOLD after Matrix retirement) plus the seventh (Runway, CPR_017, 2026-09-03, superseding CPR_016\'s prior WITHHOLD after Matrix retirement) plus the eighth through eleventh (the four Pika commercial-use claims -- baseline plus Standard/Pro/Fancy -- CPR_019, 2026-09-06, superseding CPR_018\'s prior WITHHOLD after Matrix retirement) plus the twelfth (Stability AI, CPR_020, 2026-09-09, initial sequencing-only WITHHOLD superseded same-day by that file\'s own addendum reconsideration) plus the thirteenth through seventeenth (five Artlist Remaining Claims -- Social vs Pro, Client License Retention, Standalone Exploitation, Pro Royalties, Enterprise Threshold -- CPR_021, 2026-09-10; the sixth reviewed sibling, AI Training Exclusion, was explicitly WITHHELD and has no fixture entry) plus the eighteenth through twentieth (Envato Sync, Envato Cancellation, Epidemic Tier Advertising [corrected wording] -- CPR_022, 2026-09-10, same day) plus the twenty-first (CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1, the first likeness-topic / jurisdiction-scoped non-provider claim in this fixture, activated via CPR_025, Generic Non-Provider TopicClaim Runtime Activation milestone, 2026-09-10 -- the sibling CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1 remains withheld under CPR_008 and has no fixture entry, unaffected) plus the twenty-second (CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1, still crc_eligible: Pending -- present in the fixture but structurally CRC-dormant, see this file\'s own header update above) plus the twenty-third (CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1, the first trademark-topic claim, activated via the Trademark CRC Production Representation milestone, 2026-09-16, crc_eligible: Yes) plus the twenty-fourth (CLAIM-COPYRIGHT-US-THIRD-PARTY-OUTPUT-001-v1, the first third_party_copyright-topic claim, activated via the Third-Party Copyright CRC Production Representation milestone, 2026-09-19, crc_eligible: Yes, zero unresolved_project_dependencies) plus the twenty-fifth (CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1, the first Taiwan-jurisdiction claim under the existing copyrightability topic, activated via the Taiwan AI-Assisted Copyrightability CRC Production Representation milestone, 2026-09-21, crc_eligible: Yes, dependency human_contribution_description reused from CLAIM-COPY-001/002/003-v1) are present in the fixture', () => {
     expect(TOPIC_CLAIMS_FIXTURE.map((c) => c.claim_id).sort()).toEqual([
       'CLAIM-ADOBESTOCK-AI-STUDIO-COMMERCIALLY-SAFE-LABEL-001-v1',
       'CLAIM-COPY-001-v1',
       'CLAIM-COPY-002-v1',
       'CLAIM-COPY-003-v1',
       'CLAIM-COPY-004-v1',
+      'CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1',
       'CLAIM-COPYRIGHT-US-THIRD-PARTY-OUTPUT-001-v1',
       'CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1',
       'CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1',
@@ -311,7 +324,12 @@ describe('CLAIM-COPY-001/002/003 -- reachable through exact Topic Retrieval for 
     expect(diagnostic).toBeDefined()
     // unmet_applicability aggregates one 'unresolved' jurisdiction entry per
     // claim (COPY-001/002/003) -- order-independent, since fixture array
-    // order is not part of this test's own contract.
+    // order is not part of this test's own contract. Also aggregates
+    // CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1's own, separate
+    // 'jurisdiction equals Taiwan' requirement (also unresolved when no
+    // jurisdiction fact exists at all) -- checked independently below, since
+    // its own required value (Taiwan) differs from COPY-001/002/003's
+    // (United States) and doesn't fit the shared object-shape map above.
     expect(diagnostic!.unmet_applicability).toEqual(
       expect.arrayContaining(
         ['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1'].map((claim_id) => ({
@@ -321,7 +339,12 @@ describe('CLAIM-COPY-001/002/003 -- reachable through exact Topic Retrieval for 
         })),
       ),
     )
-    expect(diagnostic!.unmet_applicability).toHaveLength(3)
+    expect(diagnostic!.unmet_applicability).toContainEqual({
+      claim_id: 'CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1',
+      requirement: { fact: 'jurisdiction', operator: 'equals', value: 'Taiwan' },
+      status: 'unresolved',
+    })
+    expect(diagnostic!.unmet_applicability).toHaveLength(4)
   })
 
   test("item F, now proven positively: relevant_applicability_unresolved (Case 3B) correctly fires for all three claims -- each carries non-empty unresolved_project_dependencies (['human_contribution_description']), so the combined statement renders under the unresolved-applicability template, never directly_relevant", () => {
