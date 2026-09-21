@@ -43,6 +43,7 @@ import { CrcLocaleProvider, useCrcLocale } from '@/components/crc/CrcLocaleProvi
 import { CrcLanguageControl } from '@/components/crc/CrcLanguageControl'
 import { CrcIdentityMark } from '@/components/crc/CrcIdentityMark'
 import { CrcZhLocaleNotice } from '@/components/crc/CrcZhLocaleNotice'
+import { shouldSubmitOnEnter } from '@/components/crc/ime-safe-enter'
 import {
   formatWaitIndicatorLocalized,
   getRateLimitMessageLocalized,
@@ -142,6 +143,13 @@ function CrcPageContent() {
   const gateShownLoggedRef = useRef(false)
   const pendingRequestRef = useRef<PendingRequestBody | null>(null)
   const scrollAnchorRef = useRef<HTMLDivElement | null>(null)
+  // CRC-UI-2 (2026-09-21): IME composition state for each Enter-to-submit
+  // textarea, tracked separately per field (not shared) -- see
+  // ime-safe-enter.ts's own header for the full defect/detection
+  // rationale. A ref, not state: must be readable synchronously inside the
+  // keydown handler without waiting for a re-render.
+  const isComposingReplyRef = useRef(false)
+  const isComposingEmailRef = useRef(false)
 
   /** Applies a `status: 'complete'` response's shared fields to state -- used by every branch that receives one (initial load, message/decline turns, results-email actions). */
   function applyCompleteResponse(data: Extract<TurnResponseBody, { status: 'complete' }> | Extract<SessionStatusResponseBody, { status: 'complete' }>) {
@@ -639,11 +647,16 @@ function CrcPageContent() {
                           onChange={(e) => setResultsEmailInput(e.target.value)}
                           placeholder={resultsGateCopy.fieldLabel}
                           disabled={resultsEmailSubmitting}
+                          onCompositionStart={() => {
+                            isComposingEmailRef.current = true
+                          }}
+                          onCompositionEnd={() => {
+                            isComposingEmailRef.current = false
+                          }}
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                              e.preventDefault()
-                              handleResultsEmailSubmit()
-                            }
+                            if (!shouldSubmitOnEnter(e, isComposingEmailRef.current)) return
+                            e.preventDefault()
+                            handleResultsEmailSubmit()
                           }}
                         />
                         {resultsEmailError && <p className="text-sm text-red-600">{resultsEmailError}</p>}
@@ -742,11 +755,16 @@ function CrcPageContent() {
                         onChange={(e) => setInputText(e.target.value)}
                         placeholder={copy.typeYourAnswer}
                         disabled={phase === 'sending'}
+                        onCompositionStart={() => {
+                          isComposingReplyRef.current = true
+                        }}
+                        onCompositionEnd={() => {
+                          isComposingReplyRef.current = false
+                        }}
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault()
-                            handleSend()
-                          }
+                          if (!shouldSubmitOnEnter(e, isComposingReplyRef.current)) return
+                          e.preventDefault()
+                          handleSend()
                         }}
                       />
                       <div className="flex flex-wrap items-center justify-between gap-2">
