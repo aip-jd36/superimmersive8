@@ -1692,4 +1692,65 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     last_verified: '2026-09-19',
     superseded_by: null,
   },
+  {
+    // Taiwan AI-Assisted Copyrightability -- Production Representation
+    // (2026-09-21). Adopted (GOVERNED-CLAIMS.md), Formal Governance Review
+    // FGR_023, CRC Publication Review CPR_029. First Taiwan-jurisdiction
+    // Living Knowledge claim in this corpus. Reuses the existing
+    // `copyrightability` topic verbatim -- independently re-tested at
+    // FGR_023 §2 as the same underlying human-creative-contribution
+    // question as CLAIM-COPY-001/002/003-v1, not CLAIM-COPY-004-v1's
+    // distinct ToS-vs-ownership question. No new GoalCategory, no new
+    // KnowledgeTopic, no TopicRelationship -- explicit-goal-reachable via
+    // the existing, unmodified exact-topic path, identical in shape to the
+    // U.S. claims. `crc_publication_scope`/`crc_candidate_statement` are
+    // copied from GOVERNED-CLAIMS.md's own `CRC Publication Scope:`/`CRC
+    // Candidate Statement:` fields, not paraphrased or strengthened.
+    claim_id: 'CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1',
+    topic: 'copyrightability',
+    claim_character: 'established',
+    jurisdiction: 'Taiwan',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      "CRC may state that under Taiwan Copyright Act Article 3 (definitions of \"work\"/\"author\") and Article 10 (copyright vests in the author upon completion of a work), and per the Taiwan Intellectual Property Office's official interpretation (TIPO letter 電子郵件1140522c, 2025-05-22), where a human exercises genuine creative input in producing AI-assisted output -- using AI merely as an assisting tool -- the resulting work may be eligible for copyright protection; where the output is generated entirely and independently by the AI's own computational function with no human intellectual/creative input, it is not eligible for copyright protection. CRC may state that ownership of a protected work's economic rights is further governed separately by Copyright Act Articles 11 (employment relationships) and 12 (commissioned relationships), and does not automatically follow from the copyrightability determination alone. CRC must not state that a specific project's output is (or is not) protected, that a specific user's described contribution is legally sufficient, that the user is the author, that the user/an employer/a client/a commissioning party owns the economic rights in any specific work, that infringement occurred or did not occur, that any third-party rights are cleared, that Taiwan jurisdiction attaches to a specific project for any reason including the user merely selecting it as the assessment jurisdiction, or that the project is otherwise commercially cleared.",
+    crc_candidate_statement:
+      "Under Taiwan copyright law, AI-assisted output may be eligible for copyright protection where a human exercised genuine creative input, using AI merely as a tool; output generated entirely by AI with no human creative input is not eligible. Ownership of a protected work is a separate question governed by Taiwan Copyright Act Articles 11 and 12.",
+    // Mirrors CLAIM-COPY-001-v1's and CLAIM-COPYRIGHT-US-THIRD-PARTY-OUTPUT-
+    // 001-v1's own precedent exactly: AssessmentJurisdictionMention
+    // represents only that the user asked CRC to consider Taiwan law --
+    // never proof that Taiwan copyright law actually attaches to a
+    // specific project (no domicile, distribution, or server-location
+    // requirement is stated or implied by TIPO or the Act). Explicit-goal-
+    // reachable only, so no Article-50-style unrestricted-reach exposure
+    // exists to solve.
+    applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'Taiwan' }],
+    // D1, independently re-derived at FGR_023 §5 after that review
+    // corrected a factual error in its own originating brief (which
+    // incorrectly asserted the existing U.S. copyrightability claims use
+    // zero dependencies -- they do not; CLAIM-COPY-001/002/003-v1 above all
+    // carry this same dependency). This dependency's actual runtime
+    // function (traced against build-bounded-interpretation.ts's
+    // shouldIncludeHumanContributionSentence()/hasGovernedProjectDependencies())
+    // is a bounded, non-interpretive echo-only augmentation (H5) -- gated
+    // by category (copyrightability/copyright_ownership), never by claim ID
+    // or jurisdiction -- that never resolves copyrightability, never
+    // removes the dependency from the array, and never permits the claim
+    // to reach directly_relevant. Listing it activates the existing,
+    // unmodified, already-safe mechanism automatically with zero code
+    // change, and avoids an unexplained asymmetry between two claims under
+    // the identical copyrightability category answering structurally the
+    // same underlying human-creative-contribution question.
+    unresolved_project_dependencies: ['human_contribution_description'],
+    // Statutory, tool-independent, and not a third-party asset-provider-
+    // scoped claim.
+    provider_scope: null,
+    tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
+    // geographic_relevance_scope deliberately omitted (opt-out by this
+    // field's own inverted default polarity) -- no discovered relevance is
+    // activated by this milestone; this claim is explicit-goal-only.
+    last_verified: '2026-09-21',
+    superseded_by: null,
+  },
 ]

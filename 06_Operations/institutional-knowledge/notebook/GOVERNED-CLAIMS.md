@@ -4721,3 +4721,147 @@ Full candidate governance package: `US-COPYRIGHT-106-501-THIRD-PARTY-OUTPUT-FGR-
 Full Formal Governance Review artifact: `governance-reviews/FGR_022_CAND-COPYRIGHT-US-THIRD-PARTY-OUTPUT-001_2026-09-18.md`
 Full CRC Publication Review artifact: `governance-reviews/CPR_028_CLAIM-COPYRIGHT-US-THIRD-PARTY-OUTPUT-001-v1_2026-09-19.md`
 Full evidence manifest: `evidence-captures/us-copyright-third-party/MANIFEST.md`
+
+### CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1
+Domain: Taiwan Copyright Law — 著作權法 (Copyright Act) Arts. 3/10/11/12, AI-Assisted Output Copyrightability
+Topic: copyrightability
+Subtopic: human-creative-contribution-taiwan
+
+GOVERNANCE TREATMENT (2026-09-21, PM adoption decision, FGR #23): First Taiwan-jurisdiction Living Knowledge claim adopted in this corpus, arising from a jurisdiction-first discovery pass, a primary-source governance deep dive, a primary evidence capture gate, and FGR_023 (all 2026-09-21 or the days immediately preceding). Reuses the existing `copyrightability` `GoalCategory`/`KnowledgeTopic` verbatim — independently re-tested at FGR_023 §2 against this candidate's own user question (does AI-assisted output qualify for copyright protection under Taiwan law) and found to be the same underlying question as `CLAIM-COPY-001/002/003-v1` (whether AI-assisted output can be protected at all, keyed to human creative contribution), not `CLAIM-COPY-004-v1`'s distinct ToS-vs-ownership question. No new `GoalCategory`, no new `KnowledgeTopic`, no `TopicRelationship` — explicit-goal-reachable via the existing, unmodified exact-topic path, identical in shape to the U.S. claims. Durable claim identifier uses the current corpus-wide descriptive-ID convention (`CLAIM-<DOMAIN>-<JURISDICTION>-<CONCEPT>-NNN-v1`), not the legacy `CLAIM-COPY-NNN-v1` sequence reserved for the pre-existing U.S. ownership/copyrightability family — this is a jurisdiction-specific sibling, not another entry in that family.
+
+Claim character: established
+Jurisdiction: Taiwan
+Context: AI-assisted or AI-generated commercial video/image output evaluated under Taiwan copyright law
+
+Claim proposition: >
+  Under Taiwan Copyright Act Article 3 (definitions of "work"/"author") and
+  Article 10 (copyright vests in the author upon completion of a work), and
+  per the Taiwan Intellectual Property Office's official interpretation
+  (TIPO letter 電子郵件1140522c, 2025-05-22), where a human exercises
+  genuine creative input in producing AI-assisted output -- using AI merely
+  as an assisting tool -- the resulting work may be eligible for copyright
+  protection; where the output is generated entirely and independently by
+  the AI's own computational function with no human intellectual/creative
+  input, it is not eligible for copyright protection. Ownership of a
+  protected work's economic rights is further governed separately by
+  Copyright Act Articles 11 (employment relationships) and 12 (commissioned
+  relationships), and does not automatically follow from the
+  copyrightability determination alone. Whether copyright protection or
+  infringement exists in a specific, disputed case is reserved to judicial
+  determination on the facts of that case.
+
+Source references:
+  - primary (Class A, official TIPO interpretation, raw HTML `curl` capture, SHA-256-verified): TIPO letter 電子郵件1140522c (2025-05-22) — `evidence-captures/taiwan-copyrightability/tipo-1140522c_20260921T031630Z.html`.
+  - primary (Class A, canonical Ministry of Justice statute database, raw HTML `curl` capture, SHA-256-verified, cross-checked identical against the letter's own embedded quotation of Arts. 3/10/11/12): Taiwan Copyright Act (著作權法) — `evidence-captures/taiwan-copyrightability/moj-copyright-act-J0070017_20260921T031630Z.html`.
+Source authority/type: Primary legal/official authority (official TIPO interpretive letter + enacted Taiwan statute text) — Class A
+Source fact: >
+  Independently re-verified at both FGR_023 and this Adoption review (SHA-256
+  recomputed and matched against the evidence manifest both times; the raw
+  HTML independently spot-checked to contain the quoted Chinese text as
+  genuine page content, not a manifest fabrication). TIPO letter 1140522c,
+  para 1: per Copyright Act Art. 3(1)(2) and Art. 10, "author" (著作人) means
+  the person who creates a work, and a work must be a natural person's
+  creation to be protected; whether AI-generated content is protected
+  depends on whether there was actual human creative input (人類實際的創意
+  投入) in the creative process. Para 2(1): where AI is used merely as an
+  assisting tool (輔助工具) and actual human creative input exists, the
+  resulting work may still be protected; ownership belongs, in principle, to
+  the person who actually created it (實際創作之人) -- except where Art. 11
+  (employment) or Art. 12 (commission) applies. Para 2(2): where the
+  creative process is completed entirely and independently by AI's own
+  computational function (AI的演算功能獨立進行完成), with no human
+  intellectual/creative input, the AI-generated content cannot be protected.
+  Para 4: because copyright is a private right, whether a specific
+  AI-generated work is protected, or infringes another's copyright, if
+  disputed, must still be determined by the judicial authorities (司法機關)
+  based on the specific facts of that individual case.
+
+SI8 interpretation: >
+  A commercial AI-assisted video/image project evaluated under Taiwan law
+  should not be represented to a client, buyer, or platform as
+  copyright-protected, or as definitively unprotected, without confirming
+  the actual nature and extent of human creative contribution in its
+  creation -- a fact-specific determination TIPO's general interpretation
+  does not resolve and CRC cannot establish from conversation alone.
+  Ownership of a protected work is a separate question from copyrightability
+  and depends further on Articles 11/12 and any governing agreement.
+
+Applicability requirements:
+  - fact: jurisdiction
+    operator: equals
+    value: Taiwan
+  <!-- Mirrors CLAIM-COPY-001-v1's and CLAIM-COPYRIGHT-US-THIRD-PARTY-OUTPUT-001-v1's own precedent exactly: AssessmentJurisdictionMention represents only that the user asked CRC to consider Taiwan law -- never proof that Taiwan copyright law actually attaches to a specific project (no domicile, distribution, or server-location requirement is stated or implied by TIPO or the Act). Explicit-goal-reachable only, so no Article-50-style unrestricted-reach exposure exists to solve. -->
+Unresolved project dependencies: [human_contribution_description]   <!-- D1, independently re-derived at FGR_023 §5 after that review corrected a factual error in its own originating brief (which incorrectly asserted the existing U.S. copyrightability claims use zero dependencies -- they do not; CLAIM-COPY-001/002/003-v1 all carry this same dependency, independently re-confirmed a third time at this Adoption review via direct grep against topic-claims-fixture.ts). Re-derived on Taiwan's own evidentiary merits, not inherited: this dependency's actual runtime function (independently traced at FGR_023 §5/§6 and re-verified at this Adoption review directly against build-bounded-interpretation.ts's shouldIncludeHumanContributionSentence()/hasGovernedProjectDependencies()) is a bounded, non-interpretive echo-only augmentation (H5) -- gated by category (copyrightability/copyright_ownership), never by claim ID or jurisdiction -- that never resolves copyrightability, never removes the dependency from the array, and never permits the claim to reach directly_relevant; unresolved_project_dependencies is a permanent, claim-level classification in current production source, not a dynamically resolvable runtime state, confirmed true of every other dependency in this corpus (Trademark per CPR_027; the superseded Third-Party Copyright composite per FGR_022 §5). Listing this dependency activates the existing, unmodified, already-safe mechanism automatically with zero code change, and avoids an unexplained asymmetry between two claims under the identical copyrightability category answering structurally the same underlying human-creative-contribution question. -->
+Tool scope: null                 <!-- tool-independent, general statutory knowledge --> Provider scope (asset-provider sense): null.
+Prohibited conclusions: >
+  Does not establish that a specific project's output is (or is not)
+  protected by copyright under Taiwan law. Does not establish that a
+  specific user's described contribution is legally sufficient to satisfy
+  the human-creative-contribution standard. Does not establish that the
+  user is the author. Does not establish that the user, an employer, a
+  client, or a commissioning party owns the economic rights in any specific
+  work -- ownership allocation under Articles 11/12 in a specific case is
+  not resolved by this claim. Does not establish that infringement occurred
+  or did not occur, or that any third-party rights are cleared. Does not
+  establish that Taiwan jurisdiction attaches to a specific project for any
+  reason, including the user merely selecting, stating, or mentioning
+  Taiwan as the assessment jurisdiction. Does not constitute legal advice,
+  a compliance determination, or a certification of commercial readiness --
+  a human-reviewed Commercial Assurance Assessment remains the
+  higher-assurance path for the project-specific facts this claim leaves
+  open. Training-data reproduction and third-party-infringement material
+  discussed in the same TIPO letter (para 3) is explicitly excluded from
+  this claim -- recorded only as a future Taiwan third-party-copyright
+  governance candidate, not developed here.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-09-21
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  APPROVED FOR CRC PUBLICATION (2026-09-21, CRC Approver: JD (PM) -- see
+  CRC Publication Review #29, CPR_029,
+  governance-reviews/CPR_029_CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1_2026-09-21.md).
+  CRC may state that under Taiwan Copyright Act Article 3 (definitions of
+  "work"/"author") and Article 10 (copyright vests in the author upon
+  completion of a work), and per the Taiwan Intellectual Property Office's
+  official interpretation (TIPO letter 電子郵件1140522c, 2025-05-22), where a
+  human exercises genuine creative input in producing AI-assisted output --
+  using AI merely as an assisting tool -- the resulting work may be
+  eligible for copyright protection; where the output is generated
+  entirely and independently by the AI's own computational function with
+  no human intellectual/creative input, it is not eligible for copyright
+  protection. CRC may state that ownership of a protected work's economic
+  rights is further governed separately by Copyright Act Articles 11
+  (employment relationships) and 12 (commissioned relationships), and does
+  not automatically follow from the copyrightability determination alone.
+  CRC must not state that a specific project's output is (or is not)
+  protected by copyright under Taiwan law, that a specific user's
+  described contribution is legally sufficient to satisfy the
+  human-creative-contribution standard, that the user is the author, that
+  the user/an employer/a client/a commissioning party owns the economic
+  rights in any specific work, that infringement occurred or did not
+  occur, that any third-party rights are cleared, that Taiwan jurisdiction
+  attaches to a specific project for any reason including the user merely
+  selecting Taiwan as the assessment jurisdiction, or that the project is
+  otherwise commercially cleared. A human-reviewed Commercial Assurance
+  Assessment remains the higher-assurance path for the project-specific
+  facts this claim leaves open.
+
+CRC Candidate Statement: >
+  Under Taiwan copyright law, AI-assisted output may be eligible for
+  copyright protection where a human exercised genuine creative input,
+  using AI merely as a tool; output generated entirely by AI with no human
+  creative input is not eligible. Ownership of a protected work is a
+  separate question governed by Taiwan Copyright Act Articles 11 and 12.
+
+Effective date: Copyright Act Arts. 3/10/11/12 are existing, settled Taiwan statutory law (no recent amendment identified or relied upon); TIPO letter 1140522c discloses its own publish date (2025-05-22) distinct from a later page-update date (2025-07-02) -- both independently confirmed present in the raw captured page. Evidence captured 2026-09-21 from the canonical `law.moj.gov.tw` statute database and TIPO's own interpretation page.
+Last reviewed: 2026-09-21 (Formal Governance Review, FGR_023; CRC Publication Review, CPR_029)
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-09-21
+Related: [[CLAIM-COPY-001-v1]] (same KnowledgeTopic, U.S. jurisdiction -- structurally analogous human-creative-contribution question, different statutory basis), [[CLAIM-COPY-004-v1]] (ownership vs. ToS permission -- distinct question, not raised by this claim's evidence). A future Taiwan third-party-copyright candidate (training-data/substantial-similarity material from TIPO letter 1140522c para 3) and the still-draft 2026 "生成式人工智慧著作權指引(初稿)" (Generative AI Copyright Guidelines) are recorded as watchlist/future-candidate context only, not adopted or related claims.
+
+Full Formal Governance Review artifact: `governance-reviews/FGR_023_CAND-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001_2026-09-21.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_029_CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1_2026-09-21.md`
+Full evidence manifest: `evidence-captures/taiwan-copyrightability/MANIFEST.md`
